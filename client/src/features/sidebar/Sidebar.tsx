@@ -1,57 +1,47 @@
 import React, { useState } from "react";
-import mergeClassNames from "classnames";
-import styles from "./Sidebar.module.css";
+import ScrollingYOverflowX from "util/components/scrollingOverflow";
 
 type Props = {
   className?: string;
 };
 
 const SceneControls: React.FC<Props> = (props) => {
-  const [allowPointerEvents, setAllowPointerEvents] = useState(false);
-
+  const [someText, setSomeText] = useState(
+    "the quick brown fox jumps over the lazy dog".repeat(3)
+  );
   return (
-    <div
-      className={mergeClassNames(props.className, styles.sidebar)}
-      onPointerMove={(e) => {
-        if (e.clientX > 300 && allowPointerEvents) {
-          setAllowPointerEvents(false);
-        }
-        if (e.clientX < 300 && !allowPointerEvents) {
-          setAllowPointerEvents(true);
-        }
-      }}
-    >
-      <div
-        className={mergeClassNames(styles.scrollable, {
-          [styles.events]: allowPointerEvents,
-        })}
-      >
-        {Array(50)
-          .fill(null)
-          .map((x, i) => {
-            if (i === 15) {
-              return (
-                <div
-                  style={{
-                    border: "1pt solid blue",
-                    height: "25px",
-                    width: "500px",
-                    backgroundColor: "orange",
-                  }}
-                  key={i}
-                >
-                  {i}
-                </div>
-              );
-            }
+    <ScrollingYOverflowX className={props.className}>
+      {Array(50)
+        .fill(null)
+        .map((x, i) => {
+          if (i === 15) {
             return (
-              <div style={{ border: "1pt solid blue", height: "25px" }} key={i}>
-                {i}
+              <div
+                style={{
+                  border: "1pt solid blue",
+                  height: "25px",
+                  backgroundColor: "orange",
+                }}
+                key={i}
+              >
+                <input
+                  type="text"
+                  size={Math.max(10, someText.length)}
+                  value={someText}
+                  onChange={(e) => {
+                    setSomeText(e.target.value);
+                  }}
+                />
               </div>
             );
-          })}
-      </div>
-    </div>
+          }
+          return (
+            <div style={{ border: "1pt solid blue", height: "25px" }} key={i}>
+              {i}
+            </div>
+          );
+        })}
+    </ScrollingYOverflowX>
   );
 };
 
