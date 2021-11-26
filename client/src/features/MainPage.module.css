@@ -1,0 +1,25 @@
+.container {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  grid-template-rows: 50px 1fr;
+  height: 100%;
+}
+
+.container > * {
+  border: 1pt solid red;
+}
+
+.header {
+  grid-column: 1 / 3;
+  grid-row: 1 / 2;
+}
+
+.sidebar {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+}
+
+.body {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+}
