@@ -6,7 +6,15 @@ type Props = {
 };
 
 const Scene: React.FC<Props> = (props) => {
-  return <div className={mergeClassNames(props.className)}></div>;
+  return (
+    <div
+      className={mergeClassNames(props.className)}
+      style={{ backgroundColor: "aquamarine" }}
+      onClick={() => {
+        alert("clicked");
+      }}
+    ></div>
+  );
 };
 
 export default Scene;
