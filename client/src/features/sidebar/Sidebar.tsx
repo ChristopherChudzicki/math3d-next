@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import ScrollingYOverflowX from "util/components/scrollingOverflow";
+import { Tabs, Tab, Button } from "react-bootstrap";
+import style from "./Sidebar.module.css";
 
 type Props = {
   className?: string;
@@ -11,6 +13,29 @@ const SceneControls: React.FC<Props> = (props) => {
   );
   return (
     <ScrollingYOverflowX className={props.className}>
+      <Tabs>
+        <Tab
+          eventKey="main"
+          tabClassName={style["controls-tab"]}
+          title={
+            <>
+              Main
+              <Button className="mx-3" variant="outline-secondary">
+                Add Object
+              </Button>
+            </>
+          }
+        >
+          a
+        </Tab>
+        <Tab
+          eventKey="axes"
+          tabClassName={style["controls-tab"]}
+          title="Axes & Camera"
+        >
+          b
+        </Tab>
+      </Tabs>
       {Array(50)
         .fill(null)
         .map((x, i) => {
