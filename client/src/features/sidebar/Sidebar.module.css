@@ -1,3 +1,22 @@
-.controls-tab {
-  height: 55px;
+.sidebar-container {
+  --tab-navs-height: 56px;
+}
+.tab-navs {
+  height: var(--tab-navs-height);
+}
+.tab-navs .tab-nav {
+  height: 100%;
+}
+.tab-navs .tab-nav > * {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.tab-content {
+  height: calc(100% - var(--tab-navs-height));
+}
+
+.tab-pane {
+  height: 100%;
 }

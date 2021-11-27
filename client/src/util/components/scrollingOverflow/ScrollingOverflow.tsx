@@ -19,6 +19,7 @@ const ScrollingYOverflowX: React.FC<Props> = (props) => {
           const { current: rootEl } = rootRef;
           if (!rootEl) return;
           const rect = rootEl.getBoundingClientRect();
+
           const isPointerInRootRect =
             e.clientX > rect.left &&
             e.clientX < rect.right &&

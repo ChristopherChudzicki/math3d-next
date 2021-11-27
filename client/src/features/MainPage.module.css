@@ -1,7 +1,7 @@
 .container {
   display: grid;
-  grid-template-columns: 375px 1fr;
-  grid-template-rows: 50px 1fr;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: var(--header-height) 1fr;
   height: 100%;
   overflow: hidden;
 }
@@ -18,7 +18,7 @@
 .sidebar {
   grid-column: 1 / 2;
   grid-row: 2 / 3;
-  max-height: calc(100vh - 50px);
+  max-height: calc(100vh - var(--header-height));
 }
 
 .body {
