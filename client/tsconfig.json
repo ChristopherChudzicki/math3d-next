@@ -24,9 +24,16 @@
         "name": "typescript-plugin-css-modules"
       }
     ],
-    "baseUrl": "src"
+    "baseUrl": "src",
+    "types": [
+      "jest"
+    ]
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "./node_modules",
+    "./**/node_modules/*"
   ]
 }
