@@ -9,7 +9,7 @@ const Scene: React.FC<Props> = (props) => {
   return (
     <div
       className={mergeClassNames(props.className)}
-      style={{ backgroundColor: "aquamarine" }}
+      style={{ backgroundColor: "aquamarine", width: "100%", height: "100%" }}
       onClick={() => {
         alert("clicked");
       }}

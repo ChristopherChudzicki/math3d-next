@@ -12,8 +12,10 @@ const MainPage: React.FC = () => {
   return (
     <div className={styles.container} style={cssVars}>
       <Header className={styles.header} />
-      <Sidebar className={styles.sidebar} />
-      <Scene className={styles.body} />
+      <div className={styles.body}>
+        <Sidebar className={styles.sidebar} side="left" />
+        <Scene />
+      </div>
     </div>
   );
 };

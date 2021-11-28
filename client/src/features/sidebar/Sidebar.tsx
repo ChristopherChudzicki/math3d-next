@@ -1,19 +1,55 @@
 import React, { useState } from "react";
 import mergeClassNames from "classnames";
-import ScrollingYOverflowX from "util/components/scrollingOverflow";
+import ScrollingYOverflowX from "../../util/components/scrollingOverflow";
 import { Tab, Button, Nav } from "react-bootstrap";
 import style from "./Sidebar.module.css";
 
-type Props = React.HTMLAttributes<HTMLDivElement>;
-
-const SceneControls: React.FC<Props> = (props) => {
-  const [someText, setSomeText] = useState(
-    "the quick brown fox jumps over the lazy dog".repeat(3)
+type CollapseButtonProps = {
+  iconDirection: "left" | "right";
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+};
+const CollapseButton: React.FC<CollapseButtonProps> = (props) => {
+  const icon =
+    props.iconDirection === "left" ? "bi-chevron-left" : "bi-chevron-right";
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={props.onClick}
+      className={style["collapse-button"]}
+    >
+      <i className={mergeClassNames(["bi", icon])}></i>
+    </Button>
   );
+};
+
+const getButtonIcon = (isCollapsed: boolean, sidebarSide: "left" | "right") => {
+  if (sidebarSide === "left") return isCollapsed ? "right" : "left";
+  return isCollapsed ? "left" : "right";
+};
+
+type SidebarProps = {
+  className: string;
+  side: "left" | "right";
+};
+
+const Sidebar: React.FC<SidebarProps> = (props) => {
+  const [someText, setSomeText] = useState(
+    "the quck brown fox jumps over the lazy dog".repeat(3)
+  );
+  const [isCollapsed, setCollapsed] = useState(false);
   return (
     <div
-      className={mergeClassNames(props.className, style["sidebar-container"])}
+      className={mergeClassNames(props.className, style["sidebar-container"], {
+        [style["collapsed-left"]]: isCollapsed,
+      })}
     >
+      <CollapseButton
+        iconDirection={getButtonIcon(isCollapsed, props.side)}
+        onClick={() => {
+          setCollapsed(!isCollapsed);
+        }}
+      />
       <Tab.Container id="sidebar-controls" defaultActiveKey="main">
         <Nav variant="tabs" className={style["tab-navs"]}>
           <Nav.Item className={style["tab-nav"]}>
@@ -77,4 +113,4 @@ const SceneControls: React.FC<Props> = (props) => {
   );
 };
 
-export default SceneControls;
+export default Sidebar;

@@ -1,6 +1,10 @@
 .sidebar-container {
   --tab-navs-height: 56px;
+  position: absolute;
+  transition: transform 1s;
+  background-color: white;
 }
+
 .tab-navs {
   height: var(--tab-navs-height);
 }
@@ -19,4 +23,14 @@
 
 .tab-pane {
   height: 100%;
+}
+
+.collapse-button {
+  position: absolute;
+  right: 0;
+  transform: translateX(100%);
+}
+
+.collapsed-left {
+  transform: translateX(-100%);
 }
