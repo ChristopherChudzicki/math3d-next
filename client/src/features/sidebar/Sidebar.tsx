@@ -5,6 +5,7 @@ import style from "./Sidebar.module.css";
 
 type CollapseButtonProps = {
   iconDirection: "left" | "right";
+  className?: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
 };
 const CollapseButton: React.FC<CollapseButtonProps> = (props) => {
@@ -15,7 +16,7 @@ const CollapseButton: React.FC<CollapseButtonProps> = (props) => {
       variant="outline"
       size="sm"
       onClick={props.onClick}
-      className={style["collapse-button"]}
+      className={props.className}
     >
       <i className={mergeClassNames(["bi", icon])}></i>
     </Button>
@@ -37,10 +38,17 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
   return (
     <div
       className={mergeClassNames(props.className, style["sidebar-container"], {
-        [style["collapsed-left"]]: isCollapsed,
+        [style["left-sidebar-collapsed"]]: props.side === "left" && isCollapsed,
+        [style["right-sidebar-collapsed"]]:
+          props.side === "right" && isCollapsed,
+        [style["right-sidebar"]]: props.side === "right",
       })}
     >
       <CollapseButton
+        className={mergeClassNames({
+          [style["left-sidebar-collapse-button"]]: props.side === "left",
+          [style["right-sidebar-collapse-button"]]: props.side === "right",
+        })}
         iconDirection={getButtonIcon(isCollapsed, props.side)}
         onClick={() => {
           setCollapsed(!isCollapsed);

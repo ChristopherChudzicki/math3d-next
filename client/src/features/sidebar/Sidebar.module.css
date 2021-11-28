@@ -4,12 +4,26 @@
   background-color: white;
 }
 
-.collapse-button {
+.right-sidebar {
+  right: 0;
+}
+
+.left-sidebar-collapse-button {
   position: absolute;
   right: 0;
   transform: translateX(100%);
 }
 
-.collapsed-left {
+.left-sidebar-collapsed {
   transform: translateX(-100%);
+}
+
+.right-sidebar-collapse-button {
+  position: absolute;
+  left: 0;
+  transform: translateX(-100%);
+}
+
+.right-sidebar-collapsed {
+  transform: translateX(100%);
 }

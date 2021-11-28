@@ -17,6 +17,7 @@ const MainPage: React.FC = () => {
         <Sidebar className={styles.sidebar} side="left">
           <SceneControsl />
         </Sidebar>
+        <Sidebar className={styles.sidebar} side="right" />
         <Scene />
       </div>
     </div>
