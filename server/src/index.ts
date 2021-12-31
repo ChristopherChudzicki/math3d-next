@@ -1,11 +1,12 @@
 import express from "express";
+import { User } from "./database/models";
+import sequelize from "./database/database";
 
 const app = express();
 const port = 3000;
 
-app.get("/", (req, res) => {
-  console.log("woof");
-  res.send("Hello World!");
+app.get("/", async (req, res) => {
+  res.send("Hello World!!");
 });
 
 app.get("/test", (req, res) => {

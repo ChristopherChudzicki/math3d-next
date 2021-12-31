@@ -32,11 +32,13 @@ User.init(
       primaryKey: true,
     },
     email: {
-      type: new DataTypes.STRING(128),
+      type: new DataTypes.TEXT(),
+      unique: true,
+      allowNull: false,
     },
   },
   {
     tableName: "users",
-    sequelize, // passing the `sequelize` instance is required
+    sequelize,
   }
 );

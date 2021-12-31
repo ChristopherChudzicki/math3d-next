@@ -1,12 +1,13 @@
 import { Sequelize } from "sequelize";
+import * as creds from "./constants";
 
 const sequelize = new Sequelize({
   dialect: "postgres",
-  host: "localhost",
-  port: 5431,
-  database: "math3d_next",
-  username: "docker",
-  password: "docker",
+  host: creds.DB_HOST,
+  port: creds.DB_PORT,
+  database: creds.DB_NAME,
+  username: creds.DB_USER,
+  password: creds.DB_PASS,
 });
 
 export default sequelize;
