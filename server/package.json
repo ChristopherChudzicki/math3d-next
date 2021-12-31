@@ -4,9 +4,11 @@
   "description": "Toying with server auth",
   "scripts": {
     "start": "node build/index.js",
-    "start:dev": "nodemon build/index.js --watch dist",
-    "build": "tsc",
-    "build:watch": "tsc --watch",
+    "start:dev": "nodemon build/index.js --watch build",
+    "filesync": "copyfiles --up 1 src/.env src/database/migrations/*.sql build",
+    "filesync:watch": "nodemon --watch ./src/.env --watch ./src/database/migrations/*.sql --exec \"npm run filesync\"",
+    "build": "rm -rf build && tsc && npm run filesync",
+    "build:watch": "npm run filesync:watch & tsc --watch",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -14,10 +16,13 @@
     "test:watch": "jest --watch test",
     "test:cov": "jest --coverage"
   },
-  "main": "dist/index.js",
+  "main": "build/index.js",
   "dependencies": {
     "@types/express": "^4.17.13",
+    "copyfiles": "^2.4.1",
     "express": "^4.17.2",
+    "pg": "^8.7.1",
+    "postgrator": "^5.0.0",
     "sequelize": "^6.12.4",
     "sequelize-cli": "^6.3.0"
   },
