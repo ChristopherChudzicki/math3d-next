@@ -17,7 +17,9 @@
   "main": "dist/index.js",
   "dependencies": {
     "@types/express": "^4.17.13",
-    "express": "^4.17.2"
+    "express": "^4.17.2",
+    "sequelize": "^6.12.4",
+    "sequelize-cli": "^6.3.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
