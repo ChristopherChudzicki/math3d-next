@@ -1,10 +1,4 @@
-const getEnvVar = (varName: string) => {
-  const value = process.env[varName];
-  if (value === undefined) {
-    throw new Error(`Env variable ${varName} is undefined.`);
-  }
-  return value;
-};
+import getEnvVar from "../util/getEnvVar";
 
 export const DB_HOST = getEnvVar("DB_HOST");
 export const DB_PORT = +getEnvVar("DB_PORT");
