@@ -8,6 +8,17 @@ const migration: Migration = {
         autoIncrement: true,
         primaryKey: true,
       },
+      publicId: {
+        type: Sequelize.DataTypes.UUID,
+        defaultValue: Sequelize.literal("gen_random_uuid()"),
+        allowNull: false,
+        unique: true,
+      },
+      username: {
+        type: Sequelize.DataTypes.TEXT(),
+        allowNull: false,
+        unique: true, // makes an index automatically
+      },
       email: {
         type: Sequelize.DataTypes.TEXT(),
         allowNull: false,

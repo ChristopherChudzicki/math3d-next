@@ -4,6 +4,8 @@ import sequelize from "../database";
 // These are all the attributes in the User model
 interface UserAttributes {
   id: number;
+  publicId: string;
+  username: string;
   email: string;
 }
 
@@ -15,7 +17,9 @@ export default class User
 {
   public id!: number; // Note that the `null assertion` `!` is required in strict mode.
 
-  public name!: string;
+  public publicId!: string;
+
+  public username!: string;
 
   public email!: string;
 
@@ -30,6 +34,17 @@ User.init(
       type: DataTypes.INTEGER.UNSIGNED,
       autoIncrement: true,
       primaryKey: true,
+    },
+    publicId: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      unique: true,
+      allowNull: false,
+    },
+    username: {
+      type: new DataTypes.TEXT(),
+      unique: true,
+      allowNull: false,
     },
     email: {
       type: new DataTypes.TEXT(),
