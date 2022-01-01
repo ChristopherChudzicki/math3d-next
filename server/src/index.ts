@@ -1,18 +1,16 @@
 import express from "express";
-import { User } from "./database/models";
-import sequelize from "./database/database";
+import * as user from "./controllers/user";
 
 const app = express();
 const port = 3000;
+
+app.use(express.json());
 
 app.get("/", async (req, res) => {
   res.send("Hello World!!");
 });
 
-app.get("/test", (req, res) => {
-  res.setHeader("Content-Type", "application/json");
-  res.send(JSON.stringify({ result: "hi" }));
-});
+user.attachRoutes(app);
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);

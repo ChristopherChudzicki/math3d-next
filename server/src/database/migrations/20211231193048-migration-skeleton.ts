@@ -11,7 +11,7 @@ const migration: Migration = {
       email: {
         type: Sequelize.DataTypes.TEXT(),
         allowNull: false,
-        unique: true,
+        unique: true, // makes an index automatically
       },
       createdAt: {
         type: "TIMESTAMP WITH TIME ZONE",
