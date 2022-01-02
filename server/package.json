@@ -11,8 +11,8 @@
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "test": "node -r dotenv/config $(which jest) src/**/*.spec.ts dotenv_config_path=.env.test",
-    "test:watch": "node -r dotenv/config $(which jest) src/**/*.spec.ts --watch dotenv_config_path=.env.test",
+    "test": "node -r dotenv/config $(which jest) test/**/*.spec.ts dotenv_config_path=.env.test",
+    "test:watch": "node -r dotenv/config $(which jest) test/**/*.spec.ts --watch dotenv_config_path=.env.test",
     "test:cov": "jest --coverage"
   },
   "main": "build/index.js",
