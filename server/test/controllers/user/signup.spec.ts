@@ -1,5 +1,6 @@
-import { Request, Response } from "express";
+import { mockReqResNext, getThrownError } from "../../testUtils";
 import signup from "../../../src/controllers/user/signup";
+import { ClientError } from "../../../src/util/errors";
 // Mocks
 import { sendEmail } from "../../../src/util/email";
 
@@ -13,32 +14,19 @@ jest.mock("../../../src/util/email");
  * - if user does exist, send email (possibly different)
  */
 
-const mockRequest = (body: unknown): Request => ({ body } as Request);
-const mockResponse = () => {
-  const response = {
-    status: jest.fn(() => response),
-    json: jest.fn(() => response),
-  } as unknown as Response;
-  return response;
-};
-const mockReqRes = (
-  body: unknown
-): { request: Request; response: Response } => {
-  const request = mockRequest(body);
-  const response = mockResponse();
-  return { request, response };
-};
-
 describe("signup", () => {
-  it("Responds 400 if email is missing from body", async () => {
-    const { request, response } = mockReqRes({});
-    signup(request, response);
+  it("throws ClientError if email is missing from body", async () => {
+    const { request, response } = mockReqResNext({});
 
-    expect(response.status).toHaveBeenLastCalledWith(400);
+    const error = await getThrownError(() => signup(request, response));
+
+    expect(error).toBeInstanceOf(ClientError);
+    expect(error.status).toBe(400);
+    expect(String(error)).toContain("required property 'email'");
   });
 
   it("Calls sendEmail", async () => {
-    const { request, response } = mockReqRes({ email: "leo@dog.com" });
+    const { request, response } = mockReqResNext({ email: "leo@dog.com" });
 
     await signup(request, response);
 

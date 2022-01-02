@@ -1,4 +1,3 @@
-import type { Express } from "express";
 import type { RouteSpec } from "../../util/routing";
 import signup from "./signup";
 

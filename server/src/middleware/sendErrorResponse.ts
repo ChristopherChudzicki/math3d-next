@@ -1,12 +1,12 @@
 import { ClientError } from "../util/errors";
 import { Request, Response, NextFunction } from "express";
 
-const handleError = (
+const sendErrorResponse = (
   error: unknown,
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction
-) => {
+): void => {
   if (res.headersSent) {
     return next(error);
   }
@@ -14,8 +14,12 @@ const handleError = (
   const details =
     error instanceof ClientError
       ? { error: String(error), status: error.status }
-      : { error: "Internal Error", status: 500 };
+      : { error: "Error: Internal Error", status: 500 };
 
-  // res.setHeader("Content-Type", "application/json");
-  // res.end(JSON.stringify({ error }));
+  res.status(details.status);
+  res.json({ error: details.error });
+
+  return next(error);
 };
+
+export default sendErrorResponse;

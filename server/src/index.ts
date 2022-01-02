@@ -1,6 +1,7 @@
 import express from "express";
 import { attachRoutes } from "./util/routing";
 import * as user from "./controllers/user";
+import * as middleware from "./middleware";
 
 const app = express();
 const port = 3000;
@@ -12,6 +13,8 @@ app.get("/", async (req, res) => {
 });
 
 attachRoutes(app, user.routes);
+
+app.use(middleware.sendErrorResponse);
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
