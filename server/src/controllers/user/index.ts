@@ -1,0 +1,1 @@
+export { attachRoutes } from "./routing";

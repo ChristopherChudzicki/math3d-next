@@ -1,45 +1,46 @@
 module.exports = {
   root: true,
-  parser: '@typescript-eslint/parser',
+  parser: "@typescript-eslint/parser",
   extends: [
-    'airbnb-base',
-    'prettier',
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
+    "airbnb-base",
+    "prettier",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
   ],
-  plugins: ['prettier', '@typescript-eslint'],
-  ignorePatterns: ['dist/', '**/*.js', 'old/', 'webpack.config.js'],
+  plugins: ["prettier", "@typescript-eslint"],
+  ignorePatterns: ["build/", "**/*.js", "old/", "webpack.config.js"],
   rules: {
-    'prettier/prettier': ['error'],
-    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-param-reassign': [
-      'error',
+    "prettier/prettier": ["error"],
+    "max-classes-per-file": 0,
+    "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
+    "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
+    "no-param-reassign": [
+      "error",
       {
         props: false,
       },
     ],
-    'no-underscore-dangle': 0,
-    '@typescript-eslint/no-unused-vars': [
+    "no-underscore-dangle": 0,
+    "@typescript-eslint/no-unused-vars": [
       2,
       {
         ignoreRestSiblings: true,
-        argsIgnorePattern: '^_',
+        argsIgnorePattern: "^_",
       },
     ],
-    'import/prefer-default-export': [0],
-    'import/extensions': [
-      'error',
-      'ignorePackages',
+    "import/prefer-default-export": [0],
+    "import/extensions": [
+      "error",
+      "ignorePackages",
       {
-        ts: 'never',
+        ts: "never",
       },
     ],
   },
   settings: {
-    'import/resolver': {
+    "import/resolver": {
       node: {
-        extensions: ['.js', '.ts'],
+        extensions: [".js", ".ts"],
       },
     },
   },
