@@ -23,6 +23,7 @@ const validateRequest = (req: Request) => {
 };
 
 const signup = async (req: Request, res: Response): Promise<void> => {
+  console.log("hi");
   if (!validateRequest(req)) {
     // TODO: Throw an error instead and handle this in middleware
     res.status(400);
@@ -30,6 +31,7 @@ const signup = async (req: Request, res: Response): Promise<void> => {
   }
   const { email }: { email: string } = req.body;
   await sendEmail(email);
+  res.json({ ok: "yay" });
 };
 
 export default signup;

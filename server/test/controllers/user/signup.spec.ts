@@ -17,6 +17,7 @@ const mockRequest = (body: unknown): Request => ({ body } as Request);
 const mockResponse = () => {
   const response = {
     status: jest.fn(() => response),
+    json: jest.fn(() => response),
   } as unknown as Response;
   return response;
 };

@@ -1,4 +1,5 @@
 import express from "express";
+import { attachRoutes } from "./util/routing";
 import * as user from "./controllers/user";
 
 const app = express();
@@ -10,7 +11,7 @@ app.get("/", async (req, res) => {
   res.send("Hello World!!");
 });
 
-user.attachRoutes(app);
+attachRoutes(app, user.routes);
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
