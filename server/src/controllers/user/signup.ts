@@ -1,15 +1,35 @@
+import Ajv, { Schema } from "ajv";
 import type { Request, Response } from "express";
+import { sendEmail } from "../../util/email";
 
-const validateRequest = (_req: Request) => {
-  // use ajv for this
-  console.log("TODO");
+const ajv = new Ajv();
+
+const schema: Schema = {
+  type: "object",
+  properties: {
+    email: { type: "string" },
+  },
+  required: ["email"],
+  additionalProperties: false,
+};
+const validate = ajv.compile(schema);
+
+const validateRequest = (req: Request) => {
+  const isValid = validate(req.body);
+  if (!isValid) {
+    console.log(validate.errors);
+  }
+  return isValid;
 };
 
-const signup = (req: Request, _res: Response): void => {
-  validateRequest(req);
+const signup = async (req: Request, res: Response): Promise<void> => {
+  if (!validateRequest(req)) {
+    // TODO: Throw an error instead and handle this in middleware
+    res.status(400);
+    return;
+  }
   const { email }: { email: string } = req.body;
-  console.log(email);
-  throw new Error("Not Implemented");
+  await sendEmail(email);
 };
 
 export default signup;

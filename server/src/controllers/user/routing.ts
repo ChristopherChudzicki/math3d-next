@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import login from "./login";
-import sendSignupEmail from "./sendSignupEmail";
+import sendSignupEmail from "./signup";
 
 export const attachRoutes = (express: Express): void => {
   express.get("/user/signup", sendSignupEmail);
