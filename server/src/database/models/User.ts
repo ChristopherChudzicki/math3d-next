@@ -26,6 +26,10 @@ export default class User
   public readonly createdAt!: Date;
 
   public readonly updatedAt!: Date;
+
+  static findByEmail(email: string): Promise<User | null> {
+    return User.findOne({ where: { email } });
+  }
 }
 
 User.init(

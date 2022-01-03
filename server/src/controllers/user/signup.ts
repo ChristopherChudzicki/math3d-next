@@ -2,6 +2,7 @@ import Ajv, { Schema } from "ajv";
 import type { Request, Response } from "express";
 import { sendEmail } from "../../util/email";
 import { ClientError } from "../../util/errors";
+import { User } from "../../database/models";
 
 const ajv = new Ajv();
 
@@ -27,8 +28,14 @@ const validateRequest = (req: Request) => {
 const signup = async (req: Request, res: Response): Promise<void> => {
   validateRequest(req);
   const { email }: { email: string } = req.body;
-  await sendEmail(email);
-  res.json({ ok: "yay" });
+  const user = await User.findByEmail(email);
+  if (user) {
+    await sendEmail(email, "existingUserEmail");
+  } else {
+    await sendEmail(email, "newUserEmail");
+  }
+
+  res.json({ result: true });
 };
 
 export default signup;

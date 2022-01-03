@@ -1,2 +1,7 @@
-export const sendEmail = (_email: string): Promise<null> =>
-  Promise.resolve(null);
+export const sendEmail = async (
+  _email: string,
+  message: string
+): Promise<null> => {
+  console.log(message);
+  return null;
+};
