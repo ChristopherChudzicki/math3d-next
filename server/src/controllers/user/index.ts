@@ -1,1 +1,1 @@
-export { attachRoutes } from "./routing";
+export { routes } from "./routing";
