@@ -3,7 +3,7 @@ import signup from "../../../src/controllers/user/signup";
 import { ClientError } from "../../../src/util/errors";
 
 // Mocks
-import { sendEmail } from "../../../src/util/email";
+import * as mail from "../../../src/util/email";
 import { User } from "../../../src/database/models";
 
 jest.mock("../../../src/util/email");
@@ -28,10 +28,12 @@ describe("signup", () => {
       MockedUser.findByEmail.mockImplementationOnce(async () => ({} as User));
       await signup(request, response);
 
-      expect(sendEmail).toHaveBeenCalledTimes(1);
-      expect(sendEmail).toHaveBeenCalledWith(
-        "leo@dog.com",
-        "existingUserEmail"
+      expect(mail.sendMail).toHaveBeenCalledTimes(1);
+      expect(mail.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "leo@dog.com",
+          subject: "Math3d Signup (Existing User)",
+        })
       );
     });
   });
@@ -42,8 +44,13 @@ describe("signup", () => {
       MockedUser.findByEmail.mockImplementationOnce(async () => null);
       await signup(request, response);
 
-      expect(sendEmail).toHaveBeenCalledTimes(1);
-      expect(sendEmail).toHaveBeenCalledWith("leo@dog.com", "newUserEmail");
+      expect(mail.sendMail).toHaveBeenCalledTimes(1);
+      expect(mail.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "leo@dog.com",
+          subject: "Math3d Signup",
+        })
+      );
     });
   });
 });

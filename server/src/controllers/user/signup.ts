@@ -1,6 +1,6 @@
 import { Schema } from "ajv";
 import type { Request, Response } from "express";
-import { sendEmail } from "../../util/email";
+import * as mail from "../../util/email";
 import * as ajv from "../../util/ajv";
 import { User } from "../../database/models";
 
@@ -34,9 +34,21 @@ const signup = async (req: Request, res: SignupResponse): Promise<void> => {
   const { email } = req.body;
   const user = await User.findByEmail(email);
   if (user) {
-    await sendEmail(email, "existingUserEmail");
+    await mail.sendMail({
+      from: "login@math3d.com",
+      to: email,
+      subject: "Math3d Signup (Existing User)",
+      text: "woof woof meow",
+      html: "<div>woof woof meow</div>",
+    });
   } else {
-    await sendEmail(email, "newUserEmail");
+    await mail.sendMail({
+      from: "login@math3d.com",
+      to: email,
+      subject: "Math3d Signup",
+      text: "woof woof meow",
+      html: "<div>woof woof meow</div>",
+    });
   }
 
   res.json({ result: true });
