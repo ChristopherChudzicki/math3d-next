@@ -5,11 +5,11 @@ import { ClientError } from "../../../src/util/errors";
 // Mocks
 import * as mail from "../../../src/util/email";
 import { User } from "../../../src/database/models";
-import { accessToken, signupToken } from "../../../src/util/tokens";
+import { accessToken, signupToken } from "../../../src/util/auth";
 
 jest.mock("../../../src/util/email");
 jest.mock("../../../src/database/models");
-jest.mock("../../../src/util/tokens");
+jest.mock("../../../src/util/auth");
 
 const MockedUser = User as jest.Mocked<typeof User>;
 const mockMail = mail as jest.Mocked<typeof mail>;

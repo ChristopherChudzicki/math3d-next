@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import * as mail from "../../util/email";
 import * as ajv from "../../util/ajv";
 import { User } from "../../database/models";
-import { signupToken, accessToken } from "../../util/tokens";
+import { signupToken, accessToken } from "../../util/auth";
 
 type PathParams = never;
 type BodyParams = { email: string };

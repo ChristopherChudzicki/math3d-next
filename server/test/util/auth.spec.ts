@@ -1,5 +1,5 @@
 import jwt, { TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
-import { accessToken, signupToken } from "../../src/util/tokens";
+import { accessToken, signupToken } from "../../src/util/auth";
 
 describe("accessToken", () => {
   it("signs and verifies tokens", () => {
