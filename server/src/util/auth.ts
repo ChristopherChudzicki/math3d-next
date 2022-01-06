@@ -23,15 +23,19 @@ const verify = (token: string, secret: string) => {
   try {
     return jwt.verify(token, secret);
   } catch (error) {
-    const authError = [
-      jwt.JsonWebTokenError,
-      jwt.TokenExpiredError,
-      jwt.NotBeforeError,
-    ].some((Err) => error instanceof Err);
-    if (!authError) {
+    if (error instanceof jwt.TokenExpiredError) {
+      throw new ClientError("Token expired", 401);
+    }
+
+    const isAuthError =
+      error instanceof jwt.JsonWebTokenError ||
+      error instanceof jwt.NotBeforeError;
+
+    if (!isAuthError) {
       console.error(error);
     }
-    throw new ClientError("Unauthorized");
+
+    throw new ClientError("Unauthorized", 403);
   }
 };
 
