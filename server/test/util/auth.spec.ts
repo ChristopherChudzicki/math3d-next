@@ -1,5 +1,6 @@
-import jwt, { TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { accessToken, signupToken } from "../../src/util/auth";
+import { ClientError } from "../../src/util/errors";
 
 describe("accessToken", () => {
   it("signs and verifies tokens", () => {
@@ -15,19 +16,19 @@ describe("accessToken", () => {
     const userId = "leo";
     const encoded = accessToken.generate(userId);
     jest.advanceTimersByTime(1000 * 60 * 30);
-    expect(() => accessToken.verify(encoded)).toThrowError(TokenExpiredError);
+    expect(() => accessToken.verify(encoded)).toThrowError(ClientError);
   });
 
   it("denies tokens created with the wrong secret", () => {
     const badEncoding = jwt.sign("woof", "bad secret");
-    expect(() => accessToken.verify(badEncoding)).toThrow(JsonWebTokenError);
-    expect(() => accessToken.verify(badEncoding)).toThrow("invalid signature");
+    expect(() => accessToken.verify(badEncoding)).toThrow(ClientError);
+    expect(() => accessToken.verify(badEncoding)).toThrow("Unauthorized");
   });
 
   it("denies signup tokens", () => {
     const badEncoding = signupToken.generate("leo@woofwoof.come");
-    expect(() => accessToken.verify(badEncoding)).toThrow(JsonWebTokenError);
-    expect(() => accessToken.verify(badEncoding)).toThrow("invalid signature");
+    expect(() => accessToken.verify(badEncoding)).toThrow(ClientError);
+    expect(() => accessToken.verify(badEncoding)).toThrow("Unauthorized");
   });
 });
 
@@ -45,18 +46,18 @@ describe("signupToken", () => {
     const email = "leo@woofwoof.com";
     const encoded = signupToken.generate(email);
     jest.advanceTimersByTime(1000 * 60 * 30);
-    expect(() => signupToken.verify(encoded)).toThrowError(TokenExpiredError);
+    expect(() => signupToken.verify(encoded)).toThrowError(ClientError);
   });
 
   it("denies tokens created with the wrong secret", () => {
     const badEncoding = jwt.sign("woof", "bad secret");
-    expect(() => signupToken.verify(badEncoding)).toThrow(JsonWebTokenError);
-    expect(() => signupToken.verify(badEncoding)).toThrow("invalid signature");
+    expect(() => signupToken.verify(badEncoding)).toThrow(ClientError);
+    expect(() => signupToken.verify(badEncoding)).toThrow("Unauthorized");
   });
 
   it("denies access tokens", () => {
     const badEncoding = accessToken.generate("leo@woofwoof.come");
-    expect(() => signupToken.verify(badEncoding)).toThrow(JsonWebTokenError);
-    expect(() => signupToken.verify(badEncoding)).toThrow("invalid signature");
+    expect(() => signupToken.verify(badEncoding)).toThrow(ClientError);
+    expect(() => signupToken.verify(badEncoding)).toThrow("Unauthorized");
   });
 });

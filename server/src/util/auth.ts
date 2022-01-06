@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import getEnvVar from "./getEnvVar";
+import { ClientError } from "./errors";
 
 const JWT_SECRET = getEnvVar("JWT_SECRET");
 const JWT_EXPIRATION = "30 min";
@@ -18,6 +19,22 @@ type SignupToken = {
   exp: number;
 };
 
+const verify = (token: string, secret: string) => {
+  try {
+    return jwt.verify(token, secret);
+  } catch (error) {
+    const authError = [
+      jwt.JsonWebTokenError,
+      jwt.TokenExpiredError,
+      jwt.NotBeforeError,
+    ].some((Err) => error instanceof Err);
+    if (!authError) {
+      console.error(error);
+    }
+    throw new ClientError("Unauthorized");
+  }
+};
+
 export const accessToken = {
   generate(userId: string): string {
     const payload = { userId };
@@ -26,7 +43,7 @@ export const accessToken = {
     });
   },
   verify(token: string): AccessToken {
-    const verified = jwt.verify(token, JWT_SECRET_ACCESS) as AccessToken;
+    const verified = verify(token, JWT_SECRET_ACCESS) as AccessToken;
     return verified;
   },
 };
@@ -39,7 +56,7 @@ export const signupToken = {
     });
   },
   verify(token: string): SignupToken {
-    const verified = jwt.verify(token, JWT_SECRET_SIGNUP) as SignupToken;
+    const verified = verify(token, JWT_SECRET_SIGNUP) as SignupToken;
     return verified;
   },
 };
