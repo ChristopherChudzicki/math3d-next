@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { Schema } from "ajv";
 import * as ajv from "../../util/ajv";
-// import { signupToken, accessToken } from "../../util/tokens";
+import { ClientError } from "../../util/errors";
+import * as auth from "../../util/auth";
 
 type PathParams = never;
 type BodyParams = { email: string; username: string };
@@ -30,15 +31,23 @@ const validateBody: (obj: unknown) => asserts obj is BodyParams =
   ajv.makeValidator<BodyParams>(schema);
 
 const validateRequest: (req: Request) => asserts req is CreateUserRequest = (
-  req: Request // TODO: validate email
+  req: Request
 ) => {
   validateBody(req.body);
-  const token = req.headers.authorization;
-  console.log(token);
+  const header = req.headers.authorization;
+  const token = auth.parseAuthHeaderForBearer(header ?? "");
+  const decoded = auth.signupToken.verify(token);
+  if (decoded.email !== req.body.email) {
+    throw new ClientError("Unauthorized", 401);
+  }
 };
 
 const create = (req: Request, _res: CreateUserResponse): void => {
   validateRequest(req);
+  const { email, username } = req.body;
+
+  console.log(`username: ${username}`);
+  console.log(`email: ${email}`);
 };
 
 export default create;

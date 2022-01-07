@@ -69,7 +69,7 @@ export const signupToken = {
  * For an authHeader string of form "Bearer<whitespace><tokenString>",
  * returns just tokenString
  */
-export const parseAuthHeaderForBearer = (authHeader: string): string | null => {
+export const parseAuthHeaderForBearer = (authHeader: string): string => {
   const scheme = "Bearer";
   if (!authHeader.startsWith(scheme)) return "";
   return authHeader.substring(scheme.length).trimStart();
