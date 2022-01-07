@@ -35,7 +35,7 @@ const verify = (token: string, secret: string) => {
       console.error(error);
     }
 
-    throw new ClientError("Unauthorized", 403);
+    throw new ClientError("Forbidden", 403);
   }
 };
 

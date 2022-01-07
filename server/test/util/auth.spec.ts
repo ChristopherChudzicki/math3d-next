@@ -32,7 +32,7 @@ describe("accessToken", () => {
     const error = await getThrownError(() => accessToken.verify(badSignature));
     expect(error).toBeInstanceOf(ClientError);
     expect(error.status).toBe(403);
-    expect(String(error)).toMatch(/Unauthorized/);
+    expect(String(error)).toMatch(/Forbidden/);
   });
 
   it("denies signup tokens", async () => {
@@ -40,7 +40,7 @@ describe("accessToken", () => {
     const error = await getThrownError(() => accessToken.verify(token));
     expect(error).toBeInstanceOf(ClientError);
     expect(error.status).toBe(403);
-    expect(String(error)).toMatch(/Unauthorized/);
+    expect(String(error)).toMatch(/Forbidden/);
   });
 });
 
@@ -69,7 +69,7 @@ describe("signupToken", () => {
     const error = await getThrownError(() => signupToken.verify(badSignature));
     expect(error).toBeInstanceOf(ClientError);
     expect(error.status).toBe(403);
-    expect(String(error)).toMatch(/Unauthorized/);
+    expect(String(error)).toMatch(/Forbidden/);
   });
 
   it("denies access tokens", async () => {
@@ -77,7 +77,7 @@ describe("signupToken", () => {
     const error = await getThrownError(() => signupToken.verify(token));
     expect(error).toBeInstanceOf(ClientError);
     expect(error.status).toBe(403);
-    expect(String(error)).toMatch(/Unauthorized/);
+    expect(String(error)).toMatch(/Forbidden/);
   });
 });
 
