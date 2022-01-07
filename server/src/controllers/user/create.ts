@@ -21,7 +21,7 @@ const schema: Schema = {
   type: "object",
   properties: {
     email: { type: "string" },
-    username: { type: "string" },
+    username: { type: "string", minLength: 4 },
   },
   required: ["email", "username"],
   additionalProperties: false,
