@@ -1,5 +1,9 @@
 import jwt from "jsonwebtoken";
-import { accessToken, signupToken } from "../../src/util/auth";
+import {
+  accessToken,
+  signupToken,
+  parseAuthHeaderForBearer,
+} from "../../src/util/auth";
 import { ClientError } from "../../src/util/errors";
 import { getThrownError } from "../testUtils";
 
@@ -74,5 +78,19 @@ describe("signupToken", () => {
     expect(error).toBeInstanceOf(ClientError);
     expect(error.status).toBe(403);
     expect(String(error)).toMatch(/Unauthorized/);
+  });
+});
+
+describe("parseAuthHeaderForBearer", () => {
+  it("returns token when scheme is Bearer", () => {
+    expect(parseAuthHeaderForBearer("Bearer woofwoof")).toBe("woofwoof");
+  });
+
+  it("returns ignores whitespace after 'Bearer'", () => {
+    expect(parseAuthHeaderForBearer("Bearer      meow")).toBe("meow");
+  });
+
+  it("returns empty string if scheme is not 'Bearer'", () => {
+    expect(parseAuthHeaderForBearer("BEARER woofwoof")).toBe("");
   });
 });

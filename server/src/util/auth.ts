@@ -64,3 +64,13 @@ export const signupToken = {
     return verified;
   },
 };
+
+/**
+ * For an authHeader string of form "Bearer<whitespace><tokenString>",
+ * returns just tokenString
+ */
+export const parseAuthHeaderForBearer = (authHeader: string): string | null => {
+  const scheme = "Bearer";
+  if (!authHeader.startsWith(scheme)) return "";
+  return authHeader.substring(scheme.length).trimStart();
+};
