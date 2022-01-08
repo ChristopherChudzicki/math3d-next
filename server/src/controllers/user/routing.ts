@@ -1,5 +1,6 @@
 import type { RouteSpec } from "../../util/routing";
 import signup from "./signup";
+import create from "./create";
 
 export const routes: RouteSpec[] = [
   {
@@ -17,8 +18,6 @@ export const routes: RouteSpec[] = [
   {
     route: "/user",
     method: "post",
-    handler: (): void => {
-      throw new Error("NotImplemented");
-    },
+    handler: create,
   },
 ];

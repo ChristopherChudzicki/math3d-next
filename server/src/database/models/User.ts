@@ -9,7 +9,7 @@ interface UserAttributes {
   email: string;
 }
 
-type UserCreationAttributes = Optional<UserAttributes, "id">;
+type UserCreationAttributes = Optional<UserAttributes, "id" | "publicId">;
 
 export default class User
   extends Model<UserAttributes, UserCreationAttributes>
@@ -26,6 +26,10 @@ export default class User
   public readonly createdAt!: Date;
 
   public readonly updatedAt!: Date;
+
+  static findByEmail(email: string): Promise<User | null> {
+    return User.findOne({ where: { email } });
+  }
 }
 
 User.init(
