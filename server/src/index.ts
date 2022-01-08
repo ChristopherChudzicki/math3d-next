@@ -2,9 +2,10 @@ import express from "express";
 import { attachRoutes } from "./util/routing";
 import * as user from "./controllers/user";
 import * as middleware from "./middleware";
+import getEnvVar from "./util/getEnvVar";
 
 const app = express();
-const port = 3000;
+const port = Number(getEnvVar("SERVER_PORT"));
 
 app.use(express.json());
 

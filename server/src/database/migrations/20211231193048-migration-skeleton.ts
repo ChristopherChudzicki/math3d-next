@@ -4,7 +4,7 @@ const migration: Migration = {
   up: async (queryInterface: QueryInterface, Sequelize: SequelizeLib) => {
     await queryInterface.createTable("users", {
       id: {
-        type: Sequelize.DataTypes.INTEGER.UNSIGNED,
+        type: Sequelize.DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
