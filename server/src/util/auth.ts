@@ -7,6 +7,16 @@ const JWT_EXPIRATION = "30 min";
 const JWT_SECRET_ACCESS = `access:${JWT_SECRET}`;
 const JWT_SECRET_SIGNUP = `signup:${JWT_SECRET}`;
 
+/**
+ * For an authHeader string of form "Bearer<whitespace><tokenString>",
+ * returns just tokenString
+ */
+export const parseAuthHeaderForBearer = (authHeader: string): string => {
+  const scheme = "Bearer";
+  if (!authHeader.startsWith(scheme)) return "";
+  return authHeader.substring(scheme.length).trimStart();
+};
+
 type AccessToken = {
   userId: string;
   iat: number;
@@ -63,14 +73,8 @@ export const signupToken = {
     const verified = verify(token, JWT_SECRET_SIGNUP) as SignupToken;
     return verified;
   },
-};
-
-/**
- * For an authHeader string of form "Bearer<whitespace><tokenString>",
- * returns just tokenString
- */
-export const parseAuthHeaderForBearer = (authHeader: string): string => {
-  const scheme = "Bearer";
-  if (!authHeader.startsWith(scheme)) return "";
-  return authHeader.substring(scheme.length).trimStart();
+  verifyHeader(authHeader: string): SignupToken {
+    const token = parseAuthHeaderForBearer(authHeader);
+    return this.verify(token);
+  },
 };

@@ -18,7 +18,7 @@ const mockSignupToken = signupToken as jest.Mocked<typeof signupToken>;
 
 describe("signup", () => {
   it("throws ClientError if email is missing from body", async () => {
-    const { request, response } = mockReqResNext({});
+    const { request, response } = mockReqResNext({ body: {} });
 
     const error = await getThrownError(() => signup(request, response));
 
@@ -29,7 +29,9 @@ describe("signup", () => {
 
   describe("when user already exists", () => {
     it("Sends an existing user email", async () => {
-      const { request, response } = mockReqResNext({ email: "leo@dog.com" });
+      const { request, response } = mockReqResNext({
+        body: { email: "leo@dog.com" },
+      });
       MockedUser.findByEmail.mockImplementationOnce(async () => ({} as User));
       await signup(request, response);
 
@@ -43,7 +45,9 @@ describe("signup", () => {
     });
 
     it("Includes a link with signup token in email", async () => {
-      const { request, response } = mockReqResNext({ email: "leo@dog.com" });
+      const { request, response } = mockReqResNext({
+        body: { email: "leo@dog.com" },
+      });
 
       MockedUser.findByEmail.mockImplementationOnce(async () => ({} as User));
       mockAccessToken.generate.mockImplementationOnce(() => "leotoken");
@@ -59,7 +63,9 @@ describe("signup", () => {
 
   describe("when user does not exist yet", () => {
     it("Sends a new user email", async () => {
-      const { request, response } = mockReqResNext({ email: "leo@dog.com" });
+      const { request, response } = mockReqResNext({
+        body: { email: "leo@dog.com" },
+      });
       MockedUser.findByEmail.mockImplementationOnce(async () => null);
       await signup(request, response);
 
@@ -73,7 +79,9 @@ describe("signup", () => {
     });
 
     it("Includes a link with signup token in email", async () => {
-      const { request, response } = mockReqResNext({ email: "leo@dog.com" });
+      const { request, response } = mockReqResNext({
+        body: { email: "leo@dog.com" },
+      });
 
       MockedUser.findByEmail.mockImplementationOnce(async () => null);
       mockSignupToken.generate.mockImplementationOnce(() => "leotoken");

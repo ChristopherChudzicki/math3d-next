@@ -9,7 +9,7 @@ interface UserAttributes {
   email: string;
 }
 
-type UserCreationAttributes = Optional<UserAttributes, "id">;
+type UserCreationAttributes = Optional<UserAttributes, "id" | "publicId">;
 
 export default class User
   extends Model<UserAttributes, UserCreationAttributes>
