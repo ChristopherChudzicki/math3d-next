@@ -13,7 +13,7 @@ const mockResponse = () => {
 
 export const mockReqResNext = ({
   body,
-  headers,
+  headers = {},
 }: {
   body?: unknown;
   headers?: unknown;
