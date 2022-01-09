@@ -1,0 +1,101 @@
+@startuml general_auth_sequence
+   participant Client as C
+   participant Server as S
+   participant "User's Email" as E
+
+   C -> S: GET /user/login
+
+   S -> E: Link with AccessToken + RefreshToken
+
+   C -> E: Check Email
+
+   E --> C: AccessToken + RefreshhToken
+
+   C -> S: API Request + ?AccessToken
+
+   S -> S: Middleware validates AccessToken, \n if valid, attaches userId to request
+
+   alt valid AccessToken
+
+      S --> C: Handle request with userId
+
+   else no AccessToken
+
+      S --> C: Handle request w/o userId  \n (may response 401 Unauthorized)
+
+   else invalid signature AccessToken
+
+      S --> C: 403 Forbidden
+
+   else expired AccessToken
+
+      S --> C: 401 Unauthorized (expired)
+
+      C -> S: GET /user/access w/ Refresh Token
+
+      S --> C: New (AccessToken, RefreshToken)
+
+      C -> S: Retry original request
+
+   end
+
+@enduml
+
+@startuml refresh_sequence
+   participant Client as C
+   participant Server as S
+   participant Database as Db
+
+   C -> S: GET /user/access w/ RefreshToken
+
+   S -> Db: Check RefreshToken valid
+
+   alt
+
+      Db --> S: RefreshToken is valid
+
+      S -> Db: Delete old Refresh Token \n Insert new RefreshToken
+
+      S --> C: 201: new (AccessToken, RefreshToken) pair
+
+   else
+
+      Db --> S: Refresh token not valid
+
+      S --> C: 403 Unauthorized
+   end
+@enduml
+
+@startuml signup_sequence
+   participant Client as C
+   participant Server as S
+   participant Database as Db
+   participant "User's Email" as E
+
+   C -> S: GET /user/signup
+   S -> E: SignupToken
+   C -> E: Check Email
+   E --> C: SignupToken
+   C -> S: POST /user/create 
+
+   alt valid SignupToken
+
+      S -> Db: Insert User Record
+      Db --> S: userId
+
+      S --> C: AccessToken + RefreshToken
+
+   else invalid signature SignupToken
+
+      S --> C: 403 Forbidden
+
+   else expired SignupToken
+
+      S --> C: 401 Unauthorized (expired)
+
+   else no SignupToken
+
+      S --> C: 401 Unauthorized
+
+   end
+@enduml
