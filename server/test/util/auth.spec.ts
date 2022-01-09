@@ -12,8 +12,12 @@ describe("accessToken", () => {
     const userId = "leo";
     const encoded = accessToken.generate(userId);
     const token = accessToken.verify(encoded);
-
-    expect(token.userId).toBe(userId);
+    expect(token).toStrictEqual({
+      userId,
+      type: "access",
+      iat: expect.any(Number),
+      exp: expect.any(Number),
+    });
   });
 
   it("creates tokens that expire after 30 minutes", async () => {
@@ -49,8 +53,12 @@ describe("signupToken", () => {
     const email = "leo@woofwoof.com";
     const signed = signupToken.generate(email);
     const token = signupToken.verify(signed);
-
-    expect(token.email).toBe(email);
+    expect(token).toStrictEqual({
+      email,
+      type: "signup",
+      iat: expect.any(Number),
+      exp: expect.any(Number),
+    });
   });
 
   it("creates tokens that expire after 30 minutes", async () => {
