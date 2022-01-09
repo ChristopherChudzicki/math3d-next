@@ -3,6 +3,7 @@ import {
   accessToken,
   signupToken,
   parseAuthHeaderForBearer,
+  decodeTokenType,
 } from "../../src/util/auth";
 import { ClientError } from "../../src/util/errors";
 import { getThrownError } from "../testUtils";
@@ -100,5 +101,23 @@ describe("parseAuthHeaderForBearer", () => {
 
   it("returns empty string if scheme is not 'Bearer'", () => {
     expect(parseAuthHeaderForBearer("BEARER woofwoof")).toBe("");
+  });
+});
+
+describe("decodeTokenType", () => {
+  it("returns null for invalid encodings", () => {
+    expect(decodeTokenType("cat")).toBeNull();
+  });
+  it("returns null for encoded strings", () => {
+    const encoded = jwt.sign("cat", "some_secret");
+    expect(decodeTokenType(encoded)).toBeNull();
+  });
+  it("returns undefined for encoded objects missing type", () => {
+    const encoded = jwt.sign({ cat: "meows" }, "some_secret");
+    expect(decodeTokenType(encoded)).toBeNull();
+  });
+  it("returns the type property for encoded objects with type", () => {
+    const encoded = jwt.sign({ cat: "meows", type: "cat" }, "some_secret");
+    expect(decodeTokenType(encoded)).toBe("cat");
   });
 });
