@@ -9,6 +9,8 @@ const port = Number(getEnvVar("SERVER_PORT"));
 
 app.use(express.json());
 
+app.use(middleware.attachContext);
+
 app.get("/", async (req, res) => {
   res.send("Hello World!!");
 });

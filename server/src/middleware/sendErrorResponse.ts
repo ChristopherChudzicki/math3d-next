@@ -1,5 +1,5 @@
-import { ClientError } from "../util/errors";
 import { Request, Response, NextFunction } from "express";
+import { ClientError } from "../util/errors";
 
 const sendErrorResponse = (
   error: unknown,

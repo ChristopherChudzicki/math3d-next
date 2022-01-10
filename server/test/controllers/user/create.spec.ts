@@ -1,5 +1,5 @@
 import { accessToken, signupToken } from "../../../src/util/auth";
-import { mockReqResNext, getThrownError } from "../../testUtils";
+import { mockReqResNext, getRejection } from "../../testUtils";
 import createUser from "../../../src/controllers/user/create";
 import { ClientError } from "../../../src/util/errors";
 
@@ -13,7 +13,7 @@ const MockedUser = User as jest.Mocked<typeof User>;
 describe("creating users", () => {
   it("throws if body is missing username", async () => {
     const { request, response } = mockReqResNext({ body: {} });
-    const error = await getThrownError(() => createUser(request, response));
+    const error = await getRejection(() => createUser(request, response));
 
     expect(error).toBeInstanceOf(ClientError);
     expect(error.status).toBe(400);
@@ -24,7 +24,7 @@ describe("creating users", () => {
     const { request, response } = mockReqResNext({
       body: { username: "cc" },
     });
-    const error = await getThrownError(() => createUser(request, response));
+    const error = await getRejection(() => createUser(request, response));
 
     expect(error).toBeInstanceOf(ClientError);
     expect(error.status).toBe(400);
@@ -36,7 +36,7 @@ describe("creating users", () => {
       body: { username: "leo" },
       headers: { authorization: "Bearer invalidtoken" },
     });
-    const error = await getThrownError(() => createUser(request, response));
+    const error = await getRejection(() => createUser(request, response));
 
     expect(error).toBeInstanceOf(ClientError);
     expect(error.status).toBe(403);
@@ -49,7 +49,7 @@ describe("creating users", () => {
       headers: { authorization: `Bearer ${token}` },
     });
     MockedUser.findByEmail.mockImplementationOnce(async () => ({} as User));
-    const error = await getThrownError(() => createUser(request, response));
+    const error = await getRejection(() => createUser(request, response));
 
     expect(error).toBeInstanceOf(ClientError);
     expect(error.status).toBe(400);

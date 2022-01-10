@@ -60,31 +60,40 @@ const verify = (token: string, type: TokenType, secret: string) => {
 };
 
 export const accessToken = {
+  type: "access" as const,
   generate(userId: string): string {
-    const payload = { userId, type: "access" };
+    const payload = { userId, type: this.type };
     return jwt.sign(payload, JWT_SECRET, {
       expiresIn: JWT_EXPIRATION,
     });
   },
   verify(token: string): AccessToken {
-    const verified = verify(token, "access", JWT_SECRET) as AccessToken;
+    const verified = verify(token, this.type, JWT_SECRET) as AccessToken;
     return verified;
   },
 };
 
 export const signupToken = {
+  type: "signup" as const,
   generate(email: string): string {
-    const payload = { email, type: "signup" };
+    const payload = { email, type: this.type };
     return jwt.sign(payload, JWT_SECRET, {
       expiresIn: JWT_EXPIRATION,
     });
   },
   verify(token: string): SignupToken {
-    const verified = verify(token, "signup", JWT_SECRET) as SignupToken;
+    const verified = verify(token, this.type, JWT_SECRET) as SignupToken;
     return verified;
   },
   verifyHeader(authHeader: string): SignupToken {
     const token = parseAuthHeaderForBearer(authHeader);
     return this.verify(token);
   },
+};
+
+export const decodeTokenType = (encoded: string): string | null => {
+  const decoded = jwt.decode(encoded);
+  if (decoded === null) return null;
+  if (typeof decoded === "string") return null;
+  return decoded.type ?? null;
 };
