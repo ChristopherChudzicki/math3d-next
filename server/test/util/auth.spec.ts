@@ -106,7 +106,10 @@ describe("parseAuthHeaderForBearer", () => {
 
 describe("decodeTokenType", () => {
   it("returns null for invalid encodings", () => {
-    expect(decodeTokenType("cat")).toBeNull();
+    const malformedToken =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxNWZmYjMyMC1jZWUyLTQ0NzctYTUzNi0zOTY4ZTE2MWI1OWYiLCJ0eXBlIjoiYWNjZXNzIiwODM5OTh9._SGj0TEsirdsUOH6Xi17L2j1MwmqS_891Mg7nv6ANt8";
+    expect(() => jwt.decode(malformedToken)).toThrow();
+    expect(decodeTokenType(malformedToken)).toBeNull();
   });
   it("returns null for encoded strings", () => {
     const encoded = jwt.sign("cat", "some_secret");

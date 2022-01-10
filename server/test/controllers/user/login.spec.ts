@@ -1,11 +1,11 @@
 import { mockReqResNext, getRejection } from "../../testUtils";
-import signup from "../../../src/controllers/user/signup";
+import login from "../../../src/controllers/user/login";
 import { ClientError } from "../../../src/util/errors";
 
 // Mocks
 import * as mail from "../../../src/util/email";
 import { User } from "../../../src/database/models";
-import { accessToken, signupToken } from "../../../src/util/auth";
+import { accessToken } from "../../../src/util/auth";
 
 jest.mock("../../../src/util/email");
 jest.mock("../../../src/database/models");
@@ -14,32 +14,31 @@ jest.mock("../../../src/util/auth");
 const MockedUser = User as jest.Mocked<typeof User>;
 const mockMail = mail as jest.Mocked<typeof mail>;
 const mockAccessToken = accessToken as jest.Mocked<typeof accessToken>;
-const mockSignupToken = signupToken as jest.Mocked<typeof signupToken>;
 
-describe("signup", () => {
+describe("login", () => {
   it("throws ClientError if email is missing from body", async () => {
     const { request, response } = mockReqResNext({ body: {} });
 
-    const error = await getRejection(() => signup(request, response));
+    const error = await getRejection(() => login(request, response));
 
     expect(error).toBeInstanceOf(ClientError);
     expect(error.status).toBe(400);
     expect(String(error)).toContain("required property 'email'");
   });
 
-  describe("when user already exists", () => {
-    it("Sends an existing user email", async () => {
+  describe("when user exists", () => {
+    it("Sends a login email", async () => {
       const { request, response } = mockReqResNext({
         body: { email: "leo@dog.com" },
       });
       MockedUser.findByEmail.mockImplementationOnce(async () => ({} as User));
-      await signup(request, response);
+      await login(request, response);
 
       expect(mail.sendMail).toHaveBeenCalledTimes(1);
       expect(mail.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: "leo@dog.com",
-          subject: "Math3d Signup (Existing User)",
+          subject: "Math3d Login",
         })
       );
     });
@@ -54,55 +53,8 @@ describe("signup", () => {
       );
       mockAccessToken.generate.mockImplementationOnce(() => "leotoken");
 
-      await signup(request, response);
+      await login(request, response);
       expect(mockAccessToken.generate).toHaveBeenCalledWith("leo");
-    });
-
-    it("Includes a link with access token in email", async () => {
-      const { request, response } = mockReqResNext({
-        body: { email: "leo@dog.com" },
-      });
-
-      MockedUser.findByEmail.mockImplementationOnce(async () => ({} as User));
-      mockAccessToken.generate.mockImplementationOnce(() => "leotoken");
-
-      await signup(request, response);
-
-      expect(mail.sendMail).toHaveBeenCalledTimes(1);
-      const [{ html }] = mockMail.sendMail.mock.calls[0];
-
-      expect(html).toMatch(/href="http:\/\/localhost:3000\?login=leotoken"/);
-    });
-  });
-
-  describe("when user does not exist yet", () => {
-    it("Sends a new user email", async () => {
-      const { request, response } = mockReqResNext({
-        body: { email: "leo@dog.com" },
-      });
-      MockedUser.findByEmail.mockImplementationOnce(async () => null);
-      await signup(request, response);
-
-      expect(mail.sendMail).toHaveBeenCalledTimes(1);
-      expect(mail.sendMail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          to: "leo@dog.com",
-          subject: "Math3d Signup",
-        })
-      );
-    });
-
-    it("generates a signup token with user's email", async () => {
-      const { request, response } = mockReqResNext({
-        body: { email: "leo@dog.com" },
-      });
-
-      MockedUser.findByEmail.mockImplementationOnce(async () => null);
-      mockSignupToken.generate.mockImplementationOnce(() => "leotoken");
-
-      await signup(request, response);
-
-      expect(mockSignupToken.generate).toHaveBeenCalledWith("leo@dog.com");
     });
 
     it("Includes a link with signup token in email", async () => {
@@ -110,15 +62,54 @@ describe("signup", () => {
         body: { email: "leo@dog.com" },
       });
 
-      MockedUser.findByEmail.mockImplementationOnce(async () => null);
-      mockSignupToken.generate.mockImplementationOnce(() => "leotoken");
+      MockedUser.findByEmail.mockImplementationOnce(
+        async () => ({ publicId: "leo" } as User)
+      );
+      mockAccessToken.generate.mockImplementationOnce(() => "leotoken");
 
-      await signup(request, response);
+      await login(request, response);
 
       expect(mail.sendMail).toHaveBeenCalledTimes(1);
       const [{ html }] = mockMail.sendMail.mock.calls[0];
 
-      expect(html).toMatch(/href="http:\/\/localhost:3000\?signup=leotoken"/);
+      expect(html).toMatch(/href="http:\/\/localhost:3000\?login=leotoken"/);
+    });
+
+    it("Sends a 200 response with result: true", async () => {
+      const { request, response } = mockReqResNext({
+        body: { email: "leo@dog.com" },
+      });
+
+      MockedUser.findByEmail.mockImplementationOnce(async () => ({} as User));
+      mockAccessToken.generate.mockImplementationOnce(() => "leotoken");
+
+      await login(request, response);
+
+      expect(response.json).toHaveBeenCalledTimes(1);
+      expect(response.json).toHaveBeenCalledWith({ result: true });
+    });
+  });
+
+  describe("when user does not exist yet", () => {
+    it("Does not send an email", async () => {
+      const { request, response } = mockReqResNext({
+        body: { email: "leo@dog.com" },
+      });
+      MockedUser.findByEmail.mockImplementationOnce(async () => null);
+      await login(request, response);
+
+      expect(mail.sendMail).toHaveBeenCalledTimes(0);
+    });
+
+    it("Returns 200 response", async () => {
+      const { request, response } = mockReqResNext({
+        body: { email: "leo@dog.com" },
+      });
+      MockedUser.findByEmail.mockImplementationOnce(async () => null);
+      await login(request, response);
+
+      expect(response.json).toHaveBeenCalledTimes(1);
+      expect(response.json).toHaveBeenCalledWith({ result: true });
     });
   });
 });

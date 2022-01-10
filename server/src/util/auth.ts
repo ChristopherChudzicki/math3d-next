@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import * as jwt from "./jwt";
 import getEnvVar from "./getEnvVar";
 import { ClientError } from "./errors";
 
@@ -92,8 +92,13 @@ export const signupToken = {
 };
 
 export const decodeTokenType = (encoded: string): string | null => {
-  const decoded = jwt.decode(encoded);
-  if (decoded === null) return null;
-  if (typeof decoded === "string") return null;
-  return decoded.type ?? null;
+  try {
+    const decoded = jwt.decode(encoded);
+    if (decoded === null) return null;
+    if (typeof decoded === "string") return null;
+    return decoded.type ?? null;
+  } catch (err) {
+    if (err instanceof jwt.JsonWebTokenError) return null;
+    throw err;
+  }
 };
