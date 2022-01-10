@@ -28,7 +28,16 @@ export const mockReqResNext = ({
   return { request, response, next };
 };
 
-export const getThrownError = async (fn: () => unknown): Promise<any> => {
+export const getThrownError = (fn: () => unknown): any => {
+  try {
+    fn();
+  } catch (error) {
+    return error;
+  }
+  throw new Error("Fn should have thrown");
+};
+
+export const getRejection = async (fn: () => unknown): Promise<any> => {
   try {
     await fn();
   } catch (error) {

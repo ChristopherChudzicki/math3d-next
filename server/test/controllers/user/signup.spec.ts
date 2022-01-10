@@ -1,4 +1,4 @@
-import { mockReqResNext, getThrownError } from "../../testUtils";
+import { mockReqResNext, getRejection } from "../../testUtils";
 import signup from "../../../src/controllers/user/signup";
 import { ClientError } from "../../../src/util/errors";
 
@@ -20,7 +20,7 @@ describe("signup", () => {
   it("throws ClientError if email is missing from body", async () => {
     const { request, response } = mockReqResNext({ body: {} });
 
-    const error = await getThrownError(() => signup(request, response));
+    const error = await getRejection(() => signup(request, response));
 
     expect(error).toBeInstanceOf(ClientError);
     expect(error.status).toBe(400);

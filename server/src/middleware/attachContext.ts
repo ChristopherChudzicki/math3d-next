@@ -7,17 +7,22 @@ import {
 } from "../util/auth";
 
 export class Context {
-  isAccessTokenValidated: boolean;
+  hasValidAccessToken: boolean;
 
-  userId?: string;
+  private _userId?: string;
 
   constructor() {
-    this.isAccessTokenValidated = false;
+    this.hasValidAccessToken = false;
+    this.mustGetUserId = this.mustGetUserId.bind(this);
   }
 
-  setUserId(userId: string): void {
-    this.userId = userId;
-    this.isAccessTokenValidated = true;
+  get userId(): string | undefined {
+    return this._userId;
+  }
+
+  setValidatedUserId(userId: string): void {
+    this._userId = userId;
+    this.hasValidAccessToken = true;
   }
 
   mustGetUserId(): string {
@@ -38,7 +43,7 @@ const attachContext = (
     return next();
   }
   const { userId } = accessToken.verify(encoded);
-  req.context.setUserId(userId);
+  req.context.setValidatedUserId(userId);
   return next();
 };
 
