@@ -12,6 +12,8 @@ app.use(express.json());
 app.use(middleware.attachContext);
 
 app.get("/", async (req, res) => {
+  console.log(`hasValidAccessToken: ${req.context.hasValidAccessToken}`);
+  console.log(`userId: ${req.context.userId}`);
   res.send("Hello World!!");
 });
 
