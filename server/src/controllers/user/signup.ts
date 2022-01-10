@@ -71,7 +71,7 @@ const signup = async (req: Request, res: SignupResponse): Promise<void> => {
   const { email } = req.body;
   const user = await User.findByEmail(email);
   if (user) {
-    const { html } = existingUserEmail(email);
+    const { html } = existingUserEmail(user.publicId);
     await mail.sendMail({
       from: "login@math3d.com",
       to: email,

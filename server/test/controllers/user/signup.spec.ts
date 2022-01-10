@@ -44,7 +44,21 @@ describe("signup", () => {
       );
     });
 
-    it("Includes a link with signup token in email", async () => {
+    it("generates an access token with user's publicId", async () => {
+      const { request, response } = mockReqResNext({
+        body: { email: "leo@dog.com" },
+      });
+
+      MockedUser.findByEmail.mockImplementationOnce(
+        async () => ({ publicId: "leo" } as User)
+      );
+      mockAccessToken.generate.mockImplementationOnce(() => "leotoken");
+
+      await signup(request, response);
+      expect(mockAccessToken.generate).toHaveBeenCalledWith("leo");
+    });
+
+    it("Includes a link with access token in email", async () => {
       const { request, response } = mockReqResNext({
         body: { email: "leo@dog.com" },
       });
@@ -76,6 +90,19 @@ describe("signup", () => {
           subject: "Math3d Signup",
         })
       );
+    });
+
+    it("generates a signup token with user's email", async () => {
+      const { request, response } = mockReqResNext({
+        body: { email: "leo@dog.com" },
+      });
+
+      MockedUser.findByEmail.mockImplementationOnce(async () => null);
+      mockSignupToken.generate.mockImplementationOnce(() => "leotoken");
+
+      await signup(request, response);
+
+      expect(mockSignupToken.generate).toHaveBeenCalledWith("leo@dog.com");
     });
 
     it("Includes a link with signup token in email", async () => {
