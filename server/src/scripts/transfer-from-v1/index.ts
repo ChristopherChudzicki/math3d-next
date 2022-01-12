@@ -1,20 +1,18 @@
 import fs from "fs";
+import minimist from "minimist";
 import { rehydrate } from "./hydrate";
 
-const GRAPHS_v1 = "/Users/cchudzicki/Documents/graphs_v1.json";
-const GRAPHS_v2 = "/Users/cchudzicki/Documents/graphs_v2.json";
-
-const run = () => {
-  const rowsV1 = JSON.parse(fs.readFileSync(GRAPHS_v1, "utf8")).map(
-    (row: any) => ({
+const transfer = (inPath: string, outPath: string) => {
+  const rowsV1 = JSON.parse(fs.readFileSync(inPath, "utf8"))
+    .slice(0, 10)
+    .map((row: any) => ({
       ...row,
       dehydrated: JSON.parse(row.dehydrated),
-    })
-  );
+    }));
 
   let failed = 0;
   const rowsV2 = rowsV1
-    .map((row: any, i) => {
+    .map((row: any, i: number) => {
       if (i % 1000 === 0) {
         console.log(`total: ${i}, failed: ${failed}`);
       }
@@ -30,7 +28,25 @@ const run = () => {
     })
     .filter((r: any) => r !== null);
 
-  fs.writeFileSync(GRAPHS_v2, JSON.stringify(rowsV2), "utf8");
+  fs.writeFileSync(outPath, JSON.stringify(rowsV2), "utf8");
 };
 
-run();
+const getCliArgs = () => {
+  const args = minimist(process.argv.slice(2));
+  const { in: inFile, out: outFile } = args;
+  if (!inFile) {
+    throw new Error(`arg --in is required`);
+  }
+  if (!outFile) {
+    throw new Error(`arg --out is required`);
+  }
+  fs.statSync(inFile);
+  return { inFile, outFile };
+};
+
+const main = () => {
+  const { inFile, outFile } = getCliArgs();
+  transfer(inFile, outFile);
+};
+
+main();
