@@ -8,7 +8,7 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
   ],
   plugins: ["prettier", "@typescript-eslint"],
-  ignorePatterns: ["build/", "**/*.js", "old/", "webpack.config.js"],
+  ignorePatterns: ["build/", "**/*.js", "src/scripts/transfer-from-v1"],
   rules: {
     "prettier/prettier": ["error"],
     "max-classes-per-file": 0,

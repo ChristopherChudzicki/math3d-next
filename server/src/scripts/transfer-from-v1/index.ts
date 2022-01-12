@@ -2,9 +2,41 @@ import fs from "fs";
 import minimist from "minimist";
 import { rehydrate } from "./hydrate";
 
+const reformatRehydrated = (rehydrated: any) => {
+  const {
+    mathGraphics = {},
+    mathSymbols = {},
+    folders = {},
+    sliderValues = {},
+    sortableTree,
+    metadata,
+  } = rehydrated;
+  Object.values(folders).forEach((f: any) => {
+    f.type = "FOLDER";
+  });
+  Object.entries(sliderValues).forEach(([k, value]) => {
+    if (mathSymbols[k]) {
+      // There's a bug in math3d where deleting a slider does not
+      // delete its sliderValue, so sometimes there's a sliderValue
+      // entry but no slider object
+      mathSymbols[k].value = value;
+    }
+  });
+  const items = [mathGraphics, mathSymbols, folders]
+    .flatMap(Object.entries)
+    .map(([id, item]: [string, any]) => {
+      const { type, ...properties } = item;
+      return { id, type, properties };
+    });
+
+  const { title, creationDate: creationDateQuoted } = metadata;
+  const creationDate = creationDateQuoted.replaceAll('"', "");
+  return { items, sortableTree, creationDate, title };
+};
+
 const transfer = (inPath: string, outPath: string) => {
   const rowsV1 = JSON.parse(fs.readFileSync(inPath, "utf8"))
-    .slice(0, 10)
+    // .slice(0, 10)
     .map((row: any) => ({
       ...row,
       dehydrated: JSON.parse(row.dehydrated),
@@ -17,16 +49,35 @@ const transfer = (inPath: string, outPath: string) => {
         console.log(`total: ${i}, failed: ${failed}`);
       }
       try {
+        const rehydrated = rehydrate(row.dehydrated);
+        const { items, sortableTree, creationDate, title } =
+          reformatRehydrated(rehydrated);
+        const {
+          id,
+          last_accessed: lastAccessed,
+          times_accessed: timesAccessed,
+          url_key: publicId,
+        } = row;
         return {
-          ...row,
-          dehydrated: rehydrate(row.dehydrated),
+          id,
+          publicId,
+          lastAccessed,
+          timesAccessed,
+          items,
+          sortableTree,
+          creationDate,
+          title,
         };
       } catch (e) {
+        console.log(row);
+        throw e;
         failed += 1;
         return null;
       }
     })
     .filter((r: any) => r !== null);
+
+  console.log(`Failed: ${failed}`);
 
   fs.writeFileSync(outPath, JSON.stringify(rowsV2), "utf8");
 };
