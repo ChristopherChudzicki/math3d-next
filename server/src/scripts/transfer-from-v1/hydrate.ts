@@ -93,7 +93,7 @@ function dehydrateFolders(folders: any) {
 
 function rehydrateFolders(sortableTree: any, folders: any) {
   const { root } = sortableTree;
-  const emptyFolders = Object.fromEntries(root.map((id) => [id, {}]));
+  const emptyFolders = Object.fromEntries(root.map((id: any) => [id, {}]));
   const toRehydrate = { ...emptyFolders, ...folders };
   return rehydrateMathObjects(toRehydrate, initialState.folders, true);
 }

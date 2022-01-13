@@ -59,13 +59,14 @@ const transfer = (inPath: string, outPath: string) => {
           url_key: publicId,
         } = row;
         return {
-          id,
+          // id, // omit this; db can pick its own new pk id
           publicId,
           lastAccessed,
           timesAccessed,
           items,
           sortableTree,
-          creationDate,
+          createdAt: creationDate,
+          updatedAt: creationDate,
           title,
         };
       } catch (e) {

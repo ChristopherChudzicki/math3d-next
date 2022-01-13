@@ -8,6 +8,7 @@
     "build": "rm -rf build && tsc",
     "build:watch": "tsc --watch",
     "migrate:local": "env $(grep -v '^#' .env.development.local | xargs) npx sequelize-cli db:migrate",
+    "seed:all:local": "env $(grep -v '^#' .env.development.local | xargs) npx sequelize-cli db:seed:all",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\"",
