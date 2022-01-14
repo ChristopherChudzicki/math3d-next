@@ -12,6 +12,10 @@ interface SceneAttributes {
   lastAccessed: number;
 }
 
+export type PublicScene = {
+  id: SceneAttributes["publicId"];
+} & Pick<SceneAttributes, "items" | "sortableTree" | "title">;
+
 type UserCreationAttributes = Optional<
   SceneAttributes,
   "id" | "publicId" | "timesAccessed" | "lastAccessed"
@@ -41,6 +45,15 @@ export default class Scene
 
   static findByPublicId(publicId: string): Promise<Scene | null> {
     return Scene.findOne({ where: { publicId } });
+  }
+
+  toPublicScene(): PublicScene {
+    return {
+      id: this.publicId,
+      title: this.title,
+      items: this.items,
+      sortableTree: this.sortableTree,
+    };
   }
 }
 
