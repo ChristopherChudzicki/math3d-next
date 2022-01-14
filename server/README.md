@@ -58,3 +58,9 @@ The server should now be accepting requests at `http://localhost:3001`.
 ## The Database
 
 We use a PostgresSQL database run locally in a docker container; see above. The credentials in `.env.development.local` can be used to connect to the database from the host machine (i.e., from outside the docker container).
+
+Locally, you can seed the database with some scenes via
+
+```sh
+npm run seed:all:local
+```
