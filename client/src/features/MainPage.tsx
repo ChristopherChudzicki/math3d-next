@@ -10,6 +10,7 @@ const MainPage: React.FC = () => {
     "--sidebar-width": "375px",
     "--header-height": "50px",
   } as React.CSSProperties;
+  alert("hi");
   return (
     <div className={styles.container} style={cssVars}>
       <Header className={styles.header} />
