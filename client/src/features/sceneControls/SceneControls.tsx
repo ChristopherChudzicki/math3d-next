@@ -1,15 +1,13 @@
 import React from "react";
 import { useAppSelector } from "app/hooks";
-import { Tab, Button, Nav } from "react-bootstrap";
+import { Tab, Nav } from "react-bootstrap";
 import ScrollingYOverflowX from "../../util/components/scrollingOverflow";
 import style from "./SceneControls.module.css";
-import MathObject from "./MathObject";
+import MathItem from "./MathItem";
 import AddObjectButton from "./AddObjectButton";
 
-const SceneControls: React.FC = (props) => {
-  const mathObjectIds = useAppSelector((state) =>
-    Object.keys(state.mathObjects)
-  );
+const SceneControls: React.FC = () => {
+  const mathItemIds = useAppSelector((state) => Object.keys(state.mathItems));
   return (
     <Tab.Container id="sidebar-controls" defaultActiveKey="main">
       <Nav variant="tabs" className={style["tab-navs"]}>
@@ -28,8 +26,8 @@ const SceneControls: React.FC = (props) => {
       <Tab.Content className={style["tab-content"]}>
         <Tab.Pane eventKey="main" className={style["tab-pane"]}>
           <ScrollingYOverflowX className="h-100">
-            {mathObjectIds.map((id) => (
-              <MathObject id={id} key={id} />
+            {mathItemIds.map((id) => (
+              <MathItem id={id} key={id} />
             ))}
           </ScrollingYOverflowX>
         </Tab.Pane>

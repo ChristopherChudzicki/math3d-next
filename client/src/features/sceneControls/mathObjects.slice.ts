@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { RootState } from "app/store";
+import type { RootState, SelectorReturn } from "app/store";
 import idGenerator from "util/idGenerator";
 
-export interface MathObject {
+export interface MathItem {
   id: string;
   type: "test";
   properties: {
@@ -10,11 +10,11 @@ export interface MathObject {
   };
 }
 
-export interface MathObjectsState {
-  [id: string]: MathObject;
+export interface MathItemsState {
+  [id: string]: MathItem;
 }
 
-const initialState: MathObjectsState = Object.fromEntries(
+const initialState: MathItemsState = Object.fromEntries(
   Array(10)
     .fill(null)
     .map((_x, i) => {
@@ -24,8 +24,8 @@ const initialState: MathObjectsState = Object.fromEntries(
     })
 );
 
-const mathObjectsSlice = createSlice({
-  name: "mathObjects",
+const mathItemsSlice = createSlice({
+  name: "mathItems",
   initialState,
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
@@ -48,7 +48,7 @@ const mathObjectsSlice = createSlice({
       state,
       action: PayloadAction<{
         id: string;
-        properties: Partial<MathObject["properties"]>;
+        properties: Partial<MathItem["properties"]>;
       }>
     ) => {
       const { id, properties: newProperties } = action.payload;
@@ -58,8 +58,10 @@ const mathObjectsSlice = createSlice({
   },
 });
 
-export const selectMathObject = (id: string) => (state: RootState) =>
-  state.mathObjects[id];
+export const selectMathItem =
+  (id: string): SelectorReturn<MathItem> =>
+  (state: RootState) =>
+    state.mathItems[id];
 
-export const { actions, reducer } = mathObjectsSlice;
-export default mathObjectsSlice;
+export const { actions, reducer } = mathItemsSlice;
+export default mathItemsSlice;

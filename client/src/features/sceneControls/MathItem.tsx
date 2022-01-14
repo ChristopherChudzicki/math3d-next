@@ -1,21 +1,20 @@
 import React from "react";
 import { useAppSelector, useAppDispatch } from "app/hooks";
-import mathObjStore, { selectMathObject } from "./mathObjects.slice";
-import idGenerator from "util/idGenerator";
+import mathItemStore, { selectMathItem } from "./mathObjects.slice";
 
-const { actions } = mathObjStore;
+const { actions } = mathItemStore;
 
 type Props = {
   id: string;
 };
-const MathObject: React.FC<Props> = ({ id }) => {
-  const mathObj = useAppSelector(selectMathObject(id));
+const MathItem: React.FC<Props> = ({ id }) => {
+  const mathItem = useAppSelector(selectMathItem(id));
   const dispatch = useAppDispatch();
   return (
     <div>
       <input
         type="text"
-        value={mathObj.properties.description}
+        value={mathItem.properties.description}
         onChange={(e) => {
           const properties = {
             description: e.target.value,
@@ -27,4 +26,4 @@ const MathObject: React.FC<Props> = ({ id }) => {
   );
 };
 
-export default MathObject;
+export default MathItem;
