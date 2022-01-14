@@ -1,3 +1,4 @@
 import User from "./User";
+import Scene, { PublicScene } from "./Scene";
 
-export { User };
+export { User, Scene, PublicScene };

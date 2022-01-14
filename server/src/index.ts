@@ -1,6 +1,7 @@
 import express from "express";
 import { attachRoutes } from "./util/routing";
 import * as user from "./controllers/user";
+import * as scene from "./controllers/scene";
 import * as middleware from "./middleware";
 import getEnvVar from "./util/getEnvVar";
 
@@ -18,6 +19,7 @@ app.get("/", async (req, res) => {
 });
 
 attachRoutes(app, user.routes);
+attachRoutes(app, scene.routes);
 
 app.use(middleware.sendErrorResponse);
 
