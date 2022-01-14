@@ -1,7 +1,7 @@
 import React from "react";
 import Header from "./header";
 import Scene from "./scene";
-import Sidebar from "./sidebar";
+import Sidebar from "../util/components/sidebar";
 import SceneControls from "./sceneControls";
 import styles from "./MainPage.module.css";
 
