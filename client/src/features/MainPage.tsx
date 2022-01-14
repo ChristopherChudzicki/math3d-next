@@ -2,7 +2,7 @@ import React from "react";
 import Header from "./header";
 import Scene from "./scene";
 import Sidebar from "./sidebar";
-import SceneControsl from "./sceneControls";
+import SceneControls from "./sceneControls";
 import styles from "./MainPage.module.css";
 
 const MainPage: React.FC = () => {
@@ -15,7 +15,7 @@ const MainPage: React.FC = () => {
       <Header className={styles.header} />
       <div className={styles.body}>
         <Sidebar className={styles.sidebar} side="left">
-          <SceneControsl />
+          <SceneControls />
         </Sidebar>
         <Sidebar className={styles.sidebar} side="right" />
         <Scene />
