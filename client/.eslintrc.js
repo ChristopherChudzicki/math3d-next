@@ -6,7 +6,7 @@ module.exports = {
     jest: true,
   },
   rules: {
-    "no-console": "error",
+    "no-console": "warn",
     "import/first": "error",
     "react/prop-types": "off",
   },
