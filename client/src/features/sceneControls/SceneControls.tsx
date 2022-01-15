@@ -6,8 +6,14 @@ import style from "./SceneControls.module.css";
 import MathItem from "./MathItem";
 import AddObjectButton from "./AddObjectButton";
 
-const SceneControls: React.FC = () => {
+type Props = {
+  sceneId?: string;
+};
+
+const SceneControls: React.FC<Props> = (props) => {
   const mathItemIds = useAppSelector((state) => Object.keys(state.mathItems));
+  const { sceneId } = props;
+
   return (
     <Tab.Container id="sidebar-controls" defaultActiveKey="main">
       <Nav variant="tabs" className={style["tab-navs"]}>
