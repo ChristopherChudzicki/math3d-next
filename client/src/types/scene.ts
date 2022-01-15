@@ -5,6 +5,6 @@ export type SortableTree = Record<string, string[]>;
 export type Scene = {
   id: string;
   title: string;
-  items: MathItem;
+  items: MathItem[];
   sortableTree: SortableTree;
 };

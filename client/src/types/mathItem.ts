@@ -50,6 +50,7 @@ export const itemType = {
 
 type FolderPoperties = {
   description: string;
+  isCollapsed: boolean;
 };
 
 type VariableProperties = {

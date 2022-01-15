@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAppSelector } from "app/hooks";
+import { getScene } from "api";
 import { MathItem } from "./mathItems";
 import ControlTabs from "./controlTabs";
 import AddObjectButton from "./AddObjectButton";
+import defaultScene from "./defaultScene";
 
 type Props = {
   sceneId?: string;
@@ -21,11 +23,15 @@ const AxesNav: React.FC = () => (
 );
 
 const SceneControls: React.FC<Props> = (props) => {
-  const mathItemIds = useAppSelector((state) => Object.keys(state.mathItems));
   const { sceneId } = props;
-
-  // {}
-
+  useEffect(() => {
+    const loadScene = async () => {
+      const scene =
+        sceneId !== undefined ? await getScene(sceneId) : defaultScene;
+    };
+    loadScene();
+  }, [sceneId]);
+  const mathItemIds = useAppSelector((state) => Object.keys(state.mathItems));
   return (
     <ControlTabs
       mainNav={<MainNav />}
