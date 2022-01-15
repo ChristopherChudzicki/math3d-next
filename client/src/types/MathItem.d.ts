@@ -1,4 +1,4 @@
-interface MathItemGeneric<T extends string, Props extends number> {
+interface MathItemGeneric<T extends string, Props extends MathItemProperties> {
   id: string;
   type: T;
   properties: Props;
@@ -9,7 +9,12 @@ interface MathItemProperties extends Record<string, string> {
 }
 
 type PointProperties = {
+  description: string;
   color: string;
+};
+
+type FolderPoperties = {
+  description: string;
 };
 
 export type Point = MathItemGeneric<"POINT", PointProperties>;
@@ -22,4 +27,8 @@ export type ParametricCurve = MathItemGeneric<
   PointProperties
 >;
 
-export type MathItem = Point | ExplicitSurface | ParametricCurve;
+export type Folder = MathItemGeneric<"FOLDER", FolderPoperties>;
+
+export type MathGraphic = Point | ExplicitSurface | ParametricCurve;
+
+export type MathItem = MathGraphic | Folder;
