@@ -1,7 +1,7 @@
 import React from "react";
 import { useAppDispatch } from "app/hooks";
 import { Button } from "react-bootstrap";
-import { actions } from "./mathObjects.slice";
+import { actions } from "./mathItems.slice";
 
 type Props = {
   className: string;

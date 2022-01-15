@@ -1,6 +1,6 @@
 import React from "react";
 import { useAppSelector, useAppDispatch } from "app/hooks";
-import mathItemStore, { selectMathItem } from "./mathObjects.slice";
+import mathItemStore, { selectMathItem } from "./mathItems.slice";
 
 const { actions } = mathItemStore;
 

@@ -1,5 +1,5 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
-import mathItems from "../features/sceneControls/mathObjects.slice";
+import mathItems from "../features/sceneControls/mathItems.slice";
 
 export const store = configureStore({
   reducer: {
