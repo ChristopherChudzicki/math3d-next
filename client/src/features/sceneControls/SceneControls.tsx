@@ -3,7 +3,7 @@ import { useAppSelector } from "app/hooks";
 import { Tab, Nav } from "react-bootstrap";
 import ScrollingYOverflowX from "../../util/components/scrollingOverflow";
 import style from "./SceneControls.module.css";
-import MathItem from "./MathItem";
+import { MathItem } from "./mathItems";
 import AddObjectButton from "./AddObjectButton";
 
 type Props = {
