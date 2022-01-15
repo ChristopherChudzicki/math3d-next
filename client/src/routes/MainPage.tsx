@@ -1,8 +1,8 @@
 import React from "react";
-import Header from "./header";
-import Scene from "./scene";
-import Sidebar from "../util/components/sidebar";
-import SceneControls from "./sceneControls";
+import Header from "features/header";
+import Scene from "features/scene";
+import Sidebar from "util/components/sidebar";
+import SceneControls from "features/sceneControls";
 import styles from "./MainPage.module.css";
 
 const MainPage: React.FC = () => {
@@ -10,7 +10,6 @@ const MainPage: React.FC = () => {
     "--sidebar-width": "375px",
     "--header-height": "50px",
   } as React.CSSProperties;
-  alert("hi");
   return (
     <div className={styles.container} style={cssVars}>
       <Header className={styles.header} />

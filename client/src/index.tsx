@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./index.css";
-import App from "./App";
+import * as routes from "./routes";
 import { store } from "./app/store";
 
 ReactDOM.render(
@@ -14,8 +14,8 @@ ReactDOM.render(
       <BrowserRouter>
         <Routes>
           <Route path="/">
-            <Route path="/:sceneId" element={<App />} />
-            <Route path="" element={<App />} />
+            <Route path="/:sceneId" element={<routes.MainPage />} />
+            <Route path="" element={<routes.MainPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
