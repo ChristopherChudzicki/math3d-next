@@ -1,46 +1,51 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState, SelectorReturn } from "app/store";
+import type { MathItem } from "types";
 import idGenerator from "util/idGenerator";
-
-export interface MathItem {
-  id: string;
-  type: "test";
-  properties: {
-    description: string;
-  };
-}
 
 export interface MathItemsState {
   [id: string]: MathItem;
 }
 
-const initialState: MathItemsState = Object.fromEntries(
-  Array(10)
-    .fill(null)
-    .map((_x, i) => {
-      const id = idGenerator.next();
-      const properties = { description: `Object number ${i}` };
-      return [id, { id, type: "test" as const, properties }];
-    })
-);
+const initialState: MathItemsState = {};
 
 const mathItemsSlice = createSlice({
   name: "mathItems",
   initialState,
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
-    add: (state, action: PayloadAction<{ type: "test" }>) => {
-      const { type } = action.payload;
+    addItems: (state, action: PayloadAction<{ items: MathItem[] }>) => {
+      const { items } = action.payload;
+      const statePatch = Object.fromEntries(
+        items.map((item) => [item.id, item])
+      );
+      return { ...state, ...statePatch };
+    },
+    addNewItem: (state) => {
       const id = idGenerator.next();
-      const description = `Test Object: id is ${id}`;
-      const mathObj = {
+      const type = "POINT" as const;
+      const properties = {
+        description: `POINT ${id}`,
+        useCalculatedVisibility: false,
+        color: "#3090FF",
+        visible: true,
+        opacity: "1",
+        zIndex: "0",
+        zBias: "0",
+        calculatedVisibility: "",
+        label: "",
+        labelVisible: false,
+        coords: "\\left[0,0,0\\right]",
+        size: "16",
+      };
+      const item = {
         id,
         type,
-        properties: { description },
+        properties,
       };
-      state[id] = mathObj;
+      state[id] = item;
     },
-    remove: (state, action: PayloadAction<{ id: number }>) => {
+    remove: (state, action: PayloadAction<{ id: string }>) => {
       const { id } = action.payload;
       delete state[id];
     },
@@ -53,7 +58,9 @@ const mathItemsSlice = createSlice({
     ) => {
       const { id, properties: newProperties } = action.payload;
       const { properties: oldProperties } = state[id];
-      state[id].properties = { ...oldProperties, ...newProperties };
+      const { description } = newProperties;
+      if (description === undefined) return;
+      state[id].properties = { ...oldProperties, ...{ description } };
     },
   },
 });

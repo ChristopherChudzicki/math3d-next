@@ -2,9 +2,10 @@ import type { Scene } from "types";
 import { fetchJson } from "./util";
 
 const getScene = async (sceneId: string): Promise<Scene> => {
-  const { result: scene } = await fetchJson<{ result: Scene }>(
+  const { result } = await fetchJson<{ result: { scene: Scene } }>(
     `/scene/${sceneId}`
   );
+  const { scene } = result;
   return scene;
 };
 

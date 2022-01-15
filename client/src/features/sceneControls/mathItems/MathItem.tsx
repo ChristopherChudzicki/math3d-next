@@ -1,29 +1,16 @@
 import React from "react";
-import { useAppSelector, useAppDispatch } from "app/hooks";
-import mathItemStore, { selectMathItem } from "./mathItems.slice";
-
-const { actions } = mathItemStore;
+import type { MathItem } from "types";
 
 type Props = {
-  id: string;
+  item: MathItem;
 };
-const MathItem: React.FC<Props> = ({ id }) => {
-  const mathItem = useAppSelector(selectMathItem(id));
-  const dispatch = useAppDispatch();
+const MathItemComponent: React.FC<Props> = ({ item }) => {
+  const { properties } = item;
   return (
     <div>
-      <input
-        type="text"
-        value={mathItem.properties.description}
-        onChange={(e) => {
-          const properties = {
-            description: e.target.value,
-          };
-          dispatch(actions.setProperties({ id, properties }));
-        }}
-      />
+      {item.id}: {properties.description}
     </div>
   );
 };
 
-export default MathItem;
+export default MathItemComponent;

@@ -16,7 +16,7 @@ const AddObjectButton: React.FC<Props> = (props) => {
       className={props.className}
       variant="outline-secondary"
       onClick={() => {
-        dispatch(actions.add({ type: "test" }));
+        dispatch(actions.addNewItem());
       }}
     >
       Add Object

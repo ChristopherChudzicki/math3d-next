@@ -1,10 +1,13 @@
 import React, { useEffect } from "react";
-import { useAppSelector } from "app/hooks";
+import { useAppSelector, useAppDispatch } from "app/hooks";
 import { getScene } from "api";
 import { MathItem } from "./mathItems";
 import ControlTabs from "./controlTabs";
 import AddObjectButton from "./AddObjectButton";
 import defaultScene from "./defaultScene";
+import { slice as mathItemsSlice } from "./mathItems";
+
+const { actions: itemActions } = mathItemsSlice;
 
 type Props = {
   sceneId?: string;
@@ -24,19 +27,22 @@ const AxesNav: React.FC = () => (
 
 const SceneControls: React.FC<Props> = (props) => {
   const { sceneId } = props;
+  const dispatch = useAppDispatch();
   useEffect(() => {
     const loadScene = async () => {
       const scene =
         sceneId !== undefined ? await getScene(sceneId) : defaultScene;
+      console.log(scene);
+      dispatch(itemActions.addItems({ items: scene.items }));
     };
     loadScene();
   }, [sceneId]);
-  const mathItemIds = useAppSelector((state) => Object.keys(state.mathItems));
+  const items = useAppSelector((state) => Object.values(state.mathItems));
   return (
     <ControlTabs
       mainNav={<MainNav />}
-      mainContent={mathItemIds.map((id) => (
-        <MathItem id={id} key={id} />
+      mainContent={items.map((item) => (
+        <MathItem item={item} key={item.id} />
       ))}
       axesNav={<AxesNav />}
       axesdContent="axes stuff"
