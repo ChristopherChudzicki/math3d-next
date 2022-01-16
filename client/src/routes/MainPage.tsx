@@ -1,21 +1,24 @@
 import React from "react";
-import Header from "./header";
-import Scene from "./scene";
-import Sidebar from "./sidebar";
-import SceneControsl from "./sceneControls";
+import { useParams } from "react-router-dom";
+import Header from "util/components/header";
+import Scene from "features/scene";
+import Sidebar from "util/components/sidebar";
+import SceneControls from "features/sceneControls";
 import styles from "./MainPage.module.css";
 
+const cssVars = {
+  "--sidebar-width": "375px",
+  "--header-height": "50px",
+} as React.CSSProperties;
+
 const MainPage: React.FC = () => {
-  const cssVars = {
-    "--sidebar-width": "375px",
-    "--header-height": "50px",
-  } as React.CSSProperties;
+  const { sceneId } = useParams();
   return (
     <div className={styles.container} style={cssVars}>
       <Header className={styles.header} />
       <div className={styles.body}>
         <Sidebar className={styles.sidebar} side="left">
-          <SceneControsl />
+          <SceneControls sceneId={sceneId} />
         </Sidebar>
         <Sidebar className={styles.sidebar} side="right" />
         <Scene />

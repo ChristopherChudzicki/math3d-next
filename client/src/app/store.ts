@@ -1,9 +1,9 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
-import mathObjects from "../features/sceneControls/mathObjects.slice";
+import { slice as mathItems } from "features/sceneControls/mathItems";
 
 export const store = configureStore({
   reducer: {
-    mathObjects: mathObjects.reducer,
+    mathItems: mathItems.reducer,
   },
 });
 
@@ -15,3 +15,5 @@ export type AppThunk<ReturnType = void> = ThunkAction<
   unknown,
   Action<string>
 >;
+
+export type SelectorReturn<T> = (state: RootState) => T;

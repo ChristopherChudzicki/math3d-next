@@ -3,6 +3,8 @@
 }
 .tab-navs .tab-nav {
   height: 100%;
+  /* ensure nav items fill space, splitting remaining width equally */
+  flex-grow: 1;
 }
 .tab-navs .tab-nav > * {
   display: flex;
