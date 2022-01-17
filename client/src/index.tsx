@@ -2,8 +2,9 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap-icons/font/bootstrap-icons.css";
+// bootstrap just for utility classes
+import "bootstrap/dist/css/bootstrap-utilities.css";
+import "antd/dist/antd.css";
 import "./index.css";
 import * as routes from "./routes";
 import { store } from "./app/store";

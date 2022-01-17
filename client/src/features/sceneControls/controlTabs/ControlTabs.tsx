@@ -1,37 +1,42 @@
 import React from "react";
-import { Tab, Nav } from "react-bootstrap";
+import { Tabs, Button } from "antd";
 import ScrollingYOverflowX from "util/components/scrollingOverflow";
 import style from "./ControlTabs.module.css";
+
+const { TabPane } = Tabs;
 
 type Props = {
   mainNav: React.ReactNode;
   axesNav: React.ReactNode;
-  mainContent?: React.ReactNode;
-  axesdContent?: React.ReactNode;
+  mainContent: React.ReactNode;
+  axesdContent: React.ReactNode;
+  tabBarExtraContent: React.ReactNode;
 };
+
+const TABS_NAV_HEIGHT = "60px";
+const tabsStyle = {
+  height: TABS_NAV_HEIGHT,
+  paddingLeft: "1em",
+  paddingRight: "1em",
+} as React.CSSProperties;
+const scrollingOverflowStyle = {
+  height: `calc(100vh - ${TABS_NAV_HEIGHT} - var(--header-height))`,
+} as React.CSSProperties;
 
 const SceneControls: React.FC<Props> = (props) => {
   return (
-    <Tab.Container id="sidebar-controls" defaultActiveKey="main">
-      <Nav variant="tabs" className={style["tab-navs"]}>
-        <Nav.Item className={style["tab-nav"]}>
-          <Nav.Link eventKey="main">{props.mainNav}</Nav.Link>
-        </Nav.Item>
-        <Nav.Item className={style["tab-nav"]}>
-          <Nav.Link eventKey="axes">{props.axesNav}</Nav.Link>
-        </Nav.Item>
-      </Nav>
-      <Tab.Content className={style["tab-content"]}>
-        <Tab.Pane eventKey="main" className={style["tab-pane"]}>
-          <ScrollingYOverflowX className="h-100">
-            {props.mainContent}
-          </ScrollingYOverflowX>
-        </Tab.Pane>
-        <Tab.Pane eventKey="axes" className={style["tab-pane"]}>
+    <Tabs tabBarExtraContent={props.tabBarExtraContent} tabBarStyle={tabsStyle}>
+      <TabPane tab={props.mainNav} key="main">
+        <ScrollingYOverflowX style={scrollingOverflowStyle}>
+          {props.mainContent}
+        </ScrollingYOverflowX>
+      </TabPane>
+      <TabPane tab={props.axesNav} key="axes">
+        <ScrollingYOverflowX style={scrollingOverflowStyle}>
           {props.axesdContent}
-        </Tab.Pane>
-      </Tab.Content>
-    </Tab.Container>
+        </ScrollingYOverflowX>
+      </TabPane>
+    </Tabs>
   );
 };
 

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import mergeClassNames from "classnames";
-import { Button } from "react-bootstrap";
+import { Button } from "antd";
 import style from "./Sidebar.module.css";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
 type CollapseButtonProps = {
   iconDirection: "left" | "right";
@@ -9,16 +10,14 @@ type CollapseButtonProps = {
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
 };
 const CollapseButton: React.FC<CollapseButtonProps> = (props) => {
-  const icon =
-    props.iconDirection === "left" ? "bi-chevron-left" : "bi-chevron-right";
   return (
     <Button
-      variant="outline"
-      size="sm"
+      type="link"
+      shape="round"
       onClick={props.onClick}
       className={props.className}
     >
-      <i className={mergeClassNames(["bi", icon])}></i>
+      {props.iconDirection === "left" ? <LeftOutlined /> : <RightOutlined />}
     </Button>
   );
 };

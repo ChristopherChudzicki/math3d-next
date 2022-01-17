@@ -13,15 +13,10 @@ type Props = {
   sceneId?: string;
 };
 
-const MainNav: React.FC = () => (
-  <>
-    Main
-    <AddObjectButton className="mx-3" />
-  </>
-);
+const MainNav: React.FC = () => <>Main</>;
 const AxesNav: React.FC = () => (
   <div className="text-center">
-    Axes and <br /> Camera
+    Axes &amp; <br /> Camera
   </div>
 );
 
@@ -40,8 +35,21 @@ const SceneControls: React.FC<Props> = (props) => {
   const items = useAppSelector((state) => Object.values(state.mathItems));
   return (
     <ControlTabs
+      tabBarExtraContent={<AddObjectButton />}
       mainNav={<MainNav />}
-      mainContent={items.map((item) => (
+      mainContent={[
+        ...items,
+        ...items,
+        ...items,
+        ...items,
+        ...items,
+        ...items,
+        ...items,
+        ...items,
+        ...items,
+        ...items,
+        ...items,
+      ].map((item) => (
         <MathItem item={item} key={item.id} />
       ))}
       axesNav={<AxesNav />}
