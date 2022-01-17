@@ -4,6 +4,13 @@
   margin-right: -100vw;
   padding-right: +100vw;
   pointer-events: none;
+  /* The method we're using for scrollable overflow means scrollbars don't show
+  up in the correct spot. This prevents them from showing up at all (and from
+  taking up horizontal space). */
+  scrollbar-width: none;
+}
+.scrollable::-webkit-scrollbar {
+  display: none;
 }
 
 .scrollable * {
