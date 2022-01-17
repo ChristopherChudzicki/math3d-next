@@ -4,13 +4,14 @@ import styles from "./ScrollingOverflow.module.css";
 
 type Props = {
   className?: string;
+  style?: React.CSSProperties;
 };
 
 const ScrollingYOverflowX: React.FC<Props> = (props) => {
   const [allowPointerEvents, setAllowPointerEvents] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   return (
-    <div className={props.className} ref={rootRef}>
+    <div className={props.className} style={props.style} ref={rootRef}>
       <div
         className={mergeClassNames(styles.scrollable, {
           [styles.events]: allowPointerEvents,
