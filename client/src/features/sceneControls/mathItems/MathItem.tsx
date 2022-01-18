@@ -6,8 +6,8 @@ type Props = {
   item: MathItem;
 };
 const MathItemComponent: React.FC<Props> = ({ item }) => {
-  const { properties } = item;
-  return <ItemTemplate />;
+  const description = `Description: ${item.id}`;
+  return <ItemTemplate description={description} />;
 };
 
 export default MathItemComponent;
