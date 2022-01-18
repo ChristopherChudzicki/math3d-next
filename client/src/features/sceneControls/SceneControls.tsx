@@ -37,19 +37,7 @@ const SceneControls: React.FC<Props> = (props) => {
     <ControlTabs
       tabBarExtraContent={<AddObjectButton />}
       mainNav={<MainNav />}
-      mainContent={[
-        ...items,
-        ...items,
-        ...items,
-        ...items,
-        ...items,
-        ...items,
-        ...items,
-        ...items,
-        ...items,
-        ...items,
-        ...items,
-      ].map((item) => (
+      mainContent={items.map((item) => (
         <MathItem item={item} key={item.id} />
       ))}
       axesNav={<AxesNav />}
