@@ -29,16 +29,20 @@ html {
   --blue-9: #003a8c;
   --blue-10: #002766;
 
-  --primary-1: var(--blue-1);
-  --primary-2: var(--blue-2);
-  --primary-3: var(--blue-3);
-  --primary-4: var(--blue-4);
-  --primary-5: var(--blue-5);
-  --primary-6: var(--blue-6);
-  --primary-7: var(--blue-7);
-  --primary-8: var(--blue-8);
-  --primary-9: var(--blue-9);
-  --primary-10: var(--blue-10);
+  --color-primary-1: var(--blue-1);
+  --color-primary-2: var(--blue-2);
+  --color-primary-3: var(--blue-3);
+  --color-primary-4: var(--blue-4);
+  --color-primary-5: var(--blue-5);
+  --color-primary-6: var(--blue-6);
+  --color-primary-7: var(--blue-7);
+  --color-primary-8: var(--blue-8);
+  --color-primary-9: var(--blue-9);
+  --color-primary-10: var(--blue-10);
+
+  --border-radius: 2px;
+  --transition-duration: 300ms;
+  --transition-timing-function: ease;
 }
 
 #root {
