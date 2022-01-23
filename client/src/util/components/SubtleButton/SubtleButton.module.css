@@ -1,0 +1,31 @@
+.subtle-button {
+  border: none;
+  border-radius: var(--border-radius);
+  background-color: transparent;
+  transition-duration: var(--transition-duration);
+  transition-timing-function: var(--transition-timing-function);
+  transition-property: all;
+}
+
+.subtle-button:focus {
+  color: var(--color-primary-6);
+}
+
+.subtle-button.darken:hover {
+  backdrop-filter: brightness(0.9);
+}
+.subtle-button.lighten:hover {
+  backdrop-filter: brightness(1.03);
+}
+
+.subtle-button.darken.pressed {
+  backdrop-filter: brightness(0.8);
+}
+.subtle-button.lighten.pressed {
+  backdrop-filter: brightness(1.06);
+}
+
+.pressed {
+  transition-duration: 0.1s;
+  transform: translateY(1px);
+}
