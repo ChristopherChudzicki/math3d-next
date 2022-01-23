@@ -9,6 +9,8 @@
     - no margin on top means top bottom outline from previous item won't be
       see when items are next to each other in the list. (But will be seen
       elsewhere, e.g., when dragging!).
+
+  Note: In some browsers, at some higher zoom levels, double borders show up sometimes.
   */
   outline: 1px solid gray;
   margin-top: 1px;
