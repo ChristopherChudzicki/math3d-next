@@ -1,0 +1,69 @@
+.container {
+  display: grid;
+  grid-template-columns: 50px auto 50px;
+  grid-template-rows: auto auto;
+  /*
+  avoid border-doubling. See https://stackoverflow.com/q/12692089/2747370
+    - outline is draw outside the element, not
+    - margins on top, left, right "make room" for the outline
+    - no margin on top means top bottom outline from previous item won't be
+      see when items are next to each other in the list. (But will be seen
+      elsewhere, e.g., when dragging!).
+
+  Note: In some browsers, at some higher zoom levels, double borders show up sometimes.
+  */
+  outline: 1px solid gray;
+  margin-top: 1px;
+  margin-left: 1px;
+  margin-right: 1px;
+}
+
+.grid-left-gutter {
+  grid-column-start: 1;
+  grid-column-end: 2;
+  grid-row-start: 1;
+  grid-row-end: 3;
+}
+
+.grid-center-top {
+  grid-column-start: 2;
+  grid-column-end: 3;
+  grid-row-start: 1;
+  grid-row-end: 2;
+}
+.grid-center-bottom {
+  grid-column-start: 2;
+  grid-column-end: 3;
+  grid-row-start: 2;
+  grid-row-end: 3;
+}
+
+.grid-right-gutter {
+  grid-column-start: 3;
+  grid-column-end: 4;
+  grid-row-start: 1;
+  grid-row-end: 3;
+}
+.grid-right-gutter-top {
+  grid-column-start: 3;
+  grid-column-end: 4;
+  grid-row-start: 1;
+  grid-row-end: 2;
+}
+.grid-right-gutter-bottom {
+  grid-column-start: 3;
+  grid-column-end: 4;
+  grid-row-start: 2;
+  grid-row-end: 3;
+}
+
+.left-gutter {
+  display: flex;
+  flex-direction: column;
+}
+.vertical-line {
+  width: 1px;
+  background-color: blue;
+  flex: 1;
+  align-self: center;
+}

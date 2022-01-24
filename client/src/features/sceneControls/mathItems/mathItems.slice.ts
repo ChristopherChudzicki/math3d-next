@@ -56,11 +56,10 @@ const mathItemsSlice = createSlice({
         properties: Partial<MathItem["properties"]>;
       }>
     ) => {
-      const { id, properties: newProperties } = action.payload;
+      const { id } = action.payload;
+      const newProperties = action.payload.properties as any;
       const { properties: oldProperties } = state[id];
-      const { description } = newProperties;
-      if (description === undefined) return;
-      state[id].properties = { ...oldProperties, ...{ description } };
+      state[id].properties = { ...oldProperties, ...newProperties };
     },
   },
 });

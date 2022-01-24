@@ -1,7 +1,6 @@
 import React from "react";
-import { Tabs, Button } from "antd";
+import { Tabs } from "antd";
 import ScrollingYOverflowX from "util/components/scrollingOverflow";
-import style from "./ControlTabs.module.css";
 
 const { TabPane } = Tabs;
 
