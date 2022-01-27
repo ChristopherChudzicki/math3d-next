@@ -8,6 +8,9 @@ import "antd/dist/antd.css";
 import "./index.css";
 import * as routes from "./routes";
 import { store } from "./app/store";
+import * as math from "mathjs";
+
+window.math = math;
 
 ReactDOM.render(
   <React.StrictMode>
