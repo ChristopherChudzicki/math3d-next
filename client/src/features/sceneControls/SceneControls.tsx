@@ -30,7 +30,7 @@ const SceneControls: React.FC<Props> = (props) => {
       dispatch(itemActions.addItems({ items: scene.items }));
     };
     loadScene();
-  }, [dispatch, sceneId]);
+  }, [dispatch]);
   const items = useAppSelector((state) => Object.values(state.mathItems));
   return (
     <ControlTabs
