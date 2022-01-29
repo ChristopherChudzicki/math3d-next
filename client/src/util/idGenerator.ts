@@ -1,5 +1,6 @@
 class IdGenerator {
   private prefix: string;
+
   private currentValue: number;
 
   constructor({

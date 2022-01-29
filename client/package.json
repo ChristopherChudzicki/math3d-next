@@ -6,24 +6,36 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@reduxjs/toolkit": "^1.6.2",
+    "@types/jest": "^24.9.1",
+    "@types/node": "^12.20.37",
+    "@types/react": "^16.14.21",
+    "@types/react-dom": "^16.9.14",
+    "@types/react-redux": "^7.1.20",
+    "@typescript-eslint/eslint-plugin": "^5.10.1",
+    "@typescript-eslint/parser": "^5.10.1",
     "antd": "^4.18.3",
     "bootstrap": "^5.1.3",
     "bootstrap-icons": "^1.7.1",
     "classnames": "^2.3.1",
+    "eslint-config-airbnb-typescript": "^16.1.0",
+    "eslint-import-resolver-typescript": "^2.5.0",
     "mathjs": "^10.0.2",
     "react": "^17.0.2",
     "react-bootstrap": "^2.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.6",
     "react-router-dom": "^6.2.1",
-    "react-textarea-autosize": "^8.3.3"
+    "react-scripts": "^5.0.0",
+    "react-textarea-autosize": "^8.3.3",
+    "typescript": "^4.5.5",
+    "typescript-plugin-css-modules": "^3.4.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint",
+    "lint": "eslint src/**/*.ts",
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public"
   },
@@ -49,15 +61,9 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
-    "@types/node": "^12.20.37",
-    "@types/react": "^16.14.21",
-    "@types/react-dom": "^16.9.14",
-    "@types/react-redux": "^7.1.20",
-    "@types/jest": "^24.9.1",
-    "@typescript-eslint/eslint-plugin": "^5.10.1",
-    "@typescript-eslint/parser": "^5.10.1",
-    "react-scripts": "^4.0.3",
-    "typescript": "^4.5.5",
-    "typescript-plugin-css-modules": "^3.4.0"
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.5.1"
   }
 }

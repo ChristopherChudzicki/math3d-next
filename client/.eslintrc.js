@@ -1,42 +1,33 @@
 module.exports = {
-  ignorePatterns: ["/node_modules/**/*.js"],
-  env: {
-    browser: true,
-    es6: true,
-    jest: true,
-  },
-  rules: {
-    "no-console": "warn",
-    "import/first": "error",
-    "react/prop-types": "off",
-  },
   extends: [
     "react-app",
     "react-app/jest",
+    "airbnb",
+    "airbnb-typescript",
+    "prettier",
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react-hooks/recommended",
   ],
-  parser: "@typescript-eslint/parser",
-  root: true,
-  plugins: ["react", "@typescript-eslint"],
-  parserOptions: {
-    ecmaVersion: 11,
-    ecmaFeatures: {
-      jsx: true,
-    },
-    project: "./tsconfig.json",
-    tsconfigRootDir: __dirname,
-    sourceType: "module",
+  plugins: ["react", "@typescript-eslint", "prettier"],
+  rules: {
+    "react/function-component-definition": [
+      "error",
+      {
+        namedComponents: "arrow-function",
+        unnamedComponents: "arrow-function",
+      },
+    ],
+    "react/require-default-props": "off",
+    "import/prefer-default-export": "off",
   },
-  settings: {
-    react: {
-      pragma: "React",
-      version: "detect",
-    },
-  },
+  settings: {},
   overrides: [
+    {
+      files: ["**/*.ts?(x)"],
+      rules: {},
+    },
     {
       files: ["**/*.stories.*"],
       rules: {
@@ -44,4 +35,7 @@ module.exports = {
       },
     },
   ],
+  parserOptions: {
+    project: "./tsconfig.json",
+  },
 };
