@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "app/hooks";
 import { getScene } from "api";
-import { MathItem } from "./mathItems";
+import { MathItem, slice as mathItemsSlice } from "./mathItems";
 import ControlTabs from "./controlTabs";
 import AddObjectButton from "./AddObjectButton";
 import defaultScene from "./defaultScene";
-import { slice as mathItemsSlice } from "./mathItems";
 
 const { actions: itemActions } = mathItemsSlice;
 
@@ -14,6 +13,7 @@ type Props = {
 };
 
 const MainNav: React.FC = () => <>Main</>;
+
 const AxesNav: React.FC = () => (
   <div className="text-center">
     Axes &amp; <br /> Camera
@@ -30,7 +30,7 @@ const SceneControls: React.FC<Props> = (props) => {
       dispatch(itemActions.addItems({ items: scene.items }));
     };
     loadScene();
-  }, [dispatch]);
+  }, [dispatch, sceneId]);
   const items = useAppSelector((state) => Object.values(state.mathItems));
   return (
     <ControlTabs
