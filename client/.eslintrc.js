@@ -3,6 +3,7 @@ module.exports = {
     "react-app",
     "react-app/jest",
     "airbnb",
+    "airbnb-typescript",
     "prettier",
     "eslint:recommended",
     "plugin:react/recommended",
@@ -18,23 +19,10 @@ module.exports = {
         unnamedComponents: "arrow-function",
       },
     ],
-    "import/extensions": [
-      "error",
-      "ignorePackages",
-      {
-        js: "never",
-        jsx: "never",
-        ts: "never",
-        tsx: "never",
-      },
-    ],
+    "react/require-default-props": "off",
+    "import/prefer-default-export": "off",
   },
-  settings: {
-    "import/resolver": {
-      typescript: {},
-    },
-    "import/extensions": [".js", ".jsx", ".ts", ".tsx"],
-  },
+  settings: {},
   overrides: [
     {
       files: ["**/*.ts?(x)"],
@@ -47,4 +35,7 @@ module.exports = {
       },
     },
   ],
+  parserOptions: {
+    project: "./tsconfig.json",
+  },
 };
