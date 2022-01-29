@@ -22,8 +22,7 @@ const scrollingOverflowStyle = {
   height: `calc(100vh - ${TABS_NAV_HEIGHT} - var(--header-height))`,
 } as React.CSSProperties;
 
-const SceneControls: React.FC<Props> = (props) => {
-  return (
+const SceneControls: React.FC<Props> = (props) => (
     <Tabs tabBarExtraContent={props.tabBarExtraContent} tabBarStyle={tabsStyle}>
       <TabPane tab={props.mainNav} key="main">
         <ScrollingYOverflowX style={scrollingOverflowStyle}>
@@ -37,6 +36,5 @@ const SceneControls: React.FC<Props> = (props) => {
       </TabPane>
     </Tabs>
   );
-};
 
 export default SceneControls;

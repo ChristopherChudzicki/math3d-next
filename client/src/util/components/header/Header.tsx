@@ -5,8 +5,6 @@ type Props = {
   className?: string;
 };
 
-const Header: React.FC<Props> = (props) => {
-  return <div className={mergeClassNames(props.className)}></div>;
-};
+const Header: React.FC<Props> = (props) => <div className={mergeClassNames(props.className)} />;
 
 export default Header;
