@@ -10,15 +10,15 @@ type CollapseButtonProps = {
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
 };
 const CollapseButton: React.FC<CollapseButtonProps> = (props) => (
-    <Button
-      type="link"
-      shape="round"
-      onClick={props.onClick}
-      className={props.className}
-    >
-      {props.iconDirection === "left" ? <LeftOutlined /> : <RightOutlined />}
-    </Button>
-  );
+  <Button
+    type="link"
+    shape="round"
+    onClick={props.onClick}
+    className={props.className}
+  >
+    {props.iconDirection === "left" ? <LeftOutlined /> : <RightOutlined />}
+  </Button>
+);
 
 const getButtonIcon = (isCollapsed: boolean, sidebarSide: "left" | "right") => {
   if (sidebarSide === "left") return isCollapsed ? "right" : "left";

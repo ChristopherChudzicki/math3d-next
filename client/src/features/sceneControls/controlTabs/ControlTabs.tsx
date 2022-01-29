@@ -23,18 +23,18 @@ const scrollingOverflowStyle = {
 } as React.CSSProperties;
 
 const SceneControls: React.FC<Props> = (props) => (
-    <Tabs tabBarExtraContent={props.tabBarExtraContent} tabBarStyle={tabsStyle}>
-      <TabPane tab={props.mainNav} key="main">
-        <ScrollingYOverflowX style={scrollingOverflowStyle}>
-          {props.mainContent}
-        </ScrollingYOverflowX>
-      </TabPane>
-      <TabPane tab={props.axesNav} key="axes">
-        <ScrollingYOverflowX style={scrollingOverflowStyle}>
-          {props.axesdContent}
-        </ScrollingYOverflowX>
-      </TabPane>
-    </Tabs>
-  );
+  <Tabs tabBarExtraContent={props.tabBarExtraContent} tabBarStyle={tabsStyle}>
+    <TabPane tab={props.mainNav} key="main">
+      <ScrollingYOverflowX style={scrollingOverflowStyle}>
+        {props.mainContent}
+      </ScrollingYOverflowX>
+    </TabPane>
+    <TabPane tab={props.axesNav} key="axes">
+      <ScrollingYOverflowX style={scrollingOverflowStyle}>
+        {props.axesdContent}
+      </ScrollingYOverflowX>
+    </TabPane>
+  </Tabs>
+);
 
 export default SceneControls;

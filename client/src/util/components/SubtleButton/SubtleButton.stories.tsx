@@ -16,15 +16,15 @@ export default {
 } as ComponentMeta<typeof SubtleButton>;
 
 export const DefaultRender: ComponentStory<typeof SubtleButton> = (args) => (
-    <div style={{ padding: "3em", border: "1pt solid black" }}>
-      <SubtleButton {...args}>Click me!</SubtleButton>
-    </div>
-  );
+  <div style={{ padding: "3em", border: "1pt solid black" }}>
+    <SubtleButton {...args}>Click me!</SubtleButton>
+  </div>
+);
 
 export const LightenVariant: ComponentStory<typeof SubtleButton> = (args) => (
-    <div style={{ padding: "3em", backgroundColor: "rgb(186, 231, 255)" }}>
-      <SubtleButton lighten {...args}>
-        Click me!
-      </SubtleButton>
-    </div>
-  );
+  <div style={{ padding: "3em", backgroundColor: "rgb(186, 231, 255)" }}>
+    <SubtleButton lighten {...args}>
+      Click me!
+    </SubtleButton>
+  </div>
+);
