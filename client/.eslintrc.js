@@ -19,14 +19,22 @@ module.exports = {
         unnamedComponents: "arrow-function",
       },
     ],
-    "react/require-default-props": "off",
     "import/prefer-default-export": "off",
+    "react/destructuring-assignment": "off",
+    "no-param-reassign": [
+      "error",
+      { props: true, ignorePropertyModificationsFor: ["state"] },
+    ],
   },
   settings: {},
   overrides: [
     {
       files: ["**/*.ts?(x)"],
-      rules: {},
+      rules: {
+        "react/prop-types": "off",
+        "react/require-default-props": "off",
+        "react/jsx-props-no-spreading": "off",
+      },
     },
     {
       files: ["**/*.stories.*"],
