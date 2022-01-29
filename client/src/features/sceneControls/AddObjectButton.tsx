@@ -12,6 +12,7 @@ const AddObjectButton: React.FC<Props> = (props) => {
   const dispatch = useAppDispatch();
   return (
     <button
+      type="button"
       className={props.className}
       onClick={() => {
         dispatch(actions.addNewItem());

@@ -1,1 +1,3 @@
-export { default } from "./ScrollingOverflow";
+import ScrollingOverflow from "./ScrollingOverflow";
+
+export default ScrollingOverflow;

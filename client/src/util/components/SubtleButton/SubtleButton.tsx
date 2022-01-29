@@ -16,6 +16,7 @@ const SubtleButton: React.FC<Props> = (props) => {
   return (
     <button
       {...props}
+      type="button"
       onPointerDown={() => setIsPressed(true)}
       onPointerUp={() => setIsPressed(false)}
       onPointerLeave={() => setIsPressed(false)}
