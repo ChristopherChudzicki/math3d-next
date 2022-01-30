@@ -6,8 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap-utilities.css";
 import "antd/dist/antd.css";
 import "./index.css";
+import * as math from "mathjs";
 import * as routes from "./routes";
 import { store } from "./app/store";
+
+window.math = math;
 
 ReactDOM.render(
   <React.StrictMode>
