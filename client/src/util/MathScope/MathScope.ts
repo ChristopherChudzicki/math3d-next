@@ -1,55 +1,57 @@
-import { parse, MathNode } from "mathjs";
-import type { IParse } from "./types";
+import { parse as defaultParse, MathNode } from "mathjs";
+import type { IParse, EvaluationScope } from "./types";
+
+const getIdentifyingParser = (
+  parse: IParse
+): ((id: string, expr: string) => MathNode) => {
+  const identifyingParser = (id: string, expr: string) => {
+    const node = parse(expr);
+    node.comment = id;
+    return node;
+  };
+  return identifyingParser;
+};
 
 /**
- * A directed graph of all
- *  1. assignment nodes that
- *    - have unique names
- *    - do not have cyclic dependencies
- *  2. and non-assignment nodes
+ * Very draft... Other classes in this directory are more developed.
+ * This class will be the API used by main app.
+ * Should emit events and stuff. TODO: spec/implement this more
  */
-class ExpressionDependencyGraph {
-  constructor(nodes) {}
-
-  static findCycles(nodes: MathNode[]): MathNode[][] {
-    return [];
-  }
-}
 export default class MathScope {
-  defaultContext: Record<string, unknown>;
+  evaluationScope: EvaluationScope;
 
-  dependencyGraph: unknown;
+  private parse: (id: string, expr: string) => MathNode;
 
-  private parse: IParse;
+  private nodes: Record<string, MathNode>;
 
-  private nodesById: Record<string, MathNode>;
-
-  private idsByNode: Map<MathNode, string>;
-
-  constructor(defaultContext = {}, parser: IParse = parse) {
-    this.parse = parse;
-    this.defaultContext = defaultContext;
+  constructor(evaluationScope = {}, parse: IParse = defaultParse) {
+    this.parse = getIdentifyingParser(parse);
+    this.evaluationScope = evaluationScope;
+    this.nodes = {};
   }
 
-  addExpression(id: string, parseable: string): void {
-    if (this.nodesById[id] !== undefined) {
+  addExpression(id: string, expr: string): void {
+    if (this.nodes[id] !== undefined) {
       throw new Error(`node with id ${id} already exists.`);
     }
-    const node = this.parse(parseable);
-    this.nodesById[id] = node;
+    this.nodes[id] = this.parse(id, expr);
   }
 
   updateExpression(id: string, parseable: string): void {
-    if (this.nodesById[id] === undefined) {
-      throw new Error(`expression with id ${id} does not exist`);
-    }
-    // When updating a constant node, we will not need to re-sort evaluation order
-  }
-
-  removeExpression(id: string, parseable: string): void {
     if (this.nodes[id] === undefined) {
       throw new Error(`expression with id ${id} does not exist`);
     }
-    // When updating a constant node, we will not need to re-sort evaluation order
+    this.nodes[id] = this.parse(id, parseable);
+    /**
+     * When updating a constant, we will not need a new Evaluator
+     */
+    throw new Error("Not implemeneted");
+  }
+
+  removeExpression(id: string): void {
+    if (this.nodes[id] === undefined) {
+      throw new Error(`expression with id ${id} does not exist`);
+    }
+    // ...
   }
 }

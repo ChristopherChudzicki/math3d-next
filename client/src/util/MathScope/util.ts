@@ -6,8 +6,8 @@ import {
   SymbolNode,
 } from "mathjs";
 import Graph, { Vertex } from "tarjan-graph";
+import type { GeneralAssignmentNode } from "./types";
 
-type GeneralAssignmentNode = AssignmentNode | FunctionAssignmentNode;
 export const isGeneralAssignmentNode = (
   node: unknown
 ): node is GeneralAssignmentNode => {

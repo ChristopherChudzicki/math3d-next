@@ -1,4 +1,4 @@
-type Edge<T> = {
+export type DirectedEdge<T> = {
   from: T;
   to: T;
 };
@@ -8,12 +8,7 @@ type DFSCallback<T> = (node: T, depth: number, graph: DirectedGraph<T>) => void;
 export default class DirectedGraph<T> {
   private successors: Map<T, Set<T>>;
 
-  constructor(edges: Edge<T>[]) {
-    this.addEdge = this.addEdge.bind(this);
-    this.dfs = this.dfs.bind(this);
-    this.getDescendants = this.getDescendants.bind(this);
-    this.getSuccessors = this.getSuccessors.bind(this);
-
+  constructor(edges: DirectedEdge<T>[]) {
     this.successors = new Map();
 
     edges.forEach((e) => this.addEdge(e.from, e.to));
@@ -66,5 +61,26 @@ export default class DirectedGraph<T> {
     }
 
     return descendants;
+  }
+
+  private getEdgesFromNodes(nodes: Iterable<T>) {
+    const nodeSet = new Set(nodes);
+    return [...this.successors]
+      .filter(([from]) => nodeSet.has(from))
+      .flatMap(([from, successors]) =>
+        [...successors].map((to) => ({ from, to }))
+      );
+  }
+
+  getEdges(): DirectedEdge<T>[] {
+    return this.getEdgesFromNodes(this.successors.keys());
+  }
+
+  getReachableSubgraph(sources: Iterable<T>) {
+    const nodes = [...sources].flatMap((source) => [
+      source,
+      ...this.getDescendants(source),
+    ]);
+    return new DirectedGraph(this.getEdgesFromNodes(nodes));
   }
 }

@@ -39,6 +39,20 @@ describe("DirectedGraph", () => {
     });
   });
 
+  describe("getEdges", () => {
+    it("retrieves an array of all edges in the graph", () => {
+      const { graph, nodes } = makeGraph1();
+      const [a, b, c, d] = nodes;
+
+      expect(graph.getEdges()).toEqual([
+        { from: a, to: b },
+        { from: b, to: c },
+        { from: b, to: d },
+        { from: d, to: d },
+      ]);
+    });
+  });
+
   /**
    * Graph 2: all edges are downward
    *
@@ -127,6 +141,27 @@ describe("DirectedGraph", () => {
       const graph = new DirectedGraph([edge(a, a)]);
 
       expect(graph.getDescendants(a)).toStrictEqual(new Set([a]));
+    });
+  });
+
+  describe("getReachableSubgraph", () => {
+    it("returns subgraph reachable from given nodes", () => {
+      const { graph, nodes } = makeGraph2();
+      const [, b, c, d, e, f, g, h, i] = nodes;
+
+      expect(graph.getReachableSubgraph([b])).toStrictEqual(
+        new DirectedGraph([
+          edge(b, d),
+          edge(b, e),
+          edge(d, g),
+          edge(e, h),
+          edge(g, i),
+        ])
+      );
+
+      expect(graph.getReachableSubgraph([c, g])).toStrictEqual(
+        new DirectedGraph([edge(c, e), edge(c, f), edge(e, h), edge(g, i)])
+      );
     });
   });
 });
