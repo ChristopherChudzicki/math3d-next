@@ -1,0 +1,31 @@
+name: unit tests
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+          cache: "npm"
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci --prefix server
+      - run: npm run test --prefix server
+      - run: npm run lint --prefix server
+  frontend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci --prefix client
+      - run: npm run test --prefix client -- --watchAll false
+      - run: npm run lint --prefix client

@@ -29,10 +29,10 @@ export const getDependencyGraph = (nodes: MathNode[]) => {
   const dependencyEdges: DirectedEdge<MathNode>[] = nodes.flatMap(
     (dependent) => {
       const dependencies = getDependencies(dependent);
-      return [...dependencies].map((dependencyName) => {
-        const dependency = assignments[dependencyName];
-        return { from: dependency, to: dependent };
-      });
+      return [...dependencies]
+        .map((dependencyName) => assignments[dependencyName])
+        .filter((dependency) => dependency)
+        .map((dependency) => ({ from: dependency, to: dependent }));
     }
   );
   return new DirectedGraph(dependencyEdges);
