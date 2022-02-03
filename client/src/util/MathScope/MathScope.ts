@@ -24,7 +24,7 @@ export default class MathScope {
 
   private nodes: Record<string, MathNode>;
 
-  constructor(evaluationScope = {}, parse: IParse = defaultParse) {
+  constructor(evaluationScope = new Map(), parse: IParse = defaultParse) {
     this.parse = getIdentifyingParser(parse);
     this.evaluationScope = evaluationScope;
     this.nodes = {};

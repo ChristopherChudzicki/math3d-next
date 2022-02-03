@@ -1,13 +1,9 @@
 import * as R from "ramda";
-import { MathNode, AssignmentNode, ConstantNode, EvalFunction } from "mathjs";
+import { MathNode, AssignmentNode, EvalFunction } from "mathjs";
 import toposort from "toposort";
 import type { EvaluationScope, GeneralAssignmentNode } from "./types";
 import { isGeneralAssignmentNode, getDependencies } from "./util";
 import DirectedGraph, { DirectedEdge } from "./DirectedGraph";
-
-type Results = {
-  [id: string]: unknown;
-};
 
 const validateNodeIds = (nodes: MathNode[]) => {
   const nodeIds = new Set(nodes.map((node) => node.comment));
@@ -41,7 +37,7 @@ export const getDependencyGraph = (nodes: MathNode[]) => {
 const getId = (node: MathNode) => node.comment;
 
 export default class Evaluator {
-  results: Results = {};
+  results: EvaluationScope = new Map();
 
   private scope: EvaluationScope;
 
@@ -55,10 +51,10 @@ export default class Evaluator {
 
   private evaluationOrders: Map<string, string[]>;
 
-  constructor(nodes: MathNode[], initialScope: EvaluationScope = {}) {
+  constructor(nodes: MathNode[], initialScope: EvaluationScope = new Map()) {
     validateNodeIds(nodes);
     this.nodes = Object.fromEntries(nodes.map((node) => [getId(node), node]));
-    this.scope = { ...initialScope };
+    this.scope = new Map(initialScope);
     this.dependencyGraph = getDependencyGraph(nodes);
     this.evaluationOrder = this.getEvaluationOrder();
 
@@ -84,7 +80,7 @@ export default class Evaluator {
       throw new Error(`Expected node ${nodeId} to be an assignment node`);
     }
     this.compiled[nodeId] = { evaluate: () => value };
-    this.results[nodeId] = value;
+    this.results.set(nodeId, value);
     this.reevaluateDescendants(nodeId);
   }
 
@@ -92,7 +88,7 @@ export default class Evaluator {
     evaluationOrder.forEach((exprId) => {
       const { evaluate } = this.compiled[exprId];
       const result = evaluate(this.scope);
-      this.results[exprId] = result;
+      this.results.set(exprId, result);
     });
   }
 
