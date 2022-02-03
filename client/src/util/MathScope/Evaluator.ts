@@ -39,6 +39,8 @@ const getId = (node: MathNode) => node.comment;
 export default class Evaluator {
   results: EvaluationScope = new Map();
 
+  errors: Map<string, Error> = new Map();
+
   private scope: EvaluationScope;
 
   private nodes: { [id: string]: MathNode };
@@ -87,8 +89,14 @@ export default class Evaluator {
   private evaluate(evaluationOrder: string[]): void {
     evaluationOrder.forEach((exprId) => {
       const { evaluate } = this.compiled[exprId];
-      const result = evaluate(this.scope);
-      this.results.set(exprId, result);
+      try {
+        const result = evaluate(this.scope);
+        this.results.set(exprId, result);
+        this.errors.delete(exprId);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        this.errors.set(exprId, error);
+      }
     });
   }
 
