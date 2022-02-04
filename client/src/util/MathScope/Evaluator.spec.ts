@@ -1,4 +1,4 @@
-import { parse } from "mathjs";
+import { MathNode, parse } from "mathjs";
 import Evaluator from "./Evaluator";
 
 const node = (id: string, parseable: string) => {
@@ -94,11 +94,74 @@ describe("Evaluator", () => {
 
   describe("updateLiteralConstant", () => {
     it("updates the results map appropriately", () => {
-      expect("chris finish this test").toBe("soon");
+      const a = node("id-a", "a = b^2");
+      const b = node("id-b", "b = 2");
+      const c = node("id-c", "c = 5");
+      const expr1 = node("id-1", "2*c");
+      const expr2 = node("id-2", "b/2");
+      const expr3 = node("id-3", "h(c)");
+      const nodes = [a, b, c, expr1, expr2, expr3];
+      const initialScope = asMap({ h: (x: number) => x ** 2 });
+      const evaluator = new Evaluator(nodes, initialScope);
+      const originalResult = {
+        "id-a": 4,
+        "id-b": 2,
+        "id-c": 5,
+        "id-1": 10,
+        "id-2": 1,
+        "id-3": 25,
+      };
+      expect(evaluator.results).toStrictEqual(asMap(originalResult));
+
+      evaluator.updateLiteralConstant("id-b", 6);
+
+      expect(evaluator.results).toStrictEqual(
+        asMap({
+          ...originalResult,
+          "id-b": 6,
+          "id-a": 36,
+          "id-2": 3,
+        })
+      );
     });
 
     it("only re-evaluates dependents of the updated literal", () => {
-      expect("chris finish this test").toBe("soon");
+      const a = node("id-a", "a = b^2");
+      const b = node("id-b", "b = 2");
+      const c = node("id-c", "c = 5");
+      const expr1 = node("id-1", "2*c");
+      const expr2 = node("id-2", "b/2");
+      const expr3 = node("id-3", "h(c)");
+      const nodes = [a, b, c, expr1, expr2, expr3];
+      const initialScope = asMap({ h: (x: number) => x ** 2 });
+
+      const spies: Map<MathNode, jest.SpyInstance> = new Map();
+      nodes.forEach((thisNode) => {
+        const originalCompile = thisNode.compile;
+        // eslint-disable-next-line no-param-reassign
+        thisNode.compile = () => {
+          const compiled = originalCompile.call(thisNode);
+          const spy = jest.spyOn(compiled, "evaluate");
+          spies.set(thisNode, spy);
+          return compiled;
+        };
+      });
+
+      const evaluator = new Evaluator(nodes, initialScope);
+      expect(spies.get(a)).toHaveBeenCalledTimes(1);
+      expect(spies.get(b)).toHaveBeenCalledTimes(1);
+      expect(spies.get(c)).toHaveBeenCalledTimes(1);
+      expect(spies.get(expr1)).toHaveBeenCalledTimes(1);
+      expect(spies.get(expr2)).toHaveBeenCalledTimes(1);
+      expect(spies.get(expr3)).toHaveBeenCalledTimes(1);
+
+      evaluator.updateLiteralConstant("id-b", 6);
+      expect(spies.get(a)).toHaveBeenCalledTimes(2);
+      expect(spies.get(b)).toHaveBeenCalledTimes(1);
+      expect(spies.get(c)).toHaveBeenCalledTimes(1);
+      expect(spies.get(expr1)).toHaveBeenCalledTimes(1);
+      expect(spies.get(expr2)).toHaveBeenCalledTimes(2);
+      expect(spies.get(expr3)).toHaveBeenCalledTimes(1);
     });
   });
 });

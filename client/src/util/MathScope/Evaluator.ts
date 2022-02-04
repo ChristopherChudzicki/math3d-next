@@ -83,6 +83,7 @@ export default class Evaluator {
     }
     this.compiled[nodeId] = { evaluate: () => value };
     this.results.set(nodeId, value);
+    this.scope.set(node.name, value);
     this.reevaluateDescendants(nodeId);
   }
 
