@@ -55,7 +55,9 @@ export default class Evaluator {
 
   constructor(nodes: MathNode[], initialScope: EvaluationScope = new Map()) {
     validateNodeIds(nodes);
-    this.nodes = Object.fromEntries(nodes.map((node) => [getId(node), node]));
+    this.nodes = Object.fromEntries(
+      Array.from(nodes).map((node) => [getId(node), node])
+    );
     this.scope = new Map(initialScope);
     this.dependencyGraph = getDependencyGraph(nodes);
     this.evaluationOrder = this.getEvaluationOrder();
@@ -76,7 +78,7 @@ export default class Evaluator {
     return toposort(edges.map((e) => [e.from, e.to])).map(getId);
   }
 
-  updateLiteralConstant(nodeId: string, value: number): void {
+  updateLiteralConstant(nodeId: string, value: number): Set<string> {
     const node = this.nodes[nodeId];
     if (!(node instanceof AssignmentNode)) {
       throw new Error(`Expected node ${nodeId} to be an assignment node`);
@@ -84,7 +86,9 @@ export default class Evaluator {
     this.compiled[nodeId] = { evaluate: () => value };
     this.results.set(nodeId, value);
     this.scope.set(node.name, value);
-    this.reevaluateDescendants(nodeId);
+    const updated = this.reevaluateDescendants(nodeId);
+    updated.add(nodeId);
+    return updated;
   }
 
   private evaluate(evaluationOrder: string[]): void {
@@ -101,7 +105,7 @@ export default class Evaluator {
     });
   }
 
-  private reevaluateDescendants(nodeId: string): void {
+  private reevaluateDescendants(nodeId: string): Set<string> {
     const node = this.nodes[nodeId];
     const evaluationOrder =
       this.evaluationOrders.get(nodeId) ?? this.getEvaluationOrder([node]);
@@ -109,6 +113,7 @@ export default class Evaluator {
       this.evaluationOrders.set(nodeId, evaluationOrder);
     }
     this.evaluate(evaluationOrder);
+    return new Set(evaluationOrder);
   }
 
   /**

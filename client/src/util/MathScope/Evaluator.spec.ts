@@ -163,5 +163,20 @@ describe("Evaluator", () => {
       expect(spies.get(expr2)).toHaveBeenCalledTimes(2);
       expect(spies.get(expr3)).toHaveBeenCalledTimes(1);
     });
+
+    it("returns the set of updated nodeIds", () => {
+      const a = node("id-a", "a = b^2");
+      const b = node("id-b", "b = 2");
+      const c = node("id-c", "c = 5");
+      const expr1 = node("id-1", "2*c");
+      const expr2 = node("id-2", "b/2");
+      const expr3 = node("id-3", "h(c)");
+      const nodes = [a, b, c, expr1, expr2, expr3];
+      const initialScope = asMap({ h: (x: number) => x ** 2 });
+
+      const evaluator = new Evaluator(nodes, initialScope);
+      const updated = evaluator.updateLiteralConstant("id-b", 6);
+      expect(updated).toStrictEqual(new Set(["id-b", "id-a", "id-2"]));
+    });
   });
 });
