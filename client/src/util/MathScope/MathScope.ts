@@ -19,6 +19,11 @@ const getIdentifyingParser = (
   return identifyingParser;
 };
 
+type IdentifiedExpression = {
+  id: string;
+  expression: string;
+};
+
 type ScopeUpdateEvent = {
   type: "update";
   result: {
@@ -77,27 +82,33 @@ export default class MathScope {
     this.events.emit(event.type, event);
   }
 
-  addExpression(id: string, expr: string): void {
-    if (this.nodes.has(id)) {
-      throw new Error(`node with id ${id} already exists.`);
-    }
-    this.nodes.set(id, this.parse(id, expr));
+  addExpression(identifiedExpressions: IdentifiedExpression[]): void {
+    identifiedExpressions.forEach(({ id, expression }) => {
+      if (this.nodes.has(id)) {
+        throw new Error(`node with id ${id} already exists.`);
+      }
+      this.nodes.set(id, this.parse(id, expression));
+    });
     this.reevaluateAll();
   }
 
-  updateExpression(id: string, expr: string): void {
-    if (!this.nodes.has(id)) {
-      throw new Error(`expression with id ${id} does not exist`);
-    }
-    this.nodes.set(id, this.parse(id, expr));
+  updateExpression(identifiedExpressions: IdentifiedExpression[]): void {
+    identifiedExpressions.forEach(({ id, expression }) => {
+      if (!this.nodes.has(id)) {
+        throw new Error(`expression with id ${id} does not exist`);
+      }
+      this.nodes.set(id, this.parse(id, expression));
+    });
     this.reevaluateAll();
   }
 
-  removeExpression(id: string): void {
-    if (!this.nodes.has(id)) {
-      throw new Error(`expression with id ${id} does not exist`);
-    }
-    this.nodes.delete(id);
-    // ...
+  removeExpressions(ids: string[]): void {
+    ids.forEach((id) => {
+      if (!this.nodes.has(id)) {
+        throw new Error(`expression with id ${id} does not exist`);
+      }
+      this.nodes.delete(id);
+    });
+    this.reevaluateAll();
   }
 }
