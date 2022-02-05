@@ -1,7 +1,12 @@
 import * as R from "ramda";
 import { MathNode, AssignmentNode, EvalFunction } from "mathjs";
 import toposort from "toposort";
-import type { EvaluationScope, GeneralAssignmentNode } from "./types";
+import type {
+  EvaluationScope,
+  EvaluationResult,
+  EvaluationErrors,
+  GeneralAssignmentNode,
+} from "./types";
 import { isGeneralAssignmentNode, getDependencies } from "./util";
 import DirectedGraph, { DirectedEdge } from "./DirectedGraph";
 
@@ -36,10 +41,14 @@ export const getDependencyGraph = (nodes: MathNode[]) => {
 
 const getId = (node: MathNode) => node.comment;
 
+type UpdateResults = {
+  resultUpdates: Set<string>;
+  errorUpdates: Set<string>;
+};
 export default class Evaluator {
-  results: EvaluationScope = new Map();
+  result: EvaluationResult = new Map();
 
-  errors: Map<string, Error> = new Map();
+  errors: EvaluationErrors = new Map();
 
   private scope: EvaluationScope;
 
@@ -78,45 +87,44 @@ export default class Evaluator {
     return toposort(edges.map((e) => [e.from, e.to])).map(getId);
   }
 
-  updateLiteralConstant(nodeId: string, value: number): Set<string> {
+  updateLiteralConstant(nodeId: string, value: number): UpdateResults {
     const node = this.nodes[nodeId];
     if (!(node instanceof AssignmentNode)) {
       throw new Error(`Expected node ${nodeId} to be an assignment node`);
     }
     this.compiled[nodeId] = { evaluate: () => value };
-    this.results.set(nodeId, value);
+    this.result.set(nodeId, value);
     this.scope.set(node.name, value);
     const updated = this.reevaluateDescendants(nodeId);
-    updated.add(nodeId);
+    updated.resultUpdates.add(nodeId);
     return updated;
   }
 
-  private evaluate(evaluationOrder: string[]): void {
+  private evaluate(evaluationOrder: string[]): UpdateResults {
+    const resultUpdates = new Set<string>();
+    const errorUpdates = new Set<string>();
+
     evaluationOrder.forEach((exprId) => {
       const { evaluate } = this.compiled[exprId];
       try {
         const result = evaluate(this.scope);
-        this.results.set(exprId, result);
+        this.result.set(exprId, result);
         this.errors.delete(exprId);
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         this.errors.set(exprId, error);
       }
     });
+    return { resultUpdates, errorUpdates };
   }
 
-  private reevaluateDescendants(nodeId: string): Set<string> {
+  private reevaluateDescendants(nodeId: string): UpdateResults {
     const node = this.nodes[nodeId];
     const evaluationOrder =
       this.evaluationOrders.get(nodeId) ?? this.getEvaluationOrder([node]);
     if (!this.evaluationOrders.has(nodeId)) {
       this.evaluationOrders.set(nodeId, evaluationOrder);
     }
-    this.evaluate(evaluationOrder);
-    return new Set(evaluationOrder);
+    return this.evaluate(evaluationOrder);
   }
-
-  /**
-   * TODO: Handle EvaluationErrors. Probably just store them in the results array
-   */
 }

@@ -38,13 +38,13 @@ describe("Evaluator", () => {
     );
   });
 
-  it("evaluates the given nodes, exposing results on Evaluator.results", () => {
+  it("evaluates the given nodes, exposing result on Evaluator.result", () => {
     const a = node("id-a", "a = b^2");
     const b = node("id-b", "b = 2");
     const expr1 = node("id-1", "a + b");
     const nodes = [a, b, expr1];
     const evaluator = new Evaluator(nodes);
-    expect(evaluator.results).toStrictEqual(
+    expect(evaluator.result).toStrictEqual(
       asMap({
         "id-b": 2,
         "id-a": 4,
@@ -59,7 +59,7 @@ describe("Evaluator", () => {
     const nodes = [a, expr1];
     const initialScope = asMap({ b: 2 });
     const evaluator = new Evaluator(nodes, initialScope);
-    expect(evaluator.results).toStrictEqual(
+    expect(evaluator.result).toStrictEqual(
       asMap({
         "id-a": 4,
         "id-1": 6,
@@ -76,7 +76,7 @@ describe("Evaluator", () => {
     const nodes = [a, b, expr1, expr2, expr3];
     const initialScope = asMap({ h: (x: number) => x ** 2 });
     const evaluator = new Evaluator(nodes, initialScope);
-    expect(evaluator.results).toStrictEqual(
+    expect(evaluator.result).toStrictEqual(
       asMap({
         "id-a": 4,
         "id-b": 2,
@@ -93,7 +93,7 @@ describe("Evaluator", () => {
   });
 
   describe("updateLiteralConstant", () => {
-    it("updates the results map appropriately", () => {
+    it("updates the result map appropriately", () => {
       const a = node("id-a", "a = b^2");
       const b = node("id-b", "b = 2");
       const c = node("id-c", "c = 5");
@@ -111,11 +111,11 @@ describe("Evaluator", () => {
         "id-2": 1,
         "id-3": 25,
       };
-      expect(evaluator.results).toStrictEqual(asMap(originalResult));
+      expect(evaluator.result).toStrictEqual(asMap(originalResult));
 
       evaluator.updateLiteralConstant("id-b", 6);
 
-      expect(evaluator.results).toStrictEqual(
+      expect(evaluator.result).toStrictEqual(
         asMap({
           ...originalResult,
           "id-b": 6,

@@ -1,7 +1,12 @@
 import { EventEmitter } from "events";
 import { parse as defaultParse, MathNode } from "mathjs";
 import Evaluator from "./Evaluator";
-import type { IParse, EvaluationScope } from "./types";
+import type {
+  IParse,
+  EvaluationScope,
+  EvaluationResult,
+  EvaluationErrors,
+} from "./types";
 
 const getIdentifyingParser = (
   parse: IParse
@@ -14,6 +19,18 @@ const getIdentifyingParser = (
   return identifyingParser;
 };
 
+type ScopeUpdateEvent = {
+  type: "update";
+  result: {
+    updated: Set<string>;
+    values: EvaluationResult;
+  };
+  errors: {
+    updated: Set<string>;
+    values: EvaluationErrors;
+  };
+};
+
 /**
  * Very draft... Other classes in this directory are more developed.
  * This class will be the API used by main app.
@@ -22,7 +39,7 @@ const getIdentifyingParser = (
 export default class MathScope {
   initialScope: EvaluationScope;
 
-  eventEmitter = new EventEmitter();
+  events = new EventEmitter();
 
   private evaluator: Evaluator;
 
@@ -45,6 +62,19 @@ export default class MathScope {
   private reevaluateAll() {
     const nodes = Array.from(this.nodes.values());
     this.evaluator = new Evaluator(nodes, this.initialScope);
+    const { result, errors } = this.evaluator;
+    const event: ScopeUpdateEvent = {
+      type: "update",
+      result: {
+        values: result,
+        updated: new Set(result.keys()),
+      },
+      errors: {
+        values: errors,
+        updated: new Set(errors.keys()),
+      },
+    };
+    this.events.emit(event.type, event);
   }
 
   addExpression(id: string, expr: string): void {
@@ -61,10 +91,6 @@ export default class MathScope {
     }
     this.nodes.set(id, this.parse(id, expr));
     this.reevaluateAll();
-    /**
-     * When updating a constant, we will not need a new Evaluator
-     */
-    throw new Error("Not implemeneted");
   }
 
   removeExpression(id: string): void {
