@@ -176,7 +176,9 @@ describe("Evaluator", () => {
 
       const evaluator = new Evaluator(nodes, initialScope);
       const updated = evaluator.updateLiteralConstant("id-b", 6);
-      expect(updated).toStrictEqual(new Set(["id-b", "id-a", "id-2"]));
+      const resultUpdates = new Set(["id-b", "id-a", "id-2"]);
+      const errorUpdates = new Set();
+      expect(updated).toStrictEqual({ resultUpdates, errorUpdates });
     });
   });
 });

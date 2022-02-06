@@ -110,6 +110,7 @@ export default class Evaluator {
         const result = evaluate(this.scope);
         this.result.set(exprId, result);
         this.errors.delete(exprId);
+        resultUpdates.add(exprId);
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         this.errors.set(exprId, error);

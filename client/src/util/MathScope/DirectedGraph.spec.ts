@@ -28,14 +28,58 @@ describe("DirectedGraph", () => {
     return { nodes, graph };
   };
 
-  describe("getSuccessors", () => {
-    it("retrieves edges from a particular node", () => {
+  describe("getSuccessors and getPredecessors", () => {
+    it("retrieves edges from/to a particular node", () => {
+      const { graph, nodes } = makeGraph1();
+      const [a, b, c, d] = nodes;
+
+      graph.deleteEdge(b, d);
+
+      expect(graph.getSuccessors(a)).toStrictEqual(new Set([b]));
+      expect(graph.getSuccessors(b)).toStrictEqual(new Set([c]));
+      expect(graph.getSuccessors(c)).toStrictEqual(new Set([]));
+      expect(graph.getSuccessors(d)).toStrictEqual(new Set([d]));
+
+      expect(graph.getPredecessors(a)).toStrictEqual(new Set());
+      expect(graph.getPredecessors(b)).toStrictEqual(new Set([a]));
+      expect(graph.getPredecessors(c)).toStrictEqual(new Set([b]));
+      expect(graph.getPredecessors(d)).toStrictEqual(new Set([d]));
+    });
+
+    it("returns correct results after addEdge", () => {
+      const { graph, nodes } = makeGraph1();
+      const [a, b, c, d] = nodes;
+      const e = node("e");
+
+      graph.addEdge(a, e);
+      graph.addEdge(e, c);
+
+      expect(graph.getSuccessors(a)).toStrictEqual(new Set([b, e]));
+      expect(graph.getSuccessors(b)).toStrictEqual(new Set([c, d]));
+      expect(graph.getSuccessors(c)).toStrictEqual(new Set([]));
+      expect(graph.getSuccessors(d)).toStrictEqual(new Set([d]));
+      expect(graph.getSuccessors(e)).toStrictEqual(new Set([c]));
+
+      expect(graph.getPredecessors(a)).toStrictEqual(new Set());
+      expect(graph.getPredecessors(b)).toStrictEqual(new Set([a]));
+      expect(graph.getPredecessors(c)).toStrictEqual(new Set([b, e]));
+      expect(graph.getPredecessors(d)).toStrictEqual(new Set([b, d]));
+      expect(graph.getPredecessors(e)).toStrictEqual(new Set([a]));
+    });
+
+    it("returns correct results after deleteEdge", () => {
       const { graph, nodes } = makeGraph1();
       const [a, b, c, d] = nodes;
 
       expect(graph.getSuccessors(a)).toStrictEqual(new Set([b]));
       expect(graph.getSuccessors(b)).toStrictEqual(new Set([c, d]));
+      expect(graph.getSuccessors(c)).toStrictEqual(new Set([]));
       expect(graph.getSuccessors(d)).toStrictEqual(new Set([d]));
+
+      expect(graph.getPredecessors(a)).toStrictEqual(new Set());
+      expect(graph.getPredecessors(b)).toStrictEqual(new Set([a]));
+      expect(graph.getPredecessors(c)).toStrictEqual(new Set([b]));
+      expect(graph.getPredecessors(d)).toStrictEqual(new Set([b, d]));
     });
   });
 

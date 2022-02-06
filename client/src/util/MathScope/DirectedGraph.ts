@@ -8,8 +8,11 @@ type DFSCallback<T> = (node: T, depth: number, graph: DirectedGraph<T>) => void;
 export default class DirectedGraph<T> {
   private successors: Map<T, Set<T>>;
 
+  private predecessors: Map<T, Set<T>>;
+
   constructor(edges: DirectedEdge<T>[]) {
     this.successors = new Map();
+    this.predecessors = new Map();
 
     edges.forEach((e) => this.addEdge(e.from, e.to));
   }
@@ -19,10 +22,34 @@ export default class DirectedGraph<T> {
       this.successors.set(from, new Set());
     }
     this.successors.get(from)?.add(to);
+
+    if (!this.predecessors.has(to)) {
+      this.predecessors.set(to, new Set());
+    }
+    this.predecessors.get(to)?.add(from);
+  }
+
+  deleteEdge(from: T, to: T): void {
+    const successorDelete = this.successors.get(from)?.delete(to);
+    const predecessorsDelete = this.predecessors.get(to)?.delete(from);
+
+    if (!successorDelete && !predecessorsDelete) {
+      throw new Error("Specified edge does not exist; it cannot be deleted.");
+    }
+
+    if (!successorDelete || !predecessorsDelete) {
+      throw new Error(
+        "Unexpected Error: Only one of predecessor or successor edge exist"
+      );
+    }
   }
 
   getSuccessors(node: T): Set<T> {
     return this.successors.get(node) ?? new Set();
+  }
+
+  getPredecessors(node: T): Set<T> {
+    return this.predecessors.get(node) ?? new Set();
   }
 
   private dfsWithDepth(
