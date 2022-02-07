@@ -2,7 +2,7 @@ import ExpressionGraph from "./ExpressionGraph";
 
 describe("ExpressionGraph", () => {
   describe("constructor", () => {
-    it("it woofs", () => {
+    it("woofs", () => {
       expect(new ExpressionGraph()).toBeDefined();
     });
   });

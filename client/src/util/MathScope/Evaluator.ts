@@ -22,8 +22,8 @@ const validateNodeIds = (nodes: MathNode[]) => {
 const getAssignmentNodesByName = R.pipe<
   [MathNode[]],
   GeneralAssignmentNode[],
-  { [name: string]: GeneralAssignmentNode }
->(R.filter(isGeneralAssignmentNode), R.indexBy(R.prop("name")));
+  { [name: string]: GeneralAssignmentNode[] }
+>(R.filter(isGeneralAssignmentNode), R.groupBy(R.prop("name")));
 
 export const getDependencyGraph = (nodes: MathNode[]) => {
   const assignments = getAssignmentNodesByName(nodes);
@@ -31,12 +31,12 @@ export const getDependencyGraph = (nodes: MathNode[]) => {
     (dependent) => {
       const dependencies = getDependencies(dependent);
       return [...dependencies]
-        .map((dependencyName) => assignments[dependencyName])
+        .flatMap((dependencyName) => assignments[dependencyName])
         .filter((dependency) => dependency)
         .map((dependency) => ({ from: dependency, to: dependent }));
     }
   );
-  return new DirectedGraph(dependencyEdges);
+  return new DirectedGraph(nodes, dependencyEdges);
 };
 
 const getId = (node: MathNode) => node.comment;
