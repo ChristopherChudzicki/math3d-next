@@ -97,7 +97,8 @@ export default class ExpressionGraph {
         ? this.graph
         : this.graph.getReachableSubgraph(sources);
     const edges = graph.getEdges();
+    const isolated = Array.from(graph.getIsolatedNodes());
 
-    return toposort(edges.map((e) => [e.from, e.to]));
+    return toposort(edges.map((e) => [e.from, e.to])).concat(isolated);
   }
 }

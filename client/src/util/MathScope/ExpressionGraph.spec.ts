@@ -1,4 +1,4 @@
-import { parse } from "mathjs";
+import { exp, index, MathNode, parse } from "mathjs";
 
 import ExpressionGraph from "./ExpressionGraph";
 import DirectedGraph from "./DirectedGraph";
@@ -131,11 +131,105 @@ describe("ExpressionGraph", () => {
 
       expect(graph).toStrictEqual(expected);
     });
+
+    it("handles multiple assignments", () => {
+      const a1 = node("id-a1", "a = 2");
+      const a2 = node("id-a2", "a = 2 + b");
+      const b1 = node("id-b1", "b = 1");
+      const b2 = node("id-b2", "b = 2");
+      const x1 = node("id-x1", "x = a + b");
+
+      const expressionGraph = new ExpressionGraph([a1, a2, b1, b2, x1]);
+      expect(expressionGraph.graph).toStrictEqual(
+        new DirectedGraph(
+          [a1, a2, b1, b2, x1],
+          [
+            edge(a1, x1),
+            edge(a2, x1),
+            edge(b1, x1),
+            edge(b2, x1),
+            edge(b1, a2),
+            edge(b2, a2),
+          ]
+        )
+      );
+
+      permutations([[a1, b1], [a2, b2], [x1]]).forEach((permutation) => {
+        const g = new ExpressionGraph();
+        permutation.forEach((nodes) => {
+          g.addExpressions(nodes);
+        });
+        expect(expressionGraph).toStrictEqual(g);
+      });
+
+      expect.assertions(7);
+    });
   });
 
   // Test multiple assignments + cycles
 
-  describe("#getEvaluationOrder", () => {});
+  describe("#getEvaluationOrder", () => {
+    /**
+     * ```
+     *       a     b
+     *      /\\  /  \
+     *     /  \c    d         x
+     *    /  / \\     \       |
+     *     e    f     g      y     z
+     *    |   /
+     *     h
+     * ```
+     */
+    const getExpressions2 = () => {
+      const a = node("id-a", "a = 2");
+      const b = node("id-b", "b(x) = x^2");
+      const c = node("id-c", "c(y) = a + b(y)");
+      const d = node("id-d", "d = b(2)");
+      const e = node("id-e", "e = a + c(1)");
+      const f = node("id-f", "f = c(a)");
+      const g = node("id-g", "d + 1");
+      const h = node("id-h", "e + f");
+      const x = node("id-x", "x = 2");
+      const y = node("id-y", "y = x^2");
+      const z = node("id-z", "sin(omega)");
+      return { a, b, c, d, e, f, g, h, x, y, z };
+    };
+
+    it("returns a valid evaluation order", () => {
+      const { a, b, c, d, e, f, g, h, x, y, z } = getExpressions2();
+      const expressions = [a, b, c, d, e, f, g, h, x, y, z];
+      const expressionGraph = new ExpressionGraph(expressions);
+
+      const expectedOrder = [a, b, c, e, f, d, g, h, x, y, z];
+      expect(expressionGraph.getEvaluationOrder()).toStrictEqual(expectedOrder);
+    });
+
+    it("includes isolated nodes", () => {
+      const { a, b, c, d, e, f, g, h, x, y, z } = getExpressions2();
+      const expressions = [a, b, c, d, e, f, g, h, x, y, z];
+      const expressionGraph = new ExpressionGraph(expressions);
+      expect(expressionGraph.getEvaluationOrder()).toContain(z);
+
+      const dag = expressionGraph.graph;
+      expect(dag.getSuccessors(z)).toStrictEqual(new Set([]));
+      expect(dag.getPredecessors(z)).toStrictEqual(new Set([]));
+    });
+
+    it("returns just the reachable subgraph when called with nodes", () => {});
+
+    it("omits cycles, but includes cycle predecessor/successors", () => {
+      const a = node("id-a", "a = 1");
+      const b = node("id-b", "b = a + 1");
+      const c = node("id-c", "c = b + d");
+      const d = node("id-d", "d = b + c");
+      const x = node("id-x", "x = c^2");
+      const y = node("id-y", "y = x^2");
+      const expressions = [a, b, c, d, x, y];
+
+      const expressionGraph = new ExpressionGraph(expressions);
+      const evalOrder = expressionGraph.getEvaluationOrder();
+    });
+  });
 
   describe("#addExpressions", () => {});
 
