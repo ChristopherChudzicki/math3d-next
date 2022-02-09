@@ -67,7 +67,7 @@ describe("ExpressionGraph", () => {
       expect(new ExpressionGraph(expressions)).toStrictEqual(expected);
     });
 
-    it("has the correct underlying DAG after several addExpressions", () => {
+    it("has the correct underlying DG after several addExpressions", () => {
       const { a, b, c, x1 } = getExpressions1();
       const expressions = [a, b, c, x1];
 
@@ -86,7 +86,7 @@ describe("ExpressionGraph", () => {
       );
     });
 
-    it("has the correct underlying DAG after a deleteExpression", () => {
+    it("has the correct underlying DG after a deleteExpression", () => {
       const { a, b, c, x1 } = getExpressions1();
       const expressions = [a, b, c, x1];
 
@@ -168,7 +168,7 @@ describe("ExpressionGraph", () => {
 
   // Test multiple assignments + cycles
 
-  describe("#getEvaluationOrder", () => {
+  describe("#getEvaluationOrder()", () => {
     /**
      * ```
      *       a     b
@@ -200,19 +200,23 @@ describe("ExpressionGraph", () => {
       const expressions = [a, b, c, d, e, f, g, h, x, y, z];
       const expressionGraph = new ExpressionGraph(expressions);
 
-      const expectedOrder = [a, b, c, e, f, d, g, h, x, y, z];
-      expect(expressionGraph.getEvaluationOrder()).toStrictEqual(expectedOrder);
+      const { order, cycleNodes, duplicateAssignmentNodes } =
+        expressionGraph.getEvaluationOrder();
+      expect(order).toStrictEqual([a, b, c, e, f, d, g, h, x, y, z]);
+      expect(cycleNodes).toStrictEqual(new Set());
+      expect(duplicateAssignmentNodes).toStrictEqual(new Set());
     });
 
     it("includes isolated nodes", () => {
       const { a, b, c, d, e, f, g, h, x, y, z } = getExpressions2();
       const expressions = [a, b, c, d, e, f, g, h, x, y, z];
       const expressionGraph = new ExpressionGraph(expressions);
-      expect(expressionGraph.getEvaluationOrder()).toContain(z);
+      const { order } = expressionGraph.getEvaluationOrder();
+      expect(order).toContain(z);
 
-      const dag = expressionGraph.graph;
-      expect(dag.getSuccessors(z)).toStrictEqual(new Set([]));
-      expect(dag.getPredecessors(z)).toStrictEqual(new Set([]));
+      const { graph } = expressionGraph;
+      expect(graph.getSuccessors(z)).toStrictEqual(new Set([]));
+      expect(graph.getPredecessors(z)).toStrictEqual(new Set([]));
     });
 
     it("returns just the reachable subgraph when called with nodes", () => {});
@@ -227,13 +231,22 @@ describe("ExpressionGraph", () => {
       const expressions = [a, b, c, d, x, y];
 
       const expressionGraph = new ExpressionGraph(expressions);
-      const evalOrder = expressionGraph.getEvaluationOrder();
+      const { order, cycleNodes, duplicateAssignmentNodes } =
+        expressionGraph.getEvaluationOrder();
+
+      /**
+       * x and y will error during evaluation since their dependencies are not
+       * met, but that's ok.
+       */
+      expect(order).toStrictEqual([a, b, x, y]);
+      expect(cycleNodes).toStrictEqual(new Set([c, d]));
+      expect(duplicateAssignmentNodes).toStrictEqual(new Set([]));
     });
+
+    it("omits duplicate assignments", () => {});
+
+    it("allows duplicate leaves matching allowedDuplicateLeafRegex", () => {});
   });
-
-  describe("#addExpressions", () => {});
-
-  describe("#deleteExpressions", () => {});
 
   describe("#updateExpressions", () => {});
 });

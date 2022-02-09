@@ -91,14 +91,28 @@ export default class ExpressionGraph {
     });
   }
 
-  getEvaluationOrder(sources?: MathNode[]): MathNode[] {
+  getEvaluationOrder(sources?: MathNode[]): {
+    order: MathNode[];
+    cycleNodes: Set<MathNode>;
+    duplicateAssignmentNodes: Set<MathNode>;
+  } {
     const graph =
       sources === undefined
         ? this.graph
         : this.graph.getReachableSubgraph(sources);
+
     const edges = graph.getEdges();
     const isolated = Array.from(graph.getIsolatedNodes());
+    const cycleNodes = new Set(graph.getCycles().flat());
 
-    return toposort(edges.map((e) => [e.from, e.to])).concat(isolated);
+    const acyclicEdges = edges.filter(
+      (e) => !cycleNodes.has(e.from) && !cycleNodes.has(e.to)
+    );
+
+    const order = toposort(acyclicEdges.map((e) => [e.from, e.to])).concat(
+      isolated
+    );
+
+    return { order, cycleNodes, duplicateAssignmentNodes: new Set() };
   }
 }
