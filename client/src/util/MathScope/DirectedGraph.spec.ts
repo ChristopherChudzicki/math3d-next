@@ -291,4 +291,48 @@ describe("DirectedGraph", () => {
       );
     });
   });
+
+  describe("getCycles", () => {
+    it("returns an array of cycles", () => {
+      const a = node("id-a");
+      const b = node("id-b");
+      const c = node("id-c");
+      const x = node("id-x");
+      const y = node("id-y");
+      const z = node("id-z");
+      const s = node("id-s");
+      const t = node("id-t");
+
+      /**
+       *               /----------->-----------\
+       *      /--->---/----------->-----\       \
+       *    /        /                   \       \
+       *   x--->---y--->---z--->---a ---> b ---> c
+       *                           \           /
+       *                            \----<----/
+       *
+       *    s ---->----t
+       *     \---<----/
+       */
+
+      const edges = [
+        edge(x, y),
+        edge(y, z),
+        edge(z, a),
+        edge(a, b),
+        edge(b, c),
+        edge(c, a),
+        edge(x, b),
+        edge(y, c),
+        edge(s, t),
+        edge(t, s),
+      ];
+      const nodes = [a, b, c, x, y, z, s, t];
+      const graph = new DirectedGraph(nodes, edges);
+      expect(graph.getCycles()).toStrictEqual([
+        [c, b, a],
+        [t, s],
+      ]);
+    });
+  });
 });

@@ -1,3 +1,5 @@
+import Graph from "tarjan-graph";
+
 export type DirectedEdge<T> = {
   from: T;
   to: T;
@@ -164,5 +166,30 @@ export default class DirectedGraph<T> {
       ...this.getDescendants(source),
     ]);
     return new DirectedGraph(nodes, this.getEdgesFromNodes(nodes));
+  }
+
+  getCycles(): T[][] {
+    const graph = new Graph();
+    const nodes = Array.from(this.getNodes());
+    const indexes = new Map(nodes.map((node, index) => [node, `${index}`]));
+    const nodeToIndex = (node: T): string => {
+      const index = indexes.get(node);
+      if (index === undefined) {
+        throw new Error("Unexpected: index should not be undefined");
+      }
+      return index;
+    };
+    const indexToNode = (index: string) => nodes[+index];
+    nodes.forEach((node) => {
+      const nodeIndex = nodeToIndex(node);
+      const successorIndexes = Array.from(this.getSuccessors(node)).map(
+        nodeToIndex
+      );
+      graph.add(nodeIndex, successorIndexes);
+    });
+    const cycles = graph.getCycles();
+    return cycles.map((cycle) =>
+      cycle.map((vertex) => indexToNode(vertex.name))
+    );
   }
 }
