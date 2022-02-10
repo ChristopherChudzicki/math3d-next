@@ -82,7 +82,7 @@ export default class MathScope {
     this.events.emit(event.type, event);
   }
 
-  addExpression(identifiedExpressions: IdentifiedExpression[]): void {
+  setExpressions(identifiedExpressions: IdentifiedExpression[]): void {
     identifiedExpressions.forEach(({ id, expression }) => {
       if (this.nodes.has(id)) {
         throw new Error(`node with id ${id} already exists.`);
@@ -92,17 +92,7 @@ export default class MathScope {
     this.reevaluateAll();
   }
 
-  updateExpression(identifiedExpressions: IdentifiedExpression[]): void {
-    identifiedExpressions.forEach(({ id, expression }) => {
-      if (!this.nodes.has(id)) {
-        throw new Error(`expression with id ${id} does not exist`);
-      }
-      this.nodes.set(id, this.parse(id, expression));
-    });
-    this.reevaluateAll();
-  }
-
-  removeExpressions(ids: string[]): void {
+  deleteExpressions(ids: string[]): void {
     ids.forEach((id) => {
       if (!this.nodes.has(id)) {
         throw new Error(`expression with id ${id} does not exist`);

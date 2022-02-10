@@ -1,6 +1,6 @@
 import { exp, index, MathNode, parse } from "mathjs";
 
-import ExpressionGraph from "./ExpressionGraph";
+import ExpressionGraphManager from "./ExpressionGraphManager";
 import DirectedGraph from "./DirectedGraph";
 
 import { permutations } from "../test_util";
@@ -12,7 +12,7 @@ const node = (id: string, parseable: string) => {
 };
 const edge = <T>(from: T, to: T) => ({ from, to });
 
-describe("ExpressionGraph", () => {
+describe("ExpressionGraphManager", () => {
   /*
    *     a = 2
    *     b = 3
@@ -56,22 +56,22 @@ describe("ExpressionGraph", () => {
     return { a, b, c, x1 };
   };
 
-  describe("Building and modifying an ExpressionGraph", () => {
+  describe("Building and modifying an ExpressionGraphManager", () => {
     it("can add nodes during or after construction", () => {
       const { a, b, c, x1 } = getExpressions1();
       const expressions = [a, b, c, x1];
 
-      const expected = new ExpressionGraph();
+      const expected = new ExpressionGraphManager();
       expected.addExpressions(expressions);
 
-      expect(new ExpressionGraph(expressions)).toStrictEqual(expected);
+      expect(new ExpressionGraphManager(expressions)).toStrictEqual(expected);
     });
 
     it("has the correct underlying DG after several addExpressions", () => {
       const { a, b, c, x1 } = getExpressions1();
       const expressions = [a, b, c, x1];
 
-      const result = new ExpressionGraph();
+      const result = new ExpressionGraphManager();
       result.addExpressions(expressions);
 
       expect(result.graph).toStrictEqual(
@@ -90,7 +90,7 @@ describe("ExpressionGraph", () => {
       const { a, b, c, x1 } = getExpressions1();
       const expressions = [a, b, c, x1];
 
-      const result = new ExpressionGraph(expressions);
+      const result = new ExpressionGraphManager(expressions);
       result.deleteExpressions([b]);
 
       expect(result.graph).toStrictEqual(
@@ -98,30 +98,30 @@ describe("ExpressionGraph", () => {
       );
     });
 
-    it("builds the same ExpressionGraph regardless of the insertion order", () => {
+    it("builds the same ExpressionGraphManager regardless of the insertion order", () => {
       const { a, b, c, x1 } = getExpressions1();
       const expressions = [a, b, c, x1];
 
-      const expected = new ExpressionGraph(expressions);
+      const expected = new ExpressionGraphManager(expressions);
 
       permutations(expressions).forEach((nodes) => {
-        const expressionGraph = new ExpressionGraph();
-        nodes.forEach((n) => expressionGraph.addExpressions([n]));
-        expect(expressionGraph).toStrictEqual(expected);
+        const expressionGraphManager = new ExpressionGraphManager();
+        nodes.forEach((n) => expressionGraphManager.addExpressions([n]));
+        expect(expressionGraphManager).toStrictEqual(expected);
       });
 
       expect.assertions(24);
     });
 
-    it("builds the same ExpressionGraph if extra nodes are added and removed", () => {
+    it("builds the same ExpressionGraphManager if extra nodes are added and removed", () => {
       const { a, b, c, x1 } = getExpressions1();
       const expressions = [a, b, c, x1];
 
-      const expected = new ExpressionGraph(expressions);
+      const expected = new ExpressionGraphManager(expressions);
 
       const d = node("id-d", "d = a * b * c");
       const x1alt = node("id-x1", "a + b + c +d");
-      const graph = new ExpressionGraph();
+      const graph = new ExpressionGraphManager();
       graph.addExpressions([a, b, c, x1, d]);
       graph.deleteExpressions([x1]);
       graph.addExpressions([x1alt]);
@@ -139,8 +139,14 @@ describe("ExpressionGraph", () => {
       const b2 = node("id-b2", "b = 2");
       const x1 = node("id-x1", "x = a + b");
 
-      const expressionGraph = new ExpressionGraph([a1, a2, b1, b2, x1]);
-      expect(expressionGraph.graph).toStrictEqual(
+      const expressionGraphManager = new ExpressionGraphManager([
+        a1,
+        a2,
+        b1,
+        b2,
+        x1,
+      ]);
+      expect(expressionGraphManager.graph).toStrictEqual(
         new DirectedGraph(
           [a1, a2, b1, b2, x1],
           [
@@ -155,11 +161,11 @@ describe("ExpressionGraph", () => {
       );
 
       permutations([[a1, b1], [a2, b2], [x1]]).forEach((permutation) => {
-        const g = new ExpressionGraph();
+        const g = new ExpressionGraphManager();
         permutation.forEach((nodes) => {
           g.addExpressions(nodes);
         });
-        expect(expressionGraph).toStrictEqual(g);
+        expect(expressionGraphManager).toStrictEqual(g);
       });
 
       expect.assertions(7);
@@ -198,10 +204,10 @@ describe("ExpressionGraph", () => {
     it("returns a valid evaluation order", () => {
       const { a, b, c, d, e, f, g, h, x, y, z } = getExpressions2();
       const expressions = [a, b, c, d, e, f, g, h, x, y, z];
-      const expressionGraph = new ExpressionGraph(expressions);
+      const expressionGraphManager = new ExpressionGraphManager(expressions);
 
       const { order, cycleNodes, duplicateAssignmentNodes } =
-        expressionGraph.getEvaluationOrder();
+        expressionGraphManager.getEvaluationOrder();
       expect(order).toStrictEqual([a, b, c, e, f, d, g, h, x, y, z]);
       expect(cycleNodes).toStrictEqual(new Set());
       expect(duplicateAssignmentNodes).toStrictEqual(new Set());
@@ -210,11 +216,11 @@ describe("ExpressionGraph", () => {
     it("includes isolated nodes", () => {
       const { a, b, c, d, e, f, g, h, x, y, z } = getExpressions2();
       const expressions = [a, b, c, d, e, f, g, h, x, y, z];
-      const expressionGraph = new ExpressionGraph(expressions);
-      const { order } = expressionGraph.getEvaluationOrder();
+      const expressionGraphManager = new ExpressionGraphManager(expressions);
+      const { order } = expressionGraphManager.getEvaluationOrder();
       expect(order).toContain(z);
 
-      const { graph } = expressionGraph;
+      const { graph } = expressionGraphManager;
       expect(graph.getSuccessors(z)).toStrictEqual(new Set([]));
       expect(graph.getPredecessors(z)).toStrictEqual(new Set([]));
     });
@@ -230,9 +236,9 @@ describe("ExpressionGraph", () => {
       const y = node("id-y", "y = x^2");
       const expressions = [a, b, c, d, x, y];
 
-      const expressionGraph = new ExpressionGraph(expressions);
+      const expressionGraphManager = new ExpressionGraphManager(expressions);
       const { order, cycleNodes, duplicateAssignmentNodes } =
-        expressionGraph.getEvaluationOrder();
+        expressionGraphManager.getEvaluationOrder();
 
       /**
        * x and y will error during evaluation since their dependencies are not

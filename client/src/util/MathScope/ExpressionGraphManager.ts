@@ -11,7 +11,7 @@ const getAssignmentNodesByName = R.pipe<
   { [name: string]: GeneralAssignmentNode[] }
 >(R.filter(isGeneralAssignmentNode), R.groupBy(R.prop("name")));
 
-export default class ExpressionGraph {
+export default class ExpressionGraphManager {
   graph = new DirectedGraph<MathNode>([], []);
 
   dependents = new Map<string, Set<MathNode>>();
