@@ -4,4 +4,8 @@ export type IParse = (parseable: string) => MathNode;
 
 export type GeneralAssignmentNode = AssignmentNode | FunctionAssignmentNode;
 
-export type EvaluationScope = Record<string, unknown>;
+export type EvaluationScope = Map<string, unknown>;
+
+export type EvaluationResult = Map<string, unknown>;
+
+export type EvaluationErrors = Map<string, Error>;

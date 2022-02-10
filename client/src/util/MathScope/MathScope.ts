@@ -1,5 +1,12 @@
+import { EventEmitter } from "events";
 import { parse as defaultParse, MathNode } from "mathjs";
-import type { IParse, EvaluationScope } from "./types";
+import Evaluator from "./Evaluator";
+import type {
+  IParse,
+  EvaluationScope,
+  EvaluationResult,
+  EvaluationErrors,
+} from "./types";
 
 const getIdentifyingParser = (
   parse: IParse
@@ -12,46 +19,86 @@ const getIdentifyingParser = (
   return identifyingParser;
 };
 
+type IdentifiedExpression = {
+  id: string;
+  expression: string;
+};
+
+type ScopeUpdateEvent = {
+  type: "update";
+  result: {
+    updated: Set<string>;
+    values: EvaluationResult;
+  };
+  errors: {
+    updated: Set<string>;
+    values: EvaluationErrors;
+  };
+};
+
 /**
  * Very draft... Other classes in this directory are more developed.
  * This class will be the API used by main app.
  * Should emit events and stuff. TODO: spec/implement this more
  */
 export default class MathScope {
-  evaluationScope: EvaluationScope;
+  initialScope: EvaluationScope;
+
+  events = new EventEmitter();
+
+  private evaluator: Evaluator;
 
   private parse: (id: string, expr: string) => MathNode;
 
-  private nodes: Record<string, MathNode>;
+  private nodes: Map<string, MathNode> = new Map();
 
-  constructor(evaluationScope = {}, parse: IParse = defaultParse) {
+  constructor({
+    parse = defaultParse,
+    initialScope = new Map(),
+  }: {
+    parse?: IParse;
+    initialScope?: EvaluationScope;
+  } = {}) {
     this.parse = getIdentifyingParser(parse);
-    this.evaluationScope = evaluationScope;
-    this.nodes = {};
+    this.initialScope = initialScope;
+    this.evaluator = new Evaluator([], initialScope);
   }
 
-  addExpression(id: string, expr: string): void {
-    if (this.nodes[id] !== undefined) {
-      throw new Error(`node with id ${id} already exists.`);
-    }
-    this.nodes[id] = this.parse(id, expr);
+  private reevaluateAll() {
+    const nodes = Array.from(this.nodes.values());
+    this.evaluator = new Evaluator(nodes, this.initialScope);
+    const { result, errors } = this.evaluator;
+    const event: ScopeUpdateEvent = {
+      type: "update",
+      result: {
+        values: result,
+        updated: new Set(result.keys()),
+      },
+      errors: {
+        values: errors,
+        updated: new Set(errors.keys()),
+      },
+    };
+    this.events.emit(event.type, event);
   }
 
-  updateExpression(id: string, parseable: string): void {
-    if (this.nodes[id] === undefined) {
-      throw new Error(`expression with id ${id} does not exist`);
-    }
-    this.nodes[id] = this.parse(id, parseable);
-    /**
-     * When updating a constant, we will not need a new Evaluator
-     */
-    throw new Error("Not implemeneted");
+  setExpressions(identifiedExpressions: IdentifiedExpression[]): void {
+    identifiedExpressions.forEach(({ id, expression }) => {
+      if (this.nodes.has(id)) {
+        throw new Error(`node with id ${id} already exists.`);
+      }
+      this.nodes.set(id, this.parse(id, expression));
+    });
+    this.reevaluateAll();
   }
 
-  removeExpression(id: string): void {
-    if (this.nodes[id] === undefined) {
-      throw new Error(`expression with id ${id} does not exist`);
-    }
-    // ...
+  deleteExpressions(ids: string[]): void {
+    ids.forEach((id) => {
+      if (!this.nodes.has(id)) {
+        throw new Error(`expression with id ${id} does not exist`);
+      }
+      this.nodes.delete(id);
+    });
+    this.reevaluateAll();
   }
 }

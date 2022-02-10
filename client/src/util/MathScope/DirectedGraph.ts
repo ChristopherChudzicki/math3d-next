@@ -1,3 +1,5 @@
+import Graph from "tarjan-graph";
+
 export type DirectedEdge<T> = {
   from: T;
   to: T;
@@ -8,21 +10,89 @@ type DFSCallback<T> = (node: T, depth: number, graph: DirectedGraph<T>) => void;
 export default class DirectedGraph<T> {
   private successors: Map<T, Set<T>>;
 
-  constructor(edges: DirectedEdge<T>[]) {
-    this.successors = new Map();
+  private predecessors: Map<T, Set<T>>;
 
+  constructor(nodes: T[], edges: DirectedEdge<T>[]) {
+    this.successors = new Map();
+    this.predecessors = new Map();
+
+    nodes.forEach((node) => this.addNode(node));
     edges.forEach((e) => this.addEdge(e.from, e.to));
   }
 
+  hasNode(node: T): boolean {
+    const p = this.predecessors.has(node);
+    const s = this.successors.has(node);
+    if (p && s) return true;
+    if (!p && !s) return false;
+    throw new Error("Unexpected: Inconsistent node record");
+  }
+
+  private assertNodeExists(node: T): void {
+    if (this.hasNode(node)) return;
+    throw new Error("Graph does not contain specified node.");
+  }
+
+  addNode(node: T): void {
+    if (!this.successors.has(node)) {
+      this.successors.set(node, new Set());
+    }
+    if (!this.predecessors.has(node)) {
+      this.predecessors.set(node, new Set());
+    }
+  }
+
   addEdge(from: T, to: T): void {
-    if (!this.successors.has(from)) {
-      this.successors.set(from, new Set());
+    if (!this.hasNode(from)) {
+      throw new Error('Cannot add edge; "from" node does not exist');
+    }
+    if (!this.hasNode(to)) {
+      throw new Error('Cannot add edge; "to" node does not exist');
     }
     this.successors.get(from)?.add(to);
+    this.predecessors.get(to)?.add(from);
+  }
+
+  hasEdge(from: T, to: T): boolean {
+    const s = this.successors.get(from)?.has(to);
+    const p = this.predecessors.get(to)?.has(from);
+    if (s && p) return true;
+    if (!s && !p) return false;
+    throw new Error("Unexpected: Inconsistent edge record");
+  }
+
+  deleteEdge(from: T, to: T): void {
+    if (!this.hasEdge(from, to)) {
+      throw new Error("Specified edge does not exist; it cannot be deleted.");
+    }
+    this.successors.get(from)?.delete(to);
+    this.predecessors.get(to)?.delete(from);
+  }
+
+  deleteNode(node: T) {
+    this.assertNodeExists(node);
+    this.getSuccessors(node).forEach((to) => {
+      this.deleteEdge(node, to);
+    });
+    this.getPredecessors(node).forEach((from) => {
+      this.deleteEdge(from, node);
+    });
+    this.successors.delete(node);
+    this.predecessors.delete(node);
   }
 
   getSuccessors(node: T): Set<T> {
-    return this.successors.get(node) ?? new Set();
+    this.assertNodeExists(node);
+    const successors = this.successors.get(node);
+    if (successors) return successors;
+    throw new Error("Unreachable.");
+  }
+
+  getPredecessors(node: T): Set<T> {
+    this.assertNodeExists(node);
+    const predecessors = this.predecessors.get(node);
+    if (predecessors) return predecessors;
+    throw new Error("Unreachable.");
   }
 
   private dfsWithDepth(
@@ -76,11 +146,50 @@ export default class DirectedGraph<T> {
     return this.getEdgesFromNodes(this.successors.keys());
   }
 
+  getNodes(): Set<T> {
+    return new Set(this.successors.keys());
+  }
+
+  getIsolatedNodes(): Set<T> {
+    const isolated = new Set<T>();
+    this.successors.forEach((successors, node) => {
+      if (successors.size > 0) return;
+      if (this.getPredecessors(node).size > 0) return;
+      isolated.add(node);
+    });
+    return isolated;
+  }
+
   getReachableSubgraph(sources: Iterable<T>) {
     const nodes = [...sources].flatMap((source) => [
       source,
       ...this.getDescendants(source),
     ]);
-    return new DirectedGraph(this.getEdgesFromNodes(nodes));
+    return new DirectedGraph(nodes, this.getEdgesFromNodes(nodes));
+  }
+
+  getCycles(): T[][] {
+    const graph = new Graph();
+    const nodes = Array.from(this.getNodes());
+    const indexes = new Map(nodes.map((node, index) => [node, `${index}`]));
+    const nodeToIndex = (node: T): string => {
+      const index = indexes.get(node);
+      if (index === undefined) {
+        throw new Error("Unexpected: index should not be undefined");
+      }
+      return index;
+    };
+    const indexToNode = (index: string) => nodes[+index];
+    nodes.forEach((node) => {
+      const nodeIndex = nodeToIndex(node);
+      const successorIndexes = Array.from(this.getSuccessors(node)).map(
+        nodeToIndex
+      );
+      graph.add(nodeIndex, successorIndexes);
+    });
+    const cycles = graph.getCycles();
+    return cycles.map((cycle) =>
+      cycle.map((vertex) => indexToNode(vertex.name))
+    );
   }
 }
