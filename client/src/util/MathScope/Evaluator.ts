@@ -129,3 +129,11 @@ export default class Evaluator {
     return this.evaluate(evaluationOrder);
   }
 }
+
+/**
+ *
+ * evaluateAll
+ * evaluateSubgraph
+ * constructor(ExpressionGraphManager)
+ *
+ */
