@@ -174,43 +174,89 @@ describe("ExpressionGraphManager", () => {
 
   // Test multiple assignments + cycles
 
-  describe("#getEvaluationOrder()", () => {
-    /**
-     * ```
-     *       a     b
-     *      /\\  /  \
-     *     /  \c    d         x
-     *    /  / \\     \       |
-     *     e    f     g      y     z
-     *    |   /
-     *     h
-     * ```
-     */
-    const getExpressions2 = () => {
-      const a = node("id-a", "a = 2");
-      const b = node("id-b", "b(x) = x^2");
-      const c = node("id-c", "c(y) = a + b(y)");
-      const d = node("id-d", "d = b(2)");
-      const e = node("id-e", "e = a + c(1)");
-      const f = node("id-f", "f = c(a)");
-      const g = node("id-g", "d + 1");
-      const h = node("id-h", "e + f");
-      const x = node("id-x", "x = 2");
-      const y = node("id-y", "y = x^2");
-      const z = node("id-z", "sin(omega)");
-      return { a, b, c, d, e, f, g, h, x, y, z };
-    };
+  describe("#getDuplicateAssignmentNodes", () => {
+    it("returns duplicate assignments nodes", () => {
+      const a = node("id-a", "a=1");
+      const b1 = node("id-b1", "b=1");
+      const b2 = node("id-b2", "b=2");
+      const c1 = node("id-c1", "c(x)=1");
+      const c2 = node("id-c2", "c(x)=2");
+      const c3 = node("id-c3", "c=3");
+      const expressions = [a, b1, b2, c1, c2, c3];
+      const manager = new ExpressionGraphManager(expressions);
+      expect(manager.getDuplicateAssignmentNodes()).toStrictEqual([
+        [b1, b2],
+        [c1, c2, c3],
+      ]);
+    });
 
+    it.each([
+      [undefined, [["gg", "gg"]]],
+      [/gg/, [["_f", "_f"]]],
+      [/$^/, [Array(2).fill("_f"), Array(2).fill("gg")]],
+    ])(
+      "allows duplicate leaves matching allowedDuplicateLeafRegex",
+      (regex, expectedDupeNames) => {
+        const f1 = node("id-f1", "_f(x)=1");
+        const f2 = node("id-f2", "_f(x)=2");
+        const g1 = node("id-g1", "gg(x)=1");
+        const g2 = node("id-g2", "gg(x)=2");
+        const expressions = [f1, f2, g1, g2];
+        const manager = new ExpressionGraphManager(expressions, regex);
+        const dupes = manager.getDuplicateAssignmentNodes();
+        const dupeNames = dupes.map((g) => g.map((n) => n.name));
+        expect(dupeNames).toStrictEqual(expectedDupeNames);
+      }
+    );
+
+    it("only permits duplicate names on leaf nodes", () => {
+      const f1 = node("id-f1", "_f(x)=x");
+      const f2 = node("id-f2", "_f(x)=x");
+      const a = node("id-a", "_f(5)");
+      const expressions = [f1, f2, a];
+      const manager = new ExpressionGraphManager(expressions);
+      const dupes = manager.getDuplicateAssignmentNodes();
+      expect(dupes).toStrictEqual([[f1, f2]]);
+    });
+  });
+
+  /**
+   * ```
+   *       a     b
+   *      /\\  /  \
+   *     /  \c    d         x
+   *    /  / \\     \       |
+   *     e    f     g      y     z
+   *    |   /
+   *     h
+   * ```
+   */
+  const getExpressions2 = () => {
+    const a = node("id-a", "a = 2");
+    const b = node("id-b", "b(x) = x^2");
+    const c = node("id-c", "c(y) = a + b(y)");
+    const d = node("id-d", "d = b(2)");
+    const e = node("id-e", "e = a + c(1)");
+    const f = node("id-f", "f = c(a)");
+    const g = node("id-g", "d + 1");
+    const h = node("id-h", "e + f");
+    const x = node("id-x", "x = 2");
+    const y = node("id-y", "y = x^2");
+    const z = node("id-z", "sin(omega)");
+    return { a, b, c, d, e, f, g, h, x, y, z };
+  };
+
+  describe("#getEvaluationOrder()", () => {
     it("returns a valid evaluation order", () => {
       const { a, b, c, d, e, f, g, h, x, y, z } = getExpressions2();
       const expressions = [a, b, c, d, e, f, g, h, x, y, z];
       const expressionGraphManager = new ExpressionGraphManager(expressions);
 
-      const { order, cycleNodes, duplicateAssignmentNodes } =
+      const { order, cycles, duplicates } =
         expressionGraphManager.getEvaluationOrder();
       expect(order).toStrictEqual([a, b, c, e, f, d, g, h, x, y, z]);
-      expect(cycleNodes).toStrictEqual(new Set());
-      expect(duplicateAssignmentNodes).toStrictEqual(new Set());
+      expect(cycles).toStrictEqual([]);
+      expect(duplicates).toStrictEqual(new Set());
     });
 
     it("includes isolated nodes", () => {
@@ -225,8 +271,6 @@ describe("ExpressionGraphManager", () => {
       expect(graph.getPredecessors(z)).toStrictEqual(new Set([]));
     });
 
-    it("returns just the reachable subgraph when called with nodes", () => {});
-
     it("omits cycles, but includes cycle predecessor/successors", () => {
       const a = node("id-a", "a = 1");
       const b = node("id-b", "b = a + 1");
@@ -234,25 +278,70 @@ describe("ExpressionGraphManager", () => {
       const d = node("id-d", "d = b + c");
       const x = node("id-x", "x = c^2");
       const y = node("id-y", "y = x^2");
-      const expressions = [a, b, c, d, x, y];
+      const z = node("id-y", "z = c^2");
+      const expressions = [a, b, c, d, x, y, z];
 
       const expressionGraphManager = new ExpressionGraphManager(expressions);
-      const { order, cycleNodes, duplicateAssignmentNodes } =
+      const { order, cycles, duplicates } =
         expressionGraphManager.getEvaluationOrder();
 
       /**
        * x and y will error during evaluation since their dependencies are not
        * met, but that's ok.
        */
-      expect(order).toStrictEqual([a, b, x, y]);
-      expect(cycleNodes).toStrictEqual(new Set([c, d]));
-      expect(duplicateAssignmentNodes).toStrictEqual(new Set([]));
+      expect(order).toStrictEqual([a, b, x, y, z]);
+      expect(cycles).toStrictEqual([[c, d]]);
+      expect(duplicates).toStrictEqual(new Set([]));
     });
 
-    it("omits duplicate assignments", () => {});
+    it("omits duplicate assignments, but includes duplicates' predecessor/successors", () => {
+      const a = node("id-a", "a = 1");
+      const b = node("id-b", "b = a + 1");
+      const c1 = node("id-c1", "c = b + 1");
+      const c2 = node("id-c2", "c = b + 2");
+      const x = node("id-x", "x = b^2");
+      const y1 = node("id-y1", "_f(x) = x^2");
+      const y2 = node("id-y2", "_f(x) = x^3");
+      const z = node("id-z", "z = c^2");
+      const expressions = [a, b, c1, c2, x, y1, y2, z];
 
-    it("allows duplicate leaves matching allowedDuplicateLeafRegex", () => {});
+      const manager = new ExpressionGraphManager(expressions);
+      const { order, cycles, duplicates } = manager.getEvaluationOrder();
+
+      expect(order).toStrictEqual([a, b, x, y1, y2, z]);
+      expect(cycles).toStrictEqual([]);
+      expect(duplicates).toStrictEqual(new Set([c1, c2]));
+    });
   });
 
-  describe("#updateExpressions", () => {});
+  describe("#getEvaluationOrder(nodes)", () => {
+    it("returns just the order for just the reachable subgraph when called with nodes", () => {
+      const { a, b, c, d, e, f, g, h, x, y, z } = getExpressions2();
+      const expressions = [a, b, c, d, e, f, g, h, x, y, z];
+      const expressionGraphManager = new ExpressionGraphManager(expressions);
+
+      const { order, cycles, duplicates } =
+        expressionGraphManager.getEvaluationOrder([c, x]);
+      expect(order).toStrictEqual([c, e, f, h, x, y]);
+      expect(cycles).toStrictEqual([]);
+      expect(duplicates).toStrictEqual(new Set());
+    });
+
+    it("includes all cycles and duplicates, not just the reachable ones", () => {
+      const a = node("id-a", "a = b + 1");
+      const b = node("id-b", "b = a + 1");
+      const c1 = node("id-c1", "c = 1");
+      const c2 = node("id-c2", "c = 2");
+      const x = node("id-x", "x = 2");
+      const y = node("id-y", "y = x^2");
+      const z = node("id-y", "z = y^2");
+      const expressions = [a, b, c1, c2, x, y, z];
+      const manager = new ExpressionGraphManager(expressions);
+
+      const { order, cycles, duplicates } = manager.getEvaluationOrder([y]);
+      expect(order).toStrictEqual([y, z]);
+      expect(cycles).toStrictEqual([[b, a]]);
+      expect(duplicates).toStrictEqual(new Set([c1, c2]));
+    });
+  });
 });

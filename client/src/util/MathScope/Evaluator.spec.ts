@@ -1,5 +1,5 @@
 import { MathNode, parse } from "mathjs";
-import Evaluator from "./Evaluator";
+import Evaluator from "./Evaluator_old";
 
 const node = (id: string, parseable: string) => {
   const parsed = parse(parseable);

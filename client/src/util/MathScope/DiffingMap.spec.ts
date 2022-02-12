@@ -106,4 +106,21 @@ describe("DiffingMap", () => {
       deleted: new Set([]),
     });
   });
+
+  it.each([
+    [(e1: Error, e2: Error) => String(e1) === String(e2), new Set([])],
+    [undefined, new Set(["a"])],
+  ])(
+    "accepts a custom comparer for determining updates",
+    (areEqual, expectedUpdated) => {
+      const map = new Map<string, Error>([["a", Error("meow")]]);
+      const diffingMap = new DiffingMap(map, areEqual);
+
+      diffingMap.set("a", Error("meow"));
+      expect(diffingMap.getDiff().updated).toStrictEqual(expectedUpdated);
+
+      diffingMap.set("a", Error("purr"));
+      expect(diffingMap.getDiff().updated).toStrictEqual(new Set(["a"]));
+    }
+  );
 });

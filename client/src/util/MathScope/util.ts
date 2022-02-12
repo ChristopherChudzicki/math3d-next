@@ -71,3 +71,19 @@ export const getAssignmentCycles = (
   const toMathjsNode = (v: Vertex) => byName[v.name];
   return cycles.map(R.map(toMathjsNode));
 };
+
+export const assertIsError: (err: unknown) => asserts err is Error = (err) => {
+  if (err instanceof Error) return;
+  throw new Error(`${err} should be an Error instance.`);
+};
+
+export const setIntersection = <T>(...sets: Set<T>[]): Set<T> => {
+  const result = new Set<T>();
+  if (sets.length === 0) return result;
+  sets[0].forEach((item) => {
+    if (sets.every((set) => set.has(item))) {
+      result.add(item);
+    }
+  });
+  return result;
+};
