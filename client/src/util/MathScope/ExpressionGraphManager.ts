@@ -2,7 +2,11 @@ import * as R from "ramda";
 import { MathNode } from "mathjs";
 import toposort from "toposort";
 import type { GeneralAssignmentNode } from "./types";
-import { isGeneralAssignmentNode, getDependencies } from "./util";
+import {
+  isGeneralAssignmentNode,
+  getDependencies,
+  setIntersection,
+} from "./util";
 import DirectedGraph from "./DirectedGraph";
 
 const getAssignmentNodesByName = R.pipe<
@@ -16,8 +20,11 @@ export default class ExpressionGraphManager {
 
   dependents = new Map<string, Set<MathNode>>();
 
-  constructor(nodes: MathNode[] = []) {
+  allowedDuplicateLeafRegex: RegExp;
+
+  constructor(nodes: MathNode[] = [], allowedDuplicateLeafRegex = /^_/) {
     this.addExpressions(nodes);
+    this.allowedDuplicateLeafRegex = allowedDuplicateLeafRegex;
   }
 
   addExpressions(nodes: MathNode[]): void {
@@ -91,28 +98,48 @@ export default class ExpressionGraphManager {
     });
   }
 
+  getDuplicateAssignmentNodes(): GeneralAssignmentNode[][] {
+    const nodes = this.graph.getNodes();
+    return Object.entries(getAssignmentNodesByName(Array.from(nodes)))
+      .filter(([name, group]) => {
+        if (group.length <= 1) return false;
+        const duplicateAllowed =
+          this.allowedDuplicateLeafRegex.test(name) &&
+          group.every((node) => this.graph.isLeaf(node));
+        return !duplicateAllowed;
+      })
+      .map((entry) => entry[1]);
+  }
+
   getEvaluationOrder(sources?: MathNode[]): {
     order: MathNode[];
-    cycleNodes: Set<MathNode>;
-    duplicateAssignmentNodes: Set<MathNode>;
+    cycles: GeneralAssignmentNode[][];
+    duplicates: Set<GeneralAssignmentNode>;
   } {
-    const graph =
+    const subgraph =
       sources === undefined
-        ? this.graph
+        ? this.graph.copy()
         : this.graph.getReachableSubgraph(sources);
+    const wholegraph = this.graph;
 
-    const edges = graph.getEdges();
-    const isolated = Array.from(graph.getIsolatedNodes());
-    const cycleNodes = new Set(graph.getCycles().flat());
+    // use the whole graph for cycles and duplicates
+    const cycles = wholegraph.getCycles();
+    const allDupeNodes = new Set(this.getDuplicateAssignmentNodes().flat());
+    [...cycles.flat(), ...allDupeNodes].forEach((node) => {
+      if (subgraph.hasNode(node)) {
+        subgraph.deleteNode(node);
+      }
+    });
 
-    const acyclicEdges = edges.filter(
-      (e) => !cycleNodes.has(e.from) && !cycleNodes.has(e.to)
-    );
+    const edges = subgraph.getEdges();
+    const isolated = Array.from(subgraph.getIsolatedNodes());
+    const order = toposort(edges.map((e) => [e.from, e.to])).concat(isolated);
 
-    const order = toposort(acyclicEdges.map((e) => [e.from, e.to])).concat(
-      isolated
-    );
-
-    return { order, cycleNodes, duplicateAssignmentNodes: new Set() };
+    return {
+      order,
+      // Non-assignment nodes never have successors, so they can't be part of cycles
+      cycles: cycles as GeneralAssignmentNode[][],
+      duplicates: allDupeNodes as Set<GeneralAssignmentNode>,
+    };
   }
 }

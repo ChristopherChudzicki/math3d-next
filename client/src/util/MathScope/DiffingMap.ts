@@ -1,8 +1,10 @@
-type Diff<T> = {
+export type Diff<T> = {
   added: Set<T>;
   updated: Set<T>;
   deleted: Set<T>;
 };
+
+type Comparer<T> = (t1: T, t2: T) => boolean;
 
 /**
  * A wrapper around native Map class that allowss tracking changes.
@@ -32,9 +34,12 @@ export default class DiffingMap<T, U> {
     }
   >;
 
-  constructor(map: Map<T, U>) {
+  areEqual: Comparer<U>;
+
+  constructor(map: Map<T, U>, areEqual: Comparer<U> = Object.is) {
     this.map = map;
     this.changes = new Map();
+    this.areEqual = areEqual;
   }
 
   has(key: T): boolean {
@@ -58,6 +63,9 @@ export default class DiffingMap<T, U> {
     return this.map.delete(key);
   }
 
+  /**
+   * Gets diff since instantiation or last resetDiff call.
+   */
   getDiff(): Diff<T> {
     const added = new Set<T>();
     const updated = new Set<T>();
@@ -69,7 +77,8 @@ export default class DiffingMap<T, U> {
           added.add(key);
         }
       } else if (this.map.has(key)) {
-        if (this.map.get(key) !== initialValue) {
+        const value = this.map.get(key) as U;
+        if (!this.areEqual(value, initialValue as U)) {
           updated.add(key);
         }
       } else {

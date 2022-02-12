@@ -160,12 +160,20 @@ export default class DirectedGraph<T> {
     return isolated;
   }
 
+  isLeaf(node: T): boolean {
+    return this.getSuccessors(node).size === 0;
+  }
+
   getReachableSubgraph(sources: Iterable<T>) {
     const nodes = [...sources].flatMap((source) => [
       source,
       ...this.getDescendants(source),
     ]);
     return new DirectedGraph(nodes, this.getEdgesFromNodes(nodes));
+  }
+
+  copy(): DirectedGraph<T> {
+    return new DirectedGraph(Array.from(this.getNodes()), this.getEdges());
   }
 
   getCycles(): T[][] {
