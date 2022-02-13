@@ -2,18 +2,21 @@ import * as R from "ramda";
 import { MathNode } from "mathjs";
 import toposort from "toposort";
 import type { GeneralAssignmentNode } from "./types";
-import {
-  isGeneralAssignmentNode,
-  getDependencies,
-  setIntersection,
-} from "./util";
+import { isGeneralAssignmentNode, getDependencies } from "./util";
 import DirectedGraph from "./DirectedGraph";
 
 const getAssignmentNodesByName = R.pipe<
   [MathNode[]],
   GeneralAssignmentNode[],
-  { [name: string]: GeneralAssignmentNode[] }
->(R.filter(isGeneralAssignmentNode), R.groupBy(R.prop("name")));
+  { [name: string]: GeneralAssignmentNode[] },
+  [string, GeneralAssignmentNode[]][],
+  Map<string, GeneralAssignmentNode[]>
+>(
+  R.filter(isGeneralAssignmentNode),
+  R.groupBy(R.prop("name")),
+  Object.entries,
+  (e) => new Map(e)
+);
 
 export default class ExpressionGraphManager {
   graph = new DirectedGraph<MathNode>([], []);
@@ -23,17 +26,16 @@ export default class ExpressionGraphManager {
   allowedDuplicateLeafRegex: RegExp;
 
   constructor(nodes: MathNode[] = [], allowedDuplicateLeafRegex = /^_/) {
-    this.addExpressions(nodes);
     this.allowedDuplicateLeafRegex = allowedDuplicateLeafRegex;
+    this.addExpressions(nodes);
   }
 
   addExpressions(nodes: MathNode[]): void {
     nodes.forEach((node) => {
       this.graph.addNode(node);
     });
-    const assignments = getAssignmentNodesByName(
-      Array.from(this.graph.getNodes())
-    );
+    const { assignments, duplicates } =
+      this.getAssignmentsAndDuplicatesByName();
     nodes.forEach((node) => {
       /**
        * Get dependencies of this node.
@@ -48,7 +50,7 @@ export default class ExpressionGraphManager {
       // construct edges FROM dependencies to this node
       const dependencyNames = getDependencies(node);
       dependencyNames.forEach((dependencyName) => {
-        const dependencies = assignments[dependencyName] ?? [];
+        const dependencies = assignments.get(dependencyName) ?? [];
         dependencies.forEach((dependency) => {
           this.graph.addEdge(dependency, node);
         });
@@ -64,6 +66,43 @@ export default class ExpressionGraphManager {
           this.graph.addEdge(node, dependent);
         });
       }
+    });
+
+    /**
+     * Establish edges between all duplicates with same name. This means
+     * duplicate assignments create cycles. Why is this desirable?
+     *
+     * Our standard procedurate is that when nodes are added/removed from the
+     * graph, we re-evaluate the reachable subgraph. So in this situation:
+     *    Nodes:               current evaluation:
+     *    --------------------------------------------
+     *    A:   a = 1           a assigned value 1
+     *    X:   a + 1           2
+     * When A is deleted, we'll re-evaluate the reachable subgraph, in this
+     * case, just X. The new evaluation will be "Error: 'a' is not defined".
+     *
+     * But in this situation:
+     *
+     *    Nodes:                current evaluation:
+     *    --------------------------------------------
+     *    A1:   a = 1           Error: duplicate assignment
+     *    A2:   a = 2           Error: duplicate assignment
+     *     X:   a + 1           Error: 'a' is not defined.
+     *
+     * When we delete A1, we need need to re-evaluate X **and** A2.
+     *
+     * In this sense, A2 depends on A1: its validity as an assignment depends on
+     * whether A1 exists or not.
+     *
+     */
+    duplicates.forEach((dupes) => {
+      dupes.forEach((dupe1) => {
+        dupes.forEach((dupe2) => {
+          if (dupe1 !== dupe2 && !this.graph.hasEdge(dupe1, dupe2)) {
+            this.graph.addEdge(dupe1, dupe2);
+          }
+        });
+      });
     });
   }
 
@@ -98,23 +137,37 @@ export default class ExpressionGraphManager {
     });
   }
 
-  getDuplicateAssignmentNodes(): GeneralAssignmentNode[][] {
-    const nodes = this.graph.getNodes();
-    return Object.entries(getAssignmentNodesByName(Array.from(nodes)))
-      .filter(([name, group]) => {
-        if (group.length <= 1) return false;
-        const duplicateAllowed =
-          this.allowedDuplicateLeafRegex.test(name) &&
-          group.every((node) => this.graph.isLeaf(node));
-        return !duplicateAllowed;
-      })
-      .map((entry) => entry[1]);
+  private getAssignmentsAndDuplicatesByName(): {
+    assignments: Map<string, GeneralAssignmentNode[]>;
+    duplicates: Map<string, GeneralAssignmentNode[]>;
+  } {
+    const assignments = getAssignmentNodesByName(
+      Array.from(this.graph.getNodes())
+    );
+    const duplicates = new Map<string, GeneralAssignmentNode[]>();
+    assignments.forEach((nodes, name) => {
+      const duplicateAllowed =
+        this.allowedDuplicateLeafRegex.test(name) &&
+        nodes.every((node) => this.graph.isLeaf(node));
+      if (nodes.length <= 1 || duplicateAllowed) return;
+      duplicates.set(name, nodes);
+    });
+
+    return { assignments, duplicates };
+  }
+
+  getDuplicateAssignmentNodes(): Set<GeneralAssignmentNode> {
+    const { duplicates } = this.getAssignmentsAndDuplicatesByName();
+    const duplicatesSet = new Set<GeneralAssignmentNode>();
+    duplicates.forEach((nodes) => {
+      nodes.forEach((node) => duplicatesSet.add(node));
+    });
+    return duplicatesSet;
   }
 
   getEvaluationOrder(sources?: MathNode[]): {
     order: MathNode[];
     cycles: GeneralAssignmentNode[][];
-    duplicates: Set<GeneralAssignmentNode>;
   } {
     const subgraph =
       sources === undefined
@@ -124,8 +177,7 @@ export default class ExpressionGraphManager {
 
     // use the whole graph for cycles and duplicates
     const cycles = wholegraph.getCycles();
-    const allDupeNodes = new Set(this.getDuplicateAssignmentNodes().flat());
-    [...cycles.flat(), ...allDupeNodes].forEach((node) => {
+    cycles.flat().forEach((node) => {
       if (subgraph.hasNode(node)) {
         subgraph.deleteNode(node);
       }
@@ -139,7 +191,6 @@ export default class ExpressionGraphManager {
       order,
       // Non-assignment nodes never have successors, so they can't be part of cycles
       cycles: cycles as GeneralAssignmentNode[][],
-      duplicates: allDupeNodes as Set<GeneralAssignmentNode>,
     };
   }
 }

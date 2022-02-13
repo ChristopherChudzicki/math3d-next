@@ -61,13 +61,13 @@ export default class MathScope {
   } = {}) {
     this.parse = getIdentifyingParser(parse);
     this.initialScope = initialScope;
-    this.evaluator = new Evaluator([], initialScope);
+    this.evaluator = new Evaluator([] as any, initialScope);
   }
 
   private reevaluateAll() {
     const nodes = Array.from(this.nodes.values());
-    this.evaluator = new Evaluator(nodes, this.initialScope);
-    const { result, errors } = this.evaluator;
+    this.evaluator = new Evaluator(nodes as any, this.initialScope);
+    const { results: result, errors } = this.evaluator;
     const event: ScopeUpdateEvent = {
       type: "update",
       result: {

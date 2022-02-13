@@ -13,7 +13,8 @@ const getId = (node: MathNode) => node.comment;
 
 class EvaluationError extends Error {}
 
-class CyclicAssignmentError extends EvaluationError {
+class AssignmentError extends EvaluationError {}
+class CyclicAssignmentError extends AssignmentError {
   constructor(cycle: GeneralAssignmentNode[]) {
     const nodeNames = cycle.map((n) => n.name);
     const message = `Cyclic dependencies: ${nodeNames}`;
@@ -21,12 +22,21 @@ class CyclicAssignmentError extends EvaluationError {
   }
 }
 
-class DuplicateAssignmentError extends EvaluationError {
+class DuplicateAssignmentError extends AssignmentError {
   constructor(node: GeneralAssignmentNode) {
     const message = `Name ${node.name} has been assigned multiple times.`;
     super(message);
   }
 }
+
+const makeAssignmentError = (
+  node: GeneralAssignmentNode,
+  cycle: GeneralAssignmentNode[],
+  isDuplicate: boolean
+) => {
+  if (isDuplicate) return new DuplicateAssignmentError(node);
+  return new CyclicAssignmentError(cycle);
+};
 
 export default class Evaluator {
   graphManager: ExpressionGraphManager;
@@ -35,12 +45,16 @@ export default class Evaluator {
 
   results: EvaluationResult = new Map();
 
-  scope: EvaluationScope = new Map();
+  scope: EvaluationScope;
 
   errors: EvaluationErrors = new Map();
 
-  constructor(expressionGraphManager: ExpressionGraphManager) {
+  constructor(
+    expressionGraphManager: ExpressionGraphManager,
+    initialScope: EvaluationScope = new Map()
+  ) {
     this.graphManager = expressionGraphManager;
+    this.scope = new Map(initialScope);
   }
 
   private compile(node: MathNode) {
@@ -51,44 +65,32 @@ export default class Evaluator {
     return compiled;
   }
 
-  private setCycleErrors(cycles: GeneralAssignmentNode[][]): void {
-    const cycleErrors = new Map(
+  private updateAssignmentErrors(cycles: GeneralAssignmentNode[][]): void {
+    const duplicates = this.graphManager.getDuplicateAssignmentNodes();
+    const currentErrors = new Map(
       cycles.flatMap((cycle) =>
-        cycle.map((node) => [getId(node), new CyclicAssignmentError(cycle)])
+        cycle.map((node) => [
+          getId(node),
+          makeAssignmentError(node, cycle, duplicates.has(node)),
+        ])
       )
     );
 
-    this.errors.forEach((error, key) => {
-      if (!(error instanceof CyclicAssignmentError)) return;
-      const newError = cycleErrors.get(key);
-      if (newError === undefined) {
+    this.errors.forEach((existing, key) => {
+      if (!AssignmentError) return;
+      const current = currentErrors.get(key);
+      if (current === undefined) {
         this.errors.delete(key);
         return;
       }
-      if (newError.message === error.message) return;
-      this.errors.set(key, newError);
+      if (current.message === existing.message) return;
+      this.errors.set(key, current);
     });
 
-    cycleErrors.forEach((error, key) => {
+    currentErrors.forEach((error, key) => {
       const existingError = this.errors.get(key);
-      if (!existingError || !(existingError instanceof CyclicAssignmentError)) {
+      if (!existingError || !AssignmentError) {
         this.errors.set(key, error);
-      }
-    });
-  }
-
-  private setDuplicateErrors(duplicates: Set<GeneralAssignmentNode>): void {
-    const duplicateIds = new Set(Array.from(duplicates).map(getId));
-    this.errors.forEach((error, key) => {
-      if (!(error instanceof DuplicateAssignmentError)) return;
-      if (duplicateIds.has(key)) return;
-      this.errors.delete(key);
-    });
-    duplicates.forEach((node) => {
-      const key = getId(node);
-      const existingErr = this.errors.get(key);
-      if (!existingErr || !(existingErr instanceof DuplicateAssignmentError)) {
-        this.errors.set(key, new DuplicateAssignmentError(node));
       }
     });
   }
@@ -97,11 +99,7 @@ export default class Evaluator {
     results: Diff<string>;
     errors: Diff<string>;
   } {
-    const { order, cycles, duplicates } =
-      this.graphManager.getEvaluationOrder(sources);
-
-    const prevResults = new Map(this.results);
-    const prevErrors = new Map(this.errors);
+    const { order, cycles } = this.graphManager.getEvaluationOrder(sources);
 
     order.forEach((node) => {
       const { evaluate } = this.compile(node);
@@ -117,8 +115,8 @@ export default class Evaluator {
       }
     });
 
-    this.setCycleErrors(cycles);
-    this.setDuplicateErrors(duplicates);
+    // The cycles include duplicates
+    this.updateAssignmentErrors(cycles);
 
     this.scope = new Map(this.scope);
 
