@@ -14,6 +14,7 @@ export type Diff<T> = {
   added: Set<T>;
   updated: Set<T>;
   deleted: Set<T>;
+  unchanged: Set<T>;
 };
 
 type Comparer<T> = (t1: T, t2: T) => boolean;

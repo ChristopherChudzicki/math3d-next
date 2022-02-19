@@ -6,7 +6,7 @@ import {
   SymbolNode,
 } from "mathjs";
 import Graph, { Vertex } from "tarjan-graph";
-import type { GeneralAssignmentNode } from "./types";
+import type { GeneralAssignmentNode, Diff } from "./types";
 
 export const isGeneralAssignmentNode = (
   node: unknown
@@ -83,6 +83,32 @@ export const setIntersection = <T>(...sets: Set<T>[]): Set<T> => {
   sets[0].forEach((item) => {
     if (sets.every((set) => set.has(item))) {
       result.add(item);
+    }
+  });
+  return result;
+};
+
+export const diff = <T, U>(x: Map<T, U>, y: Map<T, U>): Diff<T> => {
+  const result = {
+    added: new Set<T>(),
+    updated: new Set<T>(),
+    deleted: new Set<T>(),
+    unchanged: new Set<T>(),
+  };
+  x.forEach((value, key) => {
+    if (y.has(key)) {
+      if (value === y.get(key)) {
+        result.unchanged.add(key);
+      } else {
+        result.updated.add(key);
+      }
+    } else {
+      result.added.add(key);
+    }
+  });
+  y.forEach((_value, key) => {
+    if (!x.has(key)) {
+      result.deleted.add(key);
     }
   });
   return result;
