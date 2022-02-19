@@ -215,7 +215,9 @@ describe("ExpressionGraphManager", () => {
         const expressions = [f1, f2, g1, g2];
         const byId = nodesById(expressions);
 
-        const manager = new ExpressionGraphManager(expressions, regex);
+        const manager = new ExpressionGraphManager(expressions, {
+          allowedDuplicateLeafRegex: regex,
+        });
         const dupes = manager.getDuplicateAssignmentNodes();
         expect(dupes).toStrictEqual(new Set(expectedIds.map((id) => byId[id])));
       }
