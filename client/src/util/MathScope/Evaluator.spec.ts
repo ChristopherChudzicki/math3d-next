@@ -1,5 +1,5 @@
 import { parse } from "mathjs";
-import Evaluator from "./Evaluator";
+import Evaluator, { UnmetDependencyError as UnmetDepErr } from "./Evaluator";
 
 const node = (id: string, parseable: string) => {
   const parsed = parse(parseable);
@@ -27,14 +27,39 @@ describe("Evaluator", () => {
       );
     });
 
-    it("returns a diff showing changed results", () => {
-      const a = node("id-a", "a = 2*[1,2,3]");
-      const b = node("id-b", "b = [1,2,3]");
-      const expr1 = node("id-expr1", "a + b +1");
+    it("records unment dependency errors for non-function evaluations", () => {
+      const a = node("id-a", "a = 2");
+      const b = node("id-b", "b = a^2");
+      const c = node("id-c", "c = b + x");
+      const expr1 = node("id-expr1", "b + c + x");
       const evaluator = new Evaluator();
-      evaluator.graphManager.addExpressions([a, b, expr1]);
-      const diff = evaluator.evaluate();
-      console.log(evaluator.results);
+      evaluator.graphManager.addExpressions([a, b, c, expr1]);
+      evaluator.evaluate();
+      expect(evaluator.results).toStrictEqual(
+        asMap({
+          "id-a": 2,
+          "id-b": 4,
+        })
+      );
+      expect(evaluator.errors).toStrictEqual(
+        asMap({
+          "id-c": new UnmetDepErr(["x"]),
+          "id-expr1": new UnmetDepErr(["c", "x"]),
+        })
+      );
+    });
+
+    it("records unment dependency errors for function evaluations", () => {
+      const f = node("id-f", "f(x, y) = a + b + x + y");
+      const evaluator = new Evaluator();
+      evaluator.graphManager.addExpressions([f]);
+      evaluator.evaluate();
+      expect(evaluator.results).toStrictEqual(asMap({}));
+      expect(evaluator.errors).toStrictEqual(
+        asMap({
+          "id-f": new UnmetDepErr(["a", "b"]),
+        })
+      );
     });
   });
 
