@@ -18,6 +18,13 @@ const getAssignmentNodesByName = R.pipe<
   (e) => new Map(e)
 );
 
+type ValidationHook = (
+  expressions: MathNode[],
+  manager: ExpressionGraphManager
+) => void;
+
+const defaultValidateAddExpr: ValidationHook = () => {};
+
 export default class ExpressionGraphManager {
   graph = new DirectedGraph<MathNode>([], []);
 
@@ -25,12 +32,25 @@ export default class ExpressionGraphManager {
 
   allowedDuplicateLeafRegex: RegExp;
 
-  constructor(nodes: MathNode[] = [], allowedDuplicateLeafRegex = /^_/) {
+  private validateAddExpressions: ValidationHook;
+
+  constructor(
+    nodes: MathNode[] = [],
+    {
+      validateAddExpressions = defaultValidateAddExpr,
+      allowedDuplicateLeafRegex = /^_/,
+    }: {
+      validateAddExpressions?: ValidationHook;
+      allowedDuplicateLeafRegex?: RegExp;
+    } = {}
+  ) {
     this.allowedDuplicateLeafRegex = allowedDuplicateLeafRegex;
+    this.validateAddExpressions = validateAddExpressions;
     this.addExpressions(nodes);
   }
 
   addExpressions(nodes: MathNode[]): void {
+    this.validateAddExpressions(nodes, this);
     nodes.forEach((node) => {
       this.graph.addNode(node);
     });

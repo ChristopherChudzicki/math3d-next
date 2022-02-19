@@ -1,5 +1,6 @@
-import { MathNode, EvalFunction } from "mathjs";
-import type ExpressionGraphManager from "./ExpressionGraphManager";
+import * as math from "mathjs";
+import type { MathNode, EvalFunction } from "mathjs";
+import ExpressionGraphManager from "./ExpressionGraphManager";
 import type {
   EvaluationScope,
   EvaluationResult,
@@ -38,9 +39,16 @@ const makeAssignmentError = (
   return new CyclicAssignmentError(cycle);
 };
 
-export default class Evaluator {
-  graphManager: ExpressionGraphManager;
+const compile = (node: MathNode): EvalFunction => {
+  const { evaluate: rawEvaluate } = node.compile();
+  const evaluate = (scope: EvaluationScope) => {
+    const result = rawEvaluate(scope);
+    return result;
+  };
+  return { evaluate };
+};
 
+export default class Evaluator {
   compiled = new WeakMap<MathNode, EvalFunction>();
 
   results: EvaluationResult = new Map();
@@ -49,18 +57,16 @@ export default class Evaluator {
 
   errors: EvaluationErrors = new Map();
 
-  constructor(
-    expressionGraphManager: ExpressionGraphManager,
-    initialScope: EvaluationScope = new Map()
-  ) {
-    this.graphManager = expressionGraphManager;
+  graphManager = new ExpressionGraphManager();
+
+  constructor(initialScope: EvaluationScope = new Map()) {
     this.scope = new Map(initialScope);
   }
 
   private compile(node: MathNode) {
     const cachedValue = this.compiled.get(node);
     if (cachedValue) return cachedValue;
-    const compiled = node.compile();
+    const compiled = compile(node);
     this.compiled.set(node, compiled);
     return compiled;
   }
@@ -95,6 +101,15 @@ export default class Evaluator {
     });
   }
 
+  /**
+   * Evaluates some or all of the expression graph.
+   *
+   * When called with no arguments, re-evaluates the entire expression graph.
+   * When called with `sources`, re-evalautes the subgraph reachable from those
+   * sources.
+   *
+   * Returns a diff indicating results and errors that have changed.
+   */
   evaluate(sources?: MathNode[]): {
     results: Diff<string>;
     errors: Diff<string>;
