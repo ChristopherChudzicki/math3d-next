@@ -132,6 +132,27 @@ export default class Evaluator {
     });
   }
 
+  private removeOutdated() {
+    const nodeIds = new Set(
+      Array.from(this.graphManager.graph.getNodes()).map(getId)
+    );
+    this.results.forEach((_value, key) => {
+      if (!nodeIds.has(key)) {
+        this.results.delete(key);
+      }
+    });
+    this.errors.forEach((_value, key) => {
+      if (!nodeIds.has(key)) {
+        this.errors.delete(key);
+      }
+    });
+    this.scope.forEach((_value, key) => {
+      if (!nodeIds.has(key)) {
+        this.scope.delete(key);
+      }
+    });
+  }
+
   /**
    * Evaluates some or all of the expression graph.
    *
@@ -149,6 +170,8 @@ export default class Evaluator {
 
     const oldResults = new Map(this.results);
     const oldErrors = new Map(this.errors);
+
+    this.removeOutdated();
 
     order.forEach((node) => {
       const { evaluate } = this.compile(node);
@@ -183,4 +206,6 @@ export default class Evaluator {
       errors: diff(this.errors, oldErrors),
     };
   }
+
+  evaluateAll();
 }
