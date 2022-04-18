@@ -1,5 +1,5 @@
-import { MathNode, parse } from "mathjs";
-import Evaluator from "./Evaluator";
+import { parse } from "mathjs";
+import Evaluator, { UnmetDependencyError as UnmetDepErr } from "./Evaluator";
 
 const node = (id: string, parseable: string) => {
   const parsed = parse(parseable);
@@ -10,175 +10,181 @@ const node = (id: string, parseable: string) => {
 const asMap = (obj: Record<string, unknown>) => new Map(Object.entries(obj));
 
 describe("Evaluator", () => {
-  it("instantiates with an array of identified nodes and initial scope", () => {
-    const a = node("sym-a", "a = 2");
-    const f = node("func-f", "f(x) = x^2");
-    const anon = node("anon", "f(a + b)");
-    const identifiedNodes = [a, f, anon];
-    const initialScope = asMap({ b: 4 });
-
-    const evaluator = new Evaluator(identifiedNodes, initialScope);
-    expect(evaluator).toBeInstanceOf(Evaluator);
-  });
-
-  it("throws an error if one of the given nodes has no comment", () => {
-    const a = node("", "a = 2");
-    expect(a.comment).toBe("");
-    expect(() => new Evaluator([a])).toThrow(
-      /unique, non-empty comment serving as its id/g
-    );
-  });
-
-  it("throws an error if two nodes have the same id", () => {
-    const a = node("some-id", "a = 2");
-    const b = node("some-id", "a = 2");
-    expect(a.comment).toBe(b.comment);
-    expect(() => new Evaluator([a, b])).toThrow(
-      /unique, non-empty comment serving as its id/g
-    );
-  });
-
-  it("evaluates the given nodes, exposing result on Evaluator.result", () => {
-    const a = node("id-a", "a = b^2");
-    const b = node("id-b", "b = 2");
-    const expr1 = node("id-1", "a + b");
-    const nodes = [a, b, expr1];
-    const evaluator = new Evaluator(nodes);
-    expect(evaluator.result).toStrictEqual(
-      asMap({
-        "id-b": 2,
-        "id-a": 4,
-        "id-1": 6,
-      })
-    );
-  });
-
-  it("uses the initial scope when evaluating", () => {
-    const a = node("id-a", "a = b^2");
-    const expr1 = node("id-1", "a + b");
-    const nodes = [a, expr1];
-    const initialScope = asMap({ b: 2 });
-    const evaluator = new Evaluator(nodes, initialScope);
-    expect(evaluator.result).toStrictEqual(
-      asMap({
-        "id-a": 4,
-        "id-1": 6,
-      })
-    );
-  });
-
-  it("evaluates as much as possible in presence of errors", () => {
-    const a = node("id-a", "a = b^2");
-    const b = node("id-b", "b = 2");
-    const expr1 = node("id-1", "a + b");
-    const expr2 = node("id-2", "g(b)");
-    const expr3 = node("id-3", "h(a)");
-    const nodes = [a, b, expr1, expr2, expr3];
-    const initialScope = asMap({ h: (x: number) => x ** 2 });
-    const evaluator = new Evaluator(nodes, initialScope);
-    expect(evaluator.result).toStrictEqual(
-      asMap({
-        "id-a": 4,
-        "id-b": 2,
-        "id-1": 6,
-        "id-3": 16,
-      })
-    );
-
-    expect(evaluator.errors).toStrictEqual(
-      asMap({
-        "id-2": Error("Undefined function g"),
-      })
-    );
-  });
-
-  describe("updateLiteralConstant", () => {
-    it("updates the result map appropriately", () => {
+  describe("#evaluate()", () => {
+    it("evaluates the given nodes, exposing result on Evaluator.result", () => {
       const a = node("id-a", "a = b^2");
       const b = node("id-b", "b = 2");
-      const c = node("id-c", "c = 5");
-      const expr1 = node("id-1", "2*c");
-      const expr2 = node("id-2", "b/2");
-      const expr3 = node("id-3", "h(c)");
-      const nodes = [a, b, c, expr1, expr2, expr3];
-      const initialScope = asMap({ h: (x: number) => x ** 2 });
-      const evaluator = new Evaluator(nodes, initialScope);
-      const originalResult = {
-        "id-a": 4,
-        "id-b": 2,
-        "id-c": 5,
-        "id-1": 10,
-        "id-2": 1,
-        "id-3": 25,
-      };
-      expect(evaluator.result).toStrictEqual(asMap(originalResult));
-
-      evaluator.updateLiteralConstant("id-b", 6);
-
-      expect(evaluator.result).toStrictEqual(
+      const expr1 = node("id-expr1", "a + b");
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([a, b, expr1]);
+      evaluator.evaluate();
+      expect(evaluator.results).toStrictEqual(
         asMap({
-          ...originalResult,
-          "id-b": 6,
-          "id-a": 36,
-          "id-2": 3,
+          "id-a": 4,
+          "id-b": 2,
+          "id-expr1": 6,
         })
       );
     });
 
-    it("only re-evaluates dependents of the updated literal", () => {
-      const a = node("id-a", "a = b^2");
-      const b = node("id-b", "b = 2");
-      const c = node("id-c", "c = 5");
-      const expr1 = node("id-1", "2*c");
-      const expr2 = node("id-2", "b/2");
-      const expr3 = node("id-3", "h(c)");
-      const nodes = [a, b, c, expr1, expr2, expr3];
-      const initialScope = asMap({ h: (x: number) => x ** 2 });
-
-      const spies: Map<MathNode, jest.SpyInstance> = new Map();
-      nodes.forEach((thisNode) => {
-        const originalCompile = thisNode.compile;
-        // eslint-disable-next-line no-param-reassign
-        thisNode.compile = () => {
-          const compiled = originalCompile.call(thisNode);
-          const spy = jest.spyOn(compiled, "evaluate");
-          spies.set(thisNode, spy);
-          return compiled;
-        };
-      });
-
-      const evaluator = new Evaluator(nodes, initialScope);
-      expect(spies.get(a)).toHaveBeenCalledTimes(1);
-      expect(spies.get(b)).toHaveBeenCalledTimes(1);
-      expect(spies.get(c)).toHaveBeenCalledTimes(1);
-      expect(spies.get(expr1)).toHaveBeenCalledTimes(1);
-      expect(spies.get(expr2)).toHaveBeenCalledTimes(1);
-      expect(spies.get(expr3)).toHaveBeenCalledTimes(1);
-
-      evaluator.updateLiteralConstant("id-b", 6);
-      expect(spies.get(a)).toHaveBeenCalledTimes(2);
-      expect(spies.get(b)).toHaveBeenCalledTimes(1);
-      expect(spies.get(c)).toHaveBeenCalledTimes(1);
-      expect(spies.get(expr1)).toHaveBeenCalledTimes(1);
-      expect(spies.get(expr2)).toHaveBeenCalledTimes(2);
-      expect(spies.get(expr3)).toHaveBeenCalledTimes(1);
+    it("records unment dependency errors for non-function evaluations", () => {
+      const a = node("id-a", "a = 2");
+      const b = node("id-b", "b = a^2");
+      const c = node("id-c", "c = b + x");
+      const expr1 = node("id-expr1", "b + c + x");
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([a, b, c, expr1]);
+      evaluator.evaluate();
+      expect(evaluator.results).toStrictEqual(
+        asMap({
+          "id-a": 2,
+          "id-b": 4,
+        })
+      );
+      expect(evaluator.errors).toStrictEqual(
+        asMap({
+          "id-c": new UnmetDepErr(["x"]),
+          "id-expr1": new UnmetDepErr(["c", "x"]),
+        })
+      );
     });
 
-    it("returns the set of updated nodeIds", () => {
-      const a = node("id-a", "a = b^2");
-      const b = node("id-b", "b = 2");
-      const c = node("id-c", "c = 5");
-      const expr1 = node("id-1", "2*c");
-      const expr2 = node("id-2", "b/2");
-      const expr3 = node("id-3", "h(c)");
-      const nodes = [a, b, c, expr1, expr2, expr3];
-      const initialScope = asMap({ h: (x: number) => x ** 2 });
+    it("records unment dependency errors for function evaluations", () => {
+      const f = node("id-f", "f(x, y) = a + b + x + y");
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([f]);
+      evaluator.evaluate();
+      expect(evaluator.results).toStrictEqual(asMap({}));
+      expect(evaluator.errors).toStrictEqual(
+        asMap({
+          "id-f": new UnmetDepErr(["a", "b"]),
+        })
+      );
+    });
 
-      const evaluator = new Evaluator(nodes, initialScope);
-      const updated = evaluator.updateLiteralConstant("id-b", 6);
-      const resultUpdates = new Set(["id-b", "id-a", "id-2"]);
-      const errorUpdates = new Set();
-      expect(updated).toStrictEqual({ resultUpdates, errorUpdates });
+    it("can add and remove nodes", () => {
+      const a = node("id-a", "a = [b, b]");
+      const b = node("id-b", "b = 2");
+      const c = node("id-c", "c = 3");
+      const d = node("id-d", "d = 5");
+      const expr1 = node("id-expr1", "[b, b, x]");
+      const expr2 = node("id-expr2", "c^2");
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([a, b, c, d, expr1, expr2]);
+      evaluator.evaluate();
+      expect(evaluator.results).toStrictEqual(
+        asMap({
+          "id-a": [2, 2],
+          "id-b": 2,
+          "id-c": 3,
+          "id-d": 5,
+          "id-expr2": 9,
+        })
+      );
+      expect(evaluator.errors).toStrictEqual(
+        asMap({
+          "id-expr1": new UnmetDepErr(["x"]),
+        })
+      );
+
+      const x = node("id-x", "x = 1");
+      const b2 = node("id-b", "b = 4");
+      evaluator.enqueueDeleteExpressions([b, c]);
+      evaluator.enqueueAddExpressions([x, b2]);
+
+      const diff = evaluator.evaluate();
+
+      expect(evaluator.results).toStrictEqual(
+        asMap({
+          "id-a": [4, 4],
+          "id-b": 4,
+          "id-d": 5,
+          "id-x": 1,
+          "id-expr1": [4, 4, 1],
+        })
+      );
+      expect(evaluator.errors).toStrictEqual(
+        asMap({
+          "id-expr2": new UnmetDepErr(["c"]),
+        })
+      );
+
+      expect(diff).toStrictEqual({
+        results: {
+          added: new Set(["id-x", "id-expr1"]),
+          updated: new Set(["id-b", "id-a"]),
+          deleted: new Set(["id-c", "id-expr2"]),
+        },
+        errors: {
+          added: new Set(["id-expr2"]),
+          updated: new Set([]),
+          deleted: new Set(["id-expr1"]),
+        },
+      });
+    });
+
+    it("only re-evaluates the affected portion of results", () => {
+      const a = node("id-a", "a = [b, b]");
+      const b = node("id-b", "b = 2");
+      const c = node("id-c", "c = 3");
+      const d = node("id-d", "d = 5");
+      const x = node("id-x", "x = 30");
+      const exp1 = node("id-exp1", "b + c + x");
+      const exp2 = node("id-exp2", "d^2");
+      const exp3 = node("id-exp3", "w^2");
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([a, b, c, d, x, exp1, exp2, exp3]);
+      evaluator.evaluate();
+
+      const c2 = node("id-c", "c=4");
+      evaluator.enqueueDeleteExpressions([c]);
+      evaluator.enqueueAddExpressions([c2]);
+
+      expect(evaluator.results).toStrictEqual(
+        asMap({
+          "id-a": [2, 2],
+          "id-b": 2,
+          "id-c": 3,
+          "id-d": 5,
+          "id-x": 30,
+          "id-exp1": 35,
+          "id-exp2": 25,
+        })
+      );
+      const a1 = evaluator.results.get("id-a");
+      expect(a1).toStrictEqual([2, 2]);
+
+      const diff = evaluator.evaluate();
+      expect(evaluator.results).toStrictEqual(
+        asMap({
+          "id-a": [2, 2],
+          "id-b": 2,
+          "id-c": 4,
+          "id-d": 5,
+          "id-x": 30,
+          "id-exp1": 36,
+          "id-exp2": 25,
+        })
+      );
+      expect(diff).toStrictEqual({
+        results: {
+          added: new Set([]),
+          updated: new Set(["id-c", "id-exp1"]),
+          deleted: new Set([]),
+        },
+        errors: {
+          added: new Set([]),
+          updated: new Set([]),
+          deleted: new Set([]),
+        },
+      });
+
+      const a2 = evaluator.results.get("id-a");
+      expect(a2).toStrictEqual([2, 2]);
+
+      // Since 'id-a' was not part of the re-evaluated subgraph, it should be
+      // equal-by-reference.
+      expect(a1).toBe(a2);
     });
   });
 });

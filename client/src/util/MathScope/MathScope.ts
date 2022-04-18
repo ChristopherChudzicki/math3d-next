@@ -38,8 +38,10 @@ type ScopeUpdateEvent = {
 
 /**
  * Very draft... Other classes in this directory are more developed.
- * This class will be the API used by main app.
- * Should emit events and stuff. TODO: spec/implement this more
+ *
+ * This API should be focused around
+ *  - adding/removing nodes with strings, parsed by the parser
+ *  - subscribing to events
  */
 export default class MathScope {
   initialScope: EvaluationScope;
@@ -61,44 +63,6 @@ export default class MathScope {
   } = {}) {
     this.parse = getIdentifyingParser(parse);
     this.initialScope = initialScope;
-    this.evaluator = new Evaluator([], initialScope);
-  }
-
-  private reevaluateAll() {
-    const nodes = Array.from(this.nodes.values());
-    this.evaluator = new Evaluator(nodes, this.initialScope);
-    const { result, errors } = this.evaluator;
-    const event: ScopeUpdateEvent = {
-      type: "update",
-      result: {
-        values: result,
-        updated: new Set(result.keys()),
-      },
-      errors: {
-        values: errors,
-        updated: new Set(errors.keys()),
-      },
-    };
-    this.events.emit(event.type, event);
-  }
-
-  setExpressions(identifiedExpressions: IdentifiedExpression[]): void {
-    identifiedExpressions.forEach(({ id, expression }) => {
-      if (this.nodes.has(id)) {
-        throw new Error(`node with id ${id} already exists.`);
-      }
-      this.nodes.set(id, this.parse(id, expression));
-    });
-    this.reevaluateAll();
-  }
-
-  deleteExpressions(ids: string[]): void {
-    ids.forEach((id) => {
-      if (!this.nodes.has(id)) {
-        throw new Error(`expression with id ${id} does not exist`);
-      }
-      this.nodes.delete(id);
-    });
-    this.reevaluateAll();
+    this.evaluator = new Evaluator(initialScope);
   }
 }

@@ -12,6 +12,7 @@ module.exports = {
   ],
   plugins: ["react", "@typescript-eslint", "prettier"],
   rules: {
+    "max-classes-per-file": "off",
     "react/function-component-definition": [
       "error",
       {

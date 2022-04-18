@@ -1,131 +1,228 @@
-import * as R from "ramda";
-import { MathNode, AssignmentNode, EvalFunction } from "mathjs";
-import toposort from "toposort";
+import {
+  MathNode,
+  EvalFunction,
+  isMatrix,
+  FunctionAssignmentNode,
+} from "mathjs";
+import ExpressionGraphManager from "./ExpressionGraphManager";
 import type {
+  Diff,
   EvaluationScope,
   EvaluationResult,
   EvaluationErrors,
   GeneralAssignmentNode,
 } from "./types";
-import { isGeneralAssignmentNode, getDependencies } from "./util";
-import DirectedGraph, { DirectedEdge } from "./DirectedGraph";
-
-const validateNodeIds = (nodes: MathNode[]) => {
-  const nodeIds = new Set(nodes.map((node) => node.comment));
-  if (nodeIds.has("") || nodeIds.size !== nodes.length) {
-    throw new Error(
-      "Every root node should have a unique, non-empty comment serving as its id."
-    );
-  }
-};
-
-const getAssignmentNodesByName = R.pipe<
-  [MathNode[]],
-  GeneralAssignmentNode[],
-  { [name: string]: GeneralAssignmentNode[] }
->(R.filter(isGeneralAssignmentNode), R.groupBy(R.prop("name")));
-
-export const getDependencyGraph = (nodes: MathNode[]) => {
-  const assignments = getAssignmentNodesByName(nodes);
-  const dependencyEdges: DirectedEdge<MathNode>[] = nodes.flatMap(
-    (dependent) => {
-      const dependencies = getDependencies(dependent);
-      return [...dependencies]
-        .flatMap((dependencyName) => assignments[dependencyName])
-        .filter((dependency) => dependency)
-        .map((dependency) => ({ from: dependency, to: dependent }));
-    }
-  );
-  return new DirectedGraph(nodes, dependencyEdges);
-};
+import {
+  assertIsError,
+  getDependencies,
+  isGeneralAssignmentNode,
+  setDifference,
+  setUnion,
+} from "./util";
+import DiffingMap from "./DiffingMap";
 
 const getId = (node: MathNode) => node.comment;
 
-type UpdateResults = {
-  resultUpdates: Set<string>;
-  errorUpdates: Set<string>;
+class EvaluationError extends Error {}
+
+export class UnmetDependencyError extends EvaluationError {
+  constructor(unmetDependencyNames: string[]) {
+    const sorted = [...unmetDependencyNames].sort();
+    const message = `Undefined symbol(s): ${sorted}`;
+    super(message);
+  }
+}
+
+export class AssignmentError extends EvaluationError {}
+export class CyclicAssignmentError extends AssignmentError {
+  constructor(cycle: GeneralAssignmentNode[]) {
+    const nodeNames = cycle.map((n) => n.name);
+    const message = `Cyclic dependencies: ${nodeNames}`;
+    super(message);
+  }
+}
+
+export class DuplicateAssignmentError extends AssignmentError {
+  constructor(node: GeneralAssignmentNode) {
+    const message = `Name ${node.name} has been assigned multiple times.`;
+    super(message);
+  }
+}
+
+const makeAssignmentError = (
+  node: GeneralAssignmentNode,
+  cycle: GeneralAssignmentNode[]
+) => {
+  const isDuplicate = cycle.some((c) => c.name === node.name);
+  if (isDuplicate) return new DuplicateAssignmentError(node);
+  return new CyclicAssignmentError(cycle);
 };
+
+const compile = (node: MathNode): EvalFunction => {
+  const { evaluate: rawEvaluate } = node.compile();
+  const evaluate = (scope: EvaluationScope) => {
+    const result = rawEvaluate(scope);
+    if (isMatrix(result)) {
+      return result.toArray();
+    }
+    if (typeof result === "function") {
+      const f = (...args: unknown[]) => {
+        const evaluated = result(...args);
+        return isMatrix(evaluated) ? evaluated.toArray() : evaluated;
+      };
+      return f;
+    }
+    return result;
+  };
+  return { evaluate };
+};
+
+const getUnmetDependencies = (
+  node: MathNode,
+  scope: EvaluationScope
+): string[] => {
+  const dependencies = getDependencies(node);
+  const unmet = [...dependencies].filter((dep) => !scope.has(dep));
+  return unmet;
+};
+
+interface ManagerAction {
+  type: "delete" | "add";
+  nodes: MathNode[];
+}
+
 export default class Evaluator {
-  result: EvaluationResult = new Map();
+  compiled = new WeakMap<MathNode, EvalFunction>();
+
+  results: EvaluationResult = new Map();
+
+  scope: EvaluationScope;
 
   errors: EvaluationErrors = new Map();
 
-  private scope: EvaluationScope;
+  private changeQueue: ManagerAction[] = [];
 
-  private nodes: { [id: string]: MathNode };
+  private graphManager = new ExpressionGraphManager();
 
-  private compiled: { [id: string]: EvalFunction };
-
-  private dependencyGraph: DirectedGraph<MathNode>;
-
-  private evaluationOrder: string[];
-
-  private evaluationOrders: Map<string, string[]>;
-
-  constructor(nodes: MathNode[], initialScope: EvaluationScope = new Map()) {
-    validateNodeIds(nodes);
-    this.nodes = Object.fromEntries(
-      Array.from(nodes).map((node) => [getId(node), node])
-    );
+  constructor(initialScope: EvaluationScope = new Map()) {
     this.scope = new Map(initialScope);
-    this.dependencyGraph = getDependencyGraph(nodes);
-    this.evaluationOrder = this.getEvaluationOrder();
-
-    this.compiled = R.mapObjIndexed((node) => node.compile(), this.nodes);
-
-    this.evaluationOrders = new Map();
-    this.evaluate(this.evaluationOrder);
   }
 
-  private getEvaluationOrder(sources?: MathNode[]): string[] {
-    const graph =
-      sources === undefined
-        ? this.dependencyGraph
-        : this.dependencyGraph.getReachableSubgraph(sources);
-    const edges = graph.getEdges();
-
-    return toposort(edges.map((e) => [e.from, e.to])).map(getId);
+  private compile(node: MathNode) {
+    const cachedValue = this.compiled.get(node);
+    if (cachedValue) return cachedValue;
+    const compiled = compile(node);
+    this.compiled.set(node, compiled);
+    return compiled;
   }
 
-  updateLiteralConstant(nodeId: string, value: number): UpdateResults {
-    const node = this.nodes[nodeId];
-    if (!(node instanceof AssignmentNode)) {
-      throw new Error(`Expected node ${nodeId} to be an assignment node`);
-    }
-    this.compiled[nodeId] = { evaluate: () => value };
-    this.result.set(nodeId, value);
-    this.scope.set(node.name, value);
-    const updated = this.reevaluateDescendants(nodeId);
-    updated.resultUpdates.add(nodeId);
-    return updated;
-  }
+  private updateAssignmentErrors(cycles: GeneralAssignmentNode[][]): void {
+    const currentErrors = new Map(
+      cycles.flatMap((cycle) =>
+        cycle.map((node) => [getId(node), makeAssignmentError(node, cycle)])
+      )
+    );
 
-  private evaluate(evaluationOrder: string[]): UpdateResults {
-    const resultUpdates = new Set<string>();
-    const errorUpdates = new Set<string>();
-
-    evaluationOrder.forEach((exprId) => {
-      const { evaluate } = this.compiled[exprId];
-      try {
-        const result = evaluate(this.scope);
-        this.result.set(exprId, result);
-        this.errors.delete(exprId);
-        resultUpdates.add(exprId);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        this.errors.set(exprId, error);
+    currentErrors.forEach((error, key) => {
+      const existingError = this.errors.get(key);
+      if (!existingError || !(existingError instanceof AssignmentError)) {
+        this.errors.set(key, error);
       }
     });
-    return { resultUpdates, errorUpdates };
   }
 
-  private reevaluateDescendants(nodeId: string): UpdateResults {
-    const node = this.nodes[nodeId];
-    const evaluationOrder =
-      this.evaluationOrders.get(nodeId) ?? this.getEvaluationOrder([node]);
-    if (!this.evaluationOrders.has(nodeId)) {
-      this.evaluationOrders.set(nodeId, evaluationOrder);
-    }
-    return this.evaluate(evaluationOrder);
+  enqueueAddExpressions(nodes: MathNode[]): void {
+    const action: ManagerAction = { type: "add", nodes };
+    this.changeQueue.push(action);
+  }
+
+  enqueueDeleteExpressions(nodes: MathNode[]): void {
+    const action: ManagerAction = { type: "delete", nodes };
+    this.changeQueue.push(action);
+  }
+
+  /**
+   * Apply changes in the changeQueue to the graphManager and return info about
+   * the affected nodes.
+   */
+  private applyChanges(): Diff<MathNode> {
+    const deleted = new Set<MathNode>();
+    const added = new Set<MathNode>();
+    this.changeQueue.forEach(({ type, nodes }) => {
+      if (type === "add") {
+        nodes.forEach((n) => added.add(n));
+        this.graphManager.addExpressions(nodes);
+      } else if (type === "delete") {
+        nodes.forEach((n) => deleted.add(n));
+        this.graphManager.deleteExpressions(nodes);
+      }
+    });
+    this.changeQueue = [];
+    return { added, deleted, updated: new Set() };
+  }
+
+  /**
+   * Updates the results/errors sets with enqueued changes.
+   *
+   * This is O(|affectedSubgraph|)
+   */
+  evaluate(): {
+    results: Diff<string>;
+    errors: Diff<string>;
+  } {
+    const results = new DiffingMap(this.results);
+    const errors = new DiffingMap(this.errors);
+
+    const willDelete = this.changeQueue
+      .filter((a) => a.type === "delete")
+      .flatMap((a) => a.nodes);
+    const affectedByDelete =
+      this.graphManager.graph.getReachableSubgraph(willDelete);
+    const nodesAffectedByDelete = affectedByDelete.getNodes();
+    nodesAffectedByDelete.forEach((node) => {
+      results.delete(getId(node));
+      errors.delete(getId(node));
+      if (isGeneralAssignmentNode(node)) {
+        this.scope.delete(node.name);
+      }
+    });
+
+    const changes = this.applyChanges();
+
+    const affected = setUnion(
+      setDifference(nodesAffectedByDelete, changes.deleted),
+      changes.added
+    );
+    const { order, cycles } = this.graphManager.getEvaluationOrder(affected);
+
+    order.forEach((node) => {
+      const { evaluate } = this.compile(node);
+      const exprId = getId(node);
+      try {
+        const evaluated = evaluate(this.scope);
+        results.set(exprId, evaluated);
+        errors.delete(exprId);
+        if (node instanceof FunctionAssignmentNode) {
+          const unmet = getUnmetDependencies(node, this.scope);
+          if (unmet.length > 0) {
+            throw new UnmetDependencyError(unmet);
+          }
+        }
+      } catch (rawError) {
+        assertIsError(rawError);
+        const unmet = getUnmetDependencies(node, this.scope);
+        const error =
+          unmet.length > 0 ? new UnmetDependencyError(unmet) : rawError;
+        results.delete(exprId);
+        errors.set(exprId, error);
+      }
+    });
+
+    this.updateAssignmentErrors(cycles);
+
+    return {
+      results: results.getDiff(),
+      errors: errors.getDiff(),
+    };
   }
 }
