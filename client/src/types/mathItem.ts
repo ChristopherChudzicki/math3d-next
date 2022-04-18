@@ -1,14 +1,3 @@
-interface MathItemGeneric<T extends string, Props extends MathItemProperties> {
-  id: string;
-  type: T;
-  properties: Props;
-}
-
-interface MathItemProperties
-  extends Record<string, string | number | boolean | number[]> {
-  description: string;
-}
-
 const FOLDER = "FOLDER";
 
 const VARIABLE = "VARIABLE";
@@ -47,6 +36,8 @@ export const itemType = {
   IMPLICIT_SURFACE,
   VECTOR_FIELD,
 };
+
+export type MathItemType = keyof typeof itemType;
 
 type FolderPoperties = {
   description: string;
@@ -276,6 +267,20 @@ type VectorFieldProperties = {
   samples: string;
   scale: string;
 };
+
+interface MathItemGeneric<
+  T extends MathItemType,
+  Props extends MathItemProperties
+> {
+  id: string;
+  type: T;
+  properties: Props;
+}
+
+interface MathItemProperties
+  extends Record<string, string | number | boolean | number[]> {
+  description: string;
+}
 
 export type Variable = MathItemGeneric<typeof VARIABLE, VariableProperties>;
 export type VariableSlider = MathItemGeneric<

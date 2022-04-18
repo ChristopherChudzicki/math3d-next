@@ -28,6 +28,7 @@ const getButtonIcon = (isCollapsed: boolean, sidebarSide: "left" | "right") => {
 type SidebarProps = {
   className?: string;
   side: "left" | "right";
+  children?: React.ReactNode;
 };
 
 const Sidebar: React.FC<SidebarProps> = (props) => {

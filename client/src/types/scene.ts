@@ -2,9 +2,9 @@ import { MathItem } from "./mathItem";
 
 export type SortableTree = Record<string, string[]>;
 
-export type Scene = {
+export interface Scene {
   id: string;
   title: string;
   items: MathItem[];
   sortableTree: SortableTree;
-};
+}

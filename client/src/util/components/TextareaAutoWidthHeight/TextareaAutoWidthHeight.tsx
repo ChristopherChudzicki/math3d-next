@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import TextareaAutosize from "react-textarea-autosize";
+import TextareaAutosize, {
+  TextareaAutosizeProps,
+} from "@math3d/react-textarea-autosize";
 import TextMeasurer from "./TextMeasurer";
 
 type Props = React.ComponentProps<typeof TextareaAutosize> & {
@@ -10,6 +12,10 @@ type Props = React.ComponentProps<typeof TextareaAutosize> & {
 const textMeasurer = new TextMeasurer();
 
 const TextareaAutoWidthHeight: React.FC<Props> = (props) => {
+  /**
+   * Strange issue with newlines. See https://github.com/Andarist/react-textarea-autosize/issues/340
+   * Possible workaround...replace newlines with \s\n
+   */
   const { onChange, style, extraWidth, ...otherProps } = props;
 
   const lines = (props.value ?? "").split("\n");
@@ -26,16 +32,14 @@ const TextareaAutoWidthHeight: React.FC<Props> = (props) => {
     setHasRendered(true);
   }, [hasRendered]);
 
-  const mergedStyle: React.CSSProperties = {
+  const mergedStyle: TextareaAutosizeProps["style"] = {
     width: `${width}px`,
     ...style,
   };
   return (
     <TextareaAutosize
       ref={textarea}
-      // TextareaAutosize.style type seems to have a bug... its type is Style not CSSProperties?
-      // though...unclear to me why never works here
-      style={mergedStyle as never}
+      style={mergedStyle}
       onChange={props.onChange}
       {...otherProps}
       // Don't show text until the width has been measured

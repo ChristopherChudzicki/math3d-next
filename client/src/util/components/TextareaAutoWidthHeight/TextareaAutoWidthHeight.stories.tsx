@@ -29,7 +29,7 @@ const Template: ComponentStory<typeof TextareaAutoWidthHeight> = (args) => {
     >
       <TextareaAutoWidthHeight
         value={text}
-        extraWidth={15}
+        extraWidth={20}
         onChange={(e) => {
           if (onChange) {
             onChange(e);
