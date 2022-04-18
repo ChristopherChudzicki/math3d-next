@@ -25,6 +25,23 @@ type ValidationHook = (
 
 const defaultValidateAddExpr: ValidationHook = () => {};
 
+/**
+ * Helps manage a dependency graph for mathematical expressions.
+ *
+ * For example:
+ * ```ts
+ * // node implements (id: string, expr: string) => MathNode
+ * const manager = new ExpressionGraphManager()
+ * const a = node('idA', 'a = 2')
+ * const b = node('idB', 'b = a + 1')
+ * const expr1 = node('idExpr1', 'a + b')
+ * manager.addExpressions([a, b, expr])
+ * ```
+ *
+ * Includes helpers for:
+ *  - finding a valid evaluation order of this graph
+ *  - finding cycles and duplicate assignment nodes
+ */
 export default class ExpressionGraphManager {
   graph = new DirectedGraph<MathNode>([], []);
 
@@ -185,7 +202,7 @@ export default class ExpressionGraphManager {
     return duplicatesSet;
   }
 
-  getEvaluationOrder(sources?: MathNode[]): {
+  getEvaluationOrder(sources?: Iterable<MathNode>): {
     order: MathNode[];
     cycles: GeneralAssignmentNode[][];
   } {
@@ -193,10 +210,8 @@ export default class ExpressionGraphManager {
       sources === undefined
         ? this.graph.copy()
         : this.graph.getReachableSubgraph(sources);
-    const wholegraph = this.graph;
 
-    // use the whole graph for cycles and duplicates
-    const cycles = wholegraph.getCycles();
+    const cycles = subgraph.getCycles();
     cycles.flat().forEach((node) => {
       if (subgraph.hasNode(node)) {
         subgraph.deleteNode(node);

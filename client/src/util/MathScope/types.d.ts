@@ -10,11 +10,17 @@ export type EvaluationResult = Map<string, unknown>;
 
 export type EvaluationErrors = Map<string, Error>;
 
-export type Diff<T> = {
+export interface Diff<T> {
+  added: Set<T>;
+  updated: Set<T>;
+  deleted: Set<T>;
+}
+
+export interface FullDiff<T> extends Diff<T> {
   added: Set<T>;
   updated: Set<T>;
   deleted: Set<T>;
   unchanged: Set<T>;
-};
+}
 
 type Comparer<T> = (t1: T, t2: T) => boolean;
