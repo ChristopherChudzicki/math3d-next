@@ -5,6 +5,7 @@ import styles from "./ScrollingOverflow.module.css";
 type Props = {
   className?: string;
   style?: React.CSSProperties;
+  children?: React.ReactNode;
 };
 
 const ScrollingYOverflowX: React.FC<Props> = (props) => {

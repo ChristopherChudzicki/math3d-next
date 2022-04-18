@@ -1,18 +1,19 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 // bootstrap just for utility classes
 import "bootstrap/dist/css/bootstrap-utilities.css";
-import "antd/dist/antd.css";
+import "antd/dist/antd.min.css";
 import "./index.css";
-import * as math from "mathjs";
 import * as routes from "./routes";
 import { store } from "./app/store";
 
-window.math = math;
+const container = document.getElementById("root");
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const root = createRoot(container!);
 
-ReactDOM.render(
+root.render(
   <React.StrictMode>
     <Provider store={store}>
       <BrowserRouter>
@@ -24,6 +25,5 @@ ReactDOM.render(
         </Routes>
       </BrowserRouter>
     </Provider>
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 );
