@@ -162,11 +162,11 @@ export default class Evaluator {
    *
    * Returns a diff indicating results and errors that have changed.
    */
-  evaluate(sources?: MathNode[]): {
+  evaluateAll(): {
     results: Diff<string>;
     errors: Diff<string>;
   } {
-    const { order, cycles } = this.graphManager.getEvaluationOrder(sources);
+    const { order, cycles } = this.graphManager.getEvaluationOrder();
 
     const oldResults = new Map(this.results);
     const oldErrors = new Map(this.errors);
@@ -207,5 +207,22 @@ export default class Evaluator {
     };
   }
 
-  evaluateAll();
+  // evaluate reachable
+  // only re-evaluates successful previous evaluations
+  update(sources: MathNode[]): Set<string> {
+    const { order } = this.graphManager.getEvaluationOrder(sources);
+
+    const updated = new Set<string>();
+    order.forEach((node) => {
+      const { evaluate } = this.compile(node);
+      const exprId = getId(node);
+      if (this.results.has(exprId)) {
+        const evaluated = evaluate(this.scope);
+        this.results.set(exprId, evaluated);
+        updated.add(exprId);
+      }
+    });
+
+    return updated;
+  }
 }
