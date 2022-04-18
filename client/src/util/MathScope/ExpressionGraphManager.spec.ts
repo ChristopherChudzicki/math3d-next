@@ -340,7 +340,7 @@ describe("ExpressionGraphManager", () => {
       expect(cycles).toStrictEqual([]);
     });
 
-    it("includes all cycles, not just the reachable ones", () => {
+    it("includes only the reachable cycles", () => {
       const a = node("id-a", "a = b + 1");
       const b = node("id-b", "b = a + 1");
       const c1 = node("id-c1", "c = 1");
@@ -351,12 +351,9 @@ describe("ExpressionGraphManager", () => {
       const expressions = [a, b, c1, c2, x, y, z];
       const manager = new ExpressionGraphManager(expressions);
 
-      const { order, cycles } = manager.getEvaluationOrder([y]);
+      const { order, cycles } = manager.getEvaluationOrder([y, a]);
       expect(order).toStrictEqual([y, z]);
-      expect(cycles).toStrictEqual([
-        [b, a],
-        [c2, c1],
-      ]);
+      expect(cycles).toStrictEqual([[b, a]]);
     });
   });
 });

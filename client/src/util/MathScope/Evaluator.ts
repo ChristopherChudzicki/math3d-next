@@ -6,13 +6,20 @@ import {
 } from "mathjs";
 import ExpressionGraphManager from "./ExpressionGraphManager";
 import type {
+  Diff,
   EvaluationScope,
   EvaluationResult,
   EvaluationErrors,
   GeneralAssignmentNode,
 } from "./types";
-import { Diff } from "./types";
-import { assertIsError, diff, getDependencies } from "./util";
+import {
+  assertIsError,
+  getDependencies,
+  isGeneralAssignmentNode,
+  setDifference,
+  setUnion,
+} from "./util";
+import DiffingMap from "./DiffingMap";
 
 const getId = (node: MathNode) => node.comment;
 
@@ -44,9 +51,9 @@ export class DuplicateAssignmentError extends AssignmentError {
 
 const makeAssignmentError = (
   node: GeneralAssignmentNode,
-  cycle: GeneralAssignmentNode[],
-  isDuplicate: boolean
+  cycle: GeneralAssignmentNode[]
 ) => {
+  const isDuplicate = cycle.some((c) => c.name === node.name);
   if (isDuplicate) return new DuplicateAssignmentError(node);
   return new CyclicAssignmentError(cycle);
 };
@@ -79,6 +86,11 @@ const getUnmetDependencies = (
   return unmet;
 };
 
+interface ManagerAction {
+  type: "delete" | "add";
+  nodes: MathNode[];
+}
+
 export default class Evaluator {
   compiled = new WeakMap<MathNode, EvalFunction>();
 
@@ -88,7 +100,9 @@ export default class Evaluator {
 
   errors: EvaluationErrors = new Map();
 
-  graphManager = new ExpressionGraphManager();
+  private changeQueue: ManagerAction[] = [];
+
+  private graphManager = new ExpressionGraphManager();
 
   constructor(initialScope: EvaluationScope = new Map()) {
     this.scope = new Map(initialScope);
@@ -103,26 +117,11 @@ export default class Evaluator {
   }
 
   private updateAssignmentErrors(cycles: GeneralAssignmentNode[][]): void {
-    const duplicates = this.graphManager.getDuplicateAssignmentNodes();
     const currentErrors = new Map(
       cycles.flatMap((cycle) =>
-        cycle.map((node) => [
-          getId(node),
-          makeAssignmentError(node, cycle, duplicates.has(node)),
-        ])
+        cycle.map((node) => [getId(node), makeAssignmentError(node, cycle)])
       )
     );
-
-    this.errors.forEach((existing, key) => {
-      if (!(existing instanceof AssignmentError)) return;
-      const current = currentErrors.get(key);
-      if (current === undefined) {
-        this.errors.delete(key);
-        return;
-      }
-      if (current.message === existing.message) return;
-      this.errors.set(key, current);
-    });
 
     currentErrors.forEach((error, key) => {
       const existingError = this.errors.get(key);
@@ -132,54 +131,77 @@ export default class Evaluator {
     });
   }
 
-  private removeOutdated() {
-    const nodeIds = new Set(
-      Array.from(this.graphManager.graph.getNodes()).map(getId)
-    );
-    this.results.forEach((_value, key) => {
-      if (!nodeIds.has(key)) {
-        this.results.delete(key);
-      }
-    });
-    this.errors.forEach((_value, key) => {
-      if (!nodeIds.has(key)) {
-        this.errors.delete(key);
-      }
-    });
-    this.scope.forEach((_value, key) => {
-      if (!nodeIds.has(key)) {
-        this.scope.delete(key);
-      }
-    });
+  enqueueAddExpressions(nodes: MathNode[]): void {
+    const action: ManagerAction = { type: "add", nodes };
+    this.changeQueue.push(action);
+  }
+
+  enqueueDeleteExpressions(nodes: MathNode[]): void {
+    const action: ManagerAction = { type: "delete", nodes };
+    this.changeQueue.push(action);
   }
 
   /**
-   * Evaluates some or all of the expression graph.
-   *
-   * When called with no arguments, re-evaluates the entire expression graph.
-   * When called with `sources`, re-evalautes the subgraph reachable from those
-   * sources.
-   *
-   * Returns a diff indicating results and errors that have changed.
+   * Apply changes in the changeQueue to the graphManager and return info about
+   * the affected nodes.
    */
-  evaluateAll(): {
+  private applyChanges(): Diff<MathNode> {
+    const deleted = new Set<MathNode>();
+    const added = new Set<MathNode>();
+    this.changeQueue.forEach(({ type, nodes }) => {
+      if (type === "add") {
+        nodes.forEach((n) => added.add(n));
+        this.graphManager.addExpressions(nodes);
+      } else if (type === "delete") {
+        nodes.forEach((n) => deleted.add(n));
+        this.graphManager.deleteExpressions(nodes);
+      }
+    });
+    this.changeQueue = [];
+    return { added, deleted, updated: new Set() };
+  }
+
+  /**
+   * Updates the results/errors sets with enqueued changes.
+   *
+   * This is O(|affectedSubgraph|)
+   */
+  evaluate(): {
     results: Diff<string>;
     errors: Diff<string>;
   } {
-    const { order, cycles } = this.graphManager.getEvaluationOrder();
+    const results = new DiffingMap(this.results);
+    const errors = new DiffingMap(this.errors);
 
-    const oldResults = new Map(this.results);
-    const oldErrors = new Map(this.errors);
+    const willDelete = this.changeQueue
+      .filter((a) => a.type === "delete")
+      .flatMap((a) => a.nodes);
+    const affectedByDelete =
+      this.graphManager.graph.getReachableSubgraph(willDelete);
+    const nodesAffectedByDelete = affectedByDelete.getNodes();
+    nodesAffectedByDelete.forEach((node) => {
+      results.delete(getId(node));
+      errors.delete(getId(node));
+      if (isGeneralAssignmentNode(node)) {
+        this.scope.delete(node.name);
+      }
+    });
 
-    this.removeOutdated();
+    const changes = this.applyChanges();
+
+    const affected = setUnion(
+      setDifference(nodesAffectedByDelete, changes.deleted),
+      changes.added
+    );
+    const { order, cycles } = this.graphManager.getEvaluationOrder(affected);
 
     order.forEach((node) => {
       const { evaluate } = this.compile(node);
       const exprId = getId(node);
       try {
         const evaluated = evaluate(this.scope);
-        this.results.set(exprId, evaluated);
-        this.errors.delete(exprId);
+        results.set(exprId, evaluated);
+        errors.delete(exprId);
         if (node instanceof FunctionAssignmentNode) {
           const unmet = getUnmetDependencies(node, this.scope);
           if (unmet.length > 0) {
@@ -191,38 +213,16 @@ export default class Evaluator {
         const unmet = getUnmetDependencies(node, this.scope);
         const error =
           unmet.length > 0 ? new UnmetDependencyError(unmet) : rawError;
-        this.results.delete(exprId);
-        this.errors.set(exprId, error);
+        results.delete(exprId);
+        errors.set(exprId, error);
       }
     });
 
-    // The cycles include duplicates
     this.updateAssignmentErrors(cycles);
 
-    this.scope = new Map(this.scope);
-
     return {
-      results: diff(this.results, oldResults),
-      errors: diff(this.errors, oldErrors),
+      results: results.getDiff(),
+      errors: errors.getDiff(),
     };
-  }
-
-  // evaluate reachable
-  // only re-evaluates successful previous evaluations
-  update(sources: MathNode[]): Set<string> {
-    const { order } = this.graphManager.getEvaluationOrder(sources);
-
-    const updated = new Set<string>();
-    order.forEach((node) => {
-      const { evaluate } = this.compile(node);
-      const exprId = getId(node);
-      if (this.results.has(exprId)) {
-        const evaluated = evaluate(this.scope);
-        this.results.set(exprId, evaluated);
-        updated.add(exprId);
-      }
-    });
-
-    return updated;
   }
 }

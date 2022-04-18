@@ -6,7 +6,7 @@ import {
   SymbolNode,
 } from "mathjs";
 import Graph, { Vertex } from "tarjan-graph";
-import type { GeneralAssignmentNode, Diff } from "./types";
+import type { GeneralAssignmentNode, FullDiff } from "./types";
 
 export const isGeneralAssignmentNode = (
   node: unknown
@@ -77,6 +77,9 @@ export const assertIsError: (err: unknown) => asserts err is Error = (err) => {
   throw new Error(`${err} should be an Error instance.`);
 };
 
+/**
+ * Returns the intersection of input sets.
+ */
 export const setIntersection = <T>(...sets: Set<T>[]): Set<T> => {
   const result = new Set<T>();
   if (sets.length === 0) return result;
@@ -88,7 +91,28 @@ export const setIntersection = <T>(...sets: Set<T>[]): Set<T> => {
   return result;
 };
 
-export const diff = <T, U>(x: Map<T, U>, y: Map<T, U>): Diff<T> => {
+/**
+ * Returns the union of input sets.
+ */
+export const setUnion = <T>(...sets: Set<T>[]): Set<T> => {
+  const result = new Set<T>();
+  if (sets.length === 0) return result;
+  sets.forEach((set) => {
+    set.forEach((item) => result.add(item));
+  });
+  return result;
+};
+
+/**
+ * Returns a - b for sets a and b.
+ */
+export const setDifference = <T>(a: Set<T>, b: Set<T>): Set<T> => {
+  const result = new Set([...a]);
+  b.forEach((item) => result.delete(item));
+  return result;
+};
+
+export const diff = <T, U>(x: Map<T, U>, y: Map<T, U>): FullDiff<T> => {
   const result = {
     added: new Set<T>(),
     updated: new Set<T>(),
