@@ -1,13 +1,4 @@
 import React from "react";
-import type { MathItem } from "types";
-import ItemTemplate from "./ItemTemplate";
+import Point from './Point'
 
-type Props = {
-  item: MathItem;
-};
-const MathItemComponent: React.FC<Props> = ({ item }) => {
-  const description = `Description: ${item.id}`;
-  return <ItemTemplate description={description} />;
-};
-
-export default MathItemComponent;
+export default Point;
