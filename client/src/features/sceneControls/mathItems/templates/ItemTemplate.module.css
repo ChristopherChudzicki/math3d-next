@@ -1,6 +1,6 @@
 .container {
   display: grid;
-  grid-template-columns: 50px auto 50px;
+  grid-template-columns: 50px auto min-content;
   grid-template-rows: auto auto;
   /*
   avoid border-doubling. See https://stackoverflow.com/q/12692089/2747370

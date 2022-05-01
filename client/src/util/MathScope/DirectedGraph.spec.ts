@@ -48,7 +48,7 @@ describe("DirectedGraph", () => {
   describe("#addEdge", () => {
     it("updates the graph with new edge", () => {
       const nodes = [..."abcde"].map(node);
-      const [a, b, c, d, e] = nodes;
+      const [a, b, c, d] = nodes;
       const edges = [edge(a, b), edge(b, c), edge(b, d), edge(d, d)];
       const graph = new DirectedGraph(nodes, edges);
 

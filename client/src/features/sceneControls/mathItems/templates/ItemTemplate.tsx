@@ -1,7 +1,8 @@
-import React, { useMemo } from "react";
+import React from "react";
 import mergeClassNames from "classnames";
 import styles from "./ItemTemplate.module.css";
 import type { MathItemConfig } from '../configs'
+import SettingsPopover from './SettingsPopover'
 
 type Props = {
   showAlignmentBar?: boolean;
@@ -13,9 +14,7 @@ const ItemTemplate: React.FC<Props> = ({
   description,
   config,
   showAlignmentBar = true,
-}) => {
-  const settings = useMemo(() => config.properties.filter(p => !p.primaryOnly), [config])
-  return (
+}) => (
     <div className={styles.container}>
     <div
       className={mergeClassNames(
@@ -26,11 +25,14 @@ const ItemTemplate: React.FC<Props> = ({
       {showAlignmentBar && <div className={styles["vertical-line"]} />}
     </div>
     <div className={styles["grid-center-top"]}>{description}</div>
-    <div className={styles["grid-center-bottom"]}>content</div>
+    <div className={styles["grid-center-bottom"]}>
+      Content
+    </div>
     <div className={styles["grid-right-gutter-top"]}>X</div>
-    <div className={styles["grid-right-gutter-bottom"]} />
+    <div className={styles["grid-right-gutter-bottom"]} >
+    <SettingsPopover config={config} />
+    </div>
   </div>
   )
-}
 
 export default ItemTemplate;

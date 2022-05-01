@@ -1,0 +1,20 @@
+.settings-form {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+
+  row-gap: 6pt;
+  column-gap: 6pt;
+}
+
+.settings-button {
+  font-size: 20px;
+  color: var(--gray-7);
+  width: 40px
+}
+
+.settings-title {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
