@@ -3,6 +3,7 @@ import mergeClassNames from "classnames";
 import styles from "./ItemTemplate.module.css";
 import type { MathItemConfig } from '../configs'
 import SettingsPopover from './SettingsPopover'
+import CloseButton from './CloseButton'
 
 type Props = {
   showAlignmentBar?: boolean;
@@ -28,7 +29,13 @@ const ItemTemplate: React.FC<Props> = ({
     <div className={styles["grid-center-bottom"]}>
       Content
     </div>
-    <div className={styles["grid-right-gutter-top"]}>X</div>
+    <div className={mergeClassNames(
+      styles["grid-right-gutter-top"],
+      'd-flex',
+      'justify-content-end'
+    )}>
+      <CloseButton />
+    </div>
     <div className={styles["grid-right-gutter-bottom"]} >
     <SettingsPopover config={config} />
     </div>

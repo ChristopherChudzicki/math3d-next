@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { Popover } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
-import SubtleButton from "../../../../util/components/SubtleButton";
+import { SubtleButton } from "util/components"
 import styles from "./SettingsPopover.module.css";
 import type { MathItemConfig } from "../configs";
 import FieldWidget from "../FieldWidget.tsx";
