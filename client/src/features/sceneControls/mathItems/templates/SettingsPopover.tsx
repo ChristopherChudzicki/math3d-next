@@ -2,26 +2,37 @@ import React, { useState, useCallback, useMemo } from "react";
 import { Popover } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
 import { SubtleButton } from "util/components"
+import type { MathItem, MathItemConfig } from "types";
 import styles from "./SettingsPopover.module.css";
-import type { MathItemConfig } from "../configs";
 import FieldWidget from "../FieldWidget.tsx";
 import CloseButton from "./CloseButton";
 
 interface FormProps {
   config: MathItemConfig;
+  item: MathItem;
 }
 
-const SettingsForm: React.FC<FormProps> = ({ config }) => {
-  const settings = useMemo(
-    () => config.properties.filter((p) => !p.primaryOnly),
-    [config]
+const SettingsForm: React.FC<FormProps> = ({ config, item }) => {
+  const fields = useMemo(
+    () => {
+      const settings = config.properties.filter((p) => !p.primaryOnly);
+      return settings.map(field => {
+        // @ts-expect-error expect value to be a string, check at runtime
+        const value = item.properties[field.name];
+        if (typeof value !== 'string') {
+          throw new Error(`value should be a string; received ${typeof value}`)
+        }
+        return { field, value }
+      })
+    },
+    [config, item.properties]
   );
   return (
     <div className={styles["settings-form"]}>
-      {settings.map((s) => (
-        <React.Fragment key={s.name}>
-          <label htmlFor={s.name}>{s.label}</label>
-          <FieldWidget widget={s.widget} name={s.name} />
+      {fields.map(({ field, value }) => (
+        <React.Fragment key={field.name}>
+          <label htmlFor={field.name}>{field.label}</label>
+          <FieldWidget widget={field.widget} name={field.name} value={value} />
         </React.Fragment>
       ))}
     </div>
@@ -42,9 +53,10 @@ const SettingsTitle: React.FC<TitleProps> = (props) => (
 
 interface SettingsPopoverProps {
   config: MathItemConfig;
+  item: MathItem;
 }
 
-const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config }) => {
+const SettingsPopover: React.FC<SettingsPopoverProps> =({ config, item }) => {
   const [visible, setVisible] = useState(false);
   const setVisibleTrue = useCallback(() => setVisible(true), []);
   const setVisibleFalse = useCallback(() => setVisible(false), []);
@@ -53,7 +65,7 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config }) => {
   }, []);
   return (
     <Popover
-      content={<SettingsForm config={config} />}
+      content={<SettingsForm item={item} config={config} />}
       title={<SettingsTitle config={config} onClick={setVisibleFalse} />}
       placement='right'
       trigger="click"

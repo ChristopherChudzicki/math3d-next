@@ -1,18 +1,18 @@
 import React from "react";
 import mergeClassNames from "classnames";
+import type { MathItem, MathItemConfig, MathItemType as MIT } from 'types'
 import styles from "./ItemTemplate.module.css";
-import type { MathItemConfig } from '../configs'
 import SettingsPopover from './SettingsPopover'
 import CloseButton from './CloseButton'
 
 type Props = {
   showAlignmentBar?: boolean;
-  description: string;
+  item: MathItem;
   config: MathItemConfig;
 };
 
 const ItemTemplate: React.FC<Props> = ({
-  description,
+  item,
   config,
   showAlignmentBar = true,
 }) => (
@@ -25,7 +25,7 @@ const ItemTemplate: React.FC<Props> = ({
     >
       {showAlignmentBar && <div className={styles["vertical-line"]} />}
     </div>
-    <div className={styles["grid-center-top"]}>{description}</div>
+    <div className={styles["grid-center-top"]}>{item.properties.description}</div>
     <div className={styles["grid-center-bottom"]}>
       Content
     </div>
@@ -37,7 +37,7 @@ const ItemTemplate: React.FC<Props> = ({
       <CloseButton />
     </div>
     <div className={styles["grid-right-gutter-bottom"]} >
-    <SettingsPopover config={config} />
+    <SettingsPopover item={item} config={config} />
     </div>
   </div>
   )

@@ -6,6 +6,6 @@ import configs from '../configs'
 type Props = {
   item: MathItem;
 };
-const Point: React.FC<Props> = ({ item }) => <ItemTemplate item={item} config={configs[MT.Point]} />;
+const Vector: React.FC<Props> = ({ item }) => <ItemTemplate item={item} config={configs[MT.Vector]} />;
 
-export default Point;
+export default Vector;

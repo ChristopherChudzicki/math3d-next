@@ -6,6 +6,6 @@ import configs from '../configs'
 type Props = {
   item: MathItem;
 };
-const Point: React.FC<Props> = ({ item }) => <ItemTemplate item={item} config={configs[MT.Point]} />;
+const ImplicitSurface: React.FC<Props> = ({ item }) => <ItemTemplate item={item} config={configs[MT.ImplicitSurface]} />;
 
-export default Point;
+export default ImplicitSurface;

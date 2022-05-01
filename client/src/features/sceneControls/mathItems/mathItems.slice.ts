@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { useAppSelector } from "app/hooks";
 import type { RootState, SelectorReturn } from "app/store";
-import { MathItem, MathItemType as MT } from "types";
+import { MathItem, Point, MathItemType as MT } from "types";
 import idGenerator from "util/idGenerator";
 
 export interface MathItemsState {
@@ -26,15 +27,13 @@ const mathItemsSlice = createSlice({
       const type = MT.Point
       const properties = {
         description: `POINT ${id}`,
-        useCalculatedVisibility: false,
         color: "#3090FF",
-        visible: true,
+        visible: 'true',
         opacity: "1",
         zIndex: "0",
         zBias: "0",
-        calculatedVisibility: "",
         label: "",
-        labelVisible: false,
+        labelVisible: 'false',
         coords: "\\left[0,0,0\\right]",
         size: "16",
       };
@@ -68,6 +67,11 @@ export const selectMathItem =
   (id: string): SelectorReturn<MathItem> =>
   (state: RootState) =>
     state.mathItems[id];
+
+export const useMathItem = (id: string) => {
+  const mathItem = useAppSelector(selectMathItem(id))
+  return mathItem
+}
 
 export const { actions, reducer } = mathItemsSlice;
 export default mathItemsSlice;

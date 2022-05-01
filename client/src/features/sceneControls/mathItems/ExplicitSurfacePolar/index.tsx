@@ -6,6 +6,6 @@ import configs from '../configs'
 type Props = {
   item: MathItem;
 };
-const Point: React.FC<Props> = ({ item }) => <ItemTemplate item={item} config={configs[MT.Point]} />;
+const Camera: React.FC<Props> = ({ item }) => <ItemTemplate item={item} config={configs[MT.Axis]} />;
 
-export default Point;
+export default Camera;

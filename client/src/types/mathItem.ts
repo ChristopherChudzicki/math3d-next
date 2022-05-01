@@ -21,7 +21,7 @@ export enum MathItemType {
 
 type FolderPoperties = {
   description: string;
-  isCollapsed: boolean;
+  isCollapsed: string // eval to boolean;
 };
 
 type VariableProperties = {
@@ -35,117 +35,117 @@ type VariableSliderProperties = {
   min: string;
   max: string;
   description: string;
-  isAnimating: boolean;
-  speedMultiplier: number;
+  isAnimating: string // eval to boolean;
+  speedMultiplier: string // eval to number;
 };
 type BooleanVariableProperties = {
   name: string;
-  value: boolean;
+  value: string // eval to boolean
   description: string;
 };
 
 type CameraProperties = {
   description: string;
-  isOrthographic: boolean;
-  isPanEnabled: boolean;
-  isZoomEnabled: boolean;
-  isRotateEnabled: boolean;
-  relativePosition: number[];
-  relativeLookAt: number[];
+  isOrthographic: string // eval to boolean
+  isPanEnabled: string // eval to boolean
+  isZoomEnabled: string // eval to boolean
+  isRotateEnabled: string // eval to boolean
+  // relativePosition: number[];
+  // relativeLookAt: number[];
   computedPosition: string;
   computedLookAt: string;
-  useComputed: boolean;
+  useComputed: string // eval to boolean
 };
 type AxisProperties = {
   description: string;
   color: string;
-  visible: boolean;
+  visible: string;
   opacity: string;
   zIndex: string;
   zBias: string;
-  calculatedVisibility: string;
+
   label: string;
-  labelVisible: true;
+  labelVisible: string;
   min: string;
   max: string;
   axis: "x" | "y" | "z";
   scale: string;
-  ticksVisible: boolean;
+  ticksVisible: string;
   size: string;
   width: string;
 };
 type GridProperties = {
   description: string;
   color: string;
-  visible: boolean;
+  visible: string;
   opacity: string;
   zIndex: string;
   zBias: string;
-  calculatedVisibility: string;
+
   width: string;
   divisions: string;
-  snap: boolean;
+  snap: string; // eval to boolean
   axes: "xy" | "yz" | "zx";
 };
 
 type PointProperties = {
   description: string;
   color: string;
-  visible: boolean;
+  visible: string;
   opacity: string;
   zIndex: string;
   zBias: string;
-  calculatedVisibility: string;
+
   label: string;
-  labelVisible: boolean;
+  labelVisible: string;
   coords: string;
   size: string;
 };
 type LineProperties = {
   description: string;
   color: string;
-  visible: boolean;
+  visible: string;
   opacity: string;
   zIndex: string;
   zBias: string;
-  calculatedVisibility: string;
+
   label: string;
-  labelVisible: boolean;
+  labelVisible: string;
   size: string;
   width: string;
-  start: boolean;
-  end: boolean;
+  start: string; // eval to boolean;
+  end: string; // eval to boolean;
   coords: string;
 };
 type VectorProperties = {
   description: string;
   color: string;
-  visible: boolean;
+  visible: string;
   opacity: string;
   zIndex: string;
   zBias: string;
-  calculatedVisibility: string;
+
   label: string;
-  labelVisible: boolean;
+  labelVisible: string;
   size: string;
   width: string;
-  start: boolean;
-  end: boolean;
+  start: string // eval to boolean;
+  end: string // eval to boolean;
   components: string;
   tail: string;
 };
 type ParametricCurveProperties = {
   description: string;
   color: string;
-  visible: boolean;
+  visible: string;
   opacity: string;
   zIndex: string;
   zBias: string;
-  calculatedVisibility: string;
+
   size: string;
   width: string;
-  start: boolean;
-  end: boolean;
+  start: string // eval to boolean;
+  end: string // eval to boolean;
   expr: string;
   range: string;
   samples: string;
@@ -154,12 +154,12 @@ type ParametricCurveProperties = {
 type ParametricSurfaceProperties = {
   description: string;
   color: string;
-  visible: boolean;
+  visible: string;
   opacity: string;
   zIndex: string;
   zBias: string;
-  calculatedVisibility: string;
-  shaded: boolean;
+
+  shaded: string // eval to boolean;
   expr: string;
   rangeU: string;
   rangeV: string;
@@ -174,12 +174,11 @@ type ParametricSurfaceProperties = {
 type ExplicitSurfaceProperties = {
   description: string;
   color: string;
-  visible: boolean;
+  visible: string;
   opacity: string;
   zIndex: string;
   zBias: string;
-  calculatedVisibility: string;
-  shaded: boolean;
+  shaded: string // eval to boolean;
   expr: string;
   rangeU: string;
   rangeV: string;
@@ -194,12 +193,12 @@ type ExplicitSurfaceProperties = {
 type ExplicitSurfacePolarProperties = {
   description: string;
   color: string;
-  visible: boolean;
+  visible: string;
   opacity: string;
   zIndex: string;
   zBias: string;
-  calculatedVisibility: string;
-  shaded: boolean;
+
+  shaded: string // eval to boolean;
   expr: string;
   rangeU: string;
   rangeV: string;
@@ -214,12 +213,12 @@ type ExplicitSurfacePolarProperties = {
 type ImplicitSurfaceProperties = {
   description: string;
   color: string;
-  visible: boolean;
+  visible: string;
   opacity: string;
   zIndex: string;
   zBias: string;
-  calculatedVisibility: string;
-  shaded: boolean;
+
+  shaded: string // eval to boolean;
   rangeX: string;
   rangeY: string;
   rangeZ: string;
@@ -231,15 +230,15 @@ type ImplicitSurfaceProperties = {
 type VectorFieldProperties = {
   description: string;
   color: string;
-  visible: boolean;
+  visible: string;
   opacity: string;
   zIndex: string;
   zBias: string;
-  calculatedVisibility: string;
+
   size: string;
   width: string;
-  start: boolean;
-  end: boolean;
+  start: string // eval to boolean;
+  end: string // eval to boolean;
   rangeX: string;
   rangeY: string;
   rangeZ: string;
@@ -258,7 +257,7 @@ interface MathItemGeneric<
 }
 
 interface MathItemProperties
-  extends Record<string, string | number | boolean | number[]> {
+  extends Record<string, string> {
   description: string;
 }
 
@@ -342,7 +341,7 @@ export enum Widget {
 
 type PropertyValue = string | number | boolean | null;
 
-interface PropertyConfig{
+interface PropertyConfig {
   readonly name: string
   readonly defaultValue: PropertyValue
   readonly widget: Widget

@@ -1,4 +1,4 @@
-import {MathItemType as MT, MathItemConfig} from 'types/mathItem' 
+import {MathItemType as MIT, MathItemConfig} from 'types/mathItem' 
 import axisConfig from './axis'
 import booleanVariableConfig from './booleanVariable'
 import cameraConfig from './camera'
@@ -16,23 +16,23 @@ import variableSliderConfig from './variableSlider'
 import vectorConfig from './vector'
 import vectorFieldConfig from './vectorField'
 
-const configs: Record<MT, MathItemConfig> = {
-  [MT.Axis]: axisConfig,
-  [MT.BooleanVariable]: booleanVariableConfig,
-  [MT.Camera]: cameraConfig,
-  [MT.ExplicitSurface]: explicitSurfaceConfig,
-  [MT.ExplicitSurfacePolar]: explicitSurfacePolarConfig,
-  [MT.Folder]: folderConfig,
-  [MT.Grid]: gridConfig,
-  [MT.ImplicitSurface]: implicitSurfaceConfig,
-  [MT.Line]: lineConfig,
-  [MT.ParametricCurve]: parametricCurveConfig,
-  [MT.ParametricSurface]: parametricSurfaceConfig,
-  [MT.Point]: pointConfig,
-  [MT.Variable]: variableConfig,
-  [MT.VariableSlider]: variableSliderConfig,
-  [MT.Vector]: vectorConfig,
-  [MT.VectorField]: vectorFieldConfig
+const configs = {
+  [MIT.Axis]: axisConfig,
+  [MIT.BooleanVariable]: booleanVariableConfig,
+  [MIT.Camera]: cameraConfig,
+  [MIT.ExplicitSurface]: explicitSurfaceConfig,
+  [MIT.ExplicitSurfacePolar]: explicitSurfacePolarConfig,
+  [MIT.Folder]: folderConfig,
+  [MIT.Grid]: gridConfig,
+  [MIT.ImplicitSurface]: implicitSurfaceConfig,
+  [MIT.Line]: lineConfig,
+  [MIT.ParametricCurve]: parametricCurveConfig,
+  [MIT.ParametricSurface]: parametricSurfaceConfig,
+  [MIT.Point]: pointConfig,
+  [MIT.Variable]: variableConfig,
+  [MIT.VariableSlider]: variableSliderConfig,
+  [MIT.Vector]: vectorConfig,
+  [MIT.VectorField]: vectorFieldConfig
 }
 
 export default configs

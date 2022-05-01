@@ -6,6 +6,6 @@ import configs from '../configs'
 type Props = {
   item: MathItem;
 };
-const Point: React.FC<Props> = ({ item }) => <ItemTemplate item={item} config={configs[MT.Point]} />;
+const BooleanVariable: React.FC<Props> = ({ item }) => <ItemTemplate item={item} config={configs[MT.BooleanVariable]} />;
 
-export default Point;
+export default BooleanVariable;

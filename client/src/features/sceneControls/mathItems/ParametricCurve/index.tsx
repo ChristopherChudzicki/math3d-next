@@ -6,6 +6,6 @@ import configs from '../configs'
 type Props = {
   item: MathItem;
 };
-const Point: React.FC<Props> = ({ item }) => <ItemTemplate item={item} config={configs[MT.Point]} />;
+const ParametricCurve: React.FC<Props> = ({ item }) => <ItemTemplate item={item} config={configs[MT.ParametricCurve]} />;
 
-export default Point;
+export default ParametricCurve;
