@@ -1,11 +1,11 @@
-import { Scene, PartialBy } from "types";
+import { Scene, PartialBy, MathItemType } from "types";
 
 const defaultScene: PartialBy<Scene, "id"> = {
   title: "Untitled",
   items: [
     {
       id: "1",
-      type: "EXPLICIT_SURFACE",
+      type: MathItemType.ExplicitSurface,
       properties: {
         expr: "_f(x,y)=1-x^2-y",
         color: "#3498db",
@@ -29,7 +29,7 @@ const defaultScene: PartialBy<Scene, "id"> = {
     },
     {
       id: "camera",
-      type: "CAMERA",
+      type: MathItemType.Camera,
       properties: {
         description: "Camera",
         useComputed: false,
@@ -47,7 +47,7 @@ const defaultScene: PartialBy<Scene, "id"> = {
     },
     {
       id: "axis-x",
-      type: "AXIS",
+      type: MathItemType.Axis,
       properties: {
         max: "+5",
         min: "-5",
@@ -69,7 +69,7 @@ const defaultScene: PartialBy<Scene, "id"> = {
     },
     {
       id: "axis-y",
-      type: "AXIS",
+      type: MathItemType.Axis,
       properties: {
         max: "+5",
         min: "-5",
@@ -91,7 +91,7 @@ const defaultScene: PartialBy<Scene, "id"> = {
     },
     {
       id: "axis-z",
-      type: "AXIS",
+      type: MathItemType.Axis,
       properties: {
         max: "+5",
         min: "-5",
@@ -113,7 +113,7 @@ const defaultScene: PartialBy<Scene, "id"> = {
     },
     {
       id: "grid-xy",
-      type: "GRID",
+      type: MathItemType.Grid,
       properties: {
         axes: "xy",
         snap: false,
@@ -130,7 +130,7 @@ const defaultScene: PartialBy<Scene, "id"> = {
     },
     {
       id: "grid-yz",
-      type: "GRID",
+      type: MathItemType.Grid,
       properties: {
         axes: "yz",
         snap: false,
@@ -147,7 +147,7 @@ const defaultScene: PartialBy<Scene, "id"> = {
     },
     {
       id: "grid-zx",
-      type: "GRID",
+      type: MathItemType.Grid,
       properties: {
         axes: "zx",
         snap: false,
@@ -164,7 +164,7 @@ const defaultScene: PartialBy<Scene, "id"> = {
     },
     {
       id: "cameraFolder",
-      type: "FOLDER",
+      type: MathItemType.Folder,
       properties: {
         description: "Camera Controls",
         isCollapsed: false,
@@ -172,7 +172,7 @@ const defaultScene: PartialBy<Scene, "id"> = {
     },
     {
       id: "axes",
-      type: "FOLDER",
+      type: MathItemType.Folder,
       properties: {
         description: "Axes and Grids",
         isCollapsed: false,
@@ -180,7 +180,7 @@ const defaultScene: PartialBy<Scene, "id"> = {
     },
     {
       id: "mainFolder",
-      type: "FOLDER",
+      type: MathItemType.Folder,
       properties: {
         description: "A Folder",
         isCollapsed: false,

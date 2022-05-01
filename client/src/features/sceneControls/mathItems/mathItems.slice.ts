@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState, SelectorReturn } from "app/store";
-import type { MathItem } from "types";
+import { MathItem, MathItemType as MT } from "types";
 import idGenerator from "util/idGenerator";
 
 export interface MathItemsState {
@@ -23,7 +23,7 @@ const mathItemsSlice = createSlice({
     },
     addNewItem: (state) => {
       const id = idGenerator.next();
-      const type = "POINT" as const;
+      const type = MT.Point
       const properties = {
         description: `POINT ${id}`,
         useCalculatedVisibility: false,
@@ -38,7 +38,7 @@ const mathItemsSlice = createSlice({
         coords: "\\left[0,0,0\\right]",
         size: "16",
       };
-      const item = {
+      const item: MathItem = {
         id,
         type,
         properties,

@@ -1,43 +1,23 @@
-const FOLDER = "FOLDER";
-
-const VARIABLE = "VARIABLE";
-const VARIABLE_SLIDER = "VARIABLE_SLIDER";
-const BOOLEAN_VARIABLE = "BOOLEAN_VARIABLE";
-
-const CAMERA = "CAMERA";
-const AXIS = "AXIS";
-const GRID = "GRID";
-
-const POINT = "POINT";
-const LINE = "LINE";
-const VECTOR = "VECTOR";
-const PARAMETRIC_CURVE = "PARAMETRIC_CURVE";
-const PARAMETRIC_SURFACE = "PARAMETRIC_SURFACE";
-const EXPLICIT_SURFACE = "EXPLICIT_SURFACE";
-const EXPLICIT_SURFACE_POLAR = "EXPLICIT_SURFACE_POLAR";
-const IMPLICIT_SURFACE = "IMPLICIT_SURFACE";
-const VECTOR_FIELD = "VECTOR_FIELD";
-
-export const itemType = {
-  FOLDER,
-  VARIABLE,
-  VARIABLE_SLIDER,
-  BOOLEAN_VARIABLE,
-  CAMERA,
-  AXIS,
-  GRID,
-  POINT,
-  LINE,
-  VECTOR,
-  PARAMETRIC_CURVE,
-  PARAMETRIC_SURFACE,
-  EXPLICIT_SURFACE,
-  EXPLICIT_SURFACE_POLAR,
-  IMPLICIT_SURFACE,
-  VECTOR_FIELD,
-};
-
-export type MathItemType = keyof typeof itemType;
+export enum MathItemType {
+  Folder = 'FOLDER',
+  // variables
+  Variable = "VARIABLE",
+  VariableSlider = "VARIABLE_SLIDER",
+  BooleanVariable = "BOOLEAN_VARIABLE",
+  // special graphics
+  Camera = "CAMERA",
+  Axis = "AXIS",
+  Grid = "GRID",
+  Point = "POINT",
+  Line = "LINE",
+  Vector = "VECTOR",
+  ParametricCurve = "PARAMETRIC_CURVE",
+  ParametricSurface = "PARAMETRIC_SURFACE",
+  ExplicitSurface = "EXPLICIT_SURFACE",
+  ExplicitSurfacePolar = "EXPLICIT_SURFACE_POLAR",
+  ImplicitSurface = "IMPLICIT_SURFACE",
+  VectorField = "VECTOR_FIELD",
+}
 
 type FolderPoperties = {
   description: string;
@@ -271,7 +251,7 @@ type VectorFieldProperties = {
 interface MathItemGeneric<
   T extends MathItemType,
   Props extends MathItemProperties
-> {
+  > {
   id: string;
   type: T;
   properties: Props;
@@ -282,51 +262,51 @@ interface MathItemProperties
   description: string;
 }
 
-export type Variable = MathItemGeneric<typeof VARIABLE, VariableProperties>;
+export type Variable = MathItemGeneric<MathItemType.Variable, VariableProperties>;
 export type VariableSlider = MathItemGeneric<
-  typeof VARIABLE_SLIDER,
+  MathItemType.Variable,
   VariableSliderProperties
 >;
 export type BooleanVariable = MathItemGeneric<
-  typeof BOOLEAN_VARIABLE,
+  MathItemType.BooleanVariable,
   BooleanVariableProperties
 >;
 
-export type Camera = MathItemGeneric<typeof CAMERA, CameraProperties>;
-export type Axis = MathItemGeneric<typeof AXIS, AxisProperties>;
-export type Grid = MathItemGeneric<typeof GRID, GridProperties>;
+export type Camera = MathItemGeneric<MathItemType.Camera, CameraProperties>;
+export type Axis = MathItemGeneric<MathItemType.Axis, AxisProperties>;
+export type Grid = MathItemGeneric<MathItemType.Grid, GridProperties>;
 
-export type Point = MathItemGeneric<typeof POINT, PointProperties>;
-export type Line = MathItemGeneric<typeof LINE, LineProperties>;
-export type Vector = MathItemGeneric<typeof VECTOR, VectorProperties>;
+export type Point = MathItemGeneric<MathItemType.Point, PointProperties>;
+export type Line = MathItemGeneric<MathItemType.Line, LineProperties>;
+export type Vector = MathItemGeneric<MathItemType.Vector, VectorProperties>;
 export type ParametricCurve = MathItemGeneric<
-  typeof PARAMETRIC_CURVE,
+  MathItemType.ParametricCurve,
   ParametricCurveProperties
 >;
 
 export type ParametricSurface = MathItemGeneric<
-  typeof PARAMETRIC_SURFACE,
+  MathItemType.ParametricSurface,
   ParametricSurfaceProperties
 >;
 export type ExplicitSurface = MathItemGeneric<
-  typeof EXPLICIT_SURFACE,
+  MathItemType.ExplicitSurface,
   ExplicitSurfaceProperties
 >;
 export type ExplicitSurfacePolar = MathItemGeneric<
-  typeof EXPLICIT_SURFACE_POLAR,
+  MathItemType.ExplicitSurfacePolar,
   ExplicitSurfacePolarProperties
 >;
 export type ImplicitSurface = MathItemGeneric<
-  typeof IMPLICIT_SURFACE,
+  MathItemType.ImplicitSurface,
   ImplicitSurfaceProperties
 >;
 
 export type VectorField = MathItemGeneric<
-  typeof VECTOR_FIELD,
+  typeof MathItemType.VectorField,
   VectorFieldProperties
 >;
 
-export type Folder = MathItemGeneric<typeof FOLDER, FolderPoperties>;
+export type Folder = MathItemGeneric<MathItemType.Folder, FolderPoperties>;
 
 export type MathVariable = Variable | VariableSlider | BooleanVariable;
 
@@ -345,3 +325,27 @@ export type MathGraphic =
   | VectorField;
 
 export type MathItem = MathVariable | MathGraphic | Folder;
+
+export interface MathItemConfig {
+  type: MathItemType;
+  label: string;
+  properties: PropertyConfig[];
+}
+
+export enum Widget {
+  MathBoolean = 'math-boolean',
+  MathValue = 'math-value',
+  Color = 'color-picker',
+  AutosizeText = 'autosize-text'
+}
+
+
+type PropertyValue = string | number | boolean | null;
+
+interface PropertyConfig{
+  readonly name: string
+  readonly defaultValue: PropertyValue
+  readonly widget: Widget
+  readonly primaryOnly?: boolean
+  readonly label: string
+}
