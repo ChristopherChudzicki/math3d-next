@@ -1,4 +1,4 @@
-import { MathItemType, MathItemConfig, Widget } from 'types'
+import { MathItemType, MathItemConfig, Widget } from "types";
 
 const config: MathItemConfig = {
   type: MathItemType.Point,
@@ -6,67 +6,67 @@ const config: MathItemConfig = {
   properties: [
     {
       name: "coords",
-      label: 'Coordinates',
+      label: "Coordinates",
       defaultValue: "\\[0, 0, 0\\]",
       widget: Widget.MathValue,
-      primaryOnly: true
+      primaryOnly: true,
     },
     {
       name: "description",
-      label: 'Description',
+      label: "Description",
       defaultValue: "",
       widget: Widget.AutosizeText,
-      primaryOnly: true
+      primaryOnly: true,
     },
     {
       name: "size",
-      label: 'Size',
+      label: "Size",
       defaultValue: "8",
-      widget: Widget.MathValue
+      widget: Widget.MathValue,
     },
     {
       name: "visible",
-      label: 'Visible',
+      label: "Visible",
       defaultValue: "true",
-      widget: Widget.MathBoolean
+      widget: Widget.MathBoolean,
     },
     {
       name: "color",
-      label: 'Color',
+      label: "Color",
       defaultValue: "#3090ff",
-      widget: Widget.Color
+      widget: Widget.Color,
     },
     {
       name: "opacity",
-      label: 'Opacity',
+      label: "Opacity",
       defaultValue: "1",
-      widget: Widget.MathValue
+      widget: Widget.MathValue,
     },
     {
       name: "zIndex",
-      label: 'Z-Index',
+      label: "Z-Index",
       defaultValue: "0",
-      widget: Widget.MathValue
+      widget: Widget.MathValue,
     },
     {
       name: "zBias",
-      label: 'Z-Bias',
+      label: "Z-Bias",
       defaultValue: "0",
-      widget: Widget.MathValue
+      widget: Widget.MathValue,
     },
     {
       name: "label",
-      label: 'Label',
+      label: "Label",
       defaultValue: "",
-      widget: Widget.MathValue
+      widget: Widget.MathValue,
     },
     {
       name: "labelVisible",
-      label: 'Label Visibility',
+      label: "Label Visibility",
       defaultValue: "",
-      widget: Widget.MathBoolean
-    }
-  ]
+      widget: Widget.MathBoolean,
+    },
+  ],
 };
 
-export default config
+export default config;

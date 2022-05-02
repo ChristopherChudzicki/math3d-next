@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { useAppSelector } from "app/hooks";
 import type { RootState, SelectorReturn } from "app/store";
-import { MathItem, Point, MathItemType as MT } from "types";
+import { MathItem, PatchMathItem, MathItemType as MIT } from "types";
 import idGenerator from "util/idGenerator";
 
 export interface MathItemsState {
@@ -13,7 +13,6 @@ const initialState: MathItemsState = {};
 const mathItemsSlice = createSlice({
   name: "mathItems",
   initialState,
-  // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
     addItems: (state, action: PayloadAction<{ items: MathItem[] }>) => {
       const { items } = action.payload;
@@ -24,16 +23,16 @@ const mathItemsSlice = createSlice({
     },
     addNewItem: (state) => {
       const id = idGenerator.next();
-      const type = MT.Point
+      const type = MIT.Point;
       const properties = {
         description: `POINT ${id}`,
         color: "#3090FF",
-        visible: 'true',
+        visible: "true",
         opacity: "1",
         zIndex: "0",
         zBias: "0",
         label: "",
-        labelVisible: 'false',
+        labelVisible: "false",
         coords: "\\left[0,0,0\\right]",
         size: "16",
       };
@@ -50,14 +49,13 @@ const mathItemsSlice = createSlice({
     },
     setProperties: (
       state,
-      action: PayloadAction<{
-        id: string;
-        properties: Partial<MathItem["properties"]>;
-      }>
+      action: PayloadAction<PatchMathItem>
     ) => {
-      const { id } = action.payload;
-      const newProperties = action.payload.properties as any;
-      const { properties: oldProperties } = state[id];
+      const { id, type: newType, properties: newProperties } = action.payload;
+      const { properties: oldProperties, type: oldType } = state[id];
+      if (newType !== oldType) {
+        throw new Error(`Item type should not change; ${oldType} != ${newType}`);
+      }
       state[id].properties = { ...oldProperties, ...newProperties };
     },
   },
@@ -69,9 +67,9 @@ export const selectMathItem =
     state.mathItems[id];
 
 export const useMathItem = (id: string) => {
-  const mathItem = useAppSelector(selectMathItem(id))
-  return mathItem
-}
+  const mathItem = useAppSelector(selectMathItem(id));
+  return mathItem;
+};
 
 export const { actions, reducer } = mathItemsSlice;
 export default mathItemsSlice;

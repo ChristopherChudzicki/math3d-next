@@ -247,29 +247,19 @@ type VectorFieldProperties = {
   scale: string;
 };
 
-interface MathItemGeneric<
-  T extends MathItemType,
-  Props extends MathItemProperties
-  > {
+interface MathItemGeneric<T extends MathItemType, P extends MathItemProperties> {
   id: string;
   type: T;
-  properties: Props;
+  properties: P;
 }
 
-interface MathItemProperties
-  extends Record<string, string> {
+interface MathItemProperties extends Record<string, string> {
   description: string;
 }
 
 export type Variable = MathItemGeneric<MathItemType.Variable, VariableProperties>;
-export type VariableSlider = MathItemGeneric<
-  MathItemType.Variable,
-  VariableSliderProperties
->;
-export type BooleanVariable = MathItemGeneric<
-  MathItemType.BooleanVariable,
-  BooleanVariableProperties
->;
+export type VariableSlider = MathItemGeneric<MathItemType.Variable, VariableSliderProperties>;
+export type BooleanVariable = MathItemGeneric<MathItemType.BooleanVariable, BooleanVariableProperties>;
 
 export type Camera = MathItemGeneric<MathItemType.Camera, CameraProperties>;
 export type Axis = MathItemGeneric<MathItemType.Axis, AxisProperties>;
@@ -324,6 +314,45 @@ export type MathGraphic =
   | VectorField;
 
 export type MathItem = MathVariable | MathGraphic | Folder;
+
+type MathItemPatchGeneric<T extends MathItem> = {
+  [K in keyof Omit<T, 'properties'>]: T[K]
+} & { properties: Partial<T['properties']> }
+
+type PatchPatchAxis = MathItemPatchGeneric<Axis>
+type PatchBooleanVariable = MathItemPatchGeneric<BooleanVariable>
+type PatchCamera = MathItemPatchGeneric<Camera>
+type PatchExplicitSurface = MathItemPatchGeneric<ExplicitSurface>
+type PatchExplicitSurfacePolar = MathItemPatchGeneric<ExplicitSurfacePolar>
+type PatchFolder = MathItemPatchGeneric<Folder>
+type PatchGrid = MathItemPatchGeneric<Grid>
+type PatchImplicitSurface = MathItemPatchGeneric<ImplicitSurface>
+type PatchLine = MathItemPatchGeneric<Line>
+type PatchParametricCurve = MathItemPatchGeneric<ParametricCurve>
+type PatchParametricSurface = MathItemPatchGeneric<ParametricSurface>
+type PatchPoint = MathItemPatchGeneric<Point>
+type PatchVariable = MathItemPatchGeneric<Variable>
+type PatchVariableSlider = MathItemPatchGeneric<VariableSlider>
+type PatchVector = MathItemPatchGeneric<Vector>
+type PatchVectorField = MathItemPatchGeneric<VectorField>
+
+export type PatchMathItem = 
+  | PatchPatchAxis
+  | PatchBooleanVariable
+  | PatchCamera
+  | PatchExplicitSurface
+  | PatchExplicitSurfacePolar
+  | PatchFolder
+  | PatchGrid
+  | PatchImplicitSurface
+  | PatchLine
+  | PatchParametricCurve
+  | PatchParametricSurface
+  | PatchPoint
+  | PatchVariable
+  | PatchVariableSlider
+  | PatchVector
+  | PatchVectorField
 
 export interface MathItemConfig {
   type: MathItemType;

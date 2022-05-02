@@ -4,7 +4,10 @@ import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import style from "./Sidebar.module.css";
 import SubtleButtom from "../SubtleButton";
 
-const getButtonDirection = (isCollapsed: boolean, sidebarSide: "left" | "right") => {
+const getButtonDirection = (
+  isCollapsed: boolean,
+  sidebarSide: "left" | "right"
+) => {
   if (sidebarSide === "left") return isCollapsed ? "right" : "left";
   return isCollapsed ? "left" : "right";
 };
@@ -17,13 +20,16 @@ type SidebarProps = {
 
 const Sidebar: React.FC<SidebarProps> = (props) => {
   const [isCollapsed, setCollapsed] = useState(false);
-  const toggleCollapsed = useCallback(() => setCollapsed(!isCollapsed), [isCollapsed])
+  const toggleCollapsed = useCallback(
+    () => setCollapsed(!isCollapsed),
+    [isCollapsed]
+  );
   const IconComponent = useMemo(() => {
-    const direction = getButtonDirection(isCollapsed, props.side)
-    if (direction === 'left') return LeftOutlined
-    if (direction === 'right') return RightOutlined
-    throw new Error(`Unexpected direction: ${direction}`)
-}, [isCollapsed, props.side])
+    const direction = getButtonDirection(isCollapsed, props.side);
+    if (direction === "left") return LeftOutlined;
+    if (direction === "right") return RightOutlined;
+    throw new Error(`Unexpected direction: ${direction}`);
+  }, [isCollapsed, props.side]);
   return (
     <div
       className={mergeClassNames(props.className, style["sidebar-container"], {
@@ -41,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
         })}
       >
         <SubtleButtom onClick={toggleCollapsed}>
-          <IconComponent/>
+          <IconComponent />
         </SubtleButtom>
       </div>
       {props.children}

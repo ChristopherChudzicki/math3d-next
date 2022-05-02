@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import { MathItem, MathItemType as MIT } from "types";
 import Axis from "./Axis";
 import BooleanVariable from "./BooleanVariable";
@@ -52,16 +52,16 @@ const getMathItemComponent = (type: MIT) => {
     case MIT.VectorField:
       return VectorField;
     default:
-      throw new Error(`Unexpected type: '${type}'.`)
+      throw new Error(`Unexpected type: '${type}'.`);
   }
 };
 
 interface Props {
-  item: MathItem,
+  item: MathItem;
 }
 const MathItemComponent = (props: Props) => {
-  const Component = getMathItemComponent(props.item.type)
-  return <Component item={props.item} />
-}
+  const Component = getMathItemComponent(props.item.type);
+  return <Component item={props.item} />;
+};
 
 export default MathItemComponent;

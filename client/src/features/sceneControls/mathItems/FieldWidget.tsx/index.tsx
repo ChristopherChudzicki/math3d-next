@@ -1,33 +1,34 @@
-import React from 'react'
-import { Widget } from 'types/mathItem'
+import React from "react";
+import { Widget } from "types/mathItem";
 
-const PlaceholderInput: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => <input {...props} />
+const PlaceholderInput: React.FC<
+  React.InputHTMLAttributes<HTMLInputElement>
+> = (props) => <input {...props} />;
 
-const MathValue = PlaceholderInput
+const MathValue = PlaceholderInput;
 
-const MathBoolean = PlaceholderInput
+const MathBoolean = PlaceholderInput;
 
-const ColorPicker = PlaceholderInput
+const ColorPicker = PlaceholderInput;
 
-const AutosizeText = PlaceholderInput
-
+const AutosizeText = PlaceholderInput;
 
 type FormWidgetProps = React.InputHTMLAttributes<HTMLInputElement> & {
-  widget: Widget
-}
+  widget: Widget;
+};
 
-const getComponentForWidget = (widget: Widget) =>{
-  if (widget === Widget.MathValue) return MathValue
-  if (widget === Widget.MathBoolean) return MathBoolean
-  if (widget === Widget.Color) return ColorPicker
-  if (widget === Widget.AutosizeText) return AutosizeText
-  throw new Error(`Unrecognized form widget: ${widget}`)
-}
+const getComponentForWidget = (widget: Widget) => {
+  if (widget === Widget.MathValue) return MathValue;
+  if (widget === Widget.MathBoolean) return MathBoolean;
+  if (widget === Widget.Color) return ColorPicker;
+  if (widget === Widget.AutosizeText) return AutosizeText;
+  throw new Error(`Unrecognized form widget: ${widget}`);
+};
 
 const FieldWidget: React.FC<FormWidgetProps> = (props) => {
-  const { widget, ...otherProps } = props
-  const WidgetComponent = getComponentForWidget(widget)
-  return <WidgetComponent {...otherProps} />
-}
+  const { widget, ...otherProps } = props;
+  const WidgetComponent = getComponentForWidget(widget);
+  return <WidgetComponent {...otherProps} />;
+};
 
-export default FieldWidget
+export default FieldWidget;

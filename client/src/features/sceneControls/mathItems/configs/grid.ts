@@ -1,4 +1,4 @@
-import { MathItemType, MathItemConfig, Widget } from 'types/mathItem'
+import { MathItemType, MathItemConfig, Widget } from "types/mathItem";
 
 const config: MathItemConfig = {
   type: MathItemType.Grid,
@@ -6,12 +6,12 @@ const config: MathItemConfig = {
   properties: [
     {
       name: "description",
-      label: 'Description',
+      label: "Description",
       defaultValue: "",
       widget: Widget.AutosizeText,
-      primaryOnly: true
+      primaryOnly: true,
     },
-  ]
+  ],
 };
 
-export default config
+export default config;
