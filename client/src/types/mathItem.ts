@@ -265,7 +265,7 @@ export type Variable = MathItemGeneric<
   VariableProperties
 >;
 export type VariableSlider = MathItemGeneric<
-  MathItemType.Variable,
+  MathItemType.VariableSlider,
   VariableSliderProperties
 >;
 export type BooleanVariable = MathItemGeneric<
