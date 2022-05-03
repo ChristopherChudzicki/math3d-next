@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { useAppSelector } from "app/hooks";
 import type { RootState, SelectorReturn } from "app/store";
-import { MathItem, PatchMathItem, MathItemType as MIT } from "types";
+import { MathItem, PatchMathItem } from "types";
 import idGenerator from "util/idGenerator";
 import { make, AddableTypes } from "./configs";
 
