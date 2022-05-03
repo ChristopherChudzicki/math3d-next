@@ -3,7 +3,7 @@ import { useAppSelector } from "app/hooks";
 import type { RootState, SelectorReturn } from "app/store";
 import { MathItem, PatchMathItem, MathItemType as MIT } from "types";
 import idGenerator from "util/idGenerator";
-import { defaultValues, AddableTypes } from "./configs";
+import { make, AddableTypes } from "./configs";
 
 export interface MathItemsState {
   [id: string]: MathItem;
@@ -25,13 +25,7 @@ const mathItemsSlice = createSlice({
     addNewItem: (state, action: PayloadAction<{type: AddableTypes}>) => {
       const { type } = action.payload
       const id = idGenerator.next();
-      const properties = defaultValues[type]
-      // @ts-expect-error maybe use a factory function instead?
-      const item: MathItem = {
-        id,
-        type,
-        properties,
-      };
+      const item = make(id, type)
       state[id] = item;
     },
     remove: (state, action: PayloadAction<{ id: string }>) => {

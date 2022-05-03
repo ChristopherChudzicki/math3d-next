@@ -1,4 +1,4 @@
-import { MathItemType as MIT } from "types/mathItem";
+import { MathItemType as MIT, MathItems } from "types/mathItem";
 import axisConfig from "./axis";
 import booleanVariableConfig from "./booleanVariable";
 import cameraConfig from "./camera";
@@ -35,7 +35,7 @@ const configs = {
   [MIT.VectorField]: vectorFieldConfig,
 };
 
-const defaultValues = {
+const makers = {
   // [MIT.Axis]: axisConfig,
   // [MIT.BooleanVariable]: booleanVariableConfig,
   // [MIT.Camera]: cameraConfig,
@@ -47,13 +47,16 @@ const defaultValues = {
   // [MIT.Line]: lineConfig,
   // [MIT.ParametricCurve]: parametricCurveConfig,
   // [MIT.ParametricSurface]: parametricSurfaceConfig,
-  [MIT.Point]: point.defaultValues,
-  [MIT.Variable]: variable.defaultValues,
+  [MIT.Point]: point.make,
+  [MIT.Variable]: variable.make,
   // [MIT.VariableSlider]: variableSliderConfig,
   // [MIT.Vector]: vectorConfig,
   // [MIT.VectorField]: vectorFieldConfig,
 }
 
-export type AddableTypes = keyof typeof defaultValues
+export type AddableTypes = keyof typeof makers
+type Addable = MathItems[AddableTypes]
 
-export {configs, defaultValues};
+const make = (id: string, type: AddableTypes): Addable => makers[type](id)
+
+export {configs, make};

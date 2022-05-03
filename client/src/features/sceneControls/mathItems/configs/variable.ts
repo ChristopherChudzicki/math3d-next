@@ -1,4 +1,4 @@
-import { MathItemType, Variable, MathItemConfig, Widget } from "types/mathItem";
+import { MathItemType as MIT, Variable, MathItemConfig, Widget, MathItemGenerator } from "types/mathItem";
 
 const defaultValues: Variable['properties'] = {
   name: 'f(x)',
@@ -6,8 +6,14 @@ const defaultValues: Variable['properties'] = {
   description: 'Variable or Function'
 }
 
+export const make: MathItemGenerator<MIT.Variable> = (id) => ({
+  id,
+  type: MIT.Variable,
+  properties: {...defaultValues}
+})
+
 const config: MathItemConfig = {
-  type: MathItemType.Variable,
+  type: MIT.Variable,
   label: "Variable",
   properties: [
     {

@@ -29,7 +29,7 @@ const SettingsForm: React.FC<FormProps> = ({ config, item }) => {
   const fields = useMemo(() => {
     const settings = config.properties.filter((p) => !p.primaryOnly);
     return settings.map((field) => {
-      // @ts-expect-error expect value to be a string, check at runtime
+      // @ts-expect-error ts does not know that config and item are correlated
       const value = item.properties[field.name];
       if (typeof value !== "string") {
         throw new Error(`value should be a string; received ${typeof value}`);

@@ -354,6 +354,27 @@ export type PatchMathItem =
   | PatchVector
   | PatchVectorField
 
+export type MathItems = {
+  [MathItemType.Axis]: Axis,
+  [MathItemType.BooleanVariable]: BooleanVariable,
+  [MathItemType.Camera]: Camera,
+  [MathItemType.ExplicitSurface]: ExplicitSurface,
+  [MathItemType.ExplicitSurfacePolar]: ExplicitSurfacePolar,
+  [MathItemType.Folder]: Folder,
+  [MathItemType.Grid]: Grid,
+  [MathItemType.ImplicitSurface]: ImplicitSurface,
+  [MathItemType.Line]: Line,
+  [MathItemType.ParametricCurve]: ParametricCurve,
+  [MathItemType.ParametricSurface]: ParametricSurface,
+  [MathItemType.Point]: Point,
+  [MathItemType.Variable]: Variable,
+  [MathItemType.VariableSlider]: VariableSlider,
+  [MathItemType.Vector]: Vector,
+  [MathItemType.VectorField]: VectorField,
+}
+
+export type MathItemGenerator<T extends MathItemType> = (id: string) => MathItems[T]
+
 export interface MathItemConfig {
   type: MathItemType;
   label: string;
