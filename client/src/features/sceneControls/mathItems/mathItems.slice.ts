@@ -3,6 +3,7 @@ import { useAppSelector } from "app/hooks";
 import type { RootState, SelectorReturn } from "app/store";
 import { MathItem, PatchMathItem, MathItemType as MIT } from "types";
 import idGenerator from "util/idGenerator";
+import { defaultValues, AddableTypes } from "./configs";
 
 export interface MathItemsState {
   [id: string]: MathItem;
@@ -21,21 +22,11 @@ const mathItemsSlice = createSlice({
       );
       return { ...state, ...statePatch };
     },
-    addNewItem: (state) => {
+    addNewItem: (state, action: PayloadAction<{type: AddableTypes}>) => {
+      const { type } = action.payload
       const id = idGenerator.next();
-      const type = MIT.Point;
-      const properties = {
-        description: `POINT ${id}`,
-        color: "#3090FF",
-        visible: "true",
-        opacity: "1",
-        zIndex: "0",
-        zBias: "0",
-        label: "",
-        labelVisible: "false",
-        coords: "\\left[0,0,0\\right]",
-        size: "16",
-      };
+      const properties = defaultValues[type]
+      // @ts-expect-error maybe use a factory function instead?
       const item: MathItem = {
         id,
         type,

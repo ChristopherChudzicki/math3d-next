@@ -44,7 +44,7 @@ type BooleanVariableProperties = {
   description: string;
 };
 
-type CameraProperties = {
+export type CameraProperties = {
   description: string;
   isOrthographic: string // eval to boolean
   isPanEnabled: string // eval to boolean
@@ -56,7 +56,7 @@ type CameraProperties = {
   computedLookAt: string;
   useComputed: string // eval to boolean
 };
-type AxisProperties = {
+export type AxisProperties = {
   description: string;
   color: string;
   visible: string;
@@ -74,7 +74,7 @@ type AxisProperties = {
   size: string;
   width: string;
 };
-type GridProperties = {
+export type GridProperties = {
   description: string;
   color: string;
   visible: string;
@@ -88,7 +88,7 @@ type GridProperties = {
   axes: "xy" | "yz" | "zx";
 };
 
-type PointProperties = {
+export type PointProperties = {
   description: string;
   color: string;
   visible: string;
