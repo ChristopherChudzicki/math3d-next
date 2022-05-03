@@ -52,11 +52,11 @@ const makers = {
   // [MIT.VariableSlider]: variableSliderConfig,
   // [MIT.Vector]: vectorConfig,
   // [MIT.VectorField]: vectorFieldConfig,
-}
+};
 
-export type AddableTypes = keyof typeof makers
-type Addable = MathItems[AddableTypes]
+export type AddableTypes = keyof typeof makers;
+type Addable = MathItems[AddableTypes];
 
-const make = (id: string, type: AddableTypes): Addable => makers[type](id)
+const make = (id: string, type: AddableTypes): Addable => makers[type](id);
 
-export {configs, make};
+export { configs, make };

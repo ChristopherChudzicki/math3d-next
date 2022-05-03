@@ -1,5 +1,5 @@
 export enum MathItemType {
-  Folder = 'FOLDER',
+  Folder = "FOLDER",
   // variables
   Variable = "VARIABLE",
   VariableSlider = "VARIABLE_SLIDER",
@@ -21,7 +21,7 @@ export enum MathItemType {
 
 type FolderPoperties = {
   description: string;
-  isCollapsed: string // eval to boolean;
+  isCollapsed: string; // eval to boolean;
 };
 
 type VariableProperties = {
@@ -35,26 +35,26 @@ type VariableSliderProperties = {
   min: string;
   max: string;
   description: string;
-  isAnimating: string // eval to boolean;
-  speedMultiplier: string // eval to number;
+  isAnimating: string; // eval to boolean;
+  speedMultiplier: string; // eval to number;
 };
 type BooleanVariableProperties = {
   name: string;
-  value: string // eval to boolean
+  value: string; // eval to boolean
   description: string;
 };
 
 export type CameraProperties = {
   description: string;
-  isOrthographic: string // eval to boolean
-  isPanEnabled: string // eval to boolean
-  isZoomEnabled: string // eval to boolean
-  isRotateEnabled: string // eval to boolean
+  isOrthographic: string; // eval to boolean
+  isPanEnabled: string; // eval to boolean
+  isZoomEnabled: string; // eval to boolean
+  isRotateEnabled: string; // eval to boolean
   // relativePosition: number[];
   // relativeLookAt: number[];
   computedPosition: string;
   computedLookAt: string;
-  useComputed: string // eval to boolean
+  useComputed: string; // eval to boolean
 };
 export type AxisProperties = {
   description: string;
@@ -129,8 +129,8 @@ type VectorProperties = {
   labelVisible: string;
   size: string;
   width: string;
-  start: string // eval to boolean;
-  end: string // eval to boolean;
+  start: string; // eval to boolean;
+  end: string; // eval to boolean;
   components: string;
   tail: string;
 };
@@ -144,8 +144,8 @@ type ParametricCurveProperties = {
 
   size: string;
   width: string;
-  start: string // eval to boolean;
-  end: string // eval to boolean;
+  start: string; // eval to boolean;
+  end: string; // eval to boolean;
   expr: string;
   range: string;
   samples: string;
@@ -159,7 +159,7 @@ type ParametricSurfaceProperties = {
   zIndex: string;
   zBias: string;
 
-  shaded: string // eval to boolean;
+  shaded: string; // eval to boolean;
   expr: string;
   rangeU: string;
   rangeV: string;
@@ -178,7 +178,7 @@ type ExplicitSurfaceProperties = {
   opacity: string;
   zIndex: string;
   zBias: string;
-  shaded: string // eval to boolean;
+  shaded: string; // eval to boolean;
   expr: string;
   rangeU: string;
   rangeV: string;
@@ -198,7 +198,7 @@ type ExplicitSurfacePolarProperties = {
   zIndex: string;
   zBias: string;
 
-  shaded: string // eval to boolean;
+  shaded: string; // eval to boolean;
   expr: string;
   rangeU: string;
   rangeV: string;
@@ -218,7 +218,7 @@ type ImplicitSurfaceProperties = {
   zIndex: string;
   zBias: string;
 
-  shaded: string // eval to boolean;
+  shaded: string; // eval to boolean;
   rangeX: string;
   rangeY: string;
   rangeZ: string;
@@ -237,8 +237,8 @@ type VectorFieldProperties = {
 
   size: string;
   width: string;
-  start: string // eval to boolean;
-  end: string // eval to boolean;
+  start: string; // eval to boolean;
+  end: string; // eval to boolean;
   rangeX: string;
   rangeY: string;
   rangeZ: string;
@@ -247,7 +247,10 @@ type VectorFieldProperties = {
   scale: string;
 };
 
-interface MathItemGeneric<T extends MathItemType, P extends MathItemProperties> {
+interface MathItemGeneric<
+  T extends MathItemType,
+  P extends MathItemProperties
+> {
   id: string;
   type: T;
   properties: P;
@@ -257,9 +260,18 @@ interface MathItemProperties extends Record<string, string> {
   description: string;
 }
 
-export type Variable = MathItemGeneric<MathItemType.Variable, VariableProperties>;
-export type VariableSlider = MathItemGeneric<MathItemType.Variable, VariableSliderProperties>;
-export type BooleanVariable = MathItemGeneric<MathItemType.BooleanVariable, BooleanVariableProperties>;
+export type Variable = MathItemGeneric<
+  MathItemType.Variable,
+  VariableProperties
+>;
+export type VariableSlider = MathItemGeneric<
+  MathItemType.Variable,
+  VariableSliderProperties
+>;
+export type BooleanVariable = MathItemGeneric<
+  MathItemType.BooleanVariable,
+  BooleanVariableProperties
+>;
 
 export type Camera = MathItemGeneric<MathItemType.Camera, CameraProperties>;
 export type Axis = MathItemGeneric<MathItemType.Axis, AxisProperties>;
@@ -316,27 +328,27 @@ export type MathGraphic =
 export type MathItem = MathVariable | MathGraphic | Folder;
 
 type MathItemPatchGeneric<T extends MathItem> = {
-  [K in keyof Omit<T, 'properties'>]: T[K]
-} & { properties: Partial<T['properties']> }
+  [K in keyof Omit<T, "properties">]: T[K];
+} & { properties: Partial<T["properties"]> };
 
-type PatchPatchAxis = MathItemPatchGeneric<Axis>
-type PatchBooleanVariable = MathItemPatchGeneric<BooleanVariable>
-type PatchCamera = MathItemPatchGeneric<Camera>
-type PatchExplicitSurface = MathItemPatchGeneric<ExplicitSurface>
-type PatchExplicitSurfacePolar = MathItemPatchGeneric<ExplicitSurfacePolar>
-type PatchFolder = MathItemPatchGeneric<Folder>
-type PatchGrid = MathItemPatchGeneric<Grid>
-type PatchImplicitSurface = MathItemPatchGeneric<ImplicitSurface>
-type PatchLine = MathItemPatchGeneric<Line>
-type PatchParametricCurve = MathItemPatchGeneric<ParametricCurve>
-type PatchParametricSurface = MathItemPatchGeneric<ParametricSurface>
-type PatchPoint = MathItemPatchGeneric<Point>
-type PatchVariable = MathItemPatchGeneric<Variable>
-type PatchVariableSlider = MathItemPatchGeneric<VariableSlider>
-type PatchVector = MathItemPatchGeneric<Vector>
-type PatchVectorField = MathItemPatchGeneric<VectorField>
+type PatchPatchAxis = MathItemPatchGeneric<Axis>;
+type PatchBooleanVariable = MathItemPatchGeneric<BooleanVariable>;
+type PatchCamera = MathItemPatchGeneric<Camera>;
+type PatchExplicitSurface = MathItemPatchGeneric<ExplicitSurface>;
+type PatchExplicitSurfacePolar = MathItemPatchGeneric<ExplicitSurfacePolar>;
+type PatchFolder = MathItemPatchGeneric<Folder>;
+type PatchGrid = MathItemPatchGeneric<Grid>;
+type PatchImplicitSurface = MathItemPatchGeneric<ImplicitSurface>;
+type PatchLine = MathItemPatchGeneric<Line>;
+type PatchParametricCurve = MathItemPatchGeneric<ParametricCurve>;
+type PatchParametricSurface = MathItemPatchGeneric<ParametricSurface>;
+type PatchPoint = MathItemPatchGeneric<Point>;
+type PatchVariable = MathItemPatchGeneric<Variable>;
+type PatchVariableSlider = MathItemPatchGeneric<VariableSlider>;
+type PatchVector = MathItemPatchGeneric<Vector>;
+type PatchVectorField = MathItemPatchGeneric<VectorField>;
 
-export type PatchMathItem = 
+export type PatchMathItem =
   | PatchPatchAxis
   | PatchBooleanVariable
   | PatchCamera
@@ -352,28 +364,30 @@ export type PatchMathItem =
   | PatchVariable
   | PatchVariableSlider
   | PatchVector
-  | PatchVectorField
+  | PatchVectorField;
 
 export type MathItems = {
-  [MathItemType.Axis]: Axis,
-  [MathItemType.BooleanVariable]: BooleanVariable,
-  [MathItemType.Camera]: Camera,
-  [MathItemType.ExplicitSurface]: ExplicitSurface,
-  [MathItemType.ExplicitSurfacePolar]: ExplicitSurfacePolar,
-  [MathItemType.Folder]: Folder,
-  [MathItemType.Grid]: Grid,
-  [MathItemType.ImplicitSurface]: ImplicitSurface,
-  [MathItemType.Line]: Line,
-  [MathItemType.ParametricCurve]: ParametricCurve,
-  [MathItemType.ParametricSurface]: ParametricSurface,
-  [MathItemType.Point]: Point,
-  [MathItemType.Variable]: Variable,
-  [MathItemType.VariableSlider]: VariableSlider,
-  [MathItemType.Vector]: Vector,
-  [MathItemType.VectorField]: VectorField,
-}
+  [MathItemType.Axis]: Axis;
+  [MathItemType.BooleanVariable]: BooleanVariable;
+  [MathItemType.Camera]: Camera;
+  [MathItemType.ExplicitSurface]: ExplicitSurface;
+  [MathItemType.ExplicitSurfacePolar]: ExplicitSurfacePolar;
+  [MathItemType.Folder]: Folder;
+  [MathItemType.Grid]: Grid;
+  [MathItemType.ImplicitSurface]: ImplicitSurface;
+  [MathItemType.Line]: Line;
+  [MathItemType.ParametricCurve]: ParametricCurve;
+  [MathItemType.ParametricSurface]: ParametricSurface;
+  [MathItemType.Point]: Point;
+  [MathItemType.Variable]: Variable;
+  [MathItemType.VariableSlider]: VariableSlider;
+  [MathItemType.Vector]: Vector;
+  [MathItemType.VectorField]: VectorField;
+};
 
-export type MathItemGenerator<T extends MathItemType> = (id: string) => MathItems[T]
+export type MathItemGenerator<T extends MathItemType> = (
+  id: string
+) => MathItems[T];
 
 export interface MathItemConfig {
   type: MathItemType;
@@ -382,19 +396,18 @@ export interface MathItemConfig {
 }
 
 export enum Widget {
-  MathBoolean = 'math-boolean',
-  MathValue = 'math-value',
-  Color = 'color-picker',
-  AutosizeText = 'autosize-text'
+  MathBoolean = "math-boolean",
+  MathValue = "math-value",
+  Color = "color-picker",
+  AutosizeText = "autosize-text",
 }
-
 
 type PropertyValue = string | number | boolean | null;
 
 interface PropertyConfig {
-  readonly name: string
-  readonly defaultValue: PropertyValue
-  readonly widget: Widget
-  readonly primaryOnly?: boolean
-  readonly label: string
+  readonly name: string;
+  readonly defaultValue: PropertyValue;
+  readonly widget: Widget;
+  readonly primaryOnly?: boolean;
+  readonly label: string;
 }

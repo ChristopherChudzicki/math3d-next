@@ -14,14 +14,17 @@ type Props = {
 // change this to MIT[] when all items are configured
 const addableTypes: AddableTypes[] = [MIT.Point, MIT.Variable];
 
-type MenuClickHandler = NonNullable<MenuProps['onClick']>
+type MenuClickHandler = NonNullable<MenuProps["onClick"]>;
 
 const AddObjectButton: React.FC<Props> = (props) => {
   const dispatch = useAppDispatch();
-  const handleClick: MenuClickHandler = useCallback(({ key }) => {
-    assertIsMathItemType<AddableTypes>(key)
-    dispatch(actions.addNewItem({ type: key }))
-  }, [dispatch])
+  const handleClick: MenuClickHandler = useCallback(
+    ({ key }) => {
+      assertIsMathItemType<AddableTypes>(key);
+      dispatch(actions.addNewItem({ type: key }));
+    },
+    [dispatch]
+  );
   return (
     <Dropdown
       overlay={

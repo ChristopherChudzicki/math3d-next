@@ -1,6 +1,12 @@
-import { MathItemType as MIT, Point, MathItemConfig, Widget, MathItemGenerator } from "types";
+import {
+  MathItemType as MIT,
+  Point,
+  MathItemConfig,
+  Widget,
+  MathItemGenerator,
+} from "types";
 
-const defaultValues: Point['properties'] = {
+const defaultValues: Point["properties"] = {
   coords: "\\[0, 0, 0\\]",
   description: "Point",
   size: "8",
@@ -10,14 +16,14 @@ const defaultValues: Point['properties'] = {
   zIndex: "0",
   zBias: "0",
   label: "",
-  labelVisible: "false"
-}
+  labelVisible: "false",
+};
 
 export const make: MathItemGenerator<MIT.Point> = (id) => ({
   id,
   type: MIT.Point,
-  properties: {...defaultValues}
-})
+  properties: { ...defaultValues },
+});
 
 const config: MathItemConfig = {
   type: MIT.Point,
