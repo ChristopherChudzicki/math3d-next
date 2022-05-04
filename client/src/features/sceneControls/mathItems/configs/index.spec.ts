@@ -8,7 +8,7 @@ test.each([
 ] as const)("config %p has all properties", (type) => {
   const item = make("test", type);
   const { properties } = configs[type];
-  const expectedProperties = Object.keys(properties).sort();
+  const expectedProperties = Object.keys(item.properties).sort();
   const configuredProperties = properties.map((p) => p.name).sort();
   expect(configuredProperties).toStrictEqual(expectedProperties);
 });
