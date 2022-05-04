@@ -26,6 +26,15 @@ module.exports = {
       "error",
       { props: true, ignorePropertyModificationsFor: ["state"] },
     ],
+    'import/no-extraneous-dependencies': [
+      'error',
+      {
+        devDependencies: [
+          "**/*.stories.tsx",
+          "src/setupTests.ts"
+        ]
+      }
+    ]
   },
   settings: {},
   overrides: [
