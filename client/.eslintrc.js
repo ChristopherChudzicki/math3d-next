@@ -4,13 +4,13 @@ module.exports = {
     "react-app/jest",
     "airbnb",
     "airbnb-typescript",
-    "prettier",
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react-hooks/recommended",
+    'plugin:prettier/recommended' // this should come last
   ],
-  plugins: ["react", "@typescript-eslint", "prettier"],
+  plugins: ["react", "@typescript-eslint"],
   rules: {
     "max-classes-per-file": "off",
     "react/function-component-definition": [

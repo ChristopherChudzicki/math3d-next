@@ -3,11 +3,11 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   extends: [
     "airbnb-base",
-    "prettier",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
+    'plugin:prettier/recommended' // this should come last
   ],
-  plugins: ["prettier", "@typescript-eslint"],
+  plugins: ["@typescript-eslint"],
   ignorePatterns: ["build/", "**/*.js", "src/scripts/transfer-from-v1"],
   rules: {
     "prettier/prettier": ["error"],
