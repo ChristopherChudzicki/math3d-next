@@ -11,7 +11,6 @@
     "seed:all:local": "env $(grep -v '^#' .env.development.local | xargs) npx sequelize-cli db:seed:all",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix",
-    "format": "prettier --write \"src/**/*.ts\"",
     "test": "node -r dotenv/config $(which jest) test/ dotenv_config_path=.env.test",
     "test:watch": "node -r dotenv/config $(which jest) test/ --watch dotenv_config_path=.env.test",
     "test:cov": "jest --coverage"

@@ -6,8 +6,8 @@
     "build": "react-scripts build",
     "build-storybook": "build-storybook -s public",
     "eject": "react-scripts eject",
-    "format": "prettier src/ --write",
-    "lint": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "lint": "eslint \"{src,test}/**/*.ts\"",
+    "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix",
     "start": "react-scripts start",
     "storybook": "start-storybook -p 6006 -s public",
     "test": "react-scripts test"
