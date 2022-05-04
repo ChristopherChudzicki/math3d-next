@@ -12,7 +12,7 @@ export const assertIsMathItemType: <T extends MIT = MIT>(
   type?: T
 ) => asserts value is T = (value, type) => {
   if (type && value !== type) {
-    throw new Error(`Expected ${value} to be ${type}`)
+    throw new Error(`Expected ${value} to be ${type}`);
   } else if (!isMathItemType(value)) {
     throw new Error(`expected "${value}" to be a MathItemType`);
   }
