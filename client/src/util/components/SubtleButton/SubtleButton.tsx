@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import mergeClassNames from "classnames";
 import styles from "./SubtleButton.module.css";
 
-type Props = React.DetailedHTMLProps<
+export type Props = React.DetailedHTMLProps<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
   HTMLButtonElement
 > & { lighten?: boolean };

@@ -40,7 +40,7 @@ html {
   --color-primary-9: var(--blue-9);
   --color-primary-10: var(--blue-10);
 
-  --border-radius: 2px;
+  --border-radius: 4px;
   --transition-duration: 300ms;
   --transition-timing-function: ease;
 }

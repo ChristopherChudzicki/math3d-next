@@ -1,26 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import mergeClassNames from "classnames";
-import { Button } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import style from "./Sidebar.module.css";
+import SubtleButtom from "../SubtleButton";
 
-type CollapseButtonProps = {
-  iconDirection: "left" | "right";
-  className?: string;
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
-};
-const CollapseButton: React.FC<CollapseButtonProps> = (props) => (
-  <Button
-    type="link"
-    shape="round"
-    onClick={props.onClick}
-    className={props.className}
-  >
-    {props.iconDirection === "left" ? <LeftOutlined /> : <RightOutlined />}
-  </Button>
-);
-
-const getButtonIcon = (isCollapsed: boolean, sidebarSide: "left" | "right") => {
+const getButtonDirection = (
+  isCollapsed: boolean,
+  sidebarSide: "left" | "right"
+) => {
   if (sidebarSide === "left") return isCollapsed ? "right" : "left";
   return isCollapsed ? "left" : "right";
 };
@@ -33,6 +20,16 @@ type SidebarProps = {
 
 const Sidebar: React.FC<SidebarProps> = (props) => {
   const [isCollapsed, setCollapsed] = useState(false);
+  const toggleCollapsed = useCallback(
+    () => setCollapsed(!isCollapsed),
+    [isCollapsed]
+  );
+  const IconComponent = useMemo(() => {
+    const direction = getButtonDirection(isCollapsed, props.side);
+    if (direction === "left") return LeftOutlined;
+    if (direction === "right") return RightOutlined;
+    throw new Error(`Unexpected direction: ${direction}`);
+  }, [isCollapsed, props.side]);
   return (
     <div
       className={mergeClassNames(props.className, style["sidebar-container"], {
@@ -42,16 +39,17 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
         [style["right-sidebar"]]: props.side === "right",
       })}
     >
-      <CollapseButton
+      {/* Wrap the CollapseButton below  */}
+      <div
         className={mergeClassNames({
           [style["left-sidebar-collapse-button"]]: props.side === "left",
           [style["right-sidebar-collapse-button"]]: props.side === "right",
         })}
-        iconDirection={getButtonIcon(isCollapsed, props.side)}
-        onClick={() => {
-          setCollapsed(!isCollapsed);
-        }}
-      />
+      >
+        <SubtleButtom onClick={toggleCollapsed}>
+          <IconComponent />
+        </SubtleButtom>
+      </div>
       {props.children}
     </div>
   );
