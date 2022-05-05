@@ -34,7 +34,7 @@
     "@types/jest": "^27.4.1",
     "@types/jsonwebtoken": "8.5.8",
     "@types/nodemailer": "^6.4.4",
-    "@types/pg": "^8.6.3",
+    "@types/pg": "8.6.5",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
     "eslint": "^7.27.0",
