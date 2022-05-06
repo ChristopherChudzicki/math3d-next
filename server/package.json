@@ -18,7 +18,7 @@
   "main": "build/index.js",
   "dependencies": {
     "ajv": "^8.8.2",
-    "dotenv": "^10.0.0",
+    "dotenv": "^16.0.0",
     "express": "^4.17.2",
     "jsonwebtoken": "^8.5.1",
     "minimist": "^1.2.5",
