@@ -1,3 +1,4 @@
+import * as R from "ramda";
 import {
   MathNode,
   EvalFunction,
@@ -22,8 +23,9 @@ import {
   setUnion,
 } from "./util";
 import DiffingMap from "./DiffingMap";
+import { isNotNil } from "../predicates";
 
-const getId = (node: MathNode) => node.comment;
+export const getId = (node: MathNode) => node.comment;
 
 class EvaluationError extends Error {}
 
@@ -119,7 +121,7 @@ export default class Evaluator {
 
   errors: EvaluationErrors = new Map();
 
-  private idsInUse: Set<string> = new Set();
+  private nodesById: Map<string, MathNode> = new Map();
 
   private changeQueue: EvaluatorAction[] = [];
 
@@ -153,19 +155,23 @@ export default class Evaluator {
   }
 
   enqueueAddExpressions(nodes: MathNode[]): void {
-    nodes.map(getId).forEach((id) => {
-      if (this.idsInUse.has(id)) {
+    nodes.forEach((node) => {
+      const id = getId(node);
+      if (this.nodesById.has(id)) {
         throw new Error(`node id "${id}" is already in use.`);
       }
-      this.idsInUse.add(id);
+      this.nodesById.set(id, node);
     });
     const action: EvaluatorAction = { type: "add", nodes };
     this.changeQueue.push(action);
   }
 
-  enqueueDeleteExpressions(nodes: MathNode[]): void {
-    nodes.map(getId).forEach((id) => {
-      this.idsInUse.delete(id);
+  enqueueDeleteExpressions(ids: string[]): void {
+    const nodes: MathNode[] = ids
+      .map((id) => this.nodesById.get(id))
+      .filter(isNotNil);
+    ids.forEach((id) => {
+      this.nodesById.delete(id);
     });
     const action: EvaluatorAction = { type: "delete", nodes };
     this.changeQueue.push(action);

@@ -1,5 +1,8 @@
 import { parse } from "mathjs";
-import Evaluator, { UnmetDependencyError as UnmetDepErr } from "./Evaluator";
+import Evaluator, {
+  UnmetDependencyError as UnmetDepErr,
+  getId,
+} from "./Evaluator";
 
 const node = (id: string, parseable: string) => {
   const parsed = parse(parseable);
@@ -89,7 +92,7 @@ describe("Evaluator", () => {
 
       const x = node("id-x", "x = 1");
       const b2 = node("id-b", "b = 4");
-      evaluator.enqueueDeleteExpressions([b, c]);
+      evaluator.enqueueDeleteExpressions([b, c].map(getId));
       evaluator.enqueueAddExpressions([x, b2]);
 
       const diff = evaluator.evaluate();
@@ -137,7 +140,7 @@ describe("Evaluator", () => {
       evaluator.evaluate();
 
       const c2 = node("id-c", "c=4");
-      evaluator.enqueueDeleteExpressions([c]);
+      evaluator.enqueueDeleteExpressions([c].map(getId));
       evaluator.enqueueAddExpressions([c2]);
 
       expect(evaluator.results).toStrictEqual(
@@ -214,7 +217,7 @@ describe("Evaluator", () => {
       const shouldNotThrow = () => {
         const [a1, a2] = [node("a", "a = 1"), node("a", "a = 2")];
         evaluator.enqueueAddExpressions([a1]);
-        evaluator.enqueueDeleteExpressions([a1]);
+        evaluator.enqueueDeleteExpressions([a1].map(getId));
         evaluator.enqueueAddExpressions([a2]);
       };
       expect(shouldNotThrow).not.toThrow();

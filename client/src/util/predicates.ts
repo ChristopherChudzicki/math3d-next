@@ -17,3 +17,8 @@ export const assertIsMathItemType: <T extends MIT = MIT>(
     throw new Error(`expected "${value}" to be a MathItemType`);
   }
 };
+
+export const isNotNil = <T>(x: T): x is NonNullable<T> => {
+  if (x === null || x === undefined) return false;
+  return true;
+};
