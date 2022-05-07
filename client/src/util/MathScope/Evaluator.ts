@@ -10,6 +10,8 @@ import type {
   EvaluationScope,
   EvaluationResult,
   EvaluationErrors,
+  EvaluatorAction,
+  EvaluationChange,
   GeneralAssignmentNode,
 } from "./types";
 import {
@@ -86,11 +88,28 @@ const getUnmetDependencies = (
   return unmet;
 };
 
-interface ManagerAction {
-  type: "delete" | "add";
-  nodes: MathNode[];
-}
-
+/**
+ * Evaluates a collection of mathematical expressions.
+ *
+ * For example:
+ * ```ts
+ * // node implements (id: string, expr: string) => MathNode
+ * const a = node("id-a", "a = 2");
+ * const b = node("id-b", "b = a^2");
+ * const expr1 = node("id-expr1", "a + b");
+ * const expr2 = node("id-expr2", "b + c");
+ * const evaluator = new Evaluator();
+ * evaluator.enqueueAddExpressions([a, b, expr1, expr2]);
+ * evaluator.evaluate();
+ * console.log(evaluator.results)
+ * // Map(3) { 'id-a' => 3, 'id-b' => 9, 'id-expr1' => 12 }
+ * console.log(evaluator.errors)
+ * // Map(1) { 'id-expr2' => UnmetDependencyError: Undefined symbol(s): c }
+ * ```
+ *
+ * Calling `evaluator.evaluate()` applies any enqueued changes and returns a
+ * diff of the changes.
+ */
 export default class Evaluator {
   compiled = new WeakMap<MathNode, EvalFunction>();
 
@@ -100,7 +119,9 @@ export default class Evaluator {
 
   errors: EvaluationErrors = new Map();
 
-  private changeQueue: ManagerAction[] = [];
+  private idsInUse: Set<string> = new Set();
+
+  private changeQueue: EvaluatorAction[] = [];
 
   private graphManager = new ExpressionGraphManager();
 
@@ -132,12 +153,21 @@ export default class Evaluator {
   }
 
   enqueueAddExpressions(nodes: MathNode[]): void {
-    const action: ManagerAction = { type: "add", nodes };
+    nodes.map(getId).forEach((id) => {
+      if (this.idsInUse.has(id)) {
+        throw new Error(`node id "${id}" is already in use.`);
+      }
+      this.idsInUse.add(id);
+    });
+    const action: EvaluatorAction = { type: "add", nodes };
     this.changeQueue.push(action);
   }
 
   enqueueDeleteExpressions(nodes: MathNode[]): void {
-    const action: ManagerAction = { type: "delete", nodes };
+    nodes.map(getId).forEach((id) => {
+      this.idsInUse.delete(id);
+    });
+    const action: EvaluatorAction = { type: "delete", nodes };
     this.changeQueue.push(action);
   }
 
@@ -162,14 +192,13 @@ export default class Evaluator {
   }
 
   /**
-   * Updates the results/errors sets with enqueued changes.
-   *
-   * This is O(|affectedSubgraph|)
+   * Updates `results` and `errors` properties with enqueued changes to the
+   * expression graph.
+   * - Only re-evaluates the affected subgraph.
+   * - Returns a diff indicating changes.
+   * - runs in O(|affectedSubgraph|)
    */
-  evaluate(): {
-    results: Diff<string>;
-    errors: Diff<string>;
-  } {
+  evaluate(): EvaluationChange {
     const results = new DiffingMap(this.results);
     const errors = new DiffingMap(this.errors);
 

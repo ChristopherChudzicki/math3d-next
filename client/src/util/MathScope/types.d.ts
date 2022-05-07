@@ -10,6 +10,16 @@ export type EvaluationResult = Map<string, unknown>;
 
 export type EvaluationErrors = Map<string, Error>;
 
+export interface EvaluationChange {
+  results: Diff<string>;
+  errors: Diff<string>;
+}
+
+export interface EvaluatorAction {
+  type: "delete" | "add";
+  nodes: MathNode[];
+}
+
 export interface Diff<T> {
   added: Set<T>;
   updated: Set<T>;
