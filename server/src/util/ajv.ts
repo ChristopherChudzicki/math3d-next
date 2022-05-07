@@ -3,7 +3,7 @@ import { ClientError } from "./errors";
 
 const ajv = new Ajv();
 
-export const makeValidator = <T extends unknown>(
+export const makeValidator = <T>(
   schema: Schema
 ): ((obj: unknown) => asserts obj is T) => {
   const compiledValidator = ajv.compile(schema);

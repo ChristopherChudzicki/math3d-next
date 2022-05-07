@@ -28,20 +28,24 @@ export const mockReqResNext = ({
   return { request, response, next };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getThrownError = (fn: () => unknown): any => {
   try {
     fn();
   } catch (error) {
-    return error;
+    if (error instanceof Error) return error;
+    throw new Error(`Fn should have thrown an Error, not a ${typeof error}`);
   }
   throw new Error("Fn should have thrown");
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getRejection = async (fn: () => unknown): Promise<any> => {
   try {
     await fn();
   } catch (error) {
-    return error;
+    if (error instanceof Error) return error;
+    throw new Error(`Fn should have thrown an Error, not a ${typeof error}`);
   }
   throw new Error("Fn should have thrown");
 };
