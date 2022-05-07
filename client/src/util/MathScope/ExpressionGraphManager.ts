@@ -30,11 +30,11 @@ const defaultValidateAddExpr: ValidationHook = () => {};
  *
  * For example:
  * ```ts
- * // node implements (id: string, expr: string) => MathNode
+ * import { parse } from 'mathjs'
  * const manager = new ExpressionGraphManager()
- * const a = node('idA', 'a = 2')
- * const b = node('idB', 'b = a + 1')
- * const expr1 = node('idExpr1', 'a + b')
+ * const a = parse('a = 2')
+ * const b = parse('b = a + 1')
+ * const expr1 = parse('a + b')
  * manager.addExpressions([a, b, expr])
  * ```
  *
@@ -109,7 +109,7 @@ export default class ExpressionGraphManager {
      * Establish edges between all duplicates with same name. This means
      * duplicate assignments create cycles. Why is this desirable?
      *
-     * Our standard procedurate is that when nodes are added/removed from the
+     * Our standard procedure is that when nodes are added/removed from the
      * graph, we re-evaluate the reachable subgraph. So in this situation:
      *    Nodes:               current evaluation:
      *    --------------------------------------------

@@ -1,24 +1,11 @@
-import { parse, MathNode } from "mathjs";
-import * as R from "ramda";
+import { parse } from "mathjs";
 
 import ExpressionGraphManager from "./ExpressionGraphManager";
 import DirectedGraph from "./DirectedGraph";
 
 import { permutations } from "../test_util";
 
-const node = (id: string, parseable: string) => {
-  const parsed = parse(parseable);
-  parsed.comment = id;
-  return parsed;
-};
 const edge = <T>(from: T, to: T) => ({ from, to });
-const nodesById = (nodes: MathNode[]): Record<string, MathNode> => {
-  const byId = R.indexBy((n) => n.comment, nodes);
-  if (Object.keys(byId).length !== nodes.length) {
-    throw new Error("Unexpected duplicate keys");
-  }
-  return byId;
-};
 
 describe("ExpressionGraphManager", () => {
   /*
@@ -55,10 +42,10 @@ describe("ExpressionGraphManager", () => {
    */
   const getExpressions1 = () => {
     const expressions = [
-      node("id-a", "a = 2"),
-      node("id-b", "b = 2*a"),
-      node("id-c", "c = 2*b + a"),
-      node("id-x1", "a + b + c"),
+      parse("a = 2"),
+      parse("b = 2*a"),
+      parse("c = 2*b + a"),
+      parse("a + b + c"),
     ];
     const [a, b, c, x1] = expressions;
     return { a, b, c, x1 };
@@ -127,8 +114,8 @@ describe("ExpressionGraphManager", () => {
 
       const expected = new ExpressionGraphManager(expressions);
 
-      const d = node("id-d", "d = a * b * c");
-      const x1alt = node("id-x1", "a + b + c +d");
+      const d = parse("d = a * b * c");
+      const x1alt = parse("a + b + c +d");
       const graph = new ExpressionGraphManager();
       graph.addExpressions([a, b, c, x1, d]);
       graph.deleteExpressions([x1]);
@@ -141,11 +128,11 @@ describe("ExpressionGraphManager", () => {
     });
 
     it("handles multiple assignments", () => {
-      const a1 = node("id-a1", "a = 2");
-      const a2 = node("id-a2", "a = 2 + b");
-      const b1 = node("id-b1", "b = 1");
-      const b2 = node("id-b2", "b = 2");
-      const x1 = node("id-x1", "x = a + b");
+      const a1 = parse("a = 2");
+      const a2 = parse("a = 2 + b");
+      const b1 = parse("b = 1");
+      const b2 = parse("b = 2");
+      const x1 = parse("x = a + b");
 
       const expressionGraphManager = new ExpressionGraphManager([
         a1,
@@ -188,12 +175,12 @@ describe("ExpressionGraphManager", () => {
 
   describe("#getDuplicateAssignmentNodes", () => {
     it("returns duplicate assignments nodes", () => {
-      const a = node("id-a", "a=1");
-      const b1 = node("id-b1", "b=1");
-      const b2 = node("id-b2", "b=2");
-      const c1 = node("id-c1", "c(x)=1");
-      const c2 = node("id-c2", "c(x)=2");
-      const c3 = node("id-c3", "c=3");
+      const a = parse("a=1");
+      const b1 = parse("b=1");
+      const b2 = parse("b=2");
+      const c1 = parse("c(x)=1");
+      const c2 = parse("c(x)=2");
+      const c3 = parse("c=3");
       const expressions = [a, b1, b2, c1, c2, c3];
       const manager = new ExpressionGraphManager(expressions);
       expect(manager.getDuplicateAssignmentNodes()).toStrictEqual(
@@ -202,31 +189,42 @@ describe("ExpressionGraphManager", () => {
     });
 
     it.each([
-      [undefined, ["id-g1", "id-g2"]],
-      [/gg/, ["id-f1", "id-f2"]],
-      [/$^/, ["id-f1", "id-f2", "id-g1", "id-g2"]],
+      {
+        regex: undefined,
+        expectedDuplicateNames: ["g1", "g2"] as const,
+      },
+      {
+        regex: /gg/,
+        expectedDuplicateNames: ["f1", "f2"] as const,
+      },
+      {
+        regex: /$^/,
+        expectedDuplicateNames: ["f1", "f2", "g1", "g2"] as const,
+      },
     ])(
       "allows duplicate leaves matching allowedDuplicateLeafRegex",
-      (regex, expectedIds) => {
-        const f1 = node("id-f1", "_f(x)=1");
-        const f2 = node("id-f2", "_f(x)=2");
-        const g1 = node("id-g1", "gg(x)=1");
-        const g2 = node("id-g2", "gg(x)=2");
+      ({ regex, expectedDuplicateNames }) => {
+        const f1 = parse("_f(x)=1");
+        const f2 = parse("_f(x)=2");
+        const g1 = parse("gg(x)=1");
+        const g2 = parse("gg(x)=2");
+        const nodes = { f1, f2, g1, g2 };
         const expressions = [f1, f2, g1, g2];
-        const byId = nodesById(expressions);
 
         const manager = new ExpressionGraphManager(expressions, {
           allowedDuplicateLeafRegex: regex,
         });
         const dupes = manager.getDuplicateAssignmentNodes();
-        expect(dupes).toStrictEqual(new Set(expectedIds.map((id) => byId[id])));
+        expect(dupes).toStrictEqual(
+          new Set(expectedDuplicateNames.map((id) => nodes[id]))
+        );
       }
     );
 
     it("only permits duplicate names on leaf nodes", () => {
-      const f1 = node("id-f1", "_f(x)=x");
-      const f2 = node("id-f2", "_f(x)=x");
-      const a = node("id-a", "_f(5)");
+      const f1 = parse("_f(x)=x");
+      const f2 = parse("_f(x)=x");
+      const a = parse("_f(5)");
       const expressions = [f1, f2, a];
       const manager = new ExpressionGraphManager(expressions);
       const dupes = manager.getDuplicateAssignmentNodes();
@@ -246,17 +244,17 @@ describe("ExpressionGraphManager", () => {
    * ```
    */
   const getExpressions2 = () => {
-    const a = node("id-a", "a = 2");
-    const b = node("id-b", "b(x) = x^2");
-    const c = node("id-c", "c(y) = a + b(y)");
-    const d = node("id-d", "d = b(2)");
-    const e = node("id-e", "e = a + c(1)");
-    const f = node("id-f", "f = c(a)");
-    const g = node("id-g", "d + 1");
-    const h = node("id-h", "e + f");
-    const x = node("id-x", "x = 2");
-    const y = node("id-y", "y = x^2");
-    const z = node("id-z", "sin(omega)");
+    const a = parse("a = 2");
+    const b = parse("b(x) = x^2");
+    const c = parse("c(y) = a + b(y)");
+    const d = parse("d = b(2)");
+    const e = parse("e = a + c(1)");
+    const f = parse("f = c(a)");
+    const g = parse("d + 1");
+    const h = parse("e + f");
+    const x = parse("x = 2");
+    const y = parse("y = x^2");
+    const z = parse("sin(omega)");
     return { a, b, c, d, e, f, g, h, x, y, z };
   };
 
@@ -284,13 +282,13 @@ describe("ExpressionGraphManager", () => {
     });
 
     it("omits cycles, but includes cycle predecessor/successors", () => {
-      const a = node("id-a", "a = 1");
-      const b = node("id-b", "b = a + 1");
-      const c = node("id-c", "c = b + d");
-      const d = node("id-d", "d = b + c");
-      const x = node("id-x", "x = c^2");
-      const y = node("id-y", "y = x^2");
-      const z = node("id-y", "z = c^2");
+      const a = parse("a = 1");
+      const b = parse("b = a + 1");
+      const c = parse("c = b + d");
+      const d = parse("d = b + c");
+      const x = parse("x = c^2");
+      const y = parse("y = x^2");
+      const z = parse("z = c^2");
       const expressions = [a, b, c, d, x, y, z];
 
       const expressionGraphManager = new ExpressionGraphManager(expressions);
@@ -305,14 +303,14 @@ describe("ExpressionGraphManager", () => {
     });
 
     it("includes duplicates as cycles", () => {
-      const a = node("id-a", "a = 1");
-      const b = node("id-b", "b = a + 1");
-      const c1 = node("id-c1", "c = b + 1");
-      const c2 = node("id-c2", "c = b + 2");
-      const x = node("id-x", "x = b^2");
-      const y1 = node("id-y1", "_f(x) = x^2");
-      const y2 = node("id-y2", "_f(x) = x^3");
-      const z = node("id-z", "z = c^2");
+      const a = parse("a = 1");
+      const b = parse("b = a + 1");
+      const c1 = parse("c = b + 1");
+      const c2 = parse("c = b + 2");
+      const x = parse("x = b^2");
+      const y1 = parse("_f(x) = x^2");
+      const y2 = parse("_f(x) = x^3");
+      const z = parse("z = c^2");
       const expressions = [a, b, c1, c2, x, y1, y2, z];
 
       const manager = new ExpressionGraphManager(expressions);
@@ -341,13 +339,13 @@ describe("ExpressionGraphManager", () => {
     });
 
     it("includes only the reachable cycles", () => {
-      const a = node("id-a", "a = b + 1");
-      const b = node("id-b", "b = a + 1");
-      const c1 = node("id-c1", "c = 1");
-      const c2 = node("id-c2", "c = 2");
-      const x = node("id-x", "x = 2");
-      const y = node("id-y", "y = x^2");
-      const z = node("id-y", "z = y^2");
+      const a = parse("a = b + 1");
+      const b = parse("b = a + 1");
+      const c1 = parse("c = 1");
+      const c2 = parse("c = 2");
+      const x = parse("x = 2");
+      const y = parse("y = x^2");
+      const z = parse("z = y^2");
       const expressions = [a, b, c1, c2, x, y, z];
       const manager = new ExpressionGraphManager(expressions);
 
