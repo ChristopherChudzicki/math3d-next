@@ -187,4 +187,37 @@ describe("Evaluator", () => {
       expect(a1).toBe(a2);
     });
   });
+
+  describe("enqueueAddExpressions", () => {
+    it("throws an error if duplicate ids are in the same batch", () => {
+      const evaluator = new Evaluator();
+      const shouldThrow1 = () => {
+        const [a1, a2] = [node("a", "a = 1"), node("a", "a = 2")];
+        evaluator.enqueueAddExpressions([a1, a2]);
+      };
+
+      expect(shouldThrow1).toThrow(/id "a" is already in use/);
+    });
+
+    it("throws an error if duplicate ids are in different batches", () => {
+      const evaluator = new Evaluator();
+      const shouldThrow2 = () => {
+        const [a1, a2] = [node("a", "a = 1"), node("a", "a = 2")];
+        evaluator.enqueueAddExpressions([a1]);
+        evaluator.enqueueAddExpressions([a2]);
+      };
+      expect(shouldThrow2).toThrow(/id "a" is already in use/);
+    });
+
+    it("does not throw if the id is removed before being added again", () => {
+      const evaluator = new Evaluator();
+      const shouldNotThrow = () => {
+        const [a1, a2] = [node("a", "a = 1"), node("a", "a = 2")];
+        evaluator.enqueueAddExpressions([a1]);
+        evaluator.enqueueDeleteExpressions([a1]);
+        evaluator.enqueueAddExpressions([a2]);
+      };
+      expect(shouldNotThrow).not.toThrow();
+    });
+  });
 });
