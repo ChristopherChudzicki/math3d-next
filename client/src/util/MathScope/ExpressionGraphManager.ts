@@ -18,13 +18,6 @@ const getAssignmentNodesByName = R.pipe<
   (e) => new Map(e)
 );
 
-type ValidationHook = (
-  expressions: MathNode[],
-  manager: ExpressionGraphManager
-) => void;
-
-const defaultValidateAddExpr: ValidationHook = () => {};
-
 /**
  * Helps manage a dependency graph for mathematical expressions.
  *
@@ -49,25 +42,19 @@ export default class ExpressionGraphManager {
 
   allowedDuplicateLeafRegex: RegExp;
 
-  private validateAddExpressions: ValidationHook;
-
   constructor(
     nodes: MathNode[] = [],
     {
-      validateAddExpressions = defaultValidateAddExpr,
       allowedDuplicateLeafRegex = /^_/,
     }: {
-      validateAddExpressions?: ValidationHook;
       allowedDuplicateLeafRegex?: RegExp;
     } = {}
   ) {
     this.allowedDuplicateLeafRegex = allowedDuplicateLeafRegex;
-    this.validateAddExpressions = validateAddExpressions;
     this.addExpressions(nodes);
   }
 
   addExpressions(nodes: MathNode[]): void {
-    this.validateAddExpressions(nodes, this);
     nodes.forEach((node) => {
       this.graph.addNode(node);
     });
