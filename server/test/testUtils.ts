@@ -28,20 +28,22 @@ export const mockReqResNext = ({
   return { request, response, next };
 };
 
-export const getThrownError = (fn: () => unknown): any => {
+export const getThrownError = (fn: () => unknown): Error => {
   try {
     fn();
   } catch (error) {
-    return error;
+    if (error instanceof Error) return error;
+    throw new Error(`Fn should have thrown an Error, not a ${typeof error}`);
   }
   throw new Error("Fn should have thrown");
 };
 
-export const getRejection = async (fn: () => unknown): Promise<any> => {
+export const getRejection = async (fn: () => unknown): Promise<Error> => {
   try {
     await fn();
   } catch (error) {
-    return error;
+    if (error instanceof Error) return error;
+    throw new Error(`Fn should have thrown an Error, not a ${typeof error}`);
   }
   throw new Error("Fn should have thrown");
 };

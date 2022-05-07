@@ -22,7 +22,7 @@ const isJwtError = (error: unknown): boolean =>
   JWT_ERRORS.some((ErrorConstructor) => error instanceof ErrorConstructor);
 
 const throwJsonWebTokenErrorAsBackup =
-  (syncFunc: any) =>
+  (syncFunc: CallableFunction) =>
   (...args: unknown[]) => {
     try {
       return syncFunc(...args);
