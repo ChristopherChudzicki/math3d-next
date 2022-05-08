@@ -197,7 +197,12 @@ export default class Evaluator {
       }
     });
     this.changeQueue = [];
-    return { added, deleted, updated: new Set() };
+    return {
+      added,
+      deleted,
+      updated: new Set(),
+      touched: setUnion(added, deleted),
+    };
   }
 
   /**

@@ -70,11 +70,13 @@ describe("MathScope Change Events", () => {
           added: new Set(["c"]),
           deleted: new Set(),
           updated: new Set(["b"]),
+          touched: new Set(["b", "c"]),
         },
         errors: {
           added: new Set(),
           deleted: new Set(),
           updated: new Set(),
+          touched: new Set(),
         },
       },
     };
@@ -101,11 +103,13 @@ describe("MathScope Change Events", () => {
           added: new Set([]),
           deleted: new Set(["b"]),
           updated: new Set([]),
+          touched: new Set(["b"]),
         },
         errors: {
           added: new Set(),
           deleted: new Set(),
           updated: new Set(),
+          touched: new Set([]),
         },
       },
     };

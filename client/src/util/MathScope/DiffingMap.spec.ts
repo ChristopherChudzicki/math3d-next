@@ -19,6 +19,7 @@ describe("DiffingMap", () => {
       added: new Set(["x", "y"]),
       updated: new Set(["b"]),
       deleted: new Set(["c"]),
+      touched: new Set(["x", "y", "b", "c"]),
     });
   });
 
@@ -48,6 +49,7 @@ describe("DiffingMap", () => {
       added: new Set(["a"]),
       updated: new Set([]),
       deleted: new Set([]),
+      touched: new Set(["a"]),
     });
   });
 
@@ -62,6 +64,7 @@ describe("DiffingMap", () => {
       added: new Set([]),
       updated: new Set([]),
       deleted: new Set([]),
+      touched: new Set([]),
     });
   });
 
@@ -76,6 +79,7 @@ describe("DiffingMap", () => {
       added: new Set([]),
       updated: new Set([]),
       deleted: new Set(["a"]),
+      touched: new Set(["a"]),
     });
   });
 
@@ -90,6 +94,7 @@ describe("DiffingMap", () => {
       added: new Set([]),
       updated: new Set(["a"]),
       deleted: new Set([]),
+      touched: new Set(["a"]),
     });
   });
 
@@ -104,6 +109,7 @@ describe("DiffingMap", () => {
       added: new Set([]),
       updated: new Set([]),
       deleted: new Set([]),
+      touched: new Set([]),
     });
   });
 
