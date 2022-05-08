@@ -27,7 +27,7 @@ type IdentifiedExpression = {
   expr: string;
 };
 
-type OnChangeListener = (event: ScopeChangeEvent) => void;
+export type OnChangeListener = (event: ScopeChangeEvent) => void;
 
 export type ScopeChangeEvent = {
   type: "change";

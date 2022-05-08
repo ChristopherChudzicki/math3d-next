@@ -125,6 +125,7 @@ export const diff = <T, U>(x: Map<T, U>, y: Map<T, U>): FullDiff<T> => {
     updated: new Set<T>(),
     deleted: new Set<T>(),
     unchanged: new Set<T>(),
+    touched: new Set<T>(),
   };
   x.forEach((value, key) => {
     if (y.has(key)) {
@@ -132,14 +133,17 @@ export const diff = <T, U>(x: Map<T, U>, y: Map<T, U>): FullDiff<T> => {
         result.unchanged.add(key);
       } else {
         result.updated.add(key);
+        result.touched.add(key);
       }
     } else {
       result.added.add(key);
+      result.touched.add(key);
     }
   });
   y.forEach((_value, key) => {
     if (!x.has(key)) {
       result.deleted.add(key);
+      result.touched.add(key);
     }
   });
   return result;

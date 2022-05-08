@@ -26,6 +26,7 @@ export interface Diff<T> {
   added: Set<T>;
   updated: Set<T>;
   deleted: Set<T>;
+  touched: Set<T>;
 }
 
 export interface FullDiff<T> extends Diff<T> {

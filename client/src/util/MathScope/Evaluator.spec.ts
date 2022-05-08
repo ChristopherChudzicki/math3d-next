@@ -70,6 +70,7 @@ describe("Evaluator", () => {
         added: new Set(["id-f"]),
         updated: new Set(),
         deleted: new Set(),
+        touched: new Set(["id-f"]),
       });
     });
 
@@ -93,6 +94,7 @@ describe("Evaluator", () => {
         added: new Set(["id-x1", "id-x2"]),
         updated: new Set(),
         deleted: new Set(),
+        touched: new Set(["id-x1", "id-x2"]),
       });
     });
 
@@ -115,6 +117,7 @@ describe("Evaluator", () => {
         added: new Set(["id-x", "id-y"]),
         updated: new Set(),
         deleted: new Set(),
+        touched: new Set(["id-x", "id-y"]),
       });
     });
 
@@ -170,11 +173,20 @@ describe("Evaluator", () => {
           added: new Set(["id-x", "id-expr1"]),
           updated: new Set(["id-b", "id-a"]),
           deleted: new Set(["id-c", "id-expr2"]),
+          touched: new Set([
+            "id-x",
+            "id-expr1",
+            "id-b",
+            "id-a",
+            "id-c",
+            "id-expr2",
+          ]),
         },
         errors: {
           added: new Set(["id-expr2"]),
           updated: new Set([]),
           deleted: new Set(["id-expr1"]),
+          touched: new Set(["id-expr1", "id-expr2"]),
         },
       });
     });
@@ -227,11 +239,13 @@ describe("Evaluator", () => {
           added: new Set([]),
           updated: new Set(["id-c", "id-exp1"]),
           deleted: new Set([]),
+          touched: new Set(["id-c", "id-exp1"]),
         },
         errors: {
           added: new Set([]),
           updated: new Set([]),
           deleted: new Set([]),
+          touched: new Set([]),
         },
       });
 
