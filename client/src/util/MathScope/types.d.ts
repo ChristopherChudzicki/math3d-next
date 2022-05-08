@@ -10,6 +10,8 @@ export type EvaluationResult = Map<string, unknown>;
 
 export type EvaluationErrors = Map<string, Error>;
 
+export type ParseErrors = Map<string, Error>;
+
 export interface EvaluationChange {
   results: Diff<string>;
   errors: Diff<string>;
