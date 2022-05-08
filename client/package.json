@@ -59,7 +59,7 @@
     "@types/jest": "24.9.1",
     "@types/node": "16.11.33",
     "@types/ramda": "0.28.12",
-    "@types/react": "18.0.8",
+    "@types/react": "18.0.9",
     "@types/react-dom": "18.0.3",
     "@types/toposort": "2.0.3",
     "@typescript-eslint/eslint-plugin": "5.19.0",
