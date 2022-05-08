@@ -1,23 +1,23 @@
 import React from "react";
 import { MathItem, MathItemType as MIT } from "types";
-import Axis from "./Axis";
-import BooleanVariable from "./BooleanVariable";
-import Camera from "./Camera";
-import ExplicitSurface from "./ExplicitSurface";
-import ExplicitSurfacePolar from "./ExplicitSurfacePolar";
-import Folder from "./Folder";
-import Grid from "./Grid";
-import ImplicitSurface from "./ImplicitSurface";
-import Line from "./Line";
-import ParametricCurve from "./ParametricCurve";
-import ParametricSurface from "./ParametricSurface";
-import Point from "./Point";
-import Variable from "./Variable";
-import VariableSlider from "./VariableSlider";
-import Vector from "./Vector";
-import VectorField from "./VectorField";
+import Axis from "./forms/Axis";
+import BooleanVariable from "./forms/BooleanVariable";
+import Camera from "./forms/Camera";
+import ExplicitSurface from "./forms/ExplicitSurface";
+import ExplicitSurfacePolar from "./forms/ExplicitSurfacePolar";
+import Folder from "./forms/Folder";
+import Grid from "./forms/Grid";
+import ImplicitSurface from "./forms/ImplicitSurface";
+import Line from "./forms/Line";
+import ParametricCurve from "./forms/ParametricCurve";
+import ParametricSurface from "./forms/ParametricSurface";
+import Point from "./forms/Point";
+import Variable from "./forms/Variable";
+import VariableSlider from "./forms/VariableSlider";
+import Vector from "./forms/Vector";
+import VectorField from "./forms/VectorField";
 
-const getMathItemComponent = (type: MIT) => {
+const getMathItemForm = (type: MIT) => {
   switch (type) {
     case MIT.Axis:
       return Axis;
@@ -60,7 +60,7 @@ interface Props {
   item: MathItem;
 }
 const MathItemComponent = (props: Props) => {
-  const Component = getMathItemComponent(props.item.type);
+  const Component = getMathItemForm(props.item.type);
   return <Component item={props.item} />;
 };
 
