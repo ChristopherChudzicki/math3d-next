@@ -30,6 +30,8 @@ module.exports = {
       'error',
       {
         devDependencies: [
+          "**/*.spec.ts",
+          "**/*.spec.tsx",
           "**/*.stories.tsx",
           "src/setupTests.ts"
         ]
