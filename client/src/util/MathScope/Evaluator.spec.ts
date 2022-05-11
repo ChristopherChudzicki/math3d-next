@@ -2,6 +2,7 @@ import { parse } from "mathjs";
 import Evaluator, {
   UnmetDependencyError as UnmetDepErr,
   getId,
+  DuplicateAssignmentError,
 } from "./Evaluator";
 
 const node = (id: string, parseable: string) => {
@@ -56,13 +57,38 @@ describe("Evaluator", () => {
       const f = node("id-f", "f(x, y) = a + b + x + y");
       const evaluator = new Evaluator();
       evaluator.enqueueAddExpressions([f]);
-      evaluator.evaluate();
+      const diff = evaluator.evaluate();
       expect(evaluator.results).toStrictEqual(asMap({}));
       expect(evaluator.errors).toStrictEqual(
         asMap({
           "id-f": new UnmetDepErr(["a", "b"]),
         })
       );
+      expect(diff.errors).toStrictEqual({
+        added: new Set(["id-f"]),
+        updated: new Set(),
+        deleted: new Set(),
+      });
+    });
+
+    it.only("records duplicate assignment errors", () => {
+      const x1 = node("id-x1", "x = 1");
+      const x2 = node("id-x2", "x = 1");
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([x1, x2]);
+      const diff = evaluator.evaluate();
+      expect(evaluator.results).toStrictEqual(asMap({}));
+      expect(evaluator.errors).toStrictEqual(
+        asMap({
+          "id-x1": new DuplicateAssignmentError("x"),
+          "id-x2": new DuplicateAssignmentError("x"),
+        })
+      );
+      expect(diff.errors).toStrictEqual({
+        added: new Set(["id-x1", "id-x2"]),
+        updated: new Set(),
+        deleted: new Set(),
+      });
     });
 
     it("can add and remove nodes", () => {

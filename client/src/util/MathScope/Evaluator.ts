@@ -47,8 +47,8 @@ export class CyclicAssignmentError extends AssignmentError {
 }
 
 export class DuplicateAssignmentError extends AssignmentError {
-  constructor(node: GeneralAssignmentNode) {
-    const message = `Name ${node.name} has been assigned multiple times.`;
+  constructor(name: string) {
+    const message = `Name ${name} has been assigned multiple times.`;
     super(message);
   }
 }
@@ -58,7 +58,7 @@ const makeAssignmentError = (
   cycle: GeneralAssignmentNode[]
 ) => {
   const isDuplicate = cycle.some((c) => c.name === node.name);
-  if (isDuplicate) return new DuplicateAssignmentError(node);
+  if (isDuplicate) return new DuplicateAssignmentError(node.name);
   return new CyclicAssignmentError(cycle);
 };
 
@@ -139,7 +139,10 @@ export default class Evaluator {
     return compiled;
   }
 
-  private updateAssignmentErrors(cycles: GeneralAssignmentNode[][]): void {
+  private updateAssignmentErrors(
+    errors: DiffingMap<string, Error>,
+    cycles: GeneralAssignmentNode[][]
+  ): void {
     const currentErrors = new Map(
       cycles.flatMap((cycle) =>
         cycle.map((node) => [getId(node), makeAssignmentError(node, cycle)])
@@ -149,7 +152,7 @@ export default class Evaluator {
     currentErrors.forEach((error, key) => {
       const existingError = this.errors.get(key);
       if (!existingError || !(existingError instanceof AssignmentError)) {
-        this.errors.set(key, error);
+        errors.set(key, error);
       }
     });
   }
@@ -253,7 +256,7 @@ export default class Evaluator {
       }
     });
 
-    this.updateAssignmentErrors(cycles);
+    this.updateAssignmentErrors(errors, cycles);
 
     return {
       results: results.getDiff(),
