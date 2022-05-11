@@ -40,15 +40,15 @@ export class UnmetDependencyError extends EvaluationError {
 export class AssignmentError extends EvaluationError {}
 export class CyclicAssignmentError extends AssignmentError {
   constructor(cycle: GeneralAssignmentNode[]) {
-    const nodeNames = cycle.map((n) => n.name);
+    const nodeNames = cycle.map((n) => `'${n.name}'`).join(", ");
     const message = `Cyclic dependencies: ${nodeNames}`;
     super(message);
   }
 }
 
 export class DuplicateAssignmentError extends AssignmentError {
-  constructor(name: string) {
-    const message = `Name ${name} has been assigned multiple times.`;
+  constructor(node: GeneralAssignmentNode) {
+    const message = `Name ${node.name} has been assigned multiple times.`;
     super(message);
   }
 }
@@ -57,8 +57,8 @@ const makeAssignmentError = (
   node: GeneralAssignmentNode,
   cycle: GeneralAssignmentNode[]
 ) => {
-  const isDuplicate = cycle.some((c) => c.name === node.name);
-  if (isDuplicate) return new DuplicateAssignmentError(node.name);
+  const isDuplicate = cycle.some((c) => c.name === node.name && c !== node);
+  if (isDuplicate) return new DuplicateAssignmentError(node);
   return new CyclicAssignmentError(cycle);
 };
 
