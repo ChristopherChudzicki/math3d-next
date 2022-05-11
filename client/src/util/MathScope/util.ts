@@ -16,6 +16,13 @@ export const isGeneralAssignmentNode = (
   return false;
 };
 
+export const assertIsGeneralAssignmentNode: (
+  node: unknown
+) => asserts node is GeneralAssignmentNode = (node: unknown) => {
+  if (isGeneralAssignmentNode(node)) return;
+  throw new Error("Node is not a GeneralAssignmentNode");
+};
+
 /**
  * Get the symbol dependencies of a given node. For example,
  * ```ts

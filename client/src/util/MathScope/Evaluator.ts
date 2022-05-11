@@ -40,7 +40,7 @@ export class UnmetDependencyError extends EvaluationError {
 export class AssignmentError extends EvaluationError {}
 export class CyclicAssignmentError extends AssignmentError {
   constructor(cycle: GeneralAssignmentNode[]) {
-    const nodeNames = cycle.map((n) => n.name);
+    const nodeNames = cycle.map((n) => `'${n.name}'`).join(", ");
     const message = `Cyclic dependencies: ${nodeNames}`;
     super(message);
   }
@@ -57,7 +57,7 @@ const makeAssignmentError = (
   node: GeneralAssignmentNode,
   cycle: GeneralAssignmentNode[]
 ) => {
-  const isDuplicate = cycle.some((c) => c.name === node.name);
+  const isDuplicate = cycle.some((c) => c.name === node.name && c !== node);
   if (isDuplicate) return new DuplicateAssignmentError(node);
   return new CyclicAssignmentError(cycle);
 };
@@ -139,7 +139,10 @@ export default class Evaluator {
     return compiled;
   }
 
-  private updateAssignmentErrors(cycles: GeneralAssignmentNode[][]): void {
+  private updateAssignmentErrors(
+    errors: DiffingMap<string, Error>,
+    cycles: GeneralAssignmentNode[][]
+  ): void {
     const currentErrors = new Map(
       cycles.flatMap((cycle) =>
         cycle.map((node) => [getId(node), makeAssignmentError(node, cycle)])
@@ -149,7 +152,7 @@ export default class Evaluator {
     currentErrors.forEach((error, key) => {
       const existingError = this.errors.get(key);
       if (!existingError || !(existingError instanceof AssignmentError)) {
-        this.errors.set(key, error);
+        errors.set(key, error);
       }
     });
   }
@@ -253,7 +256,7 @@ export default class Evaluator {
       }
     });
 
-    this.updateAssignmentErrors(cycles);
+    this.updateAssignmentErrors(errors, cycles);
 
     return {
       results: results.getDiff(),

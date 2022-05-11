@@ -2,7 +2,10 @@ import { parse } from "mathjs";
 import Evaluator, {
   UnmetDependencyError as UnmetDepErr,
   getId,
+  DuplicateAssignmentError,
+  CyclicAssignmentError,
 } from "./Evaluator";
+import { assertIsGeneralAssignmentNode } from "./util";
 
 const node = (id: string, parseable: string) => {
   const parsed = parse(parseable);
@@ -56,13 +59,63 @@ describe("Evaluator", () => {
       const f = node("id-f", "f(x, y) = a + b + x + y");
       const evaluator = new Evaluator();
       evaluator.enqueueAddExpressions([f]);
-      evaluator.evaluate();
+      const diff = evaluator.evaluate();
       expect(evaluator.results).toStrictEqual(asMap({}));
       expect(evaluator.errors).toStrictEqual(
         asMap({
           "id-f": new UnmetDepErr(["a", "b"]),
         })
       );
+      expect(diff.errors).toStrictEqual({
+        added: new Set(["id-f"]),
+        updated: new Set(),
+        deleted: new Set(),
+      });
+    });
+
+    it("records duplicate assignment errors", () => {
+      const x1 = node("id-x1", "x = 1");
+      const x2 = node("id-x2", "x = 1");
+      assertIsGeneralAssignmentNode(x1);
+      assertIsGeneralAssignmentNode(x2);
+
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([x1, x2]);
+      const diff = evaluator.evaluate();
+      expect(evaluator.results).toStrictEqual(asMap({}));
+      expect(evaluator.errors).toStrictEqual(
+        asMap({
+          "id-x1": new DuplicateAssignmentError(x1),
+          "id-x2": new DuplicateAssignmentError(x2),
+        })
+      );
+      expect(diff.errors).toStrictEqual({
+        added: new Set(["id-x1", "id-x2"]),
+        updated: new Set(),
+        deleted: new Set(),
+      });
+    });
+
+    it("records cyclic assignment errors", () => {
+      const x = node("id-x", "x = y^2");
+      const y = node("id-y", "y = x^2");
+      assertIsGeneralAssignmentNode(x);
+      assertIsGeneralAssignmentNode(y);
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([x, y]);
+      const diff = evaluator.evaluate();
+      expect(evaluator.results).toStrictEqual(asMap({}));
+      expect(evaluator.errors).toStrictEqual(
+        asMap({
+          "id-x": new CyclicAssignmentError([y, x]),
+          "id-y": new CyclicAssignmentError([y, x]),
+        })
+      );
+      expect(diff.errors).toStrictEqual({
+        added: new Set(["id-x", "id-y"]),
+        updated: new Set(),
+        deleted: new Set(),
+      });
     });
 
     it("can add and remove nodes", () => {
