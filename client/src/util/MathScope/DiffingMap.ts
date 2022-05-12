@@ -1,4 +1,5 @@
 import type { Diff } from "./types";
+import { setUnion } from "./util";
 
 type Comparer<T> = (t1: T, t2: T) => boolean;
 
@@ -83,7 +84,8 @@ export default class DiffingMap<T, U> {
       }
     });
 
-    return { added, updated, deleted };
+    const touched = setUnion(added, updated, deleted);
+    return { added, updated, deleted, touched };
   }
 
   resetDiff() {
