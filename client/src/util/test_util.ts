@@ -1,6 +1,6 @@
 import * as R from "ramda";
 
-export const permutations = <T>(tokens: T[], subperms = [[]]): T[][] =>
+export const permutations = <T>(tokens: T[], subperms: T[][] = [[]]): T[][] =>
   R.isEmpty(tokens)
     ? subperms
     : tokens.flatMap((token: T, idx) =>
