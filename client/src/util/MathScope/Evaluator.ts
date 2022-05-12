@@ -148,7 +148,6 @@ export default class Evaluator {
         cycle.map((node) => [getId(node), makeAssignmentError(node, cycle)])
       )
     );
-
     currentErrors.forEach((error, key) => {
       const existingError = this.errors.get(key);
       if (!existingError || !(existingError instanceof AssignmentError)) {

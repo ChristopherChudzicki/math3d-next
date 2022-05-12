@@ -22,3 +22,10 @@ export const isNotNil = <T>(x: T): x is NonNullable<T> => {
   if (x === null || x === undefined) return false;
   return true;
 };
+
+export const assertNotNil: <T>(value: T) => asserts value is NonNullable<T> = (
+  value
+) => {
+  if (isNotNil(value)) return;
+  throw new Error(`Value ${value} should not be nil.`);
+};
