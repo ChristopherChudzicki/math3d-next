@@ -1,4 +1,7 @@
-import MathScope, { ScopeChangeEvent } from "./MathScope";
+import MathScope, {
+  ScopeChangeErrorsEvent,
+  ScopeChangeEvent,
+} from "./MathScope";
 
 describe("MathScope Setting Expressions", () => {
   it("Adds expressions and exposes results + errors", () => {
@@ -47,7 +50,7 @@ describe("MathScope Setting Expressions", () => {
   });
 });
 
-describe("MathScope Change Events", () => {
+describe('MathScope "change" Events', () => {
   test("Setting expressions triggers a change", () => {
     const mathScope = new MathScope();
     mathScope.setExpressions([
@@ -119,13 +122,129 @@ describe("MathScope Change Events", () => {
 
   test("Removing event listeners", () => {
     const mathScope = new MathScope();
-    const spy = jest.fn();
+    const spy1 = jest.fn();
+    const spy2 = jest.fn();
 
-    mathScope.addEventListener("change", spy);
+    mathScope.addEventListener("change", spy1);
+    mathScope.addEventListener("change", spy2);
     mathScope.setExpressions([]);
+    expect(spy1).toHaveBeenCalledTimes(1);
+    expect(spy2).toHaveBeenCalledTimes(1);
+    mathScope.removeEventListener("change", spy1);
     mathScope.setExpressions([]);
-    expect(spy).toHaveBeenCalledTimes(2);
-    mathScope.removeEventListener("change", spy);
-    expect(spy).toHaveBeenCalledTimes(2);
+    expect(spy1).toHaveBeenCalledTimes(1);
+    expect(spy2).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('MathScope "change-errors" Events', () => {
+  test("Adding without errors does not trigger the event", () => {
+    const mathScope = new MathScope();
+    mathScope.setExpressions([
+      { id: "a", expr: "a = 4" },
+      { id: "b", expr: "a + 1" },
+    ]);
+
+    const spy = jest.fn();
+    mathScope.addEventListener("change-errors", spy);
+
+    mathScope.setExpressions([
+      { id: "c", expr: "2 * 20" },
+      { id: "b", expr: "a + 2 " },
+    ]);
+    expect(spy).toHaveBeenCalledTimes(0);
+  });
+
+  test("Adding with errors does trigger the event", () => {
+    const mathScope = new MathScope();
+    mathScope.setExpressions([
+      { id: "a", expr: "a = 4" },
+      { id: "b", expr: "a + 1" },
+    ]);
+
+    const spy = jest.fn();
+    mathScope.addEventListener("change-errors", spy);
+
+    mathScope.setExpressions([{ id: "c", expr: "x + 1" }]);
+
+    const event: ScopeChangeErrorsEvent = {
+      type: "change-errors",
+      mathScope,
+      changes: {
+        errors: {
+          added: new Set("c"),
+          deleted: new Set(),
+          updated: new Set(),
+          touched: new Set(["c"]),
+        },
+      },
+    };
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledWith(event);
+  });
+
+  test("Deleting without errors does not trigger the event", () => {
+    const mathScope = new MathScope();
+    mathScope.setExpressions([
+      { id: "a", expr: "a = 4" },
+      { id: "b", expr: "a + 1" },
+    ]);
+
+    const spy = jest.fn();
+    mathScope.addEventListener("change-errors", spy);
+    mathScope.deleteExpressions(["b"]);
+
+    expect(spy).toHaveBeenCalledTimes(0);
+  });
+
+  test("Deleting with errors does trigger the event", () => {
+    const mathScope = new MathScope();
+    mathScope.setExpressions([
+      { id: "a", expr: "a = 4" },
+      { id: "b", expr: "a + 1" },
+    ]);
+
+    const spy = jest.fn();
+    mathScope.addEventListener("change-errors", spy);
+
+    mathScope.deleteExpressions(["a"]);
+
+    const event: ScopeChangeErrorsEvent = {
+      type: "change-errors",
+      mathScope,
+      changes: {
+        errors: {
+          added: new Set("b"),
+          deleted: new Set(),
+          updated: new Set(),
+          touched: new Set(["b"]),
+        },
+      },
+    };
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledWith(event);
+  });
+
+  test("Removing event listeners", () => {
+    const mathScope = new MathScope();
+    mathScope.setExpressions([
+      { id: "a", expr: "a = 4" },
+      { id: "b", expr: "a + 1" },
+      { id: "x", expr: "x = 4" },
+      { id: "y", expr: "x + 1" },
+    ]);
+
+    const spy1 = jest.fn();
+    const spy2 = jest.fn();
+    mathScope.addEventListener("change-errors", spy1);
+    mathScope.addEventListener("change-errors", spy2);
+
+    mathScope.deleteExpressions(["a"]);
+    expect(spy1).toHaveBeenCalledTimes(1);
+    expect(spy2).toHaveBeenCalledTimes(1);
+    mathScope.removeEventListener("change-errors", spy1);
+    mathScope.deleteExpressions(["x"]);
+    expect(spy1).toHaveBeenCalledTimes(1);
+    expect(spy2).toHaveBeenCalledTimes(2);
   });
 });

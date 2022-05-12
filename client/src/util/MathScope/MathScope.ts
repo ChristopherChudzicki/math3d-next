@@ -29,11 +29,21 @@ type IdentifiedExpression = {
 
 export type OnChangeListener = (event: ScopeChangeEvent) => void;
 
-export type ScopeChangeEvent = {
+export interface ScopeChangeEvent {
   type: "change";
   changes: EvaluationChange;
   mathScope: MathScope;
-};
+}
+
+export type OnChangeErrorsListener = (event: ScopeChangeErrorsEvent) => void;
+
+export interface ScopeChangeErrorsEvent {
+  type: "change-errors";
+  changes: {
+    errors: EvaluationChange["errors"];
+  };
+  mathScope: MathScope;
+}
 
 /**
  * Parse and evaluate a dynamic scope of mathematical expressions, possibly
@@ -89,36 +99,73 @@ export default class MathScope {
     this.evaluator.enqueueDeleteExpressions(ids);
     this.evaluator.enqueueAddExpressions(parsed);
 
-    const result = this.evaluator.evaluate();
-    const event: ScopeChangeEvent = {
-      type: "change",
-      changes: result,
-      mathScope: this,
-    };
+    const changes = this.evaluator.evaluate();
 
-    this.events.emit("change", event);
+    this.emitChangeEvent(changes);
+    if (changes.errors.touched.size > 0) {
+      this.emitChangeErrorsEvent(changes);
+    }
 
     return unparseable;
   }
 
   deleteExpressions(ids: string[]): void {
     this.evaluator.enqueueDeleteExpressions(ids);
-    const result = this.evaluator.evaluate();
+    const changes = this.evaluator.evaluate();
+
+    this.emitChangeEvent(changes);
+    if (changes.errors.touched.size > 0) {
+      this.emitChangeErrorsEvent(changes);
+    }
+  }
+
+  private emitChangeEvent(changes: EvaluationChange) {
     const event: ScopeChangeEvent = {
       type: "change",
-      changes: result,
+      changes,
       mathScope: this,
     };
 
     this.events.emit("change", event);
   }
 
-  addEventListener(type: "change", listener: OnChangeListener): this {
+  private emitChangeErrorsEvent(fullChanges: EvaluationChange) {
+    const changes = {
+      errors: fullChanges.errors,
+    };
+    const event: ScopeChangeErrorsEvent = {
+      type: "change-errors",
+      changes,
+      mathScope: this,
+    };
+
+    this.events.emit("change-errors", event);
+  }
+
+  addEventListener(
+    type: "change-errors",
+    listener: OnChangeErrorsListener
+  ): this;
+  addEventListener(type: "change", listener: OnChangeListener): this;
+
+  addEventListener(
+    type: "change" | "change-errors",
+    listener: OnChangeListener | OnChangeErrorsListener
+  ) {
     this.events.addListener(type, listener);
     return this;
   }
 
-  removeEventListener(type: "change", listener: OnChangeListener): this {
+  removeEventListener(
+    type: "change-errors",
+    listener: OnChangeErrorsListener
+  ): this;
+  removeEventListener(type: "change", listener: OnChangeListener): this;
+
+  removeEventListener(
+    type: "change" | "change-errors",
+    listener: OnChangeListener | OnChangeErrorsListener
+  ): this {
     this.events.removeListener(type, listener);
     return this;
   }
