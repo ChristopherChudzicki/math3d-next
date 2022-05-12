@@ -72,7 +72,7 @@
     "prettier": "2.6.2",
     "typescript": "4.6.4",
     "typescript-plugin-css-modules": "3.4.0",
-    "webpack": "5.72.0"
+    "webpack": "5.72.1"
   },
   "proxy": "http://localhost:3001"
 }
