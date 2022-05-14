@@ -7,7 +7,7 @@ import {
 } from "types";
 
 const defaultValues: Point["properties"] = {
-  coords: "\\[0, 0, 0\\]",
+  coords: "[0, 0, 0]",
   description: "Point",
   size: "8",
   visible: "true",
@@ -83,7 +83,7 @@ const config: MathItemConfig = {
       name: "label",
       label: "Label",
       defaultValue: defaultValues.label,
-      widget: Widget.MathValue,
+      widget: Widget.Text,
     },
     {
       name: "labelVisible",

@@ -1,0 +1,18 @@
+import MathScope from "util/MathScope";
+
+interface IWidgetProps {
+  name: string;
+  value: string;
+  onChange: OnWidgetChange;
+  style?: React.CSSProperties;
+  className?: string;
+}
+
+interface WidgetChangeEvent {
+  name: string;
+  value: string;
+  mathScope?: MathScope;
+}
+type OnWidgetChange = (e: WidgetChangeEvent) => void;
+
+export type { IWidgetProps, WidgetChangeEvent, OnWidgetChange };

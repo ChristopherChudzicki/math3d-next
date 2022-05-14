@@ -3,27 +3,22 @@ import { MathItem, MathItemType as MIT } from "types";
 import { assertIsMathItemType } from "util/predicates";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { configs } from "../../configs";
-import { MathValue, useDispatchSetPropertyFromWidget } from "../../FieldWidget";
+import { MathEqualityInput, useOnWidgetChange } from "../../FieldWidget";
+
+const config = configs[MIT.Variable];
 
 type Props = {
   item: MathItem;
 };
 const Variable: React.FC<Props> = ({ item }) => {
   assertIsMathItemType(item.type, MIT.Variable);
-  const dispatchSetProperty = useDispatchSetPropertyFromWidget(item);
+  const onWidgetChange = useOnWidgetChange(item);
   return (
-    <ItemTemplate item={item} config={configs[MIT.Variable]}>
-      <MathValue
-        name="name"
-        style={{ width: "50px" }}
-        value={item.properties.name}
-        onChange={dispatchSetProperty}
-      />
-      =
-      <MathValue
+    <ItemTemplate item={item} config={config}>
+      <MathEqualityInput
         name="value"
         value={item.properties.value}
-        onChange={dispatchSetProperty}
+        onChange={onWidgetChange}
       />
     </ItemTemplate>
   );

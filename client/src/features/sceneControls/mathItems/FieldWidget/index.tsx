@@ -2,20 +2,9 @@ import React, { useCallback } from "react";
 import { MathItems, MathItemType as MIT, Widget } from "types";
 import { useAppDispatch } from "app/hooks";
 import { actions } from "../mathItems.slice";
-
-interface IWidgetProps {
-  name: string;
-  value: string;
-  onChange: OnWidgetChange;
-  style?: React.CSSProperties;
-  className?: string;
-}
-
-export interface WidgetChangeEvent {
-  name: string;
-  value: string;
-}
-export type OnWidgetChange = (e: WidgetChangeEvent) => void;
+import MathEqualityInput from "./MathEqualityInput";
+import { IWidgetProps, WidgetChangeEvent, OnWidgetChange } from "./types";
+import { mathScopeId } from "../mathScope";
 
 const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const { onChange, name, ...others } = props;
@@ -37,11 +26,15 @@ const ColorPicker = PlaceholderInput;
 
 const AutosizeText = PlaceholderInput;
 
+const TextInput = PlaceholderInput;
+
 type WidgetsProps = {
   [Widget.MathValue]: React.ComponentProps<typeof MathValue>;
   [Widget.Color]: React.ComponentProps<typeof ColorPicker>;
   [Widget.MathBoolean]: React.ComponentProps<typeof MathBoolean>;
   [Widget.AutosizeText]: React.ComponentProps<typeof AutosizeText>;
+  [Widget.MathEquality]: React.ComponentProps<typeof MathEqualityInput>;
+  [Widget.Text]: React.ComponentProps<typeof TextInput>;
 };
 
 type FormWidgetProps<W extends Widget> = {
@@ -67,18 +60,31 @@ const FieldWidget = <W extends Widget>(
 export { MathValue, MathBoolean, ColorPicker, AutosizeText };
 
 export default FieldWidget;
-
-export const useDispatchSetPropertyFromWidget = <T extends MIT>(
-  item: MathItems[T]
-) => {
+/**
+ * The returned event handler will:
+ *  1. set the property value on given `item` in redux store
+ *  2. if the WidgetChangeEvent event has a MathScope object, will set
+ *    the expression on mathScope with id `itemId-propName`.
+ */
+export const useOnWidgetChange = <T extends MIT>(item: MathItems[T]) => {
   const dispatch = useAppDispatch();
-  const dispatchSetProperty: OnWidgetChange = useCallback(
+  const onWidgetChange: OnWidgetChange = useCallback(
     (e) => {
       const properties = { [e.name]: e.value };
       const patch = { id: item.id, type: item.type, properties };
       dispatch(actions.setProperties(patch));
+      if (e.mathScope) {
+        e.mathScope.setExpressions([
+          {
+            id: mathScopeId(item.id, e.name),
+            expr: e.value,
+          },
+        ]);
+      }
     },
     [dispatch, item.id, item.type]
   );
-  return dispatchSetProperty;
+  return onWidgetChange;
 };
+
+export { MathEqualityInput };
