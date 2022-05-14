@@ -3,9 +3,8 @@ import { Popover } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
 import { SubtleButton } from "util/components";
 import type { MathItem, MathItemConfig } from "types";
-import { useAppDispatch } from "app/hooks";
 import styles from "./SettingsPopover.module.css";
-import FieldWidget, { useDispatchSetPropertyFromWidget } from "../FieldWidget";
+import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import CloseButton from "./CloseButton";
 
 interface FormProps {
@@ -14,7 +13,7 @@ interface FormProps {
 }
 
 const SettingsForm: React.FC<FormProps> = ({ config, item }) => {
-  const dispatchSetProperty = useDispatchSetPropertyFromWidget(item);
+  const onWidgetChange = useOnWidgetChange(item);
   const fields = useMemo(() => {
     const settings = config.properties.filter((p) => !p.primaryOnly);
     return settings.map((field) => {
@@ -35,7 +34,7 @@ const SettingsForm: React.FC<FormProps> = ({ config, item }) => {
             widget={field.widget}
             name={field.name}
             value={value}
-            onChange={dispatchSetProperty}
+            onChange={onWidgetChange}
           />
         </React.Fragment>
       ))}

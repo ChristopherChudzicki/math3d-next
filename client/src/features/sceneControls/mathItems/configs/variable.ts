@@ -7,8 +7,7 @@ import {
 } from "types/mathItem";
 
 const defaultValues: Variable["properties"] = {
-  name: "f(x)",
-  value: "e^x",
+  value: "f(x)=e^x",
   description: "Variable or Function",
 };
 
@@ -30,17 +29,10 @@ const config: MathItemConfig = {
       primaryOnly: true,
     },
     {
-      name: "name",
-      label: "Name",
-      defaultValue: defaultValues.name,
-      widget: Widget.MathValue,
-      primaryOnly: true,
-    },
-    {
       name: "value",
       label: "Value",
       defaultValue: defaultValues.value,
-      widget: Widget.MathValue,
+      widget: Widget.MathEquality,
       primaryOnly: true,
     },
   ],

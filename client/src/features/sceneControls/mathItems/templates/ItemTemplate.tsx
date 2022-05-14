@@ -4,7 +4,7 @@ import type { MathItem, MathItemConfig } from "types";
 import styles from "./ItemTemplate.module.css";
 import SettingsPopover from "./SettingsPopover";
 import CloseButton from "./CloseButton";
-import { AutosizeText, useDispatchSetPropertyFromWidget } from "../FieldWidget";
+import { AutosizeText, useOnWidgetChange } from "../FieldWidget";
 
 type Props = {
   showAlignmentBar?: boolean;
@@ -19,7 +19,7 @@ const ItemTemplate: React.FC<Props> = ({
   children,
   showAlignmentBar = true,
 }) => {
-  const dispatchSetProperty = useDispatchSetPropertyFromWidget(item);
+  const onWidgetChange = useOnWidgetChange(item);
   return (
     <div className={styles.container}>
       <div
@@ -34,7 +34,7 @@ const ItemTemplate: React.FC<Props> = ({
         <AutosizeText
           name="description"
           value={item.properties.description}
-          onChange={dispatchSetProperty}
+          onChange={onWidgetChange}
         />
       </div>
 

@@ -8,7 +8,10 @@ import {
 } from "react";
 import MathScope, { OnChangeListener } from "util/MathScope";
 
-const MathContext = createContext(new MathScope());
+const defaultMathScope = new MathScope();
+// @ts-expect-error assign to window for debugging
+window.mathScope = defaultMathScope;
+const MathContext = createContext(defaultMathScope);
 
 type EvaluationResultsSlice<K extends string> = Partial<Record<K, unknown>>;
 type EvaluationErrorsSlice<K extends string> = Partial<Record<K, Error>>;
@@ -27,7 +30,7 @@ const extractResults = <K extends string>(
   return newResult;
 };
 
-const extrractErrors = <K extends string>(
+const extractErrors = <K extends string>(
   scope: MathScope,
   ids: Record<K, string>
 ): EvaluationErrorsSlice<K> => {
@@ -97,14 +100,14 @@ const useMathErrors = <K extends string>(
       const { mathScope } = event;
       const { errors } = event.changes;
       if (names.some((name) => errors.touched.has(ids[name]))) {
-        setErrors(extrractErrors(mathScope, ids));
+        setErrors(extractErrors(mathScope, ids));
       }
     },
     [ids, names]
   );
 
   useEffect(() => {
-    setErrors(extrractErrors(scope, ids));
+    setErrors(extractErrors(scope, ids));
     scope.addEventListener("change", onChange);
     return () => {
       scope.removeEventListener("change", onChange);
@@ -114,42 +117,4 @@ const useMathErrors = <K extends string>(
   return errorsSlice;
 };
 
-interface NamedExpression {
-  name: string;
-  expr: string;
-}
-
-const useModifyMathEpressions = (
-  idPrefix: string
-): {
-  setExpressions: (
-    namedExpressions: NamedExpression[]
-  ) => ReturnType<MathScope["setExpressions"]>;
-  deleteExpressions: (
-    names: string[]
-  ) => ReturnType<MathScope["deleteExpressions"]>;
-} => {
-  const scope = useContext(MathContext);
-  const setExpressions = useCallback(
-    (namedExpressions: NamedExpression[]) => {
-      const identifiedExpressions = namedExpressions.map((named) => ({
-        id: mathScopeId(idPrefix, named.name),
-        expr: named.expr,
-      }));
-      const result = scope.setExpressions(identifiedExpressions);
-      return result;
-    },
-    [idPrefix, scope]
-  );
-
-  const deleteExpressions = useCallback(
-    (names: string[]) => {
-      const ids = names.map((name) => mathScopeId(idPrefix, name));
-      return scope.deleteExpressions(ids);
-    },
-    [idPrefix, scope]
-  );
-  return { setExpressions, deleteExpressions };
-};
-
-export { MathContext, useMathResults, useMathErrors, useModifyMathEpressions };
+export { MathContext, useMathResults, useMathErrors };

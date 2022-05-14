@@ -1,4 +1,4 @@
-import { evaluate, parse } from "mathjs";
+import { parse } from "mathjs";
 import Evaluator, {
   UnmetDependencyError as UnmetDepErr,
   getId,

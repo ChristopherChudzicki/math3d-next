@@ -25,7 +25,6 @@ type FolderPoperties = {
 };
 
 type VariableProperties = {
-  name: string;
   value: string;
   description: string;
 };
@@ -398,6 +397,7 @@ export interface MathItemConfig {
 export enum Widget {
   MathBoolean = "math-boolean",
   MathValue = "math-value",
+  MathEquality = "math-equality",
   Color = "color-picker",
   AutosizeText = "autosize-text",
 }
