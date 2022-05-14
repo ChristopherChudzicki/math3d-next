@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useCallback } from "react";
 import mergeClassNames from "classnames";
 import type { MathItem, MathItemConfig } from "types";
+import { useAppDispatch } from "app/hooks";
 import styles from "./ItemTemplate.module.css";
 import SettingsPopover from "./SettingsPopover";
 import CloseButton from "./CloseButton";
 import { AutosizeText, useOnWidgetChange } from "../FieldWidget";
 import { usePopulateMathScope } from "../mathScope";
+import { actions } from "../mathItems.slice";
 
 type Props = {
   showAlignmentBar?: boolean;
@@ -22,6 +24,10 @@ const ItemTemplate: React.FC<Props> = ({
 }) => {
   const onWidgetChange = useOnWidgetChange(item);
   usePopulateMathScope(item, config);
+  const dispatch = useAppDispatch();
+  const remove = useCallback(() => {
+    dispatch(actions.remove({ id: item.id }));
+  }, [dispatch, item.id]);
   return (
     <div className={styles.container}>
       <div
@@ -39,7 +45,6 @@ const ItemTemplate: React.FC<Props> = ({
           onChange={onWidgetChange}
         />
       </div>
-
       <div className={styles["grid-center-bottom"]}>{children}</div>
       <div
         className={mergeClassNames(
@@ -48,7 +53,7 @@ const ItemTemplate: React.FC<Props> = ({
           "justify-content-end"
         )}
       >
-        <CloseButton />
+        <CloseButton onClick={remove} />
       </div>
       <div className={styles["grid-right-gutter-bottom"]}>
         <SettingsPopover item={item} config={config} />
