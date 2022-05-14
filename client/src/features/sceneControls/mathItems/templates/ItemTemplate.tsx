@@ -5,6 +5,7 @@ import styles from "./ItemTemplate.module.css";
 import SettingsPopover from "./SettingsPopover";
 import CloseButton from "./CloseButton";
 import { AutosizeText, useOnWidgetChange } from "../FieldWidget";
+import { usePopulateMathScope } from "../mathScope";
 
 type Props = {
   showAlignmentBar?: boolean;
@@ -20,6 +21,7 @@ const ItemTemplate: React.FC<Props> = ({
   showAlignmentBar = true,
 }) => {
   const onWidgetChange = useOnWidgetChange(item);
+  usePopulateMathScope(item, config);
   return (
     <div className={styles.container}>
       <div

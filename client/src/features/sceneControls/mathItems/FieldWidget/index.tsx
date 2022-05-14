@@ -4,6 +4,7 @@ import { useAppDispatch } from "app/hooks";
 import { actions } from "../mathItems.slice";
 import MathEqualityInput from "./MathEqualityInput";
 import { IWidgetProps, WidgetChangeEvent, OnWidgetChange } from "./types";
+import { mathScopeId } from "../mathScope";
 
 const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const { onChange, name, ...others } = props;
@@ -70,10 +71,9 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItems[T]) => {
       const patch = { id: item.id, type: item.type, properties };
       dispatch(actions.setProperties(patch));
       if (e.mathScope) {
-        const id = `${item.id}-${e.name}`;
         e.mathScope.setExpressions([
           {
-            id,
+            id: mathScopeId(item.id, e.name),
             expr: e.value,
           },
         ]);

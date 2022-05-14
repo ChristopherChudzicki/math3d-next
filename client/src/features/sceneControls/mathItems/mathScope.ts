@@ -6,6 +6,7 @@ import {
   useCallback,
   useMemo,
 } from "react";
+import { MathItem, MathItemConfig, Widget } from "types";
 import MathScope, { OnChangeListener } from "util/MathScope";
 
 const defaultMathScope = new MathScope();
@@ -44,7 +45,7 @@ const extractErrors = <K extends string>(
   return newErrors;
 };
 
-const mathScopeId = (itemId: string, propName: string) =>
+export const mathScopeId = (itemId: string, propName: string) =>
   `${itemId}-${propName}`;
 
 const useMathResults = <K extends string>(
@@ -115,6 +116,39 @@ const useMathErrors = <K extends string>(
   }, [scope, ids, onChange]);
 
   return errorsSlice;
+};
+
+const MATH_WIDGETS = new Set([
+  Widget.MathValue,
+  Widget.MathEquality,
+  Widget.MathBoolean,
+]);
+
+/**
+ * Populate the mathscope with initial values based on item properties. Removes
+ * expressions from scope on cleanup.
+ */
+export const usePopulateMathScope = (
+  item: MathItem,
+  config: MathItemConfig
+) => {
+  const mathScope = useContext(MathContext);
+  useEffect(() => {
+    const mathProperties = config.properties.filter((prop) =>
+      MATH_WIDGETS.has(prop.widget)
+    );
+    const identifiedExpressions = mathProperties.map((prop) => {
+      return {
+        id: mathScopeId(item.id, prop.name),
+        // @ts-expect-error ts does not know the config and item are correlated
+        expr: item.properties[prop.name] as string,
+      };
+    });
+    mathScope.setExpressions(identifiedExpressions);
+    return () => {
+      mathScope.deleteExpressions(identifiedExpressions.map(({ id }) => id));
+    };
+  }, [item, mathScope, config.properties]);
 };
 
 export { MathContext, useMathResults, useMathErrors };
