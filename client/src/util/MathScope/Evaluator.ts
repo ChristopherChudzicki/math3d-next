@@ -238,6 +238,14 @@ export default class Evaluator {
     );
     const { order, cycles } = this.graphManager.getEvaluationOrder(affected);
 
+    this.updateAssignmentErrors(errors, cycles);
+
+    cycles.flat().forEach((node) => {
+      const exprId = getId(node);
+      results.delete(exprId);
+      this.scope.delete(node.name);
+    });
+
     order.forEach((node) => {
       const { evaluate } = this.compile(node);
       const exprId = getId(node);
@@ -257,11 +265,12 @@ export default class Evaluator {
         const error =
           unmet.length > 0 ? new UnmetDependencyError(unmet) : rawError;
         results.delete(exprId);
+        if (isGeneralAssignmentNode(node)) {
+          this.scope.delete(node.name);
+        }
         errors.set(exprId, error);
       }
     });
-
-    this.updateAssignmentErrors(errors, cycles);
 
     return {
       results: results.getDiff(),
