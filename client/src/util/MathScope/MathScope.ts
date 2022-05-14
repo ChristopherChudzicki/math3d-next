@@ -8,8 +8,10 @@ import type {
   EvaluationErrors,
   EvaluationChange,
   ParseErrors,
+  Diff,
 } from "./types";
 import { assertIsError } from "./util";
+import DiffingMap from "./DiffingMap";
 
 const getIdentifyingParser = (
   parse: IParse
@@ -60,6 +62,8 @@ export default class MathScope {
 
   errors: EvaluationErrors;
 
+  parseErrors: ParseErrors = new Map();
+
   private parse: (id: string, expr: string) => MathNode;
 
   constructor({
@@ -82,16 +86,17 @@ export default class MathScope {
     this.removeEventListener = this.removeEventListener.bind(this);
   }
 
-  setExpressions(expressions: IdentifiedExpression[]): ParseErrors {
-    const unparseable: ParseErrors = new Map();
+  setExpressions(expressions: IdentifiedExpression[]): Diff<string> {
     const parsed: MathNode[] = [];
+    const parseErrors = new DiffingMap(this.parseErrors);
     expressions.forEach(({ id, expr }) => {
       try {
         const node = this.parse(id, expr);
         parsed.push(node);
+        parseErrors.delete(id);
       } catch (error) {
         assertIsError(error);
-        unparseable.set(id, error);
+        parseErrors.set(id, error);
       }
     });
 
@@ -99,6 +104,7 @@ export default class MathScope {
     this.evaluator.enqueueDeleteExpressions(ids);
     this.evaluator.enqueueAddExpressions(parsed);
 
+    const parseChange = parseErrors.getDiff();
     const changes = this.evaluator.evaluate();
 
     this.emitChangeEvent(changes);
@@ -106,17 +112,22 @@ export default class MathScope {
       this.emitChangeErrorsEvent(changes);
     }
 
-    return unparseable;
+    return parseChange;
   }
 
-  deleteExpressions(ids: string[]): void {
+  deleteExpressions(ids: string[]): Diff<string> {
+    const parseErrors = new DiffingMap(this.parseErrors);
     this.evaluator.enqueueDeleteExpressions(ids);
     const changes = this.evaluator.evaluate();
+    ids.forEach((id) => parseErrors.delete(id));
 
+    const parseChange = parseErrors.getDiff();
     this.emitChangeEvent(changes);
     if (changes.errors.touched.size > 0) {
       this.emitChangeErrorsEvent(changes);
     }
+
+    return parseChange;
   }
 
   private emitChangeEvent(changes: EvaluationChange) {

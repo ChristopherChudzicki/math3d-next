@@ -10,6 +10,8 @@ export type EvaluationResult = Map<string, unknown>;
 
 export type EvaluationErrors = Map<string, Error>;
 
+export type ParsingErrors = Map<string, Error>;
+
 export type ParseErrors = Map<string, Error>;
 
 export interface EvaluationChange {
@@ -35,5 +37,3 @@ export interface FullDiff<T> extends Diff<T> {
   deleted: Set<T>;
   unchanged: Set<T>;
 }
-
-type Comparer<T> = (t1: T, t2: T) => boolean;
