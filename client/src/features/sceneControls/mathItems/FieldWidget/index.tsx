@@ -26,12 +26,15 @@ const ColorPicker = PlaceholderInput;
 
 const AutosizeText = PlaceholderInput;
 
+const TextInput = PlaceholderInput;
+
 type WidgetsProps = {
   [Widget.MathValue]: React.ComponentProps<typeof MathValue>;
   [Widget.Color]: React.ComponentProps<typeof ColorPicker>;
   [Widget.MathBoolean]: React.ComponentProps<typeof MathBoolean>;
   [Widget.AutosizeText]: React.ComponentProps<typeof AutosizeText>;
   [Widget.MathEquality]: React.ComponentProps<typeof MathEqualityInput>;
+  [Widget.Text]: React.ComponentProps<typeof TextInput>;
 };
 
 type FormWidgetProps<W extends Widget> = {

@@ -400,6 +400,7 @@ export enum Widget {
   MathEquality = "math-equality",
   Color = "color-picker",
   AutosizeText = "autosize-text",
+  Text = "text",
 }
 
 type PropertyValue = string | number | boolean | null;
