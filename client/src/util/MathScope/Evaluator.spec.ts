@@ -1,9 +1,10 @@
-import { parse } from "mathjs";
+import { evaluate, parse } from "mathjs";
 import Evaluator, {
   UnmetDependencyError as UnmetDepErr,
   getId,
   DuplicateAssignmentError,
   CyclicAssignmentError,
+  UnmetDependencyError,
 } from "./Evaluator";
 import { assertIsGeneralAssignmentNode } from "./util";
 
@@ -96,6 +97,65 @@ describe("Evaluator", () => {
         deleted: new Set(),
         touched: new Set(["id-x1", "id-x2"]),
       });
+    });
+
+    it("removes old assignment from results when duplicate assignments occur", () => {
+      const x1 = node("id-x1", "x = 1");
+      const x2 = node("id-x2", "x = 1");
+      const y = node("id-y", "x + 1");
+      assertIsGeneralAssignmentNode(x1);
+      assertIsGeneralAssignmentNode(x2);
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([x1, y]);
+      evaluator.evaluate();
+
+      expect(evaluator.results).toStrictEqual(
+        asMap({
+          "id-x1": 1,
+          "id-y": 2,
+        })
+      );
+      expect(evaluator.errors).toStrictEqual(asMap({}));
+
+      evaluator.enqueueAddExpressions([x2]);
+      evaluator.evaluate();
+
+      expect(evaluator.results).toStrictEqual(asMap({}));
+      expect(evaluator.errors).toStrictEqual(
+        asMap({
+          "id-x1": new DuplicateAssignmentError(x1),
+          "id-x2": new DuplicateAssignmentError(x2),
+          "id-y": new UnmetDependencyError(["x"]),
+        })
+      );
+    });
+
+    it("removes old values from scope when assignments have unmet deps", () => {
+      const x1a = node("id-x", "x = 1");
+      const x1b = node("id-x", "x = 1 + z");
+      const y = node("id-y", "x + 1");
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([x1a, y]);
+      evaluator.evaluate();
+
+      expect(evaluator.results).toStrictEqual(
+        asMap({
+          "id-x": 1,
+          "id-y": 2,
+        })
+      );
+      expect(evaluator.errors).toStrictEqual(asMap({}));
+
+      evaluator.enqueueDeleteExpressions(["id-x"]);
+      evaluator.enqueueAddExpressions([x1b]);
+      evaluator.evaluate();
+      expect(evaluator.results).toStrictEqual(asMap({}));
+      expect(evaluator.errors).toStrictEqual(
+        asMap({
+          "id-x": new UnmetDependencyError(["z"]),
+          "id-y": new UnmetDependencyError(["x"]),
+        })
+      );
     });
 
     it("records cyclic assignment errors", () => {
