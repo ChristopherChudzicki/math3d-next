@@ -1,13 +1,15 @@
 import React, { useCallback } from "react";
+import classNames from "classnames";
 import { MathItems, MathItemType as MIT, Widget } from "types";
 import { useAppDispatch } from "app/hooks";
 import { actions } from "../mathItems.slice";
 import MathEqualityInput from "./MathEqualityInput";
 import { IWidgetProps, WidgetChangeEvent, OnWidgetChange } from "./types";
 import { mathScopeId } from "../mathScope";
+import styles from "./widget.module.css";
 
 const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const { onChange, name, ...others } = props;
+  const { onChange, name, error, ...others } = props;
   const onInputChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
       const event: WidgetChangeEvent = { name, value: e.target.value };
@@ -15,7 +17,16 @@ const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
     },
     [onChange, name]
   );
-  return <input name={name} onChange={onInputChange} {...others} />;
+  return (
+    <input
+      className={classNames({
+        [styles["has-error"]]: error,
+      })}
+      name={name}
+      onChange={onInputChange}
+      {...others}
+    />
+  );
 };
 
 const MathValue = PlaceholderInput;
@@ -46,6 +57,7 @@ const getComponentForWidget = (widget: Widget) => {
   if (widget === Widget.MathBoolean) return MathBoolean;
   if (widget === Widget.Color) return ColorPicker;
   if (widget === Widget.AutosizeText) return AutosizeText;
+  if (widget === Widget.Text) return TextInput;
   throw new Error(`Unrecognized form widget: ${widget}`);
 };
 

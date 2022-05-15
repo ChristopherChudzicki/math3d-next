@@ -6,6 +6,7 @@ import type { MathItem, MathItemConfig } from "types";
 import styles from "./SettingsPopover.module.css";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import CloseButton from "./CloseButton";
+import { getMathProperties, useMathErrors } from "../mathScope";
 
 interface FormProps {
   config: MathItemConfig;
@@ -14,6 +15,11 @@ interface FormProps {
 
 const SettingsForm: React.FC<FormProps> = ({ config, item }) => {
   const onWidgetChange = useOnWidgetChange(item);
+  const mathPropNames = useMemo(
+    () => getMathProperties(config).map((p) => p.name),
+    [config]
+  );
+  const errors = useMathErrors(item.id, mathPropNames);
   const fields = useMemo(() => {
     const settings = config.properties.filter((p) => !p.primaryOnly);
     return settings.map((field) => {
@@ -31,6 +37,7 @@ const SettingsForm: React.FC<FormProps> = ({ config, item }) => {
         <React.Fragment key={field.name}>
           <label htmlFor={field.name}>{field.label}</label>
           <FieldWidget
+            error={errors[field.name]}
             widget={field.widget}
             name={field.name}
             value={value}

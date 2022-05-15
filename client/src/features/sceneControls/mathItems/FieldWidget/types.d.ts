@@ -6,6 +6,7 @@ interface IWidgetProps {
   onChange: OnWidgetChange;
   style?: React.CSSProperties;
   className?: string;
+  error?: Error;
 }
 
 interface WidgetChangeEvent {
