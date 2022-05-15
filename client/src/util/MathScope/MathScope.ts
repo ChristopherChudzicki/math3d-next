@@ -8,8 +8,10 @@ import type {
   EvaluationErrors,
   EvaluationChange,
   ParseErrors,
+  Diff,
 } from "./types";
 import { assertIsError } from "./util";
+import DiffingMap from "./DiffingMap";
 
 const getIdentifyingParser = (
   parse: IParse
@@ -29,9 +31,15 @@ type IdentifiedExpression = {
 
 export type OnChangeListener = (event: ScopeChangeEvent) => void;
 
+interface ScopeChange {
+  results: EvaluationChange["results"];
+  evalErrors: EvaluationChange["errors"];
+  parseErrors: Diff<string>;
+}
+
 export interface ScopeChangeEvent {
   type: "change";
-  changes: EvaluationChange;
+  changes: ScopeChange;
   mathScope: MathScope;
 }
 
@@ -39,9 +47,7 @@ export type OnChangeErrorsListener = (event: ScopeChangeErrorsEvent) => void;
 
 export interface ScopeChangeErrorsEvent {
   type: "change-errors";
-  changes: {
-    errors: EvaluationChange["errors"];
-  };
+  changes: Omit<ScopeChange, "results">;
   mathScope: MathScope;
 }
 
@@ -58,7 +64,9 @@ export default class MathScope {
 
   results: EvaluationResult;
 
-  errors: EvaluationErrors;
+  evalErrors: EvaluationErrors;
+
+  parseErrors: ParseErrors = new Map();
 
   private parse: (id: string, expr: string) => MathNode;
 
@@ -74,7 +82,7 @@ export default class MathScope {
     this.evaluator = new Evaluator(initialScope);
 
     this.results = this.evaluator.results;
-    this.errors = this.evaluator.errors;
+    this.evalErrors = this.evaluator.errors;
 
     this.setExpressions = this.setExpressions.bind(this);
     this.deleteExpressions = this.deleteExpressions.bind(this);
@@ -82,16 +90,17 @@ export default class MathScope {
     this.removeEventListener = this.removeEventListener.bind(this);
   }
 
-  setExpressions(expressions: IdentifiedExpression[]): ParseErrors {
-    const unparseable: ParseErrors = new Map();
+  setExpressions(expressions: IdentifiedExpression[]): Diff<string> {
     const parsed: MathNode[] = [];
+    const parseErrors = new DiffingMap(this.parseErrors);
     expressions.forEach(({ id, expr }) => {
       try {
         const node = this.parse(id, expr);
         parsed.push(node);
+        parseErrors.delete(id);
       } catch (error) {
         assertIsError(error);
-        unparseable.set(id, error);
+        parseErrors.set(id, error);
       }
     });
 
@@ -99,27 +108,49 @@ export default class MathScope {
     this.evaluator.enqueueDeleteExpressions(ids);
     this.evaluator.enqueueAddExpressions(parsed);
 
-    const changes = this.evaluator.evaluate();
+    const parseChange = parseErrors.getDiff();
+    const evalChange = this.evaluator.evaluate();
+    const changes: ScopeChange = {
+      results: evalChange.results,
+      evalErrors: evalChange.errors,
+      parseErrors: parseChange,
+    };
 
     this.emitChangeEvent(changes);
-    if (changes.errors.touched.size > 0) {
+    if (
+      changes.evalErrors.touched.size > 0 ||
+      changes.parseErrors.touched.size > 0
+    ) {
       this.emitChangeErrorsEvent(changes);
     }
 
-    return unparseable;
+    return parseChange;
   }
 
-  deleteExpressions(ids: string[]): void {
+  deleteExpressions(ids: string[]): Diff<string> {
+    const parseErrors = new DiffingMap(this.parseErrors);
     this.evaluator.enqueueDeleteExpressions(ids);
-    const changes = this.evaluator.evaluate();
+    const evalChange = this.evaluator.evaluate();
+    ids.forEach((id) => parseErrors.delete(id));
 
+    const parseChange = parseErrors.getDiff();
+    const changes: ScopeChange = {
+      results: evalChange.results,
+      evalErrors: evalChange.errors,
+      parseErrors: parseChange,
+    };
     this.emitChangeEvent(changes);
-    if (changes.errors.touched.size > 0) {
+    if (
+      changes.evalErrors.touched.size > 0 ||
+      changes.parseErrors.touched.size > 0
+    ) {
       this.emitChangeErrorsEvent(changes);
     }
+
+    return parseChange;
   }
 
-  private emitChangeEvent(changes: EvaluationChange) {
+  private emitChangeEvent(changes: ScopeChange) {
     const event: ScopeChangeEvent = {
       type: "change",
       changes,
@@ -129,9 +160,10 @@ export default class MathScope {
     this.events.emit("change", event);
   }
 
-  private emitChangeErrorsEvent(fullChanges: EvaluationChange) {
+  private emitChangeErrorsEvent(fullChanges: ScopeChange) {
     const changes = {
-      errors: fullChanges.errors,
+      parseErrors: fullChanges.parseErrors,
+      evalErrors: fullChanges.evalErrors,
     };
     const event: ScopeChangeErrorsEvent = {
       type: "change-errors",

@@ -101,7 +101,7 @@ describe("useMathValues and useModifyMathEpressions", () => {
     expect(results.current).toStrictEqual({ a: 3, b: 9 });
   });
 
-  test("useMathErrors triggers re-renders when errors change", async () => {
+  test("useMathErrors triggers re-renders when eval errors change", async () => {
     const { errors, mathScope } = setup("id1", ["x", "y", "z"]);
 
     await act(() => {
@@ -120,5 +120,23 @@ describe("useMathValues and useModifyMathEpressions", () => {
       x: expect.any(CyclicAssignmentError),
       y: expect.any(CyclicAssignmentError),
     });
+  });
+
+  test("useMathErrors triggers re-renders when parse errors change", async () => {
+    const { errors, mathScope } = setup("id1", ["x"]);
+
+    await act(() => {
+      mathScope.setExpressions([{ id: "id1-x", expr: "x = 3^" }]);
+    });
+
+    expect(errors.current).toStrictEqual({
+      x: expect.any(Error),
+    });
+
+    await act(() => {
+      mathScope.setExpressions([{ id: "id1-x", expr: "x = 3^2" }]);
+    });
+
+    expect(errors.current).toStrictEqual({});
   });
 });
