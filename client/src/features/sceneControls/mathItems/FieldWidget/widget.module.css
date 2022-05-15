@@ -1,0 +1,6 @@
+.has-error {
+  border: 1pt solid red;
+}
+.has-error:focus {
+  outline: 2pt solid red;
+}

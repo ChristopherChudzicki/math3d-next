@@ -88,7 +88,7 @@ const useMathResults = <K extends string>(
 
 const useMathErrors = <K extends string>(
   idPrefix: string,
-  names: K[]
+  names: readonly K[]
 ): EvaluationErrorsSlice<K> => {
   const scope = useContext(MathContext);
 
@@ -130,19 +130,17 @@ const MATH_WIDGETS = new Set([
   Widget.MathBoolean,
 ]);
 
+const getMathProperties = (config: MathItemConfig) =>
+  config.properties.filter((prop) => MATH_WIDGETS.has(prop.widget));
+
 /**
  * Populate the mathscope with initial values based on item properties. Removes
  * expressions from scope on cleanup.
  */
-export const usePopulateMathScope = (
-  item: MathItem,
-  config: MathItemConfig
-) => {
+const usePopulateMathScope = (item: MathItem, config: MathItemConfig) => {
   const mathScope = useContext(MathContext);
   useEffect(() => {
-    const mathProperties = config.properties.filter((prop) =>
-      MATH_WIDGETS.has(prop.widget)
-    );
+    const mathProperties = getMathProperties(config);
     const identifiedExpressions = mathProperties.map((prop) => {
       return {
         id: mathScopeId(item.id, prop.name),
@@ -154,7 +152,13 @@ export const usePopulateMathScope = (
     return () => {
       mathScope.deleteExpressions(identifiedExpressions.map(({ id }) => id));
     };
-  }, [item, mathScope, config.properties]);
+  }, [item, mathScope, config]);
 };
 
-export { MathContext, useMathResults, useMathErrors };
+export {
+  MathContext,
+  useMathResults,
+  useMathErrors,
+  usePopulateMathScope,
+  getMathProperties,
+};
