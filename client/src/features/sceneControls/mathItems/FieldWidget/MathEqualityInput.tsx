@@ -16,13 +16,7 @@ const splitAtFirstEquality = (text: string) => {
 const MathEqualityInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const { onChange, name, value, ...others } = props;
   const mathScope = useContext(MathContext);
-  const [lhs, setLHS] = useState("");
-  const [rhs, setRHS] = useState("");
-  useEffect(() => {
-    const sides = splitAtFirstEquality(value);
-    setLHS(sides[0]);
-    setRHS(sides[1]);
-  }, [value]);
+  const [lhs, rhs] = splitAtFirstEquality(value);
   const onChangeLHS: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
       const newValue = [e.target.value, rhs].join("=");
