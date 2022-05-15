@@ -46,6 +46,7 @@ const getComponentForWidget = (widget: Widget) => {
   if (widget === Widget.MathBoolean) return MathBoolean;
   if (widget === Widget.Color) return ColorPicker;
   if (widget === Widget.AutosizeText) return AutosizeText;
+  if (widget === Widget.Text) return TextInput;
   throw new Error(`Unrecognized form widget: ${widget}`);
 };
 
