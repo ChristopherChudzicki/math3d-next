@@ -34,6 +34,16 @@ describe("Evaluator", () => {
       );
     });
 
+    it("includes arity (f.length) on results that are functions", () => {
+      const f = node("f", "f(x, y) = x + y");
+      const g = node("g", "g(x, y, z) = x");
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([f, g]);
+      evaluator.evaluate();
+      expect(evaluator.results.get("f")).toHaveLength(2);
+      expect(evaluator.results.get("g")).toHaveLength(3);
+    });
+
     it("records unment dependency errors for non-function evaluations", () => {
       const a = node("id-a", "a = 2");
       const b = node("id-b", "b = a^2");

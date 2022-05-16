@@ -4,6 +4,7 @@ import {
   EvalFunction,
   isMatrix,
   FunctionAssignmentNode,
+  isFunctionAssignmentNode,
 } from "mathjs";
 import ExpressionGraphManager from "./ExpressionGraphManager";
 import type {
@@ -74,6 +75,10 @@ const compile = (node: MathNode): EvalFunction => {
         const evaluated = result(...args);
         return isMatrix(evaluated) ? evaluated.toArray() : evaluated;
       };
+      if (isFunctionAssignmentNode(node)) {
+        Object.defineProperty(f, "length", { value: node.params.length });
+      }
+
       return f;
     }
     return result;
