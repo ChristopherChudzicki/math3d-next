@@ -7,6 +7,7 @@ import MathEqualityInput from "./MathEqualityInput";
 import { IWidgetProps, WidgetChangeEvent, OnWidgetChange } from "./types";
 import { mathScopeId } from "../mathScope";
 import styles from "./widget.module.css";
+import { validators } from "../configs";
 
 const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const { onChange, name, error, ...others } = props;
@@ -90,6 +91,7 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItems[T]) => {
           {
             id: mathScopeId(item.id, e.name),
             expr: e.value,
+            validate: validators[item.type][e.name],
           },
         ]);
       }

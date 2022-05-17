@@ -9,6 +9,7 @@ import type {
   EvaluationChange,
   ParseErrors,
   Diff,
+  ValidatedNode,
 } from "./types";
 import { assertIsError } from "./util";
 import DiffingMap from "./DiffingMap";
@@ -27,6 +28,7 @@ const getIdentifyingParser = (
 type IdentifiedExpression = {
   id: string;
   expr: string;
+  validate?: (value: unknown) => void;
 };
 
 export type OnChangeListener = (event: ScopeChangeEvent) => void;
@@ -91,12 +93,12 @@ export default class MathScope {
   }
 
   setExpressions(expressions: IdentifiedExpression[]): Diff<string> {
-    const parsed: MathNode[] = [];
+    const parsed: ValidatedNode[] = [];
     const parseErrors = new DiffingMap(this.parseErrors);
-    expressions.forEach(({ id, expr }) => {
+    expressions.forEach(({ id, expr, validate }) => {
       try {
         const node = this.parse(id, expr);
-        parsed.push(node);
+        parsed.push({ node, validate });
         parseErrors.delete(id);
       } catch (error) {
         assertIsError(error);

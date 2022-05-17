@@ -39,7 +39,6 @@ const MathEqualityInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
 
   const lhsError = error instanceof AssignmentError;
   const rhsError = error && !lhsError;
-  console.log(`rhs: ${rhs}`);
   return (
     <div {...others}>
       <input

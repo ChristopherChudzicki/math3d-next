@@ -1,4 +1,11 @@
-import { MathItemType as MIT, MathItems } from "types/mathItem";
+import * as R from "ramda";
+import {
+  MathItemType as MIT,
+  MathItems,
+  MathItemConfig,
+  PropertyConfig,
+  Validate,
+} from "types";
 import axisConfig from "./axis";
 import booleanVariableConfig from "./booleanVariable";
 import cameraConfig from "./camera";
@@ -59,4 +66,17 @@ type Addable = MathItems[AddableTypes];
 
 const make = (id: string, type: AddableTypes): Addable => makers[type](id);
 
-export { configs, make };
+const getValidators = R.pipe<
+  [MathItemConfig],
+  MathItemConfig["properties"],
+  Record<string, PropertyConfig>,
+  Record<string, Validate | undefined>
+>(
+  (c) => c.properties,
+  R.indexBy((p) => p.name),
+  R.mapObjIndexed((c) => c.validate)
+);
+
+const validators = R.mapObjIndexed(getValidators, configs);
+
+export { configs, make, validators };

@@ -8,6 +8,7 @@ import {
 } from "react";
 import { MathItem, MathItemConfig, Widget } from "types";
 import MathScope, { OnChangeListener } from "util/MathScope";
+import { validators } from "./configs";
 
 const defaultMathScope = new MathScope();
 // @ts-expect-error assign to window for debugging
@@ -146,6 +147,7 @@ const usePopulateMathScope = (item: MathItem, config: MathItemConfig) => {
         id: mathScopeId(item.id, prop.name),
         // @ts-expect-error ts does not know the config and item are correlated
         expr: item.properties[prop.name] as string,
+        validate: validators[item.type][prop.name],
       };
     });
     mathScope.setExpressions(identifiedExpressions);

@@ -5,6 +5,7 @@ import {
   Widget,
   MathItemGenerator,
 } from "types";
+import { realVectors } from "util/validators";
 
 const defaultValues: Point["properties"] = {
   coords: "[0, 0, 0]",
@@ -35,6 +36,7 @@ const config: MathItemConfig = {
       defaultValue: defaultValues.coords,
       widget: Widget.MathValue,
       primaryOnly: true,
+      validate: (x) => realVectors[3].validateSync(x),
     },
     {
       name: "description",

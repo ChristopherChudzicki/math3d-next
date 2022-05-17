@@ -19,11 +19,6 @@ export interface EvaluationChange {
   errors: Diff<string>;
 }
 
-export interface EvaluatorAction {
-  type: "delete" | "add";
-  nodes: MathNode[];
-}
-
 export interface Diff<T> {
   added: Set<T>;
   updated: Set<T>;
@@ -36,4 +31,11 @@ export interface FullDiff<T> extends Diff<T> {
   updated: Set<T>;
   deleted: Set<T>;
   unchanged: Set<T>;
+}
+
+export type Validate = (value: unknown) => void;
+
+export interface ValidatedNode {
+  node: MathNode;
+  validate?: Validate;
 }
