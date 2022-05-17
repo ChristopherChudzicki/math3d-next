@@ -1,3 +1,7 @@
+import type { Validate } from "util/MathScope";
+
+export { Validate };
+
 export enum MathItemType {
   Folder = "FOLDER",
   // variables
@@ -405,10 +409,11 @@ export enum Widget {
 
 type PropertyValue = string | number | boolean | null;
 
-interface PropertyConfig {
+export interface PropertyConfig {
   readonly name: string;
   readonly defaultValue: PropertyValue;
   readonly widget: Widget;
   readonly primaryOnly?: boolean;
   readonly label: string;
+  readonly validate?: Validate;
 }
