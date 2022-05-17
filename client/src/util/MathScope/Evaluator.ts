@@ -4,6 +4,7 @@ import {
   isMatrix,
   FunctionAssignmentNode,
   isFunctionAssignmentNode,
+  isNode,
 } from "mathjs";
 import ExpressionGraphManager from "./ExpressionGraphManager";
 import type {
@@ -11,9 +12,9 @@ import type {
   EvaluationScope,
   EvaluationResult,
   EvaluationErrors,
-  EvaluatorAction,
   EvaluationChange,
   GeneralAssignmentNode,
+  ValidatedNode,
 } from "./types";
 import {
   assertIsError,
@@ -28,6 +29,11 @@ import { isNotNil } from "../predicates";
 export const getId = (node: MathNode) => node.comment;
 
 class EvaluationError extends Error {}
+
+interface EvaluatorAction {
+  type: "delete" | "add";
+  nodes: MathNode[];
+}
 
 export class UnmetDependencyError extends EvaluationError {
   constructor(unmetDependencyNames: string[]) {
@@ -125,6 +131,8 @@ export default class Evaluator {
 
   errors: EvaluationErrors = new Map();
 
+  private validators = new Map<string, (x: unknown) => void>();
+
   private nodesById: Map<string, MathNode> = new Map();
 
   private changeQueue: EvaluatorAction[] = [];
@@ -160,15 +168,25 @@ export default class Evaluator {
     });
   }
 
-  enqueueAddExpressions(nodes: MathNode[]): void {
-    nodes.forEach((node) => {
+  enqueueAddExpressions(nodes: (MathNode | ValidatedNode)[]): void {
+    const validatedNodes = nodes.map((n) => {
+      if (isNode(n)) return { node: n, validate: null };
+      return n;
+    });
+    validatedNodes.forEach(({ node, validate }) => {
       const id = getId(node);
       if (this.nodesById.has(id)) {
         throw new Error(`node id "${id}" is already in use.`);
       }
       this.nodesById.set(id, node);
+      if (validate) {
+        this.validators.set(id, validate);
+      }
     });
-    const action: EvaluatorAction = { type: "add", nodes };
+    const action: EvaluatorAction = {
+      type: "add",
+      nodes: validatedNodes.map((n) => n.node),
+    };
     this.changeQueue.push(action);
   }
 
@@ -178,6 +196,7 @@ export default class Evaluator {
       .filter(isNotNil);
     ids.forEach((id) => {
       this.nodesById.delete(id);
+      this.validators.delete(id);
     });
     const action: EvaluatorAction = { type: "delete", nodes };
     this.changeQueue.push(action);
@@ -253,15 +272,17 @@ export default class Evaluator {
       const { evaluate } = this.compile(node);
       const exprId = getId(node);
       try {
-        const evaluated = evaluate(this.scope);
-        results.set(exprId, evaluated);
-        errors.delete(exprId);
         if (node instanceof FunctionAssignmentNode) {
           const unmet = getUnmetDependencies(node, this.scope);
           if (unmet.length > 0) {
             throw new UnmetDependencyError(unmet);
           }
         }
+        const evaluated = evaluate(this.scope);
+        const validate = this.validators.get(exprId);
+        if (validate) validate(evaluated);
+        results.set(exprId, evaluated);
+        errors.delete(exprId);
       } catch (rawError) {
         assertIsError(rawError);
         const unmet = getUnmetDependencies(node, this.scope);
