@@ -1,4 +1,4 @@
-import type { Diff } from "./types";
+import type { Diff } from "../interfaces";
 import { setUnion } from "./util";
 
 type Comparer<T> = (t1: T, t2: T) => boolean;

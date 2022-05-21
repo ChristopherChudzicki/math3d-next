@@ -1,22 +1,7 @@
-import * as R from "ramda";
-import { MathNode } from "mathjs";
+import * as _ from "lodash";
 import toposort from "toposort";
-import type { GeneralAssignmentNode } from "./types";
-import { isGeneralAssignmentNode, getDependencies } from "./util";
-import DirectedGraph from "./DirectedGraph";
-
-const getAssignmentNodesByName = R.pipe<
-  [MathNode[]],
-  GeneralAssignmentNode[],
-  { [name: string]: GeneralAssignmentNode[] },
-  [string, GeneralAssignmentNode[]][],
-  Map<string, GeneralAssignmentNode[]>
->(
-  R.filter(isGeneralAssignmentNode),
-  R.groupBy(R.prop("name")),
-  Object.entries,
-  (e) => new Map(e)
-);
+import type { AnonAssignmentNode, AnonMathNode } from "./interfaces";
+import { isAssignmentNode, DirectedGraph } from "./util";
 
 /**
  * Helps manage a dependency graph for mathematical expressions.
@@ -35,15 +20,17 @@ const getAssignmentNodesByName = R.pipe<
  *  - finding a valid evaluation order of this graph
  *  - finding cycles and duplicate assignment nodes
  */
-export default class ExpressionGraphManager {
-  graph = new DirectedGraph<MathNode>([], []);
+export default class ExpressionGraphManager<
+  N extends AnonMathNode = AnonMathNode
+> {
+  graph = new DirectedGraph<N>([], []);
 
-  dependents = new Map<string, Set<MathNode>>();
+  dependents = new Map<string, Set<N>>();
 
   allowedDuplicateLeafRegex: RegExp;
 
   constructor(
-    nodes: MathNode[] = [],
+    nodes: N[] = [],
     {
       allowedDuplicateLeafRegex = /^_/,
     }: {
@@ -54,7 +41,7 @@ export default class ExpressionGraphManager {
     this.addExpressions(nodes);
   }
 
-  addExpressions(nodes: MathNode[]): void {
+  addExpressions(nodes: N[]): void {
     nodes.forEach((node) => {
       this.graph.addNode(node);
     });
@@ -72,8 +59,7 @@ export default class ExpressionGraphManager {
        */
 
       // construct edges FROM dependencies to this node
-      const dependencyNames = getDependencies(node);
-      dependencyNames.forEach((dependencyName) => {
+      node.dependencies.forEach((dependencyName) => {
         const dependencies = assignments.get(dependencyName) ?? [];
         dependencies.forEach((dependency) => {
           this.graph.addEdge(dependency, node);
@@ -82,7 +68,7 @@ export default class ExpressionGraphManager {
 
       this.registerDependencies(node);
       // construct edges from this node TO its dependents
-      if (isGeneralAssignmentNode(node)) {
+      if (isAssignmentNode(node)) {
         const { name } = node;
         const dependents = this.dependents.get(name);
         if (dependents === undefined) return;
@@ -130,19 +116,16 @@ export default class ExpressionGraphManager {
     });
   }
 
-  private registerDependencies(node: MathNode): void {
-    const dependencyNames = getDependencies(node);
-    dependencyNames.forEach((dependencyName) => {
-      const dependents =
-        this.dependents.get(dependencyName) ?? new Set<MathNode>();
+  private registerDependencies(node: N): void {
+    node.dependencies.forEach((dependencyName) => {
+      const dependents = this.dependents.get(dependencyName) ?? new Set<N>();
       dependents.add(node);
       this.dependents.set(dependencyName, dependents);
     });
   }
 
-  private unregisterDependencies(node: MathNode): void {
-    const dependencyNames = getDependencies(node);
-    dependencyNames.forEach((dependencyName) => {
+  private unregisterDependencies(node: N): void {
+    node.dependencies.forEach((dependencyName) => {
       const dependents = this.dependents.get(dependencyName);
       if (!dependents) return;
       dependents.delete(node);
@@ -154,7 +137,7 @@ export default class ExpressionGraphManager {
     });
   }
 
-  deleteExpressions(nodes: MathNode[]): void {
+  deleteExpressions(nodes: N[]): void {
     nodes.forEach((node) => {
       this.graph.deleteNode(node);
       this.unregisterDependencies(node);
@@ -162,13 +145,13 @@ export default class ExpressionGraphManager {
   }
 
   private getAssignmentsAndDuplicatesByName(): {
-    assignments: Map<string, GeneralAssignmentNode[]>;
-    duplicates: Map<string, GeneralAssignmentNode[]>;
+    assignments: Map<string, (N & AnonAssignmentNode)[]>;
+    duplicates: Map<string, (N & AnonAssignmentNode)[]>;
   } {
-    const assignments = getAssignmentNodesByName(
+    const assignments = this.getAssignmentNodesByName(
       Array.from(this.graph.getNodes())
     );
-    const duplicates = new Map<string, GeneralAssignmentNode[]>();
+    const duplicates = new Map<string, (N & AnonAssignmentNode)[]>();
     assignments.forEach((nodes, name) => {
       const duplicateAllowed =
         this.allowedDuplicateLeafRegex.test(name) &&
@@ -180,25 +163,27 @@ export default class ExpressionGraphManager {
     return { assignments, duplicates };
   }
 
-  getDuplicateAssignmentNodes(): Set<GeneralAssignmentNode> {
+  getDuplicateAssignmentNodes(): Set<AnonAssignmentNode & N> {
     const { duplicates } = this.getAssignmentsAndDuplicatesByName();
-    const duplicatesSet = new Set<GeneralAssignmentNode>();
+    const duplicatesSet = new Set<AnonAssignmentNode & N>();
     duplicates.forEach((nodes) => {
       nodes.forEach((node) => duplicatesSet.add(node));
     });
     return duplicatesSet;
   }
 
-  getEvaluationOrder(sources?: Iterable<MathNode>): {
-    order: MathNode[];
-    cycles: GeneralAssignmentNode[][];
+  getEvaluationOrder(sources?: Iterable<N>): {
+    order: N[];
+    cycles: (N & AnonAssignmentNode)[][];
   } {
     const subgraph =
       sources === undefined
         ? this.graph.copy()
         : this.graph.getReachableSubgraph(sources);
 
-    const cycles = subgraph.getCycles();
+    // Non-assignment nodes never have successors, so they can't be part of cycles
+    const cycles = subgraph.getCycles() as (AnonAssignmentNode & N)[][];
+
     cycles.flat().forEach((node) => {
       if (subgraph.hasNode(node)) {
         subgraph.deleteNode(node);
@@ -209,10 +194,16 @@ export default class ExpressionGraphManager {
     const isolated = Array.from(subgraph.getIsolatedNodes());
     const order = toposort(edges.map((e) => [e.from, e.to])).concat(isolated);
 
-    return {
-      order,
-      // Non-assignment nodes never have successors, so they can't be part of cycles
-      cycles: cycles as GeneralAssignmentNode[][],
-    };
+    return { order, cycles };
+  }
+
+  // static methods can't use the generic type parameter
+  // eslint-disable-next-line class-methods-use-this
+  private getAssignmentNodesByName(
+    nodes: N[]
+  ): Map<string, (N & AnonAssignmentNode)[]> {
+    const assignments = nodes.filter(isAssignmentNode);
+    const grouped = _.groupBy(assignments, (n) => n.name);
+    return new Map(Object.entries(grouped));
   }
 }

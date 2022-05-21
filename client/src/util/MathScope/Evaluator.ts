@@ -1,32 +1,23 @@
-import {
-  MathNode,
-  EvalFunction,
-  isMatrix,
-  FunctionAssignmentNode,
-  isFunctionAssignmentNode,
-  isNode,
-} from "mathjs";
 import ExpressionGraphManager from "./ExpressionGraphManager";
-import type {
+import {
   Diff,
   EvaluationScope,
   EvaluationResult,
   EvaluationErrors,
   EvaluationChange,
-  GeneralAssignmentNode,
-  ValidatedNode,
-} from "./types";
+  AssignmentNode,
+  MathNode,
+  Evaluatable,
+  MathNodeType,
+} from "./interfaces";
 import {
   assertIsError,
-  getDependencies,
-  isGeneralAssignmentNode,
+  isAssignmentNode,
   setDifference,
   setUnion,
+  DiffingMap,
+  isNotNil,
 } from "./util";
-import DiffingMap from "./DiffingMap";
-import { isNotNil } from "../predicates";
-
-export const getId = (node: MathNode) => node.comment;
 
 class EvaluationError extends Error {}
 
@@ -45,7 +36,7 @@ export class UnmetDependencyError extends EvaluationError {
 
 export class AssignmentError extends EvaluationError {}
 export class CyclicAssignmentError extends AssignmentError {
-  constructor(cycle: GeneralAssignmentNode[]) {
+  constructor(cycle: AssignmentNode[]) {
     const nodeNames = cycle.map((n) => `'${n.name}'`).join(", ");
     const message = `Cyclic dependencies: ${nodeNames}`;
     super(message);
@@ -53,50 +44,23 @@ export class CyclicAssignmentError extends AssignmentError {
 }
 
 export class DuplicateAssignmentError extends AssignmentError {
-  constructor(node: GeneralAssignmentNode) {
+  constructor(node: AssignmentNode) {
     const message = `Name ${node.name} has been assigned multiple times.`;
     super(message);
   }
 }
 
-const makeAssignmentError = (
-  node: GeneralAssignmentNode,
-  cycle: GeneralAssignmentNode[]
-) => {
+const makeAssignmentError = (node: AssignmentNode, cycle: AssignmentNode[]) => {
   const isDuplicate = cycle.some((c) => c.name === node.name && c !== node);
   if (isDuplicate) return new DuplicateAssignmentError(node);
   return new CyclicAssignmentError(cycle);
-};
-
-const compile = (node: MathNode): EvalFunction => {
-  const { evaluate: rawEvaluate } = node.compile();
-  const evaluate = (scope: EvaluationScope) => {
-    const result = rawEvaluate(scope);
-    if (isMatrix(result)) {
-      return result.toArray();
-    }
-    if (typeof result === "function") {
-      const f = (...args: unknown[]) => {
-        const evaluated = result(...args);
-        return isMatrix(evaluated) ? evaluated.toArray() : evaluated;
-      };
-      if (isFunctionAssignmentNode(node)) {
-        Object.defineProperty(f, "length", { value: node.params.length });
-      }
-
-      return f;
-    }
-    return result;
-  };
-  return { evaluate };
 };
 
 const getUnmetDependencies = (
   node: MathNode,
   scope: EvaluationScope
 ): string[] => {
-  const dependencies = getDependencies(node);
-  const unmet = [...dependencies].filter((dep) => !scope.has(dep));
+  const unmet = [...node.dependencies].filter((dep) => !scope.has(dep));
   return unmet;
 };
 
@@ -123,7 +87,7 @@ const getUnmetDependencies = (
  * diff of the changes.
  */
 export default class Evaluator {
-  compiled = new WeakMap<MathNode, EvalFunction>();
+  compiled = new WeakMap<MathNode, Evaluatable>();
 
   results: EvaluationResult = new Map();
 
@@ -137,7 +101,7 @@ export default class Evaluator {
 
   private changeQueue: EvaluatorAction[] = [];
 
-  private graphManager = new ExpressionGraphManager();
+  private graphManager = new ExpressionGraphManager<MathNode>();
 
   constructor(initialScope: EvaluationScope = new Map()) {
     this.scope = new Map(initialScope);
@@ -146,18 +110,18 @@ export default class Evaluator {
   private compile(node: MathNode) {
     const cachedValue = this.compiled.get(node);
     if (cachedValue) return cachedValue;
-    const compiled = compile(node);
+    const compiled = node.compile();
     this.compiled.set(node, compiled);
     return compiled;
   }
 
   private updateAssignmentErrors(
     errors: DiffingMap<string, Error>,
-    cycles: GeneralAssignmentNode[][]
+    cycles: AssignmentNode[][]
   ): void {
     const currentErrors = new Map(
       cycles.flatMap((cycle) =>
-        cycle.map((node) => [getId(node), makeAssignmentError(node, cycle)])
+        cycle.map((node) => [node.id, makeAssignmentError(node, cycle)])
       )
     );
     currentErrors.forEach((error, key) => {
@@ -168,24 +132,17 @@ export default class Evaluator {
     });
   }
 
-  enqueueAddExpressions(nodes: (MathNode | ValidatedNode)[]): void {
-    const validatedNodes = nodes.map((n) => {
-      if (isNode(n)) return { node: n, validate: null };
-      return n;
-    });
-    validatedNodes.forEach(({ node, validate }) => {
-      const id = getId(node);
+  enqueueAddExpressions(nodes: MathNode[]): void {
+    nodes.forEach((node) => {
+      const { id } = node;
       if (this.nodesById.has(id)) {
         throw new Error(`node id "${id}" is already in use.`);
       }
       this.nodesById.set(id, node);
-      if (validate) {
-        this.validators.set(id, validate);
-      }
     });
     const action: EvaluatorAction = {
       type: "add",
-      nodes: validatedNodes.map((n) => n.node),
+      nodes,
     };
     this.changeQueue.push(action);
   }
@@ -245,9 +202,9 @@ export default class Evaluator {
       this.graphManager.graph.getReachableSubgraph(willDelete);
     const nodesAffectedByDelete = affectedByDelete.getNodes();
     nodesAffectedByDelete.forEach((node) => {
-      results.delete(getId(node));
-      errors.delete(getId(node));
-      if (isGeneralAssignmentNode(node)) {
+      results.delete(node.id);
+      errors.delete(node.id);
+      if (isAssignmentNode(node)) {
         this.scope.delete(node.name);
       }
     });
@@ -263,16 +220,16 @@ export default class Evaluator {
     this.updateAssignmentErrors(errors, cycles);
 
     cycles.flat().forEach((node) => {
-      const exprId = getId(node);
+      const exprId = node.id;
       results.delete(exprId);
       this.scope.delete(node.name);
     });
 
     order.forEach((node) => {
       const { evaluate } = this.compile(node);
-      const exprId = getId(node);
+      const exprId = node.id;
       try {
-        if (node instanceof FunctionAssignmentNode) {
+        if (node.type === MathNodeType.FunctionAssignmentNode) {
           const unmet = getUnmetDependencies(node, this.scope);
           if (unmet.length > 0) {
             throw new UnmetDependencyError(unmet);
@@ -289,7 +246,7 @@ export default class Evaluator {
         const error =
           unmet.length > 0 ? new UnmetDependencyError(unmet) : rawError;
         results.delete(exprId);
-        if (isGeneralAssignmentNode(node)) {
+        if (isAssignmentNode(node)) {
           this.scope.delete(node.name);
         }
         errors.set(exprId, error);

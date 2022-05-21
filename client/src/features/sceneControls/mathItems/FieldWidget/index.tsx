@@ -1,21 +1,26 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useContext } from "react";
 import classNames from "classnames";
 import { MathItem, MathItemType as MIT, WidgetType, validators } from "configs";
 import { useAppDispatch } from "app/hooks";
 import { actions } from "../mathItems.slice";
 import MathEqualityInput from "./MathEqualityInput";
 import { IWidgetProps, WidgetChangeEvent, OnWidgetChange } from "./types";
-import { mathScopeId } from "../mathScope";
+import { MathContext, mathScopeId } from "../mathScope";
 import styles from "./widget.module.css";
 
 const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
+  const mathScope = useContext(MathContext);
   const { onChange, name, error, ...others } = props;
   const onInputChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
-      const event: WidgetChangeEvent = { name, value: e.target.value };
+      const event: WidgetChangeEvent = {
+        name,
+        value: e.target.value,
+        mathScope,
+      };
       onChange(event);
     },
-    [onChange, name]
+    [onChange, name, mathScope]
   );
   return (
     <input
@@ -90,7 +95,9 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
           {
             id: mathScopeId(item.id, e.name),
             expr: e.value,
-            validate: validators[item.type][e.name],
+            parseOptions: {
+              validate: validators[item.type][e.name],
+            },
           },
         ]);
       }

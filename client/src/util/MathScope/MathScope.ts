@@ -1,37 +1,28 @@
 import { EventEmitter } from "events";
-import { parse as defaultParse, MathNode } from "mathjs";
+import { parse as defaultParse } from "./adapter";
+import type { ParseOptions as DefaultParseOptions } from "./adapter";
 import Evaluator from "./Evaluator";
 import type {
-  IParse,
+  Parse,
   EvaluationScope,
   EvaluationResult,
   EvaluationErrors,
   EvaluationChange,
   ParseErrors,
   Diff,
-  ValidatedNode,
-} from "./types";
-import { assertIsError } from "./util";
-import DiffingMap from "./DiffingMap";
+  MathNode,
+} from "./interfaces";
+import { assertIsError, DiffingMap } from "./util";
 
-const getIdentifyingParser = (
-  parse: IParse
-): ((id: string, expr: string) => MathNode) => {
-  const identifyingParser = (id: string, expr: string) => {
-    const node = parse(expr);
-    node.comment = id;
-    return node;
-  };
-  return identifyingParser;
-};
-
-type IdentifiedExpression = {
+export type IdentifiedExpression<PO = DefaultParseOptions> = {
   id: string;
   expr: string;
-  validate?: (value: unknown) => void;
+  parseOptions?: PO;
 };
 
-export type OnChangeListener = (event: ScopeChangeEvent) => void;
+export type OnChangeListener = <PO = DefaultParseOptions>(
+  event: ScopeChangeEvent<PO>
+) => void;
 
 interface ScopeChange {
   results: EvaluationChange["results"];
@@ -39,25 +30,27 @@ interface ScopeChange {
   parseErrors: Diff<string>;
 }
 
-export interface ScopeChangeEvent {
+export interface ScopeChangeEvent<PO = DefaultParseOptions> {
   type: "change";
   changes: ScopeChange;
-  mathScope: MathScope;
+  mathScope: MathScope<PO>;
 }
 
-export type OnChangeErrorsListener = (event: ScopeChangeErrorsEvent) => void;
+export type OnChangeErrorsListener = <PO = DefaultParseOptions>(
+  event: ScopeChangeErrorsEvent<PO>
+) => void;
 
-export interface ScopeChangeErrorsEvent {
+export interface ScopeChangeErrorsEvent<PO = DefaultParseOptions> {
   type: "change-errors";
   changes: Omit<ScopeChange, "results">;
-  mathScope: MathScope;
+  mathScope: MathScope<PO>;
 }
 
 /**
  * Parse and evaluate a dynamic scope of mathematical expressions, possibly
  * containing errors. Fires `change` events when the scope changes.
  */
-export default class MathScope {
+export default class MathScope<PO = DefaultParseOptions> {
   initialScope: EvaluationScope;
 
   private events = new EventEmitter();
@@ -70,16 +63,16 @@ export default class MathScope {
 
   parseErrors: ParseErrors = new Map();
 
-  private parse: (id: string, expr: string) => MathNode;
+  private parse: Parse<PO>;
 
   constructor({
     parse = defaultParse,
     initialScope = new Map(),
   }: {
-    parse?: IParse;
+    parse?: Parse<PO>;
     initialScope?: EvaluationScope;
   } = {}) {
-    this.parse = getIdentifyingParser(parse);
+    this.parse = parse;
     this.initialScope = initialScope;
     this.evaluator = new Evaluator(initialScope);
 
@@ -92,13 +85,13 @@ export default class MathScope {
     this.removeEventListener = this.removeEventListener.bind(this);
   }
 
-  setExpressions(expressions: IdentifiedExpression[]): Diff<string> {
-    const parsed: ValidatedNode[] = [];
+  setExpressions(expressions: IdentifiedExpression<PO>[]): Diff<string> {
+    const parsed: MathNode[] = [];
     const parseErrors = new DiffingMap(this.parseErrors);
-    expressions.forEach(({ id, expr, validate }) => {
+    expressions.forEach(({ id, expr, parseOptions }) => {
       try {
-        const node = this.parse(id, expr);
-        parsed.push({ node, validate });
+        const node = this.parse(expr, id, parseOptions);
+        parsed.push(node);
         parseErrors.delete(id);
       } catch (error) {
         assertIsError(error);
@@ -153,7 +146,7 @@ export default class MathScope {
   }
 
   private emitChangeEvent(changes: ScopeChange) {
-    const event: ScopeChangeEvent = {
+    const event: ScopeChangeEvent<PO> = {
       type: "change",
       changes,
       mathScope: this,
@@ -167,7 +160,7 @@ export default class MathScope {
       parseErrors: fullChanges.parseErrors,
       evalErrors: fullChanges.evalErrors,
     };
-    const event: ScopeChangeErrorsEvent = {
+    const event: ScopeChangeErrorsEvent<PO> = {
       type: "change-errors",
       changes,
       mathScope: this,

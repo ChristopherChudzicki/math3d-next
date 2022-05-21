@@ -1,18 +1,14 @@
-import { parse } from "mathjs";
+import { parse } from "./adapter";
 import Evaluator, {
   UnmetDependencyError as UnmetDepErr,
-  getId,
   DuplicateAssignmentError,
   CyclicAssignmentError,
   UnmetDependencyError,
 } from "./Evaluator";
-import { assertIsGeneralAssignmentNode } from "./util";
+import { MathNode } from "./interfaces";
+import { assertIsAssignmentNode } from "./util";
 
-const node = (id: string, parseable: string) => {
-  const parsed = parse(parseable);
-  parsed.comment = id;
-  return parsed;
-};
+const node = (id: string, parseable: string): MathNode => parse(parseable, id);
 
 const asMap = (obj: Record<string, unknown>) => new Map(Object.entries(obj));
 
@@ -32,16 +28,6 @@ describe("Evaluator", () => {
           "id-expr1": 6,
         })
       );
-    });
-
-    it("includes arity (f.length) on results that are functions", () => {
-      const f = node("f", "f(x, y) = x + y");
-      const g = node("g", "g(x, y, z) = x");
-      const evaluator = new Evaluator();
-      evaluator.enqueueAddExpressions([f, g]);
-      evaluator.evaluate();
-      expect(evaluator.results.get("f")).toHaveLength(2);
-      expect(evaluator.results.get("g")).toHaveLength(3);
     });
 
     it("records unment dependency errors for non-function evaluations", () => {
@@ -88,8 +74,8 @@ describe("Evaluator", () => {
     it("records duplicate assignment errors", () => {
       const x1 = node("id-x1", "x = 1");
       const x2 = node("id-x2", "x = 1");
-      assertIsGeneralAssignmentNode(x1);
-      assertIsGeneralAssignmentNode(x2);
+      assertIsAssignmentNode(x1);
+      assertIsAssignmentNode(x2);
 
       const evaluator = new Evaluator();
       evaluator.enqueueAddExpressions([x1, x2]);
@@ -113,8 +99,8 @@ describe("Evaluator", () => {
       const x1 = node("id-x1", "x = 1");
       const x2 = node("id-x2", "x = 1");
       const y = node("id-y", "x + 1");
-      assertIsGeneralAssignmentNode(x1);
-      assertIsGeneralAssignmentNode(x2);
+      assertIsAssignmentNode(x1);
+      assertIsAssignmentNode(x2);
       const evaluator = new Evaluator();
       evaluator.enqueueAddExpressions([x1, y]);
       evaluator.evaluate();
@@ -171,8 +157,8 @@ describe("Evaluator", () => {
     it("records cyclic assignment errors", () => {
       const x = node("id-x", "x = y^2");
       const y = node("id-y", "y = x^2");
-      assertIsGeneralAssignmentNode(x);
-      assertIsGeneralAssignmentNode(y);
+      assertIsAssignmentNode(x);
+      assertIsAssignmentNode(y);
       const evaluator = new Evaluator();
       evaluator.enqueueAddExpressions([x, y]);
       const diff = evaluator.evaluate();
@@ -218,7 +204,7 @@ describe("Evaluator", () => {
 
       const x = node("id-x", "x = 1");
       const b2 = node("id-b", "b = 4");
-      evaluator.enqueueDeleteExpressions([b, c].map(getId));
+      evaluator.enqueueDeleteExpressions([b, c].map((n) => n.id));
       evaluator.enqueueAddExpressions([x, b2]);
 
       const diff = evaluator.evaluate();
@@ -275,7 +261,7 @@ describe("Evaluator", () => {
       evaluator.evaluate();
 
       const c2 = node("id-c", "c=4");
-      evaluator.enqueueDeleteExpressions([c].map(getId));
+      evaluator.enqueueDeleteExpressions([c].map((n) => n.id));
       evaluator.enqueueAddExpressions([c2]);
 
       expect(evaluator.results).toStrictEqual(
@@ -354,7 +340,7 @@ describe("Evaluator", () => {
       const shouldNotThrow = () => {
         const [a1, a2] = [node("a", "a = 1"), node("a", "a = 2")];
         evaluator.enqueueAddExpressions([a1]);
-        evaluator.enqueueDeleteExpressions([a1].map(getId));
+        evaluator.enqueueDeleteExpressions([a1].map((n) => n.id));
         evaluator.enqueueAddExpressions([a2]);
       };
       expect(shouldNotThrow).not.toThrow();
