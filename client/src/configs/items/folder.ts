@@ -5,23 +5,25 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface FolderProperties {
   description: string;
   isCollapsed: string; // eval to boolean;
 }
 
-const defaultValues: Properties = {
+const defaultValues: FolderProperties = {
   isCollapsed: "false",
   description: "Folder",
 };
 
-const make: MathItemGenerator<MathItemType.Folder, Properties> = (id) => ({
+const make: MathItemGenerator<MathItemType.Folder, FolderProperties> = (
+  id
+) => ({
   id,
   type: MathItemType.Folder,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Folder, Properties> = {
+const config: MathItemConfig<MathItemType.Folder, FolderProperties> = {
   type: MathItemType.Folder,
   label: "Folder",
   properties: [
@@ -35,7 +37,7 @@ const config: MathItemConfig<MathItemType.Folder, Properties> = {
   make,
 };
 
-type Folder = MathItemGeneric<MathItemType.Folder, Properties>;
+type Folder = MathItemGeneric<MathItemType.Folder, FolderProperties>;
 
-export type { Properties, Folder };
+export type { FolderProperties, Folder };
 export { config };

@@ -5,7 +5,7 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface CameraProperties {
   description: string;
   isOrthographic: string; // eval to boolean
   isPanEnabled: string; // eval to boolean
@@ -18,7 +18,7 @@ interface Properties {
   useComputed: string; // eval to boolean
 }
 
-const defaultValues: Properties = {
+const defaultValues: CameraProperties = {
   description: "Camera",
   isOrthographic: "false",
   isPanEnabled: "false",
@@ -29,13 +29,15 @@ const defaultValues: Properties = {
   useComputed: "false",
 };
 
-const make: MathItemGenerator<MathItemType.Camera, Properties> = (id) => ({
+const make: MathItemGenerator<MathItemType.Camera, CameraProperties> = (
+  id
+) => ({
   id,
   type: MathItemType.Camera,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Camera, Properties> = {
+const config: MathItemConfig<MathItemType.Camera, CameraProperties> = {
   type: MathItemType.Camera,
   label: "Camera",
   properties: [
@@ -49,7 +51,7 @@ const config: MathItemConfig<MathItemType.Camera, Properties> = {
   make,
 };
 
-type Camera = MathItemGeneric<MathItemType.Camera, Properties>;
+type Camera = MathItemGeneric<MathItemType.Camera, CameraProperties>;
 
-export type { Properties, Camera };
+export type { CameraProperties, Camera };
 export { config };

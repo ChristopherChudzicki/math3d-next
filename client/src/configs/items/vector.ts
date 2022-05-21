@@ -5,7 +5,7 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface VectorProperties {
   description: string;
   color: string;
   visible: string;
@@ -23,7 +23,7 @@ interface Properties {
   tail: string;
 }
 
-const defaultValues: Properties = {
+const defaultValues: VectorProperties = {
   description: "Vector",
   color: "#3090FF",
   visible: "true",
@@ -40,13 +40,15 @@ const defaultValues: Properties = {
   tail: "[0,0,0]",
 };
 
-const make: MathItemGenerator<MathItemType.Vector, Properties> = (id) => ({
+const make: MathItemGenerator<MathItemType.Vector, VectorProperties> = (
+  id
+) => ({
   id,
   type: MathItemType.Vector,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Vector, Properties> = {
+const config: MathItemConfig<MathItemType.Vector, VectorProperties> = {
   type: MathItemType.Vector,
   label: "Vector",
   properties: [
@@ -60,7 +62,7 @@ const config: MathItemConfig<MathItemType.Vector, Properties> = {
   make,
 };
 
-type Vector = MathItemGeneric<MathItemType.Vector, Properties>;
+type Vector = MathItemGeneric<MathItemType.Vector, VectorProperties>;
 
-export type { Properties, Vector };
+export type { VectorProperties, Vector };
 export { config };

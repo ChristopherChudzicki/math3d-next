@@ -5,7 +5,7 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface VectorFieldProperties {
   description: string;
   color: string;
   visible: string;
@@ -25,7 +25,7 @@ interface Properties {
   scale: string;
 }
 
-const defaultValues: Properties = {
+const defaultValues: VectorFieldProperties = {
   description: "Vector Field",
   color: "#3090FF",
   visible: "true",
@@ -44,27 +44,34 @@ const defaultValues: Properties = {
   scale: "1",
 };
 
-const make: MathItemGenerator<MathItemType.VectorField, Properties> = (id) => ({
+const make: MathItemGenerator<
+  MathItemType.VectorField,
+  VectorFieldProperties
+> = (id) => ({
   id,
   type: MathItemType.VectorField,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.VectorField, Properties> = {
-  type: MathItemType.VectorField,
-  label: "Vector Field",
-  properties: [
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
-    },
-  ],
-  make,
-};
+const config: MathItemConfig<MathItemType.VectorField, VectorFieldProperties> =
+  {
+    type: MathItemType.VectorField,
+    label: "Vector Field",
+    properties: [
+      {
+        name: "description",
+        label: "Description",
+        widget: WidgetType.AutosizeText,
+        primaryOnly: true,
+      },
+    ],
+    make,
+  };
 
-type VectorField = MathItemGeneric<MathItemType.VectorField, Properties>;
+type VectorField = MathItemGeneric<
+  MathItemType.VectorField,
+  VectorFieldProperties
+>;
 
-export type { Properties, VectorField };
+export type { VectorFieldProperties, VectorField };
 export { config };

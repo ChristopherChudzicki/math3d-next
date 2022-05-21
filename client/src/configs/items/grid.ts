@@ -5,7 +5,7 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface GridProperties {
   description: string;
   color: string;
   visible: string;
@@ -19,7 +19,7 @@ interface Properties {
   axes: "xy" | "yz" | "zx";
 }
 
-const defaultValues: Properties = {
+const defaultValues: GridProperties = {
   description: "Grid",
   axes: "xy",
   color: "#808080",
@@ -32,13 +32,13 @@ const defaultValues: Properties = {
   snap: "false",
 };
 
-const make: MathItemGenerator<MathItemType.Grid, Properties> = (id) => ({
+const make: MathItemGenerator<MathItemType.Grid, GridProperties> = (id) => ({
   id,
   type: MathItemType.Grid,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Grid, Properties> = {
+const config: MathItemConfig<MathItemType.Grid, GridProperties> = {
   type: MathItemType.Grid,
   label: "Grid",
   properties: [
@@ -52,7 +52,7 @@ const config: MathItemConfig<MathItemType.Grid, Properties> = {
   make,
 };
 
-type Grid = MathItemGeneric<MathItemType.Grid, Properties>;
+type Grid = MathItemGeneric<MathItemType.Grid, GridProperties>;
 
-export type { Properties, Grid };
+export type { GridProperties, Grid };
 export { config };

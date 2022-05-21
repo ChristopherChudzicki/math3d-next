@@ -25,7 +25,7 @@ const SettingsForm = <T extends MathItemType>({
   const errors = useMathErrors(item.id, mathPropNames);
   const fields = useMemo(() => {
     return [...config.properties]
-      .filter((field) => field.primaryOnly)
+      .filter((field) => !field.primaryOnly)
       .map((field) => {
         // @ts-expect-error ts does not know that config and item are correlated
         const value = item.properties[field.name];

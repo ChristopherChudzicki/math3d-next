@@ -5,25 +5,29 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface BooleanVariableProperties {
   value: string; // eval to boolean
   description: string;
 }
 
-const defaultValues: Properties = {
+const defaultValues: BooleanVariableProperties = {
   value: "switch=true",
   description: "Toggle switch",
 };
 
-const make: MathItemGenerator<MathItemType.BooleanVariable, Properties> = (
-  id
-) => ({
+const make: MathItemGenerator<
+  MathItemType.BooleanVariable,
+  BooleanVariableProperties
+> = (id) => ({
   id,
   type: MathItemType.BooleanVariable,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.BooleanVariable, Properties> = {
+const config: MathItemConfig<
+  MathItemType.BooleanVariable,
+  BooleanVariableProperties
+> = {
   type: MathItemType.BooleanVariable,
   label: "Toggle Switch",
   properties: [
@@ -39,8 +43,8 @@ const config: MathItemConfig<MathItemType.BooleanVariable, Properties> = {
 
 type BooleanVariable = MathItemGeneric<
   MathItemType.BooleanVariable,
-  Properties
+  BooleanVariableProperties
 >;
 
-export type { Properties, BooleanVariable };
+export type { BooleanVariableProperties, BooleanVariable };
 export { config };

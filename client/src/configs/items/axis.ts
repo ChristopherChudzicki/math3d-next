@@ -5,7 +5,7 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface AxisProperties {
   description: string;
   color: string;
   visible: string;
@@ -24,7 +24,7 @@ interface Properties {
   width: string;
 }
 
-const defaultValues: Properties = {
+const defaultValues: AxisProperties = {
   description: "Axis",
   color: "#808080",
   visible: "true",
@@ -42,13 +42,13 @@ const defaultValues: Properties = {
   width: "1",
 };
 
-const make: MathItemGenerator<MathItemType.Axis, Properties> = (id) => ({
+const make: MathItemGenerator<MathItemType.Axis, AxisProperties> = (id) => ({
   id,
   type: MathItemType.Axis,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Axis, Properties> = {
+const config: MathItemConfig<MathItemType.Axis, AxisProperties> = {
   type: MathItemType.Axis,
   label: "Axis",
   properties: [
@@ -62,7 +62,7 @@ const config: MathItemConfig<MathItemType.Axis, Properties> = {
   make,
 };
 
-type Axis = MathItemGeneric<MathItemType.Axis, Properties>;
+type Axis = MathItemGeneric<MathItemType.Axis, AxisProperties>;
 
-export type { Properties, Axis };
+export type { AxisProperties, Axis };
 export { config };

@@ -5,7 +5,7 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface PointProperties {
   description: string;
   color: string;
   visible: string;
@@ -33,7 +33,7 @@ export interface EvaluatedProperties {
   size: number;
 }
 
-const defaultValues: Properties = {
+const defaultValues: PointProperties = {
   coords: "[0, 0, 0]",
   description: "Point",
   size: "8",
@@ -46,13 +46,13 @@ const defaultValues: Properties = {
   labelVisible: "false",
 };
 
-const make: MathItemGenerator<MathItemType.Point, Properties> = (id) => ({
+const make: MathItemGenerator<MathItemType.Point, PointProperties> = (id) => ({
   id,
   type: MathItemType.Point,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Point, Properties> = {
+const config: MathItemConfig<MathItemType.Point, PointProperties> = {
   type: MathItemType.Point,
   label: "Point",
   properties: [
@@ -113,7 +113,7 @@ const config: MathItemConfig<MathItemType.Point, Properties> = {
   make,
 };
 
-type Point = MathItemGeneric<MathItemType.Point, Properties>;
+type Point = MathItemGeneric<MathItemType.Point, PointProperties>;
 
-export type { Properties, Point };
+export type { PointProperties, Point };
 export { config };

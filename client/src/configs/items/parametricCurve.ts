@@ -5,7 +5,7 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface ParametricCurveProperties {
   description: string;
   color: string;
   visible: string;
@@ -22,7 +22,7 @@ interface Properties {
   samples: string;
 }
 
-const defaultValues: Properties = {
+const defaultValues: ParametricCurveProperties = {
   description: "Parametric Curve",
   color: "#3090FF",
   visible: "true",
@@ -38,15 +38,19 @@ const defaultValues: Properties = {
   samples: "128",
 };
 
-const make: MathItemGenerator<MathItemType.ParametricCurve, Properties> = (
-  id
-) => ({
+const make: MathItemGenerator<
+  MathItemType.ParametricCurve,
+  ParametricCurveProperties
+> = (id) => ({
   id,
   type: MathItemType.ParametricCurve,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.ParametricCurve, Properties> = {
+const config: MathItemConfig<
+  MathItemType.ParametricCurve,
+  ParametricCurveProperties
+> = {
   type: MathItemType.ParametricCurve,
   label: "Parametric Curve",
   properties: [
@@ -62,8 +66,8 @@ const config: MathItemConfig<MathItemType.ParametricCurve, Properties> = {
 
 type ParametricCurve = MathItemGeneric<
   MathItemType.ParametricCurve,
-  Properties
+  ParametricCurveProperties
 >;
 
-export type { Properties, ParametricCurve };
+export type { ParametricCurveProperties, ParametricCurve };
 export { config };

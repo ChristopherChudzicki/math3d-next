@@ -5,7 +5,7 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface LineProperties {
   description: string;
   color: string;
   visible: string;
@@ -22,7 +22,7 @@ interface Properties {
   coords: string;
 }
 
-const defaultValues: Properties = {
+const defaultValues: LineProperties = {
   description: "Line",
   color: "#3090FF",
   visible: "true",
@@ -38,13 +38,13 @@ const defaultValues: Properties = {
   coords: "[[-1,1,-1],[1,1,1]]",
 };
 
-const make: MathItemGenerator<MathItemType.Line, Properties> = (id) => ({
+const make: MathItemGenerator<MathItemType.Line, LineProperties> = (id) => ({
   id,
   type: MathItemType.Line,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Line, Properties> = {
+const config: MathItemConfig<MathItemType.Line, LineProperties> = {
   type: MathItemType.Line,
   label: "Line",
   properties: [
@@ -58,7 +58,7 @@ const config: MathItemConfig<MathItemType.Line, Properties> = {
   make,
 };
 
-type Line = MathItemGeneric<MathItemType.Line, Properties>;
+type Line = MathItemGeneric<MathItemType.Line, LineProperties>;
 
-export type { Properties, Line };
+export type { LineProperties, Line };
 export { config };

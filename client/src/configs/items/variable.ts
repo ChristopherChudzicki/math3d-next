@@ -5,23 +5,25 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface VariableProperties {
   value: string;
   description: string;
 }
 
-const defaultValues: Properties = {
+const defaultValues: VariableProperties = {
   value: "f(x) = x^2",
   description: "Variable or Function Assignment",
 };
 
-const make: MathItemGenerator<MathItemType.Variable, Properties> = (id) => ({
+const make: MathItemGenerator<MathItemType.Variable, VariableProperties> = (
+  id
+) => ({
   id,
   type: MathItemType.Variable,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Variable, Properties> = {
+const config: MathItemConfig<MathItemType.Variable, VariableProperties> = {
   type: MathItemType.Variable,
   label: "Variable or Function",
   properties: [
@@ -41,7 +43,7 @@ const config: MathItemConfig<MathItemType.Variable, Properties> = {
   make,
 };
 
-type Variable = MathItemGeneric<MathItemType.Variable, Properties>;
+type Variable = MathItemGeneric<MathItemType.Variable, VariableProperties>;
 
-export type { Properties, Variable };
+export type { VariableProperties, Variable };
 export { config };

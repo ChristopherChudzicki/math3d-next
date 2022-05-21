@@ -5,7 +5,7 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface ImplicitSurfaceProperties {
   description: string;
   color: string;
   visible: string;
@@ -22,7 +22,7 @@ interface Properties {
   samples: string;
 }
 
-const defaultValues: Properties = {
+const defaultValues: ImplicitSurfaceProperties = {
   description: "Implicit Surface",
   color: "#3090FF",
   visible: "true",
@@ -38,15 +38,19 @@ const defaultValues: Properties = {
   samples: "20",
 };
 
-const make: MathItemGenerator<MathItemType.ImplicitSurface, Properties> = (
-  id
-) => ({
+const make: MathItemGenerator<
+  MathItemType.ImplicitSurface,
+  ImplicitSurfaceProperties
+> = (id) => ({
   id,
   type: MathItemType.ImplicitSurface,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.ImplicitSurface, Properties> = {
+const config: MathItemConfig<
+  MathItemType.ImplicitSurface,
+  ImplicitSurfaceProperties
+> = {
   type: MathItemType.ImplicitSurface,
   label: "Implicit Surface",
   properties: [
@@ -62,8 +66,8 @@ const config: MathItemConfig<MathItemType.ImplicitSurface, Properties> = {
 
 type ImplicitSurface = MathItemGeneric<
   MathItemType.ImplicitSurface,
-  Properties
+  ImplicitSurfaceProperties
 >;
 
-export type { Properties, ImplicitSurface };
+export type { ImplicitSurfaceProperties, ImplicitSurface };
 export { config };

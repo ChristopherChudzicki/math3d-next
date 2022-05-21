@@ -9,8 +9,15 @@ export interface MathItemProperties {
 export interface PropertyConfig<P extends MathItemProperties> {
   readonly name: keyof P;
   readonly widget: WidgetType;
+  /**
+   * Should this property be included in the settings overlay?
+   */
   readonly primaryOnly?: boolean;
   readonly label: string;
+  /**
+   * Used for parsed+evaluated properties, this validator is passed to
+   * MathScope when evaluating the property.
+   */
   readonly validate?: Validate;
 }
 
@@ -21,6 +28,9 @@ export interface MathItemConfig<
   type: T;
   label: string;
   properties: PropertyConfig<P>[];
+  /**
+   * Generate a new mathItem of this type with the given id.
+   */
   make: MathItemGenerator<T, P>;
 }
 

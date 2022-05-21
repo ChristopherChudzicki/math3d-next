@@ -5,7 +5,7 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface VariableSliderProperties {
   name: string;
   value: string;
   min: string;
@@ -15,7 +15,7 @@ interface Properties {
   speedMultiplier: string; // eval to number;
 }
 
-const defaultValues: Properties = {
+const defaultValues: VariableSliderProperties = {
   name: "T",
   value: "0",
   min: "-5",
@@ -25,15 +25,19 @@ const defaultValues: Properties = {
   speedMultiplier: "1",
 };
 
-const make: MathItemGenerator<MathItemType.VariableSlider, Properties> = (
-  id
-) => ({
+const make: MathItemGenerator<
+  MathItemType.VariableSlider,
+  VariableSliderProperties
+> = (id) => ({
   id,
   type: MathItemType.VariableSlider,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.VariableSlider, Properties> = {
+const config: MathItemConfig<
+  MathItemType.VariableSlider,
+  VariableSliderProperties
+> = {
   type: MathItemType.VariableSlider,
   label: "Variable Slider",
   properties: [
@@ -47,7 +51,10 @@ const config: MathItemConfig<MathItemType.VariableSlider, Properties> = {
   make,
 };
 
-type VariableSlider = MathItemGeneric<MathItemType.VariableSlider, Properties>;
+type VariableSlider = MathItemGeneric<
+  MathItemType.VariableSlider,
+  VariableSliderProperties
+>;
 
-export type { Properties, VariableSlider };
+export type { VariableSliderProperties as Properties, VariableSlider };
 export { config };

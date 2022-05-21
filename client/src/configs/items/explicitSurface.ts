@@ -5,7 +5,7 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface ExplicitSurfaceProperties {
   description: string;
   color: string;
   visible: string;
@@ -25,7 +25,7 @@ interface Properties {
   gridV: string;
 }
 
-const defaultValues: Properties = {
+const defaultValues: ExplicitSurfaceProperties = {
   description: "Explicit Surface",
   color: "#3090FF",
   visible: "true",
@@ -45,15 +45,19 @@ const defaultValues: Properties = {
   gridV: "8",
 };
 
-const make: MathItemGenerator<MathItemType.ExplicitSurface, Properties> = (
-  id
-) => ({
+const make: MathItemGenerator<
+  MathItemType.ExplicitSurface,
+  ExplicitSurfaceProperties
+> = (id) => ({
   id,
   type: MathItemType.ExplicitSurface,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.ExplicitSurface, Properties> = {
+const config: MathItemConfig<
+  MathItemType.ExplicitSurface,
+  ExplicitSurfaceProperties
+> = {
   type: MathItemType.ExplicitSurface,
   label: "Explicit Surface",
   properties: [
@@ -69,8 +73,8 @@ const config: MathItemConfig<MathItemType.ExplicitSurface, Properties> = {
 
 type ExplicitSurface = MathItemGeneric<
   MathItemType.ExplicitSurface,
-  Properties
+  ExplicitSurfaceProperties
 >;
 
-export type { Properties, ExplicitSurface };
+export type { ExplicitSurfaceProperties, ExplicitSurface };
 export { config };

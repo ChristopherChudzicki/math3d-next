@@ -5,7 +5,7 @@ import type {
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
-interface Properties {
+interface ParametricSurfaceProperties {
   description: string;
   color: string;
   visible: string;
@@ -26,7 +26,7 @@ interface Properties {
   gridV: string;
 }
 
-const defaultValues: Properties = {
+const defaultValues: ParametricSurfaceProperties = {
   description: "Parametric Surface",
   color: "#3090FF",
   visible: "true",
@@ -46,15 +46,19 @@ const defaultValues: Properties = {
   gridV: "8",
 };
 
-const make: MathItemGenerator<MathItemType.ParametricSurface, Properties> = (
-  id
-) => ({
+const make: MathItemGenerator<
+  MathItemType.ParametricSurface,
+  ParametricSurfaceProperties
+> = (id) => ({
   id,
   type: MathItemType.ParametricSurface,
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.ParametricSurface, Properties> = {
+const config: MathItemConfig<
+  MathItemType.ParametricSurface,
+  ParametricSurfaceProperties
+> = {
   type: MathItemType.ParametricSurface,
   label: "Parametric Surface",
   properties: [
@@ -70,8 +74,8 @@ const config: MathItemConfig<MathItemType.ParametricSurface, Properties> = {
 
 type ParametricSurface = MathItemGeneric<
   MathItemType.ParametricSurface,
-  Properties
+  ParametricSurfaceProperties
 >;
 
-export type { Properties, ParametricSurface };
+export type { ParametricSurfaceProperties, ParametricSurface };
 export { config };
