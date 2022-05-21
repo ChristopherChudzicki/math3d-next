@@ -1,7 +1,6 @@
-import { parse } from "mathjs";
-
+import { anonParse as parse } from "./adapter";
 import ExpressionGraphManager from "./ExpressionGraphManager";
-import DirectedGraph from "./DirectedGraph";
+import { DirectedGraph } from "./util";
 
 import { permutations } from "../test_util";
 

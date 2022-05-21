@@ -1,9 +1,7 @@
-import MathScope, { OnChangeListener } from "./MathScope";
+import MathScope, { OnChangeListener, IdentifiedExpression } from "./MathScope";
 import { UnmetDependencyError, DuplicateAssignmentError } from "./Evaluator";
 
-export * from "./types";
-
-export type { OnChangeListener };
+export type { OnChangeListener, IdentifiedExpression };
 
 export { UnmetDependencyError, DuplicateAssignmentError };
 

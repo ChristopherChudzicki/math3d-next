@@ -61,7 +61,11 @@ const config: MathItemConfig<MathItemType.Point, PointProperties> = {
       label: "Coordinates",
       widget: WidgetType.MathValue,
       primaryOnly: true,
-      validate: () => {},
+      validate: (v) => {
+        console.log("Hiii");
+        if (!Array.isArray(v)) throw new Error("noooo");
+        if (v.length !== 3) throw new Error("nooooo");
+      },
     },
     {
       name: "description",

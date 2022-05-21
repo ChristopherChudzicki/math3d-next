@@ -7,7 +7,10 @@ import {
   useMemo,
 } from "react";
 import { MathItem, MathItemConfig, WidgetType, MathItemType } from "configs";
-import MathScope, { OnChangeListener } from "util/MathScope";
+import MathScope, {
+  OnChangeListener,
+  IdentifiedExpression,
+} from "util/MathScope";
 
 const defaultMathScope = new MathScope();
 // @ts-expect-error assign to window for debugging
@@ -17,8 +20,8 @@ const MathContext = createContext(defaultMathScope);
 type EvaluationResultsSlice<K extends string> = Partial<Record<K, unknown>>;
 type EvaluationErrorsSlice<K extends string> = Partial<Record<K, Error>>;
 
-const extractResults = <K extends string>(
-  scope: MathScope,
+const extractResults = <K extends string, PO>(
+  scope: MathScope<PO>,
   ids: Record<K, string>
 ): EvaluationResultsSlice<K> => {
   const newResult: EvaluationResultsSlice<K> = {};
@@ -31,8 +34,8 @@ const extractResults = <K extends string>(
   return newResult;
 };
 
-const extractErrors = <K extends string>(
-  scope: MathScope,
+const extractErrors = <K extends string, PO>(
+  scope: MathScope<PO>,
   ids: Record<K, string>
 ): EvaluationErrorsSlice<K> => {
   const newErrors: EvaluationErrorsSlice<K> = {};
@@ -147,14 +150,16 @@ const usePopulateMathScope = <T extends MathItemType>(
   const mathScope = useContext(MathContext);
   useEffect(() => {
     const mathProperties = getMathProperties(config);
-    const identifiedExpressions = mathProperties.map((prop) => {
-      return {
-        id: mathScopeId(item.id, prop.name),
-        // @ts-expect-error grrr
-        expr: item.properties[prop.name],
-        validate: prop.validate,
-      };
-    });
+    const identifiedExpressions: IdentifiedExpression[] = mathProperties.map(
+      (prop) => {
+        return {
+          id: mathScopeId(item.id, prop.name),
+          // @ts-expect-error ... why doesn't TS realize these are correlated?
+          expr: item.properties[prop.name],
+          parseOptions: { validate: prop.validate },
+        };
+      }
+    );
     mathScope.setExpressions(identifiedExpressions);
     return () => {
       mathScope.deleteExpressions(identifiedExpressions.map(({ id }) => id));
