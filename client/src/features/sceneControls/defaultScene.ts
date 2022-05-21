@@ -1,7 +1,7 @@
 import { MathItemType } from "configs";
-import { Scene, PartialBy } from "types";
+import { Scene } from "types";
 
-const defaultScene: PartialBy<Scene, "id"> = {
+const defaultScene: Omit<Scene, "id"> = {
   title: "Untitled",
   items: [
     {

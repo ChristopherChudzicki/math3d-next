@@ -1,4 +1,4 @@
-import { MathItemType as MIT } from "types";
+import { MathItemType as MIT } from "configs";
 
 export const isMathItemType = <T extends MIT = MIT>(
   value: unknown
