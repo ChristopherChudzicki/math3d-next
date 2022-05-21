@@ -2,8 +2,6 @@ import type { MathItemType, WidgetType } from "./constants";
 
 export type Validate = (value: unknown) => void;
 
-type PropertyValue = string | number | boolean | null;
-
 export interface MathItemProperties {
   description: string;
 }

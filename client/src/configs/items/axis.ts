@@ -1,4 +1,8 @@
-import type { MathItemConfig, MathItemGenerator } from "../interfaces";
+import type {
+  MathItemConfig,
+  MathItemGenerator,
+  MathItemGeneric,
+} from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
 interface Properties {
@@ -58,5 +62,7 @@ const config: MathItemConfig<MathItemType.Axis, Properties> = {
   make,
 };
 
-export type { Properties };
+type Axis = MathItemGeneric<MathItemType.Axis, Properties>;
+
+export type { Properties, Axis };
 export { config };

@@ -1,4 +1,8 @@
-import type { MathItemConfig, MathItemGenerator } from "../interfaces";
+import type {
+  MathItemConfig,
+  MathItemGenerator,
+  MathItemGeneric,
+} from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
 interface Properties {
@@ -109,5 +113,7 @@ const config: MathItemConfig<MathItemType.Point, Properties> = {
   make,
 };
 
-export type { Properties };
+type Point = MathItemGeneric<MathItemType.Point, Properties>;
+
+export type { Properties, Point };
 export { config };

@@ -1,4 +1,8 @@
-import type { MathItemConfig, MathItemGenerator } from "../interfaces";
+import type {
+  MathItemConfig,
+  MathItemGenerator,
+  MathItemGeneric,
+} from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
 
 interface Properties {
@@ -63,5 +67,10 @@ const config: MathItemConfig<MathItemType.ExplicitSurface, Properties> = {
   make,
 };
 
-export type { Properties };
+type ExplicitSurface = MathItemGeneric<
+  MathItemType.ExplicitSurface,
+  Properties
+>;
+
+export type { Properties, ExplicitSurface };
 export { config };
