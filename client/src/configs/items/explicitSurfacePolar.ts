@@ -56,7 +56,7 @@ const make: MathItemGenerator<MathItemType.ExplicitSurfacePolar, Properties> = (
 
 const config: MathItemConfig<MathItemType.ExplicitSurfacePolar, Properties> = {
   type: MathItemType.ExplicitSurfacePolar,
-  label: "Toggle Switch",
+  label: "Explicit Surface (Polar)",
   properties: [
     {
       name: "description",

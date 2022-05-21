@@ -56,7 +56,7 @@ const make: MathItemGenerator<MathItemType.ParametricSurface, Properties> = (
 
 const config: MathItemConfig<MathItemType.ParametricSurface, Properties> = {
   type: MathItemType.ParametricSurface,
-  label: "Toggle Switch",
+  label: "Parametric Surface",
   properties: [
     {
       name: "description",

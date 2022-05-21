@@ -48,7 +48,7 @@ const make: MathItemGenerator<MathItemType.ImplicitSurface, Properties> = (
 
 const config: MathItemConfig<MathItemType.ImplicitSurface, Properties> = {
   type: MathItemType.ImplicitSurface,
-  label: "Toggle Switch",
+  label: "Implicit Surface",
   properties: [
     {
       name: "description",

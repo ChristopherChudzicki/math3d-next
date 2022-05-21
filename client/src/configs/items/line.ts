@@ -46,7 +46,7 @@ const make: MathItemGenerator<MathItemType.Line, Properties> = (id) => ({
 
 const config: MathItemConfig<MathItemType.Line, Properties> = {
   type: MathItemType.Line,
-  label: "Toggle Switch",
+  label: "Line",
   properties: [
     {
       name: "description",

@@ -35,7 +35,7 @@ const make: MathItemGenerator<MathItemType.VariableSlider, Properties> = (
 
 const config: MathItemConfig<MathItemType.VariableSlider, Properties> = {
   type: MathItemType.VariableSlider,
-  label: "Toggle Switch",
+  label: "Variable Slider",
   properties: [
     {
       name: "description",

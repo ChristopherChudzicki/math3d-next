@@ -1,4 +1,4 @@
-import { MathItem } from "./mathItem";
+import { MathItem } from "configs";
 
 export type SortableTree = Record<string, string[]>;
 

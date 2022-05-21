@@ -50,7 +50,7 @@ const make: MathItemGenerator<MathItemType.Axis, Properties> = (id) => ({
 
 const config: MathItemConfig<MathItemType.Axis, Properties> = {
   type: MathItemType.Axis,
-  label: "Point",
+  label: "Axis",
   properties: [
     {
       name: "description",

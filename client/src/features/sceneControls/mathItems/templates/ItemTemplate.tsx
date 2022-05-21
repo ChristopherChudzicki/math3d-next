@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import mergeClassNames from "classnames";
-import type { MathItem, MathItemConfig } from "types";
+import type { MathItem, MathItemConfig, MathItemType as MIT } from "configs";
 import { useAppDispatch } from "app/hooks";
 import styles from "./ItemTemplate.module.css";
 import SettingsPopover from "./SettingsPopover";
@@ -9,19 +9,19 @@ import { AutosizeText, useOnWidgetChange } from "../FieldWidget";
 import { usePopulateMathScope } from "../mathScope";
 import { actions } from "../mathItems.slice";
 
-type Props = {
+type Props<T extends MIT> = {
   showAlignmentBar?: boolean;
-  item: MathItem;
-  config: MathItemConfig;
+  item: MathItem<T>;
+  config: MathItemConfig<T>;
   children?: React.ReactNode;
 };
 
-const ItemTemplate: React.FC<Props> = ({
+const ItemTemplate = <T extends MIT>({
   item,
   config,
   children,
   showAlignmentBar = true,
-}) => {
+}: Props<T>) => {
   const onWidgetChange = useOnWidgetChange(item);
   usePopulateMathScope(item, config);
   const dispatch = useAppDispatch();

@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useContext } from "react";
+import React, { useCallback, useContext } from "react";
 import mergeClassNames from "classnames";
 import { AssignmentError } from "util/MathScope/Evaluator";
 import type { IWidgetProps, WidgetChangeEvent } from "./types";

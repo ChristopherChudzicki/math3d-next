@@ -37,7 +37,7 @@ const make: MathItemGenerator<MathItemType.Camera, Properties> = (id) => ({
 
 const config: MathItemConfig<MathItemType.Camera, Properties> = {
   type: MathItemType.Camera,
-  label: "Toggle Switch",
+  label: "Camera",
   properties: [
     {
       name: "description",

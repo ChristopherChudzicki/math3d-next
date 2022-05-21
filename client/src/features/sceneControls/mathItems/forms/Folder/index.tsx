@@ -1,13 +1,10 @@
 import React from "react";
-import { MathItem, MathItemType as MT } from "types";
+import { MathItemType as MIT, mathItemConfigs as configs } from "configs";
 import ItemTemplate from "../../templates/ItemTemplate";
-import { configs } from "../../configs";
+import { MathItemForm } from "../interfaces";
 
-type Props = {
-  item: MathItem;
-};
-const Folder: React.FC<Props> = ({ item }) => (
-  <ItemTemplate item={item} config={configs[MT.Folder]} />
+const Folder: MathItemForm<MIT.Folder> = ({ item }) => (
+  <ItemTemplate item={item} config={configs[MIT.Folder]} />
 );
 
 export default Folder;

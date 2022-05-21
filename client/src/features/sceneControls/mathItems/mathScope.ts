@@ -6,9 +6,8 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { MathItem, MathItemConfig, Widget } from "types";
+import { MathItem, MathItemConfig, WidgetType, MathItemType } from "configs";
 import MathScope, { OnChangeListener } from "util/MathScope";
-import { validators } from "./configs";
 
 const defaultMathScope = new MathScope();
 // @ts-expect-error assign to window for debugging
@@ -126,28 +125,34 @@ const useMathErrors = <K extends string>(
 };
 
 const MATH_WIDGETS = new Set([
-  Widget.MathValue,
-  Widget.MathEquality,
-  Widget.MathBoolean,
+  WidgetType.MathValue,
+  WidgetType.MathEquality,
+  WidgetType.MathBoolean,
 ]);
 
-const getMathProperties = (config: MathItemConfig) =>
+const getMathProperties = <T extends MathItemType>(
+  config: MathItemConfig<T>
+): MathItemConfig<T>["properties"] =>
+  // @ts-expect-error https://github.com/microsoft/TypeScript/issues/44373
   config.properties.filter((prop) => MATH_WIDGETS.has(prop.widget));
 
 /**
  * Populate the mathscope with initial values based on item properties. Removes
  * expressions from scope on cleanup.
  */
-const usePopulateMathScope = (item: MathItem, config: MathItemConfig) => {
+const usePopulateMathScope = <T extends MathItemType>(
+  item: MathItem<T>,
+  config: MathItemConfig<T>
+) => {
   const mathScope = useContext(MathContext);
   useEffect(() => {
     const mathProperties = getMathProperties(config);
     const identifiedExpressions = mathProperties.map((prop) => {
       return {
         id: mathScopeId(item.id, prop.name),
-        // @ts-expect-error ts does not know the config and item are correlated
-        expr: item.properties[prop.name] as string,
-        validate: validators[item.type][prop.name],
+        // @ts-expect-error grrr
+        expr: item.properties[prop.name],
+        validate: prop.validate,
       };
     });
     mathScope.setExpressions(identifiedExpressions);

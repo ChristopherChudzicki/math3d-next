@@ -1,3 +1,5 @@
+import * as R from "ramda";
+import type { Validate } from "./interfaces";
 import * as axis from "./items/axis";
 import * as booleanVariable from "./items/booleanVariable";
 import * as camera from "./items/camera";
@@ -37,7 +39,7 @@ const mathItemConfigs = {
 
 type Configs = typeof mathItemConfigs;
 
-type MathItemConfig<T extends MathItemType> = Configs[T];
+type MathItemConfig<T extends MathItemType = MathItemType> = Configs[T];
 
 type MathItems = {
   [MathItemType.Axis]: axis.Axis;
@@ -58,7 +60,39 @@ type MathItems = {
   [MathItemType.VectorField]: vectorField.VectorField;
 };
 
-type MathItem<T extends MathItemType> = MathItems[T];
+type MathItem<T extends MathItemType = MathItemType> = MathItems[T];
 
-export { mathItemConfigs };
-export type { MathItemConfig, MathItem, WidgetType };
+type MathItemPatch<T extends MathItemType> = {
+  id: MathItem<T>["id"];
+} & { properties: Partial<MathItem<T>["properties"]> };
+
+const getValidators = <T extends MathItemType>(
+  config: MathItemConfig<T>
+): Record<string, Validate | undefined> => {
+  return Object.fromEntries(config.properties.map((p) => [p.name, p.validate]));
+};
+
+const validators = R.mapObjIndexed(getValidators, mathItemConfigs);
+
+const addableTypes = [
+  MathItemType.Point,
+  MathItemType.Line,
+  MathItemType.Vector,
+
+  MathItemType.ParametricCurve,
+  MathItemType.ParametricSurface,
+
+  MathItemType.ExplicitSurface,
+  MathItemType.ExplicitSurfacePolar,
+  MathItemType.ImplicitSurface,
+  MathItemType.VectorField,
+
+  MathItemType.Variable,
+  MathItemType.VariableSlider,
+  MathItemType.BooleanVariable,
+
+  MathItemType.Folder,
+];
+
+export { mathItemConfigs, MathItemType, WidgetType, validators, addableTypes };
+export type { MathItemConfig, MathItem, MathItemPatch };

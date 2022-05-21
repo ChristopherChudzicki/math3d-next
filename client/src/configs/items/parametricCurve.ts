@@ -48,7 +48,7 @@ const make: MathItemGenerator<MathItemType.ParametricCurve, Properties> = (
 
 const config: MathItemConfig<MathItemType.ParametricCurve, Properties> = {
   type: MathItemType.ParametricCurve,
-  label: "Toggle Switch",
+  label: "Parametric Curve",
   properties: [
     {
       name: "description",

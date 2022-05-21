@@ -1,4 +1,5 @@
-import { Scene, PartialBy, MathItemType } from "types";
+import { MathItemType } from "configs";
+import { Scene, PartialBy } from "types";
 
 const defaultScene: PartialBy<Scene, "id"> = {
   title: "Untitled",

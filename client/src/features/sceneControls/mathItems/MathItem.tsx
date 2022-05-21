@@ -1,5 +1,6 @@
 import React from "react";
-import { MathItem, MathItemType as MIT } from "types";
+import { MathItem, MathItemType as MIT } from "configs";
+import type { MathItemForm } from "./forms/interfaces";
 import Axis from "./forms/Axis";
 import BooleanVariable from "./forms/BooleanVariable";
 import Camera from "./forms/Camera";
@@ -17,49 +18,33 @@ import VariableSlider from "./forms/VariableSlider";
 import Vector from "./forms/Vector";
 import VectorField from "./forms/VectorField";
 
-const getMathItemForm = (type: MIT) => {
-  switch (type) {
-    case MIT.Axis:
-      return Axis;
-    case MIT.BooleanVariable:
-      return BooleanVariable;
-    case MIT.Camera:
-      return Camera;
-    case MIT.ExplicitSurface:
-      return ExplicitSurface;
-    case MIT.ExplicitSurfacePolar:
-      return ExplicitSurfacePolar;
-    case MIT.Folder:
-      return Folder;
-    case MIT.Grid:
-      return Grid;
-    case MIT.ImplicitSurface:
-      return ImplicitSurface;
-    case MIT.Line:
-      return Line;
-    case MIT.ParametricCurve:
-      return ParametricCurve;
-    case MIT.ParametricSurface:
-      return ParametricSurface;
-    case MIT.Point:
-      return Point;
-    case MIT.Variable:
-      return Variable;
-    case MIT.VariableSlider:
-      return VariableSlider;
-    case MIT.Vector:
-      return Vector;
-    case MIT.VectorField:
-      return VectorField;
-    default:
-      throw new Error(`Unexpected type: '${type}'.`);
-  }
+const forms = {
+  [MIT.Axis]: Axis,
+  [MIT.BooleanVariable]: BooleanVariable,
+  [MIT.Camera]: Camera,
+  [MIT.ExplicitSurface]: ExplicitSurface,
+  [MIT.ExplicitSurfacePolar]: ExplicitSurfacePolar,
+  [MIT.Folder]: Folder,
+  [MIT.Grid]: Grid,
+  [MIT.ImplicitSurface]: ImplicitSurface,
+  [MIT.Line]: Line,
+  [MIT.ParametricCurve]: ParametricCurve,
+  [MIT.ParametricSurface]: ParametricSurface,
+  [MIT.Point]: Point,
+  [MIT.Variable]: Variable,
+  [MIT.VariableSlider]: VariableSlider,
+  [MIT.Vector]: Vector,
+  [MIT.VectorField]: VectorField,
 };
 
-interface Props {
-  item: MathItem;
+const getMathItemForm = <T extends MIT>(type: T): MathItemForm<T> => {
+  return forms[type] as MathItemForm<T>;
+};
+
+interface Props<T extends MIT> {
+  item: MathItem<T>;
 }
-const MathItemComponent = (props: Props) => {
+const MathItemComponent = <T extends MIT>(props: Props<T>) => {
   const Component = getMathItemForm(props.item.type);
   return <Component item={props.item} />;
 };

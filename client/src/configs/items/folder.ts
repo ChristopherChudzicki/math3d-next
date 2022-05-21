@@ -7,11 +7,11 @@ import { MathItemType, WidgetType } from "../constants";
 
 interface Properties {
   description: string;
-  isCollapsed: boolean; // eval to boolean;
+  isCollapsed: string; // eval to boolean;
 }
 
 const defaultValues: Properties = {
-  isCollapsed: false,
+  isCollapsed: "false",
   description: "Folder",
 };
 
@@ -23,7 +23,7 @@ const make: MathItemGenerator<MathItemType.Folder, Properties> = (id) => ({
 
 const config: MathItemConfig<MathItemType.Folder, Properties> = {
   type: MathItemType.Folder,
-  label: "Toggle Switch",
+  label: "Folder",
   properties: [
     {
       name: "description",

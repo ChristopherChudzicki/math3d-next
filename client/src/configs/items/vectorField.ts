@@ -52,7 +52,7 @@ const make: MathItemGenerator<MathItemType.VectorField, Properties> = (id) => ({
 
 const config: MathItemConfig<MathItemType.VectorField, Properties> = {
   type: MathItemType.VectorField,
-  label: "Toggle Switch",
+  label: "Vector Field",
   properties: [
     {
       name: "description",

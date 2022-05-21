@@ -1,13 +1,10 @@
 import React from "react";
-import { MathItem, MathItemType as MT } from "types";
+import { MathItemType as MIT, mathItemConfigs as configs } from "configs";
 import ItemTemplate from "../../templates/ItemTemplate";
-import { configs } from "../../configs";
+import { MathItemForm } from "../interfaces";
 
-type Props = {
-  item: MathItem;
-};
-const ImplicitSurface: React.FC<Props> = ({ item }) => (
-  <ItemTemplate item={item} config={configs[MT.ImplicitSurface]} />
+const ImplicitSurface: MathItemForm<MIT.ImplicitSurface> = ({ item }) => (
+  <ItemTemplate item={item} config={configs[MIT.ImplicitSurface]} />
 );
 
 export default ImplicitSurface;

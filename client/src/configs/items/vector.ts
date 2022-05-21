@@ -48,7 +48,7 @@ const make: MathItemGenerator<MathItemType.Vector, Properties> = (id) => ({
 
 const config: MathItemConfig<MathItemType.Vector, Properties> = {
   type: MathItemType.Vector,
-  label: "Toggle Switch",
+  label: "Vector",
   properties: [
     {
       name: "description",

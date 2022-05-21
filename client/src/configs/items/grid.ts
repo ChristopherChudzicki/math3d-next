@@ -40,7 +40,7 @@ const make: MathItemGenerator<MathItemType.Grid, Properties> = (id) => ({
 
 const config: MathItemConfig<MathItemType.Grid, Properties> = {
   type: MathItemType.Grid,
-  label: "Toggle Switch",
+  label: "Grid",
   properties: [
     {
       name: "description",
