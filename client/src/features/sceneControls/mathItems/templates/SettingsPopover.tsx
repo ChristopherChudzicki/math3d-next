@@ -2,18 +2,21 @@ import React, { useState, useCallback, useMemo } from "react";
 import { Popover } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
 import { SubtleButton } from "util/components";
-import type { MathItem, MathItemConfig } from "types";
+import type { MathItem, MathItemConfig, MathItemType } from "configs";
 import styles from "./SettingsPopover.module.css";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import CloseButton from "./CloseButton";
 import { getMathProperties, useMathErrors } from "../mathScope";
 
-interface FormProps {
-  config: MathItemConfig;
-  item: MathItem;
+interface FormProps<T extends MathItemType> {
+  config: MathItemConfig<T>;
+  item: MathItem<T>;
 }
 
-const SettingsForm: React.FC<FormProps> = ({ config, item }) => {
+const SettingsForm = <T extends MathItemType>({
+  config,
+  item,
+}: FormProps<T>) => {
   const onWidgetChange = useOnWidgetChange(item);
   const mathPropNames = useMemo(
     () => getMathProperties(config).map((p) => p.name),
@@ -21,15 +24,16 @@ const SettingsForm: React.FC<FormProps> = ({ config, item }) => {
   );
   const errors = useMathErrors(item.id, mathPropNames);
   const fields = useMemo(() => {
-    const settings = config.properties.filter((p) => !p.primaryOnly);
-    return settings.map((field) => {
-      // @ts-expect-error ts does not know that config and item are correlated
-      const value = item.properties[field.name];
-      if (typeof value !== "string") {
-        throw new Error(`value should be a string; received ${typeof value}`);
-      }
-      return { field, value };
-    });
+    return [...config.properties]
+      .filter((field) => !field.primaryOnly)
+      .map((field) => {
+        // @ts-expect-error ts does not know that config and item are correlated
+        const value = item.properties[field.name];
+        if (typeof value !== "string") {
+          throw new Error(`value should be a string; received ${typeof value}`);
+        }
+        return { field, value };
+      });
   }, [config, item.properties]);
   return (
     <div className={styles["settings-form"]}>

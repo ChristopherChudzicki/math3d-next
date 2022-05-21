@@ -1,19 +1,13 @@
 import React from "react";
-import { MathItem, MathItemType as MIT } from "types";
-import { assertIsMathItemType } from "util/predicates";
+import { MathItemType as MIT, mathItemConfigs as configs } from "configs";
 import ItemTemplate from "../../templates/ItemTemplate";
-import { configs } from "../../configs";
+import { MathItemForm } from "../interfaces";
 import { MathValue, useOnWidgetChange } from "../../FieldWidget";
 import { useMathErrors } from "../../mathScope";
 
-type Props = {
-  item: MathItem;
-};
-
 const errorNames = ["coords"] as const;
 
-const Point: React.FC<Props> = ({ item }) => {
-  assertIsMathItemType(item.type, MIT.Point);
+const Point: MathItemForm<MIT.Point> = ({ item }) => {
   const onWidgetChange = useOnWidgetChange(item);
   const errors = useMathErrors(item.id, errorNames);
   return (

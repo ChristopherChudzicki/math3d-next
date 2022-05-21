@@ -1,8 +1,7 @@
 import React from "react";
-import { MathItem, MathItemType as MIT } from "types";
-import { assertIsMathItemType } from "util/predicates";
+import { MathItemType as MIT, mathItemConfigs as configs } from "configs";
 import ItemTemplate from "../../templates/ItemTemplate";
-import { configs } from "../../configs";
+import { MathItemForm } from "../interfaces";
 import { MathEqualityInput, useOnWidgetChange } from "../../FieldWidget";
 import { useMathErrors } from "../../mathScope";
 
@@ -10,11 +9,7 @@ const config = configs[MIT.Variable];
 
 const errorNames = ["value"] as const;
 
-type Props = {
-  item: MathItem;
-};
-const Variable: React.FC<Props> = ({ item }) => {
-  assertIsMathItemType(item.type, MIT.Variable);
+const Variable: MathItemForm<MIT.Variable> = ({ item }) => {
   const onWidgetChange = useOnWidgetChange(item);
   const errors = useMathErrors(item.id, errorNames);
   return (
