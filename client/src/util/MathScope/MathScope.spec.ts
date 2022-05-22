@@ -2,6 +2,7 @@ import MathScope, {
   ScopeChangeErrorsEvent,
   ScopeChangeEvent,
 } from "./MathScope";
+import * as adapter from "./adapter";
 import { Diff } from "./interfaces";
 
 const emptyDiff = (): Diff<string> => {
@@ -36,6 +37,14 @@ describe("MathScope Setting Expressions", () => {
     expect(mathScope.evalErrors).toStrictEqual(
       new Map([["x", expect.any(Error)]])
     );
+  });
+
+  it("passes parseOptions to the parser", () => {
+    const parse = jest.fn(adapter.parse);
+    const mathScope = new MathScope({ parse });
+    const parseOptions = {};
+    mathScope.setExpressions([{ id: "a", expr: "1", parseOptions }]);
+    expect(parse).toHaveBeenCalledWith("1", "a", parseOptions);
   });
 
   it("Removes expressions", () => {
