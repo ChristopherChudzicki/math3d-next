@@ -1,9 +1,21 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
+import {
+  color,
+  description,
+  opacity,
+  visible,
+  zBias,
+  zIndex,
+  size,
+  width,
+  start,
+  end,
+} from "../shared";
 
 interface VectorFieldProperties {
   description: string;
@@ -53,22 +65,71 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.VectorField, VectorFieldProperties> =
+const config: IMathItemConfig<MathItemType.VectorField, VectorFieldProperties> =
   {
     type: MathItemType.VectorField,
     label: "Vector Field",
-    properties: [
-      {
-        name: "description",
-        label: "Description",
-        widget: WidgetType.AutosizeText,
-        primaryOnly: true,
+    properties: {
+      color,
+      description,
+      opacity,
+      visible,
+      zBias,
+      zIndex,
+      size,
+      width,
+      start,
+      end,
+      rangeX: {
+        name: "rangeX",
+        label: "Range (X)",
+        widget: WidgetType.MathValue,
       },
+      rangeY: {
+        name: "rangeY",
+        label: "Range (Y)",
+        widget: WidgetType.MathValue,
+      },
+      rangeZ: {
+        name: "rangeZ",
+        label: "Range (Z)",
+        widget: WidgetType.MathValue,
+      },
+      samples: {
+        name: "samples",
+        label: "Samples",
+        // [x, y, z] ... why is this different from surface sampling?
+        widget: WidgetType.MathValue,
+      },
+      scale: {
+        name: "scale",
+        label: "Scale Multiplier",
+        widget: WidgetType.MathValue,
+      },
+      expr: {
+        name: "expr",
+        label: "Expression",
+        widget: WidgetType.MathValue,
+      },
+    },
+    settingsProperties: [
+      "opacity",
+      "rangeX",
+      "rangeY",
+      "rangeZ",
+      "size",
+      "start",
+      "end",
+      "samples",
+      "scale",
+      "width",
+      "zBias",
+      "zIndex",
     ],
     make,
   };
 
-type VectorField = MathItemGeneric<
+type VectorField = IMathItem<
   MathItemType.VectorField,
   VectorFieldProperties
 >;

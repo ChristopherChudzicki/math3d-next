@@ -1,9 +1,23 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
+import {
+  color,
+  description,
+  label,
+  labelVisible,
+  opacity,
+  visible,
+  size,
+  width,
+  zBias,
+  zIndex,
+  start,
+  end,
+} from "../shared";
 
 interface LineProperties {
   description: string;
@@ -44,21 +58,43 @@ const make: MathItemGenerator<MathItemType.Line, LineProperties> = (id) => ({
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Line, LineProperties> = {
+const config: IMathItemConfig<MathItemType.Line, LineProperties> = {
   type: MathItemType.Line,
   label: "Line",
-  properties: [
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
+  properties: {
+    color,
+    coords: {
+      name: "coords",
+      label: "Coordinates",
+      widget: WidgetType.MathValue,
     },
+    description,
+    label,
+    labelVisible,
+    opacity,
+    visible,
+    size,
+    width,
+    zBias,
+    zIndex,
+    start,
+    end,
+  },
+  settingsProperties: [
+    "label",
+    "labelVisible",
+    "opacity",
+    "size",
+    "start",
+    "end",
+    "width",
+    "zBias",
+    "zIndex",
   ],
   make,
 };
 
-type Line = MathItemGeneric<MathItemType.Line, LineProperties>;
+type Line = IMathItem<MathItemType.Line, LineProperties>;
 
 export type { LineProperties, Line };
 export { config };

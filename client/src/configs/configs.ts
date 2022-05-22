@@ -1,5 +1,3 @@
-import * as R from "ramda";
-import type { Validate } from "./interfaces";
 import * as axis from "./items/axis";
 import * as booleanVariable from "./items/booleanVariable";
 import * as camera from "./items/camera";
@@ -66,14 +64,6 @@ type MathItemPatch<T extends MathItemType> = {
   id: MathItem<T>["id"];
 } & { properties: Partial<MathItem<T>["properties"]> };
 
-const getValidators = <T extends MathItemType>(
-  config: MathItemConfig<T>
-): Record<string, Validate | undefined> => {
-  return Object.fromEntries(config.properties.map((p) => [p.name, p.validate]));
-};
-
-const validators = R.mapObjIndexed(getValidators, mathItemConfigs);
-
 const addableTypes = [
   MathItemType.Point,
   MathItemType.Line,
@@ -94,5 +84,5 @@ const addableTypes = [
   MathItemType.Folder,
 ];
 
-export { mathItemConfigs, MathItemType, WidgetType, validators, addableTypes };
+export { mathItemConfigs, MathItemType, WidgetType, addableTypes };
 export type { MathItemConfig, MathItem, MathItemPatch };

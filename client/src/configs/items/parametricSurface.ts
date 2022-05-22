@@ -1,9 +1,26 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
+import {
+  color,
+  description,
+  gridOpacity,
+  gridU,
+  gridV,
+  gridWidth,
+  opacity,
+  rangeU,
+  rangeV,
+  shaded,
+  uSamples,
+  vSamples,
+  visible,
+  zBias,
+  zIndex,
+} from "../shared";
 
 interface ParametricSurfaceProperties {
   description: string;
@@ -55,24 +72,58 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<
+const config: IMathItemConfig<
   MathItemType.ParametricSurface,
   ParametricSurfaceProperties
 > = {
   type: MathItemType.ParametricSurface,
   label: "Parametric Surface",
-  properties: [
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
+  properties: {
+    expr: {
+      name: "expr",
+      label: "Expression",
+      widget: WidgetType.MathValue,
     },
+    colorExpr: {
+      name: "colorExpr",
+      label: "Expression",
+      widget: WidgetType.MathValue,
+    },
+    color,
+    description,
+    gridOpacity,
+    gridU,
+    gridV,
+    gridWidth,
+    opacity,
+    rangeU,
+    rangeV,
+    shaded,
+    uSamples,
+    vSamples,
+    visible,
+    zBias,
+    zIndex,
+  },
+  settingsProperties: [
+    "gridOpacity",
+    "gridU",
+    "gridV",
+    "gridWidth",
+    "opacity",
+    "rangeU",
+    "rangeV",
+    "shaded",
+    "uSamples",
+    "vSamples",
+    "visible",
+    "zBias",
+    "zIndex",
   ],
   make,
 };
 
-type ParametricSurface = MathItemGeneric<
+type ParametricSurface = IMathItem<
   MathItemType.ParametricSurface,
   ParametricSurfaceProperties
 >;

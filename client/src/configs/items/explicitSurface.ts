@@ -1,9 +1,26 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
+import {
+  color,
+  description,
+  gridOpacity,
+  gridU,
+  gridV,
+  gridWidth,
+  opacity,
+  rangeU,
+  rangeV,
+  shaded,
+  uSamples,
+  vSamples,
+  visible,
+  zBias,
+  zIndex,
+} from "../shared";
 
 interface ExplicitSurfaceProperties {
   description: string;
@@ -54,24 +71,58 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<
+const config: IMathItemConfig<
   MathItemType.ExplicitSurface,
   ExplicitSurfaceProperties
 > = {
   type: MathItemType.ExplicitSurface,
   label: "Explicit Surface",
-  properties: [
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
+  properties: {
+    expr: {
+      name: "expr",
+      label: "Expression",
+      widget: WidgetType.MathValue,
     },
+    colorExpr: {
+      name: "colorExpr",
+      label: "Expression",
+      widget: WidgetType.MathValue,
+    },
+    color,
+    description,
+    gridOpacity,
+    gridU,
+    gridV,
+    gridWidth,
+    opacity,
+    rangeU,
+    rangeV,
+    shaded,
+    uSamples,
+    vSamples,
+    visible,
+    zBias,
+    zIndex,
+  },
+  settingsProperties: [
+    "gridOpacity",
+    "gridU",
+    "gridV",
+    "gridWidth",
+    "opacity",
+    "rangeU",
+    "rangeV",
+    "shaded",
+    "uSamples",
+    "vSamples",
+    "visible",
+    "zBias",
+    "zIndex",
   ],
   make,
 };
 
-type ExplicitSurface = MathItemGeneric<
+type ExplicitSurface = IMathItem<
   MathItemType.ExplicitSurface,
   ExplicitSurfaceProperties
 >;

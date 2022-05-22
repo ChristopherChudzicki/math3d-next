@@ -1,3 +1,4 @@
+import { filter as collectionFilter } from "lodash";
 import {
   createContext,
   useContext,
@@ -6,7 +7,13 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { MathItem, MathItemConfig, WidgetType, MathItemType } from "configs";
+import {
+  MathItem,
+  MathItemConfig,
+  WidgetType,
+  MathItemType,
+  PropertyConfig,
+} from "configs";
 import MathScope, {
   OnChangeListener,
   IdentifiedExpression,
@@ -135,9 +142,8 @@ const MATH_WIDGETS = new Set([
 
 const getMathProperties = <T extends MathItemType>(
   config: MathItemConfig<T>
-): MathItemConfig<T>["properties"] =>
-  // @ts-expect-error https://github.com/microsoft/TypeScript/issues/44373
-  config.properties.filter((prop) => MATH_WIDGETS.has(prop.widget));
+): PropertyConfig<string>[] =>
+  collectionFilter(config.properties, (p) => MATH_WIDGETS.has(p.widget));
 
 /**
  * Populate the mathscope with initial values based on item properties. Removes
@@ -146,7 +152,7 @@ const getMathProperties = <T extends MathItemType>(
 const usePopulateMathScope = <T extends MathItemType>(
   item: MathItem<T>,
   config: MathItemConfig<T>
-) => {
+): void => {
   const mathScope = useContext(MathContext);
   useEffect(() => {
     const mathProperties = getMathProperties(config);
@@ -173,6 +179,6 @@ export {
   MathContext,
   useMathResults,
   useMathErrors,
-  usePopulateMathScope,
   getMathProperties,
+  usePopulateMathScope,
 };

@@ -1,9 +1,20 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
+import {
+  color,
+  description,
+  label,
+  labelVisible,
+  opacity,
+  visible,
+  size,
+  zBias,
+  zIndex,
+} from "../shared";
 
 interface PointProperties {
   description: string;
@@ -52,71 +63,41 @@ const make: MathItemGenerator<MathItemType.Point, PointProperties> = (id) => ({
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Point, PointProperties> = {
+const config: IMathItemConfig<MathItemType.Point, PointProperties> = {
   type: MathItemType.Point,
   label: "Point",
-  properties: [
-    {
+  properties: {
+    color,
+    coords: {
       name: "coords",
       label: "Coordinates",
       widget: WidgetType.MathValue,
-      primaryOnly: true,
       validate: (v) => {
         if (!Array.isArray(v)) throw new Error("noooo");
         if (v.length !== 3) throw new Error("nooooo");
       },
     },
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
-    },
-    {
-      name: "size",
-      label: "Size",
-      widget: WidgetType.MathValue,
-    },
-    {
-      name: "visible",
-      label: "Visible",
-      widget: WidgetType.MathBoolean,
-    },
-    {
-      name: "color",
-      label: "Color",
-      widget: WidgetType.Color,
-    },
-    {
-      name: "opacity",
-      label: "Opacity",
-      widget: WidgetType.MathValue,
-    },
-    {
-      name: "zIndex",
-      label: "Z-Index",
-      widget: WidgetType.MathValue,
-    },
-    {
-      name: "zBias",
-      label: "Z-Bias",
-      widget: WidgetType.MathValue,
-    },
-    {
-      name: "label",
-      label: "Label",
-      widget: WidgetType.Text,
-    },
-    {
-      name: "labelVisible",
-      label: "Label Visibility",
-      widget: WidgetType.MathBoolean,
-    },
+    description,
+    label,
+    labelVisible,
+    opacity,
+    visible,
+    size,
+    zBias,
+    zIndex,
+  },
+  settingsProperties: [
+    "label",
+    "labelVisible",
+    "opacity",
+    "size",
+    "zBias",
+    "zIndex",
   ],
   make,
 };
 
-type Point = MathItemGeneric<MathItemType.Point, PointProperties>;
+type Point = IMathItem<MathItemType.Point, PointProperties>;
 
 export type { PointProperties, Point };
 export { config };

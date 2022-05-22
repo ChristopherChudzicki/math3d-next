@@ -1,7 +1,14 @@
 import React, { useCallback, useContext } from "react";
 import classNames from "classnames";
-import { MathItem, MathItemType as MIT, WidgetType, validators } from "configs";
+import {
+  MathItem,
+  MathItemType as MIT,
+  WidgetType,
+  mathItemConfigs,
+  PropertyConfig,
+} from "configs";
 import { useAppDispatch } from "app/hooks";
+import { assertNotNil } from "util/predicates";
 import { actions } from "../mathItems.slice";
 import MathEqualityInput from "./MathEqualityInput";
 import { IWidgetProps, WidgetChangeEvent, OnWidgetChange } from "./types";
@@ -92,12 +99,16 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
       const patch = { id: item.id, type: item.type, properties };
       dispatch(actions.setProperties(patch));
       if (e.mathScope) {
+        const config = mathItemConfigs[item.type];
+        // @ts-expect-error ... string can't index config.properties
+        const propConfig: PropertyConfig<string> = config.properties[e.name];
+        assertNotNil(propConfig);
         e.mathScope.setExpressions([
           {
             id: mathScopeId(item.id, e.name),
             expr: e.value,
             parseOptions: {
-              validate: validators[item.type][e.name],
+              validate: propConfig.validate,
             },
           },
         ]);

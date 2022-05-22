@@ -2,7 +2,12 @@ import React, { useState, useCallback, useMemo } from "react";
 import { Popover } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
 import { SubtleButton } from "util/components";
-import type { MathItem, MathItemConfig, MathItemType } from "configs";
+import type {
+  MathItem,
+  MathItemConfig,
+  MathItemType,
+  PropertyConfig,
+} from "configs";
 import styles from "./SettingsPopover.module.css";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import CloseButton from "./CloseButton";
@@ -24,16 +29,16 @@ const SettingsForm = <T extends MathItemType>({
   );
   const errors = useMathErrors(item.id, mathPropNames);
   const fields = useMemo(() => {
-    return [...config.properties]
-      .filter((field) => !field.primaryOnly)
-      .map((field) => {
-        // @ts-expect-error ts does not know that config and item are correlated
-        const value = item.properties[field.name];
-        if (typeof value !== "string") {
-          throw new Error(`value should be a string; received ${typeof value}`);
-        }
-        return { field, value };
-      });
+    return config.settingsProperties.map((name) => {
+      // @ts-expect-error ts does not know name is correlated with properties
+      const field: PropertyConfig<string> = config.properties[name];
+      // @ts-expect-error ts does not know that config and item are correlated
+      const value = item.properties[name];
+      if (typeof value !== "string") {
+        throw new Error(`value should be a string; received ${typeof value}`);
+      }
+      return { field, value };
+    });
   }, [config, item.properties]);
   return (
     <div className={styles["settings-form"]}>

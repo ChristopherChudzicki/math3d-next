@@ -9,14 +9,16 @@ const errorNames = ["coords"] as const;
 
 const config = configs[MIT.Point];
 
+const configProps = config.properties;
+
 const Point: MathItemForm<MIT.Point> = ({ item }) => {
   const onWidgetChange = useOnWidgetChange(item);
   const errors = useMathErrors(item.id, errorNames);
   return (
     <ItemTemplate item={item} config={config}>
       <MathValue
-        title={config.label}
-        name="coords"
+        title={configProps.coords.label}
+        name="name"
         error={errors.coords}
         value={item.properties.coords}
         onChange={onWidgetChange}

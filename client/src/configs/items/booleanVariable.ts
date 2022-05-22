@@ -1,9 +1,10 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
+import { description } from "../shared";
 
 interface BooleanVariableProperties {
   value: string; // eval to boolean
@@ -24,24 +25,25 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<
+const config: IMathItemConfig<
   MathItemType.BooleanVariable,
   BooleanVariableProperties
 > = {
   type: MathItemType.BooleanVariable,
   label: "Toggle Switch",
-  properties: [
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
+  properties: {
+    description,
+    value: {
+      name: "value",
+      label: "Value",
+      widget: WidgetType.MathBoolean,
     },
-  ],
+  },
+  settingsProperties: [],
   make,
 };
 
-type BooleanVariable = MathItemGeneric<
+type BooleanVariable = IMathItem<
   MathItemType.BooleanVariable,
   BooleanVariableProperties
 >;

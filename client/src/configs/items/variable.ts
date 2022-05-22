@@ -1,9 +1,10 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
+import { description } from "../shared";
 
 interface VariableProperties {
   value: string;
@@ -23,27 +24,22 @@ const make: MathItemGenerator<MathItemType.Variable, VariableProperties> = (
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Variable, VariableProperties> = {
+const config: IMathItemConfig<MathItemType.Variable, VariableProperties> = {
   type: MathItemType.Variable,
   label: "Variable or Function",
-  properties: [
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
-    },
-    {
+  properties: {
+    description,
+    value: {
       name: "value",
       label: "Value",
-      widget: WidgetType.MathEquality,
-      primaryOnly: true,
+      widget: WidgetType.MathValue,
     },
-  ],
+  },
+  settingsProperties: [],
   make,
 };
 
-type Variable = MathItemGeneric<MathItemType.Variable, VariableProperties>;
+type Variable = IMathItem<MathItemType.Variable, VariableProperties>;
 
 export type { VariableProperties, Variable };
 export { config };

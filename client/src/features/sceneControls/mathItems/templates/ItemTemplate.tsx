@@ -40,7 +40,7 @@ const ItemTemplate = <T extends MIT>({
       </div>
       <div className={styles["grid-center-top"]}>
         <AutosizeText
-          title="Description"
+          title={config.properties.description.label}
           name="description"
           value={item.properties.description}
           onChange={onWidgetChange}
