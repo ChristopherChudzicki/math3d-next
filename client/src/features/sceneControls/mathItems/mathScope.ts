@@ -164,7 +164,9 @@ const usePopulateMathScope = <T extends MathItemType>(
     return () => {
       mathScope.deleteExpressions(identifiedExpressions.map(({ id }) => id));
     };
-  }, [item, mathScope, config]);
+    // updating mathScope when properties change is done by the event handlers
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.id, mathScope, config]);
 };
 
 export {
