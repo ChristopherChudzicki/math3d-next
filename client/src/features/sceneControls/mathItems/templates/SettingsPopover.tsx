@@ -41,6 +41,7 @@ const SettingsForm = <T extends MathItemType>({
         <React.Fragment key={field.name}>
           <label htmlFor={field.name}>{field.label}</label>
           <FieldWidget
+            title={field.label}
             error={errors[field.name]}
             widget={field.widget}
             name={field.name}

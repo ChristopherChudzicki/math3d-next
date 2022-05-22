@@ -10,7 +10,7 @@ import styles from "./widget.module.css";
 
 const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const mathScope = useContext(MathContext);
-  const { onChange, name, error, ...others } = props;
+  const { onChange, name, title, error, ...others } = props;
   const onInputChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
       const event: WidgetChangeEvent = {
@@ -24,6 +24,7 @@ const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   );
   return (
     <input
+      title={title}
       className={classNames({
         [styles["has-error"]]: error,
       })}

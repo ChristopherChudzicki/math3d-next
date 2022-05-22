@@ -17,7 +17,7 @@ const splitAtFirstEquality = (text: string) => {
 };
 
 const MathEqualityInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const { onChange, name, value, error, ...others } = props;
+  const { onChange, name, value, error, title, ...others } = props;
   const mathScope = useContext(MathContext);
   const [lhs, rhs] = splitAtFirstEquality(value);
   const onChangeLHS: React.ChangeEventHandler<HTMLInputElement> = useCallback(
@@ -39,9 +39,13 @@ const MathEqualityInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
 
   const lhsError = error instanceof AssignmentError;
   const rhsError = error && !lhsError;
+
+  const lhsTitle = `${title} (left-hand side)`;
+  const rhsTitle = `${title} (right-hand side)`;
   return (
     <div {...others}>
       <input
+        title={lhsTitle}
         style={{ width: "25%" }}
         name={`${name}-lhs`}
         className={mergeClassNames({
@@ -53,6 +57,7 @@ const MathEqualityInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
       />
       =
       <input
+        title={rhsTitle}
         name={`${name}-rhs`}
         type="text"
         className={mergeClassNames({
