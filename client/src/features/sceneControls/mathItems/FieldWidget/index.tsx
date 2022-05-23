@@ -102,8 +102,6 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
         const config = mathItemConfigs[item.type];
         // @ts-expect-error ... string can't index config.properties
         const propConfig: PropertyConfig<string> = config.properties[e.name];
-        console.log(e);
-        console.log(config);
         assertNotNil(propConfig);
         e.mathScope.setExpressions([
           {
