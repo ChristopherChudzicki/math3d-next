@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { useAppSelector } from "app/hooks";
-import type { RootState, SelectorReturn } from "app/store";
+import { useAppSelector } from "store/hooks";
+import type { RootState, SelectorReturn } from "store/store";
 import {
   MathItem,
   MathItemPatch,
@@ -13,11 +13,11 @@ export interface MathItemsState {
   [id: string]: MathItem;
 }
 
-const initialState: MathItemsState = {};
+const getInitialState = (): MathItemsState => ({});
 
 const mathItemsSlice = createSlice({
   name: "mathItems",
-  initialState,
+  initialState: getInitialState,
   reducers: {
     addItems: (state, action: PayloadAction<{ items: MathItem[] }>) => {
       const { items } = action.payload;

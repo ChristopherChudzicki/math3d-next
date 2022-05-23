@@ -18,7 +18,7 @@ const Point: MathItemForm<MIT.Point> = ({ item }) => {
     <ItemTemplate item={item} config={config}>
       <MathValue
         title={configProps.coords.label}
-        name="name"
+        name="coords"
         error={errors.coords}
         value={item.properties.coords}
         onChange={onWidgetChange}

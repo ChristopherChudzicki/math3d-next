@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import mergeClassNames from "classnames";
 import type { MathItem, MathItemConfig, MathItemType as MIT } from "configs";
-import { useAppDispatch } from "app/hooks";
+import { useAppDispatch } from "store/hooks";
 import styles from "./ItemTemplate.module.css";
 import SettingsPopover from "./SettingsPopover";
 import CloseButton from "./CloseButton";

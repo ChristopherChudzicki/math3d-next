@@ -1,8 +1,7 @@
+import { permutations } from "test_util";
 import { anonParse as parse } from "./adapter";
 import ExpressionGraphManager from "./ExpressionGraphManager";
 import { DirectedGraph } from "./util";
-
-import { permutations } from "../test_util";
 
 const edge = <T>(from: T, to: T) => ({ from, to });
 

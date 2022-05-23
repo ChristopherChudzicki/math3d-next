@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useAppSelector, useAppDispatch } from "app/hooks";
+import { useAppSelector, useAppDispatch } from "store/hooks";
 import { getScene } from "api";
 import { MathItem, slice as mathItemsSlice } from "./mathItems";
 import ControlTabs from "./controlTabs";

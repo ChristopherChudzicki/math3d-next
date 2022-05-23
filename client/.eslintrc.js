@@ -33,7 +33,9 @@ module.exports = {
           "**/*.spec.ts",
           "**/*.spec.tsx",
           "**/*.stories.tsx",
-          "src/setupTests.ts"
+          "src/setupTests.ts",
+          "src/test_util/**/*.ts",
+          "src/test_util/**/*.tsx"
         ]
       }
     ]
