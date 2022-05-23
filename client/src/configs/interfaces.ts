@@ -6,7 +6,7 @@ export interface MathItemProperties {
   description: string;
 }
 
-export interface PropertyConfig<K extends KS, KS = string> {
+export interface PropertyConfig<K> {
   readonly name: K;
   readonly widget: WidgetType;
   readonly label: string;
@@ -24,9 +24,9 @@ export interface IMathItemConfig<
   type: T;
   label: string;
   properties: {
-    [K in keyof P]: PropertyConfig<K, keyof P>;
+    [K in keyof P]: K extends string ? PropertyConfig<K> : never;
   };
-  settingsProperties: (keyof P)[];
+  settingsProperties: (keyof P & string)[];
   /**
    * Generate a new mathItem of this type with the given id.
    */

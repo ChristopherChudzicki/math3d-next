@@ -160,7 +160,7 @@ const usePopulateMathScope = <T extends MathItemType>(
       (prop) => {
         return {
           id: mathScopeId(item.id, prop.name),
-          // @ts-expect-error ... why doesn't TS realize these are correlated?
+          // @ts-expect-error ... TS does not know config and item are correlated
           expr: item.properties[prop.name],
           parseOptions: { validate: prop.validate },
         };
