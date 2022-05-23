@@ -1,3 +1,4 @@
+import { keyBy } from "lodash";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { useAppSelector } from "store/hooks";
 import type { RootState, SelectorReturn } from "store/store";
@@ -8,12 +9,14 @@ import {
   MathItemType,
 } from "configs";
 import idGenerator from "util/idGenerator";
+import defaultScene from "../defaultScene";
 
 export interface MathItemsState {
   [id: string]: MathItem;
 }
 
-const getInitialState = (): MathItemsState => ({});
+const getInitialState = (): MathItemsState =>
+  keyBy(defaultScene.items, (item) => item.id);
 
 const mathItemsSlice = createSlice({
   name: "mathItems",

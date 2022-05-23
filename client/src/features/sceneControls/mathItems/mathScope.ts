@@ -19,10 +19,7 @@ import MathScope, {
   IdentifiedExpression,
 } from "util/MathScope";
 
-const defaultMathScope = new MathScope();
-// @ts-expect-error assign to window for debugging
-window.mathScope = defaultMathScope;
-const MathContext = createContext(defaultMathScope);
+const MathContext = createContext(new MathScope());
 
 type EvaluationResultsSlice<K extends string> = Partial<Record<K, unknown>>;
 type EvaluationErrorsSlice<K extends string> = Partial<Record<K, Error>>;
