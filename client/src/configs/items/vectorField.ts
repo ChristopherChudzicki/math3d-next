@@ -129,10 +129,7 @@ const config: IMathItemConfig<MathItemType.VectorField, VectorFieldProperties> =
     make,
   };
 
-type VectorField = IMathItem<
-  MathItemType.VectorField,
-  VectorFieldProperties
->;
+type VectorField = IMathItem<MathItemType.VectorField, VectorFieldProperties>;
 
 export type { VectorFieldProperties, VectorField };
 export { config };

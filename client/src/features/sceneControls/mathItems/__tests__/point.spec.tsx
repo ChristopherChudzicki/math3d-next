@@ -1,4 +1,3 @@
-import { waitFor } from "@testing-library/react";
 import { MathItem, MathItemType as MIT } from "configs";
 import {
   IntegrationTest,
@@ -8,8 +7,6 @@ import {
   nodeId,
   typeText,
   within,
-  prettyDOM,
-  assertInstanceOf,
 } from "test_util";
 
 test.each([
