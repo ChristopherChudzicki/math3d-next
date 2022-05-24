@@ -1,4 +1,5 @@
-import { MathItemType as MIT } from "configs";
+import { waitFor } from "@testing-library/react";
+import { MathItem, MathItemType as MIT } from "configs";
 import {
   IntegrationTest,
   user,
@@ -6,6 +7,9 @@ import {
   makeItem,
   nodeId,
   typeText,
+  within,
+  prettyDOM,
+  assertInstanceOf,
 } from "test_util";
 
 test.each([
@@ -28,7 +32,7 @@ test.each([
     numEvalErrors: 1,
   },
 ])(
-  "initial coords evaluation/errors are correct",
+  "initial coords evaluation/errors are correct; text=$coordsString",
   ({ coordsString, coords, numParseErrors, numEvalErrors }) => {
     const point = makeItem(MIT.Point, { coords: coordsString });
     const id = nodeId(point);
@@ -78,3 +82,46 @@ test.each([
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);
   }
 );
+
+test("Adding items adds to mathScope", async () => {
+  const helper = new IntegrationTest();
+  helper.patchMathItems([]);
+  const { mathScope, store } = helper.render();
+  await user.click(await screen.findByText("Add New Object"));
+  const menu = await screen.findByRole("menu");
+  const addPoint = await within(menu).findByText("Point");
+  // antd has issues with point-events checks, see, e.g.,
+  await user.click(addPoint, { pointerEventsCheck: 0 });
+
+  const mathItems = Object.values(store.getState().mathItems);
+  expect(mathItems).toHaveLength(1);
+  const point = Object.values(mathItems)[0] as MathItem<MIT.Point>;
+  const id = nodeId(point);
+  screen.getByTestId(`mathItem-${point.id}`);
+  expect(mathScope.results.get(id("coords"))).toStrictEqual([0, 0, 0]);
+  expect(mathScope.evalErrors.size).toBe(0);
+  expect(mathScope.parseErrors.size).toBe(0);
+});
+
+test("Deleting items removes them from mathScope", async () => {
+  const point = makeItem(MIT.Point, {
+    label: "Point 123",
+    coords: "[1, 2, 3]",
+    size: "1 + ",
+    opacity: "2^[1,2,3]",
+  });
+  const helper = new IntegrationTest();
+  helper.patchMathItems([point]);
+  const { mathScope } = helper.render();
+  expect(mathScope.results.size).toBeGreaterThan(0);
+  expect(mathScope.parseErrors.size).toBeGreaterThan(0);
+  expect(mathScope.evalErrors.size).toBeGreaterThan(0);
+
+  const item = screen.getByTestId(`mathItem-${point.id}`);
+  const remove = within(item).getByLabelText("Remove Item");
+  await user.click(remove);
+  expect(mathScope.results.size).toBe(0);
+  expect(mathScope.parseErrors.size).toBe(0);
+  expect(mathScope.evalErrors.size).toBe(0);
+  expect(item).not.toBeInTheDocument();
+});

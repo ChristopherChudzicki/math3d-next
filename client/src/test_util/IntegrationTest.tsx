@@ -35,7 +35,7 @@ class IntegrationTest {
     const store = getStore({ preloadedState: state });
     const mathScope = new MathScope();
     const result = render(<App store={store} mathScope={mathScope} />);
-    return { result, mathScope };
+    return { result, mathScope, store };
   };
 }
 
