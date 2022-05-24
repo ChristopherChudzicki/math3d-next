@@ -1,7 +1,14 @@
 import React, { useCallback, useContext } from "react";
 import classNames from "classnames";
-import { MathItem, MathItemType as MIT, WidgetType, validators } from "configs";
-import { useAppDispatch } from "app/hooks";
+import {
+  MathItem,
+  MathItemType as MIT,
+  WidgetType,
+  mathItemConfigs,
+  PropertyConfig,
+} from "configs";
+import { useAppDispatch } from "store/hooks";
+import { assertNotNil } from "util/predicates";
 import { actions } from "../mathItems.slice";
 import MathEqualityInput from "./MathEqualityInput";
 import { IWidgetProps, WidgetChangeEvent, OnWidgetChange } from "./types";
@@ -10,7 +17,7 @@ import styles from "./widget.module.css";
 
 const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const mathScope = useContext(MathContext);
-  const { onChange, name, error, ...others } = props;
+  const { onChange, name, title, error, ...others } = props;
   const onInputChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
       const event: WidgetChangeEvent = {
@@ -24,6 +31,7 @@ const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   );
   return (
     <input
+      title={title}
       className={classNames({
         [styles["has-error"]]: error,
       })}
@@ -91,12 +99,16 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
       const patch = { id: item.id, type: item.type, properties };
       dispatch(actions.setProperties(patch));
       if (e.mathScope) {
+        const config = mathItemConfigs[item.type];
+        // @ts-expect-error ... string can't index config.properties
+        const propConfig: PropertyConfig<string> = config.properties[e.name];
+        assertNotNil(propConfig);
         e.mathScope.setExpressions([
           {
             id: mathScopeId(item.id, e.name),
             expr: e.value,
             parseOptions: {
-              validate: validators[item.type][e.name],
+              validate: propConfig.validate,
             },
           },
         ]);

@@ -1,9 +1,21 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
+import {
+  color,
+  description,
+  opacity,
+  visible,
+  size,
+  width,
+  zBias,
+  zIndex,
+  start,
+  end,
+} from "../shared";
 
 interface ParametricCurveProperties {
   description: string;
@@ -47,24 +59,53 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<
+const config: IMathItemConfig<
   MathItemType.ParametricCurve,
   ParametricCurveProperties
 > = {
   type: MathItemType.ParametricCurve,
   label: "Parametric Curve",
-  properties: [
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
+  properties: {
+    color,
+    description,
+    expr: {
+      name: "expr",
+      label: "Expression",
+      widget: WidgetType.MathValue,
     },
+    opacity,
+    visible,
+    size,
+    width,
+    zBias,
+    zIndex,
+    start,
+    end,
+    range: {
+      name: "range",
+      label: "Range",
+      widget: WidgetType.MathValue,
+    },
+    samples: {
+      name: "samples",
+      label: "Samples",
+      widget: WidgetType.MathValue,
+    },
+  },
+  settingsProperties: [
+    "opacity",
+    "size",
+    "start",
+    "end",
+    "samples",
+    "width",
+    "zBias",
+    "zIndex",
   ],
   make,
 };
 
-type ParametricCurve = MathItemGeneric<
+type ParametricCurve = IMathItem<
   MathItemType.ParametricCurve,
   ParametricCurveProperties
 >;

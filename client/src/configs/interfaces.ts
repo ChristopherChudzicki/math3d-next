@@ -6,13 +6,9 @@ export interface MathItemProperties {
   description: string;
 }
 
-export interface PropertyConfig<P extends MathItemProperties> {
-  readonly name: keyof P;
+export interface PropertyConfig<K> {
+  readonly name: K;
   readonly widget: WidgetType;
-  /**
-   * Should this property be included in the settings overlay?
-   */
-  readonly primaryOnly?: boolean;
   readonly label: string;
   /**
    * Used for parsed+evaluated properties, this validator is passed to
@@ -21,20 +17,23 @@ export interface PropertyConfig<P extends MathItemProperties> {
   readonly validate?: Validate;
 }
 
-export interface MathItemConfig<
+export interface IMathItemConfig<
   T extends MathItemType,
   P extends MathItemProperties
 > {
   type: T;
   label: string;
-  properties: PropertyConfig<P>[];
+  properties: {
+    [K in keyof P]: K extends string ? PropertyConfig<K> : never;
+  };
+  settingsProperties: (keyof P & string)[];
   /**
    * Generate a new mathItem of this type with the given id.
    */
   make: MathItemGenerator<T, P>;
 }
 
-export interface MathItemGeneric<
+export interface IMathItem<
   T extends MathItemType,
   P extends MathItemProperties
 > {
@@ -46,4 +45,4 @@ export interface MathItemGeneric<
 export type MathItemGenerator<
   T extends MathItemType,
   P extends MathItemProperties
-> = (id: string) => MathItemGeneric<T, P>;
+> = (id: string) => IMathItem<T, P>;

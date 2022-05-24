@@ -1,9 +1,10 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
+import { description } from "../shared";
 
 interface CameraProperties {
   description: string;
@@ -37,21 +38,52 @@ const make: MathItemGenerator<MathItemType.Camera, CameraProperties> = (
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Camera, CameraProperties> = {
+const config: IMathItemConfig<MathItemType.Camera, CameraProperties> = {
   type: MathItemType.Camera,
   label: "Camera",
-  properties: [
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
+  properties: {
+    description,
+    isOrthographic: {
+      name: "isOrthographic",
+      label: "Orthographic",
+      widget: WidgetType.MathBoolean,
     },
-  ],
+    isPanEnabled: {
+      name: "isPanEnabled",
+      label: "Pan",
+      widget: WidgetType.MathBoolean,
+    },
+    isZoomEnabled: {
+      name: "isZoomEnabled",
+      label: "Zoom",
+      widget: WidgetType.MathBoolean,
+    },
+    isRotateEnabled: {
+      name: "isRotateEnabled",
+      label: "Rotate",
+      widget: WidgetType.MathBoolean,
+    },
+    useComputed: {
+      name: "useComputed",
+      label: "Use Computed",
+      widget: WidgetType.MathBoolean,
+    },
+    computedPosition: {
+      name: "computedPosition",
+      label: "Position",
+      widget: WidgetType.MathValue,
+    },
+    computedLookAt: {
+      name: "computedLookAt",
+      label: "Look At",
+      widget: WidgetType.MathValue,
+    },
+  },
+  settingsProperties: [],
   make,
 };
 
-type Camera = MathItemGeneric<MathItemType.Camera, CameraProperties>;
+type Camera = IMathItem<MathItemType.Camera, CameraProperties>;
 
 export type { CameraProperties, Camera };
 export { config };

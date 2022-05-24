@@ -1,9 +1,18 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
+import {
+  color,
+  description,
+  opacity,
+  shaded,
+  visible,
+  zBias,
+  zIndex,
+} from "../shared";
 
 interface ImplicitSurfaceProperties {
   description: string;
@@ -47,24 +56,64 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<
+const config: IMathItemConfig<
   MathItemType.ImplicitSurface,
   ImplicitSurfaceProperties
 > = {
   type: MathItemType.ImplicitSurface,
   label: "Implicit Surface",
-  properties: [
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
+  properties: {
+    color,
+    description,
+    opacity,
+    visible,
+    samples: {
+      name: "samples",
+      label: "Samples",
+      widget: WidgetType.MathValue,
+      // scalar value used for x, y, z... why different from other surfaces?
     },
+    shaded,
+    rangeX: {
+      name: "rangeX",
+      label: "Range X",
+      widget: WidgetType.MathValue,
+    },
+    rangeY: {
+      name: "rangeY",
+      label: "Range X",
+      widget: WidgetType.MathValue,
+    },
+    rangeZ: {
+      name: "rangeZ",
+      label: "Range X",
+      widget: WidgetType.MathValue,
+    },
+    lhs: {
+      name: "lhs",
+      label: "Left-hand side",
+      widget: WidgetType.MathValue,
+    },
+    rhs: {
+      name: "rhs",
+      label: "Right-hand side",
+      widget: WidgetType.MathValue,
+    },
+    zBias,
+    zIndex,
+  },
+  settingsProperties: [
+    "opacity",
+    "samples",
+    "shaded",
+    "visible",
+    "zBias",
+    "zIndex",
   ],
   make,
 };
 
-type ImplicitSurface = MathItemGeneric<
+type ImplicitSurface = IMathItem<
   MathItemType.ImplicitSurface,
   ImplicitSurfaceProperties
 >;

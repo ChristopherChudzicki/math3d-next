@@ -1,9 +1,23 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
+import {
+  color,
+  description,
+  label,
+  labelVisible,
+  opacity,
+  visible,
+  size,
+  width,
+  zBias,
+  zIndex,
+  start,
+  end,
+} from "../shared";
 
 interface VectorProperties {
   description: string;
@@ -48,21 +62,49 @@ const make: MathItemGenerator<MathItemType.Vector, VectorProperties> = (
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Vector, VectorProperties> = {
+const config: IMathItemConfig<MathItemType.Vector, VectorProperties> = {
   type: MathItemType.Vector,
   label: "Vector",
-  properties: [
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
+  properties: {
+    color,
+    components: {
+      name: "components",
+      label: "Components",
+      widget: WidgetType.MathValue,
     },
+    description,
+    label,
+    labelVisible,
+    opacity,
+    tail: {
+      name: "tail",
+      label: "Tail Coordinates",
+      widget: WidgetType.MathValue,
+    },
+    visible,
+    size,
+    width,
+    zBias,
+    zIndex,
+    start,
+    end,
+  },
+  settingsProperties: [
+    "label",
+    "labelVisible",
+    "opacity",
+    "size",
+    "start",
+    "end",
+    "tail",
+    "width",
+    "zBias",
+    "zIndex",
   ],
   make,
 };
 
-type Vector = MathItemGeneric<MathItemType.Vector, VectorProperties>;
+type Vector = IMathItem<MathItemType.Vector, VectorProperties>;
 
 export type { VectorProperties, Vector };
 export { config };

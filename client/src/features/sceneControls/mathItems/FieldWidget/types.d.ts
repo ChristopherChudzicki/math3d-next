@@ -2,6 +2,7 @@ import MathScope from "util/MathScope";
 
 interface IWidgetProps {
   name: string;
+  title: string;
   value: string;
   onChange: OnWidgetChange;
   style?: React.CSSProperties;

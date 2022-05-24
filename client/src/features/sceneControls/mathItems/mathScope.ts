@@ -1,3 +1,4 @@
+import { filter as collectionFilter } from "lodash";
 import {
   createContext,
   useContext,
@@ -6,16 +7,19 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { MathItem, MathItemConfig, WidgetType, MathItemType } from "configs";
+import {
+  MathItem,
+  MathItemConfig,
+  WidgetType,
+  MathItemType,
+  PropertyConfig,
+} from "configs";
 import MathScope, {
   OnChangeListener,
   IdentifiedExpression,
 } from "util/MathScope";
 
-const defaultMathScope = new MathScope();
-// @ts-expect-error assign to window for debugging
-window.mathScope = defaultMathScope;
-const MathContext = createContext(defaultMathScope);
+const MathContext = createContext(new MathScope());
 
 type EvaluationResultsSlice<K extends string> = Partial<Record<K, unknown>>;
 type EvaluationErrorsSlice<K extends string> = Partial<Record<K, Error>>;
@@ -135,9 +139,8 @@ const MATH_WIDGETS = new Set([
 
 const getMathProperties = <T extends MathItemType>(
   config: MathItemConfig<T>
-): MathItemConfig<T>["properties"] =>
-  // @ts-expect-error https://github.com/microsoft/TypeScript/issues/44373
-  config.properties.filter((prop) => MATH_WIDGETS.has(prop.widget));
+): PropertyConfig<string>[] =>
+  collectionFilter(config.properties, (p) => MATH_WIDGETS.has(p.widget));
 
 /**
  * Populate the mathscope with initial values based on item properties. Removes
@@ -146,7 +149,7 @@ const getMathProperties = <T extends MathItemType>(
 const usePopulateMathScope = <T extends MathItemType>(
   item: MathItem<T>,
   config: MathItemConfig<T>
-) => {
+): void => {
   const mathScope = useContext(MathContext);
   useEffect(() => {
     const mathProperties = getMathProperties(config);
@@ -154,7 +157,7 @@ const usePopulateMathScope = <T extends MathItemType>(
       (prop) => {
         return {
           id: mathScopeId(item.id, prop.name),
-          // @ts-expect-error ... why doesn't TS realize these are correlated?
+          // @ts-expect-error ... TS does not know config and item are correlated
           expr: item.properties[prop.name],
           parseOptions: { validate: prop.validate },
         };
@@ -173,6 +176,6 @@ export {
   MathContext,
   useMathResults,
   useMathErrors,
-  usePopulateMathScope,
   getMathProperties,
+  usePopulateMathScope,
 };

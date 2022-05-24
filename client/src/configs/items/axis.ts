@@ -1,8 +1,20 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
+import {
+  color,
+  description,
+  label,
+  labelVisible,
+  opacity,
+  visible,
+  size,
+  width,
+  zBias,
+  zIndex,
+} from "../shared";
 import { MathItemType, WidgetType } from "../constants";
 
 interface AxisProperties {
@@ -48,21 +60,64 @@ const make: MathItemGenerator<MathItemType.Axis, AxisProperties> = (id) => ({
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Axis, AxisProperties> = {
+const config: IMathItemConfig<MathItemType.Axis, AxisProperties> = {
   type: MathItemType.Axis,
   label: "Axis",
-  properties: [
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
+  properties: {
+    axis: {
+      name: "axis",
+      label: "Axis",
+      widget: WidgetType.Text,
     },
+    color,
+    description,
+    label,
+    labelVisible,
+    min: {
+      name: "min",
+      label: "Min",
+      widget: WidgetType.MathValue,
+      // validate number
+    },
+    max: {
+      name: "max",
+      label: "Max",
+      widget: WidgetType.MathValue,
+      // validate number
+    },
+    opacity,
+    scale: {
+      name: "scale",
+      label: "Max",
+      widget: WidgetType.MathValue,
+      // validate number
+    },
+    size,
+    ticksVisible: {
+      name: "ticksVisible",
+      label: "Ticks Visible",
+      widget: WidgetType.MathBoolean,
+      // validate boolean
+    },
+    visible,
+    width,
+    zBias,
+    zIndex,
+  },
+  settingsProperties: [
+    "label",
+    "labelVisible",
+    "opacity",
+    "size",
+    "width",
+    "scale",
+    "zBias",
+    "zIndex",
   ],
   make,
 };
 
-type Axis = MathItemGeneric<MathItemType.Axis, AxisProperties>;
+type Axis = IMathItem<MathItemType.Axis, AxisProperties>;
 
 export type { AxisProperties, Axis };
 export { config };

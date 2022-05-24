@@ -1,13 +1,14 @@
 import React, { useCallback } from "react";
 import mergeClassNames from "classnames";
 import type { MathItem, MathItemConfig, MathItemType as MIT } from "configs";
-import { useAppDispatch } from "app/hooks";
+import { useAppDispatch } from "store/hooks";
 import styles from "./ItemTemplate.module.css";
 import SettingsPopover from "./SettingsPopover";
 import CloseButton from "./CloseButton";
 import { AutosizeText, useOnWidgetChange } from "../FieldWidget";
 import { usePopulateMathScope } from "../mathScope";
 import { actions } from "../mathItems.slice";
+import { testId } from "../util";
 
 type Props<T extends MIT> = {
   showAlignmentBar?: boolean;
@@ -29,7 +30,7 @@ const ItemTemplate = <T extends MIT>({
     dispatch(actions.remove({ id: item.id }));
   }, [dispatch, item.id]);
   return (
-    <div className={styles.container}>
+    <div className={styles.container} data-testid={testId(item.id)}>
       <div
         className={mergeClassNames(
           styles["grid-left-gutter"],
@@ -40,6 +41,7 @@ const ItemTemplate = <T extends MIT>({
       </div>
       <div className={styles["grid-center-top"]}>
         <AutosizeText
+          title={config.properties.description.label}
           name="description"
           value={item.properties.description}
           onChange={onWidgetChange}
@@ -53,7 +55,7 @@ const ItemTemplate = <T extends MIT>({
           "justify-content-end"
         )}
       >
-        <CloseButton onClick={remove} />
+        <CloseButton onClick={remove} aria-label="Remove Item" />
       </div>
       <div className={styles["grid-right-gutter-bottom"]}>
         <SettingsPopover item={item} config={config} />

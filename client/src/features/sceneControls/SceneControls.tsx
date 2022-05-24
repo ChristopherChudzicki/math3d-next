@@ -1,10 +1,9 @@
 import React, { useEffect } from "react";
-import { useAppSelector, useAppDispatch } from "app/hooks";
+import { useAppSelector, useAppDispatch } from "store/hooks";
 import { getScene } from "api";
 import { MathItem, slice as mathItemsSlice } from "./mathItems";
 import ControlTabs from "./controlTabs";
 import AddObjectButton from "./AddObjectButton";
-import defaultScene from "./defaultScene";
 
 const { actions: itemActions } = mathItemsSlice;
 
@@ -24,12 +23,13 @@ const SceneControls: React.FC<Props> = (props) => {
   const { sceneId } = props;
   const dispatch = useAppDispatch();
   useEffect(() => {
-    const loadScene = async () => {
-      const scene =
-        sceneId !== undefined ? await getScene(sceneId) : defaultScene;
+    const loadScene = async (id: string) => {
+      const scene = await getScene(id);
       dispatch(itemActions.addItems({ items: scene.items }));
     };
-    loadScene();
+    if (sceneId) {
+      loadScene(sceneId);
+    }
   }, [dispatch, sceneId]);
   const items = useAppSelector((state) => Object.values(state.mathItems));
   return (

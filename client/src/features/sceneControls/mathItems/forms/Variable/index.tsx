@@ -7,6 +7,8 @@ import { useMathErrors } from "../../mathScope";
 
 const config = configs[MIT.Variable];
 
+const configProps = config.properties;
+
 const errorNames = ["value"] as const;
 
 const Variable: MathItemForm<MIT.Variable> = ({ item }) => {
@@ -15,6 +17,7 @@ const Variable: MathItemForm<MIT.Variable> = ({ item }) => {
   return (
     <ItemTemplate item={item} config={config}>
       <MathEqualityInput
+        title={configProps.value.label}
         error={errors.value}
         name="value"
         value={item.properties.value}

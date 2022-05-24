@@ -1,12 +1,12 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
+import { description } from "../shared";
 
 interface VariableSliderProperties {
-  name: string;
   value: string;
   min: string;
   max: string;
@@ -16,8 +16,7 @@ interface VariableSliderProperties {
 }
 
 const defaultValues: VariableSliderProperties = {
-  name: "T",
-  value: "0",
+  value: "T=0",
   min: "-5",
   max: "5",
   description: "Variable Slider",
@@ -34,24 +33,47 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<
+const config: IMathItemConfig<
   MathItemType.VariableSlider,
   VariableSliderProperties
 > = {
   type: MathItemType.VariableSlider,
   label: "Variable Slider",
-  properties: [
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
+  properties: {
+    description,
+    min: {
+      name: "min",
+      label: "Min",
+      widget: WidgetType.MathValue,
+      // validate number
     },
-  ],
+    max: {
+      name: "max",
+      label: "Max",
+      widget: WidgetType.MathValue,
+      // validate number
+    },
+    value: {
+      name: "value",
+      label: "Value",
+      widget: WidgetType.MathValue,
+    },
+    isAnimating: {
+      name: "isAnimating",
+      label: "Animating",
+      widget: WidgetType.MathBoolean,
+    },
+    speedMultiplier: {
+      name: "speedMultiplier",
+      label: "Speed Multiplier",
+      widget: WidgetType.MathValue,
+    },
+  },
+  settingsProperties: [],
   make,
 };
 
-type VariableSlider = MathItemGeneric<
+type VariableSlider = IMathItem<
   MathItemType.VariableSlider,
   VariableSliderProperties
 >;

@@ -7,12 +7,17 @@ import { useMathErrors } from "../../mathScope";
 
 const errorNames = ["coords"] as const;
 
+const config = configs[MIT.Point];
+
+const configProps = config.properties;
+
 const Point: MathItemForm<MIT.Point> = ({ item }) => {
   const onWidgetChange = useOnWidgetChange(item);
   const errors = useMathErrors(item.id, errorNames);
   return (
-    <ItemTemplate item={item} config={configs[MIT.Point]}>
+    <ItemTemplate item={item} config={config}>
       <MathValue
+        title={configProps.coords.label}
         name="coords"
         error={errors.coords}
         value={item.properties.coords}

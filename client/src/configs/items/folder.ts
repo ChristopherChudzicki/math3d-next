@@ -1,9 +1,10 @@
 import type {
-  MathItemConfig,
+  IMathItemConfig,
   MathItemGenerator,
-  MathItemGeneric,
+  IMathItem,
 } from "../interfaces";
 import { MathItemType, WidgetType } from "../constants";
+import { description } from "../shared";
 
 interface FolderProperties {
   description: string;
@@ -23,21 +24,22 @@ const make: MathItemGenerator<MathItemType.Folder, FolderProperties> = (
   properties: { ...defaultValues },
 });
 
-const config: MathItemConfig<MathItemType.Folder, FolderProperties> = {
+const config: IMathItemConfig<MathItemType.Folder, FolderProperties> = {
   type: MathItemType.Folder,
   label: "Folder",
-  properties: [
-    {
-      name: "description",
-      label: "Description",
-      widget: WidgetType.AutosizeText,
-      primaryOnly: true,
+  properties: {
+    description,
+    isCollapsed: {
+      name: "isCollapsed",
+      label: "Collapse Folder",
+      widget: WidgetType.MathBoolean,
     },
-  ],
+  },
+  settingsProperties: [],
   make,
 };
 
-type Folder = MathItemGeneric<MathItemType.Folder, FolderProperties>;
+type Folder = IMathItem<MathItemType.Folder, FolderProperties>;
 
 export type { FolderProperties, Folder };
 export { config };
