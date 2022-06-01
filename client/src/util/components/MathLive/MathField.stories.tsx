@@ -79,7 +79,6 @@ export const Controlled: ComponentStory<typeof MathField> = (args) => {
           setLatex(event.target.value);
         }}
       />
-      {latex}
     </div>
   );
 };
