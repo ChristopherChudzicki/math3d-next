@@ -112,4 +112,4 @@ const parse: Parse<ParseOptions> = (
 
 export type { ParseOptions };
 
-export { anonParse, parse };
+export { anonParse, parse, convertNode };
