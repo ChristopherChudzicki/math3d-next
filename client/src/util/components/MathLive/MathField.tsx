@@ -2,7 +2,6 @@ import React, {
   forwardRef,
   useEffect,
   useState,
-  RefObject,
   useImperativeHandle,
 } from "react";
 import { MathfieldElement, MathfieldOptions } from "mathlive";
@@ -24,6 +23,8 @@ interface MathfieldProps extends MathFieldWebComponentProps {
   makeOptions?: MakeMathfieldOptions;
   children?: string;
 }
+
+type OnMathFieldChange = NonNullable<MathfieldProps["onChange"]>;
 
 /**
  * A React component for MathLive's MathField.
@@ -68,4 +69,4 @@ const MathFieldForwardRef = (
 const MathField = forwardRef(MathFieldForwardRef);
 
 export default MathField;
-export type { MathfieldProps };
+export type { MathfieldProps, OnMathFieldChange };

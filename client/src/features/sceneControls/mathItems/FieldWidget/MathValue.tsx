@@ -4,6 +4,7 @@ import {
   MathField,
   MathfieldProps,
   MathfieldElement,
+  OnMathFieldChange,
 } from "util/components/MathLive";
 import { useShadowStylesheet } from "util/hooks";
 import { MathContext } from "../mathScope";
@@ -29,7 +30,7 @@ const MathEqualityInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const mathScope = useContext(MathContext);
   useShadowStylesheet(mf, styleOverrides);
 
-  const handleChange: NonNullable<MathfieldProps["onChange"]> = useCallback(
+  const handleChange: OnMathFieldChange = useCallback(
     (e) => {
       const widgetChangeEvent = {
         name,

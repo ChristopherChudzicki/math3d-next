@@ -3,3 +3,14 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import "@testing-library/jest-dom";
+
+/**
+ * Jest does not support enough ShadowDOM for MathLive to function properly, so
+ * this mocks it with a textarea.
+ */
+import "./util/components/MathLive/MockMathField";
+
+/**
+ * And since we're not using a ShadowDOM, we can't change the ShadowDOM styles.
+ */
+jest.mock("./util/hooks/useShadowStylesheet");
