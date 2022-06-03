@@ -45,7 +45,16 @@ const backslashRule: TextParserRegexRule = {
 
 const simplifyRule: MathJsRule = {
   type: ParserRuleType.MathJs,
-  transform: (node) => math.simplify(node),
+  transform: (node) => {
+    if (node.type === "FunctionAssignmentNode") {
+      // eslint-disable-next-line no-param-reassign
+      node.expr = math.simplify(node.expr);
+    } else if (node.type === "AssignmentNode") {
+      // eslint-disable-next-line no-param-reassign
+      node.value = math.simplify(node.value);
+    }
+    return node;
+  },
 };
 
 const parserRules: ParserRule[] = [
