@@ -1,6 +1,21 @@
 .has-error {
-  border: 1pt solid red;
+  border-bottom: 1pt solid var(--color-error) !important;
+  margin-bottom: -1pt;
 }
 .has-error:focus {
-  outline: 2pt solid red;
+  border-bottom: 2pt solid var(--color-error) !important;
+  margin-bottom: -1pt;
+}
+
+.math-font {
+  font-size: 1.25em;
+  padding: 0px;
+  border-bottom: 1pt solid var(--color-secondary);
+  margin-bottom: -1pt;
+}
+
+.math-font:focus {
+  outline: none;
+  border-bottom: 2pt solid var(--color-primary);
+  margin-bottom: -2pt;
 }

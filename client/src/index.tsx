@@ -4,11 +4,15 @@ import { createRoot } from "react-dom/client";
 import "bootstrap/dist/css/bootstrap-utilities.css";
 import "antd/dist/antd.min.css";
 import "./index.css";
+import * as math from "mathjs";
 import { getStore } from "./store/store";
 import App from "./app";
 import MathScope from "./util/MathScope";
+import { latexParser } from "./util/parsing";
 
-const mathScope = new MathScope();
+window.math = math;
+
+const mathScope = new MathScope({ parse: latexParser.parse });
 // @ts-expect-error assign to window for debugging
 window.mathScope = mathScope;
 

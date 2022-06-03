@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  forwardRef,
+  useEffect,
+  useState,
+  RefObject,
+  useImperativeHandle,
+} from "react";
 import { MathfieldElement, MathfieldOptions } from "mathlive";
 import { useListenToEvent } from "./util";
 import "./mathlive";
@@ -25,7 +31,10 @@ interface MathfieldProps extends MathFieldWebComponentProps {
  * Note: Following React's convention, `props.onChange` is bound to the `input`
  * event. See https://reactjs.org/docs/dom-elements.html#onchange
  */
-const MathField = (props: MathfieldProps) => {
+const MathFieldForwardRef = (
+  props: MathfieldProps,
+  ref: React.Ref<MathfieldElement | null>
+) => {
   const {
     onKeystroke,
     onFocusOut,
@@ -49,10 +58,14 @@ const MathField = (props: MathfieldProps) => {
     mf?.setValue(children);
   }, [mf, children]);
 
+  useImperativeHandle(ref, () => mf);
+
   return (
     <math-field {...others} class={className} onInput={onChange} ref={setMf} />
   );
 };
+
+const MathField = forwardRef(MathFieldForwardRef);
 
 export default MathField;
 export type { MathfieldProps };

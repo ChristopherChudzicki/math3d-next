@@ -14,6 +14,7 @@ import MathEqualityInput from "./MathEqualityInput";
 import { IWidgetProps, WidgetChangeEvent, OnWidgetChange } from "./types";
 import { MathContext, mathScopeId } from "../mathScope";
 import styles from "./widget.module.css";
+import MathValue from "./MathValue";
 
 const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const mathScope = useContext(MathContext);
@@ -41,8 +42,6 @@ const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
     />
   );
 };
-
-const MathValue = PlaceholderInput;
 
 const MathBoolean = PlaceholderInput;
 
