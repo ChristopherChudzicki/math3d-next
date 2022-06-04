@@ -40,6 +40,17 @@ html {
   --color-primary-9: var(--blue-9);
   --color-primary-10: var(--blue-10);
 
+  --color-secondary-1: var(--gray-1);
+  --color-secondary-2: var(--gray-2);
+  --color-secondary-3: var(--gray-3);
+  --color-secondary-4: var(--gray-4);
+  --color-secondary-5: var(--gray-5);
+  --color-secondary-6: var(--gray-6);
+  --color-secondary-7: var(--gray-7);
+  --color-secondary-8: var(--gray-8);
+  --color-secondary-9: var(--gray-9);
+  --color-secondary-10: var(--gray-10);
+
   --color-primary: var(--color-primary-6);
   --color-secondary: var(--gray-6);
   --color-error: red;
