@@ -2,7 +2,7 @@ import React from "react";
 import { MathItemType as MIT, mathItemConfigs as configs } from "configs";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
-import { MathEqualityInput, useOnWidgetChange } from "../../FieldWidget";
+import { MathAssignment, useOnWidgetChange } from "../../FieldWidget";
 import { useMathErrors } from "../../mathScope";
 
 const config = configs[MIT.Variable];
@@ -16,7 +16,7 @@ const Variable: MathItemForm<MIT.Variable> = ({ item }) => {
   const errors = useMathErrors(item.id, errorNames);
   return (
     <ItemTemplate item={item} config={config}>
-      <MathEqualityInput
+      <MathAssignment
         title={configProps.value.label}
         error={errors.value}
         name="value"

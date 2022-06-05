@@ -133,7 +133,7 @@ const useMathErrors = <K extends string>(
 
 const MATH_WIDGETS = new Set([
   WidgetType.MathValue,
-  WidgetType.MathEquality,
+  WidgetType.MathAssignment,
   WidgetType.MathBoolean,
 ]);
 

@@ -10,7 +10,7 @@ import {
 import { useAppDispatch } from "store/hooks";
 import { assertNotNil } from "util/predicates";
 import { actions } from "../mathItems.slice";
-import MathEqualityInput from "./MathEqualityInput";
+import MathAssignment from "./MathAssignment";
 import { IWidgetProps, WidgetChangeEvent, OnWidgetChange } from "./types";
 import { MathContext, mathScopeId } from "../mathScope";
 import styles from "./widget.module.css";
@@ -56,7 +56,7 @@ type WidgetsProps = {
   [WidgetType.Color]: React.ComponentProps<typeof ColorPicker>;
   [WidgetType.MathBoolean]: React.ComponentProps<typeof MathBoolean>;
   [WidgetType.AutosizeText]: React.ComponentProps<typeof AutosizeText>;
-  [WidgetType.MathEquality]: React.ComponentProps<typeof MathEqualityInput>;
+  [WidgetType.MathAssignment]: React.ComponentProps<typeof MathAssignment>;
   [WidgetType.Text]: React.ComponentProps<typeof TextInput>;
 };
 
@@ -118,4 +118,4 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
   return onWidgetChange;
 };
 
-export { MathEqualityInput };
+export { MathAssignment };

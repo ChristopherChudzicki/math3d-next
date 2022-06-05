@@ -20,7 +20,7 @@ export enum MathItemType {
 export enum WidgetType {
   MathBoolean = "math-boolean",
   MathValue = "math-value",
-  MathEquality = "math-equality",
+  MathAssignment = "math-assignment",
   Color = "color-picker",
   AutosizeText = "autosize-text",
   Text = "text",
