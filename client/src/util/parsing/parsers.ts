@@ -1,5 +1,10 @@
 import * as math from "mathjs";
-import { subscriptRule, fractionRule, operatornameRule } from "./rules";
+import {
+  subscriptRule,
+  fractionRule,
+  operatornameRule,
+  validateAssignmentLHS,
+} from "./rules";
 import MathJsParser from "./MathJsParser";
 import {
   ParserRuleType,
@@ -67,10 +72,12 @@ const parserRules: ParserRule[] = [
   rightBraceRule,
   backslashRule,
   spaceRule,
+  validateAssignmentLHS,
   // MathJS rules
   simplifyRule,
 ];
 
-const latexParser = new MathJsParser(parserRules);
+const getLatexParser = () => new MathJsParser(parserRules);
+const latexParser = getLatexParser();
 
-export { latexParser };
+export { latexParser, getLatexParser };

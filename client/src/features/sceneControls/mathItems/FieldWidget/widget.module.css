@@ -7,14 +7,17 @@
   margin-bottom: -1pt;
 }
 
-.math-font {
+.static-math {
   font-size: 1.25em;
-  padding: 0px;
+}
+
+.math-input {
+  font-size: 1.25em;
   border-bottom: 1pt solid var(--color-secondary);
   margin-bottom: -1pt;
 }
 
-.math-font:focus {
+.math-input:focus {
   outline: none;
   border-bottom: 2pt solid var(--color-primary);
   margin-bottom: -2pt;

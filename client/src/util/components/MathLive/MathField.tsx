@@ -43,6 +43,7 @@ const MathFieldForwardRef = (
     makeOptions,
     className,
     children,
+    defaultValue,
     ...others
   } = props;
   const [mf, setMf] = useState<MathfieldElement | null>(null);
@@ -62,7 +63,9 @@ const MathFieldForwardRef = (
   useImperativeHandle(ref, () => mf);
 
   return (
-    <math-field {...others} class={className} onInput={onChange} ref={setMf} />
+    <math-field {...others} class={className} onInput={onChange} ref={setMf}>
+      {defaultValue}
+    </math-field>
   );
 };
 
