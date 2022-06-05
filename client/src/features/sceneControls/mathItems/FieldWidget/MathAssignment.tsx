@@ -19,7 +19,7 @@ const splitAtFirstEquality = (text: string) => {
   return [lhs, rhs];
 };
 
-const MathEqualityInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
+const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const { onChange, name, value, error, title, className, ...others } = props;
   const [lhs, rhs] = splitAtFirstEquality(value);
   const mathScope = useContext(MathContext);
@@ -68,7 +68,11 @@ const MathEqualityInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
         defaultValue={lhs}
       />
       <SmallMathField
-        className={classNames("static-math", "align-self-center", "px-1")}
+        className={classNames(
+          style["static-math"],
+          "align-self-center",
+          "px-1"
+        )}
         makeOptions={makeReadOnly}
         defaultValue="="
       />
@@ -87,4 +91,4 @@ const MathEqualityInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   );
 };
 
-export default MathEqualityInput;
+export default MathAssignment;
