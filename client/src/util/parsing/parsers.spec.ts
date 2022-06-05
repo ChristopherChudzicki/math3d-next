@@ -1,4 +1,5 @@
 import { latexParser as parser } from "./parsers";
+import { ParseAssignmentLHSError } from "./rules";
 
 describe("preprocesser fraction conversion", () => {
   test("converts zero fractions correctly", () => {
@@ -54,4 +55,27 @@ describe("backslash removal", () => {
     const expected = "1 + 3 sin( pi x)";
     expect(parser.preprocess(input)).toBe(expected);
   });
+});
+
+describe("validateAssignmentLHS", () => {
+  it("throws ParseAssignmentLHSError if LHS is invalid", () => {
+    const input = "f(x+) = 123";
+    const shouldThrow = () => parser.parse(input, "some-id");
+    expect(shouldThrow).toThrow(ParseAssignmentLHSError);
+  });
+
+  it("throws non-ParseAssignmentLHSError if RHS is invalid", () => {
+    const input = "f(x) = 123 +";
+    const shouldThrow = () => parser.parse(input, "some-id");
+    expect(shouldThrow).toThrow();
+    expect(shouldThrow).not.toThrow(ParseAssignmentLHSError);
+  });
+
+  it.each(["123", "f(x)=123", "a=123"])(
+    "does not throw for valid assignments or valid non-assignments",
+    (text) => {
+      const shouldNotThrow = () => parser.parse(text, "some-id");
+      expect(shouldNotThrow).not.toThrow();
+    }
+  );
 });

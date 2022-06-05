@@ -4,6 +4,7 @@ import { render } from "@testing-library/react";
 import { RootState, getStore, getInitialState } from "store/store";
 import { MathItem } from "configs";
 import MathScope from "util/MathScope";
+import { getLatexParser } from "util/parsing";
 import App from "../app";
 
 class IntegrationTest {
@@ -33,7 +34,8 @@ class IntegrationTest {
   render = () => {
     const state = { ...getInitialState(), ...this.storePatch };
     const store = getStore({ preloadedState: state });
-    const mathScope = new MathScope();
+    const parser = getLatexParser();
+    const mathScope = new MathScope(parser);
     const result = render(<App store={store} mathScope={mathScope} />);
     return { result, mathScope, store };
   };

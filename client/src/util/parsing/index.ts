@@ -1,3 +1,1 @@
-import { latexParser } from "./parsers";
-
-export { latexParser };
+export * from "./parsers";

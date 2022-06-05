@@ -1,9 +1,12 @@
 import React, { useCallback, useContext } from "react";
-import mergeClassNames from "classnames";
 import { AssignmentError } from "util/MathScope/Evaluator";
+import classNames from "classnames";
+import SmallMathField, { makeReadOnly } from "util/components/SmallMathField";
+import { OnMathFieldChange } from "util/components/MathLive";
+import { ParseAssignmentLHSError } from "util/parsing/rules";
 import type { IWidgetProps, WidgetChangeEvent } from "./types";
-import { MathContext } from "../mathScope";
 import style from "./widget.module.css";
+import { MathContext } from "../mathScope";
 
 const splitAtFirstEquality = (text: string) => {
   const pieces = text.split("=");
@@ -17,54 +20,68 @@ const splitAtFirstEquality = (text: string) => {
 };
 
 const MathEqualityInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const { onChange, name, value, error, title, ...others } = props;
-  const mathScope = useContext(MathContext);
+  const { onChange, name, value, error, title, className, ...others } = props;
   const [lhs, rhs] = splitAtFirstEquality(value);
-  const onChangeLHS: React.ChangeEventHandler<HTMLInputElement> = useCallback(
+  const mathScope = useContext(MathContext);
+  const onChangeLHS: OnMathFieldChange = useCallback(
     (e) => {
       const newValue = [e.target.value, rhs].join("=");
-      const event: WidgetChangeEvent = { name, value: newValue, mathScope };
+      const event: WidgetChangeEvent = {
+        name,
+        value: newValue,
+        mathScope,
+      };
       onChange(event);
     },
     [rhs, onChange, name, mathScope]
   );
-  const onChangeRHS: React.ChangeEventHandler<HTMLInputElement> = useCallback(
+  const onChangeRHS: OnMathFieldChange = useCallback(
     (e) => {
       const newValue = [lhs, e.target.value].join("=");
-      const event: WidgetChangeEvent = { name, value: newValue, mathScope };
+      const event: WidgetChangeEvent = {
+        name,
+        value: newValue,
+        mathScope,
+      };
       onChange(event);
     },
     [lhs, onChange, name, mathScope]
   );
 
-  const lhsError = error instanceof AssignmentError;
+  const lhsError =
+    error instanceof AssignmentError ||
+    error instanceof ParseAssignmentLHSError;
   const rhsError = error && !lhsError;
 
   const lhsTitle = `${title} (left-hand side)`;
   const rhsTitle = `${title} (right-hand side)`;
   return (
-    <div {...others}>
-      <input
+    <div {...others} className={classNames(className, "d-flex")}>
+      <SmallMathField
         title={lhsTitle}
-        style={{ width: "25%" }}
-        name={`${name}-lhs`}
-        className={mergeClassNames({
-          [style["has-error"]]: lhsError,
-        })}
-        type="text"
-        value={lhs}
+        className={classNames(
+          style["math-input"],
+          { [style["has-error"]]: lhsError },
+          className
+        )}
         onChange={onChangeLHS}
+        defaultValue={lhs}
       />
-      =
-      <input
+      <SmallMathField
+        className={classNames("static-math", "align-self-center", "px-1")}
+        makeOptions={makeReadOnly}
+        defaultValue="="
+      />
+      <SmallMathField
         title={rhsTitle}
-        name={`${name}-rhs`}
-        type="text"
-        className={mergeClassNames({
-          [style["has-error"]]: rhsError,
-        })}
-        value={rhs}
+        className={classNames(
+          style["math-input"],
+          { [style["has-error"]]: rhsError },
+          className,
+          "flex-1"
+        )}
         onChange={onChangeRHS}
+        defaultValue={rhs}
       />
     </div>
   );
