@@ -6,7 +6,7 @@ import { MathContext } from "../mathScope";
 import { IWidgetProps } from "./types";
 import styles from "./widget.module.css";
 
-const MathEqualityInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
+const MathValue: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const { name, title, value, onChange, error, style, className } = props;
   const mathScope = useContext(MathContext);
 
@@ -38,4 +38,4 @@ const MathEqualityInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   );
 };
 
-export default MathEqualityInput;
+export default MathValue;
