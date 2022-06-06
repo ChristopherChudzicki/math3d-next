@@ -61,7 +61,7 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
         title={lhsTitle}
         className={classNames(
           style["field-widget"],
-          style["math-widget"],
+          style["adjust-margin-for-border"],
           { [style["has-error"]]: lhsError },
           className
         )}
@@ -81,7 +81,7 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
         title={rhsTitle}
         className={classNames(
           style["field-widget"],
-          style["math-widget"],
+          style["adjust-margin-for-border"],
           { [style["has-error"]]: rhsError },
           className,
           "flex-1"

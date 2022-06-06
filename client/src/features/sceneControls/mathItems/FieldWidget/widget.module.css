@@ -30,10 +30,10 @@ textarea.field-widget {
   border-bottom: 2pt solid var(--color-primary);
 }
 
-.math-widget {
+.adjust-margin-for-border {
   margin-bottom: -1pt;
 }
-.math-widget:focus {
+.adjust-margin-for-border:focus {
   margin-bottom: -2pt;
 }
 

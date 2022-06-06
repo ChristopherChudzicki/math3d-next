@@ -28,9 +28,7 @@ const AutosizeText: React.FC<IWidgetProps> = (props: IWidgetProps) => {
       extraWidth={EXTRA_WIDTH}
       title={title}
       className={classNames(
-        {
-          [styles["has-error"]]: error,
-        },
+        { [styles["has-error"]]: error },
         styles["field-widget"]
       )}
       name={name}

@@ -28,7 +28,7 @@ const MathValue: React.FC<IWidgetProps> = (props: IWidgetProps) => {
       style={style}
       className={classNames(
         styles["field-widget"],
-        styles["math-widget"],
+        styles["adjust-margin-for-border"],
         { [styles["has-error"]]: error },
         className
       )}
