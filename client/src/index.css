@@ -54,6 +54,7 @@ html {
   --color-primary: var(--color-primary-6);
   --color-secondary: var(--gray-6);
   --color-error: red;
+  --color-text-gray: var(--gray-7);
 
   --border-radius: 4px;
   --transition-duration: 300ms;

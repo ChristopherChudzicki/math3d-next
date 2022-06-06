@@ -10,15 +10,16 @@ import {
 import { useAppDispatch } from "store/hooks";
 import { assertNotNil } from "util/predicates";
 import { actions } from "../mathItems.slice";
-import MathAssignment from "./MathAssignment";
 import { IWidgetProps, WidgetChangeEvent, OnWidgetChange } from "./types";
 import { MathContext, mathScopeId } from "../mathScope";
 import styles from "./widget.module.css";
 import MathValue from "./MathValue";
+import MathBoolean from "./MathBoolean";
+import MathAssignment from "./MathAssignment";
 
 const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const mathScope = useContext(MathContext);
-  const { onChange, name, title, error, ...others } = props;
+  const { onChange, name, title, error, itemId, ...others } = props;
   const onInputChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
       const event: WidgetChangeEvent = {
@@ -42,8 +43,6 @@ const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
     />
   );
 };
-
-const MathBoolean = PlaceholderInput;
 
 const ColorPicker = PlaceholderInput;
 

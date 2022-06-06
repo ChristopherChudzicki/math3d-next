@@ -22,3 +22,9 @@
   border-bottom: 2pt solid var(--color-primary);
   margin-bottom: -2pt;
 }
+
+.detail-text {
+  font-size: 75%;
+  font-style: italic;
+  color: var(--color-text-gray)
+}

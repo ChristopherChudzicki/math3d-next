@@ -91,6 +91,7 @@ const config: IMathItemConfig<MathItemType.Point, PointProperties> = {
     "labelVisible",
     "opacity",
     "size",
+    "visible",
     "zBias",
     "zIndex",
   ],
