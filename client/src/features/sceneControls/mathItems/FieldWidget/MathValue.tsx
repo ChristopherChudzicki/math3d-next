@@ -27,7 +27,8 @@ const MathValue: React.FC<IWidgetProps> = (props: IWidgetProps) => {
       title={title}
       style={style}
       className={classNames(
-        styles["math-input"],
+        styles["field-widget"],
+        styles["math-widget"],
         { [styles["has-error"]]: error },
         className
       )}

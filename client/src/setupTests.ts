@@ -8,12 +8,14 @@ import "@testing-library/jest-dom";
  * Jest does not support enough ShadowDOM for MathLive to function properly, so
  * this mocks it with a textarea.
  */
-import "./util/components/MathLive/MockMathField";
+jest.mock("./util/components/MathLive/MathField");
 
 /**
  * And since we're not using a ShadowDOM, we can't change the ShadowDOM styles.
  */
 jest.mock("./util/hooks/useShadowStylesheet");
+
+jest.mock("./util/components/TextareaAutoWidthHeight/TextMeasurer");
 
 /**
  * Suppress deprecration warnings from React due to antd

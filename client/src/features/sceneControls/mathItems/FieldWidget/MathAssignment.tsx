@@ -60,7 +60,8 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
       <SmallMathField
         title={lhsTitle}
         className={classNames(
-          style["math-input"],
+          style["field-widget"],
+          style["math-widget"],
           { [style["has-error"]]: lhsError },
           className
         )}
@@ -79,7 +80,8 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
       <SmallMathField
         title={rhsTitle}
         className={classNames(
-          style["math-input"],
+          style["field-widget"],
+          style["math-widget"],
           { [style["has-error"]]: rhsError },
           className,
           "flex-1"

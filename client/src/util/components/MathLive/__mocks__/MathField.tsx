@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable global-require */
-import React from "react";
-import { MathfieldProps } from ".";
+import React, { forwardRef } from "react";
+import { MathfieldProps } from "..";
 
 const MockMathFieldForwardRef = (
   props: MathfieldProps,
@@ -21,9 +21,4 @@ const MockMathFieldForwardRef = (
   );
 };
 
-jest.mock(".", () => {
-  const { forwardRef } = require("react");
-  return {
-    MathField: forwardRef(MockMathFieldForwardRef),
-  };
-});
+export default forwardRef(MockMathFieldForwardRef);

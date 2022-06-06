@@ -1,4 +1,8 @@
-export default class TextMeasurer {
+export interface ITextMeasurer {
+  measure: (texts: string[], element: HTMLElement) => TextMetrics[];
+}
+
+export default class TextMeasurer implements ITextMeasurer {
   canvas: HTMLCanvasElement;
 
   constructor() {
@@ -11,7 +15,6 @@ export default class TextMeasurer {
     if (context === null) {
       throw new Error("context is null");
     }
-    context.font = style.font;
     return texts.map((text) => context.measureText(text));
   }
 }
