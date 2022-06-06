@@ -15,6 +15,7 @@ export default class TextMeasurer implements ITextMeasurer {
     if (context === null) {
       throw new Error("context is null");
     }
+    context.font = style.font;
     return texts.map((text) => context.measureText(text));
   }
 }

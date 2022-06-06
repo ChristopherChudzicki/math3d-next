@@ -1,5 +1,4 @@
-import React, { useCallback, useContext } from "react";
-import classNames from "classnames";
+import React, { useCallback } from "react";
 import {
   MathItem,
   MathItemType as MIT,
@@ -10,48 +9,18 @@ import {
 import { useAppDispatch } from "store/hooks";
 import { assertNotNil } from "util/predicates";
 import { actions } from "../mathItems.slice";
-import { IWidgetProps, WidgetChangeEvent, OnWidgetChange } from "./types";
-import { MathContext, mathScopeId } from "../mathScope";
-import styles from "./widget.module.css";
+import { OnWidgetChange } from "./types";
+import { mathScopeId } from "../mathScope";
 import MathValue from "./MathValue";
 import MathBoolean from "./MathBoolean";
 import MathAssignment from "./MathAssignment";
 import AutosizeText from "./AutosizeText";
-
-const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const mathScope = useContext(MathContext);
-  const { onChange, name, title, error, itemId, ...others } = props;
-  const onInputChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
-    (e) => {
-      const event: WidgetChangeEvent = {
-        name,
-        value: e.target.value,
-        mathScope,
-      };
-      onChange(event);
-    },
-    [onChange, name, mathScope]
-  );
-  return (
-    <input
-      title={title}
-      className={classNames({
-        [styles["has-error"]]: error,
-      })}
-      name={name}
-      onChange={onInputChange}
-      {...others}
-    />
-  );
-};
-
-const ColorPicker = PlaceholderInput;
-
-const TextInput = PlaceholderInput;
+import TextInput from "./TextInput";
+import ColorWidget from "./ColorWidget";
 
 type WidgetsProps = {
   [WidgetType.MathValue]: React.ComponentProps<typeof MathValue>;
-  [WidgetType.Color]: React.ComponentProps<typeof ColorPicker>;
+  [WidgetType.Color]: React.ComponentProps<typeof ColorWidget>;
   [WidgetType.MathBoolean]: React.ComponentProps<typeof MathBoolean>;
   [WidgetType.AutosizeText]: React.ComponentProps<typeof AutosizeText>;
   [WidgetType.MathAssignment]: React.ComponentProps<typeof MathAssignment>;
@@ -65,7 +34,7 @@ type FormWidgetProps<W extends WidgetType> = {
 const getComponentForWidget = (widget: WidgetType) => {
   if (widget === WidgetType.MathValue) return MathValue;
   if (widget === WidgetType.MathBoolean) return MathBoolean;
-  if (widget === WidgetType.Color) return ColorPicker;
+  if (widget === WidgetType.Color) return ColorWidget;
   if (widget === WidgetType.AutosizeText) return AutosizeText;
   if (widget === WidgetType.Text) return TextInput;
   throw new Error(`Unrecognized form widget: ${widget}`);
@@ -79,7 +48,7 @@ const FieldWidget = <W extends WidgetType>(
   return <WidgetComponent {...otherProps} />;
 };
 
-export { MathValue, MathBoolean, ColorPicker, AutosizeText };
+export { MathValue, MathBoolean, AutosizeText };
 
 export default FieldWidget;
 /**
