@@ -1,6 +1,6 @@
 .settings-form {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: auto minmax(100px, auto);
   grid-template-rows: auto auto;
 
   row-gap: 6pt;
@@ -9,7 +9,7 @@
 
 .settings-button {
   font-size: 20px;
-  color: var(--gray-6);
+  color: var(--color-secondary);
   width: 35px;
 }
 

@@ -41,11 +41,12 @@ const SettingsForm = <T extends MathItemType>({
     });
   }, [config, item.properties]);
   return (
-    <div className={styles["settings-form"]}>
+    <div className={styles["settings-form"]} title="Settings">
       {fields.map(({ field, value }) => (
         <React.Fragment key={field.name}>
           <label htmlFor={field.name}>{field.label}</label>
           <FieldWidget
+            itemId={item.id}
             title={field.label}
             error={errors[field.name]}
             widget={field.widget}
@@ -93,6 +94,7 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
       onVisibleChange={handleVisibleChange}
     >
       <SubtleButton
+        title="Show Settings"
         className={styles["settings-button"]}
         onClick={setVisibleTrue}
       >

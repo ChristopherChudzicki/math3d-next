@@ -9,6 +9,7 @@
 
 .subtle-button:focus {
   color: var(--color-primary-6);
+  outline-color: var(--color-primary-6);
 }
 
 .subtle-button.darken:hover {

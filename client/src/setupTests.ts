@@ -14,3 +14,25 @@ import "./util/components/MathLive/MockMathField";
  * And since we're not using a ShadowDOM, we can't change the ShadowDOM styles.
  */
 jest.mock("./util/hooks/useShadowStylesheet");
+
+/**
+ * Suppress deprecration warnings from React due to antd
+ * https://github.com/ant-design/ant-design/issues/31805
+ */
+const suppressFindDomNodeWarnings = () => {
+  // eslint-disable-next-line
+  const consoleError = console.error.bind(console);
+  // eslint-disable-next-line
+  console.error = (errObj, ...args) => {
+    const suppresionEnvs = ["test"];
+    if (
+      suppresionEnvs.includes(process.env.NODE_ENV) &&
+      args.includes("findDOMNode")
+    ) {
+      return;
+    }
+    consoleError(errObj, ...args);
+  };
+};
+
+suppressFindDomNodeWarnings();

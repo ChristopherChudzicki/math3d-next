@@ -1,6 +1,10 @@
 import MathScope from "util/MathScope";
 
 interface IWidgetProps {
+  /**
+   * used to access values; most items do not need it.
+   */
+  itemId?: string;
   name: string;
   title: string;
   value: string;
