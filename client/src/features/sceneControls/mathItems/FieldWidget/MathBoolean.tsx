@@ -72,7 +72,7 @@ const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
           title={`Math Expression for: ${title}`}
           style={style}
           className={classNames(
-            styles["math-input"],
+            styles["math-widget"],
             { [styles["has-error"]]: error },
             "flex-1"
           )}

@@ -20,6 +20,7 @@ const TextareaAutoWidthHeight: React.FC<Props> = (props) => {
 
   const lines = (props.value ?? "").split("\n");
   const textarea = useRef<HTMLTextAreaElement>(null);
+
   const widths =
     textarea.current === null
       ? [0]

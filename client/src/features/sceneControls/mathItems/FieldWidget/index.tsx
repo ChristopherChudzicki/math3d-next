@@ -16,6 +16,7 @@ import styles from "./widget.module.css";
 import MathValue from "./MathValue";
 import MathBoolean from "./MathBoolean";
 import MathAssignment from "./MathAssignment";
+import AutosizeText from "./AutosizeText";
 
 const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const mathScope = useContext(MathContext);
@@ -45,8 +46,6 @@ const PlaceholderInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
 };
 
 const ColorPicker = PlaceholderInput;
-
-const AutosizeText = PlaceholderInput;
 
 const TextInput = PlaceholderInput;
 

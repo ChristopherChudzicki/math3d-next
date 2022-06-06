@@ -11,15 +11,29 @@
   font-size: 1.25em;
 }
 
-.math-input {
+.field-widget {
   font-size: 1.25em;
+  border-top: none;
+  border-left: none;
+  border-right: none;
   border-bottom: 1pt solid var(--color-secondary);
-  margin-bottom: -1pt;
+  
 }
 
-.math-input:focus {
+textarea.field-widget {
+  resize: none;
+}
+
+
+.field-widget:focus {
   outline: none;
   border-bottom: 2pt solid var(--color-primary);
+}
+
+.math-widget {
+  margin-bottom: -1pt;
+}
+.math-widget:focus {
   margin-bottom: -2pt;
 }
 
