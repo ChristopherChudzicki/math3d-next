@@ -17,6 +17,7 @@ const tabsStyle = {
   height: TABS_NAV_HEIGHT,
   paddingLeft: "1em",
   paddingRight: "1em",
+  marginBottom: "0px",
 } as React.CSSProperties;
 const scrollingOverflowStyle = {
   height: `calc(100vh - ${TABS_NAV_HEIGHT} - var(--header-height))`,
