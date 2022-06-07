@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from "react";
+import React, { useCallback } from "react";
 import classNames from "classnames";
 import { IWidgetProps, WidgetChangeEvent } from "./types";
 import styles from "./widget.module.css";
