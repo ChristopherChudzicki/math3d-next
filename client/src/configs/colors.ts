@@ -28,6 +28,12 @@ const toFractionRgb = ({
   return [r / 255, g / 255, b / 255];
 };
 
+const makeColorConfig = (text: string): ColorConfig => ({
+  type: "color",
+  value: text,
+  backgroundPreview: text,
+});
+
 const colors: ColorConfig[] = [
   "#33FF00",
   "#2ecc71",
@@ -39,11 +45,7 @@ const colors: ColorConfig[] = [
   "#e67e22",
   "#e74c3c",
   "#808080",
-].map((color) => ({
-  type: "color",
-  value: color,
-  backgroundPreview: color,
-}));
+].map(makeColorConfig);
 
 const rainbow: GradientConfig = {
   type: "gradient",
@@ -100,6 +102,8 @@ const gradients = {
   temperature,
 };
 
+const colorsAndGradients = [...colors, ...[rainbow, bluered, temperature]];
+
 export type { ColorOrGradientConfig };
 
-export { colors, gradients };
+export { colors, gradients, colorsAndGradients, makeColorConfig };

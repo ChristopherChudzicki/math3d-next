@@ -6,9 +6,21 @@ import styles from "./ItemTemplate.module.css";
 import SettingsPopover from "./SettingsPopover";
 import CloseButton from "./CloseButton";
 import { AutosizeText, useOnWidgetChange } from "../FieldWidget";
-import { usePopulateMathScope } from "../mathScope";
 import { actions } from "../mathItems.slice";
 import { testId } from "../util";
+import ColorAndVisibilityIndicator, {
+  ItemWithColorAndVisible,
+} from "./ColorAndVisibilityIndicator";
+import { usePopulateMathScope } from "../mathScope";
+
+const hasColorAndVisible = (
+  item: MathItem
+): item is MathItem & ItemWithColorAndVisible => {
+  return (
+    Object.hasOwn(item.properties, "color") &&
+    Object.hasOwn(item.properties, "visible")
+  );
+};
 
 type Props<T extends MIT> = {
   showAlignmentBar?: boolean;
@@ -29,15 +41,21 @@ const ItemTemplate = <T extends MIT>({
   const remove = useCallback(() => {
     dispatch(actions.remove({ id: item.id }));
   }, [dispatch, item.id]);
+
   return (
     <div className={styles.container} data-testid={testId(item.id)}>
       <div
         className={mergeClassNames(
           styles["grid-left-gutter"],
-          styles["left-gutter"]
+          styles["left-gutter"],
+          "position-relative",
+          "d-flex"
         )}
       >
         {showAlignmentBar && <div className={styles["vertical-line"]} />}
+        {hasColorAndVisible(item) && (
+          <ColorAndVisibilityIndicator item={item} />
+        )}
       </div>
       <div className={styles["grid-center-top"]}>
         <AutosizeText

@@ -62,7 +62,7 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
   const onWidgetChange: OnWidgetChange = useCallback(
     (e) => {
       const properties = { [e.name]: e.value };
-      const patch = { id: item.id, type: item.type, properties };
+      const patch = { id: item.id, properties };
       dispatch(actions.setProperties(patch));
       if (e.mathScope) {
         const config = mathItemConfigs[item.type];
