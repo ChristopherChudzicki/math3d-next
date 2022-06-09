@@ -1,11 +1,15 @@
-import React, { useMemo, useContext, useCallback } from "react";
+import React, { useMemo, useContext, useCallback, useRef } from "react";
 import { colorsAndGradients, makeColorConfig } from "configs/colors";
 import classNames from "classnames";
+import { Popover } from "antd";
 import { MathItem } from "configs";
+import { useLongPress } from "use-long-press";
+import { useToggle } from "util/hooks";
 import { MathContext, useMathResults } from "../mathScope";
 import styles from "./ColorAndVisibilityIndicator.module.css";
 import { useOnWidgetChange } from "../FieldWidget";
 import { WidgetChangeEvent } from "../FieldWidget/types";
+import ColorDialog from "./ColorDialog";
 
 const getColor = (colorText: string) => {
   const color = colorsAndGradients.find((c) => c.value === colorText);
@@ -27,6 +31,8 @@ const VISIBLE = ["visible"];
 
 const ColorAndVisibilityIndicator: React.FC<Props> = (props) => {
   const { item } = props;
+  const isOpening = useRef(false);
+  const [dialogVisible, setDialogVisible] = useToggle(false);
   const { color } = item.properties;
   const mathScope = useContext(MathContext);
   const results = useMathResults(item.id, VISIBLE);
@@ -40,7 +46,18 @@ const ColorAndVisibilityIndicator: React.FC<Props> = (props) => {
       } as React.CSSProperties),
     [colorAndStyle]
   );
-  const onClick = useCallback(() => {
+  const handleVisibleChange = useCallback(
+    (value: boolean) => {
+      if (value) return;
+      if (!isOpening.current) {
+        setDialogVisible(value);
+      }
+      isOpening.current = false;
+    },
+    [setDialogVisible]
+  );
+
+  const handleLongPressCancel = useCallback(() => {
     const event: WidgetChangeEvent = {
       name: "visible",
       mathScope,
@@ -48,14 +65,28 @@ const ColorAndVisibilityIndicator: React.FC<Props> = (props) => {
     };
     onChange(event);
   }, [visible, onChange, mathScope]);
+  const handleLongPress = useCallback(() => {
+    setDialogVisible.on();
+    isOpening.current = true;
+  }, [setDialogVisible]);
+  const bindLongPress = useLongPress(handleLongPress, {
+    onCancel: handleLongPressCancel,
+  });
   return (
-    <button
-      type="button"
-      style={style}
-      onClick={onClick}
-      aria-label="Color and Visibility"
-      className={classNames(styles.circle, { [styles.empty]: !visible })}
-    />
+    <Popover
+      content={<ColorDialog />}
+      trigger="click"
+      visible={dialogVisible}
+      onVisibleChange={handleVisibleChange}
+    >
+      <button
+        type="button"
+        style={style}
+        aria-label="Color and Visibility"
+        className={classNames(styles.circle, { [styles.empty]: !visible })}
+        {...bindLongPress()}
+      />
+    </Popover>
   );
 };
 

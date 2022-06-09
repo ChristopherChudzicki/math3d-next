@@ -45,6 +45,7 @@
     "tarjan-graph": "3.0.0",
     "tinycolor2": "^1.4.2",
     "toposort": "2.0.2",
+    "use-long-press": "^2.0.2",
     "yup": "1.0.0-beta.4"
   },
   "devDependencies": {

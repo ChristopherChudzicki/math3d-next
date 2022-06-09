@@ -1,3 +1,4 @@
 import useShadowStylesheet from "./useShadowStylesheet";
+import useToggle from "./useToggle";
 
-export { useShadowStylesheet };
+export { useShadowStylesheet, useToggle };
