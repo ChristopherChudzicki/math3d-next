@@ -3,8 +3,8 @@ import { colorsAndGradients, makeColorConfig } from "configs/colors";
 import classNames from "classnames";
 import { Popover } from "antd";
 import { MathItem } from "configs";
-import { useLongPress } from "use-long-press";
 import { useToggle } from "util/hooks";
+import { useLongAndShortPress } from "util/hooks/useLongAndShortPress";
 import { MathContext, useMathResults } from "../mathScope";
 import styles from "./ColorAndVisibilityIndicator.module.css";
 import { useOnWidgetChange } from "../FieldWidget";
@@ -31,7 +31,6 @@ const VISIBLE = ["visible"];
 
 const ColorAndVisibilityIndicator: React.FC<Props> = (props) => {
   const { item } = props;
-  const isOpening = useRef(false);
   const [dialogVisible, setDialogVisible] = useToggle(false);
   const { color } = item.properties;
   const mathScope = useContext(MathContext);
@@ -46,32 +45,28 @@ const ColorAndVisibilityIndicator: React.FC<Props> = (props) => {
       } as React.CSSProperties),
     [colorAndStyle]
   );
+  const { bind: bindLongPress, lastPressWasLong } = useLongAndShortPress(
+    setDialogVisible.on
+  );
+
   const handleVisibleChange = useCallback(
     (value: boolean) => {
       if (value) return;
-      if (!isOpening.current) {
-        setDialogVisible(value);
-      }
-      isOpening.current = false;
+      if (lastPressWasLong()) return;
+      setDialogVisible.off();
     },
-    [setDialogVisible]
+    [setDialogVisible, lastPressWasLong]
   );
-
-  const handleLongPressCancel = useCallback(() => {
+  const handleButtonClick = useCallback(() => {
+    if (lastPressWasLong()) return;
     const event: WidgetChangeEvent = {
       name: "visible",
       mathScope,
       value: `${!visible}`,
     };
     onChange(event);
-  }, [visible, onChange, mathScope]);
-  const handleLongPress = useCallback(() => {
-    setDialogVisible.on();
-    isOpening.current = true;
-  }, [setDialogVisible]);
-  const bindLongPress = useLongPress(handleLongPress, {
-    onCancel: handleLongPressCancel,
-  });
+  }, [visible, onChange, mathScope, lastPressWasLong]);
+
   return (
     <Popover
       content={<ColorDialog />}
@@ -84,6 +79,7 @@ const ColorAndVisibilityIndicator: React.FC<Props> = (props) => {
         style={style}
         aria-label="Color and Visibility"
         className={classNames(styles.circle, { [styles.empty]: !visible })}
+        onClick={handleButtonClick}
         {...bindLongPress()}
       />
     </Popover>
