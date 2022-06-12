@@ -7,8 +7,16 @@ import {
   nodeId,
   within,
   assertInstanceOf,
+  patchConsoleError,
 } from "test_util";
 import { MathItemType as MIT } from "configs";
+
+/**
+ * Antd is causing react to complain about StrictMode.
+ * But everything seems to be working fine, so let's just ignore that error.
+ */
+const restore = patchConsoleError([{ ignoreStr: "in StrictMode." }]);
+afterAll(restore);
 
 /**
  * Sets up test scenario for MathBoolean:
