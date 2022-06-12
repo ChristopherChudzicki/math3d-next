@@ -16,25 +16,3 @@ jest.mock("./util/components/MathLive/MathField");
 jest.mock("./util/hooks/useShadowStylesheet");
 
 jest.mock("./util/components/TextareaAutoWidthHeight/TextMeasurer");
-
-/**
- * Suppress deprecration warnings from React due to antd
- * https://github.com/ant-design/ant-design/issues/31805
- */
-const suppressFindDomNodeWarnings = () => {
-  // eslint-disable-next-line
-  const consoleError = console.error.bind(console);
-  // eslint-disable-next-line
-  console.error = (errObj, ...args) => {
-    const suppresionEnvs = ["test"];
-    if (
-      suppresionEnvs.includes(process.env.NODE_ENV) &&
-      args.includes("findDOMNode")
-    ) {
-      return;
-    }
-    consoleError(errObj, ...args);
-  };
-};
-
-suppressFindDomNodeWarnings();

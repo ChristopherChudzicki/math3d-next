@@ -32,4 +32,5 @@
 
 .color-swatch.text-color-swatch {
   height: 1em;
+  pointer-events: none;
 }

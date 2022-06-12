@@ -55,7 +55,7 @@ const ColorDialog: React.FC<ColorDialogProps> = (props) => {
   );
   const pickerColors = hasColorExpr(item) ? colorsAndGradients : colors;
   return (
-    <div>
+    <div role="dialog">
       {hasColorExpr(item) ? (
         <Tabs>
           <TabPane tab="Color" key="color">

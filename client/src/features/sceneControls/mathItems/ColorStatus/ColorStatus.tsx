@@ -22,7 +22,7 @@ interface Props {
 
 const VISIBLE = ["visible"];
 
-const ColorAndVisibilityIndicator: React.FC<Props> = (props) => {
+const ColorStatus: React.FC<Props> = (props) => {
   const { item } = props;
   const [dialogVisible, setDialogVisible] = useToggle(false);
   const { color } = item.properties;
@@ -38,9 +38,7 @@ const ColorAndVisibilityIndicator: React.FC<Props> = (props) => {
       } as React.CSSProperties),
     [colorAndStyle]
   );
-  const { bind: bindLongPress, lastPressWasLong } = useLongAndShortPress(
-    setDialogVisible.on
-  );
+  const { bind, lastPressWasLong } = useLongAndShortPress(setDialogVisible.on);
 
   const handleVisibleChange = useCallback(
     (value: boolean) => {
@@ -71,13 +69,14 @@ const ColorAndVisibilityIndicator: React.FC<Props> = (props) => {
       <button
         type="button"
         style={style}
+        title="Color and Visibility"
         aria-label="Color and Visibility"
         className={classNames(styles.circle, { [styles.empty]: !visible })}
         onClick={handleButtonClick}
-        {...bindLongPress()}
+        {...bind()}
       />
     </Popover>
   );
 };
 
-export default ColorAndVisibilityIndicator;
+export default ColorStatus;

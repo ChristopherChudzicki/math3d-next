@@ -37,7 +37,7 @@ const makeColorConfig = (text: string): ColorConfig => ({
 const colors: ColorConfig[] = [
   "#33FF00",
   "#2ecc71",
-  "#3498db",
+  "#3090ff",
   "#9b59b6",
   "#8e44ad",
   "#2c3e50",

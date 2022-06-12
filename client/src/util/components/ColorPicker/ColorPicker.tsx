@@ -136,6 +136,8 @@ const ColorPicker: React.FC<ColorPickerProps> = (props: ColorPickerProps) => {
         );
       })}
       <Input
+        title="Custom Color Input"
+        aria-label="Custom Color Input"
         prefix={
           isValidColor(current) ? (
             <ColorSquare color={normalizeColor(current)} textOnly />
