@@ -1,2 +1,2 @@
 export * from "./configs";
-export type { PropertyConfig } from "./interfaces";
+export type { PropertyConfig, IMathItemConfig } from "./interfaces";

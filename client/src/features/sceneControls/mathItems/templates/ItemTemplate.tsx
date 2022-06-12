@@ -1,14 +1,20 @@
 import React, { useCallback } from "react";
 import mergeClassNames from "classnames";
-import type { MathItem, MathItemConfig, MathItemType as MIT } from "configs";
+import {
+  isMathGraphic,
+  MathItem,
+  MathItemConfig,
+  MathItemType as MIT,
+} from "configs";
 import { useAppDispatch } from "store/hooks";
 import styles from "./ItemTemplate.module.css";
 import SettingsPopover from "./SettingsPopover";
 import CloseButton from "./CloseButton";
 import { AutosizeText, useOnWidgetChange } from "../FieldWidget";
-import { usePopulateMathScope } from "../mathScope";
 import { actions } from "../mathItems.slice";
 import { testId } from "../util";
+import ColorStatus from "../ColorStatus";
+import { usePopulateMathScope } from "../mathScope";
 
 type Props<T extends MIT> = {
   showAlignmentBar?: boolean;
@@ -29,15 +35,19 @@ const ItemTemplate = <T extends MIT>({
   const remove = useCallback(() => {
     dispatch(actions.remove({ id: item.id }));
   }, [dispatch, item.id]);
+
   return (
     <div className={styles.container} data-testid={testId(item.id)}>
       <div
         className={mergeClassNames(
           styles["grid-left-gutter"],
-          styles["left-gutter"]
+          styles["left-gutter"],
+          "position-relative",
+          "d-flex"
         )}
       >
         {showAlignmentBar && <div className={styles["vertical-line"]} />}
+        {isMathGraphic(item) && <ColorStatus item={item} />}
       </div>
       <div className={styles["grid-center-top"]}>
         <AutosizeText

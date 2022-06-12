@@ -16,6 +16,22 @@ import * as vector from "./items/vector";
 import * as vectorField from "./items/vectorField";
 import { MathItemType, WidgetType } from "./constants";
 
+const MATH_GRAPHIC_TYPES = [
+  MathItemType.Axis,
+  MathItemType.ExplicitSurface,
+  MathItemType.ExplicitSurfacePolar,
+  MathItemType.Grid,
+  MathItemType.ImplicitSurface,
+  MathItemType.Line,
+  MathItemType.Point,
+  MathItemType.ParametricCurve,
+  MathItemType.ParametricSurface,
+  MathItemType.Vector,
+  MathItemType.VectorField,
+] as const;
+
+type MathGraphicType = typeof MATH_GRAPHIC_TYPES[number];
+
 const mathItemConfigs = {
   [MathItemType.Axis]: axis.config,
   [MathItemType.BooleanVariable]: booleanVariable.config,
@@ -59,6 +75,7 @@ type MathItems = {
 };
 
 type MathItem<T extends MathItemType = MathItemType> = MathItems[T];
+type MathGraphic<T extends MathGraphicType = MathGraphicType> = MathItems[T];
 
 type MathItemPatch<T extends MathItemType> = {
   id: MathItem<T>["id"];
@@ -84,5 +101,15 @@ const addableTypes = [
   MathItemType.Folder,
 ];
 
-export { mathItemConfigs, MathItemType, WidgetType, addableTypes };
-export type { MathItemConfig, MathItem, MathItemPatch };
+const isMathGraphic = (item: MathItem): item is MathGraphic => {
+  return (MATH_GRAPHIC_TYPES as readonly MathItemType[]).includes(item.type);
+};
+
+export {
+  mathItemConfigs,
+  MathItemType,
+  WidgetType,
+  addableTypes,
+  isMathGraphic,
+};
+export type { MathItemConfig, MathItem, MathItemPatch, MathGraphic };

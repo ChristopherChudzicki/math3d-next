@@ -1,0 +1,28 @@
+.circle {
+  border-radius: 50%;
+  width: calc(100% - 10px);
+  aspect-ratio: 1;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: none;
+  outline: none;
+  background: var(--indicator-color);
+  cursor: pointer;
+}
+
+.circle::before {
+  border-radius: 50%;
+  content: '';
+  background: var(--indicator-color);
+  top: 2px;
+  left: 2px;
+  bottom: 2px;
+  right: 2px;
+  position: absolute;
+  pointer-events: none;
+}
+.empty.circle::before {
+  background: var(--color-background);
+}

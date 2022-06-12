@@ -1,0 +1,36 @@
+.color-picker-grid {
+  padding: 5px;
+  display: grid;
+  grid-template-columns: repeat(5, min-content);
+  grid-auto-rows: min-content;
+  gap: 5px;
+}
+
+.color-input {
+  grid-column-start: 1;
+  grid-column-end: -1;
+}
+
+.color-swatch {
+  border-radius: 15%;
+  height: 30px;
+  aspect-ratio: 1;
+  cursor: pointer;
+  outline: none;
+  border: none;
+}
+
+.color-swatch:hover {
+  transform: scale(115%);
+  transition-duration: var(--transition-duration);
+  transition-timing-function: var(--transition-timing-function);
+}
+
+.light-colored-swatch {
+  border: 1pt solid gray;
+}
+
+.color-swatch.text-color-swatch {
+  height: 1em;
+  pointer-events: none;
+}

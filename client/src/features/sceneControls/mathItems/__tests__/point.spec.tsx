@@ -7,7 +7,15 @@ import {
   nodeId,
   typeText,
   within,
+  patchConsoleError,
 } from "test_util";
+
+/**
+ * Antd is causing react to complain that some things aren't wrapped in act(...).
+ * But everything seems to be working fine, so let's just ignore that error.
+ */
+const restore = patchConsoleError([{ ignoreData: "ForwardRef(TabNavList)" }]);
+afterAll(restore);
 
 test.each([
   {
