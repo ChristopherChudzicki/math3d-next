@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   useLongPress,
   LongPressCallback,
@@ -33,21 +33,20 @@ export const useLongAndShortPress = <T = Element>(
     },
     [longPressCb]
   );
-  const onCancel: LongPressCallback<T> = useCallback(
-    (event, meta) => {
+
+  useEffect(() => {
+    const onPointerDown = () => {
       wasLongPressedRef.current = false;
-      if (options?.onCancel) {
-        options.onCancel(event, meta);
-      }
-    },
-    [options]
-  );
-  const patchedOptions = useMemo(() => {
-    return { ...(options ?? {}), onCancel };
-  }, [onCancel, options]);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, []);
+
   const lastPressWasLong = useCallback(() => {
     return wasLongPressedRef.current;
   }, []);
-  const bind = useLongPress(handleLongPress, patchedOptions);
+  const bind = useLongPress(handleLongPress, options);
   return { bind, lastPressWasLong };
 };

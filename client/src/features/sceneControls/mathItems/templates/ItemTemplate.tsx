@@ -1,6 +1,11 @@
 import React, { useCallback } from "react";
 import mergeClassNames from "classnames";
-import type { MathItem, MathItemConfig, MathItemType as MIT } from "configs";
+import {
+  isMathGraphic,
+  MathItem,
+  MathItemConfig,
+  MathItemType as MIT,
+} from "configs";
 import { useAppDispatch } from "store/hooks";
 import styles from "./ItemTemplate.module.css";
 import SettingsPopover from "./SettingsPopover";
@@ -8,19 +13,8 @@ import CloseButton from "./CloseButton";
 import { AutosizeText, useOnWidgetChange } from "../FieldWidget";
 import { actions } from "../mathItems.slice";
 import { testId } from "../util";
-import ColorAndVisibilityIndicator, {
-  ItemWithColorAndVisible,
-} from "./ColorAndVisibilityIndicator";
+import ColorAndVisibilityIndicator from "./ColorAndVisibilityIndicator";
 import { usePopulateMathScope } from "../mathScope";
-
-const hasColorAndVisible = (
-  item: MathItem
-): item is MathItem & ItemWithColorAndVisible => {
-  return (
-    Object.hasOwn(item.properties, "color") &&
-    Object.hasOwn(item.properties, "visible")
-  );
-};
 
 type Props<T extends MIT> = {
   showAlignmentBar?: boolean;
@@ -53,9 +47,7 @@ const ItemTemplate = <T extends MIT>({
         )}
       >
         {showAlignmentBar && <div className={styles["vertical-line"]} />}
-        {hasColorAndVisible(item) && (
-          <ColorAndVisibilityIndicator item={item} />
-        )}
+        {isMathGraphic(item) && <ColorAndVisibilityIndicator item={item} />}
       </div>
       <div className={styles["grid-center-top"]}>
         <AutosizeText

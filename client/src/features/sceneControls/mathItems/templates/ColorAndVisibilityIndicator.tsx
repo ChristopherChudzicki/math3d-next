@@ -2,7 +2,7 @@ import React, { useMemo, useContext, useCallback, useRef } from "react";
 import { colorsAndGradients, makeColorConfig } from "configs/colors";
 import classNames from "classnames";
 import { Popover } from "antd";
-import { MathItem } from "configs";
+import { MathGraphic } from "configs";
 import { useToggle } from "util/hooks";
 import { useLongAndShortPress } from "util/hooks/useLongAndShortPress";
 import { MathContext, useMathResults } from "../mathScope";
@@ -16,15 +16,8 @@ const getColor = (colorText: string) => {
   return color ?? makeColorConfig(colorText);
 };
 
-interface ItemWithColorAndVisible {
-  properties: {
-    color: string;
-    visible: string;
-  };
-}
-
 interface Props {
-  item: MathItem & ItemWithColorAndVisible;
+  item: MathGraphic;
 }
 
 const VISIBLE = ["visible"];
@@ -69,8 +62,9 @@ const ColorAndVisibilityIndicator: React.FC<Props> = (props) => {
 
   return (
     <Popover
-      content={<ColorDialog />}
+      content={<ColorDialog item={item} />}
       trigger="click"
+      placement="right"
       visible={dialogVisible}
       onVisibleChange={handleVisibleChange}
     >
@@ -87,4 +81,3 @@ const ColorAndVisibilityIndicator: React.FC<Props> = (props) => {
 };
 
 export default ColorAndVisibilityIndicator;
-export type { ItemWithColorAndVisible };
