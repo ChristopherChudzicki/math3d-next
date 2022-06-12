@@ -1,4 +1,4 @@
-import React, { useMemo, useContext, useCallback, useRef } from "react";
+import React, { useMemo, useContext, useCallback } from "react";
 import { colorsAndGradients, makeColorConfig } from "configs/colors";
 import classNames from "classnames";
 import { Popover } from "antd";
@@ -6,7 +6,7 @@ import { MathGraphic } from "configs";
 import { useToggle } from "util/hooks";
 import { useLongAndShortPress } from "util/hooks/useLongAndShortPress";
 import { MathContext, useMathResults } from "../mathScope";
-import styles from "./ColorAndVisibilityIndicator.module.css";
+import styles from "./ColorStatus.module.css";
 import { useOnWidgetChange } from "../FieldWidget";
 import { WidgetChangeEvent } from "../FieldWidget/types";
 import ColorDialog from "./ColorDialog";

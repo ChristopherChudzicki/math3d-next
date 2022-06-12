@@ -13,7 +13,7 @@ import CloseButton from "./CloseButton";
 import { AutosizeText, useOnWidgetChange } from "../FieldWidget";
 import { actions } from "../mathItems.slice";
 import { testId } from "../util";
-import ColorAndVisibilityIndicator from "./ColorAndVisibilityIndicator";
+import ColorStatus from "../ColorStatus";
 import { usePopulateMathScope } from "../mathScope";
 
 type Props<T extends MIT> = {
@@ -47,7 +47,7 @@ const ItemTemplate = <T extends MIT>({
         )}
       >
         {showAlignmentBar && <div className={styles["vertical-line"]} />}
-        {isMathGraphic(item) && <ColorAndVisibilityIndicator item={item} />}
+        {isMathGraphic(item) && <ColorStatus item={item} />}
       </div>
       <div className={styles["grid-center-top"]}>
         <AutosizeText
