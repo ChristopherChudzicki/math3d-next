@@ -53,15 +53,18 @@ class MathJsParser implements IMathJsParser {
     return expressionFinal;
   };
 
-  parse: IMathJsParser["parse"] = (expression, id, options): MathNode => {
+  mjsParse: IMathJsParser["mjsParse"] = (expression) => {
     const preprocessed = this.preprocess(expression);
     const mjsRules = this.rules.filter(isMathJsRule);
-    const mjsFinal = mjsRules.reduce(
+    return mjsRules.reduce(
       (mjsNode, rule) => rule.transform(mjsNode),
       mjs.parse(preprocessed)
     );
+  };
 
-    const node = msAdapter.convertNode(mjsFinal, options) as MathNode;
+  parse: IMathJsParser["parse"] = (expression, id, options): MathNode => {
+    const mjsNode = this.mjsParse(expression);
+    const node = msAdapter.convertNode(mjsNode, options) as MathNode;
     node.id = id;
     return node;
   };

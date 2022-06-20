@@ -4,20 +4,11 @@ import classNames from "classnames";
 import SmallMathField, { makeReadOnly } from "util/components/SmallMathField";
 import { OnMathFieldChange } from "util/components/MathLive";
 import { ParseAssignmentLHSError } from "util/parsing/rules";
+import { splitAtFirstEquality } from "util/parsing";
 import type { IWidgetProps, WidgetChangeEvent } from "./types";
 import style from "./widget.module.css";
 import { MathContext } from "../mathScope";
-
-const splitAtFirstEquality = (text: string) => {
-  const pieces = text.split("=");
-  if (pieces.length < 2) {
-    // They should have eactly one, but if they have more, that's an issue for the parser
-    throw new Error(`Fatal error: Assignments should have an equality sign.`);
-  }
-  const [lhs, ...others] = pieces;
-  const rhs = others.join("=");
-  return [lhs, rhs];
-};
+import ReadonlyMathField from "./ReadonlyMathField";
 
 const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const { onChange, name, value, error, title, className, ...others } = props;
@@ -68,6 +59,7 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
         onChange={onChangeLHS}
         defaultValue={lhs}
       />
+      <ReadonlyMathField value="=" />
       <SmallMathField
         className={classNames(
           style["static-math"],

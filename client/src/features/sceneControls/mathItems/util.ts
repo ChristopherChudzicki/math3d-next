@@ -1,6 +1,5 @@
 import { MathItem, MathItemType, mathItemConfigs } from "configs";
 import idGenerator from "util/idGenerator";
-import React from "react";
 
 const makeItem = <T extends MathItemType>(
   type: T,
