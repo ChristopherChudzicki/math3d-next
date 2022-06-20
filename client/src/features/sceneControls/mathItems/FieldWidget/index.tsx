@@ -68,7 +68,7 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
         const config = mathItemConfigs[item.type];
         // @ts-expect-error ... string can't index config.properties
         const propConfig: PropertyConfig<string> = config.properties[e.name];
-        assertNotNil(propConfig);
+        assertNotNil(propConfig, "Property config should not be nil.");
         e.mathScope.setExpressions([
           {
             id: mathScopeId(item.id, e.name),

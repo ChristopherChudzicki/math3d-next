@@ -3,6 +3,7 @@ import user from "@testing-library/user-event";
 import { mathScopeId } from "features/sceneControls/mathItems/mathScope";
 import { testId } from "features/sceneControls/mathItems/util";
 import { MathItem } from "configs";
+import { assertInstanceOf } from "util/predicates";
 
 const permutations = <T>(tokens: T[], subperms: T[][] = [[]]): T[][] =>
   R.isEmpty(tokens)
@@ -27,20 +28,6 @@ const nodeId =
 const typeText = (element: Element, text: string): Promise<void> => {
   const escaped = text.replaceAll("[", "[[");
   return user.type(element, escaped);
-};
-
-/**
- * Type assertion that asserts value is not null or undefined.
- *
- * Unlike jest assertions, this will refine the type.
- * See https://github.com/DefinitelyTyped/DefinitelyTyped/issues/41179
- */
-const assertInstanceOf: <C extends { new (...args: any): any }>(
-  value: unknown,
-  Class: C
-) => asserts value is InstanceType<C> = (value, Class) => {
-  if (value instanceof Class) return;
-  throw new Error(`Expected value to be instanceof ${Class}`);
 };
 
 export { permutations, nodeId, typeText, assertInstanceOf, testId };

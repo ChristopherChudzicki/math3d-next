@@ -12,6 +12,16 @@ module.exports = {
   ],
   plugins: ["react", "@typescript-eslint"],
   rules: {
+    "@typescript-eslint/naming-convention": [
+      "warn",
+      {
+        "selector": "default",
+        "modifiers": ["unused"],
+        "format": ["camelCase"],
+        "leadingUnderscore": "allow" // do not require... it's annoying when required for object destructuring.
+      }
+    ],
+    "@typescript-eslint/no-unused-vars": ["warn", { varsIgnorePattern: "^_", destructuredArrayIgnorePattern: "^_"  }],
     "max-classes-per-file": "off",
     "react/function-component-definition": [
       "error",

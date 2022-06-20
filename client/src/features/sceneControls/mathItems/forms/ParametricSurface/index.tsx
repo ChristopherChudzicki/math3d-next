@@ -1,10 +1,17 @@
 import React from "react";
-import { MathItemType as MIT, mathItemConfigs as configs } from "configs";
-import ItemTemplate from "../../templates/ItemTemplate";
+import { MathItemType as MIT } from "configs";
 import { MathItemForm } from "../interfaces";
+import RangedMathItemForm from "../RangedMathItemForm";
+
+const rangePropNames = ["rangeU", "rangeV"] as const;
+const errorNames = ["expr", ...rangePropNames] as const;
 
 const ParametricSurface: MathItemForm<MIT.ParametricSurface> = ({ item }) => (
-  <ItemTemplate item={item} config={configs[MIT.ParametricSurface]} />
+  <RangedMathItemForm
+    item={item}
+    errorNames={errorNames}
+    rangePropNames={rangePropNames}
+  />
 );
 
 export default ParametricSurface;
