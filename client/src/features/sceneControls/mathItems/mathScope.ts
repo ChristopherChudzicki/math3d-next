@@ -1,22 +1,22 @@
-import { filter as collectionFilter } from "lodash";
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
 import {
   MathItem,
   MathItemConfig,
-  WidgetType,
   MathItemType,
   PropertyConfig,
+  WidgetType,
 } from "configs";
+import { filter as collectionFilter } from "lodash";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import MathScope, {
-  OnChangeListener,
   IdentifiedExpression,
+  OnChangeListener,
 } from "util/MathScope";
 
 const MathContext = createContext(new MathScope());
@@ -173,9 +173,9 @@ const usePopulateMathScope = <T extends MathItemType>(
 };
 
 export {
-  MathContext,
-  useMathResults,
-  useMathErrors,
   getMathProperties,
+  MathContext,
+  useMathErrors,
+  useMathResults,
   usePopulateMathScope,
 };

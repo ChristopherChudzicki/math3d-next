@@ -1,22 +1,22 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
-import { MathItemType, WidgetType } from "../constants";
 import {
   color,
   description,
+  end,
   label,
   labelVisible,
   opacity,
-  visible,
   size,
+  start,
+  visible,
   width,
   zBias,
   zIndex,
-  start,
-  end,
 } from "../shared";
 
 interface VectorProperties {
@@ -106,5 +106,5 @@ const config: IMathItemConfig<MathItemType.Vector, VectorProperties> = {
 
 type Vector = IMathItem<MathItemType.Vector, VectorProperties>;
 
-export type { VectorProperties, Vector };
+export type { Vector, VectorProperties };
 export { config };

@@ -1,20 +1,20 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
-import { MathItemType, WidgetType } from "../constants";
 import {
   color,
   description,
+  end,
   opacity,
+  size,
+  start,
   visible,
+  width,
   zBias,
   zIndex,
-  size,
-  width,
-  start,
-  end,
 } from "../shared";
 
 interface VectorFieldProperties {
@@ -131,5 +131,5 @@ const config: IMathItemConfig<MathItemType.VectorField, VectorFieldProperties> =
 
 type VectorField = IMathItem<MathItemType.VectorField, VectorFieldProperties>;
 
-export type { VectorFieldProperties, VectorField };
+export type { VectorField, VectorFieldProperties };
 export { config };

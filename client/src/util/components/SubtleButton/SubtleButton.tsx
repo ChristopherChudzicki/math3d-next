@@ -1,5 +1,6 @@
-import React, { useState } from "react";
 import mergeClassNames from "classnames";
+import React, { useState } from "react";
+
 import styles from "./SubtleButton.module.css";
 
 export type Props = React.DetailedHTMLProps<

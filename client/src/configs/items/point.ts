@@ -1,17 +1,17 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
-import { MathItemType, WidgetType } from "../constants";
 import {
   color,
   description,
   label,
   labelVisible,
   opacity,
-  visible,
   size,
+  visible,
   zBias,
   zIndex,
 } from "../shared";
@@ -100,5 +100,5 @@ const config: IMathItemConfig<MathItemType.Point, PointProperties> = {
 
 type Point = IMathItem<MathItemType.Point, PointProperties>;
 
-export type { PointProperties, Point };
+export type { Point, PointProperties };
 export { config };

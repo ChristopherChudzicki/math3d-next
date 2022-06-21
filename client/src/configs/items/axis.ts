@@ -1,7 +1,8 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
 import {
   color,
@@ -9,13 +10,12 @@ import {
   label,
   labelVisible,
   opacity,
-  visible,
   size,
+  visible,
   width,
   zBias,
   zIndex,
 } from "../shared";
-import { MathItemType, WidgetType } from "../constants";
 
 interface AxisProperties {
   description: string;
@@ -119,5 +119,5 @@ const config: IMathItemConfig<MathItemType.Axis, AxisProperties> = {
 
 type Axis = IMathItem<MathItemType.Axis, AxisProperties>;
 
-export type { AxisProperties, Axis };
+export type { Axis, AxisProperties };
 export { config };

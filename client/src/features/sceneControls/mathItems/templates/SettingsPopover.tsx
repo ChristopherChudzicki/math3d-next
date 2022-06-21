@@ -1,17 +1,18 @@
-import React, { useState, useCallback, useMemo } from "react";
-import { Popover } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
-import { SubtleButton } from "util/components";
+import { Popover } from "antd";
 import type {
   MathItem,
   MathItemConfig,
   MathItemType,
   PropertyConfig,
 } from "configs";
-import styles from "./SettingsPopover.module.css";
+import React, { useCallback, useMemo, useState } from "react";
+import { SubtleButton } from "util/components";
+
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
-import CloseButton from "./CloseButton";
 import { getMathProperties, useMathErrors } from "../mathScope";
+import CloseButton from "./CloseButton";
+import styles from "./SettingsPopover.module.css";
 
 interface FormProps<T extends MathItemType> {
   config: MathItemConfig<T>;

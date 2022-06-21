@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
-  useLongPress,
   LongPressCallback,
   LongPressOptions,
   LongPressResult,
+  useLongPress,
 } from "use-long-press";
 
 /**

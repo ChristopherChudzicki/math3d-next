@@ -1,8 +1,9 @@
-import React, { useCallback, useContext } from "react";
 import classNames from "classnames";
+import React, { useCallback, useContext } from "react";
 import { TextareaAutoWidthHeight } from "util/components";
-import { IWidgetProps, WidgetChangeEvent } from "./types";
+
 import { MathContext } from "../mathScope";
+import { IWidgetProps, WidgetChangeEvent } from "./types";
 import styles from "./widget.module.css";
 
 const EXTRA_WIDTH = 20;

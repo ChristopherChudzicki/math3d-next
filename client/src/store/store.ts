@@ -1,7 +1,7 @@
-import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
+import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
 import {
-  slice as mathItems,
   MathItemsState,
+  slice as mathItems,
 } from "features/sceneControls/mathItems";
 
 type RootState = {
@@ -36,5 +36,5 @@ type AppThunk<ReturnType = void> = ThunkAction<
 
 type SelectorReturn<T> = (state: RootState) => T;
 
-export type { RootState, SelectorReturn, AppStore, AppDispatch, AppThunk };
-export { getStore, getInitialState };
+export type { AppDispatch, AppStore, AppThunk, RootState, SelectorReturn };
+export { getInitialState, getStore };

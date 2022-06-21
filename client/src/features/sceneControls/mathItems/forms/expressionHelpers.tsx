@@ -1,12 +1,13 @@
 import React, {
   MutableRefObject,
-  useRef,
   useCallback,
   useContext,
+  useRef,
   useState,
 } from "react";
-import { assertInstanceOf } from "util/predicates";
 import { getParameters, latexParser, splitAtFirstEquality } from "util/parsing";
+import { assertInstanceOf } from "util/predicates";
+
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import { OnWidgetChange } from "../FieldWidget/types";
 import { MathContext } from "../mathScope";

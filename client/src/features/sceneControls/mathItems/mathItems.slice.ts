@@ -1,14 +1,15 @@
-import { keyBy } from "lodash";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { useAppSelector } from "store/hooks";
-import type { RootState, SelectorReturn } from "store/store";
 import {
   MathItem,
-  MathItemPatch,
   mathItemConfigs,
+  MathItemPatch,
   MathItemType,
 } from "configs";
+import { keyBy } from "lodash";
+import { useAppSelector } from "store/hooks";
+import type { RootState, SelectorReturn } from "store/store";
 import idGenerator from "util/idGenerator";
+
 import defaultScene from "../defaultScene";
 
 export interface MathItemsState {

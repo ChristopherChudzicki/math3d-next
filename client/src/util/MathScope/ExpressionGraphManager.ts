@@ -1,7 +1,8 @@
 import * as _ from "lodash";
 import toposort from "toposort";
+
 import type { AnonAssignmentNode, AnonMathNode } from "./interfaces";
-import { isAssignmentNode, DirectedGraph } from "./util";
+import { DirectedGraph, isAssignmentNode } from "./util";
 
 /**
  * Helps manage a dependency graph for mathematical expressions.

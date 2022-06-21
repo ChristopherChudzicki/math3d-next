@@ -1,17 +1,18 @@
 import * as math from "mathjs";
+
 import {
-  subscriptRule,
-  fractionRule,
-  operatornameRule,
-  validateAssignmentLHS,
-} from "./rules";
-import MathJsParser from "./MathJsParser";
-import {
+  MathJsRule,
+  ParserRule,
   ParserRuleType,
   TextParserRegexRule,
-  ParserRule,
-  MathJsRule,
 } from "./interfaces";
+import MathJsParser from "./MathJsParser";
+import {
+  fractionRule,
+  operatornameRule,
+  subscriptRule,
+  validateAssignmentLHS,
+} from "./rules";
 
 const cdotRule: TextParserRegexRule = {
   type: ParserRuleType.TextRegexp,
@@ -80,4 +81,4 @@ const parserRules: ParserRule[] = [
 const getLatexParser = () => new MathJsParser(parserRules);
 const latexParser = getLatexParser();
 
-export { latexParser, getLatexParser };
+export { getLatexParser, latexParser };

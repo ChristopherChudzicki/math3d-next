@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-no-bind */
+import { ComponentMeta, ComponentStory } from "@storybook/react";
 import React, { useState } from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+
 import { colors, gradients } from "../../../configs/colors";
 import ColorPicker, { OnColorChange } from "./ColorPicker";
 

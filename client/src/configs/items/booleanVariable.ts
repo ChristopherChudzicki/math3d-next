@@ -1,9 +1,9 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
-import { MathItemType, WidgetType } from "../constants";
 import { description } from "../shared";
 
 interface BooleanVariableProperties {
@@ -48,5 +48,5 @@ type BooleanVariable = IMathItem<
   BooleanVariableProperties
 >;
 
-export type { BooleanVariableProperties, BooleanVariable };
+export type { BooleanVariable, BooleanVariableProperties };
 export { config };

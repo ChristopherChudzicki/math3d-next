@@ -1,12 +1,12 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
-import { MathItemType, WidgetType } from "../constants";
 import {
-  description,
   color,
+  description,
   opacity,
   visible,
   width,
@@ -88,5 +88,5 @@ const config: IMathItemConfig<MathItemType.Grid, GridProperties> = {
 
 type Grid = IMathItem<MathItemType.Grid, GridProperties>;
 
-export type { GridProperties, Grid };
+export type { Grid, GridProperties };
 export { config };

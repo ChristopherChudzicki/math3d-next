@@ -122,4 +122,4 @@ const replaceAllTexCommand = (
 };
 
 export { findNestedExpression, findTexCommand, replaceAllTexCommand };
-export type { TexCommand, CommandReplacer };
+export type { CommandReplacer, TexCommand };

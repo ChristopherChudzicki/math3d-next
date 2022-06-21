@@ -1,4 +1,5 @@
 import * as math from "mathjs";
+
 import { anonParse } from "./adapter";
 
 describe("anonParsed dependencies", () => {

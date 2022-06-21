@@ -1,22 +1,22 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
-import { MathItemType, WidgetType } from "../constants";
 import {
   color,
   description,
+  end,
   label,
   labelVisible,
   opacity,
-  visible,
   size,
+  start,
+  visible,
   width,
   zBias,
   zIndex,
-  start,
-  end,
 } from "../shared";
 
 interface LineProperties {
@@ -96,5 +96,5 @@ const config: IMathItemConfig<MathItemType.Line, LineProperties> = {
 
 type Line = IMathItem<MathItemType.Line, LineProperties>;
 
-export type { LineProperties, Line };
+export type { Line, LineProperties };
 export { config };

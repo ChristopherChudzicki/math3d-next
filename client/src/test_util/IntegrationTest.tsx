@@ -1,10 +1,11 @@
-import React from "react";
-import { keyBy } from "lodash";
 import { render } from "@testing-library/react";
-import { RootState, getStore, getInitialState } from "store/store";
 import { MathItem } from "configs";
+import { keyBy } from "lodash";
+import React from "react";
+import { getInitialState, getStore, RootState } from "store/store";
 import MathScope from "util/MathScope";
 import { getLatexParser } from "util/parsing";
+
 import App from "../app";
 
 class IntegrationTest {

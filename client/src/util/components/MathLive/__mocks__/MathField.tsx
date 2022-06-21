@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable global-require */
 import React, { forwardRef } from "react";
+
 import { MathfieldProps } from "..";
 
 const MockMathFieldForwardRef = (

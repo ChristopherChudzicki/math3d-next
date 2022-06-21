@@ -1,4 +1,5 @@
 import type { MathNode as MJsNode } from "mathjs";
+
 import type { Parse } from "../MathScope";
 import type { ParseOptions } from "../MathScope/adapter";
 
@@ -36,10 +37,10 @@ interface IMathJsParser {
 
 export { ParserRuleType };
 export type {
-  TextParserRule,
-  TextParserRegexRule,
+  IMathJsParser,
   MathJsRule,
   ParserRule,
-  IMathJsParser,
   StrictRegepMatchArray,
+  TextParserRegexRule,
+  TextParserRule,
 };

@@ -1,4 +1,4 @@
-import { MathfieldElement, KeystrokeEvent, FocusOutEvent } from "mathlive";
+import { FocusOutEvent, KeystrokeEvent, MathfieldElement } from "mathlive";
 
 export type KeystrokeHandler = (
   this: MathfieldElement,

@@ -1,4 +1,3 @@
-import React, { CSSProperties } from "react";
 import tinycolor from "tinycolor2";
 
 interface ColorConfig {
@@ -106,4 +105,4 @@ const colorsAndGradients = [...colors, ...[rainbow, bluered, temperature]];
 
 export type { ColorOrGradientConfig };
 
-export { colors, gradients, colorsAndGradients, makeColorConfig };
+export { colors, colorsAndGradients, gradients, makeColorConfig };

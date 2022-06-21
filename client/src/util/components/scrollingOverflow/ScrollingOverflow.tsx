@@ -1,5 +1,6 @@
-import React, { useState, useRef } from "react";
 import mergeClassNames from "classnames";
+import React, { useRef, useState } from "react";
+
 import styles from "./ScrollingOverflow.module.css";
 
 type Props = {

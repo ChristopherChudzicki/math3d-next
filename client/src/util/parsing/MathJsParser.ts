@@ -1,14 +1,15 @@
 import * as mjs from "mathjs";
+
+import { adapter as msAdapter, MathNode } from "../MathScope";
 import {
-  ParserRuleType,
-  TextParserRule,
-  TextParserRegexRule,
+  IMathJsParser,
   MathJsRule,
   ParserRule,
+  ParserRuleType,
   StrictRegepMatchArray,
-  IMathJsParser,
+  TextParserRegexRule,
+  TextParserRule,
 } from "./interfaces";
-import { adapter as msAdapter, MathNode } from "../MathScope";
 
 const isBeforeMathjsRule = (
   rule: ParserRule

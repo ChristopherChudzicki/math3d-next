@@ -1,20 +1,20 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
-import { MathItemType, WidgetType } from "../constants";
 import {
   color,
   description,
+  end,
   opacity,
-  visible,
   size,
+  start,
+  visible,
   width,
   zBias,
   zIndex,
-  start,
-  end,
 } from "../shared";
 
 interface ParametricCurveProperties {
@@ -110,5 +110,5 @@ type ParametricCurve = IMathItem<
   ParametricCurveProperties
 >;
 
-export type { ParametricCurveProperties, ParametricCurve };
+export type { ParametricCurve, ParametricCurveProperties };
 export { config };

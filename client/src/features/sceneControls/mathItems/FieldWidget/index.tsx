@@ -1,22 +1,23 @@
-import React, { useCallback } from "react";
 import {
   MathItem,
-  MathItemType as MIT,
-  WidgetType,
   mathItemConfigs,
+  MathItemType as MIT,
   PropertyConfig,
+  WidgetType,
 } from "configs";
+import React, { useCallback } from "react";
 import { useAppDispatch } from "store/hooks";
 import { assertNotNil } from "util/predicates";
+
 import { actions } from "../mathItems.slice";
-import { OnWidgetChange } from "./types";
 import { mathScopeId } from "../mathScope";
-import MathValue from "./MathValue";
-import MathBoolean from "./MathBoolean";
-import MathAssignment from "./MathAssignment";
 import AutosizeText from "./AutosizeText";
-import TextInput from "./TextInput";
 import ColorWidget from "./ColorWidget";
+import MathAssignment from "./MathAssignment";
+import MathBoolean from "./MathBoolean";
+import MathValue from "./MathValue";
+import TextInput from "./TextInput";
+import { OnWidgetChange } from "./types";
 
 type WidgetsProps = {
   [WidgetType.MathValue]: React.ComponentProps<typeof MathValue>;
@@ -48,7 +49,7 @@ const FieldWidget = <W extends WidgetType>(
   return <WidgetComponent {...otherProps} />;
 };
 
-export { MathValue, MathBoolean, AutosizeText };
+export { AutosizeText, MathBoolean, MathValue };
 
 export default FieldWidget;
 /**

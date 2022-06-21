@@ -1,4 +1,3 @@
-import React, { useCallback } from "react";
 import mergeClassNames from "classnames";
 import {
   isMathGraphic,
@@ -6,15 +5,17 @@ import {
   MathItemConfig,
   MathItemType as MIT,
 } from "configs";
+import React, { useCallback } from "react";
 import { useAppDispatch } from "store/hooks";
-import styles from "./ItemTemplate.module.css";
-import SettingsPopover from "./SettingsPopover";
-import CloseButton from "./CloseButton";
+
+import ColorStatus from "../ColorStatus";
 import { AutosizeText, useOnWidgetChange } from "../FieldWidget";
 import { actions } from "../mathItems.slice";
-import { testId } from "../util";
-import ColorStatus from "../ColorStatus";
 import { usePopulateMathScope } from "../mathScope";
+import { testId } from "../util";
+import CloseButton from "./CloseButton";
+import styles from "./ItemTemplate.module.css";
+import SettingsPopover from "./SettingsPopover";
 
 type Props<T extends MIT> = {
   showAlignmentBar?: boolean;

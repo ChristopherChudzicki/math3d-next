@@ -1,8 +1,8 @@
+import { Diff } from "./interfaces";
 import MathScope, {
   ScopeChangeErrorsEvent,
   ScopeChangeEvent,
 } from "./MathScope";
-import { Diff } from "./interfaces";
 
 const emptyDiff = (): Diff<string> => {
   return {

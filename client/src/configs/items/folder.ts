@@ -1,9 +1,9 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
-import { MathItemType, WidgetType } from "../constants";
 import { description } from "../shared";
 
 interface FolderProperties {
@@ -41,5 +41,5 @@ const config: IMathItemConfig<MathItemType.Folder, FolderProperties> = {
 
 type Folder = IMathItem<MathItemType.Folder, FolderProperties>;
 
-export type { FolderProperties, Folder };
+export type { Folder, FolderProperties };
 export { config };

@@ -1,15 +1,15 @@
+import { MathItemType as MIT } from "configs";
 import React from "react";
 import {
+  assertInstanceOf,
   IntegrationTest,
-  user,
-  screen,
   makeItem,
   nodeId,
-  within,
-  assertInstanceOf,
   patchConsoleError,
+  screen,
+  user,
+  within,
 } from "test_util";
-import { MathItemType as MIT } from "configs";
 
 /**
  * Antd is causing react to complain about StrictMode.

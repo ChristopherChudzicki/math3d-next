@@ -10,8 +10,10 @@ module.exports = {
     "plugin:react-hooks/recommended",
     'plugin:prettier/recommended' // this should come last
   ],
-  plugins: ["react", "@typescript-eslint"],
+  plugins: ["react", "simple-import-sort", "@typescript-eslint"],
   rules: {
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
     "@typescript-eslint/naming-convention": [
       "warn",
       {
@@ -21,7 +23,14 @@ module.exports = {
         "leadingUnderscore": "allow" // do not require... it's annoying when required for object destructuring.
       }
     ],
-    "@typescript-eslint/no-unused-vars": ["warn", { varsIgnorePattern: "^_", destructuredArrayIgnorePattern: "^_"  }],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        varsIgnorePattern: "^_",
+        destructuredArrayIgnorePattern: "^_",
+        ignoreRestSiblings: true,
+      }
+    ],
     "max-classes-per-file": "off",
     "react/function-component-definition": [
       "error",

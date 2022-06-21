@@ -1,16 +1,17 @@
 import { EventEmitter } from "events";
-import { parse as defaultParse } from "./adapter";
+
 import type { ParseOptions as DefaultParseOptions } from "./adapter";
+import { parse as defaultParse } from "./adapter";
 import Evaluator from "./Evaluator";
 import type {
-  Parse,
-  EvaluationScope,
-  EvaluationResult,
-  EvaluationErrors,
-  EvaluationChange,
-  ParseErrors,
   Diff,
+  EvaluationChange,
+  EvaluationErrors,
+  EvaluationResult,
+  EvaluationScope,
   MathNode,
+  Parse,
+  ParseErrors,
 } from "./interfaces";
 import { assertIsError, DiffingMap } from "./util";
 

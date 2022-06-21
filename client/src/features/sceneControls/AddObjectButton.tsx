@@ -1,8 +1,9 @@
+import { Button, Dropdown, Menu, MenuProps } from "antd";
+import { addableTypes, mathItemConfigs, MathItemType } from "configs";
 import React, { useCallback } from "react";
-import { Menu, Dropdown, Button, MenuProps } from "antd";
 import { useAppDispatch } from "store/hooks";
 import { assertIsMathItemType } from "util/predicates";
-import { MathItemType, addableTypes, mathItemConfigs } from "configs";
+
 import { slice } from "./mathItems";
 
 const { actions } = slice;

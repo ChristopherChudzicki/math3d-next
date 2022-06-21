@@ -1,9 +1,9 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
-import { MathItemType, WidgetType } from "../constants";
 import {
   color,
   description,
@@ -16,8 +16,8 @@ import {
   rangeV,
   shaded,
   uSamples,
-  vSamples,
   visible,
+  vSamples,
   zBias,
   zIndex,
 } from "../shared";
@@ -128,5 +128,5 @@ type ExplicitSurfacePolar = IMathItem<
   ExplicitSurfacePolarProperties
 >;
 
-export type { ExplicitSurfacePolarProperties, ExplicitSurfacePolar };
+export type { ExplicitSurfacePolar, ExplicitSurfacePolarProperties };
 export { config };

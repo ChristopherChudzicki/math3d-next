@@ -1,14 +1,15 @@
-import React, { useMemo } from "react";
-import ordinal from "ordinal";
 import {
-  MathItemType as MIT,
-  mathItemConfigs as configs,
   MathItem,
+  mathItemConfigs as configs,
+  MathItemType as MIT,
 } from "configs";
-import ItemTemplate from "../templates/ItemTemplate";
+import ordinal from "ordinal";
+import React, { useMemo } from "react";
+
 import { MathValue, useOnWidgetChange } from "../FieldWidget";
-import { useMathErrors } from "../mathScope";
 import { OnWidgetChange } from "../FieldWidget/types";
+import { useMathErrors } from "../mathScope";
+import ItemTemplate from "../templates/ItemTemplate";
 import {
   ParameterContainer,
   ParameterForm,

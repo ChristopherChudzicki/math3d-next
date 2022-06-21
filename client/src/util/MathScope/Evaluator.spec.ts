@@ -1,9 +1,9 @@
 import { parse } from "./adapter";
 import Evaluator, {
-  UnmetDependencyError as UnmetDepErr,
-  DuplicateAssignmentError,
   CyclicAssignmentError,
+  DuplicateAssignmentError,
   UnmetDependencyError,
+  UnmetDependencyError as UnmetDepErr,
 } from "./Evaluator";
 import { MathNode } from "./interfaces";
 import { assertIsAssignmentNode } from "./util";

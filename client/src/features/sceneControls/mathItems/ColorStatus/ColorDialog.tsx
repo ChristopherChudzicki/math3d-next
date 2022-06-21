@@ -1,8 +1,9 @@
-import React, { useCallback } from "react";
 import { Tabs } from "antd";
-import ColorPicker, { OnColorChange } from "util/components/ColorPicker";
 import { MathGraphic } from "configs";
 import { colors, colorsAndGradients } from "configs/colors";
+import React, { useCallback } from "react";
+import ColorPicker, { OnColorChange } from "util/components/ColorPicker";
+
 import { MathValue, useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";
 import { useMathErrors } from "../mathScope";

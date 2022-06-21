@@ -1,10 +1,11 @@
 import * as R from "ramda";
 import Graph, { Vertex } from "tarjan-graph";
+
 import {
-  FullDiff,
-  ASSIGNMENT_TYPES,
-  AnonMathNode,
   AnonAssignmentNode,
+  AnonMathNode,
+  ASSIGNMENT_TYPES,
+  FullDiff,
 } from "../interfaces";
 
 const isAssignmentNode = <
@@ -117,13 +118,13 @@ const isNotNil = <T>(x: T): x is NonNullable<T> => {
 };
 
 export {
+  assertIsAssignmentNode,
+  assertIsError,
+  diff,
+  getAssignmentCycles,
   isAssignmentNode,
   isNotNil,
-  assertIsAssignmentNode,
-  getAssignmentCycles,
   setDifference,
   setIntersection,
   setUnion,
-  diff,
-  assertIsError,
 };

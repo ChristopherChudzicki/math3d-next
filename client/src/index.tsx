@@ -1,12 +1,14 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
 // bootstrap just for utility classes
 import "bootstrap/dist/css/bootstrap-utilities.css";
 import "antd/dist/antd.min.css";
 import "./index.css";
+
 import * as math from "mathjs";
-import { getStore } from "./store/store";
+import React from "react";
+import { createRoot } from "react-dom/client";
+
 import App from "./app";
+import { getStore } from "./store/store";
 import MathScope from "./util/MathScope";
 import { latexParser } from "./util/parsing";
 

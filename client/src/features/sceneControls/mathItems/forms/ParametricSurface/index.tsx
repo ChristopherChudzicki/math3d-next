@@ -1,5 +1,6 @@
-import React from "react";
 import { MathItemType as MIT } from "configs";
+import React from "react";
+
 import { MathItemForm } from "../interfaces";
 import RangedMathItemForm from "../RangedMathItemForm";
 

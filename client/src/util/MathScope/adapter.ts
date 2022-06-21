@@ -1,13 +1,14 @@
 import * as math from "mathjs";
-import { MathNodeType } from "./interfaces";
+
 import type {
-  AnonParse,
-  Parse,
   AnonMathNode,
+  AnonParse,
   Evaluatable,
   EvaluationScope,
   MathNode,
+  Parse,
 } from "./interfaces";
+import { MathNodeType } from "./interfaces";
 
 const getDependencies = (
   node: math.MathNode,
@@ -112,4 +113,4 @@ const parse: Parse<ParseOptions> = (
 
 export type { ParseOptions };
 
-export { anonParse, parse, convertNode };
+export { anonParse, convertNode, parse };

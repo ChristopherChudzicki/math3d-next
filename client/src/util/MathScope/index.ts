@@ -1,19 +1,19 @@
-import MathScope, { OnChangeListener, IdentifiedExpression } from "./MathScope";
+import * as adapter from "./adapter";
 import {
-  UnmetDependencyError,
-  DuplicateAssignmentError,
   AssignmentError,
+  DuplicateAssignmentError,
+  UnmetDependencyError,
 } from "./Evaluator";
 import type { MathNode, Parse } from "./interfaces";
-import * as adapter from "./adapter";
+import MathScope, { IdentifiedExpression, OnChangeListener } from "./MathScope";
 
-export type { OnChangeListener, IdentifiedExpression, MathNode, Parse };
+export type { IdentifiedExpression, MathNode, OnChangeListener, Parse };
 
 export {
-  AssignmentError,
-  UnmetDependencyError,
-  DuplicateAssignmentError,
   adapter,
+  AssignmentError,
+  DuplicateAssignmentError,
+  UnmetDependencyError,
 };
 
 export default MathScope;

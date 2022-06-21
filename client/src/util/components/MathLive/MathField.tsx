@@ -1,17 +1,19 @@
+import "./mathlive";
+
+import { MathfieldElement, MathfieldOptions } from "mathlive";
 import React, {
   forwardRef,
   useEffect,
-  useState,
   useImperativeHandle,
+  useState,
 } from "react";
-import { MathfieldElement, MathfieldOptions } from "mathlive";
-import { useListenToEvent } from "./util";
-import "./mathlive";
+
 import type {
   FocusOutHandler,
   KeystrokeHandler,
   MathFieldWebComponentProps,
 } from "./types";
+import { useListenToEvent } from "./util";
 
 export type MakeMathfieldOptions = (
   options: MathfieldOptions
