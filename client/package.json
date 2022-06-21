@@ -6,7 +6,7 @@
     "build": "react-scripts build",
     "build-storybook": "build-storybook -s public",
     "eject": "react-scripts eject",
-    "lint": "eslint \"{src,test}/**/*.{ts,tsx}\"",
+    "lint": "eslint --max-warnings 0 \"{src,test}/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"{src,test}/**/*.{ts,tsx}\" --fix",
     "start": "react-scripts start",
     "storybook": "start-storybook -p 6006 -s public",
