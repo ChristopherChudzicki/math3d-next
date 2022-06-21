@@ -1,10 +1,11 @@
 import React from "react";
 import { Provider } from "react-redux";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import MathScope from "util/MathScope";
+
+import { MathContext } from "./features/sceneControls/mathItems";
 import * as routes from "./routes";
 import type { AppStore } from "./store/store";
-import { MathContext } from "./features/sceneControls/mathItems";
 
 interface Props {
   store: AppStore;

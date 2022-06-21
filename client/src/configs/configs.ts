@@ -1,3 +1,4 @@
+import { MathItemType, WidgetType } from "./constants";
 import * as axis from "./items/axis";
 import * as booleanVariable from "./items/booleanVariable";
 import * as camera from "./items/camera";
@@ -14,7 +15,6 @@ import * as variable from "./items/variable";
 import * as variableSlider from "./items/variableSlider";
 import * as vector from "./items/vector";
 import * as vectorField from "./items/vectorField";
-import { MathItemType, WidgetType } from "./constants";
 
 const MATH_GRAPHIC_TYPES = [
   MathItemType.Axis,
@@ -106,10 +106,10 @@ const isMathGraphic = (item: MathItem): item is MathGraphic => {
 };
 
 export {
+  addableTypes,
+  isMathGraphic,
   mathItemConfigs,
   MathItemType,
   WidgetType,
-  addableTypes,
-  isMathGraphic,
 };
-export type { MathItemConfig, MathItem, MathItemPatch, MathGraphic };
+export type { MathGraphic, MathItem, MathItemConfig, MathItemPatch };

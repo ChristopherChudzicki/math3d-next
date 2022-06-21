@@ -1,22 +1,22 @@
 import ExpressionGraphManager from "./ExpressionGraphManager";
 import {
-  Diff,
-  EvaluationScope,
-  EvaluationResult,
-  EvaluationErrors,
-  EvaluationChange,
   AssignmentNode,
-  MathNode,
+  Diff,
   Evaluatable,
+  EvaluationChange,
+  EvaluationErrors,
+  EvaluationResult,
+  EvaluationScope,
+  MathNode,
   MathNodeType,
 } from "./interfaces";
 import {
   assertIsError,
+  DiffingMap,
   isAssignmentNode,
+  isNotNil,
   setDifference,
   setUnion,
-  DiffingMap,
-  isNotNil,
 } from "./util";
 
 class EvaluationError extends Error {}

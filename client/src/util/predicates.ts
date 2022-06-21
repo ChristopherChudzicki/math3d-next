@@ -40,7 +40,8 @@ export const assertNotNil: <T>(
  * Unlike jest assertions, this will refine the type.
  * See https://github.com/DefinitelyTyped/DefinitelyTyped/issues/41179
  */
-export const assertInstanceOf: <C extends { new (...args: any): any }>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const assertInstanceOf: <C extends { new (...args: any[]): unknown }>(
   value: unknown,
   Class: C
 ) => asserts value is InstanceType<C> = (value, Class) => {

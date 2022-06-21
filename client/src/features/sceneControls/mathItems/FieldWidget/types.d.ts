@@ -21,4 +21,4 @@ interface WidgetChangeEvent {
 }
 type OnWidgetChange = (e: WidgetChangeEvent) => void;
 
-export type { IWidgetProps, WidgetChangeEvent, OnWidgetChange };
+export type { IWidgetProps, OnWidgetChange, WidgetChangeEvent };

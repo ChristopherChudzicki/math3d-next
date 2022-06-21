@@ -76,18 +76,18 @@ export interface EvaluationChange {
   errors: Diff<string>;
 }
 
-export { MathNodeType, ASSIGNMENT_TYPES };
+export { ASSIGNMENT_TYPES, MathNodeType };
 export type {
-  MathNode,
   AnonMathNode,
-  AssignmentType,
-  AssignmentNode,
-  Parse,
   AnonParse,
+  AssignmentNode,
+  AssignmentType,
   Diff,
-  EvaluationScope,
-  EvaluationResult,
-  EvaluationErrors,
-  ParseErrors,
   Evaluatable,
+  EvaluationErrors,
+  EvaluationResult,
+  EvaluationScope,
+  MathNode,
+  Parse,
+  ParseErrors,
 };

@@ -1,6 +1,7 @@
-import React from "react";
 import classNames from "classnames";
+import React from "react";
 import SmallMathField, { makeReadOnly } from "util/components/SmallMathField";
+
 import styles from "./widget.module.css";
 
 interface Props {

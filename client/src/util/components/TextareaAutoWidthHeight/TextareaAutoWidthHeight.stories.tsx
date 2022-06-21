@@ -1,5 +1,6 @@
+import { ComponentMeta, ComponentStory } from "@storybook/react";
 import React, { useState } from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+
 import TextareaAutoWidthHeight from "./TextareaAutoWidthHeight";
 
 export default {

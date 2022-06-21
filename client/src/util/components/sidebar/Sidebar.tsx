@@ -1,8 +1,9 @@
-import React, { useState, useCallback, useMemo } from "react";
-import mergeClassNames from "classnames";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import style from "./Sidebar.module.css";
+import mergeClassNames from "classnames";
+import React, { useCallback, useMemo, useState } from "react";
+
 import SubtleButtom from "../SubtleButton";
+import style from "./Sidebar.module.css";
 
 const getButtonDirection = (
   isCollapsed: boolean,

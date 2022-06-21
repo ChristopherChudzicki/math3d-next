@@ -1,5 +1,5 @@
-import React from "react";
 import mergeClassNames from "classnames";
+import React from "react";
 
 type Props = {
   className?: string;
@@ -11,6 +11,7 @@ const Scene: React.FC<Props> = (props) => (
     className={mergeClassNames(props.className)}
     style={{ backgroundColor: "aquamarine", width: "100%", height: "100%" }}
     onClick={() => {
+      // eslint-disable-next-line no-alert
       alert("clicked");
     }}
   />

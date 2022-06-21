@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
 import TextareaAutosize, {
   TextareaAutosizeProps,
 } from "@math3d/react-textarea-autosize";
+import React, { useEffect, useRef, useState } from "react";
+
 import TextMeasurer from "./TextMeasurer";
 
 type Props = React.ComponentProps<typeof TextareaAutosize> & {

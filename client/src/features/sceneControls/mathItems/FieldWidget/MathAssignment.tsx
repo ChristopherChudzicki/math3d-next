@@ -1,14 +1,15 @@
-import React, { useCallback, useContext } from "react";
-import { AssignmentError } from "util/MathScope/Evaluator";
 import classNames from "classnames";
-import SmallMathField, { makeReadOnly } from "util/components/SmallMathField";
+import React, { useCallback, useContext } from "react";
 import { OnMathFieldChange } from "util/components/MathLive";
-import { ParseAssignmentLHSError } from "util/parsing/rules";
+import SmallMathField, { makeReadOnly } from "util/components/SmallMathField";
+import { AssignmentError } from "util/MathScope/Evaluator";
 import { splitAtFirstEquality } from "util/parsing";
-import type { IWidgetProps, WidgetChangeEvent } from "./types";
-import style from "./widget.module.css";
+import { ParseAssignmentLHSError } from "util/parsing/rules";
+
 import { MathContext } from "../mathScope";
 import ReadonlyMathField from "./ReadonlyMathField";
+import type { IWidgetProps, WidgetChangeEvent } from "./types";
+import style from "./widget.module.css";
 
 const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const { onChange, name, value, error, title, className, ...others } = props;

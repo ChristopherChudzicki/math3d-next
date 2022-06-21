@@ -1,15 +1,16 @@
-import React, { useMemo, useContext, useCallback } from "react";
-import { colorsAndGradients, makeColorConfig } from "configs/colors";
-import classNames from "classnames";
 import { Popover } from "antd";
+import classNames from "classnames";
 import { MathGraphic } from "configs";
+import { colorsAndGradients, makeColorConfig } from "configs/colors";
+import React, { useCallback, useContext, useMemo } from "react";
 import { useToggle } from "util/hooks";
 import { useLongAndShortPress } from "util/hooks/useLongAndShortPress";
-import { MathContext, useMathResults } from "../mathScope";
-import styles from "./ColorStatus.module.css";
+
 import { useOnWidgetChange } from "../FieldWidget";
 import { WidgetChangeEvent } from "../FieldWidget/types";
+import { MathContext, useMathResults } from "../mathScope";
 import ColorDialog from "./ColorDialog";
+import styles from "./ColorStatus.module.css";
 
 const getColor = (colorText: string) => {
   const color = colorsAndGradients.find((c) => c.value === colorText);

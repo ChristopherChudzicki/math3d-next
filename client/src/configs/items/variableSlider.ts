@@ -1,9 +1,9 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
-import { MathItemType, WidgetType } from "../constants";
 import { description } from "../shared";
 
 interface VariableSliderProperties {

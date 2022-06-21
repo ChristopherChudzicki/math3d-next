@@ -1,17 +1,11 @@
-import React from "react";
-import { render } from "@testing-library/react";
 import { MathItem, MathItemType as MIT } from "configs";
 import {
+  assertInstanceOf,
   IntegrationTest,
-  user,
-  screen,
   makeItem,
   nodeId,
-  typeText,
-  within,
-  patchConsoleError,
-  prettyDOM,
-  assertInstanceOf,
+  screen,
+  user,
 } from "test_util";
 import { UnmetDependencyError } from "util/MathScope";
 

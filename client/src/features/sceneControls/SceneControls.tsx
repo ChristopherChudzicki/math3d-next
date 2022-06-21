@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
-import { useAppSelector, useAppDispatch } from "store/hooks";
 import { getScene } from "api";
-import { MathItem, slice as mathItemsSlice } from "./mathItems";
-import ControlTabs from "./controlTabs";
+import React, { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "store/hooks";
+
 import AddObjectButton from "./AddObjectButton";
+import ControlTabs from "./controlTabs";
+import { MathItem, slice as mathItemsSlice } from "./mathItems";
 
 const { actions: itemActions } = mathItemsSlice;
 

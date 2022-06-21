@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-no-bind */
+import { ComponentMeta, ComponentStory } from "@storybook/react";
 import React, { useState } from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+
 import MathField from "./MathField";
 
 export default {

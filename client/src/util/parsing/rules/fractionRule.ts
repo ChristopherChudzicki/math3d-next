@@ -1,5 +1,5 @@
-import { CommandReplacer, replaceAllTexCommand } from "./util";
 import { ParserRuleType, TextParserRule } from "../interfaces";
+import { CommandReplacer, replaceAllTexCommand } from "./util";
 
 const fractionReplacer: CommandReplacer = (frac) => {
   const [top, bottom] = frac.params;

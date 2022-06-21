@@ -1,11 +1,12 @@
-import React, { useCallback, useRef } from "react";
 import classNames from "classnames";
+import { MathfieldOptions } from "mathlive";
+import React, { useCallback, useRef } from "react";
 import {
   MathField,
-  MathfieldProps,
   MathfieldElement,
+  MathfieldProps,
 } from "util/components/MathLive";
-import { MathfieldOptions } from "mathlive";
+
 import { useShadowStylesheet } from "../hooks";
 
 /**

@@ -1,4 +1,4 @@
-import { TextParserRegexRule, ParserRuleType } from "../interfaces";
+import { ParserRuleType, TextParserRegexRule } from "../interfaces";
 
 /**
  * Replace "\operatorname{thing}" with "thing"

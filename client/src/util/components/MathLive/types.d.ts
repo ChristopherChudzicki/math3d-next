@@ -1,4 +1,4 @@
-import { MathfieldElement, KeystrokeEvent, FocusOutEvent } from "mathlive";
+import { FocusOutEvent, KeystrokeEvent, MathfieldElement } from "mathlive";
 
 export type KeystrokeHandler = (
   this: MathfieldElement,
@@ -30,6 +30,7 @@ export type MathFieldWebComponentProps = React.DetailedHTMLProps<
 declare global {
   /** @internal */
   namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     interface IntrinsicElements {
       "math-field": Omit<MathFieldWebComponentProps, "className" | "style"> & {
         class: MathFieldWebComponentProps["className"];

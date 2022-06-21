@@ -1,9 +1,9 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
-import { MathItemType, WidgetType } from "../constants";
 import {
   color,
   description,
@@ -118,5 +118,5 @@ type ImplicitSurface = IMathItem<
   ImplicitSurfaceProperties
 >;
 
-export type { ImplicitSurfaceProperties, ImplicitSurface };
+export type { ImplicitSurface, ImplicitSurfaceProperties };
 export { config };

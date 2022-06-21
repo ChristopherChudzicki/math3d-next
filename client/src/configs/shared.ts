@@ -1,5 +1,5 @@
-import type { PropertyConfig } from "./interfaces";
 import { WidgetType } from "./constants";
+import type { PropertyConfig } from "./interfaces";
 
 const color: PropertyConfig<"color"> = {
   name: "color",
@@ -148,6 +148,7 @@ const end: PropertyConfig<"end"> = {
 export {
   color,
   description,
+  end,
   gridOpacity,
   gridU,
   gridV,
@@ -158,13 +159,12 @@ export {
   rangeU,
   rangeV,
   shaded,
-  uSamples,
-  vSamples,
   size,
+  start,
+  uSamples,
   visible,
+  vSamples,
   width,
   zBias,
   zIndex,
-  start,
-  end,
 };

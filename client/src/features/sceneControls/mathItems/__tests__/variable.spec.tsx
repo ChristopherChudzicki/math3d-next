@@ -1,5 +1,5 @@
 import { MathItemType as MIT } from "configs";
-import { IntegrationTest, screen, makeItem } from "test_util";
+import { IntegrationTest, makeItem, screen } from "test_util";
 
 test("left-hand parse errors are indicated on left-hand side", async () => {
   const variable = makeItem(MIT.Variable, { value: "a+ = 123" });

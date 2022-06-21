@@ -1,13 +1,13 @@
 import { MathItem, MathItemType as MIT } from "configs";
 import {
   IntegrationTest,
-  user,
-  screen,
   makeItem,
   nodeId,
-  typeText,
-  within,
   patchConsoleError,
+  screen,
+  typeText,
+  user,
+  within,
 } from "test_util";
 
 /**

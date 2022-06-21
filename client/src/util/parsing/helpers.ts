@@ -1,4 +1,3 @@
-import { parse as mjsParse } from "mathjs";
 import { latexParser } from "./parsers";
 /**
  * This file includes helpers for parsing mathematical expressions, not
@@ -29,4 +28,4 @@ const getParameters = (expr: string): string[] => {
   return node.params;
 };
 
-export { splitAtFirstEquality, getParameters };
+export { getParameters, splitAtFirstEquality };

@@ -1,10 +1,11 @@
-import React, { useCallback, useContext, useMemo, useState } from "react";
+import { Switch, Tooltip } from "antd";
 import classNames from "classnames";
+import React, { useCallback, useContext, useMemo, useState } from "react";
+import { SubtleButton } from "util/components";
 import { OnMathFieldChange } from "util/components/MathLive";
 import SmallMathField from "util/components/SmallMathField";
-import { Switch, Tooltip } from "antd";
 import { assertNotNil } from "util/predicates";
-import { SubtleButton } from "util/components";
+
 import { MathContext, useMathResults } from "../mathScope";
 import { IWidgetProps } from "./types";
 import styles from "./widget.module.css";

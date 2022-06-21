@@ -1,9 +1,9 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
-import { MathItemType, WidgetType } from "../constants";
 import { description } from "../shared";
 
 interface CameraProperties {
@@ -85,5 +85,5 @@ const config: IMathItemConfig<MathItemType.Camera, CameraProperties> = {
 
 type Camera = IMathItem<MathItemType.Camera, CameraProperties>;
 
-export type { CameraProperties, Camera };
+export type { Camera, CameraProperties };
 export { config };

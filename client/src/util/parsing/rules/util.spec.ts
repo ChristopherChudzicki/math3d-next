@@ -1,8 +1,4 @@
-import {
-  findNestedExpression,
-  findTexCommand,
-  replaceAllTexCommand,
-} from "./util";
+import { findNestedExpression, findTexCommand } from "./util";
 
 describe("findNestedExpression", () => {
   test.each([

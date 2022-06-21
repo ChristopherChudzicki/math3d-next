@@ -1,6 +1,6 @@
 import { MathItemType as MIT } from "configs";
 import { Point, PointProperties } from "configs/items/point";
-import { IntegrationTest, user, screen, makeItem, nodeId } from "test_util";
+import { IntegrationTest, makeItem, nodeId, screen, user } from "test_util";
 
 /**
  * Press and hold pointer on element for `ms` seconds.

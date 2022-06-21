@@ -1,6 +1,6 @@
-import React from "react";
 import { MathItem, MathItemType as MIT } from "configs";
-import type { MathItemForm } from "./forms/interfaces";
+import React from "react";
+
 import Axis from "./forms/Axis";
 import BooleanVariable from "./forms/BooleanVariable";
 import Camera from "./forms/Camera";
@@ -9,6 +9,7 @@ import ExplicitSurfacePolar from "./forms/ExplicitSurfacePolar";
 import Folder from "./forms/Folder";
 import Grid from "./forms/Grid";
 import ImplicitSurface from "./forms/ImplicitSurface";
+import type { MathItemForm } from "./forms/interfaces";
 import Line from "./forms/Line";
 import ParametricCurve from "./forms/ParametricCurve";
 import ParametricSurface from "./forms/ParametricSurface";

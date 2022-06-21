@@ -1,9 +1,9 @@
+import { MathItemType, WidgetType } from "../constants";
 import type {
+  IMathItem,
   IMathItemConfig,
   MathItemGenerator,
-  IMathItem,
 } from "../interfaces";
-import { MathItemType, WidgetType } from "../constants";
 import {
   color,
   description,
@@ -16,8 +16,8 @@ import {
   rangeV,
   shaded,
   uSamples,
-  vSamples,
   visible,
+  vSamples,
   zBias,
   zIndex,
 } from "../shared";
@@ -127,5 +127,5 @@ type ExplicitSurface = IMathItem<
   ExplicitSurfaceProperties
 >;
 
-export type { ExplicitSurfaceProperties, ExplicitSurface };
+export type { ExplicitSurface, ExplicitSurfaceProperties };
 export { config };

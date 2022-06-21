@@ -1,5 +1,5 @@
-import { findNestedExpression } from "./util";
 import { ParserRuleType, TextParserRule } from "../interfaces";
+import { findNestedExpression } from "./util";
 
 const removeSubscriptBraces = (tex: string): string => {
   const sub = "_{";

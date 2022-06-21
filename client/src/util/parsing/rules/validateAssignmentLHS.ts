@@ -1,4 +1,5 @@
 import * as math from "mathjs";
+
 import { AssignmentError } from "../../MathScope";
 import { ParserRuleType, TextParserRule } from "../interfaces";
 

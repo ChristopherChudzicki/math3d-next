@@ -1,8 +1,8 @@
-import * as R from "ramda";
 import user from "@testing-library/user-event";
+import { MathItem } from "configs";
 import { mathScopeId } from "features/sceneControls/mathItems/mathScope";
 import { testId } from "features/sceneControls/mathItems/util";
-import { MathItem } from "configs";
+import * as R from "ramda";
 import { assertInstanceOf } from "util/predicates";
 
 const permutations = <T>(tokens: T[], subperms: T[][] = [[]]): T[][] =>
@@ -30,4 +30,4 @@ const typeText = (element: Element, text: string): Promise<void> => {
   return user.type(element, escaped);
 };
 
-export { permutations, nodeId, typeText, assertInstanceOf, testId };
+export { assertInstanceOf, nodeId, permutations, testId, typeText };

@@ -1,5 +1,6 @@
-import { useEffect } from "react";
 import { MathfieldElement } from "mathlive";
+import { useEffect } from "react";
+
 import { MathfieldEventName, MathfieldHandlers } from "./types";
 
 type AddEventListenerParams = Parameters<Element["addEventListener"]>;

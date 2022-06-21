@@ -1,13 +1,14 @@
+import { WarningOutlined } from "@ant-design/icons";
+import { Input, Tooltip } from "antd";
 import classNames from "classnames";
 import React, {
-  useCallback,
-  useState,
-  useEffect,
   MouseEventHandler,
+  useCallback,
+  useEffect,
+  useState,
 } from "react";
-import { Input, Tooltip } from "antd";
 import tinycolor from "tinycolor2";
-import { WarningOutlined } from "@ant-design/icons";
+
 import styles from "./ColorPicker.module.css";
 
 interface ColorWithStyle {

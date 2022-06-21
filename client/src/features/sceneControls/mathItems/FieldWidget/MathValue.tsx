@@ -1,7 +1,8 @@
-import React, { useCallback, useContext } from "react";
 import classNames from "classnames";
+import React, { useCallback, useContext } from "react";
 import { OnMathFieldChange } from "util/components/MathLive";
 import SmallMathField from "util/components/SmallMathField";
+
 import { MathContext } from "../mathScope";
 import { IWidgetProps } from "./types";
 import styles from "./widget.module.css";

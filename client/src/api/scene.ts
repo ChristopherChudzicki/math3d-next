@@ -1,4 +1,5 @@
 import type { Scene } from "types";
+
 import { fetchJson } from "./util";
 
 const getScene = async (sceneId: string): Promise<Scene> => {
