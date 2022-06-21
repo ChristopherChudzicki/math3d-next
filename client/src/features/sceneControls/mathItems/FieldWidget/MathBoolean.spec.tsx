@@ -1,5 +1,4 @@
 import { MathItemType as MIT } from "configs";
-import React from "react";
 import {
   assertInstanceOf,
   IntegrationTest,
