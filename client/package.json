@@ -33,7 +33,7 @@
     "bootstrap-icons": "1.8.3",
     "classnames": "2.3.1",
     "lodash": "4.17.21",
-    "mathjs": "10.6.1",
+    "mathjs": "10.6.4",
     "mathlive": "0.74.0",
     "ordinal": "^1.0.3",
     "ramda": "0.28.0",
