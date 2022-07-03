@@ -56,7 +56,11 @@ const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const useExpression = useCallback(() => setShouldUseExpression(true), []);
 
   return (
-    <div className={classNames("d-flex", "align-items-center", className)}>
+    <div
+      className={classNames("d-flex", "align-items-center", className)}
+      onBlur={props.onBlur}
+      onFocus={props.onFocus}
+    >
       <Tooltip trigger={TOOLTIP_TRIGGERS} title={tooltipTitle}>
         <Switch
           title={`Toggle property: ${title}`}

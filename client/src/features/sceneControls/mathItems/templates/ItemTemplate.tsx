@@ -4,12 +4,13 @@ import {
   MathItem,
   MathItemConfig,
   MathItemType as MIT,
+  WidgetType,
 } from "configs";
 import React, { useCallback } from "react";
 import { useAppDispatch } from "store/hooks";
 
 import ColorStatus from "../ColorStatus";
-import { AutosizeText, useOnWidgetChange } from "../FieldWidget";
+import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { actions } from "../mathItems.slice";
 import { usePopulateMathScope } from "../mathScope";
 import { testId } from "../util";
@@ -51,7 +52,8 @@ const ItemTemplate = <T extends MIT>({
         {isMathGraphic(item) && <ColorStatus item={item} />}
       </div>
       <div className={styles["grid-center-top"]}>
-        <AutosizeText
+        <FieldWidget
+          widget={WidgetType.AutosizeText}
           title={config.properties.description.label}
           name="description"
           value={item.properties.description}
