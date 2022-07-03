@@ -1,36 +1,39 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useRef } from "react";
 import { Tooltip } from "antd";
 import { useToggle } from "util/hooks";
 import styles from "./ErrorTooltip.module.css";
 
-interface FocusHandlers {
-  onFocus: React.FocusEventHandler;
-  onBlur: React.FocusEventHandler;
-}
-
 interface Props {
   error?: Error;
-  children?: (handlers: FocusHandlers) => React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const ErrorTooltip: React.FC<Props> = ({ error, children }) => {
+  const container = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useToggle(false);
   const showTooltip = isFocused && !!error?.message;
-  const handlers = useMemo(
-    () => ({
-      onBlur: setIsFocused.off,
-      onFocus: setIsFocused.on,
-    }),
-    [setIsFocused.off, setIsFocused.on]
-  );
+  const getPopupContainer = useCallback(() => {
+    if (!container.current) {
+      throw new Error("Container ref should not be null");
+    }
+    return container.current;
+  }, []);
   return (
-    <Tooltip
-      overlayClassName={styles["error-tooltip"]}
-      title={error?.message}
-      visible={showTooltip}
+    <div
+      className="position-relative"
+      ref={container}
+      onFocus={setIsFocused.on}
+      onBlur={setIsFocused.off}
     >
-      {children && children(handlers)}
-    </Tooltip>
+      <Tooltip
+        getPopupContainer={getPopupContainer}
+        overlayClassName={styles["error-tooltip"]}
+        title={error?.message}
+        visible={showTooltip}
+      >
+        {children}
+      </Tooltip>
+    </div>
   );
 };
 

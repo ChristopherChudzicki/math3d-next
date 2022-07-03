@@ -13,7 +13,7 @@ test("left-hand parse errors are indicated on left-hand side", async () => {
   expect(rhs).not.toHaveClass("has-error");
 });
 
-test("right-hand parse errors are indicated on left-hand side", async () => {
+test("right-hand parse errors are indicated on right-hand side", async () => {
   const variable = makeItem(MIT.Variable, { value: "a = 123 + " });
   const helper = new IntegrationTest();
   helper.patchMathItems([variable]);

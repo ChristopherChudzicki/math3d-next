@@ -53,38 +53,32 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   return (
     <div {...others} className={classNames(className, "d-flex")}>
       <ErrorTooltip error={lhsError}>
-        {(handlers) => (
-          <SmallMathField
-            title={lhsTitle}
-            className={classNames(
-              style["field-widget"],
-              style["adjust-margin-for-border"],
-              { [style["has-error"]]: hasLhsError },
-              className
-            )}
-            onChange={onChangeLHS}
-            defaultValue={lhs}
-            {...handlers}
-          />
-        )}
+        <SmallMathField
+          title={lhsTitle}
+          className={classNames(
+            style["field-widget"],
+            style["adjust-margin-for-border"],
+            { [style["has-error"]]: hasLhsError },
+            className
+          )}
+          onChange={onChangeLHS}
+          defaultValue={lhs}
+        />
       </ErrorTooltip>
       <ReadonlyMathField value="=" />
       <ErrorTooltip error={rhsError}>
-        {(handlers) => (
-          <SmallMathField
-            title={rhsTitle}
-            className={classNames(
-              style["field-widget"],
-              style["adjust-margin-for-border"],
-              { [style["has-error"]]: hasRhsError },
-              className,
-              "flex-1"
-            )}
-            onChange={onChangeRHS}
-            defaultValue={rhs}
-            {...handlers}
-          />
-        )}
+        <SmallMathField
+          title={rhsTitle}
+          className={classNames(
+            style["field-widget"],
+            style["adjust-margin-for-border"],
+            { [style["has-error"]]: hasRhsError },
+            className,
+            "flex-1"
+          )}
+          onChange={onChangeRHS}
+          defaultValue={rhs}
+        />
       </ErrorTooltip>
     </div>
   );

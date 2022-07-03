@@ -49,7 +49,7 @@ const FieldWidget = <W extends WidgetType>(
   const WidgetComponent = getComponentForWidget(widget);
   return (
     <ErrorTooltip error={props.error}>
-      {(handlers) => <WidgetComponent {...otherProps} {...handlers} />}
+      <WidgetComponent {...otherProps} />
     </ErrorTooltip>
   );
 };

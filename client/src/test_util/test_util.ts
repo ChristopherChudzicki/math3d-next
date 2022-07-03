@@ -30,4 +30,19 @@ const typeText = (element: Element, text: string): Promise<void> => {
   return user.type(element, escaped);
 };
 
-export { assertInstanceOf, nodeId, permutations, testId, typeText };
+const sleep = (ms: number) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+const shortSleep = () => sleep(15);
+
+export {
+  assertInstanceOf,
+  nodeId,
+  permutations,
+  testId,
+  typeText,
+  sleep,
+  shortSleep,
+};
