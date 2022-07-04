@@ -20,6 +20,7 @@ import SettingsPopover from "./SettingsPopover";
 
 type Props<T extends MIT> = {
   showAlignmentBar?: boolean;
+  sideContent?: React.ReactNode;
   item: MathItem<T>;
   config: MathItemConfig<T>;
   children?: React.ReactNode;
@@ -29,6 +30,7 @@ const ItemTemplate = <T extends MIT>({
   item,
   config,
   children,
+  sideContent,
   showAlignmentBar = true,
 }: Props<T>) => {
   const onWidgetChange = useOnWidgetChange(item);
@@ -49,6 +51,7 @@ const ItemTemplate = <T extends MIT>({
         )}
       >
         {showAlignmentBar && <div className={styles["vertical-line"]} />}
+        {sideContent}
         {isMathGraphic(item) && <ColorStatus item={item} />}
       </div>
       <div className={styles["grid-center-top"]}>
@@ -71,7 +74,9 @@ const ItemTemplate = <T extends MIT>({
         <CloseButton onClick={remove} aria-label="Remove Item" />
       </div>
       <div className={styles["grid-right-gutter-bottom"]}>
-        <SettingsPopover item={item} config={config} />
+        {config.settingsProperties.length > 0 && (
+          <SettingsPopover item={item} config={config} />
+        )}
       </div>
     </div>
   );
