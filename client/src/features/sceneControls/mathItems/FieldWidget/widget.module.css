@@ -42,3 +42,7 @@ textarea.field-widget {
   font-style: italic;
   color: var(--color-text-gray)
 }
+
+.error-tooltip {
+  width: 250px;
+}

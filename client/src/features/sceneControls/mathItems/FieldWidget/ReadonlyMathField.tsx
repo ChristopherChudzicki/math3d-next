@@ -1,12 +1,17 @@
 import classNames from "classnames";
 import React from "react";
-import SmallMathField, { makeReadOnly } from "util/components/SmallMathField";
+import { MathfieldProps } from "util/components/MathLive";
+import SmallMathField from "util/components/SmallMathField";
 
 import styles from "./widget.module.css";
 
 interface Props {
   value: string;
 }
+
+const makeReadOnly: MathfieldProps["makeOptions"] = () => ({
+  readOnly: true,
+});
 
 const ReadonlyMathField: React.FC<Props> = ({ value }) => (
   <SmallMathField

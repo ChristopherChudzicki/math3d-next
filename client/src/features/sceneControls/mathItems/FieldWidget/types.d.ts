@@ -1,3 +1,4 @@
+import React from "react";
 import MathScope from "util/MathScope";
 
 interface IWidgetProps {
@@ -12,6 +13,8 @@ interface IWidgetProps {
   style?: React.CSSProperties;
   className?: string;
   error?: Error;
+  onFocus?: React.FocusEventHandler;
+  onBlur?: React.FocusEventHandler;
 }
 
 interface WidgetChangeEvent {

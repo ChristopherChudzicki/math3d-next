@@ -18,6 +18,8 @@ const TextInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   );
   return (
     <input
+      onBlur={props.onBlur}
+      onFocus={props.onFocus}
       title={title}
       className={classNames(
         { [styles["has-error"]]: error },

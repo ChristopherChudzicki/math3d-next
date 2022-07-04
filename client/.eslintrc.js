@@ -10,10 +10,8 @@ module.exports = {
     "plugin:react-hooks/recommended",
     'plugin:prettier/recommended' // this should come last
   ],
-  plugins: ["react", "simple-import-sort", "@typescript-eslint"],
+  plugins: ["react", "@typescript-eslint"],
   rules: {
-    "simple-import-sort/imports": "error",
-    "simple-import-sort/exports": "error",
     "@typescript-eslint/naming-convention": [
       "warn",
       {

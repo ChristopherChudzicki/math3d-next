@@ -26,11 +26,14 @@ const AutosizeText: React.FC<IWidgetProps> = (props: IWidgetProps) => {
     );
   return (
     <TextareaAutoWidthHeight
+      onBlur={props.onBlur}
+      onFocus={props.onFocus}
       extraWidth={EXTRA_WIDTH}
       title={title}
       className={classNames(
         { [styles["has-error"]]: error },
-        styles["field-widget"]
+        styles["field-widget"],
+        styles["adjust-margin-for-border"]
       )}
       name={name}
       onChange={onInputChange}

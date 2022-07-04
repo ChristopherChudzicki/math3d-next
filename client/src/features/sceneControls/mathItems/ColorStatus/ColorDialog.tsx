@@ -1,10 +1,10 @@
 import { Tabs } from "antd";
-import { MathGraphic } from "configs";
+import { MathGraphic, WidgetType } from "configs";
 import { colors, colorsAndGradients } from "configs/colors";
 import React, { useCallback } from "react";
 import ColorPicker, { OnColorChange } from "util/components/ColorPicker";
 
-import { MathValue, useOnWidgetChange } from "../FieldWidget";
+import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";
 import { useMathErrors } from "../mathScope";
 
@@ -32,7 +32,8 @@ const ColorExprInput: React.FC<ColorExprProps> = (props) => {
   const { colorExpr } = useMathErrors(item.id, COLOR_EXPR);
   return (
     <div>
-      <MathValue
+      <FieldWidget
+        widget={WidgetType.MathValue}
         title="Color Expression"
         name="colorExpr"
         onChange={onChange}

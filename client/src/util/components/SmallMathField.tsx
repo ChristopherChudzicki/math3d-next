@@ -22,10 +22,6 @@ const makeOptionsDefault: MathfieldProps["makeOptions"] = () => ({
   plonkSound: null,
 });
 
-const makeReadOnly: MathfieldProps["makeOptions"] = () => ({
-  readOnly: true,
-});
-
 const SmallMathField: React.FC<MathfieldProps> = (props: MathfieldProps) => {
   const { className, makeOptions, ...others } = props;
   const ref = useRef<MathfieldElement>(null);
@@ -48,5 +44,4 @@ const SmallMathField: React.FC<MathfieldProps> = (props: MathfieldProps) => {
   );
 };
 
-export { makeReadOnly };
 export default SmallMathField;

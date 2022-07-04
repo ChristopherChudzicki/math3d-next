@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React, { useCallback, useContext } from "react";
 import { OnMathFieldChange } from "util/components/MathLive";
-import SmallMathField, { makeReadOnly } from "util/components/SmallMathField";
+import SmallMathField from "util/components/SmallMathField";
 import { AssignmentError } from "util/MathScope/Evaluator";
 import { splitAtFirstEquality } from "util/parsing";
 import { ParseAssignmentLHSError } from "util/parsing/rules";
@@ -9,6 +9,7 @@ import { ParseAssignmentLHSError } from "util/parsing/rules";
 import { MathContext } from "../mathScope";
 import ReadonlyMathField from "./ReadonlyMathField";
 import type { IWidgetProps, WidgetChangeEvent } from "./types";
+import ErrorTooltip from "./ErrorTooltip";
 import style from "./widget.module.css";
 
 const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
@@ -40,48 +41,45 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
     [lhs, onChange, name, mathScope]
   );
 
-  const lhsError =
+  const hasLhsError =
     error instanceof AssignmentError ||
     error instanceof ParseAssignmentLHSError;
-  const rhsError = error && !lhsError;
+  const hasRhsError = error && !hasLhsError;
+  const lhsError = hasLhsError ? error : undefined;
+  const rhsError = hasRhsError ? error : undefined;
 
   const lhsTitle = `${title} (left-hand side)`;
   const rhsTitle = `${title} (right-hand side)`;
   return (
     <div {...others} className={classNames(className, "d-flex")}>
-      <SmallMathField
-        title={lhsTitle}
-        className={classNames(
-          style["field-widget"],
-          style["adjust-margin-for-border"],
-          { [style["has-error"]]: lhsError },
-          className
-        )}
-        onChange={onChangeLHS}
-        defaultValue={lhs}
-      />
+      <ErrorTooltip error={lhsError}>
+        <SmallMathField
+          title={lhsTitle}
+          className={classNames(
+            style["field-widget"],
+            style["adjust-margin-for-border"],
+            { [style["has-error"]]: hasLhsError },
+            className
+          )}
+          onChange={onChangeLHS}
+          defaultValue={lhs}
+        />
+      </ErrorTooltip>
       <ReadonlyMathField value="=" />
-      <SmallMathField
-        className={classNames(
-          style["static-math"],
-          "align-self-center",
-          "px-1"
-        )}
-        makeOptions={makeReadOnly}
-        defaultValue="="
-      />
-      <SmallMathField
-        title={rhsTitle}
-        className={classNames(
-          style["field-widget"],
-          style["adjust-margin-for-border"],
-          { [style["has-error"]]: rhsError },
-          className,
-          "flex-1"
-        )}
-        onChange={onChangeRHS}
-        defaultValue={rhs}
-      />
+      <ErrorTooltip error={rhsError}>
+        <SmallMathField
+          title={rhsTitle}
+          className={classNames(
+            style["field-widget"],
+            style["adjust-margin-for-border"],
+            { [style["has-error"]]: hasRhsError },
+            className,
+            "flex-1"
+          )}
+          onChange={onChangeRHS}
+          defaultValue={rhs}
+        />
+      </ErrorTooltip>
     </div>
   );
 };

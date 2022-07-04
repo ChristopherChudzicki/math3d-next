@@ -1,7 +1,11 @@
-import { mathItemConfigs as configs, MathItemType as MIT } from "configs";
+import {
+  mathItemConfigs as configs,
+  MathItemType as MIT,
+  WidgetType,
+} from "configs";
 import React from "react";
 
-import { MathValue, useOnWidgetChange } from "../../FieldWidget";
+import FieldWidget, { useOnWidgetChange } from "../../FieldWidget";
 import { useMathErrors } from "../../mathScope";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
@@ -17,7 +21,8 @@ const Point: MathItemForm<MIT.Point> = ({ item }) => {
   const errors = useMathErrors(item.id, errorNames);
   return (
     <ItemTemplate item={item} config={config}>
-      <MathValue
+      <FieldWidget
+        widget={WidgetType.MathValue}
         title={configProps.coords.label}
         name="coords"
         error={errors.coords}

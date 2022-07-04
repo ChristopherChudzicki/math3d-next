@@ -18,6 +18,7 @@ import MathBoolean from "./MathBoolean";
 import MathValue from "./MathValue";
 import TextInput from "./TextInput";
 import { OnWidgetChange } from "./types";
+import ErrorTooltip from "./ErrorTooltip";
 
 type WidgetsProps = {
   [WidgetType.MathValue]: React.ComponentProps<typeof MathValue>;
@@ -46,10 +47,12 @@ const FieldWidget = <W extends WidgetType>(
 ): JSX.Element => {
   const { widget, ...otherProps } = props;
   const WidgetComponent = getComponentForWidget(widget);
-  return <WidgetComponent {...otherProps} />;
+  return (
+    <ErrorTooltip error={props.error}>
+      <WidgetComponent {...otherProps} />
+    </ErrorTooltip>
+  );
 };
-
-export { AutosizeText, MathBoolean, MathValue };
 
 export default FieldWidget;
 /**

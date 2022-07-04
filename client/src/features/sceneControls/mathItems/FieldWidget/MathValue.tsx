@@ -25,6 +25,8 @@ const MathValue: React.FC<IWidgetProps> = (props: IWidgetProps) => {
 
   return (
     <SmallMathField
+      onBlur={props.onBlur}
+      onFocus={props.onFocus}
       title={title}
       style={style}
       className={classNames(

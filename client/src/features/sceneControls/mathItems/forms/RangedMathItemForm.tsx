@@ -2,11 +2,12 @@ import {
   MathItem,
   mathItemConfigs as configs,
   MathItemType as MIT,
+  WidgetType,
 } from "configs";
 import ordinal from "ordinal";
 import React, { useMemo } from "react";
 
-import { MathValue, useOnWidgetChange } from "../FieldWidget";
+import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";
 import { useMathErrors } from "../mathScope";
 import ItemTemplate from "../templates/ItemTemplate";
@@ -53,7 +54,8 @@ const RangedMathItemForm = ({
   );
   return (
     <ItemTemplate item={item} config={config}>
-      <MathValue
+      <FieldWidget
+        widget={WidgetType.MathValue}
         title={config.properties.expr.label}
         name="expr"
         error={errors.expr}
@@ -65,7 +67,8 @@ const RangedMathItemForm = ({
           <ParameterForm
             key={rangeProp}
             nameInput={
-              <MathValue
+              <FieldWidget
+                widget={WidgetType.MathValue}
                 title={`Name for ${ordinal(i + 1)} parameter`}
                 name={`${ordinal(i + 1)}-parameter-name`}
                 error={paramErrors[i]}
@@ -74,7 +77,8 @@ const RangedMathItemForm = ({
               />
             }
             rangeInput={
-              <MathValue
+              <FieldWidget
+                widget={WidgetType.MathValue}
                 // @ts-expect-error need to figure out this error
                 title={config.properties[rangeProp].label}
                 name={rangeProp}
