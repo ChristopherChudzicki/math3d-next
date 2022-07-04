@@ -3,10 +3,11 @@ import { addableTypes, mathItemConfigs, MathItemType } from "configs";
 import React, { useCallback } from "react";
 import { useAppDispatch } from "store/hooks";
 import { assertIsMathItemType } from "util/predicates";
+import idGenerator from "util/idGenerator";
 
-import { slice } from "./mathItems";
+import { mathItemsSlice } from "./mathItems";
 
-const { actions } = slice;
+const { actions } = mathItemsSlice;
 
 type Props = {
   className?: string;
@@ -19,7 +20,7 @@ const AddObjectButton: React.FC<Props> = (props) => {
   const handleClick: MenuClickHandler = useCallback(
     ({ key }) => {
       assertIsMathItemType<MathItemType>(key);
-      dispatch(actions.addNewItem({ type: key }));
+      dispatch(actions.addNewItem({ type: key, id: idGenerator.next() }));
     },
     [dispatch]
   );

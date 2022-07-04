@@ -71,7 +71,11 @@ const ItemTemplate = <T extends MIT>({
           "justify-content-end"
         )}
       >
-        <CloseButton onClick={remove} aria-label="Remove Item" />
+        <CloseButton
+          disabled={item.type === MIT.Folder}
+          onClick={remove}
+          aria-label="Remove Item"
+        />
       </div>
       <div className={styles["grid-right-gutter-bottom"]}>
         {config.settingsProperties.length > 0 && (

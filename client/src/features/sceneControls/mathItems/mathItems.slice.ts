@@ -8,7 +8,6 @@ import {
 import { keyBy } from "lodash";
 import { useAppSelector } from "store/hooks";
 import type { RootState, SelectorReturn } from "store/store";
-import idGenerator from "util/idGenerator";
 
 import defaultScene from "../defaultScene";
 
@@ -30,9 +29,11 @@ const mathItemsSlice = createSlice({
       );
       return { ...state, ...statePatch };
     },
-    addNewItem: (state, action: PayloadAction<{ type: MathItemType }>) => {
-      const { type } = action.payload;
-      const id = idGenerator.next();
+    addNewItem: (
+      state,
+      action: PayloadAction<{ type: MathItemType; id: string }>
+    ) => {
+      const { type, id } = action.payload;
       const item = mathItemConfigs[type].make(id);
       state[id] = item;
     },
@@ -50,6 +51,10 @@ const mathItemsSlice = createSlice({
     },
   },
 });
+
+export const selectMathItems =
+  (): SelectorReturn<MathItemsState> => (state: RootState) =>
+    state.mathItems;
 
 export const selectMathItem =
   (id: string): SelectorReturn<MathItem> =>
