@@ -30,7 +30,7 @@ test.each([
   "Widgets display error message in tooltip only when focused",
   async ({ getInput, item, errMatcher }) => {
     const helper = new IntegrationTest();
-    helper.patchMathItems([item]);
+    helper.patchMathItemsInFolder([item]);
     helper.render();
     const theInput = getInput();
 
@@ -53,7 +53,7 @@ test.each([
 test("Widget does not show a tooltip when focused if no error", async () => {
   const item = makeItem(MIT.Point, { coords: "[1,2,3] + 1" });
   const helper = new IntegrationTest();
-  helper.patchMathItems([item]);
+  helper.patchMathItemsInFolder([item]);
   helper.render();
 
   const theInput = screen.getByTitle("Coordinates");

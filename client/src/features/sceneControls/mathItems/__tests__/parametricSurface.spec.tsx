@@ -46,7 +46,7 @@ test.each([
     const item = makeItem(MIT.ParametricSurface, { expr: expression.initial });
     const id = nodeId(item);
     const helper = new IntegrationTest();
-    helper.patchMathItems([item]);
+    helper.patchMathItemsInFolder([item]);
     const { mathScope, store } = helper.render();
     // initiall there is an error since the expr RHS contains "abc" which is not a param name or defined variable
     expect(mathScope.evalErrors.has(id("expr"))).toBe(true);
@@ -93,7 +93,7 @@ test.each([
     const item = makeItem(MIT.ParametricSurface, { expr: expression.initial });
     const id = nodeId(item);
     const helper = new IntegrationTest();
-    helper.patchMathItems([item]);
+    helper.patchMathItemsInFolder([item]);
     const { mathScope, store } = helper.render();
 
     const inputs = getParamNameInputs();
@@ -114,7 +114,7 @@ test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
   async ({ paramIndex }) => {
     const item = makeItem(MIT.ParametricSurface);
     const helper = new IntegrationTest();
-    helper.patchMathItems([item]);
+    helper.patchMathItemsInFolder([item]);
     helper.render();
 
     const paramInput = getParamNameInputs()[paramIndex];
