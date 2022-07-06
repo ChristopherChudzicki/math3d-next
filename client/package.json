@@ -64,7 +64,7 @@
     "@types/node": "16.11.43",
     "@types/ramda": "0.28.14",
     "@types/react": "18.0.14",
-    "@types/react-dom": "18.0.5",
+    "@types/react-dom": "18.0.6",
     "@types/tinycolor2": "^1.4.3",
     "@types/toposort": "2.0.3",
     "@typescript-eslint/eslint-plugin": "5.30.5",
