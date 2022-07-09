@@ -69,7 +69,11 @@
 }
 .vertical-line {
   width: 1px;
-  background-color: blue;
+  background-color: var(--color-secondary);
   flex: 1;
   align-self: center;
+}
+
+.item-active {
+  background-color: var(--color-primary-2);
 }

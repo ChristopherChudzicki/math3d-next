@@ -177,12 +177,15 @@ const defaultScene: Omit<Scene, "id"> = {
       },
     },
   ],
-  sortableTree: {
-    axes: ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"],
-    main: ["initialFolder"],
-    setup: ["cameraFolder", "axes"],
-    initialFolder: ["1"],
-    cameraFolder: ["camera"],
+  itemOrder: {
+    tree: {
+      axes: ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"],
+      main: ["initialFolder"],
+      setup: ["cameraFolder", "axes"],
+      initialFolder: ["1"],
+      cameraFolder: ["camera"],
+    },
+    activeItemId: "1",
   },
 };
 

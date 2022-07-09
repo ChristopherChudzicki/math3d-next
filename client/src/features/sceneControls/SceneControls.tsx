@@ -11,7 +11,7 @@ import {
   mathItemsSlice,
   selectMathItems,
 } from "./mathItems";
-import { selectSubtree } from "./mathItems/sortableTree.slice";
+import { selectSubtree } from "./mathItems/itemOrder.slice";
 
 const { actions: itemActions } = mathItemsSlice;
 

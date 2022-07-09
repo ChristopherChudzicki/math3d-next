@@ -7,11 +7,15 @@ import {
   WidgetType,
 } from "configs";
 import React, { useCallback } from "react";
-import { useAppDispatch } from "store/hooks";
+import { useAppDispatch, useAppSelector } from "store/hooks";
 
 import ColorStatus from "../ColorStatus";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
-import { actions } from "../mathItems.slice";
+import { actions as mathItemActions } from "../mathItems.slice";
+import {
+  actions as itemOrderActions,
+  selectIsActive,
+} from "../itemOrder.slice";
 import { usePopulateMathScope } from "../mathScope";
 import { testId } from "../util";
 import CloseButton from "./CloseButton";
@@ -36,18 +40,30 @@ const ItemTemplate = <T extends MIT>({
   const onWidgetChange = useOnWidgetChange(item);
   usePopulateMathScope(item, config);
   const dispatch = useAppDispatch();
+  const isActive = useAppSelector(selectIsActive(item.id));
   const remove = useCallback(() => {
-    dispatch(actions.remove({ id: item.id }));
+    dispatch(mathItemActions.remove({ id: item.id }));
   }, [dispatch, item.id]);
 
+  const onFocus = useCallback(() => {
+    dispatch(itemOrderActions.setActiveItem({ id: item.id }));
+  }, [item.id, dispatch]);
+
   return (
-    <div className={styles.container} data-testid={testId(item.id)}>
+    <div
+      className={styles.container}
+      data-testid={testId(item.id)}
+      onFocus={onFocus}
+    >
       <div
         className={mergeClassNames(
           styles["grid-left-gutter"],
           styles["left-gutter"],
           "position-relative",
-          "d-flex"
+          "d-flex",
+          {
+            [styles["item-active"]]: isActive,
+          }
         )}
       >
         {showAlignmentBar && <div className={styles["vertical-line"]} />}

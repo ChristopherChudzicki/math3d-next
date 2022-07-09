@@ -2,24 +2,26 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState, SelectorReturn } from "store/store";
 import { assertNotNil } from "util/predicates";
 import { MathItemType } from "configs";
+import type { ItemOrder } from "types";
 import { actions as mathItemActions } from "./mathItems.slice";
 
 import defaultScene from "../defaultScene";
 
-export interface SortableTreeState {
-  [id: string]: string[];
-}
+export type ItemOrderState = ItemOrder;
 
-const getInitialState = (): SortableTreeState => defaultScene.sortableTree;
+const getInitialState = (): ItemOrderState => defaultScene.itemOrder;
 
 const MAIN_FOLDER = "main";
 
-const sortableTreeSlice = createSlice({
-  name: "sortableTree",
+const itemOrderSlice = createSlice({
+  name: "itemOrder",
   initialState: getInitialState,
   reducers: {
-    addNodes: (state, action: PayloadAction<{ nodes: SortableTreeState }>) => {
-      return { ...state, ...action.payload.nodes };
+    addNodes: (state, action: PayloadAction<ItemOrderState>) => {
+      return { ...state, ...action.payload };
+    },
+    setActiveItem: (state, action: PayloadAction<{ id: string }>) => {
+      state.activeItemId = action.payload.id;
     },
   },
   extraReducers: (builder) =>
@@ -29,20 +31,21 @@ const sortableTreeSlice = createSlice({
         const isFolder = type === MathItemType.Folder;
         const targetFolderId = isFolder
           ? MAIN_FOLDER
-          : state[MAIN_FOLDER].at(-1);
+          : state.tree[MAIN_FOLDER].at(-1);
         assertNotNil(targetFolderId);
-        state[targetFolderId].push(id);
+        state.tree[targetFolderId].push(id);
         if (isFolder) {
-          state[id] = [];
+          state.tree[id] = [];
         }
       })
       .addCase(mathItemActions.remove, (state, action) => {
+        const { tree } = state;
         const { id } = action.payload;
-        const parentFolderId = Object.keys(state).find((folderId) => {
-          return state[folderId].includes(id);
+        const parentFolderId = Object.keys(tree).find((folderId) => {
+          return tree[folderId].includes(id);
         });
         assertNotNil(parentFolderId);
-        state[parentFolderId] = state[parentFolderId].filter(
+        tree[parentFolderId] = tree[parentFolderId].filter(
           (itemId) => itemId !== id
         );
       }),
@@ -54,12 +57,12 @@ interface Subtree {
 }
 
 const getSubtree = (
-  state: SortableTreeState,
+  state: ItemOrderState,
   node: Subtree,
   depth = 0
 ): Subtree => {
   if (node.children) return node;
-  if (!state[node.id]) return node;
+  if (!state.tree[node.id]) return node;
   if (depth > 2) {
     /**
      * Sanity check. Math3d UI does not support nesting folders.
@@ -73,7 +76,7 @@ const getSubtree = (
      */
     throw new Error("Depth should not be greater than 2.");
   }
-  const children = state[node.id].map((id) => {
+  const children = state.tree[node.id].map((id) => {
     return getSubtree(state, { id }, depth + 1);
   });
   return { ...node, children };
@@ -82,7 +85,12 @@ const getSubtree = (
 export const selectSubtree =
   (rootId: string): SelectorReturn<Subtree> =>
   (state: RootState) =>
-    getSubtree(state.sortableTree, { id: rootId });
+    getSubtree(state.itemOrder, { id: rootId });
 
-export const { actions, reducer } = sortableTreeSlice;
-export default sortableTreeSlice;
+export const selectIsActive =
+  (id: string): SelectorReturn<boolean> =>
+  (state: RootState) =>
+    state.itemOrder.activeItemId === id;
+
+export const { actions, reducer } = itemOrderSlice;
+export default itemOrderSlice;

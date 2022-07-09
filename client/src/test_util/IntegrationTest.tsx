@@ -25,14 +25,17 @@ class IntegrationTest {
     { folder = makeItem(MathItemType.Folder) } = {}
   ): void => {
     this.assertNotRendered(
-      "patchMathItems cannot be called after initial render."
+      "patchMathItemsInFolder cannot be called after initial render."
     );
     const patch = keyBy([folder, ...items], (item) => item.id);
     this.storePatch.mathItems = patch;
-    this.storePatch.sortableTree = {
-      main: [folder.id],
-      [folder.id]: items.map((item) => item.id),
-      setup: [],
+    this.storePatch.itemOrder = {
+      activeItemId: folder.id,
+      tree: {
+        main: [folder.id],
+        [folder.id]: items.map((item) => item.id),
+        setup: [],
+      },
     };
   };
 
