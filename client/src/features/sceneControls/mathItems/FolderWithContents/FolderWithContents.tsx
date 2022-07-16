@@ -1,17 +1,27 @@
+/* eslint-disable no-param-reassign */
 import React from "react";
 import { MathItem, MathItemType } from "configs";
+import classNames from "classnames";
+import { useCollapsible } from "util/hooks";
 import MathItemComponent from "../MathItem";
+import { useMathResults } from "../mathScope";
+import style from "./FolderWithContents.module.css";
 
 interface Props {
   folder: MathItem<MathItemType.Folder>;
   items: MathItem[];
 }
 
+const EVALUATED_PROPS = ["isCollapsed"];
+
 const FolderWithContents: React.FC<Props> = ({ folder, items }) => {
+  const evaluated = useMathResults(folder.id, EVALUATED_PROPS);
+  const isOpen = !evaluated.isCollapsed;
+  const collapseRef = useCollapsible(isOpen);
   return (
     <>
       <MathItemComponent item={folder} />
-      <div>
+      <div ref={collapseRef} className={classNames(style.folder, "foo")}>
         {items.map((item) => (
           <MathItemComponent key={item.id} item={item} />
         ))}
