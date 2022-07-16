@@ -76,4 +76,6 @@
 
 .item-active {
   background-color: var(--color-primary-2);
+  transition-property: background-color;
+  transition-duration: var(--transition-duration);
 }

@@ -50,7 +50,8 @@ const ItemTemplate = <T extends MIT>({
   }, [item.id, dispatch]);
 
   return (
-    <div
+    <form
+      title={`Settings for ${item.properties.description}`}
       className={styles.container}
       data-testid={testId(item.id)}
       onFocus={onFocus}
@@ -98,7 +99,7 @@ const ItemTemplate = <T extends MIT>({
           <SettingsPopover item={item} config={config} />
         )}
       </div>
-    </div>
+    </form>
   );
 };
 

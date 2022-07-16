@@ -2,22 +2,47 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState, SelectorReturn } from "store/store";
 import { assertNotNil } from "util/predicates";
 import { MathItemType } from "configs";
-import type { ItemOrder } from "types";
+import { Scene } from "types";
 import { actions as mathItemActions } from "./mathItems.slice";
 
 import defaultScene from "../defaultScene";
 
-export type ItemOrderState = ItemOrder;
+export type ItemOrderState = {
+  tree: Record<string, string[]>;
+  activeItemId: string | undefined;
+};
 
-const getInitialState = (): ItemOrderState => defaultScene.itemOrder;
+const getInitialState = (): ItemOrderState => ({
+  tree: defaultScene.itemOrder,
+  activeItemId: undefined,
+});
 
 const MAIN_FOLDER = "main";
+
+const getActiveFolderId = (state: ItemOrderState, itemId?: string): string => {
+  if (itemId === undefined) {
+    const folderId = state.tree[MAIN_FOLDER].at(-1);
+    assertNotNil(folderId, "Main folder should have at least one child.");
+    return folderId;
+  }
+  /**
+   * If the item exists at tree root, then it's a folder.
+   */
+  if (state.tree[itemId]) return itemId;
+  const folderEntry = Object.entries(state.tree).find(
+    ([_folderId, itemIds]) => {
+      return itemIds.includes(itemId);
+    }
+  );
+  assertNotNil(folderEntry, "Could not find active folder.");
+  return folderEntry[0];
+};
 
 const itemOrderSlice = createSlice({
   name: "itemOrder",
   initialState: getInitialState,
   reducers: {
-    addNodes: (state, action: PayloadAction<ItemOrderState>) => {
+    addTree: (state, action: PayloadAction<{ tree: Scene["itemOrder"] }>) => {
       return { ...state, ...action.payload };
     },
     setActiveItem: (state, action: PayloadAction<{ id: string }>) => {
@@ -29,14 +54,21 @@ const itemOrderSlice = createSlice({
       .addCase(mathItemActions.addNewItem, (state, action) => {
         const { id, type } = action.payload;
         const isFolder = type === MathItemType.Folder;
-        const targetFolderId = isFolder
-          ? MAIN_FOLDER
-          : state.tree[MAIN_FOLDER].at(-1);
+        const activeFolderId = getActiveFolderId(state, state.activeItemId);
+        const targetFolderId = isFolder ? MAIN_FOLDER : activeFolderId;
+        const insertAfterId = isFolder ? activeFolderId : state.activeItemId;
         assertNotNil(targetFolderId);
-        state.tree[targetFolderId].push(id);
+        const folderItems = state.tree[targetFolderId];
+        const insertAfterIndex = folderItems.findIndex(
+          (itemId) => itemId === insertAfterId
+        );
+        const insertionIndex =
+          insertAfterIndex < 0 ? folderItems.length : insertAfterIndex + 1;
+        state.tree[targetFolderId].splice(insertionIndex, 0, id);
         if (isFolder) {
           state.tree[id] = [];
         }
+        state.activeItemId = id;
       })
       .addCase(mathItemActions.remove, (state, action) => {
         const { tree } = state;
