@@ -1,5 +1,4 @@
 import { screen, within, user } from "test_util";
-import { assertNotNil } from "util/predicates";
 
 const addItem = async (itemLabel: string): Promise<void> => {
   const addNewItemButton = screen.getByText("Add New Object");

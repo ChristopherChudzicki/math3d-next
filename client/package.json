@@ -6,8 +6,8 @@
     "build": "react-scripts build",
     "build-storybook": "build-storybook -s public",
     "eject": "react-scripts eject",
-    "lint": "eslint --max-warnings 0 \"{src}/**/*.{ts,tsx}\"",
-    "lint:fix": "eslint \"{src}/**/*.{ts,tsx}\" --fix",
+    "lint": "eslint --max-warnings 0 \"./src/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix",
     "start": "react-scripts start",
     "storybook": "start-storybook -p 6006 -s public",
     "test": "react-scripts test --testMatch **/*.spec.{ts,tsx}"
