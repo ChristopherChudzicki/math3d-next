@@ -12,6 +12,31 @@ const getMs = (duration: string): number => {
   return 0;
 };
 
+/**
+ * A hook to make elements collapsible via css even if they have height: auto.
+ *
+ * Example:
+ *
+ * ```css
+ * .collapsible {
+ *   transition-duration: 100ms;
+ *   transition-property: height;
+ * }
+ * ```
+ * ```ts
+ * const Example = () => {
+ *   const [isOpen, setIsOpen] = useState(true);
+ *   const makeCollapsible = useCollapsible(isOpen);
+ *   return (
+ *     <ul ref={makeCollapsible} className="collapsible">
+ *       <li>Thing 1</li>
+ *       <li>Thing 2</li>
+ *       <li>Thing 3</li>
+ *     </ul>
+ *   );
+ * };
+ * ```
+ */
 const useCollapsible = (
   isOpen: boolean,
   refCb?: React.RefCallback<HTMLElement>
