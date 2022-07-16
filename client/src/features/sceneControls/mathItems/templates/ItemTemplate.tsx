@@ -1,4 +1,4 @@
-import mergeClassNames from "classnames";
+import classNames from "classnames";
 import {
   isMathGraphic,
   MathItem,
@@ -57,7 +57,7 @@ const ItemTemplate = <T extends MIT>({
       onFocus={onFocus}
     >
       <div
-        className={mergeClassNames(
+        className={classNames(
           styles["grid-left-gutter"],
           styles["left-gutter"],
           "position-relative",
@@ -80,9 +80,11 @@ const ItemTemplate = <T extends MIT>({
           onChange={onWidgetChange}
         />
       </div>
-      <div className={styles["grid-center-bottom"]}>{children}</div>
+      <div className={classNames(styles["grid-center-bottom"], "pb-2")}>
+        {children}
+      </div>
       <div
-        className={mergeClassNames(
+        className={classNames(
           styles["grid-right-gutter-top"],
           "d-flex",
           "justify-content-end"
