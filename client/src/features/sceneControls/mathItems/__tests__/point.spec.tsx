@@ -9,6 +9,7 @@ import {
   user,
   within,
 } from "test_util";
+import { assertNotNil } from "util/predicates";
 
 /**
  * Antd is causing react to complain that some things aren't wrapped in act(...).
@@ -42,7 +43,7 @@ test.each([
     const point = makeItem(MIT.Point, { coords: coordsString });
     const id = nodeId(point);
     const helper = new IntegrationTest();
-    helper.patchMathItems([point]);
+    helper.patchMathItemsInFolder([point]);
     const { mathScope } = helper.render();
 
     expect(mathScope.evalErrors.size).toBe(numEvalErrors);
@@ -76,7 +77,7 @@ test.each([
     const point = makeItem(MIT.Point);
     const id = nodeId(point);
     const helper = new IntegrationTest();
-    helper.patchMathItems([point]);
+    helper.patchMathItemsInFolder([point]);
     const { mathScope } = helper.render();
 
     const coordsInput = await screen.findByTitle("Coordinates");
@@ -90,7 +91,7 @@ test.each([
 
 test("Adding items adds to mathScope", async () => {
   const helper = new IntegrationTest();
-  helper.patchMathItems([]);
+  helper.patchMathItemsInFolder([]);
   const { mathScope, store } = helper.render();
   await user.click(await screen.findByText("Add New Object"));
   const menu = await screen.findByRole("menu");
@@ -99,8 +100,11 @@ test("Adding items adds to mathScope", async () => {
   await user.click(addPoint, { pointerEventsCheck: 0 });
 
   const mathItems = Object.values(store.getState().mathItems);
-  expect(mathItems).toHaveLength(1);
-  const point = Object.values(mathItems)[0] as MathItem<MIT.Point>;
+  expect(mathItems).toHaveLength(2); // point + folder
+  const point = Object.values(mathItems).find(
+    (item) => item.type === MIT.Point
+  ) as MathItem<MIT.Point>;
+  assertNotNil(point);
   const id = nodeId(point);
   screen.getByTestId(`mathItem-${point.id}`);
   expect(mathScope.results.get(id("coords"))).toStrictEqual([0, 0, 0]);
@@ -116,16 +120,16 @@ test("Deleting items removes them from mathScope", async () => {
     opacity: "2^[1,2,3]",
   });
   const helper = new IntegrationTest();
-  helper.patchMathItems([point]);
+  helper.patchMathItemsInFolder([point]);
   const { mathScope } = helper.render();
-  expect(mathScope.results.size).toBeGreaterThan(0);
+  expect(mathScope.results.size).toBeGreaterThan(1); // point + folder visibility
   expect(mathScope.parseErrors.size).toBeGreaterThan(0);
   expect(mathScope.evalErrors.size).toBeGreaterThan(0);
 
   const item = screen.getByTestId(`mathItem-${point.id}`);
   const remove = within(item).getByLabelText("Remove Item");
   await user.click(remove);
-  expect(mathScope.results.size).toBe(0);
+  expect(mathScope.results.size).toBe(1); // folder visibility
   expect(mathScope.parseErrors.size).toBe(0);
   expect(mathScope.evalErrors.size).toBe(0);
   expect(item).not.toBeInTheDocument();

@@ -169,7 +169,7 @@ const defaultScene: Omit<Scene, "id"> = {
       },
     },
     {
-      id: "mainFolder",
+      id: "initialFolder",
       type: MathItemType.Folder,
       properties: {
         description: "A Folder",
@@ -177,11 +177,11 @@ const defaultScene: Omit<Scene, "id"> = {
       },
     },
   ],
-  sortableTree: {
+  itemOrder: {
     axes: ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"],
-    root: ["mainFolder"],
+    main: ["initialFolder"],
     setup: ["cameraFolder", "axes"],
-    mainFolder: ["1"],
+    initialFolder: ["1"],
     cameraFolder: ["camera"],
   },
 };

@@ -22,7 +22,7 @@ const setup = () => {
   const point = makeItem(MIT.Point);
   const id = nodeId(point);
   const helper = new IntegrationTest();
-  helper.patchMathItems([point]);
+  helper.patchMathItemsInFolder([point]);
   const { mathScope, store } = helper.render();
   const findButton = () => screen.findByTitle("Color and Visibility");
   const findDialog = () => screen.findByRole("dialog");

@@ -6,6 +6,7 @@ import React, { useCallback, useContext, useMemo } from "react";
 import { useToggle } from "util/hooks";
 import { useLongAndShortPress } from "util/hooks/useLongAndShortPress";
 
+import { positioning } from "util/styles";
 import { useOnWidgetChange } from "../FieldWidget";
 import { WidgetChangeEvent } from "../FieldWidget/types";
 import { MathContext, useMathResults } from "../mathScope";
@@ -72,7 +73,9 @@ const ColorStatus: React.FC<Props> = (props) => {
         style={style}
         title="Color and Visibility"
         aria-label="Color and Visibility"
-        className={classNames(styles.circle, { [styles.empty]: !visible })}
+        className={classNames(styles.circle, positioning["absolute-centered"], {
+          [styles.empty]: !visible,
+        })}
         onClick={handleButtonClick}
         {...bind()}
       />

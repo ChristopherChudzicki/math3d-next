@@ -47,6 +47,7 @@ module.exports = {
       'error',
       {
         devDependencies: [
+          "**/__tests__/**/*.ts",
           "**/*.spec.ts",
           "**/*.spec.tsx",
           "**/*.stories.tsx",

@@ -1,10 +1,17 @@
 import { getScene } from "api";
+import { MathItemType } from "configs";
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "store/hooks";
+import { assertIsMathItemType } from "util/predicates";
 
 import AddObjectButton from "./AddObjectButton";
 import ControlTabs from "./controlTabs";
-import { MathItem, slice as mathItemsSlice } from "./mathItems";
+import {
+  FolderWithContents,
+  mathItemsSlice,
+  selectMathItems,
+} from "./mathItems";
+import { selectSubtree } from "./mathItems/itemOrder.slice";
 
 const { actions: itemActions } = mathItemsSlice;
 
@@ -20,9 +27,32 @@ const AxesNav: React.FC = () => (
   </div>
 );
 
+const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
+  const { children = [] } = useAppSelector(selectSubtree(rootId));
+  const mathItems = useAppSelector(selectMathItems());
+  return (
+    <>
+      {children.map((folder) => {
+        const childItems =
+          folder.children?.map(({ id }) => mathItems[id]) ?? [];
+        const folderItem = mathItems[folder.id];
+        assertIsMathItemType(folderItem.type, MathItemType.Folder);
+        return (
+          <FolderWithContents
+            key={folderItem.id}
+            folder={folderItem}
+            items={childItems}
+          />
+        );
+      })}
+    </>
+  );
+};
+
 const SceneControls: React.FC<Props> = (props) => {
   const { sceneId } = props;
   const dispatch = useAppDispatch();
+
   useEffect(() => {
     const loadScene = async (id: string) => {
       const scene = await getScene(id);
@@ -32,16 +62,13 @@ const SceneControls: React.FC<Props> = (props) => {
       loadScene(sceneId);
     }
   }, [dispatch, sceneId]);
-  const items = useAppSelector((state) => Object.values(state.mathItems));
   return (
     <ControlTabs
       tabBarExtraContent={<AddObjectButton />}
       mainNav={<MainNav />}
-      mainContent={items.map((item) => (
-        <MathItem item={item} key={item.id} />
-      ))}
+      mainContent={<MathItemsList rootId="main" />}
       axesNav={<AxesNav />}
-      axesdContent="axes stuff"
+      axesdContent={<MathItemsList rootId="setup" />}
     />
   );
 };

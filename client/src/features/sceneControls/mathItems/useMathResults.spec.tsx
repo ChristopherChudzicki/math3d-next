@@ -41,7 +41,7 @@ const TestErrors: React.FC<TestErrorsProps> = ({ names, prefix, onRender }) => {
   return null;
 };
 
-describe("useMathValues and useModifyMathEpressions", () => {
+describe("useMathResults and useMathErrors", () => {
   const setup = (prefix: string, names: string[]) => {
     // This is a false positive from eslint; eslint seems to think this is a component
     // eslint-disable-next-line react/jsx-no-constructed-context-values
@@ -86,7 +86,7 @@ describe("useMathValues and useModifyMathEpressions", () => {
     };
   };
 
-  test("useMathValues triggers re-renders when values change", async () => {
+  test("useMathResults triggers re-renders when values change", async () => {
     const { results, mathScope } = setup("id1", ["a", "b", "c"]);
 
     await act(() => {

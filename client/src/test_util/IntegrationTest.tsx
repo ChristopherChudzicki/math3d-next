@@ -1,8 +1,10 @@
 import { render } from "@testing-library/react";
-import { MathItem } from "configs";
+import { MathItem, MathItemType } from "configs";
 import { keyBy } from "lodash";
 import React from "react";
-import { getInitialState, getStore, RootState } from "store/store";
+import { getInitialState, getStore } from "store/store";
+import type { RootState } from "store/store";
+import { makeItem } from "test_util";
 import MathScope from "util/MathScope";
 import { getLatexParser } from "util/parsing";
 
@@ -19,12 +21,23 @@ class IntegrationTest {
     }
   };
 
-  patchMathItems = (items: MathItem[]): void => {
+  patchMathItemsInFolder = (
+    items: MathItem[],
+    { folder = makeItem(MathItemType.Folder) } = {}
+  ): void => {
     this.assertNotRendered(
-      "patchMathItems cannot be called after initial render."
+      "patchMathItemsInFolder cannot be called after initial render."
     );
-    const patch = keyBy(items, (item) => item.id);
+    const patch = keyBy([folder, ...items], (item) => item.id);
     this.storePatch.mathItems = patch;
+    this.storePatch.itemOrder = {
+      activeItemId: folder.id,
+      tree: {
+        main: [folder.id],
+        [folder.id]: items.map((item) => item.id),
+        setup: [],
+      },
+    };
   };
 
   patchStore = (patch: Partial<RootState>) => {

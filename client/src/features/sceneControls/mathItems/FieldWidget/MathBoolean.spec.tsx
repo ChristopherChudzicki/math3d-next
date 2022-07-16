@@ -27,7 +27,7 @@ const setup = async (initialValue: string) => {
   const helper = new IntegrationTest();
   const point = makeItem(MIT.Point, { visible: initialValue });
   const id = nodeId(point);
-  helper.patchMathItems([point]);
+  helper.patchMathItemsInFolder([point]);
   const { mathScope } = helper.render();
   await user.click(await screen.findByTitle("Show Settings"));
   const settings = await screen.findByTitle("Settings");

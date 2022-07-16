@@ -4,7 +4,7 @@ import { IntegrationTest, makeItem, screen } from "test_util";
 test("left-hand parse errors are indicated on left-hand side", async () => {
   const variable = makeItem(MIT.Variable, { value: "a+ = 123" });
   const helper = new IntegrationTest();
-  helper.patchMathItems([variable]);
+  helper.patchMathItemsInFolder([variable]);
   const { mathScope } = helper.render();
   expect(mathScope.parseErrors.size).toBe(1);
   const lhs = await screen.findByTitle("left-hand side", { exact: false });
@@ -16,7 +16,7 @@ test("left-hand parse errors are indicated on left-hand side", async () => {
 test("right-hand parse errors are indicated on right-hand side", async () => {
   const variable = makeItem(MIT.Variable, { value: "a = 123 + " });
   const helper = new IntegrationTest();
-  helper.patchMathItems([variable]);
+  helper.patchMathItemsInFolder([variable]);
   const { mathScope } = helper.render();
   expect(mathScope.parseErrors.size).toBe(1);
   const lhs = await screen.findByTitle("left-hand side", { exact: false });
