@@ -45,7 +45,7 @@ const useCollapsible = (
   const overflowY = useRef("");
   const expandInterval = useRef(-1);
   const collapseInterval = useRef(-1);
-  const shouldExpandCollapse = useRef(false);
+  const shouldAnimate = useRef(false);
   const collapsing = useRef(false);
 
   const [hasRendered, setHasRendered] = useState(false);
@@ -111,15 +111,9 @@ const useCollapsible = (
   }, []);
 
   useEffect(() => {
-    if (!hasRendered) {
-      setHasRendered(true);
-    }
-  }, [hasRendered]);
-
-  useEffect(() => {
     if (!hasRendered) return;
-    if (!shouldExpandCollapse.current) {
-      shouldExpandCollapse.current = true;
+    if (!shouldAnimate.current) {
+      shouldAnimate.current = true;
       return;
     }
     if (isOpen) {
@@ -134,6 +128,11 @@ const useCollapsible = (
       refCb(node);
     }
     if (!node) return;
+    if (!isOpen && !hasRendered) {
+      node.style.height = "0px";
+      node.style.overflowY = "hidden";
+    }
+    setHasRendered(true);
     elRef.current = node;
   };
 };
