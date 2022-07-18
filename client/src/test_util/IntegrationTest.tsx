@@ -28,16 +28,16 @@ class IntegrationTest {
     this.assertNotRendered(
       "patchMathItemsInFolder cannot be called after initial render."
     );
-    const patch = keyBy([folder, ...items], (item) => item.id);
-    this.storePatch.mathItems = patch;
-    this.storePatch.itemOrder = {
-      activeItemId: folder.id,
-      tree: {
+    const mathItemsPatch: RootState["mathItems"] = {
+      items: keyBy([folder, ...items], (item) => item.id),
+      activeItemId: undefined,
+      order: {
         main: [folder.id],
         [folder.id]: items.map((item) => item.id),
         setup: [],
       },
     };
+    this.storePatch.mathItems = mathItemsPatch;
   };
 
   patchStore = (patch: Partial<RootState>) => {

@@ -11,8 +11,8 @@ import {
   FolderWithContents,
   mathItemsSlice,
   selectMathItems,
+  selectSubtree,
 } from "./mathItems";
-import { selectSubtree } from "./mathItems/itemOrder.slice";
 import style from "./SceneControls.module.css";
 
 const { actions: itemActions } = mathItemsSlice;

@@ -11,11 +11,7 @@ import { useAppDispatch, useAppSelector } from "store/hooks";
 
 import ColorStatus from "../ColorStatus";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
-import { actions as mathItemActions } from "../mathItems.slice";
-import {
-  actions as itemOrderActions,
-  selectIsActive,
-} from "../itemOrder.slice";
+import { actions, selectIsActive } from "../mathItems.slice";
 import { usePopulateMathScope } from "../mathScope";
 import { testId } from "../util";
 import CloseButton from "./CloseButton";
@@ -42,11 +38,11 @@ const ItemTemplate = <T extends MIT>({
   const dispatch = useAppDispatch();
   const isActive = useAppSelector(selectIsActive(item.id));
   const remove = useCallback(() => {
-    dispatch(mathItemActions.remove({ id: item.id }));
+    dispatch(actions.remove({ id: item.id }));
   }, [dispatch, item.id]);
 
   const onFocus = useCallback(() => {
-    dispatch(itemOrderActions.setActiveItem({ id: item.id }));
+    dispatch(actions.setActiveItem({ id: item.id }));
   }, [item.id, dispatch]);
 
   return (

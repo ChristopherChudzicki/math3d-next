@@ -40,11 +40,21 @@ const folderFixture = ({
   const folders = folderDescriptions.map((description) =>
     makeItem(MIT.Folder, { description, ...folderProps[description] })
   );
-  const mathItems = keyBy([...points, ...folders], (item) => item.id);
+  const items = keyBy([...points, ...folders], (item) => item.id);
   const [p0, p1, p2, p3, p4, p5] = points.map((p) => p.id);
   const [f0, f1, f2] = folders.map((f) => f.id);
   return {
-    mathItems,
+    mathItems: {
+      items,
+      activeItemId: undefined,
+      order: {
+        setup: [],
+        main: [f0, f1, f2],
+        [f0]: [p0, p1],
+        [f1]: [p2, p3],
+        [f2]: [p4, p5],
+      },
+    },
     itemOrder: {
       activeItemId: undefined,
       tree: {

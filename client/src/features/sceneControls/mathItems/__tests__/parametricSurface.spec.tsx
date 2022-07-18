@@ -54,7 +54,7 @@ test.each([
     await user.type(inputs[param.index], param.name);
 
     // assert store is updated correctly
-    const editedItem = store.getState().mathItems[
+    const editedItem = store.getState().mathItems.items[
       item.id
     ] as MathItem<MIT.ParametricSurface>;
     expect(editedItem.properties.expr).toBe(expression.expectedFinal);
@@ -99,7 +99,7 @@ test.each([
     const inputs = getParamNameInputs();
     await user.type(inputs[param.index], param.name);
 
-    const itemAfterEdit = store.getState().mathItems[
+    const itemAfterEdit = store.getState().mathItems.items[
       item.id
     ] as MathItem<MIT.ParametricSurface>;
     expect(itemAfterEdit.properties.expr).toBe(expression.expectedFinal);
