@@ -1,5 +1,5 @@
 import { MathItemType as MIT, MathItem } from "configs";
-import { keyBy, zip } from "lodash";
+import { keyBy } from "lodash";
 import { RootState } from "store/store";
 import { screen, within, user, makeItem } from "test_util";
 
