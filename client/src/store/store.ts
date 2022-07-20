@@ -1,4 +1,4 @@
-import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import type { MathItemsState } from "features/sceneControls/mathItems";
 import { mathItemsSlice } from "features/sceneControls/mathItems";
 
@@ -25,14 +25,8 @@ const getStore = ({ preloadedState }: ConfigureStoreOptions = {}) =>
 type AppStore = ReturnType<typeof getStore>;
 
 type AppDispatch = AppStore["dispatch"];
-type AppThunk<ReturnType = void> = ThunkAction<
-  ReturnType,
-  RootState,
-  unknown,
-  Action<string>
->;
 
 type SelectorReturn<T> = (state: RootState) => T;
 
-export type { AppDispatch, AppStore, AppThunk, RootState, SelectorReturn };
+export type { AppDispatch, AppStore, RootState, SelectorReturn };
 export { getInitialState, getStore };

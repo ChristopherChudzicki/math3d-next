@@ -1,18 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import {
-  MathItem,
-  mathItemConfigs,
-  MathItemPatch,
-  MathItemType,
-} from "configs";
+import { mathItemConfigs } from "configs";
+import type { MathItem, MathItemPatch, MathItemType } from "configs";
 import { keyBy } from "lodash";
-import { useAppSelector } from "store/hooks";
-import type { RootState, SelectorReturn } from "store/store";
 import { assertNotNil } from "util/predicates";
 
-import defaultScene from "../defaultScene";
+import defaultScene from "../../defaultScene";
 
-export interface MathItemsState {
+interface MathItemsState {
   items: {
     [id: string]: MathItem;
   };
@@ -110,60 +104,6 @@ const mathItemsSlice = createSlice({
   },
 });
 
-export const selectMathItems =
-  (): SelectorReturn<MathItemsState["items"]> => (state: RootState) =>
-    state.mathItems.items;
-
-export const selectMathItem =
-  (id: string): SelectorReturn<MathItem> =>
-  (state: RootState) =>
-    state.mathItems.items[id];
-
-export const useMathItem = (id: string) => {
-  const mathItem = useAppSelector(selectMathItem(id));
-  return mathItem;
-};
-
-interface Subtree {
-  id: string;
-  children?: Subtree[];
-}
-
-const getSubtree = (
-  state: MathItemsState,
-  node: Subtree,
-  depth = 0
-): Subtree => {
-  if (node.children) return node;
-  if (!state.order[node.id]) return node;
-  if (depth > 2) {
-    /**
-     * Sanity check. Math3d UI does not support nesting folders.
-     * Max depth should be 2:
-     * root
-     *    userFolder1
-     *      item1a
-     *      item1b
-     *    userFolder2
-     *      ...etc
-     */
-    throw new Error("Depth should not be greater than 2.");
-  }
-  const children = state.order[node.id].map((id) => {
-    return getSubtree(state, { id }, depth + 1);
-  });
-  return { ...node, children };
-};
-
-export const selectSubtree =
-  (rootId: string): SelectorReturn<Subtree> =>
-  (state: RootState) =>
-    getSubtree(state.mathItems, { id: rootId });
-
-export const selectIsActive =
-  (id: string): SelectorReturn<boolean> =>
-  (state: RootState) =>
-    state.mathItems.activeItemId === id;
-
+export type { MathItemsState };
 export const { actions, reducer } = mathItemsSlice;
 export default mathItemsSlice;

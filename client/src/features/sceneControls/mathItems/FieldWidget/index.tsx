@@ -9,7 +9,7 @@ import React, { useCallback } from "react";
 import { useAppDispatch } from "store/hooks";
 import { assertNotNil } from "util/predicates";
 
-import { actions } from "../mathItems.slice";
+import { actions } from "../mathItemsSlice";
 import { mathScopeId } from "../mathScope";
 import AutosizeText from "./AutosizeText";
 import ColorWidget from "./ColorWidget";
