@@ -11,9 +11,10 @@ import { useShadowStylesheet } from "../hooks";
 
 /**
  * Custom overrides for math-live's MathField Web Component.
+ * Danger! This relies on internal math-live classnames
  */
 const styleOverrides = /* css */ `
-:host(.small-math-field) .ML__fieldcontainer {
+:host(.small-math-field) .ML__container {
   min-height: auto;
 }`;
 

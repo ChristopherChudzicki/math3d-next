@@ -28,7 +28,7 @@ const setup = () => {
   const findDialog = () => screen.findByRole("dialog");
   const findTextInput = () => screen.findByTitle("Custom Color Input");
   const findAllSwatches = () => screen.findAllByTitle("Select Color");
-  const getPoint = () => store.getState().mathItems[point.id] as Point;
+  const getPoint = () => store.getState().mathItems.items[point.id] as Point;
   const getCalculatedProp = (prop: keyof PointProperties) =>
     mathScope.results.get(id(prop));
   return {

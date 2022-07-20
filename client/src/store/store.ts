@@ -1,21 +1,13 @@
 import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
-import type {
-  MathItemsState,
-  ItemOrderState,
-} from "features/sceneControls/mathItems";
-import {
-  mathItemsSlice,
-  itemOrderSlice,
-} from "features/sceneControls/mathItems";
+import type { MathItemsState } from "features/sceneControls/mathItems";
+import { mathItemsSlice } from "features/sceneControls/mathItems";
 
 type RootState = {
   mathItems: MathItemsState;
-  itemOrder: ItemOrderState;
 };
 
 const getInitialState = (): RootState => ({
   mathItems: mathItemsSlice.getInitialState(),
-  itemOrder: itemOrderSlice.getInitialState(),
 });
 
 type ConfigureStoreOptions = {
@@ -26,7 +18,6 @@ const getStore = ({ preloadedState }: ConfigureStoreOptions = {}) =>
   configureStore({
     reducer: {
       [mathItemsSlice.name]: mathItemsSlice.reducer,
-      [itemOrderSlice.name]: itemOrderSlice.reducer,
     },
     preloadedState,
   });

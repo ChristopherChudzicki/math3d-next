@@ -99,9 +99,9 @@ test("Adding items adds to mathScope", async () => {
   // antd has issues with point-events checks, see, e.g.,
   await user.click(addPoint, { pointerEventsCheck: 0 });
 
-  const mathItems = Object.values(store.getState().mathItems);
-  expect(mathItems).toHaveLength(2); // point + folder
-  const point = Object.values(mathItems).find(
+  const items = Object.values(store.getState().mathItems.items);
+  expect(items).toHaveLength(2); // point + folder
+  const point = Object.values(items).find(
     (item) => item.type === MIT.Point
   ) as MathItem<MIT.Point>;
   assertNotNil(point);

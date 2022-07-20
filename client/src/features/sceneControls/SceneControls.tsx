@@ -1,4 +1,5 @@
 import { getScene } from "api";
+import classNames from "classnames";
 import { MathItemType } from "configs";
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "store/hooks";
@@ -10,8 +11,9 @@ import {
   FolderWithContents,
   mathItemsSlice,
   selectMathItems,
+  selectSubtree,
 } from "./mathItems";
-import { selectSubtree } from "./mathItems/itemOrder.slice";
+import style from "./SceneControls.module.css";
 
 const { actions: itemActions } = mathItemsSlice;
 
@@ -32,13 +34,16 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
   const mathItems = useAppSelector(selectMathItems());
   return (
     <>
-      {children.map((folder) => {
+      {children.map((folder, folderIndex) => {
         const childItems =
           folder.children?.map(({ id }) => mathItems[id]) ?? [];
         const folderItem = mathItems[folder.id];
         assertIsMathItemType(folderItem.type, MathItemType.Folder);
         return (
           <FolderWithContents
+            contentsClassName={classNames({
+              [style["last-folder"]]: folderIndex === children.length - 1,
+            })}
             key={folderItem.id}
             folder={folderItem}
             items={childItems}

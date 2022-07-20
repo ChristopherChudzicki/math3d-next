@@ -1,39 +1,10 @@
-import { MathItemType } from "configs";
-import { IntegrationTest, makeItem, screen, user, within } from "test_util";
-import type { RootState } from "store/store";
+import { IntegrationTest, screen, user, within } from "test_util";
 import _ from "lodash";
-import { addItem, getItemByDescription } from "./utils";
-
-const getStorePatch = (): Partial<RootState> => {
-  const pointDescriptions = ["P1a", "P1b", "P2a", "P2b", "P3a", "P3b"];
-  const folderDescriptions = ["F1", "F2", "F3"];
-  const points = pointDescriptions.map((description) =>
-    makeItem(MathItemType.Point, { description })
-  );
-  const folders = folderDescriptions.map((description) =>
-    makeItem(MathItemType.Folder, { description })
-  );
-  const mathItems = _.keyBy([...points, ...folders], (item) => item.id);
-  const [p0, p1, p2, p3, p4, p5] = points.map((p) => p.id);
-  const [f0, f1, f2] = folders.map((f) => f.id);
-  return {
-    mathItems,
-    itemOrder: {
-      activeItemId: undefined,
-      tree: {
-        setup: [],
-        main: [f0, f1, f2],
-        [f0]: [p0, p1],
-        [f1]: [p2, p3],
-        [f2]: [p4, p5],
-      },
-    },
-  };
-};
+import { addItem, getItemByDescription, folderFixture } from "./utils";
 
 test("setup renders 9 points in 3 folders", async () => {
   const helper = new IntegrationTest();
-  helper.patchStore(getStorePatch());
+  helper.patchStore(folderFixture());
   helper.render();
   const descriptions = screen
     .getAllByTitle("Description")
@@ -91,7 +62,7 @@ test.each([
   },
 ])("$description", async ({ itemToAdd, expected, beforeAdd }) => {
   const helper = new IntegrationTest();
-  helper.patchStore(getStorePatch());
+  helper.patchStore(folderFixture());
   helper.render();
 
   await beforeAdd();
@@ -107,7 +78,7 @@ test.each([
 
 test("Newly inserted item is activated", async () => {
   const helper = new IntegrationTest();
-  helper.patchStore(getStorePatch());
+  helper.patchStore(folderFixture());
   helper.render();
 
   /**

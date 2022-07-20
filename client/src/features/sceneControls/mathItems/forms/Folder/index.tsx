@@ -26,7 +26,7 @@ const FolderButton: React.FC<FolderButtonProps> = ({
      * Need an extra container here because SubtleButton also uses transforms
      */
     <div className={positioning["absolute-centered"]}>
-      <SubtleButton onClick={onClick}>
+      <SubtleButton onClick={onClick} aria-label="Expand/Collapse Folder">
         <DownOutlined
           className={classNames({
             [styles["rotate-90"]]: isCollapsed,
