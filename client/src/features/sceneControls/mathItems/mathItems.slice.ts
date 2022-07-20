@@ -58,9 +58,8 @@ const mathItemsSlice = createSlice({
   name: "mathItems",
   initialState: getInitialState,
   reducers: {
-    addItems: (state, action: PayloadAction<{ items: MathItem[] }>) => {
+    addItems: (_state, _action: PayloadAction<{ items: MathItem[] }>) => {
       throw new Error("Not implemented");
-      console.log(action);
     },
     addNewItem: (
       state,

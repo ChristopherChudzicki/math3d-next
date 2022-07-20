@@ -25,6 +25,7 @@ module.exports = {
       "error",
       {
         varsIgnorePattern: "^_",
+        argsIgnorePattern: "^_",
         destructuredArrayIgnorePattern: "^_",
         ignoreRestSiblings: true,
       }
