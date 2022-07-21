@@ -22,12 +22,9 @@ interface MathItemsState {
 }
 
 const getInitialState = (): MathItemsState => {
-  const { items } = defaultScene;
-  const mathScope = new MathScope({ parse: latexParser.parse });
-  syncItemsToMathScope(mathScope, items);
   return {
-    mathScope,
-    items: keyBy(items, (item) => item.id),
+    mathScope: new MathScope({ parse: latexParser.parse }),
+    items: keyBy(defaultScene.items, (item) => item.id),
     activeItemId: undefined,
     order: defaultScene.itemOrder,
   };
@@ -74,6 +71,11 @@ const mathItemsSlice = createSlice({
   reducers: {
     addItems: (_state, _action: PayloadAction<{ items: MathItem[] }>) => {
       throw new Error("Not implemented");
+    },
+    initializeMathScope: (state) => {
+      const items = Object.values(state.items);
+      console.log(`Initializing ${items.length} items`);
+      syncItemsToMathScope(rawMathScope(state), items);
     },
     addNewItem: (
       state,

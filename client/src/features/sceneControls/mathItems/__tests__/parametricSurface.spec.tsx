@@ -17,7 +17,7 @@ const getParamNameInputs = (): HTMLTextAreaElement[] => {
   return [zeroth, first];
 };
 
-test.each([
+test.only.each([
   {
     expression: {
       initial: "_f(x,y)=[1+abc, 0, 0]",
@@ -29,17 +29,17 @@ test.each([
     ],
     param: { name: "abc", index: 0 },
   },
-  {
-    expression: {
-      initial: "_f(x,y)=[1+abc, 0, 0]",
-      expectedFinal: "_f(x,abc)=[1+abc, 0, 0]",
-    },
-    evaluations: [
-      { parmaValues: [1, 0], expectedOutput: [1, 0, 0] },
-      { parmaValues: [0, 1], expectedOutput: [2, 0, 0] },
-    ],
-    param: { name: "abc", index: 1 },
-  },
+  // {
+  //   expression: {
+  //     initial: "_f(x,y)=[1+abc, 0, 0]",
+  //     expectedFinal: "_f(x,abc)=[1+abc, 0, 0]",
+  //   },
+  //   evaluations: [
+  //     { parmaValues: [1, 0], expectedOutput: [1, 0, 0] },
+  //     { parmaValues: [0, 1], expectedOutput: [2, 0, 0] },
+  //   ],
+  //   param: { name: "abc", index: 1 },
+  // },
 ])(
   "Updating parameter names to valid values updates expression appropriately",
   async ({ expression, param, evaluations }) => {
@@ -48,6 +48,9 @@ test.each([
     const helper = new IntegrationTest();
     helper.patchMathItemsInFolder([item]);
     const { mathScope, store } = helper.render();
+    await new Promise((resolve) => {
+      setTimeout(resolve);
+    });
     // initiall there is an error since the expr RHS contains "abc" which is not a param name or defined variable
     expect(mathScope.evalErrors.has(id("expr"))).toBe(true);
     const inputs = getParamNameInputs();

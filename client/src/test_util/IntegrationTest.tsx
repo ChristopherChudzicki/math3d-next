@@ -14,6 +14,14 @@ type StorePatch = Partial<{
   [k in keyof RootState]: Partial<RootState[k]>;
 }>;
 
+const mergeStoreStates = (state: RootState, patch: StorePatch) => {
+  const copy = { ...state };
+  if (patch.mathItems) {
+    copy.mathItems = { ...copy.mathItems, ...patch.mathItems };
+  }
+  return copy;
+};
+
 class IntegrationTest {
   private storePatch: StorePatch = {};
 
@@ -49,7 +57,7 @@ class IntegrationTest {
   };
 
   render = () => {
-    const state = { ...getInitialState() };
+    const state = mergeStoreStates(getInitialState(), this.storePatch);
     const store = getStore({ preloadedState: state });
     const { mathScope } = state.mathItems;
     const result = render(<App store={store} />);
