@@ -1,25 +1,19 @@
 import {
-  MathItem,
   MathItemConfig,
   MathItemType,
   PropertyConfig,
   WidgetType,
 } from "configs";
 import { filter as collectionFilter } from "lodash";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import MathScope, {
-  IdentifiedExpression,
-  OnChangeListener,
-} from "util/MathScope";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAppSelector } from "store/hooks";
+import MathScope, { OnChangeListener } from "util/MathScope";
+import { select } from "./mathItemsSlice";
 
-const MathContext = createContext(new MathScope());
+// TEMPORARY... moving this to redux store
+const useMathScope = (): MathScope => {
+  return useAppSelector(select.mathScope());
+};
 
 type EvaluationResultsSlice<K extends string> = Partial<Record<K, unknown>>;
 type EvaluationErrorsSlice<K extends string> = Partial<Record<K, Error>>;
@@ -59,11 +53,10 @@ export const mathScopeId = (itemId: string, propName: string) =>
   `${itemId}-${propName}`;
 
 const useMathResults = <K extends string>(
+  scope: MathScope,
   idPrefix: string,
   names: K[]
 ): EvaluationResultsSlice<K> => {
-  const scope = useContext(MathContext);
-
   const [resultsSlice, setResults] = useState<EvaluationResultsSlice<K>>({});
 
   const ids = useMemo(() => {
@@ -94,11 +87,10 @@ const useMathResults = <K extends string>(
 };
 
 const useMathErrors = <K extends string>(
+  scope: MathScope,
   idPrefix: string,
   names: readonly K[]
 ): EvaluationErrorsSlice<K> => {
-  const scope = useContext(MathContext);
-
   const [errorsSlice, setErrors] = useState<EvaluationErrorsSlice<K>>({});
 
   const ids = useMemo(() => {
@@ -142,40 +134,4 @@ const getMathProperties = <T extends MathItemType>(
 ): PropertyConfig<string>[] =>
   collectionFilter(config.properties, (p) => MATH_WIDGETS.has(p.widget));
 
-/**
- * Populate the mathscope with initial values based on item properties. Removes
- * expressions from scope on cleanup.
- */
-const usePopulateMathScope = <T extends MathItemType>(
-  item: MathItem<T>,
-  config: MathItemConfig<T>
-): void => {
-  const mathScope = useContext(MathContext);
-  useEffect(() => {
-    const mathProperties = getMathProperties(config);
-    const identifiedExpressions: IdentifiedExpression[] = mathProperties.map(
-      (prop) => {
-        return {
-          id: mathScopeId(item.id, prop.name),
-          // @ts-expect-error ... TS does not know config and item are correlated
-          expr: item.properties[prop.name],
-          parseOptions: { validate: prop.validate },
-        };
-      }
-    );
-    mathScope.setExpressions(identifiedExpressions);
-    return () => {
-      mathScope.deleteExpressions(identifiedExpressions.map(({ id }) => id));
-    };
-    // updating mathScope when properties change is done by the event handlers
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item.id, mathScope, config]);
-};
-
-export {
-  getMathProperties,
-  MathContext,
-  useMathErrors,
-  useMathResults,
-  usePopulateMathScope,
-};
+export { getMathProperties, useMathScope, useMathErrors, useMathResults };

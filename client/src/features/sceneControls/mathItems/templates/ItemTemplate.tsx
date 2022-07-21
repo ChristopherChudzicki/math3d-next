@@ -12,7 +12,6 @@ import { useAppDispatch, useAppSelector } from "store/hooks";
 import ColorStatus from "../ColorStatus";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { actions, select } from "../mathItemsSlice";
-import { usePopulateMathScope } from "../mathScope";
 import { testId } from "../util";
 import CloseButton from "./CloseButton";
 import styles from "./ItemTemplate.module.css";
@@ -34,7 +33,7 @@ const ItemTemplate = <T extends MIT>({
   showAlignmentBar = true,
 }: Props<T>) => {
   const onWidgetChange = useOnWidgetChange(item);
-  usePopulateMathScope(item, config);
+
   const dispatch = useAppDispatch();
   const isActive = useAppSelector(select.isActive(item.id));
   const remove = useCallback(() => {

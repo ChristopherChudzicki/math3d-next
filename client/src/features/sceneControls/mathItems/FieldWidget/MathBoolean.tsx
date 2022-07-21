@@ -1,12 +1,12 @@
 import { Switch, Tooltip } from "antd";
 import classNames from "classnames";
-import React, { useCallback, useContext, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { SubtleButton } from "util/components";
 import { OnMathFieldChange } from "util/components/MathLive";
 import SmallMathField from "util/components/SmallMathField";
 import { assertNotNil } from "util/predicates";
 
-import { MathContext, useMathResults } from "../mathScope";
+import { useMathResults, useMathScope } from "../mathScope";
 import { IWidgetProps } from "./types";
 import styles from "./widget.module.css";
 
@@ -21,14 +21,14 @@ const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
     !LITERAL_BOOLEAN_STRINGS.includes(value)
   );
 
-  const mathScope = useContext(MathContext);
+  const mathScope = useMathScope();
 
   const triggerChange = useCallback(
     (newValue: string) => {
-      const widgetChangeEvent = { name, value: newValue, mathScope };
+      const widgetChangeEvent = { name, value: newValue };
       onChange(widgetChangeEvent);
     },
-    [name, mathScope, onChange]
+    [name, onChange]
   );
 
   const handleChange: OnMathFieldChange = useCallback(
@@ -39,7 +39,7 @@ const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   );
 
   const names = useMemo(() => [name], [name]);
-  const result = !!useMathResults(itemId, names)[name];
+  const result = !!useMathResults(mathScope, itemId, names)[name];
 
   const handleSwitchChange = useCallback(
     (e: boolean) => triggerChange(e ? "true" : "false"),

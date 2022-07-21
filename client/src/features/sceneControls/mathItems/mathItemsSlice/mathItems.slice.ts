@@ -1,12 +1,19 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { mathItemConfigs } from "configs";
-import type { MathItem, MathItemPatch, MathItemType } from "configs";
+import { createSlice, PayloadAction, Draft, isDraft } from "@reduxjs/toolkit";
+import { mathItemConfigs, MathItemType } from "configs";
+import type { MathItem, MathItemPatch } from "configs";
 import { keyBy } from "lodash";
 import { assertNotNil } from "util/predicates";
+import MathScope from "util/MathScope";
 
+import { latexParser } from "util/parsing";
 import defaultScene from "../../defaultScene";
+import {
+  syncItemsToMathScope,
+  removeItemsFromMathScope,
+} from "./syncMathScope";
 
 interface MathItemsState {
+  mathScope: MathScope;
   items: {
     [id: string]: MathItem;
   };
@@ -14,38 +21,51 @@ interface MathItemsState {
   activeItemId: string | undefined;
 }
 
-const getInitialState = (): MathItemsState => ({
-  items: keyBy(defaultScene.items, (item) => item.id),
-  activeItemId: undefined,
-  order: defaultScene.itemOrder,
-});
+const getInitialState = (): MathItemsState => {
+  const { items } = defaultScene;
+  const mathScope = new MathScope({ parse: latexParser.parse });
+  syncItemsToMathScope(mathScope, items);
+  return {
+    mathScope,
+    items: keyBy(items, (item) => item.id),
+    activeItemId: undefined,
+    order: defaultScene.itemOrder,
+  };
+};
 
 const MAIN_FOLDER = "main";
-const getActiveFolderId = (state: MathItemsState, itemId?: string): string => {
+const getActiveFolderId = (
+  order: MathItemsState["order"],
+  itemId?: string
+): string => {
   if (itemId === undefined) {
-    const folderId = state.order[MAIN_FOLDER].at(-1);
+    const folderId = order[MAIN_FOLDER].at(-1);
     assertNotNil(folderId, "Main folder should have at least one child.");
     return folderId;
   }
   /**
    * If the item exists at tree root, then it's a folder.
    */
-  if (state.order[itemId]) return itemId;
-  const folderEntry = Object.entries(state.order).find(
-    ([_folderId, itemIds]) => {
-      return itemIds.includes(itemId);
-    }
-  );
+  if (order[itemId]) return itemId;
+  const folderEntry = Object.entries(order).find(([_folderId, itemIds]) => {
+    return itemIds.includes(itemId);
+  });
   assertNotNil(folderEntry, "Could not find active folder.");
   return folderEntry[0];
 };
-const getParent = (state: MathItemsState, itemId: string): string => {
-  const { order } = state;
+const getParent = (order: MathItemsState["order"], itemId: string): string => {
   const parentFolderId = Object.keys(order).find((folderId) => {
     return order[folderId].includes(itemId);
   });
   assertNotNil(parentFolderId, "could not find item parent");
   return parentFolderId;
+};
+
+const rawMathScope = (state: Draft<MathItemsState>) => {
+  if (isDraft(state.mathScope)) {
+    throw new Error("MathScope is not immerable");
+  }
+  return state.mathScope as MathScope;
 };
 
 const mathItemsSlice = createSlice({
@@ -64,7 +84,7 @@ const mathItemsSlice = createSlice({
       state.items[id] = item;
 
       const isFolder = type === MathItemType.Folder;
-      const activeFolderId = getActiveFolderId(state, state.activeItemId);
+      const activeFolderId = getActiveFolderId(state.order, state.activeItemId);
       const targetFolderId = isFolder ? MAIN_FOLDER : activeFolderId;
       const insertAfterId = isFolder ? activeFolderId : state.activeItemId;
       assertNotNil(targetFolderId);
@@ -79,19 +99,24 @@ const mathItemsSlice = createSlice({
         state.order[id] = [];
       }
       state.activeItemId = id;
+
+      syncItemsToMathScope(rawMathScope(state), [item]);
     },
     setActiveItem: (state, action: PayloadAction<{ id: string }>) => {
       state.activeItemId = action.payload.id;
     },
     remove: (state, action: PayloadAction<{ id: string }>) => {
       const { id } = action.payload;
+      const item = state.items[id];
       delete state.items[id];
 
       const { order } = state;
-      const parentFolderId = getParent(state, id);
+      const parentFolderId = getParent(state.order, id);
       order[parentFolderId] = order[parentFolderId].filter(
         (itemId) => itemId !== id
       );
+
+      removeItemsFromMathScope(rawMathScope(state), [item]);
     },
     setProperties: (
       state,
@@ -100,6 +125,9 @@ const mathItemsSlice = createSlice({
       const { id, properties: newProperties } = action.payload;
       const { properties: oldProperties } = state.items[id];
       state.items[id].properties = { ...oldProperties, ...newProperties };
+
+      const item = state.items[id];
+      syncItemsToMathScope(rawMathScope(state), [item]);
     },
   },
 });

@@ -9,19 +9,15 @@ import { createRoot } from "react-dom/client";
 
 import App from "./app";
 import { getStore } from "./store/store";
-import MathScope from "./util/MathScope";
-import { latexParser } from "./util/parsing";
 
 window.math = math;
-
-const mathScope = new MathScope({ parse: latexParser.parse });
-// @ts-expect-error assign to window for debugging
-window.mathScope = mathScope;
 
 const container = document.getElementById("root");
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const root = createRoot(container!);
 
 const store = getStore();
+// @ts-expect-error for debugging
+window.store = store;
 
-root.render(<App store={store} mathScope={mathScope} />);
+root.render(<App store={store} />);

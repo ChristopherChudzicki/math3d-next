@@ -77,8 +77,9 @@ type MathItems = {
 type MathItem<T extends MathItemType = MathItemType> = MathItems[T];
 type MathGraphic<T extends MathGraphicType = MathGraphicType> = MathItems[T];
 
-type MathItemPatch<T extends MathItemType> = {
+type MathItemPatch<T extends MathItemType = MathItemType> = {
   id: MathItem<T>["id"];
+  type: MathItem<T>["type"];
 } & { properties: Partial<MathItem<T>["properties"]> };
 
 const addableTypes = [

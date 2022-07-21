@@ -20,6 +20,13 @@ const getStore = ({ preloadedState }: ConfigureStoreOptions = {}) =>
       [mathItemsSlice.name]: mathItemsSlice.reducer,
     },
     preloadedState,
+    middleware: (getDefaultMiddleware) => {
+      return getDefaultMiddleware({
+        serializableCheck: {
+          ignoredPaths: ["mathItems.mathScope"],
+        },
+      });
+    },
   });
 
 type AppStore = ReturnType<typeof getStore>;

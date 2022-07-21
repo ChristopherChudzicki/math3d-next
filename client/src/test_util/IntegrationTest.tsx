@@ -10,8 +10,12 @@ import { getLatexParser } from "util/parsing";
 
 import App from "../app";
 
+type StorePatch = Partial<{
+  [k in keyof RootState]: Partial<RootState[k]>;
+}>;
+
 class IntegrationTest {
-  private storePatch: Partial<RootState> = {};
+  private storePatch: StorePatch = {};
 
   private hasRendered = false;
 
@@ -28,9 +32,8 @@ class IntegrationTest {
     this.assertNotRendered(
       "patchMathItemsInFolder cannot be called after initial render."
     );
-    const mathItemsPatch: RootState["mathItems"] = {
+    const mathItemsPatch: Partial<RootState["mathItems"]> = {
       items: keyBy([folder, ...items], (item) => item.id),
-      activeItemId: undefined,
       order: {
         main: [folder.id],
         [folder.id]: items.map((item) => item.id),
@@ -40,17 +43,16 @@ class IntegrationTest {
     this.storePatch.mathItems = mathItemsPatch;
   };
 
-  patchStore = (patch: Partial<RootState>) => {
+  patchStore = (patch: StorePatch) => {
     this.assertNotRendered("patchStore cannot be called after initial render.");
     this.storePatch = patch;
   };
 
   render = () => {
-    const state = { ...getInitialState(), ...this.storePatch };
+    const state = { ...getInitialState() };
     const store = getStore({ preloadedState: state });
-    const parser = getLatexParser();
-    const mathScope = new MathScope(parser);
-    const result = render(<App store={store} mathScope={mathScope} />);
+    const { mathScope } = state.mathItems;
+    const result = render(<App store={store} />);
     return { result, mathScope, store };
   };
 }

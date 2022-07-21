@@ -1,12 +1,11 @@
 import classNames from "classnames";
-import React, { useCallback, useContext } from "react";
+import React, { useCallback } from "react";
 import { OnMathFieldChange } from "util/components/MathLive";
 import SmallMathField from "util/components/SmallMathField";
 import { AssignmentError } from "util/MathScope/Evaluator";
 import { splitAtFirstEquality } from "util/parsing";
 import { ParseAssignmentLHSError } from "util/parsing/rules";
 
-import { MathContext } from "../mathScope";
 import ReadonlyMathField from "./ReadonlyMathField";
 import type { IWidgetProps, WidgetChangeEvent } from "./types";
 import ErrorTooltip from "./ErrorTooltip";
@@ -15,18 +14,16 @@ import style from "./widget.module.css";
 const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const { onChange, name, value, error, title, className, ...others } = props;
   const [lhs, rhs] = splitAtFirstEquality(value);
-  const mathScope = useContext(MathContext);
   const onChangeLHS: OnMathFieldChange = useCallback(
     (e) => {
       const newValue = [e.target.value, rhs].join("=");
       const event: WidgetChangeEvent = {
         name,
         value: newValue,
-        mathScope,
       };
       onChange(event);
     },
-    [rhs, onChange, name, mathScope]
+    [rhs, onChange, name]
   );
   const onChangeRHS: OnMathFieldChange = useCallback(
     (e) => {
@@ -34,11 +31,10 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
       const event: WidgetChangeEvent = {
         name,
         value: newValue,
-        mathScope,
       };
       onChange(event);
     },
-    [lhs, onChange, name, mathScope]
+    [lhs, onChange, name]
   );
 
   const hasLhsError =

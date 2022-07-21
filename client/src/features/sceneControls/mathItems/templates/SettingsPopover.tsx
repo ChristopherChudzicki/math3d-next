@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { SubtleButton } from "util/components";
 
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
-import { getMathProperties, useMathErrors } from "../mathScope";
+import { getMathProperties, useMathErrors, useMathScope } from "../mathScope";
 import CloseButton from "./CloseButton";
 import styles from "./SettingsPopover.module.css";
 
@@ -28,7 +28,8 @@ const SettingsForm = <T extends MathItemType>({
     () => getMathProperties(config).map((p) => p.name),
     [config]
   );
-  const errors = useMathErrors(item.id, mathPropNames);
+  const mathScope = useMathScope();
+  const errors = useMathErrors(mathScope, item.id, mathPropNames);
   const fields = useMemo(() => {
     return config.settingsProperties.map((name) => {
       // @ts-expect-error ts does not know name is correlated with properties

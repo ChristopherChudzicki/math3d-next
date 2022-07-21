@@ -1,5 +1,6 @@
 import type { SelectorReturn, RootState } from "store/store";
 import type { MathItem } from "configs";
+import MathScope from "util/MathScope";
 import type { MathItemsState } from "./mathItems.slice";
 
 const mathItems =
@@ -52,4 +53,7 @@ const isActive =
   (state: RootState) =>
     state.mathItems.activeItemId === id;
 
-export { subtree, isActive, mathItems, mathItem };
+const mathScope = (): SelectorReturn<MathScope> => (state: RootState) =>
+  state.mathItems.mathScope;
+
+export { subtree, isActive, mathItems, mathItem, mathScope };

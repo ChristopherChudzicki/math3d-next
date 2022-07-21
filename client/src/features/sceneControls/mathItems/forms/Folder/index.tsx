@@ -1,14 +1,14 @@
 import classNames from "classnames";
 import { DownOutlined } from "@ant-design/icons";
 import { mathItemConfigs as configs, MathItemType as MIT } from "configs";
-import React, { useCallback, useContext } from "react";
+import React, { useCallback } from "react";
 
 import { SubtleButton } from "util/components";
 import { positioning } from "util/styles";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
 import styles from "./Folder.module.css";
-import { MathContext, useMathResults } from "../../mathScope";
+import { useMathResults, useMathScope } from "../../mathScope";
 import { useOnWidgetChange } from "../../FieldWidget";
 import { WidgetChangeEvent } from "../../FieldWidget/types";
 
@@ -41,19 +41,18 @@ const FolderButton: React.FC<FolderButtonProps> = ({
 const EVALUATED_PROPS = ["isCollapsed"];
 
 const Folder: MathItemForm<MIT.Folder> = ({ item }) => {
-  const evaluated = useMathResults(item.id, EVALUATED_PROPS);
+  const mathScope = useMathScope();
+  const evaluated = useMathResults(mathScope, item.id, EVALUATED_PROPS);
   const isCollapsed = !!evaluated.isCollapsed;
-  const mathScope = useContext(MathContext);
   const onWidgetChange = useOnWidgetChange(item);
   const onClick = useCallback(() => {
     const value = String(!isCollapsed);
     const event: WidgetChangeEvent = {
       value,
       name: "isCollapsed",
-      mathScope,
     };
     onWidgetChange(event);
-  }, [isCollapsed, onWidgetChange, mathScope]);
+  }, [isCollapsed, onWidgetChange]);
   return (
     <ItemTemplate
       item={item}

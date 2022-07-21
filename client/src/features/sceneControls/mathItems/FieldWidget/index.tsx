@@ -1,16 +1,8 @@
-import {
-  MathItem,
-  mathItemConfigs,
-  MathItemType as MIT,
-  PropertyConfig,
-  WidgetType,
-} from "configs";
+import { MathItem, MathItemType as MIT, WidgetType } from "configs";
 import React, { useCallback } from "react";
 import { useAppDispatch } from "store/hooks";
-import { assertNotNil } from "util/predicates";
 
 import { actions } from "../mathItemsSlice";
-import { mathScopeId } from "../mathScope";
 import AutosizeText from "./AutosizeText";
 import ColorWidget from "./ColorWidget";
 import MathAssignment from "./MathAssignment";
@@ -66,23 +58,8 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
   const onWidgetChange: OnWidgetChange = useCallback(
     (e) => {
       const properties = { [e.name]: e.value };
-      const patch = { id: item.id, properties };
+      const patch = { id: item.id, properties, type: item.type };
       dispatch(actions.setProperties(patch));
-      if (e.mathScope) {
-        const config = mathItemConfigs[item.type];
-        // @ts-expect-error ... string can't index config.properties
-        const propConfig: PropertyConfig<string> = config.properties[e.name];
-        assertNotNil(propConfig, "Property config should not be nil.");
-        e.mathScope.setExpressions([
-          {
-            id: mathScopeId(item.id, e.name),
-            expr: e.value,
-            parseOptions: {
-              validate: propConfig.validate,
-            },
-          },
-        ]);
-      }
     },
     [dispatch, item.id, item.type]
   );

@@ -9,7 +9,7 @@ import React, { useMemo } from "react";
 
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";
-import { useMathErrors } from "../mathScope";
+import { useMathErrors, useMathScope } from "../mathScope";
 import ItemTemplate from "../templates/ItemTemplate";
 import {
   ParameterContainer,
@@ -42,7 +42,8 @@ const RangedMathItemForm = ({
     exprRef,
     paramNameErrors: paramErrors,
   } = useExpressionAndParameters(item.properties.expr, onWidgetChange);
-  const errors = useMathErrors(item.id, errorNames);
+  const mathScope = useMathScope();
+  const errors = useMathErrors(mathScope, item.id, errorNames);
 
   const onParamChanges = useMemo(
     () =>
