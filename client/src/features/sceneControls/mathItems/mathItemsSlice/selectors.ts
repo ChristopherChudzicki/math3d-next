@@ -54,6 +54,6 @@ const isActive =
     state.mathItems.activeItemId === id;
 
 const mathScope = (): SelectorReturn<MathScope> => (state: RootState) =>
-  state.mathItems.mathScope;
+  state.mathItems.mathScope();
 
 export { subtree, isActive, mathItems, mathItem, mathScope };

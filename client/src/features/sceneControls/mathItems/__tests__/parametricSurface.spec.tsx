@@ -17,7 +17,7 @@ const getParamNameInputs = (): HTMLTextAreaElement[] => {
   return [zeroth, first];
 };
 
-test.only.each([
+test.each([
   {
     expression: {
       initial: "_f(x,y)=[1+abc, 0, 0]",
@@ -29,17 +29,17 @@ test.only.each([
     ],
     param: { name: "abc", index: 0 },
   },
-  // {
-  //   expression: {
-  //     initial: "_f(x,y)=[1+abc, 0, 0]",
-  //     expectedFinal: "_f(x,abc)=[1+abc, 0, 0]",
-  //   },
-  //   evaluations: [
-  //     { parmaValues: [1, 0], expectedOutput: [1, 0, 0] },
-  //     { parmaValues: [0, 1], expectedOutput: [2, 0, 0] },
-  //   ],
-  //   param: { name: "abc", index: 1 },
-  // },
+  {
+    expression: {
+      initial: "_f(x,y)=[1+abc, 0, 0]",
+      expectedFinal: "_f(x,abc)=[1+abc, 0, 0]",
+    },
+    evaluations: [
+      { parmaValues: [1, 0], expectedOutput: [1, 0, 0] },
+      { parmaValues: [0, 1], expectedOutput: [2, 0, 0] },
+    ],
+    param: { name: "abc", index: 1 },
+  },
 ])(
   "Updating parameter names to valid values updates expression appropriately",
   async ({ expression, param, evaluations }) => {

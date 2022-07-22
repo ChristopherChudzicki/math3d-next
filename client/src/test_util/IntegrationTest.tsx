@@ -59,7 +59,7 @@ class IntegrationTest {
   render = () => {
     const state = mergeStoreStates(getInitialState(), this.storePatch);
     const store = getStore({ preloadedState: state });
-    const { mathScope } = state.mathItems;
+    const mathScope = state.mathItems.mathScope();
     const result = render(<App store={store} />);
     return { result, mathScope, store };
   };

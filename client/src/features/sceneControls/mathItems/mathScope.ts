@@ -10,7 +10,6 @@ import { useAppSelector } from "store/hooks";
 import MathScope, { OnChangeListener } from "util/MathScope";
 import { select } from "./mathItemsSlice";
 
-// TEMPORARY... moving this to redux store
 const useMathScope = (): MathScope => {
   return useAppSelector(select.mathScope());
 };

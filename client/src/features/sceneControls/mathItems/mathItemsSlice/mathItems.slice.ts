@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction, Draft, isDraft } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { mathItemConfigs, MathItemType } from "configs";
 import type { MathItem, MathItemPatch } from "configs";
 import { keyBy } from "lodash";
@@ -13,7 +13,7 @@ import {
 } from "./syncMathScope";
 
 interface MathItemsState {
-  mathScope: MathScope;
+  mathScope: () => MathScope;
   items: {
     [id: string]: MathItem;
   };
@@ -22,8 +22,9 @@ interface MathItemsState {
 }
 
 const getInitialState = (): MathItemsState => {
+  const mathScope = new MathScope({ parse: latexParser.parse });
   return {
-    mathScope: new MathScope({ parse: latexParser.parse }),
+    mathScope: () => mathScope,
     items: keyBy(defaultScene.items, (item) => item.id),
     activeItemId: undefined,
     order: defaultScene.itemOrder,
@@ -58,13 +59,6 @@ const getParent = (order: MathItemsState["order"], itemId: string): string => {
   return parentFolderId;
 };
 
-const rawMathScope = (state: Draft<MathItemsState>) => {
-  if (isDraft(state.mathScope)) {
-    throw new Error("MathScope is not immerable");
-  }
-  return state.mathScope as MathScope;
-};
-
 const mathItemsSlice = createSlice({
   name: "mathItems",
   initialState: getInitialState,
@@ -74,8 +68,7 @@ const mathItemsSlice = createSlice({
     },
     initializeMathScope: (state) => {
       const items = Object.values(state.items);
-      console.log(`Initializing ${items.length} items`);
-      syncItemsToMathScope(rawMathScope(state), items);
+      syncItemsToMathScope(state.mathScope(), items);
     },
     addNewItem: (
       state,
@@ -102,7 +95,7 @@ const mathItemsSlice = createSlice({
       }
       state.activeItemId = id;
 
-      syncItemsToMathScope(rawMathScope(state), [item]);
+      syncItemsToMathScope(state.mathScope(), [item]);
     },
     setActiveItem: (state, action: PayloadAction<{ id: string }>) => {
       state.activeItemId = action.payload.id;
@@ -118,7 +111,7 @@ const mathItemsSlice = createSlice({
         (itemId) => itemId !== id
       );
 
-      removeItemsFromMathScope(rawMathScope(state), [item]);
+      removeItemsFromMathScope(state.mathScope(), [item]);
     },
     setProperties: (
       state,
@@ -129,7 +122,7 @@ const mathItemsSlice = createSlice({
       state.items[id].properties = { ...oldProperties, ...newProperties };
 
       const item = state.items[id];
-      syncItemsToMathScope(rawMathScope(state), [item]);
+      syncItemsToMathScope(state.mathScope(), [item]);
     },
   },
 });
