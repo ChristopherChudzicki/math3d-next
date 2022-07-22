@@ -11,8 +11,7 @@ import { useAppDispatch, useAppSelector } from "store/hooks";
 
 import ColorStatus from "../ColorStatus";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
-import { actions, selectIsActive } from "../mathItems.slice";
-import { usePopulateMathScope } from "../mathScope";
+import { actions, select } from "../mathItemsSlice";
 import { testId } from "../util";
 import CloseButton from "./CloseButton";
 import styles from "./ItemTemplate.module.css";
@@ -34,9 +33,9 @@ const ItemTemplate = <T extends MIT>({
   showAlignmentBar = true,
 }: Props<T>) => {
   const onWidgetChange = useOnWidgetChange(item);
-  usePopulateMathScope(item, config);
+
   const dispatch = useAppDispatch();
-  const isActive = useAppSelector(selectIsActive(item.id));
+  const isActive = useAppSelector(select.isActive(item.id));
   const remove = useCallback(() => {
     dispatch(actions.remove({ id: item.id }));
   }, [dispatch, item.id]);
@@ -76,9 +75,7 @@ const ItemTemplate = <T extends MIT>({
           onChange={onWidgetChange}
         />
       </div>
-      <div className={classNames(styles["grid-center-bottom"], "pb-2")}>
-        {children}
-      </div>
+      <div className={styles["grid-center-bottom"]}>{children}</div>
       <div
         className={classNames(
           styles["grid-right-gutter-top"],

@@ -50,4 +50,4 @@ const MathItemComponent = <T extends MIT>(props: Props<T>) => {
   return <Component item={props.item} />;
 };
 
-export default MathItemComponent;
+export default React.memo(MathItemComponent);

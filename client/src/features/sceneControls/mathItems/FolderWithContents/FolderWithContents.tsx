@@ -6,6 +6,7 @@ import { useCollapsible } from "util/hooks";
 import MathItemComponent from "../MathItem";
 import { useMathResults } from "../mathScope";
 import style from "./FolderWithContents.module.css";
+import { useMathScope } from "../mathItemsSlice";
 
 interface Props {
   folder: MathItem<MathItemType.Folder>;
@@ -20,7 +21,8 @@ const FolderWithContents: React.FC<Props> = ({
   items,
   contentsClassName,
 }) => {
-  const evaluated = useMathResults(folder.id, EVALUATED_PROPS);
+  const mathScope = useMathScope();
+  const evaluated = useMathResults(mathScope, folder.id, EVALUATED_PROPS);
   const isOpen = !evaluated.isCollapsed;
   const hasEvaluated = evaluated.isCollapsed !== undefined;
   const collapseRef = useCollapsible(isOpen);

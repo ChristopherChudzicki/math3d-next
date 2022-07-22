@@ -1,5 +1,4 @@
 import React from "react";
-import MathScope from "util/MathScope";
 
 interface IWidgetProps {
   /**
@@ -20,7 +19,6 @@ interface IWidgetProps {
 interface WidgetChangeEvent {
   name: string;
   value: string;
-  mathScope?: MathScope;
 }
 type OnWidgetChange = (e: WidgetChangeEvent) => void;
 

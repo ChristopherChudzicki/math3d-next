@@ -6,6 +6,7 @@ import ColorPicker, { OnColorChange } from "util/components/ColorPicker";
 
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";
+import { useMathScope } from "../mathItemsSlice";
 import { useMathErrors } from "../mathScope";
 
 const { TabPane } = Tabs;
@@ -29,7 +30,8 @@ const COLOR_EXPR = ["colorExpr"] as const;
 
 const ColorExprInput: React.FC<ColorExprProps> = (props) => {
   const { onChange, item } = props;
-  const { colorExpr } = useMathErrors(item.id, COLOR_EXPR);
+  const mathScope = useMathScope();
+  const { colorExpr } = useMathErrors(mathScope, item.id, COLOR_EXPR);
   return (
     <div>
       <FieldWidget

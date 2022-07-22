@@ -10,8 +10,8 @@ import ControlTabs from "./controlTabs";
 import {
   FolderWithContents,
   mathItemsSlice,
-  selectMathItems,
-  selectSubtree,
+  select,
+  actions,
 } from "./mathItems";
 import style from "./SceneControls.module.css";
 
@@ -30,8 +30,12 @@ const AxesNav: React.FC = () => (
 );
 
 const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
-  const { children = [] } = useAppSelector(selectSubtree(rootId));
-  const mathItems = useAppSelector(selectMathItems());
+  const { children = [] } = useAppSelector(select.subtree(rootId));
+  const mathItems = useAppSelector(select.mathItems());
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    dispatch(actions.initializeMathScope());
+  }, [dispatch]);
   return (
     <>
       {children.map((folder, folderIndex) => {

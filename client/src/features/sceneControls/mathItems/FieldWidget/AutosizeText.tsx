@@ -1,15 +1,13 @@
 import classNames from "classnames";
-import React, { useCallback, useContext } from "react";
+import React, { useCallback } from "react";
 import { TextareaAutoWidthHeight } from "util/components";
 
-import { MathContext } from "../mathScope";
 import { IWidgetProps, WidgetChangeEvent } from "./types";
 import styles from "./widget.module.css";
 
 const EXTRA_WIDTH = 20;
 
 const AutosizeText: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const mathScope = useContext(MathContext);
   const { onChange, name, title, error, itemId, style = {}, ...others } = props;
   const { width, height, ...styleWithoutSize } = style;
   const onInputChange: React.ChangeEventHandler<HTMLTextAreaElement> =
@@ -18,11 +16,10 @@ const AutosizeText: React.FC<IWidgetProps> = (props: IWidgetProps) => {
         const event: WidgetChangeEvent = {
           name,
           value: e.target.value,
-          mathScope,
         };
         onChange(event);
       },
-      [onChange, name, mathScope]
+      [onChange, name]
     );
   return (
     <TextareaAutoWidthHeight

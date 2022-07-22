@@ -1,11 +1,13 @@
 import { render } from "@testing-library/react";
-import React, { useEffect } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import { act } from "react-dom/test-utils";
 import MathScope, { UnmetDependencyError } from "util/MathScope";
 import { CyclicAssignmentError } from "util/MathScope/Evaluator";
 import { assertNotNil } from "util/predicates";
 
-import { MathContext, useMathErrors, useMathResults } from "./mathScope";
+import { useMathErrors, useMathResults } from "./mathScope";
+
+const TestMathContext = createContext(new MathScope());
 
 type Errors = Record<string, Error>;
 
@@ -22,7 +24,8 @@ const TestResults: React.FC<TestResultsProps> = ({
   prefix,
   onRender,
 }) => {
-  const results = useMathResults(prefix, names);
+  const mathScope = useContext(TestMathContext);
+  const results = useMathResults(mathScope, prefix, names);
   useEffect(() => {
     onRender(results as Results);
   });
@@ -34,7 +37,8 @@ interface TestErrorsProps {
   onRender: (results: Errors) => void;
 }
 const TestErrors: React.FC<TestErrorsProps> = ({ names, prefix, onRender }) => {
-  const errors = useMathErrors(prefix, names);
+  const mathScope = useContext(TestMathContext);
+  const errors = useMathErrors(mathScope, prefix, names);
   useEffect(() => {
     onRender(errors as Errors);
   });
@@ -53,7 +57,7 @@ describe("useMathResults and useMathErrors", () => {
       errors: 0,
     };
     render(
-      <MathContext.Provider value={mathScope}>
+      <TestMathContext.Provider value={mathScope}>
         <TestResults
           prefix={prefix}
           names={names}
@@ -70,7 +74,7 @@ describe("useMathResults and useMathErrors", () => {
             errorsSlice.current = slice;
           }}
         />
-      </MathContext.Provider>
+      </TestMathContext.Provider>
     );
     assertNotNil(resultsSlice.current);
     assertNotNil(errorsSlice.current);

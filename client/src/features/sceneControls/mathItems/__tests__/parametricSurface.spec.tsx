@@ -48,6 +48,9 @@ test.each([
     const helper = new IntegrationTest();
     helper.patchMathItemsInFolder([item]);
     const { mathScope, store } = helper.render();
+    await new Promise((resolve) => {
+      setTimeout(resolve);
+    });
     // initiall there is an error since the expr RHS contains "abc" which is not a param name or defined variable
     expect(mathScope.evalErrors.has(id("expr"))).toBe(true);
     const inputs = getParamNameInputs();

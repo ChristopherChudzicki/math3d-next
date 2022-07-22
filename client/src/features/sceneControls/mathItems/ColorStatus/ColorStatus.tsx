@@ -2,14 +2,15 @@ import { Popover } from "antd";
 import classNames from "classnames";
 import { MathGraphic } from "configs";
 import { colorsAndGradients, makeColorConfig } from "configs/colors";
-import React, { useCallback, useContext, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useToggle } from "util/hooks";
 import { useLongAndShortPress } from "util/hooks/useLongAndShortPress";
 
 import { positioning } from "util/styles";
 import { useOnWidgetChange } from "../FieldWidget";
 import { WidgetChangeEvent } from "../FieldWidget/types";
-import { MathContext, useMathResults } from "../mathScope";
+import { useMathScope } from "../mathItemsSlice";
+import { useMathResults } from "../mathScope";
 import ColorDialog from "./ColorDialog";
 import styles from "./ColorStatus.module.css";
 
@@ -28,8 +29,8 @@ const ColorStatus: React.FC<Props> = (props) => {
   const { item } = props;
   const [dialogVisible, setDialogVisible] = useToggle(false);
   const { color } = item.properties;
-  const mathScope = useContext(MathContext);
-  const results = useMathResults(item.id, VISIBLE);
+  const mathScope = useMathScope();
+  const results = useMathResults(mathScope, item.id, VISIBLE);
   const onChange = useOnWidgetChange(item);
   const visible = !!results.visible;
   const colorAndStyle = useMemo(() => getColor(color), [color]);
@@ -54,11 +55,10 @@ const ColorStatus: React.FC<Props> = (props) => {
     if (lastPressWasLong()) return;
     const event: WidgetChangeEvent = {
       name: "visible",
-      mathScope,
       value: `${!visible}`,
     };
     onChange(event);
-  }, [visible, onChange, mathScope, lastPressWasLong]);
+  }, [visible, onChange, lastPressWasLong]);
 
   return (
     <Popover

@@ -1,16 +1,10 @@
-import React, {
-  MutableRefObject,
-  useCallback,
-  useContext,
-  useRef,
-  useState,
-} from "react";
+import React, { MutableRefObject, useCallback, useRef, useState } from "react";
 import { getParameters, latexParser, splitAtFirstEquality } from "util/parsing";
 import { assertInstanceOf } from "util/predicates";
 
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import { OnWidgetChange } from "../FieldWidget/types";
-import { MathContext } from "../mathScope";
+import { useMathScope } from "../mathItemsSlice";
 import styles from "./ItemForms.module.css";
 
 interface ParameterContainerProps {
@@ -93,7 +87,7 @@ const useExpressionAndParameters = (
    */
   paramNameErrors: Record<number, Error>;
 } => {
-  const mathScope = useContext(MathContext);
+  const mathScope = useMathScope();
   const [paramErrors, setParamErrors] = useState<Record<number, Error>>({});
   const exprRef: MutableRefObject<ExprData> = useRef({
     rhs: splitAtFirstEquality(initialExpr)[1],

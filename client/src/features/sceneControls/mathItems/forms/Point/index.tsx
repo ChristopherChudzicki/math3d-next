@@ -6,6 +6,7 @@ import {
 import React from "react";
 
 import FieldWidget, { useOnWidgetChange } from "../../FieldWidget";
+import { useMathScope } from "../../mathItemsSlice";
 import { useMathErrors } from "../../mathScope";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
@@ -18,7 +19,8 @@ const configProps = config.properties;
 
 const Point: MathItemForm<MIT.Point> = ({ item }) => {
   const onWidgetChange = useOnWidgetChange(item);
-  const errors = useMathErrors(item.id, errorNames);
+  const mathScope = useMathScope();
+  const errors = useMathErrors(mathScope, item.id, errorNames);
   return (
     <ItemTemplate item={item} config={config}>
       <FieldWidget
