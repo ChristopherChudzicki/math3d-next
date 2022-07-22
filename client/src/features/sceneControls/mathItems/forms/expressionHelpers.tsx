@@ -4,7 +4,7 @@ import { assertInstanceOf } from "util/predicates";
 
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import { OnWidgetChange } from "../FieldWidget/types";
-import { useMathScope } from "../mathScope";
+import { useMathScope } from "../mathItemsSlice";
 import styles from "./ItemForms.module.css";
 
 interface ParameterContainerProps {

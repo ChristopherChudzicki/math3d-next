@@ -5,8 +5,9 @@ import { SubtleButton } from "util/components";
 import { OnMathFieldChange } from "util/components/MathLive";
 import SmallMathField from "util/components/SmallMathField";
 import { assertNotNil } from "util/predicates";
+import { useMathScope } from "../mathItemsSlice";
 
-import { useMathResults, useMathScope } from "../mathScope";
+import { useMathResults } from "../mathScope";
 import { IWidgetProps } from "./types";
 import styles from "./widget.module.css";
 

@@ -6,13 +6,7 @@ import {
 } from "configs";
 import { filter as collectionFilter } from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAppSelector } from "store/hooks";
 import MathScope, { OnChangeListener } from "util/MathScope";
-import { select } from "./mathItemsSlice";
-
-const useMathScope = (): MathScope => {
-  return useAppSelector(select.mathScope());
-};
 
 type EvaluationResultsSlice<K extends string> = Partial<Record<K, unknown>>;
 type EvaluationErrorsSlice<K extends string> = Partial<Record<K, Error>>;
@@ -133,4 +127,4 @@ const getMathProperties = <T extends MathItemType>(
 ): PropertyConfig<string>[] =>
   collectionFilter(config.properties, (p) => MATH_WIDGETS.has(p.widget));
 
-export { getMathProperties, useMathScope, useMathErrors, useMathResults };
+export { getMathProperties, useMathErrors, useMathResults };

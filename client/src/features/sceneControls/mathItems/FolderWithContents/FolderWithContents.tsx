@@ -4,8 +4,9 @@ import { MathItem, MathItemType } from "configs";
 import classNames from "classnames";
 import { useCollapsible } from "util/hooks";
 import MathItemComponent from "../MathItem";
-import { useMathResults, useMathScope } from "../mathScope";
+import { useMathResults } from "../mathScope";
 import style from "./FolderWithContents.module.css";
+import { useMathScope } from "../mathItemsSlice";
 
 interface Props {
   folder: MathItem<MathItemType.Folder>;

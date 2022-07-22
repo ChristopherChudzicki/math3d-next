@@ -2,7 +2,8 @@ import { mathItemConfigs as configs, MathItemType as MIT } from "configs";
 import React from "react";
 
 import { MathAssignment, useOnWidgetChange } from "../../FieldWidget";
-import { useMathErrors, useMathScope } from "../../mathScope";
+import { useMathScope } from "../../mathItemsSlice";
+import { useMathErrors } from "../../mathScope";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
 

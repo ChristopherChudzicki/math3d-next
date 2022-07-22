@@ -9,7 +9,8 @@ import React, { useMemo } from "react";
 
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";
-import { useMathErrors, useMathScope } from "../mathScope";
+import { useMathScope } from "../mathItemsSlice";
+import { useMathErrors } from "../mathScope";
 import ItemTemplate from "../templates/ItemTemplate";
 import {
   ParameterContainer,

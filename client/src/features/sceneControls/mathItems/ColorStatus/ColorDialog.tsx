@@ -6,7 +6,8 @@ import ColorPicker, { OnColorChange } from "util/components/ColorPicker";
 
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";
-import { useMathErrors, useMathScope } from "../mathScope";
+import { useMathScope } from "../mathItemsSlice";
+import { useMathErrors } from "../mathScope";
 
 const { TabPane } = Tabs;
 

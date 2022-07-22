@@ -9,7 +9,8 @@ import { useLongAndShortPress } from "util/hooks/useLongAndShortPress";
 import { positioning } from "util/styles";
 import { useOnWidgetChange } from "../FieldWidget";
 import { WidgetChangeEvent } from "../FieldWidget/types";
-import { useMathResults, useMathScope } from "../mathScope";
+import { useMathScope } from "../mathItemsSlice";
+import { useMathResults } from "../mathScope";
 import ColorDialog from "./ColorDialog";
 import styles from "./ColorStatus.module.css";
 

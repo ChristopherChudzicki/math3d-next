@@ -8,9 +8,10 @@ import { positioning } from "util/styles";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
 import styles from "./Folder.module.css";
-import { useMathResults, useMathScope } from "../../mathScope";
+import { useMathResults } from "../../mathScope";
 import { useOnWidgetChange } from "../../FieldWidget";
 import { WidgetChangeEvent } from "../../FieldWidget/types";
+import { useMathScope } from "../../mathItemsSlice";
 
 interface FolderButtonProps {
   onClick: React.MouseEventHandler;

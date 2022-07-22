@@ -10,7 +10,8 @@ import React, { useCallback, useMemo, useState } from "react";
 import { SubtleButton } from "util/components";
 
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
-import { getMathProperties, useMathErrors, useMathScope } from "../mathScope";
+import { useMathScope } from "../mathItemsSlice";
+import { getMathProperties, useMathErrors } from "../mathScope";
 import CloseButton from "./CloseButton";
 import styles from "./SettingsPopover.module.css";
 
