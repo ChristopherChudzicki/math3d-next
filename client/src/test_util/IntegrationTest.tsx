@@ -5,8 +5,6 @@ import React from "react";
 import { getInitialState, getStore } from "store/store";
 import type { RootState } from "store/store";
 import { makeItem } from "test_util";
-import MathScope from "util/MathScope";
-import { getLatexParser } from "util/parsing";
 
 import App from "../app";
 
