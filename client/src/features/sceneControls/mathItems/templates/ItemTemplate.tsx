@@ -75,9 +75,7 @@ const ItemTemplate = <T extends MIT>({
           onChange={onWidgetChange}
         />
       </div>
-      <div className={classNames(styles["grid-center-bottom"], "pb-2")}>
-        {children}
-      </div>
+      <div className={styles["grid-center-bottom"]}>{children}</div>
       <div
         className={classNames(
           styles["grid-right-gutter-top"],
