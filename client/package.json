@@ -30,7 +30,7 @@
     "@reduxjs/toolkit": "1.8.3",
     "antd": "4.21.7",
     "bootstrap": "5.2.0",
-    "bootstrap-icons": "1.9.0",
+    "bootstrap-icons": "1.9.1",
     "classnames": "2.3.1",
     "lodash": "4.17.21",
     "mathjs": "11.0.0",
