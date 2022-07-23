@@ -1,6 +1,11 @@
 import { IntegrationTest, screen, user, within } from "test_util";
 import _ from "lodash";
-import { addItem, getItemByDescription, folderFixture } from "./utils";
+import {
+  addItem,
+  clickRemoveItem,
+  getItemByDescription,
+  folderFixture,
+} from "./utils";
 
 test("setup renders 9 points in 3 folders", async () => {
   const helper = new IntegrationTest();
@@ -99,5 +104,30 @@ test("Newly inserted item is activated", async () => {
 
   const expected = "F1 P1a P1b F2 P2a Point Line P2b F3 P3a P3b";
   expect(descriptions).toHaveLength(11);
+  expect(descriptions).toStrictEqual(expected.split(" "));
+});
+
+test("Inserting items after deletion---active item resets", async () => {
+  const helper = new IntegrationTest();
+  helper.patchStore(folderFixture());
+  helper.render();
+  const p2b = getItemByDescription("P2b");
+  const description = within(p2b).getByTitle("Description");
+  await user.click(description);
+  await clickRemoveItem(p2b);
+  await addItem("Line");
+  const line = getItemByDescription("Line");
+  expect(line).toBeDefined();
+
+  const descriptions = screen
+    .getAllByTitle("Description")
+    .map((x) => x.textContent);
+
+  /**
+   * P2b was active, but then we removed it.
+   * ActiveItem should reset, so Line should be at the bottom of the last folder
+   */
+  const expected = "F1 P1a P1b F2 P2a F3 P3a P3b Line";
+  expect(descriptions).toHaveLength(9);
   expect(descriptions).toStrictEqual(expected.split(" "));
 });

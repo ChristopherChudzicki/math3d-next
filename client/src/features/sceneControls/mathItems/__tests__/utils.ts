@@ -1,18 +1,22 @@
 import { MathItemType as MIT, MathItem } from "configs";
 import { keyBy } from "lodash";
-import { RootState } from "store/store";
-import { screen, within, user, makeItem } from "test_util";
+import { screen, within, user, makeItem, StatePatch } from "test_util";
 
-const addItem = async (itemLabel: string): Promise<void> => {
+const addItem = async (itemTypeLabel: string): Promise<void> => {
   const addNewItemButton = screen.getByText("Add New Object");
   await user.click(addNewItemButton);
   const menu = await screen.findByRole("menu");
-  const itemType = await within(menu).findByText(itemLabel);
+  const itemType = await within(menu).findByText(itemTypeLabel);
   await user.click(itemType);
 };
 
 const getItemByDescription = (description: string): HTMLElement =>
   screen.getByTitle(`Settings for ${description}`);
+
+const clickRemoveItem = async (itemElement: HTMLElement): Promise<void> => {
+  const remove = within(itemElement).getByLabelText("Remove Item");
+  await user.click(remove);
+};
 
 /**
  * Creates a store patch with 6 points distributed between 3 folders
@@ -30,7 +34,7 @@ const folderFixture = ({
   F1?: Partial<MathItem<MIT.Folder>["properties"]>;
   F2?: Partial<MathItem<MIT.Folder>["properties"]>;
   F3?: Partial<MathItem<MIT.Folder>["properties"]>;
-} = {}): Partial<RootState> => {
+} = {}): StatePatch => {
   const folderProps = { F1, F2, F3 };
   const pointDescriptions = ["P1a", "P1b", "P2a", "P2b", "P3a", "P3b"];
   const folderDescriptions = ["F1", "F2", "F3"] as const;
@@ -68,4 +72,4 @@ const folderFixture = ({
   };
 };
 
-export { addItem, getItemByDescription, folderFixture };
+export { addItem, clickRemoveItem, getItemByDescription, folderFixture };
