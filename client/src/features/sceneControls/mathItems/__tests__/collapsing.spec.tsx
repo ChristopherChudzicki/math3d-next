@@ -1,6 +1,6 @@
 import { IntegrationTest, screen, user, within } from "test_util";
 import _ from "lodash";
-import { folderFixture, getItemByDescription } from "./utils";
+import { addItem, folderFixture, getItemByDescription } from "./utils";
 
 /**
  * Detect whether an element or one of its ancestors is hidden based on its
@@ -15,6 +15,9 @@ const isHidden = (el: HTMLElement | null): boolean => {
   }
   return isHidden(el.parentElement);
 };
+
+const getExpandCollapse = (folderElement: HTMLElement) =>
+  within(folderElement).getByLabelText("Expand/Collapse Folder");
 
 test.each([
   { isCollapsed: "false", expectHidden: false, adjective: "visible" },
@@ -41,7 +44,7 @@ test("Collapsing and expanding folders", async () => {
   expect(els[4]).toBeVisible();
 
   const folder = getItemByDescription("F2");
-  const toggle = within(folder).getByLabelText("Expand/Collapse Folder");
+  const toggle = getExpandCollapse(folder);
 
   expect(isHidden(getItemByDescription("P2a"))).toBe(true);
   expect(isHidden(getItemByDescription("P2b"))).toBe(true);
@@ -55,4 +58,30 @@ test("Collapsing and expanding folders", async () => {
 
   expect(isHidden(getItemByDescription("P2a"))).toBe(true);
   expect(isHidden(getItemByDescription("P2b"))).toBe(true);
+});
+
+test("Inserting into a collapsed folder expands the folder", async () => {
+  const helper = new IntegrationTest();
+  helper.patchStore(folderFixture());
+  helper.render();
+
+  const folder = getItemByDescription("F2");
+  const toggle = getExpandCollapse(folder);
+  await user.click(toggle);
+
+  expect(isHidden(getItemByDescription("P2a"))).toBe(true);
+  expect(isHidden(getItemByDescription("P2b"))).toBe(true);
+
+  await addItem("Point");
+  const descriptions = screen
+    .getAllByTitle("Description")
+    .map((x) => x.textContent);
+
+  const expected = "F1 P1a P1b F2 P2a P2b Point F3 P3a P3b";
+  expect(descriptions).toHaveLength(10);
+  expect(descriptions).toStrictEqual(expected.split(" "));
+
+  expect(isHidden(getItemByDescription("P2a"))).toBe(false);
+  expect(isHidden(getItemByDescription("P2b"))).toBe(false);
+  expect(isHidden(getItemByDescription("Point"))).toBe(false);
 });

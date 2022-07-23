@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { mathItemConfigs, MathItemType } from "configs";
 import type { MathItem, MathItemPatch } from "configs";
 import { keyBy } from "lodash";
-import { assertNotNil } from "util/predicates";
+import { assertIsMathItemType, assertNotNil } from "util/predicates";
 import MathScope from "util/MathScope";
 
 import { latexParser } from "util/parsing";
@@ -100,6 +100,12 @@ const mathItemsSlice = createSlice({
       state.order[targetFolderId].splice(insertionIndex, 0, id);
       if (isFolder) {
         state.order[id] = [];
+      }
+      if (state.items[targetFolderId]) {
+        const folder = state.items[targetFolderId];
+        assertIsMathItemType(folder.type, MathItemType.Folder);
+        folder.properties.isCollapsed = "false";
+        syncItemsToMathScope(state.mathScope(), [folder]);
       }
       state.activeItemId = id;
 
