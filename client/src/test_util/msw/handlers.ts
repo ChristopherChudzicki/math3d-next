@@ -1,8 +1,17 @@
-import { rest } from "msw";
+import type { RestHandler } from "msw";
+import db from "./db";
 
-export const handlers = [
-  rest.get("/scene/:id", (req, res, ctx) => {
-    console.log(req.params);
-    return res(ctx.status(200), ctx.json({ scene: "cat" }));
-  }),
-];
+type HandlerInfo = Pick<RestHandler["info"], "method" | "path">;
+
+const handlerKey = (info: HandlerInfo) =>
+  JSON.stringify([info.method, info.path]);
+const filterHandlers = (handlers: RestHandler[], infos: HandlerInfo[]) => {
+  const keep = new Set(infos.map(handlerKey));
+  return handlers.filter((h) => keep.has(handlerKey(h.info)));
+};
+
+const sceneHandlers = filterHandlers(db.scene.toHandlers("rest"), [
+  { method: "GET", path: "/scenes/:id" },
+]);
+
+export const handlers = [...sceneHandlers];
