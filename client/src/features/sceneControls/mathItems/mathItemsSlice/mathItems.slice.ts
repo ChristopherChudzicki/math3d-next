@@ -119,6 +119,10 @@ const mathItemsSlice = createSlice({
         (itemId) => itemId !== id
       );
 
+      if (state.activeItemId === id) {
+        state.activeItemId = undefined;
+      }
+
       removeItemsFromMathScope(state.mathScope(), [item]);
     },
     setProperties: (
