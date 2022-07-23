@@ -10,6 +10,12 @@ import { createRoot } from "react-dom/client";
 import App from "./app";
 import { getStore } from "./store/store";
 
+if (process.env.NODE_ENV === "development") {
+  // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+  const { worker } = require("./test_util/msw/browser");
+  worker.start();
+}
+
 window.math = math;
 
 const container = document.getElementById("root");

@@ -1,6 +1,6 @@
 import { IntegrationTest, screen, user, within } from "test_util";
 import _ from "lodash";
-import { addItem, folderFixture, getItemByDescription } from "./utils";
+import { addItem, folderFixture, getItemByDescription } from "./__utils__";
 
 /**
  * Detect whether an element or one of its ancestors is hidden based on its

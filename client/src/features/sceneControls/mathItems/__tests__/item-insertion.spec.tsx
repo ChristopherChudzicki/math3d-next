@@ -5,7 +5,7 @@ import {
   clickRemoveItem,
   getItemByDescription,
   folderFixture,
-} from "./utils";
+} from "./__utils__";
 
 test("setup renders 9 points in 3 folders", async () => {
   const helper = new IntegrationTest();
