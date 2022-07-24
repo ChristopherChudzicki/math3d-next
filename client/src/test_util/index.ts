@@ -11,9 +11,13 @@ import { makeItem } from "features/sceneControls/mathItems/util";
 
 import IntegrationTest from "./IntegrationTest";
 import patchConsoleError from "./patchConsoleError";
+import { seedDb } from "./msw/db";
+import { sceneIds } from "./msw/fixtures";
 
 export * from "./test_util";
 export {
+  seedDb,
+  sceneIds,
   act,
   fireEvent,
   IntegrationTest,

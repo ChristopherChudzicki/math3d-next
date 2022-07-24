@@ -1,3 +1,4 @@
+import { seedDb } from "test_util";
 import { server } from "./test_util/msw/server";
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
@@ -23,6 +24,9 @@ jest.mock("./util/components/TextareaAutoWidthHeight/TextMeasurer");
  * API mocking for our tests.
  * Reset any test-specific handlers between tests.
  */
-beforeAll(() => server.listen());
+beforeAll(() => {
+  server.listen();
+  seedDb.withFixtures();
+});
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());

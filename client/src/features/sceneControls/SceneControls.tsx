@@ -7,6 +7,7 @@ import { assertIsMathItemType } from "util/predicates";
 
 import AddObjectButton from "./AddObjectButton";
 import ControlTabs from "./controlTabs";
+import defaultScene from "./defaultScene";
 import {
   FolderWithContents,
   mathItemsSlice,
@@ -62,15 +63,22 @@ const SceneControls: React.FC<Props> = (props) => {
   const { sceneId } = props;
   const dispatch = useAppDispatch();
 
+  /**
+   * TODO: Remove this check after updating tests to use msw
+   */
+  const items = useAppSelector(select.mathItems());
+  const hasItems = Object.keys(items).length > 0;
+
   useEffect(() => {
-    const loadScene = async (id: string) => {
-      const scene = await getScene(id);
-      dispatch(itemActions.addItems({ items: scene.items }));
+    const loadScene = async () => {
+      const scene = sceneId ? await getScene(sceneId) : defaultScene;
+      const payload = { items: scene.items, order: scene.itemOrder };
+      dispatch(itemActions.setItems(payload));
     };
-    if (sceneId) {
-      loadScene(sceneId);
+    if (!hasItems) {
+      loadScene();
     }
-  }, [dispatch, sceneId]);
+  }, [dispatch, sceneId, hasItems]);
   return (
     <ControlTabs
       tabBarExtraContent={<AddObjectButton />}
