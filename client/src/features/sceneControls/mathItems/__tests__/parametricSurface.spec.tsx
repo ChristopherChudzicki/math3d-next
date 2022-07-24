@@ -47,7 +47,9 @@ test.each([
     const id = nodeId(item);
     const helper = new IntegrationTest();
     helper.patchMathItemsInFolder([item]);
-    const { mathScope, store } = helper.render();
+    const { store } = helper.render();
+
+    const mathScope = store.getState().mathItems.mathScope();
     await new Promise((resolve) => {
       setTimeout(resolve);
     });
@@ -97,8 +99,9 @@ test.each([
     const id = nodeId(item);
     const helper = new IntegrationTest();
     helper.patchMathItemsInFolder([item]);
-    const { mathScope, store } = helper.render();
+    const { store } = helper.render();
 
+    const mathScope = store.getState().mathItems.mathScope();
     const inputs = getParamNameInputs();
     await user.type(inputs[param.index], param.name);
 

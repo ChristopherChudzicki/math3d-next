@@ -28,7 +28,9 @@ const setup = async (initialValue: string) => {
   const point = makeItem(MIT.Point, { visible: initialValue });
   const id = nodeId(point);
   helper.patchMathItemsInFolder([point]);
-  const { mathScope } = helper.render();
+  const { store } = helper.render();
+
+  const mathScope = store.getState().mathItems.mathScope();
   await user.click(await screen.findByTitle("Show Settings"));
   const settings = await screen.findByTitle("Settings");
 

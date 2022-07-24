@@ -23,7 +23,9 @@ const setup = () => {
   const id = nodeId(point);
   const helper = new IntegrationTest();
   helper.patchMathItemsInFolder([point]);
-  const { mathScope, store } = helper.render();
+  const { store } = helper.render();
+
+  const mathScope = store.getState().mathItems.mathScope();
   const findButton = () => screen.findByTitle("Color and Visibility");
   const findDialog = () => screen.findByRole("dialog");
   const findTextInput = () => screen.findByTitle("Custom Color Input");

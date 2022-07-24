@@ -6,8 +6,10 @@ import "./index.css";
 import * as math from "mathjs";
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
 
-import App from "./app";
+import { Provider } from "react-redux";
+import AppRoutes from "./app";
 import { getStore } from "./store/store";
 
 if (process.env.NODE_ENV === "development") {
@@ -26,7 +28,13 @@ const container = document.getElementById("root");
 const root = createRoot(container!);
 
 const store = getStore();
-// @ts-expect-error for debugging
-window.store = store;
 
-root.render(<App store={store} />);
+root.render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </Provider>
+  </React.StrictMode>
+);

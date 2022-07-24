@@ -2,11 +2,14 @@ import { render } from "@testing-library/react";
 import { MathItem, MathItemType } from "configs";
 import { keyBy } from "lodash";
 import React from "react";
+import { MemoryRouter } from "react-router-dom";
 import { getInitialState, getStore } from "store/store";
 import type { RootState } from "store/store";
 import { makeItem } from "test_util";
 
-import App from "../app";
+import { Provider } from "react-redux";
+import { InitialEntry } from "history";
+import AppRoutes from "../app";
 
 type StorePatch = Partial<{
   [k in keyof RootState]: Partial<RootState[k]>;
@@ -20,6 +23,9 @@ const mergeStoreStates = (state: RootState, patch: StorePatch) => {
   return copy;
 };
 
+/**
+ * @deprecated Prefer using `renderTestApp`
+ */
 class IntegrationTest {
   private storePatch: StorePatch = {};
 
@@ -57,10 +63,38 @@ class IntegrationTest {
   render = () => {
     const state = mergeStoreStates(getInitialState(), this.storePatch);
     const store = getStore({ preloadedState: state });
-    const mathScope = state.mathItems.mathScope();
-    const result = render(<App store={store} />);
-    return { result, mathScope, store };
+    const result = render(
+      <React.StrictMode>
+        <Provider store={store}>
+          <MemoryRouter>
+            <AppRoutes />
+          </MemoryRouter>
+        </Provider>
+      </React.StrictMode>
+    );
+    return { result, store };
   };
 }
 
 export default IntegrationTest;
+
+/**
+ * Render the app using a MemoryRouter instead of a BrowserRouter.
+ * Optionally, provide an initial route.
+ */
+const renderTestApp = (initialRoute: InitialEntry = "/") => {
+  const initialEntries: InitialEntry[] = [initialRoute];
+  const store = getStore();
+  const result = render(
+    <React.StrictMode>
+      <Provider store={store}>
+        <MemoryRouter initialEntries={initialEntries}>
+          <AppRoutes />
+        </MemoryRouter>
+      </Provider>
+    </React.StrictMode>
+  );
+  return { result, store };
+};
+
+export { renderTestApp };

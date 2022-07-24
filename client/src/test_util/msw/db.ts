@@ -10,8 +10,14 @@ const db = factory({
     id: primaryKey(faker.random.alphaNumeric),
     title: faker.lorem.sentence,
     items: () => [],
-    // @ts-expect-error unsure how to define a directionary in model
-    itemOrder: () => ({}),
+    /**
+     * This is a string because @mswjs/data does not have great support for
+     * unstructured data at the moment.
+     *
+     * So this factory uses a stringified itemOrder, and the msw handler will
+     * parse it (and re-stringify the whole body).
+     */
+    itemOrder: () => JSON.stringify({}),
   },
 });
 
@@ -21,8 +27,12 @@ type PartialScene = PartialBy<Scene, "title" | "id">;
  * A wrapper around `db.scene.create` to fix some ts issues.
  */
 const addScene = (scene: PartialScene): Scene => {
+  const { itemOrder } = scene;
   // @ts-expect-error Having trouble with mswjs/data factory types
-  return db.scene.create(scene);
+  return db.scene.create({
+    ...scene,
+    ...(itemOrder ? { itemOrder: JSON.stringify(itemOrder) } : {}),
+  });
 };
 
 const seedDb = {

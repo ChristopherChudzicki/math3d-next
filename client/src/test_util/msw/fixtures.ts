@@ -9,7 +9,7 @@ const sceneIds = {
    * - folder `"F2"` with points `["P2a", "P2b"]`
    * - folder `"F3"` with points `["P3a", "P3b"]`
    */
-  testFolders: "testfolders",
+  testFolders: "test_folders",
 };
 
 const makeFolderScene = (): Scene => {

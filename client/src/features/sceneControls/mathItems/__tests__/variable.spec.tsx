@@ -5,7 +5,9 @@ test("left-hand parse errors are indicated on left-hand side", async () => {
   const variable = makeItem(MIT.Variable, { value: "a+ = 123" });
   const helper = new IntegrationTest();
   helper.patchMathItemsInFolder([variable]);
-  const { mathScope } = helper.render();
+  const { store } = helper.render();
+
+  const mathScope = store.getState().mathItems.mathScope();
   expect(mathScope.parseErrors.size).toBe(1);
   const lhs = await screen.findByTitle("left-hand side", { exact: false });
   const rhs = await screen.findByTitle("right-hand side", { exact: false });
@@ -17,7 +19,9 @@ test("right-hand parse errors are indicated on right-hand side", async () => {
   const variable = makeItem(MIT.Variable, { value: "a = 123 + " });
   const helper = new IntegrationTest();
   helper.patchMathItemsInFolder([variable]);
-  const { mathScope } = helper.render();
+  const { store } = helper.render();
+
+  const mathScope = store.getState().mathItems.mathScope();
   expect(mathScope.parseErrors.size).toBe(1);
   const lhs = await screen.findByTitle("left-hand side", { exact: false });
   const rhs = await screen.findByTitle("right-hand side", { exact: false });

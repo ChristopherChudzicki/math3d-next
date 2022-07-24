@@ -44,8 +44,9 @@ test.each([
     const id = nodeId(point);
     const helper = new IntegrationTest();
     helper.patchMathItemsInFolder([point]);
-    const { mathScope } = helper.render();
+    const { store } = helper.render();
 
+    const mathScope = store.getState().mathItems.mathScope();
     expect(mathScope.evalErrors.size).toBe(numEvalErrors);
     expect(mathScope.parseErrors.size).toBe(numParseErrors);
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);
@@ -78,8 +79,9 @@ test.each([
     const id = nodeId(point);
     const helper = new IntegrationTest();
     helper.patchMathItemsInFolder([point]);
-    const { mathScope } = helper.render();
+    const { store } = helper.render();
 
+    const mathScope = store.getState().mathItems.mathScope();
     const coordsInput = await screen.findByTitle("Coordinates");
     user.clear(coordsInput);
     await typeText(coordsInput, coordsString);
@@ -92,7 +94,9 @@ test.each([
 test("Adding items adds to mathScope", async () => {
   const helper = new IntegrationTest();
   helper.patchMathItemsInFolder([]);
-  const { mathScope, store } = helper.render();
+  const { store } = helper.render();
+
+  const mathScope = store.getState().mathItems.mathScope();
   await user.click(await screen.findByText("Add New Object"));
   const menu = await screen.findByRole("menu");
   const addPoint = await within(menu).findByText("Point");
@@ -121,7 +125,9 @@ test("Deleting items removes them from mathScope", async () => {
   });
   const helper = new IntegrationTest();
   helper.patchMathItemsInFolder([point]);
-  const { mathScope } = helper.render();
+  const { store } = helper.render();
+
+  const mathScope = store.getState().mathItems.mathScope();
   expect(mathScope.results.size).toBeGreaterThan(1); // point + folder visibility
   expect(mathScope.parseErrors.size).toBeGreaterThan(0);
   expect(mathScope.evalErrors.size).toBeGreaterThan(0);

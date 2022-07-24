@@ -1,13 +1,9 @@
 import type { Scene } from "types";
-
-import { fetchJson } from "./util";
+import axios from "redaxios";
 
 const getScene = async (sceneId: string): Promise<Scene> => {
-  const { result } = await fetchJson<{ result: { scene: Scene } }>(
-    `/scenes/${sceneId}`
-  );
-  const { scene } = result;
-  return scene;
+  const { data } = await axios.get<Scene>(`/scenes/${sceneId}`);
+  return data;
 };
 
 export { getScene };
