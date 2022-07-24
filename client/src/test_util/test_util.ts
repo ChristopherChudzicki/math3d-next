@@ -1,3 +1,4 @@
+import { waitFor, screen, within } from "@testing-library/react";
 import user from "@testing-library/user-event";
 import { MathItem } from "configs";
 import { mathScopeId } from "features/sceneControls/mathItems/mathScope";
@@ -37,6 +38,27 @@ const sleep = (ms: number) =>
 
 const shortSleep = () => sleep(15);
 
+/**
+ * Wait for `n` items to have been rendered with non-empty Descriptions.
+ *
+ * (Descriptions are initially rendered blank.)
+ */
+const waitForItems = (n: number) => {
+  return waitFor(() => {
+    const items = screen.getAllByTitle("Settings for", { exact: false });
+    const hasDescription = items.filter((item) => {
+      const descrip = within(item).getByTitle("Description");
+      assertInstanceOf(descrip, HTMLTextAreaElement);
+      return descrip.value !== "";
+    });
+    if (hasDescription.length !== n) {
+      throw new Error(
+        `Expected ${n} items, found ${hasDescription.length} with non-empty descriptions`
+      );
+    }
+  });
+};
+
 export {
   assertInstanceOf,
   nodeId,
@@ -45,4 +67,5 @@ export {
   typeText,
   sleep,
   shortSleep,
+  waitForItems,
 };

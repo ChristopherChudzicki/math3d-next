@@ -40,6 +40,7 @@ const TextareaAutoWidthHeight: React.FC<Props> = (props) => {
   };
   return (
     <TextareaAutosize
+      aria-busy={!hasRendered}
       ref={textarea}
       style={mergedStyle}
       onChange={props.onChange}

@@ -1,4 +1,11 @@
-import { IntegrationTest, screen, user, within } from "test_util";
+import {
+  renderTestApp,
+  IntegrationTest,
+  screen,
+  user,
+  within,
+  waitForItems,
+} from "test_util";
 import _ from "lodash";
 import {
   addItem,
@@ -8,9 +15,9 @@ import {
 } from "./__utils__";
 
 test("setup renders 9 points in 3 folders", async () => {
-  const helper = new IntegrationTest();
-  helper.patchStore(folderFixture());
-  helper.render();
+  renderTestApp("/test_folders");
+  await waitForItems(9);
+
   const descriptions = screen
     .getAllByTitle("Description")
     .map((x) => x.textContent);
