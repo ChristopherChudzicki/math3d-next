@@ -7,7 +7,7 @@ import { sceneFixtures } from "./fixtures";
 
 const db = factory({
   scene: {
-    id: primaryKey(faker.random.alphaNumeric),
+    id: primaryKey(faker.datatype.uuid),
     title: faker.lorem.sentence,
     items: () => [],
     /**
