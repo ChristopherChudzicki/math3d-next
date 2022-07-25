@@ -1,6 +1,5 @@
 import { MathItem, MathItemType as MIT } from "configs";
 import {
-  IntegrationTest,
   makeItem,
   nodeId,
   patchConsoleError,

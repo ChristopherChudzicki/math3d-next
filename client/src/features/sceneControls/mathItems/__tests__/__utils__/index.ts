@@ -1,6 +1,4 @@
-import { MathItemType as MIT, MathItem } from "configs";
-import { keyBy } from "lodash";
-import { screen, within, user, makeItem, StatePatch } from "test_util";
+import { screen, within, user } from "test_util";
 
 const addItem = async (itemTypeLabel: string): Promise<void> => {
   const addNewItemButton = screen.getByText("Add New Object");
