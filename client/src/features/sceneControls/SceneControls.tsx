@@ -1,4 +1,4 @@
-import { getScene } from "api";
+import { useScene } from "api/scene";
 import classNames from "classnames";
 import { MathItemType } from "configs";
 import React, { useEffect } from "react";
@@ -62,17 +62,29 @@ const SceneControls: React.FC<Props> = (props) => {
   const { sceneId } = props;
   const dispatch = useAppDispatch();
 
+  /**
+   * TODO: Remove this check after updating tests to use msw
+   */
+  const items = useAppSelector(select.mathItems());
+  const hasItems = Object.keys(items).length > 0;
+
+  const { isLoading, data: scene } = useScene(sceneId);
+
   useEffect(() => {
-    const loadScene = async (id: string) => {
-      const scene = await getScene(id);
-      dispatch(itemActions.addItems({ items: scene.items }));
-    };
-    if (sceneId) {
-      loadScene(sceneId);
-    }
-  }, [dispatch, sceneId]);
+    /**
+     * Old integration tests directly patch the store.
+     * If the store already has items, don't update.
+     * Temporary until I change all the tests.
+     */
+    if (hasItems) return;
+    if (!scene) return;
+    const payload = { items: scene.items, order: scene.itemOrder };
+    dispatch(itemActions.setItems(payload));
+  }, [dispatch, scene, sceneId, hasItems]);
+
   return (
     <ControlTabs
+      loading={isLoading}
       tabBarExtraContent={<AddObjectButton />}
       mainNav={<MainNav />}
       mainContent={<MathItemsList rootId="main" />}

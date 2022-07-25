@@ -6,9 +6,20 @@ import "./index.css";
 import * as math from "mathjs";
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import { QueryClient } from "@tanstack/react-query";
 
-import App from "./app";
+import AppRoutes from "./app";
 import { getStore } from "./store/store";
+
+if (process.env.NODE_ENV === "development") {
+  // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+  const { worker } = require("./test_util/msw/browser");
+  // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+  const { seedDb } = require("./test_util");
+  seedDb.withFixtures();
+  worker.start();
+}
 
 window.math = math;
 
@@ -17,7 +28,12 @@ const container = document.getElementById("root");
 const root = createRoot(container!);
 
 const store = getStore();
-// @ts-expect-error for debugging
-window.store = store;
+const queryClient = new QueryClient();
 
-root.render(<App store={store} />);
+root.render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <AppRoutes queryClient={queryClient} store={store} />
+    </BrowserRouter>
+  </React.StrictMode>
+);

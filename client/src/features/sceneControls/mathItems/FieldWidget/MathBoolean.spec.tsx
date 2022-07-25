@@ -1,11 +1,12 @@
 import { MathItemType as MIT } from "configs";
 import {
   assertInstanceOf,
-  IntegrationTest,
   makeItem,
   nodeId,
   patchConsoleError,
+  renderTestApp,
   screen,
+  seedDb,
   user,
   within,
 } from "test_util";
@@ -24,11 +25,12 @@ afterAll(restore);
  *  3. Return form as HTML element `settings`
  */
 const setup = async (initialValue: string) => {
-  const helper = new IntegrationTest();
   const point = makeItem(MIT.Point, { visible: initialValue });
   const id = nodeId(point);
-  helper.patchMathItemsInFolder([point]);
-  const { mathScope } = helper.render();
+  const scene = seedDb.withSceneFromItems([point]);
+  const { store } = await renderTestApp(`/${scene.id}`);
+
+  const mathScope = store.getState().mathItems.mathScope();
   await user.click(await screen.findByTitle("Show Settings"));
   const settings = await screen.findByTitle("Settings");
 
@@ -67,7 +69,6 @@ const setup = async (initialValue: string) => {
 
   return {
     settings,
-    helper,
     mathScope,
     getValue,
     getEvalError,

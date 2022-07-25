@@ -6,7 +6,6 @@ import { assertIsMathItemType, assertNotNil } from "util/predicates";
 import MathScope from "util/MathScope";
 
 import { latexParser } from "util/parsing";
-import defaultScene from "../../defaultScene";
 import {
   syncItemsToMathScope,
   removeItemsFromMathScope,
@@ -29,13 +28,15 @@ interface MathItemsState {
   mathScope: () => MathScope;
 }
 
+const makeMathScope = () => new MathScope({ parse: latexParser.parse });
+
 const getInitialState = (): MathItemsState => {
-  const mathScope = new MathScope({ parse: latexParser.parse });
+  const mathScope = makeMathScope();
   return {
     mathScope: () => mathScope,
-    items: keyBy(defaultScene.items, (item) => item.id),
+    items: {},
     activeItemId: undefined,
-    order: defaultScene.itemOrder,
+    order: {},
   };
 };
 
@@ -71,8 +72,20 @@ const mathItemsSlice = createSlice({
   name: "mathItems",
   initialState: getInitialState,
   reducers: {
-    addItems: (_state, _action: PayloadAction<{ items: MathItem[] }>) => {
-      throw new Error("Not implemented");
+    setItems: (
+      state,
+      action: PayloadAction<{
+        items: MathItem[];
+        order: MathItemsState["order"];
+      }>
+    ) => {
+      const { items, order } = action.payload;
+      state.items = keyBy(items, (item) => item.id);
+      state.order = order;
+      state.activeItemId = undefined;
+      const mathScope = makeMathScope();
+      state.mathScope = () => mathScope;
+      syncItemsToMathScope(mathScope, items);
     },
     initializeMathScope: (state) => {
       const items = Object.values(state.items);
