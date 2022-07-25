@@ -4,7 +4,9 @@ import {
   makeItem,
   nodeId,
   patchConsoleError,
+  renderTestApp,
   screen,
+  seedDb,
   typeText,
   user,
   within,
@@ -39,12 +41,11 @@ test.each([
   },
 ])(
   "initial coords evaluation/errors are correct; text=$coordsString",
-  ({ coordsString, coords, numParseErrors, numEvalErrors }) => {
-    const point = makeItem(MIT.Point, { coords: coordsString });
-    const id = nodeId(point);
-    const helper = new IntegrationTest();
-    helper.patchMathItemsInFolder([point]);
-    const { store } = helper.render();
+  async ({ coordsString, coords, numParseErrors, numEvalErrors }) => {
+    const item = makeItem(MIT.Point, { coords: coordsString });
+    const id = nodeId(item);
+    const scene = seedDb.withSceneFromItems([item]);
+    const { store } = await renderTestApp(`/${scene.id}`);
 
     const mathScope = store.getState().mathItems.mathScope();
     expect(mathScope.evalErrors.size).toBe(numEvalErrors);
@@ -75,11 +76,10 @@ test.each([
 ])(
   "coords evaluation/errors update on text change; text='$coordsString'",
   async ({ coords, coordsString, numEvalErrors, numParseErrors }) => {
-    const point = makeItem(MIT.Point);
-    const id = nodeId(point);
-    const helper = new IntegrationTest();
-    helper.patchMathItemsInFolder([point]);
-    const { store } = helper.render();
+    const item = makeItem(MIT.Point);
+    const id = nodeId(item);
+    const scene = seedDb.withSceneFromItems([item]);
+    const { store } = await renderTestApp(`/${scene.id}`);
 
     const mathScope = store.getState().mathItems.mathScope();
     const coordsInput = await screen.findByTitle("Coordinates");
@@ -92,9 +92,8 @@ test.each([
 );
 
 test("Adding items adds to mathScope", async () => {
-  const helper = new IntegrationTest();
-  helper.patchMathItemsInFolder([]);
-  const { store } = helper.render();
+  const scene = seedDb.withSceneFromItems([]);
+  const { store } = await renderTestApp(`/${scene.id}`);
 
   const mathScope = store.getState().mathItems.mathScope();
   await user.click(await screen.findByText("Add New Object"));
@@ -123,9 +122,8 @@ test("Deleting items removes them from mathScope", async () => {
     size: "1 + ",
     opacity: "2^[1,2,3]",
   });
-  const helper = new IntegrationTest();
-  helper.patchMathItemsInFolder([point]);
-  const { store } = helper.render();
+  const scene = seedDb.withSceneFromItems([point]);
+  const { store } = await renderTestApp(`/${scene.id}`);
 
   const mathScope = store.getState().mathItems.mathScope();
   expect(mathScope.results.size).toBeGreaterThan(1); // point + folder visibility

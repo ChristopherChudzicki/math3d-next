@@ -1,10 +1,11 @@
 import { MathItem, MathItemType as MIT } from "configs";
 import {
   assertInstanceOf,
-  IntegrationTest,
   makeItem,
   nodeId,
+  renderTestApp,
   screen,
+  seedDb,
   user,
 } from "test_util";
 import { UnmetDependencyError } from "util/MathScope";
@@ -45,9 +46,8 @@ test.each([
   async ({ expression, param, evaluations }) => {
     const item = makeItem(MIT.ParametricSurface, { expr: expression.initial });
     const id = nodeId(item);
-    const helper = new IntegrationTest();
-    helper.patchMathItemsInFolder([item]);
-    const { store } = helper.render();
+    const scene = seedDb.withSceneFromItems([item]);
+    const { store } = await renderTestApp(`/${scene.id}`);
 
     const mathScope = store.getState().mathItems.mathScope();
     await new Promise((resolve) => {
@@ -97,9 +97,8 @@ test.each([
   async ({ expression, param, expectedError }) => {
     const item = makeItem(MIT.ParametricSurface, { expr: expression.initial });
     const id = nodeId(item);
-    const helper = new IntegrationTest();
-    helper.patchMathItemsInFolder([item]);
-    const { store } = helper.render();
+    const scene = seedDb.withSceneFromItems([item]);
+    const { store } = await renderTestApp(`/${scene.id}`);
 
     const mathScope = store.getState().mathItems.mathScope();
     const inputs = getParamNameInputs();
@@ -119,9 +118,8 @@ test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
   "when param name is invalid, error class is added, then removed when valid again",
   async ({ paramIndex }) => {
     const item = makeItem(MIT.ParametricSurface);
-    const helper = new IntegrationTest();
-    helper.patchMathItemsInFolder([item]);
-    helper.render();
+    const scene = seedDb.withSceneFromItems([item]);
+    await renderTestApp(`/${scene.id}`);
 
     const paramInput = getParamNameInputs()[paramIndex];
     await user.type(paramInput, "a+b");

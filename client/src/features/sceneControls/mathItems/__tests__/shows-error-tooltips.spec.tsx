@@ -1,10 +1,11 @@
 import { MathItemType as MIT } from "configs";
 import {
-  IntegrationTest,
   makeItem,
   screen,
   waitFor,
   shortSleep,
+  seedDb,
+  renderTestApp,
 } from "test_util";
 
 const getTooltip = () => screen.getByRole("tooltip");
@@ -29,9 +30,8 @@ test.each([
 ])(
   "Widgets display error message in tooltip only when focused",
   async ({ getInput, item, errMatcher }) => {
-    const helper = new IntegrationTest();
-    helper.patchMathItemsInFolder([item]);
-    helper.render();
+    const scene = seedDb.withSceneFromItems([item]);
+    await renderTestApp(`/${scene.id}`);
     const theInput = getInput();
 
     // not initially shown
@@ -52,9 +52,8 @@ test.each([
 
 test("Widget does not show a tooltip when focused if no error", async () => {
   const item = makeItem(MIT.Point, { coords: "[1,2,3] + 1" });
-  const helper = new IntegrationTest();
-  helper.patchMathItemsInFolder([item]);
-  helper.render();
+  const scene = seedDb.withSceneFromItems([item]);
+  await renderTestApp(`/${scene.id}`);
 
   const theInput = screen.getByTitle("Coordinates");
 

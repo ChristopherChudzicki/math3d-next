@@ -1,17 +1,6 @@
-import {
-  renderTestApp,
-  IntegrationTest,
-  screen,
-  user,
-  within,
-} from "test_util";
+import { renderTestApp, screen, user, within } from "test_util";
 import _ from "lodash";
-import {
-  addItem,
-  clickRemoveItem,
-  getItemByDescription,
-  folderFixture,
-} from "./__utils__";
+import { addItem, clickRemoveItem, getItemByDescription } from "./__utils__";
 
 test("setup renders 9 points in 3 folders", async () => {
   await renderTestApp("/test_folders");

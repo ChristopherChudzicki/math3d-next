@@ -9,7 +9,7 @@ import {
 import user from "@testing-library/user-event";
 import { makeItem } from "features/sceneControls/mathItems/util";
 
-import IntegrationTest, { renderTestApp } from "./IntegrationTest";
+import renderTestApp from "./renderTestApp";
 import patchConsoleError from "./patchConsoleError";
 import { seedDb } from "./msw/db";
 import { sceneIds } from "./msw/fixtures";
@@ -20,7 +20,6 @@ export {
   sceneIds,
   act,
   fireEvent,
-  IntegrationTest,
   makeItem,
   patchConsoleError,
   prettyDOM,
