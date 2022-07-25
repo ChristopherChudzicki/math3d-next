@@ -1,6 +1,6 @@
-import { IntegrationTest, screen, user, within } from "test_util";
+import { renderTestApp, screen, user, within } from "test_util";
 import _ from "lodash";
-import { addItem, folderFixture, getItemByDescription } from "./__utils__";
+import { addItem, getItemByDescription } from "./__utils__";
 
 /**
  * Detect whether an element or one of its ancestors is hidden based on its
@@ -20,14 +20,23 @@ const getExpandCollapse = (folderElement: HTMLElement) =>
   within(folderElement).getByLabelText("Expand/Collapse Folder");
 
 test.each([
-  { isCollapsed: "false", expectHidden: false, adjective: "visible" },
-  { isCollapsed: "true", expectHidden: true, adjective: "hidden" },
+  {
+    isCollapsed: "false",
+    route: "/test_folders",
+    expectHidden: false,
+    adjective: "visible",
+  },
+  {
+    isCollapsed: "true",
+    route: "/test_folders_F2_collapsed",
+    expectHidden: true,
+    adjective: "hidden",
+  },
 ])(
   "When isCollapsed is initially $isCollapsed, items are $adjective",
-  async ({ isCollapsed, expectHidden }) => {
-    const helper = new IntegrationTest();
-    helper.patchStore(folderFixture({ F2: { isCollapsed } }));
-    helper.render();
+  async ({ route, expectHidden }) => {
+    await renderTestApp(route);
+
     const els = screen.getAllByTitle("Description");
     expect(els[4]).toBeVisible();
 
@@ -37,9 +46,9 @@ test.each([
 );
 
 test("Collapsing and expanding folders", async () => {
-  const helper = new IntegrationTest();
-  helper.patchStore(folderFixture({ F2: { isCollapsed: "true" } }));
-  helper.render();
+  await renderTestApp("/test_folders");
+  await user.click(getExpandCollapse(getItemByDescription("F2")));
+
   const els = screen.getAllByTitle("Description");
   expect(els[4]).toBeVisible();
 
@@ -61,9 +70,7 @@ test("Collapsing and expanding folders", async () => {
 });
 
 test("Inserting into a collapsed folder expands the folder", async () => {
-  const helper = new IntegrationTest();
-  helper.patchStore(folderFixture());
-  helper.render();
+  await renderTestApp("/test_folders");
 
   const folder = getItemByDescription("F2");
   const toggle = getExpandCollapse(folder);

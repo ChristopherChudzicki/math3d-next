@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { MathItem, MathItemType } from "configs";
 import { keyBy } from "lodash";
 import React from "react";
@@ -7,8 +7,8 @@ import { getInitialState, getStore } from "store/store";
 import type { RootState } from "store/store";
 import { makeItem } from "test_util";
 
-import { Provider } from "react-redux";
 import { InitialEntry } from "history";
+import { QueryClient } from "@tanstack/react-query";
 import AppRoutes from "../app";
 
 type StorePatch = Partial<{
@@ -63,13 +63,12 @@ class IntegrationTest {
   render = () => {
     const state = mergeStoreStates(getInitialState(), this.storePatch);
     const store = getStore({ preloadedState: state });
+    const queryClient = new QueryClient();
     const result = render(
       <React.StrictMode>
-        <Provider store={store}>
-          <MemoryRouter>
-            <AppRoutes />
-          </MemoryRouter>
-        </Provider>
+        <MemoryRouter>
+          <AppRoutes queryClient={queryClient} store={store} />
+        </MemoryRouter>
       </React.StrictMode>
     );
     return { result, store };
@@ -78,22 +77,35 @@ class IntegrationTest {
 
 export default IntegrationTest;
 
+const waitForNotBusy = () =>
+  waitFor(() => {
+    const busy = document.querySelector('[aria-busy="true"]');
+    if (busy !== null) {
+      throw new Error("Some elements are still loading.");
+    }
+  });
+
 /**
  * Render the app using a MemoryRouter instead of a BrowserRouter.
  * Optionally, provide an initial route.
  */
-const renderTestApp = (initialRoute: InitialEntry = "/") => {
+const renderTestApp = async (
+  initialRoute: InitialEntry = "/",
+  { waitForReady = true } = {}
+) => {
   const initialEntries: InitialEntry[] = [initialRoute];
   const store = getStore();
+  const queryClient = new QueryClient();
   const result = render(
     <React.StrictMode>
-      <Provider store={store}>
-        <MemoryRouter initialEntries={initialEntries}>
-          <AppRoutes />
-        </MemoryRouter>
-      </Provider>
+      <MemoryRouter initialEntries={initialEntries}>
+        <AppRoutes queryClient={queryClient} store={store} />
+      </MemoryRouter>
     </React.StrictMode>
   );
+  if (waitForReady) {
+    await waitForNotBusy();
+  }
   return { result, store };
 };
 

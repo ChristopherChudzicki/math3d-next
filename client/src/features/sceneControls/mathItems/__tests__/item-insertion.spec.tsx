@@ -4,7 +4,6 @@ import {
   screen,
   user,
   within,
-  waitForItems,
 } from "test_util";
 import _ from "lodash";
 import {
@@ -15,8 +14,7 @@ import {
 } from "./__utils__";
 
 test("setup renders 9 points in 3 folders", async () => {
-  renderTestApp("/test_folders");
-  await waitForItems(9);
+  await renderTestApp("/test_folders");
 
   const descriptions = screen
     .getAllByTitle("Description")
@@ -73,9 +71,7 @@ test.each([
     description: "[Active Item = Folder] folders are inserted after it",
   },
 ])("$description", async ({ itemToAdd, expected, beforeAdd }) => {
-  const helper = new IntegrationTest();
-  helper.patchStore(folderFixture());
-  helper.render();
+  await renderTestApp("/test_folders");
 
   await beforeAdd();
   await addItem(itemToAdd);
@@ -89,9 +85,7 @@ test.each([
 });
 
 test("Newly inserted item is activated", async () => {
-  const helper = new IntegrationTest();
-  helper.patchStore(folderFixture());
-  helper.render();
+  await renderTestApp("/test_folders");
 
   /**
    * The behaviors associated with "being active item" are
@@ -115,9 +109,7 @@ test("Newly inserted item is activated", async () => {
 });
 
 test("Inserting items after deletion---active item resets", async () => {
-  const helper = new IntegrationTest();
-  helper.patchStore(folderFixture());
-  helper.render();
+  await renderTestApp("/test_folders");
   const p2b = getItemByDescription("P2b");
   const description = within(p2b).getByTitle("Description");
   await user.click(description);

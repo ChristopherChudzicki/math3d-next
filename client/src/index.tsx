@@ -7,8 +7,8 @@ import * as math from "mathjs";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import { QueryClient } from "@tanstack/react-query";
 
-import { Provider } from "react-redux";
 import AppRoutes from "./app";
 import { getStore } from "./store/store";
 
@@ -28,13 +28,12 @@ const container = document.getElementById("root");
 const root = createRoot(container!);
 
 const store = getStore();
+const queryClient = new QueryClient();
 
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </Provider>
+    <BrowserRouter>
+      <AppRoutes queryClient={queryClient} store={store} />
+    </BrowserRouter>
   </React.StrictMode>
 );

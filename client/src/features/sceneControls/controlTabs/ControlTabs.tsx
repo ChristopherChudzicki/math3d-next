@@ -5,6 +5,7 @@ import ScrollingYOverflowX from "util/components/scrollingOverflow";
 const { TabPane } = Tabs;
 
 type Props = {
+  loading: boolean;
   mainNav: React.ReactNode;
   axesNav: React.ReactNode;
   mainContent: React.ReactNode;
@@ -24,7 +25,11 @@ const scrollingOverflowStyle = {
 } as React.CSSProperties;
 
 const SceneControls: React.FC<Props> = (props) => (
-  <Tabs tabBarExtraContent={props.tabBarExtraContent} tabBarStyle={tabsStyle}>
+  <Tabs
+    aria-busy={props.loading}
+    tabBarExtraContent={props.tabBarExtraContent}
+    tabBarStyle={tabsStyle}
+  >
     <TabPane tab={props.mainNav} key="main">
       <ScrollingYOverflowX style={scrollingOverflowStyle}>
         {props.mainContent}

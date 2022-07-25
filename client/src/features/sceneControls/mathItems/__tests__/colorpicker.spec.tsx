@@ -1,6 +1,13 @@
 import { MathItemType as MIT } from "configs";
 import { Point, PointProperties } from "configs/items/point";
-import { IntegrationTest, makeItem, nodeId, screen, user } from "test_util";
+import {
+  makeItem,
+  nodeId,
+  renderTestApp,
+  screen,
+  seedDb,
+  user,
+} from "test_util";
 
 /**
  * Press and hold pointer on element for `ms` seconds.
@@ -18,12 +25,11 @@ const longClick = async (element: HTMLElement, ms: number) => {
  * Add a single point to the mathItems store and return some helpers for finding
  * relevant elements + data.
  */
-const setup = () => {
+const setup = async () => {
   const point = makeItem(MIT.Point);
   const id = nodeId(point);
-  const helper = new IntegrationTest();
-  helper.patchMathItemsInFolder([point]);
-  const { store } = helper.render();
+  const scene = seedDb.withSceneFromItems([point]);
+  const { store } = await renderTestApp(`/${scene.id}`);
 
   const mathScope = store.getState().mathItems.mathScope();
   const findButton = () => screen.findByTitle("Color and Visibility");
@@ -44,7 +50,7 @@ const setup = () => {
 };
 
 test("short clicks on indicator toggle visibility", async () => {
-  const { findButton, getCalculatedProp } = setup();
+  const { findButton, getCalculatedProp } = await setup();
   expect(getCalculatedProp("visible")).toBe(true);
   await user.click(await findButton());
   expect(getCalculatedProp("visible")).toBe(false);
@@ -54,7 +60,7 @@ test("short clicks on indicator toggle visibility", async () => {
 
 test("long press opens color picker dialog", async () => {
   const { findButton, findDialog, getCalculatedProp, findAllSwatches } =
-    setup();
+    await setup();
   expect(getCalculatedProp("visible")).toBe(true);
   await expect(findDialog).rejects.toBeDefined();
   longClick(await findButton(), 1000);
@@ -66,7 +72,7 @@ test("long press opens color picker dialog", async () => {
 });
 
 test("clicking a swatch sets item to that color", async () => {
-  const { findButton, getPoint, findAllSwatches } = setup();
+  const { findButton, getPoint, findAllSwatches } = await setup();
   expect(getPoint().properties.color).toBe("#3090ff");
   longClick(await findButton(), 1000);
   const swatches = await findAllSwatches();

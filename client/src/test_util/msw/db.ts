@@ -3,7 +3,7 @@ import { factory, primaryKey } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
 import { MathItem, MathItemType } from "configs";
 import { makeItem } from "features/sceneControls/mathItems/util";
-import { makeFolderScene } from "./fixtures";
+import { sceneFixtures } from "./fixtures";
 
 const db = factory({
   scene: {
@@ -37,7 +37,7 @@ const addScene = (scene: PartialScene): Scene => {
 
 const seedDb = {
   withFixtures: (): void => {
-    addScene(makeFolderScene());
+    sceneFixtures.forEach((f) => addScene(f()));
   },
   withScene: addScene,
   /**
