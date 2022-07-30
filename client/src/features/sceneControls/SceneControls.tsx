@@ -62,25 +62,13 @@ const SceneControls: React.FC<Props> = (props) => {
   const { sceneId } = props;
   const dispatch = useAppDispatch();
 
-  /**
-   * TODO: Remove this check after updating tests to use msw
-   */
-  const items = useAppSelector(select.mathItems());
-  const hasItems = Object.keys(items).length > 0;
-
   const { isLoading, data: scene } = useScene(sceneId);
 
   useEffect(() => {
-    /**
-     * Old integration tests directly patch the store.
-     * If the store already has items, don't update.
-     * Temporary until I change all the tests.
-     */
-    if (hasItems) return;
     if (!scene) return;
     const payload = { items: scene.items, order: scene.itemOrder };
     dispatch(itemActions.setItems(payload));
-  }, [dispatch, scene, sceneId, hasItems]);
+  }, [dispatch, scene]);
 
   return (
     <ControlTabs
