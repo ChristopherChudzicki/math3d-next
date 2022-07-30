@@ -1,0 +1,19 @@
+name: "Bundlewatch GitHub Action (Main)"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  bundlewatch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Borales/actions-yarn@v2.1.0
+      - run: yarn install
+      - uses: jackyef/bundlewatch-gh-action@0.2.0
+        with:
+          build-script: npm run build --prefix client
+          bundlewatch-github-token: ${{ secrets.BUNDLEWATCH_GITHUB_TOKEN }}
+          bundlewatch-config: ./client/bundlewatch.config.js

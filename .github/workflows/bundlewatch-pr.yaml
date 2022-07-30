@@ -1,0 +1,18 @@
+name: "Bundlewatch GitHub Action (PRs)"
+
+on:
+  pull_request:
+    types: [synchronize, opened]
+
+jobs:
+  bundlewatch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Borales/actions-yarn@v2.1.0
+      - run: yarn install
+      - uses: jackyef/bundlewatch-gh-action@master
+        with:
+          build-script: npm run build --prefix client
+          bundlewatch-github-token: ${{ secrets.BUNDLEWATCH_GITHUB_TOKEN }}
+          bundlewatch-config: ./client/bundlewatch.config.js

@@ -1,0 +1,6 @@
+{
+    "files": [{
+        "path": "./build/**/*.!(*map)",
+        "compression": "none"
+    }]
+}
