@@ -10,8 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: Borales/actions-yarn@v2.1.0
-      - run: yarn install
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci --prefix client
       - uses: jackyef/bundlewatch-gh-action@0.2.0
         with:
           build-script: npm run build --prefix client
