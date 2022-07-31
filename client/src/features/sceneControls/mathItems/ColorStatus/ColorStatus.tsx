@@ -1,9 +1,9 @@
-import { Popover } from "antd";
 import classNames from "classnames";
 import { MathGraphic } from "configs";
 import { colorsAndGradients, makeColorConfig } from "configs/colors";
 import React, { useCallback, useMemo } from "react";
 import { useToggle } from "util/hooks";
+import Popover, { rightStartEnd } from "util/components/Popover";
 import { useLongAndShortPress } from "util/hooks/useLongAndShortPress";
 
 import { positioning } from "util/styles";
@@ -25,6 +25,7 @@ interface Props {
 
 const VISIBLE = ["visible"];
 
+const popperModifiers = [rightStartEnd];
 const ColorStatus: React.FC<Props> = (props) => {
   const { item } = props;
   const [dialogVisible, setDialogVisible] = useToggle(false);
@@ -43,14 +44,6 @@ const ColorStatus: React.FC<Props> = (props) => {
   );
   const { bind, lastPressWasLong } = useLongAndShortPress(setDialogVisible.on);
 
-  const handleVisibleChange = useCallback(
-    (value: boolean) => {
-      if (value) return;
-      if (lastPressWasLong()) return;
-      setDialogVisible.off();
-    },
-    [setDialogVisible, lastPressWasLong]
-  );
   const handleButtonClick = useCallback(() => {
     if (lastPressWasLong()) return;
     const event: WidgetChangeEvent = {
@@ -59,26 +52,35 @@ const ColorStatus: React.FC<Props> = (props) => {
     };
     onChange(event);
   }, [visible, onChange, lastPressWasLong]);
+  const handlePointerAway = useCallback(() => {
+    if (lastPressWasLong()) return;
+    setDialogVisible.off();
+  }, [lastPressWasLong, setDialogVisible]);
 
   return (
     <Popover
-      content={<ColorDialog item={item} />}
-      trigger="click"
-      placement="right"
+      modifiers={popperModifiers}
+      trigger={
+        <button
+          type="button"
+          style={style}
+          title="Color and Visibility"
+          aria-label="Color and Visibility"
+          className={classNames(
+            styles.circle,
+            positioning["absolute-centered"],
+            {
+              [styles.empty]: !visible,
+            }
+          )}
+          onClick={handleButtonClick}
+          {...bind()}
+        />
+      }
       visible={dialogVisible}
-      onVisibleChange={handleVisibleChange}
+      onPointerAway={handlePointerAway}
     >
-      <button
-        type="button"
-        style={style}
-        title="Color and Visibility"
-        aria-label="Color and Visibility"
-        className={classNames(styles.circle, positioning["absolute-centered"], {
-          [styles.empty]: !visible,
-        })}
-        onClick={handleButtonClick}
-        {...bind()}
-      />
+      <ColorDialog className={styles.dialog} item={item} />
     </Popover>
   );
 };

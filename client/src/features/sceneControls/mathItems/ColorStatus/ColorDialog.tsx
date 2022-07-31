@@ -48,6 +48,7 @@ const ColorExprInput: React.FC<ColorExprProps> = (props) => {
 
 interface ColorDialogProps {
   item: MathGraphic;
+  className?: string;
 }
 
 const ColorDialog: React.FC<ColorDialogProps> = (props) => {
@@ -59,7 +60,7 @@ const ColorDialog: React.FC<ColorDialogProps> = (props) => {
   );
   const pickerColors = hasColorExpr(item) ? colorsAndGradients : colors;
   return (
-    <div role="dialog">
+    <div role="dialog" className={props.className}>
       {hasColorExpr(item) ? (
         <Tabs>
           <TabPane tab="Color" key="color">

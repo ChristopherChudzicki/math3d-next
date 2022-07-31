@@ -1,14 +1,13 @@
 import { SettingOutlined } from "@ant-design/icons";
-import { Popover } from "antd";
+import { Popover, SubtleButton } from "util/components";
 import type {
   MathItem,
   MathItemConfig,
   MathItemType,
   PropertyConfig,
 } from "configs";
-import React, { useCallback, useMemo, useState } from "react";
-import { SubtleButton } from "util/components";
-
+import React, { useMemo } from "react";
+import { useToggle } from "util/hooks";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { useMathScope } from "../mathItemsSlice";
 import { getMathProperties, useMathErrors } from "../mathScope";
@@ -63,46 +62,32 @@ const SettingsForm = <T extends MathItemType>({
   );
 };
 
-interface TitleProps {
-  config: MathItemConfig;
-  onClick: React.MouseEventHandler<HTMLButtonElement>;
-}
-
-const SettingsTitle: React.FC<TitleProps> = (props) => (
-  <div className={styles["settings-title"]}>
-    {props.config.label} Settings
-    <CloseButton onClick={props.onClick} />
-  </div>
-);
-
 interface SettingsPopoverProps {
   config: MathItemConfig;
   item: MathItem;
 }
 
 const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
-  const [visible, setVisible] = useState(false);
-  const setVisibleTrue = useCallback(() => setVisible(true), []);
-  const setVisibleFalse = useCallback(() => setVisible(false), []);
-  const handleVisibleChange = useCallback((isVisible: boolean) => {
-    setVisible(isVisible);
-  }, []);
+  const [visible, setVisible] = useToggle(false);
   return (
     <Popover
-      content={<SettingsForm item={item} config={config} />}
-      title={<SettingsTitle config={config} onClick={setVisibleFalse} />}
-      placement="right"
-      trigger="click"
       visible={visible}
-      onVisibleChange={handleVisibleChange}
+      className={styles.container}
+      onPointerAway={setVisible.off}
+      trigger={
+        <SubtleButton
+          onClick={setVisible.toggle}
+          title="Show Settings"
+          className={styles["settings-button"]}
+        >
+          <SettingOutlined />
+        </SubtleButton>
+      }
     >
-      <SubtleButton
-        title="Show Settings"
-        className={styles["settings-button"]}
-        onClick={setVisibleTrue}
-      >
-        <SettingOutlined />
-      </SubtleButton>
+      <CloseButton className={styles.close} onClick={setVisible.off} />
+      <h3 className={styles.title}>{config.label} Settings</h3>
+      <hr className={styles.divider} />
+      <SettingsForm item={item} config={config} />
     </Popover>
   );
 };

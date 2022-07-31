@@ -1,10 +1,11 @@
+import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useMemo, useState } from "react";
 
-interface Toggler {
+interface Toggler extends Dispatch<SetStateAction<boolean>> {
   toggle: () => void;
   on: () => void;
   off: () => void;
-  (value: boolean): void;
+  set: Dispatch<SetStateAction<boolean>>;
 }
 
 const useToggle = (initialValue: boolean): [boolean, Toggler] => {
@@ -14,7 +15,7 @@ const useToggle = (initialValue: boolean): [boolean, Toggler] => {
   const off = useCallback(() => setValue(false), []);
 
   const toggler: Toggler = useMemo(() => {
-    return Object.assign((v: boolean) => setValue(v), {
+    return Object.assign(setValue, {
       on,
       off,
       toggle,

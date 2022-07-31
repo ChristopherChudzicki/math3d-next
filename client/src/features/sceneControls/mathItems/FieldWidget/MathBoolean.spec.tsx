@@ -3,20 +3,12 @@ import {
   assertInstanceOf,
   makeItem,
   nodeId,
-  patchConsoleError,
   renderTestApp,
   screen,
   seedDb,
   user,
   within,
 } from "test_util";
-
-/**
- * Antd is causing react to complain about StrictMode.
- * But everything seems to be working fine, so let's just ignore that error.
- */
-const restore = patchConsoleError([{ ignoreStr: "in StrictMode." }]);
-afterAll(restore);
 
 /**
  * Sets up test scenario for MathBoolean:
