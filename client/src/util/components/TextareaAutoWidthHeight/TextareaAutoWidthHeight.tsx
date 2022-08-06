@@ -31,7 +31,9 @@ const TextareaAutoWidthHeight: React.FC<Props> = (props) => {
 
   const [hasRendered, setHasRendered] = useState(false);
   useEffect(() => {
-    setHasRendered(true);
+    if (!hasRendered) {
+      setHasRendered(true);
+    }
   }, [hasRendered]);
 
   const mergedStyle: TextareaAutosizeProps["style"] = {

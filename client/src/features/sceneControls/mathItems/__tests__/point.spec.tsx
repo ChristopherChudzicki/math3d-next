@@ -12,13 +12,6 @@ import {
 } from "test_util";
 import { assertNotNil } from "util/predicates";
 
-/**
- * Antd is causing react to complain that some things aren't wrapped in act(...).
- * But everything seems to be working fine, so let's just ignore that error.
- */
-const restore = patchConsoleError([{ ignoreData: "ForwardRef(TabNavList)" }]);
-afterAll(restore);
-
 test.each([
   {
     coordsString: "[1, 2, 3]",

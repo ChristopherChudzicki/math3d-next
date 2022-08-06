@@ -109,6 +109,7 @@ interface PopoverProps {
   transitionDuration?: number;
   trigger: React.ReactElement;
   visible: boolean;
+  placement?: PopperProps["placement"];
 }
 
 const noOp = () => {};
@@ -122,6 +123,7 @@ const Popover: React.FC<PopoverProps> = ({
   trigger,
   children,
   className,
+  placement,
   transitionDuration = 300,
   onPointerAway = noOp,
   modifiers = [],
@@ -159,7 +161,7 @@ const Popover: React.FC<PopoverProps> = ({
         anchorEl={anchorEl}
         transition
         disablePortal
-        placement="right"
+        placement={placement}
       >
         {({ TransitionProps }) => (
           <Fade {...TransitionProps} timeout={transitionDuration}>

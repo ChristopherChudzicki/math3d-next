@@ -1,3 +1,6 @@
 .error-tooltip {
   width: 250px;
+  padding: 0.5em;
+  --popover-background: var(--gray-8);
+  color: white
 }

@@ -74,6 +74,7 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
       visible={visible}
       className={styles.container}
       onPointerAway={setVisible.off}
+      placement="right"
       trigger={
         <SubtleButton
           onClick={setVisible.toggle}
