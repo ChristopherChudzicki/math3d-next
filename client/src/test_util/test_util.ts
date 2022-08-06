@@ -25,9 +25,15 @@ const nodeId =
  * Thin wrapper around `userEvent.type`. Doubles all instances of `[` since this
  * is a special character in `userEvent.type`.
  */
-const typeText = (element: Element, text: string): Promise<void> => {
+const typeText = (element: HTMLElement, text: string): Promise<void> => {
   const escaped = text.replaceAll("[", "[[");
   return user.type(element, escaped);
+};
+
+const pasteText = (element: HTMLElement, text: string) => {
+  user.clear(element);
+  user.click(element);
+  return user.paste(text);
 };
 
 const sleep = (ms: number) =>
@@ -43,6 +49,7 @@ export {
   permutations,
   testId,
   typeText,
+  pasteText,
   sleep,
   shortSleep,
 };

@@ -2,10 +2,10 @@ import { MathItem, MathItemType as MIT } from "configs";
 import {
   makeItem,
   nodeId,
+  pasteText,
   renderTestApp,
   screen,
   seedDb,
-  typeText,
   user,
   within,
 } from "test_util";
@@ -75,9 +75,7 @@ test.each([
     const mathScope = store.getState().mathItems.mathScope();
     const coordsInput = await screen.findByTitle("Coordinates");
 
-    user.clear(coordsInput);
-    await typeText(coordsInput, coordsString);
-
+    pasteText(coordsInput, coordsString);
     expect(mathScope.evalErrors.size).toBe(numEvalErrors);
     expect(mathScope.parseErrors.size).toBe(numParseErrors);
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);
