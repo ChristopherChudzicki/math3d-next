@@ -1,6 +1,5 @@
 import { MathItemType as MIT } from "configs";
 import { Point, PointProperties } from "configs/items/point";
-import { act } from "react-dom/test-utils";
 import {
   makeItem,
   nodeId,

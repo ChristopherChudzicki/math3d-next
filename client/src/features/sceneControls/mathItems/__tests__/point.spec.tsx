@@ -1,5 +1,4 @@
 import { MathItem, MathItemType as MIT } from "configs";
-import { act } from "react-dom/test-utils";
 import {
   makeItem,
   nodeId,
