@@ -1,3 +1,5 @@
+import failOnConsole from "jest-fail-on-console";
+
 import { seedDb } from "test_util";
 import { server } from "./test_util/msw/server";
 
@@ -6,6 +8,18 @@ import { server } from "./test_util/msw/server";
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import "@testing-library/jest-dom";
+
+failOnConsole({
+  silenceMessage: (error) => {
+    return [
+      /An update to ItemTemplate inside a tes/,
+      /ForwardRef\(TabNavList\)/,
+      /An update to Transition inside a test/,
+      /An update to MathItemsList insid/,
+      /An update to ErrorTooltip inside a test/,
+    ].some((regex) => regex.test(error));
+  },
+});
 
 /**
  * Jest does not support enough ShadowDOM for MathLive to function properly, so
