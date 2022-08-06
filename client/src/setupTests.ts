@@ -16,7 +16,7 @@ failOnConsole({
       /ForwardRef\(TabNavList\)/,
       /An update to Transition inside a test/,
       /An update to MathItemsList insid/,
-      /An update to ErrorTooltip inside a test/,
+      // /An update to ErrorTooltip inside a test/,
     ].some((regex) => regex.test(error));
   },
 });

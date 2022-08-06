@@ -1,4 +1,5 @@
 import { render, waitFor } from "@testing-library/react";
+import { createTheme } from "@mui/material/styles";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { getStore } from "store/store";
@@ -26,10 +27,11 @@ const renderTestApp = async (
   const initialEntries: InitialEntry[] = [initialRoute];
   const store = getStore();
   const queryClient = new QueryClient();
+  const theme = createTheme();
   const result = render(
     <React.StrictMode>
       <MemoryRouter initialEntries={initialEntries}>
-        <AppRoutes queryClient={queryClient} store={store} />
+        <AppRoutes queryClient={queryClient} store={store} theme={theme} />
       </MemoryRouter>
     </React.StrictMode>
   );
