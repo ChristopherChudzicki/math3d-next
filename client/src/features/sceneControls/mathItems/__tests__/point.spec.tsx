@@ -1,8 +1,8 @@
 import { MathItem, MathItemType as MIT } from "configs";
+import { act } from "react-dom/test-utils";
 import {
   makeItem,
   nodeId,
-  patchConsoleError,
   renderTestApp,
   screen,
   seedDb,
@@ -75,6 +75,7 @@ test.each([
 
     const mathScope = store.getState().mathItems.mathScope();
     const coordsInput = await screen.findByTitle("Coordinates");
+
     user.clear(coordsInput);
     await typeText(coordsInput, coordsString);
     expect(mathScope.evalErrors.size).toBe(numEvalErrors);

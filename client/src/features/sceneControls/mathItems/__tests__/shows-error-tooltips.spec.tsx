@@ -1,4 +1,4 @@
-import { waitForElementToBeRemoved, act } from "@testing-library/react";
+import { act } from "@testing-library/react";
 import { MathItemType as MIT } from "configs";
 import {
   makeItem,
@@ -45,7 +45,7 @@ test.each([
 
     // not shown after blur
     act(() => theInput.blur());
-    await waitForElementToBeRemoved(tooltip);
+    expect(tooltip).not.toBeInTheDocument();
   }
 );
 

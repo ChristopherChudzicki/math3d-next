@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from "react";
 import MuiPopper, { PopperProps } from "@mui/material/Popper";
-import { styled } from "@mui/material/styles";
+import { styled, useTheme } from "@mui/material/styles";
 import Fade from "@mui/material/Fade";
 import classNames from "classnames";
 import usePointerAway from "./usePointerAway";
@@ -124,7 +124,7 @@ const Popover: React.FC<PopoverProps> = ({
   children,
   className,
   placement,
-  transitionDuration = 300,
+  transitionDuration,
   onPointerAway = noOp,
   modifiers = [],
 }) => {
@@ -150,30 +150,34 @@ const Popover: React.FC<PopoverProps> = ({
     ],
     [arrowEl, modifiers]
   );
-
   const containerRef = useRef<HTMLDivElement>(null);
   usePointerAway(containerRef, onPointerAway);
+  const contents = (
+    <div ref={containerRef} className={classNames(style.container, className)}>
+      <Arrow ref={setArrowEl} className="MuiPopper-arrow" />
+      {children}
+    </div>
+  );
+  const theme = useTheme();
+  const duration = transitionDuration ?? theme.transitions.duration.standard;
+  const transition = duration > 0;
   return (
     <>
       <Popper
         modifiers={allModifiers}
         open={visible}
         anchorEl={anchorEl}
-        transition
+        transition={transition}
         disablePortal
         placement={placement}
       >
-        {({ TransitionProps }) => (
-          <Fade {...TransitionProps} timeout={transitionDuration}>
-            <div
-              ref={containerRef}
-              className={classNames(style.container, className)}
-            >
-              <Arrow ref={setArrowEl} className="MuiPopper-arrow" />
-              {children}
-            </div>
-          </Fade>
-        )}
+        {transition
+          ? ({ TransitionProps }) => (
+              <Fade {...TransitionProps} timeout={duration}>
+                {contents}
+              </Fade>
+            )
+          : contents}
       </Popper>
       {React.cloneElement(trigger, { ref: setAnchorEl })}
     </>
