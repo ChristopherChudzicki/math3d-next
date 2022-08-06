@@ -78,6 +78,7 @@ test.each([
 
     user.clear(coordsInput);
     await typeText(coordsInput, coordsString);
+
     expect(mathScope.evalErrors.size).toBe(numEvalErrors);
     expect(mathScope.parseErrors.size).toBe(numParseErrors);
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);
