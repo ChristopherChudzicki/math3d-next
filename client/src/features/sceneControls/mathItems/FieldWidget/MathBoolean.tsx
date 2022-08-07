@@ -1,4 +1,5 @@
-import { Switch, Tooltip } from "antd";
+import { Switch } from "antd";
+import Tooltip from "@mui/material/Tooltip";
 import classNames from "classnames";
 import React, { useCallback, useMemo, useState } from "react";
 import { SubtleButton } from "util/components";
@@ -12,7 +13,6 @@ import { IWidgetProps } from "./types";
 import styles from "./widget.module.css";
 
 const LITERAL_BOOLEAN_STRINGS = ["false", "true"];
-const TOOLTIP_TRIGGERS = ["hover", "focus"];
 
 const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const { name, label, value, onChange, error, style, className, itemId } =
@@ -63,15 +63,17 @@ const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
       onBlur={props.onBlur}
       onFocus={props.onFocus}
     >
-      <Tooltip trigger={TOOLTIP_TRIGGERS} title={tooltipTitle}>
-        <Switch
-          aria-label={`Toggle property: ${label}`}
-          checked={result}
-          disabled={shouldUseExpression}
-          size="small"
-          className="me-2"
-          onChange={handleSwitchChange}
-        />
+      <Tooltip arrow title={tooltipTitle}>
+        <span>
+          <Switch
+            aria-label={`Toggle property: ${label}`}
+            checked={result}
+            disabled={shouldUseExpression}
+            size="small"
+            className="me-2"
+            onChange={handleSwitchChange}
+          />
+        </span>
       </Tooltip>
       {shouldUseExpression && (
         <SmallMathField

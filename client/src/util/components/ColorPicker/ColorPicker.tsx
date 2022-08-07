@@ -1,5 +1,6 @@
 import { WarningOutlined } from "@ant-design/icons";
-import { Input, Tooltip } from "antd";
+import { Input } from "antd";
+import Tooltip from "@mui/material/Tooltip";
 import classNames from "classnames";
 import React, {
   MouseEventHandler,
@@ -50,7 +51,7 @@ const ColorSquare: React.FC<ColorSquareProps> = (props) => {
 };
 
 const ColorWarning: React.FC<{ value: string }> = ({ value }) => (
-  <Tooltip title={`${value} is not a valid color`}>
+  <Tooltip arrow title={`${value} is not a valid color`}>
     <WarningOutlined />
   </Tooltip>
 );
