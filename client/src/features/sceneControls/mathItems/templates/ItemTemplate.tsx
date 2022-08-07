@@ -46,7 +46,7 @@ const ItemTemplate = <T extends MIT>({
 
   return (
     <form
-      title={`Settings for ${item.properties.description}`}
+      aria-label={`Settings for ${item.properties.description}`}
       className={styles.container}
       data-testid={testId(item.id)}
       onFocus={onFocus}
