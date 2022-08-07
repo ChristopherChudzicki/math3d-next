@@ -25,7 +25,9 @@ const setup = async (initialValue: string) => {
 
   const mathScope = store.getState().mathItems.mathScope();
   await user.click(await screen.findByTitle("Show Settings"));
-  const settings = await screen.findByTitle("Settings");
+  const settingsTitle = await screen.findByText("Settings", { exact: false });
+  const settings = settingsTitle.closest("section");
+  assertInstanceOf(settings, HTMLElement);
 
   const getValue = () => mathScope.results.get(id("visible"));
   const getEvalError = () => mathScope.evalErrors.get(id("visible"));

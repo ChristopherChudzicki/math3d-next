@@ -71,6 +71,7 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
   const [visible, setVisible] = useToggle(false);
   return (
     <Popover
+      as="section"
       visible={visible}
       className={styles.container}
       onPointerAway={setVisible.off}
