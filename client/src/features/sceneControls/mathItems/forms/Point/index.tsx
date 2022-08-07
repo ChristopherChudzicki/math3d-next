@@ -25,7 +25,7 @@ const Point: MathItemForm<MIT.Point> = ({ item }) => {
     <ItemTemplate item={item} config={config}>
       <FieldWidget
         widget={WidgetType.MathValue}
-        title={configProps.coords.label}
+        label={configProps.coords.label}
         name="coords"
         error={errors.coords}
         value={item.properties.coords}

@@ -73,7 +73,7 @@ test.each([
     const { store } = await renderTestApp(`/${scene.id}`);
 
     const mathScope = store.getState().mathItems.mathScope();
-    const coordsInput = await screen.findByTitle("Coordinates");
+    const coordsInput = await screen.findByLabelText("Coordinates");
 
     pasteText(coordsInput, coordsString);
     expect(mathScope.evalErrors.size).toBe(numEvalErrors);

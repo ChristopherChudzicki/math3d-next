@@ -36,7 +36,7 @@ const ColorExprInput: React.FC<ColorExprProps> = (props) => {
     <div>
       <FieldWidget
         widget={WidgetType.MathValue}
-        title="Color Expression"
+        label="Color Expression"
         name="colorExpr"
         onChange={onChange}
         error={colorExpr}

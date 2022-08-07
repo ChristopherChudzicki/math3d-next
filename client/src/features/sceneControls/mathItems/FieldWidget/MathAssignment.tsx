@@ -12,7 +12,7 @@ import ErrorTooltip from "./ErrorTooltip";
 import style from "./widget.module.css";
 
 const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const { onChange, name, value, error, title, className, ...others } = props;
+  const { onChange, name, value, error, label, className, ...others } = props;
   const [lhs, rhs] = splitAtFirstEquality(value);
   const onChangeLHS: OnMathFieldChange = useCallback(
     (e) => {
@@ -44,13 +44,13 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const lhsError = hasLhsError ? error : undefined;
   const rhsError = hasRhsError ? error : undefined;
 
-  const lhsTitle = `${title} (left-hand side)`;
-  const rhsTitle = `${title} (right-hand side)`;
+  const lhsLabel = `${label} (left-hand side)`;
+  const rhsLabel = `${label} (right-hand side)`;
   return (
     <div {...others} className={classNames(className, "d-flex")}>
       <ErrorTooltip error={lhsError}>
         <SmallMathField
-          title={lhsTitle}
+          aria-label={lhsLabel}
           className={classNames(
             style["field-widget"],
             style["adjust-margin-for-border"],
@@ -64,7 +64,7 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
       <ReadonlyMathField value="=" />
       <ErrorTooltip error={rhsError}>
         <SmallMathField
-          title={rhsTitle}
+          aria-label={rhsLabel}
           className={classNames(
             style["field-widget"],
             style["adjust-margin-for-border"],

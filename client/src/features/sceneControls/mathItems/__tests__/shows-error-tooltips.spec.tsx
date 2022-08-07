@@ -14,17 +14,17 @@ const queryTooltip = () => screen.queryByRole("tooltip");
 
 test.each([
   {
-    getInput: () => screen.getByTitle("Value (left-hand side)"),
+    getInput: () => screen.getByLabelText("Value (left-hand side)"),
     item: makeItem(MIT.Variable, { value: "a + = 1" }),
     errMatcher: /Invalid assignment left-hand side/,
   },
   {
-    getInput: () => screen.getByTitle("Value (right-hand side)"),
+    getInput: () => screen.getByLabelText("Value (right-hand side)"),
     item: makeItem(MIT.Variable, { value: "a = 1 + " }),
     errMatcher: /Unexpected end of expression/,
   },
   {
-    getInput: () => screen.getByTitle("Coordinates"),
+    getInput: () => screen.getByLabelText("Coordinates"),
     item: makeItem(MIT.Point, { coords: "[1,2,3] + " }),
     errMatcher: /Unexpected end of expression/,
   },
@@ -54,7 +54,7 @@ test("Widget does not show a tooltip when focused if no error", async () => {
   const scene = seedDb.withSceneFromItems([item]);
   await renderTestApp(`/${scene.id}`);
 
-  const theInput = screen.getByTitle("Coordinates");
+  const theInput = screen.getByLabelText("Coordinates");
 
   // not initially shown
   expect(queryTooltip()).not.toBeInTheDocument();

@@ -6,7 +6,8 @@ interface IWidgetProps {
    */
   itemId?: string;
   name: string;
-  title: string;
+  label: string;
+  "aria-labelledby"?: string;
   value: string;
   onChange: OnWidgetChange;
   style?: React.CSSProperties;

@@ -7,7 +7,7 @@ import { IWidgetProps } from "./types";
 import styles from "./widget.module.css";
 
 const MathValue: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const { name, title, value, onChange, error, style, className } = props;
+  const { name, label, value, onChange, error, style, className } = props;
 
   const handleChange: OnMathFieldChange = useCallback(
     (e) => {
@@ -22,9 +22,10 @@ const MathValue: React.FC<IWidgetProps> = (props: IWidgetProps) => {
 
   return (
     <SmallMathField
+      aria-labelledby={props["aria-labelledby"]}
       onBlur={props.onBlur}
       onFocus={props.onFocus}
-      title={title}
+      aria-label={label}
       style={style}
       className={classNames(
         styles["field-widget"],

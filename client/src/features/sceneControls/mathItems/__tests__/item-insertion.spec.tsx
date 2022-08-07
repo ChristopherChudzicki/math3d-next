@@ -6,7 +6,7 @@ test("setup renders 9 points in 3 folders", async () => {
   await renderTestApp("/test_folders");
 
   const descriptions = screen
-    .getAllByTitle("Description")
+    .getAllByLabelText("Description")
     .map((x) => x.textContent);
   const expected = "F1 P1a P1b F2 P2a P2b F3 P3a P3b".split(" ");
   expect(descriptions).toStrictEqual(expected);
@@ -15,7 +15,7 @@ test("setup renders 9 points in 3 folders", async () => {
 const activateItem = (description: string): (() => Promise<void>) => {
   return async () => {
     const item = getItemByDescription(description);
-    const descriptionField = within(item).getByTitle("Description");
+    const descriptionField = within(item).getByLabelText("Description");
     await user.click(descriptionField);
   };
 };
@@ -66,7 +66,7 @@ test.each([
   await addItem(itemToAdd);
 
   const descriptions = screen
-    .getAllByTitle("Description")
+    .getAllByLabelText("Description")
     .map((x) => x.textContent);
 
   expect(descriptions).toHaveLength(10);
@@ -89,7 +89,7 @@ test("Newly inserted item is activated", async () => {
   await addItem("Line");
 
   const descriptions = screen
-    .getAllByTitle("Description")
+    .getAllByLabelText("Description")
     .map((x) => x.textContent);
 
   const expected = "F1 P1a P1b F2 P2a Point Line P2b F3 P3a P3b";
@@ -100,7 +100,7 @@ test("Newly inserted item is activated", async () => {
 test("Inserting items after deletion---active item resets", async () => {
   await renderTestApp("/test_folders");
   const p2b = getItemByDescription("P2b");
-  const description = within(p2b).getByTitle("Description");
+  const description = within(p2b).getByLabelText("Description");
   await user.click(description);
   await clickRemoveItem(p2b);
   await addItem("Line");
@@ -108,7 +108,7 @@ test("Inserting items after deletion---active item resets", async () => {
   expect(line).toBeDefined();
 
   const descriptions = screen
-    .getAllByTitle("Description")
+    .getAllByLabelText("Description")
     .map((x) => x.textContent);
 
   /**
