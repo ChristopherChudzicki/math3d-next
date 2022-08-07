@@ -14,7 +14,6 @@ import {
  */
 const longClick = async (element: HTMLElement, ms: number) => {
   jest.useFakeTimers();
-  element.focus();
   user.pointer({ keys: "[MouseLeft>]", target: element }); // press the left mouse button
   jest.advanceTimersByTime(ms);
   user.pointer({ keys: "[/MouseLeft]", target: element }); // release the left mouse button

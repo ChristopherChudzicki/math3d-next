@@ -2,22 +2,14 @@ import { MathItem, MathItemType as MIT } from "configs";
 import {
   makeItem,
   nodeId,
-  patchConsoleError,
+  pasteText,
   renderTestApp,
   screen,
   seedDb,
-  typeText,
   user,
   within,
 } from "test_util";
 import { assertNotNil } from "util/predicates";
-
-/**
- * Antd is causing react to complain that some things aren't wrapped in act(...).
- * But everything seems to be working fine, so let's just ignore that error.
- */
-const restore = patchConsoleError([{ ignoreData: "ForwardRef(TabNavList)" }]);
-afterAll(restore);
 
 test.each([
   {
@@ -82,8 +74,8 @@ test.each([
 
     const mathScope = store.getState().mathItems.mathScope();
     const coordsInput = await screen.findByTitle("Coordinates");
-    user.clear(coordsInput);
-    await typeText(coordsInput, coordsString);
+
+    pasteText(coordsInput, coordsString);
     expect(mathScope.evalErrors.size).toBe(numEvalErrors);
     expect(mathScope.parseErrors.size).toBe(numParseErrors);
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);

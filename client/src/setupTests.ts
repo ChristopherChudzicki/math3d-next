@@ -1,3 +1,5 @@
+import failOnConsole from "jest-fail-on-console";
+
 import { seedDb } from "test_util";
 import { server } from "./test_util/msw/server";
 
@@ -6,6 +8,12 @@ import { server } from "./test_util/msw/server";
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import "@testing-library/jest-dom";
+
+failOnConsole({
+  silenceMessage: (error) => {
+    return [/ForwardRef\(TabNavList\)/].some((regex) => regex.test(error));
+  },
+});
 
 /**
  * Jest does not support enough ShadowDOM for MathLive to function properly, so

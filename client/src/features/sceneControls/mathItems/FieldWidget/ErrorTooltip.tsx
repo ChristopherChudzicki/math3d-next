@@ -1,6 +1,6 @@
-import React, { useCallback, useRef } from "react";
-import { Tooltip } from "antd";
+import React from "react";
 import { useToggle } from "util/hooks";
+import { Popover } from "util/components";
 import styles from "./ErrorTooltip.module.css";
 
 interface Props {
@@ -9,31 +9,24 @@ interface Props {
 }
 
 const ErrorTooltip: React.FC<Props> = ({ error, children }) => {
-  const container = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useToggle(false);
   const showTooltip = isFocused && !!error?.message;
-  const getPopupContainer = useCallback(() => {
-    if (!container.current) {
-      throw new Error("Container ref should not be null");
-    }
-    return container.current;
-  }, []);
   return (
-    <div
-      className="position-relative"
-      ref={container}
-      onFocus={setIsFocused.on}
-      onBlur={setIsFocused.off}
+    <Popover
+      className={styles["error-tooltip"]}
+      trigger={
+        <div
+          className="position-relative"
+          onFocus={setIsFocused.on}
+          onBlur={setIsFocused.off}
+        >
+          {children}
+        </div>
+      }
+      visible={showTooltip}
     >
-      <Tooltip
-        getPopupContainer={getPopupContainer}
-        overlayClassName={styles["error-tooltip"]}
-        title={error?.message}
-        visible={showTooltip}
-      >
-        {children}
-      </Tooltip>
-    </div>
+      {error?.message}
+    </Popover>
   );
 };
 

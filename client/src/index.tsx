@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap-utilities.css";
 import "antd/dist/antd.min.css";
 import "./index.css";
 
+import { createTheme } from "@mui/material/styles";
 import * as math from "mathjs";
 import React from "react";
 import { createRoot } from "react-dom/client";
@@ -29,11 +30,12 @@ const root = createRoot(container!);
 
 const store = getStore();
 const queryClient = new QueryClient();
+const theme = createTheme();
 
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <AppRoutes queryClient={queryClient} store={store} />
+      <AppRoutes queryClient={queryClient} store={store} theme={theme} />
     </BrowserRouter>
   </React.StrictMode>
 );

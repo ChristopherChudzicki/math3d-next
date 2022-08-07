@@ -1,3 +1,4 @@
+import { act } from "@testing-library/react";
 import { MathItemType as MIT } from "configs";
 import {
   makeItem,
@@ -38,15 +39,13 @@ test.each([
     expect(queryTooltip()).not.toBeInTheDocument();
 
     // shown when focused
-    theInput.focus();
+    act(() => theInput.focus());
     const tooltip = await waitFor(getTooltip);
     expect(tooltip).toHaveTextContent(errMatcher);
 
     // not shown after blur
-    theInput.blur();
-    await waitFor(() => {
-      expect(queryTooltip()).not.toBeVisible();
-    });
+    act(() => theInput.blur());
+    expect(tooltip).not.toBeInTheDocument();
   }
 );
 
@@ -61,12 +60,14 @@ test("Widget does not show a tooltip when focused if no error", async () => {
   expect(queryTooltip()).not.toBeInTheDocument();
 
   // shown when focused
-  theInput.focus();
+  act(() => theInput.focus());
+  // if the tooltip was going to show, it would show asynchronously in reaction
+  // to the focus event. So wait just a sec before checking.
   await shortSleep();
   expect(queryTooltip()).not.toBeInTheDocument();
 
   // not shown after blur
-  theInput.blur();
+  act(() => theInput.blur());
   await shortSleep();
   expect(queryTooltip()).not.toBeInTheDocument();
 });

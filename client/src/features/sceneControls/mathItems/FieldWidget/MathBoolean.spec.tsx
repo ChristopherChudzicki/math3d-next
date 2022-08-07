@@ -1,22 +1,15 @@
+import { waitFor } from "@testing-library/react";
 import { MathItemType as MIT } from "configs";
 import {
   assertInstanceOf,
   makeItem,
   nodeId,
-  patchConsoleError,
   renderTestApp,
   screen,
   seedDb,
   user,
   within,
 } from "test_util";
-
-/**
- * Antd is causing react to complain about StrictMode.
- * But everything seems to be working fine, so let's just ignore that error.
- */
-const restore = patchConsoleError([{ ignoreStr: "in StrictMode." }]);
-afterAll(restore);
 
 /**
  * Sets up test scenario for MathBoolean:
@@ -53,11 +46,20 @@ const setup = async (initialValue: string) => {
     assertInstanceOf(toggle, HTMLButtonElement);
     return toggle;
   };
+  const queryReset = (): HTMLElement | null => {
+    const title = "Reset: Visible";
+    return within(settings).queryByTitle(title);
+  };
+
   const findUseExpr = async (): Promise<HTMLButtonElement> => {
     const title = "Use Expression for: Visible";
     const toggle = await within(settings).findByTitle(title);
     assertInstanceOf(toggle, HTMLButtonElement);
     return toggle;
+  };
+  const queryUseExpr = (): HTMLElement | null => {
+    const title = "Use Expression for: Visible";
+    return within(settings).queryByTitle(title);
   };
 
   const findExpr = async (): Promise<HTMLTextAreaElement> => {
@@ -76,7 +78,9 @@ const setup = async (initialValue: string) => {
     findToggle,
     findReset,
     findUseExpr,
+    queryUseExpr,
     findExpr,
+    queryReset,
   };
 };
 
@@ -131,16 +135,20 @@ test('Clicking "Use Expression" shows MathField and Reset', async () => {
   await expect(findUseExpr).rejects.toBeTruthy();
 });
 
-test('Shows "Reset" button when switch is disabled', async () => {
-  const { findExpr, findReset, findUseExpr } = await setup("!false");
+test('Shows "Reset" button when switch is computed', async () => {
+  const { queryReset, queryUseExpr, findExpr, findReset, findUseExpr } =
+    await setup("!false");
+  const expr = await findExpr();
+  const reset = await findReset();
 
-  await expect(findUseExpr).rejects.toBeTruthy();
-  await user.click(await findReset(), { pointerEventsCheck: 0 });
+  expect(queryUseExpr()).toBe(null);
+  await user.click(reset, { pointerEventsCheck: 0 });
   expect(await findUseExpr()).toHaveTextContent("Use Expression");
-
   await findUseExpr();
-  await expect(findExpr).rejects.toBeTruthy();
-  await expect(findReset).rejects.toBeTruthy();
+  await waitFor(() => {
+    expect(expr).not.toBeVisible();
+  });
+  expect(queryReset()).toBe(null);
 });
 
 test("Clicking reset resets widget", async () => {

@@ -3,8 +3,9 @@
   grid-template-columns: auto minmax(100px, auto);
   grid-template-rows: auto auto;
 
-  row-gap: 6pt;
-  column-gap: 6pt;
+  align-items: baseline;
+  row-gap: 0.5em;
+  column-gap: 2em;
 }
 
 .settings-button {
@@ -13,8 +14,27 @@
   width: 35px;
 }
 
-.settings-title {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+.close {
+  position:absolute;
+  top:0;
+  right:0
+}
+
+.container {
+  position: relative;
+  padding-top: 0.5em;
+  padding-bottom:1em;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.title {
+  margin:0;
+}
+
+.divider {
+  border-width: 0 0 1px 0;
+  border-color: var(--color-secondary-4);
+  margin-left: -1em;
+  margin-right: -1em;
 }

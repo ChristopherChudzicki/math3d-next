@@ -1,4 +1,5 @@
 import { render, waitFor } from "@testing-library/react";
+import { createTheme } from "@mui/material/styles";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { getStore } from "store/store";
@@ -26,10 +27,20 @@ const renderTestApp = async (
   const initialEntries: InitialEntry[] = [initialRoute];
   const store = getStore();
   const queryClient = new QueryClient();
+  const theme = createTheme({
+    transitions: {
+      create: () => "none",
+      /**
+       * This prevents our Popover from using transitions. Transitions in our
+       * Popover seemed to be causing un-acted state updates in our tests.
+       */
+      duration: { standard: 0 },
+    },
+  });
   const result = render(
     <React.StrictMode>
       <MemoryRouter initialEntries={initialEntries}>
-        <AppRoutes queryClient={queryClient} store={store} />
+        <AppRoutes queryClient={queryClient} store={store} theme={theme} />
       </MemoryRouter>
     </React.StrictMode>
   );

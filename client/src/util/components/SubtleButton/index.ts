@@ -1,5 +1,4 @@
-import SubtleButton, { Props } from "./SubtleButton";
+import SubtleButton, { SubtleButtonProps } from "./SubtleButton";
 
-export type SubtleButtonProps = Props;
-
+export type { SubtleButtonProps };
 export default SubtleButton;
