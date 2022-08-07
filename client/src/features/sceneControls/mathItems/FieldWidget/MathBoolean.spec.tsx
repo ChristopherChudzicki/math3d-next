@@ -1,8 +1,4 @@
-import {
-  prettyDOM,
-  waitFor,
-  waitForElementToBeRemoved,
-} from "@testing-library/react";
+import { waitFor } from "@testing-library/react";
 import { MathItemType as MIT } from "configs";
 import {
   assertInstanceOf,
