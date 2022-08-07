@@ -43,7 +43,7 @@ const SettingsForm = <T extends MathItemType>({
     });
   }, [config, item.properties]);
   return (
-    <div className={styles["settings-form"]} title="Settings">
+    <div className={styles["settings-form"]}>
       {fields.map(({ field, value }) => (
         <React.Fragment key={field.name}>
           <label id={`${item.id}-${field.name}`} htmlFor={field.name}>
