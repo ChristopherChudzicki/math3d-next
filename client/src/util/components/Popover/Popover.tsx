@@ -100,6 +100,7 @@ const Arrow = styled("div")({
 });
 
 interface PopoverProps {
+  as?: React.ElementType;
   children: React.ReactNode;
   className?: string;
   header?: React.ReactNode;
@@ -119,6 +120,7 @@ const noOp = () => {};
  * interface.
  */
 const Popover: React.FC<PopoverProps> = ({
+  as: Component = "div",
   visible,
   trigger,
   children,
@@ -153,10 +155,13 @@ const Popover: React.FC<PopoverProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   usePointerAway(containerRef, onPointerAway);
   const contents = (
-    <div ref={containerRef} className={classNames(style.container, className)}>
+    <Component
+      ref={containerRef}
+      className={classNames(style.container, className)}
+    >
       <Arrow ref={setArrowEl} className="MuiPopper-arrow" />
       {children}
-    </div>
+    </Component>
   );
   const theme = useTheme();
   const duration = transitionDuration ?? theme.transitions.duration.standard;

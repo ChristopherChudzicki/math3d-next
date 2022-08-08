@@ -9,7 +9,7 @@ const addItem = async (itemTypeLabel: string): Promise<void> => {
 };
 
 const getItemByDescription = (description: string): HTMLElement =>
-  screen.getByTitle(`Settings for ${description}`);
+  screen.getByLabelText(`Settings for ${description}`);
 
 const clickRemoveItem = async (itemElement: HTMLElement): Promise<void> => {
   const remove = within(itemElement).getByLabelText("Remove Item");

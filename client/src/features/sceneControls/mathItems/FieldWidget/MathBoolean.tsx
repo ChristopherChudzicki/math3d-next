@@ -1,4 +1,5 @@
-import { Switch, Tooltip } from "antd";
+import { Switch } from "antd";
+import Tooltip from "@mui/material/Tooltip";
 import classNames from "classnames";
 import React, { useCallback, useMemo, useState } from "react";
 import { SubtleButton } from "util/components";
@@ -12,10 +13,9 @@ import { IWidgetProps } from "./types";
 import styles from "./widget.module.css";
 
 const LITERAL_BOOLEAN_STRINGS = ["false", "true"];
-const TOOLTIP_TRIGGERS = ["hover", "focus"];
 
 const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const { name, title, value, onChange, error, style, className, itemId } =
+  const { name, label, value, onChange, error, style, className, itemId } =
     props;
   assertNotNil(itemId);
   const [shouldUseExpression, setShouldUseExpression] = useState(
@@ -58,23 +58,26 @@ const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
 
   return (
     <div
+      aria-labelledby={props["aria-labelledby"]}
       className={classNames("d-flex", "align-items-center", className)}
       onBlur={props.onBlur}
       onFocus={props.onFocus}
     >
-      <Tooltip trigger={TOOLTIP_TRIGGERS} title={tooltipTitle}>
-        <Switch
-          title={`Toggle property: ${title}`}
-          checked={result}
-          disabled={shouldUseExpression}
-          size="small"
-          className="me-2"
-          onChange={handleSwitchChange}
-        />
+      <Tooltip arrow title={tooltipTitle}>
+        <span>
+          <Switch
+            aria-label={`Toggle property: ${label}`}
+            checked={result}
+            disabled={shouldUseExpression}
+            size="small"
+            className="me-2"
+            onChange={handleSwitchChange}
+          />
+        </span>
       </Tooltip>
       {shouldUseExpression && (
         <SmallMathField
-          title={`Math Expression for: ${title}`}
+          aria-label={`Math Expression for: ${label}`}
           style={style}
           className={classNames(
             styles["adjust-margin-for-border"],
@@ -87,19 +90,11 @@ const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
         </SmallMathField>
       )}
       {shouldUseExpression ? (
-        <SubtleButton
-          title={`Reset: ${title}`}
-          onClick={handleReset}
-          className={styles["detail-text"]}
-        >
+        <SubtleButton onClick={handleReset} className={styles["detail-text"]}>
           Reset
         </SubtleButton>
       ) : (
-        <SubtleButton
-          title={`Use Expression for: ${title}`}
-          onClick={useExpression}
-          className={styles["detail-text"]}
-        >
+        <SubtleButton onClick={useExpression} className={styles["detail-text"]}>
           Use Expression
         </SubtleButton>
       )}

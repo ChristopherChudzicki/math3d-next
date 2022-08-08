@@ -37,7 +37,7 @@ test.each([
   async ({ route, expectHidden }) => {
     await renderTestApp(route);
 
-    const els = screen.getAllByTitle("Description");
+    const els = screen.getAllByLabelText("Description");
     expect(els[4]).toBeVisible();
 
     expect(isHidden(getItemByDescription("P2a"))).toBe(expectHidden);
@@ -49,7 +49,7 @@ test("Collapsing and expanding folders", async () => {
   await renderTestApp("/test_folders");
   await user.click(getExpandCollapse(getItemByDescription("F2")));
 
-  const els = screen.getAllByTitle("Description");
+  const els = screen.getAllByLabelText("Description");
   expect(els[4]).toBeVisible();
 
   const folder = getItemByDescription("F2");
@@ -81,7 +81,7 @@ test("Inserting into a collapsed folder expands the folder", async () => {
 
   await addItem("Point");
   const descriptions = screen
-    .getAllByTitle("Description")
+    .getAllByLabelText("Description")
     .map((x) => x.textContent);
 
   const expected = "F1 P1a P1b F2 P2a P2b Point F3 P3a P3b";

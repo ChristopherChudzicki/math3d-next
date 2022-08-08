@@ -8,7 +8,7 @@ import styles from "./widget.module.css";
 const EXTRA_WIDTH = 20;
 
 const AutosizeText: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const { onChange, name, title, error, itemId, style = {}, ...others } = props;
+  const { onChange, name, label, error, itemId, style = {}, ...others } = props;
   const { width, height, ...styleWithoutSize } = style;
   const onInputChange: React.ChangeEventHandler<HTMLTextAreaElement> =
     useCallback(
@@ -23,10 +23,11 @@ const AutosizeText: React.FC<IWidgetProps> = (props: IWidgetProps) => {
     );
   return (
     <TextareaAutoWidthHeight
+      aria-labelledby={props["aria-labelledby"]}
       onBlur={props.onBlur}
       onFocus={props.onFocus}
       extraWidth={EXTRA_WIDTH}
-      title={title}
+      aria-label={label}
       className={classNames(
         { [styles["has-error"]]: error },
         styles["field-widget"],

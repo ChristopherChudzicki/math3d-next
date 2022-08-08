@@ -11,8 +11,8 @@ import {
 import { UnmetDependencyError } from "util/MathScope";
 
 const getParamNameInputs = (): HTMLTextAreaElement[] => {
-  const zeroth = screen.getByTitle("Name for 1st parameter");
-  const first = screen.getByTitle("Name for 2nd parameter");
+  const zeroth = screen.getByLabelText("Name for 1st parameter");
+  const first = screen.getByLabelText("Name for 2nd parameter");
   assertInstanceOf(zeroth, HTMLTextAreaElement);
   assertInstanceOf(first, HTMLTextAreaElement);
   return [zeroth, first];

@@ -58,7 +58,7 @@ const RangedMathItemForm = ({
     <ItemTemplate item={item} config={config}>
       <FieldWidget
         widget={WidgetType.MathValue}
-        title={config.properties.expr.label}
+        label={config.properties.expr.label}
         name="expr"
         error={errors.expr}
         value={exprRef.current.rhs}
@@ -71,7 +71,7 @@ const RangedMathItemForm = ({
             nameInput={
               <FieldWidget
                 widget={WidgetType.MathValue}
-                title={`Name for ${ordinal(i + 1)} parameter`}
+                label={`Name for ${ordinal(i + 1)} parameter`}
                 name={`${ordinal(i + 1)}-parameter-name`}
                 error={paramErrors[i]}
                 value={exprRef.current.params[i]}
@@ -81,8 +81,10 @@ const RangedMathItemForm = ({
             rangeInput={
               <FieldWidget
                 widget={WidgetType.MathValue}
-                // @ts-expect-error need to figure out this error
-                title={config.properties[rangeProp].label}
+                label={
+                  // @ts-expect-error need to figure out this error
+                  config.properties[rangeProp].label
+                }
                 name={rangeProp}
                 error={errors[rangeProp]}
                 // @ts-expect-error need to figure out this error

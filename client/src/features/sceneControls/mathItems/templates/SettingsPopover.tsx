@@ -43,13 +43,16 @@ const SettingsForm = <T extends MathItemType>({
     });
   }, [config, item.properties]);
   return (
-    <div className={styles["settings-form"]} title="Settings">
+    <div className={styles["settings-form"]}>
       {fields.map(({ field, value }) => (
         <React.Fragment key={field.name}>
-          <label htmlFor={field.name}>{field.label}</label>
+          <label id={`${item.id}-${field.name}`} htmlFor={field.name}>
+            {field.label}
+          </label>
           <FieldWidget
+            aria-labelledby={`${item.id}-${field.name}`}
             itemId={item.id}
-            title={field.label}
+            label={field.label}
             error={errors[field.name]}
             widget={field.widget}
             name={field.name}
@@ -71,6 +74,7 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
   const [visible, setVisible] = useToggle(false);
   return (
     <Popover
+      as="section"
       visible={visible}
       className={styles.container}
       onPointerAway={setVisible.off}
@@ -78,7 +82,7 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
       trigger={
         <SubtleButton
           onClick={setVisible.toggle}
-          title="Show Settings"
+          aria-label="Show Settings"
           className={styles["settings-button"]}
         >
           <SettingOutlined />

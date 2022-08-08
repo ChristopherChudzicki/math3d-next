@@ -20,7 +20,7 @@ const Variable: MathItemForm<MIT.Variable> = ({ item }) => {
   return (
     <ItemTemplate item={item} config={config}>
       <MathAssignment
-        title={configProps.value.label}
+        label={configProps.value.label}
         error={errors.value}
         name="value"
         value={item.properties.value}

@@ -46,7 +46,7 @@ const ItemTemplate = <T extends MIT>({
 
   return (
     <form
-      title={`Settings for ${item.properties.description}`}
+      aria-label={`Settings for ${item.properties.description}`}
       className={styles.container}
       data-testid={testId(item.id)}
       onFocus={onFocus}
@@ -69,7 +69,7 @@ const ItemTemplate = <T extends MIT>({
       <div className={styles["grid-center-top"]}>
         <FieldWidget
           widget={WidgetType.AutosizeText}
-          title={config.properties.description.label}
+          label={config.properties.description.label}
           name="description"
           value={item.properties.description}
           onChange={onWidgetChange}

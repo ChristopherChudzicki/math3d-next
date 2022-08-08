@@ -5,7 +5,7 @@ import { IWidgetProps, WidgetChangeEvent } from "./types";
 import styles from "./widget.module.css";
 
 const TextInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const { onChange, name, title, error, itemId, ...others } = props;
+  const { onChange, name, label, error, itemId, ...others } = props;
   const onInputChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
       const event: WidgetChangeEvent = {
@@ -20,7 +20,8 @@ const TextInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
     <input
       onBlur={props.onBlur}
       onFocus={props.onFocus}
-      title={title}
+      aria-label={label}
+      aria-labelledby={props["aria-labelledby"]}
       className={classNames(
         { [styles["has-error"]]: error },
         styles["field-widget"],
