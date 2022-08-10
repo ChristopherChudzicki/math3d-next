@@ -1,8 +1,10 @@
 import React, { useCallback, useState } from "react";
 import {
+  defaultDropAnimationSideEffects,
   DndContext,
   DndContextProps,
   DragOverlay,
+  DropAnimation,
   KeyboardSensor,
   UniqueIdentifier,
   useSensor,
@@ -100,6 +102,16 @@ interface MultiContainerDndContextProps {
   renderActive: (id: UniqueIdentifier) => React.ReactNode;
 }
 
+const dropAnimationConfig: DropAnimation = {
+  sideEffects: defaultDropAnimationSideEffects({
+    styles: {
+      active: {
+        opacity: "0.5",
+      },
+    },
+  }),
+};
+
 const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
   children,
   renderActive,
@@ -133,7 +145,9 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
       onDragEnd={handleDragEnd}
     >
       {children}
-      <DragOverlay>{activeItemId && renderActive(activeItemId)}</DragOverlay>
+      <DragOverlay dropAnimation={dropAnimationConfig}>
+        {activeItemId && renderActive(activeItemId)}
+      </DragOverlay>
     </DndContext>
   );
 };
