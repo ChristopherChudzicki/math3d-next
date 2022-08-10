@@ -1,6 +1,6 @@
 import type { PointerEvent } from "react";
 import { PointerSensor } from "@dnd-kit/core";
-import type { PointerSensorOptions, SensorProps } from "@dnd-kit/core";
+import type { PointerSensorOptions } from "@dnd-kit/core";
 
 const always = () => true;
 
@@ -8,14 +8,7 @@ interface CustomPointerSensorOptions extends PointerSensorOptions {
   isDraggableElement?: (element: HTMLElement) => boolean;
 }
 
-type CustomPointerSensorProps = SensorProps<CustomPointerSensorOptions>;
-
 export default class CustomPointerSensor extends PointerSensor {
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-  constructor(props: CustomPointerSensorProps) {
-    super(props);
-  }
-
   static activators = [
     {
       eventName: "onPointerDown" as const,
