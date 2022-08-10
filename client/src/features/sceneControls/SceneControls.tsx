@@ -1,19 +1,11 @@
 import { useScene } from "api/scene";
-import classNames from "classnames";
-import { MathItemType } from "configs";
+
 import React, { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "store/hooks";
-import { assertIsMathItemType } from "util/predicates";
+import { useAppDispatch } from "store/hooks";
 
 import AddObjectButton from "./AddObjectButton";
 import ControlTabs from "./controlTabs";
-import {
-  FolderWithContents,
-  mathItemsSlice,
-  select,
-  actions,
-} from "./mathItems";
-import style from "./SceneControls.module.css";
+import { mathItemsSlice, MathItemsList } from "./mathItems";
 
 const { actions: itemActions } = mathItemsSlice;
 
@@ -28,35 +20,6 @@ const AxesNav: React.FC = () => (
     Axes &amp; <br /> Camera
   </div>
 );
-
-const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
-  const { children = [] } = useAppSelector(select.subtree(rootId));
-  const mathItems = useAppSelector(select.mathItems());
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    dispatch(actions.initializeMathScope());
-  }, [dispatch]);
-  return (
-    <>
-      {children.map((folder, folderIndex) => {
-        const childItems =
-          folder.children?.map(({ id }) => mathItems[id]) ?? [];
-        const folderItem = mathItems[folder.id];
-        assertIsMathItemType(folderItem.type, MathItemType.Folder);
-        return (
-          <FolderWithContents
-            contentsClassName={classNames({
-              [style["last-folder"]]: folderIndex === children.length - 1,
-            })}
-            key={folderItem.id}
-            folder={folderItem}
-            items={childItems}
-          />
-        );
-      })}
-    </>
-  );
-};
 
 const SceneControls: React.FC<Props> = (props) => {
   const { sceneId } = props;

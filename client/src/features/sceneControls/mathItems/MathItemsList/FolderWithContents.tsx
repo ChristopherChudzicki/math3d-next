@@ -3,6 +3,7 @@ import React from "react";
 import { MathItem, MathItemType } from "configs";
 import classNames from "classnames";
 import { useCollapsible } from "util/hooks";
+import { SortableList } from "util/components/dnd";
 import MathItemComponent from "../MathItem";
 import { useMathResults } from "../mathScope";
 import style from "./FolderWithContents.module.css";
@@ -34,9 +35,11 @@ const FolderWithContents: React.FC<Props> = ({
           ref={collapseRef}
           className={classNames(style.folder, contentsClassName)}
         >
-          {items.map((item) => (
-            <MathItemComponent key={item.id} item={item} />
-          ))}
+          <SortableList>
+            {items.map((item) => (
+              <MathItemComponent key={item.id} item={item} />
+            ))}
+          </SortableList>
         </div>
       )}
     </>
