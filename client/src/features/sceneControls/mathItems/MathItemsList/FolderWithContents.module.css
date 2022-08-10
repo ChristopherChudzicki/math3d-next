@@ -1,5 +1,0 @@
-.folder {
-  transition-property: height;
-  transition-duration: var(--transition-duration);
-  transition-timing-function: var(--transition-timing-function);
-}

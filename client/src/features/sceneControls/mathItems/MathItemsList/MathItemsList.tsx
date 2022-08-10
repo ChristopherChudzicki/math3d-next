@@ -39,7 +39,7 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
   );
   return (
     <MultiContainerDndContext renderActive={renderActive}>
-      <SortableList>
+      <SortableList draggingItemClassName={style.dragging}>
         {folders.map((folder, folderIndex) => {
           const childItems = itemsByFolder.get(folder.id) ?? [];
           const folderItem = mathItems[folder.id];

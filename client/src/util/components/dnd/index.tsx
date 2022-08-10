@@ -17,27 +17,48 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import classNames from "classnames";
 import PointerSensor from "./PointerSensor";
 
 interface SortableItemProps {
   id: UniqueIdentifier;
+  draggingClassName?: string;
   className?: string;
   children?: React.ReactNode;
   as?: React.ElementType;
 }
 
 const SortableItem: React.FC<SortableItemProps> = (props) => {
-  const { as: Component = "div" } = props;
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({
-      id: props.id,
-    });
+  const { as: Component = "div", draggingClassName, className } = props;
+  const {
+    isDragging,
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({
+    id: props.id,
+  });
   const style = {
     transform: CSS.Translate.toString(transform),
     transition,
   };
   return (
-    <Component ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <Component
+      className={classNames(
+        className,
+        draggingClassName
+          ? {
+              [draggingClassName]: isDragging,
+            }
+          : {}
+      )}
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+    >
       {props.children}
     </Component>
   );
@@ -47,6 +68,7 @@ interface SortableListProps {
   as?: React.ElementType;
   className?: string;
   itemClassName?: string;
+  draggingItemClassName?: string;
   children: React.ReactElement[];
 }
 
@@ -69,7 +91,12 @@ const SortableList: React.FC<SortableListProps> = (
         {children.map((child) => {
           const { key } = child;
           return (
-            <SortableItem className={props.itemClassName} key={key} id={key}>
+            <SortableItem
+              className={props.itemClassName}
+              draggingClassName={props.draggingItemClassName}
+              key={key}
+              id={key}
+            >
               {child}
             </SortableItem>
           );
@@ -80,6 +107,7 @@ const SortableList: React.FC<SortableListProps> = (
 };
 
 type OnDragStart = NonNullable<DndContextProps["onDragStart"]>;
+type OnDragEnd = NonNullable<DndContextProps["onDragEnd"]>;
 
 const interactiveTags = [
   "textarea",
@@ -100,6 +128,11 @@ const isNotInteractive = (el: HTMLElement) => !isInteractive(el);
 interface MultiContainerDndContextProps {
   children?: React.ReactNode;
   renderActive: (id: UniqueIdentifier) => React.ReactNode;
+  onDragStart?: DndContextProps["onDragStart"];
+  onDragMove?: DndContextProps["onDragMove"];
+  onDragOver?: DndContextProps["onDragOver"];
+  onDragEnd?: DndContextProps["onDragEnd"];
+  onDragCancel?: DndContextProps["onDragCancel"];
 }
 
 const dropAnimationConfig: DropAnimation = {
@@ -115,6 +148,11 @@ const dropAnimationConfig: DropAnimation = {
 const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
   children,
   renderActive,
+  onDragStart,
+  onDragCancel,
+  onDragEnd,
+  onDragMove,
+  onDragOver,
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -131,18 +169,33 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
   const [activeItemId, setActiveItemId] = useState<null | UniqueIdentifier>(
     null
   );
-  const handleDragStart: OnDragStart = useCallback((event) => {
-    const { id } = event.active;
-    setActiveItemId(id);
-  }, []);
-  const handleDragEnd: OnDragStart = useCallback((_event) => {
-    setActiveItemId(null);
-  }, []);
+  const handleDragStart: OnDragStart = useCallback(
+    (event) => {
+      const { id } = event.active;
+      setActiveItemId(id);
+      if (onDragStart) {
+        onDragStart(event);
+      }
+    },
+    [onDragStart]
+  );
+  const handleDragEnd: OnDragEnd = useCallback(
+    (event) => {
+      setActiveItemId(null);
+      if (onDragEnd) {
+        onDragEnd(event);
+      }
+    },
+    [onDragEnd]
+  );
   return (
     <DndContext
       sensors={sensors}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onDragMove={onDragMove}
+      onDragOver={onDragOver}
+      onDragCancel={onDragCancel}
     >
       {children}
       <DragOverlay dropAnimation={dropAnimationConfig}>
@@ -152,7 +205,7 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
   );
 };
 
-export { SortableList, SortableItem, MultiContainerDndContext };
+export { SortableList, MultiContainerDndContext };
 
 export type {
   UniqueIdentifier,

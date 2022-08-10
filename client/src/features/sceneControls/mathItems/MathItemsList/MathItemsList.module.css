@@ -1,3 +1,13 @@
 .last-folder {
   border-bottom: 1px solid var(--color-secondary-7);
 }
+
+.dragging {
+  filter: opacity(0.25);
+}
+
+.folder {
+  transition-property: height;
+  transition-duration: var(--transition-duration);
+  transition-timing-function: var(--transition-timing-function);
+}
