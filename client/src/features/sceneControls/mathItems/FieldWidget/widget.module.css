@@ -1,10 +1,23 @@
-.has-error {
-  border-bottom: 1pt solid var(--color-error) !important;
-  margin-bottom: -1pt;
+.has-error, .field-widget.has-error{
+  padding-right:0pt;
+  padding-left: 0pt;
+  padding-bottom: 2pt;
+  background-image: linear-gradient(
+    to top,
+    var(--color-error),
+    var(--color-error) 1px,
+    transparent 1px,
+    transparent
+  );
 }
-.has-error:focus {
-  border-bottom: 2pt solid var(--color-error) !important;
-  margin-bottom: -1pt;
+.has-error:focus-within, .field-widget.has-error:focus-within {
+  background-image: linear-gradient(
+    to top,
+    var(--color-error),
+    var(--color-error) 2pt,
+    transparent 2pt,
+    transparent
+  );
 }
 
 .static-math {
