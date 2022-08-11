@@ -9,6 +9,8 @@ import {
   UniqueIdentifier,
   useSensor,
   useSensors,
+  Active,
+  Over,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -16,6 +18,7 @@ import {
   useSortable,
   verticalListSortingStrategy,
   SortableData,
+  hasSortableData,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import classNames from "classnames";
@@ -211,9 +214,11 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
   );
 };
 
-export { SortableList, MultiContainerDndContext };
+export { SortableList, MultiContainerDndContext, hasSortableData };
 
 export type {
+  Active,
+  Over,
   OnDragStart,
   OnDragMove,
   OnDragOver,
