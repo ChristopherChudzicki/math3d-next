@@ -20,6 +20,7 @@ interface MathItemsState {
 
 interface Subtree {
   id: string;
+  parent: Subtree | null;
   children?: Subtree[];
 }
 

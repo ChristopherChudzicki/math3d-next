@@ -15,6 +15,7 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
+  SortableData,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import classNames from "classnames";
@@ -65,6 +66,7 @@ const SortableItem: React.FC<SortableItemProps> = (props) => {
 };
 
 interface SortableListProps {
+  id?: string;
   as?: React.ElementType;
   className?: string;
   itemClassName?: string;
@@ -84,6 +86,7 @@ const SortableList: React.FC<SortableListProps> = (
   const children = props.children as KeyedElement[];
   return (
     <SortableContext
+      id={props.id}
       strategy={verticalListSortingStrategy}
       items={children.map((child) => child.key)}
     >
@@ -216,6 +219,7 @@ export type {
   OnDragOver,
   OnDragEnd,
   OnDragCancel,
+  SortableData,
   UniqueIdentifier,
   SortableListProps,
   SortableItemProps,

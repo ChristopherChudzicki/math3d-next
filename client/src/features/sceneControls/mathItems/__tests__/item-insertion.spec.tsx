@@ -24,7 +24,7 @@ test.each([
   {
     beforeAdd: () => {},
     itemToAdd: "Point",
-    expected: "F1 P1a P1b F2 P2a P2b F3 P3a P3b Point",
+    expected: "F1 P1a P1b F2 P2a P2b F3 Point P3a P3b",
     description: "[active item = None] Point insertion occurs at end",
   },
   {
@@ -36,7 +36,7 @@ test.each([
   {
     beforeAdd: activateItem("F2"),
     itemToAdd: "Point",
-    expected: "F1 P1a P1b F2 P2a P2b Point F3 P3a P3b",
+    expected: "F1 P1a P1b F2 Point P2a P2b F3 P3a P3b",
     description:
       "[active item = folder] items are inserted at end of active folder",
   },
@@ -115,7 +115,7 @@ test("Inserting items after deletion---active item resets", async () => {
    * P2b was active, but then we removed it.
    * ActiveItem should reset, so Line should be at the bottom of the last folder
    */
-  const expected = "F1 P1a P1b F2 P2a F3 P3a P3b Line";
+  const expected = "F1 P1a P1b F2 P2a F3 Line P3a P3b";
   expect(descriptions).toHaveLength(9);
   expect(descriptions).toStrictEqual(expected.split(" "));
 });

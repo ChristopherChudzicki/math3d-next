@@ -33,15 +33,20 @@ const getSubtree = (
     throw new Error("Depth should not be greater than 2.");
   }
   const children = state.order[node.id].map((id) => {
-    return getSubtree(state, { id }, depth + 1);
+    return getSubtree(state, { id, parent: null }, depth + 1);
   });
-  return { ...node, children };
+  const nodeWithChildren = { ...node, children };
+  children.forEach((child) => {
+    // eslint-disable-next-line no-param-reassign
+    child.parent = nodeWithChildren;
+  });
+  return nodeWithChildren;
 };
 
 const subtree =
   (rootId: string): SelectorReturn<Subtree> =>
   (state: RootState) =>
-    getSubtree(state.mathItems, { id: rootId });
+    getSubtree(state.mathItems, { id: rootId, parent: null });
 
 const isActive =
   (id: string): SelectorReturn<boolean> =>

@@ -35,7 +35,7 @@ const FolderWithContents: React.FC<Props> = ({
           ref={collapseRef}
           className={classNames(style.folder, contentsClassName)}
         >
-          <SortableList draggingItemClassName={style.dragging}>
+          <SortableList id={folder.id} draggingItemClassName={style.dragging}>
             {items.map((item) => (
               <MathItemComponent key={item.id} item={item} />
             ))}
