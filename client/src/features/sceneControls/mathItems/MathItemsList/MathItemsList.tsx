@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useCallback } from "react";
-import { UniqueIdentifier } from "@dnd-kit/core";
 import classNames from "classnames";
 import { MathItemType, MathItem } from "configs";
 import { useAppSelector, useAppDispatch } from "store/hooks";
 import { assertIsMathItemType } from "util/predicates";
 import { MultiContainerDndContext, SortableList } from "util/components/dnd";
+import type { UniqueIdentifier, OnDragOver } from "util/components/dnd";
 import FolderWithContents from "./FolderWithContents";
 import MathItemUI from "../MathItem";
 import { select, actions } from "../mathItemsSlice";
@@ -37,8 +37,14 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
     },
     [mathItems, itemsByFolder]
   );
+  const handleDragOver: OnDragOver = useCallback((e) => {
+    console.log(e);
+  }, []);
   return (
-    <MultiContainerDndContext renderActive={renderActive}>
+    <MultiContainerDndContext
+      onDragOver={handleDragOver}
+      renderActive={renderActive}
+    >
       <SortableList draggingItemClassName={style.dragging}>
         {folders.map((folder, folderIndex) => {
           const childItems = itemsByFolder.get(folder.id) ?? [];

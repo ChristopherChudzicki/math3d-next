@@ -107,7 +107,10 @@ const SortableList: React.FC<SortableListProps> = (
 };
 
 type OnDragStart = NonNullable<DndContextProps["onDragStart"]>;
+type OnDragMove = NonNullable<DndContextProps["onDragMove"]>;
+type OnDragOver = NonNullable<DndContextProps["onDragOver"]>;
 type OnDragEnd = NonNullable<DndContextProps["onDragEnd"]>;
+type OnDragCancel = NonNullable<DndContextProps["onDragCancel"]>;
 
 const interactiveTags = [
   "textarea",
@@ -208,6 +211,11 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
 export { SortableList, MultiContainerDndContext };
 
 export type {
+  OnDragStart,
+  OnDragMove,
+  OnDragOver,
+  OnDragEnd,
+  OnDragCancel,
   UniqueIdentifier,
   SortableListProps,
   SortableItemProps,
