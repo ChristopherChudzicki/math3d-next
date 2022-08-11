@@ -13,11 +13,30 @@
 
 .field-widget {
   font-size: 1.25em;
-  border-top: none;
-  border-left: none;
-  border-right: none;
-  border-bottom: 1pt solid var(--color-secondary);
-  
+  border: none;
+  margin-left:2pt;
+  margin-right:2pt;
+  padding-right:0pt;
+  padding-left: 0pt;
+  padding-bottom: 2pt;
+  background-image: linear-gradient(
+    to top,
+    var(--color-secondary),
+    var(--color-secondary) 1px,
+    transparent 1px,
+    transparent
+  );
+}
+.field-widget:focus-within {
+  font-size: 1.25em;
+  border: none;
+  background-image: linear-gradient(
+    to top,
+    var(--color-primary),
+    var(--color-primary) 2pt,
+    transparent 2pt,
+    transparent
+  );
 }
 
 textarea.field-widget {
@@ -25,16 +44,11 @@ textarea.field-widget {
 }
 
 
+.field-widget {
+  box-sizing: border-box;
+}
 .field-widget:focus {
   outline: none;
-  border-bottom: 2pt solid var(--color-primary);
-}
-
-.adjust-margin-for-border {
-  margin-bottom: -1pt;
-}
-.adjust-margin-for-border:focus {
-  margin-bottom: -2pt;
 }
 
 .detail-text {
