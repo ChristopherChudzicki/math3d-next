@@ -72,6 +72,19 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
         newIndex: overData.sortable.index,
       });
       if (activeContainer === newContainer) {
+        /**
+         * dnd-kit's "sortingStrategy" takes care of UI transitions within a
+         * container. So if the draggable didn't change containers, we can wait
+         * until dragEnd to dispatch the action that actually reorders stuff in
+         * the store.
+         *
+         * This prevents some jumping that I encountered, and also reduces the
+         * overall number of redux actions. (Which isn't really important,
+         * except for decluttering the logs.)
+         *
+         * We store the action in a ref for use onDragEnd because the endEvent
+         * might have over:null if cursor is moved off of a droppable.
+         */
         actionRef.current = action;
         return;
       }
