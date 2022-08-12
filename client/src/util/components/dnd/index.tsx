@@ -11,6 +11,8 @@ import {
   useSensors,
   Active,
   Over,
+  Data,
+  useDroppable,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -26,6 +28,7 @@ import PointerSensor from "./PointerSensor";
 
 interface SortableItemProps {
   id: UniqueIdentifier;
+  data?: Data;
   draggingClassName?: string;
   className?: string;
   children?: React.ReactNode;
@@ -43,6 +46,7 @@ const SortableItem: React.FC<SortableItemProps> = (props) => {
     transition,
   } = useSortable({
     id: props.id,
+    data: props.data,
   });
   const style = {
     transform: CSS.Translate.toString(transform),
@@ -69,12 +73,11 @@ const SortableItem: React.FC<SortableItemProps> = (props) => {
 };
 
 interface SortableListProps {
+  items: UniqueIdentifier[];
   id?: string;
   as?: React.ElementType;
   className?: string;
-  itemClassName?: string;
-  draggingItemClassName?: string;
-  children: React.ReactElement[];
+  children?: React.ReactNode;
 }
 
 type KeyedElement = React.ReactElement & { key: string };
@@ -83,31 +86,14 @@ const SortableList: React.FC<SortableListProps> = (
   props: SortableListProps
 ) => {
   const { as: Component = "div" } = props;
-  if (props.children.some((child) => !child.key)) {
-    throw new Error(`All children of SortableList must have keys.`);
-  }
   const children = props.children as KeyedElement[];
   return (
     <SortableContext
       id={props.id}
       strategy={verticalListSortingStrategy}
-      items={children.map((child) => child.key)}
+      items={props.items}
     >
-      <Component className={props.className}>
-        {children.map((child) => {
-          const { key } = child;
-          return (
-            <SortableItem
-              className={props.itemClassName}
-              draggingClassName={props.draggingItemClassName}
-              key={key}
-              id={key}
-            >
-              {child}
-            </SortableItem>
-          );
-        })}
-      </Component>
+      <Component className={props.className}>{children}</Component>
     </SortableContext>
   );
 };
@@ -169,7 +155,7 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
         tolerance: 1000,
         delay: 100,
       },
-      isDraggableElement: isNotInteractive,
+      isDraggableElement: (el) => isNotInteractive(el) && !el.dataset.noDrag,
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -214,9 +200,39 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
   );
 };
 
-export { SortableList, MultiContainerDndContext, hasSortableData };
+interface DroppableAreaProps {
+  id: UniqueIdentifier;
+  data?: Data;
+  children: React.ReactNode;
+  className?: string;
+  noDrag?: boolean;
+}
+
+const DroppableArea: React.FC<DroppableAreaProps> = ({
+  children,
+  data,
+  id,
+  className,
+  noDrag,
+}) => {
+  const { setNodeRef } = useDroppable({ id, data });
+  return (
+    <div data-no-drag={noDrag} className={className} ref={setNodeRef}>
+      {children}
+    </div>
+  );
+};
+
+export {
+  DroppableArea,
+  SortableList,
+  SortableItem,
+  MultiContainerDndContext,
+  hasSortableData,
+};
 
 export type {
+  Data,
   Active,
   Over,
   OnDragStart,

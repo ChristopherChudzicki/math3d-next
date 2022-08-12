@@ -6,16 +6,117 @@ import { assertIsMathItemType } from "util/predicates";
 import {
   MultiContainerDndContext,
   SortableList,
-  SortableData,
+  SortableItem,
   hasSortableData,
+  DroppableArea,
+} from "util/components/dnd";
+import type {
+  SortableData,
   Active,
   Over,
+  Data,
+  UniqueIdentifier,
+  OnDragOver,
 } from "util/components/dnd";
-import type { UniqueIdentifier, OnDragOver } from "util/components/dnd";
-import FolderWithContents from "./FolderWithContents";
+import { useCollapsible } from "util/hooks";
 import MathItemUI from "../MathItem";
-import { select, actions } from "../mathItemsSlice";
+import { select, actions, useMathScope } from "../mathItemsSlice";
 import style from "./MathItemsList.module.css";
+import { useMathResults } from "../mathScope";
+
+type TypeData =
+  | {
+      readonly type: "item" | "folder";
+    }
+  | {
+      readonly type: "placeholder";
+      for: string;
+    };
+const itemData: TypeData = {
+  type: "item",
+};
+const folderData: TypeData = {
+  type: "folder",
+};
+
+const assertTyped: <T extends Active | Over>(
+  target: T
+) => asserts target is T & {
+  data: { current: Data<TypeData> };
+} = (target) => {
+  if (target.data.current && "type" in target.data.current) return;
+  throw new Error("Data should have property 'type'");
+};
+
+const assertSortable: <T extends Active | Over>(
+  target: T
+) => asserts target is T & {
+  target: { current: Data<SortableData & TypeData> };
+} = (target) => {
+  if (!hasSortableData(target)) {
+    throw new Error("Should have SortableData");
+  }
+};
+
+const placeholderId = (folderId: string) => `placeholder-${folderId}`;
+
+interface FolderProps {
+  folder: MathItem<MathItemType.Folder>;
+  items: MathItem[];
+  contentsClassName?: string;
+}
+
+const EVALUATED_PROPS = ["isCollapsed"];
+
+const FolderWithContents: React.FC<FolderProps> = ({
+  folder,
+  items,
+  contentsClassName,
+}) => {
+  const mathScope = useMathScope();
+  const evaluated = useMathResults(mathScope, folder.id, EVALUATED_PROPS);
+  const isOpen = !evaluated.isCollapsed;
+  const hasEvaluated = evaluated.isCollapsed !== undefined;
+  const collapseRef = useCollapsible(isOpen);
+  const itemIds = useMemo(() => items.map((item) => item.id), [items]);
+  return (
+    <>
+      <MathItemUI item={folder} />
+      {hasEvaluated && (
+        <div
+          ref={collapseRef}
+          className={classNames(style.folder, contentsClassName)}
+        >
+          <SortableList id={folder.id} items={itemIds}>
+            {items.length === 0 && (
+              <DroppableArea
+                data={{
+                  type: "placeholder",
+                  for: folder.id,
+                }}
+                noDrag
+                className={style.placeholder}
+                id={placeholderId(folder.id)}
+              >
+                <em>Empty folder</em>
+              </DroppableArea>
+            )}
+            {items.map((item) => (
+              <SortableItem
+                key={item.id}
+                id={item.id}
+                data={itemData}
+                draggingClassName={style.dragging}
+              >
+                <MathItemUI item={item} />
+              </SortableItem>
+            ))}
+          </SortableList>
+        </div>
+      )}
+    </>
+  );
+};
 
 const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
   const root = useAppSelector(select.subtree(rootId));
@@ -47,30 +148,41 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
   );
   const actionRef = useRef<null | ReturnType<typeof actions.move>>(null);
 
-  const reorder = useCallback(
-    (active: Active, over: Over) => {
-      if (!hasSortableData(active) || !hasSortableData(over)) {
-        throw new Error("Should have sortable data.");
-      }
+  const handleDragOver: OnDragOver = useCallback(
+    (e) => {
+      const { active, over } = e;
+      if (!over) return;
+      assertTyped(active);
+      assertTyped(over);
       if (typeof active.id !== "string" || typeof over.id !== "string") {
         throw new Error("ids should be strings");
       }
-      const activeData = active.data.current as SortableData;
-      const overData = over.data.current as SortableData;
+
+      assertSortable(active);
+      const activeData = active.data.current;
       const activeContainer = activeData.sortable.containerId;
-      const newContainer = overData.sortable.containerId;
-      if (
-        (activeContainer === rootId || newContainer === rootId) &&
-        !(activeContainer === rootId && newContainer === rootId)
-      ) {
-        return;
+
+      let newContainer: string;
+      let newIndex: number;
+      if (over.data.current.type === "placeholder") {
+        newContainer = over.data.current.for;
+        newIndex = 0;
+      } else {
+        assertSortable(over);
+        const overData = over.data.current;
+        newContainer = overData.sortable.containerId;
+        if (overData.type !== activeData.type) {
+          return;
+        }
+        newIndex = overData.sortable.index;
       }
 
       const action = actions.move({
         id: active.id,
         newParent: newContainer as string,
-        newIndex: overData.sortable.index,
+        newIndex,
       });
+
       if (activeContainer === newContainer) {
         /**
          * dnd-kit's "sortingStrategy" takes care of UI transitions within a
@@ -90,39 +202,42 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
       }
       dispatch(action);
     },
-    [rootId, dispatch]
-  );
-  const handleDragOver: OnDragOver = useCallback(
-    (e) => {
-      if (!e.over) return;
-      reorder(e.active, e.over);
-    },
-    [reorder]
+    [dispatch]
   );
   const handleDragEnd = useCallback(() => {
     if (actionRef.current) dispatch(actionRef.current);
     actionRef.current = null;
   }, [dispatch]);
+  const folderIds = useMemo(
+    () => folders.map((folder) => folder.id),
+    [folders]
+  );
   return (
     <MultiContainerDndContext
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
       renderActive={renderActive}
     >
-      <SortableList id={rootId} draggingItemClassName={style.dragging}>
+      <SortableList id={rootId} items={folderIds}>
         {folders.map((folder, folderIndex) => {
           const childItems = itemsByFolder.get(folder.id) ?? [];
           const folderItem = mathItems[folder.id];
           assertIsMathItemType(folderItem.type, MathItemType.Folder);
           return (
-            <FolderWithContents
+            <SortableItem
               key={folderItem.id}
-              contentsClassName={classNames({
-                [style["last-folder"]]: folderIndex === folders.length - 1,
-              })}
-              folder={folderItem}
-              items={childItems}
-            />
+              id={folderItem.id}
+              data={folderData}
+              draggingClassName={style.dragging}
+            >
+              <FolderWithContents
+                contentsClassName={classNames({
+                  [style["last-folder"]]: folderIndex === folders.length - 1,
+                })}
+                folder={folderItem}
+                items={childItems}
+              />
+            </SortableItem>
           );
         })}
       </SortableList>
