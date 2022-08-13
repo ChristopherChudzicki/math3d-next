@@ -23,6 +23,6 @@
     "baseUrl": "src",
     "types": ["jest"]
   },
-  "include": ["src"],
+  "include": ["src", "playwright.config.ts"],
   "exclude": ["./node_modules", "./**/node_modules/*"]
 }

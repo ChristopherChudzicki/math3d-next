@@ -51,6 +51,7 @@ module.exports = {
           "**/__tests__/**/*.ts",
           "**/*.spec.ts",
           "**/*.spec.tsx",
+          "playwright.config.ts",
           "**/*.stories.tsx",
           "src/setupTests.ts",
           "src/test_util/**/*.ts",

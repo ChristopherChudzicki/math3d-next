@@ -10,7 +10,7 @@
     "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix",
     "start": "react-scripts start",
     "storybook": "start-storybook -p 6006 -s public",
-    "test": "react-scripts test --testPathIgnorePatterns __utils__"
+    "test": "react-scripts test --testPathIgnorePatterns __utils__ tests-e2e"
   },
   "browserslist": {
     "production": [
@@ -62,6 +62,7 @@
   "devDependencies": {
     "@faker-js/faker": "^7.3.0",
     "@mswjs/data": "^0.10.1",
+    "@playwright/test": "^1.25.0",
     "@storybook/addon-actions": "6.5.10",
     "@storybook/addon-essentials": "6.5.10",
     "@storybook/addon-links": "6.5.10",
