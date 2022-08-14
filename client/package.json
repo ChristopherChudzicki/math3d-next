@@ -43,7 +43,7 @@
     "history": "^5.3.0",
     "lodash": "4.17.21",
     "mathjs": "11.0.1",
-    "mathlive": "0.77.0",
+    "mathlive": "0.78.1",
     "ordinal": "^1.0.3",
     "ramda": "0.28.0",
     "react": "18.2.0",
