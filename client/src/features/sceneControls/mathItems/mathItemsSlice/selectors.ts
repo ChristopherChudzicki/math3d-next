@@ -1,7 +1,7 @@
 import type { SelectorReturn, RootState } from "store/store";
 import type { MathItem } from "configs";
 import MathScope from "util/MathScope";
-import type { MathItemsState } from "./mathItems.slice";
+import type { MathItemsState, Subtree } from "./interfaces";
 
 const mathItems =
   (): SelectorReturn<MathItemsState["items"]> => (state: RootState) =>
@@ -11,11 +11,6 @@ const mathItem =
   (id: string): SelectorReturn<MathItem> =>
   (state: RootState) =>
     state.mathItems.items[id];
-
-interface Subtree {
-  id: string;
-  children?: Subtree[];
-}
 
 const getSubtree = (
   state: MathItemsState,
@@ -38,15 +33,20 @@ const getSubtree = (
     throw new Error("Depth should not be greater than 2.");
   }
   const children = state.order[node.id].map((id) => {
-    return getSubtree(state, { id }, depth + 1);
+    return getSubtree(state, { id, parent: null }, depth + 1);
   });
-  return { ...node, children };
+  const nodeWithChildren = { ...node, children };
+  children.forEach((child) => {
+    // eslint-disable-next-line no-param-reassign
+    child.parent = nodeWithChildren;
+  });
+  return nodeWithChildren;
 };
 
 const subtree =
   (rootId: string): SelectorReturn<Subtree> =>
   (state: RootState) =>
-    getSubtree(state.mathItems, { id: rootId });
+    getSubtree(state.mathItems, { id: rootId, parent: null });
 
 const isActive =
   (id: string): SelectorReturn<boolean> =>
@@ -57,3 +57,4 @@ const mathScope = (): SelectorReturn<MathScope> => (state: RootState) =>
   state.mathItems.mathScope();
 
 export { subtree, isActive, mathItems, mathItem, mathScope };
+export type { Subtree };

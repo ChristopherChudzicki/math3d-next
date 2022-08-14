@@ -53,7 +53,6 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
           aria-label={lhsLabel}
           className={classNames(
             style["field-widget"],
-            style["adjust-margin-for-border"],
             { [style["has-error"]]: hasLhsError },
             className
           )}
@@ -67,7 +66,6 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
           aria-label={rhsLabel}
           className={classNames(
             style["field-widget"],
-            style["adjust-margin-for-border"],
             { [style["has-error"]]: hasRhsError },
             className,
             "flex-1"

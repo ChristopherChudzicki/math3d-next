@@ -10,23 +10,7 @@ import {
   syncItemsToMathScope,
   removeItemsFromMathScope,
 } from "./syncMathScope";
-
-interface MathItemsState {
-  items: {
-    [id: string]: MathItem;
-  };
-  order: Record<string, string[]>;
-  activeItemId: string | undefined;
-  /**
-   * We need to sync the expressions in MathItem.properties with the MathScope.
-   * Putting mathScope in the redux store is a very convenient way to do this
-   * since actions are the centralized place for editing MathItem properties.
-   *
-   * This is a nonserializable value, so comes with some caveats. See
-   * https://redux-toolkit.js.org/usage/usage-guide#working-with-non-serializable-data
-   */
-  mathScope: () => MathScope;
-}
+import type { MathItemsState } from "./interfaces";
 
 const makeMathScope = () => new MathScope({ parse: latexParser.parse });
 
@@ -68,6 +52,11 @@ const getParent = (order: MathItemsState["order"], itemId: string): string => {
   return parentFolderId;
 };
 
+const insertAtIndex = <T>(array: T[], item: T, index: number) => {
+  const insertionIndex = index < 0 ? array.length : index;
+  array.splice(insertionIndex, 0, item);
+};
+
 const mathItemsSlice = createSlice({
   name: "mathItems",
   initialState: getInitialState,
@@ -105,12 +94,9 @@ const mathItemsSlice = createSlice({
       const insertAfterId = isFolder ? activeFolderId : state.activeItemId;
       assertNotNil(targetFolderId);
       const folderItems = state.order[targetFolderId];
-      const insertAfterIndex = folderItems.findIndex(
-        (itemId) => itemId === insertAfterId
-      );
-      const insertionIndex =
-        insertAfterIndex < 0 ? folderItems.length : insertAfterIndex + 1;
-      state.order[targetFolderId].splice(insertionIndex, 0, id);
+      const atIndex =
+        folderItems.findIndex((itemId) => itemId === insertAfterId) + 1;
+      insertAtIndex(state.order[targetFolderId], id, atIndex);
       if (isFolder) {
         state.order[id] = [];
       }
@@ -154,6 +140,15 @@ const mathItemsSlice = createSlice({
 
       const item = state.items[id];
       syncItemsToMathScope(state.mathScope(), [item]);
+    },
+    move: (
+      state,
+      action: PayloadAction<{ id: string; newParent: string; newIndex: number }>
+    ) => {
+      const { id, newParent, newIndex } = action.payload;
+      const oldParent = getParent(state.order, id);
+      state.order[oldParent] = state.order[oldParent].filter((x) => x !== id);
+      insertAtIndex(state.order[newParent], id, newIndex);
     },
   },
 });

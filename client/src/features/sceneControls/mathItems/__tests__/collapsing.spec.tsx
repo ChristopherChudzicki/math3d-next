@@ -84,7 +84,7 @@ test("Inserting into a collapsed folder expands the folder", async () => {
     .getAllByLabelText("Description")
     .map((x) => x.textContent);
 
-  const expected = "F1 P1a P1b F2 P2a P2b Point F3 P3a P3b";
+  const expected = "F1 P1a P1b F2 Point P2a P2b F3 P3a P3b";
   expect(descriptions).toHaveLength(10);
   expect(descriptions).toStrictEqual(expected.split(" "));
 

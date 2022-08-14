@@ -30,8 +30,7 @@ const AutosizeText: React.FC<IWidgetProps> = (props: IWidgetProps) => {
       aria-label={label}
       className={classNames(
         { [styles["has-error"]]: error },
-        styles["field-widget"],
-        styles["adjust-margin-for-border"]
+        styles["field-widget"]
       )}
       name={name}
       onChange={onInputChange}

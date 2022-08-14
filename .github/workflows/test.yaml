@@ -23,9 +23,12 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: "16.x"
           cache: "npm"
           cache-dependency-path: client/package-lock.json
-      - run: npm ci --prefix client
-      - run: npm run test --prefix client -- --watchAll false
-      - run: npm run lint --prefix client
+      - run: npm ci
+        working-directory: client
+      - run: npm run test -- --watchAll false
+        working-directory: client
+      - run: npm run lint
+        working-directory: client
