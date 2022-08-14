@@ -7,6 +7,7 @@ import {
   screen,
   seedDb,
   user,
+  allowActWarnings,
 } from "test_util";
 
 /**
@@ -58,13 +59,19 @@ test("short clicks on indicator toggle visibility", async () => {
 });
 
 test("long press opens color picker dialog", async () => {
+  /**
+   * Having trouble determing the origin of act warnings for this test.
+   * They started appearing with user-events upgrade from 14.3.0 -> 14.4.3
+   */
+  allowActWarnings();
+
   const { findButton, findDialog, getCalculatedProp, findAllSwatches } =
     await setup();
   expect(getCalculatedProp("visible")).toBe(true);
   await expect(findDialog).rejects.toBeDefined();
   longClick(await findButton(), 1000);
   expect(await findDialog()).toBeDefined();
-  // Still visible; long-press does not fire normal click event
+  // Still visible; long-press does not trigger normal click handler
   expect(getCalculatedProp("visible")).toBe(true);
   const swatches = await findAllSwatches();
   expect(swatches).toHaveLength(11);
