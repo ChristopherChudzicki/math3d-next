@@ -41,11 +41,12 @@ const drag = async (
 const getItem = (
   page: Page,
   folderDescription: string,
-  itemDescription: string
+  itemDescription?: string
 ) => {
   const folder = page.locator("css=[aria-roledescription='sortable']", {
     hasText: folderDescription,
   });
+  if (!itemDescription) return folder
   return folder.locator("css=[aria-roledescription='sortable']", {
     hasText: itemDescription,
   });
@@ -71,27 +72,54 @@ const initialOrder = [
   "P3b",
 ];
 
-test("homepage has Playwright in title and get started link linking to the intro page", async ({
-  page,
-}) => {
+test("Dragging item X after item Y", async ({ page }) => {
   await page.goto("/test_folders");
-  const source = getItem(page, "F2", "P2b");
-  const target = getItem(page, "F3", "P3a");
+  const source = getItem(page, "F2", "P2a");
+  const target = getItem(page, "F3", "P3b");
 
   await expect(await getAllItemDescriptions(page)).toEqual(initialOrder);
   await drag(page, source, target);
   const after = await getAllItemDescriptions(page);
-  expect(after).toEqual([
-    "F1",
-    "P1a",
-    "P1b",
-    "F2",
-    "P2a",
-    "F3",
-    "P3a",
-    "P2b",
-    "P3b",
-  ]);
+  expect(after).toEqual("F1 P1a P1b F2 P2b F3 P3a P3b P2a".split(" "));
+
+  await page.pause();
+});
+
+test("Dragging item X before item Y", async ({ page }) => {
+  await page.goto("/test_folders");
+  const source = getItem(page, "F2", "P2a");
+  const target = getItem(page, "F3", "P3b");
+
+  await expect(await getAllItemDescriptions(page)).toEqual(initialOrder);
+  await drag(page, source, target, { targetOffset: { x: 5, y: -50 } });
+  const after = await getAllItemDescriptions(page);
+  expect(after).toEqual("F1 P1a P1b F2 P2b F3 P3a P2a P3b".split(" "));
+
+  await page.pause();
+});
+
+test("Dragging folder X after folder Y", async ({ page }) => {
+  await page.goto("/test_folders");
+  const source = getItem(page, "F2");
+  const target = getItem(page, "F3");
+
+  await expect(await getAllItemDescriptions(page)).toEqual(initialOrder);
+  await drag(page, source, target);
+  const after = await getAllItemDescriptions(page);
+  expect(after).toEqual("F1 P1a P1b F3 P3a P3b F2 P2a P2b".split(" "));
+
+  await page.pause();
+});
+
+test("Dragging folder X before folder Y", async ({ page }) => {
+  await page.goto("/test_folders");
+  const source = getItem(page, "F3");
+  const target = getItem(page, "F2");
+
+  await expect(await getAllItemDescriptions(page)).toEqual(initialOrder);
+  await drag(page, source, target);
+  const after = await getAllItemDescriptions(page);
+  expect(after).toEqual("F1 P1a P1b F3 P3a P3b F2 P2a P2b".split(" "));
 
   await page.pause();
 });
