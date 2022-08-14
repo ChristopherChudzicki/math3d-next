@@ -21,6 +21,8 @@ jobs:
       working-directory: client
     - name: Run Playwright tests
       run: npx playwright test
+      env:
+        NODE_ENV: CI_E2E
       working-directory: client
     - uses: actions/upload-artifact@v2
       if: always()

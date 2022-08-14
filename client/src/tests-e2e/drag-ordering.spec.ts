@@ -46,7 +46,7 @@ const getItem = (
   const folder = page.locator("css=[aria-roledescription='sortable']", {
     hasText: folderDescription,
   });
-  if (!itemDescription) return folder
+  if (!itemDescription) return folder;
   return folder.locator("css=[aria-roledescription='sortable']", {
     hasText: itemDescription,
   });
