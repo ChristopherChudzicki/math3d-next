@@ -42,6 +42,14 @@
   grid-column-end: 3;
   grid-row-start: 2;
   grid-row-end: 3;
+
+}
+.container.childItem .grid-center-bottom {
+  min-height: 40px;
+  padding-bottom: 0.5em;
+}
+.container.childItem .grid-right-gutter-bottom{
+  padding-bottom: 0.5em
 }
 
 .grid-right-gutter {
@@ -65,7 +73,6 @@
   grid-row-start: 2;
   grid-row-end: 3;
   padding-right: 0.25em;
-  padding-bottom: 0.25em;
 }
 
 .left-gutter {

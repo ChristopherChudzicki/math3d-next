@@ -51,7 +51,7 @@ const defaultValues: ParametricSurfaceProperties = {
   zIndex: "0",
   zBias: "0",
   shaded: "true",
-  expr: "_f(u,v)=[v*cos(u), v*sin(u), v]",
+  expr: "_f(u,v)=[1,1,1]",
   rangeU: "[-pi, pi]",
   rangeV: "[-3, 3]",
   colorExpr: "_f(X, Y, Z, u, v)=mod(Z, 1)",

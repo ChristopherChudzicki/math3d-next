@@ -57,6 +57,7 @@ const Folder: MathItemForm<MIT.Folder> = ({ item }) => {
   return (
     <ItemTemplate
       item={item}
+      childItem={false}
       config={configs[MIT.Folder]}
       showAlignmentBar={false}
       sideContent={<FolderButton onClick={onClick} isCollapsed={isCollapsed} />}

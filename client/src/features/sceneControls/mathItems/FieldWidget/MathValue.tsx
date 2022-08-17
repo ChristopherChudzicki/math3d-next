@@ -28,7 +28,7 @@ const MathValue: React.FC<IWidgetProps> = (props: IWidgetProps) => {
       aria-label={label}
       style={style}
       className={classNames(
-        styles["field-widget"],
+        styles["field-widget-input"],
         { [styles["has-error"]]: error },
         className
       )}
