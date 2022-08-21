@@ -1,4 +1,4 @@
-.has-error, .field-widget.has-error{
+.has-error, .field-widget-input.has-error{
   padding-right:0pt;
   padding-left: 0pt;
   padding-bottom: 2pt;
@@ -10,7 +10,7 @@
     transparent
   );
 }
-.has-error:focus-within, .field-widget.has-error:focus-within {
+.has-error:focus-within, .field-widget-input.has-error:focus-within {
   background-image: linear-gradient(
     to top,
     var(--color-error),
@@ -25,6 +25,10 @@
 }
 
 .field-widget {
+  margin-bottom: 2pt;
+}
+
+.field-widget-input {
   font-size: 1.25em;
   border: none;
   margin-left:2pt;
@@ -40,7 +44,7 @@
     transparent
   );
 }
-.field-widget:focus-within {
+.field-widget-input:focus-within {
   font-size: 1.25em;
   border: none;
   background-image: linear-gradient(
@@ -52,15 +56,15 @@
   );
 }
 
-textarea.field-widget {
+textarea.field-widget-input {
   resize: none;
 }
 
 
-.field-widget {
+.field-widget-input {
   box-sizing: border-box;
 }
-.field-widget:focus {
+.field-widget-input:focus {
   outline: none;
 }
 

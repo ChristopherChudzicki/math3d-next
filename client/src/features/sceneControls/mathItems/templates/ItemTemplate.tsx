@@ -23,6 +23,7 @@ type Props<T extends MIT> = {
   item: MathItem<T>;
   config: MathItemConfig<T>;
   children?: React.ReactNode;
+  childItem?: boolean;
 };
 
 const ItemTemplate = <T extends MIT>({
@@ -31,6 +32,7 @@ const ItemTemplate = <T extends MIT>({
   children,
   sideContent,
   showAlignmentBar = true,
+  childItem = true,
 }: Props<T>) => {
   const onWidgetChange = useOnWidgetChange(item);
 
@@ -47,7 +49,9 @@ const ItemTemplate = <T extends MIT>({
   return (
     <form
       aria-label={`Settings for ${item.properties.description}`}
-      className={styles.container}
+      className={classNames(styles.container, {
+        [styles.childItem]: childItem,
+      })}
       data-testid={testId(item.id)}
       onFocus={onFocus}
     >
