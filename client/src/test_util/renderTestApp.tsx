@@ -9,12 +9,15 @@ import { QueryClient } from "@tanstack/react-query";
 import AppRoutes from "../app";
 
 const waitForNotBusy = () =>
-  waitFor(() => {
-    const busy = document.querySelector('[aria-busy="true"]');
-    if (busy !== null) {
-      throw new Error("Some elements are still loading.");
-    }
-  });
+  waitFor(
+    () => {
+      const busy = document.querySelector('[aria-busy="true"]');
+      if (busy !== null) {
+        throw new Error("Some elements are still loading.");
+      }
+    },
+    { timeout: 2000 }
+  );
 
 /**
  * Render the app using a MemoryRouter instead of a BrowserRouter.
