@@ -143,17 +143,23 @@ test('Clicking "Use Expression" shows MathField and Reset', async () => {
 test('Shows "Reset" button when switch is computed', async () => {
   const { queryReset, queryUseExpr, findExpr, findReset, findUseExpr } =
     await setup("!false");
+  console.time("A");
   const expr = await findExpr();
   const reset = await findReset();
+  console.timeEnd("A");
+  console.time("B");
 
   expect(queryUseExpr()).toBe(null);
   await user.click(reset, { pointerEventsCheck: 0 });
   expect(await findUseExpr()).toHaveTextContent("Use Expression");
+  console.timeEnd("B");
+  console.time("C");
   await findUseExpr();
   await waitFor(() => {
     expect(expr).not.toBeVisible();
   });
   expect(queryReset()).toBe(null);
+  console.timeEnd("C");
 });
 
 test("Clicking reset resets widget", async () => {

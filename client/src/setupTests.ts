@@ -38,3 +38,5 @@ beforeAll(() => {
 });
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
+
+jest.setTimeout(10 * 1000);
