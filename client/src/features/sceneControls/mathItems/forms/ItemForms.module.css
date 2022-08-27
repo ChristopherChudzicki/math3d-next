@@ -3,4 +3,9 @@
   padding: 6px;
   grid-template-columns: min-content min-content;
   justify-content: end;
+  align-items: center;
+}
+
+.param-input {
+  min-width:10px;
 }

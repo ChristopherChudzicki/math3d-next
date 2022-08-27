@@ -1,11 +1,17 @@
-import { mathItemConfigs as configs, MathItemType as MIT } from "configs";
 import React from "react";
-
-import ItemTemplate from "../../templates/ItemTemplate";
+import { MathItemType as MIT } from "configs";
 import { MathItemForm } from "../interfaces";
+import RangedMathItemForm from "../RangedMathItemForm";
 
-const VectorField: MathItemForm<MIT.VectorField> = ({ item }) => (
-  <ItemTemplate item={item} config={configs[MIT.VectorField]} />
+const rangePropNames = ["rangeX", "rangeY", "rangeZ"] as const;
+const errorNames = ["expr", ...rangePropNames] as const;
+
+const ParametricSurface: MathItemForm<MIT.VectorField> = ({ item }) => (
+  <RangedMathItemForm
+    item={item}
+    errorNames={errorNames}
+    rangePropNames={rangePropNames}
+  />
 );
 
-export default VectorField;
+export default ParametricSurface;
