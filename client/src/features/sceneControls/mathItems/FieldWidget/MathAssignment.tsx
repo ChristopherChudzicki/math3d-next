@@ -12,7 +12,8 @@ import ErrorTooltip from "./ErrorTooltip";
 import style from "./widget.module.css";
 
 const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const { onChange, name, value, error, label, className, ...others } = props;
+  const { onChange, name, value, error, label, className, itemId, ...others } =
+    props;
   const [lhs, rhs] = splitAtFirstEquality(value);
   const onChangeLHS: OnMathFieldChange = useCallback(
     (e) => {

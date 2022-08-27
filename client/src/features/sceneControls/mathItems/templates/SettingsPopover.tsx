@@ -50,6 +50,7 @@ const SettingsForm = <T extends MathItemType>({
             {field.label}
           </label>
           <FieldWidget
+            className={styles["settings-item"]}
             aria-labelledby={`${item.id}-${field.name}`}
             itemId={item.id}
             label={field.label}

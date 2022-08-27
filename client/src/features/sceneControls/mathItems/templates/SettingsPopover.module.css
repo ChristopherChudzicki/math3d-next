@@ -1,11 +1,15 @@
 .settings-form {
   display: grid;
   grid-template-columns: auto minmax(100px, auto);
-  grid-template-rows: auto auto;
+  align-items: center;
 
   align-items: baseline;
   row-gap: 0.5em;
   column-gap: 2em;
+}
+
+.settings-item {
+  min-height: 30px;
 }
 
 .settings-button {
