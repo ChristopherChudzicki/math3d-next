@@ -117,7 +117,7 @@ test("Dragging folder X before folder Y", async ({ page }) => {
   const target = getItem(page, "F2");
 
   await expect(await getAllItemDescriptions(page)).toEqual(initialOrder);
-  await drag(page, source, target);
+  await drag(page, source, target, { targetOffset: { x: 5, y: -50 } });
   const after = await getAllItemDescriptions(page);
   expect(after).toEqual("F1 P1a P1b F3 P3a P3b F2 P2a P2b".split(" "));
 

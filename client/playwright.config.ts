@@ -1,6 +1,23 @@
 import type { PlaywrightTestConfig } from "@playwright/test";
 import { devices } from "@playwright/test";
 
+const getWebServer = (): NonNullable<PlaywrightTestConfig["webServer"]> => {
+  const port = 3000;
+  if (process.env.CI)
+    return {
+      command: "npm run start-prod",
+      port,
+      timeout: 300 * 1000,
+      reuseExistingServer: false,
+    };
+  return {
+    command: "npm run start",
+    port,
+    timeout: 300 * 1000,
+    reuseExistingServer: false,
+  };
+};
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -78,12 +95,7 @@ const config: PlaywrightTestConfig = {
   // outputDir: 'test-results/',
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: "npm run start",
-    port: 3000,
-    timeout: 240 * 1000,
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: getWebServer(),
 };
 
 export default config;

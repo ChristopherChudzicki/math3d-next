@@ -9,8 +9,10 @@
     "lint": "eslint --max-warnings 0 \"./src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix",
     "start": "react-scripts start",
+    "start-prod": "npm run build && serve -s build",
     "storybook": "start-storybook -p 6006 -s public",
-    "test": "react-scripts test --testPathIgnorePatterns __utils__ tests-e2e"
+    "test": "react-scripts test --testPathIgnorePatterns __utils__ tests-e2e",
+    "test-e2e": "playwright test"
   },
   "browserslist": {
     "production": [
@@ -90,6 +92,7 @@
     "jest-fail-on-console": "2.4.2",
     "msw": "0.44.2",
     "prettier": "2.7.1",
+    "serve": "^14.0.1",
     "typescript": "4.7.4",
     "typescript-plugin-css-modules": "3.4.0",
     "webpack": "5.74.0"
