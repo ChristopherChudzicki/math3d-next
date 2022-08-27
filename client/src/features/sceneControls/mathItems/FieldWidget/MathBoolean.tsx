@@ -79,7 +79,11 @@ const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
         <SmallMathField
           aria-label={`Math Expression for: ${label}`}
           style={style}
-          className={classNames({ [styles["has-error"]]: error }, "flex-1")}
+          className={classNames(
+            { [styles["has-error"]]: error },
+            "flex-1",
+            styles["field-widget-input"]
+          )}
           onChange={handleChange}
         >
           {value}
