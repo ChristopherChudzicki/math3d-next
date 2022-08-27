@@ -23,9 +23,6 @@ const AutosizeText: React.FC<IWidgetProps> = (props: IWidgetProps) => {
     );
   return (
     <TextareaAutoWidthHeight
-      aria-labelledby={props["aria-labelledby"]}
-      onBlur={props.onBlur}
-      onFocus={props.onFocus}
       extraWidth={EXTRA_WIDTH}
       aria-label={label}
       className={classNames(

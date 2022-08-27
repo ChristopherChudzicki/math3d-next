@@ -15,8 +15,17 @@ import styles from "./widget.module.css";
 const LITERAL_BOOLEAN_STRINGS = ["false", "true"];
 
 const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const { name, label, value, onChange, error, style, className, itemId } =
-    props;
+  const {
+    name,
+    label,
+    value,
+    onChange,
+    error,
+    style,
+    className,
+    itemId,
+    ...others
+  } = props;
   assertNotNil(itemId);
   const [shouldUseExpression, setShouldUseExpression] = useState(
     !LITERAL_BOOLEAN_STRINGS.includes(value)
@@ -58,10 +67,8 @@ const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
 
   return (
     <div
-      aria-labelledby={props["aria-labelledby"]}
       className={classNames("d-flex", "align-items-center", className)}
-      onBlur={props.onBlur}
-      onFocus={props.onFocus}
+      {...others}
     >
       <Tooltip arrow title={tooltipTitle}>
         <span>

@@ -18,10 +18,7 @@ const TextInput: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   );
   return (
     <input
-      onBlur={props.onBlur}
-      onFocus={props.onFocus}
       aria-label={label}
-      aria-labelledby={props["aria-labelledby"]}
       className={classNames(
         { [styles["has-error"]]: error },
         styles["field-widget-input"],
