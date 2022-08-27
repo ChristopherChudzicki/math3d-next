@@ -25,6 +25,7 @@ jobs:
       run: npx playwright test
       env:
         CI: True
+        REACT_APP_USE_MSW: True
       working-directory: client
     - uses: actions/upload-artifact@v3
       if: always()
