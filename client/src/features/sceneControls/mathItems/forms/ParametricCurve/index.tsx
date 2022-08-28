@@ -4,7 +4,7 @@ import React from "react";
 import { MathItemForm } from "../interfaces";
 import RangedMathItemForm from "../RangedMathItemForm";
 
-const rangePropNames = ["range"] as const;
+const rangePropNames = ["range1"] as const;
 const errorNames = ["expr", ...rangePropNames] as const;
 
 const ParametricSurface: MathItemForm<MIT.ParametricCurve> = ({ item }) => (

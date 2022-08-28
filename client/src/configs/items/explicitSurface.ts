@@ -12,6 +12,8 @@ import {
   grid2,
   gridWidth,
   opacity,
+  param1,
+  param2,
   range1,
   range2,
   shaded,
@@ -31,6 +33,8 @@ interface ExplicitSurfaceProperties {
   zBias: string;
   shaded: string; // eval to boolean;
   expr: string;
+  param1: string;
+  param2: string;
   range1: string;
   range2: string;
   colorExpr: string;
@@ -51,6 +55,8 @@ const defaultValues: ExplicitSurfaceProperties = {
   zBias: "0",
   shaded: "true",
   expr: "_f(x,y)=x^2-y^2",
+  param1: "x",
+  param2: "y",
   range1: "[-2, 2]",
   range2: "[-2, 2]",
   colorExpr: "_f(X, Y, Z, x, y)=mod(Z, 1)",
@@ -95,6 +101,8 @@ const config: IMathItemConfig<
     grid2,
     gridWidth,
     opacity,
+    param1,
+    param2,
     range1,
     range2,
     shaded,

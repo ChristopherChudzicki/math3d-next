@@ -12,6 +12,8 @@ import {
   grid2,
   gridWidth,
   opacity,
+  param1,
+  param2,
   range1,
   range2,
   shaded,
@@ -32,6 +34,8 @@ interface ExplicitSurfacePolarProperties {
 
   shaded: string; // eval to boolean;
   expr: string;
+  param1: string;
+  param2: string;
   range1: string;
   range2: string;
   colorExpr: string;
@@ -52,6 +56,8 @@ const defaultValues: ExplicitSurfacePolarProperties = {
   zBias: "0",
   shaded: "true",
   expr: "_f(r, Q)=\\frac{1}{4}r^2*cos(3*Q)",
+  param1: "r",
+  param2: "Q",
   range1: "[0, 3]",
   range2: "[-pi, pi]",
   colorExpr: "_f(X, Y, Z, r, theta)=mod(Z, 1)",
@@ -96,6 +102,8 @@ const config: IMathItemConfig<
     grid2,
     gridWidth,
     opacity,
+    param1,
+    param2,
     range1,
     range2,
     shaded,

@@ -62,6 +62,25 @@ const opacity: PropertyConfig<"opacity"> = {
   // validate real number
 };
 
+const param1: PropertyConfig<"param1"> = {
+  name: "param1",
+  label: "1st parameter name",
+  widget: WidgetType.Text,
+  // complicated validation... [real, real] or func of V
+};
+const param2: PropertyConfig<"param2"> = {
+  name: "param2",
+  label: "2nd parameter name",
+  widget: WidgetType.Text,
+  // complicated validation... [real, real] or func of V
+};
+const param3: PropertyConfig<"param3"> = {
+  name: "param3",
+  label: "3rd parameter name",
+  widget: WidgetType.Text,
+  // complicated validation... [real, real] or func of V
+};
+
 const range1: PropertyConfig<"range1"> = {
   name: "range1",
   label: "Range (1st parameter)",
@@ -170,6 +189,9 @@ export {
   label,
   labelVisible,
   opacity,
+  param1,
+  param2,
+  param3,
   range1,
   range2,
   range3,

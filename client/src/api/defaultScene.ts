@@ -13,6 +13,8 @@ const defaultScene: Omit<Scene, "id"> = {
         grid1: "8",
         grid2: "8",
         zBias: "0",
+        param1: "x",
+        param2: "y",
         range1: "\\left[-2,\\ 2\\right]",
         range2: "\\left[-2,\\ 2\\right]",
         shaded: "true",
