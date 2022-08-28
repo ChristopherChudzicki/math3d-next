@@ -15,6 +15,7 @@ const makeReadOnly: MathfieldProps["makeOptions"] = () => ({
 
 const ReadonlyMathField: React.FC<Props> = ({ value }) => (
   <SmallMathField
+    tabIndex={-1}
     className={classNames(styles["static-math"], "align-self-center", "px-1")}
     makeOptions={makeReadOnly}
     defaultValue={value}

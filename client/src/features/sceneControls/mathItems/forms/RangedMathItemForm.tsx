@@ -12,6 +12,7 @@ import { OnWidgetChange } from "../FieldWidget/types";
 import { useMathScope } from "../mathItemsSlice";
 import { useMathErrors } from "../mathScope";
 import ItemTemplate from "../templates/ItemTemplate";
+import styles from "./ItemForms.module.css";
 import {
   ParameterContainer,
   ParameterForm,
@@ -28,7 +29,8 @@ type RangedMathItemFormProps =
   | GenericRangedMathItemFormProps<MIT.ParametricCurve>
   | GenericRangedMathItemFormProps<MIT.ParametricSurface>
   | GenericRangedMathItemFormProps<MIT.ExplicitSurface>
-  | GenericRangedMathItemFormProps<MIT.ExplicitSurfacePolar>;
+  | GenericRangedMathItemFormProps<MIT.ExplicitSurfacePolar>
+  | GenericRangedMathItemFormProps<MIT.VectorField>;
 
 const RangedMathItemForm = ({
   item,
@@ -70,6 +72,7 @@ const RangedMathItemForm = ({
             key={rangeProp}
             nameInput={
               <FieldWidget
+                className={styles["param-input"]}
                 widget={WidgetType.MathValue}
                 label={`Name for ${ordinal(i + 1)} parameter`}
                 name={`${ordinal(i + 1)}-parameter-name`}
@@ -80,6 +83,7 @@ const RangedMathItemForm = ({
             }
             rangeInput={
               <FieldWidget
+                className={styles["param-input"]}
                 widget={WidgetType.MathValue}
                 label={
                   // @ts-expect-error need to figure out this error
