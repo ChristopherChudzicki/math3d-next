@@ -114,11 +114,29 @@ const interactiveTags = [
   "video",
   "audio",
 ];
+
+const getPathToRoot = (el: HTMLElement): HTMLElement[] => {
+  const path = [el];
+  let current = el;
+  while (current.parentElement) {
+    path.push(current.parentElement);
+    current = current.parentElement;
+  }
+  return path;
+};
+
 const isInteractive = (el: HTMLElement) => {
   if (el.isContentEditable) return true;
   return interactiveTags.includes(el.tagName.toLowerCase());
 };
-const isNotInteractive = (el: HTMLElement) => !isInteractive(el);
+const isDraggableElement = (el: HTMLElement) => {
+  const path = getPathToRoot(el);
+  return !path.some((pathEl) => {
+    if (isInteractive(pathEl)) return true;
+    if (pathEl.dataset.dndkitNoDrag) return true;
+    return false;
+  });
+};
 
 interface MultiContainerDndContextProps {
   children?: React.ReactNode;
@@ -155,7 +173,7 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
         tolerance: 1000,
         delay: 100,
       },
-      isDraggableElement: (el) => isNotInteractive(el) && !el.dataset.noDrag,
+      isDraggableElement,
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
