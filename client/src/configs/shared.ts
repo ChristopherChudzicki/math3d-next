@@ -76,6 +76,13 @@ const range2: PropertyConfig<"range2"> = {
   // complicated validation... [real, real] or func of U
 };
 
+const range3: PropertyConfig<"range3"> = {
+  name: "range3",
+  label: "Range (3rd parameter)",
+  widget: WidgetType.MathValue,
+  // complicated validation... [real, real] or func of U
+};
+
 const shaded: PropertyConfig<"shaded"> = {
   name: "shaded",
   label: "Shaded",
@@ -100,6 +107,13 @@ const samples1: PropertyConfig<"samples1"> = {
 const samples2: PropertyConfig<"samples2"> = {
   name: "samples2",
   label: "Samples (2nd parameter)",
+  widget: WidgetType.MathValue,
+  // validate real number
+};
+
+const samples3: PropertyConfig<"samples3"> = {
+  name: "samples3",
+  label: "Samples (3rd parameter)",
   widget: WidgetType.MathValue,
   // validate real number
 };
@@ -158,12 +172,14 @@ export {
   opacity,
   range1,
   range2,
+  range3,
+  samples1,
+  samples2,
+  samples3,
   shaded,
   size,
   start,
-  samples1,
   visible,
-  samples2,
   width,
   zBias,
   zIndex,

@@ -23,9 +23,9 @@ interface ImplicitSurfaceProperties {
   zBias: string;
 
   shaded: string; // eval to boolean;
-  rangeX: string;
-  rangeY: string;
-  rangeZ: string;
+  range1: string;
+  range2: string;
+  range3: string;
   lhs: string;
   rhs: string;
   samples: string;
@@ -39,9 +39,9 @@ const defaultValues: ImplicitSurfaceProperties = {
   zIndex: "0",
   zBias: "0",
   shaded: "true",
-  rangeX: "[-5, 5]",
-  rangeY: "[-5, 5]",
-  rangeZ: "[-5, 5]",
+  range1: "[-5, 5]",
+  range2: "[-5, 5]",
+  range3: "[-5, 5]",
   lhs: "_f(x,y,z)=x^2+y^2",
   rhs: "_f(x,y,z)=z^2+1",
   samples: "20",
@@ -74,18 +74,18 @@ const config: IMathItemConfig<
       // scalar value used for x, y, z... why different from other surfaces?
     },
     shaded,
-    rangeX: {
-      name: "rangeX",
+    range1: {
+      name: "range1",
       label: "Range X",
       widget: WidgetType.MathValue,
     },
-    rangeY: {
-      name: "rangeY",
+    range2: {
+      name: "range2",
       label: "Range X",
       widget: WidgetType.MathValue,
     },
-    rangeZ: {
-      name: "rangeZ",
+    range3: {
+      name: "range3",
       label: "Range X",
       widget: WidgetType.MathValue,
     },
