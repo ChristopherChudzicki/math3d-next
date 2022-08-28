@@ -3,7 +3,7 @@ import { MathItemType as MIT } from "configs";
 import { MathItemForm } from "../interfaces";
 import RangedMathItemForm from "../RangedMathItemForm";
 
-const rangePropNames = ["rangeU", "rangeV"] as const;
+const rangePropNames = ["range1", "range2"] as const;
 const errorNames = ["expr", ...rangePropNames] as const;
 
 const ExplicitSurfacePolar: MathItemForm<MIT.ExplicitSurfacePolar> = ({
