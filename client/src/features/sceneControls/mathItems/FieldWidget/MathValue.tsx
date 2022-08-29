@@ -40,9 +40,10 @@ const MathValue: React.FC<IWidgetProps> = (props: IWidgetProps) => {
         className
       )}
       onChange={handleChange}
-      defaultValue={value}
       {...others}
-    />
+    >
+      {value}
+    </SmallMathField>
   );
 };
 

@@ -49,7 +49,7 @@ const MathFieldForwardRef = (
     ...others
   } = props;
   const [mf, setMf] = useState<MathfieldElement | null>(null);
-  useListenToEvent(mf, "keystroke", onKeystroke);
+  useListenToEvent(mf, "keystroke", () => {});
   useListenToEvent(mf, "focus-out", onFocusOut);
   useEffect(() => {
     if (!mf) return;
@@ -59,15 +59,16 @@ const MathFieldForwardRef = (
   }, [makeOptions, mf]);
 
   useEffect(() => {
-    mf?.setValue(children);
-  }, [mf, children]);
+    if (!mf) return;
+    if (mf.getValue() !== children) {
+      mf.setValue(children);
+    }
+  });
 
   useImperativeHandle(ref, () => mf);
 
   return (
-    <math-field {...others} class={className} onInput={onChange} ref={setMf}>
-      {defaultValue}
-    </math-field>
+    <math-field {...others} class={className} onInput={onChange} ref={setMf} />
   );
 };
 
