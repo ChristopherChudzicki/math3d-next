@@ -39,12 +39,8 @@ const RangedMathItemForm = ({
 }: RangedMathItemFormProps) => {
   const config = configs[item.type];
   const onWidgetChange = useOnWidgetChange(item);
-  const {
-    onParamNameChange,
-    onRhsChange,
-    exprRef,
-    paramNameErrors: paramErrors,
-  } = useExpressionAndParameters(item.properties.expr, onWidgetChange);
+  const { assignment, onParamNameChange, onRhsChange } =
+    useExpressionAndParameters(item.properties.expr, onWidgetChange);
   const mathScope = useMathScope();
   const errors = useMathErrors(mathScope, item.id, errorNames);
 
@@ -63,7 +59,7 @@ const RangedMathItemForm = ({
         label={config.properties.expr.label}
         name="expr"
         error={errors.expr}
-        value={exprRef.current.rhs}
+        value={assignment.rhs}
         onChange={onRhsChange}
       />
       <ParameterContainer>
@@ -76,8 +72,7 @@ const RangedMathItemForm = ({
                 widget={WidgetType.MathValue}
                 label={`Name for ${ordinal(i + 1)} parameter`}
                 name={`${ordinal(i + 1)}-parameter-name`}
-                error={paramErrors[i]}
-                value={exprRef.current.params[i]}
+                value={assignment.params[i]}
                 onChange={onParamChanges[i]}
               />
             }
