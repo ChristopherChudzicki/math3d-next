@@ -78,7 +78,7 @@
     "@types/jest": "27.5.2",
     "@types/node": "16.11.56",
     "@types/ramda": "0.28.15",
-    "@types/react": "18.0.17",
+    "@types/react": "18.0.18",
     "@types/react-dom": "18.0.6",
     "@types/tinycolor2": "1.4.3",
     "@types/toposort": "2.0.3",
