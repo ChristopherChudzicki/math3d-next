@@ -62,7 +62,7 @@
     "yup": "1.0.0-beta.7"
   },
   "devDependencies": {
-    "@faker-js/faker": "7.4.0",
+    "@faker-js/faker": "7.5.0",
     "@mswjs/data": "0.10.2",
     "@playwright/test": "1.25.1",
     "@storybook/addon-actions": "6.5.10",
