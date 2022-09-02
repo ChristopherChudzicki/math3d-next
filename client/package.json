@@ -89,7 +89,7 @@
     "eslint-config-prettier": "8.5.0",
     "eslint-import-resolver-typescript": "3.5.0",
     "eslint-plugin-prettier": "4.1.0",
-    "jest-fail-on-console": "2.5.0",
+    "jest-fail-on-console": "3.0.1",
     "msw": "0.45.0",
     "prettier": "2.7.1",
     "serve": "14.0.1",
