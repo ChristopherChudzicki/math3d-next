@@ -19,6 +19,18 @@ interface FunctionAssignmentProps {
   params: string[];
   rhs: string;
 }
+
+/**
+ * Represents a potentially invalid function assignment. For example:
+ *  1. f(x, y)   = x
+ *  2. f(x +, y) = x
+ *  3. f(x, x)   = x
+ *
+ * This class only does enough parsing to determing the lhs, rhs, function name,
+ * and parameter names. In this way, we can parse stirngs that MathJS's parser
+ * would reject, and we can give slightly more detailed information about the
+ * errors.
+ */
 class FunctionAssignment {
   readonly params: string[];
 
@@ -33,6 +45,9 @@ class FunctionAssignment {
   }
 
   private static fromExprRegex = /(?<name>.+)\((?<paramsString>.*)\)$/;
+
+  static isFunctionAssignment = (expr: string) =>
+    FunctionAssignment.fromExprRegex.test(expr);
 
   static fromExpr(expr: string) {
     const [lhs, rhs] = splitAtFirstEquality(expr);

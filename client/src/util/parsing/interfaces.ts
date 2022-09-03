@@ -31,7 +31,6 @@ type ParserRule = TextParserRule | TextParserRegexRule | MathJsRule;
 
 interface IMathJsParser {
   preprocess: (text: string) => string;
-  mjsParse: (text: string) => MJsNode;
   parse: Parse<ParseOptions>;
 }
 
