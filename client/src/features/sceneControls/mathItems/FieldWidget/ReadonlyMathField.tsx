@@ -18,8 +18,9 @@ const ReadonlyMathField: React.FC<Props> = ({ value }) => (
     tabIndex={-1}
     className={classNames(styles["static-math"], "align-self-center", "px-1")}
     makeOptions={makeReadOnly}
-    defaultValue={value}
-  />
+  >
+    {value}
+  </SmallMathField>
 );
 
 export default ReadonlyMathField;
