@@ -6,6 +6,7 @@ import {
 } from "configs";
 import ordinal from "ordinal";
 import React, { useMemo } from "react";
+import { ParseAssignmentLHSError } from "util/parsing";
 
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";
@@ -52,13 +53,18 @@ const RangedMathItemForm = ({
       }),
     [onParamNameChange, rangePropNames]
   );
+
+  const exprErr = errors.expr;
+  const lhsErr =
+    exprErr instanceof ParseAssignmentLHSError ? exprErr : undefined;
+  const rhsErr = lhsErr ? undefined : exprErr;
   return (
     <ItemTemplate item={item} config={config}>
       <FieldWidget
         widget={WidgetType.MathValue}
         label={config.properties.expr.label}
         name="expr"
-        error={errors.expr}
+        error={rhsErr}
         value={assignment.rhs}
         onChange={onRhsChange}
       />
@@ -70,6 +76,7 @@ const RangedMathItemForm = ({
               <FieldWidget
                 className={styles["param-input"]}
                 widget={WidgetType.MathValue}
+                error={lhsErr?.details.paramErrors[i]}
                 label={`Name for ${ordinal(i + 1)} parameter`}
                 name={`${ordinal(i + 1)}-parameter-name`}
                 value={assignment.params[i]}

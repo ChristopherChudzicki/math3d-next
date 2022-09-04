@@ -39,14 +39,14 @@ class FunctionAssignment {
   readonly rhs: string;
 
   constructor({ name, params, rhs }: FunctionAssignmentProps) {
-    this.params = params;
+    this.params = params.map((p) => p.trim());
     this.name = name;
     this.rhs = rhs;
   }
 
-  private static fromExprRegex = /(?<name>.+)\((?<paramsString>.*)\)$/;
+  private static fromExprRegex = /(?<name>.+)\((?<paramsString>.*)\)\s*$/;
 
-  static isFunctionAssignment = (expr: string) =>
+  static isFunctionLHS = (expr: string) =>
     FunctionAssignment.fromExprRegex.test(expr);
 
   static fromExpr(expr: string) {

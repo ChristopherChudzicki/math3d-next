@@ -10,6 +10,7 @@ import MathJsParser from "./MathJsParser";
 import {
   fractionRule,
   operatornameRule,
+  ParseAssignmentLHSError,
   subscriptRule,
   validateAssignmentLHS,
 } from "./rules";
@@ -81,4 +82,4 @@ const parserRules: ParserRule[] = [
 const getLatexParser = () => new MathJsParser(parserRules);
 const latexParser = getLatexParser();
 
-export { getLatexParser, latexParser };
+export { getLatexParser, latexParser, ParseAssignmentLHSError };
