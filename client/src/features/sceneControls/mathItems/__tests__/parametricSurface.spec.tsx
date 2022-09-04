@@ -8,7 +8,7 @@ import {
   seedDb,
   user,
 } from "test_util";
-import { UnmetDependencyError } from "util/MathScope";
+import { ParseAssignmentLHSError } from "util/parsing";
 
 const getParamNameInputs = (): HTMLTextAreaElement[] => {
   const zeroth = screen.getByLabelText("Name for 1st parameter");
@@ -42,7 +42,7 @@ test.each([
     param: { name: "abc", index: 1 },
   },
 ])(
-  "Updating parameter names to valid values updates expression appropriately",
+  "Updating parameter names updates expression appropriately",
   async ({ expression, param, evaluations }) => {
     const item = makeItem(MIT.ParametricSurface, { expr: expression.initial });
     const id = nodeId(item);
@@ -56,7 +56,9 @@ test.each([
     // initiall there is an error since the expr RHS contains "abc" which is not a param name or defined variable
     expect(mathScope.evalErrors.has(id("expr"))).toBe(true);
     const inputs = getParamNameInputs();
-    await user.type(inputs[param.index], param.name);
+    await user.clear(inputs[param.index]);
+    await user.click(inputs[param.index]);
+    await user.paste(param.name);
 
     // assert store is updated correctly
     const editedItem = store.getState().mathItems.items[
@@ -78,23 +80,20 @@ test.each([
   {
     expression: {
       initial: "_f(x,y)=[x, y, 0]",
-      // When typing "a+b" the last valid varname will be "a"
-      expectedFinal: "_f(a,y)=[x, y, 0]",
+      expectedFinal: "_f(a+b,y)=[x, y, 0]",
     },
-    expectedError: new UnmetDependencyError(["x"]),
     param: { name: "a+b", index: 0 },
   },
   {
     expression: {
       initial: "_f(x,y)=[x, y, 0]",
-      expectedFinal: "_f(x,a)=[x, y, 0]",
+      expectedFinal: "_f(x,a+b)=[x, y, 0]",
     },
-    expectedError: new UnmetDependencyError(["y"]),
     param: { name: "a+b", index: 1 },
   },
 ])(
-  "invalid var names do not update the expression",
-  async ({ expression, param, expectedError }) => {
+  "invalid var names also update the expression",
+  async ({ expression, param }) => {
     const item = makeItem(MIT.ParametricSurface, { expr: expression.initial });
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
@@ -102,15 +101,19 @@ test.each([
 
     const mathScope = store.getState().mathItems.mathScope();
     const inputs = getParamNameInputs();
-    await user.type(inputs[param.index], param.name);
+
+    await user.clear(inputs[param.index]);
+    await user.click(inputs[param.index]);
+    await user.paste(param.name);
 
     const itemAfterEdit = store.getState().mathItems.items[
       item.id
     ] as MathItem<MIT.ParametricSurface>;
     expect(itemAfterEdit.properties.expr).toBe(expression.expectedFinal);
 
-    const fError = mathScope.evalErrors.get(id("expr"));
-    expect(fError).toStrictEqual(expectedError);
+    const fError = mathScope.parseErrors.get(id("expr"));
+    assertInstanceOf(fError, ParseAssignmentLHSError);
+    expect(fError.details.paramErrors[param.index]).toBeInstanceOf(Error);
   }
 );
 

@@ -6,7 +6,7 @@ import type {
   MathItemType,
   PropertyConfig,
 } from "configs";
-import React, { useMemo } from "react";
+import React, { forwardRef, useMemo } from "react";
 import { useToggle } from "util/hooks";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { useMathScope } from "../mathItemsSlice";
@@ -66,6 +66,15 @@ const SettingsForm = <T extends MathItemType>({
   );
 };
 
+/**
+ * This is just a normal section element, but with data-dndkit-no-drag attr
+ */
+const PopoverContainer = forwardRef<
+  HTMLElement,
+  React.HTMLAttributes<HTMLElement>
+>((props, ref) => <section {...props} ref={ref} data-dndkit-no-drag />);
+PopoverContainer.displayName = "PopoverContainer";
+
 interface SettingsPopoverProps {
   config: MathItemConfig;
   item: MathItem;
@@ -75,7 +84,7 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
   const [visible, setVisible] = useToggle(false);
   return (
     <Popover
-      as="section"
+      as={PopoverContainer}
       visible={visible}
       className={styles.container}
       onPointerAway={setVisible.off}

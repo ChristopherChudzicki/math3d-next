@@ -20,16 +20,16 @@ const gridOpacity: PropertyConfig<"gridOpacity"> = {
   // validate real number
 };
 
-const gridU: PropertyConfig<"gridU"> = {
-  name: "gridU",
-  label: "Grid U",
+const grid1: PropertyConfig<"grid1"> = {
+  name: "grid1",
+  label: "Grid (1st parameter)",
   widget: WidgetType.MathValue,
   // validate real number
 };
 
-const gridV: PropertyConfig<"gridV"> = {
-  name: "gridV",
-  label: "Grid V",
+const grid2: PropertyConfig<"grid2"> = {
+  name: "grid2",
+  label: "Grid (2nd parameter)",
   widget: WidgetType.MathValue,
   // validate real number
 };
@@ -62,16 +62,42 @@ const opacity: PropertyConfig<"opacity"> = {
   // validate real number
 };
 
-const rangeU: PropertyConfig<"rangeU"> = {
-  name: "rangeU",
-  label: "Range U",
+const param1: PropertyConfig<"param1"> = {
+  name: "param1",
+  label: "1st parameter name",
+  widget: WidgetType.Text,
+  // complicated validation... [real, real] or func of V
+};
+const param2: PropertyConfig<"param2"> = {
+  name: "param2",
+  label: "2nd parameter name",
+  widget: WidgetType.Text,
+  // complicated validation... [real, real] or func of V
+};
+const param3: PropertyConfig<"param3"> = {
+  name: "param3",
+  label: "3rd parameter name",
+  widget: WidgetType.Text,
+  // complicated validation... [real, real] or func of V
+};
+
+const range1: PropertyConfig<"range1"> = {
+  name: "range1",
+  label: "Range (1st parameter)",
   widget: WidgetType.MathValue,
   // complicated validation... [real, real] or func of V
 };
 
-const rangeV: PropertyConfig<"rangeV"> = {
-  name: "rangeV",
-  label: "Range V",
+const range2: PropertyConfig<"range2"> = {
+  name: "range2",
+  label: "Range (2nd parameter)",
+  widget: WidgetType.MathValue,
+  // complicated validation... [real, real] or func of U
+};
+
+const range3: PropertyConfig<"range3"> = {
+  name: "range3",
+  label: "Range (3rd parameter)",
   widget: WidgetType.MathValue,
   // complicated validation... [real, real] or func of U
 };
@@ -90,16 +116,23 @@ const size: PropertyConfig<"size"> = {
   // validate real number
 };
 
-const uSamples: PropertyConfig<"uSamples"> = {
-  name: "uSamples",
-  label: "Samples U",
+const samples1: PropertyConfig<"samples1"> = {
+  name: "samples1",
+  label: "Samples (1st parameter)",
   widget: WidgetType.MathValue,
   // validate real number
 };
 
-const vSamples: PropertyConfig<"vSamples"> = {
-  name: "vSamples",
-  label: "Samples V",
+const samples2: PropertyConfig<"samples2"> = {
+  name: "samples2",
+  label: "Samples (2nd parameter)",
+  widget: WidgetType.MathValue,
+  // validate real number
+};
+
+const samples3: PropertyConfig<"samples3"> = {
+  name: "samples3",
+  label: "Samples (3rd parameter)",
   widget: WidgetType.MathValue,
   // validate real number
 };
@@ -150,20 +183,25 @@ export {
   description,
   end,
   gridOpacity,
-  gridU,
-  gridV,
+  grid1,
+  grid2,
   gridWidth,
   label,
   labelVisible,
   opacity,
-  rangeU,
-  rangeV,
+  param1,
+  param2,
+  param3,
+  range1,
+  range2,
+  range3,
+  samples1,
+  samples2,
+  samples3,
   shaded,
   size,
   start,
-  uSamples,
   visible,
-  vSamples,
   width,
   zBias,
   zIndex,

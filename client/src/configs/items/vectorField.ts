@@ -9,6 +9,12 @@ import {
   description,
   end,
   opacity,
+  range1,
+  range2,
+  range3,
+  samples1,
+  samples2,
+  samples3,
   size,
   start,
   visible,
@@ -29,11 +35,13 @@ interface VectorFieldProperties {
   width: string;
   start: string; // eval to boolean;
   end: string; // eval to boolean;
-  rangeX: string;
-  rangeY: string;
-  rangeZ: string;
+  range1: string;
+  range2: string;
+  range3: string;
   expr: string;
-  samples: string;
+  samples1: string;
+  samples2: string;
+  samples3: string;
   scale: string;
 }
 
@@ -48,11 +56,13 @@ const defaultValues: VectorFieldProperties = {
   width: "2",
   start: "false",
   end: "true",
-  rangeX: "[-5,5]",
-  rangeY: "[-5,5]",
-  rangeZ: "[-5,5]",
+  range1: "[-5,5]",
+  range2: "[-5,5]",
+  range3: "[-5,5]",
   expr: "_f(x,y,z)=[y, -x]/sqrt(x^2 + y^2)",
-  samples: "[10, 10, 5]",
+  samples1: "10",
+  samples2: "10",
+  samples3: "5",
   scale: "1",
 };
 
@@ -80,27 +90,12 @@ const config: IMathItemConfig<MathItemType.VectorField, VectorFieldProperties> =
       width,
       start,
       end,
-      rangeX: {
-        name: "rangeX",
-        label: "Range (X)",
-        widget: WidgetType.MathValue,
-      },
-      rangeY: {
-        name: "rangeY",
-        label: "Range (Y)",
-        widget: WidgetType.MathValue,
-      },
-      rangeZ: {
-        name: "rangeZ",
-        label: "Range (Z)",
-        widget: WidgetType.MathValue,
-      },
-      samples: {
-        name: "samples",
-        label: "Samples",
-        // [x, y, z] ... why is this different from surface sampling?
-        widget: WidgetType.MathValue,
-      },
+      range1,
+      range2,
+      range3,
+      samples1,
+      samples2,
+      samples3,
       scale: {
         name: "scale",
         label: "Scale Multiplier",
@@ -114,13 +109,12 @@ const config: IMathItemConfig<MathItemType.VectorField, VectorFieldProperties> =
     },
     settingsProperties: [
       "opacity",
-      "rangeX",
-      "rangeY",
-      "rangeZ",
       "size",
       "start",
       "end",
-      "samples",
+      "samples1",
+      "samples2",
+      "samples3",
       "scale",
       "width",
       "zBias",

@@ -6,6 +6,7 @@ import {
 } from "configs";
 import ordinal from "ordinal";
 import React, { useMemo } from "react";
+import { ParseAssignmentLHSError } from "util/parsing";
 
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";
@@ -39,12 +40,8 @@ const RangedMathItemForm = ({
 }: RangedMathItemFormProps) => {
   const config = configs[item.type];
   const onWidgetChange = useOnWidgetChange(item);
-  const {
-    onParamNameChange,
-    onRhsChange,
-    exprRef,
-    paramNameErrors: paramErrors,
-  } = useExpressionAndParameters(item.properties.expr, onWidgetChange);
+  const { assignment, onParamNameChange, onRhsChange } =
+    useExpressionAndParameters(item.properties.expr, onWidgetChange);
   const mathScope = useMathScope();
   const errors = useMathErrors(mathScope, item.id, errorNames);
 
@@ -56,14 +53,19 @@ const RangedMathItemForm = ({
       }),
     [onParamNameChange, rangePropNames]
   );
+
+  const exprErr = errors.expr;
+  const lhsErr =
+    exprErr instanceof ParseAssignmentLHSError ? exprErr : undefined;
+  const rhsErr = lhsErr ? undefined : exprErr;
   return (
     <ItemTemplate item={item} config={config}>
       <FieldWidget
         widget={WidgetType.MathValue}
         label={config.properties.expr.label}
         name="expr"
-        error={errors.expr}
-        value={exprRef.current.rhs}
+        error={rhsErr}
+        value={assignment.rhs}
         onChange={onRhsChange}
       />
       <ParameterContainer>
@@ -74,10 +76,10 @@ const RangedMathItemForm = ({
               <FieldWidget
                 className={styles["param-input"]}
                 widget={WidgetType.MathValue}
+                error={lhsErr?.details.paramErrors[i]}
                 label={`Name for ${ordinal(i + 1)} parameter`}
                 name={`${ordinal(i + 1)}-parameter-name`}
-                error={paramErrors[i]}
-                value={exprRef.current.params[i]}
+                value={assignment.params[i]}
                 onChange={onParamChanges[i]}
               />
             }

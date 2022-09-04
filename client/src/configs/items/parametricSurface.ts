@@ -8,16 +8,18 @@ import {
   color,
   description,
   gridOpacity,
-  gridU,
-  gridV,
+  grid1,
+  grid2,
   gridWidth,
   opacity,
-  rangeU,
-  rangeV,
+  param1,
+  param2,
+  range1,
+  range2,
   shaded,
-  uSamples,
+  samples1,
   visible,
-  vSamples,
+  samples2,
   zBias,
   zIndex,
 } from "../shared";
@@ -32,15 +34,17 @@ interface ParametricSurfaceProperties {
 
   shaded: string; // eval to boolean;
   expr: string;
-  rangeU: string;
-  rangeV: string;
+  param1: string;
+  param2: string;
+  range1: string;
+  range2: string;
   colorExpr: string;
   gridOpacity: string;
   gridWidth: string;
-  uSamples: string;
-  vSamples: string;
-  gridU: string;
-  gridV: string;
+  samples1: string;
+  samples2: string;
+  grid1: string;
+  grid2: string;
 }
 
 const defaultValues: ParametricSurfaceProperties = {
@@ -52,15 +56,17 @@ const defaultValues: ParametricSurfaceProperties = {
   zBias: "0",
   shaded: "true",
   expr: "_f(u,v)=[1,1,1]",
-  rangeU: "[-pi, pi]",
-  rangeV: "[-3, 3]",
+  param1: "u",
+  param2: "v",
+  range1: "[-pi, pi]",
+  range2: "[-3, 3]",
   colorExpr: "_f(X, Y, Z, u, v)=mod(Z, 1)",
   gridOpacity: "0.5",
   gridWidth: "2",
-  uSamples: "64",
-  vSamples: "64",
-  gridU: "8",
-  gridV: "8",
+  samples1: "64",
+  samples2: "64",
+  grid1: "8",
+  grid2: "8",
 };
 
 const make: MathItemGenerator<
@@ -92,30 +98,30 @@ const config: IMathItemConfig<
     color,
     description,
     gridOpacity,
-    gridU,
-    gridV,
+    grid1,
+    grid2,
     gridWidth,
     opacity,
-    rangeU,
-    rangeV,
+    param1,
+    param2,
+    range1,
+    range2,
     shaded,
-    uSamples,
-    vSamples,
+    samples1,
+    samples2,
     visible,
     zBias,
     zIndex,
   },
   settingsProperties: [
     "gridOpacity",
-    "gridU",
-    "gridV",
+    "grid1",
+    "grid2",
     "gridWidth",
     "opacity",
-    "rangeU",
-    "rangeV",
     "shaded",
-    "uSamples",
-    "vSamples",
+    "samples1",
+    "samples2",
     "visible",
     "zBias",
     "zIndex",

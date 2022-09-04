@@ -1,4 +1,3 @@
-import { latexParser } from "./parsers";
 /**
  * This file includes helpers for parsing mathematical expressions, not
  * necessarily related to the MathScope adapter.
@@ -15,17 +14,61 @@ const splitAtFirstEquality = (text: string): [string, string] => {
   return [lhs, rhs];
 };
 
-const getParameters = (expr: string): string[] => {
-  /**
-   * Expr should parse to a FunctionAssignmentNode, but let's discard the RHS
-   * and use LHS = 1 in case the RHS includes a parsing error.
-   */
-  const [lhs] = splitAtFirstEquality(expr);
-  const node = latexParser.mjsParse(`${lhs} = 1`);
-  if (node.type !== "FunctionAssignmentNode") {
-    throw new Error("Expected a FunctionAssignmentNode");
-  }
-  return node.params;
-};
+interface FunctionAssignmentProps {
+  name: string;
+  params: string[];
+  rhs: string;
+}
 
-export { getParameters, splitAtFirstEquality };
+/**
+ * Represents a potentially invalid function assignment. For example:
+ *  1. f(x, y)   = x
+ *  2. f(x +, y) = x
+ *  3. f(x, x)   = x
+ *
+ * This class only does enough parsing to determing the lhs, rhs, function name,
+ * and parameter names. In this way, we can parse stirngs that MathJS's parser
+ * would reject, and we can give slightly more detailed information about the
+ * errors.
+ */
+class FunctionAssignment {
+  readonly params: string[];
+
+  readonly name: string;
+
+  readonly rhs: string;
+
+  constructor({ name, params, rhs }: FunctionAssignmentProps) {
+    this.params = params.map((p) => p.trim());
+    this.name = name;
+    this.rhs = rhs;
+  }
+
+  private static fromExprRegex = /(?<name>.+)\((?<paramsString>.*)\)\s*$/;
+
+  static isFunctionLHS = (expr: string) =>
+    FunctionAssignment.fromExprRegex.test(expr);
+
+  static fromExpr(expr: string) {
+    const [lhs, rhs] = splitAtFirstEquality(expr);
+    const { paramsString, name } =
+      lhs.trim().match(FunctionAssignment.fromExprRegex)?.groups ?? {};
+    const params = paramsString.split(",");
+    return new FunctionAssignment({ name, params, rhs });
+  }
+
+  clone(props: Partial<FunctionAssignmentProps> = {}) {
+    const { name, params, rhs } = this;
+    return new FunctionAssignment({ name, params, rhs, ...props });
+  }
+
+  toExpr(): string {
+    return `${this.getLhs()}=${this.rhs}`;
+  }
+
+  getLhs(): string {
+    return `${this.name}(${this.params.join(",")})`;
+  }
+}
+
+export { FunctionAssignment, splitAtFirstEquality };
