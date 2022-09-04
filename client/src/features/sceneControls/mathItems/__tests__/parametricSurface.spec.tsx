@@ -8,7 +8,6 @@ import {
   seedDb,
   user,
 } from "test_util";
-import { UnmetDependencyError } from "util/MathScope";
 import { ParseAssignmentLHSError } from "util/parsing";
 
 const getParamNameInputs = (): HTMLTextAreaElement[] => {
