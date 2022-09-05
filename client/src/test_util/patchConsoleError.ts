@@ -12,7 +12,6 @@ interface ConsoleErrorArgs {
  * https://github.com/ant-design/ant-design/issues/31805
  */
 const patchConsoleError = (patterns: ConsoleErrorArgs[]) => {
-  const suppresionEnvs = ["test"];
   const patched = (message: string, ...data: string[]) => {
     const shouldIgnore = patterns.some((pattern) => {
       return (
@@ -20,7 +19,7 @@ const patchConsoleError = (patterns: ConsoleErrorArgs[]) => {
         (pattern.ignoreData && data.includes(pattern.ignoreData))
       );
     });
-    if (suppresionEnvs.includes(process.env.NODE_ENV) && shouldIgnore) return;
+    if (process.env.NODE_ENV === "test" && shouldIgnore) return;
     originalConsoleError(message, ...data);
   };
 
