@@ -1,8 +1,8 @@
-export {}
+export {};
 
 declare global {
   namespace NodeJS {
-      interface Global {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/naming-convention
+    interface Global {}
   }
 }
-  
