@@ -12,18 +12,18 @@ import { QueryClient } from "@tanstack/react-query";
 import AppRoutes from "./app";
 import { getStore } from "./store/store";
 
-let setup = Promise.resolve();
+const prepare = async () => {
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+    const { worker } = await import("./test_util/msw/browser");
+    // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+    const { seedDb } = await import("./test_util");
+    seedDb.withFixtures();
+    await worker.start();
+  }
+};
 
-if (process.env.NODE_ENV === "development") {
-  // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
-  const { worker } = require("./test_util/msw/browser");
-  // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
-  const { seedDb } = require("./test_util");
-  seedDb.withFixtures();
-  setup = worker.start();
-}
-
-setup.then(() => {
+prepare().then(() => {
   const container = document.getElementById("root");
   if (!container) {
     throw new Error("Could not find root container.");

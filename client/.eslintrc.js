@@ -52,6 +52,8 @@ module.exports = {
           "**/*.spec.ts",
           "**/*.spec.tsx",
           "playwright.config.ts",
+          "vite.config.ts",
+          "jest.config.ts",
           "**/*.stories.tsx",
           "src/setupTests.ts",
           "src/test_util/**/*.ts",
@@ -60,7 +62,11 @@ module.exports = {
       }
     ]
   },
-  settings: {},
+  settings: {
+    "import/resolver": {
+      typescript: true
+    }
+  },
   overrides: [
     {
       files: ["**/*.ts?(x)"],
