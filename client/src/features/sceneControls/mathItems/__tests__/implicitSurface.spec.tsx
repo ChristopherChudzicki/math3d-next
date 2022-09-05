@@ -2,13 +2,11 @@ import { MathItem, MathItemType as MIT, mathItemConfigs } from "configs";
 import {
   assertInstanceOf,
   makeItem,
-  nodeId,
   renderTestApp,
   screen,
   seedDb,
   user,
 } from "test_util";
-import { ParseAssignmentLHSError } from "util/parsing";
 
 const config = mathItemConfigs[MIT.ImplicitSurface];
 
