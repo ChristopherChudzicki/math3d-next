@@ -1,12 +1,12 @@
 import classNames from "classnames";
-import { MathGraphic } from "configs";
-import { colorsAndGradients, makeColorConfig } from "configs/colors";
+import { MathGraphic } from "@/configs";
+import { colorsAndGradients, makeColorConfig } from "@/configs/colors";
 import React, { useCallback, useMemo } from "react";
-import { useToggle } from "util/hooks";
-import Popover, { rightStartEnd } from "util/components/Popover";
-import { useLongAndShortPress } from "util/hooks/useLongAndShortPress";
+import { useToggle } from "@/util/hooks";
+import Popover, { rightStartEnd } from "@/util/components/Popover";
+import { useLongAndShortPress } from "@/util/hooks/useLongAndShortPress";
 
-import { positioning } from "util/styles";
+import { positioning } from "@/util/styles";
 import { useOnWidgetChange } from "../FieldWidget";
 import { WidgetChangeEvent } from "../FieldWidget/types";
 import { useMathScope } from "../mathItemsSlice";

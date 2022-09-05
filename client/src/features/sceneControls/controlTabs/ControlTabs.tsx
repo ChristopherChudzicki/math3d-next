@@ -1,6 +1,6 @@
 import { Tabs } from "antd";
 import React from "react";
-import ScrollingYOverflowX from "util/components/scrollingOverflow";
+import ScrollingYOverflowX from "@/util/components/scrollingOverflow";
 
 const { TabPane } = Tabs;
 

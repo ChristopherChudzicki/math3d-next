@@ -1,10 +1,10 @@
 import classNames from "classnames";
 import { DownOutlined } from "@ant-design/icons";
-import { mathItemConfigs as configs, MathItemType as MIT } from "configs";
+import { mathItemConfigs as configs, MathItemType as MIT } from "@/configs";
 import React, { useCallback } from "react";
 
-import { SubtleButton } from "util/components";
-import { positioning } from "util/styles";
+import { SubtleButton } from "@/util/components";
+import { positioning } from "@/util/styles";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
 import styles from "./Folder.module.css";

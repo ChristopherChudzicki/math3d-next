@@ -3,7 +3,7 @@ import {
   mathItemConfigs as configs,
   MathItemType as MIT,
   WidgetType,
-} from "configs";
+} from "@/configs";
 import ordinal from "ordinal";
 import React from "react";
 

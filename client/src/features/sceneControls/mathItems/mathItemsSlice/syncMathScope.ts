@@ -6,10 +6,10 @@ import {
   MathItem,
   mathItemConfigs,
   MathItemPatch,
-} from "configs";
+} from "@/configs";
 import { filter as collectionFilter } from "lodash";
-import { isNotNil } from "util/predicates";
-import MathScope, { IdentifiedExpression } from "util/MathScope";
+import { isNotNil } from "@/util/predicates";
+import MathScope, { IdentifiedExpression } from "@/util/MathScope";
 
 const mathScopeId = (itemId: string, propName: string) =>
   `${itemId}-${propName}`;

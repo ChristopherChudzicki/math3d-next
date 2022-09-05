@@ -1,4 +1,4 @@
-import { MathItem, MathItemType as MIT, mathItemConfigs } from "configs";
+import { MathItem, MathItemType as MIT, mathItemConfigs } from "@/configs";
 import {
   assertInstanceOf,
   makeItem,
@@ -7,8 +7,8 @@ import {
   screen,
   seedDb,
   user,
-} from "test_util";
-import { ParseAssignmentLHSError } from "util/parsing";
+} from "@/test_util";
+import { ParseAssignmentLHSError } from "@/util/parsing";
 
 const config = mathItemConfigs[MIT.ParametricSurface];
 

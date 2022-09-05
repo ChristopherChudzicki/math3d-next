@@ -1,5 +1,5 @@
-import { MathItemType as MIT } from "configs";
-import { Point, PointProperties } from "configs/items/point";
+import { MathItemType as MIT } from "@/configs";
+import { Point, PointProperties } from "@/configs/items/point";
 import {
   makeItem,
   nodeId,
@@ -8,7 +8,7 @@ import {
   seedDb,
   user,
   allowActWarnings,
-} from "test_util";
+} from "@/test_util";
 
 /**
  * Press and hold pointer on element for `ms` seconds.

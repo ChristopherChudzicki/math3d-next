@@ -1,15 +1,15 @@
 import React, { useEffect, useMemo, useCallback, useRef } from "react";
 import classNames from "classnames";
-import { MathItemType, MathItem } from "configs";
-import { useAppSelector, useAppDispatch } from "store/hooks";
-import { assertIsMathItemType } from "util/predicates";
+import { MathItemType, MathItem } from "@/configs";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { assertIsMathItemType } from "@/util/predicates";
 import {
   MultiContainerDndContext,
   SortableList,
   SortableItem,
   hasSortableData,
   DroppableArea,
-} from "util/components/dnd";
+} from "@/util/components/dnd";
 import type {
   SortableData,
   Active,
@@ -17,8 +17,8 @@ import type {
   Data,
   UniqueIdentifier,
   OnDragOver,
-} from "util/components/dnd";
-import { useCollapsible } from "util/hooks";
+} from "@/util/components/dnd";
+import { useCollapsible } from "@/util/hooks";
 import MathItemUI from "../MathItem";
 import { select, actions, useMathScope } from "../mathItemsSlice";
 import style from "./MathItemsList.module.css";

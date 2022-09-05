@@ -1,5 +1,5 @@
-import type { MathItem } from "configs";
-import type MathScope from "util/MathScope";
+import type { MathItem } from "@/configs";
+import type MathScope from "@/util/MathScope";
 
 interface MathItemsState {
   items: {

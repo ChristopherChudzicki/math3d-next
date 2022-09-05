@@ -7,7 +7,7 @@ import {
   within,
 } from "@testing-library/react";
 import user from "@testing-library/user-event";
-import { makeItem } from "features/sceneControls/mathItems/util";
+import { makeItem } from "@/features/sceneControls/mathItems/util";
 
 import renderTestApp from "./renderTestApp";
 import patchConsoleError from "./patchConsoleError";

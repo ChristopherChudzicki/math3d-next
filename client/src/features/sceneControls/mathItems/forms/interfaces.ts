@@ -1,4 +1,4 @@
-import type { MathItem, MathItemType } from "configs";
+import type { MathItem, MathItemType } from "@/configs";
 import React from "react";
 
 interface MathItemProps<T extends MathItemType> {

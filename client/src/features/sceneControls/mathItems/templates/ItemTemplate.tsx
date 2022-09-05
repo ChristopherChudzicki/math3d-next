@@ -5,9 +5,9 @@ import {
   MathItemConfig,
   MathItemType as MIT,
   WidgetType,
-} from "configs";
+} from "@/configs";
 import React, { useCallback } from "react";
-import { useAppDispatch, useAppSelector } from "store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 import ColorStatus from "../ColorStatus";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";

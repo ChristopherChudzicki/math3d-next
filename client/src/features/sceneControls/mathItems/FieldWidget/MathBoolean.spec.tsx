@@ -1,5 +1,5 @@
 import { waitFor } from "@testing-library/react";
-import { MathItemType as MIT } from "configs";
+import { MathItemType as MIT } from "@/configs";
 import {
   assertInstanceOf,
   makeItem,
@@ -9,7 +9,7 @@ import {
   seedDb,
   user,
   within,
-} from "test_util";
+} from "@/test_util";
 
 /**
  * Sets up test scenario for MathBoolean:

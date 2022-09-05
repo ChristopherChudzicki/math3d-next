@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { assertNotNil } from "util/predicates";
+import { assertNotNil } from "@/util/predicates";
 
 /**
  * Insert a stylesheet into a ShadowDOM.

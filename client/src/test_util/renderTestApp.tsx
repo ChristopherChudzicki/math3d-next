@@ -2,7 +2,7 @@ import { render, waitFor } from "@testing-library/react";
 import { createTheme } from "@mui/material/styles";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import { getStore } from "store/store";
+import { getStore } from "@/store/store";
 
 import { InitialEntry } from "history";
 import { QueryClient } from "@tanstack/react-query";

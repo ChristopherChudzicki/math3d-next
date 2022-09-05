@@ -1,7 +1,7 @@
-import { useScene } from "api/scene";
+import { useScene } from "@/api/scene";
 
 import React, { useEffect } from "react";
-import { useAppDispatch } from "store/hooks";
+import { useAppDispatch } from "@/store/hooks";
 
 import AddObjectButton from "./AddObjectButton";
 import ControlTabs from "./controlTabs";

@@ -1,4 +1,4 @@
-import { assertInstanceOf } from "test_util";
+import { assertInstanceOf } from "@/test_util";
 import { latexParser as parser } from "./parsers";
 import { ParseAssignmentLHSError } from "./rules";
 

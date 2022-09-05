@@ -3,10 +3,10 @@ import {
   MathItemType,
   PropertyConfig,
   WidgetType,
-} from "configs";
+} from "@/configs";
 import { filter as collectionFilter } from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import MathScope, { OnChangeListener } from "util/MathScope";
+import MathScope, { OnChangeListener } from "@/util/MathScope";
 
 type EvaluationResultsSlice<K extends string> = Partial<Record<K, unknown>>;
 type EvaluationErrorsSlice<K extends string> = Partial<Record<K, Error>>;

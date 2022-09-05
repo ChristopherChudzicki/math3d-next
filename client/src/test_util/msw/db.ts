@@ -1,8 +1,8 @@
-import type { PartialBy, Scene } from "types";
+import type { PartialBy, Scene } from "@/types";
 import { factory, primaryKey } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
-import { MathItem, MathItemType } from "configs";
-import { makeItem } from "features/sceneControls/mathItems/util";
+import { MathItem, MathItemType } from "@/configs";
+import { makeItem } from "@/features/sceneControls/mathItems/util";
 import { sceneFixtures } from "./fixtures";
 
 const db = factory({

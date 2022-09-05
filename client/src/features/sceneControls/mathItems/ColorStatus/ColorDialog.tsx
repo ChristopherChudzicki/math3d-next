@@ -1,8 +1,8 @@
 import { Tabs } from "antd";
-import { MathGraphic, WidgetType } from "configs";
-import { colors, colorsAndGradients } from "configs/colors";
+import { MathGraphic, WidgetType } from "@/configs";
+import { colors, colorsAndGradients } from "@/configs/colors";
 import React, { useCallback } from "react";
-import ColorPicker, { OnColorChange } from "util/components/ColorPicker";
+import ColorPicker, { OnColorChange } from "@/util/components/ColorPicker";
 
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";

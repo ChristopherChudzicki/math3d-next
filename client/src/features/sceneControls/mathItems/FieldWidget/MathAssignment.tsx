@@ -1,10 +1,10 @@
 import classNames from "classnames";
 import React, { useCallback } from "react";
-import { OnMathFieldChange } from "util/components/MathLive";
-import SmallMathField from "util/components/SmallMathField";
-import { AssignmentError } from "util/MathScope/Evaluator";
-import { splitAtFirstEquality } from "util/parsing";
-import { ParseAssignmentLHSError } from "util/parsing/rules";
+import { OnMathFieldChange } from "@/util/components/MathLive";
+import SmallMathField from "@/util/components/SmallMathField";
+import { AssignmentError } from "@/util/MathScope/Evaluator";
+import { splitAtFirstEquality } from "@/util/parsing";
+import { ParseAssignmentLHSError } from "@/util/parsing/rules";
 
 import ReadonlyMathField from "./ReadonlyMathField";
 import type { IWidgetProps, WidgetChangeEvent } from "./types";

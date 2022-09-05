@@ -1,5 +1,5 @@
-import { MathItemType } from "configs";
-import { Scene } from "types";
+import { MathItemType } from "@/configs";
+import { Scene } from "@/types";
 
 const defaultScene: Omit<Scene, "id"> = {
   title: "Untitled",

@@ -2,10 +2,10 @@ import { Switch } from "antd";
 import Tooltip from "@mui/material/Tooltip";
 import classNames from "classnames";
 import React, { useCallback, useMemo, useState } from "react";
-import { SubtleButton } from "util/components";
-import { OnMathFieldChange } from "util/components/MathLive";
-import SmallMathField from "util/components/SmallMathField";
-import { assertNotNil } from "util/predicates";
+import { SubtleButton } from "@/util/components";
+import { OnMathFieldChange } from "@/util/components/MathLive";
+import SmallMathField from "@/util/components/SmallMathField";
+import { assertNotNil } from "@/util/predicates";
 import { useMathScope } from "../mathItemsSlice";
 
 import { useMathResults } from "../mathScope";

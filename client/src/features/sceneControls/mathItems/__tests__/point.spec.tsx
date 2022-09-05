@@ -1,4 +1,4 @@
-import { MathItem, MathItemType as MIT } from "configs";
+import { MathItem, MathItemType as MIT } from "@/configs";
 import {
   makeItem,
   nodeId,
@@ -8,8 +8,8 @@ import {
   seedDb,
   user,
   within,
-} from "test_util";
-import { assertNotNil } from "util/predicates";
+} from "@/test_util";
+import { assertNotNil } from "@/util/predicates";
 
 test.each([
   {

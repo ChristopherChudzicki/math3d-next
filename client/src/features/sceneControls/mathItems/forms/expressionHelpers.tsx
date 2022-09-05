@@ -1,6 +1,6 @@
-import { MathItem } from "configs";
+import { MathItem } from "@/configs";
 import React, { useCallback, useMemo } from "react";
-import { FunctionAssignment, ParseAssignmentLHSError } from "util/parsing";
+import { FunctionAssignment, ParseAssignmentLHSError } from "@/util/parsing";
 
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import { OnWidgetChange } from "../FieldWidget/types";

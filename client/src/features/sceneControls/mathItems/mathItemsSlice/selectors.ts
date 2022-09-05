@@ -1,6 +1,6 @@
-import type { SelectorReturn, RootState } from "store/store";
-import type { MathItem } from "configs";
-import MathScope from "util/MathScope";
+import type { SelectorReturn, RootState } from "@/store/store";
+import type { MathItem } from "@/configs";
+import MathScope from "@/util/MathScope";
 import type { MathItemsState, Subtree } from "./interfaces";
 
 const mathItems =

@@ -1,5 +1,5 @@
 import { act } from "@testing-library/react";
-import { MathItemType as MIT } from "configs";
+import { MathItemType as MIT } from "@/configs";
 import {
   makeItem,
   screen,
@@ -7,7 +7,7 @@ import {
   shortSleep,
   seedDb,
   renderTestApp,
-} from "test_util";
+} from "@/test_util";
 
 const getTooltip = () => screen.getByRole("tooltip");
 const queryTooltip = () => screen.queryByRole("tooltip");

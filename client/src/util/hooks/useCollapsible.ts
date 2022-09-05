@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { assertNotNil } from "util/predicates";
+import { assertNotNil } from "@/util/predicates";
 
 const getMs = (duration: string): number => {
   if (duration.endsWith("ms")) {

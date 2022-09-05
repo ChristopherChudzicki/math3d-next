@@ -1,4 +1,4 @@
-import { permutations } from "test_util";
+import { permutations } from "@/test_util";
 
 import { anonParse as parse } from "./adapter";
 import ExpressionGraphManager from "./ExpressionGraphManager";

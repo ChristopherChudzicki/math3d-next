@@ -1,6 +1,6 @@
-import { MathItem, MathItemType as MIT, WidgetType } from "configs";
+import { MathItem, MathItemType as MIT, WidgetType } from "@/configs";
 import React, { useCallback } from "react";
-import { useAppDispatch } from "store/hooks";
+import { useAppDispatch } from "@/store/hooks";
 
 import { actions } from "../mathItemsSlice";
 import AutosizeText from "./AutosizeText";
