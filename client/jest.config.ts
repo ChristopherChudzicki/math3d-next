@@ -26,6 +26,10 @@ const config: Config.InitialOptions = {
     "^.+\\.module$": "identity-obj-proxy",
   },
   moduleFileExtensions: ["ts", "tsx", "js"],
+  watchPlugins: [
+    "jest-watch-typeahead/filename",
+    "jest-watch-typeahead/testname",
+  ],
   verbose: true,
 };
 

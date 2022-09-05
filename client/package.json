@@ -95,6 +95,7 @@
     "eslint-plugin-prettier": "4.1.0",
     "identity-obj-proxy": "^3.0.0",
     "jest-fail-on-console": "3.0.1",
+    "jest-watch-typeahead": "^2.1.1",
     "msw": "0.47.0",
     "prettier": "2.7.1",
     "ts-node": "^10.9.1",
