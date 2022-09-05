@@ -1,4 +1,4 @@
-import { MathItemType as MIT } from "configs";
+import { MathItemType as MIT } from "@/configs";
 import React from "react";
 
 import { MathItemForm } from "../interfaces";

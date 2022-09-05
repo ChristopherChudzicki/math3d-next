@@ -1,6 +1,6 @@
 import mergeClassNames from "classnames";
 import React, { forwardRef } from "react";
-import { useToggle } from "util/hooks";
+import { useToggle } from "@/util/hooks";
 
 import styles from "./SubtleButton.module.css";
 

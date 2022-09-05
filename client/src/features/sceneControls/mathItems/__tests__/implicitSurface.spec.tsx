@@ -1,4 +1,4 @@
-import { MathItem, MathItemType as MIT, mathItemConfigs } from "configs";
+import { MathItem, MathItemType as MIT, mathItemConfigs } from "@/configs";
 import {
   assertInstanceOf,
   makeItem,
@@ -6,7 +6,7 @@ import {
   screen,
   seedDb,
   user,
-} from "test_util";
+} from "@/test_util";
 
 const config = mathItemConfigs[MIT.ImplicitSurface];
 

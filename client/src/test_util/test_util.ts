@@ -1,9 +1,9 @@
 import user from "@testing-library/user-event";
-import { MathItem } from "configs";
-import { mathScopeId } from "features/sceneControls/mathItems/mathScope";
-import { testId } from "features/sceneControls/mathItems/util";
+import { MathItem } from "@/configs";
+import { mathScopeId } from "@/features/sceneControls/mathItems/mathScope";
+import { testId } from "@/features/sceneControls/mathItems/util";
 import * as R from "ramda";
-import { assertInstanceOf } from "util/predicates";
+import { assertInstanceOf } from "@/util/predicates";
 
 const permutations = <T>(tokens: T[], subperms: T[][] = [[]]): T[][] =>
   R.isEmpty(tokens)

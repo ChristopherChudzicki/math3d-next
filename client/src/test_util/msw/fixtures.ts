@@ -1,6 +1,6 @@
-import { MathItem, MathItemType as MIT } from "configs";
-import { makeItem } from "features/sceneControls/mathItems/util";
-import { Scene } from "types";
+import { MathItem, MathItemType as MIT } from "@/configs";
+import { makeItem } from "@/features/sceneControls/mathItems/util";
+import { Scene } from "@/types";
 
 const sceneIds = {
   /**

@@ -5,7 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import { Provider } from "react-redux";
 import { Route, Routes } from "react-router-dom";
-import { AppStore } from "store/store";
+import { AppStore } from "@/store/store";
 
 import * as routes from "./routes";
 

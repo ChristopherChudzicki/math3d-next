@@ -1,13 +1,13 @@
 import { SettingOutlined } from "@ant-design/icons";
-import { Popover, SubtleButton } from "util/components";
+import { Popover, SubtleButton } from "@/util/components";
 import type {
   MathItem,
   MathItemConfig,
   MathItemType,
   PropertyConfig,
-} from "configs";
+} from "@/configs";
 import React, { forwardRef, useMemo } from "react";
-import { useToggle } from "util/hooks";
+import { useToggle } from "@/util/hooks";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { useMathScope } from "../mathItemsSlice";
 import { getMathProperties, useMathErrors } from "../mathScope";

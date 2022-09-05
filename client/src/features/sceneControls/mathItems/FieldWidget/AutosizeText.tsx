@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import React, { useCallback } from "react";
-import { TextareaAutoWidthHeight } from "util/components";
+import { TextareaAutoWidthHeight } from "@/util/components";
 
 import { IWidgetProps, WidgetChangeEvent } from "./types";
 import styles from "./widget.module.css";

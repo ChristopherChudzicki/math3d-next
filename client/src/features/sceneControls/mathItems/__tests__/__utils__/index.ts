@@ -1,4 +1,4 @@
-import { screen, within, user } from "test_util";
+import { screen, within, user } from "@/test_util";
 
 const addItem = async (itemTypeLabel: string): Promise<void> => {
   const addNewItemButton = screen.getByText("Add New Object");

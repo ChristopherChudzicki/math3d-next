@@ -1,9 +1,9 @@
 import { render } from "@testing-library/react";
 import React, { createContext, useContext, useEffect } from "react";
 import { act } from "react-dom/test-utils";
-import MathScope, { UnmetDependencyError } from "util/MathScope";
-import { CyclicAssignmentError } from "util/MathScope/Evaluator";
-import { assertNotNil } from "util/predicates";
+import MathScope, { UnmetDependencyError } from "@/util/MathScope";
+import { CyclicAssignmentError } from "@/util/MathScope/Evaluator";
+import { assertNotNil } from "@/util/predicates";
 
 import { useMathErrors, useMathResults } from "./mathScope";
 

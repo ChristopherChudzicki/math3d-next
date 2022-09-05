@@ -2,7 +2,7 @@ import {
   MathItemType as MIT,
   WidgetType,
   mathItemConfigs as configs,
-} from "configs";
+} from "@/configs";
 import React from "react";
 import FieldWidget from "../../FieldWidget";
 import ReadonlyMathField from "../../FieldWidget/ReadonlyMathField";

@@ -1,7 +1,9 @@
 import { CloseOutlined } from "@ant-design/icons";
 import mergeClassNames from "classnames";
 import React from "react";
-import SubtleButton, { SubtleButtonProps } from "util/components/SubtleButton";
+import SubtleButton, {
+  SubtleButtonProps,
+} from "@/util/components/SubtleButton";
 
 import styles from "./CloseButton.module.css";
 

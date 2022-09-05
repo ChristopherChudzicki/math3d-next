@@ -1,9 +1,9 @@
 import { Button, Dropdown, Menu, MenuProps } from "antd";
-import { addableTypes, mathItemConfigs, MathItemType } from "configs";
+import { addableTypes, mathItemConfigs, MathItemType } from "@/configs";
 import React, { useCallback } from "react";
-import { useAppDispatch } from "store/hooks";
-import { assertIsMathItemType } from "util/predicates";
-import idGenerator from "util/idGenerator";
+import { useAppDispatch } from "@/store/hooks";
+import { assertIsMathItemType } from "@/util/predicates";
+import idGenerator from "@/util/idGenerator";
 
 import { mathItemsSlice } from "./mathItems";
 

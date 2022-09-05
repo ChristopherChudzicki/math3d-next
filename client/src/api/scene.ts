@@ -1,4 +1,4 @@
-import type { Scene } from "types";
+import type { Scene } from "@/types";
 import axios from "redaxios";
 import { useQuery } from "@tanstack/react-query";
 import defaultScene from "./defaultScene";

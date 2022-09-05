@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
-import type { MathItemsState } from "features/sceneControls/mathItems";
-import { mathItemsSlice } from "features/sceneControls/mathItems";
+import type { MathItemsState } from "@/features/sceneControls/mathItems";
+import { mathItemsSlice } from "@/features/sceneControls/mathItems";
 
 type RootState = {
   mathItems: MathItemsState;

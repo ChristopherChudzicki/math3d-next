@@ -1,4 +1,4 @@
-import { MathItem, MathItemType as MIT } from "configs";
+import { MathItem, MathItemType as MIT } from "@/configs";
 import React from "react";
 
 import Axis from "./forms/Axis";

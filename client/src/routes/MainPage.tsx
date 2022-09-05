@@ -1,9 +1,9 @@
-import Scene from "features/scene";
-import SceneControls from "features/sceneControls";
+import Scene from "@/features/scene";
+import SceneControls from "@/features/sceneControls";
 import React from "react";
 import { useParams } from "react-router-dom";
-import Header from "util/components/header";
-import Sidebar from "util/components/sidebar";
+import Header from "@/util/components/header";
+import Sidebar from "@/util/components/sidebar";
 
 import styles from "./MainPage.module.css";
 

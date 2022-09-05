@@ -5,7 +5,7 @@ import {
   MathField,
   MathfieldElement,
   MathfieldProps,
-} from "util/components/MathLive";
+} from "@/util/components/MathLive";
 
 import { useShadowStylesheet } from "../hooks";
 

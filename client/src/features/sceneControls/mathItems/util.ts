@@ -1,5 +1,5 @@
-import { MathItem, mathItemConfigs, MathItemType } from "configs";
-import idGenerator from "util/idGenerator";
+import { MathItem, mathItemConfigs, MathItemType } from "@/configs";
+import idGenerator from "@/util/idGenerator";
 
 const makeItem = <T extends MathItemType>(
   type: T,
