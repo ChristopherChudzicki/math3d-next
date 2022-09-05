@@ -1,5 +1,6 @@
+import { MathItem } from "configs";
 import React, { useCallback, useMemo } from "react";
-import { FunctionAssignment } from "util/parsing";
+import { FunctionAssignment, ParseAssignmentLHSError } from "util/parsing";
 
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import { OnWidgetChange } from "../FieldWidget/types";
@@ -32,71 +33,120 @@ const ParameterForm: React.FC<ParameterFormProps> = (props) => {
   );
 };
 
-type OnParamNameChange = (value: string, index: number) => void;
+type ExpressionProps = {
+  /**
+   * An array of assignments.
+   */
+  assignments: FunctionAssignment[];
+  /**
+   * Arrays of widget change handlers.
+   *  - One `rhs` handler for each expression name
+   *  - One `param` handler for each parameter name in the expression LHS
+   */
+  handlers: {
+    rhs: OnWidgetChange[];
+    param: OnWidgetChange[];
+  };
+  /**
+   * One error object for each exprName
+   */
+  errors: {
+    rhs?: Error;
+    lhs?: ParseAssignmentLHSError;
+  }[];
+};
 
 /**
- * Several math items include an "expr" property whose values should be
- * parseable as functions, e.g., `"f(x, y) = x^2 + y^2"`.
+ * Several math items include properties whose values should be
+ * parseable as functions, e.g., an "expr" property with value
+ * `"f(x, y) = x^2 + y^2"`.
  *
  * We'd like a UI that:
  *  - displays only the right-hand-side
- *  - allows editing the parameter names (e.g., change x, y to x1, x2).
+ *  - allows editing the parameter names (e.g., change x, y to x1, x2)
+ *  - shows "expr" errors at the appropriate input (parameter name or RHS value)
  *
  * This hook provides callbacks and data to assist with this.
- *
  */
-const useExpressionAndParameters = (
-  expr: string,
-  onWidgetChange: OnWidgetChange
-): {
+const useExpressionsAndParameters = (
+  item: MathItem,
   /**
-   * A ref which holds the RHS and parameters separately.
+   * The names of the function-parseable math properties. If multiple are
+   * provided, they should have the same LHS.
+   *
+   * @examples
+   *  - ["expr"] for ParametricCurve, etc
+   *  - ["lhs", "rhs"] for implicit surfaces
    */
-  assignment: FunctionAssignment;
-  /**
-   * An OnWidgetChange handler that updates `exprRef` and re-combines the params
-   * and RHS to a function-like expression, updating the store and MathScope
-   * with the function-like expression value.
-   */
-  onRhsChange: OnWidgetChange;
-  /**
-   * An event handler (value, i) => void that updates the i'th parameter name
-   * to the provided value. Updates `exprRef`, `paramNameErrors`, the store, and MathScope.
-   */
-  onParamNameChange: OnParamNameChange;
-} => {
+  exprNames: readonly string[],
+  numParams: number,
+  onWidgetChange: OnWidgetChange,
+  errors: Partial<Record<string, Error>>
+): ExpressionProps => {
   const mathScope = useMathScope();
-  const assignment = useMemo(() => FunctionAssignment.fromExpr(expr), [expr]);
+
+  const exprs = useMemo(
+    // @ts-expect-error need to resolve this
+    () => exprNames.map((name) => item.properties[name]),
+    [exprNames, item.properties]
+  );
+
+  const assignments = useMemo(
+    () => exprs.map(FunctionAssignment.fromExpr),
+    [exprs]
+  );
 
   const updateExpr = useCallback(
-    (newAssignment: FunctionAssignment) => {
-      const event = { name: "expr", value: newAssignment.toExpr(), mathScope };
+    (newAssignment: FunctionAssignment, propName: string) => {
+      const event = {
+        name: propName,
+        value: newAssignment.toExpr(),
+        mathScope,
+      };
       onWidgetChange(event);
     },
     [onWidgetChange, mathScope]
   );
 
-  const onParamNameChange: OnParamNameChange = useCallback(
-    (value, index) => {
-      const newParams = [...assignment.params];
-      newParams[index] = value.replaceAll(",", "");
-      const newAssignment = assignment.clone({ params: newParams });
-      updateExpr(newAssignment);
-    },
-    [updateExpr, assignment]
+  const handlers = useMemo(() => {
+    const rhs: OnWidgetChange[] = exprNames.map((name, i) => {
+      const handler: OnWidgetChange = (e) => {
+        const assignment = assignments[i];
+        const newAssignment = assignment.clone({ rhs: e.value });
+        updateExpr(newAssignment, name);
+      };
+      return handler;
+    });
+    const param: OnWidgetChange[] = Array(numParams)
+      .fill(null)
+      .map((_null, handlerIndex) => {
+        const handler: OnWidgetChange = (e) => {
+          assignments.forEach((assignment, i) => {
+            const newParams = [...assignment.params];
+            newParams[handlerIndex] = e.value.replaceAll(/[,=]/g, "");
+            const newAssignment = assignment.clone({ params: newParams });
+            updateExpr(newAssignment, exprNames[i]);
+          });
+        };
+        return handler;
+      });
+    return { rhs, param };
+  }, [assignments, updateExpr, exprNames, numParams]);
+
+  const errs = useMemo(
+    () =>
+      exprNames.map((exprName) => {
+        const err = errors[exprName];
+        if (!err) return {};
+
+        const lhs = err instanceof ParseAssignmentLHSError ? err : undefined;
+        return { lhs, rhs: err };
+      }),
+    [exprNames, errors]
   );
-  const onRhsChange: OnWidgetChange = useCallback(
-    (e) => {
-      const newAssignment = assignment.clone({ rhs: e.value });
-      updateExpr(newAssignment);
-    },
-    [updateExpr, assignment]
-  );
-  return {
-    assignment,
-    onRhsChange,
-    onParamNameChange,
-  };
+
+  return { assignments, handlers, errors: errs };
 };
 
-export { ParameterContainer, ParameterForm, useExpressionAndParameters };
+export { ParameterContainer, ParameterForm, useExpressionsAndParameters };
+export type { ExpressionProps };
