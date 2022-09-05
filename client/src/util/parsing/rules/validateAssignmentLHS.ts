@@ -40,10 +40,13 @@ const handleFuncLhs = (lhs: string) => {
       return { symbol, isValid, index: i };
     })
     .filter(({ isValid }) => !isValid)
-    .map(
-      ({ symbol, index }) =>
-        [index, `"${symbol}" is not a valid parameter name.`] as const
-    );
+    .map(({ symbol, index }) => {
+      const errMsg =
+        symbol === ""
+          ? "Parameter name cannot be empty."
+          : `"${symbol}" is not a valid parameter name.`;
+      return [index, errMsg] as const;
+    });
 
   const dupes = pickBy(countBy(funcAssignment.params), (c) => c > 1);
   const dupeEntries = funcAssignment.params
@@ -61,7 +64,11 @@ const handleFuncLhs = (lhs: string) => {
   );
 
   if (Object.keys(paramErrors).length > 0) {
-    throw new ParseAssignmentLHSError("Invalid assignment.", true, paramErrors);
+    throw new ParseAssignmentLHSError(
+      "Some parameter names are invalid.",
+      true,
+      paramErrors
+    );
   }
 };
 /**
