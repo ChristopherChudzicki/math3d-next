@@ -1,4 +1,4 @@
-import { MathItem, MathItemType as MIT } from "configs";
+import { MathItem, MathItemType as MIT, mathItemConfigs } from "configs";
 import {
   assertInstanceOf,
   makeItem,
@@ -9,6 +9,8 @@ import {
   user,
 } from "test_util";
 import { ParseAssignmentLHSError } from "util/parsing";
+
+const config = mathItemConfigs[MIT.ParametricSurface];
 
 const getParamNameInputs = (): HTMLTextAreaElement[] => {
   const zeroth = screen.getByLabelText("Name for 1st parameter");
@@ -124,13 +126,17 @@ test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
     const scene = seedDb.withSceneFromItems([item]);
     await renderTestApp(`/${scene.id}`);
 
+    const exprInput = screen.getByLabelText(config.properties.expr.label);
+
     const paramInput = getParamNameInputs()[paramIndex];
     await user.type(paramInput, "a+b");
     expect(paramInput).toHaveClass("has-error");
+    expect(exprInput).toHaveClass("has-error");
 
     // selectRange approach https://github.com/testing-library/user-event/issues/232#issuecomment-640791105 was not working?
     await user.clear(paramInput);
     await user.type(paramInput, "ab");
     expect(paramInput).not.toHaveClass("has-error");
+    expect(exprInput).not.toHaveClass("has-error");
   }
 );

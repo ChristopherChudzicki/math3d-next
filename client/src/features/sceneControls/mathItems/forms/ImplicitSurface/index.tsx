@@ -22,7 +22,6 @@ const ImplicitSurfaceExpressions: React.FC<ExpressionProps> = ({
   errors: exprErrors,
   handlers,
 }) => {
-  console.log(exprErrors);
   return (
     <div className="d-flex">
       <FieldWidget

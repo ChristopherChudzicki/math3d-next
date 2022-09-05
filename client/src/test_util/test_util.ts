@@ -21,15 +21,6 @@ const nodeId =
   (propName: keyof T["properties"] & string) =>
     mathScopeId(item.id, propName);
 
-/**
- * Thin wrapper around `userEvent.type`. Doubles all instances of `[` since this
- * is a special character in `userEvent.type`.
- */
-const typeText = (element: HTMLElement, text: string): Promise<void> => {
-  const escaped = text.replaceAll("[", "[[");
-  return user.type(element, escaped);
-};
-
 const pasteText = (element: HTMLElement, text: string) => {
   user.clear(element);
   user.click(element);
@@ -57,12 +48,30 @@ const allowActWarnings = () => {
   });
 };
 
+/**
+ * Returns the cartesian product of two object arrays, with objects flattened.
+ *
+ * @example
+ * ```ts
+ * const arr1 = [{ a: 1 }, { a: 2 }]
+ * const arr2 = [{ b: 10 }, { b: 20 }]
+ * const prod = flatProduct(arr1, arr2)
+ * // [{ a: 1, b: 10 }, { a: 2, b: 10 }, { a: 1, b: 20 }, { a: 2, b: 20 }]
+ * ```
+ *
+ * Particularly useful for jest testcases.
+ */
+const flatProduct = <T, U>(arr1: T[], arr2: U[]): (T & U)[] =>
+  arr1.flatMap((obj1) => {
+    return arr2.map((obj2) => ({ ...obj1, ...obj2 }));
+  });
+
 export {
   assertInstanceOf,
   nodeId,
   permutations,
+  flatProduct,
   testId,
-  typeText,
   pasteText,
   sleep,
   shortSleep,
