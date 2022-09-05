@@ -63,7 +63,7 @@ class FunctionAssignment {
   }
 
   toExpr(): string {
-    return `${this.getLhs()}=${this.rhs}`;
+    return `${this.getLhs()}=${this.rhs.trim()}`;
   }
 
   getLhs(): string {
