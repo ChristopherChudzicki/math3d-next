@@ -1,6 +1,8 @@
 .parameters {
   display: grid;
-  padding: 6px;
+  padding-left: 6px;
+  padding-top: 6px;
+  padding-bottom: 6px;
   grid-template-columns: min-content min-content;
   justify-content: end;
   align-items: center;
