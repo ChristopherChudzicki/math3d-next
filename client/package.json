@@ -38,7 +38,7 @@
     "@reduxjs/toolkit": "1.8.5",
     "@tanstack/react-query": "4.2.3",
     "@types/node": "18.7.15",
-    "antd": "4.22.8",
+    "antd": "4.23.0",
     "bootstrap": "5.2.0",
     "bootstrap-icons": "1.9.1",
     "classnames": "2.3.1",
