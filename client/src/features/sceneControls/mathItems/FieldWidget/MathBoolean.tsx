@@ -72,16 +72,14 @@ const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
       {...others}
     >
       <Tooltip arrow title={tooltipTitle}>
-        <span>
-          <Switch
-            aria-label={`Toggle property: ${label}`}
-            checked={result}
-            disabled={shouldUseExpression}
-            size="small"
-            className="me-2"
-            onChange={handleSwitchChange}
-          />
-        </span>
+        <Switch
+          aria-label={`Toggle property: ${label}`}
+          checked={result}
+          disabled={shouldUseExpression}
+          size="small"
+          className="me-2"
+          onChange={handleSwitchChange}
+        />
       </Tooltip>
       {shouldUseExpression && (
         <SmallMathField

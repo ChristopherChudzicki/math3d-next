@@ -10,7 +10,6 @@ import user from "@testing-library/user-event";
 import { makeItem } from "@/features/sceneControls/mathItems/util";
 
 import renderTestApp from "./renderTestApp";
-import patchConsoleError from "./patchConsoleError";
 import { seedDb } from "./msw/db";
 import { sceneIds } from "./msw/fixtures";
 
@@ -21,7 +20,6 @@ export {
   act,
   fireEvent,
   makeItem,
-  patchConsoleError,
   prettyDOM,
   screen,
   user,
