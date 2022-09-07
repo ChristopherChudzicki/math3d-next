@@ -1,4 +1,4 @@
-import { Switch } from "antd";
+import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
 import classNames from "classnames";
 import React, { useCallback, useMemo, useState } from "react";
@@ -51,10 +51,11 @@ const MathBoolean: React.FC<IWidgetProps> = (props: IWidgetProps) => {
   const names = useMemo(() => [name], [name]);
   const result = !!useMathResults(mathScope, itemId, names)[name];
 
-  const handleSwitchChange = useCallback(
-    (e: boolean) => triggerChange(e ? "true" : "false"),
-    [triggerChange]
-  );
+  const handleSwitchChange: React.ChangeEventHandler<HTMLInputElement> =
+    useCallback(
+      (e) => triggerChange(e.target.checked ? "true" : "false"),
+      [triggerChange]
+    );
 
   const tooltipTitle = shouldUseExpression
     ? "Value is computed by expression. Reset to re-enable toggle switch control."
