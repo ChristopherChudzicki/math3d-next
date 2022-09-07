@@ -30,3 +30,10 @@
   transition-duration: 0.1s;
   transform: translateY(1px);
 }
+
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1;
+}

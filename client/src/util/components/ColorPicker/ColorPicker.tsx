@@ -1,4 +1,4 @@
-import { WarningOutlined } from "@ant-design/icons";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import Tooltip from "@mui/material/Tooltip";
@@ -54,7 +54,7 @@ const ColorSquare: React.FC<ColorSquareProps> = (props) => {
 
 const ColorWarning: React.FC<{ value: string }> = ({ value }) => (
   <Tooltip arrow title={`${value} is not a valid color`}>
-    <WarningOutlined />
+    <WarningAmberIcon />
   </Tooltip>
 );
 

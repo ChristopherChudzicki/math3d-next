@@ -10,17 +10,17 @@ export type SubtleButtonProps = Omit<
     HTMLButtonElement
   >,
   "ref"
-> & { lighten?: boolean };
+> & { lighten?: boolean; centered?: boolean };
 
 const SubtleButton = forwardRef<HTMLButtonElement, SubtleButtonProps>(
   (props, ref) => {
     // use opacity to darken, brightness to lighten?
-    const { lighten = false, disabled } = props;
+    const { lighten = false, disabled, centered, ...others } = props;
     const [isPressed, setIsPressed] = useToggle(false);
 
     return (
       <button
-        {...props}
+        {...others}
         ref={ref}
         type="button"
         onPointerDown={setIsPressed.on}
@@ -31,6 +31,7 @@ const SubtleButton = forwardRef<HTMLButtonElement, SubtleButtonProps>(
           [styles.lighten]: lighten && !disabled,
           [styles.darken]: !lighten && !disabled,
           [styles.pressed]: isPressed && !disabled,
+          [styles.centered]: centered,
         })}
       >
         {props.children}
