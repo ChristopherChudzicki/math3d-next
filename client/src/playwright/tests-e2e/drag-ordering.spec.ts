@@ -10,7 +10,7 @@ const drag = async (
   source: Locator,
   target: Locator,
   {
-    sourceOffset = { x: 5, y: 5 },
+    sourceOffset = { x: 100, y: 5 },
     targetOffset = { x: 25, y: 25 },
     steps = 25,
     downTimeout = 150,
@@ -91,7 +91,7 @@ test("Dragging item X before item Y", async ({ page }) => {
   const target = getItem(page, "F3", "P3b");
 
   await expect(await getAllItemDescriptions(page)).toEqual(initialOrder);
-  await drag(page, source, target, { targetOffset: { x: 5, y: -50 } });
+  await drag(page, source, target, { targetOffset: { x: 150, y: -40 } });
   const after = await getAllItemDescriptions(page);
   expect(after).toEqual("F1 P1a P1b F2 P2b F3 P3a P2a P3b".split(" "));
 
@@ -117,7 +117,7 @@ test("Dragging folder X before folder Y", async ({ page }) => {
   const target = getItem(page, "F2");
 
   await expect(await getAllItemDescriptions(page)).toEqual(initialOrder);
-  await drag(page, source, target, { targetOffset: { x: 5, y: -50 } });
+  await drag(page, source, target, { targetOffset: { x: 5, y: -40 } });
   const after = await getAllItemDescriptions(page);
   expect(after).toEqual("F1 P1a P1b F3 P3a P3b F2 P2a P2b".split(" "));
 
