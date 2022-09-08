@@ -1,5 +1,5 @@
 import path from "path";
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import { visualizer } from "rollup-plugin-visualizer";
 import react from "@vitejs/plugin-react";
 import viteTsconfigPaths from "vite-tsconfig-paths";
@@ -23,5 +23,12 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  test: {
+    globals: true,
+    setupFiles: ["./src/setupTests.ts"],
+    environment: "jsdom",
+    exclude: ["**/playwright/**"],
+    include: ["./src/**/*.{test,spec}.{ts,tsx}"],
   },
 });
