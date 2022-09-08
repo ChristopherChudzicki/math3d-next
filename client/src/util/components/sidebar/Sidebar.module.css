@@ -8,6 +8,10 @@
   right: 0;
 }
 
+.sidebar-button {
+  color: var(--color-secondary)
+}
+
 .left-sidebar-collapse-button {
   position: absolute;
   right: 0;

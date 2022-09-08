@@ -38,10 +38,11 @@ const setup = async (initialValue: string) => {
   /**
    * Find and return the Switch button
    */
-  const findToggle = async (): Promise<HTMLButtonElement> => {
+  const findToggle = async (): Promise<HTMLInputElement> => {
     const label = "Toggle property: Visible";
-    const toggle = await within(settings).findByLabelText(label);
-    assertInstanceOf(toggle, HTMLButtonElement);
+    const labeled = await within(settings).findByLabelText(label);
+    const toggle = within(labeled).getByRole("checkbox");
+    assertInstanceOf(toggle, HTMLInputElement);
     return toggle;
   };
   const findReset = async (): Promise<HTMLButtonElement> => {

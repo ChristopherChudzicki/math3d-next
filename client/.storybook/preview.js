@@ -1,4 +1,3 @@
-import "antd/dist/antd.css";
 import "../src/index.css";
 
 export const parameters = {

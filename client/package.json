@@ -10,7 +10,7 @@
     "lint": "eslint --max-warnings 0 \"./src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix",
     "storybook": "start-storybook -p 6006 -s public",
-    "test": "jest --testPathIgnorePatterns __utils__ tests-e2e",
+    "test": "jest --testPathIgnorePatterns __utils__ tests-e2e --watch",
     "test-e2e": "playwright test"
   },
   "browserslist": {
@@ -26,19 +26,20 @@
     ]
   },
   "dependencies": {
-    "@ant-design/icons": "4.7.0",
     "@dnd-kit/core": "6.0.5",
     "@dnd-kit/sortable": "7.0.1",
     "@dnd-kit/utilities": "3.2.0",
     "@emotion/react": "11.10.4",
     "@emotion/styled": "11.10.4",
     "@math3d/react-textarea-autosize": "8.3.5",
+    "@mui/icons-material": "^5.10.3",
+    "@mui/lab": "^5.0.0-alpha.97",
     "@mui/material": "5.10.3",
     "@popperjs/core": "2.11.6",
     "@reduxjs/toolkit": "1.8.5",
     "@tanstack/react-query": "4.2.3",
     "@types/node": "18.7.15",
-    "antd": "4.22.8",
+    "antd": "^4.23.0",
     "bootstrap": "5.2.0",
     "bootstrap-icons": "1.9.1",
     "classnames": "2.3.1",

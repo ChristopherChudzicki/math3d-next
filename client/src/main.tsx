@@ -1,6 +1,6 @@
 // bootstrap just for utility classes
 import "bootstrap/dist/css/bootstrap-utilities.css";
-import "antd/dist/antd.min.css";
+import "./globals.css";
 import "./index.css";
 
 import { createTheme } from "@mui/material/styles";

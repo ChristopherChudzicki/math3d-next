@@ -1,4 +1,5 @@
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import mergeClassNames from "classnames";
 import React, { useCallback, useMemo, useState } from "react";
 
@@ -27,8 +28,8 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
   );
   const IconComponent = useMemo(() => {
     const direction = getButtonDirection(isCollapsed, props.side);
-    if (direction === "left") return LeftOutlined;
-    if (direction === "right") return RightOutlined;
+    if (direction === "left") return ChevronLeftIcon;
+    if (direction === "right") return ChevronRightIcon;
     throw new Error(`Unexpected direction: ${direction}`);
   }, [isCollapsed, props.side]);
   return (
@@ -47,7 +48,11 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
           [style["right-sidebar-collapse-button"]]: props.side === "right",
         })}
       >
-        <SubtleButtom onClick={toggleCollapsed}>
+        <SubtleButtom
+          onClick={toggleCollapsed}
+          className={style["sidebar-button"]}
+          centered
+        >
           <IconComponent />
         </SubtleButtom>
       </div>

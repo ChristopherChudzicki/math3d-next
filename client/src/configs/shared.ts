@@ -153,7 +153,7 @@ const width: PropertyConfig<"width"> = {
 
 const zBias: PropertyConfig<"zBias"> = {
   name: "zBias",
-  label: "Z-Index",
+  label: "Z-Bias",
   widget: WidgetType.MathValue,
   // validate real number
 };

@@ -1,11 +1,13 @@
-import { WarningOutlined } from "@ant-design/icons";
-import { Input } from "antd";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
 import Tooltip from "@mui/material/Tooltip";
 import classNames from "classnames";
 import React, {
   MouseEventHandler,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import tinycolor from "tinycolor2";
@@ -52,7 +54,7 @@ const ColorSquare: React.FC<ColorSquareProps> = (props) => {
 
 const ColorWarning: React.FC<{ value: string }> = ({ value }) => (
   <Tooltip arrow title={`${value} is not a valid color`}>
-    <WarningOutlined />
+    <WarningAmberIcon />
   </Tooltip>
 );
 
@@ -123,6 +125,19 @@ const ColorPicker: React.FC<ColorPickerProps> = (props: ColorPickerProps) => {
     handleColor(value);
   }, [value, handleColor]);
 
+  const InputProps = useMemo(() => {
+    const adornment = (
+      <InputAdornment position="start">
+        {isValidColor(current) ? (
+          <ColorSquare color={normalizeColor(current)} textOnly />
+        ) : (
+          <ColorWarning value={current} />
+        )}
+      </InputAdornment>
+    );
+    return { startAdornment: adornment };
+  }, [current, isValidColor, normalizeColor]);
+
   return (
     <div
       style={style}
@@ -137,19 +152,15 @@ const ColorPicker: React.FC<ColorPickerProps> = (props: ColorPickerProps) => {
           />
         );
       })}
-      <Input
-        title="Custom Color Input"
-        aria-label="Custom Color Input"
-        prefix={
-          isValidColor(current) ? (
-            <ColorSquare color={normalizeColor(current)} textOnly />
-          ) : (
-            <ColorWarning value={current} />
-          )
-        }
+      <TextField
+        size="small"
+        title="Custom Color"
         className={styles["color-input"]}
         onChange={handleChange}
         value={current}
+        label="Custom Color"
+        margin="dense"
+        InputProps={InputProps}
       />
     </div>
   );

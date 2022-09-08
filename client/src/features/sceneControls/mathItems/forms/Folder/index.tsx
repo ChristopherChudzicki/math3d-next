@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { DownOutlined } from "@ant-design/icons";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { mathItemConfigs as configs, MathItemType as MIT } from "@/configs";
 import React, { useCallback } from "react";
 
@@ -27,9 +27,14 @@ const FolderButton: React.FC<FolderButtonProps> = ({
      * Need an extra container here because SubtleButton also uses transforms
      */
     <div className={positioning["absolute-centered"]}>
-      <SubtleButton onClick={onClick} aria-label="Expand/Collapse Folder">
-        <DownOutlined
+      <SubtleButton
+        onClick={onClick}
+        aria-label="Expand/Collapse Folder"
+        centered
+      >
+        <ExpandMoreIcon
           className={classNames({
+            [styles.color]: true,
             [styles["rotate-90"]]: isCollapsed,
             [styles["rotate-0"]]: !isCollapsed,
           })}

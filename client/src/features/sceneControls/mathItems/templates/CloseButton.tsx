@@ -1,4 +1,4 @@
-import { CloseOutlined } from "@ant-design/icons";
+import CloseIcon from "@mui/icons-material/Close";
 import mergeClassNames from "classnames";
 import React from "react";
 import SubtleButton, {
@@ -10,8 +10,8 @@ import styles from "./CloseButton.module.css";
 const CloseButton: React.FC<SubtleButtonProps> = (props) => {
   const className = mergeClassNames(props.className, styles["close-button"]);
   return (
-    <SubtleButton {...props} className={className}>
-      <CloseOutlined />
+    <SubtleButton {...props} className={className} centered>
+      <CloseIcon />
     </SubtleButton>
   );
 };

@@ -1,15 +1,16 @@
-import { Tabs } from "antd";
+import Tab from "@mui/material/Tab";
+import TabPanel from "@mui/lab/TabPanel";
+import TabContext from "@mui/lab/TabContext";
+import TabList from "@mui/lab/TabList";
 import { MathGraphic, WidgetType } from "@/configs";
 import { colors, colorsAndGradients } from "@/configs/colors";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import ColorPicker, { OnColorChange } from "@/util/components/ColorPicker";
 
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";
 import { useMathScope } from "../mathItemsSlice";
 import { useMathErrors } from "../mathScope";
-
-const { TabPane } = Tabs;
 
 type GraphicWithColorExpr = MathGraphic & {
   properties: { colorExpr: "string" };
@@ -51,6 +52,8 @@ interface ColorDialogProps {
   className?: string;
 }
 
+const lessPadding = { padding: "0.5em" };
+
 const ColorDialog: React.FC<ColorDialogProps> = (props) => {
   const { item } = props;
   const onWidgetChange = useOnWidgetChange(item);
@@ -59,21 +62,32 @@ const ColorDialog: React.FC<ColorDialogProps> = (props) => {
     [onWidgetChange]
   );
   const pickerColors = hasColorExpr(item) ? colorsAndGradients : colors;
+  const [tab, setTab] = useState("color");
+  const handleChange = useCallback(
+    (_event: React.SyntheticEvent, newValue: string) => {
+      setTab(newValue);
+    },
+    []
+  );
   return (
     <div role="dialog" className={props.className}>
       {hasColorExpr(item) ? (
-        <Tabs>
-          <TabPane tab="Color" key="color">
+        <TabContext value={tab}>
+          <TabList onChange={handleChange} aria-label="lab API tabs example">
+            <Tab label="Color" value="color" />
+            <Tab label="Color Map" value="colormap" />
+          </TabList>
+          <TabPanel sx={lessPadding} value="color">
             <ColorPicker
               colors={pickerColors}
               value={item.properties.color}
               onChange={onColorChange}
             />
-          </TabPane>
-          <TabPane tab="Color Map" key="colormap">
+          </TabPanel>
+          <TabPanel sx={lessPadding} value="colormap">
             <ColorExprInput item={item} onChange={onWidgetChange} />
-          </TabPane>
-        </Tabs>
+          </TabPanel>
+        </TabContext>
       ) : (
         <ColorPicker
           colors={pickerColors}

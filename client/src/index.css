@@ -73,3 +73,7 @@ html {
 .flex-1 {
   flex: 1 !important;
 }
+
+#root .MuiTab-root, #root .MuiButton-root  {
+  text-transform: none;
+}

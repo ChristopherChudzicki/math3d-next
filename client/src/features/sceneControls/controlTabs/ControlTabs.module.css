@@ -1,0 +1,24 @@
+.tabContext {
+  --tabListHeight: 60px;
+}
+
+.tabsHeader {
+  composes: tabContext;
+  padding-left: 1em;
+  padding-right: 1em;
+  height: var(--tabListHeight);
+  display: flex;
+  flex-direction: row;
+}
+
+.scrollingOverflow {
+  composes: tabContext;
+  height: calc(100vh - var(--tabListHeight) - var(--header-height));
+}
+
+.tabListExtra {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-self: center;
+}

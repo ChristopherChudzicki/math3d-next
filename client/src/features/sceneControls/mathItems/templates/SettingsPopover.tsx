@@ -1,4 +1,4 @@
-import { SettingOutlined } from "@ant-design/icons";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { Popover, SubtleButton } from "@/util/components";
 import type {
   MathItem,
@@ -94,8 +94,9 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
           onClick={setVisible.toggle}
           aria-label="Show Settings"
           className={styles["settings-button"]}
+          centered
         >
-          <SettingOutlined />
+          <SettingsOutlinedIcon />
         </SubtleButton>
       }
     >
