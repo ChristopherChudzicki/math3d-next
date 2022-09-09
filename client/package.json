@@ -63,7 +63,7 @@
   "devDependencies": {
     "@faker-js/faker": "7.5.0",
     "@mswjs/data": "0.10.2",
-    "@playwright/test": "1.25.1",
+    "@playwright/test": "1.25.2",
     "@storybook/addon-actions": "6.5.10",
     "@storybook/addon-essentials": "6.5.10",
     "@storybook/addon-links": "6.5.10",
