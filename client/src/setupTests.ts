@@ -37,7 +37,7 @@ vitest.mock("./util/components/TextareaAutoWidthHeight/TextMeasurer");
  * Reset any test-specific handlers between tests.
  */
 beforeAll(() => {
-  server.listen();
+  server.listen({ onUnhandledRequest: "error" });
   seedDb.withFixtures();
 });
 afterEach(() => server.resetHandlers());

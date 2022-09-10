@@ -70,7 +70,7 @@ describe('MathScope "change" Events', () => {
       { id: "b", expr: "a + 1" },
     ]);
 
-    const spy = jest.fn();
+    const spy = vi.fn();
     mathScope.addEventListener("change", spy);
 
     mathScope.setExpressions([
@@ -112,7 +112,7 @@ describe('MathScope "change" Events', () => {
       { id: "b", expr: "a + 1" },
     ]);
 
-    const spy = jest.fn();
+    const spy = vi.fn();
     mathScope.addEventListener("change", spy);
 
     mathScope.deleteExpressions(["b"]);
@@ -146,8 +146,8 @@ describe('MathScope "change" Events', () => {
 
   test("Removing event listeners", () => {
     const mathScope = new MathScope();
-    const spy1 = jest.fn();
-    const spy2 = jest.fn();
+    const spy1 = vi.fn();
+    const spy2 = vi.fn();
 
     mathScope.addEventListener("change", spy1);
     mathScope.addEventListener("change", spy2);
@@ -169,7 +169,7 @@ describe('MathScope "change-errors" Events', () => {
       { id: "b", expr: "a + 1" },
     ]);
 
-    const spy = jest.fn();
+    const spy = vi.fn();
     mathScope.addEventListener("change-errors", spy);
 
     mathScope.setExpressions([
@@ -181,7 +181,7 @@ describe('MathScope "change-errors" Events', () => {
 
   test("Adding/updating/deleting with parse errors does trigger change-errors", () => {
     const mathScope = new MathScope();
-    const spy = jest.fn();
+    const spy = vi.fn();
     mathScope.addEventListener("change-errors", spy);
     mathScope.setExpressions([{ id: "a", expr: "a = 4 +" }]);
 
@@ -242,7 +242,7 @@ describe('MathScope "change-errors" Events', () => {
       { id: "b", expr: "a + 1" },
     ]);
 
-    const spy = jest.fn();
+    const spy = vi.fn();
     mathScope.addEventListener("change-errors", spy);
 
     mathScope.setExpressions([{ id: "c", expr: "x + 1" }]);
@@ -271,7 +271,7 @@ describe('MathScope "change-errors" Events', () => {
       { id: "b", expr: "a + 1" },
     ]);
 
-    const spy = jest.fn();
+    const spy = vi.fn();
     mathScope.addEventListener("change-errors", spy);
     mathScope.deleteExpressions(["b"]);
 
@@ -285,7 +285,7 @@ describe('MathScope "change-errors" Events', () => {
       { id: "b", expr: "a + 1" },
     ]);
 
-    const spy = jest.fn();
+    const spy = vi.fn();
     mathScope.addEventListener("change-errors", spy);
 
     mathScope.deleteExpressions(["a"]);
@@ -321,8 +321,8 @@ describe('MathScope "change-errors" Events', () => {
       { id: "y", expr: "x + 1" },
     ]);
 
-    const spy1 = jest.fn();
-    const spy2 = jest.fn();
+    const spy1 = vi.fn();
+    const spy2 = vi.fn();
     mathScope.addEventListener("change-errors", spy1);
     mathScope.addEventListener("change-errors", spy2);
 
