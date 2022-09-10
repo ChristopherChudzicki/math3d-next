@@ -27,6 +27,16 @@ const fenceLRule: TextParserRegexRule = {
   replacement: "",
 };
 
+const brackRule: TextParserRegexRule = {
+  type: ParserRuleType.TextRegexp,
+  regexp: /\\(?<side>[lr])brack/g,
+  replacement: (match) => {
+    if (match.groups?.side === "l") return "[";
+    if (match.groups?.side === "r") return "]";
+    throw new Error("Unexpected: Side not matched.");
+  },
+};
+
 const leftBraceRule: TextParserRegexRule = {
   type: ParserRuleType.TextRegexp,
   regexp: /\{/g,
@@ -70,6 +80,7 @@ const parserRules: ParserRule[] = [
   operatornameRule,
   cdotRule,
   fenceLRule,
+  brackRule,
   leftBraceRule,
   rightBraceRule,
   backslashRule,
