@@ -30,5 +30,11 @@ export default defineConfig({
     environment: "jsdom",
     exclude: ["**/playwright/**"],
     include: ["./src/**/*.{test,spec}.{ts,tsx}"],
+    css: {
+      include: /\*.module.css/,
+      modules: {
+        classNameStrategy: "non-scoped",
+      },
+    },
   },
 });
