@@ -8,20 +8,13 @@ import React, {
   useState,
 } from "react";
 
-import type {
-  FocusOutHandler,
-  KeystrokeHandler,
-  MathFieldWebComponentProps,
-} from "./types";
-import { useListenToEvent } from "./util";
+import type { MathFieldWebComponentProps } from "./types";
 
 export type MakeMathfieldOptions = (
   options: MathfieldOptions
 ) => Partial<MathfieldOptions>;
 
 interface MathfieldProps extends MathFieldWebComponentProps {
-  onKeystroke?: KeystrokeHandler;
-  onFocusOut?: FocusOutHandler;
   makeOptions?: MakeMathfieldOptions;
   children?: string;
 }
@@ -39,8 +32,7 @@ const MathFieldForwardRef = (
   ref: React.Ref<MathfieldElement | null>
 ) => {
   const {
-    onKeystroke,
-    onFocusOut,
+    onKeyDown,
     onChange,
     makeOptions,
     className,
@@ -49,8 +41,7 @@ const MathFieldForwardRef = (
     ...others
   } = props;
   const [mf, setMf] = useState<MathfieldElement | null>(null);
-  useListenToEvent(mf, "keystroke", () => {});
-  useListenToEvent(mf, "focus-out", onFocusOut);
+
   useEffect(() => {
     if (!mf) return;
     if (!makeOptions) return;
