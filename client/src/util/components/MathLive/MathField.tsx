@@ -51,8 +51,20 @@ const MathFieldForwardRef = (
 
   useEffect(() => {
     if (!mf) return;
-    if (mf.getValue() !== children) {
+    const mfValue = mf.getValue();
+    if (mfValue !== children) {
       mf.setValue(children);
+      /**
+       * In an empty mathfield:
+       *  1. Typing "[" results in LaTeX "\left\lbrack\right?"
+       *  2. But in a controlled field, the cursor is put at end of line rather
+       *     than in between the fences.
+       * This attempts to account for that issue. *Likely there is a better way
+       * to make a controlled field.*
+       */
+      if (children?.endsWith("?") && !mfValue.endsWith("?")) {
+        mf.executeCommand("moveToPreviousWord");
+      }
     }
   });
 
