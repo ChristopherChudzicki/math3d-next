@@ -14,11 +14,11 @@ import {
  * Press and hold pointer on element for `ms` seconds.
  */
 const longClick = async (element: HTMLElement, ms: number) => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
   user.pointer({ keys: "[MouseLeft>]", target: element }); // press the left mouse button
-  jest.advanceTimersByTime(ms);
+  vi.advanceTimersByTime(ms);
   user.pointer({ keys: "[/MouseLeft]", target: element }); // release the left mouse button
-  jest.useRealTimers();
+  vi.useRealTimers();
 };
 
 /**

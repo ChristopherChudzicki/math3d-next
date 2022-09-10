@@ -23,24 +23,22 @@ failOnConsole({
  * Jest does not support enough ShadowDOM for MathLive to function properly, so
  * this mocks it with a textarea.
  */
-jest.mock("./util/components/MathLive/MathField");
+vitest.mock("./util/components/MathLive/MathField");
 
 /**
  * And since we're not using a ShadowDOM, we can't change the ShadowDOM styles.
  */
-jest.mock("./util/hooks/useShadowStylesheet");
+vitest.mock("./util/hooks/useShadowStylesheet");
 
-jest.mock("./util/components/TextareaAutoWidthHeight/TextMeasurer");
+vitest.mock("./util/components/TextareaAutoWidthHeight/TextMeasurer");
 
 /**
  * API mocking for our tests.
  * Reset any test-specific handlers between tests.
  */
 beforeAll(() => {
-  server.listen();
+  server.listen({ onUnhandledRequest: "error" });
   seedDb.withFixtures();
 });
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
-
-jest.setTimeout(10 * 1000);

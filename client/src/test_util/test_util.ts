@@ -42,7 +42,7 @@ const shortSleep = () => sleep(15);
 const allowActWarnings = () => {
   // eslint-disable-next-line no-console
   const consoleError = console.error;
-  jest.spyOn(console, "error").mockImplementation((...args) => {
+  vi.spyOn(console, "error").mockImplementation((...args) => {
     if (/not wrapped in act/.test(args[0])) return;
     consoleError(...args);
   });

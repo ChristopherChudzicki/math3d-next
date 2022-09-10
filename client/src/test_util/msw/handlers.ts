@@ -2,7 +2,7 @@ import { rest } from "msw";
 import db from "./db";
 
 export const handlers = [
-  rest.get("/scenes/:id", (req, res, ctx) => {
+  rest.get("http://localhost:3000/scenes/:id", (req, res, ctx) => {
     const { id } = req.params;
     if (typeof id !== "string") {
       throw new Error("id should be string");

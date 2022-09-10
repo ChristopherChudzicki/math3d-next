@@ -215,7 +215,7 @@ describe("DirectedGraph", () => {
     it("calls the given callback with currentNode, depth, and graph", () => {
       const { graph, nodes } = makeGraph2();
       const [, b, , d, e, , g, h, i] = nodes;
-      const cb = jest.fn();
+      const cb = vi.fn();
       graph.dfs(b, cb);
 
       expect(cb.mock.calls).toEqual([
@@ -233,7 +233,7 @@ describe("DirectedGraph", () => {
       const [a, b] = nodes;
       const graph = new DirectedGraph(nodes, [edge(a, b), edge(b, a)]);
 
-      const cb = jest.fn();
+      const cb = vi.fn();
       graph.dfs(a, cb);
       expect(cb.mock.calls).toEqual([
         [a, 0, graph],
