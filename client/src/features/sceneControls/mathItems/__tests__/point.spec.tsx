@@ -91,7 +91,6 @@ test("Adding items adds to mathScope", async () => {
   await user.click(await screen.findByText("Add New Object"));
   const menu = await screen.findByRole("menu");
   const addPoint = await within(menu).findByText("Point");
-  // antd has issues with point-events checks, see, e.g.,
   await user.click(addPoint, { pointerEventsCheck: 0 });
 
   const items = Object.values(store.getState().mathItems.items);
