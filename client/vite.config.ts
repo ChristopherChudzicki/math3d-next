@@ -37,4 +37,7 @@ export default defineConfig({
       },
     },
   },
+  define: {
+    __PLAYWRIGHT__: process.env.PLAYWRIGHT,
+  },
 });

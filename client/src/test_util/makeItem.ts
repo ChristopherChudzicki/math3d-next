@@ -14,6 +14,4 @@ const makeItem = <T extends MathItemType>(
   return item;
 };
 
-const testId = (itemId: string): string => `mathItem-${itemId}`;
-
-export { makeItem, testId };
+export { makeItem };

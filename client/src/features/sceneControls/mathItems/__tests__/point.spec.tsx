@@ -10,6 +10,7 @@ import {
   within,
 } from "@/test_util";
 import { assertNotNil } from "@/util/predicates";
+import { getItemByDescription } from "./__utils__";
 
 test.each([
   {
@@ -100,7 +101,7 @@ test("Adding items adds to mathScope", async () => {
   ) as MathItem<MIT.Point>;
   assertNotNil(point);
   const id = nodeId(point);
-  screen.getByTestId(`mathItem-${point.id}`);
+  getItemByDescription(point.properties.description);
   expect(mathScope.results.get(id("coords"))).toStrictEqual([0, 0, 0]);
   expect(mathScope.evalErrors.size).toBe(0);
   expect(mathScope.parseErrors.size).toBe(0);
@@ -121,7 +122,7 @@ test("Deleting items removes them from mathScope", async () => {
   expect(mathScope.parseErrors.size).toBeGreaterThan(0);
   expect(mathScope.evalErrors.size).toBeGreaterThan(0);
 
-  const item = screen.getByTestId(`mathItem-${point.id}`);
+  const item = getItemByDescription(point.properties.description);
   const remove = within(item).getByLabelText("Remove Item");
   await user.click(remove);
   expect(mathScope.results.size).toBe(1); // folder visibility
