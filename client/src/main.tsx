@@ -13,13 +13,42 @@ import AppRoutes from "./app";
 import { getStore } from "./store/store";
 
 const prepare = async () => {
-  if (import.meta.env.DEV) {
+  if (import.meta.env.VITE_USE_MSW) {
     // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
     const { worker } = await import("./test_util/msw/browser");
     // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
     const { seedDb } = await import("./test_util");
     seedDb.withFixtures();
     await worker.start();
+
+    window.$pw = {
+      seedDb,
+      doneSeeding: () => {
+        throw new Error("Called before initialization.");
+      },
+    };
+    const whenDoneSeeding = new Promise<void>((resolve) => {
+      window.$pw.doneSeeding = () => {
+        resolve();
+        const alwaysThrow = new Proxy(
+          {},
+          {
+            get: () => {
+              throw new Error(
+                "Cannot access $pw.seedDb after seeding is finished."
+              );
+            },
+          }
+        );
+        // @ts-expect-error The types don't match but irrelant for alwaysThrow
+        window.$pw.seedDb = alwaysThrow;
+      };
+    });
+
+    if (!window.$pwCustomSeed) {
+      window.$pw.doneSeeding();
+    }
+    await whenDoneSeeding;
   }
 };
 

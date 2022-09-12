@@ -2,7 +2,7 @@ import type { PartialBy, Scene } from "@/types";
 import { factory, primaryKey } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
 import { MathItem, MathItemType } from "@/configs";
-import { makeItem } from "@/features/sceneControls/mathItems/util";
+import { makeItem } from "../makeItem";
 import { sceneFixtures } from "./fixtures";
 
 const db = factory({
@@ -43,7 +43,7 @@ const seedDb = {
   /**
    * Create a schene with given items in a single folder, in the given order
    */
-  withSceneFromItems: (items: MathItem[]) => {
+  withSceneFromItems: (items: MathItem[], { id }: { id?: string } = {}) => {
     const folder = makeItem(MathItemType.Folder);
     const scene: PartialScene = {
       items: [folder, ...items],
@@ -53,10 +53,17 @@ const seedDb = {
         setup: [],
       },
     };
+    if (id) {
+      scene.id = id;
+    }
     return addScene(scene);
   },
 };
 
+type SeedDb = typeof seedDb;
+
 export default db;
+
+export type { SeedDb };
 
 export { seedDb };

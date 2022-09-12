@@ -22,6 +22,12 @@ describe("preprocesser fraction conversion", () => {
   });
 });
 
+test("brackect conversion", () => {
+  const input = String.raw`1 + \left\lbrack\left\lbrack1,2\right\rbrack,\left\lbrack3,4\right\rbrack\right\rbrack`;
+  const expected = "1 + [[1,2],[3,4]]";
+  expect(parser.preprocess(input)).toBe(expected);
+});
+
 describe("subscript conversion", () => {
   test("does nothing to single character subscripts", () => {
     const input = "x_1 + x_2";

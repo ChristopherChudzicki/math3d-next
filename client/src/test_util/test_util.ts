@@ -1,7 +1,6 @@
 import user from "@testing-library/user-event";
 import { MathItem } from "@/configs";
 import { mathScopeId } from "@/features/sceneControls/mathItems/mathScope";
-import { testId } from "@/features/sceneControls/mathItems/util";
 import * as R from "ramda";
 import { assertInstanceOf } from "@/util/predicates";
 
@@ -71,7 +70,6 @@ export {
   nodeId,
   permutations,
   flatProduct,
-  testId,
   pasteText,
   sleep,
   shortSleep,

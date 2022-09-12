@@ -12,7 +12,6 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import ColorStatus from "../ColorStatus";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { actions, select } from "../mathItemsSlice";
-import { testId } from "../util";
 import CloseButton from "./CloseButton";
 import styles from "./ItemTemplate.module.css";
 import SettingsPopover from "./SettingsPopover";
@@ -52,7 +51,6 @@ const ItemTemplate = <T extends MIT>({
       className={classNames(styles.container, {
         [styles.childItem]: childItem,
       })}
-      data-testid={testId(item.id)}
       onFocus={onFocus}
     >
       <div

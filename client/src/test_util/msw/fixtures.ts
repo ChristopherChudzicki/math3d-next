@@ -1,6 +1,6 @@
 import { MathItem, MathItemType as MIT } from "@/configs";
-import { makeItem } from "@/features/sceneControls/mathItems/util";
 import { Scene } from "@/types";
+import { makeItem } from "../makeItem";
 
 const sceneIds = {
   /**
@@ -57,7 +57,9 @@ const makeFolderScene = (
   };
 };
 
-const sceneFixtures = [
+type SceneFixture = () => Scene;
+
+const sceneFixtures: SceneFixture[] = [
   () => makeFolderScene(sceneIds.testFolders),
   () =>
     makeFolderScene(sceneIds.testFoldersF2Collapsed, {
