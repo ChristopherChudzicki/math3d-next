@@ -15,13 +15,17 @@ import type {
 } from "./interfaces";
 import { assertIsError, DiffingMap } from "./util";
 
-export type IdentifiedExpression<PO = DefaultParseOptions> = {
+export type IdentifiedExpression<
+  PO extends DefaultParseOptions = DefaultParseOptions
+> = {
   id: string;
   expr: string;
   parseOptions?: PO;
 };
 
-export type OnChangeListener = <PO = DefaultParseOptions>(
+export type OnChangeListener = <
+  PO extends DefaultParseOptions = DefaultParseOptions
+>(
   event: ScopeChangeEvent<PO>
 ) => void;
 
@@ -31,17 +35,23 @@ interface ScopeChange {
   parseErrors: Diff<string>;
 }
 
-export interface ScopeChangeEvent<PO = DefaultParseOptions> {
+export interface ScopeChangeEvent<
+  PO extends DefaultParseOptions = DefaultParseOptions
+> {
   type: "change";
   changes: ScopeChange;
   mathScope: MathScope<PO>;
 }
 
-export type OnChangeErrorsListener = <PO = DefaultParseOptions>(
+export type OnChangeErrorsListener = <
+  PO extends DefaultParseOptions = DefaultParseOptions
+>(
   event: ScopeChangeErrorsEvent<PO>
 ) => void;
 
-export interface ScopeChangeErrorsEvent<PO = DefaultParseOptions> {
+export interface ScopeChangeErrorsEvent<
+  PO extends DefaultParseOptions = DefaultParseOptions
+> {
   type: "change-errors";
   changes: Omit<ScopeChange, "results">;
   mathScope: MathScope<PO>;
@@ -51,7 +61,9 @@ export interface ScopeChangeErrorsEvent<PO = DefaultParseOptions> {
  * Parse and evaluate a dynamic scope of mathematical expressions, possibly
  * containing errors. Fires `change` events when the scope changes.
  */
-export default class MathScope<PO = DefaultParseOptions> {
+export default class MathScope<
+  PO extends DefaultParseOptions = DefaultParseOptions
+> {
   initialScope: EvaluationScope;
 
   private events = new EventEmitter();

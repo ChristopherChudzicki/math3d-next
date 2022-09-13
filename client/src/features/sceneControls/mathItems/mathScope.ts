@@ -7,11 +7,12 @@ import {
 import { filter as collectionFilter } from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import MathScope, { OnChangeListener } from "@/util/MathScope";
+import type { ParseOptions as DefaultParseOptions } from "@/util/MathScope/adapter";
 
 type EvaluationResultsSlice<K extends string> = Partial<Record<K, unknown>>;
 type EvaluationErrorsSlice<K extends string> = Partial<Record<K, Error>>;
 
-const extractResults = <K extends string, PO>(
+const extractResults = <K extends string, PO extends DefaultParseOptions>(
   scope: MathScope<PO>,
   ids: Record<K, string>
 ): EvaluationResultsSlice<K> => {
@@ -25,7 +26,7 @@ const extractResults = <K extends string, PO>(
   return newResult;
 };
 
-const extractErrors = <K extends string, PO>(
+const extractErrors = <K extends string, PO extends DefaultParseOptions>(
   scope: MathScope<PO>,
   ids: Record<K, string>
 ): EvaluationErrorsSlice<K> => {
