@@ -4,7 +4,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "types": ["vite/client", "vitest/globals"],
     "allowJs": false,
-    "skipLibCheck": false,
+    "skipLibCheck": true, // Skip this for now. TS 4.8 Introduced some breaking changes that libraries haven't all caught up to.
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
