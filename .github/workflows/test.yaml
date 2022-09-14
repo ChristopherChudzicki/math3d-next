@@ -35,3 +35,5 @@ jobs:
         working-directory: client
       - run: npm run test
         working-directory: client
+      - run: npm run build
+        working-directory: client
