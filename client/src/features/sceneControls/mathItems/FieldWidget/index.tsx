@@ -35,6 +35,9 @@ const getComponentForWidget = (widget: WidgetType) => {
   if (widget === WidgetType.Custom) {
     throw new Error(`Cannot get component for custom widget.`);
   }
+  if (widget === WidgetType.MathAssignment) {
+    throw new Error(`MathAssignment must be called directly`);
+  }
   throw new Error(`Unrecognized form widget: ${widget}`);
 };
 

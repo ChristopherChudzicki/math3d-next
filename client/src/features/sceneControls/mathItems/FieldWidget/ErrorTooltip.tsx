@@ -1,32 +1,33 @@
 import React from "react";
 import { useToggle } from "@/util/hooks";
-import { Popover } from "@/util/components";
+// import { Popover } from "@/util/components";
+import Tooltip from "@mui/material/Tooltip";
 import styles from "./ErrorTooltip.module.css";
 
 interface Props {
   error?: Error;
-  children?: React.ReactNode;
+  children: React.ReactElement;
 }
 
 const ErrorTooltip: React.FC<Props> = ({ error, children }) => {
   const [isFocused, setIsFocused] = useToggle(false);
   const showTooltip = isFocused && !!error?.message;
   return (
-    <Popover
-      className={styles["error-tooltip"]}
-      trigger={
-        <div
-          className="position-relative"
-          onFocus={setIsFocused.on}
-          onBlur={setIsFocused.off}
-        >
-          {children}
-        </div>
+    <Tooltip
+      title={
+        error?.message ? (
+          <div className={styles["error-tooltip"]}>{error?.message}</div>
+        ) : (
+          ""
+        )
       }
-      visible={showTooltip}
+      open={showTooltip}
     >
-      {error?.message}
-    </Popover>
+      {React.cloneElement(children, {
+        onBlur: setIsFocused.off,
+        onFocus: setIsFocused.on,
+      })}
+    </Tooltip>
   );
 };
 

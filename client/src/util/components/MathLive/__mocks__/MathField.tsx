@@ -9,12 +9,13 @@ const MockMathFieldForwardRef = (
   props: MathfieldProps,
   ref: React.Ref<HTMLTextAreaElement>
 ) => {
-  const { children, onChange, className, makeOptions } = props;
+  const { children, onChange, className, makeOptions, ...others } = props;
 
   const readOnly = makeOptions && makeOptions({} as MathfieldOptions).readOnly;
 
   return (
     <textarea
+      {...others}
       className={className}
       value={children}
       readOnly={readOnly}

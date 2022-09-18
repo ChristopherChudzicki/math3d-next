@@ -1,4 +1,3 @@
-import classNames from "classnames";
 import React from "react";
 import { MathfieldProps } from "@/util/components/MathLive";
 import SmallMathField from "@/util/components/SmallMathField";

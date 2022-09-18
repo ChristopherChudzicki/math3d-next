@@ -7,34 +7,48 @@ import styles from "./widget.module.css";
 
 const EXTRA_WIDTH = 20;
 
-const AutosizeText: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const { onChange, name, label, error, itemId, style = {}, ...others } = props;
-  const { width, height, ...styleWithoutSize } = style;
-  const onInputChange: React.ChangeEventHandler<HTMLTextAreaElement> =
-    useCallback(
-      (e) => {
-        const event: WidgetChangeEvent = {
-          name,
-          value: e.target.value,
-        };
-        onChange(event);
-      },
-      [onChange, name]
+const AutosizeText = React.forwardRef<HTMLTextAreaElement, IWidgetProps>(
+  (props, ref) => {
+    const {
+      onChange,
+      name,
+      label,
+      error,
+      itemId,
+      style = {},
+      className,
+      ...others
+    } = props;
+    const { width, height, ...styleWithoutSize } = style;
+    const onInputChange: React.ChangeEventHandler<HTMLTextAreaElement> =
+      useCallback(
+        (e) => {
+          const event: WidgetChangeEvent = {
+            name,
+            value: e.target.value,
+          };
+          onChange(event);
+        },
+        [onChange, name]
+      );
+    return (
+      <TextareaAutoWidthHeight
+        {...others}
+        extraWidth={EXTRA_WIDTH}
+        aria-label={label}
+        className={classNames(
+          { [styles["has-error"]]: error },
+          styles["field-widget-input"],
+          className
+        )}
+        name={name}
+        onChange={onInputChange}
+        style={styleWithoutSize}
+        ref={ref}
+      />
     );
-  return (
-    <TextareaAutoWidthHeight
-      extraWidth={EXTRA_WIDTH}
-      aria-label={label}
-      className={classNames(
-        { [styles["has-error"]]: error },
-        styles["field-widget-input"]
-      )}
-      name={name}
-      onChange={onInputChange}
-      style={styleWithoutSize}
-      {...others}
-    />
-  );
-};
+  }
+);
+AutosizeText.displayName = "AutosizeText";
 
 export default AutosizeText;
