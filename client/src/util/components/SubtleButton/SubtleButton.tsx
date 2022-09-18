@@ -21,6 +21,7 @@ const SubtleButton = forwardRef<HTMLButtonElement, SubtleButtonProps>(
     return (
       <button
         {...others}
+        disabled={disabled}
         ref={ref}
         type="button"
         onPointerDown={setIsPressed.on}

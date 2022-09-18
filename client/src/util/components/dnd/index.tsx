@@ -5,7 +5,6 @@ import {
   DndContextProps,
   DragOverlay,
   DropAnimation,
-  KeyboardSensor,
   UniqueIdentifier,
   useSensor,
   useSensors,
@@ -25,6 +24,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import classNames from "classnames";
 import PointerSensor from "./PointerSensor";
+import KeyboardSensor from "./KeyboardSensor";
 
 interface SortableItemProps {
   id: UniqueIdentifier;
@@ -177,6 +177,7 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
+      isDraggableElement,
     })
   );
   const [activeItemId, setActiveItemId] = useState<null | UniqueIdentifier>(
