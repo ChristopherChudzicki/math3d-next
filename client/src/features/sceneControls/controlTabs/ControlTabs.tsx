@@ -29,8 +29,8 @@ const SceneControls: React.FC<Props> = (props) => {
     <TabContext value={tab}>
       <div className={styles.tabsHeader}>
         <TabList onChange={handleChange} aria-label="lab API tabs example">
-          <Tab label={props.mainNav} value="main" />
-          <Tab label={props.axesNav} value="axes" />
+          <Tab className={styles.tab} label={props.mainNav} value="main" />
+          <Tab className={styles.tab} label={props.axesNav} value="axes" />
         </TabList>
         <div className={styles.tabListExtra}>{props.tabBarExtraContent}</div>
       </div>

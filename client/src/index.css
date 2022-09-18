@@ -60,20 +60,22 @@ html {
   --border-radius: 4px;
   --transition-duration: 300ms;
   --transition-timing-function: ease;
+  font-size: 14px
 }
 
 #root {
   height: 100%;
+  color: var(--color-text-gray)
 }
 
-* {
-  box-sizing: border-box;
+#root .MuiTab-root, #root .MuiButton-root  {
+  text-transform: none;
 }
 
 .flex-1 {
   flex: 1 !important;
 }
 
-#root .MuiTab-root, #root .MuiButton-root  {
-  text-transform: none;
+math-field {
+  font-size: 1.25rem;
 }

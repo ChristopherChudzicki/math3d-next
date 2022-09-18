@@ -20,9 +20,6 @@
   );
 }
 
-.static-math {
-  font-size: 1.25em;
-}
 
 .field-widget {
   margin-bottom: 2pt;
@@ -30,7 +27,6 @@
 
 .field-widget-input {
   min-width: 10px;
-  font-size: 1.25em;
   border: none;
   margin-left:2pt;
   margin-right:2pt;
@@ -46,7 +42,6 @@
   );
 }
 .field-widget-input:focus-within {
-  font-size: 1.25em;
   border: none;
   background-image: linear-gradient(
     to top,

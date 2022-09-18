@@ -11,9 +11,24 @@ import type { IWidgetProps, WidgetChangeEvent } from "./types";
 import ErrorTooltip from "./ErrorTooltip";
 import style from "./widget.module.css";
 
-const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
-  const { onChange, name, value, error, label, className, itemId, ...others } =
-    props;
+type ExtraProps = {
+  lhsClassName?: string;
+  rhsClassName?: string;
+};
+
+const MathAssignment: React.FC<IWidgetProps & ExtraProps> = (props) => {
+  const {
+    onChange,
+    name,
+    value,
+    error,
+    label,
+    className,
+    lhsClassName,
+    rhsClassName,
+    itemId,
+    ...others
+  } = props;
   const [lhs, rhs] = splitAtFirstEquality(value);
   const onChangeLHS: OnMathFieldChange = useCallback(
     (e) => {
@@ -55,16 +70,15 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
           className={classNames(
             style["field-widget-input"],
             { [style["has-error"]]: hasLhsError },
-            className
+            lhsClassName
           )}
           onChange={onChangeLHS}
         >
           {lhs}
         </SmallMathField>
       </ErrorTooltip>
+      {/** Wrapper div similar to ErrorTooltips */}
       <div>
-        {" "}
-        {/** Wrapper div similar to ErrorTooltips */}
         <ReadonlyMathField value="=" />
       </div>
       <ErrorTooltip error={rhsError}>
@@ -73,8 +87,7 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
           className={classNames(
             style["field-widget-input"],
             { [style["has-error"]]: hasRhsError },
-            className,
-            "flex-1"
+            rhsClassName
           )}
           onChange={onChangeRHS}
         >
