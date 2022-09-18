@@ -19,6 +19,7 @@ type WidgetsProps = {
   [WidgetType.AutosizeText]: React.ComponentProps<typeof AutosizeText>;
   [WidgetType.MathAssignment]: React.ComponentProps<typeof MathAssignment>;
   [WidgetType.Text]: React.ComponentProps<typeof TextInput>;
+  [WidgetType.Custom]: never;
 };
 
 type FormWidgetProps<W extends WidgetType> = {
@@ -31,6 +32,9 @@ const getComponentForWidget = (widget: WidgetType) => {
   if (widget === WidgetType.Color) return ColorWidget;
   if (widget === WidgetType.AutosizeText) return AutosizeText;
   if (widget === WidgetType.Text) return TextInput;
+  if (widget === WidgetType.Custom) {
+    throw new Error(`Cannot get component for custom widget.`);
+  }
   throw new Error(`Unrecognized form widget: ${widget}`);
 };
 

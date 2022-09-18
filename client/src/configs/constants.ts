@@ -24,4 +24,5 @@ export enum WidgetType {
   Color = "color-picker",
   AutosizeText = "autosize-text",
   Text = "text",
+  Custom = "custom",
 }

@@ -58,10 +58,15 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
             className
           )}
           onChange={onChangeLHS}
-          defaultValue={lhs}
-        />
+        >
+          {lhs}
+        </SmallMathField>
       </ErrorTooltip>
-      <ReadonlyMathField value="=" />
+      <div>
+        {" "}
+        {/** Wrapper div similar to ErrorTooltips */}
+        <ReadonlyMathField value="=" />
+      </div>
       <ErrorTooltip error={rhsError}>
         <SmallMathField
           aria-label={rhsLabel}
@@ -72,8 +77,9 @@ const MathAssignment: React.FC<IWidgetProps> = (props: IWidgetProps) => {
             "flex-1"
           )}
           onChange={onChangeRHS}
-          defaultValue={rhs}
-        />
+        >
+          {rhs}
+        </SmallMathField>
       </ErrorTooltip>
     </div>
   );

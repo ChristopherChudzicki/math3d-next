@@ -29,6 +29,7 @@
 }
 
 .field-widget-input {
+  min-width: 10px;
   font-size: 1.25em;
   border: none;
   margin-left:2pt;

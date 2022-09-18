@@ -16,7 +16,12 @@ import { useShadowStylesheet } from "../hooks";
 const styleOverrides = /* css */ `
 :host(.small-math-field) .ML__container {
   min-height: auto;
-}`;
+}
+
+:host(.small-math-field) .ML__content {
+  padding: 1px;
+}
+`;
 
 const makeOptionsDefault: MathfieldProps["makeOptions"] = () => ({
   keypressSound: null,

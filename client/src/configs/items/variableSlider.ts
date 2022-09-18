@@ -56,7 +56,7 @@ const config: IMathItemConfig<
     value: {
       name: "value",
       label: "Value",
-      widget: WidgetType.MathValue,
+      widget: WidgetType.Custom,
     },
     isAnimating: {
       name: "isAnimating",
