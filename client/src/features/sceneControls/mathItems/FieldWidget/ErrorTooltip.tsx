@@ -14,6 +14,7 @@ const ErrorTooltip: React.FC<Props> = ({ error, children }) => {
   const showTooltip = isFocused && !!error?.message;
   return (
     <Tooltip
+      describeChild
       title={
         error?.message ? (
           <div className={styles["error-tooltip"]}>{error?.message}</div>
