@@ -24,6 +24,11 @@
   min-width: calc(100% - 2px);
 }
 
+.description {
+  /** Make description lighter so that mathfields draw more visual focus */
+  color: var(--color-text-light)
+}
+
 .grid-left-gutter {
   grid-column-start: 1;
   grid-column-end: 2;

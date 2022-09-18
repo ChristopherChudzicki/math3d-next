@@ -3,11 +3,11 @@ import "bootstrap/dist/css/bootstrap-utilities.css";
 import "./globals.css";
 import "./index.css";
 
-import { createTheme } from "@mui/material/styles";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient } from "@tanstack/react-query";
+import { theme } from "./mui";
 
 import AppRoutes from "./app";
 import { getStore } from "./store/store";
@@ -61,7 +61,6 @@ prepare().then(() => {
 
   const store = getStore();
   const queryClient = new QueryClient();
-  const theme = createTheme();
 
   root.render(
     <React.StrictMode>

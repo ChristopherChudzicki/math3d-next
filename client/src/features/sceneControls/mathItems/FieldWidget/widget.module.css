@@ -67,7 +67,6 @@ textarea.field-widget-input {
 .detail-text {
   font-size: 75%;
   font-style: italic;
-  color: var(--color-text-gray)
 }
 
 .error-tooltip {

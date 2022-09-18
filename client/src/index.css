@@ -55,17 +55,18 @@ html {
   --color-secondary: var(--color-secondary-6);
   --color-background: var(--color-secondary-1);
   --color-error: red;
-  --color-text-gray: var(--gray-7);
+  --color-text-light: var(--gray-7);
+  --color-text-primary: var(--gray-9);
 
   --border-radius: 4px;
   --transition-duration: 300ms;
   --transition-timing-function: ease;
-  font-size: 14px
+  font-size: 14px;
+  color: var(--color-text-primary);
 }
 
 #root {
   height: 100%;
-  color: var(--color-text-gray)
 }
 
 #root .MuiTab-root, #root .MuiButton-root  {
@@ -78,4 +79,5 @@ html {
 
 math-field {
   font-size: 1.25rem;
+  color: var(--color-text-primary)
 }
