@@ -20,16 +20,13 @@
   );
 }
 
-.static-math {
-  font-size: 1.25em;
-}
 
 .field-widget {
   margin-bottom: 2pt;
 }
 
 .field-widget-input {
-  font-size: 1.25em;
+  min-width: 10px;
   border: none;
   margin-left:2pt;
   margin-right:2pt;
@@ -45,7 +42,6 @@
   );
 }
 .field-widget-input:focus-within {
-  font-size: 1.25em;
   border: none;
   background-image: linear-gradient(
     to top,
@@ -71,7 +67,6 @@ textarea.field-widget-input {
 .detail-text {
   font-size: 75%;
   font-style: italic;
-  color: var(--color-text-gray)
 }
 
 .error-tooltip {

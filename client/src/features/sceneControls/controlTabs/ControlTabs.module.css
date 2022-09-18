@@ -1,5 +1,5 @@
 .tabContext {
-  --tabListHeight: 60px;
+  --tabListHeight: 50px;
 }
 
 .tabsHeader {
@@ -9,6 +9,10 @@
   height: var(--tabListHeight);
   display: flex;
   flex-direction: row;
+}
+
+.tab {
+  height: var(--tabListHeight);
 }
 
 .scrollingOverflow {

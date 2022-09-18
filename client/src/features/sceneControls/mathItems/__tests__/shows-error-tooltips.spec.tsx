@@ -1,15 +1,14 @@
-import { act } from "@testing-library/react";
+import { act, waitForElementToBeRemoved } from "@testing-library/react";
 import { MathItemType as MIT } from "@/configs";
 import {
   makeItem,
   screen,
-  waitFor,
   shortSleep,
   seedDb,
   renderTestApp,
 } from "@/test_util";
 
-const getTooltip = () => screen.getByRole("tooltip");
+const findTooltip = () => screen.findByRole("tooltip");
 const queryTooltip = () => screen.queryByRole("tooltip");
 
 test.each([
@@ -40,12 +39,13 @@ test.each([
 
     // shown when focused
     act(() => theInput.focus());
-    const tooltip = await waitFor(getTooltip);
+
+    const tooltip = await findTooltip();
     expect(tooltip).toHaveTextContent(errMatcher);
 
     // not shown after blur
     act(() => theInput.blur());
-    expect(tooltip).not.toBeInTheDocument();
+    await waitForElementToBeRemoved(tooltip);
   }
 );
 

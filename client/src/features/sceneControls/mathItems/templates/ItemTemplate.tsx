@@ -75,6 +75,7 @@ const ItemTemplate = <T extends MIT>({
           name="description"
           value={item.properties.description}
           onChange={onWidgetChange}
+          className={styles.description}
         />
       </div>
       <div className={styles["grid-center-bottom"]}>{children}</div>

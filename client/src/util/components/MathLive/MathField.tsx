@@ -66,7 +66,7 @@ const MathFieldForwardRef = (
         mf.executeCommand("moveToPreviousWord");
       }
     }
-  });
+  }, [mf, children]);
 
   useImperativeHandle(ref, () => mf);
 

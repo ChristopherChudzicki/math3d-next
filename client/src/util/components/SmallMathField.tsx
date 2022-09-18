@@ -8,6 +8,7 @@ import {
 } from "@/util/components/MathLive";
 
 import { useShadowStylesheet } from "../hooks";
+import composeRefs from "../composeRefs";
 
 /**
  * Custom overrides for math-live's MathField Web Component.
@@ -16,33 +17,41 @@ import { useShadowStylesheet } from "../hooks";
 const styleOverrides = /* css */ `
 :host(.small-math-field) .ML__container {
   min-height: auto;
-}`;
+}
+
+:host(.small-math-field) .ML__content {
+  padding: 1px;
+}
+`;
 
 const makeOptionsDefault: MathfieldProps["makeOptions"] = () => ({
   keypressSound: null,
   plonkSound: null,
 });
 
-const SmallMathField: React.FC<MathfieldProps> = (props: MathfieldProps) => {
-  const { className, makeOptions, ...others } = props;
-  const ref = useRef<MathfieldElement>(null);
-  useShadowStylesheet(ref.current, styleOverrides);
-  const mergedMakeOptions = useCallback(
-    (options: MathfieldOptions) => {
-      const overrides = makeOptions ? makeOptions(options) : {};
-      const defaults = makeOptionsDefault(options);
-      return { ...defaults, ...overrides };
-    },
-    [makeOptions]
-  );
-  return (
-    <MathField
-      makeOptions={mergedMakeOptions}
-      {...others}
-      ref={ref}
-      className={classNames("small-math-field", className)}
-    />
-  );
-};
+const SmallMathField = React.forwardRef<MathfieldElement, MathfieldProps>(
+  (props, forwardedRef) => {
+    const { className, makeOptions, ...others } = props;
+    const mfRef = useRef<MathfieldElement>(null);
+    useShadowStylesheet(mfRef.current, styleOverrides);
+    const mergedMakeOptions = useCallback(
+      (options: MathfieldOptions) => {
+        const overrides = makeOptions ? makeOptions(options) : {};
+        const defaults = makeOptionsDefault(options);
+        return { ...defaults, ...overrides };
+      },
+      [makeOptions]
+    );
+    return (
+      <MathField
+        makeOptions={mergedMakeOptions}
+        {...others}
+        ref={composeRefs(mfRef, forwardedRef)}
+        className={classNames("small-math-field", className)}
+      />
+    );
+  }
+);
+SmallMathField.displayName = "SmallMathField";
 
 export default SmallMathField;

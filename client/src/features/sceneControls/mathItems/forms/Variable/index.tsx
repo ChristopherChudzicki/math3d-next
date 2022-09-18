@@ -25,6 +25,7 @@ const Variable: MathItemForm<MIT.Variable> = ({ item }) => {
         name="value"
         value={item.properties.value}
         onChange={onWidgetChange}
+        rhsClassName="flex-1"
       />
     </ItemTemplate>
   );
