@@ -51,8 +51,10 @@ html {
   --color-secondary-9: var(--gray-9);
   --color-secondary-10: var(--gray-10);
 
-  --color-primary: var(--color-primary-6);
-  --color-secondary: var(--color-secondary-6);
+  --color-primary-rgb: 24, 144, 255;
+  --color-primary: rgb(var(--color-primary-rgb));
+  --color-secondary-light: var(--color-secondary-6);
+  --color-secondary: var(--color-secondary-8);
   --color-background: var(--color-secondary-1);
   --color-error: red;
   --color-text-light: var(--gray-7);

@@ -1,0 +1,9 @@
+:global(.MuiSlider-root).slider :global(.MuiSlider-thumb.Mui-active) {
+  box-shadow: 0px 0px 0px 8px rgb(var(--color-primary-rgb), 16%);
+}
+
+.slider :global(.MuiSlider-thumb.Mui-focusVisible),
+.slider :global(.MuiSlider-thumb):hover {
+  box-shadow: 0px 0px 0px 6px rgb(var(--color-primary-rgb), 16%);
+}
+

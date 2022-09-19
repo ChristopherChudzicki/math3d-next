@@ -86,7 +86,7 @@
 }
 .vertical-line {
   width: 1px;
-  background-color: var(--color-secondary);
+  background-color: var(--color-secondary-light);
   flex: 1;
   align-self: center;
 }
