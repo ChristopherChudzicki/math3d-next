@@ -1,6 +1,7 @@
 import React from "react";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import PlayArrowOutlinedIcon from "@mui/icons-material/PlayArrowOutlined";
 import FastRewindOutlinedIcon from "@mui/icons-material/FastRewindOutlined";
 import FastForwardOutlinedIcon from "@mui/icons-material/FastForwardOutlined";
@@ -13,6 +14,12 @@ interface SliderControlsProps {}
 const SliderControls: React.FC<SliderControlsProps> = (props) => {
   return (
     <div className="d-flex align-items-center">
+      <IconButton
+        sx={{ border: "1pt solid currentColor", width: "20px", height: "20px" }}
+        size="small"
+      >
+        <PlayArrowOutlinedIcon fontSize="small" />
+      </IconButton>
       <ButtonGroup
         className={styles.speedGroup}
         size="small"
@@ -23,33 +30,34 @@ const SliderControls: React.FC<SliderControlsProps> = (props) => {
           color="secondary"
           variant="outlined"
         >
-          <FastRewindOutlinedIcon />
+          <FastRewindOutlinedIcon fontSize="small" />
+        </Button>
+        <Button
+          className={styles.speedControls}
+          color="secondary"
+          variant="outlined"
+          disabled
+        >
+          2x
         </Button>
         <Button
           className={styles.speedControls}
           color="secondary"
           variant="outlined"
         >
-          <PlayArrowOutlinedIcon />
-        </Button>
-        <Button
-          className={styles.speedControls}
-          color="secondary"
-          variant="outlined"
-        >
-          <FastForwardOutlinedIcon />
+          <FastForwardOutlinedIcon fontSize="small" />
         </Button>
       </ButtonGroup>
       <ButtonGroup size="small" color="secondary" variant="outlined">
         <Button className={styles.stepControls} variant="outlined">
-          <RemoveOutlinedIcon />
+          <RemoveOutlinedIcon fontSize="small" />
         </Button>
         <Button
           className={styles.stepControls}
           color="secondary"
           variant="outlined"
         >
-          <AddOutlinedIcon />
+          <AddOutlinedIcon fontSize="small" />
         </Button>
       </ButtonGroup>
     </div>

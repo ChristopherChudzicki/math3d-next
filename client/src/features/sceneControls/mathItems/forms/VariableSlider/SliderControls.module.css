@@ -3,13 +3,13 @@
 }
 
 :global(.MuiButton-root.MuiButtonGroup-grouped).speedControls {
-  max-width: 35px;
-  min-width: 35px;
+  max-width: 30px;
+  min-width: 30px;
 }
 
 :global(.MuiButton-root.MuiButtonGroup-grouped).stepControls {
-  max-width: 30px;
-  min-width: 30px;
+  max-width: 25px;
+  min-width: 25px;
 }
 
 .speedGroup {
