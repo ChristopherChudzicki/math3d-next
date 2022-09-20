@@ -9,14 +9,19 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
 import styles from "./SliderControls.module.css";
 
-interface SliderControlsProps {}
+interface SliderControlsProps {
+  onPlay: () => void;
+  // onSpeedChange: () => void;
+  // onStepChange: () => void;
+}
 
 const SliderControls: React.FC<SliderControlsProps> = (props) => {
   return (
     <div className="d-flex align-items-center">
       <IconButton
-        sx={{ border: "1pt solid currentColor", width: "20px", height: "20px" }}
         size="small"
+        className={styles.playButton}
+        onClick={props.onPlay}
       >
         <PlayArrowOutlinedIcon fontSize="small" />
       </IconButton>
@@ -48,7 +53,7 @@ const SliderControls: React.FC<SliderControlsProps> = (props) => {
           <FastForwardOutlinedIcon fontSize="small" />
         </Button>
       </ButtonGroup>
-      <ButtonGroup size="small" color="secondary" variant="outlined">
+      <ButtonGroup color="secondary" variant="outlined">
         <Button className={styles.stepControls} variant="outlined">
           <RemoveOutlinedIcon fontSize="small" />
         </Button>
