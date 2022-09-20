@@ -37,7 +37,7 @@
 
 .divider {
   border-width: 0 0 1px 0;
-  border-color: var(--color-secondary-4);
+  border-color: var(--color-secondary-light);
   margin-left: -1em;
   margin-right: -1em;
 }

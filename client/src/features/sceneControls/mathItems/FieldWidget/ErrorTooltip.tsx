@@ -2,7 +2,6 @@ import React from "react";
 import { useToggle } from "@/util/hooks";
 // import { Popover } from "@/util/components";
 import Tooltip from "@mui/material/Tooltip";
-import styles from "./ErrorTooltip.module.css";
 
 interface Props {
   error?: Error;
@@ -15,13 +14,7 @@ const ErrorTooltip: React.FC<Props> = ({ error, children }) => {
   return (
     <Tooltip
       describeChild
-      title={
-        error?.message ? (
-          <div className={styles["error-tooltip"]}>{error?.message}</div>
-        ) : (
-          ""
-        )
-      }
+      title={error?.message ? <div>{error?.message}</div> : ""}
       open={showTooltip}
     >
       {React.cloneElement(children, {

@@ -37,13 +37,18 @@ const FolderButton: React.FC<FolderButtonProps> = ({
         centered
         lighten={lighten}
       >
-        <ExpandMoreIcon
-          className={classNames({
-            [styles.color]: true,
-            [styles["rotate-90"]]: isCollapsed,
-            [styles["rotate-0"]]: !isCollapsed,
-          })}
-        />
+        <span
+          className={classNames(
+            {
+              [styles["rotate-90"]]: isCollapsed,
+              [styles["rotate-0"]]: !isCollapsed,
+            },
+            styles.color,
+            "d-flex align-items-center justify-center"
+          )}
+        >
+          <ExpandMoreIcon />
+        </span>
       </SubtleButton>
     </div>
   );

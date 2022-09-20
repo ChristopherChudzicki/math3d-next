@@ -10,7 +10,7 @@ import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
 import styles from "./SliderControls.module.css";
 
 interface SliderControlsProps {
-  onPlay: () => void;
+  onPlay?: () => void;
   // onSpeedChange: () => void;
   // onStepChange: () => void;
 }

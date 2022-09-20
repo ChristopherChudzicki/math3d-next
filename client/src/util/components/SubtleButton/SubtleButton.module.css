@@ -8,8 +8,8 @@
 }
 
 .subtle-button:focus {
-  color: var(--color-primary-6);
-  outline-color: var(--color-primary-6);
+  color: var(--color-primary);
+  outline-color: var(--color-primary);
 }
 
 .subtle-button.darken:hover {
