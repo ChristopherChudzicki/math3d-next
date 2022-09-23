@@ -7,3 +7,8 @@
   box-shadow: 0px 0px 0px 6px rgb(var(--color-primary-rgb), 16%);
 }
 
+.sliderRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1em;
+}

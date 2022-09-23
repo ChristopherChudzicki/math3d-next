@@ -1,6 +1,7 @@
 import { MathItem, MathItemType as MIT } from "@/configs";
 import { Scene } from "@/types";
 import { makeItem } from "../makeItem";
+import { makeSceneFromItems } from "./util";
 
 const sceneIds = {
   /**
@@ -57,6 +58,12 @@ const makeFolderScene = (
   };
 };
 
+const makeSliderScene = () =>
+  makeSceneFromItems([makeItem(MIT.VariableSlider)], {
+    id: "slider",
+    title: "Sliders",
+  });
+
 type SceneFixture = () => Scene;
 
 const sceneFixtures: SceneFixture[] = [
@@ -65,6 +72,7 @@ const sceneFixtures: SceneFixture[] = [
     makeFolderScene(sceneIds.testFoldersF2Collapsed, {
       F2: { isCollapsed: "true" },
     }),
+  makeSliderScene,
 ];
 
 export { sceneIds, sceneFixtures };

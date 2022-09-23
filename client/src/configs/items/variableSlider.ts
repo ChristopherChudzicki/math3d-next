@@ -18,7 +18,7 @@ interface VariableSliderProperties {
 const defaultValues: VariableSliderProperties = {
   value: "T=0",
   min: "-5",
-  max: "5",
+  max: "+5",
   description: "Variable Slider",
   isAnimating: "false",
   speedMultiplier: "1",
