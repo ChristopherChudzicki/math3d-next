@@ -1,6 +1,6 @@
 import * as yup from "yup";
 
-const num = yup.number().required();
+const num = yup.number().strict().required();
 
 type Dim = 1 | 2 | 3 | 4;
 
@@ -10,6 +10,8 @@ type RealVectors = {
   3: [number, number, number];
   4: [number, number, number, number];
 };
+
+export const real = num;
 
 export const realVectors = {
   1: yup.tuple([num]),
@@ -96,4 +98,8 @@ export const realFuncSchemas = {
     3: numericFunc(3, 3),
     4: numericFunc(3, 4),
   },
+};
+
+export const validators = {
+  real: real.validateSync.bind(real),
 };

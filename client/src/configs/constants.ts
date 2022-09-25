@@ -25,4 +25,5 @@ export enum WidgetType {
   AutosizeText = "autosize-text",
   Text = "text",
   Custom = "custom",
+  CustomMath = "custom-math",
 }

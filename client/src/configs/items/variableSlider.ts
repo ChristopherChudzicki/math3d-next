@@ -1,3 +1,4 @@
+import { validators } from "@/util";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -45,18 +46,19 @@ const config: IMathItemConfig<
       name: "min",
       label: "Min",
       widget: WidgetType.MathValue,
-      // validate number
+      validate: validators.real,
     },
     max: {
       name: "max",
       label: "Max",
       widget: WidgetType.MathValue,
-      // validate number
+      validate: validators.real,
     },
     value: {
       name: "value",
       label: "Value",
-      widget: WidgetType.Custom,
+      widget: WidgetType.CustomMath,
+      validate: validators.real,
     },
     isAnimating: {
       name: "isAnimating",
@@ -67,6 +69,7 @@ const config: IMathItemConfig<
       name: "speedMultiplier",
       label: "Speed Multiplier",
       widget: WidgetType.MathValue,
+      validate: validators.real,
     },
   },
   settingsProperties: [],

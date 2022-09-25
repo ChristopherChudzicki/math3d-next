@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useCallback, useRef } from "react";
 import classNames from "classnames";
-import { MathItemType, MathItem } from "@/configs";
+import { MathItemType, MathItem, assertIsMathItemType } from "@/configs";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { assertIsMathItemType } from "@/util/predicates";
 import {
   MultiContainerDndContext,
   SortableList,

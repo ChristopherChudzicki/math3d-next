@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { mathItemConfigs, MathItemType } from "@/configs";
+import { mathItemConfigs, MathItemType, assertIsMathItemType } from "@/configs";
 import type { MathItem, MathItemPatch } from "@/configs";
 import { keyBy } from "lodash";
-import { assertIsMathItemType, assertNotNil } from "@/util/predicates";
+import { assertNotNil } from "@/util/predicates";
 import MathScope from "@/util/MathScope";
 
 import { latexParser } from "@/util/parsing";
@@ -73,6 +73,7 @@ const mathItemsSlice = createSlice({
       state.order = order;
       state.activeItemId = undefined;
       const mathScope = makeMathScope();
+      window.mathscope = mathScope;
       state.mathScope = () => mathScope;
       syncItemsToMathScope(mathScope, items);
     },

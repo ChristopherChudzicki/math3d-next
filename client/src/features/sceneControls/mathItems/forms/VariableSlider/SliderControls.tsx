@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useCallback } from "react";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import PlayArrowOutlinedIcon from "@mui/icons-material/PlayArrowOutlined";
+import PauseIcon from "@mui/icons-material/Pause";
 import FastRewindOutlinedIcon from "@mui/icons-material/FastRewindOutlined";
 import FastForwardOutlinedIcon from "@mui/icons-material/FastForwardOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
@@ -10,20 +11,33 @@ import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
 import styles from "./SliderControls.module.css";
 
 interface SliderControlsProps {
-  onPlay?: () => void;
+  onAnimationChange: (value: boolean) => void;
+  isAnimating: boolean;
   // onSpeedChange: () => void;
   // onStepChange: () => void;
 }
 
-const SliderControls: React.FC<SliderControlsProps> = (props) => {
+const pauseIconAdjustSx = { transform: "scale(0.8)" };
+
+const SliderControls: React.FC<SliderControlsProps> = ({
+  onAnimationChange,
+  isAnimating,
+}) => {
+  const handleAnimationChange = useCallback(() => {
+    onAnimationChange(!isAnimating);
+  }, [onAnimationChange, isAnimating]);
   return (
     <div className="d-flex align-items-center">
       <IconButton
         size="small"
         className={styles.playButton}
-        onClick={props.onPlay}
+        onClick={handleAnimationChange}
       >
-        <PlayArrowOutlinedIcon fontSize="small" />
+        {isAnimating ? (
+          <PauseIcon fontSize="small" sx={pauseIconAdjustSx} />
+        ) : (
+          <PlayArrowOutlinedIcon fontSize="small" />
+        )}
       </IconButton>
       <ButtonGroup
         className={styles.speedGroup}

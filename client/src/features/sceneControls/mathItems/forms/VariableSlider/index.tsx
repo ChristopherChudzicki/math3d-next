@@ -1,82 +1,176 @@
-import { mathItemConfigs as configs, MathItemType as MIT } from "@/configs";
-import React, { MutableRefObject, useRef } from "react";
+import {
+  mathItemConfigs as configs,
+  MathItemType as MIT,
+  WidgetType,
+} from "@/configs";
+import React, {
+  MutableRefObject,
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 
 import Slider from "@mui/material/Slider";
+import { useInterval } from "@/util/hooks/useInterval";
+import classNames from "classnames";
+import { splitAtFirstEquality } from "@/util/parsing";
 import SliderControls from "./SliderControls";
-import { MathAssignment, useOnWidgetChange } from "../../FieldWidget";
+import FieldWidget, {
+  MathAssignment,
+  useOnWidgetChange,
+} from "../../FieldWidget";
 import { useMathScope } from "../../mathItemsSlice";
 import { useMathErrors, useMathResults } from "../../mathScope";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
 import styles from "./Slider.module.css";
-import MathValue from "../../FieldWidget/MathValue";
+import { OnWidgetChange } from "../../FieldWidget/types";
 
 const config = configs[MIT.VariableSlider];
-
 const configProps = config.properties;
 
 const errorNames = ["value", "min", "max"] as const;
-const resultNames = ["value", "min", "max"] as const;
+const resultNames = ["value", "min", "max", "isAnimating"] as const;
 
-interface SliderValues {
+interface AnimatedSliderProps {
+  fps: number;
+  duration: number;
+  isAnimating: boolean;
   min: number;
   max: number;
   value: number;
+  onChange: (value: number) => void;
 }
-const initialValues: SliderValues = {
-  min: -5,
-  max: +5,
-  value: 0,
+
+const trueMod = (x: number, modulus: number) => {
+  const y = x % modulus;
+  return y < 0 ? y + modulus : y;
 };
-const assignResultsToRef = (
-  ref: MutableRefObject<Record<string, number>>,
-  values: Record<string, unknown>
-) => {
-  Object.keys(ref.current).forEach((k) => {
-    const v = values[k];
-    if (typeof v === "number") {
-      // eslint-disable-next-line no-param-reassign
-      ref.current[k] = v;
-    }
-  });
+
+const wrap = (x: number, min: number, max: number) =>
+  min + trueMod(x - min, max - min);
+
+const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
+  onChange,
+  min,
+  max,
+  fps,
+  duration,
+  value,
+  isAnimating,
+}) => {
+  const valueRef = useRef(value);
+  valueRef.current = value;
+  const frames = fps * duration;
+  const ms = (1 / fps) * 1000;
+  const range = max - min;
+  const increment = range / frames;
+
+  const tick = useCallback(() => {
+    valueRef.current = wrap(valueRef.current + increment, min, max);
+    onChange(valueRef.current);
+  }, [increment, onChange, min, max]);
+
+  useInterval(tick, isAnimating ? ms : null);
+
+  return (
+    <Slider
+      size="small"
+      className={classNames(styles.slider, {
+        [styles.animating]: isAnimating,
+      })}
+      data-dndkit-no-drag
+      min={min}
+      max={max}
+      value={value}
+    />
+  );
 };
 
 const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
   const onWidgetChange = useOnWidgetChange(item);
+  const [lhs] = splitAtFirstEquality(item.properties.value);
+  const [maxDigits, setMaxDigits] = useState<number | undefined>(2);
+  const lhsRef = useRef(lhs);
+  lhsRef.current = lhs;
+
+  const [lastValidMin, setMin] = useState(-5);
+  const [lastValidMax, setMax] = useState(-5);
+  const [lastValidValue, setValue] = useState(0);
+
   const mathScope = useMathScope();
   const errors = useMathErrors(mathScope, item.id, errorNames);
   const results = useMathResults(mathScope, item.id, resultNames);
-  const resultsRef = useRef({ ...initialValues });
-  assignResultsToRef(resultsRef, results);
+  const isAnimating = !!results.isAnimating;
+
+  useEffect(() => {
+    setMin((v) => (typeof results.min === "number" ? results.min : v));
+    setMax((v) => (typeof results.max === "number" ? results.max : v));
+    setValue((v) => (typeof results.value === "number" ? results.value : v));
+  }, [results]);
+
+  const onAnimationChange = useCallback(
+    (animating: boolean) => {
+      onWidgetChange({ name: "isAnimating", value: `${animating}` });
+    },
+    [onWidgetChange]
+  );
+  const onValueChange = useCallback(
+    (v: number) => {
+      setMaxDigits(2);
+      onWidgetChange({ name: "value", value: `${lhsRef.current}=${v}` });
+    },
+    [onWidgetChange]
+  );
+  const onManualChange: OnWidgetChange = useCallback(
+    (e) => {
+      setMaxDigits(undefined);
+      onWidgetChange(e);
+    },
+    [onWidgetChange]
+  );
   return (
     <ItemTemplate item={item} config={config}>
-      <div className="d-flex align-items-center justify-content-between">
+      <div className={styles.controlsRow}>
         <MathAssignment
           label={configProps.value.label}
           error={errors.value}
+          className={styles.sliderValue}
+          lhsClassName={styles.displayValueLhs}
+          rhsClassName={styles.displayValueRhs}
           name="value"
           value={item.properties.value}
-          onChange={onWidgetChange}
+          onChange={onManualChange}
+          numDecimalDigits={maxDigits}
         />
-        <SliderControls />
+        <SliderControls
+          isAnimating={isAnimating}
+          onAnimationChange={onAnimationChange}
+        />
       </div>
       <div className={styles.sliderRow}>
-        <MathValue
+        <FieldWidget
+          widget={WidgetType.MathValue}
           name="min"
+          error={errors.min}
           onChange={onWidgetChange}
           label={configProps.min.label}
           value={item.properties.min}
         />
-        <Slider
-          size="small"
-          className={styles.slider}
-          data-dndkit-no-drag
-          min={resultsRef.current.min}
-          max={resultsRef.current.max}
-          value={resultsRef.current.value}
+        <AnimatedSlider
+          min={lastValidMin}
+          max={lastValidMax}
+          value={lastValidValue}
+          fps={50}
+          duration={2}
+          isAnimating={isAnimating}
+          onChange={onValueChange}
         />
-        <MathValue
+        <FieldWidget
+          widget={WidgetType.MathValue}
           name="max"
+          error={errors.max}
           onChange={onWidgetChange}
           label={configProps.max.label}
           value={item.properties.max}
