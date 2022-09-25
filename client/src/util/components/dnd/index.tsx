@@ -171,7 +171,7 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
     useSensor(PointerSensor, {
       activationConstraint: {
         tolerance: 1000,
-        delay: 100,
+        delay: 150,
       },
       isDraggableElement,
     }),

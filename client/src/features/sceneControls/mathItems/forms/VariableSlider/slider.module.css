@@ -15,14 +15,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  overflow: hidden
+  overflow: hidden;
+  margin-bottom: 10px;
 }
 
 .displayValueLhs {
   min-width: 20px
 }
 .displayValueRhs {
-  min-width: 30px
+  min-width: 20px
 }
 
 .sliderRow {
