@@ -11,6 +11,7 @@ interface VariableSliderProperties {
   value: string;
   min: string;
   max: string;
+  duration: string;
   description: string;
   isAnimating: string; // eval to boolean;
   speedMultiplier: string; // eval to number;
@@ -20,6 +21,7 @@ const defaultValues: VariableSliderProperties = {
   value: "T=0",
   min: "-5",
   max: "+5",
+  duration: "4",
   description: "Variable Slider",
   isAnimating: "false",
   speedMultiplier: "1",
@@ -39,9 +41,15 @@ const config: IMathItemConfig<
   VariableSliderProperties
 > = {
   type: MathItemType.VariableSlider,
-  label: "Variable Slider",
+  label: "Slider",
   properties: {
     description,
+    duration: {
+      name: "duration",
+      label: "Duration (at 1x)",
+      widget: WidgetType.MathValue,
+      validate: validators.positive,
+    },
     min: {
       name: "min",
       label: "Min",
@@ -68,11 +76,11 @@ const config: IMathItemConfig<
     speedMultiplier: {
       name: "speedMultiplier",
       label: "Speed Multiplier",
-      widget: WidgetType.MathValue,
+      widget: WidgetType.Custom,
       validate: validators.real,
     },
   },
-  settingsProperties: [],
+  settingsProperties: ["duration"],
   make,
 };
 

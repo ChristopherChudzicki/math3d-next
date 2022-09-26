@@ -21,7 +21,8 @@ type ExtraProps = {
 const formatted = (x: string, numDecimalDigits?: number) => {
   if (numDecimalDigits === undefined) return x;
   const xNum = Number(x);
-  return round(xNum, numDecimalDigits).toString();
+  const prefix = x.trim().startsWith("+") ? "+" : "";
+  return prefix + round(xNum, numDecimalDigits).toString();
 };
 
 const MathAssignment: React.FC<IWidgetProps & ExtraProps> = (props) => {

@@ -13,6 +13,8 @@ type RealVectors = {
 
 export const real = num;
 
+const positive = real.positive();
+
 export const realVectors = {
   1: yup.tuple([num]),
   2: yup.tuple([num, num]),
@@ -102,4 +104,5 @@ export const realFuncSchemas = {
 
 export const validators = {
   real: real.validateSync.bind(real),
+  positive: positive.validateSync.bind(positive),
 };

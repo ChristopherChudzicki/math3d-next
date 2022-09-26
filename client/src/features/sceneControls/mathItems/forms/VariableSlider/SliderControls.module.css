@@ -7,13 +7,20 @@
 }
 
 :global(.MuiButton-root.MuiButtonGroup-grouped).speedControls {
-  max-width: 30px;
-  min-width: 30px;
+  max-width: 25px;
+  min-width: 25px;
+}
+:global(.MuiButton-root.MuiButtonGroup-grouped).speedControls.display {
+  max-width: 40px;
+  min-width: 40px;
+  background-color: var( --color-secondary-lighter);
 }
 
 :global(.MuiButton-root.MuiButtonGroup-grouped).stepControls {
   max-width: 25px;
   min-width: 25px;
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 .speedGroup {
