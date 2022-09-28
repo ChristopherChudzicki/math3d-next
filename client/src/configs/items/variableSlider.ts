@@ -9,6 +9,7 @@ import { description } from "../shared";
 
 interface VariableSliderProperties {
   value: string;
+  fps: string;
   min: string;
   max: string;
   duration: string;
@@ -19,6 +20,7 @@ interface VariableSliderProperties {
 
 const defaultValues: VariableSliderProperties = {
   value: "T=0",
+  fps: "50",
   min: "-5",
   max: "+5",
   duration: "4",
@@ -49,6 +51,12 @@ const config: IMathItemConfig<
       label: "Duration (at 1x)",
       widget: WidgetType.MathValue,
       validate: validators.positive,
+    },
+    fps: {
+      name: "fps",
+      label: "Frames per second",
+      widget: WidgetType.MathValue,
+      validate: validators.real,
     },
     min: {
       name: "min",

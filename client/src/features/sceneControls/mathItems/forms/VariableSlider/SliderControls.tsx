@@ -12,6 +12,15 @@ import { assertNotNil } from "@/util";
 import classNames from "classnames";
 import styles from "./SliderControls.module.css";
 
+const btnLabels = {
+  pause: "Pause",
+  play: "Play",
+  faster: "Increase speed",
+  slower: "Decrease speed",
+  increment: "Step forward",
+  decrement: "Step backward",
+};
+
 type SpeedOption = {
   value: string;
   label: string;
@@ -84,6 +93,8 @@ const SliderControls: React.FC<SliderControlsProps> = ({
         size="small"
         className={styles.playButton}
         onClick={handleAnimationChange}
+        title={isAnimating ? btnLabels.pause : btnLabels.play}
+        aria-label={isAnimating ? btnLabels.pause : btnLabels.play}
       >
         {isAnimating ? (
           <PauseIcon fontSize="small" sx={pauseIconAdjustSx} />
@@ -102,6 +113,7 @@ const SliderControls: React.FC<SliderControlsProps> = ({
           variant="outlined"
           onClick={onDecrease}
           disabled={!canDecrease}
+          aria-label={btnLabels.slower}
         >
           <FastRewindOutlinedIcon fontSize="small" />
         </Button>
@@ -119,6 +131,7 @@ const SliderControls: React.FC<SliderControlsProps> = ({
           variant="outlined"
           onClick={onIncrease}
           disabled={!canIncrease}
+          aria-label={btnLabels.faster}
         >
           <FastForwardOutlinedIcon fontSize="small" />
         </Button>
@@ -128,6 +141,7 @@ const SliderControls: React.FC<SliderControlsProps> = ({
           className={styles.stepControls}
           variant="outlined"
           onClick={onStepDown}
+          aria-label={btnLabels.decrement}
         >
           <RemoveOutlinedIcon fontSize="small" />
         </Button>
@@ -135,6 +149,7 @@ const SliderControls: React.FC<SliderControlsProps> = ({
           className={styles.stepControls}
           color="secondary"
           variant="outlined"
+          aria-label={btnLabels.increment}
           onClick={onStepUp}
         >
           <AddOutlinedIcon fontSize="small" />

@@ -25,8 +25,15 @@ import { OnWidgetChange } from "../../FieldWidget/types";
 const config = configs[MIT.VariableSlider];
 const configProps = config.properties;
 
-const errorNames = ["value", "min", "max"] as const;
-const resultNames = ["duration", "value", "min", "max", "isAnimating"] as const;
+const errorNames = ["value", "min", "max", "fps"] as const;
+const resultNames = [
+  "duration",
+  "value",
+  "min",
+  "max",
+  "fps",
+  "isAnimating",
+] as const;
 
 interface AnimatedSliderProps {
   fps: number;
@@ -93,8 +100,6 @@ const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
   );
 };
 
-const FPS = 50;
-
 const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
   const onWidgetChange = useOnWidgetChange(item);
   const [lhs] = splitAtFirstEquality(item.properties.value);
@@ -102,6 +107,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
   const lhsRef = useRef(lhs);
   lhsRef.current = lhs;
 
+  const [lastValidFps, setFps] = useState(0);
   const [lastValidMin, setMin] = useState(-5);
   const [lastValidMax, setMax] = useState(-5);
   const [lastValidValue, setValue] = useState(0);
@@ -114,6 +120,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
   const isAnimating = !!results.isAnimating;
 
   useEffect(() => {
+    setFps((v) => (typeof results.fps === "number" ? results.fps : v));
     setMin((v) => (typeof results.min === "number" ? results.min : v));
     setMax((v) => (typeof results.max === "number" ? results.max : v));
     setValue((v) => (typeof results.value === "number" ? results.value : v));
@@ -157,7 +164,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
       const { increment } = getSliderParameters(
         lastValidMin,
         lastValidMax,
-        FPS,
+        lastValidFps,
         lastValidDuration
       );
       onValueChange(lastValidValue + increment * step);
@@ -166,6 +173,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
       lastValidValue,
       lastValidMin,
       lastValidMax,
+      lastValidFps,
       lastValidDuration,
       onValueChange,
     ]
@@ -205,7 +213,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
           min={lastValidMin}
           max={lastValidMax}
           value={lastValidValue}
-          fps={FPS}
+          fps={lastValidFps}
           duration={lastValidDuration / speed.numeric}
           isAnimating={isAnimating}
           onChange={onValueChange}
