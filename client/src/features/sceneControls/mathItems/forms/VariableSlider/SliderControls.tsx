@@ -161,4 +161,4 @@ const SliderControls: React.FC<SliderControlsProps> = ({
 
 export default SliderControls;
 export { mustFindSpeed };
-export type { SliderControlsProps };
+export type { SliderControlsProps, SpeedOption };

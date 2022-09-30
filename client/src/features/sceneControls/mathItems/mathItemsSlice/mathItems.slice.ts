@@ -73,7 +73,6 @@ const mathItemsSlice = createSlice({
       state.order = order;
       state.activeItemId = undefined;
       const mathScope = makeMathScope();
-      window.mathscope = mathScope;
       state.mathScope = () => mathScope;
       syncItemsToMathScope(mathScope, items);
     },

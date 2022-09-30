@@ -5,7 +5,7 @@ import {
 } from "@/configs";
 import React, { useRef, useState, useEffect, useCallback } from "react";
 
-import Slider from "@mui/material/Slider";
+import Slider, { SliderProps } from "@mui/material/Slider";
 import { useInterval } from "@/util/hooks/useInterval";
 import classNames from "classnames";
 import { splitAtFirstEquality } from "@/util/parsing";
@@ -37,7 +37,8 @@ const resultNames = [
 
 interface AnimatedSliderProps {
   fps: number;
-  duration: number;
+  baseDuration: number;
+  speedMultiplier: number;
   isAnimating: boolean;
   min: number;
   max: number;
@@ -57,13 +58,17 @@ const getSliderParameters = (
   min: number,
   max: number,
   fps: number,
-  duration: number
+  baseDuration: number,
+  speedMultiplier = 1
 ) => {
+  const duration = baseDuration * speedMultiplier;
   const frames = fps * duration;
+  const baseFrames = fps * baseDuration;
   const ms = (1 / fps) * 1000;
   const range = max - min;
   const increment = range / frames;
-  return { increment, ms };
+  const baseIncrement = range / baseFrames;
+  return { increment, ms, baseIncrement };
 };
 
 const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
@@ -71,18 +76,35 @@ const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
   min,
   max,
   fps,
-  duration,
+  baseDuration,
+  speedMultiplier,
   value,
   isAnimating,
 }) => {
   const valueRef = useRef(value);
   valueRef.current = value;
-  const { increment, ms } = getSliderParameters(min, max, fps, duration);
+  const { baseIncrement, increment, ms } = getSliderParameters(
+    min,
+    max,
+    fps,
+    baseDuration,
+    speedMultiplier
+  );
 
   const tick = useCallback(() => {
     valueRef.current = wrap(valueRef.current + increment, min, max);
     onChange(valueRef.current);
   }, [increment, onChange, min, max]);
+  const handleChange: NonNullable<SliderProps["onChange"]> = useCallback(
+    (_e, v) => {
+      if (!(typeof v === "number")) {
+        throw new Error(`Expected a number, received ${JSON.stringify(v)}`);
+      }
+      valueRef.current = v;
+      onChange(valueRef.current);
+    },
+    [onChange]
+  );
 
   useInterval(tick, isAnimating ? ms : null);
 
@@ -93,6 +115,8 @@ const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
         [styles.animating]: isAnimating,
       })}
       data-dndkit-no-drag
+      onChange={handleChange}
+      step={baseIncrement}
       min={min}
       max={max}
       value={value}
@@ -161,13 +185,13 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
   );
   const onStep: SliderControlsProps["onStep"] = useCallback(
     (step) => {
-      const { increment } = getSliderParameters(
+      const { baseIncrement } = getSliderParameters(
         lastValidMin,
         lastValidMax,
         lastValidFps,
         lastValidDuration
       );
-      onValueChange(lastValidValue + increment * step);
+      onValueChange(lastValidValue + baseIncrement * step);
     },
     [
       lastValidValue,
@@ -214,7 +238,8 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
           max={lastValidMax}
           value={lastValidValue}
           fps={lastValidFps}
-          duration={lastValidDuration / speed.numeric}
+          speedMultiplier={speed.numeric}
+          baseDuration={lastValidDuration}
           isAnimating={isAnimating}
           onChange={onValueChange}
         />
