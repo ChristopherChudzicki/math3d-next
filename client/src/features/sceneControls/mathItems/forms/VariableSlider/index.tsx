@@ -36,6 +36,7 @@ const resultNames = [
 ] as const;
 
 interface AnimatedSliderProps {
+  label: string;
   fps: number;
   baseDuration: number;
   speedMultiplier: number;
@@ -80,6 +81,7 @@ const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
   speedMultiplier,
   value,
   isAnimating,
+  label,
 }) => {
   const valueRef = useRef(value);
   valueRef.current = value;
@@ -110,6 +112,7 @@ const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
 
   return (
     <Slider
+      aria-label={label}
       size="small"
       className={classNames(styles.slider, {
         [styles.animating]: isAnimating,
@@ -131,9 +134,9 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
   const lhsRef = useRef(lhs);
   lhsRef.current = lhs;
 
-  const [lastValidFps, setFps] = useState(0);
+  const [lastValidFps, setFps] = useState(0.01);
   const [lastValidMin, setMin] = useState(-5);
-  const [lastValidMax, setMax] = useState(-5);
+  const [lastValidMax, setMax] = useState(+5);
   const [lastValidValue, setValue] = useState(0);
   const [lastValidDuration, setDuration] = useState(3);
   const speed = mustFindSpeed(item.properties.speedMultiplier);
@@ -234,6 +237,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
           value={item.properties.min}
         />
         <AnimatedSlider
+          label={configProps.value.label}
           min={lastValidMin}
           max={lastValidMax}
           value={lastValidValue}

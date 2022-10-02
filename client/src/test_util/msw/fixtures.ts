@@ -61,7 +61,7 @@ const makeFolderScene = (
 const makeSliderScene = () =>
   makeSceneFromItems([makeItem(MIT.VariableSlider)], {
     id: "slider",
-    title: "Sliders",
+    title: "Slider",
   });
 
 type SceneFixture = () => Scene;

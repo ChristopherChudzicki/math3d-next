@@ -3,6 +3,7 @@ import { MathItem } from "@/configs";
 import { mathScopeId } from "@/features/sceneControls/mathItems/mathScope";
 import * as R from "ramda";
 import { assertInstanceOf } from "@/util/predicates";
+import { act } from "react-dom/test-utils";
 
 const permutations = <T>(tokens: T[], subperms: T[][] = [[]]): T[][] =>
   R.isEmpty(tokens)
@@ -27,11 +28,13 @@ const pasteText = (element: HTMLElement, text: string) => {
 };
 
 const sleep = (ms: number) =>
-  new Promise((resolve) => {
+  new Promise<void>((resolve) => {
     setTimeout(resolve, ms);
   });
 
 const shortSleep = () => sleep(15);
+
+const userWaits = (ms: number) => act(() => sleep(ms));
 
 /**
  * Disable act warnings for a single test.
@@ -73,6 +76,7 @@ export {
   flatProduct,
   pasteText,
   sleep,
+  userWaits,
   shortSleep,
   allowActWarnings,
 };

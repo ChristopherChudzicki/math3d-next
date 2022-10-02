@@ -74,6 +74,8 @@ export default class MathScope<
 
   evalErrors: EvaluationErrors;
 
+  evalScope: EvaluationScope;
+
   parseErrors: ParseErrors = new Map();
 
   private parse: Parse<PO>;
@@ -91,6 +93,7 @@ export default class MathScope<
 
     this.results = this.evaluator.results;
     this.evalErrors = this.evaluator.errors;
+    this.evalScope = this.evaluator.scope;
 
     this.setExpressions = this.setExpressions.bind(this);
     this.deleteExpressions = this.deleteExpressions.bind(this);
