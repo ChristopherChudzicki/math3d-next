@@ -1,6 +1,5 @@
 import { MathItem, MathItemType } from "@/configs";
 import { PartialBy, Scene } from "@/types";
-import { T } from "vitest/dist/global-ea084c9f";
 import { makeItem } from "../makeItem";
 
 type PartialScene = PartialBy<Scene, "title" | "id">;

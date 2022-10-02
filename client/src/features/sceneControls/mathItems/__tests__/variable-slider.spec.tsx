@@ -12,6 +12,7 @@ import {
   within,
   screen,
 } from "@/test_util";
+import type { ResolvePromise } from "@/types/util";
 import { faker } from "@faker-js/faker";
 import { getItemByDescription, findBtn } from "./__utils__";
 import { mathScopeId } from "../mathScope";
@@ -57,8 +58,14 @@ const setupTest = async (
   const btnSlower = await findBtn(itemEl, btnLabels.slower);
   const btnIncrement = await findBtn(itemEl, btnLabels.increment);
   const btnDecrement = await findBtn(itemEl, btnLabels.decrement);
-  const lhs = await within(itemEl).findByLabelText("Value (left-hand side)");
-  const rhs = await within(itemEl).findByLabelText("Value (right-hand side)");
+  const inputLhs = await within(itemEl).findByLabelText(
+    "Value (left-hand side)"
+  );
+  const inputRhs = await within(itemEl).findByLabelText(
+    "Value (right-hand side)"
+  );
+  const inputMin = await within(itemEl).findByLabelText("Min");
+  const inputMax = await within(itemEl).findByLabelText("Max");
   const slider = await within(itemEl).findByLabelText("Value");
   assertInstanceOf(slider, HTMLInputElement);
 
@@ -70,8 +77,10 @@ const setupTest = async (
     btnIncrement,
     btnDecrement,
     slider,
-    rhs,
-    lhs,
+    inputRhs,
+    inputLhs,
+    inputMin,
+    inputMax,
   };
 
   const valueUpdates: number[] = [];
@@ -110,6 +119,7 @@ const setupTest = async (
     speed,
   };
 };
+type SetupResult = ResolvePromise<ReturnType<typeof setupTest>>;
 
 /**
  * Repeat the elements of an array a specified number of times.
@@ -288,44 +298,63 @@ describe("Variable Slider", () => {
     });
     const mathsScope = store.getState().mathItems.mathScope();
     expect(mathsScope.evalScope).toEqual(new Map(Object.entries({ X: 1 })));
-    el.lhs.focus();
-    await user.clear(el.lhs);
+    el.inputLhs.focus();
+    await user.clear(el.inputLhs);
     await user.paste("Y1");
     expect(mathsScope.evalScope).toEqual(new Map(Object.entries({ Y1: 1 })));
   });
 
-  test("Renaming variable w invalid name adds error", async () => {
-    const { el, store } = await setupTest({
-      value: "X=1",
-      min: "-2",
-      max: "+3",
-    });
-    const mathsScope = store.getState().mathItems.mathScope();
-    expect(mathsScope.evalScope).toEqual(new Map(Object.entries({ X: 1 })));
-    act(() => el.lhs.focus());
-    await user.clear(el.lhs);
-    await user.paste("X+");
-    const tooltip = screen.getByRole("tooltip");
-    expect(tooltip).toHaveTextContent(/Invalid assignment/);
-    expect(el.lhs).toHaveClass("has-error");
-    await user.clear(el.lhs);
-    await user.paste("X1");
-    expect(el.lhs).not.toHaveClass("has-error");
-    expect(tooltip).not.toBeInTheDocument();
-  });
+  test.each([
+    {
+      getInput: (el: SetupResult["el"]) => el.inputMin,
+      inputDecription: "min",
+      goodValue: "1+1",
+      badValue: "1+",
+    },
+    {
+      getInput: (el: SetupResult["el"]) => el.inputMax,
+      inputDecription: "max",
+      goodValue: "1+1",
+      badValue: "1+",
+    },
+    {
+      getInput: (el: SetupResult["el"]) => el.inputLhs,
+      inputDecription: "lhs",
+      goodValue: "X1",
+      badValue: "X+",
+    },
+    {
+      getInput: (el: SetupResult["el"]) => el.inputRhs,
+      inputDecription: "rhs",
+      goodValue: "1+1",
+      badValue: "1+",
+    },
+  ])(
+    "$inputDecription show errors and pass previous value to slider",
+    async ({ getInput, goodValue, badValue }) => {
+      const { el } = await setupTest({
+        value: "X=1",
+        min: "-10",
+        max: "+10",
+      });
+      const inputEl = getInput(el);
+      inputEl.focus();
+      await user.clear(inputEl);
+      await user.paste(badValue);
+      expect(inputEl).toHaveClass("has-error");
+      const tooltip = await screen.findByRole("tooltip");
+      expect(inputEl).toHaveClass("has-error");
 
-  /**
-   * Tests:
-   * 1. [DONE] framerates and and base durations
-   * 2. [DONE] play/pause
-   * 3. [DONE] step up/down does 1x increment, irresdpective of speed
-   * 4. [DONE] speed up/down affects increment duration, not framerate
-   * 5. [DONE] Renaming the variable
-   * 6. [DONE] Passes max/min values to slider
-   * 7. [DONE] step up with slider
-   * 8. REFACTOR error test
-   * 9. Add tests for setting min/max/value
-   * Playwright:
-   * 1. mathlive truncation
-   */
+      expect(el.slider.min).toBe("-10");
+      expect(el.slider.value).toBe("1");
+      expect(el.slider.max).toBe("10");
+
+      await user.clear(inputEl);
+      await user.paste(goodValue);
+      expect(inputEl).not.toHaveClass("has-error");
+      await waitFor(() => {
+        expect(tooltip).not.toBeInTheDocument();
+      });
+    }
+  );
 });
