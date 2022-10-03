@@ -67,6 +67,10 @@ const setupTest = async (
   const inputMin = await within(itemEl).findByLabelText("Min");
   const inputMax = await within(itemEl).findByLabelText("Max");
   const slider = await within(itemEl).findByLabelText("Value");
+  assertInstanceOf(inputMin, HTMLTextAreaElement);
+  assertInstanceOf(inputMax, HTMLTextAreaElement);
+  assertInstanceOf(inputLhs, HTMLTextAreaElement);
+  assertInstanceOf(inputRhs, HTMLTextAreaElement);
   assertInstanceOf(slider, HTMLInputElement);
 
   const el = {
@@ -357,4 +361,44 @@ describe("Variable Slider", () => {
       });
     }
   );
+
+  test("value display shows 2 digits except when set explicitly by user", async () => {
+    const { el, valueUpdates } = await setupTest({
+      value: "X=0",
+      min: "0",
+      max: "1",
+      duration: "0.5",
+      fps: "6",
+      speedMultiplier: "1",
+    });
+    const duration = 0.35;
+
+    await user.click(el.btnToggle);
+    await userWaits(duration * 1000);
+    await user.click(el.btnToggle);
+
+    /**
+     * Slider and events have exact value; input displays approx value
+     */
+    expectSliderArraysEqual(valueUpdates, [1 / 3, 2 / 3]);
+    expect(el.slider.value).toBeCloseTo(2 / 3, 6);
+    expect(el.inputRhs.value).toBe("+0.67");
+
+    /**
+     * inputRhs can have extra digits if set by user
+     */
+    await user.click(el.inputRhs);
+    await user.clear(el.inputRhs);
+    await user.paste("0.111");
+    expect(el.slider.value).toBe("0.111");
+    expect(el.inputRhs.value).toBe("0.111");
+
+    /**
+     * After being set by user, inputRhs goes back to 2 digits when incremented
+     * by buttons (or slider; not tested here.)
+     */
+    await user.click(el.btnIncrement);
+    expect(el.slider.value).toBeCloseTo(0.4443333, 6);
+    expect(el.inputRhs.value).toBe("+0.44");
+  });
 });
