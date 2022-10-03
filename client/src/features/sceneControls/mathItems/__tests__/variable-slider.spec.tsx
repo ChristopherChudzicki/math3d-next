@@ -302,7 +302,9 @@ describe("Variable Slider", () => {
     });
     const mathsScope = store.getState().mathItems.mathScope();
     expect(mathsScope.evalScope).toEqual(new Map(Object.entries({ X: 1 })));
-    el.inputLhs.focus();
+
+    act(() => el.inputLhs.focus());
+
     await user.clear(el.inputLhs);
     await user.paste("Y1");
     expect(mathsScope.evalScope).toEqual(new Map(Object.entries({ Y1: 1 })));
@@ -342,7 +344,7 @@ describe("Variable Slider", () => {
         max: "+10",
       });
       const inputEl = getInput(el);
-      inputEl.focus();
+      act(() => inputEl.focus());
       await user.clear(inputEl);
       await user.paste(badValue);
       expect(inputEl).toHaveClass("has-error");
