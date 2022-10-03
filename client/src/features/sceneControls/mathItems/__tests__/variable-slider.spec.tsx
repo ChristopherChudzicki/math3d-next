@@ -373,16 +373,13 @@ describe("Variable Slider", () => {
       fps: "6",
       speedMultiplier: "1",
     });
-    const duration = 0.35;
 
-    await user.click(el.btnToggle);
-    await userWaits(duration * 1000);
-    await user.click(el.btnToggle);
+    await user.click(el.btnIncrement);
+    await user.click(el.btnIncrement);
 
     /**
      * Slider and events have exact value; input displays approx value
      */
-    expectSliderArraysEqual(valueUpdates, [1 / 3, 2 / 3]);
     expect(el.slider.value).toBeCloseTo(2 / 3, 6);
     expect(el.inputRhs.value).toBe("+0.67");
 
