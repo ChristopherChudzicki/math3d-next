@@ -19,7 +19,7 @@ import { useMathScope } from "../../mathItemsSlice";
 import { useMathErrors, useMathResults } from "../../mathScope";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
-import styles from "./Slider.module.css";
+import styles from "./slider.module.css";
 import { OnWidgetChange } from "../../FieldWidget/types";
 
 const config = configs[MIT.VariableSlider];
