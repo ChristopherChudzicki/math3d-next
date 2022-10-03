@@ -1,5 +1,5 @@
 .last-folder {
-  border-bottom: 1px solid var(--color-secondary-7);
+  border-bottom: 1px solid var(--color-secondary);
 }
 
 .dragging {
@@ -15,6 +15,6 @@
 .placeholder {
   margin:1em;
   padding:1em;
-  border: 2pt dashed var(--color-secondary-5);
+  border: 2pt dashed var(--color-secondary-light);
   border-radius: var(--border-radius);
 }

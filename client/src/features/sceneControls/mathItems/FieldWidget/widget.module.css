@@ -35,8 +35,8 @@
   padding-bottom: 2pt;
   background-image: linear-gradient(
     to top,
-    var(--color-secondary),
-    var(--color-secondary) 1px,
+    var(--color-secondary-light),
+    var(--color-secondary-light) 1px,
     transparent 1px,
     transparent
   );

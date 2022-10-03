@@ -18,6 +18,7 @@ const MATH_WIDGETS = new Set([
   WidgetType.MathValue,
   WidgetType.MathAssignment,
   WidgetType.MathBoolean,
+  WidgetType.CustomMath,
 ]);
 
 const getMathProperties = <T extends MathItemType>(

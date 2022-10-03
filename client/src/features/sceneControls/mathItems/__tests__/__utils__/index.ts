@@ -1,4 +1,4 @@
-import { screen, within, user } from "@/test_util";
+import { screen, within, user, assertInstanceOf } from "@/test_util";
 
 const addItem = async (itemTypeLabel: string): Promise<void> => {
   const addNewItemButton = screen.getByText("Add New Object");
@@ -16,4 +16,10 @@ const clickRemoveItem = async (itemElement: HTMLElement): Promise<void> => {
   await user.click(remove);
 };
 
-export { addItem, clickRemoveItem, getItemByDescription };
+const findBtn = async (item: HTMLElement, name: string | RegExp) => {
+  const btn = await within(item).findByRole("button", { name });
+  assertInstanceOf(btn, HTMLButtonElement);
+  return btn;
+};
+
+export { addItem, clickRemoveItem, getItemByDescription, findBtn };

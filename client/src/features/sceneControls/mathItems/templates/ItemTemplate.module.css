@@ -13,7 +13,7 @@
 
   Note: In some browsers, at some higher zoom levels, double borders show up sometimes.
   */
-  outline: 1px solid var(--color-secondary-7);
+  outline: 1px solid var(--color-secondary);
   margin-top: 1px;
   margin-left: 1px;
   margin-right: 1px;
@@ -86,13 +86,13 @@
 }
 .vertical-line {
   width: 1px;
-  background-color: var(--color-secondary);
+  background-color: var(--color-secondary-light);
   flex: 1;
   align-self: center;
 }
 
 .item-active {
-  background-color: var(--color-primary-2);
+  background-color: var(--color-primary-light);
   transition-property: background-color;
   transition-duration: var(--transition-duration);
 }

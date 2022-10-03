@@ -1,3 +1,4 @@
+import { validators } from "@/util";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -8,8 +9,10 @@ import { description } from "../shared";
 
 interface VariableSliderProperties {
   value: string;
+  fps: string;
   min: string;
   max: string;
+  duration: string;
   description: string;
   isAnimating: string; // eval to boolean;
   speedMultiplier: string; // eval to number;
@@ -17,8 +20,10 @@ interface VariableSliderProperties {
 
 const defaultValues: VariableSliderProperties = {
   value: "T=0",
+  fps: "50",
   min: "-5",
-  max: "5",
+  max: "+5",
+  duration: "4",
   description: "Variable Slider",
   isAnimating: "false",
   speedMultiplier: "1",
@@ -38,25 +43,38 @@ const config: IMathItemConfig<
   VariableSliderProperties
 > = {
   type: MathItemType.VariableSlider,
-  label: "Variable Slider",
+  label: "Slider",
   properties: {
     description,
+    duration: {
+      name: "duration",
+      label: "Duration (at 1x)",
+      widget: WidgetType.MathValue,
+      validate: validators.positive,
+    },
+    fps: {
+      name: "fps",
+      label: "Frames per second",
+      widget: WidgetType.MathValue,
+      validate: validators.real,
+    },
     min: {
       name: "min",
       label: "Min",
       widget: WidgetType.MathValue,
-      // validate number
+      validate: validators.real,
     },
     max: {
       name: "max",
       label: "Max",
       widget: WidgetType.MathValue,
-      // validate number
+      validate: validators.real,
     },
     value: {
       name: "value",
       label: "Value",
-      widget: WidgetType.Custom,
+      widget: WidgetType.CustomMath,
+      validate: validators.real,
     },
     isAnimating: {
       name: "isAnimating",
@@ -66,10 +84,11 @@ const config: IMathItemConfig<
     speedMultiplier: {
       name: "speedMultiplier",
       label: "Speed Multiplier",
-      widget: WidgetType.MathValue,
+      widget: WidgetType.Custom,
+      validate: validators.real,
     },
   },
-  settingsProperties: [],
+  settingsProperties: ["duration"],
   make,
 };
 

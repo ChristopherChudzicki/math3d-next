@@ -14,13 +14,13 @@
 
 .settings-button {
   font-size: 20px;
-  color: var(--color-secondary);
+  color: var(--color-secondary-light);
 }
 
 .close {
   position:absolute;
-  top:0;
-  right:0
+  top:  4px;
+  right:4px;
 }
 
 .container {
@@ -37,7 +37,7 @@
 
 .divider {
   border-width: 0 0 1px 0;
-  border-color: var(--color-secondary-4);
+  border-color: var(--color-secondary-light);
   margin-left: -1em;
   margin-right: -1em;
 }

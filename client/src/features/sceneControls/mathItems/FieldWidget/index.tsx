@@ -20,6 +20,7 @@ type WidgetsProps = {
   [WidgetType.MathAssignment]: React.ComponentProps<typeof MathAssignment>;
   [WidgetType.Text]: React.ComponentProps<typeof TextInput>;
   [WidgetType.Custom]: never;
+  [WidgetType.CustomMath]: never;
 };
 
 type FormWidgetProps<W extends WidgetType> = {
@@ -54,12 +55,7 @@ const FieldWidget = <W extends WidgetType>(
 };
 
 export default FieldWidget;
-/**
- * The returned event handler will:
- *  1. set the property value on given `item` in redux store
- *  2. if the WidgetChangeEvent event has a MathScope object, will set
- *    the expression on mathScope with id `itemId-propName`.
- */
+
 export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
   const dispatch = useAppDispatch();
   const onWidgetChange: OnWidgetChange = useCallback(

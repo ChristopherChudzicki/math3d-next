@@ -5,6 +5,7 @@ import SmallMathField from "@/util/components/SmallMathField";
 import { AssignmentError } from "@/util/MathScope/Evaluator";
 import { splitAtFirstEquality } from "@/util/parsing";
 import { ParseAssignmentLHSError } from "@/util/parsing/rules";
+import { round } from "lodash";
 
 import ReadonlyMathField from "./ReadonlyMathField";
 import type { IWidgetProps, WidgetChangeEvent } from "./types";
@@ -14,6 +15,14 @@ import style from "./widget.module.css";
 type ExtraProps = {
   lhsClassName?: string;
   rhsClassName?: string;
+  numDecimalDigits?: number;
+};
+
+const formatted = (x: string, numDecimalDigits?: number) => {
+  if (numDecimalDigits === undefined) return x;
+  const xNum = Number(x);
+  const prefix = x.trim().startsWith("+") ? "+" : "";
+  return prefix + round(xNum, numDecimalDigits).toString();
 };
 
 const MathAssignment: React.FC<IWidgetProps & ExtraProps> = (props) => {
@@ -27,6 +36,7 @@ const MathAssignment: React.FC<IWidgetProps & ExtraProps> = (props) => {
     lhsClassName,
     rhsClassName,
     itemId,
+    numDecimalDigits,
     ...others
   } = props;
   const [lhs, rhs] = splitAtFirstEquality(value);
@@ -91,7 +101,7 @@ const MathAssignment: React.FC<IWidgetProps & ExtraProps> = (props) => {
           )}
           onChange={onChangeRHS}
         >
-          {rhs}
+          {formatted(rhs, numDecimalDigits)}
         </SmallMathField>
       </ErrorTooltip>
     </div>

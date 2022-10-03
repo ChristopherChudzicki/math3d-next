@@ -49,7 +49,7 @@ export const mathScopeId = (itemId: string, propName: string) =>
 const useMathResults = <K extends string>(
   scope: MathScope,
   idPrefix: string,
-  names: K[]
+  names: readonly K[]
 ): EvaluationResultsSlice<K> => {
   const [resultsSlice, setResults] = useState<EvaluationResultsSlice<K>>({});
 

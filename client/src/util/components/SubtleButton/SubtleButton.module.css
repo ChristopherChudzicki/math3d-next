@@ -8,22 +8,22 @@
 }
 
 .subtle-button:focus {
-  color: var(--color-primary-6);
-  outline-color: var(--color-primary-6);
+  color: var(--color-primary);
+  outline-color: var(--color-primary);
 }
 
 .subtle-button.darken:hover {
   backdrop-filter: brightness(0.9);
 }
 .subtle-button.lighten:hover {
-  backdrop-filter: brightness(1.03);
+  backdrop-filter: brightness(1.2);
 }
 
 .subtle-button.darken.pressed {
   backdrop-filter: brightness(0.8);
 }
 .subtle-button.lighten.pressed {
-  backdrop-filter: brightness(1.06);
+  backdrop-filter: brightness(1.25);
 }
 
 .pressed {

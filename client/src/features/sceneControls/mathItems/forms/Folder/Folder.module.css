@@ -10,3 +10,8 @@
 .color {
   color: var(--color-secondary)
 }
+
+.toggleButton {
+  height: 25px;
+  width: 25px;
+}

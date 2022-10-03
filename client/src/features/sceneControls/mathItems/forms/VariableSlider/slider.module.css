@@ -1,0 +1,35 @@
+:global(.MuiSlider-root).slider :global(.MuiSlider-thumb.Mui-active) {
+  box-shadow: 0px 0px 0px 8px rgb(var(--color-primary-rgb), 16%);
+}
+
+.slider :global(.MuiSlider-thumb.Mui-focusVisible),
+.slider :global(.MuiSlider-thumb):hover {
+  box-shadow: 0px 0px 0px 6px rgb(var(--color-primary-rgb), 16%);
+}
+.slider.animating :global(.MuiSlider-thumb),
+.slider.animating :global(.MuiSlider-track) {
+  transition: none
+}
+
+.controlsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+  margin-bottom: 10px;
+  margin-right: 5px;
+  height: 33px; /* The height of the settings button */
+}
+
+.displayValueLhs {
+  min-width: 20px
+}
+.displayValueRhs {
+  min-width: 20px
+}
+
+.sliderRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1em;
+}
