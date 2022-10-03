@@ -365,7 +365,7 @@ describe("Variable Slider", () => {
   );
 
   test("value display shows 2 digits except when set explicitly by user", async () => {
-    const { el, valueUpdates } = await setupTest({
+    const { el } = await setupTest({
       value: "X=0",
       min: "0",
       max: "1",
