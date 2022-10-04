@@ -159,6 +159,7 @@ const expectSliderArraysEqual = (
 
 describe("Variable Slider", () => {
   beforeEach(() => {
+    // See https://github.com/testing-library/dom-testing-library/issues/987#issuecomment-1266266801
     vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
