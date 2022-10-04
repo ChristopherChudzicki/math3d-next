@@ -34,7 +34,14 @@ const sleep = (ms: number) =>
 
 const shortSleep = () => sleep(15);
 
-const userWaits = (ms: number) => act(() => sleep(ms));
+const userWaits = (ms: number, { useFake = false } = {}) =>
+  act(() => {
+    if (useFake) {
+      vi.advanceTimersByTime(ms);
+      return Promise.resolve();
+    }
+    return sleep(ms);
+  });
 
 /**
  * Disable act warnings for a single test.

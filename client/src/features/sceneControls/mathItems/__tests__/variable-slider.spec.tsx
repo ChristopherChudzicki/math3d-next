@@ -158,6 +158,15 @@ const expectSliderArraysEqual = (
 };
 
 describe("Variable Slider", () => {
+  beforeEach(() => {
+    // See https://github.com/testing-library/dom-testing-library/issues/987#issuecomment-1266266801
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   test.each([
     {
       duration: 0.6,
@@ -203,12 +212,14 @@ describe("Variable Slider", () => {
       expect(valueUpdates.length).toBe(0);
 
       await user.click(el.btnToggle);
-      await userWaits(periods * duration * 1000);
+
+      await userWaits(periods * duration * 1000, { useFake: true });
+
       await user.click(el.btnToggle);
       expectSliderArraysEqual(valueUpdates, expectedValues);
 
       // No new updates after paused.
-      await userWaits(duration * 1000);
+      await userWaits(duration * 1000, { useFake: true });
       expectSliderArraysEqual(valueUpdates, expectedValues);
     }
   );
@@ -250,7 +261,7 @@ describe("Variable Slider", () => {
       expect(valueUpdates.length).toBe(0);
 
       act(() => el.slider.focus());
-      await userWaits(100);
+      await userWaits(100, { useFake: true });
       await user.keyboard(`{${key}}`);
       expect(increment).toBeGreaterThan(0);
       expect(typeof valueUpdates[0]).toBe("number");
@@ -276,7 +287,7 @@ describe("Variable Slider", () => {
       };
       const { el, valueUpdates } = await setupTest(props);
       await user.click(el.btnToggle);
-      await userWaits(timeout * 1000);
+      await userWaits(timeout * 1000, { useFake: true });
       await user.click(el.btnToggle);
 
       expectSliderArraysEqual(valueUpdates, expectedValues);
