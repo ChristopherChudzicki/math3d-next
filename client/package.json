@@ -89,7 +89,7 @@
     "eslint-plugin-prettier": "4.2.1",
     "identity-obj-proxy": "3.0.0",
     "jest-fail-on-console": "3.0.1",
-    "msw": "0.47.3",
+    "msw": "0.47.4",
     "prettier": "2.7.1",
     "rollup-plugin-visualizer": "5.8.2",
     "ts-node": "10.9.1",
