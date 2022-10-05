@@ -3,10 +3,8 @@ import "./mathlive";
 import { MathfieldElement, MathfieldOptions } from "mathlive";
 import React, {
   forwardRef,
-  useCallback,
   useEffect,
   useImperativeHandle,
-  useRef,
   useState,
 } from "react";
 
