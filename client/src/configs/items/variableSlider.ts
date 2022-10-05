@@ -43,7 +43,7 @@ const config: IMathItemConfig<
   VariableSliderProperties
 > = {
   type: MathItemType.VariableSlider,
-  label: "Slider",
+  label: "Variable Slider",
   properties: {
     description,
     duration: {

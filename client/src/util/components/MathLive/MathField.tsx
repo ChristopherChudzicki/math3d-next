@@ -3,10 +3,8 @@ import "./mathlive";
 import { MathfieldElement, MathfieldOptions } from "mathlive";
 import React, {
   forwardRef,
-  useCallback,
   useEffect,
   useImperativeHandle,
-  useRef,
   useState,
 } from "react";
 
@@ -43,7 +41,6 @@ const MathFieldForwardRef = (
     ...others
   } = props;
   const [mf, setMf] = useState<MathfieldElement | null>(null);
-  const cancelNextEvent = useRef(false);
 
   useEffect(() => {
     if (!mf) return;
@@ -56,7 +53,6 @@ const MathFieldForwardRef = (
     if (!mf) return;
     const mfValue = mf.getValue();
     if (mfValue !== children) {
-      cancelNextEvent.current = true;
       mf.setValue(children);
       /**
        * In an empty mathfield:
@@ -72,25 +68,10 @@ const MathFieldForwardRef = (
     }
   });
 
-  const handleInput: React.ChangeEventHandler<MathfieldElement> = useCallback(
-    (e) => {
-      if (!cancelNextEvent.current) {
-        onChange?.(e);
-      }
-      cancelNextEvent.current = false;
-    },
-    [onChange]
-  );
-
   useImperativeHandle(ref, () => mf);
 
   return (
-    <math-field
-      {...others}
-      class={className}
-      onInput={handleInput}
-      ref={setMf}
-    />
+    <math-field {...others} class={className} onInput={onChange} ref={setMf} />
   );
 };
 
