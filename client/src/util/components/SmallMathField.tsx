@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { MathfieldOptions } from "mathlive";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   MathField,
   MathfieldElement,
