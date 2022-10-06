@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { MathfieldOptions } from "mathlive";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   MathField,
   MathfieldElement,
@@ -32,8 +32,8 @@ const makeOptionsDefault: MathfieldProps["makeOptions"] = () => ({
 const SmallMathField = React.forwardRef<MathfieldElement, MathfieldProps>(
   (props, forwardedRef) => {
     const { className, makeOptions, ...others } = props;
-    const mfRef = useRef<MathfieldElement>(null);
-    useShadowStylesheet(mfRef.current, styleOverrides);
+    const [mfEl, setMfEl] = useState<MathfieldElement | null>(null);
+    useShadowStylesheet(mfEl, styleOverrides);
     const mergedMakeOptions = useCallback(
       (options: MathfieldOptions) => {
         const overrides = makeOptions ? makeOptions(options) : {};
@@ -46,7 +46,7 @@ const SmallMathField = React.forwardRef<MathfieldElement, MathfieldProps>(
       <MathField
         makeOptions={mergedMakeOptions}
         {...others}
-        ref={composeRefs(mfRef, forwardedRef)}
+        ref={composeRefs(setMfEl, forwardedRef)}
         className={classNames("small-math-field", className)}
       />
     );
