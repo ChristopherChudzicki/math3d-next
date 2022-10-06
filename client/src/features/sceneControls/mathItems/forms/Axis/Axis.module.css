@@ -1,0 +1,13 @@
+.row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.labeledGroup {
+  display: flex;
+  align-items: baseline;
+}
+
+.label {
+  margin-right: 0.5rem;
+}

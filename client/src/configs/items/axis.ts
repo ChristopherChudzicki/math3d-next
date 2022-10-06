@@ -88,7 +88,7 @@ const config: IMathItemConfig<MathItemType.Axis, AxisProperties> = {
     opacity,
     scale: {
       name: "scale",
-      label: "Max",
+      label: "Scale",
       widget: WidgetType.MathValue,
       // validate number
     },
