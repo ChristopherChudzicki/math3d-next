@@ -15,7 +15,6 @@ import {
   width,
   zBias,
   zIndex,
-  param1,
   range1,
   samples1,
 } from "../shared";
@@ -33,7 +32,6 @@ interface ParametricCurveProperties {
   start: string; // eval to boolean;
   end: string; // eval to boolean;
   expr: string;
-  param1: string;
   range1: string;
   samples1: string;
 }
@@ -50,7 +48,6 @@ const defaultValues: ParametricCurveProperties = {
   start: "false",
   end: "false",
   expr: "_f(t)=[cos(t), sin(t), t]",
-  param1: "t",
   range1: "[-2*pi, 2*pi]",
   samples1: "128",
 };
@@ -86,7 +83,6 @@ const config: IMathItemConfig<
     zIndex,
     start,
     end,
-    param1,
     range1: { ...range1, label: "Range" },
     samples1: { ...samples1, label: "Samples" },
   },
