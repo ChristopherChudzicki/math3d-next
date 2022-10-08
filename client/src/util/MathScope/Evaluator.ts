@@ -95,8 +95,6 @@ export default class Evaluator {
 
   errors: EvaluationErrors = new Map();
 
-  private validators = new Map<string, (x: unknown) => void>();
-
   private nodesById: Map<string, MathNode> = new Map();
 
   private changeQueue: EvaluatorAction[] = [];
@@ -153,7 +151,6 @@ export default class Evaluator {
       .filter(isNotNil);
     ids.forEach((id) => {
       this.nodesById.delete(id);
-      this.validators.delete(id);
     });
     const action: EvaluatorAction = { type: "delete", nodes };
     this.changeQueue.push(action);
@@ -236,8 +233,6 @@ export default class Evaluator {
           }
         }
         const evaluated = evaluate(this.scope);
-        const validate = this.validators.get(exprId);
-        if (validate) validate(evaluated);
         results.set(exprId, evaluated);
         errors.delete(exprId);
       } catch (rawError) {
