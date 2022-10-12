@@ -105,14 +105,6 @@ export default class Evaluator {
     this.scope = new Map(initialScope);
   }
 
-  private compile(node: MathNode) {
-    const cachedValue = this.compiled.get(node);
-    if (cachedValue) return cachedValue;
-    const compiled = node.compile();
-    this.compiled.set(node, compiled);
-    return compiled;
-  }
-
   private updateAssignmentErrors(
     errors: DiffingMap<string, Error>,
     cycles: AssignmentNode[][]
@@ -223,7 +215,7 @@ export default class Evaluator {
     });
 
     order.forEach((node) => {
-      const { evaluate } = this.compile(node);
+      const { evaluate } = node;
       const exprId = node.id;
       try {
         if (node.type === MathNodeType.FunctionAssignmentNode) {

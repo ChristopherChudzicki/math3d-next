@@ -4,7 +4,6 @@ import { assertInstanceOf, isNotNil } from "../predicates";
 import type {
   AnonMathNode,
   AnonParse,
-  Evaluatable,
   EvaluationScope,
   MathNode,
   Parse,
@@ -78,7 +77,7 @@ const evalArray = (
 const compileNode = (
   mjsNode: math.MathNode,
   options: ParseOptions
-): Evaluatable => {
+): AnonMathNode["evaluate"] => {
   const compiled = mjsNode.compile();
   const { validate = defaultParseOptions.validate } = {
     ...options,
@@ -131,7 +130,7 @@ const compileNode = (
       throw new EvaluationError(err.message);
     }
   };
-  return { evaluate };
+  return evaluate;
 };
 
 const convertNode = (
@@ -139,13 +138,13 @@ const convertNode = (
   options: ParseOptions = {}
 ): AnonMathNode => {
   const dependencies = getDependencies(mjsNode);
-  const compile = () => compileNode(mjsNode, options);
+  const evaluate = compileNode(mjsNode, options);
   if (mjsNode.type === "FunctionAssignmentNode") {
     return {
       type: MathNodeType.FunctionAssignmentNode,
       name: mjsNode.name,
       params: mjsNode.params,
-      compile,
+      evaluate,
       dependencies,
     };
   }
@@ -153,13 +152,13 @@ const convertNode = (
     return {
       type: MathNodeType.ValueAssignment,
       name: mjsNode.name,
-      compile,
+      evaluate,
       dependencies,
     };
   }
   return {
     type: MathNodeType.Value,
-    compile,
+    evaluate,
     dependencies,
   };
 };

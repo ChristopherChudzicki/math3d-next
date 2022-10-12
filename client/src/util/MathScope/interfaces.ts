@@ -1,7 +1,3 @@
-interface Evaluatable {
-  evaluate: (scope?: Map<string, unknown>) => unknown;
-}
-
 enum MathNodeType {
   FunctionAssignmentNode = "FunctionAssignmentNode",
   ValueAssignment = "ValueAssignment",
@@ -19,7 +15,7 @@ type AssignmentType = typeof assignmentTypes[number];
 interface MathNodeBase<T extends MathNodeType = MathNodeType> {
   id: string;
   type: T;
-  compile: () => Evaluatable;
+  evaluate: (scope?: Map<string, unknown>) => unknown;
   dependencies: Set<string>;
 }
 

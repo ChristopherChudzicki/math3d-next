@@ -30,19 +30,17 @@ describe("anonParsed dependencies", () => {
 
 describe("MathNode.evaluate", () => {
   it("includes arity (f.length) on results that are functions", () => {
-    const f = anonParse("f(x, y, z) = x + y + z").compile().evaluate();
-    const g = anonParse("g(w, x, y, z) = x").compile().evaluate();
-    const h = anonParse("h = g")
-      .compile()
-      .evaluate(new Map(Object.entries({ g })));
+    const f = anonParse("f(x, y, z) = x + y + z").evaluate();
+    const g = anonParse("g(w, x, y, z) = x").evaluate();
+    const h = anonParse("h = g").evaluate(new Map(Object.entries({ g })));
     expect(f).toHaveLength(3);
     expect(g).toHaveLength(4);
     expect(h).toHaveLength(4);
   });
 
   it("Evaluates vectors/matrices to arrays", () => {
-    const a = anonParse("[1,2,3, 4]").compile().evaluate();
-    const b = anonParse("[[1,2],[3,4]]").compile().evaluate();
+    const a = anonParse("[1,2,3, 4]").evaluate();
+    const b = anonParse("[[1,2],[3,4]]").evaluate();
     expect(a).toStrictEqual([1, 2, 3, 4]);
     expect(b).toStrictEqual([
       [1, 2],
@@ -51,12 +49,8 @@ describe("MathNode.evaluate", () => {
   });
 
   it("Evaluates functions returning vectors/matrices to funcs returning arrays", () => {
-    const f = anonParse("f() = [1,2,3, 4]")
-      .compile()
-      .evaluate() as CallableFunction;
-    const g = anonParse("g() = [[1,2],[3,4]]")
-      .compile()
-      .evaluate() as CallableFunction;
+    const f = anonParse("f() = [1,2,3, 4]").evaluate() as CallableFunction;
+    const g = anonParse("g() = [[1,2],[3,4]]").evaluate() as CallableFunction;
     expect(f()).toStrictEqual([1, 2, 3, 4]);
     expect(g()).toStrictEqual([
       [1, 2],
@@ -66,8 +60,8 @@ describe("MathNode.evaluate", () => {
 
   it("throws an error for functions that throw errors when evauated", () => {
     const node = anonParse("f(x) = 2^[1,2,3]");
-    expect(() => node.compile().evaluate()).toThrow(EvaluationError);
-    expect(() => node.compile().evaluate()).toThrow(
+    expect(() => node.evaluate()).toThrow(EvaluationError);
+    expect(() => node.evaluate()).toThrow(
       /Unexpected type of argument in function pow/
     );
   });
