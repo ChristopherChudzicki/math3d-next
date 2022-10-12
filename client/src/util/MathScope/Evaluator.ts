@@ -19,7 +19,7 @@ import {
   setUnion,
 } from "./util";
 
-class EvaluationError extends Error {}
+export class EvaluationError extends Error {}
 
 interface EvaluatorAction {
   type: "delete" | "add";
@@ -235,6 +235,12 @@ export default class Evaluator {
         const evaluated = evaluate(this.scope);
         results.set(exprId, evaluated);
         errors.delete(exprId);
+        if (
+          node.type === MathNodeType.FunctionAssignmentNode ||
+          node.type === MathNodeType.ValueAssignment
+        ) {
+          this.scope.set(node.name, evaluated);
+        }
       } catch (rawError) {
         assertIsError(rawError);
         const unmet = getUnmetDependencies(node, this.scope);

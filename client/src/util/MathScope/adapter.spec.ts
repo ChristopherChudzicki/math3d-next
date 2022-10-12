@@ -1,6 +1,7 @@
 import * as math from "mathjs";
 
 import { anonParse } from "./adapter";
+import { EvaluationError } from "./Evaluator";
 
 describe("anonParsed dependencies", () => {
   it("returns a set of symbol dependencies", () => {
@@ -29,10 +30,14 @@ describe("anonParsed dependencies", () => {
 
 describe("MathNode.evaluate", () => {
   it("includes arity (f.length) on results that are functions", () => {
-    const f = anonParse("f(x, y) = x + y").compile().evaluate();
-    const g = anonParse("g(x, y, z) = x").compile().evaluate();
-    expect(f).toHaveLength(2);
-    expect(g).toHaveLength(3);
+    const f = anonParse("f(x, y, z) = x + y + z").compile().evaluate();
+    const g = anonParse("g(w, x, y, z) = x").compile().evaluate();
+    const h = anonParse("h = g")
+      .compile()
+      .evaluate(new Map(Object.entries({ g })));
+    expect(f).toHaveLength(3);
+    expect(g).toHaveLength(4);
+    expect(h).toHaveLength(4);
   });
 
   it("Evaluates vectors/matrices to arrays", () => {
@@ -57,5 +62,13 @@ describe("MathNode.evaluate", () => {
       [1, 2],
       [3, 4],
     ]);
+  });
+
+  it("throws an error for functions that throw errors when evauated", () => {
+    const node = anonParse("f(x) = 2^[1,2,3]");
+    expect(() => node.compile().evaluate()).toThrow(EvaluationError);
+    expect(() => node.compile().evaluate()).toThrow(
+      /Unexpected type of argument in function pow/
+    );
   });
 });

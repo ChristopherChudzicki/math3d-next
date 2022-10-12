@@ -6,7 +6,10 @@
 const splitAtFirstEquality = (text: string): [string, string] => {
   const pieces = text.split("=");
   if (pieces.length < 2) {
-    // They should have eactly one, but if they have more, that's an issue for the parser
+    /**
+     * The expression could have multiple equalities, e.g., for boolean
+     * expressions like X = a >= 2
+     */
     throw new Error(`Fatal error: Assignments should have an equality sign.`);
   }
   const [lhs, ...others] = pieces;

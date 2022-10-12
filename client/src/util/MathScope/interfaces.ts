@@ -29,7 +29,7 @@ interface AssignmentNode<T extends AssignmentType = AssignmentType>
 }
 
 interface FunctionAssignmentNode
-  extends MathNodeBase<MathNodeType.FunctionAssignmentNode> {
+  extends AssignmentNode<MathNodeType.FunctionAssignmentNode> {
   type: MathNodeType.FunctionAssignmentNode;
   params: string[];
 }
