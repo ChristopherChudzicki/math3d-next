@@ -1,6 +1,5 @@
 import * as adapter from "./adapter";
 import {
-  EvaluationError,
   AssignmentError,
   DuplicateAssignmentError,
   UnmetDependencyError,
@@ -12,7 +11,6 @@ export type { IdentifiedExpression, MathNode, OnChangeListener, Parse };
 
 export {
   adapter,
-  EvaluationError,
   AssignmentError,
   DuplicateAssignmentError,
   UnmetDependencyError,
