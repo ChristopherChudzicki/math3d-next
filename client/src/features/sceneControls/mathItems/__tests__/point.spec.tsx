@@ -40,8 +40,7 @@ test.each([
     const { store } = await renderTestApp(`/${scene.id}`);
 
     const mathScope = store.getState().mathItems.mathScope();
-    expect(mathScope.evalErrors.size).toBe(numEvalErrors);
-    expect(mathScope.parseErrors.size).toBe(numParseErrors);
+    expect(mathScope.errors.size).toBe(numEvalErrors + numParseErrors);
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);
   }
 );
@@ -77,8 +76,7 @@ test.each([
     const coordsInput = await screen.findByLabelText("Coordinates");
 
     pasteText(coordsInput, coordsString);
-    expect(mathScope.evalErrors.size).toBe(numEvalErrors);
-    expect(mathScope.parseErrors.size).toBe(numParseErrors);
+    expect(mathScope.errors.size).toBe(numEvalErrors + numParseErrors);
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);
   }
 );
@@ -102,8 +100,7 @@ test("Adding items adds to mathScope", async () => {
   const id = nodeId(point);
   getItemByDescription(point.properties.description);
   expect(mathScope.results.get(id("coords"))).toStrictEqual([0, 0, 0]);
-  expect(mathScope.evalErrors.size).toBe(0);
-  expect(mathScope.parseErrors.size).toBe(0);
+  expect(mathScope.errors.size).toBe(0);
 });
 
 test("Deleting items removes them from mathScope", async () => {
@@ -118,14 +115,12 @@ test("Deleting items removes them from mathScope", async () => {
 
   const mathScope = store.getState().mathItems.mathScope();
   expect(mathScope.results.size).toBeGreaterThan(1); // point + folder visibility
-  expect(mathScope.parseErrors.size).toBeGreaterThan(0);
-  expect(mathScope.evalErrors.size).toBeGreaterThan(0);
+  expect(mathScope.errors.size).toBeGreaterThan(0);
 
   const item = getItemByDescription(point.properties.description);
   const remove = within(item).getByLabelText("Remove Item");
   await user.click(remove);
   expect(mathScope.results.size).toBe(1); // folder visibility
-  expect(mathScope.parseErrors.size).toBe(0);
-  expect(mathScope.evalErrors.size).toBe(0);
+  expect(mathScope.errors.size).toBe(0);
   expect(item).not.toBeInTheDocument();
 });

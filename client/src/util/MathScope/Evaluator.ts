@@ -2,9 +2,7 @@ import ExpressionGraphManager from "./ExpressionGraphManager";
 import {
   AssignmentNode,
   Diff,
-  Evaluatable,
   EvaluationChange,
-  EvaluationErrors,
   EvaluationResult,
   EvaluationScope,
   MathNode,
@@ -18,8 +16,7 @@ import {
   setDifference,
   setUnion,
 } from "./util";
-
-class EvaluationError extends Error {}
+import { EvaluationError } from "./errors";
 
 interface EvaluatorAction {
   type: "delete" | "add";
@@ -87,15 +84,11 @@ const getUnmetDependencies = (
  * diff of the changes.
  */
 export default class Evaluator {
-  compiled = new WeakMap<MathNode, Evaluatable>();
-
   results: EvaluationResult = new Map();
 
   scope: EvaluationScope;
 
-  errors: EvaluationErrors = new Map();
-
-  private validators = new Map<string, (x: unknown) => void>();
+  errors = new Map<string, Error>();
 
   private nodesById: Map<string, MathNode> = new Map();
 
@@ -105,14 +98,6 @@ export default class Evaluator {
 
   constructor(initialScope: EvaluationScope = new Map()) {
     this.scope = new Map(initialScope);
-  }
-
-  private compile(node: MathNode) {
-    const cachedValue = this.compiled.get(node);
-    if (cachedValue) return cachedValue;
-    const compiled = node.compile();
-    this.compiled.set(node, compiled);
-    return compiled;
   }
 
   private updateAssignmentErrors(
@@ -153,7 +138,6 @@ export default class Evaluator {
       .filter(isNotNil);
     ids.forEach((id) => {
       this.nodesById.delete(id);
-      this.validators.delete(id);
     });
     const action: EvaluatorAction = { type: "delete", nodes };
     this.changeQueue.push(action);
@@ -226,7 +210,7 @@ export default class Evaluator {
     });
 
     order.forEach((node) => {
-      const { evaluate } = this.compile(node);
+      const { evaluate } = node;
       const exprId = node.id;
       try {
         if (node.type === MathNodeType.FunctionAssignmentNode) {
@@ -236,10 +220,14 @@ export default class Evaluator {
           }
         }
         const evaluated = evaluate(this.scope);
-        const validate = this.validators.get(exprId);
-        if (validate) validate(evaluated);
         results.set(exprId, evaluated);
         errors.delete(exprId);
+        if (
+          node.type === MathNodeType.FunctionAssignmentNode ||
+          node.type === MathNodeType.ValueAssignment
+        ) {
+          this.scope.set(node.name, evaluated);
+        }
       } catch (rawError) {
         assertIsError(rawError);
         const unmet = getUnmetDependencies(node, this.scope);

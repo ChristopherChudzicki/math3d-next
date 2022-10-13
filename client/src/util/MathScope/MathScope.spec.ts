@@ -33,9 +33,7 @@ describe("MathScope Setting Expressions", () => {
       ])
     );
 
-    expect(mathScope.evalErrors).toStrictEqual(
-      new Map([["x", expect.any(Error)]])
-    );
+    expect(mathScope.errors).toStrictEqual(new Map([["x", expect.any(Error)]]));
   });
 
   it("Removes expressions", () => {
@@ -53,12 +51,12 @@ describe("MathScope Setting Expressions", () => {
         ["c", 20],
       ])
     );
-    expect(mathScope.evalErrors).toStrictEqual(new Map());
+    expect(mathScope.errors).toStrictEqual(new Map());
 
     mathScope.deleteExpressions(["a"]);
 
     expect(new Set(mathScope.results.keys())).toStrictEqual(new Set(["c"]));
-    expect(new Set(mathScope.evalErrors.keys())).toStrictEqual(new Set(["b"]));
+    expect(new Set(mathScope.errors.keys())).toStrictEqual(new Set(["b"]));
   });
 });
 
@@ -87,13 +85,7 @@ describe('MathScope "change" Events', () => {
           updated: new Set(["b"]),
           touched: new Set(["b", "c"]),
         },
-        evalErrors: {
-          added: new Set(),
-          deleted: new Set(),
-          updated: new Set(),
-          touched: new Set(),
-        },
-        parseErrors: {
+        errors: {
           added: new Set(),
           deleted: new Set(),
           updated: new Set(),
@@ -126,13 +118,7 @@ describe('MathScope "change" Events', () => {
           updated: new Set([]),
           touched: new Set(["b"]),
         },
-        evalErrors: {
-          added: new Set(),
-          deleted: new Set(),
-          updated: new Set(),
-          touched: new Set([]),
-        },
-        parseErrors: {
+        errors: {
           added: new Set(),
           deleted: new Set(),
           updated: new Set(),
@@ -189,8 +175,7 @@ describe('MathScope "change-errors" Events', () => {
       type: "change-errors",
       mathScope,
       changes: {
-        evalErrors: emptyDiff(),
-        parseErrors: {
+        errors: {
           ...emptyDiff(),
           touched: new Set(["a"]),
           added: new Set(["a"]),
@@ -205,8 +190,7 @@ describe('MathScope "change-errors" Events', () => {
       type: "change-errors",
       mathScope,
       changes: {
-        evalErrors: emptyDiff(),
-        parseErrors: {
+        errors: {
           ...emptyDiff(),
           touched: new Set(["a"]),
           updated: new Set(["a"]),
@@ -222,8 +206,7 @@ describe('MathScope "change-errors" Events', () => {
       type: "change-errors",
       mathScope,
       changes: {
-        evalErrors: emptyDiff(),
-        parseErrors: {
+        errors: {
           ...emptyDiff(),
           touched: new Set(["a"]),
           deleted: new Set(["a"]),
@@ -251,13 +234,12 @@ describe('MathScope "change-errors" Events', () => {
       type: "change-errors",
       mathScope,
       changes: {
-        evalErrors: {
+        errors: {
           added: new Set("c"),
           deleted: new Set(),
           updated: new Set(),
           touched: new Set(["c"]),
         },
-        parseErrors: emptyDiff(),
       },
     };
     expect(spy).toHaveBeenCalledTimes(1);
@@ -294,17 +276,11 @@ describe('MathScope "change-errors" Events', () => {
       type: "change-errors",
       mathScope,
       changes: {
-        evalErrors: {
+        errors: {
           added: new Set("b"),
           deleted: new Set(),
           updated: new Set(),
           touched: new Set(["b"]),
-        },
-        parseErrors: {
-          added: new Set(),
-          deleted: new Set(),
-          updated: new Set(),
-          touched: new Set(),
         },
       },
     };

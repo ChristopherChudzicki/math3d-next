@@ -1,7 +1,3 @@
-interface Evaluatable {
-  evaluate: (scope?: Map<string, unknown>) => unknown;
-}
-
 enum MathNodeType {
   FunctionAssignmentNode = "FunctionAssignmentNode",
   ValueAssignment = "ValueAssignment",
@@ -19,7 +15,7 @@ type AssignmentType = typeof assignmentTypes[number];
 interface MathNodeBase<T extends MathNodeType = MathNodeType> {
   id: string;
   type: T;
-  compile: () => Evaluatable;
+  evaluate: (scope?: Map<string, unknown>) => unknown;
   dependencies: Set<string>;
 }
 
@@ -29,7 +25,7 @@ interface AssignmentNode<T extends AssignmentType = AssignmentType>
 }
 
 interface FunctionAssignmentNode
-  extends MathNodeBase<MathNodeType.FunctionAssignmentNode> {
+  extends AssignmentNode<MathNodeType.FunctionAssignmentNode> {
   type: MathNodeType.FunctionAssignmentNode;
   params: string[];
 }
@@ -56,10 +52,6 @@ type EvaluationScope = Map<string, unknown>;
 
 type EvaluationResult = Map<string, unknown>;
 
-type EvaluationErrors = Map<string, Error>;
-
-type ParseErrors = Map<string, Error>;
-
 interface Diff<T> {
   added: Set<T>;
   updated: Set<T>;
@@ -83,11 +75,8 @@ export type {
   AssignmentNode,
   AssignmentType,
   Diff,
-  Evaluatable,
-  EvaluationErrors,
   EvaluationResult,
   EvaluationScope,
   MathNode,
   Parse,
-  ParseErrors,
 };

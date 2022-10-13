@@ -12,8 +12,6 @@ import {
   grid2,
   gridWidth,
   opacity,
-  param1,
-  param2,
   range1,
   range2,
   shaded,
@@ -34,8 +32,6 @@ interface ParametricSurfaceProperties {
 
   shaded: string; // eval to boolean;
   expr: string;
-  param1: string;
-  param2: string;
   range1: string;
   range2: string;
   colorExpr: string;
@@ -56,8 +52,6 @@ const defaultValues: ParametricSurfaceProperties = {
   zBias: "0",
   shaded: "true",
   expr: "_f(u,v)=[1,1,1]",
-  param1: "u",
-  param2: "v",
   range1: "[-pi, pi]",
   range2: "[-3, 3]",
   colorExpr: "_f(X, Y, Z, u, v)=mod(Z, 1)",
@@ -102,8 +96,6 @@ const config: IMathItemConfig<
     grid2,
     gridWidth,
     opacity,
-    param1,
-    param2,
     range1,
     range2,
     shaded,

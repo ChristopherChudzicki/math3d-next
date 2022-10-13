@@ -33,11 +33,8 @@ const extractErrors = <K extends string, PO extends DefaultParseOptions>(
   const newErrors: EvaluationErrorsSlice<K> = {};
   (Object.keys(ids) as K[]).forEach((name) => {
     const id = ids[name];
-    if (scope.evalErrors.has(id)) {
-      newErrors[name] = scope.evalErrors.get(id);
-    }
-    if (scope.parseErrors.has(id)) {
-      newErrors[name] = scope.parseErrors.get(id);
+    if (scope.errors.has(id)) {
+      newErrors[name] = scope.errors.get(id);
     }
   });
   return newErrors;
@@ -95,11 +92,8 @@ const useMathErrors = <K extends string>(
   const onChange = useCallback<OnChangeListener>(
     (event) => {
       const { mathScope } = event;
-      const { evalErrors, parseErrors } = event.changes;
-      if (
-        names.some((name) => evalErrors.touched.has(ids[name])) ||
-        names.some((name) => parseErrors.touched.has(ids[name]))
-      ) {
+      const { errors } = event.changes;
+      if (names.some((name) => errors.touched.has(ids[name]))) {
         setErrors(extractErrors(mathScope, ids));
       }
     },

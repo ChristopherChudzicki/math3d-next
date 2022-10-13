@@ -101,10 +101,6 @@ const setupTest = async (
   });
 
   const getValueResult = () => mathScope.results.get(valueId);
-  const getValueError = (type: "parse" | "eval") =>
-    type === "parse"
-      ? mathScope.parseErrors.get(valueId)
-      : mathScope.evalErrors.get(valueId);
 
   return {
     mathScope,
@@ -113,7 +109,6 @@ const setupTest = async (
     item,
     valueUpdates,
     getValueResult,
-    getValueError,
     props,
     min,
     max,

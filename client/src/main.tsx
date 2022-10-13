@@ -60,6 +60,10 @@ prepare().then(() => {
   const root = createRoot(container);
 
   const store = getStore();
+  if (import.meta.env.DEV) {
+    // @ts-expect-error Allow accessing store on widnow in dev for debugging
+    window.store = store;
+  }
   const queryClient = new QueryClient();
 
   root.render(
