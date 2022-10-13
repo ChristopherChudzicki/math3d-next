@@ -95,10 +95,9 @@ const compileNode = (
         const evaluated = rawResult(...args);
         return math.isMatrix(evaluated) ? evaluated.toArray() : evaluated;
       };
-      const numArgs =
-        mjsNode.type === "FunctionAssignmentNode"
-          ? mjsNode.params.length
-          : rawResult.length;
+      const numArgs = math.isFunctionAssignmentNode(mjsNode)
+        ? mjsNode.params.length
+        : rawResult.length;
       Object.defineProperty(f, "length", { value: numArgs });
       /**
        * 1. First the node is evalauted... the result is a function F
@@ -139,7 +138,7 @@ const convertNode = (
 ): AnonMathNode => {
   const dependencies = getDependencies(mjsNode);
   const evaluate = compileNode(mjsNode, options);
-  if (mjsNode.type === "FunctionAssignmentNode") {
+  if (math.isFunctionAssignmentNode(mjsNode)) {
     return {
       type: MathNodeType.FunctionAssignmentNode,
       name: mjsNode.name,
@@ -148,7 +147,7 @@ const convertNode = (
       dependencies,
     };
   }
-  if (mjsNode.type === "AssignmentNode") {
+  if (math.isAssignmentNode(mjsNode)) {
     return {
       type: MathNodeType.ValueAssignment,
       name: mjsNode.name,

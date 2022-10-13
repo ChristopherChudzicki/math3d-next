@@ -63,10 +63,10 @@ const backslashRule: TextParserRegexRule = {
 const simplifyRule: MathJsRule = {
   type: ParserRuleType.MathJs,
   transform: (node) => {
-    if (node.type === "FunctionAssignmentNode") {
+    if (math.isFunctionAssignmentNode(node)) {
       // eslint-disable-next-line no-param-reassign
       node.expr = math.simplify(node.expr);
-    } else if (node.type === "AssignmentNode") {
+    } else if (math.isAssignmentNode(node)) {
       // eslint-disable-next-line no-param-reassign
       node.value = math.simplify(node.value);
     }
