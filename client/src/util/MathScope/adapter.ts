@@ -9,7 +9,7 @@ import type {
   Parse,
 } from "./interfaces";
 import { MathNodeType } from "./interfaces";
-import { EvaluationError } from "./Evaluator";
+import { EvaluationError } from "./errors";
 
 window.math = math;
 

@@ -40,7 +40,7 @@ test("Updating parameter names updates the lhs and rhs appropriately", async () 
   await user.clear(paramInput);
   await user.click(paramInput);
   await user.paste("a1");
-  expect(mathScope.evalErrors.size).toBe(2);
+  expect(mathScope.errors.size).toBe(2);
   const newItem = store.getState().mathItems.items[
     item.id
   ] as MathItem<MIT.ImplicitSurface>;

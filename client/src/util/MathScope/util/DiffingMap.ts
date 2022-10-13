@@ -39,6 +39,10 @@ export default class DiffingMap<T, U> {
     this.areEqual = areEqual;
   }
 
+  get(key: T): U | undefined {
+    return this.map.get(key);
+  }
+
   has(key: T): boolean {
     return this.map.has(key);
   }

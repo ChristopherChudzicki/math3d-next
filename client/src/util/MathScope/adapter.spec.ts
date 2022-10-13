@@ -1,7 +1,7 @@
 import * as math from "mathjs";
 
 import { anonParse } from "./adapter";
-import { EvaluationError } from "./Evaluator";
+import { EvaluationError } from "./errors";
 
 describe("anonParsed dependencies", () => {
   it("returns a set of symbol dependencies", () => {

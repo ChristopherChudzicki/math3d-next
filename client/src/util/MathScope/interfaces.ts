@@ -52,10 +52,6 @@ type EvaluationScope = Map<string, unknown>;
 
 type EvaluationResult = Map<string, unknown>;
 
-type EvaluationErrors = Map<string, Error>;
-
-type ParseErrors = Map<string, Error>;
-
 interface Diff<T> {
   added: Set<T>;
   updated: Set<T>;
@@ -79,11 +75,8 @@ export type {
   AssignmentNode,
   AssignmentType,
   Diff,
-  Evaluatable,
-  EvaluationErrors,
   EvaluationResult,
   EvaluationScope,
   MathNode,
   Parse,
-  ParseErrors,
 };

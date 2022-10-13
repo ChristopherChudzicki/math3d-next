@@ -56,7 +56,7 @@ test.each([
       setTimeout(resolve);
     });
     // initiall there is an error since the expr RHS contains "abc" which is not a param name or defined variable
-    expect(mathScope.evalErrors.has(id("expr"))).toBe(true);
+    expect(mathScope.errors.has(id("expr"))).toBe(true);
     const inputs = getParamNameInputs();
     await user.clear(inputs[param.index]);
     await user.click(inputs[param.index]);
@@ -113,7 +113,7 @@ test.each([
     ] as MathItem<MIT.ParametricSurface>;
     expect(itemAfterEdit.properties.expr).toBe(expression.expectedFinal);
 
-    const fError = mathScope.parseErrors.get(id("expr"));
+    const fError = mathScope.errors.get(id("expr"));
     assertInstanceOf(fError, ParseAssignmentLHSError);
     expect(fError.details.paramErrors[param.index]).toBeInstanceOf(Error);
   }

@@ -32,8 +32,6 @@ const setup = async (initialValue: string) => {
   const visibleControl = within(settings).getByLabelText("Visible");
 
   const getValue = () => mathScope.results.get(id("visible"));
-  const getEvalError = () => mathScope.evalErrors.get(id("visible"));
-  const getParseError = () => mathScope.parseErrors.get(id("visible"));
 
   /**
    * Find and return the Switch button
@@ -78,8 +76,6 @@ const setup = async (initialValue: string) => {
     settings,
     mathScope,
     getValue,
-    getEvalError,
-    getParseError,
     findToggle,
     findReset,
     findUseExpr,

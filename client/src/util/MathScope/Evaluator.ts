@@ -2,9 +2,7 @@ import ExpressionGraphManager from "./ExpressionGraphManager";
 import {
   AssignmentNode,
   Diff,
-  Evaluatable,
   EvaluationChange,
-  EvaluationErrors,
   EvaluationResult,
   EvaluationScope,
   MathNode,
@@ -18,8 +16,7 @@ import {
   setDifference,
   setUnion,
 } from "./util";
-
-export class EvaluationError extends Error {}
+import { EvaluationError } from "./errors";
 
 interface EvaluatorAction {
   type: "delete" | "add";
@@ -87,13 +84,11 @@ const getUnmetDependencies = (
  * diff of the changes.
  */
 export default class Evaluator {
-  compiled = new WeakMap<MathNode, Evaluatable>();
-
   results: EvaluationResult = new Map();
 
   scope: EvaluationScope;
 
-  errors: EvaluationErrors = new Map();
+  errors = new Map<string, Error>();
 
   private nodesById: Map<string, MathNode> = new Map();
 
