@@ -1,6 +1,6 @@
 import * as mjs from "mathjs";
 
-import { adapter as msAdapter, MathNode } from "../MathScope";
+import { adapter as msAdapter } from "../MathScope";
 import {
   IMathJsParser,
   MathJsRule,
@@ -62,11 +62,15 @@ class MathJsParser implements IMathJsParser {
     );
   };
 
-  parse: IMathJsParser["parse"] = (expression, id, options): MathNode => {
-    const preprocessed = this.preprocess(expression);
+  parse: IMathJsParser["parse"] = (parseable) => {
+    const parseableObj =
+      typeof parseable === "string" ? { expr: parseable } : parseable;
+    const preprocessed = this.preprocess(parseableObj.expr);
     const mjsNode = this.mjsParse(preprocessed);
-    const node = msAdapter.convertNode(mjsNode, options) as MathNode;
-    node.id = id;
+    const node = msAdapter.convertNode(mjsNode, {
+      ...parseableObj,
+      expr: preprocessed,
+    });
     return node;
   };
 

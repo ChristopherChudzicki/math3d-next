@@ -1,4 +1,4 @@
-import { anonParse as parse } from "../adapter";
+import { parse } from "../adapter";
 import { getAssignmentCycles } from "./util";
 
 describe("getAssignmentCycles", () => {

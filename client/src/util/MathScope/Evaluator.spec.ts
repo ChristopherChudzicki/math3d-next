@@ -8,7 +8,9 @@ import Evaluator, {
 import { MathNode } from "./interfaces";
 import { assertIsAssignmentNode } from "./util";
 
-const node = (id: string, parseable: string): MathNode => parse(parseable, id);
+const node = (id: string, parseable: string): MathNode => {
+  return { ...parse(parseable), id };
+};
 
 const asMap = (obj: Record<string, unknown>) => new Map(Object.entries(obj));
 

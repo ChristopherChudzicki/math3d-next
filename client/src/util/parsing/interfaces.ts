@@ -1,7 +1,7 @@
 import type { MathNode as MJsNode } from "mathjs";
 
 import type { Parse } from "../MathScope";
-import type { ParseOptions } from "../MathScope/adapter";
+import type { Parseable } from "../MathScope/adapter";
 
 enum ParserRuleType {
   MathJs = "mathjs",
@@ -31,11 +31,12 @@ type ParserRule = TextParserRule | TextParserRegexRule | MathJsRule;
 
 interface IMathJsParser {
   preprocess: (text: string) => string;
-  parse: Parse<ParseOptions>;
+  parse: Parse<Parseable>;
 }
 
 export { ParserRuleType };
 export type {
+  Parseable,
   IMathJsParser,
   MathJsRule,
   ParserRule,

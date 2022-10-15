@@ -5,14 +5,15 @@ import { keyBy } from "lodash";
 import { assertNotNil } from "@/util/predicates";
 import MathScope from "@/util/MathScope";
 
-import { latexParser } from "@/util/parsing";
+import { latexParser, Parseable } from "@/util/parsing";
 import {
   syncItemsToMathScope,
   removeItemsFromMathScope,
 } from "./syncMathScope";
 import type { MathItemsState } from "./interfaces";
 
-const makeMathScope = () => new MathScope({ parse: latexParser.parse });
+const makeMathScope = () =>
+  new MathScope<Parseable>({ parse: latexParser.parse });
 
 const getInitialState = (): MathItemsState => {
   const mathScope = makeMathScope();

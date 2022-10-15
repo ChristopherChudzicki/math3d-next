@@ -9,7 +9,9 @@ import {
 } from "@/configs";
 import { filter as collectionFilter } from "lodash";
 import { isNotNil } from "@/util/predicates";
-import MathScope, { IdentifiedExpression } from "@/util/MathScope";
+import MathScope from "@/util/MathScope";
+import type { IdentifiedParseable } from "@/util/MathScope";
+import type { Parseable } from "@/util/parsing";
 
 const mathScopeId = (itemId: string, propName: string) =>
   `${itemId}-${propName}`;
@@ -28,7 +30,7 @@ const getMathProperties = <T extends MathItemType>(
 
 const getIdentifiedExpressions = (
   items: MathItemPatch[]
-): IdentifiedExpression[] =>
+): IdentifiedParseable<Parseable>[] =>
   items.flatMap((item) => {
     const config = mathItemConfigs[item.type];
     const mathProperties = getMathProperties(config);
@@ -37,22 +39,31 @@ const getIdentifiedExpressions = (
         // @ts-expect-error ... TS does not know config and item are correlated
         .filter((prop) => isNotNil(item.properties[prop.name]))
         .map((prop) => {
+          // @ts-expect-error ... TS does not know config and item are correlated
+          const expr: string = item.properties[prop.name];
           return {
             id: mathScopeId(item.id, prop.name),
-            // @ts-expect-error ... TS does not know config and item are correlated
-            expr: item.properties[prop.name],
-            parseOptions: { validate: prop.validate },
+            parseable: {
+              expr,
+              validate: prop.validate,
+            },
           };
         })
     );
   });
 
-const syncItemsToMathScope = (mathScope: MathScope, items: MathItemPatch[]) => {
+const syncItemsToMathScope = (
+  mathScope: MathScope<Parseable>,
+  items: MathItemPatch[]
+) => {
   const identifiedExpressions = getIdentifiedExpressions(items);
   mathScope.setExpressions(identifiedExpressions);
 };
 
-const removeItemsFromMathScope = (mathScope: MathScope, items: MathItem[]) => {
+const removeItemsFromMathScope = (
+  mathScope: MathScope<Parseable>,
+  items: MathItem[]
+) => {
   const identifiedExpressions = getIdentifiedExpressions(items);
   mathScope.deleteExpressions(identifiedExpressions.map(({ id }) => id));
 };

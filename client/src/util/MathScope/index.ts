@@ -5,9 +5,9 @@ import {
   UnmetDependencyError,
 } from "./Evaluator";
 import type { MathNode, Parse } from "./interfaces";
-import MathScope, { IdentifiedExpression, OnChangeListener } from "./MathScope";
+import MathScope, { IdentifiedParseable, OnChangeListener } from "./MathScope";
 
-export type { IdentifiedExpression, MathNode, OnChangeListener, Parse };
+export type { IdentifiedParseable, MathNode, OnChangeListener, Parse };
 
 export {
   adapter,

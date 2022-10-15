@@ -1,13 +1,13 @@
 import { render } from "@testing-library/react";
 import React, { createContext, useContext, useEffect } from "react";
 import { act } from "react-dom/test-utils";
-import MathScope, { UnmetDependencyError } from "@/util/MathScope";
+import MathScope, { UnmetDependencyError, adapter } from "@/util/MathScope";
 import { CyclicAssignmentError } from "@/util/MathScope/Evaluator";
 import { assertNotNil } from "@/util/predicates";
 
 import { useMathErrors, useMathResults } from "./mathScope";
 
-const TestMathContext = createContext(new MathScope());
+const TestMathContext = createContext(new MathScope({ parse: adapter.parse }));
 
 type Errors = Record<string, Error>;
 
@@ -49,7 +49,7 @@ describe("useMathResults and useMathErrors", () => {
   const setup = (prefix: string, names: string[]) => {
     // This is a false positive from eslint; eslint seems to think this is a component
     // eslint-disable-next-line react/jsx-no-constructed-context-values
-    const mathScope = new MathScope();
+    const mathScope = new MathScope({ parse: adapter.parse });
     const resultsSlice: { current: Results | null } = { current: null };
     const errorsSlice: { current: Errors | null } = { current: null };
     const rerenders: { results: number; errors: number } = {
@@ -94,13 +94,13 @@ describe("useMathResults and useMathErrors", () => {
     const { results, mathScope } = setup("id1", ["a", "b", "c"]);
 
     await act(() => {
-      mathScope.setExpressions([{ id: "id1-a", expr: "a = 1 + 2" }]);
+      mathScope.setExpressions([{ id: "id1-a", parseable: "a = 1 + 2" }]);
     });
 
     expect(results.current).toStrictEqual({ a: 3 });
 
     await act(() => {
-      mathScope.setExpressions([{ id: "id1-b", expr: "a^2" }]);
+      mathScope.setExpressions([{ id: "id1-b", parseable: "a^2" }]);
     });
 
     expect(results.current).toStrictEqual({ a: 3, b: 9 });
@@ -110,7 +110,7 @@ describe("useMathResults and useMathErrors", () => {
     const { errors, mathScope } = setup("id1", ["x", "y", "z"]);
 
     await act(() => {
-      mathScope.setExpressions([{ id: "id1-x", expr: "x = y^2" }]);
+      mathScope.setExpressions([{ id: "id1-x", parseable: "x = y^2" }]);
     });
 
     expect(errors.current).toStrictEqual({
@@ -118,7 +118,7 @@ describe("useMathResults and useMathErrors", () => {
     });
 
     await act(() => {
-      mathScope.setExpressions([{ id: "id1-y", expr: "y = x^2" }]);
+      mathScope.setExpressions([{ id: "id1-y", parseable: "y = x^2" }]);
     });
 
     expect(errors.current).toStrictEqual({
@@ -131,7 +131,7 @@ describe("useMathResults and useMathErrors", () => {
     const { errors, mathScope } = setup("id1", ["x"]);
 
     await act(() => {
-      mathScope.setExpressions([{ id: "id1-x", expr: "x = 3^" }]);
+      mathScope.setExpressions([{ id: "id1-x", parseable: "x = 3^" }]);
     });
 
     expect(errors.current).toStrictEqual({
@@ -139,7 +139,7 @@ describe("useMathResults and useMathErrors", () => {
     });
 
     await act(() => {
-      mathScope.setExpressions([{ id: "id1-x", expr: "x = 3^2" }]);
+      mathScope.setExpressions([{ id: "id1-x", parseable: "x = 3^2" }]);
     });
 
     expect(errors.current).toStrictEqual({});

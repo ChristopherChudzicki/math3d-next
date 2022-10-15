@@ -1,13 +1,7 @@
 import * as math from "mathjs";
 import { assertInstanceOf, isNotNil } from "../predicates";
 
-import type {
-  AnonMathNode,
-  AnonParse,
-  EvaluationScope,
-  MathNode,
-  Parse,
-} from "./interfaces";
+import type { AnonMathNode, EvaluationScope, Parse } from "./interfaces";
 import { MathNodeType } from "./interfaces";
 import { EvaluationError } from "./errors";
 
@@ -30,13 +24,11 @@ const getDependencies = (
   return dependencies;
 };
 
-interface ParseOptions {
+export type ParseableObj = {
+  expr: string;
   validate?: (evaluated: unknown, parsed: math.MathNode) => void;
-}
-
-const defaultParseOptions: Required<ParseOptions> = {
-  validate: () => {},
 };
+export type Parseable = ParseableObj | string;
 
 class ArrayEvaluationError extends EvaluationError {
   itemErrors: Record<number, Error> = {};
@@ -74,14 +66,11 @@ const evalArray = (
   }
 };
 
-const compileNode = (
+const getValidatedEvaluate = (
   mjsNode: math.MathNode,
-  options: ParseOptions
+  validate: ParseableObj["validate"] = () => {}
 ): AnonMathNode["evaluate"] => {
   const compiled = mjsNode.compile();
-  const { validate = defaultParseOptions.validate } = {
-    ...options,
-  };
   const unvalidatedEvaluate = (scope?: EvaluationScope) => {
     const rawResult =
       mjsNode instanceof math.ArrayNode
@@ -135,11 +124,11 @@ const compileNode = (
 
 const convertNode = (
   mjsNode: math.MathNode,
-  options: ParseOptions = {}
+  parseable: ParseableObj
 ): AnonMathNode => {
   const dependencies = getDependencies(mjsNode);
-  const evaluate = compileNode(mjsNode, options);
-  if (mjsNode.type === "FunctionAssignmentNode") {
+  const evaluate = getValidatedEvaluate(mjsNode, parseable.validate);
+  if (math.isFunctionAssignmentNode(mjsNode)) {
     return {
       type: MathNodeType.FunctionAssignmentNode,
       name: mjsNode.name,
@@ -163,18 +152,10 @@ const convertNode = (
   };
 };
 
-const anonParse: AnonParse = (expr) => convertNode(math.parse(expr));
-
-const parse: Parse<ParseOptions> = (
-  expr,
-  id: string,
-  options: ParseOptions = {}
-) => {
-  const node = convertNode(math.parse(expr), options) as MathNode;
-  node.id = id;
-  return node;
+const parse: Parse<Parseable> = (parseable) => {
+  const parseableObj =
+    typeof parseable === "string" ? { expr: parseable } : parseable;
+  return convertNode(math.parse(parseableObj.expr), parseableObj);
 };
 
-export type { ParseOptions };
-
-export { anonParse, convertNode, parse };
+export { convertNode, parse };

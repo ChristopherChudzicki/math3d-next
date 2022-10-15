@@ -67,7 +67,7 @@ describe("backslash removal", () => {
 describe("validateAssignmentLHS", () => {
   const getParseError = (s: string) => {
     try {
-      parser.parse(s, "some-id");
+      parser.parse(s);
     } catch (err) {
       return err;
     }
@@ -76,13 +76,13 @@ describe("validateAssignmentLHS", () => {
 
   it("throws ParseAssignmentLHSError if LHS is invalid", () => {
     const input = "f(x+) = 123";
-    const shouldThrow = () => parser.parse(input, "some-id");
+    const shouldThrow = () => parser.parse(input);
     expect(shouldThrow).toThrow(ParseAssignmentLHSError);
   });
 
   it("throws non-ParseAssignmentLHSError if RHS is invalid", () => {
     const input = "f(x) = 123 +";
-    const shouldThrow = () => parser.parse(input, "some-id");
+    const shouldThrow = () => parser.parse(input);
     expect(shouldThrow).toThrow();
     expect(shouldThrow).not.toThrow(ParseAssignmentLHSError);
   });
@@ -90,7 +90,7 @@ describe("validateAssignmentLHS", () => {
   it.each(["123", "f(x)=123", "a=123"])(
     "does not throw for valid assignments or valid non-assignments",
     (text) => {
-      const shouldNotThrow = () => parser.parse(text, "some-id");
+      const shouldNotThrow = () => parser.parse(text);
       expect(shouldNotThrow).not.toThrow();
     }
   );

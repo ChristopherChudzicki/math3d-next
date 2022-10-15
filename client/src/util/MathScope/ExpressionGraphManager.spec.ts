@@ -1,6 +1,6 @@
 import { permutations } from "@/test_util";
 
-import { anonParse as parse } from "./adapter";
+import { parse } from "./adapter";
 import ExpressionGraphManager from "./ExpressionGraphManager";
 import { DirectedGraph } from "./util";
 

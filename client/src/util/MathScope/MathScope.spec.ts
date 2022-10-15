@@ -3,6 +3,10 @@ import MathScope, {
   ScopeChangeErrorsEvent,
   ScopeChangeEvent,
 } from "./MathScope";
+import { parse } from "./adapter";
+import type { Parseable } from "./adapter";
+
+const getMathScope = () => new MathScope({ parse });
 
 const emptyDiff = (): Diff<string> => {
   return {
@@ -15,14 +19,14 @@ const emptyDiff = (): Diff<string> => {
 
 describe("MathScope Setting Expressions", () => {
   it("Adds expressions and exposes results + errors", () => {
-    const mathScope = new MathScope();
+    const mathScope = getMathScope();
     mathScope.setExpressions([
-      { id: "b", expr: "b = a^2" },
-      { id: "x", expr: "x = y" },
+      { id: "b", parseable: "b = a^2" },
+      { id: "x", parseable: "x = y" },
     ]);
     mathScope.setExpressions([
-      { id: "a", expr: "a = 3" },
-      { id: "c", expr: "a + b" },
+      { id: "a", parseable: "a = 3" },
+      { id: "c", parseable: "a + b" },
     ]);
 
     expect(mathScope.results).toStrictEqual(
@@ -37,11 +41,11 @@ describe("MathScope Setting Expressions", () => {
   });
 
   it("Removes expressions", () => {
-    const mathScope = new MathScope();
+    const mathScope = getMathScope();
     mathScope.setExpressions([
-      { id: "a", expr: "a = 4" },
-      { id: "b", expr: "a + 1" },
-      { id: "c", expr: "2 * 10" },
+      { id: "a", parseable: "a = 4" },
+      { id: "b", parseable: "a + 1" },
+      { id: "c", parseable: "2 * 10" },
     ]);
 
     expect(mathScope.results).toStrictEqual(
@@ -62,20 +66,20 @@ describe("MathScope Setting Expressions", () => {
 
 describe('MathScope "change" Events', () => {
   test("Setting expressions triggers a change", () => {
-    const mathScope = new MathScope();
+    const mathScope = getMathScope();
     mathScope.setExpressions([
-      { id: "a", expr: "a = 4" },
-      { id: "b", expr: "a + 1" },
+      { id: "a", parseable: "a = 4" },
+      { id: "b", parseable: "a + 1" },
     ]);
 
     const spy = vi.fn();
     mathScope.addEventListener("change", spy);
 
     mathScope.setExpressions([
-      { id: "c", expr: "2 * 20" },
-      { id: "b", expr: "a + 2 " },
+      { id: "c", parseable: "2 * 20" },
+      { id: "b", parseable: "a + 2 " },
     ]);
-    const event: ScopeChangeEvent = {
+    const event: ScopeChangeEvent<Parseable> = {
       type: "change",
       mathScope,
       changes: {
@@ -98,17 +102,17 @@ describe('MathScope "change" Events', () => {
   });
 
   test("Deleting expressions triggers a change", () => {
-    const mathScope = new MathScope();
+    const mathScope = getMathScope();
     mathScope.setExpressions([
-      { id: "a", expr: "a = 4" },
-      { id: "b", expr: "a + 1" },
+      { id: "a", parseable: "a = 4" },
+      { id: "b", parseable: "a + 1" },
     ]);
 
     const spy = vi.fn();
     mathScope.addEventListener("change", spy);
 
     mathScope.deleteExpressions(["b"]);
-    const event: ScopeChangeEvent = {
+    const event: ScopeChangeEvent<Parseable> = {
       type: "change",
       mathScope,
       changes: {
@@ -131,7 +135,7 @@ describe('MathScope "change" Events', () => {
   });
 
   test("Removing event listeners", () => {
-    const mathScope = new MathScope();
+    const mathScope = getMathScope();
     const spy1 = vi.fn();
     const spy2 = vi.fn();
 
@@ -149,29 +153,29 @@ describe('MathScope "change" Events', () => {
 
 describe('MathScope "change-errors" Events', () => {
   test("Adding without errors does not trigger the event", () => {
-    const mathScope = new MathScope();
+    const mathScope = getMathScope();
     mathScope.setExpressions([
-      { id: "a", expr: "a = 4" },
-      { id: "b", expr: "a + 1" },
+      { id: "a", parseable: "a = 4" },
+      { id: "b", parseable: "a + 1" },
     ]);
 
     const spy = vi.fn();
     mathScope.addEventListener("change-errors", spy);
 
     mathScope.setExpressions([
-      { id: "c", expr: "2 * 20" },
-      { id: "b", expr: "a + 2 " },
+      { id: "c", parseable: "2 * 20" },
+      { id: "b", parseable: "a + 2 " },
     ]);
     expect(spy).toHaveBeenCalledTimes(0);
   });
 
   test("Adding/updating/deleting with parse errors does trigger change-errors", () => {
-    const mathScope = new MathScope();
+    const mathScope = getMathScope();
     const spy = vi.fn();
     mathScope.addEventListener("change-errors", spy);
-    mathScope.setExpressions([{ id: "a", expr: "a = 4 +" }]);
+    mathScope.setExpressions([{ id: "a", parseable: "a = 4 +" }]);
 
-    const event1: ScopeChangeErrorsEvent = {
+    const event1: ScopeChangeErrorsEvent<Parseable> = {
       type: "change-errors",
       mathScope,
       changes: {
@@ -185,8 +189,8 @@ describe('MathScope "change-errors" Events', () => {
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy).toHaveBeenLastCalledWith(event1);
 
-    mathScope.setExpressions([{ id: "a", expr: "a = 4 + +" }]);
-    const event2: ScopeChangeErrorsEvent = {
+    mathScope.setExpressions([{ id: "a", parseable: "a = 4 + +" }]);
+    const event2: ScopeChangeErrorsEvent<Parseable> = {
       type: "change-errors",
       mathScope,
       changes: {
@@ -201,8 +205,8 @@ describe('MathScope "change-errors" Events', () => {
     expect(spy).toHaveBeenCalledTimes(2);
     expect(spy).toHaveBeenLastCalledWith(event2);
 
-    mathScope.setExpressions([{ id: "a", expr: "a = 4" }]);
-    const event3: ScopeChangeErrorsEvent = {
+    mathScope.setExpressions([{ id: "a", parseable: "a = 4" }]);
+    const event3: ScopeChangeErrorsEvent<Parseable> = {
       type: "change-errors",
       mathScope,
       changes: {
@@ -219,18 +223,18 @@ describe('MathScope "change-errors" Events', () => {
   });
 
   test("Adding with eval errors does trigger the event", () => {
-    const mathScope = new MathScope();
+    const mathScope = getMathScope();
     mathScope.setExpressions([
-      { id: "a", expr: "a = 4" },
-      { id: "b", expr: "a + 1" },
+      { id: "a", parseable: "a = 4" },
+      { id: "b", parseable: "a + 1" },
     ]);
 
     const spy = vi.fn();
     mathScope.addEventListener("change-errors", spy);
 
-    mathScope.setExpressions([{ id: "c", expr: "x + 1" }]);
+    mathScope.setExpressions([{ id: "c", parseable: "x + 1" }]);
 
-    const event: ScopeChangeErrorsEvent = {
+    const event: ScopeChangeErrorsEvent<Parseable> = {
       type: "change-errors",
       mathScope,
       changes: {
@@ -247,10 +251,10 @@ describe('MathScope "change-errors" Events', () => {
   });
 
   test("Deleting without eval errors does not trigger the event", () => {
-    const mathScope = new MathScope();
+    const mathScope = getMathScope();
     mathScope.setExpressions([
-      { id: "a", expr: "a = 4" },
-      { id: "b", expr: "a + 1" },
+      { id: "a", parseable: "a = 4" },
+      { id: "b", parseable: "a + 1" },
     ]);
 
     const spy = vi.fn();
@@ -261,10 +265,10 @@ describe('MathScope "change-errors" Events', () => {
   });
 
   test("Deleting with eval errors does trigger the event", () => {
-    const mathScope = new MathScope();
+    const mathScope = getMathScope();
     mathScope.setExpressions([
-      { id: "a", expr: "a = 4" },
-      { id: "b", expr: "a + 1" },
+      { id: "a", parseable: "a = 4" },
+      { id: "b", parseable: "a + 1" },
     ]);
 
     const spy = vi.fn();
@@ -272,7 +276,7 @@ describe('MathScope "change-errors" Events', () => {
 
     mathScope.deleteExpressions(["a"]);
 
-    const event: ScopeChangeErrorsEvent = {
+    const event: ScopeChangeErrorsEvent<Parseable> = {
       type: "change-errors",
       mathScope,
       changes: {
@@ -289,12 +293,12 @@ describe('MathScope "change-errors" Events', () => {
   });
 
   test("Removing event listeners", () => {
-    const mathScope = new MathScope();
+    const mathScope = getMathScope();
     mathScope.setExpressions([
-      { id: "a", expr: "a = 4" },
-      { id: "b", expr: "a + 1" },
-      { id: "x", expr: "x = 4" },
-      { id: "y", expr: "x + 1" },
+      { id: "a", parseable: "a = 4" },
+      { id: "b", parseable: "a + 1" },
+      { id: "x", parseable: "x = 4" },
+      { id: "y", parseable: "x + 1" },
     ]);
 
     const spy1 = vi.fn();

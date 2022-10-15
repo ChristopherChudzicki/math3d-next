@@ -30,23 +30,22 @@ interface FunctionAssignmentNode
   params: string[];
 }
 
-type MathNode =
-  | MathNodeBase<MathNodeType.Value>
-  | AssignmentNode
-  | FunctionAssignmentNode;
+type MathNodes = {
+  [MathNodeType.FunctionAssignmentNode]: FunctionAssignmentNode;
+  [MathNodeType.ValueAssignment]: AssignmentNode<MathNodeType.ValueAssignment>;
+  [MathNodeType.Value]: MathNodeBase<MathNodeType.Value>;
+};
+
+type MathNode = MathNodes[keyof MathNodes];
+
+type AnonMathNodes = {
+  [K in keyof MathNodes]: Omit<MathNodes[K], "id">;
+};
+type AnonMathNode = AnonMathNodes[keyof AnonMathNodes];
 
 export type AnonAssignmentNode = Omit<AssignmentNode, "id">;
-export type AnonValueNode = Omit<MathNodeBase<MathNodeType.Value>, "id">;
-export type AnonFunctionAssignmentNode = Omit<FunctionAssignmentNode, "id">;
 
-type AnonMathNode =
-  | AnonAssignmentNode
-  | AnonValueNode
-  | AnonFunctionAssignmentNode;
-
-type AnonParse = (expr: string) => AnonMathNode;
-
-type Parse<PO> = (expr: string, id: string, options?: PO) => MathNode;
+type Parse<P> = (parseable: P) => AnonMathNode;
 
 type EvaluationScope = Map<string, unknown>;
 
@@ -71,7 +70,6 @@ export interface EvaluationChange {
 export { ASSIGNMENT_TYPES, MathNodeType };
 export type {
   AnonMathNode,
-  AnonParse,
   AssignmentNode,
   AssignmentType,
   Diff,
