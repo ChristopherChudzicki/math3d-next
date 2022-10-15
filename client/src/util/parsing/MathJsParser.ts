@@ -1,6 +1,7 @@
 import * as mjs from "mathjs";
 
-import { adapter as msAdapter } from "../MathScope";
+import { adapter as msAdapter } from "@/util/MathScope";
+import { getValidatedEvaluate } from "./evaluate";
 import {
   IMathJsParser,
   MathJsRule,
@@ -67,10 +68,8 @@ class MathJsParser implements IMathJsParser {
       typeof parseable === "string" ? { expr: parseable } : parseable;
     const preprocessed = this.preprocess(parseableObj.expr);
     const mjsNode = this.mjsParse(preprocessed);
-    const node = msAdapter.convertNode(mjsNode, {
-      ...parseableObj,
-      expr: preprocessed,
-    });
+    const evaluate = getValidatedEvaluate(mjsNode, parseableObj.validate);
+    const node = msAdapter.convertNode(mjsNode, evaluate);
     return node;
   };
 

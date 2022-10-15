@@ -12,10 +12,11 @@ const ASSIGNMENT_TYPES: readonly MathNodeType[] = assignmentTypes;
 
 type AssignmentType = typeof assignmentTypes[number];
 
+type Evaluate = (scope?: Map<string, unknown>) => unknown;
 interface MathNodeBase<T extends MathNodeType = MathNodeType> {
   id: string;
   type: T;
-  evaluate: (scope?: Map<string, unknown>) => unknown;
+  evaluate: Evaluate;
   dependencies: Set<string>;
 }
 
@@ -73,6 +74,7 @@ export type {
   AssignmentNode,
   AssignmentType,
   Diff,
+  Evaluate,
   EvaluationResult,
   EvaluationScope,
   MathNode,

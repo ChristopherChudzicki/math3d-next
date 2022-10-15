@@ -1,4 +1,5 @@
 import { assertInstanceOf } from "@/test_util";
+import { EvaluationError } from "@/util/MathScope";
 import { latexParser as parser } from "./parsers";
 import { ParseAssignmentLHSError } from "./rules";
 
@@ -132,5 +133,46 @@ describe("validateAssignmentLHS", () => {
         1: new Error('"x+" is not a valid parameter name.'),
       },
     });
+  });
+});
+
+describe("returned node's MathNode.evaluate", () => {
+  const { parse } = parser;
+
+  it("includes arity (f.length) on results that are functions", () => {
+    const f = parse("f(x, y, z) = x + y + z").evaluate();
+    const g = parse("g(w, x, y, z) = x").evaluate();
+    const h = parse("h = g").evaluate(new Map(Object.entries({ g })));
+    expect(f).toHaveLength(3);
+    expect(g).toHaveLength(4);
+    expect(h).toHaveLength(4);
+  });
+
+  it("Evaluates vectors/matrices to arrays", () => {
+    const a = parse("[1,2,3, 4]").evaluate();
+    const b = parse("[[1,2],[3,4]]").evaluate();
+    expect(a).toStrictEqual([1, 2, 3, 4]);
+    expect(b).toStrictEqual([
+      [1, 2],
+      [3, 4],
+    ]);
+  });
+
+  it("Evaluates functions returning vectors/matrices to funcs returning arrays", () => {
+    const f = parse("f() = [1,2,3, 4]").evaluate() as CallableFunction;
+    const g = parse("g() = [[1,2],[3,4]]").evaluate() as CallableFunction;
+    expect(f()).toStrictEqual([1, 2, 3, 4]);
+    expect(g()).toStrictEqual([
+      [1, 2],
+      [3, 4],
+    ]);
+  });
+
+  it("throws an error for functions that throw errors when evauated", () => {
+    const node = parse("f(x) = 2^[1,2,3]");
+    expect(() => node.evaluate()).toThrow(EvaluationError);
+    expect(() => node.evaluate()).toThrow(
+      /Unexpected type of argument in function pow/
+    );
   });
 });

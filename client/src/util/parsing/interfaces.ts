@@ -1,7 +1,11 @@
 import type { MathNode as MJsNode } from "mathjs";
 
 import type { Parse } from "../MathScope";
-import type { Parseable } from "../MathScope/adapter";
+
+type Validate = (evaluated: unknown, parsed: math.MathNode) => void;
+
+type ParseableObj = { expr: string; validate?: Validate };
+type Parseable = string | ParseableObj;
 
 enum ParserRuleType {
   MathJs = "mathjs",
@@ -43,4 +47,5 @@ export type {
   StrictRegepMatchArray,
   TextParserRegexRule,
   TextParserRule,
+  Validate,
 };
