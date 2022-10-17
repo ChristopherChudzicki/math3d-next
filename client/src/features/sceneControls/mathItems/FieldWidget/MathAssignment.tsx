@@ -2,11 +2,10 @@ import classNames from "classnames";
 import React, { useCallback } from "react";
 import { OnMathFieldChange } from "@/util/components/MathLive";
 import SmallMathField from "@/util/components/SmallMathField";
-import { AssignmentError } from "@/util/MathScope/Evaluator";
-import { splitAtFirstEquality } from "@/util/parsing";
-import { ParseAssignmentLHSError } from "@/util/parsing/rules";
+import { ParseableObjs } from "@/util/parsing";
 import { round } from "lodash";
 
+import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
 import ReadonlyMathField from "./ReadonlyMathField";
 import type { IWidgetProps, WidgetChangeEvent } from "./types";
 import ErrorTooltip from "./ErrorTooltip";
@@ -25,7 +24,20 @@ const formatted = (x: string, numDecimalDigits?: number) => {
   return prefix + round(xNum, numDecimalDigits).toString();
 };
 
-const MathAssignment: React.FC<IWidgetProps & ExtraProps> = (props) => {
+type MathAssignmentProps = IWidgetProps<ParseableObjs["assignment"]> &
+  ExtraProps;
+
+const extractErrors = (err: Error | undefined) => {
+  if (!err) {
+    return { lhs: undefined, rhs: undefined };
+  }
+  if (err instanceof DetailedAssignmentError) {
+    return { lhs: err.lhs, rhs: err.rhs };
+  }
+  return { lhs: undefined, rhs: err };
+};
+
+const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
   const {
     onChange,
     name,
@@ -39,69 +51,62 @@ const MathAssignment: React.FC<IWidgetProps & ExtraProps> = (props) => {
     numDecimalDigits,
     ...others
   } = props;
-  const [lhs, rhs] = splitAtFirstEquality(value);
   const onChangeLHS: OnMathFieldChange = useCallback(
     (e) => {
-      const newValue = [e.target.value, rhs].join("=");
-      const event: WidgetChangeEvent = {
+      const event: WidgetChangeEvent<ParseableObjs["assignment"]> = {
         name,
-        value: newValue,
+        value: { ...value, lhs: e.target.value },
+        oldValue: value,
       };
       onChange(event);
     },
-    [rhs, onChange, name]
+    [onChange, name, value]
   );
   const onChangeRHS: OnMathFieldChange = useCallback(
     (e) => {
-      const newValue = [lhs, e.target.value].join("=");
-      const event: WidgetChangeEvent = {
+      const event: WidgetChangeEvent<ParseableObjs["assignment"]> = {
         name,
-        value: newValue,
+        value: { ...value, rhs: e.target.value },
+        oldValue: value,
       };
       onChange(event);
     },
-    [lhs, onChange, name]
+    [value, onChange, name]
   );
-
-  const hasLhsError =
-    error instanceof AssignmentError ||
-    error instanceof ParseAssignmentLHSError;
-  const hasRhsError = error && !hasLhsError;
-  const lhsError = hasLhsError ? error : undefined;
-  const rhsError = hasRhsError ? error : undefined;
+  const errors = extractErrors(error);
 
   const lhsLabel = `${label} (left-hand side)`;
   const rhsLabel = `${label} (right-hand side)`;
   return (
     <div {...others} className={classNames(className, "d-flex")}>
-      <ErrorTooltip error={lhsError}>
+      <ErrorTooltip error={errors.lhs}>
         <SmallMathField
           aria-label={lhsLabel}
           className={classNames(
             style["field-widget-input"],
-            { [style["has-error"]]: hasLhsError },
+            { [style["has-error"]]: !!errors.lhs },
             lhsClassName
           )}
           onChange={onChangeLHS}
         >
-          {lhs}
+          {value.lhs}
         </SmallMathField>
       </ErrorTooltip>
       {/** Wrapper div similar to ErrorTooltips */}
       <div>
         <ReadonlyMathField value="=" />
       </div>
-      <ErrorTooltip error={rhsError}>
+      <ErrorTooltip error={errors.rhs}>
         <SmallMathField
           aria-label={rhsLabel}
           className={classNames(
             style["field-widget-input"],
-            { [style["has-error"]]: hasRhsError },
+            { [style["has-error"]]: !!errors.rhs },
             rhsClassName
           )}
           onChange={onChangeRHS}
         >
-          {formatted(rhs, numDecimalDigits)}
+          {formatted(value.rhs, numDecimalDigits)}
         </SmallMathField>
       </ErrorTooltip>
     </div>

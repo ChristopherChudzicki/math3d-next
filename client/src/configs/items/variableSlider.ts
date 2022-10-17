@@ -1,4 +1,5 @@
 import { validators } from "@/util";
+import { ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -8,7 +9,7 @@ import type {
 import { description } from "../shared";
 
 interface VariableSliderProperties {
-  value: string;
+  value: ParseableObjs["assignment"];
   fps: string;
   min: string;
   max: string;
@@ -19,7 +20,7 @@ interface VariableSliderProperties {
 }
 
 const defaultValues: VariableSliderProperties = {
-  value: "T=0",
+  value: { lhs: "T", rhs: "0", type: "assignment" },
   fps: "50",
   min: "-5",
   max: "+5",

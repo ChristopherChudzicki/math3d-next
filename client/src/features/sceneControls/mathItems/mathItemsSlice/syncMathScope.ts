@@ -40,11 +40,13 @@ const getIdentifiedExpressions = (
         .filter((prop) => isNotNil(item.properties[prop.name]))
         .map((prop) => {
           // @ts-expect-error ... TS does not know config and item are correlated
-          const expr: string = item.properties[prop.name];
+          const parseable: Parseable = item.properties[prop.name];
+          const parseableObj =
+            typeof parseable === "string" ? { expr: parseable } : parseable;
           return {
             id: mathScopeId(item.id, prop.name),
             parseable: {
-              expr,
+              ...parseableObj,
               validate: prop.validate,
             },
           };
