@@ -1,7 +1,6 @@
-import { assertInstanceOf } from "@/test_util";
 import { EvaluationError } from "@/util/MathScope";
+import { DetailedAssignmentError } from "./MathJsParser";
 import { latexParser as parser } from "./parsers";
-import { ParseAssignmentLHSError } from "./rules";
 
 describe("preprocesser fraction conversion", () => {
   test("converts zero fractions correctly", () => {
@@ -65,74 +64,96 @@ describe("backslash removal", () => {
   });
 });
 
-describe("validateAssignmentLHS", () => {
-  const getParseError = (s: string) => {
+describe("Parsing assignments", () => {
+  const getParseError = (
+    lhs: string,
+    rhs: string,
+    Err = DetailedAssignmentError
+  ) => {
     try {
-      parser.parse(s);
+      parser.parse({ lhs, rhs, type: "assignment" });
     } catch (err) {
+      if (!(err instanceof Err)) {
+        throw new Error(`Expected an instanceof ${Err.name}`);
+      }
       return err;
     }
     throw new Error("Expected parser.parse to throw.");
   };
 
-  it("throws ParseAssignmentLHSError if LHS is invalid", () => {
-    const input = "f(x+) = 123";
-    const shouldThrow = () => parser.parse(input);
-    expect(shouldThrow).toThrow(ParseAssignmentLHSError);
+  it("parses { lhs, rhs } variable assignments", () => {
+    const node = parser.parse({
+      lhs: "a",
+      rhs: "1 + 2",
+      type: "assignment",
+    });
+    const evaluated = node.evaluate();
+    expect(evaluated).toBe(3);
   });
 
-  it("throws non-ParseAssignmentLHSError if RHS is invalid", () => {
-    const input = "f(x) = 123 +";
-    const shouldThrow = () => parser.parse(input);
-    expect(shouldThrow).toThrow();
-    expect(shouldThrow).not.toThrow(ParseAssignmentLHSError);
-  });
-
-  it.each(["123", "f(x)=123", "a=123"])(
-    "does not throw for valid assignments or valid non-assignments",
-    (text) => {
-      const shouldNotThrow = () => parser.parse(text);
-      expect(shouldNotThrow).not.toThrow();
+  it("parses { lhs, rhs } function assignments", () => {
+    const node = parser.parse({
+      lhs: "f(x, y,z)",
+      rhs: "x*y*z",
+      type: "assignment",
+    });
+    const evaluated = node.evaluate();
+    if (typeof evaluated !== "function") {
+      throw new Error("Expected evaluated to be a function.");
     }
-  );
-
-  it("Records invalid parameter positions", () => {
-    const expr = "f(x,y+z,a, z-1, w) = 1";
-    const err = getParseError(expr);
-    assertInstanceOf(err, ParseAssignmentLHSError);
-    expect(err.details).toEqual({
-      isFunctionAssignment: true,
-      paramErrors: {
-        1: new Error('"y+z" is not a valid parameter name.'),
-        3: new Error('"z-1" is not a valid parameter name.'),
-      },
-    });
+    expect(evaluated(2, 3, 4)).toBe(24);
+    expect(evaluated.length).toBe(3);
   });
 
-  it("Records duplicate parameter names", () => {
-    const expr = "f(x,y,y,z) = 1";
-    const err = getParseError(expr);
-    assertInstanceOf(err, ParseAssignmentLHSError);
-    expect(err.details).toEqual({
-      isFunctionAssignment: true,
-      paramErrors: {
-        1: new Error("Parameter names must be unique."),
-        2: new Error("Parameter names must be unique."),
+  it.only.each([
+    {
+      lhs: "f(x+)",
+      rhs: "1",
+      expected: {
+        lhsErr: /"x\+" is not a valid parameter name/,
+        rhsErr: undefined,
       },
-    });
-  });
-
-  it("Treats duplicate errors as errors, not dupes", () => {
-    const expr = "f(x+, x+) = 1";
-    const err = getParseError(expr);
-    assertInstanceOf(err, ParseAssignmentLHSError);
-    expect(err.details).toEqual({
-      isFunctionAssignment: true,
-      paramErrors: {
-        0: new Error('"x+" is not a valid parameter name.'),
-        1: new Error('"x+" is not a valid parameter name.'),
+    },
+    {
+      lhs: "f(x+)",
+      rhs: "1+",
+      expected: {
+        lhsErr: /"x\+" is not a valid parameter name/,
+        rhsErr: /Unexpected end of expression/,
       },
-    });
+    },
+    {
+      lhs: "f(x)",
+      rhs: "1+",
+      expected: {
+        lhsErr: undefined,
+        rhsErr: /Unexpected end of expression/,
+      },
+    },
+    {
+      lhs: "f+(x)",
+      rhs: "1",
+      expected: {
+        lhsErr: /Invalid left-hand side./,
+        rhsErr: undefined,
+      },
+    },
+    {
+      lhs: "f(x,x,y)",
+      rhs: "1",
+      expected: {
+        lhsErr: /Parameter names must be unique/,
+        rhsErr: undefined,
+      },
+    },
+  ])("Associates parse errors with lhs or rhs", ({ lhs, rhs, expected }) => {
+    const err = getParseError(lhs, rhs);
+    const methods = {
+      lhs: expected.lhsErr ? "toMatch" : "toBe",
+      rhs: expected.rhsErr ? "toMatch" : "toBe",
+    };
+    expect(err.lhs)[methods.lhs](expected.lhsErr);
+    expect(err.rhs)[methods.rhs](expected.rhsErr);
   });
 });
 
