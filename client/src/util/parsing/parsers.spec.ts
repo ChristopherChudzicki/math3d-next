@@ -1,6 +1,8 @@
 import { EvaluationError } from "@/util/MathScope";
+import { assertInstanceOf } from "../predicates";
 import { DetailedAssignmentError } from "./MathJsParser";
 import { latexParser as parser } from "./parsers";
+import { ParameterErrors } from "./rules";
 
 describe("preprocesser fraction conversion", () => {
   test("converts zero fractions correctly", () => {
@@ -105,12 +107,12 @@ describe("Parsing assignments", () => {
     expect(evaluated.length).toBe(3);
   });
 
-  it.only.each([
+  it.each([
     {
       lhs: "f(x+)",
       rhs: "1",
       expected: {
-        lhsErr: /"x\+" is not a valid parameter name/,
+        lhsErr: /Some parameter names are invalid/,
         rhsErr: undefined,
       },
     },
@@ -118,7 +120,7 @@ describe("Parsing assignments", () => {
       lhs: "f(x+)",
       rhs: "1+",
       expected: {
-        lhsErr: /"x\+" is not a valid parameter name/,
+        lhsErr: /Some parameter names are in/,
         rhsErr: /Unexpected end of expression/,
       },
     },
@@ -154,6 +156,19 @@ describe("Parsing assignments", () => {
     };
     expect(err.lhs)[methods.lhs](expected.lhsErr);
     expect(err.rhs)[methods.rhs](expected.rhsErr);
+  });
+
+  it("Associates bad parameters with their indexes", () => {
+    const err = getParseError("f(x,y,w+,z,z)", "1");
+    assertInstanceOf(err, DetailedAssignmentError);
+    assertInstanceOf(err.lhs, ParameterErrors);
+
+    expect(Object.keys(err.lhs.paramErrors)).toEqual(["2", "3", "4"]);
+    expect(err.lhs.paramErrors[2]).toMatch(
+      /"w\+" is not a valid parameter name/
+    );
+    expect(err.lhs.paramErrors[3]).toMatch(/Parameter names must be unique./);
+    expect(err.lhs.paramErrors[4]).toMatch(/Parameter names must be unique./);
   });
 });
 
