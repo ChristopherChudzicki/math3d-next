@@ -22,12 +22,20 @@ const getParamNameInputs = (): HTMLTextAreaElement[] => {
 
 test("Updating parameter names updates the lhs and rhs appropriately", async () => {
   const lhs = {
-    initial: "_f(x,y,z)=x + y + z",
-    final: "_f(a1,y,z)=x + y + z",
+    initial: {
+      lhs: "_f(x,y,z)",
+      rhs: "x + y + z",
+      type: "assignment" as const,
+    },
+    final: { lhs: "_f(a1,y,z)", rhs: "x + y + z", type: "assignment" as const },
   };
   const rhs = {
-    initial: "_f(x,y,z)=x * y * z",
-    final: "_f(a1,y,z)=x * y * z",
+    initial: {
+      lhs: "_f(x,y,z)",
+      rhs: "x * y * z",
+      type: "assignment" as const,
+    },
+    final: { lhs: "_f(a1,y,z)", rhs: "x * y * z", type: "assignment" as const },
   };
   const item = makeItem(MIT.ImplicitSurface, {
     lhs: lhs.initial,
@@ -44,16 +52,20 @@ test("Updating parameter names updates the lhs and rhs appropriately", async () 
   const newItem = store.getState().mathItems.items[
     item.id
   ] as MathItem<MIT.ImplicitSurface>;
-  expect(newItem.properties.rhs).toBe(rhs.final);
-  expect(newItem.properties.lhs).toBe(lhs.final);
+  expect(newItem.properties.rhs).toEqual(rhs.final);
+  expect(newItem.properties.lhs).toEqual(lhs.final);
 });
 
 test.each([{ name: "lhs" as const }, { name: "rhs" as const }])(
   "Updating parameter names updates the lhs and rhs appropriately",
   async ({ name }) => {
-    const initial = "_f(x,y,z)=x + y + z";
+    const initial = {
+      lhs: "_f(x,y,z)",
+      rhs: "x + y + z",
+      type: "assignment" as const,
+    };
     const initialDisplay = "x + y + z";
-    const final = "_f(x,y,z)=x + y + z^2";
+    const final = { lhs: "_f(x,y,z)", rhs: "x + y + z^2", type: "assignment" };
     const finalDisplay = "x + y + z^2";
 
     const item = makeItem(MIT.ImplicitSurface, {
@@ -74,6 +86,6 @@ test.each([{ name: "lhs" as const }, { name: "rhs" as const }])(
     const newItem = store.getState().mathItems.items[
       item.id
     ] as MathItem<MIT.ImplicitSurface>;
-    expect(newItem.properties[name]).toBe(final);
+    expect(newItem.properties[name]).toEqual(final);
   }
 );

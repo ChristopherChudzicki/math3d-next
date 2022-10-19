@@ -1,3 +1,4 @@
+import { ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -31,7 +32,7 @@ interface ParametricSurfaceProperties {
   zBias: string;
 
   shaded: string; // eval to boolean;
-  expr: string;
+  expr: ParseableObjs["assignment"];
   range1: string;
   range2: string;
   colorExpr: string;
@@ -51,7 +52,11 @@ const defaultValues: ParametricSurfaceProperties = {
   zIndex: "0",
   zBias: "0",
   shaded: "true",
-  expr: "_f(u,v)=[1,1,1]",
+  expr: {
+    lhs: "_f(u,v)",
+    rhs: "[u^2-v^2, 2*u*v, u^2+v^2]",
+    type: "assignment",
+  },
   range1: "[-pi, pi]",
   range2: "[-3, 3]",
   colorExpr: "_f(X, Y, Z, u, v)=mod(Z, 1)",

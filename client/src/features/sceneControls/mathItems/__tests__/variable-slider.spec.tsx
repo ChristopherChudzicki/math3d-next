@@ -14,8 +14,14 @@ import {
 } from "@/test_util";
 import type { ResolvePromise } from "@/types/util";
 import { faker } from "@faker-js/faker";
+import { ParseableObjs } from "@/util/parsing";
 import { getItemByDescription, findBtn } from "./__utils__";
 import { mathScopeId } from "../mathScope";
+
+const valueObj = (v: string): ParseableObjs["assignment"] => {
+  const [lhs, rhs] = v.split("=");
+  return { lhs, rhs, type: "assignment" as const };
+};
 
 const btnLabels = {
   pause: "Pause",
@@ -43,7 +49,7 @@ const setupTest = async (
     min: String(min),
     max: String(max),
     fps: String(fps),
-    value: `X=${value}`,
+    value: valueObj(`X=${value}`),
     duration: String(duration),
     speedMultiplier: speed,
     ...overrides,
@@ -179,7 +185,7 @@ describe("Variable Slider", () => {
         fps: "10 + 0",
         min: "-10 + 0",
         max: "11 + 0",
-        value: "X=6 + 0",
+        value: valueObj("X=6 + 0"),
       },
     },
     {
@@ -197,7 +203,7 @@ describe("Variable Slider", () => {
         fps: "20 + 0",
         min: "4 + 0",
         max: "10 + 0",
-        value: "X=5 + 0",
+        value: valueObj("X=5 + 0"),
       },
     },
   ])(
@@ -278,7 +284,7 @@ describe("Variable Slider", () => {
         fps: "20",
         min: "0",
         max: "10",
-        value: "X=0",
+        value: valueObj("X=0"),
       };
       const { el, valueUpdates } = await setupTest(props);
       await user.click(el.btnToggle);
@@ -302,7 +308,7 @@ describe("Variable Slider", () => {
 
   test("Renaming variable changes name in mathscope", async () => {
     const { el, store } = await setupTest({
-      value: "X=1",
+      value: valueObj("X=1"),
       min: "-2",
       max: "+3",
     });
@@ -345,7 +351,7 @@ describe("Variable Slider", () => {
     "$inputDecription show errors and pass previous value to slider",
     async ({ getInput, goodValue, badValue }) => {
       const { el } = await setupTest({
-        value: "X=1",
+        value: valueObj("X=1"),
         min: "-10",
         max: "+10",
       });
@@ -372,7 +378,7 @@ describe("Variable Slider", () => {
 
   test("value display shows 2 digits except when set explicitly by user", async () => {
     const { el } = await setupTest({
-      value: "X=0",
+      value: valueObj("X=0"),
       min: "0",
       max: "1",
       duration: "0.5",

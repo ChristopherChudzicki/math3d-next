@@ -50,26 +50,20 @@ const RangedMathItemForm = ({
   const {
     assignments,
     handlers,
-    errors: exprErrors,
-  } = useExpressionsAndParameters(
-    item,
-    exprNames,
-    numParams,
-    onWidgetChange,
-    errors
-  );
+    errors: assignmentErrors,
+  } = useExpressionsAndParameters(item, exprNames, numParams, errors);
 
   return (
     <ItemTemplate item={item} config={config}>
       {children ? (
-        children({ assignments, handlers, errors: exprErrors })
+        children({ assignments, handlers, errors: assignmentErrors })
       ) : (
         <FieldWidget
           widget={WidgetType.MathValue}
           // @ts-expect-error exprName should be correlated with properties
           label={config.properties[exprNames[0]].label}
           name={exprNames[0]}
-          error={exprErrors[0].rhs ?? exprErrors[0].lhs}
+          error={assignmentErrors[0].rhs}
           value={assignments[0].rhs}
           onChange={handlers.rhs[0]}
         />
@@ -82,7 +76,7 @@ const RangedMathItemForm = ({
               <FieldWidget
                 className={styles["param-input"]}
                 widget={WidgetType.MathValue}
-                error={exprErrors[0].lhs?.details.paramErrors[i]}
+                error={assignmentErrors[0].lhs?.paramErrors[i]}
                 label={`Name for ${ordinal(i + 1)} parameter`}
                 name={`${ordinal(i + 1)}-parameter-name`}
                 value={assignments[0].params[i]}

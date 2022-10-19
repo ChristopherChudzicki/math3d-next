@@ -1,3 +1,4 @@
+import { ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -30,7 +31,7 @@ interface ExplicitSurfaceProperties {
   zIndex: string;
   zBias: string;
   shaded: string; // eval to boolean;
-  expr: string;
+  expr: ParseableObjs["assignment"];
   range1: string;
   range2: string;
   colorExpr: string;
@@ -50,7 +51,7 @@ const defaultValues: ExplicitSurfaceProperties = {
   zIndex: "0",
   zBias: "0",
   shaded: "true",
-  expr: "_f(x,y)=x^2-y^2",
+  expr: { lhs: "_f(x,y)", rhs: "x^2-y^2", type: "assignment" },
   range1: "[-2, 2]",
   range2: "[-2, 2]",
   colorExpr: "_f(X, Y, Z, x, y)=mod(Z, 1)",

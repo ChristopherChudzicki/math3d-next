@@ -8,7 +8,7 @@ import {
   seedDb,
   user,
 } from "@/test_util";
-import { ParseAssignmentLHSError } from "@/util/parsing";
+import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
 
 const config = mathItemConfigs[MIT.ParametricSurface];
 
@@ -23,8 +23,16 @@ const getParamNameInputs = (): HTMLTextAreaElement[] => {
 test.each([
   {
     expression: {
-      initial: "_f(x,y)=[1+abc, 0, 0]",
-      expectedFinal: "_f(abc,y)=[1+abc, 0, 0]",
+      initial: {
+        lhs: "_f(x,y)",
+        rhs: "[1+abc, 0, 0]",
+        type: "assignment" as const,
+      },
+      expectedFinal: {
+        lhs: "_f(abc,y)",
+        rhs: "[1+abc, 0, 0]",
+        type: "assignment" as const,
+      },
     },
     evaluations: [
       { parmaValues: [1, 0], expectedOutput: [2, 0, 0] },
@@ -34,8 +42,16 @@ test.each([
   },
   {
     expression: {
-      initial: "_f(x,y)=[1+abc, 0, 0]",
-      expectedFinal: "_f(x,abc)=[1+abc, 0, 0]",
+      initial: {
+        lhs: "_f(x,y)",
+        rhs: "[1+abc, 0, 0]",
+        type: "assignment" as const,
+      },
+      expectedFinal: {
+        lhs: "_f(x,abc)",
+        rhs: "[1+abc, 0, 0]",
+        type: "assignment" as const,
+      },
     },
     evaluations: [
       { parmaValues: [1, 0], expectedOutput: [1, 0, 0] },
@@ -66,7 +82,7 @@ test.each([
     const editedItem = store.getState().mathItems.items[
       item.id
     ] as MathItem<MIT.ParametricSurface>;
-    expect(editedItem.properties.expr).toBe(expression.expectedFinal);
+    expect(editedItem.properties.expr).toEqual(expression.expectedFinal);
 
     // assert MathScope updated correctly
     const f = mathScope.results.get(id("expr"));
@@ -81,15 +97,31 @@ test.each([
 test.each([
   {
     expression: {
-      initial: "_f(x,y)=[x, y, 0]",
-      expectedFinal: "_f(a+b,y)=[x, y, 0]",
+      initial: {
+        lhs: "_f(x,y)",
+        rhs: "[x, y, 0]",
+        type: "assignment" as const,
+      },
+      expectedFinal: {
+        lhs: "_f(a+b,y)",
+        rhs: "[x, y, 0]",
+        type: "assignment" as const,
+      },
     },
     param: { name: "a+b", index: 0 },
   },
   {
     expression: {
-      initial: "_f(x,y)=[x, y, 0]",
-      expectedFinal: "_f(x,a+b)=[x, y, 0]",
+      initial: {
+        lhs: "_f(x,y)",
+        rhs: "[x, y, 0]",
+        type: "assignment" as const,
+      },
+      expectedFinal: {
+        lhs: "_f(x,a+b)",
+        rhs: "[x, y, 0]",
+        type: "assignment" as const,
+      },
     },
     param: { name: "a+b", index: 1 },
   },
@@ -111,32 +143,50 @@ test.each([
     const itemAfterEdit = store.getState().mathItems.items[
       item.id
     ] as MathItem<MIT.ParametricSurface>;
-    expect(itemAfterEdit.properties.expr).toBe(expression.expectedFinal);
+    expect(itemAfterEdit.properties.expr).toEqual(expression.expectedFinal);
 
     const fError = mathScope.errors.get(id("expr"));
-    assertInstanceOf(fError, ParseAssignmentLHSError);
-    expect(fError.details.paramErrors[param.index]).toBeInstanceOf(Error);
+    assertInstanceOf(fError, DetailedAssignmentError);
+    expect(fError.lhs).toBeInstanceOf(Error);
   }
 );
 
 test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
   "when param name is invalid, error class is added, then removed when valid again",
   async ({ paramIndex }) => {
-    const item = makeItem(MIT.ParametricSurface);
+    const item = makeItem(MIT.ParametricSurface, {
+      expr: {
+        lhs: "_f(x,y)",
+        rhs: "[x, y, 0]",
+        type: "assignment",
+      },
+    });
     const scene = seedDb.withSceneFromItems([item]);
     await renderTestApp(`/${scene.id}`);
 
     const exprInput = screen.getByLabelText(config.properties.expr.label);
 
     const paramInput = getParamNameInputs()[paramIndex];
-    await user.type(paramInput, "a+b");
+    await user.clear(paramInput);
+    paramInput.focus();
+    await user.paste("a+b");
+
+    // param is invalid
     expect(paramInput).toHaveClass("has-error");
+    // expression is not (debateable, since one var is undefined now)
+    expect(exprInput).not.toHaveClass("has-error");
+
+    await user.clear(paramInput);
+    paramInput.focus();
+    await user.paste("ab");
+    // param is valid
+    expect(paramInput).not.toHaveClass("has-error");
+    // expr is not.. one var is definitely undefined
     expect(exprInput).toHaveClass("has-error");
 
-    // selectRange approach https://github.com/testing-library/user-event/issues/232#issuecomment-640791105 was not working?
-    await user.clear(paramInput);
-    await user.type(paramInput, "ab");
-    expect(paramInput).not.toHaveClass("has-error");
+    await user.clear(exprInput);
+    exprInput.focus();
+    await user.paste("[1,1,1]");
     expect(exprInput).not.toHaveClass("has-error");
   }
 );
