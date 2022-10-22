@@ -85,7 +85,7 @@
     "eslint-config-airbnb-typescript": "17.0.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-config-react-app": "7.0.1",
-    "eslint-import-resolver-typescript": "3.5.1",
+    "eslint-import-resolver-typescript": "3.5.2",
     "eslint-plugin-prettier": "4.2.1",
     "identity-obj-proxy": "3.0.0",
     "jest-fail-on-console": "3.0.2",
