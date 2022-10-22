@@ -10,9 +10,9 @@ import {
   syncItemsToMathScope,
   removeItemsFromMathScope,
 } from "./syncMathScope";
-import type { MathItemsState } from "./interfaces";
+import type { MathItemsState, AppMathScope } from "./interfaces";
 
-const makeMathScope = () =>
+const makeMathScope = (): AppMathScope =>
   new MathScope<Parseable>({ parse: latexParser.parse });
 
 const getInitialState = (): MathItemsState => {

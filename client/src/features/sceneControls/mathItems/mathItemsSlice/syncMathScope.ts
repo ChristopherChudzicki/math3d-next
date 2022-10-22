@@ -9,9 +9,9 @@ import {
 } from "@/configs";
 import { filter as collectionFilter } from "lodash";
 import { isNotNil } from "@/util/predicates";
-import MathScope from "@/util/MathScope";
 import type { IdentifiedParseable } from "@/util/MathScope";
 import type { Parseable } from "@/util/parsing";
+import { AppMathScope } from "./interfaces";
 
 const mathScopeId = (itemId: string, propName: string) =>
   `${itemId}-${propName}`;
@@ -55,7 +55,7 @@ const getIdentifiedExpressions = (
   });
 
 const syncItemsToMathScope = (
-  mathScope: MathScope<Parseable>,
+  mathScope: AppMathScope,
   items: MathItemPatch[]
 ) => {
   const identifiedExpressions = getIdentifiedExpressions(items);
@@ -63,7 +63,7 @@ const syncItemsToMathScope = (
 };
 
 const removeItemsFromMathScope = (
-  mathScope: MathScope<Parseable>,
+  mathScope: AppMathScope,
   items: MathItem[]
 ) => {
   const identifiedExpressions = getIdentifiedExpressions(items);

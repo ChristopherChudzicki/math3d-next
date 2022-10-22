@@ -62,3 +62,4 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
 };
 
 export { MathAssignment };
+export type { WidgetsProps };

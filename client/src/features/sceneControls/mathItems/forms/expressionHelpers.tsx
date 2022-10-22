@@ -3,6 +3,7 @@ import React, { useCallback, useMemo } from "react";
 import { FunctionAssignment, ParseableObjs } from "@/util/parsing";
 
 import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
+import { ParameterErrors } from "@/util/parsing/rules";
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import { OnWidgetChange, WidgetChangeEvent } from "../FieldWidget/types";
 import styles from "./ItemForms.module.css";
@@ -54,6 +55,7 @@ type ExpressionProps = {
   errors: {
     rhs?: Error;
     lhs?: Error;
+    paramErrors?: Record<number, Error>;
   }[];
 };
 
@@ -144,6 +146,12 @@ const useExpressionsAndParameters = (
       exprNames.map((exprName) => {
         const err = errors[exprName];
         if (!err) return {};
+        if (err instanceof DetailedAssignmentError) {
+          const { lhs, rhs } = err;
+          const paramErrors =
+            lhs instanceof ParameterErrors ? lhs.paramErrors : {};
+          return { lhs, rhs, paramErrors };
+        }
         if (err instanceof DetailedAssignmentError) return err;
         return { rhs: err };
       }),

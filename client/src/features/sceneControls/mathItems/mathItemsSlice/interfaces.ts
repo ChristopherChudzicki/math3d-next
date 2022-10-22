@@ -1,6 +1,9 @@
 import type { MathItem } from "@/configs";
 import type MathScope from "@/util/MathScope";
-import { Parseable } from "../FieldWidget/types";
+import { Parseable } from "@/util/parsing";
+
+type AppParseable = Parseable;
+type AppMathScope = MathScope<AppParseable>;
 
 interface MathItemsState {
   items: {
@@ -16,7 +19,7 @@ interface MathItemsState {
    * This is a nonserializable value, so comes with some caveats. See
    * https://redux-toolkit.js.org/usage/usage-guide#working-with-non-serializable-data
    */
-  mathScope: () => MathScope<Parseable>;
+  mathScope: () => AppMathScope;
 }
 
 interface Subtree {
@@ -25,4 +28,4 @@ interface Subtree {
   children?: Subtree[];
 }
 
-export type { Subtree, MathItemsState };
+export type { Subtree, MathItemsState, AppMathScope, AppParseable };

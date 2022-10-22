@@ -1,8 +1,8 @@
 import { useAppSelector } from "@/store/hooks";
-import MathScope from "@/util/MathScope";
+import type { AppMathScope } from "./interfaces";
 import * as select from "./selectors";
 
-const useMathScope = (): MathScope => {
+const useMathScope = (): AppMathScope => {
   return useAppSelector(select.mathScope());
 };
 

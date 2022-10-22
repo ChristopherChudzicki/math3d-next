@@ -6,14 +6,14 @@ import {
 } from "@/configs";
 import { filter as collectionFilter } from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import MathScope, { OnChangeListener } from "@/util/MathScope";
-import type { ParseOptions as DefaultParseOptions } from "@/util/MathScope/adapter";
+import { OnChangeListener } from "@/util/MathScope";
+import { AppMathScope, AppParseable } from "./mathItemsSlice/interfaces";
 
 type EvaluationResultsSlice<K extends string> = Partial<Record<K, unknown>>;
 type EvaluationErrorsSlice<K extends string> = Partial<Record<K, Error>>;
 
-const extractResults = <K extends string, PO extends DefaultParseOptions>(
-  scope: MathScope<PO>,
+const extractResults = <K extends string>(
+  scope: AppMathScope,
   ids: Record<K, string>
 ): EvaluationResultsSlice<K> => {
   const newResult: EvaluationResultsSlice<K> = {};
@@ -26,8 +26,8 @@ const extractResults = <K extends string, PO extends DefaultParseOptions>(
   return newResult;
 };
 
-const extractErrors = <K extends string, PO extends DefaultParseOptions>(
-  scope: MathScope<PO>,
+const extractErrors = <K extends string>(
+  scope: AppMathScope,
   ids: Record<K, string>
 ): EvaluationErrorsSlice<K> => {
   const newErrors: EvaluationErrorsSlice<K> = {};
@@ -44,7 +44,7 @@ export const mathScopeId = (itemId: string, propName: string) =>
   `${itemId}-${propName}`;
 
 const useMathResults = <K extends string>(
-  scope: MathScope,
+  scope: AppMathScope,
   idPrefix: string,
   names: readonly K[]
 ): EvaluationResultsSlice<K> => {
@@ -55,7 +55,7 @@ const useMathResults = <K extends string>(
     return Object.fromEntries(entries) as Record<K, string>;
   }, [idPrefix, names]);
 
-  const onChange = useCallback<OnChangeListener>(
+  const onChange = useCallback<OnChangeListener<AppParseable>>(
     (event) => {
       const { mathScope } = event;
       const { results } = event.changes;
@@ -78,7 +78,7 @@ const useMathResults = <K extends string>(
 };
 
 const useMathErrors = <K extends string>(
-  scope: MathScope,
+  scope: AppMathScope,
   idPrefix: string,
   names: readonly K[]
 ): EvaluationErrorsSlice<K> => {
@@ -89,7 +89,7 @@ const useMathErrors = <K extends string>(
     return Object.fromEntries(entries) as Record<K, string>;
   }, [idPrefix, names]);
 
-  const onChange = useCallback<OnChangeListener>(
+  const onChange = useCallback<OnChangeListener<AppParseable>>(
     (event) => {
       const { mathScope } = event;
       const { errors } = event.changes;

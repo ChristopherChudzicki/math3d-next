@@ -1,13 +1,16 @@
 import { render } from "@testing-library/react";
 import React, { createContext, useContext, useEffect } from "react";
 import { act } from "react-dom/test-utils";
-import MathScope, { UnmetDependencyError, adapter } from "@/util/MathScope";
+import MathScope, { UnmetDependencyError } from "@/util/MathScope";
 import { CyclicAssignmentError } from "@/util/MathScope/Evaluator";
 import { assertNotNil } from "@/util/predicates";
+import { latexParser } from "@/util/parsing";
 
 import { useMathErrors, useMathResults } from "./mathScope";
 
-const TestMathContext = createContext(new MathScope({ parse: adapter.parse }));
+const TestMathContext = createContext(
+  new MathScope({ parse: latexParser.parse })
+);
 
 type Errors = Record<string, Error>;
 
@@ -49,7 +52,7 @@ describe("useMathResults and useMathErrors", () => {
   const setup = (prefix: string, names: string[]) => {
     // This is a false positive from eslint; eslint seems to think this is a component
     // eslint-disable-next-line react/jsx-no-constructed-context-values
-    const mathScope = new MathScope({ parse: adapter.parse });
+    const mathScope = new MathScope({ parse: latexParser.parse });
     const resultsSlice: { current: Results | null } = { current: null };
     const errorsSlice: { current: Errors | null } = { current: null };
     const rerenders: { results: number; errors: number } = {

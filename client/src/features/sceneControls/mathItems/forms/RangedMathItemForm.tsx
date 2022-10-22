@@ -76,7 +76,7 @@ const RangedMathItemForm = ({
               <FieldWidget
                 className={styles["param-input"]}
                 widget={WidgetType.MathValue}
-                error={assignmentErrors[0].lhs?.paramErrors[i]}
+                error={assignmentErrors[0].paramErrors?.[i]}
                 label={`Name for ${ordinal(i + 1)} parameter`}
                 name={`${ordinal(i + 1)}-parameter-name`}
                 value={assignments[0].params[i]}
