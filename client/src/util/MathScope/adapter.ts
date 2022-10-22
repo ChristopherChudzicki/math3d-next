@@ -3,8 +3,6 @@ import * as math from "mathjs";
 import type { AnonMathNode, Parse } from "./interfaces";
 import { MathNodeType, Evaluate } from "./interfaces";
 
-window.math = math;
-
 const getDependencies = (
   node: math.MathNode,
   omit: Set<string> = new Set([])
