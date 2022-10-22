@@ -137,6 +137,7 @@ const mathItemsSlice = createSlice({
     ) => {
       const { id, properties: newProperties } = action.payload;
       const { properties: oldProperties } = state.items[id];
+      // @ts-expect-error TODO figure this out + reconisder the unions
       state.items[id].properties = { ...oldProperties, ...newProperties };
 
       const item = state.items[id];

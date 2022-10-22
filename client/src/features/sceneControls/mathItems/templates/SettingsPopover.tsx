@@ -55,6 +55,7 @@ const SettingsForm = <T extends MathItemType>({
             itemId={item.id}
             label={field.label}
             error={errors[field.name]}
+            // @ts-expect-error TODO reconisder the unions
             widget={field.widget}
             name={field.name}
             value={value}
