@@ -9,24 +9,14 @@ import MathAssignment from "./MathAssignment";
 import MathBoolean from "./MathBoolean";
 import MathValue from "./MathValue";
 import TextInput from "./TextInput";
-import { OnWidgetChange, Parseable } from "./types";
+import { IWidgetProps, OnWidgetChange, Parseable } from "./types";
 import ErrorTooltip from "./ErrorTooltip";
 
-type WidgetsProps = {
-  [WidgetType.MathValue]: React.ComponentProps<typeof MathValue>;
-  [WidgetType.Color]: React.ComponentProps<typeof ColorWidget>;
-  [WidgetType.MathBoolean]: React.ComponentProps<typeof MathBoolean>;
-  [WidgetType.AutosizeText]: React.ComponentProps<typeof AutosizeText>;
-  [WidgetType.MathAssignment]: React.ComponentProps<typeof MathAssignment>;
-  [WidgetType.Text]: React.ComponentProps<typeof TextInput>;
-  [WidgetType.Custom]: never;
-  [WidgetType.CustomMath]: never;
+type WidgetProps = IWidgetProps & {
+  // This seems like a false positive
+  // eslint-disable-next-line react/no-unused-prop-types
+  widget: WidgetType;
 };
-
-type WidgetsAndWidgetsProps = {
-  [W in keyof WidgetsProps]: WidgetsProps[W] & { widget: W };
-};
-type WidgetProps = WidgetsAndWidgetsProps[keyof WidgetsAndWidgetsProps];
 
 const getWidgetComponent = (props: WidgetProps) => {
   if (props.widget === WidgetType.MathValue) return <MathValue {...props} />;
@@ -36,8 +26,6 @@ const getWidgetComponent = (props: WidgetProps) => {
   if (props.widget === WidgetType.AutosizeText)
     return <AutosizeText {...props} />;
   if (props.widget === WidgetType.Text) return <TextInput {...props} />;
-  if (props.widget === WidgetType.MathAssignment)
-    return <MathAssignment {...props} />;
   throw new Error(`Unrecognized form widget`);
 };
 
