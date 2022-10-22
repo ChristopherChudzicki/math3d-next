@@ -1,14 +1,12 @@
 import fractionRule from "./fractionRule";
 import operatornameRule from "./operatornameRule";
 import subscriptRule from "./subscriptRule";
-import validateAssignmentLHS, {
-  ParseAssignmentLHSError,
-} from "./validateAssignmentLHS";
+import validateParameters, { ParameterErrors } from "./validateParameters";
 
 export {
   fractionRule,
   operatornameRule,
-  ParseAssignmentLHSError,
   subscriptRule,
-  validateAssignmentLHS,
+  validateParameters,
+  ParameterErrors,
 };

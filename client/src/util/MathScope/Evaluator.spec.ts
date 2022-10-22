@@ -1,3 +1,4 @@
+import * as math from "mathjs";
 import { parse } from "./adapter";
 import Evaluator, {
   CyclicAssignmentError,
@@ -8,7 +9,9 @@ import Evaluator, {
 import { MathNode } from "./interfaces";
 import { assertIsAssignmentNode } from "./util";
 
-const node = (id: string, parseable: string): MathNode => parse(parseable, id);
+const node = (id: string, parseable: string): MathNode => {
+  return { ...parse(parseable), id };
+};
 
 const asMap = (obj: Record<string, unknown>) => new Map(Object.entries(obj));
 
@@ -189,7 +192,7 @@ describe("Evaluator", () => {
       evaluator.evaluate();
       expect(evaluator.results).toStrictEqual(
         asMap({
-          "id-a": [2, 2],
+          "id-a": math.matrix([2, 2]),
           "id-b": 2,
           "id-c": 3,
           "id-d": 5,
@@ -211,11 +214,11 @@ describe("Evaluator", () => {
 
       expect(evaluator.results).toStrictEqual(
         asMap({
-          "id-a": [4, 4],
+          "id-a": math.matrix([4, 4]),
           "id-b": 4,
           "id-d": 5,
           "id-x": 1,
-          "id-expr1": [4, 4, 1],
+          "id-expr1": math.matrix([4, 4, 1]),
         })
       );
       expect(evaluator.errors).toStrictEqual(
@@ -266,7 +269,7 @@ describe("Evaluator", () => {
 
       expect(evaluator.results).toStrictEqual(
         asMap({
-          "id-a": [2, 2],
+          "id-a": math.matrix([2, 2]),
           "id-b": 2,
           "id-c": 3,
           "id-d": 5,
@@ -276,12 +279,12 @@ describe("Evaluator", () => {
         })
       );
       const a1 = evaluator.results.get("id-a");
-      expect(a1).toStrictEqual([2, 2]);
+      expect(a1).toStrictEqual(math.matrix([2, 2]));
 
       const diff = evaluator.evaluate();
       expect(evaluator.results).toStrictEqual(
         asMap({
-          "id-a": [2, 2],
+          "id-a": math.matrix([2, 2]),
           "id-b": 2,
           "id-c": 4,
           "id-d": 5,
@@ -306,7 +309,7 @@ describe("Evaluator", () => {
       });
 
       const a2 = evaluator.results.get("id-a");
-      expect(a2).toStrictEqual([2, 2]);
+      expect(a2).toStrictEqual(math.matrix([2, 2]));
 
       // Since 'id-a' was not part of the re-evaluated subgraph, it should be
       // equal-by-reference.

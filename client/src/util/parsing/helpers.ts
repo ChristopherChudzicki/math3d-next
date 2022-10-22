@@ -56,7 +56,9 @@ class FunctionAssignment {
     const [lhs, rhs] = splitAtFirstEquality(expr);
     const { paramsString, name } =
       lhs.trim().match(FunctionAssignment.fromExprRegex)?.groups ?? {};
-    const params = paramsString.split(",");
+
+    const params =
+      paramsString.trim().length > 0 ? paramsString.split(",") : [];
     return new FunctionAssignment({ name, params, rhs });
   }
 

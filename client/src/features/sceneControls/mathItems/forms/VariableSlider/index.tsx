@@ -8,7 +8,7 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import Slider, { SliderProps } from "@mui/material/Slider";
 import { useInterval } from "@/util/hooks/useInterval";
 import classNames from "classnames";
-import { splitAtFirstEquality } from "@/util/parsing";
+import { ParseableObjs } from "@/util/parsing";
 import SliderControls, { mustFindSpeed } from "./SliderControls";
 import type { SliderControlsProps } from "./SliderControls";
 import FieldWidget, {
@@ -129,7 +129,7 @@ const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
 
 const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
   const onWidgetChange = useOnWidgetChange(item);
-  const [lhs] = splitAtFirstEquality(item.properties.value);
+  const { lhs } = item.properties.value;
   const [maxDigits, setMaxDigits] = useState<number | undefined>(2);
   const lhsRef = useRef(lhs);
   lhsRef.current = lhs;
@@ -168,18 +168,25 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
       const prefix = v > 0 ? "+" : "";
       onWidgetChange({
         name: "value",
-        value: `${lhsRef.current}=${prefix}${v}`,
+        value: {
+          lhs: lhsRef.current,
+          rhs: `${prefix}${v}`,
+          type: "assignment",
+        },
       });
     },
     [onWidgetChange]
   );
-  const onManualChange: OnWidgetChange = useCallback(
-    (e) => {
-      setMaxDigits(undefined);
-      onWidgetChange(e);
-    },
-    [onWidgetChange]
-  );
+  const onManualChange: OnWidgetChange<ParseableObjs["assignment"]> =
+    useCallback(
+      (e) => {
+        if (e.oldValue?.rhs !== e.value.rhs) {
+          setMaxDigits(undefined);
+        }
+        onWidgetChange(e);
+      },
+      [onWidgetChange]
+    );
   const onSpeedChange: SliderControlsProps["onSpeedChange"] = useCallback(
     (nextSpeed) => {
       onWidgetChange({ name: "speedMultiplier", value: nextSpeed.value });

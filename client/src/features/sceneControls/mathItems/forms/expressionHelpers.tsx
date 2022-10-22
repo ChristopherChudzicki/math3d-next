@@ -1,11 +1,13 @@
 import { MathItem } from "@/configs";
 import React, { useCallback, useMemo } from "react";
-import { FunctionAssignment, ParseAssignmentLHSError } from "@/util/parsing";
+import { FunctionAssignment, ParseableObjs } from "@/util/parsing";
 
+import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
+import { ParameterErrors } from "@/util/parsing/rules";
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
-import { OnWidgetChange } from "../FieldWidget/types";
-import { useMathScope } from "../mathItemsSlice";
+import { OnWidgetChange, WidgetChangeEvent } from "../FieldWidget/types";
 import styles from "./ItemForms.module.css";
+import { useOnWidgetChange } from "../FieldWidget";
 
 interface ParameterContainerProps {
   children: React.ReactNode;
@@ -52,7 +54,8 @@ type ExpressionProps = {
    */
   errors: {
     rhs?: Error;
-    lhs?: ParseAssignmentLHSError;
+    lhs?: Error;
+    paramErrors?: Record<number, Error>;
   }[];
 };
 
@@ -80,32 +83,37 @@ const useExpressionsAndParameters = (
    */
   exprNames: readonly string[],
   numParams: number,
-  onWidgetChange: OnWidgetChange,
   errors: Partial<Record<string, Error>>
 ): ExpressionProps => {
-  const mathScope = useMathScope();
+  const onWidgetChange = useOnWidgetChange(item);
 
-  const exprs = useMemo(
+  const exprs: ParseableObjs["assignment"][] = useMemo(
     // @ts-expect-error need to resolve this
     () => exprNames.map((name) => item.properties[name]),
     [exprNames, item.properties]
   );
 
   const assignments = useMemo(
-    () => exprs.map(FunctionAssignment.fromExpr),
+    () =>
+      exprs.map((expr) =>
+        FunctionAssignment.fromExpr(`${expr.lhs}=${expr.rhs}`)
+      ),
     [exprs]
   );
 
   const updateExpr = useCallback(
     (newAssignment: FunctionAssignment, propName: string) => {
-      const event = {
+      const event: WidgetChangeEvent<ParseableObjs["assignment"]> = {
         name: propName,
-        value: newAssignment.toExpr(),
-        mathScope,
+        value: {
+          lhs: newAssignment.getLhs(),
+          rhs: newAssignment.rhs,
+          type: "assignment",
+        },
       };
       onWidgetChange(event);
     },
-    [onWidgetChange, mathScope]
+    [onWidgetChange]
   );
 
   const handlers = useMemo(() => {
@@ -138,9 +146,14 @@ const useExpressionsAndParameters = (
       exprNames.map((exprName) => {
         const err = errors[exprName];
         if (!err) return {};
-
-        const lhs = err instanceof ParseAssignmentLHSError ? err : undefined;
-        return { lhs, rhs: err };
+        if (err instanceof DetailedAssignmentError) {
+          const { lhs, rhs } = err;
+          const paramErrors =
+            lhs instanceof ParameterErrors ? lhs.paramErrors : {};
+          return { lhs, rhs, paramErrors };
+        }
+        if (err instanceof DetailedAssignmentError) return err;
+        return { rhs: err };
       }),
     [exprNames, errors]
   );

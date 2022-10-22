@@ -1,6 +1,7 @@
+import { Parseable } from "@/util/parsing";
 import React from "react";
 
-interface IWidgetProps {
+interface IWidgetProps<V extends Parseable = string> {
   /**
    * used to access values; most items do not need it.
    */
@@ -8,8 +9,8 @@ interface IWidgetProps {
   name: string;
   label: string;
   "aria-labelledby"?: string;
-  value: string;
-  onChange: OnWidgetChange;
+  value: V;
+  onChange: OnWidgetChange<V>;
   style?: React.CSSProperties;
   className?: string;
   error?: Error;
@@ -17,10 +18,13 @@ interface IWidgetProps {
   onBlur?: React.FocusEventHandler;
 }
 
-interface WidgetChangeEvent {
+interface WidgetChangeEvent<V extends Parseable = string> {
   name: string;
-  value: string;
+  value: V;
+  oldValue?: V;
 }
-type OnWidgetChange = (e: WidgetChangeEvent) => void;
+type OnWidgetChange<V extends Parseable = string> = (
+  e: WidgetChangeEvent<V>
+) => void;
 
-export type { IWidgetProps, OnWidgetChange, WidgetChangeEvent };
+export type { IWidgetProps, OnWidgetChange, WidgetChangeEvent, Parseable };

@@ -5,14 +5,15 @@ import { keyBy } from "lodash";
 import { assertNotNil } from "@/util/predicates";
 import MathScope from "@/util/MathScope";
 
-import { latexParser } from "@/util/parsing";
+import { latexParser, Parseable } from "@/util/parsing";
 import {
   syncItemsToMathScope,
   removeItemsFromMathScope,
 } from "./syncMathScope";
-import type { MathItemsState } from "./interfaces";
+import type { MathItemsState, AppMathScope } from "./interfaces";
 
-const makeMathScope = () => new MathScope({ parse: latexParser.parse });
+const makeMathScope = (): AppMathScope =>
+  new MathScope<Parseable>({ parse: latexParser.parse });
 
 const getInitialState = (): MathItemsState => {
   const mathScope = makeMathScope();
@@ -136,6 +137,7 @@ const mathItemsSlice = createSlice({
     ) => {
       const { id, properties: newProperties } = action.payload;
       const { properties: oldProperties } = state.items[id];
+      // @ts-expect-error TODO figure this out + reconisder the unions
       state.items[id].properties = { ...oldProperties, ...newProperties };
 
       const item = state.items[id];

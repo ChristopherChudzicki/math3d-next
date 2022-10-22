@@ -10,9 +10,8 @@ import MathJsParser from "./MathJsParser";
 import {
   fractionRule,
   operatornameRule,
-  ParseAssignmentLHSError,
+  validateParameters,
   subscriptRule,
-  validateAssignmentLHS,
 } from "./rules";
 
 const cdotRule: TextParserRegexRule = {
@@ -85,7 +84,7 @@ const parserRules: ParserRule[] = [
   rightBraceRule,
   backslashRule,
   spaceRule,
-  validateAssignmentLHS,
+  validateParameters,
   // MathJS rules
   simplifyRule,
 ];
@@ -93,4 +92,4 @@ const parserRules: ParserRule[] = [
 const getLatexParser = () => new MathJsParser(parserRules);
 const latexParser = getLatexParser();
 
-export { getLatexParser, latexParser, ParseAssignmentLHSError };
+export { getLatexParser, latexParser };

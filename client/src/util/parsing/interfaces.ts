@@ -1,7 +1,25 @@
-import type { MathNode as MJsNode } from "mathjs";
+import { MathNode as MJsNode } from "mathjs";
 
 import type { Parse } from "../MathScope";
-import type { ParseOptions } from "../MathScope/adapter";
+
+type Validate = (evaluated: unknown, parsed: math.MathNode) => void;
+
+type ParseableObjs = {
+  expr: {
+    type?: "expr";
+    expr: string;
+    validate?: Validate;
+  };
+  assignment: {
+    type: "assignment";
+    lhs: string;
+    rhs: string;
+    validate?: Validate;
+  };
+};
+
+type ParseableObj = ParseableObjs[keyof ParseableObjs];
+type Parseable = string | ParseableObj;
 
 enum ParserRuleType {
   MathJs = "mathjs",
@@ -14,12 +32,12 @@ interface TextParserRule {
   transform: (text: string) => string;
 }
 
-type StrictRegepMatchArray = RegExpMatchArray & { index: number };
+type StrictRegexpMatchArray = RegExpMatchArray & { index: number };
 
 interface TextParserRegexRule {
   type: ParserRuleType.TextRegexp;
   regexp: RegExp;
-  replacement: string | ((match: StrictRegepMatchArray) => string);
+  replacement: string | ((match: StrictRegexpMatchArray) => string);
 }
 
 interface MathJsRule {
@@ -31,15 +49,18 @@ type ParserRule = TextParserRule | TextParserRegexRule | MathJsRule;
 
 interface IMathJsParser {
   preprocess: (text: string) => string;
-  parse: Parse<ParseOptions>;
+  parse: Parse<Parseable>;
 }
 
 export { ParserRuleType };
 export type {
+  Parseable,
+  ParseableObjs,
   IMathJsParser,
   MathJsRule,
   ParserRule,
-  StrictRegepMatchArray,
+  StrictRegexpMatchArray,
   TextParserRegexRule,
   TextParserRule,
+  Validate,
 };

@@ -9,56 +9,36 @@ import MathAssignment from "./MathAssignment";
 import MathBoolean from "./MathBoolean";
 import MathValue from "./MathValue";
 import TextInput from "./TextInput";
-import { OnWidgetChange } from "./types";
+import { IWidgetProps, OnWidgetChange, Parseable } from "./types";
 import ErrorTooltip from "./ErrorTooltip";
 
-type WidgetsProps = {
-  [WidgetType.MathValue]: React.ComponentProps<typeof MathValue>;
-  [WidgetType.Color]: React.ComponentProps<typeof ColorWidget>;
-  [WidgetType.MathBoolean]: React.ComponentProps<typeof MathBoolean>;
-  [WidgetType.AutosizeText]: React.ComponentProps<typeof AutosizeText>;
-  [WidgetType.MathAssignment]: React.ComponentProps<typeof MathAssignment>;
-  [WidgetType.Text]: React.ComponentProps<typeof TextInput>;
-  [WidgetType.Custom]: never;
-  [WidgetType.CustomMath]: never;
+type WidgetProps = IWidgetProps & {
+  // This seems like a false positive
+  // eslint-disable-next-line react/no-unused-prop-types
+  widget: WidgetType;
 };
 
-type FormWidgetProps<W extends WidgetType> = {
-  widget: W;
-} & WidgetsProps[W];
-
-const getComponentForWidget = (widget: WidgetType) => {
-  if (widget === WidgetType.MathValue) return MathValue;
-  if (widget === WidgetType.MathBoolean) return MathBoolean;
-  if (widget === WidgetType.Color) return ColorWidget;
-  if (widget === WidgetType.AutosizeText) return AutosizeText;
-  if (widget === WidgetType.Text) return TextInput;
-  if (widget === WidgetType.Custom) {
-    throw new Error(`Cannot get component for custom widget.`);
-  }
-  if (widget === WidgetType.MathAssignment) {
-    throw new Error(`MathAssignment must be called directly`);
-  }
-  throw new Error(`Unrecognized form widget: ${widget}`);
+const getWidgetComponent = (props: WidgetProps) => {
+  if (props.widget === WidgetType.MathValue) return <MathValue {...props} />;
+  if (props.widget === WidgetType.MathBoolean)
+    return <MathBoolean {...props} />;
+  if (props.widget === WidgetType.Color) return <ColorWidget {...props} />;
+  if (props.widget === WidgetType.AutosizeText)
+    return <AutosizeText {...props} />;
+  if (props.widget === WidgetType.Text) return <TextInput {...props} />;
+  throw new Error(`Unrecognized form widget`);
 };
 
-const FieldWidget = <W extends WidgetType>(
-  props: FormWidgetProps<W>
-): JSX.Element => {
-  const { widget, ...otherProps } = props;
-  const WidgetComponent = getComponentForWidget(widget);
-  return (
-    <ErrorTooltip error={props.error}>
-      <WidgetComponent {...otherProps} />
-    </ErrorTooltip>
-  );
+const FieldWidget = (props: WidgetProps): JSX.Element => {
+  const widgetComponent = getWidgetComponent(props);
+  return <ErrorTooltip error={props.error}>{widgetComponent}</ErrorTooltip>;
 };
 
 export default FieldWidget;
 
 export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
   const dispatch = useAppDispatch();
-  const onWidgetChange: OnWidgetChange = useCallback(
+  const onWidgetChange: OnWidgetChange<Parseable> = useCallback(
     (e) => {
       const properties = { [e.name]: e.value };
       const patch = { id: item.id, properties, type: item.type };
@@ -70,3 +50,4 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
 };
 
 export { MathAssignment };
+export type { WidgetProps };

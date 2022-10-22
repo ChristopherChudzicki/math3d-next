@@ -1,15 +1,18 @@
 import * as mjs from "mathjs";
 
-import { adapter as msAdapter, MathNode } from "../MathScope";
+import { adapter as msAdapter, AssignmentError } from "@/util/MathScope";
+import { getValidatedEvaluate } from "./evaluate";
 import {
   IMathJsParser,
   MathJsRule,
+  ParseableObjs,
   ParserRule,
   ParserRuleType,
-  StrictRegepMatchArray,
+  StrictRegexpMatchArray,
   TextParserRegexRule,
   TextParserRule,
 } from "./interfaces";
+import { assertInstanceOf } from "../predicates";
 
 const isBeforeMathjsRule = (
   rule: ParserRule
@@ -22,6 +25,18 @@ const isBeforeMathjsRule = (
 const isMathJsRule = (rule: ParserRule): rule is MathJsRule => {
   return rule.type === ParserRuleType.MathJs;
 };
+
+class DetailedAssignmentError extends Error {
+  lhs?: Error;
+
+  rhs?: Error;
+
+  constructor(msg: string, { lhs, rhs }: { lhs?: Error; rhs?: Error }) {
+    super(msg);
+    this.lhs = lhs;
+    this.rhs = rhs;
+  }
+}
 
 /**
  * A parser that transforms strings into MathNodes for MathScope. The general
@@ -62,11 +77,46 @@ class MathJsParser implements IMathJsParser {
     );
   };
 
-  parse: IMathJsParser["parse"] = (expression, id, options): MathNode => {
-    const preprocessed = this.preprocess(expression);
+  parseAssignment = ({ lhs, rhs, validate }: ParseableObjs["assignment"]) => {
+    let lhsError: Error | undefined;
+    let rhsError: Error | undefined;
+    try {
+      this.parse(`${lhs} = 0`);
+    } catch (err) {
+      if (err instanceof AssignmentError) {
+        lhsError = err;
+      } else {
+        lhsError = new AssignmentError("Invalid left-hand side.");
+      }
+    }
+    try {
+      this.parse(`x = ${rhs}`);
+    } catch (err) {
+      assertInstanceOf(err, Error);
+      rhsError = err;
+    }
+    if (lhsError || rhsError) {
+      throw new DetailedAssignmentError("Invalid assignment", {
+        lhs: lhsError,
+        rhs: rhsError,
+      });
+    }
+
+    const expr = `${lhs}=${rhs}`;
+
+    return this.parse({ expr, validate });
+  };
+
+  parse: IMathJsParser["parse"] = (parseable) => {
+    const parseableObj =
+      typeof parseable === "string" ? { expr: parseable } : parseable;
+    if (parseableObj.type === "assignment") {
+      return this.parseAssignment(parseableObj);
+    }
+    const preprocessed = this.preprocess(parseableObj.expr);
     const mjsNode = this.mjsParse(preprocessed);
-    const node = msAdapter.convertNode(mjsNode, options) as MathNode;
-    node.id = id;
+    const evaluate = getValidatedEvaluate(mjsNode, parseableObj.validate);
+    const node = msAdapter.convertNode(mjsNode, evaluate);
     return node;
   };
 
@@ -77,7 +127,7 @@ class MathJsParser implements IMathJsParser {
     const { regexp, replacement } = rule;
     const matches = [
       ...expr.matchAll(regexp),
-    ].reverse() as StrictRegepMatchArray[];
+    ].reverse() as StrictRegexpMatchArray[];
     return matches.reduce((text, match) => {
       return [
         text.slice(0, match.index),
@@ -89,3 +139,4 @@ class MathJsParser implements IMathJsParser {
 }
 
 export default MathJsParser;
+export { DetailedAssignmentError };

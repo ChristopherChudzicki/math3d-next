@@ -2,7 +2,9 @@ import { MathItemType as MIT } from "@/configs";
 import { makeItem, renderTestApp, screen, seedDb } from "@/test_util";
 
 test("left-hand parse errors are indicated on left-hand side", async () => {
-  const variable = makeItem(MIT.Variable, { value: "a+ = 123" });
+  const variable = makeItem(MIT.Variable, {
+    value: { lhs: "a+", rhs: "123", type: "assignment" },
+  });
   const scene = seedDb.withSceneFromItems([variable]);
   const { store } = await renderTestApp(`/${scene.id}`);
 
@@ -15,7 +17,9 @@ test("left-hand parse errors are indicated on left-hand side", async () => {
 });
 
 test("right-hand parse errors are indicated on right-hand side", async () => {
-  const variable = makeItem(MIT.Variable, { value: "a = 123 + " });
+  const variable = makeItem(MIT.Variable, {
+    value: { lhs: "a", rhs: "123 + ", type: "assignment" },
+  });
   const scene = seedDb.withSceneFromItems([variable]);
   const { store } = await renderTestApp(`/${scene.id}`);
 

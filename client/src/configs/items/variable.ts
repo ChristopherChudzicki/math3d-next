@@ -1,3 +1,4 @@
+import { ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -7,12 +8,12 @@ import type {
 import { description } from "../shared";
 
 interface VariableProperties {
-  value: string;
+  value: ParseableObjs["assignment"];
   description: string;
 }
 
 const defaultValues: VariableProperties = {
-  value: "f(x) = x^2",
+  value: { lhs: "f(x)", rhs: "x^2", type: "assignment" },
   description: "Variable or Function Assignment",
 };
 

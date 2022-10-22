@@ -1,3 +1,4 @@
+import { ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -31,7 +32,7 @@ interface ParametricCurveProperties {
   width: string;
   start: string; // eval to boolean;
   end: string; // eval to boolean;
-  expr: string;
+  expr: ParseableObjs["assignment"];
   range1: string;
   samples1: string;
 }
@@ -47,7 +48,7 @@ const defaultValues: ParametricCurveProperties = {
   width: "4",
   start: "false",
   end: "false",
-  expr: "_f(t)=[cos(t), sin(t), t]",
+  expr: { lhs: "_f(t)", rhs: "[cos(t), sin(t), t]", type: "assignment" },
   range1: "[-2*pi, 2*pi]",
   samples1: "128",
 };

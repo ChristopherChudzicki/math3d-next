@@ -1,3 +1,4 @@
+import { ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -26,8 +27,8 @@ interface ImplicitSurfaceProperties {
   range1: string;
   range2: string;
   range3: string;
-  lhs: string;
-  rhs: string;
+  lhs: ParseableObjs["assignment"];
+  rhs: ParseableObjs["assignment"];
   samples: string;
 }
 
@@ -42,8 +43,8 @@ const defaultValues: ImplicitSurfaceProperties = {
   range1: "[-5, 5]",
   range2: "[-5, 5]",
   range3: "[-5, 5]",
-  lhs: "_f(x,y,z)=x^2+y^2",
-  rhs: "_f(x,y,z)=z^2+1",
+  lhs: { lhs: "_f(x,y,z)", rhs: "x^2+y^2", type: "assignment" },
+  rhs: { lhs: "_f(x,y,z)", rhs: "z^2+1", type: "assignment" },
   samples: "20",
 };
 

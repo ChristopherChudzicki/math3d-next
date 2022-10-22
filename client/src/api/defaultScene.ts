@@ -8,7 +8,7 @@ const defaultScene: Omit<Scene, "id"> = {
       id: "1",
       type: MathItemType.ExplicitSurface,
       properties: {
-        expr: "_f(x,y)=1-x^2-y",
+        expr: { lhs: "_f(x,y)", rhs: "1 - x^2 - y", type: "assignment" },
         color: "#3498db",
         grid1: "8",
         grid2: "8",

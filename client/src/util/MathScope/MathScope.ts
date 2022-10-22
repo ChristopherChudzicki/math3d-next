@@ -1,7 +1,4 @@
 import { EventEmitter } from "events";
-
-import type { ParseOptions as DefaultParseOptions } from "./adapter";
-import { parse as defaultParse } from "./adapter";
 import Evaluator from "./Evaluator";
 import type {
   Diff,
@@ -13,54 +10,39 @@ import type {
 } from "./interfaces";
 import { assertIsError, DiffingMap } from "./util";
 
-export type IdentifiedExpression<
-  PO extends DefaultParseOptions = DefaultParseOptions
-> = {
+export type IdentifiedParseable<P> = {
   id: string;
-  expr: string;
-  parseOptions?: PO;
+  parseable: P;
 };
 
-export type OnChangeListener = <
-  PO extends DefaultParseOptions = DefaultParseOptions
->(
-  event: ScopeChangeEvent<PO>
-) => void;
+export type OnChangeListener<P> = (event: ScopeChangeEvent<P>) => void;
 
 interface ScopeChange {
   results: Diff<string>;
   errors: Diff<string>;
 }
 
-export interface ScopeChangeEvent<
-  PO extends DefaultParseOptions = DefaultParseOptions
-> {
+export interface ScopeChangeEvent<P> {
   type: "change";
   changes: ScopeChange;
-  mathScope: MathScope<PO>;
+  mathScope: MathScope<P>;
 }
 
-export type OnChangeErrorsListener = <
-  PO extends DefaultParseOptions = DefaultParseOptions
->(
-  event: ScopeChangeErrorsEvent<PO>
+export type OnChangeErrorsListener<P> = (
+  event: ScopeChangeErrorsEvent<P>
 ) => void;
 
-export interface ScopeChangeErrorsEvent<
-  PO extends DefaultParseOptions = DefaultParseOptions
-> {
+export interface ScopeChangeErrorsEvent<P> {
   type: "change-errors";
   changes: Omit<ScopeChange, "results">;
-  mathScope: MathScope<PO>;
+  mathScope: MathScope<P>;
 }
 
 /**
  * Parse and evaluate a dynamic scope of mathematical expressions, possibly
  * containing errors. Fires `change` events when the scope changes.
  */
-export default class MathScope<
-  PO extends DefaultParseOptions = DefaultParseOptions
-> {
+export default class MathScope<P> {
   initialScope: EvaluationScope;
 
   private events = new EventEmitter();
@@ -73,15 +55,15 @@ export default class MathScope<
 
   evalScope: EvaluationScope;
 
-  private parse: Parse<PO>;
+  private parse: Parse<P>;
 
   constructor({
-    parse = defaultParse,
+    parse,
     initialScope = new Map(),
   }: {
-    parse?: Parse<PO>;
+    parse: Parse<P>;
     initialScope?: EvaluationScope;
-  } = {}) {
+  }) {
     this.parse = parse;
     this.initialScope = initialScope;
     this.evaluator = new Evaluator(initialScope);
@@ -115,14 +97,15 @@ export default class MathScope<
     });
   }
 
-  setExpressions(expressions: IdentifiedExpression<PO>[]): void {
+  setExpressions(expressions: IdentifiedParseable<P>[]): void {
     const parsed: MathNode[] = [];
     const errors = new DiffingMap(this.errors);
     const parseErrors = new Map<string, Error>();
-    expressions.forEach(({ id, expr, parseOptions }) => {
+    expressions.forEach(({ id, parseable }) => {
       try {
-        const node = this.parse(expr, id, parseOptions);
-        parsed.push(node);
+        const node = this.parse(parseable);
+
+        parsed.push({ ...node, id });
         // delete the old error:
         // if it was a parse error, it has now parsed fine.
         // if it was an eval error, it is about to be re-evaluated
@@ -175,7 +158,7 @@ export default class MathScope<
   }
 
   private emitChangeEvent(changes: ScopeChange) {
-    const event: ScopeChangeEvent<PO> = {
+    const event: ScopeChangeEvent<P> = {
       type: "change",
       changes,
       mathScope: this,
@@ -188,7 +171,7 @@ export default class MathScope<
     const changes = {
       errors: fullChanges.errors,
     };
-    const event: ScopeChangeErrorsEvent<PO> = {
+    const event: ScopeChangeErrorsEvent<P> = {
       type: "change-errors",
       changes,
       mathScope: this,
@@ -199,13 +182,13 @@ export default class MathScope<
 
   addEventListener(
     type: "change-errors",
-    listener: OnChangeErrorsListener
+    listener: OnChangeErrorsListener<P>
   ): this;
-  addEventListener(type: "change", listener: OnChangeListener): this;
+  addEventListener(type: "change", listener: OnChangeListener<P>): this;
 
   addEventListener(
     type: "change" | "change-errors",
-    listener: OnChangeListener | OnChangeErrorsListener
+    listener: OnChangeListener<P> | OnChangeErrorsListener<P>
   ) {
     this.events.addListener(type, listener);
     return this;
@@ -213,13 +196,13 @@ export default class MathScope<
 
   removeEventListener(
     type: "change-errors",
-    listener: OnChangeErrorsListener
+    listener: OnChangeErrorsListener<P>
   ): this;
-  removeEventListener(type: "change", listener: OnChangeListener): this;
+  removeEventListener(type: "change", listener: OnChangeListener<P>): this;
 
   removeEventListener(
     type: "change" | "change-errors",
-    listener: OnChangeListener | OnChangeErrorsListener
+    listener: OnChangeListener<P> | OnChangeErrorsListener<P>
   ): this {
     this.events.removeListener(type, listener);
     return this;

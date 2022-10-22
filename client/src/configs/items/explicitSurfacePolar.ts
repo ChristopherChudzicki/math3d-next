@@ -1,3 +1,4 @@
+import { ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -31,7 +32,7 @@ interface ExplicitSurfacePolarProperties {
   zBias: string;
 
   shaded: string; // eval to boolean;
-  expr: string;
+  expr: ParseableObjs["assignment"];
   range1: string;
   range2: string;
   colorExpr: string;
@@ -51,7 +52,11 @@ const defaultValues: ExplicitSurfacePolarProperties = {
   zIndex: "0",
   zBias: "0",
   shaded: "true",
-  expr: "_f(r, Q)=\\frac{1}{4}r^2*cos(3*Q)",
+  expr: {
+    lhs: "_f(r, Q)",
+    rhs: "\\frac{1}{4}r^2*cos(3*Q)]",
+    type: "assignment",
+  },
   range1: "[0, 3]",
   range2: "[-pi, pi]",
   colorExpr: "_f(X, Y, Z, r, theta)=mod(Z, 1)",

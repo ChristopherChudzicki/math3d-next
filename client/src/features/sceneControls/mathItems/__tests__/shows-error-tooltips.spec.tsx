@@ -14,12 +14,16 @@ const queryTooltip = () => screen.queryByRole("tooltip");
 test.each([
   {
     getInput: () => screen.getByLabelText("Value (left-hand side)"),
-    item: makeItem(MIT.Variable, { value: "a + = 1" }),
-    errMatcher: /Invalid assignment left-hand side/,
+    item: makeItem(MIT.Variable, {
+      value: { lhs: "a + ", rhs: "1", type: "assignment" },
+    }),
+    errMatcher: /Invalid left-hand side/,
   },
   {
     getInput: () => screen.getByLabelText("Value (right-hand side)"),
-    item: makeItem(MIT.Variable, { value: "a = 1 + " }),
+    item: makeItem(MIT.Variable, {
+      value: { lhs: "a", rhs: "1 + ", type: "assignment" },
+    }),
     errMatcher: /Unexpected end of expression/,
   },
   {
