@@ -13,6 +13,34 @@ class ArrayEvaluationError extends EvaluationError {
   }
 }
 
+class FunctionEvaluationError extends EvaluationError {
+  innerError: Error;
+
+  funcName: string;
+
+  static getErrors(
+    name: string,
+    error: Error
+  ): { name: string; error: Error }[] {
+    const namedErrors: { error: Error; name: string }[] = [{ name, error }];
+    let e = error;
+    while (e instanceof FunctionEvaluationError) {
+      namedErrors.push({ name: e.funcName, error: e.innerError });
+      e = e.innerError;
+    }
+    namedErrors.reverse();
+    return namedErrors;
+  }
+
+  constructor(name: string, error: Error) {
+    const namedErrors = FunctionEvaluationError.getErrors(name, error);
+    const message = `Error evaluating ${namedErrors[0].name}: ${namedErrors[0].error.message}.`;
+    super(message);
+    this.innerError = error;
+    this.funcName = name;
+  }
+}
+
 const evalArray = (
   parsed: math.ArrayNode,
   compileNode: math.EvalFunction,
@@ -54,28 +82,27 @@ const getValidatedEvaluate = (
       return rawResult.toArray();
     }
     if (typeof rawResult === "function") {
+      const name =
+        mjsNode.type === "AssignmentNode" ||
+        mjsNode.type === "FunctionAssignmentNode"
+          ? mjsNode.name
+          : "";
       const f = (...args: unknown[]) => {
-        const evaluated = rawResult(...args);
-        return math.isMatrix(evaluated) ? evaluated.toArray() : evaluated;
+        try {
+          const rawEval = rawResult(...args);
+          return math.isMatrix(rawEval) ? rawEval.toArray() : rawEval;
+        } catch (e) {
+          if (!(e instanceof Error)) {
+            throw new Error('Expected error to be an instance of "Error"');
+          }
+          throw new FunctionEvaluationError(name, e);
+        }
       };
       const numArgs =
         mjsNode.type === "FunctionAssignmentNode"
           ? mjsNode.params.length
           : rawResult.length;
       Object.defineProperty(f, "length", { value: numArgs });
-      /**
-       * 1. First the node is evalauted... the result is a function F
-       * 2. Subsequently (perhaps) the function F might be evaluated
-       *
-       * The point here is to check that if evaluating F would throw, then we
-       * want to figure that out at step (1) not step (2). Determing a good
-       * sample point seems...infeasible. But in general, if a point is
-       * outside the domain of F, we expect F to return NaN not to throw.
-       */
-      const sample = Array(f.length)
-        .fill(0)
-        .map(() => Math.random());
-      f(...sample);
       return f;
     }
     return rawResult;

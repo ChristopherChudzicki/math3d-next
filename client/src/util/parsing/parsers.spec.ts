@@ -204,11 +204,17 @@ describe("returned node's MathNode.evaluate", () => {
     ]);
   });
 
-  it("throws an error for functions that throw errors when evauated", () => {
-    const node = parse("f(x) = 2^[1,2,3]");
-    expect(() => node.evaluate()).toThrow(EvaluationError);
-    expect(() => node.evaluate()).toThrow(
-      /Unexpected type of argument in function pow/
+  it("Functions that throw errors hint at their origin", () => {
+    const nodeF = parse("f(x) = 2^[1,2,3]");
+    const f = nodeF.evaluate() as (x: number) => unknown;
+    expect(() => f(1)).toThrowError(
+      /Error evaluating f: Unexpected type of argument in function pow/
+    );
+
+    const nodeG = parse("g = f");
+    const g = nodeG.evaluate(new Map([["f", f]])) as (x: number) => unknown;
+    expect(() => g(1)).toThrowError(
+      /Error evaluating f: Unexpected type of argument in function pow/
     );
   });
 });
