@@ -52,6 +52,10 @@ interface IMathJsParser {
   parse: Parse<Parseable>;
 }
 
+interface ArrayError {
+  itemErrors: Error[];
+}
+
 export { ParserRuleType };
 export type {
   Parseable,

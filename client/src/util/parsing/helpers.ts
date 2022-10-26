@@ -33,6 +33,8 @@ interface FunctionAssignmentProps {
  * and parameter names. In this way, we can parse stirngs that MathJS's parser
  * would reject, and we can give slightly more detailed information about the
  * errors.
+ *
+ * @deprecated
  */
 class FunctionAssignment {
   readonly params: string[];
@@ -76,4 +78,4 @@ class FunctionAssignment {
   }
 }
 
-export { FunctionAssignment, splitAtFirstEquality };
+export { FunctionAssignment };
