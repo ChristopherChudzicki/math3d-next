@@ -1,4 +1,5 @@
 import { assertInstanceOf } from "../predicates";
+import { isBatchError } from "./batch";
 import { DetailedAssignmentError } from "./MathJsParser";
 import { latexParser as parser } from "./parsers";
 import { ParameterErrors } from "./rules";
@@ -168,6 +169,109 @@ describe("Parsing assignments", () => {
     );
     expect(err.lhs.paramErrors[3]).toMatch(/Parameter names must be unique./);
     expect(err.lhs.paramErrors[4]).toMatch(/Parameter names must be unique./);
+  });
+});
+
+describe("Parsing arrays", () => {
+  it("returns an array", () => {
+    const node = parser.parse({
+      type: "array",
+      items: ["1", "2", "3"],
+    });
+    expect(node.evaluate()).toEqual([1, 2, 3]);
+  });
+
+  it("parses arrays", () => {
+    const node = parser.parse({
+      type: "array",
+      items: [
+        "1+2",
+        "f(x) = x^2",
+        {
+          type: "expr",
+          expr: "[1,2,3]",
+        },
+        {
+          type: "assignment",
+          lhs: "g(x)",
+          rhs: "x^3",
+        },
+      ],
+    });
+    const evaluated = node.evaluate() as unknown[];
+    expect(evaluated[0]).toBe(3);
+    expect(evaluated[2]).toEqual([1, 2, 3]);
+    const f = evaluated[1] as (x: number) => number;
+    const g = evaluated[3] as (x: number) => number;
+    expect(f(2)).toBe(4);
+    expect(g(3)).toBe(27);
+  });
+
+  it("Can validate the overall array result", () => {
+    const validate = ([a, b]: unknown[]) => {
+      if ((b as number) < (a as number)) {
+        throw new Error("Shucks!");
+      }
+    };
+    const node = parser.parse({ type: "array", items: ["1", "2"], validate });
+    expect(node.evaluate()).toEqual([1, 2]);
+
+    const shouldThrow = () =>
+      parser.parse({ type: "array", items: ["2", "1"], validate }).evaluate();
+    expect(shouldThrow).toThrowError("Shucks!");
+  });
+
+  it("Records dependencies of all items", () => {
+    const node = parser.parse({
+      type: "array",
+      items: ["a+b", "b+c", "c+d"],
+    });
+    expect(node.dependencies).toEqual(new Set(["a", "b", "c", "d"]));
+  });
+
+  const getError = (cb: () => void) => {
+    try {
+      cb();
+    } catch (e) {
+      if (!(e instanceof Error)) {
+        throw new Error("Expected an error.");
+      }
+      return e;
+    }
+    throw new Error("Expected parser.parse to throw.");
+  };
+
+  it("Records parsing errors for individual items", () => {
+    const error = getError(() =>
+      parser.parse({
+        type: "array",
+        items: ["a", "b+", "c", "d+", "e"],
+      })
+    );
+
+    if (!isBatchError(error)) {
+      throw new Error("Expected a batch error.");
+    }
+    expect(Object.keys(error.errors)).toHaveLength(2);
+    expect(error.errors[1].message).toMatch(/Unexpected end of expression/);
+    expect(error.errors[3].message).toMatch(/Unexpected end of expression/);
+  });
+
+  it("Records eval errors for individual items", () => {
+    const error = getError(() =>
+      parser
+        .parse({
+          type: "array",
+          items: ["1", "2", "x", "4", "y"],
+        })
+        .evaluate()
+    );
+    if (!isBatchError(error)) {
+      throw new Error("Expected a batch error.");
+    }
+    expect(Object.keys(error.errors)).toHaveLength(2);
+    expect(error.errors[2].message).toMatch(/Undefined symbol x/);
+    expect(error.errors[4].message).toMatch(/Undefined symbol y/);
   });
 });
 

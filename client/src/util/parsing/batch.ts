@@ -1,25 +1,25 @@
 import { AnonMathNode, EvaluationError } from "../MathScope";
 import { MathNodeType } from "../MathScope/interfaces";
 import { assertInstanceOf } from "../predicates";
-import { IBatchError, IBatchErrorCtor } from "./interfaces";
+import { IBatchError, IBatchErrorCtor, ParseableObjs } from "./interfaces";
 
 class ArrayParseError extends Error implements IBatchError {
-  itemErrors: IBatchError["itemErrors"];
+  errors: IBatchError["errors"];
 
-  constructor(errors: IBatchError["itemErrors"]) {
+  constructor(errors: IBatchError["errors"]) {
     const [e] = Object.values(errors);
     super(e.message);
-    this.itemErrors = errors;
+    this.errors = errors;
   }
 }
 
 class ArrayEvaluationError extends EvaluationError implements IBatchError {
-  itemErrors: Record<number, Error> = {};
+  errors: Record<number, Error> = {};
 
-  constructor(errors: IBatchError["itemErrors"]) {
+  constructor(errors: IBatchError["errors"]) {
     const [e] = Object.values(errors);
     super(e.message);
-    this.itemErrors = errors;
+    this.errors = errors;
   }
 }
 
@@ -48,9 +48,19 @@ const batch = <T, R, E extends IBatchErrorCtor>(
   return results as R[];
 };
 
-const batchNodes = (nodes: AnonMathNode[]): AnonMathNode => {
+const noOp = () => {};
+const batchNodes = (
+  nodes: AnonMathNode[],
+  validate: NonNullable<ParseableObjs["array"]["validate"]> = noOp
+): AnonMathNode => {
   const evaluate: AnonMathNode["evaluate"] = (scope) => {
-    return batch(nodes, (node) => node.evaluate(scope), ArrayEvaluationError);
+    const result = batch(
+      nodes,
+      (node) => node.evaluate(scope),
+      ArrayEvaluationError
+    );
+    validate(result);
+    return result;
   };
   const dependencies = new Set(nodes.flatMap((node) => [...node.dependencies]));
 

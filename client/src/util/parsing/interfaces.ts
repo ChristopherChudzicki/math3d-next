@@ -19,6 +19,7 @@ type ParseableObjs = {
   array: {
     type: "array";
     items: Parseable[];
+    validate?: (evaluated: unknown[]) => void;
   };
 };
 
@@ -60,7 +61,7 @@ interface IBatchErrorCtor {
   new (errors: Record<number, Error>): IBatchError;
 }
 interface IBatchError extends Error {
-  itemErrors: Record<number, Error>;
+  errors: Record<number, Error>;
 }
 
 export { ParserRuleType };

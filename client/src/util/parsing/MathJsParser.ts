@@ -112,9 +112,9 @@ class MathJsParser implements IMathJsParser {
     return this.parse({ expr, validate });
   };
 
-  private parseArray = ({ items }: ParseableObjs["array"]) => {
+  private parseArray = ({ items, validate }: ParseableObjs["array"]) => {
     const parsed = batch(items, (item) => this.parse(item), ArrayParseError);
-    return batchNodes(parsed);
+    return batchNodes(parsed, validate);
   };
 
   parse: IMathJsParser["parse"] = (parseable) => {
