@@ -1,6 +1,7 @@
 import * as mjs from "mathjs";
 
 import { adapter as msAdapter, AssignmentError } from "@/util/MathScope";
+import { assertInstanceOf } from "@/util/predicates";
 import { getValidatedEvaluate } from "./evaluate";
 import {
   IMathJsParser,
@@ -12,7 +13,7 @@ import {
   TextParserRegexRule,
   TextParserRule,
 } from "./interfaces";
-import { assertInstanceOf } from "../predicates";
+import { ArrayParseError, batch, batchNodes } from "./batch";
 
 const isBeforeMathjsRule = (
   rule: ParserRule
@@ -77,7 +78,11 @@ class MathJsParser implements IMathJsParser {
     );
   };
 
-  parseAssignment = ({ lhs, rhs, validate }: ParseableObjs["assignment"]) => {
+  private parseAssignment = ({
+    lhs,
+    rhs,
+    validate,
+  }: ParseableObjs["assignment"]) => {
     let lhsError: Error | undefined;
     let rhsError: Error | undefined;
     try {
@@ -107,11 +112,19 @@ class MathJsParser implements IMathJsParser {
     return this.parse({ expr, validate });
   };
 
+  private parseArray = ({ items }: ParseableObjs["array"]) => {
+    const parsed = batch(items, (item) => this.parse(item), ArrayParseError);
+    return batchNodes(parsed);
+  };
+
   parse: IMathJsParser["parse"] = (parseable) => {
     const parseableObj =
       typeof parseable === "string" ? { expr: parseable } : parseable;
     if (parseableObj.type === "assignment") {
       return this.parseAssignment(parseableObj);
+    }
+    if (parseableObj.type === "array") {
+      return this.parseArray(parseableObj);
     }
     const preprocessed = this.preprocess(parseableObj.expr);
     const mjsNode = this.mjsParse(preprocessed);

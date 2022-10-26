@@ -16,6 +16,10 @@ type ParseableObjs = {
     rhs: string;
     validate?: Validate;
   };
+  array: {
+    type: "array";
+    items: Parseable[];
+  };
 };
 
 type ParseableObj = ParseableObjs[keyof ParseableObjs];
@@ -52,8 +56,11 @@ interface IMathJsParser {
   parse: Parse<Parseable>;
 }
 
-interface ArrayError {
-  itemErrors: Error[];
+interface IBatchErrorCtor {
+  new (errors: Record<number, Error>): IBatchError;
+}
+interface IBatchError extends Error {
+  itemErrors: Record<number, Error>;
 }
 
 export { ParserRuleType };
@@ -67,4 +74,6 @@ export type {
   TextParserRegexRule,
   TextParserRule,
   Validate,
+  IBatchError,
+  IBatchErrorCtor,
 };

@@ -1,17 +1,8 @@
 import * as math from "mathjs";
 import type { EvaluationScope, AnonMathNode } from "@/util/MathScope";
 import { EvaluationError } from "@/util/MathScope";
-import { isNotNil, assertInstanceOf } from "../predicates";
+import { assertInstanceOf } from "@/util/predicates";
 import type { Validate } from "./interfaces";
-
-class ArrayEvaluationError extends EvaluationError {
-  itemErrors: Record<number, Error> = {};
-
-  constructor(message: string, itemErrors: Record<number, Error>) {
-    super(message);
-    this.itemErrors = itemErrors;
-  }
-}
 
 class FunctionEvaluationError extends EvaluationError {
   innerError: Error;
@@ -41,43 +32,13 @@ class FunctionEvaluationError extends EvaluationError {
   }
 }
 
-const evalArray = (
-  parsed: math.ArrayNode,
-  compileNode: math.EvalFunction,
-  scope?: EvaluationScope
-) => {
-  try {
-    return compileNode.evaluate(scope);
-  } catch (err) {
-    const items = parsed.items
-      .map((item, i) => {
-        try {
-          item.evaluate(scope);
-          return null;
-        } catch (itemErr) {
-          if (!(itemErr instanceof Error)) {
-            throw new Error("Unexpected error type");
-          }
-          return [i, itemErr] as const;
-        }
-      })
-      .filter(isNotNil);
-    const itemErrors = Object.fromEntries(items);
-    const firstError = items[0][1];
-    throw new ArrayEvaluationError(firstError.message, itemErrors);
-  }
-};
-
 const getValidatedEvaluate = (
   mjsNode: math.MathNode,
   validate: Validate = () => {}
 ): AnonMathNode["evaluate"] => {
   const compiled = mjsNode.compile();
   const unvalidatedEvaluate = (scope?: EvaluationScope) => {
-    const rawResult =
-      mjsNode instanceof math.ArrayNode
-        ? evalArray(mjsNode, compiled, scope)
-        : compiled.evaluate(scope);
+    const rawResult = compiled.evaluate(scope);
     if (math.isMatrix(rawResult)) {
       return rawResult.toArray();
     }

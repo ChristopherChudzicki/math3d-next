@@ -1,4 +1,3 @@
-import { EvaluationError } from "@/util/MathScope";
 import { assertInstanceOf } from "../predicates";
 import { DetailedAssignmentError } from "./MathJsParser";
 import { latexParser as parser } from "./parsers";
