@@ -74,7 +74,7 @@
     "@testing-library/react": "13.4.0",
     "@testing-library/user-event": "14.4.3",
     "@types/ramda": "0.28.18",
-    "@types/react": "18.0.21",
+    "@types/react": "18.0.24",
     "@types/react-dom": "18.0.7",
     "@types/tinycolor2": "1.4.3",
     "@types/toposort": "2.0.3",
