@@ -410,4 +410,30 @@ describe("Variable Slider", () => {
     expect(el.slider.value).toBeCloseTo(0.4443333, 6);
     expect(el.inputRhs.value).toBe("+0.44");
   });
+
+  test("validates that min < max", async () => {
+    const { el } = await setupTest({
+      value: valueObj("X=1"),
+      range: { items: ["5", "1"], type: "array" },
+    });
+
+    const { inputMin, inputMax } = el;
+    act(() => inputMin.focus());
+    expect(inputMin).toHaveClass("has-error");
+    const tooltipMin = await screen.findByRole("tooltip");
+    expect(tooltipMin).toHaveTextContent("Minimum must be less than maximum.");
+
+    act(() => inputMax.focus());
+    expect(inputMax).toHaveClass("has-error");
+    const tooltipMax = await screen.findByRole("tooltip");
+    expect(tooltipMax).toHaveTextContent("Minimum must be less than maximum.");
+
+    await user.type(inputMax, "5");
+
+    expect(inputMin).not.toHaveClass("has-error");
+    expect(inputMax).not.toHaveClass("has-error");
+
+    expect(el.slider.min).toBe("5");
+    expect(el.slider.max).toBe("15");
+  });
 });
