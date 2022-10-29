@@ -59,7 +59,6 @@ const parse: Parse<Parseable> = (parseable) => {
     typeof parseable === "string" ? { expr: parseable } : parseable;
   const mjsNode = math.parse(parseableObj.expr);
   const { evaluate } = mjsNode.compile();
-  // const evaluate = getValidatedEvaluate(mjsNode, parseableObj.validate);
   return convertNode(mjsNode, evaluate);
 };
 

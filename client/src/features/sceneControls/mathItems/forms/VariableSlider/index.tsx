@@ -3,12 +3,18 @@ import {
   MathItemType as MIT,
   WidgetType,
 } from "@/configs";
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 
 import Slider, { SliderProps } from "@mui/material/Slider";
 import { useInterval } from "@/util/hooks/useInterval";
 import classNames from "classnames";
-import { ParseableObjs } from "@/util/parsing";
+import { ParseableObjs, isBatchError } from "@/util/parsing";
 import SliderControls, { mustFindSpeed } from "./SliderControls";
 import type { SliderControlsProps } from "./SliderControls";
 import FieldWidget, {
@@ -20,17 +26,16 @@ import { useMathErrors, useMathResults } from "../../mathScope";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
 import styles from "./slider.module.css";
-import { OnWidgetChange } from "../../FieldWidget/types";
+import { OnWidgetChange, WidgetChangeEvent } from "../../FieldWidget/types";
 
 const config = configs[MIT.VariableSlider];
 const configProps = config.properties;
 
-const errorNames = ["value", "min", "max", "fps"] as const;
+const errorNames = ["value", "range", "fps"] as const;
 const resultNames = [
   "duration",
   "value",
-  "min",
-  "max",
+  "range",
   "fps",
   "isAnimating",
 ] as const;
@@ -62,7 +67,7 @@ const getSliderParameters = (
   baseDuration: number,
   speedMultiplier = 1
 ) => {
-  const duration = baseDuration * speedMultiplier;
+  const duration = baseDuration / speedMultiplier;
   const frames = fps * duration;
   const baseFrames = fps * baseDuration;
   const ms = (1 / fps) * 1000;
@@ -148,8 +153,11 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
 
   useEffect(() => {
     setFps((v) => (typeof results.fps === "number" ? results.fps : v));
-    setMin((v) => (typeof results.min === "number" ? results.min : v));
-    setMax((v) => (typeof results.max === "number" ? results.max : v));
+    const range = results.range as [number, number] | undefined;
+    if (range) {
+      setMin(range[0]);
+      setMax(range[1]);
+    }
     setValue((v) => (typeof results.value === "number" ? results.value : v));
     setDuration((v) =>
       typeof results.duration === "number" ? results.duration : v
@@ -212,6 +220,32 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
       onValueChange,
     ]
   );
+  const { range } = item.properties;
+  const onSetRange = useMemo(() => {
+    const setMinMax = (e: WidgetChangeEvent<string>, i: number) => {
+      const items = [...range.items];
+      items[i] = e.value;
+      const event: WidgetChangeEvent<ParseableObjs["array"]> = {
+        name: "range",
+        value: { type: "array", items },
+      };
+      onWidgetChange(event);
+    };
+    return {
+      min: (e: WidgetChangeEvent<string>) => setMinMax(e, 0),
+      max: (e: WidgetChangeEvent<string>) => setMinMax(e, 1),
+    };
+  }, [range, onWidgetChange]);
+  const rangeErrors: { min?: Error; max?: Error } = useMemo(() => {
+    if (!errors.range) return {};
+    if (isBatchError(errors.range)) {
+      return {
+        min: errors.range.errors[0],
+        max: errors.range.errors[1],
+      };
+    }
+    return { min: errors.range, max: errors.range };
+  }, [errors.range]);
   return (
     <ItemTemplate item={item} config={config}>
       <div className={styles.controlsRow}>
@@ -238,10 +272,10 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
         <FieldWidget
           widget={WidgetType.MathValue}
           name="min"
-          error={errors.min}
-          onChange={onWidgetChange}
-          label={configProps.min.label}
-          value={item.properties.min}
+          error={rangeErrors.min}
+          onChange={onSetRange.min}
+          label="Min"
+          value={item.properties.range.items[0] as string}
         />
         <AnimatedSlider
           label={configProps.value.label}
@@ -257,10 +291,10 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
         <FieldWidget
           widget={WidgetType.MathValue}
           name="max"
-          error={errors.max}
-          onChange={onWidgetChange}
-          label={configProps.max.label}
-          value={item.properties.max}
+          error={rangeErrors.max}
+          onChange={onSetRange.max}
+          label="Max"
+          value={item.properties.range.items[1] as string}
         />
       </div>
     </ItemTemplate>

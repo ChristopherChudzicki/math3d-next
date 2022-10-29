@@ -4,10 +4,4 @@ export class MathScopeError extends Error {
   }
 }
 
-export class ParsingError extends MathScopeError {}
-
 export class EvaluationError extends MathScopeError {}
-
-export interface IBatchedError {
-  errors: Map<string, Error>;
-}

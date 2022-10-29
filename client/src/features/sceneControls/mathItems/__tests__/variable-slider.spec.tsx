@@ -32,9 +32,14 @@ const btnLabels = {
   decrement: "Step backward",
 };
 
-const setupTest = async (
-  overrides: Partial<MathItem<MIT.VariableSlider>["properties"]> = {}
-) => {
+const range = (min: string, max: string) => ({
+  type: "array" as const,
+  items: [min, max],
+});
+
+type Overrides = Partial<MathItem<MIT.VariableSlider>["properties"]>;
+
+const setupTest = async (overrides: Overrides = {}) => {
   const min = faker.datatype.number({ min: -10, max: -6 });
   const max = faker.datatype.number({ min: 2, max: 10 });
   const fps = faker.datatype.number({ min: 20, max: 40 });
@@ -45,9 +50,8 @@ const setupTest = async (
     precision: 0.1,
   });
   const speed = faker.helpers.arrayElement(["1/4", "1/2", "1", "2", "4"]);
-  const props = {
-    min: String(min),
-    max: String(max),
+  const props: Overrides = {
+    range: { items: [min, max].map(String), type: "array" },
     fps: String(fps),
     value: valueObj(`X=${value}`),
     duration: String(duration),
@@ -183,8 +187,7 @@ describe("Variable Slider", () => {
         // simple check that these are parsed as math
         duration: "0.6 + 0",
         fps: "10 + 0",
-        min: "-10 + 0",
-        max: "11 + 0",
+        range: range("-10 + 0", "11 + 0"),
         value: valueObj("X=6 + 0"),
       },
     },
@@ -201,8 +204,7 @@ describe("Variable Slider", () => {
         speedMultiplier: "1",
         duration: "0.4 + 0",
         fps: "20 + 0",
-        min: "4 + 0",
-        max: "10 + 0",
+        range: range("4 + 0", "10 + 0"),
         value: valueObj("X=5 + 0"),
       },
     },
@@ -271,19 +273,18 @@ describe("Variable Slider", () => {
   );
 
   test.each([
-    { speedMultiplier: "1/2", expectedValues: [2, 4, 6, 8] },
+    { speedMultiplier: "1/2", expectedValues: [0.5, 1, 1.5, 2] },
     { speedMultiplier: "1", expectedValues: [1, 2, 3, 4] },
-    { speedMultiplier: "2", expectedValues: [0.5, 1, 1.5, 2] },
+    { speedMultiplier: "2", expectedValues: [2, 4, 6, 8] },
   ])(
     "Speeding up/down affects duration and increment size, not framerate",
     async ({ speedMultiplier, expectedValues }) => {
       const timeout = 1 / 5;
-      const props = {
+      const props: Overrides = {
         speedMultiplier,
         duration: "0.5",
         fps: "20",
-        min: "0",
-        max: "10",
+        range: range("0", "10"),
         value: valueObj("X=0"),
       };
       const { el, valueUpdates } = await setupTest(props);
@@ -309,8 +310,7 @@ describe("Variable Slider", () => {
   test("Renaming variable changes name in mathscope", async () => {
     const { el, store } = await setupTest({
       value: valueObj("X=1"),
-      min: "-2",
-      max: "+3",
+      range: { items: ["-2", "+3"], type: "array" },
     });
     const mathsScope = store.getState().mathItems.mathScope();
     expect(mathsScope.evalScope).toEqual(new Map(Object.entries({ X: 1 })));
@@ -352,8 +352,7 @@ describe("Variable Slider", () => {
     async ({ getInput, goodValue, badValue }) => {
       const { el } = await setupTest({
         value: valueObj("X=1"),
-        min: "-10",
-        max: "+10",
+        range: { items: ["-10", "+10"], type: "array" },
       });
       const inputEl = getInput(el);
       act(() => inputEl.focus());
@@ -379,8 +378,7 @@ describe("Variable Slider", () => {
   test("value display shows 2 digits except when set explicitly by user", async () => {
     const { el } = await setupTest({
       value: valueObj("X=0"),
-      min: "0",
-      max: "1",
+      range: { items: ["0", "1"], type: "array" },
       duration: "0.5",
       fps: "6",
       speedMultiplier: "1",
@@ -411,5 +409,31 @@ describe("Variable Slider", () => {
     await user.click(el.btnIncrement);
     expect(el.slider.value).toBeCloseTo(0.4443333, 6);
     expect(el.inputRhs.value).toBe("+0.44");
+  });
+
+  test("validates that min < max", async () => {
+    const { el } = await setupTest({
+      value: valueObj("X=1"),
+      range: { items: ["5", "1"], type: "array" },
+    });
+
+    const { inputMin, inputMax } = el;
+    act(() => inputMin.focus());
+    expect(inputMin).toHaveClass("has-error");
+    const tooltipMin = await screen.findByRole("tooltip");
+    expect(tooltipMin).toHaveTextContent("Minimum must be less than maximum.");
+
+    act(() => inputMax.focus());
+    expect(inputMax).toHaveClass("has-error");
+    const tooltipMax = await screen.findByRole("tooltip");
+    expect(tooltipMax).toHaveTextContent("Minimum must be less than maximum.");
+
+    await user.type(inputMax, "5");
+
+    expect(inputMin).not.toHaveClass("has-error");
+    expect(inputMax).not.toHaveClass("has-error");
+
+    expect(el.slider.min).toBe("5");
+    expect(el.slider.max).toBe("15");
   });
 });

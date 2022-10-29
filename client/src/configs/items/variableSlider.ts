@@ -1,5 +1,5 @@
 import { validators } from "@/util";
-import { ParseableObjs } from "@/util/parsing";
+import { ParseableObjs, batch, ArrayEvaluationError } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -11,8 +11,7 @@ import { description } from "../shared";
 interface VariableSliderProperties {
   value: ParseableObjs["assignment"];
   fps: string;
-  min: string;
-  max: string;
+  range: ParseableObjs["array"];
   duration: string;
   description: string;
   isAnimating: string; // eval to boolean;
@@ -22,8 +21,10 @@ interface VariableSliderProperties {
 const defaultValues: VariableSliderProperties = {
   value: { lhs: "T", rhs: "0", type: "assignment" },
   fps: "50",
-  min: "-5",
-  max: "+5",
+  range: {
+    type: "array",
+    items: ["-5", "+5"],
+  },
   duration: "4",
   description: "Variable Slider",
   isAnimating: "false",
@@ -59,17 +60,18 @@ const config: IMathItemConfig<
       widget: WidgetType.MathValue,
       validate: validators.real,
     },
-    min: {
-      name: "min",
-      label: "Min",
+    range: {
+      name: "range",
+      label: "Range",
       widget: WidgetType.MathValue,
-      validate: validators.real,
-    },
-    max: {
-      name: "max",
-      label: "Max",
-      widget: WidgetType.MathValue,
-      validate: validators.real,
+      validate: (value) => {
+        const array = validators.array(value);
+        batch(array, (v) => validators.real(v), ArrayEvaluationError);
+        const [min, max] = array as [number, number];
+        if (min >= max) {
+          throw new Error("Minimum must be less than maximum.");
+        }
+      },
     },
     value: {
       name: "value",

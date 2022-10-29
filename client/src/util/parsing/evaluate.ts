@@ -1,44 +1,36 @@
 import * as math from "mathjs";
 import type { EvaluationScope, AnonMathNode } from "@/util/MathScope";
 import { EvaluationError } from "@/util/MathScope";
-import { isNotNil, assertInstanceOf } from "../predicates";
+import { assertInstanceOf } from "@/util/predicates";
 import type { Validate } from "./interfaces";
 
-class ArrayEvaluationError extends EvaluationError {
-  itemErrors: Record<number, Error> = {};
+class FunctionEvaluationError extends EvaluationError {
+  innerError: Error;
 
-  constructor(message: string, itemErrors: Record<number, Error>) {
+  funcName: string;
+
+  static getErrors(
+    name: string,
+    error: Error
+  ): { name: string; error: Error }[] {
+    const namedErrors: { error: Error; name: string }[] = [{ name, error }];
+    let e = error;
+    while (e instanceof FunctionEvaluationError) {
+      namedErrors.push({ name: e.funcName, error: e.innerError });
+      e = e.innerError;
+    }
+    namedErrors.reverse();
+    return namedErrors;
+  }
+
+  constructor(name: string, error: Error) {
+    const namedErrors = FunctionEvaluationError.getErrors(name, error);
+    const message = `Error evaluating ${namedErrors[0].name}: ${namedErrors[0].error.message}.`;
     super(message);
-    this.itemErrors = itemErrors;
+    this.innerError = error;
+    this.funcName = name;
   }
 }
-
-const evalArray = (
-  parsed: math.ArrayNode,
-  compileNode: math.EvalFunction,
-  scope?: EvaluationScope
-) => {
-  try {
-    return compileNode.evaluate(scope);
-  } catch (err) {
-    const items = parsed.items
-      .map((item, i) => {
-        try {
-          item.evaluate(scope);
-          return null;
-        } catch (itemErr) {
-          if (!(itemErr instanceof Error)) {
-            throw new Error("Unexpected error type");
-          }
-          return [i, itemErr] as const;
-        }
-      })
-      .filter(isNotNil);
-    const itemErrors = Object.fromEntries(items);
-    const firstError = items[0][1];
-    throw new ArrayEvaluationError(firstError.message, itemErrors);
-  }
-};
 
 const getValidatedEvaluate = (
   mjsNode: math.MathNode,
@@ -46,36 +38,32 @@ const getValidatedEvaluate = (
 ): AnonMathNode["evaluate"] => {
   const compiled = mjsNode.compile();
   const unvalidatedEvaluate = (scope?: EvaluationScope) => {
-    const rawResult =
-      mjsNode instanceof math.ArrayNode
-        ? evalArray(mjsNode, compiled, scope)
-        : compiled.evaluate(scope);
+    const rawResult = compiled.evaluate(scope);
     if (math.isMatrix(rawResult)) {
       return rawResult.toArray();
     }
     if (typeof rawResult === "function") {
+      const name =
+        mjsNode.type === "AssignmentNode" ||
+        mjsNode.type === "FunctionAssignmentNode"
+          ? mjsNode.name
+          : "";
       const f = (...args: unknown[]) => {
-        const evaluated = rawResult(...args);
-        return math.isMatrix(evaluated) ? evaluated.toArray() : evaluated;
+        try {
+          const rawEval = rawResult(...args);
+          return math.isMatrix(rawEval) ? rawEval.toArray() : rawEval;
+        } catch (e) {
+          if (!(e instanceof Error)) {
+            throw new Error('Expected error to be an instance of "Error"');
+          }
+          throw new FunctionEvaluationError(name, e);
+        }
       };
       const numArgs =
         mjsNode.type === "FunctionAssignmentNode"
           ? mjsNode.params.length
           : rawResult.length;
       Object.defineProperty(f, "length", { value: numArgs });
-      /**
-       * 1. First the node is evalauted... the result is a function F
-       * 2. Subsequently (perhaps) the function F might be evaluated
-       *
-       * The point here is to check that if evaluating F would throw, then we
-       * want to figure that out at step (1) not step (2). Determing a good
-       * sample point seems...infeasible. But in general, if a point is
-       * outside the domain of F, we expect F to return NaN not to throw.
-       */
-      const sample = Array(f.length)
-        .fill(0)
-        .map(() => Math.random());
-      f(...sample);
       return f;
     }
     return rawResult;

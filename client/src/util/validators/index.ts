@@ -1,6 +1,7 @@
 import * as yup from "yup";
 
 const num = yup.number().strict().required();
+const array = yup.array().strict().required();
 
 type Dim = 1 | 2 | 3 | 4;
 
@@ -105,4 +106,5 @@ export const realFuncSchemas = {
 export const validators = {
   real: real.validateSync.bind(real),
   positive: positive.validateSync.bind(positive),
+  array: array.validateSync.bind(array),
 };
