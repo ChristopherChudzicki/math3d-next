@@ -67,7 +67,7 @@ const getSliderParameters = (
   baseDuration: number,
   speedMultiplier = 1
 ) => {
-  const duration = baseDuration * speedMultiplier;
+  const duration = baseDuration / speedMultiplier;
   const frames = fps * duration;
   const baseFrames = fps * baseDuration;
   const ms = (1 / fps) * 1000;
