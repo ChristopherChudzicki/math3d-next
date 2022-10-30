@@ -75,7 +75,7 @@
     "@testing-library/user-event": "14.4.3",
     "@types/ramda": "0.28.18",
     "@types/react": "18.0.24",
-    "@types/react-dom": "18.0.7",
+    "@types/react-dom": "18.0.8",
     "@types/tinycolor2": "1.4.3",
     "@types/toposort": "2.0.3",
     "@typescript-eslint/eslint-plugin": "5.40.1",
