@@ -1,5 +1,4 @@
 import { validators } from "@/util";
-import { schema } from "@/util/validators";
 import { WidgetType } from "./constants";
 import type { PropertyConfig } from "./interfaces";
 
@@ -19,28 +18,28 @@ const gridOpacity: PropertyConfig<"gridOpacity", number> = {
   name: "gridOpacity",
   label: "Grid Opacity",
   widget: WidgetType.MathValue,
-  validate: schema.positive.validateSync,
+  validate: validators.positive,
 };
 
 const grid1: PropertyConfig<"grid1", number> = {
   name: "grid1",
   label: "Grid (1st parameter)",
   widget: WidgetType.MathValue,
-  validate: schema.positive.validateSync,
+  validate: validators.positive,
 };
 
 const grid2: PropertyConfig<"grid2", number> = {
   name: "grid2",
   label: "Grid (2nd parameter)",
   widget: WidgetType.MathValue,
-  validate: schema.positive.validateSync,
+  validate: validators.positive,
 };
 
 const gridWidth: PropertyConfig<"gridWidth", number> = {
   name: "gridWidth",
   label: "Grid Width",
   widget: WidgetType.MathValue,
-  validate: schema.positive.validateSync,
+  validate: validators.positive,
 };
 
 const label: PropertyConfig<"label"> = {
@@ -53,7 +52,7 @@ const labelVisible: PropertyConfig<"labelVisible", boolean> = {
   name: "labelVisible",
   label: "Label Visible",
   widget: WidgetType.MathBoolean,
-  validate: schema.boolean.validateSync,
+  validate: validators.boolean,
 };
 
 const opacity: PropertyConfig<"opacity", number> = {
@@ -67,97 +66,97 @@ const range1: PropertyConfig<"range1", [number, number]> = {
   name: "range1",
   label: "Range (1st parameter)",
   widget: WidgetType.MathValue,
-  validate: schema.realVectors[2].validateSync,
+  validate: validators.realVec[2],
 };
 
 const range2: PropertyConfig<"range2", [number, number]> = {
   name: "range2",
   label: "Range (2nd parameter)",
   widget: WidgetType.MathValue,
-  validate: schema.realVectors[2].validateSync,
+  validate: validators.realVec[2],
 };
 
 const range3: PropertyConfig<"range3", [number, number]> = {
   name: "range3",
   label: "Range (3rd parameter)",
   widget: WidgetType.MathValue,
-  validate: schema.realVectors[2].validateSync,
+  validate: validators.realVec[2],
 };
 
 const shaded: PropertyConfig<"shaded", boolean> = {
   name: "shaded",
   label: "Shaded",
   widget: WidgetType.MathBoolean,
-  validate: schema.boolean.validateSync,
+  validate: validators.boolean,
 };
 
 const size: PropertyConfig<"size", number> = {
   name: "size",
   label: "Size",
   widget: WidgetType.MathValue,
-  validate: schema.positive.validateSync,
+  validate: validators.positive,
 };
 
 const samples1: PropertyConfig<"samples1", number> = {
   name: "samples1",
   label: "Samples (1st parameter)",
   widget: WidgetType.MathValue,
-  validate: schema.positive.validateSync,
+  validate: validators.positive,
 };
 
 const samples2: PropertyConfig<"samples2", number> = {
   name: "samples2",
   label: "Samples (2nd parameter)",
   widget: WidgetType.MathValue,
-  validate: schema.positive.validateSync,
+  validate: validators.positive,
 };
 
 const samples3: PropertyConfig<"samples3", number> = {
   name: "samples3",
   label: "Samples (3rd parameter)",
   widget: WidgetType.MathValue,
-  validate: schema.positive.validateSync,
+  validate: validators.positive,
 };
 
 const visible: PropertyConfig<"visible", boolean> = {
   name: "visible",
   label: "Visible",
   widget: WidgetType.MathBoolean,
-  validate: schema.boolean.validateSync,
+  validate: validators.boolean,
 };
 
 const width: PropertyConfig<"width", number> = {
   name: "width",
   label: "Width",
   widget: WidgetType.MathValue,
-  validate: schema.positive.validateSync,
+  validate: validators.positive,
 };
 
 const zBias: PropertyConfig<"zBias", number> = {
   name: "zBias",
   label: "Z-Bias",
   widget: WidgetType.MathValue,
-  validate: schema.real.validateSync,
+  validate: validators.real,
 };
 
 const zIndex: PropertyConfig<"zIndex", number> = {
   name: "zIndex",
   label: "Z-Index",
   widget: WidgetType.MathValue,
-  validate: schema.real.validateSync,
+  validate: validators.real,
 };
 
 const start: PropertyConfig<"start", boolean> = {
   name: "start",
   label: "Arrow (start)",
   widget: WidgetType.MathBoolean,
-  validate: schema.boolean.validateSync,
+  validate: validators.boolean,
 };
 const end: PropertyConfig<"end", boolean> = {
   name: "end",
   label: "Arrow (end)",
   widget: WidgetType.MathBoolean,
-  validate: schema.boolean.validateSync,
+  validate: validators.boolean,
 };
 
 export {

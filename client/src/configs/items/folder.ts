@@ -1,3 +1,4 @@
+import { validators } from "@/util/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -24,7 +25,15 @@ const make: MathItemGenerator<MathItemType.Folder, FolderProperties> = (
   properties: { ...defaultValues },
 });
 
-const config: IMathItemConfig<MathItemType.Folder, FolderProperties> = {
+type EvaluatedProperties = {
+  isCollapsed: boolean;
+};
+
+const config: IMathItemConfig<
+  MathItemType.Folder,
+  FolderProperties,
+  EvaluatedProperties
+> = {
   type: MathItemType.Folder,
   label: "Folder",
   properties: {
@@ -33,6 +42,7 @@ const config: IMathItemConfig<MathItemType.Folder, FolderProperties> = {
       name: "isCollapsed",
       label: "Collapse Folder",
       widget: WidgetType.MathBoolean,
+      validate: validators.boolean,
     },
   },
   settingsProperties: [],

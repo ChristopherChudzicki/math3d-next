@@ -131,19 +131,20 @@ const realFuncValidators = {
   },
 };
 
+const realVecValidators = {
+  1: realVectors[1].validateSync.bind(realVectors[1]),
+  2: realVectors[2].validateSync.bind(realVectors[2]),
+  3: realVectors[3].validateSync.bind(realVectors[3]),
+  4: realVectors[4].validateSync.bind(realVectors[4]),
+};
+
+const boolean = yup.boolean().strict().required();
+
 export const validators = {
   real: real.validateSync.bind(real),
   positive: positive.validateSync.bind(positive),
   array: array.validateSync.bind(array),
   realFunc: realFuncValidators,
-};
-
-const boolean = yup.boolean().strict().required();
-
-export const schema = {
-  realVectors,
-  positive,
-  real,
-  array,
-  boolean,
+  realVec: realVecValidators,
+  boolean: boolean.validateSync.bind(boolean),
 };

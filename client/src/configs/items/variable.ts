@@ -25,7 +25,15 @@ const make: MathItemGenerator<MathItemType.Variable, VariableProperties> = (
   properties: { ...defaultValues },
 });
 
-const config: IMathItemConfig<MathItemType.Variable, VariableProperties> = {
+type EvaluatedProperties = {
+  value: unknown;
+};
+
+const config: IMathItemConfig<
+  MathItemType.Variable,
+  VariableProperties,
+  EvaluatedProperties
+> = {
   type: MathItemType.Variable,
   label: "Variable or Function",
   properties: {

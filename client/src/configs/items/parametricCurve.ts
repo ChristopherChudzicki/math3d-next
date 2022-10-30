@@ -62,9 +62,23 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
+type EvaluatedProperties = {
+  opacity: number;
+  visible: boolean;
+  size: number;
+  width: number;
+  zBias: number;
+  zIndex: number;
+  start: boolean;
+  end: boolean;
+  range1: [number, number];
+  samples1: number;
+};
+
 const config: IMathItemConfig<
   MathItemType.ParametricCurve,
-  ParametricCurveProperties
+  ParametricCurveProperties,
+  EvaluatedProperties
 > = {
   type: MathItemType.ParametricCurve,
   label: "Parametric Curve",

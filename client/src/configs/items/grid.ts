@@ -47,7 +47,20 @@ const make: MathItemGenerator<MathItemType.Grid, GridProperties> = (id) => ({
   properties: { ...defaultValues },
 });
 
-const config: IMathItemConfig<MathItemType.Grid, GridProperties> = {
+type EvaluatedProperties = {
+  divisions: number;
+  opacity: number;
+  visible: boolean;
+  width: number;
+  zBias: number;
+  zIndex: number;
+};
+
+const config: IMathItemConfig<
+  MathItemType.Grid,
+  GridProperties,
+  EvaluatedProperties
+> = {
   type: MathItemType.Grid,
   label: "Grid",
   properties: {

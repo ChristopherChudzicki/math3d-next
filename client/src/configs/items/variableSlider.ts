@@ -46,6 +46,7 @@ type Evaluated = {
   fps: number;
   value: number;
   speedMultiplier: number;
+  isAnimating: boolean;
 };
 
 const config: IMathItemConfig<
@@ -93,6 +94,7 @@ const config: IMathItemConfig<
       name: "isAnimating",
       label: "Animating",
       widget: WidgetType.MathBoolean,
+      validate: validators.boolean,
     },
     speedMultiplier: {
       name: "speedMultiplier",

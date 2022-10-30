@@ -1,3 +1,4 @@
+import { validators } from "@/util/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -40,7 +41,7 @@ export interface EvaluatedProperties {
 
   label: string;
   labelVisible: boolean;
-  coords: string;
+  coords: [number, number, number];
   size: number;
 }
 
@@ -63,7 +64,11 @@ const make: MathItemGenerator<MathItemType.Point, PointProperties> = (id) => ({
   properties: { ...defaultValues },
 });
 
-const config: IMathItemConfig<MathItemType.Point, PointProperties> = {
+const config: IMathItemConfig<
+  MathItemType.Point,
+  PointProperties,
+  EvaluatedProperties
+> = {
   type: MathItemType.Point,
   label: "Point",
   properties: {
@@ -72,10 +77,7 @@ const config: IMathItemConfig<MathItemType.Point, PointProperties> = {
       name: "coords",
       label: "Coordinates",
       widget: WidgetType.MathValue,
-      validate: (v) => {
-        if (!Array.isArray(v)) throw new Error("noooo");
-        if (v.length !== 3) throw new Error("nooooo");
-      },
+      validate: validators.realVec[3],
     },
     description,
     label,

@@ -58,7 +58,24 @@ const make: MathItemGenerator<MathItemType.Line, LineProperties> = (id) => ({
   properties: { ...defaultValues },
 });
 
-const config: IMathItemConfig<MathItemType.Line, LineProperties> = {
+type EvaluatedProperties = {
+  coords: [number, number, number] | [number, number, number][];
+  labelVisible: boolean;
+  opacity: number;
+  visible: boolean;
+  size: number;
+  width: number;
+  zBias: number;
+  zIndex: number;
+  start: boolean;
+  end: boolean;
+};
+
+const config: IMathItemConfig<
+  MathItemType.Line,
+  LineProperties,
+  EvaluatedProperties
+> = {
   type: MathItemType.Line,
   label: "Line",
   properties: {

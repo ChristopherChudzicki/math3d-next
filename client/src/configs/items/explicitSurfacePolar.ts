@@ -77,9 +77,26 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
+type EvaluatedProperties = {
+  gridOpacity: number;
+  grid1: number;
+  grid2: number;
+  gridWidth: number;
+  opacity: number;
+  range1: [number, number];
+  range2: [number, number];
+  shaded: boolean;
+  samples1: number;
+  samples2: number;
+  visible: boolean;
+  zBias: number;
+  zIndex: number;
+};
+
 const config: IMathItemConfig<
   MathItemType.ExplicitSurfacePolar,
-  ExplicitSurfacePolarProperties
+  ExplicitSurfacePolarProperties,
+  EvaluatedProperties
 > = {
   type: MathItemType.ExplicitSurfacePolar,
   label: "Explicit Surface (Polar)",

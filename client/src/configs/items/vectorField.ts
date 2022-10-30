@@ -75,53 +75,74 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
-const config: IMathItemConfig<MathItemType.VectorField, VectorFieldProperties> =
-  {
-    type: MathItemType.VectorField,
-    label: "Vector Field",
-    properties: {
-      color,
-      description,
-      opacity,
-      visible,
-      zBias,
-      zIndex,
-      size,
-      width,
-      start,
-      end,
-      range1,
-      range2,
-      range3,
-      samples1,
-      samples2,
-      samples3,
-      scale: {
-        name: "scale",
-        label: "Scale Multiplier",
-        widget: WidgetType.MathValue,
-      },
-      expr: {
-        name: "expr",
-        label: "Expression",
-        widget: WidgetType.MathValue,
-      },
+type EvaluatedProperties = {
+  opacity: number;
+  visible: boolean;
+  zBias: number;
+  zIndex: number;
+  size: number;
+  width: number;
+  start: boolean;
+  end: boolean;
+  range1: [number, number];
+  range2: [number, number];
+  range3: [number, number];
+  samples1: number;
+  samples2: number;
+  samples3: number;
+  scale: number;
+};
+
+const config: IMathItemConfig<
+  MathItemType.VectorField,
+  VectorFieldProperties,
+  EvaluatedProperties
+> = {
+  type: MathItemType.VectorField,
+  label: "Vector Field",
+  properties: {
+    color,
+    description,
+    opacity,
+    visible,
+    zBias,
+    zIndex,
+    size,
+    width,
+    start,
+    end,
+    range1,
+    range2,
+    range3,
+    samples1,
+    samples2,
+    samples3,
+    scale: {
+      name: "scale",
+      label: "Scale Multiplier",
+      widget: WidgetType.MathValue,
     },
-    settingsProperties: [
-      "opacity",
-      "size",
-      "start",
-      "end",
-      "samples1",
-      "samples2",
-      "samples3",
-      "scale",
-      "width",
-      "zBias",
-      "zIndex",
-    ],
-    make,
-  };
+    expr: {
+      name: "expr",
+      label: "Expression",
+      widget: WidgetType.MathValue,
+    },
+  },
+  settingsProperties: [
+    "opacity",
+    "size",
+    "start",
+    "end",
+    "samples1",
+    "samples2",
+    "samples3",
+    "scale",
+    "width",
+    "zBias",
+    "zIndex",
+  ],
+  make,
+};
 
 type VectorField = IMathItem<MathItemType.VectorField, VectorFieldProperties>;
 

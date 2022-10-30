@@ -1,4 +1,5 @@
 import { ParseableObjs } from "@/util/parsing";
+import { validators } from "@/util/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -57,9 +58,21 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
+type EvaluatedProperties = {
+  opacity: number;
+  range1: [number, number];
+  range2: [number, number];
+  range3: [number, number];
+  shaded: boolean;
+  visible: boolean;
+  zBias: number;
+  zIndex: number;
+};
+
 const config: IMathItemConfig<
   MathItemType.ImplicitSurface,
-  ImplicitSurfaceProperties
+  ImplicitSurfaceProperties,
+  EvaluatedProperties
 > = {
   type: MathItemType.ImplicitSurface,
   label: "Implicit Surface",
@@ -79,16 +92,19 @@ const config: IMathItemConfig<
       name: "range1",
       label: "Range X",
       widget: WidgetType.MathValue,
+      validate: validators.realVec[2],
     },
     range2: {
       name: "range2",
       label: "Range X",
       widget: WidgetType.MathValue,
+      validate: validators.realVec[2],
     },
     range3: {
       name: "range3",
       label: "Range X",
       widget: WidgetType.MathValue,
+      validate: validators.realVec[2],
     },
     lhs: {
       name: "lhs",
