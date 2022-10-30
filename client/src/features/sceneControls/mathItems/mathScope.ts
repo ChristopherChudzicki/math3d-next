@@ -119,7 +119,7 @@ const MATH_WIDGETS = new Set([
 
 const getMathProperties = <T extends MathItemType>(
   config: MathItemConfig<T>
-): PropertyConfig<string>[] =>
+): PropertyConfig<string, unknown>[] =>
   collectionFilter(config.properties, (p) => MATH_WIDGETS.has(p.widget));
 
 export { getMathProperties, useMathErrors, useMathResults };
