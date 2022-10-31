@@ -1,5 +1,4 @@
 import { ParseableObjs } from "@/util/parsing";
-import { validators } from "@/util/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -9,6 +8,8 @@ import type {
 import {
   color,
   description,
+  domain3,
+  EvaluatedDomain3,
   opacity,
   shaded,
   visible,
@@ -25,9 +26,7 @@ interface ImplicitSurfaceProperties {
   zBias: string;
 
   shaded: string; // eval to boolean;
-  range1: string;
-  range2: string;
-  range3: string;
+  domain: ParseableObjs["array"];
   lhs: ParseableObjs["assignment"];
   rhs: ParseableObjs["assignment"];
   samples: string;
@@ -41,9 +40,26 @@ const defaultValues: ImplicitSurfaceProperties = {
   zIndex: "0",
   zBias: "0",
   shaded: "true",
-  range1: "[-5, 5]",
-  range2: "[-5, 5]",
-  range3: "[-5, 5]",
+  domain: {
+    type: "array",
+    items: [
+      {
+        type: "assignment",
+        lhs: "_f(y, z)",
+        rhs: "[-5, 5]",
+      },
+      {
+        type: "assignment",
+        lhs: "_f(x, z)",
+        rhs: "[-5, 5]",
+      },
+      {
+        type: "assignment",
+        lhs: "_f(x, y)",
+        rhs: "[-5, 5]",
+      },
+    ],
+  },
   lhs: { lhs: "_f(x,y,z)", rhs: "x^2+y^2", type: "assignment" },
   rhs: { lhs: "_f(x,y,z)", rhs: "z^2+1", type: "assignment" },
   samples: "20",
@@ -60,9 +76,7 @@ const make: MathItemGenerator<
 
 type EvaluatedProperties = {
   opacity: number;
-  range1: [number, number];
-  range2: [number, number];
-  range3: [number, number];
+  domain: EvaluatedDomain3;
   shaded: boolean;
   visible: boolean;
   zBias: number;
@@ -88,24 +102,7 @@ const config: IMathItemConfig<
       // scalar value used for x, y, z... why different from other surfaces?
     },
     shaded,
-    range1: {
-      name: "range1",
-      label: "Range X",
-      widget: WidgetType.MathValue,
-      validate: validators.realVec[2],
-    },
-    range2: {
-      name: "range2",
-      label: "Range X",
-      widget: WidgetType.MathValue,
-      validate: validators.realVec[2],
-    },
-    range3: {
-      name: "range3",
-      label: "Range X",
-      widget: WidgetType.MathValue,
-      validate: validators.realVec[2],
-    },
+    domain: domain3,
     lhs: {
       name: "lhs",
       label: "Left-hand side",

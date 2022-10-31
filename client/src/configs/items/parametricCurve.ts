@@ -8,6 +8,7 @@ import type {
 import {
   color,
   description,
+  domain1,
   end,
   opacity,
   size,
@@ -16,8 +17,8 @@ import {
   width,
   zBias,
   zIndex,
-  range1,
   samples1,
+  EvaluatedDomain1,
 } from "../shared";
 
 interface ParametricCurveProperties {
@@ -33,7 +34,7 @@ interface ParametricCurveProperties {
   start: string; // eval to boolean;
   end: string; // eval to boolean;
   expr: ParseableObjs["assignment"];
-  range1: string;
+  domain: ParseableObjs["array"];
   samples1: string;
 }
 
@@ -49,7 +50,16 @@ const defaultValues: ParametricCurveProperties = {
   start: "false",
   end: "false",
   expr: { lhs: "_f(t)", rhs: "[cos(t), sin(t), t]", type: "assignment" },
-  range1: "[-2*pi, 2*pi]",
+  domain: {
+    type: "array",
+    items: [
+      {
+        type: "assignment",
+        lhs: "_f()",
+        rhs: "[-2*pi, 2*pi]",
+      },
+    ],
+  },
   samples1: "128",
 };
 
@@ -71,8 +81,8 @@ type EvaluatedProperties = {
   zIndex: number;
   start: boolean;
   end: boolean;
-  range1: [number, number];
   samples1: number;
+  domain: EvaluatedDomain1;
 };
 
 const config: IMathItemConfig<
@@ -98,7 +108,7 @@ const config: IMathItemConfig<
     zIndex,
     start,
     end,
-    range1: { ...range1, label: "Range" },
+    domain: domain1,
     samples1: { ...samples1, label: "Samples" },
   },
   settingsProperties: [

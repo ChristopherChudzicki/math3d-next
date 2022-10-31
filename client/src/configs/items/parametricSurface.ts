@@ -13,8 +13,7 @@ import {
   grid2,
   gridWidth,
   opacity,
-  range1,
-  range2,
+  domain2,
   shaded,
   samples1,
   visible,
@@ -22,6 +21,7 @@ import {
   zBias,
   zIndex,
 } from "../shared";
+import type { EvaluatedDomain2 } from "../shared";
 
 interface ParametricSurfaceProperties {
   description: string;
@@ -33,8 +33,7 @@ interface ParametricSurfaceProperties {
 
   shaded: string; // eval to boolean;
   expr: ParseableObjs["assignment"];
-  range1: string;
-  range2: string;
+  domain: ParseableObjs["array"];
   colorExpr: string;
   gridOpacity: string;
   gridWidth: string;
@@ -57,8 +56,21 @@ const defaultValues: ParametricSurfaceProperties = {
     rhs: "[u^2-v^2, 2*u*v, u^2+v^2]",
     type: "assignment",
   },
-  range1: "[-pi, pi]",
-  range2: "[-3, 3]",
+  domain: {
+    type: "array",
+    items: [
+      {
+        type: "assignment",
+        lhs: "_f(v)",
+        rhs: "[-pi, pi]",
+      },
+      {
+        type: "assignment",
+        lhs: "_f(u)",
+        rhs: "[-3, 3]",
+      },
+    ],
+  },
   colorExpr: "_f(X, Y, Z, u, v)=mod(Z, 1)",
   gridOpacity: "0.5",
   gridWidth: "2",
@@ -83,8 +95,7 @@ type EvaluatedProperties = {
   grid2: number;
   gridWidth: number;
   opacity: number;
-  range1: [number, number];
-  range2: [number, number];
+  domain: EvaluatedDomain2;
   shaded: boolean;
   samples1: number;
   samples2: number;
@@ -113,13 +124,12 @@ const config: IMathItemConfig<
     },
     color,
     description,
+    domain: domain2,
     gridOpacity,
     grid1,
     grid2,
     gridWidth,
     opacity,
-    range1,
-    range2,
     shaded,
     samples1,
     samples2,

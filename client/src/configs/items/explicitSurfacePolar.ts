@@ -13,14 +13,14 @@ import {
   grid2,
   gridWidth,
   opacity,
-  range1,
-  range2,
   shaded,
   samples1,
   visible,
   samples2,
   zBias,
   zIndex,
+  domain2,
+  EvaluatedDomain2,
 } from "../shared";
 
 interface ExplicitSurfacePolarProperties {
@@ -30,11 +30,9 @@ interface ExplicitSurfacePolarProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
-
   shaded: string; // eval to boolean;
   expr: ParseableObjs["assignment"];
-  range1: string;
-  range2: string;
+  domain: ParseableObjs["array"];
   colorExpr: string;
   gridOpacity: string;
   gridWidth: string;
@@ -57,8 +55,21 @@ const defaultValues: ExplicitSurfacePolarProperties = {
     rhs: "\\frac{1}{4}r^2*cos(3*Q)]",
     type: "assignment",
   },
-  range1: "[0, 3]",
-  range2: "[-pi, pi]",
+  domain: {
+    type: "array",
+    items: [
+      {
+        type: "assignment",
+        lhs: "_f(Q)",
+        rhs: "[0, 3]",
+      },
+      {
+        type: "assignment",
+        lhs: "_f(r)",
+        rhs: "[-pi, pi]",
+      },
+    ],
+  },
   colorExpr: "_f(X, Y, Z, r, theta)=mod(Z, 1)",
   gridOpacity: "0.5",
   gridWidth: "2",
@@ -83,8 +94,7 @@ type EvaluatedProperties = {
   grid2: number;
   gridWidth: number;
   opacity: number;
-  range1: [number, number];
-  range2: [number, number];
+  domain: EvaluatedDomain2;
   shaded: boolean;
   samples1: number;
   samples2: number;
@@ -118,8 +128,7 @@ const config: IMathItemConfig<
     grid2,
     gridWidth,
     opacity,
-    range1,
-    range2,
+    domain: domain2,
     shaded,
     samples1,
     samples2,

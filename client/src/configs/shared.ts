@@ -69,6 +69,37 @@ const range1: PropertyConfig<"range1", [number, number]> = {
   validate: validators.realVec[2],
 };
 
+type EvaluatedDomain1 = [() => [number, number]];
+
+const domain1: PropertyConfig<"domain", EvaluatedDomain1> = {
+  name: "domain",
+  label: "Domain",
+  widget: WidgetType.MathValue,
+};
+
+type EvaluatedDomain2 = [
+  (v: number) => [number, number],
+  (u: number) => [number, number]
+];
+
+const domain2: PropertyConfig<"domain", EvaluatedDomain2> = {
+  name: "domain",
+  label: "Range",
+  widget: WidgetType.CustomMath,
+};
+
+type EvaluatedDomain3 = [
+  (y: number, z: number) => [number, number],
+  (x: number, z: number) => [number, number],
+  (x: number, y: number) => [number, number]
+];
+
+const domain3: PropertyConfig<"domain", EvaluatedDomain3> = {
+  name: "domain",
+  label: "Range",
+  widget: WidgetType.CustomMath,
+};
+
 const range2: PropertyConfig<"range2", [number, number]> = {
   name: "range2",
   label: "Range (2nd parameter)",
@@ -183,4 +214,9 @@ export {
   width,
   zBias,
   zIndex,
+  domain1,
+  domain2,
+  domain3,
 };
+
+export type { EvaluatedDomain1, EvaluatedDomain2, EvaluatedDomain3 };

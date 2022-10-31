@@ -1,3 +1,4 @@
+import { ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -7,11 +8,10 @@ import type {
 import {
   color,
   description,
+  domain3,
   end,
+  EvaluatedDomain3,
   opacity,
-  range1,
-  range2,
-  range3,
   samples1,
   samples2,
   samples3,
@@ -35,9 +35,7 @@ interface VectorFieldProperties {
   width: string;
   start: string; // eval to boolean;
   end: string; // eval to boolean;
-  range1: string;
-  range2: string;
-  range3: string;
+  domain: ParseableObjs["array"];
   expr: string;
   samples1: string;
   samples2: string;
@@ -56,9 +54,26 @@ const defaultValues: VectorFieldProperties = {
   width: "2",
   start: "false",
   end: "true",
-  range1: "[-5,5]",
-  range2: "[-5,5]",
-  range3: "[-5,5]",
+  domain: {
+    type: "array",
+    items: [
+      {
+        type: "assignment",
+        lhs: "_f(y, z)",
+        rhs: "[-5, 5]",
+      },
+      {
+        type: "assignment",
+        lhs: "_f(x, z)",
+        rhs: "[-5, 5]",
+      },
+      {
+        type: "assignment",
+        lhs: "_f(x, y)",
+        rhs: "[-5, 5]",
+      },
+    ],
+  },
   expr: "_f(x,y,z)=[y, -x]/sqrt(x^2 + y^2)",
   samples1: "10",
   samples2: "10",
@@ -84,9 +99,7 @@ type EvaluatedProperties = {
   width: number;
   start: boolean;
   end: boolean;
-  range1: [number, number];
-  range2: [number, number];
-  range3: [number, number];
+  domain: EvaluatedDomain3;
   samples1: number;
   samples2: number;
   samples3: number;
@@ -111,9 +124,7 @@ const config: IMathItemConfig<
     width,
     start,
     end,
-    range1,
-    range2,
-    range3,
+    domain: domain3,
     samples1,
     samples2,
     samples3,
