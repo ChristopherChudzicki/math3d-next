@@ -1,13 +1,19 @@
-import { MathItem } from "@/configs";
+import { MathItem, WidgetType } from "@/configs";
 import React, { useCallback, useMemo } from "react";
-import { FunctionAssignment, ParseableObjs } from "@/util/parsing";
+import {
+  FunctionAssignment,
+  isBatchError,
+  ParseableObjs,
+} from "@/util/parsing";
 
 import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
 import { ParameterErrors } from "@/util/parsing/rules";
+import invariant from "tiny-invariant";
+import ordinal from "ordinal";
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import { OnWidgetChange, WidgetChangeEvent } from "../FieldWidget/types";
 import styles from "./ItemForms.module.css";
-import { useOnWidgetChange } from "../FieldWidget";
+import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 
 interface ParameterContainerProps {
   children: React.ReactNode;
@@ -32,6 +38,85 @@ const ParameterForm: React.FC<ParameterFormProps> = (props) => {
       </div>
       <div className="d-flex">{props.rangeInput}</div>
     </>
+  );
+};
+
+interface DomainFormProps {
+  item: MathItem & { properties: { domain: ParseableObjs["array"] } };
+  domainError?: Error;
+  exprProps: ExpressionProps;
+}
+const DomainForm: React.FC<DomainFormProps> = ({
+  item,
+  exprProps,
+  domainError,
+}) => {
+  const { domain } = item.properties;
+  const onWidgetChange = useOnWidgetChange(item);
+  const { assignments, errors: assignmentErrors, handlers } = exprProps;
+  const domainValueHandlers: OnWidgetChange<string>[] = useMemo(
+    () =>
+      domain.items.map((paramDomain, i) => {
+        invariant(
+          typeof paramDomain !== "string" && paramDomain.type === "assignment"
+        );
+        const f: OnWidgetChange<string> = (e) => {
+          onWidgetChange({
+            name: "domain",
+            oldValue: domain,
+            value: {
+              ...domain,
+              items: domain.items.map((item, j) => {
+                return i === j ? { ...paramDomain, rhs: e.value } : item;
+              }),
+            },
+          });
+        };
+        return f;
+      }),
+    [domain, onWidgetChange]
+  );
+  return (
+    <ParameterContainer>
+      {domain.items.map((paramDomain, i) => {
+        invariant(
+          typeof paramDomain !== "string" && paramDomain.type === "assignment"
+        );
+        return (
+          <ParameterForm
+            // it's fine, these are not re-orderable
+            // eslint-disable-next-line react/no-array-index-key
+            key={`param-${i}`}
+            nameInput={
+              <FieldWidget
+                className={styles["param-input"]}
+                widget={WidgetType.MathValue}
+                error={assignmentErrors[0].paramErrors?.[i]}
+                label={`Name for ${ordinal(i + 1)} parameter`}
+                name={`${ordinal(i + 1)}-parameter-name`}
+                value={assignments[0].params[i]}
+                onChange={handlers.param[i]}
+              />
+            }
+            rangeInput={
+              <FieldWidget
+                className={styles["param-input"]}
+                widget={WidgetType.MathValue}
+                label={`Range for ${ordinal(i + 1)} parameter`}
+                name={`${ordinal(i + 1)}-parameter-value`}
+                error={
+                  isBatchError(domainError)
+                    ? domainError.errors[i]
+                    : domainError
+                }
+                value={paramDomain.rhs}
+                onChange={domainValueHandlers[i]}
+              />
+            }
+          />
+        );
+      })}
+    </ParameterContainer>
   );
 };
 
@@ -72,7 +157,7 @@ type ExpressionProps = {
  * This hook provides callbacks and data to assist with this.
  */
 const useExpressionsAndParameters = (
-  item: MathItem,
+  item: MathItem & { properties: { domain: ParseableObjs["array"] } },
   /**
    * The names of the function-parseable math properties. If multiple are
    * provided, they should have the same LHS.
@@ -92,6 +177,7 @@ const useExpressionsAndParameters = (
     () => exprNames.map((name) => item.properties[name]),
     [exprNames, item.properties]
   );
+  const { domain } = item.properties;
 
   const assignments = useMemo(
     () =>
@@ -116,6 +202,27 @@ const useExpressionsAndParameters = (
     [onWidgetChange]
   );
 
+  const updateDomains = useCallback(
+    (newParameters: string[]) => {
+      const event: WidgetChangeEvent<ParseableObjs["array"]> = {
+        name: "domain",
+        value: {
+          items: domain.items.map((pd, i) => {
+            invariant(typeof pd !== "string" && pd.type === "assignment");
+            return {
+              type: "assignment",
+              lhs: `_f(${newParameters.filter((p, k) => k !== i).join(", ")})`,
+              rhs: pd.rhs,
+            };
+          }),
+          type: "array",
+        },
+      };
+      onWidgetChange(event);
+    },
+    [domain.items, onWidgetChange]
+  );
+
   const handlers = useMemo(() => {
     const rhs: OnWidgetChange[] = exprNames.map((name, i) => {
       const handler: OnWidgetChange = (e) => {
@@ -134,12 +241,13 @@ const useExpressionsAndParameters = (
             newParams[handlerIndex] = e.value.replaceAll(/[,=]/g, "");
             const newAssignment = assignment.clone({ params: newParams });
             updateExpr(newAssignment, exprNames[i]);
+            updateDomains(newParams);
           });
         };
         return handler;
       });
     return { rhs, param };
-  }, [assignments, updateExpr, exprNames, numParams]);
+  }, [exprNames, numParams, assignments, updateExpr, updateDomains]);
 
   const errs = useMemo(
     () =>
@@ -161,5 +269,10 @@ const useExpressionsAndParameters = (
   return { assignments, handlers, errors: errs };
 };
 
-export { ParameterContainer, ParameterForm, useExpressionsAndParameters };
+export {
+  DomainForm,
+  ParameterContainer,
+  ParameterForm,
+  useExpressionsAndParameters,
+};
 export type { ExpressionProps };

@@ -13,8 +13,21 @@ const defaultScene: Omit<Scene, "id"> = {
         grid1: "8",
         grid2: "8",
         zBias: "0",
-        range1: "\\left[-2,\\ 2\\right]",
-        range2: "\\left[-2,\\ 2\\right]",
+        domain: {
+          type: "array",
+          items: [
+            {
+              type: "assignment",
+              lhs: "_f(y)",
+              rhs: "[-5, 5]",
+            },
+            {
+              type: "assignment",
+              lhs: "_f(x)",
+              rhs: "[-5, 5]",
+            },
+          ],
+        },
         shaded: "true",
         zIndex: "0",
         opacity: "0.5",
