@@ -16,6 +16,13 @@ type ParseableObjs = {
     rhs: string;
     validate?: Validate;
   };
+  "function-assignment": {
+    type: "function-assignment";
+    name: string;
+    params: string[];
+    rhs: string;
+    validate?: Validate;
+  };
   array: {
     type: "array";
     items: Parseable[];

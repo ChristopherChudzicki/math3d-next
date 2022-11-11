@@ -30,7 +30,7 @@ const validateParameters: TextParserRule = {
     const match = text.match(FUNCTION_ASSIGNMENT_REGEX);
     if (!match?.groups?.params) return text;
     if (match.groups.params.trim() === "") return text;
-    const params = match.groups.params.split(",");
+    const params = match.groups.params.split(",").map((p) => p.trim());
     const invalidEntries = params
       .map((s, i) => {
         const symbol = s;

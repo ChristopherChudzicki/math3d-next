@@ -82,7 +82,7 @@ class MathJsParser implements IMathJsParser {
     lhs,
     rhs,
     validate,
-  }: ParseableObjs["assignment"]) => {
+  }: Omit<ParseableObjs["assignment"], "type">) => {
     let lhsError: Error | undefined;
     let rhsError: Error | undefined;
     try {
@@ -112,6 +112,16 @@ class MathJsParser implements IMathJsParser {
     return this.parse({ expr, validate });
   };
 
+  private parseFunctionAssignment = ({
+    name,
+    params,
+    rhs,
+    validate,
+  }: Omit<ParseableObjs["function-assignment"], "type">) => {
+    const lhs = `${name}(${params.join(",")})`;
+    return this.parseAssignment({ lhs, rhs, validate });
+  };
+
   private parseArray = ({ items, validate }: ParseableObjs["array"]) => {
     const parsed = batch(items, (item) => this.parse(item), ArrayParseError);
     return batchNodes(parsed, validate);
@@ -122,6 +132,9 @@ class MathJsParser implements IMathJsParser {
       typeof parseable === "string" ? { expr: parseable } : parseable;
     if (parseableObj.type === "assignment") {
       return this.parseAssignment(parseableObj);
+    }
+    if (parseableObj.type === "function-assignment") {
+      return this.parseFunctionAssignment(parseableObj);
     }
     if (parseableObj.type === "array") {
       return this.parseArray(parseableObj);
