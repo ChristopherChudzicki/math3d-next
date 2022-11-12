@@ -55,13 +55,15 @@ const defaultValues: ExplicitSurfaceProperties = {
     type: "array",
     items: [
       {
-        type: "assignment",
-        lhs: "_f(y)",
+        type: "function-assignment",
+        name: "_f",
+        params: ["y"],
         rhs: "[-5, 5]",
       },
       {
-        type: "assignment",
-        lhs: "_f(x)",
+        type: "function-assignment",
+        name: "_f",
+        params: ["x"],
         rhs: "[-5, 5]",
       },
     ],

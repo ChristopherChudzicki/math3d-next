@@ -58,7 +58,8 @@ const DomainForm: React.FC<DomainFormProps> = ({
     () =>
       domain.items.map((paramDomain, i) => {
         invariant(
-          typeof paramDomain !== "string" && paramDomain.type === "assignment"
+          typeof paramDomain !== "string" &&
+            paramDomain.type === "function-assignment"
         );
         const f: OnWidgetChange<string> = (e) => {
           onWidgetChange({
@@ -66,8 +67,8 @@ const DomainForm: React.FC<DomainFormProps> = ({
             oldValue: domain,
             value: {
               ...domain,
-              items: domain.items.map((item, j) => {
-                return i === j ? { ...paramDomain, rhs: e.value } : item;
+              items: domain.items.map((_, j) => {
+                return i === j ? { ...paramDomain, rhs: e.value } : paramDomain;
               }),
             },
           });
@@ -80,7 +81,8 @@ const DomainForm: React.FC<DomainFormProps> = ({
     <ParameterContainer>
       {domain.items.map((paramDomain, i) => {
         invariant(
-          typeof paramDomain !== "string" && paramDomain.type === "assignment"
+          typeof paramDomain !== "string" &&
+            paramDomain.type === "function-assignment"
         );
         return (
           <ParameterForm

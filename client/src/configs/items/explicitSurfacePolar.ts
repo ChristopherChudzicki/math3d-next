@@ -59,13 +59,15 @@ const defaultValues: ExplicitSurfacePolarProperties = {
     type: "array",
     items: [
       {
-        type: "assignment",
-        lhs: "_f(Q)",
+        type: "function-assignment",
+        name: "_f",
+        params: ["Q"],
         rhs: "[0, 3]",
       },
       {
-        type: "assignment",
-        lhs: "_f(r)",
+        type: "function-assignment",
+        name: "_f",
+        params: ["r"],
         rhs: "[-pi, pi]",
       },
     ],

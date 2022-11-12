@@ -54,8 +54,9 @@ const defaultValues: ParametricCurveProperties = {
     type: "array",
     items: [
       {
-        type: "assignment",
-        lhs: "_f()",
+        type: "function-assignment",
+        name: "_f",
+        params: [],
         rhs: "[-2*pi, 2*pi]",
       },
     ],

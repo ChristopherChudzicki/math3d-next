@@ -60,13 +60,15 @@ const defaultValues: ParametricSurfaceProperties = {
     type: "array",
     items: [
       {
-        type: "assignment",
-        lhs: "_f(v)",
+        type: "function-assignment",
+        name: "_f",
+        params: ["v"],
         rhs: "[-pi, pi]",
       },
       {
-        type: "assignment",
-        lhs: "_f(u)",
+        type: "function-assignment",
+        name: "_f",
+        params: ["u"],
         rhs: "[-3, 3]",
       },
     ],

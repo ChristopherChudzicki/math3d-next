@@ -58,18 +58,21 @@ const defaultValues: VectorFieldProperties = {
     type: "array",
     items: [
       {
-        type: "assignment",
-        lhs: "_f(y, z)",
+        type: "function-assignment",
+        name: "_f",
+        params: ["y", "z"],
         rhs: "[-5, 5]",
       },
       {
-        type: "assignment",
-        lhs: "_f(x, z)",
+        type: "function-assignment",
+        name: "_f",
+        params: ["x", "z"],
         rhs: "[-5, 5]",
       },
       {
-        type: "assignment",
-        lhs: "_f(x, y)",
+        type: "function-assignment",
+        name: "_f",
+        params: ["x", "y"],
         rhs: "[-5, 5]",
       },
     ],
