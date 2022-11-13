@@ -32,7 +32,7 @@ interface ParametricSurfaceProperties {
   zBias: string;
 
   shaded: string; // eval to boolean;
-  expr: ParseableObjs["assignment"];
+  expr: ParseableObjs["function-assignment"];
   domain: ParseableObjs["array"];
   colorExpr: string;
   gridOpacity: string;
@@ -52,9 +52,10 @@ const defaultValues: ParametricSurfaceProperties = {
   zBias: "0",
   shaded: "true",
   expr: {
-    lhs: "_f(u,v)",
+    type: "function-assignment",
+    name: "_f",
+    params: ["u", "v"],
     rhs: "[u^2-v^2, 2*u*v, u^2+v^2]",
-    type: "assignment",
   },
   domain: {
     type: "array",

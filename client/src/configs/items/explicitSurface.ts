@@ -31,7 +31,7 @@ interface ExplicitSurfaceProperties {
   zIndex: string;
   zBias: string;
   shaded: string; // eval to boolean;
-  expr: ParseableObjs["assignment"];
+  expr: ParseableObjs["function-assignment"];
   domain: ParseableObjs["array"];
   colorExpr: string;
   gridOpacity: string;
@@ -50,7 +50,12 @@ const defaultValues: ExplicitSurfaceProperties = {
   zIndex: "0",
   zBias: "0",
   shaded: "true",
-  expr: { lhs: "_f(x,y)", rhs: "x^2-y^2", type: "assignment" },
+  expr: {
+    type: "function-assignment",
+    name: "_f",
+    params: ["x", "y"],
+    rhs: "x^2-y^2",
+  },
   domain: {
     type: "array",
     items: [

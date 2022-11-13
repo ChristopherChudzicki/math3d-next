@@ -1,15 +1,12 @@
 import { MathItem, WidgetType } from "@/configs";
 import React, { useCallback, useMemo } from "react";
-import {
-  FunctionAssignment,
-  isBatchError,
-  ParseableObjs,
-} from "@/util/parsing";
+import { isBatchError, ParseableObjs } from "@/util/parsing";
 
 import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
 import { ParameterErrors } from "@/util/parsing/rules";
 import invariant from "tiny-invariant";
 import ordinal from "ordinal";
+import { ParseableArray } from "@/util/parsing/interfaces";
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import { OnWidgetChange, WidgetChangeEvent } from "../FieldWidget/types";
 import styles from "./ItemForms.module.css";
@@ -41,8 +38,12 @@ const ParameterForm: React.FC<ParameterFormProps> = (props) => {
   );
 };
 
+type HasDomain = {
+  properties: { domain: ParseableArray<ParseableObjs["function-assignment"]> };
+};
+
 interface DomainFormProps {
-  item: MathItem & { properties: { domain: ParseableObjs["array"] } };
+  item: MathItem & HasDomain;
   domainError?: Error;
   exprProps: ExpressionProps;
 }
@@ -52,31 +53,27 @@ const DomainForm: React.FC<DomainFormProps> = ({
   domainError,
 }) => {
   const { domain } = item.properties;
+  invariant(domain.items.every((x) => x.type === "function-assignment"));
+
   const onWidgetChange = useOnWidgetChange(item);
   const { assignments, errors: assignmentErrors, handlers } = exprProps;
-  const domainValueHandlers: OnWidgetChange<string>[] = useMemo(
-    () =>
-      domain.items.map((paramDomain, i) => {
-        invariant(
-          typeof paramDomain !== "string" &&
-            paramDomain.type === "function-assignment"
-        );
-        const f: OnWidgetChange<string> = (e) => {
-          onWidgetChange({
-            name: "domain",
-            oldValue: domain,
-            value: {
-              ...domain,
-              items: domain.items.map((_, j) => {
-                return i === j ? { ...paramDomain, rhs: e.value } : paramDomain;
-              }),
-            },
-          });
-        };
-        return f;
-      }),
-    [domain, onWidgetChange]
-  );
+  const domainValueHandlers: OnWidgetChange<string>[] = useMemo(() => {
+    return domain.items.map((_item, i) => {
+      const f: OnWidgetChange<string> = (e) => {
+        onWidgetChange({
+          name: "domain",
+          oldValue: domain,
+          value: {
+            ...domain,
+            items: domain.items.map((domainItem, j) => {
+              return i === j ? { ...domainItem, rhs: e.value } : domainItem;
+            }),
+          },
+        });
+      };
+      return f;
+    });
+  }, [domain, onWidgetChange]);
   return (
     <ParameterContainer>
       {domain.items.map((paramDomain, i) => {
@@ -126,7 +123,7 @@ type ExpressionProps = {
   /**
    * An array of assignments.
    */
-  assignments: FunctionAssignment[];
+  assignments: ParseableObjs["function-assignment"][];
   /**
    * Arrays of widget change handlers.
    *  - One `rhs` handler for each expression name
@@ -159,7 +156,7 @@ type ExpressionProps = {
  * This hook provides callbacks and data to assist with this.
  */
 const useExpressionsAndParameters = (
-  item: MathItem & { properties: { domain: ParseableObjs["array"] } },
+  item: MathItem & HasDomain,
   /**
    * The names of the function-parseable math properties. If multiple are
    * provided, they should have the same LHS.
@@ -174,30 +171,23 @@ const useExpressionsAndParameters = (
 ): ExpressionProps => {
   const onWidgetChange = useOnWidgetChange(item);
 
-  const exprs: ParseableObjs["assignment"][] = useMemo(
-    // @ts-expect-error need to resolve this
-    () => exprNames.map((name) => item.properties[name]),
+  const assignments: ParseableObjs["function-assignment"][] = useMemo(
+    () =>
+      exprNames.map((name) => {
+        // @ts-expect-error TODO: Resolve this.
+        const expr = item.properties[name];
+        invariant(expr.type === "function-assignment");
+        return expr;
+      }),
     [exprNames, item.properties]
   );
   const { domain } = item.properties;
 
-  const assignments = useMemo(
-    () =>
-      exprs.map((expr) =>
-        FunctionAssignment.fromExpr(`${expr.lhs}=${expr.rhs}`)
-      ),
-    [exprs]
-  );
-
   const updateExpr = useCallback(
-    (newAssignment: FunctionAssignment, propName: string) => {
-      const event: WidgetChangeEvent<ParseableObjs["assignment"]> = {
+    (newAssignment: ParseableObjs["function-assignment"], propName: string) => {
+      const event: WidgetChangeEvent<ParseableObjs["function-assignment"]> = {
         name: propName,
-        value: {
-          lhs: newAssignment.getLhs(),
-          rhs: newAssignment.rhs,
-          type: "assignment",
-        },
+        value: newAssignment,
       };
       onWidgetChange(event);
     },
@@ -210,10 +200,13 @@ const useExpressionsAndParameters = (
         name: "domain",
         value: {
           items: domain.items.map((pd, i) => {
-            invariant(typeof pd !== "string" && pd.type === "assignment");
+            invariant(
+              typeof pd !== "string" && pd.type === "function-assignment"
+            );
             return {
-              type: "assignment",
-              lhs: `_f(${newParameters.filter((p, k) => k !== i).join(", ")})`,
+              type: "function-assignment",
+              name: "_f",
+              params: newParameters.filter((p, k) => k !== i),
               rhs: pd.rhs,
             };
           }),
@@ -228,8 +221,7 @@ const useExpressionsAndParameters = (
   const handlers = useMemo(() => {
     const rhs: OnWidgetChange[] = exprNames.map((name, i) => {
       const handler: OnWidgetChange = (e) => {
-        const assignment = assignments[i];
-        const newAssignment = assignment.clone({ rhs: e.value });
+        const newAssignment = { ...assignments[i], rhs: e.value };
         updateExpr(newAssignment, name);
       };
       return handler;
@@ -238,10 +230,10 @@ const useExpressionsAndParameters = (
       .fill(null)
       .map((_null, handlerIndex) => {
         const handler: OnWidgetChange = (e) => {
-          assignments.forEach((assignment, i) => {
-            const newParams = [...assignment.params];
+          assignments.forEach((expr, i) => {
+            const newParams = [...expr.params];
             newParams[handlerIndex] = e.value.replaceAll(/[,=]/g, "");
-            const newAssignment = assignment.clone({ params: newParams });
+            const newAssignment = { ...expr, params: newParams };
             updateExpr(newAssignment, exprNames[i]);
             updateDomains(newParams);
           });
@@ -249,7 +241,7 @@ const useExpressionsAndParameters = (
         return handler;
       });
     return { rhs, param };
-  }, [exprNames, numParams, assignments, updateExpr, updateDomains]);
+  }, [assignments, exprNames, numParams, updateExpr, updateDomains]);
 
   const errs = useMemo(
     () =>
@@ -268,7 +260,7 @@ const useExpressionsAndParameters = (
     [exprNames, errors]
   );
 
-  return { assignments, handlers, errors: errs };
+  return { handlers, errors: errs, assignments };
 };
 
 export {

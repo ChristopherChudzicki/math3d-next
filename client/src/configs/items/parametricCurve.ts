@@ -33,7 +33,7 @@ interface ParametricCurveProperties {
   width: string;
   start: string; // eval to boolean;
   end: string; // eval to boolean;
-  expr: ParseableObjs["assignment"];
+  expr: ParseableObjs["function-assignment"];
   domain: ParseableObjs["array"];
   samples1: string;
 }
@@ -49,7 +49,12 @@ const defaultValues: ParametricCurveProperties = {
   width: "4",
   start: "false",
   end: "false",
-  expr: { lhs: "_f(t)", rhs: "[cos(t), sin(t), t]", type: "assignment" },
+  expr: {
+    type: "function-assignment",
+    name: "_f",
+    params: ["t"],
+    rhs: "[cos(t), sin(t), t]",
+  },
   domain: {
     type: "array",
     items: [

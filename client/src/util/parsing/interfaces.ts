@@ -32,6 +32,12 @@ type ParseableObjs = {
 
 type ParseableObj = ParseableObjs[keyof ParseableObjs];
 type Parseable = string | ParseableObj;
+type ParseableArray<I extends Parseable = Parseable> = Omit<
+  ParseableObjs["array"],
+  "items"
+> & {
+  items: I[];
+};
 
 enum ParserRuleType {
   MathJs = "mathjs",
@@ -75,6 +81,7 @@ export { ParserRuleType };
 export type {
   Parseable,
   ParseableObjs,
+  ParseableArray,
   IMathJsParser,
   MathJsRule,
   ParserRule,

@@ -31,7 +31,7 @@ interface ExplicitSurfacePolarProperties {
   zIndex: string;
   zBias: string;
   shaded: string; // eval to boolean;
-  expr: ParseableObjs["assignment"];
+  expr: ParseableObjs["function-assignment"];
   domain: ParseableObjs["array"];
   colorExpr: string;
   gridOpacity: string;
@@ -51,9 +51,10 @@ const defaultValues: ExplicitSurfacePolarProperties = {
   zBias: "0",
   shaded: "true",
   expr: {
-    lhs: "_f(r, Q)",
+    type: "function-assignment",
+    name: "_f",
+    params: ["r", "Q"],
     rhs: "\\frac{1}{4}r^2*cos(3*Q)]",
-    type: "assignment",
   },
   domain: {
     type: "array",

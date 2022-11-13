@@ -27,8 +27,8 @@ interface ImplicitSurfaceProperties {
 
   shaded: string; // eval to boolean;
   domain: ParseableObjs["array"];
-  lhs: ParseableObjs["assignment"];
-  rhs: ParseableObjs["assignment"];
+  lhs: ParseableObjs["function-assignment"];
+  rhs: ParseableObjs["function-assignment"];
   samples: string;
 }
 
@@ -63,8 +63,18 @@ const defaultValues: ImplicitSurfaceProperties = {
       },
     ],
   },
-  lhs: { lhs: "_f(x,y,z)", rhs: "x^2+y^2", type: "assignment" },
-  rhs: { lhs: "_f(x,y,z)", rhs: "z^2+1", type: "assignment" },
+  lhs: {
+    type: "function-assignment",
+    name: "_f",
+    params: ["x", "y", "z"],
+    rhs: "x^2+y^2",
+  },
+  rhs: {
+    type: "function-assignment",
+    name: "_f",
+    params: ["x", "y", "z"],
+    rhs: "z^2 + 1",
+  },
   samples: "20",
 };
 

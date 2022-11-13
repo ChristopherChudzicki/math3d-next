@@ -36,7 +36,7 @@ interface VectorFieldProperties {
   start: string; // eval to boolean;
   end: string; // eval to boolean;
   domain: ParseableObjs["array"];
-  expr: string;
+  expr: ParseableObjs["function-assignment"];
   samples1: string;
   samples2: string;
   samples3: string;
@@ -77,7 +77,12 @@ const defaultValues: VectorFieldProperties = {
       },
     ],
   },
-  expr: "_f(x,y,z)=[y, -x]/sqrt(x^2 + y^2)",
+  expr: {
+    type: "function-assignment",
+    name: "_f",
+    params: ["x", "y", "z"],
+    rhs: "[y, -x]/sqrt(x^2 + y^2)",
+  },
   samples1: "10",
   samples2: "10",
   samples3: "5",
