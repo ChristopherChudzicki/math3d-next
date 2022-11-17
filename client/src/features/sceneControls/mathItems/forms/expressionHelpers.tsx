@@ -10,7 +10,10 @@ import { ParseableArray } from "@/util/parsing/interfaces";
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import { OnWidgetChange, WidgetChangeEvent } from "../FieldWidget/types";
 import styles from "./ItemForms.module.css";
-import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
+import FieldWidget, {
+  useOnWidgetChange,
+  usePatchPropertyOnChange,
+} from "../FieldWidget";
 
 interface ParameterContainerProps {
   children: React.ReactNode;
@@ -55,25 +58,18 @@ const DomainForm: React.FC<DomainFormProps> = ({
   const { domain } = item.properties;
   invariant(domain.items.every((x) => x.type === "function-assignment"));
 
-  const onWidgetChange = useOnWidgetChange(item);
+  const patchProperty = usePatchPropertyOnChange(item);
   const { assignments, errors: assignmentErrors, handlers } = exprProps;
   const domainValueHandlers: OnWidgetChange<string>[] = useMemo(() => {
     return domain.items.map((_item, i) => {
       const f: OnWidgetChange<string> = (e) => {
-        onWidgetChange({
-          name: "domain",
-          oldValue: domain,
-          value: {
-            ...domain,
-            items: domain.items.map((domainItem, j) => {
-              return i === j ? { ...domainItem, rhs: e.value } : domainItem;
-            }),
-          },
-        });
+        const event = { ...e, name: "domain" };
+        const subpath = `/items/${i}/rhs`;
+        patchProperty(event, subpath);
       };
       return f;
     });
-  }, [domain, onWidgetChange]);
+  }, [domain, patchProperty]);
   return (
     <ParameterContainer>
       {domain.items.map((paramDomain, i) => {

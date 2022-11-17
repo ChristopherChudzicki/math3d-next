@@ -9,7 +9,12 @@ import MathAssignment from "./MathAssignment";
 import MathBoolean from "./MathBoolean";
 import MathValue from "./MathValue";
 import TextInput from "./TextInput";
-import { IWidgetProps, OnWidgetChange, Parseable } from "./types";
+import {
+  IWidgetProps,
+  OnWidgetChange,
+  Parseable,
+  WidgetChangeEvent,
+} from "./types";
 import ErrorTooltip from "./ErrorTooltip";
 
 type WidgetProps = IWidgetProps & {
@@ -45,6 +50,23 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
       dispatch(actions.setProperties(patch));
     },
     [dispatch, item.id, item.type]
+  );
+  return onWidgetChange;
+};
+
+type PatchPropertyOnChange = (
+  e: WidgetChangeEvent<Parseable>,
+  subpath: string
+) => void;
+
+export const usePatchPropertyOnChange = <T extends MIT>(item: MathItem<T>) => {
+  const dispatch = useAppDispatch();
+  const onWidgetChange: PatchPropertyOnChange = useCallback(
+    (e, subpath) => {
+      const path = `/${e.name}/${subpath}`;
+      dispatch(actions.patchProperty({ id: item.id, path, value: e.value }));
+    },
+    [dispatch, item.id]
   );
   return onWidgetChange;
 };
