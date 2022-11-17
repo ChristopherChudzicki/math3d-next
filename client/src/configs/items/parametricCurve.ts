@@ -1,4 +1,4 @@
-import { ParseableObjs } from "@/util/parsing";
+import { ParseableArray, ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -34,7 +34,7 @@ interface ParametricCurveProperties {
   start: string; // eval to boolean;
   end: string; // eval to boolean;
   expr: ParseableObjs["function-assignment"];
-  domain: ParseableObjs["array"];
+  domain: ParseableArray<ParseableObjs["function-assignment"]>;
   samples1: string;
 }
 

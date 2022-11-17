@@ -56,6 +56,7 @@ const DomainForm: React.FC<DomainFormProps> = ({
   domainError,
 }) => {
   const { domain } = item.properties;
+
   invariant(domain.items.every((x) => x.type === "function-assignment"));
 
   const patchProperty = usePatchPropertyOnChange(item);
@@ -77,6 +78,25 @@ const DomainForm: React.FC<DomainFormProps> = ({
           typeof paramDomain !== "string" &&
             paramDomain.type === "function-assignment"
         );
+
+        /**
+         * The domain property is an array for functions.
+         * The UI displays each item in the array with separate LHS and RHS fields.
+         * If the domain property has error, extract the relevant error (if there is one)
+         * for the RHS of each domain dimension.
+         */
+        const getDomainIndexRhsError = (
+          err: Error | undefined,
+          domainIndex: number
+        ) => {
+          if (!err) return undefined;
+          if (!isBatchError(err)) return err;
+          const indexError = err.errors[domainIndex];
+          if (indexError instanceof DetailedAssignmentError)
+            return indexError.rhs;
+          return indexError;
+        };
+
         return (
           <ParameterForm
             // it's fine, these are not re-orderable
@@ -99,11 +119,7 @@ const DomainForm: React.FC<DomainFormProps> = ({
                 widget={WidgetType.MathValue}
                 label={`Range for ${ordinal(i + 1)} parameter`}
                 name={`${ordinal(i + 1)}-parameter-value`}
-                error={
-                  isBatchError(domainError)
-                    ? domainError.errors[i]
-                    : domainError
-                }
+                error={getDomainIndexRhsError(domainError, i)}
                 value={paramDomain.rhs}
                 onChange={domainValueHandlers[i]}
               />

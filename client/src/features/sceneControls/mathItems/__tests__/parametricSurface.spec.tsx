@@ -7,10 +7,12 @@ import {
   screen,
   seedDb,
   user,
+  within,
 } from "@/test_util";
 import type { ParseableObjs, ParseableArray } from "@/util/parsing";
 import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
 import invariant from "tiny-invariant";
+import { findItemByDescription } from "./__utils__";
 
 const func = (
   name: string,
@@ -182,7 +184,9 @@ test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
     const scene = seedDb.withSceneFromItems([item]);
     await renderTestApp(`/${scene.id}`);
 
-    const exprInput = screen.getByLabelText(config.properties.expr.label);
+    const form = await findItemByDescription(item.properties.description);
+
+    const exprInput = within(form).getByLabelText(config.properties.expr.label);
 
     const paramInput = getParamNameInputs()[paramIndex];
     await user.clear(paramInput);
@@ -191,8 +195,17 @@ test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
 
     // param is invalid
     expect(paramInput).toHaveClass("has-error");
-    // expression is not (debateable, since one var is undefined now)
-    expect(exprInput).not.toHaveClass("has-error");
+    /**
+     * And no other fields are marked invalid.
+     *
+     * Other properties are invalid:
+     *  - expr is now a function with invalid LHS
+     *  - domain is now a function with invalid LHS
+     *
+     * But we only want to display the error with the parameter.
+     */
+    expect(form.querySelectorAll("[aria-invalid=true]")).toHaveLength(1);
+    expect(form.querySelectorAll(".has-error")).toHaveLength(1);
 
     await user.clear(paramInput);
     paramInput.focus();

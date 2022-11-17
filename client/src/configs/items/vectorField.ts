@@ -1,4 +1,4 @@
-import { ParseableObjs } from "@/util/parsing";
+import { ParseableArray, ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -35,7 +35,7 @@ interface VectorFieldProperties {
   width: string;
   start: string; // eval to boolean;
   end: string; // eval to boolean;
-  domain: ParseableObjs["array"];
+  domain: ParseableArray<ParseableObjs["function-assignment"]>;
   expr: ParseableObjs["function-assignment"];
   samples1: string;
   samples2: string;

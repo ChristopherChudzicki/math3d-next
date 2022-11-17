@@ -11,6 +11,9 @@ const addItem = async (itemTypeLabel: string): Promise<void> => {
 const getItemByDescription = (description: string): HTMLElement =>
   screen.getByLabelText(`Settings for ${description}`);
 
+const findItemByDescription = (description: string): Promise<HTMLElement> =>
+  screen.findByLabelText(`Settings for ${description}`);
+
 const clickRemoveItem = async (itemElement: HTMLElement): Promise<void> => {
   const remove = within(itemElement).getByLabelText("Remove Item");
   await user.click(remove);
@@ -22,4 +25,10 @@ const findBtn = async (item: HTMLElement, name: string | RegExp) => {
   return btn;
 };
 
-export { addItem, clickRemoveItem, getItemByDescription, findBtn };
+export {
+  addItem,
+  clickRemoveItem,
+  getItemByDescription,
+  findItemByDescription,
+  findBtn,
+};

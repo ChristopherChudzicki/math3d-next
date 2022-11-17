@@ -1,4 +1,4 @@
-import { ParseableObjs } from "@/util/parsing";
+import { ParseableArray, ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -26,7 +26,7 @@ interface ImplicitSurfaceProperties {
   zBias: string;
 
   shaded: string; // eval to boolean;
-  domain: ParseableObjs["array"];
+  domain: ParseableArray<ParseableObjs["function-assignment"]>;
   lhs: ParseableObjs["function-assignment"];
   rhs: ParseableObjs["function-assignment"];
   samples: string;

@@ -27,6 +27,11 @@ const pasteText = (element: HTMLElement, text: string) => {
   return user.paste(text);
 };
 
+const sleep = (ms: number): Promise<void> =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
 const userWaits = (ms: number, { useFake = false } = {}) =>
   act(() => {
     if (useFake) {
