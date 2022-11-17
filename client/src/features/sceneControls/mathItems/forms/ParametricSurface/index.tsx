@@ -7,11 +7,7 @@ import RangedMathItemForm from "../RangedMathItemForm";
 const exprNames = ["expr"] as const;
 
 const ParametricSurface: MathItemForm<MIT.ParametricSurface> = ({ item }) => (
-  <RangedMathItemForm
-    item={item}
-    exprNames={exprNames}
-    errorNames={exprNames}
-  />
+  <RangedMathItemForm item={item} exprNames={exprNames} />
 );
 
 export default ParametricSurface;

@@ -12,7 +12,6 @@ import { MathItemForm } from "../interfaces";
 import RangedMathItemForm from "../RangedMathItemForm";
 
 const exprNames = ["lhs", "rhs"] as const;
-const errorNames = [...exprNames] as const;
 
 const config = configs[MIT.ImplicitSurface];
 
@@ -48,7 +47,7 @@ const ImplicitSurfaceExpressions: React.FC<ExpressionProps> = ({
 };
 
 const ImplicitSurface: MathItemForm<MIT.ImplicitSurface> = ({ item }) => (
-  <RangedMathItemForm item={item} exprNames={exprNames} errorNames={errorNames}>
+  <RangedMathItemForm item={item} exprNames={exprNames}>
     {ImplicitSurfaceExpressions}
   </RangedMathItemForm>
 );

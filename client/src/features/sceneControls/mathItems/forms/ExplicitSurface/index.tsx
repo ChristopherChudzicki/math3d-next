@@ -4,14 +4,9 @@ import { MathItemForm } from "../interfaces";
 import RangedMathItemForm from "../RangedMathItemForm";
 
 const exprNames = ["expr"] as const;
-const errorNames = [...exprNames] as const;
 
 const ExplicitSurface: MathItemForm<MIT.ExplicitSurface> = ({ item }) => (
-  <RangedMathItemForm
-    item={item}
-    exprNames={exprNames}
-    errorNames={errorNames}
-  />
+  <RangedMathItemForm item={item} exprNames={exprNames} />
 );
 
 export default ExplicitSurface;

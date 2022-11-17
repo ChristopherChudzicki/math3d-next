@@ -16,7 +16,6 @@ import type { ExpressionProps } from "./expressionHelpers";
 interface GenericRangedMathItemFormProps<T extends MIT> {
   item: MathItem<T>;
   exprNames: readonly (keyof MathItem<T>["properties"] & string)[];
-  errorNames: readonly (keyof MathItem<T>["properties"] & string)[];
   children?: React.FC<ExpressionProps>;
 }
 
