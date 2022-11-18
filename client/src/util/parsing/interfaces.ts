@@ -16,6 +16,13 @@ type ParseableObjs = {
     rhs: string;
     validate?: Validate;
   };
+  "function-assignment": {
+    type: "function-assignment";
+    name: string;
+    params: string[];
+    rhs: string;
+    validate?: Validate;
+  };
   array: {
     type: "array";
     items: Parseable[];
@@ -25,6 +32,12 @@ type ParseableObjs = {
 
 type ParseableObj = ParseableObjs[keyof ParseableObjs];
 type Parseable = string | ParseableObj;
+type ParseableArray<I extends Parseable = Parseable> = Omit<
+  ParseableObjs["array"],
+  "items"
+> & {
+  items: I[];
+};
 
 enum ParserRuleType {
   MathJs = "mathjs",
@@ -68,6 +81,7 @@ export { ParserRuleType };
 export type {
   Parseable,
   ParseableObjs,
+  ParseableArray,
   IMathJsParser,
   MathJsRule,
   ParserRule,

@@ -1,4 +1,4 @@
-import { ParseableObjs } from "@/util/parsing";
+import { ParseableArray, ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -13,15 +13,15 @@ import {
   grid2,
   gridWidth,
   opacity,
-  range1,
-  range2,
   shaded,
   samples1,
   visible,
   samples2,
   zBias,
   zIndex,
+  domain2,
 } from "../shared";
+import type { EvaluatedDomain2 } from "../shared";
 
 interface ExplicitSurfaceProperties {
   description: string;
@@ -31,9 +31,8 @@ interface ExplicitSurfaceProperties {
   zIndex: string;
   zBias: string;
   shaded: string; // eval to boolean;
-  expr: ParseableObjs["assignment"];
-  range1: string;
-  range2: string;
+  expr: ParseableObjs["function-assignment"];
+  domain: ParseableArray<ParseableObjs["function-assignment"]>;
   colorExpr: string;
   gridOpacity: string;
   gridWidth: string;
@@ -51,9 +50,29 @@ const defaultValues: ExplicitSurfaceProperties = {
   zIndex: "0",
   zBias: "0",
   shaded: "true",
-  expr: { lhs: "_f(x,y)", rhs: "x^2-y^2", type: "assignment" },
-  range1: "[-2, 2]",
-  range2: "[-2, 2]",
+  expr: {
+    type: "function-assignment",
+    name: "_f",
+    params: ["x", "y"],
+    rhs: "x^2-y^2",
+  },
+  domain: {
+    type: "array",
+    items: [
+      {
+        type: "function-assignment",
+        name: "_f",
+        params: ["y"],
+        rhs: "[-5, 5]",
+      },
+      {
+        type: "function-assignment",
+        name: "_f",
+        params: ["x"],
+        rhs: "[-5, 5]",
+      },
+    ],
+  },
   colorExpr: "_f(X, Y, Z, x, y)=mod(Z, 1)",
   gridOpacity: "0.5",
   gridWidth: "2",
@@ -72,9 +91,25 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
+type EvaluatedProperties = {
+  gridOpacity: number;
+  grid1: number;
+  grid2: number;
+  gridWidth: number;
+  opacity: number;
+  domain: EvaluatedDomain2;
+  shaded: boolean;
+  samples1: number;
+  samples2: number;
+  visible: boolean;
+  zBias: number;
+  zIndex: number;
+};
+
 const config: IMathItemConfig<
   MathItemType.ExplicitSurface,
-  ExplicitSurfaceProperties
+  ExplicitSurfaceProperties,
+  EvaluatedProperties
 > = {
   type: MathItemType.ExplicitSurface,
   label: "Explicit Surface",
@@ -89,6 +124,7 @@ const config: IMathItemConfig<
       label: "Expression",
       widget: WidgetType.MathValue,
     },
+    domain: domain2,
     color,
     description,
     gridOpacity,
@@ -96,8 +132,6 @@ const config: IMathItemConfig<
     grid2,
     gridWidth,
     opacity,
-    range1,
-    range2,
     shaded,
     samples1,
     samples2,

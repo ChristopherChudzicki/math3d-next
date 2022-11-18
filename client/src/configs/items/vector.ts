@@ -1,3 +1,4 @@
+import { validators } from "@/util/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -62,7 +63,24 @@ const make: MathItemGenerator<MathItemType.Vector, VectorProperties> = (
   properties: { ...defaultValues },
 });
 
-const config: IMathItemConfig<MathItemType.Vector, VectorProperties> = {
+type EvaluatedProperties = {
+  visible: boolean;
+  size: number;
+  width: number;
+  zBias: number;
+  zIndex: number;
+  start: boolean;
+  end: boolean;
+  labelVisible: boolean;
+  opacity: number;
+  tail: [number, number, number];
+};
+
+const config: IMathItemConfig<
+  MathItemType.Vector,
+  VectorProperties,
+  EvaluatedProperties
+> = {
   type: MathItemType.Vector,
   label: "Vector",
   properties: {
@@ -80,6 +98,7 @@ const config: IMathItemConfig<MathItemType.Vector, VectorProperties> = {
       name: "tail",
       label: "Tail Coordinates",
       widget: WidgetType.MathValue,
+      validate: validators.realVec[3],
     },
     visible,
     size,

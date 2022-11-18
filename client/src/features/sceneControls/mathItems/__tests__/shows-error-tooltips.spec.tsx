@@ -1,12 +1,15 @@
 import { act, waitForElementToBeRemoved } from "@testing-library/react";
 import { MathItemType as MIT } from "@/configs";
-import {
-  makeItem,
-  screen,
-  shortSleep,
-  seedDb,
-  renderTestApp,
-} from "@/test_util";
+import { makeItem, screen, seedDb, renderTestApp } from "@/test_util";
+
+/**
+ *
+ * @deprecated Avoid explicit waits in tests. Use retries instead.
+ */
+const shortSleep = () =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, 15);
+  });
 
 const findTooltip = () => screen.findByRole("tooltip");
 const queryTooltip = () => screen.queryByRole("tooltip");

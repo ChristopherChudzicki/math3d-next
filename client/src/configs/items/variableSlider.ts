@@ -40,9 +40,19 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
+type Evaluated = {
+  range: [number, number];
+  duration: number;
+  fps: number;
+  value: number;
+  speedMultiplier: number;
+  isAnimating: boolean;
+};
+
 const config: IMathItemConfig<
   MathItemType.VariableSlider,
-  VariableSliderProperties
+  VariableSliderProperties,
+  Evaluated
 > = {
   type: MathItemType.VariableSlider,
   label: "Variable Slider",
@@ -71,6 +81,7 @@ const config: IMathItemConfig<
         if (min >= max) {
           throw new Error("Minimum must be less than maximum.");
         }
+        return [min, max];
       },
     },
     value: {
@@ -83,6 +94,7 @@ const config: IMathItemConfig<
       name: "isAnimating",
       label: "Animating",
       widget: WidgetType.MathBoolean,
+      validate: validators.boolean,
     },
     speedMultiplier: {
       name: "speedMultiplier",

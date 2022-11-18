@@ -16,11 +16,11 @@ export const real = num;
 
 const positive = real.positive();
 
-export const realVectors = {
-  1: yup.tuple([num]),
-  2: yup.tuple([num, num]),
-  3: yup.tuple([num, num, num]),
-  4: yup.tuple([num, num, num, num]),
+const realVectors = {
+  1: yup.tuple([num]).strict().required(),
+  2: yup.tuple([num, num]).strict().required(),
+  3: yup.tuple([num, num, num]).strict().required(),
+  4: yup.tuple([num, num, num, num]).strict().required(),
 };
 
 type RealFuncs = {
@@ -55,28 +55,29 @@ const numericFunc = <M extends Dim, N extends Dim>(fromDim: M, toDim: N) => {
     `Expected a function from R^${fromDim} -> R^${toDim}. ${detail}`;
   const schema = yup
     .mixed<RealFuncs[M][N]>()
-    .transform((f) => {
-      const zeros = Array(fromDim).fill(0);
-      return f(zeros);
-    })
     .test({
       name: `func-arity-${fromDim}`,
       message: message(`This is not a function from R^${fromDim}.`),
-      test: (_x, ctx) => {
-        return ctx.originalValue.length === fromDim;
+      test: (f) => {
+        return f?.length === fromDim;
       },
     })
     .test({
       name: `func-to-R${toDim}`,
       message: message(`The outputs of this function are not in R^${toDim}`),
-      test: (x) => {
-        return realVectors[toDim].isValidSync(x);
+      test: (f) => {
+        const sample = Array(fromDim)
+          .fill(0)
+          .map(() => Math.random());
+        // @ts-expect-error TS can't tell that sample has correct number of params
+        const out = f?.(...sample);
+        return realVectors[toDim].isValidSync(out);
       },
     });
   return schema;
 };
 
-export const realFuncSchemas = {
+const realFuncSchemas = {
   1: {
     1: numericFunc(1, 1),
     2: numericFunc(1, 2),
@@ -103,8 +104,47 @@ export const realFuncSchemas = {
   },
 };
 
+const realFuncValidators = {
+  1: {
+    1: realFuncSchemas[1][1].validateSync.bind(realFuncSchemas[1][1]),
+    2: realFuncSchemas[1][2].validateSync.bind(realFuncSchemas[1][2]),
+    3: realFuncSchemas[1][3].validateSync.bind(realFuncSchemas[1][3]),
+    4: realFuncSchemas[1][4].validateSync.bind(realFuncSchemas[1][4]),
+  },
+  2: {
+    1: realFuncSchemas[2][1].validateSync.bind(realFuncSchemas[2][1]),
+    2: realFuncSchemas[2][2].validateSync.bind(realFuncSchemas[2][2]),
+    3: realFuncSchemas[2][3].validateSync.bind(realFuncSchemas[2][3]),
+    4: realFuncSchemas[2][4].validateSync.bind(realFuncSchemas[2][4]),
+  },
+  3: {
+    1: realFuncSchemas[3][1].validateSync.bind(realFuncSchemas[3][1]),
+    2: realFuncSchemas[3][2].validateSync.bind(realFuncSchemas[3][2]),
+    3: realFuncSchemas[3][3].validateSync.bind(realFuncSchemas[3][3]),
+    4: realFuncSchemas[3][4].validateSync.bind(realFuncSchemas[3][4]),
+  },
+  4: {
+    1: realFuncSchemas[4][1].validateSync.bind(realFuncSchemas[4][1]),
+    2: realFuncSchemas[4][2].validateSync.bind(realFuncSchemas[4][2]),
+    3: realFuncSchemas[4][3].validateSync.bind(realFuncSchemas[4][3]),
+    4: realFuncSchemas[4][4].validateSync.bind(realFuncSchemas[4][4]),
+  },
+};
+
+const realVecValidators = {
+  1: realVectors[1].validateSync.bind(realVectors[1]),
+  2: realVectors[2].validateSync.bind(realVectors[2]),
+  3: realVectors[3].validateSync.bind(realVectors[3]),
+  4: realVectors[4].validateSync.bind(realVectors[4]),
+};
+
+const boolean = yup.boolean().strict().required();
+
 export const validators = {
   real: real.validateSync.bind(real),
   positive: positive.validateSync.bind(positive),
   array: array.validateSync.bind(array),
+  realFunc: realFuncValidators,
+  realVec: realVecValidators,
+  boolean: boolean.validateSync.bind(boolean),
 };

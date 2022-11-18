@@ -1,3 +1,4 @@
+import { validators } from "@/util/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -25,9 +26,14 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
+type EvaluatedProperties = {
+  value: boolean;
+};
+
 const config: IMathItemConfig<
   MathItemType.BooleanVariable,
-  BooleanVariableProperties
+  BooleanVariableProperties,
+  EvaluatedProperties
 > = {
   type: MathItemType.BooleanVariable,
   label: "Toggle Switch",
@@ -37,6 +43,7 @@ const config: IMathItemConfig<
       name: "value",
       label: "Value",
       widget: WidgetType.MathBoolean,
+      validate: validators.boolean,
     },
   },
   settingsProperties: [],

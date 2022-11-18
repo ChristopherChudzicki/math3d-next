@@ -4,8 +4,10 @@ import type { MathItem, MathItemPatch } from "@/configs";
 import { keyBy } from "lodash";
 import { assertNotNil } from "@/util/predicates";
 import MathScope from "@/util/MathScope";
+import jsonPatch from "fast-json-patch";
 
 import { latexParser, Parseable } from "@/util/parsing";
+import invariant from "tiny-invariant";
 import {
   syncItemsToMathScope,
   removeItemsFromMathScope,
@@ -139,6 +141,30 @@ const mathItemsSlice = createSlice({
       const { properties: oldProperties } = state.items[id];
       // @ts-expect-error TODO figure this out + reconisder the unions
       state.items[id].properties = { ...oldProperties, ...newProperties };
+
+      const item = state.items[id];
+      syncItemsToMathScope(state.mathScope(), [item]);
+    },
+    patchProperty: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        path: string;
+        value: unknown;
+      }>
+    ) => {
+      const { id, path, value } = action.payload;
+
+      const [result] = jsonPatch.applyPatch(
+        state.items[id].properties,
+        [{ op: "replace", path, value }],
+        false, // skip validating the patch against JsonPatch spec
+        true // do mutate the object. (But not really, since it's a WriteableDraft)
+      );
+      invariant(
+        result.removed !== undefined,
+        "patch should have replaced and existing property."
+      );
 
       const item = state.items[id];
       syncItemsToMathScope(state.mathScope(), [item]);

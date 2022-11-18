@@ -1,4 +1,4 @@
-import { ParseableObjs } from "@/util/parsing";
+import { ParseableArray, ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -13,8 +13,7 @@ import {
   grid2,
   gridWidth,
   opacity,
-  range1,
-  range2,
+  domain2,
   shaded,
   samples1,
   visible,
@@ -22,6 +21,7 @@ import {
   zBias,
   zIndex,
 } from "../shared";
+import type { EvaluatedDomain2 } from "../shared";
 
 interface ParametricSurfaceProperties {
   description: string;
@@ -32,9 +32,8 @@ interface ParametricSurfaceProperties {
   zBias: string;
 
   shaded: string; // eval to boolean;
-  expr: ParseableObjs["assignment"];
-  range1: string;
-  range2: string;
+  expr: ParseableObjs["function-assignment"];
+  domain: ParseableArray<ParseableObjs["function-assignment"]>;
   colorExpr: string;
   gridOpacity: string;
   gridWidth: string;
@@ -53,12 +52,28 @@ const defaultValues: ParametricSurfaceProperties = {
   zBias: "0",
   shaded: "true",
   expr: {
-    lhs: "_f(u,v)",
+    type: "function-assignment",
+    name: "_f",
+    params: ["u", "v"],
     rhs: "[u^2-v^2, 2*u*v, u^2+v^2]",
-    type: "assignment",
   },
-  range1: "[-pi, pi]",
-  range2: "[-3, 3]",
+  domain: {
+    type: "array",
+    items: [
+      {
+        type: "function-assignment",
+        name: "_f",
+        params: ["v"],
+        rhs: "[-pi, pi]",
+      },
+      {
+        type: "function-assignment",
+        name: "_f",
+        params: ["u"],
+        rhs: "[-3, 3]",
+      },
+    ],
+  },
   colorExpr: "_f(X, Y, Z, u, v)=mod(Z, 1)",
   gridOpacity: "0.5",
   gridWidth: "2",
@@ -77,9 +92,25 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
+type EvaluatedProperties = {
+  gridOpacity: number;
+  grid1: number;
+  grid2: number;
+  gridWidth: number;
+  opacity: number;
+  domain: EvaluatedDomain2;
+  shaded: boolean;
+  samples1: number;
+  samples2: number;
+  visible: boolean;
+  zBias: number;
+  zIndex: number;
+};
+
 const config: IMathItemConfig<
   MathItemType.ParametricSurface,
-  ParametricSurfaceProperties
+  ParametricSurfaceProperties,
+  EvaluatedProperties
 > = {
   type: MathItemType.ParametricSurface,
   label: "Parametric Surface",
@@ -96,13 +127,12 @@ const config: IMathItemConfig<
     },
     color,
     description,
+    domain: domain2,
     gridOpacity,
     grid1,
     grid2,
     gridWidth,
     opacity,
-    range1,
-    range2,
     shaded,
     samples1,
     samples2,

@@ -27,12 +27,10 @@ const pasteText = (element: HTMLElement, text: string) => {
   return user.paste(text);
 };
 
-const sleep = (ms: number) =>
+const sleep = (ms: number): Promise<void> =>
   new Promise<void>((resolve) => {
     setTimeout(resolve, ms);
   });
-
-const shortSleep = () => sleep(15);
 
 const userWaits = (ms: number, { useFake = false } = {}) =>
   act(() => {
@@ -58,6 +56,11 @@ const allowActWarnings = () => {
   vi.spyOn(console, "error").mockImplementation(patchedConsoleError);
 };
 
+const flatProduct1 = <T, U>(arr1: T[], arr2: U[]): (T & U)[] =>
+  arr1.flatMap((obj1) => {
+    return arr2.map((obj2) => ({ ...obj1, ...obj2 }));
+  });
+
 /**
  * Returns the cartesian product of two object arrays, with objects flattened.
  *
@@ -71,10 +74,26 @@ const allowActWarnings = () => {
  *
  * Particularly useful for jest testcases.
  */
-const flatProduct = <T, U>(arr1: T[], arr2: U[]): (T & U)[] =>
-  arr1.flatMap((obj1) => {
-    return arr2.map((obj2) => ({ ...obj1, ...obj2 }));
+function flatProduct<T1, T2>(arr1: T1[], arr2: T2[]): (T1 & T2)[];
+function flatProduct<T1, T2, T3>(
+  arr1: T1[],
+  arr2: T2[],
+  arr3: T3[]
+): (T1 & T2 & T3)[];
+function flatProduct<T1, T2, T3, T4>(
+  arr1: T1[],
+  arr2: T2[],
+  arr3: T3[],
+  arr4: T4[]
+): (T1 & T2 & T3 & T4)[];
+
+function flatProduct(...arrays: unknown[][]): unknown[] {
+  if (arrays.length === 0) return [];
+  if (arrays.length === 1) return arrays[0];
+  return arrays.reduce((acc, arr) => {
+    return flatProduct1(acc, arr);
   });
+}
 
 export {
   assertInstanceOf,
@@ -82,8 +101,6 @@ export {
   permutations,
   flatProduct,
   pasteText,
-  sleep,
   userWaits,
-  shortSleep,
   allowActWarnings,
 };

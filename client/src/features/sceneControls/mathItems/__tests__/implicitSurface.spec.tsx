@@ -23,19 +23,31 @@ const getParamNameInputs = (): HTMLTextAreaElement[] => {
 test("Updating parameter names updates the lhs and rhs appropriately", async () => {
   const lhs = {
     initial: {
-      lhs: "_f(x,y,z)",
+      type: "function-assignment" as const,
+      name: "_f",
+      params: ["x", "y", "z"],
       rhs: "x + y + z",
-      type: "assignment" as const,
     },
-    final: { lhs: "_f(a1,y,z)", rhs: "x + y + z", type: "assignment" as const },
+    final: {
+      type: "function-assignment" as const,
+      name: "_f",
+      params: ["a1", "y", "z"],
+      rhs: "x + y + z",
+    },
   };
   const rhs = {
     initial: {
-      lhs: "_f(x,y,z)",
+      type: "function-assignment" as const,
+      name: "_f",
+      params: ["x", "y", "z"],
       rhs: "x * y * z",
-      type: "assignment" as const,
     },
-    final: { lhs: "_f(a1,y,z)", rhs: "x * y * z", type: "assignment" as const },
+    final: {
+      type: "function-assignment" as const,
+      name: "_f",
+      params: ["a1", "y", "z"],
+      rhs: "x * y * z",
+    },
   };
   const item = makeItem(MIT.ImplicitSurface, {
     lhs: lhs.initial,
@@ -60,12 +72,18 @@ test.each([{ name: "lhs" as const }, { name: "rhs" as const }])(
   "Updating parameter names updates the lhs and rhs appropriately",
   async ({ name }) => {
     const initial = {
-      lhs: "_f(x,y,z)",
+      type: "function-assignment" as const,
+      name: "_f",
+      params: ["x", "y", "z"],
       rhs: "x + y + z",
-      type: "assignment" as const,
     };
     const initialDisplay = "x + y + z";
-    const final = { lhs: "_f(x,y,z)", rhs: "x + y + z^2", type: "assignment" };
+    const final = {
+      type: "function-assignment" as const,
+      name: "_f",
+      params: ["x", "y", "z"],
+      rhs: "x + y + z^2",
+    };
     const finalDisplay = "x + y + z^2";
 
     const item = makeItem(MIT.ImplicitSurface, {

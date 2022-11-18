@@ -60,7 +60,21 @@ const make: MathItemGenerator<MathItemType.Axis, AxisProperties> = (id) => ({
   properties: { ...defaultValues },
 });
 
-const config: IMathItemConfig<MathItemType.Axis, AxisProperties> = {
+type EvaluatedProperties = {
+  labelVisible: boolean;
+  opacity: number;
+  size: number;
+  visible: boolean;
+  width: number;
+  zBias: number;
+  zIndex: number;
+};
+
+const config: IMathItemConfig<
+  MathItemType.Axis,
+  AxisProperties,
+  EvaluatedProperties
+> = {
   type: MathItemType.Axis,
   label: "Axis",
   properties: {

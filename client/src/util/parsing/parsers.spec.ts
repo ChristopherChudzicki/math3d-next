@@ -1,5 +1,7 @@
+import invariant from "tiny-invariant";
 import { assertInstanceOf } from "../predicates";
 import { isBatchError } from "./batch";
+import { Parseable } from "./interfaces";
 import { DetailedAssignmentError } from "./MathJsParser";
 import { latexParser as parser } from "./parsers";
 import { ParameterErrors } from "./rules";
@@ -66,14 +68,13 @@ describe("backslash removal", () => {
   });
 });
 
-describe("Parsing assignments", () => {
+describe("Parsing assignments and function assignments", () => {
   const getParseError = (
-    lhs: string,
-    rhs: string,
+    parseable: Parseable,
     Err = DetailedAssignmentError
   ) => {
     try {
-      parser.parse({ lhs, rhs, type: "assignment" });
+      parser.parse(parseable);
     } catch (err) {
       if (!(err instanceof Err)) {
         throw new Error(`Expected an instanceof ${Err.name}`);
@@ -100,9 +101,21 @@ describe("Parsing assignments", () => {
       type: "assignment",
     });
     const evaluated = node.evaluate();
-    if (typeof evaluated !== "function") {
-      throw new Error("Expected evaluated to be a function.");
-    }
+    invariant(typeof evaluated === "function");
+    expect(evaluated(2, 3, 4)).toBe(24);
+    expect(evaluated.length).toBe(3);
+  });
+
+  it("Parsing { name, params, rhs } function assignments", () => {
+    const node = parser.parse({
+      name: "f",
+      params: ["x", "y", "z"],
+      rhs: "x * y * z",
+      type: "function-assignment",
+    });
+    const evaluated = node.evaluate();
+    invariant(typeof evaluated === "function");
+
     expect(evaluated(2, 3, 4)).toBe(24);
     expect(evaluated.length).toBe(3);
   });
@@ -148,18 +161,100 @@ describe("Parsing assignments", () => {
         rhsErr: undefined,
       },
     },
-  ])("Associates parse errors with lhs or rhs", ({ lhs, rhs, expected }) => {
-    const err = getParseError(lhs, rhs);
-    const methods = {
-      lhs: expected.lhsErr ? "toMatch" : "toBe",
-      rhs: expected.rhsErr ? "toMatch" : "toBe",
-    };
-    expect(err.lhs)[methods.lhs](expected.lhsErr);
-    expect(err.rhs)[methods.rhs](expected.rhsErr);
-  });
+    {
+      /**
+       * Duplicate parameter detection should be whitespace-insensitive
+       */
+      lhs: "f(x,x ,y)",
+      rhs: "1",
+      expected: {
+        lhsErr: /Parameter names must be unique/,
+        rhsErr: undefined,
+      },
+    },
+  ])(
+    "Associates parse function asiggnment { lhs, rhs } errors with lhs or rhs",
+    ({ lhs, rhs, expected }) => {
+      const err = getParseError({ lhs, rhs, type: "assignment" });
+      const methods = {
+        lhs: expected.lhsErr ? "toMatch" : "toBe",
+        rhs: expected.rhsErr ? "toMatch" : "toBe",
+      };
+      expect(err.lhs)[methods.lhs](expected.lhsErr);
+      expect(err.rhs)[methods.rhs](expected.rhsErr);
+    }
+  );
+
+  it.each([
+    {
+      name: "f",
+      params: ["x+"],
+      rhs: "1",
+      expected: {
+        lhsErr: /Some parameter names are invalid/,
+        rhsErr: undefined,
+      },
+    },
+    {
+      name: "f",
+      params: ["x+"],
+      rhs: "1+",
+      expected: {
+        lhsErr: /Some parameter names are in/,
+        rhsErr: /Unexpected end of expression/,
+      },
+    },
+    {
+      name: "f",
+      params: ["x"],
+      rhs: "1+",
+      expected: {
+        lhsErr: undefined,
+        rhsErr: /Unexpected end of expression/,
+      },
+    },
+    {
+      name: "f+",
+      params: ["x"],
+      rhs: "1",
+      expected: {
+        lhsErr: /Invalid left-hand side./,
+        rhsErr: undefined,
+      },
+    },
+    {
+      name: "f",
+      params: ["x", "x", "y"],
+      rhs: "1",
+      expected: {
+        lhsErr: /Parameter names must be unique/,
+        rhsErr: undefined,
+      },
+    },
+  ])(
+    "Associates parse function asiggnment { name, params, rhs } errors with lhs or rhs",
+    ({ name, params, rhs, expected }) => {
+      const err = getParseError({
+        name,
+        params,
+        rhs,
+        type: "function-assignment",
+      });
+      const methods = {
+        lhs: expected.lhsErr ? "toMatch" : "toBe",
+        rhs: expected.rhsErr ? "toMatch" : "toBe",
+      };
+      expect(err.lhs)[methods.lhs](expected.lhsErr);
+      expect(err.rhs)[methods.rhs](expected.rhsErr);
+    }
+  );
 
   it("Associates bad parameters with their indexes", () => {
-    const err = getParseError("f(x,y,w+,z,z)", "1");
+    const err = getParseError({
+      lhs: "f(x,y,w+,z,z)",
+      rhs: "1",
+      type: "assignment",
+    });
     assertInstanceOf(err, DetailedAssignmentError);
     assertInstanceOf(err.lhs, ParameterErrors);
 

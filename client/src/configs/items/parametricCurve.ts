@@ -1,4 +1,4 @@
-import { ParseableObjs } from "@/util/parsing";
+import { ParseableArray, ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -8,6 +8,7 @@ import type {
 import {
   color,
   description,
+  domain1,
   end,
   opacity,
   size,
@@ -16,8 +17,8 @@ import {
   width,
   zBias,
   zIndex,
-  range1,
   samples1,
+  EvaluatedDomain1,
 } from "../shared";
 
 interface ParametricCurveProperties {
@@ -32,8 +33,8 @@ interface ParametricCurveProperties {
   width: string;
   start: string; // eval to boolean;
   end: string; // eval to boolean;
-  expr: ParseableObjs["assignment"];
-  range1: string;
+  expr: ParseableObjs["function-assignment"];
+  domain: ParseableArray<ParseableObjs["function-assignment"]>;
   samples1: string;
 }
 
@@ -48,8 +49,23 @@ const defaultValues: ParametricCurveProperties = {
   width: "4",
   start: "false",
   end: "false",
-  expr: { lhs: "_f(t)", rhs: "[cos(t), sin(t), t]", type: "assignment" },
-  range1: "[-2*pi, 2*pi]",
+  expr: {
+    type: "function-assignment",
+    name: "_f",
+    params: ["t"],
+    rhs: "[cos(t), sin(t), t]",
+  },
+  domain: {
+    type: "array",
+    items: [
+      {
+        type: "function-assignment",
+        name: "_f",
+        params: [],
+        rhs: "[-2*pi, 2*pi]",
+      },
+    ],
+  },
   samples1: "128",
 };
 
@@ -62,9 +78,23 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
+type EvaluatedProperties = {
+  opacity: number;
+  visible: boolean;
+  size: number;
+  width: number;
+  zBias: number;
+  zIndex: number;
+  start: boolean;
+  end: boolean;
+  samples1: number;
+  domain: EvaluatedDomain1;
+};
+
 const config: IMathItemConfig<
   MathItemType.ParametricCurve,
-  ParametricCurveProperties
+  ParametricCurveProperties,
+  EvaluatedProperties
 > = {
   type: MathItemType.ParametricCurve,
   label: "Parametric Curve",
@@ -84,7 +114,7 @@ const config: IMathItemConfig<
     zIndex,
     start,
     end,
-    range1: { ...range1, label: "Range" },
+    domain: domain1,
     samples1: { ...samples1, label: "Samples" },
   },
   settingsProperties: [

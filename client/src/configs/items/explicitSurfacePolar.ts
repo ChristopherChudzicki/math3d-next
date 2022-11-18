@@ -1,4 +1,4 @@
-import { ParseableObjs } from "@/util/parsing";
+import { ParseableArray, ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -13,14 +13,14 @@ import {
   grid2,
   gridWidth,
   opacity,
-  range1,
-  range2,
   shaded,
   samples1,
   visible,
   samples2,
   zBias,
   zIndex,
+  domain2,
+  EvaluatedDomain2,
 } from "../shared";
 
 interface ExplicitSurfacePolarProperties {
@@ -30,11 +30,9 @@ interface ExplicitSurfacePolarProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
-
   shaded: string; // eval to boolean;
-  expr: ParseableObjs["assignment"];
-  range1: string;
-  range2: string;
+  expr: ParseableObjs["function-assignment"];
+  domain: ParseableArray<ParseableObjs["function-assignment"]>;
   colorExpr: string;
   gridOpacity: string;
   gridWidth: string;
@@ -53,12 +51,28 @@ const defaultValues: ExplicitSurfacePolarProperties = {
   zBias: "0",
   shaded: "true",
   expr: {
-    lhs: "_f(r, Q)",
+    type: "function-assignment",
+    name: "_f",
+    params: ["r", "Q"],
     rhs: "\\frac{1}{4}r^2*cos(3*Q)]",
-    type: "assignment",
   },
-  range1: "[0, 3]",
-  range2: "[-pi, pi]",
+  domain: {
+    type: "array",
+    items: [
+      {
+        type: "function-assignment",
+        name: "_f",
+        params: ["Q"],
+        rhs: "[0, 3]",
+      },
+      {
+        type: "function-assignment",
+        name: "_f",
+        params: ["r"],
+        rhs: "[-pi, pi]",
+      },
+    ],
+  },
   colorExpr: "_f(X, Y, Z, r, theta)=mod(Z, 1)",
   gridOpacity: "0.5",
   gridWidth: "2",
@@ -77,9 +91,25 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
+type EvaluatedProperties = {
+  gridOpacity: number;
+  grid1: number;
+  grid2: number;
+  gridWidth: number;
+  opacity: number;
+  domain: EvaluatedDomain2;
+  shaded: boolean;
+  samples1: number;
+  samples2: number;
+  visible: boolean;
+  zBias: number;
+  zIndex: number;
+};
+
 const config: IMathItemConfig<
   MathItemType.ExplicitSurfacePolar,
-  ExplicitSurfacePolarProperties
+  ExplicitSurfacePolarProperties,
+  EvaluatedProperties
 > = {
   type: MathItemType.ExplicitSurfacePolar,
   label: "Explicit Surface (Polar)",
@@ -101,8 +131,7 @@ const config: IMathItemConfig<
     grid2,
     gridWidth,
     opacity,
-    range1,
-    range2,
+    domain: domain2,
     shaded,
     samples1,
     samples2,

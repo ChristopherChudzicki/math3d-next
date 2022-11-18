@@ -45,6 +45,7 @@ const MathValue = React.forwardRef<MathfieldElement, IWidgetProps>(
           { [styles["has-error"]]: error },
           className
         )}
+        aria-invalid={error ? "true" : "false"}
         onChange={handleChange}
       >
         {value}

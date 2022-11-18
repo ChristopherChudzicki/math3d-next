@@ -7,8 +7,30 @@ import {
   screen,
   seedDb,
   user,
+  within,
 } from "@/test_util";
+import type { ParseableObjs, ParseableArray } from "@/util/parsing";
 import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
+import invariant from "tiny-invariant";
+import { findItemByDescription } from "./__utils__";
+
+const func = (
+  name: string,
+  params: string[],
+  rhs: string
+): ParseableObjs["function-assignment"] => ({
+  type: "function-assignment",
+  name,
+  params,
+  rhs,
+});
+
+const dom = (
+  ...funcs: ParseableObjs["function-assignment"][]
+): ParseableArray<ParseableObjs["function-assignment"]> => ({
+  type: "array",
+  items: funcs,
+});
 
 const config = mathItemConfigs[MIT.ParametricSurface];
 
@@ -23,46 +45,52 @@ const getParamNameInputs = (): HTMLTextAreaElement[] => {
 test.each([
   {
     expression: {
-      initial: {
-        lhs: "_f(x,y)",
-        rhs: "[1+abc, 0, 0]",
-        type: "assignment" as const,
-      },
-      expectedFinal: {
-        lhs: "_f(abc,y)",
-        rhs: "[1+abc, 0, 0]",
-        type: "assignment" as const,
-      },
+      initial: func("_f", ["x", "y"], "[1+abc, 0, 0]"),
+      expectedFinal: func("_f", ["abc", "y"], "[1+abc, 0, 0]"),
+      expectedEvaluation: (abc: number, _y: number) => [1 + abc, 0, 0],
     },
-    evaluations: [
-      { parmaValues: [1, 0], expectedOutput: [2, 0, 0] },
-      { parmaValues: [0, 1], expectedOutput: [1, 0, 0] },
-    ],
+    domain: {
+      initial: dom(
+        func("_f", ["y"], "[-5, 5]"),
+        func("_f", ["x"], "[-abc, abc]")
+      ),
+      expectedFinal: dom(
+        func("_f", ["y"], "[-5, 5]"),
+        func("_f", ["abc"], "[-abc, abc]")
+      ),
+      expectedEvaluation: [
+        (_x: number) => [-5, 5],
+        (abc: number) => [-abc, abc],
+      ],
+    },
     param: { name: "abc", index: 0 },
   },
   {
     expression: {
-      initial: {
-        lhs: "_f(x,y)",
-        rhs: "[1+abc, 0, 0]",
-        type: "assignment" as const,
-      },
-      expectedFinal: {
-        lhs: "_f(x,abc)",
-        rhs: "[1+abc, 0, 0]",
-        type: "assignment" as const,
-      },
+      initial: func("_f", ["x", "y"], "[1+abc, 0, 0]"),
+      expectedFinal: func("_f", ["x", "abc"], "[1+abc, 0, 0]"),
+      expectedEvaluation: (_x: number, abc: number) => [1 + abc, 0, 0],
     },
-    evaluations: [
-      { parmaValues: [1, 0], expectedOutput: [1, 0, 0] },
-      { parmaValues: [0, 1], expectedOutput: [2, 0, 0] },
-    ],
+    domain: {
+      initial: dom(
+        func("_f", ["y"], "[-abc, abc]"),
+        func("_f", ["x"], "[-5, 5]")
+      ),
+      expectedFinal: dom(
+        func("_f", ["abc"], "[-abc, abc]"),
+        func("_f", ["x"], "[-5, 5]")
+      ),
+      expectedEvaluation: [(abc: number) => [-abc, abc], () => [-5, 5]],
+    },
     param: { name: "abc", index: 1 },
   },
 ])(
-  "Updating parameter names updates expression appropriately",
-  async ({ expression, param, evaluations }) => {
-    const item = makeItem(MIT.ParametricSurface, { expr: expression.initial });
+  "Updating parameter names updates other fields appropriately",
+  async ({ expression, param, domain }) => {
+    const item = makeItem(MIT.ParametricSurface, {
+      expr: expression.initial,
+      domain: domain.initial,
+    });
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
     const { store } = await renderTestApp(`/${scene.id}`);
@@ -83,45 +111,36 @@ test.each([
       item.id
     ] as MathItem<MIT.ParametricSurface>;
     expect(editedItem.properties.expr).toEqual(expression.expectedFinal);
+    expect(editedItem.properties.domain).toEqual(domain.expectedFinal);
 
     // assert MathScope updated correctly
-    const f = mathScope.results.get(id("expr"));
-    assertInstanceOf(f, Function);
-    const actuals = evaluations.map((e) => f(...e.parmaValues));
-    const expecteds = evaluations.map((e) => e.expectedOutput);
-    expect(actuals).toHaveLength(2);
-    expect(actuals).toStrictEqual(expecteds);
+    const exprF = mathScope.results.get(id("expr"));
+    invariant(exprF instanceof Function);
+
+    const [x, y] = [Math.random(), Math.random()];
+    expect(exprF(x, y)).toEqual(expression.expectedEvaluation(x, y));
+
+    type DomFunc = (x: number) => [number, number];
+    const domExpectedEval = domain.expectedEvaluation;
+    const domActualEval = mathScope.results.get(id("domain")) as DomFunc[];
+    const val = Math.random();
+    expect(domActualEval[0](val)).toEqual(domExpectedEval[0](val));
+    expect(domActualEval[1](val)).toEqual(domExpectedEval[1](val));
   }
 );
 
 test.each([
   {
     expression: {
-      initial: {
-        lhs: "_f(x,y)",
-        rhs: "[x, y, 0]",
-        type: "assignment" as const,
-      },
-      expectedFinal: {
-        lhs: "_f(a+b,y)",
-        rhs: "[x, y, 0]",
-        type: "assignment" as const,
-      },
+      initial: func("_f", ["x", "y"], "[1+abc, 0, 0]"),
+      expectedFinal: func("_f", ["a+b", "y"], "[1+abc, 0, 0]"),
     },
     param: { name: "a+b", index: 0 },
   },
   {
     expression: {
-      initial: {
-        lhs: "_f(x,y)",
-        rhs: "[x, y, 0]",
-        type: "assignment" as const,
-      },
-      expectedFinal: {
-        lhs: "_f(x,a+b)",
-        rhs: "[x, y, 0]",
-        type: "assignment" as const,
-      },
+      initial: func("_f", ["x", "y"], "[1+abc, 0, 0]"),
+      expectedFinal: func("_f", ["x", "a+b"], "[1+abc, 0, 0]"),
     },
     param: { name: "a+b", index: 1 },
   },
@@ -156,15 +175,18 @@ test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
   async ({ paramIndex }) => {
     const item = makeItem(MIT.ParametricSurface, {
       expr: {
-        lhs: "_f(x,y)",
+        name: "_f",
+        params: ["x", "y"],
         rhs: "[x, y, 0]",
-        type: "assignment",
+        type: "function-assignment",
       },
     });
     const scene = seedDb.withSceneFromItems([item]);
     await renderTestApp(`/${scene.id}`);
 
-    const exprInput = screen.getByLabelText(config.properties.expr.label);
+    const form = await findItemByDescription(item.properties.description);
+
+    const exprInput = within(form).getByLabelText(config.properties.expr.label);
 
     const paramInput = getParamNameInputs()[paramIndex];
     await user.clear(paramInput);
@@ -173,8 +195,17 @@ test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
 
     // param is invalid
     expect(paramInput).toHaveClass("has-error");
-    // expression is not (debateable, since one var is undefined now)
-    expect(exprInput).not.toHaveClass("has-error");
+    /**
+     * And no other fields are marked invalid.
+     *
+     * Other properties are invalid:
+     *  - expr is now a function with invalid LHS
+     *  - domain is now a function with invalid LHS
+     *
+     * But we only want to display the error with the parameter.
+     */
+    expect(form.querySelectorAll("[aria-invalid=true]")).toHaveLength(1);
+    expect(form.querySelectorAll(".has-error")).toHaveLength(1);
 
     await user.clear(paramInput);
     paramInput.focus();

@@ -1,4 +1,4 @@
-import { ParseableObjs } from "@/util/parsing";
+import { ParseableArray, ParseableObjs } from "@/util/parsing";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -8,6 +8,8 @@ import type {
 import {
   color,
   description,
+  domain3,
+  EvaluatedDomain3,
   opacity,
   shaded,
   visible,
@@ -24,11 +26,9 @@ interface ImplicitSurfaceProperties {
   zBias: string;
 
   shaded: string; // eval to boolean;
-  range1: string;
-  range2: string;
-  range3: string;
-  lhs: ParseableObjs["assignment"];
-  rhs: ParseableObjs["assignment"];
+  domain: ParseableArray<ParseableObjs["function-assignment"]>;
+  lhs: ParseableObjs["function-assignment"];
+  rhs: ParseableObjs["function-assignment"];
   samples: string;
 }
 
@@ -40,11 +40,41 @@ const defaultValues: ImplicitSurfaceProperties = {
   zIndex: "0",
   zBias: "0",
   shaded: "true",
-  range1: "[-5, 5]",
-  range2: "[-5, 5]",
-  range3: "[-5, 5]",
-  lhs: { lhs: "_f(x,y,z)", rhs: "x^2+y^2", type: "assignment" },
-  rhs: { lhs: "_f(x,y,z)", rhs: "z^2+1", type: "assignment" },
+  domain: {
+    type: "array",
+    items: [
+      {
+        type: "function-assignment",
+        name: "_f",
+        params: ["y", "z"],
+        rhs: "[-5, 5]",
+      },
+      {
+        type: "function-assignment",
+        name: "_f",
+        params: ["x", "z"],
+        rhs: "[-5, 5]",
+      },
+      {
+        type: "function-assignment",
+        name: "_f",
+        params: ["x", "y"],
+        rhs: "[-5, 5]",
+      },
+    ],
+  },
+  lhs: {
+    type: "function-assignment",
+    name: "_f",
+    params: ["x", "y", "z"],
+    rhs: "x^2+y^2",
+  },
+  rhs: {
+    type: "function-assignment",
+    name: "_f",
+    params: ["x", "y", "z"],
+    rhs: "z^2 + 1",
+  },
   samples: "20",
 };
 
@@ -57,9 +87,19 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
+type EvaluatedProperties = {
+  opacity: number;
+  domain: EvaluatedDomain3;
+  shaded: boolean;
+  visible: boolean;
+  zBias: number;
+  zIndex: number;
+};
+
 const config: IMathItemConfig<
   MathItemType.ImplicitSurface,
-  ImplicitSurfaceProperties
+  ImplicitSurfaceProperties,
+  EvaluatedProperties
 > = {
   type: MathItemType.ImplicitSurface,
   label: "Implicit Surface",
@@ -75,21 +115,7 @@ const config: IMathItemConfig<
       // scalar value used for x, y, z... why different from other surfaces?
     },
     shaded,
-    range1: {
-      name: "range1",
-      label: "Range X",
-      widget: WidgetType.MathValue,
-    },
-    range2: {
-      name: "range2",
-      label: "Range X",
-      widget: WidgetType.MathValue,
-    },
-    range3: {
-      name: "range3",
-      label: "Range X",
-      widget: WidgetType.MathValue,
-    },
+    domain: domain3,
     lhs: {
       name: "lhs",
       label: "Left-hand side",

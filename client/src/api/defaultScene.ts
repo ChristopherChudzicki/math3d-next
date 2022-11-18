@@ -8,13 +8,33 @@ const defaultScene: Omit<Scene, "id"> = {
       id: "1",
       type: MathItemType.ExplicitSurface,
       properties: {
-        expr: { lhs: "_f(x,y)", rhs: "1 - x^2 - y", type: "assignment" },
+        expr: {
+          name: "_f",
+          params: ["x", "y"],
+          rhs: "1 - x^2 - y",
+          type: "function-assignment",
+        },
         color: "#3498db",
         grid1: "8",
         grid2: "8",
         zBias: "0",
-        range1: "\\left[-2,\\ 2\\right]",
-        range2: "\\left[-2,\\ 2\\right]",
+        domain: {
+          type: "array",
+          items: [
+            {
+              type: "function-assignment",
+              name: "_f",
+              params: ["y"],
+              rhs: "[-5, 5]",
+            },
+            {
+              type: "function-assignment",
+              name: "_f",
+              params: ["x"],
+              rhs: "[-5, 5]",
+            },
+          ],
+        },
         shaded: "true",
         zIndex: "0",
         opacity: "0.5",

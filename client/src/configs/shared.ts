@@ -1,3 +1,4 @@
+import { validators } from "@/util";
 import { WidgetType } from "./constants";
 import type { PropertyConfig } from "./interfaces";
 
@@ -13,150 +14,180 @@ const description: PropertyConfig<"description"> = {
   widget: WidgetType.AutosizeText,
 };
 
-const gridOpacity: PropertyConfig<"gridOpacity"> = {
+const gridOpacity: PropertyConfig<"gridOpacity", number> = {
   name: "gridOpacity",
   label: "Grid Opacity",
   widget: WidgetType.MathValue,
-  // validate real number
+  validate: validators.positive,
 };
 
-const grid1: PropertyConfig<"grid1"> = {
+const grid1: PropertyConfig<"grid1", number> = {
   name: "grid1",
   label: "Grid (1st parameter)",
   widget: WidgetType.MathValue,
-  // validate real number
+  validate: validators.positive,
 };
 
-const grid2: PropertyConfig<"grid2"> = {
+const grid2: PropertyConfig<"grid2", number> = {
   name: "grid2",
   label: "Grid (2nd parameter)",
   widget: WidgetType.MathValue,
-  // validate real number
+  validate: validators.positive,
 };
 
-const gridWidth: PropertyConfig<"gridWidth"> = {
+const gridWidth: PropertyConfig<"gridWidth", number> = {
   name: "gridWidth",
   label: "Grid Width",
   widget: WidgetType.MathValue,
-  // validate real number
+  validate: validators.positive,
 };
 
 const label: PropertyConfig<"label"> = {
   name: "label",
   label: "Label",
   widget: WidgetType.Text,
-  // validate string
 };
 
-const labelVisible: PropertyConfig<"labelVisible"> = {
+const labelVisible: PropertyConfig<"labelVisible", boolean> = {
   name: "labelVisible",
   label: "Label Visible",
   widget: WidgetType.MathBoolean,
-  // validate boolean
+  validate: validators.boolean,
 };
 
-const opacity: PropertyConfig<"opacity"> = {
+const opacity: PropertyConfig<"opacity", number> = {
   name: "opacity",
   label: "Opacity",
   widget: WidgetType.MathValue,
-  // validate real number
+  validate: validators.positive,
 };
 
-const range1: PropertyConfig<"range1"> = {
+const range1: PropertyConfig<"range1", [number, number]> = {
   name: "range1",
   label: "Range (1st parameter)",
   widget: WidgetType.MathValue,
-  // complicated validation... [real, real] or func of V
+  validate: validators.realVec[2],
 };
 
-const range2: PropertyConfig<"range2"> = {
+type EvaluatedDomain1 = [() => [number, number]];
+
+const domain1: PropertyConfig<"domain", EvaluatedDomain1> = {
+  name: "domain",
+  label: "Domain",
+  widget: WidgetType.MathValue,
+};
+
+type EvaluatedDomain2 = [
+  (v: number) => [number, number],
+  (u: number) => [number, number]
+];
+
+const domain2: PropertyConfig<"domain", EvaluatedDomain2> = {
+  name: "domain",
+  label: "Range",
+  widget: WidgetType.CustomMath,
+};
+
+type EvaluatedDomain3 = [
+  (y: number, z: number) => [number, number],
+  (x: number, z: number) => [number, number],
+  (x: number, y: number) => [number, number]
+];
+
+const domain3: PropertyConfig<"domain", EvaluatedDomain3> = {
+  name: "domain",
+  label: "Range",
+  widget: WidgetType.CustomMath,
+};
+
+const range2: PropertyConfig<"range2", [number, number]> = {
   name: "range2",
   label: "Range (2nd parameter)",
   widget: WidgetType.MathValue,
-  // complicated validation... [real, real] or func of U
+  validate: validators.realVec[2],
 };
 
-const range3: PropertyConfig<"range3"> = {
+const range3: PropertyConfig<"range3", [number, number]> = {
   name: "range3",
   label: "Range (3rd parameter)",
   widget: WidgetType.MathValue,
-  // complicated validation... [real, real] or func of U
+  validate: validators.realVec[2],
 };
 
-const shaded: PropertyConfig<"shaded"> = {
+const shaded: PropertyConfig<"shaded", boolean> = {
   name: "shaded",
   label: "Shaded",
   widget: WidgetType.MathBoolean,
-  // validate real number
+  validate: validators.boolean,
 };
 
-const size: PropertyConfig<"size"> = {
+const size: PropertyConfig<"size", number> = {
   name: "size",
   label: "Size",
   widget: WidgetType.MathValue,
-  // validate real number
+  validate: validators.positive,
 };
 
-const samples1: PropertyConfig<"samples1"> = {
+const samples1: PropertyConfig<"samples1", number> = {
   name: "samples1",
   label: "Samples (1st parameter)",
   widget: WidgetType.MathValue,
-  // validate real number
+  validate: validators.positive,
 };
 
-const samples2: PropertyConfig<"samples2"> = {
+const samples2: PropertyConfig<"samples2", number> = {
   name: "samples2",
   label: "Samples (2nd parameter)",
   widget: WidgetType.MathValue,
-  // validate real number
+  validate: validators.positive,
 };
 
-const samples3: PropertyConfig<"samples3"> = {
+const samples3: PropertyConfig<"samples3", number> = {
   name: "samples3",
   label: "Samples (3rd parameter)",
   widget: WidgetType.MathValue,
-  // validate real number
+  validate: validators.positive,
 };
 
-const visible: PropertyConfig<"visible"> = {
+const visible: PropertyConfig<"visible", boolean> = {
   name: "visible",
   label: "Visible",
   widget: WidgetType.MathBoolean,
-  // validate boolean
+  validate: validators.boolean,
 };
 
-const width: PropertyConfig<"width"> = {
+const width: PropertyConfig<"width", number> = {
   name: "width",
   label: "Width",
   widget: WidgetType.MathValue,
-  // validate real number
+  validate: validators.positive,
 };
 
-const zBias: PropertyConfig<"zBias"> = {
+const zBias: PropertyConfig<"zBias", number> = {
   name: "zBias",
   label: "Z-Bias",
   widget: WidgetType.MathValue,
-  // validate real number
+  validate: validators.real,
 };
 
-const zIndex: PropertyConfig<"zIndex"> = {
+const zIndex: PropertyConfig<"zIndex", number> = {
   name: "zIndex",
   label: "Z-Index",
   widget: WidgetType.MathValue,
-  // validate real number
+  validate: validators.real,
 };
 
-const start: PropertyConfig<"start"> = {
+const start: PropertyConfig<"start", boolean> = {
   name: "start",
   label: "Arrow (start)",
   widget: WidgetType.MathBoolean,
-  // validate boolean
+  validate: validators.boolean,
 };
-const end: PropertyConfig<"end"> = {
+const end: PropertyConfig<"end", boolean> = {
   name: "end",
   label: "Arrow (end)",
   widget: WidgetType.MathBoolean,
-  // validate boolean
+  validate: validators.boolean,
 };
 
 export {
@@ -183,4 +214,9 @@ export {
   width,
   zBias,
   zIndex,
+  domain1,
+  domain2,
+  domain3,
 };
+
+export type { EvaluatedDomain1, EvaluatedDomain2, EvaluatedDomain3 };
