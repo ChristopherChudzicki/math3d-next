@@ -1,6 +1,6 @@
 import invariant from "tiny-invariant";
+import { isBatchError } from "@/util/batch";
 import { assertInstanceOf } from "../predicates";
-import { isBatchError } from "./batch";
 import { Parseable } from "./interfaces";
 import { DetailedAssignmentError } from "./MathJsParser";
 import { latexParser as parser } from "./parsers";
@@ -344,9 +344,7 @@ describe("Parsing arrays", () => {
       })
     );
 
-    if (!isBatchError(error)) {
-      throw new Error("Expected a batch error.");
-    }
+    invariant(isBatchError(error));
     expect(Object.keys(error.errors)).toHaveLength(2);
     expect(error.errors[1].message).toMatch(/Unexpected end of expression/);
     expect(error.errors[3].message).toMatch(/Unexpected end of expression/);

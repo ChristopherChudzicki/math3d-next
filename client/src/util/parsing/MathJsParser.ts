@@ -6,6 +6,7 @@ import {
   AssignmentError,
 } from "@/util/MathScope";
 import { assertInstanceOf } from "@/util/predicates";
+import { batch } from "@/util/batch";
 import { getValidatedEvaluate } from "./evaluate";
 import {
   IMathJsParser,
@@ -18,7 +19,7 @@ import {
   TextParserRegexRule,
   TextParserRule,
 } from "./interfaces";
-import { ArrayParseError, batch, batchNodes } from "./batch";
+import { batchNodes } from "./batch";
 
 const isBeforeMathjsRule = (
   rule: ParserRule
@@ -137,7 +138,7 @@ class MathJsParser implements IMathJsParser {
     items,
     validate,
   }: ParseableObjs["array"]): readonly [AnonMathNode, mjs.MathNode] => {
-    const parsed = batch(items, (item) => this.$parse(item), ArrayParseError);
+    const parsed = batch(items, (item) => this.$parse(item));
     const nodes = parsed.map((p) => p[0]);
     const mjsNodes = parsed.map((p) => p[1]);
     const mjsNode = new mjs.ArrayNode(mjsNodes);

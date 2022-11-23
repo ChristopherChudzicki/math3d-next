@@ -70,13 +70,6 @@ interface IMathJsParser {
   parse: Parse<Parseable>;
 }
 
-interface IBatchErrorCtor {
-  new (errors: Record<number, Error>): IBatchError;
-}
-interface IBatchError extends Error {
-  errors: Record<number, Error>;
-}
-
 export { ParserRuleType };
 export type {
   Parseable,
@@ -89,6 +82,4 @@ export type {
   TextParserRegexRule,
   TextParserRule,
   Validate,
-  IBatchError,
-  IBatchErrorCtor,
 };

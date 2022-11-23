@@ -1,6 +1,7 @@
 import { MathItem, WidgetType } from "@/configs";
 import React, { useCallback, useMemo } from "react";
-import { isBatchError, ParseableObjs } from "@/util/parsing";
+import { ParseableObjs } from "@/util/parsing";
+import { isBatchError } from "@/util/batch";
 
 import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
 import { ParameterErrors } from "@/util/parsing/rules";

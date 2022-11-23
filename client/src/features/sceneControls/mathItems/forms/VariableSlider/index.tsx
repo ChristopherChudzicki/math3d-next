@@ -14,7 +14,8 @@ import React, {
 import Slider, { SliderProps } from "@mui/material/Slider";
 import { useInterval } from "@/util/hooks/useInterval";
 import classNames from "classnames";
-import { ParseableObjs, isBatchError } from "@/util/parsing";
+import { ParseableObjs } from "@/util/parsing";
+import { isBatchError } from "@/util/batch";
 import SliderControls, { mustFindSpeed } from "./SliderControls";
 import type { SliderControlsProps } from "./SliderControls";
 import FieldWidget, {

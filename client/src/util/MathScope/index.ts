@@ -10,6 +10,7 @@ import type {
   AnonMathNode,
   Parse,
 } from "./interfaces";
+import { MathNodeType } from "./interfaces";
 import MathScope, { IdentifiedParseable, OnChangeListener } from "./MathScope";
 import { EvaluationError } from "./errors";
 
@@ -24,6 +25,7 @@ export type {
 
 export {
   adapter,
+  MathNodeType,
   EvaluationError,
   AssignmentError,
   DuplicateAssignmentError,
