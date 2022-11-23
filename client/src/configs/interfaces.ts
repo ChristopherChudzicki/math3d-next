@@ -1,6 +1,7 @@
+import type * as mjs from "mathjs";
 import type { MathItemType, WidgetType } from "./constants";
 
-export type Validate<V> = (value: unknown) => V;
+export type Validate<V> = (value: unknown, node: mjs.MathNode) => V;
 
 export interface MathItemProperties {
   description: string;

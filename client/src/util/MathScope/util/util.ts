@@ -48,20 +48,6 @@ const assertIsError: (err: unknown) => asserts err is Error = (err) => {
 };
 
 /**
- * Returns the intersection of input sets.
- */
-const setIntersection = <T>(...sets: Set<T>[]): Set<T> => {
-  const result = new Set<T>();
-  if (sets.length === 0) return result;
-  sets[0].forEach((item) => {
-    if (sets.every((set) => set.has(item))) {
-      result.add(item);
-    }
-  });
-  return result;
-};
-
-/**
  * Returns the union of input sets.
  */
 const setUnion = <T>(...sets: Set<T>[]): Set<T> => {
@@ -125,6 +111,5 @@ export {
   isAssignmentNode,
   isNotNil,
   setDifference,
-  setIntersection,
   setUnion,
 };

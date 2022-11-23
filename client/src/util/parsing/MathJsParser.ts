@@ -1,11 +1,16 @@
 import * as mjs from "mathjs";
 
-import { adapter as msAdapter, AssignmentError } from "@/util/MathScope";
+import {
+  adapter as msAdapter,
+  AnonMathNode,
+  AssignmentError,
+} from "@/util/MathScope";
 import { assertInstanceOf } from "@/util/predicates";
 import { getValidatedEvaluate } from "./evaluate";
 import {
   IMathJsParser,
   MathJsRule,
+  Parseable,
   ParseableObjs,
   ParserRule,
   ParserRuleType,
@@ -82,7 +87,10 @@ class MathJsParser implements IMathJsParser {
     lhs,
     rhs,
     validate,
-  }: Omit<ParseableObjs["assignment"], "type">) => {
+  }: Omit<ParseableObjs["assignment"], "type">): readonly [
+    AnonMathNode,
+    mjs.MathNode
+  ] => {
     let lhsError: Error | undefined;
     let rhsError: Error | undefined;
     try {
@@ -109,7 +117,7 @@ class MathJsParser implements IMathJsParser {
 
     const expr = `${lhs}=${rhs}`;
 
-    return this.parse({ expr, validate });
+    return this.$parse({ expr, validate });
   };
 
   private parseFunctionAssignment = ({
@@ -117,17 +125,28 @@ class MathJsParser implements IMathJsParser {
     params,
     rhs,
     validate,
-  }: Omit<ParseableObjs["function-assignment"], "type">) => {
+  }: Omit<ParseableObjs["function-assignment"], "type">): readonly [
+    AnonMathNode,
+    mjs.MathNode
+  ] => {
     const lhs = `${name}(${params.join(",")})`;
     return this.parseAssignment({ lhs, rhs, validate });
   };
 
-  private parseArray = ({ items, validate }: ParseableObjs["array"]) => {
-    const parsed = batch(items, (item) => this.parse(item), ArrayParseError);
-    return batchNodes(parsed, validate);
+  private parseArray = ({
+    items,
+    validate,
+  }: ParseableObjs["array"]): readonly [AnonMathNode, mjs.MathNode] => {
+    const parsed = batch(items, (item) => this.$parse(item), ArrayParseError);
+    const nodes = parsed.map((p) => p[0]);
+    const mjsNodes = parsed.map((p) => p[1]);
+    const mjsNode = new mjs.ArrayNode(mjsNodes);
+    return [batchNodes(nodes, mjsNode, validate), mjsNode] as const;
   };
 
-  parse: IMathJsParser["parse"] = (parseable) => {
+  private $parse = (
+    parseable: Parseable
+  ): readonly [AnonMathNode, mjs.MathNode] => {
     const parseableObj =
       typeof parseable === "string" ? { expr: parseable } : parseable;
     if (parseableObj.type === "assignment") {
@@ -143,7 +162,11 @@ class MathJsParser implements IMathJsParser {
     const mjsNode = this.mjsParse(preprocessed);
     const evaluate = getValidatedEvaluate(mjsNode, parseableObj.validate);
     const node = msAdapter.convertNode(mjsNode, evaluate);
-    return node;
+    return [node, mjsNode];
+  };
+
+  parse: IMathJsParser["parse"] = (parseable) => {
+    return this.$parse(parseable)[0];
   };
 
   private static applyTextRegexpRule = (

@@ -1,3 +1,4 @@
+import * as mjs from "mathjs";
 import { AnonMathNode, EvaluationError } from "../MathScope";
 import { MathNodeType } from "../MathScope/interfaces";
 import { assertInstanceOf } from "../predicates";
@@ -51,6 +52,7 @@ const batch = <T, R, E extends IBatchErrorCtor>(
 const noOp = () => {};
 const batchNodes = (
   nodes: AnonMathNode[],
+  mjsNode: mjs.ArrayNode,
   validate: NonNullable<ParseableObjs["array"]["validate"]> = noOp
 ): AnonMathNode => {
   const evaluate: AnonMathNode["evaluate"] = (scope) => {
@@ -59,7 +61,7 @@ const batchNodes = (
       (node) => node.evaluate(scope),
       ArrayEvaluationError
     );
-    validate(result);
+    validate(result, mjsNode);
     return result;
   };
   const dependencies = new Set(nodes.flatMap((node) => [...node.dependencies]));
