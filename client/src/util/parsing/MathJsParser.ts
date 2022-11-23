@@ -4,9 +4,10 @@ import {
   adapter as msAdapter,
   AnonMathNode,
   AssignmentError,
+  MathNodeType,
 } from "@/util/MathScope";
 import { assertInstanceOf } from "@/util/predicates";
-import { batch } from "@/util/batch";
+import aggregate from "@/util/aggregate";
 import { getValidatedEvaluate } from "./evaluate";
 import {
   IMathJsParser,
@@ -19,7 +20,6 @@ import {
   TextParserRegexRule,
   TextParserRule,
 } from "./interfaces";
-import { batchNodes } from "./batch";
 
 const isBeforeMathjsRule = (
   rule: ParserRule
@@ -138,11 +138,14 @@ class MathJsParser implements IMathJsParser {
     items,
     validate,
   }: ParseableObjs["array"]): readonly [AnonMathNode, mjs.MathNode] => {
-    const parsed = batch(items, (item) => this.$parse(item));
+    const parsed = aggregate(items, (item) => this.$parse(item));
     const nodes = parsed.map((p) => p[0]);
     const mjsNodes = parsed.map((p) => p[1]);
     const mjsNode = new mjs.ArrayNode(mjsNodes);
-    return [batchNodes(nodes, mjsNode, validate), mjsNode] as const;
+    return [
+      MathJsParser.aggregateNodes(nodes, mjsNode, validate),
+      mjsNode,
+    ] as const;
   };
 
   private $parse = (
@@ -185,6 +188,26 @@ class MathJsParser implements IMathJsParser {
         text.slice(match.index + match[0].length),
       ].join("");
     }, expr);
+  };
+
+  private static aggregateNodes = (
+    nodes: AnonMathNode[],
+    mjsNode: mjs.ArrayNode,
+    validate: NonNullable<ParseableObjs["array"]["validate"]> = (x) => x
+  ): AnonMathNode => {
+    const evaluate: AnonMathNode["evaluate"] = (scope) => {
+      const result = aggregate(nodes, (node) => node.evaluate(scope));
+      return validate(result, mjsNode);
+    };
+    const dependencies = new Set(
+      nodes.flatMap((node) => [...node.dependencies])
+    );
+
+    return {
+      type: MathNodeType.Value,
+      evaluate,
+      dependencies,
+    };
   };
 }
 

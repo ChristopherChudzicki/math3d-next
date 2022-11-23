@@ -15,7 +15,6 @@ import Slider, { SliderProps } from "@mui/material/Slider";
 import { useInterval } from "@/util/hooks/useInterval";
 import classNames from "classnames";
 import { ParseableObjs } from "@/util/parsing";
-import { isBatchError } from "@/util/batch";
 import SliderControls, { mustFindSpeed } from "./SliderControls";
 import type { SliderControlsProps } from "./SliderControls";
 import FieldWidget, {
@@ -239,7 +238,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
   }, [range, onWidgetChange]);
   const rangeErrors: { min?: Error; max?: Error } = useMemo(() => {
     if (!errors.range) return {};
-    if (isBatchError(errors.range)) {
+    if (errors.range instanceof AggregateError) {
       return {
         min: errors.range.errors[0],
         max: errors.range.errors[1],
