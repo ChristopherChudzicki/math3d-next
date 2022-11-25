@@ -1,6 +1,6 @@
 import { MathItem, WidgetType } from "@/configs";
 import React, { useCallback, useMemo } from "react";
-import { isBatchError, ParseableObjs } from "@/util/parsing";
+import { ParseableObjs } from "@/util/parsing";
 
 import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
 import { ParameterErrors } from "@/util/parsing/rules";
@@ -90,7 +90,7 @@ const DomainForm: React.FC<DomainFormProps> = ({
           domainIndex: number
         ) => {
           if (!err) return undefined;
-          if (!isBatchError(err)) return err;
+          if (!(err instanceof AggregateError)) return err;
           const indexError = err.errors[domainIndex];
           if (indexError instanceof DetailedAssignmentError)
             return indexError.rhs;

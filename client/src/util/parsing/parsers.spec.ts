@@ -1,6 +1,5 @@
 import invariant from "tiny-invariant";
 import { assertInstanceOf } from "../predicates";
-import { isBatchError } from "./batch";
 import { Parseable } from "./interfaces";
 import { DetailedAssignmentError } from "./MathJsParser";
 import { latexParser as parser } from "./parsers";
@@ -302,14 +301,16 @@ describe("Parsing arrays", () => {
     expect(g(3)).toBe(27);
   });
 
-  it("Can validate the overall array result", () => {
+  it("Can validate and transform the overall array result", () => {
     const validate = ([a, b]: unknown[]) => {
-      if ((b as number) < (a as number)) {
+      invariant(typeof a === "number" && typeof b === "number");
+      if (a > b) {
         throw new Error("Shucks!");
       }
+      return [a ** 2, b ** 2];
     };
     const node = parser.parse({ type: "array", items: ["1", "2"], validate });
-    expect(node.evaluate()).toEqual([1, 2]);
+    expect(node.evaluate()).toEqual([1, 4]);
 
     const shouldThrow = () =>
       parser.parse({ type: "array", items: ["2", "1"], validate }).evaluate();
@@ -344,10 +345,10 @@ describe("Parsing arrays", () => {
       })
     );
 
-    if (!isBatchError(error)) {
-      throw new Error("Expected a batch error.");
-    }
-    expect(Object.keys(error.errors)).toHaveLength(2);
+    invariant(error instanceof AggregateError);
+    expect(
+      Object.values(error.errors).filter((e) => e !== undefined)
+    ).toHaveLength(2);
     expect(error.errors[1].message).toMatch(/Unexpected end of expression/);
     expect(error.errors[3].message).toMatch(/Unexpected end of expression/);
   });
@@ -361,10 +362,10 @@ describe("Parsing arrays", () => {
         })
         .evaluate()
     );
-    if (!isBatchError(error)) {
-      throw new Error("Expected a batch error.");
-    }
-    expect(Object.keys(error.errors)).toHaveLength(2);
+    invariant(error instanceof AggregateError);
+    expect(
+      Object.values(error.errors).filter((e) => e !== undefined)
+    ).toHaveLength(2);
     expect(error.errors[2].message).toMatch(/Undefined symbol x/);
     expect(error.errors[4].message).toMatch(/Undefined symbol y/);
   });

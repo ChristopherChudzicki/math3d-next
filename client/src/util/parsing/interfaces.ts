@@ -1,8 +1,8 @@
-import { MathNode as MJsNode } from "mathjs";
+import type * as mjs from "mathjs";
 
 import type { Parse } from "../MathScope";
 
-type Validate = (evaluated: unknown, parsed: math.MathNode) => void;
+type Validate = (evaluated: unknown, parsed: mjs.MathNode) => void;
 
 type ParseableObjs = {
   expr: {
@@ -26,7 +26,7 @@ type ParseableObjs = {
   array: {
     type: "array";
     items: Parseable[];
-    validate?: (evaluated: unknown[]) => void;
+    validate?: (evaluated: unknown[], node: mjs.ArrayNode) => void;
   };
 };
 
@@ -60,7 +60,7 @@ interface TextParserRegexRule {
 
 interface MathJsRule {
   type: ParserRuleType.MathJs;
-  transform: (node: MJsNode) => MJsNode;
+  transform: (node: mjs.MathNode) => mjs.MathNode;
 }
 
 type ParserRule = TextParserRule | TextParserRegexRule | MathJsRule;
@@ -68,13 +68,6 @@ type ParserRule = TextParserRule | TextParserRegexRule | MathJsRule;
 interface IMathJsParser {
   preprocess: (text: string) => string;
   parse: Parse<Parseable>;
-}
-
-interface IBatchErrorCtor {
-  new (errors: Record<number, Error>): IBatchError;
-}
-interface IBatchError extends Error {
-  errors: Record<number, Error>;
 }
 
 export { ParserRuleType };
@@ -89,6 +82,4 @@ export type {
   TextParserRegexRule,
   TextParserRule,
   Validate,
-  IBatchError,
-  IBatchErrorCtor,
 };

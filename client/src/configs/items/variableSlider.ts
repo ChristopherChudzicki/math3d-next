@@ -1,5 +1,6 @@
 import { validators } from "@/util";
-import { ParseableObjs, batch, ArrayEvaluationError } from "@/util/parsing";
+import { ParseableObjs } from "@/util/parsing";
+import aggregate from "@/util/aggregate";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -76,7 +77,7 @@ const config: IMathItemConfig<
       widget: WidgetType.MathValue,
       validate: (value) => {
         const array = validators.array(value);
-        batch(array, (v) => validators.real(v), ArrayEvaluationError);
+        aggregate(array, (v) => validators.real(v));
         const [min, max] = array as [number, number];
         if (min >= max) {
           throw new Error("Minimum must be less than maximum.");

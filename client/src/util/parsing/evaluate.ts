@@ -32,9 +32,11 @@ class FunctionEvaluationError extends EvaluationError {
   }
 }
 
+const identity = <T>(x: T): T => x;
+
 const getValidatedEvaluate = (
   mjsNode: math.MathNode,
-  validate: Validate = () => {}
+  validate: Validate = identity
 ): AnonMathNode["evaluate"] => {
   const compiled = mjsNode.compile();
   const unvalidatedEvaluate = (scope?: EvaluationScope) => {
@@ -71,8 +73,7 @@ const getValidatedEvaluate = (
   const evaluate = (scope?: EvaluationScope) => {
     try {
       const result = unvalidatedEvaluate(scope);
-      validate(result, mjsNode);
-      return result;
+      return validate(result, mjsNode);
     } catch (err) {
       assertInstanceOf(err, Error);
       if (err instanceof EvaluationError) {
