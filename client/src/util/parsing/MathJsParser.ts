@@ -118,7 +118,7 @@ class MathJsParser implements IMathJsParser {
 
     const expr = `${lhs}=${rhs}`;
 
-    return this.$parse({ expr, validate });
+    return this.$parse({ expr, validate, type: "expr" });
   };
 
   private parseFunctionAssignment = ({
@@ -151,8 +151,10 @@ class MathJsParser implements IMathJsParser {
   private $parse = (
     parseable: Parseable
   ): readonly [AnonMathNode, mjs.MathNode] => {
-    const parseableObj =
-      typeof parseable === "string" ? { expr: parseable } : parseable;
+    const parseableObj: Parseable =
+      typeof parseable === "string"
+        ? { expr: parseable, type: "expr" }
+        : parseable;
     if (parseableObj.type === "assignment") {
       return this.parseAssignment(parseableObj);
     }

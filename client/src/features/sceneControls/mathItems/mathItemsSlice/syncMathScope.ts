@@ -41,8 +41,10 @@ const getIdentifiedExpressions = (
         .map((prop) => {
           // @ts-expect-error ... TS does not know config and item are correlated
           const parseable: Parseable = item.properties[prop.name];
-          const parseableObj =
-            typeof parseable === "string" ? { expr: parseable } : parseable;
+          const parseableObj: Parseable =
+            typeof parseable === "string"
+              ? { expr: parseable, type: "expr" }
+              : parseable;
           return {
             id: mathScopeId(item.id, prop.name),
             parseable: {
