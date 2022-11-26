@@ -12,7 +12,7 @@ import {
 import type { ParseableObjs, ParseableArray } from "@/util/parsing";
 import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
 import invariant from "tiny-invariant";
-import { findItemByDescription } from "./__utils__";
+import { setupItemTest } from "./__utils__";
 
 const func = (
   name: string,
@@ -34,13 +34,34 @@ const dom = (
 
 const config = mathItemConfigs[MIT.ParametricSurface];
 
-const getParamNameInputs = (): HTMLTextAreaElement[] => {
+const getParamNameInputs = (): [HTMLTextAreaElement, HTMLTextAreaElement] => {
   const zeroth = screen.getByLabelText("Name for 1st parameter");
   const first = screen.getByLabelText("Name for 2nd parameter");
   assertInstanceOf(zeroth, HTMLTextAreaElement);
   assertInstanceOf(first, HTMLTextAreaElement);
   return [zeroth, first];
 };
+
+const getDomainInputs = (
+  itemElement: HTMLElement,
+  dimension: 2 | 3
+): HTMLTextAreaElement[] => {
+  const zeroth = within(itemElement).getByLabelText("Domain for 1st parameter");
+  const first = within(itemElement).getByLabelText("Domain for 2nd parameter");
+  assertInstanceOf(zeroth, HTMLTextAreaElement);
+  assertInstanceOf(first, HTMLTextAreaElement);
+  const result = [zeroth, first];
+  if (dimension === 3) {
+    const second = within(itemElement).getByLabelText(
+      "Domain for 3rd parameter"
+    );
+    assertInstanceOf(second, HTMLTextAreaElement);
+    result.push(second);
+  }
+  return result;
+};
+
+type DomFunc = (x: number) => [number, number];
 
 test.each([
   {
@@ -120,7 +141,6 @@ test.each([
     const [x, y] = [Math.random(), Math.random()];
     expect(exprF(x, y)).toEqual(expression.expectedEvaluation(x, y));
 
-    type DomFunc = (x: number) => [number, number];
     const domExpectedEval = domain.expectedEvaluation;
     const domActualEval = mathScope.results.get(id("domain")) as DomFunc[];
     const val = Math.random();
@@ -173,7 +193,7 @@ test.each([
 test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
   "when param name is invalid, error class is added, then removed when valid again",
   async ({ paramIndex }) => {
-    const item = makeItem(MIT.ParametricSurface, {
+    const { form } = await setupItemTest(MIT.ParametricSurface, {
       expr: {
         name: "_f",
         params: ["x", "y"],
@@ -181,10 +201,6 @@ test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
         type: "function-assignment",
       },
     });
-    const scene = seedDb.withSceneFromItems([item]);
-    await renderTestApp(`/${scene.id}`);
-
-    const form = await findItemByDescription(item.properties.description);
 
     const exprInput = within(form).getByLabelText(config.properties.expr.label);
 
@@ -219,5 +235,141 @@ test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
     exprInput.focus();
     await user.paste("[1,1,1]");
     expect(exprInput).not.toHaveClass("has-error");
+  }
+);
+
+test.each([
+  {
+    domain: {
+      initial: dom(
+        //
+        func("_f", ["y"], "[-5, 5]"),
+        func("_f", ["x"], "[-x, x]")
+      ),
+      expectedFinal: dom(
+        //
+        func("_f", ["y"], "[-2, 2]"),
+        func("_f", ["x"], "[-x, x]")
+      ),
+      expectedEvaluation: [
+        //
+        (_y: number) => [-2, 2],
+        (x: number) => [-x, x],
+      ],
+    },
+    change: { index: 0, value: "[-2, 2]" },
+  },
+  {
+    domain: {
+      initial: dom(
+        //
+        func("_f", ["y"], "[-5, 5]"),
+        func("_f", ["x"], "[-x, x]")
+      ),
+      expectedFinal: dom(
+        //
+        func("_f", ["y"], "[-5, 5]"),
+        func("_f", ["x"], "[-x^2, x^2]")
+      ),
+      expectedEvaluation: [
+        (_y: number) => [-5, 5],
+        (x: number) => [-(x ** 2), x ** 2],
+      ],
+    },
+    change: { index: 1, value: "[-x^2, x^2]" },
+  },
+])(
+  "Updating domain functions (ParametricSurface)",
+  async ({ domain, change }) => {
+    const { item, form, store } = await setupItemTest(MIT.ParametricSurface, {
+      domain: domain.initial,
+    });
+    const domainInput = getDomainInputs(form, 2)[change.index];
+    await user.clear(domainInput);
+    await user.paste(change.value);
+
+    const mathScope = store.getState().mathItems.mathScope();
+    const id = nodeId(item);
+    const domExpectedEval = domain.expectedEvaluation;
+    const domActualEval = mathScope.results.get(id("domain")) as DomFunc[];
+    const val = Math.random();
+    expect(domActualEval[0](val)).toEqual(domExpectedEval[0](val));
+    expect(domActualEval[1](val)).toEqual(domExpectedEval[1](val));
+  }
+);
+
+test.each([0, 1, 2])("Updating domain arrays (ImplicitSurface)", async (i) => {
+  /**
+   * Here we want to test updating the domain values when the domain values are
+   * an array. Implicit Surfaces use array values rather than functions.
+   *
+   * (Right now, surfaces support function-based domains.)
+   */
+  const { item, form, store } = await setupItemTest(MIT.ImplicitSurface, {
+    domain: {
+      type: "array",
+      items: [
+        { type: "expr", expr: "[-5,5]" },
+        { type: "expr", expr: "[-5,5]" },
+        { type: "expr", expr: "[-5,5]" },
+      ],
+    },
+  });
+  const domainInput = getDomainInputs(form, 3)[i];
+  await user.clear(domainInput);
+  await user.paste("[-2,2]");
+
+  const mathScope = store.getState().mathItems.mathScope();
+  const id = nodeId(item);
+  const domExpectedEval = [
+    [-5, 5],
+    [-5, 5],
+    [-5, 5],
+  ].map((arr, j) => (i === j ? [-2, 2] : arr));
+  const domActualEval = mathScope.results.get(id("domain"));
+  expect(domActualEval).toEqual(domExpectedEval);
+});
+
+test.each([
+  {
+    domainInitial: dom(
+      //
+      func("_f", ["y"], "[-5, 5] + "),
+      func("_f", ["x"], "[-x, x]")
+    ),
+    errIndices: [0],
+    errClass: AggregateError,
+    errMatcher: expect.objectContaining({
+      errors: expect.objectContaining({
+        0: expect.objectContaining({
+          rhs: expect.objectContaining({
+            message: expect.stringMatching(/Unexpected end of expression/),
+          }),
+        }),
+      }),
+    }),
+  },
+])(
+  "Domain functions errors",
+  async ({ domainInitial, errClass, errIndices, errMatcher }) => {
+    const { form, store, item } = await setupItemTest(MIT.ParametricSurface, {
+      domain: domainInitial,
+    });
+
+    const errCount = errIndices.length;
+    expect(form.querySelectorAll("[aria-invalid=true]")).toHaveLength(errCount);
+    expect(form.querySelectorAll(".has-error")).toHaveLength(errCount);
+    const domainInputs = getDomainInputs(form, 2);
+    errIndices.forEach((i) => {
+      expect(domainInputs[i]).toHaveClass("has-error");
+      expect(domainInputs[i]).toHaveAttribute("aria-invalid", "true");
+    });
+
+    const mathScope = store.getState().mathItems.mathScope();
+    const id = nodeId(item);
+
+    const error = mathScope.errors.get(id("domain"));
+    expect(error).toBeInstanceOf(errClass);
+    expect(error).toEqual(errMatcher);
   }
 );

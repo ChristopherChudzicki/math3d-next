@@ -6,7 +6,7 @@ type Validate = (evaluated: unknown, parsed: mjs.MathNode) => void;
 
 type ParseableObjs = {
   expr: {
-    type?: "expr";
+    type: "expr";
     expr: string;
     validate?: Validate;
   };

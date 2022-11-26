@@ -17,6 +17,7 @@ interface GenericRangedMathItemFormProps<T extends MIT> {
   item: MathItem<T>;
   exprNames: readonly (keyof MathItem<T>["properties"] & string)[];
   children?: React.FC<ExpressionProps>;
+  domainFunctions?: boolean;
 }
 
 type RangedMathItemFormProps =

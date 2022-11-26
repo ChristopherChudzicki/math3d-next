@@ -42,7 +42,11 @@ const ParameterForm: React.FC<ParameterFormProps> = (props) => {
 };
 
 type HasDomain = {
-  properties: { domain: ParseableArray<ParseableObjs["function-assignment"]> };
+  properties: {
+    domain: ParseableArray<
+      ParseableObjs["function-assignment"] | ParseableObjs["expr"]
+    >;
+  };
 };
 
 interface DomainFormProps {
@@ -57,15 +61,23 @@ const DomainForm: React.FC<DomainFormProps> = ({
 }) => {
   const { domain } = item.properties;
 
-  invariant(domain.items.every((x) => x.type === "function-assignment"));
+  invariant(
+    domain.items.every(
+      (x) => x.type === "expr" || x.type === "function-assignment"
+    ),
+    "Domain must be a list of expressions or function assignments"
+  );
 
   const patchProperty = usePatchPropertyOnChange(item);
   const { assignments, errors: assignmentErrors, handlers } = exprProps;
   const domainValueHandlers: OnWidgetChange<string>[] = useMemo(() => {
-    return domain.items.map((_item, i) => {
+    return domain.items.map((paramDomain, i) => {
       const f: OnWidgetChange<string> = (e) => {
         const event = { ...e, name: "domain" };
-        const subpath = `/items/${i}/rhs`;
+        const subpath =
+          paramDomain.type === "function-assignment"
+            ? `items/${i}/rhs`
+            : `items/${i}/expr`;
         patchProperty(event, subpath);
       };
       return f;
@@ -74,11 +86,6 @@ const DomainForm: React.FC<DomainFormProps> = ({
   return (
     <ParameterContainer>
       {domain.items.map((paramDomain, i) => {
-        invariant(
-          typeof paramDomain !== "string" &&
-            paramDomain.type === "function-assignment"
-        );
-
         /**
          * The domain property is an array for functions.
          * The UI displays each item in the array with separate LHS and RHS fields.
@@ -117,10 +124,14 @@ const DomainForm: React.FC<DomainFormProps> = ({
               <FieldWidget
                 className={styles["param-input"]}
                 widget={WidgetType.MathValue}
-                label={`Range for ${ordinal(i + 1)} parameter`}
+                label={`Domain for ${ordinal(i + 1)} parameter`}
                 name={`${ordinal(i + 1)}-parameter-value`}
                 error={getDomainIndexRhsError(domainError, i)}
-                value={paramDomain.rhs}
+                value={
+                  paramDomain.type === "function-assignment"
+                    ? paramDomain.rhs
+                    : paramDomain.expr
+                }
                 onChange={domainValueHandlers[i]}
               />
             }
@@ -188,7 +199,10 @@ const useExpressionsAndParameters = (
       exprNames.map((name) => {
         // @ts-expect-error TODO: Resolve this.
         const expr = item.properties[name];
-        invariant(expr.type === "function-assignment");
+        invariant(
+          expr.type === "function-assignment",
+          "Expected type: function-assignment"
+        );
         return expr;
       }),
     [exprNames, item.properties]
@@ -212,15 +226,14 @@ const useExpressionsAndParameters = (
         name: "domain",
         value: {
           items: domain.items.map((pd, i) => {
-            invariant(
-              typeof pd !== "string" && pd.type === "function-assignment"
-            );
-            return {
-              type: "function-assignment",
-              name: "_f",
-              params: newParameters.filter((p, k) => k !== i),
-              rhs: pd.rhs,
-            };
+            return pd.type === "expr"
+              ? pd
+              : {
+                  type: "function-assignment",
+                  name: "_f",
+                  params: newParameters.filter((p, k) => k !== i),
+                  rhs: pd.rhs,
+                };
           }),
           type: "array",
         },

@@ -34,7 +34,7 @@ interface ParametricCurveProperties {
   start: string; // eval to boolean;
   end: string; // eval to boolean;
   expr: ParseableObjs["function-assignment"];
-  domain: ParseableArray<ParseableObjs["function-assignment"]>;
+  domain: ParseableArray<ParseableObjs["expr"]>;
   samples1: string;
 }
 
@@ -59,10 +59,8 @@ const defaultValues: ParametricCurveProperties = {
     type: "array",
     items: [
       {
-        type: "function-assignment",
-        name: "_f",
-        params: [],
-        rhs: "[-2*pi, 2*pi]",
+        type: "expr",
+        expr: "[-2*pi, 2*pi]",
       },
     ],
   },

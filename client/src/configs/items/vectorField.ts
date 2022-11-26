@@ -35,7 +35,7 @@ interface VectorFieldProperties {
   width: string;
   start: string; // eval to boolean;
   end: string; // eval to boolean;
-  domain: ParseableArray<ParseableObjs["function-assignment"]>;
+  domain: ParseableArray<ParseableObjs["expr"]>;
   expr: ParseableObjs["function-assignment"];
   samples1: string;
   samples2: string;
@@ -58,22 +58,16 @@ const defaultValues: VectorFieldProperties = {
     type: "array",
     items: [
       {
-        type: "function-assignment",
-        name: "_f",
-        params: ["y", "z"],
-        rhs: "[-5, 5]",
+        type: "expr",
+        expr: "[-5, 5]",
       },
       {
-        type: "function-assignment",
-        name: "_f",
-        params: ["x", "z"],
-        rhs: "[-5, 5]",
+        type: "expr",
+        expr: "[-5, 5]",
       },
       {
-        type: "function-assignment",
-        name: "_f",
-        params: ["x", "y"],
-        rhs: "[-5, 5]",
+        type: "expr",
+        expr: "[-5, 5]",
       },
     ],
   },
