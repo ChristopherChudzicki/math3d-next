@@ -26,7 +26,7 @@ interface ImplicitSurfaceProperties {
   zBias: string;
 
   shaded: string; // eval to boolean;
-  domain: ParseableArray<ParseableObjs["function-assignment"]>;
+  domain: ParseableArray<ParseableObjs["expr"]>;
   lhs: ParseableObjs["function-assignment"];
   rhs: ParseableObjs["function-assignment"];
   samples: string;
@@ -44,22 +44,16 @@ const defaultValues: ImplicitSurfaceProperties = {
     type: "array",
     items: [
       {
-        type: "function-assignment",
-        name: "_f",
-        params: ["y", "z"],
-        rhs: "[-5, 5]",
+        type: "expr",
+        expr: "[-5, 5]",
       },
       {
-        type: "function-assignment",
-        name: "_f",
-        params: ["x", "z"],
-        rhs: "[-5, 5]",
+        type: "expr",
+        expr: "[-5, 5]",
       },
       {
-        type: "function-assignment",
-        name: "_f",
-        params: ["x", "y"],
-        rhs: "[-5, 5]",
+        type: "expr",
+        expr: "[-5, 5]",
       },
     ],
   },

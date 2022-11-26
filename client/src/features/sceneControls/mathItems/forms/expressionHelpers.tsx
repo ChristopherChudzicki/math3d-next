@@ -64,7 +64,8 @@ const DomainForm: React.FC<DomainFormProps> = ({
   invariant(
     domain.items.every(
       (x) => x.type === "expr" || x.type === "function-assignment"
-    )
+    ),
+    "Domain must be a list of expressions or function assignments"
   );
 
   const patchProperty = usePatchPropertyOnChange(item);
@@ -75,8 +76,8 @@ const DomainForm: React.FC<DomainFormProps> = ({
         const event = { ...e, name: "domain" };
         const subpath =
           paramDomain.type === "function-assignment"
-            ? `/items/${i}/rhs`
-            : `/items/${i}/value`;
+            ? `items/${i}/rhs`
+            : `items/${i}/value`;
         patchProperty(event, subpath);
       };
       return f;
@@ -198,7 +199,10 @@ const useExpressionsAndParameters = (
       exprNames.map((name) => {
         // @ts-expect-error TODO: Resolve this.
         const expr = item.properties[name];
-        invariant(expr.type === "function-assignment");
+        invariant(
+          expr.type === "function-assignment",
+          "Expected type: function-assignment"
+        );
         return expr;
       }),
     [exprNames, item.properties]
@@ -222,15 +226,14 @@ const useExpressionsAndParameters = (
         name: "domain",
         value: {
           items: domain.items.map((pd, i) => {
-            invariant(
-              typeof pd !== "string" && pd.type === "function-assignment"
-            );
-            return {
-              type: "function-assignment",
-              name: "_f",
-              params: newParameters.filter((p, k) => k !== i),
-              rhs: pd.rhs,
-            };
+            return pd.type === "expr"
+              ? pd
+              : {
+                  type: "function-assignment",
+                  name: "_f",
+                  params: newParameters.filter((p, k) => k !== i),
+                  rhs: pd.rhs,
+                };
           }),
           type: "array",
         },
