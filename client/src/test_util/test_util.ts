@@ -13,8 +13,10 @@ const permutations = <T>(tokens: T[], subperms: T[][] = [[]]): T[][] =>
       );
 
 /**
- * Returns a callback that transforms a mathItem into a callback mapping prop
- * names to mathScope node ids.
+ * Helps transform a mathItem's property names into MathScope node ids.
+ *
+ * Returns `propName => <nodeId for prop value>`
+ *
  */
 const nodeId =
   <T extends MathItem>(item: T) =>

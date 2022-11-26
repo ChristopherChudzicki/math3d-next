@@ -1,4 +1,14 @@
-import { screen, within, user, assertInstanceOf } from "@/test_util";
+import type { MathItemType, MathItem } from "@/configs";
+import {
+  screen,
+  within,
+  user,
+  assertInstanceOf,
+  makeItem,
+  seedDb,
+  renderTestApp,
+} from "@/test_util";
+import invariant from "tiny-invariant";
 
 const addItem = async (itemTypeLabel: string): Promise<void> => {
   const addNewItemButton = screen.getByText("Add New Object");
@@ -25,10 +35,30 @@ const findBtn = async (item: HTMLElement, name: string | RegExp) => {
   return btn;
 };
 
+/**
+ * Renders test app with specified item
+ */
+const setupItemTest = async <T extends MathItemType>(
+  type: T,
+  props: Partial<MathItem<T>["properties"]> = {}
+) => {
+  const item = makeItem(type, props);
+  const scene = seedDb.withSceneFromItems([item]);
+  const { store } = await renderTestApp(`/${scene.id}`);
+
+  const form = await findItemByDescription(item.properties.description);
+  invariant(
+    form instanceof HTMLFormElement,
+    "Expected item form to be an HTMLFormElement"
+  );
+  return { item, form, store };
+};
+
 export {
   addItem,
   clickRemoveItem,
   getItemByDescription,
   findItemByDescription,
   findBtn,
+  setupItemTest,
 };

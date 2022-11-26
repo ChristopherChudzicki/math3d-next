@@ -77,7 +77,7 @@ const DomainForm: React.FC<DomainFormProps> = ({
         const subpath =
           paramDomain.type === "function-assignment"
             ? `items/${i}/rhs`
-            : `items/${i}/value`;
+            : `items/${i}/expr`;
         patchProperty(event, subpath);
       };
       return f;
@@ -124,7 +124,7 @@ const DomainForm: React.FC<DomainFormProps> = ({
               <FieldWidget
                 className={styles["param-input"]}
                 widget={WidgetType.MathValue}
-                label={`Range for ${ordinal(i + 1)} parameter`}
+                label={`Domain for ${ordinal(i + 1)} parameter`}
                 name={`${ordinal(i + 1)}-parameter-value`}
                 error={getDomainIndexRhsError(domainError, i)}
                 value={
