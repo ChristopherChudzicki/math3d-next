@@ -142,10 +142,12 @@ test.each([
     expect(exprF(x, y)).toEqual(expression.expectedEvaluation(x, y));
 
     const domExpectedEval = domain.expectedEvaluation;
-    const domActualEval = mathScope.results.get(id("domain")) as DomFunc[];
+    const domActualEval = mathScope.results.get(id("domain")) as {
+      value: DomFunc[];
+    };
     const val = Math.random();
-    expect(domActualEval[0](val)).toEqual(domExpectedEval[0](val));
-    expect(domActualEval[1](val)).toEqual(domExpectedEval[1](val));
+    expect(domActualEval.value[0](val)).toEqual(domExpectedEval[0](val));
+    expect(domActualEval.value[1](val)).toEqual(domExpectedEval[1](val));
   }
 );
 
@@ -291,10 +293,12 @@ test.each([
     const mathScope = store.getState().mathItems.mathScope();
     const id = nodeId(item);
     const domExpectedEval = domain.expectedEvaluation;
-    const domActualEval = mathScope.results.get(id("domain")) as DomFunc[];
+    const domActualEval = mathScope.results.get(id("domain")) as {
+      value: DomFunc[];
+    };
     const val = Math.random();
-    expect(domActualEval[0](val)).toEqual(domExpectedEval[0](val));
-    expect(domActualEval[1](val)).toEqual(domExpectedEval[1](val));
+    expect(domActualEval.value[0](val)).toEqual(domExpectedEval[0](val));
+    expect(domActualEval.value[1](val)).toEqual(domExpectedEval[1](val));
   }
 );
 
@@ -347,6 +351,78 @@ test.each([
           }),
         }),
       }),
+    }),
+  },
+])(
+  "Domain functions errors",
+  async ({ domainInitial, errClass, errIndices, errMatcher }) => {
+    const { form, store, item } = await setupItemTest(MIT.ParametricSurface, {
+      domain: domainInitial,
+    });
+
+    const errCount = errIndices.length;
+    expect(form.querySelectorAll("[aria-invalid=true]")).toHaveLength(errCount);
+    expect(form.querySelectorAll(".has-error")).toHaveLength(errCount);
+    const domainInputs = getDomainInputs(form, 2);
+    errIndices.forEach((i) => {
+      expect(domainInputs[i]).toHaveClass("has-error");
+      expect(domainInputs[i]).toHaveAttribute("aria-invalid", "true");
+    });
+
+    const mathScope = store.getState().mathItems.mathScope();
+    const id = nodeId(item);
+
+    const error = mathScope.errors.get(id("domain"));
+    expect(error).toBeInstanceOf(errClass);
+    expect(error).toEqual(errMatcher);
+  }
+);
+
+test.each([
+  {
+    domainInitial: dom(
+      //
+      func("_f", ["y"], "[-5, 5] + "),
+      func("_f", ["x"], "[-x, x]")
+    ),
+    errIndices: [0],
+    errClass: AggregateError,
+    errMatcher: expect.objectContaining({
+      errors: expect.objectContaining({
+        0: expect.objectContaining({
+          rhs: expect.objectContaining({
+            message: expect.stringMatching(/Unexpected end of expression/),
+          }),
+        }),
+      }),
+    }),
+  },
+  {
+    domainInitial: dom(
+      //
+      func("_f", ["y"], "[0, a + b]"),
+      func("_f", ["x"], "[0, x]")
+    ),
+    errIndices: [0],
+    errClass: AggregateError,
+    errMatcher: expect.objectContaining({
+      errors: expect.objectContaining({
+        0: expect.objectContaining({
+          message: expect.stringMatching(/Undefined symbol a/),
+        }),
+      }),
+    }),
+  },
+  {
+    domainInitial: dom(
+      //
+      func("_f", ["y"], "[0, y]"),
+      func("_f", ["x"], "[0, x]")
+    ),
+    errIndices: [0, 1],
+    errClass: Error,
+    errMatcher: expect.objectContaining({
+      message: "Cyclic Dependency: Both domain functions depend on each other.",
     }),
   },
 ])(

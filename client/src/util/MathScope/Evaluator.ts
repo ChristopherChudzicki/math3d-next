@@ -26,7 +26,7 @@ interface EvaluatorAction {
 export class UnmetDependencyError extends EvaluationError {
   constructor(unmetDependencyNames: string[]) {
     const sorted = [...unmetDependencyNames].sort();
-    const message = `Undefined symbol(s): ${sorted}`;
+    const message = `Undefined symbol${sorted.length > 1 ? "s" : ""} ${sorted}`;
     super(message);
   }
 }
@@ -228,11 +228,8 @@ export default class Evaluator {
         ) {
           this.scope.set(node.name, evaluated);
         }
-      } catch (rawError) {
-        assertIsError(rawError);
-        const unmet = getUnmetDependencies(node, this.scope);
-        const error =
-          unmet.length > 0 ? new UnmetDependencyError(unmet) : rawError;
+      } catch (error) {
+        assertIsError(error);
         results.delete(exprId);
         if (isAssignmentNode(node)) {
           this.scope.delete(node.name);

@@ -1,9 +1,5 @@
 import * as adapter from "./adapter";
-import {
-  AssignmentError,
-  DuplicateAssignmentError,
-  UnmetDependencyError,
-} from "./Evaluator";
+import { AssignmentError, DuplicateAssignmentError } from "./Evaluator";
 import type {
   MathNode,
   EvaluationScope,
@@ -29,7 +25,6 @@ export {
   EvaluationError,
   AssignmentError,
   DuplicateAssignmentError,
-  UnmetDependencyError,
 };
 
 export default MathScope;

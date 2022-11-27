@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import React, { createContext, useContext, useEffect } from "react";
 import { act } from "react-dom/test-utils";
-import MathScope, { UnmetDependencyError } from "@/util/MathScope";
+import MathScope from "@/util/MathScope";
 import { CyclicAssignmentError } from "@/util/MathScope/Evaluator";
 import { assertNotNil } from "@/util/predicates";
 import { latexParser } from "@/util/parsing";
@@ -109,7 +109,7 @@ describe("useMathResults and useMathErrors", () => {
     expect(results.current).toStrictEqual({ a: 3, b: 9 });
   });
 
-  test("useMathErrors triggers re-renders when eval errors change", async () => {
+  test.only("useMathErrors triggers re-renders when eval errors change", async () => {
     const { errors, mathScope } = setup("id1", ["x", "y", "z"]);
 
     await act(() => {
@@ -117,7 +117,9 @@ describe("useMathResults and useMathErrors", () => {
     });
 
     expect(errors.current).toStrictEqual({
-      x: expect.any(UnmetDependencyError),
+      x: expect.objectContaining({
+        message: "Undefined symbol y",
+      }),
     });
 
     await act(() => {

@@ -25,7 +25,9 @@ class FunctionEvaluationError extends EvaluationError {
 
   constructor(name: string, error: Error) {
     const namedErrors = FunctionEvaluationError.getErrors(name, error);
-    const message = `Error evaluating ${namedErrors[0].name}: ${namedErrors[0].error.message}.`;
+    const message = name.startsWith("_")
+      ? namedErrors[0].error.message
+      : `Error evaluating ${namedErrors[0].name}: ${namedErrors[0].error.message}.`;
     super(message);
     this.innerError = error;
     this.funcName = name;

@@ -1,4 +1,4 @@
-import { validators } from "@/util";
+import { validators, domainFuncs } from "@/util/validators";
 import { WidgetType } from "./constants";
 import type { PropertyConfig } from "./interfaces";
 
@@ -69,35 +69,66 @@ const range1: PropertyConfig<"range1", [number, number]> = {
   validate: validators.realVec[2],
 };
 
-type EvaluatedDomain1 = [() => [number, number]];
+type EvaluatedDomain1 = [[number, number]];
 
 const domain1: PropertyConfig<"domain", EvaluatedDomain1> = {
   name: "domain",
   label: "Domain",
   widget: WidgetType.MathValue,
+  validate: validators.arrayOf(validators.realVec[2], 1),
 };
 
-type EvaluatedDomain2 = [
-  (v: number) => [number, number],
-  (u: number) => [number, number]
-];
+/**
+ * A pair of functions describing a simple subset of R2.
+ *
+ * For example:
+ * ```
+ * // For a function f(x, y)
+ * // x \in {0, 5}, y \in {0, x}
+ * {
+ *   value: [(y) => [0, 5], (x) => [0, x]],
+ *   order: [0, 1]
+ * }
+ * ```
+ * Here, the `order` property indicates a valid evaluation order for the variables'
+ * domains. In this case, the `y` domain depends on the value of `x`, so the
+ * evaluation order is "x first, then y".
+ *
+ * If the function were `f(y, x)`, then the evaluation order would be reversed.
+ *
+ */
+type EvaluatedDomain2 = {
+  value: [
+    (param: number) => [number, number],
+    (param: number) => [number, number]
+  ];
+  /**
+   *
+   */
+  order: [number, number];
+};
 
 const domain2: PropertyConfig<"domain", EvaluatedDomain2> = {
   name: "domain",
-  label: "Range",
+  label: "Domain",
   widget: WidgetType.CustomMath,
+  validate: (value, node) => {
+    const funcs = validators.arrayOf(validators.realFunc[1][2], 2)(value);
+    const order = domainFuncs[2](node);
+    return {
+      value: funcs,
+      order,
+    };
+  },
 };
 
-type EvaluatedDomain3 = [
-  (y: number, z: number) => [number, number],
-  (x: number, z: number) => [number, number],
-  (x: number, y: number) => [number, number]
-];
+type EvaluatedDomain3 = [[number, number], [number, number], [number, number]];
 
 const domain3: PropertyConfig<"domain", EvaluatedDomain3> = {
   name: "domain",
-  label: "Range",
+  label: "Domain",
   widget: WidgetType.CustomMath,
+  validate: validators.arrayOf(validators.realVec[2], 3),
 };
 
 const range2: PropertyConfig<"range2", [number, number]> = {
