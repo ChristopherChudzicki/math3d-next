@@ -1,24 +1,8 @@
 import * as math from "mathjs";
+import { getDependencies } from "@/util/mathjs-utils";
 
 import type { AnonMathNode, Parse } from "./interfaces";
 import { MathNodeType, Evaluate } from "./interfaces";
-
-const getDependencies = (
-  node: math.MathNode,
-  omit: Set<string> = new Set([])
-): Set<string> => {
-  if (node instanceof math.AssignmentNode) return getDependencies(node.value);
-  if (node instanceof math.FunctionAssignmentNode) {
-    return getDependencies(node.expr, new Set(node.params));
-  }
-  const dependencies = new Set<string>();
-  node.traverse((n) => {
-    if (n instanceof math.SymbolNode && !omit.has(n.name)) {
-      dependencies.add(n.name);
-    }
-  });
-  return dependencies;
-};
 
 export type ParseableObj = {
   expr: string;

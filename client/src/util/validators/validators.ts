@@ -1,4 +1,7 @@
 import * as yup from "yup";
+import type { TupleOf } from "@/types";
+import aggregate from "../aggregate";
+import type { Validator } from "./interfaces";
 
 const firstArg = <A, B, C>(f: (a: A, b?: B) => C) => {
   return (x: A) => f(x);
@@ -59,6 +62,7 @@ const numericFunc = <M extends Dim, N extends Dim>(fromDim: M, toDim: N) => {
     `Expected a function from R^${fromDim} -> R^${toDim}. ${detail}`;
   const schema = yup
     .mixed<RealFuncs[M][N]>()
+    .required()
     .test({
       name: `func-arity-${fromDim}`,
       message: message(`This is not a function from R^${fromDim}.`),
@@ -144,6 +148,25 @@ const realVecValidators = {
 
 const boolean = yup.boolean().strict().required();
 
+function arrayOf<T, N extends number>(
+  itemValidator: Validator<T>,
+  n: N
+): Validator<TupleOf<T, N>>;
+function arrayOf<T>(itemValidator: Validator<T>): Validator<T[]>;
+function arrayOf<T, N extends number>(itemValidator: Validator<T>, n?: N) {
+  return (value: unknown) => {
+    if (!Array.isArray(value)) {
+      throw new Error(`Expected an array, received a ${typeof value}`);
+    }
+    if (n !== undefined && value.length !== n) {
+      throw new Error(
+        `Expected an array of length ${n}, received ${value.length}`
+      );
+    }
+    return aggregate(value, itemValidator);
+  };
+}
+
 export const validators = {
   real: firstArg(real.validateSync.bind(real)),
   positive: firstArg(positive.validateSync.bind(positive)),
@@ -151,4 +174,5 @@ export const validators = {
   realFunc: realFuncValidators,
   realVec: realVecValidators,
   boolean: firstArg(boolean.validateSync.bind(boolean)),
+  arrayOf,
 };
