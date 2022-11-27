@@ -109,7 +109,7 @@ describe("useMathResults and useMathErrors", () => {
     expect(results.current).toStrictEqual({ a: 3, b: 9 });
   });
 
-  test.only("useMathErrors triggers re-renders when eval errors change", async () => {
+  test("useMathErrors triggers re-renders when eval errors change", async () => {
     const { errors, mathScope } = setup("id1", ["x", "y", "z"]);
 
     await act(() => {
