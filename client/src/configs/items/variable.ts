@@ -50,5 +50,5 @@ const config: IMathItemConfig<
 
 type Variable = IMathItem<MathItemType.Variable, VariableProperties>;
 
-export type { Variable, VariableProperties };
+export type { Variable, VariableProperties, EvaluatedProperties };
 export { config };

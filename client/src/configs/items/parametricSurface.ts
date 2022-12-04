@@ -161,5 +161,9 @@ type ParametricSurface = IMathItem<
   ParametricSurfaceProperties
 >;
 
-export type { ParametricSurface, ParametricSurfaceProperties };
+export type {
+  ParametricSurface,
+  ParametricSurfaceProperties,
+  EvaluatedProperties,
+};
 export { config };

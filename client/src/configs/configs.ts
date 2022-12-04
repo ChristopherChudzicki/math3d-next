@@ -74,6 +74,25 @@ type MathItems = {
   [MathItemType.VectorField]: vectorField.VectorField;
 };
 
+type EvaluatedProperties = {
+  [MathItemType.Axis]: axis.EvaluatedProperties;
+  [MathItemType.BooleanVariable]: booleanVariable.EvaluatedProperties;
+  [MathItemType.Camera]: camera.EvaluatedProperties;
+  [MathItemType.ExplicitSurface]: explicitSurface.EvaluatedProperties;
+  [MathItemType.ExplicitSurfacePolar]: explicitSurfacePolar.EvaluatedProperties;
+  [MathItemType.Folder]: folder.EvaluatedProperties;
+  [MathItemType.Grid]: grid.EvaluatedProperties;
+  [MathItemType.ImplicitSurface]: implicitSurface.EvaluatedProperties;
+  [MathItemType.Line]: line.EvaluatedProperties;
+  [MathItemType.ParametricCurve]: parametricCurve.EvaluatedProperties;
+  [MathItemType.ParametricSurface]: parametricSurface.EvaluatedProperties;
+  [MathItemType.Point]: point.EvaluatedProperties;
+  [MathItemType.Variable]: variable.EvaluatedProperties;
+  [MathItemType.VariableSlider]: variableSlider.EvaluatedProperties;
+  [MathItemType.Vector]: vector.EvaluatedProperties;
+  [MathItemType.VectorField]: vectorField.EvaluatedProperties;
+};
+
 type MathItem<T extends MathItemType = MathItemType> = MathItems[T];
 type MathGraphic<T extends MathGraphicType = MathGraphicType> = MathItems[T];
 
@@ -113,4 +132,10 @@ export {
   MathItemType,
   WidgetType,
 };
-export type { MathGraphic, MathItem, MathItemConfig, MathItemPatch };
+export type {
+  MathGraphic,
+  MathItem,
+  MathItemConfig,
+  MathItemPatch,
+  EvaluatedProperties,
+};

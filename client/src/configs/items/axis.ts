@@ -133,5 +133,5 @@ const config: IMathItemConfig<
 
 type Axis = IMathItem<MathItemType.Axis, AxisProperties>;
 
-export type { Axis, AxisProperties };
+export type { Axis, AxisProperties, EvaluatedProperties };
 export { config };

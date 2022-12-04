@@ -31,7 +31,7 @@ interface PointProperties {
   size: string;
 }
 
-export interface EvaluatedProperties {
+interface EvaluatedProperties {
   description: string;
   color: string;
   visible: boolean;
@@ -102,5 +102,5 @@ const config: IMathItemConfig<
 
 type Point = IMathItem<MathItemType.Point, PointProperties>;
 
-export type { Point, PointProperties };
+export type { Point, PointProperties, EvaluatedProperties };
 export { config };

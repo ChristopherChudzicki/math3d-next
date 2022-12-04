@@ -107,5 +107,5 @@ const config: IMathItemConfig<
 
 type Camera = IMathItem<MathItemType.Camera, CameraProperties>;
 
-export type { Camera, CameraProperties };
+export type { Camera, CameraProperties, EvaluatedProperties };
 export { config };

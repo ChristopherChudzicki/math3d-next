@@ -7,6 +7,11 @@ const firstArg = <A, B, C>(f: (a: A, b?: B) => C) => {
   return (x: A) => f(x);
 };
 
+/**
+ * Allow all values as boolean, but coerce them.
+ */
+const boolean = (x: unknown) => !!x;
+
 const num = yup.number().strict().required();
 const array = yup.array().strict().required();
 
@@ -146,8 +151,6 @@ const realVecValidators = {
   4: firstArg(realVectors[4].validateSync.bind(realVectors[4])),
 };
 
-const boolean = yup.boolean().strict().required();
-
 function arrayOf<T, N extends number>(
   itemValidator: Validator<T>,
   n: N
@@ -173,6 +176,6 @@ export const validators = {
   array: firstArg(array.validateSync.bind(array)),
   realFunc: realFuncValidators,
   realVec: realVecValidators,
-  boolean: firstArg(boolean.validateSync.bind(boolean)),
+  boolean,
   arrayOf,
 };

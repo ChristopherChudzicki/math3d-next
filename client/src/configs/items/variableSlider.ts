@@ -41,7 +41,7 @@ const make: MathItemGenerator<
   properties: { ...defaultValues },
 });
 
-type Evaluated = {
+type EvaluatedProperties = {
   range: [number, number];
   duration: number;
   fps: number;
@@ -53,7 +53,7 @@ type Evaluated = {
 const config: IMathItemConfig<
   MathItemType.VariableSlider,
   VariableSliderProperties,
-  Evaluated
+  EvaluatedProperties
 > = {
   type: MathItemType.VariableSlider,
   label: "Variable Slider",
@@ -113,5 +113,9 @@ type VariableSlider = IMathItem<
   VariableSliderProperties
 >;
 
-export type { VariableSliderProperties as Properties, VariableSlider };
+export type {
+  VariableSliderProperties as Properties,
+  VariableSlider,
+  EvaluatedProperties,
+};
 export { config };

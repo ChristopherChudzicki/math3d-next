@@ -113,5 +113,5 @@ const config: IMathItemConfig<
 
 type Line = IMathItem<MathItemType.Line, LineProperties>;
 
-export type { Line, LineProperties };
+export type { Line, LineProperties, EvaluatedProperties };
 export { config };
