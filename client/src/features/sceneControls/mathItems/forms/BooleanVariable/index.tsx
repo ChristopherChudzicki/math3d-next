@@ -56,14 +56,18 @@ const Vector: MathItemForm<MIT.BooleanVariable> = ({ item }) => {
         <FieldWidget
           className={style["name-container"]}
           widget={WidgetType.MathValue}
-          label={configProps.value.label}
+          label="Switch name"
           name="value"
           error={errors.value}
           value={item.properties.value.lhs}
           onChange={onChangeName}
         />
         <div className={style["switch-container"]}>
-          <Switch checked={!!results.value} onChange={onToggle} />
+          <Switch
+            aria-label={config.properties.value.label}
+            checked={!!results.value}
+            onChange={onToggle}
+          />
         </div>
       </div>
     </ItemTemplate>
