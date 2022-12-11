@@ -125,5 +125,5 @@ const config: IMathItemConfig<
 
 type Vector = IMathItem<MathItemType.Vector, VectorProperties>;
 
-export type { Vector, VectorProperties };
+export type { Vector, VectorProperties, EvaluatedProperties };
 export { config };

@@ -1,3 +1,4 @@
+import { ParseableObjs } from "@/util/parsing";
 import { validators } from "@/util/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
@@ -8,12 +9,16 @@ import type {
 import { description } from "../shared";
 
 interface BooleanVariableProperties {
-  value: string; // eval to boolean
+  value: ParseableObjs["assignment"]; // eval to boolean
   description: string;
 }
 
 const defaultValues: BooleanVariableProperties = {
-  value: "switch=true",
+  value: {
+    type: "assignment",
+    rhs: "true",
+    lhs: "switch",
+  },
   description: "Toggle switch",
 };
 
@@ -55,5 +60,5 @@ type BooleanVariable = IMathItem<
   BooleanVariableProperties
 >;
 
-export type { BooleanVariable, BooleanVariableProperties };
+export type { BooleanVariable, BooleanVariableProperties, EvaluatedProperties };
 export { config };

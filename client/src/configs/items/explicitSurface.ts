@@ -160,5 +160,5 @@ type ExplicitSurface = IMathItem<
   ExplicitSurfaceProperties
 >;
 
-export type { ExplicitSurface, ExplicitSurfaceProperties };
+export type { ExplicitSurface, ExplicitSurfaceProperties, EvaluatedProperties };
 export { config };

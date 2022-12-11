@@ -1,0 +1,15 @@
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.name-container {
+    flex: 2
+}
+.switch-container {
+    flex: 1;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}

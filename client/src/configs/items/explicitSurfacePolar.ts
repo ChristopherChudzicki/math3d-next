@@ -160,5 +160,9 @@ type ExplicitSurfacePolar = IMathItem<
   ExplicitSurfacePolarProperties
 >;
 
-export type { ExplicitSurfacePolar, ExplicitSurfacePolarProperties };
+export type {
+  ExplicitSurfacePolar,
+  ExplicitSurfacePolarProperties,
+  EvaluatedProperties,
+};
 export { config };

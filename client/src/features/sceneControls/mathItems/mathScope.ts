@@ -1,4 +1,6 @@
 import {
+  EvaluatedProperties,
+  MathItem,
   MathItemConfig,
   MathItemType,
   PropertyConfig,
@@ -77,6 +79,20 @@ const useMathResults = <K extends string>(
   return resultsSlice;
 };
 
+const useMathItemResults = <
+  I extends MathItem,
+  K extends string & keyof EvaluatedProperties[I["type"]]
+>(
+  scope: AppMathScope,
+  item: I,
+  names: readonly K[]
+) => {
+  const idPrefix = item.id;
+  return useMathResults(scope, idPrefix, names) as Partial<
+    Pick<EvaluatedProperties[I["type"]], K>
+  >;
+};
+
 const useMathErrors = <K extends string>(
   scope: AppMathScope,
   idPrefix: string,
@@ -122,4 +138,4 @@ const getMathProperties = <T extends MathItemType>(
 ): PropertyConfig<string, unknown>[] =>
   collectionFilter(config.properties, (p) => MATH_WIDGETS.has(p.widget));
 
-export { getMathProperties, useMathErrors, useMathResults };
+export { getMathProperties, useMathErrors, useMathResults, useMathItemResults };

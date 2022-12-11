@@ -139,5 +139,5 @@ type ImplicitSurface = IMathItem<
   ImplicitSurfaceProperties
 >;
 
-export type { ImplicitSurface, ImplicitSurfaceProperties };
+export type { ImplicitSurface, ImplicitSurfaceProperties, EvaluatedProperties };
 export { config };

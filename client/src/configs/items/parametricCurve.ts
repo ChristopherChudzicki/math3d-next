@@ -133,5 +133,5 @@ type ParametricCurve = IMathItem<
   ParametricCurveProperties
 >;
 
-export type { ParametricCurve, ParametricCurveProperties };
+export type { ParametricCurve, ParametricCurveProperties, EvaluatedProperties };
 export { config };

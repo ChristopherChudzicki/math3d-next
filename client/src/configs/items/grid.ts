@@ -101,5 +101,5 @@ const config: IMathItemConfig<
 
 type Grid = IMathItem<MathItemType.Grid, GridProperties>;
 
-export type { Grid, GridProperties };
+export type { Grid, GridProperties, EvaluatedProperties };
 export { config };

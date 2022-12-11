@@ -159,5 +159,5 @@ const config: IMathItemConfig<
 
 type VectorField = IMathItem<MathItemType.VectorField, VectorFieldProperties>;
 
-export type { VectorField, VectorFieldProperties };
+export type { VectorField, VectorFieldProperties, EvaluatedProperties };
 export { config };

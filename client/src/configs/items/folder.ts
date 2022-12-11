@@ -51,5 +51,5 @@ const config: IMathItemConfig<
 
 type Folder = IMathItem<MathItemType.Folder, FolderProperties>;
 
-export type { Folder, FolderProperties };
+export type { Folder, FolderProperties, EvaluatedProperties };
 export { config };
