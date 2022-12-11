@@ -17,8 +17,6 @@ const resultNames = ["value"] as const;
 
 const config = configs[MIT.BooleanVariable];
 
-const configProps = config.properties;
-
 const Vector: MathItemForm<MIT.BooleanVariable> = ({ item }) => {
   const onWidgetChange = useOnWidgetChange(item);
   const mathScope = useMathScope();
