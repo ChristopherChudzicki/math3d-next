@@ -9,6 +9,8 @@ html {
   --color-primary-light-rgb: 186, 231, 255;
   --color-primary-light: rgb(var(--color-primary-light-rgb));
 
+  --color-secondary-lightest-rgb: 250, 250, 250;
+  --color-secondary-lightest: rgb(var(--color-secondary-lightest-rgb));
   --color-secondary-lighter-rgb: 235, 235, 235;
   --color-secondary-lighter: rgb(var(--color-secondary-lighter-rgb));
   --color-secondary-light-rgb: 217, 217, 217;
