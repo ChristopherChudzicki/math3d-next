@@ -32,7 +32,6 @@ interface PointProperties {
 }
 
 interface EvaluatedProperties {
-  description: string;
   color: string;
   visible: boolean;
   opacity: number;
@@ -41,7 +40,7 @@ interface EvaluatedProperties {
 
   label: string;
   labelVisible: boolean;
-  coords: [number, number, number];
+  coords: [number, number, number][];
   size: number;
 }
 
@@ -77,7 +76,7 @@ const config: IMathItemConfig<
       name: "coords",
       label: "Coordinates",
       widget: WidgetType.MathValue,
-      validate: validators.realVec[3],
+      validate: validators.oneOrMany(validators.realVec[3]),
     },
     description,
     label,

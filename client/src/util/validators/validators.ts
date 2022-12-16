@@ -170,6 +170,20 @@ function arrayOf<T, N extends number>(itemValidator: Validator<T>, n?: N) {
   };
 }
 
+const oneOrMany: <T>(itemValidator: Validator<T>) => Validator<T[]> =
+  (itemValidator) => (value) => {
+    try {
+      return [itemValidator(value)];
+    } catch (err) {
+      try {
+        return arrayOf(itemValidator)(value);
+      } catch (batchError) {
+        /** pass */
+      }
+      throw err;
+    }
+  };
+
 export const validators = {
   real: firstArg(real.validateSync.bind(real)),
   positive: firstArg(positive.validateSync.bind(positive)),
@@ -178,4 +192,5 @@ export const validators = {
   realVec: realVecValidators,
   boolean,
   arrayOf,
+  oneOrMany,
 };

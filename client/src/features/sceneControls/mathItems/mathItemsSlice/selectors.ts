@@ -6,6 +6,9 @@ const mathItems =
   (): SelectorReturn<MathItemsState["items"]> => (state: RootState) =>
     state.mathItems.items;
 
+const orderedMathItems = (): SelectorReturn<MathItem[]> => (state: RootState) =>
+  Object.values(state.mathItems.items).sort((a, b) => a.id.localeCompare(b.id));
+
 const mathItem =
   (id: string): SelectorReturn<MathItem> =>
   (state: RootState) =>
@@ -55,5 +58,5 @@ const isActive =
 const mathScope = (): SelectorReturn<AppMathScope> => (state: RootState) =>
   state.mathItems.mathScope();
 
-export { subtree, isActive, mathItems, mathItem, mathScope };
+export { subtree, isActive, mathItems, mathItem, mathScope, orderedMathItems };
 export type { Subtree };
