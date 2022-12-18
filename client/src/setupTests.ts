@@ -15,12 +15,19 @@ import { server } from "./test_util/msw/server";
 
 failOnConsole();
 
+/**
+ * For the JSDOM tests, we need to mock at least Mathbox, since it relies on a
+ * bunch of WebGL APIs that are not supported.
+ *
+ * We might as well do this mocking at the mathbox-react level: At most, we will
+ * assert that mathbox-react is getting the correct props.
+ */
 vitest.mock("mathbox-react", () =>
   vi.importActual("@/__mocks__/mathbox-react")
 );
 
 /**
- * Jest does not support enough ShadowDOM for MathLive to function properly, so
+ * JSDOM does not support enough ShadowDOM for MathLive to function properly, so
  * this mocks it with a textarea.
  */
 vitest.mock("./util/components/MathLive/MathField");
