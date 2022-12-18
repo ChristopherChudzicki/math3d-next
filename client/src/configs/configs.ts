@@ -138,4 +138,5 @@ export type {
   MathItemConfig,
   MathItemPatch,
   EvaluatedProperties,
+  MathGraphicType,
 };

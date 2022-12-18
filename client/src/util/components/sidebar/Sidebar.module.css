@@ -1,7 +1,6 @@
 .sidebar-container {
   position: absolute;
-  transition: transform 1s;
-  background-color: white;
+  transition: transform var(--sidebar-duration, 0.5s);
 }
 
 .right-sidebar {

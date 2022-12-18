@@ -13,11 +13,14 @@
 .header {
   grid-column: 1 / 2;
   grid-row: 1 / 2;
+  background-color: var(--color-secondary-lightest)
 }
 
 .sidebar {
   height: 100%;
   width: var(--sidebar-width);
+  z-index: var(--sidebar-z);
+  background-color: var(--color-secondary-lightest)
 }
 
 .body {
@@ -25,4 +28,15 @@
   grid-row: 2 / 3;
   max-height: calc(100vh - var(--header-height));
   position: relative;
+}
+
+.scene-adjust-controls-open {
+  transform: translateX(
+    calc(var(--sidebar-width) / 2)
+  );
+  transition-duration: var(--sidebar-duration);
+}
+.scene-adjust-controls-closed {
+  transform: translateX(0px);
+  transition-duration: var(--sidebar-duration);
 }
