@@ -38,7 +38,6 @@ interface EvaluatedProperties {
   zIndex: number;
   zBias: number;
 
-  label: string;
   labelVisible: boolean;
   coords: [number, number, number][];
   size: number;

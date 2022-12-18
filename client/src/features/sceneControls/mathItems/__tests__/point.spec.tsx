@@ -15,7 +15,7 @@ import { getItemByDescription } from "./__utils__";
 test.each([
   {
     coordsString: "[1, 2, 3]",
-    coords: [1, 2, 3],
+    coords: [[1, 2, 3]],
     numParseErrors: 0,
     numEvalErrors: 0,
   },
@@ -48,7 +48,7 @@ test.each([
 test.each([
   {
     coordsString: "[1, 2, 3]",
-    coords: [1, 2, 3],
+    coords: [[1, 2, 3]],
     numParseErrors: 0,
     numEvalErrors: 0,
   },
@@ -99,7 +99,7 @@ test("Adding items adds to mathScope", async () => {
   assertNotNil(point);
   const id = nodeId(point);
   getItemByDescription(point.properties.description);
-  expect(mathScope.results.get(id("coords"))).toStrictEqual([0, 0, 0]);
+  expect(mathScope.results.get(id("coords"))).toStrictEqual([[0, 0, 0]]);
   expect(mathScope.errors.size).toBe(0);
 });
 

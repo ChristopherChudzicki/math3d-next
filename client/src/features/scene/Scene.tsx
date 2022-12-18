@@ -24,24 +24,30 @@ const setup = (mathbox: MathboxSelection | null) => {
   window.mathbox = mathbox;
 };
 
+const SceneContent = () => {
+  const items = useAppSelector(select.orderedMathItems());
+  return (
+    <MB.Cartesian>
+      <MB.Grid axes="xz" />
+      {items.filter(isMathGraphic).map((item) => {
+        const Graphic = getGraphic(item);
+        return <Graphic key={item.id} item={item} />;
+      })}
+    </MB.Cartesian>
+  );
+};
+
 const Scene: React.FC<Props> = (props) => {
   const [container, setContainer] = React.useState<HTMLDivElement | null>(null);
-  const items = useAppSelector(select.orderedMathItems());
   return (
     <div
       className={mergeClassNames(props.className)}
       style={{ width: "100%", height: "100%" }}
       ref={setContainer}
     >
-      {container && items.length >= 12 && (
+      {container && (
         <MB.Mathbox container={container} options={mathboxOptions} ref={setup}>
-          <MB.Cartesian>
-            <MB.Grid axes="xz" />
-            {items.filter(isMathGraphic).map((item) => {
-              const Graphic = getGraphic(item);
-              return <Graphic key={item.id} item={item} />;
-            })}
-          </MB.Cartesian>
+          <SceneContent />
         </MB.Mathbox>
       )}
     </div>
