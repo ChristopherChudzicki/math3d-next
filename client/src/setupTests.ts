@@ -15,7 +15,9 @@ import { server } from "./test_util/msw/server";
 
 failOnConsole();
 
-vitest.mock("mathbox-react", () => ({}));
+vitest.mock("mathbox-react", () =>
+  vi.importActual("@/__mocks__/mathbox-react")
+);
 
 /**
  * Jest does not support enough ShadowDOM for MathLive to function properly, so

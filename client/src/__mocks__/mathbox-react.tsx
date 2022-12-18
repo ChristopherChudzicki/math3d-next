@@ -1,14 +1,17 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, forwardRef } from "react";
 
-const MockComponent = vi.fn((props) => {
-  const ref = useRef<HTMLDivElement>(null);
+const MockComponent = forwardRef((props, ref) => {
+  const divRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!ref.current) return;
-    // @ts-expect-error hack to make props visible during tests
-    ref.current.$props = props;
+    if (!divRef.current) return;
+    // @ts-expect-error hack to mack props visible during tests
+    divRef.current.$props = props;
+    // @ts-expect-error hack to mack ref visible during tests
+    divRef.current.$ref = ref;
   });
-  return <div ref={ref} />;
+  return <div ref={divRef} />;
 });
+MockComponent.displayName = "MockComponent";
 
 export const Area = MockComponent;
 
@@ -139,3 +142,5 @@ export const View = MockComponent;
 export const Volume = MockComponent;
 
 export const Voxel = MockComponent;
+
+export const Mathbox = MockComponent;
