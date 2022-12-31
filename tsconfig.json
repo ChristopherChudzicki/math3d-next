@@ -2,7 +2,6 @@
   "compilerOptions": {
     "target": "ESNext",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "types": ["vite/client", "vitest/globals"],
     "allowJs": false,
     "skipLibCheck": true, // Skip this for now. TS 4.8 Introduced some breaking changes that libraries haven't all caught up to.
     "esModuleInterop": true,
@@ -21,11 +20,5 @@
         "name": "typescript-plugin-css-modules"
       }
     ],
-    "baseUrl": "src",
-    "paths": {
-      "@/*": ["./*"],
-    },
   },
-  "include": ["src", "playwright.config.ts", "vite.config.ts"],
-  "exclude": ["./node_modules", "./**/node_modules/*"]
 }

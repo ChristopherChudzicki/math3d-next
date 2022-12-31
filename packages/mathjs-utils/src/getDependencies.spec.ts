@@ -1,3 +1,4 @@
+import { test, expect } from "vitest";
 import { parse } from "mathjs";
 import getDependencies from "./getDependencies";
 

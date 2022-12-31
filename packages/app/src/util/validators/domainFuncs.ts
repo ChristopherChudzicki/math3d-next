@@ -1,5 +1,5 @@
 import type * as math from "mathjs";
-import { getDependencies } from "@/util/mathjs-utils";
+import { getDependencies } from "mathjs-utils";
 
 const domainFuncs2 = (value: math.MathNode): [number, number] => {
   if (value.type !== "ArrayNode") {

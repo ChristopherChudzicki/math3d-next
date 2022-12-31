@@ -1,0 +1,14 @@
+{
+  "name": "mathjs-utils",
+  "exports": "./src/index.ts",
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "mathjs": "11.2.1",
+    "vitest": "0.26.3"
+  },
+  "scripts": {
+    "test": "vitest",
+    "lint": "yarn global:lint",
+    "lint-fix": "yarn global:lint --fix"
+  }
+}

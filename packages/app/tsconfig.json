@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "types": [
+      "vite/client",
+      "vitest/globals"
+    ],
+    "baseUrl": "src",
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+    },
+  },
+  "include": [
+    "src",
+    "playwright.config.ts",
+    "vite.config.ts"
+  ],
+}

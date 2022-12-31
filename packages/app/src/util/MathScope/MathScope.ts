@@ -76,6 +76,8 @@ export default class MathScope<P> {
     this.deleteExpressions = this.deleteExpressions.bind(this);
     this.addEventListener = this.addEventListener.bind(this);
     this.removeEventListener = this.removeEventListener.bind(this);
+
+    this.events.setMaxListeners(Infinity);
   }
 
   private syncEvalErrors(

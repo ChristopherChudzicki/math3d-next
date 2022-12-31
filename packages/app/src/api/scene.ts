@@ -1,6 +1,6 @@
-import type { Scene } from "@/types";
 import axios from "redaxios";
 import { useQuery } from "@tanstack/react-query";
+import type { Scene } from "@/types";
 import defaultScene from "./defaultScene";
 
 const getScene = async (sceneId: string): Promise<Scene> => {

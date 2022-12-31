@@ -8,18 +8,18 @@ module.exports = {
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react-hooks/recommended",
-    'plugin:prettier/recommended' // this should come last
+    "plugin:prettier/recommended", // this should come last
   ],
   plugins: ["react", "@typescript-eslint"],
   rules: {
     "@typescript-eslint/naming-convention": [
       "warn",
       {
-        "selector": "default",
-        "modifiers": ["unused"],
-        "format": ["camelCase"],
-        "leadingUnderscore": "allow" // do not require... it's annoying when required for object destructuring.
-      }
+        selector: "default",
+        modifiers: ["unused"],
+        format: ["camelCase"],
+        leadingUnderscore: "allow", // do not require... it's annoying when required for object destructuring.
+      },
     ],
     "@typescript-eslint/no-unused-vars": [
       "error",
@@ -28,7 +28,7 @@ module.exports = {
         argsIgnorePattern: "^_",
         destructuredArrayIgnorePattern: "^_",
         ignoreRestSiblings: true,
-      }
+      },
     ],
     "max-classes-per-file": "off",
     "react/function-component-definition": [
@@ -44,26 +44,34 @@ module.exports = {
       "error",
       { props: true, ignorePropertyModificationsFor: ["state"] },
     ],
-    'import/no-extraneous-dependencies': [
-      'error',
+    "import/no-extraneous-dependencies": [
+      "error",
       {
         devDependencies: [
           "**/__tests__/**/*.ts",
           "**/*.spec.ts",
           "**/*.spec.tsx",
-          "playwright.config.ts",
-          "vite.config.ts",
+          "**/playwright.config.ts",
+          "**/vite.config.ts",
           "**/*.stories.tsx",
-          "src/setupTests.ts",
-          "src/test_util/**/*.ts",
-          "src/test_util/**/*.tsx"
-        ]
-      }
-    ]
+          "**/src/setupTests.ts",
+          "**/src/test_util/**/*.ts",
+          "**/src/test_util/**/*.tsx",
+        ],
+      },
+    ],
   },
-  settings: {
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
     "import/resolver": {
-      typescript: true
+      "typescript": {
+        "project": ["tsconfig.json", "./packages/**/tsconfig.json"]
+      },
+      "node": {
+        "project": ["tsconfig.json", "./packages/**/tsconfig.json"]
+      }
     }
   },
   overrides: [
@@ -83,6 +91,7 @@ module.exports = {
     },
   ],
   parserOptions: {
-    project: "./tsconfig.json",
-  },
+    project: ['./packages/**/tsconfig.json'],
+    tsconfigRootDir: __dirname
+  }
 };

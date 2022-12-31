@@ -1,4 +1,4 @@
-import * as math from "mathjs";
+import type * as math from "mathjs";
 
 // eslint-disable-next-line no-underscore-dangle
 const _getDependencies = (
