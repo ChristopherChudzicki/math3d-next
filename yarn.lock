@@ -2270,6 +2270,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@math3d/mathscope@workspace:packages/mathscope":
+  version: 0.0.0-use.local
+  resolution: "@math3d/mathscope@workspace:packages/mathscope"
+  dependencies:
+    just-group-by: ^2.2.0
+    just-permutations: ^2.2.0
+    mathjs: 11.2.1
+    tarjan-graph: ^3.0.0
+    toposort: ^2.0.2
+    vitest: 0.26.3
+  languageName: unknown
+  linkType: soft
+
 "@math3d/react-textarea-autosize@npm:8.3.5":
   version: 8.3.5
   resolution: "@math3d/react-textarea-autosize@npm:8.3.5"
@@ -12094,6 +12107,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"just-group-by@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "just-group-by@npm:2.2.0"
+  checksum: dfdfded91d285065b536f7381f3f15f4c5510c977d7462200211d8e1678617c43a5a06c809247bc730faa9897f90d073ad9cf42de5bb42c397154cccfef441d2
+  languageName: node
+  linkType: hard
+
+"just-permutations@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "just-permutations@npm:2.2.0"
+  checksum: 421e55552fe1691fc9454d349890c7dd7847bddeac2d97067435e04cbee8da00f7a90fcc118be48309079b15ec81ab304f6f080db8197cb249d86c147fabf5a5
+  languageName: node
+  linkType: hard
+
 "kind-of@npm:^3.0.2, kind-of@npm:^3.0.3, kind-of@npm:^3.2.0":
   version: 3.2.2
   resolution: "kind-of@npm:3.2.2"
@@ -16786,7 +16813,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tarjan-graph@npm:3.0.0":
+"tarjan-graph@npm:3.0.0, tarjan-graph@npm:^3.0.0":
   version: 3.0.0
   resolution: "tarjan-graph@npm:3.0.0"
   checksum: 6286738f30032848f88f815ed5bfe21d16b449d5a401d3581e8000135e8afc6b7ecbce009aa695f6286c8ced817b8ba4074574a57040b38786b58630246db908
