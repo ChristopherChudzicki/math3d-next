@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import permutations from "just-permutations";
+import { permutations } from "@math3d/utils";
 
 import { parse } from "./adapter";
 import ExpressionGraphManager from "./ExpressionGraphManager";

@@ -2274,6 +2274,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math3d/mathscope@workspace:packages/mathscope"
   dependencies:
+    "@math3d/utils": "workspace:^"
     just-group-by: ^2.2.0
     just-permutations: ^2.2.0
     mathjs: 11.2.1
@@ -2304,6 +2305,14 @@ __metadata:
   checksum: 7151da806649232ecf48d0af6e04c982323bb576560c67e9835683b5b2a516c968a41451492410b5d7a7a6b58d7c854ed920197cf3d2965ec9a212626a6abaef
   languageName: node
   linkType: hard
+
+"@math3d/utils@workspace:^, @math3d/utils@workspace:packages/utils":
+  version: 0.0.0-use.local
+  resolution: "@math3d/utils@workspace:packages/utils"
+  dependencies:
+    vitest: 0.26.3
+  languageName: unknown
+  linkType: soft
 
 "@mdx-js/mdx@npm:^1.6.22":
   version: 1.6.22
