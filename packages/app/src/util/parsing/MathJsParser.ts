@@ -5,7 +5,7 @@ import {
   AnonMathNode,
   AssignmentError,
   MathNodeType,
-} from "@/util/MathScope";
+} from "@math3d/mathscope";
 import { assertInstanceOf } from "@/util/predicates";
 import aggregate from "@/util/aggregate";
 import { getValidatedEvaluate } from "./evaluate";

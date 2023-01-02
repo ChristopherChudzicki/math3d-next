@@ -8,7 +8,7 @@ import {
 } from "@/configs";
 import { filter as collectionFilter } from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { OnChangeListener } from "@/util/MathScope";
+import { OnChangeListener } from "@math3d/mathscope";
 import { AppMathScope, AppParseable } from "./mathItemsSlice/interfaces";
 
 type EvaluationResultsSlice<K extends string> = Partial<Record<K, unknown>>;

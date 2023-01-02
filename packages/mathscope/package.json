@@ -11,6 +11,7 @@
     "lint-fix": "yarn global:lint --fix"
   },
   "dependencies": {
+    "@math3d/mathjs-utils": "workspace:^",
     "@math3d/utils": "workspace:^",
     "just-group-by": "^2.2.0",
     "mathjs": "11.2.1",

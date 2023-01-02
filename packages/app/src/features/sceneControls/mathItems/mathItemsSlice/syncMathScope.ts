@@ -9,7 +9,7 @@ import {
 } from "@/configs";
 import { filter as collectionFilter } from "lodash";
 import { isNotNil } from "@/util/predicates";
-import type { IdentifiedParseable } from "@/util/MathScope";
+import type { IdentifiedParseable } from "@math3d/mathscope";
 import type { Parseable } from "@/util/parsing";
 import { AppMathScope } from "./interfaces";
 

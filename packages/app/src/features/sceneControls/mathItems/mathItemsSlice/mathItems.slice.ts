@@ -3,7 +3,7 @@ import { mathItemConfigs, MathItemType, assertIsMathItemType } from "@/configs";
 import type { MathItem, MathItemPatch } from "@/configs";
 import { keyBy } from "lodash";
 import { assertNotNil } from "@/util/predicates";
-import MathScope from "@/util/MathScope";
+import MathScope from "@math3d/mathscope";
 import jsonPatch from "fast-json-patch";
 
 import { latexParser, Parseable } from "@/util/parsing";

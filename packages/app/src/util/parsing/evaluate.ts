@@ -1,7 +1,7 @@
 import * as math from "mathjs";
-import type { EvaluationScope, AnonMathNode } from "@/util/MathScope";
-import { EvaluationError } from "@/util/MathScope";
-import { assertInstanceOf } from "@/util/predicates";
+import type { EvaluationScope, AnonMathNode } from "@math3d/mathscope";
+import { EvaluationError } from "@math3d/mathscope";
+import invariant from "tiny-invariant";
 import type { Validate } from "./interfaces";
 
 class FunctionEvaluationError extends EvaluationError {
@@ -77,7 +77,7 @@ const getValidatedEvaluate = (
       const result = unvalidatedEvaluate(scope);
       return validate(result, mjsNode);
     } catch (err) {
-      assertInstanceOf(err, Error);
+      invariant(err instanceof Error);
       if (err instanceof EvaluationError) {
         throw err;
       }

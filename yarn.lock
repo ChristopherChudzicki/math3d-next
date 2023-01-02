@@ -2270,13 +2270,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math3d/mathscope@workspace:packages/mathscope":
+"@math3d/mathjs-utils@workspace:*, @math3d/mathjs-utils@workspace:^, @math3d/mathjs-utils@workspace:packages/mathjs-utils":
+  version: 0.0.0-use.local
+  resolution: "@math3d/mathjs-utils@workspace:packages/mathjs-utils"
+  dependencies:
+    mathjs: 11.2.1
+    vitest: 0.26.3
+  languageName: unknown
+  linkType: soft
+
+"@math3d/mathscope@workspace:^, @math3d/mathscope@workspace:packages/mathscope":
   version: 0.0.0-use.local
   resolution: "@math3d/mathscope@workspace:packages/mathscope"
   dependencies:
+    "@math3d/mathjs-utils": "workspace:^"
     "@math3d/utils": "workspace:^"
     just-group-by: ^2.2.0
-    just-permutations: ^2.2.0
     mathjs: 11.2.1
     tarjan-graph: ^3.0.0
     toposort: ^2.0.2
@@ -5810,6 +5819,8 @@ __metadata:
     "@emotion/react": 11.10.4
     "@emotion/styled": 11.10.4
     "@faker-js/faker": 7.6.0
+    "@math3d/mathjs-utils": "workspace:*"
+    "@math3d/mathscope": "workspace:^"
     "@math3d/react-textarea-autosize": 8.3.5
     "@mswjs/data": 0.10.2
     "@mui/icons-material": 5.10.6
@@ -5848,7 +5859,6 @@ __metadata:
     mathbox: ^2.2.0
     mathbox-react: ^0.0.10
     mathjs: 11.2.1
-    mathjs-utils: "workspace:*"
     mathlive: 0.83.0
     msw: 0.49.0
     ordinal: 1.0.3
@@ -12123,13 +12133,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"just-permutations@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "just-permutations@npm:2.2.0"
-  checksum: 421e55552fe1691fc9454d349890c7dd7847bddeac2d97067435e04cbee8da00f7a90fcc118be48309079b15ec81ab304f6f080db8197cb249d86c147fabf5a5
-  languageName: node
-  linkType: hard
-
 "kind-of@npm:^3.0.2, kind-of@npm:^3.0.3, kind-of@npm:^3.2.0":
   version: 3.2.2
   resolution: "kind-of@npm:3.2.2"
@@ -12647,15 +12650,6 @@ __metadata:
   checksum: 59e92d3485cbf3d80ff62c78b6584fee58a30b9713939575cdc90abc7a57d5e405a97e7949f0870665e9f090690bd44497ca1097d31231ce7e414a9034ac74c5
   languageName: node
   linkType: hard
-
-"mathjs-utils@workspace:*, mathjs-utils@workspace:packages/mathjs-utils":
-  version: 0.0.0-use.local
-  resolution: "mathjs-utils@workspace:packages/mathjs-utils"
-  dependencies:
-    mathjs: 11.2.1
-    vitest: 0.26.3
-  languageName: unknown
-  linkType: soft
 
 "mathjs@npm:11.2.1":
   version: 11.2.1

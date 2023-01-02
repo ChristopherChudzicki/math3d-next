@@ -1,5 +1,5 @@
 import type { MathItem } from "@/configs";
-import type MathScope from "@/util/MathScope";
+import type MathScope from "@math3d/mathscope";
 import { Parseable } from "@/util/parsing";
 
 type AppParseable = Parseable;

@@ -1,5 +1,5 @@
 {
-  "name": "mathjs-utils",
+  "name": "@math3d/mathjs-utils",
   "exports": "./src/index.ts",
   "main": "./src/index.ts",
   "devDependencies": {

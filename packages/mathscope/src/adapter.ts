@@ -1,5 +1,5 @@
 import * as math from "mathjs";
-import { getDependencies } from "mathjs-utils";
+import { getDependencies } from "@math3d/mathjs-utils";
 
 import type { AnonMathNode, Parse } from "./interfaces";
 import { MathNodeType, Evaluate } from "./interfaces";

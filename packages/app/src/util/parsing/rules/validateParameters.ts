@@ -1,6 +1,6 @@
 import * as math from "mathjs";
 import { countBy, pickBy } from "lodash";
-import { AssignmentError } from "@/util/MathScope";
+import { AssignmentError } from "@math3d/mathscope";
 import { ParserRuleType, TextParserRule } from "../interfaces";
 
 const FUNCTION_ASSIGNMENT_REGEX = /\((?<params>.*?)\)[^><=]?\s*=\s*[^><=]?/;
