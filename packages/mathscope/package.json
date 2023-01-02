@@ -1,0 +1,21 @@
+{
+  "name": "@math3d/mathscope",
+  "exports": "./src/index.ts",
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "vitest": "0.26.3"
+  },
+  "scripts": {
+    "test": "vitest ",
+    "lint": "yarn global:lint",
+    "lint-fix": "yarn global:lint --fix"
+  },
+  "dependencies": {
+    "@math3d/mathjs-utils": "workspace:^",
+    "@math3d/utils": "workspace:^",
+    "just-group-by": "^2.2.0",
+    "mathjs": "11.2.1",
+    "tarjan-graph": "^3.0.0",
+    "toposort": "^2.0.2"
+  }
+}

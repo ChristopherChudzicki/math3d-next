@@ -1,0 +1,13 @@
+{
+  "name": "@math3d/utils",
+  "exports": "./src/index.ts",
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "vitest": "0.26.3"
+  },
+  "scripts": {
+    "test": "vitest",
+    "lint": "yarn global:lint",
+    "lint-fix": "yarn global:lint --fix"
+  }
+}

@@ -8,18 +8,6 @@ on:
     branches: [main]
 
 jobs:
-  backend-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: "16"
-          cache: "npm"
-          cache-dependency-path: server/package-lock.json
-      - run: npm ci --prefix server
-      - run: npm run test --prefix server
-      - run: npm run lint --prefix server
   frontend-tests:
     runs-on: ubuntu-latest
     steps:
@@ -27,13 +15,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "17.9.1"
-          cache: "npm"
-          cache-dependency-path: client/package-lock.json
-      - run: npm ci
-        working-directory: client
-      - run: npm run lint
-        working-directory: client
-      - run: npm run test
-        working-directory: client
-      - run: npm run build
-        working-directory: client
+      - run: yarn install --immutable
+      - run: yarn lint
+      - run: yarn test
+      - run: yarn build
