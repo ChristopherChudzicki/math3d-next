@@ -1,6 +1,6 @@
 import type * as mjs from "mathjs";
 
-import type { Parse } from "../MathScope";
+import type { Parse } from "@math3d/mathscope";
 
 type Validate = (evaluated: unknown, parsed: mjs.MathNode) => void;
 
