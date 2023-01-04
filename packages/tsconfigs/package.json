@@ -1,0 +1,9 @@
+{
+  "name": "@math3d/tsconfigs",
+  "private": true,
+  "files": [
+    "base.json",
+    "nextjs.json",
+    "react-library.json"
+  ]
+}

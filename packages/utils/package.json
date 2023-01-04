@@ -3,11 +3,12 @@
   "exports": "./src/index.ts",
   "main": "./src/index.ts",
   "devDependencies": {
+    "@math3d/eslint-config": "workspace:^",
+    "eslint": "^8.31.0",
     "vitest": "0.26.3"
   },
   "scripts": {
     "test": "vitest",
-    "lint": "yarn global:lint",
-    "lint-fix": "yarn global:lint --fix"
+    "lint": "eslint \"**/*.ts?(x)\""
   }
 }
