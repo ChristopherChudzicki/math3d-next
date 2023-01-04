@@ -2292,7 +2292,7 @@ __metadata:
   resolution: "@math3d/mathjs-utils@workspace:packages/mathjs-utils"
   dependencies:
     "@math3d/eslint-config": "workspace:^"
-    "@math3d/tsconfigs": "workspace:^"
+    "@math3d/tsconfig": "workspace:^"
     eslint: ^8.31.0
     mathjs: 11.2.1
     vitest: 0.26.3
@@ -2305,7 +2305,7 @@ __metadata:
   dependencies:
     "@math3d/eslint-config": "workspace:^"
     "@math3d/mathjs-utils": "workspace:^"
-    "@math3d/tsconfigs": "workspace:^"
+    "@math3d/tsconfig": "workspace:^"
     "@math3d/utils": "workspace:^"
     eslint: ^8.31.0
     just-group-by: ^2.2.0
@@ -2329,9 +2329,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math3d/tsconfigs@workspace:^, @math3d/tsconfigs@workspace:packages/tsconfigs":
+"@math3d/tsconfig@workspace:^, @math3d/tsconfig@workspace:packages/tsconfig":
   version: 0.0.0-use.local
-  resolution: "@math3d/tsconfigs@workspace:packages/tsconfigs"
+  resolution: "@math3d/tsconfig@workspace:packages/tsconfig"
   languageName: unknown
   linkType: soft
 
@@ -5917,6 +5917,7 @@ __metadata:
     "@math3d/mathjs-utils": "workspace:*"
     "@math3d/mathscope": "workspace:^"
     "@math3d/react-textarea-autosize": 8.3.5
+    "@math3d/tsconfig": "workspace:^"
     "@mswjs/data": 0.10.2
     "@mui/icons-material": 5.10.6
     "@mui/lab": 5.0.0-alpha.102
