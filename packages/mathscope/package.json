@@ -9,7 +9,8 @@
     "vitest": "0.26.3"
   },
   "scripts": {
-    "test": "vitest",
+    "test": "vitest --run",
+    "test-watch": "vitest",
     "lint": "eslint \"**/*.ts?(x)\""
   },
   "dependencies": {

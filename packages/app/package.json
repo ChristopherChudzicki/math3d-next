@@ -8,7 +8,8 @@
     "build-storybook": "build-storybook -s public",
     "lint": "eslint \"**/*.ts?(x)\"",
     "storybook": "start-storybook -p 6006 -s public",
-    "test": "vitest",
+    "test": "vitest --run",
+    "test-watch": "vitest",
     "test-e2e": "playwright test"
   },
   "browserslist": {
