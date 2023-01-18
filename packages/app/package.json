@@ -6,10 +6,10 @@
     "build": "tsc && vite build",
     "serve": "vite preview",
     "build-storybook": "build-storybook -s public",
-    "lint": "yarn global:lint",
-    "lint-fix": "yarn global:lint --fix",
+    "lint": "eslint \"**/*.ts?(x)\"",
     "storybook": "start-storybook -p 6006 -s public",
-    "test": "vitest",
+    "test": "vitest --run",
+    "test-watch": "vitest",
     "test-e2e": "playwright test"
   },
   "browserslist": {
@@ -68,6 +68,8 @@
   },
   "devDependencies": {
     "@faker-js/faker": "7.6.0",
+    "@math3d/eslint-config": "workspace:^",
+    "@math3d/tsconfig": "workspace:^",
     "@mswjs/data": "0.10.2",
     "@playwright/test": "1.27.1",
     "@storybook/addon-actions": "6.5.13",
@@ -86,6 +88,7 @@
     "@types/tinycolor2": "1.4.3",
     "@types/toposort": "2.0.3",
     "@vitejs/plugin-react": "3.0.0",
+    "eslint": "^8.31.0",
     "identity-obj-proxy": "3.0.0",
     "jest-fail-on-console": "3.0.2",
     "jsdom": "^20.0.3",

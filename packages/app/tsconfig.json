@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "@math3d/tsconfig/base.json",
   "compilerOptions": {
     "rootDir": ".",
     "types": [
