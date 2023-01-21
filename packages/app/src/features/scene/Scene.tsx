@@ -3,6 +3,7 @@ import React from "react";
 import * as MB from "mathbox-react";
 import type { MathboxSelection } from "mathbox";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { Vector3 } from "three";
 import { useAppSelector } from "@/store/hooks";
 import { isMathGraphic } from "@/configs";
 import * as select from "../sceneControls/mathItems/mathItemsSlice/selectors";
@@ -17,6 +18,9 @@ const mathboxOptions = {
   controls: {
     klass: OrbitControls,
   },
+  camera: {
+    up: new Vector3(0, 0, 1),
+  },
 };
 
 const setup = (mathbox: MathboxSelection | null) => {
@@ -28,7 +32,6 @@ const SceneContent = () => {
   const items = useAppSelector(select.orderedMathItems());
   return (
     <MB.Cartesian>
-      <MB.Grid axes="xz" />
       {items.filter(isMathGraphic).map((item) => {
         const Graphic = getGraphic(item);
         return <Graphic key={item.id} item={item} />;

@@ -5954,8 +5954,8 @@ __metadata:
     jest-fail-on-console: 3.0.2
     jsdom: ^20.0.3
     lodash: 4.17.21
-    mathbox: ^2.2.0
-    mathbox-react: ^0.0.10
+    mathbox: ^2.3.1
+    mathbox-react: ^0.0.14
     mathjs: 11.2.1
     mathlive: 0.83.0
     msw: 0.49.0
@@ -12715,30 +12715,30 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"mathbox-react@npm:^0.0.10":
-  version: 0.0.10
-  resolution: "mathbox-react@npm:0.0.10"
+"mathbox-react@npm:^0.0.14":
+  version: 0.0.14
+  resolution: "mathbox-react@npm:0.0.14"
   dependencies:
     lodash: ^4.17.21
   peerDependencies:
-    mathbox: ^2.1.4
+    mathbox: ^2.2.1
     react: ^17.0.2 || ^18.0.0
     three: ">=0.118.0"
-  checksum: 935d305cbf60ec2950dc2f61b11639ae03095a2a763974afaf3f72115aeb594da65e097467d38502601fb1dc3e9784812d7b7efeb43c65241eea05dff17f7f9e
+  checksum: a0041a9a8bec3a1ff5f788297a34f29b48eee5ed5eb23e8e1e40893f18d04689487adb19e4acae03d52e5b6694f8c9be693e7639525bb574abcb36d85858c0a1
   languageName: node
   linkType: hard
 
-"mathbox@npm:^2.2.0":
-  version: 2.2.1
-  resolution: "mathbox@npm:2.2.1"
+"mathbox@npm:^2.3.1":
+  version: 2.3.1
+  resolution: "mathbox@npm:2.3.1"
   dependencies:
     css-select: ^4.2.1
     lodash: ^4.17.21
     shadergraph: ^2.1.3
-    threestrap: ^0.4.1
+    threestrap: ^0.5.1
   peerDependencies:
     three: ">=0.118.0"
-  checksum: 59e92d3485cbf3d80ff62c78b6584fee58a30b9713939575cdc90abc7a57d5e405a97e7949f0870665e9f090690bd44497ca1097d31231ce7e414a9034ac74c5
+  checksum: 9ff70206a93288bdf8e2fb0c94f91ba3a9998ac2c61c37f6abce4f285a950eb22383e5b02162bcabd7df2350e1caae7af88ef8fb3039fc069d9352a5b902fcbe
   languageName: node
   linkType: hard
 
@@ -17042,14 +17042,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"threestrap@npm:^0.4.1":
-  version: 0.4.1
-  resolution: "threestrap@npm:0.4.1"
+"threestrap@npm:^0.5.1":
+  version: 0.5.1
+  resolution: "threestrap@npm:0.5.1"
   dependencies:
     stats.js: ^0.17.0
   peerDependencies:
     three: ">=0.118.0"
-  checksum: aeb7ac3573b4b1e2c30d5fb2f4f90247feba8d75478ec4a5cf6f0983b2078eb6b86fcd1b58f0a5d404837f1da2bd8e17f293d275b216302bcac08b770d6218b8
+  checksum: 9cff4dcabff8e4a863e63f3eec8561dfcd96e92bc1d80f6a9e40fd5cf2609ed0a9c2455c17f8f4309e85c1be6b6672b818f802e55afd7b2cbcd4dd2d7e89377a
   languageName: node
   linkType: hard
 

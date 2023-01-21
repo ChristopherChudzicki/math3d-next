@@ -2,6 +2,7 @@ import { MathItemType, MathItem, MathGraphic } from "@/configs";
 
 import React from "react";
 import Point from "./Point";
+import Grid from "./Grid";
 
 const NotImplemented: React.FC<{ item: MathItem }> = () => null;
 
@@ -10,7 +11,7 @@ const graphics = {
   [MathItemType.Axis]: NotImplemented,
   [MathItemType.ExplicitSurface]: NotImplemented,
   [MathItemType.ExplicitSurfacePolar]: NotImplemented,
-  [MathItemType.Grid]: NotImplemented,
+  [MathItemType.Grid]: Grid,
   [MathItemType.ImplicitSurface]: NotImplemented,
   [MathItemType.Line]: NotImplemented,
   [MathItemType.ParametricCurve]: NotImplemented,
