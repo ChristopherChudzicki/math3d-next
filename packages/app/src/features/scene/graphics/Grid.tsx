@@ -11,12 +11,13 @@ const props = [
   "width",
   "zBias",
   "zIndex",
+  "snap",
 ] as const;
 
 const Grid: React.FC<{ item: MathItem<MathItemType.Grid> }> = ({ item }) => {
   const scope = useMathScope();
   const { color, axes } = item.properties;
-  const { divisions, visible, opacity, width, zIndex, zBias } =
+  const { divisions, visible, opacity, width, zIndex, zBias, snap } =
     useMathItemResults(scope, item, props);
   return !visible ? null : (
     <MB.Grid
@@ -29,6 +30,8 @@ const Grid: React.FC<{ item: MathItem<MathItemType.Grid> }> = ({ item }) => {
       visible={visible}
       zIndex={zIndex}
       zBias={zBias}
+      niceX={snap}
+      niceY={snap} 
     />
   );
 };

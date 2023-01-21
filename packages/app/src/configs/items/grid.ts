@@ -54,6 +54,7 @@ type EvaluatedProperties = {
   width: number;
   zBias: number;
   zIndex: number;
+  snap: boolean;
 };
 
 const config: IMathItemConfig<
