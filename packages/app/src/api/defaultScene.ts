@@ -68,7 +68,7 @@ const defaultScene: Omit<Scene, "id"> = {
         max: "+5",
         min: "-5",
         axis: "x",
-        size: "2",
+        size: "6",
         color: "#808080",
         label: "x",
         scale: "1",
@@ -80,6 +80,9 @@ const defaultScene: Omit<Scene, "id"> = {
         description: "Axis",
         labelVisible: "true",
         ticksVisible: "true",
+        end: "true",
+        start: "false",
+        divisions: "10"
       },
     },
     {
@@ -89,7 +92,7 @@ const defaultScene: Omit<Scene, "id"> = {
         max: "+5",
         min: "-5",
         axis: "y",
-        size: "2",
+        size: "6",
         color: "#808080",
         label: "y",
         scale: "1",
@@ -101,6 +104,9 @@ const defaultScene: Omit<Scene, "id"> = {
         description: "Axis",
         labelVisible: "true",
         ticksVisible: "true",
+        end: "true",
+        start: "false",
+        divisions: "10"
       },
     },
     {
@@ -110,10 +116,10 @@ const defaultScene: Omit<Scene, "id"> = {
         max: "+5",
         min: "-5",
         axis: "z",
-        size: "2",
+        size: "6",
         color: "#808080",
         label: "z",
-        scale: "1",
+        scale: "\\frac{1}{2}",
         width: "1",
         zBias: "0",
         zIndex: "0",
@@ -122,6 +128,9 @@ const defaultScene: Omit<Scene, "id"> = {
         description: "Axis",
         labelVisible: "true",
         ticksVisible: "true",
+        end: "true",
+        start: "false",
+        divisions: "10"
       },
     },
     {

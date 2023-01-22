@@ -8,10 +8,12 @@ import type {
 import {
   color,
   description,
+  end,
   label,
   labelVisible,
   opacity,
   size,
+  start,
   visible,
   width,
   zBias,
@@ -35,6 +37,9 @@ interface AxisProperties {
   ticksVisible: string;
   size: string;
   width: string;
+  start: string;
+  end: string;
+  divisions: string;
 }
 
 const defaultValues: AxisProperties = {
@@ -51,8 +56,11 @@ const defaultValues: AxisProperties = {
   axis: "x",
   scale: "1",
   ticksVisible: "true",
-  size: "2",
+  size: "6",
   width: "1",
+  end: "true",
+  start: "false",
+  divisions: "10",
 };
 
 const make: MathItemGenerator<MathItemType.Axis, AxisProperties> = (id) => ({
@@ -73,6 +81,9 @@ type EvaluatedProperties = {
   min: number;
   max: number;
   scale: number;
+  start: boolean;
+  end: boolean;
+  divisions: number;
 };
 
 const config: IMathItemConfig<
@@ -122,6 +133,14 @@ const config: IMathItemConfig<
     width,
     zBias,
     zIndex,
+    start,
+    end,
+    divisions: {
+      name: "divisions",
+      label: "Divisions",
+      widget: WidgetType.MathValue,
+      validate: validators.positive,
+    },
   },
   settingsProperties: [
     "label",
@@ -132,6 +151,9 @@ const config: IMathItemConfig<
     "scale",
     "zBias",
     "zIndex",
+    "start",
+    "end",
+    "divisions",
   ],
   make,
 };
