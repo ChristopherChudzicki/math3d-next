@@ -1,3 +1,4 @@
+import { validators } from "@/util/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -62,12 +63,16 @@ const make: MathItemGenerator<MathItemType.Axis, AxisProperties> = (id) => ({
 
 type EvaluatedProperties = {
   labelVisible: boolean;
+  ticksVisible: boolean;
   opacity: number;
   size: number;
   visible: boolean;
   width: number;
   zBias: number;
   zIndex: number;
+  min: number;
+  max: number;
+  scale: number;
 };
 
 const config: IMathItemConfig<
@@ -91,27 +96,27 @@ const config: IMathItemConfig<
       name: "min",
       label: "Min",
       widget: WidgetType.MathValue,
-      // validate number
+      validate: validators.real,
     },
     max: {
       name: "max",
       label: "Max",
       widget: WidgetType.MathValue,
-      // validate number
+      validate: validators.real,
     },
     opacity,
     scale: {
       name: "scale",
       label: "Scale",
       widget: WidgetType.MathValue,
-      // validate number
+      validate: validators.real,
     },
     size,
     ticksVisible: {
       name: "ticksVisible",
       label: "Ticks Visible",
       widget: WidgetType.MathBoolean,
-      // validate boolean
+      validate: validators.boolean,
     },
     visible,
     width,

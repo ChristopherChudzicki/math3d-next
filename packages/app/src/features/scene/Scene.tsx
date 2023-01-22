@@ -8,6 +8,7 @@ import { useAppSelector } from "@/store/hooks";
 import { isMathGraphic } from "@/configs";
 import * as select from "../sceneControls/mathItems/mathItemsSlice/selectors";
 import { getGraphic } from "./graphics";
+import SceneCartesian from "./SceneCartesian";
 
 type Props = {
   className?: string;
@@ -28,27 +29,30 @@ const setup = (mathbox: MathboxSelection | null) => {
   window.mathbox = mathbox;
 };
 
+const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z"];
 const SceneContent = () => {
   const items = useAppSelector(select.orderedMathItems());
+  const [x, y, z] = useAppSelector(select.getItems(REQUIRED_ITEMS));
   return (
-    <MB.Cartesian>
+    <SceneCartesian axisX={x} axisY={y} axisZ={z}>
       {items.filter(isMathGraphic).map((item) => {
         const Graphic = getGraphic(item);
         return <Graphic key={item.id} item={item} />;
       })}
-    </MB.Cartesian>
+    </SceneCartesian>
   );
 };
 
 const Scene: React.FC<Props> = (props) => {
   const [container, setContainer] = React.useState<HTMLDivElement | null>(null);
+  const hasRequired = useAppSelector(select.hasItems(REQUIRED_ITEMS));
   return (
     <div
       className={mergeClassNames(props.className)}
       style={{ width: "100%", height: "100%" }}
       ref={setContainer}
     >
-      {container && (
+      {container && hasRequired && (
         <MB.Mathbox container={container} options={mathboxOptions} ref={setup}>
           <SceneContent />
         </MB.Mathbox>

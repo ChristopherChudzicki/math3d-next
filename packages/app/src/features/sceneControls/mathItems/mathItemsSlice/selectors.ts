@@ -1,6 +1,7 @@
 import type { SelectorReturn, RootState } from "@/store/store";
 import type { MathItem } from "@/configs";
 import type { MathItemsState, AppMathScope, Subtree } from "./interfaces";
+import invariant from "tiny-invariant";
 
 const mathItems =
   (): SelectorReturn<MathItemsState["items"]> => (state: RootState) =>
@@ -58,5 +59,31 @@ const isActive =
 const mathScope = (): SelectorReturn<AppMathScope> => (state: RootState) =>
   state.mathItems.mathScope();
 
-export { subtree, isActive, mathItems, mathItem, mathScope, orderedMathItems };
+const getItems =
+  (ids: string[]): SelectorReturn<MathItem[]> =>
+  (state: RootState) => {
+    const { items } = state.mathItems;
+    return ids.map((id) => {
+      invariant(items[id], `MathItem with id ${id} not found.`);
+      return items[id];
+    });
+  };
+
+const hasItems =
+  (ids: string[]): SelectorReturn<boolean> =>
+  (state: RootState) => {
+    const { items } = state.mathItems;
+    return ids.every((id) => items[id]);
+  };
+
+export {
+  subtree,
+  isActive,
+  mathItems,
+  mathItem,
+  mathScope,
+  orderedMathItems,
+  hasItems,
+  getItems,
+};
 export type { Subtree };
