@@ -7,7 +7,7 @@ import { Vector3 } from "three";
 import { useAppSelector } from "@/store/hooks";
 import { isMathGraphic } from "@/configs";
 import * as select from "../sceneControls/mathItems/mathItemsSlice/selectors";
-import { getGraphic } from "./graphics";
+import { Graphic } from "./graphics";
 import SceneCartesian from "./SceneCartesian";
 
 type Props = {
@@ -36,7 +36,6 @@ const SceneContent = () => {
   return (
     <SceneCartesian axisX={x} axisY={y} axisZ={z}>
       {items.filter(isMathGraphic).map((item) => {
-        const Graphic = getGraphic(item);
         return <Graphic key={item.id} item={item} />;
       })}
     </SceneCartesian>

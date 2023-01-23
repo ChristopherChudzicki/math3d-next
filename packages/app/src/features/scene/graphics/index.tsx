@@ -29,4 +29,10 @@ const getGraphic = (item: MathGraphic): React.FC<{ item: MathGraphic }> => {
   return Graphic;
 };
 
-export { getGraphic };
+const Graphic: React.FC<{ item: MathGraphic }> = React.memo(({ item }) => {
+  const Component = getGraphic(item);
+  return <Component item={item} />;
+});
+Graphic.displayName = "Graphic";
+
+export { Graphic };
