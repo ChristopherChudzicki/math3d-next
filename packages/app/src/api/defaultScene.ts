@@ -55,7 +55,7 @@ const defaultScene: Omit<Scene, "id"> = {
         useComputed: "false",
         isPanEnabled: "false",
         isZoomEnabled: "true",
-        computedLookAt: "\\left[0, 0, 0\\right]",
+        computedTarget: "\\left[0, 0, 0\\right]",
         isOrthographic: "false",
         isRotateEnabled: "true",
         computedPosition: "\\left[-6, -4, 2\\right]",
@@ -82,7 +82,7 @@ const defaultScene: Omit<Scene, "id"> = {
         ticksVisible: "true",
         end: "true",
         start: "false",
-        divisions: "10"
+        divisions: "10",
       },
     },
     {
@@ -106,7 +106,7 @@ const defaultScene: Omit<Scene, "id"> = {
         ticksVisible: "true",
         end: "true",
         start: "false",
-        divisions: "10"
+        divisions: "10",
       },
     },
     {
@@ -130,7 +130,7 @@ const defaultScene: Omit<Scene, "id"> = {
         ticksVisible: "true",
         end: "true",
         start: "false",
-        divisions: "10"
+        divisions: "10",
       },
     },
     {

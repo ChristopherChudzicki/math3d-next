@@ -9,15 +9,13 @@ import { description } from "../shared";
 
 interface CameraProperties {
   description: string;
-  isOrthographic: string; // eval to boolean
-  isPanEnabled: string; // eval to boolean
-  isZoomEnabled: string; // eval to boolean
-  isRotateEnabled: string; // eval to boolean
-  // relativePosition: number[];
-  // relativeLookAt: number[];
+  isOrthographic: string;
+  isPanEnabled: string;
+  isZoomEnabled: string;
+  isRotateEnabled: string;
   computedPosition: string;
-  computedLookAt: string;
-  useComputed: string; // eval to boolean
+  computedTarget: string;
+  useComputed: string;
 }
 
 const defaultValues: CameraProperties = {
@@ -27,7 +25,7 @@ const defaultValues: CameraProperties = {
   isZoomEnabled: "true",
   isRotateEnabled: "true",
   computedPosition: "[-6, -4, 2]",
-  computedLookAt: "[0, 0, 0]",
+  computedTarget: "[0, 0, 0]",
   useComputed: "false",
 };
 
@@ -38,7 +36,7 @@ type EvaluatedProperties = {
   isRotateEnabled: boolean;
   useComputed: boolean;
   computedPosition: [number, number, number];
-  computedLookAt: [number, number, number];
+  computedTarget: [number, number, number];
 };
 
 const make: MathItemGenerator<MathItemType.Camera, CameraProperties> = (
@@ -60,7 +58,7 @@ const config: IMathItemConfig<
     description,
     isOrthographic: {
       name: "isOrthographic",
-      label: "Orthographic",
+      label: "Use orthographic projection",
       widget: WidgetType.MathBoolean,
       validate: validators.boolean,
     },
@@ -84,7 +82,7 @@ const config: IMathItemConfig<
     },
     useComputed: {
       name: "useComputed",
-      label: "Use Computed",
+      label: "Active",
       widget: WidgetType.MathBoolean,
       validate: validators.boolean,
     },
@@ -94,8 +92,8 @@ const config: IMathItemConfig<
       widget: WidgetType.MathValue,
       validate: validators.realVec[3],
     },
-    computedLookAt: {
-      name: "computedLookAt",
+    computedTarget: {
+      name: "computedTarget",
       label: "Look At",
       widget: WidgetType.MathValue,
       validate: validators.realVec[3],

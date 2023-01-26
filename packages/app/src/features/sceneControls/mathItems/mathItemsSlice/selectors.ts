@@ -1,7 +1,7 @@
 import type { SelectorReturn, RootState } from "@/store/store";
 import type { MathItem } from "@/configs";
-import type { MathItemsState, AppMathScope, Subtree } from "./interfaces";
 import invariant from "tiny-invariant";
+import type { MathItemsState, AppMathScope, Subtree } from "./interfaces";
 
 const mathItems =
   (): SelectorReturn<MathItemsState["items"]> => (state: RootState) =>

@@ -31,7 +31,7 @@ const Grid: React.FC<{ item: MathItem<MathItemType.Grid> }> = ({ item }) => {
       zIndex={zIndex}
       zBias={zBias}
       niceX={snap}
-      niceY={snap} 
+      niceY={snap}
     />
   );
 };
