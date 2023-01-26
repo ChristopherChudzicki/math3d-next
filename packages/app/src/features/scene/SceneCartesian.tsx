@@ -1,7 +1,7 @@
 import { MathItem, MathItemType } from "@/configs";
 import { useMathScope } from "@/features/sceneControls/mathItems/mathItemsSlice";
 import { useMathItemResults } from "@/features/sceneControls/mathItems/mathScope";
-import { Cartesian, Camera } from "mathbox-react";
+import { Cartesian } from "mathbox-react";
 import React, { useMemo } from "react";
 import invariant from "tiny-invariant";
 
@@ -40,7 +40,6 @@ const SceneCartesian: React.FC<SceneCartesianProps> = ({
   );
   return (
     <Cartesian range={range} scale={scale}>
-      <Camera proxy position={[2, 1, 0.5]} />
       {children}
     </Cartesian>
   );

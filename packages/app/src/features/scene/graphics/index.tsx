@@ -4,10 +4,12 @@ import React from "react";
 import Point from "./Point";
 import Grid from "./Grid";
 import Axis from "./Axis";
+import Camera from "./Camera"
 
 const NotImplemented: React.FC<{ item: MathItem }> = () => null;
 
 const graphics = {
+  [MathItemType.Camera]: Camera,
   [MathItemType.Point]: Point,
   [MathItemType.Axis]: Axis,
   [MathItemType.ExplicitSurface]: NotImplemented,
