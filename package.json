@@ -14,7 +14,6 @@
   "scripts": {
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "build": "yarn workspace app build",
-    "global:lint": "cd $INIT_CWD && eslint --max-warnings 0 \"./src/**/*.{ts,tsx}\""
+    "build": "yarn workspace app build"
   }
 }

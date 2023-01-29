@@ -61,8 +61,13 @@ type CameraProps = {
 const Camera: React.FC<CameraProps> = ({ item, range, onMoveEnd }) => {
   invariant(range !== undefined, "Camera must have a range");
   const scope = useMathScope();
-  const { isRotateEnabled, isZoomEnabled, isPanEnabled, position, updateOnDrag } =
-    useMathItemResults(scope, item, props);
+  const {
+    isRotateEnabled,
+    isZoomEnabled,
+    isPanEnabled,
+    position,
+    updateOnDrag,
+  } = useMathItemResults(scope, item, props);
 
   const toThreeJSCoords = useCallback(
     (coords: Coords) => {

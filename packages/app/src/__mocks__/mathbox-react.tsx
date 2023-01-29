@@ -144,3 +144,8 @@ export const Volume = MockComponent;
 export const Voxel = MockComponent;
 
 export const Mathbox = MockComponent;
+
+export const Threestrap = {
+  Controls: MockComponent,
+  Camera: MockComponent,
+};
