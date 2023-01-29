@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
 import * as MB from "mathbox-react";
-import { MathItem, MathItemType } from "@/configs";
+import { MathItemType } from "@/configs";
 import { useMathItemResults } from "../../sceneControls/mathItems/mathScope";
 import { useMathScope } from "../../sceneControls/mathItems/mathItemsSlice";
+import { GraphicComponent } from "./interfaces";
 
 const props = [
   "color",
@@ -15,7 +16,7 @@ const props = [
   "size",
 ] as const;
 const labelOffset = [0, 40, 0];
-const Point: React.FC<{ item: MathItem<MathItemType.Point> }> = ({ item }) => {
+const Point: GraphicComponent<MathItemType.Point> = ({ item }) => {
   const scope = useMathScope();
   const { color, label } = item.properties;
   const { coords, size, visible, opacity, zIndex, zBias, labelVisible } =

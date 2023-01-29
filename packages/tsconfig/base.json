@@ -3,7 +3,6 @@
       "target": "ESNext",
       "lib": ["dom", "dom.iterable", "esnext"],
       "allowJs": false,
-      // Skip this for now. TS 4.8 Introduced some breaking changes that libraries haven't all caught up to.
       "skipLibCheck": true,
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,

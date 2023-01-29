@@ -48,12 +48,13 @@ const make: MathItemGenerator<MathItemType.Grid, GridProperties> = (id) => ({
 });
 
 type EvaluatedProperties = {
-  divisions: number;
+  divisions: number[];
   opacity: number;
   visible: boolean;
   width: number;
   zBias: number;
   zIndex: number;
+  snap: boolean;
 };
 
 const config: IMathItemConfig<

@@ -1,0 +1,24 @@
+.form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.header {
+  grid-column: 1 / 3;
+}
+
+.input-label {
+  text-align: end;
+  margin-right: 1em;
+  grid-column: 1 / 2;
+}
+.input { 
+  grid-column: 2 / 3;
+}
+
+.divider {
+  grid-column: 1 / 3;
+  border-bottom: 1pt solid var(--color-secondary-light);
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
