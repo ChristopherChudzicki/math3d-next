@@ -16,7 +16,6 @@ interface IWidgetProps<V extends Parseable = string> {
   error?: Error;
   onFocus?: React.FocusEventHandler;
   onBlur?: React.FocusEventHandler;
-  disabled?: boolean;
 }
 
 interface WidgetChangeEvent<V extends Parseable = string> {

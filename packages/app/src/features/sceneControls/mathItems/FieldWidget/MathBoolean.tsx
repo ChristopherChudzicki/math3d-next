@@ -25,7 +25,6 @@ const MathBoolean = React.forwardRef<HTMLDivElement, IWidgetProps>(
       style,
       className,
       itemId,
-      disabled,
       ...others
     } = props;
     assertNotNil(itemId);
@@ -68,10 +67,6 @@ const MathBoolean = React.forwardRef<HTMLDivElement, IWidgetProps>(
     }, [triggerChange]);
     const useExpression = useCallback(() => setShouldUseExpression(true), []);
 
-    const makeOptions = useCallback(() => {
-      return { readOnly: disabled };
-    }, [disabled]);
-
     return (
       <div
         className={classNames("d-flex", "align-items-center", className)}
@@ -82,7 +77,7 @@ const MathBoolean = React.forwardRef<HTMLDivElement, IWidgetProps>(
           <Switch
             aria-label={`Toggle property: ${label}`}
             checked={result}
-            disabled={shouldUseExpression || disabled}
+            disabled={shouldUseExpression}
             size="small"
             className="me-2"
             onChange={handleSwitchChange}
@@ -98,22 +93,16 @@ const MathBoolean = React.forwardRef<HTMLDivElement, IWidgetProps>(
               styles["field-widget-input"]
             )}
             onChange={handleChange}
-            makeOptions={makeOptions}
           >
             {value}
           </SmallMathField>
         )}
         {shouldUseExpression ? (
-          <SubtleButton
-            disabled={disabled}
-            onClick={handleReset}
-            className={styles["detail-text"]}
-          >
+          <SubtleButton onClick={handleReset} className={styles["detail-text"]}>
             Reset
           </SubtleButton>
         ) : (
           <SubtleButton
-            disabled={disabled}
             onClick={useExpression}
             className={styles["detail-text"]}
           >

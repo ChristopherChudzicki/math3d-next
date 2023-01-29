@@ -1,8 +1,9 @@
 import React from "react";
 import * as MB from "mathbox-react";
-import { MathItem, MathItemType } from "@/configs";
+import { MathItemType } from "@/configs";
 import { useMathItemResults } from "../../sceneControls/mathItems/mathScope";
 import { useMathScope } from "../../sceneControls/mathItems/mathItemsSlice";
+import { GraphicComponent } from "./interfaces";
 
 const props = [
   "divisions",
@@ -14,7 +15,7 @@ const props = [
   "snap",
 ] as const;
 
-const Grid: React.FC<{ item: MathItem<MathItemType.Grid> }> = ({ item }) => {
+const Grid: GraphicComponent<MathItemType.Grid> = ({ item }) => {
   const scope = useMathScope();
   const { color, axes } = item.properties;
   const { divisions, visible, opacity, width, zIndex, zBias, snap } =

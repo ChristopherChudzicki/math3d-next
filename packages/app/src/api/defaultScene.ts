@@ -52,13 +52,13 @@ const defaultScene: Omit<Scene, "id"> = {
       type: MathItemType.Camera,
       properties: {
         description: "Camera",
-        useComputed: "false",
+        updateOnDrag: "true",
         isPanEnabled: "false",
         isZoomEnabled: "true",
-        computedTarget: "\\left[0, 0, 0\\right]",
+        target: "\\left[0, 0, 0\\right]",
         isOrthographic: "false",
         isRotateEnabled: "true",
-        computedPosition: "\\left[-6, -4, 2\\right]",
+        position: "\\left[-6, -4, 2\\right]",
       },
     },
     {

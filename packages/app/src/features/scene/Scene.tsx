@@ -1,21 +1,24 @@
 import mergeClassNames from "classnames";
-import React from "react";
+import React, { useCallback } from "react";
 import * as MB from "mathbox-react";
 import type { MathboxSelection } from "mathbox";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Vector3 } from "three";
-import { useAppSelector } from "@/store/hooks";
-import { isMathGraphic } from "@/configs";
-import * as select from "../sceneControls/mathItems/mathItemsSlice/selectors";
-import { Graphic } from "./graphics";
-import SceneCartesian from "./SceneCartesian";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { isMathGraphic, MathItemType } from "@/configs";
+import invariant from "tiny-invariant";
+import { actions, select } from "../sceneControls/mathItems/mathItemsSlice";
+import { Graphic, graphicNeedsRange } from "./graphics";
+import useAxesInfo from "./useAxesInfo";
+import Camera from "./Camera";
+import type { OnMoveEnd } from "./Camera";
 
 type Props = {
   className?: string;
 };
 
 const mathboxOptions = {
-  plugins: ["core", "controls", "cursor"],
+  plugins: ["core", "controls", "cursor", "stats"],
   controls: {
     klass: OrbitControls,
   },
@@ -29,16 +32,40 @@ const setup = (mathbox: MathboxSelection | null) => {
   window.mathbox = mathbox;
 };
 
-const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z"];
+const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 const SceneContent = () => {
+  const dispatch = useAppDispatch();
   const items = useAppSelector(select.orderedMathItems());
-  const [x, y, z] = useAppSelector(select.getItems(REQUIRED_ITEMS));
+  const [x, y, z, camera] = useAppSelector(select.getItems(REQUIRED_ITEMS));
+  invariant(camera.type === MathItemType.Camera);
+  const { scale, range } = useAxesInfo(x, y, z);
+  const onCameraChange: OnMoveEnd = useCallback(
+    (event) => {
+      dispatch(
+        actions.patchProperty({
+          id: camera.id,
+          path: "/position",
+          value: `[${event.position.map((pos) => pos.toPrecision(3))}]`,
+        })
+      );
+      dispatch(
+        actions.patchProperty({
+          id: camera.id,
+          path: "/target",
+          value: `[${event.target.map((pos) => pos.toPrecision(3))}]`,
+        })
+      );
+    },
+    [dispatch, camera.id]
+  );
   return (
-    <SceneCartesian axisX={x} axisY={y} axisZ={z}>
+    <MB.Cartesian range={range} scale={scale}>
+      <Camera item={camera} range={range} onMoveEnd={onCameraChange} />
       {items.filter(isMathGraphic).map((item) => {
-        return <Graphic key={item.id} item={item} />;
+        const others = graphicNeedsRange(item.type) ? { range } : undefined;
+        return <Graphic key={item.id} item={item} {...others} />;
       })}
-    </SceneCartesian>
+    </MB.Cartesian>
   );
 };
 

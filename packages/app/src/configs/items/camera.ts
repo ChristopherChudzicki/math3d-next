@@ -13,9 +13,9 @@ interface CameraProperties {
   isPanEnabled: string;
   isZoomEnabled: string;
   isRotateEnabled: string;
-  computedPosition: string;
-  computedTarget: string;
-  useComputed: string;
+  position: string;
+  target: string;
+  updateOnDrag: string;
 }
 
 const defaultValues: CameraProperties = {
@@ -24,9 +24,9 @@ const defaultValues: CameraProperties = {
   isPanEnabled: "false",
   isZoomEnabled: "true",
   isRotateEnabled: "true",
-  computedPosition: "[-6, -4, 2]",
-  computedTarget: "[0, 0, 0]",
-  useComputed: "false",
+  position: "[-6, -4, 2]",
+  target: "[0, 0, 0]",
+  updateOnDrag: "true",
 };
 
 type EvaluatedProperties = {
@@ -34,9 +34,9 @@ type EvaluatedProperties = {
   isPanEnabled: boolean;
   isZoomEnabled: boolean;
   isRotateEnabled: boolean;
-  useComputed: boolean;
-  computedPosition: [number, number, number];
-  computedTarget: [number, number, number];
+  updateOnDrag: boolean;
+  position: [number, number, number];
+  target: [number, number, number];
 };
 
 const make: MathItemGenerator<MathItemType.Camera, CameraProperties> = (
@@ -80,20 +80,20 @@ const config: IMathItemConfig<
       widget: WidgetType.MathBoolean,
       validate: validators.boolean,
     },
-    useComputed: {
-      name: "useComputed",
-      label: "Active",
+    updateOnDrag: {
+      name: "updateOnDrag",
+      label: "Update on drag",
       widget: WidgetType.MathBoolean,
       validate: validators.boolean,
     },
-    computedPosition: {
-      name: "computedPosition",
+    position: {
+      name: "position",
       label: "Position",
       widget: WidgetType.MathValue,
       validate: validators.realVec[3],
     },
-    computedTarget: {
-      name: "computedTarget",
+    target: {
+      name: "target",
       label: "Look At",
       widget: WidgetType.MathValue,
       validate: validators.realVec[3],

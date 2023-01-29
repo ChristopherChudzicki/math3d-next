@@ -18,7 +18,6 @@ import * as vectorField from "./items/vectorField";
 
 const MATH_GRAPHIC_TYPES = [
   MathItemType.Axis,
-  MathItemType.Camera,
   MathItemType.ExplicitSurface,
   MathItemType.ExplicitSurfacePolar,
   MathItemType.Grid,

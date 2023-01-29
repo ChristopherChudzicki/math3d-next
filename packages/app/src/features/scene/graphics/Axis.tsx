@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
 import * as MB from "mathbox-react";
-import { MathItem, MathItemType } from "@/configs";
+import { MathItemType } from "@/configs";
 import { useMathItemResults } from "../../sceneControls/mathItems/mathScope";
 import { useMathScope } from "../../sceneControls/mathItems/mathItemsSlice";
+import { GraphicComponent } from "./interfaces";
 
 const props = [
   "visible",
@@ -20,7 +21,7 @@ const props = [
 ] as const;
 
 const LABEL_OFFSET = [0, 30, 0];
-const Axis: React.FC<{ item: MathItem<MathItemType.Axis> }> = ({ item }) => {
+const Axis: GraphicComponent<MathItemType.Axis> = ({ item }) => {
   const scope = useMathScope();
   const { color, axis, label } = item.properties;
   const {
