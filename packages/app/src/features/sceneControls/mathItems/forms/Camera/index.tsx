@@ -16,7 +16,6 @@ const propNames = [
   "isRotateEnabled",
   "isZoomEnabled",
   "isPanEnabled",
-
   "position",
   "target",
   "updateOnDrag",
