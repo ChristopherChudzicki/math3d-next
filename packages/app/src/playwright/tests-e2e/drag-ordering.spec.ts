@@ -35,6 +35,7 @@ const drag = async (
   await page.mouse.down();
   await sleep(downTimeout);
   await page.mouse.move(targetPos.x, targetPos.y, { steps });
+  await page.mouse.move(targetPos.x, targetPos.y, { steps });
   await page.mouse.up();
 };
 
@@ -87,13 +88,13 @@ test("Dragging item X after item Y", async ({ page }) => {
 
 test("Dragging item X before item Y", async ({ page }) => {
   await page.goto("/test_folders");
-  const source = getItem(page, "F2", "P2a");
-  const target = getItem(page, "F3", "P3b");
+  const source = getItem(page, "F3", "P3b");
+  const target = getItem(page, "F2", "P2b");
 
   await expect(await getAllItemDescriptions(page)).toEqual(initialOrder);
-  await drag(page, source, target, { targetOffset: { x: 150, y: -40 } });
+  await drag(page, source, target);
   const after = await getAllItemDescriptions(page);
-  expect(after).toEqual("F1 P1a P1b F2 P2b F3 P3a P2a P3b".split(" "));
+  expect(after).toEqual("F1 P1a P1b F2 P2a P3b P2b F3 P3a".split(" "));
 
   await page.pause();
 });
