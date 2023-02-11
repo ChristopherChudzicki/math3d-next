@@ -16,4 +16,4 @@ services:
     command: >
       bash
     volumes:
-      - ./webserver:/app
+      - ./webserver:/src

@@ -3,7 +3,7 @@ name = "math3d-webserver"
 version = "0.1.0"
 description = ""
 authors = ["Chris Chudzicki"]
-packages = [{include = "foo"}]
+packages = [{include = "main"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
