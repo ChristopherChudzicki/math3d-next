@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "math3d-webserver"
+version = "0.1.0"
+description = ""
+authors = ["Chris Chudzicki"]
+packages = [{include = "foo"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Django = "^4.1.6"
+djangorestframework = "^3.14.0"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
