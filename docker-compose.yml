@@ -20,6 +20,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env
     environment:
         DATABASE_URL: postgresql://docker:docker@db:5432/math3d
     command: >

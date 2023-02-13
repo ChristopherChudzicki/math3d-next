@@ -11,6 +11,7 @@ Django = "^4.1.6"
 djangorestframework = "^3.14.0"
 dj-database-url = "^1.2.0"
 psycopg2 = "^2.9.5"
+tqdm = "^4.64.1"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.0.0"
