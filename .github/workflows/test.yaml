@@ -23,6 +23,9 @@ jobs:
 
   webserver-tests:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./webserver
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.11
@@ -30,6 +33,6 @@ jobs:
         with:
           python-version: 3.11
       - name: Install python dependencies
-        run: ./webserver/scripts/setup_python.sh
+        run: ./scripts/setup_python.sh
       - name: Check Python Formatting
         run: black --check ./webserver
