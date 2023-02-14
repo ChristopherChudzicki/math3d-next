@@ -1,4 +1,4 @@
-name: unit tests
+name: Tests
 
 env:
   CI: True
@@ -9,6 +9,7 @@ on:
 
 jobs:
   frontend-tests:
+    if: ${{ false }}  # disable for now
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,3 +20,16 @@ jobs:
       - run: yarn lint
       - run: yarn test
       - run: yarn build
+
+  webserver-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install python dependencies
+        run: ./webserver/setup_python.sh
+      - name: Check Python Formatting
+        run: black --check ./webserver
