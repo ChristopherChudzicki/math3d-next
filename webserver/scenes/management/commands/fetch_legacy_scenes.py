@@ -1,9 +1,11 @@
-from django.core.management.base import BaseCommand
-import psycopg2
-from psycopg2.extras import DictCursor
-from psycopg2 import sql
 import os
+
+import psycopg2
 import tqdm
+from django.core.management.base import BaseCommand
+from psycopg2 import sql
+from psycopg2.extras import DictCursor
+
 from scenes.models import LegacyScene
 
 
