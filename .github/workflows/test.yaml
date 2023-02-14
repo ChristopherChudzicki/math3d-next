@@ -35,4 +35,4 @@ jobs:
       - name: Install python dependencies
         run: ./scripts/setup_python.sh
       - name: Check Python Formatting
-        run: black --check ./webserver
+        run: black --check .
