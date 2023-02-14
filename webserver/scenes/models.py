@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class LegacyScene(models.Model):
     """
     A scene that was created in the legacy system.

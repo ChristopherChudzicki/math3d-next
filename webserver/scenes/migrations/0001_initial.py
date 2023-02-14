@@ -4,21 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='LegacyScene',
+            name="LegacyScene",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('key', models.CharField(max_length=80, unique=True)),
-                ('times_accessed', models.IntegerField(default=0)),
-                ('last_accessed', models.DateTimeField(auto_now=True)),
-                ('dehydrated', models.JSONField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("key", models.CharField(max_length=80, unique=True)),
+                ("times_accessed", models.IntegerField(default=0)),
+                ("last_accessed", models.DateTimeField(auto_now=True)),
+                ("dehydrated", models.JSONField()),
             ],
         ),
     ]
