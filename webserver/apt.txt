@@ -1,5 +1,0 @@
-# Core requirements
-git
-curl
-libpq-dev
-postgresql-client
