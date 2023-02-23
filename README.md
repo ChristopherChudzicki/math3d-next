@@ -1,17 +1,34 @@
-# Next version of math3d
+# Math3d-next
 
-_TODO: Rewrite this, since I wrote it in 3 minutes._
+[Math3d](https://math3d.org) is a web-based, 3d math visualization tool—an online 3d graphing calculator.
 
-A rewrite of [math3d-react](https://github.com/ChristopherChudzicki/math3d-react). Why rewrite? Because math3d is using a bunch of pretty old tech, some of which is not maintained or poorly maintained:
+The repository represents the next generation of math3d, the current source code for which is at https://github.com/ChristopherChudzicki/math3d-react.
 
-- math3d relies heavily on MathQuill, for WYSIWYG LaTeX editing. MathQuill is not maintained **and** [MathLive](https://github.com/arnog/mathlive) seems like a viable replacement
-- math3d uses Flow. Let's use Typescript instead. TS is a more active project with better adoption / community support
-- math3d is stuck on MathJS version 3. Let's use 10
-- math3d uses a fairly old version of React
+## Development
 
-Also: math3d is not a hgue project, so a re-write is definitely viable.
+### Prerequisites
+The math3d backend and database are managed by docker containers. The frontend is not currently containerized. You'll need:
+- [Yarn](https://yarnpkg.com/getting-started/install), our JS package manager
+- [nvm](https://github.com/nvm-sh/nvm), for managing node versions
+- [Docker](https://docs.docker.com/get-docker/)
 
-### Big goals for re-write:
+### Webserver Commands
 
-- update tech stack
-- have user login system
+> **Note**
+> The commands below should be run in a `webserver` container, e.g., via
+> ```
+> # one-off
+> docker compose run --rm webserver <COMMAND> 
+> # run commands in docker shell
+> docker compose run --rm webserver bash
+> ```
+
+| Command           | Notes                                           |
+|-------------------|-------------------------------------------------|
+| `make tests`      | Run tests                                       |
+| `make format-fix` | Formats python code with  [`black`][black]  and  [`isort`][isort] |
+
+[black]: https://github.com/psf/black
+[isort]: https://github.com/PyCQA/isort
+
+See [webserver/Makefile](./webserver/Makefile) for more `make` commands.
