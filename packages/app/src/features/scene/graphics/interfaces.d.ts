@@ -1,4 +1,4 @@
-import { MathItem, MathGraphicType } from "@/configs/configs";
+import { MathItem, MathGraphicType } from "@math3d/mathitem-configs/configs";
 import React from "react";
 
 type AxesRange = [[number, number], [number, number], [number, number]];

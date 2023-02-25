@@ -1,12 +1,14 @@
-import { MathItem, WidgetType } from "@/configs";
+import { MathItem, WidgetType } from "@math3d/mathitem-configs";
 import React, { useCallback, useMemo } from "react";
-import { ParseableObjs } from "@/util/parsing";
+import {
+  ParseableObjs,
+  ParseableArray,
+  ParameterErrors,
+  DetailedAssignmentError,
+} from "@math3d/parser";
 
-import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
-import { ParameterErrors } from "@/util/parsing/rules";
 import invariant from "tiny-invariant";
 import ordinal from "ordinal";
-import { ParseableArray } from "@/util/parsing/interfaces";
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import { OnWidgetChange, WidgetChangeEvent } from "../FieldWidget/types";
 import styles from "./ItemForms.module.css";

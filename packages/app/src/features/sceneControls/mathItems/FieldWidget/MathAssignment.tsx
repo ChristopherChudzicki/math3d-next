@@ -2,10 +2,9 @@ import classNames from "classnames";
 import React, { useCallback } from "react";
 import { OnMathFieldChange } from "@/util/components/MathLive";
 import SmallMathField from "@/util/components/SmallMathField";
-import { ParseableObjs } from "@/util/parsing";
-import { round } from "lodash";
+import { ParseableObjs, DetailedAssignmentError } from "@math3d/parser";
+import { round } from "lodash-es";
 
-import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
 import ReadonlyMathField from "./ReadonlyMathField";
 import type { IWidgetProps, WidgetChangeEvent } from "./types";
 import ErrorTooltip from "./ErrorTooltip";

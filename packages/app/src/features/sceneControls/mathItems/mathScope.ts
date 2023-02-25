@@ -5,8 +5,8 @@ import {
   MathItemType,
   PropertyConfig,
   WidgetType,
-} from "@/configs";
-import { filter as collectionFilter } from "lodash";
+} from "@math3d/mathitem-configs";
+import { filter as collectionFilter } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { OnChangeListener } from "@math3d/mathscope";
 import { AppMathScope, AppParseable } from "./mathItemsSlice/interfaces";

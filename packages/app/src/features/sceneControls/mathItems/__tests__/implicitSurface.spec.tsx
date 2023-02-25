@@ -1,4 +1,8 @@
-import { MathItem, MathItemType as MIT, mathItemConfigs } from "@/configs";
+import {
+  MathItem,
+  MathItemType as MIT,
+  mathItemConfigs,
+} from "@math3d/mathitem-configs";
 import {
   assertInstanceOf,
   makeItem,

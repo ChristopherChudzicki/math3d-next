@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect } from "react";
 import { act } from "react-dom/test-utils";
 import MathScope, { CyclicAssignmentError } from "@math3d/mathscope";
 import { assertNotNil } from "@/util/predicates";
-import { latexParser } from "@/util/parsing";
+import { latexParser } from "@math3d/parser";
 
 import { useMathErrors, useMathResults } from "./mathScope";
 

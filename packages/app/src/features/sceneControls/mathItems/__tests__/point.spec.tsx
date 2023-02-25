@@ -1,4 +1,4 @@
-import { MathItem, MathItemType as MIT } from "@/configs";
+import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
 import {
   makeItem,
   nodeId,

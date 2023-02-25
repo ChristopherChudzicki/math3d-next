@@ -1,4 +1,7 @@
-import { mathItemConfigs as configs, MathItemType as MIT } from "@/configs";
+import {
+  mathItemConfigs as configs,
+  MathItemType as MIT,
+} from "@math3d/mathitem-configs";
 import React from "react";
 
 import { MathAssignment, useOnWidgetChange } from "../../FieldWidget";

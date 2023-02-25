@@ -5,7 +5,7 @@ import type { MathboxSelection } from "mathbox";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Vector3 } from "three";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { isMathGraphic, MathItemType } from "@/configs";
+import { isMathGraphic, MathItemType } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import { actions, select } from "../sceneControls/mathItems/mathItemsSlice";
 import { Graphic, graphicNeedsRange } from "./graphics";

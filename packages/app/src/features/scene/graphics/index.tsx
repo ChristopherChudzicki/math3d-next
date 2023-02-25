@@ -1,4 +1,4 @@
-import { MathItemType, MathItem, MathGraphic } from "@/configs";
+import { MathItemType, MathItem, MathGraphic } from "@math3d/mathitem-configs";
 
 import React from "react";
 import Point from "./Point";

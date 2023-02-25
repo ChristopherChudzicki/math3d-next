@@ -1,4 +1,4 @@
-import { Parseable } from "@/util/parsing";
+import { Parseable } from "@math3d/parser";
 import React from "react";
 
 interface IWidgetProps<V extends Parseable = string> {

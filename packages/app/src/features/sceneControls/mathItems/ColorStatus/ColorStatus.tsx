@@ -1,6 +1,9 @@
 import classNames from "classnames";
-import { MathGraphic } from "@/configs";
-import { colorsAndGradients, makeColorConfig } from "@/configs/colors";
+import {
+  MathGraphic,
+  makeColorConfig,
+  colorsAndGradients,
+} from "@math3d/mathitem-configs";
 import React, { useCallback, useMemo } from "react";
 import { useToggle } from "@/util/hooks";
 import Popover, { rightStartEnd } from "@/util/components/Popover";

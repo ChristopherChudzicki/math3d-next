@@ -1,5 +1,5 @@
-import { MathItemType as MIT } from "@/configs";
-import { Point, PointProperties } from "@/configs/items/point";
+import { MathItemType as MIT } from "@math3d/mathitem-configs";
+import { Point, PointProperties } from "@math3d/mathitem-configs/items/point";
 import {
   makeItem,
   nodeId,
