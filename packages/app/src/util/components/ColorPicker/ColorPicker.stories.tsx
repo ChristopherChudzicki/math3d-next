@@ -2,7 +2,7 @@
 import { ComponentMeta, ComponentStory } from "@storybook/react";
 import React, { useState } from "react";
 
-import { colors, gradients } from "../../../configs/colors";
+import { colors, gradients } from "@math3d/mathitem-configs";
 import ColorPicker, { OnColorChange } from "./ColorPicker";
 
 const colorsAndGradients = [

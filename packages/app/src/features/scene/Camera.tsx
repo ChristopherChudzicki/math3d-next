@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import * as MB from "mathbox-react";
-import { MathItem, MathItemType } from "@/configs";
+import { MathItem, MathItemType } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import { useMathItemResults } from "../sceneControls/mathItems/mathScope";
 import { useMathScope } from "../sceneControls/mathItems/mathItemsSlice/index";

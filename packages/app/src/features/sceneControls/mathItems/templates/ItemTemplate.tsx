@@ -5,7 +5,7 @@ import {
   MathItemConfig,
   MathItemType as MIT,
   WidgetType,
-} from "@/configs";
+} from "@math3d/mathitem-configs";
 import React, { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 

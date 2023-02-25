@@ -1,5 +1,8 @@
 import React from "react";
-import { mathItemConfigs as configs, MathItemType as MIT } from "@/configs";
+import {
+  mathItemConfigs as configs,
+  MathItemType as MIT,
+} from "@math3d/mathitem-configs";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
 import styles from "./Grid.module.css";

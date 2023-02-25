@@ -1,4 +1,4 @@
-import type { MathItemType, MathItem } from "@/configs";
+import type { MathItemType, MathItem } from "@math3d/mathitem-configs";
 import {
   screen,
   within,

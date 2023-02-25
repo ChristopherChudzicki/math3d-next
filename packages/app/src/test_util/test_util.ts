@@ -1,5 +1,5 @@
 import user from "@testing-library/user-event";
-import { MathItem } from "@/configs";
+import { MathItem } from "@math3d/mathitem-configs";
 import { mathScopeId } from "@/features/sceneControls/mathItems/mathScope";
 import * as R from "ramda";
 import { assertInstanceOf } from "@/util/predicates";

@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { faker } from "@faker-js/faker";
-import { MathItemType as MIT } from "@/configs";
+import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { getItemForm, makeItem, pwHelpersExist, getLatex } from "./util";
 
 test("Typing arrays into an empty <math-field />", async ({ page }) => {

@@ -1,5 +1,6 @@
-import { MathItemType as MIT } from "@/configs";
-import type { MathItem } from "@/configs";
+import { MathItemType as MIT } from "@math3d/mathitem-configs";
+import type { MathItem } from "@math3d/mathitem-configs";
+import { faker } from "@faker-js/faker";
 import {
   act,
   assertInstanceOf,
@@ -12,9 +13,8 @@ import {
   within,
   screen,
 } from "@/test_util";
-import type { ResolvePromise } from "@/types/util";
-import { faker } from "@faker-js/faker";
-import { ParseableObjs } from "@/util/parsing";
+import type { ResolvePromise } from "@math3d/utils";
+import { ParseableObjs } from "@math3d/parser";
 import { getItemByDescription, findBtn } from "./__utils__";
 import { mathScopeId } from "../mathScope";
 

@@ -1,7 +1,8 @@
-import type { PartialBy, Scene } from "@/types";
+import type { PartialBy } from "@math3d/utils";
 import { factory, primaryKey } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
-import { MathItem, MathItemType } from "@/configs";
+import { MathItem, MathItemType } from "@math3d/mathitem-configs";
+import type { Scene } from "@/types";
 import { makeItem } from "../makeItem";
 import { sceneFixtures } from "./fixtures";
 

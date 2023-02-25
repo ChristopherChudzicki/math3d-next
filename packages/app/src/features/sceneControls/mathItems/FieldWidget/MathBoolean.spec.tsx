@@ -1,5 +1,5 @@
 import { waitFor } from "@testing-library/react";
-import { MathItemType as MIT } from "@/configs";
+import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import {
   assertInstanceOf,
   makeItem,

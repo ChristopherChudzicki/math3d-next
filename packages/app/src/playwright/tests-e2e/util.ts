@@ -1,4 +1,4 @@
-import { MathItem } from "@/configs";
+import { MathItem } from "@math3d/mathitem-configs";
 import type { Locator, Page } from "@playwright/test";
 import type { Mathfield } from "mathlive";
 /**

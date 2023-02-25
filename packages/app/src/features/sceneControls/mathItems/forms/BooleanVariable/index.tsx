@@ -4,7 +4,7 @@ import {
   mathItemConfigs as configs,
   MathItemType as MIT,
   WidgetType,
-} from "@/configs";
+} from "@math3d/mathitem-configs";
 import FieldWidget, { useOnWidgetChange } from "../../FieldWidget";
 import { useMathScope } from "../../mathItemsSlice";
 import { useMathErrors, useMathItemResults } from "../../mathScope";

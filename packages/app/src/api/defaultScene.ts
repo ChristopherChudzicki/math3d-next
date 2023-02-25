@@ -1,4 +1,4 @@
-import { MathItemType } from "@/configs";
+import { MathItemType } from "@math3d/mathitem-configs";
 import { Scene } from "@/types";
 
 const defaultScene: Omit<Scene, "id"> = {

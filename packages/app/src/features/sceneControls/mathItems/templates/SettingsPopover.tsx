@@ -5,7 +5,7 @@ import type {
   MathItemConfig,
   MathItemType,
   PropertyConfig,
-} from "@/configs";
+} from "@math3d/mathitem-configs";
 import React, { forwardRef, useMemo } from "react";
 import { useToggle } from "@/util/hooks";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";

@@ -1,7 +1,7 @@
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { addableTypes, mathItemConfigs } from "@/configs";
+import { addableTypes, mathItemConfigs } from "@math3d/mathitem-configs";
 import React, { useRef } from "react";
 import { useAppDispatch } from "@/store/hooks";
 import idGenerator from "@/util/idGenerator";

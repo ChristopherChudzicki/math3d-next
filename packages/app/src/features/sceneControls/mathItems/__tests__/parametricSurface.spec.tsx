@@ -1,4 +1,8 @@
-import { MathItem, MathItemType as MIT, mathItemConfigs } from "@/configs";
+import {
+  MathItem,
+  MathItemType as MIT,
+  mathItemConfigs,
+} from "@math3d/mathitem-configs";
 import {
   assertInstanceOf,
   makeItem,
@@ -9,8 +13,8 @@ import {
   user,
   within,
 } from "@/test_util";
-import type { ParseableObjs, ParseableArray } from "@/util/parsing";
-import { DetailedAssignmentError } from "@/util/parsing/MathJsParser";
+import type { ParseableObjs, ParseableArray } from "@math3d/parser";
+import { DetailedAssignmentError } from "@math3d/parser";
 import invariant from "tiny-invariant";
 import { setupItemTest } from "./__utils__";
 

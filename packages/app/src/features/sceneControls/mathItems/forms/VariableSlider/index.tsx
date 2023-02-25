@@ -2,7 +2,7 @@ import {
   mathItemConfigs as configs,
   MathItemType as MIT,
   WidgetType,
-} from "@/configs";
+} from "@math3d/mathitem-configs";
 import React, {
   useRef,
   useState,
@@ -14,7 +14,7 @@ import React, {
 import Slider, { SliderProps } from "@mui/material/Slider";
 import { useInterval } from "@/util/hooks/useInterval";
 import classNames from "classnames";
-import { ParseableObjs } from "@/util/parsing";
+import { ParseableObjs } from "@math3d/parser";
 import SliderControls, { mustFindSpeed } from "./SliderControls";
 import type { SliderControlsProps } from "./SliderControls";
 import FieldWidget, {

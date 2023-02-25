@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useCallback, useRef } from "react";
 import classNames from "classnames";
-import { MathItemType, MathItem } from "@/configs";
+import { MathItemType, MathItem } from "@math3d/mathitem-configs";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import {
   MultiContainerDndContext,
@@ -18,11 +18,11 @@ import type {
   OnDragOver,
 } from "@/util/components/dnd";
 import { useCollapsible } from "@/util/hooks";
+import invariant from "tiny-invariant";
 import MathItemUI from "../MathItem";
 import { select, actions, useMathScope } from "../mathItemsSlice";
 import style from "./MathItemsList.module.css";
 import { useMathResults } from "../mathScope";
-import invariant from "tiny-invariant";
 
 type TypeData =
   | {
