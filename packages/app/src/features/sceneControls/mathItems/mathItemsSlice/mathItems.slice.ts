@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { mathItemConfigs, MathItemType, assertIsMathItemType } from "@/configs";
+import { mathItemConfigs, MathItemType } from "@/configs";
 import type { MathItem, MathItemPatch } from "@/configs";
 import { keyBy } from "lodash";
 import { assertNotNil } from "@/util/predicates";
@@ -105,7 +105,7 @@ const mathItemsSlice = createSlice({
       }
       if (state.items[targetFolderId]) {
         const folder = state.items[targetFolderId];
-        assertIsMathItemType(folder.type, MathItemType.Folder);
+        invariant(folder.type === MathItemType.Folder, "expected folder")
         folder.properties.isCollapsed = "false";
         syncItemsToMathScope(state.mathScope(), [folder]);
       }
