@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useCallback, useRef } from "react";
 import classNames from "classnames";
-import { MathItemType, MathItem, assertIsMathItemType } from "@/configs";
+import { MathItemType, MathItem } from "@/configs";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import {
   MultiContainerDndContext,
@@ -22,6 +22,7 @@ import MathItemUI from "../MathItem";
 import { select, actions, useMathScope } from "../mathItemsSlice";
 import style from "./MathItemsList.module.css";
 import { useMathResults } from "../mathScope";
+import invariant from "tiny-invariant";
 
 type TypeData =
   | {
@@ -221,7 +222,7 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
         {folders.map((folder, folderIndex) => {
           const childItems = itemsByFolder.get(folder.id) ?? [];
           const folderItem = mathItems[folder.id];
-          assertIsMathItemType(folderItem.type, MathItemType.Folder);
+          invariant(folderItem.type === MathItemType.Folder);
           return (
             <SortableItem
               key={folderItem.id}
