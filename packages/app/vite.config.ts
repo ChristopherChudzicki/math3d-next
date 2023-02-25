@@ -7,6 +7,9 @@ import viteTsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   server: {
     port: 3000,
+    proxy: {
+      "/admin": "http://localhost:8000",
+    },
   },
   plugins: [
     react(),

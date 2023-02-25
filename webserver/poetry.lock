@@ -127,6 +127,46 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django-stubs"
+version = "1.15.0"
+description = "Mypy stubs for Django"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "django-stubs-1.15.0.tar.gz", hash = "sha256:0bbf9eb172c5b06eccff2d704c7c3906e4a2c6146df8c32ee9f3a51e29265581"},
+    {file = "django_stubs-1.15.0-py3-none-any.whl", hash = "sha256:25010658acac0ce4a69211b55dd719fd16dbfe54fcfe5c878d0c8db07bdd5482"},
+]
+
+[package.dependencies]
+django = "*"
+django-stubs-ext = ">=0.7.0"
+mypy = ">=0.980"
+tomli = "*"
+types-pytz = "*"
+types-PyYAML = "*"
+typing-extensions = "*"
+
+[package.extras]
+compatible-mypy = ["mypy (>=1.0,<1.1)"]
+
+[[package]]
+name = "django-stubs-ext"
+version = "0.7.0"
+description = "Monkey-patching and extensions for django-stubs"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "django-stubs-ext-0.7.0.tar.gz", hash = "sha256:4fd8cdbc68d1a421f21bb7e0d9e76d50f6a4b504d350ba786405daf536e90c21"},
+    {file = "django_stubs_ext-0.7.0-py3-none-any.whl", hash = "sha256:d729fbc7fe8970a7e26b35956c35b48502516f011d523c0577bdfb02ed956284"},
+]
+
+[package.dependencies]
+django = "*"
+typing-extensions = "*"
+
+[[package]]
 name = "djangorestframework"
 version = "3.14.0"
 description = "Web APIs for Django, made easy."
@@ -306,6 +346,18 @@ files = [
 ]
 
 [[package]]
+name = "tomli"
+version = "2.0.1"
+description = "A lil' TOML parser"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
+    {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+]
+
+[[package]]
 name = "tqdm"
 version = "4.64.1"
 description = "Fast, Extensible Progress Meter"
@@ -325,6 +377,54 @@ dev = ["py-make (>=0.1.0)", "twine", "wheel"]
 notebook = ["ipywidgets (>=6)"]
 slack = ["slack-sdk"]
 telegram = ["requests"]
+
+[[package]]
+name = "types-psycopg2"
+version = "2.9.21.7"
+description = "Typing stubs for psycopg2"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-psycopg2-2.9.21.7.tar.gz", hash = "sha256:10358015a5f7bd96b4ca90b18da1e20783a73c2cd47392e794b0120929ec7d98"},
+    {file = "types_psycopg2-2.9.21.7-py3-none-any.whl", hash = "sha256:0e065f4f415df43c4955ae63250615cc468e86a28b8ee4e3014f514361e9047b"},
+]
+
+[[package]]
+name = "types-pytz"
+version = "2022.7.1.2"
+description = "Typing stubs for pytz"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-pytz-2022.7.1.2.tar.gz", hash = "sha256:487d3e8e9f4071eec8081746d53fa982bbc05812e719dcbf2ebf3d55a1a4cd28"},
+    {file = "types_pytz-2022.7.1.2-py3-none-any.whl", hash = "sha256:40ca448a928d566f7d44ddfde0066e384f7ffbd4da2778e42a4570eaca572446"},
+]
+
+[[package]]
+name = "types-pyyaml"
+version = "6.0.12.8"
+description = "Typing stubs for PyYAML"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-PyYAML-6.0.12.8.tar.gz", hash = "sha256:19304869a89d49af00be681e7b267414df213f4eb89634c4495fa62e8f942b9f"},
+    {file = "types_PyYAML-6.0.12.8-py3-none-any.whl", hash = "sha256:5314a4b2580999b2ea06b2e5f9a7763d860d6e09cdf21c0e9561daa9cbd60178"},
+]
+
+[[package]]
+name = "types-tqdm"
+version = "4.64.7.15"
+description = "Typing stubs for tqdm"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-tqdm-4.64.7.15.tar.gz", hash = "sha256:763cae7cd91debdc509b70f54057fb092020d6f108a7924237d856a6346dd9e4"},
+    {file = "types_tqdm-4.64.7.15-py3-none-any.whl", hash = "sha256:f6a3a7143931c16b141c8151c3517709d3ccdbaef7c5b90b4c954b868efc4c1d"},
+]
 
 [[package]]
 name = "typing-extensions"
@@ -353,4 +453,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "0bba6bc9036cfe51ce9fde2e3b76e199a3dea9da2d8d640969f9a8c9fb89c0d1"
+content-hash = "0953ca274eea3192adcd9613a27d08277e9051489136e29a6813f48f64b6496b"

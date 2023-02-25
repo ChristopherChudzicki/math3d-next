@@ -31,7 +31,7 @@ services:
     environment:
         DATABASE_URL: postgresql://docker:docker@db:5432/math3d
     command: >
-      python manage.py runserver
+      python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./webserver:/src
     networks:
@@ -39,3 +39,5 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    ports:
+      - "8000:8000"
