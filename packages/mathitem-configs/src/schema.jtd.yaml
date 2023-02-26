@@ -1,5 +1,18 @@
 ---
 definitions:
+  parseableExpr:
+    properties:
+      type:
+        enum: ["expr"]
+      expr:
+        type: string
+  parseableExprArray:
+    properties:
+      type:
+        enum: ["array"]
+      items:
+        elements:
+          ref: parseableExpr
   parseableAssignment:
     properties:
       type:
@@ -8,8 +21,28 @@ definitions:
         type: string
       rhs:
         type: string
+  parseableFunctionAssignment:
+    properties:
+      type:
+        enum: ["function-assignment"]
+      name:
+        type: string
+      params:
+        elements:
+          type: string
+      rhs:
+        type: string
+  parseableFunctionAssignmentArray:
+    properties:
+      type:
+        enum: ["array"]
+      items:
+        elements:
+          ref: parseableFunctionAssignment
   propAxis:
     enum: ["x", "y", "z"]
+  propAxes:
+    enum: ["xy", "yz", "zx"]
   itemPropertiesAxis:
     properties:
       description:
@@ -25,7 +58,7 @@ definitions:
       zBias: 
         type: string
       label:
-        type:  string
+        type: string
       labelVisible: 
         type: string
       min: 
@@ -54,6 +87,110 @@ definitions:
         type: string
       value:
         ref: parseableAssignment
+  itemPropertiesCamera:
+    properties:
+      description:
+        type: string
+      isOrthographic:
+        type: string
+      isPanEnabled:
+        type: string
+      isZoomEnabled:
+        type: string
+      isRotateEnabled:
+        type: string
+      position:
+        type: string
+      target:
+        type: string
+      updateOnDrag:
+        type: string
+  itemPropertiesExplicitSurface:
+    properties:
+      description:
+        type: string
+      color:
+        type: string
+      visible:
+        type: string
+      opacity:
+        type: string
+      zIndex:
+        type: string
+      zBias:
+        type: string
+      shaded:
+        type: string
+      expr:
+        ref: parseableFunctionAssignment
+      domain:
+        ref: parseableFunctionAssignmentArray
+      colorExpr:
+        type: string
+      gridOpacity:
+        type: string
+      gridWidth:
+        type: string
+      samples1:
+        type: string
+      samples2:
+        type: string
+      grid1:
+        type: string
+      grid2:
+        type: string
+  itemPropertiesFolder:
+    properties:
+      description:
+        type: string
+      isCollapsed:
+        type: string
+  itemPropertiesGrid:
+    properties:
+      description:
+        type: string
+      color:
+        type: string
+      visible:
+        type: string
+      opacity:
+        type: string
+      zIndex:
+        type: string
+      zBias:
+        type: string
+      width:
+        type: string
+      divisions:
+        type: string
+      snap:
+        type: string
+      axes:
+        ref: propAxes
+  itemPropertiesImplicitSurface:
+    properties:
+      description:
+        type: string
+      color:
+        type: string
+      visible:
+        type: string
+      opacity:
+        type: string
+      zIndex:
+        type: string
+      zBias:
+        type: string
+      shaded:
+        type: string
+      domain:
+        ref: parseableExprArray
+      lhs:
+        ref: parseableFunctionAssignment
+      rhs:
+        ref: parseableFunctionAssignment
+      samples:
+        type: string
 discriminator: type
 mapping:
   AXIS:
@@ -68,3 +205,39 @@ mapping:
         type: string
       properties:
         ref: itemPropertiesBooleanVariable
+  CAMERA:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesCamera
+  EXPLICIT_SURFACE:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesExplicitSurface
+  EXPLICIT_SURFACE_POLAR:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesExplicitSurface # This happens to be the same at the moment.
+  FOLDER:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesFolder
+  GRID:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesGrid
+  IMPLICIT_SURFACE:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesImplicitSurface
