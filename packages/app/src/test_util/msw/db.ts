@@ -60,6 +60,8 @@ const seedDb = {
   },
 };
 
+seedDb.withFixtures();
+
 type SeedDb = typeof seedDb;
 
 export default db;
