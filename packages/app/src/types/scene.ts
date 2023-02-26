@@ -1,4 +1,4 @@
-import { MathItem } from "@/configs";
+import { MathItem } from "@math3d/mathitem-configs";
 
 export interface Scene {
   id: string;

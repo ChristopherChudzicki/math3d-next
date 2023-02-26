@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { mathItemConfigs, MathItemType, assertIsMathItemType } from "@/configs";
-import type { MathItem, MathItemPatch } from "@/configs";
+import { mathItemConfigs, MathItemType } from "@math3d/mathitem-configs";
+import type { MathItem, MathItemPatch } from "@math3d/mathitem-configs";
 import { keyBy } from "lodash";
 import { assertNotNil } from "@/util/predicates";
 import MathScope from "@math3d/mathscope";
 import jsonPatch from "fast-json-patch";
 
-import { latexParser, Parseable } from "@/util/parsing";
+import { latexParser, Parseable } from "@math3d/parser";
 import invariant from "tiny-invariant";
 import {
   syncItemsToMathScope,
@@ -105,7 +105,7 @@ const mathItemsSlice = createSlice({
       }
       if (state.items[targetFolderId]) {
         const folder = state.items[targetFolderId];
-        assertIsMathItemType(folder.type, MathItemType.Folder);
+        invariant(folder.type === MathItemType.Folder, "expected folder");
         folder.properties.isCollapsed = "false";
         syncItemsToMathScope(state.mathScope(), [folder]);
       }

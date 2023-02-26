@@ -6,11 +6,11 @@ import {
   MathItem,
   mathItemConfigs,
   MathItemPatch,
-} from "@/configs";
+} from "@math3d/mathitem-configs";
 import { filter as collectionFilter } from "lodash";
 import { isNotNil } from "@/util/predicates";
 import type { IdentifiedParseable } from "@math3d/mathscope";
-import type { Parseable } from "@/util/parsing";
+import type { Parseable } from "@math3d/parser";
 import { AppMathScope } from "./interfaces";
 
 const mathScopeId = (itemId: string, propName: string) =>

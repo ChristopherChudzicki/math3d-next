@@ -2287,6 +2287,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@math3d/mathitem-configs@workspace:^, @math3d/mathitem-configs@workspace:packages/mathitem-configs":
+  version: 0.0.0-use.local
+  resolution: "@math3d/mathitem-configs@workspace:packages/mathitem-configs"
+  dependencies:
+    "@math3d/eslint-config": "workspace:^"
+    "@math3d/parser": "workspace:^"
+    "@math3d/tsconfig": "workspace:^"
+    "@math3d/utils": "workspace:^"
+    "@math3d/validators": "workspace:^"
+    eslint: ^8.31.0
+    mathjs: 11.2.1
+    tinycolor2: ^1.6.0
+    vitest: 0.26.3
+  languageName: unknown
+  linkType: soft
+
 "@math3d/mathjs-utils@workspace:*, @math3d/mathjs-utils@workspace:^, @math3d/mathjs-utils@workspace:packages/mathjs-utils":
   version: 0.0.0-use.local
   resolution: "@math3d/mathjs-utils@workspace:packages/mathjs-utils"
@@ -2313,6 +2329,24 @@ __metadata:
     tarjan-graph: ^3.0.0
     toposort: ^2.0.2
     vitest: 0.29.1
+  languageName: unknown
+  linkType: soft
+
+"@math3d/parser@workspace:^, @math3d/parser@workspace:packages/parser":
+  version: 0.0.0-use.local
+  resolution: "@math3d/parser@workspace:packages/parser"
+  dependencies:
+    "@math3d/eslint-config": "workspace:^"
+    "@math3d/mathscope": "workspace:^"
+    "@math3d/tsconfig": "workspace:^"
+    "@math3d/utils": "workspace:^"
+    "@types/lodash-es": ^4.17.6
+    eslint: ^8.31.0
+    lodash: 4.17.21
+    mathjs: 11.2.1
+    tiny-invariant: ^1.3.1
+    vitest: 0.26.3
+    yup: ^1.0.1
   languageName: unknown
   linkType: soft
 
@@ -2352,6 +2386,21 @@ __metadata:
     "@math3d/tsconfig": "workspace:^"
     eslint: ^8.31.0
     vitest: 0.29.1
+  languageName: unknown
+  linkType: soft
+
+"@math3d/validators@workspace:^, @math3d/validators@workspace:packages/validators":
+  version: 0.0.0-use.local
+  resolution: "@math3d/validators@workspace:packages/validators"
+  dependencies:
+    "@math3d/eslint-config": "workspace:^"
+    "@math3d/mathjs-utils": "workspace:^"
+    "@math3d/tsconfig": "workspace:^"
+    "@math3d/utils": "workspace:^"
+    eslint: ^8.31.0
+    mathjs: 11.2.1
+    vitest: 0.26.3
+    yup: ^1.0.1
   languageName: unknown
   linkType: soft
 
@@ -4640,7 +4689,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.14.167, @types/lodash@npm:^4.14.172":
+"@types/lodash-es@npm:^4.17.6":
+  version: 4.17.6
+  resolution: "@types/lodash-es@npm:4.17.6"
+  dependencies:
+    "@types/lodash": "*"
+  checksum: 9bd239dd525086e278821949ce12fbdd4f100a060fed9323fc7ad5661113e1641f28a7ebab617230ed3474680d8f4de705c1928b48252bb684be6ec9eed715db
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:*, @types/lodash@npm:^4.14.167, @types/lodash@npm:^4.14.172":
   version: 4.14.191
   resolution: "@types/lodash@npm:4.14.191"
   checksum: ba0d5434e10690869f32d5ea49095250157cae502f10d57de0a723fd72229ce6c6a4979576f0f13e0aa9fbe3ce2457bfb9fa7d4ec3d6daba56730a51906d1491
@@ -5982,10 +6040,13 @@ __metadata:
     "@emotion/styled": 11.10.4
     "@faker-js/faker": 7.6.0
     "@math3d/eslint-config": "workspace:^"
+    "@math3d/mathitem-configs": "workspace:^"
     "@math3d/mathjs-utils": "workspace:*"
     "@math3d/mathscope": "workspace:^"
+    "@math3d/parser": "workspace:^"
     "@math3d/react-textarea-autosize": 8.3.5
     "@math3d/tsconfig": "workspace:^"
+    "@math3d/utils": "workspace:^"
     "@mswjs/data": 0.10.2
     "@mui/icons-material": 5.10.6
     "@mui/lab": 5.0.0-alpha.102
@@ -6003,6 +6064,7 @@ __metadata:
     "@testing-library/jest-dom": 5.16.5
     "@testing-library/react": 13.4.0
     "@testing-library/user-event": 14.4.3
+    "@types/lodash-es": ^4.17.6
     "@types/node": 18.7.15
     "@types/ramda": 0.28.18
     "@types/react": 18.0.24
@@ -6046,7 +6108,6 @@ __metadata:
     vite-tsconfig-paths: 4.0.3
     vitest: ^0.29.1
     whatwg-fetch: 3.6.2
-    yup: 1.0.0-beta.7
   languageName: unknown
   linkType: soft
 
@@ -13307,7 +13368,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mlly@npm:^1.1.0, mlly@npm:^1.1.1":
+"mlly@npm:^1.0.0, mlly@npm:^1.1.0, mlly@npm:^1.1.1":
   version: 1.1.1
   resolution: "mlly@npm:1.1.1"
   dependencies:
@@ -14370,6 +14431,13 @@ __metadata:
   version: 4.0.0
   resolution: "path-type@npm:4.0.0"
   checksum: 5b1e2daa247062061325b8fdbfd1fb56dde0a448fb1455453276ea18c60685bdad23a445dc148cf87bc216be1573357509b7d4060494a6fd768c7efad833ee45
+  languageName: node
+  linkType: hard
+
+"pathe@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "pathe@npm:0.2.0"
+  checksum: 9a8149ce152088f30d15b0b03a7c128ba21f16b4dc1f3f90fe38eee9f6d0f1d6da8e4e47bd2a4f9e14aaac7c30ed01cfc86216479011de2bdc598b65e6f19f41
   languageName: node
   linkType: hard
 
@@ -16450,7 +16518,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-support@npm:^0.5.16, source-map-support@npm:~0.5.12, source-map-support@npm:~0.5.20":
+"source-map-support@npm:^0.5.16, source-map-support@npm:^0.5.21, source-map-support@npm:~0.5.12, source-map-support@npm:~0.5.20":
   version: 0.5.21
   resolution: "source-map-support@npm:0.5.21"
   dependencies:
@@ -17289,6 +17357,20 @@ __metadata:
   version: 1.4.2
   resolution: "tinycolor2@npm:1.4.2"
   checksum: 57ed262e08815a4ab0ed933edafdbc6555a17081781766149813b44a080ecbe58b3ee281e81c0e75b42e4d41679f138cfa98eabf043f829e0683c04adb12c031
+  languageName: node
+  linkType: hard
+
+"tinycolor2@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "tinycolor2@npm:1.6.0"
+  checksum: 6df4d07fceeedc0a878d7bac47e2cd47c1ceeb1078340a9eb8a295bc0651e17c750f73d47b3028d829f30b85c15e0572c0fd4142083e4c21a30a597e47f47230
+  languageName: node
+  linkType: hard
+
+"tinypool@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "tinypool@npm:0.3.0"
+  checksum: 92291c309ed8d004c1ee1ef7f610cd90352383f12c52b0ec16abd9ebc665c03626e7afbc9993df97f63e67fea002b5cc18ba5e8f90260643867cbcac278a183c
   languageName: node
   linkType: hard
 
@@ -18324,6 +18406,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"vite-node@npm:0.26.3":
+  version: 0.26.3
+  resolution: "vite-node@npm:0.26.3"
+  dependencies:
+    debug: ^4.3.4
+    mlly: ^1.0.0
+    pathe: ^0.2.0
+    source-map: ^0.6.1
+    source-map-support: ^0.5.21
+    vite: ^3.0.0 || ^4.0.0
+  bin:
+    vite-node: vite-node.mjs
+  checksum: ae290288cbd5e79580365a5128f7ba4cbe088c27dbb014bd1dab3e1c0955c04a6add13bed5db923ddb8fd4eb1d75394fdf0e72ebf270f1a1007dd3e9b7049387
+  languageName: node
+  linkType: hard
+
 "vite-node@npm:0.29.1":
   version: 0.29.1
   resolution: "vite-node@npm:0.29.1"
@@ -18388,6 +18486,48 @@ __metadata:
   bin:
     vite: bin/vite.js
   checksum: 7df71d955f78cbe0dd8e1eb0851fc75070346a0426b8e3e913bf2e05d1053ca8a50619d550fab4f1ed52c68dfcc2921e6421504e9669fc5ed77497a77f84e33e
+  languageName: node
+  linkType: hard
+
+"vitest@npm:0.26.3":
+  version: 0.26.3
+  resolution: "vitest@npm:0.26.3"
+  dependencies:
+    "@types/chai": ^4.3.4
+    "@types/chai-subset": ^1.3.3
+    "@types/node": "*"
+    acorn: ^8.8.1
+    acorn-walk: ^8.2.0
+    chai: ^4.3.7
+    debug: ^4.3.4
+    local-pkg: ^0.4.2
+    source-map: ^0.6.1
+    strip-literal: ^1.0.0
+    tinybench: ^2.3.1
+    tinypool: ^0.3.0
+    tinyspy: ^1.0.2
+    vite: ^3.0.0 || ^4.0.0
+    vite-node: 0.26.3
+  peerDependencies:
+    "@edge-runtime/vm": "*"
+    "@vitest/browser": "*"
+    "@vitest/ui": "*"
+    happy-dom: "*"
+    jsdom: "*"
+  peerDependenciesMeta:
+    "@edge-runtime/vm":
+      optional: true
+    "@vitest/browser":
+      optional: true
+    "@vitest/ui":
+      optional: true
+    happy-dom:
+      optional: true
+    jsdom:
+      optional: true
+  bin:
+    vitest: vitest.mjs
+  checksum: b74c10444ab913c1d716005034308b347fa7341d26e3797eff17d1cc4903a30b6137d9e5da8b3f3c1047a7a645355c7a1b6601fcad94a29c44910289c5f12295
   languageName: node
   linkType: hard
 
@@ -19047,14 +19187,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yup@npm:1.0.0-beta.7":
-  version: 1.0.0-beta.7
-  resolution: "yup@npm:1.0.0-beta.7"
+"yup@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "yup@npm:1.0.1"
   dependencies:
     property-expr: ^2.0.5
     tiny-case: ^1.0.3
     toposort: ^2.0.2
-  checksum: 27ea3f12ce84f55da2d4a490cac3a5ad9b34c0da3d3a5fca013b9417861e61ef0ed5f2b98170d84cc23bbf0783cf2f65d12a19c575d5d080c05a404367adcc06
+    type-fest: ^2.19.0
+  checksum: 0c9075cdb8b7f33de37e4e65912b10231141deef6a99d512446941b3ce544d82c646dd1a1ca14cb166f280d1a91cb3c5d964363e94ef36a7f56e7de66f8d4d52
   languageName: node
   linkType: hard
 

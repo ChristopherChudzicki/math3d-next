@@ -1,5 +1,5 @@
 import type { SelectorReturn, RootState } from "@/store/store";
-import type { MathItem } from "@/configs";
+import type { MathItem } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import type { MathItemsState, AppMathScope, Subtree } from "./interfaces";
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useCallback, useRef } from "react";
 import classNames from "classnames";
-import { MathItemType, MathItem, assertIsMathItemType } from "@/configs";
+import { MathItemType, MathItem } from "@math3d/mathitem-configs";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import {
   MultiContainerDndContext,
@@ -18,6 +18,7 @@ import type {
   OnDragOver,
 } from "@/util/components/dnd";
 import { useCollapsible } from "@/util/hooks";
+import invariant from "tiny-invariant";
 import MathItemUI from "../MathItem";
 import { select, actions, useMathScope } from "../mathItemsSlice";
 import style from "./MathItemsList.module.css";
@@ -221,7 +222,7 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
         {folders.map((folder, folderIndex) => {
           const childItems = itemsByFolder.get(folder.id) ?? [];
           const folderItem = mathItems[folder.id];
-          assertIsMathItemType(folderItem.type, MathItemType.Folder);
+          invariant(folderItem.type === MathItemType.Folder);
           return (
             <SortableItem
               key={folderItem.id}

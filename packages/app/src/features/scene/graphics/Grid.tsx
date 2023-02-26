@@ -1,6 +1,6 @@
 import React from "react";
 import * as MB from "mathbox-react";
-import { MathItemType } from "@/configs";
+import { MathItemType } from "@math3d/mathitem-configs";
 import { useMathItemResults } from "../../sceneControls/mathItems/mathScope";
 import { useMathScope } from "../../sceneControls/mathItems/mathItemsSlice";
 import { GraphicComponent } from "./interfaces";

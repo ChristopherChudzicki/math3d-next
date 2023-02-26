@@ -3,7 +3,7 @@ import {
   mathItemConfigs as configs,
   MathItemType as MIT,
   WidgetType,
-} from "@/configs";
+} from "@math3d/mathitem-configs";
 import React, { useMemo } from "react";
 
 import FieldWidget from "../FieldWidget";

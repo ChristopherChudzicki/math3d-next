@@ -1,4 +1,8 @@
-import { MathItem, mathItemConfigs, MathItemType } from "@/configs";
+import {
+  MathItem,
+  mathItemConfigs,
+  MathItemType,
+} from "@math3d/mathitem-configs";
 import idGenerator from "@/util/idGenerator";
 
 const makeItem = <T extends MathItemType>(

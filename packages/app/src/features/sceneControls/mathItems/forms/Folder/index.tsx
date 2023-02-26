@@ -1,6 +1,9 @@
 import classNames from "classnames";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { mathItemConfigs as configs, MathItemType as MIT } from "@/configs";
+import {
+  mathItemConfigs as configs,
+  MathItemType as MIT,
+} from "@math3d/mathitem-configs";
 import React, { useCallback } from "react";
 
 import { SubtleButton } from "@/util/components";

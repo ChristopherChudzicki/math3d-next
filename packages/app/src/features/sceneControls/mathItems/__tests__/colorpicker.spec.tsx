@@ -1,5 +1,4 @@
-import { MathItemType as MIT } from "@/configs";
-import { Point, PointProperties } from "@/configs/items/point";
+import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
 import {
   makeItem,
   nodeId,
@@ -9,6 +8,8 @@ import {
   user,
   allowActWarnings,
 } from "@/test_util";
+
+type Point = MathItem<MIT.Point>;
 
 /**
  * Press and hold pointer on element for `ms` seconds.
@@ -37,7 +38,7 @@ const setup = async () => {
   const findTextInput = () => screen.findByTitle("Custom Color Input");
   const findAllSwatches = () => screen.findAllByTitle("Select Color");
   const getPoint = () => store.getState().mathItems.items[point.id] as Point;
-  const getCalculatedProp = (prop: keyof PointProperties) =>
+  const getCalculatedProp = (prop: keyof Point["properties"]) =>
     mathScope.results.get(id(prop));
   return {
     getPoint,

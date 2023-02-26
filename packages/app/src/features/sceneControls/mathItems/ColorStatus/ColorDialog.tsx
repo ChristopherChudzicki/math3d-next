@@ -2,8 +2,12 @@ import Tab from "@mui/material/Tab";
 import TabPanel from "@mui/lab/TabPanel";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
-import { MathGraphic, WidgetType } from "@/configs";
-import { colors, colorsAndGradients } from "@/configs/colors";
+import {
+  MathGraphic,
+  WidgetType,
+  colorsAndGradients,
+  colors,
+} from "@math3d/mathitem-configs";
 import React, { useCallback, useState } from "react";
 import ColorPicker, { OnColorChange } from "@/util/components/ColorPicker";
 

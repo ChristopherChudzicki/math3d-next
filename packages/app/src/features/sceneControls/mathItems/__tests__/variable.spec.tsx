@@ -1,4 +1,4 @@
-import { MathItemType as MIT } from "@/configs";
+import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { makeItem, renderTestApp, screen, seedDb } from "@/test_util";
 
 test("left-hand parse errors are indicated on left-hand side", async () => {
