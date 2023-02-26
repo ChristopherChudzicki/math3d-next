@@ -31,9 +31,10 @@ services:
     environment:
         DATABASE_URL: postgresql://docker:docker@db:5432/math3d
     command: >
-      python manage.py runserver 0.0.0.0:8000
+      python ./webserver/manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./webserver:/src
+      - ./webserver:/src/webserver
+      - ./packages/mathitem-configs:/src/packages/mathitem-configs
     networks:
       default-network:
     depends_on:

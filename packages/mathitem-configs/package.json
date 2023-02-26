@@ -3,9 +3,13 @@
   "exports": "./src/index.ts",
   "main": "./src/index.ts",
   "devDependencies": {
+    "@faker-js/faker": "^7.6.0",
     "@math3d/eslint-config": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
+    "@types/js-yaml": "^4.0.5",
+    "ajv": "^8.12.0",
     "eslint": "^8.31.0",
+    "js-yaml": "^4.1.0",
     "mathjs": "11.2.1",
     "vitest": "0.29.1"
   },

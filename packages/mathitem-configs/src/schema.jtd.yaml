@@ -1,0 +1,70 @@
+---
+definitions:
+  parseableAssignment:
+    properties:
+      type:
+        enum: ["assignment"]
+      lhs:
+        type: string
+      rhs:
+        type: string
+  propAxis:
+    enum: ["x", "y", "z"]
+  itemPropertiesAxis:
+    properties:
+      description:
+        type: string
+      color: 
+        type: string
+      visible: 
+        type: string
+      opacity: 
+        type: string
+      zIndex: 
+        type: string
+      zBias: 
+        type: string
+      label:
+        type:  string
+      labelVisible: 
+        type: string
+      min: 
+        type: string
+      max: 
+        type: string
+      axis: 
+        ref: propAxis
+      scale: 
+        type: string
+      ticksVisible: 
+        type: string
+      size: 
+        type: string
+      width: 
+        type: string
+      start: 
+        type: string
+      end: 
+        type: string
+      divisions: 
+        type: string
+  itemPropertiesBooleanVariable:
+    properties:
+      description:
+        type: string
+      value:
+        ref: parseableAssignment
+discriminator: type
+mapping:
+  AXIS:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesAxis
+  BOOLEAN_VARIABLE:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesBooleanVariable
