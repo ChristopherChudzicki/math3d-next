@@ -10,7 +10,6 @@ import "@testing-library/jest-dom";
 
 import failOnConsole from "jest-fail-on-console";
 
-import { seedDb } from "@/test_util";
 import { server } from "./test_util/msw/server";
 
 failOnConsole();
@@ -45,7 +44,8 @@ vitest.mock("./util/components/TextareaAutoWidthHeight/TextMeasurer");
  */
 beforeAll(() => {
   server.listen({ onUnhandledRequest: "error" });
-  seedDb.withFixtures();
 });
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  server.resetHandlers();
+});
 afterAll(() => server.close());

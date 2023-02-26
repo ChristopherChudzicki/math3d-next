@@ -18,7 +18,6 @@ const prepare = async () => {
     const { worker } = await import("./test_util/msw/browser");
     // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
     const { seedDb } = await import("./test_util");
-    seedDb.withFixtures();
     await worker.start();
 
     window.$pw = {
