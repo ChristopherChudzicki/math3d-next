@@ -1,4 +1,4 @@
-import { escapeRegExp } from "lodash-es";
+import escapeRegExp from "lodash/escapeRegExp";
 
 interface SubstringRange {
   start: number;

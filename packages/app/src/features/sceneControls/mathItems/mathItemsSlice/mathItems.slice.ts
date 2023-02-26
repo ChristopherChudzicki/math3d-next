@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { mathItemConfigs, MathItemType } from "@math3d/mathitem-configs";
 import type { MathItem, MathItemPatch } from "@math3d/mathitem-configs";
-import { keyBy } from "lodash-es";
+import { keyBy } from "lodash";
 import { assertNotNil } from "@/util/predicates";
 import MathScope from "@math3d/mathscope";
 import jsonPatch from "fast-json-patch";

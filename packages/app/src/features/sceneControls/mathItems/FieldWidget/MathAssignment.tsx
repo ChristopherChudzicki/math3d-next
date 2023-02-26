@@ -3,7 +3,7 @@ import React, { useCallback } from "react";
 import { OnMathFieldChange } from "@/util/components/MathLive";
 import SmallMathField from "@/util/components/SmallMathField";
 import { ParseableObjs, DetailedAssignmentError } from "@math3d/parser";
-import { round } from "lodash-es";
+import { round } from "lodash";
 
 import ReadonlyMathField from "./ReadonlyMathField";
 import type { IWidgetProps, WidgetChangeEvent } from "./types";

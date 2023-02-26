@@ -1,5 +1,5 @@
 import { renderTestApp, screen, user, within } from "@/test_util";
-import _ from "lodash-es";
+import _ from "lodash";
 import { addItem, clickRemoveItem, getItemByDescription } from "./__utils__";
 
 test("setup renders 9 points in 3 folders", async () => {
