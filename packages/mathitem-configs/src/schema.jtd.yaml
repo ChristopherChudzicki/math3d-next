@@ -1,4 +1,20 @@
 ---
+# This is a JTD schema for MathItems.
+# Used in the webserver for validating data before storing in database, and for
+# assisting in data migration.
+#
+# We store this in a frontend node package because:
+# - it's nice to co-locate with the typescript definitions
+# - it's easy to run simple heuristic tests that this schema accurately reflects
+#   what the frontend expects.
+#
+# These schemas only validate basic shape. Almost all of these properties are
+# strings that will be evaluated via the math parser. Additional constraints,
+# like "string should evaluate to a vector in R3" are not expressed in this
+# schema. Indeed, we probably do not *want* to express such constraints here:
+# Users can create mathematically inappropriate objects in the app (e.g., a
+# vector whose coordinates evaluate to a boolean) and storing such objects in
+# the database is fine.
 definitions:
   parseableExpr:
     properties:
@@ -13,6 +29,13 @@ definitions:
       items:
         elements:
           ref: parseableExpr
+  parseableStringArray:
+    properties:
+      type:
+        enum: ["array"]
+      items:
+        elements:
+          type: string
   parseableAssignment:
     properties:
       type:
@@ -47,39 +70,39 @@ definitions:
     properties:
       description:
         type: string
-      color: 
+      color:
         type: string
-      visible: 
+      visible:
         type: string
-      opacity: 
+      opacity:
         type: string
-      zIndex: 
+      zIndex:
         type: string
-      zBias: 
+      zBias:
         type: string
       label:
         type: string
-      labelVisible: 
+      labelVisible:
         type: string
-      min: 
+      min:
         type: string
-      max: 
+      max:
         type: string
-      axis: 
+      axis:
         ref: propAxis
-      scale: 
+      scale:
         type: string
-      ticksVisible: 
+      ticksVisible:
         type: string
-      size: 
+      size:
         type: string
-      width: 
+      width:
         type: string
-      start: 
+      start:
         type: string
-      end: 
+      end:
         type: string
-      divisions: 
+      divisions:
         type: string
   itemPropertiesBooleanVariable:
     properties:
@@ -191,6 +214,204 @@ definitions:
         ref: parseableFunctionAssignment
       samples:
         type: string
+  itemPropertiesLine:
+    properties:
+      description:
+        type: string
+      color:
+        type: string
+      visible:
+        type: string
+      opacity:
+        type: string
+      zIndex:
+        type: string
+      zBias:
+        type: string
+      label:
+        type: string
+      labelVisible:
+        type: string
+      size:
+        type: string
+      width:
+        type: string
+      start:
+        type: string
+      end:
+        type: string
+      coords:
+        type: string
+  itemPropertiesParametricCurve:
+    properties:
+      description:
+        type: string
+      color:
+        type: string
+      visible:
+        type: string
+      opacity:
+        type: string
+      zIndex:
+        type: string
+      zBias:
+        type: string
+      size:
+        type: string
+      width:
+        type: string
+      start:
+        type: string
+      end:
+        type: string
+      expr:
+        ref: parseableFunctionAssignment
+      domain:
+        ref: parseableExprArray
+      samples1:
+        type: string
+  itemPropertiesParametricSurface:
+    properties:
+      description:
+        type: string
+      color:
+        type: string
+      visible:
+        type: string
+      opacity:
+        type: string
+      zIndex:
+        type: string
+      zBias:
+        type: string
+      shaded:
+        type: string
+      expr:
+        ref: parseableFunctionAssignment
+      domain:
+        ref: parseableFunctionAssignmentArray
+      colorExpr:
+        type: string
+      gridOpacity:
+        type: string
+      gridWidth:
+        type: string
+      samples1:
+        type: string
+      samples2:
+        type: string
+      grid1:
+        type: string
+      grid2:
+        type: string
+  itemPropertiesPoint:
+    properties:
+      description:
+        type: string
+      color:
+        type: string
+      visible:
+        type: string
+      opacity:
+        type: string
+      zIndex:
+        type: string
+      zBias:
+        type: string
+      label:
+        type: string
+      labelVisible:
+        type: string
+      coords:
+        type: string
+      size:
+        type: string
+  itemPropertiesVariable:
+    properties:
+      description:
+        type: string
+      value:
+        ref: parseableAssignment
+  itemPropertiesVariableSlider:
+    properties:
+      value:
+        ref: parseableAssignment
+      fps:
+        type: string
+      range:
+        ref: parseableStringArray
+      duration:
+        type: string
+      description:
+        type: string
+      isAnimating:
+        type: string
+      speedMultiplier:
+        type: string
+  itemPropertiesVector:
+    properties:
+      description:
+        type: string
+      color:
+        type: string
+      visible:
+        type: string
+      opacity:
+        type: string
+      zIndex:
+        type: string
+      zBias:
+        type: string
+      label:
+        type: string
+      labelVisible:
+        type: string
+      size:
+        type: string
+      width:
+        type: string
+      start:
+        type: string
+      end:
+        type: string
+      components:
+        type: string
+      tail:
+        type: string
+  itemPropertiesVectorField:
+    properties:
+      description:
+        type: string
+      color:
+        type: string
+      visible:
+        type: string
+      opacity:
+        type: string
+      zIndex:
+        type: string
+      zBias:
+        type: string
+      size:
+        type: string
+      width:
+        type: string
+      start:
+        type: string
+      end:
+        type: string
+      domain:
+        ref: parseableExprArray
+      expr:
+        ref: parseableFunctionAssignment
+      samples1:
+        type: string
+      samples2:
+        type: string
+      samples3:
+        type: string
+      scale:
+        type: string
 discriminator: type
 mapping:
   AXIS:
@@ -241,3 +462,51 @@ mapping:
         type: string
       properties:
         ref: itemPropertiesImplicitSurface
+  LINE:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesLine
+  PARAMETRIC_CURVE:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesParametricCurve
+  PARAMETRIC_SURFACE:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesParametricSurface
+  POINT:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesPoint
+  VARIABLE:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesVariable
+  VARIABLE_SLIDER:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesVariableSlider
+  VECTOR:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesVector
+  VECTOR_FIELD:
+    properties:
+      id:
+        type: string
+      properties:
+        ref: itemPropertiesVectorField

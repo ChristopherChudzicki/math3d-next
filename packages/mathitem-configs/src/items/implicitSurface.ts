@@ -24,8 +24,7 @@ interface ImplicitSurfaceProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
-
-  shaded: string; // eval to boolean;
+  shaded: string;
   domain: ParseableArray<ParseableObjs["expr"]>;
   lhs: ParseableObjs["function-assignment"];
   rhs: ParseableObjs["function-assignment"];

@@ -25,29 +25,29 @@ const types = [
   MIT.Folder,
   MIT.Grid,
   MIT.ImplicitSurface,
-  // MIT.Line,
-  // MIT.Point,
-  // MIT.ParametricCurve,
-  // MIT.ParametricSurface,
-  // MIT.Variable,
-  // MIT.VariableSlider,
-  // MIT.Vector,
-  // MIT.VectorField,
+  MIT.Line,
+  MIT.ParametricCurve,
+  MIT.ParametricSurface,
+  MIT.Point,
+  MIT.Variable,
+  MIT.VariableSlider,
+  MIT.Vector,
+  MIT.VectorField,
 ];
 
-test.skip("All configs are tested", () => {
-  expect(new Set(types)).toBe(new Set(Object.values(MIT)));
+test("All configs are tested", () => {
+  expect(new Set(types)).toEqual(new Set(Object.values(MIT)));
 });
 
-describe.each(types)("Schema validation for $type", (type) => {
+describe.each(types)("Schema validation for %s", (type) => {
   test("happy path", () => {
     const validate = ajv.compile(schema);
 
     const item = configs[type].make("fake-id");
 
     const isValid = validate(item);
-    // console.log(validate.errors);
-    expect(isValid).toBe(true);
+    expect(validate.errors).toBe(null);
+    expect(isValid).toBe(true); // should be redundant, but ok
   });
 
   test("Extra properties", () => {

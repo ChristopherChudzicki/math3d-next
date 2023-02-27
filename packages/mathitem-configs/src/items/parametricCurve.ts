@@ -28,11 +28,10 @@ interface ParametricCurveProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
-
   size: string;
   width: string;
-  start: string; // eval to boolean;
-  end: string; // eval to boolean;
+  start: string;
+  end: string;
   expr: ParseableObjs["function-assignment"];
   domain: ParseableArray<ParseableObjs["expr"]>;
   samples1: string;
