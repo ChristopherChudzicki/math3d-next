@@ -1,13 +1,13 @@
 import mergeClassNames from "classnames";
-import React, { useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import * as MB from "mathbox-react";
 import type { MathboxSelection } from "mathbox";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Vector3 } from "three";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { isMathGraphic, MathItemType } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import { debounce } from "lodash";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { actions, select } from "../sceneControls/mathItems/mathItemsSlice";
 import { Graphic, graphicNeedsRange } from "./graphics";
 import useAxesInfo from "./useAxesInfo";
