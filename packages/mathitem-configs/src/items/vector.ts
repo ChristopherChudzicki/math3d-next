@@ -27,13 +27,12 @@ interface VectorProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
-
   label: string;
   labelVisible: string;
   size: string;
   width: string;
-  start: string; // eval to boolean;
-  end: string; // eval to boolean;
+  start: string;
+  end: string;
   components: string;
   tail: string;
 }

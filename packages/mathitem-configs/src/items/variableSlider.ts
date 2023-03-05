@@ -1,5 +1,5 @@
 import { validators } from "@math3d/validators";
-import { ParseableObjs } from "@math3d/parser";
+import { ParseableArray, ParseableObjs } from "@math3d/parser";
 import { aggregate } from "@math3d/utils";
 import { MathItemType, WidgetType } from "../constants";
 import type {
@@ -12,11 +12,11 @@ import { description } from "../shared";
 interface VariableSliderProperties {
   value: ParseableObjs["assignment"];
   fps: string;
-  range: ParseableObjs["array"];
+  range: ParseableArray<string>;
   duration: string;
   description: string;
-  isAnimating: string; // eval to boolean;
-  speedMultiplier: string; // eval to number;
+  isAnimating: string;
+  speedMultiplier: string;
 }
 
 const defaultValues: VariableSliderProperties = {
