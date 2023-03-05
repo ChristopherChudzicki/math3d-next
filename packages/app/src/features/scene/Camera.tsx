@@ -15,6 +15,7 @@ const props = [
   "position",
   "target",
   "updateOnDrag",
+  "useRelative",
 ] as const;
 
 type Coords = [number, number, number];
@@ -67,33 +68,36 @@ const Camera: React.FC<CameraProps> = ({ item, range, onMoveEnd }) => {
     isPanEnabled,
     position,
     updateOnDrag,
+    useRelative,
   } = useMathItemResults(scope, item, props);
 
-  const toThreeJSCoords = useCallback(
+  const fromUiCoords = useCallback(
     (coords: Coords) => {
+      if (useRelative) return coords;
       return project(coords, range, THREEJS_RANGE);
     },
-    [range]
+    [range, useRelative]
   );
-  const toMathboxCoords = useCallback(
+  const toUiCoords = useCallback(
     (coords: Coords) => {
+      if (useRelative) return coords;
       return project(coords, THREEJS_RANGE, range);
     },
-    [range]
+    [range, useRelative]
   );
 
-  const threePos = position ? toThreeJSCoords(position) : undefined;
+  const threePos = position ? fromUiCoords(position) : undefined;
   const onEnd: OnControlsChangeEnd = useCallback(
     (e) => {
       if (!updateOnDrag) return;
       const cameraPosition = e.target.object.position.toArray();
       const target = e.target.target.toArray();
       onMoveEnd?.({
-        position: toMathboxCoords(cameraPosition),
-        target: toMathboxCoords(target),
+        position: toUiCoords(cameraPosition),
+        target: toUiCoords(target),
       });
     },
-    [onMoveEnd, toMathboxCoords, updateOnDrag]
+    [onMoveEnd, toUiCoords, updateOnDrag]
   );
   return (
     <>

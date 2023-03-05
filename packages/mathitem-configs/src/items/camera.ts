@@ -16,6 +16,7 @@ interface CameraProperties {
   position: string;
   target: string;
   updateOnDrag: string;
+  useRelative: string;
 }
 
 const defaultValues: CameraProperties = {
@@ -27,6 +28,7 @@ const defaultValues: CameraProperties = {
   position: "[-6, -4, 2]",
   target: "[0, 0, 0]",
   updateOnDrag: "true",
+  useRelative: "false",
 };
 
 type EvaluatedProperties = {
@@ -37,6 +39,7 @@ type EvaluatedProperties = {
   updateOnDrag: boolean;
   position: [number, number, number];
   target: [number, number, number];
+  useRelative: boolean;
 };
 
 const make: MathItemGenerator<MathItemType.Camera, CameraProperties> = (
@@ -97,6 +100,12 @@ const config: IMathItemConfig<
       label: "Look At",
       widget: WidgetType.MathValue,
       validate: validators.realVec[3],
+    },
+    useRelative: {
+      name: "useRelative",
+      label: "Use relative coordinates",
+      widget: WidgetType.MathBoolean,
+      validate: validators.boolean,
     },
   },
   settingsProperties: [],

@@ -59,6 +59,7 @@ const defaultScene: Omit<Scene, "id"> = {
         isOrthographic: "false",
         isRotateEnabled: "true",
         position: "\\left[-6, -4, 2\\right]",
+        useRelative: "false",
       },
     },
     {
