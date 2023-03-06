@@ -42,7 +42,7 @@ const SceneContent = () => {
   const { scale, range } = useAxesInfo(x, y, z);
 
   const onCameraChange: OnMoveEnd = useMemo(() => {
-    return debounce((event) => {
+    const cb: OnMoveEnd = (event) => {
       dispatch(
         actions.patchProperty({
           id: camera.id,
@@ -57,7 +57,8 @@ const SceneContent = () => {
           value: `[${event.target.map((pos) => pos.toPrecision(6))}]`,
         })
       );
-    }, 200);
+    };
+    return debounce(cb, 200);
   }, [dispatch, camera.id]);
   return (
     <MB.Cartesian range={range} scale={scale}>
