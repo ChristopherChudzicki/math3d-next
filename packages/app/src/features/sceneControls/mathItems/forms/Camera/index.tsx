@@ -21,6 +21,7 @@ const propNames = [
   "isPanEnabled",
   "position",
   "target",
+  "useRelative",
   "updateOnDrag",
   "isOrthographic",
 ] as const;

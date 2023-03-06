@@ -1,12 +1,13 @@
 import mergeClassNames from "classnames";
-import React, { useCallback } from "react";
+import React, { useMemo } from "react";
 import * as MB from "mathbox-react";
 import type { MathboxSelection } from "mathbox";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Vector3 } from "three";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { isMathGraphic, MathItemType } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
+import { debounce } from "lodash";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { actions, select } from "../sceneControls/mathItems/mathItemsSlice";
 import { Graphic, graphicNeedsRange } from "./graphics";
 import useAxesInfo from "./useAxesInfo";
@@ -39,25 +40,26 @@ const SceneContent = () => {
   const [x, y, z, camera] = useAppSelector(select.getItems(REQUIRED_ITEMS));
   invariant(camera.type === MathItemType.Camera);
   const { scale, range } = useAxesInfo(x, y, z);
-  const onCameraChange: OnMoveEnd = useCallback(
-    (event) => {
+
+  const onCameraChange: OnMoveEnd = useMemo(() => {
+    const cb: OnMoveEnd = (event) => {
       dispatch(
         actions.patchProperty({
           id: camera.id,
           path: "/position",
-          value: `[${event.position.map((pos) => pos.toPrecision(3))}]`,
+          value: `[${event.position.map((pos) => pos.toPrecision(6))}]`,
         })
       );
       dispatch(
         actions.patchProperty({
           id: camera.id,
           path: "/target",
-          value: `[${event.target.map((pos) => pos.toPrecision(3))}]`,
+          value: `[${event.target.map((pos) => pos.toPrecision(6))}]`,
         })
       );
-    },
-    [dispatch, camera.id]
-  );
+    };
+    return debounce(cb, 200);
+  }, [dispatch, camera.id]);
   return (
     <MB.Cartesian range={range} scale={scale}>
       <Camera item={camera} range={range} onMoveEnd={onCameraChange} />
