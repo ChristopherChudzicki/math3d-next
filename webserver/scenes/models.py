@@ -10,3 +10,15 @@ class LegacyScene(models.Model):
     times_accessed = models.IntegerField(default=0)
     last_accessed = models.DateTimeField(auto_now=True)
     dehydrated = models.JSONField()
+
+
+class Scene(models.Model):
+    """
+    A scene that was created in the legacy system.
+    """
+
+    key = models.CharField(max_length=80, unique=True)
+    items = models.JSONField()
+    item_order = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    title = models.TextField()
