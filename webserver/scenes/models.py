@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import jtd
@@ -8,7 +9,12 @@ from scenes.validators import JtdValidator
 
 items_schema = jtd.Schema.from_dict(
     yaml.safe_load(
-        Path("/src/packages/mathitem-configs/src/schema.jtd.yaml").read_text()
+        Path(
+            os.path.join(
+                os.path.dirname(__file__),
+                "../../packages/mathitem-configs/src/schema.jtd.yaml",
+            )
+        ).read_text()
     )
 )
 

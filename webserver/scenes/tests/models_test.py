@@ -1,9 +1,12 @@
-import pytest
 from unittest import mock
-from scenes.models import Scene
-from django.db import models 
 
-@mock.patch.object(models.Model, 'save')
+import pytest
+from django.db import models
+
+from scenes.models import Scene
+
+
+@mock.patch.object(models.Model, "save")
 @pytest.mark.django_db
 def test_my_user(save_mock):
     scene = Scene(
