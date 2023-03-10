@@ -1,4 +1,16 @@
+from pathlib import Path
+
+import jtd
+import yaml
 from django.db import models
+
+from scenes.validators import JtdValidator
+
+items_schema = jtd.Schema.from_dict(
+    yaml.safe_load(
+        Path("/src/packages/mathitem-configs/src/schema.jtd.yaml").read_text()
+    )
+)
 
 
 class LegacyScene(models.Model):
@@ -14,11 +26,15 @@ class LegacyScene(models.Model):
 
 class Scene(models.Model):
     """
-    A scene that was created in the legacy system.
+    A Scene.
     """
 
     key = models.CharField(max_length=80, unique=True)
-    items = models.JSONField()
+    items = models.JSONField(validators=[JtdValidator(limit_value=items_schema)])
     item_order = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
     title = models.TextField()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)

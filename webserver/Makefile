@@ -35,3 +35,7 @@ help: ## Show help
 .PHONY: devserver
 devserver: ## Start django webserver in dev mode; restarts when crashes
 	bash -c "while true; do python ./manage.py runserver 0.0.0.0:8000; sleep 2; done"
+
+.PHONY: test
+test: ## Run tests
+	pytest -sv --ds main.settings
