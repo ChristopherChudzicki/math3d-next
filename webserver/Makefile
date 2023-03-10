@@ -23,10 +23,6 @@ format-check: ## Check formatting code with black and isort
 	${FORMAT_PYTHON} --check
 	${SORT_PYTHON_IMPORTS} --check-only
 
-.PHONY: test
-test: ## Run tests
-	@echo "TODO: Add tests"
-
 .PHONY: help
 # Adapted from https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 help: ## Show help
@@ -38,4 +34,4 @@ devserver: ## Start django webserver in dev mode; restarts when crashes
 
 .PHONY: test
 test: ## Run tests
-	pytest -sv --ds main.settings
+	pytest -sv --ds main.test_settings
