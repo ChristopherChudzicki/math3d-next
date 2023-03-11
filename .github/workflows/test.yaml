@@ -35,5 +35,7 @@ jobs:
         run: make setup_python
       - name: Format Python
         run: make format-check
+      - name: Typecheck Python
+        run: make typecheck
       - name: Test Python
         run: make test
