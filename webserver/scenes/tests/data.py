@@ -9,12 +9,9 @@ default_scene_data = {
             "properties": {
                 "expr": {
                     "name": "_f",
-                    "params": [
-                        "x",
-                        "y"
-                    ],
+                    "params": ["x", "y"],
                     "rhs": "1 - x^2 - y",
-                    "type": "function-assignment"
+                    "type": "function-assignment",
                 },
                 "color": "#3498db",
                 "grid1": "8",
@@ -26,20 +23,16 @@ default_scene_data = {
                         {
                             "type": "function-assignment",
                             "name": "_f",
-                            "params": [
-                                "y"
-                            ],
-                            "rhs": "[-5, 5]"
+                            "params": ["y"],
+                            "rhs": "[-5, 5]",
                         },
                         {
                             "type": "function-assignment",
                             "name": "_f",
-                            "params": [
-                                "x"
-                            ],
-                            "rhs": "[-5, 5]"
-                        }
-                    ]
+                            "params": ["x"],
+                            "rhs": "[-5, 5]",
+                        },
+                    ],
                 },
                 "shaded": "true",
                 "zIndex": "0",
@@ -50,8 +43,8 @@ default_scene_data = {
                 "colorExpr": "_f(X, Y, Z, x, y)=mod(Z, 1)",
                 "gridWidth": "2",
                 "description": "Explicit Surface",
-                "gridOpacity": "0.5"
-            }
+                "gridOpacity": "0.5",
+            },
         },
         {
             "id": "camera",
@@ -65,8 +58,8 @@ default_scene_data = {
                 "isOrthographic": "false",
                 "isRotateEnabled": "true",
                 "position": "\\left[-6, -4, 2\\right]",
-                "useRelative": "false"
-            }
+                "useRelative": "false",
+            },
         },
         {
             "id": "axis-x",
@@ -89,8 +82,8 @@ default_scene_data = {
                 "ticksVisible": "true",
                 "end": "true",
                 "start": "false",
-                "divisions": "10"
-            }
+                "divisions": "10",
+            },
         },
         {
             "id": "axis-y",
@@ -113,8 +106,8 @@ default_scene_data = {
                 "ticksVisible": "true",
                 "end": "true",
                 "start": "false",
-                "divisions": "10"
-            }
+                "divisions": "10",
+            },
         },
         {
             "id": "axis-z",
@@ -137,8 +130,8 @@ default_scene_data = {
                 "ticksVisible": "true",
                 "end": "true",
                 "start": "false",
-                "divisions": "10"
-            }
+                "divisions": "10",
+            },
         },
         {
             "id": "grid-xy",
@@ -153,8 +146,8 @@ default_scene_data = {
                 "opacity": "1",
                 "visible": "true",
                 "divisions": "\\left[10,\\ 10\\right]",
-                "description": "Grid"
-            }
+                "description": "Grid",
+            },
         },
         {
             "id": "grid-yz",
@@ -169,8 +162,8 @@ default_scene_data = {
                 "opacity": "1",
                 "visible": "false",
                 "divisions": "\\left[10,\\ 10\\right]",
-                "description": "Grid"
-            }
+                "description": "Grid",
+            },
         },
         {
             "id": "grid-zx",
@@ -185,58 +178,34 @@ default_scene_data = {
                 "opacity": "1",
                 "visible": "false",
                 "divisions": "\\left[10,\\ 10\\right]",
-                "description": "Grid"
-            }
+                "description": "Grid",
+            },
         },
         {
             "id": "cameraFolder",
             "type": "FOLDER",
-            "properties": {
-                "description": "Camera Controls",
-                "isCollapsed": "false"
-            }
+            "properties": {"description": "Camera Controls", "isCollapsed": "false"},
         },
         {
             "id": "axes",
             "type": "FOLDER",
-            "properties": {
-                "description": "Axes and Grids",
-                "isCollapsed": "false"
-            }
+            "properties": {"description": "Axes and Grids", "isCollapsed": "false"},
         },
         {
             "id": "initialFolder",
             "type": "FOLDER",
-            "properties": {
-                "description": "A Folder",
-                "isCollapsed": "false"
-            }
-        }
+            "properties": {"description": "A Folder", "isCollapsed": "false"},
+        },
     ],
     "itemOrder": {
-        "axes": [
-            "axis-x",
-            "axis-y",
-            "axis-z",
-            "grid-xy",
-            "grid-yz",
-            "grid-zx"
-        ],
-        "main": [
-            "initialFolder"
-        ],
-        "setup": [
-            "cameraFolder",
-            "axes"
-        ],
-        "initialFolder": [
-            "1"
-        ],
-        "cameraFolder": [
-            "camera"
-        ]
-    }
+        "axes": ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"],
+        "main": ["initialFolder"],
+        "setup": ["cameraFolder", "axes"],
+        "initialFolder": ["1"],
+        "cameraFolder": ["camera"],
+    },
 }
+
 
 def default_scene():
     return deepcopy(default_scene_data)

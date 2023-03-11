@@ -1,6 +1,6 @@
 import pytest
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 
 from scenes.models import Scene
 from scenes.tests.data import default_scene
@@ -17,6 +17,7 @@ def test_valid_items_are_saveable():
         created_at="2021-01-01 00:00:00",
     )
     scene.save()
+
 
 @pytest.mark.django_db
 def test_invalid_items_raise_validation_error():
