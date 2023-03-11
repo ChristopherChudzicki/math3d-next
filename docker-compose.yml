@@ -30,8 +30,8 @@ services:
       - .env
     environment:
         DATABASE_URL: postgresql://docker:docker@db:5432/math3d
-    command: >
-      python ./webserver/manage.py runserver 0.0.0.0:8000
+    command:
+      make devserver
     volumes:
       - ./webserver:/src/webserver
       - ./packages/mathitem-configs:/src/packages/mathitem-configs

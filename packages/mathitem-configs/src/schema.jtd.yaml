@@ -414,101 +414,104 @@ definitions:
         type: string
       scale:
         type: string
-discriminator: type
-mapping:
-  AXIS:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesAxis
-  BOOLEAN_VARIABLE:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesBooleanVariable
-  CAMERA:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesCamera
-  EXPLICIT_SURFACE:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesExplicitSurface
-  EXPLICIT_SURFACE_POLAR:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesExplicitSurface # This happens to be the same at the moment.
-  FOLDER:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesFolder
-  GRID:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesGrid
-  IMPLICIT_SURFACE:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesImplicitSurface
-  LINE:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesLine
-  PARAMETRIC_CURVE:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesParametricCurve
-  PARAMETRIC_SURFACE:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesParametricSurface
-  POINT:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesPoint
-  VARIABLE:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesVariable
-  VARIABLE_SLIDER:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesVariableSlider
-  VECTOR:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesVector
-  VECTOR_FIELD:
-    properties:
-      id:
-        type: string
-      properties:
-        ref: itemPropertiesVectorField
+  mathItem:
+    discriminator: type
+    mapping:
+      AXIS:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesAxis
+      BOOLEAN_VARIABLE:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesBooleanVariable
+      CAMERA:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesCamera
+      EXPLICIT_SURFACE:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesExplicitSurface
+      EXPLICIT_SURFACE_POLAR:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesExplicitSurface # This happens to be the same at the moment.
+      FOLDER:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesFolder
+      GRID:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesGrid
+      IMPLICIT_SURFACE:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesImplicitSurface
+      LINE:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesLine
+      PARAMETRIC_CURVE:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesParametricCurve
+      PARAMETRIC_SURFACE:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesParametricSurface
+      POINT:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesPoint
+      VARIABLE:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesVariable
+      VARIABLE_SLIDER:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesVariableSlider
+      VECTOR:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesVector
+      VECTOR_FIELD:
+        properties:
+          id:
+            type: string
+          properties:
+            ref: itemPropertiesVectorField
+elements:
+  ref: mathItem

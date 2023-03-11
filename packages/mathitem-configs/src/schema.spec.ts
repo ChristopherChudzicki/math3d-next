@@ -39,13 +39,17 @@ test("All configs are tested", () => {
   expect(new Set(types)).toEqual(new Set(Object.values(MIT)));
 });
 
+test("schema compiles", () => {
+  ajv.compile(schema);
+});
+
 describe.each(types)("Schema validation for %s", (type) => {
   test("happy path", () => {
     const validate = ajv.compile(schema);
 
     const item = configs[type].make("fake-id");
 
-    const isValid = validate(item);
+    const isValid = validate([item]);
     expect(validate.errors).toBe(null);
     expect(isValid).toBe(true); // should be redundant, but ok
   });
@@ -54,20 +58,20 @@ describe.each(types)("Schema validation for %s", (type) => {
     const validate = ajv.compile(schema);
 
     const item = configs[type].make("fake-id");
-    expect(validate(item)).toBe(true);
-    expect(validate({ ...item, cat: "meow" })).toBe(false);
+    expect(validate([item])).toBe(true);
+    expect(validate([{ ...item, cat: "meow" }])).toBe(false);
   });
 
   test("Bad properties", () => {
     const validate = ajv.compile(schema);
     const item = configs[type].make("fake-id");
 
-    expect(validate(item)).toBe(true);
+    expect(validate([item])).toBe(true);
 
     const key = faker.helpers.arrayElement(Object.keys(item.properties));
     // @ts-expect-error making bad data on purpose
     item.properties[key] = {};
 
-    expect(validate(item)).toBe(false);
+    expect(validate([item])).toBe(false);
   });
 });

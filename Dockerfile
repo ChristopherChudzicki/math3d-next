@@ -1,6 +1,7 @@
 FROM python:3.11.2
 
-WORKDIR /src
-COPY /webserver/ /src/
+COPY /webserver/ /src/webserver
 
-RUN make -C /src setup_python
+WORKDIR /src/webserver
+
+RUN make setup_python

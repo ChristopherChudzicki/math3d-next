@@ -23,11 +23,19 @@ format-check: ## Check formatting code with black and isort
 	${FORMAT_PYTHON} --check
 	${SORT_PYTHON_IMPORTS} --check-only
 
-.PHONY: test
-test: ## Run tests
-	@echo "TODO: Add tests"
-
 .PHONY: help
 # Adapted from https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 help: ## Show help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+.PHONY: devserver
+devserver: ## Start django webserver in dev mode; restarts when crashes
+	bash -c "while true; do python ./manage.py runserver 0.0.0.0:8000; sleep 2; done"
+
+.PHONY: test
+test: ## Run tests
+	pytest -sv --ds main.test_settings
+
+.PHONY: typecheck
+typecheck: ## Run MyPy typechecker
+	mypy .

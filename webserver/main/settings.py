@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-g4fiiz=+pm)76t@vm1l0694kpcm5t1yb#5k2lb_l6uyn7fd$dk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: list[str] = []
 
 
 # Application definition
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
     "main",
     "scenes",
 ]
@@ -78,7 +79,14 @@ WSGI_APPLICATION = "main.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {"default": dj_database_url.config(default=os.environ.get("DATABASE_URL"))}
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.environ.get(
+            "DATABASE_URLz",
+            f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}",
+        )
+    )
+}
 
 
 # Password validation
