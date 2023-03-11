@@ -701,6 +701,18 @@ slack = ["slack-sdk"]
 telegram = ["requests"]
 
 [[package]]
+name = "types-dj-database-url"
+version = "1.2.0.1"
+description = "Typing stubs for dj-database-url"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-dj-database-url-1.2.0.1.tar.gz", hash = "sha256:ffeb257f916779398ac5385a15840fcfca780a5d70420012251fa8ca680e54ed"},
+    {file = "types_dj_database_url-1.2.0.1-py3-none-any.whl", hash = "sha256:20edc5162ce27f0f1e99d9b21f3763b5de33a1b6ca2628585af5c36e4c526ad6"},
+]
+
+[[package]]
 name = "types-psycopg2"
 version = "2.9.21.7"
 description = "Typing stubs for psycopg2"
@@ -819,4 +831,4 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "61aac858c448f7eae102b58045e735102dc7590bbc613031795bdf2dd4b74228"
+content-hash = "020f7038652d0e03adaac171089e670df57b268e2b9185757416a7fcbcafc888"

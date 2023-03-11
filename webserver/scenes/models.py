@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-import jtd
+import jtd  # type: ignore
 import yaml
 from django.db import models
 

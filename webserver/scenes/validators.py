@@ -13,7 +13,6 @@ class JtdValidator(BaseValidator):
     """
 
     def compare(self, value, schema):
-        for item in value:
-            errors = jtd.validate(schema=schema, instance=item, options=options)
-            if errors:
-                raise ValidationError(f"{value} failed JTD schema check")
+        errors = jtd.validate(schema=schema, instance=value, options=options)
+        if errors:
+            raise ValidationError(f"{value} failed JTD schema check")

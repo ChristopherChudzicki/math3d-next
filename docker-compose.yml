@@ -31,7 +31,7 @@ services:
     environment:
         DATABASE_URL: postgresql://docker:docker@db:5432/math3d
     command:
-      make -C /src/webserver devserver
+      make devserver
     volumes:
       - ./webserver:/src/webserver
       - ./packages/mathitem-configs:/src/packages/mathitem-configs
