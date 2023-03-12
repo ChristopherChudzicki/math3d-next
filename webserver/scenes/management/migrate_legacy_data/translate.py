@@ -122,6 +122,32 @@ def translate_explicit_surface(props) -> new.ItemPropertiesExplicitSurface:
     )
 
 
+def translate_explicit_surface_polar(props) -> new.ItemPropertiesExplicitSurface:
+    x = old.ExplicitSurfacePolarProperties(**props)
+    expr = function_assignment(x.expr)
+    rangeU = x.rangeU if "=" in x.rangeU else f"_f(Q)={x.rangeU}"
+    rangeV = x.rangeV if "=" in x.rangeV else f"_f(r)={x.rangeV}"
+    domain = domain_array([rangeU, rangeV])
+    return new.ItemPropertiesExplicitSurface(
+        color=x.color,
+        color_expr=x.colorExpr,
+        description=x.description,
+        domain=domain,
+        expr=expr,
+        grid1=x.gridU,
+        grid2=x.gridV,
+        grid_opacity=x.gridOpacity,
+        grid_width=x.gridWidth,
+        opacity=x.opacity,
+        samples1=x.uSamples,
+        samples2=x.vSamples,
+        shaded=stringify(x.shaded),
+        visible=get_visible(x),
+        z_bias=x.zBias,
+        z_index=x.zIndex,
+    )
+
+
 def translate_item(item) -> new.MathItem:
     item_id = item["id"]
     item_type = item["type"]
@@ -152,6 +178,13 @@ def translate_item(item) -> new.MathItem:
             id=item_id,
             type="EXPLICIT_SURFACE",
             properties=translate_explicit_surface(item),
+        )
+
+    if item_type == "EXPLICIT_SURFACE_POLAR":
+        return new.MathItemExplicitSurfacePolar(
+            id=item_id,
+            type="EXPLICIT_SURFACE_POLAR",
+            properties=translate_explicit_surface_polar(item),
         )
 
     raise NotImplementedError(f"Unknown item type: {item['type']}")

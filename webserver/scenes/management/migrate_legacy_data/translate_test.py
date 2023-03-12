@@ -172,3 +172,70 @@ def test_explicit_surface(in_patch, out_patch):
     }
     actual_out = translate_item(data_in).to_json_data()
     assert expected_out == actual_out
+
+
+@pytest.mark.parametrize(
+    ("in_patch", "out_patch"),
+    [
+        (
+            {"useCalculatedVisibility": True, "calculatedVisibility": "!false"},
+            {"visible": "!false"},
+        ),
+        (
+            {
+                "useCalculatedVisibility": False,
+                "calculatedVisibility": "!false",
+                "visible": False,
+            },
+            {"visible": "false"},
+        ),
+    ],
+)
+def test_explicit_surface(in_patch, out_patch):
+    data_in = {"type": "EXPLICIT_SURFACE_POLAR", "id": "some-item", **in_patch}
+    expected_out = {
+        "type": "EXPLICIT_SURFACE_POLAR",
+        "id": "some-item",
+        "properties": {
+            "color": "#3090FF",
+            "colorExpr": "_f(X, Y, Z, r, \\theta)=mod(Z, 1)",
+            "description": "Explicit Surface (Polar)",
+            "domain": {
+                "items": [
+                    {
+                        "name": "_f",
+                        "params": ["Q"],
+                        "rhs": "\\left[0,\\ 3\\right]",
+                        "type": "function-assignment",
+                    },
+                    {
+                        "name": "_f",
+                        "params": ["r"],
+                        "rhs": "\\left[-\\pi,\\ \\pi\\right]",
+                        "type": "function-assignment",
+                    },
+                ],
+                "type": "array",
+            },
+            "expr": {
+                "name": "_f",
+                "params": ["r", "\\theta"],
+                "rhs": "\\frac{1}{4}r^2\\cdot\\cos\\left(3\\theta\\right)",
+                "type": "function-assignment",
+            },
+            "grid1": "8",
+            "grid2": "8",
+            "gridOpacity": "0.5",
+            "gridWidth": "2",
+            "opacity": "0.75",
+            "samples1": "64",
+            "samples2": "64",
+            "shaded": "true",
+            "visible": "false",
+            "zBias": "0",
+            "zIndex": "0",
+            **out_patch
+        },
+    }
+    actual_out = translate_item(data_in).to_json_data()
+    assert expected_out == actual_out
