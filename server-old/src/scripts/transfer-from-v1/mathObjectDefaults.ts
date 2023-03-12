@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const mathObjectDefaults: any = {
+mathObjectDefaults = {
   FOLDER: {
     isCollapsed: false,
     isDropDisabled: false,
@@ -253,4 +253,31 @@ const mathObjectDefaults: any = {
   },
 };
 
-export default mathObjectDefaults;
+toPython = (value) => {
+  if (value === true) return "True";
+  if (value === false) return "False";
+  if (value === null) return "None";
+  return JSON.stringify(value)
+}
+
+toPythonType = (value) => {
+  if (value === true) return "bool";
+  if (value === false) return "bool";
+  if (value === null) return "FIXME";
+  if (typeof value === 'string') return "str";
+  return "FIXME"
+}
+
+toDataClass = (name, props) => {
+  const dataProps = Object.keys(props).filter(p => p !== "type");
+  const body = dataProps.map(p => `    ${p}:${toPythonType(props[p])} =${toPython(props[p])}`).join("\n");
+  return `
+@dataclass
+class ${name}:
+${body}
+  `
+}
+
+x = Object.entries(mathObjectDefaults).map(([name, props]) => {
+  return `${toDataClass(name, props)}`
+}).join("\n\n")

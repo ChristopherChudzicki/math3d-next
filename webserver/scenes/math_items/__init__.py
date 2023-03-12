@@ -9,38 +9,39 @@ from typing import Any, Dict, List, Optional, Type, Union, get_args, get_origin
 
 @dataclass
 class MathItems:
-    value: 'List[MathItem]'
+    value: "List[MathItem]"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItems':
+    def from_json_data(cls, data: Any) -> "MathItems":
         return cls(_from_json_data(List[MathItem], data))
 
     def to_json_data(self) -> Any:
         return _to_json_data(self.value)
 
+
 @dataclass
 class ItemPropertiesAxis:
-    axis: 'PropAxis'
-    color: 'str'
-    description: 'str'
-    divisions: 'str'
-    end: 'str'
-    label: 'str'
-    label_visible: 'str'
-    max: 'str'
-    min: 'str'
-    opacity: 'str'
-    scale: 'str'
-    size: 'str'
-    start: 'str'
-    ticks_visible: 'str'
-    visible: 'str'
-    width: 'str'
-    z_bias: 'str'
-    z_index: 'str'
+    axis: "PropAxis"
+    color: "str"
+    description: "str"
+    divisions: "str"
+    end: "str"
+    label: "str"
+    label_visible: "str"
+    max: "str"
+    min: "str"
+    opacity: "str"
+    scale: "str"
+    size: "str"
+    start: "str"
+    ticks_visible: "str"
+    visible: "str"
+    width: "str"
+    z_bias: "str"
+    z_index: "str"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesAxis':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesAxis":
         return cls(
             _from_json_data(PropAxis, data.get("axis")),
             _from_json_data(str, data.get("color")),
@@ -84,13 +85,14 @@ class ItemPropertiesAxis:
         data["zIndex"] = _to_json_data(self.z_index)
         return data
 
+
 @dataclass
 class ItemPropertiesBooleanVariable:
-    description: 'str'
-    value: 'ParseableAssignment'
+    description: "str"
+    value: "ParseableAssignment"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesBooleanVariable':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesBooleanVariable":
         return cls(
             _from_json_data(str, data.get("description")),
             _from_json_data(ParseableAssignment, data.get("value")),
@@ -102,20 +104,21 @@ class ItemPropertiesBooleanVariable:
         data["value"] = _to_json_data(self.value)
         return data
 
+
 @dataclass
 class ItemPropertiesCamera:
-    description: 'str'
-    is_orthographic: 'str'
-    is_pan_enabled: 'str'
-    is_rotate_enabled: 'str'
-    is_zoom_enabled: 'str'
-    position: 'str'
-    target: 'str'
-    update_on_drag: 'str'
-    use_relative: 'str'
+    description: "str"
+    is_orthographic: "str"
+    is_pan_enabled: "str"
+    is_rotate_enabled: "str"
+    is_zoom_enabled: "str"
+    position: "str"
+    target: "str"
+    update_on_drag: "str"
+    use_relative: "str"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesCamera':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesCamera":
         return cls(
             _from_json_data(str, data.get("description")),
             _from_json_data(str, data.get("isOrthographic")),
@@ -141,27 +144,28 @@ class ItemPropertiesCamera:
         data["useRelative"] = _to_json_data(self.use_relative)
         return data
 
+
 @dataclass
 class ItemPropertiesExplicitSurface:
-    color: 'str'
-    color_expr: 'str'
-    description: 'str'
-    domain: 'ParseableFunctionAssignmentArray'
-    expr: 'ParseableFunctionAssignment'
-    grid1: 'str'
-    grid2: 'str'
-    grid_opacity: 'str'
-    grid_width: 'str'
-    opacity: 'str'
-    samples1: 'str'
-    samples2: 'str'
-    shaded: 'str'
-    visible: 'str'
-    z_bias: 'str'
-    z_index: 'str'
+    color: "str"
+    color_expr: "str"
+    description: "str"
+    domain: "ParseableFunctionAssignmentArray"
+    expr: "ParseableFunctionAssignment"
+    grid1: "str"
+    grid2: "str"
+    grid_opacity: "str"
+    grid_width: "str"
+    opacity: "str"
+    samples1: "str"
+    samples2: "str"
+    shaded: "str"
+    visible: "str"
+    z_bias: "str"
+    z_index: "str"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesExplicitSurface':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesExplicitSurface":
         return cls(
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("colorExpr")),
@@ -201,13 +205,14 @@ class ItemPropertiesExplicitSurface:
         data["zIndex"] = _to_json_data(self.z_index)
         return data
 
+
 @dataclass
 class ItemPropertiesFolder:
-    description: 'str'
-    is_collapsed: 'str'
+    description: "str"
+    is_collapsed: "str"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesFolder':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesFolder":
         return cls(
             _from_json_data(str, data.get("description")),
             _from_json_data(str, data.get("isCollapsed")),
@@ -219,21 +224,22 @@ class ItemPropertiesFolder:
         data["isCollapsed"] = _to_json_data(self.is_collapsed)
         return data
 
+
 @dataclass
 class ItemPropertiesGrid:
-    axes: 'PropAxes'
-    color: 'str'
-    description: 'str'
-    divisions: 'str'
-    opacity: 'str'
-    snap: 'str'
-    visible: 'str'
-    width: 'str'
-    z_bias: 'str'
-    z_index: 'str'
+    axes: "PropAxes"
+    color: "str"
+    description: "str"
+    divisions: "str"
+    opacity: "str"
+    snap: "str"
+    visible: "str"
+    width: "str"
+    z_bias: "str"
+    z_index: "str"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesGrid':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesGrid":
         return cls(
             _from_json_data(PropAxes, data.get("axes")),
             _from_json_data(str, data.get("color")),
@@ -261,22 +267,23 @@ class ItemPropertiesGrid:
         data["zIndex"] = _to_json_data(self.z_index)
         return data
 
+
 @dataclass
 class ItemPropertiesImplicitSurface:
-    color: 'str'
-    description: 'str'
-    domain: 'ParseableExprArray'
-    lhs: 'ParseableFunctionAssignment'
-    opacity: 'str'
-    rhs: 'ParseableFunctionAssignment'
-    samples: 'str'
-    shaded: 'str'
-    visible: 'str'
-    z_bias: 'str'
-    z_index: 'str'
+    color: "str"
+    description: "str"
+    domain: "ParseableExprArray"
+    lhs: "ParseableFunctionAssignment"
+    opacity: "str"
+    rhs: "ParseableFunctionAssignment"
+    samples: "str"
+    shaded: "str"
+    visible: "str"
+    z_bias: "str"
+    z_index: "str"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesImplicitSurface':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesImplicitSurface":
         return cls(
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("description")),
@@ -306,24 +313,25 @@ class ItemPropertiesImplicitSurface:
         data["zIndex"] = _to_json_data(self.z_index)
         return data
 
+
 @dataclass
 class ItemPropertiesLine:
-    color: 'str'
-    coords: 'str'
-    description: 'str'
-    end: 'str'
-    label: 'str'
-    label_visible: 'str'
-    opacity: 'str'
-    size: 'str'
-    start: 'str'
-    visible: 'str'
-    width: 'str'
-    z_bias: 'str'
-    z_index: 'str'
+    color: "str"
+    coords: "str"
+    description: "str"
+    end: "str"
+    label: "str"
+    label_visible: "str"
+    opacity: "str"
+    size: "str"
+    start: "str"
+    visible: "str"
+    width: "str"
+    z_bias: "str"
+    z_index: "str"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesLine':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesLine":
         return cls(
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("coords")),
@@ -357,24 +365,25 @@ class ItemPropertiesLine:
         data["zIndex"] = _to_json_data(self.z_index)
         return data
 
+
 @dataclass
 class ItemPropertiesParametricCurve:
-    color: 'str'
-    description: 'str'
-    domain: 'ParseableExprArray'
-    end: 'str'
-    expr: 'ParseableFunctionAssignment'
-    opacity: 'str'
-    samples1: 'str'
-    size: 'str'
-    start: 'str'
-    visible: 'str'
-    width: 'str'
-    z_bias: 'str'
-    z_index: 'str'
+    color: "str"
+    description: "str"
+    domain: "ParseableExprArray"
+    end: "str"
+    expr: "ParseableFunctionAssignment"
+    opacity: "str"
+    samples1: "str"
+    size: "str"
+    start: "str"
+    visible: "str"
+    width: "str"
+    z_bias: "str"
+    z_index: "str"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesParametricCurve':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesParametricCurve":
         return cls(
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("description")),
@@ -408,27 +417,28 @@ class ItemPropertiesParametricCurve:
         data["zIndex"] = _to_json_data(self.z_index)
         return data
 
+
 @dataclass
 class ItemPropertiesParametricSurface:
-    color: 'str'
-    color_expr: 'str'
-    description: 'str'
-    domain: 'ParseableFunctionAssignmentArray'
-    expr: 'ParseableFunctionAssignment'
-    grid1: 'str'
-    grid2: 'str'
-    grid_opacity: 'str'
-    grid_width: 'str'
-    opacity: 'str'
-    samples1: 'str'
-    samples2: 'str'
-    shaded: 'str'
-    visible: 'str'
-    z_bias: 'str'
-    z_index: 'str'
+    color: "str"
+    color_expr: "str"
+    description: "str"
+    domain: "ParseableFunctionAssignmentArray"
+    expr: "ParseableFunctionAssignment"
+    grid1: "str"
+    grid2: "str"
+    grid_opacity: "str"
+    grid_width: "str"
+    opacity: "str"
+    samples1: "str"
+    samples2: "str"
+    shaded: "str"
+    visible: "str"
+    z_bias: "str"
+    z_index: "str"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesParametricSurface':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesParametricSurface":
         return cls(
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("colorExpr")),
@@ -468,21 +478,22 @@ class ItemPropertiesParametricSurface:
         data["zIndex"] = _to_json_data(self.z_index)
         return data
 
+
 @dataclass
 class ItemPropertiesPoint:
-    color: 'str'
-    coords: 'str'
-    description: 'str'
-    label: 'str'
-    label_visible: 'str'
-    opacity: 'str'
-    size: 'str'
-    visible: 'str'
-    z_bias: 'str'
-    z_index: 'str'
+    color: "str"
+    coords: "str"
+    description: "str"
+    label: "str"
+    label_visible: "str"
+    opacity: "str"
+    size: "str"
+    visible: "str"
+    z_bias: "str"
+    z_index: "str"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesPoint':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesPoint":
         return cls(
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("coords")),
@@ -510,13 +521,14 @@ class ItemPropertiesPoint:
         data["zIndex"] = _to_json_data(self.z_index)
         return data
 
+
 @dataclass
 class ItemPropertiesVariable:
-    description: 'str'
-    value: 'ParseableAssignment'
+    description: "str"
+    value: "ParseableAssignment"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesVariable':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesVariable":
         return cls(
             _from_json_data(str, data.get("description")),
             _from_json_data(ParseableAssignment, data.get("value")),
@@ -528,18 +540,19 @@ class ItemPropertiesVariable:
         data["value"] = _to_json_data(self.value)
         return data
 
+
 @dataclass
 class ItemPropertiesVariableSlider:
-    description: 'str'
-    duration: 'str'
-    fps: 'str'
-    is_animating: 'str'
-    range: 'ParseableStringArray'
-    speed_multiplier: 'str'
-    value: 'ParseableAssignment'
+    description: "str"
+    duration: "str"
+    fps: "str"
+    is_animating: "str"
+    range: "ParseableStringArray"
+    speed_multiplier: "str"
+    value: "ParseableAssignment"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesVariableSlider':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesVariableSlider":
         return cls(
             _from_json_data(str, data.get("description")),
             _from_json_data(str, data.get("duration")),
@@ -561,25 +574,26 @@ class ItemPropertiesVariableSlider:
         data["value"] = _to_json_data(self.value)
         return data
 
+
 @dataclass
 class ItemPropertiesVector:
-    color: 'str'
-    components: 'str'
-    description: 'str'
-    end: 'str'
-    label: 'str'
-    label_visible: 'str'
-    opacity: 'str'
-    size: 'str'
-    start: 'str'
-    tail: 'str'
-    visible: 'str'
-    width: 'str'
-    z_bias: 'str'
-    z_index: 'str'
+    color: "str"
+    components: "str"
+    description: "str"
+    end: "str"
+    label: "str"
+    label_visible: "str"
+    opacity: "str"
+    size: "str"
+    start: "str"
+    tail: "str"
+    visible: "str"
+    width: "str"
+    z_bias: "str"
+    z_index: "str"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesVector':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesVector":
         return cls(
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("components")),
@@ -615,27 +629,28 @@ class ItemPropertiesVector:
         data["zIndex"] = _to_json_data(self.z_index)
         return data
 
+
 @dataclass
 class ItemPropertiesVectorField:
-    color: 'str'
-    description: 'str'
-    domain: 'ParseableExprArray'
-    end: 'str'
-    expr: 'ParseableFunctionAssignment'
-    opacity: 'str'
-    samples1: 'str'
-    samples2: 'str'
-    samples3: 'str'
-    scale: 'str'
-    size: 'str'
-    start: 'str'
-    visible: 'str'
-    width: 'str'
-    z_bias: 'str'
-    z_index: 'str'
+    color: "str"
+    description: "str"
+    domain: "ParseableExprArray"
+    end: "str"
+    expr: "ParseableFunctionAssignment"
+    opacity: "str"
+    samples1: "str"
+    samples2: "str"
+    samples3: "str"
+    scale: "str"
+    size: "str"
+    start: "str"
+    visible: "str"
+    width: "str"
+    z_bias: "str"
+    z_index: "str"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ItemPropertiesVectorField':
+    def from_json_data(cls, data: Any) -> "ItemPropertiesVectorField":
         return cls(
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("description")),
@@ -675,12 +690,13 @@ class ItemPropertiesVectorField:
         data["zIndex"] = _to_json_data(self.z_index)
         return data
 
+
 @dataclass
 class MathItem:
-    type: 'str'
+    type: "str"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItem':
+    def from_json_data(cls, data: Any) -> "MathItem":
         variants: Dict[str, Type[MathItem]] = {
             "AXIS": MathItemAxis,
             "BOOLEAN_VARIABLE": MathItemBooleanVariable,
@@ -705,13 +721,14 @@ class MathItem:
     def to_json_data(self) -> Any:
         pass
 
+
 @dataclass
 class MathItemAxis(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesAxis'
+    id: "str"
+    properties: "ItemPropertiesAxis"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemAxis':
+    def from_json_data(cls, data: Any) -> "MathItemAxis":
         return cls(
             "AXIS",
             _from_json_data(str, data.get("id")),
@@ -719,18 +736,19 @@ class MathItemAxis(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "AXIS" }
+        data = {"type": "AXIS"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemBooleanVariable(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesBooleanVariable'
+    id: "str"
+    properties: "ItemPropertiesBooleanVariable"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemBooleanVariable':
+    def from_json_data(cls, data: Any) -> "MathItemBooleanVariable":
         return cls(
             "BOOLEAN_VARIABLE",
             _from_json_data(str, data.get("id")),
@@ -738,18 +756,19 @@ class MathItemBooleanVariable(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "BOOLEAN_VARIABLE" }
+        data = {"type": "BOOLEAN_VARIABLE"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemCamera(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesCamera'
+    id: "str"
+    properties: "ItemPropertiesCamera"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemCamera':
+    def from_json_data(cls, data: Any) -> "MathItemCamera":
         return cls(
             "CAMERA",
             _from_json_data(str, data.get("id")),
@@ -757,18 +776,19 @@ class MathItemCamera(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "CAMERA" }
+        data = {"type": "CAMERA"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemExplicitSurface(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesExplicitSurface'
+    id: "str"
+    properties: "ItemPropertiesExplicitSurface"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemExplicitSurface':
+    def from_json_data(cls, data: Any) -> "MathItemExplicitSurface":
         return cls(
             "EXPLICIT_SURFACE",
             _from_json_data(str, data.get("id")),
@@ -776,18 +796,19 @@ class MathItemExplicitSurface(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "EXPLICIT_SURFACE" }
+        data = {"type": "EXPLICIT_SURFACE"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemExplicitSurfacePolar(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesExplicitSurface'
+    id: "str"
+    properties: "ItemPropertiesExplicitSurface"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemExplicitSurfacePolar':
+    def from_json_data(cls, data: Any) -> "MathItemExplicitSurfacePolar":
         return cls(
             "EXPLICIT_SURFACE_POLAR",
             _from_json_data(str, data.get("id")),
@@ -795,18 +816,19 @@ class MathItemExplicitSurfacePolar(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "EXPLICIT_SURFACE_POLAR" }
+        data = {"type": "EXPLICIT_SURFACE_POLAR"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemFolder(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesFolder'
+    id: "str"
+    properties: "ItemPropertiesFolder"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemFolder':
+    def from_json_data(cls, data: Any) -> "MathItemFolder":
         return cls(
             "FOLDER",
             _from_json_data(str, data.get("id")),
@@ -814,18 +836,19 @@ class MathItemFolder(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "FOLDER" }
+        data = {"type": "FOLDER"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemGrid(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesGrid'
+    id: "str"
+    properties: "ItemPropertiesGrid"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemGrid':
+    def from_json_data(cls, data: Any) -> "MathItemGrid":
         return cls(
             "GRID",
             _from_json_data(str, data.get("id")),
@@ -833,18 +856,19 @@ class MathItemGrid(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "GRID" }
+        data = {"type": "GRID"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemImplicitSurface(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesImplicitSurface'
+    id: "str"
+    properties: "ItemPropertiesImplicitSurface"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemImplicitSurface':
+    def from_json_data(cls, data: Any) -> "MathItemImplicitSurface":
         return cls(
             "IMPLICIT_SURFACE",
             _from_json_data(str, data.get("id")),
@@ -852,18 +876,19 @@ class MathItemImplicitSurface(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "IMPLICIT_SURFACE" }
+        data = {"type": "IMPLICIT_SURFACE"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemLine(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesLine'
+    id: "str"
+    properties: "ItemPropertiesLine"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemLine':
+    def from_json_data(cls, data: Any) -> "MathItemLine":
         return cls(
             "LINE",
             _from_json_data(str, data.get("id")),
@@ -871,18 +896,19 @@ class MathItemLine(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "LINE" }
+        data = {"type": "LINE"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemParametricCurve(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesParametricCurve'
+    id: "str"
+    properties: "ItemPropertiesParametricCurve"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemParametricCurve':
+    def from_json_data(cls, data: Any) -> "MathItemParametricCurve":
         return cls(
             "PARAMETRIC_CURVE",
             _from_json_data(str, data.get("id")),
@@ -890,18 +916,19 @@ class MathItemParametricCurve(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "PARAMETRIC_CURVE" }
+        data = {"type": "PARAMETRIC_CURVE"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemParametricSurface(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesParametricSurface'
+    id: "str"
+    properties: "ItemPropertiesParametricSurface"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemParametricSurface':
+    def from_json_data(cls, data: Any) -> "MathItemParametricSurface":
         return cls(
             "PARAMETRIC_SURFACE",
             _from_json_data(str, data.get("id")),
@@ -909,18 +936,19 @@ class MathItemParametricSurface(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "PARAMETRIC_SURFACE" }
+        data = {"type": "PARAMETRIC_SURFACE"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemPoint(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesPoint'
+    id: "str"
+    properties: "ItemPropertiesPoint"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemPoint':
+    def from_json_data(cls, data: Any) -> "MathItemPoint":
         return cls(
             "POINT",
             _from_json_data(str, data.get("id")),
@@ -928,18 +956,19 @@ class MathItemPoint(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "POINT" }
+        data = {"type": "POINT"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemVariable(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesVariable'
+    id: "str"
+    properties: "ItemPropertiesVariable"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemVariable':
+    def from_json_data(cls, data: Any) -> "MathItemVariable":
         return cls(
             "VARIABLE",
             _from_json_data(str, data.get("id")),
@@ -947,18 +976,19 @@ class MathItemVariable(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "VARIABLE" }
+        data = {"type": "VARIABLE"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemVariableSlider(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesVariableSlider'
+    id: "str"
+    properties: "ItemPropertiesVariableSlider"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemVariableSlider':
+    def from_json_data(cls, data: Any) -> "MathItemVariableSlider":
         return cls(
             "VARIABLE_SLIDER",
             _from_json_data(str, data.get("id")),
@@ -966,18 +996,19 @@ class MathItemVariableSlider(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "VARIABLE_SLIDER" }
+        data = {"type": "VARIABLE_SLIDER"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemVector(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesVector'
+    id: "str"
+    properties: "ItemPropertiesVector"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemVector':
+    def from_json_data(cls, data: Any) -> "MathItemVector":
         return cls(
             "VECTOR",
             _from_json_data(str, data.get("id")),
@@ -985,18 +1016,19 @@ class MathItemVector(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "VECTOR" }
+        data = {"type": "VECTOR"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 @dataclass
 class MathItemVectorField(MathItem):
-    id: 'str'
-    properties: 'ItemPropertiesVectorField'
+    id: "str"
+    properties: "ItemPropertiesVectorField"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'MathItemVectorField':
+    def from_json_data(cls, data: Any) -> "MathItemVectorField":
         return cls(
             "VECTOR_FIELD",
             _from_json_data(str, data.get("id")),
@@ -1004,28 +1036,31 @@ class MathItemVectorField(MathItem):
         )
 
     def to_json_data(self) -> Any:
-        data = { "type": "VECTOR_FIELD" }
+        data = {"type": "VECTOR_FIELD"}
         data["id"] = _to_json_data(self.id)
         data["properties"] = _to_json_data(self.properties)
         return data
 
+
 class ParseableAssignmentType(Enum):
     ASSIGNMENT = "assignment"
+
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ParseableAssignmentType':
+    def from_json_data(cls, data: Any) -> "ParseableAssignmentType":
         return cls(data)
 
     def to_json_data(self) -> Any:
         return self.value
 
+
 @dataclass
 class ParseableAssignment:
-    lhs: 'str'
-    rhs: 'str'
-    type: 'ParseableAssignmentType'
+    lhs: "str"
+    rhs: "str"
+    type: "ParseableAssignmentType"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ParseableAssignment':
+    def from_json_data(cls, data: Any) -> "ParseableAssignment":
         return cls(
             _from_json_data(str, data.get("lhs")),
             _from_json_data(str, data.get("rhs")),
@@ -1039,22 +1074,25 @@ class ParseableAssignment:
         data["type"] = _to_json_data(self.type)
         return data
 
+
 class ParseableExprType(Enum):
     EXPR = "expr"
+
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ParseableExprType':
+    def from_json_data(cls, data: Any) -> "ParseableExprType":
         return cls(data)
 
     def to_json_data(self) -> Any:
         return self.value
 
+
 @dataclass
 class ParseableExpr:
-    expr: 'str'
-    type: 'ParseableExprType'
+    expr: "str"
+    type: "ParseableExprType"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ParseableExpr':
+    def from_json_data(cls, data: Any) -> "ParseableExpr":
         return cls(
             _from_json_data(str, data.get("expr")),
             _from_json_data(ParseableExprType, data.get("type")),
@@ -1066,22 +1104,25 @@ class ParseableExpr:
         data["type"] = _to_json_data(self.type)
         return data
 
+
 class ParseableExprArrayType(Enum):
     ARRAY = "array"
+
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ParseableExprArrayType':
+    def from_json_data(cls, data: Any) -> "ParseableExprArrayType":
         return cls(data)
 
     def to_json_data(self) -> Any:
         return self.value
 
+
 @dataclass
 class ParseableExprArray:
-    items: 'List[ParseableExpr]'
-    type: 'ParseableExprArrayType'
+    items: "List[ParseableExpr]"
+    type: "ParseableExprArrayType"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ParseableExprArray':
+    def from_json_data(cls, data: Any) -> "ParseableExprArray":
         return cls(
             _from_json_data(List[ParseableExpr], data.get("items")),
             _from_json_data(ParseableExprArrayType, data.get("type")),
@@ -1093,24 +1134,27 @@ class ParseableExprArray:
         data["type"] = _to_json_data(self.type)
         return data
 
+
 class ParseableFunctionAssignmentType(Enum):
     FUNCTION_ASSIGNMENT = "function-assignment"
+
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ParseableFunctionAssignmentType':
+    def from_json_data(cls, data: Any) -> "ParseableFunctionAssignmentType":
         return cls(data)
 
     def to_json_data(self) -> Any:
         return self.value
 
+
 @dataclass
 class ParseableFunctionAssignment:
-    name: 'str'
-    params: 'List[str]'
-    rhs: 'str'
-    type: 'ParseableFunctionAssignmentType'
+    name: "str"
+    params: "List[str]"
+    rhs: "str"
+    type: "ParseableFunctionAssignmentType"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ParseableFunctionAssignment':
+    def from_json_data(cls, data: Any) -> "ParseableFunctionAssignment":
         return cls(
             _from_json_data(str, data.get("name")),
             _from_json_data(List[str], data.get("params")),
@@ -1126,22 +1170,25 @@ class ParseableFunctionAssignment:
         data["type"] = _to_json_data(self.type)
         return data
 
+
 class ParseableFunctionAssignmentArrayType(Enum):
     ARRAY = "array"
+
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ParseableFunctionAssignmentArrayType':
+    def from_json_data(cls, data: Any) -> "ParseableFunctionAssignmentArrayType":
         return cls(data)
 
     def to_json_data(self) -> Any:
         return self.value
 
+
 @dataclass
 class ParseableFunctionAssignmentArray:
-    items: 'List[ParseableFunctionAssignment]'
-    type: 'ParseableFunctionAssignmentArrayType'
+    items: "List[ParseableFunctionAssignment]"
+    type: "ParseableFunctionAssignmentArrayType"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ParseableFunctionAssignmentArray':
+    def from_json_data(cls, data: Any) -> "ParseableFunctionAssignmentArray":
         return cls(
             _from_json_data(List[ParseableFunctionAssignment], data.get("items")),
             _from_json_data(ParseableFunctionAssignmentArrayType, data.get("type")),
@@ -1153,22 +1200,25 @@ class ParseableFunctionAssignmentArray:
         data["type"] = _to_json_data(self.type)
         return data
 
+
 class ParseableStringArrayType(Enum):
     ARRAY = "array"
+
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ParseableStringArrayType':
+    def from_json_data(cls, data: Any) -> "ParseableStringArrayType":
         return cls(data)
 
     def to_json_data(self) -> Any:
         return self.value
 
+
 @dataclass
 class ParseableStringArray:
-    items: 'List[str]'
-    type: 'ParseableStringArrayType'
+    items: "List[str]"
+    type: "ParseableStringArrayType"
 
     @classmethod
-    def from_json_data(cls, data: Any) -> 'ParseableStringArray':
+    def from_json_data(cls, data: Any) -> "ParseableStringArray":
         return cls(
             _from_json_data(List[str], data.get("items")),
             _from_json_data(ParseableStringArrayType, data.get("type")),
@@ -1180,27 +1230,32 @@ class ParseableStringArray:
         data["type"] = _to_json_data(self.type)
         return data
 
+
 class PropAxes(Enum):
     XY = "xy"
     YZ = "yz"
     ZX = "zx"
+
     @classmethod
-    def from_json_data(cls, data: Any) -> 'PropAxes':
+    def from_json_data(cls, data: Any) -> "PropAxes":
         return cls(data)
 
     def to_json_data(self) -> Any:
         return self.value
+
 
 class PropAxis(Enum):
     X = "x"
     Y = "y"
     Z = "z"
+
     @classmethod
-    def from_json_data(cls, data: Any) -> 'PropAxis':
+    def from_json_data(cls, data: Any) -> "PropAxis":
         return cls(data)
 
     def to_json_data(self) -> Any:
         return self.value
+
 
 def _from_json_data(cls: Any, data: Any) -> Any:
     if data is None or cls in [bool, int, float, str, object] or cls is Any:
@@ -1212,8 +1267,9 @@ def _from_json_data(cls: Any, data: Any) -> Any:
     if get_origin(cls) is list:
         return [_from_json_data(get_args(cls)[0], d) for d in data]
     if get_origin(cls) is dict:
-        return { k: _from_json_data(get_args(cls)[1], v) for k, v in data.items() }
+        return {k: _from_json_data(get_args(cls)[1], v) for k, v in data.items()}
     return cls.from_json_data(data)
+
 
 def _to_json_data(data: Any) -> Any:
     if data is None or type(data) in [bool, int, float, str, object]:
@@ -1223,17 +1279,17 @@ def _to_json_data(data: Any) -> Any:
     if type(data) is list:
         return [_to_json_data(d) for d in data]
     if type(data) is dict:
-        return { k: _to_json_data(v) for k, v in data.items() }
+        return {k: _to_json_data(v) for k, v in data.items()}
     return data.to_json_data()
 
+
 def _parse_rfc3339(s: str) -> datetime:
-    datetime_re = '^(\d{4})-(\d{2})-(\d{2})[tT](\d{2}):(\d{2}):(\d{2})(\.\d+)?([zZ]|((\+|-)(\d{2}):(\d{2})))$'
+    datetime_re = r"^(\d{4})-(\d{2})-(\d{2})[tT](\d{2}):(\d{2}):(\d{2})(\.\d+)?([zZ]|((\+|-)(\d{2}):(\d{2})))$"
     match = re.match(datetime_re, s)
     if not match:
-        raise ValueError('Invalid RFC3339 date/time', s)
+        raise ValueError("Invalid RFC3339 date/time", s)
 
-    (year, month, day, hour, minute, second, frac_seconds, offset,
-     *tz) = match.groups()
+    (year, month, day, hour, minute, second, frac_seconds, offset, *tz) = match.groups()
 
     frac_seconds_parsed = None
     if frac_seconds:
@@ -1242,15 +1298,15 @@ def _parse_rfc3339(s: str) -> datetime:
         frac_seconds_parsed = 0
 
     tzinfo = None
-    if offset == 'Z':
+    if offset == "Z":
         tzinfo = timezone.utc
     else:
         hours = int(tz[2])
         minutes = int(tz[3])
-        sign = 1 if tz[1] == '+' else -1
+        sign = 1 if tz[1] == "+" else -1
 
         if minutes not in range(60):
-            raise ValueError('minute offset must be in 0..59')
+            raise ValueError("minute offset must be in 0..59")
 
         tzinfo = timezone(timedelta(minutes=sign * (60 * hours + minutes)))
 
@@ -1258,5 +1314,13 @@ def _parse_rfc3339(s: str) -> datetime:
     if second_parsed == 60:
         second_parsed = 59
 
-    return datetime(int(year), int(month), int(day), int(hour), int(minute),
-                    second_parsed, frac_seconds_parsed, tzinfo)            
+    return datetime(
+        int(year),
+        int(month),
+        int(day),
+        int(hour),
+        int(minute),
+        second_parsed,
+        frac_seconds_parsed,
+        tzinfo,
+    )
