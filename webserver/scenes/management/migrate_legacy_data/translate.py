@@ -1,3 +1,4 @@
+import re
 from typing import Any, Union
 
 import scenes.management.migrate_legacy_data.legacy_data as old
@@ -15,6 +16,28 @@ def get_visible(x: object) -> str:
     if hasattr(x, "useCalculatedVisibility") and x.useCalculatedVisibility:
         return x.calculatedVisibility
     return stringify(x.visible)
+
+
+def function_assignment(expr: str) -> new.ParseableFunctionAssignment:
+    lhs, rhs = expr.split("=")
+    matches = re.search(r"(.*?)\((.*?)\)", lhs)
+    if matches is None:
+        raise ValueError(f"Expected lhs to have form 'f(...)'. Value: {lhs}")
+    name = matches[1]
+    params = matches[2].split(",")
+    return new.ParseableFunctionAssignment(
+        type=new.ParseableFunctionAssignmentType.FUNCTION_ASSIGNMENT,
+        name=name,
+        params=params,
+        rhs=rhs,
+    )
+
+
+def domain_array(exprs: list[str]) -> new.ParseableFunctionAssignmentArray:
+    items = [function_assignment(expr) for expr in exprs]
+    return new.ParseableFunctionAssignmentArray(
+        type=new.ParseableFunctionAssignmentArrayType.ARRAY, items=items
+    )
 
 
 def translate_axis(props) -> new.ItemPropertiesAxis:
@@ -73,6 +96,32 @@ def translate_camera(props) -> new.ItemPropertiesCamera:
     )
 
 
+def translate_explicit_surface(props) -> new.ItemPropertiesExplicitSurface:
+    x = old.ExplicitSurfaceProperties(**props)
+    expr = function_assignment(x.expr)
+    rangeU = x.rangeU if "=" in x.rangeU else f"_f(y)={x.rangeU}"
+    rangeV = x.rangeV if "=" in x.rangeV else f"_f(x)={x.rangeV}"
+    domain = domain_array([rangeU, rangeV])
+    return new.ItemPropertiesExplicitSurface(
+        color=x.color,
+        color_expr=x.colorExpr,
+        description=x.description,
+        domain=domain,
+        expr=expr,
+        grid1=x.gridU,
+        grid2=x.gridV,
+        grid_opacity=x.gridOpacity,
+        grid_width=x.gridWidth,
+        opacity=x.opacity,
+        samples1=x.uSamples,
+        samples2=x.vSamples,
+        shaded=stringify(x.shaded),
+        visible=get_visible(x),
+        z_bias=x.zBias,
+        z_index=x.zIndex,
+    )
+
+
 def translate_item(item) -> new.MathItem:
     item_id = item["id"]
     item_type = item["type"]
@@ -96,6 +145,13 @@ def translate_item(item) -> new.MathItem:
             id=item_id,
             type="CAMERA",
             properties=translate_camera(item),
+        )
+
+    if item_type == "EXPLICIT_SURFACE":
+        return new.MathItemExplicitSurface(
+            id=item_id,
+            type="EXPLICIT_SURFACE",
+            properties=translate_explicit_surface(item),
         )
 
     raise NotImplementedError(f"Unknown item type: {item['type']}")
