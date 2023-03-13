@@ -325,11 +325,68 @@ def translate_variable_slider(props) -> new.ItemPropertiesVariableSlider:
 
 
 def translate_vector(props) -> new.ItemPropertiesVector:
-    pass
+    x = old.VectorProperties(**props)
+    return new.ItemPropertiesVector(
+        color=x.color,
+        components=x.components,
+        description=x.description,
+        end=stringify(x.end),
+        label=x.label,
+        label_visible=stringify(x.labelVisible),
+        opacity=x.opacity,
+        size=x.size,
+        start=stringify(x.start),
+        tail=x.tail,
+        visible=get_visible(x),
+        width=x.width,
+        z_bias=x.zBias,
+        z_index=x.zIndex,
+    )
+
+
+def vector_field_samples(arr: str, index: int):
+    match = re.match(r"\[(.+?),(.+?),(.+?)\]", arr)
+    if not match:
+        raise ValueError(f"Invalid vector field samples: {arr}")
+    return match[index].strip()
 
 
 def translate_vector_field(props) -> new.ItemPropertiesVectorField:
-    pass
+    x = old.VectorFieldProperties(**props)
+    return new.ItemPropertiesVectorField(
+        color=x.color,
+        description=x.description,
+        domain=new.ParseableExprArray(
+            type=new.ParseableExprArrayType.ARRAY,
+            items=[
+                new.ParseableExpr(
+                    type=new.ParseableExprType.EXPR,
+                    expr=x.rangeX,
+                ),
+                new.ParseableExpr(
+                    type=new.ParseableExprType.EXPR,
+                    expr=x.rangeY,
+                ),
+                new.ParseableExpr(
+                    type=new.ParseableExprType.EXPR,
+                    expr=x.rangeZ,
+                ),
+            ],
+        ),
+        end=stringify(x.end),
+        expr=function_assignment(x.expr),
+        opacity=x.opacity,
+        samples1=vector_field_samples(x.samples, 1),
+        samples2=vector_field_samples(x.samples, 2),
+        samples3=vector_field_samples(x.samples, 3),
+        scale=x.scale,
+        size=x.size,
+        start=stringify(x.start),
+        visible=get_visible(x),
+        width=x.width,
+        z_bias=x.zBias,
+        z_index=x.zIndex,
+    )
 
 
 def translate_item(item) -> new.MathItem:
@@ -432,6 +489,20 @@ def translate_item(item) -> new.MathItem:
             id=item_id,
             type="VARIABLE_SLIDER",
             properties=translate_variable_slider(item),
+        )
+
+    if item_type == "VECTOR":
+        return new.MathItemVector(
+            id=item_id,
+            type="VECTOR",
+            properties=translate_vector(item),
+        )
+
+    if item_type == "VECTOR_FIELD":
+        return new.MathItemVectorField(
+            id=item_id,
+            type="VECTOR_FIELD",
+            properties=translate_vector_field(item),
         )
 
     raise NotImplementedError(f"Unknown item type: {item['type']}")

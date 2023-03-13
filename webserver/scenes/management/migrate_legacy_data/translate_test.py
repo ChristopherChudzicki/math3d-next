@@ -481,16 +481,87 @@ def test_variable_slider():
     assert expected_out == actual_out
 
 
-# def test_vector():
-#     data_in = {"type": "VECTOR", "id": "some-item"}
-#     expected_out = {}
-#     actual_out = translate_item(data_in).to_json_data()
-#     print(actual_out)
-#     assert expected_out == actual_out
+def test_vector():
+    data_in = {"type": "VECTOR", "id": "some-item"}
+    expected_out = {
+        "type": "VECTOR",
+        "id": "some-item",
+        "properties": {
+            "color": "#3090FF",
+            "components": "\\left[3,2,1\\right]",
+            "description": "Vector",
+            "end": "true",
+            "label": "",
+            "labelVisible": "false",
+            "opacity": "1",
+            "size": "6",
+            "start": "false",
+            "tail": "\\left[0,0,0\\right]",
+            "visible": "true",
+            "width": "4",
+            "zBias": "0",
+            "zIndex": "0",
+        },
+    }
+    actual_out = translate_item(data_in).to_json_data()
+    assert expected_out == actual_out
 
-# def test_vector_field():
-#     data_in = {"type": "VECTOR_FIELD", "id": "some-item"}
-#     expected_out = {}
-#     actual_out = translate_item(data_in).to_json_data()
-#     print(actual_out)
-#     assert expected_out == actual_out
+
+@pytest.mark.parametrize(
+    ("in_patch", "out_patch"),
+    [
+        (
+            {},
+            {},
+        ),
+        (
+            {
+                "samples": "[10, 20, 30]"
+            },
+            {
+                "samples1": "10",
+                "samples2": "20",
+                "samples3": "30",
+            }
+        )
+    ]
+)
+def test_vector_field(in_patch, out_patch):
+    data_in = {"type": "VECTOR_FIELD", "id": "some-item", **in_patch}
+    expected_out = {
+        "type": "VECTOR_FIELD",
+        "id": "some-item",
+        "properties": {
+            "color": "#3090FF",
+            "description": "Vector Field",
+            "domain": {
+                "items": [
+                    {"expr": "\\left[-5,\\ 5\\right]", "type": "expr"},
+                    {"expr": "\\left[-5,\\ 5\\right]", "type": "expr"},
+                    {"expr": "\\left[-5,\\ 5\\right]", "type": "expr"},
+                ],
+                "type": "array",
+            },
+            "end": "true",
+            "expr": {
+                "name": "_f",
+                "params": ["x", "y", "z"],
+                "rhs": "\\frac{[y,\\ -x,\\ 0]}{\\sqrt{x^2+y^2}}",
+                "type": "function-assignment",
+            },
+            "opacity": "1",
+            "samples1": "10",
+            "samples2": "10",
+            "samples3": "5",
+            "scale": "1",
+            "size": "6",
+            "start": "false",
+            "visible": "true",
+            "width": "2",
+            "zBias": "0",
+            "zIndex": "0",
+            **out_patch
+        },
+    }
+    actual_out = translate_item(data_in).to_json_data()
+    assert expected_out == actual_out
