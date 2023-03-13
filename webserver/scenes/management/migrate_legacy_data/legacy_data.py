@@ -74,6 +74,7 @@ class AxisProperties:
 @dataclass
 class GridProperties:
     description: str = "Grid"
+    axes: str = "xy"
     useCalculatedVisibility: bool = False
     color: str = "#808080"
     visible: bool = True

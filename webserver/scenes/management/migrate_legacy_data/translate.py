@@ -12,7 +12,7 @@ def stringify(obj: bool):
         return "false"
 
 
-def get_visible(x: object) -> str:
+def get_visible(x) -> str:
     if hasattr(x, "useCalculatedVisibility") and x.useCalculatedVisibility:
         return x.calculatedVisibility
     return stringify(x.visible)
@@ -85,13 +85,13 @@ def translate_camera(props) -> new.ItemPropertiesCamera:
         target = x.computedLookAt
     return new.ItemPropertiesCamera(
         description=x.description,
-        use_relative=not x.useComputed,
+        use_relative=stringify(not x.useComputed),
         position=position,
         target=target,
-        is_orthographic=x.isOrthographic,
-        is_pan_enabled=x.isPanEnabled,
-        is_zoom_enabled=x.isZoomEnabled,
-        is_rotate_enabled=x.isRotateEnabled,
+        is_orthographic=stringify(x.isOrthographic),
+        is_pan_enabled=stringify(x.isPanEnabled),
+        is_zoom_enabled=stringify(x.isZoomEnabled),
+        is_rotate_enabled=stringify(x.isRotateEnabled),
         update_on_drag=stringify(True),
     )
 
@@ -148,6 +148,65 @@ def translate_explicit_surface_polar(props) -> new.ItemPropertiesExplicitSurface
     )
 
 
+def translate_grid(props) -> new.ItemPropertiesGrid:
+    x = old.GridProperties(**props)
+    return new.ItemPropertiesGrid(
+        color=x.color,
+        description=x.description,
+        opacity=x.opacity,
+        visible=get_visible(x),
+        z_bias=x.zBias,
+        z_index=x.zIndex,
+        divisions=x.divisions,
+        width="1/2",
+        snap="false",
+        axes=new.PropAxes(x.axes),
+    )
+
+
+def translate_folder(props) -> new.ItemPropertiesFolder:
+    x = old.FolderProperties(**props)
+    return new.ItemPropertiesFolder(
+        description=x.description, is_collapsed=stringify(x.isCollapsed)
+    )
+
+
+def test_implicit_surface(props) -> new.ItemPropertiesImplicitSurface:
+    pass
+
+
+def test_line(props) -> new.ItemPropertiesLine:
+    pass
+
+
+def test_parametric_curve(props) -> new.ItemPropertiesParametricCurve:
+    pass
+
+
+def test_parametric_surface(props) -> new.ItemPropertiesParametricSurface:
+    pass
+
+
+def test_point(props) -> new.ItemPropertiesPoint:
+    pass
+
+
+def test_variable(props) -> new.ItemPropertiesVariable:
+    pass
+
+
+def test_variable_slider(props) -> new.ItemPropertiesVariableSlider:
+    pass
+
+
+def test_vector(props) -> new.ItemPropertiesVector:
+    pass
+
+
+def test_vector_field(props) -> new.ItemPropertiesVectorField:
+    pass
+
+
 def translate_item(item) -> new.MathItem:
     item_id = item["id"]
     item_type = item["type"]
@@ -185,6 +244,20 @@ def translate_item(item) -> new.MathItem:
             id=item_id,
             type="EXPLICIT_SURFACE_POLAR",
             properties=translate_explicit_surface_polar(item),
+        )
+
+    if item_type == "FOLDER":
+        return new.MathItemFolder(
+            id=item_id,
+            type="FOLDER",
+            properties=translate_folder(item),
+        )
+
+    if item_type == "GRID":
+        return new.MathItemGrid(
+            id=item_id,
+            type="GRID",
+            properties=translate_grid(item),
         )
 
     raise NotImplementedError(f"Unknown item type: {item['type']}")

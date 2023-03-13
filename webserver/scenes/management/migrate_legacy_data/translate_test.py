@@ -191,7 +191,7 @@ def test_explicit_surface(in_patch, out_patch):
         ),
     ],
 )
-def test_explicit_surface(in_patch, out_patch):
+def test_explicit_surface_polar(in_patch, out_patch):
     data_in = {"type": "EXPLICIT_SURFACE_POLAR", "id": "some-item", **in_patch}
     expected_out = {
         "type": "EXPLICIT_SURFACE_POLAR",
@@ -234,7 +234,45 @@ def test_explicit_surface(in_patch, out_patch):
             "visible": "false",
             "zBias": "0",
             "zIndex": "0",
-            **out_patch
+            **out_patch,
+        },
+    }
+    actual_out = translate_item(data_in).to_json_data()
+    assert expected_out == actual_out
+
+
+def test_folder():
+    data_in = {
+        "type": "FOLDER",
+        "id": "some-item",
+        "isCollapsed": True,
+        "description": "test folder",
+    }
+    expected_out = {
+        "type": "FOLDER",
+        "id": "some-item",
+        "properties": {"description": "test folder", "isCollapsed": "true"},
+    }
+    actual_out = translate_item(data_in).to_json_data()
+    assert expected_out == actual_out
+
+
+def test_grid():
+    data_in = {"type": "GRID", "id": "some-item", "color": "red"}
+    expected_out = {
+        "type": "GRID",
+        "id": "some-item",
+        "properties": {
+            "axes": "xy",
+            "color": "red",
+            "description": "Grid",
+            "divisions": "\\left[10,\\ 10\\right]",
+            "opacity": "1",
+            "snap": "false",
+            "visible": "true",
+            "width": "1/2",
+            "zBias": "0",
+            "zIndex": "0",
         },
     }
     actual_out = translate_item(data_in).to_json_data()
