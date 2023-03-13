@@ -18,6 +18,15 @@ def get_visible(x) -> str:
     return stringify(x.visible)
 
 
+def assignment(expr: str) -> new.ParseableAssignment:
+    lhs, rhs = expr.split("=")
+    return new.ParseableAssignment(
+        type=new.ParseableAssignmentType.ASSIGNMENT,
+        lhs=lhs,
+        rhs=rhs,
+    )
+
+
 def function_assignment(expr: str) -> new.ParseableFunctionAssignment:
     lhs, rhs = expr.split("=")
     matches = re.search(r"(.*?)\((.*?)\)", lhs)
@@ -204,35 +213,122 @@ def translate_implicit_surface(props) -> new.ItemPropertiesImplicitSurface:
     )
 
 
-def test_line(props) -> new.ItemPropertiesLine:
+def translate_line(props) -> new.ItemPropertiesLine:
+    x = old.LineProperties(**props)
+    return new.ItemPropertiesLine(
+        color=x.color,
+        coords=x.coords,
+        description=x.description,
+        end=stringify(x.end),
+        label=x.label,
+        label_visible=stringify(x.labelVisible),
+        opacity=x.opacity,
+        size=x.size,
+        start=stringify(x.start),
+        visible=get_visible(x),
+        width=x.width,
+        z_bias=x.zBias,
+        z_index=x.zIndex,
+    )
+
+
+def translate_parametric_curve(props) -> new.ItemPropertiesParametricCurve:
+    x = old.ParametricCurveProperties(**props)
+    return new.ItemPropertiesParametricCurve(
+        color=x.color,
+        description=x.description,
+        domain=new.ParseableExprArray(
+            type=new.ParseableExprArrayType.ARRAY,
+            items=[
+                new.ParseableExpr(
+                    type=new.ParseableExprType.EXPR,
+                    expr=x.range,
+                ),
+            ],
+        ),
+        end=stringify(x.end),
+        expr=function_assignment(x.expr),
+        opacity=x.opacity,
+        samples1=x.samples,
+        start=stringify(x.start),
+        size=x.size,
+        visible=get_visible(x),
+        width=x.width,
+        z_bias=x.zBias,
+        z_index=x.zIndex,
+    )
+
+
+def translate_parametric_surface(props) -> new.ItemPropertiesParametricSurface:
+    x = old.ParametricSurfaceProperties(**props)
+    expr = function_assignment(x.expr)
+    rangeU = x.rangeU if "=" in x.rangeU else f"_f(v)={x.rangeU}"
+    rangeV = x.rangeV if "=" in x.rangeV else f"_f(u)={x.rangeV}"
+    domain = domain_array([rangeU, rangeV])
+    return new.ItemPropertiesParametricSurface(
+        color=x.color,
+        color_expr=x.colorExpr,
+        description=x.description,
+        domain=domain,
+        expr=expr,
+        grid1=x.gridU,
+        grid2=x.gridV,
+        grid_opacity=x.gridOpacity,
+        grid_width=x.gridWidth,
+        opacity=x.opacity,
+        samples1=x.uSamples,
+        samples2=x.vSamples,
+        shaded=stringify(x.shaded),
+        visible=get_visible(x),
+        z_bias=x.zBias,
+        z_index=x.zIndex,
+    )
+
+
+def translate_point(props) -> new.ItemPropertiesPoint:
+    x = old.PointProperties(**props)
+    return new.ItemPropertiesPoint(
+        color=x.color,
+        coords=x.coords,
+        description=x.description,
+        label=x.label,
+        label_visible=stringify(x.labelVisible),
+        opacity=x.opacity,
+        size=x.size,
+        visible=get_visible(x),
+        z_bias=x.zBias,
+        z_index=x.zIndex,
+    )
+
+
+def translate_variable(props) -> new.ItemPropertiesVariable:
+    x = old.VariableProperties(**props)
+    return new.ItemPropertiesVariable(
+        description=x.description,
+        value=assignment(f"{x.name}={x.value}"),
+    )
+
+
+def translate_variable_slider(props) -> new.ItemPropertiesVariableSlider:
+    x = old.VariableSlider(**props)
+    return new.ItemPropertiesVariableSlider(
+        description=x.description,
+        duration="4",
+        fps="30",
+        is_animating=stringify(x.isAnimating),
+        range=new.ParseableStringArray(
+            type=new.ParseableStringArrayType.ARRAY, items=[x.min, x.max]
+        ),
+        speed_multiplier=x.speedMultiplier,
+        value=assignment(f"{x.name}={x.value}"),
+    )
+
+
+def translate_vector(props) -> new.ItemPropertiesVector:
     pass
 
 
-def test_parametric_curve(props) -> new.ItemPropertiesParametricCurve:
-    pass
-
-
-def test_parametric_surface(props) -> new.ItemPropertiesParametricSurface:
-    pass
-
-
-def test_point(props) -> new.ItemPropertiesPoint:
-    pass
-
-
-def test_variable(props) -> new.ItemPropertiesVariable:
-    pass
-
-
-def test_variable_slider(props) -> new.ItemPropertiesVariableSlider:
-    pass
-
-
-def test_vector(props) -> new.ItemPropertiesVector:
-    pass
-
-
-def test_vector_field(props) -> new.ItemPropertiesVectorField:
+def translate_vector_field(props) -> new.ItemPropertiesVectorField:
     pass
 
 
@@ -294,6 +390,48 @@ def translate_item(item) -> new.MathItem:
             id=item_id,
             type="IMPLICIT_SURFACE",
             properties=translate_implicit_surface(item),
+        )
+
+    if item_type == "LINE":
+        return new.MathItemImplicitSurface(
+            id=item_id,
+            type="LINE",
+            properties=translate_line(item),
+        )
+
+    if item_type == "PARAMETRIC_CURVE":
+        return new.MathItemParametricCurve(
+            id=item_id,
+            type="PARAMETRIC_CURVE",
+            properties=translate_parametric_curve(item),
+        )
+
+    if item_type == "PARAMETRIC_SURFACE":
+        return new.MathItemParametricSurface(
+            id=item_id,
+            type="PARAMETRIC_SURFACE",
+            properties=translate_parametric_surface(item),
+        )
+
+    if item_type == "POINT":
+        return new.MathItemPoint(
+            id=item_id,
+            type="POINT",
+            properties=translate_point(item),
+        )
+
+    if item_type == "VARIABLE":
+        return new.MathItemVariable(
+            id=item_id,
+            type="VARIABLE",
+            properties=translate_variable(item),
+        )
+
+    if item_type == "VARIABLE_SLIDER":
+        return new.MathItemVariableSlider(
+            id=item_id,
+            type="VARIABLE_SLIDER",
+            properties=translate_variable_slider(item),
         )
 
     raise NotImplementedError(f"Unknown item type: {item['type']}")
