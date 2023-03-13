@@ -233,7 +233,7 @@ class ExplicitSurfacePolarProperties:
 
 
 @dataclass
-class IMPLICIT_SURFACE:
+class ImplicitSurfaceProperties:
     description: str = "Implicit Surface"
     useCalculatedVisibility: bool = False
     color: str = "#3090FF"

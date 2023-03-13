@@ -63,7 +63,7 @@ def test_boolean_variable():
                 "useComputed": False,
             },
             {
-                "useRelative": True,
+                "useRelative": "true",
                 "position": "[0.1, 0.2, 0.3]",
                 "target": "[0, 0, -0.1]",
             },
@@ -76,7 +76,7 @@ def test_boolean_variable():
                 "computedLookAt": "[0, 0, -1]",
                 "useComputed": True,
             },
-            {"useRelative": False, "position": "[1+1, 2, 3]", "target": "[0, 0, -1]"},
+            {"useRelative": "false", "position": "[1+1, 2, 3]", "target": "[0, 0, -1]"},
         ),
     ],
 )
@@ -92,14 +92,14 @@ def test_camera(in_patch, out_patch):
         "id": "some-item",
         "properties": {
             "description": "test camera",
-            "isOrthographic": False,
-            "isPanEnabled": False,
-            "isRotateEnabled": True,
-            "isZoomEnabled": True,
+            "isOrthographic": "false",
+            "isPanEnabled": "false",
+            "isRotateEnabled": "true",
+            "isZoomEnabled": "true",
             "position": "[0.5, -2, 0.5]",
             "target": "[0, 0, 0]",
             "updateOnDrag": "true",
-            "useRelative": True,
+            "useRelative": "true",
             **out_patch,
         },
     }
@@ -271,6 +271,46 @@ def test_grid():
             "snap": "false",
             "visible": "true",
             "width": "1/2",
+            "zBias": "0",
+            "zIndex": "0",
+        },
+    }
+    actual_out = translate_item(data_in).to_json_data()
+    assert expected_out == actual_out
+
+
+def test_implicit_surface():
+    data_in = {"type": "IMPLICIT_SURFACE", "id": "some-item"}
+    expected_out = {
+        "type": "IMPLICIT_SURFACE",
+        "id": "some-item",
+        "properties": {
+            "color": "#3090FF",
+            "description": "Implicit Surface",
+            "domain": {
+                "items": [
+                    {"expr": "\\left[-5,\\ 5\\right]", "type": "expr"},
+                    {"expr": "\\left[-5,\\ 5\\right]", "type": "expr"},
+                    {"expr": "\\left[-5,\\ 5\\right]", "type": "expr"},
+                ],
+                "type": "array",
+            },
+            "lhs": {
+                "name": "_f",
+                "params": ["x", "y", "z"],
+                "rhs": "x^2+y^2",
+                "type": "function-assignment",
+            },
+            "opacity": "1",
+            "rhs": {
+                "name": "_f",
+                "params": ["x", "y", "z"],
+                "rhs": "z^2+1",
+                "type": "function-assignment",
+            },
+            "samples": "20",
+            "shaded": "true",
+            "visible": "true",
             "zBias": "0",
             "zIndex": "0",
         },

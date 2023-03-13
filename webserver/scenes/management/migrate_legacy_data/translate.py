@@ -171,8 +171,37 @@ def translate_folder(props) -> new.ItemPropertiesFolder:
     )
 
 
-def test_implicit_surface(props) -> new.ItemPropertiesImplicitSurface:
-    pass
+def translate_implicit_surface(props) -> new.ItemPropertiesImplicitSurface:
+    x = old.ImplicitSurfaceProperties(**props)
+    return new.ItemPropertiesImplicitSurface(
+        color=x.color,
+        description=x.description,
+        domain=new.ParseableExprArray(
+            type=new.ParseableExprArrayType.ARRAY,
+            items=[
+                new.ParseableExpr(
+                    type=new.ParseableExprType.EXPR,
+                    expr=x.rangeX,
+                ),
+                new.ParseableExpr(
+                    type=new.ParseableExprType.EXPR,
+                    expr=x.rangeY,
+                ),
+                new.ParseableExpr(
+                    type=new.ParseableExprType.EXPR,
+                    expr=x.rangeZ,
+                ),
+            ],
+        ),
+        lhs=function_assignment(x.lhs),
+        rhs=function_assignment(x.rhs),
+        opacity=x.opacity,
+        samples=x.samples,
+        shaded=stringify(x.shaded),
+        visible=get_visible(x),
+        z_bias=x.zBias,
+        z_index=x.zIndex,
+    )
 
 
 def test_line(props) -> new.ItemPropertiesLine:
@@ -258,6 +287,13 @@ def translate_item(item) -> new.MathItem:
             id=item_id,
             type="GRID",
             properties=translate_grid(item),
+        )
+
+    if item_type == "IMPLICIT_SURFACE":
+        return new.MathItemImplicitSurface(
+            id=item_id,
+            type="IMPLICIT_SURFACE",
+            properties=translate_implicit_surface(item),
         )
 
     raise NotImplementedError(f"Unknown item type: {item['type']}")
