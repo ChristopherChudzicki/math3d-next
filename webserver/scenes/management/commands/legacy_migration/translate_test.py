@@ -485,11 +485,13 @@ def test_variable():
     assert expected_out == actual_out
 
 
-def test_variable_slider():
+@pytest.mark.parametrize(
+    ("in_patch", "out_patch"),
+    [({}, {}), ({"speedMultiplier": 0.25}, {"speedMultiplier": "1/4"})],
+)
+def test_variable_slider(in_patch, out_patch):
     migrator = ItemMigrator()
-    data_in = {
-        "type": "VARIABLE_SLIDER",
-    }
+    data_in = {"type": "VARIABLE_SLIDER", **in_patch}
     expected_out = {
         "id": "some-id",
         "type": "VARIABLE_SLIDER",
@@ -501,6 +503,7 @@ def test_variable_slider():
             "range": {"items": ["-5", "5"], "type": "array"},
             "speedMultiplier": "1",
             "value": {"lhs": "T", "rhs": "None", "type": "assignment"},
+            **out_patch,
         },
     }
     actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
@@ -557,8 +560,8 @@ def test_vector_field(in_patch, out_patch):
     migrator = ItemMigrator()
     data_in = {"type": "VECTOR_FIELD", **in_patch}
     expected_out = {
-        "id": "some-id",
         "type": "VECTOR_FIELD",
+        "id": "some-id",
         "properties": {
             "color": "#3090FF",
             "description": "Vector Field",

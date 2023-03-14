@@ -40,7 +40,7 @@ class Scene(models.Model):
     items = models.JSONField(validators=[JtdValidator(limit_value=items_schema)])
     item_order = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
-    title = models.TextField()
+    title = models.TextField(blank=True, default="Untitled")
 
     def save(self, *args, **kwargs):
         self.full_clean()

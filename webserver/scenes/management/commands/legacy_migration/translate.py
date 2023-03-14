@@ -62,12 +62,33 @@ class ItemMigrator:
             type=new.ParseableFunctionAssignmentArrayType.ARRAY, items=items
         )
 
+    def find_speed(self, speed: float) -> str:
+        if speed == 0.125:
+            return "1/8"
+        if speed == 0.25:
+            return "1/4"
+        if speed == 0.5:
+            return "1/2"
+        if speed == 0.75:
+            return "3/4"
+        if speed == 1:
+            return "1"
+        if speed == 2:
+            return "2"
+        if speed == 4:
+            return "4"
+        if speed == 8:
+            return "8"
+
+        self.log.error(f"Unexpected speedMultipler: {speed}")
+        return "1"
+
     def vector_field_samples(self, arr: str):
         match = re.match(r"(?:\\left)?\[(.+?),(.+?),(.+?)(?:\right)?\]", arr)
         if not match:
             self.log.error(f"Invalid vector field samples: {arr}")
             return "10", "10", "5"
-        return match[1], match[2], match[3]
+        return match[1].strip(), match[2].strip(), match[3].strip()
 
     def translate_axis(self, props) -> new.ItemPropertiesAxis:
         x = old.AxisProperties(**props)
@@ -330,7 +351,7 @@ class ItemMigrator:
             range=new.ParseableStringArray(
                 type=new.ParseableStringArrayType.ARRAY, items=[x.min, x.max]
             ),
-            speed_multiplier=str(x.speedMultiplier),
+            speed_multiplier=self.find_speed(x.speedMultiplier),
             value=self.assignment(f"{x.name}={x.value}"),
         )
 

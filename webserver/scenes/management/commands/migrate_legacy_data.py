@@ -22,7 +22,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         limit = options["limit"]
         legacy_scenes = LegacyScene.objects.all()[:limit]
-        errs = 0
 
         for legacy_scene in tqdm.tqdm(legacy_scenes):
             set_defaults(legacy_scene)
@@ -41,24 +40,21 @@ class Command(BaseCommand):
             for item_id, item in old_items.items():
                 items.append(migrator.translate_item(item, item_id).to_json_data())
 
-            try:
-                Scene.objects.update_or_create(
-                    key=legacy_scene.key,
-                    defaults={
-                        "items": items,
-                        "item_order": legacy_scene.dehydrated["sortableTree"],
-                        "created_at": legacy_scene.dehydrated["metadata"][
-                            "creationDate"
-                        ].replace('"', ""),
-                        "title": legacy_scene.dehydrated["metadata"]["title"],
-                    },
-                )
-            except:
-                errs += 1
+            Scene.objects.update_or_create(
+                key=legacy_scene.key,
+                defaults={
+                    "items": items,
+                    "item_order": legacy_scene.dehydrated["sortableTree"],
+                    "created_at": legacy_scene.dehydrated["metadata"][
+                        "creationDate"
+                    ].replace('"', ""),
+                    "title": legacy_scene.dehydrated["metadata"].get(
+                        "title", "Untitled"
+                    ),
+                },
+            )
 
             legacy_scene.migration_note = "\n".join(
                 (issue.message for issue in migrator.log.issues())
             )
             legacy_scene.save(update_fields=["migration_note"])
-
-        print(f"Total Errors: {errs}")
