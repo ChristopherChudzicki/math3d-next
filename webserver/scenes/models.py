@@ -28,6 +28,7 @@ class LegacyScene(models.Model):
     times_accessed = models.IntegerField(default=0)
     last_accessed = models.DateTimeField(auto_now=True)
     dehydrated = models.JSONField()
+    migration_note = models.TextField(default="")
 
 
 class Scene(models.Model):

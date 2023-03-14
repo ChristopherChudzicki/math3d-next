@@ -1,13 +1,15 @@
 import pytest
 
-from scenes.management.migrate_legacy_data.translate import translate_item
+from scenes.management.commands.legacy_migration.translate import ItemMigrator
 
 
 def test_axis():
-    data_in = {"type": "AXIS", "id": "some-item", "description": "test axis"}
+    migrator = ItemMigrator()
+    migrator = ItemMigrator()
+    data_in = {"type": "AXIS", "description": "test axis"}
     expected_out = {
+        "id": "some-id",
         "type": "AXIS",
-        "id": "some-item",
         "properties": {
             "axis": "x",
             "color": "#808080",
@@ -29,25 +31,25 @@ def test_axis():
             "zIndex": "0",
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert actual_out == expected_out
 
 
 def test_boolean_variable():
+    migrator = ItemMigrator()
     data_in = {
         "type": "BOOLEAN_VARIABLE",
-        "id": "some-item",
         "description": "test boolean variable",
     }
     expected_out = {
+        "id": "some-id",
         "type": "BOOLEAN_VARIABLE",
-        "id": "some-item",
         "properties": {
             "description": "test boolean variable",
             "value": {"lhs": "switch", "rhs": "true", "type": "assignment"},
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
@@ -81,15 +83,15 @@ def test_boolean_variable():
     ],
 )
 def test_camera(in_patch, out_patch):
+    migrator = ItemMigrator()
     data_in = {
         "type": "CAMERA",
-        "id": "some-item",
         "description": "test camera",
         **in_patch,
     }
     expected_out = {
+        "id": "some-id",
         "type": "CAMERA",
-        "id": "some-item",
         "properties": {
             "description": "test camera",
             "isOrthographic": "false",
@@ -103,7 +105,7 @@ def test_camera(in_patch, out_patch):
             **out_patch,
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
@@ -125,10 +127,11 @@ def test_camera(in_patch, out_patch):
     ],
 )
 def test_explicit_surface(in_patch, out_patch):
-    data_in = {"type": "EXPLICIT_SURFACE", "id": "some-item", **in_patch}
+    migrator = ItemMigrator()
+    data_in = {"type": "EXPLICIT_SURFACE", **in_patch}
     expected_out = {
+        "id": "some-id",
         "type": "EXPLICIT_SURFACE",
-        "id": "some-item",
         "properties": {
             "color": "#3090FF",
             "colorExpr": "_f(X, Y, Z, x, y)=mod(Z, 1)",
@@ -170,7 +173,7 @@ def test_explicit_surface(in_patch, out_patch):
             **out_patch,
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
@@ -192,10 +195,11 @@ def test_explicit_surface(in_patch, out_patch):
     ],
 )
 def test_explicit_surface_polar(in_patch, out_patch):
-    data_in = {"type": "EXPLICIT_SURFACE_POLAR", "id": "some-item", **in_patch}
+    migrator = ItemMigrator()
+    data_in = {"type": "EXPLICIT_SURFACE_POLAR", **in_patch}
     expected_out = {
+        "id": "some-id",
         "type": "EXPLICIT_SURFACE_POLAR",
-        "id": "some-item",
         "properties": {
             "color": "#3090FF",
             "colorExpr": "_f(X, Y, Z, r, \\theta)=mod(Z, 1)",
@@ -237,31 +241,32 @@ def test_explicit_surface_polar(in_patch, out_patch):
             **out_patch,
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
 def test_folder():
+    migrator = ItemMigrator()
     data_in = {
         "type": "FOLDER",
-        "id": "some-item",
         "isCollapsed": True,
         "description": "test folder",
     }
     expected_out = {
+        "id": "some-id",
         "type": "FOLDER",
-        "id": "some-item",
         "properties": {"description": "test folder", "isCollapsed": "true"},
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
 def test_grid():
-    data_in = {"type": "GRID", "id": "some-item", "color": "red"}
+    migrator = ItemMigrator()
+    data_in = {"type": "GRID", "color": "red"}
     expected_out = {
+        "id": "some-id",
         "type": "GRID",
-        "id": "some-item",
         "properties": {
             "axes": "xy",
             "color": "red",
@@ -275,15 +280,18 @@ def test_grid():
             "zIndex": "0",
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
 def test_implicit_surface():
-    data_in = {"type": "IMPLICIT_SURFACE", "id": "some-item"}
-    expected_out = {
+    migrator = ItemMigrator()
+    data_in = {
         "type": "IMPLICIT_SURFACE",
-        "id": "some-item",
+    }
+    expected_out = {
+        "id": "some-id",
+        "type": "IMPLICIT_SURFACE",
         "properties": {
             "color": "#3090FF",
             "description": "Implicit Surface",
@@ -315,15 +323,18 @@ def test_implicit_surface():
             "zIndex": "0",
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
 def test_line():
-    data_in = {"type": "LINE", "id": "some-item"}
+    migrator = ItemMigrator()
+    data_in = {
+        "type": "LINE",
+    }
     expected_out = {
-        "type": "IMPLICIT_SURFACE",
-        "id": "some-item",
+        "id": "some-id",
+        "type": "LINE",
         "properties": {
             "color": "#3090FF",
             "coords": "\\left[\\left[1,1,1\\right], \\left[-1,1,-1\\right]\\right]",
@@ -340,15 +351,18 @@ def test_line():
             "zIndex": "0",
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
 def test_parametric_curve():
-    data_in = {"type": "PARAMETRIC_CURVE", "id": "some-item"}
-    expected_out = {
+    migrator = ItemMigrator()
+    data_in = {
         "type": "PARAMETRIC_CURVE",
-        "id": "some-item",
+    }
+    expected_out = {
+        "id": "some-id",
+        "type": "PARAMETRIC_CURVE",
         "properties": {
             "color": "#3090FF",
             "description": "Parametric Curve",
@@ -373,15 +387,18 @@ def test_parametric_curve():
             "zIndex": "0",
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
 def test_parametric_surface():
-    data_in = {"type": "PARAMETRIC_SURFACE", "id": "some-item"}
-    expected_out = {
+    migrator = ItemMigrator()
+    data_in = {
         "type": "PARAMETRIC_SURFACE",
-        "id": "some-item",
+    }
+    expected_out = {
+        "id": "some-id",
+        "type": "PARAMETRIC_SURFACE",
         "properties": {
             "color": "#3090FF",
             "colorExpr": "_f(X, Y, Z, u, v)=mod(Z, 1)",
@@ -422,15 +439,18 @@ def test_parametric_surface():
             "zIndex": "0",
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
 def test_point():
-    data_in = {"type": "POINT", "id": "some-item"}
-    expected_out = {
+    migrator = ItemMigrator()
+    data_in = {
         "type": "POINT",
-        "id": "some-item",
+    }
+    expected_out = {
+        "id": "some-id",
+        "type": "POINT",
         "properties": {
             "color": "#3090FF",
             "coords": "\\left[0,0,0\\right]",
@@ -444,48 +464,57 @@ def test_point():
             "zIndex": "0",
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
 def test_variable():
-    data_in = {"type": "VARIABLE", "id": "some-item"}
-    expected_out = {
+    migrator = ItemMigrator()
+    data_in = {
         "type": "VARIABLE",
-        "id": "some-item",
+    }
+    expected_out = {
+        "id": "some-id",
+        "type": "VARIABLE",
         "properties": {
             "description": "Variable or Function",
             "value": {"lhs": "f(x)", "rhs": "e^x", "type": "assignment"},
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
 def test_variable_slider():
-    data_in = {"type": "VARIABLE_SLIDER", "id": "some-item"}
-    expected_out = {
+    migrator = ItemMigrator()
+    data_in = {
         "type": "VARIABLE_SLIDER",
-        "id": "some-item",
+    }
+    expected_out = {
+        "id": "some-id",
+        "type": "VARIABLE_SLIDER",
         "properties": {
             "description": "Variable Slider",
             "duration": "4",
             "fps": "30",
             "isAnimating": "false",
             "range": {"items": ["-5", "5"], "type": "array"},
-            "speedMultiplier": 1,
+            "speedMultiplier": "1",
             "value": {"lhs": "T", "rhs": "None", "type": "assignment"},
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
 def test_vector():
-    data_in = {"type": "VECTOR", "id": "some-item"}
-    expected_out = {
+    migrator = ItemMigrator()
+    data_in = {
         "type": "VECTOR",
-        "id": "some-item",
+    }
+    expected_out = {
+        "id": "some-id",
+        "type": "VECTOR",
         "properties": {
             "color": "#3090FF",
             "components": "\\left[3,2,1\\right]",
@@ -503,7 +532,7 @@ def test_vector():
             "zIndex": "0",
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
 
 
@@ -515,22 +544,21 @@ def test_vector():
             {},
         ),
         (
-            {
-                "samples": "[10, 20, 30]"
-            },
+            {"samples": "[10, 20, 30]"},
             {
                 "samples1": "10",
                 "samples2": "20",
                 "samples3": "30",
-            }
-        )
-    ]
+            },
+        ),
+    ],
 )
 def test_vector_field(in_patch, out_patch):
-    data_in = {"type": "VECTOR_FIELD", "id": "some-item", **in_patch}
+    migrator = ItemMigrator()
+    data_in = {"type": "VECTOR_FIELD", **in_patch}
     expected_out = {
+        "id": "some-id",
         "type": "VECTOR_FIELD",
-        "id": "some-item",
         "properties": {
             "color": "#3090FF",
             "description": "Vector Field",
@@ -560,8 +588,8 @@ def test_vector_field(in_patch, out_patch):
             "width": "2",
             "zBias": "0",
             "zIndex": "0",
-            **out_patch
+            **out_patch,
         },
     }
-    actual_out = translate_item(data_in).to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
     assert expected_out == actual_out
