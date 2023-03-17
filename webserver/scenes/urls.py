@@ -1,7 +1,12 @@
-from django.urls import path
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 
-from scenes.views import SceneListView
+from scenes.views import ScenesView
+
+# Create a router and register our viewsets with it.
+router = DefaultRouter()
+router.register(r"scenes", ScenesView, basename="")
 
 urlpatterns = [
-    path("api", SceneListView.as_view()),
+    path("", include(router.urls)),
 ]
