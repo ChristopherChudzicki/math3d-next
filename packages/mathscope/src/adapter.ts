@@ -23,7 +23,7 @@ const convertNode = (
       dependencies,
     };
   }
-  if (mjsNode.type === "AssignmentNode") {
+  if (math.isAssignmentNode(mjsNode)) {
     return {
       type: MathNodeType.ValueAssignment,
       name: mjsNode.name,

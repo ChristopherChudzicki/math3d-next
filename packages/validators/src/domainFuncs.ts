@@ -1,8 +1,9 @@
 import type * as math from "mathjs";
+import { isArrayNode } from "mathjs";
 import { getDependencies } from "@math3d/mathjs-utils";
 
 const domainFuncs2 = (value: math.MathNode): [number, number] => {
-  if (value.type !== "ArrayNode") {
+  if (!isArrayNode(value)) {
     throw new Error("Expected an ArrayNode");
   }
   if (!value.items.every((n) => n.type === "FunctionAssignmentNode")) {

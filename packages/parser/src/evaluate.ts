@@ -48,8 +48,7 @@ const getValidatedEvaluate = (
     }
     if (typeof rawResult === "function") {
       const name =
-        mjsNode.type === "AssignmentNode" ||
-        mjsNode.type === "FunctionAssignmentNode"
+        math.isAssignmentNode(mjsNode) || math.isFunctionAssignmentNode(mjsNode)
           ? mjsNode.name
           : "";
       const f = (...args: unknown[]) => {
@@ -63,10 +62,9 @@ const getValidatedEvaluate = (
           throw new FunctionEvaluationError(name, e);
         }
       };
-      const numArgs =
-        mjsNode.type === "FunctionAssignmentNode"
-          ? mjsNode.params.length
-          : rawResult.length;
+      const numArgs = math.isFunctionAssignmentNode(mjsNode)
+        ? mjsNode.params.length
+        : rawResult.length;
       Object.defineProperty(f, "length", { value: numArgs });
       return f;
     }
