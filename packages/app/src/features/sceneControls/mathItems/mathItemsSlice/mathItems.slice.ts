@@ -14,8 +14,14 @@ import {
 } from "./syncMathScope";
 import type { MathItemsState, AppMathScope } from "./interfaces";
 
+const initialScope = new Map(
+  Object.entries({
+    sin: Math.sin,
+    cos: Math.cos,
+  })
+);
 const makeMathScope = (): AppMathScope =>
-  new MathScope<Parseable>({ parse: latexParser.parse });
+  new MathScope<Parseable>({ parse: latexParser.parse, initialScope });
 
 const getInitialState = (): MathItemsState => {
   const mathScope = makeMathScope();

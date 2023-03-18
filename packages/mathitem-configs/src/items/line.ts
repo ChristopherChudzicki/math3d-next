@@ -1,3 +1,4 @@
+import { validators } from "@math3d/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -58,7 +59,7 @@ const make: MathItemGenerator<MathItemType.Line, LineProperties> = (id) => ({
 });
 
 type EvaluatedProperties = {
-  coords: [number, number, number] | [number, number, number][];
+  coords: [number, number, number][];
   labelVisible: boolean;
   opacity: number;
   visible: boolean;
@@ -83,6 +84,7 @@ const config: IMathItemConfig<
       name: "coords",
       label: "Coordinates",
       widget: WidgetType.MathValue,
+      validate: validators.oneOrMany(validators.realVec[3]),
     },
     description,
     label,
