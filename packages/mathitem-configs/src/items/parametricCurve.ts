@@ -1,4 +1,5 @@
 import { ParseableArray, ParseableObjs } from "@math3d/parser";
+import { validators } from "@math3d/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -86,6 +87,7 @@ type EvaluatedProperties = {
   end: boolean;
   samples1: number;
   domain: EvaluatedDomain1;
+  expr: (x: number) => [number, number, number];
 };
 
 const config: IMathItemConfig<
@@ -102,6 +104,7 @@ const config: IMathItemConfig<
       name: "expr",
       label: "Expression",
       widget: WidgetType.MathValue,
+      validate: validators.realFunc[1][3],
     },
     opacity,
     visible,

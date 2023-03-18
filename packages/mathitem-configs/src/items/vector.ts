@@ -73,6 +73,7 @@ type EvaluatedProperties = {
   labelVisible: boolean;
   opacity: number;
   tail: [number, number, number];
+  components: [number, number, number];
 };
 
 const config: IMathItemConfig<
@@ -88,6 +89,7 @@ const config: IMathItemConfig<
       name: "components",
       label: "Components",
       widget: WidgetType.MathValue,
+      validate: validators.realVec[3],
     },
     description,
     label,

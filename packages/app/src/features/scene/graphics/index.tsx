@@ -4,6 +4,9 @@ import React from "react";
 import Point from "./Point";
 import Grid from "./Grid";
 import Axis from "./Axis";
+import Line from "./Line";
+import Vector from "./Vector";
+import ParametricCurve from "./ParametricCurve";
 import { GraphicComponent } from "./interfaces";
 
 const NotImplemented: React.FC<{ item: MathItem }> = () => null;
@@ -15,10 +18,10 @@ const graphics = {
   [MathItemType.ExplicitSurfacePolar]: NotImplemented,
   [MathItemType.Grid]: Grid,
   [MathItemType.ImplicitSurface]: NotImplemented,
-  [MathItemType.Line]: NotImplemented,
-  [MathItemType.ParametricCurve]: NotImplemented,
+  [MathItemType.Line]: Line,
+  [MathItemType.ParametricCurve]: ParametricCurve,
   [MathItemType.ParametricSurface]: NotImplemented,
-  [MathItemType.Vector]: NotImplemented,
+  [MathItemType.Vector]: Vector,
   [MathItemType.VectorField]: NotImplemented,
 };
 
