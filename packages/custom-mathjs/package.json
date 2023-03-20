@@ -1,0 +1,19 @@
+{
+  "name": "@math3d/custom-mathjs",
+  "exports": "./src/index.ts",
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "@math3d/eslint-config": "workspace:^",
+    "@math3d/tsconfig": "workspace:^",
+    "eslint": "^8.31.0",
+    "vitest": "0.29.1"
+  },
+  "dependencies": {
+    "mathjs": "11.7.0"
+  },
+  "scripts": {
+    "test": "vitest --run",
+    "test-watch": "vitest",
+    "lint": "eslint \"**/*.ts?(x)\""
+  }
+}

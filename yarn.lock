@@ -2279,6 +2279,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@math3d/custom-mathjs@workspace:packages/custom-mathjs":
+  version: 0.0.0-use.local
+  resolution: "@math3d/custom-mathjs@workspace:packages/custom-mathjs"
+  dependencies:
+    "@math3d/eslint-config": "workspace:^"
+    "@math3d/tsconfig": "workspace:^"
+    eslint: ^8.31.0
+    mathjs: 11.7.0
+    vitest: 0.29.1
+  languageName: unknown
+  linkType: soft
+
 "@math3d/eslint-config@workspace:*, @math3d/eslint-config@workspace:^, @math3d/eslint-config@workspace:packages/eslint-config":
   version: 0.0.0-use.local
   resolution: "@math3d/eslint-config@workspace:packages/eslint-config"
