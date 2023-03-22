@@ -36,7 +36,7 @@ import {
   sqrtDependencies,
   cubeDependencies,
   cbrtDependencies,
-  // misc
+  // misc functions
   absDependencies,
   signDependencies,
   floorDependencies,
@@ -59,11 +59,23 @@ import {
   InfinityDependencies,
   tauDependencies,
   // parsing
-  evalDependencies,
+  evaluateDependencies,
+  simplifyDependencies,
   // objects
   matrixDependencies,
   complexDependencies,
+  // vector functions
+  crossDependencies,
+  normDependencies,
+  dotDependencies,
 } from "mathjs";
+
+import {
+  createTotalDerivative,
+  createUnitB,
+  createUnitN,
+  createUnitT,
+} from "./derivatives";
 
 const normalTrig = {
   sinDependencies,
@@ -137,6 +149,12 @@ const constants = {
   tauDependencies,
 };
 
+const vectorFunctions = {
+  crossDependencies,
+  normDependencies,
+  dotDependencies,
+};
+
 const mathjs = create({
   normalTrig,
   hyperbolicTrig,
@@ -145,9 +163,19 @@ const mathjs = create({
   miscFuncs,
   operators,
   constants,
-  evalDependencies,
+  evaluateDependencies,
   matrixDependencies,
   complexDependencies,
+  vectorFunctions,
+  simplifyDependencies,
+});
+
+mathjs.import({
+  ln: mathjs.log,
+  diff: createTotalDerivative,
+  unitT: createUnitB,
+  unitN: createUnitN,
+  unitB: createUnitT,
 });
 
 export default mathjs;

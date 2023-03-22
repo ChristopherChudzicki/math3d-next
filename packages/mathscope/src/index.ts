@@ -1,4 +1,4 @@
-import * as adapter from "./adapter";
+import { SimplerMathJsParser } from "./adapter";
 import {
   AssignmentError,
   DuplicateAssignmentError,
@@ -24,7 +24,7 @@ export type {
 };
 
 export {
-  adapter,
+  SimplerMathJsParser,
   MathNodeType,
   EvaluationError,
   AssignmentError,

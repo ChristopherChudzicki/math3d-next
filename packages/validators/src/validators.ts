@@ -84,6 +84,9 @@ const numericFunc = <M extends Dim, N extends Dim>(fromDim: M, toDim: N) => {
           .map(() => Math.random());
         // @ts-expect-error TS can't tell that sample has correct number of params
         const out = f?.(...sample);
+        if (toDim === 1) {
+          return real.isValidSync(out);
+        }
         return realVectors[toDim].isValidSync(out);
       },
     });

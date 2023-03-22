@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { parse } from "../adapter";
+import * as math from "mathjs";
+import { SimplerMathJsParser } from "../adapter";
 import { getAssignmentCycles } from "./util";
+
+const { parse } = new SimplerMathJsParser(math);
 
 describe("getAssignmentCycles", () => {
   it("detects cycles", () => {

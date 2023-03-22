@@ -1,12 +1,14 @@
 import { describe, it, expect } from "vitest";
 import * as math from "mathjs";
-import { parse } from "./adapter";
+import { SimplerMathJsParser } from "./adapter";
 import Evaluator, {
   CyclicAssignmentError,
   DuplicateAssignmentError,
 } from "./Evaluator";
 import { MathNode } from "./interfaces";
 import { assertIsAssignmentNode } from "./util";
+
+const { parse } = new SimplerMathJsParser(math);
 
 const node = (id: string, parseable: string): MathNode => {
   return { ...parse(parseable), id };

@@ -10,7 +10,7 @@ import { useMathErrors } from "../../mathScope";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
 
-const errorNames = ["coords"] as const;
+const errorNames = ["components"] as const;
 
 const config = configs[MIT.Vector];
 
@@ -25,8 +25,8 @@ const Vector: MathItemForm<MIT.Vector> = ({ item }) => {
       <FieldWidget
         widget={WidgetType.MathValue}
         label={configProps.components.label}
-        name="coords"
-        error={errors.coords}
+        name="components"
+        error={errors.components}
         value={item.properties.components}
         onChange={onWidgetChange}
       />

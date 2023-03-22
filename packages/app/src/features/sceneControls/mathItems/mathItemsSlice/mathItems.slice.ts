@@ -2,20 +2,16 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { mathItemConfigs, MathItemType } from "@math3d/mathitem-configs";
 import type { MathItem, MathItemPatch } from "@math3d/mathitem-configs";
 import { keyBy } from "lodash";
-import { assertNotNil } from "@/util/predicates";
-import MathScope from "@math3d/mathscope";
 import jsonPatch from "fast-json-patch";
 
-import { latexParser, Parseable } from "@math3d/parser";
 import invariant from "tiny-invariant";
+import { assertNotNil } from "@/util/predicates";
 import {
   syncItemsToMathScope,
   removeItemsFromMathScope,
 } from "./syncMathScope";
-import type { MathItemsState, AppMathScope } from "./interfaces";
-
-const makeMathScope = (): AppMathScope =>
-  new MathScope<Parseable>({ parse: latexParser.parse });
+import type { MathItemsState } from "./interfaces";
+import { makeMathScope } from "./mathScopeInstance";
 
 const getInitialState = (): MathItemsState => {
   const mathScope = makeMathScope();

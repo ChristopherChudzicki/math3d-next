@@ -55,9 +55,12 @@ const makeAssignmentError = (node: AssignmentNode, cycle: AssignmentNode[]) => {
 
 const getUnmetDependencies = (
   node: MathNode,
-  scope: EvaluationScope
+  scope: EvaluationScope,
+  builtins: Set<string>
 ): string[] => {
-  const unmet = [...node.dependencies].filter((dep) => !scope.has(dep));
+  const unmet = [...node.dependencies].filter(
+    (dep) => !scope.has(dep) && !builtins.has(dep)
+  );
   return unmet;
 };
 
@@ -84,6 +87,8 @@ const getUnmetDependencies = (
  * diff of the changes.
  */
 export default class Evaluator {
+  private readonly builtins: Set<string>;
+
   results: EvaluationResult = new Map();
 
   scope: EvaluationScope;
@@ -96,8 +101,9 @@ export default class Evaluator {
 
   private graphManager = new ExpressionGraphManager<MathNode>();
 
-  constructor(initialScope: EvaluationScope = new Map()) {
-    this.scope = new Map(initialScope);
+  constructor(builtins: Set<string> = new Set()) {
+    this.scope = new Map();
+    this.builtins = builtins;
   }
 
   private updateAssignmentErrors(
@@ -214,7 +220,7 @@ export default class Evaluator {
       const exprId = node.id;
       try {
         if (node.type === MathNodeType.FunctionAssignmentNode) {
-          const unmet = getUnmetDependencies(node, this.scope);
+          const unmet = getUnmetDependencies(node, this.scope, this.builtins);
           if (unmet.length > 0) {
             throw new UnmetDependencyError(unmet);
           }
