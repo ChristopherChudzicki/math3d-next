@@ -2279,6 +2279,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@math3d/custom-mathjs@workspace:^, @math3d/custom-mathjs@workspace:packages/custom-mathjs":
+  version: 0.0.0-use.local
+  resolution: "@math3d/custom-mathjs@workspace:packages/custom-mathjs"
+  dependencies:
+    "@math3d/eslint-config": "workspace:^"
+    "@math3d/test-utils": "workspace:^"
+    "@math3d/tsconfig": "workspace:^"
+    eslint: ^8.31.0
+    mathjs: 11.7.0
+    vitest: 0.29.1
+  languageName: unknown
+  linkType: soft
+
 "@math3d/eslint-config@workspace:*, @math3d/eslint-config@workspace:^, @math3d/eslint-config@workspace:packages/eslint-config":
   version: 0.0.0-use.local
   resolution: "@math3d/eslint-config@workspace:packages/eslint-config"
@@ -2349,6 +2362,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math3d/parser@workspace:packages/parser"
   dependencies:
+    "@math3d/custom-mathjs": "workspace:^"
     "@math3d/eslint-config": "workspace:^"
     "@math3d/mathscope": "workspace:^"
     "@math3d/tsconfig": "workspace:^"
@@ -2375,6 +2389,18 @@ __metadata:
   checksum: 36f505e7b26dbce3e6647030c0d5283c5e34d961c073b29b4bba749d945cbba017e36b0ef8870bf16d48b8b292dfa45f2b5b14eb8d497bf979bc46e047e27c80
   languageName: node
   linkType: hard
+
+"@math3d/test-utils@workspace:^, @math3d/test-utils@workspace:packages/test-utils":
+  version: 0.0.0-use.local
+  resolution: "@math3d/test-utils@workspace:packages/test-utils"
+  dependencies:
+    "@math3d/eslint-config": "workspace:^"
+    "@math3d/tsconfig": "workspace:^"
+    eslint: ^8.31.0
+    jest-get-type: ^29.4.3
+    vitest: 0.29.1
+  languageName: unknown
+  linkType: soft
 
 "@math3d/tsconfig@workspace:^, @math3d/tsconfig@workspace:packages/tsconfig":
   version: 0.0.0-use.local
@@ -6062,6 +6088,7 @@ __metadata:
     "@emotion/react": 11.10.4
     "@emotion/styled": 11.10.4
     "@faker-js/faker": 7.6.0
+    "@math3d/custom-mathjs": "workspace:^"
     "@math3d/eslint-config": "workspace:^"
     "@math3d/mathitem-configs": "workspace:^"
     "@math3d/mathjs-utils": "workspace:*"
@@ -6108,7 +6135,6 @@ __metadata:
     lodash: 4.17.21
     mathbox: ^2.3.1
     mathbox-react: ^0.2.2
-    mathjs: 11.7.0
     mathlive: 0.87.1
     msw: 0.49.0
     ordinal: 1.0.3
@@ -12088,6 +12114,13 @@ __metadata:
   version: 29.2.0
   resolution: "jest-get-type@npm:29.2.0"
   checksum: e396fd880a30d08940ed8a8e43cd4595db1b8ff09649018eb358ca701811137556bae82626af73459e3c0f8c5e972ed1e57fd3b1537b13a260893dac60a90942
+  languageName: node
+  linkType: hard
+
+"jest-get-type@npm:^29.4.3":
+  version: 29.4.3
+  resolution: "jest-get-type@npm:29.4.3"
+  checksum: 6ac7f2dde1c65e292e4355b6c63b3a4897d7e92cb4c8afcf6d397f2682f8080e094c8b0b68205a74d269882ec06bf696a9de6cd3e1b7333531e5ed7b112605ce
   languageName: node
   linkType: hard
 

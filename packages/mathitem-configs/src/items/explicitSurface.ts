@@ -1,4 +1,5 @@
 import { ParseableArray, ParseableObjs } from "@math3d/parser";
+import { validators } from "@math3d/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -104,6 +105,7 @@ type EvaluatedProperties = {
   visible: boolean;
   zBias: number;
   zIndex: number;
+  expr: (x: number, y: number) => number;
 };
 
 const config: IMathItemConfig<
@@ -118,6 +120,7 @@ const config: IMathItemConfig<
       name: "expr",
       label: "Expression",
       widget: WidgetType.MathValue,
+      validate: validators.realFunc[2][1],
     },
     colorExpr: {
       name: "colorExpr",

@@ -15,7 +15,7 @@ module.exports = {
     "@typescript-eslint/naming-convention": [
       "warn",
       {
-        selector: "default",
+        selector: "parameter",
         modifiers: ["unused"],
         format: ["camelCase"],
         leadingUnderscore: "allow", // do not require... it's annoying when required for object destructuring.

@@ -6,6 +6,7 @@
     "@math3d/eslint-config": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
     "eslint": "^8.31.0",
+    "mathjs": "11.7.0",
     "vitest": "0.29.1"
   },
   "scripts": {
@@ -17,7 +18,6 @@
     "@math3d/mathjs-utils": "workspace:^",
     "@math3d/utils": "workspace:^",
     "just-group-by": "^2.2.0",
-    "mathjs": "11.7.0",
     "tarjan-graph": "^3.0.0",
     "toposort": "^2.0.2"
   }

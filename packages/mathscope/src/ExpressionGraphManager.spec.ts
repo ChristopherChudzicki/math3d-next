@@ -1,9 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { permutations } from "@math3d/utils";
+import * as math from "mathjs";
 
-import { parse } from "./adapter";
+import { SimplerMathJsParser } from "./adapter";
 import ExpressionGraphManager from "./ExpressionGraphManager";
 import { DirectedGraph } from "./util";
+
+const { parse } = new SimplerMathJsParser(math);
 
 const edge = <T>(from: T, to: T) => ({ from, to });
 

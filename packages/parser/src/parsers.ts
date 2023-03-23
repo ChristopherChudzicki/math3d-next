@@ -1,4 +1,4 @@
-import * as math from "mathjs";
+import math from "@math3d/custom-mathjs";
 
 import {
   MathJsRule,

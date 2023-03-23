@@ -1,4 +1,4 @@
-import * as math from "mathjs";
+import type { MathJsStatic } from "mathjs";
 import { getDependencies } from "@math3d/mathjs-utils";
 
 import type { AnonMathNode, Parse } from "./interfaces";
@@ -9,41 +9,48 @@ export type ParseableObj = {
 };
 export type Parseable = ParseableObj | string;
 
-const convertNode = (
-  mjsNode: math.MathNode,
-  evaluate: Evaluate
-): AnonMathNode => {
-  const dependencies = getDependencies(mjsNode);
-  if (math.isFunctionAssignmentNode(mjsNode)) {
+class SimplerMathJsParser {
+  private math: MathJsStatic;
+
+  constructor(mathJs: MathJsStatic) {
+    this.math = mathJs;
+  }
+
+  convertNode = (mjsNode: math.MathNode, evaluate: Evaluate): AnonMathNode => {
+    const { math } = this;
+    const dependencies = getDependencies(mjsNode);
+    if (math.isFunctionAssignmentNode(mjsNode)) {
+      return {
+        type: MathNodeType.FunctionAssignmentNode,
+        name: mjsNode.name,
+        params: mjsNode.params,
+        evaluate,
+        dependencies,
+      };
+    }
+    if (math.isAssignmentNode(mjsNode)) {
+      return {
+        type: MathNodeType.ValueAssignment,
+        name: mjsNode.name,
+        evaluate,
+        dependencies,
+      };
+    }
     return {
-      type: MathNodeType.FunctionAssignmentNode,
-      name: mjsNode.name,
-      params: mjsNode.params,
+      type: MathNodeType.Value,
       evaluate,
       dependencies,
     };
-  }
-  if (math.isAssignmentNode(mjsNode)) {
-    return {
-      type: MathNodeType.ValueAssignment,
-      name: mjsNode.name,
-      evaluate,
-      dependencies,
-    };
-  }
-  return {
-    type: MathNodeType.Value,
-    evaluate,
-    dependencies,
   };
-};
 
-const parse: Parse<Parseable> = (parseable) => {
-  const parseableObj =
-    typeof parseable === "string" ? { expr: parseable } : parseable;
-  const mjsNode = math.parse(parseableObj.expr);
-  const { evaluate } = mjsNode.compile();
-  return convertNode(mjsNode, evaluate);
-};
+  parse: Parse<Parseable> = (parseable) => {
+    const { math } = this;
+    const parseableObj =
+      typeof parseable === "string" ? { expr: parseable } : parseable;
+    const mjsNode = math.parse(parseableObj.expr);
+    const { evaluate } = mjsNode.compile();
+    return this.convertNode(mjsNode, evaluate);
+  };
+}
 
-export { convertNode, parse };
+export { SimplerMathJsParser };

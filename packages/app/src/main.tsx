@@ -7,10 +7,13 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient } from "@tanstack/react-query";
+import math from "@math3d/custom-mathjs";
 import { theme } from "./mui";
 
 import AppRoutes from "./app";
 import { getStore } from "./store/store";
+
+window.math = math;
 
 const prepare = async () => {
   if (import.meta.env.VITE_USE_MSW) {

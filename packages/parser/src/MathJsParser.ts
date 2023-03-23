@@ -1,7 +1,8 @@
-import * as mjs from "mathjs";
+import type * as mjs from "mathjs";
+import math from "@math3d/custom-mathjs";
 
 import {
-  adapter as msAdapter,
+  SimplerMathJsParser,
   AnonMathNode,
   AssignmentError,
   MathNodeType,
@@ -20,6 +21,8 @@ import {
   TextParserRegexRule,
   TextParserRule,
 } from "./interfaces";
+
+const mjsAdapter = new SimplerMathJsParser(math);
 
 const isBeforeMathjsRule = (
   rule: ParserRule
@@ -80,7 +83,7 @@ class MathJsParser implements IMathJsParser {
     const mjsRules = this.rules.filter(isMathJsRule);
     return mjsRules.reduce(
       (mjsNode, rule) => rule.transform(mjsNode),
-      mjs.parse(preprocessed)
+      math.parse(preprocessed)
     );
   };
 
@@ -141,7 +144,7 @@ class MathJsParser implements IMathJsParser {
     const parsed = aggregate(items, (item) => this.$parse(item));
     const nodes = parsed.map((p) => p[0]);
     const mjsNodes = parsed.map((p) => p[1]);
-    const mjsNode = new mjs.ArrayNode(mjsNodes);
+    const mjsNode = new math.ArrayNode(mjsNodes);
     return [
       MathJsParser.aggregateNodes(nodes, mjsNode, validate),
       mjsNode,
@@ -167,7 +170,7 @@ class MathJsParser implements IMathJsParser {
     const preprocessed = this.preprocess(parseableObj.expr);
     const mjsNode = this.mjsParse(preprocessed);
     const evaluate = getValidatedEvaluate(mjsNode, parseableObj.validate);
-    const node = msAdapter.convertNode(mjsNode, evaluate);
+    const node = mjsAdapter.convertNode(mjsNode, evaluate);
     return [node, mjsNode];
   };
 

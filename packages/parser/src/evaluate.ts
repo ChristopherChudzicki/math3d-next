@@ -1,4 +1,5 @@
-import * as math from "mathjs";
+import math from "@math3d/custom-mathjs";
+import type * as mjs from "mathjs";
 import type { EvaluationScope, AnonMathNode } from "@math3d/mathscope";
 import { EvaluationError } from "@math3d/mathscope";
 import invariant from "tiny-invariant";
@@ -37,7 +38,7 @@ class FunctionEvaluationError extends EvaluationError {
 const identity = <T>(x: T): T => x;
 
 const getValidatedEvaluate = (
-  mjsNode: math.MathNode,
+  mjsNode: mjs.MathNode,
   validate: Validate = identity
 ): AnonMathNode["evaluate"] => {
   const compiled = mjsNode.compile();

@@ -1,11 +1,14 @@
 import { describe, it, expect, test, vi } from "vitest";
+import * as math from "mathjs";
 import { Diff } from "./interfaces";
 import MathScope, {
   ScopeChangeErrorsEvent,
   ScopeChangeEvent,
 } from "./MathScope";
-import { parse } from "./adapter";
+import { SimplerMathJsParser } from "./adapter";
 import type { Parseable } from "./adapter";
+
+const { parse } = new SimplerMathJsParser(math);
 
 const getMathScope = () => new MathScope({ parse });
 

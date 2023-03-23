@@ -1,7 +1,9 @@
 import { describe, it, expect } from "vitest";
 import * as math from "mathjs";
 
-import { parse } from "./adapter";
+import { SimplerMathJsParser } from "./adapter";
+
+const { parse } = new SimplerMathJsParser(math);
 
 describe("parse dependencies", () => {
   it("returns a set of symbol dependencies", () => {

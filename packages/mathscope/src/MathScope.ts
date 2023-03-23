@@ -43,8 +43,6 @@ export interface ScopeChangeErrorsEvent<P> {
  * containing errors. Fires `change` events when the scope changes.
  */
 export default class MathScope<P> {
-  initialScope: EvaluationScope;
-
   private events = new EventEmitter();
 
   private evaluator: Evaluator;
@@ -59,14 +57,13 @@ export default class MathScope<P> {
 
   constructor({
     parse,
-    initialScope = new Map(),
+    builtins = new Set(),
   }: {
     parse: Parse<P>;
-    initialScope?: EvaluationScope;
+    builtins?: Set<string>;
   }) {
     this.parse = parse;
-    this.initialScope = initialScope;
-    this.evaluator = new Evaluator(initialScope);
+    this.evaluator = new Evaluator(builtins);
 
     this.results = this.evaluator.results;
 
