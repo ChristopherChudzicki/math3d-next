@@ -46,10 +46,6 @@ const MathFieldForwardRef = (
     if (!mf) return;
     if (!makeOptions) return;
     const options = makeOptions(mf.getOptions());
-    options.inlineShortcuts = {
-      ...options.inlineShortcuts,
-      diff: "\\operatorname{diff}",
-    };
     mf.setOptions(options);
   }, [makeOptions, mf]);
 
