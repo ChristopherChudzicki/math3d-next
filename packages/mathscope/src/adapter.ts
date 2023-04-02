@@ -26,6 +26,7 @@ class SimplerMathJsParser {
         params: mjsNode.params,
         evaluate,
         dependencies,
+        toString: () => mjsNode.toString(),
       };
     }
     if (math.isAssignmentNode(mjsNode)) {
@@ -34,12 +35,14 @@ class SimplerMathJsParser {
         name: mjsNode.name,
         evaluate,
         dependencies,
+        toString: () => mjsNode.toString(),
       };
     }
     return {
       type: MathNodeType.Value,
       evaluate,
       dependencies,
+      toString: () => mjsNode.toString(),
     };
   };
 

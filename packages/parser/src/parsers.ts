@@ -8,6 +8,7 @@ import {
 } from "./interfaces";
 import MathJsParser from "./MathJsParser";
 import {
+  pdiffRule,
   fractionRule,
   operatornameRule,
   validateParameters,
@@ -86,7 +87,8 @@ const parserRules: ParserRule[] = [
   spaceRule,
   validateParameters,
   // MathJS rules
-  simplifyRule,
+  pdiffRule,
+  // simplifyRule,
 ];
 
 const getLatexParser = () => new MathJsParser(parserRules);

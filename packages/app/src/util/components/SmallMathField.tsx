@@ -24,9 +24,16 @@ const styleOverrides = /* css */ `
 }
 `;
 
-const makeOptionsDefault: MathfieldProps["makeOptions"] = () => ({
+const makeOptionsDefault: MathfieldProps["makeOptions"] = (opts) => ({
   keypressSound: null,
   plonkSound: null,
+  inlineShortcuts: {
+    ...opts.inlineShortcuts,
+    pdiff: "\\frac{\\partial #?}{\\partial #?}",
+    diff: "\\frac{\\differentialD #?}{\\differentialD #?}",
+    fft: undefined,
+    in: undefined,
+  },
 });
 
 const SmallMathField = React.forwardRef<MathfieldElement, MathfieldProps>(
