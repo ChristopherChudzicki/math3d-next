@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { MathfieldOptions } from "mathlive";
+import type { MathfieldOptions } from "mathlive";
 import React, { useCallback, useState } from "react";
 import {
   MathField,
@@ -24,9 +24,16 @@ const styleOverrides = /* css */ `
 }
 `;
 
-const makeOptionsDefault: MathfieldProps["makeOptions"] = () => ({
+const makeOptionsDefault: MathfieldProps["makeOptions"] = (opts) => ({
   keypressSound: null,
   plonkSound: null,
+  inlineShortcuts: {
+    ...opts.inlineShortcuts,
+    pdiff: "\\frac{\\partial #?}{\\partial #?}",
+    diff: "\\frac{\\differentialD #?}{\\differentialD #?}",
+    fft: undefined,
+    in: undefined,
+  },
 });
 
 const SmallMathField = React.forwardRef<MathfieldElement, MathfieldProps>(

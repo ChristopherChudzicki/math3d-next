@@ -8,6 +8,7 @@ import {
 } from "./interfaces";
 import MathJsParser from "./MathJsParser";
 import {
+  pdiffRule,
   fractionRule,
   operatornameRule,
   validateParameters,
@@ -59,6 +60,7 @@ const backslashRule: TextParserRegexRule = {
   replacement: " ",
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const simplifyRule: MathJsRule = {
   type: ParserRuleType.MathJs,
   transform: (node) => {
@@ -86,7 +88,8 @@ const parserRules: ParserRule[] = [
   spaceRule,
   validateParameters,
   // MathJS rules
-  simplifyRule,
+  pdiffRule,
+  // simplifyRule,
 ];
 
 const getLatexParser = () => new MathJsParser(parserRules);

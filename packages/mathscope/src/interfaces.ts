@@ -18,6 +18,7 @@ interface MathNodeBase<T extends MathNodeType = MathNodeType> {
   type: T;
   evaluate: Evaluate;
   dependencies: Set<string>;
+  toString: () => string;
 }
 
 interface AssignmentNode<T extends AssignmentType = AssignmentType>

@@ -1,6 +1,6 @@
 import "./mathlive";
 
-import { MathfieldElement, MathfieldOptions } from "mathlive";
+import type { MathfieldElement, MathfieldOptions } from "mathlive";
 import React, {
   forwardRef,
   useEffect,

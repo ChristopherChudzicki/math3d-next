@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable global-require */
-import { MathfieldOptions } from "mathlive";
+import type { MathfieldOptions } from "mathlive";
 import React, { forwardRef } from "react";
 
 import { MathfieldProps } from "..";
