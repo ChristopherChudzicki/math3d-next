@@ -6135,7 +6135,7 @@ __metadata:
     lodash: 4.17.21
     mathbox: ^2.3.1
     mathbox-react: ^0.2.2
-    mathlive: 0.89.4
+    mathlive: 0.87.1
     msw: 0.49.0
     ordinal: 1.0.3
     ramda: 0.28.0
@@ -12991,10 +12991,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathlive@npm:0.89.4":
-  version: 0.89.4
-  resolution: "mathlive@npm:0.89.4"
-  checksum: c251dffb2f1c8d700ba5b4d100b68f813629473943fd77c3e1147941ffdcff1cdc8787a528f48db08908fbbcada2db4c5cee65209716280e561ea0fd626bbf78
+"mathlive@npm:0.87.1":
+  version: 0.87.1
+  resolution: "mathlive@npm:0.87.1"
+  checksum: 2ecbed992e1973a82d1c277bad1f5a624ef1b21a95b1ae1154d2ac0c78a153e93a6ca20484a0cbd9ebd7f599f7af540cbd9a4bb236213217d71c6e96cc1c7991
   languageName: node
   linkType: hard
 
