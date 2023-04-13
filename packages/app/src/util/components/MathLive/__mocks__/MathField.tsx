@@ -9,20 +9,13 @@ const MockMathFieldForwardRef = (
   props: MathfieldProps,
   ref: React.Ref<HTMLTextAreaElement>
 ) => {
-  const { children, onChange, className, makeOptions, ...others } = props;
-
-  const readOnly =
-    makeOptions &&
-    makeOptions({
-      inlineShortcuts: {},
-    } as MathfieldOptions).readOnly;
+  const { children, onChange, className, ...others } = props;
 
   return (
     <textarea
       {...others}
       className={className}
       value={children}
-      readOnly={readOnly}
       aria-label={props["aria-label"]}
       // @ts-expect-error for e.target should be MathfieldElement but is Textarea
       onChange={onChange}

@@ -10,12 +10,7 @@ import React, {
 
 import type { MathFieldWebComponentProps } from "./types";
 
-export type MakeMathfieldOptions = (
-  options: MathfieldOptions
-) => Partial<MathfieldOptions>;
-
 interface MathfieldProps extends MathFieldWebComponentProps {
-  makeOptions?: MakeMathfieldOptions;
   children?: string;
 }
 
@@ -31,23 +26,9 @@ const MathFieldForwardRef = (
   props: MathfieldProps,
   ref: React.Ref<MathfieldElement | null>
 ) => {
-  const {
-    onKeyDown,
-    onChange,
-    makeOptions,
-    className,
-    children,
-    defaultValue,
-    ...others
-  } = props;
+  const { onKeyDown, onChange, className, children, defaultValue, ...others } =
+    props;
   const [mf, setMf] = useState<MathfieldElement | null>(null);
-
-  useEffect(() => {
-    if (!mf) return;
-    if (!makeOptions) return;
-    const options = makeOptions(mf.getOptions());
-    mf.setOptions(options);
-  }, [makeOptions, mf]);
 
   useEffect(() => {
     if (!mf) return;

@@ -72,3 +72,8 @@ textarea.field-widget-input {
 .error-tooltip {
   width: 250px;
 }
+
+.readonly-mathfield {
+  border: none;
+  outline: none;
+}

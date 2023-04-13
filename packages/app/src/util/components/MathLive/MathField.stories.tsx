@@ -18,7 +18,7 @@ export const Simple: ComponentStory<typeof MathField> = (args) => (
       borderRadius: "8px",
       width: "min-content",
     }}
-    makeOptions={() => ({ readOnly: true })}
+    readOnly
   >
     {String.raw`1 + \frac{1}{4} + \frac{1}{9} + \frac{1}{16} + \cdots = \frac{\pi^2}{6}`}
   </MathField>
@@ -48,11 +48,7 @@ export const Static: ComponentStory<typeof MathField> = (args) => (
       overflowX: "visible",
     }}
   >
-    <MathField
-      {...args}
-      style={{ width: "min-content" }}
-      makeOptions={() => ({ readOnly: true })}
-    >
+    <MathField {...args} style={{ width: "min-content" }} readOnly>
       E=mc^2
     </MathField>
   </div>
