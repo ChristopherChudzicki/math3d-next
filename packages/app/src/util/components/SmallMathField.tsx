@@ -24,17 +24,24 @@ const styleOverrides = /* css */ `
 }
 `;
 
-const makeOptionsDefault: MathfieldProps["makeOptions"] = (opts) => ({
-  keypressSound: null,
-  plonkSound: null,
-  inlineShortcuts: {
-    ...opts.inlineShortcuts,
-    pdiff: "\\frac{\\partial #?}{\\partial #?}",
-    diff: "\\frac{\\differentialD #?}{\\differentialD #?}",
-    fft: undefined,
-    in: undefined,
-  },
-});
+const makeOptionsDefault: NonNullable<MathfieldProps["makeOptions"]> = (
+  opts
+) => {
+  const omit = ["fft", "in"];
+  return {
+    keypressSound: null,
+    plonkSound: null,
+    inlineShortcuts: {
+      ...Object.fromEntries(
+        Object.entries(opts.inlineShortcuts).filter(
+          ([key]) => !omit.includes(key)
+        )
+      ),
+      pdiff: "\\frac{\\partial #?}{\\partial #?}",
+      diff: "\\frac{\\differentialD #?}{\\differentialD #?}",
+    },
+  };
+};
 
 const SmallMathField = React.forwardRef<MathfieldElement, MathfieldProps>(
   (props, forwardedRef) => {

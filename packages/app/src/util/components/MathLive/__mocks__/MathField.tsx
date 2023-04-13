@@ -11,7 +11,11 @@ const MockMathFieldForwardRef = (
 ) => {
   const { children, onChange, className, makeOptions, ...others } = props;
 
-  const readOnly = makeOptions && makeOptions({} as MathfieldOptions).readOnly;
+  const readOnly =
+    makeOptions &&
+    makeOptions({
+      inlineShortcuts: {},
+    } as MathfieldOptions).readOnly;
 
   return (
     <textarea
