@@ -417,3 +417,60 @@ describe("returned node's MathNode.evaluate", () => {
     );
   });
 });
+
+describe("parsing derivatives", () => {
+  const { parse } = parser;
+  test.each([
+    "\\frac{\\differentialD x^3}{\\differentialD x}",
+    "\\frac{\\partial x^3}{\\partial x}",
+  ])("simple derivative", (expr) => {
+    const node = parse(expr);
+    expect(node.toString()).toBe("diff(_f(x$0) = x$0 ^ 3, x)");
+  });
+
+  test("top with parens", () => {
+    const node = parse("\\frac{\\differentialD(x^3)}{\\differentialD x}");
+    expect(node.toString()).toBe("diff(_f(x$0) = x$0 ^ 3, x)");
+  });
+
+  test.each([
+    {
+      varname: "x",
+      expected: "diff(_f(x$0) = f(x$0 + y, 3 x$0 + z), x)",
+      expectedDeps: new Set(["diff", "f", "x", "y", "z"]),
+    },
+    {
+      varname: "y",
+      expected: "diff(_f(y$0) = f(x + y$0, 3 x + z), y)",
+      expectedDeps: new Set(["diff", "f", "x", "y", "z"]),
+    },
+    {
+      varname: "z",
+      expected: "diff(_f(z$0) = f(x + y, 3 x + z$0), z)",
+      expectedDeps: new Set(["diff", "f", "x", "y", "z"]),
+    },
+  ])("partial derivatives", ({ varname, expected, expectedDeps }) => {
+    const node = parse(
+      `\\frac{\\differentialD f(x + y, 3x + z)}{\\differentialD ${varname}}`
+    );
+    expect(node.toString()).toBe(expected);
+    expect(node.dependencies).toEqual(expectedDeps);
+  });
+
+  test("nested derivatives", () => {
+    const nested = "\\frac{\\differentialD x^3}{\\differentialD x} + 2x^2";
+    const node = parse(
+      `\\frac{\\differentialD (${nested})}{\\differentialD x}`
+    );
+    expect(node.toString()).toBe(
+      "diff(_f(x$0) = diff(_f(x$1) = x$1 ^ 3, x$0) + 2 x$0 ^ 2, x)"
+    );
+    expect(node.dependencies).toEqual(new Set(["diff", "x"]));
+  });
+
+  test("Expressions with bad differentialD throw error", () => {
+    expect(() => {
+      parse("differentialD + x");
+    }).toThrow("Could not parse derivative");
+  });
+});

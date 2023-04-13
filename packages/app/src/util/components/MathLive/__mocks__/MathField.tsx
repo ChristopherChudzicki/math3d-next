@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable global-require */
-import { MathfieldOptions } from "mathlive";
+import type { MathfieldOptions } from "mathlive";
 import React, { forwardRef } from "react";
 
 import { MathfieldProps } from "..";
@@ -11,7 +11,11 @@ const MockMathFieldForwardRef = (
 ) => {
   const { children, onChange, className, makeOptions, ...others } = props;
 
-  const readOnly = makeOptions && makeOptions({} as MathfieldOptions).readOnly;
+  const readOnly =
+    makeOptions &&
+    makeOptions({
+      inlineShortcuts: {},
+    } as MathfieldOptions).readOnly;
 
   return (
     <textarea

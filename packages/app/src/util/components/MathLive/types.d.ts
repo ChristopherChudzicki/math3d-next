@@ -1,4 +1,4 @@
-import { MathfieldElement } from "mathlive";
+import type { MathfieldElement } from "mathlive";
 
 export interface MathfieldHTMLAttributes
   extends React.HTMLAttributes<MathfieldElement> {

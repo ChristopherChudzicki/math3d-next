@@ -30,3 +30,10 @@ test("getDependencies returns symbols used in right-hand side of FunctionAssignm
   // NOT "a"
   expect(dependencies).toEqual(new Set(["b", "c"]));
 });
+
+test("getDependencies returns only symbols used in right-hand side of nested FunctionAssignmentNode", () => {
+  const node = parse("diff(_f(x$0) = f(x$0, y), x)");
+  const dependencies = getDependencies(node);
+  // NOT "a"
+  expect(dependencies).toEqual(new Set(["diff", "f", "x", "y"]));
+});
