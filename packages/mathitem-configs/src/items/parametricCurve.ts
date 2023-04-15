@@ -53,14 +53,14 @@ const defaultValues: ParametricCurveProperties = {
     type: "function-assignment",
     name: "_f",
     params: ["t"],
-    rhs: "[cos(t), sin(t), t]",
+    rhs: "\\left[\\cos(t), \\sin(t), t\\right]",
   },
   domain: {
     type: "array",
     items: [
       {
         type: "expr",
-        expr: "[-2*pi, 2*pi]",
+        expr: "\\left[-2\\pi, 2\\pi\\right]",
       },
     ],
   },

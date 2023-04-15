@@ -47,9 +47,8 @@ const MathValue = React.forwardRef<MathfieldElement, IWidgetProps>(
         )}
         aria-invalid={error ? "true" : "false"}
         onChange={handleChange}
-      >
-        {value}
-      </SmallMathField>
+        value={value}
+      />
     );
   }
 );

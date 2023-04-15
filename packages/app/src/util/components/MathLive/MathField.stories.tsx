@@ -18,10 +18,9 @@ export const Simple: ComponentStory<typeof MathField> = (args) => (
       borderRadius: "8px",
       width: "min-content",
     }}
-    makeOptions={() => ({ readOnly: true })}
-  >
-    {String.raw`1 + \frac{1}{4} + \frac{1}{9} + \frac{1}{16} + \cdots = \frac{\pi^2}{6}`}
-  </MathField>
+    options={{ readOnly: true }}
+    value={String.raw`1 + \frac{1}{4} + \frac{1}{9} + \frac{1}{16} + \cdots = \frac{\pi^2}{6}`}
+  />
 );
 
 export const Overflowing: ComponentStory<typeof MathField> = (args) => (
@@ -33,9 +32,8 @@ export const Overflowing: ComponentStory<typeof MathField> = (args) => (
         borderRadius: "8px",
         width: "min-content",
       }}
-    >
-      {String.raw`1 + \frac{1}{4} + \frac{1}{9} + \frac{1}{16} + \cdots = \frac{\pi^2}{6}`}
-    </MathField>
+      value={String.raw`1 + \frac{1}{4} + \frac{1}{9} + \frac{1}{16} + \cdots = \frac{\pi^2}{6}`}
+    />
   </div>
 );
 
@@ -51,10 +49,9 @@ export const Static: ComponentStory<typeof MathField> = (args) => (
     <MathField
       {...args}
       style={{ width: "min-content" }}
-      makeOptions={() => ({ readOnly: true })}
-    >
-      E=mc^2
-    </MathField>
+      options={{ readOnly: true }}
+      value="E=mc^2"
+    />
   </div>
 );
 
@@ -64,12 +61,11 @@ export const Controlled: ComponentStory<typeof MathField> = (args) => {
     <div>
       <MathField
         {...args}
+        value={latex}
         onChange={(event) => {
           setLatex(event.target.value);
         }}
-      >
-        {latex}
-      </MathField>
+      />
       <textarea
         name="latex"
         id="latex"

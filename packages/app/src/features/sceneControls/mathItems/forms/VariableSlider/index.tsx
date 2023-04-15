@@ -252,7 +252,6 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
         <MathAssignment
           label={configProps.value.label}
           error={errors.value}
-          className={styles.sliderValue}
           lhsClassName={styles.displayValueLhs}
           rhsClassName={styles.displayValueRhs}
           name="value"
@@ -261,6 +260,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
           numDecimalDigits={maxDigits}
         />
         <SliderControls
+          className={styles.sliderControls}
           speed={speed}
           onSpeedChange={onSpeedChange}
           isAnimating={isAnimating}

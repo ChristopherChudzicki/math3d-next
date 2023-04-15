@@ -23,6 +23,7 @@ const Point: MathItemForm<MIT.Point> = ({ item }) => {
   return (
     <ItemTemplate item={item} config={config}>
       <FieldWidget
+        className="d-block"
         widget={WidgetType.MathValue}
         label={configProps.coords.label}
         name="coords"

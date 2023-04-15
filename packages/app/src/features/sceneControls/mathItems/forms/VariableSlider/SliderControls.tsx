@@ -59,6 +59,7 @@ interface SliderControlsProps {
   speed: SpeedOption;
   onSpeedChange: (speed: SpeedOption) => void;
   onStep: (increment: number) => void;
+  className?: string;
 }
 
 const pauseIconAdjustSx = { transform: "scale(0.8)" };
@@ -69,6 +70,7 @@ const SliderControls: React.FC<SliderControlsProps> = ({
   speed,
   onSpeedChange,
   onStep,
+  className,
 }) => {
   const handleAnimationChange = useCallback(() => {
     onAnimationChange(!isAnimating);
@@ -88,7 +90,7 @@ const SliderControls: React.FC<SliderControlsProps> = ({
   const onStepDown = useCallback(() => onStep(-1), [onStep]);
 
   return (
-    <div className="d-flex align-items-center">
+    <div className={classNames("d-flex align-items-center", className)}>
       <IconButton
         size="small"
         className={styles.playButton}

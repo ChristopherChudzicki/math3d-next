@@ -2,6 +2,20 @@
   padding-right:0pt;
   padding-left: 0pt;
   padding-bottom: 2pt;
+  /*
+  We're using background images for dynamically applied border.
+
+  Why? Increasing border width dynamically changes the height of the parent
+  element, which doesn't look great in our UI. A variety of solutions to this
+  exist:
+    1. use outline instead of border
+    2. use box shadow instead of border
+    3. use background image + padding instead of border.
+
+  (1) cannot be used one side at a time.
+  (2) may suffer a similar issue (?)
+  (3) is working fine for us.
+  */
   background-image: linear-gradient(
     to top,
     var(--color-error),
@@ -71,4 +85,9 @@ textarea.field-widget-input {
 
 .error-tooltip {
   width: 250px;
+}
+
+.readonly-mathfield {
+  border: none;
+  outline: none;
 }

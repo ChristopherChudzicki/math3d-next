@@ -87,9 +87,8 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
             lhsClassName
           )}
           onChange={onChangeLHS}
-        >
-          {value.lhs}
-        </SmallMathField>
+          value={value.lhs}
+        />
       </ErrorTooltip>
       {/** Wrapper div similar to ErrorTooltips */}
       <div>
@@ -104,9 +103,8 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
             rhsClassName
           )}
           onChange={onChangeRHS}
-        >
-          {formatted(value.rhs, numDecimalDigits)}
-        </SmallMathField>
+          value={formatted(value.rhs, numDecimalDigits)}
+        />
       </ErrorTooltip>
     </div>
   );

@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable global-require */
-import type { MathfieldOptions } from "mathlive";
 import React, { forwardRef } from "react";
 
 import { MathfieldProps } from "..";
@@ -9,23 +6,16 @@ const MockMathFieldForwardRef = (
   props: MathfieldProps,
   ref: React.Ref<HTMLTextAreaElement>
 ) => {
-  const { children, onChange, className, makeOptions, ...others } = props;
-
-  const readOnly =
-    makeOptions &&
-    makeOptions({
-      inlineShortcuts: {},
-    } as MathfieldOptions).readOnly;
-
+  const { value: children, onChange, className, options, ...others } = props;
   return (
     <textarea
       {...others}
       className={className}
       value={children}
-      readOnly={readOnly}
       aria-label={props["aria-label"]}
       // @ts-expect-error for e.target should be MathfieldElement but is Textarea
       onChange={onChange}
+      readOnly={options?.readOnly}
       ref={ref}
     />
   );
