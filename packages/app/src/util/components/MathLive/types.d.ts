@@ -1,8 +1,7 @@
 import type { MathfieldElement } from "mathlive";
 
 export interface MathfieldHTMLAttributes
-  extends React.HTMLAttributes<MathfieldElement>,
-    Partial<MathfieldElement> {
+  extends React.HTMLAttributes<MathfieldElement> {
   onChange?: React.ChangeEventHandler<MathfieldElement> | undefined;
 }
 

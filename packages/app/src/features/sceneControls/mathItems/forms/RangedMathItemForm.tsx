@@ -54,6 +54,7 @@ const RangedMathItemForm = ({
       ) : (
         <FieldWidget
           widget={WidgetType.MathValue}
+          className="d-block"
           // @ts-expect-error exprName should be correlated with properties
           label={config.properties[exprNames[0]].label}
           name={exprNames[0]}

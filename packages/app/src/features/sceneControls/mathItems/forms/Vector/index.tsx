@@ -23,6 +23,7 @@ const Vector: MathItemForm<MIT.Vector> = ({ item }) => {
   return (
     <ItemTemplate item={item} config={config}>
       <FieldWidget
+        className="d-block"
         widget={WidgetType.MathValue}
         label={configProps.components.label}
         name="components"

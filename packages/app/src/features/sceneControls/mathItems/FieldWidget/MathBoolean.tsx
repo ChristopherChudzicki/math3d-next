@@ -93,9 +93,8 @@ const MathBoolean = React.forwardRef<HTMLDivElement, IWidgetProps>(
               styles["field-widget-input"]
             )}
             onChange={handleChange}
-          >
-            {value}
-          </SmallMathField>
+            value={value}
+          />
         )}
         {shouldUseExpression ? (
           <SubtleButton onClick={handleReset} className={styles["detail-text"]}>

@@ -18,9 +18,8 @@ const ReadonlyMathField: React.FC<Props> = ({ value, className }) => (
       className
     )}
     readOnly
-  >
-    {value}
-  </SmallMathField>
+    value={value}
+  />
 );
 
 export default ReadonlyMathField;

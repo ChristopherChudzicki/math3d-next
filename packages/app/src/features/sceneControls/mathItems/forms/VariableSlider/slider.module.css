@@ -14,11 +14,10 @@
 .controlsRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: start;
   overflow: hidden;
   margin-bottom: 10px;
   margin-right: 5px;
-  height: 33px; /* The height of the settings button */
 }
 
 .displayValueLhs {
@@ -32,4 +31,8 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: 1em;
+}
+
+.sliderControls {
+  margin-top: 10px;
 }

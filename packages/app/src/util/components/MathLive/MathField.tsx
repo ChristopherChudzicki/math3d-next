@@ -1,17 +1,23 @@
 import "./mathlive";
 
-import type { MathfieldElement, MathfieldOptions } from "mathlive";
+import type { MathfieldElement } from "mathlive";
 import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useRef,
   useState,
 } from "react";
 
 import type { MathFieldWebComponentProps } from "./types";
 
+type MathfieldPropsOptions = Pick<
+  MathfieldElement,
+  "inlineShortcuts" | "readOnly"
+>;
 interface MathfieldProps extends MathFieldWebComponentProps {
-  children?: string;
+  value?: string;
+  options?: Partial<MathfieldPropsOptions>;
 }
 
 type OnMathFieldChange = NonNullable<MathfieldProps["onChange"]>;
@@ -26,15 +32,42 @@ const MathFieldForwardRef = (
   props: MathfieldProps,
   ref: React.Ref<MathfieldElement | null>
 ) => {
-  const { onKeyDown, onChange, className, children, defaultValue, ...others } =
-    props;
+  const {
+    onKeyDown,
+    onChange,
+    className,
+    value,
+    defaultValue,
+    options,
+    ...others
+  } = props;
   const [mf, setMf] = useState<MathfieldElement | null>(null);
+  const mfOptsRef = useRef<NonNullable<MathfieldProps["options"]>>({});
+
+  useEffect(() => {
+    if (!mf) return;
+    const keys = new Set([
+      ...Object.keys(mfOptsRef.current),
+      ...Object.keys(options ?? {}),
+    ]) as Set<keyof MathfieldPropsOptions>;
+    keys.forEach((key) => {
+      if (!mfOptsRef.current[key]) {
+        mfOptsRef.current[key] = mf[key];
+      }
+      if (options?.[key]) {
+        mf[key] = options[key];
+      } else {
+        mf[key] = mfOptsRef.current[key];
+        delete mfOptsRef.current[key];
+      }
+    });
+  }, [mf, options]);
 
   useEffect(() => {
     if (!mf) return;
     const mfValue = mf.getValue();
-    if (mfValue !== children) {
-      mf.setValue(children);
+    if (mfValue !== value) {
+      mf.setValue(value);
       /**
        * In an empty mathfield:
        *  1. Typing "[" results in LaTeX "\left\lbrack\right?"
@@ -43,7 +76,7 @@ const MathFieldForwardRef = (
        * This attempts to account for that issue. *Likely there is a better way
        * to make a controlled field.*
        */
-      if (children?.endsWith("?") && !mfValue.endsWith("?")) {
+      if (value?.endsWith("?") && !mfValue.endsWith("?")) {
         mf.executeCommand("moveToPreviousWord");
       }
     }
