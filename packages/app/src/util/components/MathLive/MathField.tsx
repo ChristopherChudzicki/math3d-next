@@ -52,11 +52,14 @@ const MathFieldForwardRef = (
     ]) as Set<keyof MathfieldPropsOptions>;
     keys.forEach((key) => {
       if (!mfOptsRef.current[key]) {
+        // @ts-expect-error keys, values not correlated well.
         mfOptsRef.current[key] = mf[key];
       }
       if (options?.[key]) {
+        // @ts-expect-error keys, values not correlated well.
         mf[key] = options[key];
       } else {
+        // @ts-expect-error keys, values not correlated well.
         mf[key] = mfOptsRef.current[key];
         delete mfOptsRef.current[key];
       }

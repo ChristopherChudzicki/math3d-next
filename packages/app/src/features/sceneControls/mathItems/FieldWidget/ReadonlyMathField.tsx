@@ -8,6 +8,8 @@ interface Props {
   className?: string;
 }
 
+const options = { readOnly: true };
+
 const ReadonlyMathField: React.FC<Props> = ({ value, className }) => (
   <SmallMathField
     tabIndex={-1}
@@ -17,7 +19,7 @@ const ReadonlyMathField: React.FC<Props> = ({ value, className }) => (
       styles["field-widget"],
       className
     )}
-    readOnly
+    options={options}
     value={value}
   />
 );

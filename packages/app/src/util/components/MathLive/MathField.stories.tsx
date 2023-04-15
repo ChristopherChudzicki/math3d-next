@@ -18,7 +18,7 @@ export const Simple: ComponentStory<typeof MathField> = (args) => (
       borderRadius: "8px",
       width: "min-content",
     }}
-    readOnly
+    options={{ readOnly: true }}
     value={String.raw`1 + \frac{1}{4} + \frac{1}{9} + \frac{1}{16} + \cdots = \frac{\pi^2}{6}`}
   />
 );
@@ -49,7 +49,7 @@ export const Static: ComponentStory<typeof MathField> = (args) => (
     <MathField
       {...args}
       style={{ width: "min-content" }}
-      readOnly
+      options={{ readOnly: true }}
       value="E=mc^2"
     />
   </div>
