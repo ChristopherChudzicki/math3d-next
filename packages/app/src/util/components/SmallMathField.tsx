@@ -20,13 +20,14 @@ const SmallMathField = React.forwardRef<MathfieldElement, MathfieldProps>(
     const [mfEl, setMfEl] = useState<MathfieldElement | null>(null);
     const options: MathfieldProps["options"] = useMemo(() => {
       return {
+        ...props.options,
         inlineShortcuts: {
           ...omit(mfEl?.inlineShortcuts ?? {}, ["fft", "int"]),
           pdiff: "\\frac{\\partial #?}{\\partial #?}",
           diff: "\\frac{\\differentialD #?}{\\differentialD #?}",
         },
       };
-    }, [mfEl]);
+    }, [mfEl, props.options]);
     return (
       <MathField
         {...others}

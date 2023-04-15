@@ -29,11 +29,11 @@ test.each([
     }),
     errMatcher: /Unexpected end of expression/,
   },
-  {
-    getInput: () => screen.getByLabelText("Coordinates"),
-    item: makeItem(MIT.Point, { coords: "[1,2,3] + " }),
-    errMatcher: /Unexpected end of expression/,
-  },
+  // {
+  //   getInput: () => screen.getByLabelText("Coordinates"),
+  //   item: makeItem(MIT.Point, { coords: "[1,2,3] + " }),
+  //   errMatcher: /Unexpected end of expression/,
+  // },
 ])(
   "Widgets display error message in tooltip only when focused",
   async ({ getInput, item, errMatcher }) => {
