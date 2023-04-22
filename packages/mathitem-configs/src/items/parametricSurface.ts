@@ -1,4 +1,5 @@
 import { ParseableArray, ParseableObjs } from "@math3d/parser";
+import { validators } from "@math3d/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -55,7 +56,7 @@ const defaultValues: ParametricSurfaceProperties = {
     type: "function-assignment",
     name: "_f",
     params: ["u", "v"],
-    rhs: "[u^2-v^2, 2*u*v, u^2+v^2]",
+    rhs: "\\left[u\\cdot \\cos(v), u\\cdot \\sin(v), u \\right]",
   },
   domain: {
     type: "array",
@@ -64,13 +65,13 @@ const defaultValues: ParametricSurfaceProperties = {
         type: "function-assignment",
         name: "_f",
         params: ["v"],
-        rhs: "[-pi, pi]",
+        rhs: "\\left[-3, 3\\right]",
       },
       {
         type: "function-assignment",
         name: "_f",
         params: ["u"],
-        rhs: "[-3, 3]",
+        rhs: "\\left[-\\pi, \\pi\\right]",
       },
     ],
   },
@@ -105,6 +106,8 @@ type EvaluatedProperties = {
   visible: boolean;
   zBias: number;
   zIndex: number;
+  expr: (u: number, v: number) => [number, number, number];
+  colorExpr: (X: number, Y: number, Z: number, u: number, v: number) => number;
 };
 
 const config: IMathItemConfig<
@@ -119,11 +122,13 @@ const config: IMathItemConfig<
       name: "expr",
       label: "Expression",
       widget: WidgetType.MathValue,
+      validate: validators.realFunc[2][3],
     },
     colorExpr: {
       name: "colorExpr",
       label: "Expression",
       widget: WidgetType.MathValue,
+      validate: validators.realFunc[5][1],
     },
     color,
     description,
