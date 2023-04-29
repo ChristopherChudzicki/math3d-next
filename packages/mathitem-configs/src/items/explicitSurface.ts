@@ -34,7 +34,7 @@ interface ExplicitSurfaceProperties {
   shaded: string; // eval to boolean;
   expr: ParseableObjs["function-assignment"];
   domain: ParseableArray<ParseableObjs["function-assignment"]>;
-  colorExpr: string;
+  colorExpr: ParseableObjs["function-assignment"];
   gridOpacity: string;
   gridWidth: string;
   samples1: string;
@@ -74,7 +74,12 @@ const defaultValues: ExplicitSurfaceProperties = {
       },
     ],
   },
-  colorExpr: "_f(X, Y, Z, x, y)=mod(Z, 1)",
+  colorExpr: {
+    type: "function-assignment",
+    name: "_f",
+    params: ["X", "Y", "Z", "x", "y"],
+    rhs: "mod(Z, 1)",
+  },
   gridOpacity: "0.5",
   gridWidth: "2",
   samples1: "64",
@@ -127,6 +132,7 @@ const config: IMathItemConfig<
       name: "colorExpr",
       label: "Expression",
       widget: WidgetType.MathValue,
+      validate: validators.realFunc[5][1],
     },
     domain: domain2,
     color,

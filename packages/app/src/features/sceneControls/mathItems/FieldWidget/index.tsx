@@ -59,7 +59,10 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
 };
 
 type PatchPropertyOnChange = (
-  e: WidgetChangeEvent<Parseable>,
+  e: {
+    name: string;
+    value: unknown;
+  },
   subpath: string
 ) => void;
 

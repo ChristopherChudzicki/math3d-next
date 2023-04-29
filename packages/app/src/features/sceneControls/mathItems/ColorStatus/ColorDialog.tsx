@@ -8,6 +8,7 @@ import {
   colorsAndGradients,
   colors,
 } from "@math3d/mathitem-configs";
+import type { ParseableObjs } from "@math3d/parser";
 import React, { useCallback, useState } from "react";
 import ColorPicker, { OnColorChange } from "@/util/components/ColorPicker";
 
@@ -17,7 +18,7 @@ import { useMathScope } from "../mathItemsSlice";
 import { useMathErrors } from "../mathScope";
 
 type GraphicWithColorExpr = MathGraphic & {
-  properties: { colorExpr: "string" };
+  properties: { colorExpr: ParseableObjs["function-assignment"] };
 };
 
 const hasColorExpr = (
@@ -27,7 +28,7 @@ const hasColorExpr = (
 };
 
 interface ColorExprProps {
-  onChange: OnWidgetChange;
+  onChange: OnWidgetChange<ParseableObjs["function-assignment"]>;
   item: GraphicWithColorExpr;
 }
 
@@ -37,15 +38,27 @@ const ColorExprInput: React.FC<ColorExprProps> = (props) => {
   const { onChange, item } = props;
   const mathScope = useMathScope();
   const { colorExpr } = useMathErrors(mathScope, item.id, COLOR_EXPR);
+  const onWidgetChange: OnWidgetChange<string> = useCallback(
+    (e) => {
+      onChange({
+        name: "colorExpr",
+        value: {
+          ...item.properties.colorExpr,
+          rhs: e.value,
+        },
+      });
+    },
+    [onChange, item.properties.colorExpr]
+  );
   return (
     <div>
       <FieldWidget
         widget={WidgetType.MathValue}
         label="Color Expression"
         name="colorExpr"
-        onChange={onChange}
+        onChange={onWidgetChange}
         error={colorExpr}
-        value={item.properties.colorExpr}
+        value={item.properties.colorExpr.rhs}
       />
     </div>
   );

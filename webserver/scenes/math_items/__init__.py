@@ -148,7 +148,7 @@ class ItemPropertiesCamera:
 @dataclass
 class ItemPropertiesExplicitSurface:
     color: "str"
-    color_expr: "str"
+    color_expr: "ParseableFunctionAssignment"
     description: "str"
     domain: "ParseableFunctionAssignmentArray"
     expr: "ParseableFunctionAssignment"
@@ -168,7 +168,7 @@ class ItemPropertiesExplicitSurface:
     def from_json_data(cls, data: Any) -> "ItemPropertiesExplicitSurface":
         return cls(
             _from_json_data(str, data.get("color")),
-            _from_json_data(str, data.get("colorExpr")),
+            _from_json_data(ParseableFunctionAssignment, data.get("colorExpr")),
             _from_json_data(str, data.get("description")),
             _from_json_data(ParseableFunctionAssignmentArray, data.get("domain")),
             _from_json_data(ParseableFunctionAssignment, data.get("expr")),
@@ -421,7 +421,7 @@ class ItemPropertiesParametricCurve:
 @dataclass
 class ItemPropertiesParametricSurface:
     color: "str"
-    color_expr: "str"
+    color_expr: "ParseableFunctionAssignment"
     description: "str"
     domain: "ParseableFunctionAssignmentArray"
     expr: "ParseableFunctionAssignment"
@@ -441,7 +441,7 @@ class ItemPropertiesParametricSurface:
     def from_json_data(cls, data: Any) -> "ItemPropertiesParametricSurface":
         return cls(
             _from_json_data(str, data.get("color")),
-            _from_json_data(str, data.get("colorExpr")),
+            _from_json_data(ParseableFunctionAssignment, data.get("colorExpr")),
             _from_json_data(str, data.get("description")),
             _from_json_data(ParseableFunctionAssignmentArray, data.get("domain")),
             _from_json_data(ParseableFunctionAssignment, data.get("expr")),
