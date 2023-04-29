@@ -100,9 +100,18 @@ const gradients = {
   bluered,
   temperature,
 };
+const isGradientName = (name: string): name is keyof typeof gradients => {
+  return Object.keys(gradients).includes(name);
+};
 
 const colorsAndGradients = [...colors, ...[rainbow, bluered, temperature]];
 
 export type { ColorOrGradientConfig };
 
-export { colors, colorsAndGradients, gradients, makeColorConfig };
+export {
+  colors,
+  colorsAndGradients,
+  gradients,
+  isGradientName,
+  makeColorConfig,
+};

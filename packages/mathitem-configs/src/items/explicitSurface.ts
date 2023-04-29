@@ -106,6 +106,7 @@ type EvaluatedProperties = {
   zBias: number;
   zIndex: number;
   expr: (x: number, y: number) => number;
+  colorExpr: (X: number, Y: number, Z: number, u: number, v: number) => number;
 };
 
 const config: IMathItemConfig<

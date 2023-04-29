@@ -18,7 +18,7 @@ const gridOpacity: PropertyConfig<"gridOpacity", number> = {
   name: "gridOpacity",
   label: "Grid Opacity",
   widget: WidgetType.MathValue,
-  validate: validators.positive,
+  validate: validators.nonnegative,
 };
 
 const grid1: PropertyConfig<"grid1", number> = {

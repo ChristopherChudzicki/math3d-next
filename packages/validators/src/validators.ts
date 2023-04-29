@@ -27,6 +27,11 @@ type RealVectors = {
 export const real = num;
 
 const positive = real.positive();
+const nonnegative = real.test({
+  test: (x) => x >= 0,
+  message: "Expected a nonnegative number.",
+  name: "nonnegative",
+});
 
 const realVectors = {
   1: yup.tuple([num]).strict().required(),
@@ -60,9 +65,18 @@ type RealFuncs = {
     3: (w: number, x: number, y: number, z: number) => RealVectors[3];
     4: (w: number, x: number, y: number, z: number) => RealVectors[4];
   };
+  5: {
+    1: (w: number, x: number, y: number, z: number) => number;
+    2: (w: number, x: number, y: number, z: number) => RealVectors[2];
+    3: (w: number, x: number, y: number, z: number) => RealVectors[3];
+    4: (w: number, x: number, y: number, z: number) => RealVectors[4];
+  };
 };
 
-const numericFunc = <M extends Dim, N extends Dim>(fromDim: M, toDim: N) => {
+const numericFunc = <M extends Dim | 5, N extends Dim>(
+  fromDim: M,
+  toDim: N
+) => {
   const message = (detail: string) =>
     `Expected a function from R^${fromDim} -> R^${toDim}. ${detail}`;
   const schema = yup
@@ -107,16 +121,19 @@ const realFuncSchemas = {
     4: numericFunc(2, 4),
   },
   3: {
-    1: numericFunc(2, 1),
+    1: numericFunc(3, 1),
     2: numericFunc(3, 2),
     3: numericFunc(3, 3),
     4: numericFunc(3, 4),
   },
   4: {
-    1: numericFunc(2, 1),
-    2: numericFunc(3, 2),
-    3: numericFunc(3, 3),
-    4: numericFunc(3, 4),
+    1: numericFunc(4, 1),
+    2: numericFunc(4, 2),
+    3: numericFunc(4, 3),
+    4: numericFunc(4, 4),
+  },
+  5: {
+    1: numericFunc(5, 1),
   },
 };
 
@@ -144,6 +161,9 @@ const realFuncValidators = {
     2: firstArg(realFuncSchemas[4][2].validateSync.bind(realFuncSchemas[4][2])),
     3: firstArg(realFuncSchemas[4][3].validateSync.bind(realFuncSchemas[4][3])),
     4: firstArg(realFuncSchemas[4][4].validateSync.bind(realFuncSchemas[4][4])),
+  },
+  5: {
+    1: firstArg(realFuncSchemas[5][1].validateSync.bind(realFuncSchemas[5][1])),
   },
 };
 
@@ -189,6 +209,7 @@ const oneOrMany: <T>(itemValidator: Validator<T>) => Validator<T[]> =
 
 export const validators = {
   real: firstArg(real.validateSync.bind(real)),
+  nonnegative: firstArg(positive.validateSync.bind(nonnegative)),
   positive: firstArg(positive.validateSync.bind(positive)),
   array: firstArg(array.validateSync.bind(array)),
   realFunc: realFuncValidators,

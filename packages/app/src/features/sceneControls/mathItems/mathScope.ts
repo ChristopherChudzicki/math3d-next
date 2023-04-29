@@ -6,7 +6,7 @@ import {
   PropertyConfig,
   WidgetType,
 } from "@math3d/mathitem-configs";
-import { filter as collectionFilter } from "lodash";
+import { filter as collectionFilter, pickBy } from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { OnChangeListener } from "@math3d/mathscope";
 import { AppMathScope, AppParseable } from "./mathItemsSlice/interfaces";
@@ -62,7 +62,11 @@ const useMathResults = <K extends string>(
       const { mathScope } = event;
       const { results } = event.changes;
       if (names.some((name) => results.touched.has(ids[name]))) {
-        setResults(extractResults(mathScope, ids));
+        const patch = pickBy(
+          extractResults(mathScope, ids),
+          (value) => value !== undefined
+        );
+        setResults((current) => ({ ...current, ...patch }));
       }
     },
     [ids, names]

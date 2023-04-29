@@ -22,7 +22,7 @@ import invariant from "tiny-invariant";
 import MathItemUI from "../MathItem";
 import { select, actions, useMathScope } from "../mathItemsSlice";
 import style from "./MathItemsList.module.css";
-import { useMathResults } from "../mathScope";
+import { useMathItemResults } from "../mathScope";
 
 type TypeData =
   | {
@@ -66,7 +66,7 @@ interface FolderProps {
   contentsClassName?: string;
 }
 
-const EVALUATED_PROPS = ["isCollapsed"];
+const EVALUATED_PROPS = ["isCollapsed"] as const;
 
 const FolderWithContents: React.FC<FolderProps> = ({
   folder,
@@ -74,7 +74,7 @@ const FolderWithContents: React.FC<FolderProps> = ({
   contentsClassName,
 }) => {
   const mathScope = useMathScope();
-  const evaluated = useMathResults(mathScope, folder.id, EVALUATED_PROPS);
+  const evaluated = useMathItemResults(mathScope, folder, EVALUATED_PROPS);
   const isOpen = !evaluated.isCollapsed;
   const hasEvaluated = evaluated.isCollapsed !== undefined;
   const collapseRef = useCollapsible(isOpen);

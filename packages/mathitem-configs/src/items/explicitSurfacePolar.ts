@@ -53,8 +53,8 @@ const defaultValues: ExplicitSurfacePolarProperties = {
   expr: {
     type: "function-assignment",
     name: "_f",
-    params: ["r", "Q"],
-    rhs: "\\frac{1}{4}r^2*cos(3*Q)]",
+    params: ["r", "\\theta"],
+    rhs: "\\frac{1}{4} \\cdot r^2 \\cdot cos(3\\theta)",
   },
   domain: {
     type: "array",
@@ -104,6 +104,8 @@ type EvaluatedProperties = {
   visible: boolean;
   zBias: number;
   zIndex: number;
+  expr: (x: number, y: number) => number;
+  colorExpr: (X: number, Y: number, Z: number, u: number, v: number) => number;
 };
 
 const config: IMathItemConfig<

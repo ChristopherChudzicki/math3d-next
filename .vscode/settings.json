@@ -5,5 +5,6 @@
     ],
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
-      },
+    },
+    "github.copilot.inlineSuggest.enable": true,
 }

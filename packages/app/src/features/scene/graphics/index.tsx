@@ -7,6 +7,11 @@ import Axis from "./Axis";
 import Line from "./Line";
 import Vector from "./Vector";
 import ParametricCurve from "./ParametricCurve";
+import {
+  ParametricSurface,
+  ExplicitSurface,
+  ExplicitSurfacePolar,
+} from "./ParametricSurface";
 import { GraphicComponent } from "./interfaces";
 
 const NotImplemented: React.FC<{ item: MathItem }> = () => null;
@@ -14,18 +19,22 @@ const NotImplemented: React.FC<{ item: MathItem }> = () => null;
 const graphics = {
   [MathItemType.Point]: Point,
   [MathItemType.Axis]: Axis,
-  [MathItemType.ExplicitSurface]: NotImplemented,
-  [MathItemType.ExplicitSurfacePolar]: NotImplemented,
+  [MathItemType.ExplicitSurface]: ExplicitSurface,
+  [MathItemType.ExplicitSurfacePolar]: ExplicitSurfacePolar,
   [MathItemType.Grid]: Grid,
   [MathItemType.ImplicitSurface]: NotImplemented,
   [MathItemType.Line]: Line,
   [MathItemType.ParametricCurve]: ParametricCurve,
-  [MathItemType.ParametricSurface]: NotImplemented,
+  [MathItemType.ParametricSurface]: ParametricSurface,
   [MathItemType.Vector]: Vector,
   [MathItemType.VectorField]: NotImplemented,
 };
 
-const NEEDS_RANGE: MathItemType[] = [];
+const NEEDS_RANGE: MathItemType[] = [
+  MathItemType.ParametricSurface,
+  MathItemType.ExplicitSurface,
+  MathItemType.ExplicitSurfacePolar,
+];
 const graphicNeedsRange = (type: MathItemType): boolean => {
   return NEEDS_RANGE.includes(type);
 };

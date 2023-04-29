@@ -41,6 +41,7 @@ import {
   signDependencies,
   floorDependencies,
   ceilDependencies,
+  modDependencies,
   // operators
   addDependencies,
   subtractDependencies,
@@ -126,6 +127,7 @@ const miscFuncs = {
   signDependencies,
   floorDependencies,
   ceilDependencies,
+  modDependencies,
 };
 
 const operators = {
