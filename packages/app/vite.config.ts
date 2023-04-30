@@ -28,6 +28,7 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    clearMocks: true,
     setupFiles: ["./src/setupTests.ts"],
     environment: "jsdom",
     exclude: ["**/playwright/**"],

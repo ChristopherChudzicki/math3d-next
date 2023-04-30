@@ -13,12 +13,7 @@ import MathAssignment from "./MathAssignment";
 import MathBoolean from "./MathBoolean";
 import MathValue from "./MathValue";
 import TextInput from "./TextInput";
-import {
-  IWidgetProps,
-  OnWidgetChange,
-  Parseable,
-  WidgetChangeEvent,
-} from "./types";
+import { IWidgetProps, OnWidgetChange, Parseable } from "./types";
 import ErrorTooltip from "./ErrorTooltip";
 
 type WidgetProps = IWidgetProps & {

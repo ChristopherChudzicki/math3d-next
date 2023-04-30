@@ -12,10 +12,13 @@ import type { ParseableObjs } from "@math3d/parser";
 import React, { useCallback, useState } from "react";
 import ColorPicker, { OnColorChange } from "@/util/components/ColorPicker";
 
+import StaticMath from "@/util/components/MathLive/StaticMath";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";
 import { useMathScope } from "../mathItemsSlice";
 import { useMathErrors } from "../mathScope";
+import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
+import styles from "./ColorDialog.module.css";
 
 type GraphicWithColorExpr = MathGraphic & {
   properties: { colorExpr: ParseableObjs["function-assignment"] };
@@ -50,16 +53,23 @@ const ColorExprInput: React.FC<ColorExprProps> = (props) => {
     },
     [onChange, item.properties.colorExpr]
   );
+  const lhs = `f(${item.properties.colorExpr.params.join(", ")}) =`;
   return (
     <div>
+      <ReadonlyMathField value={lhs} />
       <FieldWidget
         widget={WidgetType.MathValue}
         label="Color Expression"
         name="colorExpr"
+        className={styles.expression}
         onChange={onWidgetChange}
         error={colorExpr}
         value={item.properties.colorExpr.rhs}
       />
+      <p className={styles.note}>
+        Note: <StaticMath value="X, Y, Z" mode="inline" /> (capitals) refer to
+        normalized coordinates ranging from 0 to 1.
+      </p>
     </div>
   );
 };
@@ -87,7 +97,7 @@ const ColorDialog: React.FC<ColorDialogProps> = (props) => {
     []
   );
   return (
-    <div role="dialog" className={props.className}>
+    <div role="dialog" className={props.className} data-dndkit-no-drag>
       {hasColorExpr(item) ? (
         <TabContext value={tab}>
           <TabList onChange={handleChange} aria-label="lab API tabs example">
