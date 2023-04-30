@@ -151,7 +151,7 @@ class ItemMigrator:
         domain = self.domain_array([rangeU, rangeV])
         return new.ItemPropertiesExplicitSurface(
             color=x.color,
-            color_expr=x.colorExpr,
+            color_expr=self.function_assignment(x.colorExpr),
             description=x.description,
             domain=domain,
             expr=expr,
@@ -178,7 +178,7 @@ class ItemMigrator:
         domain = self.domain_array([rangeU, rangeV])
         return new.ItemPropertiesExplicitSurface(
             color=x.color,
-            color_expr=x.colorExpr,
+            color_expr=self.function_assignment(x.colorExpr),
             description=x.description,
             domain=domain,
             expr=expr,
@@ -302,7 +302,7 @@ class ItemMigrator:
         domain = self.domain_array([rangeU, rangeV])
         return new.ItemPropertiesParametricSurface(
             color=x.color,
-            color_expr=x.colorExpr,
+            color_expr=self.function_assignment(x.colorExpr),
             description=x.description,
             domain=domain,
             expr=expr,

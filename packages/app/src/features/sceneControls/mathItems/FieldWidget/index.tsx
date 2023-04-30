@@ -13,12 +13,7 @@ import MathAssignment from "./MathAssignment";
 import MathBoolean from "./MathBoolean";
 import MathValue from "./MathValue";
 import TextInput from "./TextInput";
-import {
-  IWidgetProps,
-  OnWidgetChange,
-  Parseable,
-  WidgetChangeEvent,
-} from "./types";
+import { IWidgetProps, OnWidgetChange, Parseable } from "./types";
 import ErrorTooltip from "./ErrorTooltip";
 
 type WidgetProps = IWidgetProps & {
@@ -59,7 +54,10 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
 };
 
 type PatchPropertyOnChange = (
-  e: WidgetChangeEvent<Parseable>,
+  e: {
+    name: string;
+    value: unknown;
+  },
   subpath: string
 ) => void;
 

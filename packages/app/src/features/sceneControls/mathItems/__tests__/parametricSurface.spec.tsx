@@ -72,7 +72,11 @@ test.each([
     expression: {
       initial: func("_f", ["x", "y"], "[1+abc, 0, 0]"),
       expectedFinal: func("_f", ["abc", "y"], "[1+abc, 0, 0]"),
-      expectedEvaluation: (abc: number, _y: number) => [1 + abc, 0, 0],
+      expectedEval: (abc: number, _y: number): number[] => [1 + abc, 0, 0],
+    },
+    colorExpr: {
+      initial: func("_f", ["X", "Y", "Z", "x", "y"], "mod(X, 1)"),
+      expectedFinal: func("_f", ["X", "Y", "Z", "abc", "y"], "mod(X, 1)"),
     },
     domain: {
       initial: dom(
@@ -83,10 +87,7 @@ test.each([
         func("_f", ["y"], "[-5, 5]"),
         func("_f", ["abc"], "[-abc, abc]")
       ),
-      expectedEvaluation: [
-        (_x: number) => [-5, 5],
-        (abc: number) => [-abc, abc],
-      ],
+      expectedEval: [(_x: number) => [-5, 5], (abc: number) => [-abc, abc]],
     },
     param: { name: "abc", index: 0 },
   },
@@ -94,7 +95,11 @@ test.each([
     expression: {
       initial: func("_f", ["x", "y"], "[1+abc, 0, 0]"),
       expectedFinal: func("_f", ["x", "abc"], "[1+abc, 0, 0]"),
-      expectedEvaluation: (_x: number, abc: number) => [1 + abc, 0, 0],
+      expectedEval: (_x: number, abc: number) => [1 + abc, 0, 0],
+    },
+    colorExpr: {
+      initial: func("_f", ["X", "Y", "Z", "x", "y"], "mod(X, 1)"),
+      expectedFinal: func("_f", ["X", "Y", "Z", "x", "abc"], "mod(X, 1)"),
     },
     domain: {
       initial: dom(
@@ -105,16 +110,17 @@ test.each([
         func("_f", ["abc"], "[-abc, abc]"),
         func("_f", ["x"], "[-5, 5]")
       ),
-      expectedEvaluation: [(abc: number) => [-abc, abc], () => [-5, 5]],
+      expectedEval: [(abc: number) => [-abc, abc], () => [-5, 5]],
     },
     param: { name: "abc", index: 1 },
   },
 ])(
   "Updating parameter names updates other fields appropriately",
-  async ({ expression, param, domain }) => {
+  async ({ expression, param, domain, colorExpr }) => {
     const item = makeItem(MIT.ParametricSurface, {
       expr: expression.initial,
       domain: domain.initial,
+      colorExpr: colorExpr.initial,
     });
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
@@ -137,15 +143,16 @@ test.each([
     ] as MathItem<MIT.ParametricSurface>;
     expect(editedItem.properties.expr).toEqual(expression.expectedFinal);
     expect(editedItem.properties.domain).toEqual(domain.expectedFinal);
+    expect(editedItem.properties.colorExpr).toEqual(colorExpr.expectedFinal);
 
     // assert MathScope updated correctly
     const exprF = mathScope.results.get(id("expr"));
     invariant(exprF instanceof Function);
 
     const [x, y] = [Math.random(), Math.random()];
-    expect(exprF(x, y)).toEqual(expression.expectedEvaluation(x, y));
+    expect(exprF(x, y)).toEqual(expression.expectedEval(x, y));
 
-    const domExpectedEval = domain.expectedEvaluation;
+    const domExpectedEval = domain.expectedEval;
     const domActualEval = mathScope.results.get(id("domain")) as {
       value: DomFunc[];
     };
@@ -257,7 +264,7 @@ test.each([
         func("_f", ["y"], "[-2, 2]"),
         func("_f", ["x"], "[-x, x]")
       ),
-      expectedEvaluation: [
+      expectedEval: [
         //
         (_y: number) => [-2, 2],
         (x: number) => [-x, x],
@@ -277,7 +284,7 @@ test.each([
         func("_f", ["y"], "[-5, 5]"),
         func("_f", ["x"], "[-x^2, x^2]")
       ),
-      expectedEvaluation: [
+      expectedEval: [
         (_y: number) => [-5, 5],
         (x: number) => [-(x ** 2), x ** 2],
       ],
@@ -296,7 +303,7 @@ test.each([
 
     const mathScope = store.getState().mathItems.mathScope();
     const id = nodeId(item);
-    const domExpectedEval = domain.expectedEvaluation;
+    const domExpectedEval = domain.expectedEval;
     const domActualEval = mathScope.results.get(id("domain")) as {
       value: DomFunc[];
     };

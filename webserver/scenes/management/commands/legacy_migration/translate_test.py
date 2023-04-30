@@ -134,7 +134,12 @@ def test_explicit_surface(in_patch, out_patch):
         "type": "EXPLICIT_SURFACE",
         "properties": {
             "color": "#3090FF",
-            "colorExpr": "_f(X, Y, Z, x, y)=mod(Z, 1)",
+            "colorExpr": {
+                "name": "_f",
+                "params": ["X", " Y", " Z", " x", " y"],
+                "rhs": "mod(Z, 1)",
+                "type": "function-assignment",
+            },
             "description": "Explicit Surface",
             "domain": {
                 "items": [
@@ -202,7 +207,12 @@ def test_explicit_surface_polar(in_patch, out_patch):
         "type": "EXPLICIT_SURFACE_POLAR",
         "properties": {
             "color": "#3090FF",
-            "colorExpr": "_f(X, Y, Z, r, \\theta)=mod(Z, 1)",
+            "colorExpr": {
+                "name": "_f",
+                "params": ["X", " Y", " Z", " r", " \\theta"],
+                "rhs": "mod(Z, 1)",
+                "type": "function-assignment",
+            },
             "description": "Explicit Surface (Polar)",
             "domain": {
                 "items": [
@@ -401,7 +411,12 @@ def test_parametric_surface():
         "type": "PARAMETRIC_SURFACE",
         "properties": {
             "color": "#3090FF",
-            "colorExpr": "_f(X, Y, Z, u, v)=mod(Z, 1)",
+            "colorExpr": {
+                "name": "_f",
+                "params": ["X", " Y", " Z", " u", " v"],
+                "rhs": "mod(Z, 1)",
+                "type": "function-assignment",
+            },
             "description": "Parametric Surface",
             "domain": {
                 "items": [

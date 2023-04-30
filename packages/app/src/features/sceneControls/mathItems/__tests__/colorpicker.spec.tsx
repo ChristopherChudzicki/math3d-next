@@ -6,30 +6,38 @@ import {
   screen,
   seedDb,
   user,
-  allowActWarnings,
+  act,
+  within,
 } from "@/test_util";
-
-type Point = MathItem<MIT.Point>;
 
 /**
  * Press and hold pointer on element for `ms` seconds.
  */
 const longClick = async (element: HTMLElement, ms: number) => {
-  vi.useFakeTimers();
-  user.pointer({ keys: "[MouseLeft>]", target: element }); // press the left mouse button
-  vi.advanceTimersByTime(ms);
-  user.pointer({ keys: "[/MouseLeft]", target: element }); // release the left mouse button
-  vi.useRealTimers();
+  await user.pointer({ keys: "[MouseLeft>]", target: element }); // press the left mouse button
+  await user.pointer({ keys: "[/MouseLeft]", target: element }); // release the left mouse button
+  /**
+   * Confused why the waiting happens after pointer-up, but putting it between does not work...
+   */
+  await act(
+    () =>
+      new Promise((res) => {
+        setTimeout(res, ms);
+      })
+  );
 };
 
 /**
- * Add a single point to the mathItems store and return some helpers for finding
- * relevant elements + data.
+ * Add an item to mathItems store and return some helpers for finding relevant
+ * elements + data.
  */
-const setup = async () => {
-  const point = makeItem(MIT.Point);
-  const id = nodeId(point);
-  const scene = seedDb.withSceneFromItems([point]);
+const setup = async <R extends MIT>(
+  type: R,
+  itemProps: Partial<MathItem<R>["properties"]> = {}
+) => {
+  const item = makeItem(type, itemProps);
+  const id = nodeId(item);
+  const scene = seedDb.withSceneFromItems([item]);
   const { store } = await renderTestApp(`/${scene.id}`);
 
   const mathScope = store.getState().mathItems.mathScope();
@@ -37,11 +45,12 @@ const setup = async () => {
   const findDialog = () => screen.findByRole("dialog");
   const findTextInput = () => screen.findByTitle("Custom Color Input");
   const findAllSwatches = () => screen.findAllByTitle("Select Color");
-  const getPoint = () => store.getState().mathItems.items[point.id] as Point;
-  const getCalculatedProp = (prop: keyof Point["properties"]) =>
+  const getItem = () =>
+    store.getState().mathItems.items[item.id] as MathItem<R>;
+  const getCalculatedProp = (prop: keyof MathItem<R>["properties"] & string) =>
     mathScope.results.get(id(prop));
   return {
-    getPoint,
+    getItem,
     findButton,
     findDialog,
     findTextInput,
@@ -51,7 +60,7 @@ const setup = async () => {
 };
 
 test("short clicks on indicator toggle visibility", async () => {
-  const { findButton, getCalculatedProp } = await setup();
+  const { findButton, getCalculatedProp } = await setup(MIT.Point);
   expect(getCalculatedProp("visible")).toBe(true);
   await user.click(await findButton());
   expect(getCalculatedProp("visible")).toBe(false);
@@ -60,17 +69,11 @@ test("short clicks on indicator toggle visibility", async () => {
 });
 
 test("long press opens color picker dialog", async () => {
-  /**
-   * Having trouble determing the origin of act warnings for this test.
-   * They started appearing with user-events upgrade from 14.3.0 -> 14.4.3
-   */
-  allowActWarnings();
-
   const { findButton, findDialog, getCalculatedProp, findAllSwatches } =
-    await setup();
+    await setup(MIT.Point);
   expect(getCalculatedProp("visible")).toBe(true);
   await expect(findDialog).rejects.toBeDefined();
-  longClick(await findButton(), 1000);
+  await longClick(await findButton(), 1000);
   expect(await findDialog()).toBeDefined();
   // Still visible; long-press does not trigger normal click handler
   expect(getCalculatedProp("visible")).toBe(true);
@@ -79,10 +82,62 @@ test("long press opens color picker dialog", async () => {
 });
 
 test("clicking a swatch sets item to that color", async () => {
-  const { findButton, getPoint, findAllSwatches } = await setup();
-  expect(getPoint().properties.color).toBe("#3090ff");
-  longClick(await findButton(), 1000);
+  const { findButton, getItem, findAllSwatches } = await setup(MIT.Point);
+  expect(getItem().properties.color).toBe("#3090ff");
+  await longClick(await findButton(), 1000);
   const swatches = await findAllSwatches();
   await user.click(swatches[8]);
-  expect(getPoint().properties.color).toBe("#e74c3c");
+  expect(getItem().properties.color).toBe("#e74c3c");
+});
+
+test("Setting colorExpr for surfaces", async () => {
+  const { findButton, getItem } = await setup(MIT.ParametricSurface, {
+    colorExpr: {
+      type: "function-assignment",
+      name: "_f",
+      params: ["X", "Y", "Z", "a", "b"],
+      rhs: "mod(a, 2)",
+    },
+    expr: {
+      type: "function-assignment",
+      name: "_f",
+      params: ["a", "b"],
+      rhs: "a^2 + b^2",
+    },
+    domain: {
+      type: "array",
+      items: [
+        {
+          type: "function-assignment",
+          name: "_f",
+          params: ["b"],
+          rhs: "[-2, 2]",
+        },
+        {
+          type: "function-assignment",
+          name: "_f",
+          params: ["a"],
+          rhs: "[-2, 2]",
+        },
+      ],
+    },
+  });
+  await longClick(await findButton(), 1000);
+  const dialog = await screen.findByRole("dialog");
+  await user.click(within(dialog).getByRole("tab", { name: "Color Map" }));
+
+  within(dialog).getByText("f(X, Y, Z, a, b) =");
+
+  const exprInput = within(dialog).getByRole("math", {
+    name: "Color Expression",
+  });
+
+  // Shows correct text
+  expect(exprInput).toHaveValue("mod(a, 2)");
+  await user.click(exprInput);
+  await user.paste(" + 0.1");
+  // updates UI
+  expect(exprInput).toHaveValue("mod(a, 2) + 0.1");
+  // updates store
+  expect(getItem().properties.colorExpr.rhs).toBe("mod(a, 2) + 0.1");
 });

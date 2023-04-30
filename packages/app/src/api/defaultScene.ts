@@ -41,7 +41,12 @@ const defaultScene: Omit<Scene, "id"> = {
         visible: "true",
         samples1: "64",
         samples2: "64",
-        colorExpr: "_f(X, Y, Z, x, y)=mod(Z, 1)",
+        colorExpr: {
+          type: "function-assignment",
+          name: "_f",
+          params: ["X", "Y", "Z", "x", "y"],
+          rhs: "mod(Z, 1)",
+        },
         gridWidth: "2",
         description: "Explicit Surface",
         gridOpacity: "0.5",

@@ -31,6 +31,8 @@ vitest.mock("mathbox-react", () =>
  */
 vitest.mock("./util/components/MathLive/MathField");
 
+vitest.mock("mathlive", () => vi.importActual("@/__mocks__/mathlive"));
+
 /**
  * And since we're not using a ShadowDOM, we can't change the ShadowDOM styles.
  */
