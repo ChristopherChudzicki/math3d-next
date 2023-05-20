@@ -3,7 +3,7 @@ import { CommandReplacer, replaceAllTexCommand } from "./util";
 
 const fractionReplacer: CommandReplacer = (frac) => {
   const [top, bottom] = frac.params;
-  return `(${top})/(${bottom})`;
+  return `divide(${top}, ${bottom})`;
 };
 
 /**

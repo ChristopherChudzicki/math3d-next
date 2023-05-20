@@ -14,13 +14,13 @@ describe("preprocesser fraction conversion", () => {
 
   test("converts a single fraction correctly", () => {
     const input = "1 + \\frac{1 + \\cos{x}}{1 - \\cos{x}}";
-    const expected = "1 + (1 + cos(x))/(1 - cos(x))";
+    const expected = "1 + divide(1 + cos(x), 1 - cos(x))";
     expect(parser.preprocess(input)).toBe(expected);
   });
 
   test("converts multiple fractions correctly", () => {
     const input = "x + \\frac{a + \\frac{b + c}{d - e}}{f + g}";
-    const expected = "x + (a + (b + c)/(d - e))/(f + g)";
+    const expected = "x + divide(a + divide(b + c, d - e), f + g)";
     expect(parser.preprocess(input)).toBe(expected);
   });
 });
