@@ -4,7 +4,6 @@ import { styled, useTheme } from "@mui/material/styles";
 import Fade from "@mui/material/Fade";
 import classNames from "classnames";
 import FocusTrap from "@mui/base/FocusTrap";
-import { TransitionProps } from "@mui/material/transitions";
 import usePointerAway from "./usePointerAway";
 import style from "./Popover.module.css";
 
@@ -181,8 +180,8 @@ const Popover: React.FC<PopoverProps> = ({
         placement={placement}
       >
         {transition
-          ? (props: { TransitionProps: TransitionProps }) => (
-              <Fade {...props.TransitionProps} timeout={duration}>
+          ? ({ TransitionProps }) => (
+              <Fade {...TransitionProps} timeout={duration}>
                 <div>
                   <FocusTrap open={visible}>{contents}</FocusTrap>
                 </div>
