@@ -44,7 +44,11 @@ const setup = async <R extends MIT>(
   const findButton = () => screen.findByTitle("Color and Visibility");
   const findDialog = () => screen.findByRole("dialog");
   const findTextInput = () => screen.findByTitle("Custom Color Input");
-  const findAllSwatches = () => screen.findAllByTitle("Select Color");
+  const getAllSwatches = () => {
+    const dialog = screen.getByRole("dialog");
+    const swatches = within(dialog).getAllByRole("button");
+    return swatches;
+  };
   const getItem = () =>
     store.getState().mathItems.items[item.id] as MathItem<R>;
   const getCalculatedProp = (prop: keyof MathItem<R>["properties"] & string) =>
@@ -54,7 +58,7 @@ const setup = async <R extends MIT>(
     findButton,
     findDialog,
     findTextInput,
-    findAllSwatches,
+    getAllSwatches,
     getCalculatedProp,
   };
 };
@@ -69,23 +73,23 @@ test("short clicks on indicator toggle visibility", async () => {
 });
 
 test("long press opens color picker dialog", async () => {
-  const { findButton, findDialog, getCalculatedProp, findAllSwatches } =
+  const { findButton, findDialog, getCalculatedProp, getAllSwatches } =
     await setup(MIT.Point);
   expect(getCalculatedProp("visible")).toBe(true);
   await expect(findDialog).rejects.toBeDefined();
-  await longClick(await findButton(), 1000);
+  await longClick(await findButton(), 500);
   expect(await findDialog()).toBeDefined();
   // Still visible; long-press does not trigger normal click handler
   expect(getCalculatedProp("visible")).toBe(true);
-  const swatches = await findAllSwatches();
-  expect(swatches).toHaveLength(11);
+  const swatches = await getAllSwatches();
+  expect(swatches).toHaveLength(10);
 });
 
 test("clicking a swatch sets item to that color", async () => {
-  const { findButton, getItem, findAllSwatches } = await setup(MIT.Point);
+  const { findButton, getItem, getAllSwatches } = await setup(MIT.Point);
   expect(getItem().properties.color).toBe("#3090ff");
-  await longClick(await findButton(), 1000);
-  const swatches = await findAllSwatches();
+  await longClick(await findButton(), 500);
+  const swatches = await getAllSwatches();
   await user.click(swatches[8]);
   expect(getItem().properties.color).toBe("#e74c3c");
 });

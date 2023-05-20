@@ -19,7 +19,7 @@ import styles from "./ColorStatus.module.css";
 
 const getColor = (colorText: string) => {
   const color = colorsAndGradients.find((c) => c.value === colorText);
-  return color ?? makeColorConfig(colorText);
+  return color ?? makeColorConfig(colorText, "");
 };
 
 interface Props {
@@ -59,7 +59,6 @@ const ColorStatus: React.FC<Props> = (props) => {
     if (lastPressWasLong()) return;
     setDialogVisible.off();
   }, [lastPressWasLong, setDialogVisible]);
-
   return (
     <Popover
       modifiers={popperModifiers}

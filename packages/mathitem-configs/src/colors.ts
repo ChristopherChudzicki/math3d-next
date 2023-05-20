@@ -3,12 +3,14 @@ import tinycolor from "tinycolor2";
 interface ColorConfig {
   type: "color";
   value: string;
+  label: string;
   backgroundPreview: string;
 }
 
 interface GradientConfig {
   type: "gradient";
   value: string;
+  label: string;
   backgroundPreview: string;
   getRGB: (x: number) => [number, number, number];
 }
@@ -27,28 +29,30 @@ const toFractionRgb = ({
   return [r / 255, g / 255, b / 255];
 };
 
-const makeColorConfig = (text: string): ColorConfig => ({
+const makeColorConfig = (text: string, label: string): ColorConfig => ({
   type: "color",
   value: text,
   backgroundPreview: text,
+  label,
 });
 
 const colors: ColorConfig[] = [
-  "#33FF00",
-  "#2ecc71",
-  "#3090ff",
-  "#9b59b6",
-  "#8e44ad",
-  "#2c3e50",
-  "#f1c40f",
-  "#e67e22",
-  "#e74c3c",
-  "#808080",
-].map(makeColorConfig);
+  ["#33FF00", "Bright green"],
+  ["#2ecc71", "Green"],
+  ["#3090ff", "Blue"],
+  ["#9b59b6", "Purple"],
+  ["#8e44ad", "Deep Purple"],
+  ["#2c3e50", "Navy"],
+  ["#f1c40f", "Yellow"],
+  ["#e67e22", "Orange"],
+  ["#e74c3c", "Red"],
+  ["#808080", "Gray"],
+].map(([text, label]) => makeColorConfig(text, label));
 
 const rainbow: GradientConfig = {
   type: "gradient",
   value: "rainbow",
+  label: "Rainbow",
   backgroundPreview: `linear-gradient(
     to right,
     hsl(360, 100%, 50%),
@@ -68,6 +72,7 @@ const rainbow: GradientConfig = {
 const bluered: GradientConfig = {
   type: "gradient",
   value: "bluered",
+  label: "Blue to Red",
   backgroundPreview: "linear-gradient(to right, blue, red)",
   getRGB: (frac: number) => {
     return [frac, 0, 1 - frac];
@@ -77,6 +82,7 @@ const bluered: GradientConfig = {
 const temperature: GradientConfig = {
   type: "gradient",
   value: "temperature",
+  label: "Temperature",
   backgroundPreview: `linear-gradient(
     to right,
     hsl(240, 100%, 50%),
