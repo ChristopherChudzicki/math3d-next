@@ -3,6 +3,7 @@ import MuiPopper, { PopperProps } from "@mui/material/Popper";
 import { styled, useTheme } from "@mui/material/styles";
 import Fade from "@mui/material/Fade";
 import classNames from "classnames";
+import FocusTrap from "@mui/base/FocusTrap";
 import usePointerAway from "./usePointerAway";
 import style from "./Popover.module.css";
 
@@ -160,7 +161,9 @@ const Popover: React.FC<PopoverProps> = ({
       className={classNames(style.container, className)}
     >
       <Arrow ref={setArrowEl} className="MuiPopper-arrow" />
-      {children}
+      <FocusTrap open={visible}>
+        <div tabIndex={-1}>{children}</div>
+      </FocusTrap>
     </Component>
   );
   const theme = useTheme();
@@ -179,7 +182,9 @@ const Popover: React.FC<PopoverProps> = ({
         {transition
           ? ({ TransitionProps }) => (
               <Fade {...TransitionProps} timeout={duration}>
-                {contents}
+                <div>
+                  <FocusTrap open={visible}>{contents}</FocusTrap>
+                </div>
               </Fade>
             )
           : contents}

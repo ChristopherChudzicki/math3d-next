@@ -6,7 +6,6 @@ import classNames from "classnames";
 import React, {
   MouseEventHandler,
   useCallback,
-  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -17,6 +16,7 @@ import styles from "./ColorPicker.module.css";
 interface ColorWithStyle {
   backgroundPreview: string;
   value: string;
+  label: string;
 }
 
 interface ColorPickerEvent {
@@ -32,24 +32,20 @@ interface ColorSquareProps {
 const ColorSquare: React.FC<ColorSquareProps> = (props) => {
   const { color, onClick, textOnly = false } = props;
 
-  // In the case of gradients, tinycolor object won't be valid
-  const isLight = tinycolor(color.value).isLight();
-  return (
-    <button
-      type="button"
-      aria-label="Select Color"
-      title="Select Color"
-      onClick={onClick}
-      style={{ background: color.backgroundPreview }}
-      className={classNames(
-        {
-          [styles["light-colored-swatch"]]: isLight,
-          [styles["text-color-swatch"]]: textOnly,
-        },
-        styles["color-swatch"]
-      )}
-    />
-  );
+  const childProps = {
+    "aria-label": color.label,
+    style: { background: color.backgroundPreview },
+    className: classNames(
+      {
+        [styles["text-color-swatch"]]: textOnly,
+      },
+      styles["color-swatch"]
+    ),
+  };
+  if (onClick) {
+    return <button type="button" {...childProps} onClick={onClick} />;
+  }
+  return <div {...childProps} />;
 };
 
 const ColorWarning: React.FC<{ value: string }> = ({ value }) => (
@@ -90,7 +86,7 @@ const ColorPicker: React.FC<ColorPickerProps> = (props: ColorPickerProps) => {
         const propColor = colors.find((c) => c.value === color);
         if (propColor) return propColor;
         const hex = tinycolor(color).toHexString();
-        return { value: hex, backgroundPreview: hex };
+        return { value: hex, backgroundPreview: hex, label: color };
       }
       return color;
     },
@@ -100,6 +96,8 @@ const ColorPicker: React.FC<ColorPickerProps> = (props: ColorPickerProps) => {
   const isValidColor = useCallback(
     (text: string): boolean => {
       if (colors.map((c) => c.value).includes(text)) return true;
+      const tc = tinycolor(text);
+      if (tc.getFormat() === "hex" && !text.startsWith("#")) return false;
       return tinycolor(text).isValid();
     },
     [colors]
@@ -119,11 +117,6 @@ const ColorPicker: React.FC<ColorPickerProps> = (props: ColorPickerProps) => {
     (e) => handleColor(e.target.value),
     [handleColor]
   );
-
-  useEffect(() => {
-    // tribgger event when prop changes
-    handleColor(value);
-  }, [value, handleColor]);
 
   const InputProps = useMemo(() => {
     const adornment = (
