@@ -24,20 +24,18 @@ const isDiffSymbolName = (name: string) => {
  * listed above.
  */
 const getDiffNode = (node: mjs.MathNode): mjs.MathNode | null => {
-  if (!math.isParenthesisNode(node)) return null;
-  const { content } = node;
   if (
-    math.isFunctionNode(content) &&
-    isDiffSymbolName(content.fn.name) &&
-    content.args.length === 1
+    math.isFunctionNode(node) &&
+    isDiffSymbolName(node.fn.name) &&
+    node.args.length === 1
   ) {
-    return content.args[0];
+    return node.args[0];
   }
-  if (!math.isOperatorNode(content)) return null;
-  if (content.op !== "*") return null;
-  if (!content.implicit) return null;
-  if (content.args.length !== 2) return null;
-  const [a, b] = content.args;
+  if (!math.isOperatorNode(node)) return null;
+  if (node.op !== "*") return null;
+  if (!node.implicit) return null;
+  if (node.args.length !== 2) return null;
+  const [a, b] = node.args;
   if (!math.isSymbolNode(a)) return null;
   if (!isDiffSymbolName(a.name)) return null;
   return b;
@@ -49,8 +47,8 @@ const getDummyVarName = (varName: string, depth: number) => {
 };
 
 const handleSingleNode = (node: mjs.MathNode, depth: number) => {
-  if (!math.isOperatorNode(node)) return node;
-  if (node.op !== "/") return node;
+  if (!math.isFunctionNode(node)) return node;
+  if (node.fn.name !== "divide") return node;
   if (node.args.length !== 2) return node;
   const top = getDiffNode(node.args[0]);
   const bottom = getDiffNode(node.args[1]);
