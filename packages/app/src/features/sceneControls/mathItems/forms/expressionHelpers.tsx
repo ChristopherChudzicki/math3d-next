@@ -233,7 +233,11 @@ const useExpressionsAndParameters = (
               : {
                   type: "function-assignment",
                   name: "_f",
-                  params: newParameters.filter((p, k) => k !== i),
+                  params: newParameters
+                    .filter((p, k) => k !== i)
+                    // if a param is missing, we still want the function to have
+                    // correct number of mathjs-recognized symbol arguments
+                    .map((p) => (p.trim() === "" ? "_" : p)),
                   rhs: pd.rhs,
                 };
           }),

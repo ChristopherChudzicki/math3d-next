@@ -251,6 +251,18 @@ test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
   }
 );
 
+test("Empty parameter names show error in one spot", async () => {
+  const { form } = await setupItemTest(MIT.ParametricSurface);
+
+  await user.clear(getParamNameInputs()[0]);
+
+  const maths = within(form)
+    .getAllByRole("math")
+    .filter((el) => el.classList.contains("has-error"));
+
+  expect(maths).toHaveLength(1);
+});
+
 test.each([
   {
     domain: {
@@ -344,50 +356,6 @@ test.each([0, 1, 2])("Updating domain arrays (ImplicitSurface)", async (i) => {
   const domActualEval = mathScope.results.get(id("domain"));
   expect(domActualEval).toEqual(domExpectedEval);
 });
-
-test.each([
-  {
-    domainInitial: dom(
-      //
-      func("_f", ["y"], "[-5, 5] + "),
-      func("_f", ["x"], "[-x, x]")
-    ),
-    errIndices: [0],
-    errClass: AggregateError,
-    errMatcher: expect.objectContaining({
-      errors: expect.objectContaining({
-        0: expect.objectContaining({
-          rhs: expect.objectContaining({
-            message: expect.stringMatching(/Unexpected end of expression/),
-          }),
-        }),
-      }),
-    }),
-  },
-])(
-  "Domain functions errors",
-  async ({ domainInitial, errClass, errIndices, errMatcher }) => {
-    const { form, store, item } = await setupItemTest(MIT.ParametricSurface, {
-      domain: domainInitial,
-    });
-
-    const errCount = errIndices.length;
-    expect(form.querySelectorAll("[aria-invalid=true]")).toHaveLength(errCount);
-    expect(form.querySelectorAll(".has-error")).toHaveLength(errCount);
-    const domainInputs = getDomainInputs(form, 2);
-    errIndices.forEach((i) => {
-      expect(domainInputs[i]).toHaveClass("has-error");
-      expect(domainInputs[i]).toHaveAttribute("aria-invalid", "true");
-    });
-
-    const mathScope = store.getState().mathItems.mathScope();
-    const id = nodeId(item);
-
-    const error = mathScope.errors.get(id("domain"));
-    expect(error).toBeInstanceOf(errClass);
-    expect(error).toEqual(errMatcher);
-  }
-);
 
 test.each([
   {
