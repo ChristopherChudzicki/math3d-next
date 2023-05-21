@@ -8,6 +8,7 @@ const MockMathFieldForwardRef = (
 ) => {
   const { value: children, onChange, className, options, ...others } = props;
   return (
+    // eslint-disable-next-line jsx-a11y/role-supports-aria-props
     <textarea
       {...others}
       // mathlive uses 'math' role for its interactive math elements
@@ -16,6 +17,7 @@ const MockMathFieldForwardRef = (
       className={className}
       value={children}
       aria-label={props["aria-label"]}
+      aria-invalid={props["aria-invalid"]}
       // @ts-expect-error for e.target should be MathfieldElement but is Textarea
       onChange={onChange}
       readOnly={options?.readOnly}
