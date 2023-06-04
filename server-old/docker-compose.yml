@@ -1,7 +1,0 @@
-version: "3.9"
-services:
-  math3d_db:
-    image: math3d_postgres
-    ports:
-      - "5431:5432"
-    build: "./docker"
