@@ -43,7 +43,7 @@
     "@mui/material": "5.13.1",
     "@popperjs/core": "2.11.8",
     "@reduxjs/toolkit": "1.8.5",
-    "@tanstack/react-query": "4.13.0",
+    "@tanstack/react-query": "4.29.12",
     "@types/lodash-es": "^4.17.6",
     "@types/node": "18.7.15",
     "bootstrap": "5.2.2",
