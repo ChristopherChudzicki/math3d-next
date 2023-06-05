@@ -6168,7 +6168,7 @@ __metadata:
     toposort: 2.0.2
     typescript: 4.9.4
     typescript-plugin-css-modules: 3.4.0
-    use-long-press: 2.0.2
+    use-long-press: 2.0.4
     vite: 4.0.3
     vite-tsconfig-paths: 4.0.3
     vitest: ^0.29.1
@@ -18343,12 +18343,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-long-press@npm:2.0.2":
-  version: 2.0.2
-  resolution: "use-long-press@npm:2.0.2"
+"use-long-press@npm:2.0.4":
+  version: 2.0.4
+  resolution: "use-long-press@npm:2.0.4"
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 0ddebac1616b91701d532320fd14c091163d71c11b7df8a3c55acba091bdb8f42f1b09b93e5a27df83a6827f169ddf0a1c59238789b01d3d3546773564828b45
+  checksum: 50e57a33653c2e4825ef700565e6db7ac94441929aaaf3226b164162f9be62084d97689d017ff0e9a33834b6fc454be8768d0cb6f10ecb1ca95c06cf509596e7
   languageName: node
   linkType: hard
 
