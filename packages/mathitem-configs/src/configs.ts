@@ -30,7 +30,7 @@ const MATH_GRAPHIC_TYPES = [
   MathItemType.VectorField,
 ] as const;
 
-type MathGraphicType = typeof MATH_GRAPHIC_TYPES[number];
+type MathGraphicType = (typeof MATH_GRAPHIC_TYPES)[number];
 
 const mathItemConfigs = {
   [MathItemType.Axis]: axis.config,
