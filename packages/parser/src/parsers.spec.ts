@@ -171,8 +171,16 @@ describe("Parsing assignments and function assignments", () => {
         rhsErr: undefined,
       },
     },
+    {
+      lhs: "x!",
+      rhs: "1",
+      expected: {
+        lhsErr: /Invalid left-hand side/,
+        rhsErr: undefined,
+      },
+    },
   ])(
-    "Associates parse function asiggnment { lhs, rhs } errors with lhs or rhs",
+    "Associates parse asiggnment { lhs, rhs } errors with lhs or rhs",
     ({ lhs, rhs, expected }) => {
       const err = getParseError({ lhs, rhs, type: "assignment" });
       const methods = {
