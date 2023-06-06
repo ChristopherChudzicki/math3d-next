@@ -10,7 +10,7 @@ const assignmentTypes = [
 ] as const;
 const ASSIGNMENT_TYPES: readonly MathNodeType[] = assignmentTypes;
 
-type AssignmentType = typeof assignmentTypes[number];
+type AssignmentType = (typeof assignmentTypes)[number];
 
 type Evaluate = (scope?: Map<string, unknown>) => unknown;
 interface MathNodeBase<T extends MathNodeType = MathNodeType> {
