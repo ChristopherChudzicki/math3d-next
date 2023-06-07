@@ -47,7 +47,7 @@
     "@types/lodash-es": "^4.17.6",
     "@types/node": "18.16.16",
     "bootstrap": "5.2.2",
-    "bootstrap-icons": "1.9.1",
+    "bootstrap-icons": "1.10.5",
     "classnames": "2.3.2",
     "fast-json-patch": "^3.1.1",
     "history": "5.3.0",
