@@ -75,7 +75,7 @@
     "@math3d/eslint-config": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
     "@mswjs/data": "0.13.0",
-    "@playwright/test": "1.27.1",
+    "@playwright/test": "1.35.0",
     "@storybook/addon-actions": "6.5.16",
     "@storybook/addon-essentials": "6.5.16",
     "@storybook/addon-links": "6.5.16",
