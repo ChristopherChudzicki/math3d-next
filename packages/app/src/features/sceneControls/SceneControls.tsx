@@ -29,7 +29,11 @@ const SceneControls: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (!scene) return;
-    const payload = { items: scene.items, order: scene.itemOrder };
+    const payload = {
+      items: scene.items,
+      order: scene.itemOrder,
+      title: scene.title,
+    };
     dispatch(itemActions.setItems(payload));
   }, [dispatch, scene]);
 

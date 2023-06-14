@@ -3,6 +3,10 @@ import type { MathItem } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import type { MathItemsState, AppMathScope, Subtree } from "./interfaces";
 
+const title =
+  (): SelectorReturn<MathItemsState["title"]> => (state: RootState) =>
+    state.mathItems.title;
+
 const mathItems =
   (): SelectorReturn<MathItemsState["items"]> => (state: RootState) =>
     state.mathItems.items;
@@ -77,6 +81,7 @@ const hasItems =
   };
 
 export {
+  title,
   subtree,
   isActive,
   mathItems,
