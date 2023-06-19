@@ -1,5 +1,10 @@
 import React, { useCallback, useEffect } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import Scene from "@/features/scene";
 import SceneControls from "@/features/sceneControls";
 import Sidebar from "@/util/components/sidebar";
@@ -90,41 +95,17 @@ const useSearchEnum = <T extends string>({
         return s;
       });
     },
-    [name, setSearch]
+    [defaultValue, name, setSearch]
   );
   return [value, set] as const;
 };
 
 const CONTROLS_VALUES = ["closed", "open"] as const;
 
-const useBooleanSearchParam = (param: string, defaultValue: boolean) => {
-  const [search, setSearch] = useSearchParams();
-  const stringified = search.get(param);
-  let value = defaultValue;
-  if (stringified === "true") {
-    value = true;
-  } else if (stringified === "false") {
-    value = false;
-  }
-
-  const toggle = useCallback(() => {
-    setSearch((current) => {
-      const s = new URLSearchParams(current);
-      if (value !== defaultValue) {
-        s.delete(param);
-      } else {
-        s.append(param, String(!value));
-      }
-      return s;
-    });
-  }, [value, setSearch, defaultValue, param]);
-
-  return [value, toggle] as const;
-};
-
 const MainPage: React.FC = () => {
   const { sceneId } = useParams();
-  const [examplesOpen, toggleExamplesOpen] = useToggle(false);
+  const location = useLocation();
+  const navigate = useNavigate();
   const [controlsVisibility, setControlsVisibility] = useSearchEnum({
     name: "controls",
     values: CONTROLS_VALUES,
@@ -141,6 +122,14 @@ const MainPage: React.FC = () => {
     },
     [setControlsVisibility]
   );
+  const examplesOpen = location.hash === "#examples";
+  const handleExamplesClick = useCallback(() => {
+    if (!examplesOpen) {
+      navigate("#examples");
+    } else {
+      navigate("");
+    }
+  }, [navigate, examplesOpen]);
   return (
     <div className={styles.container} style={cssVars}>
       <Header title={<TitleInput />} className={styles.header} />
@@ -157,7 +146,7 @@ const MainPage: React.FC = () => {
           className={styles.sidebar}
           side="right"
           visible={examplesOpen}
-          onVisibleChange={toggleExamplesOpen}
+          onVisibleChange={handleExamplesClick}
         />
         <Scene
           className={
