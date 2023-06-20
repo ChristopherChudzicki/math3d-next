@@ -28,7 +28,7 @@
     "@dnd-kit/core": "6.0.8",
     "@dnd-kit/sortable": "7.0.2",
     "@dnd-kit/utilities": "3.2.1",
-    "@emotion/react": "11.11.0",
+    "@emotion/react": "11.11.1",
     "@emotion/styled": "11.11.0",
     "@math3d/custom-mathjs": "workspace:^",
     "@math3d/mathitem-configs": "workspace:^",
