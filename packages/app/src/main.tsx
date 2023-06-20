@@ -66,7 +66,13 @@ prepare().then(() => {
     // @ts-expect-error Allow accessing store on widnow in dev for debugging
     window.store = store;
   }
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: Infinity,
+      },
+    },
+  });
 
   root.render(
     <React.StrictMode>
