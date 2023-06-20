@@ -133,7 +133,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
           const [X, Y, Z] = project(xyz, range, NORMALIZED_RANGE);
           const [u, v] = uvFunc(U, V);
           const [r, g, b] = gradient.getRGB(colorFunc(X, Y, Z, u, v));
-          emit(r, g, b, 1.0);
+          emit(r, g, b, opacity ?? 1.0);
         },
         width: samples1,
         height: samples2,
@@ -142,14 +142,16 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
     return {
       expr: (emit) => {
         const { r, g, b } = new Color(color);
-        emit(r, g, b, 1.0);
+        emit(r, g, b, opacity ?? 1.0);
       },
       width: 2,
       height: 2,
+      channels: 4,
     };
   }, [
     hasColorFunc,
     color,
+    opacity,
     xyzFunc,
     colorFunc,
     uvFunc,
@@ -183,7 +185,6 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
           points={dataNode}
           colors={colorNode}
           color="#FFFFFF"
-          opacity={opacity}
           zBias={zBias}
           zIndex={zIndex}
           shaded={shaded}

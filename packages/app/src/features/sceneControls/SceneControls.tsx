@@ -26,6 +26,7 @@ const SceneControls: React.FC<Props> = (props) => {
   const dispatch = useAppDispatch();
 
   const { isLoading, data: scene } = useScene(sceneId);
+  console.log(scene);
 
   useEffect(() => {
     if (!scene) return;

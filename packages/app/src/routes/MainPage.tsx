@@ -9,13 +9,12 @@ import Scene from "@/features/scene";
 import SceneControls from "@/features/sceneControls";
 import Sidebar from "@/util/components/sidebar";
 
-import { useToggle } from "@/util/hooks";
 import classNames from "classnames";
 import Button from "@mui/material/Button";
 import TitleInput from "@/features/sceneControls/TitleInput";
 import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
-import CloudOutlinedIcon from "@mui/icons-material/CloudOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import ShareButton from "@/features/sceneControls/mathItems/ShareButton";
 import styles from "./MainPage.module.css";
 
 const cssVars = {
@@ -44,13 +43,7 @@ const Header: React.FC<HeaderProps> = (props) => (
         >
           Examples
         </Button>
-        <Button
-          variant="text"
-          color="secondary"
-          startIcon={<CloudOutlinedIcon fontSize="inherit" />}
-        >
-          Share
-        </Button>
+        <ShareButton />
         <Button
           variant="text"
           color="secondary"

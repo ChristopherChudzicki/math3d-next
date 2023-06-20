@@ -1,4 +1,5 @@
 import type { SelectorReturn, RootState } from "@/store/store";
+import { Scene } from "@/types";
 import type { MathItem } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import type { MathItemsState, AppMathScope, Subtree } from "./interfaces";
@@ -80,6 +81,14 @@ const hasItems =
     return ids.every((id) => items[id]);
   };
 
+const scene = (): SelectorReturn<Omit<Scene, "id">> => (state: RootState) => {
+  return {
+    title: state.mathItems.title,
+    items: Object.values(state.mathItems.items),
+    itemOrder: state.mathItems.order,
+  };
+};
+
 export {
   title,
   subtree,
@@ -90,5 +99,6 @@ export {
   orderedMathItems,
   hasItems,
   getItems,
+  scene,
 };
 export type { Subtree };

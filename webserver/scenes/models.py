@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import random
 
 import jtd  # type: ignore
 import yaml
@@ -30,13 +31,17 @@ class LegacyScene(models.Model):
     dehydrated = models.JSONField()
     migration_note = models.TextField(default="")
 
+KEY_ALPHABET = "123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNPQRSTUVWXYZ"
+
+def random_key(length=9):
+    return ''.join(random.choices(KEY_ALPHABET, k=length))
 
 class Scene(models.Model):
     """
     A Scene.
     """
 
-    key = models.CharField(max_length=80, unique=True)
+    key = models.CharField(max_length=80, unique=True, default=random_key)
     items = models.JSONField(validators=[JtdValidator(limit_value=items_schema)])
     item_order = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
