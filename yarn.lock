@@ -6367,7 +6367,7 @@ __metadata:
     fast-json-patch: ^3.1.1
     history: 5.3.0
     identity-obj-proxy: 3.0.0
-    jest-fail-on-console: 3.0.2
+    jest-fail-on-console: 3.1.1
     jsdom: ^20.0.3
     lodash: 4.17.21
     mathbox: ^2.3.1
@@ -12409,12 +12409,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-fail-on-console@npm:3.0.2":
-  version: 3.0.2
-  resolution: "jest-fail-on-console@npm:3.0.2"
+"jest-fail-on-console@npm:3.1.1":
+  version: 3.1.1
+  resolution: "jest-fail-on-console@npm:3.1.1"
   dependencies:
     chalk: ^4.1.0
-  checksum: 3d14a72f38028317a3dd1d1d7118bf045b71ce7c7d815fa0be2e4303ebaee314e83f640a155c34a42a2e8819259f994ac4341d0e6743d049880b81aee27e10a0
+  checksum: dbc244766fb78525b2d4a7e879678b91032acefa04694e17edb5917e325abf8ee356bdf728bc1c89058d67b9c8b3da4cd45515232eb9ab1b973a6b4f57bfb7af
   languageName: node
   linkType: hard
 
