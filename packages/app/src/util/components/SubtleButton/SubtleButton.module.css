@@ -12,6 +12,10 @@
   outline-color: var(--color-primary);
 }
 
+.subtle-button:hover {
+  cursor: pointer;
+}
+
 .subtle-button.darken:hover {
   backdrop-filter: brightness(0.9);
 }

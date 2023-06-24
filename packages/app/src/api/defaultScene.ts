@@ -5,7 +5,7 @@ const defaultScene: Omit<Scene, "key"> = {
   title: "Untitled",
   items: [
     {
-      id: "100",
+      id: "99",
       type: MathItemType.ExplicitSurface,
       properties: {
         expr: {
@@ -208,7 +208,7 @@ const defaultScene: Omit<Scene, "key"> = {
     main: ["initialFolder"],
     setup: ["cameraFolder", "axes"],
     cameraFolder: ["camera"],
-    initialFolder: ["100"],
+    initialFolder: ["99"],
   },
 };
 

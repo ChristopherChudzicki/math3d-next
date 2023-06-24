@@ -67,33 +67,34 @@ const useSearchEnum = <T extends string>({
   values,
   defaultValue,
 }: UseSearchEnumOptions<T>) => {
-  const [search, setSearch] = useSearchParams();
+  const [search] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const raw = search.get(name);
   const valid = raw === null || values.includes(raw as T);
   useEffect(() => {
     if (!valid) {
-      console.error("Invalid value for search param", name, raw);
+      // eslint-disable-next-line no-console
+      console.error(`Invalid value ${raw} for search parameter ${name}`);
     }
   }, [valid, name, raw]);
   const value = valid ? (raw as T) ?? defaultValue : defaultValue;
   const set = useCallback(
     (v: T) => {
-      setSearch((current) => {
-        const s = new URLSearchParams(current);
-        if (v === defaultValue) {
-          s.delete(name);
-        } else {
-          s.set(name, v);
-        }
-        return s;
-      });
+      const next = new URLSearchParams(search);
+      if (v === defaultValue) {
+        next.delete(name);
+      } else {
+        next.set(name, v);
+      }
+      navigate({ search: next.toString(), hash: location.hash });
     },
-    [defaultValue, name, setSearch]
+    [defaultValue, name, navigate, search, location.hash]
   );
   return [value, set] as const;
 };
 
-const CONTROLS_VALUES = ["closed", "open"] as const;
+const CONTROLS_VALUES = ["0", "1"] as const;
 
 const MainPage: React.FC = () => {
   const { sceneKey } = useParams();
@@ -102,15 +103,15 @@ const MainPage: React.FC = () => {
   const [controlsVisibility, setControlsVisibility] = useSearchEnum({
     name: "controls",
     values: CONTROLS_VALUES,
-    defaultValue: "open",
+    defaultValue: "1",
   });
-  const controlsOpen = controlsVisibility === "open";
+  const controlsOpen = controlsVisibility === "1";
   const handleControlsClick = useCallback(
     (currentlyOpen: boolean) => {
       if (currentlyOpen) {
-        setControlsVisibility("closed");
+        setControlsVisibility("0");
       } else {
-        setControlsVisibility("open");
+        setControlsVisibility("1");
       }
     },
     [setControlsVisibility]
@@ -118,11 +119,11 @@ const MainPage: React.FC = () => {
   const examplesOpen = location.hash === "#examples";
   const handleExamplesClick = useCallback(() => {
     if (!examplesOpen) {
-      navigate("#examples");
+      navigate({ hash: "examples", search: location.search });
     } else {
-      navigate("");
+      navigate({ hash: undefined, search: location.search });
     }
-  }, [navigate, examplesOpen]);
+  }, [navigate, examplesOpen, location.search]);
   return (
     <div className={styles.container} style={cssVars}>
       <Header title={<TitleInput />} className={styles.header} />
@@ -132,6 +133,7 @@ const MainPage: React.FC = () => {
           side="left"
           visible={controlsOpen}
           onVisibleChange={handleControlsClick}
+          label="Controls"
         >
           <SceneControls sceneKey={sceneKey} />
         </Sidebar>
@@ -140,6 +142,7 @@ const MainPage: React.FC = () => {
           side="right"
           visible={examplesOpen}
           onVisibleChange={handleExamplesClick}
+          label="Examples"
         />
         <Scene
           className={

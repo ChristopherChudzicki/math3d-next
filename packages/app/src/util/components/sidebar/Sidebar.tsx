@@ -1,7 +1,7 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import classNames from "classnames";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useId, useMemo } from "react";
 
 import SubtleButtom from "../SubtleButton";
 import style from "./Sidebar.module.css";
@@ -20,6 +20,7 @@ type SidebarProps = {
   onVisibleChange?: (current: boolean) => void;
   side: "left" | "right";
   children?: React.ReactNode;
+  label: string;
 };
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -28,8 +29,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   className,
   visible,
   onVisibleChange,
+  label,
 }) => {
   const isCollapsed = !visible;
+  const regionId = useId();
   const IconComponent = useMemo(() => {
     const direction = getButtonDirection(visible, side);
     if (direction === "left") return ChevronLeftIcon;
@@ -59,11 +62,16 @@ const Sidebar: React.FC<SidebarProps> = ({
           onClick={handleClick}
           className={style["sidebar-button"]}
           centered
+          aria-controls={regionId}
+          aria-expanded={visible}
+          aria-label={isCollapsed ? `Expand ${label}` : `Collapse ${label}`}
         >
           <IconComponent />
         </SubtleButtom>
       </div>
-      {children}
+      <div role="region" id={regionId}>
+        {children}
+      </div>
     </div>
   );
 };
