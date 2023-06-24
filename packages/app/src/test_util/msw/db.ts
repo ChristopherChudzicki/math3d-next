@@ -8,7 +8,7 @@ import { sceneFixtures } from "./fixtures";
 
 const db = factory({
   scene: {
-    id: primaryKey(faker.datatype.uuid),
+    key: primaryKey(faker.datatype.uuid),
     title: faker.lorem.sentence,
     items: () => [],
     /**
@@ -22,7 +22,7 @@ const db = factory({
   },
 });
 
-type PartialScene = PartialBy<Scene, "title" | "id">;
+type PartialScene = PartialBy<Scene, "title" | "key">;
 
 /**
  * A wrapper around `db.scene.create` to fix some ts issues.
@@ -55,7 +55,7 @@ const seedDb = {
       },
     };
     if (id) {
-      scene.id = id;
+      scene.key = id;
     }
     return addScene(scene);
   },

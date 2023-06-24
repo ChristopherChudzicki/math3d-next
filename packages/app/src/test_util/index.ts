@@ -11,12 +11,12 @@ import { makeItem } from "./makeItem";
 
 import renderTestApp from "./renderTestApp";
 import { seedDb } from "./msw/db";
-import { sceneIds } from "./msw/fixtures";
+import { sceneKeys } from "./msw/fixtures";
 
 export * from "./test_util";
 export {
   seedDb,
-  sceneIds,
+  sceneKeys,
   act,
   fireEvent,
   makeItem,

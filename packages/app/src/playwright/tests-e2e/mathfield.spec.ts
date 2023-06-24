@@ -5,19 +5,19 @@ import { getItemForm, makeItem, pwHelpersExist, getLatex } from "./util";
 
 test("Typing arrays into an empty <math-field />", async ({ page }) => {
   const point = makeItem(MIT.Point, { description: "SomePoint", coords: "" });
-  const sceneId = faker.datatype.uuid();
+  const sceneKey = faker.datatype.uuid();
   await page.addInitScript(() => {
     window.$pwCustomSeed = true;
   });
 
-  await page.goto(`/${sceneId}`);
+  await page.goto(`/${sceneKey}`);
   await expect.poll(pwHelpersExist(page)).toBeTruthy();
   await page.evaluate(
     ({ items, id }) => {
       window.$pw.seedDb.withSceneFromItems(items, { id });
       window.$pw.doneSeeding();
     },
-    { items: [point], id: sceneId }
+    { items: [point], id: sceneKey }
   );
 
   const form = getItemForm(page, point);

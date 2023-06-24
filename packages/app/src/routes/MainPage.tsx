@@ -96,7 +96,7 @@ const useSearchEnum = <T extends string>({
 const CONTROLS_VALUES = ["closed", "open"] as const;
 
 const MainPage: React.FC = () => {
-  const { sceneId } = useParams();
+  const { sceneKey } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [controlsVisibility, setControlsVisibility] = useSearchEnum({
@@ -133,7 +133,7 @@ const MainPage: React.FC = () => {
           visible={controlsOpen}
           onVisibleChange={handleControlsClick}
         >
-          <SceneControls sceneId={sceneId} />
+          <SceneControls sceneKey={sceneKey} />
         </Sidebar>
         <Sidebar
           className={styles.sidebar}

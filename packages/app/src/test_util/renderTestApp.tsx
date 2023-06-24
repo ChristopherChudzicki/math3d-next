@@ -50,6 +50,7 @@ const renderTestApp = async (
   if (waitForReady) {
     await waitForNotBusy();
   }
+
   return { result, store };
 };
 

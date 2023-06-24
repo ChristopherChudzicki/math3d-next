@@ -81,7 +81,7 @@ const hasItems =
     return ids.every((id) => items[id]);
   };
 
-const scene = (): SelectorReturn<Omit<Scene, "id">> => (state: RootState) => {
+const scene = (): SelectorReturn<Omit<Scene, "key">> => (state: RootState) => {
   return {
     title: state.mathItems.title,
     items: Object.values(state.mathItems.items),

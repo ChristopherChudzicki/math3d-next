@@ -21,7 +21,7 @@ const AppRoutes: React.FC<AppProps> = ({ store, queryClient, theme }) => (
       <ThemeProvider theme={theme}>
         <Routes>
           <Route path="/">
-            <Route path="/:sceneId" element={<routes.MainPage />} />
+            <Route path="/:sceneKey" element={<routes.MainPage />} />
             <Route path="" element={<routes.MainPage />} />
           </Route>
         </Routes>

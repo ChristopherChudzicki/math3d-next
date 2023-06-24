@@ -6,7 +6,7 @@ test("left-hand parse errors are indicated on left-hand side", async () => {
     value: { lhs: "a+", rhs: "123", type: "assignment" },
   });
   const scene = seedDb.withSceneFromItems([variable]);
-  const { store } = await renderTestApp(`/${scene.id}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   const mathScope = store.getState().mathItems.mathScope();
   expect(mathScope.errors.size).toBe(1);
@@ -21,7 +21,7 @@ test("right-hand parse errors are indicated on right-hand side", async () => {
     value: { lhs: "a", rhs: "123 + ", type: "assignment" },
   });
   const scene = seedDb.withSceneFromItems([variable]);
-  const { store } = await renderTestApp(`/${scene.id}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   const mathScope = store.getState().mathItems.mathScope();
   expect(mathScope.errors.size).toBe(1);

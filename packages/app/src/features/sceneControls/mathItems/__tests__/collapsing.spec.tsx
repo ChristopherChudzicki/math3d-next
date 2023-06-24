@@ -19,7 +19,7 @@ const isHidden = (el: HTMLElement | null): boolean => {
 const getExpandCollapse = (folderElement: HTMLElement) =>
   within(folderElement).getByLabelText("Expand/Collapse Folder");
 
-test.each([
+test.only.each([
   {
     isCollapsed: "false",
     route: "/test_folders",

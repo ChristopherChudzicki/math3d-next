@@ -34,9 +34,9 @@ const ShareButton: React.FC = () => {
     toggleCopied.off();
     const result = await createScene.mutateAsync(scene);
     navigate({
-      pathname: `/${result.id}`,
+      pathname: `/${result.key}`,
     });
-    setUrl(`${window.location.origin}/${result.id}`);
+    setUrl(`${window.location.origin}/${result.key}`);
   }, [toggleOpen, toggleCopied, createScene, scene, navigate]);
 
   const handleCopy = useCallback(() => {

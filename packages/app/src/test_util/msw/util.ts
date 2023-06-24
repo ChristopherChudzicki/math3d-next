@@ -3,9 +3,9 @@ import type { PartialBy } from "@math3d/utils";
 import type { Scene } from "@/types";
 import { makeItem } from "../makeItem";
 
-type PartialScene = PartialBy<Scene, "title" | "id">;
+type PartialScene = PartialBy<Scene, "title" | "key">;
 
-type SceneOptions = Partial<Pick<Scene, "id" | "title">>;
+type SceneOptions = Partial<Pick<Scene, "key" | "title">>;
 
 function makeSceneFromItems(items: MathItem[]): PartialScene;
 function makeSceneFromItems<T extends SceneOptions>(

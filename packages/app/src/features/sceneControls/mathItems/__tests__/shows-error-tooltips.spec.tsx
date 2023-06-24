@@ -38,7 +38,7 @@ test.each([
   "Widgets display error message in tooltip only when focused",
   async ({ getInput, item, errMatcher }) => {
     const scene = seedDb.withSceneFromItems([item]);
-    await renderTestApp(`/${scene.id}`);
+    await renderTestApp(`/${scene.key}`);
     const theInput = getInput();
 
     // not initially shown
@@ -59,7 +59,7 @@ test.each([
 test("Widget does not show a tooltip when focused if no error", async () => {
   const item = makeItem(MIT.Point, { coords: "[1,2,3] + 1" });
   const scene = seedDb.withSceneFromItems([item]);
-  await renderTestApp(`/${scene.id}`);
+  await renderTestApp(`/${scene.key}`);
 
   const theInput = screen.getByLabelText("Coordinates");
 

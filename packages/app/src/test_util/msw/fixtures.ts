@@ -3,7 +3,7 @@ import { Scene } from "@/types";
 import { makeItem } from "../makeItem";
 import { makeSceneFromItems } from "./util";
 
-const sceneIds = {
+const sceneKeys = {
   /**
    * A scene with 6 points distributed between 3 folders using labels:
    * - folder `"F1"` with points `["P1a", "P1b"]`
@@ -21,7 +21,7 @@ const sceneIds = {
 };
 
 const makeFolderScene = (
-  sceneId: string,
+  sceneKey: string,
   {
     F1 = {},
     F2 = {},
@@ -45,7 +45,7 @@ const makeFolderScene = (
   const [p0, p1, p2, p3, p4, p5] = points.map((p) => p.id);
   const [f0, f1, f2] = folders.map((f) => f.id);
   return {
-    id: sceneId,
+    key: sceneKey,
     title: "Test data for folders",
     items,
     itemOrder: {
@@ -60,19 +60,19 @@ const makeFolderScene = (
 
 const makeSliderScene = () =>
   makeSceneFromItems([makeItem(MIT.VariableSlider)], {
-    id: "slider",
+    key: "slider",
     title: "Slider",
   });
 
 type SceneFixture = () => Scene;
 
 const sceneFixtures: SceneFixture[] = [
-  () => makeFolderScene(sceneIds.testFolders),
+  () => makeFolderScene(sceneKeys.testFolders),
   () =>
-    makeFolderScene(sceneIds.testFoldersF2Collapsed, {
+    makeFolderScene(sceneKeys.testFoldersF2Collapsed, {
       F2: { isCollapsed: "true" },
     }),
   makeSliderScene,
 ];
 
-export { sceneIds, sceneFixtures };
+export { sceneKeys, sceneFixtures };

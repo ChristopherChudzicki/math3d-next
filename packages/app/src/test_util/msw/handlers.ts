@@ -2,13 +2,13 @@ import { rest } from "msw";
 import db from "./db";
 
 export const handlers = [
-  rest.get("http://localhost:3000/scenes/:id", (req, res, ctx) => {
-    const { id } = req.params;
-    if (typeof id !== "string") {
-      throw new Error("id should be string");
+  rest.get("http://localhost:3000/api/scenes/:key/", (req, res, ctx) => {
+    const { key } = req.params;
+    if (typeof key !== "string") {
+      throw new Error("key should be string");
     }
     const scene = db.scene.findFirst({
-      where: { id: { equals: id } },
+      where: { key: { equals: key } },
     });
     if (!scene) {
       return res(
