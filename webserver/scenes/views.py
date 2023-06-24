@@ -18,4 +18,4 @@ class ScenesView(viewsets.ModelViewSet):
 
     authentication_classes = []
     permission_classes = [AllowAny]
-    http_method_names = ['get', 'post', 'head']
+    http_method_names = ["get", "post", "head"]

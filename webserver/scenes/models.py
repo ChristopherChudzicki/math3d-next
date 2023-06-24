@@ -1,6 +1,6 @@
 import os
-from pathlib import Path
 import random
+from pathlib import Path
 
 import jtd  # type: ignore
 import yaml
@@ -31,10 +31,13 @@ class LegacyScene(models.Model):
     dehydrated = models.JSONField()
     migration_note = models.TextField(default="")
 
+
 KEY_ALPHABET = "123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNPQRSTUVWXYZ"
 
+
 def random_key(length=9):
-    return ''.join(random.choices(KEY_ALPHABET, k=length))
+    return "".join(random.choices(KEY_ALPHABET, k=length))
+
 
 class Scene(models.Model):
     """
