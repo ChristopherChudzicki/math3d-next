@@ -6316,7 +6316,7 @@ __metadata:
     typescript: 4.9.5
     typescript-plugin-css-modules: 3.4.0
     use-long-press: 2.0.4
-    vite: 4.0.3
+    vite: 4.0.5
     vite-tsconfig-paths: 4.0.3
     vitest: ^0.29.1
     whatwg-fetch: 3.6.2
@@ -18695,7 +18695,45 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:4.0.3, vite@npm:^3.0.0 || ^4.0.0":
+"vite@npm:4.0.5":
+  version: 4.0.5
+  resolution: "vite@npm:4.0.5"
+  dependencies:
+    esbuild: ^0.16.3
+    fsevents: ~2.3.2
+    postcss: ^8.4.20
+    resolve: ^1.22.1
+    rollup: ^3.7.0
+  peerDependencies:
+    "@types/node": ">= 14"
+    less: "*"
+    sass: "*"
+    stylus: "*"
+    sugarss: "*"
+    terser: ^5.4.0
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  peerDependenciesMeta:
+    "@types/node":
+      optional: true
+    less:
+      optional: true
+    sass:
+      optional: true
+    stylus:
+      optional: true
+    sugarss:
+      optional: true
+    terser:
+      optional: true
+  bin:
+    vite: bin/vite.js
+  checksum: efaa4cf8a1065ea34ef001e385a9bb89e068ec2d1c633cb3a8e4eb3149343f95827615fd5cc28cada8090b6c8cee9b1f00d3d553050377a67aa202e740f43717
+  languageName: node
+  linkType: hard
+
+"vite@npm:^3.0.0 || ^4.0.0":
   version: 4.0.3
   resolution: "vite@npm:4.0.3"
   dependencies:
