@@ -10,4 +10,4 @@ class SceneSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Scene
-        fields = ["items", "item_order", "title", "key"]
+        fields = ["items", "itemOrder", "title", "key"]
