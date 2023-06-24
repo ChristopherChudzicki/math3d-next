@@ -1,15 +1,17 @@
 import user from "@testing-library/user-event";
 import { MathItem } from "@math3d/mathitem-configs";
 import { mathScopeId } from "@/features/sceneControls/mathItems/mathScope";
-import * as R from "ramda";
 import { assertInstanceOf } from "@/util/predicates";
 import { act } from "react-dom/test-utils";
 
 const permutations = <T>(tokens: T[], subperms: T[][] = [[]]): T[][] =>
-  R.isEmpty(tokens)
+  tokens.length === 0
     ? subperms
     : tokens.flatMap((token: T, idx) =>
-        permutations(R.remove(idx, 1, tokens), R.map(R.append(token), subperms))
+        permutations(
+          tokens.filter((_tok, i) => i !== idx),
+          subperms.map((subperm) => [...subperm, token])
+        )
       );
 
 /**
