@@ -84,7 +84,9 @@ const hasItems =
 const scene = (): SelectorReturn<Omit<Scene, "key">> => (state: RootState) => {
   return {
     title: state.mathItems.title,
-    items: Object.values(state.mathItems.items),
+    items: Object.values(state.mathItems.items).sort((a, b) =>
+      a.id.localeCompare(b.id)
+    ),
     itemOrder: state.mathItems.order,
   };
 };

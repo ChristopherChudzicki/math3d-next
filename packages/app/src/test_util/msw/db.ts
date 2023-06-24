@@ -1,3 +1,4 @@
+import { cloneDeep } from "lodash";
 import type { PartialBy } from "@math3d/utils";
 import { factory, primaryKey } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
@@ -10,7 +11,7 @@ const db = factory({
   scene: {
     key: primaryKey(faker.datatype.uuid),
     title: faker.lorem.sentence,
-    items: () => [],
+    items: () => [] as any[],
     /**
      * This is a string because @mswjs/data does not have great support for
      * unstructured data at the moment.
@@ -29,11 +30,16 @@ type PartialScene = PartialBy<Scene, "title" | "key">;
  */
 const addScene = (scene: PartialScene): Scene => {
   const { itemOrder } = scene;
-  // @ts-expect-error Having trouble with mswjs/data factory types
-  return db.scene.create({
+
+  // @ts-expect-error Having trouble with msw types
+  const created = db.scene.create({
     ...scene,
     ...(itemOrder ? { itemOrder: JSON.stringify(itemOrder) } : {}),
   });
+  const copy = cloneDeep(created);
+  copy.itemOrder = JSON.parse(copy.itemOrder);
+  // @ts-expect-error Having trouble with msw types
+  return copy as Scene;
 };
 
 const seedDb = {
@@ -47,7 +53,7 @@ const seedDb = {
   withSceneFromItems: (items: MathItem[], { id }: { id?: string } = {}) => {
     const folder = makeItem(MathItemType.Folder);
     const scene: PartialScene = {
-      items: [folder, ...items],
+      items: [folder, ...items].sort((a, b) => a.id.localeCompare(b.id)),
       itemOrder: {
         main: [folder.id],
         [folder.id]: items.map((item) => item.id),

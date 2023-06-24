@@ -24,4 +24,23 @@ export const handlers = [
     };
     return res(ctx.json(parsedScene));
   }),
+  rest.post("http://localhost:3000/api/scenes/", async (req, res, ctx) => {
+    const { title, items, itemOrder } = await req.json();
+    if (typeof title !== "string") {
+      throw new Error("title should be string");
+    }
+    if (!Array.isArray(items)) {
+      throw new Error("items should be array");
+    }
+    if (!itemOrder) {
+      throw new Error("itemOrder should be object");
+    }
+    const scene = db.scene.create({
+      title,
+      items,
+      itemOrder: JSON.stringify(itemOrder),
+    });
+    scene.itemOrder = JSON.parse(scene.itemOrder);
+    return res(ctx.json(scene));
+  }),
 ];
