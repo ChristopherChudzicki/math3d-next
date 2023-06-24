@@ -37,7 +37,7 @@ test.each([
     const item = makeItem(MIT.Point, { coords: coordsString });
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
-    const { store } = await renderTestApp(`/${scene.id}`);
+    const { store } = await renderTestApp(`/${scene.key}`);
 
     const mathScope = store.getState().mathItems.mathScope();
     expect(mathScope.errors.size).toBe(numEvalErrors + numParseErrors);
@@ -70,7 +70,7 @@ test.each([
     const item = makeItem(MIT.Point);
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
-    const { store } = await renderTestApp(`/${scene.id}`);
+    const { store } = await renderTestApp(`/${scene.key}`);
 
     const mathScope = store.getState().mathItems.mathScope();
     const coordsInput = await screen.findByLabelText("Coordinates");
@@ -83,7 +83,7 @@ test.each([
 
 test("Adding items adds to mathScope", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { store } = await renderTestApp(`/${scene.id}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   const mathScope = store.getState().mathItems.mathScope();
   await user.click(await screen.findByText("Add New Object"));
@@ -111,7 +111,7 @@ test("Deleting items removes them from mathScope", async () => {
     opacity: "2^[1,2,3]",
   });
   const scene = seedDb.withSceneFromItems([point]);
-  const { store } = await renderTestApp(`/${scene.id}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   const mathScope = store.getState().mathItems.mathScope();
   expect(mathScope.results.size).toBeGreaterThan(1); // point + folder visibility

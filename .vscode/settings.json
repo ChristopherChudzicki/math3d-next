@@ -6,6 +6,6 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     },
-    "github.copilot.inlineSuggest.enable": false,
+    "github.copilot.inlineSuggest.enable": true,
     "typescript.tsdk": "node_modules/typescript/lib",
 }

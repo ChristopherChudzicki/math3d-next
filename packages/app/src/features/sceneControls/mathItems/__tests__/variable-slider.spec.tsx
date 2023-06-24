@@ -61,7 +61,7 @@ const setupTest = async (overrides: Overrides = {}) => {
 
   const item = makeItem(MIT.VariableSlider, props);
   const scene = seedDb.withSceneFromItems([item]);
-  const { store } = await renderTestApp(`/${scene.id}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
   const itemEl = getItemByDescription(item.properties.description);
   const btnToggle = await findBtn(itemEl, /(Pause)|(Play)/);
   const btnFaster = await findBtn(itemEl, btnLabels.faster);

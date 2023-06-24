@@ -12,7 +12,15 @@ import failOnConsole from "jest-fail-on-console";
 
 import { server } from "./test_util/msw/server";
 
-failOnConsole();
+failOnConsole({
+  silenceMessage: (msg) => {
+    const allowed = [
+      // This seems to come from whatwg-fetch sometimes even when MSW intercepts
+      /Network request failed/,
+    ];
+    return allowed.some((re) => re.test(msg));
+  },
+});
 
 /**
  * For the JSDOM tests, we need to mock at least Mathbox, since it relies on a

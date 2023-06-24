@@ -1,52 +1,48 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import classNames from "classnames";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useId, useMemo } from "react";
 
 import SubtleButtom from "../SubtleButton";
 import style from "./Sidebar.module.css";
 
 const getButtonDirection = (
-  isCollapsed: boolean,
+  isVisible: boolean,
   sidebarSide: "left" | "right"
 ) => {
-  if (sidebarSide === "left") return isCollapsed ? "right" : "left";
-  return isCollapsed ? "left" : "right";
+  if (sidebarSide === "left") return isVisible ? "left" : "right";
+  return isVisible ? "right" : "left";
 };
 
 type SidebarProps = {
   className?: string;
-  defaultOpen?: boolean;
+  visible: boolean;
+  onVisibleChange?: (current: boolean) => void;
   side: "left" | "right";
   children?: React.ReactNode;
-  onOpenStart?: () => void;
-  onCloseStart?: () => void;
+  label: string;
 };
 
 const Sidebar: React.FC<SidebarProps> = ({
-  defaultOpen = true,
-  onCloseStart,
-  onOpenStart,
   side,
   children,
   className,
+  visible,
+  onVisibleChange,
+  label,
 }) => {
-  const [isCollapsed, setCollapsed] = useState(!defaultOpen);
-  const toggleCollapsed = useCallback(() => {
-    const nowCollapsed = !isCollapsed;
-    setCollapsed(nowCollapsed);
-    if (nowCollapsed) {
-      onCloseStart?.();
-    } else {
-      onOpenStart?.();
-    }
-  }, [isCollapsed, onCloseStart, onOpenStart]);
+  const isCollapsed = !visible;
+  const regionId = useId();
   const IconComponent = useMemo(() => {
-    const direction = getButtonDirection(isCollapsed, side);
+    const direction = getButtonDirection(visible, side);
     if (direction === "left") return ChevronLeftIcon;
     if (direction === "right") return ChevronRightIcon;
     throw new Error(`Unexpected direction: ${direction}`);
-  }, [isCollapsed, side]);
+  }, [visible, side]);
+
+  const handleClick = useCallback(() => {
+    if (onVisibleChange) onVisibleChange(visible);
+  }, [visible, onVisibleChange]);
   return (
     <div
       className={classNames(className, style["sidebar-container"], {
@@ -63,14 +59,19 @@ const Sidebar: React.FC<SidebarProps> = ({
         })}
       >
         <SubtleButtom
-          onClick={toggleCollapsed}
+          onClick={handleClick}
           className={style["sidebar-button"]}
           centered
+          aria-controls={regionId}
+          aria-expanded={visible}
+          aria-label={isCollapsed ? `Expand ${label}` : `Collapse ${label}`}
         >
           <IconComponent />
         </SubtleButtom>
       </div>
-      {children}
+      <div role="region" id={regionId}>
+        {children}
+      </div>
     </div>
   );
 };

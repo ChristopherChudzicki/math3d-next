@@ -10,7 +10,7 @@ import { mathItemsSlice, MathItemsList } from "./mathItems";
 const { actions: itemActions } = mathItemsSlice;
 
 type Props = {
-  sceneId?: string;
+  sceneKey?: string;
 };
 
 const MainNav: React.FC = () => <>Main</>;
@@ -22,14 +22,18 @@ const AxesNav: React.FC = () => (
 );
 
 const SceneControls: React.FC<Props> = (props) => {
-  const { sceneId } = props;
+  const { sceneKey } = props;
   const dispatch = useAppDispatch();
 
-  const { isLoading, data: scene } = useScene(sceneId);
+  const { isLoading, data: scene } = useScene(sceneKey);
 
   useEffect(() => {
     if (!scene) return;
-    const payload = { items: scene.items, order: scene.itemOrder };
+    const payload = {
+      items: scene.items,
+      order: scene.itemOrder,
+      title: scene.title,
+    };
     dispatch(itemActions.setItems(payload));
   }, [dispatch, scene]);
 

@@ -11,6 +11,7 @@ interface MathItemsState {
   };
   order: Record<string, string[]>;
   activeItemId: string | undefined;
+  title: string;
   /**
    * We need to sync the expressions in MathItem.properties with the MathScope.
    * Putting mathScope in the redux store is a very convenient way to do this

@@ -20,6 +20,7 @@ const getInitialState = (): MathItemsState => {
     items: {},
     activeItemId: undefined,
     order: {},
+    title: "Untitled",
   };
 };
 
@@ -65,9 +66,11 @@ const mathItemsSlice = createSlice({
       action: PayloadAction<{
         items: MathItem[];
         order: MathItemsState["order"];
+        title: MathItemsState["title"];
       }>
     ) => {
-      const { items, order } = action.payload;
+      const { items, order, title } = action.payload;
+      state.title = title;
       state.items = keyBy(items, (item) => item.id);
       state.order = order;
       state.activeItemId = undefined;
@@ -173,6 +176,10 @@ const mathItemsSlice = createSlice({
       const oldParent = getParent(state.order, id);
       state.order[oldParent] = state.order[oldParent].filter((x) => x !== id);
       insertAtIndex(state.order[newParent], id, newIndex);
+    },
+    setTitle: (state, action: PayloadAction<{ title: string }>) => {
+      const { title } = action.payload;
+      state.title = title;
     },
   },
 });

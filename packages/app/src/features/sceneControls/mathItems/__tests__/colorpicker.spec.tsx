@@ -38,7 +38,7 @@ const setup = async <R extends MIT>(
   const item = makeItem(type, itemProps);
   const id = nodeId(item);
   const scene = seedDb.withSceneFromItems([item]);
-  const { store } = await renderTestApp(`/${scene.id}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   const mathScope = store.getState().mathItems.mathScope();
   const findButton = () => screen.findByTitle("Color and Visibility");
@@ -53,6 +53,7 @@ const setup = async <R extends MIT>(
     store.getState().mathItems.items[item.id] as MathItem<R>;
   const getCalculatedProp = (prop: keyof MathItem<R>["properties"] & string) =>
     mathScope.results.get(id(prop));
+
   return {
     getItem,
     findButton,

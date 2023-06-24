@@ -9,6 +9,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       "/admin": "http://localhost:8000",
+      "/api": "http://localhost:8000",
     },
   },
   plugins: [

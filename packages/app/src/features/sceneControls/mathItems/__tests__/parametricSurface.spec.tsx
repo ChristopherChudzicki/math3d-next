@@ -124,7 +124,7 @@ test.each([
     });
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
-    const { store } = await renderTestApp(`/${scene.id}`);
+    const { store } = await renderTestApp(`/${scene.key}`);
 
     const mathScope = store.getState().mathItems.mathScope();
     await new Promise((resolve) => {
@@ -183,7 +183,7 @@ test.each([
     const item = makeItem(MIT.ParametricSurface, { expr: expression.initial });
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
-    const { store } = await renderTestApp(`/${scene.id}`);
+    const { store } = await renderTestApp(`/${scene.key}`);
 
     const mathScope = store.getState().mathItems.mathScope();
     const inputs = getParamNameInputs();

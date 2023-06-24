@@ -15,7 +15,7 @@ test("left-hand parse errors are indicated on left-hand side", async () => {
     value: { lhs: "a+", rhs: "123", type: "assignment" },
   });
   const scene = seedDb.withSceneFromItems([variable]);
-  const { store } = await renderTestApp(`/${scene.id}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   const mathScope = store.getState().mathItems.mathScope();
   expect(mathScope.errors.size).toBe(1);
@@ -32,7 +32,7 @@ test("Clicking switch on Boolean variable toggles value", async () => {
   });
   const scene = seedDb.withSceneFromItems([variable]);
   const id = nodeId(variable);
-  const { store } = await renderTestApp(`/${scene.id}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
   const mathScope = store.getState().mathItems.mathScope();
   const form = getItemByDescription("Test Switch");
   const switchEl = await within(form).findByLabelText("Value");

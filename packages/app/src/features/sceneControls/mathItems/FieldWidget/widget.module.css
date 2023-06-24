@@ -37,6 +37,7 @@
 
 .field-widget {
   margin-bottom: 2pt;
+  background-color: transparent;
 }
 
 .field-widget-input {
@@ -47,6 +48,7 @@
   padding-right:0pt;
   padding-left: 0pt;
   padding-bottom: 2pt;
+  background-color: transparent;
   background-image: linear-gradient(
     to top,
     var(--color-secondary-light),

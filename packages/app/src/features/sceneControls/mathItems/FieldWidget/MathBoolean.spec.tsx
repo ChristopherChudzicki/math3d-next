@@ -21,7 +21,7 @@ const setup = async (initialValue: string) => {
   const point = makeItem(MIT.Point, { visible: initialValue });
   const id = nodeId(point);
   const scene = seedDb.withSceneFromItems([point]);
-  const { store } = await renderTestApp(`/${scene.id}`);
+  const { store } = await renderTestApp(`/${scene.key}`);
 
   const mathScope = store.getState().mathItems.mathScope();
   await user.click(await screen.findByLabelText("Show Settings"));

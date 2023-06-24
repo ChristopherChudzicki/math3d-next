@@ -13,7 +13,7 @@ html {
   --color-secondary-lightest: rgb(var(--color-secondary-lightest-rgb));
   --color-secondary-lighter-rgb: 235, 235, 235;
   --color-secondary-lighter: rgb(var(--color-secondary-lighter-rgb));
-  --color-secondary-light-rgb: 217, 217, 217;
+  --color-secondary-light-rgb: 191, 191, 191;
   --color-secondary-light: rgb(var(--color-secondary-light-rgb));
   --color-secondary-rgb: 140, 140, 140;
   --color-secondary: rgb(var(--color-secondary-rgb));
@@ -22,7 +22,8 @@ html {
   --color-background: rgb(var(--color-background-rgb));
 
   --color-error: red;
-  --color-text-light: rgb(140, 140, 140);;
+  --color-text-lighter: rgb(191, 191, 191);
+  --color-text-light: rgb(140, 140, 140);
   --color-text-primary:rgb(67, 67, 67);
 
   --border-radius: 4px;
