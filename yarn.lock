@@ -5939,7 +5939,6 @@ __metadata:
     "@types/toposort": 2.0.3
     "@vitejs/plugin-react": 4.0.1
     bootstrap: 5.2.2
-    bootstrap-icons: 1.9.1
     classnames: 2.3.2
     eslint: ^8.31.0
     fast-json-patch: ^3.1.1
@@ -6638,13 +6637,6 @@ __metadata:
   version: 1.0.0
   resolution: "boolbase@npm:1.0.0"
   checksum: 3e25c80ef626c3a3487c73dbfc70ac322ec830666c9ad915d11b701142fab25ec1e63eff2c450c74347acfd2de854ccde865cd79ef4db1683f7c7b046ea43bb0
-  languageName: node
-  linkType: hard
-
-"bootstrap-icons@npm:1.9.1":
-  version: 1.9.1
-  resolution: "bootstrap-icons@npm:1.9.1"
-  checksum: b388264719b5d2526809df509b83aa7e696d467f3b976d79faefb6fc7f07cee5427a894331af90b00b1ceb8d28a99fc398f1ca0553afaa53eb77a7749bb73ea5
   languageName: node
   linkType: hard
 
