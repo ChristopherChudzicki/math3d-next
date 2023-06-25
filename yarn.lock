@@ -4766,12 +4766,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ramda@npm:0.28.18":
-  version: 0.28.18
-  resolution: "@types/ramda@npm:0.28.18"
+"@types/ramda@npm:0.29.2":
+  version: 0.29.2
+  resolution: "@types/ramda@npm:0.29.2"
   dependencies:
-    ts-toolbelt: ^6.15.1
-  checksum: b140b062efefb3f293811783fdaabf43059d0ec1d78c1bc54884e6fc2bcd909ffe845d99d876b4a13972cc57109097c56f2c3a70e31401ede189a035a840465d
+    types-ramda: ^0.29.3
+  checksum: 152151848a02aca8b7eb7e95e247a10c8e0f12e07d096a25c4c230cc3bd704009670c735737d3f843373a4598869c2b2d6f81e425fa17c762e4b57808400d968
   languageName: node
   linkType: hard
 
@@ -5931,7 +5931,7 @@ __metadata:
     "@testing-library/user-event": 14.4.3
     "@types/lodash-es": ^4.17.6
     "@types/node": 18.16.18
-    "@types/ramda": 0.28.18
+    "@types/ramda": 0.29.2
     "@types/react": 18.0.24
     "@types/react-dom": 18.0.8
     "@types/three": ^0.146.0
@@ -17726,10 +17726,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-toolbelt@npm:^6.15.1":
-  version: 6.15.5
-  resolution: "ts-toolbelt@npm:6.15.5"
-  checksum: 24ad00cfd9ce735c76c873a9b1347eac475b94e39ebbdf100c9019dce88dd5f4babed52884cf82bb456a38c28edd0099ab6f704b84b2e5e034852b618472c1f3
+"ts-toolbelt@npm:^9.6.0":
+  version: 9.6.0
+  resolution: "ts-toolbelt@npm:9.6.0"
+  checksum: 9f35fd95d895a5d32ea9fd2e532a695b0bae6cbff6832b77292efa188a0ed1ed6e54f63f74a8920390f3d909a7a3adb20a144686372a8e78b420246a9bd3d58a
   languageName: node
   linkType: hard
 
@@ -17963,6 +17963,15 @@ __metadata:
   version: 0.0.6
   resolution: "typedarray@npm:0.0.6"
   checksum: 33b39f3d0e8463985eeaeeacc3cb2e28bc3dfaf2a5ed219628c0b629d5d7b810b0eb2165f9f607c34871d5daa92ba1dc69f49051cf7d578b4cbd26c340b9d1b1
+  languageName: node
+  linkType: hard
+
+"types-ramda@npm:^0.29.3":
+  version: 0.29.3
+  resolution: "types-ramda@npm:0.29.3"
+  dependencies:
+    ts-toolbelt: ^9.6.0
+  checksum: 2efb5182a02b9b11b0fd960c501c8a3c595f7fe82922526872020868a6a98c788b544c6beccb48360f1af9401d0c7f5e0be9b2ca484987f0339a71f48cec6199
   languageName: node
   linkType: hard
 
