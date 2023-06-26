@@ -1,0 +1,12 @@
+{
+    "name": "Math3d",
+    "repository": "https://github.com/christopherChudzicki/math3d-next",
+    "buildpacks": [
+        {
+            "url": "https://github.com/moneymeets/python-poetry-buildpack.git"
+        },
+        {
+            "url": "heroku/python"
+        }
+    ]
+  }
