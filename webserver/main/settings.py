@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    # "django.contrib.staticfiles",
+    "django.contrib.staticfiles",
     "rest_framework",
     "main",
     "scenes",
@@ -87,7 +87,7 @@ WSGI_APPLICATION = "main.wsgi.application"
 DATABASES = {
     "default": dj_database_url.config(
         default=os.environ.get(
-            "DATABASE_URLz",
+            "DATABASE_URL",
             f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}",
         )
     )
@@ -135,5 +135,3 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-import django_heroku
-django_heroku.settings(locals())
