@@ -7,6 +7,9 @@ colorama==0.4.6 ; python_version >= "3.11" and python_version < "4.0" and platfo
 dj-database-url==1.2.0 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:5c2993b91801c0f78a8b19e642b497b90831124cbade0c265900d4c1037b4730 \
     --hash=sha256:b23b15046cb38180e0c95207bcc90fe5e9dbde8eef16065907dd85cf4ca7036c
+django-heroku==0.3.1 ; python_version >= "3.11" and python_version < "4.0" \
+    --hash=sha256:2bc690aab89eedbe01311752320a9a12e7548e3b0ed102681acc5736a41a4762 \
+    --hash=sha256:6af4bc3ae4a9b55eaad6dbe5164918982d2762661aebc9f83d9fa49f6009514e
 django==4.2.2 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:2a6b6fbff5b59dd07bef10bcb019bee2ea97a30b2a656d51346596724324badf \
     --hash=sha256:672b3fa81e1f853bb58be1b51754108ab4ffa12a77c06db86aa8df9ed0c46fe5
@@ -90,3 +93,6 @@ tqdm==4.64.1 ; python_version >= "3.11" and python_version < "4.0" \
 tzdata==2022.7 ; python_version >= "3.11" and python_version < "4.0" and sys_platform == "win32" \
     --hash=sha256:2b88858b0e3120792a3c0635c23daf36a7d7eeeca657c323da299d2094402a0d \
     --hash=sha256:fe5f866eddd8b96e9fcba978f8e503c909b19ea7efda11e52e39494bad3a7bfa
+whitenoise==6.5.0 ; python_version >= "3.11" and python_version < "4.0" \
+    --hash=sha256:15fe60546ac975b58e357ccaeb165a4ca2d0ab697e48450b8f0307ca368195a8 \
+    --hash=sha256:16468e9ad2189f09f4a8c635a9031cc9bb2cdbc8e5e53365407acf99f7ade9ec
