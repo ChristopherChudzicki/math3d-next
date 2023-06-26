@@ -13,7 +13,7 @@ items_schema = jtd.Schema.from_dict(
         Path(
             os.path.join(
                 os.path.dirname(__file__),
-                "../../packages/mathitem-configs/src/schema.jtd.yaml",
+                "./math_items/schema.jtd.yaml",
             )
         ).read_text()
     )
