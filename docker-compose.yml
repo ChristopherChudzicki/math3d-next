@@ -34,7 +34,6 @@ services:
       make devserver
     volumes:
       - ./webserver:/src/webserver
-      - ./packages/mathitem-configs:/src/packages/mathitem-configs
     networks:
       default-network:
     depends_on:
