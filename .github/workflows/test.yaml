@@ -20,6 +20,8 @@ jobs:
       - run: yarn lint
       - run: yarn test
       - run: yarn build
+        env:
+          VITE_API_BASE_URL: https://api.math3d.org/v0
 
   webserver-tests:
     runs-on: ubuntu-latest
