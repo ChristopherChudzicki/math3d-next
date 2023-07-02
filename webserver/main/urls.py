@@ -18,4 +18,4 @@ from django.urls import include, path
 
 import scenes.urls
 
-urlpatterns = [path("admin/", admin.site.urls), path("api/", include(scenes.urls))]
+urlpatterns = [path("admin/", admin.site.urls), path("v0/", include(scenes.urls))]
