@@ -1,7 +1,7 @@
 import redaxios from "redaxios";
 
 const instance = redaxios.create({
-  baseURL: "http://localhost:3000/",
+  baseURL: import.meta.env.VITE_API_BASE_URL as string,
 });
 
 export default instance;

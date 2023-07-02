@@ -1,10 +1,11 @@
-import axios from "redaxios";
+import axios from "@/util/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Scene } from "@/types";
+import * as urls from "./urls";
 import defaultScene from "./defaultScene";
 
 const getScene = async (key: string): Promise<Scene> => {
-  const { data } = await axios.get<Scene>(`/api/scenes/${key}/`);
+  const { data } = await axios.get<Scene>(urls.SCENE_DETAIL(key));
   return data;
 };
 
@@ -22,7 +23,7 @@ const useScene = (key?: string) => {
 };
 
 const createScene = async (scene: Omit<Scene, "key">): Promise<Scene> => {
-  const { data } = await axios.post<Scene>("/api/scenes/", {
+  const { data } = await axios.post<Scene>(urls.SCENE_CREATE, {
     items: scene.items,
     title: scene.title,
     itemOrder: scene.itemOrder,

@@ -10,7 +10,10 @@ import { mathItemConfigs as configs, MathItemType as MIT } from "./index";
 const ajv = new Ajv();
 
 const getSchema = () => {
-  const filepath = path.join(__dirname, "./schema.jtd.yaml");
+  const filepath = path.join(
+    __dirname,
+    "../../../webserver/scenes/math_items/schema.jtd.yaml"
+  );
   const doc = yaml.load(fs.readFileSync(filepath, "utf8"));
   return doc as Record<string, unknown>;
 };
