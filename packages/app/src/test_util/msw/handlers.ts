@@ -2,7 +2,7 @@ import { rest } from "msw";
 import db from "./db";
 
 export const handlers = [
-  rest.get("http://localhost:3000/api/scenes/:key/", (req, res, ctx) => {
+  rest.get("http://localhost:8000/v0/scenes/:key/", (req, res, ctx) => {
     const { key } = req.params;
     if (typeof key !== "string") {
       throw new Error("key should be string");
@@ -24,7 +24,7 @@ export const handlers = [
     };
     return res(ctx.json(parsedScene));
   }),
-  rest.post("http://localhost:3000/api/scenes/", async (req, res, ctx) => {
+  rest.post("http://localhost:8000/v0/scenes/", async (req, res, ctx) => {
     const { title, items, itemOrder } = await req.json();
     if (typeof title !== "string") {
       throw new Error("title should be string");

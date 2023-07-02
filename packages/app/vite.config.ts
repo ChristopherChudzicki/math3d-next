@@ -3,16 +3,16 @@ import { defineConfig } from "vitest/config";
 import { visualizer } from "rollup-plugin-visualizer";
 import react from "@vitejs/plugin-react";
 import viteTsconfigPaths from "vite-tsconfig-paths";
+import { Schema, ValidateEnv } from "@julr/vite-plugin-validate-env";
 
 export default defineConfig({
   server: {
     port: 3000,
-    proxy: {
-      "/admin": "http://localhost:8000",
-      "/api": "http://localhost:8000",
-    },
   },
   plugins: [
+    ValidateEnv({
+      VITE_API_BASE_URL: Schema.string(),
+    }),
     react(),
     viteTsconfigPaths(),
     visualizer({

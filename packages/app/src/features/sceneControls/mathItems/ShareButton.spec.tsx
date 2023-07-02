@@ -1,8 +1,9 @@
 import { test, expect, vi } from "vitest";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { makeItem, renderTestApp, screen, seedDb, user } from "@/test_util";
-import axios from "redaxios";
+import axios from "@/util/axios";
 import { Scene } from "@/types";
+import { urls } from "@/api";
 
 describe("Share Button", () => {
   beforeAll(() => {
@@ -25,7 +26,7 @@ describe("Share Button", () => {
     const shareButton = screen.getByRole("button", { name: "Share" });
     await user.click(shareButton);
 
-    expect(axios.post).toHaveBeenCalledWith("/api/scenes/", {
+    expect(axios.post).toHaveBeenCalledWith(urls.SCENE_CREATE, {
       title: scene.title,
       items: scene.items,
       itemOrder: scene.itemOrder,

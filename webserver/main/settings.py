@@ -14,6 +14,9 @@ import os
 from pathlib import Path
 
 import dj_database_url
+import environ  # type: ignore
+
+env = environ.Env(CORS_ALLOWED_ORIGINS=(list, []))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,6 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "corsheaders",
     "main",
     "scenes",
 ]
@@ -51,6 +55,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -59,6 +64,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
 
 ROOT_URLCONF = "main.urls"
 
@@ -87,7 +94,7 @@ WSGI_APPLICATION = "main.wsgi.application"
 DATABASES = {
     "default": dj_database_url.config(
         default=os.environ.get(
-            "DATABASE_URLz",
+            "DATABASE_URL",
             f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}",
         )
     )
@@ -134,3 +141,9 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Configure Django App for Heroku.
+if os.environ.get("IS_HEROKU"):
+    import django_heroku  # type: ignore
+
+    django_heroku.settings(locals())
