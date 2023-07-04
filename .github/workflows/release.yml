@@ -22,7 +22,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18.12.1"
-          cache: 'yarn'
       - run: yarn instxall --immutable
       - run: yarn build
       - run: aws s3 cp packages/app/dist s3://${{ vars.AWS_S3_BUCKET }}
