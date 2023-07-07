@@ -6,6 +6,7 @@ import { useAppDispatch } from "@/store/hooks";
 import AddObjectButton from "./AddObjectButton";
 import ControlTabs from "./controlTabs";
 import { mathItemsSlice, MathItemsList } from "./mathItems";
+import styles from "./SceneControls.module.css";
 
 const { actions: itemActions } = mathItemsSlice;
 
@@ -40,7 +41,9 @@ const SceneControls: React.FC<Props> = (props) => {
   return (
     <ControlTabs
       loading={isLoading}
-      tabBarExtraContent={<AddObjectButton />}
+      tabBarExtraContent={
+        <AddObjectButton className={styles.AddObjectButton} />
+      }
       mainNav={<MainNav />}
       mainContent={<MathItemsList rootId="main" />}
       axesNav={<AxesNav />}

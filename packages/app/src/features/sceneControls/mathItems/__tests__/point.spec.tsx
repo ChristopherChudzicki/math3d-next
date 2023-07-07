@@ -86,7 +86,7 @@ test("Adding items adds to mathScope", async () => {
   const { store } = await renderTestApp(`/${scene.key}`);
 
   const mathScope = store.getState().mathItems.mathScope();
-  await user.click(await screen.findByText("Add New Object"));
+  await user.click(await screen.findByText("Add Object"));
   const menu = await screen.findByRole("menu");
   const addPoint = await within(menu).findByText("Point");
   await user.click(addPoint, { pointerEventsCheck: 0 });
