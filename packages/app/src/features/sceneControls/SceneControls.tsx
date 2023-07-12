@@ -35,6 +35,7 @@ const SceneControls: React.FC<Props> = (props) => {
       order: scene.itemOrder,
       title: scene.title,
     };
+    console.log(payload);
     dispatch(itemActions.setItems(payload));
   }, [dispatch, scene]);
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   useLocation,
   useNavigate,
@@ -16,8 +16,76 @@ import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import ShareButton from "@/features/sceneControls/mathItems/ShareButton";
 import { useBodyClass, useToggle } from "@/util/hooks";
+import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import MenuIcon from "@mui/icons-material/Menu";
+import Menu from "@mui/material/Menu";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import styles from "./MainPage.module.css";
 import ExamplesDrawer from "./ExamplesDrawer";
+
+type HeaderMenuProps = {
+  onClickExamples: () => void;
+};
+
+const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
+  const smallScreen = useMediaQuery("(max-width: 600px)");
+  const [menuOpen, toggleMenuOpen] = useToggle(false);
+  const [buttonEl, setButtonEl] = useState<HTMLElement | null>(null);
+  return (
+    <nav className={styles["nav-container"]}>
+      {smallScreen ? (
+        <>
+          <IconButton onClick={toggleMenuOpen.on} ref={setButtonEl}>
+            <MenuIcon />
+          </IconButton>
+          <Menu
+            keepMounted
+            open={menuOpen}
+            anchorEl={buttonEl}
+            onClose={toggleMenuOpen.off}
+            onClick={toggleMenuOpen.off}
+          >
+            <ShareButton variant="mobile" />
+            <MenuItem onClick={props.onClickExamples}>
+              <ListItemIcon>
+                <LightbulbOutlined fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Examples</ListItemText>
+            </MenuItem>
+            <MenuItem>
+              <ListItemIcon>
+                <HelpOutlineOutlinedIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Contact</ListItemText>
+            </MenuItem>
+          </Menu>
+        </>
+      ) : (
+        <>
+          <ShareButton variant="desktop" />
+          <Button
+            onClick={props.onClickExamples}
+            variant="text"
+            color="secondary"
+            startIcon={<LightbulbOutlined fontSize="inherit" />}
+          >
+            Examples
+          </Button>
+          <Button
+            variant="text"
+            color="secondary"
+            startIcon={<HelpOutlineOutlinedIcon fontSize="inherit" />}
+          >
+            Contact
+          </Button>
+        </>
+      )}
+    </nav>
+  );
+};
 
 type HeaderProps = {
   className?: string;
@@ -30,24 +98,7 @@ const Header: React.FC<HeaderProps> = (props) => (
     <div className={styles["header-container"]}>
       <span className={styles.brand}>Math3d</span>
       {props.title}
-      <nav className={styles["nav-container"]}>
-        <Button
-          onClick={props.onClickExamples}
-          variant="text"
-          color="secondary"
-          startIcon={<LightbulbOutlined fontSize="inherit" />}
-        >
-          Examples
-        </Button>
-        <ShareButton />
-        <Button
-          variant="text"
-          color="secondary"
-          startIcon={<HelpOutlineOutlinedIcon fontSize="inherit" />}
-        >
-          Contact
-        </Button>
-      </nav>
+      <HeaderMenu onClickExamples={props.onClickExamples} />
     </div>
   </header>
 );
@@ -130,13 +181,6 @@ const MainPage: React.FC = () => {
           <SceneControls sceneKey={sceneKey} />
         </Sidebar>
         <ExamplesDrawer open={examplesOpen} onClose={toggleExamplesOpen.off} />
-        {/* <Sidebar
-          className={styles.sidebar}
-          side="right"
-          visible={examplesOpen}
-          onVisibleChange={handleExamplesClick}
-          label="Examples"
-        /> */}
         <Scene
           className={
             controlsOpen
