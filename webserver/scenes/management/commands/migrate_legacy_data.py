@@ -38,6 +38,13 @@ class Command(BaseCommand):
                 "grid-yz": {"type": "GRID"},
                 "grid-zx": {"type": "GRID"},
             }
+
+            symbols = legacy_scene.dehydrated["mathSymbols"]
+            for item_id, item in symbols.items():
+                if item["type"] == "VARIABLE_SLIDER" and "value" not in item:
+                    item["value"] = legacy_scene.dehydrated["sliderValues"][item_id]
+
+
             old_items = {
                 **default_items,
                 **legacy_scene.dehydrated["folders"],
