@@ -44,7 +44,6 @@ class Command(BaseCommand):
                 if item["type"] == "VARIABLE_SLIDER" and "value" not in item:
                     item["value"] = legacy_scene.dehydrated["sliderValues"][item_id]
 
-
             old_items = {
                 **default_items,
                 **legacy_scene.dehydrated["folders"],
