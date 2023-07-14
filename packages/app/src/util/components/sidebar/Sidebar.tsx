@@ -40,6 +40,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     throw new Error(`Unexpected direction: ${direction}`);
   }, [visible, side]);
 
+  const inertness = isCollapsed ? { inert: "true", "aria-hidden": true } : {};
+
   const handleClick = useCallback(() => {
     if (onVisibleChange) onVisibleChange(visible);
   }, [visible, onVisibleChange]);
@@ -69,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <IconComponent />
         </SubtleButtom>
       </div>
-      <div role="region" id={regionId}>
+      <div role="region" id={regionId} {...inertness}>
         {children}
       </div>
     </div>

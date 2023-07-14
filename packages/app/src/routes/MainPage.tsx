@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   useLocation,
   useNavigate,
@@ -15,18 +15,82 @@ import TitleInput from "@/features/sceneControls/TitleInput";
 import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import ShareButton from "@/features/sceneControls/mathItems/ShareButton";
+import { useBodyClass, useToggle } from "@/util/hooks";
+import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import MenuIcon from "@mui/icons-material/Menu";
+import Menu from "@mui/material/Menu";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import styles from "./MainPage.module.css";
+import ExamplesDrawer from "./ExamplesDrawer";
 
-const cssVars = {
-  "--sidebar-width": "375px",
-  "--header-height": "50px",
-  "--sidebar-z": "10",
-  "--sidebar-duration": "0.5s",
-} as React.CSSProperties;
+type HeaderMenuProps = {
+  onClickExamples: () => void;
+};
+
+const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
+  const smallScreen = useMediaQuery("(max-width: 600px)");
+  const [menuOpen, toggleMenuOpen] = useToggle(false);
+  const [buttonEl, setButtonEl] = useState<HTMLElement | null>(null);
+  return (
+    <nav className={styles["nav-container"]}>
+      {smallScreen ? (
+        <>
+          <IconButton onClick={toggleMenuOpen.on} ref={setButtonEl}>
+            <MenuIcon />
+          </IconButton>
+          <Menu
+            keepMounted
+            open={menuOpen}
+            anchorEl={buttonEl}
+            onClose={toggleMenuOpen.off}
+            onClick={toggleMenuOpen.off}
+          >
+            <ShareButton variant="mobile" />
+            <MenuItem onClick={props.onClickExamples}>
+              <ListItemIcon>
+                <LightbulbOutlined fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Examples</ListItemText>
+            </MenuItem>
+            <MenuItem>
+              <ListItemIcon>
+                <HelpOutlineOutlinedIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Contact</ListItemText>
+            </MenuItem>
+          </Menu>
+        </>
+      ) : (
+        <>
+          <ShareButton variant="desktop" />
+          <Button
+            onClick={props.onClickExamples}
+            variant="text"
+            color="secondary"
+            startIcon={<LightbulbOutlined fontSize="inherit" />}
+          >
+            Examples
+          </Button>
+          <Button
+            variant="text"
+            color="secondary"
+            startIcon={<HelpOutlineOutlinedIcon fontSize="inherit" />}
+          >
+            Contact
+          </Button>
+        </>
+      )}
+    </nav>
+  );
+};
 
 type HeaderProps = {
   className?: string;
   title: React.ReactNode;
+  onClickExamples: () => void;
 };
 
 const Header: React.FC<HeaderProps> = (props) => (
@@ -34,24 +98,7 @@ const Header: React.FC<HeaderProps> = (props) => (
     <div className={styles["header-container"]}>
       <span className={styles.brand}>Math3d</span>
       {props.title}
-      <nav className={styles["nav-container"]}>
-        <Button
-          href="#examples"
-          variant="text"
-          color="secondary"
-          startIcon={<LightbulbOutlined fontSize="inherit" />}
-        >
-          Examples
-        </Button>
-        <ShareButton />
-        <Button
-          variant="text"
-          color="secondary"
-          startIcon={<HelpOutlineOutlinedIcon fontSize="inherit" />}
-        >
-          Contact
-        </Button>
-      </nav>
+      <HeaderMenu onClickExamples={props.onClickExamples} />
     </div>
   </header>
 );
@@ -97,9 +144,9 @@ const useSearchEnum = <T extends string>({
 const CONTROLS_VALUES = ["0", "1"] as const;
 
 const MainPage: React.FC = () => {
+  useBodyClass(styles.bodyVariables);
   const { sceneKey } = useParams();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [examplesOpen, toggleExamplesOpen] = useToggle(false);
   const [controlsVisibility, setControlsVisibility] = useSearchEnum({
     name: "controls",
     values: CONTROLS_VALUES,
@@ -116,17 +163,13 @@ const MainPage: React.FC = () => {
     },
     [setControlsVisibility]
   );
-  const examplesOpen = location.hash === "#examples";
-  const handleExamplesClick = useCallback(() => {
-    if (!examplesOpen) {
-      navigate({ hash: "examples", search: location.search });
-    } else {
-      navigate({ hash: undefined, search: location.search });
-    }
-  }, [navigate, examplesOpen, location.search]);
   return (
-    <div className={styles.container} style={cssVars}>
-      <Header title={<TitleInput />} className={styles.header} />
+    <div className={styles.container}>
+      <Header
+        title={<TitleInput />}
+        className={styles.header}
+        onClickExamples={toggleExamplesOpen.on}
+      />
       <div className={styles.body}>
         <Sidebar
           className={styles.sidebar}
@@ -137,13 +180,7 @@ const MainPage: React.FC = () => {
         >
           <SceneControls sceneKey={sceneKey} />
         </Sidebar>
-        <Sidebar
-          className={styles.sidebar}
-          side="right"
-          visible={examplesOpen}
-          onVisibleChange={handleExamplesClick}
-          label="Examples"
-        />
+        <ExamplesDrawer open={examplesOpen} onClose={toggleExamplesOpen.off} />
         <Scene
           className={
             controlsOpen

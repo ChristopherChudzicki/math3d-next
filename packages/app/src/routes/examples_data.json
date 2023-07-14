@@ -1,0 +1,121 @@
+[
+    {
+        "id": "sliders_intro",
+        "text": {
+            "primary": "Using Variable Sliders",
+            "secondary": "feature demo"
+        }
+    },
+    {
+        "id": "sliders_plotrange",
+        "text": {
+            "primary": "Using Sliders to Animate Plot Range",
+            "secondary": "feature demo"
+        }
+    },
+    {
+        "id": "color_and_visibility",
+        "text": {
+            "primary": "Color and Visibility",
+            "secondary": "feature demo"
+        }
+    },
+    {
+        "id": "vectors",
+        "text": {
+            "primary": "Vectors and Vector Tails",
+            "secondary": "feature demo"
+        }
+    },
+    {
+        "id": "labels",
+        "text": {
+            "primary": "Labeling Points, Vectors, and Lines",
+            "secondary": "feature demo"
+        }
+    },
+    {
+        "id": "functions",
+        "text": {
+            "primary": "Using Functions",
+            "secondary": "feature demo"
+        }
+    },
+    {
+        "id": "derivatives",
+        "text": {
+            "primary": "diff: Using Derivatives",
+            "secondary": "feature demo"
+        }
+    },
+    {
+        "id": "calculated_visibility",
+        "text": {
+            "primary": "Controlling Multiple Object Visibility with Toggles",
+            "secondary": "feature demo"
+        }
+    },
+    {
+        "id": "z_bias",
+        "text": {
+            "primary": "Fine-tuning Visibility with z-bias",
+            "secondary": "feature demo"
+        }
+    },
+    {
+        "id": "tnb",
+        "text": {
+            "primary": "The TNB Vectors for Parametric Curves",
+            "secondary": "feature demo"
+        }
+    },
+    {
+        "id": "animate_camera",
+        "text": {
+            "primary": "Animating the Camera Position",
+            "secondary": "feature demo"
+        }
+    },
+    {
+        "id": "motion",
+        "text": {
+            "primary": "Motion: Velocity and Acceleration",
+            "secondary": "example"
+        }
+    },
+    {
+        "id": "ruled_hyperboloid",
+        "text": {
+            "primary": "Ruled Hyperboloid",
+            "secondary": "example"
+        }
+    },
+    {
+        "id": "horizontal_revolution_washer",
+        "text": {
+            "primary": "Surface of Revolution: Washer Method (Horizontal Axis)",
+            "secondary": "example"
+        }
+    },
+    {
+        "id": "vertical_revolution_shell_method",
+        "text": {
+            "primary": "Surface of Revolution: Shell Method (Vertical Axis)",
+            "secondary": "example"
+        }
+    },
+    {
+        "id": "sphere_colormap",
+        "text": {
+            "primary": "Color Maps on a Sphere",
+            "secondary": "example"
+        }
+    },
+    {
+        "id": "osculating_circle",
+        "text": {
+            "primary": "Osculating Circle",
+            "secondary": "example"
+        }
+    }
+]

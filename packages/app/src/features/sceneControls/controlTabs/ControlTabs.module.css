@@ -4,8 +4,6 @@
 
 .tabsHeader {
   composes: tabContext;
-  padding-left: 1em;
-  padding-right: 1em;
   height: var(--tabListHeight);
   display: flex;
   flex-direction: row;
@@ -25,4 +23,6 @@
   display: flex;
   justify-content: flex-end;
   align-self: center;
+  align-items: center;
+  height: 100%;
 }

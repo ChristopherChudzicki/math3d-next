@@ -26,7 +26,8 @@
 
 .description {
   /** Make description lighter so that mathfields draw more visual focus */
-  color: var(--color-text-light)
+  color: var(--color-text-light);
+  max-width: 100%
 }
 
 .grid-left-gutter {

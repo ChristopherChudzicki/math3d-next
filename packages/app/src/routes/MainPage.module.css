@@ -1,16 +1,24 @@
 .container {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 100vw;
   grid-template-rows: var(--header-height) 1fr;
   height: 100%;
   overflow: hidden;
 }
 
 .header {
+  height: var(--header-height);
   grid-column: 1 / 2;
   grid-row: 1 / 2;
   background-color: var(--color-secondary-lightest);
   border-bottom: 1pt solid var(--color-secondary-light);
+}
+
+.bodyVariables {
+  --header-height: 50px;
+  --sidebar-width: min(375px, calc(100vw - 50px));
+  --sidebar-z: 10;
+  --sidebar-duration: 0.5s;
 }
 
 .sidebar {

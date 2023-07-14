@@ -1,0 +1,6 @@
+
+.examplesList :global(.MuiListSubheader-root) {
+  height: var(--header-height);
+  border-bottom: 1pt solid var(--color-secondary-light);
+  margin-bottom: 0px;
+}

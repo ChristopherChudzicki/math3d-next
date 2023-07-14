@@ -11,7 +11,7 @@ import {
 import invariant from "tiny-invariant";
 
 const addItem = async (itemTypeLabel: string): Promise<void> => {
-  const addNewItemButton = screen.getByText("Add New Object");
+  const addNewItemButton = screen.getByText("Add Object");
   await user.click(addNewItemButton);
   const menu = await screen.findByRole("menu");
   const itemType = await within(menu).findByText(itemTypeLabel);
