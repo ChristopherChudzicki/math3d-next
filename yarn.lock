@@ -4809,15 +4809,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ramda@npm:0.29.2":
-  version: 0.29.2
-  resolution: "@types/ramda@npm:0.29.2"
-  dependencies:
-    types-ramda: ^0.29.3
-  checksum: 152151848a02aca8b7eb7e95e247a10c8e0f12e07d096a25c4c230cc3bd704009670c735737d3f843373a4598869c2b2d6f81e425fa17c762e4b57808400d968
-  languageName: node
-  linkType: hard
-
 "@types/react-dom@npm:18.0.8":
   version: 18.0.8
   resolution: "@types/react-dom@npm:18.0.8"
@@ -5975,7 +5966,6 @@ __metadata:
     "@testing-library/user-event": 14.4.3
     "@types/lodash-es": ^4.17.6
     "@types/node": 18.16.18
-    "@types/ramda": 0.29.2
     "@types/react": 18.0.24
     "@types/react-dom": 18.0.8
     "@types/three": ^0.146.0
@@ -5983,7 +5973,6 @@ __metadata:
     "@types/toposort": 2.0.3
     "@vitejs/plugin-react": 4.0.1
     bootstrap: 5.2.2
-    bootstrap-icons: 1.9.1
     classnames: 2.3.2
     eslint: ^8.31.0
     fast-json-patch: ^3.1.1
@@ -6682,13 +6671,6 @@ __metadata:
   version: 1.0.0
   resolution: "boolbase@npm:1.0.0"
   checksum: 3e25c80ef626c3a3487c73dbfc70ac322ec830666c9ad915d11b701142fab25ec1e63eff2c450c74347acfd2de854ccde865cd79ef4db1683f7c7b046ea43bb0
-  languageName: node
-  linkType: hard
-
-"bootstrap-icons@npm:1.9.1":
-  version: 1.9.1
-  resolution: "bootstrap-icons@npm:1.9.1"
-  checksum: b388264719b5d2526809df509b83aa7e696d467f3b976d79faefb6fc7f07cee5427a894331af90b00b1ceb8d28a99fc398f1ca0553afaa53eb77a7749bb73ea5
   languageName: node
   linkType: hard
 
@@ -17793,13 +17775,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-toolbelt@npm:^9.6.0":
-  version: 9.6.0
-  resolution: "ts-toolbelt@npm:9.6.0"
-  checksum: 9f35fd95d895a5d32ea9fd2e532a695b0bae6cbff6832b77292efa188a0ed1ed6e54f63f74a8920390f3d909a7a3adb20a144686372a8e78b420246a9bd3d58a
-  languageName: node
-  linkType: hard
-
 "tsconfck@npm:^2.1.0":
   version: 2.1.1
   resolution: "tsconfck@npm:2.1.1"
@@ -18030,15 +18005,6 @@ __metadata:
   version: 0.0.6
   resolution: "typedarray@npm:0.0.6"
   checksum: 33b39f3d0e8463985eeaeeacc3cb2e28bc3dfaf2a5ed219628c0b629d5d7b810b0eb2165f9f607c34871d5daa92ba1dc69f49051cf7d578b4cbd26c340b9d1b1
-  languageName: node
-  linkType: hard
-
-"types-ramda@npm:^0.29.3":
-  version: 0.29.3
-  resolution: "types-ramda@npm:0.29.3"
-  dependencies:
-    ts-toolbelt: ^9.6.0
-  checksum: 2efb5182a02b9b11b0fd960c501c8a3c595f7fe82922526872020868a6a98c788b544c6beccb48360f1af9401d0c7f5e0be9b2ca484987f0339a71f48cec6199
   languageName: node
   linkType: hard
 
