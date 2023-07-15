@@ -73,4 +73,6 @@ export const inlineShortcuts = {
   // derivatives
   pdiff: "\\frac{\\partial #?}{\\partial #?}",
   diff: "\\frac{\\differentialD #?}{\\differentialD #?}",
+  // operators
+  "*": "\\cdot",
 };
