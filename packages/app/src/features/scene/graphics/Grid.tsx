@@ -15,7 +15,7 @@ const props = [
   "snap",
 ] as const;
 
-const Grid: GraphicComponent<MathItemType.Grid> = ({ item }) => {
+const Grid: GraphicComponent<MathItemType.Grid> = ({ item, zOrder }) => {
   const scope = useMathScope();
   const { color, axes } = item.properties;
   const { divisions, visible, opacity, width, zIndex, zBias, snap } =
@@ -31,6 +31,7 @@ const Grid: GraphicComponent<MathItemType.Grid> = ({ item }) => {
       visible={visible}
       zIndex={zIndex}
       zBias={zBias}
+      zOrder={zOrder}
       niceX={snap}
       niceY={snap}
     />

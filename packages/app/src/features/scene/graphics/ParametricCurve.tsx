@@ -23,6 +23,7 @@ const props = [
 const RANGE = [0, 1];
 const ParametricCurve: GraphicComponent<MathItemType.ParametricCurve> = ({
   item,
+  zOrder,
 }) => {
   const scope = useMathScope();
   const { color } = item.properties;
@@ -69,6 +70,7 @@ const ParametricCurve: GraphicComponent<MathItemType.ParametricCurve> = ({
         size={size}
         zBias={zBias}
         zIndex={zIndex}
+        zOrder={zOrder}
       />
     </MB.Group>
   );
