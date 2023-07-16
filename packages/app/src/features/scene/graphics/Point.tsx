@@ -16,7 +16,7 @@ const props = [
   "size",
 ] as const;
 const labelOffset = [0, 40, 0];
-const Point: GraphicComponent<MathItemType.Point> = ({ item }) => {
+const Point: GraphicComponent<MathItemType.Point> = ({ item, zOrder }) => {
   const scope = useMathScope();
   const { color, label } = item.properties;
   const { coords, size, visible, opacity, zIndex, zBias, labelVisible } =
@@ -33,11 +33,12 @@ const Point: GraphicComponent<MathItemType.Point> = ({ item }) => {
         opacity={opacity}
         zIndex={zIndex}
         zBias={zBias}
+        zOrder={zOrder}
       />
       {labelVisible && (
         <MB.Group>
           <MB.Format weight="bold" data={labels} />
-          <MB.Label offset={labelOffset} />
+          <MB.Label offset={labelOffset} zOrder={zOrder} />
         </MB.Group>
       )}
     </MB.Group>

@@ -19,7 +19,7 @@ const props = [
 ] as const;
 
 const labelOffset = [0, 40, 0];
-const Line: GraphicComponent<MathItemType.Line> = ({ item }) => {
+const Line: GraphicComponent<MathItemType.Line> = ({ item, zOrder }) => {
   const scope = useMathScope();
   const { color, label } = item.properties;
   const {
@@ -50,6 +50,7 @@ const Line: GraphicComponent<MathItemType.Line> = ({ item }) => {
         opacity={opacity}
         zIndex={zIndex}
         zBias={zBias}
+        zOrder={zOrder}
         start={start}
         end={end}
         width={width}

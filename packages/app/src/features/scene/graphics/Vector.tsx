@@ -20,7 +20,7 @@ const props = [
 ] as const;
 
 const labelOffset = [0, 40, 0];
-const Vector: GraphicComponent<MathItemType.Vector> = ({ item }) => {
+const Vector: GraphicComponent<MathItemType.Vector> = ({ item, zOrder }) => {
   const scope = useMathScope();
   const { color, label } = item.properties;
   const {
@@ -60,12 +60,13 @@ const Vector: GraphicComponent<MathItemType.Vector> = ({ item }) => {
         start={start}
         end={end}
         width={width}
+        zOrder={zOrder}
       />
       {labelVisible && labelCoords && (
         <MB.Group>
           <MB.Array data={labelCoords} items={1} channels={3} />
           <MB.Format weight="bold" data={labels} />
-          <MB.Label offset={labelOffset} />
+          <MB.Label offset={labelOffset} zOrder={zOrder} />
         </MB.Group>
       )}
     </MB.Group>

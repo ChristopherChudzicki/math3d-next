@@ -4,7 +4,11 @@ import * as MB from "mathbox-react";
 import type { MathboxSelection } from "mathbox";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Vector3 } from "three";
-import { isMathGraphic, MathItemType } from "@math3d/mathitem-configs";
+import {
+  isMathGraphic,
+  MathItem,
+  MathItemType,
+} from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import { debounce } from "lodash";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -31,6 +35,15 @@ const mathboxOptions = {
 const setup = (mathbox: MathboxSelection | null) => {
   // @ts-expect-error For debugging
   window.mathbox = mathbox;
+};
+
+const isSurface = (item: MathItem) => {
+  return [
+    MathItemType.ParametricSurface,
+    MathItemType.ExplicitSurface,
+    MathItemType.ExplicitSurfacePolar,
+    MathItemType.ImplicitSurface,
+  ].includes(item.type);
 };
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
@@ -60,11 +73,15 @@ const SceneContent = () => {
     };
     return debounce(cb, 200);
   }, [dispatch, camera.id]);
+
   return (
     <MB.Cartesian range={range} scale={scale}>
       <Camera item={camera} range={range} onMoveEnd={onCameraChange} />
       {items.filter(isMathGraphic).map((item) => {
-        const others = graphicNeedsRange(item.type) ? { range } : undefined;
+        const others = {
+          ...(graphicNeedsRange(item.type) ? { range } : {}),
+          ...(isSurface(item) ? { zOrder: 1 } : {}),
+        };
         return <Graphic key={item.id} item={item} {...others} />;
       })}
     </MB.Cartesian>

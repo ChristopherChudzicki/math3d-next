@@ -48,6 +48,7 @@ type MathboxParametricSurfaceProps = {
   opacity?: number;
   zBias?: number;
   zIndex?: number;
+  zOrder?: number;
   samples1?: number;
   samples2?: number;
   grid1?: number;
@@ -85,6 +86,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
   colorFunc,
   color,
   range,
+  zOrder,
 }) => {
   const [dataNode, setData] = useState<MathboxSelection<"area"> | null>(null);
   const [colorNode, setColor] = useState<MathboxSelection<"area"> | null>(null);
@@ -187,6 +189,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
           color="#FFFFFF"
           zBias={zBias}
           zIndex={zIndex}
+          zOrder={zOrder}
           shaded={shaded}
         />
       )}
@@ -198,6 +201,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
             color={gridColor}
             width={gridWidth}
             opacity={gridOpacity}
+            zOrder={zOrder}
           />
         </MB.Group>
       )}
@@ -210,6 +214,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
             color={gridColor}
             width={gridWidth}
             opacity={gridOpacity}
+            zOrder={zOrder}
           />
         </MB.Group>
       )}
@@ -220,6 +225,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
 const ParametricSurface: GraphicComponent<MIT.ParametricSurface> = ({
   item,
   range,
+  zOrder,
 }) => {
   invariant(range);
   const scope = useMathScope();
@@ -236,6 +242,7 @@ const ParametricSurface: GraphicComponent<MIT.ParametricSurface> = ({
       colorFunc={colorFunc}
       color={color}
       range={range}
+      zOrder={zOrder}
       {...others}
     />
   );
@@ -244,6 +251,7 @@ const ParametricSurface: GraphicComponent<MIT.ParametricSurface> = ({
 const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({
   item,
   range,
+  zOrder,
 }) => {
   invariant(range);
   const scope = useMathScope();
@@ -264,6 +272,7 @@ const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({
       colorFunc={colorFunc}
       color={color}
       range={range}
+      zOrder={zOrder}
       {...others}
     />
   );
@@ -272,6 +281,7 @@ const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({
 const ExplicitSurfacePolar: GraphicComponent<MIT.ExplicitSurfacePolar> = ({
   item,
   range,
+  zOrder,
 }) => {
   invariant(range);
   const scope = useMathScope();
@@ -296,6 +306,7 @@ const ExplicitSurfacePolar: GraphicComponent<MIT.ExplicitSurfacePolar> = ({
       colorFunc={colorFunc}
       color={color}
       range={range}
+      zOrder={zOrder}
       {...others}
     />
   );

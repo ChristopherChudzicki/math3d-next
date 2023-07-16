@@ -21,7 +21,7 @@ const props = [
 ] as const;
 
 const LABEL_OFFSET = [0, 30, 0];
-const Axis: GraphicComponent<MathItemType.Axis> = ({ item }) => {
+const Axis: GraphicComponent<MathItemType.Axis> = ({ item, zOrder }) => {
   const scope = useMathScope();
   const { color, axis, label } = item.properties;
   const {
@@ -55,6 +55,7 @@ const Axis: GraphicComponent<MathItemType.Axis> = ({ item }) => {
         visible={visible}
         zIndex={zIndex}
         zBias={zBias}
+        zOrder={zOrder}
         end={end}
         start={start}
         size={size}
@@ -62,16 +63,16 @@ const Axis: GraphicComponent<MathItemType.Axis> = ({ item }) => {
       <MB.Scale axis={axis} divide={divisions} zero={false} />
       {ticksVisible && (
         <MB.Group>
-          <MB.Ticks color={color} width={2} />
+          <MB.Ticks color={color} width={2} zOrder={zOrder} />
           <MB.Format digits={2} />
-          <MB.Label {...tickLabelProps} />
+          <MB.Label {...tickLabelProps} zOrder={zOrder} />
         </MB.Group>
       )}
       {labelVisible && (
         <MB.Group>
           <MB.Array live={false} channels={3} data={labelPosData} />
           <MB.Text live={false} data={[label]} />
-          <MB.Label offset={LABEL_OFFSET} />
+          <MB.Label offset={LABEL_OFFSET} zOrder={zOrder} />
         </MB.Group>
       )}
     </MB.Group>
