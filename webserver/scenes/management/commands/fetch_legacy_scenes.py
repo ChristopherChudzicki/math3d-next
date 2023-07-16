@@ -23,6 +23,13 @@ class Command(BaseCommand):
             help="Limit the number of scenes fetched",
         )
 
+        parser.add_argument(
+            "--filter",
+            dest="filter",
+            type=str,
+            help="Filter the scenes fetched by a SQL WHERE clause",
+        )
+
     def get_cursor(self):
         conn = psycopg2.connect(
             os.environ["LEGACY_DATABASE_URL"], cursor_factory=DictCursor
@@ -32,16 +39,24 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         limit = options["limit"]
         cursor = self.get_cursor()
-        query = (
+        if options["filter"]:
+            query = cursor.mogrify(
+                """
+        SELECT url_key, dehydrated, times_accessed, last_accessed
+        FROM graphs WHERE url_key IN (%s)
+        """,
+                options["filter"].split(","),
+            )
+        elif limit:
             sql.SQL(
                 f"""
         SELECT url_key, dehydrated, times_accessed, last_accessed
-        FROM graphs LIMIT {limit};
+        FROM graphs LIMIT %s;
         """
-            ).format(limit=limit)
-            if limit
-            else sql.SQL("SELECT * FROM graphs;")
-        )
+            )
+        else:
+            query = sql.SQL("SELECT * FROM graphs;")
+
         cursor.execute(query)
 
         for scene in tqdm.tqdm(cursor.fetchall()):
