@@ -26,3 +26,8 @@ jobs:
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
       - run: aws s3 cp --recursive packages/app/dist s3://${{ vars.AWS_S3_BUCKET }}/
       - run: aws cloudfront create-invalidation --distribution-id ${{vars.CLOUDFRONT_DISTRIBUTION_ID}} --paths "/"
+      - uses: akhileshns/heroku-deploy@v3.12.14 # This is the action
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: ${{vars.HEROKU_APP_NAME}}
+          heroku_email: ${{vars.HEROKU_EMAIL}}
