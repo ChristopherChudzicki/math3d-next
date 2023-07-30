@@ -47,7 +47,7 @@ const SceneControls: React.FC<Props> = (props) => {
       mainNav={<MainNav />}
       mainContent={<MathItemsList rootId="main" />}
       axesNav={<AxesNav />}
-      axesdContent={<MathItemsList rootId="setup" />}
+      axesdContent={<MathItemsList rootId="setup" permanent />}
     />
   );
 };

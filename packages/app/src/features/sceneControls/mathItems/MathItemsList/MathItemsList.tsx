@@ -68,10 +68,11 @@ interface FolderProps {
 
 const EVALUATED_PROPS = ["isCollapsed"] as const;
 
-const FolderWithContents: React.FC<FolderProps> = ({
+const FolderWithContents: React.FC<FolderProps & { permanent?: boolean }> = ({
   folder,
   items,
   contentsClassName,
+  permanent,
 }) => {
   const mathScope = useMathScope();
   const evaluated = useMathItemResults(mathScope, folder, EVALUATED_PROPS);
@@ -105,6 +106,7 @@ const FolderWithContents: React.FC<FolderProps> = ({
               <SortableItem
                 key={item.id}
                 id={item.id}
+                disabled={permanent}
                 data={itemData}
                 draggingClassName={style.dragging}
               >
@@ -118,7 +120,10 @@ const FolderWithContents: React.FC<FolderProps> = ({
   );
 };
 
-const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
+const MathItemsList: React.FC<{ rootId: string; permanent?: boolean }> = ({
+  rootId,
+  permanent,
+}) => {
   const root = useAppSelector(select.subtree(rootId));
   const { children: folders = [] } = root;
   const mathItems = useAppSelector(select.mathItems());
@@ -225,6 +230,7 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
           invariant(folderItem.type === MathItemType.Folder);
           return (
             <SortableItem
+              disabled={permanent}
               key={folderItem.id}
               id={folderItem.id}
               data={folderData}
@@ -236,6 +242,7 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
                 })}
                 folder={folderItem}
                 items={childItems}
+                permanent={permanent}
               />
             </SortableItem>
           );
