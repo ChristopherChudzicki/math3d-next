@@ -16,7 +16,7 @@
   "dependencies": {
     "@math3d/mathjs-utils": "workspace:^",
     "@math3d/utils": "workspace:^",
-    "mathjs": "11.7.0",
+    "mathjs": "11.9.1",
     "yup": "^1.0.1"
   }
 }

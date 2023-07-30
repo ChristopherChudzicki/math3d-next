@@ -3,7 +3,7 @@
   "exports": "./src/index.ts",
   "main": "./src/index.ts",
   "dependencies": {
-    "mathjs": "11.7.0"
+    "mathjs": "11.9.1"
   },
   "devDependencies": {
     "@math3d/eslint-config": "workspace:^",
