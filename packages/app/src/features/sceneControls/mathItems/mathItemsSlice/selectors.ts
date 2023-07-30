@@ -3,6 +3,8 @@ import { Scene } from "@/types";
 import type { MathItem } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import type { MathItemsState, AppMathScope, Subtree } from "./interfaces";
+import * as utils from "./util";
+import { SETTINGS_FOLDER } from "./util";
 
 const title =
   (): SelectorReturn<MathItemsState["title"]> => (state: RootState) =>
@@ -64,6 +66,14 @@ const isActive =
 const mathScope = (): SelectorReturn<AppMathScope> => (state: RootState) =>
   state.mathItems.mathScope();
 
+const isPermanent =
+  (id: string): SelectorReturn<boolean> =>
+  (state: RootState) => {
+    if (id === SETTINGS_FOLDER) return true;
+    const { order } = state.mathItems;
+    return utils.isDescendantOf(order, id, SETTINGS_FOLDER);
+  };
+
 const getItems =
   (ids: string[]): SelectorReturn<MathItem[]> =>
   (state: RootState) => {
@@ -102,5 +112,6 @@ export {
   hasItems,
   getItems,
   scene,
+  isPermanent,
 };
 export type { Subtree };

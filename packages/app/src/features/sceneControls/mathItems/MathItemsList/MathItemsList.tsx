@@ -120,11 +120,9 @@ const FolderWithContents: React.FC<FolderProps & { permanent?: boolean }> = ({
   );
 };
 
-const MathItemsList: React.FC<{ rootId: string; permanent?: boolean }> = ({
-  rootId,
-  permanent,
-}) => {
+const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
   const root = useAppSelector(select.subtree(rootId));
+  const permanent = useAppSelector(select.isPermanent(rootId));
   const { children: folders = [] } = root;
   const mathItems = useAppSelector(select.mathItems());
   const dispatch = useAppDispatch();

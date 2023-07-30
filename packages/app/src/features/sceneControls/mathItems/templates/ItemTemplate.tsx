@@ -6,7 +6,7 @@ import {
   MathItemType as MIT,
   WidgetType,
 } from "@math3d/mathitem-configs";
-import React, { useCallback } from "react";
+import React, { useCallback, createContext, useContext } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 import ColorStatus from "../ColorStatus";
@@ -44,6 +44,8 @@ const ItemTemplate = <T extends MIT>({
   const onFocus = useCallback(() => {
     dispatch(actions.setActiveItem({ id: item.id }));
   }, [item.id, dispatch]);
+
+  const permanent = useAppSelector(select.isPermanent(item.id));
 
   return (
     <form
@@ -88,6 +90,9 @@ const ItemTemplate = <T extends MIT>({
       >
         <CloseButton
           disabled={item.type === MIT.Folder}
+          className={classNames({
+            [styles.hidden]: permanent,
+          })}
           onClick={remove}
           aria-label="Remove Item"
         />

@@ -119,3 +119,17 @@ test("Inserting items after deletion---active item resets", async () => {
   expect(descriptions).toHaveLength(9);
   expect(descriptions).toStrictEqual(expected.split(" "));
 });
+
+test("Cannot insert items into permanent folders", () => {
+  // insertion should be allowed but should be into default folder and refocus tab
+  throw new Error("TODO");
+});
+
+test("Removing items", () => {
+  // folders and non-folders
+  throw new Error("TODO");
+});
+
+test("Cannot permanent folders or their items", () => {
+  throw new Error("TODO");
+});

@@ -11,6 +11,7 @@ interface MathItemsState {
   };
   order: Record<string, string[]>;
   activeItemId: string | undefined;
+  activeTabId: string;
   title: string;
   /**
    * We need to sync the expressions in MathItem.properties with the MathScope.
