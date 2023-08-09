@@ -9,6 +9,7 @@ import {
   renderTestApp,
 } from "@/test_util";
 import invariant from "tiny-invariant";
+import type { RootState } from "@/store/store";
 
 const addItem = async (itemTypeLabel: string): Promise<void> => {
   const addNewItemButton = screen.getByText("Add Object");
@@ -23,6 +24,9 @@ const getItemByDescription = (description: string): HTMLElement =>
 
 const findItemByDescription = (description: string): Promise<HTMLElement> =>
   screen.findByLabelText(`Settings for ${description}`);
+
+const getItemByTestId = (id: string): HTMLElement =>
+  screen.getByTestId(`settings-${id}`);
 
 const clickRemoveItem = async (itemElement: HTMLElement): Promise<void> => {
   const remove = within(itemElement).getByLabelText("Remove Item");
@@ -54,6 +58,15 @@ const setupItemTest = async <T extends MathItemType>(
   return { item, form, store };
 };
 
+const getActiveItem = (store: {
+  getState: () => RootState;
+}): MathItem | null => {
+  const { activeItemId } = store.getState().mathItems;
+  if (!activeItemId) return null;
+  const item = store.getState().mathItems.items[activeItemId];
+  return item;
+};
+
 export {
   addItem,
   clickRemoveItem,
@@ -61,4 +74,6 @@ export {
   findItemByDescription,
   findBtn,
   setupItemTest,
+  getActiveItem,
+  getItemByTestId,
 };

@@ -1,6 +1,20 @@
-import { renderTestApp, screen, user, within } from "@/test_util";
+import { MathItemType as MIT } from "@math3d/mathitem-configs";
+import {
+  makeItem,
+  renderTestApp,
+  screen,
+  seedDb,
+  user,
+  within,
+} from "@/test_util";
 import _ from "lodash";
-import { addItem, clickRemoveItem, getItemByDescription } from "./__utils__";
+import {
+  addItem,
+  clickRemoveItem,
+  getActiveItem,
+  getItemByDescription,
+  getItemByTestId,
+} from "./__utils__";
 
 test("setup renders 9 points in 3 folders", async () => {
   await renderTestApp("/test_folders");
@@ -120,16 +134,80 @@ test("Inserting items after deletion---active item resets", async () => {
   expect(descriptions).toStrictEqual(expected.split(" "));
 });
 
-test("Cannot insert items into permanent folders", () => {
-  // insertion should be allowed but should be into default folder and refocus tab
-  throw new Error("TODO");
+const permanentItems = [
+  {
+    itemId: "axes",
+  },
+  {
+    itemId: "axis-x",
+  },
+];
+
+test.each(permanentItems)(
+  "Cannot insert items into permanent folders",
+  async ({ itemId }) => {
+    // insertion should be allowed but should be into default folder and refocus tab
+    const { store } = await renderTestApp("/");
+    await user.click(screen.getByRole("tab", { name: "Axes & Camera" }));
+    const item = getItemByTestId(itemId);
+    const description = within(item).getByLabelText("Description");
+    await user.click(description);
+    expect(getActiveItem(store)?.id).toBe(itemId);
+    const order0 = store.getState().mathItems.order;
+    await addItem("Point");
+    const order1 = store.getState().mathItems.order;
+    expect(order1).toEqual({
+      ...order0,
+      initialFolder: [expect.any(String), ...order0.initialFolder],
+    });
+  }
+);
+
+test.each(permanentItems)("Removing items", async ({ itemId }) => {
+  await renderTestApp("/");
+  const removeBtnLabel = "Remove Item";
+  within(getItemByDescription("Explicit Surface")).getByRole("button", {
+    name: removeBtnLabel,
+  });
+  await user.click(screen.getByRole("tab", { name: "Axes & Camera" }));
+  const item = getItemByTestId(itemId);
+  const removeBtn = within(item).getByRole("button", {
+    name: removeBtnLabel,
+  });
+  expect(removeBtn).toHaveClass("hidden");
+  expect(removeBtn).toBeDisabled();
 });
 
-test("Removing items", () => {
-  // folders and non-folders
-  throw new Error("TODO");
-});
+test.each(permanentItems)(
+  "Cannot move permanent folders or their items",
+  async ({ itemId }) => {
+    await renderTestApp("/");
+    const surface = getItemByDescription("Explicit Surface");
+    expect(
+      surface.closest('[aria-roledescription="sortable"]')
+    ).not.toHaveAttribute("aria-disabled", "true");
+    await user.click(screen.getByRole("tab", { name: "Axes & Camera" }));
+    expect(
+      getItemByTestId(itemId).closest('[aria-roledescription="sortable"]')
+    ).toHaveAttribute("aria-disabled", "true");
+  }
+);
 
-test("Cannot permanent folders or their items", () => {
-  throw new Error("TODO");
+test.each([
+  {
+    items: [makeItem(MIT.Point)],
+    isRemoveDisabled: true,
+  },
+  {
+    items: [],
+    isRemoveDisabled: false,
+  },
+])("Cannot delete non-empty folders", async ({ items, isRemoveDisabled }) => {
+  const scene = seedDb.withSceneFromItems(items);
+  await renderTestApp(`/${scene.key}`);
+  const folder = getItemByDescription("Folder");
+  const removeBtn = within(folder).getByRole("button", {
+    name: "Remove Item",
+  }) as HTMLButtonElement;
+  expect(removeBtn.disabled).toBe(isRemoveDisabled);
 });

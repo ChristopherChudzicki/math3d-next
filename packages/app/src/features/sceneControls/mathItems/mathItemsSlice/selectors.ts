@@ -74,6 +74,13 @@ const isPermanent =
     return utils.isDescendantOf(order, id, SETTINGS_FOLDER);
   };
 
+const hasChildren =
+  (id: string): SelectorReturn<boolean> =>
+  (state: RootState) => {
+    const { order } = state.mathItems;
+    return order[id]?.length > 0;
+  };
+
 const getItems =
   (ids: string[]): SelectorReturn<MathItem[]> =>
   (state: RootState) => {
@@ -113,5 +120,6 @@ export {
   getItems,
   scene,
   isPermanent,
+  hasChildren,
 };
 export type { Subtree };

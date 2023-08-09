@@ -11,6 +11,7 @@ const db = factory({
   scene: {
     key: primaryKey(faker.datatype.uuid),
     title: faker.lorem.sentence,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     items: () => [] as any[],
     /**
      * This is a string because @mswjs/data does not have great support for
