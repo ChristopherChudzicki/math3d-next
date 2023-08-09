@@ -29,6 +29,7 @@ import KeyboardSensor from "./KeyboardSensor";
 interface SortableItemProps {
   id: UniqueIdentifier;
   data?: Data;
+  disabled?: boolean;
   draggingClassName?: string;
   className?: string;
   children?: React.ReactNode;
@@ -47,6 +48,7 @@ const SortableItem: React.FC<SortableItemProps> = (props) => {
   } = useSortable({
     id: props.id,
     data: props.data,
+    disabled: props.disabled,
   });
   const style = {
     transform: CSS.Translate.toString(transform),

@@ -37,6 +37,7 @@ const ItemTemplate = <T extends MIT>({
 
   const dispatch = useAppDispatch();
   const isActive = useAppSelector(select.isActive(item.id));
+  const hasChildren = useAppSelector(select.hasChildren(item.id));
   const remove = useCallback(() => {
     dispatch(actions.remove({ id: item.id }));
   }, [dispatch, item.id]);
@@ -45,8 +46,11 @@ const ItemTemplate = <T extends MIT>({
     dispatch(actions.setActiveItem({ id: item.id }));
   }, [item.id, dispatch]);
 
+  const permanent = useAppSelector(select.isPermanent(item.id));
+
   return (
     <form
+      data-testid={`settings-${item.id}`}
       aria-label={`Settings for ${item.properties.description}`}
       className={classNames(styles.container, {
         [styles.childItem]: childItem,
@@ -87,7 +91,10 @@ const ItemTemplate = <T extends MIT>({
         )}
       >
         <CloseButton
-          disabled={item.type === MIT.Folder}
+          disabled={permanent || hasChildren}
+          className={classNames({
+            [styles.hidden]: permanent,
+          })}
           onClick={remove}
           aria-label="Remove Item"
         />

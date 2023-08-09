@@ -12,6 +12,7 @@ import {
 } from "./syncMathScope";
 import type { MathItemsState } from "./interfaces";
 import { makeMathScope } from "./mathScopeInstance";
+import { isDescendantOf, MAIN_FOLDER, SETTINGS_FOLDER } from "./util";
 
 const getInitialState = (): MathItemsState => {
   const mathScope = makeMathScope();
@@ -19,23 +20,23 @@ const getInitialState = (): MathItemsState => {
     mathScope: () => mathScope,
     items: {},
     activeItemId: undefined,
+    activeTabId: MAIN_FOLDER,
     order: {},
     title: "Untitled",
   };
 };
 
-const MAIN_FOLDER = "main";
-const getActiveFolderId = (
+const getInsertionFolder = (
   order: MathItemsState["order"],
   itemId?: string
 ): string => {
-  if (itemId === undefined) {
+  if (itemId === undefined || isDescendantOf(order, itemId, SETTINGS_FOLDER)) {
     const folderId = order[MAIN_FOLDER].at(-1);
     assertNotNil(folderId, "Main folder should have at least one child.");
     return folderId;
   }
   /**
-   * If the item exists at tree root, then it's a folder.
+   * If the item exists on `order`, then it's a folder.
    */
   if (order[itemId]) return itemId;
   const folderEntry = Object.entries(order).find(([_folderId, itemIds]) => {
@@ -74,6 +75,11 @@ const mathItemsSlice = createSlice({
       state.items = keyBy(items, (item) => item.id);
       state.order = order;
       state.activeItemId = undefined;
+      state.activeTabId = MAIN_FOLDER;
+
+      invariant(state.order[MAIN_FOLDER], "Main folder should exist.");
+      invariant(state.order[SETTINGS_FOLDER], "Settings folder should exist.");
+
       const mathScope = makeMathScope();
       state.mathScope = () => mathScope;
       syncItemsToMathScope(mathScope, items);
@@ -89,9 +95,13 @@ const mathItemsSlice = createSlice({
       const { type, id } = action.payload;
       const item = mathItemConfigs[type].make(id);
       state.items[id] = item;
+      state.activeTabId = MAIN_FOLDER;
 
       const isFolder = type === MathItemType.Folder;
-      const activeFolderId = getActiveFolderId(state.order, state.activeItemId);
+      const activeFolderId = getInsertionFolder(
+        state.order,
+        state.activeItemId
+      );
       const targetFolderId = isFolder ? MAIN_FOLDER : activeFolderId;
       const insertAfterId = isFolder ? activeFolderId : state.activeItemId;
       assertNotNil(targetFolderId);
@@ -181,9 +191,17 @@ const mathItemsSlice = createSlice({
       const { title } = action.payload;
       state.title = title;
     },
+    setActiveTab: (
+      state,
+      action: PayloadAction<{ id: typeof MAIN_FOLDER | typeof SETTINGS_FOLDER }>
+    ) => {
+      state.activeTabId = action.payload.id;
+    },
   },
 });
 
+const { actions, reducer } = mathItemsSlice;
+
 export type { MathItemsState };
-export const { actions, reducer } = mathItemsSlice;
 export default mathItemsSlice;
+export { actions, reducer };
