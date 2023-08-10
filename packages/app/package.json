@@ -88,7 +88,7 @@
     "@types/three": "^0.146.0",
     "@types/tinycolor2": "1.4.3",
     "@types/toposort": "2.0.3",
-    "@vitejs/plugin-react": "4.0.3",
+    "@vitejs/plugin-react": "4.0.4",
     "eslint": "^8.31.0",
     "identity-obj-proxy": "3.0.0",
     "jest-fail-on-console": "3.1.1",
