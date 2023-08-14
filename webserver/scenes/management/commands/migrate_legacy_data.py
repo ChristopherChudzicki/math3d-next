@@ -42,12 +42,12 @@ class Command(BaseCommand):
                 item["type"] = "FOLDER"
 
             default_items = {
-                "axis-x": {"type": "AXIS"},
-                "axis-y": {"type": "AXIS"},
-                "axis-z": {"type": "AXIS"},
-                "grid-xy": {"type": "GRID"},
-                "grid-yz": {"type": "GRID"},
-                "grid-zx": {"type": "GRID"},
+                "axis-x": {"type": "AXIS", "axis": "x"},
+                "axis-y": {"type": "AXIS", "axis": "y"},
+                "axis-z": {"type": "AXIS", "axis": "z", "scale": "1/2"},
+                "grid-xy": {"type": "GRID", "axes": "xy"},
+                "grid-yz": {"type": "GRID", "axes": "yz", "visible": False},
+                "grid-zx": {"type": "GRID", "axes": "zx", "visible": False},
             }
 
             symbols = legacy_scene.dehydrated["mathSymbols"]
