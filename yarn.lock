@@ -1970,6 +1970,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cortex-js/compute-engine@npm:0.12.3":
+  version: 0.12.3
+  resolution: "@cortex-js/compute-engine@npm:0.12.3"
+  dependencies:
+    complex.js: ^2.1.1
+    decimal.js: ^10.4.0
+  checksum: 424cc566fdd37d8d5852dfedae9fb8e2dd47f8fffdf75f11bba184bc5cc4d7df53cea3fef702b2d98c9fce555485d80297358e377ef3a171e9421b06e33b3ddb
+  languageName: node
+  linkType: hard
+
 "@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
   resolution: "@cspotcode/source-map-support@npm:0.8.1"
@@ -6155,7 +6165,7 @@ __metadata:
     lodash: 4.17.21
     mathbox: ^2.3.1
     mathbox-react: ^0.2.2
-    mathlive: 0.91.2
+    mathlive: 0.95.5
     msw: 0.49.3
     ordinal: 1.0.3
     react: 18.2.0
@@ -8332,7 +8342,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"decimal.js@npm:^10.4.2, decimal.js@npm:^10.4.3":
+"decimal.js@npm:^10.4.0, decimal.js@npm:^10.4.2, decimal.js@npm:^10.4.3":
   version: 10.4.3
   resolution: "decimal.js@npm:10.4.3"
   checksum: 796404dcfa9d1dbfdc48870229d57f788b48c21c603c3f6554a1c17c10195fc1024de338b0cf9e1efe0c7c167eeb18f04548979bcc5fdfabebb7cc0ae3287bae
@@ -13270,10 +13280,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathlive@npm:0.91.2":
-  version: 0.91.2
-  resolution: "mathlive@npm:0.91.2"
-  checksum: 260cff0898eae0436a6500336ad9aa6f8ed13ab37789c5708f26719383fb022498a46ea247dbf2a86234f27e0864abbdbe2dd625cbc3034a5c718739f266e828
+"mathlive@npm:0.95.5":
+  version: 0.95.5
+  resolution: "mathlive@npm:0.95.5"
+  dependencies:
+    "@cortex-js/compute-engine": 0.12.3
+  checksum: 4309cf56ce0ef8e59de307d9de5bdcba6cfe95ac746cbefa252d371998ef0374f5722ea0950a4aed2d5de6d107c6d5df43f17f51814e9f1335b75503a78d1582
   languageName: node
   linkType: hard
 
