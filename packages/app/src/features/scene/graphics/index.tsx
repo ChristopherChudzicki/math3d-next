@@ -6,6 +6,7 @@ import Grid from "./Grid";
 import Axis from "./Axis";
 import Line from "./Line";
 import Vector from "./Vector";
+import VectorField from "./VectorField";
 import ParametricCurve from "./ParametricCurve";
 import {
   ParametricSurface,
@@ -27,7 +28,7 @@ const graphics = {
   [MathItemType.ParametricCurve]: ParametricCurve,
   [MathItemType.ParametricSurface]: ParametricSurface,
   [MathItemType.Vector]: Vector,
-  [MathItemType.VectorField]: NotImplemented,
+  [MathItemType.VectorField]: VectorField,
 };
 
 const NEEDS_RANGE: MathItemType[] = [

@@ -1,3 +1,4 @@
+import { validators } from "@math3d/validators";
 import { ParseableArray, ParseableObjs } from "@math3d/parser";
 import { MathItemType, WidgetType } from "../constants";
 import type {
@@ -59,15 +60,15 @@ const defaultValues: VectorFieldProperties = {
     items: [
       {
         type: "expr",
-        expr: "[-5, 5]",
+        expr: "\\left[-5, 5\\right]",
       },
       {
         type: "expr",
-        expr: "[-5, 5]",
+        expr: "\\left[-5, 5\\right]",
       },
       {
         type: "expr",
-        expr: "[-5, 5]",
+        expr: "\\left[-5, 5\\right]",
       },
     ],
   },
@@ -75,7 +76,7 @@ const defaultValues: VectorFieldProperties = {
     type: "function-assignment",
     name: "_f",
     params: ["x", "y", "z"],
-    rhs: "[y, -x]/sqrt(x^2 + y^2)",
+    rhs: "\\frac{\\left[y, -x, 0\\right]}{\\sqrt(x^2 + y^2)}",
   },
   samples1: "10",
   samples2: "10",
@@ -106,6 +107,7 @@ type EvaluatedProperties = {
   samples2: number;
   samples3: number;
   scale: number;
+  expr: (x: number, y: number, z: number) => [number, number, number];
 };
 
 const config: IMathItemConfig<
@@ -134,11 +136,13 @@ const config: IMathItemConfig<
       name: "scale",
       label: "Scale Multiplier",
       widget: WidgetType.MathValue,
+      validate: validators.real,
     },
     expr: {
       name: "expr",
       label: "Expression",
       widget: WidgetType.MathValue,
+      validate: validators.realFunc[3][3],
     },
   },
   settingsProperties: [
