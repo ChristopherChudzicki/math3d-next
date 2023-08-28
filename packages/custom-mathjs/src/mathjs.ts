@@ -78,6 +78,8 @@ import {
   createUnitT,
 } from "./derivatives";
 
+import customConstants from "./constants";
+
 const normalTrig = {
   sinDependencies,
   cosDependencies,
@@ -179,5 +181,12 @@ mathjs.import({
   unitN: createUnitN,
   unitB: createUnitT,
 });
+
+mathjs.import(
+  {
+    customConstants,
+  },
+  { override: true }
+);
 
 export default mathjs;
