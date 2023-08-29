@@ -42,4 +42,15 @@ describe("mathjs instance", () => {
     // @ts-expect-error added by me
     expect(math.ln).toBeDefined();
   });
+
+  it("defines expected constants", () => {
+    expect(math.i).toEqual([1, 0, 0]);
+    expect(math.j).toEqual([0, 1, 0]);
+    expect(math.k).toEqual([0, 0, 1]);
+    expect(math.hati).toEqual([1, 0, 0]);
+    expect(math.hatj).toEqual([0, 1, 0]);
+    expect(math.hatk).toEqual([0, 0, 1]);
+    expect(math.I.re).toBe(0);
+    expect(math.I.im).toBe(1);
+  });
 });

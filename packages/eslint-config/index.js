@@ -1,7 +1,6 @@
 module.exports = {
   extends: [
     "react-app",
-    "react-app/jest",
     "airbnb",
     "airbnb-typescript",
     "eslint:recommended",
@@ -55,6 +54,7 @@ module.exports = {
           "**/vite.config.ts",
           "**/*.stories.tsx",
           "**/src/setupTests.ts",
+          "**/src/playwright/**",
           "**/src/test_util/**/*.ts",
           "**/src/test_util/**/*.tsx",
         ],
@@ -88,6 +88,11 @@ module.exports = {
       rules: {
         "import/no-anonymous-default-export": "off",
       },
+    },
+    {
+      files: ["**/*.spec.*"],
+      excludedFiles: ["**/src/playwright/**"],
+      extends: ["react-app/jest"]
     },
   ],
   parserOptions: {

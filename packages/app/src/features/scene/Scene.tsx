@@ -93,6 +93,7 @@ const Scene: React.FC<Props> = (props) => {
   const hasRequired = useAppSelector(select.hasItems(REQUIRED_ITEMS));
   return (
     <div
+      data-testid="scene"
       className={mergeClassNames(props.className)}
       style={{ width: "100%", height: "100%" }}
       ref={setContainer}

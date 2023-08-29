@@ -23,6 +23,7 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
 import Menu from "@mui/material/Menu";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { ToggleKeyboardButton } from "@/features/virtualKeyboard";
 import styles from "./MainPage.module.css";
 import ExamplesDrawer from "./ExamplesDrawer";
 
@@ -189,6 +190,7 @@ const MainPage: React.FC = () => {
           }
         />
       </div>
+      <ToggleKeyboardButton />
     </div>
   );
 };
