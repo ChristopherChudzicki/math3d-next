@@ -60,6 +60,7 @@ const ToggleKeyboardButton = () => {
         color="secondary"
         variant="contained"
         disableElevation
+        data-testid="toggle-keyboard-button"
         onClick={handleClick}
       >
         <KeyboardAltOutlinedIcon />

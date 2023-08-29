@@ -1,5 +1,4 @@
 import { factory } from "mathjs";
-import type { MathJsStatic, Complex } from "mathjs";
 
 declare module "mathjs" {
   export interface MathJsStatic {
