@@ -50,20 +50,12 @@ interface TextParserRule {
   transform: (text: string) => string;
 }
 
-type StrictRegexpMatchArray = RegExpMatchArray & { index: number };
-
-interface TextParserRegexRule {
-  type: ParserRuleType.TextRegexp;
-  regexp: RegExp;
-  replacement: string | ((match: StrictRegexpMatchArray) => string);
-}
-
 interface MathJsRule {
   type: ParserRuleType.MathJs;
   transform: (node: mjs.MathNode) => mjs.MathNode;
 }
 
-type ParserRule = TextParserRule | TextParserRegexRule | MathJsRule;
+type ParserRule = TextParserRule | MathJsRule;
 
 interface IMathJsParser {
   preprocess: (text: string) => string;
@@ -78,8 +70,6 @@ export type {
   IMathJsParser,
   MathJsRule,
   ParserRule,
-  StrictRegexpMatchArray,
-  TextParserRegexRule,
   TextParserRule,
   Validate,
 };

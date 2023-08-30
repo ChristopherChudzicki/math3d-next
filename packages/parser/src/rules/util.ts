@@ -78,7 +78,7 @@ const findTexCommand = (
   numArgs: number
 ): TexCommand | null => {
   const command = `\\${name}`;
-  const start = tex.indexOf(command);
+  const start = tex.indexOf(`${command}{`);
   if (start < 0) return null;
   const params = [];
   let currentIndex = start + command.length;

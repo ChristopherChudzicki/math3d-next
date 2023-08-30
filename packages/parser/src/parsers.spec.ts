@@ -23,6 +23,18 @@ describe("preprocesser fraction conversion", () => {
     const expected = "x + divide(a + divide(b + c, d - e), f + g)";
     expect(parser.preprocess(input)).toBe(expected);
   });
+
+  test("Converts numeric fractions without braces", () => {
+    const input = "x + \\frac123 \\frac456 \\fracabc";
+    const expected = "x + divide(1, 2)3 divide(4, 5)6 fracabc";
+    expect(parser.preprocess(input)).toBe(expected);
+  });
+});
+
+test("Unbracketed exponent conversion", () => {
+  const input = "1 + 2^34 + 5^ab";
+  const expected = "1 + 2^(3)4 + 5^(a)b";
+  expect(parser.preprocess(input)).toBe(expected);
 });
 
 test("brackect conversion", () => {
@@ -433,12 +445,12 @@ describe("parsing derivatives", () => {
     "\\frac{\\partial x^3}{\\partial x}",
   ])("simple derivative", (expr) => {
     const node = parse(expr);
-    expect(node.toString()).toBe("diff(_f(x$0) = x$0 ^ 3, x)");
+    expect(node.toString()).toBe("diff(_f(x$0) = x$0 ^ (3), x)");
   });
 
   test("top with parens", () => {
     const node = parse("\\frac{\\differentialD(x^3)}{\\differentialD x}");
-    expect(node.toString()).toBe("diff(_f(x$0) = x$0 ^ 3, x)");
+    expect(node.toString()).toBe("diff(_f(x$0) = x$0 ^ (3), x)");
   });
 
   test.each([
@@ -471,7 +483,7 @@ describe("parsing derivatives", () => {
       `\\frac{\\differentialD (${nested})}{\\differentialD x}`
     );
     expect(node.toString()).toBe(
-      "diff(_f(x$0) = diff(_f(x$1) = x$1 ^ 3, x$0) + 2 x$0 ^ 2, x)"
+      "diff(_f(x$0) = diff(_f(x$1) = x$1 ^ (3), x$0) + 2 x$0 ^ (2), x)"
     );
     expect(node.dependencies).toEqual(new Set(["diff", "x"]));
   });
