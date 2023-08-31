@@ -1,64 +1,33 @@
 import math from "@math3d/custom-mathjs";
 
-import {
-  MathJsRule,
-  ParserRule,
-  ParserRuleType,
-  TextParserRegexRule,
-} from "./interfaces";
+import { MathJsRule, ParserRule, ParserRuleType } from "./interfaces";
 import MathJsParser from "./MathJsParser";
 import {
+  RegexpParserRule,
   pdiffRule,
   fractionRule,
   operatornameRule,
   validateParameters,
   subscriptRule,
+  exponentRule,
 } from "./rules";
 
-const cdotRule: TextParserRegexRule = {
-  type: ParserRuleType.TextRegexp,
-  regexp: /\\cdot/g,
-  replacement: " * ",
-};
+const cdotRule = new RegexpParserRule(/\\cdot/g, " * ");
 
-const fenceLRule: TextParserRegexRule = {
-  type: ParserRuleType.TextRegexp,
-  regexp: /\\left|\\right/g,
-  replacement: "",
-};
+const fenceLRule = new RegexpParserRule(/\\left|\\right/g, "");
 
-const brackRule: TextParserRegexRule = {
-  type: ParserRuleType.TextRegexp,
-  regexp: /\\(?<side>[lr])brack/g,
-  replacement: (match) => {
-    if (match.groups?.side === "l") return "[";
-    if (match.groups?.side === "r") return "]";
-    throw new Error("Unexpected: Side not matched.");
-  },
-};
+const brackRule = new RegexpParserRule(/\\(?<side>[lr])brack/g, (match) => {
+  if (match.groups?.side === "l") return "[";
+  if (match.groups?.side === "r") return "]";
+  throw new Error("Unexpected: Side not matched.");
+});
 
-const leftBraceRule: TextParserRegexRule = {
-  type: ParserRuleType.TextRegexp,
-  regexp: /\{/g,
-  replacement: "(",
-};
-const rightBraceRule: TextParserRegexRule = {
-  type: ParserRuleType.TextRegexp,
-  regexp: /\}/g,
-  replacement: ")",
-};
+const leftBraceRule = new RegexpParserRule(/\{/g, "(");
+const rightBraceRule = new RegexpParserRule(/\}/g, ")");
 
-const spaceRule: TextParserRegexRule = {
-  type: ParserRuleType.TextRegexp,
-  regexp: /[~\s]+/g,
-  replacement: " ",
-};
+const spaceRule = new RegexpParserRule(/[~\s]+/g, " ");
 
-const backslashRule: TextParserRegexRule = {
-  type: ParserRuleType.TextRegexp,
-  regexp: /\\/g,
-  replacement: " ",
-};
+const backslashRule = new RegexpParserRule(/\\/g, " ");
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const simplifyRule: MathJsRule = {
@@ -77,6 +46,7 @@ const simplifyRule: MathJsRule = {
 
 const parserRules: ParserRule[] = [
   fractionRule,
+  exponentRule,
   subscriptRule,
   operatornameRule,
   cdotRule,

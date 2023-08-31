@@ -17,18 +17,13 @@ import {
   ParseableObjs,
   ParserRule,
   ParserRuleType,
-  StrictRegexpMatchArray,
-  TextParserRegexRule,
   TextParserRule,
 } from "./interfaces";
 
 const mjsAdapter = new SimplerMathJsParser(math);
 
-const isBeforeMathjsRule = (
-  rule: ParserRule
-): rule is TextParserRule | TextParserRegexRule => {
+const isBeforeMathjsRule = (rule: ParserRule): rule is TextParserRule => {
   if (rule.type === ParserRuleType.Text) return true;
-  if (rule.type === ParserRuleType.TextRegexp) return true;
   return false;
 };
 
@@ -71,10 +66,7 @@ class MathJsParser implements IMathJsParser {
   preprocess = (expression: string): string => {
     const textRules = this.rules.filter(isBeforeMathjsRule);
     const expressionFinal = textRules.reduce((text, rule) => {
-      if (rule.type === ParserRuleType.Text) {
-        return rule.transform(text);
-      }
-      return MathJsParser.applyTextRegexpRule(text, rule);
+      return rule.transform(text);
     }, expression);
     return expressionFinal;
   };
@@ -176,23 +168,6 @@ class MathJsParser implements IMathJsParser {
 
   parse: IMathJsParser["parse"] = (parseable) => {
     return this.$parse(parseable)[0];
-  };
-
-  private static applyTextRegexpRule = (
-    expr: string,
-    rule: TextParserRegexRule
-  ): string => {
-    const { regexp, replacement } = rule;
-    const matches = [
-      ...expr.matchAll(regexp),
-    ].reverse() as StrictRegexpMatchArray[];
-    return matches.reduce((text, match) => {
-      return [
-        text.slice(0, match.index),
-        typeof replacement === "string" ? replacement : replacement(match),
-        text.slice(match.index + match[0].length),
-      ].join("");
-    }, expr);
   };
 
   private static aggregateNodes = (
