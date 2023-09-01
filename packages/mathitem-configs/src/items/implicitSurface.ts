@@ -1,4 +1,5 @@
 import { ParseableArray, ParseableObjs } from "@math3d/parser";
+import { validators } from "@math3d/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -87,6 +88,9 @@ type EvaluatedProperties = {
   visible: boolean;
   zBias: number;
   zIndex: number;
+  samples: number;
+  lhs: (x: number, y: number, z: number) => number;
+  rhs: (x: number, y: number, z: number) => number;
 };
 
 const config: IMathItemConfig<
@@ -105,7 +109,7 @@ const config: IMathItemConfig<
       name: "samples",
       label: "Samples",
       widget: WidgetType.MathValue,
-      // scalar value used for x, y, z... why different from other surfaces?
+      validate: validators.positive,
     },
     shaded,
     domain: domain3,
@@ -113,11 +117,13 @@ const config: IMathItemConfig<
       name: "lhs",
       label: "Left-hand side",
       widget: WidgetType.MathValue,
+      validate: validators.realFunc[3][1],
     },
     rhs: {
       name: "rhs",
       label: "Right-hand side",
       widget: WidgetType.MathValue,
+      validate: validators.realFunc[3][1],
     },
     zBias,
     zIndex,

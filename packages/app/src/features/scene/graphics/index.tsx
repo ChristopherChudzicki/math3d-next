@@ -1,4 +1,4 @@
-import { MathItemType, MathItem, MathGraphic } from "@math3d/mathitem-configs";
+import { MathItemType, MathGraphic } from "@math3d/mathitem-configs";
 
 import React from "react";
 import Point from "./Point";
@@ -14,8 +14,7 @@ import {
   ExplicitSurfacePolar,
 } from "./ParametricSurface";
 import { GraphicComponent } from "./interfaces";
-
-const NotImplemented: React.FC<{ item: MathItem }> = () => null;
+import ImplicitSurface from "./ImplicitSurface";
 
 const graphics = {
   [MathItemType.Point]: Point,
@@ -23,7 +22,7 @@ const graphics = {
   [MathItemType.ExplicitSurface]: ExplicitSurface,
   [MathItemType.ExplicitSurfacePolar]: ExplicitSurfacePolar,
   [MathItemType.Grid]: Grid,
-  [MathItemType.ImplicitSurface]: NotImplemented,
+  [MathItemType.ImplicitSurface]: ImplicitSurface,
   [MathItemType.Line]: Line,
   [MathItemType.ParametricCurve]: ParametricCurve,
   [MathItemType.ParametricSurface]: ParametricSurface,
