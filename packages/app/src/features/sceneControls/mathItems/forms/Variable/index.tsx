@@ -12,7 +12,7 @@ import { useMathErrors, useMathItemResults } from "../../mathScope";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
 import ReadonlyMathField from "../../FieldWidget/ReadonlyMathField";
-import * as styles from "./Variable.module.css";
+import styles from "./Variable.module.css";
 
 const config = configs[MIT.Variable];
 
