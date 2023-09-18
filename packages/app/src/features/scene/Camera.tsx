@@ -1,11 +1,13 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import * as MB from "mathbox-react";
 import { MathItem, MathItemType } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
+import { Vector3 } from "three";
 import { useMathItemResults } from "../sceneControls/mathItems/mathScope";
 import { useMathScope } from "../sceneControls/mathItems/mathItemsSlice/index";
 import type { AxesRange, Coords } from "./graphics/interfaces";
 import { project } from "./graphics/util";
+import { dolly, FOV_DOLLY_IN, FOV_DOLLY_OUT } from "./dollyZoom";
 
 const { Controls } = MB.Threestrap;
 
@@ -17,6 +19,7 @@ const props = [
   "target",
   "updateOnDrag",
   "useRelative",
+  "isOrthographic",
 ] as const;
 
 const THREEJS_RANGE: AxesRange = [
@@ -37,6 +40,29 @@ type OnMoveEnd = ({
   target: [number, number, number];
 }) => void;
 
+const useCoordinates = ({
+  range,
+  useRelative = false,
+}: {
+  range: AxesRange;
+  useRelative?: boolean;
+}) => {
+  const convert = useMemo(() => {
+    return {
+      fromUi: (pos: Coords) => {
+        if (useRelative) return pos;
+        return project(pos, range, THREEJS_RANGE);
+      },
+      toUi: (pos: Coords) => {
+        if (useRelative) return pos;
+        return project(pos, THREEJS_RANGE, range);
+      },
+    };
+  }, [range, useRelative]);
+
+  return { convert };
+};
+
 type CameraProps = {
   item: MathItem<MathItemType.Camera>;
   range: AxesRange;
@@ -52,41 +78,48 @@ const Camera: React.FC<CameraProps> = ({ item, range, onMoveEnd }) => {
     position,
     updateOnDrag,
     useRelative,
+    isOrthographic,
+    target,
   } = useMathItemResults(scope, item, props);
 
-  const fromUiCoords = useCallback(
-    (coords: Coords) => {
-      if (useRelative) return coords;
-      return project(coords, range, THREEJS_RANGE);
-    },
-    [range, useRelative]
-  );
-  const toUiCoords = useCallback(
-    (coords: Coords) => {
-      if (useRelative) return coords;
-      return project(coords, THREEJS_RANGE, range);
-    },
-    [range, useRelative]
-  );
+  const { convert } = useCoordinates({ useRelative, range });
 
-  const threePos = position ? fromUiCoords(position) : undefined;
+  const controlsTarget = useMemo(() => {
+    return new Vector3(...convert.fromUi(target ?? [0, 0, 0]));
+  }, [target, convert]);
+
+  const threePos = useMemo(() => {
+    if (!position) return undefined;
+    const pos = convert.fromUi(position);
+    const targ = convert.fromUi(target ?? [0, 0, 0]);
+    return isOrthographic ? dolly.out(pos, targ) : pos;
+  }, [convert, position, target, isOrthographic]);
+
   const onEnd: OnControlsChangeEnd = useCallback(
     (e) => {
       if (!updateOnDrag) return;
       const cameraPosition = e.target.object.position.toArray();
-      const target = e.target.target.toArray();
+      const cameraTarget = e.target.target.toArray();
+      const withoutDollyZoom = isOrthographic
+        ? dolly.in(cameraPosition, cameraTarget).toArray()
+        : cameraPosition;
       onMoveEnd?.({
-        position: toUiCoords(cameraPosition),
-        target: toUiCoords(target),
+        position: convert.toUi(withoutDollyZoom),
+        target: convert.toUi(cameraTarget),
       });
     },
-    [onMoveEnd, toUiCoords, updateOnDrag]
+    [onMoveEnd, convert, updateOnDrag, isOrthographic]
   );
   return (
     <>
-      <MB.Camera proxy position={threePos} />
+      <MB.Camera
+        proxy
+        position={threePos}
+        fov={isOrthographic ? FOV_DOLLY_OUT : FOV_DOLLY_IN}
+      />
       <Controls
         type="orbit"
+        target={controlsTarget}
         enableRotate={isRotateEnabled}
         enablePan={isPanEnabled}
         enableZoom={isZoomEnabled}

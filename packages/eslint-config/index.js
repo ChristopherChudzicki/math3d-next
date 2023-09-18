@@ -92,10 +92,10 @@ module.exports = {
     {
       files: ["**/*.spec.*"],
       excludedFiles: ["**/src/playwright/**"],
-      extends: ["react-app/jest"]
+      extends: ["react-app/jest"],
     },
   ],
   parserOptions: {
-    project: "./tsconfig.json"
-  }
+    project: "./tsconfig.json",
+  },
 };

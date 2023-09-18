@@ -12,11 +12,20 @@ import {
 import invariant from "tiny-invariant";
 import { debounce } from "lodash";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { actions, select } from "../sceneControls/mathItems/mathItemsSlice";
+import {
+  actions,
+  select,
+  useMathScope,
+} from "../sceneControls/mathItems/mathItemsSlice";
 import { Graphic, graphicNeedsRange } from "./graphics";
 import useAxesInfo from "./useAxesInfo";
 import Camera from "./Camera";
 import type { OnMoveEnd } from "./Camera";
+import { ZOOM_FACTOR } from "./dollyZoom";
+import {
+  useMathItemResults,
+  useMathResults,
+} from "../sceneControls/mathItems/mathScope";
 
 type Props = {
   className?: string;
@@ -88,9 +97,19 @@ const SceneContent = () => {
   );
 };
 
+const cameraProps = ["isOrthographic"] as const;
+const useIsOrthographic = () => {
+  const scope = useMathScope();
+  const { isOrthographic } = useMathResults(scope, "camera", cameraProps);
+  return !!isOrthographic;
+};
+
 const Scene: React.FC<Props> = (props) => {
   const [container, setContainer] = React.useState<HTMLDivElement | null>(null);
   const hasRequired = useAppSelector(select.hasItems(REQUIRED_ITEMS));
+
+  const isOrthographic = useIsOrthographic();
+  const focus = isOrthographic ? ZOOM_FACTOR : 1;
   return (
     <div
       data-testid="scene"
@@ -99,7 +118,12 @@ const Scene: React.FC<Props> = (props) => {
       ref={setContainer}
     >
       {container && hasRequired && (
-        <MB.Mathbox container={container} options={mathboxOptions} ref={setup}>
+        <MB.Mathbox
+          container={container}
+          options={mathboxOptions}
+          focus={focus}
+          ref={setup}
+        >
           <SceneContent />
         </MB.Mathbox>
       )}
