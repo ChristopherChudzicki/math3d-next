@@ -1,6 +1,6 @@
 import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
 import { Scene } from "@/types";
-import { makeItem } from "../makeItem";
+import { makeItem } from "../factories";
 import { makeSceneFromItems } from "./util";
 
 const sceneKeys = {

@@ -14,11 +14,11 @@ test("Typing arrays into an empty <math-field />", async ({ page }) => {
   await page.goto(`/${sceneKey}`);
   await expect.poll(pwHelpersExist(page)).toBeTruthy();
   await page.evaluate(
-    ({ items, id }) => {
-      window.$pw.seedDb.withSceneFromItems(items, { id });
+    ({ items, key }) => {
+      window.$pw.seedDb.withSceneFromItems(items, { key });
       window.$pw.doneSeeding();
     },
-    { items: [point], id: sceneKey }
+    { items: [point], key: sceneKey }
   );
 
   const form = getItemForm(page, point);

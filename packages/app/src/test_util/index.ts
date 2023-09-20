@@ -7,7 +7,7 @@ import {
   within,
 } from "@testing-library/react";
 import user from "@testing-library/user-event";
-import { makeItem } from "./makeItem";
+import { makeItem } from "./factories";
 
 import renderTestApp from "./renderTestApp";
 import { seedDb } from "./msw/db";

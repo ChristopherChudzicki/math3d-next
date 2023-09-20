@@ -4,7 +4,7 @@ import { factory, primaryKey } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
 import { MathItem, MathItemType } from "@math3d/mathitem-configs";
 import type { Scene } from "@/types";
-import { makeItem } from "../makeItem";
+import { makeItem, sceneFromItems } from "../factories";
 import { sceneFixtures } from "./fixtures";
 
 const db = factory({
@@ -51,19 +51,8 @@ const seedDb = {
   /**
    * Create a schene with given items in a single folder, in the given order
    */
-  withSceneFromItems: (items: MathItem[], { id }: { id?: string } = {}) => {
-    const folder = makeItem(MathItemType.Folder);
-    const scene: PartialScene = {
-      items: [folder, ...items].sort((a, b) => a.id.localeCompare(b.id)),
-      itemOrder: {
-        main: [folder.id],
-        [folder.id]: items.map((item) => item.id),
-        setup: [],
-      },
-    };
-    if (id) {
-      scene.key = id;
-    }
+  withSceneFromItems: (items: MathItem[], { key }: { key?: string } = {}) => {
+    const scene = sceneFromItems(items, { key });
     return addScene(scene);
   },
 };
