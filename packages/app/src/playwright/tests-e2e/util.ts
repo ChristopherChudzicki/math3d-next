@@ -5,19 +5,13 @@ import type { Mathfield } from "mathlive";
  * Importing from "@/test_util" includes some TSX which Playwright can't handle,
  * so need to import the TS-only files directly
  */
-import { makeItem } from "@/test_util/makeItem";
+import { makeItem } from "@/test_util/factories";
 
 const getItemForm = (page: Page, item: MathItem): Locator => {
   return page.locator(
     `css=form[aria-label="Settings for ${item.properties.description}"]`
   );
 };
-
-/**
- * Check whether the $pw helpers exist on window yet.
- */
-const pwHelpersExist = (page: Page) => () =>
-  page.evaluate(() => window.$pw !== undefined);
 
 /**
  * Get the LaTeX value of a <math-field />. Useful with Playwright locators:
@@ -35,4 +29,4 @@ const getLatex = (e: HTMLElement | SVGElement) => {
   return mf.getValue();
 };
 
-export { getItemForm, makeItem, pwHelpersExist, getLatex };
+export { getItemForm, makeItem, getLatex };

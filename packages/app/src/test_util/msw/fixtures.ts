@@ -18,7 +18,8 @@ const sceneKeys = {
    * - folder `"F3"` with points `["P3a", "P3b"]`
    */
   testFoldersF2Collapsed: "test_folders_F2_collapsed",
-};
+  slider: "slider",
+} as const;
 
 const makeFolderScene = (
   sceneKey: string,
@@ -66,13 +67,13 @@ const makeSliderScene = () =>
 
 type SceneFixture = () => Scene;
 
-const sceneFixtures: SceneFixture[] = [
-  () => makeFolderScene(sceneKeys.testFolders),
-  () =>
+const sceneFixtures = {
+  [sceneKeys.testFolders]: () => makeFolderScene(sceneKeys.testFolders),
+  [sceneKeys.testFoldersF2Collapsed]: () =>
     makeFolderScene(sceneKeys.testFoldersF2Collapsed, {
       F2: { isCollapsed: "true" },
     }),
-  makeSliderScene,
-];
+  [sceneKeys.slider]: makeSliderScene,
+} satisfies Record<string, SceneFixture>;
 
 export { sceneKeys, sceneFixtures };

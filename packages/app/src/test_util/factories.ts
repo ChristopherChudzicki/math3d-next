@@ -22,7 +22,7 @@ const makeItem = <T extends MathItemType>(
 
 const sceneFromItems = (
   items: MathItem[],
-  sceneProps: Partial<Omit<Scene, "items" | "itemOrder">>
+  sceneProps: Partial<Omit<Scene, "items" | "itemOrder">> = {}
 ) => {
   const folder = makeItem(MathItemType.Folder);
   const scene: Scene = {

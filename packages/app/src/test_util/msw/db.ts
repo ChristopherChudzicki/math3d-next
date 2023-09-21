@@ -45,7 +45,7 @@ const addScene = (scene: PartialScene): Scene => {
 
 const seedDb = {
   withFixtures: (): void => {
-    sceneFixtures.forEach((f) => addScene(f()));
+    Object.values(sceneFixtures).forEach((f) => addScene(f()));
   },
   withScene: addScene,
   /**
