@@ -8,7 +8,6 @@ import type { Mathfield } from "mathlive";
  */
 import { makeItem } from "@/test_util/factories";
 import { Scene } from "@/types";
-import type { MathboxSelection } from "mathbox";
 
 const getItemForm = (page: Page, item: MathItem): Locator => {
   return page.locator(

@@ -8,6 +8,13 @@ import type { Coords } from "./graphics/interfaces";
  *
  * MathBox does not support ThreeJS's orthographic camera, so we'll use a dolly
  * zoom to simulate it.
+ *
+ * Drawbacks
+ * =========
+ * As currently implemented, the dolly zoom keeps the front clipping plane near
+ * the camera. As  the camera moves out (and fov decreases) extra objects may
+ * appear that should not be visible.
+ * Potentially fixable using https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer.clippingPlanes
  */
 class DollyZoom {
   constructor(private zoomFactor: number) {

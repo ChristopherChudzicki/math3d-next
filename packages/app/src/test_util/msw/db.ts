@@ -2,9 +2,9 @@ import { cloneDeep } from "lodash";
 import type { PartialBy } from "@math3d/utils";
 import { factory, primaryKey } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
-import { MathItem, MathItemType } from "@math3d/mathitem-configs";
+import { MathItem } from "@math3d/mathitem-configs";
 import type { Scene } from "@/types";
-import { makeItem, sceneFromItems } from "../factories";
+import { sceneFromItems } from "../factories";
 import { sceneFixtures } from "./fixtures";
 
 const db = factory({

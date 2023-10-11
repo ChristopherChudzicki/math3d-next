@@ -92,12 +92,17 @@ const Camera: React.FC<CameraProps> = ({ item, range, onMoveEnd }) => {
     if (!position) return undefined;
     const pos = convert.fromUi(position);
     const targ = convert.fromUi(target ?? [0, 0, 0]);
-    return isOrthographic ? dolly.out(pos, targ) : pos;
+    return isOrthographic ? dolly.out(pos, targ).toArray() : pos;
   }, [convert, position, target, isOrthographic]);
 
   const onEnd: OnControlsChangeEnd = useCallback(
     (e) => {
-      if (!updateOnDrag) return;
+      if (!updateOnDrag) {
+        if (threePos) {
+          e.target.object.position.set(...threePos);
+        }
+        return;
+      }
       const cameraPosition = e.target.object.position.toArray();
       const cameraTarget = e.target.target.toArray();
       const withoutDollyZoom = isOrthographic
@@ -108,7 +113,7 @@ const Camera: React.FC<CameraProps> = ({ item, range, onMoveEnd }) => {
         target: convert.toUi(cameraTarget),
       });
     },
-    [onMoveEnd, convert, updateOnDrag, isOrthographic]
+    [onMoveEnd, convert, updateOnDrag, isOrthographic, threePos]
   );
   return (
     <>

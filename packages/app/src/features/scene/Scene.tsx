@@ -22,10 +22,7 @@ import useAxesInfo from "./useAxesInfo";
 import Camera from "./Camera";
 import type { OnMoveEnd } from "./Camera";
 import { ZOOM_FACTOR } from "./dollyZoom";
-import {
-  useMathItemResults,
-  useMathResults,
-} from "../sceneControls/mathItems/mathScope";
+import { useMathResults } from "../sceneControls/mathItems/mathScope";
 
 type Props = {
   className?: string;
