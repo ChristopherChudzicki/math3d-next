@@ -1,25 +1,23 @@
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { faker } from "@faker-js/faker";
+
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import { getItemForm, makeItem, pwHelpersExist, getLatex } from "./util";
+
+import { makeItem, sceneFromItems } from "@/test_util/factories";
+import { getItemForm, getLatex } from "./util";
 
 test("Typing arrays into an empty <math-field />", async ({ page }) => {
   const point = makeItem(MIT.Point, { description: "SomePoint", coords: "" });
-  const sceneKey = faker.datatype.uuid();
+  const scene = sceneFromItems([point]);
+  await page.route(`*/**/v0/scenes/${scene.key}/`, async (route) => {
+    await route.fulfill({ json: scene });
+  });
+
   await page.addInitScript(() => {
     window.$pwCustomSeed = true;
   });
 
-  await page.goto(`/${sceneKey}`);
-  await expect.poll(pwHelpersExist(page)).toBeTruthy();
-  await page.evaluate(
-    ({ items, id }) => {
-      window.$pw.seedDb.withSceneFromItems(items, { id });
-      window.$pw.doneSeeding();
-    },
-    { items: [point], id: sceneKey }
-  );
+  await page.goto(`/${scene.key}`);
 
   const form = getItemForm(page, point);
   const mf = await form.locator('css=[aria-label="Coordinates"]');

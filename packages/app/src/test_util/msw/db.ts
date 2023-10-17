@@ -2,9 +2,9 @@ import { cloneDeep } from "lodash";
 import type { PartialBy } from "@math3d/utils";
 import { factory, primaryKey } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
-import { MathItem, MathItemType } from "@math3d/mathitem-configs";
+import { MathItem } from "@math3d/mathitem-configs";
 import type { Scene } from "@/types";
-import { makeItem } from "../makeItem";
+import { sceneFromItems } from "../factories";
 import { sceneFixtures } from "./fixtures";
 
 const db = factory({
@@ -45,25 +45,14 @@ const addScene = (scene: PartialScene): Scene => {
 
 const seedDb = {
   withFixtures: (): void => {
-    sceneFixtures.forEach((f) => addScene(f()));
+    Object.values(sceneFixtures).forEach((f) => addScene(f()));
   },
   withScene: addScene,
   /**
    * Create a schene with given items in a single folder, in the given order
    */
-  withSceneFromItems: (items: MathItem[], { id }: { id?: string } = {}) => {
-    const folder = makeItem(MathItemType.Folder);
-    const scene: PartialScene = {
-      items: [folder, ...items].sort((a, b) => a.id.localeCompare(b.id)),
-      itemOrder: {
-        main: [folder.id],
-        [folder.id]: items.map((item) => item.id),
-        setup: [],
-      },
-    };
-    if (id) {
-      scene.key = id;
-    }
+  withSceneFromItems: (items: MathItem[], { key }: { key?: string } = {}) => {
+    const scene = sceneFromItems(items, { key });
     return addScene(scene);
   },
 };

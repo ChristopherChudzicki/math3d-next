@@ -1,7 +1,7 @@
 import { MathItem, MathItemType } from "@math3d/mathitem-configs";
 import type { PartialBy } from "@math3d/utils";
 import type { Scene } from "@/types";
-import { makeItem } from "../makeItem";
+import { makeItem } from "../factories";
 
 type PartialScene = PartialBy<Scene, "title" | "key">;
 
