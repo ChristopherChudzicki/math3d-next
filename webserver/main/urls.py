@@ -17,10 +17,12 @@ from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import include, path
 
+import authentication.urls
 import scenes.urls
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("v0/", include(scenes.urls)),
+    path("v0/auth/", include(authentication.urls)),
     path("", lambda request: HttpResponseRedirect("/v0")),
 ]
