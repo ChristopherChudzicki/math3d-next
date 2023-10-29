@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
-import environ  # type: ignore
+import environ
 
 env = environ.Env(CORS_ALLOWED_ORIGINS=(list, []))
 
@@ -33,6 +33,7 @@ DEBUG = True
 
 ALLOWED_HOSTS: list[str] = []
 
+SITE_NAME = "Math3d"
 
 # Application definition
 
@@ -45,10 +46,13 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "authentication",
+    "djoser",
     "corsheaders",
     "main",
     "scenes",
 ]
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
@@ -88,6 +92,38 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "main.wsgi.application"
 
+##################################################
+# Start auth settings
+##################################################
+DJOSER = {
+    "LOGIN_FIELD": "email",
+    # Send notifications / confirmations
+    "SEND_ACTIVATION_EMAIL": True,
+    "SEND_CONFIRMATION_EMAIL": True,
+    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
+    # Require retyping password
+    "USER_CREATE_PASSWORD_RETYPE": True,
+    "SET_PASSWORD_RETYPE": True,
+    "PASSWORD_RESET_CONFIRM_RETYPE": True,
+    # Emails
+    "EMAIL": {
+        "activation": "authentication.email.ActivationEmail",
+        "confirmation": "authentication.email.ConfirmationEmail",
+        "password_reset": "authentication.email.PasswordResetEmail",
+        "password_changed_confirmation": "authentication.email.PasswordChangedConfirmationEmail",
+        "username_changed_confirmation": "authentication.email.UsernameChangedConfirmationEmail",
+        "username_reset": "authentication.email.UsernameResetEmail",
+    },
+    "_CUSTOM": {
+        "ACTIVATION_URL": "http://localhost:3000/account/activate/{uid}/{token}",
+        "PASSWORD_RESET_CONFIRM_URL": "http://localhost:3000/account/password-reset/confirm/{uid}/{token}",
+        "USERNAME_RESET_CONFIRM_URL": "http://localhost:3000/account/username-reset/confirm/{uid}/{token}",
+    },
+}
+
+##################################################
+# End auth settings
+##################################################
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
