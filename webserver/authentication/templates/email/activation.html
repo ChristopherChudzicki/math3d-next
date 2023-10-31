@@ -8,7 +8,7 @@
 {% blocktrans %}You're receiving this email because your email address was used to register an account at {{ site_name }}.{% endblocktrans %}
 
 {% trans "To activate the account, please visit:" %}
-{{url}}
+{{url | safe}}
 
 {% trans "Thanks for using" %} {{ site_name }}!
 
@@ -19,7 +19,7 @@
 <div>
 <p>{% blocktrans %}You're receiving this email because your email address was used to register an account at {{ site_name }}.{% endblocktrans %}</p>
 
-<p>{% trans "To activate the account, please visit:"%} <a href="{{url}}">{{url}}</a></p>
+<p>{% trans "To activate the account, please visit:"%} <a href="{{url | safe}}" data-testid="activation-link">{{url | safe}}</a></p>
 
 <p>{% trans "Thanks for using" %} {{ site_name }}!</p>
 

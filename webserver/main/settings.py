@@ -115,7 +115,7 @@ DJOSER = {
         "username_reset": "authentication.email.UsernameResetEmail",
     },
     "_CUSTOM": {
-        "ACTIVATION_URL": "http://localhost:3000/account/activate/{uid}/{token}",
+        "ACTIVATION_URL": "http://localhost:3000/account/activate?uid={uid}&token={token}",
         "PASSWORD_RESET_CONFIRM_URL": "http://localhost:3000/account/password-reset/confirm/{uid}/{token}",
         "USERNAME_RESET_CONFIRM_URL": "http://localhost:3000/account/username-reset/confirm/{uid}/{token}",
     },
