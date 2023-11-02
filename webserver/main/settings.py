@@ -45,9 +45,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "authentication",
     "djoser",
     "corsheaders",
+    "drf_spectacular",
+    ## Custom apps
+    "authentication",
     "main",
     "scenes",
 ]
@@ -57,6 +59,7 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 MIDDLEWARE = [
@@ -179,6 +182,16 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Math3d API",
+    "DESCRIPTION": "Math3d API",
+    "VERSION": "0.0.1",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_URLCONF": "main.urls",
+    "ENUM_GENERATE_CHOICE_DESCRIPTION": True,
+    "COMPONENT_SPLIT_REQUEST": True,
+}
 
 # Configure Django App for Heroku.
 if os.environ.get("IS_HEROKU"):

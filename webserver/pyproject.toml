@@ -20,6 +20,7 @@ django-cors-headers = "^4.1.0"
 django-environ = "^0.10.0"
 faker = "^19.12.0"
 djoser = "^2.2.0"
+drf-spectacular = "^0.26.5"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.0.0"

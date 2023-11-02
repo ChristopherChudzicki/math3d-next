@@ -20,9 +20,16 @@ from django.urls import include, path
 import authentication.urls
 import scenes.urls
 
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+)
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("v0/", include(scenes.urls)),
     path("v0/auth/", include(authentication.urls)),
-    path("", lambda request: HttpResponseRedirect("/v0")),
+    path("", lambda request: HttpResponseRedirect("/v0/schema/swagger")),
+    path("v0/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path('v0/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
