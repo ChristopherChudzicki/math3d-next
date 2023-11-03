@@ -6,9 +6,11 @@ from django.core import mail
 from django.core.mail.message import EmailMessage
 from django.urls import reverse
 from djoser.conf import settings
-from faker import Faker
 from rest_framework.test import APIClient
 from urllib.parse import urlparse, parse_qs, ParseResult
+from authentication.models import CustomUser
+from faker import Faker
+from authentication.factories import CustomUserFactory
 
 faker = Faker()
 
@@ -33,17 +35,19 @@ def get_parsed_activation_url_from_html(message: EmailMessage, data_testid) -> A
     return AnchorData(link)
 
 @pytest.mark.django_db
-def test_create_user():
+def test_create_and_activate_user():
     client = APIClient()
-    url = reverse("customuser-list")
     email = faker.email()
     password = faker.password()
-    request = {
+    creation_url = reverse("customuser-list")
+    creation_request = {
         "email": email,
         "password": password,
         "re_password": password,
     }
-    response = client.post(url, request)
+    creation_request = response = client.post(creation_url, creation_request)
+
+    user_id = response.data["id"]
 
     assert response.status_code == 201
 
@@ -56,5 +60,36 @@ def test_create_user():
     )
     # Raw text email has same url
     assert str(link.raw) in message.body
+    
+    # Initially NOT active
+    created_user = CustomUser.objects.get(id=user_id)
+    assert created_user.is_active == False
 
-    print(link.query)
+    # Activate user
+    activation_url = reverse("customuser-activation")
+    activation_request = {
+        "uid": link.query["uid"][0],
+        "token": link.query["token"][0],
+    }
+    activation_response = client.post(activation_url, activation_request)
+    assert activation_response.status_code == 204
+
+    # Now active
+    activated_user = CustomUser.objects.get(id=user_id)
+    assert activated_user.is_active == True 
+
+@pytest.mark.django_db
+def test_resend_activation():
+    client = APIClient()
+    user = CustomUserFactory()
+    
+    assert user.is_active == False
+    resend_url = reverse("customuser-resend-activation")
+    resent_request = {
+        "email": user.email,
+    }
+    resend_response = client.post(resend_url, resent_request)
+    message = mail.outbox[0]
+    link = get_parsed_activation_url_from_html(message, "activation-link")
+    assert resend_response.status_code == 204
+    print(link)
