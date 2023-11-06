@@ -63,6 +63,4 @@ ignore_missing_imports = true
 django_settings_module = "main.settings"
 
 [tool.pytest.ini_options]
-testpaths = [
-    "tests"
-]
+testpaths = []

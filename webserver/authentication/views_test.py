@@ -92,4 +92,16 @@ def test_resend_activation():
     message = mail.outbox[0]
     link = get_parsed_activation_url_from_html(message, "activation-link")
     assert resend_response.status_code == 204
-    print(link)
+
+    # Activate user
+    activation_url = reverse("customuser-activation")
+    activation_request = {
+        "uid": link.query["uid"][0],
+        "token": link.query["token"][0],
+    }
+    activation_response = client.post(activation_url, activation_request)
+    assert activation_response.status_code == 204
+
+    # Now active
+    activated_user = CustomUser.objects.get(id=user.id)
+    assert activated_user.is_active == True 
