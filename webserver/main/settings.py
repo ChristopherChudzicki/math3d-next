@@ -140,10 +140,13 @@ DJOSER = {
         # 'token_create': ['rest_framework.permissions.AllowAny'],
         # 'token_destroy': ['rest_framework.permissions.IsAuthenticated'],
     },
+    "SERIALIZERS": {
+        'user': 'authentication.serializers.CustomUserSerializer',
+        'current_user': 'authentication.serializers.CustomUserSerializer',
+    },
     "_CUSTOM": {
         "ACTIVATION_URL": "http://localhost:3000/account/activate?uid={uid}&token={token}",
-        "PASSWORD_RESET_CONFIRM_URL": "http://localhost:3000/account/password-reset/confirm/{uid}/{token}",
-        "USERNAME_RESET_CONFIRM_URL": "http://localhost:3000/account/username-reset/confirm/{uid}/{token}",
+        "PASSWORD_RESET_CONFIRM_URL": "http://localhost:3000/account/password-reset/confirm/?uid={uid}&token={token}",
     },
 }
 

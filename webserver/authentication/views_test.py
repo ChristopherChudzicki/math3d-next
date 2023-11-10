@@ -31,7 +31,6 @@ def get_parsed_activation_url_from_html(message: EmailMessage, data_testid) -> A
     html, _ = next(alt for alt in message.alternatives if alt[1] == "text/html")
     doc = lxml.etree.fromstring(html, parser=lxml.etree.HTMLParser())
     [link] = doc.cssselect(f'[data-testid="{data_testid}"]')
-    href = link.attrib["href"]
     return AnchorData(link)
 
 @pytest.mark.django_db
@@ -105,3 +104,32 @@ def test_resend_activation():
     # Now active
     activated_user = CustomUser.objects.get(id=user.id)
     assert activated_user.is_active == True 
+
+@pytest.mark.django_db
+def test_reset_password():
+    client = APIClient()
+    user = CustomUserFactory.create(is_active=True)
+    url = reverse("customuser-reset-password")
+    request = {
+        "email": user.email,
+    }
+    response = client.post(url, request)
+    message = mail.outbox[0]
+    link = get_parsed_activation_url_from_html(message, "password-reset-link")
+    assert response.status_code == 204
+
+    new_password = faker.password()
+    assert user.check_password(new_password) == False
+
+    confirmation_url = reverse("customuser-reset-password-confirm")
+    confirmation_request = {
+        "uid": link.query["uid"][0],
+        "token": link.query["token"][0],
+        "new_password": new_password,
+        "re_new_password": new_password
+    }
+    confirmation_response = client.post(confirmation_url, confirmation_request)
+    assert confirmation_response.status_code == 204
+
+    user.refresh_from_db()
+    assert user.check_password(new_password)
