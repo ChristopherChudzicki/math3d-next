@@ -132,7 +132,7 @@ DJOSER = {
         # 'set_password': ['djoser.permissions.CurrentUserOrAdmin'],
         'username_reset': ['rest_framework.permissions.IsAdminUser'],
         'username_reset_confirm': ['rest_framework.permissions.IsAdminUser'],
-        # 'set_username': ['djoser.permissions.IsAdminUser'],
+        'set_username': ['djoser.permissions.IsAdminUser'],
         # 'user_create': ['rest_framework.permissions.AllowAny'],
         # 'user_delete': ['djoser.permissions.CurrentUserOrAdmin'],
         # 'user': ['djoser.permissions.CurrentUserOrAdmin'],
