@@ -122,6 +122,24 @@ DJOSER = {
         "username_changed_confirmation": "authentication.email.UsernameChangedConfirmationEmail",
         "username_reset": "authentication.email.UsernameResetEmail",
     },
+    # Limit endpoints we don't want to just admin users.
+    # Not ideal, but it's the best solution for now.
+    # See https://github.com/sunscrapers/djoser/issues/549
+    "PERMISSIONS": {
+        # 'activation': ['rest_framework.permissions.AllowAny'],
+        # 'password_reset': ['rest_framework.permissions.AllowAny'],
+        # 'password_reset_confirm': ['rest_framework.permissions.AllowAny'],
+        # 'set_password': ['djoser.permissions.CurrentUserOrAdmin'],
+        'username_reset': ['rest_framework.permissions.IsAdminUser'],
+        'username_reset_confirm': ['rest_framework.permissions.IsAdminUser'],
+        # 'set_username': ['djoser.permissions.IsAdminUser'],
+        # 'user_create': ['rest_framework.permissions.AllowAny'],
+        # 'user_delete': ['djoser.permissions.CurrentUserOrAdmin'],
+        # 'user': ['djoser.permissions.CurrentUserOrAdmin'],
+        'user_list': ['djoser.permissions.IsAdminUser'],
+        # 'token_create': ['rest_framework.permissions.AllowAny'],
+        # 'token_destroy': ['rest_framework.permissions.IsAuthenticated'],
+    },
     "_CUSTOM": {
         "ACTIVATION_URL": "http://localhost:3000/account/activate?uid={uid}&token={token}",
         "PASSWORD_RESET_CONFIRM_URL": "http://localhost:3000/account/password-reset/confirm/{uid}/{token}",
