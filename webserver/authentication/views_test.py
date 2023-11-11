@@ -1,4 +1,5 @@
 import re
+from urllib.parse import ParseResult, parse_qs, urlparse
 
 import lxml.etree
 import pytest
@@ -6,13 +7,14 @@ from django.core import mail
 from django.core.mail.message import EmailMessage
 from django.urls import reverse
 from djoser.conf import settings
-from rest_framework.test import APIClient
-from urllib.parse import urlparse, parse_qs, ParseResult
-from authentication.models import CustomUser
 from faker import Faker
+from rest_framework.test import APIClient
+
 from authentication.factories import CustomUserFactory
+from authentication.models import CustomUser
 
 faker = Faker()
+
 
 class AnchorData:
     element: lxml.etree._Element
@@ -27,11 +29,14 @@ class AnchorData:
         self.raw = element.attrib["href"]
 
 
-def get_parsed_activation_url_from_html(message: EmailMessage, data_testid) -> AnchorData:
+def get_parsed_activation_url_from_html(
+    message: EmailMessage, data_testid
+) -> AnchorData:
     html, _ = next(alt for alt in message.alternatives if alt[1] == "text/html")
     doc = lxml.etree.fromstring(html, parser=lxml.etree.HTMLParser())
     [link] = doc.cssselect(f'[data-testid="{data_testid}"]')
     return AnchorData(link)
+
 
 @pytest.mark.django_db
 def test_create_and_activate_user():
@@ -59,7 +64,7 @@ def test_create_and_activate_user():
     )
     # Raw text email has same url
     assert str(link.raw) in message.body
-    
+
     # Initially NOT active
     created_user = CustomUser.objects.get(id=user_id)
     assert created_user.is_active == False
@@ -75,13 +80,14 @@ def test_create_and_activate_user():
 
     # Now active
     activated_user = CustomUser.objects.get(id=user_id)
-    assert activated_user.is_active == True 
+    assert activated_user.is_active == True
+
 
 @pytest.mark.django_db
 def test_resend_activation():
     client = APIClient()
     user = CustomUserFactory()
-    
+
     assert user.is_active == False
     resend_url = reverse("customuser-resend-activation")
     resent_request = {
@@ -103,7 +109,8 @@ def test_resend_activation():
 
     # Now active
     activated_user = CustomUser.objects.get(id=user.id)
-    assert activated_user.is_active == True 
+    assert activated_user.is_active == True
+
 
 @pytest.mark.django_db
 def test_reset_password():
@@ -126,7 +133,7 @@ def test_reset_password():
         "uid": link.query["uid"][0],
         "token": link.query["token"][0],
         "new_password": new_password,
-        "re_new_password": new_password
+        "re_new_password": new_password,
     }
     confirmation_response = client.post(confirmation_url, confirmation_request)
     assert confirmation_response.status_code == 204

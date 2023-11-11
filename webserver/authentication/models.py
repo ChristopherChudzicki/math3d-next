@@ -7,7 +7,7 @@ from authentication.managers import CustomUserManager
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    public_nickname = models.CharField(max_length=64, blank=True)
+    public_nickname = models.CharField(max_length=64)
     email = models.EmailField(gettext_lazy("email address"), unique=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)

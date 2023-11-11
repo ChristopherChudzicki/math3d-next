@@ -61,8 +61,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
     ),
 }
 
@@ -130,19 +130,19 @@ DJOSER = {
         # 'password_reset': ['rest_framework.permissions.AllowAny'],
         # 'password_reset_confirm': ['rest_framework.permissions.AllowAny'],
         # 'set_password': ['djoser.permissions.CurrentUserOrAdmin'],
-        'username_reset': ['rest_framework.permissions.IsAdminUser'],
-        'username_reset_confirm': ['rest_framework.permissions.IsAdminUser'],
-        'set_username': ['djoser.permissions.IsAdminUser'],
+        "username_reset": ["rest_framework.permissions.IsAdminUser"],
+        "username_reset_confirm": ["rest_framework.permissions.IsAdminUser"],
+        "set_username": ["rest_framework.permissions.IsAdminUser"],
         # 'user_create': ['rest_framework.permissions.AllowAny'],
         # 'user_delete': ['djoser.permissions.CurrentUserOrAdmin'],
         # 'user': ['djoser.permissions.CurrentUserOrAdmin'],
-        'user_list': ['djoser.permissions.IsAdminUser'],
+        "user_list": ["rest_framework.permissions.IsAdminUser"],
         # 'token_create': ['rest_framework.permissions.AllowAny'],
         # 'token_destroy': ['rest_framework.permissions.IsAuthenticated'],
     },
     "SERIALIZERS": {
-        'user': 'authentication.serializers.CustomUserSerializer',
-        'current_user': 'authentication.serializers.CustomUserSerializer',
+        "user": "authentication.serializers.CustomUserSerializer",
+        "current_user": "authentication.serializers.CustomUserSerializer",
     },
     "_CUSTOM": {
         "ACTIVATION_URL": "http://localhost:3000/account/activate?uid={uid}&token={token}",
