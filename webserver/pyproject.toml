@@ -6,7 +6,7 @@ authors = ["Chris Chudzicki"]
 packages = [{include = "main"}]
 
 [tool.poetry.dependencies]
-python = "3.11.5"
+python = "3.11.6"
 Django = "^4.1.6"
 djangorestframework = "^3.14.0"
 dj-database-url = "^1.2.0"
