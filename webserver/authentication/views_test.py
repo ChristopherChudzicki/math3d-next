@@ -4,10 +4,11 @@ from urllib.parse import ParseResult, parse_qs, urlparse
 import lxml.etree
 import pytest
 from django.core import mail
-from django.core.mail.message import EmailMessage
+from django.core.mail.message import EmailMessage, EmailMultiAlternatives
 from django.urls import reverse
 from djoser.conf import settings
 from faker import Faker
+from lxml.html import fragment_fromstring
 from rest_framework.test import APIClient
 
 from authentication.factories import CustomUserFactory
@@ -30,10 +31,15 @@ class AnchorData:
 
 
 def get_parsed_activation_url_from_html(
-    message: EmailMessage, data_testid
+    message: EmailMultiAlternatives, data_testid
 ) -> AnchorData:
-    html, _ = next(alt for alt in message.alternatives if alt[1] == "text/html")
-    doc = lxml.etree.fromstring(html, parser=lxml.etree.HTMLParser())
+    html = next(
+        content for content, mime in message.alternatives if mime == "text/html"
+    )
+    if not isinstance(html, str):
+        msg = "Expected html to be a string"
+        raise TypeError(msg)
+    doc = fragment_fromstring(f"<div>{html}</div>")
     [link] = doc.cssselect(f'[data-testid="{data_testid}"]')
     return AnchorData(link)
 

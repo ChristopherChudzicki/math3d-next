@@ -1,15 +1,27 @@
+from typing import Generic, TypeVar
+
 import factory
+import faker
 from factory.django import DjangoModelFactory
-from factory.faker import Faker
 
 import authentication.models as models
 
+fake = faker.Faker()
 
-class CustomUserFactory(DjangoModelFactory):
+T = TypeVar("T")
+
+
+class BaseFactory(DjangoModelFactory, Generic[T]):
+    @classmethod
+    def create(cls, **kwargs) -> T:
+        return super().create(**kwargs)
+
+
+class CustomUserFactory(BaseFactory[models.CustomUser]):
     """Factory for LearningResourceContentTag objects"""
 
-    email = Faker("email")
-    public_nickname = Faker("name")
+    email = factory.LazyFunction(fake.email)
+    public_nickname = factory.LazyFunction(fake.first_name)
 
     @factory.post_generation
     def set_password(self, create, extracted, **kwargs):

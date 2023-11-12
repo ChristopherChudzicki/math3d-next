@@ -1528,6 +1528,22 @@ files = [
 ]
 
 [[package]]
+name = "types-factory-boy"
+version = "0.4.1"
+description = "Typing stubs for factory-boy"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "types_factory_boy-0.4.1-py3-none-any.whl", hash = "sha256:a1fa265fad8b24ddf2d4363227d675d0c4cd44951b71d68ea8fc58aa90b0f85d"},
+    {file = "types_factory_boy-0.4.1.tar.gz", hash = "sha256:275b9e17a6ad79992bec77b956bb707770f7b0256e4172265e2139e48faf6faf"},
+]
+
+[package.dependencies]
+factory-boy = ">=3.2.0"
+typing-extensions = ">=4.2.0,<5.0.0"
+
+[[package]]
 name = "types-psycopg2"
 version = "2.9.21.15"
 description = "Typing stubs for psycopg2"
@@ -1661,5 +1677,5 @@ brotli = ["Brotli"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = "3.11.5"
-content-hash = "bf681c2d85a9de7f40009d0aff5eb0b84663a267b11ea07996f395711c75f66c"
+python-versions = "3.11.6"
+content-hash = "7be0d3c07dbe3371ba0cec094f7b9ffed84e13653e707abd255af1486009088c"
