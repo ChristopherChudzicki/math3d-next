@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
-import environ  # type: ignore
+import environ
 
 env = environ.Env(CORS_ALLOWED_ORIGINS=(list, []))
 
@@ -33,6 +33,7 @@ DEBUG = True
 
 ALLOWED_HOSTS: list[str] = []
 
+SITE_NAME = "Math3d"
 
 # Application definition
 
@@ -44,14 +45,25 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework.authtoken",
+    "authentication",
+    "djoser",
     "corsheaders",
+    "drf_spectacular",
+    ## Custom apps
     "main",
     "scenes",
 ]
 
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+    ),
 }
 
 MIDDLEWARE = [
@@ -87,6 +99,60 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "main.wsgi.application"
 
+##################################################
+# Start auth settings
+##################################################
+DJOSER = {
+    "LOGIN_FIELD": "email",
+    # Send notifications / confirmations
+    "SEND_ACTIVATION_EMAIL": True,
+    "SEND_CONFIRMATION_EMAIL": True,
+    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
+    "USERNAME_CHANGED_EMAIL_CONFIRMATION": True,
+    # Require retyping password
+    "USER_CREATE_PASSWORD_RETYPE": True,
+    "SET_PASSWORD_RETYPE": True,
+    "PASSWORD_RESET_CONFIRM_RETYPE": True,
+    # Emails
+    "EMAIL": {
+        "activation": "authentication.email.ActivationEmail",
+        "confirmation": "authentication.email.ConfirmationEmail",
+        "password_reset": "authentication.email.PasswordResetEmail",
+        "password_changed_confirmation": "authentication.email.PasswordChangedConfirmationEmail",
+        "username_changed_confirmation": "authentication.email.UsernameChangedConfirmationEmail",
+        "username_reset": "authentication.email.UsernameResetEmail",
+    },
+    # Limit endpoints we don't want to just admin users.
+    # Not ideal, but it's the best solution for now.
+    # See https://github.com/sunscrapers/djoser/issues/549
+    "PERMISSIONS": {
+        # 'activation': ['rest_framework.permissions.AllowAny'],
+        # 'password_reset': ['rest_framework.permissions.AllowAny'],
+        # 'password_reset_confirm': ['rest_framework.permissions.AllowAny'],
+        # 'set_password': ['djoser.permissions.CurrentUserOrAdmin'],
+        "username_reset": ["rest_framework.permissions.IsAdminUser"],
+        "username_reset_confirm": ["rest_framework.permissions.IsAdminUser"],
+        "set_username": ["rest_framework.permissions.IsAdminUser"],
+        # 'user_create': ['rest_framework.permissions.AllowAny'],
+        # 'user_delete': ['djoser.permissions.CurrentUserOrAdmin'],
+        # 'user': ['djoser.permissions.CurrentUserOrAdmin'],
+        "user_list": ["rest_framework.permissions.IsAdminUser"],
+        # 'token_create': ['rest_framework.permissions.AllowAny'],
+        # 'token_destroy': ['rest_framework.permissions.IsAuthenticated'],
+    },
+    "SERIALIZERS": {
+        "user": "authentication.serializers.CustomUserSerializer",
+        "current_user": "authentication.serializers.CustomUserSerializer",
+    },
+    "_CUSTOM": {
+        "ACTIVATION_URL": "http://localhost:3000/account/activate?uid={uid}&token={token}",
+        "PASSWORD_RESET_CONFIRM_URL": "http://localhost:3000/account/password-reset/confirm/?uid={uid}&token={token}",
+    },
+}
+
+##################################################
+# End auth settings
+##################################################
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -119,6 +185,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = "authentication.CustomUser"
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -141,6 +210,16 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Math3d API",
+    "DESCRIPTION": "Math3d API",
+    "VERSION": "0.0.1",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_URLCONF": "main.urls",
+    "ENUM_GENERATE_CHOICE_DESCRIPTION": True,
+    "COMPONENT_SPLIT_REQUEST": True,
+}
 
 # Configure Django App for Heroku.
 if os.environ.get("IS_HEROKU"):
