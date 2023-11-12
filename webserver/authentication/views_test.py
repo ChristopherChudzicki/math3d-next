@@ -140,3 +140,50 @@ def test_reset_password():
 
     user.refresh_from_db()
     assert user.check_password(new_password)
+
+
+@pytest.mark.django_db
+def test_can_retrieve_own_user():
+    client = APIClient()
+    user = CustomUserFactory.create(is_active=True)
+    url = reverse("customuser-me")
+    client.force_authenticate(user)
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.data == {
+        "id": user.id,
+        "email": user.email,
+        "public_nickname": user.public_nickname,
+    }
+
+
+@pytest.mark.django_db
+def test_cannot_change_email_via_users_me():
+    client = APIClient()
+    user = CustomUserFactory.create(is_active=True)
+    url = reverse("customuser-me")
+    client.force_authenticate(user)
+    request = {"public_nickname": "new-nickname", "email": "new-email@foo.com"}
+    response = client.patch(url, request)
+    assert response.status_code == 200
+    assert response.data == {
+        "id": user.id,
+        "email": user.email,
+        "public_nickname": "new-nickname",
+    }
+
+
+# This should be limited to admin users
+@pytest.mark.django_db
+@pytest.mark.parametrize("is_staff", [True, False])
+def test_cannot_change_email_via_set_username(is_staff):
+    client = APIClient()
+    user = CustomUserFactory.create(is_active=True, is_staff=is_staff)
+    url = reverse("customuser-set-username")
+    client.force_authenticate(user)
+    request = {
+        "new_email": "new-email@foo.com",
+        "current_password": "testpassword",
+    }
+    response = client.post(url, request)
+    assert response.status_code == 204 if is_staff else 403
