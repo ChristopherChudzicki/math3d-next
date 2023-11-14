@@ -1,12 +1,3 @@
----
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
-ci:
-  skip:
-    - prettier-django
-    # Because these are local hooks it seems like they won't easily run in pre-commit CI
-    - eslint
-    - scss-lint
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
@@ -38,25 +29,6 @@ repos:
     rev: v1.4.0
     hooks:
       - id: detect-secrets
-        args:
-          - --baseline
-          - .secrets.baseline
-          - --exclude-files
-          - .yarn/
-          - --exclude-files
-          - cassettes/
-          - --exclude-files
-          - test_json/
-          - --exclude-files
-          - ".*_test.py"
-          - --exclude-files
-          - "test_.*.py"
-          - --exclude-files
-          - poetry.lock
-          - --exclude-files
-          - yarn.lock
-          - --exclude-files
-          - ".*/generated/"
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: "v0.1.5"
     hooks:
