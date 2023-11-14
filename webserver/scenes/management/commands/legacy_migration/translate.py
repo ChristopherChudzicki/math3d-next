@@ -1,5 +1,4 @@
 import re
-from typing import Any, Union
 
 import scenes.management.commands.legacy_migration.legacy_data as old
 import scenes.math_items as new

@@ -8,7 +8,7 @@ import { latexParser } from "@math3d/parser";
 import { useMathErrors, useMathResults } from "./mathScope";
 
 const TestMathContext = createContext(
-  new MathScope({ parse: latexParser.parse })
+  new MathScope({ parse: latexParser.parse }),
 );
 
 type Errors = Record<string, Error>;
@@ -76,7 +76,7 @@ describe("useMathResults and useMathErrors", () => {
             errorsSlice.current = slice;
           }}
         />
-      </TestMathContext.Provider>
+      </TestMathContext.Provider>,
     );
     assertNotNil(resultsSlice.current);
     assertNotNil(errorsSlice.current);

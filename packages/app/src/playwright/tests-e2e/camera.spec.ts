@@ -38,7 +38,7 @@ const cameraScene = ({ camera, axisX, axisY, axisZ }: MakeSceneProps = {}) => {
 };
 
 const getCameraPosition = async (
-  page: Page
+  page: Page,
 ): Promise<{ x: number; y: number; z: number }> => {
   await whenMathboxRendered(page);
   return page.evaluate(() => {
@@ -48,7 +48,7 @@ const getCameraPosition = async (
 };
 
 const getControlsTarget = async (
-  page: Page
+  page: Page,
 ): Promise<{ x: number; y: number; z: number }> => {
   await whenMathboxRendered(page);
   return page.evaluate(() => {

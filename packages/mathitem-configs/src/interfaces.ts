@@ -23,7 +23,7 @@ export interface PropertyConfig<K, V = never> {
 export interface IMathItemConfig<
   T extends MathItemType,
   P extends MathItemProperties,
-  E extends Partial<Record<keyof P, unknown>>
+  E extends Partial<Record<keyof P, unknown>>,
 > {
   type: T;
   label: string;
@@ -41,7 +41,7 @@ export interface IMathItemConfig<
 
 export interface IMathItem<
   T extends MathItemType,
-  P extends MathItemProperties
+  P extends MathItemProperties,
 > {
   id: string;
   type: T;
@@ -50,5 +50,5 @@ export interface IMathItem<
 
 export type MathItemGenerator<
   T extends MathItemType,
-  P extends MathItemProperties
+  P extends MathItemProperties,
 > = (id: string) => IMathItem<T, P>;

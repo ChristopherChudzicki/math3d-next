@@ -6,7 +6,7 @@ import type { AxesRange, Coords } from "./interfaces";
 const project = (
   position1: Coords,
   range1: AxesRange,
-  range2: AxesRange
+  range2: AxesRange,
 ): Coords => {
   const [x1, y1, z1] = position1;
   const [[xMin1, xMax1], [yMin1, yMax1], [zMin1, zMax1]] = range1;

@@ -20,7 +20,7 @@ import {
  */
 export const useLongAndShortPress = <T = Element>(
   longPressCb: LongPressCallback<T>,
-  options?: LongPressOptions<T>
+  options?: LongPressOptions<T>,
 ): {
   bind: (context?: unknown) => LongPressResult<T>;
   lastPressWasLong: () => boolean;
@@ -31,7 +31,7 @@ export const useLongAndShortPress = <T = Element>(
       wasLongPressedRef.current = true;
       longPressCb(event, meta);
     },
-    [longPressCb]
+    [longPressCb],
   );
 
   useEffect(() => {

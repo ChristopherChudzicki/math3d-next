@@ -97,7 +97,7 @@ test.each([{ name: "lhs" as const }, { name: "rhs" as const }])(
     const { store } = await renderTestApp(`/${scene.key}`);
 
     const input = screen.getByLabelText(
-      config.properties[name].label
+      config.properties[name].label,
     ) as HTMLInputElement;
     expect(input.value).toBe(initialDisplay);
     await user.clear(input);
@@ -109,5 +109,5 @@ test.each([{ name: "lhs" as const }, { name: "rhs" as const }])(
       item.id
     ] as MathItem<MIT.ImplicitSurface>;
     expect(newItem.properties[name]).toEqual(final);
-  }
+  },
 );

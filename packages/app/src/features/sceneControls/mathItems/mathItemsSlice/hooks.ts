@@ -14,7 +14,7 @@ const useSetTitle = () => {
     (title: string) => {
       dispatch(actions.setTitle({ title }));
     },
-    [dispatch]
+    [dispatch],
   );
 };
 

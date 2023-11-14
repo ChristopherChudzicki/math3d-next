@@ -43,7 +43,7 @@ type EvaluatedProperties = {
 };
 
 const make: MathItemGenerator<MathItemType.Camera, CameraProperties> = (
-  id
+  id,
 ) => ({
   id,
   type: MathItemType.Camera,

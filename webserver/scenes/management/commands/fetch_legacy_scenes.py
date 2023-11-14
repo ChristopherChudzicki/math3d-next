@@ -49,7 +49,7 @@ class Command(BaseCommand):
             )
         elif limit:
             sql.SQL(
-                f"""
+                """
         SELECT url_key, dehydrated, times_accessed, last_accessed
         FROM graphs LIMIT %s;
         """

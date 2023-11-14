@@ -69,10 +69,10 @@ const setupTest = async (overrides: Overrides = {}) => {
   const btnIncrement = await findBtn(itemEl, btnLabels.increment);
   const btnDecrement = await findBtn(itemEl, btnLabels.decrement);
   const inputLhs = await within(itemEl).findByLabelText(
-    "Value (left-hand side)"
+    "Value (left-hand side)",
   );
   const inputRhs = await within(itemEl).findByLabelText(
-    "Value (right-hand side)"
+    "Value (right-hand side)",
   );
   const inputMin = await within(itemEl).findByLabelText("Min");
   const inputMax = await within(itemEl).findByLabelText("Max");
@@ -147,17 +147,17 @@ const expectSliderArraysEqual = (
   arr1: number[],
   arr2: number[],
   lengthTolerance = 1,
-  precision = 6
+  precision = 6,
 ) => {
   const min = Math.min(arr1.length, arr2.length);
   const max = Math.max(arr1.length, arr2.length);
   if (Math.abs(max - min) > lengthTolerance) {
     throw new Error(
-      `arr1 and arr2 should have lengths within ${lengthTolerance} of each other`
+      `arr1 and arr2 should have lengths within ${lengthTolerance} of each other`,
     );
   }
   const [rounded1, rounded2] = [arr1, arr2].map((arr) =>
-    arr.slice(0, min).map((x) => x.toPrecision(precision))
+    arr.slice(0, min).map((x) => x.toPrecision(precision)),
   );
   expect(rounded1).toEqual(rounded2);
 };
@@ -224,7 +224,7 @@ describe("Variable Slider", () => {
       // No new updates after paused.
       await userWaits(duration * 1000, { useFake: true });
       expectSliderArraysEqual(valueUpdates, expectedValues);
-    }
+    },
   );
 
   test.each([
@@ -243,7 +243,7 @@ describe("Variable Slider", () => {
       expect(increment).toBeGreaterThan(0);
       expect(typeof valueUpdates[0]).toBe("number");
       expect(valueUpdates[0]).toEqual(value + dirMultiplier * increment);
-    }
+    },
   );
 
   /**
@@ -269,7 +269,7 @@ describe("Variable Slider", () => {
       expect(increment).toBeGreaterThan(0);
       expect(typeof valueUpdates[0]).toBe("number");
       expect(valueUpdates[0]).toEqual(value + dirMultiplier * increment);
-    }
+    },
   );
 
   test.each([
@@ -293,7 +293,7 @@ describe("Variable Slider", () => {
       await user.click(el.btnToggle);
 
       expectSliderArraysEqual(valueUpdates, expectedValues);
-    }
+    },
   );
 
   test("Min, max, step passed to input[type=range]", async () => {
@@ -372,7 +372,7 @@ describe("Variable Slider", () => {
       await waitFor(() => {
         expect(tooltip).not.toBeInTheDocument();
       });
-    }
+    },
   );
 
   test("value display shows 2 digits except when set explicitly by user", async () => {

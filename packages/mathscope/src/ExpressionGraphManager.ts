@@ -22,7 +22,7 @@ import { DirectedGraph, isAssignmentNode } from "./util";
  *  - finding cycles and duplicate assignment nodes
  */
 export default class ExpressionGraphManager<
-  N extends AnonMathNode = AnonMathNode
+  N extends AnonMathNode = AnonMathNode,
 > {
   graph = new DirectedGraph<N>([], []);
 
@@ -36,7 +36,7 @@ export default class ExpressionGraphManager<
       allowedDuplicateLeafRegex = /^_/,
     }: {
       allowedDuplicateLeafRegex?: RegExp;
-    } = {}
+    } = {},
   ) {
     this.allowedDuplicateLeafRegex = allowedDuplicateLeafRegex;
     this.addExpressions(nodes);
@@ -150,7 +150,7 @@ export default class ExpressionGraphManager<
     duplicates: Map<string, (N & AnonAssignmentNode)[]>;
   } {
     const assignments = this.getAssignmentNodesByName(
-      Array.from(this.graph.getNodes())
+      Array.from(this.graph.getNodes()),
     );
     const duplicates = new Map<string, (N & AnonAssignmentNode)[]>();
     assignments.forEach((nodes, name) => {
@@ -201,7 +201,7 @@ export default class ExpressionGraphManager<
   // static methods can't use the generic type parameter
   // eslint-disable-next-line class-methods-use-this
   private getAssignmentNodesByName(
-    nodes: N[]
+    nodes: N[],
   ): Map<string, (N & AnonAssignmentNode)[]> {
     const assignments = nodes.filter(isAssignmentNode);
     const grouped = groupBy(assignments, (n) => n.name);

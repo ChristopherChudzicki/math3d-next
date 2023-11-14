@@ -18,7 +18,7 @@ const waitForNotBusy = () =>
         throw new Error("Some elements are still loading.");
       }
     },
-    { timeout: 2000 }
+    { timeout: 2000 },
   );
 
 const LocationSpy = React.forwardRef<Location>((_props, ref) => {
@@ -34,7 +34,7 @@ LocationSpy.displayName = "LocationSpy";
  */
 const renderTestApp = async (
   initialRoute: InitialEntry = "/",
-  { waitForReady = true } = {}
+  { waitForReady = true } = {},
 ) => {
   const initialEntries: InitialEntry[] = [initialRoute];
   const store = getStore();
@@ -62,7 +62,7 @@ const renderTestApp = async (
           }}
         />
       </MemoryRouter>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
   if (waitForReady) {
     await waitForNotBusy();

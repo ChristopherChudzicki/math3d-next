@@ -7,7 +7,8 @@ module.exports = {
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react-hooks/recommended",
-    "plugin:prettier/recommended", // this should come last
+    "prettier",
+    "prettier/prettier",
   ],
   plugins: ["react", "@typescript-eslint"],
   rules: {

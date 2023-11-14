@@ -67,14 +67,14 @@ const SceneContent = () => {
           id: camera.id,
           path: "/position",
           value: `[${event.position.map((pos) => pos.toPrecision(6))}]`,
-        })
+        }),
       );
       dispatch(
         actions.patchProperty({
           id: camera.id,
           path: "/target",
           value: `[${event.target.map((pos) => pos.toPrecision(6))}]`,
-        })
+        }),
       );
     };
     return debounce(cb, 200);

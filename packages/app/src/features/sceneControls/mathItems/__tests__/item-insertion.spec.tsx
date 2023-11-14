@@ -160,7 +160,7 @@ test.each(permanentItems)(
       ...order0,
       initialFolder: [expect.any(String), ...order0.initialFolder],
     });
-  }
+  },
 );
 
 test.each(permanentItems)("Removing items", async ({ itemId }) => {
@@ -184,13 +184,13 @@ test.each(permanentItems)(
     await renderTestApp("/");
     const surface = getItemByDescription("Explicit Surface");
     expect(
-      surface.closest('[aria-roledescription="sortable"]')
+      surface.closest('[aria-roledescription="sortable"]'),
     ).not.toHaveAttribute("aria-disabled", "true");
     await user.click(screen.getByRole("tab", { name: "Axes & Camera" }));
     expect(
-      getItemByTestId(itemId).closest('[aria-roledescription="sortable"]')
+      getItemByTestId(itemId).closest('[aria-roledescription="sortable"]'),
     ).toHaveAttribute("aria-disabled", "true");
-  }
+  },
 );
 
 test.each([

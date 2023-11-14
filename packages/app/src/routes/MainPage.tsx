@@ -137,7 +137,7 @@ const useSearchEnum = <T extends string>({
       }
       navigate({ search: next.toString(), hash: location.hash });
     },
-    [defaultValue, name, navigate, search, location.hash]
+    [defaultValue, name, navigate, search, location.hash],
   );
   return [value, set] as const;
 };
@@ -162,7 +162,7 @@ const MainPage: React.FC = () => {
         setControlsVisibility("1");
       }
     },
-    [setControlsVisibility]
+    [setControlsVisibility],
   );
   return (
     <div className={styles.container}>

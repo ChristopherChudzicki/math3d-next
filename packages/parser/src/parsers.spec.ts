@@ -82,7 +82,7 @@ describe("backslash removal", () => {
 describe("Parsing assignments and function assignments", () => {
   const getParseError = (
     parseable: Parseable,
-    Err = DetailedAssignmentError
+    Err = DetailedAssignmentError,
   ) => {
     try {
       parser.parse(parseable);
@@ -201,7 +201,7 @@ describe("Parsing assignments and function assignments", () => {
       };
       expect(err.lhs)[methods.lhs](expected.lhsErr);
       expect(err.rhs)[methods.rhs](expected.rhsErr);
-    }
+    },
   );
 
   it.each([
@@ -265,7 +265,7 @@ describe("Parsing assignments and function assignments", () => {
       };
       expect(err.lhs)[methods.lhs](expected.lhsErr);
       expect(err.rhs)[methods.rhs](expected.rhsErr);
-    }
+    },
   );
 
   it("Associates bad parameters with their indexes", () => {
@@ -279,7 +279,7 @@ describe("Parsing assignments and function assignments", () => {
 
     expect(Object.keys(err.lhs.paramErrors)).toEqual(["2", "3", "4"]);
     expect(err.lhs.paramErrors[2]).toMatch(
-      /"w\+" is not a valid parameter name/
+      /"w\+" is not a valid parameter name/,
     );
     expect(err.lhs.paramErrors[3]).toMatch(/Parameter names must be unique./);
     expect(err.lhs.paramErrors[4]).toMatch(/Parameter names must be unique./);
@@ -362,12 +362,12 @@ describe("Parsing arrays", () => {
       parser.parse({
         type: "array",
         items: ["a", "b+", "c", "d+", "e"],
-      })
+      }),
     );
 
     invariant(error instanceof AggregateError);
     expect(
-      Object.values(error.errors).filter((e) => e !== undefined)
+      Object.values(error.errors).filter((e) => e !== undefined),
     ).toHaveLength(2);
     expect(error.errors[1].message).toMatch(/Unexpected end of expression/);
     expect(error.errors[3].message).toMatch(/Unexpected end of expression/);
@@ -380,11 +380,11 @@ describe("Parsing arrays", () => {
           type: "array",
           items: ["1", "2", "x", "4", "y"],
         })
-        .evaluate()
+        .evaluate(),
     );
     invariant(error instanceof AggregateError);
     expect(
-      Object.values(error.errors).filter((e) => e !== undefined)
+      Object.values(error.errors).filter((e) => e !== undefined),
     ).toHaveLength(2);
     expect(error.errors[2].message).toMatch(/Undefined symbol x/);
     expect(error.errors[4].message).toMatch(/Undefined symbol y/);
@@ -427,13 +427,13 @@ describe("returned node's MathNode.evaluate", () => {
     const nodeF = parse("f(x) = 2^[1,2,3]");
     const f = nodeF.evaluate() as (x: number) => unknown;
     expect(() => f(1)).toThrowError(
-      /Error evaluating f: Unexpected type of argument in function pow/
+      /Error evaluating f: Unexpected type of argument in function pow/,
     );
 
     const nodeG = parse("g = f");
     const g = nodeG.evaluate(new Map([["f", f]])) as (x: number) => unknown;
     expect(() => g(1)).toThrowError(
-      /Error evaluating f: Unexpected type of argument in function pow/
+      /Error evaluating f: Unexpected type of argument in function pow/,
     );
   });
 });
@@ -471,7 +471,7 @@ describe("parsing derivatives", () => {
     },
   ])("partial derivatives", ({ varname, expected, expectedDeps }) => {
     const node = parse(
-      `\\frac{\\differentialD f(x + y, 3x + z)}{\\differentialD ${varname}}`
+      `\\frac{\\differentialD f(x + y, 3x + z)}{\\differentialD ${varname}}`,
     );
     expect(node.toString()).toBe(expected);
     expect(node.dependencies).toEqual(expectedDeps);
@@ -480,10 +480,10 @@ describe("parsing derivatives", () => {
   test("nested derivatives", () => {
     const nested = "\\frac{\\differentialD x^3}{\\differentialD x} + 2x^2";
     const node = parse(
-      `\\frac{\\differentialD (${nested})}{\\differentialD x}`
+      `\\frac{\\differentialD (${nested})}{\\differentialD x}`,
     );
     expect(node.toString()).toBe(
-      "diff(_f(x$0) = diff(_f(x$1) = x$1 ^ (3), x$0) + 2 x$0 ^ (2), x)"
+      "diff(_f(x$0) = diff(_f(x$1) = x$1 ^ (3), x$0) + 2 x$0 ^ (2), x)",
     );
     expect(node.dependencies).toEqual(new Set(["diff", "x"]));
   });

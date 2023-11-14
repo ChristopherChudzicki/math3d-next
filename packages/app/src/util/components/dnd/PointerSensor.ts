@@ -17,7 +17,7 @@ export default class CustomPointerSensor extends PointerSensor {
         {
           onActivation,
           isDraggableElement = always,
-        }: CustomPointerSensorOptions
+        }: CustomPointerSensorOptions,
       ) => {
         const { nativeEvent: event } = syntheticEvent;
         if (!event.isPrimary || event.button !== 0) {

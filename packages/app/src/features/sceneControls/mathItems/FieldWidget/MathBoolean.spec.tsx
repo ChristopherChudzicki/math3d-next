@@ -107,7 +107,7 @@ test.each([
     const visible = within(settings).getByLabelText("Visible");
     const useExpression = within(visible).queryByText(text);
     expect(useExpression instanceof HTMLButtonElement).toBe(showUseExpression);
-  }
+  },
 );
 
 describe("When the switch is initially enabled", () => {
@@ -116,7 +116,7 @@ describe("When the switch is initially enabled", () => {
     async (initialValue) => {
       const { findToggle } = await setup(initialValue);
       expect(await findToggle()).toBeEnabled();
-    }
+    },
   );
 
   test('disabled if value is not "false" or "true"', async () => {

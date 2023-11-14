@@ -25,7 +25,7 @@ type GraphicWithColorExpr = MathGraphic & {
 };
 
 const hasColorExpr = (
-  graphic: MathGraphic
+  graphic: MathGraphic,
 ): graphic is GraphicWithColorExpr => {
   return "colorExpr" in graphic.properties;
 };
@@ -51,7 +51,7 @@ const ColorExprInput: React.FC<ColorExprProps> = (props) => {
         },
       });
     },
-    [onChange, item.properties.colorExpr]
+    [onChange, item.properties.colorExpr],
   );
   const lhs = `f(${item.properties.colorExpr.params.join(", ")}) =`;
   return (
@@ -86,7 +86,7 @@ const ColorDialog: React.FC<ColorDialogProps> = (props) => {
   const onWidgetChange = useOnWidgetChange(item);
   const onColorChange: OnColorChange = useCallback(
     (event) => onWidgetChange({ name: "color", value: event.value }),
-    [onWidgetChange]
+    [onWidgetChange],
   );
   const pickerColors = hasColorExpr(item) ? colorsAndGradients : colors;
   const [tab, setTab] = useState("color");
@@ -94,7 +94,7 @@ const ColorDialog: React.FC<ColorDialogProps> = (props) => {
     (_event: React.SyntheticEvent, newValue: string) => {
       setTab(newValue);
     },
-    []
+    [],
   );
   return (
     <div role="dialog" className={props.className} data-dndkit-no-drag>

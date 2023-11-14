@@ -39,7 +39,7 @@ const getMs = (duration: string): number => {
  */
 const useCollapsible = (
   isOpen: boolean,
-  refCb?: React.RefCallback<HTMLElement>
+  refCb?: React.RefCallback<HTMLElement>,
 ): React.RefCallback<HTMLElement> => {
   const elRef = useRef<HTMLElement>();
   const overflowY = useRef("");

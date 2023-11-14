@@ -26,7 +26,7 @@ describe("ColorPicker", () => {
   it("Clicking a color swatch calls onChange", async () => {
     const onChange = vi.fn();
     render(
-      <ColorPicker onChange={onChange} colors={colorsWithStyles} value="red" />
+      <ColorPicker onChange={onChange} colors={colorsWithStyles} value="red" />,
     );
 
     expect(onChange).not.toHaveBeenCalled();
@@ -38,7 +38,7 @@ describe("ColorPicker", () => {
   test("Entering a valid color in custom color calls onChange", async () => {
     const onChange = vi.fn();
     render(
-      <ColorPicker onChange={onChange} colors={colorsWithStyles} value="red" />
+      <ColorPicker onChange={onChange} colors={colorsWithStyles} value="red" />,
     );
     const textInput = screen.getByRole("textbox", { name: "Custom Color" });
 
@@ -58,7 +58,7 @@ describe("ColorPicker", () => {
   test("Entering an invalid color in custom color does not call onChange", async () => {
     const onChange = vi.fn();
     render(
-      <ColorPicker onChange={onChange} colors={colorsWithStyles} value="red" />
+      <ColorPicker onChange={onChange} colors={colorsWithStyles} value="red" />,
     );
     const textInput = screen.getByRole("textbox", { name: "Custom Color" });
 

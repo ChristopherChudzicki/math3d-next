@@ -42,8 +42,8 @@ const ColorStatus: React.FC<Props> = (props) => {
     () =>
       ({
         "--indicator-color": colorAndStyle.backgroundPreview,
-      } as React.CSSProperties),
-    [colorAndStyle]
+      }) as React.CSSProperties,
+    [colorAndStyle],
   );
   const { bind, lastPressWasLong } = useLongAndShortPress(setDialogVisible.on);
 
@@ -73,7 +73,7 @@ const ColorStatus: React.FC<Props> = (props) => {
             positioning["absolute-centered"],
             {
               [styles.empty]: !visible,
-            }
+            },
           )}
           onClick={handleButtonClick}
           {...bind()}

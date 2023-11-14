@@ -1,4 +1,6 @@
-.speedControls, .stepControls, .playButton {
+.speedControls,
+.stepControls,
+.playButton {
   max-height: 20px;
 }
 
@@ -13,7 +15,7 @@
 :global(.MuiButton-root.MuiButtonGroup-grouped).speedControls.display {
   max-width: 40px;
   min-width: 40px;
-  background-color: var( --color-secondary-lighter);
+  background-color: var(--color-secondary-lighter);
 }
 
 :global(.MuiButton-root.MuiButtonGroup-grouped).stepControls {
@@ -29,8 +31,8 @@
 }
 
 :global(.MuiIconButton-root).playButton {
-  border: 1px solid rgba(var(--color-secondary-rgb), 0.5)
+  border: 1px solid rgba(var(--color-secondary-rgb), 0.5);
 }
 .playButton:hover {
-  border: 1px solid rgba(var(--color-secondary-rgb))
+  border: 1px solid rgba(var(--color-secondary-rgb));
 }

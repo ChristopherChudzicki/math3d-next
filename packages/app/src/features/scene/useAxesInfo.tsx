@@ -14,7 +14,7 @@ type AxesInfo = {
 const useAxesInfo = (
   axisX: MathItem,
   axisY: MathItem,
-  axisZ: MathItem
+  axisZ: MathItem,
 ): AxesInfo => {
   invariant(axisX.type === MathItemType.Axis, "x is not an axis");
   invariant(axisY.type === MathItemType.Axis, "y is not an axis");

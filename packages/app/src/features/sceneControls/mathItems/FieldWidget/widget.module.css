@@ -1,5 +1,6 @@
-.has-error, .field-widget-input.has-error{
-  padding-right:0pt;
+.has-error,
+.field-widget-input.has-error {
+  padding-right: 0pt;
   padding-left: 0pt;
   padding-bottom: 2pt;
   /*
@@ -24,7 +25,8 @@
     transparent
   );
 }
-.has-error:focus-within, .field-widget-input.has-error:focus-within {
+.has-error:focus-within,
+.field-widget-input.has-error:focus-within {
   background-image: linear-gradient(
     to top,
     var(--color-error),
@@ -34,7 +36,6 @@
   );
 }
 
-
 .field-widget {
   margin-bottom: 2pt;
   background-color: transparent;
@@ -43,9 +44,9 @@
 .field-widget-input {
   min-width: 10px;
   border: none;
-  margin-left:2pt;
-  margin-right:2pt;
-  padding-right:0pt;
+  margin-left: 2pt;
+  margin-right: 2pt;
+  padding-right: 0pt;
   padding-left: 0pt;
   padding-bottom: 2pt;
   background-color: transparent;
@@ -71,7 +72,6 @@
 textarea.field-widget-input {
   resize: none;
 }
-
 
 .field-widget-input {
   box-sizing: border-box;

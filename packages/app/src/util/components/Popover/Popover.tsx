@@ -151,7 +151,7 @@ const Popover: React.FC<PopoverProps> = ({
         },
       },
     ],
-    [arrowEl, modifiers]
+    [arrowEl, modifiers],
   );
   const containerRef = useRef<HTMLDivElement>(null);
   usePointerAway(containerRef, onPointerAway);

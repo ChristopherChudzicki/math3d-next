@@ -27,7 +27,7 @@
 .description {
   /** Make description lighter so that mathfields draw more visual focus */
   color: var(--color-text-light);
-  max-width: 100%
+  max-width: 100%;
 }
 
 .grid-left-gutter {
@@ -48,14 +48,13 @@
   grid-column-end: 3;
   grid-row-start: 2;
   grid-row-end: 3;
-
 }
 .container.childItem .grid-center-bottom {
   min-height: 40px;
   padding-bottom: 0.5em;
 }
-.container.childItem .grid-right-gutter-bottom{
-  padding-bottom: 0.5em
+.container.childItem .grid-right-gutter-bottom {
+  padding-bottom: 0.5em;
 }
 
 .grid-right-gutter {

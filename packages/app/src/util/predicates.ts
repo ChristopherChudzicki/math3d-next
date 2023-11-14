@@ -5,7 +5,7 @@ export const isNotNil = <T>(x: T): x is NonNullable<T> => {
 
 export const assertNotNil: <T>(
   value: T,
-  msg?: string
+  msg?: string,
 ) => asserts value is NonNullable<T> = (value, msg) => {
   if (isNotNil(value)) return;
   if (msg) {
@@ -23,7 +23,7 @@ export const assertNotNil: <T>(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const assertInstanceOf: <C extends { new (...args: any[]): unknown }>(
   value: unknown,
-  Class: C
+  Class: C,
 ) => asserts value is InstanceType<C> = (value, Class) => {
   if (value instanceof Class) return;
   throw new Error(`Expected value to be instanceof ${Class}`);

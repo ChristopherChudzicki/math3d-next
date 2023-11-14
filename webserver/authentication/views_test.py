@@ -1,10 +1,9 @@
-import re
 from urllib.parse import ParseResult, parse_qs, urlparse
 
 import lxml.etree
 import pytest
 from django.core import mail
-from django.core.mail.message import EmailMessage, EmailMultiAlternatives
+from django.core.mail.message import EmailMultiAlternatives
 from django.urls import reverse
 from djoser.conf import settings
 from faker import Faker

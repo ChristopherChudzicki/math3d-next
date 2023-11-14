@@ -15,7 +15,7 @@ describe("toLaTeX", () => {
       toLaTeX([
         [1, 2],
         [3, 4],
-      ])
+      ]),
     ).toBe(`\\begin{bmatrix}
 1 & 2 \\\\
 3 & 4

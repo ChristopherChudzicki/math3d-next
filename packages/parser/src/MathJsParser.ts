@@ -75,7 +75,7 @@ class MathJsParser implements IMathJsParser {
     const mjsRules = this.rules.filter(isMathJsRule);
     return mjsRules.reduce(
       (mjsNode, rule) => rule.transform(mjsNode),
-      math.parse(preprocessed)
+      math.parse(preprocessed),
     );
   };
 
@@ -85,7 +85,7 @@ class MathJsParser implements IMathJsParser {
     validate,
   }: Omit<ParseableObjs["assignment"], "type">): readonly [
     AnonMathNode,
-    mjs.MathNode
+    mjs.MathNode,
   ] => {
     let lhsError: Error | undefined;
     let rhsError: Error | undefined;
@@ -123,7 +123,7 @@ class MathJsParser implements IMathJsParser {
     validate,
   }: Omit<ParseableObjs["function-assignment"], "type">): readonly [
     AnonMathNode,
-    mjs.MathNode
+    mjs.MathNode,
   ] => {
     const lhs = `${name}(${params.join(",")})`;
     return this.parseAssignment({ lhs, rhs, validate });
@@ -144,7 +144,7 @@ class MathJsParser implements IMathJsParser {
   };
 
   private $parse = (
-    parseable: Parseable
+    parseable: Parseable,
   ): readonly [AnonMathNode, mjs.MathNode] => {
     const parseableObj: Parseable =
       typeof parseable === "string"
@@ -173,14 +173,14 @@ class MathJsParser implements IMathJsParser {
   private static aggregateNodes = (
     nodes: AnonMathNode[],
     mjsNode: mjs.ArrayNode,
-    validate: NonNullable<ParseableObjs["array"]["validate"]> = (x) => x
+    validate: NonNullable<ParseableObjs["array"]["validate"]> = (x) => x,
   ): AnonMathNode => {
     const evaluate: AnonMathNode["evaluate"] = (scope) => {
       const result = aggregate(nodes, (node) => node.evaluate(scope));
       return validate(result, mjsNode);
     };
     const dependencies = new Set(
-      nodes.flatMap((node) => [...node.dependencies])
+      nodes.flatMap((node) => [...node.dependencies]),
     );
 
     return {

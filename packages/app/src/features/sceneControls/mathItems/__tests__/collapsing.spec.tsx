@@ -42,7 +42,7 @@ test.each([
 
     expect(isHidden(getItemByDescription("P2a"))).toBe(expectHidden);
     expect(isHidden(getItemByDescription("P2b"))).toBe(expectHidden);
-  }
+  },
 );
 
 test("Collapsing and expanding folders", async () => {

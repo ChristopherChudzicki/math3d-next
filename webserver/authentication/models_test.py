@@ -2,7 +2,6 @@ import pytest
 from django.contrib.auth import get_user_model
 from faker import Faker
 
-from authentication.models import CustomUser
 
 faker = Faker()
 

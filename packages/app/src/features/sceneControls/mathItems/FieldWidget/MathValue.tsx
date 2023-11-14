@@ -31,7 +31,7 @@ const MathValue = React.forwardRef<MathfieldElement, IWidgetProps>(
         };
         onChange(widgetChangeEvent);
       },
-      [name, onChange]
+      [name, onChange],
     );
 
     return (
@@ -43,14 +43,14 @@ const MathValue = React.forwardRef<MathfieldElement, IWidgetProps>(
         className={classNames(
           styles["field-widget-input"],
           { [styles["has-error"]]: error },
-          className
+          className,
         )}
         aria-invalid={error ? "true" : "false"}
         onChange={handleChange}
         value={value}
       />
     );
-  }
+  },
 );
 MathValue.displayName = "MathValue";
 

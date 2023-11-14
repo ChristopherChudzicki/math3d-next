@@ -24,7 +24,7 @@ const findNestedExpression = (
   opener: string,
   closer: string,
   startingFrom = 0,
-  escapeChar = "\\"
+  escapeChar = "\\",
 ): SubstringRange | null => {
   const start = text.indexOf(opener, startingFrom);
   if (start < 0) return null;
@@ -32,8 +32,8 @@ const findNestedExpression = (
   let numOpen = 1;
   const regex = new RegExp(
     String.raw`(?<!${escapeRegExp(escapeChar)})(?<delimiter>${escapeRegExp(
-      opener
-    )}|${escapeRegExp(closer)})`
+      opener,
+    )}|${escapeRegExp(closer)})`,
   );
   while (numOpen > 0) {
     const nextDelimiter = text.substring(scanningIndex).match(regex);
@@ -75,7 +75,7 @@ interface TexCommand {
 const findTexCommand = (
   tex: string,
   name: string,
-  numArgs: number
+  numArgs: number,
 ): TexCommand | null => {
   const command = `\\${name}`;
   const start = tex.indexOf(`${command}{`);
@@ -105,7 +105,7 @@ const replaceAllTexCommand = (
   tex: string,
   name: string,
   numArgs: number,
-  replacer: CommandReplacer
+  replacer: CommandReplacer,
 ) => {
   let withReplacements = tex;
   let command: TexCommand | null;

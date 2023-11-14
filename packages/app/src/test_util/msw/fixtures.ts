@@ -31,16 +31,16 @@ const makeFolderScene = (
     F1?: Partial<MathItem<MIT.Folder>["properties"]>;
     F2?: Partial<MathItem<MIT.Folder>["properties"]>;
     F3?: Partial<MathItem<MIT.Folder>["properties"]>;
-  } = {}
+  } = {},
 ): Scene => {
   const folderProps = { F1, F2, F3 };
   const pointDescriptions = ["P1a", "P1b", "P2a", "P2b", "P3a", "P3b"];
   const folderDescriptions = ["F1", "F2", "F3"] as const;
   const points = pointDescriptions.map((description) =>
-    makeItem(MIT.Point, { description })
+    makeItem(MIT.Point, { description }),
   );
   const folders = folderDescriptions.map((description) =>
-    makeItem(MIT.Folder, { description, ...folderProps[description] })
+    makeItem(MIT.Folder, { description, ...folderProps[description] }),
   );
   const items = [...points, ...folders];
   const [p0, p1, p2, p3, p4, p5] = points.map((p) => p.id);

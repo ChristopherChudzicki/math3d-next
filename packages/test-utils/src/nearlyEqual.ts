@@ -17,7 +17,7 @@ function genSamples(
   min: number,
   max: number,
   nSamples: number,
-  sampleLength: number
+  sampleLength: number,
 ) {
   return Array.from({ length: nSamples }).map(() => {
     return randomReals(min, max, sampleLength);
@@ -40,7 +40,7 @@ type ToNearlyEqualOptions = {
 const isNearlyEqual = (
   a: unknown,
   b: unknown,
-  opts: ToNearlyEqualOptions
+  opts: ToNearlyEqualOptions,
 ): boolean => {
   const { digitsToCompare, nSamples, range } = opts;
 
@@ -68,7 +68,7 @@ const isNearlyEqual = (
     return isNearlyEqual(
       samples.map((sample) => a(...sample)),
       samples.map((sample) => b(...sample)),
-      opts
+      opts,
     );
   }
 
@@ -93,7 +93,7 @@ const isNearlyEqual = (
 const toNearlyEqual = (
   received: unknown,
   expected: unknown,
-  opts: Partial<ToNearlyEqualOptions> = {}
+  opts: Partial<ToNearlyEqualOptions> = {},
 ) => {
   const { nSamples = 5, digitsToCompare = 6, range = [1, 3] } = opts;
   const pass = isNearlyEqual(received, expected, {
@@ -113,7 +113,7 @@ const toNearlyEqual = (
 interface CustomMatchers {
   toNearlyEqual: (
     expected: unknown,
-    opts?: Partial<ToNearlyEqualOptions>
+    opts?: Partial<ToNearlyEqualOptions>,
   ) => void;
 }
 

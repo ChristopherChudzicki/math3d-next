@@ -23,7 +23,7 @@ const longClick = async (element: HTMLElement, ms: number) => {
     () =>
       new Promise((res) => {
         setTimeout(res, ms);
-      })
+      }),
   );
 };
 
@@ -33,7 +33,7 @@ const longClick = async (element: HTMLElement, ms: number) => {
  */
 const setup = async <R extends MIT>(
   type: R,
-  itemProps: Partial<MathItem<R>["properties"]> = {}
+  itemProps: Partial<MathItem<R>["properties"]> = {},
 ) => {
   const item = makeItem(type, itemProps);
   const id = nodeId(item);

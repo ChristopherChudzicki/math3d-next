@@ -9,9 +9,9 @@ import {
 
 const isAssignmentNode = <
   N extends AnonMathNode,
-  AN extends N & AnonAssignmentNode
+  AN extends N & AnonAssignmentNode,
 >(
-  node: N
+  node: N,
 ): node is AN => {
   if (ASSIGNMENT_TYPES.includes(node.type)) return true;
   return false;
@@ -19,16 +19,16 @@ const isAssignmentNode = <
 
 const assertIsAssignmentNode: <
   N extends AnonMathNode,
-  AN extends N & AnonAssignmentNode
+  AN extends N & AnonAssignmentNode,
 >(
-  node: N
+  node: N,
 ) => asserts node is AN = (node) => {
   if (isAssignmentNode(node)) return;
   throw new Error(`Node should be an assignment node; it is ${node.type}`);
 };
 
 const getAssignmentCycles = <N extends AnonMathNode>(
-  nodes: N[]
+  nodes: N[],
 ): (AnonAssignmentNode & N)[][] => {
   const assignmentNodes = nodes.filter(isAssignmentNode);
   const graph = new Graph();

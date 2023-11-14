@@ -18,7 +18,7 @@ describe("findNestedExpression", () => {
     //            0123456789012345678901234567890123456789
     const text = "a << hello << a >> << >> >> << >> b";
     expect(findNestedExpression(text, opener, closer, start)).toStrictEqual(
-      expected
+      expected,
     );
   });
 
@@ -30,7 +30,7 @@ describe("findNestedExpression", () => {
     const text = ">> << >> >> <<";
     const expected = { start: 3, end: 8 };
     expect(findNestedExpression(text, opener, closer, 0)).toStrictEqual(
-      expected
+      expected,
     );
   });
 
@@ -51,7 +51,7 @@ describe("findNestedExpression", () => {
     const text = "cats [[[ rats [[[]]] > [[[ >> bats";
     const expected = { start: 5, end: 29 };
     expect(findNestedExpression(text, opener, closer, 0)).toStrictEqual(
-      expected
+      expected,
     );
   });
 });

@@ -99,7 +99,7 @@ export default class DirectedGraph<T> {
     current: T,
     cb: DFSCallback<T>,
     depth: number,
-    seen: Set<T>
+    seen: Set<T>,
   ): void {
     if (seen.has(current)) return;
     cb(current, depth, this);
@@ -138,7 +138,7 @@ export default class DirectedGraph<T> {
     return [...this.successors]
       .filter(([from]) => nodeSet.has(from))
       .flatMap(([from, successors]) =>
-        [...successors].map((to) => ({ from, to }))
+        [...successors].map((to) => ({ from, to })),
       );
   }
 
@@ -191,13 +191,13 @@ export default class DirectedGraph<T> {
     nodes.forEach((node) => {
       const nodeIndex = nodeToIndex(node);
       const successorIndexes = Array.from(this.getSuccessors(node)).map(
-        nodeToIndex
+        nodeToIndex,
       );
       graph.add(nodeIndex, successorIndexes);
     });
     const cycles = graph.getCycles();
     return cycles.map((cycle) =>
-      cycle.map((vertex) => indexToNode(vertex.name))
+      cycle.map((vertex) => indexToNode(vertex.name)),
     );
   }
 }

@@ -43,7 +43,7 @@ const RangedMathItemForm = ({
     item,
     exprNames,
     numParams,
-    errors
+    errors,
   );
   const { assignments, handlers, errors: assignmentErrors } = exprProps;
 

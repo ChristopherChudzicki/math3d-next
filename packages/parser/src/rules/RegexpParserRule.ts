@@ -6,7 +6,7 @@ class TextParserRegexpRule implements TextParserRule {
 
   constructor(
     private regexp: RegExp,
-    private replace: string | ((match: RegExpExecArray) => string)
+    private replace: string | ((match: RegExpExecArray) => string),
   ) {}
 
   transform(text: string) {

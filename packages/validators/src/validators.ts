@@ -75,7 +75,7 @@ type RealFuncs = {
 
 const numericFunc = <M extends Dim | 5, N extends Dim>(
   fromDim: M,
-  toDim: N
+  toDim: N,
 ) => {
   const message = (detail: string) =>
     `Expected a function from R^${fromDim} -> R^${toDim}. ${detail}`;
@@ -176,7 +176,7 @@ const realVecValidators = {
 
 function arrayOf<T, N extends number>(
   itemValidator: Validator<T>,
-  n: N
+  n: N,
 ): Validator<TupleOf<T, N>>;
 function arrayOf<T>(itemValidator: Validator<T>): Validator<T[]>;
 function arrayOf<T, N extends number>(itemValidator: Validator<T>, n?: N) {
@@ -186,7 +186,7 @@ function arrayOf<T, N extends number>(itemValidator: Validator<T>, n?: N) {
     }
     if (n !== undefined && value.length !== n) {
       throw new Error(
-        `Expected an array of length ${n}, received ${value.length}`
+        `Expected an array of length ${n}, received ${value.length}`,
       );
     }
     return aggregate(value, itemValidator);

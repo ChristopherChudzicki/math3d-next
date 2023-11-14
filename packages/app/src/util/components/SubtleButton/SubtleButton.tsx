@@ -38,7 +38,7 @@ const SubtleButton = forwardRef<HTMLButtonElement, SubtleButtonProps>(
         {props.children}
       </button>
     );
-  }
+  },
 );
 SubtleButton.displayName = "SubtleButton";
 

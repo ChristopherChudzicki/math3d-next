@@ -5,7 +5,7 @@
   "devDependencies": {
     "@math3d/eslint-config": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
-    "eslint": "^8.31.0",
+    "eslint": "^8.53.0",
     "vitest": "0.32.2"
   },
   "scripts": {

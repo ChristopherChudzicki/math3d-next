@@ -44,7 +44,7 @@ const findBtn = async (item: HTMLElement, name: string | RegExp) => {
  */
 const setupItemTest = async <T extends MathItemType>(
   type: T,
-  props: Partial<MathItem<T>["properties"]> = {}
+  props: Partial<MathItem<T>["properties"]> = {},
 ) => {
   const item = makeItem(type, props);
   const scene = seedDb.withSceneFromItems([item]);
@@ -53,7 +53,7 @@ const setupItemTest = async <T extends MathItemType>(
   const form = await findItemByDescription(item.properties.description);
   invariant(
     form instanceof HTMLFormElement,
-    "Expected item form to be an HTMLFormElement"
+    "Expected item form to be an HTMLFormElement",
   );
   return { item, form, store };
 };

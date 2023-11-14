@@ -10,8 +10,8 @@ const permutations = <T>(tokens: T[], subperms: T[][] = [[]]): T[][] =>
     : tokens.flatMap((token: T, idx) =>
         permutations(
           tokens.filter((_tok, i) => i !== idx),
-          subperms.map((subperm) => [...subperm, token])
-        )
+          subperms.map((subperm) => [...subperm, token]),
+        ),
       );
 
 /**
@@ -82,13 +82,13 @@ function flatProduct<T1, T2>(arr1: T1[], arr2: T2[]): (T1 & T2)[];
 function flatProduct<T1, T2, T3>(
   arr1: T1[],
   arr2: T2[],
-  arr3: T3[]
+  arr3: T3[],
 ): (T1 & T2 & T3)[];
 function flatProduct<T1, T2, T3, T4>(
   arr1: T1[],
   arr2: T2[],
   arr3: T3[],
-  arr4: T4[]
+  arr4: T4[],
 ): (T1 & T2 & T3 & T4)[];
 
 function flatProduct(...arrays: unknown[][]): unknown[] {

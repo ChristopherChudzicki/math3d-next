@@ -56,7 +56,7 @@ const Vector: GraphicComponent<MathItemType.VectorField> = ({
       const z2 = z + v[2] * scale;
       emit(x2, y2, z2);
     },
-    [expr, scale]
+    [expr, scale],
   );
 
   return (

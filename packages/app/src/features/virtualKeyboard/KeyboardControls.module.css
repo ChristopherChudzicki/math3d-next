@@ -1,7 +1,7 @@
 :global(math-field::part(virtual-keyboard-toggle)) {
   display: none;
 }
-  
+
 :global(.ML__keyboard > .MLK__backdrop) {
   transition-property: transform;
   transition-duration: var(--transition-duration);

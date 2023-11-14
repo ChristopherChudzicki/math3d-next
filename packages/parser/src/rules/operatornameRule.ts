@@ -11,7 +11,7 @@ const operatornameRule = new RegexpParserRule(
       throw new Error(`Unexpected undefined name.`);
     }
     return name;
-  }
+  },
 );
 
 export default operatornameRule;

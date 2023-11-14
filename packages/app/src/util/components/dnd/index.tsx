@@ -62,7 +62,7 @@ const SortableItem: React.FC<SortableItemProps> = (props) => {
           ? {
               [draggingClassName]: isDragging,
             }
-          : {}
+          : {},
       )}
       ref={setNodeRef}
       style={style}
@@ -85,7 +85,7 @@ interface SortableListProps {
 type KeyedElement = React.ReactElement & { key: string };
 
 const SortableList: React.FC<SortableListProps> = (
-  props: SortableListProps
+  props: SortableListProps,
 ) => {
   const { as: Component = "div" } = props;
   const children = props.children as KeyedElement[];
@@ -180,10 +180,10 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
       isDraggableElement,
-    })
+    }),
   );
   const [activeItemId, setActiveItemId] = useState<null | UniqueIdentifier>(
-    null
+    null,
   );
   const handleDragStart: OnDragStart = useCallback(
     (event) => {
@@ -193,7 +193,7 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
         onDragStart(event);
       }
     },
-    [onDragStart]
+    [onDragStart],
   );
   const handleDragEnd: OnDragEnd = useCallback(
     (event) => {
@@ -202,7 +202,7 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
         onDragEnd(event);
       }
     },
-    [onDragEnd]
+    [onDragEnd],
   );
   return (
     <DndContext

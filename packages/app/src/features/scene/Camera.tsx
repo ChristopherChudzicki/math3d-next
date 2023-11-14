@@ -113,7 +113,7 @@ const Camera: React.FC<CameraProps> = ({ item, range, onMoveEnd }) => {
         target: convert.toUi(cameraTarget),
       });
     },
-    [onMoveEnd, convert, updateOnDrag, isOrthographic, threePos]
+    [onMoveEnd, convert, updateOnDrag, isOrthographic, threePos],
   );
   return (
     <>

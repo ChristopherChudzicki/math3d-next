@@ -12,7 +12,7 @@ class FunctionEvaluationError extends EvaluationError {
 
   static getErrors(
     name: string,
-    error: Error
+    error: Error,
   ): { name: string; error: Error }[] {
     const namedErrors: { error: Error; name: string }[] = [{ name, error }];
     let e = error;
@@ -39,7 +39,7 @@ const identity = <T>(x: T): T => x;
 
 const getValidatedEvaluate = (
   mjsNode: mjs.MathNode,
-  validate: Validate = identity
+  validate: Validate = identity,
 ): AnonMathNode["evaluate"] => {
   const compiled = mjsNode.compile();
   const unvalidatedEvaluate = (scope?: EvaluationScope) => {
