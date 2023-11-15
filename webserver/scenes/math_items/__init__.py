@@ -1272,7 +1272,7 @@ def _from_json_data(cls: Any, data: Any) -> Any:
 
 
 def _to_json_data(data: Any) -> Any:
-    if data is None or isinstance(data, (bool, int, float, str, object)):
+    if data is None or isinstance(data, (bool, int, float, str)):
         return data
     if isinstance(data, datetime):
         return data.isoformat()
