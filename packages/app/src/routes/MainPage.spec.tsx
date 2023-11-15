@@ -41,7 +41,7 @@ test.each([
 
     expect(controls?.getAttribute("inert")).toBe(expectedInert);
     expect(controls?.getAttribute("aria-hidden")).toBe(expectedHidden);
-  }
+  },
 );
 
 test("Clicking the 'Expand/Collapse Controls' button toggles the controls and preserves hash", async () => {

@@ -8,7 +8,7 @@ import style from "./Sidebar.module.css";
 
 const getButtonDirection = (
   isVisible: boolean,
-  sidebarSide: "left" | "right"
+  sidebarSide: "left" | "right",
 ) => {
   if (sidebarSide === "left") return isVisible ? "left" : "right";
   return isVisible ? "right" : "left";

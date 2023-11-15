@@ -80,11 +80,11 @@ const SliderControls: React.FC<SliderControlsProps> = ({
   const canDecrease = !!findSpeed(speed.value, -1);
   const onIncrease = useCallback(
     () => onSpeedChange(mustFindSpeed(speed.value, +1)),
-    [onSpeedChange, speed]
+    [onSpeedChange, speed],
   );
   const onDecrease = useCallback(
     () => onSpeedChange(mustFindSpeed(speed.value, -1)),
-    [onSpeedChange, speed]
+    [onSpeedChange, speed],
   );
   const onStepUp = useCallback(() => onStep(+1), [onStep]);
   const onStepDown = useCallback(() => onStep(-1), [onStep]);

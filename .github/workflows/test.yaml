@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18.12.1"
-          cache: 'yarn'
+          cache: "yarn"
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn test
@@ -36,8 +36,6 @@ jobs:
           python-version: 3.11
       - name: Install python dependencies
         run: make setup_python
-      - name: Format Python
-        run: make format-check
       - name: Typecheck Python
         run: make typecheck
       - name: Test Python

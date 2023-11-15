@@ -6,8 +6,8 @@ import { AppMathScope } from "./interfaces";
 const builtins = new Set(
   Object.keys(
     // @ts-expect-error Unclear to me whehter this is a public
-    math.expression.mathWithTransform
-  )
+    math.expression.mathWithTransform,
+  ),
 );
 const makeMathScope = (): AppMathScope =>
   new MathScope<Parseable>({ parse: latexParser.parse, builtins });

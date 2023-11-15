@@ -26,7 +26,7 @@ const SettingsForm = <T extends MathItemType>({
   const onWidgetChange = useOnWidgetChange(item);
   const mathPropNames = useMemo(
     () => getMathProperties(config).map((p) => p.name),
-    [config]
+    [config],
   );
   const mathScope = useMathScope();
   const errors = useMathErrors(mathScope, item.id, mathPropNames);

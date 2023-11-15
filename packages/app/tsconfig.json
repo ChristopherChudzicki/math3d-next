@@ -2,20 +2,11 @@
   "extends": "@math3d/tsconfig/base.json",
   "compilerOptions": {
     "rootDir": ".",
-    "types": [
-      "vite/client",
-      "vitest/globals"
-    ],
+    "types": ["vite/client", "vitest/globals"],
     "baseUrl": "src",
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-    },
+      "@/*": ["./*"]
+    }
   },
-  "include": [
-    "src",
-    "playwright.config.ts",
-    "vite.config.ts",
-  ],
+  "include": ["src", "playwright.config.ts", "vite.config.ts"]
 }

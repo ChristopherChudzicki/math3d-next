@@ -42,7 +42,7 @@ test.each([
     const mathScope = store.getState().mathItems.mathScope();
     expect(mathScope.errors.size).toBe(numEvalErrors + numParseErrors);
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);
-  }
+  },
 );
 
 test.each([
@@ -78,7 +78,7 @@ test.each([
     pasteText(coordsInput, coordsString);
     expect(mathScope.errors.size).toBe(numEvalErrors + numParseErrors);
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);
-  }
+  },
 );
 
 test("Adding items adds to mathScope", async () => {
@@ -94,7 +94,7 @@ test("Adding items adds to mathScope", async () => {
   const items = Object.values(store.getState().mathItems.items);
   expect(items).toHaveLength(2); // point + folder
   const point = Object.values(items).find(
-    (item) => item.type === MIT.Point
+    (item) => item.type === MIT.Point,
   ) as MathItem<MIT.Point>;
   assertNotNil(point);
   const id = nodeId(point);

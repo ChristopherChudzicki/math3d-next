@@ -30,7 +30,7 @@ type OnMathFieldChange = NonNullable<MathfieldProps["onChange"]>;
  */
 const MathFieldForwardRef = (
   props: MathfieldProps,
-  ref: React.Ref<MathfieldElement | null>
+  ref: React.Ref<MathfieldElement | null>,
 ) => {
   const {
     onKeyDown,

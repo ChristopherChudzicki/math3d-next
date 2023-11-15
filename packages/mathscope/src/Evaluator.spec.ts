@@ -35,7 +35,7 @@ describe("Evaluator", () => {
           "id-a": 4,
           "id-b": 2,
           "id-expr1": 6,
-        })
+        }),
       );
     });
 
@@ -51,13 +51,13 @@ describe("Evaluator", () => {
         asMap({
           "id-a": 2,
           "id-b": 4,
-        })
+        }),
       );
       expect(evaluator.errors).toStrictEqual(
         asMap({
           "id-c": unmetDepErr("x"),
           "id-expr1": unmetDepErr("c"),
-        })
+        }),
       );
     });
 
@@ -70,7 +70,7 @@ describe("Evaluator", () => {
       expect(evaluator.errors).toStrictEqual(
         asMap({
           "id-f": unmetDepErr("a", "b"),
-        })
+        }),
       );
       expect(diff.errors).toStrictEqual({
         added: new Set(["id-f"]),
@@ -94,7 +94,7 @@ describe("Evaluator", () => {
         asMap({
           "id-x1": new DuplicateAssignmentError(x1),
           "id-x2": new DuplicateAssignmentError(x2),
-        })
+        }),
       );
       expect(diff.errors).toStrictEqual({
         added: new Set(["id-x1", "id-x2"]),
@@ -118,7 +118,7 @@ describe("Evaluator", () => {
         asMap({
           "id-x1": 1,
           "id-y": 2,
-        })
+        }),
       );
       expect(evaluator.errors).toStrictEqual(asMap({}));
 
@@ -131,7 +131,7 @@ describe("Evaluator", () => {
           "id-x1": new DuplicateAssignmentError(x1),
           "id-x2": new DuplicateAssignmentError(x2),
           "id-y": unmetDepErr("x"),
-        })
+        }),
       );
     });
 
@@ -147,7 +147,7 @@ describe("Evaluator", () => {
         asMap({
           "id-x": 1,
           "id-y": 2,
-        })
+        }),
       );
       expect(evaluator.errors).toStrictEqual(asMap({}));
 
@@ -159,7 +159,7 @@ describe("Evaluator", () => {
         asMap({
           "id-x": unmetDepErr("z"),
           "id-y": unmetDepErr("x"),
-        })
+        }),
       );
     });
 
@@ -176,7 +176,7 @@ describe("Evaluator", () => {
         asMap({
           "id-x": new CyclicAssignmentError([y, x]),
           "id-y": new CyclicAssignmentError([y, x]),
-        })
+        }),
       );
       expect(diff.errors).toStrictEqual({
         added: new Set(["id-x", "id-y"]),
@@ -203,12 +203,12 @@ describe("Evaluator", () => {
           "id-c": 3,
           "id-d": 5,
           "id-expr2": 9,
-        })
+        }),
       );
       expect(evaluator.errors).toStrictEqual(
         asMap({
           "id-expr1": unmetDepErr("x"),
-        })
+        }),
       );
 
       const x = node("id-x", "x = 1");
@@ -225,12 +225,12 @@ describe("Evaluator", () => {
           "id-d": 5,
           "id-x": 1,
           "id-expr1": math.matrix([4, 4, 1]),
-        })
+        }),
       );
       expect(evaluator.errors).toStrictEqual(
         asMap({
           "id-expr2": unmetDepErr("c"),
-        })
+        }),
       );
 
       expect(diff).toStrictEqual({
@@ -282,7 +282,7 @@ describe("Evaluator", () => {
           "id-x": 30,
           "id-exp1": 35,
           "id-exp2": 25,
-        })
+        }),
       );
       const a1 = evaluator.results.get("id-a");
       expect(a1).toStrictEqual(math.matrix([2, 2]));
@@ -297,7 +297,7 @@ describe("Evaluator", () => {
           "id-x": 30,
           "id-exp1": 36,
           "id-exp2": 25,
-        })
+        }),
       );
       expect(diff).toStrictEqual({
         results: {

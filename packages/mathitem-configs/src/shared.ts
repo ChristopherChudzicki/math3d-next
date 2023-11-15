@@ -100,7 +100,7 @@ const domain1: PropertyConfig<"domain", EvaluatedDomain1> = {
 type EvaluatedDomain2 = {
   value: [
     (param: number) => [number, number],
-    (param: number) => [number, number]
+    (param: number) => [number, number],
   ];
   /**
    *

@@ -15,7 +15,7 @@ export const handlers = [
         ctx.status(404),
         ctx.json({
           errorMessage: "Not found",
-        })
+        }),
       );
     }
     const parsedScene = {

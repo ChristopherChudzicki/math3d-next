@@ -15,7 +15,7 @@ const drag = async (
     targetOffset = { x: 25, y: 25 },
     steps = 25,
     downTimeout = 150,
-  } = {}
+  } = {},
 ) => {
   const h1 = await source.elementHandle();
   const h2 = await target.elementHandle();
@@ -43,7 +43,7 @@ const drag = async (
 const getItem = (
   page: Page,
   folderDescription: string,
-  itemDescription?: string
+  itemDescription?: string,
 ) => {
   const folder = page.locator("css=[aria-roledescription='sortable']", {
     hasText: folderDescription,
@@ -56,7 +56,7 @@ const getItem = (
 
 const getAllItemDescriptions = async (page: Page, count = 9) => {
   const locator = page.locator(
-    "css=[aria-roledescription='sortable'] [aria-label='Description']"
+    "css=[aria-roledescription='sortable'] [aria-label='Description']",
   );
   await expect(locator).toHaveCount(count);
   return locator.evaluateAll((list) => list.map((el) => el.innerHTML));

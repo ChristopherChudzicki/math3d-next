@@ -39,7 +39,7 @@ const ColorSquare: React.FC<ColorSquareProps> = (props) => {
       {
         [styles["text-color-swatch"]]: textOnly,
       },
-      styles["color-swatch"]
+      styles["color-swatch"],
     ),
   };
   if (onClick) {
@@ -90,7 +90,7 @@ const ColorPicker: React.FC<ColorPickerProps> = (props: ColorPickerProps) => {
       }
       return color;
     },
-    [colors]
+    [colors],
   );
 
   const isValidColor = useCallback(
@@ -100,7 +100,7 @@ const ColorPicker: React.FC<ColorPickerProps> = (props: ColorPickerProps) => {
       if (tc.getFormat() === "hex" && !text.startsWith("#")) return false;
       return tinycolor(text).isValid();
     },
-    [colors]
+    [colors],
   );
 
   const handleColor = useCallback(
@@ -111,11 +111,11 @@ const ColorPicker: React.FC<ColorPickerProps> = (props: ColorPickerProps) => {
         onChange(event);
       }
     },
-    [onChange, isValidColor]
+    [onChange, isValidColor],
   );
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => handleColor(e.target.value),
-    [handleColor]
+    [handleColor],
   );
 
   const InputProps = useMemo(() => {

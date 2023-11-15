@@ -24,7 +24,7 @@ interface WidgetChangeEvent<V extends Parseable = string> {
   oldValue?: V;
 }
 type OnWidgetChange<V extends Parseable = string> = (
-  e: WidgetChangeEvent<V>
+  e: WidgetChangeEvent<V>,
 ) => void;
 
 export type { IWidgetProps, OnWidgetChange, WidgetChangeEvent, Parseable };

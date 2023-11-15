@@ -28,7 +28,7 @@ const getInitialState = (): MathItemsState => {
 
 const getInsertionFolder = (
   order: MathItemsState["order"],
-  itemId?: string
+  itemId?: string,
 ): string => {
   if (itemId === undefined || isDescendantOf(order, itemId, SETTINGS_FOLDER)) {
     const folderId = order[MAIN_FOLDER].at(-1);
@@ -68,7 +68,7 @@ const mathItemsSlice = createSlice({
         items: MathItem[];
         order: MathItemsState["order"];
         title: MathItemsState["title"];
-      }>
+      }>,
     ) => {
       const { items, order, title } = action.payload;
       state.title = title;
@@ -90,7 +90,7 @@ const mathItemsSlice = createSlice({
     },
     addNewItem: (
       state,
-      action: PayloadAction<{ type: MathItemType; id: string }>
+      action: PayloadAction<{ type: MathItemType; id: string }>,
     ) => {
       const { type, id } = action.payload;
       const item = mathItemConfigs[type].make(id);
@@ -100,7 +100,7 @@ const mathItemsSlice = createSlice({
       const isFolder = type === MathItemType.Folder;
       const activeFolderId = getInsertionFolder(
         state.order,
-        state.activeItemId
+        state.activeItemId,
       );
       const targetFolderId = isFolder ? MAIN_FOLDER : activeFolderId;
       const insertAfterId = isFolder ? activeFolderId : state.activeItemId;
@@ -133,7 +133,7 @@ const mathItemsSlice = createSlice({
       const { order } = state;
       const parentFolderId = getParent(state.order, id);
       order[parentFolderId] = order[parentFolderId].filter(
-        (itemId) => itemId !== id
+        (itemId) => itemId !== id,
       );
 
       if (state.activeItemId === id) {
@@ -144,7 +144,7 @@ const mathItemsSlice = createSlice({
     },
     setProperties: (
       state,
-      action: PayloadAction<MathItemPatch<MathItemType>>
+      action: PayloadAction<MathItemPatch<MathItemType>>,
     ) => {
       const { id, properties: newProperties } = action.payload;
       const { properties: oldProperties } = state.items[id];
@@ -160,7 +160,7 @@ const mathItemsSlice = createSlice({
         id: string;
         path: string;
         value: unknown;
-      }>
+      }>,
     ) => {
       const { id, path, value } = action.payload;
 
@@ -168,11 +168,11 @@ const mathItemsSlice = createSlice({
         state.items[id].properties,
         [{ op: "replace", path, value }],
         false, // skip validating the patch against JsonPatch spec
-        true // do mutate the object. (But not really, since it's a WriteableDraft)
+        true, // do mutate the object. (But not really, since it's a WriteableDraft)
       );
       invariant(
         result.removed !== undefined,
-        "patch should have replaced and existing property."
+        "patch should have replaced and existing property.",
       );
 
       const item = state.items[id];
@@ -180,7 +180,11 @@ const mathItemsSlice = createSlice({
     },
     move: (
       state,
-      action: PayloadAction<{ id: string; newParent: string; newIndex: number }>
+      action: PayloadAction<{
+        id: string;
+        newParent: string;
+        newIndex: number;
+      }>,
     ) => {
       const { id, newParent, newIndex } = action.payload;
       const oldParent = getParent(state.order, id);
@@ -193,7 +197,9 @@ const mathItemsSlice = createSlice({
     },
     setActiveTab: (
       state,
-      action: PayloadAction<{ id: typeof MAIN_FOLDER | typeof SETTINGS_FOLDER }>
+      action: PayloadAction<{
+        id: typeof MAIN_FOLDER | typeof SETTINGS_FOLDER;
+      }>,
     ) => {
       state.activeTabId = action.payload.id;
     },

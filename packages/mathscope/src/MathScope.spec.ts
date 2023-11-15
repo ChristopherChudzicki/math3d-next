@@ -38,7 +38,7 @@ describe("MathScope Setting Expressions", () => {
         ["a", 3],
         ["b", 9],
         ["c", 12],
-      ])
+      ]),
     );
 
     expect(mathScope.errors).toStrictEqual(new Map([["x", expect.any(Error)]]));
@@ -57,7 +57,7 @@ describe("MathScope Setting Expressions", () => {
         ["a", 4],
         ["b", 5],
         ["c", 20],
-      ])
+      ]),
     );
     expect(mathScope.errors).toStrictEqual(new Map());
 

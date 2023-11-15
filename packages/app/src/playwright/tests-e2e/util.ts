@@ -11,7 +11,7 @@ import { Scene } from "@/types";
 
 const getItemForm = (page: Page, item: MathItem): Locator => {
   return page.locator(
-    `css=form[aria-label="Settings for ${item.properties.description}"]`
+    `css=form[aria-label="Settings for ${item.properties.description}"]`,
   );
 };
 
@@ -46,7 +46,7 @@ const whenMathboxRendered = (page: Page) =>
       () =>
         // @ts-expect-error We assign mathbox to window, but leaving it off
         // the type definitions to discourage use outside of debugging.
-        !!window.mathbox
+        !!window.mathbox,
     );
     expect(exists).toBe(true);
   }).toPass();

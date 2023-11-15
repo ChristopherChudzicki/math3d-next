@@ -186,7 +186,7 @@ mathjs.import(
   {
     customConstants,
   },
-  { override: true }
+  { override: true },
 );
 
 export default mathjs;

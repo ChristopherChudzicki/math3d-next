@@ -6,7 +6,7 @@
 .labeledGroup {
   display: flex;
   align-items: center;
-  overflow:auto;
+  overflow: auto;
   min-width: 70px;
 }
 

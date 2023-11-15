@@ -80,7 +80,7 @@ describe("ExpressionGraphManager", () => {
           edge(a, x1),
           edge(b, x1),
           edge(c, x1),
-        ])
+        ]),
       );
     });
 
@@ -92,7 +92,7 @@ describe("ExpressionGraphManager", () => {
       result.deleteExpressions([b]);
 
       expect(result.graph).toStrictEqual(
-        new DirectedGraph([a, c, x1], [edge(a, c), edge(a, x1), edge(c, x1)])
+        new DirectedGraph([a, c, x1], [edge(a, c), edge(a, x1), edge(c, x1)]),
       );
     });
 
@@ -158,8 +158,8 @@ describe("ExpressionGraphManager", () => {
             edge(a2, a1),
             edge(b1, b2),
             edge(b2, b1),
-          ]
-        )
+          ],
+        ),
       );
 
       permutations([[a1, b1], [a2, b2], [x1]]).forEach((permutation) => {
@@ -187,7 +187,7 @@ describe("ExpressionGraphManager", () => {
       const expressions = [a, b1, b2, c1, c2, c3];
       const manager = new ExpressionGraphManager(expressions);
       expect(manager.getDuplicateAssignmentNodes()).toStrictEqual(
-        new Set([b1, b2, c1, c2, c3])
+        new Set([b1, b2, c1, c2, c3]),
       );
     });
 
@@ -219,9 +219,9 @@ describe("ExpressionGraphManager", () => {
         });
         const dupes = manager.getDuplicateAssignmentNodes();
         expect(dupes).toStrictEqual(
-          new Set(expectedDuplicateNames.map((id) => nodes[id]))
+          new Set(expectedDuplicateNames.map((id) => nodes[id])),
         );
-      }
+      },
     );
 
     it("only permits duplicate names on leaf nodes", () => {
@@ -322,7 +322,7 @@ describe("ExpressionGraphManager", () => {
       expect(order).toStrictEqual([a, b, x, y1, y2, z]);
       expect(cycles).toStrictEqual([[c1, c2]]);
       expect(manager.getDuplicateAssignmentNodes()).toStrictEqual(
-        new Set([c1, c2])
+        new Set([c1, c2]),
       );
     });
   });

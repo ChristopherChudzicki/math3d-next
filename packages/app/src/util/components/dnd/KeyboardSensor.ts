@@ -24,7 +24,7 @@ export default class CustomKeyboardSensor extends KeyboardSensor {
           keyboardCodes = defaultKeyboardCodes,
           isDraggableElement = always,
         },
-        { active }
+        { active },
       ) => {
         const { code } = event.nativeEvent;
 

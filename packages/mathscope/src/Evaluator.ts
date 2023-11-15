@@ -56,10 +56,10 @@ const makeAssignmentError = (node: AssignmentNode, cycle: AssignmentNode[]) => {
 const getUnmetDependencies = (
   node: MathNode,
   scope: EvaluationScope,
-  builtins: Set<string>
+  builtins: Set<string>,
 ): string[] => {
   const unmet = [...node.dependencies].filter(
-    (dep) => !scope.has(dep) && !builtins.has(dep)
+    (dep) => !scope.has(dep) && !builtins.has(dep),
   );
   return unmet;
 };
@@ -108,12 +108,12 @@ export default class Evaluator {
 
   private updateAssignmentErrors(
     errors: DiffingMap<string, Error>,
-    cycles: AssignmentNode[][]
+    cycles: AssignmentNode[][],
   ): void {
     const currentErrors = new Map(
       cycles.flatMap((cycle) =>
-        cycle.map((node) => [node.id, makeAssignmentError(node, cycle)])
-      )
+        cycle.map((node) => [node.id, makeAssignmentError(node, cycle)]),
+      ),
     );
     currentErrors.forEach((error, key) => {
       const existingError = this.errors.get(key);
@@ -203,7 +203,7 @@ export default class Evaluator {
 
     const affected = setUnion(
       setDifference(nodesAffectedByDelete, changes.deleted),
-      changes.added
+      changes.added,
     );
     const { order, cycles } = this.graphManager.getEvaluationOrder(affected);
 

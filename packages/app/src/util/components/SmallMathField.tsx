@@ -24,7 +24,7 @@ const SmallMathField = React.forwardRef<MathfieldElement, MathfieldProps>(
         className={classNames("small-math-field", className)}
       />
     );
-  }
+  },
 );
 SmallMathField.displayName = "SmallMathField";
 

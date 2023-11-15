@@ -12,7 +12,7 @@ const TitleInput: React.FC = () => {
     (e) => {
       setTitle(e.value);
     },
-    [setTitle]
+    [setTitle],
   );
   return (
     <AutosizeText

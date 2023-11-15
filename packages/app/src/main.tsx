@@ -49,6 +49,6 @@ prepare().then(() => {
       <BrowserRouter>
         <AppRoutes queryClient={queryClient} store={store} theme={theme} />
       </BrowserRouter>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 });

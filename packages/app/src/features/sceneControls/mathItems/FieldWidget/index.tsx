@@ -48,7 +48,7 @@ export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
       const patch = { id: item.id, properties, type: item.type };
       dispatch(actions.setProperties(patch));
     },
-    [dispatch, item.id, item.type]
+    [dispatch, item.id, item.type],
   );
   return onWidgetChange;
 };
@@ -58,7 +58,7 @@ type PatchPropertyOnChange = (
     name: string;
     value: unknown;
   },
-  subpath: string
+  subpath: string,
 ) => void;
 
 export const usePatchPropertyOnChange = <T extends MIT>(item: MathItem<T>) => {
@@ -68,7 +68,7 @@ export const usePatchPropertyOnChange = <T extends MIT>(item: MathItem<T>) => {
       const path = `/${e.name}/${subpath}`;
       dispatch(actions.patchProperty({ id: item.id, path, value: e.value }));
     },
-    [dispatch, item.id]
+    [dispatch, item.id],
   );
   return onWidgetChange;
 };

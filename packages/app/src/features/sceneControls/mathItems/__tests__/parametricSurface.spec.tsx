@@ -21,7 +21,7 @@ import { setupItemTest } from "./__utils__";
 const func = (
   name: string,
   params: string[],
-  rhs: string
+  rhs: string,
 ): ParseableObjs["function-assignment"] => ({
   type: "function-assignment",
   name,
@@ -48,7 +48,7 @@ const getParamNameInputs = (): [HTMLTextAreaElement, HTMLTextAreaElement] => {
 
 const getDomainInputs = (
   itemElement: HTMLElement,
-  dimension: 2 | 3
+  dimension: 2 | 3,
 ): HTMLTextAreaElement[] => {
   const zeroth = within(itemElement).getByLabelText("Domain for 1st parameter");
   const first = within(itemElement).getByLabelText("Domain for 2nd parameter");
@@ -57,7 +57,7 @@ const getDomainInputs = (
   const result = [zeroth, first];
   if (dimension === 3) {
     const second = within(itemElement).getByLabelText(
-      "Domain for 3rd parameter"
+      "Domain for 3rd parameter",
     );
     assertInstanceOf(second, HTMLTextAreaElement);
     result.push(second);
@@ -81,11 +81,11 @@ test.each([
     domain: {
       initial: dom(
         func("_f", ["y"], "[-5, 5]"),
-        func("_f", ["x"], "[-abc, abc]")
+        func("_f", ["x"], "[-abc, abc]"),
       ),
       expectedFinal: dom(
         func("_f", ["y"], "[-5, 5]"),
-        func("_f", ["abc"], "[-abc, abc]")
+        func("_f", ["abc"], "[-abc, abc]"),
       ),
       expectedEval: [(_x: number) => [-5, 5], (abc: number) => [-abc, abc]],
     },
@@ -104,11 +104,11 @@ test.each([
     domain: {
       initial: dom(
         func("_f", ["y"], "[-abc, abc]"),
-        func("_f", ["x"], "[-5, 5]")
+        func("_f", ["x"], "[-5, 5]"),
       ),
       expectedFinal: dom(
         func("_f", ["abc"], "[-abc, abc]"),
-        func("_f", ["x"], "[-5, 5]")
+        func("_f", ["x"], "[-5, 5]"),
       ),
       expectedEval: [(abc: number) => [-abc, abc], () => [-5, 5]],
     },
@@ -159,7 +159,7 @@ test.each([
     const val = Math.random();
     expect(domActualEval.value[0](val)).toEqual(domExpectedEval[0](val));
     expect(domActualEval.value[1](val)).toEqual(domExpectedEval[1](val));
-  }
+  },
 );
 
 test.each([
@@ -200,7 +200,7 @@ test.each([
     const fError = mathScope.errors.get(id("expr"));
     assertInstanceOf(fError, DetailedAssignmentError);
     expect(fError.lhs).toBeInstanceOf(Error);
-  }
+  },
 );
 
 test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
@@ -248,7 +248,7 @@ test.each([{ paramIndex: 0 }, { paramIndex: 1 }])(
     exprInput.focus();
     await user.paste("[1,1,1]");
     expect(exprInput).not.toHaveClass("has-error");
-  }
+  },
 );
 
 test("Empty parameter names show error in one spot", async () => {
@@ -269,12 +269,12 @@ test.each([
       initial: dom(
         //
         func("_f", ["y"], "[-5, 5]"),
-        func("_f", ["x"], "[-x, x]")
+        func("_f", ["x"], "[-x, x]"),
       ),
       expectedFinal: dom(
         //
         func("_f", ["y"], "[-2, 2]"),
-        func("_f", ["x"], "[-x, x]")
+        func("_f", ["x"], "[-x, x]"),
       ),
       expectedEval: [
         //
@@ -289,12 +289,12 @@ test.each([
       initial: dom(
         //
         func("_f", ["y"], "[-5, 5]"),
-        func("_f", ["x"], "[-x, x]")
+        func("_f", ["x"], "[-x, x]"),
       ),
       expectedFinal: dom(
         //
         func("_f", ["y"], "[-5, 5]"),
-        func("_f", ["x"], "[-x^2, x^2]")
+        func("_f", ["x"], "[-x^2, x^2]"),
       ),
       expectedEval: [
         (_y: number) => [-5, 5],
@@ -322,7 +322,7 @@ test.each([
     const val = Math.random();
     expect(domActualEval.value[0](val)).toEqual(domExpectedEval[0](val));
     expect(domActualEval.value[1](val)).toEqual(domExpectedEval[1](val));
-  }
+  },
 );
 
 test.each([0, 1, 2])("Updating domain arrays (ImplicitSurface)", async (i) => {
@@ -362,7 +362,7 @@ test.each([
     domainInitial: dom(
       //
       func("_f", ["y"], "[-5, 5] + "),
-      func("_f", ["x"], "[-x, x]")
+      func("_f", ["x"], "[-x, x]"),
     ),
     errIndices: [0],
     errClass: AggregateError,
@@ -380,7 +380,7 @@ test.each([
     domainInitial: dom(
       //
       func("_f", ["y"], "[0, a + b]"),
-      func("_f", ["x"], "[0, x]")
+      func("_f", ["x"], "[0, x]"),
     ),
     errIndices: [0],
     errClass: AggregateError,
@@ -396,7 +396,7 @@ test.each([
     domainInitial: dom(
       //
       func("_f", ["y"], "[0, y]"),
-      func("_f", ["x"], "[0, x]")
+      func("_f", ["x"], "[0, x]"),
     ),
     errIndices: [0, 1],
     errClass: Error,
@@ -426,5 +426,5 @@ test.each([
     const error = mathScope.errors.get(id("domain"));
     expect(error).toBeInstanceOf(errClass);
     expect(error).toEqual(errMatcher);
-  }
+  },
 );

@@ -9,7 +9,7 @@
 
 .circle::before {
   border-radius: 50%;
-  content: '';
+  content: "";
   background: var(--indicator-color);
   top: 2px;
   left: 2px;
@@ -23,7 +23,7 @@
 }
 
 .dialog {
-  padding-left:   0.5em;
-  padding-right:  0.5em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
   padding-bottom: 0.5em;
 }

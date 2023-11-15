@@ -29,7 +29,7 @@ export interface ScopeChangeEvent<P> {
 }
 
 export type OnChangeErrorsListener<P> = (
-  event: ScopeChangeErrorsEvent<P>
+  event: ScopeChangeErrorsEvent<P>,
 ) => void;
 
 export interface ScopeChangeErrorsEvent<P> {
@@ -79,7 +79,7 @@ export default class MathScope<P> {
 
   private syncEvalErrors(
     evalChange: EvaluationChange,
-    diff: DiffingMap<string, Error>
+    diff: DiffingMap<string, Error>,
   ) {
     evalChange.errors.added.forEach((id) => {
       const err = this.evaluator.errors.get(id);
@@ -181,13 +181,13 @@ export default class MathScope<P> {
 
   addEventListener(
     type: "change-errors",
-    listener: OnChangeErrorsListener<P>
+    listener: OnChangeErrorsListener<P>,
   ): this;
   addEventListener(type: "change", listener: OnChangeListener<P>): this;
 
   addEventListener(
     type: "change" | "change-errors",
-    listener: OnChangeListener<P> | OnChangeErrorsListener<P>
+    listener: OnChangeListener<P> | OnChangeErrorsListener<P>,
   ) {
     this.events.addListener(type, listener);
     return this;
@@ -195,13 +195,13 @@ export default class MathScope<P> {
 
   removeEventListener(
     type: "change-errors",
-    listener: OnChangeErrorsListener<P>
+    listener: OnChangeErrorsListener<P>,
   ): this;
   removeEventListener(type: "change", listener: OnChangeListener<P>): this;
 
   removeEventListener(
     type: "change" | "change-errors",
-    listener: OnChangeListener<P> | OnChangeErrorsListener<P>
+    listener: OnChangeListener<P> | OnChangeErrorsListener<P>,
   ): this {
     this.events.removeListener(type, listener);
     return this;

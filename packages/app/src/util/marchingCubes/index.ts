@@ -39,7 +39,7 @@ class MarchingCube {
     private yStep: number,
     private zStep: number,
     func: ($x: number, $y: number, $z: number) => number,
-    private c: number
+    private c: number,
   ) {
     this.c = c;
     this.v1 = func(x, y, z);
@@ -162,7 +162,7 @@ export function marchingCubes(
   zMax: number,
   func: ($x: number, $y: number, $z: number) => number,
   c = 0,
-  resolution = 128
+  resolution = 128,
 ) {
   const xStep = (xMax - xMin) / resolution;
   const yStep = (yMax - yMin) / resolution;

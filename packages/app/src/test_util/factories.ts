@@ -10,7 +10,7 @@ import { faker } from "@faker-js/faker/locale/en";
 const makeItem = <T extends MathItemType>(
   type: T,
   props: Partial<MathItem<T>["properties"]> = {},
-  id = idGenerator.next()
+  id = idGenerator.next(),
 ): MathItem<T> => {
   const item = mathItemConfigs[type].make(id) as MathItem<T>;
   item.properties = {
@@ -22,7 +22,7 @@ const makeItem = <T extends MathItemType>(
 
 const sceneFromItems = (
   items: MathItem[],
-  sceneProps: Partial<Omit<Scene, "items" | "itemOrder">> = {}
+  sceneProps: Partial<Omit<Scene, "items" | "itemOrder">> = {},
 ) => {
   const folder = makeItem(MathItemType.Folder);
   const scene: Scene = {

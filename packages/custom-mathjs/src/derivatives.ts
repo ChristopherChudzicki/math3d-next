@@ -38,7 +38,7 @@ const createTotalDerivative = factory(
       return df(...sample);
     };
     return totalDerivative;
-  }
+  },
 );
 
 type FuncR3 = (t: number) => number[];
@@ -54,7 +54,7 @@ const createUnitT = factory(
       return out as number[];
     };
     return unitT;
-  }
+  },
 );
 
 const createUnitN = factory(
@@ -68,7 +68,7 @@ const createUnitN = factory(
       return divide(normal, norm(normal)) as number[];
     };
     return unitN;
-  }
+  },
 );
 
 const createUnitB = factory(
@@ -77,11 +77,10 @@ const createUnitB = factory(
   ["cross", "unitT", "unitN"],
   // @ts-expect-error MathJS Types do not know about unitT
   ({ cross, unitT, unitN }) => {
-    const unitB = (f: FuncR3, t: number): number[] => {
-      return cross(unitT(f, t), unitN(f, t)) as number[];
-    };
+    const unitB = (f: FuncR3, t: number): number[] =>
+      cross(unitT(f, t), unitN(f, t)) as number[];
     return unitB;
-  }
+  },
 );
 
 export { createTotalDerivative, createUnitT, createUnitN, createUnitB };

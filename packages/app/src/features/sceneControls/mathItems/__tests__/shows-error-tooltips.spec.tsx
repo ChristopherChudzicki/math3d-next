@@ -53,7 +53,7 @@ test.each([
     // not shown after blur
     act(() => theInput.blur());
     await waitForElementToBeRemoved(tooltip);
-  }
+  },
 );
 
 test("Widget does not show a tooltip when focused if no error", async () => {

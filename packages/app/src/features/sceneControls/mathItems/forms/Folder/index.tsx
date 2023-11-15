@@ -47,7 +47,7 @@ const FolderButton: React.FC<FolderButtonProps> = ({
               [styles["rotate-0"]]: !isCollapsed,
             },
             styles.color,
-            "d-flex align-items-center justify-center"
+            "d-flex align-items-center justify-center",
           )}
         >
           <ExpandMoreIcon />

@@ -25,7 +25,7 @@ const domainFuncs2 = (value: math.MathNode): [number, number] => {
 
   if (deps1.has(p2) && deps2.has(p1)) {
     throw new Error(
-      "Cyclic Dependency: Both domain functions depend on each other."
+      "Cyclic Dependency: Both domain functions depend on each other.",
     );
   }
 

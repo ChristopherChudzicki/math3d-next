@@ -19,7 +19,7 @@ type FuncR3_R1 = (x: number, y: number, z: number) => number;
 type FuncR3_R3 = (x: number, y: number, z: number) => [number, number, number];
 type FuncR2_R2R3 = (
   x: number,
-  y: number
+  y: number,
 ) => [[number, number, number], [number, number, number]];
 type FuncR2_R3 = (u: number, v: number) => [number, number, number];
 
@@ -90,7 +90,7 @@ describe("unitT", () => {
       (2 * t) / (1 + 2 * t ** 2),
     ];
     expect((t: number) => math.evaluate("unitT(f, t)", { f, t })).toNearlyEqual(
-      manualUnitT
+      manualUnitT,
     );
   });
 });
@@ -104,7 +104,7 @@ describe("unitN", () => {
       -1 + 2 / (1 + 2 * t ** 2),
     ];
     expect((t: number) => math.evaluate("unitN(f, t)", { f, t })).toNearlyEqual(
-      manualUnitN
+      manualUnitN,
     );
   });
 });
@@ -118,7 +118,7 @@ describe("unitB", () => {
       (2 * t) / (1 + 2 * t ** 2),
     ];
     expect((t: number) => math.evaluate("unitB(f, t)", { f, t })).toNearlyEqual(
-      manualUnitB
+      manualUnitB,
     );
   });
 });

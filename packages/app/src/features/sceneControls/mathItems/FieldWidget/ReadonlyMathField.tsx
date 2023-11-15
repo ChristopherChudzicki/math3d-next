@@ -17,7 +17,7 @@ const ReadonlyMathField: React.FC<Props> = ({ value, className }) => (
       "align-self-center px-1",
       styles["readonly-mathfield"],
       styles["field-widget"],
-      className
+      className,
     )}
     options={options}
     value={value}

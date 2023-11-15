@@ -58,7 +58,7 @@ type MathboxParametricSurfaceProps = {
   domain?: {
     value: [
       (param: number) => [number, number],
-      (param: number) => [number, number]
+      (param: number) => [number, number],
     ];
     order: [number, number];
   };
@@ -104,7 +104,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
       };
       return order[0] === 0 ? [u(UU), v(UU, VV)] : [v(UU, VV), u(UU)];
     },
-    [domain]
+    [domain],
   );
   const xyzFunc = useCallback(
     (U: number, V: number) => {
@@ -112,7 +112,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
       const [u, v] = uvFunc(U, V);
       return func(u, v);
     },
-    [func, uvFunc]
+    [func, uvFunc],
   );
 
   const emitter: AreaEmitter = useCallback(
@@ -121,7 +121,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
       if (!xyz) return;
       emit(...xyz);
     },
-    [xyzFunc]
+    [xyzFunc],
   );
 
   const hasColorFunc = !!(colorFunc && color && isGradientName(color));

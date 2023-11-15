@@ -10,7 +10,7 @@ services:
     environment:
       - POSTGRES_USER=docker
       - POSTGRES_PASSWORD=docker
-      - POSTGRES_DB=math3d 
+      - POSTGRES_DB=math3d
     networks:
       default-network:
     ports:
@@ -20,8 +20,8 @@ services:
       interval: 5s
       timeout: 60s
       retries: 5
-      start_period: 80s  
-  
+      start_period: 80s
+
   webserver:
     build:
       context: .
@@ -29,10 +29,9 @@ services:
     env_file:
       - .env
     environment:
-        DATABASE_URL: postgresql://docker:docker@db:5432/math3d
-        CORS_ALLOWED_ORIGINS: http://localhost:3000
-    command:
-      make devserver
+      DATABASE_URL: postgresql://docker:docker@db:5432/math3d
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+    command: make devserver
     volumes:
       - ./webserver:/src/webserver
     networks:

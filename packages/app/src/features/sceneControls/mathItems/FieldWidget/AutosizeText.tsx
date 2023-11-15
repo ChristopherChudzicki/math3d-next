@@ -29,7 +29,7 @@ const AutosizeText = React.forwardRef<HTMLTextAreaElement, IWidgetProps>(
           };
           onChange(event);
         },
-        [onChange, name]
+        [onChange, name],
       );
     return (
       <TextareaAutoWidthHeight
@@ -39,7 +39,7 @@ const AutosizeText = React.forwardRef<HTMLTextAreaElement, IWidgetProps>(
         className={classNames(
           { [styles["has-error"]]: error },
           styles["field-widget-input"],
-          className
+          className,
         )}
         name={name}
         onChange={onInputChange}
@@ -47,7 +47,7 @@ const AutosizeText = React.forwardRef<HTMLTextAreaElement, IWidgetProps>(
         ref={ref}
       />
     );
-  }
+  },
 );
 AutosizeText.displayName = "AutosizeText";
 

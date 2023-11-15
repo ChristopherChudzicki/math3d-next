@@ -4,8 +4,8 @@ const permutations = <T>(tokens: T[], subperms: T[][] = [[]]): T[][] =>
     : tokens.flatMap((token: T, idx) =>
         permutations(
           tokens.filter((_tok, i) => i !== idx),
-          subperms.map((subperm) => subperm.concat([token]))
-        )
+          subperms.map((subperm) => subperm.concat([token])),
+        ),
       );
 
 export default permutations;

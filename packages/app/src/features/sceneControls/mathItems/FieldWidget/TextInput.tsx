@@ -17,7 +17,7 @@ const TextInput = React.forwardRef<HTMLInputElement, IWidgetProps>(
           };
           onChange(event);
         },
-        [onChange, name]
+        [onChange, name],
       );
     return (
       <input
@@ -26,14 +26,14 @@ const TextInput = React.forwardRef<HTMLInputElement, IWidgetProps>(
         className={classNames(
           { [styles["has-error"]]: error },
           styles["field-widget-input"],
-          className
+          className,
         )}
         name={name}
         onChange={onInputChange}
         {...others}
       />
     );
-  }
+  },
 );
 TextInput.displayName = "TextInput";
 

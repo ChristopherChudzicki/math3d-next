@@ -51,7 +51,7 @@ const TextareaAutoWidthHeight = React.forwardRef<HTMLTextAreaElement, Props>(
         value={hasRendered ? props.value : ""}
       />
     );
-  }
+  },
 );
 TextareaAutoWidthHeight.displayName = "TextareaAutoWidthHeight";
 

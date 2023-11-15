@@ -65,7 +65,7 @@ const ItemTemplate = <T extends MIT>({
           "d-flex",
           {
             [styles["item-active"]]: isActive,
-          }
+          },
         )}
       >
         {showAlignmentBar && <div className={styles["vertical-line"]} />}
@@ -87,7 +87,7 @@ const ItemTemplate = <T extends MIT>({
         className={classNames(
           styles["grid-right-gutter-top"],
           "d-flex",
-          "justify-content-end"
+          "justify-content-end",
         )}
       >
         <CloseButton

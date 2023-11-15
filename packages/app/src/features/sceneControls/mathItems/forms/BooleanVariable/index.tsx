@@ -32,7 +32,7 @@ const Vector: MathItemForm<MIT.BooleanVariable> = ({ item }) => {
         },
       });
     },
-    [item.properties.value, onWidgetChange]
+    [item.properties.value, onWidgetChange],
   );
 
   const onToggle = useCallback(
@@ -45,7 +45,7 @@ const Vector: MathItemForm<MIT.BooleanVariable> = ({ item }) => {
         },
       });
     },
-    [onWidgetChange, item.properties.value]
+    [onWidgetChange, item.properties.value],
   );
 
   return (

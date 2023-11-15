@@ -29,7 +29,7 @@ const MathBoolean = React.forwardRef<HTMLDivElement, IWidgetProps>(
     } = props;
     assertNotNil(itemId);
     const [shouldUseExpression, setShouldUseExpression] = useState(
-      !LITERAL_BOOLEAN_STRINGS.includes(value)
+      !LITERAL_BOOLEAN_STRINGS.includes(value),
     );
 
     const mathScope = useMathScope();
@@ -39,14 +39,14 @@ const MathBoolean = React.forwardRef<HTMLDivElement, IWidgetProps>(
         const widgetChangeEvent = { name, value: newValue };
         onChange(widgetChangeEvent);
       },
-      [name, onChange]
+      [name, onChange],
     );
 
     const handleChange: OnMathFieldChange = useCallback(
       (e) => {
         triggerChange(e.target.value);
       },
-      [triggerChange]
+      [triggerChange],
     );
 
     const names = useMemo(() => [name], [name]);
@@ -55,7 +55,7 @@ const MathBoolean = React.forwardRef<HTMLDivElement, IWidgetProps>(
     const handleSwitchChange: React.ChangeEventHandler<HTMLInputElement> =
       useCallback(
         (e) => triggerChange(e.target.checked ? "true" : "false"),
-        [triggerChange]
+        [triggerChange],
       );
 
     const tooltipTitle = shouldUseExpression
@@ -90,7 +90,7 @@ const MathBoolean = React.forwardRef<HTMLDivElement, IWidgetProps>(
             className={classNames(
               { [styles["has-error"]]: error },
               "flex-1",
-              styles["field-widget-input"]
+              styles["field-widget-input"],
             )}
             onChange={handleChange}
             value={value}
@@ -110,7 +110,7 @@ const MathBoolean = React.forwardRef<HTMLDivElement, IWidgetProps>(
         )}
       </div>
     );
-  }
+  },
 );
 MathBoolean.displayName = "MathBoolean";
 

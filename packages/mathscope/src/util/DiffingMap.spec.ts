@@ -128,6 +128,6 @@ describe("DiffingMap", () => {
 
       diffingMap.set("a", Error("purr"));
       expect(diffingMap.getDiff().updated).toStrictEqual(new Set(["a"]));
-    }
+    },
   );
 });

@@ -40,7 +40,7 @@ const folderData: TypeData = {
 };
 
 const assertTyped: <T extends Active | Over>(
-  target: T
+  target: T,
 ) => asserts target is T & {
   data: { current: Data<TypeData> };
 } = (target) => {
@@ -49,7 +49,7 @@ const assertTyped: <T extends Active | Over>(
 };
 
 const assertSortable: <T extends Active | Over>(
-  target: T
+  target: T,
 ) => asserts target is T & {
   target: { current: Data<SortableData & TypeData> };
 } = (target) => {
@@ -147,7 +147,7 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
       }
       return <MathItemUI key={item.id} item={item} />;
     },
-    [mathItems, itemsByFolder]
+    [mathItems, itemsByFolder],
   );
   const actionRef = useRef<null | ReturnType<typeof actions.move>>(null);
 
@@ -205,7 +205,7 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
       }
       dispatch(action);
     },
-    [dispatch]
+    [dispatch],
   );
   const handleDragEnd = useCallback(() => {
     if (actionRef.current) dispatch(actionRef.current);
@@ -213,7 +213,7 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
   }, [dispatch]);
   const folderIds = useMemo(
     () => folders.map((folder) => folder.id),
-    [folders]
+    [folders],
   );
   return (
     <MultiContainerDndContext

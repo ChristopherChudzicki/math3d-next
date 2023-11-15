@@ -59,7 +59,7 @@ const validateParameters: TextParserRule = {
       [...dupeEntries, ...invalidEntries].map(([key, value]) => [
         key,
         new Error(value),
-      ])
+      ]),
     );
 
     if (Object.keys(paramErrors).length > 0) {

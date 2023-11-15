@@ -9,7 +9,7 @@ describe("parse dependencies", () => {
   it("returns a set of symbol dependencies", () => {
     const node = parse("a + (b + c)^2 + g(x, sin(y)) + 123/pi");
     expect(node.dependencies).toStrictEqual(
-      new Set(["a", "b", "c", "g", "x", "y", "sin", "pi"])
+      new Set(["a", "b", "c", "g", "x", "y", "sin", "pi"]),
     );
   });
 

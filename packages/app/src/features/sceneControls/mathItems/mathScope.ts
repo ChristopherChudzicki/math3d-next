@@ -16,7 +16,7 @@ type EvaluationErrorsSlice<K extends string> = Partial<Record<K, Error>>;
 
 const extractResults = <K extends string>(
   scope: AppMathScope,
-  ids: Record<K, string>
+  ids: Record<K, string>,
 ): EvaluationResultsSlice<K> => {
   const newResult: EvaluationResultsSlice<K> = {};
   (Object.keys(ids) as K[]).forEach((name) => {
@@ -30,7 +30,7 @@ const extractResults = <K extends string>(
 
 const extractErrors = <K extends string>(
   scope: AppMathScope,
-  ids: Record<K, string>
+  ids: Record<K, string>,
 ): EvaluationErrorsSlice<K> => {
   const newErrors: EvaluationErrorsSlice<K> = {};
   (Object.keys(ids) as K[]).forEach((name) => {
@@ -48,7 +48,7 @@ export const mathScopeId = (itemId: string, propName: string) =>
 const useMathResults = <K extends string>(
   scope: AppMathScope,
   idPrefix: string,
-  names: readonly K[]
+  names: readonly K[],
 ): EvaluationResultsSlice<K> => {
   const [resultsSlice, setResults] = useState<EvaluationResultsSlice<K>>({});
 
@@ -64,12 +64,12 @@ const useMathResults = <K extends string>(
       if (names.some((name) => results.touched.has(ids[name]))) {
         const patch = pickBy(
           extractResults(mathScope, ids),
-          (value) => value !== undefined
+          (value) => value !== undefined,
         );
         setResults((current) => ({ ...current, ...patch }));
       }
     },
-    [ids, names]
+    [ids, names],
   );
 
   useEffect(() => {
@@ -85,11 +85,11 @@ const useMathResults = <K extends string>(
 
 const useMathItemResults = <
   I extends MathItem,
-  K extends string & keyof EvaluatedProperties[I["type"]]
+  K extends string & keyof EvaluatedProperties[I["type"]],
 >(
   scope: AppMathScope,
   item: I,
-  names: readonly K[]
+  names: readonly K[],
 ) => {
   const idPrefix = item.id;
   return useMathResults(scope, idPrefix, names) as Partial<
@@ -100,7 +100,7 @@ const useMathItemResults = <
 const useMathErrors = <K extends string>(
   scope: AppMathScope,
   idPrefix: string,
-  names: readonly K[]
+  names: readonly K[],
 ): EvaluationErrorsSlice<K> => {
   const [errorsSlice, setErrors] = useState<EvaluationErrorsSlice<K>>({});
 
@@ -117,7 +117,7 @@ const useMathErrors = <K extends string>(
         setErrors(extractErrors(mathScope, ids));
       }
     },
-    [ids, names]
+    [ids, names],
   );
 
   useEffect(() => {
@@ -138,7 +138,7 @@ const MATH_WIDGETS = new Set([
 ]);
 
 const getMathProperties = <T extends MathItemType>(
-  config: MathItemConfig<T>
+  config: MathItemConfig<T>,
 ): PropertyConfig<string, unknown>[] =>
   collectionFilter(config.properties, (p) => MATH_WIDGETS.has(p.widget));
 

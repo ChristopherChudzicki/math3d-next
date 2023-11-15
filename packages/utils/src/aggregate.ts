@@ -4,11 +4,11 @@
  */
 const aggregate = <T, R>(
   items: T[],
-  cb: (item: T, i: number, arr: T[]) => R
+  cb: (item: T, i: number, arr: T[]) => R,
 ): R[] => {
   let hasError = false;
   const itemErrors: (Error | undefined)[] = new Array(items.length).fill(
-    undefined
+    undefined,
   );
   const results = items.map((item, i, arr) => {
     try {

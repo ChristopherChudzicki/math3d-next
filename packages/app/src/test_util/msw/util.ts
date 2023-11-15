@@ -10,11 +10,11 @@ type SceneOptions = Partial<Pick<Scene, "key" | "title">>;
 function makeSceneFromItems(items: MathItem[]): PartialScene;
 function makeSceneFromItems<T extends SceneOptions>(
   items: MathItem[],
-  options: T
+  options: T,
 ): PartialScene & T;
 function makeSceneFromItems<T extends SceneOptions>(
   items: MathItem[],
-  options?: T
+  options?: T,
 ): (PartialScene & T) | PartialScene {
   const folder = makeItem(MathItemType.Folder);
   const scene: PartialScene = {

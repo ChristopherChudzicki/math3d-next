@@ -1,6 +1,5 @@
 import pytest
 from django.core.exceptions import ValidationError
-from django.db import models
 
 from scenes.models import Scene
 from scenes.tests.data import default_scene

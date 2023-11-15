@@ -16,11 +16,12 @@ body {
   margin: 0;
   color: rgba(0, 0, 0, 0.85);
   font-size: 14px;
-  font-family: Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-family: Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   font-variant: tabular-nums;
   line-height: 1.5715;
   background-color: #fff;
-  font-feature-settings: 'tnum';
+  font-feature-settings: "tnum";
 }
 h1,
 h2,
@@ -68,8 +69,8 @@ a[disabled] {
 a,
 area,
 button,
-[role='button'],
-input:not([type='range']),
+[role="button"],
+input:not([type="range"]),
 label,
 select,
 summary,

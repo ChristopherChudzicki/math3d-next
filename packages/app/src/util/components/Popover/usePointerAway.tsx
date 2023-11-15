@@ -15,7 +15,7 @@ import { RefObject, useCallback, useEffect, useRef } from "react";
  */
 const usePointerAway = (
   containerRef: RefObject<HTMLElement>,
-  onPointerAway: () => void
+  onPointerAway: () => void,
 ) => {
   const downRef = useRef<HTMLElement>();
 
@@ -38,7 +38,7 @@ const usePointerAway = (
       if (container.contains(downEl) || container.contains(upEl)) return;
       onPointerAway();
     },
-    [onPointerAway, containerRef]
+    [onPointerAway, containerRef],
   );
   useEffect(() => {
     document.addEventListener("pointerdown", onPointerDown);

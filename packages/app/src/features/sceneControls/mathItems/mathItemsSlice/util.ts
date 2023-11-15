@@ -5,7 +5,7 @@ const SETTINGS_FOLDER = "setup";
 
 const getParent = (
   order: MathItemsState["order"],
-  itemId: string
+  itemId: string,
 ): string | null => {
   const parentFolderId = Object.keys(order).find((folderId) => {
     return order[folderId].includes(itemId);
@@ -17,7 +17,7 @@ const getParent = (
 const isDescendantOf = (
   order: MathItemsState["order"],
   id: string,
-  candidateAncestor: string
+  candidateAncestor: string,
 ): boolean => {
   const parent = getParent(order, id);
   if (parent === candidateAncestor) return true;

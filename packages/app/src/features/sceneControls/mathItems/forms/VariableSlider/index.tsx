@@ -65,7 +65,7 @@ const getSliderParameters = (
   max: number,
   fps: number,
   baseDuration: number,
-  speedMultiplier = 1
+  speedMultiplier = 1,
 ) => {
   const duration = baseDuration / speedMultiplier;
   const frames = fps * duration;
@@ -95,7 +95,7 @@ const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
     max,
     fps,
     baseDuration,
-    speedMultiplier
+    speedMultiplier,
   );
 
   const tick = useCallback(() => {
@@ -110,7 +110,7 @@ const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
       valueRef.current = v;
       onChange(valueRef.current);
     },
-    [onChange]
+    [onChange],
   );
 
   useInterval(tick, isAnimating ? ms : null);
@@ -160,7 +160,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
     }
     setValue((v) => (typeof results.value === "number" ? results.value : v));
     setDuration((v) =>
-      typeof results.duration === "number" ? results.duration : v
+      typeof results.duration === "number" ? results.duration : v,
     );
   }, [results]);
 
@@ -168,7 +168,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
     (animating: boolean) => {
       onWidgetChange({ name: "isAnimating", value: `${animating}` });
     },
-    [onWidgetChange]
+    [onWidgetChange],
   );
   const onValueChange = useCallback(
     (v: number) => {
@@ -183,7 +183,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
         },
       });
     },
-    [onWidgetChange]
+    [onWidgetChange],
   );
   const onManualChange: OnWidgetChange<ParseableObjs["assignment"]> =
     useCallback(
@@ -193,13 +193,13 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
         }
         onWidgetChange(e);
       },
-      [onWidgetChange]
+      [onWidgetChange],
     );
   const onSpeedChange: SliderControlsProps["onSpeedChange"] = useCallback(
     (nextSpeed) => {
       onWidgetChange({ name: "speedMultiplier", value: nextSpeed.value });
     },
-    [onWidgetChange]
+    [onWidgetChange],
   );
   const onStep: SliderControlsProps["onStep"] = useCallback(
     (step) => {
@@ -207,7 +207,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
         lastValidMin,
         lastValidMax,
         lastValidFps,
-        lastValidDuration
+        lastValidDuration,
       );
       onValueChange(lastValidValue + baseIncrement * step);
     },
@@ -218,7 +218,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
       lastValidFps,
       lastValidDuration,
       onValueChange,
-    ]
+    ],
   );
   const { range } = item.properties;
   const onSetRange = useMemo(() => {

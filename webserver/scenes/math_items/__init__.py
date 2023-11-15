@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional, Type, Union, get_args, get_origin
+from typing import Any, Dict, List, Type, Union, get_args, get_origin
 
 
 @dataclass
@@ -1272,13 +1272,13 @@ def _from_json_data(cls: Any, data: Any) -> Any:
 
 
 def _to_json_data(data: Any) -> Any:
-    if data is None or type(data) in [bool, int, float, str, object]:
+    if data is None or isinstance(data, (bool, int, float, str)):
         return data
-    if type(data) is datetime:
+    if isinstance(data, datetime):
         return data.isoformat()
-    if type(data) is list:
+    if isinstance(data, list):
         return [_to_json_data(d) for d in data]
-    if type(data) is dict:
+    if isinstance(data, dict):
         return {k: _to_json_data(v) for k, v in data.items()}
     return data.to_json_data()
 

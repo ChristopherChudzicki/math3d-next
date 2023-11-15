@@ -18,7 +18,7 @@ const defaultValues: FolderProperties = {
 };
 
 const make: MathItemGenerator<MathItemType.Folder, FolderProperties> = (
-  id
+  id,
 ) => ({
   id,
   type: MathItemType.Folder,

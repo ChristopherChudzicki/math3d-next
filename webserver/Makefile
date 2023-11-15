@@ -9,20 +9,6 @@ setup_python:
 	poetry install
 	poetry build
 
-
-FORMAT_PYTHON = black .
-SORT_PYTHON_IMPORTS = isort .
-
-.PHONY: format-fix
-format-fix: ## Reformat code with black and isort
-	${FORMAT_PYTHON}
-	${SORT_PYTHON_IMPORTS}
-
-.PHONY: format-check
-format-check: ## Check formatting code with black and isort
-	${FORMAT_PYTHON} --check
-	${SORT_PYTHON_IMPORTS} --check-only
-
 .PHONY: help
 # Adapted from https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 help: ## Show help

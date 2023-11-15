@@ -67,7 +67,7 @@ const ToggleKeyboardButton = () => {
         {autoExpand ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
       </Button>
     </div>,
-    document.body
+    document.body,
   );
 };
 

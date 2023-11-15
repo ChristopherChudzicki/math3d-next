@@ -42,9 +42,8 @@ describe("Share Button", () => {
     const shareButton = screen.getByRole("button", { name: "Share" });
     await user.click(shareButton);
 
-    const input = await screen.findByLabelText<HTMLInputElement>(
-      "Shareable URL"
-    );
+    const input =
+      await screen.findByLabelText<HTMLInputElement>("Shareable URL");
     const saved: Scene = vi.mocked(axios.post).mock.results[0].value.data;
     const expectedUrl = `${window.location.origin}/${saved.key}`;
     expect(input.value).toBe(expectedUrl);
@@ -56,9 +55,8 @@ describe("Share Button", () => {
     const shareButton = screen.getByRole("button", { name: "Share" });
     await user.click(shareButton);
 
-    const input = await screen.findByLabelText<HTMLInputElement>(
-      "Shareable URL"
-    );
+    const input =
+      await screen.findByLabelText<HTMLInputElement>("Shareable URL");
     const url = input.value;
 
     const copiedIndicator = screen.getByText("Copied!");

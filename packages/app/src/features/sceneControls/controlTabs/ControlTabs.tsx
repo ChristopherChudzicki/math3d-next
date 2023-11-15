@@ -26,15 +26,15 @@ const SceneControls: React.FC<Props> = (props) => {
   const handleChange = useCallback(
     (
       _event: React.SyntheticEvent,
-      newValue: typeof MAIN_FOLDER | typeof SETTINGS_FOLDER
+      newValue: typeof MAIN_FOLDER | typeof SETTINGS_FOLDER,
     ) => {
       dispatch(
         actions.setActiveTab({
           id: newValue,
-        })
+        }),
       );
     },
-    [dispatch]
+    [dispatch],
   );
   return (
     <TabContext value={activeTab}>

@@ -13,14 +13,14 @@ test.each([
   ({ mode, expectedType }) => {
     const { container } = render(<StaticMath value="x^2" mode={mode} />);
     expect(container.innerHTML).toBe(
-      `<span><script type="${expectedType}">x^2</script></span>`
+      `<span><script type="${expectedType}">x^2</script></span>`,
     );
-  }
+  },
 );
 
 test("renderMathInElement is called when value changes", () => {
   const { rerender, container } = render(
-    <StaticMath value="x^2" mode="inline" />
+    <StaticMath value="x^2" mode="inline" />,
   );
   const span = container.firstChild as HTMLElement;
   expect(renderMathInElement).toHaveBeenCalledTimes(1);
@@ -31,7 +31,7 @@ test("renderMathInElement is called when value changes", () => {
 
 test("renderMathInElement is called when mode changes", () => {
   const { rerender, container } = render(
-    <StaticMath value="x^2" mode="inline" />
+    <StaticMath value="x^2" mode="inline" />,
   );
   const span = container.firstChild as HTMLElement;
   expect(renderMathInElement).toHaveBeenCalledTimes(1);
@@ -42,7 +42,7 @@ test("renderMathInElement is called when mode changes", () => {
 
 test("renderMathInElement is NOT called on re-render unncessarily", () => {
   const { rerender, container } = render(
-    <StaticMath value="x^2" mode="inline" />
+    <StaticMath value="x^2" mode="inline" />,
   );
   const span = container.firstChild as HTMLElement;
   expect(renderMathInElement).toHaveBeenCalledTimes(1);

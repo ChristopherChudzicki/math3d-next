@@ -19,12 +19,12 @@
   border: none;
 }
 
-.color-swatch:hover, .color-swatch:focus {
+.color-swatch:hover,
+.color-swatch:focus {
   transform: scale(115%);
   transition-duration: var(--transition-duration);
   transition-timing-function: var(--transition-timing-function);
 }
-
 
 .light-colored-swatch {
   border: 1pt solid gray;

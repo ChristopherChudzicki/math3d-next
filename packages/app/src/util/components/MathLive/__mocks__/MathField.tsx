@@ -4,7 +4,7 @@ import { MathfieldProps } from "..";
 
 const MockMathFieldForwardRef = (
   props: MathfieldProps,
-  ref: React.Ref<HTMLTextAreaElement>
+  ref: React.Ref<HTMLTextAreaElement>,
 ) => {
   const { value: children, onChange, className, options, ...others } = props;
   return (

@@ -9,7 +9,7 @@ import { assertNotNil } from "@/util/predicates";
  */
 const useShadowStylesheet = (
   shadowHost: HTMLElement | null,
-  stylesheet: string
+  stylesheet: string,
 ) => {
   useEffect(() => {
     if (!shadowHost) return () => {};

@@ -25,7 +25,7 @@ const mathItem =
 const getSubtree = (
   state: MathItemsState,
   node: Subtree,
-  depth = 0
+  depth = 0,
 ): Subtree => {
   if (node.children) return node;
   if (!state.order[node.id]) return node;
@@ -102,7 +102,7 @@ const scene = (): SelectorReturn<Omit<Scene, "key">> => (state: RootState) => {
   return {
     title: state.mathItems.title,
     items: Object.values(state.mathItems.items).sort((a, b) =>
-      a.id.localeCompare(b.id)
+      a.id.localeCompare(b.id),
     ),
     itemOrder: state.mathItems.order,
   };

@@ -18,7 +18,7 @@ const defaultValues: VariableProperties = {
 };
 
 const make: MathItemGenerator<MathItemType.Variable, VariableProperties> = (
-  id
+  id,
 ) => ({
   id,
   type: MathItemType.Variable,

@@ -24,12 +24,12 @@ const MATH_WIDGETS = new Set([
 ]);
 
 const getMathProperties = <T extends MathItemType>(
-  config: MathItemConfig<T>
+  config: MathItemConfig<T>,
 ): PropertyConfig<string, unknown>[] =>
   collectionFilter(config.properties, (p) => MATH_WIDGETS.has(p.widget));
 
 const getIdentifiedExpressions = (
-  items: MathItemPatch[]
+  items: MathItemPatch[],
 ): IdentifiedParseable<Parseable>[] =>
   items.flatMap((item) => {
     const config = mathItemConfigs[item.type];
@@ -58,7 +58,7 @@ const getIdentifiedExpressions = (
 
 const syncItemsToMathScope = (
   mathScope: AppMathScope,
-  items: MathItemPatch[]
+  items: MathItemPatch[],
 ) => {
   const identifiedExpressions = getIdentifiedExpressions(items);
   mathScope.setExpressions(identifiedExpressions);
@@ -66,7 +66,7 @@ const syncItemsToMathScope = (
 
 const removeItemsFromMathScope = (
   mathScope: AppMathScope,
-  items: MathItem[]
+  items: MathItem[],
 ) => {
   const identifiedExpressions = getIdentifiedExpressions(items);
   mathScope.deleteExpressions(identifiedExpressions.map(({ id }) => id));

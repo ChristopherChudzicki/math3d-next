@@ -8,7 +8,7 @@
 }
 .slider.animating :global(.MuiSlider-thumb),
 .slider.animating :global(.MuiSlider-track) {
-  transition: none
+  transition: none;
 }
 
 .controlsRow {
@@ -21,10 +21,10 @@
 }
 
 .displayValueLhs {
-  min-width: 20px
+  min-width: 20px;
 }
 .displayValueRhs {
-  min-width: 20px
+  min-width: 20px;
 }
 
 .sliderRow {

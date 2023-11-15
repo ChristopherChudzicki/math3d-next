@@ -57,21 +57,21 @@ describe("DirectedGraph", () => {
 
       graph.addEdge(d, b);
       expect(graph).toStrictEqual(
-        new DirectedGraph(nodes, [...edges, edge(d, b)])
+        new DirectedGraph(nodes, [...edges, edge(d, b)]),
       );
     });
 
     it("throws an error if the graph does not contain 'from' node", () => {
       const graph = new DirectedGraph<string>([], []);
       expect(() => graph.addEdge("a", "b")).toThrow(
-        /Cannot add edge; "from" node does not exist/
+        /Cannot add edge; "from" node does not exist/,
       );
     });
 
     it("throws an error if the graph does not contain 'to' node", () => {
       const graph = new DirectedGraph<string>(["a"], []);
       expect(() => graph.addEdge("a", "b")).toThrow(
-        /Cannot add edge; "to" node does not exist/
+        /Cannot add edge; "to" node does not exist/,
       );
     });
   });
@@ -86,14 +86,14 @@ describe("DirectedGraph", () => {
       expect(nodes.every((n) => !!n)).toBe(true);
       graph.deleteEdge(b, d);
       expect(graph).toStrictEqual(
-        new DirectedGraph(nodes, [edge(a, b), edge(b, c), edge(d, d)])
+        new DirectedGraph(nodes, [edge(a, b), edge(b, c), edge(d, d)]),
       );
     });
 
     it("throws an error if the edge does not exist", () => {
       const graph = new DirectedGraph<string>([], []);
       expect(() => graph.deleteEdge("a", "b")).toThrow(
-        /Specified edge does not exist/
+        /Specified edge does not exist/,
       );
     });
   });
@@ -113,14 +113,14 @@ describe("DirectedGraph", () => {
 
       graph.deleteNode(b);
       expect(graph).toStrictEqual(
-        new DirectedGraph([a, c, d, e], [edge(a, d), edge(d, d)])
+        new DirectedGraph([a, c, d, e], [edge(a, d), edge(d, d)]),
       );
     });
 
     it("throws an error if the edge does not exist", () => {
       const graph = new DirectedGraph<string>([], []);
       expect(() => graph.deleteEdge("a", "b")).toThrow(
-        /Specified edge does not exist/
+        /Specified edge does not exist/,
       );
     });
   });
@@ -249,7 +249,7 @@ describe("DirectedGraph", () => {
       const [a, b, c, d, e, f, g, h, i] = nodes;
 
       expect(graph.getDescendants(a)).toStrictEqual(
-        new Set([b, d, e, g, h, i])
+        new Set([b, d, e, g, h, i]),
       );
 
       expect(graph.getDescendants(c)).toStrictEqual(new Set([e, f, h]));
@@ -280,15 +280,15 @@ describe("DirectedGraph", () => {
       expect(graph.getReachableSubgraph([b])).toStrictEqual(
         new DirectedGraph(
           [b, d, e, g, h, i],
-          [edge(b, d), edge(b, e), edge(d, g), edge(e, h), edge(g, i)]
-        )
+          [edge(b, d), edge(b, e), edge(d, g), edge(e, h), edge(g, i)],
+        ),
       );
 
       expect(graph.getReachableSubgraph([c, g])).toStrictEqual(
         new DirectedGraph(
           [c, e, f, g, h, i],
-          [edge(c, e), edge(c, f), edge(e, h), edge(g, i)]
-        )
+          [edge(c, e), edge(c, f), edge(e, h), edge(g, i)],
+        ),
       );
     });
   });

@@ -1,4 +1,4 @@
-const path = require("path") 
+const path = require("path");
 const { mergeConfig } = require("vite");
 
 module.exports = {
@@ -6,7 +6,7 @@ module.exports = {
   addons: ["@storybook/addon-links", "@storybook/addon-essentials"],
   framework: "@storybook/react",
   core: {
-    builder: "@storybook/builder-vite"
+    builder: "@storybook/builder-vite",
   },
   async viteFinal(config) {
     return mergeConfig(config, {

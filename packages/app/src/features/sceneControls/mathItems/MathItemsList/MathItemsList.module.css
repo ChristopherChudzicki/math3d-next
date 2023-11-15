@@ -13,8 +13,8 @@
 }
 
 .placeholder {
-  margin:1em;
-  padding:1em;
+  margin: 1em;
+  padding: 1em;
   border: 2pt dashed var(--color-secondary-light);
   border-radius: var(--border-radius);
 }

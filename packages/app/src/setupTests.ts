@@ -30,7 +30,7 @@ failOnConsole({
  * assert that mathbox-react is getting the correct props.
  */
 vitest.mock("mathbox-react", () =>
-  vi.importActual("@/__mocks__/mathbox-react")
+  vi.importActual("@/__mocks__/mathbox-react"),
 );
 
 /**

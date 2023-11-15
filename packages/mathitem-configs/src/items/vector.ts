@@ -55,7 +55,7 @@ const defaultValues: VectorProperties = {
 };
 
 const make: MathItemGenerator<MathItemType.Vector, VectorProperties> = (
-  id
+  id,
 ) => ({
   id,
   type: MathItemType.Vector,

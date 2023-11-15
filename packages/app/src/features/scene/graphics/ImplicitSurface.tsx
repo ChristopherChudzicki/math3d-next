@@ -41,7 +41,7 @@ const ImplicitSurface: GraphicComponent<MathItemType.ImplicitSurface> = ({
       domain[2][1],
       implicitFunc,
       0,
-      samples
+      samples,
     );
 
     // "samples" really determines the field discretization length
