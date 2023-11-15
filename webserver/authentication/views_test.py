@@ -72,7 +72,7 @@ def test_create_and_activate_user():
 
     # Initially NOT active
     created_user = CustomUser.objects.get(id=user_id)
-    assert created_user.is_active == False
+    assert created_user.is_active is False
 
     # Activate user
     activation_url = reverse("customuser-activation")
@@ -85,7 +85,7 @@ def test_create_and_activate_user():
 
     # Now active
     activated_user = CustomUser.objects.get(id=user_id)
-    assert activated_user.is_active == True
+    assert activated_user.is_active is True
 
 
 @pytest.mark.django_db
@@ -93,7 +93,7 @@ def test_resend_activation():
     client = APIClient()
     user = CustomUserFactory()
 
-    assert user.is_active == False
+    assert user.is_active is False
     resend_url = reverse("customuser-resend-activation")
     resent_request = {
         "email": user.email,
@@ -114,7 +114,7 @@ def test_resend_activation():
 
     # Now active
     activated_user = CustomUser.objects.get(id=user.id)
-    assert activated_user.is_active == True
+    assert activated_user.is_active is True
 
 
 @pytest.mark.django_db
@@ -131,7 +131,7 @@ def test_reset_password():
     assert response.status_code == 204
 
     new_password = faker.password()
-    assert user.check_password(new_password) == False
+    assert user.check_password(new_password) is False
 
     confirmation_url = reverse("customuser-reset-password-confirm")
     confirmation_request = {

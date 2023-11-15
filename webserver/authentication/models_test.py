@@ -13,9 +13,9 @@ def test_create_user():
     password = faker.password()
     user = User.objects.create_user(email=email, password=password)
     assert user.email == email
-    assert user.is_active == False
-    assert user.is_staff == False
-    assert user.is_superuser == False
+    assert user.is_active is False
+    assert user.is_staff is False
+    assert user.is_superuser is False
     with pytest.raises(AttributeError):
         user.username
     with pytest.raises(TypeError):
@@ -33,9 +33,9 @@ def test_create_superuser():
     password = faker.password()
     user = User.objects.create_superuser(email=email, password=password)
     assert user.email == email
-    assert user.is_active == True
-    assert user.is_staff == True
-    assert user.is_superuser == True
+    assert user.is_active is True
+    assert user.is_staff is True
+    assert user.is_superuser is True
     with pytest.raises(ValueError):
         user = User.objects.create_superuser(
             email=faker.email(), password=faker.password(), is_superuser=False
