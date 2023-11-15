@@ -26,12 +26,9 @@ The math3d backend and database are managed by docker containers. The frontend i
 > docker compose run --rm webserver bash
 > ```
 
-| Command           | Notes                                                          |
-| ----------------- | -------------------------------------------------------------- |
-| `make tests`      | Run tests                                                      |
-| `make format-fix` | Formats python code with [`black`][black] and [`isort`][isort] |
-
-[black]: https://github.com/psf/black
-[isort]: https://github.com/PyCQA/isort
+| Command          | Notes               |
+| ---------------- | ------------------- |
+| `make tests`     | Run tests           |
+| `make typecheck` | Typecheck with Mypy |
 
 See [webserver/Makefile](./webserver/Makefile) for more `make` commands.
