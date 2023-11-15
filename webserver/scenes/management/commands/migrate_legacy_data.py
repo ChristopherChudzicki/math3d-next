@@ -1,7 +1,7 @@
 import tqdm
 from django.core.management.base import BaseCommand
 
-from scenes.management.commands.legacy_migration import ItemMigrator
+from scenes.management.commands.legacy_migration.translate import ItemMigrator
 from scenes.models import LegacyScene, Scene
 
 from .legacy_migration.default_data import set_defaults
