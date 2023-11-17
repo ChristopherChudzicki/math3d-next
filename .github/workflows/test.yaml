@@ -36,7 +36,43 @@ jobs:
           python-version: 3.11
       - name: Install python dependencies
         run: make setup_python
+      - name: Check OpenAPI up-to-date
+        run: ./scripts/test/openapi_spec_check.sh
       - name: Typecheck Python
         run: make typecheck
       - name: Test Python
         run: make test
+
+  openapi-generated-client-check:
+    # This job checks that the output of openapi-generator-typescript-axios that
+    # is checked into version control is up-to-date.
+    env:
+      OPENAPI_SCHEMA: ./webserver/openapi.yaml
+      GENERATOR_IGNORE_FILE: ./packages/api/.openapi-generator-ignore
+      GENERATOR_OUTPUT_DIR_CI: ./packages/api/tmp/generated
+      GENERATOR_OUTPUT_DIR_VC: ./packages/api/src/generated
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18.12.1"
+          cache: "yarn"
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Generate Fresh API Client
+        uses: openapi-generators/openapitools-generator-action@v1
+        with:
+          generator: typescript-axios
+          openapi-file: ${{ env.OPENAPI_SCHEMA }}
+          generator-tag: v7.1.0
+          command-args: |
+            --output $GENERATOR_OUTPUT_DIR_CI \
+            --ignore-file-override $GENERATOR_IGNORE_FILE \
+            --additional-properties=useSingleRequestParameter=true,paramNaming=original
+      - name: Format freshly generated client
+        run: npx prettier $GENERATOR_OUTPUT_DIR_CI/**/*.ts --write
+      - name: Check VC client is up-to-date
+        run: |
+          diff $GENERATOR_OUTPUT_DIR_CI $GENERATOR_OUTPUT_DIR_VC \
+          || { echo "OpenAPI spec is out of date. Please regenerate via ./scripts/generate_openapi.sh"; exit 1; }
