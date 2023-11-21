@@ -7,6 +7,7 @@ import yaml
 from django.db import models
 
 from scenes.validators import JtdValidator
+from authentication.models import CustomUser
 
 items_schema = jtd.Schema.from_dict(
     yaml.safe_load(
@@ -49,6 +50,9 @@ class Scene(models.Model):
     item_order = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
     title = models.TextField(blank=True, default="Untitled")
+    author = models.ForeignKey(
+        CustomUser, blank=True, null=True, on_delete=models.CASCADE
+    )
 
     def save(self, *args, **kwargs):
         self.full_clean()
