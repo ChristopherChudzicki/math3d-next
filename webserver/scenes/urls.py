@@ -5,7 +5,7 @@ from scenes.views import ScenesView
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
-router.register(r"scenes", ScenesView, basename="")
+router.register(r"scenes", ScenesView, basename="scenes")
 
 urlpatterns = [
     path("", include(router.urls)),
