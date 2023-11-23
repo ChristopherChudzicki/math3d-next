@@ -1,6 +1,13 @@
 import { test, expect, vi } from "vitest";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import { makeItem, renderTestApp, screen, seedDb, user } from "@/test_util";
+import {
+  makeItem,
+  renderTestApp,
+  screen,
+  seedDb,
+  user,
+  waitFor,
+} from "@/test_util";
 import axios from "@/util/axios";
 import { Scene } from "@/types";
 import { urls } from "@/api";
@@ -44,9 +51,13 @@ describe("Share Button", () => {
 
     const input =
       await screen.findByLabelText<HTMLInputElement>("Shareable URL");
-    const saved: Scene = vi.mocked(axios.post).mock.results[0].value.data;
+
+    const saved: Scene = (await vi.mocked(axios.post).mock.results[0].value)
+      .data;
     const expectedUrl = `${window.location.origin}/${saved.key}`;
-    expect(input.value).toBe(expectedUrl);
+    await waitFor(() => {
+      expect(input.value).toBe(expectedUrl);
+    });
   });
 
   test("Clicking Copy button copies the URL", async () => {
@@ -57,6 +68,7 @@ describe("Share Button", () => {
 
     const input =
       await screen.findByLabelText<HTMLInputElement>("Shareable URL");
+    await waitFor(() => expect(input.value).toBeTruthy());
     const url = input.value;
 
     const copiedIndicator = screen.getByText("Copied!");

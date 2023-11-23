@@ -100,14 +100,14 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
   if (variant === "mobile") {
     return (
       <>
-        <MenuItem onClick={handleClick} disabled={createScene.isLoading}>
+        <MenuItem onClick={handleClick} disabled={createScene.isPending}>
           <ListItemIcon>
             <CloudOutlinedIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>Share</ListItemText>
         </MenuItem>
         <Dialog open={open} onClose={toggleOpen.off}>
-          <ShareBody url={url} loading={createScene.isLoading} />
+          <ShareBody url={url} loading={createScene.isPending} />
         </Dialog>
       </>
     );
@@ -121,7 +121,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
           variant="text"
           color="secondary"
           onClick={handleClick}
-          disabled={createScene.isLoading}
+          disabled={createScene.isPending}
           startIcon={<CloudOutlinedIcon fontSize="inherit" />}
         >
           Share
@@ -135,7 +135,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
           anchorOrigin={anchorOrigin}
           transformOrigin={transformOrigin}
         >
-          <ShareBody url={url} loading={createScene.isLoading} />
+          <ShareBody url={url} loading={createScene.isPending} />
         </Popover>
       </>
     );

@@ -13,6 +13,7 @@
   "scripts": {
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
     "start": "yarn workspace app start",
     "build": "yarn workspace app build"
   },
