@@ -8,10 +8,10 @@
     "@math3d/tsconfig": "workspace:^",
     "@types/js-yaml": "^4.0.5",
     "ajv": "^8.12.0",
-    "eslint": "^8.53.0",
+    "eslint": "^8.54.0",
     "js-yaml": "^4.1.0",
     "mathjs": "11.9.1",
-    "vitest": "0.32.2"
+    "vitest": "^0.34.6"
   },
   "scripts": {
     "test": "vitest --run",
