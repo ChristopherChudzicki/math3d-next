@@ -22,7 +22,7 @@ class ScenesView(viewsets.ModelViewSet):
 
     authentication_classes = []
     permission_classes = [ScenePermissions]
-    http_method_names = ["get", "post", "head"]
+    http_method_names = ["get", "post", "head", "patch", "delete"]
 
     @extend_schema(responses=SceneSerializer(many=True))
     @action(methods=["GET"], detail=False, name="My Scenes")

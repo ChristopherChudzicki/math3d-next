@@ -13,9 +13,14 @@ T = TypeVar("T")
 
 
 class BaseFactory(DjangoModelFactory, Generic[T]):
+    # Type hinting for Factory.create()
     @classmethod
     def create(cls, **kwargs) -> T:
         return super().create(**kwargs)
+
+    # Type hinting Factory()
+    def __new__(cls, *args, **kwargs) -> T:  # type: ignore
+        return super().__new__(*args, **kwargs)
 
 
 class SceneFactory(BaseFactory[Scene]):
@@ -34,6 +39,8 @@ class SceneFactory(BaseFactory[Scene]):
     item_order = factory.LazyFunction(
         lambda: {"main": ["initialFolder"], "initialFolder": []}
     )
+
+    title = factory.LazyFunction(lambda: fake.sentence(nb_words=3))
 
     author = factory.SubFactory(CustomUserFactory)  # type: ignore
 
