@@ -7,7 +7,7 @@ import { Provider } from "react-redux";
 import { Route, Routes } from "react-router-dom";
 import { AppStore } from "@/store/store";
 
-import * as routes from "./routes";
+import * as pages from "./pages";
 
 interface AppProps {
   store: AppStore;
@@ -21,8 +21,8 @@ const AppRoutes: React.FC<AppProps> = ({ store, queryClient, theme }) => (
       <ThemeProvider theme={theme}>
         <Routes>
           <Route path="/">
-            <Route path="/:sceneKey" element={<routes.MainPage />} />
-            <Route path="" element={<routes.MainPage />} />
+            <Route path="/:sceneKey" element={<pages.MainPage />} />
+            <Route path="" element={<pages.MainPage />} />
           </Route>
         </Routes>
       </ThemeProvider>
