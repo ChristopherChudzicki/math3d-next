@@ -29,10 +29,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@antfu/utils@npm:^0.7.2":
-  version: 0.7.4
-  resolution: "@antfu/utils@npm:0.7.4"
-  checksum: f5c1107c9aec0bda43a7021f3a9adb4bed113467a40590a9cecd3998408a5c04b0fb68be53438f56487153eaf6278fa128dbe4e0be88b7af65212fe0497e4fdd
+"@antfu/utils@npm:^0.7.6":
+  version: 0.7.6
+  resolution: "@antfu/utils@npm:0.7.6"
+  checksum: 92bf38ded4364e237c401e546eef3dbcc383186e1515e1e1c5c505d19ae12d8702cac7527b94c28f12ab6063d26969798297980619d42aba76771d8f3bc7f620
   languageName: node
   linkType: hard
 
@@ -2665,19 +2665,19 @@ __metadata:
   linkType: hard
 
 "@julr/vite-plugin-validate-env@npm:^0.2.4":
-  version: 0.2.4
-  resolution: "@julr/vite-plugin-validate-env@npm:0.2.4"
+  version: 0.2.5
+  resolution: "@julr/vite-plugin-validate-env@npm:0.2.5"
   dependencies:
     "@poppinss/colors": ^3.0.3
-    "@poppinss/validator-lite": ^1.0.2
-    unconfig: ^0.3.7
+    "@poppinss/validator-lite": ^1.0.3
+    unconfig: ^0.3.11
   peerDependencies:
-    vite: ^2.9.0 || ^3.0.0-0 || ^4.0.0
+    vite: ^2.9.0 || ^3.0.0-0 || ^4.0.0 || ^5.0.0
     zod: ^3.0.0
   peerDependenciesMeta:
     zod:
       optional: true
-  checksum: 74de1842f98e1fc64d332664e2656efe3edf43e82a26f191d345ae283f58b7fdee0b69fa7e7a2975f46cddcdb8ea099ec304ce39e691aa30cc0ddaeed077ac76
+  checksum: c28b9ec616c20adf1becdf49f57863c0cac4cecbeb2ae3852f031bdb0a53e85eb0ab605e21a8b17612740264abfe02fe83e3e1a6f06975ca498479b1facad7e0
   languageName: node
   linkType: hard
 
@@ -3322,7 +3322,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@poppinss/validator-lite@npm:^1.0.2":
+"@poppinss/validator-lite@npm:^1.0.3":
   version: 1.0.3
   resolution: "@poppinss/validator-lite@npm:1.0.3"
   dependencies:
@@ -12621,12 +12621,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jiti@npm:^1.18.2":
-  version: 1.18.2
-  resolution: "jiti@npm:1.18.2"
+"jiti@npm:^1.20.0":
+  version: 1.21.0
+  resolution: "jiti@npm:1.21.0"
   bin:
     jiti: bin/jiti.js
-  checksum: 46c41cd82d01c6efdee3fc0ae9b3e86ed37457192d6366f19157d863d64961b07982ab04e9d5879576a1af99cc4d132b0b73b336094f86a5ce9fb1029ec2d29f
+  checksum: a7bd5d63921c170eaec91eecd686388181c7828e1fa0657ab374b9372bfc1f383cf4b039e6b272383d5cb25607509880af814a39abdff967322459cca41f2961
   languageName: node
   linkType: hard
 
@@ -13858,7 +13858,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mlly@npm:^1.4.0":
+"mlly@npm:^1.4.0, mlly@npm:^1.4.2":
   version: 1.4.2
   resolution: "mlly@npm:1.4.2"
   dependencies:
@@ -18499,14 +18499,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unconfig@npm:^0.3.7":
-  version: 0.3.9
-  resolution: "unconfig@npm:0.3.9"
+"unconfig@npm:^0.3.11":
+  version: 0.3.11
+  resolution: "unconfig@npm:0.3.11"
   dependencies:
-    "@antfu/utils": ^0.7.2
+    "@antfu/utils": ^0.7.6
     defu: ^6.1.2
-    jiti: ^1.18.2
-  checksum: d76b9a3a4ec9690273615a427703aad68fcb2de9a862f69db7c5b53dbb49c288a8ac00a4aee91b4e048e74c7fc0b9f2c4e214f98f51dfe8c96316f0f0b8d1f28
+    jiti: ^1.20.0
+    mlly: ^1.4.2
+  checksum: 860f66a3ad840ffc97b73fda65b3e67946bb0317a2add1a5cef5aac14f3ad91f5f678717426a1fa70e7137e4e61e5ffe4822268e5336e3be8daa64aea96be8e0
   languageName: node
   linkType: hard
 
