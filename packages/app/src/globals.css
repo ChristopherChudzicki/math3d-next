@@ -39,33 +39,6 @@ p {
   margin-bottom: 1em;
 }
 
-a {
-  color: #1890ff;
-  text-decoration: none;
-  background-color: transparent;
-  outline: none;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-a:hover {
-  color: #40a9ff;
-}
-a:active {
-  color: #096dd9;
-}
-a:active,
-a:hover {
-  text-decoration: none;
-  outline: 0;
-}
-a:focus {
-  text-decoration: none;
-  outline: 0;
-}
-a[disabled] {
-  color: rgba(0, 0, 0, 0.25);
-  cursor: not-allowed;
-}
 a,
 area,
 button,

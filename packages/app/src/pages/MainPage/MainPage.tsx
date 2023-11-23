@@ -4,13 +4,13 @@ import {
   useNavigate,
   useParams,
   useSearchParams,
+  Link,
 } from "react-router-dom";
 import Scene from "@/features/scene";
 import SceneControls from "@/features/sceneControls";
 import Sidebar from "@/util/components/sidebar";
 
 import classNames from "classnames";
-import Button from "@mui/material/Button";
 import TitleInput from "@/features/sceneControls/TitleInput";
 import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
@@ -24,6 +24,9 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Menu from "@mui/material/Menu";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { ToggleKeyboardButton } from "@/features/virtualKeyboard";
+import { useAuthStatus } from "@/features/auth";
+import Button from "@mui/material/Button";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import styles from "./MainPage.module.css";
 import ExamplesDrawer from "./ExamplesDrawer";
 
@@ -35,55 +38,54 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
   const smallScreen = useMediaQuery("(max-width: 600px)");
   const [menuOpen, toggleMenuOpen] = useToggle(false);
   const [buttonEl, setButtonEl] = useState<HTMLElement | null>(null);
+
+  const [isAuthenticated] = useAuthStatus();
+
   return (
     <nav className={styles["nav-container"]}>
-      {smallScreen ? (
-        <>
-          <IconButton onClick={toggleMenuOpen.on} ref={setButtonEl}>
-            <MenuIcon />
-          </IconButton>
-          <Menu
-            keepMounted
-            open={menuOpen}
-            anchorEl={buttonEl}
-            onClose={toggleMenuOpen.off}
-            onClick={toggleMenuOpen.off}
-          >
-            <ShareButton variant="mobile" />
-            <MenuItem onClick={props.onClickExamples}>
-              <ListItemIcon>
-                <LightbulbOutlined fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Examples</ListItemText>
-            </MenuItem>
-            <MenuItem>
-              <ListItemIcon>
-                <HelpOutlineOutlinedIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Contact</ListItemText>
-            </MenuItem>
-          </Menu>
-        </>
-      ) : (
-        <>
-          <ShareButton variant="desktop" />
-          <Button
-            onClick={props.onClickExamples}
-            variant="text"
-            color="secondary"
-            startIcon={<LightbulbOutlined fontSize="inherit" />}
-          >
-            Examples
-          </Button>
-          <Button
-            variant="text"
-            color="secondary"
-            startIcon={<HelpOutlineOutlinedIcon fontSize="inherit" />}
-          >
-            Contact
-          </Button>
-        </>
-      )}
+      <ShareButton variant={smallScreen ? "mobile" : "desktop"} />
+      {!isAuthenticated ? (
+        <Button
+          variant="text"
+          color="secondary"
+          component={Link}
+          to="auth/login"
+          startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
+        >
+          Login
+        </Button>
+      ) : null}
+      <IconButton onClick={toggleMenuOpen.on} ref={setButtonEl}>
+        <MenuIcon />
+      </IconButton>
+      <Menu
+        keepMounted
+        open={menuOpen}
+        anchorEl={buttonEl}
+        onClose={toggleMenuOpen.off}
+        onClick={toggleMenuOpen.off}
+      >
+        {isAuthenticated ? (
+          <MenuItem to="auth/logout" component={Link}>
+            <ListItemIcon>
+              <AccountCircleOutlinedIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Logout</ListItemText>
+          </MenuItem>
+        ) : null}
+        <MenuItem onClick={props.onClickExamples}>
+          <ListItemIcon>
+            <LightbulbOutlined fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Examples</ListItemText>
+        </MenuItem>
+        <MenuItem>
+          <ListItemIcon>
+            <HelpOutlineOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Contact</ListItemText>
+        </MenuItem>
+      </Menu>
     </nav>
   );
 };

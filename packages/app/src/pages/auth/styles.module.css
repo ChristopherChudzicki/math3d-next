@@ -1,0 +1,5 @@
+.form-content {
+  display: grid;
+  grid-template-columns: auto;
+  row-gap: 16px;
+}

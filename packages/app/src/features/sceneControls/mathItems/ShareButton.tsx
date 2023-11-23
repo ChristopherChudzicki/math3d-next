@@ -9,9 +9,6 @@ import { useToggle } from "@/util/hooks";
 import TextField from "@mui/material/TextField";
 import classNames from "classnames";
 import { useNavigate } from "react-router-dom";
-import MenuItem from "@mui/material/MenuItem";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
 import Dialog from "@mui/material/Dialog";
 import styles from "./ShareButton.module.css";
 import { select } from "./mathItemsSlice";
@@ -97,35 +94,20 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
     setUrl(`${window.location.origin}/${result.key}`);
   }, [toggleOpen, createScene, scene, navigate]);
 
-  if (variant === "mobile") {
-    return (
-      <>
-        <MenuItem onClick={handleClick} disabled={createScene.isPending}>
-          <ListItemIcon>
-            <CloudOutlinedIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Share</ListItemText>
-        </MenuItem>
-        <Dialog open={open} onClose={toggleOpen.off}>
-          <ShareBody url={url} loading={createScene.isPending} />
-        </Dialog>
-      </>
-    );
-  }
-  if (variant === "desktop") {
-    return (
-      <>
-        <Button
-          aria-describedby={elementId}
-          ref={buttonRef}
-          variant="text"
-          color="secondary"
-          onClick={handleClick}
-          disabled={createScene.isPending}
-          startIcon={<CloudOutlinedIcon fontSize="inherit" />}
-        >
-          Share
-        </Button>
+  return (
+    <>
+      <Button
+        aria-describedby={elementId}
+        ref={buttonRef}
+        variant="text"
+        color="secondary"
+        onClick={handleClick}
+        disabled={createScene.isPending}
+        startIcon={<CloudOutlinedIcon fontSize="inherit" />}
+      >
+        Share
+      </Button>
+      {variant === "mobile" ? (
         <Popover
           id={elementId}
           open={open}
@@ -137,11 +119,13 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
         >
           <ShareBody url={url} loading={createScene.isPending} />
         </Popover>
-      </>
-    );
-  }
-
-  throw new Error(`Unexpected variant: ${variant}`);
+      ) : (
+        <Dialog open={open} onClose={toggleOpen.off}>
+          <ShareBody url={url} loading={createScene.isPending} />
+        </Dialog>
+      )}
+    </>
+  );
 };
 
 export default ShareButton;

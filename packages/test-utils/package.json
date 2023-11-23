@@ -16,6 +16,7 @@
     "lint": "eslint \"**/*.ts?(x)\""
   },
   "dependencies": {
-    "jest-get-type": "^29.4.3"
+    "jest-get-type": "^29.4.3",
+    "tiny-invariant": "^1.3.1"
   }
 }

@@ -1,8 +1,10 @@
 {
-  "name": "api",
+  "name": "@math3d/api",
   "version": "0.0.0",
-  "type": "module",
   "private": true,
+  "exports": "./src/index.ts",
+  "main": "./src/index.ts",
+  "type": "module",
   "scripts": {
     "test": "vitest --run",
     "typecheck": "tsc --noEmit",
@@ -10,6 +12,7 @@
     "lint": "eslint \"**/*.ts?(x)\""
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.8.4",
     "axios": "^0.27"
   },
   "devDependencies": {
