@@ -497,8 +497,6 @@ paths:
           type: integer
       tags:
       - scenes
-      security:
-      - {}
       responses:
         '200':
           content:
@@ -522,8 +520,6 @@ paths:
             schema:
               $ref: '#/components/schemas/SceneRequest'
         required: true
-      security:
-      - {}
       responses:
         '201':
           content:
@@ -542,14 +538,78 @@ paths:
         required: true
       tags:
       - scenes
-      security:
-      - {}
       responses:
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Scene'
+          description: ''
+    patch:
+      operationId: scenes_partial_update
+      parameters:
+      - in: path
+        name: key
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSceneRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSceneRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSceneRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scene'
+          description: ''
+    delete:
+      operationId: scenes_destroy
+      parameters:
+      - in: path
+        name: key
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenes
+      responses:
+        '204':
+          description: No response body
+  /v0/scenes/me/:
+    get:
+      operationId: scenes_me_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - scenes
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSceneList'
           description: ''
 components:
   schemas:
@@ -651,6 +711,21 @@ components:
       - re_new_password
       - token
       - uid
+    PatchedSceneRequest:
+      type: object
+      properties:
+        items:
+          type: object
+          additionalProperties: {}
+        itemOrder:
+          type: object
+          additionalProperties: {}
+        title:
+          type: string
+        key:
+          type: string
+          minLength: 1
+          maxLength: 80
     PatchedUserRequest:
       type: object
       properties:

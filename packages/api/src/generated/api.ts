@@ -204,6 +204,37 @@ export interface PasswordResetConfirmRetypeRequest {
 /**
  *
  * @export
+ * @interface PatchedSceneRequest
+ */
+export interface PatchedSceneRequest {
+  /**
+   *
+   * @type {{ [key: string]: any; }}
+   * @memberof PatchedSceneRequest
+   */
+  items?: { [key: string]: any };
+  /**
+   *
+   * @type {{ [key: string]: any; }}
+   * @memberof PatchedSceneRequest
+   */
+  itemOrder?: { [key: string]: any };
+  /**
+   *
+   * @type {string}
+   * @memberof PatchedSceneRequest
+   */
+  title?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof PatchedSceneRequest
+   */
+  key?: string;
+}
+/**
+ *
+ * @export
  * @interface PatchedUserRequest
  */
 export interface PatchedUserRequest {
@@ -3228,6 +3259,51 @@ export const ScenesApiAxiosParamCreator = function (
     },
     /**
      *
+     * @param {string} key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    scenesDestroy: async (
+      key: string,
+      options: AxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'key' is not null or undefined
+      assertParamExists("scenesDestroy", "key", key);
+      const localVarPath = `/v0/scenes/{key}/`.replace(
+        `{${"key"}}`,
+        encodeURIComponent(String(key)),
+      );
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = {
+        method: "DELETE",
+        ...baseOptions,
+        ...options,
+      };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {*} [options] Override http request option.
@@ -3270,6 +3346,110 @@ export const ScenesApiAxiosParamCreator = function (
         ...headersFromBaseOptions,
         ...options.headers,
       };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
+     * @param {number} [limit] Number of results to return per page.
+     * @param {number} [offset] The initial index from which to return the results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    scenesMeList: async (
+      limit?: number,
+      offset?: number,
+      options: AxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/v0/scenes/me/`;
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = {
+        method: "GET",
+        ...baseOptions,
+        ...options,
+      };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      if (limit !== undefined) {
+        localVarQueryParameter["limit"] = limit;
+      }
+
+      if (offset !== undefined) {
+        localVarQueryParameter["offset"] = offset;
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
+     * @param {string} key
+     * @param {PatchedSceneRequest} [PatchedSceneRequest]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    scenesPartialUpdate: async (
+      key: string,
+      PatchedSceneRequest?: PatchedSceneRequest,
+      options: AxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'key' is not null or undefined
+      assertParamExists("scenesPartialUpdate", "key", key);
+      const localVarPath = `/v0/scenes/{key}/`.replace(
+        `{${"key"}}`,
+        encodeURIComponent(String(key)),
+      );
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = {
+        method: "PATCH",
+        ...baseOptions,
+        ...options,
+      };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      localVarHeaderParameter["Content-Type"] = "application/json";
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        PatchedSceneRequest,
+        localVarRequestOptions,
+        configuration,
+      );
 
       return {
         url: toPathString(localVarUrlObj),
@@ -3360,6 +3540,33 @@ export const ScenesApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @param {string} key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async scenesDestroy(
+      key: string,
+      options?: AxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.scenesDestroy(
+        key,
+        options,
+      );
+      const index = configuration?.serverIndex ?? 0;
+      const operationBasePath =
+        operationServerMap["ScenesApi.scenesDestroy"]?.[index]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath);
+    },
+    /**
+     *
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {*} [options] Override http request option.
@@ -3383,6 +3590,70 @@ export const ScenesApiFp = function (configuration?: Configuration) {
       const index = configuration?.serverIndex ?? 0;
       const operationBasePath =
         operationServerMap["ScenesApi.scenesList"]?.[index]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath);
+    },
+    /**
+     *
+     * @param {number} [limit] Number of results to return per page.
+     * @param {number} [offset] The initial index from which to return the results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async scenesMeList(
+      limit?: number,
+      offset?: number,
+      options?: AxiosRequestConfig,
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string,
+      ) => AxiosPromise<PaginatedSceneList>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.scenesMeList(
+        limit,
+        offset,
+        options,
+      );
+      const index = configuration?.serverIndex ?? 0;
+      const operationBasePath =
+        operationServerMap["ScenesApi.scenesMeList"]?.[index]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath);
+    },
+    /**
+     *
+     * @param {string} key
+     * @param {PatchedSceneRequest} [PatchedSceneRequest]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async scenesPartialUpdate(
+      key: string,
+      PatchedSceneRequest?: PatchedSceneRequest,
+      options?: AxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Scene>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.scenesPartialUpdate(
+          key,
+          PatchedSceneRequest,
+          options,
+        );
+      const index = configuration?.serverIndex ?? 0;
+      const operationBasePath =
+        operationServerMap["ScenesApi.scenesPartialUpdate"]?.[index]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -3448,6 +3719,20 @@ export const ScenesApiFactory = function (
     },
     /**
      *
+     * @param {ScenesApiScenesDestroyRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    scenesDestroy(
+      requestParameters: ScenesApiScenesDestroyRequest,
+      options?: AxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .scenesDestroy(requestParameters.key, options)
+        .then((request) => request(axios, basePath));
+    },
+    /**
+     *
      * @param {ScenesApiScenesListRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3458,6 +3743,42 @@ export const ScenesApiFactory = function (
     ): AxiosPromise<PaginatedSceneList> {
       return localVarFp
         .scenesList(requestParameters.limit, requestParameters.offset, options)
+        .then((request) => request(axios, basePath));
+    },
+    /**
+     *
+     * @param {ScenesApiScenesMeListRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    scenesMeList(
+      requestParameters: ScenesApiScenesMeListRequest = {},
+      options?: AxiosRequestConfig,
+    ): AxiosPromise<PaginatedSceneList> {
+      return localVarFp
+        .scenesMeList(
+          requestParameters.limit,
+          requestParameters.offset,
+          options,
+        )
+        .then((request) => request(axios, basePath));
+    },
+    /**
+     *
+     * @param {ScenesApiScenesPartialUpdateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    scenesPartialUpdate(
+      requestParameters: ScenesApiScenesPartialUpdateRequest,
+      options?: AxiosRequestConfig,
+    ): AxiosPromise<Scene> {
+      return localVarFp
+        .scenesPartialUpdate(
+          requestParameters.key,
+          requestParameters.PatchedSceneRequest,
+          options,
+        )
         .then((request) => request(axios, basePath));
     },
     /**
@@ -3492,6 +3813,20 @@ export interface ScenesApiScenesCreateRequest {
 }
 
 /**
+ * Request parameters for scenesDestroy operation in ScenesApi.
+ * @export
+ * @interface ScenesApiScenesDestroyRequest
+ */
+export interface ScenesApiScenesDestroyRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof ScenesApiScenesDestroy
+   */
+  readonly key: string;
+}
+
+/**
  * Request parameters for scenesList operation in ScenesApi.
  * @export
  * @interface ScenesApiScenesListRequest
@@ -3510,6 +3845,48 @@ export interface ScenesApiScenesListRequest {
    * @memberof ScenesApiScenesList
    */
   readonly offset?: number;
+}
+
+/**
+ * Request parameters for scenesMeList operation in ScenesApi.
+ * @export
+ * @interface ScenesApiScenesMeListRequest
+ */
+export interface ScenesApiScenesMeListRequest {
+  /**
+   * Number of results to return per page.
+   * @type {number}
+   * @memberof ScenesApiScenesMeList
+   */
+  readonly limit?: number;
+
+  /**
+   * The initial index from which to return the results.
+   * @type {number}
+   * @memberof ScenesApiScenesMeList
+   */
+  readonly offset?: number;
+}
+
+/**
+ * Request parameters for scenesPartialUpdate operation in ScenesApi.
+ * @export
+ * @interface ScenesApiScenesPartialUpdateRequest
+ */
+export interface ScenesApiScenesPartialUpdateRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof ScenesApiScenesPartialUpdate
+   */
+  readonly key: string;
+
+  /**
+   *
+   * @type {PatchedSceneRequest}
+   * @memberof ScenesApiScenesPartialUpdate
+   */
+  readonly PatchedSceneRequest?: PatchedSceneRequest;
 }
 
 /**
@@ -3551,6 +3928,22 @@ export class ScenesApi extends BaseAPI {
 
   /**
    *
+   * @param {ScenesApiScenesDestroyRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ScenesApi
+   */
+  public scenesDestroy(
+    requestParameters: ScenesApiScenesDestroyRequest,
+    options?: AxiosRequestConfig,
+  ) {
+    return ScenesApiFp(this.configuration)
+      .scenesDestroy(requestParameters.key, options)
+      .then((request) => request(this.axios, this.basePath));
+  }
+
+  /**
+   *
    * @param {ScenesApiScenesListRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -3562,6 +3955,42 @@ export class ScenesApi extends BaseAPI {
   ) {
     return ScenesApiFp(this.configuration)
       .scenesList(requestParameters.limit, requestParameters.offset, options)
+      .then((request) => request(this.axios, this.basePath));
+  }
+
+  /**
+   *
+   * @param {ScenesApiScenesMeListRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ScenesApi
+   */
+  public scenesMeList(
+    requestParameters: ScenesApiScenesMeListRequest = {},
+    options?: AxiosRequestConfig,
+  ) {
+    return ScenesApiFp(this.configuration)
+      .scenesMeList(requestParameters.limit, requestParameters.offset, options)
+      .then((request) => request(this.axios, this.basePath));
+  }
+
+  /**
+   *
+   * @param {ScenesApiScenesPartialUpdateRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ScenesApi
+   */
+  public scenesPartialUpdate(
+    requestParameters: ScenesApiScenesPartialUpdateRequest,
+    options?: AxiosRequestConfig,
+  ) {
+    return ScenesApiFp(this.configuration)
+      .scenesPartialUpdate(
+        requestParameters.key,
+        requestParameters.PatchedSceneRequest,
+        options,
+      )
       .then((request) => request(this.axios, this.basePath));
   }
 
