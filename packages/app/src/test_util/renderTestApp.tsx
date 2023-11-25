@@ -8,6 +8,7 @@ import { getStore } from "@/store/store";
 import { InitialEntry } from "history";
 import { QueryClient } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
+import { API_TOKEN_KEY } from "@math3d/api";
 import AppRoutes from "../app";
 
 const waitForNotBusy = () =>
@@ -34,7 +35,7 @@ LocationSpy.displayName = "LocationSpy";
  */
 const renderTestApp = async (
   initialRoute: InitialEntry = "/",
-  { waitForReady = true } = {},
+  { waitForReady = true, isAuthenticated = false } = {},
 ) => {
   const initialEntries: InitialEntry[] = [initialRoute];
   const store = getStore();
@@ -66,6 +67,10 @@ const renderTestApp = async (
   );
   if (waitForReady) {
     await waitForNotBusy();
+  }
+
+  if (isAuthenticated) {
+    localStorage.setItem(API_TOKEN_KEY, '"fake_api_key"');
   }
 
   invariant(locationRef.current, "LocationSpy was not mounted.");
