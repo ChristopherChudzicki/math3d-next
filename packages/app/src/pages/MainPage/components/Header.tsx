@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-import classNames from "classnames";
-
 import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import ShareButton from "@/features/sceneControls/mathItems/ShareButton";
@@ -42,10 +40,14 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
           to="auth/login"
           startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
         >
-          Login
+          Sign in
         </Button>
       ) : null}
-      <IconButton onClick={toggleMenuOpen.on} ref={setButtonEl}>
+      <IconButton
+        aria-label="App Menu"
+        onClick={toggleMenuOpen.on}
+        ref={setButtonEl}
+      >
         <MenuIcon />
       </IconButton>
       <Menu
@@ -60,7 +62,7 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
             <ListItemIcon>
               <AccountCircleOutlinedIcon fontSize="small" />
             </ListItemIcon>
-            <ListItemText>Logout</ListItemText>
+            <ListItemText>Sign out</ListItemText>
           </MenuItem>
         ) : null}
         <MenuItem onClick={props.onClickExamples}>

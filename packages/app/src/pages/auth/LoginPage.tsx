@@ -1,8 +1,8 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { useLogin } from "@math3d/api";
+import { isAxiosError, useLogin } from "@math3d/api";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useAuthStatus } from "@/features/auth";
@@ -18,7 +18,7 @@ const schema = yup.object({
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const [_isAuthenticated, setIsAuthenticated] = useAuthStatus();
+  const [isAuthenticated, setIsAuthenticated] = useAuthStatus();
   const resolver = yupResolver(schema);
   const {
     register,
@@ -31,18 +31,28 @@ const LoginPage: React.FC = () => {
     navigate("../");
   }, [navigate]);
   const login = useLogin();
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("../");
+    }
+  }, [isAuthenticated, navigate]);
   return (
     <FormDialog
-      title="Login"
+      title="Sign in"
       open
       onClose={handleClose}
       onSubmit={handleSubmit(async (data) => {
-        await login.mutateAsync(data, {});
-        setIsAuthenticated(true);
-        handleClose();
+        try {
+          await login.mutateAsync(data, {});
+          setIsAuthenticated(true);
+          handleClose();
+        } catch (err) {
+          if (isAxiosError(err, [400])) return;
+          throw err;
+        }
       })}
       onReset={reset}
-      submitButtonContent="Login"
+      submitButtonContent="Sign in"
       fullWidth
       maxWidth="xs"
     >
@@ -54,6 +64,7 @@ const LoginPage: React.FC = () => {
           {...register("email")}
         />
         <TextField
+          id="foobar"
           error={!!errors.password?.message}
           helperText={errors.password?.message}
           label="Password"

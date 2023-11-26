@@ -107,7 +107,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
       >
         Share
       </Button>
-      {variant === "mobile" ? (
+      {variant === "desktop" ? (
         <Popover
           id={elementId}
           open={open}

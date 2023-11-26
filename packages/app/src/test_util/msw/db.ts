@@ -4,6 +4,7 @@ import { factory, primaryKey } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
 import { MathItem } from "@math3d/mathitem-configs";
 import type { Scene } from "@/types";
+import type { User } from "@math3d/api";
 import { sceneFromItems } from "../factories";
 import { sceneFixtures } from "./fixtures";
 
@@ -22,9 +23,28 @@ const db = factory({
      */
     itemOrder: () => JSON.stringify({}),
   },
+  user: {
+    id: primaryKey(faker.datatype.number),
+    public_nickname: faker.internet.userName,
+    email: faker.internet.email,
+    password: faker.internet.password,
+    auth_token: faker.datatype.uuid,
+  },
 });
 
 type PartialScene = PartialBy<Scene, "title" | "key">;
+
+type UserWithPassword = User & {
+  // Real API response does not include password/token, of course, but we need it for
+  // the msw model & handler.
+  password: string;
+  auth_token: string;
+};
+
+const addUser = (user?: Partial<UserWithPassword>): UserWithPassword => {
+  const created = db.user.create(user);
+  return created;
+};
 
 /**
  * A wrapper around `db.scene.create` to fix some ts issues.
@@ -55,6 +75,7 @@ const seedDb = {
     const scene = sceneFromItems(items, { key });
     return addScene(scene);
   },
+  withUser: addUser,
 };
 
 seedDb.withFixtures();

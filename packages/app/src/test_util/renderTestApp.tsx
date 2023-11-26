@@ -10,6 +10,7 @@ import { QueryClient } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
 import { API_TOKEN_KEY } from "@math3d/api";
 import AppRoutes from "../app";
+import { seedDb } from "./msw/db";
 
 const waitForNotBusy = () =>
   waitFor(
@@ -51,6 +52,11 @@ const renderTestApp = async (
     },
   });
 
+  const user = isAuthenticated ? seedDb.withUser() : null;
+  if (user) {
+    localStorage.setItem(API_TOKEN_KEY, `"${user.auth_token}"`);
+  }
+
   // React router v6 does not provide a good way to view location in tests.
   const locationRef = { current: null as null | Location };
   const result = render(
@@ -69,13 +75,9 @@ const renderTestApp = async (
     await waitForNotBusy();
   }
 
-  if (isAuthenticated) {
-    localStorage.setItem(API_TOKEN_KEY, '"fake_api_key"');
-  }
-
   invariant(locationRef.current, "LocationSpy was not mounted.");
   const location = locationRef as { current: Location };
-  return { result, store, location };
+  return { result, store, location, user };
 };
 
 export default renderTestApp;

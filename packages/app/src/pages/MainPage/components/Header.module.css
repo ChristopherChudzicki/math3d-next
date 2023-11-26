@@ -8,7 +8,7 @@
 
 .header-container {
   display: grid;
-  grid-template-columns: min-content 1fr min-content;
+  grid-template-columns: min-content 1fr auto;
   grid-template-rows: var(--header-height);
   align-items: center;
   padding-left: 1rem;

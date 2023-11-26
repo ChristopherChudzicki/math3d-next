@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLogout } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
@@ -6,8 +6,7 @@ import FormDialog from "./components/FormDialog";
 
 const LogoutPage: React.FC = () => {
   const navigate = useNavigate();
-  const [_isAuthenticated, setIsAuthenticated] = useAuthStatus();
-
+  const [isAuthenticated, setIsAuthenticated] = useAuthStatus();
   const handleClose = useCallback(() => {
     navigate("../");
   }, [navigate]);
@@ -21,6 +20,11 @@ const LogoutPage: React.FC = () => {
     },
     [handleClose, logout, setIsAuthenticated],
   );
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("../");
+    }
+  }, [isAuthenticated, navigate]);
   return (
     <FormDialog
       title="Logout"

@@ -1,5 +1,19 @@
 import { rest } from "msw";
+import type { RestRequest } from "msw";
 import db from "./db";
+
+const hasValidToken = (req: RestRequest) => {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    return false;
+  }
+  const prefix = "Token ";
+  const token = authHeader.slice(prefix.length);
+  const user = db.user.findFirst({
+    where: { auth_token: { equals: token } },
+  });
+  return !!user;
+};
 
 export const handlers = [
   rest.get("http://localhost:8000/v0/scenes/:key/", (req, res, ctx) => {
@@ -43,4 +57,55 @@ export const handlers = [
     scene.itemOrder = JSON.parse(scene.itemOrder);
     return res(ctx.json(scene));
   }),
+  rest.post(
+    "http://localhost:8000/v0/auth/token/login/",
+    async (req, res, ctx) => {
+      const { email, password } = await req.json();
+      if (typeof email !== "string") {
+        throw new Error("email should be string");
+      }
+      if (typeof password !== "string" /** # pragma: allowlist secret */) {
+        throw new Error("password should be string");
+      }
+      const user = db.user.findFirst({
+        where: { email: { equals: email } },
+      });
+      if (!user) {
+        return res(
+          ctx.status(404),
+          ctx.json({
+            errorMessage: "Not found",
+          }),
+        );
+      }
+      if (user.password !== password) {
+        return res(
+          ctx.status(400),
+          ctx.json({
+            errorMessage: "Invalid password",
+          }),
+        );
+      }
+      return res(
+        ctx.json({
+          auth_token: "fake-token",
+        }),
+      );
+    },
+  ),
+  rest.post(
+    "http://localhost:8000/v0/auth/token/logout/",
+    async (req, res, ctx) => {
+      if (!hasValidToken(req)) {
+        return res(
+          ctx.status(401),
+          ctx.json({
+            errorMessage: "Invalid token",
+          }),
+        );
+      }
+      // The real API deletes the token, but that's not important for our tests.
+      return res(ctx.status(204));
+    },
+  ),
 ];
