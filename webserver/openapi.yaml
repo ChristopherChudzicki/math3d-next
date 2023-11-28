@@ -103,7 +103,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this custom user.
+        description: A unique integer value identifying this User.
         required: true
       tags:
       - auth
@@ -123,7 +123,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this custom user.
+        description: A unique integer value identifying this User.
         required: true
       tags:
       - auth
@@ -155,7 +155,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this custom user.
+        description: A unique integer value identifying this User.
         required: true
       tags:
       - auth
@@ -186,7 +186,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this custom user.
+        description: A unique integer value identifying this User.
         required: true
       tags:
       - auth
@@ -879,6 +879,9 @@ components:
     UserCreatePasswordRetype:
       type: object
       properties:
+        public_nickname:
+          type: string
+          maxLength: 64
         email:
           type: string
           format: email
@@ -892,10 +895,15 @@ components:
       required:
       - email
       - id
+      - public_nickname
       - re_password
     UserCreatePasswordRetypeRequest:
       type: object
       properties:
+        public_nickname:
+          type: string
+          minLength: 1
+          maxLength: 64
         email:
           type: string
           format: email
@@ -912,6 +920,7 @@ components:
       required:
       - email
       - password
+      - public_nickname
       - re_password
     UserRequest:
       type: object

@@ -495,6 +495,12 @@ export interface UserCreatePasswordRetype {
    * @type {string}
    * @memberof UserCreatePasswordRetype
    */
+  public_nickname: string;
+  /**
+   *
+   * @type {string}
+   * @memberof UserCreatePasswordRetype
+   */
   email: string;
   /**
    *
@@ -515,6 +521,12 @@ export interface UserCreatePasswordRetype {
  * @interface UserCreatePasswordRetypeRequest
  */
 export interface UserCreatePasswordRetypeRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof UserCreatePasswordRetypeRequest
+   */
+  public_nickname: string;
   /**
    *
    * @type {string}
@@ -803,7 +815,7 @@ export const AuthApiAxiosParamCreator = function (
     },
     /**
      *
-     * @param {number} id A unique integer value identifying this custom user.
+     * @param {number} id A unique integer value identifying this User.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1112,7 +1124,7 @@ export const AuthApiAxiosParamCreator = function (
     },
     /**
      *
-     * @param {number} id A unique integer value identifying this custom user.
+     * @param {number} id A unique integer value identifying this User.
      * @param {PatchedUserRequest} [PatchedUserRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1473,7 +1485,7 @@ export const AuthApiAxiosParamCreator = function (
     },
     /**
      *
-     * @param {number} id A unique integer value identifying this custom user.
+     * @param {number} id A unique integer value identifying this User.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1645,7 +1657,7 @@ export const AuthApiAxiosParamCreator = function (
     },
     /**
      *
-     * @param {number} id A unique integer value identifying this custom user.
+     * @param {number} id A unique integer value identifying this User.
      * @param {UserRequest} UserRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1827,7 +1839,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @param {number} id A unique integer value identifying this custom user.
+     * @param {number} id A unique integer value identifying this User.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1984,7 +1996,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @param {number} id A unique integer value identifying this custom user.
+     * @param {number} id A unique integer value identifying this User.
      * @param {PatchedUserRequest} [PatchedUserRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2166,7 +2178,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @param {number} id A unique integer value identifying this custom user.
+     * @param {number} id A unique integer value identifying this User.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -2250,7 +2262,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @param {number} id A unique integer value identifying this custom user.
+     * @param {number} id A unique integer value identifying this User.
      * @param {UserRequest} UserRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2645,7 +2657,7 @@ export interface AuthApiAuthUsersCreateRequest {
  */
 export interface AuthApiAuthUsersDestroyRequest {
   /**
-   * A unique integer value identifying this custom user.
+   * A unique integer value identifying this User.
    * @type {number}
    * @memberof AuthApiAuthUsersDestroy
    */
@@ -2708,7 +2720,7 @@ export interface AuthApiAuthUsersMeUpdateRequest {
  */
 export interface AuthApiAuthUsersPartialUpdateRequest {
   /**
-   * A unique integer value identifying this custom user.
+   * A unique integer value identifying this User.
    * @type {number}
    * @memberof AuthApiAuthUsersPartialUpdate
    */
@@ -2799,7 +2811,7 @@ export interface AuthApiAuthUsersResetPasswordCreateRequest {
  */
 export interface AuthApiAuthUsersRetrieveRequest {
   /**
-   * A unique integer value identifying this custom user.
+   * A unique integer value identifying this User.
    * @type {number}
    * @memberof AuthApiAuthUsersRetrieve
    */
@@ -2841,7 +2853,7 @@ export interface AuthApiAuthUsersSetPasswordCreateRequest {
  */
 export interface AuthApiAuthUsersUpdateRequest {
   /**
-   * A unique integer value identifying this custom user.
+   * A unique integer value identifying this User.
    * @type {number}
    * @memberof AuthApiAuthUsersUpdate
    */

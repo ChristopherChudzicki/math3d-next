@@ -18,6 +18,53 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import { useToggle } from "@/util/hooks";
 import styles from "./Header.module.css";
 
+const LoginButtons: React.FC<{
+  smallScreen: boolean;
+  isAuthenticated: boolean;
+}> = ({ smallScreen, isAuthenticated }) => {
+  if (isAuthenticated) return null;
+  if (smallScreen) {
+    return (
+      <>
+        <MenuItem to="auth/login" component={Link}>
+          <ListItemIcon>
+            <AccountCircleOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Sign in</ListItemText>
+        </MenuItem>
+        <MenuItem to="auth/register" component={Link}>
+          <ListItemIcon>
+            <AccountCircleOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Sign up</ListItemText>
+        </MenuItem>
+      </>
+    );
+  }
+  return (
+    <>
+      <Button
+        variant="text"
+        color="secondary"
+        component={Link}
+        to="auth/register"
+        startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
+      >
+        Sign up
+      </Button>
+      <Button
+        variant="text"
+        color="secondary"
+        component={Link}
+        to="auth/login"
+        startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
+      >
+        Sign in
+      </Button>
+    </>
+  );
+};
+
 type HeaderMenuProps = {
   onClickExamples: () => void;
 };
@@ -32,17 +79,10 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
   return (
     <nav className={styles["nav-container"]}>
       <ShareButton variant={smallScreen ? "mobile" : "desktop"} />
-      {!isAuthenticated ? (
-        <Button
-          variant="text"
-          color="secondary"
-          component={Link}
-          to="auth/login"
-          startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
-        >
-          Sign in
-        </Button>
-      ) : null}
+      {smallScreen ? null : (
+        <LoginButtons isAuthenticated={isAuthenticated} smallScreen={false} />
+      )}
+
       <IconButton
         aria-label="App Menu"
         onClick={toggleMenuOpen.on}
@@ -57,6 +97,9 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
         onClose={toggleMenuOpen.off}
         onClick={toggleMenuOpen.off}
       >
+        {smallScreen ? (
+          <LoginButtons isAuthenticated={isAuthenticated} smallScreen />
+        ) : null}
         {isAuthenticated ? (
           <MenuItem to="auth/logout" component={Link}>
             <ListItemIcon>

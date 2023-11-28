@@ -2,14 +2,14 @@ import React, { useCallback, useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { isAxiosError, useLogin } from "@math3d/api";
+import { useLogin } from "@math3d/api";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useAuthStatus } from "@/features/auth";
 import Alert from "@mui/material/Alert";
-import { AxiosError } from "axios";
 import styles from "./styles.module.css";
-import FormDialog from "./components/FormDialog";
+import { handleErrors } from "./util";
+import { BasicDialog } from "./components/BasicDialog";
 
 const schema = yup.object({
   email: yup.string().email().required(),
@@ -24,7 +24,7 @@ const LoginPage: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
+    setError,
   } = useForm({ resolver });
 
   const handleClose = useCallback(() => {
@@ -37,26 +37,24 @@ const LoginPage: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
   return (
-    <FormDialog
+    <BasicDialog
       title="Sign in"
       open
       onClose={handleClose}
-      onSubmit={handleSubmit(async (data) => {
+      onConfirm={handleSubmit(async (data) => {
         try {
           await login.mutateAsync(data, {});
           setIsAuthenticated(true);
           handleClose();
         } catch (err) {
-          if (isAxiosError(err, [400])) return;
-          throw err;
+          handleErrors(data, err, setError);
         }
       })}
-      onReset={reset}
-      submitButtonContent="Sign in"
+      confirmText="Sign in"
       fullWidth
       maxWidth="xs"
     >
-      <div className={styles["form-content"]}>
+      <form className={styles["form-content"]}>
         <TextField
           label="Email"
           error={!!errors.email?.message}
@@ -64,23 +62,17 @@ const LoginPage: React.FC = () => {
           {...register("email")}
         />
         <TextField
-          id="foobar"
           error={!!errors.password?.message}
           helperText={errors.password?.message}
           label="Password"
           type="password"
           {...register("password")}
         />
-        {login.isError ? (
-          <Alert severity="error">
-            {login.error instanceof AxiosError &&
-            login.error.response?.status === 400
-              ? "Email or password is incorrect."
-              : "Something went wrong. Please try again later."}
-          </Alert>
+        {errors.root?.message ? (
+          <Alert severity="error">{errors.root?.message}</Alert>
         ) : null}
-      </div>
-    </FormDialog>
+      </form>
+    </BasicDialog>
   );
 };
 

@@ -4,6 +4,8 @@ html {
   padding: 0;
   height: 100%;
 
+  --color-primary-dark-rgb: 16, 100, 178;
+  --color-primary-dark: rgb(var(--color-primary-dark-rgb));
   --color-primary-rgb: 24, 144, 255;
   --color-primary: rgb(var(--color-primary-rgb));
   --color-primary-light-rgb: 186, 231, 255;

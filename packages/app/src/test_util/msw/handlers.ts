@@ -15,8 +15,22 @@ const hasValidToken = (req: RestRequest) => {
   return !!user;
 };
 
+const BASE_URL: string = import.meta.env.VITE_API_BASE_URL;
+
+export const urls = {
+  scenes: {
+    detail: `${BASE_URL}/v0/scenes/:key/`,
+    list: `${BASE_URL}/v0/scenes/`,
+  },
+  auth: {
+    users: `${BASE_URL}/v0/auth/users/`,
+    tokenLogin: `${BASE_URL}/v0/auth/token/login/`,
+    tokenLogout: `${BASE_URL}/v0/auth/token/logout/`,
+  },
+} as const;
+
 export const handlers = [
-  rest.get("http://localhost:8000/v0/scenes/:key/", (req, res, ctx) => {
+  rest.get(urls.scenes.detail, (req, res, ctx) => {
     const { key } = req.params;
     if (typeof key !== "string") {
       throw new Error("key should be string");
@@ -38,7 +52,7 @@ export const handlers = [
     };
     return res(ctx.json(parsedScene));
   }),
-  rest.post("http://localhost:8000/v0/scenes/", async (req, res, ctx) => {
+  rest.post(urls.scenes.list, async (req, res, ctx) => {
     const { title, items, itemOrder } = await req.json();
     if (typeof title !== "string") {
       throw new Error("title should be string");
@@ -57,55 +71,60 @@ export const handlers = [
     scene.itemOrder = JSON.parse(scene.itemOrder);
     return res(ctx.json(scene));
   }),
-  rest.post(
-    "http://localhost:8000/v0/auth/token/login/",
-    async (req, res, ctx) => {
-      const { email, password } = await req.json();
-      if (typeof email !== "string") {
-        throw new Error("email should be string");
-      }
-      if (typeof password !== "string" /** # pragma: allowlist secret */) {
-        throw new Error("password should be string");
-      }
-      const user = db.user.findFirst({
-        where: { email: { equals: email } },
-      });
-      if (!user) {
-        return res(
-          ctx.status(404),
-          ctx.json({
-            errorMessage: "Not found",
-          }),
-        );
-      }
-      if (user.password !== password) {
-        return res(
-          ctx.status(400),
-          ctx.json({
-            errorMessage: "Invalid password",
-          }),
-        );
-      }
+  rest.post(urls.auth.tokenLogin, async (req, res, ctx) => {
+    const { email, password } = await req.json();
+    if (typeof email !== "string") {
+      throw new Error("email should be string");
+    }
+    if (typeof password !== "string" /** # pragma: allowlist secret */) {
+      throw new Error("password should be string");
+    }
+    const user = db.user.findFirst({
+      where: { email: { equals: email } },
+    });
+    if (!user || user.password !== password) {
       return res(
+        ctx.status(400),
         ctx.json({
-          auth_token: "fake-token",
+          non_field_errors: ["Unable to log in with provided credentials."],
         }),
       );
-    },
-  ),
-  rest.post(
-    "http://localhost:8000/v0/auth/token/logout/",
-    async (req, res, ctx) => {
-      if (!hasValidToken(req)) {
-        return res(
-          ctx.status(401),
-          ctx.json({
-            errorMessage: "Invalid token",
-          }),
-        );
-      }
-      // The real API deletes the token, but that's not important for our tests.
-      return res(ctx.status(204));
-    },
-  ),
+    }
+    return res(
+      ctx.json({
+        auth_token: "fake-token",
+      }),
+    );
+  }),
+  rest.post(urls.auth.tokenLogout, async (req, res, ctx) => {
+    if (!hasValidToken(req)) {
+      return res(
+        ctx.status(401),
+        ctx.json({
+          errorMessage: "Invalid token",
+        }),
+      );
+    }
+    // The real API deletes the token, but that's not important for our tests.
+    return res(ctx.status(204));
+  }),
+  rest.post(urls.auth.users, async (req, res, ctx) => {
+    const { email, password } = await req.json();
+    if (typeof email !== "string") {
+      throw new Error("email should be string");
+    }
+    if (typeof password !== "string" /** # pragma: allowlist secret */) {
+      throw new Error("password should be string");
+    }
+    const user = db.user.create({
+      email,
+      password,
+    });
+    return res(
+      ctx.json({
+        public_nickname: user.public_nickname,
+        email: user.email,
+      }),
+    );
+  }),
 ];

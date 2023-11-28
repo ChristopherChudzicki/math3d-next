@@ -61,7 +61,9 @@ test("Login form displays error if password/email wrong", async () => {
 
   await user.click(submit);
   const alert = within(dialog).getByRole("alert");
-  expect(alert).toHaveTextContent("Email or password is incorrect.");
+  expect(alert).toHaveTextContent(
+    "Unable to log in with provided credentials.",
+  );
 
   // Sign-in link still visible
   expect(getSignInLink()).toBeInTheDocument();

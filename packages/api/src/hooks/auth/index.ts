@@ -1,6 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AuthApi, Configuration } from "../../generated";
-import type { TokenCreateRequest } from "../../generated";
+import type {
+  TokenCreateRequest,
+  UserCreatePasswordRetypeRequest,
+} from "../../generated";
 
 const config = new Configuration({
   apiKey: async () => {
@@ -42,4 +45,11 @@ const useUserMe = () => {
   });
 };
 
-export { useLogin, useLogout, useUserMe, API_TOKEN_KEY };
+const useCreateUser = () => {
+  return useMutation({
+    mutationFn: (data: UserCreatePasswordRetypeRequest) =>
+      authApi.authUsersCreate({ UserCreatePasswordRetypeRequest: data }),
+  });
+};
+
+export { useLogin, useLogout, useUserMe, useCreateUser, API_TOKEN_KEY };
