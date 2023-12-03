@@ -3,6 +3,7 @@ import { AuthApi, Configuration } from "../../generated";
 import type {
   TokenCreateRequest,
   UserCreatePasswordRetypeRequest,
+  ActivationRequest,
 } from "../../generated";
 
 const config = new Configuration({
@@ -52,4 +53,18 @@ const useCreateUser = () => {
   });
 };
 
-export { useLogin, useLogout, useUserMe, useCreateUser, API_TOKEN_KEY };
+const useActivateUser = () => {
+  return useMutation({
+    mutationFn: (data: ActivationRequest) =>
+      authApi.authUsersActivationCreate({ ActivationRequest: data }),
+  });
+};
+
+export {
+  useLogin,
+  useLogout,
+  useUserMe,
+  useCreateUser,
+  useActivateUser,
+  API_TOKEN_KEY,
+};

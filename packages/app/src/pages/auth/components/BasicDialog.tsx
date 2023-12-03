@@ -85,7 +85,7 @@ const BasicDialog: React.FC<BasicDialogProps> = ({
     } finally {
       setConfirming(false);
     }
-  }, [onClose, onConfirm]);
+  }, [onConfirm]);
   return (
     <Dialog
       className={className}

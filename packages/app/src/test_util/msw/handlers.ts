@@ -26,6 +26,7 @@ export const urls = {
     users: `${BASE_URL}/v0/auth/users/`,
     tokenLogin: `${BASE_URL}/v0/auth/token/login/`,
     tokenLogout: `${BASE_URL}/v0/auth/token/logout/`,
+    activation: `${BASE_URL}/v0/auth/users/activation/`,
   },
 } as const;
 
@@ -126,5 +127,15 @@ export const handlers = [
         email: user.email,
       }),
     );
+  }),
+  rest.post(urls.auth.activation, async (req, res, ctx) => {
+    const { uid, token } = await req.json();
+    if (typeof uid !== "string") {
+      throw new Error("uid should be string");
+    }
+    if (typeof token !== "string") {
+      throw new Error("token should be string");
+    }
+    return res(ctx.status(204));
   }),
 ];

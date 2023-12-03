@@ -145,8 +145,8 @@ DJOSER = {
         "current_user": "authentication.serializers.CustomUserSerializer",
     },
     "_CUSTOM": {
-        "ACTIVATION_URL": "http://localhost:3000/account/activate?uid={uid}&token={token}",
-        "PASSWORD_RESET_CONFIRM_URL": "http://localhost:3000/account/password-reset/confirm/?uid={uid}&token={token}",
+        "ACTIVATION_URL": "http://localhost:3000/auth/activate-account?uid={uid}&token={token}",
+        "PASSWORD_RESET_CONFIRM_URL": "http://localhost:3000/auth/password-reset/confirm/?uid={uid}&token={token}",  # pragma: allowlist secret
     },
 }
 

@@ -12,6 +12,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import LogoutPage from "./pages/auth/LogoutPage";
 import { AuthStatusProvider } from "./features/auth";
 import RegistrationPage from "./pages/auth/RegistrationPage";
+import AccountActivationPage from "./pages/auth/ActivationPage";
 
 interface AppProps {
   store: AppStore;
@@ -37,6 +38,10 @@ const AppRoutes: React.FC<AppProps> = ({ store, queryClient, theme }) => (
               <Route path="auth/login" element={<LoginPage />} />
               <Route path="auth/logout" element={<LogoutPage />} />
               <Route path="auth/register" element={<RegistrationPage />} />
+              <Route
+                path="auth/activate-account"
+                element={<AccountActivationPage />}
+              />
             </Route>
           </Routes>
         </ThemeProvider>

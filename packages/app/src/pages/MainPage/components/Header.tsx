@@ -100,14 +100,6 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
         {smallScreen ? (
           <LoginButtons isAuthenticated={isAuthenticated} smallScreen />
         ) : null}
-        {isAuthenticated ? (
-          <MenuItem to="auth/logout" component={Link}>
-            <ListItemIcon>
-              <AccountCircleOutlinedIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Sign out</ListItemText>
-          </MenuItem>
-        ) : null}
         <MenuItem onClick={props.onClickExamples}>
           <ListItemIcon>
             <LightbulbOutlined fontSize="small" />
@@ -120,6 +112,14 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
           </ListItemIcon>
           <ListItemText>Contact</ListItemText>
         </MenuItem>
+        {isAuthenticated ? (
+          <MenuItem to="auth/logout" component={Link}>
+            <ListItemIcon>
+              <AccountCircleOutlinedIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Sign out</ListItemText>
+          </MenuItem>
+        ) : null}
       </Menu>
     </nav>
   );
