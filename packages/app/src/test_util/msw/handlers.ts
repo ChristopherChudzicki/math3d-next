@@ -27,6 +27,8 @@ export const urls = {
     tokenLogin: `${BASE_URL}/v0/auth/token/login/`,
     tokenLogout: `${BASE_URL}/v0/auth/token/logout/`,
     activation: `${BASE_URL}/v0/auth/users/activation/`,
+    resetPassword: `${BASE_URL}/v0/auth/users/reset_password/`,
+    resetPasswordConfirm: `${BASE_URL}/v0/auth/users/reset_password_confirm/`,
   },
 } as const;
 
@@ -136,6 +138,12 @@ export const handlers = [
     if (typeof token !== "string") {
       throw new Error("token should be string");
     }
+    return res(ctx.status(204));
+  }),
+  rest.post(urls.auth.resetPassword, async (req, res, ctx) => {
+    return res(ctx.status(204));
+  }),
+  rest.post(urls.auth.resetPasswordConfirm, async (req, res, ctx) => {
     return res(ctx.status(204));
   }),
 ];

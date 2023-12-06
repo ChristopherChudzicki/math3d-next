@@ -146,7 +146,7 @@ DJOSER = {
     },
     "_CUSTOM": {
         "ACTIVATION_URL": "http://localhost:3000/auth/activate-account?uid={uid}&token={token}",
-        "PASSWORD_RESET_CONFIRM_URL": "http://localhost:3000/auth/password-reset/confirm/?uid={uid}&token={token}",  # pragma: allowlist secret
+        "PASSWORD_RESET_CONFIRM_URL": "http://localhost:3000/auth/reset-password/confirm/?uid={uid}&token={token}",  # pragma: allowlist secret
     },
 }
 

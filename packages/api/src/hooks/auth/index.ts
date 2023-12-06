@@ -1,9 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { AuthApi, Configuration } from "../../generated";
+import { AuthApi, Configuration, SendEmailResetRequest } from "../../generated";
 import type {
   TokenCreateRequest,
   UserCreatePasswordRetypeRequest,
   ActivationRequest,
+  PasswordResetConfirmRetypeRequest,
 } from "../../generated";
 
 const config = new Configuration({
@@ -15,6 +16,8 @@ const config = new Configuration({
 });
 
 const authApi = new AuthApi(config);
+
+window.authApi = authApi;
 
 const API_TOKEN_KEY = "apiToken";
 
@@ -60,11 +63,29 @@ const useActivateUser = () => {
   });
 };
 
+const useResetPassword = () => {
+  return useMutation({
+    mutationFn: (data: SendEmailResetRequest) =>
+      authApi.authUsersResetPasswordCreate({ SendEmailResetRequest: data }),
+  });
+};
+
+const useResetPasswordConfirm = () => {
+  return useMutation({
+    mutationFn: (data: PasswordResetConfirmRetypeRequest) =>
+      authApi.authUsersResetPasswordConfirmCreate({
+        PasswordResetConfirmRetypeRequest: data,
+      }),
+  });
+};
+
 export {
   useLogin,
   useLogout,
   useUserMe,
   useCreateUser,
   useActivateUser,
+  useResetPassword,
+  useResetPasswordConfirm,
   API_TOKEN_KEY,
 };
