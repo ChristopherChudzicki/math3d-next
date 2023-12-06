@@ -386,44 +386,6 @@ export interface SetPasswordRetypeRequest {
 /**
  *
  * @export
- * @interface SetUsername
- */
-export interface SetUsername {
-  /**
-   *
-   * @type {string}
-   * @memberof SetUsername
-   */
-  current_password: string;
-  /**
-   *
-   * @type {string}
-   * @memberof SetUsername
-   */
-  new_email: string;
-}
-/**
- *
- * @export
- * @interface SetUsernameRequest
- */
-export interface SetUsernameRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof SetUsernameRequest
-   */
-  current_password: string;
-  /**
-   *
-   * @type {string}
-   * @memberof SetUsernameRequest
-   */
-  new_email: string;
-}
-/**
- *
- * @export
  * @interface TokenCreate
  */
 export interface TokenCreate {
@@ -487,37 +449,6 @@ export interface User {
 /**
  *
  * @export
- * @interface UserCreatePasswordRetype
- */
-export interface UserCreatePasswordRetype {
-  /**
-   *
-   * @type {string}
-   * @memberof UserCreatePasswordRetype
-   */
-  public_nickname: string;
-  /**
-   *
-   * @type {string}
-   * @memberof UserCreatePasswordRetype
-   */
-  email: string;
-  /**
-   *
-   * @type {number}
-   * @memberof UserCreatePasswordRetype
-   */
-  id: number;
-  /**
-   *
-   * @type {string}
-   * @memberof UserCreatePasswordRetype
-   */
-  re_password: string;
-}
-/**
- *
- * @export
  * @interface UserCreatePasswordRetypeRequest
  */
 export interface UserCreatePasswordRetypeRequest {
@@ -558,32 +489,6 @@ export interface UserRequest {
    * @memberof UserRequest
    */
   public_nickname: string;
-}
-/**
- *
- * @export
- * @interface UsernameResetConfirm
- */
-export interface UsernameResetConfirm {
-  /**
-   *
-   * @type {string}
-   * @memberof UsernameResetConfirm
-   */
-  new_email: string;
-}
-/**
- *
- * @export
- * @interface UsernameResetConfirmRequest
- */
-export interface UsernameResetConfirmRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof UsernameResetConfirmRequest
-   */
-  new_email: string;
 }
 
 /**
@@ -694,7 +599,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {ActivationRequest} ActivationRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -754,7 +659,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {UserCreatePasswordRetypeRequest} UserCreatePasswordRetypeRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -814,7 +719,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {number} id A unique integer value identifying this User.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -866,7 +771,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {*} [options] Override http request option.
@@ -923,7 +828,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -968,7 +873,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {PatchedUserRequest} [PatchedUserRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1022,7 +927,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1067,7 +972,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {UserRequest} UserRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1123,7 +1028,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {number} id A unique integer value identifying this User.
      * @param {PatchedUserRequest} [PatchedUserRequest]
      * @param {*} [options] Override http request option.
@@ -1184,7 +1089,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {SendEmailResetRequest} SendEmailResetRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1244,127 +1149,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
-     * @param {UsernameResetConfirmRequest} UsernameResetConfirmRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersResetEmailConfirmCreate: async (
-      UsernameResetConfirmRequest: UsernameResetConfirmRequest,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'UsernameResetConfirmRequest' is not null or undefined
-      assertParamExists(
-        "authUsersResetEmailConfirmCreate",
-        "UsernameResetConfirmRequest",
-        UsernameResetConfirmRequest,
-      );
-      const localVarPath = `/v0/auth/users/reset_email_confirm/`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      localVarHeaderParameter["Content-Type"] = "application/json";
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        UsernameResetConfirmRequest,
-        localVarRequestOptions,
-        configuration,
-      );
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     *
-     * @param {SendEmailResetRequest} SendEmailResetRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersResetEmailCreate: async (
-      SendEmailResetRequest: SendEmailResetRequest,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'SendEmailResetRequest' is not null or undefined
-      assertParamExists(
-        "authUsersResetEmailCreate",
-        "SendEmailResetRequest",
-        SendEmailResetRequest,
-      );
-      const localVarPath = `/v0/auth/users/reset_email/`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      localVarHeaderParameter["Content-Type"] = "application/json";
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        SendEmailResetRequest,
-        localVarRequestOptions,
-        configuration,
-      );
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {PasswordResetConfirmRetypeRequest} PasswordResetConfirmRetypeRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1424,7 +1209,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {SendEmailResetRequest} SendEmailResetRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1484,7 +1269,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {number} id A unique integer value identifying this User.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1536,67 +1321,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
-     * @param {SetUsernameRequest} SetUsernameRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersSetEmailCreate: async (
-      SetUsernameRequest: SetUsernameRequest,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'SetUsernameRequest' is not null or undefined
-      assertParamExists(
-        "authUsersSetEmailCreate",
-        "SetUsernameRequest",
-        SetUsernameRequest,
-      );
-      const localVarPath = `/v0/auth/users/set_email/`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      localVarHeaderParameter["Content-Type"] = "application/json";
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        SetUsernameRequest,
-        localVarRequestOptions,
-        configuration,
-      );
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {SetPasswordRetypeRequest} SetPasswordRetypeRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1656,7 +1381,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {number} id A unique integer value identifying this User.
      * @param {UserRequest} UserRequest
      * @param {*} [options] Override http request option.
@@ -1780,7 +1505,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {ActivationRequest} ActivationRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1808,7 +1533,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {UserCreatePasswordRetypeRequest} UserCreatePasswordRetypeRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1817,10 +1542,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
       UserCreatePasswordRetypeRequest: UserCreatePasswordRetypeRequest,
       options?: AxiosRequestConfig,
     ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string,
-      ) => AxiosPromise<UserCreatePasswordRetype>
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.authUsersCreate(
         UserCreatePasswordRetypeRequest,
@@ -1838,7 +1560,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {number} id A unique integer value identifying this User.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1863,7 +1585,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {*} [options] Override http request option.
@@ -1896,7 +1618,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1919,7 +1641,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {PatchedUserRequest} [PatchedUserRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1947,7 +1669,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1970,7 +1692,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {UserRequest} UserRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1995,7 +1717,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {number} id A unique integer value identifying this User.
      * @param {PatchedUserRequest} [PatchedUserRequest]
      * @param {*} [options] Override http request option.
@@ -2026,7 +1748,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {SendEmailResetRequest} SendEmailResetRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2055,67 +1777,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
-     * @param {UsernameResetConfirmRequest} UsernameResetConfirmRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersResetEmailConfirmCreate(
-      UsernameResetConfirmRequest: UsernameResetConfirmRequest,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string,
-      ) => AxiosPromise<UsernameResetConfirm>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersResetEmailConfirmCreate(
-          UsernameResetConfirmRequest,
-          options,
-        );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersResetEmailConfirmCreate"]?.[index]
-          ?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     *
-     * @param {SendEmailResetRequest} SendEmailResetRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersResetEmailCreate(
-      SendEmailResetRequest: SendEmailResetRequest,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<SendEmailReset>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersResetEmailCreate(
-          SendEmailResetRequest,
-          options,
-        );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersResetEmailCreate"]?.[index]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {PasswordResetConfirmRetypeRequest} PasswordResetConfirmRetypeRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2148,7 +1810,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {SendEmailResetRequest} SendEmailResetRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2177,7 +1839,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {number} id A unique integer value identifying this User.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2202,35 +1864,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
-     * @param {SetUsernameRequest} SetUsernameRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersSetEmailCreate(
-      SetUsernameRequest: SetUsernameRequest,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<SetUsername>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersSetEmailCreate(
-          SetUsernameRequest,
-          options,
-        );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersSetEmailCreate"]?.[index]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {SetPasswordRetypeRequest} SetPasswordRetypeRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2261,7 +1895,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {number} id A unique integer value identifying this User.
      * @param {UserRequest} UserRequest
      * @param {*} [options] Override http request option.
@@ -2329,7 +1963,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {AuthApiAuthUsersActivationCreateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2343,7 +1977,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {AuthApiAuthUsersCreateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2351,7 +1985,7 @@ export const AuthApiFactory = function (
     authUsersCreate(
       requestParameters: AuthApiAuthUsersCreateRequest,
       options?: AxiosRequestConfig,
-    ): AxiosPromise<UserCreatePasswordRetype> {
+    ): AxiosPromise<User> {
       return localVarFp
         .authUsersCreate(
           requestParameters.UserCreatePasswordRetypeRequest,
@@ -2360,7 +1994,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {AuthApiAuthUsersDestroyRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2374,7 +2008,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {AuthApiAuthUsersListRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2392,7 +2026,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -2402,7 +2036,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {AuthApiAuthUsersMePartialUpdateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2416,7 +2050,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -2426,7 +2060,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {AuthApiAuthUsersMeUpdateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2440,7 +2074,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {AuthApiAuthUsersPartialUpdateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2458,7 +2092,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {AuthApiAuthUsersResendActivationCreateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2475,41 +2109,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
-     * @param {AuthApiAuthUsersResetEmailConfirmCreateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersResetEmailConfirmCreate(
-      requestParameters: AuthApiAuthUsersResetEmailConfirmCreateRequest,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<UsernameResetConfirm> {
-      return localVarFp
-        .authUsersResetEmailConfirmCreate(
-          requestParameters.UsernameResetConfirmRequest,
-          options,
-        )
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     *
-     * @param {AuthApiAuthUsersResetEmailCreateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersResetEmailCreate(
-      requestParameters: AuthApiAuthUsersResetEmailCreateRequest,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<SendEmailReset> {
-      return localVarFp
-        .authUsersResetEmailCreate(
-          requestParameters.SendEmailResetRequest,
-          options,
-        )
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {AuthApiAuthUsersResetPasswordConfirmCreateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2526,7 +2126,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {AuthApiAuthUsersResetPasswordCreateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2543,7 +2143,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {AuthApiAuthUsersRetrieveRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2557,21 +2157,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
-     * @param {AuthApiAuthUsersSetEmailCreateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersSetEmailCreate(
-      requestParameters: AuthApiAuthUsersSetEmailCreateRequest,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<SetUsername> {
-      return localVarFp
-        .authUsersSetEmailCreate(requestParameters.SetUsernameRequest, options)
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {AuthApiAuthUsersSetPasswordCreateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2588,7 +2174,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     *
+     * A version of Djoser\'s UserViewSet with some actions removed.
      * @param {AuthApiAuthUsersUpdateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2749,34 +2335,6 @@ export interface AuthApiAuthUsersResendActivationCreateRequest {
 }
 
 /**
- * Request parameters for authUsersResetEmailConfirmCreate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersResetEmailConfirmCreateRequest
- */
-export interface AuthApiAuthUsersResetEmailConfirmCreateRequest {
-  /**
-   *
-   * @type {UsernameResetConfirmRequest}
-   * @memberof AuthApiAuthUsersResetEmailConfirmCreate
-   */
-  readonly UsernameResetConfirmRequest: UsernameResetConfirmRequest;
-}
-
-/**
- * Request parameters for authUsersResetEmailCreate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersResetEmailCreateRequest
- */
-export interface AuthApiAuthUsersResetEmailCreateRequest {
-  /**
-   *
-   * @type {SendEmailResetRequest}
-   * @memberof AuthApiAuthUsersResetEmailCreate
-   */
-  readonly SendEmailResetRequest: SendEmailResetRequest;
-}
-
-/**
  * Request parameters for authUsersResetPasswordConfirmCreate operation in AuthApi.
  * @export
  * @interface AuthApiAuthUsersResetPasswordConfirmCreateRequest
@@ -2816,20 +2374,6 @@ export interface AuthApiAuthUsersRetrieveRequest {
    * @memberof AuthApiAuthUsersRetrieve
    */
   readonly id: number;
-}
-
-/**
- * Request parameters for authUsersSetEmailCreate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersSetEmailCreateRequest
- */
-export interface AuthApiAuthUsersSetEmailCreateRequest {
-  /**
-   *
-   * @type {SetUsernameRequest}
-   * @memberof AuthApiAuthUsersSetEmailCreate
-   */
-  readonly SetUsernameRequest: SetUsernameRequest;
 }
 
 /**
@@ -2903,7 +2447,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {AuthApiAuthUsersActivationCreateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -2919,7 +2463,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {AuthApiAuthUsersCreateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -2938,7 +2482,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {AuthApiAuthUsersDestroyRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -2954,7 +2498,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {AuthApiAuthUsersListRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -2970,7 +2514,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof AuthApi
@@ -2982,7 +2526,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {AuthApiAuthUsersMePartialUpdateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -2998,7 +2542,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof AuthApi
@@ -3010,7 +2554,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {AuthApiAuthUsersMeUpdateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -3026,7 +2570,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {AuthApiAuthUsersPartialUpdateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -3046,7 +2590,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {AuthApiAuthUsersResendActivationCreateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -3065,45 +2609,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
-   * @param {AuthApiAuthUsersResetEmailConfirmCreateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersResetEmailConfirmCreate(
-    requestParameters: AuthApiAuthUsersResetEmailConfirmCreateRequest,
-    options?: AxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersResetEmailConfirmCreate(
-        requestParameters.UsernameResetConfirmRequest,
-        options,
-      )
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   *
-   * @param {AuthApiAuthUsersResetEmailCreateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersResetEmailCreate(
-    requestParameters: AuthApiAuthUsersResetEmailCreateRequest,
-    options?: AxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersResetEmailCreate(
-        requestParameters.SendEmailResetRequest,
-        options,
-      )
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {AuthApiAuthUsersResetPasswordConfirmCreateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -3122,7 +2628,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {AuthApiAuthUsersResetPasswordCreateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -3141,7 +2647,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {AuthApiAuthUsersRetrieveRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -3157,23 +2663,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
-   * @param {AuthApiAuthUsersSetEmailCreateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersSetEmailCreate(
-    requestParameters: AuthApiAuthUsersSetEmailCreateRequest,
-    options?: AxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersSetEmailCreate(requestParameters.SetUsernameRequest, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {AuthApiAuthUsersSetPasswordCreateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -3192,7 +2682,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   *
+   * A version of Djoser\'s UserViewSet with some actions removed.
    * @param {AuthApiAuthUsersUpdateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}

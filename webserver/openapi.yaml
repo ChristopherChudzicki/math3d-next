@@ -45,6 +45,7 @@ paths:
   /v0/auth/users/:
     get:
       operationId: auth_users_list
+      description: A version of Djoser's UserViewSet with some actions removed.
       parameters:
       - name: limit
         required: false
@@ -71,6 +72,7 @@ paths:
           description: ''
     post:
       operationId: auth_users_create
+      description: A version of Djoser's UserViewSet with some actions removed.
       tags:
       - auth
       requestBody:
@@ -93,11 +95,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserCreatePasswordRetype'
+                $ref: '#/components/schemas/User'
           description: ''
   /v0/auth/users/{id}/:
     get:
       operationId: auth_users_retrieve
+      description: A version of Djoser's UserViewSet with some actions removed.
       parameters:
       - in: path
         name: id
@@ -118,6 +121,7 @@ paths:
           description: ''
     put:
       operationId: auth_users_update
+      description: A version of Djoser's UserViewSet with some actions removed.
       parameters:
       - in: path
         name: id
@@ -150,6 +154,7 @@ paths:
           description: ''
     patch:
       operationId: auth_users_partial_update
+      description: A version of Djoser's UserViewSet with some actions removed.
       parameters:
       - in: path
         name: id
@@ -181,6 +186,7 @@ paths:
           description: ''
     delete:
       operationId: auth_users_destroy
+      description: A version of Djoser's UserViewSet with some actions removed.
       parameters:
       - in: path
         name: id
@@ -198,6 +204,7 @@ paths:
   /v0/auth/users/activation/:
     post:
       operationId: auth_users_activation_create
+      description: A version of Djoser's UserViewSet with some actions removed.
       tags:
       - auth
       requestBody:
@@ -225,6 +232,7 @@ paths:
   /v0/auth/users/me/:
     get:
       operationId: auth_users_me_retrieve
+      description: A version of Djoser's UserViewSet with some actions removed.
       tags:
       - auth
       security:
@@ -238,6 +246,7 @@ paths:
           description: ''
     put:
       operationId: auth_users_me_update
+      description: A version of Djoser's UserViewSet with some actions removed.
       tags:
       - auth
       requestBody:
@@ -263,6 +272,7 @@ paths:
           description: ''
     patch:
       operationId: auth_users_me_partial_update
+      description: A version of Djoser's UserViewSet with some actions removed.
       tags:
       - auth
       requestBody:
@@ -287,6 +297,7 @@ paths:
           description: ''
     delete:
       operationId: auth_users_me_destroy
+      description: A version of Djoser's UserViewSet with some actions removed.
       tags:
       - auth
       security:
@@ -297,6 +308,7 @@ paths:
   /v0/auth/users/resend_activation/:
     post:
       operationId: auth_users_resend_activation_create
+      description: A version of Djoser's UserViewSet with some actions removed.
       tags:
       - auth
       requestBody:
@@ -321,61 +333,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/SendEmailReset'
           description: ''
-  /v0/auth/users/reset_email/:
-    post:
-      operationId: auth_users_reset_email_create
-      tags:
-      - auth
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SendEmailResetRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/SendEmailResetRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/SendEmailResetRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SendEmailReset'
-          description: ''
-  /v0/auth/users/reset_email_confirm/:
-    post:
-      operationId: auth_users_reset_email_confirm_create
-      tags:
-      - auth
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UsernameResetConfirmRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/UsernameResetConfirmRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/UsernameResetConfirmRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UsernameResetConfirm'
-          description: ''
   /v0/auth/users/reset_password/:
     post:
       operationId: auth_users_reset_password_create
+      description: A version of Djoser's UserViewSet with some actions removed.
       tags:
       - auth
       requestBody:
@@ -403,6 +364,7 @@ paths:
   /v0/auth/users/reset_password_confirm/:
     post:
       operationId: auth_users_reset_password_confirm_create
+      description: A version of Djoser's UserViewSet with some actions removed.
       tags:
       - auth
       requestBody:
@@ -427,35 +389,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordResetConfirmRetype'
           description: ''
-  /v0/auth/users/set_email/:
-    post:
-      operationId: auth_users_set_email_create
-      tags:
-      - auth
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SetUsernameRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/SetUsernameRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/SetUsernameRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SetUsername'
-          description: ''
   /v0/auth/users/set_password/:
     post:
       operationId: auth_users_set_password_create
+      description: A version of Djoser's UserViewSet with some actions removed.
       tags:
       - auth
       requestBody:
@@ -814,34 +751,6 @@ components:
       - current_password
       - new_password
       - re_new_password
-    SetUsername:
-      type: object
-      properties:
-        current_password:
-          type: string
-        new_email:
-          type: string
-          format: email
-          title: Email address
-          maxLength: 254
-      required:
-      - current_password
-      - new_email
-    SetUsernameRequest:
-      type: object
-      properties:
-        current_password:
-          type: string
-          minLength: 1
-        new_email:
-          type: string
-          format: email
-          minLength: 1
-          title: Email address
-          maxLength: 254
-      required:
-      - current_password
-      - new_email
     TokenCreate:
       type: object
       properties:
@@ -876,27 +785,6 @@ components:
       - email
       - id
       - public_nickname
-    UserCreatePasswordRetype:
-      type: object
-      properties:
-        public_nickname:
-          type: string
-          maxLength: 64
-        email:
-          type: string
-          format: email
-          title: Email address
-          maxLength: 254
-        id:
-          type: integer
-          readOnly: true
-        re_password:
-          type: string
-      required:
-      - email
-      - id
-      - public_nickname
-      - re_password
     UserCreatePasswordRetypeRequest:
       type: object
       properties:
@@ -931,27 +819,6 @@ components:
           maxLength: 64
       required:
       - public_nickname
-    UsernameResetConfirm:
-      type: object
-      properties:
-        new_email:
-          type: string
-          format: email
-          title: Email address
-          maxLength: 254
-      required:
-      - new_email
-    UsernameResetConfirmRequest:
-      type: object
-      properties:
-        new_email:
-          type: string
-          format: email
-          minLength: 1
-          title: Email address
-          maxLength: 254
-      required:
-      - new_email
   securitySchemes:
     tokenAuth:
       type: apiKey
