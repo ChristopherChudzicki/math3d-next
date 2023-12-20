@@ -1,6 +1,11 @@
 from djoser.views import UserViewSet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from authentication.serializers import CustomUserSerializer
+from authentication.email import PasswordResetInactiveEmail
+from rest_framework.decorators import action
+from djoser.compat import get_user_email
+from rest_framework.response import Response
+from rest_framework import status
 
 
 @extend_schema_view(
@@ -19,3 +24,15 @@ class CustomUserViewSet(UserViewSet):
 
     def reset_username_confirm():
         pass
+
+    @action(["post"], detail=False)
+    def reset_password(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.get_user(is_active=False)
+        if not user.is_active:
+            context = {"user": user}
+            to = [get_user_email(user)]
+            PasswordResetInactiveEmail(self.request, context).send(to)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return super().reset_password(request, *args, **kwargs)
