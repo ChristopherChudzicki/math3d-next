@@ -12,11 +12,19 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 import os
 from pathlib import Path
+import logging
 
 import dj_database_url
 import environ
 
-env = environ.Env(CORS_ALLOWED_ORIGINS=(list, []))
+
+logger = logging.getLogger(__name__)
+
+env = environ.Env(
+    CORS_ALLOWED_ORIGINS=(list, []),
+    AWS_SES_ACCESS_KEY_ID=(str, ""),
+    AWS_SES_SECRET_ACCESS_KEY=(str, ""),
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -190,7 +198,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "authentication.CustomUser"
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+AWS_SES_ACCESS_KEY_ID = env("AWS_SES_ACCESS_KEY_ID")
+AWS_SES_SECRET_ACCESS_KEY = env("AWS_SES_SECRET_ACCESS_KEY")
+if AWS_SES_ACCESS_KEY_ID and AWS_SES_SECRET_ACCESS_KEY:
+    EMAIL_BACKEND = "django_ses.SESBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    logger.warning(f"Email backend: {EMAIL_BACKEND}")
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
