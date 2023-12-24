@@ -24,7 +24,9 @@ const setup = async (initialValue: string) => {
   const { store } = await renderTestApp(`/${scene.key}`);
 
   const mathScope = store.getState().mathItems.mathScope();
-  await user.click(await screen.findByLabelText("Show Settings"));
+  await user.click(await screen.findByLabelText("Show Settings"), {
+    pointerEventsCheck: 0,
+  });
   const settingsTitle = await screen.findByText("Settings", { exact: false });
   // eslint-disable-next-line testing-library/no-node-access
   const settings = settingsTitle.closest("section");
@@ -43,9 +45,9 @@ const setup = async (initialValue: string) => {
     assertInstanceOf(toggle, HTMLInputElement);
     return toggle;
   };
-  const findReset = async (): Promise<HTMLButtonElement> => {
+  const getReset = (): HTMLButtonElement => {
     const label = "Reset";
-    const toggle = await within(visibleControl).findByText(label);
+    const toggle = within(visibleControl).getByText(label);
     assertInstanceOf(toggle, HTMLButtonElement);
     return toggle;
   };
@@ -77,7 +79,7 @@ const setup = async (initialValue: string) => {
     mathScope,
     getValue,
     findToggle,
-    findReset,
+    getReset,
     findUseExpr,
     queryUseExpr,
     findExpr,
@@ -126,22 +128,22 @@ describe("When the switch is initially enabled", () => {
 });
 
 test('Clicking "Use Expression" shows MathField and Reset', async () => {
-  const { findExpr, findReset, findUseExpr } = await setup("false");
+  const { findExpr, getReset, findUseExpr } = await setup("false");
 
-  await expect(findReset).rejects.toBeTruthy();
+  expect(screen.queryByText("Reset")).toBe(null);
   await user.click(await findUseExpr(), { pointerEventsCheck: 0 });
-  expect(await findReset()).toHaveTextContent("Reset");
+  expect(getReset()).toHaveTextContent("Reset");
 
-  await findReset();
+  getReset();
   await findExpr();
   await expect(findUseExpr).rejects.toBeTruthy();
 });
 
 test('Shows "Reset" button when switch is computed', async () => {
-  const { queryReset, queryUseExpr, findExpr, findReset, findUseExpr } =
+  const { queryReset, queryUseExpr, findExpr, getReset, findUseExpr } =
     await setup("!false");
   const expr = await findExpr();
-  const reset = await findReset();
+  const reset = getReset();
 
   expect(queryUseExpr()).toBe(null);
   await user.click(reset, { pointerEventsCheck: 0 });
@@ -154,9 +156,8 @@ test('Shows "Reset" button when switch is computed', async () => {
 });
 
 test("Clicking reset resets widget", async () => {
-  const { findReset, findToggle } = await setup("true || false");
+  const { getReset, findToggle } = await setup("true || false");
 
-  await user.click(await findReset(), { pointerEventsCheck: 0 });
-
+  await user.click(await getReset(), { pointerEventsCheck: 0 });
   expect(await findToggle()).toBeEnabled();
 });
