@@ -24,6 +24,7 @@ env = environ.Env(
     CORS_ALLOWED_ORIGINS=(list, []),
     AWS_SES_ACCESS_KEY_ID=(str, ""),
     AWS_SES_SECRET_ACCESS_KEY=(str, ""),
+    DEFAULT_FROM_EMAIL=(str, ""),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -205,7 +206,7 @@ if AWS_SES_ACCESS_KEY_ID and AWS_SES_SECRET_ACCESS_KEY:
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     logger.warning(f"Email backend: {EMAIL_BACKEND}")
-
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/

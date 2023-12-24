@@ -111,7 +111,6 @@ test.each([
   const token = faker.datatype.uuid();
   const uid = faker.datatype.string(2);
   await renderTestApp(`/auth/reset-password/confirm?uid=${uid}&token=${token}`);
-
   mockResponseOnce({
     status: 400,
     url: urls.auth.resetPasswordConfirm,
@@ -119,7 +118,7 @@ test.each([
     data: errData,
   });
 
-  const controls = await submitForm({
+  await submitForm({
     password: "Password1234", // pragma: allowlist secret
     rePassword: "Password1234", // pragma: allowlist secret
   });

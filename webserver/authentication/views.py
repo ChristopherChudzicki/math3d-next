@@ -16,13 +16,13 @@ class CustomUserViewSet(UserViewSet):
     A version of Djoser's UserViewSet with some actions removed.
     """
 
-    def set_username():
+    def set_username(self):
         pass
 
-    def reset_username():
+    def reset_username(self):
         pass
 
-    def reset_username_confirm():
+    def reset_username_confirm(self):
         pass
 
     @action(["post"], detail=False)
@@ -30,7 +30,7 @@ class CustomUserViewSet(UserViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.get_user(is_active=False)
-        if not user.is_active:
+        if user and not user.is_active:
             context = {"user": user}
             to = [get_user_email(user)]
             PasswordResetInactiveEmail(self.request, context).send(to)

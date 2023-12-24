@@ -54,8 +54,9 @@ def test_create_and_activate_user():
         "email": email,
         "password": password,
         "re_password": password,
+        "public_nickname": faker.name(),
     }
-    creation_request = response = client.post(creation_url, creation_request)
+    response = client.post(creation_url, creation_request)
 
     user_id = response.data["id"]
 
@@ -219,19 +220,3 @@ def test_cannot_change_email_via_users_me():
         "email": user.email,
         "public_nickname": "new-nickname",
     }
-
-
-# This should be limited to admin users
-@pytest.mark.django_db
-@pytest.mark.parametrize("is_staff", [True, False])
-def test_cannot_change_email_via_set_username(is_staff):
-    client = APIClient()
-    user = CustomUserFactory.create(is_active=True, is_staff=is_staff)
-    url = reverse("customuser-set-username")
-    client.force_authenticate(user)
-    request = {
-        "new_email": "new-email@foo.com",
-        "current_password": "testpassword",
-    }
-    response = client.post(url, request)
-    assert response.status_code == 204 if is_staff else 403
