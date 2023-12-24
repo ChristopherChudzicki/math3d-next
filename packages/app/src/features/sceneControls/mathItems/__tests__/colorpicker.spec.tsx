@@ -42,7 +42,8 @@ const setup = async <R extends MIT>(
 
   const mathScope = store.getState().mathItems.mathScope();
   const findButton = () => screen.findByTitle("Color and Visibility");
-  const findDialog = () => screen.findByRole("dialog");
+  const getButton = () =>
+    screen.getByRole("button", { name: "Color and Visibility" });
   const findTextInput = () => screen.findByTitle("Custom Color Input");
   const getAllSwatches = () => {
     const dialog = screen.getByRole("dialog");
@@ -57,7 +58,7 @@ const setup = async <R extends MIT>(
   return {
     getItem,
     findButton,
-    findDialog,
+    getButton,
     findTextInput,
     getAllSwatches,
     getCalculatedProp,
@@ -74,12 +75,13 @@ test("short clicks on indicator toggle visibility", async () => {
 });
 
 test("long press opens color picker dialog", async () => {
-  const { findButton, findDialog, getCalculatedProp, getAllSwatches } =
-    await setup(MIT.Point);
+  const { findButton, getCalculatedProp, getAllSwatches } = await setup(
+    MIT.Point,
+  );
   expect(getCalculatedProp("visible")).toBe(true);
-  await expect(findDialog).rejects.toBeDefined();
+  expect(screen.queryByRole("dialog")).toBe(null);
   await longClick(await findButton(), 500);
-  expect(await findDialog()).toBeDefined();
+  expect(screen.getByRole("dialog")).toBeDefined();
   // Still visible; long-press does not trigger normal click handler
   expect(getCalculatedProp("visible")).toBe(true);
   const swatches = await getAllSwatches();
@@ -96,7 +98,7 @@ test("clicking a swatch sets item to that color", async () => {
 });
 
 test("Setting colorExpr for surfaces", async () => {
-  const { findButton, getItem } = await setup(MIT.ParametricSurface, {
+  const { getButton, getItem } = await setup(MIT.ParametricSurface, {
     colorExpr: {
       type: "function-assignment",
       name: "_f",
@@ -127,8 +129,10 @@ test("Setting colorExpr for surfaces", async () => {
       ],
     },
   });
-  await longClick(await findButton(), 1000);
+  await longClick(getButton(), 500);
+
   const dialog = await screen.findByRole("dialog");
+
   await user.click(within(dialog).getByRole("tab", { name: "Color Map" }));
 
   within(dialog).getByText("f(X, Y, Z, a, b) =");
