@@ -11,7 +11,7 @@
     "eslint": "^8.54.0",
     "js-yaml": "^4.1.0",
     "mathjs": "11.9.1",
-    "vitest": "^0.34.6"
+    "vitest": "^1.1.0"
   },
   "scripts": {
     "test": "vitest --run",
