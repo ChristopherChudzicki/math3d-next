@@ -14,6 +14,4 @@ const theme = createTheme({
   },
 });
 
-window.theme = theme;
-
 export { theme };
