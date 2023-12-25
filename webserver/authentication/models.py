@@ -14,9 +14,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(default=timezone.now)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ["public_nickname"]
 
     objects: CustomUserManager = CustomUserManager()
 
     def __str__(self):
         return self.email
+
+    class Meta:
+        verbose_name = "User"

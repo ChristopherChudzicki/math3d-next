@@ -1,0 +1,16 @@
+.form-content {
+  display: grid;
+  grid-template-columns: auto;
+  row-gap: 16px;
+}
+
+.email-address {
+  color: var(--color-primary-dark);
+  font-family: monospace;
+}
+
+.activation-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

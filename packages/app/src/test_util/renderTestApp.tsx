@@ -8,7 +8,9 @@ import { getStore } from "@/store/store";
 import { InitialEntry } from "history";
 import { QueryClient } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
+import { API_TOKEN_KEY } from "@math3d/api";
 import AppRoutes from "../app";
+import { seedDb } from "./msw/db";
 
 const waitForNotBusy = () =>
   waitFor(
@@ -34,7 +36,7 @@ LocationSpy.displayName = "LocationSpy";
  */
 const renderTestApp = async (
   initialRoute: InitialEntry = "/",
-  { waitForReady = true } = {},
+  { waitForReady = true, isAuthenticated = false } = {},
 ) => {
   const initialEntries: InitialEntry[] = [initialRoute];
   const store = getStore();
@@ -49,6 +51,11 @@ const renderTestApp = async (
       duration: { standard: 0 },
     },
   });
+
+  const user = isAuthenticated ? seedDb.withUser() : null;
+  if (user) {
+    localStorage.setItem(API_TOKEN_KEY, `"${user.auth_token}"`);
+  }
 
   // React router v6 does not provide a good way to view location in tests.
   const locationRef = { current: null as null | Location };
@@ -70,7 +77,7 @@ const renderTestApp = async (
 
   invariant(locationRef.current, "LocationSpy was not mounted.");
   const location = locationRef as { current: Location };
-  return { result, store, location };
+  return { result, store, location, user };
 };
 
 export default renderTestApp;

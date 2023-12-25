@@ -12,11 +12,20 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 import os
 from pathlib import Path
+import logging
 
 import dj_database_url
 import environ
 
-env = environ.Env(CORS_ALLOWED_ORIGINS=(list, []))
+
+logger = logging.getLogger(__name__)
+
+env = environ.Env(
+    CORS_ALLOWED_ORIGINS=(list, []),
+    AWS_SES_ACCESS_KEY_ID=(str, ""),
+    AWS_SES_SECRET_ACCESS_KEY=(str, ""),
+    DEFAULT_FROM_EMAIL=(str, ""),
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -145,8 +154,8 @@ DJOSER = {
         "current_user": "authentication.serializers.CustomUserSerializer",
     },
     "_CUSTOM": {
-        "ACTIVATION_URL": "http://localhost:3000/account/activate?uid={uid}&token={token}",
-        "PASSWORD_RESET_CONFIRM_URL": "http://localhost:3000/account/password-reset/confirm/?uid={uid}&token={token}",
+        "ACTIVATION_URL": "http://localhost:3000/auth/activate-account?uid={uid}&token={token}",
+        "PASSWORD_RESET_CONFIRM_URL": "http://localhost:3000/auth/reset-password/confirm/?uid={uid}&token={token}",  # pragma: allowlist secret
     },
 }
 
@@ -176,6 +185,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 9,
+        },
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -187,7 +199,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "authentication.CustomUser"
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+AWS_SES_ACCESS_KEY_ID = env("AWS_SES_ACCESS_KEY_ID")
+AWS_SES_SECRET_ACCESS_KEY = env("AWS_SES_SECRET_ACCESS_KEY")
+if AWS_SES_ACCESS_KEY_ID and AWS_SES_SECRET_ACCESS_KEY:
+    EMAIL_BACKEND = "django_ses.SESBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    logger.warning(f"Email backend: {EMAIL_BACKEND}")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/

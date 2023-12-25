@@ -3,6 +3,7 @@ import { MathItem } from "@math3d/mathitem-configs";
 import { mathScopeId } from "@/features/sceneControls/mathItems/mathScope";
 import { assertInstanceOf } from "@/util/predicates";
 import { act } from "react-dom/test-utils";
+import invariant from "tiny-invariant";
 
 const permutations = <T>(tokens: T[], subperms: T[][] = [[]]): T[][] =>
   tokens.length === 0
@@ -99,6 +100,28 @@ function flatProduct(...arrays: unknown[][]): unknown[] {
   });
 }
 
+/**
+ * Given an HTMLElement with an aria-describedby attribute, return the element
+ * that describes it.
+ *
+ * This is particularly useful with `@testing-library`, which makes it easy to
+ * find form inputs by label, but has no builtin method for finding the
+ * corresponding descriptions (which you might want when asserting about form
+ * validation).
+ */
+const getDescribedBy = (el: HTMLElement) => {
+  const describedBy = el.getAttribute("aria-describedby");
+  if (describedBy === null) {
+    throw new Error(
+      "The specified element does not have an associated ariia-describedby.",
+    );
+  }
+  // eslint-disable-next-line testing-library/no-node-access
+  const descriptionEl = document.getElementById(describedBy);
+  invariant(descriptionEl !== null, "descriptionEl should not be null");
+  return descriptionEl;
+};
+
 export {
   assertInstanceOf,
   nodeId,
@@ -107,4 +130,5 @@ export {
   pasteText,
   userWaits,
   allowActWarnings,
+  getDescribedBy,
 };
