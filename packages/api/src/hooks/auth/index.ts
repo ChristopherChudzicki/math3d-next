@@ -17,8 +17,6 @@ const config = new Configuration({
 
 const authApi = new AuthApi(config);
 
-window.authApi = authApi;
-
 const API_TOKEN_KEY = "apiToken";
 
 const useLogin = () => {
