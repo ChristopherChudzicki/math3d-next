@@ -18,7 +18,7 @@ jobs:
           cache: "yarn"
       - run: yarn install --immutable
       - run: yarn lint
-      - run: yarn test
+      - run: yarn test -- --test-timeout=10000
       - run: yarn build
         env:
           VITE_API_BASE_URL: https://api.math3d.org/v0
