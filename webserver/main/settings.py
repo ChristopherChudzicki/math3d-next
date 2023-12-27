@@ -25,6 +25,7 @@ env = environ.Env(
     AWS_SES_ACCESS_KEY_ID=(str, ""),
     AWS_SES_SECRET_ACCESS_KEY=(str, ""),
     DEFAULT_FROM_EMAIL=(str, ""),
+    APP_ENV=(str, "production"),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     ## Custom apps
     "main",
+    "emails",
     "scenes",
 ]
 
@@ -245,3 +247,6 @@ if os.environ.get("IS_HEROKU"):
     import django_heroku  # type: ignore
 
     django_heroku.settings(locals())
+
+if env("APP_ENV") == "development":
+    AWS_SES_VERIFY_EVENT_SIGNATURES = False
