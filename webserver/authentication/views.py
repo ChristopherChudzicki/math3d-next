@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from djoser.compat import get_user_email
 from rest_framework.response import Response
 from rest_framework import status
+from emails.permissions import EmailDeliverabilityCheck
 
 
 @extend_schema_view(
@@ -25,6 +26,7 @@ class CustomUserViewSet(UserViewSet):
     def reset_username_confirm(self):
         pass
 
+    @EmailDeliverabilityCheck()
     @action(["post"], detail=False)
     def reset_password(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -36,3 +38,7 @@ class CustomUserViewSet(UserViewSet):
             PasswordResetInactiveEmail(self.request, context).send(to)
             return Response(status=status.HTTP_204_NO_CONTENT)
         return super().reset_password(request, *args, **kwargs)
+
+    @EmailDeliverabilityCheck()
+    def create(self, *args, **kwargs):
+        return super().create(*args, **kwargs)

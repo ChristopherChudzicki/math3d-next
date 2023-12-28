@@ -24,10 +24,9 @@ env = environ.Env(
     CORS_ALLOWED_ORIGINS=(list, []),
     AWS_SES_ACCESS_KEY_ID=(str, ""),
     AWS_SES_SECRET_ACCESS_KEY=(str, ""),
-    MAILJET_API_KEY=(str, ""),
-    MAILJET_SECRET_KEY=(str, ""),
     DEFAULT_FROM_EMAIL=(str, ""),
     SERVER_EMAIL=(str, ""),
+    APP_ENV=(str, "production"),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -64,6 +63,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     ## Custom apps
     "main",
+    "emails",
     "scenes",
 ]
 
@@ -202,19 +202,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "authentication.CustomUser"
 
-MAILJET_API_KEY = env("MAILJET_API_KEY")
-MAILJET_SECRET_KEY = env("MAILJET_SECRET_KEY")
+AWS_SES_ACCESS_KEY_ID = env("AWS_SES_ACCESS_KEY_ID")
+AWS_SES_SECRET_ACCESS_KEY = env("AWS_SES_SECRET_ACCESS_KEY")
 
-ANYMAIL = {
-    "MAILJET_API_KEY": env("MAILJET_API_KEY"),
-    "MAILJET_SECRET_KEY": env("MAILJET_SECRET_KEY"),
-}
-if MAILJET_API_KEY and MAILJET_SECRET_KEY:
-    EMAIL_BACKEND = "anymail.backends.mailjet.EmailBackend"
+if AWS_SES_SECRET_ACCESS_KEY and AWS_SES_ACCESS_KEY_ID:
+    EMAIL_BACKEND = "django_ses.SESBackend"
 else:
-    logger.warn(
-        "MAILJET_API_KEY and MAILJET_SECRET_KEY settings not found. Using email console backend."
-    )
+    logger.warn("Email provider settings not found. Using email console backend.")
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
@@ -257,3 +251,6 @@ if os.environ.get("IS_HEROKU"):
     import django_heroku  # type: ignore
 
     django_heroku.settings(locals())
+
+if env("APP_ENV") == "development":
+    AWS_SES_VERIFY_EVENT_SIGNATURES = False

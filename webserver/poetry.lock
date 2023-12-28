@@ -371,28 +371,6 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
-name = "django-anymail"
-version = "10.2"
-description = "Django email backends and webhooks for Amazon SES, Brevo (Sendinblue),     MailerSend, Mailgun, Mailjet, Mandrill, Postal, Postmark, Resend,     SendGrid, and SparkPost"
-category = "main"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "django_anymail-10.2-py3-none-any.whl", hash = "sha256:ca273abbc04b5ce06d1f3b3e5f28e2d79331519198fa6d6b5ba1b5aa5eea02f7"},
-    {file = "django_anymail-10.2.tar.gz", hash = "sha256:1f3006d3b16874aaa32976078da6cdc9baa7f5274cf80e3fc51a288887617aaf"},
-]
-
-[package.dependencies]
-django = ">=2.0"
-requests = ">=2.4.3"
-urllib3 = ">=1.25.0"
-
-[package.extras]
-amazon-ses = ["boto3"]
-postal = ["cryptography"]
-resend = ["svix"]
-
-[[package]]
 name = "django-cors-headers"
 version = "4.3.0"
 description = "django-cors-headers is a Django application for handling the server headers required for Cross-Origin Resource Sharing (CORS)."
@@ -1689,4 +1667,4 @@ brotli = ["Brotli"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.11.6"
-content-hash = "0c8f43d7fd710b38c9632e3c2afc1888e40d834a6a657d5b11a9ae42562baef3"
+content-hash = "34794b2eea20e33e22d3096da8dd662411f06600fa9acf3387aef043f289b954"
