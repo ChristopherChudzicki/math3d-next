@@ -434,8 +434,10 @@ files = [
 
 [package.dependencies]
 boto3 = ">=1.0.0"
+cryptography = {version = ">=36.0.2", optional = true, markers = "extra == \"bounce\" or extra == \"events\""}
 django = ">=2.2"
 pytz = ">=2016.10"
+requests = {version = ">=2.27.1", optional = true, markers = "extra == \"bounce\" or extra == \"events\""}
 
 [package.extras]
 bounce = ["cryptography (>=36.0.2)", "requests (>=2.27.1)"]
@@ -1667,4 +1669,4 @@ brotli = ["Brotli"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.11.6"
-content-hash = "34794b2eea20e33e22d3096da8dd662411f06600fa9acf3387aef043f289b954"
+content-hash = "37a26e879e75e335356235119d7baa8f5d4b3c756db4cc6f9f792db10332392a"

@@ -21,7 +21,7 @@ django-environ = "^0.10.0"
 faker = "^19.12.0"
 djoser = "^2.2.0"
 drf-spectacular = "^0.26.5"
-django-ses = "^3.5.2"
+django-ses = {extras = ["events"], version = "^3.5.2"}
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.0.0"
@@ -49,6 +49,10 @@ plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
 
 [[tool.mypy.overrides]]
 module = "djoser.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "django_ses.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]

@@ -20,11 +20,13 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 import authentication.urls
 import scenes.urls
+import emails.urls
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("v0/", include(scenes.urls)),
     path("v0/auth/", include(authentication.urls)),
+    path("v0/", include(emails.urls)),
     path("", lambda request: HttpResponseRedirect("/v0/schema/swagger")),
     path("v0/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
