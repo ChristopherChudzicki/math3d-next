@@ -24,7 +24,10 @@ env = environ.Env(
     CORS_ALLOWED_ORIGINS=(list, []),
     AWS_SES_ACCESS_KEY_ID=(str, ""),
     AWS_SES_SECRET_ACCESS_KEY=(str, ""),
+    MAILJET_API_KEY=(str, ""),
+    MAILJET_SECRET_KEY=(str, ""),
     DEFAULT_FROM_EMAIL=(str, ""),
+    SERVER_EMAIL=(str, ""),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -199,14 +202,23 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "authentication.CustomUser"
 
-AWS_SES_ACCESS_KEY_ID = env("AWS_SES_ACCESS_KEY_ID")
-AWS_SES_SECRET_ACCESS_KEY = env("AWS_SES_SECRET_ACCESS_KEY")
-if AWS_SES_ACCESS_KEY_ID and AWS_SES_SECRET_ACCESS_KEY:
-    EMAIL_BACKEND = "django_ses.SESBackend"
+MAILJET_API_KEY = env("MAILJET_API_KEY")
+MAILJET_SECRET_KEY = env("MAILJET_SECRET_KEY")
+
+ANYMAIL = {
+    "MAILJET_API_KEY": env("MAILJET_API_KEY"),
+    "MAILJET_SECRET_KEY": env("MAILJET_SECRET_KEY"),
+}
+if MAILJET_API_KEY and MAILJET_SECRET_KEY:
+    EMAIL_BACKEND = "anymail.backends.mailjet.EmailBackend"
 else:
+    logger.warn(
+        "MAILJET_API_KEY and MAILJET_SECRET_KEY settings not found. Using email console backend."
+    )
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-    logger.warning(f"Email backend: {EMAIL_BACKEND}")
+
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+SERVER_EMAIL = env("SERVER_EMAIL")
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
