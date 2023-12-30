@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
@@ -65,17 +65,13 @@ const LoginButtons: React.FC<{
   );
 };
 
-type HeaderMenuProps = {
-  onClickExamples: () => void;
-};
-
-const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
+const HeaderMenu: React.FC = () => {
   const smallScreen = useMediaQuery("(max-width: 600px)");
   const [menuOpen, toggleMenuOpen] = useToggle(false);
   const [buttonEl, setButtonEl] = useState<HTMLElement | null>(null);
 
   const [isAuthenticated] = useAuthStatus();
-
+  const navigate = useNavigate();
   return (
     <nav className={styles["nav-container"]}>
       <ShareButton variant={smallScreen ? "mobile" : "desktop"} />
@@ -100,7 +96,7 @@ const HeaderMenu: React.FC<HeaderMenuProps> = (props) => {
         {smallScreen ? (
           <LoginButtons isAuthenticated={isAuthenticated} smallScreen />
         ) : null}
-        <MenuItem onClick={props.onClickExamples}>
+        <MenuItem onClick={() => navigate("scenes/examples")}>
           <ListItemIcon>
             <LightbulbOutlined fontSize="small" />
           </ListItemIcon>
