@@ -5,13 +5,14 @@ import "./index.css";
 
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import { QueryClient } from "@tanstack/react-query";
 import math from "@math3d/custom-mathjs";
 import { theme } from "./mui";
 
-import AppRoutes from "./app";
+import AppRoutes from "./AppProviders";
 import { getStore } from "./store/store";
+import routes from "./routes";
 
 window.math = math;
 
@@ -44,11 +45,16 @@ prepare().then(() => {
     },
   });
 
+  const router = createBrowserRouter(routes);
+
   root.render(
     <React.StrictMode>
-      <BrowserRouter>
-        <AppRoutes queryClient={queryClient} store={store} theme={theme} />
-      </BrowserRouter>
+      <AppRoutes
+        queryClient={queryClient}
+        store={store}
+        theme={theme}
+        router={router}
+      />
     </React.StrictMode>,
   );
 });
