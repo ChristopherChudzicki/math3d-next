@@ -5,6 +5,7 @@ from pathlib import Path
 import jtd  # type: ignore
 import yaml
 from django.db import models
+from django.contrib.postgres.indexes import GinIndex
 
 from scenes.validators import JtdValidator
 from authentication.models import CustomUser
@@ -53,6 +54,15 @@ class Scene(models.Model):
     author = models.ForeignKey(
         CustomUser, blank=True, null=True, on_delete=models.CASCADE
     )
+
+    class Meta:
+        indexes = [
+            GinIndex(
+                name="title_gin_trgm_index",
+                fields=["title"],
+                opclasses=["gin_trgm_ops"],
+            )
+        ]
 
     def save(self, *args, **kwargs):
         self.full_clean()

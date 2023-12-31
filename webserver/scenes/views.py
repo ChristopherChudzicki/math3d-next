@@ -6,8 +6,10 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 
 from scenes.models import Scene
-from scenes.serializers import SceneSerializer
+from scenes.serializers import SceneSerializer, MiniSceneSerializer
 from scenes.permissions import ScenePermissions
+from scenes.filters import SceneFilterSet
+from django_filters import rest_framework as filters
 
 
 # Create your views here.
@@ -20,14 +22,24 @@ class ScenesView(viewsets.ModelViewSet):
 
     lookup_field = "key"
 
-    authentication_classes = []
     permission_classes = [ScenePermissions]
     http_method_names = ["get", "post", "head", "patch", "delete"]
 
-    @extend_schema(responses=SceneSerializer(many=True))
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = SceneFilterSet
+
+    def get_serializer_class(self):
+        LIST_ACTIONS = ["list", "me"]
+        if self.action in LIST_ACTIONS:
+            return MiniSceneSerializer
+        else:
+            return self.serializer_class
+
+    @extend_schema(responses=MiniSceneSerializer(many=True))
     @action(methods=["GET"], detail=False, name="My Scenes")
     def me(self, request: Request) -> Response:  # noqa: ARG002
-        my_queryset = self.queryset.filter(author_id=self.request.user.id)
-        page = self.paginate_queryset(my_queryset)
+        queryset = self.queryset.filter(author_id=self.request.user.id)
+        filtered_queryset = self.filter_queryset(queryset)
+        page = self.paginate_queryset(filtered_queryset)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)

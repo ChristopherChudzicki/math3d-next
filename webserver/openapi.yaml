@@ -432,14 +432,20 @@ paths:
         description: The initial index from which to return the results.
         schema:
           type: integer
+      - in: query
+        name: title
+        schema:
+          type: string
       tags:
       - scenes
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedSceneList'
+                $ref: '#/components/schemas/PaginatedMiniSceneList'
           description: ''
     post:
       operationId: scenes_create
@@ -457,6 +463,8 @@ paths:
             schema:
               $ref: '#/components/schemas/SceneRequest'
         required: true
+      security:
+      - tokenAuth: []
       responses:
         '201':
           content:
@@ -475,6 +483,8 @@ paths:
         required: true
       tags:
       - scenes
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -503,6 +513,8 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedSceneRequest'
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -520,6 +532,8 @@ paths:
         required: true
       tags:
       - scenes
+      security:
+      - tokenAuth: []
       responses:
         '204':
           description: No response body
@@ -539,14 +553,20 @@ paths:
         description: The initial index from which to return the results.
         schema:
           type: integer
+      - in: query
+        name: title
+        schema:
+          type: string
       tags:
       - scenes
+      security:
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedSceneList'
+                $ref: '#/components/schemas/PaginatedMiniSceneList'
           description: ''
 components:
   schemas:
@@ -572,7 +592,15 @@ components:
       required:
       - token
       - uid
-    PaginatedSceneList:
+    MiniScene:
+      type: object
+      properties:
+        title:
+          type: string
+        key:
+          type: string
+          maxLength: 80
+    PaginatedMiniSceneList:
       type: object
       properties:
         count:
@@ -591,7 +619,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/Scene'
+            $ref: '#/components/schemas/MiniScene'
     PaginatedUserList:
       type: object
       properties:

@@ -23,6 +23,7 @@ djoser = "^2.2.0"
 drf-spectacular = "^0.26.5"
 django-ses = "^3.5.2"
 django-anymail = {extras = ["mailjet"], version = "^10.2"}
+django-filter = "^23.5"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.0.0"
