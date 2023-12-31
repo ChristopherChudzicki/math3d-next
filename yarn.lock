@@ -5406,6 +5406,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-window@npm:^1.8.8":
+  version: 1.8.8
+  resolution: "@types/react-window@npm:1.8.8"
+  dependencies:
+    "@types/react": "*"
+  checksum: 253c9d6e0c942f34633edbddcbc369324403c42458ff004457c5bd5972961d8433a909c0cc1a89c918063d5eb85ecbdd774142af2555fae61f4ceb3ba9884b5a
+  languageName: node
+  linkType: hard
+
 "@types/react@npm:*":
   version: 18.2.14
   resolution: "@types/react@npm:18.2.14"
@@ -6564,6 +6573,7 @@ __metadata:
     "@types/node": 18.16.18
     "@types/react": 18.0.24
     "@types/react-dom": 18.0.8
+    "@types/react-window": ^1.8.8
     "@types/three": ^0.146.0
     "@types/tinycolor2": 1.4.3
     "@types/toposort": 2.0.3
@@ -6586,6 +6596,7 @@ __metadata:
     react: 18.2.0
     react-dom: 18.2.0
     react-hook-form: ^7.48.2
+    react-infinite-scroll-component: ^6.1.0
     react-redux: 8.0.7
     react-router: ^6.21.1
     react-router-dom: ^6.21.1
@@ -16134,6 +16145,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-infinite-scroll-component@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "react-infinite-scroll-component@npm:6.1.0"
+  dependencies:
+    throttle-debounce: ^2.1.0
+  peerDependencies:
+    react: ">=16.0.0"
+  checksum: 3708398934366df907dbad215247ebc1033221957ce7e32289ea31750cce70aa16513e2d03743e06c8b868ac7c542d12d5dbb6c830fd408433a4762f3cb5ecfb
+  languageName: node
+  linkType: hard
+
 "react-inspector@npm:^5.1.0":
   version: 5.1.1
   resolution: "react-inspector@npm:5.1.1"
@@ -18301,6 +18323,13 @@ __metadata:
   peerDependencies:
     three: ">=0.118.0"
   checksum: 9cff4dcabff8e4a863e63f3eec8561dfcd96e92bc1d80f6a9e40fd5cf2609ed0a9c2455c17f8f4309e85c1be6b6672b818f802e55afd7b2cbcd4dd2d7e89377a
+  languageName: node
+  linkType: hard
+
+"throttle-debounce@npm:^2.1.0":
+  version: 2.3.0
+  resolution: "throttle-debounce@npm:2.3.0"
+  checksum: 6d90aa2ddb294f8dad13d854a1cfcd88fdb757469669a096a7da10f515ee466857ac1e750649cb9da931165c6f36feb448318e7cb92570f0a3679d20e860a925
   languageName: node
   linkType: hard
 

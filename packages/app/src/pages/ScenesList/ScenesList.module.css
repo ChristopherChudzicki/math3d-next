@@ -1,5 +1,12 @@
-.examplesList :global(.MuiListSubheader-root) {
-  height: var(--header-height);
-  border-bottom: 1pt solid var(--color-secondary-light);
-  margin-bottom: 0px;
+.tabList {
+  height: 48px;
+}
+.infiniteList {
+  height: calc(100vh - 48px);
+  overflow: auto;
+}
+
+.tabPanel:global(.MuiTabPanel-root) {
+  padding: 0px;
+  width: 300px;
 }

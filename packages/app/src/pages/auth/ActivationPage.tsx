@@ -16,7 +16,7 @@ const ActivationMessage: React.FC<{ success: boolean; error: boolean }> = ({
     return (
       <Alert severity="success">
         Account successfully activated. Please{" "}
-        <Link to="../auth/login">log in</Link>.
+        <Link href="../auth/login">log in</Link>.
       </Alert>
     );
   }

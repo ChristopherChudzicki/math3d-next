@@ -78,7 +78,7 @@ const RegistrationPage: React.FC = () => {
     >
       {resetPassword.isSuccess ? (
         <Alert severity="success">
-          Password changed. Please <Link to="../auth/login">log in</Link>.
+          Password changed. Please <Link href="../auth/login">log in</Link>.
         </Alert>
       ) : (
         <form id={formId} className={styles["form-content"]}>

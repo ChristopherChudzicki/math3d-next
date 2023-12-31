@@ -30,6 +30,10 @@ const routes: RouteObject[] = [
             element: <ScenesList initialTab="examples" />,
           },
           {
+            path: "scenes/me",
+            element: <ScenesList initialTab="my-scenes" />,
+          },
+          {
             path: "auth/login",
             element: <LoginPage />,
           },
