@@ -123,7 +123,6 @@ const HeaderMenu: React.FC = () => {
 
 type HeaderProps = {
   title: React.ReactNode;
-  onClickExamples: () => void;
 };
 
 const Header: React.FC<HeaderProps> = (props) => (
@@ -131,7 +130,7 @@ const Header: React.FC<HeaderProps> = (props) => (
     <div className={styles["header-container"]}>
       <span className={styles.brand}>Math3d</span>
       {props.title}
-      <HeaderMenu onClickExamples={props.onClickExamples} />
+      <HeaderMenu />
     </div>
   </header>
 );

@@ -1,8 +1,10 @@
-import { useScene } from "@/api/scene";
+import { useScene } from "@math3d/api";
 
 import React, { useEffect } from "react";
 import { useAppDispatch } from "@/store/hooks";
 
+import type { Scene } from "@/types";
+import defaultScene from "@/store/defaultScene";
 import AddObjectButton from "./AddObjectButton";
 import ControlTabs from "./controlTabs";
 import { mathItemsSlice, MathItemsList } from "./mathItems";
@@ -26,7 +28,12 @@ const SceneControls: React.FC<Props> = (props) => {
   const { sceneKey } = props;
   const dispatch = useAppDispatch();
 
-  const { isLoading, data: scene } = useScene(sceneKey);
+  const { isLoading, data } = useScene(sceneKey, {
+    enabled: sceneKey !== undefined,
+  });
+
+  const scene =
+    sceneKey === undefined ? defaultScene : (data as Scene | undefined);
 
   useEffect(() => {
     if (!scene) return;

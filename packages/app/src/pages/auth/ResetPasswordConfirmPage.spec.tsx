@@ -44,7 +44,7 @@ test("Hapy path: Expected API call and form states", async () => {
     `/auth/reset-password/confirm?uid=${uid}&token=${token}`,
   );
 
-  const dialog = screen.getByRole("dialog");
+  const dialog = await screen.findByRole("dialog");
 
   within(dialog).getByRole("heading", {
     name: "Change Password",

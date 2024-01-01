@@ -10,11 +10,11 @@ import styles from "./ScenesList.module.css";
 
 const VirtualizerDynamic: React.FC = () => {
   const {
-    status,
+    // status,
     data,
-    error,
-    isFetching,
-    isFetchingNextPage,
+    // error,
+    // isFetching,
+    // isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
   } = useInfiniteScenesMe({ limit: 50 });

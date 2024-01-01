@@ -77,7 +77,7 @@ const MainPage: React.FC = () => {
   );
   return (
     <div className={styles.container}>
-      <Header title={<TitleInput />} onClickExamples={console.log} />
+      <Header title={<TitleInput />} />
       <div className={styles.body}>
         <Sidebar
           className={styles.sidebar}

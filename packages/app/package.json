@@ -49,7 +49,6 @@
     "@tanstack/react-query": "^5.8.4",
     "@types/lodash-es": "^4.17.6",
     "@types/node": "18.16.18",
-    "axios": "^0.27",
     "bootstrap": "5.2.2",
     "classnames": "2.3.2",
     "fast-json-patch": "^3.1.1",

@@ -11,7 +11,7 @@ import {
 test("Hapy path: Expected API call and form states", async () => {
   const { location } = await renderTestApp("/auth/reset-password");
 
-  const dialog = screen.getByRole("dialog");
+  const dialog = await screen.findByRole("dialog");
   const controls = {
     email: within(dialog).getByRole("textbox", { name: "Email" }),
     submit: within(dialog).getByRole("button", { name: "Reset Password" }),
@@ -41,7 +41,7 @@ test("Hapy path: Expected API call and form states", async () => {
 test("Form requires email", async () => {
   await renderTestApp("/auth/reset-password");
 
-  const dialog = screen.getByRole("dialog");
+  const dialog = await screen.findByRole("dialog");
   const controls = {
     email: within(dialog).getByRole("textbox", { name: "Email" }),
     submit: within(dialog).getByRole("button", { name: "Reset Password" }),

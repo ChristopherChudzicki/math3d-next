@@ -2,8 +2,7 @@ import { test, expect } from "vitest";
 import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
 
 const querySignInLink = () => {
-  const nav = screen.getByRole("navigation", { hidden: true });
-  const signin = within(nav).queryByRole("link", {
+  const signin = screen.queryByRole("link", {
     name: "Sign in",
     hidden: true,
   });
