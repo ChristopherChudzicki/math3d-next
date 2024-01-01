@@ -26,12 +26,8 @@ const routes: RouteObject[] = [
         ),
         children: [
           {
-            path: "scenes/examples",
-            element: <ScenesList initialTab="examples" />,
-          },
-          {
-            path: "scenes/me",
-            element: <ScenesList initialTab="my-scenes" />,
+            path: "scenes/:listType",
+            element: <ScenesList />,
           },
           {
             path: "auth/login",

@@ -6,20 +6,25 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import { useInfiniteScenesMe } from "@math3d/api";
 import Link from "@/util/components/Link";
+import LoadingSpinner from "@/util/components/LoadingSpinner/LoadingSpinner";
+import Alert from "@mui/material/Alert";
 import styles from "./ScenesList.module.css";
 
 const VirtualizerDynamic: React.FC = () => {
-  const {
-    // status,
-    data,
-    // error,
-    // isFetching,
-    // isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteScenesMe({ limit: 50 });
+  const { status, data, isFetching, fetchNextPage, hasNextPage } =
+    useInfiniteScenesMe({ limit: 50 });
 
   const allItems = data ? data.pages.flatMap((d) => d.results ?? []) : [];
+  if (status === "pending") {
+    return <LoadingSpinner className={styles["with-margin"]} />;
+  }
+  if (status === "error") {
+    return (
+      <Alert className={styles["with-margin"]} severity="error">
+        Error loading scenes.
+      </Alert>
+    );
+  }
   return (
     <List
       component="nav"
@@ -31,7 +36,7 @@ const VirtualizerDynamic: React.FC = () => {
         dataLength={allItems.length}
         hasMore={hasNextPage}
         next={fetchNextPage}
-        loader={<h4>Loading...</h4>}
+        loader={<LoadingSpinner className={styles["with-margin"]} />}
         scrollableTarget="scrollableDiv"
       >
         {allItems.map((item) => (
