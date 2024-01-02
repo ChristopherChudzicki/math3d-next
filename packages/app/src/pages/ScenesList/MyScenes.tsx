@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -9,6 +9,7 @@ import Link from "@/util/components/Link";
 import LoadingSpinner from "@/util/components/LoadingSpinner/LoadingSpinner";
 import Alert from "@mui/material/Alert";
 import TextField from "@mui/material/TextField";
+import { debounce } from "lodash";
 import styles from "./ScenesList.module.css";
 
 type MyScenesListProps = {
@@ -16,16 +17,22 @@ type MyScenesListProps = {
 };
 
 const MyScenesList: React.FC<MyScenesListProps> = (props) => {
-  const [filter, setFilter] = useState("");
+  const [filterText, setFilterText] = useState("");
+  const [filterValue, setFilterValue] = useState("");
+  const debouncedSetFilterValue = useMemo(
+    () => debounce(setFilterValue, 300),
+    [],
+  );
   const { status, data, fetchNextPage, hasNextPage } = useInfiniteScenesMe({
     limit: 50,
-    title: filter,
+    title: filterValue,
   });
 
   const handleFilterChange: React.ChangeEventHandler<HTMLInputElement> = (
     e,
   ) => {
-    setFilter(e.target.value);
+    setFilterText(e.target.value);
+    debouncedSetFilterValue(e.target.value);
   };
 
   const allItems = data ? data.pages.flatMap((d) => d.results ?? []) : [];
@@ -44,7 +51,7 @@ const MyScenesList: React.FC<MyScenesListProps> = (props) => {
       <TextField
         label="Filter scenes"
         size="small"
-        value={filter}
+        value={filterText}
         className={styles["filter-input"]}
         onChange={handleFilterChange}
       />
