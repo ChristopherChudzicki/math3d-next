@@ -42,6 +42,7 @@ const ScenesList: React.FC = () => {
   };
 
   const examplesId = useId();
+  const myScenesId = useId();
 
   return (
     <Drawer open anchor="right" onClose={handleClose}>
@@ -62,7 +63,7 @@ const ScenesList: React.FC = () => {
           <ExamplesListing aria-labelledby={examplesId} />
         </TabPanel>
         <TabPanel value={ListType.Me} className={styles.tabPanel}>
-          <MyScenes />
+          <MyScenes aria-labelledby={myScenesId} />
         </TabPanel>
       </TabContext>
     </Drawer>

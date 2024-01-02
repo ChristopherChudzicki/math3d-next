@@ -33,15 +33,17 @@ const useCreateScene = () => {
 const useInfiniteScenesMe = ({
   limit,
   offset,
-}: { limit?: number; offset?: number } = {}) => {
+  title,
+}: { limit?: number; offset?: number; title?: string } = {}) => {
   return useInfiniteQuery({
-    queryKey: ["scenes", "me", { limit, offset }],
+    queryKey: ["scenes", "me", { limit, offset, title }],
     initialPageParam: offset,
     queryFn: ({ pageParam }) =>
       scenesApi
         .scenesMeList({
           limit,
           offset: pageParam,
+          title,
         })
         .then((res) => res.data),
     getNextPageParam: (lastPage) => {
