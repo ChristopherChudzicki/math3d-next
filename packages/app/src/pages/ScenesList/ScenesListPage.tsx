@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useState } from "react";
+import React, { useCallback, useEffect, useId } from "react";
 import Drawer from "@mui/material/Drawer";
 
 import { useNavigate, useParams } from "react-router-dom";
@@ -16,11 +16,18 @@ enum ListType {
   Examples = "examples",
   Me = "me",
 }
+const normalizeListType = (listType: string): ListType => {
+  if (Object.values(ListType).includes(listType as ListType)) {
+    return listType as ListType;
+  }
+  return ListType.Examples;
+};
 
 const ScenesList: React.FC = () => {
-  const { listType } = useParams<{ listType: ListType }>();
+  const params = useParams<{ listType: ListType }>();
+  invariant(params.listType);
+  const listType = normalizeListType(params.listType);
   const navigate = useNavigate();
-  invariant(listType);
   const activateListType = useCallback(
     (aListType: ListType) => {
       navigate(`../scenes/${aListType}`);
@@ -28,10 +35,10 @@ const ScenesList: React.FC = () => {
     [navigate],
   );
   useEffect(() => {
-    if (!Object.values(ListType).includes(listType)) {
-      activateListType(ListType.Examples);
+    if (listType !== params.listType) {
+      activateListType(listType);
     }
-  }, [activateListType, listType]);
+  }, [activateListType, params.listType, listType]);
 
   const handleClose = useCallback(() => {
     navigate("../");
@@ -53,10 +60,10 @@ const ScenesList: React.FC = () => {
           <TabList
             className={styles.tabList}
             onChange={handleChangeTab}
-            aria-label="lab API tabs example"
+            aria-label="Scenes"
           >
             <Tab label="Examples" id={examplesId} value={ListType.Examples} />
-            <Tab label="My Scenes" value={ListType.Me} />
+            <Tab label="My Scenes" id={myScenesId} value={ListType.Me} />
           </TabList>
         </Box>
         <TabPanel value={ListType.Examples} className={styles.tabPanel}>

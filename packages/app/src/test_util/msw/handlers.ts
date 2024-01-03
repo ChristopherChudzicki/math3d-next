@@ -2,7 +2,7 @@ import { rest } from "msw";
 import type { RestRequest } from "msw";
 import db from "./db";
 
-const hasValidToken = (req: RestRequest) => {
+const getUser = (req: RestRequest) => {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
     return false;
@@ -12,7 +12,7 @@ const hasValidToken = (req: RestRequest) => {
   const user = db.user.findFirst({
     where: { auth_token: { equals: token } },
   });
-  return !!user;
+  return user;
 };
 
 const BASE_URL: string = import.meta.env.VITE_API_BASE_URL;
@@ -21,6 +21,7 @@ export const urls = {
   scenes: {
     detail: `${BASE_URL}/v0/scenes/:key/`,
     list: `${BASE_URL}/v0/scenes/`,
+    meList: `${BASE_URL}/v0/scenes/me/`,
   },
   auth: {
     users: `${BASE_URL}/v0/auth/users/`,
@@ -33,6 +34,30 @@ export const urls = {
 } as const;
 
 export const handlers = [
+  rest.get(urls.scenes.meList, async (req, res, ctx) => {
+    const user = getUser(req);
+    if (!user) {
+      return res(
+        ctx.status(401),
+        ctx.json({
+          errorMessage: "Invalid token",
+        }),
+      );
+    }
+
+    const scenes = db.scene.findMany({
+      where: {
+        author: {
+          equals: user.id,
+        },
+      },
+    });
+    const mini = scenes.map((s) => ({
+      title: s.title,
+      key: s.key,
+    }));
+    return res(ctx.json(mini));
+  }),
   rest.get(urls.scenes.detail, (req, res, ctx) => {
     const { key } = req.params;
     if (typeof key !== "string") {
@@ -100,7 +125,8 @@ export const handlers = [
     );
   }),
   rest.post(urls.auth.tokenLogout, async (req, res, ctx) => {
-    if (!hasValidToken(req)) {
+    const user = getUser(req);
+    if (!user) {
       return res(
         ctx.status(401),
         ctx.json({

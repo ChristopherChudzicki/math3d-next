@@ -4,10 +4,8 @@ import Link from "@/util/components/Link";
 import { useActivateUser } from "@math3d/api";
 import { useToggle } from "@/util/hooks";
 import Alert from "@mui/material/Alert";
-import CircularProgress from "@mui/material/CircularProgress";
 import LoadingSpinner from "@/util/components/LoadingSpinner/LoadingSpinner";
 import { BasicDialog } from "./components/BasicDialog";
-import styles from "./styles.module.css";
 
 const ActivationMessage: React.FC<{ success: boolean; error: boolean }> = ({
   success,

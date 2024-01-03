@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -10,6 +10,7 @@ import LoadingSpinner from "@/util/components/LoadingSpinner/LoadingSpinner";
 import Alert from "@mui/material/Alert";
 import TextField from "@mui/material/TextField";
 import { debounce } from "lodash";
+import { useAuthStatus } from "@/features/auth";
 import styles from "./ScenesList.module.css";
 
 type MyScenesListProps = {
@@ -17,16 +18,22 @@ type MyScenesListProps = {
 };
 
 const MyScenesList: React.FC<MyScenesListProps> = (props) => {
+  const [isAuthenticated] = useAuthStatus();
   const [filterText, setFilterText] = useState("");
   const [filterValue, setFilterValue] = useState("");
   const debouncedSetFilterValue = useMemo(
     () => debounce(setFilterValue, 300),
     [],
   );
-  const { status, data, fetchNextPage, hasNextPage } = useInfiniteScenesMe({
-    limit: 50,
-    title: filterValue,
-  });
+  const { status, data, fetchNextPage, hasNextPage } = useInfiniteScenesMe(
+    {
+      limit: 50,
+      title: filterValue,
+    },
+    {
+      enabled: isAuthenticated,
+    },
+  );
 
   const handleFilterChange: React.ChangeEventHandler<HTMLInputElement> = (
     e,
@@ -36,6 +43,14 @@ const MyScenesList: React.FC<MyScenesListProps> = (props) => {
   };
 
   const allItems = data ? data.pages.flatMap((d) => d.results ?? []) : [];
+  if (!isAuthenticated) {
+    return (
+      <p className={styles["with-margin"]}>
+        To view scenes you have saved, <Link href="../auth/login">log in</Link>{" "}
+        or <Link href="../auth/register">create an account</Link>.
+      </p>
+    );
+  }
   if (status === "pending") {
     return <LoadingSpinner className={styles["with-margin"]} />;
   }

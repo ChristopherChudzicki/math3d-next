@@ -1,5 +1,6 @@
 import {
   useInfiniteQuery,
+  UseInfiniteQueryOptions,
   useMutation,
   useQuery,
   UseQueryOptions,
@@ -30,11 +31,14 @@ const useCreateScene = () => {
   });
 };
 
-const useInfiniteScenesMe = ({
-  limit,
-  offset,
-  title,
-}: { limit?: number; offset?: number; title?: string } = {}) => {
+const useInfiniteScenesMe = (
+  {
+    limit,
+    offset,
+    title,
+  }: { limit?: number; offset?: number; title?: string } = {},
+  opts: Pick<UseInfiniteQueryOptions, "enabled"> = {},
+) => {
   return useInfiniteQuery({
     queryKey: ["scenes", "me", { limit, offset, title }],
     initialPageParam: offset,
@@ -51,6 +55,7 @@ const useInfiniteScenesMe = ({
       const url = new URL(lastPage.next);
       return Number(url.searchParams.get("offset"));
     },
+    ...opts,
   });
 };
 

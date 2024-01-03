@@ -10,7 +10,7 @@ import RegistrationPage from "./pages/auth/RegistrationPage";
 import AccountActivationPage from "./pages/auth/ActivationPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ResetPasswordConfirmPage from "./pages/auth/ResetPasswordConfirmPage";
-import ScenesList from "./pages/ScenesList/ScenesList";
+import ScenesList from "./pages/ScenesList/ScenesListPage";
 
 const routes: RouteObject[] = [
   {
