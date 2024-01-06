@@ -29,10 +29,10 @@ test("Login form logs user in", async () => {
   const password = within(dialog).getByLabelText("Password");
   const submit = within(dialog).getByRole("button", { name: "Sign in" });
   await user.click(email);
-  user.paste(userData.email);
+  await user.paste(userData.email);
 
   await user.click(password);
-  user.paste(userData.password);
+  await user.paste(userData.password);
 
   expect(signin).toBeInTheDocument();
   await user.click(submit);
@@ -54,10 +54,10 @@ test("Login form displays error if password/email wrong", async () => {
   const password = within(dialog).getByLabelText("Password");
   const submit = within(dialog).getByRole("button", { name: "Sign in" });
   await user.click(email);
-  user.paste(userData.email);
+  await user.paste(userData.email);
 
   await user.click(password);
-  user.paste("foo");
+  await user.paste("foo");
 
   await user.click(submit);
   const alert = within(dialog).getByRole("alert");
