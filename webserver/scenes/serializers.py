@@ -25,3 +25,9 @@ class SceneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scene
         fields = ["items", "itemOrder", "title", "key", "author"]
+
+
+class MiniSceneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Scene
+        fields = ["title", "key"]

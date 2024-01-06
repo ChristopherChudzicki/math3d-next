@@ -2813,6 +2813,7 @@ __metadata:
     "@tanstack/react-query": ^5.8.4
     axios: ^0.27
     eslint: ^8.54.0
+    tiny-invariant: ^1.3.1
     vitest: ^1.1.0
   languageName: unknown
   linkType: soft
@@ -3609,10 +3610,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remix-run/router@npm:1.7.2":
-  version: 1.7.2
-  resolution: "@remix-run/router@npm:1.7.2"
-  checksum: ea43bb662f1f5c93965989b1667fb6e8a301cb69c44341ee92c81cb15ea685b494168e5905593b5777d59058f1455b4b58083d5b895f04382e49362e420d7af4
+"@remix-run/router@npm:1.14.1":
+  version: 1.14.1
+  resolution: "@remix-run/router@npm:1.14.1"
+  checksum: a3a0e7bd1917a4fd10322269b78ce1c5917a74889dfa747305b5a56e5d441b9187e1d8aaa6d58c4bf77713e7baca825f87057a64b2d21718cdb361f1cda75687
   languageName: node
   linkType: hard
 
@@ -5406,6 +5407,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-window@npm:^1.8.8":
+  version: 1.8.8
+  resolution: "@types/react-window@npm:1.8.8"
+  dependencies:
+    "@types/react": "*"
+  checksum: 253c9d6e0c942f34633edbddcbc369324403c42458ff004457c5bd5972961d8433a909c0cc1a89c918063d5eb85ecbdd774142af2555fae61f4ceb3ba9884b5a
+  languageName: node
+  linkType: hard
+
 "@types/react@npm:*":
   version: 18.2.14
   resolution: "@types/react@npm:18.2.14"
@@ -6564,11 +6574,11 @@ __metadata:
     "@types/node": 18.16.18
     "@types/react": 18.0.24
     "@types/react-dom": 18.0.8
+    "@types/react-window": ^1.8.8
     "@types/three": ^0.146.0
     "@types/tinycolor2": 1.4.3
     "@types/toposort": 2.0.3
     "@vitejs/plugin-react": ^4.2.1
-    axios: ^0.27
     bootstrap: 5.2.2
     classnames: 2.3.2
     eslint: ^8.54.0
@@ -6586,8 +6596,10 @@ __metadata:
     react: 18.2.0
     react-dom: 18.2.0
     react-hook-form: ^7.48.2
+    react-infinite-scroll-component: ^6.1.0
     react-redux: 8.0.7
-    react-router-dom: 6.14.2
+    react-router: ^6.21.1
+    react-router-dom: ^6.21.1
     redaxios: 0.5.1
     rollup-plugin-visualizer: 5.9.2
     tarjan-graph: 3.0.0
@@ -16133,6 +16145,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-infinite-scroll-component@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "react-infinite-scroll-component@npm:6.1.0"
+  dependencies:
+    throttle-debounce: ^2.1.0
+  peerDependencies:
+    react: ">=16.0.0"
+  checksum: 3708398934366df907dbad215247ebc1033221957ce7e32289ea31750cce70aa16513e2d03743e06c8b868ac7c542d12d5dbb6c830fd408433a4762f3cb5ecfb
+  languageName: node
+  linkType: hard
+
 "react-inspector@npm:^5.1.0":
   version: 5.1.1
   resolution: "react-inspector@npm:5.1.1"
@@ -16216,27 +16239,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:6.14.2":
-  version: 6.14.2
-  resolution: "react-router-dom@npm:6.14.2"
+"react-router-dom@npm:^6.21.1":
+  version: 6.21.1
+  resolution: "react-router-dom@npm:6.21.1"
   dependencies:
-    "@remix-run/router": 1.7.2
-    react-router: 6.14.2
+    "@remix-run/router": 1.14.1
+    react-router: 6.21.1
   peerDependencies:
     react: ">=16.8"
     react-dom: ">=16.8"
-  checksum: a53dbc566ecab7890b829d42d38553684f704803c1f615db1bd6aa2d71542c369a1a79e4385be31ae71a14b72ddbcd0d8b51188248c2bccd44e015050d1927df
+  checksum: d8ea3370babab626827008ced8a776ac991023745dc69d44332b6a5229dd2a6899f3e46fc50365cef0c7487cf726bcdccb365ec106915f92c735da6e4c2e6b97
   languageName: node
   linkType: hard
 
-"react-router@npm:6.14.2":
-  version: 6.14.2
-  resolution: "react-router@npm:6.14.2"
+"react-router@npm:6.21.1, react-router@npm:^6.21.1":
+  version: 6.21.1
+  resolution: "react-router@npm:6.21.1"
   dependencies:
-    "@remix-run/router": 1.7.2
+    "@remix-run/router": 1.14.1
   peerDependencies:
     react: ">=16.8"
-  checksum: 7507bf5732b3a8ddbd901c2061216eebca73e194449bff58acc1445171e22bdda36b455b8af066e467748ebfb5875b3c0a565941c46af65c6f653a6ed0dc4fe4
+  checksum: c6774cf4440b524401cecb40f4fbf4dbc89d61405f9f6d3cb3d2338e262a5254b9e27bc6039dc32e2c5f8b3009e83e9d6b30a61159dd6c423297cb0e3bd46fb3
   languageName: node
   linkType: hard
 
@@ -18300,6 +18323,13 @@ __metadata:
   peerDependencies:
     three: ">=0.118.0"
   checksum: 9cff4dcabff8e4a863e63f3eec8561dfcd96e92bc1d80f6a9e40fd5cf2609ed0a9c2455c17f8f4309e85c1be6b6672b818f802e55afd7b2cbcd4dd2d7e89377a
+  languageName: node
+  linkType: hard
+
+"throttle-debounce@npm:^2.1.0":
+  version: 2.3.0
+  resolution: "throttle-debounce@npm:2.3.0"
+  checksum: 6d90aa2ddb294f8dad13d854a1cfcd88fdb757469669a096a7da10f515ee466857ac1e750649cb9da931165c6f36feb448318e7cb92570f0a3679d20e860a925
   languageName: node
   linkType: hard
 

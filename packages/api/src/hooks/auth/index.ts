@@ -1,23 +1,14 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { AuthApi, Configuration, SendEmailResetRequest } from "../../generated";
+import { AuthApi, SendEmailResetRequest } from "../../generated";
 import type {
   TokenCreateRequest,
   UserCreatePasswordRetypeRequest,
   ActivationRequest,
   PasswordResetConfirmRetypeRequest,
 } from "../../generated";
+import { getConfig } from "../util";
 
-const config = new Configuration({
-  apiKey: async () => {
-    const token = JSON.parse(localStorage.getItem("apiToken") ?? "null");
-    return token ? `Token ${token}` : "";
-  },
-  basePath: import.meta.env.VITE_API_BASE_URL as string,
-});
-
-const authApi = new AuthApi(config);
-
-const API_TOKEN_KEY = "apiToken";
+const authApi = new AuthApi(getConfig());
 
 const useLogin = () => {
   return useMutation({
@@ -85,5 +76,4 @@ export {
   useActivateUser,
   useResetPassword,
   useResetPasswordConfirm,
-  API_TOKEN_KEY,
 };

@@ -1,0 +1,26 @@
+.tabList {
+  height: 48px;
+}
+.infiniteList:global(.MuiList-root) {
+  /* 48 for tabs, 61 for textfield */
+  height: calc(100vh - 48px - 62px);
+  overflow: auto;
+  padding-top: 0px;
+}
+
+.tabPanel:global(.MuiTabPanel-root) {
+  padding: 0px;
+  width: 300px;
+}
+
+.with-margin {
+  margin: 1rem;
+}
+
+.filter-input:global(.MuiTextField-root) {
+  margin-left: 16px;
+  margin-right: 16px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  width: calc(100% - 32px);
+}

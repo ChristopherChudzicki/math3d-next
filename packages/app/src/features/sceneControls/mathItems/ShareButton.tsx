@@ -2,7 +2,7 @@ import Button from "@mui/material/Button";
 import React, { useCallback, useId, useRef, useState } from "react";
 import CloudOutlinedIcon from "@mui/icons-material/CloudOutlined";
 import { useAppSelector } from "@/store/hooks";
-import { useCreateScene } from "@/api/scene";
+import { useCreateScene } from "@math3d/api";
 import Popover from "@mui/material/Popover";
 import type { PopoverProps } from "@mui/material/Popover";
 import { useToggle } from "@/util/hooks";
@@ -87,7 +87,9 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
   const createScene = useCreateScene();
   const handleClick = useCallback(async () => {
     toggleOpen.on();
-    const result = await createScene.mutateAsync(scene);
+    const result = await createScene.mutateAsync({
+      SceneRequest: scene,
+    });
     navigate({
       pathname: `/${result.key}`,
     });

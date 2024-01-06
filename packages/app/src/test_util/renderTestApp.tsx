@@ -1,15 +1,14 @@
 import { render, waitFor } from "@testing-library/react";
 import { createTheme } from "@mui/material/styles";
-import React, { useImperativeHandle } from "react";
-import { MemoryRouter, useLocation } from "react-router-dom";
-import type { Location } from "react-router";
+import React from "react";
+import { createMemoryRouter } from "react-router";
 import { getStore } from "@/store/store";
 
 import { InitialEntry } from "history";
 import { QueryClient } from "@tanstack/react-query";
-import invariant from "tiny-invariant";
 import { API_TOKEN_KEY } from "@math3d/api";
-import AppRoutes from "../app";
+import AppProviders from "@/AppProviders";
+import routes from "@/routes";
 import { seedDb } from "./msw/db";
 
 const waitForNotBusy = () =>
@@ -22,13 +21,6 @@ const waitForNotBusy = () =>
     },
     { timeout: 2000 },
   );
-
-const LocationSpy = React.forwardRef<Location>((_props, ref) => {
-  const location = useLocation();
-  useImperativeHandle(ref, () => location, [location]);
-  return null;
-});
-LocationSpy.displayName = "LocationSpy";
 
 /**
  * Render the app using a MemoryRouter instead of a BrowserRouter.
@@ -57,26 +49,27 @@ const renderTestApp = async (
     localStorage.setItem(API_TOKEN_KEY, `"${user.auth_token}"`);
   }
 
-  // React router v6 does not provide a good way to view location in tests.
-  const locationRef = { current: null as null | Location };
+  const router = createMemoryRouter(routes, { initialEntries });
   const result = render(
     <React.StrictMode>
-      <MemoryRouter initialEntries={initialEntries}>
-        <AppRoutes queryClient={queryClient} store={store} theme={theme} />
-        <LocationSpy
-          ref={(loc) => {
-            locationRef.current = loc;
-          }}
-        />
-      </MemoryRouter>
+      <AppProviders
+        queryClient={queryClient}
+        store={store}
+        theme={theme}
+        router={router}
+      />
     </React.StrictMode>,
   );
   if (waitForReady) {
     await waitForNotBusy();
   }
 
-  invariant(locationRef.current, "LocationSpy was not mounted.");
-  const location = locationRef as { current: Location };
+  const location = {
+    get current() {
+      return router.state.location;
+    },
+  };
+
   return { result, store, location, user };
 };
 

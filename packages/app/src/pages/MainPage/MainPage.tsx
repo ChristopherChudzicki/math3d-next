@@ -8,13 +8,12 @@ import {
 import Scene from "@/features/scene";
 import SceneControls from "@/features/sceneControls";
 import Sidebar from "@/util/components/sidebar";
-import { useBodyClass, useToggle } from "@/util/hooks";
+import { useBodyClass } from "@/util/hooks";
 import TitleInput from "@/features/sceneControls/TitleInput";
 
 import { ToggleKeyboardButton } from "@/features/virtualKeyboard";
 
 import styles from "./MainPage.module.css";
-import ExamplesDrawer from "./components/ExamplesDrawer";
 import Header from "./components/Header";
 
 type UseSearchEnumOptions<T extends string = string> = {
@@ -60,7 +59,6 @@ const CONTROLS_VALUES = ["0", "1"] as const;
 const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
   const { sceneKey } = useParams();
-  const [examplesOpen, toggleExamplesOpen] = useToggle(false);
   const [controlsVisibility, setControlsVisibility] = useSearchEnum({
     name: "controls",
     values: CONTROLS_VALUES,
@@ -79,7 +77,7 @@ const MainPage: React.FC = () => {
   );
   return (
     <div className={styles.container}>
-      <Header title={<TitleInput />} onClickExamples={toggleExamplesOpen.on} />
+      <Header title={<TitleInput />} />
       <div className={styles.body}>
         <Sidebar
           className={styles.sidebar}
@@ -90,7 +88,6 @@ const MainPage: React.FC = () => {
         >
           <SceneControls sceneKey={sceneKey} />
         </Sidebar>
-        <ExamplesDrawer open={examplesOpen} onClose={toggleExamplesOpen.off} />
         <Scene
           className={
             controlsOpen

@@ -43,7 +43,7 @@ def test_scenes_me_errors_for_anon_users():
     client = JsonAPIClient()
 
     response = client.get(reverse("scenes-me"))
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 @pytest.mark.django_db
@@ -80,7 +80,13 @@ def test_scene_partial_update(authenticated, authorized):
     url = reverse("scenes-detail", kwargs={"key": scene.key})
     data = {"title": new_title}
     response = client.patch(url, data)
-    expected_status_code = 200 if authenticated and authorized else 403
+
+    if not authenticated:
+        expected_status_code = 401
+    elif not authorized:
+        expected_status_code = 403
+    else:
+        expected_status_code = 200
     assert response.status_code == expected_status_code
 
     if authenticated and authorized:
@@ -101,9 +107,36 @@ def test_scene_delete_update(authenticated, authorized):
     url = reverse("scenes-detail", kwargs={"key": scene.key})
     data = {"title": new_title}
     response = client.delete(url, data)
-    expected_status_code = 204 if authenticated and authorized else 403
+    if not authenticated:
+        expected_status_code = 401
+    elif not authorized:
+        expected_status_code = 403
+    else:
+        expected_status_code = 204
     assert response.status_code == expected_status_code
 
     if authenticated and authorized:
         with pytest.raises(Scene.DoesNotExist):
             Scene.objects.get(key=scene.key)
+
+
+@pytest.mark.django_db
+def test_scenes_me_list_filtering():
+    user = CustomUserFactory.create()
+    scene_dogbark = SceneFactory.create(title="dog bark", author=user)
+    scene_dogwoof = SceneFactory.create(title="dog woof", author=user)
+    SceneFactory.create(title="cat meow", author=user)
+    client = JsonAPIClient()
+    client.force_authenticate(user)
+
+    unfiltered_response = client.get(reverse("scenes-me"))
+    unfiltered_data = unfiltered_response.json()
+    assert unfiltered_data["count"] == 3
+
+    filtered_response = client.get(reverse("scenes-me"), {"title": "dog"})
+    filtered_data = filtered_response.json()
+    assert filtered_data["count"] == 2
+    assert {scene["title"] for scene in filtered_data["results"]} == {
+        scene_dogbark.title,
+        scene_dogwoof.title,
+    }

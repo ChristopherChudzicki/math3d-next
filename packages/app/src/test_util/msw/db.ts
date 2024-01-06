@@ -1,5 +1,4 @@
 import { cloneDeep } from "lodash";
-import type { PartialBy } from "@math3d/utils";
 import { factory, primaryKey } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
 import { MathItem } from "@math3d/mathitem-configs";
@@ -22,6 +21,7 @@ const db = factory({
      * parse it (and re-stringify the whole body).
      */
     itemOrder: () => JSON.stringify({}),
+    author: faker.datatype.number,
   },
   user: {
     id: primaryKey(faker.datatype.number),
@@ -31,8 +31,6 @@ const db = factory({
     auth_token: faker.datatype.uuid,
   },
 });
-
-type PartialScene = PartialBy<Scene, "title" | "key">;
 
 type UserWithPassword = User & {
   // Real API response does not include password/token, of course, but we need it for
@@ -46,11 +44,13 @@ const addUser = (user?: Partial<UserWithPassword>): UserWithPassword => {
   return created;
 };
 
+type SceneRecord = Scene & { author?: number };
+
 /**
  * A wrapper around `db.scene.create` to fix some ts issues.
  */
-const addScene = (scene: PartialScene): Scene => {
-  const { itemOrder } = scene;
+const addScene = (scene?: Partial<SceneRecord>): Scene => {
+  const { itemOrder } = scene ?? {};
 
   // @ts-expect-error Having trouble with msw types
   const created = db.scene.create({
@@ -68,6 +68,10 @@ const seedDb = {
     Object.values(sceneFixtures).forEach((f) => addScene(f()));
   },
   withScene: addScene,
+  withScenes(count: number, overrides?: Partial<SceneRecord>): Scene[] {
+    const scenes = Array.from({ length: count });
+    return scenes.map(() => addScene(overrides));
+  },
   /**
    * Create a schene with given items in a single folder, in the given order
    */

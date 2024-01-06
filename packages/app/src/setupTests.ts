@@ -55,8 +55,10 @@ vitest.mock("./util/components/TextareaAutoWidthHeight/TextMeasurer");
 beforeAll(() => {
   server.listen({ onUnhandledRequest: "error" });
 });
+beforeEach(() => {
+  localStorage.clear();
+});
 afterEach(() => {
   server.resetHandlers();
-  localStorage.clear();
 });
 afterAll(() => server.close());

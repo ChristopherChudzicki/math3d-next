@@ -8,9 +8,8 @@ import {
   waitFor,
 } from "@/test_util";
 
-const getSignInLink = () => {
-  const nav = screen.getByRole("navigation", { hidden: true });
-  const signin = within(nav).getByRole("link", {
+const findSignInLink = async () => {
+  const signin = await screen.findByRole("link", {
     name: "Sign in",
     hidden: true,
   });
@@ -22,10 +21,10 @@ test("Login form logs user in", async () => {
 
   const { location } = await renderTestApp("/auth/login", {});
 
-  const signin = getSignInLink();
+  const signin = await findSignInLink();
   expect(signin).toBeInTheDocument();
 
-  const dialog = screen.getByRole("dialog");
+  const dialog = await screen.findByRole("dialog");
   const email = within(dialog).getByRole("textbox", { name: "Email" });
   const password = within(dialog).getByLabelText("Password");
   const submit = within(dialog).getByRole("button", { name: "Sign in" });
@@ -48,7 +47,8 @@ test("Login form displays error if password/email wrong", async () => {
   const userData = seedDb.withUser();
 
   await renderTestApp("/auth/login", {});
-  const dialog = screen.getByRole("dialog");
+
+  const dialog = await screen.findByRole("dialog");
 
   const email = within(dialog).getByRole("textbox", { name: "Email" });
   const password = within(dialog).getByLabelText("Password");
@@ -66,7 +66,7 @@ test("Login form displays error if password/email wrong", async () => {
   );
 
   // Sign-in link still visible
-  expect(getSignInLink()).toBeInTheDocument();
+  expect(await findSignInLink()).toBeInTheDocument();
   // Dialog still open
   expect(dialog).toBeInTheDocument();
 });

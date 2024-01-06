@@ -80,33 +80,52 @@ export interface ActivationRequest {
 /**
  *
  * @export
- * @interface PaginatedSceneList
+ * @interface MiniScene
  */
-export interface PaginatedSceneList {
+export interface MiniScene {
+  /**
+   *
+   * @type {string}
+   * @memberof MiniScene
+   */
+  title?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof MiniScene
+   */
+  key?: string;
+}
+/**
+ *
+ * @export
+ * @interface PaginatedMiniSceneList
+ */
+export interface PaginatedMiniSceneList {
   /**
    *
    * @type {number}
-   * @memberof PaginatedSceneList
+   * @memberof PaginatedMiniSceneList
    */
   count?: number;
   /**
    *
    * @type {string}
-   * @memberof PaginatedSceneList
+   * @memberof PaginatedMiniSceneList
    */
   next?: string | null;
   /**
    *
    * @type {string}
-   * @memberof PaginatedSceneList
+   * @memberof PaginatedMiniSceneList
    */
   previous?: string | null;
   /**
    *
-   * @type {Array<Scene>}
-   * @memberof PaginatedSceneList
+   * @type {Array<MiniScene>}
+   * @memberof PaginatedMiniSceneList
    */
-  results?: Array<Scene>;
+  results?: Array<MiniScene>;
 }
 /**
  *
@@ -2738,6 +2757,13 @@ export const ScenesApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
+      // authentication tokenAuth required
+      await setApiKeyToObject(
+        localVarHeaderParameter,
+        "Authorization",
+        configuration,
+      );
+
       localVarHeaderParameter["Content-Type"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -2790,6 +2816,13 @@ export const ScenesApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
+      // authentication tokenAuth required
+      await setApiKeyToObject(
+        localVarHeaderParameter,
+        "Authorization",
+        configuration,
+      );
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
         baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -2808,12 +2841,14 @@ export const ScenesApiAxiosParamCreator = function (
      *
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
+     * @param {string} [title]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     scenesList: async (
       limit?: number,
       offset?: number,
+      title?: string,
       options: AxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/v0/scenes/`;
@@ -2832,12 +2867,23 @@ export const ScenesApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
+      // authentication tokenAuth required
+      await setApiKeyToObject(
+        localVarHeaderParameter,
+        "Authorization",
+        configuration,
+      );
+
       if (limit !== undefined) {
         localVarQueryParameter["limit"] = limit;
       }
 
       if (offset !== undefined) {
         localVarQueryParameter["offset"] = offset;
+      }
+
+      if (title !== undefined) {
+        localVarQueryParameter["title"] = title;
       }
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -2858,12 +2904,14 @@ export const ScenesApiAxiosParamCreator = function (
      *
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
+     * @param {string} [title]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     scenesMeList: async (
       limit?: number,
       offset?: number,
+      title?: string,
       options: AxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/v0/scenes/me/`;
@@ -2882,12 +2930,23 @@ export const ScenesApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
+      // authentication tokenAuth required
+      await setApiKeyToObject(
+        localVarHeaderParameter,
+        "Authorization",
+        configuration,
+      );
+
       if (limit !== undefined) {
         localVarQueryParameter["limit"] = limit;
       }
 
       if (offset !== undefined) {
         localVarQueryParameter["offset"] = offset;
+      }
+
+      if (title !== undefined) {
+        localVarQueryParameter["title"] = title;
       }
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -2936,6 +2995,13 @@ export const ScenesApiAxiosParamCreator = function (
       };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
+
+      // authentication tokenAuth required
+      await setApiKeyToObject(
+        localVarHeaderParameter,
+        "Authorization",
+        configuration,
+      );
 
       localVarHeaderParameter["Content-Type"] = "application/json";
 
@@ -2988,6 +3054,13 @@ export const ScenesApiAxiosParamCreator = function (
       };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
+
+      // authentication tokenAuth required
+      await setApiKeyToObject(
+        localVarHeaderParameter,
+        "Authorization",
+        configuration,
+      );
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -3071,22 +3144,25 @@ export const ScenesApiFp = function (configuration?: Configuration) {
      *
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
+     * @param {string} [title]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async scenesList(
       limit?: number,
       offset?: number,
+      title?: string,
       options?: AxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
         basePath?: string,
-      ) => AxiosPromise<PaginatedSceneList>
+      ) => AxiosPromise<PaginatedMiniSceneList>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.scenesList(
         limit,
         offset,
+        title,
         options,
       );
       const index = configuration?.serverIndex ?? 0;
@@ -3104,22 +3180,25 @@ export const ScenesApiFp = function (configuration?: Configuration) {
      *
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
+     * @param {string} [title]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async scenesMeList(
       limit?: number,
       offset?: number,
+      title?: string,
       options?: AxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
         basePath?: string,
-      ) => AxiosPromise<PaginatedSceneList>
+      ) => AxiosPromise<PaginatedMiniSceneList>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.scenesMeList(
         limit,
         offset,
+        title,
         options,
       );
       const index = configuration?.serverIndex ?? 0;
@@ -3242,9 +3321,14 @@ export const ScenesApiFactory = function (
     scenesList(
       requestParameters: ScenesApiScenesListRequest = {},
       options?: AxiosRequestConfig,
-    ): AxiosPromise<PaginatedSceneList> {
+    ): AxiosPromise<PaginatedMiniSceneList> {
       return localVarFp
-        .scenesList(requestParameters.limit, requestParameters.offset, options)
+        .scenesList(
+          requestParameters.limit,
+          requestParameters.offset,
+          requestParameters.title,
+          options,
+        )
         .then((request) => request(axios, basePath));
     },
     /**
@@ -3256,11 +3340,12 @@ export const ScenesApiFactory = function (
     scenesMeList(
       requestParameters: ScenesApiScenesMeListRequest = {},
       options?: AxiosRequestConfig,
-    ): AxiosPromise<PaginatedSceneList> {
+    ): AxiosPromise<PaginatedMiniSceneList> {
       return localVarFp
         .scenesMeList(
           requestParameters.limit,
           requestParameters.offset,
+          requestParameters.title,
           options,
         )
         .then((request) => request(axios, basePath));
@@ -3347,6 +3432,13 @@ export interface ScenesApiScenesListRequest {
    * @memberof ScenesApiScenesList
    */
   readonly offset?: number;
+
+  /**
+   *
+   * @type {string}
+   * @memberof ScenesApiScenesList
+   */
+  readonly title?: string;
 }
 
 /**
@@ -3368,6 +3460,13 @@ export interface ScenesApiScenesMeListRequest {
    * @memberof ScenesApiScenesMeList
    */
   readonly offset?: number;
+
+  /**
+   *
+   * @type {string}
+   * @memberof ScenesApiScenesMeList
+   */
+  readonly title?: string;
 }
 
 /**
@@ -3456,7 +3555,12 @@ export class ScenesApi extends BaseAPI {
     options?: AxiosRequestConfig,
   ) {
     return ScenesApiFp(this.configuration)
-      .scenesList(requestParameters.limit, requestParameters.offset, options)
+      .scenesList(
+        requestParameters.limit,
+        requestParameters.offset,
+        requestParameters.title,
+        options,
+      )
       .then((request) => request(this.axios, this.basePath));
   }
 
@@ -3472,7 +3576,12 @@ export class ScenesApi extends BaseAPI {
     options?: AxiosRequestConfig,
   ) {
     return ScenesApiFp(this.configuration)
-      .scenesMeList(requestParameters.limit, requestParameters.offset, options)
+      .scenesMeList(
+        requestParameters.limit,
+        requestParameters.offset,
+        requestParameters.title,
+        options,
+      )
       .then((request) => request(this.axios, this.basePath));
   }
 
