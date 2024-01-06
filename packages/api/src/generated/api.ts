@@ -13,7 +13,7 @@
  */
 
 import type { Configuration } from "./configuration";
-import type { AxiosPromise, AxiosInstance, AxiosRequestConfig } from "axios";
+import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from "axios";
 import globalAxios from "axios";
 // Some imports not used depending on template conditions
 // @ts-ignore
@@ -526,7 +526,7 @@ export const AuthApiAxiosParamCreator = function (
      */
     authTokenLoginCreate: async (
       TokenCreateRequest?: TokenCreateRequest,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/v0/auth/token/login/`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -578,7 +578,7 @@ export const AuthApiAxiosParamCreator = function (
      * @throws {RequiredError}
      */
     authTokenLogoutCreate: async (
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/v0/auth/token/logout/`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -625,7 +625,7 @@ export const AuthApiAxiosParamCreator = function (
      */
     authUsersActivationCreate: async (
       ActivationRequest: ActivationRequest,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'ActivationRequest' is not null or undefined
       assertParamExists(
@@ -685,7 +685,7 @@ export const AuthApiAxiosParamCreator = function (
      */
     authUsersCreate: async (
       UserCreatePasswordRetypeRequest: UserCreatePasswordRetypeRequest,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'UserCreatePasswordRetypeRequest' is not null or undefined
       assertParamExists(
@@ -745,7 +745,7 @@ export const AuthApiAxiosParamCreator = function (
      */
     authUsersDestroy: async (
       id: number,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'id' is not null or undefined
       assertParamExists("authUsersDestroy", "id", id);
@@ -799,7 +799,7 @@ export const AuthApiAxiosParamCreator = function (
     authUsersList: async (
       limit?: number,
       offset?: number,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/v0/auth/users/`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -852,7 +852,7 @@ export const AuthApiAxiosParamCreator = function (
      * @throws {RequiredError}
      */
     authUsersMeDestroy: async (
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/v0/auth/users/me/`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -899,7 +899,7 @@ export const AuthApiAxiosParamCreator = function (
      */
     authUsersMePartialUpdate: async (
       PatchedUserRequest?: PatchedUserRequest,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/v0/auth/users/me/`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -951,7 +951,7 @@ export const AuthApiAxiosParamCreator = function (
      * @throws {RequiredError}
      */
     authUsersMeRetrieve: async (
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/v0/auth/users/me/`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -998,7 +998,7 @@ export const AuthApiAxiosParamCreator = function (
      */
     authUsersMeUpdate: async (
       UserRequest: UserRequest,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'UserRequest' is not null or undefined
       assertParamExists("authUsersMeUpdate", "UserRequest", UserRequest);
@@ -1056,7 +1056,7 @@ export const AuthApiAxiosParamCreator = function (
     authUsersPartialUpdate: async (
       id: number,
       PatchedUserRequest?: PatchedUserRequest,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'id' is not null or undefined
       assertParamExists("authUsersPartialUpdate", "id", id);
@@ -1115,7 +1115,7 @@ export const AuthApiAxiosParamCreator = function (
      */
     authUsersResendActivationCreate: async (
       SendEmailResetRequest: SendEmailResetRequest,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'SendEmailResetRequest' is not null or undefined
       assertParamExists(
@@ -1175,7 +1175,7 @@ export const AuthApiAxiosParamCreator = function (
      */
     authUsersResetPasswordConfirmCreate: async (
       PasswordResetConfirmRetypeRequest: PasswordResetConfirmRetypeRequest,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'PasswordResetConfirmRetypeRequest' is not null or undefined
       assertParamExists(
@@ -1235,7 +1235,7 @@ export const AuthApiAxiosParamCreator = function (
      */
     authUsersResetPasswordCreate: async (
       SendEmailResetRequest: SendEmailResetRequest,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'SendEmailResetRequest' is not null or undefined
       assertParamExists(
@@ -1295,7 +1295,7 @@ export const AuthApiAxiosParamCreator = function (
      */
     authUsersRetrieve: async (
       id: number,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'id' is not null or undefined
       assertParamExists("authUsersRetrieve", "id", id);
@@ -1347,7 +1347,7 @@ export const AuthApiAxiosParamCreator = function (
      */
     authUsersSetPasswordCreate: async (
       SetPasswordRetypeRequest: SetPasswordRetypeRequest,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'SetPasswordRetypeRequest' is not null or undefined
       assertParamExists(
@@ -1409,7 +1409,7 @@ export const AuthApiAxiosParamCreator = function (
     authUsersUpdate: async (
       id: number,
       UserRequest: UserRequest,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'id' is not null or undefined
       assertParamExists("authUsersUpdate", "id", id);
@@ -1480,7 +1480,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      */
     async authTokenLoginCreate(
       TokenCreateRequest?: TokenCreateRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<TokenCreate>
     > {
@@ -1506,7 +1506,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async authTokenLogoutCreate(
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
     > {
@@ -1531,7 +1531,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      */
     async authUsersActivationCreate(
       ActivationRequest: ActivationRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Activation>
     > {
@@ -1559,7 +1559,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      */
     async authUsersCreate(
       UserCreatePasswordRetypeRequest: UserCreatePasswordRetypeRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>
     > {
@@ -1586,7 +1586,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      */
     async authUsersDestroy(
       id: number,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
     > {
@@ -1613,7 +1613,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
     async authUsersList(
       limit?: number,
       offset?: number,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
@@ -1642,7 +1642,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async authUsersMeDestroy(
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
     > {
@@ -1667,7 +1667,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      */
     async authUsersMePartialUpdate(
       PatchedUserRequest?: PatchedUserRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>
     > {
@@ -1693,7 +1693,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async authUsersMeRetrieve(
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>
     > {
@@ -1718,7 +1718,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      */
     async authUsersMeUpdate(
       UserRequest: UserRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>
     > {
@@ -1745,7 +1745,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
     async authUsersPartialUpdate(
       id: number,
       PatchedUserRequest?: PatchedUserRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>
     > {
@@ -1774,7 +1774,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      */
     async authUsersResendActivationCreate(
       SendEmailResetRequest: SendEmailResetRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<SendEmailReset>
     > {
@@ -1803,7 +1803,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      */
     async authUsersResetPasswordConfirmCreate(
       PasswordResetConfirmRetypeRequest: PasswordResetConfirmRetypeRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
@@ -1836,7 +1836,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      */
     async authUsersResetPasswordCreate(
       SendEmailResetRequest: SendEmailResetRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<SendEmailReset>
     > {
@@ -1865,7 +1865,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      */
     async authUsersRetrieve(
       id: number,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>
     > {
@@ -1890,7 +1890,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
      */
     async authUsersSetPasswordCreate(
       SetPasswordRetypeRequest: SetPasswordRetypeRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
@@ -1923,7 +1923,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
     async authUsersUpdate(
       id: number,
       UserRequest: UserRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>
     > {
@@ -1965,7 +1965,7 @@ export const AuthApiFactory = function (
      */
     authTokenLoginCreate(
       requestParameters: AuthApiAuthTokenLoginCreateRequest = {},
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<TokenCreate> {
       return localVarFp
         .authTokenLoginCreate(requestParameters.TokenCreateRequest, options)
@@ -1976,7 +1976,7 @@ export const AuthApiFactory = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    authTokenLogoutCreate(options?: AxiosRequestConfig): AxiosPromise<void> {
+    authTokenLogoutCreate(options?: RawAxiosRequestConfig): AxiosPromise<void> {
       return localVarFp
         .authTokenLogoutCreate(options)
         .then((request) => request(axios, basePath));
@@ -1989,7 +1989,7 @@ export const AuthApiFactory = function (
      */
     authUsersActivationCreate(
       requestParameters: AuthApiAuthUsersActivationCreateRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<Activation> {
       return localVarFp
         .authUsersActivationCreate(requestParameters.ActivationRequest, options)
@@ -2003,7 +2003,7 @@ export const AuthApiFactory = function (
      */
     authUsersCreate(
       requestParameters: AuthApiAuthUsersCreateRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<User> {
       return localVarFp
         .authUsersCreate(
@@ -2020,7 +2020,7 @@ export const AuthApiFactory = function (
      */
     authUsersDestroy(
       requestParameters: AuthApiAuthUsersDestroyRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
         .authUsersDestroy(requestParameters.id, options)
@@ -2034,7 +2034,7 @@ export const AuthApiFactory = function (
      */
     authUsersList(
       requestParameters: AuthApiAuthUsersListRequest = {},
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<PaginatedUserList> {
       return localVarFp
         .authUsersList(
@@ -2049,7 +2049,7 @@ export const AuthApiFactory = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    authUsersMeDestroy(options?: AxiosRequestConfig): AxiosPromise<void> {
+    authUsersMeDestroy(options?: RawAxiosRequestConfig): AxiosPromise<void> {
       return localVarFp
         .authUsersMeDestroy(options)
         .then((request) => request(axios, basePath));
@@ -2062,7 +2062,7 @@ export const AuthApiFactory = function (
      */
     authUsersMePartialUpdate(
       requestParameters: AuthApiAuthUsersMePartialUpdateRequest = {},
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<User> {
       return localVarFp
         .authUsersMePartialUpdate(requestParameters.PatchedUserRequest, options)
@@ -2073,7 +2073,7 @@ export const AuthApiFactory = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    authUsersMeRetrieve(options?: AxiosRequestConfig): AxiosPromise<User> {
+    authUsersMeRetrieve(options?: RawAxiosRequestConfig): AxiosPromise<User> {
       return localVarFp
         .authUsersMeRetrieve(options)
         .then((request) => request(axios, basePath));
@@ -2086,7 +2086,7 @@ export const AuthApiFactory = function (
      */
     authUsersMeUpdate(
       requestParameters: AuthApiAuthUsersMeUpdateRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<User> {
       return localVarFp
         .authUsersMeUpdate(requestParameters.UserRequest, options)
@@ -2100,7 +2100,7 @@ export const AuthApiFactory = function (
      */
     authUsersPartialUpdate(
       requestParameters: AuthApiAuthUsersPartialUpdateRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<User> {
       return localVarFp
         .authUsersPartialUpdate(
@@ -2118,7 +2118,7 @@ export const AuthApiFactory = function (
      */
     authUsersResendActivationCreate(
       requestParameters: AuthApiAuthUsersResendActivationCreateRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<SendEmailReset> {
       return localVarFp
         .authUsersResendActivationCreate(
@@ -2135,7 +2135,7 @@ export const AuthApiFactory = function (
      */
     authUsersResetPasswordConfirmCreate(
       requestParameters: AuthApiAuthUsersResetPasswordConfirmCreateRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<PasswordResetConfirmRetype> {
       return localVarFp
         .authUsersResetPasswordConfirmCreate(
@@ -2152,7 +2152,7 @@ export const AuthApiFactory = function (
      */
     authUsersResetPasswordCreate(
       requestParameters: AuthApiAuthUsersResetPasswordCreateRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<SendEmailReset> {
       return localVarFp
         .authUsersResetPasswordCreate(
@@ -2169,7 +2169,7 @@ export const AuthApiFactory = function (
      */
     authUsersRetrieve(
       requestParameters: AuthApiAuthUsersRetrieveRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<User> {
       return localVarFp
         .authUsersRetrieve(requestParameters.id, options)
@@ -2183,7 +2183,7 @@ export const AuthApiFactory = function (
      */
     authUsersSetPasswordCreate(
       requestParameters: AuthApiAuthUsersSetPasswordCreateRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<SetPasswordRetype> {
       return localVarFp
         .authUsersSetPasswordCreate(
@@ -2200,7 +2200,7 @@ export const AuthApiFactory = function (
      */
     authUsersUpdate(
       requestParameters: AuthApiAuthUsersUpdateRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<User> {
       return localVarFp
         .authUsersUpdate(
@@ -2446,7 +2446,7 @@ export class AuthApi extends BaseAPI {
    */
   public authTokenLoginCreate(
     requestParameters: AuthApiAuthTokenLoginCreateRequest = {},
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authTokenLoginCreate(requestParameters.TokenCreateRequest, options)
@@ -2459,7 +2459,7 @@ export class AuthApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof AuthApi
    */
-  public authTokenLogoutCreate(options?: AxiosRequestConfig) {
+  public authTokenLogoutCreate(options?: RawAxiosRequestConfig) {
     return AuthApiFp(this.configuration)
       .authTokenLogoutCreate(options)
       .then((request) => request(this.axios, this.basePath));
@@ -2474,7 +2474,7 @@ export class AuthApi extends BaseAPI {
    */
   public authUsersActivationCreate(
     requestParameters: AuthApiAuthUsersActivationCreateRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authUsersActivationCreate(requestParameters.ActivationRequest, options)
@@ -2490,7 +2490,7 @@ export class AuthApi extends BaseAPI {
    */
   public authUsersCreate(
     requestParameters: AuthApiAuthUsersCreateRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authUsersCreate(
@@ -2509,7 +2509,7 @@ export class AuthApi extends BaseAPI {
    */
   public authUsersDestroy(
     requestParameters: AuthApiAuthUsersDestroyRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authUsersDestroy(requestParameters.id, options)
@@ -2525,7 +2525,7 @@ export class AuthApi extends BaseAPI {
    */
   public authUsersList(
     requestParameters: AuthApiAuthUsersListRequest = {},
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authUsersList(requestParameters.limit, requestParameters.offset, options)
@@ -2538,7 +2538,7 @@ export class AuthApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof AuthApi
    */
-  public authUsersMeDestroy(options?: AxiosRequestConfig) {
+  public authUsersMeDestroy(options?: RawAxiosRequestConfig) {
     return AuthApiFp(this.configuration)
       .authUsersMeDestroy(options)
       .then((request) => request(this.axios, this.basePath));
@@ -2553,7 +2553,7 @@ export class AuthApi extends BaseAPI {
    */
   public authUsersMePartialUpdate(
     requestParameters: AuthApiAuthUsersMePartialUpdateRequest = {},
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authUsersMePartialUpdate(requestParameters.PatchedUserRequest, options)
@@ -2566,7 +2566,7 @@ export class AuthApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof AuthApi
    */
-  public authUsersMeRetrieve(options?: AxiosRequestConfig) {
+  public authUsersMeRetrieve(options?: RawAxiosRequestConfig) {
     return AuthApiFp(this.configuration)
       .authUsersMeRetrieve(options)
       .then((request) => request(this.axios, this.basePath));
@@ -2581,7 +2581,7 @@ export class AuthApi extends BaseAPI {
    */
   public authUsersMeUpdate(
     requestParameters: AuthApiAuthUsersMeUpdateRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authUsersMeUpdate(requestParameters.UserRequest, options)
@@ -2597,7 +2597,7 @@ export class AuthApi extends BaseAPI {
    */
   public authUsersPartialUpdate(
     requestParameters: AuthApiAuthUsersPartialUpdateRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authUsersPartialUpdate(
@@ -2617,7 +2617,7 @@ export class AuthApi extends BaseAPI {
    */
   public authUsersResendActivationCreate(
     requestParameters: AuthApiAuthUsersResendActivationCreateRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authUsersResendActivationCreate(
@@ -2636,7 +2636,7 @@ export class AuthApi extends BaseAPI {
    */
   public authUsersResetPasswordConfirmCreate(
     requestParameters: AuthApiAuthUsersResetPasswordConfirmCreateRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authUsersResetPasswordConfirmCreate(
@@ -2655,7 +2655,7 @@ export class AuthApi extends BaseAPI {
    */
   public authUsersResetPasswordCreate(
     requestParameters: AuthApiAuthUsersResetPasswordCreateRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authUsersResetPasswordCreate(
@@ -2674,7 +2674,7 @@ export class AuthApi extends BaseAPI {
    */
   public authUsersRetrieve(
     requestParameters: AuthApiAuthUsersRetrieveRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authUsersRetrieve(requestParameters.id, options)
@@ -2690,7 +2690,7 @@ export class AuthApi extends BaseAPI {
    */
   public authUsersSetPasswordCreate(
     requestParameters: AuthApiAuthUsersSetPasswordCreateRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authUsersSetPasswordCreate(
@@ -2709,7 +2709,7 @@ export class AuthApi extends BaseAPI {
    */
   public authUsersUpdate(
     requestParameters: AuthApiAuthUsersUpdateRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
       .authUsersUpdate(
@@ -2737,7 +2737,7 @@ export const ScenesApiAxiosParamCreator = function (
      */
     scenesCreate: async (
       SceneRequest: SceneRequest,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'SceneRequest' is not null or undefined
       assertParamExists("scenesCreate", "SceneRequest", SceneRequest);
@@ -2793,7 +2793,7 @@ export const ScenesApiAxiosParamCreator = function (
      */
     scenesDestroy: async (
       key: string,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'key' is not null or undefined
       assertParamExists("scenesDestroy", "key", key);
@@ -2849,7 +2849,7 @@ export const ScenesApiAxiosParamCreator = function (
       limit?: number,
       offset?: number,
       title?: string,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/v0/scenes/`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -2912,7 +2912,7 @@ export const ScenesApiAxiosParamCreator = function (
       limit?: number,
       offset?: number,
       title?: string,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/v0/scenes/me/`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -2973,7 +2973,7 @@ export const ScenesApiAxiosParamCreator = function (
     scenesPartialUpdate: async (
       key: string,
       PatchedSceneRequest?: PatchedSceneRequest,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'key' is not null or undefined
       assertParamExists("scenesPartialUpdate", "key", key);
@@ -3032,7 +3032,7 @@ export const ScenesApiAxiosParamCreator = function (
      */
     scenesRetrieve: async (
       key: string,
-      options: AxiosRequestConfig = {},
+      options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'key' is not null or undefined
       assertParamExists("scenesRetrieve", "key", key);
@@ -3094,7 +3094,7 @@ export const ScenesApiFp = function (configuration?: Configuration) {
      */
     async scenesCreate(
       SceneRequest: SceneRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Scene>
     > {
@@ -3121,7 +3121,7 @@ export const ScenesApiFp = function (configuration?: Configuration) {
      */
     async scenesDestroy(
       key: string,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
     > {
@@ -3152,7 +3152,7 @@ export const ScenesApiFp = function (configuration?: Configuration) {
       limit?: number,
       offset?: number,
       title?: string,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
@@ -3188,7 +3188,7 @@ export const ScenesApiFp = function (configuration?: Configuration) {
       limit?: number,
       offset?: number,
       title?: string,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (
         axios?: AxiosInstance,
@@ -3222,7 +3222,7 @@ export const ScenesApiFp = function (configuration?: Configuration) {
     async scenesPartialUpdate(
       key: string,
       PatchedSceneRequest?: PatchedSceneRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Scene>
     > {
@@ -3251,7 +3251,7 @@ export const ScenesApiFp = function (configuration?: Configuration) {
      */
     async scenesRetrieve(
       key: string,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Scene>
     > {
@@ -3292,7 +3292,7 @@ export const ScenesApiFactory = function (
      */
     scenesCreate(
       requestParameters: ScenesApiScenesCreateRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<Scene> {
       return localVarFp
         .scenesCreate(requestParameters.SceneRequest, options)
@@ -3306,7 +3306,7 @@ export const ScenesApiFactory = function (
      */
     scenesDestroy(
       requestParameters: ScenesApiScenesDestroyRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
         .scenesDestroy(requestParameters.key, options)
@@ -3320,7 +3320,7 @@ export const ScenesApiFactory = function (
      */
     scenesList(
       requestParameters: ScenesApiScenesListRequest = {},
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<PaginatedMiniSceneList> {
       return localVarFp
         .scenesList(
@@ -3339,7 +3339,7 @@ export const ScenesApiFactory = function (
      */
     scenesMeList(
       requestParameters: ScenesApiScenesMeListRequest = {},
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<PaginatedMiniSceneList> {
       return localVarFp
         .scenesMeList(
@@ -3358,7 +3358,7 @@ export const ScenesApiFactory = function (
      */
     scenesPartialUpdate(
       requestParameters: ScenesApiScenesPartialUpdateRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<Scene> {
       return localVarFp
         .scenesPartialUpdate(
@@ -3376,7 +3376,7 @@ export const ScenesApiFactory = function (
      */
     scenesRetrieve(
       requestParameters: ScenesApiScenesRetrieveRequest,
-      options?: AxiosRequestConfig,
+      options?: RawAxiosRequestConfig,
     ): AxiosPromise<Scene> {
       return localVarFp
         .scenesRetrieve(requestParameters.key, options)
@@ -3520,7 +3520,7 @@ export class ScenesApi extends BaseAPI {
    */
   public scenesCreate(
     requestParameters: ScenesApiScenesCreateRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return ScenesApiFp(this.configuration)
       .scenesCreate(requestParameters.SceneRequest, options)
@@ -3536,7 +3536,7 @@ export class ScenesApi extends BaseAPI {
    */
   public scenesDestroy(
     requestParameters: ScenesApiScenesDestroyRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return ScenesApiFp(this.configuration)
       .scenesDestroy(requestParameters.key, options)
@@ -3552,7 +3552,7 @@ export class ScenesApi extends BaseAPI {
    */
   public scenesList(
     requestParameters: ScenesApiScenesListRequest = {},
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return ScenesApiFp(this.configuration)
       .scenesList(
@@ -3573,7 +3573,7 @@ export class ScenesApi extends BaseAPI {
    */
   public scenesMeList(
     requestParameters: ScenesApiScenesMeListRequest = {},
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return ScenesApiFp(this.configuration)
       .scenesMeList(
@@ -3594,7 +3594,7 @@ export class ScenesApi extends BaseAPI {
    */
   public scenesPartialUpdate(
     requestParameters: ScenesApiScenesPartialUpdateRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return ScenesApiFp(this.configuration)
       .scenesPartialUpdate(
@@ -3614,7 +3614,7 @@ export class ScenesApi extends BaseAPI {
    */
   public scenesRetrieve(
     requestParameters: ScenesApiScenesRetrieveRequest,
-    options?: AxiosRequestConfig,
+    options?: RawAxiosRequestConfig,
   ) {
     return ScenesApiFp(this.configuration)
       .scenesRetrieve(requestParameters.key, options)
