@@ -1,5 +1,4 @@
 import { cloneDeep } from "lodash";
-import type { PartialBy } from "@math3d/utils";
 import { factory, primaryKey } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
 import { MathItem } from "@math3d/mathitem-configs";
