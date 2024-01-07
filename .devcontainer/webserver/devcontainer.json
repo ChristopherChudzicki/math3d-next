@@ -1,0 +1,33 @@
+// This file describes a development container, e.g., for use in an IDE.
+// For more, see
+//  - https://aka.ms/devcontainer.json
+//  - https://code.visualstudio.com/docs/devcontainers/containers
+{
+  "name": "Existing Dockerfile",
+  "build": {
+    "context": "../..",
+    "dockerfile": "../../Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      // Extensions you want in all containers can also be set in the
+      // User Settings `Dev Containers: Default Extensions` field.
+      "extensions": ["ms-python.python"]
+    }
+  }
+
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  // "features": {},
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
+
+  // Uncomment the next line to run commands after the container is created.
+  // "postCreateCommand": "cat /etc/os-release",
+
+  // Configure tool-specific properties.
+  // "customizations": {},
+
+  // Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "devcontainer"
+}
