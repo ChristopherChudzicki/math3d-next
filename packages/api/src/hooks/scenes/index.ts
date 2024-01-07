@@ -3,6 +3,7 @@ import {
   UseInfiniteQueryOptions,
   useMutation,
   useQuery,
+  useQueryClient,
   UseQueryOptions,
 } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
@@ -12,9 +13,11 @@ import { getConfig } from "../util";
 
 const scenesApi = new ScenesApi(getConfig());
 
+const detailKey = (key?: string) => ["scenes", "detail", key];
+
 const useScene = (key?: string, opts?: Pick<UseQueryOptions, "enabled">) => {
   return useQuery({
-    queryKey: ["scenes", "detail", key],
+    queryKey: detailKey(key),
     queryFn: () => {
       invariant(key, "When useScene is enabled, key is required");
       return scenesApi.scenesRetrieve({ key }).then((res) => res.data);
@@ -23,13 +26,7 @@ const useScene = (key?: string, opts?: Pick<UseQueryOptions, "enabled">) => {
   });
 };
 
-const useCreateScene = () => {
-  return useMutation({
-    mutationFn: (data: ScenesApiScenesCreateRequest) => {
-      return scenesApi.scenesCreate(data).then((res) => res.data);
-    },
-  });
-};
+const meListKey = () => ["scenes", "me"];
 
 const useInfiniteScenesMe = (
   {
@@ -40,7 +37,7 @@ const useInfiniteScenesMe = (
   opts: Pick<UseInfiniteQueryOptions, "enabled"> = {},
 ) => {
   return useInfiniteQuery({
-    queryKey: ["scenes", "me", { limit, offset, title }],
+    queryKey: [...meListKey(), { limit, offset, title }],
     initialPageParam: offset,
     queryFn: ({ pageParam }) =>
       scenesApi
@@ -56,6 +53,20 @@ const useInfiniteScenesMe = (
       return Number(url.searchParams.get("offset"));
     },
     ...opts,
+  });
+};
+
+const useCreateScene = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ScenesApiScenesCreateRequest) => {
+      return scenesApi.scenesCreate(data).then((res) => res.data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: meListKey(),
+      });
+    },
   });
 };
 
