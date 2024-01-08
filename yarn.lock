@@ -5502,10 +5502,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/tinycolor2@npm:1.4.3":
-  version: 1.4.3
-  resolution: "@types/tinycolor2@npm:1.4.3"
-  checksum: 61984b2825d4ee902016ef24777787bb2fb9e4999ccd4f7e5a709442c00cf90ba4afa510b9c78f18dcc83c03305d597d5fe3825a6aad38354f95c68af70ebc1b
+"@types/tinycolor2@npm:1.4.6":
+  version: 1.4.6
+  resolution: "@types/tinycolor2@npm:1.4.6"
+  checksum: 50179851b32dcf78e0b4b691350a61043d8a00c3a8176d8155a257b34bb937136ff5d7950c814dca3c832673c7b6dc835f89dd154e85ccec3a4d4eac3993ed84
   languageName: node
   linkType: hard
 
@@ -6578,7 +6578,7 @@ __metadata:
     "@types/react-dom": 18.0.8
     "@types/react-window": ^1.8.8
     "@types/three": ^0.146.0
-    "@types/tinycolor2": 1.4.3
+    "@types/tinycolor2": 1.4.6
     "@types/toposort": 2.0.3
     "@vitejs/plugin-react": ^4.2.1
     axios: ^1.6.5
