@@ -5509,10 +5509,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/toposort@npm:2.0.3":
-  version: 2.0.3
-  resolution: "@types/toposort@npm:2.0.3"
-  checksum: 018a372a899fd417d67ed85cb98bd3f15915020b865257b9e795e443bcfa0df79c6c44693ba88cbdd9e54ca872cecb91bf46764ec03c5b63968b2234804d14d2
+"@types/toposort@npm:2.0.7":
+  version: 2.0.7
+  resolution: "@types/toposort@npm:2.0.7"
+  checksum: 7424224e96675419f4f2adb1c2f26d2cc94da9f0af7afb6c67e434a6929ff895fbffc6707ec75fe7169df2af73f9fd573c282ae7db991513909a4c5fc03be9f1
   languageName: node
   linkType: hard
 
@@ -6579,7 +6579,7 @@ __metadata:
     "@types/react-window": ^1.8.8
     "@types/three": ^0.146.0
     "@types/tinycolor2": 1.4.6
-    "@types/toposort": 2.0.3
+    "@types/toposort": 2.0.7
     "@vitejs/plugin-react": ^4.2.1
     axios: ^1.6.5
     bootstrap: 5.2.2

@@ -97,7 +97,7 @@
     "@types/react-window": "^1.8.8",
     "@types/three": "^0.146.0",
     "@types/tinycolor2": "1.4.6",
-    "@types/toposort": "2.0.3",
+    "@types/toposort": "2.0.7",
     "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^8.54.0",
     "identity-obj-proxy": "3.0.0",
