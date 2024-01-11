@@ -95,6 +95,24 @@ export interface MiniScene {
    * @memberof MiniScene
    */
   key?: string;
+  /**
+   *
+   * @type {number}
+   * @memberof MiniScene
+   */
+  author?: number | null;
+  /**
+   *
+   * @type {string}
+   * @memberof MiniScene
+   */
+  created_date: string;
+  /**
+   *
+   * @type {string}
+   * @memberof MiniScene
+   */
+  modified_date: string;
 }
 /**
  *
@@ -294,6 +312,18 @@ export interface Scene {
    * @memberof Scene
    */
   key?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof Scene
+   */
+  created_date: string;
+  /**
+   *
+   * @type {string}
+   * @memberof Scene
+   */
+  modified_date: string;
 }
 /**
  *

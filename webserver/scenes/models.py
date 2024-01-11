@@ -10,6 +10,7 @@ from django.contrib.postgres.indexes import GinIndex
 from scenes.validators import JtdValidator
 from authentication.models import CustomUser
 
+
 items_schema = jtd.Schema.from_dict(
     yaml.safe_load(
         Path(
@@ -49,7 +50,8 @@ class Scene(models.Model):
     key = models.CharField(max_length=80, unique=True, default=random_key)
     items = models.JSONField(validators=[JtdValidator(limit_value=items_schema)])
     item_order = models.JSONField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    modified_date = models.DateTimeField(auto_now=True)
     title = models.TextField(blank=True, default="Untitled")
     author = models.ForeignKey(
         CustomUser, blank=True, null=True, on_delete=models.CASCADE
