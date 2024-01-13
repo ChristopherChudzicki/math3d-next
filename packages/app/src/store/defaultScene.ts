@@ -1,7 +1,7 @@
 import { MathItemType } from "@math3d/mathitem-configs";
 import { Scene } from "@/types";
 
-const defaultScene: Omit<Scene, "key"> = {
+const defaultScene: Pick<Scene, "title" | "items" | "itemOrder"> = {
   title: "Untitled",
   items: [
     {

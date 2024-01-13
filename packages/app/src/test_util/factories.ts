@@ -34,6 +34,8 @@ const sceneFromItems = (
     },
     title: faker.lorem.words(),
     key: faker.datatype.uuid(),
+    created_date: faker.date.past().toISOString(),
+    modified_date: faker.date.past().toISOString(),
     ...sceneProps,
   };
   return scene;

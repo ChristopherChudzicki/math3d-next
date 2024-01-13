@@ -1,5 +1,6 @@
 import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
 import { Scene } from "@/types";
+import { faker } from "@faker-js/faker/locale/en";
 import { makeItem } from "../factories";
 import { makeSceneFromItems } from "./util";
 
@@ -56,6 +57,8 @@ const makeFolderScene = (
       [f1]: [p2, p3],
       [f2]: [p4, p5],
     },
+    created_date: faker.date.past().toISOString(),
+    modified_date: faker.date.past().toISOString(),
   };
 };
 

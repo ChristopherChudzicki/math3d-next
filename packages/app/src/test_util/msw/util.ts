@@ -1,34 +1,29 @@
 import { MathItem, MathItemType } from "@math3d/mathitem-configs";
 import type { PartialBy } from "@math3d/utils";
 import type { Scene } from "@/types";
+import { faker } from "@faker-js/faker/locale/en";
 import { makeItem } from "../factories";
 
 type PartialScene = PartialBy<Scene, "title" | "key">;
 
-type SceneOptions = Partial<Pick<Scene, "key" | "title">>;
-
-function makeSceneFromItems(items: MathItem[]): PartialScene;
-function makeSceneFromItems<T extends SceneOptions>(
+function makeSceneFromItems(
   items: MathItem[],
-  options: T,
-): PartialScene & T;
-function makeSceneFromItems<T extends SceneOptions>(
-  items: MathItem[],
-  options?: T,
-): (PartialScene & T) | PartialScene {
+  options?: Partial<Omit<Scene, "items" | "itemOrder">>,
+): Scene {
   const folder = makeItem(MathItemType.Folder);
-  const scene: PartialScene = {
+  return {
     items: [folder, ...items],
     itemOrder: {
       main: [folder.id],
       [folder.id]: items.map((item) => item.id),
       setup: [],
     },
+    title: faker.lorem.words(),
+    created_date: faker.date.past().toISOString(),
+    modified_date: faker.date.past().toISOString(),
+    key: faker.datatype.uuid(),
+    ...options,
   };
-  if (options) {
-    return { ...scene, ...options };
-  }
-  return scene;
 }
 
 export { makeSceneFromItems };
