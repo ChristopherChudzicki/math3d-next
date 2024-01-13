@@ -29,3 +29,21 @@ def test_invalid_items_raise_validation_error():
     )
     with pytest.raises(ValidationError):
         scene.save()
+
+
+@pytest.mark.django_db
+def test_created_modified_timestamps():
+    data = default_scene()
+    scene = Scene(
+        key="fake2",
+        items=data["items"],
+        item_order=data["itemOrder"],
+        title=data["title"],
+    )
+    scene.save()
+
+    assert scene.created_date == scene.modified_date
+
+    scene.save()
+
+    assert scene.modified_date > scene.created_date
