@@ -4,7 +4,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
-import { useInfiniteScenesMe, MiniScene } from "@math3d/api";
+import { useInfiniteScenesMe } from "@math3d/api";
 import Link from "@/util/components/Link";
 import LoadingSpinner from "@/util/components/LoadingSpinner/LoadingSpinner";
 import Alert from "@mui/material/Alert";
