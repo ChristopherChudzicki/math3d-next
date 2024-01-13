@@ -603,17 +603,17 @@ components:
         author:
           type: integer
           nullable: true
-        created_date:
+        createdDate:
           type: string
           format: date-time
           readOnly: true
-        modified_date:
+        modifiedDate:
           type: string
           format: date-time
           readOnly: true
       required:
-      - created_date
-      - modified_date
+      - createdDate
+      - modifiedDate
     PaginatedMiniSceneList:
       type: object
       properties:
@@ -726,19 +726,19 @@ components:
         key:
           type: string
           maxLength: 80
-        created_date:
+        createdDate:
           type: string
           format: date-time
           readOnly: true
-        modified_date:
+        modifiedDate:
           type: string
           format: date-time
           readOnly: true
       required:
-      - created_date
+      - createdDate
       - itemOrder
       - items
-      - modified_date
+      - modifiedDate
     SceneRequest:
       type: object
       properties:

@@ -106,13 +106,13 @@ export interface MiniScene {
    * @type {string}
    * @memberof MiniScene
    */
-  created_date: string;
+  createdDate: string;
   /**
    *
    * @type {string}
    * @memberof MiniScene
    */
-  modified_date: string;
+  modifiedDate: string;
 }
 /**
  *
@@ -317,13 +317,13 @@ export interface Scene {
    * @type {string}
    * @memberof Scene
    */
-  created_date: string;
+  createdDate: string;
   /**
    *
    * @type {string}
    * @memberof Scene
    */
-  modified_date: string;
+  modifiedDate: string;
 }
 /**
  *

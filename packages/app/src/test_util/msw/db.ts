@@ -22,8 +22,8 @@ const db = factory({
      */
     itemOrder: () => JSON.stringify({}),
     author: faker.datatype.number,
-    created_date: () => faker.date.recent().toUTCString(),
-    modified_date: () => faker.date.recent().toUTCString(),
+    createdDate: () => faker.date.recent().toUTCString(),
+    modifiedDate: () => faker.date.recent().toUTCString(),
   },
   user: {
     id: primaryKey(faker.datatype.number),

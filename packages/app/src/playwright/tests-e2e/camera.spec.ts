@@ -32,8 +32,8 @@ const cameraScene = ({ camera, axisX, axisY, axisZ }: MakeSceneProps = {}) => {
       cameraFolder: ["camera"],
       initialFolder: [],
     },
-    created_date: faker.date.past().toISOString(),
-    modified_date: faker.date.past().toISOString(),
+    createdDate: faker.date.past().toISOString(),
+    modifiedDate: faker.date.past().toISOString(),
   };
 
   return scene;
