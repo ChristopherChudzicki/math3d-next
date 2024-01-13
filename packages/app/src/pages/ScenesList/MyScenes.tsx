@@ -13,6 +13,8 @@ import { debounce } from "lodash";
 import { useAuthStatus } from "@/features/auth";
 import styles from "./ScenesList.module.css";
 
+const { format } = new Intl.DateTimeFormat(navigator.languages[0]);
+
 type MyScenesListProps = {
   "aria-labelledby": string;
 };
@@ -90,7 +92,12 @@ const MyScenesList: React.FC<MyScenesListProps> = (props) => {
               key={item.key}
               href={`/${item.key}/scenes/me`}
             >
-              <ListItemText primary={item.title} secondary="Date here" />
+              <ListItemText
+                primary={item.title}
+                secondary={`Last modified: ${format(
+                  new Date(item.modifiedDate),
+                )}`}
+              />
             </ListItemButton>
           ))}
         </InfiniteScroll>

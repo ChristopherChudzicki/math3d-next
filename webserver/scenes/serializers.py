@@ -21,13 +21,26 @@ class SceneSerializer(serializers.ModelSerializer):
     author = serializers.HiddenField(
         default=CurrentUserDefaultOrNone(), allow_null=True, required=False
     )
+    createdDate = serializers.DateTimeField(source="created_date", read_only=True)
+    modifiedDate = serializers.DateTimeField(source="modified_date", read_only=True)
 
     class Meta:
         model = Scene
-        fields = ["items", "itemOrder", "title", "key", "author"]
+        fields = [
+            "items",
+            "itemOrder",
+            "title",
+            "key",
+            "author",
+            "createdDate",
+            "modifiedDate",
+        ]
 
 
 class MiniSceneSerializer(serializers.ModelSerializer):
+    createdDate = serializers.DateTimeField(source="created_date", read_only=True)
+    modifiedDate = serializers.DateTimeField(source="modified_date", read_only=True)
+
     class Meta:
         model = Scene
-        fields = ["title", "key"]
+        fields = ["title", "key", "author", "createdDate", "modifiedDate"]

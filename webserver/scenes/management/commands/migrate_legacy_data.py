@@ -68,18 +68,25 @@ class Command(BaseCommand):
             item_order["main"] = item_order["root"]
             del item_order["root"]
 
-            Scene.objects.update_or_create(
+            scene, _created = Scene.objects.update_or_create(
                 key=legacy_scene.key,
                 defaults={
                     "items": items,
                     "item_order": legacy_scene.dehydrated["sortableTree"],
-                    "created_at": legacy_scene.dehydrated["metadata"][
-                        "creationDate"
-                    ].replace('"', ""),
                     "title": legacy_scene.dehydrated["metadata"].get(
                         "title", "Untitled"
                     ),
                 },
+            )
+            # These are auto_now_add, auto_now columns and can't be modified
+            # in save()
+            Scene.objects.filter(pk=scene.id).update(
+                created_date=legacy_scene.dehydrated["metadata"][
+                    "creationDate"
+                ].replace('"', ""),
+                modified_date=legacy_scene.dehydrated["metadata"][
+                    "creationDate"
+                ].replace('"', ""),
             )
 
             legacy_scene.migration_note = "\n".join(

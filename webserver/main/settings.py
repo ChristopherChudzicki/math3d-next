@@ -213,7 +213,7 @@ ANYMAIL = {
 if MAILJET_API_KEY and MAILJET_SECRET_KEY:
     EMAIL_BACKEND = "anymail.backends.mailjet.EmailBackend"
 else:
-    logger.warn(
+    logger.warning(
         "MAILJET_API_KEY and MAILJET_SECRET_KEY settings not found. Using email console backend."
     )
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

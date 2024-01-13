@@ -22,6 +22,8 @@ const db = factory({
      */
     itemOrder: () => JSON.stringify({}),
     author: faker.datatype.number,
+    createdDate: () => faker.date.recent().toUTCString(),
+    modifiedDate: () => faker.date.recent().toUTCString(),
   },
   user: {
     id: primaryKey(faker.datatype.number),
@@ -58,9 +60,11 @@ const addScene = (scene?: Partial<SceneRecord>): Scene => {
     ...(itemOrder ? { itemOrder: JSON.stringify(itemOrder) } : {}),
   });
   const copy = cloneDeep(created);
-  copy.itemOrder = JSON.parse(copy.itemOrder);
-  // @ts-expect-error Having trouble with msw types
-  return copy as Scene;
+  const theScene: Scene = {
+    ...copy,
+    itemOrder: JSON.parse(copy.itemOrder),
+  };
+  return theScene;
 };
 
 const seedDb = {

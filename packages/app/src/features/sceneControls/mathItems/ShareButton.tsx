@@ -82,7 +82,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [url, setUrl] = useState("");
 
-  const scene = useAppSelector(select.scene());
+  const scene = useAppSelector(select.sceneInfo());
   const [open, toggleOpen] = useToggle(false);
   const createScene = useCreateScene();
   const handleClick = useCallback(async () => {

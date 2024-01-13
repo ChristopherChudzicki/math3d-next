@@ -600,6 +600,20 @@ components:
         key:
           type: string
           maxLength: 80
+        author:
+          type: integer
+          nullable: true
+        createdDate:
+          type: string
+          format: date-time
+          readOnly: true
+        modifiedDate:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdDate
+      - modifiedDate
     PaginatedMiniSceneList:
       type: object
       properties:
@@ -712,9 +726,19 @@ components:
         key:
           type: string
           maxLength: 80
+        createdDate:
+          type: string
+          format: date-time
+          readOnly: true
+        modifiedDate:
+          type: string
+          format: date-time
+          readOnly: true
       required:
+      - createdDate
       - itemOrder
       - items
+      - modifiedDate
     SceneRequest:
       type: object
       properties:
