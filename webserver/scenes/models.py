@@ -6,6 +6,7 @@ import jtd  # type: ignore
 import yaml
 from django.db import models
 from django.contrib.postgres.indexes import GinIndex
+from django.utils import timezone
 
 from scenes.validators import JtdValidator
 from authentication.models import CustomUser
@@ -42,7 +43,34 @@ def random_key(length=9):
     return "".join(random.choices(KEY_ALPHABET, k=length))
 
 
-class Scene(models.Model):
+class TimestampedModel(models.Model):
+    """
+    A base model with created_date and modified_date fields.
+
+    Similar behavior can be achieved with DateTimeField using auto_now_add and
+    auto_now. However, using auto_now and auto_now_add, on an initial save, the
+    created_date and modified_date fields are generated with different timestamp
+    function calls, resulting in slightly different times:
+    >>> model.save()
+    >>> s.modified_date - s.created_date
+    datetime.timedelta(microseconds=14)
+    """
+
+    created_date = models.DateTimeField(default=timezone.now)
+    modified_date = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        now = timezone.now()
+        if not self.id:
+            self.created_date = now
+        self.modified_date = now
+        return super().save()
+
+
+class Scene(TimestampedModel):
     """
     A Scene.
     """
@@ -50,8 +78,7 @@ class Scene(models.Model):
     key = models.CharField(max_length=80, unique=True, default=random_key)
     items = models.JSONField(validators=[JtdValidator(limit_value=items_schema)])
     item_order = models.JSONField()
-    created_date = models.DateTimeField(auto_now_add=True)
-    modified_date = models.DateTimeField(auto_now=True)
+
     title = models.TextField(blank=True, default="Untitled")
     author = models.ForeignKey(
         CustomUser, blank=True, null=True, on_delete=models.CASCADE
