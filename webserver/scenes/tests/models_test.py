@@ -13,7 +13,6 @@ def test_valid_items_are_saveable():
         items=data["items"],
         item_order=data["itemOrder"],
         title=data["title"],
-        created_at="2021-01-01 00:00:00",
     )
     scene.save()
 
@@ -27,7 +26,6 @@ def test_invalid_items_raise_validation_error():
         items=data["items"],
         item_order=data["itemOrder"],
         title=data["title"],
-        created_at="2021-01-01 00:00:00",
     )
     with pytest.raises(ValidationError):
         scene.save()
