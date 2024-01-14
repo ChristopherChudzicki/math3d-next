@@ -1,5 +1,5 @@
 import "test_util/network_polyfills";
-import { server } from "@math3d/mock-api";
+import { server } from "@math3d/mock-api/node";
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:

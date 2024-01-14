@@ -7,7 +7,8 @@ import {
   getDescribedBy,
 } from "@/test_util";
 import { faker } from "@faker-js/faker";
-import { mockResponseOnce, urls } from "@math3d/mock-api";
+import { urls } from "@math3d/mock-api";
+import { mockResponseOnce } from "@math3d/mock-api/node";
 
 type FormValues = {
   email: string;

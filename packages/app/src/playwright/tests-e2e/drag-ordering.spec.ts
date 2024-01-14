@@ -1,5 +1,5 @@
 import { test, expect, Locator, Page } from "@playwright/test";
-import { sceneFixtures } from "@/test_util/msw/fixtures";
+import { sceneFixtures } from "@math3d/mock-api";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {

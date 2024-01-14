@@ -18,9 +18,8 @@ window.math = math;
 
 const prepare = async () => {
   if (import.meta.env.VITE_USE_MSW) {
-    // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
-    const { worker } = await import("./test_util/msw/browser");
-    // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const { worker } = await import("@math3d/mock-api/browser");
     await worker.start();
   }
 };

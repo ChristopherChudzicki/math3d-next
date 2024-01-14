@@ -3,7 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./browser": "./src/browser/browser.ts",
+    "./node": "./src/node/node.ts"
+  },
   "main": "./src/index.ts",
   "devDependencies": {
     "@math3d/eslint-config": "workspace:^",

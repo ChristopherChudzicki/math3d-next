@@ -1,6 +1,7 @@
 {
   "extends": "@math3d/tsconfig/base.json",
   "compilerOptions": {
-    "rootDir": "."
+    "rootDir": ".",
+    "types": ["vite/client"]
   }
 }
