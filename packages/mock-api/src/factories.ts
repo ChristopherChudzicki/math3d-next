@@ -5,7 +5,7 @@ import {
 } from "@math3d/mathitem-configs";
 import type { StrictScene as Scene } from "@math3d/api";
 import { faker } from "@faker-js/faker/locale/en";
-import { uniqueId } from "lodash";
+import { uniqueId } from "lodash-es";
 
 const makeItem = <T extends MathItemType>(
   type: T,

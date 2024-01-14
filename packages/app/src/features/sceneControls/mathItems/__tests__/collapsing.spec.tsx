@@ -1,5 +1,5 @@
 import { renderTestApp, screen, user, within } from "@/test_util";
-import _ from "lodash";
+import _ from "lodash-es";
 import { addItem, getItemByDescription } from "./__utils__";
 
 /**

@@ -10,7 +10,7 @@ import {
   MathItemType,
 } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
-import { debounce } from "lodash";
+import { debounce } from "lodash-es";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   actions,

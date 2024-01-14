@@ -9,7 +9,7 @@ import Link from "@/util/components/Link";
 import LoadingSpinner from "@/util/components/LoadingSpinner/LoadingSpinner";
 import Alert from "@mui/material/Alert";
 import TextField from "@mui/material/TextField";
-import { debounce } from "lodash";
+import { debounce } from "lodash-es";
 import { useAuthStatus } from "@/features/auth";
 import styles from "./ScenesList.module.css";
 

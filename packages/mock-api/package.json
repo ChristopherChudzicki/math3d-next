@@ -6,20 +6,21 @@
   "exports": {
     ".": "./src/index.ts",
     "./browser": "./src/browser/browser.ts",
-    "./node": "./src/node/node.ts"
+    "./node": "./src/node/node.ts",
+    "./fixtures": "./src/fixtures.ts"
   },
   "main": "./src/index.ts",
   "devDependencies": {
     "@math3d/eslint-config": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
-    "@types/lodash": "^4.14.202",
+    "@types/lodash-es": "^4.17.12",
     "eslint": "^8.54.0"
   },
   "dependencies": {
     "@faker-js/faker": "7.6.0",
     "@math3d/mathitem-configs": "workspace:^",
     "@mswjs/data": "^0.16.1",
-    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "msw": "^2.0.14",
     "vitest": "^1.1.0"
   },
