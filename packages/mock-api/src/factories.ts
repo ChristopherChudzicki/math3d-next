@@ -3,14 +3,14 @@ import {
   mathItemConfigs,
   MathItemType,
 } from "@math3d/mathitem-configs";
-import idGenerator from "@/util/idGenerator";
 import type { StrictScene as Scene } from "@math3d/api";
 import { faker } from "@faker-js/faker/locale/en";
+import { uniqueId } from "lodash-es";
 
 const makeItem = <T extends MathItemType>(
   type: T,
   props: Partial<MathItem<T>["properties"]> = {},
-  id = idGenerator.next(),
+  id = uniqueId(),
 ): MathItem<T> => {
   const item = mathItemConfigs[type].make(id) as MathItem<T>;
   item.properties = {
@@ -20,7 +20,7 @@ const makeItem = <T extends MathItemType>(
   return item;
 };
 
-const sceneFromItems = (
+const makeSceneFromItems = (
   items: MathItem[],
   sceneProps: Partial<Omit<Scene, "items" | "itemOrder">> = {},
 ) => {
@@ -41,4 +41,4 @@ const sceneFromItems = (
   return scene;
 };
 
-export { makeItem, sceneFromItems };
+export { makeItem, makeSceneFromItems };

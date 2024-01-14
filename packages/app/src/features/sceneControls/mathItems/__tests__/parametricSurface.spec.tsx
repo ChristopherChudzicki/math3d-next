@@ -5,14 +5,13 @@ import {
 } from "@math3d/mathitem-configs";
 import {
   assertInstanceOf,
-  makeItem,
   nodeId,
   renderTestApp,
   screen,
-  seedDb,
   user,
   within,
 } from "@/test_util";
+import { seedDb, makeItem } from "@math3d/mock-api";
 import type { ParseableObjs, ParseableArray } from "@math3d/parser";
 import { DetailedAssignmentError } from "@math3d/parser";
 import invariant from "tiny-invariant";

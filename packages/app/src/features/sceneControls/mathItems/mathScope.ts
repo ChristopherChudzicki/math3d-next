@@ -6,7 +6,7 @@ import {
   PropertyConfig,
   WidgetType,
 } from "@math3d/mathitem-configs";
-import { filter as collectionFilter, pickBy } from "lodash";
+import { filter as collectionFilter, pickBy } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { OnChangeListener } from "@math3d/mathscope";
 import { AppMathScope, AppParseable } from "./mathItemsSlice/interfaces";

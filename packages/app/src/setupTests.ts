@@ -1,4 +1,5 @@
 import "test_util/network_polyfills";
+import { server } from "@math3d/mock-api/node";
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:
@@ -7,8 +8,6 @@ import "test_util/network_polyfills";
 import "@testing-library/jest-dom";
 
 import failOnConsole from "jest-fail-on-console";
-
-import { server } from "./test_util/msw/server";
 
 failOnConsole();
 

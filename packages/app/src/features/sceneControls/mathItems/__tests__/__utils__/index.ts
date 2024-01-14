@@ -4,12 +4,11 @@ import {
   within,
   user,
   assertInstanceOf,
-  makeItem,
-  seedDb,
   renderTestApp,
 } from "@/test_util";
 import invariant from "tiny-invariant";
 import type { RootState } from "@/store/store";
+import { seedDb, makeItem } from "@math3d/mock-api";
 
 const addItem = async (itemTypeLabel: string): Promise<void> => {
   const addNewItemButton = screen.getByText("Add Object");

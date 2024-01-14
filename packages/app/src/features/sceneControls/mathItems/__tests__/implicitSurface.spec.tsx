@@ -3,14 +3,8 @@ import {
   MathItemType as MIT,
   mathItemConfigs,
 } from "@math3d/mathitem-configs";
-import {
-  assertInstanceOf,
-  makeItem,
-  renderTestApp,
-  screen,
-  seedDb,
-  user,
-} from "@/test_util";
+import { assertInstanceOf, renderTestApp, screen, user } from "@/test_util";
+import { seedDb, makeItem } from "@math3d/mock-api";
 
 const config = mathItemConfigs[MIT.ImplicitSurface];
 

@@ -4,15 +4,14 @@ import { faker } from "@faker-js/faker";
 import {
   act,
   assertInstanceOf,
-  makeItem,
   renderTestApp,
-  seedDb,
   user,
   userWaits,
   waitFor,
   within,
   screen,
 } from "@/test_util";
+import { seedDb, makeItem } from "@math3d/mock-api";
 import type { ResolvePromise } from "@math3d/utils";
 import { ParseableObjs } from "@math3d/parser";
 import { getItemByDescription, findBtn } from "./__utils__";

@@ -10,13 +10,9 @@ import user from "@testing-library/user-event";
 import { makeItem } from "./factories";
 
 import renderTestApp from "./renderTestApp";
-import { seedDb } from "./msw/db";
-import { sceneKeys } from "./msw/fixtures";
 
 export * from "./test_util";
 export {
-  seedDb,
-  sceneKeys,
   act,
   fireEvent,
   makeItem,

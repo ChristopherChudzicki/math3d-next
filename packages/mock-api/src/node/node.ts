@@ -1,6 +1,11 @@
 import { http, HttpResponse } from "msw";
-import { urls } from "./handlers";
-import { server } from "./server";
+import { setupServer } from "msw/node";
+import { handlers } from "../handlers";
+
+/**
+ * A request-mocking server for use in NodeJS, e.g., integration tests.
+ */
+const server = setupServer(...handlers);
 
 const mockResponseOnce = ({
   status,
@@ -25,4 +30,4 @@ const mockResponseOnce = ({
   );
 };
 
-export { server, urls, mockResponseOnce };
+export { server, mockResponseOnce };

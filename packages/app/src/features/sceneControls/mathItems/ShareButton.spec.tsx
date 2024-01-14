@@ -1,13 +1,7 @@
 import { test, expect, vi } from "vitest";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import {
-  makeItem,
-  renderTestApp,
-  screen,
-  seedDb,
-  user,
-  waitFor,
-} from "@/test_util";
+import { renderTestApp, screen, user, waitFor } from "@/test_util";
+import { seedDb, makeItem } from "@math3d/mock-api";
 
 describe("Share Button", () => {
   beforeAll(() => {

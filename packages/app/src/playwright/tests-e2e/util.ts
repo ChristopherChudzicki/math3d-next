@@ -7,7 +7,7 @@ import type { Mathfield } from "mathlive";
  * so need to import the TS-only files directly
  */
 import { makeItem } from "@/test_util/factories";
-import { Scene } from "@/types";
+import type { StrictScene as Scene } from "@math3d/api";
 
 const getItemForm = (page: Page, item: MathItem): Locator => {
   return page.locator(

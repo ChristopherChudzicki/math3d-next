@@ -1,9 +1,9 @@
 import { useScene } from "@math3d/api";
+import type { StrictScene as Scene } from "@math3d/api";
 
 import React, { useEffect } from "react";
 import { useAppDispatch } from "@/store/hooks";
 
-import type { Scene } from "@/types";
 import defaultScene from "@/store/defaultScene";
 import AddObjectButton from "./AddObjectButton";
 import ControlTabs from "./controlTabs";

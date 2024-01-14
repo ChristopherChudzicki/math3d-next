@@ -3,6 +3,7 @@ import {
   LongPressCallback,
   LongPressOptions,
   LongPressResult,
+  LongPressHandlers,
   useLongPress,
 } from "use-long-press";
 
@@ -18,11 +19,11 @@ import {
  *
  * The hook returns the longPress context and a `lastPressWasLong` function.
  */
-export const useLongAndShortPress = <T = Element>(
+export const useLongAndShortPress = <T extends Element = Element>(
   longPressCb: LongPressCallback<T>,
   options?: LongPressOptions<T>,
 ): {
-  bind: (context?: unknown) => LongPressResult<T>;
+  bind: LongPressResult<LongPressHandlers<T>, unknown>;
   lastPressWasLong: () => boolean;
 } => {
   const wasLongPressedRef = useRef(false);

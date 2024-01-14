@@ -1,14 +1,6 @@
 import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
-import {
-  makeItem,
-  nodeId,
-  renderTestApp,
-  screen,
-  seedDb,
-  user,
-  act,
-  within,
-} from "@/test_util";
+import { nodeId, renderTestApp, screen, user, act, within } from "@/test_util";
+import { seedDb, makeItem } from "@math3d/mock-api";
 
 /**
  * Press and hold pointer on element for `ms` seconds.

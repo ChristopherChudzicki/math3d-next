@@ -1,5 +1,5 @@
 import type { SelectorReturn, RootState } from "@/store/store";
-import { Scene } from "@/types";
+import type { StrictScene as Scene } from "@math3d/api";
 import type { MathItem } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import type { MathItemsState, AppMathScope, Subtree } from "./interfaces";
