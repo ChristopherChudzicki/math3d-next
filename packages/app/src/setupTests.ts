@@ -1,6 +1,4 @@
-// JS-Dom does not include fetch.
-// See https://github.com/mswjs/examples/blob/master/examples/with-jest/jest.setup.js
-import "whatwg-fetch";
+import "test_util/network_polyfills";
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:
@@ -12,15 +10,7 @@ import failOnConsole from "jest-fail-on-console";
 
 import { server } from "./test_util/msw/server";
 
-failOnConsole({
-  silenceMessage: (msg) => {
-    const allowed = [
-      // This seems to come from whatwg-fetch sometimes even when MSW intercepts
-      /Network request failed/,
-    ];
-    return allowed.some((re) => re.test(msg));
-  },
-});
+failOnConsole();
 
 /**
  * For the JSDOM tests, we need to mock at least Mathbox, since it relies on a
