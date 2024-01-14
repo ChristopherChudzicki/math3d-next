@@ -164,7 +164,7 @@ export const handlers = [
       );
     }
     // The real API deletes the token, but that's not important for our tests.
-    return HttpResponse.json(null, { status: 204 });
+    return new HttpResponse(null, { status: 204 });
   }),
   http.post<
     NoParams,
@@ -190,7 +190,7 @@ export const handlers = [
       { status: 201 },
     );
   }),
-  http.post<NoParams, ActivationRequest, null>(
+  http.post<NoParams, ActivationRequest>(
     urls.auth.activation,
     async ({ request }) => {
       const { uid, token } = await request.json();
@@ -200,13 +200,13 @@ export const handlers = [
       if (typeof token !== "string") {
         throw new Error("token should be string");
       }
-      return HttpResponse.json(null, { status: 204 });
+      return new HttpResponse(null, { status: 204 });
     },
   ),
   http.post(urls.auth.resetPassword, async () => {
-    return HttpResponse.json(null, { status: 204 });
+    return new HttpResponse(null, { status: 204 });
   }),
   http.post(urls.auth.resetPasswordConfirm, async () => {
-    return HttpResponse.json(null, { status: 204 });
+    return new HttpResponse(null, { status: 204 });
   }),
 ];
