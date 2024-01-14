@@ -1,6 +1,5 @@
 import math from "@math3d/custom-mathjs";
-import countBy from "lodash/countBy";
-import pickBy from "lodash/pickBy";
+import { countBy, pickBy } from "lodash-es";
 import { AssignmentError } from "@math3d/mathscope";
 import { ParserRuleType, TextParserRule } from "../interfaces";
 
