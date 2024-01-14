@@ -1,6 +1,4 @@
-// JS-Dom does not include fetch.
-// See https://github.com/mswjs/examples/blob/master/examples/with-jest/jest.setup.js
-import "whatwg-fetch";
+import "polyfill";
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:

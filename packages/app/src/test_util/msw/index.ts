@@ -1,4 +1,4 @@
-import { rest } from "msw";
+import { http, HttpResponse } from "msw";
 import { urls } from "./handlers";
 import { server } from "./server";
 
@@ -15,9 +15,13 @@ const mockResponseOnce = ({
   data: any;
 }) => {
   server.use(
-    rest[method](url, (req, res, ctx) => {
-      return res.once(ctx.status(status), ctx.json(data));
-    }),
+    http[method](
+      url,
+      () => {
+        return HttpResponse.json(data, { status });
+      },
+      { once: true },
+    ),
   );
 };
 
