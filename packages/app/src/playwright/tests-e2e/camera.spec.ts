@@ -1,6 +1,6 @@
 import { MathItemType as MIT, MathItem } from "@math3d/mathitem-configs";
 import { makeItem } from "@/test_util/factories";
-import { Scene } from "@/types";
+import type { StrictScene as Scene } from "@math3d/api";
 import { test, expect, Page } from "@playwright/test";
 import { faker } from "@faker-js/faker/locale/en";
 import { Vector3 } from "three";

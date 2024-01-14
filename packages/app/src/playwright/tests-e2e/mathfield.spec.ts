@@ -13,10 +13,6 @@ test("Typing arrays into an empty <math-field />", async ({ page }) => {
     await route.fulfill({ json: scene });
   });
 
-  await page.addInitScript(() => {
-    window.$pwCustomSeed = true;
-  });
-
   await page.goto(`/${scene.key}`);
 
   const form = getItemForm(page, point);

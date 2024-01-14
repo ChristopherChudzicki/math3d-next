@@ -9,7 +9,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { API_TOKEN_KEY } from "@math3d/api";
 import AppProviders from "@/AppProviders";
 import routes from "@/routes";
-import { seedDb } from "./msw/db";
+import { seedDb } from "@math3d/mock-api";
 
 const waitForNotBusy = () =>
   waitFor(

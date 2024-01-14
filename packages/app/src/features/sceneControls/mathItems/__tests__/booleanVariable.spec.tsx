@@ -1,13 +1,6 @@
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import {
-  makeItem,
-  nodeId,
-  renderTestApp,
-  screen,
-  seedDb,
-  user,
-  within,
-} from "@/test_util";
+import { nodeId, renderTestApp, screen, user, within } from "@/test_util";
+import { seedDb, makeItem } from "@math3d/mock-api";
 import { getItemByDescription } from "./__utils__";
 
 test("left-hand parse errors are indicated on left-hand side", async () => {

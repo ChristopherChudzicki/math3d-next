@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { renderTestApp, screen, user, within } from "@/test_util";
 import { faker } from "@faker-js/faker/locale/en";
-import { mockResponseOnce, urls } from "@/test_util/msw";
+import { mockResponseOnce, urls } from "@math3d/mock-api";
 
 test("Authorization form happy path: API call, success indication, & log in", async () => {
   const token = faker.datatype.uuid();

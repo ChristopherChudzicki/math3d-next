@@ -1,14 +1,13 @@
 import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
 import {
-  makeItem,
   nodeId,
   pasteText,
   renderTestApp,
   screen,
-  seedDb,
   user,
   within,
 } from "@/test_util";
+import { seedDb, makeItem } from "@math3d/mock-api";
 import { assertNotNil } from "@/util/predicates";
 import { getItemByDescription } from "./__utils__";
 

@@ -8,7 +8,7 @@ import {
   within,
 } from "@/test_util";
 import invariant from "tiny-invariant";
-import { mockResponseOnce, urls } from "@/test_util/msw";
+import { mockResponseOnce, urls } from "@math3d/mock-api";
 
 type FormValues = {
   password: string;

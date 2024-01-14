@@ -1,13 +1,7 @@
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import {
-  makeItem,
-  renderTestApp,
-  screen,
-  seedDb,
-  user,
-  within,
-} from "@/test_util";
+import { renderTestApp, screen, user, within } from "@/test_util";
 import _ from "lodash";
+import { seedDb, makeItem } from "@math3d/mock-api";
 import {
   addItem,
   clickRemoveItem,

@@ -12,6 +12,7 @@
     "lint": "eslint \"**/*.ts?(x)\""
   },
   "dependencies": {
+    "@math3d/mathitem-configs": "workspace:^",
     "@tanstack/react-query": "^5.8.4",
     "axios": "^1.6.5",
     "tiny-invariant": "^1.3.1"

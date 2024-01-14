@@ -1,5 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { urls } from "./handlers";
+import { seedDb } from "./db";
+import { makeItem } from "./factories";
 import { server } from "./server";
 
 const mockResponseOnce = ({
@@ -25,4 +27,4 @@ const mockResponseOnce = ({
   );
 };
 
-export { server, urls, mockResponseOnce };
+export { seedDb, urls, mockResponseOnce, makeItem, server };

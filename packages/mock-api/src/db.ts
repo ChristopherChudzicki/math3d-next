@@ -2,9 +2,9 @@ import { cloneDeep } from "lodash";
 import { factory, primaryKey } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
 import { MathItem } from "@math3d/mathitem-configs";
-import type { Scene } from "@/types";
-import type { User } from "@math3d/api";
-import { sceneFromItems } from "../factories";
+import type { StrictScene as Scene, User } from "@math3d/api";
+
+import { makeSceneFromItems } from "./factories";
 import { sceneFixtures } from "./fixtures";
 
 const db = factory({
@@ -80,7 +80,7 @@ const seedDb = {
    * Create a schene with given items in a single folder, in the given order
    */
   withSceneFromItems: (items: MathItem[], { key }: { key?: string } = {}) => {
-    const scene = sceneFromItems(items, { key });
+    const scene = makeSceneFromItems(items, { key });
     return addScene(scene);
   },
   withUser: addUser,

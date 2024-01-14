@@ -1,8 +1,8 @@
 import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
-import { Scene } from "@/types";
 import { faker } from "@faker-js/faker/locale/en";
-import { makeItem } from "../factories";
-import { makeSceneFromItems } from "./util";
+import type { StrictScene as Scene } from "@math3d/api";
+
+import { makeItem, makeSceneFromItems } from "./factories";
 
 const sceneKeys = {
   /**
