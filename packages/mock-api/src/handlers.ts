@@ -25,7 +25,7 @@ const getUser = (req: Request) => {
   return user;
 };
 
-const BASE_URL: string = import.meta.env.VITE_API_BASE_URL;
+const BASE_URL: string = import.meta.env?.VITE_API_BASE_URL ?? "";
 
 type NoParams = Record<string, never>;
 export const urls = {

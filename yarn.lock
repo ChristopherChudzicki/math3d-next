@@ -6629,6 +6629,7 @@ __metadata:
     mathlive: ^0.95.5
     msw: ^2.0.14
     ordinal: 1.0.3
+    playwright-msw: ^3.0.1
     react: 18.2.0
     react-dom: 18.2.0
     react-hook-form: ^7.48.2
@@ -15460,6 +15461,19 @@ __metadata:
   bin:
     playwright-core: cli.js
   checksum: be91857b1bb56890b3929ed8cd529f5f5abe4b748f709abc8dbe5b0ee4c0e158247c3958fbccec6a52394dafe4619bc0e69c93d1b129a71b31ab3697771e4c5a
+  languageName: node
+  linkType: hard
+
+"playwright-msw@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "playwright-msw@npm:3.0.1"
+  dependencies:
+    "@mswjs/cookies": ^1.1.0
+    strict-event-emitter: ^0.5.1
+  peerDependencies:
+    "@playwright/test": ">=1.20.0"
+    msw: ^2.0.0
+  checksum: c1017bfac271be1c3d95989e848f04902439517c96a5cb066e9998b8c7c6493edf51a13878274932e8bd4a86e48ee80fd25fddf2208059b8dcdd9ef58669faea
   languageName: node
   linkType: hard
 

@@ -1,5 +1,5 @@
-import { test, expect, Locator, Page } from "@playwright/test";
-import { sceneFixtures } from "@math3d/mock-api/fixtures";
+import { Locator, Page } from "@playwright/test";
+import { test, expect } from "@/playwright/test";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
@@ -75,12 +75,6 @@ const initialOrder = [
 ];
 
 test("Dragging item X after item Y", async ({ page }) => {
-  // Mock the api call before navigating
-  await page.route("*/**/v0/scenes/test_folders/", async (route) => {
-    const json = sceneFixtures.test_folders();
-    await route.fulfill({ json });
-  });
-
   await page.goto("/test_folders");
   const source = getItem(page, "F2", "P2a");
   const target = getItem(page, "F3", "P3b");
@@ -94,11 +88,6 @@ test("Dragging item X after item Y", async ({ page }) => {
 });
 
 test("Dragging item X before item Y", async ({ page }) => {
-  await page.route("*/**/v0/scenes/test_folders/", async (route) => {
-    const json = sceneFixtures.test_folders();
-    await route.fulfill({ json });
-  });
-
   await page.goto("/test_folders");
   const source = getItem(page, "F3", "P3b");
   const target = getItem(page, "F2", "P2b");
@@ -112,11 +101,6 @@ test("Dragging item X before item Y", async ({ page }) => {
 });
 
 test("Dragging folder X after folder Y", async ({ page }) => {
-  await page.route("*/**/v0/scenes/test_folders/", async (route) => {
-    const json = sceneFixtures.test_folders();
-    await route.fulfill({ json });
-  });
-
   await page.goto("/test_folders");
   const source = getItem(page, "F2");
   const target = getItem(page, "F3");
@@ -130,11 +114,6 @@ test("Dragging folder X after folder Y", async ({ page }) => {
 });
 
 test("Dragging folder X before folder Y", async ({ page }) => {
-  await page.route("*/**/v0/scenes/test_folders/", async (route) => {
-    const json = sceneFixtures.test_folders();
-    await route.fulfill({ json });
-  });
-
   await page.goto("/test_folders");
   const source = getItem(page, "F3");
   const target = getItem(page, "F2");

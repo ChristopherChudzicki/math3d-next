@@ -1,10 +1,11 @@
 import { MathItemType as MIT, MathItem } from "@math3d/mathitem-configs";
-import { makeItem } from "@/test_util/factories";
 import type { StrictScene as Scene } from "@math3d/api";
-import { test, expect, Page } from "@playwright/test";
+import { Page } from "@playwright/test";
+import { test, expect } from "@/playwright/test";
 import { faker } from "@faker-js/faker/locale/en";
 import { Vector3 } from "three";
-import { mockScene, whenMathboxRendered } from "./util";
+import { makeItem, seedDb } from "@math3d/mock-api";
+import { whenMathboxRendered } from "./util";
 
 type MakeSceneProps = {
   camera?: Partial<MathItem<MIT.Camera>["properties"]>;
@@ -68,7 +69,7 @@ test("Setting camera position/target using UI coordinates", async ({
     axisY: { min: "-4", max: "4" },
     axisZ: { min: "-8", max: "8" },
   });
-  await mockScene(page, scene);
+  seedDb.withScene(scene);
   await page.goto(`/${scene.key}`);
   const position = await getCameraPosition(page);
   expect(position.x).toBeCloseTo(0.5);
@@ -94,7 +95,7 @@ test("`useRelative: true` sets camera position/target using ThreeJS coordinates"
     axisY: { min: "-4", max: "4" },
     axisZ: { min: "-8", max: "8" },
   });
-  await mockScene(page, scene);
+  seedDb.withScene(scene);
   await page.goto(`/${scene.key}`);
   const position = await getCameraPosition(page);
   expect(position.x).toBeCloseTo(1);
@@ -126,7 +127,7 @@ test("isOrthographic: true does a dollyZoom", async ({ page }) => {
   const zoomFactor = 40 - 1;
   const expectedCameraPos = expectedPos.add(diff.multiplyScalar(zoomFactor));
 
-  await mockScene(page, scene);
+  seedDb.withScene(scene);
   await page.goto(`/${scene.key}`);
   const cameraPos = await getCameraPosition(page);
   expect(cameraPos.x).toBeCloseTo(expectedCameraPos.x);
@@ -161,7 +162,7 @@ test("isOrthographic: true does a dollyZoom with useRelative: true", async ({
   const zoomFactor = 40 - 1;
   const expectedCameraPos = expectedPos.add(diff.multiplyScalar(zoomFactor));
 
-  await mockScene(page, scene);
+  seedDb.withScene(scene);
   await page.goto(`/${scene.key}`);
   const cameraPos = await getCameraPosition(page);
   expect(cameraPos.x).toBeCloseTo(expectedCameraPos.x);

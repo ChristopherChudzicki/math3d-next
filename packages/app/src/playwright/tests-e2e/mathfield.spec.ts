@@ -1,17 +1,13 @@
-import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
-
+import { test, expect } from "@/playwright/test";
+import { makeItem, seedDb } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 
-import { makeItem, sceneFromItems } from "@/test_util/factories";
 import { getItemForm, getLatex } from "./util";
 
 test("Typing arrays into an empty <math-field />", async ({ page }) => {
   const point = makeItem(MIT.Point, { description: "SomePoint", coords: "" });
-  const scene = sceneFromItems([point]);
-  await page.route(`*/**/v0/scenes/${scene.key}/`, async (route) => {
-    await route.fulfill({ json: scene });
-  });
+  const scene = seedDb.withSceneFromItems([point]);
 
   await page.goto(`/${scene.key}`);
 

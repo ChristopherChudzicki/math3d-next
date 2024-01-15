@@ -2,11 +2,6 @@ import { MathItem } from "@math3d/mathitem-configs";
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 import type { Mathfield } from "mathlive";
-/**
- * Importing from "@/test_util" includes some TSX which Playwright can't handle,
- * so need to import the TS-only files directly
- */
-import { makeItem } from "@/test_util/factories";
 import type { StrictScene as Scene } from "@math3d/api";
 
 const getItemForm = (page: Page, item: MathItem): Locator => {
@@ -51,4 +46,4 @@ const whenMathboxRendered = (page: Page) =>
     expect(exists).toBe(true);
   }).toPass();
 
-export { getItemForm, makeItem, getLatex, mockScene, whenMathboxRendered };
+export { getItemForm, getLatex, mockScene, whenMathboxRendered };
