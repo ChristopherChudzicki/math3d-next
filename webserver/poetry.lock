@@ -594,13 +594,13 @@ markdown = ["types-Markdown (>=0.1.5)"]
 
 [[package]]
 name = "djoser"
-version = "2.2.0"
+version = "2.2.2"
 description = "REST implementation of Django authentication system."
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "djoser-2.2.0-py3-none-any.whl", hash = "sha256:7b24718cdc51b4294b0abcf6bf0ead11aa3ca83652e351dfb04b7b8b15afa3b0"},
-    {file = "djoser-2.2.0.tar.gz", hash = "sha256:4aa48502df870c8b5f07109ad4a749cc881c37bb5efa85cf5462ea695a0dca8c"},
+    {file = "djoser-2.2.2-py3-none-any.whl", hash = "sha256:efb91ad61e4d5b8d664db029b5947df9d34078289ef2680a1ab665e047144b74"},
+    {file = "djoser-2.2.2.tar.gz", hash = "sha256:9deb831a1c8781ceff325699e1407b4e1be8b4588e87071621d88ba31c09349f"},
 ]
 
 [package.dependencies]
