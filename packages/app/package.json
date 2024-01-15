@@ -103,7 +103,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^8.54.0",
     "identity-obj-proxy": "3.0.0",
-    "jest-fail-on-console": "3.1.1",
+    "jest-fail-on-console": "3.1.2",
     "jsdom": "^20.0.3",
     "msw": "^2.0.14",
     "rollup-plugin-visualizer": "5.9.2",
