@@ -1,5 +1,4 @@
-import type { PlaywrightTestConfig } from "@playwright/test";
-import { devices } from "@playwright/test";
+import { defineConfig, devices } from "@playwright/test";
 
 const DEV_SERVER_PORT = 3000;
 

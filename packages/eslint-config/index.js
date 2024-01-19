@@ -59,6 +59,8 @@ module.exports = {
           "**/src/playwright/**",
           "**/src/test_util/**/*.ts",
           "**/src/test_util/**/*.tsx",
+          "**/mock-api/**",
+          "**/app-tests-e2e/**",
         ],
       },
     ],
