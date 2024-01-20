@@ -262,12 +262,6 @@ export interface PatchedSceneRequest {
    * @memberof PatchedSceneRequest
    */
   title?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PatchedSceneRequest
-   */
-  key?: string;
 }
 /**
  *
@@ -311,7 +305,7 @@ export interface Scene {
    * @type {string}
    * @memberof Scene
    */
-  key?: string;
+  key: string;
   /**
    *
    * @type {string}
@@ -349,12 +343,6 @@ export interface SceneRequest {
    * @memberof SceneRequest
    */
   title?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof SceneRequest
-   */
-  key?: string;
 }
 /**
  *

@@ -131,9 +131,21 @@ class SceneBuilder implements IScene {
       { axis: "z", scale: "1/2" },
       ids.axisZ,
     );
-    const gridXY = makeItem(MathItemType.Grid, { axes: "xy" }, ids.gridXY);
-    const gridYZ = makeItem(MathItemType.Grid, { axes: "yz" }, ids.gridYZ);
-    const gridZX = makeItem(MathItemType.Grid, { axes: "zx" }, ids.gridZX);
+    const gridXY = makeItem(
+      MathItemType.Grid,
+      { axes: "xy", visible: "true" },
+      ids.gridXY,
+    );
+    const gridYZ = makeItem(
+      MathItemType.Grid,
+      { axes: "yz", visible: "false" },
+      ids.gridYZ,
+    );
+    const gridZX = makeItem(
+      MathItemType.Grid,
+      { axes: "zx", visible: "false" },
+      ids.gridZX,
+    );
     addItemToScene(this, ids.axesFolder, axisX);
     addItemToScene(this, ids.axesFolder, axisY);
     addItemToScene(this, ids.axesFolder, axisZ);

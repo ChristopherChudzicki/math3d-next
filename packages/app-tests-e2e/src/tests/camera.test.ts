@@ -1,44 +1,9 @@
-import { MathItemType as MIT, MathItem } from "@math3d/mathitem-configs";
-import type { StrictScene as Scene } from "@math3d/api";
-import { Page } from "@playwright/test";
-import { test, expect } from "@/playwright/test";
-import { faker } from "@faker-js/faker/locale/en";
+import type { Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { Vector3 } from "three";
-import { makeItem, seedDb } from "@math3d/mock-api";
-import { whenMathboxRendered } from "./util";
-
-type MakeSceneProps = {
-  camera?: Partial<MathItem<MIT.Camera>["properties"]>;
-  axisX?: Partial<MathItem<MIT.Axis>["properties"]>;
-  axisY?: Partial<MathItem<MIT.Axis>["properties"]>;
-  axisZ?: Partial<MathItem<MIT.Axis>["properties"]>;
-};
-const cameraScene = ({ camera, axisX, axisY, axisZ }: MakeSceneProps = {}) => {
-  const scene: Scene = {
-    key: faker.datatype.uuid(),
-    title: "Camera Tests",
-    items: [
-      makeItem(MIT.Camera, camera, "camera"),
-      makeItem(MIT.Axis, { axis: "x", ...axisX }, "axis-x"),
-      makeItem(MIT.Axis, { axis: "y", ...axisY }, "axis-y"),
-      makeItem(MIT.Axis, { axis: "z", ...axisZ }, "axis-z"),
-      makeItem(MIT.Folder, { description: "Camera Controls" }, "cameraFolder"),
-      makeItem(MIT.Folder, { description: "Axes and Grids" }, "axes"),
-      makeItem(MIT.Folder, { description: "A Folder" }, "initialFolder"),
-    ],
-    itemOrder: {
-      axes: ["axis-x", "axis-y", "axis-z"],
-      main: ["initialFolder"],
-      setup: ["cameraFolder", "axes"],
-      cameraFolder: ["camera"],
-      initialFolder: [],
-    },
-    createdDate: faker.date.past().toISOString(),
-    modifiedDate: faker.date.past().toISOString(),
-  };
-
-  return scene;
-};
+import { SceneBuilder } from "@math3d/mock-api";
+import { test } from "@/fixtures/users";
+import { whenMathboxRendered } from "@/utilities";
 
 const getCameraPosition = async (
   page: Page,
@@ -60,17 +25,19 @@ const getControlsTarget = async (
   });
 };
 
+test.use({ user: "dynamic" });
+
 test("Setting camera position/target using UI coordinates", async ({
   page,
+  prepareScene,
 }) => {
-  const scene = cameraScene({
-    camera: { position: "[1, 3, 2]", target: "[-0.5, 2, 6]" },
-    axisX: { min: "-2", max: "2" },
-    axisY: { min: "-4", max: "4" },
-    axisZ: { min: "-8", max: "8" },
-  });
-  seedDb.withScene(scene);
-  await page.goto(`/${scene.key}`);
+  const scene = new SceneBuilder();
+  scene.axis("x", { min: "-2", max: "2" });
+  scene.axis("y", { min: "-4", max: "4" });
+  scene.axis("z", { min: "-8", max: "8" });
+  scene.camera({ position: "[1, 3, 2]", target: "[-0.5, 2, 6]" });
+  const key = await prepareScene(scene.json());
+  await page.goto(`/${key}`);
   const position = await getCameraPosition(page);
   expect(position.x).toBeCloseTo(0.5);
   expect(position.y).toBeCloseTo(0.75);
@@ -84,19 +51,20 @@ test("Setting camera position/target using UI coordinates", async ({
 
 test("`useRelative: true` sets camera position/target using ThreeJS coordinates", async ({
   page,
+  prepareScene,
 }) => {
-  const scene = cameraScene({
-    camera: {
-      position: "[1, 3, 2]",
-      target: "[-0.5, 2, 6]",
-      useRelative: "true",
-    },
-    axisX: { min: "-2", max: "2" },
-    axisY: { min: "-4", max: "4" },
-    axisZ: { min: "-8", max: "8" },
+  const scene = new SceneBuilder();
+  scene.axis("x", { min: "-2", max: "2" });
+  scene.axis("y", { min: "-4", max: "4" });
+  scene.axis("z", { min: "-8", max: "8" });
+  scene.camera({
+    position: "[1, 3, 2]",
+    target: "[-0.5, 2, 6]",
+    useRelative: "true",
   });
-  seedDb.withScene(scene);
-  await page.goto(`/${scene.key}`);
+  const key = await prepareScene(scene.json());
+  await page.goto(`/${key}`);
+
   const position = await getCameraPosition(page);
   expect(position.x).toBeCloseTo(1);
   expect(position.y).toBeCloseTo(3);
@@ -108,17 +76,21 @@ test("`useRelative: true` sets camera position/target using ThreeJS coordinates"
   expect(target.z).toBeCloseTo(6);
 });
 
-test("isOrthographic: true does a dollyZoom", async ({ page }) => {
-  const scene = cameraScene({
-    camera: {
-      position: "[1, 3, 2]",
-      target: "[-0.5, 2, 6]",
-      isOrthographic: "true",
-    },
-    axisX: { min: "-2", max: "2" },
-    axisY: { min: "-4", max: "4" },
-    axisZ: { min: "-8", max: "8" },
+test("isOrthographic: true does a dollyZoom", async ({
+  page,
+  prepareScene,
+}) => {
+  const scene = new SceneBuilder();
+  scene.axis("x", { min: "-2", max: "2" });
+  scene.axis("y", { min: "-4", max: "4" });
+  scene.axis("z", { min: "-8", max: "8" });
+  scene.camera({
+    position: "[1, 3, 2]",
+    target: "[-0.5, 2, 6]",
+    isOrthographic: "true",
   });
+  const key = await prepareScene(scene.json());
+  await page.goto(`/${key}`);
 
   // position and target in scaled coordinates
   const expectedPos = new Vector3(1 / 2, 3 / 4, 2 / 8);
@@ -127,8 +99,6 @@ test("isOrthographic: true does a dollyZoom", async ({ page }) => {
   const zoomFactor = 40 - 1;
   const expectedCameraPos = expectedPos.add(diff.multiplyScalar(zoomFactor));
 
-  seedDb.withScene(scene);
-  await page.goto(`/${scene.key}`);
   const cameraPos = await getCameraPosition(page);
   expect(cameraPos.x).toBeCloseTo(expectedCameraPos.x);
   expect(cameraPos.y).toBeCloseTo(expectedCameraPos.y);
@@ -142,18 +112,19 @@ test("isOrthographic: true does a dollyZoom", async ({ page }) => {
 
 test("isOrthographic: true does a dollyZoom with useRelative: true", async ({
   page,
+  prepareScene,
 }) => {
-  const scene = cameraScene({
-    camera: {
-      position: "[1, 3, 2]",
-      target: "[-0.5, 2, 6]",
-      isOrthographic: "true",
-      useRelative: "true",
-    },
-    axisX: { min: "-2", max: "2" },
-    axisY: { min: "-4", max: "4" },
-    axisZ: { min: "-8", max: "8" },
+  const scene = new SceneBuilder();
+  scene.axis("x", { min: "-2", max: "2" });
+  scene.axis("y", { min: "-4", max: "4" });
+  scene.axis("z", { min: "-8", max: "8" });
+  scene.camera({
+    position: "[1, 3, 2]",
+    target: "[-0.5, 2, 6]",
+    isOrthographic: "true",
+    useRelative: "true",
   });
+  const key = await prepareScene(scene.json());
 
   // position and target in scaled coordinates
   const expectedPos = new Vector3(1, 3, 2);
@@ -162,8 +133,7 @@ test("isOrthographic: true does a dollyZoom with useRelative: true", async ({
   const zoomFactor = 40 - 1;
   const expectedCameraPos = expectedPos.add(diff.multiplyScalar(zoomFactor));
 
-  seedDb.withScene(scene);
-  await page.goto(`/${scene.key}`);
+  await page.goto(`/${key}`);
   const cameraPos = await getCameraPosition(page);
   expect(cameraPos.x).toBeCloseTo(expectedCameraPos.x);
   expect(cameraPos.y).toBeCloseTo(expectedCameraPos.y);
