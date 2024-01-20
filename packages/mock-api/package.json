@@ -27,5 +27,8 @@
     "typecheck": "tsc --noEmit",
     "test-watch": "vitest",
     "lint": "eslint \"**/*.ts?(x)\""
+  },
+  "dependencies": {
+    "tiny-invariant": "^1.3.1"
   }
 }
