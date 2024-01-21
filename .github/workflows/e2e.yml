@@ -1,4 +1,4 @@
-name: Frontend Playwright Tests
+name: End-to-end Tests
 
 on:
   push:
@@ -10,7 +10,7 @@ env:
   CI: True
 
 jobs:
-  test:
+  e2e-tests:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     environment: "ci"
