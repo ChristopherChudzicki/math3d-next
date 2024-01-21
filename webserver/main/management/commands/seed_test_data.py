@@ -50,6 +50,14 @@ class Command(BaseCommand):
 
         for j in range(TEST_SCENE_COUNT):
             title = title = f"Test Scene {j}"
-            s = Scene.objects.get(title=title, author=user_1)
-            s.items = test_scene["items"]
-            s.item_order = test_scene["itemOrder"]
+            s = Scene.objects.filter(title=title, author=user_1).first()
+            if s:
+                s.items = test_scene["items"]
+                s.item_order = test_scene["itemOrder"]
+            else:
+                Scene.objects.create(
+                    title=title,
+                    author=user_1,
+                    items=test_scene["items"],
+                    item_order=test_scene["itemOrder"],
+                )

@@ -6569,6 +6569,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "app-tests-e2e@workspace:packages/app-tests-e2e"
   dependencies:
+    "@faker-js/faker": "npm:7.6.0"
     "@math3d/api": "workspace:^"
     "@math3d/mock-api": "workspace:^"
     "@playwright/test": "npm:^1.41.0"
@@ -6609,7 +6610,6 @@ __metadata:
     "@mui/icons-material": "npm:5.14.1"
     "@mui/lab": "npm:5.0.0-alpha.137"
     "@mui/material": "npm:^5.14.18"
-    "@playwright/test": "npm:^1.41.0"
     "@popperjs/core": "npm:2.11.8"
     "@reduxjs/toolkit": "npm:1.9.7"
     "@storybook/addon-actions": "npm:6.5.16"
@@ -6646,7 +6646,6 @@ __metadata:
     mathlive: "npm:^0.95.5"
     msw: "npm:^2.0.14"
     ordinal: "npm:1.0.3"
-    playwright-msw: "npm:^3.0.1"
     react: "npm:18.2.0"
     react-dom: "npm:18.2.0"
     react-hook-form: "npm:^7.48.2"
@@ -15492,19 +15491,6 @@ __metadata:
   bin:
     playwright-core: cli.js
   checksum: d87be32ed9a97bb6d379afaa1f0bc8ae1369cfc27468e89df58a723c51ea7e242ae91107a7aada7564da68f7b18fa2925c25d9f238be60410c7fd6c4923901ae
-  languageName: node
-  linkType: hard
-
-"playwright-msw@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "playwright-msw@npm:3.0.1"
-  dependencies:
-    "@mswjs/cookies": "npm:^1.1.0"
-    strict-event-emitter: "npm:^0.5.1"
-  peerDependencies:
-    "@playwright/test": ">=1.20.0"
-    msw: ^2.0.0
-  checksum: ebf84f3453eb542dd95ab9412455afd2a95be9c4b12b8a542dced1f1b7e2473f27bcda4fbbcdaf20ad91fb45290332684caf2c8d6169cecd5d4b84d41e5e8963
   languageName: node
   linkType: hard
 
