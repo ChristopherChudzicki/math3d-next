@@ -6650,7 +6650,7 @@ __metadata:
     react-dom: "npm:18.2.0"
     react-hook-form: "npm:^7.48.2"
     react-infinite-scroll-component: "npm:^6.1.0"
-    react-redux: "npm:8.0.7"
+    react-redux: "npm:8.1.3"
     react-router: "npm:^6.21.1"
     react-router-dom: "npm:^6.21.1"
     redaxios: "npm:0.5.1"
@@ -16222,9 +16222,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-redux@npm:8.0.7":
-  version: 8.0.7
-  resolution: "react-redux@npm:8.0.7"
+"react-redux@npm:8.1.3":
+  version: 8.1.3
+  resolution: "react-redux@npm:8.1.3"
   dependencies:
     "@babel/runtime": "npm:^7.12.1"
     "@types/hoist-non-react-statics": "npm:^3.3.1"
@@ -16233,7 +16233,6 @@ __metadata:
     react-is: "npm:^18.0.0"
     use-sync-external-store: "npm:^1.0.0"
   peerDependencies:
-    "@reduxjs/toolkit": ^1 || ^2.0.0-beta.0
     "@types/react": ^16.8 || ^17.0 || ^18.0
     "@types/react-dom": ^16.8 || ^17.0 || ^18.0
     react: ^16.8 || ^17.0 || ^18.0
@@ -16241,8 +16240,6 @@ __metadata:
     react-native: ">=0.59"
     redux: ^4 || ^5.0.0-beta.0
   peerDependenciesMeta:
-    "@reduxjs/toolkit":
-      optional: true
     "@types/react":
       optional: true
     "@types/react-dom":
@@ -16253,7 +16250,7 @@ __metadata:
       optional: true
     redux:
       optional: true
-  checksum: cde6d63ee4e98a47440076bf4715db5947cef47f86eed953b254db173a418dc7f7fc59ecc4fbee04a0a66ee9548bf5028bf9c46d01ffcee0502e04eb7c2f0ffa
+  checksum: c4c7586cff3abeb784e73598d330f5301116a4e9942fd36895f2bccd8990001709c6c3ea1817edb75ee477470d6c67c9113e05a7f86b2b68a3950c9c29fe20cb
   languageName: node
   linkType: hard
 
