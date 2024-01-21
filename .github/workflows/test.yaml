@@ -9,13 +9,16 @@ on:
 
 jobs:
   frontend-tests:
+    env:
+      SKIP_YARN_COREPACK_CHECK: true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20.10.0"
           cache: "yarn"
+      - run: corepack enable
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn test -- --test-timeout=10000
@@ -47,17 +50,19 @@ jobs:
     # This job checks that the output of openapi-generator-typescript-axios that
     # is checked into version control is up-to-date.
     env:
+      SKIP_YARN_COREPACK_CHECK: true # https://github.com/actions/setup-node/issues/531#issuecomment-1819151412
       OPENAPI_SCHEMA: ./webserver/openapi.yaml
       GENERATOR_IGNORE_FILE: ./packages/api/.openapi-generator-ignore
       GENERATOR_OUTPUT_DIR_CI: ./packages/api/tmp/generated
       GENERATOR_OUTPUT_DIR_VC: ./packages/api/src/generated
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20.10.0"
           cache: "yarn"
+      - run: corepack enable
       - name: Install dependencies
         run: yarn install --immutable
       - name: Generate Fresh API Client

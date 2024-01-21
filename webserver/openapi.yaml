@@ -701,10 +701,6 @@ components:
           additionalProperties: {}
         title:
           type: string
-        key:
-          type: string
-          minLength: 1
-          maxLength: 80
     PatchedUserRequest:
       type: object
       properties:
@@ -725,7 +721,7 @@ components:
           type: string
         key:
           type: string
-          maxLength: 80
+          readOnly: true
         createdDate:
           type: string
           format: date-time
@@ -738,6 +734,7 @@ components:
       - createdDate
       - itemOrder
       - items
+      - key
       - modifiedDate
     SceneRequest:
       type: object
@@ -750,10 +747,6 @@ components:
           additionalProperties: {}
         title:
           type: string
-        key:
-          type: string
-          minLength: 1
-          maxLength: 80
       required:
       - itemOrder
       - items

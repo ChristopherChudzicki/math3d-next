@@ -1,17 +1,24 @@
 import type { Page } from "@playwright/test";
-import { test, expect } from "@/playwright/test";
-import { makeItem, seedDb } from "@math3d/mock-api";
-import { MathItemType as MIT } from "@math3d/mathitem-configs";
+import { test } from "@/fixtures/users";
+import { expect } from "@playwright/test";
+import { getItemForm, getLatex } from "@/utilities";
+import { SceneBuilder } from "@math3d/mock-api";
 
-import { getItemForm, getLatex } from "./util";
+test.use({ user: "dynamic" });
 
-test("Typing arrays into an empty <math-field />", async ({ page }) => {
-  const point = makeItem(MIT.Point, { description: "SomePoint", coords: "" });
-  const scene = seedDb.withSceneFromItems([point]);
+test("Typing arrays into an empty <math-field />", async ({
+  page,
+  prepareScene,
+}) => {
+  const scene = new SceneBuilder();
+  scene.folder().point({
+    description: "SomePoint",
+    coords: "",
+  });
+  const key = await prepareScene(scene.json());
+  await page.goto(`/${key}`);
 
-  await page.goto(`/${scene.key}`);
-
-  const form = getItemForm(page, point);
+  const form = getItemForm(page, "SomePoint");
   const mf = await form.locator('css=[aria-label="Coordinates"]');
   await mf.type("[1,2,3,]");
   expect(await mf.evaluate(getLatex)).toBe(
@@ -25,7 +32,7 @@ const activeElement = (page: Page) =>
 test("Toggling keyboard visibility auto-focuses a math-field and shows virtual keyboard when focused", async ({
   page,
 }) => {
-  await page.goto("");
+  await page.goto(`/`);
   await expect(activeElement(page)).resolves.toBe("BODY");
   const toggler = page.getByTestId("toggle-keyboard-button");
 

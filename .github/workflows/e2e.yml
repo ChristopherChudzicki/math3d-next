@@ -1,0 +1,58 @@
+name: End-to-end Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CI: True
+
+jobs:
+  e2e-tests:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    environment: "ci"
+    env:
+      SKIP_YARN_COREPACK_CHECK: true
+      VITE_API_BASE_URL: ${{ vars.TEST_API_URL }}
+      TEST_API_URL: ${{ vars.TEST_API_URL }}
+      TEST_APP_URL: ${{ vars.TEST_APP_URL }}
+      TEST_USER_1_EMAIL: ${{ vars.TEST_USER_1_EMAIL }}
+      TEST_USER_1_PASSWORD: ${{ vars.TEST_USER_1_PASSWORD }}
+      TEST_USER_2_EMAIL: ${{ vars.TEST_USER_2_EMAIL }}
+      TEST_USER_2_PASSWORD: ${{ vars.TEST_USER_2_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.10.0"
+          cache: "yarn"
+      - run: corepack enable
+      - name: Make env file
+        run: touch .env
+      - name: Build docker stack
+        run: docker compose build
+      - name: Migrate backend database
+        run: docker compose run --rm webserver ./manage.py migrate
+      - name: Seed database
+        run: docker compose run --rm webserver ./manage.py seed_test_data
+      - name: Start docker stack
+        run: docker compose up -d
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Start frontend
+        run: yarn workspace app start &
+      - name: Install Playwright Browsers
+        run: yarn workspace app-tests-e2e playwright install --with-deps
+      - name: Run Playwright tests
+        run: yarn workspace app-tests-e2e run test-e2e
+        env:
+          CI: True
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

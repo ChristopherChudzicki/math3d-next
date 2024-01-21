@@ -1,5 +1,6 @@
-import { Locator, Page } from "@playwright/test";
-import { test, expect } from "@/playwright/test";
+import { Locator, Page, expect } from "@playwright/test";
+import { test } from "@/fixtures/users";
+import { SceneBuilder } from "@math3d/mock-api";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
@@ -74,8 +75,25 @@ const initialOrder = [
   "P3b",
 ];
 
-test("Dragging item X after item Y", async ({ page }) => {
-  await page.goto("/test_folders");
+const makeFolderScene = () => {
+  const scene = new SceneBuilder();
+  const f1 = scene.folder({ description: "F1" });
+  f1.point({ description: "P1a" });
+  f1.point({ description: "P1b" });
+  const f2 = scene.folder({ description: "F2" });
+  f2.point({ description: "P2a" });
+  f2.point({ description: "P2b" });
+  const f3 = scene.folder({ description: "F3" });
+  f3.point({ description: "P3a" });
+  f3.point({ description: "P3b" });
+  return scene.json();
+};
+
+test.use({ user: "dynamic" });
+
+test("Dragging item X after item Y", async ({ page, prepareScene }) => {
+  const key = await prepareScene(makeFolderScene());
+  await page.goto(`/${key}`);
   const source = getItem(page, "F2", "P2a");
   const target = getItem(page, "F3", "P3b");
 
@@ -87,8 +105,9 @@ test("Dragging item X after item Y", async ({ page }) => {
   await page.pause();
 });
 
-test("Dragging item X before item Y", async ({ page }) => {
-  await page.goto("/test_folders");
+test("Dragging item X before item Y", async ({ page, prepareScene }) => {
+  const key = await prepareScene(makeFolderScene());
+  await page.goto(`/${key}`);
   const source = getItem(page, "F3", "P3b");
   const target = getItem(page, "F2", "P2b");
 
@@ -100,8 +119,9 @@ test("Dragging item X before item Y", async ({ page }) => {
   await page.pause();
 });
 
-test("Dragging folder X after folder Y", async ({ page }) => {
-  await page.goto("/test_folders");
+test("Dragging folder X after folder Y", async ({ page, prepareScene }) => {
+  const key = await prepareScene(makeFolderScene());
+  await page.goto(`/${key}`);
   const source = getItem(page, "F2");
   const target = getItem(page, "F3");
 
@@ -113,8 +133,9 @@ test("Dragging folder X after folder Y", async ({ page }) => {
   await page.pause();
 });
 
-test("Dragging folder X before folder Y", async ({ page }) => {
-  await page.goto("/test_folders");
+test("Dragging folder X before folder Y", async ({ page, prepareScene }) => {
+  const key = await prepareScene(makeFolderScene());
+  await page.goto(`/${key}`);
   const source = getItem(page, "F3");
   const target = getItem(page, "F2");
 

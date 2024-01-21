@@ -2,11 +2,9 @@
   "extends": "@math3d/tsconfig/base.json",
   "compilerOptions": {
     "rootDir": ".",
-    "types": ["vite/client", "vitest/globals"],
     "baseUrl": "src",
     "paths": {
       "@/*": ["./*"]
     }
-  },
-  "include": ["src", "vite.config.ts"]
+  }
 }

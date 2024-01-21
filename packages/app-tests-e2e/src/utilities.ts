@@ -1,13 +1,9 @@
-import { MathItem } from "@math3d/mathitem-configs";
-import type { Locator, Page } from "@playwright/test";
-import { expect } from "@playwright/test";
+import type { Page, Locator } from "@playwright/test";
 import type { Mathfield } from "mathlive";
-import type { StrictScene as Scene } from "@math3d/api";
+import { expect } from "@playwright/test";
 
-const getItemForm = (page: Page, item: MathItem): Locator => {
-  return page.locator(
-    `css=form[aria-label="Settings for ${item.properties.description}"]`,
-  );
+const getItemForm = (page: Page, description: string): Locator => {
+  return page.locator(`css=form[aria-label="Settings for ${description}"]`);
 };
 
 /**
@@ -26,12 +22,6 @@ const getLatex = (e: HTMLElement | SVGElement) => {
   return mf.getValue();
 };
 
-const mockScene = (page: Page, scene: Scene) => {
-  return page.route(`*/**/v0/scenes/${scene.key}/`, async (route) => {
-    await route.fulfill({ json: scene });
-  });
-};
-
 /**
  * Resolves when mathbox has rendered.
  */
@@ -46,4 +36,4 @@ const whenMathboxRendered = (page: Page) =>
     expect(exists).toBe(true);
   }).toPass();
 
-export { getItemForm, getLatex, mockScene, whenMathboxRendered };
+export { getItemForm, getLatex, whenMathboxRendered };

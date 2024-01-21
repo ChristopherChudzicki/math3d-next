@@ -10,8 +10,7 @@
     "lint": "eslint \"**/*.ts?(x)\"",
     "storybook": "start-storybook -p 6006 -s public",
     "test": "NODE_OPTIONS='--no-experimental-fetch' vitest --run",
-    "test-watch": "NODE_OPTIONS='--no-experimental-fetch' vitest",
-    "test-e2e": "playwright test"
+    "test-watch": "NODE_OPTIONS='--no-experimental-fetch' vitest"
   },
   "browserslist": {
     "production": [
@@ -59,7 +58,6 @@
     "mathbox-react": "^0.3.0",
     "mathlive": "^0.95.5",
     "ordinal": "1.0.3",
-    "playwright-msw": "^3.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.48.2",
@@ -84,7 +82,6 @@
     "@math3d/test-utils": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
     "@mswjs/data": "^0.16.1",
-    "@playwright/test": "1.37.0",
     "@storybook/addon-actions": "6.5.16",
     "@storybook/addon-essentials": "6.5.16",
     "@storybook/addon-links": "6.5.16",

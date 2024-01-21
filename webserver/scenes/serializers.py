@@ -36,6 +36,8 @@ class SceneSerializer(serializers.ModelSerializer):
             "modifiedDate",
         ]
 
+        read_only_fields = ["key"]
+
 
 class MiniSceneSerializer(serializers.ModelSerializer):
     createdDate = serializers.DateTimeField(source="created_date", read_only=True)
