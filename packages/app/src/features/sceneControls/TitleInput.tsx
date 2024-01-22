@@ -6,7 +6,7 @@ import { OnWidgetChange } from "./mathItems/FieldWidget/types";
 import styles from "./TitleInput.module.css";
 
 const TitleInput: React.FC = () => {
-  const title = useAppSelector(select.title());
+  const title = useAppSelector(select.title);
   const setTitle = useSetTitle();
   const onChange: OnWidgetChange = useCallback(
     (e) => {

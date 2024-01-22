@@ -1,21 +1,21 @@
+import { createSelector } from "@reduxjs/toolkit";
 import type { SelectorReturn, RootState } from "@/store/store";
-import type { StrictScene as Scene } from "@math3d/api";
 import type { MathItem } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import type { MathItemsState, AppMathScope, Subtree } from "./interfaces";
 import * as utils from "./util";
 import { SETTINGS_FOLDER } from "./util";
 
-const title =
-  (): SelectorReturn<MathItemsState["title"]> => (state: RootState) =>
-    state.mathItems.title;
+const title: SelectorReturn<MathItemsState["title"]> = (state: RootState) =>
+  state.mathItems.title;
 
-const mathItems =
-  (): SelectorReturn<MathItemsState["items"]> => (state: RootState) =>
-    state.mathItems.items;
+const mathItems: SelectorReturn<MathItemsState["items"]> = (state: RootState) =>
+  state.mathItems.items;
 
-const orderedMathItems = (): SelectorReturn<MathItem[]> => (state: RootState) =>
-  Object.values(state.mathItems.items).sort((a, b) => a.id.localeCompare(b.id));
+const orderedMathItems: SelectorReturn<MathItem[]> = createSelector(
+  [mathItems],
+  (items) => Object.values(items).sort((a, b) => a.id.localeCompare(b.id)),
+);
 
 const mathItem =
   (id: string): SelectorReturn<MathItem> =>
@@ -23,12 +23,12 @@ const mathItem =
     state.mathItems.items[id];
 
 const getSubtree = (
-  state: MathItemsState,
+  order: MathItemsState["order"],
   node: Subtree,
   depth = 0,
 ): Subtree => {
   if (node.children) return node;
-  if (!state.order[node.id]) return node;
+  if (!order[node.id]) return node;
   if (depth > 2) {
     /**
      * Sanity check. Math3d UI does not support nesting folders.
@@ -42,8 +42,8 @@ const getSubtree = (
      */
     throw new Error("Depth should not be greater than 2.");
   }
-  const children = state.order[node.id].map((id) => {
-    return getSubtree(state, { id, parent: null }, depth + 1);
+  const children = order[node.id].map((id) => {
+    return getSubtree(order, { id, parent: null }, depth + 1);
   });
   const nodeWithChildren = { ...node, children };
   children.forEach((child) => {
@@ -53,10 +53,13 @@ const getSubtree = (
   return nodeWithChildren;
 };
 
-const subtree =
-  (rootId: string): SelectorReturn<Subtree> =>
-  (state: RootState) =>
-    getSubtree(state.mathItems, { id: rootId, parent: null });
+const subtree = createSelector(
+  [
+    (state: RootState) => state.mathItems.order,
+    (_state: RootState, rootId: string) => rootId,
+  ],
+  (order, rootId) => getSubtree(order, { id: rootId, parent: null }),
+);
 
 const isActive =
   (id: string): SelectorReturn<boolean> =>
@@ -81,15 +84,14 @@ const hasChildren =
     return order[id]?.length > 0;
   };
 
-const getItems =
-  (ids: string[]): SelectorReturn<MathItem[]> =>
-  (state: RootState) => {
-    const { items } = state.mathItems;
-    return ids.map((id) => {
+const getItems = createSelector(
+  [mathItems, (_state: RootState, ids: string[]) => ids],
+  (items, ids) =>
+    ids.map((id) => {
       invariant(items[id], `MathItem with id ${id} not found.`);
       return items[id];
-    });
-  };
+    }),
+);
 
 const hasItems =
   (ids: string[]): SelectorReturn<boolean> =>
@@ -98,17 +100,14 @@ const hasItems =
     return ids.every((id) => items[id]);
   };
 
-const sceneInfo =
-  (): SelectorReturn<Pick<Scene, "items" | "itemOrder" | "title">> =>
-  (state: RootState) => {
-    return {
-      title: state.mathItems.title,
-      items: Object.values(state.mathItems.items).sort((a, b) =>
-        a.id.localeCompare(b.id),
-      ),
-      itemOrder: state.mathItems.order,
-    };
-  };
+const sceneInfo = createSelector(
+  [title, orderedMathItems, (state: RootState) => state.mathItems.order],
+  (sceneTitle, items, order) => ({
+    title: sceneTitle,
+    items,
+    itemOrder: order,
+  }),
+);
 
 export {
   title,
