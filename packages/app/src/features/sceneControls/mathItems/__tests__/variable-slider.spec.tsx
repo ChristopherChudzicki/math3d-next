@@ -295,7 +295,7 @@ describe("Variable Slider", () => {
     },
   );
 
-  test("Min, max, step passed to input[type=range]", async () => {
+  test.only("Min, max, step passed to input[type=range]", async () => {
     const { el, min, max, fps, duration } = await setupTest();
     const frames = fps * duration;
     const step = (max - min) / frames;

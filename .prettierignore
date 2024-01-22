@@ -2,3 +2,4 @@ build
 **/build/
 openapi.yaml
 .yarn/
+packages/app/public/mockServiceWorker.js

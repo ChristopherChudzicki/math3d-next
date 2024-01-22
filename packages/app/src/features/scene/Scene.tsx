@@ -55,8 +55,10 @@ const isSurface = (item: MathItem) => {
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 const SceneContent = () => {
   const dispatch = useAppDispatch();
-  const items = useAppSelector(select.orderedMathItems());
-  const [x, y, z, camera] = useAppSelector(select.getItems(REQUIRED_ITEMS));
+  const items = useAppSelector(select.orderedMathItems);
+  const [x, y, z, camera] = useAppSelector((state) =>
+    select.getItems(state, REQUIRED_ITEMS),
+  );
   invariant(camera.type === MathItemType.Camera);
   const { scale, range } = useAxesInfo(x, y, z);
 
