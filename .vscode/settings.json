@@ -1,9 +1,8 @@
 {
-  "eslint.alwaysShowStatus": true,
   "eslint.workingDirectories": [{ "pattern": "./packages/*/" }],
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll": "explicit"
   },
-  "github.copilot.inlineSuggest.enable": true,
+  "github.copilot.editor.enableAutoCompletions": true,
   "typescript.tsdk": "node_modules/typescript/lib"
 }
