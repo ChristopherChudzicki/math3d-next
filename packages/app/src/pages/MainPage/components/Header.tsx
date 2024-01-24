@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
@@ -16,7 +16,10 @@ import { useAuthStatus } from "@/features/auth";
 import Button from "@mui/material/Button";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import { useToggle } from "@/util/hooks";
+import type { SimpleMenuItem } from "@/util/components/SimpleMenu/SimpleMenu";
+import { useUserMe } from "@math3d/api";
 import styles from "./Header.module.css";
+import UserMenu from "./UserMenu";
 
 const LoginButtons: React.FC<{
   smallScreen: boolean;
@@ -65,58 +68,70 @@ const LoginButtons: React.FC<{
   );
 };
 
+type FilterableItem = SimpleMenuItem & {
+  shouldShow?: ({
+    smallScreen,
+    isAuthenticated,
+  }: {
+    smallScreen: boolean;
+    isAuthenticated: boolean;
+  }) => boolean;
+};
+const items: FilterableItem[] = [
+  {
+    key: "signin",
+    label: "Sign in",
+    icon: <AccountCircleOutlinedIcon fontSize="small" />,
+    href: "auth/login",
+    shouldShow: ({ isAuthenticated }) => !isAuthenticated,
+  },
+  {
+    label: "Sign up",
+    key: "signup",
+    icon: <AccountCircleOutlinedIcon fontSize="small" />,
+    href: "auth/register",
+    shouldShow: ({ isAuthenticated }) => !isAuthenticated,
+  },
+  {
+    label: "Examples",
+    key: "examples",
+    icon: <LightbulbOutlined fontSize="small" />,
+    href: "scenes/examples",
+  },
+  {
+    label: "Contact",
+    key: "contact",
+    icon: <HelpOutlineOutlinedIcon fontSize="small" />,
+    href: "contact",
+    shouldShow: () => true,
+  },
+  {
+    label: "Sign out",
+    key: "signout",
+    icon: <AccountCircleOutlinedIcon fontSize="small" />,
+    href: "auth/logout",
+    shouldShow: ({ isAuthenticated }) => isAuthenticated,
+  },
+];
+
 const HeaderMenu: React.FC = () => {
   const smallScreen = useMediaQuery("(max-width: 600px)");
-  const [menuOpen, toggleMenuOpen] = useToggle(false);
-  const [buttonEl, setButtonEl] = useState<HTMLElement | null>(null);
-
   const [isAuthenticated] = useAuthStatus();
-  const navigate = useNavigate();
+  const filteredItems = useMemo(
+    () =>
+      items.filter(
+        (item) => !!item.shouldShow?.({ smallScreen, isAuthenticated }),
+      ),
+    [smallScreen, isAuthenticated],
+  );
+  const userQuery = useUserMe({ enabled: isAuthenticated });
   return (
     <nav className={styles["nav-container"]}>
       <ShareButton variant={smallScreen ? "mobile" : "desktop"} />
       {smallScreen ? null : (
         <LoginButtons isAuthenticated={isAuthenticated} smallScreen={false} />
       )}
-
-      <IconButton
-        aria-label="App Menu"
-        onClick={toggleMenuOpen.on}
-        ref={setButtonEl}
-      >
-        <MenuIcon />
-      </IconButton>
-      <Menu
-        keepMounted
-        open={menuOpen}
-        anchorEl={buttonEl}
-        onClose={toggleMenuOpen.off}
-        onClick={toggleMenuOpen.off}
-      >
-        {smallScreen ? (
-          <LoginButtons isAuthenticated={isAuthenticated} smallScreen />
-        ) : null}
-        <MenuItem onClick={() => navigate("scenes/examples")}>
-          <ListItemIcon>
-            <LightbulbOutlined fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Examples</ListItemText>
-        </MenuItem>
-        <MenuItem>
-          <ListItemIcon>
-            <HelpOutlineOutlinedIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Contact</ListItemText>
-        </MenuItem>
-        {isAuthenticated ? (
-          <MenuItem to="auth/logout" component={Link}>
-            <ListItemIcon>
-              <AccountCircleOutlinedIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Sign out</ListItemText>
-          </MenuItem>
-        ) : null}
-      </Menu>
+      <UserMenu items={filteredItems} user={userQuery.data} />
     </nav>
   );
 };

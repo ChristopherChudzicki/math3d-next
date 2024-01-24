@@ -1,0 +1,12 @@
+.badge {
+  pointer-events: none;
+}
+
+.avatar:global(.MuiAvatar-root) {
+  pointer-events: all;
+  height: 32px;
+  width: 32px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+}

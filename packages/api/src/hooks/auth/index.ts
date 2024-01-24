@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
 import { AuthApi, SendEmailResetRequest } from "../../generated";
 import type {
   TokenCreateRequest,
@@ -31,10 +31,11 @@ const useLogout = () => {
   });
 };
 
-const useUserMe = () => {
+const useUserMe = (opts?: Pick<UseQueryOptions, "enabled">) => {
   return useQuery({
     queryKey: ["me"],
-    queryFn: () => authApi.authUsersMeRetrieve(),
+    queryFn: () => authApi.authUsersMeRetrieve().then((res) => res.data),
+    ...opts,
   });
 };
 
