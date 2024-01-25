@@ -5037,12 +5037,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/user-event@npm:14.4.3":
-  version: 14.4.3
-  resolution: "@testing-library/user-event@npm:14.4.3"
+"@testing-library/user-event@npm:14.5.2":
+  version: 14.5.2
+  resolution: "@testing-library/user-event@npm:14.5.2"
   peerDependencies:
     "@testing-library/dom": ">=7.21.4"
-  checksum: 0c7c1ee6bacd8faf15e00624ff6815f0cdf2529493c3a0d8ec6878bbedfc7bd4c7600b7a4b7a07302737e71400dc560ee17dc5706291505da09905c8ea3f3cd7
+  checksum: 49821459d81c6bc435d97128d6386ca24f1e4b3ba8e46cb5a96fe3643efa6e002d88c1b02b7f2ec58da593e805c59b78d7fdf0db565c1f02ba782f63ee984040
   languageName: node
   linkType: hard
 
@@ -6611,7 +6611,7 @@ __metadata:
     "@tanstack/react-query": "npm:^5.8.4"
     "@testing-library/jest-dom": "npm:5.17.0"
     "@testing-library/react": "npm:13.4.0"
-    "@testing-library/user-event": "npm:14.4.3"
+    "@testing-library/user-event": "npm:14.5.2"
     "@types/lodash-es": "npm:^4.17.12"
     "@types/node": "npm:^20.10.6"
     "@types/react": "npm:18.0.24"
