@@ -35,12 +35,19 @@ type SimpleMenuItemHref = SimpleMenuItemBase & {
   href: string;
 };
 
-type SimpleMenuItem = SimpleMenuItemOnClick | SimpleMenuItemHref;
+type SimpleMenuItem =
+  | SimpleMenuItemOnClick
+  | SimpleMenuItemHref
+  | {
+      element: React.ReactNode;
+    };
 
 type SimpleMenuProps = {
   items: SimpleMenuItem[];
   trigger: React.ReactElement;
   onVisibilityChange?: (visible: boolean) => void;
+  className?: string;
+  "aria-label"?: string;
 };
 
 /**
@@ -56,6 +63,8 @@ const SimpleMenu: React.FC<SimpleMenuProps> = ({
   items,
   trigger: _trigger,
   onVisibilityChange,
+  className,
+  "aria-label": ariaLabel,
 }) => {
   const [open, _setOpen] = useState(false);
   const setOpen = useCallback(
@@ -83,8 +92,20 @@ const SimpleMenu: React.FC<SimpleMenuProps> = ({
   return (
     <>
       {trigger}
-      <Menu open={open} anchorEl={el} onClose={() => setOpen(false)}>
+      <Menu
+        className={className}
+        open={open}
+        MenuListProps={{
+          "aria-label": ariaLabel,
+          className,
+        }}
+        anchorEl={el}
+        onClose={() => setOpen(false)}
+      >
         {items.map((item) => {
+          if ("element" in item) {
+            return item.element;
+          }
           const linkProps = item.href
             ? {
                 /**

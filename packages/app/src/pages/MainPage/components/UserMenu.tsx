@@ -20,16 +20,19 @@ const UserIcon = ({ user }: { user?: User }) => {
   return user.public_nickname[0].toUpperCase() || <PersonIcon />;
 };
 
-const UserMenu: React.FC<{ items: SimpleMenuItem[]; user?: User }> = ({
-  items,
-  user,
-}) => {
+const UserMenu: React.FC<{
+  items: SimpleMenuItem[];
+  user?: User;
+  className?: string;
+}> = ({ items, user, className }) => {
   const [visible, setVisible] = useState(false);
 
   return (
     <SimpleMenu
       onVisibilityChange={setVisible}
       items={items}
+      aria-label="User Menu"
+      className={className}
       trigger={
         <Badge
           className={styles.badge}
@@ -40,7 +43,7 @@ const UserMenu: React.FC<{ items: SimpleMenuItem[]; user?: User }> = ({
           <Avatar
             className={styles.avatar}
             component="button"
-            aria-label="App Menu"
+            aria-label="Open User Menu"
           >
             <UserIcon user={user} />
           </Avatar>

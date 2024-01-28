@@ -8,11 +8,11 @@ test.each([
   "Header includes signin / signout links based on current auth status (authenticated=$authStatus)",
   async ({ authStatus, expected }) => {
     await renderTestApp("", { isAuthenticated: authStatus });
-    await screen.findByRole("button", { name: "App Menu" });
+    await screen.findByRole("button", { name: "Open User Menu" });
 
     const signin = screen.queryByRole("link", { name: "Sign in" });
 
-    const button = screen.getByRole("button", { name: "App Menu" });
+    const button = screen.getByRole("button", { name: "Open User Menu" });
     await user.click(button);
     await screen.findByRole("menu");
 
@@ -32,7 +32,7 @@ test("Login link goes to login page", async () => {
 
 test("Logout link goes to login page", async () => {
   const { location } = await renderTestApp("", { isAuthenticated: true });
-  const button = screen.getByRole("button", { name: "App Menu" });
+  const button = screen.getByRole("button", { name: "Open User Menu" });
   await user.click(button);
   const signin = screen.getByRole("menuitem", { name: "Sign out" });
   await user.click(signin);
