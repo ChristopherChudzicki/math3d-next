@@ -17,6 +17,10 @@ class AppPage {
     const root = this.page.getByRole("menu", { name: "User Menu" });
     return new UserMenu(root);
   }
+
+  header(): Locator {
+    return this.page.getByRole("banner");
+  }
 }
 
 export default AppPage;

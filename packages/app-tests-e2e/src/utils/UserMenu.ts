@@ -26,6 +26,10 @@ class UserMenu {
   contact(): Locator {
     return this.root.getByRole("button", { name: "Contact" });
   }
+
+  items(): Locator {
+    return this.root.getByRole("menuitem");
+  }
 }
 
 export default UserMenu;
