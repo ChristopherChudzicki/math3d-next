@@ -45,10 +45,10 @@ describe("SimpleMenu", () => {
   });
 
   it("Calls the menuitem's event andler when clicked and closes menu", async () => {
-    const items: SimpleMenuItem[] = [
+    const items = [
       { key: "one", label: "Item 1", onClick: vi.fn() },
       { key: "two", label: "Item 2", onClick: vi.fn() },
-    ];
+    ] satisfies SimpleMenuItem[];
 
     render(
       <SimpleMenu
