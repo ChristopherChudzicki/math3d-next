@@ -56,7 +56,7 @@
     "lodash-es": "4.17.21",
     "mathbox": "^2.3.1",
     "mathbox-react": "^0.3.0",
-    "mathlive": "^0.95.5",
+    "mathlive": "^0.98.0",
     "ordinal": "1.0.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
