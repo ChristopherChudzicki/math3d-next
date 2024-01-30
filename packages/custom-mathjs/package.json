@@ -11,7 +11,7 @@
     "vitest": "^1.1.0"
   },
   "dependencies": {
-    "mathjs": "11.9.1"
+    "mathjs": "11.12.0"
   },
   "scripts": {
     "test": "vitest --run",

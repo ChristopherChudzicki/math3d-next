@@ -2874,7 +2874,7 @@ __metadata:
     "@math3d/test-utils": "workspace:^"
     "@math3d/tsconfig": "workspace:^"
     eslint: "npm:^8.54.0"
-    mathjs: "npm:11.9.1"
+    mathjs: "npm:11.12.0"
     vitest: "npm:^1.1.0"
   languageName: unknown
   linkType: soft
@@ -2909,7 +2909,7 @@ __metadata:
     ajv: "npm:^8.12.0"
     eslint: "npm:^8.54.0"
     js-yaml: "npm:^4.1.0"
-    mathjs: "npm:11.9.1"
+    mathjs: "npm:11.12.0"
     tinycolor2: "npm:^1.6.0"
     vitest: "npm:^1.1.0"
   languageName: unknown
@@ -2922,7 +2922,7 @@ __metadata:
     "@math3d/eslint-config": "workspace:^"
     "@math3d/tsconfig": "workspace:^"
     eslint: "npm:^8.54.0"
-    mathjs: "npm:11.9.1"
+    mathjs: "npm:11.12.0"
     vitest: "npm:^1.1.0"
   languageName: unknown
   linkType: soft
@@ -2937,7 +2937,7 @@ __metadata:
     "@math3d/utils": "workspace:^"
     eslint: "npm:^8.54.0"
     just-group-by: "npm:^2.2.0"
-    mathjs: "npm:11.9.1"
+    mathjs: "npm:11.12.0"
     tarjan-graph: "npm:^3.0.0"
     toposort: "npm:^2.0.2"
     vitest: "npm:^1.1.0"
@@ -2974,7 +2974,7 @@ __metadata:
     "@types/lodash-es": "npm:^4.17.12"
     eslint: "npm:^8.54.0"
     lodash-es: "npm:4.17.21"
-    mathjs: "npm:11.9.1"
+    mathjs: "npm:11.12.0"
     tiny-invariant: "npm:^1.3.1"
     vitest: "npm:^1.1.0"
     yup: "npm:^1.3.2"
@@ -3042,7 +3042,7 @@ __metadata:
     "@math3d/tsconfig": "workspace:^"
     "@math3d/utils": "workspace:^"
     eslint: "npm:^8.54.0"
-    mathjs: "npm:11.9.1"
+    mathjs: "npm:11.12.0"
     vitest: "npm:^1.1.0"
     yup: "npm:^1.3.2"
   languageName: unknown
@@ -10838,10 +10838,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fraction.js@npm:^4.2.0":
-  version: 4.2.0
-  resolution: "fraction.js@npm:4.2.0"
-  checksum: 8f8e3c02a4d10cd03bae5c036c02ef0bd1a50be69ac56e5b9b25025ff07466c1d2288f383fb613ecec583e77bcfd586dee2d932f40e588c910bf55c5103014ab
+"fraction.js@npm:4.3.4":
+  version: 4.3.4
+  resolution: "fraction.js@npm:4.3.4"
+  checksum: 3a1e6b268038ffdea625fab6a8d155d7ab644d35d0c99bc59084bfd29fbc714f3a38381b0627751ddb5f188bcde0b3f48c27e80eeb2ecd440825a7d2cd2bf9f1
   languageName: node
   linkType: hard
 
@@ -13758,22 +13758,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathjs@npm:11.9.1":
-  version: 11.9.1
-  resolution: "mathjs@npm:11.9.1"
+"mathjs@npm:11.12.0":
+  version: 11.12.0
+  resolution: "mathjs@npm:11.12.0"
   dependencies:
-    "@babel/runtime": "npm:^7.22.6"
+    "@babel/runtime": "npm:^7.23.2"
     complex.js: "npm:^2.1.1"
     decimal.js: "npm:^10.4.3"
     escape-latex: "npm:^1.2.0"
-    fraction.js: "npm:^4.2.0"
+    fraction.js: "npm:4.3.4"
     javascript-natural-sort: "npm:^0.7.1"
     seedrandom: "npm:^3.0.5"
     tiny-emitter: "npm:^2.1.0"
-    typed-function: "npm:^4.1.0"
+    typed-function: "npm:^4.1.1"
   bin:
     mathjs: bin/cli.js
-  checksum: 99a2f70f9d74006e165a7abc7acd47b497d735590fcefd4fe01a8fa534610bee42d3458aa98344e413c91535769145ec5f39ae09ea1c23860678d26c9d7da7fa
+  checksum: d0a3ab35fb0a51be321709cdd49bd69de832c4f62ab578fc5761f94502411a016ddb3809020cf3d87e0c563d379c24f68a1b77aa14031e59965203956518d6ad
   languageName: node
   linkType: hard
 
@@ -18828,10 +18828,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typed-function@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "typed-function@npm:4.1.0"
-  checksum: fd21d9e11d4379ef1f8bf2862131c9c24b8d48a0d5469f74f82be67026e3573477b984ac0354921cb4fa5c85a0042489bc04ae3a6308632350b3db9cf56661f5
+"typed-function@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "typed-function@npm:4.1.1"
+  checksum: 0ef538d5f02e5c40659cccc14b5f2727f0e4181f11d91bb7897327c33cc2893de7e92343b6b32e1bb15e44a215a1e92e27ab2aa1353b100a9a2697abf2989a0c
   languageName: node
   linkType: hard
 
