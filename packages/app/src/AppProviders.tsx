@@ -1,5 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider, StyledEngineProvider } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
 import { QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
@@ -25,9 +25,11 @@ const AppProviders: React.FC<AppProps> = ({
   <AuthStatusProvider>
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={theme}>
-          <RouterProvider router={router} />
-        </ThemeProvider>
+        <StyledEngineProvider injectFirst>
+          <ThemeProvider theme={theme}>
+            <RouterProvider router={router} />
+          </ThemeProvider>
+        </StyledEngineProvider>
       </QueryClientProvider>
     </Provider>
   </AuthStatusProvider>

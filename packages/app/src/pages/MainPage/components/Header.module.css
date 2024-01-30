@@ -25,6 +25,12 @@
   display: flex;
 }
 .nav-container > * {
-  padding-left: 1rem;
-  padding-right: 1rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.menu-header {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  line-height: unset;
 }

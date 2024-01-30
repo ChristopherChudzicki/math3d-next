@@ -36,6 +36,7 @@ export const urls = {
   },
   auth: {
     users: `${BASE_URL}/v0/auth/users/`,
+    usersMe: `${BASE_URL}/v0/auth/users/me/`,
     tokenLogin: `${BASE_URL}/v0/auth/token/login/`,
     tokenLogout: `${BASE_URL}/v0/auth/token/logout/`,
     activation: `${BASE_URL}/v0/auth/users/activation/`,
@@ -190,6 +191,45 @@ export const handlers = [
       { status: 201 },
     );
   }),
+  http.post<
+    NoParams,
+    UserCreatePasswordRetypeRequest,
+    ErrorResponseBody | User
+  >(urls.auth.users, async ({ request }) => {
+    const { email, password } = await request.json();
+    if (typeof email !== "string") {
+      throw new Error("email should be string");
+    }
+    if (typeof password !== "string" /** # pragma: allowlist secret */) {
+      throw new Error("password should be string");
+    }
+    const user = db.user.create({
+      email,
+      password,
+    });
+    return HttpResponse.json(
+      {
+        public_nickname: user.public_nickname,
+        email: user.email,
+      },
+      { status: 201 },
+    );
+  }),
+  http.get<NoParams, UserCreatePasswordRetypeRequest, ErrorResponseBody | User>(
+    urls.auth.usersMe,
+    async ({ request }) => {
+      const user = getUser(request);
+      if (!user) {
+        return HttpResponse.json(
+          {
+            errorMessage: "Invalid token",
+          },
+          { status: 401 },
+        );
+      }
+      return HttpResponse.json(user, { status: 201 });
+    },
+  ),
   http.post<NoParams, ActivationRequest>(
     urls.auth.activation,
     async ({ request }) => {

@@ -1,27 +1,38 @@
 import { test } from "@/fixtures/users";
+import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
+import AppPage from "@/utils/AppPage";
+import env from "@/env";
 
 test("Anonymous user", async ({ page }) => {
   await page.goto("");
-  // Test stuff with an anonymous user
-  // TODO: Add an assertion about user icon?
+  const app = new AppPage(page);
+  await app.userMenuOpener().click();
+  const username = app.userMenu().username();
+  await expect(username).not.toBeVisible();
 });
 
 test.describe("Authorized user (static)", () => {
   test.use({ user: "static" });
 
-  test("Typing arrays into an empty <math-field />", async ({ page }) => {
+  test("Check user info", async ({ page }) => {
     await page.goto("");
-    await page.pause();
+    const app = new AppPage(page);
+    await app.userMenuOpener().click();
+    const username = app.userMenu().username();
+    expect(await username.textContent()).toBe(env.TEST_USER_1_EMAIL);
   });
 });
 
 test.describe("Authorized user (dynamic)", () => {
   test.use({ user: "dynamic" });
 
-  test("Typing arrays into an empty <math-field />", async ({ page }) => {
+  test("Check user info", async ({ page }) => {
     await page.goto("");
-    await page.pause();
+    const app = new AppPage(page);
+    await app.userMenuOpener().click();
+    const username = app.userMenu().username();
+    expect(await username.textContent()).toBe(env.TEST_USER_2_EMAIL);
   });
 
   test("Building a custom scene", async ({ page, prepareScene }) => {
