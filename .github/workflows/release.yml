@@ -13,12 +13,14 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
       AWS_S3_BUCKET: ${{ vars.AWS_S3_BUCKET }}
+      SKIP_YARN_COREPACK_CHECK: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20.10.0"
           cache: "yarn"
+      - run: corepack enable
       - run: yarn install --immutable
       - run: yarn build
         env:
