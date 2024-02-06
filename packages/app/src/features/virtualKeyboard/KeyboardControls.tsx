@@ -11,7 +11,7 @@ import Button from "@mui/material/Button";
 
 import styles from "./KeyboardControls.module.css";
 
-mathVirtualKeyboard.layouts = [LAYOUTS.numeric];
+mathVirtualKeyboard.layouts = [LAYOUTS.numeric, LAYOUTS.functions, "greek"];
 
 const showKeyboard = (event: FocusEvent) => {
   const { target } = event;

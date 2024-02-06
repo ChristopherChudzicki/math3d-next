@@ -180,6 +180,18 @@ mathjs.import({
   unitT: createUnitB,
   unitN: createUnitN,
   unitB: createUnitT,
+  arccos: mathjs.acos,
+  arcsin: mathjs.asin,
+  arctan: mathjs.atan,
+  arcsec: mathjs.asec,
+  arccsc: mathjs.acsc,
+  arccot: mathjs.acot,
+  arccosh: mathjs.acosh,
+  arcsinh: mathjs.asinh,
+  arctanh: mathjs.atanh,
+  arcsech: mathjs.asech,
+  arccsch: mathjs.acsch,
+  arccoth: mathjs.acoth,
 });
 
 mathjs.import(

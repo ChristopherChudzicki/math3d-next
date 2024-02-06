@@ -6,9 +6,12 @@ declare module "mathjs" {
     i: [number, number, number];
     j: [number, number, number];
     k: [number, number, number];
-    hati: [number, number, number];
-    hatj: [number, number, number];
-    hatk: [number, number, number];
+    uniti: [number, number, number];
+    unitj: [number, number, number];
+    unitk: [number, number, number];
+    unitx: [number, number, number];
+    unity: [number, number, number];
+    unitz: [number, number, number];
     I: Complex;
   }
 }
@@ -23,16 +26,28 @@ const constants = {
   k: factory("k", [], () => {
     return [0, 0, 1];
   }),
-  hati: factory("hati", [], () => {
+  uniti: factory("uniti", [], () => {
     return [1, 0, 0];
   }),
-  hatj: factory("hatj", [], () => {
+  unitj: factory("unitj", [], () => {
     return [0, 1, 0];
   }),
-  hatk: factory("hatk", [], () => {
+  unitk: factory("unitk", [], () => {
+    return [0, 0, 1];
+  }),
+  unitx: factory("unitx", [], () => {
+    return [1, 0, 0];
+  }),
+  unity: factory("unity", [], () => {
+    return [0, 1, 0];
+  }),
+  unitz: factory("unitz", [], () => {
     return [0, 0, 1];
   }),
   I: factory("I", ["complex"], ({ complex }) => {
+    return complex(0, 1);
+  }),
+  imaginaryI: factory("imaginaryI", ["complex"], ({ complex }) => {
     return complex(0, 1);
   }),
 };

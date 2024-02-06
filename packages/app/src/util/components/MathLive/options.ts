@@ -21,12 +21,14 @@ export const inlineShortcuts = {
   sech: "\\sech",
   coth: "\\coth",
   // inverse hyperbolic trig
-  arcsinh: "\\arcsinh",
-  arccosh: "\\arccosh",
-  arctanh: "\\arctanh",
-  arccsch: "\\arccsch",
-  arcsech: "\\arcsech",
-  arccoth: "\\arccoth",
+  arcsinh: "\\operatorname{arcsinh}",
+  arccosh: "\\operatorname{arccosh}",
+  arctanh: "\\operatorname{arctanh}",
+  // misc
+  abs: "\\abs",
+  sign: "\\operatorname{sign}",
+  floor: "\\operatorname{floor}",
+  ceil: "\\operatorname{ceil}",
   // sqrt
   sqrt: "\\sqrt{#?}",
   // exp
@@ -70,9 +72,28 @@ export const inlineShortcuts = {
   Phi: "\\Phi",
   Psi: "\\Psi",
   Omega: "\\Omega",
+  // unit vectors
+  uniti: "\\uniti",
+  unitj: "\\unitj",
+  unitk: "\\unitk",
+  unitx: "\\unitx",
+  unity: "\\unity",
+  unitz: "\\unitz",
   // derivatives
   pdiff: "\\frac{\\partial #?}{\\partial #?}",
   diff: "\\frac{\\differentialD #?}{\\differentialD #?}",
   // operators
-  "*": "\\cdot",
+  "*": " \\cdot",
+};
+
+export const extraMacros = {
+  // unit vectors
+  uniti: "\\mathbf{\\hat{i}}",
+  unitj: "\\mathbf{\\hat{j}}",
+  unitk: "\\mathbf{\\hat{k}}",
+  unitx: "\\mathbf{\\hat{x}}",
+  unity: "\\mathbf{\\hat{y}}",
+  unitz: "\\mathbf{\\hat{z}}",
+  // others
+  abs: "\\operatorname{abs}",
 };

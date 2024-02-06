@@ -2,7 +2,7 @@ import type { VirtualKeyboardLayout } from "mathlive";
 
 const { mathVirtualKeyboard } = window;
 
-type CustomKeyboards = "numeric";
+type CustomKeyboards = "numeric" | "functions";
 
 const LAYOUTS: Record<CustomKeyboards, VirtualKeyboardLayout> = {
   numeric: {
@@ -37,9 +37,10 @@ const LAYOUTS: Record<CustomKeyboards, VirtualKeyboardLayout> = {
         "[/]",
         "[separator-5]",
         {
-          latex: "\\exponentialE",
-          shift: "\\ln",
-          variants: ["\\exp", "\\ln", "\\log"],
+          latex: "e^{#0}",
+          shift: "\\ln(#0)",
+          class: "hide-shift",
+          variants: ["\\exp(#0)", "\\ln(#0)", "\\log(#0)"],
         },
         {
           latex: "I",
@@ -65,12 +66,13 @@ const LAYOUTS: Record<CustomKeyboards, VirtualKeyboardLayout> = {
         "[4]",
         "[5]",
         "[6]",
-        "[*]",
+        {
+          latex: "\\cdot",
+          insert: "\\cdot",
+        },
         "[separator-5]",
         {
-          class: "hide-shift",
           latex: "#@^2}",
-          shift: "#@^{\\prime}}",
         },
         {
           latex: "#@^{#0}}",
@@ -78,40 +80,133 @@ const LAYOUTS: Record<CustomKeyboards, VirtualKeyboardLayout> = {
           shift: "#@_{#?}",
         },
         {
-          class: "hide-shift",
           latex: "\\sqrt{#0}",
-          shift: { latex: "\\sqrt[#0]{#?}}" },
         },
       ],
       [
-        "[(]",
-        "[)]",
+        { latex: "(", insert: "\\left(" },
+        { latex: ")", insert: "\\right)" },
         "[separator-5]",
         "[1]",
         "[2]",
         "[3]",
-        "[-]",
+        { latex: "-" },
         "[separator-5]",
         {
-          latex: "\\hat{i}",
+          latex: "\\mathbf{\\hat{i}}",
+          insert: "\\uniti",
           aside: "[1,0,0]",
+          shift: {
+            latex: "\\mathbf{\\hat{x}}",
+            insert: "\\unitx",
+          },
         },
         {
-          latex: "\\hat{j}",
-          aside: "[0,1,0]",
+          latex: "\\mathbf{\\hat{j}}",
+          insert: "\\uniti",
+          aside: "[1,0,0]",
+          shift: {
+            latex: "\\mathbf{\\hat{y}}",
+            insert: "\\unitx",
+          },
         },
         {
-          latex: "\\hat{k}",
-          aside: "[0,0,1]",
+          latex: "\\mathbf{\\hat{k}}",
+          insert: "\\uniti",
+          aside: "[1,0,0]",
+          shift: {
+            latex: "\\mathbf{\\hat{z}}",
+            insert: "\\unitx",
+          },
         },
       ],
       [
         { label: "[shift]", width: 2.0 },
         "[separator-5]",
-        "[0]",
-        "[.]",
-        "[=]",
-        "[+]",
+        { latex: "0" },
+        "[separator-20]",
+        { latex: "+" },
+        "[separator-5]",
+        "[left]",
+        "[right]",
+        { label: "[backspace]", width: 1.0 },
+      ],
+    ],
+  },
+  functions: {
+    label: "f(x)",
+    labelClass: "MLK__tex-math",
+    tooltip: "keyboard.tooltip.numeric",
+    rows: [
+      [
+        { latex: "e^{#0}" },
+        { latex: "\\ln(#0)" },
+        "[separator-5]",
+        { latex: "\\sin(#0)" }, // middle
+        { latex: "\\cos(#0)" },
+        { latex: "\\tan(#0)" },
+        "[separator-5]",
+        // right
+        { latex: "\\frac{\\differentialD #0}{\\differentialD #1}", width: 1.5 },
+        { latex: "\\frac{\\partial #0}{\\partial #1}", width: 1.5 },
+      ],
+      [
+        { latex: "\\sqrt{#0}" },
+        { latex: "\\operatorname{sign}(#0)" },
+        "[separator-5]",
+        { latex: "\\arcsin(#0)", class: "small" }, // middle
+        { latex: "\\arccos(#0)", class: "small" },
+        { latex: "\\arctan(#0)", class: "small" },
+        "[separator-5]",
+        {
+          latex: "\\operatorname{unitT}(\\vec{r},t)",
+          insert: "\\operatorname{unitT}(#0, #1)",
+          width: 1.0,
+          class: "small",
+        },
+        {
+          latex: "\\operatorname{unitN}(\\vec{r},t)",
+          insert: "\\operatorname{unitN}(#0, #1)",
+          width: 1.0,
+          class: "small",
+        },
+        {
+          latex: "\\operatorname{unitB}(\\vec{r},t)",
+          insert: "\\operatorname{unitB}(#0, #1)",
+          width: 1.0,
+          class: "small",
+        },
+      ],
+      [
+        { latex: "\\operatorname{floor}(#0)", class: "small" },
+        { latex: "\\operatorname{ceil}(#0)", class: "small" },
+        "[separator-5]",
+        { latex: "\\sinh(#0)" }, // middle
+        { latex: "\\cosh(#0)" },
+        { latex: "\\tanh(#0)" },
+        "[separator-5]",
+        { latex: "\\operatorname{Im}(#0)" },
+        { latex: "\\operatorname{Re}(#0)" },
+        { latex: "\\operatorname{abs}(#0)" },
+      ],
+      [
+        { label: "[shift]", width: 2.0 },
+        "[separator-5]",
+        {
+          latex: "\\operatorname{arcsinh}(#0)",
+          class: "small",
+          insert: "\\arcsinh",
+        }, // middle
+        {
+          latex: "\\operatorname{arccosh}(#0)",
+          class: "small",
+          insert: "\\arccosh",
+        },
+        {
+          latex: "\\operatorname{arctanh}(#0)",
+          class: "small",
+          insert: "\\arctanh",
+        },
         "[separator-5]",
         "[left]",
         "[right]",
