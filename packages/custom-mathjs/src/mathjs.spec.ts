@@ -47,9 +47,12 @@ describe("mathjs instance", () => {
     expect(math.i).toEqual([1, 0, 0]);
     expect(math.j).toEqual([0, 1, 0]);
     expect(math.k).toEqual([0, 0, 1]);
-    expect(math.hati).toEqual([1, 0, 0]);
-    expect(math.hatj).toEqual([0, 1, 0]);
-    expect(math.hatk).toEqual([0, 0, 1]);
+    expect(math.uniti).toEqual([1, 0, 0]);
+    expect(math.unitj).toEqual([0, 1, 0]);
+    expect(math.unitk).toEqual([0, 0, 1]);
+    expect(math.unitx).toEqual([1, 0, 0]);
+    expect(math.unity).toEqual([0, 1, 0]);
+    expect(math.unitz).toEqual([0, 0, 1]);
     expect(math.I.re).toBe(0);
     expect(math.I.im).toBe(1);
   });

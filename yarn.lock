@@ -2064,13 +2064,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cortex-js/compute-engine@npm:0.12.3":
-  version: 0.12.3
-  resolution: "@cortex-js/compute-engine@npm:0.12.3"
+"@cortex-js/compute-engine@npm:0.22.0":
+  version: 0.22.0
+  resolution: "@cortex-js/compute-engine@npm:0.22.0"
   dependencies:
     complex.js: "npm:^2.1.1"
-    decimal.js: "npm:^10.4.0"
-  checksum: 98d1399f9914dfb6cfb298c0e32fb0e54de2ed0aa14caf563b3567cfa45368d04f3e92198be63fd7ac35ea51b5036166074a79ee2f6afa9ddcd5548e31609f90
+    decimal.js: "npm:^10.4.3"
+  checksum: 38e5b5ccea61ce2a73e76d60e51ad9800e9129148fb7813f13aab878e2119aeb99b7c93f702505ec561852bcf6f0bb430b6b9d76cebd1be30359eb07f7f82f2b
   languageName: node
   linkType: hard
 
@@ -6565,7 +6565,7 @@ __metadata:
     "@playwright/test": "npm:^1.41.0"
     dotenv: "npm:^16.3.1"
     envalid: "npm:^8.0.0"
-    mathlive: "npm:^0.95.5"
+    mathlive: "npm:^0.98.6"
     three: "npm:^0.147.0"
     tiny-invariant: "npm:^1.3.1"
   languageName: unknown
@@ -6633,7 +6633,7 @@ __metadata:
     lodash-es: "npm:4.17.21"
     mathbox: "npm:^2.3.1"
     mathbox-react: "npm:^0.3.0"
-    mathlive: "npm:^0.95.5"
+    mathlive: "npm:^0.98.6"
     msw: "npm:^2.0.14"
     ordinal: "npm:1.0.3"
     react: "npm:18.2.0"
@@ -8800,7 +8800,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"decimal.js@npm:^10.4.0, decimal.js@npm:^10.4.2, decimal.js@npm:^10.4.3":
+"decimal.js@npm:^10.4.2, decimal.js@npm:^10.4.3":
   version: 10.4.3
   resolution: "decimal.js@npm:10.4.3"
   checksum: de663a7bc4d368e3877db95fcd5c87b965569b58d16cdc4258c063d231ca7118748738df17cd638f7e9dd0be8e34cec08d7234b20f1f2a756a52fc5a38b188d0
@@ -13777,12 +13777,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathlive@npm:^0.95.5":
-  version: 0.95.5
-  resolution: "mathlive@npm:0.95.5"
+"mathlive@npm:^0.98.6":
+  version: 0.98.6
+  resolution: "mathlive@npm:0.98.6"
   dependencies:
-    "@cortex-js/compute-engine": "npm:0.12.3"
-  checksum: 1f547919b90092ef3a82a01acca56fda5c093d657bbd002bb89786fd30eed1ae53a5f19be92e7452df8f4da41212955ad6071b9959d932d29c393b0722bc8bdd
+    "@cortex-js/compute-engine": "npm:0.22.0"
+  checksum: c67963f413ba5a76faa05cea1c8373dd98b92d5f74a4c97b34ba5d08272e861ffcf6c32b8a8791ff24f99fa802628ba11ca328d0bb9ce13e509d38e52c0646b1
   languageName: node
   linkType: hard
 
