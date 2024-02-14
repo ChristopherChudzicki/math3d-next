@@ -1,6 +1,6 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import AppPage from "@/utils/AppPage";
+import AppPage from "@/utils/pages/AppPage";
 import env from "@/env";
 
 test.describe("Authorized user header", () => {
@@ -10,7 +10,7 @@ test.describe("Authorized user header", () => {
     await page.goto("");
     const app = new AppPage(page);
 
-    const trigger = await app.userMenuOpener();
+    const trigger = await app.userMenu().opener();
     await expect(trigger).toBeVisible();
     expect(await trigger.textContent()).toBe("D");
 
@@ -23,7 +23,7 @@ test.describe("Authorized user header", () => {
     await page.goto("");
     const app = new AppPage(page);
 
-    await app.userMenuOpener().click();
+    await app.userMenu().opener().click();
 
     expect(await app.userMenu().items().allTextContents()).toEqual([
       "My Scenes",
@@ -39,7 +39,7 @@ test.describe("Anonymous user header", () => {
     await page.goto("");
     const app = new AppPage(page);
 
-    const trigger = await app.userMenuOpener();
+    const trigger = await app.userMenu().opener();
     await expect(trigger).toBeVisible();
     expect(await trigger.textContent()).toBe("");
 
@@ -51,7 +51,7 @@ test.describe("Anonymous user header", () => {
   test("Header and usermenu links", async ({ page }) => {
     await page.goto("");
     const app = new AppPage(page);
-    await app.userMenuOpener().click();
+    await app.userMenu().opener().click();
     expect(await app.userMenu().items().allTextContents()).toEqual([
       "Sign in",
       "Sign up",

@@ -1,10 +1,18 @@
-import type { Locator } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 class UserMenu {
   root: Locator;
 
-  constructor(locator: Locator) {
-    this.root = locator;
+  page: Page;
+
+  constructor(page: Page) {
+    const root = page.getByRole("menu", { name: "User Menu" });
+    this.root = root;
+    this.page = page;
+  }
+
+  opener(): Locator {
+    return this.page.getByRole("button", { name: "Open User Menu" });
   }
 
   username(): Locator {

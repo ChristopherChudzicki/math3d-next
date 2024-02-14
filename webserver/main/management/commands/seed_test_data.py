@@ -11,6 +11,8 @@ env = environ.Env(
     TEST_USER_1_PASSWORD=(str, ""),
     TEST_USER_2_EMAIL=(str, ""),
     TEST_USER_2_PASSWORD=(str, ""),
+    TEST_USER_3_EMAIL=(str, ""),
+    TEST_USER_3_PASSWORD=(str, ""),
 )
 
 User = get_user_model()
@@ -23,6 +25,14 @@ def create_test_user(email: str, password: str, public_nickname: str):
     user.set_password(password)
     user.save()
     return user
+
+
+def delete_test_user(email: str):
+    try:
+        user = User.objects.get(email=email)
+        user.delete()
+    except User.DoesNotExist:
+        pass
 
 
 TEST_SCENE_COUNT = 100
@@ -42,6 +52,8 @@ class Command(BaseCommand):
             password=env("TEST_USER_2_PASSWORD"),
             public_nickname="Dynamic Test User",
         )
+
+        delete_test_user(env("TEST_USER_3_EMAIL"))
 
         dirname = os.path.dirname(__file__)
         filename = os.path.join(dirname, "./test_scene.json")
