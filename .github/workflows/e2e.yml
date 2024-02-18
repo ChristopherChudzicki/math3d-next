@@ -17,12 +17,6 @@ jobs:
     env:
       SKIP_YARN_COREPACK_CHECK: true
       VITE_API_BASE_URL: ${{ vars.TEST_API_URL }}
-      TEST_API_URL: ${{ vars.TEST_API_URL }}
-      TEST_APP_URL: ${{ vars.TEST_APP_URL }}
-      TEST_USER_1_EMAIL: ${{ vars.TEST_USER_1_EMAIL }}
-      TEST_USER_1_PASSWORD: ${{ vars.TEST_USER_1_PASSWORD }}
-      TEST_USER_2_EMAIL: ${{ vars.TEST_USER_2_EMAIL }}
-      TEST_USER_2_PASSWORD: ${{ vars.TEST_USER_2_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
