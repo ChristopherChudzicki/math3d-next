@@ -18,14 +18,13 @@ interface EmailData {
 }
 
 abstract class InboxBackend {
-  protected instantiatedAt = new Date();
-
   abstract findEmail(matchers: EmailMatchers): Promise<EmailData>;
+
+  abstract deleteAll(): Promise<void>;
 
   public async waitForEmail(matchers: EmailMatchers): Promise<EmailData> {
     return pRetry(() =>
       this.findEmail({
-        after: this.instantiatedAt,
         ...matchers,
       }),
     );

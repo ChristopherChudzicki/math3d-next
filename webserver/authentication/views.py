@@ -6,6 +6,8 @@ from rest_framework.decorators import action
 from djoser.compat import get_user_email
 from rest_framework.response import Response
 from rest_framework import status
+from django_filters import rest_framework as filters
+from authentication.filters import CustomUserFilterSet
 
 
 @extend_schema_view(
@@ -15,6 +17,9 @@ class CustomUserViewSet(UserViewSet):
     """
     A version of Djoser's UserViewSet with some actions removed.
     """
+
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = CustomUserFilterSet
 
     def set_username(self):
         pass

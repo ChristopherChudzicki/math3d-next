@@ -80,6 +80,11 @@ class FileEmailBackend extends InboxBackend {
   async findEmail(matchers: EmailMatchers) {
     return findEmail(this.emailDir, matchers);
   }
+
+  async deleteAll() {
+    const files = await getSortedFiles(this.emailDir);
+    await Promise.all(files.map((file) => fs.unlink(file)));
+  }
 }
 
 export default FileEmailBackend;

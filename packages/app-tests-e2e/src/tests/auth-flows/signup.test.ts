@@ -1,7 +1,7 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@/utils/expect";
 import AppPage from "@/utils/pages/AppPage";
-import { getEmailBackend } from "@/utils/inbox/emails";
+import { getInbox } from "@/utils/inbox/emails";
 import env from "@/env";
 import invariant from "tiny-invariant";
 import { faker } from "@faker-js/faker/locale/en";
@@ -13,7 +13,7 @@ import { faker } from "@faker-js/faker/locale/en";
 // reset - bad token
 
 test("User sign up flow", async ({ page, context }) => {
-  const inbox = getEmailBackend();
+  const inbox = getInbox();
 
   await test.step("Create account", async () => {
     await page.goto("/");
@@ -65,7 +65,7 @@ test("User sign up flow", async ({ page, context }) => {
   });
 });
 
-test.only("Existing accounts cause error on signup", async ({ page }) => {
+test("Existing accounts cause error on signup", async ({ page }) => {
   await page.goto("/");
   const app = new AppPage(page);
   await app.signupPage().signup({

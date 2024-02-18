@@ -47,6 +47,10 @@ paths:
       operationId: auth_users_list
       description: A version of Djoser's UserViewSet with some actions removed.
       parameters:
+      - in: query
+        name: email
+        schema:
+          type: string
       - name: limit
         required: false
         in: query

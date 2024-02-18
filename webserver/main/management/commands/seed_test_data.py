@@ -7,6 +7,8 @@ import json
 
 
 env = environ.Env(
+    TEST_ADMIN_USER_EMAIL=(str, ""),
+    TEST_ADMIN_USER_PASSWORD=(str, ""),
     TEST_USER_1_EMAIL=(str, ""),
     TEST_USER_1_PASSWORD=(str, ""),
     TEST_USER_2_EMAIL=(str, ""),
@@ -18,10 +20,13 @@ env = environ.Env(
 User = get_user_model()
 
 
-def create_test_user(email: str, password: str, public_nickname: str):
+def create_test_user(
+    email: str, password: str, public_nickname: str, *, is_staff=False
+):
     user, _ = User.objects.get_or_create(email=email)
     user.is_active = True
     user.public_nickname = public_nickname
+    user.is_staff = is_staff
     user.set_password(password)
     user.save()
     return user
@@ -42,6 +47,13 @@ class Command(BaseCommand):
     help = """Seed test data for e2e tests"""
 
     def handle(self, *args, **options):
+        create_test_user(
+            email=env("TEST_USER_ADMIN_EMAIL"),
+            password=env("TEST_USER_ADMIN_PASSWORD"),
+            public_nickname="Admin Test User",
+            is_staff=True,
+        )
+
         user_1 = create_test_user(
             email=env("TEST_USER_1_EMAIL"),
             password=env("TEST_USER_1_PASSWORD"),
