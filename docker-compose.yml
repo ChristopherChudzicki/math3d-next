@@ -27,16 +27,11 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
+      - .env.development
       - .env
     environment:
       DATABASE_URL: postgresql://docker:docker@db:5432/math3d
       CORS_ALLOWED_ORIGINS: http://localhost:3000
-      TEST_API_URL: ${TEST_API_URL}
-      TEST_APP_URL: ${TEST_APP_URL}
-      TEST_USER_1_EMAIL: ${TEST_USER_1_EMAIL}
-      TEST_USER_1_PASSWORD: ${TEST_USER_1_PASSWORD}
-      TEST_USER_2_EMAIL: ${TEST_USER_2_EMAIL}
-      TEST_USER_2_PASSWORD: ${TEST_USER_2_PASSWORD}
     command: make devserver
     volumes:
       - ./webserver:/src/webserver

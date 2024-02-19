@@ -7,6 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useAuthStatus } from "@/features/auth";
 import Alert from "@mui/material/Alert";
+import Link from "@/util/components/Link";
 import styles from "./styles.module.css";
 import { handleErrors } from "./util";
 import { BasicDialog } from "./components/BasicDialog";
@@ -72,6 +73,10 @@ const LoginPage: React.FC = () => {
           <Alert severity="error">{errors.root?.message}</Alert>
         ) : null}
       </form>
+      <div className={styles["sign-in-footer"]}>
+        <Link href="../auth/reset-password">Forgot password?</Link>
+        <Link href="../auth/register">Create Account</Link>
+      </div>
     </BasicDialog>
   );
 };

@@ -110,11 +110,11 @@ const RegistrationPage: React.FC = () => {
         </form>
       ) : (
         <div className={styles["form-content"]}>
-          <p>
+          <Alert severity="success">
             To finish creating your account, please use the link emailed to{" "}
             <span className={styles["email-address"]}>{getValues().email}</span>
             . This email may take a few moments to deliver.
-          </p>
+          </Alert>
         </div>
       )}
     </BasicDialog>

@@ -8,3 +8,10 @@
   color: var(--color-primary-dark);
   font-family: monospace;
 }
+
+.sign-in-footer {
+  padding-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

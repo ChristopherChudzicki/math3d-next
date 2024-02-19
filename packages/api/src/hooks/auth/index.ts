@@ -7,6 +7,7 @@ import type {
   PasswordResetConfirmRetypeRequest,
 } from "../../generated";
 import { getConfig } from "../util";
+import { deleteUser } from "./api";
 
 const authApi = new AuthApi(getConfig());
 
@@ -77,4 +78,5 @@ export {
   useActivateUser,
   useResetPassword,
   useResetPasswordConfirm,
+  deleteUser,
 };

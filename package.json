@@ -11,6 +11,7 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
+    "echo": "echo $CAT",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",

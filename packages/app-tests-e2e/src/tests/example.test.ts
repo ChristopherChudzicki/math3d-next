@@ -1,13 +1,13 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
-import AppPage from "@/utils/AppPage";
+import AppPage from "@/utils/pages/AppPage";
 import env from "@/env";
 
 test("Anonymous user", async ({ page }) => {
   await page.goto("");
   const app = new AppPage(page);
-  await app.userMenuOpener().click();
+  await app.userMenu().opener().click();
   const username = app.userMenu().username();
   await expect(username).not.toBeVisible();
 });
@@ -18,7 +18,7 @@ test.describe("Authorized user (static)", () => {
   test("Check user info", async ({ page }) => {
     await page.goto("");
     const app = new AppPage(page);
-    await app.userMenuOpener().click();
+    await app.userMenu().opener().click();
     const username = app.userMenu().username();
     expect(await username.textContent()).toBe(env.TEST_USER_1_EMAIL);
   });
@@ -30,7 +30,7 @@ test.describe("Authorized user (dynamic)", () => {
   test("Check user info", async ({ page }) => {
     await page.goto("");
     const app = new AppPage(page);
-    await app.userMenuOpener().click();
+    await app.userMenu().opener().click();
     const username = app.userMenu().username();
     expect(await username.textContent()).toBe(env.TEST_USER_2_EMAIL);
   });

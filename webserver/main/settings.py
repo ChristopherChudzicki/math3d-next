@@ -68,8 +68,6 @@ INSTALLED_APPS = [
     "scenes",
 ]
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 20,
@@ -216,7 +214,8 @@ else:
     logger.warning(
         "MAILJET_API_KEY and MAILJET_SECRET_KEY settings not found. Using email console backend."
     )
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+    EMAIL_FILE_PATH = "./private/email/"
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 SERVER_EMAIL = env("SERVER_EMAIL")

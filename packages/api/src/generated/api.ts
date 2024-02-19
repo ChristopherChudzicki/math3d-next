@@ -809,12 +809,14 @@ export const AuthApiAxiosParamCreator = function (
     },
     /**
      * A version of Djoser\'s UserViewSet with some actions removed.
+     * @param {string} [email]
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     authUsersList: async (
+      email?: string,
       limit?: number,
       offset?: number,
       options: RawAxiosRequestConfig = {},
@@ -841,6 +843,10 @@ export const AuthApiAxiosParamCreator = function (
         "Authorization",
         configuration,
       );
+
+      if (email !== undefined) {
+        localVarQueryParameter["email"] = email;
+      }
 
       if (limit !== undefined) {
         localVarQueryParameter["limit"] = limit;
@@ -1623,12 +1629,14 @@ export const AuthApiFp = function (configuration?: Configuration) {
     },
     /**
      * A version of Djoser\'s UserViewSet with some actions removed.
+     * @param {string} [email]
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async authUsersList(
+      email?: string,
       limit?: number,
       offset?: number,
       options?: RawAxiosRequestConfig,
@@ -1639,6 +1647,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
       ) => AxiosPromise<PaginatedUserList>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.authUsersList(
+        email,
         limit,
         offset,
         options,
@@ -2056,6 +2065,7 @@ export const AuthApiFactory = function (
     ): AxiosPromise<PaginatedUserList> {
       return localVarFp
         .authUsersList(
+          requestParameters.email,
           requestParameters.limit,
           requestParameters.offset,
           options,
@@ -2293,6 +2303,13 @@ export interface AuthApiAuthUsersDestroyRequest {
  * @interface AuthApiAuthUsersListRequest
  */
 export interface AuthApiAuthUsersListRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof AuthApiAuthUsersList
+   */
+  readonly email?: string;
+
   /**
    * Number of results to return per page.
    * @type {number}
@@ -2546,7 +2563,12 @@ export class AuthApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
-      .authUsersList(requestParameters.limit, requestParameters.offset, options)
+      .authUsersList(
+        requestParameters.email,
+        requestParameters.limit,
+        requestParameters.offset,
+        options,
+      )
       .then((request) => request(this.axios, this.basePath));
   }
 

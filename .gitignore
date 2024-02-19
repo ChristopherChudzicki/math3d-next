@@ -24,3 +24,5 @@ playwright-report
 test-results
 
 dist
+webserver/private/email/*
+!webserver/private/email/.gitkeep

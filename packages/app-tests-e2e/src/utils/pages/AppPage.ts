@@ -1,5 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import UserMenu from "./UserMenu";
+import SigninPage from "./SigninPage";
+import SignupPage from "./SignupPage";
 
 class AppPage {
   private page: Page;
@@ -8,14 +10,16 @@ class AppPage {
     this.page = page;
   }
 
-  userMenuOpener(): Locator {
-    return this.page.getByRole("button", { name: "Open User Menu" });
+  userMenu(): UserMenu {
+    return new UserMenu(this.page);
   }
 
-  userMenu(): UserMenu {
-    this.page.getByRole("menu", { name: "User Menu" });
-    const root = this.page.getByRole("menu", { name: "User Menu" });
-    return new UserMenu(root);
+  signupPage(): SignupPage {
+    return new SignupPage(this.page);
+  }
+
+  signinPage(): SigninPage {
+    return new SigninPage(this.page);
   }
 
   header(): Locator {

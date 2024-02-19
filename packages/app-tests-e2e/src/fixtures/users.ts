@@ -1,21 +1,25 @@
 import { test as base } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { AuthApi, API_TOKEN_KEY, ScenesApi, Configuration } from "@math3d/api";
+import { AuthApi, API_TOKEN_KEY, ScenesApi } from "@math3d/api";
 import type { Scene } from "@math3d/api";
 import invariant from "tiny-invariant";
-import env from "../env";
+import env from "@/env";
+import { getConfig } from "@/utils/api";
 
 const TEST_SCENE_PREFIX = "[TEST-E2E-SCENE]";
 
-const getConfig = (authToken: string | null) =>
-  new Configuration({
-    apiKey: () => {
-      return authToken ? `Token ${authToken}` : "";
-    },
-  });
 const authApi = new AuthApi(undefined, env.TEST_API_URL);
 
 const users = {
+  /**
+   * This admin user should not be necessary in actual tests, but is useful for
+   * setup and teardown. E.g., this user is used to delete ephemeral test
+   * accounts if they exists.
+   */
+  admin: {
+    email: env.TEST_USER_ADMIN_EMAIL,
+    password: env.TEST_USER_ADMIN_PASSWORD,
+  },
   static: {
     email: env.TEST_USER_1_EMAIL,
     password: env.TEST_USER_1_PASSWORD,
@@ -27,7 +31,7 @@ const users = {
 };
 
 type Fixtures = {
-  user: "static" | "dynamic" | null;
+  user: keyof typeof users | null;
   authToken: string | null;
   page: Page;
   prepareScene: (scene: Scene) => Promise<string>;
@@ -76,7 +80,7 @@ const test = base.extend<Fixtures>({
     await use(page);
   },
   prepareScene: async ({ user, authToken }, use) => {
-    const scenesApi = new ScenesApi(getConfig(authToken), env.TEST_API_URL);
+    const scenesApi = new ScenesApi(getConfig(authToken));
     let key: string | undefined;
     const create = async (s: Scene) => {
       const title =
