@@ -21,6 +21,7 @@ const getSortedFiles = async (dir: string) => {
     }),
   );
   return times
+    .filter((file) => file.name !== ".gitkeep")
     .sort((a, b) => b.time - a.time)
     .map((file) => path.join(dir, file.name));
 };

@@ -1,9 +1,9 @@
 import { test as setup } from "@/fixtures/users";
-import { getInbox } from "./utils/inbox/emails";
 import { deleteUser, AuthApi } from "@math3d/api";
 import invariant from "tiny-invariant";
 import env from "@/env";
 import { getConfig, axios } from "@/utils/api";
+import { getInbox } from "./utils/inbox/emails";
 
 const inbox = getInbox();
 
