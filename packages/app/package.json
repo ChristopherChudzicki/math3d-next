@@ -9,8 +9,8 @@
     "build-storybook": "build-storybook -s public",
     "lint": "eslint \"**/*.ts?(x)\"",
     "storybook": "start-storybook -p 6006 -s public",
-    "test": "NODE_OPTIONS='--no-experimental-fetch' vitest --run",
-    "test-watch": "NODE_OPTIONS='--no-experimental-fetch' vitest"
+    "test": "vitest --run",
+    "test-watch": "vitest"
   },
   "browserslist": {
     "production": [
@@ -106,7 +106,6 @@
     "rollup-plugin-visualizer": "5.9.2",
     "typescript": "^5.3.3",
     "typescript-plugin-css-modules": "3.4.0",
-    "undici": "^6.3.0",
     "vite": "^5.0.10",
     "vite-tsconfig-paths": "^4.2.2",
     "vitest": "^1.1.0"
