@@ -20,19 +20,19 @@ class UserMenu {
   }
 
   signOut(): Locator {
-    return this.root.getByRole("button", { name: "Sign out" });
+    return this.root.getByRole("menuitem", { name: "Sign out" });
   }
 
   myScenes(): Locator {
-    return this.root.getByRole("button", { name: "My Scenes" });
+    return this.root.getByRole("menuitem", { name: "My Scenes" });
   }
 
   examples(): Locator {
-    return this.root.getByRole("button", { name: "Examples" });
+    return this.root.getByRole("menuitem", { name: "Examples" });
   }
 
   contact(): Locator {
-    return this.root.getByRole("button", { name: "Contact" });
+    return this.root.getByRole("menuitem", { name: "Contact" });
   }
 
   items(): Locator {

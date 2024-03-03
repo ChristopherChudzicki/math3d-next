@@ -2,6 +2,7 @@ import type { Locator, Page } from "@playwright/test";
 import UserMenu from "./UserMenu";
 import SigninPage from "./SigninPage";
 import SignupPage from "./SignupPage";
+import SignoutPage from "./SignoutPage";
 
 class AppPage {
   private page: Page;
@@ -20,6 +21,10 @@ class AppPage {
 
   signinPage(): SigninPage {
     return new SigninPage(this.page);
+  }
+
+  signoutPage(): SignoutPage {
+    return new SignoutPage(this.page);
   }
 
   header(): Locator {

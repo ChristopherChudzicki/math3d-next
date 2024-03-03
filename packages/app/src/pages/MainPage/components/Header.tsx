@@ -70,7 +70,7 @@ const LoginButtons: React.FC<{
 type FilterableItem = SimpleMenuItem & {
   shouldShow: boolean;
 };
-const getItems = ({ user }: { user?: User }): FilterableItem[] => {
+const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
   const isAuthenticated = !!user;
   return [
     {
@@ -134,7 +134,7 @@ const getItems = ({ user }: { user?: User }): FilterableItem[] => {
 const HeaderMenu: React.FC = () => {
   const smallScreen = useMediaQuery("(max-width: 600px)");
   const [isAuthenticated] = useAuthStatus();
-  const userQuery = useUserMe({ enabled: isAuthenticated });
+  const userQuery = useUserMe();
   const filteredItems = useMemo(
     () =>
       getItems({ user: userQuery.data }).filter((item) => !!item.shouldShow),

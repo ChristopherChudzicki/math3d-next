@@ -15,14 +15,14 @@ const badgeAnchorOrigin: BadgeProps["anchorOrigin"] = {
   horizontal: "right",
 };
 
-const UserIcon = ({ user }: { user?: User }) => {
+const UserIcon = ({ user }: { user?: User | null }) => {
   if (!user) return <PersonIcon />;
   return user.public_nickname[0].toUpperCase() || <PersonIcon />;
 };
 
 const UserMenu: React.FC<{
   items: SimpleMenuItem[];
-  user?: User;
+  user?: User | null;
   className?: string;
 }> = ({ items, user, className }) => {
   const [visible, setVisible] = useState(false);

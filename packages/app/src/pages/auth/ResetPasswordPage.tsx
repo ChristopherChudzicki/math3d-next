@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useId } from "react";
 import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -19,6 +19,7 @@ type FormData = yup.InferType<typeof schema>;
 
 const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
+  const formId = useId();
   const resolver = yupResolver(schema);
   const [pendingSubmit, setPendingSubmit] = useToggle(true);
   const {
@@ -58,6 +59,7 @@ const ResetPasswordPage: React.FC = () => {
       onClose={navigateAway}
       onConfirm={handleSubmit(submitHandler)}
       confirmText={submitButtonContent}
+      confirmButtonProps={{ type: "submit", form: formId }}
       fullWidth
       maxWidth="xs"
       cancelButton={cancelButton}
@@ -71,7 +73,7 @@ const ResetPasswordPage: React.FC = () => {
           </p>
         </Alert>
       ) : (
-        <form className={styles["form-content"]}>
+        <form className={styles["form-content"]} id={formId}>
           <TextField
             label="Email"
             error={!!errors.email?.message}

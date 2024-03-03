@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useId } from "react";
 import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -31,6 +31,7 @@ const LoginPage: React.FC = () => {
   const handleClose = useCallback(() => {
     navigate("../");
   }, [navigate]);
+  const formId = useId();
   const login = useLogin();
   useEffect(() => {
     if (isAuthenticated) {
@@ -52,10 +53,11 @@ const LoginPage: React.FC = () => {
         }
       })}
       confirmText="Sign in"
+      confirmButtonProps={{ type: "submit", form: formId }}
       fullWidth
       maxWidth="xs"
     >
-      <form className={styles["form-content"]}>
+      <form className={styles["form-content"]} id={formId}>
         <TextField
           label="Email"
           error={!!errors.email?.message}

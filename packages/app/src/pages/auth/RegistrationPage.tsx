@@ -72,7 +72,7 @@ const RegistrationPage: React.FC = () => {
       cancelButton={cancelButton}
       confirmText={submitButtonContent}
       fullWidth
-      confirmButtonProps={{ form: formId }}
+      confirmButtonProps={{ form: formId, type: "submit" }}
       maxWidth="xs"
     >
       {registering ? (

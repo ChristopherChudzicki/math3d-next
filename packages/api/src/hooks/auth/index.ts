@@ -1,4 +1,9 @@
-import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  UseQueryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { AuthApi, SendEmailResetRequest } from "../../generated";
 import type {
   TokenCreateRequest,
@@ -12,6 +17,7 @@ import { deleteUser } from "./api";
 const authApi = new AuthApi(getConfig());
 
 const useLogin = () => {
+  const client = useQueryClient();
   return useMutation({
     mutationFn: (data: TokenCreateRequest) =>
       authApi.authTokenLoginCreate({ TokenCreateRequest: data }),
@@ -19,15 +25,18 @@ const useLogin = () => {
       // @ts-expect-error drf-spectacular issue
       const token = data.data.auth_token;
       localStorage.setItem("apiToken", JSON.stringify(token));
+      client.resetQueries();
     },
   });
 };
 
 const useLogout = () => {
+  const client = useQueryClient();
   return useMutation({
     mutationFn: () => authApi.authTokenLogoutCreate(),
     onSuccess: () => {
       localStorage.removeItem("apiToken");
+      client.resetQueries();
     },
   });
 };
@@ -35,7 +44,13 @@ const useLogout = () => {
 const useUserMe = (opts?: Pick<UseQueryOptions, "enabled">) => {
   return useQuery({
     queryKey: ["me"],
-    queryFn: () => authApi.authUsersMeRetrieve().then((res) => res.data),
+    queryFn: () => {
+      console.log("getting useUserMe");
+      if (!localStorage.getItem("apiToken")) {
+        return Promise.resolve(null);
+      }
+      return authApi.authUsersMeRetrieve().then((res) => res.data);
+    },
     ...opts,
   });
 };
