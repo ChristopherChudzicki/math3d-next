@@ -43,21 +43,25 @@ const LoginPage: React.FC = () => {
       title="Sign in"
       open
       onClose={handleClose}
-      onConfirm={handleSubmit(async (data) => {
-        try {
-          await login.mutateAsync(data, {});
-          setIsAuthenticated(true);
-          handleClose();
-        } catch (err) {
-          handleErrors(data, err, setError);
-        }
-      })}
       confirmText="Sign in"
       confirmButtonProps={{ type: "submit", form: formId }}
       fullWidth
       maxWidth="xs"
     >
-      <form className={styles["form-content"]} id={formId}>
+      <form
+        className={styles["form-content"]}
+        id={formId}
+        onSubmit={handleSubmit(async (data, event) => {
+          event?.preventDefault();
+          try {
+            await login.mutateAsync(data, {});
+            setIsAuthenticated(true);
+            handleClose();
+          } catch (err) {
+            handleErrors(data, err, setError);
+          }
+        })}
+      >
         <TextField
           label="Email"
           error={!!errors.email?.message}

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useId } from "react";
 import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import type { SubmitHandler } from "react-hook-form";
 import { useCreateUser, UserCreatePasswordRetypeRequest } from "@math3d/api";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -47,36 +48,47 @@ const RegistrationPage: React.FC = () => {
     }
   }, [isAuthenticated, navigateAway]);
 
-  const createAccount = useCallback(
-    async (data: UserCreatePasswordRetypeRequest) => {
-      try {
-        await createUser.mutateAsync(data);
-        setRegistering(false);
-      } catch (err) {
-        handleErrors(data, err, setError);
-      }
-    },
-    [createUser, setError, setRegistering],
-  );
+  const createAccount: SubmitHandler<UserCreatePasswordRetypeRequest> =
+    useCallback(
+      async (data, event) => {
+        event?.preventDefault();
+        try {
+          await createUser.mutateAsync(data);
+          setRegistering(false);
+        } catch (err) {
+          handleErrors(data, err, setError);
+        }
+      },
+      [createUser, setError, setRegistering],
+    );
 
   const title = registering ? "Create Account" : "Confirmation Required";
   const cancelButton = registering ? undefined : null; // null will suppress normal button
   const submitButtonContent = registering ? "Create Account" : "OK";
-  const submitHandler = registering ? createAccount : navigateAway;
   return (
     <BasicDialog
       title={title}
       open
       onClose={navigateAway}
-      onConfirm={handleSubmit(submitHandler)}
       cancelButton={cancelButton}
       confirmText={submitButtonContent}
       fullWidth
-      confirmButtonProps={{ form: formId, type: "submit" }}
+      confirmButtonProps={
+        registering
+          ? {
+              form: formId,
+              type: "submit",
+            }
+          : { type: "button", onClick: navigateAway }
+      }
       maxWidth="xs"
     >
       {registering ? (
-        <form id={formId} className={styles["form-content"]}>
+        <form
+          id={formId}
+          className={styles["form-content"]}
+          onSubmit={handleSubmit(createAccount)}
+        >
           <TextField
             label="Email"
             error={!!errors.email?.message}

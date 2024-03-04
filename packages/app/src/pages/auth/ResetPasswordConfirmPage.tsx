@@ -2,6 +2,7 @@ import React, { useCallback, useId } from "react";
 import TextField from "@mui/material/TextField";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import type { SubmitHandler } from "react-hook-form";
 import { useResetPasswordConfirm } from "@math3d/api";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -47,8 +48,9 @@ const RegistrationPage: React.FC = () => {
     navigate("../");
   }, [navigate]);
   const resetPassword = useResetPasswordConfirm();
-  const changePassword = useCallback(
-    async (data: FormData) => {
+  const changePassword: SubmitHandler<FormData> = useCallback(
+    async (data, event) => {
+      event?.preventDefault();
       try {
         await resetPassword.mutateAsync(data);
       } catch (err) {
@@ -63,17 +65,22 @@ const RegistrationPage: React.FC = () => {
   const submitButtonContent = resetPassword.isSuccess
     ? "Go to login"
     : "Change Password";
-  const submitHandler = resetPassword.isSuccess ? goToLogin : changePassword;
   return (
     <BasicDialog
       title="Change Password"
       open
       onClose={navigateAway}
-      onConfirm={handleSubmit(submitHandler)}
       cancelButton={cancelButton}
       confirmText={submitButtonContent}
       fullWidth
-      confirmButtonProps={{ form: formId, type: "submit" }}
+      confirmButtonProps={
+        resetPassword.isSuccess
+          ? { type: "button", onClick: goToLogin }
+          : {
+              form: formId,
+              type: "submit",
+            }
+      }
       maxWidth="xs"
     >
       {resetPassword.isSuccess ? (
@@ -81,7 +88,11 @@ const RegistrationPage: React.FC = () => {
           Password changed. Please <Link href="../auth/login">log in</Link>.
         </Alert>
       ) : (
-        <form id={formId} className={styles["form-content"]}>
+        <form
+          id={formId}
+          className={styles["form-content"]}
+          onSubmit={handleSubmit(changePassword)}
+        >
           <TextField
             error={!!errors.new_password?.message}
             helperText={errors.new_password?.message}

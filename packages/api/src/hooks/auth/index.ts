@@ -45,7 +45,6 @@ const useUserMe = (opts?: Pick<UseQueryOptions, "enabled">) => {
   return useQuery({
     queryKey: ["me"],
     queryFn: () => {
-      console.log("getting useUserMe");
       if (!localStorage.getItem("apiToken")) {
         return Promise.resolve(null);
       }
