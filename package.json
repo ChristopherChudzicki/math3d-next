@@ -16,7 +16,8 @@
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "start": "yarn workspace app start",
-    "build": "yarn workspace app build"
+    "build": "yarn workspace app build",
+    "preview": "yarn workspace app preview"
   },
   "dependencies": {
     "prettier": "^3.1.0"

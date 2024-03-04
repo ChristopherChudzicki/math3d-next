@@ -5,7 +5,7 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "serve": "vite preview",
+    "preview": "vite preview --port 3000",
     "build-storybook": "build-storybook -s public",
     "lint": "eslint \"**/*.ts?(x)\"",
     "storybook": "start-storybook -p 6006 -s public",
