@@ -3,7 +3,7 @@ import { expect } from "@playwright/test";
 import { Vector3 } from "three";
 import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
-import { whenMathboxRendered } from "@/utilities";
+import { whenMathboxRendered } from "@/utils/selectors";
 
 const getCameraPosition = async (
   page: Page,

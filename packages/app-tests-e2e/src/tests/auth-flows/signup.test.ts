@@ -5,6 +5,9 @@ import { getInbox } from "@/utils/inbox/emails";
 import env from "@/env";
 import invariant from "tiny-invariant";
 import { faker } from "@faker-js/faker/locale/en";
+import { getAuthToken } from "@/utils/api/auth";
+import { getConfig, axios } from "@/utils/api/config";
+import { AuthApi, deleteUser } from "@math3d/api";
 
 // create - activate - signin - verify - signout - verify
 // create - duplicate account - error
@@ -16,6 +19,26 @@ test.setTimeout(60_000);
 
 test("User sign up flow", async ({ page, context }) => {
   const inbox = getInbox();
+
+  await test.step("Delete ephemeral accounts", async () => {
+    const authToken = await getAuthToken("admin");
+    invariant(authToken, "Expected an auth token");
+    const config = getConfig(authToken);
+    const api = new AuthApi(config);
+    const { data: response } = await api.authUsersList({
+      email: env.TEST_USER_3_EMAIL,
+    });
+    const { results: users } = response;
+    invariant(users, "Expected users to be defined");
+    invariant(users.length <= 1, "Expected at most one user with this email");
+    if (users.length === 1) {
+      await deleteUser(
+        { id: users[0].id, currentPassword: env.TEST_USER_ADMIN_PASSWORD },
+        config,
+        axios,
+      );
+    }
+  });
 
   await test.step("Create account", async () => {
     await page.goto("/");
