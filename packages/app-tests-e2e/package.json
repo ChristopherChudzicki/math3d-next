@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "playwright test"
+    "test-e2e": "playwright test"
   },
   "devDependencies": {
     "@faker-js/faker": "7.6.0",

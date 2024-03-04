@@ -41,7 +41,7 @@ jobs:
       - name: Install Playwright Browsers
         run: yarn workspace app-tests-e2e playwright install --with-deps
       - name: Run Playwright tests
-        run: yarn workspace app-tests-e2e run test
+        run: yarn workspace app-tests-e2e run test-e2e
         env:
           CI: True
       - uses: actions/upload-artifact@v3
