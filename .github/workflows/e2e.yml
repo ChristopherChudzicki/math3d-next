@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
       - name: Start frontend
-        run: yarn workspace app start &
+        run: yarn preview &
       - name: Install Playwright Browsers
         run: yarn workspace app-tests-e2e playwright install --with-deps
       - name: Run Playwright tests

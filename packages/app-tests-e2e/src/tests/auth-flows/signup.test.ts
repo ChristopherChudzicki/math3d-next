@@ -78,9 +78,10 @@ test("User sign up flow", async ({ page, context }) => {
     const dialog = await page.getByRole("dialog", {
       name: "Account Activation",
     });
-    await expect(await dialog.getByRole("alert")).toContainText(
-      /Account successfully activated./,
-    );
+    await expect(
+      dialog.getByRole("alert"),
+      "This can be flaky in dev mode due to StrictMode double renders => 2 API calls",
+    ).toContainText(/Account successfully activated./);
     return dialog.getByRole("link", { name: "log in" }).click();
   });
 
