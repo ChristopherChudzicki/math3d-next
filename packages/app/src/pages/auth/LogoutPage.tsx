@@ -23,11 +23,11 @@ const LogoutPage: React.FC = () => {
   }, [isAuthenticated, navigate]);
   return (
     <BasicDialog
-      title="Logout"
+      title="Sign out"
       open
       onClose={handleClose}
       onConfirm={handleSubmit}
-      confirmText="Yes, log out"
+      confirmText="Yes, sign out"
     >
       Are you sure you want to log out?
     </BasicDialog>

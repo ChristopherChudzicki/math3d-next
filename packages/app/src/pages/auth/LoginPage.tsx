@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useId } from "react";
 import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -31,6 +31,7 @@ const LoginPage: React.FC = () => {
   const handleClose = useCallback(() => {
     navigate("../");
   }, [navigate]);
+  const formId = useId();
   const login = useLogin();
   useEffect(() => {
     if (isAuthenticated) {
@@ -42,20 +43,25 @@ const LoginPage: React.FC = () => {
       title="Sign in"
       open
       onClose={handleClose}
-      onConfirm={handleSubmit(async (data) => {
-        try {
-          await login.mutateAsync(data, {});
-          setIsAuthenticated(true);
-          handleClose();
-        } catch (err) {
-          handleErrors(data, err, setError);
-        }
-      })}
       confirmText="Sign in"
+      confirmButtonProps={{ type: "submit", form: formId }}
       fullWidth
       maxWidth="xs"
     >
-      <form className={styles["form-content"]}>
+      <form
+        className={styles["form-content"]}
+        id={formId}
+        onSubmit={handleSubmit(async (data, event) => {
+          event?.preventDefault();
+          try {
+            await login.mutateAsync(data, {});
+            setIsAuthenticated(true);
+            handleClose();
+          } catch (err) {
+            handleErrors(data, err, setError);
+          }
+        })}
+      >
         <TextField
           label="Email"
           error={!!errors.email?.message}

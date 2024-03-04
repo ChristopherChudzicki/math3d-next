@@ -16,7 +16,7 @@ test("Logout dialog logs user out", async () => {
   expect(querySignInLink()).toBe(null);
 
   const dialog = screen.getByRole("dialog");
-  const logout = within(dialog).getByRole("button", { name: "Yes, log out" });
+  const logout = within(dialog).getByRole("button", { name: "Yes, sign out" });
 
   await user.click(logout);
 

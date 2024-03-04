@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import { getItemForm, getLatex } from "@/utilities";
+import { getItemForm, getLatex } from "@/utils/selectors";
 import { SceneBuilder } from "@math3d/mock-api";
 
 test.use({ user: "dynamic" });

@@ -37,7 +37,6 @@ const ActivationMessage: React.FC<{ success: boolean; error: boolean }> = ({
 
 const AccountActivationPage: React.FC = () => {
   const [success, setSuccess] = useToggle(false);
-
   const navigate = useNavigate();
   const handleClose = useCallback(() => {
     navigate("../auth/login");
