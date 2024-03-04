@@ -12,6 +12,8 @@ import { faker } from "@faker-js/faker/locale/en";
 // reset - activated account
 // reset - bad token
 
+test.setTimeout(60_000);
+
 test("User sign up flow", async ({ page, context }) => {
   const inbox = getInbox();
 
@@ -31,21 +33,26 @@ test("User sign up flow", async ({ page, context }) => {
     );
   });
 
-  const authedPage = await test.step("Activate account", async () => {
-    const message = await inbox.waitForEmail({
-      subject: "Activate your account",
-      to: env.TEST_USER_3_EMAIL,
+  const activationLink =
+    await test.step("Retrieve activation link", async () => {
+      const message = await inbox.waitForEmail({
+        subject: "Activate your account",
+        to: env.TEST_USER_3_EMAIL,
+      });
+      invariant(message.html, "Expected email to have HTML content");
+      const messagePage = await context.newPage();
+      await messagePage.setContent(message.html);
+      const link = await messagePage.getByTestId("activation-link");
+      const href = await link.getAttribute("href");
+      invariant(href, "Expected link to have href");
+      await messagePage.goto(href); // Gives us a longer
+      messagePage.close();
+      return href;
     });
-    invariant(message.html, "Expected email to have HTML content");
-    const messagePage = await context.newPage();
-    await messagePage.setContent(message.html);
-    const link = await messagePage.getByTestId("activation-link");
-    await link.click();
-    return messagePage;
-  });
 
-  await test.step("Verify account is activated", async () => {
-    const dialog = await authedPage.getByRole("dialog", {
+  await test.step("Activate account", async () => {
+    await page.goto(activationLink);
+    const dialog = await page.getByRole("dialog", {
       name: "Account Activation",
     });
     await expect(await dialog.getByRole("alert")).toContainText(
@@ -55,7 +62,7 @@ test("User sign up flow", async ({ page, context }) => {
   });
 
   await test.step("Sign in & verify", async () => {
-    const app = new AppPage(authedPage);
+    const app = new AppPage(page);
     await app.signinPage().signin({
       email: env.TEST_USER_3_EMAIL,
       password: env.TEST_USER_3_PASSWORD,
