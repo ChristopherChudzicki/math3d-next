@@ -6616,7 +6616,7 @@ __metadata:
     "@types/toposort": "npm:2.0.7"
     "@vitejs/plugin-react": "npm:^4.2.1"
     axios: "npm:^1.6.7"
-    bootstrap: "npm:5.2.2"
+    bootstrap: "npm:5.3.3"
     classnames: "npm:2.5.1"
     eslint: "npm:^8.54.0"
     fast-json-patch: "npm:^3.1.1"
@@ -7325,12 +7325,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bootstrap@npm:5.2.2":
-  version: 5.2.2
-  resolution: "bootstrap@npm:5.2.2"
+"bootstrap@npm:5.3.3":
+  version: 5.3.3
+  resolution: "bootstrap@npm:5.3.3"
   peerDependencies:
-    "@popperjs/core": ^2.11.6
-  checksum: 10/61ff284f7a4144a05a545d83ca6f482c294eae3c9e50b62c4d0a550643fd52ea88883657fccd91a40a3143690cce0c38d5ab118cd0d56d57097ed15bd48ab59a
+    "@popperjs/core": ^2.11.8
+  checksum: 10/f05183948b00b496400cc13df5798ecab7a85975e7d9a77b314a763b574a990aec0f1bbf1913c648a93b5d8cc82e73bc05f5ec1161d2932aad7ef7f316d9c82d
   languageName: node
   linkType: hard
 
