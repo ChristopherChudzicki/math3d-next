@@ -36,8 +36,8 @@ jobs:
         run: docker compose up -d
       - name: Install dependencies
         run: yarn install --immutable
-      - name: Start frontend
-        run: yarn preview &
+      - name: Build and Start Frontend
+        run: yarn build && yarn preview &
       - name: Install Playwright Browsers
         run: yarn workspace app-tests-e2e playwright install --with-deps
       - name: Run Playwright tests
