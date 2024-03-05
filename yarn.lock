@@ -2819,10 +2819,10 @@ __metadata:
   linkType: hard
 
 "@julr/vite-plugin-validate-env@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@julr/vite-plugin-validate-env@npm:1.0.1"
+  version: 1.1.1
+  resolution: "@julr/vite-plugin-validate-env@npm:1.1.1"
   dependencies:
-    "@poppinss/cliui": "npm:^6.2.1"
+    "@poppinss/cliui": "npm:^6.3.0"
     "@poppinss/validator-lite": "npm:^1.0.3"
     unconfig: "npm:^0.3.11"
   peerDependencies:
@@ -2831,7 +2831,7 @@ __metadata:
   peerDependenciesMeta:
     zod:
       optional: true
-  checksum: 10/5fc838322eff1f08122c92b9c83560dcc318ef3dcf766345904751b676a5ce1d526b57939e36d4ecb623679188b2fe854720bdaa4cfb400d4083ebe89f772dad
+  checksum: 10/e97bedc193699bf50f8c7ddbbaba3bc5e3e0f174ac3b356d8fc14f30a95e5796b4edee9aca8441f38e9a3210b48a1981facc860c4254156926cde673ce56acee
   languageName: node
   linkType: hard
 
@@ -3611,9 +3611,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@poppinss/cliui@npm:^6.2.1":
-  version: 6.2.3
-  resolution: "@poppinss/cliui@npm:6.2.3"
+"@poppinss/cliui@npm:^6.3.0":
+  version: 6.4.0
+  resolution: "@poppinss/cliui@npm:6.4.0"
   dependencies:
     "@poppinss/colors": "npm:^4.1.2"
     cli-boxes: "npm:^3.0.0"
@@ -3621,11 +3621,11 @@ __metadata:
     cli-truncate: "npm:^4.0.0"
     log-update: "npm:^6.0.0"
     pretty-hrtime: "npm:^1.0.3"
-    string-width: "npm:^7.0.0"
+    string-width: "npm:^7.1.0"
     supports-color: "npm:^9.4.0"
     terminal-size: "npm:^4.0.0"
     wordwrap: "npm:^1.0.0"
-  checksum: 10/987226ef15329020c7a51242c3a8fea559e3937ceaec4d9a9de8bb08276727decbfa7b27d905fd79e6871a23ffd9fd09469aca197eeb289ffd911f82004a5860
+  checksum: 10/d46a9572f50d93cc75f5e2c3960d3a4fa396e433d02f1b31a03620357c20386123eb0b2495b06465870decf34ec52af4f620715d414cd7e139e368394d3162e9
   languageName: node
   linkType: hard
 
@@ -17845,6 +17845,17 @@ __metadata:
     get-east-asian-width: "npm:^1.0.0"
     strip-ansi: "npm:^7.1.0"
   checksum: 10/bc0de5700a2690895169fce447ec4ed44bc62de80312c2093d5606bfd48319bb88e48a99e97f269dff2bc9577448b91c26b3804c16e7d9b389699795e4655c3b
+  languageName: node
+  linkType: hard
+
+"string-width@npm:^7.1.0":
+  version: 7.1.0
+  resolution: "string-width@npm:7.1.0"
+  dependencies:
+    emoji-regex: "npm:^10.3.0"
+    get-east-asian-width: "npm:^1.0.0"
+    strip-ansi: "npm:^7.1.0"
+  checksum: 10/a183573fe7209e0d294f661846d33f8caf72aa86d983e5b48a0ed45ab15bcccb02c6f0344b58b571988871105457137b8207855ea536827dbc4a376a0f31bf8f
   languageName: node
   linkType: hard
 
