@@ -9,6 +9,7 @@ import {
 import React, { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
+import u from "@/util/styles/utils.module.css";
 import ColorStatus from "../ColorStatus";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { actions, select } from "../mathItemsSlice";
@@ -62,10 +63,10 @@ const ItemTemplate = <T extends MIT>({
           styles["grid-left-gutter"],
           styles["left-gutter"],
           "position-relative",
-          "d-flex",
+          u.dFlex,
           {
             [styles["item-active"]]: isActive,
-          },
+          }
         )}
       >
         {showAlignmentBar && <div className={styles["vertical-line"]} />}
@@ -86,8 +87,8 @@ const ItemTemplate = <T extends MIT>({
       <div
         className={classNames(
           styles["grid-right-gutter-top"],
-          "d-flex",
-          "justify-content-end",
+          u.dFlex,
+          u.justifyContentEnd
         )}
       >
         <CloseButton

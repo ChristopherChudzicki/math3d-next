@@ -9,6 +9,8 @@ import {
 
 import invariant from "tiny-invariant";
 import ordinal from "ordinal";
+import u from "@/util/styles/utils.module.css";
+import classNames from "classnames";
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import { OnWidgetChange, WidgetChangeEvent } from "../FieldWidget/types";
 import styles from "./ItemForms.module.css";
@@ -34,11 +36,11 @@ interface ParameterFormProps {
 const ParameterForm: React.FC<ParameterFormProps> = (props) => {
   return (
     <>
-      <div className="d-flex justify-content-end">
+      <div className={classNames(u.dFlex, u.justifyContentEnd)}>
         {props.nameInput}
         <ReadonlyMathField value="\in" />
       </div>
-      <div className="d-flex">{props.rangeInput}</div>
+      <div className={u.dFlex}>{props.rangeInput}</div>
     </>
   );
 };
@@ -65,9 +67,9 @@ const DomainForm: React.FC<DomainFormProps> = ({
 
   invariant(
     domain.items.every(
-      (x) => x.type === "expr" || x.type === "function-assignment",
+      (x) => x.type === "expr" || x.type === "function-assignment"
     ),
-    "Domain must be a list of expressions or function assignments",
+    "Domain must be a list of expressions or function assignments"
   );
 
   const patchProperty = usePatchPropertyOnChange(item);
@@ -96,7 +98,7 @@ const DomainForm: React.FC<DomainFormProps> = ({
          */
         const getDomainIndexRhsError = (
           err: Error | undefined,
-          domainIndex: number,
+          domainIndex: number
         ) => {
           if (!err) return undefined;
           if (!(err instanceof AggregateError)) return err;
@@ -192,7 +194,7 @@ const useExpressionsAndParameters = (
    */
   exprNames: readonly string[],
   numParams: number,
-  errors: Partial<Record<string, Error>>,
+  errors: Partial<Record<string, Error>>
 ): ExpressionProps => {
   const onWidgetChange = useOnWidgetChange(item);
 
@@ -203,11 +205,11 @@ const useExpressionsAndParameters = (
         const expr = item.properties[name];
         invariant(
           expr.type === "function-assignment",
-          "Expected type: function-assignment",
+          "Expected type: function-assignment"
         );
         return expr;
       }),
-    [exprNames, item.properties],
+    [exprNames, item.properties]
   );
   const { domain } = item.properties;
 
@@ -219,7 +221,7 @@ const useExpressionsAndParameters = (
       };
       onWidgetChange(event);
     },
-    [onWidgetChange],
+    [onWidgetChange]
   );
 
   const updateDomains = useCallback(
@@ -246,7 +248,7 @@ const useExpressionsAndParameters = (
       };
       onWidgetChange(event);
     },
-    [domain.items, onWidgetChange],
+    [domain.items, onWidgetChange]
   );
 
   const handlers = useMemo(() => {
@@ -288,7 +290,7 @@ const useExpressionsAndParameters = (
         if (err instanceof DetailedAssignmentError) return err;
         return { rhs: err };
       }),
-    [exprNames, errors],
+    [exprNames, errors]
   );
 
   return { handlers, errors: errs, assignments };

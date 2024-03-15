@@ -6,6 +6,8 @@ import {
 } from "@math3d/mathitem-configs";
 import { toLaTeX } from "@math3d/mathjs-utils";
 
+import u from "@/util/styles/utils.module.css";
+import classNames from "classnames";
 import { MathAssignment, useOnWidgetChange } from "../../FieldWidget";
 import { useMathScope } from "../../mathItemsSlice";
 import { useMathErrors, useMathItemResults } from "../../mathScope";
@@ -53,7 +55,7 @@ const Variable: MathItemForm<MIT.Variable> = ({ item }) => {
         onChange={onWidgetChange}
         rhsClassName="flex-1"
       />
-      <div className="d-flex justify-content-end">
+      <div className={classNames(u.dFlex, u.justifyContentEnd)}>
         <ValueDisplay item={item} className={styles.display} />
       </div>
     </ItemTemplate>

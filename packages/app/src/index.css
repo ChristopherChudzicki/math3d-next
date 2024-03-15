@@ -56,3 +56,8 @@ math-field {
 math-field::part(menu-toggle) {
   display: none;
 }
+
+.undefined {
+  background-color: red;
+  outline: 5px solid #369;
+}

@@ -5,6 +5,7 @@ import SmallMathField from "@/util/components/SmallMathField";
 import { ParseableObjs, DetailedAssignmentError } from "@math3d/parser";
 import { round } from "lodash-es";
 
+import u from "@/util/styles/utils.module.css";
 import ReadonlyMathField from "./ReadonlyMathField";
 import type { IWidgetProps, WidgetChangeEvent } from "./types";
 import ErrorTooltip from "./ErrorTooltip";
@@ -59,7 +60,7 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
       };
       onChange(event);
     },
-    [onChange, name, value],
+    [onChange, name, value]
   );
   const onChangeRHS: OnMathFieldChange = useCallback(
     (e) => {
@@ -70,21 +71,21 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
       };
       onChange(event);
     },
-    [value, onChange, name],
+    [value, onChange, name]
   );
   const errors = extractErrors(error);
 
   const lhsLabel = `${label} (left-hand side)`;
   const rhsLabel = `${label} (right-hand side)`;
   return (
-    <div {...others} className={classNames(className, "d-flex")}>
+    <div {...others} className={classNames(className, u.dFlex)}>
       <ErrorTooltip error={errors.lhs}>
         <SmallMathField
           aria-label={lhsLabel}
           className={classNames(
             style["field-widget-input"],
             { [style["has-error"]]: !!errors.lhs },
-            lhsClassName,
+            lhsClassName
           )}
           onChange={onChangeLHS}
           value={value.lhs}
@@ -100,7 +101,7 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
           className={classNames(
             style["field-widget-input"],
             { [style["has-error"]]: !!errors.rhs },
-            rhsClassName,
+            rhsClassName
           )}
           onChange={onChangeRHS}
           value={formatted(value.rhs, numDecimalDigits)}

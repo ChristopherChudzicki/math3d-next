@@ -10,6 +10,7 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
 import { assertNotNil } from "@/util";
 import classNames from "classnames";
+import u from "@/util/styles/utils.module.css";
 import styles from "./SliderControls.module.css";
 
 const btnLabels = {
@@ -80,17 +81,17 @@ const SliderControls: React.FC<SliderControlsProps> = ({
   const canDecrease = !!findSpeed(speed.value, -1);
   const onIncrease = useCallback(
     () => onSpeedChange(mustFindSpeed(speed.value, +1)),
-    [onSpeedChange, speed],
+    [onSpeedChange, speed]
   );
   const onDecrease = useCallback(
     () => onSpeedChange(mustFindSpeed(speed.value, -1)),
-    [onSpeedChange, speed],
+    [onSpeedChange, speed]
   );
   const onStepUp = useCallback(() => onStep(+1), [onStep]);
   const onStepDown = useCallback(() => onStep(-1), [onStep]);
 
   return (
-    <div className={classNames("d-flex align-items-center", className)}>
+    <div className={classNames(u.dFlex, u.alignItemsCenter, className)}>
       <IconButton
         size="small"
         className={styles.playButton}

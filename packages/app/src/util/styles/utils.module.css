@@ -1,0 +1,15 @@
+.dFlex {
+  display: flex;
+}
+
+.alignItemsCenter {
+  align-items: center;
+}
+
+.justifyContentEnd {
+  justify-content: end;
+}
+
+.justifyContentCenter {
+  justify-content: center;
+}
