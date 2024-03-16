@@ -6,4 +6,3 @@ declare const styles: {
   readonly "text-color-swatch": string;
 };
 export = styles;
-
