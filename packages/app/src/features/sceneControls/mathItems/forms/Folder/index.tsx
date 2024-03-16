@@ -50,7 +50,7 @@ const FolderButton: React.FC<FolderButtonProps> = ({
             styles.color,
             u.dFlex,
             u.alignItemsCenter,
-            u.justifyContentCenter
+            u.justifyContentCenter,
           )}
         >
           <ExpandMoreIcon />

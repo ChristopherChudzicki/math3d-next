@@ -51,6 +51,6 @@ prepare().then(() => {
         theme={theme}
         router={router}
       />
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 });

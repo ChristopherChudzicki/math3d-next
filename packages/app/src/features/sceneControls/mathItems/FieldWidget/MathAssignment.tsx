@@ -60,7 +60,7 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
       };
       onChange(event);
     },
-    [onChange, name, value]
+    [onChange, name, value],
   );
   const onChangeRHS: OnMathFieldChange = useCallback(
     (e) => {
@@ -71,7 +71,7 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
       };
       onChange(event);
     },
-    [value, onChange, name]
+    [value, onChange, name],
   );
   const errors = extractErrors(error);
 
@@ -85,7 +85,7 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
           className={classNames(
             style["field-widget-input"],
             { [style["has-error"]]: !!errors.lhs },
-            lhsClassName
+            lhsClassName,
           )}
           onChange={onChangeLHS}
           value={value.lhs}
@@ -101,7 +101,7 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
           className={classNames(
             style["field-widget-input"],
             { [style["has-error"]]: !!errors.rhs },
-            rhsClassName
+            rhsClassName,
           )}
           onChange={onChangeRHS}
           value={formatted(value.rhs, numDecimalDigits)}
