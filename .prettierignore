@@ -3,4 +3,4 @@ build
 openapi.yaml
 .yarn/
 packages/app/public/mockServiceWorker.js
-**/*.css.d.ts
+*.css.d.ts
