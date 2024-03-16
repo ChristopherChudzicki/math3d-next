@@ -6,6 +6,7 @@ import {
 } from "@math3d/mathitem-configs";
 import React, { useMemo } from "react";
 
+import * as u from "@/util/styles/utils.module.css";
 import FieldWidget from "../FieldWidget";
 import { useMathScope } from "../mathItemsSlice";
 import { useMathErrors } from "../mathScope";
@@ -43,7 +44,7 @@ const RangedMathItemForm = ({
     item,
     exprNames,
     numParams,
-    errors,
+    errors
   );
   const { assignments, handlers, errors: assignmentErrors } = exprProps;
 
@@ -54,7 +55,7 @@ const RangedMathItemForm = ({
       ) : (
         <FieldWidget
           widget={WidgetType.MathValue}
-          className="d-block"
+          className={u.dBlock}
           // @ts-expect-error exprName should be correlated with properties
           label={config.properties[exprNames[0]].label}
           name={exprNames[0]}

@@ -1,6 +1,7 @@
 import React from "react";
 import SmallMathField from "@/util/components/SmallMathField";
 import classNames from "classnames";
+import * as u from "@/util/styles/utils.module.css";
 import styles from "./widget.module.css";
 
 interface Props {
@@ -14,10 +15,11 @@ const ReadonlyMathField: React.FC<Props> = ({ value, className }) => (
   <SmallMathField
     tabIndex={-1}
     className={classNames(
-      "align-self-center px-1",
+      u.alignSelfCenter,
+      u.px1,
       styles["readonly-mathfield"],
       styles["field-widget"],
-      className,
+      className
     )}
     options={options}
     value={value}

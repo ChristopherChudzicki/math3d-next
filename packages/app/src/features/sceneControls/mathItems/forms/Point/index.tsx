@@ -4,6 +4,7 @@ import {
   MathItemType as MIT,
   WidgetType,
 } from "@math3d/mathitem-configs";
+import * as u from "@/util/styles/utils.module.css";
 import FieldWidget, { useOnWidgetChange } from "../../FieldWidget";
 import { useMathScope } from "../../mathItemsSlice";
 import { useMathErrors } from "../../mathScope";
@@ -23,7 +24,7 @@ const Point: MathItemForm<MIT.Point> = ({ item }) => {
   return (
     <ItemTemplate item={item} config={config}>
       <FieldWidget
-        className="d-block"
+        className={u.dBlock}
         widget={WidgetType.MathValue}
         label={configProps.coords.label}
         name="coords"

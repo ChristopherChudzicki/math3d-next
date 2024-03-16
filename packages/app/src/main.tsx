@@ -1,5 +1,3 @@
-// bootstrap just for utility classes
-import "bootstrap/dist/css/bootstrap-utilities.css";
 import "./globals.css";
 import "./index.css";
 
@@ -54,6 +52,6 @@ prepare().then(() => {
         theme={theme}
         router={router}
       />
-    </React.StrictMode>,
+    </React.StrictMode>
   );
 });

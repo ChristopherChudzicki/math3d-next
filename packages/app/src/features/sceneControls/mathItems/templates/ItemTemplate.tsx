@@ -9,7 +9,7 @@ import {
 import React, { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
-import u from "@/util/styles/utils.module.css";
+import * as u from "@/util/styles/utils.module.css";
 import ColorStatus from "../ColorStatus";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { actions, select } from "../mathItemsSlice";
@@ -62,7 +62,7 @@ const ItemTemplate = <T extends MIT>({
         className={classNames(
           styles["grid-left-gutter"],
           styles["left-gutter"],
-          "position-relative",
+          u.positionRelative,
           u.dFlex,
           {
             [styles["item-active"]]: isActive,

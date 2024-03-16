@@ -1,15 +1,40 @@
+.dBlock {
+  display: block !important;
+}
+
 .dFlex {
-  display: flex;
+  display: flex !important;
 }
 
 .alignItemsCenter {
-  align-items: center;
+  align-items: center !important;
+}
+
+.alignSelfCenter {
+  align-self: center;
+}
+
+.flex1 {
+  flex: 1 !important;
 }
 
 .justifyContentEnd {
-  justify-content: end;
+  justify-content: end !important;
 }
 
 .justifyContentCenter {
-  justify-content: center;
+  justify-content: center !important;
+}
+
+.px1 {
+  padding-left: 0.25rem !important;
+  padding-right: 0.25rem !important;
+}
+
+.mr2 {
+  margin-right: 0.5rem !important;
+}
+
+.positionRelative {
+  position: relative !important;
 }

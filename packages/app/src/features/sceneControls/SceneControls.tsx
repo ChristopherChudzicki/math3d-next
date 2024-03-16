@@ -16,14 +16,6 @@ type Props = {
   sceneKey?: string;
 };
 
-const MainNav: React.FC = () => <>Main</>;
-
-const AxesNav: React.FC = () => (
-  <div className="text-center">
-    Axes &amp; <br /> Camera
-  </div>
-);
-
 const SceneControls: React.FC<Props> = (props) => {
   const { sceneKey } = props;
   const dispatch = useAppDispatch();
@@ -51,9 +43,13 @@ const SceneControls: React.FC<Props> = (props) => {
       tabBarExtraContent={
         <AddObjectButton className={styles.AddObjectButton} />
       }
-      mainNav={<MainNav />}
+      mainNav="Main"
       mainContent={<MathItemsList rootId="main" />}
-      axesNav={<AxesNav />}
+      axesNav={
+        <div>
+          Axes &amp; <br /> Camera
+        </div>
+      }
       axesdContent={<MathItemsList rootId="setup" />}
     />
   );
