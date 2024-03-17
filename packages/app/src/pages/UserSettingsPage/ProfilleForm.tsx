@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo } from "react";
-import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useUserMe, useUserMePatch } from "@math3d/api";
-import { useForm } from "react-hook-form";
 import { TextField } from "@mui/material";
+import { useValidatedForm } from "@/util/forms";
 
 const schema = yup.object({
   public_nickname: yup.string().label("Public nickname").required(),
@@ -13,7 +12,6 @@ const ProfileForm: React.FC<{
   id: string;
   setDisabled: (disabled: boolean) => void;
 }> = ({ id, setDisabled }) => {
-  const resolver = yupResolver(schema);
   const userQuery = useUserMe();
   const patchUserMe = useUserMePatch();
   const defaultValues = useMemo(() => {
@@ -26,8 +24,8 @@ const ProfileForm: React.FC<{
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm({
-    resolver,
+  } = useValidatedForm({
+    schema,
     defaultValues,
   });
 

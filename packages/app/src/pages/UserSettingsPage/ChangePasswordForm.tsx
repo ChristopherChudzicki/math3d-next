@@ -1,10 +1,8 @@
 import React from "react";
-import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useUpdatePassword } from "@math3d/api";
-import { useForm } from "react-hook-form";
 import { TextField } from "@mui/material";
-import { OverallError, setFieldErrors } from "@/util/forms";
+import { OverallError, useValidatedForm } from "@/util/forms";
 
 const schema = yup.object({
   current_password: yup.string().label("Current Password").required(),
@@ -19,14 +17,12 @@ const ChangePasswordForm: React.FC<{
   id: string;
   setDisabled: (disabled: boolean) => void;
 }> = ({ id, setDisabled }) => {
-  const resolver = yupResolver(schema);
   const updatePassword = useUpdatePassword();
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setError,
-  } = useForm({ resolver });
+  } = useValidatedForm({ schema });
 
   return (
     <form
@@ -37,8 +33,6 @@ const ChangePasswordForm: React.FC<{
         try {
           setDisabled(true);
           await updatePassword.mutateAsync(data);
-        } catch (err) {
-          setFieldErrors(data, err, setError);
         } finally {
           setDisabled(false);
         }
