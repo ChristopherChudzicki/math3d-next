@@ -8,8 +8,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import Alert from "@mui/material/Alert";
 import { useToggle } from "@/util/hooks";
+import { OverallError, setFieldErrors } from "@/util/forms";
 import styles from "./styles.module.css";
-import { handleErrors } from "./util";
 import { BasicDialog } from "./components/BasicDialog";
 
 const schema = yup.object({
@@ -44,7 +44,7 @@ const ResetPasswordPage: React.FC = () => {
         await resetPassword.mutateAsync(data, {});
         setPendingSubmit(false);
       } catch (err) {
-        handleErrors(data, err, setError);
+        setFieldErrors(data, err, setError);
       }
     },
     [resetPassword, setPendingSubmit, setError],
@@ -88,9 +88,7 @@ const ResetPasswordPage: React.FC = () => {
             helperText={errors.email?.message}
             {...register("email")}
           />
-          {errors.root?.message ? (
-            <Alert severity="error">{errors.root?.message}</Alert>
-          ) : null}
+          <OverallError error={errors.root} />
         </form>
       )}
     </BasicDialog>

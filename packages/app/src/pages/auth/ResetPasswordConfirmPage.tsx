@@ -8,8 +8,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import Alert from "@mui/material/Alert";
 import Link from "@/util/components/Link";
+import { setFieldErrors } from "@/util/forms";
 import styles from "./styles.module.css";
-import { handleErrors } from "./util";
 import { BasicDialog } from "./components/BasicDialog";
 
 const schema = yup.object({
@@ -54,7 +54,7 @@ const RegistrationPage: React.FC = () => {
       try {
         await resetPassword.mutateAsync(data);
       } catch (err) {
-        handleErrors(data, err, setError);
+        setFieldErrors(data, err, setError);
       }
     },
     [resetPassword, setError],
