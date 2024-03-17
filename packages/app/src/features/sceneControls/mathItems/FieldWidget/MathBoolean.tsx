@@ -6,6 +6,7 @@ import { SubtleButton } from "@/util/components";
 import type { OnMathFieldChange } from "@/util/components/MathLive";
 import SmallMathField from "@/util/components/SmallMathField";
 import { assertNotNil } from "@/util/predicates";
+import * as u from "@/util/styles/utils.module.css";
 import { useMathScope } from "../mathItemsSlice";
 
 import { useMathResults } from "../mathScope";
@@ -69,7 +70,7 @@ const MathBoolean = React.forwardRef<HTMLDivElement, IWidgetProps>(
 
     return (
       <div
-        className={classNames("d-flex", "align-items-center", className)}
+        className={classNames(u.dFlex, u.alignItemsCenter, className)}
         ref={ref}
         {...others}
       >
@@ -79,7 +80,7 @@ const MathBoolean = React.forwardRef<HTMLDivElement, IWidgetProps>(
             checked={result}
             disabled={shouldUseExpression}
             size="small"
-            className="me-2"
+            className={u.mr2}
             onChange={handleSwitchChange}
           />
         </Tooltip>
@@ -89,7 +90,7 @@ const MathBoolean = React.forwardRef<HTMLDivElement, IWidgetProps>(
             style={style}
             className={classNames(
               { [styles["has-error"]]: error },
-              "flex-1",
+              u.flex1,
               styles["field-widget-input"],
             )}
             onChange={handleChange}

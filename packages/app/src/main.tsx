@@ -1,7 +1,4 @@
-// bootstrap just for utility classes
-import "bootstrap/dist/css/bootstrap-utilities.css";
 import "./globals.css";
-import "./index.css";
 
 import React from "react";
 import { createRoot } from "react-dom/client";

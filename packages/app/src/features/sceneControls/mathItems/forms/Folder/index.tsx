@@ -9,6 +9,7 @@ import React, { useCallback } from "react";
 import { SubtleButton } from "@/util/components";
 import { positioning } from "@/util/styles";
 import { useAppSelector } from "@/store/hooks";
+import u from "@/util/styles/utils.module.css";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
 import styles from "./Folder.module.css";
@@ -47,7 +48,9 @@ const FolderButton: React.FC<FolderButtonProps> = ({
               [styles["rotate-0"]]: !isCollapsed,
             },
             styles.color,
-            "d-flex align-items-center justify-center",
+            u.dFlex,
+            u.alignItemsCenter,
+            u.justifyContentCenter,
           )}
         >
           <ExpandMoreIcon />

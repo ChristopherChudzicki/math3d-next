@@ -9,6 +9,8 @@ import {
 
 import invariant from "tiny-invariant";
 import ordinal from "ordinal";
+import u from "@/util/styles/utils.module.css";
+import classNames from "classnames";
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import { OnWidgetChange, WidgetChangeEvent } from "../FieldWidget/types";
 import styles from "./ItemForms.module.css";
@@ -34,11 +36,11 @@ interface ParameterFormProps {
 const ParameterForm: React.FC<ParameterFormProps> = (props) => {
   return (
     <>
-      <div className="d-flex justify-content-end">
+      <div className={classNames(u.dFlex, u.justifyContentEnd)}>
         {props.nameInput}
         <ReadonlyMathField value="\in" />
       </div>
-      <div className="d-flex">{props.rangeInput}</div>
+      <div className={u.dFlex}>{props.rangeInput}</div>
     </>
   );
 };

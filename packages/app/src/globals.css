@@ -1,16 +1,7 @@
-html,
-body {
-  width: 100%;
-  height: 100%;
-}
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-}
-html {
-  font-family: sans-serif;
-  line-height: 1.15;
 }
 body {
   margin: 0;
@@ -22,21 +13,6 @@ body {
   line-height: 1.5715;
   background-color: #fff;
   font-feature-settings: "tnum";
-}
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin-top: 0;
-  margin-bottom: 0.5em;
-  color: rgba(0, 0, 0, 0.85);
-  font-weight: 500;
-}
-p {
-  margin-top: 0;
-  margin-bottom: 1em;
 }
 
 a,
@@ -63,4 +39,55 @@ textarea {
   font-size: inherit;
   font-family: inherit;
   line-height: inherit;
+}
+
+body,
+html {
+  --color-primary-dark-rgb: 16, 100, 178;
+  --color-primary-dark: rgb(var(--color-primary-dark-rgb));
+  --color-primary-rgb: 24, 144, 255;
+  --color-primary: rgb(var(--color-primary-rgb));
+  --color-primary-light-rgb: 186, 231, 255;
+  --color-primary-light: rgb(var(--color-primary-light-rgb));
+
+  --color-secondary-lightest-rgb: 250, 250, 250;
+  --color-secondary-lightest: rgb(var(--color-secondary-lightest-rgb));
+  --color-secondary-lighter-rgb: 235, 235, 235;
+  --color-secondary-lighter: rgb(var(--color-secondary-lighter-rgb));
+  --color-secondary-light-rgb: 191, 191, 191;
+  --color-secondary-light: rgb(var(--color-secondary-light-rgb));
+  --color-secondary-rgb: 140, 140, 140;
+  --color-secondary: rgb(var(--color-secondary-rgb));
+
+  --color-background-rgb: 255, 255, 255;
+  --color-background: rgb(var(--color-background-rgb));
+
+  --color-error: red;
+  --color-text-lighter: rgb(191, 191, 191);
+  --color-text-light: rgb(140, 140, 140);
+  --color-text-primary: rgb(67, 67, 67);
+
+  --border-radius: 4px;
+  --transition-duration: 300ms;
+  --transition-timing-function: ease;
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+#root {
+  height: 100vh;
+}
+
+#root .MuiTab-root,
+#root .MuiButton-root {
+  text-transform: none;
+}
+
+math-field {
+  border-radius: 0;
+  font-size: 1.25rem;
+  color: var(--color-text-primary);
+}
+math-field::part(menu-toggle) {
+  display: none;
 }

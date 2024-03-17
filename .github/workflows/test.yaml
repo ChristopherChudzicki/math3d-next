@@ -21,6 +21,7 @@ jobs:
       - run: corepack enable
       - run: yarn install --immutable
       - run: yarn lint
+      - run: yarn workspace app css-types --list-different
       - run: yarn test -- --test-timeout=10000
 
   webserver-tests:

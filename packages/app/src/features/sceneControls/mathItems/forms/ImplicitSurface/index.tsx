@@ -4,6 +4,7 @@ import {
   mathItemConfigs as configs,
 } from "@math3d/mathitem-configs";
 import React from "react";
+import * as u from "@/util/styles/utils.module.css";
 import FieldWidget from "../../FieldWidget";
 import ReadonlyMathField from "../../FieldWidget/ReadonlyMathField";
 import { ExpressionProps } from "../expressionHelpers";
@@ -21,7 +22,7 @@ const ImplicitSurfaceExpressions: React.FC<ExpressionProps> = ({
   handlers,
 }) => {
   return (
-    <div className="d-flex">
+    <div className={u.dFlex}>
       <FieldWidget
         className={styles.lhs}
         widget={WidgetType.MathValue}
@@ -32,7 +33,7 @@ const ImplicitSurfaceExpressions: React.FC<ExpressionProps> = ({
         onChange={handlers.rhs[0]}
       />
       <ReadonlyMathField value="=" />
-      <div className="flex-1">
+      <div className={u.flex1}>
         <FieldWidget
           widget={WidgetType.MathValue}
           label={config.properties[exprNames[1]].label}

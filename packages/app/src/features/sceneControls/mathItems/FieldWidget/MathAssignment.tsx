@@ -5,6 +5,7 @@ import SmallMathField from "@/util/components/SmallMathField";
 import { ParseableObjs, DetailedAssignmentError } from "@math3d/parser";
 import { round } from "lodash-es";
 
+import u from "@/util/styles/utils.module.css";
 import ReadonlyMathField from "./ReadonlyMathField";
 import type { IWidgetProps, WidgetChangeEvent } from "./types";
 import ErrorTooltip from "./ErrorTooltip";
@@ -77,7 +78,7 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
   const lhsLabel = `${label} (left-hand side)`;
   const rhsLabel = `${label} (right-hand side)`;
   return (
-    <div {...others} className={classNames(className, "d-flex")}>
+    <div {...others} className={classNames(className, u.dFlex)}>
       <ErrorTooltip error={errors.lhs}>
         <SmallMathField
           aria-label={lhsLabel}
