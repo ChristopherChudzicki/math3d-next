@@ -1,6 +1,5 @@
 import { AuthApi } from "@math3d/api";
 import env from "@/env";
-import { getConfig } from "@/utils/api";
 
 const authApi = new AuthApi(undefined, env.TEST_API_URL);
 

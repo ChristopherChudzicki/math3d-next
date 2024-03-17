@@ -15,7 +15,7 @@ import { isAxiosError } from "@math3d/api";
  *
  * The error object shape is compatible with errors thrown by DRF serializers.
  */
-const handleErrors = <TFieldValues extends FieldValues>(
+const setFieldErrors = <TFieldValues extends FieldValues>(
   data: TFieldValues,
   err: unknown,
   setError: UseFormSetError<TFieldValues>,
@@ -48,4 +48,4 @@ const handleErrors = <TFieldValues extends FieldValues>(
   throw err;
 };
 
-export { handleErrors };
+export { setFieldErrors };

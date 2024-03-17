@@ -10,11 +10,16 @@ import type {
   UserCreatePasswordRetypeRequest,
   ActivationRequest,
   PasswordResetConfirmRetypeRequest,
+  PatchedUserRequest,
 } from "../../generated";
 import { getConfig } from "../util";
 import { deleteUser } from "./api";
 
 const authApi = new AuthApi(getConfig());
+
+const keys = {
+  userMe: ["me"],
+};
 
 const useLogin = () => {
   const client = useQueryClient();
@@ -84,6 +89,30 @@ const useResetPasswordConfirm = () => {
   });
 };
 
+const useUserMePatch = () => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (data: PatchedUserRequest) =>
+      authApi.authUsersMePartialUpdate({
+        PatchedUserRequest: data,
+      }),
+    onSettled: () => {
+      client.invalidateQueries({
+        queryKey: keys.userMe,
+      });
+    },
+  });
+};
+
+const useUpdatePassword = () => {
+  return useMutation({
+    mutationFn: (data: SetPasswordRetypeRequest) =>
+      authApi.authUsersSetPasswordCreate({
+        SetPasswordRetypeRequest: data,
+      }),
+  });
+};
+
 export {
   useLogin,
   useLogout,
@@ -93,4 +122,6 @@ export {
   useResetPassword,
   useResetPasswordConfirm,
   deleteUser,
+  useUserMePatch,
+  useUpdatePassword,
 };

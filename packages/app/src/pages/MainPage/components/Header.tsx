@@ -13,6 +13,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useAuthStatus } from "@/features/auth";
 import Button from "@mui/material/Button";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import ListIcon from "@mui/icons-material/List";
 import type { SimpleMenuItem } from "@/util/components/SimpleMenu/SimpleMenu";
 import { useUserMe, User } from "@math3d/api";
@@ -120,6 +121,13 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       icon: <HelpOutlineOutlinedIcon fontSize="small" />,
       href: "contact",
       shouldShow: true,
+    },
+    {
+      label: "Account Settings",
+      key: "signout",
+      icon: <ManageAccountsIcon fontSize="small" />,
+      href: "user/settings",
+      shouldShow: isAuthenticated,
     },
     {
       label: "Sign out",
