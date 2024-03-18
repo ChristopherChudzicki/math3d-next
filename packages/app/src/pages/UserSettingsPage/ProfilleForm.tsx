@@ -50,6 +50,18 @@ const ProfileForm: React.FC<{
       })}
     >
       <TextField
+        fullWidth
+        margin="normal"
+        InputProps={{
+          readOnly: true,
+        }}
+        label="Email"
+        type="text"
+        value={userQuery.data.email}
+      />
+      <TextField
+        fullWidth
+        margin="normal"
         error={!!errors.public_nickname?.message}
         helperText={errors.public_nickname?.message}
         label="Public Nickname"

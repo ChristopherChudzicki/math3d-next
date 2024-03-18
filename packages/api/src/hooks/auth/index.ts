@@ -11,9 +11,11 @@ import type {
   ActivationRequest,
   PasswordResetConfirmRetypeRequest,
   PatchedUserRequest,
+  SetPasswordRetypeRequest,
 } from "../../generated";
 import { getConfig } from "../util";
-import { deleteUser } from "./api";
+import { deleteUser, deleteUserMe } from "./api";
+import type { DeleteUserMeParams } from "./api";
 
 const authApi = new AuthApi(getConfig());
 
@@ -113,6 +115,17 @@ const useUpdatePassword = () => {
   });
 };
 
+const useUserMeDelete = () => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (data: DeleteUserMeParams) => deleteUserMe(data, getConfig()),
+    onSuccess: () => {
+      localStorage.removeItem("apiToken");
+      client.resetQueries();
+    },
+  });
+};
+
 export {
   useLogin,
   useLogout,
@@ -124,4 +137,5 @@ export {
   deleteUser,
   useUserMePatch,
   useUpdatePassword,
+  useUserMeDelete,
 };

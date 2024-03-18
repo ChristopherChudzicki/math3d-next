@@ -124,7 +124,7 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
     },
     {
       label: "Account Settings",
-      key: "signout",
+      key: "settings",
       icon: <ManageAccountsIcon fontSize="small" />,
       href: "user/settings",
       shouldShow: isAuthenticated,
