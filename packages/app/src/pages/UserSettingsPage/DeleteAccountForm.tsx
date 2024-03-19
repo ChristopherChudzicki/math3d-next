@@ -4,6 +4,8 @@ import { useUserMe, useUserMeDelete } from "@math3d/api";
 import { Alert, TextField } from "@mui/material";
 import { useValidatedForm } from "@/util/forms";
 import { useAuthStatus } from "@/features/auth";
+import { useNotifications } from "@/features/notifications/NotificationsContext";
+import { useNavigate } from "react-router";
 
 const CONFIRM_PROMPT = "Yes, permanently delete";
 
@@ -24,6 +26,8 @@ const DeleteAccountForm: React.FC<{
     handleSubmit,
     formState: { errors },
   } = useValidatedForm({ schema });
+  const { add: addNotification } = useNotifications();
+  const navigate = useNavigate();
 
   if (!userQuery.data) return null;
 
@@ -37,7 +41,11 @@ const DeleteAccountForm: React.FC<{
           setDisabled(true);
           await deleteAccount.mutateAsync(data);
           setAuthenticated(false);
-          alert("Account deletd!");
+          addNotification({
+            title: "Account Deleted",
+            body: "Your account has been deleted.",
+          });
+          navigate("/");
         } finally {
           setDisabled(false);
         }

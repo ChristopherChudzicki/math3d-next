@@ -9,12 +9,16 @@ import json
 env = environ.Env(
     TEST_ADMIN_USER_EMAIL=(str, ""),
     TEST_ADMIN_USER_PASSWORD=(str, ""),
-    TEST_USER_1_EMAIL=(str, ""),
-    TEST_USER_1_PASSWORD=(str, ""),
-    TEST_USER_2_EMAIL=(str, ""),
-    TEST_USER_2_PASSWORD=(str, ""),
-    TEST_USER_3_EMAIL=(str, ""),
-    TEST_USER_3_PASSWORD=(str, ""),
+    TEST_USER_STATIC_EMAIL=(str, ""),
+    TEST_USER_STATIC_PASSWORD=(str, ""),
+    TEST_USER_DYNAMIC_EMAIL=(str, ""),
+    TEST_USER_DYNAMIC_PASSWORD=(str, ""),
+    TEST_USER_EDITABLE_EMAIL=(str, ""),
+    TEST_USER_EDITABLE_PASSWORD=(str, ""),
+    TEST_USER_DELETABLE_EMAIL=(str, ""),
+    TEST_USER_DELETABLE_PASSWORD=(str, ""),
+    TEST_USER_NOT_CREATED_EMAIL=(str, ""),
+    TEST_USER_NOT_CREATED_PASSWORD=(str, ""),
 )
 
 User = get_user_model()
@@ -55,17 +59,27 @@ class Command(BaseCommand):
         )
 
         user_1 = create_test_user(
-            email=env("TEST_USER_1_EMAIL"),
-            password=env("TEST_USER_1_PASSWORD"),
+            email=env("TEST_USER_STATIC_EMAIL"),
+            password=env("TEST_USER_STATIC_PASSWORD"),
             public_nickname="Static Test User",
         )
         create_test_user(
-            email=env("TEST_USER_2_EMAIL"),
-            password=env("TEST_USER_2_PASSWORD"),
+            email=env("TEST_USER_DYNAMIC_EMAIL"),
+            password=env("TEST_USER_DYNAMIC_PASSWORD"),
             public_nickname="Dynamic Test User",
         )
+        create_test_user(
+            email=env("TEST_USER_EDITABLE_EMAIL"),
+            password=env("TEST_USER_EDITABLE_PASSWORD"),
+            public_nickname="Editable Test User",
+        )
+        create_test_user(
+            email=env("TEST_USER_DELETABLE_EMAIL"),
+            password=env("TEST_USER_DELETABLE_PASSWORD"),
+            public_nickname="Deletable Test User",
+        )
 
-        delete_test_user(env("TEST_USER_3_EMAIL"))
+        delete_test_user(env("TEST_USER_NOT_CREATED_EMAIL"))
 
         dirname = os.path.dirname(__file__)
         filename = os.path.join(dirname, "./test_scene.json")

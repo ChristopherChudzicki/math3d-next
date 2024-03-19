@@ -11,7 +11,7 @@ test("Signing out", async ({ page }) => {
   await expect(app.userMenu().opener()).toHaveText("S");
   await app.userMenu().opener().click();
   const username = app.userMenu().username();
-  expect(await username.textContent()).toBe(env.TEST_USER_1_EMAIL);
+  expect(await username.textContent()).toBe(env.TEST_USER_STATIC_EMAIL);
   await app.userMenu().signOut().click();
   await app.signoutPage().confirm().click();
   await expect(app.userMenu().opener()).toHaveText("");

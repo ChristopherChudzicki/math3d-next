@@ -6,6 +6,7 @@ import jsonPatch from "fast-json-patch";
 
 import invariant from "tiny-invariant";
 import { assertNotNil } from "@/util/predicates";
+import IdGenerator from "@/util/idGenerator";
 import {
   syncItemsToMathScope,
   removeItemsFromMathScope,
@@ -13,6 +14,8 @@ import {
 import type { MathItemsState } from "./interfaces";
 import { makeMathScope } from "./mathScopeInstance";
 import { isDescendantOf, MAIN_FOLDER, SETTINGS_FOLDER } from "./util";
+
+const idGenerator = new IdGenerator({ initialValue: 100 });
 
 const getInitialState = (): MathItemsState => {
   const mathScope = makeMathScope();
@@ -88,11 +91,9 @@ const mathItemsSlice = createSlice({
       const items = Object.values(state.items);
       syncItemsToMathScope(state.mathScope(), items);
     },
-    addNewItem: (
-      state,
-      action: PayloadAction<{ type: MathItemType; id: string }>,
-    ) => {
-      const { type, id } = action.payload;
+    addNewItem: (state, action: PayloadAction<{ type: MathItemType }>) => {
+      const id = idGenerator.next();
+      const { type } = action.payload;
       const item = mathItemConfigs[type].make(id);
       state.items[id] = item;
       state.activeTabId = MAIN_FOLDER;

@@ -16,7 +16,7 @@ test.describe("Authorized user header", () => {
 
     await trigger.click();
     const username = app.userMenu().username();
-    expect(await username.textContent()).toBe(env.TEST_USER_2_EMAIL);
+    expect(await username.textContent()).toBe(env.TEST_USER_DYNAMIC_EMAIL);
   });
 
   test("Header and usermenu links", async ({ page }) => {
@@ -29,6 +29,7 @@ test.describe("Authorized user header", () => {
       "My Scenes",
       "Examples",
       "Contact",
+      "Account Settings",
       "Sign out",
     ]);
   });

@@ -14,12 +14,12 @@ const users = {
     password: env.TEST_USER_ADMIN_PASSWORD,
   },
   static: {
-    email: env.TEST_USER_1_EMAIL,
-    password: env.TEST_USER_1_PASSWORD,
+    email: env.TEST_USER_STATIC_EMAIL,
+    password: env.TEST_USER_STATIC_PASSWORD,
   },
   dynamic: {
-    email: env.TEST_USER_2_EMAIL,
-    password: env.TEST_USER_2_PASSWORD,
+    email: env.TEST_USER_DYNAMIC_EMAIL,
+    password: env.TEST_USER_DYNAMIC_PASSWORD,
   },
 };
 
