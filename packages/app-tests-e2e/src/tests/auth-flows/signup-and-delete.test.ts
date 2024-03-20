@@ -17,8 +17,12 @@ import { AuthApi, deleteUser } from "@math3d/api";
 
 test.setTimeout(60_000);
 
-test("User sign up flow", async ({ page, context }) => {
+test.only("User sign up flow and account deletion", async ({
+  page,
+  context,
+}) => {
   const inbox = getInbox();
+  const app = new AppPage(page);
 
   await test.step("Delete ephemeral accounts", async () => {
     const authToken = await getAuthToken("admin");
@@ -42,7 +46,6 @@ test("User sign up flow", async ({ page, context }) => {
 
   await test.step("Create account", async () => {
     await page.goto("/");
-    const app = new AppPage(page);
     await app.signupPage().signup({
       email: env.TEST_USER_NOT_CREATED_EMAIL,
       publicNickname: "Test user 3",
@@ -68,7 +71,6 @@ test("User sign up flow", async ({ page, context }) => {
       const link = await messagePage.getByTestId("activation-link");
       const href = await link.getAttribute("href");
       invariant(href, "Expected link to have href");
-      await messagePage.goto(href); // Gives us a longer
       messagePage.close();
       return href;
     });
@@ -86,7 +88,6 @@ test("User sign up flow", async ({ page, context }) => {
   });
 
   await test.step("Sign in & verify", async () => {
-    const app = new AppPage(page);
     await app.signinPage().signin({
       email: env.TEST_USER_NOT_CREATED_EMAIL,
       password: env.TEST_USER_NOT_CREATED_PASSWORD,
@@ -95,6 +96,30 @@ test("User sign up flow", async ({ page, context }) => {
     await expect(app.userMenu().username()).toHaveText(
       env.TEST_USER_NOT_CREATED_EMAIL,
     );
+  });
+
+  await test.step("Delete account", async () => {
+    await app.userMenu().activate("settings");
+    const deleteAccountForm = app.userSettings().deleteAccountForm();
+    await deleteAccountForm.activate();
+    await deleteAccountForm.password().fill(env.TEST_USER_NOT_CREATED_PASSWORD);
+    await deleteAccountForm.confirm().fill("Yes, permanently delete");
+    await deleteAccountForm.submit().click();
+  });
+
+  await test.step("Verify account deletion", async () => {
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByRole("heading")).toContainText("Account Deleted");
+    await dialog.getByRole("button", { name: "OK" }).click();
+
+    await app.assertSignedOut();
+
+    await app.signinPage().signin({
+      email: env.TEST_USER_NOT_CREATED_EMAIL,
+      password: env.TEST_USER_NOT_CREATED_PASSWORD,
+    });
+
+    await expect(dialog.getByRole("alert")).toContainText(/Unable to log in/);
   });
 });
 

@@ -52,9 +52,7 @@ const ProfileForm: React.FC<{
       <TextField
         fullWidth
         margin="normal"
-        InputProps={{
-          readOnly: true,
-        }}
+        disabled
         label="Email"
         type="text"
         value={userQuery.data.email}

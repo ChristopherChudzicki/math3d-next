@@ -60,7 +60,7 @@ const DeleteAccountForm: React.FC<{
         margin="normal"
         error={!!errors.current_password?.message}
         helperText={errors.current_password?.message}
-        label="Current Password"
+        label="Password"
         type="password"
         {...register("current_password")}
       />
@@ -68,7 +68,7 @@ const DeleteAccountForm: React.FC<{
         fullWidth
         margin="normal"
         error={!!errors.confirm?.message}
-        helperText={`Please type "${CONFIRM_PROMPT}" exactly.`}
+        helperText={`To proceed, enter "${CONFIRM_PROMPT}" exactly.`}
         label="Confirm"
         type="text"
         {...register("confirm")}

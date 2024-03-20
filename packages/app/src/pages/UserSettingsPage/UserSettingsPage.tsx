@@ -71,7 +71,7 @@ const UserSettingsPage: React.FC = () => {
 
   return (
     <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>
-      <DialogTitle>User Settings</DialogTitle>
+      <DialogTitle>Account Settings</DialogTitle>
       <div style={topRightStyle}>
         <IconButton onClick={handleClose}>
           <Close />

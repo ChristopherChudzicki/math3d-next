@@ -21,6 +21,14 @@ const users = {
     email: env.TEST_USER_DYNAMIC_EMAIL,
     password: env.TEST_USER_DYNAMIC_PASSWORD,
   },
+  editable: {
+    email: env.TEST_USER_EDITABLE_EMAIL,
+    password: env.TEST_USER_EDITABLE_PASSWORD,
+  },
+  deletable: {
+    email: env.TEST_USER_DELETABLE_EMAIL,
+    password: env.TEST_USER_DELETABLE_PASSWORD,
+  },
 };
 
 const getAuthToken = async (user: keyof typeof users) => {
