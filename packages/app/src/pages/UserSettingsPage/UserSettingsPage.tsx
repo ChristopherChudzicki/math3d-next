@@ -73,7 +73,7 @@ const UserSettingsPage: React.FC = () => {
     <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>
       <DialogTitle>Account Settings</DialogTitle>
       <div style={topRightStyle}>
-        <IconButton onClick={handleClose}>
+        <IconButton onClick={handleClose} aria-label="Close">
           <Close />
         </IconButton>
       </div>

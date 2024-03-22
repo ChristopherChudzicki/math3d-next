@@ -9,18 +9,9 @@ import { getAuthToken } from "@/utils/api/auth";
 import { getConfig, axios } from "@/utils/api/config";
 import { AuthApi, deleteUser } from "@math3d/api";
 
-// create - activate - signin - verify - signout - verify
-// create - duplicate account - error
-// reset - unactivated acount
-// reset - activated account
-// reset - bad token
-
 test.setTimeout(60_000);
 
-test.only("User sign up flow and account deletion", async ({
-  page,
-  context,
-}) => {
+test("User sign up flow and account deletion", async ({ page, context }) => {
   const inbox = getInbox();
   const app = new AppPage(page);
 

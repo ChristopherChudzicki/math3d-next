@@ -63,7 +63,7 @@ class UserMenu {
   }
 
   async activate(option: UserMenuOption): Promise<void> {
-    if (!this[option]().isVisible()) {
+    if (!(await this[option]().isVisible())) {
       await this.opener().click();
     }
     await this[option]().click();

@@ -48,6 +48,34 @@ class DeleteAccountForm {
   }
 }
 
+class ChangePasswordForm {
+  private root: Locator;
+
+  constructor(root: Locator) {
+    this.root = root;
+  }
+
+  activate(): Promise<void> {
+    return this.root.getByRole("tab", { name: "Change Password" }).click();
+  }
+
+  currentPassword(): Locator {
+    return this.root.getByLabel("Current Password", { exact: true });
+  }
+
+  newPassword(): Locator {
+    return this.root.getByLabel("New Password", { exact: true });
+  }
+
+  confirmNewPassword(): Locator {
+    return this.root.getByLabel("Confirm New Password");
+  }
+
+  submit(): Locator {
+    return this.root.getByRole("button", { name: "Save" });
+  }
+}
+
 class UserSettingsPage {
   private root: Locator;
 
@@ -63,8 +91,16 @@ class UserSettingsPage {
     return new DeleteAccountForm(this.root);
   }
 
-  close(): Locator {
+  changePasswordForm(): ChangePasswordForm {
+    return new ChangePasswordForm(this.root);
+  }
+
+  cancel(): Locator {
     return this.root.getByRole("button", { name: "Cancel" });
+  }
+
+  close(): Locator {
+    return this.root.getByRole("button", { name: "Close" });
   }
 }
 

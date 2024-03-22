@@ -1,4 +1,4 @@
-import { AuthApi } from "@math3d/api";
+import { AuthApi, TokenCreateRequest } from "@math3d/api";
 import env from "@/env";
 
 const authApi = new AuthApi(undefined, env.TEST_API_URL);
@@ -25,14 +25,15 @@ const users = {
     email: env.TEST_USER_EDITABLE_EMAIL,
     password: env.TEST_USER_EDITABLE_PASSWORD,
   },
-  deletable: {
-    email: env.TEST_USER_DELETABLE_EMAIL,
-    password: env.TEST_USER_DELETABLE_PASSWORD,
+  pwChanger: {
+    email: env.TEST_USER_PW_CHANGER_EMAIL,
+    password: env.TEST_USER_PW_CHANGER_PASSWORD,
   },
 };
 
-const getAuthToken = async (user: keyof typeof users) => {
-  const { email, password } = users[user];
+const getAuthToken = async (user: keyof typeof users | TokenCreateRequest) => {
+  const userObj = typeof user === "string" ? users[user] : user;
+  const { email, password } = userObj;
   const response = await authApi.authTokenLoginCreate({
     TokenCreateRequest: {
       email,

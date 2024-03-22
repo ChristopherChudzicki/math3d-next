@@ -15,8 +15,8 @@ env = environ.Env(
     TEST_USER_DYNAMIC_PASSWORD=(str, ""),
     TEST_USER_EDITABLE_EMAIL=(str, ""),
     TEST_USER_EDITABLE_PASSWORD=(str, ""),
-    TEST_USER_DELETABLE_EMAIL=(str, ""),
-    TEST_USER_DELETABLE_PASSWORD=(str, ""),
+    TEST_USER_PW_CHANGER_EMAIL=(str, ""),
+    TEST_USER_PW_CHANGER_PASSWORD=(str, ""),
     TEST_USER_NOT_CREATED_EMAIL=(str, ""),
     TEST_USER_NOT_CREATED_PASSWORD=(str, ""),
 )
@@ -74,9 +74,9 @@ class Command(BaseCommand):
             public_nickname="Editable Test User",
         )
         create_test_user(
-            email=env("TEST_USER_DELETABLE_EMAIL"),
-            password=env("TEST_USER_DELETABLE_PASSWORD"),
-            public_nickname="Deletable Test User",
+            email=env("TEST_USER_PW_CHANGER_EMAIL"),
+            password=env("TEST_USER_PW_CHANGER_PASSWORD"),
+            public_nickname="Password Changing Test User",
         )
 
         delete_test_user(env("TEST_USER_NOT_CREATED_EMAIL"))
