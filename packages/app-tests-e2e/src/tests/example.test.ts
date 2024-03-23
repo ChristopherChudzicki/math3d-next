@@ -20,7 +20,7 @@ test.describe("Authorized user (static)", () => {
     const app = new AppPage(page);
     await app.userMenu().opener().click();
     const username = app.userMenu().username();
-    expect(await username.textContent()).toBe(env.TEST_USER_1_EMAIL);
+    expect(await username.textContent()).toBe(env.TEST_USER_STATIC_EMAIL);
   });
 });
 
@@ -32,7 +32,7 @@ test.describe("Authorized user (dynamic)", () => {
     const app = new AppPage(page);
     await app.userMenu().opener().click();
     const username = app.userMenu().username();
-    expect(await username.textContent()).toBe(env.TEST_USER_2_EMAIL);
+    expect(await username.textContent()).toBe(env.TEST_USER_DYNAMIC_EMAIL);
   });
 
   test("Building a custom scene", async ({ page, prepareScene }) => {

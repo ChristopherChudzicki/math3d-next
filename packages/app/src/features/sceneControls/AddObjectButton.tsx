@@ -4,7 +4,6 @@ import MenuItem from "@mui/material/MenuItem";
 import { addableTypes, mathItemConfigs } from "@math3d/mathitem-configs";
 import React, { useId, useRef } from "react";
 import { useAppDispatch } from "@/store/hooks";
-import idGenerator from "@/util/idGenerator";
 
 import { useToggle } from "@/util/hooks";
 import { Typography } from "@mui/material";
@@ -56,7 +55,7 @@ const AddObjectButton: React.FC<Props> = (props) => {
         {addableTypes.map((type) => {
           const { label } = mathItemConfigs[type];
           const handleClick = () => {
-            dispatch(actions.addNewItem({ type, id: idGenerator.next() }));
+            dispatch(actions.addNewItem({ type }));
             setOpen.off();
           };
           return (

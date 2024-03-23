@@ -11,6 +11,7 @@ import AccountActivationPage from "./pages/auth/ActivationPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ResetPasswordConfirmPage from "./pages/auth/ResetPasswordConfirmPage";
 import ScenesList from "./pages/ScenesList/ScenesListPage";
+import UserSettingsPage from "./pages/UserSettingsPage/UserSettingsPage";
 
 const routes: RouteObject[] = [
   {
@@ -52,6 +53,10 @@ const routes: RouteObject[] = [
           {
             path: "auth/reset-password/confirm",
             element: <ResetPasswordConfirmPage />,
+          },
+          {
+            path: "user/settings",
+            element: <UserSettingsPage />,
           },
         ],
       },

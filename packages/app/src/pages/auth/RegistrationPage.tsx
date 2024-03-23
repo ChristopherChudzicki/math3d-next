@@ -9,8 +9,8 @@ import * as yup from "yup";
 import { useAuthStatus } from "@/features/auth";
 import Alert from "@mui/material/Alert";
 import { useToggle } from "@/util/hooks";
+import { setFieldErrors, OverallError } from "@/util/forms";
 import styles from "./styles.module.css";
-import { handleErrors } from "./util";
 import { BasicDialog } from "./components/BasicDialog";
 
 const schema = yup.object({
@@ -56,7 +56,7 @@ const RegistrationPage: React.FC = () => {
           await createUser.mutateAsync(data);
           setRegistering(false);
         } catch (err) {
-          handleErrors(data, err, setError);
+          setFieldErrors(data, err, setError);
         }
       },
       [createUser, setError, setRegistering],
@@ -116,9 +116,7 @@ const RegistrationPage: React.FC = () => {
             type="password"
             {...register("re_password")}
           />
-          {errors.root?.message ? (
-            <Alert severity="error">{errors.root?.message}</Alert>
-          ) : null}
+          <OverallError error={errors.root} />
         </form>
       ) : (
         <div className={styles["form-content"]}>

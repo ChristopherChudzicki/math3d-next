@@ -21,6 +21,4 @@ class IdGenerator {
   }
 }
 
-const idGenerator = new IdGenerator({ initialValue: 100 });
-
-export default idGenerator;
+export default IdGenerator;

@@ -8,6 +8,8 @@ import { RouterProvider } from "react-router";
 import type { RouterProviderProps } from "react-router";
 import { AppStore } from "@/store/store";
 import { AuthStatusProvider } from "./features/auth";
+import { NotificationsProvider } from "./features/notifications/NotificationsContext";
+import NotificationsDisplay from "./features/notifications/NotificationsDisplay";
 
 interface AppProps {
   store: AppStore;
@@ -24,13 +26,16 @@ const AppProviders: React.FC<AppProps> = ({
 }) => (
   <AuthStatusProvider>
     <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <StyledEngineProvider injectFirst>
-          <ThemeProvider theme={theme}>
-            <RouterProvider router={router} />
-          </ThemeProvider>
-        </StyledEngineProvider>
-      </QueryClientProvider>
+      <NotificationsProvider>
+        <QueryClientProvider client={queryClient}>
+          <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={theme}>
+              <RouterProvider router={router} />
+              <NotificationsDisplay />
+            </ThemeProvider>
+          </StyledEngineProvider>
+        </QueryClientProvider>
+      </NotificationsProvider>
     </Provider>
   </AuthStatusProvider>
 );

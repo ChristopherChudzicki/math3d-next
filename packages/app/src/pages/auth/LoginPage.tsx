@@ -6,10 +6,9 @@ import { useLogin } from "@math3d/api";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useAuthStatus } from "@/features/auth";
-import Alert from "@mui/material/Alert";
 import Link from "@/util/components/Link";
+import { OverallError, setFieldErrors } from "@/util/forms";
 import styles from "./styles.module.css";
-import { handleErrors } from "./util";
 import { BasicDialog } from "./components/BasicDialog";
 
 const schema = yup.object({
@@ -58,7 +57,7 @@ const LoginPage: React.FC = () => {
             setIsAuthenticated(true);
             handleClose();
           } catch (err) {
-            handleErrors(data, err, setError);
+            setFieldErrors(data, err, setError);
           }
         })}
       >
@@ -75,9 +74,7 @@ const LoginPage: React.FC = () => {
           type="password"
           {...register("password")}
         />
-        {errors.root?.message ? (
-          <Alert severity="error">{errors.root?.message}</Alert>
-        ) : null}
+        <OverallError error={errors.root} />
       </form>
       <div className={styles["sign-in-footer"]}>
         <Link href="../auth/reset-password">Forgot password?</Link>
