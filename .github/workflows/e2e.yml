@@ -24,8 +24,8 @@ jobs:
           node-version: "20.11.1"
           cache: "yarn"
       - run: corepack enable
-      - name: Make env file
-        run: touch .env
+      - name: Setup env variables
+        run: cp .env.development .env
       - name: Build docker stack
         run: docker compose build
       - name: Migrate backend database
@@ -41,7 +41,7 @@ jobs:
       - name: Install Playwright Browsers
         run: yarn workspace app-tests-e2e playwright install --with-deps
       - name: Run Playwright tests
-        run: yarn workspace app-tests-e2e run test-e2e
+        run: yarn test-e2e
         env:
           CI: True
       - uses: actions/upload-artifact@v3
