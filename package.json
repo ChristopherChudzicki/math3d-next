@@ -13,13 +13,15 @@
   "scripts": {
     "echo": "echo $CAT",
     "lint": "turbo run lint",
-    "test": "turbo run test",
+    "test": "dotenv -- turbo run test",
+    "test-e2e": "dotenv -- yarn workspace app-tests-e2e test-e2e",
     "typecheck": "turbo run typecheck",
-    "start": "yarn workspace app start",
-    "build": "yarn workspace app build",
-    "preview": "yarn workspace app preview"
+    "start": "dotenv -- yarn workspace app start",
+    "build": "dotenv -- yarn workspace app build",
+    "preview": "dotenv -- yarn workspace app preview"
   },
   "dependencies": {
+    "@dotenvx/dotenvx": "^0.27.1",
     "prettier": "^3.1.0"
   },
   "msw": {
