@@ -21,7 +21,6 @@ jobs:
           node-version: "20.11.1"
           cache: "yarn"
       - run: corepack enable
-      - run: rm .env.development
       - run: yarn install --immutable
       - run: yarn build
         env:

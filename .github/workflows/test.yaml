@@ -19,6 +19,8 @@ jobs:
           node-version: "20.11.1"
           cache: "yarn"
       - run: corepack enable
+      - name: Setup env variables
+        run: cp .env.development .env
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn workspace app css-types --list-different
@@ -35,6 +37,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.11.6
+      - name: Setup env variables
+        run: cp .env.development .env
       - name: Install python dependencies
         run: make setup_python
       - name: Check OpenAPI up-to-date
@@ -61,6 +65,8 @@ jobs:
           node-version: "20.11.1"
           cache: "yarn"
       - run: corepack enable
+      - name: Setup env variables
+        run: cp .env.development .env
       - name: Install dependencies
         run: yarn install --immutable
       - name: Generate Fresh API Client

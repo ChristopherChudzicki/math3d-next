@@ -24,8 +24,8 @@ jobs:
           node-version: "20.11.1"
           cache: "yarn"
       - run: corepack enable
-      - name: Make env file
-        run: touch .env
+      - name: Setup env variables
+        run: cp .env.development .env
       - name: Build docker stack
         run: docker compose build
       - name: Migrate backend database

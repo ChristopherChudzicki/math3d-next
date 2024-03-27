@@ -3,7 +3,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "yarn css-types --watch & vite",
+    "start": "concurrently 'yarn css-types --watch' 'vite'",
     "css-types": "tcm src",
     "build": "tsc && vite build",
     "preview": "vite preview --port 3000",
@@ -98,6 +98,7 @@
     "@types/tinycolor2": "1.4.6",
     "@types/toposort": "2.0.7",
     "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
     "eslint": "^8.54.0",
     "identity-obj-proxy": "3.0.0",
     "jest-fail-on-console": "3.1.2",

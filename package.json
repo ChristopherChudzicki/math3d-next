@@ -11,14 +11,13 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "echo": "echo $CAT",
     "lint": "turbo run lint",
-    "test": "dotenv -- turbo run test",
-    "test-e2e": "dotenv -- yarn workspace app-tests-e2e test-e2e",
+    "test": "dotenvx run -- turbo run test",
+    "test-e2e": "dotenvx run -- yarn workspace app-tests-e2e test-e2e",
     "typecheck": "turbo run typecheck",
-    "start": "dotenv -- yarn workspace app start",
-    "build": "dotenv -- yarn workspace app build",
-    "preview": "dotenv -- yarn workspace app preview"
+    "start": "dotenvx run -- yarn workspace app start",
+    "build": "dotenvx run -- yarn workspace app build",
+    "preview": "dotenvx run -- yarn workspace app preview"
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^0.27.1",
