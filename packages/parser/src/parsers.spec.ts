@@ -95,6 +95,16 @@ describe("Parsing assignments and function assignments", () => {
     throw new Error("Expected parser.parse to throw.");
   };
 
+  const assertErrorMatches = (err?: Error, matcher?: RegExp) => {
+    if (matcher instanceof RegExp) {
+      expect(err).toBeInstanceOf(Error);
+      invariant(err);
+      expect(err.message).toMatch(matcher);
+    } else {
+      expect(err).toBeUndefined();
+    }
+  };
+
   it("parses { lhs, rhs } variable assignments", () => {
     const node = parser.parse({
       lhs: "a",
@@ -195,12 +205,8 @@ describe("Parsing assignments and function assignments", () => {
     "Associates parse asiggnment { lhs, rhs } errors with lhs or rhs",
     ({ lhs, rhs, expected }) => {
       const err = getParseError({ lhs, rhs, type: "assignment" });
-      const methods = {
-        lhs: expected.lhsErr ? "toMatch" : "toBe",
-        rhs: expected.rhsErr ? "toMatch" : "toBe",
-      };
-      expect(err.lhs)[methods.lhs](expected.lhsErr);
-      expect(err.rhs)[methods.rhs](expected.rhsErr);
+      assertErrorMatches(err.lhs, expected.lhsErr);
+      assertErrorMatches(err.rhs, expected.rhsErr);
     },
   );
 
@@ -259,12 +265,8 @@ describe("Parsing assignments and function assignments", () => {
         rhs,
         type: "function-assignment",
       });
-      const methods = {
-        lhs: expected.lhsErr ? "toMatch" : "toBe",
-        rhs: expected.rhsErr ? "toMatch" : "toBe",
-      };
-      expect(err.lhs)[methods.lhs](expected.lhsErr);
-      expect(err.rhs)[methods.rhs](expected.rhsErr);
+      assertErrorMatches(err.lhs, expected.lhsErr);
+      assertErrorMatches(err.rhs, expected.rhsErr);
     },
   );
 
@@ -278,11 +280,18 @@ describe("Parsing assignments and function assignments", () => {
     invariant(err.lhs instanceof ParameterErrors);
 
     expect(Object.keys(err.lhs.paramErrors)).toEqual(["2", "3", "4"]);
-    expect(err.lhs.paramErrors[2]).toMatch(
+    assertErrorMatches(
+      err.lhs.paramErrors[2],
       /"w\+" is not a valid parameter name/,
     );
-    expect(err.lhs.paramErrors[3]).toMatch(/Parameter names must be unique./);
-    expect(err.lhs.paramErrors[4]).toMatch(/Parameter names must be unique./);
+    assertErrorMatches(
+      err.lhs.paramErrors[3],
+      /Parameter names must be unique./,
+    );
+    assertErrorMatches(
+      err.lhs.paramErrors[4],
+      /Parameter names must be unique./,
+    );
   });
 });
 
