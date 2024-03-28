@@ -246,16 +246,16 @@ export interface PasswordResetConfirmRetypeRequest {
 export interface PatchedSceneRequest {
   /**
    *
-   * @type {{ [key: string]: any; }}
+   * @type {any}
    * @memberof PatchedSceneRequest
    */
-  items?: { [key: string]: any };
+  items?: any;
   /**
    *
-   * @type {{ [key: string]: any; }}
+   * @type {any}
    * @memberof PatchedSceneRequest
    */
-  itemOrder?: { [key: string]: any };
+  itemOrder?: any;
   /**
    *
    * @type {string}
@@ -284,16 +284,16 @@ export interface PatchedUserRequest {
 export interface Scene {
   /**
    *
-   * @type {{ [key: string]: any; }}
+   * @type {any}
    * @memberof Scene
    */
-  items: { [key: string]: any };
+  items: any;
   /**
    *
-   * @type {{ [key: string]: any; }}
+   * @type {any}
    * @memberof Scene
    */
-  itemOrder: { [key: string]: any };
+  itemOrder: any;
   /**
    *
    * @type {string}
@@ -327,16 +327,16 @@ export interface Scene {
 export interface SceneRequest {
   /**
    *
-   * @type {{ [key: string]: any; }}
+   * @type {any}
    * @memberof SceneRequest
    */
-  items: { [key: string]: any };
+  items: any;
   /**
    *
-   * @type {{ [key: string]: any; }}
+   * @type {any}
    * @memberof SceneRequest
    */
-  itemOrder: { [key: string]: any };
+  itemOrder: any;
   /**
    *
    * @type {string}
