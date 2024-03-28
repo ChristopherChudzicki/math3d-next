@@ -3,7 +3,7 @@ import MuiPopper, { PopperProps } from "@mui/material/Popper";
 import { styled, useTheme } from "@mui/material/styles";
 import Fade from "@mui/material/Fade";
 import classNames from "classnames";
-import FocusTrap from "@mui/base/FocusTrap";
+import { FocusTrap } from "@mui/base/FocusTrap";
 import usePointerAway from "./usePointerAway";
 import style from "./Popover.module.css";
 
