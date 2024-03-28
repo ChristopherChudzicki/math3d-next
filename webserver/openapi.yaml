@@ -697,12 +697,8 @@ components:
     PatchedSceneRequest:
       type: object
       properties:
-        items:
-          type: object
-          additionalProperties: {}
-        itemOrder:
-          type: object
-          additionalProperties: {}
+        items: {}
+        itemOrder: {}
         title:
           type: string
     PatchedUserRequest:
@@ -715,12 +711,8 @@ components:
     Scene:
       type: object
       properties:
-        items:
-          type: object
-          additionalProperties: {}
-        itemOrder:
-          type: object
-          additionalProperties: {}
+        items: {}
+        itemOrder: {}
         title:
           type: string
         key:
@@ -743,12 +735,8 @@ components:
     SceneRequest:
       type: object
       properties:
-        items:
-          type: object
-          additionalProperties: {}
-        itemOrder:
-          type: object
-          additionalProperties: {}
+        items: {}
+        itemOrder: {}
         title:
           type: string
       required:
