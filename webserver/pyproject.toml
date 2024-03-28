@@ -7,7 +7,7 @@ packages = [{include = "main"}]
 
 [tool.poetry.dependencies]
 python = "3.11.6"
-Django = "^4.1.6"
+Django = "^5.0.0"
 djangorestframework = "^3.14.0"
 dj-database-url = "^1.2.0"
 psycopg2 = "^2.9.5"
@@ -32,7 +32,7 @@ types-tqdm = "^4.64.7.15"
 types-psycopg2 = "^2.9.21.7"
 djangorestframework-stubs = {extras = ["compatible-mypy"], version = "^1.9.1"}
 pytest = "^7.2.2"
-django = "^4.1.7"
+django = "^5.0.0"
 pytest-django = "^4.5.2"
 types-dj-database-url = "^1.2.0.1"
 faker = "^19.12.0"
