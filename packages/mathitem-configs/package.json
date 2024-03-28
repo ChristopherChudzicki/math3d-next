@@ -3,7 +3,7 @@
   "exports": "./src/index.ts",
   "main": "./src/index.ts",
   "devDependencies": {
-    "@faker-js/faker": "^7.6.0",
+    "@faker-js/faker": "^8.0.0",
     "@math3d/eslint-config": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
     "@types/js-yaml": "^4.0.5",
