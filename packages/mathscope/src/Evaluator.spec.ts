@@ -4,6 +4,7 @@ import { SimplerMathJsParser } from "./adapter";
 import Evaluator, {
   CyclicAssignmentError,
   DuplicateAssignmentError,
+  UnmetDependencyError,
 } from "./Evaluator";
 import { MathNode } from "./interfaces";
 import { assertIsAssignmentNode } from "./util";
@@ -14,7 +15,10 @@ const node = (id: string, parseable: string): MathNode => {
   return { ...parse(parseable), id };
 };
 
-const unmetDepErr = (...unmet: string[]) =>
+/**
+ * MathJS throws unmet dependency errors as an Error; we use UnmetDependencyError
+ */
+const mjsUnmetDepErr = (...unmet: string[]) =>
   unmet.length === 1
     ? new Error(`Undefined symbol ${unmet}`)
     : new Error(`Undefined symbols ${unmet}`);
@@ -55,8 +59,8 @@ describe("Evaluator", () => {
       );
       expect(evaluator.errors).toStrictEqual(
         asMap({
-          "id-c": unmetDepErr("x"),
-          "id-expr1": unmetDepErr("c"),
+          "id-c": mjsUnmetDepErr("x"),
+          "id-expr1": mjsUnmetDepErr("c"),
         }),
       );
     });
@@ -67,9 +71,10 @@ describe("Evaluator", () => {
       evaluator.enqueueAddExpressions([f]);
       const diff = evaluator.evaluate();
       expect(evaluator.results).toStrictEqual(asMap({}));
+
       expect(evaluator.errors).toStrictEqual(
         asMap({
-          "id-f": unmetDepErr("a", "b"),
+          "id-f": new UnmetDependencyError(["a", "b"]),
         }),
       );
       expect(diff.errors).toStrictEqual({
@@ -130,7 +135,7 @@ describe("Evaluator", () => {
         asMap({
           "id-x1": new DuplicateAssignmentError(x1),
           "id-x2": new DuplicateAssignmentError(x2),
-          "id-y": unmetDepErr("x"),
+          "id-y": mjsUnmetDepErr("x"),
         }),
       );
     });
@@ -157,8 +162,8 @@ describe("Evaluator", () => {
       expect(evaluator.results).toStrictEqual(asMap({}));
       expect(evaluator.errors).toStrictEqual(
         asMap({
-          "id-x": unmetDepErr("z"),
-          "id-y": unmetDepErr("x"),
+          "id-x": mjsUnmetDepErr("z"),
+          "id-y": mjsUnmetDepErr("x"),
         }),
       );
     });
@@ -207,7 +212,7 @@ describe("Evaluator", () => {
       );
       expect(evaluator.errors).toStrictEqual(
         asMap({
-          "id-expr1": unmetDepErr("x"),
+          "id-expr1": mjsUnmetDepErr("x"),
         }),
       );
 
@@ -229,7 +234,7 @@ describe("Evaluator", () => {
       );
       expect(evaluator.errors).toStrictEqual(
         asMap({
-          "id-expr2": unmetDepErr("c"),
+          "id-expr2": mjsUnmetDepErr("c"),
         }),
       );
 
