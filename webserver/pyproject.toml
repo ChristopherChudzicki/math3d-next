@@ -27,7 +27,7 @@ django-filter = "^23.5"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.0.0"
-django-stubs = "^1.15.0"
+django-stubs = "^4.0.0"
 types-tqdm = "^4.64.7.15"
 types-psycopg2 = "^2.9.21.7"
 djangorestframework-stubs = {extras = ["compatible-mypy"], version = "^1.9.1"}
