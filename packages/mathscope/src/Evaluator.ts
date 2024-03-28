@@ -222,8 +222,6 @@ export default class Evaluator {
         if (node.type === MathNodeType.FunctionAssignmentNode) {
           const unmet = getUnmetDependencies(node, this.scope, this.builtins);
           if (unmet.length > 0) {
-            console.log("hihihi");
-            console.log(unmet);
             throw new UnmetDependencyError(unmet);
           }
         }
