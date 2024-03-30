@@ -15,11 +15,7 @@ import styles from "./ScenesList.module.css";
 
 const { format } = new Intl.DateTimeFormat(navigator.languages[0]);
 
-type MyScenesListProps = {
-  "aria-labelledby": string;
-};
-
-const MyScenesList: React.FC<MyScenesListProps> = (props) => {
+const MyScenesList: React.FC = () => {
   const [isAuthenticated] = useAuthStatus();
   const [filterText, setFilterText] = useState("");
   const [filterValue, setFilterValue] = useState("");
@@ -74,7 +70,6 @@ const MyScenesList: React.FC<MyScenesListProps> = (props) => {
       />
       <List
         component="nav"
-        aria-labelledby={props["aria-labelledby"]}
         dense
         id="scrollableDiv"
         className={styles.infiniteList}

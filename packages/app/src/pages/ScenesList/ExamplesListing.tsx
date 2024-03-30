@@ -5,15 +5,9 @@ import ListItemText from "@mui/material/ListItemText";
 import Link from "@/util/components/Link";
 import examplesData from "./examples_data.json";
 
-type ExamplesListingProps = {
-  "aria-labelledby": string;
-};
-
-const ExamplesListing: React.FC<ExamplesListingProps> = ({
-  "aria-labelledby": ariaLabelledBy,
-}) => {
+const ExamplesListing: React.FC = () => {
   return (
-    <List component="nav" dense aria-labelledby={ariaLabelledBy}>
+    <List component="nav" dense>
       {examplesData.map((e) => (
         <ListItemButton
           key={e.id}
