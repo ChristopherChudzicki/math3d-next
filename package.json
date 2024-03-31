@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^0.27.1",
+    "package": "^1.0.1",
     "prettier": "^4.0.0-alpha.8"
   },
   "msw": {
