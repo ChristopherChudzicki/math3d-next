@@ -308,6 +308,12 @@ export interface Scene {
   key: string;
   /**
    *
+   * @type {number}
+   * @memberof Scene
+   */
+  author: number;
+  /**
+   *
    * @type {string}
    * @memberof Scene
    */
@@ -322,25 +328,68 @@ export interface Scene {
 /**
  *
  * @export
- * @interface SceneRequest
+ * @interface SceneCreate
  */
-export interface SceneRequest {
+export interface SceneCreate {
   /**
    *
    * @type {any}
-   * @memberof SceneRequest
+   * @memberof SceneCreate
    */
   items: any;
   /**
    *
    * @type {any}
-   * @memberof SceneRequest
+   * @memberof SceneCreate
    */
   itemOrder: any;
   /**
    *
    * @type {string}
-   * @memberof SceneRequest
+   * @memberof SceneCreate
+   */
+  title?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof SceneCreate
+   */
+  key: string;
+  /**
+   *
+   * @type {string}
+   * @memberof SceneCreate
+   */
+  createdDate: string;
+  /**
+   *
+   * @type {string}
+   * @memberof SceneCreate
+   */
+  modifiedDate: string;
+}
+/**
+ *
+ * @export
+ * @interface SceneCreateRequest
+ */
+export interface SceneCreateRequest {
+  /**
+   *
+   * @type {any}
+   * @memberof SceneCreateRequest
+   */
+  items: any;
+  /**
+   *
+   * @type {any}
+   * @memberof SceneCreateRequest
+   */
+  itemOrder: any;
+  /**
+   *
+   * @type {string}
+   * @memberof SceneCreateRequest
    */
   title?: string;
 }
@@ -2771,16 +2820,20 @@ export const ScenesApiAxiosParamCreator = function (
   return {
     /**
      *
-     * @param {SceneRequest} SceneRequest
+     * @param {SceneCreateRequest} SceneCreateRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     scenesCreate: async (
-      SceneRequest: SceneRequest,
+      SceneCreateRequest: SceneCreateRequest,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'SceneRequest' is not null or undefined
-      assertParamExists("scenesCreate", "SceneRequest", SceneRequest);
+      // verify required parameter 'SceneCreateRequest' is not null or undefined
+      assertParamExists(
+        "scenesCreate",
+        "SceneCreateRequest",
+        SceneCreateRequest,
+      );
       const localVarPath = `/v0/scenes/`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2815,7 +2868,7 @@ export const ScenesApiAxiosParamCreator = function (
         ...options.headers,
       };
       localVarRequestOptions.data = serializeDataIfNeeded(
-        SceneRequest,
+        SceneCreateRequest,
         localVarRequestOptions,
         configuration,
       );
@@ -3128,18 +3181,18 @@ export const ScenesApiFp = function (configuration?: Configuration) {
   return {
     /**
      *
-     * @param {SceneRequest} SceneRequest
+     * @param {SceneCreateRequest} SceneCreateRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async scenesCreate(
-      SceneRequest: SceneRequest,
+      SceneCreateRequest: SceneCreateRequest,
       options?: RawAxiosRequestConfig,
     ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Scene>
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<SceneCreate>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.scenesCreate(
-        SceneRequest,
+        SceneCreateRequest,
         options,
       );
       const index = configuration?.serverIndex ?? 0;
@@ -3333,9 +3386,9 @@ export const ScenesApiFactory = function (
     scenesCreate(
       requestParameters: ScenesApiScenesCreateRequest,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Scene> {
+    ): AxiosPromise<SceneCreate> {
       return localVarFp
-        .scenesCreate(requestParameters.SceneRequest, options)
+        .scenesCreate(requestParameters.SceneCreateRequest, options)
         .then((request) => request(axios, basePath));
     },
     /**
@@ -3433,10 +3486,10 @@ export const ScenesApiFactory = function (
 export interface ScenesApiScenesCreateRequest {
   /**
    *
-   * @type {SceneRequest}
+   * @type {SceneCreateRequest}
    * @memberof ScenesApiScenesCreate
    */
-  readonly SceneRequest: SceneRequest;
+  readonly SceneCreateRequest: SceneCreateRequest;
 }
 
 /**
@@ -3563,7 +3616,7 @@ export class ScenesApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ScenesApiFp(this.configuration)
-      .scenesCreate(requestParameters.SceneRequest, options)
+      .scenesCreate(requestParameters.SceneCreateRequest, options)
       .then((request) => request(this.axios, this.basePath));
   }
 

@@ -94,6 +94,18 @@ def test_scene_partial_update(authenticated, authorized):
 
 
 @pytest.mark.django_db
+def test_scene_partial_update_no_author_update():
+    client = JsonAPIClient()
+    scene = SceneFactory.create()
+    user = scene.author
+    client.force_authenticate(user)
+    url = reverse("scenes-detail", kwargs={"key": scene.key})
+    data = {"author": user.id + 1}
+    response = client.patch(url, data)
+    assert response.data["author"] == user.id
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize("authenticated", [False, True])
 @pytest.mark.parametrize("authorized", [False, True])
 def test_scene_delete_update(authenticated, authorized):

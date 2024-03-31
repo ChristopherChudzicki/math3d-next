@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
 import { ScenesApi } from "../../generated";
-import type { ScenesApiScenesCreateRequest } from "../../generated";
+import type { SceneCreateRequest } from "../../generated";
 import { getConfig } from "../util";
 
 const scenesApi = new ScenesApi(getConfig());
@@ -59,8 +59,12 @@ const useInfiniteScenesMe = (
 const useCreateScene = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: ScenesApiScenesCreateRequest) => {
-      return scenesApi.scenesCreate(data).then((res) => res.data);
+    mutationFn: (data: SceneCreateRequest) => {
+      return scenesApi
+        .scenesCreate({
+          SceneCreateRequest: data,
+        })
+        .then((res) => res.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

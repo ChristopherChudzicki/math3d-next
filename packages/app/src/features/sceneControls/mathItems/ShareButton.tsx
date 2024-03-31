@@ -87,9 +87,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
   const createScene = useCreateScene();
   const handleClick = useCallback(async () => {
     toggleOpen.on();
-    const result = await createScene.mutateAsync({
-      SceneRequest: scene,
-    });
+    const result = await createScene.mutateAsync(scene);
     navigate({
       pathname: `/${result.key}`,
     });

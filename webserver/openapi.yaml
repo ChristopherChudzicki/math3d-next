@@ -459,13 +459,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SceneRequest'
+              $ref: '#/components/schemas/SceneCreateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/SceneRequest'
+              $ref: '#/components/schemas/SceneCreateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/SceneRequest'
+              $ref: '#/components/schemas/SceneCreateRequest'
         required: true
       security:
       - tokenAuth: []
@@ -474,7 +474,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Scene'
+                $ref: '#/components/schemas/SceneCreate'
           description: ''
   /v0/scenes/{key}/:
     get:
@@ -701,6 +701,8 @@ components:
         itemOrder: {}
         title:
           type: string
+        archived:
+          type: boolean
     PatchedUserRequest:
       type: object
       properties:
@@ -718,6 +720,9 @@ components:
         key:
           type: string
           readOnly: true
+        author:
+          type: integer
+          readOnly: true
         createdDate:
           type: string
           format: date-time
@@ -726,19 +731,50 @@ components:
           type: string
           format: date-time
           readOnly: true
+        archived:
+          type: boolean
       required:
+      - author
       - createdDate
       - itemOrder
       - items
       - key
       - modifiedDate
-    SceneRequest:
+    SceneCreate:
       type: object
       properties:
         items: {}
         itemOrder: {}
         title:
           type: string
+        key:
+          type: string
+          readOnly: true
+        createdDate:
+          type: string
+          format: date-time
+          readOnly: true
+        modifiedDate:
+          type: string
+          format: date-time
+          readOnly: true
+        archived:
+          type: boolean
+      required:
+      - createdDate
+      - itemOrder
+      - items
+      - key
+      - modifiedDate
+    SceneCreateRequest:
+      type: object
+      properties:
+        items: {}
+        itemOrder: {}
+        title:
+          type: string
+        archived:
+          type: boolean
       required:
       - itemOrder
       - items
