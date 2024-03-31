@@ -17,10 +17,8 @@
   margin: 1rem;
 }
 
-.filter-input:global(.MuiTextField-root) {
+.form-row {
   margin-left: 16px;
   margin-right: 16px;
-  margin-top: 12px;
-  margin-bottom: 12px;
   width: calc(100% - 32px);
 }

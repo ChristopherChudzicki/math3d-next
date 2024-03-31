@@ -50,4 +50,4 @@ class MiniSceneSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Scene
-        fields = ["title", "key", "author", "createdDate", "modifiedDate"]
+        fields = ["title", "key", "author", "createdDate", "modifiedDate", "archived"]

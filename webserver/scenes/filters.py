@@ -7,4 +7,4 @@ class SceneFilterSet(FilterSet):
 
     class Meta:
         model = Scene
-        fields = ["title"]
+        fields = ["title", "archived"]

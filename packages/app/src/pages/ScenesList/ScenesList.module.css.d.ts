@@ -1,5 +1,5 @@
 declare const styles: {
-  readonly "filter-input": string;
+  readonly "form-row": string;
   readonly "infiniteList": string;
   readonly "tabList": string;
   readonly "tabPanel": string;

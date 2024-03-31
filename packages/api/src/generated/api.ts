@@ -113,6 +113,12 @@ export interface MiniScene {
    * @memberof MiniScene
    */
   modifiedDate: string;
+  /**
+   *
+   * @type {boolean}
+   * @memberof MiniScene
+   */
+  archived?: boolean;
 }
 /**
  *
@@ -262,6 +268,12 @@ export interface PatchedSceneRequest {
    * @memberof PatchedSceneRequest
    */
   title?: string;
+  /**
+   *
+   * @type {boolean}
+   * @memberof PatchedSceneRequest
+   */
+  archived?: boolean;
 }
 /**
  *
@@ -324,6 +336,12 @@ export interface Scene {
    * @memberof Scene
    */
   modifiedDate: string;
+  /**
+   *
+   * @type {boolean}
+   * @memberof Scene
+   */
+  archived?: boolean;
 }
 /**
  *
@@ -367,6 +385,12 @@ export interface SceneCreate {
    * @memberof SceneCreate
    */
   modifiedDate: string;
+  /**
+   *
+   * @type {boolean}
+   * @memberof SceneCreate
+   */
+  archived?: boolean;
 }
 /**
  *
@@ -392,6 +416,12 @@ export interface SceneCreateRequest {
    * @memberof SceneCreateRequest
    */
   title?: string;
+  /**
+   *
+   * @type {boolean}
+   * @memberof SceneCreateRequest
+   */
+  archived?: boolean;
 }
 /**
  *
@@ -2932,6 +2962,7 @@ export const ScenesApiAxiosParamCreator = function (
     },
     /**
      *
+     * @param {boolean} [archived]
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [title]
@@ -2939,6 +2970,7 @@ export const ScenesApiAxiosParamCreator = function (
      * @throws {RequiredError}
      */
     scenesList: async (
+      archived?: boolean,
       limit?: number,
       offset?: number,
       title?: string,
@@ -2966,6 +2998,10 @@ export const ScenesApiAxiosParamCreator = function (
         "Authorization",
         configuration,
       );
+
+      if (archived !== undefined) {
+        localVarQueryParameter["archived"] = archived;
+      }
 
       if (limit !== undefined) {
         localVarQueryParameter["limit"] = limit;
@@ -2995,6 +3031,7 @@ export const ScenesApiAxiosParamCreator = function (
     },
     /**
      *
+     * @param {boolean} [archived]
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [title]
@@ -3002,6 +3039,7 @@ export const ScenesApiAxiosParamCreator = function (
      * @throws {RequiredError}
      */
     scenesMeList: async (
+      archived?: boolean,
       limit?: number,
       offset?: number,
       title?: string,
@@ -3029,6 +3067,10 @@ export const ScenesApiAxiosParamCreator = function (
         "Authorization",
         configuration,
       );
+
+      if (archived !== undefined) {
+        localVarQueryParameter["archived"] = archived;
+      }
 
       if (limit !== undefined) {
         localVarQueryParameter["limit"] = limit;
@@ -3235,6 +3277,7 @@ export const ScenesApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @param {boolean} [archived]
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [title]
@@ -3242,6 +3285,7 @@ export const ScenesApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async scenesList(
+      archived?: boolean,
       limit?: number,
       offset?: number,
       title?: string,
@@ -3253,6 +3297,7 @@ export const ScenesApiFp = function (configuration?: Configuration) {
       ) => AxiosPromise<PaginatedMiniSceneList>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.scenesList(
+        archived,
         limit,
         offset,
         title,
@@ -3271,6 +3316,7 @@ export const ScenesApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @param {boolean} [archived]
      * @param {number} [limit] Number of results to return per page.
      * @param {number} [offset] The initial index from which to return the results.
      * @param {string} [title]
@@ -3278,6 +3324,7 @@ export const ScenesApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async scenesMeList(
+      archived?: boolean,
       limit?: number,
       offset?: number,
       title?: string,
@@ -3289,6 +3336,7 @@ export const ScenesApiFp = function (configuration?: Configuration) {
       ) => AxiosPromise<PaginatedMiniSceneList>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.scenesMeList(
+        archived,
         limit,
         offset,
         title,
@@ -3417,6 +3465,7 @@ export const ScenesApiFactory = function (
     ): AxiosPromise<PaginatedMiniSceneList> {
       return localVarFp
         .scenesList(
+          requestParameters.archived,
           requestParameters.limit,
           requestParameters.offset,
           requestParameters.title,
@@ -3436,6 +3485,7 @@ export const ScenesApiFactory = function (
     ): AxiosPromise<PaginatedMiniSceneList> {
       return localVarFp
         .scenesMeList(
+          requestParameters.archived,
           requestParameters.limit,
           requestParameters.offset,
           requestParameters.title,
@@ -3513,6 +3563,13 @@ export interface ScenesApiScenesDestroyRequest {
  */
 export interface ScenesApiScenesListRequest {
   /**
+   *
+   * @type {boolean}
+   * @memberof ScenesApiScenesList
+   */
+  readonly archived?: boolean;
+
+  /**
    * Number of results to return per page.
    * @type {number}
    * @memberof ScenesApiScenesList
@@ -3540,6 +3597,13 @@ export interface ScenesApiScenesListRequest {
  * @interface ScenesApiScenesMeListRequest
  */
 export interface ScenesApiScenesMeListRequest {
+  /**
+   *
+   * @type {boolean}
+   * @memberof ScenesApiScenesMeList
+   */
+  readonly archived?: boolean;
+
   /**
    * Number of results to return per page.
    * @type {number}
@@ -3649,6 +3713,7 @@ export class ScenesApi extends BaseAPI {
   ) {
     return ScenesApiFp(this.configuration)
       .scenesList(
+        requestParameters.archived,
         requestParameters.limit,
         requestParameters.offset,
         requestParameters.title,
@@ -3670,6 +3735,7 @@ export class ScenesApi extends BaseAPI {
   ) {
     return ScenesApiFp(this.configuration)
       .scenesMeList(
+        requestParameters.archived,
         requestParameters.limit,
         requestParameters.offset,
         requestParameters.title,

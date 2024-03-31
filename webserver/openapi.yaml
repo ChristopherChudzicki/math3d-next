@@ -424,6 +424,10 @@ paths:
     get:
       operationId: scenes_list
       parameters:
+      - in: query
+        name: archived
+        schema:
+          type: boolean
       - name: limit
         required: false
         in: query
@@ -545,6 +549,10 @@ paths:
     get:
       operationId: scenes_me_list
       parameters:
+      - in: query
+        name: archived
+        schema:
+          type: boolean
       - name: limit
         required: false
         in: query
@@ -615,6 +623,8 @@ components:
           type: string
           format: date-time
           readOnly: true
+        archived:
+          type: boolean
       required:
       - createdDate
       - modifiedDate
