@@ -44,6 +44,7 @@ const DeleteAccountForm: React.FC<{
           addNotification({
             title: "Account Deleted",
             body: "Your account has been deleted.",
+            type: "alert",
           });
           navigate("/");
         } finally {
