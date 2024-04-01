@@ -2,8 +2,8 @@
   height: 48px;
 }
 .infiniteList:global(.MuiList-root) {
-  /* 48 for tabs, 61 for textfield */
-  height: calc(100vh - 48px - 62px);
+  /* 48 for tabs, 62 for textfield, 60 for checkbox */
+  height: calc(100vh - 48px - 62px - 40px);
   overflow: auto;
   padding-top: 0px;
 }

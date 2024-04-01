@@ -7,7 +7,6 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItem from "@mui/material/ListItem";
 import {
   MiniScene,
-  PatchedSceneRequest,
   useDestroyScene,
   useInfiniteScenesMe,
   usePatchScene,
@@ -31,6 +30,7 @@ import SimpleMenu, {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useNavigate, useParams } from "react-router";
 import invariant from "tiny-invariant";
+import { useNotifications } from "@/features/notifications/NotificationsContext";
 import styles from "./ScenesList.module.css";
 
 const { format } = new Intl.DateTimeFormat(navigator.languages[0]);
@@ -39,6 +39,7 @@ const MyScenesList: React.FC = () => {
   const [isAuthenticated] = useAuthStatus();
   const { sceneKey } = useParams();
   const navigate = useNavigate();
+  const { add: addNotification } = useNotifications();
   const [filterText, setFilterText] = useState("");
   const [filterValue, setFilterValue] = useState("");
   const patch = usePatchScene();
@@ -60,12 +61,24 @@ const MyScenesList: React.FC = () => {
   const destroyScene = useCallback(
     async (scene: MiniScene) => {
       invariant(scene.key);
-      await destroyMutateAsync(scene.key);
-      if (scene.key === sceneKey) {
-        navigate("/scenes/me");
+      const { confirmed } = addNotification({
+        type: "confirmation",
+        body: (
+          <>
+            Are you sure you want to delete the scene{" "}
+            <strong>{scene.title}</strong>?
+          </>
+        ),
+        title: "Delete scene?",
+      });
+      if (await confirmed) {
+        await destroyMutateAsync(scene.key);
+        if (scene.key === sceneKey) {
+          navigate("/scenes/me");
+        }
       }
     },
-    [destroyMutateAsync, navigate, sceneKey],
+    [destroyMutateAsync, navigate, sceneKey, addNotification],
   );
   const [includeArchived, toggleIncludeArchived] = useToggle(false);
   const debouncedSetFilterValue = useMemo(
