@@ -3,8 +3,8 @@ import "./globals.css";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter } from "react-router-dom";
-import { QueryClient } from "@tanstack/react-query";
 import math from "@math3d/custom-mathjs";
+import { createQueryClient } from "./services/react-query/react-query";
 import { theme } from "./mui";
 
 import AppRoutes from "./AppProviders";
@@ -33,13 +33,7 @@ prepare().then(() => {
     // @ts-expect-error Allow accessing store on widnow in dev for debugging
     window.store = store;
   }
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: Infinity,
-      },
-    },
-  });
+  const queryClient = createQueryClient();
 
   const router = createBrowserRouter(routes);
 

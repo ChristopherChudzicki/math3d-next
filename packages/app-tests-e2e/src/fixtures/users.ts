@@ -57,7 +57,7 @@ const test = base.extend<Fixtures>({
       const title =
         user === "dynamic" ? s.title : `${TEST_SCENE_PREFIX} ${s.title}`;
       const response = await scenesApi.scenesCreate({
-        SceneRequest: { ...s, title },
+        SceneCreateRequest: { ...s, title },
       });
       key = response.data.key;
       invariant(key);

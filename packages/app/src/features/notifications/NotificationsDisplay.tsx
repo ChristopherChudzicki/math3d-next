@@ -16,7 +16,7 @@ const NotificationsDisplay: React.FC = () => {
       {notifications.map((n) => (
         <Dialog
           fullWidth
-          maxWidth="sm"
+          maxWidth="xs"
           key={n.id}
           open={!pendingRemovals.has(n.id)}
           onTransitionExited={() => {
