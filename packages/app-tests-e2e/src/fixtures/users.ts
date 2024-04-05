@@ -1,19 +1,25 @@
 import { test as base } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { API_TOKEN_KEY, ScenesApi } from "@math3d/api";
+import { API_TOKEN_KEY, ScenesApi, isAxiosError } from "@math3d/api";
 import type { Scene } from "@math3d/api";
-import invariant from "tiny-invariant";
 import env from "@/env";
 import { getConfig } from "@/utils/api/config";
 import { getAuthToken, users } from "@/utils/api/auth";
 
 const TEST_SCENE_PREFIX = "[TEST-E2E-SCENE]";
 
+type PrepareSceneOpts = {
+  allowCleanup404: boolean;
+};
+
 type Fixtures = {
   user: keyof typeof users | null;
   authToken: string | null;
   page: Page;
-  prepareScene: (scene: Scene) => Promise<string>;
+  prepareScene: (
+    scene: Scene,
+    opts?: Partial<PrepareSceneOpts>,
+  ) => Promise<string>;
 };
 
 const test = base.extend<Fixtures>({
@@ -52,21 +58,36 @@ const test = base.extend<Fixtures>({
   },
   prepareScene: async ({ user, authToken }, use) => {
     const scenesApi = new ScenesApi(getConfig(authToken));
-    let key: string | undefined;
-    const create = async (s: Scene) => {
+    const cleanup: { key: string; allow404: boolean }[] = [];
+    const create: Fixtures["prepareScene"] = async (s, opts) => {
+      const { allowCleanup404 = false } = opts ?? {};
       const title =
         user === "dynamic" ? s.title : `${TEST_SCENE_PREFIX} ${s.title}`;
       const response = await scenesApi.scenesCreate({
         SceneCreateRequest: { ...s, title },
       });
-      key = response.data.key;
-      invariant(key);
+      const { key } = response.data;
+      cleanup.push({ key, allow404: allowCleanup404 });
       return key;
     };
     await use(create);
-    invariant(key);
-    await scenesApi.scenesDestroy({ key });
+    const cleanupRequests = await Promise.allSettled(
+      cleanup.map(({ key }) => scenesApi.scenesDestroy({ key })),
+    );
+    cleanupRequests.forEach((r, i) => {
+      if (r.status === "rejected") {
+        const { key, allow404 } = cleanup[i];
+        if (isAxiosError(r.reason, [404])) {
+          if (!allow404) {
+            throw new Error(`Scene with key ${key} not found`);
+          }
+        } else {
+          throw r.reason;
+        }
+      }
+    });
   },
 });
 
 export { test };
+export type { Fixtures };
