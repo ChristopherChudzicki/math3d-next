@@ -15,7 +15,10 @@ const scenesApi = new ScenesApi(getConfig());
 
 const detailKey = (key?: string) => ["scenes", "detail", key];
 
-const useScene = (key?: string, opts?: Pick<UseQueryOptions, "enabled">) => {
+const useScene = (
+  key?: string,
+  opts?: Pick<UseQueryOptions, "enabled" | "staleTime">,
+) => {
   return useQuery({
     queryKey: detailKey(key),
     queryFn: () => {

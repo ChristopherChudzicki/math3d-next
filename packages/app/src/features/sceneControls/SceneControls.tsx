@@ -15,16 +15,12 @@ import { useNotifications } from "../notifications/NotificationsContext";
 
 const { actions: itemActions } = mathItemsSlice;
 
-type Props = {
-  sceneKey?: string;
-};
-
-const SceneControls: React.FC<Props> = (props) => {
-  const { sceneKey } = props;
+const useLoadSceneIntoRedux = (sceneKey?: string) => {
   const dispatch = useAppDispatch();
 
   const { isLoading, data, error } = useScene(sceneKey, {
     enabled: sceneKey !== undefined,
+    staleTime: Infinity,
   });
   useEffect(() => {
     const title = data?.title ? `Math3d - ${data.title}` : "Math3d";
@@ -60,7 +56,16 @@ const SceneControls: React.FC<Props> = (props) => {
     };
     dispatch(itemActions.setItems(payload));
   }, [dispatch, scene]);
+  return { isLoading };
+};
 
+type Props = {
+  sceneKey?: string;
+};
+
+const SceneControls: React.FC<Props> = (props) => {
+  const { sceneKey } = props;
+  const { isLoading } = useLoadSceneIntoRedux(sceneKey);
   return (
     <ControlTabs
       loading={isLoading}
