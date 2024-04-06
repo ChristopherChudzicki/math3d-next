@@ -1,7 +1,11 @@
 import { expect, describe, it } from "vitest";
 import { toNearlyEqual } from "@math3d/test-utils";
-import type { ToNearlyEqualOptions } from "@math3d/test-utils";
+import type { CustomMatchers, ToNearlyEqualOptions } from "@math3d/test-utils";
 import math from "./mathjs";
+
+declare module "vitest" {
+  interface Assertion extends CustomMatchers {}
+}
 
 // For comparing approximate equality of arrays, functions, objects.
 // For numbers, this uses a default tolerance of 1e-4
