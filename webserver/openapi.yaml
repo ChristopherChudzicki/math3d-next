@@ -733,6 +733,7 @@ components:
         author:
           type: integer
           readOnly: true
+          nullable: true
         createdDate:
           type: string
           format: date-time

@@ -4,4 +4,4 @@ export * from "./hooks/scenes";
 export { getConfig } from "./hooks/util";
 export { API_TOKEN_KEY } from "./hooks/util";
 export { isAxiosError } from "./util";
-export type { StrictScene, StrictSceneCreate } from "./types";
+export type { StrictScene } from "./types";

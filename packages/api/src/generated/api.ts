@@ -323,7 +323,7 @@ export interface Scene {
    * @type {number}
    * @memberof Scene
    */
-  author: number;
+  author: number | null;
   /**
    *
    * @type {string}

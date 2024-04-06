@@ -22,6 +22,7 @@ const db = factory({
      */
     itemOrder: () => JSON.stringify({}),
     author: faker.datatype.number,
+    archived: faker.datatype.boolean,
     createdDate: () => faker.date.recent().toUTCString(),
     modifiedDate: () => faker.date.recent().toUTCString(),
   },
@@ -46,7 +47,7 @@ const addUser = (user?: Partial<UserWithPassword>): UserWithPassword => {
   return created;
 };
 
-type SceneRecord = Scene & { author?: number };
+type SceneRecord = Scene;
 
 /**
  * A wrapper around `db.scene.create` to fix some ts issues.

@@ -38,6 +38,8 @@ const makeSceneFromItems = (
     key: faker.datatype.uuid(),
     createdDate: faker.date.past().toISOString(),
     modifiedDate: faker.date.past().toISOString(),
+    author: null,
+    archived: false,
     ...sceneProps,
   };
   return scene;
@@ -72,6 +74,7 @@ class SceneBuilder implements IScene {
     opts: Partial<IScene> = {},
     { setup = true }: { setup?: boolean } = {},
   ) {
+    this.author = null;
     this.title = opts.title ?? faker.lorem.words();
     this.key = opts.key ?? faker.datatype.uuid();
     this.createdDate = opts.createdDate ?? faker.date.past().toISOString();
@@ -87,9 +90,7 @@ class SceneBuilder implements IScene {
     }
   }
 
-  author: number;
-
-  archived: boolean;
+  author: number | null;
 
   folder(opts?: Partial<MathItem<MathItemType.Folder>["properties"]>) {
     return new Folder(this, "main", opts);
@@ -206,6 +207,8 @@ class SceneBuilder implements IScene {
       modifiedDate: this.modifiedDate,
       items: this.items,
       itemOrder: this.itemOrder,
+      archived: this.archived,
+      author: this.author,
     };
   }
 }
