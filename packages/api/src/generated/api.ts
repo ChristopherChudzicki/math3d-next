@@ -131,7 +131,7 @@ export interface PaginatedMiniSceneList {
    * @type {number}
    * @memberof PaginatedMiniSceneList
    */
-  count?: number;
+  count: number;
   /**
    *
    * @type {string}
@@ -149,7 +149,7 @@ export interface PaginatedMiniSceneList {
    * @type {Array<MiniScene>}
    * @memberof PaginatedMiniSceneList
    */
-  results?: Array<MiniScene>;
+  results: Array<MiniScene>;
 }
 /**
  *
@@ -162,7 +162,7 @@ export interface PaginatedUserList {
    * @type {number}
    * @memberof PaginatedUserList
    */
-  count?: number;
+  count: number;
   /**
    *
    * @type {string}
@@ -180,7 +180,7 @@ export interface PaginatedUserList {
    * @type {Array<User>}
    * @memberof PaginatedUserList
    */
-  results?: Array<User>;
+  results: Array<User>;
 }
 /**
  *
