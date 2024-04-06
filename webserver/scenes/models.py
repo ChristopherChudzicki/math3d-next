@@ -84,6 +84,8 @@ class Scene(TimestampedModel):
         CustomUser, blank=True, null=True, on_delete=models.CASCADE
     )
 
+    archived = models.BooleanField(default=False)
+
     class Meta:
         indexes = [
             GinIndex(

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId } from "react";
+import React, { useCallback, useEffect } from "react";
 import Drawer from "@mui/material/Drawer";
 
 import { useNavigate, useParams } from "react-router-dom";
@@ -48,9 +48,6 @@ const ScenesList: React.FC = () => {
     activateListType(newValue);
   };
 
-  const examplesId = useId();
-  const myScenesId = useId();
-
   return (
     <Drawer open anchor="right" onClose={handleClose}>
       <TabContext value={listType}>
@@ -62,15 +59,15 @@ const ScenesList: React.FC = () => {
             onChange={handleChangeTab}
             aria-label="Scenes"
           >
-            <Tab label="Examples" id={examplesId} value={ListType.Examples} />
-            <Tab label="My Scenes" id={myScenesId} value={ListType.Me} />
+            <Tab label="Examples" value={ListType.Examples} />
+            <Tab label="My Scenes" value={ListType.Me} />
           </TabList>
         </Box>
         <TabPanel value={ListType.Examples} className={styles.tabPanel}>
-          <ExamplesListing aria-labelledby={examplesId} />
+          <ExamplesListing />
         </TabPanel>
         <TabPanel value={ListType.Me} className={styles.tabPanel}>
-          <MyScenes aria-labelledby={myScenesId} />
+          <MyScenes />
         </TabPanel>
       </TabContext>
     </Drawer>

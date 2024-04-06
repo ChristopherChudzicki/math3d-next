@@ -16,6 +16,8 @@ repos:
       - id: prettier
         types_or:
           [javascript, jsx, ts, tsx, json, scss, sass, css, yaml, markdown]
+        args:
+          - --no-error-on-unmatched-pattern
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.8.0-1
     hooks:

@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
+import type { CustomMatchers } from "./nearlyEqual";
 import { toNearlyEqual } from "./nearlyEqual";
+
+declare module "vitest" {
+  interface Assertion extends CustomMatchers {}
+}
 
 expect.extend({
   toNearlyEqual,

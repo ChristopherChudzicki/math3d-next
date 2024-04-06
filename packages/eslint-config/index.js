@@ -1,6 +1,5 @@
 module.exports = {
   extends: [
-    "react-app",
     "airbnb",
     "airbnb-typescript",
     "eslint:recommended",
@@ -96,7 +95,7 @@ module.exports = {
     {
       files: ["**/*.spec.*"],
       excludedFiles: ["**/src/playwright/**"],
-      extends: ["react-app/jest"],
+      extends: ["plugin:testing-library/react"],
     },
   ],
   parserOptions: {

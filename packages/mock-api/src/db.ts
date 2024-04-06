@@ -1,5 +1,5 @@
 import { cloneDeep } from "lodash-es";
-import { factory, primaryKey } from "@mswjs/data";
+import { factory, primaryKey, nullable } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
 import { MathItem } from "@math3d/mathitem-configs";
 import type { StrictScene as Scene, User } from "@math3d/api";
@@ -21,7 +21,8 @@ const db = factory({
      * parse it (and re-stringify the whole body).
      */
     itemOrder: () => JSON.stringify({}),
-    author: faker.datatype.number,
+    author: nullable(faker.datatype.number),
+    archived: faker.datatype.boolean,
     createdDate: () => faker.date.recent().toUTCString(),
     modifiedDate: () => faker.date.recent().toUTCString(),
   },
@@ -46,7 +47,7 @@ const addUser = (user?: Partial<UserWithPassword>): UserWithPassword => {
   return created;
 };
 
-type SceneRecord = Scene & { author?: number };
+type SceneRecord = Scene;
 
 /**
  * A wrapper around `db.scene.create` to fix some ts issues.

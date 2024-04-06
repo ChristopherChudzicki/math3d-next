@@ -22,8 +22,8 @@ const expect = baseExpect.extend({
       const descriptor = await locator.page().locator(`id=${describedBy}`);
       await baseExpect(descriptor).toContainText(expected);
       pass = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
-      console.log(e);
       matcherResult = e.matcherResult;
       pass = false;
     }

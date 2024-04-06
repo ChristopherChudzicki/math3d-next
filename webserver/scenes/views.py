@@ -6,7 +6,11 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 
 from scenes.models import Scene
-from scenes.serializers import SceneSerializer, MiniSceneSerializer
+from scenes.serializers import (
+    SceneSerializer,
+    MiniSceneSerializer,
+    SceneCreateSerializer,
+)
 from scenes.permissions import ScenePermissions
 from scenes.filters import SceneFilterSet
 from django_filters import rest_framework as filters
@@ -30,6 +34,8 @@ class ScenesView(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         LIST_ACTIONS = ["list", "me"]
+        if self.action == "create":
+            return SceneCreateSerializer
         if self.action in LIST_ACTIONS:
             return MiniSceneSerializer
         else:

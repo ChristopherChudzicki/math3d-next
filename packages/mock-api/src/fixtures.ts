@@ -59,6 +59,8 @@ const makeFolderScene = (
     },
     createdDate: faker.date.past().toISOString(),
     modifiedDate: faker.date.past().toISOString(),
+    author: null,
+    archived: false,
   };
 };
 

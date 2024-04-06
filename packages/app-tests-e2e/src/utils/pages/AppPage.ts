@@ -29,6 +29,10 @@ class AppPage {
     return new SignoutPage(this.page);
   }
 
+  sceneTitle(): Locator {
+    return this.header().getByLabel("Scene title");
+  }
+
   header(): Locator {
     return this.page.getByRole("banner");
   }

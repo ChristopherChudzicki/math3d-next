@@ -18,8 +18,8 @@ class CurrentUserDefaultOrNone:
 
 class SceneSerializer(serializers.ModelSerializer):
     itemOrder = serializers.JSONField(source="item_order")
-    author = serializers.HiddenField(
-        default=CurrentUserDefaultOrNone(), allow_null=True, required=False
+    author: int | None = serializers.SlugRelatedField(  # type: ignore[assignment]
+        slug_field="id", read_only=True, allow_null=True
     )
     createdDate = serializers.DateTimeField(source="created_date", read_only=True)
     modifiedDate = serializers.DateTimeField(source="modified_date", read_only=True)
@@ -34,9 +34,16 @@ class SceneSerializer(serializers.ModelSerializer):
             "author",
             "createdDate",
             "modifiedDate",
+            "archived",
         ]
 
         read_only_fields = ["key"]
+
+
+class SceneCreateSerializer(SceneSerializer):
+    author = serializers.HiddenField(  # type: ignore[assignment]
+        default=CurrentUserDefaultOrNone(), allow_null=True, required=False
+    )
 
 
 class MiniSceneSerializer(serializers.ModelSerializer):
@@ -45,4 +52,4 @@ class MiniSceneSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Scene
-        fields = ["title", "key", "author", "createdDate", "modifiedDate"]
+        fields = ["title", "key", "author", "createdDate", "modifiedDate", "archived"]
