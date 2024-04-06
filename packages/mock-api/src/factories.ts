@@ -66,6 +66,8 @@ class SceneBuilder implements IScene {
 
   modifiedDate: string;
 
+  archived: boolean;
+
   constructor(
     opts: Partial<IScene> = {},
     { setup = true }: { setup?: boolean } = {},
@@ -78,11 +80,16 @@ class SceneBuilder implements IScene {
       faker.date
         .between(this.createdDate, new Date().toISOString())
         .toISOString();
+    this.archived = opts.archived ?? false;
 
     if (setup) {
       this.#setupFolder();
     }
   }
+
+  author: number;
+
+  archived: boolean;
 
   folder(opts?: Partial<MathItem<MathItemType.Folder>["properties"]>) {
     return new Folder(this, "main", opts);
