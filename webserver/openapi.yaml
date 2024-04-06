@@ -630,6 +630,9 @@ components:
       - modifiedDate
     PaginatedMiniSceneList:
       type: object
+      required:
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -650,6 +653,9 @@ components:
             $ref: '#/components/schemas/MiniScene'
     PaginatedUserList:
       type: object
+      required:
+      - count
+      - results
       properties:
         count:
           type: integer
