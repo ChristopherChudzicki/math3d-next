@@ -75,7 +75,7 @@
     "yup": "^1.3.2"
   },
   "devDependencies": {
-    "@faker-js/faker": "7.6.0",
+    "@faker-js/faker": "^8.4.1",
     "@julr/vite-plugin-validate-env": "^1.0.1",
     "@math3d/eslint-config": "workspace:^",
     "@math3d/mock-api": "workspace:^",

@@ -39,11 +39,11 @@ const range = (min: string, max: string) => ({
 type Overrides = Partial<MathItem<MIT.VariableSlider>["properties"]>;
 
 const setupTest = async (overrides: Overrides = {}) => {
-  const min = faker.datatype.number({ min: -10, max: -6 });
-  const max = faker.datatype.number({ min: 2, max: 10 });
-  const fps = faker.datatype.number({ min: 20, max: 40 });
-  const value = faker.datatype.number({ min, max, precision: 0.1 });
-  const duration = faker.datatype.number({
+  const min = faker.number.int({ min: -10, max: -6 });
+  const max = faker.number.int({ min: 2, max: 10 });
+  const fps = faker.number.int({ min: 20, max: 40 });
+  const value = faker.number.int({ min, max, precision: 0.1 });
+  const duration = faker.number.int({
     min: 0.5,
     max: 1.5,
     precision: 0.1,

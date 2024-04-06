@@ -9,7 +9,7 @@ import { sceneFixtures } from "./fixtures";
 
 const db = factory({
   scene: {
-    key: primaryKey(faker.datatype.uuid),
+    key: primaryKey(faker.string.uuid),
     title: faker.lorem.sentence,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     items: () => [] as any[],
@@ -21,17 +21,17 @@ const db = factory({
      * parse it (and re-stringify the whole body).
      */
     itemOrder: () => JSON.stringify({}),
-    author: nullable(faker.datatype.number),
+    author: nullable(faker.number.int),
     archived: faker.datatype.boolean,
     createdDate: () => faker.date.recent().toUTCString(),
     modifiedDate: () => faker.date.recent().toUTCString(),
   },
   user: {
-    id: primaryKey(faker.datatype.number),
+    id: primaryKey(faker.number.int),
     public_nickname: faker.internet.userName,
     email: faker.internet.email,
     password: faker.internet.password,
-    auth_token: faker.datatype.uuid,
+    auth_token: faker.string.uuid,
   },
 });
 

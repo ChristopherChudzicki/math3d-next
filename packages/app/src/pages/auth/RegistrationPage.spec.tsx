@@ -120,7 +120,7 @@ test("Informs user about confirmation email", async () => {
   const { location } = await renderTestApp("/auth/register");
   const userInfo = {
     email: faker.internet.email(),
-    nickname: faker.name.firstName(),
+    nickname: faker.person.firstName(),
     password: faker.internet.password(),
   };
   await submitForm({

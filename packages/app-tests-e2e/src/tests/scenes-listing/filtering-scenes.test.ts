@@ -6,7 +6,7 @@ import { faker } from "@faker-js/faker";
 test.use({ user: "dynamic" });
 
 test("Filtering scenes by titles", async ({ page, prepareScene }) => {
-  const suffix = faker.datatype.uuid();
+  const suffix = faker.string.uuid();
   const scene1 = new SceneBuilder({ title: `scene-1-${suffix}` });
   const scene2 = new SceneBuilder({ title: `scene-2-${suffix}` });
   const scene3 = new SceneBuilder({ title: `scene-3` });
