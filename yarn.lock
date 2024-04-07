@@ -2535,10 +2535,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@faker-js/faker@npm:7.6.0, @faker-js/faker@npm:^7.6.0":
-  version: 7.6.0
-  resolution: "@faker-js/faker@npm:7.6.0"
-  checksum: 10/9236ee7a7ab32fcd99fa8cbc046b65b0af4fe714b12e33a39d3e058bef77e53bb0f42fe3331ed578a6db581b22c31f12ed2ba587a4bdb58a9ba0bb5b19f99bc4
+"@faker-js/faker@npm:8.4.1, @faker-js/faker@npm:^8.0.0":
+  version: 8.4.1
+  resolution: "@faker-js/faker@npm:8.4.1"
+  checksum: 10/5983c2ea64f26055ad6648de748878e11ebe2fb751e3c7435ae141cdffabc2dccfe4c4f49da69a3d2add71e21b415c683ac5fba196fab0d5ed6779fbec436c80
   languageName: node
   linkType: hard
 
@@ -2967,7 +2967,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math3d/mathitem-configs@workspace:packages/mathitem-configs"
   dependencies:
-    "@faker-js/faker": "npm:^7.6.0"
+    "@faker-js/faker": "npm:^8.0.0"
     "@math3d/eslint-config": "workspace:^"
     "@math3d/parser": "workspace:^"
     "@math3d/tsconfig": "workspace:^"
@@ -3016,7 +3016,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math3d/mock-api@workspace:packages/mock-api"
   dependencies:
-    "@faker-js/faker": "npm:7.6.0"
+    "@faker-js/faker": "npm:8.4.1"
     "@math3d/eslint-config": "workspace:^"
     "@math3d/mathitem-configs": "workspace:^"
     "@math3d/tsconfig": "workspace:^"
@@ -6617,7 +6617,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "app-tests-e2e@workspace:packages/app-tests-e2e"
   dependencies:
-    "@faker-js/faker": "npm:7.6.0"
+    "@faker-js/faker": "npm:8.4.1"
     "@math3d/api": "workspace:^"
     "@math3d/mock-api": "workspace:^"
     "@playwright/test": "npm:^1.41.0"
@@ -6641,7 +6641,7 @@ __metadata:
     "@dnd-kit/utilities": "npm:3.2.2"
     "@emotion/react": "npm:11.11.4"
     "@emotion/styled": "npm:11.11.5"
-    "@faker-js/faker": "npm:7.6.0"
+    "@faker-js/faker": "npm:8.4.1"
     "@hookform/resolvers": "npm:^3.3.2"
     "@julr/vite-plugin-validate-env": "npm:^1.0.1"
     "@math3d/api": "workspace:^"
