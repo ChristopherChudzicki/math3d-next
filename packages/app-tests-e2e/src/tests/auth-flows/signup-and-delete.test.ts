@@ -119,7 +119,7 @@ test("Existing accounts cause error on signup", async ({ page }) => {
   const app = new AppPage(page);
   await app.signupPage().signup({
     email: env.TEST_USER_STATIC_EMAIL,
-    publicNickname: faker.name.firstName(),
+    publicNickname: faker.person.firstName(),
     password: faker.internet.password(),
   });
   await expect(app.signupPage().email()).toBeInvalid();

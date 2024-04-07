@@ -12,7 +12,7 @@ test.describe("User settings profile form", () => {
     await page.goto("");
     app.userMenu().activate("settings");
 
-    const newNickname = faker.name.firstName();
+    const newNickname = faker.person.firstName();
     await test.step("Fill out form", async () => {
       const profileForm = app.userSettings().profileForm();
       await expect(profileForm.email()).toHaveValue(

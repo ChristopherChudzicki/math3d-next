@@ -35,7 +35,7 @@ const makeSceneFromItems = (
       setup: [],
     },
     title: faker.lorem.words(),
-    key: faker.datatype.uuid(),
+    key: faker.string.uuid(),
     createdDate: faker.date.past().toISOString(),
     modifiedDate: faker.date.past().toISOString(),
     author: null,
@@ -76,7 +76,7 @@ class SceneBuilder implements IScene {
   ) {
     this.author = null;
     this.title = opts.title ?? faker.lorem.words();
-    this.key = opts.key ?? faker.datatype.uuid();
+    this.key = opts.key ?? faker.string.uuid();
     this.createdDate = opts.createdDate ?? faker.date.past().toISOString();
     this.modifiedDate =
       opts.modifiedDate ??

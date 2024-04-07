@@ -39,8 +39,8 @@ const submitForm = async (data: FormValues) => {
 };
 
 test("Hapy path: Expected API call and form states", async () => {
-  const token = faker.datatype.uuid();
-  const uid = faker.datatype.string(2);
+  const token = faker.string.uuid();
+  const uid = faker.string.sample(2);
   const { location } = await renderTestApp(
     `/auth/reset-password/confirm?uid=${uid}&token=${token}`,
   );
@@ -68,8 +68,8 @@ test("Hapy path: Expected API call and form states", async () => {
 });
 
 test("Requires passwords match", async () => {
-  const token = faker.datatype.uuid();
-  const uid = faker.datatype.string(2);
+  const token = faker.string.uuid();
+  const uid = faker.string.sample(2);
   await renderTestApp(`/auth/reset-password/confirm?uid=${uid}&token=${token}`);
 
   const controls = await submitForm({
@@ -82,8 +82,8 @@ test("Requires passwords match", async () => {
 });
 
 test("Reports API errors (password field)", async () => {
-  const token = faker.datatype.uuid();
-  const uid = faker.datatype.string(2);
+  const token = faker.string.uuid();
+  const uid = faker.string.sample(2);
   await renderTestApp(`/auth/reset-password/confirm?uid=${uid}&token=${token}`);
 
   mockResponseOnce({
@@ -109,8 +109,8 @@ test.each([
   { errData: { uid: ["uid error"] } },
   { errData: { token: ["token error"] } },
 ])("token or uid errors suggest to check link", async ({ errData }) => {
-  const token = faker.datatype.uuid();
-  const uid = faker.datatype.string(2);
+  const token = faker.string.uuid();
+  const uid = faker.string.sample(2);
   await renderTestApp(`/auth/reset-password/confirm?uid=${uid}&token=${token}`);
   mockResponseOnce({
     status: 400,
