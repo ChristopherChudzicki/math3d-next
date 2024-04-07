@@ -20,7 +20,7 @@
     "preview": "dotenvx run -- yarn workspace app preview"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "^0.29.2",
+    "@dotenvx/dotenvx": "^0.30.0",
     "package": "^1.0.1",
     "prettier": "^4.0.0-alpha.8"
   },
