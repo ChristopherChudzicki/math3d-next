@@ -42,11 +42,11 @@ const setupTest = async (overrides: Overrides = {}) => {
   const min = faker.number.int({ min: -10, max: -6 });
   const max = faker.number.int({ min: 2, max: 10 });
   const fps = faker.number.int({ min: 20, max: 40 });
-  const value = faker.number.int({ min, max, precision: 0.1 });
-  const duration = faker.number.int({
+  const value = faker.number.float({ min, max, multipleOf: 0.1 });
+  const duration = faker.number.float({
     min: 0.5,
     max: 1.5,
-    precision: 0.1,
+    multipleOf: 0.1,
   });
   const speed = faker.helpers.arrayElement(["1/4", "1/2", "1", "2", "4"]);
   const props: Overrides = {
