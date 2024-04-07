@@ -2106,9 +2106,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dotenvx/dotenvx@npm:^0.29.2":
-  version: 0.29.2
-  resolution: "@dotenvx/dotenvx@npm:0.29.2"
+"@dotenvx/dotenvx@npm:^0.30.0":
+  version: 0.30.0
+  resolution: "@dotenvx/dotenvx@npm:0.30.0"
   dependencies:
     "@inquirer/confirm": "npm:^2.0.17"
     arch: "npm:^2.1.1"
@@ -2132,7 +2132,7 @@ __metadata:
   bin:
     dotenvx: src/cli/dotenvx.js
     git-dotenvx: src/cli/dotenvx.js
-  checksum: 10/1d809ebaece5d60e5d2410623e7c1fe68423ece8146c2605cc5100844b3c5dae8da0e4bb5a817f8e22302677fc579de4942b8ad0819c9698410c6b5eecf72936
+  checksum: 10/f789bffb79fd277bfa243ccbfc3394769693d35c96b0e9d9c2b3724510681f5e2b9e94c35f3160ae4e227feb6b1dfbd3c73113629e34f455223a6050902b95d0
   languageName: node
   linkType: hard
 
@@ -14291,7 +14291,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math3d-next@workspace:."
   dependencies:
-    "@dotenvx/dotenvx": "npm:^0.29.2"
+    "@dotenvx/dotenvx": "npm:^0.30.0"
     "@math3d/eslint-config": "workspace:*"
     package: "npm:^1.0.1"
     prettier: "npm:^4.0.0-alpha.8"
