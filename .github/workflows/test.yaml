@@ -36,7 +36,7 @@ jobs:
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11.6
+          python-version: 3.12.2
       - name: Install python dependencies
         run: make setup_python
       - name: Check OpenAPI up-to-date
