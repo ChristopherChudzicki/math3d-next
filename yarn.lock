@@ -2106,17 +2106,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dotenvx/dotenvx@npm:^0.30.0":
-  version: 0.30.0
-  resolution: "@dotenvx/dotenvx@npm:0.30.0"
+"@dotenvx/dotenvx@npm:^0.45.0":
+  version: 0.45.0
+  resolution: "@dotenvx/dotenvx@npm:0.45.0"
   dependencies:
     "@inquirer/confirm": "npm:^2.0.17"
     arch: "npm:^2.1.1"
     chalk: "npm:^4.1.2"
     commander: "npm:^11.1.0"
     conf: "npm:^10.2.0"
+    diff: "npm:^5.2.0"
     dotenv: "npm:^16.4.5"
     dotenv-expand: "npm:^11.0.6"
+    eciesjs: "npm:^0.4.6"
     execa: "npm:^5.1.1"
     glob: "npm:^10.3.10"
     ignore: "npm:^5.3.0"
@@ -2132,7 +2134,7 @@ __metadata:
   bin:
     dotenvx: src/cli/dotenvx.js
     git-dotenvx: src/cli/dotenvx.js
-  checksum: 10/f789bffb79fd277bfa243ccbfc3394769693d35c96b0e9d9c2b3724510681f5e2b9e94c35f3160ae4e227feb6b1dfbd3c73113629e34f455223a6050902b95d0
+  checksum: 10/72e12280e1160c3e865927854ce8ff8cf1305fbc0792ae831e2dcd7042dbb47a9ebd8776f75f0cec37d9c426ee2fd3e1d2fa0db0c882d8d7d881a0c1a4ec8cd2
   languageName: node
   linkType: hard
 
@@ -3415,6 +3417,29 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10/b3cbe2d0aa7ec65969752dababc39fc6e0b8bb1a9cf8b9bac42ca40e3dd3eaa59b79765bd259019318acc7421d64b9f421bc67e776a581d7c9da6a1c0c50bfbc
+  languageName: node
+  linkType: hard
+
+"@noble/ciphers@npm:^0.5.3":
+  version: 0.5.3
+  resolution: "@noble/ciphers@npm:0.5.3"
+  checksum: 10/af0ad96b5807feace93e63549e05de6f5e305b36e2e95f02d90532893fbc3af3f19b9621b6de4caa98303659e5df2e7aa082064e5d4a82e6f38c728d48dfae5d
+  languageName: node
+  linkType: hard
+
+"@noble/curves@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@noble/curves@npm:1.4.0"
+  dependencies:
+    "@noble/hashes": "npm:1.4.0"
+  checksum: 10/b21b30a36ff02bfcc0f5e6163d245cdbaf7f640511fff97ccf83fc207ee79cfd91584b4d97977374de04cb118a55eb63a7964c82596a64162bbc42bc685ae6d9
+  languageName: node
+  linkType: hard
+
+"@noble/hashes@npm:1.4.0, @noble/hashes@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@noble/hashes@npm:1.4.0"
+  checksum: 10/e156e65794c473794c52fa9d06baf1eb20903d0d96719530f523cc4450f6c721a957c544796e6efd0197b2296e7cd70efeb312f861465e17940a3e3c7e0febc6
   languageName: node
   linkType: hard
 
@@ -9307,6 +9332,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"diff@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "diff@npm:5.2.0"
+  checksum: 10/01b7b440f83a997350a988e9d2f558366c0f90f15be19f4aa7f1bb3109a4e153dfc3b9fbf78e14ea725717017407eeaa2271e3896374a0181e8f52445740846d
+  languageName: node
+  linkType: hard
+
 "diffie-hellman@npm:^5.0.0":
   version: 5.0.3
   resolution: "diffie-hellman@npm:5.0.3"
@@ -9513,6 +9545,17 @@ __metadata:
   version: 0.2.0
   resolution: "eastasianwidth@npm:0.2.0"
   checksum: 10/9b1d3e1baefeaf7d70799db8774149cef33b97183a6addceeba0cf6b85ba23ee2686f302f14482006df32df75d32b17c509c143a3689627929e4a8efaf483952
+  languageName: node
+  linkType: hard
+
+"eciesjs@npm:^0.4.6":
+  version: 0.4.7
+  resolution: "eciesjs@npm:0.4.7"
+  dependencies:
+    "@noble/ciphers": "npm:^0.5.3"
+    "@noble/curves": "npm:^1.4.0"
+    "@noble/hashes": "npm:^1.4.0"
+  checksum: 10/8aacd36eb25ada1de860b0f5dd4ae4cbe79507c610790a681c2a1a51daf171307bfd5b532dba84009acd206716fb6fa86cbb8f7f02d722445150b84535e8cec3
   languageName: node
   linkType: hard
 
@@ -14313,7 +14356,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math3d-next@workspace:."
   dependencies:
-    "@dotenvx/dotenvx": "npm:^0.30.0"
+    "@dotenvx/dotenvx": "npm:^0.45.0"
     "@math3d/eslint-config": "workspace:*"
     package: "npm:^1.0.1"
     prettier: "npm:^4.0.0-alpha.8"
