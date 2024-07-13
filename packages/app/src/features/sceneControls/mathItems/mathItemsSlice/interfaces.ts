@@ -6,6 +6,7 @@ type AppParseable = Parseable;
 type AppMathScope = MathScope<AppParseable>;
 
 interface MathItemsState {
+  author: number | null;
   items: {
     [id: string]: MathItem;
   };

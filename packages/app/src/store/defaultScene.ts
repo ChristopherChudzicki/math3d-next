@@ -1,8 +1,9 @@
 import { MathItemType } from "@math3d/mathitem-configs";
 import type { StrictScene as Scene } from "@math3d/api";
 
-const defaultScene: Pick<Scene, "title" | "items" | "itemOrder"> = {
+const defaultScene: Pick<Scene, "title" | "items" | "itemOrder" | "author"> = {
   title: "Untitled",
+  author: null,
   items: [
     {
       id: "99",

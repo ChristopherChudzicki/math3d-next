@@ -9,6 +9,9 @@ import { SETTINGS_FOLDER } from "./util";
 const title: SelectorReturn<MathItemsState["title"]> = (state: RootState) =>
   state.mathItems.title;
 
+const author: SelectorReturn<MathItemsState["author"]> = (state: RootState) =>
+  state.mathItems.author;
+
 const mathItems: SelectorReturn<MathItemsState["items"]> = (state: RootState) =>
   state.mathItems.items;
 
@@ -101,9 +104,15 @@ const hasItems =
   };
 
 const sceneInfo = createSelector(
-  [title, orderedMathItems, (state: RootState) => state.mathItems.order],
-  (sceneTitle, items, order) => ({
+  [
+    title,
+    author,
+    orderedMathItems,
+    (state: RootState) => state.mathItems.order,
+  ],
+  (sceneTitle, sceneAuthor, items, order) => ({
     title: sceneTitle,
+    author: sceneAuthor,
     items,
     itemOrder: order,
   }),
