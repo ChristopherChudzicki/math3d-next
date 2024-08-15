@@ -103,18 +103,18 @@ const hasItems =
     return ids.every((id) => items[id]);
   };
 
+const key = (state: RootState) => state.mathItems.key;
+
+const itemOrder = (state: RootState) => state.mathItems.order;
+
 const sceneInfo = createSelector(
-  [
-    title,
-    author,
-    orderedMathItems,
-    (state: RootState) => state.mathItems.order,
-  ],
-  (sceneTitle, sceneAuthor, items, order) => ({
+  [title, author, orderedMathItems, itemOrder, key],
+  (sceneTitle, sceneAuthor, items, order, key) => ({
     title: sceneTitle,
     author: sceneAuthor,
     items,
     itemOrder: order,
+    key,
   }),
 );
 

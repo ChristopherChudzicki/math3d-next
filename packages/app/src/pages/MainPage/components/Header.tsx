@@ -20,6 +20,7 @@ import { useUserMe, User } from "@math3d/api";
 import ListSubheader from "@mui/material/ListSubheader";
 import styles from "./Header.module.css";
 import UserMenu from "./UserMenu";
+import SaveButton from "./SaveButton";
 
 const LoginButtons: React.FC<{
   smallScreen: boolean;
@@ -151,6 +152,7 @@ const HeaderMenu: React.FC = () => {
 
   return (
     <nav className={styles["nav-container"]}>
+      <SaveButton />
       <ShareButton variant={smallScreen ? "mobile" : "desktop"} />
       {smallScreen ? null : (
         <LoginButtons isAuthenticated={isAuthenticated} smallScreen={false} />

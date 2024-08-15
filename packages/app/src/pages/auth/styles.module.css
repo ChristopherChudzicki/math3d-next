@@ -1,4 +1,5 @@
 .form-content {
+  margin-top: 0.5rem;
   display: grid;
   grid-template-columns: auto;
   row-gap: 16px;

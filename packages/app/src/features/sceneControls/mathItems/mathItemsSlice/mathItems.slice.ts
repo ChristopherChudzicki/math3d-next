@@ -20,6 +20,7 @@ const idGenerator = new IdGenerator({ initialValue: 100 });
 const getInitialState = (): MathItemsState => {
   const mathScope = makeMathScope();
   return {
+    key: null,
     author: null,
     mathScope: () => mathScope,
     items: {},
@@ -73,15 +74,17 @@ const mathItemsSlice = createSlice({
         order: MathItemsState["order"];
         title: MathItemsState["title"];
         author: MathItemsState["author"];
+        key: MathItemsState["key"];
       }>,
     ) => {
-      const { items, order, title, author } = action.payload;
+      const { items, order, title, author, key } = action.payload;
       state.title = title;
       state.items = keyBy(items, (item) => item.id);
       state.order = order;
       state.activeItemId = undefined;
       state.activeTabId = MAIN_FOLDER;
       state.author = author;
+      state.key = key;
 
       invariant(state.order[MAIN_FOLDER], "Main folder should exist.");
       invariant(state.order[SETTINGS_FOLDER], "Settings folder should exist.");

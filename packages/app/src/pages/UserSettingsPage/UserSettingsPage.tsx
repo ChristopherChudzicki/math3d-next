@@ -71,12 +71,12 @@ const UserSettingsPage: React.FC = () => {
 
   return (
     <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>
-      <DialogTitle>Account Settings</DialogTitle>
       <div style={topRightStyle}>
         <IconButton onClick={handleClose} aria-label="Close">
           <Close />
         </IconButton>
       </div>
+      <DialogTitle>Account Settings</DialogTitle>
       <TabContext value={activeTab}>
         <DialogContent className={styles.container}>
           <TabList

@@ -8,6 +8,7 @@ import type { ButtonProps } from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import Close from "@mui/icons-material/Close";
+import { Divider } from "@mui/material";
 
 const topRightStyle: React.CSSProperties = {
   position: "absolute",
@@ -95,12 +96,12 @@ const BasicDialog: React.FC<BasicDialogProps> = ({
       TransitionProps={TransitionProps}
       maxWidth={maxWidth}
     >
-      <DialogTitle>{title}</DialogTitle>
       <div style={topRightStyle}>
         <IconButton onClick={onClose}>
           <Close />
         </IconButton>
       </div>
+      <DialogTitle>{title}</DialogTitle>
       <DialogContent>{children}</DialogContent>
       {showFooter && (
         <DialogActions>

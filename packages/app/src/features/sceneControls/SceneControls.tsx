@@ -44,16 +44,16 @@ const useLoadSceneIntoRedux = (sceneKey?: string) => {
     }
   }, [error, addNotification, navigate]);
 
-  const scene =
-    sceneKey === undefined ? defaultScene : (data as Scene | undefined);
+  const scene = sceneKey === undefined ? defaultScene : data;
 
   useEffect(() => {
     if (!scene) return;
     const payload = {
+      key: scene.key,
       author: scene.author,
       items: scene.items,
       order: scene.itemOrder,
-      title: scene.title,
+      title: scene.title ?? "",
     };
     dispatch(itemActions.setItems(payload));
   }, [dispatch, scene]);
