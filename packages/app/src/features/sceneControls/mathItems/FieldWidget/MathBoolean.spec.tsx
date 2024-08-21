@@ -22,7 +22,7 @@ const setup = async (initialValue: string) => {
   const scene = seedDb.withSceneFromItems([point]);
   const { store } = await renderTestApp(`/${scene.key}`);
 
-  const mathScope = store.getState().mathItems.mathScope();
+  const mathScope = store.getState().scene.mathScope();
   await user.click(await screen.findByLabelText("Show Settings"), {
     pointerEventsCheck: 0,
   });

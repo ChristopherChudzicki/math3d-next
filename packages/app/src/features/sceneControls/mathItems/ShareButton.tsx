@@ -11,7 +11,7 @@ import classNames from "classnames";
 import { useNavigate } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
 import styles from "./ShareButton.module.css";
-import { select } from "./mathItemsSlice";
+import { select } from "./sceneSlice";
 
 type ShareBodyProps = {
   loading: boolean;
@@ -86,7 +86,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
   const { author, ...scene } = useAppSelector(select.sceneInfo);
   const [open, toggleOpen] = useToggle(false);
   const createScene = useCreateScene();
-  console.log(`You are the author: ${author === queryMe.data?.id}`);
+
   const handleClick = useCallback(async () => {
     toggleOpen.on();
     const result = await createScene.mutateAsync(scene);

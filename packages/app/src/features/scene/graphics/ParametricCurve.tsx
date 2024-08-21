@@ -3,7 +3,7 @@ import * as MB from "mathbox-react";
 import type { IntervalEmitter } from "mathbox";
 import { MathItemType } from "@math3d/mathitem-configs";
 import { useMathItemResults } from "../../sceneControls/mathItems/mathScope";
-import { useMathScope } from "../../sceneControls/mathItems/mathItemsSlice";
+import { useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import { GraphicComponent } from "./interfaces";
 
 const props = [

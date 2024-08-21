@@ -16,7 +16,7 @@ import styles from "./Folder.module.css";
 import { useMathResults } from "../../mathScope";
 import { useOnWidgetChange } from "../../FieldWidget";
 import { WidgetChangeEvent } from "../../FieldWidget/types";
-import { select, useMathScope } from "../../mathItemsSlice";
+import { select, useMathScope } from "../../sceneSlice";
 
 interface FolderButtonProps {
   onClick: React.MouseEventHandler;

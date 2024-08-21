@@ -1,5 +1,5 @@
 import { MathItem, MathItemType } from "@math3d/mathitem-configs";
-import { useMathScope } from "@/features/sceneControls/mathItems/mathItemsSlice";
+import { useMathScope } from "@/features/sceneControls/mathItems/sceneSlice";
 import { useMathItemResults } from "@/features/sceneControls/mathItems/mathScope";
 import { useMemo } from "react";
 import invariant from "tiny-invariant";

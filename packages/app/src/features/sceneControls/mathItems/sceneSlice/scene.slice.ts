@@ -11,13 +11,13 @@ import {
   syncItemsToMathScope,
   removeItemsFromMathScope,
 } from "./syncMathScope";
-import type { MathItemsState } from "./interfaces";
+import type { SceneState } from "./interfaces";
 import { makeMathScope } from "./mathScopeInstance";
 import { isDescendantOf, MAIN_FOLDER, SETTINGS_FOLDER } from "./util";
 
 const idGenerator = new IdGenerator({ initialValue: 100 });
 
-const getInitialState = (): MathItemsState => {
+const getInitialState = (): SceneState => {
   const mathScope = makeMathScope();
   return {
     key: null,
@@ -32,7 +32,7 @@ const getInitialState = (): MathItemsState => {
 };
 
 const getInsertionFolder = (
-  order: MathItemsState["order"],
+  order: SceneState["order"],
   itemId?: string,
 ): string => {
   if (itemId === undefined || isDescendantOf(order, itemId, SETTINGS_FOLDER)) {
@@ -50,7 +50,7 @@ const getInsertionFolder = (
   assertNotNil(folderEntry, "Could not find active folder.");
   return folderEntry[0];
 };
-const getParent = (order: MathItemsState["order"], itemId: string): string => {
+const getParent = (order: SceneState["order"], itemId: string): string => {
   const parentFolderId = Object.keys(order).find((folderId) => {
     return order[folderId].includes(itemId);
   });
@@ -63,18 +63,18 @@ const insertAtIndex = <T>(array: T[], item: T, index: number) => {
   array.splice(insertionIndex, 0, item);
 };
 
-const mathItemsSlice = createSlice({
-  name: "mathItems",
+const sceneSlice = createSlice({
+  name: "scene",
   initialState: getInitialState,
   reducers: {
     setItems: (
       state,
       action: PayloadAction<{
         items: MathItem[];
-        order: MathItemsState["order"];
-        title: MathItemsState["title"];
-        author: MathItemsState["author"];
-        key: MathItemsState["key"];
+        order: SceneState["order"];
+        title: SceneState["title"];
+        author: SceneState["author"];
+        key: SceneState["key"];
       }>,
     ) => {
       const { items, order, title, author, key } = action.payload;
@@ -213,8 +213,8 @@ const mathItemsSlice = createSlice({
   },
 });
 
-const { actions, reducer } = mathItemsSlice;
+const { actions, reducer } = sceneSlice;
 
-export type { MathItemsState };
-export default mathItemsSlice;
+export type { SceneState };
+export default sceneSlice;
 export { actions, reducer };

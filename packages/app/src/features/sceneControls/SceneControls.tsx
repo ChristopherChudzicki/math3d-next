@@ -9,11 +9,11 @@ import { isAxiosError } from "axios";
 import { useNavigate } from "react-router";
 import AddObjectButton from "./AddObjectButton";
 import ControlTabs from "./controlTabs";
-import { mathItemsSlice, MathItemsList } from "./mathItems";
+import { sceneSlice, MathItemsList } from "./mathItems";
 import styles from "./SceneControls.module.css";
 import { useNotifications } from "../notifications/NotificationsContext";
 
-const { actions: itemActions } = mathItemsSlice;
+const { actions: itemActions } = sceneSlice;
 
 const useLoadSceneIntoRedux = (sceneKey?: string) => {
   const dispatch = useAppDispatch();

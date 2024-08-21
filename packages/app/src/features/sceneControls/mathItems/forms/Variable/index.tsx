@@ -9,7 +9,7 @@ import { toLaTeX } from "@math3d/mathjs-utils";
 import * as u from "@/util/styles/utils.module.css";
 import classNames from "classnames";
 import { MathAssignment, useOnWidgetChange } from "../../FieldWidget";
-import { useMathScope } from "../../mathItemsSlice";
+import { useMathScope } from "../../sceneSlice";
 import { useMathErrors, useMathItemResults } from "../../mathScope";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";

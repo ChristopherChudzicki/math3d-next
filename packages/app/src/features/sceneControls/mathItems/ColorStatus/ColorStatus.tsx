@@ -12,7 +12,7 @@ import { useLongAndShortPress } from "@/util/hooks/useLongAndShortPress";
 import { positioning } from "@/util/styles";
 import { useOnWidgetChange } from "../FieldWidget";
 import { WidgetChangeEvent } from "../FieldWidget/types";
-import { useMathScope } from "../mathItemsSlice";
+import { useMathScope } from "../sceneSlice";
 import { useMathResults } from "../mathScope";
 import ColorDialog from "./ColorDialog";
 import styles from "./ColorStatus.module.css";

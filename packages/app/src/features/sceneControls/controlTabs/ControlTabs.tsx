@@ -21,7 +21,7 @@ type Props = {
 const noPadding = { padding: 0 };
 
 const SceneControls: React.FC<Props> = (props) => {
-  const activeTab = useAppSelector((state) => state.mathItems.activeTabId);
+  const activeTab = useAppSelector((state) => state.scene.activeTabId);
   const dispatch = useDispatch();
   const handleChange = useCallback(
     (

@@ -147,9 +147,9 @@ test.each(permanentItems)(
     const description = within(item).getByLabelText("Description");
     await user.click(description);
     expect(getActiveItem(store)?.id).toBe(itemId);
-    const order0 = store.getState().mathItems.order;
+    const order0 = store.getState().scene.order;
     await addItem("Point");
-    const order1 = store.getState().mathItems.order;
+    const order1 = store.getState().scene.order;
     expect(order1).toEqual({
       ...order0,
       initialFolder: [expect.any(String), ...order0.initialFolder],

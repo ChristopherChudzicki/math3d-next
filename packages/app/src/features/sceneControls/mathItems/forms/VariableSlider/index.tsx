@@ -21,7 +21,7 @@ import FieldWidget, {
   MathAssignment,
   useOnWidgetChange,
 } from "../../FieldWidget";
-import { useMathScope } from "../../mathItemsSlice";
+import { useMathScope } from "../../sceneSlice";
 import { useMathErrors, useMathResults } from "../../mathScope";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";

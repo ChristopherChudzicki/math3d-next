@@ -1,13 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
-import type { MathItemsState } from "@/features/sceneControls/mathItems";
-import { mathItemsSlice } from "@/features/sceneControls/mathItems";
+import type { SceneState } from "@/features/sceneControls/mathItems";
+import { sceneSlice } from "@/features/sceneControls/mathItems";
 
 type RootState = {
-  mathItems: MathItemsState;
+  scene: SceneState;
 };
 
 const getInitialState = (): RootState => ({
-  mathItems: mathItemsSlice.getInitialState(),
+  scene: sceneSlice.getInitialState(),
 });
 
 type ConfigureStoreOptions = {
@@ -17,13 +17,13 @@ type ConfigureStoreOptions = {
 const getStore = ({ preloadedState }: ConfigureStoreOptions = {}) =>
   configureStore({
     reducer: {
-      [mathItemsSlice.name]: mathItemsSlice.reducer,
+      [sceneSlice.name]: sceneSlice.reducer,
     },
     preloadedState,
     middleware: (getDefaultMiddleware) => {
       return getDefaultMiddleware({
         serializableCheck: {
-          ignoredPaths: ["mathItems.mathScope"],
+          ignoredPaths: ["scene.mathScope"],
         },
       });
     },

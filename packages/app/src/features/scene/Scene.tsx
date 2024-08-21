@@ -16,7 +16,7 @@ import {
   actions,
   select,
   useMathScope,
-} from "../sceneControls/mathItems/mathItemsSlice";
+} from "../sceneControls/mathItems/sceneSlice";
 import { Graphic, graphicNeedsRange } from "./graphics";
 import useAxesInfo from "./useAxesInfo";
 import Camera from "./Camera";

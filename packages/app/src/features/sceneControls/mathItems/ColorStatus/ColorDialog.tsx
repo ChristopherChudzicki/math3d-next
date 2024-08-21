@@ -15,7 +15,7 @@ import ColorPicker, { OnColorChange } from "@/util/components/ColorPicker";
 import StaticMath from "@/util/components/MathLive/StaticMath";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";
-import { useMathScope } from "../mathItemsSlice";
+import { useMathScope } from "../sceneSlice";
 import { useMathErrors } from "../mathScope";
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import styles from "./ColorDialog.module.css";

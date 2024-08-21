@@ -7,7 +7,7 @@ import type { OnMathFieldChange } from "@/util/components/MathLive";
 import SmallMathField from "@/util/components/SmallMathField";
 import { assertNotNil } from "@/util/predicates";
 import * as u from "@/util/styles/utils.module.css";
-import { useMathScope } from "../mathItemsSlice";
+import { useMathScope } from "../sceneSlice";
 
 import { useMathResults } from "../mathScope";
 import { IWidgetProps } from "./types";

@@ -1,19 +1,19 @@
 import MathItem from "./MathItem";
-import type { MathItemsState } from "./mathItemsSlice";
-import mathItemsSlice, {
+import type { SceneState } from "./sceneSlice";
+import sceneSlice, {
   reducer,
   actions,
   select,
   MAIN_FOLDER,
   SETTINGS_FOLDER,
-} from "./mathItemsSlice";
+} from "./sceneSlice";
 
 export { default as MathItemsList } from "./MathItemsList";
 
-export type { MathItemsState };
+export type { SceneState };
 export {
   MathItem,
-  mathItemsSlice,
+  sceneSlice,
   reducer,
   actions,
   select,

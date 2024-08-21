@@ -125,7 +125,7 @@ test.each([
     const scene = seedDb.withSceneFromItems([item]);
     const { store } = await renderTestApp(`/${scene.key}`);
 
-    const mathScope = store.getState().mathItems.mathScope();
+    const mathScope = store.getState().scene.mathScope();
     await new Promise((resolve) => {
       setTimeout(resolve);
     });
@@ -137,7 +137,7 @@ test.each([
     await user.paste(param.name);
 
     // assert store is updated correctly
-    const editedItem = store.getState().mathItems.items[
+    const editedItem = store.getState().scene.items[
       item.id
     ] as MathItem<MIT.ParametricSurface>;
     expect(editedItem.properties.expr).toEqual(expression.expectedFinal);
@@ -184,14 +184,14 @@ test.each([
     const scene = seedDb.withSceneFromItems([item]);
     const { store } = await renderTestApp(`/${scene.key}`);
 
-    const mathScope = store.getState().mathItems.mathScope();
+    const mathScope = store.getState().scene.mathScope();
     const inputs = getParamNameInputs();
 
     await user.clear(inputs[param.index]);
     await user.click(inputs[param.index]);
     await user.paste(param.name);
 
-    const itemAfterEdit = store.getState().mathItems.items[
+    const itemAfterEdit = store.getState().scene.items[
       item.id
     ] as MathItem<MIT.ParametricSurface>;
     expect(itemAfterEdit.properties.expr).toEqual(expression.expectedFinal);
@@ -312,7 +312,7 @@ test.each([
     await user.clear(domainInput);
     await user.paste(change.value);
 
-    const mathScope = store.getState().mathItems.mathScope();
+    const mathScope = store.getState().scene.mathScope();
     const id = nodeId(item);
     const domExpectedEval = domain.expectedEval;
     const domActualEval = mathScope.results.get(id("domain")) as {
@@ -345,7 +345,7 @@ test.each([0, 1, 2])("Updating domain arrays (ImplicitSurface)", async (i) => {
   await user.clear(domainInput);
   await user.paste("[-2,2]");
 
-  const mathScope = store.getState().mathItems.mathScope();
+  const mathScope = store.getState().scene.mathScope();
   const id = nodeId(item);
   const domExpectedEval = [
     [-5, 5],
@@ -419,7 +419,7 @@ test.each([
       expect(domainInputs[i]).toHaveAttribute("aria-invalid", "true");
     });
 
-    const mathScope = store.getState().mathItems.mathScope();
+    const mathScope = store.getState().scene.mathScope();
     const id = nodeId(item);
 
     const error = mathScope.errors.get(id("domain"));

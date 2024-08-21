@@ -6,7 +6,7 @@ import {
 } from "@math3d/mathitem-configs";
 import * as u from "@/util/styles/utils.module.css";
 import FieldWidget, { useOnWidgetChange } from "../../FieldWidget";
-import { useMathScope } from "../../mathItemsSlice";
+import { useMathScope } from "../../sceneSlice";
 import { useMathErrors } from "../../mathScope";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";

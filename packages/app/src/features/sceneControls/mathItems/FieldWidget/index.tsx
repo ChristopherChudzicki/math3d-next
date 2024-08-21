@@ -6,7 +6,7 @@ import {
 import React, { useCallback } from "react";
 import { useAppDispatch } from "@/store/hooks";
 
-import { actions } from "../mathItemsSlice";
+import { actions } from "../sceneSlice";
 import AutosizeText from "./AutosizeText";
 import ColorWidget from "./ColorWidget";
 import MathAssignment from "./MathAssignment";

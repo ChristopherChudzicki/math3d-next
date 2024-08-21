@@ -5,7 +5,7 @@ import { Parseable } from "@math3d/parser";
 type AppParseable = Parseable;
 type AppMathScope = MathScope<AppParseable>;
 
-interface MathItemsState {
+interface SceneState {
   key: string | null;
   author: number | null;
   items: {
@@ -32,4 +32,4 @@ interface Subtree {
   children?: Subtree[];
 }
 
-export type { Subtree, MathItemsState, AppMathScope, AppParseable };
+export type { Subtree, SceneState, AppMathScope, AppParseable };
