@@ -6,6 +6,11 @@
   grid-template-rows: auto auto;
   width: 275px;
 }
+.share-note {
+  grid-column-start: 1;
+  grid-column-end: 3;
+  margin: 0px;
+}
 
 .saving {
   grid-column-start: 1;

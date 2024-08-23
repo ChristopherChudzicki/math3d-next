@@ -147,6 +147,7 @@ const RECENTLY_SAVED_TIMEOUT = 3000;
 const SaveButton: React.FC = () => {
   const [saveDialogOpen, toggleSaveDialog] = useToggle(false);
   const [savingState, setSavingState] = useState(SavingState.Default);
+  const navigate = useNavigate();
 
   const patchScene = usePatchScene();
   const createScene = useCreateScene();
@@ -164,7 +165,9 @@ const SaveButton: React.FC = () => {
     } else if (updating || cloning) {
       const request = updating
         ? patchScene.mutateAsync({ key, patch: scene })
-        : createScene.mutateAsync(scene);
+        : createScene.mutateAsync(scene).then((result) => {
+            navigate(`/${result.key}`);
+          });
       setSavingState(SavingState.Saving);
       await Promise.all([request, sleep(MIN_SAVING_DELAY)]);
       setSavingState(SavingState.RecentlySaved);
@@ -191,7 +194,7 @@ const SaveButton: React.FC = () => {
       <StatefulSavingButton
         variant="outlined"
         color="primary"
-        disabled={!dirty}
+        disabled={!dirty && !cloning}
         savingState={savingState}
         onClick={handleClick}
         saveText={cloning ? "Save Copy" : "Save"}

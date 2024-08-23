@@ -10,15 +10,21 @@ import TextField from "@mui/material/TextField";
 import classNames from "classnames";
 import { useNavigate } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
+import Typography from "@mui/material/Typography";
 import styles from "./ShareButton.module.css";
 import { select } from "./sceneSlice";
 
 type ShareBodyProps = {
   loading: boolean;
   url: string;
+  hasUnsavedChanges: boolean;
 };
 
-const ShareBody: React.FC<ShareBodyProps> = ({ loading, url }) => {
+const ShareBody: React.FC<ShareBodyProps> = ({
+  loading,
+  url,
+  hasUnsavedChanges,
+}) => {
   const [copied, toggleCopied] = useToggle(false);
 
   const handleCopy = useCallback(() => {
@@ -57,6 +63,11 @@ const ShareBody: React.FC<ShareBodyProps> = ({ loading, url }) => {
           >
             Copied!
           </div>
+          {hasUnsavedChanges ? (
+            <p className={styles["share-note"]}>
+              <em>Note: This scene has unsaved changes.</em>
+            </p>
+          ) : null}
         </>
       )}
     </div>
@@ -79,9 +90,10 @@ type ShareButtonProps = {
 const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
   const elementId = useId();
   const navigate = useNavigate();
-  const queryMe = useUserMe();
+  const meQuery = useUserMe();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [url, setUrl] = useState("");
+  const dirty = useAppSelector(select.dirty);
 
   const { author, ...scene } = useAppSelector(select.sceneInfo);
   const [open, toggleOpen] = useToggle(false);
@@ -89,13 +101,18 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
 
   const handleClick = useCallback(async () => {
     toggleOpen.on();
+    if (meQuery.data) {
+      setUrl(`${window.location.origin}/${scene.key}`);
+      return;
+    }
     const result = await createScene.mutateAsync(scene);
     navigate({
       pathname: `/${result.key}`,
     });
     setUrl(`${window.location.origin}/${result.key}`);
-  }, [toggleOpen, createScene, scene, navigate]);
+  }, [toggleOpen, createScene, scene, navigate, meQuery.data]);
 
+  const hasUnsavedChanges = !!meQuery.data && dirty;
   return (
     <>
       <Button
@@ -119,11 +136,19 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
           anchorOrigin={anchorOrigin}
           transformOrigin={transformOrigin}
         >
-          <ShareBody url={url} loading={createScene.isPending} />
+          <ShareBody
+            hasUnsavedChanges={hasUnsavedChanges}
+            url={url}
+            loading={createScene.isPending}
+          />
         </Popover>
       ) : (
         <Dialog open={open} onClose={toggleOpen.off}>
-          <ShareBody url={url} loading={createScene.isPending} />
+          <ShareBody
+            hasUnsavedChanges={hasUnsavedChanges}
+            url={url}
+            loading={createScene.isPending}
+          />
         </Dialog>
       )}
     </>
