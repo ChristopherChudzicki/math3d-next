@@ -7,6 +7,7 @@ type AppMathScope = MathScope<AppParseable>;
 
 interface SceneState {
   key: string | null;
+  dirty: boolean;
   author: number | null;
   items: {
     [id: string]: MathItem;

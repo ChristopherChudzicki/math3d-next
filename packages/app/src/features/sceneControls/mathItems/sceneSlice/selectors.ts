@@ -105,16 +105,18 @@ const hasItems =
 
 const key = (state: RootState) => state.scene.key;
 
+const dirty = (state: RootState) => state.scene.dirty;
+
 const itemOrder = (state: RootState) => state.scene.order;
 
 const sceneInfo = createSelector(
   [title, author, orderedMathItems, itemOrder, key],
-  (sceneTitle, sceneAuthor, items, order, key) => ({
+  (sceneTitle, sceneAuthor, items, order, sceneKey) => ({
     title: sceneTitle,
     author: sceneAuthor,
     items,
     itemOrder: order,
-    key,
+    key: sceneKey,
   }),
 );
 
@@ -131,5 +133,6 @@ export {
   sceneInfo,
   isPermanent,
   hasChildren,
+  dirty,
 };
 export type { Subtree };

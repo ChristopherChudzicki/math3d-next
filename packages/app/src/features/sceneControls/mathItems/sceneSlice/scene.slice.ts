@@ -1,4 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { CaseReducer } from "@reduxjs/toolkit";
+import type { Reducer, UnknownAction } from "redux";
 import { mathItemConfigs, MathItemType } from "@math3d/mathitem-configs";
 import type { MathItem, MathItemPatch } from "@math3d/mathitem-configs";
 import { keyBy } from "lodash-es";
@@ -21,6 +23,7 @@ const getInitialState = (): SceneState => {
   const mathScope = makeMathScope();
   return {
     key: null,
+    dirty: false,
     author: null,
     mathScope: () => mathScope,
     items: {},
@@ -63,20 +66,32 @@ const insertAtIndex = <T>(array: T[], item: T, index: number) => {
   array.splice(insertionIndex, 0, item);
 };
 
-const sceneSlice = createSlice({
+type SceneCaseReducer<P> = CaseReducer<SceneState, PayloadAction<P>>;
+const withClean =
+  (defaultClean: boolean = true) =>
+  <P>(fn: SceneCaseReducer<P>) => {
+    return {
+      prepare: (payload: P, clean = defaultClean) => {
+        return {
+          payload,
+          meta: { clean },
+        };
+      },
+      reducer: fn,
+    };
+  };
+
+const slice = createSlice({
   name: "scene",
   initialState: getInitialState,
   reducers: {
-    setItems: (
-      state,
-      action: PayloadAction<{
-        items: MathItem[];
-        order: SceneState["order"];
-        title: SceneState["title"];
-        author: SceneState["author"];
-        key: SceneState["key"];
-      }>,
-    ) => {
+    setItems: withClean(true)<{
+      items: MathItem[];
+      order: SceneState["order"];
+      title: SceneState["title"];
+      author: SceneState["author"];
+      key: SceneState["key"];
+    }>((state, action) => {
       const { items, order, title, author, key } = action.payload;
       state.title = title;
       state.items = keyBy(items, (item) => item.id);
@@ -92,11 +107,11 @@ const sceneSlice = createSlice({
       const mathScope = makeMathScope();
       state.mathScope = () => mathScope;
       syncItemsToMathScope(mathScope, items);
-    },
-    initializeMathScope: (state) => {
+    }),
+    initializeMathScope: withClean(true)<void>((state) => {
       const items = Object.values(state.items);
       syncItemsToMathScope(state.mathScope(), items);
-    },
+    }),
     addNewItem: (state, action: PayloadAction<{ type: MathItemType }>) => {
       const id = idGenerator.next();
       const { type } = action.payload;
@@ -129,9 +144,6 @@ const sceneSlice = createSlice({
 
       syncItemsToMathScope(state.mathScope(), [item]);
     },
-    setActiveItem: (state, action: PayloadAction<{ id: string }>) => {
-      state.activeItemId = action.payload.id;
-    },
     remove: (state, action: PayloadAction<{ id: string }>) => {
       const { id } = action.payload;
       const item = state.items[id];
@@ -149,26 +161,22 @@ const sceneSlice = createSlice({
 
       removeItemsFromMathScope(state.mathScope(), [item]);
     },
-    setProperties: (
-      state,
-      action: PayloadAction<MathItemPatch<MathItemType>>,
-    ) => {
-      const { id, properties: newProperties } = action.payload;
-      const { properties: oldProperties } = state.items[id];
-      // @ts-expect-error TODO figure this out + reconisder the unions
-      state.items[id].properties = { ...oldProperties, ...newProperties };
+    setProperties: withClean(false)<MathItemPatch<MathItemType>>(
+      (state, action) => {
+        const { id, properties: newProperties } = action.payload;
+        const { properties: oldProperties } = state.items[id];
+        // @ts-expect-error TODO figure this out + reconisder the unions
+        state.items[id].properties = { ...oldProperties, ...newProperties };
 
-      const item = state.items[id];
-      syncItemsToMathScope(state.mathScope(), [item]);
-    },
-    patchProperty: (
-      state,
-      action: PayloadAction<{
-        id: string;
-        path: string;
-        value: unknown;
-      }>,
-    ) => {
+        const item = state.items[id];
+        syncItemsToMathScope(state.mathScope(), [item]);
+      },
+    ),
+    patchProperty: withClean(false)<{
+      id: string;
+      path: string;
+      value: unknown;
+    }>((state, action) => {
       const { id, path, value } = action.payload;
 
       const [result] = jsonPatch.applyPatch(
@@ -184,7 +192,7 @@ const sceneSlice = createSlice({
 
       const item = state.items[id];
       syncItemsToMathScope(state.mathScope(), [item]);
-    },
+    }),
     move: (
       state,
       action: PayloadAction<{
@@ -202,18 +210,39 @@ const sceneSlice = createSlice({
       const { title } = action.payload;
       state.title = title;
     },
-    setActiveTab: (
-      state,
-      action: PayloadAction<{
-        id: typeof MAIN_FOLDER | typeof SETTINGS_FOLDER;
-      }>,
-    ) => {
+    setActiveItem: withClean(true)<{ id: string }>((state, action) => {
+      state.activeItemId = action.payload.id;
+    }),
+    setActiveTab: withClean(true)<{ id: string }>((state, action) => {
       state.activeTabId = action.payload.id;
-    },
+    }),
+    setClean: withClean(true)<void>((state, _action) => {
+      state.dirty = false;
+    }),
   },
 });
 
-const { actions, reducer } = sceneSlice;
+const { actions } = slice;
+
+type UnknownMaybeCleanAction = UnknownAction & { meta?: { clean?: boolean } };
+
+const reducer: Reducer<SceneState, UnknownMaybeCleanAction> = (
+  state,
+  action,
+) => {
+  if (
+    !state ||
+    state.dirty ||
+    !action.type.startsWith("scene/") ||
+    action?.meta?.clean
+  ) {
+    return slice.reducer(state, action);
+  }
+
+  return slice.reducer({ ...state, dirty: true }, action);
+};
+
+const sceneSlice = { ...slice, reducer };
 
 export type { SceneState };
 export default sceneSlice;

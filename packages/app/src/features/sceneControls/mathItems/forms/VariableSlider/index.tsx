@@ -49,7 +49,7 @@ interface AnimatedSliderProps {
   min: number;
   max: number;
   value: number;
-  onChange: (value: number) => void;
+  onChange: (value: number, clean?: boolean) => void;
 }
 
 const trueMod = (x: number, modulus: number) => {
@@ -100,7 +100,7 @@ const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
 
   const tick = useCallback(() => {
     valueRef.current = wrap(valueRef.current + increment, min, max);
-    onChange(valueRef.current);
+    onChange(valueRef.current, true);
   }, [increment, onChange, min, max]);
   const handleChange: NonNullable<SliderProps["onChange"]> = useCallback(
     (_e, v) => {
@@ -171,17 +171,20 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
     [onWidgetChange],
   );
   const onValueChange = useCallback(
-    (v: number) => {
+    (v: number, clean?: boolean) => {
       setMaxDigits(2);
       const prefix = v > 0 ? "+" : "";
-      onWidgetChange({
-        name: "value",
-        value: {
-          lhs: lhsRef.current,
-          rhs: `${prefix}${v}`,
-          type: "assignment",
+      onWidgetChange(
+        {
+          name: "value",
+          value: {
+            lhs: lhsRef.current,
+            rhs: `${prefix}${v}`,
+            type: "assignment",
+          },
         },
-      });
+        clean,
+      );
     },
     [onWidgetChange],
   );

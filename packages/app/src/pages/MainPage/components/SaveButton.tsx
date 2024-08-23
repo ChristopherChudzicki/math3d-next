@@ -7,8 +7,8 @@ import Button from "@mui/material/Button";
 import type { ButtonProps } from "@mui/material/Button";
 import { useNavigate } from "react-router";
 import { useCreateScene, usePatchScene, useUserMe } from "@math3d/api";
-import { useAppSelector } from "@/store/hooks";
-import { select } from "@/features/sceneControls/mathItems";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { select, actions } from "@/features/sceneControls/mathItems";
 import CheckIcon from "@mui/icons-material/Check";
 
 type SaveDialogProps = Pick<BasicDialogProps, "open"> & {
@@ -123,14 +123,14 @@ const StatefulSavingButton: React.FC<
     }
     case SavingState.Saving: {
       return (
-        <Button disabled {...props}>
+        <Button {...props} role="none">
           Saving...
         </Button>
       );
     }
     case SavingState.RecentlySaved: {
       return (
-        <Button disabled startIcon={<CheckIcon />} {...props}>
+        <Button startIcon={<CheckIcon />} {...props}>
           Saved!
         </Button>
       );
@@ -150,7 +150,9 @@ const SaveButton: React.FC = () => {
 
   const patchScene = usePatchScene();
   const createScene = useCreateScene();
+  const dispatch = useAppDispatch();
   const { key, ...scene } = useAppSelector(select.sceneInfo);
+  const dirty = useAppSelector(select.dirty);
   const { data: user } = useUserMe();
 
   const creating = !key;
@@ -168,6 +170,7 @@ const SaveButton: React.FC = () => {
       setSavingState(SavingState.RecentlySaved);
       await sleep(RECENTLY_SAVED_TIMEOUT);
       setSavingState(SavingState.Default);
+      dispatch(actions.setClean());
     }
   }, [
     cloning,
@@ -178,6 +181,7 @@ const SaveButton: React.FC = () => {
     scene,
     toggleSaveDialog,
     updating,
+    dispatch,
   ]);
 
   if (!user) return null;
@@ -187,6 +191,7 @@ const SaveButton: React.FC = () => {
       <StatefulSavingButton
         variant="outlined"
         color="primary"
+        disabled={!dirty}
         savingState={savingState}
         onClick={handleClick}
         saveText={cloning ? "Save Copy" : "Save"}
@@ -201,7 +206,10 @@ const SaveButton: React.FC = () => {
             setSavingState(SavingState.Default);
           }
         }}
-        onSave={() => setSavingState(SavingState.RecentlySaved)}
+        onSave={() => {
+          setSavingState(SavingState.RecentlySaved);
+          dispatch(actions.setClean());
+        }}
       />
     </>
   );
