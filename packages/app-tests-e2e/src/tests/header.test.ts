@@ -6,17 +6,17 @@ import env from "@/env";
 test.describe("Authorized user header", () => {
   test.use({ user: "dynamic" });
 
-  test("Shows username in usermenu", async ({ page }) => {
+  test.only("Shows username in usermenu", async ({ page }) => {
     await page.goto("");
     const app = new AppPage(page);
 
     const trigger = await app.userMenu().opener();
     await expect(trigger).toBeVisible();
-    expect(await trigger.textContent()).toBe("D");
+    await expect(trigger).toHaveText("D");
 
     await trigger.click();
     const username = app.userMenu().username();
-    expect(await username.textContent()).toBe(env.TEST_USER_DYNAMIC_EMAIL);
+    await expect(username).toHaveText(env.TEST_USER_DYNAMIC_EMAIL);
   });
 
   test("Header and usermenu links", async ({ page }) => {
