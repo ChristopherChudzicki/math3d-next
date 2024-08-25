@@ -1,7 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { readEml } from "./eml-parse-js";
-import type { EmailAddress, ReadedEmlJson } from "./eml-parse-js";
+import { simpleParser } from "mailparser";
+import type { AddressObject } from "mailparser";
+import invariant from "tiny-invariant";
 import InboxBackend from "./InboxBackend";
 import type { EmailData, EmailMatchers } from "./InboxBackend";
 /**
@@ -33,7 +34,9 @@ const match = (text: string, matcher: string | RegExp) => {
   return text.includes(matcher);
 };
 
-const standardizeTo = (to: ReadedEmlJson["to"]): EmailAddress[] => {
+const standardizeTo = (
+  to: AddressObject | AddressObject[],
+): AddressObject[] => {
   if (Array.isArray(to)) return to;
   if (to) return [to];
   return [];
@@ -54,17 +57,25 @@ export const findEmail = async (
   for (const file of files) {
     // eslint-disable-next-line no-await-in-loop
     const content = await fs.readFile(file);
-    const parsed = readEml(content.toString());
-    const recipients = standardizeTo(parsed.to);
+    // eslint-disable-next-line no-await-in-loop
+    const parsed = await simpleParser(content.toString());
+    invariant(parsed.to, "Email must have a 'to' field");
+    invariant(parsed.date, "Email must have a 'date' field");
+    invariant(parsed.subject, "Email must have a 'date' field");
+    const recipients = standardizeTo(parsed.to).flatMap(({ value }) => value);
     const date = new Date(parsed.date);
     if (
       match(parsed.subject, subject) &&
-      recipients.some(({ email }) => match(email, to)) &&
+      recipients.some(({ address }) => match(address ?? "", to)) &&
       (!after || date > after)
     ) {
       return {
-        headers: parsed.headers,
-        html: parsed.html,
+        headers: {
+          Subject: parsed.headers.get("subject") as string,
+          From: parsed.headers.get("from") as string,
+          To: parsed.headers.get("to") as string,
+        },
+        html: parsed.html || undefined,
         text: parsed.text,
         date,
       };
