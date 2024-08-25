@@ -81,7 +81,7 @@ class SceneBuilder implements IScene {
     this.modifiedDate =
       opts.modifiedDate ??
       faker.date
-        .between(this.createdDate, new Date().toISOString())
+        .between({ from: this.createdDate, to: new Date().toISOString() })
         .toISOString();
     this.archived = opts.archived ?? false;
 
