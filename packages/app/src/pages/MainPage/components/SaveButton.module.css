@@ -1,0 +1,13 @@
+.form-row {
+  margin-top: "1rem";
+}
+
+.small-alert {
+  align-items: center;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+.small-alert > * {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}

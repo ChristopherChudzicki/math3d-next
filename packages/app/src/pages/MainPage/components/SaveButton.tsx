@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { BasicDialog } from "@/pages/auth/components/BasicDialog";
 import type { BasicDialogProps } from "@/pages/auth/components/BasicDialog";
-import { FormGroup, TextField, Typography } from "@mui/material";
+import { Alert, FormGroup, TextField, Typography } from "@mui/material";
 import { useToggle } from "@/util/hooks";
 import Button from "@mui/material/Button";
 import type { ButtonProps } from "@mui/material/Button";
@@ -10,6 +10,8 @@ import { useCreateScene, usePatchScene, useUserMe } from "@math3d/api";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { select, actions } from "@/features/sceneControls/mathItems";
 import CheckIcon from "@mui/icons-material/Check";
+import u from "@/util/styles/utils.module.css";
+import styles from "./SaveButton.module.css";
 
 type SaveDialogProps = Pick<BasicDialogProps, "open"> & {
   onClose: ({ saved }: { saved: boolean }) => void;
@@ -54,14 +56,14 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, onClose, onSave }) => {
               <Typography>
                 Share your scene with others at the URL below.
               </Typography>
-              <FormGroup row sx={{ marginTop: "1rem" }}>
+              <FormGroup row className={styles["form-row"]}>
                 <TextField
                   label="Shareable URL"
                   size="small"
                   value={url}
                   inputProps={{ readOnly: true }}
                   helperText={copied ? "Copied!" : " "}
-                  sx={{ flex: 1 }}
+                  className={u.flex1}
                 />
                 <Button
                   variant="text"
@@ -111,36 +113,6 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-const StatefulSavingButton: React.FC<
-  ButtonProps & {
-    savingState: SavingState;
-    saveText: string;
-  }
-> = ({ saveText, savingState, ...props }) => {
-  switch (savingState) {
-    case SavingState.Default: {
-      return <Button {...props}>{saveText}</Button>;
-    }
-    case SavingState.Saving: {
-      return (
-        <Button {...props} role="none">
-          Saving...
-        </Button>
-      );
-    }
-    case SavingState.RecentlySaved: {
-      return (
-        <Button startIcon={<CheckIcon />} {...props}>
-          Saved!
-        </Button>
-      );
-    }
-    default: {
-      throw new Error(`Unexpected SavingState: ${savingState}`);
-    }
-  }
-};
-
 const MIN_SAVING_DELAY = 500;
 const RECENTLY_SAVED_TIMEOUT = 3000;
 
@@ -185,20 +157,26 @@ const SaveButton: React.FC = () => {
     toggleSaveDialog,
     updating,
     dispatch,
+    navigate,
   ]);
 
   if (!user) return null;
 
+  const enabled = savingState === SavingState.Default && (dirty || cloning);
+
   return (
     <>
-      <StatefulSavingButton
+      {savingState === SavingState.RecentlySaved ? (
+        <Alert className={styles["small-alert"]}>Saved!</Alert>
+      ) : null}
+      <Button
         variant="outlined"
         color="primary"
-        disabled={!dirty && !cloning}
-        savingState={savingState}
+        disabled={!enabled}
         onClick={handleClick}
-        saveText={cloning ? "Save Copy" : "Save"}
-      />
+      >
+        {savingState === SavingState.Saving ? "Saving..." : "Save"}
+      </Button>
       <SaveDialog
         open={saveDialogOpen}
         onClose={async ({ saved }) => {
