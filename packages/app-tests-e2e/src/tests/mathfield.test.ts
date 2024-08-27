@@ -4,7 +4,7 @@ import { expect } from "@playwright/test";
 import { getItemForm, getLatex } from "@/utils/selectors";
 import { SceneBuilder } from "@math3d/mock-api";
 
-test.use({ user: "dynamic" });
+test.use({ user: {} });
 
 test("Typing arrays into an empty <math-field />", async ({
   page,

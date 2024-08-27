@@ -25,7 +25,7 @@ const getControlsTarget = async (
   });
 };
 
-test.use({ user: "dynamic" });
+test.use({ user: {} });
 
 test("Setting camera position/target using UI coordinates", async ({
   page,

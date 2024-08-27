@@ -616,6 +616,58 @@ export const AuthApiAxiosParamCreator = function (
 ) {
   return {
     /**
+     * Activate a user. Intended for admin use only, primarily in the e2e tests.
+     * @param {number} id A unique integer value identifying this User.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    activateOther: async (
+      id: number,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists("activateOther", "id", id);
+      const localVarPath = `/v0/auth/users/{id}/activation/`.replace(
+        `{${"id"}}`,
+        encodeURIComponent(String(id)),
+      );
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = {
+        method: "POST",
+        ...baseOptions,
+        ...options,
+      };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication tokenAuth required
+      await setApiKeyToObject(
+        localVarHeaderParameter,
+        "Authorization",
+        configuration,
+      );
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
      * Use this endpoint to obtain user authentication token.
      * @param {TokenCreateRequest} [TokenCreateRequest]
      * @param {*} [options] Override http request option.
@@ -1576,6 +1628,33 @@ export const AuthApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = AuthApiAxiosParamCreator(configuration);
   return {
     /**
+     * Activate a user. Intended for admin use only, primarily in the e2e tests.
+     * @param {number} id A unique integer value identifying this User.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async activateOther(
+      id: number,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.activateOther(
+        id,
+        options,
+      );
+      const index = configuration?.serverIndex ?? 0;
+      const operationBasePath =
+        operationServerMap["AuthApi.activateOther"]?.[index]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath);
+    },
+    /**
      * Use this endpoint to obtain user authentication token.
      * @param {TokenCreateRequest} [TokenCreateRequest]
      * @param {*} [options] Override http request option.
@@ -2064,6 +2143,20 @@ export const AuthApiFactory = function (
   const localVarFp = AuthApiFp(configuration);
   return {
     /**
+     * Activate a user. Intended for admin use only, primarily in the e2e tests.
+     * @param {AuthApiActivateOtherRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    activateOther(
+      requestParameters: AuthApiActivateOtherRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .activateOther(requestParameters.id, options)
+        .then((request) => request(axios, basePath));
+    },
+    /**
      * Use this endpoint to obtain user authentication token.
      * @param {AuthApiAuthTokenLoginCreateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -2321,6 +2414,20 @@ export const AuthApiFactory = function (
 };
 
 /**
+ * Request parameters for activateOther operation in AuthApi.
+ * @export
+ * @interface AuthApiActivateOtherRequest
+ */
+export interface AuthApiActivateOtherRequest {
+  /**
+   * A unique integer value identifying this User.
+   * @type {number}
+   * @memberof AuthApiActivateOther
+   */
+  readonly id: number;
+}
+
+/**
  * Request parameters for authTokenLoginCreate operation in AuthApi.
  * @export
  * @interface AuthApiAuthTokenLoginCreateRequest
@@ -2551,6 +2658,22 @@ export interface AuthApiAuthUsersUpdateRequest {
  * @extends {BaseAPI}
  */
 export class AuthApi extends BaseAPI {
+  /**
+   * Activate a user. Intended for admin use only, primarily in the e2e tests.
+   * @param {AuthApiActivateOtherRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof AuthApi
+   */
+  public activateOther(
+    requestParameters: AuthApiActivateOtherRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return AuthApiFp(this.configuration)
+      .activateOther(requestParameters.id, options)
+      .then((request) => request(this.axios, this.basePath));
+  }
+
   /**
    * Use this endpoint to obtain user authentication token.
    * @param {AuthApiAuthTokenLoginCreateRequest} requestParameters Request parameters.

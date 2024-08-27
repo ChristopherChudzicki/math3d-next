@@ -89,7 +89,7 @@ const makeFolderScene = () => {
   return scene.json();
 };
 
-test.use({ user: "dynamic" });
+test.use({ user: {} });
 
 test("Dragging item X after item Y", async ({ page, prepareScene }) => {
   const key = await prepareScene(makeFolderScene());

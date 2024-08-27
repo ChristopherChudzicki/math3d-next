@@ -1,12 +1,12 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@/utils/expect";
 import AppPage from "@/utils/pages/AppPage";
-import env from "@/env";
 import { faker } from "@faker-js/faker/locale/en";
 
-test.use({ user: "editable" });
-
 test.describe("User settings profile form", () => {
+  const email = faker.internet.email();
+  test.use({ user: { email } });
+
   test("Editing user profile", async ({ page }) => {
     const app = new AppPage(page);
     await page.goto("");
@@ -15,9 +15,7 @@ test.describe("User settings profile form", () => {
     const newNickname = faker.person.firstName();
     await test.step("Fill out form", async () => {
       const profileForm = app.userSettings().profileForm();
-      await expect(profileForm.email()).toHaveValue(
-        env.TEST_USER_EDITABLE_EMAIL,
-      );
+      await expect(profileForm.email()).toHaveValue(email);
       await profileForm.publicNickname().fill(newNickname);
       await profileForm.submit().click();
     });
@@ -30,7 +28,7 @@ test.describe("User settings profile form", () => {
     });
   });
 
-  test("Editing profile form validation", async ({ page }) => {
+  test.only("Editing profile form validation", async ({ page }) => {
     const app = new AppPage(page);
     await page.goto("");
     app.userMenu().activate("settings");

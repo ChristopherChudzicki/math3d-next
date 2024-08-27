@@ -4,7 +4,8 @@ import { API_TOKEN_KEY, ScenesApi, isAxiosError } from "@math3d/api";
 import type { Scene } from "@math3d/api";
 import env from "@/env";
 import { getConfig } from "@/utils/api/config";
-import { getAuthToken, users } from "@/utils/api/auth";
+import { createActiveUser, getAuthToken, users } from "@/utils/api/auth";
+import type { UserFixture } from "@/utils/api/auth";
 
 const TEST_SCENE_PREFIX = "[TEST-E2E-SCENE]";
 
@@ -13,7 +14,7 @@ type PrepareSceneOpts = {
 };
 
 type Fixtures = {
-  user: keyof typeof users | null;
+  user: keyof typeof users | null | UserFixture;
   authToken: string | null;
   page: Page;
   prepareScene: (
@@ -22,14 +23,27 @@ type Fixtures = {
   ) => Promise<string>;
 };
 
+const isEphemeralUser = (user: Fixtures["user"]): user is UserFixture => {
+  if (typeof user === "string" || user === null) {
+    return false;
+  }
+  return true;
+};
+
 const test = base.extend<Fixtures>({
   user: null,
   authToken: async ({ user }, use) => {
     let authToken: string | null = null;
-    if (user) {
+    let cleanup = async () => {};
+    if (isEphemeralUser(user)) {
+      const ephemeralUser = await createActiveUser(user);
+      authToken = await getAuthToken(ephemeralUser.auth);
+      cleanup = ephemeralUser.cleanup;
+    } else if (user) {
       authToken = await getAuthToken(user);
     }
     await use(authToken);
+    await cleanup();
   },
   page: async ({ page: basePage, browser, authToken }, use) => {
     let page: Page;
@@ -61,8 +75,9 @@ const test = base.extend<Fixtures>({
     const cleanup: { key: string; allow404: boolean }[] = [];
     const create: Fixtures["prepareScene"] = async (s, opts) => {
       const { allowCleanup404 = false } = opts ?? {};
-      const title =
-        user === "dynamic" ? s.title : `${TEST_SCENE_PREFIX} ${s.title}`;
+      const title = isEphemeralUser(user)
+        ? s.title
+        : `${TEST_SCENE_PREFIX} ${s.title}`;
       const response = await scenesApi.scenesCreate({
         SceneCreateRequest: { ...s, title },
       });

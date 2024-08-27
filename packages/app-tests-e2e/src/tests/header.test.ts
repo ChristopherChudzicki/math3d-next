@@ -1,22 +1,24 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import AppPage from "@/utils/pages/AppPage";
-import env from "@/env";
+import { faker } from "@faker-js/faker/locale/en";
 
 test.describe("Authorized user header", () => {
-  test.use({ user: "dynamic" });
+  const nickname = faker.person.firstName();
+  const email = faker.internet.email();
+  test.use({ user: { public_nickname: nickname, email } });
 
-  test.only("Shows username in usermenu", async ({ page }) => {
+  test("Shows username in usermenu", async ({ page }) => {
     await page.goto("");
     const app = new AppPage(page);
 
     const trigger = await app.userMenu().opener();
     await expect(trigger).toBeVisible();
-    await expect(trigger).toHaveText("D");
+    await expect(trigger).toHaveText(nickname[0]);
 
     await trigger.click();
     const username = app.userMenu().username();
-    await expect(username).toHaveText(env.TEST_USER_DYNAMIC_EMAIL);
+    await expect(username).toHaveText(email);
   });
 
   test("Header and usermenu links", async ({ page }) => {
@@ -25,7 +27,7 @@ test.describe("Authorized user header", () => {
 
     await app.userMenu().opener().click();
 
-    expect(await app.userMenu().items().allTextContents()).toEqual([
+    await expect(app.userMenu().items()).toHaveText([
       "My Scenes",
       "Examples",
       "Contact",
@@ -53,7 +55,7 @@ test.describe("Anonymous user header", () => {
     await page.goto("");
     const app = new AppPage(page);
     await app.userMenu().opener().click();
-    expect(await app.userMenu().items().allTextContents()).toEqual([
+    await expect(app.userMenu().items()).toHaveText([
       "Sign in",
       "Sign up",
       "Examples",

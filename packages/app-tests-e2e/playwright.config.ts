@@ -12,6 +12,7 @@ export default defineConfig({
   use: {
     baseURL: env.TEST_APP_URL,
     trace: "on-first-retry",
+    screenshot: "only-on-failure",
   },
   projects: [
     {
