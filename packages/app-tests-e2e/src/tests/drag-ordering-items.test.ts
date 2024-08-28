@@ -101,8 +101,6 @@ test("Dragging item X after item Y", async ({ page, prepareScene }) => {
   await drag(page, source, target);
   const after = await getAllItemDescriptions(page);
   expect(after).toEqual("F1 P1a P1b F2 P2b F3 P3a P3b P2a".split(" "));
-
-  await page.pause();
 });
 
 test("Dragging item X before item Y", async ({ page, prepareScene }) => {
@@ -115,8 +113,6 @@ test("Dragging item X before item Y", async ({ page, prepareScene }) => {
   await drag(page, source, target);
   const after = await getAllItemDescriptions(page);
   expect(after).toEqual("F1 P1a P1b F2 P2a P3b P2b F3 P3a".split(" "));
-
-  await page.pause();
 });
 
 test("Dragging folder X after folder Y", async ({ page, prepareScene }) => {
@@ -129,8 +125,6 @@ test("Dragging folder X after folder Y", async ({ page, prepareScene }) => {
   await drag(page, source, target);
   const after = await getAllItemDescriptions(page);
   expect(after).toEqual("F1 P1a P1b F3 P3a P3b F2 P2a P2b".split(" "));
-
-  await page.pause();
 });
 
 test("Dragging folder X before folder Y", async ({ page, prepareScene }) => {
@@ -143,6 +137,4 @@ test("Dragging folder X before folder Y", async ({ page, prepareScene }) => {
   await drag(page, source, target, { targetOffset: { x: 5, y: -40 } });
   const after = await getAllItemDescriptions(page);
   expect(after).toEqual("F1 P1a P1b F3 P3a P3b F2 P2a P2b".split(" "));
-
-  await page.pause();
 });

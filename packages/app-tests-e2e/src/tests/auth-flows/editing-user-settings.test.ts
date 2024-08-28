@@ -28,7 +28,7 @@ test.describe("User settings profile form", () => {
     });
   });
 
-  test.only("Editing profile form validation", async ({ page }) => {
+  test("Editing profile form validation", async ({ page }) => {
     const app = new AppPage(page);
     await page.goto("");
     app.userMenu().activate("settings");

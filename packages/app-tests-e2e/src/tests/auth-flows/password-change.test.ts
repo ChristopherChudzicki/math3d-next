@@ -9,7 +9,7 @@ test.describe("Password changes", () => {
 
   test.use({ user: { email, password } });
 
-  test.only("Changing password settings form", async ({ page }) => {
+  test("Changing password settings form", async ({ page }) => {
     const app = new AppPage(page);
     await page.goto("");
 

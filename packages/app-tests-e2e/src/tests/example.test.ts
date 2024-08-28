@@ -44,6 +44,5 @@ test.describe("Authorized user (dynamic)", () => {
       .point({ color: "orange", coords: "[1, 2, 3]" });
     const key = await prepareScene(scene);
     await page.goto(`/${key}`);
-    await page.pause();
   });
 });
