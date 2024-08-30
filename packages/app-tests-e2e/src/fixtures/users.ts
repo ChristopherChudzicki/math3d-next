@@ -5,7 +5,7 @@ import type { Scene } from "@math3d/api";
 import env from "@/env";
 import { getConfig } from "@/utils/api/config";
 import { createActiveUser, getAuthToken, users } from "@/utils/api/auth";
-import type { UserCredentials, UserInfo } from "@/utils/api/auth";
+import type { UserCredentials } from "@/utils/api/auth";
 import invariant from "tiny-invariant";
 
 const TEST_SCENE_PREFIX = "[TEST-E2E-SCENE]";
@@ -14,13 +14,12 @@ type PrepareSceneOpts = {
   allowCleanup404: boolean;
 };
 
-type UserFixture = keyof typeof users | UserInfo;
 type Fixtures = {
-  user: UserFixture | null;
+  user: UserCredentials | "static" | null;
   /**
    * Create an activte user.
    */
-  createUser: (user: UserFixture) => Promise<UserCredentials>;
+  createUser: (user: UserCredentials) => Promise<UserCredentials>;
   authToken: string | null;
   page: Page;
   prepareScene: (
@@ -35,9 +34,6 @@ const test = base.extend<Fixtures>({
   createUser: async ({}, use) => {
     const requests: Promise<{ cleanup: () => Promise<void> }>[] = [];
     const createUser: Fixtures["createUser"] = async (user) => {
-      if (typeof user === "string") {
-        return users[user];
-      }
       const request = createActiveUser(user);
       requests.push(request);
       const { auth } = await request;
@@ -126,5 +122,5 @@ const test = base.extend<Fixtures>({
   },
 });
 
-export { test };
+export { test, users };
 export type { Fixtures };

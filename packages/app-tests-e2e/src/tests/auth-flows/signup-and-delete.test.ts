@@ -1,4 +1,4 @@
-import { test } from "@/fixtures/users";
+import { test, users } from "@/fixtures/users";
 import { expect } from "@/utils/expect";
 import AppPage from "@/utils/pages/AppPage";
 import { getInbox } from "@/utils/inbox/emails";
@@ -16,17 +16,20 @@ test.describe("User sign up flow and account deletion", () => {
   const { email, public_nickname: publicNickname, password } = makeUserInfo();
 
   test.afterAll(async () => {
-    const authToken = await getAuthToken("admin");
+    const authToken = await getAuthToken(users.admin);
     invariant(authToken, "Expected an auth token");
     const config = getConfig(authToken);
     const api = new AuthApi(config);
     const { data: response } = await api.authUsersList({ email });
-    const { results: users } = response;
-    invariant(users, "Expected users to be defined");
-    invariant(users.length <= 1, "Expected at most one user with this email");
-    if (users.length === 1) {
+    const { results: usersList } = response;
+    invariant(usersList, "Expected users to be defined");
+    invariant(
+      usersList.length <= 1,
+      "Expected at most one user with this email",
+    );
+    if (usersList.length === 1) {
       await deleteUser(
-        { id: users[0].id, currentPassword: env.TEST_USER_ADMIN_PASSWORD },
+        { id: usersList[0].id, currentPassword: env.TEST_USER_ADMIN_PASSWORD },
         config,
         axios,
       );

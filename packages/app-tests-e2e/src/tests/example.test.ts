@@ -3,7 +3,6 @@ import { expect } from "@playwright/test";
 import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
 import AppPage from "@/utils/pages/AppPage";
 import env from "@/env";
-import { faker } from "@faker-js/faker/locale/en";
 
 test("Anonymous user", async ({ page }) => {
   await page.goto("");

@@ -1,7 +1,6 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import AppPage from "@/utils/pages/AppPage";
-import { faker } from "@faker-js/faker/locale/en";
 import { makeUserInfo } from "@math3d/mock-api";
 
 test.describe("Authorized user header", () => {

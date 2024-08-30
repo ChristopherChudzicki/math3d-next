@@ -1,4 +1,4 @@
-import { AuthApi, TokenCreateRequest, deleteUser } from "@math3d/api";
+import { AuthApi, deleteUser } from "@math3d/api";
 import type { UserCreatePasswordRetypeRequest } from "@math3d/api";
 import { faker } from "@faker-js/faker/locale/en";
 import { getConfig } from "@/utils/api/config";
@@ -30,14 +30,9 @@ const users = {
   },
 } satisfies Record<string, UserCredentials>;
 
-const getAuthToken = async (user: keyof typeof users | TokenCreateRequest) => {
-  const userObj = typeof user === "string" ? users[user] : user;
-  const { email, password } = userObj;
+const getAuthToken = async (user: UserCredentials) => {
   const response = await authApi.authTokenLoginCreate({
-    TokenCreateRequest: {
-      email,
-      password,
-    },
+    TokenCreateRequest: user,
   });
   // @ts-expect-error drf-spectacular issue
   return response.data.auth_token;
