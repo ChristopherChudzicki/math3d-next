@@ -38,7 +38,7 @@ const useSearchEnum = <T extends string>({
       console.error(`Invalid value ${raw} for search parameter ${name}`);
     }
   }, [valid, name, raw]);
-  const value = valid ? (raw as T) ?? defaultValue : defaultValue;
+  const value = valid ? ((raw as T) ?? defaultValue) : defaultValue;
   const set = useCallback(
     (v: T) => {
       const next = new URLSearchParams(search);
