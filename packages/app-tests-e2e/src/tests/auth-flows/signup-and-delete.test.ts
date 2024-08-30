@@ -11,18 +11,17 @@ import { AuthApi, deleteUser } from "@math3d/api";
 
 test.setTimeout(60_000);
 
-test("User sign up flow and account deletion", async ({ page, context }) => {
-  const inbox = getInbox();
-  const app = new AppPage(page);
+test.describe("User sign up flow and account deletion", () => {
+  const email = faker.internet.email();
+  const password = faker.internet.password();
+  const publicNickname = faker.person.firstName();
 
-  await test.step("Delete ephemeral accounts", async () => {
+  test.afterAll(async () => {
     const authToken = await getAuthToken("admin");
     invariant(authToken, "Expected an auth token");
     const config = getConfig(authToken);
     const api = new AuthApi(config);
-    const { data: response } = await api.authUsersList({
-      email: env.TEST_USER_NOT_CREATED_EMAIL,
-    });
+    const { data: response } = await api.authUsersList({ email });
     const { results: users } = response;
     invariant(users, "Expected users to be defined");
     invariant(users.length <= 1, "Expected at most one user with this email");
@@ -35,82 +34,80 @@ test("User sign up flow and account deletion", async ({ page, context }) => {
     }
   });
 
-  await test.step("Create account", async () => {
-    await page.goto("/");
-    await app.signupPage().signup({
-      email: env.TEST_USER_NOT_CREATED_EMAIL,
-      publicNickname: "Test user 3",
-      password: env.TEST_USER_NOT_CREATED_PASSWORD,
+  test.only("User sign up flow and account deletion", async ({
+    page,
+    context,
+  }) => {
+    const inbox = getInbox();
+    const app = new AppPage(page);
+
+    await test.step("Create account", async () => {
+      await page.goto("/");
+      await app.signupPage().signup({ email, publicNickname, password });
+      const successScreen = app.signupPage().successScreen();
+      await expect(successScreen).toBeVisible();
+
+      await expect(successScreen.getByRole("alert")).toContainText(
+        `To finish creating your account, please use the link emailed to ${email}`,
+      );
     });
-    const successScreen = app.signupPage().successScreen();
-    await expect(successScreen).toBeVisible();
 
-    await expect(successScreen.getByRole("alert")).toContainText(
-      `To finish creating your account, please use the link emailed to ${env.TEST_USER_NOT_CREATED_EMAIL}`,
-    );
-  });
-
-  const activationLink =
-    await test.step("Retrieve activation link", async () => {
-      const message = await inbox.waitForEmail({
-        subject: "Activate your account",
-        to: env.TEST_USER_NOT_CREATED_EMAIL,
+    const activationLink =
+      await test.step("Retrieve activation link", async () => {
+        const message = await inbox.waitForEmail({
+          subject: "Activate your account",
+          to: email,
+        });
+        invariant(message.html, "Expected email to have HTML content");
+        const messagePage = await context.newPage();
+        await messagePage.setContent(message.html);
+        const link = await messagePage.getByTestId("activation-link");
+        const href = await link.getAttribute("href");
+        invariant(href, "Expected link to have href");
+        messagePage.close();
+        return href;
       });
-      invariant(message.html, "Expected email to have HTML content");
-      const messagePage = await context.newPage();
-      await messagePage.setContent(message.html);
-      const link = await messagePage.getByTestId("activation-link");
-      const href = await link.getAttribute("href");
-      invariant(href, "Expected link to have href");
-      messagePage.close();
-      return href;
+
+    await test.step("Activate account", async () => {
+      await page.goto(activationLink);
+      const dialog = await page.getByRole("dialog", {
+        name: "Account Activation",
+      });
+      await expect(
+        dialog.getByRole("alert"),
+        "This can be flaky in dev mode due to StrictMode double renders => 2 API calls",
+      ).toContainText(/Account successfully activated./);
+      return dialog.getByRole("link", { name: "log in" }).click();
     });
 
-  await test.step("Activate account", async () => {
-    await page.goto(activationLink);
-    const dialog = await page.getByRole("dialog", {
-      name: "Account Activation",
-    });
-    await expect(
-      dialog.getByRole("alert"),
-      "This can be flaky in dev mode due to StrictMode double renders => 2 API calls",
-    ).toContainText(/Account successfully activated./);
-    return dialog.getByRole("link", { name: "log in" }).click();
-  });
-
-  await test.step("Sign in & verify", async () => {
-    await app.signinPage().signin({
-      email: env.TEST_USER_NOT_CREATED_EMAIL,
-      password: env.TEST_USER_NOT_CREATED_PASSWORD,
-    });
-    await app.userMenu().opener().click();
-    await expect(app.userMenu().username()).toHaveText(
-      env.TEST_USER_NOT_CREATED_EMAIL,
-    );
-  });
-
-  await test.step("Delete account", async () => {
-    await app.userMenu().activate("settings");
-    const deleteAccountForm = app.userSettings().deleteAccountForm();
-    await deleteAccountForm.activate();
-    await deleteAccountForm.password().fill(env.TEST_USER_NOT_CREATED_PASSWORD);
-    await deleteAccountForm.confirm().fill("Yes, permanently delete");
-    await deleteAccountForm.submit().click();
-  });
-
-  await test.step("Verify account deletion", async () => {
-    const dialog = page.getByRole("dialog");
-    await expect(dialog.getByRole("heading")).toContainText("Account Deleted");
-    await dialog.getByRole("button", { name: "OK" }).click();
-
-    await app.assertSignedOut();
-
-    await app.signinPage().signin({
-      email: env.TEST_USER_NOT_CREATED_EMAIL,
-      password: env.TEST_USER_NOT_CREATED_PASSWORD,
+    await test.step("Sign in & verify", async () => {
+      await app.signinPage().signin({ email, password });
+      await app.userMenu().opener().click();
+      await expect(app.userMenu().username()).toHaveText(email);
     });
 
-    await expect(dialog.getByRole("alert")).toContainText(/Unable to log in/);
+    await test.step("Delete account", async () => {
+      await app.userMenu().activate("settings");
+      const deleteAccountForm = app.userSettings().deleteAccountForm();
+      await deleteAccountForm.activate();
+      await deleteAccountForm.password().fill(password);
+      await deleteAccountForm.confirm().fill("Yes, permanently delete");
+      await deleteAccountForm.submit().click();
+    });
+
+    await test.step("Verify account deletion", async () => {
+      const dialog = page.getByRole("dialog");
+      await expect(dialog.getByRole("heading")).toContainText(
+        "Account Deleted",
+      );
+      await dialog.getByRole("button", { name: "OK" }).click();
+
+      await app.assertSignedOut();
+
+      await app.signinPage().signin({ email, password });
+
+      await expect(dialog.getByRole("alert")).toContainText(/Unable to log in/);
+    });
   });
 });
 

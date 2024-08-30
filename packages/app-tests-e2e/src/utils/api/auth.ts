@@ -9,7 +9,7 @@ import env from "@/env";
  */
 const authApi = new AuthApi(getConfig(null));
 
-type UserAuth = {
+type UserCredentials = {
   email: string;
   password: string;
 };
@@ -28,7 +28,7 @@ const users = {
     email: env.TEST_USER_STATIC_EMAIL,
     password: env.TEST_USER_STATIC_PASSWORD,
   },
-} satisfies Record<string, UserAuth>;
+} satisfies Record<string, UserCredentials>;
 
 const getAuthToken = async (user: keyof typeof users | TokenCreateRequest) => {
   const userObj = typeof user === "string" ? users[user] : user;
@@ -43,11 +43,9 @@ const getAuthToken = async (user: keyof typeof users | TokenCreateRequest) => {
   return response.data.auth_token;
 };
 
-type UserFixture = Partial<
-  Omit<UserCreatePasswordRetypeRequest, "re_password">
->;
+type UserInfo = Partial<Omit<UserCreatePasswordRetypeRequest, "re_password">>;
 
-const createActiveUser = async (user: UserFixture = {}) => {
+const createActiveUser = async (user: UserInfo = {}) => {
   const defaults = {
     email: faker.internet.email({
       provider: `${faker.string.uuid()}.com`,
@@ -77,7 +75,7 @@ const createActiveUser = async (user: UserFixture = {}) => {
       adminConfig,
     );
   };
-  const userAuth: UserAuth = {
+  const userAuth: UserCredentials = {
     email: request.email,
     password: request.password,
   };
@@ -85,4 +83,4 @@ const createActiveUser = async (user: UserFixture = {}) => {
 };
 
 export { authApi, getAuthToken, users, createActiveUser };
-export type { UserFixture };
+export type { UserInfo, UserCredentials };

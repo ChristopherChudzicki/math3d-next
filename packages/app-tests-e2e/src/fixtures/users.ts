@@ -5,7 +5,8 @@ import type { Scene } from "@math3d/api";
 import env from "@/env";
 import { getConfig } from "@/utils/api/config";
 import { createActiveUser, getAuthToken, users } from "@/utils/api/auth";
-import type { UserFixture } from "@/utils/api/auth";
+import type { UserCredentials, UserInfo } from "@/utils/api/auth";
+import invariant from "tiny-invariant";
 
 const TEST_SCENE_PREFIX = "[TEST-E2E-SCENE]";
 
@@ -13,8 +14,13 @@ type PrepareSceneOpts = {
   allowCleanup404: boolean;
 };
 
+type UserFixture = keyof typeof users | UserInfo;
 type Fixtures = {
-  user: keyof typeof users | null | UserFixture;
+  user: UserFixture | null;
+  /**
+   * Create an activte user.
+   */
+  createUser: (user: UserFixture) => Promise<UserCredentials>;
   authToken: string | null;
   page: Page;
   prepareScene: (
@@ -23,28 +29,39 @@ type Fixtures = {
   ) => Promise<string>;
 };
 
-const isEphemeralUser = (user: Fixtures["user"]): user is UserFixture => {
-  if (typeof user === "string" || user === null) {
-    return false;
-  }
-  return true;
-};
-
 const test = base.extend<Fixtures>({
   user: null,
-  authToken: async ({ user }, use) => {
+  // eslint-disable-next-line no-empty-pattern
+  createUser: async ({}, use) => {
+    const requests: Promise<{ cleanup: () => Promise<void> }>[] = [];
+    const createUser: Fixtures["createUser"] = async (user) => {
+      if (typeof user === "string") {
+        return users[user];
+      }
+      const request = createActiveUser(user);
+      requests.push(request);
+      const { auth } = await request;
+      return auth;
+    };
+    await use(createUser);
+    const cleanups = await Promise.all(requests);
+    await Promise.all(cleanups.map((r) => r.cleanup()));
+  },
+  /**
+   * Auth token for `user` fixture.
+   */
+  authToken: async ({ user, createUser }, use) => {
     let authToken: string | null = null;
-    let cleanup = async () => {};
-    if (isEphemeralUser(user)) {
-      const ephemeralUser = await createActiveUser(user);
-      authToken = await getAuthToken(ephemeralUser.auth);
-      cleanup = ephemeralUser.cleanup;
-    } else if (user) {
-      authToken = await getAuthToken(user);
+    if (user) {
+      const creds =
+        typeof user === "string" ? users[user] : await createUser(user);
+      authToken = await getAuthToken(creds);
     }
     await use(authToken);
-    await cleanup();
   },
+  /**
+   * authenticated page for `user` fixture.
+   */
   page: async ({ page: basePage, browser, authToken }, use) => {
     let page: Page;
     if (authToken) {
@@ -70,14 +87,19 @@ const test = base.extend<Fixtures>({
     }
     await use(page);
   },
+  /**
+   * pre-create scenes owned by `user` fixture.
+   */
   prepareScene: async ({ user, authToken }, use) => {
     const scenesApi = new ScenesApi(getConfig(authToken));
     const cleanup: { key: string; allow404: boolean }[] = [];
     const create: Fixtures["prepareScene"] = async (s, opts) => {
       const { allowCleanup404 = false } = opts ?? {};
-      const title = isEphemeralUser(user)
-        ? s.title
-        : `${TEST_SCENE_PREFIX} ${s.title}`;
+      invariant(
+        user !== "static",
+        "Do not create scenes with pre-seeded static user during e2e tests",
+      );
+      const title = user ? s.title : `${TEST_SCENE_PREFIX} ${s.title}`;
       const response = await scenesApi.scenesCreate({
         SceneCreateRequest: { ...s, title },
       });
