@@ -8,13 +8,12 @@ import { faker } from "@faker-js/faker/locale/en";
 import { getAuthToken } from "@/utils/api/auth";
 import { getConfig, axios } from "@/utils/api/config";
 import { AuthApi, deleteUser } from "@math3d/api";
+import { makeUserInfo } from "@math3d/mock-api";
 
 test.setTimeout(60_000);
 
 test.describe("User sign up flow and account deletion", () => {
-  const email = faker.internet.email();
-  const password = faker.internet.password();
-  const publicNickname = faker.person.firstName();
+  const { email, public_nickname: publicNickname, password } = makeUserInfo();
 
   test.afterAll(async () => {
     const authToken = await getAuthToken("admin");
@@ -34,10 +33,7 @@ test.describe("User sign up flow and account deletion", () => {
     }
   });
 
-  test.only("User sign up flow and account deletion", async ({
-    page,
-    context,
-  }) => {
+  test("User sign up flow and account deletion", async ({ page, context }) => {
     const inbox = getInbox();
     const app = new AppPage(page);
 

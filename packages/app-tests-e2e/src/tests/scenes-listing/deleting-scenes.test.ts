@@ -1,10 +1,11 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import { SceneBuilder } from "@math3d/mock-api";
+import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
 import type { Fixtures } from "@/fixtures/users";
 import AppPage from "@/utils/pages/AppPage";
 
-test.use({ user: {} });
+const user = makeUserInfo();
+test.use({ user });
 
 test.describe("Deleting a scene", async () => {
   const setup = async (

@@ -2,11 +2,11 @@ import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import AppPage from "@/utils/pages/AppPage";
 import { faker } from "@faker-js/faker/locale/en";
+import { makeUserInfo } from "@math3d/mock-api";
 
 test.describe("Authorized user header", () => {
-  const nickname = faker.person.firstName();
-  const email = faker.internet.email();
-  test.use({ user: { public_nickname: nickname, email } });
+  const user = makeUserInfo();
+  test.use({ user });
 
   test("Shows username in usermenu", async ({ page }) => {
     await page.goto("");
@@ -14,11 +14,11 @@ test.describe("Authorized user header", () => {
 
     const trigger = await app.userMenu().opener();
     await expect(trigger).toBeVisible();
-    await expect(trigger).toHaveText(nickname[0]);
+    await expect(trigger).toHaveText(user.public_nickname[0]);
 
     await trigger.click();
     const username = app.userMenu().username();
-    await expect(username).toHaveText(email);
+    await expect(username).toHaveText(user.email);
   });
 
   test("Header and usermenu links", async ({ page }) => {

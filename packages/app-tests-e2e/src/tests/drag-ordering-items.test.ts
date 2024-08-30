@@ -1,6 +1,6 @@
 import { Locator, Page, expect } from "@playwright/test";
 import { test } from "@/fixtures/users";
-import { SceneBuilder } from "@math3d/mock-api";
+import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
@@ -89,7 +89,8 @@ const makeFolderScene = () => {
   return scene.json();
 };
 
-test.use({ user: {} });
+const user = makeUserInfo();
+test.use({ user });
 
 test("Dragging item X after item Y", async ({ page, prepareScene }) => {
   const key = await prepareScene(makeFolderScene());

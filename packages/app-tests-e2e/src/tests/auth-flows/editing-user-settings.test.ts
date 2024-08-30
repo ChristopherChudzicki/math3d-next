@@ -2,10 +2,11 @@ import { test } from "@/fixtures/users";
 import { expect } from "@/utils/expect";
 import AppPage from "@/utils/pages/AppPage";
 import { faker } from "@faker-js/faker/locale/en";
+import { makeUserInfo } from "@math3d/mock-api";
 
 test.describe("User settings profile form", () => {
-  const email = faker.internet.email();
-  test.use({ user: { email } });
+  const user = makeUserInfo();
+  test.use({ user });
 
   test("Editing user profile", async ({ page }) => {
     const app = new AppPage(page);
@@ -15,7 +16,7 @@ test.describe("User settings profile form", () => {
     const newNickname = faker.person.firstName();
     await test.step("Fill out form", async () => {
       const profileForm = app.userSettings().profileForm();
-      await expect(profileForm.email()).toHaveValue(email);
+      await expect(profileForm.email()).toHaveValue(user.email);
       await profileForm.publicNickname().fill(newNickname);
       await profileForm.submit().click();
     });
