@@ -3,6 +3,7 @@ import type { UserCreatePasswordRetypeRequest } from "@math3d/api";
 import { faker } from "@faker-js/faker/locale/en";
 import { getConfig } from "@/utils/api/config";
 import env from "@/env";
+import invariant from "tiny-invariant";
 
 /**
  * Anonymouse user authentication API
@@ -54,6 +55,11 @@ const createActiveUser = async (user: UserInfo = {}) => {
     ...user,
     re_password: user.password ?? defaults.password,
   };
+
+  invariant(
+    request.email.endsWith(env.TEST_EMAIL_PROVIDER),
+    `Dynamically generated users in e2e tests must have emails ending with the test email provider (${env.TEST_EMAIL_PROVIDER}). Email: ${request.email}`,
+  );
 
   const [inactive, adminToken] = await Promise.all([
     authApi.authUsersCreate({

@@ -360,13 +360,15 @@ class Folder {
   }
 }
 
+const DEFAULT_EMAIL_PROVIDER =
+  import.meta?.env?.TEST_EMAIL_PROVIDER ?? process.env.TEST_EMAIL_PROVIDER;
 const makeUserInfo = (
   info?: UserCreatePasswordRetypeRequest,
 ): UserCreatePasswordRetypeRequest => {
   const password = faker.internet.password();
-  const provider = import.meta?.env?.TEST_EMAIL_PROVIDER;
+
   return {
-    email: faker.internet.email({ provider }),
+    email: faker.internet.email({ provider: DEFAULT_EMAIL_PROVIDER }),
     password,
     re_password: password,
     public_nickname: faker.person.firstName(),
