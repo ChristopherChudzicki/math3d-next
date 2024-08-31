@@ -23,6 +23,7 @@ jobs:
         run: cp .env.development .env
       - run: yarn install --immutable
       - run: yarn lint
+      - run: yarn fmt-check
       - run: yarn workspace app css-types --list-different
       - run: yarn test -- --test-timeout=10000
 

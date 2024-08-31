@@ -17,12 +17,13 @@
     "typecheck": "turbo run typecheck",
     "start": "dotenvx run -- yarn workspace app start",
     "build": "dotenvx run -- yarn workspace app build",
-    "preview": "dotenvx run -- yarn workspace app preview"
+    "preview": "dotenvx run -- yarn workspace app preview",
+    "fmt-check": "prettier --ignore-path .gitignore --ignore-path .prettierignore --check ."
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^0.45.0",
     "package": "^1.0.1",
-    "prettier": "^4.0.0-alpha.8"
+    "prettier": "4.0.0-alpha.8"
   },
   "msw": {
     "workerDirectory": "packages/app/public"

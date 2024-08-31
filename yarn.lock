@@ -14523,7 +14523,7 @@ __metadata:
     "@dotenvx/dotenvx": "npm:^0.45.0"
     "@math3d/eslint-config": "workspace:*"
     package: "npm:^1.0.1"
-    prettier: "npm:^4.0.0-alpha.8"
+    prettier: "npm:4.0.0-alpha.8"
     ts-node: "npm:^10.9.1"
     turbo: "npm:^1.6.3"
     typescript: "npm:^5.4.3"
@@ -16673,16 +16673,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:>=2.2.1 <=2.3.0":
-  version: 2.3.0
-  resolution: "prettier@npm:2.3.0"
-  bin:
-    prettier: bin-prettier.js
-  checksum: 10/b3a03b35fa0835f5d95e4fde6244280fe8e132f1cd009a6804039f77bf09d79f8f770ab8105adc467376a6a446ee8ccf6fc97d01d980d8ef052d10f69217946f
-  languageName: node
-  linkType: hard
-
-"prettier@npm:^4.0.0-alpha.8":
+"prettier@npm:4.0.0-alpha.8":
   version: 4.0.0-alpha.8
   resolution: "prettier@npm:4.0.0-alpha.8"
   dependencies:
@@ -16690,6 +16681,15 @@ __metadata:
   bin:
     prettier: bin/prettier.cjs
   checksum: 10/d4afeffbb730c1249646d7ae0797f74ab7eb2e935087bfff097593623ac25494f86874d51ccdba8e7b19b6e0442f7a66a198da47f675a74e8f0d5a62593f07e7
+  languageName: node
+  linkType: hard
+
+"prettier@npm:>=2.2.1 <=2.3.0":
+  version: 2.3.0
+  resolution: "prettier@npm:2.3.0"
+  bin:
+    prettier: bin-prettier.js
+  checksum: 10/b3a03b35fa0835f5d95e4fde6244280fe8e132f1cd009a6804039f77bf09d79f8f770ab8105adc467376a6a446ee8ccf6fc97d01d980d8ef052d10f69217946f
   languageName: node
   linkType: hard
 
