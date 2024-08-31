@@ -220,3 +220,23 @@ def test_cannot_change_email_via_users_me():
         "email": user.email,
         "public_nickname": "new-nickname",
     }
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("is_staff", [False, True])
+def test_admin_activation_api(is_staff):
+    client = APIClient()
+    user_targeted = CustomUserFactory.create(is_active=False)
+    user_requesting = CustomUserFactory.create(is_staff=is_staff)
+    url = reverse("customuser-activate-other", kwargs={"id": user_targeted.id})
+    client.force_authenticate(user_requesting)
+    response = client.post(url)
+
+    if is_staff:
+        assert response.status_code == 204
+        user_targeted.refresh_from_db()
+        assert user_targeted.is_active is True
+    else:
+        assert response.status_code == 403
+        user_targeted.refresh_from_db()
+        assert user_targeted.is_active is False

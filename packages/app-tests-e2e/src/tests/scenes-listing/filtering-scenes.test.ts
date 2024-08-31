@@ -1,9 +1,10 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import { SceneBuilder } from "@math3d/mock-api";
+import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
 import { faker } from "@faker-js/faker";
 
-test.use({ user: "dynamic" });
+const user = makeUserInfo();
+test.use({ user });
 
 test("Filtering scenes by titles", async ({ page, prepareScene }) => {
   const suffix = faker.string.uuid();

@@ -4,7 +4,9 @@ import { API_TOKEN_KEY, ScenesApi, isAxiosError } from "@math3d/api";
 import type { Scene } from "@math3d/api";
 import env from "@/env";
 import { getConfig } from "@/utils/api/config";
-import { getAuthToken, users } from "@/utils/api/auth";
+import { createActiveUser, getAuthToken, users } from "@/utils/api/auth";
+import type { UserCredentials } from "@/utils/api/auth";
+import invariant from "tiny-invariant";
 
 const TEST_SCENE_PREFIX = "[TEST-E2E-SCENE]";
 
@@ -13,7 +15,11 @@ type PrepareSceneOpts = {
 };
 
 type Fixtures = {
-  user: keyof typeof users | null;
+  user: UserCredentials | "static" | null;
+  /**
+   * Create an activte user.
+   */
+  createUser: (user: UserCredentials) => Promise<UserCredentials>;
   authToken: string | null;
   page: Page;
   prepareScene: (
@@ -24,13 +30,34 @@ type Fixtures = {
 
 const test = base.extend<Fixtures>({
   user: null,
-  authToken: async ({ user }, use) => {
+  // eslint-disable-next-line no-empty-pattern
+  createUser: async ({}, use) => {
+    const requests: Promise<{ cleanup: () => Promise<void> }>[] = [];
+    const createUser: Fixtures["createUser"] = async (user) => {
+      const request = createActiveUser(user);
+      requests.push(request);
+      const { auth } = await request;
+      return auth;
+    };
+    await use(createUser);
+    const cleanups = await Promise.all(requests);
+    await Promise.all(cleanups.map((r) => r.cleanup()));
+  },
+  /**
+   * Auth token for `user` fixture.
+   */
+  authToken: async ({ user, createUser }, use) => {
     let authToken: string | null = null;
     if (user) {
-      authToken = await getAuthToken(user);
+      const creds =
+        typeof user === "string" ? users[user] : await createUser(user);
+      authToken = await getAuthToken(creds);
     }
     await use(authToken);
   },
+  /**
+   * authenticated page for `user` fixture.
+   */
   page: async ({ page: basePage, browser, authToken }, use) => {
     let page: Page;
     if (authToken) {
@@ -56,13 +83,19 @@ const test = base.extend<Fixtures>({
     }
     await use(page);
   },
+  /**
+   * pre-create scenes owned by `user` fixture.
+   */
   prepareScene: async ({ user, authToken }, use) => {
     const scenesApi = new ScenesApi(getConfig(authToken));
     const cleanup: { key: string; allow404: boolean }[] = [];
     const create: Fixtures["prepareScene"] = async (s, opts) => {
       const { allowCleanup404 = false } = opts ?? {};
-      const title =
-        user === "dynamic" ? s.title : `${TEST_SCENE_PREFIX} ${s.title}`;
+      invariant(
+        user !== "static",
+        "Do not create scenes with pre-seeded static user during e2e tests",
+      );
+      const title = user ? s.title : `${TEST_SCENE_PREFIX} ${s.title}`;
       const response = await scenesApi.scenesCreate({
         SceneCreateRequest: { ...s, title },
       });
@@ -89,5 +122,5 @@ const test = base.extend<Fixtures>({
   },
 });
 
-export { test };
+export { test, users };
 export type { Fixtures };

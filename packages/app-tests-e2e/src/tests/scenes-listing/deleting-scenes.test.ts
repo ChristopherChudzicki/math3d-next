@@ -1,10 +1,11 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import { SceneBuilder } from "@math3d/mock-api";
+import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
 import type { Fixtures } from "@/fixtures/users";
 import AppPage from "@/utils/pages/AppPage";
 
-test.use({ user: "dynamic" });
+const user = makeUserInfo();
+test.use({ user });
 
 test.describe("Deleting a scene", async () => {
   const setup = async (
@@ -45,8 +46,10 @@ test.describe("Deleting a scene", async () => {
       { page, prepareScene },
       true,
     );
-    await expect(sceneItem1).toHaveCount(0);
     await expect(sceneItem2).toBeVisible();
+    await expect(sceneItem1).toHaveCount(0);
+
+    await page.screenshot();
 
     await page.goto(`/${key1}`);
     await expect(page.getByRole("dialog", { name: "Not found" })).toBeVisible();

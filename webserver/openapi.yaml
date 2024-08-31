@@ -205,6 +205,25 @@ paths:
       responses:
         '204':
           description: No response body
+  /v0/auth/users/{id}/activation/:
+    post:
+      operationId: activate_other
+      description: Activate a user. Intended for admin use only, primarily in the
+        e2e tests.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this User.
+        required: true
+      tags:
+      - auth
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
   /v0/auth/users/activation/:
     post:
       operationId: auth_users_activation_create

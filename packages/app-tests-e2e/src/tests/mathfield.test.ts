@@ -2,9 +2,10 @@ import type { Page } from "@playwright/test";
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import { getItemForm, getLatex } from "@/utils/selectors";
-import { SceneBuilder } from "@math3d/mock-api";
+import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
 
-test.use({ user: "dynamic" });
+const user = makeUserInfo();
+test.use({ user });
 
 test("Typing arrays into an empty <math-field />", async ({
   page,

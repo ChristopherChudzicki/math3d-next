@@ -2,6 +2,7 @@
   "name": "@math3d/mathitem-configs",
   "exports": "./src/index.ts",
   "main": "./src/index.ts",
+  "type": "module",
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
     "@math3d/eslint-config": "workspace:^",

@@ -1,10 +1,11 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import AppPage from "@/utils/pages/AppPage";
-import env from "@/env";
+import { makeUserInfo } from "@math3d/mock-api";
 
 test.describe("Authorized user header", () => {
-  test.use({ user: "dynamic" });
+  const user = makeUserInfo();
+  test.use({ user });
 
   test("Shows username in usermenu", async ({ page }) => {
     await page.goto("");
@@ -12,11 +13,11 @@ test.describe("Authorized user header", () => {
 
     const trigger = await app.userMenu().opener();
     await expect(trigger).toBeVisible();
-    expect(await trigger.textContent()).toBe("D");
+    await expect(trigger).toHaveText(user.public_nickname[0]);
 
     await trigger.click();
     const username = app.userMenu().username();
-    expect(await username.textContent()).toBe(env.TEST_USER_DYNAMIC_EMAIL);
+    await expect(username).toHaveText(user.email);
   });
 
   test("Header and usermenu links", async ({ page }) => {
@@ -25,7 +26,7 @@ test.describe("Authorized user header", () => {
 
     await app.userMenu().opener().click();
 
-    expect(await app.userMenu().items().allTextContents()).toEqual([
+    await expect(app.userMenu().items()).toHaveText([
       "My Scenes",
       "Examples",
       "Contact",
@@ -53,7 +54,7 @@ test.describe("Anonymous user header", () => {
     await page.goto("");
     const app = new AppPage(page);
     await app.userMenu().opener().click();
-    expect(await app.userMenu().items().allTextContents()).toEqual([
+    await expect(app.userMenu().items()).toHaveText([
       "Sign in",
       "Sign up",
       "Examples",

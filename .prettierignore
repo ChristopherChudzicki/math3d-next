@@ -1,6 +1,5 @@
-build
-**/build/
-openapi.yaml
 .yarn/
 packages/app/public/mockServiceWorker.js
 **/*.css.d.ts
+openapi.yaml
+webserver/**/*.html

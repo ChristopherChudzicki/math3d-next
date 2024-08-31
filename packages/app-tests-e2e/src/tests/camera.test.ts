@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 import { Vector3 } from "three";
-import { SceneBuilder } from "@math3d/mock-api";
+import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
 import { whenMathboxRendered } from "@/utils/selectors";
 
@@ -25,7 +25,8 @@ const getControlsTarget = async (
   });
 };
 
-test.use({ user: "dynamic" });
+const user = makeUserInfo();
+test.use({ user });
 
 test("Setting camera position/target using UI coordinates", async ({
   page,
