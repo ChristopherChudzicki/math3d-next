@@ -78,7 +78,7 @@ jobs:
             --ignore-file-override $GENERATOR_IGNORE_FILE \
             --additional-properties=useSingleRequestParameter=true,paramNaming=original
       - name: Format freshly generated client
-        run: npx prettier $GENERATOR_OUTPUT_DIR_CI/**/*.ts --write
+        run: npx prettier@4.0.0-alpha.8 $GENERATOR_OUTPUT_DIR_CI/**/*.ts --write
       - name: Check VC client is up-to-date
         run: |
           diff $GENERATOR_OUTPUT_DIR_CI $GENERATOR_OUTPUT_DIR_VC \
