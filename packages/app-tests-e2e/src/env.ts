@@ -1,9 +1,7 @@
 import { cleanEnv, str, email, url } from "envalid";
 
 const env = cleanEnv(process.env, {
-  TEST_EMAIL_PROVIDER: str({
-    default: "test.math3d.org",
-  }),
+  TEST_EMAIL_PROVIDER: str(),
   TEST_APP_URL: url(),
   TEST_API_URL: url(),
   TEST_USER_ADMIN_EMAIL: email(),

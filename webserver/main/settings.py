@@ -22,12 +22,11 @@ logger = logging.getLogger(__name__)
 
 env = environ.Env(
     CORS_ALLOWED_ORIGINS=(list, []),
-    AWS_SES_ACCESS_KEY_ID=(str, ""),
-    AWS_SES_SECRET_ACCESS_KEY=(str, ""),
     MAILJET_API_KEY=(str, ""),
     MAILJET_SECRET_KEY=(str, ""),
     DEFAULT_FROM_EMAIL=(str, ""),
     SERVER_EMAIL=(str, ""),
+    APP_BASE_URL=(str, ""),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -156,8 +155,8 @@ DJOSER = {
         "current_user": "authentication.serializers.CustomUserSerializer",
     },
     "_CUSTOM": {
-        "ACTIVATION_URL": "http://localhost:3000/auth/activate-account?uid={uid}&token={token}",
-        "PASSWORD_RESET_CONFIRM_URL": "http://localhost:3000/auth/reset-password/confirm/?uid={uid}&token={token}",  # pragma: allowlist secret
+        "ACTIVATION_URL": f"{env('APP_BASE_URL')}/auth/activate-account?uid={{uid}}&token={{token}}",
+        "PASSWORD_RESET_CONFIRM_URL": f"{env('APP_BASE_URL')}/auth/reset-password/confirm/?uid={{uid}}&token={{token}}",  # pragma: allowlist secret
     },
 }
 

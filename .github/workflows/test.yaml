@@ -9,9 +9,12 @@ on:
 
 jobs:
   frontend-tests:
+    runs-on: ubuntu-latest
+    environment: "ci"
     env:
       SKIP_YARN_COREPACK_CHECK: true
-    runs-on: ubuntu-latest
+      APP_BASE_URL: ${{ vars.APP_BASE_URL }}
+      VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,8 +22,6 @@ jobs:
           node-version: "20.11.1"
           cache: "yarn"
       - run: corepack enable
-      - name: Setup env variables
-        run: cp .env.development .env
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn fmt-check

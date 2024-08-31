@@ -12,16 +12,15 @@
   },
   "scripts": {
     "lint": "turbo run lint",
-    "test": "dotenvx run -- turbo run test",
-    "test-e2e": "dotenvx run -- yarn workspace app-tests-e2e test-e2e",
+    "test": "turbo run test",
+    "test-e2e": "yarn workspace app-tests-e2e test-e2e",
     "typecheck": "turbo run typecheck",
-    "start": "dotenvx run -- yarn workspace app start",
-    "build": "dotenvx run -- yarn workspace app build",
-    "preview": "dotenvx run -- yarn workspace app preview",
+    "start": "yarn workspace app start",
+    "build": "yarn workspace app build",
+    "preview": "yarn workspace app preview",
     "fmt-check": "prettier --ignore-path .gitignore --ignore-path .prettierignore --check ."
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "^0.45.0",
     "package": "^1.0.1",
     "prettier": "4.0.0-alpha.8"
   },

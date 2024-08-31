@@ -14,6 +14,12 @@ The math3d backend and database are managed by docker containers. The frontend i
 - [nvm](https://github.com/nvm-sh/nvm), for managing node versions
 - [Docker](https://docs.docker.com/get-docker/), for containerization during development
 - [pre-commit](https://pre-commit.com/index.html), a framework for running pre-commit hooks
+- **Environment Variables**: Additionally, you'll want some way to load environment variables for the frontend, which currently runs on the host machine. We recommend using [direnv](https://direnv.net/docs/installation.html), which a `.envrc` file along the lines of
+
+  ```sh
+  dotenv_if_exists .env.development # committed in repo
+  dotenv_if_exists .env             # customizations
+  ```
 
 ### Webserver Commands
 
