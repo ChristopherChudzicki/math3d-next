@@ -1,17 +1,21 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useId, useMemo, useState } from "react";
 import { BasicDialog } from "@/pages/auth/components/BasicDialog";
 import type { BasicDialogProps } from "@/pages/auth/components/BasicDialog";
 import { Alert, FormGroup, TextField, Typography } from "@mui/material";
 import { useToggle } from "@/util/hooks";
 import Button from "@mui/material/Button";
-import type { ButtonProps } from "@mui/material/Button";
 import { useNavigate } from "react-router";
 import { useCreateScene, usePatchScene, useUserMe } from "@math3d/api";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { select, actions } from "@/features/sceneControls/mathItems";
-import CheckIcon from "@mui/icons-material/Check";
 import u from "@/util/styles/utils.module.css";
+import * as yup from "yup";
+import { useValidatedForm } from "@/util/forms";
 import styles from "./SaveButton.module.css";
+
+const schema = yup.object({
+  title: yup.string().required(),
+});
 
 type SaveDialogProps = Pick<BasicDialogProps, "open"> & {
   onClose: ({ saved }: { saved: boolean }) => void;
@@ -24,16 +28,29 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, onClose, onSave }) => {
   const navigate = useNavigate();
   const createScene = useCreateScene();
   const scene = useAppSelector(select.sceneInfo);
-  const [title, setTitle] = useState(scene.title);
+  const defaultValues = useMemo(() => {
+    return {
+      title: scene.title,
+    };
+  }, [scene.title]);
+  const { register, handleSubmit } = useValidatedForm({
+    schema,
+    defaultValues,
+  });
 
-  const handleSave = useCallback(async () => {
-    const result = await createScene.mutateAsync({ ...scene, title });
-    onSave();
-    navigate({
-      pathname: `/${result.key}`,
-    });
-    setUrl(`${window.location.origin}/${result.key}`);
-  }, [createScene, scene, title, onSave, navigate]);
+  const handleSave: React.FormEventHandler = useMemo(
+    () =>
+      handleSubmit(async (data) => {
+        const { title } = data;
+        const result = await createScene.mutateAsync({ ...scene, title });
+        onSave();
+        navigate({
+          pathname: `/${result.key}`,
+        });
+        setUrl(`${window.location.origin}/${result.key}`);
+      }),
+    [createScene, handleSubmit, navigate, onSave, scene],
+  );
 
   const handleClose = useCallback(() => {
     onClose({ saved: createScene.isSuccess });
@@ -44,61 +61,72 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, onClose, onSave }) => {
     toggleCopied.on();
   }, [toggleCopied, url]);
 
-  const dialogProps =
-    createScene.isSuccess && url // && url avoids an initial animation on the label
-      ? {
-          title: "Scene Saved!",
-          confirmText: "OK",
-          onConfirm: handleClose,
-          cancelButton: null,
-          children: (
-            <>
-              <Typography>
-                Share your scene with others at the URL below.
-              </Typography>
-              <FormGroup row className={styles["form-row"]}>
-                <TextField
-                  label="Shareable URL"
-                  size="small"
-                  value={url}
-                  inputProps={{ readOnly: true }}
-                  helperText={copied ? "Copied!" : " "}
-                  className={u.flex1}
-                />
-                <Button
-                  variant="text"
-                  onClick={handleCopy}
-                  sx={{ alignSelf: "start" }}
-                >
-                  Copy
-                </Button>
-              </FormGroup>
-            </>
-          ),
-        }
-      : {
-          title: "Save Scene",
-          confirmText: "Save",
-          onConfirm: handleSave,
-          children: (
-            <TextField
-              margin="dense"
-              fullWidth
-              label="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          ),
-        };
+  const formId = useId();
 
+  const commonProps: Pick<
+    BasicDialogProps,
+    "fullWidth" | "maxWidth" | "open" | "onClose"
+  > = {
+    fullWidth: true,
+    maxWidth: "xs",
+    open,
+    onClose: handleClose,
+  };
+
+  if (createScene.isSuccess && url) {
+    return (
+      <BasicDialog
+        {...commonProps}
+        title="Scene Saved!"
+        onConfirm={handleClose}
+        confirmText="OK"
+        cancelButton={null}
+      >
+        <>
+          <Typography>
+            Share your scene with others at the URL below.
+          </Typography>
+          <FormGroup row className={styles["form-row"]}>
+            <TextField
+              label="Shareable URL"
+              size="small"
+              value={url}
+              inputProps={{ readOnly: true }}
+              helperText={copied ? "Copied!" : " "}
+              className={u.flex1}
+            />
+            <Button
+              variant="text"
+              onClick={handleCopy}
+              sx={{ alignSelf: "start" }}
+            >
+              Copy
+            </Button>
+          </FormGroup>
+        </>
+      </BasicDialog>
+    );
+  }
   return (
     <BasicDialog
-      fullWidth
-      maxWidth="xs"
-      open={open}
-      onClose={handleClose}
-      {...dialogProps}
-    />
+      {...commonProps}
+      title="Save Scene"
+      confirmText="Save"
+      cancelButton={null}
+      confirmButtonProps={{
+        type: "submit",
+        form: formId,
+      }}
+    >
+      <form id={formId} onSubmit={handleSave}>
+        <TextField
+          margin="dense"
+          fullWidth
+          label="Title"
+          {...register("title")}
+        />
+      </form>
+    </BasicDialog>
   );
 };
 
@@ -143,9 +171,9 @@ const SaveButton: React.FC = () => {
       setSavingState(SavingState.Saving);
       await Promise.all([request, sleep(MIN_SAVING_DELAY)]);
       setSavingState(SavingState.RecentlySaved);
+      dispatch(actions.setClean());
       await sleep(RECENTLY_SAVED_TIMEOUT);
       setSavingState(SavingState.Default);
-      dispatch(actions.setClean());
     }
   }, [
     cloning,

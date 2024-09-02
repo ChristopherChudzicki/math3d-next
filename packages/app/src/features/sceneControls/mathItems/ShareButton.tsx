@@ -10,7 +10,6 @@ import TextField from "@mui/material/TextField";
 import classNames from "classnames";
 import { useNavigate } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
-import Typography from "@mui/material/Typography";
 import styles from "./ShareButton.module.css";
 import { select } from "./sceneSlice";
 

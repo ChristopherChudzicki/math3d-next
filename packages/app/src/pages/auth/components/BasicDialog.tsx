@@ -8,7 +8,6 @@ import type { ButtonProps } from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import Close from "@mui/icons-material/Close";
-import { Divider } from "@mui/material";
 
 const topRightStyle: React.CSSProperties = {
   position: "absolute",

@@ -1,5 +1,4 @@
 import { useScene } from "@math3d/api";
-import type { StrictScene as Scene } from "@math3d/api";
 
 import React, { useEffect } from "react";
 import { useAppDispatch } from "@/store/hooks";
