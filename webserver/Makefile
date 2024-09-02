@@ -2,7 +2,7 @@
 setup_python: export PIP_DEFAULT_TIMEOUT = 100
 setup_python: export PIP_DISABLE_PIP_VERSION_CHECK = 1
 setup_python: export PIP_DISABLE_PIP_VERSION_CHECK = 1
-setup_python: export POETRY_VERSION = 1.3.1
+setup_python: export POETRY_VERSION = 1.8.3
 setup_python:
 	pip install "poetry==${POETRY_VERSION}"
 	poetry config virtualenvs.create false

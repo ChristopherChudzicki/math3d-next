@@ -35,10 +35,10 @@ jobs:
         working-directory: ./webserver
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11.6
+          python-version: 3.12.5
       - name: Install python dependencies
         run: make setup_python
       - name: Check OpenAPI up-to-date
