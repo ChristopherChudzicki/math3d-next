@@ -14,7 +14,7 @@ import routes from "./routes";
 window.math = math;
 
 const prepare = async () => {
-  if (import.meta.env.VITE_USE_MSW) {
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_MSW) {
     // eslint-disable-next-line import/no-extraneous-dependencies
     const { worker } = await import("@math3d/mock-api/browser");
     await worker.start();
