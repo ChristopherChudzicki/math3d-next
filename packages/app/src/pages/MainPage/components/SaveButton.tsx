@@ -144,6 +144,13 @@ const sleep = (ms: number) =>
 const MIN_SAVING_DELAY = 500;
 const RECENTLY_SAVED_TIMEOUT = 3000;
 
+const getSaveText = (state: SavingState, cloning: boolean) => {
+  if (state === SavingState.Saving) {
+    return "Saving...";
+  }
+  return cloning ? "Save a Copy" : "Save";
+};
+
 const SaveButton: React.FC = () => {
   const [saveDialogOpen, toggleSaveDialog] = useToggle(false);
   const [savingState, setSavingState] = useState(SavingState.Default);
@@ -157,8 +164,8 @@ const SaveButton: React.FC = () => {
   const { data: user } = useUserMe();
 
   const creating = !key;
-  const cloning = key && user && scene.author !== user.id;
-  const updating = key && user && scene.author === user.id;
+  const cloning = Boolean(key && user && scene.author !== user.id);
+  const updating = Boolean(key && user && scene.author === user.id);
   const handleClick = useCallback(async () => {
     if (creating) {
       toggleSaveDialog.on();
@@ -203,7 +210,7 @@ const SaveButton: React.FC = () => {
         disabled={!enabled}
         onClick={handleClick}
       >
-        {savingState === SavingState.Saving ? "Saving..." : "Save"}
+        {getSaveText(savingState, cloning)}
       </Button>
       <SaveDialog
         open={saveDialogOpen}
