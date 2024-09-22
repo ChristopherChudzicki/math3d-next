@@ -31,7 +31,7 @@ const users = {
   },
 } satisfies Record<string, UserCredentials>;
 
-const getAuthToken = async (user: UserCredentials) => {
+const getAuthToken = async (user: UserCredentials): Promise<string> => {
   const response = await authApi.authTokenLoginCreate({
     TokenCreateRequest: user,
   });

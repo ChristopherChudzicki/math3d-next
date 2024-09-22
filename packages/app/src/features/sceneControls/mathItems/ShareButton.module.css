@@ -4,12 +4,11 @@
   grid-template-columns: auto auto;
   grid-gap: 0.5em;
   grid-template-rows: auto auto;
-  width: 275px;
+  width: 300px;
 }
 .share-note {
   grid-column-start: 1;
   grid-column-end: 3;
-  margin: 0px;
 }
 
 .saving {
@@ -29,14 +28,10 @@
 .copy-button {
   grid-column-start: 1;
   grid-column-end: 2;
-  grid-row-start: 2;
-  grid-row-end: 3;
 }
 .copied-indicator {
   grid-column-start: 2;
   grid-column-end: 3;
-  grid-row-start: 2;
-  grid-row-end: 3;
   align-self: center;
   justify-self: center;
 }

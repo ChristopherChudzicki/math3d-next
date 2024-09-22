@@ -205,6 +205,7 @@ const SaveButton: React.FC = () => {
         <Alert className={styles["small-alert"]}>Saved!</Alert>
       ) : null}
       <Button
+        data-testid="save"
         variant="outlined"
         color="primary"
         disabled={!enabled}

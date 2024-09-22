@@ -10,6 +10,7 @@ import TextField from "@mui/material/TextField";
 import classNames from "classnames";
 import { useNavigate } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
+import Alert from "@mui/material/Alert";
 import styles from "./ShareButton.module.css";
 import { select } from "./sceneSlice";
 
@@ -46,6 +47,11 @@ const ShareBody: React.FC<ShareBodyProps> = ({
             }}
             value={url}
           />
+          {hasUnsavedChanges ? (
+            <Alert severity="info" className={styles["share-note"]}>
+              This scene has unsaved changes.
+            </Alert>
+          ) : null}
           <Button
             variant="contained"
             className={styles["copy-button"]}
@@ -62,11 +68,6 @@ const ShareBody: React.FC<ShareBodyProps> = ({
           >
             Copied!
           </div>
-          {hasUnsavedChanges ? (
-            <p className={styles["share-note"]}>
-              <em>Note: This scene has unsaved changes.</em>
-            </p>
-          ) : null}
         </>
       )}
     </div>
@@ -101,7 +102,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
   const handleClick = useCallback(async () => {
     toggleOpen.on();
     if (meQuery.data) {
-      setUrl(`${window.location.origin}/${scene.key}`);
+      setUrl(`${window.location.origin}/${scene.key ?? ""}`);
       return;
     }
     const result = await createScene.mutateAsync(scene);
@@ -115,6 +116,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
   return (
     <>
       <Button
+        data-testid="share"
         aria-describedby={elementId}
         ref={buttonRef}
         variant="text"
@@ -127,6 +129,8 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
       </Button>
       {variant === "desktop" ? (
         <Popover
+          role="region"
+          aria-label="Share scene"
           id={elementId}
           open={open}
           keepMounted={false}
