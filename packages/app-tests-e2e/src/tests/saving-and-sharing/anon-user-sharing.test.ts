@@ -17,6 +17,7 @@ test("Anon users can share but not save", async ({ page }) => {
   await expect(shareButton).toBeVisible();
 
   await shareButton.click();
+  await expect(app.sharePopover().shareableUrl()).not.toBeEmpty();
   const url = await page.getByLabel("Shareable URL").inputValue();
   expect(page.url()).toBe(url);
 });
