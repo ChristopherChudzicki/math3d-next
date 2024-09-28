@@ -92,24 +92,27 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
   const navigate = useNavigate();
   const meQuery = useUserMe();
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [url, setUrl] = useState("");
+  const [newlyCreatedUrl, setNewlyCreatedUrl] = useState("");
   const dirty = useAppSelector(select.dirty);
 
   const { author, ...scene } = useAppSelector(select.sceneInfo);
   const [open, toggleOpen] = useToggle(false);
   const createScene = useCreateScene();
 
+  const url = meQuery.data
+    ? `${window.location.origin}/${scene.key ?? ""}`
+    : newlyCreatedUrl;
+
   const handleClick = useCallback(async () => {
     toggleOpen.on();
     if (meQuery.data) {
-      setUrl(`${window.location.origin}/${scene.key ?? ""}`);
       return;
     }
     const result = await createScene.mutateAsync(scene);
     navigate({
       pathname: `/${result.key}`,
     });
-    setUrl(`${window.location.origin}/${result.key}`);
+    setNewlyCreatedUrl(`${window.location.origin}/${result.key}`);
   }, [toggleOpen, createScene, scene, navigate, meQuery.data]);
 
   const hasUnsavedChanges = !!meQuery.data && dirty;
@@ -122,7 +125,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
         variant="text"
         color="secondary"
         onClick={handleClick}
-        disabled={createScene.isPending}
+        disabled={meQuery.isLoading || createScene.isPending}
         startIcon={<CloudOutlinedIcon fontSize="inherit" />}
       >
         Share
@@ -149,7 +152,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
         <Dialog open={open} onClose={toggleOpen.off}>
           <ShareBody
             hasUnsavedChanges={hasUnsavedChanges}
-            url={url}
+            url={newlyCreatedUrl}
             loading={createScene.isPending}
           />
         </Dialog>
