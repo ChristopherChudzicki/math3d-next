@@ -71,7 +71,7 @@ test("Saving an existing scene scene", async ({
 
   await test.step("Assert original page unchanged", async () => {
     await page.goto(`/${key}`);
-    // button shows 'Save' now that we are owner
+    // Original still shows 'Save a copy
     await expect(app.saveButton()).toHaveText("Save a Copy");
     // item has new description
     await expect(item.field("description")).toHaveValue(initialDescription);
