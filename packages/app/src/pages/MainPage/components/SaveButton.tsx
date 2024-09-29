@@ -195,7 +195,7 @@ const SaveButton: React.FC = () => {
     navigate,
   ]);
 
-  if (!user) return null;
+  if (!updating && !creating) return null;
 
   const enabled = savingState === SavingState.Default && (dirty || cloning);
 
