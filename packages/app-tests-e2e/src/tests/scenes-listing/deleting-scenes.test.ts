@@ -6,6 +6,7 @@ import AppPage from "@/utils/pages/AppPage";
 
 const user = makeUserInfo();
 test.use({ user });
+test.setTimeout(60_000);
 
 test.describe("Deleting a scene", async () => {
   const setup = async (

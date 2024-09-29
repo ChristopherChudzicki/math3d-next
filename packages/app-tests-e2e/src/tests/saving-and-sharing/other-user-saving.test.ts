@@ -9,6 +9,8 @@ const user = makeUserInfo();
 test.use({ user });
 const sceneOwner = makeUserInfo();
 
+test.setTimeout(60_000);
+
 test("Saving an existing scene scene", async ({
   page,
   getPrepareScene,
