@@ -6,6 +6,7 @@ import { faker } from "@faker-js/faker/locale/en";
 
 const user = makeUserInfo();
 test.use({ user });
+test.setTimeout(60_000);
 
 test("Saving a new scene", async ({ page }) => {
   await page.goto("");

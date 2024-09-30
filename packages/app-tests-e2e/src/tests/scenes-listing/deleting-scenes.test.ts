@@ -21,6 +21,10 @@ test.describe("Deleting a scene", async () => {
     ]);
 
     await page.goto(`/scenes/me`);
+    await expect(
+      page.getByRole("tab", { name: "My Scenes", selected: true }),
+    ).toBeVisible();
+
     const sceneItem1 = page.getByRole("listitem").filter({
       hasText: scene1.title,
     });
