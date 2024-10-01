@@ -3173,8 +3173,8 @@ __metadata:
   linkType: hard
 
 "@mswjs/data@npm:^0.16.1":
-  version: 0.16.1
-  resolution: "@mswjs/data@npm:0.16.1"
+  version: 0.16.2
+  resolution: "@mswjs/data@npm:0.16.2"
   dependencies:
     "@types/lodash": "npm:^4.14.172"
     "@types/md5": "npm:^2.3.0"
@@ -3193,7 +3193,7 @@ __metadata:
   dependenciesMeta:
     msw:
       optional: true
-  checksum: 10/a16d0ed61e820ab5775b5392bf268bfe3f422f7dcfdcf893e10a477f9aa49cdcecc710f86e9dad25d6d6446c11effb5fd62eb18e79199360968b5b571a2b839a
+  checksum: 10/1e547bd3c5316570e206b9d69378a97cc234f82e7dda860418c1cd519d82d0d12901f321295cdd45fd8aca26477873f92eb15b63ef4feb4b5307b77540baeac7
   languageName: node
   linkType: hard
 
