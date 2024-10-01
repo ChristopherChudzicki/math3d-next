@@ -38,7 +38,7 @@ test.each([
     const scene = seedDb.withSceneFromItems([item]);
     const { store } = await renderTestApp(`/${scene.key}`);
 
-    const mathScope = store.getState().mathItems.mathScope();
+    const mathScope = store.getState().scene.mathScope();
     expect(mathScope.errors.size).toBe(numEvalErrors + numParseErrors);
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);
   },
@@ -71,7 +71,7 @@ test.each([
     const scene = seedDb.withSceneFromItems([item]);
     const { store } = await renderTestApp(`/${scene.key}`);
 
-    const mathScope = store.getState().mathItems.mathScope();
+    const mathScope = store.getState().scene.mathScope();
     const coordsInput = await screen.findByLabelText("Coordinates");
 
     pasteText(coordsInput, coordsString);
@@ -84,13 +84,13 @@ test("Adding items adds to mathScope", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const { store } = await renderTestApp(`/${scene.key}`);
 
-  const mathScope = store.getState().mathItems.mathScope();
+  const mathScope = store.getState().scene.mathScope();
   await user.click(await screen.findByText("Add Object"));
   const menu = await screen.findByRole("menu");
   const addPoint = await within(menu).findByText("Point");
   await user.click(addPoint, { pointerEventsCheck: 0 });
 
-  const items = Object.values(store.getState().mathItems.items);
+  const items = Object.values(store.getState().scene.items);
   expect(items).toHaveLength(2); // point + folder
   const point = Object.values(items).find(
     (item) => item.type === MIT.Point,
@@ -112,7 +112,7 @@ test("Deleting items removes them from mathScope", async () => {
   const scene = seedDb.withSceneFromItems([point]);
   const { store } = await renderTestApp(`/${scene.key}`);
 
-  const mathScope = store.getState().mathItems.mathScope();
+  const mathScope = store.getState().scene.mathScope();
   expect(mathScope.results.size).toBeGreaterThan(1); // point + folder visibility
   expect(mathScope.errors.size).toBeGreaterThan(0);
 

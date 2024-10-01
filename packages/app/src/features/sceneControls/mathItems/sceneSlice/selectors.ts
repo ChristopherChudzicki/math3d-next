@@ -2,15 +2,18 @@ import { createSelector } from "@reduxjs/toolkit";
 import type { SelectorReturn, RootState } from "@/store/store";
 import type { MathItem } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
-import type { MathItemsState, AppMathScope, Subtree } from "./interfaces";
+import type { SceneState, AppMathScope, Subtree } from "./interfaces";
 import * as utils from "./util";
 import { SETTINGS_FOLDER } from "./util";
 
-const title: SelectorReturn<MathItemsState["title"]> = (state: RootState) =>
-  state.mathItems.title;
+const title: SelectorReturn<SceneState["title"]> = (state: RootState) =>
+  state.scene.title;
 
-const mathItems: SelectorReturn<MathItemsState["items"]> = (state: RootState) =>
-  state.mathItems.items;
+const author: SelectorReturn<SceneState["author"]> = (state: RootState) =>
+  state.scene.author;
+
+const mathItems: SelectorReturn<SceneState["items"]> = (state: RootState) =>
+  state.scene.items;
 
 const orderedMathItems: SelectorReturn<MathItem[]> = createSelector(
   [mathItems],
@@ -20,10 +23,10 @@ const orderedMathItems: SelectorReturn<MathItem[]> = createSelector(
 const mathItem =
   (id: string): SelectorReturn<MathItem> =>
   (state: RootState) =>
-    state.mathItems.items[id];
+    state.scene.items[id];
 
 const getSubtree = (
-  order: MathItemsState["order"],
+  order: SceneState["order"],
   node: Subtree,
   depth = 0,
 ): Subtree => {
@@ -55,7 +58,7 @@ const getSubtree = (
 
 const subtree = createSelector(
   [
-    (state: RootState) => state.mathItems.order,
+    (state: RootState) => state.scene.order,
     (_state: RootState, rootId: string) => rootId,
   ],
   (order, rootId) => getSubtree(order, { id: rootId, parent: null }),
@@ -64,23 +67,23 @@ const subtree = createSelector(
 const isActive =
   (id: string): SelectorReturn<boolean> =>
   (state: RootState) =>
-    state.mathItems.activeItemId === id;
+    state.scene.activeItemId === id;
 
 const mathScope = (): SelectorReturn<AppMathScope> => (state: RootState) =>
-  state.mathItems.mathScope();
+  state.scene.mathScope();
 
 const isPermanent =
   (id: string): SelectorReturn<boolean> =>
   (state: RootState) => {
     if (id === SETTINGS_FOLDER) return true;
-    const { order } = state.mathItems;
+    const { order } = state.scene;
     return utils.isDescendantOf(order, id, SETTINGS_FOLDER);
   };
 
 const hasChildren =
   (id: string): SelectorReturn<boolean> =>
   (state: RootState) => {
-    const { order } = state.mathItems;
+    const { order } = state.scene;
     return order[id]?.length > 0;
   };
 
@@ -96,16 +99,24 @@ const getItems = createSelector(
 const hasItems =
   (ids: string[]): SelectorReturn<boolean> =>
   (state: RootState) => {
-    const { items } = state.mathItems;
+    const { items } = state.scene;
     return ids.every((id) => items[id]);
   };
 
+const key = (state: RootState) => state.scene.key;
+
+const dirty = (state: RootState) => state.scene.dirty;
+
+const itemOrder = (state: RootState) => state.scene.order;
+
 const sceneInfo = createSelector(
-  [title, orderedMathItems, (state: RootState) => state.mathItems.order],
-  (sceneTitle, items, order) => ({
+  [title, author, orderedMathItems, itemOrder, key],
+  (sceneTitle, sceneAuthor, items, order, sceneKey) => ({
     title: sceneTitle,
+    author: sceneAuthor,
     items,
     itemOrder: order,
+    key: sceneKey,
   }),
 );
 
@@ -122,5 +133,6 @@ export {
   sceneInfo,
   isPermanent,
   hasChildren,
+  dirty,
 };
 export type { Subtree };

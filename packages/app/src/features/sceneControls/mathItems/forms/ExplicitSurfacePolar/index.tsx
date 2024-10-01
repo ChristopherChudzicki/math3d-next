@@ -13,7 +13,7 @@ const ExplicitSurfacePolar: MathItemForm<MIT.ExplicitSurfacePolar> = ({
   const patchProperty = usePatchPropertyOnChange(item);
   useEffect(() => {
     const params = ["X", "Y", "Z", ...expr.params];
-    patchProperty({ name: "colorExpr", value: params }, "params");
+    patchProperty({ name: "colorExpr", value: params }, "params", true);
   }, [expr.params, patchProperty]);
   return <RangedMathItemForm item={item} exprNames={exprNames} />;
 };

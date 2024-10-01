@@ -95,12 +95,12 @@ const BasicDialog: React.FC<BasicDialogProps> = ({
       TransitionProps={TransitionProps}
       maxWidth={maxWidth}
     >
-      <DialogTitle>{title}</DialogTitle>
       <div style={topRightStyle}>
         <IconButton onClick={onClose}>
           <Close />
         </IconButton>
       </div>
+      <DialogTitle>{title}</DialogTitle>
       <DialogContent>{children}</DialogContent>
       {showFooter && (
         <DialogActions>

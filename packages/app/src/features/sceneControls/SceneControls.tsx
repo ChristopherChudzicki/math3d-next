@@ -1,5 +1,4 @@
 import { useScene } from "@math3d/api";
-import type { StrictScene as Scene } from "@math3d/api";
 
 import React, { useEffect } from "react";
 import { useAppDispatch } from "@/store/hooks";
@@ -9,11 +8,11 @@ import { isAxiosError } from "axios";
 import { useNavigate } from "react-router";
 import AddObjectButton from "./AddObjectButton";
 import ControlTabs from "./controlTabs";
-import { mathItemsSlice, MathItemsList } from "./mathItems";
+import { sceneSlice, MathItemsList } from "./mathItems";
 import styles from "./SceneControls.module.css";
 import { useNotifications } from "../notifications/NotificationsContext";
 
-const { actions: itemActions } = mathItemsSlice;
+const { actions: itemActions } = sceneSlice;
 
 const useLoadSceneIntoRedux = (sceneKey?: string) => {
   const dispatch = useAppDispatch();
@@ -44,15 +43,16 @@ const useLoadSceneIntoRedux = (sceneKey?: string) => {
     }
   }, [error, addNotification, navigate]);
 
-  const scene =
-    sceneKey === undefined ? defaultScene : (data as Scene | undefined);
+  const scene = sceneKey === undefined ? defaultScene : data;
 
   useEffect(() => {
     if (!scene) return;
     const payload = {
+      key: scene.key,
+      author: scene.author,
       items: scene.items,
       order: scene.itemOrder,
-      title: scene.title,
+      title: scene.title ?? "",
     };
     dispatch(itemActions.setItems(payload));
   }, [dispatch, scene]);

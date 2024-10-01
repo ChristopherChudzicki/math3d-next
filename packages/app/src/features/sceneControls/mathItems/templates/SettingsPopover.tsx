@@ -9,7 +9,7 @@ import type {
 import React, { forwardRef, useMemo } from "react";
 import { useToggle } from "@/util/hooks";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
-import { useMathScope } from "../mathItemsSlice";
+import { useMathScope } from "../sceneSlice";
 import { getMathProperties, useMathErrors } from "../mathScope";
 import CloseButton from "./CloseButton";
 import styles from "./SettingsPopover.module.css";

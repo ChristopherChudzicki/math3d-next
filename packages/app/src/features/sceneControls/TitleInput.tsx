@@ -1,6 +1,6 @@
 import { useAppSelector } from "@/store/hooks";
 import React, { useCallback } from "react";
-import { select, useSetTitle } from "./mathItems/mathItemsSlice";
+import { select, useSetTitle } from "./mathItems/sceneSlice";
 import AutosizeText from "./mathItems/FieldWidget/AutosizeText";
 import { OnWidgetChange } from "./mathItems/FieldWidget/types";
 import styles from "./TitleInput.module.css";

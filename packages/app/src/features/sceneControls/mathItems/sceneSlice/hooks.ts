@@ -2,7 +2,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useCallback } from "react";
 import type { AppMathScope } from "./interfaces";
 import * as select from "./selectors";
-import { actions } from "./mathItems.slice";
+import { actions } from "./scene.slice";
 
 const useMathScope = (): AppMathScope => {
   return useAppSelector(select.mathScope());

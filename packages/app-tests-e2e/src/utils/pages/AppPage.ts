@@ -5,6 +5,8 @@ import SigninPage from "./SigninPage";
 import SignupPage from "./SignupPage";
 import SignoutPage from "./SignoutPage";
 import UserSettingsPage from "./UserSettingsPage";
+import ItemSettings from "./ItemSettings";
+import SharePopover from "./SharePopover";
 
 class AppPage {
   private page: Page;
@@ -29,12 +31,21 @@ class AppPage {
     return new SignoutPage(this.page);
   }
 
+  sharePopover(): SharePopover {
+    return new SharePopover(this.page);
+  }
+
   sceneTitle(): Locator {
     return this.header().getByLabel("Scene title");
   }
 
   header(): Locator {
     return this.page.getByRole("banner");
+  }
+
+  saveButton(): Locator {
+    const header = this.header();
+    return header.getByRole("button").and(header.getByTestId("save"));
   }
 
   userSettings(): UserSettingsPage {
@@ -70,6 +81,10 @@ class AppPage {
     await this.userMenu().opener().click();
     await expect(this.userMenu().username()).toBeVisible();
     await this.userMenu().root.press("Escape");
+  }
+
+  getUniqueItemSettings(description: string): Promise<ItemSettings> {
+    return ItemSettings.getUniqueItemSettings(this.page, description);
   }
 }
 

@@ -1,4 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { CaseReducer } from "@reduxjs/toolkit";
+import type { Reducer, UnknownAction } from "redux";
 import { mathItemConfigs, MathItemType } from "@math3d/mathitem-configs";
 import type { MathItem, MathItemPatch } from "@math3d/mathitem-configs";
 import { keyBy } from "lodash-es";
@@ -11,15 +13,18 @@ import {
   syncItemsToMathScope,
   removeItemsFromMathScope,
 } from "./syncMathScope";
-import type { MathItemsState } from "./interfaces";
+import type { SceneState } from "./interfaces";
 import { makeMathScope } from "./mathScopeInstance";
 import { isDescendantOf, MAIN_FOLDER, SETTINGS_FOLDER } from "./util";
 
 const idGenerator = new IdGenerator({ initialValue: 100 });
 
-const getInitialState = (): MathItemsState => {
+const getInitialState = (): SceneState => {
   const mathScope = makeMathScope();
   return {
+    key: null,
+    dirty: false,
+    author: null,
     mathScope: () => mathScope,
     items: {},
     activeItemId: undefined,
@@ -30,7 +35,7 @@ const getInitialState = (): MathItemsState => {
 };
 
 const getInsertionFolder = (
-  order: MathItemsState["order"],
+  order: SceneState["order"],
   itemId?: string,
 ): string => {
   if (itemId === undefined || isDescendantOf(order, itemId, SETTINGS_FOLDER)) {
@@ -48,7 +53,7 @@ const getInsertionFolder = (
   assertNotNil(folderEntry, "Could not find active folder.");
   return folderEntry[0];
 };
-const getParent = (order: MathItemsState["order"], itemId: string): string => {
+const getParent = (order: SceneState["order"], itemId: string): string => {
   const parentFolderId = Object.keys(order).find((folderId) => {
     return order[folderId].includes(itemId);
   });
@@ -61,24 +66,40 @@ const insertAtIndex = <T>(array: T[], item: T, index: number) => {
   array.splice(insertionIndex, 0, item);
 };
 
-const mathItemsSlice = createSlice({
-  name: "mathItems",
+type SceneCaseReducer<P> = CaseReducer<SceneState, PayloadAction<P>>;
+const withClean =
+  (defaultClean: boolean = true) =>
+  <P>(fn: SceneCaseReducer<P>) => {
+    return {
+      prepare: (payload: P, clean = defaultClean) => {
+        return {
+          payload,
+          meta: { clean },
+        };
+      },
+      reducer: fn,
+    };
+  };
+
+const slice = createSlice({
+  name: "scene",
   initialState: getInitialState,
   reducers: {
-    setItems: (
-      state,
-      action: PayloadAction<{
-        items: MathItem[];
-        order: MathItemsState["order"];
-        title: MathItemsState["title"];
-      }>,
-    ) => {
-      const { items, order, title } = action.payload;
+    setItems: withClean(true)<{
+      items: MathItem[];
+      order: SceneState["order"];
+      title: SceneState["title"];
+      author: SceneState["author"];
+      key: SceneState["key"];
+    }>((state, action) => {
+      const { items, order, title, author, key } = action.payload;
       state.title = title;
       state.items = keyBy(items, (item) => item.id);
       state.order = order;
       state.activeItemId = undefined;
       state.activeTabId = MAIN_FOLDER;
+      state.author = author;
+      state.key = key;
 
       invariant(state.order[MAIN_FOLDER], "Main folder should exist.");
       invariant(state.order[SETTINGS_FOLDER], "Settings folder should exist.");
@@ -86,11 +107,11 @@ const mathItemsSlice = createSlice({
       const mathScope = makeMathScope();
       state.mathScope = () => mathScope;
       syncItemsToMathScope(mathScope, items);
-    },
-    initializeMathScope: (state) => {
+    }),
+    initializeMathScope: withClean(true)<void>((state) => {
       const items = Object.values(state.items);
       syncItemsToMathScope(state.mathScope(), items);
-    },
+    }),
     addNewItem: (state, action: PayloadAction<{ type: MathItemType }>) => {
       const id = idGenerator.next();
       const { type } = action.payload;
@@ -123,9 +144,6 @@ const mathItemsSlice = createSlice({
 
       syncItemsToMathScope(state.mathScope(), [item]);
     },
-    setActiveItem: (state, action: PayloadAction<{ id: string }>) => {
-      state.activeItemId = action.payload.id;
-    },
     remove: (state, action: PayloadAction<{ id: string }>) => {
       const { id } = action.payload;
       const item = state.items[id];
@@ -143,26 +161,22 @@ const mathItemsSlice = createSlice({
 
       removeItemsFromMathScope(state.mathScope(), [item]);
     },
-    setProperties: (
-      state,
-      action: PayloadAction<MathItemPatch<MathItemType>>,
-    ) => {
-      const { id, properties: newProperties } = action.payload;
-      const { properties: oldProperties } = state.items[id];
-      // @ts-expect-error TODO figure this out + reconisder the unions
-      state.items[id].properties = { ...oldProperties, ...newProperties };
+    setProperties: withClean(false)<MathItemPatch<MathItemType>>(
+      (state, action) => {
+        const { id, properties: newProperties } = action.payload;
+        const { properties: oldProperties } = state.items[id];
+        // @ts-expect-error TODO figure this out + reconisder the unions
+        state.items[id].properties = { ...oldProperties, ...newProperties };
 
-      const item = state.items[id];
-      syncItemsToMathScope(state.mathScope(), [item]);
-    },
-    patchProperty: (
-      state,
-      action: PayloadAction<{
-        id: string;
-        path: string;
-        value: unknown;
-      }>,
-    ) => {
+        const item = state.items[id];
+        syncItemsToMathScope(state.mathScope(), [item]);
+      },
+    ),
+    patchProperty: withClean(false)<{
+      id: string;
+      path: string;
+      value: unknown;
+    }>((state, action) => {
       const { id, path, value } = action.payload;
 
       const [result] = jsonPatch.applyPatch(
@@ -178,7 +192,7 @@ const mathItemsSlice = createSlice({
 
       const item = state.items[id];
       syncItemsToMathScope(state.mathScope(), [item]);
-    },
+    }),
     move: (
       state,
       action: PayloadAction<{
@@ -196,19 +210,40 @@ const mathItemsSlice = createSlice({
       const { title } = action.payload;
       state.title = title;
     },
-    setActiveTab: (
-      state,
-      action: PayloadAction<{
-        id: typeof MAIN_FOLDER | typeof SETTINGS_FOLDER;
-      }>,
-    ) => {
+    setActiveItem: withClean(true)<{ id: string }>((state, action) => {
+      state.activeItemId = action.payload.id;
+    }),
+    setActiveTab: withClean(true)<{ id: string }>((state, action) => {
       state.activeTabId = action.payload.id;
-    },
+    }),
+    setClean: withClean(true)<void>((state, _action) => {
+      state.dirty = false;
+    }),
   },
 });
 
-const { actions, reducer } = mathItemsSlice;
+const { actions } = slice;
 
-export type { MathItemsState };
-export default mathItemsSlice;
+type UnknownMaybeCleanAction = UnknownAction & { meta?: { clean?: boolean } };
+
+const reducer: Reducer<SceneState, UnknownMaybeCleanAction> = (
+  state,
+  action,
+) => {
+  if (
+    !state ||
+    state.dirty ||
+    !action.type.startsWith("scene/") ||
+    action?.meta?.clean
+  ) {
+    return slice.reducer(state, action);
+  }
+
+  return slice.reducer({ ...state, dirty: true }, action);
+};
+
+const sceneSlice = { ...slice, reducer };
+
+export type { SceneState };
+export default sceneSlice;
 export { actions, reducer };

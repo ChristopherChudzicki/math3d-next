@@ -8,7 +8,7 @@ import FieldWidget, { useOnWidgetChange } from "../../FieldWidget";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
 import styles from "./Camera.module.css";
-import { useMathScope } from "../../mathItemsSlice";
+import { useMathScope } from "../../sceneSlice";
 import { useMathErrors } from "../../mathScope";
 
 const config = configs[MIT.Camera];

@@ -13,6 +13,10 @@ const TEST_SCENE_PREFIX = "[TEST-E2E-SCENE]";
 type PrepareSceneOpts = {
   allowCleanup404: boolean;
 };
+type PrepareScene = (
+  scene: Scene,
+  opts?: Partial<PrepareSceneOpts>,
+) => Promise<string>;
 
 type Fixtures = {
   user: UserCredentials | "static" | null;
@@ -22,10 +26,12 @@ type Fixtures = {
   createUser: (user: UserCredentials) => Promise<UserCredentials>;
   authToken: string | null;
   page: Page;
-  prepareScene: (
-    scene: Scene,
-    opts?: Partial<PrepareSceneOpts>,
-  ) => Promise<string>;
+  getPrepareScene: ({
+    authToken,
+  }: {
+    authToken: string | null;
+  }) => PrepareScene;
+  prepareScene: PrepareScene;
 };
 
 const test = base.extend<Fixtures>({
@@ -83,42 +89,49 @@ const test = base.extend<Fixtures>({
     }
     await use(page);
   },
+  // eslint-disable-next-line no-empty-pattern
+  getPrepareScene: async ({}, user) => {
+    const cleanups: (() => Promise<void>)[] = [];
+    const getPrepareScene: Fixtures["getPrepareScene"] = ({ authToken }) => {
+      const scenesApi = new ScenesApi(getConfig(authToken));
+      const create: Fixtures["prepareScene"] = async (s, opts) => {
+        const { allowCleanup404 = false } = opts ?? {};
+        const title = authToken ? s.title : `${TEST_SCENE_PREFIX} ${s.title}`;
+        const response = await scenesApi.scenesCreate({
+          SceneCreateRequest: { ...s, title },
+        });
+        const { key } = response.data;
+        const cleanup = async () => {
+          try {
+            await scenesApi.scenesDestroy({ key });
+          } catch (err) {
+            if (isAxiosError(err, [404])) {
+              if (!allowCleanup404) {
+                throw new Error(`Scene with key ${key} not found`);
+              }
+            } else {
+              throw err;
+            }
+          }
+        };
+        cleanups.push(cleanup);
+        return key;
+      };
+      return create;
+    };
+    user(getPrepareScene);
+    await Promise.all(cleanups.map((f) => f()));
+  },
   /**
    * pre-create scenes owned by `user` fixture.
    */
-  prepareScene: async ({ user, authToken }, use) => {
-    const scenesApi = new ScenesApi(getConfig(authToken));
-    const cleanup: { key: string; allow404: boolean }[] = [];
-    const create: Fixtures["prepareScene"] = async (s, opts) => {
-      const { allowCleanup404 = false } = opts ?? {};
-      invariant(
-        user !== "static",
-        "Do not create scenes with pre-seeded static user during e2e tests",
-      );
-      const title = user ? s.title : `${TEST_SCENE_PREFIX} ${s.title}`;
-      const response = await scenesApi.scenesCreate({
-        SceneCreateRequest: { ...s, title },
-      });
-      const { key } = response.data;
-      cleanup.push({ key, allow404: allowCleanup404 });
-      return key;
-    };
-    await use(create);
-    const cleanupRequests = await Promise.allSettled(
-      cleanup.map(({ key }) => scenesApi.scenesDestroy({ key })),
+  prepareScene: async ({ user, authToken, getPrepareScene }, use) => {
+    invariant(
+      user !== "static",
+      "Static user should not create data during the e2e tests.",
     );
-    cleanupRequests.forEach((r, i) => {
-      if (r.status === "rejected") {
-        const { key, allow404 } = cleanup[i];
-        if (isAxiosError(r.reason, [404])) {
-          if (!allow404) {
-            throw new Error(`Scene with key ${key} not found`);
-          }
-        } else {
-          throw r.reason;
-        }
-      }
-    });
+    const prepareScene = getPrepareScene({ authToken });
+    await use(prepareScene);
   },
 });
 

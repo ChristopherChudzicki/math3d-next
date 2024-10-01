@@ -1,10 +1,10 @@
-import { MathItemsState } from "./interfaces";
+import { SceneState } from "./interfaces";
 
 const MAIN_FOLDER = "main";
 const SETTINGS_FOLDER = "setup";
 
 const getParent = (
-  order: MathItemsState["order"],
+  order: SceneState["order"],
   itemId: string,
 ): string | null => {
   const parentFolderId = Object.keys(order).find((folderId) => {
@@ -15,7 +15,7 @@ const getParent = (
 };
 
 const isDescendantOf = (
-  order: MathItemsState["order"],
+  order: SceneState["order"],
   id: string,
   candidateAncestor: string,
 ): boolean => {

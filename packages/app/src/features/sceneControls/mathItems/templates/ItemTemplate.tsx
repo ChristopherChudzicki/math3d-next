@@ -12,7 +12,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import * as u from "@/util/styles/utils.module.css";
 import ColorStatus from "../ColorStatus";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
-import { actions, select } from "../mathItemsSlice";
+import { actions, select } from "../sceneSlice";
 import CloseButton from "./CloseButton";
 import styles from "./ItemTemplate.module.css";
 import SettingsPopover from "./SettingsPopover";

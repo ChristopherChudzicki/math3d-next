@@ -9,7 +9,7 @@ import {
 import { filter as collectionFilter, pickBy } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { OnChangeListener } from "@math3d/mathscope";
-import { AppMathScope, AppParseable } from "./mathItemsSlice/interfaces";
+import { AppMathScope, AppParseable } from "./sceneSlice/interfaces";
 
 type EvaluationResultsSlice<K extends string> = Partial<Record<K, unknown>>;
 type EvaluationErrorsSlice<K extends string> = Partial<Record<K, Error>>;

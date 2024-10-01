@@ -9,7 +9,7 @@ import {
 } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import { useMathItemResults } from "../../sceneControls/mathItems/mathScope";
-import { useMathScope } from "../../sceneControls/mathItems/mathItemsSlice";
+import { useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import { GraphicComponent, AxesRange } from "./interfaces";
 import { project } from "./util";
 

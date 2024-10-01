@@ -5,7 +5,10 @@ import { Parseable } from "@math3d/parser";
 type AppParseable = Parseable;
 type AppMathScope = MathScope<AppParseable>;
 
-interface MathItemsState {
+interface SceneState {
+  key: string | null;
+  dirty: boolean;
+  author: number | null;
   items: {
     [id: string]: MathItem;
   };
@@ -30,4 +33,4 @@ interface Subtree {
   children?: Subtree[];
 }
 
-export type { Subtree, MathItemsState, AppMathScope, AppParseable };
+export type { Subtree, SceneState, AppMathScope, AppParseable };

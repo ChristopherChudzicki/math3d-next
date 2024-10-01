@@ -6,6 +6,7 @@ import AppPage from "@/utils/pages/AppPage";
 
 const user = makeUserInfo();
 test.use({ user });
+test.setTimeout(60_000);
 
 test.describe("Deleting a scene", async () => {
   const setup = async (
@@ -20,6 +21,10 @@ test.describe("Deleting a scene", async () => {
     ]);
 
     await page.goto(`/scenes/me`);
+    await expect(
+      page.getByRole("tab", { name: "My Scenes", selected: true }),
+    ).toBeVisible();
+
     const sceneItem1 = page.getByRole("listitem").filter({
       hasText: scene1.title,
     });
@@ -48,8 +53,6 @@ test.describe("Deleting a scene", async () => {
     );
     await expect(sceneItem2).toBeVisible();
     await expect(sceneItem1).toHaveCount(0);
-
-    await page.screenshot();
 
     await page.goto(`/${key1}`);
     await expect(page.getByRole("dialog", { name: "Not found" })).toBeVisible();

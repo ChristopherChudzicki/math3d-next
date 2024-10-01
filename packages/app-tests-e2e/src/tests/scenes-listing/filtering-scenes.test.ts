@@ -18,6 +18,10 @@ test("Filtering scenes by titles", async ({ page, prepareScene }) => {
   ]);
 
   await page.goto(`/scenes/me`);
+  await expect(
+    page.getByRole("tab", { name: "My Scenes", selected: true }),
+  ).toBeVisible();
+
   const sceneItem1 = page.getByRole("listitem").filter({
     hasText: scene1.title,
   });
@@ -45,6 +49,10 @@ test("Archiving and unarchiving scenes", async ({ page, prepareScene }) => {
   await Promise.all([prepareScene(scene1.json()), prepareScene(scene2.json())]);
 
   await page.goto(`/scenes/me`);
+  await expect(
+    page.getByRole("tab", { name: "My Scenes", selected: true }),
+  ).toBeVisible();
+
   const sceneItem1 = page.getByRole("listitem").filter({
     hasText: scene1.title,
   });
@@ -55,7 +63,15 @@ test("Archiving and unarchiving scenes", async ({ page, prepareScene }) => {
     name: "Include archived",
   });
 
-  await expect(sceneItem1).toBeVisible();
+  try {
+    await expect(sceneItem1).toBeVisible();
+  } catch (err) {
+    await page.screenshot({
+      path: `archive-unarchive-${new Date().toString()}.png`,
+    });
+    throw err;
+  }
+
   await expect(sceneItem2).toBeVisible();
 
   await sceneItem1.getByRole("button", { name: "Edit" }).click();

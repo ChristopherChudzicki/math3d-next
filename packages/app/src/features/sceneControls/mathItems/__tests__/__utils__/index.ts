@@ -60,9 +60,9 @@ const setupItemTest = async <T extends MathItemType>(
 const getActiveItem = (store: {
   getState: () => RootState;
 }): MathItem | null => {
-  const { activeItemId } = store.getState().mathItems;
+  const { activeItemId } = store.getState().scene;
   if (!activeItemId) return null;
-  const item = store.getState().mathItems.items[activeItemId];
+  const item = store.getState().scene.items[activeItemId];
   return item;
 };
 

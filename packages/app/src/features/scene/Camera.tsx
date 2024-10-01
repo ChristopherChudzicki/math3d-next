@@ -4,7 +4,7 @@ import { MathItem, MathItemType } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import { Vector3 } from "three";
 import { useMathItemResults } from "../sceneControls/mathItems/mathScope";
-import { useMathScope } from "../sceneControls/mathItems/mathItemsSlice/index";
+import { useMathScope } from "../sceneControls/mathItems/sceneSlice/index";
 import type { AxesRange, Coords } from "./graphics/interfaces";
 import { project } from "./graphics/util";
 import { dolly, FOV_DOLLY_IN, FOV_DOLLY_OUT } from "./dollyZoom";

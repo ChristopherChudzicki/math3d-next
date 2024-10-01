@@ -7,9 +7,9 @@ import { useAppDispatch } from "@/store/hooks";
 
 import { useToggle } from "@/util/hooks";
 import { Typography } from "@mui/material";
-import { mathItemsSlice } from "./mathItems";
+import { sceneSlice } from "./mathItems";
 
-const { actions } = mathItemsSlice;
+const { actions } = sceneSlice;
 
 type Props = {
   className?: string;

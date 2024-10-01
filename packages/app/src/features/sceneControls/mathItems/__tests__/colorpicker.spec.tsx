@@ -32,7 +32,7 @@ const setup = async <R extends MIT>(
   const scene = seedDb.withSceneFromItems([item]);
   const { store } = await renderTestApp(`/${scene.key}`);
 
-  const mathScope = store.getState().mathItems.mathScope();
+  const mathScope = store.getState().scene.mathScope();
   const findButton = () => screen.findByTitle("Color and Visibility");
   const getButton = () =>
     screen.getByRole("button", { name: "Color and Visibility" });
@@ -42,8 +42,7 @@ const setup = async <R extends MIT>(
     const swatches = within(dialog).getAllByRole("button");
     return swatches;
   };
-  const getItem = () =>
-    store.getState().mathItems.items[item.id] as MathItem<R>;
+  const getItem = () => store.getState().scene.items[item.id] as MathItem<R>;
   const getCalculatedProp = (prop: keyof MathItem<R>["properties"] & string) =>
     mathScope.results.get(id(prop));
 

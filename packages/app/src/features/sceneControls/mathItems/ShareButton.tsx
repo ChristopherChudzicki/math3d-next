@@ -2,7 +2,7 @@ import Button from "@mui/material/Button";
 import React, { useCallback, useId, useRef, useState } from "react";
 import CloudOutlinedIcon from "@mui/icons-material/CloudOutlined";
 import { useAppSelector } from "@/store/hooks";
-import { useCreateScene } from "@math3d/api";
+import { useCreateScene, useUserMe } from "@math3d/api";
 import Popover from "@mui/material/Popover";
 import type { PopoverProps } from "@mui/material/Popover";
 import { useToggle } from "@/util/hooks";
@@ -10,15 +10,21 @@ import TextField from "@mui/material/TextField";
 import classNames from "classnames";
 import { useNavigate } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
+import Alert from "@mui/material/Alert";
 import styles from "./ShareButton.module.css";
-import { select } from "./mathItemsSlice";
+import { select } from "./sceneSlice";
 
 type ShareBodyProps = {
   loading: boolean;
   url: string;
+  hasUnsavedChanges: boolean;
 };
 
-const ShareBody: React.FC<ShareBodyProps> = ({ loading, url }) => {
+const ShareBody: React.FC<ShareBodyProps> = ({
+  loading,
+  url,
+  hasUnsavedChanges,
+}) => {
   const [copied, toggleCopied] = useToggle(false);
 
   const handleCopy = useCallback(() => {
@@ -41,6 +47,11 @@ const ShareBody: React.FC<ShareBodyProps> = ({ loading, url }) => {
             }}
             value={url}
           />
+          {hasUnsavedChanges ? (
+            <Alert severity="info" className={styles["share-note"]}>
+              This scene has unsaved changes.
+            </Alert>
+          ) : null}
           <Button
             variant="contained"
             className={styles["copy-button"]}
@@ -79,36 +90,50 @@ type ShareButtonProps = {
 const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
   const elementId = useId();
   const navigate = useNavigate();
+  const meQuery = useUserMe();
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [url, setUrl] = useState("");
+  const [newlyCreatedUrl, setNewlyCreatedUrl] = useState("");
+  const dirty = useAppSelector(select.dirty);
 
-  const scene = useAppSelector(select.sceneInfo);
+  const { author, ...scene } = useAppSelector(select.sceneInfo);
   const [open, toggleOpen] = useToggle(false);
   const createScene = useCreateScene();
+
+  const url = meQuery.data
+    ? `${window.location.origin}/${scene.key ?? ""}`
+    : newlyCreatedUrl;
+
   const handleClick = useCallback(async () => {
     toggleOpen.on();
+    if (meQuery.data) {
+      return;
+    }
     const result = await createScene.mutateAsync(scene);
     navigate({
       pathname: `/${result.key}`,
     });
-    setUrl(`${window.location.origin}/${result.key}`);
-  }, [toggleOpen, createScene, scene, navigate]);
+    setNewlyCreatedUrl(`${window.location.origin}/${result.key}`);
+  }, [toggleOpen, createScene, scene, navigate, meQuery.data]);
 
+  const hasUnsavedChanges = !!meQuery.data && dirty;
   return (
     <>
       <Button
+        data-testid="share"
         aria-describedby={elementId}
         ref={buttonRef}
         variant="text"
         color="secondary"
         onClick={handleClick}
-        disabled={createScene.isPending}
+        disabled={meQuery.isLoading || createScene.isPending}
         startIcon={<CloudOutlinedIcon fontSize="inherit" />}
       >
         Share
       </Button>
       {variant === "desktop" ? (
         <Popover
+          role="region"
+          aria-label="Share scene"
           id={elementId}
           open={open}
           keepMounted={false}
@@ -117,11 +142,19 @@ const ShareButton: React.FC<ShareButtonProps> = ({ variant }) => {
           anchorOrigin={anchorOrigin}
           transformOrigin={transformOrigin}
         >
-          <ShareBody url={url} loading={createScene.isPending} />
+          <ShareBody
+            hasUnsavedChanges={hasUnsavedChanges}
+            url={url}
+            loading={createScene.isPending}
+          />
         </Popover>
       ) : (
         <Dialog open={open} onClose={toggleOpen.off}>
-          <ShareBody url={url} loading={createScene.isPending} />
+          <ShareBody
+            hasUnsavedChanges={hasUnsavedChanges}
+            url={newlyCreatedUrl}
+            loading={createScene.isPending}
+          />
         </Dialog>
       )}
     </>

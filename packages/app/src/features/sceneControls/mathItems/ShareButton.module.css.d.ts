@@ -5,6 +5,7 @@ declare const styles: {
   readonly "input": string;
   readonly "not-copied": string;
   readonly "saving": string;
+  readonly "share-note": string;
   readonly "share-popover": string;
 };
 export = styles;

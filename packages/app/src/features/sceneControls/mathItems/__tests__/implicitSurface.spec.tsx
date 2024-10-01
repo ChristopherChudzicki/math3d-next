@@ -53,13 +53,13 @@ test("Updating parameter names updates the lhs and rhs appropriately", async () 
   });
   const scene = seedDb.withSceneFromItems([item]);
   const { store } = await renderTestApp(`/${scene.key}`);
-  const mathScope = store.getState().mathItems.mathScope();
+  const mathScope = store.getState().scene.mathScope();
   const [paramInput] = getParamNameInputs();
   await user.clear(paramInput);
   await user.click(paramInput);
   await user.paste("a1");
   expect(mathScope.errors.size).toBe(2);
-  const newItem = store.getState().mathItems.items[
+  const newItem = store.getState().scene.items[
     item.id
   ] as MathItem<MIT.ImplicitSurface>;
   expect(newItem.properties.rhs).toEqual(rhs.final);
@@ -99,7 +99,7 @@ test.each([{ name: "lhs" as const }, { name: "rhs" as const }])(
     await user.paste(finalDisplay);
     expect(input.value).toBe(finalDisplay);
 
-    const newItem = store.getState().mathItems.items[
+    const newItem = store.getState().scene.items[
       item.id
     ] as MathItem<MIT.ImplicitSurface>;
     expect(newItem.properties[name]).toEqual(final);

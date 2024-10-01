@@ -6,7 +6,7 @@ import {
 import React, { useCallback } from "react";
 import { useAppDispatch } from "@/store/hooks";
 
-import { actions } from "../mathItemsSlice";
+import { actions } from "../sceneSlice";
 import AutosizeText from "./AutosizeText";
 import ColorWidget from "./ColorWidget";
 import MathAssignment from "./MathAssignment";
@@ -43,10 +43,10 @@ export default FieldWidget;
 export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
   const dispatch = useAppDispatch();
   const onWidgetChange: OnWidgetChange<Parseable> = useCallback(
-    (e) => {
+    (e, clean) => {
       const properties = { [e.name]: e.value };
       const patch = { id: item.id, properties, type: item.type };
-      dispatch(actions.setProperties(patch));
+      dispatch(actions.setProperties(patch, clean));
     },
     [dispatch, item.id, item.type],
   );
@@ -59,14 +59,17 @@ type PatchPropertyOnChange = (
     value: unknown;
   },
   subpath: string,
+  clean?: boolean,
 ) => void;
 
 export const usePatchPropertyOnChange = <T extends MIT>(item: MathItem<T>) => {
   const dispatch = useAppDispatch();
   const onWidgetChange: PatchPropertyOnChange = useCallback(
-    (e, subpath) => {
+    (e, subpath, clean) => {
       const path = `/${e.name}/${subpath}`;
-      dispatch(actions.patchProperty({ id: item.id, path, value: e.value }));
+      dispatch(
+        actions.patchProperty({ id: item.id, path, value: e.value }, clean),
+      );
     },
     [dispatch, item.id],
   );
