@@ -101,7 +101,7 @@
     "concurrently": "^8.2.2",
     "eslint": "^8.54.0",
     "identity-obj-proxy": "3.0.0",
-    "jest-fail-on-console": "3.3.0",
+    "jest-fail-on-console": "3.3.1",
     "jsdom": "^24.0.0",
     "msw": "^2.0.14",
     "rollup-plugin-visualizer": "5.12.0",
