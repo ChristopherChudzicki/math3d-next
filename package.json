@@ -3,7 +3,7 @@
   "workspaces": [
     "packages/*"
   ],
-  "packageManager": "yarn@4.4.1",
+  "packageManager": "yarn@4.5.0",
   "devDependencies": {
     "@math3d/eslint-config": "workspace:*",
     "ts-node": "^10.9.1",
