@@ -32,7 +32,7 @@ types-tqdm = "^4.64.7.15"
 types-psycopg2 = "^2.9.21.7"
 djangorestframework-stubs = {extras = ["compatible-mypy"], version = "^3.0.0"}
 pytest = "^8.0.0"
-django = "5.0.8"
+django = "5.0.9"
 pytest-django = "^4.5.2"
 types-dj-database-url = "^1.2.0.1"
 faker = "^24.0.0"
