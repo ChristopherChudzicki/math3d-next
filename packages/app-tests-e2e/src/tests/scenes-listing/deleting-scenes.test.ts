@@ -20,21 +20,18 @@ test.describe("Deleting a scene", async () => {
       prepareScene(scene2.json()),
     ]);
 
-    await page.goto(`/scenes/me`);
-    await expect(
-      page.getByRole("tab", { name: "My Scenes", selected: true }),
-    ).toBeVisible();
+    const app = new AppPage(page);
+    const myScenes = app.myScenes();
 
-    const sceneItem1 = page.getByRole("listitem").filter({
-      hasText: scene1.title,
-    });
-    const sceneItem2 = page.getByRole("listitem").filter({
-      hasText: scene2.title,
-    });
-    await expect(sceneItem1).toBeVisible();
-    await expect(sceneItem2).toBeVisible();
-    await sceneItem1.getByRole("button", { name: "Edit" }).click();
-    await page.getByRole("menuitem", { name: "Delete" }).click();
+    await myScenes.goTo();
+    await myScenes.assertReady();
+
+    const sceneItem1 = myScenes.sceneItem(scene1.title);
+    const sceneItem2 = myScenes.sceneItem(scene2.title);
+    await expect(sceneItem1.root).toBeVisible();
+    await expect(sceneItem2.root).toBeVisible();
+    await sceneItem1.menuTrigger().click();
+    await sceneItem1.menuItem.delete().click();
     const dialog = page.getByRole("dialog", { name: "Delete scene?" });
     await expect(dialog).toBeVisible();
     if (confirm) {
@@ -51,8 +48,8 @@ test.describe("Deleting a scene", async () => {
       { page, prepareScene },
       true,
     );
-    await expect(sceneItem2).toBeVisible();
-    await expect(sceneItem1).toHaveCount(0);
+    await expect(sceneItem2.root).toBeVisible();
+    await expect(sceneItem1.root).toHaveCount(0);
 
     await page.goto(`/${key1}`);
     await expect(page.getByRole("dialog", { name: "Not found" })).toBeVisible();
@@ -66,8 +63,8 @@ test.describe("Deleting a scene", async () => {
       { page, prepareScene },
       false,
     );
-    await expect(sceneItem1).toBeVisible();
-    await expect(sceneItem2).toBeVisible();
+    await expect(sceneItem1.root).toBeVisible();
+    await expect(sceneItem2.root).toBeVisible();
 
     await page.goto(`/${key1}`);
 
