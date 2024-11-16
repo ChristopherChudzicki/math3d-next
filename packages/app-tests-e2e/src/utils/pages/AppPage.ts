@@ -7,6 +7,7 @@ import SignoutPage from "./SignoutPage";
 import UserSettingsPage from "./UserSettingsPage";
 import ItemSettings from "./ItemSettings";
 import SharePopover from "./SharePopover";
+import MyScenes from "./MyScenes";
 
 class AppPage {
   private page: Page;
@@ -50,6 +51,10 @@ class AppPage {
 
   userSettings(): UserSettingsPage {
     return new UserSettingsPage(this.page);
+  }
+
+  myScenes(): MyScenes {
+    return new MyScenes(this.page);
   }
 
   async signin({

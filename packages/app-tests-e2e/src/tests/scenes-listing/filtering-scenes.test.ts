@@ -2,6 +2,7 @@ import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
 import { faker } from "@faker-js/faker";
+import AppPage from "@/utils/pages/AppPage";
 
 const user = makeUserInfo();
 test.use({ user });
@@ -17,30 +18,26 @@ test("Filtering scenes by titles", async ({ page, prepareScene }) => {
     prepareScene(scene3.json()),
   ]);
 
-  await page.goto(`/scenes/me`);
-  await expect(
-    page.getByRole("tab", { name: "My Scenes", selected: true }),
-  ).toBeVisible();
+  const app = new AppPage(page);
+  const myScenes = app.myScenes();
 
-  const sceneItem1 = page.getByRole("listitem").filter({
-    hasText: scene1.title,
-  });
-  const sceneItem2 = page.getByRole("listitem").filter({
-    hasText: scene2.title,
-  });
-  const sceneItem3 = page.getByRole("listitem").filter({
-    hasText: scene3.title,
-  });
+  await myScenes.goTo();
+  await myScenes.assertReady();
 
-  await expect(sceneItem1).toBeVisible();
-  await expect(sceneItem2).toBeVisible();
-  await expect(sceneItem3).toBeVisible();
+  const sceneItem1 = myScenes.sceneItem(scene1.title);
+  const sceneItem2 = myScenes.sceneItem(scene2.title);
+  const sceneItem3 = myScenes.sceneItem(scene3.title);
 
-  await page.getByRole("textbox", { name: "Filter scenes" }).fill(`${suffix}`);
+  await expect(sceneItem1.root).toBeVisible();
+  await expect(sceneItem2.root).toBeVisible();
+  await expect(sceneItem3.root).toBeVisible();
+
+  await myScenes.field("Filter scenes").fill(suffix);
+
   await expect(page.getByRole("listitem")).toHaveCount(2);
-  await expect(sceneItem1).toBeVisible();
-  await expect(sceneItem2).toBeVisible();
-  await expect(sceneItem3).toHaveCount(0);
+  await expect(sceneItem1.root).toBeVisible();
+  await expect(sceneItem2.root).toBeVisible();
+  await expect(sceneItem3.root).toHaveCount(0);
 });
 
 test("Archiving and unarchiving scenes", async ({ page, prepareScene }) => {
@@ -48,52 +45,41 @@ test("Archiving and unarchiving scenes", async ({ page, prepareScene }) => {
   const scene2 = new SceneBuilder();
   await Promise.all([prepareScene(scene1.json()), prepareScene(scene2.json())]);
 
-  await page.goto(`/scenes/me`);
-  await expect(
-    page.getByRole("tab", { name: "My Scenes", selected: true }),
-  ).toBeVisible();
+  const app = new AppPage(page);
+  const myScenes = app.myScenes();
 
-  const sceneItem1 = page.getByRole("listitem").filter({
-    hasText: scene1.title,
-  });
-  const sceneItem2 = page.getByRole("listitem").filter({
-    hasText: scene2.title,
-  });
-  const includeArchived = page.getByRole("checkbox", {
-    name: "Include archived",
-  });
+  await myScenes.goTo();
+  await myScenes.assertReady();
 
-  try {
-    await expect(sceneItem1).toBeVisible();
-  } catch (err) {
-    await page.screenshot({
-      path: `archive-unarchive-${new Date().toString()}.png`,
-    });
-    throw err;
-  }
+  const sceneItem1 = myScenes.sceneItem(scene1.title);
+  const sceneItem2 = myScenes.sceneItem(scene2.title);
 
-  await expect(sceneItem2).toBeVisible();
+  const includeArchived = myScenes.field("Include archived");
+  await expect(includeArchived).not.toBeChecked();
 
-  await sceneItem1.getByRole("button", { name: "Edit" }).click();
-  await page.getByRole("menuitem", { name: "Archive" }).click();
+  await expect(sceneItem1.root).toBeVisible();
+  await expect(sceneItem2.root).toBeVisible();
 
-  await expect(sceneItem1).not.toBeVisible();
-  await expect(sceneItem2).toBeVisible();
+  await sceneItem1.menuTrigger().click();
+  await sceneItem1.menuItem.archive().click();
 
-  includeArchived.click();
+  await expect(sceneItem1.root).not.toBeVisible();
+  await expect(sceneItem2.root).toBeVisible();
+
+  await includeArchived.click();
   await expect(includeArchived).toBeChecked();
 
-  await expect(sceneItem1).toBeVisible();
-  await expect(sceneItem1).toContainText("Archived");
-  await expect(sceneItem2).toBeVisible();
+  await expect(sceneItem1.root).toBeVisible();
+  await expect(sceneItem1.root).toContainText("Archived");
+  await expect(sceneItem2.root).toBeVisible();
 
-  await sceneItem1.getByRole("button", { name: "Edit" }).click();
-  await page.getByRole("menuitem", { name: "Unarchive" }).click();
+  await sceneItem1.menuTrigger().click();
+  await sceneItem1.menuItem.unarchive().click();
 
   await includeArchived.click();
   await expect(includeArchived).not.toBeChecked();
 
-  await expect(sceneItem1).toBeVisible();
-  await expect(sceneItem1).not.toContainText("Archived");
-  await expect(sceneItem2).toBeVisible();
+  await expect(sceneItem1.root).toBeVisible();
+  await expect(sceneItem1.root).not.toContainText("Archived");
+  await expect(sceneItem2.root).toBeVisible();
 });
