@@ -1,7 +1,4 @@
-const isComplex = (value: object): value is { im: number; re: number } => {
-  // @ts-expect-error Checking properties that might not exist
-  return typeof value.im === "number" && typeof value.re === "number";
-};
+import { isComplex } from "./utils";
 
 const isNotNull = <T>(x: T | null): x is T => {
   return x !== null;
