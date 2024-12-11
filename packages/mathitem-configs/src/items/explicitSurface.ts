@@ -1,5 +1,6 @@
 import { ParseableArray, ParseableObjs } from "@math3d/parser";
 import { validators } from "@math3d/validators";
+import type { MaybeComplex } from "@math3d/validators";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -110,7 +111,7 @@ type EvaluatedProperties = {
   visible: boolean;
   zBias: number;
   zIndex: number;
-  expr: (x: number, y: number) => number;
+  expr: (x: number, y: number) => MaybeComplex;
   colorExpr: (X: number, Y: number, Z: number, u: number, v: number) => number;
 };
 
@@ -126,7 +127,7 @@ const config: IMathItemConfig<
       name: "expr",
       label: "Expression",
       widget: WidgetType.MathValue,
-      validate: validators.realFunc[2][1],
+      validate: validators.realDomainFunc[2][1],
     },
     colorExpr: {
       name: "colorExpr",
