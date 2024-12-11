@@ -218,6 +218,13 @@ const realDomainFunc = <M extends Dim | 5, N extends Dim>(
         const sample = Array(fromDim)
           .fill(0)
           .map(() => Math.random());
+        /**
+         * ASSUMPTION: outputs of f are always have same length and are always
+         * or (never) numbers.
+         *
+         * A terrible assumption for software functions, but good for math
+         * functions.
+         */
         // @ts-expect-error TS can't tell that sample has correct number of params
         const out = f?.(...sample);
         if (toDim === 1) {
