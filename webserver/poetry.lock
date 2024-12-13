@@ -535,17 +535,6 @@ django = "*"
 typing-extensions = "*"
 
 [[package]]
-name = "django-templated-mail"
-version = "1.1.1"
-description = "Send emails using Django template system."
-optional = false
-python-versions = "*"
-files = [
-    {file = "django-templated-mail-1.1.1.tar.gz", hash = "sha256:8db807effebb42a532622e2d142dfd453dafcd0d7794c4c3332acb90656315f9"},
-    {file = "django_templated_mail-1.1.1-py3-none-any.whl", hash = "sha256:f7127e1e31d7cad4e6c4b4801d25814d4b8782627ead76f4a75b3b7650687556"},
-]
-
-[[package]]
 name = "djangorestframework"
 version = "3.15.2"
 description = "Web APIs for Django, made easy."
@@ -612,18 +601,17 @@ markdown = ["types-Markdown (>=0.1.5)"]
 
 [[package]]
 name = "djoser"
-version = "2.2.3"
+version = "2.3.1"
 description = "REST implementation of Django authentication system."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "djoser-2.2.3-py3-none-any.whl", hash = "sha256:1325e5c1ee3233560e3737fc8fe2ab4b014c5adb98a01682f30ef250aaabafba"},
-    {file = "djoser-2.2.3.tar.gz", hash = "sha256:28545bfb15096dd26e0d74b49b4dd267c0a8d5f9d562225ecc60c83289799131"},
+    {file = "djoser-2.3.1-py3-none-any.whl", hash = "sha256:386f337b9e05cb82354525fe2b6fec19fb1743e93e53b5b4b9dfaffccc38789f"},
+    {file = "djoser-2.3.1.tar.gz", hash = "sha256:4e7e2716b5b961f1289b5e49b2216ba5c18eb2a3b4b597dd6430638716ff5107"},
 ]
 
 [package.dependencies]
 django = ">=3.0.0"
-django-templated-mail = ">=1.1.1,<2.0.0"
 djangorestframework-simplejwt = ">=5.0,<6.0"
 social-auth-app-django = ">=5.0.0,<6.0.0"
 
