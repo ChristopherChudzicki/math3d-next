@@ -47,7 +47,7 @@ const ParametricCurve: GraphicComponent<MathItemType.ParametricCurve> = ({
       if (!domain) return;
       const [t1, t2] = domain[0];
       const [x, y, z] = expr(t1 + (t2 - t1) * t);
-      emit(x, y, z);
+      emit(+x, +y, +z);
     },
     [expr, domain],
   );

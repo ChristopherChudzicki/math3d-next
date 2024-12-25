@@ -25,13 +25,11 @@ type RealVectors = {
   4: [number, number, number, number];
 };
 
-type Complex = { re: number; im: number };
-type MaybeComplex = number | Complex;
-type MaybeComplexVectors = {
-  1: [MaybeComplex];
-  2: [MaybeComplex, MaybeComplex];
-  3: [MaybeComplex, MaybeComplex, MaybeComplex];
-  4: [MaybeComplex, MaybeComplex, MaybeComplex];
+type numberVectors = {
+  1: [number];
+  2: [number, number];
+  3: [number, number, number];
+  4: [number, number, number];
 };
 
 export const real = num;
@@ -102,108 +100,11 @@ type RealFuncs = {
   };
 };
 
-type RealDomainFuncs = {
-  1: {
-    1: (x: number) => MaybeComplex;
-    2: (x: number) => MaybeComplexVectors[2];
-    3: (x: number) => MaybeComplexVectors[3];
-    4: (x: number) => MaybeComplexVectors[4];
-  };
-  2: {
-    1: (x: number, y: number) => MaybeComplex;
-    2: (x: number, y: number) => MaybeComplexVectors[2];
-    3: (x: number, y: number) => MaybeComplexVectors[3];
-    4: (x: number, y: number) => MaybeComplexVectors[4];
-  };
-  3: {
-    1: (x: number, y: number, z: number) => MaybeComplex;
-    2: (x: number, y: number, z: number) => MaybeComplexVectors[2];
-    3: (x: number, y: number, z: number) => MaybeComplexVectors[3];
-    4: (x: number, y: number, z: number) => MaybeComplexVectors[4];
-  };
-  4: {
-    1: (w: number, x: number, y: number, z: number) => MaybeComplex;
-    2: (w: number, x: number, y: number, z: number) => MaybeComplexVectors[2];
-    3: (w: number, x: number, y: number, z: number) => MaybeComplexVectors[3];
-    4: (w: number, x: number, y: number, z: number) => MaybeComplexVectors[4];
-  };
-  5: {
-    1: (w: number, x: number, y: number, z: number) => MaybeComplex;
-    2: (w: number, x: number, y: number, z: number) => MaybeComplexVectors[2];
-    3: (w: number, x: number, y: number, z: number) => MaybeComplexVectors[3];
-    4: (w: number, x: number, y: number, z: number) => MaybeComplexVectors[4];
-  };
-};
-
 const realFunc = <M extends Dim | 5, N extends Dim>(fromDim: M, toDim: N) => {
-  const message = (detail: string) =>
-    `Expected a function from R^${fromDim} -> R^${toDim}. ${detail}`;
-  const schema = yup
-    .mixed<RealFuncs[M][N]>()
-    .required()
-    .test({
-      name: `func-arity-${fromDim}`,
-      message: message(`This is not a function from R^${fromDim}.`),
-      test: (f) => {
-        return f?.length === fromDim;
-      },
-    })
-    .test({
-      name: `func-to-R${toDim}`,
-      message: message(`The outputs of this function are not in R^${toDim}`),
-      test: (f) => {
-        const sample = Array(fromDim)
-          .fill(0)
-          .map(() => Math.random());
-        // @ts-expect-error TS can't tell that sample has correct number of params
-        const out = f?.(...sample);
-        if (toDim === 1) {
-          return real.isValidSync(out);
-        }
-        return realVectors[toDim].isValidSync(out);
-      },
-    });
-  return schema;
-};
-
-const realFuncSchemas = {
-  1: {
-    1: realFunc(1, 1),
-    2: realFunc(1, 2),
-    3: realFunc(1, 3),
-    4: realFunc(1, 4),
-  },
-  2: {
-    1: realFunc(2, 1),
-    2: realFunc(2, 2),
-    3: realFunc(2, 3),
-    4: realFunc(2, 4),
-  },
-  3: {
-    1: realFunc(3, 1),
-    2: realFunc(3, 2),
-    3: realFunc(3, 3),
-    4: realFunc(3, 4),
-  },
-  4: {
-    1: realFunc(4, 1),
-    2: realFunc(4, 2),
-    3: realFunc(4, 3),
-    4: realFunc(4, 4),
-  },
-  5: {
-    1: realFunc(5, 1),
-  },
-};
-
-const realDomainFunc = <M extends Dim | 5, N extends Dim>(
-  fromDim: M,
-  toDim: N,
-) => {
   const message = (detail: string) =>
     `Expected a function from R^${fromDim} -> R^${toDim} (or C^${toDim}). ${detail}`;
   const schema = yup
-    .mixed<RealDomainFuncs[M][N]>()
+    .mixed<RealFuncs[M][N]>()
     .required()
     .test({
       name: "Input dimension",
@@ -244,37 +145,45 @@ const realDomainFunc = <M extends Dim | 5, N extends Dim>(
         maybeComplexVectors[toDim].validateSync(out);
         return true;
       },
+    })
+    .transform((f) => {
+      const ff = (...args: unknown[]) => {
+        const out = f(...args);
+        return Array.isArray(out) ? out.map(Number) : +Number(out);
+      };
+
+      return Object.defineProperty(ff, "length", { value: f.length });
     });
   return schema;
 };
 
-const realDomainFuncSchemas = {
+const realFuncSchemas = {
   1: {
-    1: realDomainFunc(1, 1),
-    2: realDomainFunc(1, 2),
-    3: realDomainFunc(1, 3),
-    4: realDomainFunc(1, 4),
+    1: realFunc(1, 1),
+    2: realFunc(1, 2),
+    3: realFunc(1, 3),
+    4: realFunc(1, 4),
   },
   2: {
-    1: realDomainFunc(2, 1),
-    2: realDomainFunc(2, 2),
-    3: realDomainFunc(2, 3),
-    4: realDomainFunc(2, 4),
+    1: realFunc(2, 1),
+    2: realFunc(2, 2),
+    3: realFunc(2, 3),
+    4: realFunc(2, 4),
   },
   3: {
-    1: realDomainFunc(3, 1),
-    2: realDomainFunc(3, 2),
-    3: realDomainFunc(3, 3),
-    4: realDomainFunc(3, 4),
+    1: realFunc(3, 1),
+    2: realFunc(3, 2),
+    3: realFunc(3, 3),
+    4: realFunc(3, 4),
   },
   4: {
-    1: realDomainFunc(4, 1),
-    2: realDomainFunc(4, 2),
-    3: realDomainFunc(4, 3),
-    4: realDomainFunc(4, 4),
+    1: realFunc(4, 1),
+    2: realFunc(4, 2),
+    3: realFunc(4, 3),
+    4: realFunc(4, 4),
   },
   5: {
-    1: realDomainFunc(5, 1),
+    1: realFunc(5, 1),
   },
 };
 
@@ -305,37 +214,6 @@ const realFuncValidators = {
   },
   5: {
     1: firstArg(realFuncSchemas[5][1].validateSync.bind(realFuncSchemas[5][1])),
-  },
-};
-
-const rdfs = realDomainFuncSchemas;
-const realDomainFuncValidators = {
-  1: {
-    1: firstArg(rdfs[1][1].validateSync.bind(rdfs[1][1])),
-    2: firstArg(rdfs[1][2].validateSync.bind(rdfs[1][2])),
-    3: firstArg(rdfs[1][3].validateSync.bind(rdfs[1][3])),
-    4: firstArg(rdfs[1][4].validateSync.bind(rdfs[1][4])),
-  },
-  2: {
-    1: firstArg(rdfs[2][1].validateSync.bind(rdfs[2][1])),
-    2: firstArg(rdfs[2][2].validateSync.bind(rdfs[2][2])),
-    3: firstArg(rdfs[2][3].validateSync.bind(rdfs[2][3])),
-    4: firstArg(rdfs[2][4].validateSync.bind(rdfs[2][4])),
-  },
-  3: {
-    1: firstArg(rdfs[3][1].validateSync.bind(rdfs[3][1])),
-    2: firstArg(rdfs[3][2].validateSync.bind(rdfs[3][2])),
-    3: firstArg(rdfs[3][3].validateSync.bind(rdfs[3][3])),
-    4: firstArg(rdfs[3][4].validateSync.bind(rdfs[3][4])),
-  },
-  4: {
-    1: firstArg(rdfs[4][1].validateSync.bind(rdfs[4][1])),
-    2: firstArg(rdfs[4][2].validateSync.bind(rdfs[4][2])),
-    3: firstArg(rdfs[4][3].validateSync.bind(rdfs[4][3])),
-    4: firstArg(rdfs[4][4].validateSync.bind(rdfs[4][4])),
-  },
-  5: {
-    1: firstArg(rdfs[5][1].validateSync.bind(rdfs[5][1])),
   },
 };
 
@@ -385,11 +263,8 @@ export const validators = {
   positive: firstArg(positive.validateSync.bind(positive)),
   array: firstArg(array.validateSync.bind(array)),
   realFunc: realFuncValidators,
-  realDomainFunc: realDomainFuncValidators,
   realVec: realVecValidators,
   boolean,
   arrayOf,
   oneOrMany,
 };
-
-export type { MaybeComplex };
