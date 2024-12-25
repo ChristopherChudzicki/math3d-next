@@ -25,13 +25,6 @@ type RealVectors = {
   4: [number, number, number, number];
 };
 
-type numberVectors = {
-  1: [number];
-  2: [number, number];
-  3: [number, number, number];
-  4: [number, number, number];
-};
-
 export const real = num;
 
 export const complex = yup.mixed().test({
