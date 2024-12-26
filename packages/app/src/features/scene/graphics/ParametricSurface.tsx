@@ -264,7 +264,7 @@ const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({
 
   const func: MathboxParametricSurfaceProps["func"] = useMemo(() => {
     if (!expr) return undefined;
-    return (x: number, y: number) => [x, y, expr(x, y)];
+    return (x: number, y: number) => [x, y, +expr(x, y)];
   }, [expr]);
   return (
     <MathboxParametricSurface

@@ -1,6 +1,7 @@
 import * as yup from "yup";
 import { aggregate } from "@math3d/utils";
 import type { TupleOf } from "@math3d/utils";
+import { isComplex } from "@math3d/mathjs-utils";
 import type { Validator } from "./interfaces";
 
 const firstArg = <A, B, C>(f: (a: A, b?: B) => C) => {
@@ -26,6 +27,15 @@ type RealVectors = {
 
 export const real = num;
 
+export const complex = yup.mixed().test({
+  test: isComplex,
+  message: "Expected a complex number",
+});
+export const maybeComplex = yup.mixed().test({
+  test: (val) => typeof val === "number" || isComplex(val),
+  message: "Expected a real or complex number",
+});
+
 const positive = real.positive();
 const nonnegative = real.test({
   test: (x) => x >= 0,
@@ -38,6 +48,16 @@ const realVectors = {
   2: yup.tuple([num, num]).strict().required(),
   3: yup.tuple([num, num, num]).strict().required(),
   4: yup.tuple([num, num, num, num]).strict().required(),
+};
+
+const maybeComplexVectors = {
+  1: yup.tuple([maybeComplex]).strict().required(),
+  2: yup.tuple([maybeComplex, maybeComplex]).strict().required(),
+  3: yup.tuple([maybeComplex, maybeComplex, maybeComplex]).strict().required(),
+  4: yup
+    .tuple([maybeComplex, maybeComplex, maybeComplex, maybeComplex])
+    .strict()
+    .required(),
 };
 
 type RealFuncs = {
@@ -73,67 +93,90 @@ type RealFuncs = {
   };
 };
 
-const numericFunc = <M extends Dim | 5, N extends Dim>(
-  fromDim: M,
-  toDim: N,
-) => {
+const realFunc = <M extends Dim | 5, N extends Dim>(fromDim: M, toDim: N) => {
   const message = (detail: string) =>
-    `Expected a function from R^${fromDim} -> R^${toDim}. ${detail}`;
+    `Expected a function from R^${fromDim} -> R^${toDim} (or C^${toDim}). ${detail}`;
   const schema = yup
     .mixed<RealFuncs[M][N]>()
     .required()
     .test({
-      name: `func-arity-${fromDim}`,
+      name: "Input dimension",
       message: message(`This is not a function from R^${fromDim}.`),
       test: (f) => {
         return f?.length === fromDim;
       },
     })
     .test({
-      name: `func-to-R${toDim}`,
-      message: message(`The outputs of this function are not in R^${toDim}`),
-      test: (f) => {
+      name: "output dimension",
+      test: (f, ctx) => {
         const sample = Array(fromDim)
           .fill(0)
           .map(() => Math.random());
+        /**
+         * ASSUMPTION: outputs of f are always have same length and are always
+         * or (never) numbers.
+         *
+         * A terrible assumption for software functions, but good for math
+         * functions.
+         */
         // @ts-expect-error TS can't tell that sample has correct number of params
         const out = f?.(...sample);
         if (toDim === 1) {
-          return real.isValidSync(out);
+          return maybeComplex.isValidSync(out)
+            ? true
+            : ctx.createError({
+                message: message("Outputs are not real (or complex)."),
+              });
         }
-        return realVectors[toDim].isValidSync(out);
+        if (Array.isArray(out) && out.length !== toDim) {
+          return ctx.createError({
+            message: message(
+              `Output has wrong number of components (${out.length})`,
+            ),
+          });
+        }
+        maybeComplexVectors[toDim].validateSync(out);
+        return true;
       },
+    })
+    .transform((f) => {
+      const ff = (...args: unknown[]) => {
+        const out = f(...args);
+        return Array.isArray(out) ? out.map(Number) : +Number(out);
+      };
+
+      return Object.defineProperty(ff, "length", { value: f.length });
     });
   return schema;
 };
 
 const realFuncSchemas = {
   1: {
-    1: numericFunc(1, 1),
-    2: numericFunc(1, 2),
-    3: numericFunc(1, 3),
-    4: numericFunc(1, 4),
+    1: realFunc(1, 1),
+    2: realFunc(1, 2),
+    3: realFunc(1, 3),
+    4: realFunc(1, 4),
   },
   2: {
-    1: numericFunc(2, 1),
-    2: numericFunc(2, 2),
-    3: numericFunc(2, 3),
-    4: numericFunc(2, 4),
+    1: realFunc(2, 1),
+    2: realFunc(2, 2),
+    3: realFunc(2, 3),
+    4: realFunc(2, 4),
   },
   3: {
-    1: numericFunc(3, 1),
-    2: numericFunc(3, 2),
-    3: numericFunc(3, 3),
-    4: numericFunc(3, 4),
+    1: realFunc(3, 1),
+    2: realFunc(3, 2),
+    3: realFunc(3, 3),
+    4: realFunc(3, 4),
   },
   4: {
-    1: numericFunc(4, 1),
-    2: numericFunc(4, 2),
-    3: numericFunc(4, 3),
-    4: numericFunc(4, 4),
+    1: realFunc(4, 1),
+    2: realFunc(4, 2),
+    3: realFunc(4, 3),
+    4: realFunc(4, 4),
   },
   5: {
-    1: numericFunc(5, 1),
+    1: realFunc(5, 1),
   },
 };
 
