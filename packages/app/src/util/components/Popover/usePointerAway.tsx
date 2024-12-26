@@ -14,10 +14,10 @@ import { RefObject, useCallback, useEffect, useRef } from "react";
  *
  */
 const usePointerAway = (
-  containerRef: RefObject<HTMLElement>,
+  containerRef: RefObject<HTMLElement | undefined>,
   onPointerAway: () => void,
 ) => {
-  const downRef = useRef<HTMLElement>();
+  const downRef = useRef<HTMLElement>(undefined);
 
   const onPointerDown = useCallback((event: PointerEvent) => {
     if (event.target instanceof HTMLElement) {

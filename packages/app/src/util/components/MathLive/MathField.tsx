@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 
+import composeRefs from "@/util/composeRefs";
 import type { MathFieldWebComponentProps } from "./types";
 
 type MathfieldPropsOptions = Pick<
@@ -28,10 +29,7 @@ type OnMathFieldChange = NonNullable<MathfieldProps["onChange"]>;
  * Note: Following React's convention, `props.onChange` is bound to the `input`
  * event. See https://reactjs.org/docs/dom-elements.html#onchange
  */
-const MathFieldForwardRef = (
-  props: MathfieldProps,
-  ref: React.Ref<MathfieldElement | null>,
-) => {
+const MathField = (props: MathfieldProps) => {
   const {
     onKeyDown,
     onChange,
@@ -39,6 +37,7 @@ const MathFieldForwardRef = (
     value,
     defaultValue,
     options,
+    ref,
     ...others
   } = props;
   const [mf, setMf] = useState<MathfieldElement | null>(null);
@@ -85,14 +84,15 @@ const MathFieldForwardRef = (
     }
   });
 
-  useImperativeHandle(ref, () => mf);
-
   return (
-    <math-field {...others} class={className} onInput={onChange} ref={setMf} />
+    <math-field
+      {...others}
+      class={className}
+      onInput={onChange}
+      ref={composeRefs(ref, setMf)}
+    />
   );
 };
-
-const MathField = forwardRef(MathFieldForwardRef);
 
 export default MathField;
 export type { MathfieldProps, OnMathFieldChange };
