@@ -1,6 +1,6 @@
-import { act, waitForElementToBeRemoved } from "@testing-library/react";
+import { waitForElementToBeRemoved } from "@testing-library/react";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import { screen, renderTestApp } from "@/test_util";
+import { screen, renderTestApp, act } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
 
 /**

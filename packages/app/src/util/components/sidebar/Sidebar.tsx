@@ -40,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     throw new Error(`Unexpected direction: ${direction}`);
   }, [visible, side]);
 
-  const inertness = isCollapsed ? { inert: "true", "aria-hidden": true } : {};
+  const inertness = isCollapsed ? { inert: true, "aria-hidden": true } : {};
 
   const handleClick = useCallback(() => {
     if (onVisibleChange) onVisibleChange(visible);

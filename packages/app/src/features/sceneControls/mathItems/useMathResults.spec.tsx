@@ -1,6 +1,5 @@
 import { render } from "@testing-library/react";
-import React, { createContext, useContext, useEffect } from "react";
-import { act } from "react-dom/test-utils";
+import React, { createContext, useContext, useEffect, act } from "react";
 import MathScope, { CyclicAssignmentError } from "@math3d/mathscope";
 import { assertNotNil } from "@/util/predicates";
 import { latexParser } from "@math3d/parser";

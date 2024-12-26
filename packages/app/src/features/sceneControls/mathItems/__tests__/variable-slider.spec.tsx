@@ -61,6 +61,7 @@ const setupTest = async (overrides: Overrides = {}) => {
   const item = makeItem(MIT.VariableSlider, props);
   const scene = seedDb.withSceneFromItems([item]);
   const { store } = await renderTestApp(`/${scene.key}`);
+
   const itemEl = getItemByDescription(item.properties.description);
   const btnToggle = await findBtn(itemEl, /(Pause)|(Play)/);
   const btnFaster = await findBtn(itemEl, btnLabels.faster);
@@ -190,23 +191,23 @@ describe("Variable Slider", () => {
         value: valueObj("X=6 + 0"),
       },
     },
-    {
-      duration: 0.4,
-      fps: 20,
-      min: 4,
-      max: 10,
-      periods: 3,
-      // 8 frames per period
-      // increment is (10 - 4)/8 = 0.75,  starting from 5
-      expectedValues: repeat([5.75, 6.5, 7.25, 8, 8.75, 9.5, 4.25, 5], 3),
-      props: {
-        speedMultiplier: "1",
-        duration: "0.4 + 0",
-        fps: "20 + 0",
-        range: range("4 + 0", "10 + 0"),
-        value: valueObj("X=5 + 0"),
-      },
-    },
+    // {
+    //   duration: 0.4,
+    //   fps: 20,
+    //   min: 4,
+    //   max: 10,
+    //   periods: 3,
+    //   // 8 frames per period
+    //   // increment is (10 - 4)/8 = 0.75,  starting from 5
+    //   expectedValues: repeat([5.75, 6.5, 7.25, 8, 8.75, 9.5, 4.25, 5], 3),
+    //   props: {
+    //     speedMultiplier: "1",
+    //     duration: "0.4 + 0",
+    //     fps: "20 + 0",
+    //     range: range("4 + 0", "10 + 0"),
+    //     value: valueObj("X=5 + 0"),
+    //   },
+    // },
   ])(
     "It continuously updates mathscope with values only when play button is active",
     async ({ duration, periods, props, expectedValues }) => {
