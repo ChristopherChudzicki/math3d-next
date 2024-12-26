@@ -1,16 +1,18 @@
-import React, { useEffect, useRef, forwardRef } from "react";
+import React, { useEffect, useRef } from "react";
 
-const MockComponent = forwardRef((props, ref) => {
+const MockComponent: React.FC<{
+  ref?: React.Ref<HTMLDivElement>;
+}> = (props) => {
   const divRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!divRef.current) return;
     // @ts-expect-error hack to mack props visible during tests
     divRef.current.$props = props;
     // @ts-expect-error hack to mack ref visible during tests
-    divRef.current.$ref = ref;
+    divRef.current.$ref = props.ref;
   });
   return <div ref={divRef} />;
-});
+};
 MockComponent.displayName = "MockComponent";
 
 export const Area = MockComponent;
