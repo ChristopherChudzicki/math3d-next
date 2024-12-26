@@ -9708,17 +9708,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"encoding-japanese@npm:2.0.0":
-  version: 2.0.0
-  resolution: "encoding-japanese@npm:2.0.0"
-  checksum: 10/aabdaa913fcd354ee3933142f121a2027cabb2cd2aff74d84464464d8e0b2bf2dc7223a0176d908954aa39c0682afe03045b6edf8042410bf5cc1fec34758e8f
-  languageName: node
-  linkType: hard
-
-"encoding-japanese@npm:2.1.0":
-  version: 2.1.0
-  resolution: "encoding-japanese@npm:2.1.0"
-  checksum: 10/9c06abca6176aa9db49567956950b9b18508d59bc98eb132b9c8f841422812470bf45c7cba049e35a0bbdb8c888d5dcffc4a76ea696c88d846f7f0834e9f67fc
+"encoding-japanese@npm:2.2.0":
+  version: 2.2.0
+  resolution: "encoding-japanese@npm:2.2.0"
+  checksum: 10/e77259312054ed0f3cdbb5b35d56d244ef4a56779d47e279e7b9da96e0f81b71b0ee2a74709eb047b06d1365f857501cfdbe62bd4e782a412123fd5933feda6c
   languageName: node
   linkType: hard
 
@@ -9847,7 +9840,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"es-abstract@npm:^1.17.5, es-abstract@npm:^1.22.1, es-abstract@npm:^1.22.3, es-abstract@npm:^1.23.0, es-abstract@npm:^1.23.1, es-abstract@npm:^1.23.2, es-abstract@npm:^1.23.3":
+"es-abstract@npm:^1.17.5, es-abstract@npm:^1.22.1, es-abstract@npm:^1.22.3, es-abstract@npm:^1.23.0, es-abstract@npm:^1.23.2, es-abstract@npm:^1.23.3":
   version: 1.23.3
   resolution: "es-abstract@npm:1.23.3"
   dependencies:
@@ -10042,28 +10035,6 @@ __metadata:
     isarray: "npm:^2.0.5"
     stop-iteration-iterator: "npm:^1.0.0"
   checksum: 10/bc2194befbe55725f9489098626479deee3c801eda7e83ce0dff2eb266a28dc808edb9b623ff01d31ebc1328f09d661333d86b601036692c2e3c1a6942319433
-  languageName: node
-  linkType: hard
-
-"es-iterator-helpers@npm:^1.0.19":
-  version: 1.0.19
-  resolution: "es-iterator-helpers@npm:1.0.19"
-  dependencies:
-    call-bind: "npm:^1.0.7"
-    define-properties: "npm:^1.2.1"
-    es-abstract: "npm:^1.23.3"
-    es-errors: "npm:^1.3.0"
-    es-set-tostringtag: "npm:^2.0.3"
-    function-bind: "npm:^1.1.2"
-    get-intrinsic: "npm:^1.2.4"
-    globalthis: "npm:^1.0.3"
-    has-property-descriptors: "npm:^1.0.2"
-    has-proto: "npm:^1.0.3"
-    has-symbols: "npm:^1.0.3"
-    internal-slot: "npm:^1.0.7"
-    iterator.prototype: "npm:^1.1.2"
-    safe-array-concat: "npm:^1.1.2"
-  checksum: 10/980a8081cf6798fe17fcea193b0448d784d72d76aca7240b10813207c67e3dc0d8a23992263870c4fc291da5a946935b0c56dec4fa1a9de8fee0165e4fa1fc58
   languageName: node
   linkType: hard
 
@@ -13294,15 +13265,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-finalizationregistry@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "is-finalizationregistry@npm:1.0.2"
-  dependencies:
-    call-bind: "npm:^1.0.2"
-  checksum: 10/1b8e9e1bf2075e862315ef9d38ce6d39c43ca9d81d46f73b34473506992f4b0fbaadb47ec9b420a5e76afe3f564d9f1f0d9b552ef272cc2395e0f21d743c9c29
-  languageName: node
-  linkType: hard
-
 "is-finalizationregistry@npm:^1.1.0":
   version: 1.1.1
   resolution: "is-finalizationregistry@npm:1.1.1"
@@ -13901,19 +13863,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"iterator.prototype@npm:^1.1.2":
-  version: 1.1.2
-  resolution: "iterator.prototype@npm:1.1.2"
-  dependencies:
-    define-properties: "npm:^1.2.1"
-    get-intrinsic: "npm:^1.2.1"
-    has-symbols: "npm:^1.0.3"
-    reflect.getprototypeof: "npm:^1.0.4"
-    set-function-name: "npm:^2.0.1"
-  checksum: 10/b5013967ad8f28c9ca1be8e159eb10f591b8e46deae87476fe39d668c04374fe9158c815e8b6d2f45885b0a3fd842a8ba13f497ec762b3a0eff49bec278670b1
-  languageName: node
-  linkType: hard
-
 "iterator.prototype@npm:^1.1.4":
   version: 1.1.4
   resolution: "iterator.prototype@npm:1.1.4"
@@ -14382,13 +14331,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"libbase64@npm:1.2.1":
-  version: 1.2.1
-  resolution: "libbase64@npm:1.2.1"
-  checksum: 10/b7b5c99c0c2305802e402cc6a21784396911e42853312a1aa530d11725c737776712d71b2fd2dc5f21b87a80fb186d29e6c472c34be31170aa86a587b23c1033
-  languageName: node
-  linkType: hard
-
 "libbase64@npm:1.3.0":
   version: 1.3.0
   resolution: "libbase64@npm:1.3.0"
@@ -14396,41 +14338,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"libmime@npm:5.2.0":
-  version: 5.2.0
-  resolution: "libmime@npm:5.2.0"
+"libmime@npm:5.3.6":
+  version: 5.3.6
+  resolution: "libmime@npm:5.3.6"
   dependencies:
-    encoding-japanese: "npm:2.0.0"
-    iconv-lite: "npm:0.6.3"
-    libbase64: "npm:1.2.1"
-    libqp: "npm:2.0.1"
-  checksum: 10/d8de523d99bedb1d8055ad27b731ea697c2627595aadbc090eca8393a10def85f4f43e94a240f72a17943203c5ef37b8b24ae53b94d3bb6aa7c9deb6388f79ea
-  languageName: node
-  linkType: hard
-
-"libmime@npm:5.3.5":
-  version: 5.3.5
-  resolution: "libmime@npm:5.3.5"
-  dependencies:
-    encoding-japanese: "npm:2.1.0"
+    encoding-japanese: "npm:2.2.0"
     iconv-lite: "npm:0.6.3"
     libbase64: "npm:1.3.0"
-    libqp: "npm:2.1.0"
-  checksum: 10/7f610cd981081919fc698d4fc1f2281ddf90f2ed4f7b60687a443901ec2c06b9837cb504daf78b6ad772643ec06c67131554ba7a05f645aaab00d984d07c584c
+    libqp: "npm:2.1.1"
+  checksum: 10/4467377ca5f06074fe0d8b96187fab42e38d37a61a1c330d0e94ef6d1884595c25a97891a2def739e2c29d829a107f2b18ef8eab60a06a64a6d79266b2eb8c04
   languageName: node
   linkType: hard
 
-"libqp@npm:2.0.1":
-  version: 2.0.1
-  resolution: "libqp@npm:2.0.1"
-  checksum: 10/5550280b09b1c0caa02870cdd0651be1de91cf74902ff4bfeb23889ae4c002fbedcf532aff3667e85ba2b0eda5b224ac12cae809653e71056439ee7216e70c55
-  languageName: node
-  linkType: hard
-
-"libqp@npm:2.1.0":
-  version: 2.1.0
-  resolution: "libqp@npm:2.1.0"
-  checksum: 10/a44681f80523a2f88fe737dd395bb5bdcc9a1f731e24b2e66ec1de2f92a6292516c9b628f0a81f53ad991233764b5ca0a322268492e1a4534be5d532172b182a
+"libqp@npm:2.1.1":
+  version: 2.1.1
+  resolution: "libqp@npm:2.1.1"
+  checksum: 10/cc59bd6ea61604b0505651fa79b722ff69d39b1fc609dad3ad4a20a51c6eb904babc0d1a59699a55a628063f31540232845bab471910d92c8b607120f563089e
   languageName: node
   linkType: hard
 
@@ -14709,31 +14632,31 @@ __metadata:
   linkType: hard
 
 "mailparser@npm:^3.7.1":
-  version: 3.7.1
-  resolution: "mailparser@npm:3.7.1"
+  version: 3.7.2
+  resolution: "mailparser@npm:3.7.2"
   dependencies:
-    encoding-japanese: "npm:2.1.0"
+    encoding-japanese: "npm:2.2.0"
     he: "npm:1.2.0"
     html-to-text: "npm:9.0.5"
     iconv-lite: "npm:0.6.3"
-    libmime: "npm:5.3.5"
+    libmime: "npm:5.3.6"
     linkify-it: "npm:5.0.0"
-    mailsplit: "npm:5.4.0"
-    nodemailer: "npm:6.9.13"
+    mailsplit: "npm:5.4.2"
+    nodemailer: "npm:6.9.16"
     punycode.js: "npm:2.3.1"
-    tlds: "npm:1.252.0"
-  checksum: 10/02a1b27b70cdf77b2a52ac4f7e4e25abf019a1fc5e0e2a5a23f09e26c39471469797f98060dbc7b8aadfb8dae1f254ff65057ef90453ab25f037e8f53eba6bed
+    tlds: "npm:1.255.0"
+  checksum: 10/3677df620cce0c7f0fd93943eacbdec3662dab6c4119c4c3b5f93f034186aa8771aebb9a9e14f8cc133eeb50dbc0e09152c6662947b28e450cc0ec1b8e88f422
   languageName: node
   linkType: hard
 
-"mailsplit@npm:5.4.0":
-  version: 5.4.0
-  resolution: "mailsplit@npm:5.4.0"
+"mailsplit@npm:5.4.2":
+  version: 5.4.2
+  resolution: "mailsplit@npm:5.4.2"
   dependencies:
-    libbase64: "npm:1.2.1"
-    libmime: "npm:5.2.0"
-    libqp: "npm:2.0.1"
-  checksum: 10/64a9e140ffaff5874b9fe6852514ffe119ee09ed4a0dd3a95a07997840519d07d93f451b3f9675b5524e44f5f12f8348680329183b2c723bac7bf84340c4e1cb
+    libbase64: "npm:1.3.0"
+    libmime: "npm:5.3.6"
+    libqp: "npm:2.1.1"
+  checksum: 10/7557ef6a9961a0da50537fc46a7175e473dec3f27aba18412174dea6c66046f880b7b248a682d34b1aa1de492310ab5f1a5e2083b3578a521bfa5fd57d27dffc
   languageName: node
   linkType: hard
 
@@ -15670,10 +15593,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:6.9.13":
-  version: 6.9.13
-  resolution: "nodemailer@npm:6.9.13"
-  checksum: 10/efbc6fc415ec1e1dc1b91530920b0bcfc648183003c3d79718cd54fc2efef4b7dd1917ddd3853ab127e4b5ebd7353903b5859f0ac3ccea487374b076d41ac8b8
+"nodemailer@npm:6.9.16":
+  version: 6.9.16
+  resolution: "nodemailer@npm:6.9.16"
+  checksum: 10/f131888d3111238fde4ee03539e62f1764b99365ff31d556dde0367dfefcee1f2eb8948558f35ba84fe5cd805f2d01294eee63a5675d3aa501e7df548a2518ce
   languageName: node
   linkType: hard
 
@@ -17707,21 +17630,6 @@ __metadata:
   version: 5.0.1
   resolution: "redux@npm:5.0.1"
   checksum: 10/a373f9ed65693ead58bea5ef61c1d6bef39da9f2706db3be6f84815f3a1283230ecd1184efb1b3daa7f807d8211b0181564ca8f336fc6ee0b1e2fa0ba06737c2
-  languageName: node
-  linkType: hard
-
-"reflect.getprototypeof@npm:^1.0.4":
-  version: 1.0.6
-  resolution: "reflect.getprototypeof@npm:1.0.6"
-  dependencies:
-    call-bind: "npm:^1.0.7"
-    define-properties: "npm:^1.2.1"
-    es-abstract: "npm:^1.23.1"
-    es-errors: "npm:^1.3.0"
-    get-intrinsic: "npm:^1.2.4"
-    globalthis: "npm:^1.0.3"
-    which-builtin-type: "npm:^1.1.3"
-  checksum: 10/518f6457e4bb470c9b317d239c62d4b4a05678b7eae4f1c3f4332fad379b3ea6d2d8999bfad448547fdba8fb77e4725cfe8c6440d0168ff387f16b4f19f759ad
   languageName: node
   linkType: hard
 
@@ -20139,12 +20047,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tlds@npm:1.252.0":
-  version: 1.252.0
-  resolution: "tlds@npm:1.252.0"
+"tlds@npm:1.255.0":
+  version: 1.255.0
+  resolution: "tlds@npm:1.255.0"
   bin:
     tlds: bin.js
-  checksum: 10/ea5b0d54ec7463e6da735eb45a6cd81533288cb95aa6ce62bd44c5b2264206ba6fabcc9202656ff2f0c7964dceeaa995622d9001efac2cd7e43aa07492a63235
+  checksum: 10/ec42c9e913ded4cdce26cc95343be444850ac23ed6193944d7eb5b6e0a2978fb597956aaed1e9e22f1cd5c562aed94a6664c4779048593b8d3170e7a54c62f75
   languageName: node
   linkType: hard
 
@@ -21776,26 +21684,6 @@ __metadata:
     is-string: "npm:^1.1.1"
     is-symbol: "npm:^1.1.1"
   checksum: 10/a877c0667bc089518c83ad4d845cf8296b03efe3565c1de1940c646e00a2a1ae9ed8a185bcfa27cbf352de7906f0616d83b9d2f19ca500ee02a551fb5cf40740
-  languageName: node
-  linkType: hard
-
-"which-builtin-type@npm:^1.1.3":
-  version: 1.1.3
-  resolution: "which-builtin-type@npm:1.1.3"
-  dependencies:
-    function.prototype.name: "npm:^1.1.5"
-    has-tostringtag: "npm:^1.0.0"
-    is-async-function: "npm:^2.0.0"
-    is-date-object: "npm:^1.0.5"
-    is-finalizationregistry: "npm:^1.0.2"
-    is-generator-function: "npm:^1.0.10"
-    is-regex: "npm:^1.1.4"
-    is-weakref: "npm:^1.0.2"
-    isarray: "npm:^2.0.5"
-    which-boxed-primitive: "npm:^1.0.2"
-    which-collection: "npm:^1.0.1"
-    which-typed-array: "npm:^1.1.9"
-  checksum: 10/d7823c4a6aa4fc8183eb572edd9f9ee2751e5f3ba2ccd5b298cc163f720df0f02ee1a5291d18ca8a41d48144ef40007ff6a64e6f5e7c506527086c7513a5f673
   languageName: node
   linkType: hard
 
