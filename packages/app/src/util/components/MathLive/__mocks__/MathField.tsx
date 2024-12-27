@@ -1,10 +1,11 @@
-import React, { forwardRef } from "react";
+import React from "react";
 
 import { MathfieldProps } from "..";
 
-const MockMathFieldForwardRef = (
-  props: MathfieldProps,
-  ref: React.Ref<HTMLTextAreaElement>,
+const MockMathField = (
+  props: MathfieldProps & {
+    ref?: React.Ref<HTMLTextAreaElement>;
+  },
 ) => {
   const {
     value: children,
@@ -32,9 +33,8 @@ const MockMathFieldForwardRef = (
       // @ts-expect-error for e.target should be MathfieldElement but is Textarea
       onChange={onChange}
       readOnly={options?.readOnly}
-      ref={ref}
     />
   );
 };
 
-export default forwardRef(MockMathFieldForwardRef);
+export default MockMathField;

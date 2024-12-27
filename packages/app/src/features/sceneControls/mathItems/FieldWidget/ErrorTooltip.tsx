@@ -17,10 +17,9 @@ const ErrorTooltip: React.FC<Props> = ({ error, children }) => {
       title={error?.message ? <div>{error?.message}</div> : ""}
       open={showTooltip}
     >
-      {React.cloneElement(children, {
-        onBlur: setIsFocused.off,
-        onFocus: setIsFocused.on,
-      })}
+      <span onBlur={setIsFocused.off} onFocus={setIsFocused.on}>
+        {children}
+      </span>
     </Tooltip>
   );
 };

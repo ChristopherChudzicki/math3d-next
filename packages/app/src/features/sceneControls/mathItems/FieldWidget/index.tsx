@@ -33,7 +33,7 @@ const getWidgetComponent = (props: WidgetProps) => {
   throw new Error(`Unrecognized form widget`);
 };
 
-const FieldWidget = (props: WidgetProps): JSX.Element => {
+const FieldWidget: React.FC<WidgetProps> = (props) => {
   const widgetComponent = getWidgetComponent(props);
   return <ErrorTooltip error={props.error}>{widgetComponent}</ErrorTooltip>;
 };

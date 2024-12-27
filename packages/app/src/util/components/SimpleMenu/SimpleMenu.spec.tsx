@@ -8,20 +8,17 @@ import type { SimpleMenuItem } from "./SimpleMenu";
 // Mock react-router-dom's Link so we don't need to set up a Router
 vi.mock("react-router-dom", () => {
   return {
-    Link: React.forwardRef<HTMLAnchorElement, LinkProps>(
-      vi.fn(({ children, ...others }, ref) => {
-        return (
-          <a
-            {...others}
-            ref={ref}
-            data-prop-to={others.to}
-            data-react-component="react-router-dom-link"
-          >
-            {children}
-          </a>
-        );
-      }),
-    ),
+    Link: vi.fn(({ children, ...others }: LinkProps) => {
+      return (
+        <a
+          {...others}
+          data-prop-to={others.to}
+          data-react-component="react-router-dom-link"
+        >
+          {children}
+        </a>
+      );
+    }),
   };
 });
 
@@ -138,17 +135,17 @@ describe("SimpleMenu", () => {
   });
 
   it("Renders link with custom LinkComponent if specified", async () => {
-    const LinkComponent = React.forwardRef<
-      HTMLAnchorElement,
-      React.ComponentPropsWithoutRef<"a">
-    >(({ children, ...others }, ref) => {
+    const LinkComponent: React.FC<React.ComponentProps<"a">> = ({
+      children,
+      ...others
+    }) => {
       return (
-        <a {...others} ref={ref} data-react-component="custom-link">
+        <a {...others} data-react-component="custom-link">
           {children}
         </a>
       );
-    });
-    LinkComponent.displayName = "LinkComponent";
+    };
+
     const items: SimpleMenuItem[] = [
       { key: "one", label: "Item 1", onClick: vi.fn() },
       { key: "two", label: "Item 2", href: "./woof", LinkComponent },

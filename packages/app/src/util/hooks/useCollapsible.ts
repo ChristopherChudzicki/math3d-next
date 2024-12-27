@@ -41,7 +41,7 @@ const useCollapsible = (
   isOpen: boolean,
   refCb?: React.RefCallback<HTMLElement>,
 ): React.RefCallback<HTMLElement> => {
-  const elRef = useRef<HTMLElement>();
+  const elRef = useRef<HTMLElement>(undefined);
   const overflowY = useRef("");
   const expandInterval = useRef(-1);
   const collapseInterval = useRef(-1);

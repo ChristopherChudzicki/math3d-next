@@ -18,7 +18,7 @@ test.each([
   {
     url: "/?controls=0",
     controlsVisible: false,
-    expectedInert: "true",
+    expectedInert: "", // boolean attributes are either present ("") or not (null)
     expectedHidden: "true",
   },
 ])(

@@ -5,18 +5,19 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import { Link as RouterLink } from "react-router-dom";
 import type { LinkProps as RouterLinkProps } from "react-router-dom";
 
+type LinkBehaviorProps = Omit<RouterLinkProps, "to"> & {
+  href: RouterLinkProps["to"];
+  ref?: React.Ref<HTMLAnchorElement>;
+};
+
 /**
  * See https://mui.com/material-ui/guides/routing/#global-theme-link
  */
-const LinkBehavior = React.forwardRef<
-  HTMLAnchorElement,
-  Omit<RouterLinkProps, "to"> & { href: RouterLinkProps["to"] }
->((props, ref) => {
+const LinkBehavior: React.FC<LinkBehaviorProps> = (props) => {
   const { href, ...other } = props;
   // Map href (Material UI) -> to (react-router)
-  return <RouterLink ref={ref} to={href} {...other} />;
-});
-LinkBehavior.displayName = "LinkBehavior";
+  return <RouterLink to={href} {...other} />;
+};
 
 interface SimpleMenuItemBase {
   key: string;
@@ -44,7 +45,10 @@ type SimpleMenuItem =
 
 type SimpleMenuProps = {
   items: SimpleMenuItem[];
-  trigger: React.ReactElement;
+  trigger: React.ReactElement<{
+    onClick?: React.MouseEventHandler;
+    ref?: React.Ref<HTMLElement>;
+  }>;
   onVisibilityChange?: (visible: boolean) => void;
   className?: string;
   "aria-label"?: string;

@@ -10,8 +10,7 @@ export type MathFieldWebComponentProps = React.DetailedHTMLProps<
   MathfieldElement
 >;
 
-declare global {
-  /** @internal */
+declare module "react" {
   namespace JSX {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     interface IntrinsicElements {
