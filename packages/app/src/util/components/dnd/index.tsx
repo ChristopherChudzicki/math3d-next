@@ -27,9 +27,6 @@ import classNames from "classnames";
 import PointerSensor from "./PointerSensor";
 import KeyboardSensor from "./KeyboardSensor";
 
-// @ts-expect-error - dnd-kit bug
-const DragOverlayFixed: React.FC<DragOverlayProps> = DragOverlay;
-
 interface SortableItemProps {
   id: UniqueIdentifier;
   data?: Data;
@@ -94,7 +91,6 @@ const SortableList: React.FC<SortableListProps> = (
   const { as: Component = "div" } = props;
   const children = props.children as KeyedElement[];
   return (
-    // @ts-expect-error - dnd-kit bug
     <SortableContext
       id={props.id}
       strategy={verticalListSortingStrategy}
@@ -219,9 +215,9 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
       onDragCancel={onDragCancel}
     >
       {children}
-      <DragOverlayFixed dropAnimation={dropAnimationConfig}>
+      <DragOverlay dropAnimation={dropAnimationConfig}>
         {activeItemId && renderActive(activeItemId)}
-      </DragOverlayFixed>
+      </DragOverlay>
     </DndContext>
   );
 };
