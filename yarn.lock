@@ -2047,13 +2047,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cortex-js/compute-engine@npm:0.22.0":
-  version: 0.22.0
-  resolution: "@cortex-js/compute-engine@npm:0.22.0"
+"@cortex-js/compute-engine@npm:0.24.1":
+  version: 0.24.1
+  resolution: "@cortex-js/compute-engine@npm:0.24.1"
   dependencies:
     complex.js: "npm:^2.1.1"
     decimal.js: "npm:^10.4.3"
-  checksum: 10/38e5b5ccea61ce2a73e76d60e51ad9800e9129148fb7813f13aab878e2119aeb99b7c93f702505ec561852bcf6f0bb430b6b9d76cebd1be30359eb07f7f82f2b
+  checksum: 10/394deffc2defd17ea09563044ad720023246cdb5e0d4f557e0a654feda02e85d3a9252e0739a191353379dafae58e0c761d53511f17547b3cd3b4b01f2c00620
   languageName: node
   linkType: hard
 
@@ -6706,7 +6706,7 @@ __metadata:
     dotenv: "npm:^16.3.1"
     envalid: "npm:^8.0.0"
     mailparser: "npm:^3.7.1"
-    mathlive: "npm:^0.98.6"
+    mathlive: "npm:^0.103.0"
     p-retry: "npm:^6.2.0"
     three: "npm:^0.147.0"
     tiny-invariant: "npm:^1.3.1"
@@ -6776,7 +6776,7 @@ __metadata:
     lodash-es: "npm:4.17.21"
     mathbox: "npm:^2.3.1"
     mathbox-react: "npm:^0.3.0"
-    mathlive: "npm:^0.98.6"
+    mathlive: "npm:^0.103.0"
     msw: "npm:^2.0.14"
     ordinal: "npm:1.0.3"
     react: "npm:^19.0.0"
@@ -14730,12 +14730,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathlive@npm:^0.98.6":
-  version: 0.98.6
-  resolution: "mathlive@npm:0.98.6"
+"mathlive@npm:^0.103.0":
+  version: 0.103.0
+  resolution: "mathlive@npm:0.103.0"
   dependencies:
-    "@cortex-js/compute-engine": "npm:0.22.0"
-  checksum: 10/c67963f413ba5a76faa05cea1c8373dd98b92d5f74a4c97b34ba5d08272e861ffcf6c32b8a8791ff24f99fa802628ba11ca328d0bb9ce13e509d38e52c0646b1
+    "@cortex-js/compute-engine": "npm:0.24.1"
+  checksum: 10/4f56b66639f6d2e6afb5a77c4b862e140f4a7df1b3ebc13346c9a18b872ea002d075b657aedd5239fba0b1bebe2e4b5b7e7173e738bc170e1b4d9a1667bfd479
   languageName: node
   linkType: hard
 
