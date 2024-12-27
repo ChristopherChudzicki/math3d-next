@@ -55,10 +55,6 @@ module = "djoser.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "templated_mail.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
 module = "environ.*"
 ignore_missing_imports = true
 
