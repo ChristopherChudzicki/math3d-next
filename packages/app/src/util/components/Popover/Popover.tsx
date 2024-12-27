@@ -109,7 +109,7 @@ interface PopoverProps {
   modifiers?: PopperProps["modifiers"];
   onPointerAway?: () => void;
   transitionDuration?: number;
-  trigger: React.ReactElement;
+  trigger: React.ReactElement<{ ref?: React.Ref<unknown> }>;
   visible: boolean;
   placement?: PopperProps["placement"];
 }

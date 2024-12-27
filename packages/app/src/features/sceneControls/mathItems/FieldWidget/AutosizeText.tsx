@@ -9,7 +9,7 @@ const EXTRA_WIDTH = 20;
 
 const AutosizeText: React.FC<
   IWidgetProps & {
-    ref: React.Ref<HTMLTextAreaElement>;
+    ref?: React.Ref<HTMLTextAreaElement>;
   }
 > = (props) => {
   const {

@@ -13,6 +13,7 @@ import {
   Data,
   useDroppable,
 } from "@dnd-kit/core";
+import type { DragOverlayProps } from "@dnd-kit/core";
 import {
   SortableContext,
   sortableKeyboardCoordinates,
@@ -25,6 +26,9 @@ import { CSS } from "@dnd-kit/utilities";
 import classNames from "classnames";
 import PointerSensor from "./PointerSensor";
 import KeyboardSensor from "./KeyboardSensor";
+
+// @ts-expect-error - dnd-kit bug
+const DragOverlayFixed: React.FC<DragOverlayProps> = DragOverlay;
 
 interface SortableItemProps {
   id: UniqueIdentifier;
@@ -90,6 +94,7 @@ const SortableList: React.FC<SortableListProps> = (
   const { as: Component = "div" } = props;
   const children = props.children as KeyedElement[];
   return (
+    // @ts-expect-error - dnd-kit bug
     <SortableContext
       id={props.id}
       strategy={verticalListSortingStrategy}
@@ -214,9 +219,9 @@ const MultiContainerDndContext: React.FC<MultiContainerDndContextProps> = ({
       onDragCancel={onDragCancel}
     >
       {children}
-      <DragOverlay dropAnimation={dropAnimationConfig}>
+      <DragOverlayFixed dropAnimation={dropAnimationConfig}>
         {activeItemId && renderActive(activeItemId)}
-      </DragOverlay>
+      </DragOverlayFixed>
     </DndContext>
   );
 };

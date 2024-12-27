@@ -32,7 +32,7 @@ type RangedMathItemFormProps =
 const RangedMathItemForm = ({
   item,
   exprNames,
-  children,
+  children: Children,
 }: RangedMathItemFormProps) => {
   const config = configs[item.type];
   const { domain } = item.properties;
@@ -50,8 +50,12 @@ const RangedMathItemForm = ({
 
   return (
     <ItemTemplate item={item} config={config}>
-      {children ? (
-        children({ assignments, handlers, errors: assignmentErrors })
+      {Children ? (
+        <Children
+          assignments={assignments}
+          handlers={handlers}
+          errors={assignmentErrors}
+        />
       ) : (
         <FieldWidget
           widget={WidgetType.MathValue}

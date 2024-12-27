@@ -149,6 +149,7 @@ const MyScenesList: React.FC = () => {
         id="scrollableDiv"
         className={styles.infiniteList}
       >
+        {/* @ts-expect-error  InfiniteScroll TS bug */}
         <InfiniteScroll
           dataLength={allItems.length}
           hasMore={hasNextPage}

@@ -1,13 +1,7 @@
 import "./mathlive";
 
 import type { MathfieldElement } from "mathlive";
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import composeRefs from "@/util/composeRefs";
 import type { MathFieldWebComponentProps } from "./types";

@@ -4,9 +4,9 @@ import React, { useCallback } from "react";
 import { IWidgetProps, WidgetChangeEvent } from "./types";
 import styles from "./widget.module.css";
 
-const TextInput: React.FC<IWidgetProps & { ref?: HTMLInputElement }> = (
-  props,
-) => {
+const TextInput: React.FC<
+  IWidgetProps & { ref?: React.Ref<HTMLInputElement> }
+> = (props) => {
   const { onChange, className, name, label, error, itemId, ref, ...others } =
     props;
   const onInputChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(

@@ -1,10 +1,8 @@
 import {
   useInfiniteQuery,
-  UseInfiniteQueryOptions,
   useMutation,
   useQuery,
   useQueryClient,
-  UseQueryOptions,
 } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
 import { ScenesApi } from "../../generated";
@@ -13,11 +11,11 @@ import { getConfig } from "../util";
 
 const scenesApi = new ScenesApi(getConfig());
 
-const detailKey = (key?: string) => ["scenes", "detail", key];
+const detailKey = (key?: string) => ["scenes", "detail", String(key)];
 
 const useScene = (
   key?: string,
-  opts?: Pick<UseQueryOptions, "enabled" | "staleTime">,
+  opts: { enabled?: boolean; staleTime?: number } = {},
 ) => {
   return useQuery({
     queryKey: detailKey(key),
@@ -43,7 +41,7 @@ const useInfiniteScenesMe = (
     title?: string;
     archived?: boolean;
   } = {},
-  opts: Pick<UseInfiniteQueryOptions, "enabled"> = {},
+  opts?: { enabled?: boolean },
 ) => {
   return useInfiniteQuery({
     queryKey: [...meListKey(), { limit, offset, title, archived }],
