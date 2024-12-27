@@ -13,7 +13,6 @@ import {
   Data,
   useDroppable,
 } from "@dnd-kit/core";
-import type { DragOverlayProps } from "@dnd-kit/core";
 import {
   SortableContext,
   sortableKeyboardCoordinates,
