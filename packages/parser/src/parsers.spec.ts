@@ -64,8 +64,9 @@ describe("subscript conversion", () => {
 });
 
 describe("operatorname conversion", () => {
-  test("operatorname is removed", () => {
-    const input = "1 + \\operatorname{sin}(1+\\operatorname{woof}(x)) + y";
+  test("operatorname and mathrm are removed", () => {
+    const input =
+      "1 + \\operatorname{sin}(1+\\operatorname{\\mathrm{woof}}(x)) + y";
     const expected = "1 + sin(1+woof(x)) + y";
     expect(parser.preprocess(input)).toBe(expected);
   });

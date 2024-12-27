@@ -1,6 +1,6 @@
 import fractionRule from "./fractionRule";
 import pdiffRule from "./pdiffRule";
-import operatornameRule from "./operatornameRule";
+import decorativeTextRule from "./decorativeTextRule";
 import subscriptRule from "./subscriptRule";
 import validateParameters, { ParameterErrors } from "./validateParameters";
 import RegexpParserRule from "./RegexpParserRule";
@@ -10,7 +10,7 @@ export {
   RegexpParserRule,
   pdiffRule,
   fractionRule,
-  operatornameRule,
+  decorativeTextRule,
   subscriptRule,
   validateParameters,
   ParameterErrors,
