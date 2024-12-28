@@ -1,4 +1,4 @@
-import type { MathJsStatic } from "mathjs";
+import type { MathJsInstance } from "mathjs";
 import { getDependencies } from "@math3d/mathjs-utils";
 
 import type { AnonMathNode, Parse } from "./interfaces";
@@ -9,10 +9,15 @@ export type ParseableObj = {
 };
 export type Parseable = ParseableObj | string;
 
-class SimplerMathJsParser {
-  private math: MathJsStatic;
+type MathjsLike = Pick<
+  MathJsInstance,
+  "parse" | "isFunctionAssignmentNode" | "isAssignmentNode"
+>;
 
-  constructor(mathJs: MathJsStatic) {
+class SimplerMathJsParser {
+  private math: MathjsLike;
+
+  constructor(mathJs: MathjsLike) {
     this.math = mathJs;
   }
 
