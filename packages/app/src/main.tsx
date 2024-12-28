@@ -11,6 +11,7 @@ import AppRoutes from "./AppProviders";
 import { getStore } from "./store/store";
 import routes from "./routes";
 
+// @ts-expect-error Allow accessing math on window in dev for debugging
 window.math = math;
 
 const prepare = async () => {

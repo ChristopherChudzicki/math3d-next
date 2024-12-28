@@ -1,7 +1,7 @@
 import { factory } from "mathjs";
 
 declare module "mathjs" {
-  export interface MathJsStatic {
+  export interface MathJsInstance {
     // @ts-expect-error can't change the type of mathjs I
     i: [number, number, number];
     j: [number, number, number];
