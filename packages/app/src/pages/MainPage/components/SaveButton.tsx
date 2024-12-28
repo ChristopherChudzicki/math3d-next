@@ -1,7 +1,13 @@
-import React, { useCallback, useId, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { BasicDialog } from "@/pages/auth/components/BasicDialog";
 import type { BasicDialogProps } from "@/pages/auth/components/BasicDialog";
-import { Alert, FormGroup, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  ButtonGroup,
+  FormGroup,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useToggle } from "@/util/hooks";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router";
@@ -11,6 +17,10 @@ import { select, actions } from "@/features/sceneControls/mathItems";
 import u from "@/util/styles/utils.module.css";
 import * as yup from "yup";
 import { useValidatedForm } from "@/util/forms";
+import SimpleMenu, {
+  SimpleMenuItem,
+} from "@/util/components/SimpleMenu/SimpleMenu";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import styles from "./SaveButton.module.css";
 
 const schema = yup.object({
@@ -20,23 +30,31 @@ const schema = yup.object({
 type SaveDialogProps = Pick<BasicDialogProps, "open"> & {
   onClose: ({ saved }: { saved: boolean }) => void;
   onSave: () => void;
+  duplicating?: boolean;
 };
 
-const SaveDialog: React.FC<SaveDialogProps> = ({ open, onClose, onSave }) => {
+const SaveDialog: React.FC<SaveDialogProps> = ({
+  open,
+  onClose,
+  onSave,
+  duplicating,
+}) => {
   const [copied, toggleCopied] = useToggle(false);
   const [url, setUrl] = useState("");
   const navigate = useNavigate();
   const createScene = useCreateScene();
   const scene = useAppSelector(select.sceneInfo);
   const defaultValues = useMemo(() => {
-    return {
-      title: scene.title,
-    };
-  }, [scene.title]);
-  const { register, handleSubmit } = useValidatedForm({
+    const title = duplicating ? `Copy of ${scene.title}` : scene.title;
+    return { title };
+  }, [scene.title, duplicating]);
+  const { register, handleSubmit, reset } = useValidatedForm({
     schema,
     defaultValues,
   });
+  useEffect(() => {
+    reset(defaultValues);
+  }, [defaultValues, reset]);
 
   const handleSave: React.FormEventHandler = useMemo(
     () =>
@@ -91,7 +109,9 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, onClose, onSave }) => {
               label="Shareable URL"
               size="small"
               value={url}
-              inputProps={{ readOnly: true }}
+              slotProps={{
+                htmlInput: { readOnly: true },
+              }}
               helperText={copied ? "Copied!" : " "}
               className={u.flex1}
             />
@@ -107,10 +127,12 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, onClose, onSave }) => {
       </BasicDialog>
     );
   }
+
+  const title = duplicating ? "Save a Copy" : "Save Scene";
   return (
     <BasicDialog
       {...commonProps}
-      title="Save Scene"
+      title={title}
       confirmText="Save"
       cancelButton={null}
       confirmButtonProps={{
@@ -153,6 +175,7 @@ const getSaveText = (state: SavingState, cloning: boolean) => {
 
 const SaveButton: React.FC = () => {
   const [saveDialogOpen, toggleSaveDialog] = useToggle(false);
+  const [ownerCloning, setOwnerCloning] = useToggle(false);
   const [savingState, setSavingState] = useState(SavingState.Default);
   const navigate = useNavigate();
 
@@ -164,12 +187,12 @@ const SaveButton: React.FC = () => {
   const { data: user } = useUserMe();
 
   const creating = !key;
-  const cloning = Boolean(key && user && scene.author !== user.id);
+  const otherCloning = Boolean(key && user && scene.author !== user.id);
   const updating = Boolean(key && user && scene.author === user.id);
   const handleClick = useCallback(async () => {
     if (creating) {
       toggleSaveDialog.on();
-    } else if (updating || cloning) {
+    } else if (updating || otherCloning) {
       const request = updating
         ? patchScene.mutateAsync({ key, patch: scene })
         : createScene.mutateAsync(scene).then((result) => {
@@ -183,7 +206,7 @@ const SaveButton: React.FC = () => {
       setSavingState(SavingState.Default);
     }
   }, [
-    cloning,
+    otherCloning,
     createScene,
     creating,
     key,
@@ -195,29 +218,63 @@ const SaveButton: React.FC = () => {
     navigate,
   ]);
 
-  if (!user) return null;
-  if (!updating && !cloning && !creating) return null;
+  const menuItems: SimpleMenuItem[] = useMemo(
+    () => [
+      {
+        key: "duplicate",
+        label: "Duplicate",
+        onClick: () => {
+          setOwnerCloning.on();
+          toggleSaveDialog.on();
+        },
+      },
+    ],
+    [setOwnerCloning, toggleSaveDialog],
+  );
 
-  const enabled = savingState === SavingState.Default && (dirty || cloning);
+  if (!user) return null;
+  if (!updating && !otherCloning && !creating) return null;
+
+  const enabled =
+    savingState === SavingState.Default && (dirty || otherCloning);
 
   return (
     <>
       {savingState === SavingState.RecentlySaved ? (
         <Alert className={styles["small-alert"]}>Saved!</Alert>
       ) : null}
-      <Button
-        data-testid="save"
-        variant="outlined"
-        color="primary"
-        disabled={!enabled}
-        onClick={handleClick}
-      >
-        {getSaveText(savingState, cloning)}
-      </Button>
+      <ButtonGroup>
+        <Button
+          data-testid="save"
+          variant="text"
+          color="primary"
+          disabled={!enabled}
+          onClick={handleClick}
+          sx={{
+            "&.MuiButtonGroup-grouped": { minWidth: "96px" },
+          }}
+        >
+          {getSaveText(savingState, otherCloning)}
+        </Button>
+        <SimpleMenu
+          items={menuItems}
+          trigger={
+            <Button
+              variant="text"
+              color="secondary"
+              aria-label="Other Saving Options"
+            >
+              <ExpandMoreIcon fontSize="small" />
+            </Button>
+          }
+        />
+      </ButtonGroup>
       <SaveDialog
         open={saveDialogOpen}
+        duplicating={ownerCloning}
         onClose={async ({ saved }) => {
           toggleSaveDialog.off();
+          setOwnerCloning.off();
           if (saved) {
             setSavingState(SavingState.RecentlySaved);
             await sleep(RECENTLY_SAVED_TIMEOUT);
