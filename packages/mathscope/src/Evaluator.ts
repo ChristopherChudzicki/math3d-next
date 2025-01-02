@@ -200,7 +200,6 @@ export default class Evaluator {
     });
 
     const changes = this.applyChanges();
-
     const affected = setUnion(
       setDifference(nodesAffectedByDelete, changes.deleted),
       changes.added,

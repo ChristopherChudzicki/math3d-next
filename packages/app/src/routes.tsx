@@ -12,6 +12,7 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ResetPasswordConfirmPage from "./pages/auth/ResetPasswordConfirmPage";
 import ScenesList from "./pages/ScenesList/ScenesListPage";
 import UserSettingsPage from "./pages/UserSettingsPage/UserSettingsPage";
+import HelpPage from "./pages/HelpPage/HelpPage";
 
 const routes: RouteObject[] = [
   {
@@ -57,6 +58,10 @@ const routes: RouteObject[] = [
           {
             path: "user/settings",
             element: <UserSettingsPage />,
+          },
+          {
+            path: "help",
+            element: <HelpPage />,
           },
         ],
       },

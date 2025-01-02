@@ -69,6 +69,7 @@ import {
   crossDependencies,
   normDependencies,
   dotDependencies,
+  atan2Dependencies,
 } from "mathjs";
 
 import {
@@ -87,6 +88,7 @@ const normalTrig = {
   asinDependencies,
   acosDependencies,
   atanDependencies,
+  atan2Dependencies,
   secDependencies,
   cscDependencies,
   cotDependencies,
@@ -187,7 +189,12 @@ mathjs.import(
     customConstants,
     arccos: mathjs.acos,
     arcsin: mathjs.asin,
-    arctan: mathjs.atan,
+    arctan: (x: any, y: any) => {
+      if (y === undefined) {
+        return mathjs.atan(x);
+      }
+      return mathjs.atan2(y, x);
+    },
     arcsec: mathjs.asec,
     arccsc: mathjs.acsc,
     arccot: mathjs.acot,
