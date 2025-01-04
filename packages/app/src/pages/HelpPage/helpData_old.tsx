@@ -8,8 +8,8 @@ interface BaseReferenceEntry {
   name: string;
   latex: string;
   keyboard: string;
-  shortDescription: React.ReactNode;
-  longDescription?: React.ReactNode;
+  shortDescription: string;
+  longDescription?: string;
   tags: string[];
 }
 interface ConstantEntry extends BaseReferenceEntry {
@@ -119,21 +119,12 @@ const FUNCTIONS: ReferenceEntry[] = makeReferences([
     id: "atan2",
     latex: "\\(\\arctan(y, x)\\)",
     keyboard: "arctan(y, x)",
-    shortDescription: (
-      <>
-        <p>2-argument arctangent:</p>
-        <ul>
-          <li>
-            \(\arctan(y, x)\) is the angle between the positive x-axis and the
-            ray between origin and \((x, y)\).
-          </li>
-          <li>Its range is \([-\pi, \pi]\).</li>
-          <li>
-            For points in quadrants 1 and 4, \(\arctan(y,x)=\arctan(y/x)\).
-          </li>
-        </ul>
-      </>
-    ),
+    shortDescription: `
+2-argument arctangent:
+- \\(\\arctan(y, x)\\) is the angle between the positive x-axis and the ray between origin and \\((x, y)\\).
+- Its range is \\([-\\pi, \\pi]\\).
+- For points in quadrants 1 and 4, \\(\\arctan(y,x)=\\arctan(y/x)\\).
+`,
     tags: [Tags.Trig],
   },
   {

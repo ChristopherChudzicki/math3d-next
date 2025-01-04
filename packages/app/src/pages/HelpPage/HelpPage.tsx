@@ -13,7 +13,7 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import invariant from "tiny-invariant";
 import ReferenceTable from "./ReferenceTable";
-import * as helpData from "./helpData";
+import * as helpData from "./helpData_old";
 
 const topRightStyle: React.CSSProperties = {
   position: "absolute",
