@@ -1,31 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { renderMathInElement } from "mathlive";
-import type { ReferenceEntry } from "./helpData_old";
+import React from "react";
+import type { ReferenceEntry } from "./data.compile";
 import * as styles from "./ReferenceTable.module.css";
-import useMd2Html from "./useMd2Html";
-import * as foo from "./data";
-
-window.files = foo.files;
 
 type ReferenceTableProps = {
   entries: ReferenceEntry[];
 };
 
 const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
-  const [el, setEl] = useState<HTMLTableRowElement | null>(null);
-  useEffect(() => {
-    if (!el) return;
-
-    renderMathInElement(el);
-  }, [entry, el]);
-  const shortDescription = useMd2Html(entry.shortDescription);
   return (
-    <tr className={styles.row} ref={setEl}>
-      <td>{entry.latex}</td>
+    <tr className={styles.row}>
+      <td dangerouslySetInnerHTML={{ __html: entry.latex }} />
       <td>
         <span className={styles.keyboard}>{entry.keyboard}</span>
       </td>
-      <td dangerouslySetInnerHTML={{ __html: shortDescription }} />
+      <td>
+        <div dangerouslySetInnerHTML={{ __html: entry.summary }} />
+        <div dangerouslySetInnerHTML={{ __html: entry.details }} />
+      </td>
     </tr>
   );
 };

@@ -13,7 +13,7 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import invariant from "tiny-invariant";
 import ReferenceTable from "./ReferenceTable";
-import * as helpData from "./helpData_old";
+import { entries } from "./data.compile";
 
 const topRightStyle: React.CSSProperties = {
   position: "absolute",
@@ -29,14 +29,9 @@ type TabConfig = {
 
 const TABS: TabConfig[] = [
   {
-    id: "functions",
-    label: "Functions",
-    element: <ReferenceTable entries={helpData.FUNCTIONS} />,
-  },
-  {
-    id: "constants",
-    label: "Constants",
-    element: <div />,
+    id: "reference",
+    label: "Reference",
+    element: <ReferenceTable entries={entries} />,
   },
   {
     id: "examples",

@@ -8,5 +8,5 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src", "vite.config.ts", "src/pages/HelpPage/data.compile.ts"]
 }

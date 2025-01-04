@@ -1,8 +1,9 @@
 ---
 type: function
 name: arccot
-latex: \\(\\arccot(x)\\)
+latex: \(\operatorname{arccot}(x)\)
 keyboard: arccot(x)
 summary: Inverse cotangent
-tags: trig
+tags:
+  - trig
 ---

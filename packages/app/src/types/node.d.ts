@@ -1,3 +1,5 @@
+/// <reference types="vite-plugin-compile-time/client" />
+
 export {};
 
 declare global {
