@@ -43,7 +43,7 @@
     "@math3d/utils": "workspace:^",
     "@mui/base": "5.0.0-beta.68",
     "@mui/icons-material": "^6.3.0",
-    "@mui/lab": "6.0.0-beta.21",
+    "@mui/lab": "6.0.0-beta.22",
     "@mui/material": "^6.3.0",
     "@popperjs/core": "2.11.8",
     "@reduxjs/toolkit": "^2.2.3",
