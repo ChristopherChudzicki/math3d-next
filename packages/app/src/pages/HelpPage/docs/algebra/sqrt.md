@@ -1,7 +1,7 @@
 ---
 type: function
 name: square root
-latex: \(\sqrt(x)\)
+latex: \(\sqrt{x}\)
 keyboard: sqrt(x)
 summary: Square root
 tags:

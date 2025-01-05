@@ -104,6 +104,7 @@
     "concurrently": "^8.2.2",
     "eslint": "^8.54.0",
     "gray-matter": "^4.0.3",
+    "htmlparser2": "^10.0.0",
     "identity-obj-proxy": "3.0.0",
     "jest-fail-on-console": "3.3.1",
     "jsdom": "^24.0.0",

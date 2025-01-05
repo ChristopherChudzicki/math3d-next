@@ -1,9 +1,16 @@
+/**
+ * This file is run at compile-time, not runtime.
+ *
+ * Handled via [vite-plugin-compile-time](https://github.com/egoist/vite-plugin-compile-time)
+ */
 import showdown from "showdown";
 import matter from "gray-matter";
 import { convertLatexToMarkup } from "mathlive";
 import * as yup from "yup";
 import fs from "fs";
 import path from "path";
+import * as htmlparser2 from "htmlparser2";
+import invariant from "tiny-invariant";
 
 const readAll = () => {
   const files = fs.readdirSync(path.join(__dirname, "docs"), {
@@ -36,8 +43,8 @@ interface BaseReferenceEntry {
   name: string;
   latex: string;
   keyboard: string;
-  summary: string;
-  details?: string;
+  summaryInnerHtml: string;
+  detailsHtml?: string;
   tags: string[];
 }
 interface ConstantEntry extends BaseReferenceEntry {
@@ -73,7 +80,15 @@ const converter = new showdown.Converter({
 
 const schema = yup.object({
   name: yup.string().required(),
-  summary: yup.string().required(),
+  summary: yup
+    .string()
+    .required()
+    .test((v) => {
+      if (v.includes("\n")) {
+        throw new Error("Summary cannot contain newlines");
+      }
+      return true;
+    }),
   keyboard: yup.string().required(),
   latex: yup.string().required(),
   tags: yup
@@ -83,23 +98,34 @@ const schema = yup.object({
   type: yup.string().oneOf(["constant", "function"]).required(),
 });
 
-const validateEntry = (filepath: string, data: unknown) => {
+const validateMetadata = (filepath: string, data: unknown) => {
   try {
     return schema.validateSync(data);
   } catch (err) {
     throw new Error(`Error validating ${filepath}:\n${err}`);
   }
 };
+const summaryInnerHtml = (summary: string) => {
+  const html = converter.makeHtml(summary);
+  const dom = htmlparser2.parseDocument(html);
+  if (dom.childNodes.length !== 1) {
+    throw new Error("Summary must have exactly one root element");
+  }
+  const regex = /<p>(.*?)<\/p>/;
+  const match = regex.exec(html);
+  invariant(match !== null, "Summary must be a paragraph");
+  const innerHtml = match[1];
+  return innerHtml;
+};
 
 export const entries: ReferenceEntry[] = files.map(({ filepath, contents }) => {
   const { data, content } = matter(contents);
-  const details = converter.makeHtml(content);
-  const metadata = validateEntry(filepath, data);
+  const metadata = validateMetadata(filepath, data);
   const entry: ReferenceEntry = {
     ...metadata,
-    details,
+    detailsHtml: converter.makeHtml(content),
     latex: convertLatexToMarkup(metadata.latex),
-    summary: converter.makeHtml(metadata.summary),
+    summaryInnerHtml: summaryInnerHtml(metadata.summary),
     id: filepath,
   };
   return entry;

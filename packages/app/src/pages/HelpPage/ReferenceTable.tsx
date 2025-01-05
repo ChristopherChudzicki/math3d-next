@@ -1,4 +1,9 @@
+/* eslint-disable react/no-danger */
+/* eslint-disable jsx-a11y/control-has-associated-label */
 import React from "react";
+
+import Link from "@mui/material/Link";
+import { useToggle } from "@/util/hooks";
 import type { ReferenceEntry } from "./data.compile";
 import * as styles from "./ReferenceTable.module.css";
 
@@ -7,6 +12,8 @@ type ReferenceTableProps = {
 };
 
 const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
+  const hasDetails = !!entry.detailsHtml;
+  const [expanded, setExpanded] = useToggle(false);
   return (
     <tr className={styles.row}>
       <td dangerouslySetInnerHTML={{ __html: entry.latex }} />
@@ -14,8 +21,36 @@ const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
         <span className={styles.keyboard}>{entry.keyboard}</span>
       </td>
       <td>
-        <div dangerouslySetInnerHTML={{ __html: entry.summary }} />
-        <div dangerouslySetInnerHTML={{ __html: entry.details }} />
+        <div>
+          <p>
+            <span
+              dangerouslySetInnerHTML={{ __html: entry.summaryInnerHtml }}
+            />
+            {hasDetails && !expanded && (
+              // eslint-disable-next-line jsx-a11y/anchor-is-valid
+              <Link
+                onClick={setExpanded.on}
+                sx={{ verticalAlign: "baseline", marginLeft: "0.5em" }}
+                component="button"
+              >
+                Show more
+              </Link>
+            )}
+          </p>
+        </div>
+        {expanded && entry.detailsHtml && (
+          <>
+            <div dangerouslySetInnerHTML={{ __html: entry.detailsHtml }} />
+            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+            <Link
+              onClick={setExpanded.off}
+              sx={{ verticalAlign: "baseline" }}
+              component="button"
+            >
+              Show less
+            </Link>
+          </>
+        )}
       </td>
     </tr>
   );
