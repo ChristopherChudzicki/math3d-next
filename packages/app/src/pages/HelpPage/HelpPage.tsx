@@ -12,7 +12,7 @@ import TabPanel from "@mui/lab/TabPanel";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import invariant from "tiny-invariant";
-import ReferenceTable from "./ReferenceTable";
+import ReferencePanel from "./ReferencePanel";
 import { entries } from "./data.compile";
 
 const topRightStyle: React.CSSProperties = {
@@ -31,7 +31,7 @@ const TABS: TabConfig[] = [
   {
     id: "reference",
     label: "Reference",
-    element: <ReferenceTable entries={entries} />,
+    element: <ReferencePanel entries={entries} />,
   },
   {
     id: "examples",
@@ -87,7 +87,7 @@ const HelpPage: React.FC = () => {
           </TabList>
           {TABS.map((t) => (
             <TabPanel
-              sx={{ paddingTop: "0px", paddingBottom: "0px", width: "100%" }}
+              sx={{ padding: "0px", width: "100%" }}
               key={t.id}
               value={t.id}
             >

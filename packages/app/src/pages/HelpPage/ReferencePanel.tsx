@@ -4,10 +4,13 @@ import React from "react";
 
 import Link from "@mui/material/Link";
 import { useToggle } from "@/util/hooks";
+import classNames from "classnames";
+import { Typography } from "@mui/material";
 import type { ReferenceEntry } from "./data.compile";
-import * as styles from "./ReferenceTable.module.css";
+import * as styles from "./ReferencePanel.module.css";
+import { Tag, READABLE_TAG } from "./util";
 
-type ReferenceTableProps = {
+type ReferencePanelProps = {
   entries: ReferenceEntry[];
 };
 
@@ -56,11 +59,11 @@ const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
   );
 };
 
-const ReferenceTable: React.FC<ReferenceTableProps> = ({ entries }) => {
+const ReferenceTable: React.FC<ReferencePanelProps> = ({ entries }) => {
   return (
     <table className={styles.table}>
       <thead>
-        <tr className={styles.headerRow}>
+        <tr className={styles.row}>
           <th>Function</th>
           <th>Keyboard</th>
           <th>Description</th>
@@ -75,4 +78,34 @@ const ReferenceTable: React.FC<ReferenceTableProps> = ({ entries }) => {
   );
 };
 
-export default ReferenceTable;
+const ReferencePanel: React.FC<ReferencePanelProps> = ({ entries }) => {
+  const groupMap = Object.groupBy(entries, (entry) => {
+    return entry.tags[0] as Tag;
+  });
+  const groups = Object.entries(groupMap)
+    .map(([tag, group]) => {
+      return {
+        tag,
+        label: READABLE_TAG[tag as Tag],
+        entries: group,
+      };
+    })
+    .sort((a, b) => {
+      return a.label.localeCompare(b.label);
+    });
+
+  return groups.map((group) => (
+    <React.Fragment key={group.tag}>
+      <Typography
+        component="h2"
+        variant="h5"
+        sx={{ marginBottom: "16px", marginTop: "16px" }}
+      >
+        {group.label}
+      </Typography>
+      <ReferenceTable entries={group.entries} />
+    </React.Fragment>
+  ));
+};
+
+export default ReferencePanel;

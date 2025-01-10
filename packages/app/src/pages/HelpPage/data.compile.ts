@@ -11,6 +11,7 @@ import fs from "fs";
 import path from "path";
 import * as htmlparser2 from "htmlparser2";
 import invariant from "tiny-invariant";
+import { Tag } from "./util";
 
 const readAll = () => {
   const files = fs.readdirSync(path.join(__dirname, "docs"), {
@@ -26,14 +27,6 @@ const readAll = () => {
       };
     });
 };
-
-enum Tag {
-  Trig = "trig",
-  Algebra = "algebra",
-  Calculus = "calculus",
-  ExpLog = "explog",
-  Misc = "misc",
-}
 
 interface BaseReferenceEntry {
   id: string;
