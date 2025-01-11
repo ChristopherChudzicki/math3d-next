@@ -12,6 +12,7 @@ import path from "path";
 import * as htmlparser2 from "htmlparser2";
 import invariant from "tiny-invariant";
 import { Tag } from "./util";
+import type { ReferenceEntry } from "./util";
 
 const readAll = () => {
   const files = fs.readdirSync(path.join(__dirname, "docs"), {
@@ -27,26 +28,6 @@ const readAll = () => {
       };
     });
 };
-
-interface BaseReferenceEntry {
-  id: string;
-  /**
-   * Human-readable name, displayed to users
-   */
-  name: string;
-  latex: string;
-  keyboard: string;
-  summaryInnerHtml: string;
-  detailsHtml?: string;
-  tags: string[];
-}
-interface ConstantEntry extends BaseReferenceEntry {
-  type: "constant";
-}
-interface FunctionEntry extends BaseReferenceEntry {
-  type: "function";
-}
-type ReferenceEntry = ConstantEntry | FunctionEntry;
 
 const mathExtensions: showdown.ShowdownExtension[] = [
   {

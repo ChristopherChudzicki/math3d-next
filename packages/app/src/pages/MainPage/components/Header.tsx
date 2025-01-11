@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
+import Header from "@/util/components/Header";
 
 import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
@@ -18,7 +19,7 @@ import ListIcon from "@mui/icons-material/List";
 import type { SimpleMenuItem } from "@/util/components/SimpleMenu/SimpleMenu";
 import { useUserMe, User } from "@math3d/api";
 import ListSubheader from "@mui/material/ListSubheader";
-import styles from "./Header.module.css";
+
 import UserMenu from "./UserMenu";
 import SaveButton from "./SaveButton";
 
@@ -81,7 +82,11 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
           data-testid="username-display"
           key="header"
           component="div"
-          className={styles["menu-header"]}
+          sx={{
+            textOverflow: "ellipsis",
+            overflow: "hidden",
+            lineHeight: "unset",
+          }}
         >
           {user?.email}
         </ListSubheader>
@@ -140,7 +145,11 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
   ];
 };
 
-const HeaderMenu: React.FC = () => {
+type AppHeaderProps = {
+  title: React.ReactNode;
+};
+
+const AppHeader: React.FC<AppHeaderProps> = (props) => {
   const smallScreen = useMediaQuery("(max-width: 600px)");
   const [isAuthenticated] = useAuthStatus();
   const userQuery = useUserMe();
@@ -149,31 +158,24 @@ const HeaderMenu: React.FC = () => {
       getItems({ user: userQuery.data }).filter((item) => !!item.shouldShow),
     [userQuery.data],
   );
-
   return (
-    <nav className={styles["nav-container"]}>
-      <SaveButton />
-      <ShareButton variant={smallScreen ? "mobile" : "desktop"} />
-      {smallScreen ? null : (
-        <LoginButtons isAuthenticated={isAuthenticated} smallScreen={false} />
-      )}
-      <UserMenu items={filteredItems} user={userQuery.data} />
-    </nav>
+    <Header
+      title={props.title}
+      nav={
+        <>
+          <SaveButton />
+          <ShareButton variant={smallScreen ? "mobile" : "desktop"} />
+          {smallScreen ? null : (
+            <LoginButtons
+              isAuthenticated={isAuthenticated}
+              smallScreen={false}
+            />
+          )}
+          <UserMenu items={filteredItems} user={userQuery.data} />
+        </>
+      }
+    />
   );
 };
 
-type HeaderProps = {
-  title: React.ReactNode;
-};
-
-const Header: React.FC<HeaderProps> = (props) => (
-  <header className={styles.header}>
-    <div className={styles["header-container"]}>
-      <span className={styles.brand}>Math3d</span>
-      {props.title}
-      <HeaderMenu />
-    </div>
-  </header>
-);
-
-export default Header;
+export default AppHeader;

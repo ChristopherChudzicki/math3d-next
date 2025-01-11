@@ -19,6 +19,10 @@ const routes: RouteObject[] = [
     // Saving a slot for errorElement
     children: [
       {
+        path: "/help",
+        element: <HelpPage />,
+      },
+      {
         path: "/:sceneKey?",
         element: (
           <>
@@ -58,10 +62,6 @@ const routes: RouteObject[] = [
           {
             path: "user/settings",
             element: <UserSettingsPage />,
-          },
-          {
-            path: "help",
-            element: <HelpPage />,
           },
         ],
       },
