@@ -58,7 +58,7 @@ const schema = yup.object({
     .string()
     .required()
     .test((v) => {
-      if (v.includes("\n")) {
+      if (v.slice(0, -1).includes("\n")) {
         throw new Error("Summary cannot contain newlines");
       }
       return true;

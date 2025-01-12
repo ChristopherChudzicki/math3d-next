@@ -1,6 +1,6 @@
 ---
 type: function
-name: arcsin
+name: arcsine
 latex: \(\arcsin(x)\)
 keyboard: arcsin(x)
 summary: Inverse sine

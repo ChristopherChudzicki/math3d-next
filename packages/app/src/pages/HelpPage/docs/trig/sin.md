@@ -1,6 +1,6 @@
 ---
 type: function
-name: sin
+name: sine
 latex: \(\sin(x)\)
 keyboard: sin(x)
 summary: Sine

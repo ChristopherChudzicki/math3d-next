@@ -1,6 +1,6 @@
 ---
 type: function
-name: cot
+name: cotangent
 latex: \(\cot(x)\)
 keyboard: cot(x)
 summary: Cotangent

@@ -1,6 +1,6 @@
 ---
 type: function
-name: cos
+name: cosine
 latex: \(\cos(x)\)
 keyboard: cos(x)
 summary: Cosine

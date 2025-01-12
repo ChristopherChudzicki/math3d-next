@@ -18,7 +18,7 @@ const HelpPage: React.FC = () => {
         title={<Typography variant="h6">Function Reference</Typography>}
         nav={<Link href="/">Back to main page</Link>}
       />
-      <Container sx={{ backgroundColor: "var(--color-secondary-lightest)" }}>
+      <Container>
         <Grid container>
           <Grid
             className={styles.sidebar}

@@ -1,6 +1,6 @@
 ---
 type: function
-name: arccot
+name: arccotangent
 latex: \(\operatorname{arccot}(x)\)
 keyboard: arccot(x)
 summary: Inverse cotangent

@@ -70,6 +70,9 @@ import {
   normDependencies,
   dotDependencies,
   atan2Dependencies,
+  // vectors
+  indexDependencies,
+  mapDependencies,
 } from "mathjs";
 
 import {
@@ -174,14 +177,17 @@ const mathjs = create({
   complexDependencies,
   vectorFunctions,
   simplifyDependencies,
+  // vectors, matrices
+  indexDependencies,
+  mapDependencies,
 });
 
 mathjs.import({
   ln: mathjs.log,
   diff: createTotalDerivative,
-  unitT: createUnitB,
+  unitT: createUnitT,
   unitN: createUnitN,
-  unitB: createUnitT,
+  unitB: createUnitB,
 });
 
 mathjs.import(
@@ -189,7 +195,7 @@ mathjs.import(
     customConstants,
     arccos: mathjs.acos,
     arcsin: mathjs.asin,
-    arctan: (x: any, y: any) => {
+    arctan: (x: number, y: number) => {
       if (y === undefined) {
         return mathjs.atan(x);
       }
@@ -204,6 +210,8 @@ mathjs.import(
     arcsech: mathjs.asech,
     arccsch: mathjs.acsch,
     arccoth: mathjs.acoth,
+    // @ts-expect-error diff is defined above
+    grad: mathjs.diff,
   },
   { override: true },
 );

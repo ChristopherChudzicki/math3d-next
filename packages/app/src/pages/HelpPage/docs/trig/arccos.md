@@ -1,6 +1,6 @@
 ---
 type: function
-name: arccos
+name: arccosine
 latex: \(\arccos(x)\)
 keyboard: arccos(x)
 summary: Inverse cosine

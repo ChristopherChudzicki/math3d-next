@@ -13,18 +13,22 @@ interface ReferenceEntry {
 
 enum Tag {
   Trig = "trig",
+  TrigHyperbolic = "trig-hyperbolic",
   Algebra = "algebra",
   Calculus = "calculus",
   ExpLog = "explog",
   Misc = "misc",
+  Constants = "constants",
 }
 
 const READABLE_TAG: Record<Tag, string> = {
   [Tag.Algebra]: "Algebra",
   [Tag.Calculus]: "Calculus",
   [Tag.Trig]: "Trigonometry",
+  [Tag.TrigHyperbolic]: "Trigonometry (Hyperbolic)",
   [Tag.Misc]: "Miscellaneous",
   [Tag.ExpLog]: "Logs & Exponents",
+  [Tag.Constants]: "Constants",
 };
 
 type EntryGroup = {
