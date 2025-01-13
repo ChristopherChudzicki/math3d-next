@@ -108,6 +108,7 @@ describe("useMathResults and useMathErrors", () => {
   });
 
   test("useMathErrors triggers re-renders when eval errors change", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
     const { errors, mathScope } = setup("id1", ["x", "y", "z"]);
 
     await act(() => {

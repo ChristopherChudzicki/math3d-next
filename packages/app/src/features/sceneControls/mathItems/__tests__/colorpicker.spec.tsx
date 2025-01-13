@@ -89,7 +89,7 @@ test("clicking a swatch sets item to that color", async () => {
 });
 
 test("Setting colorExpr for surfaces", async () => {
-  const { getButton, getItem } = await setup(MIT.ParametricSurface, {
+  const { getButton, getItem } = await setup(MIT.ExplicitSurface, {
     colorExpr: {
       type: "function-assignment",
       name: "_f",
