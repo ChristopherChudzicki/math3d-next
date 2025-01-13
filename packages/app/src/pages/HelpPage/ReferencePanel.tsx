@@ -63,7 +63,7 @@ const ReferenceTable: React.FC<ReferencePanelProps> = ({ entries }) => {
     <table className={styles.table}>
       <thead>
         <tr className={styles.row}>
-          <th>Function</th>
+          <th>Expression</th>
           <th>Keyboard</th>
           <th>Description</th>
         </tr>

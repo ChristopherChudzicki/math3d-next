@@ -36,6 +36,7 @@ import {
   sqrtDependencies,
   cubeDependencies,
   cbrtDependencies,
+  nthRootDependencies,
   // misc functions
   absDependencies,
   signDependencies,
@@ -127,6 +128,7 @@ const algebraic = {
   sqrtDependencies,
   cubeDependencies,
   cbrtDependencies,
+  nthRootDependencies,
 };
 
 const miscFuncs = {
@@ -193,6 +195,7 @@ mathjs.import({
 mathjs.import(
   {
     customConstants,
+    root: mathjs.nthRoot,
     arccos: mathjs.acos,
     arcsin: mathjs.asin,
     arctan: (x: number, y: number) => {

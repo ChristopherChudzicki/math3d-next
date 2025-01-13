@@ -15,7 +15,11 @@ const HelpPage: React.FC = () => {
   return (
     <>
       <Header
-        title={<Typography variant="h6">Function Reference</Typography>}
+        title={
+          <Typography component="h1" variant="h6">
+            Function Reference
+          </Typography>
+        }
         nav={<Link href="/">Back to main page</Link>}
       />
       <Container>
@@ -23,6 +27,7 @@ const HelpPage: React.FC = () => {
           <Grid
             className={styles.sidebar}
             component="nav"
+            aria-label="Reference Sections"
             sx={{
               position: "sticky",
               top: "1rem",

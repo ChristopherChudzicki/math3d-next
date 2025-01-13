@@ -19,7 +19,7 @@ const routes: RouteObject[] = [
     // Saving a slot for errorElement
     children: [
       {
-        path: "/help",
+        path: "/help/reference",
         element: <HelpPage />,
       },
       {

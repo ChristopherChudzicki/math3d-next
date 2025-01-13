@@ -28,10 +28,12 @@ export const inlineShortcuts = {
   arcsech: "\\operatorname{arcsech}(#?)",
   arccoth: "\\operatorname{arccoth}(#?)",
   // misc
-  abs: "\\abs",
+  abs: "\\abs(#?)",
+  norm: "\\operatorname{norm}{(#?)}",
   sign: "\\operatorname{sign}(#?)",
   floor: "\\operatorname{floor}(#?)",
   ceil: "\\operatorname{ceil}(#?)",
+  root: "\\operatorname{root}(#?, #?)",
   // sqrt
   sqrt: "\\sqrt{#?}",
   // exp
@@ -101,6 +103,4 @@ export const extraMacros = {
   unitx: "\\hat{\\mathbf{x}}",
   unity: "\\hat{\\mathbf{y}}",
   unitz: "\\hat{\\mathbf{z}}",
-  // others
-  abs: "\\operatorname{abs}",
 };
