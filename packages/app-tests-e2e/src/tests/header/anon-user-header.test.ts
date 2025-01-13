@@ -24,6 +24,7 @@ test("Header and usermenu links", async ({ page }) => {
     "Sign in",
     "Sign up",
     "Examples",
+    "Function Reference",
     "Contact",
   ]);
 });

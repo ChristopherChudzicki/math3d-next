@@ -20,7 +20,7 @@ const HelpPage: React.FC = () => {
             Function Reference
           </Typography>
         }
-        nav={<Link href="/">Back to main page</Link>}
+        nav={<Link href="/">Back to Math3d</Link>}
       />
       <Container>
         <Grid container>

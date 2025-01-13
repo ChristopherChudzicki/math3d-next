@@ -19,6 +19,7 @@ import ListIcon from "@mui/icons-material/List";
 import type { SimpleMenuItem } from "@/util/components/SimpleMenu/SimpleMenu";
 import { useUserMe, User } from "@math3d/api";
 import ListSubheader from "@mui/material/ListSubheader";
+import FunctionsIcon from "@mui/icons-material/Functions";
 
 import UserMenu from "./UserMenu";
 import SaveButton from "./SaveButton";
@@ -119,6 +120,13 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       key: "examples",
       icon: <LightbulbOutlined fontSize="small" />,
       href: "scenes/examples",
+      shouldShow: true,
+    },
+    {
+      label: "Function Reference",
+      key: "reference",
+      icon: <FunctionsIcon fontSize="small" />,
+      href: "help/reference",
       shouldShow: true,
     },
     {
