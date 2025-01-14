@@ -11,7 +11,7 @@ body {
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   font-variant: tabular-nums;
   line-height: 1.5715;
-  background-color: #fff;
+  background-color: var(--color-secondary-lightest);
   font-feature-settings: "tnum";
 }
 
@@ -43,6 +43,7 @@ textarea {
 
 body,
 html {
+  --font-family-monospace: "roboto mono", monospace;
   --color-primary-dark-rgb: 16, 100, 178;
   --color-primary-dark: rgb(var(--color-primary-dark-rgb));
   --color-primary-rgb: 24, 144, 255;

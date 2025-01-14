@@ -36,6 +36,7 @@ import {
   sqrtDependencies,
   cubeDependencies,
   cbrtDependencies,
+  nthRootDependencies,
   // misc functions
   absDependencies,
   signDependencies,
@@ -69,6 +70,10 @@ import {
   crossDependencies,
   normDependencies,
   dotDependencies,
+  atan2Dependencies,
+  // vectors
+  indexDependencies,
+  mapDependencies,
 } from "mathjs";
 
 import {
@@ -87,6 +92,7 @@ const normalTrig = {
   asinDependencies,
   acosDependencies,
   atanDependencies,
+  atan2Dependencies,
   secDependencies,
   cscDependencies,
   cotDependencies,
@@ -122,6 +128,7 @@ const algebraic = {
   sqrtDependencies,
   cubeDependencies,
   cbrtDependencies,
+  nthRootDependencies,
 };
 
 const miscFuncs = {
@@ -172,22 +179,31 @@ const mathjs = create({
   complexDependencies,
   vectorFunctions,
   simplifyDependencies,
+  // vectors, matrices
+  indexDependencies,
+  mapDependencies,
 });
 
 mathjs.import({
   ln: mathjs.log,
   diff: createTotalDerivative,
-  unitT: createUnitB,
+  unitT: createUnitT,
   unitN: createUnitN,
-  unitB: createUnitT,
+  unitB: createUnitB,
 });
 
 mathjs.import(
   {
     customConstants,
+    root: mathjs.nthRoot,
     arccos: mathjs.acos,
     arcsin: mathjs.asin,
-    arctan: mathjs.atan,
+    arctan: (x: number, y: number) => {
+      if (y === undefined) {
+        return mathjs.atan(x);
+      }
+      return mathjs.atan2(y, x);
+    },
     arcsec: mathjs.asec,
     arccsc: mathjs.acsc,
     arccot: mathjs.acot,
@@ -197,6 +213,8 @@ mathjs.import(
     arcsech: mathjs.asech,
     arccsch: mathjs.acsch,
     arccoth: mathjs.acoth,
+    // @ts-expect-error diff is defined above
+    grad: mathjs.diff,
   },
   { override: true },
 );

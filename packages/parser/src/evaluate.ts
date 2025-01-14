@@ -35,6 +35,22 @@ class FunctionEvaluationError extends EvaluationError {
   }
 }
 
+const IM_ROUNDING_THRESHOLD = 1e-10;
+const numericTypeSimplify = (val: unknown): unknown => {
+  if (math.isMatrix(val)) {
+    return val.toArray().map(numericTypeSimplify);
+  }
+  if (Array.isArray(val)) {
+    return val.map(numericTypeSimplify);
+  }
+  if (math.isComplex(val)) {
+    if (val.im < IM_ROUNDING_THRESHOLD) {
+      return val.re;
+    }
+  }
+  return val;
+};
+
 const identity = <T>(x: T): T => x;
 
 const getValidatedEvaluate = (
@@ -44,9 +60,6 @@ const getValidatedEvaluate = (
   const compiled = mjsNode.compile();
   const unvalidatedEvaluate = (scope?: EvaluationScope) => {
     const rawResult = compiled.evaluate(scope);
-    if (math.isMatrix(rawResult)) {
-      return rawResult.toArray();
-    }
     if (typeof rawResult === "function") {
       const name =
         math.isAssignmentNode(mjsNode) || math.isFunctionAssignmentNode(mjsNode)
@@ -55,7 +68,7 @@ const getValidatedEvaluate = (
       const f = (...args: unknown[]) => {
         try {
           const rawEval = rawResult(...args);
-          return math.isMatrix(rawEval) ? rawEval.toArray() : rawEval;
+          return numericTypeSimplify(rawEval);
         } catch (e) {
           if (!(e instanceof Error)) {
             throw new Error('Expected error to be an instance of "Error"');
@@ -69,7 +82,7 @@ const getValidatedEvaluate = (
       Object.defineProperty(f, "length", { value: numArgs });
       return f;
     }
-    return rawResult;
+    return numericTypeSimplify(rawResult);
   };
   const evaluate = (scope?: EvaluationScope) => {
     try {
@@ -80,6 +93,7 @@ const getValidatedEvaluate = (
       if (err instanceof EvaluationError) {
         throw err;
       }
+      console.warn(err);
       throw new EvaluationError(err.message);
     }
   };

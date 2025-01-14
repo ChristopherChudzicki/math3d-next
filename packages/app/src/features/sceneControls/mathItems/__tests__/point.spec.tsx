@@ -33,6 +33,7 @@ test.each([
 ])(
   "initial coords evaluation/errors are correct; text=$coordsString",
   async ({ coordsString, coords, numParseErrors, numEvalErrors }) => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
     const item = makeItem(MIT.Point, { coords: coordsString });
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
@@ -66,6 +67,7 @@ test.each([
 ])(
   "coords evaluation/errors update on text change; text='$coordsString'",
   async ({ coords, coordsString, numEvalErrors, numParseErrors }) => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
     const item = makeItem(MIT.Point);
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
@@ -103,6 +105,7 @@ test("Adding items adds to mathScope", async () => {
 });
 
 test("Deleting items removes them from mathScope", async () => {
+  vi.spyOn(console, "warn").mockImplementation(() => {});
   const point = makeItem(MIT.Point, {
     label: "Point 123",
     coords: "[1, 2, 3]",

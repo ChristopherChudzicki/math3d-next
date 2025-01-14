@@ -49,6 +49,7 @@ module.exports = {
       {
         devDependencies: [
           "**/__tests__/**/*.ts",
+          "**/*.compile.ts",
           "**/*.spec.ts",
           "**/*.spec.tsx",
           "**/playwright.config.ts",

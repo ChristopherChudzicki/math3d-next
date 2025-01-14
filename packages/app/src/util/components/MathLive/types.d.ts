@@ -15,7 +15,7 @@ declare module "react" {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     interface IntrinsicElements {
       "math-field": Omit<MathFieldWebComponentProps, "className" | "style"> & {
-        class: MathFieldWebComponentProps["className"];
+        class?: MathFieldWebComponentProps["className"];
       };
     }
   }

@@ -504,3 +504,9 @@ describe("parsing derivatives", () => {
     }).toThrow("Could not parse derivative");
   });
 });
+
+test("Small imaginary numbers are truncated", () => {
+  const { parse } = parser;
+  expect(parse("I^2").evaluate()).toBe(-1);
+  expect(parse("1+1e-11I").evaluate()).toBe(1);
+});

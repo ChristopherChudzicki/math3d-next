@@ -1,34 +1,39 @@
 export const inlineShortcuts = {
   // trig
-  sin: "\\sin",
-  cos: "\\cos",
-  tan: "\\tan",
-  csc: "\\csc",
-  sec: "\\sec",
-  cot: "\\cot",
+  sin: "\\sin(#?)",
+  cos: "\\cos(#?)",
+  tan: "\\tan(#?)",
+  csc: "\\csc(#?)",
+  sec: "\\sec(#?)",
+  cot: "\\cot(#?)",
   // inverse trig
-  arcsin: "\\arcsin",
-  arccos: "\\arccos",
-  arctan: "\\arctan",
-  arccsc: "\\arccsc",
-  arcsec: "\\arcsec",
-  arccot: "\\arccot",
+  arcsin: "\\arcsin(#?)",
+  arccos: "\\arccos(#?)",
+  arctan: "\\arctan(#?)",
+  arccsc: "\\arccsc(#?)",
+  arcsec: "\\arcsec(#?)",
+  arccot: "\\arccot(#?)",
   // hyperbolic trig
-  sinh: "\\sinh",
-  cosh: "\\cosh",
-  tanh: "\\tanh",
-  csch: "\\csch",
-  sech: "\\sech",
-  coth: "\\coth",
+  sinh: "\\sinh(#?)",
+  cosh: "\\cosh(#?)",
+  tanh: "\\tanh(#?)",
+  csch: "\\csch(#?)",
+  sech: "\\sech(#?)",
+  coth: "\\coth(#?)",
   // inverse hyperbolic trig
-  arcsinh: "\\operatorname{arcsinh}",
-  arccosh: "\\operatorname{arccosh}",
-  arctanh: "\\operatorname{arctanh}",
+  arcsinh: "\\operatorname{arcsinh}(#?)",
+  arccosh: "\\operatorname{arccosh}(#?)",
+  arctanh: "\\operatorname{arctanh}(#?)",
+  arccsch: "\\operatorname{arccsch}(#?)",
+  arcsech: "\\operatorname{arcsech}(#?)",
+  arccoth: "\\operatorname{arccoth}(#?)",
   // misc
-  abs: "\\abs",
-  sign: "\\operatorname{sign}",
-  floor: "\\operatorname{floor}",
-  ceil: "\\operatorname{ceil}",
+  abs: "\\abs(#?)",
+  norm: "\\operatorname{norm}{(#?)}",
+  sign: "\\operatorname{sign}(#?)",
+  floor: "\\operatorname{floor}(#?)",
+  ceil: "\\operatorname{ceil}(#?)",
+  root: "\\operatorname{root}(#?, #?)",
   // sqrt
   sqrt: "\\sqrt{#?}",
   // exp
@@ -82,18 +87,20 @@ export const inlineShortcuts = {
   // derivatives
   pdiff: "\\frac{\\partial #?}{\\partial #?}",
   diff: "\\frac{\\differentialD #?}{\\differentialD #?}",
+  unitT: "\\operatorname{unitT}(#?, #?)",
+  unitN: "\\operatorname{unitN}(#?, #?)",
+  unitB: "\\operatorname{unitB}(#?, #?)",
+  grad: "\\operatorname{grad}(#?)",
   // operators
   "*": " \\cdot",
 };
 
 export const extraMacros = {
   // unit vectors
-  uniti: "\\mathbf{\\hat{i}}",
-  unitj: "\\mathbf{\\hat{j}}",
-  unitk: "\\mathbf{\\hat{k}}",
-  unitx: "\\mathbf{\\hat{x}}",
-  unity: "\\mathbf{\\hat{y}}",
-  unitz: "\\mathbf{\\hat{z}}",
-  // others
-  abs: "\\operatorname{abs}",
+  uniti: "\\hat{\\mathbf{i}}",
+  unitj: "\\hat{\\mathbf{j}}",
+  unitk: "\\hat{\\mathbf{k}}",
+  unitx: "\\hat{\\mathbf{x}}",
+  unity: "\\hat{\\mathbf{y}}",
+  unitz: "\\hat{\\mathbf{z}}",
 };

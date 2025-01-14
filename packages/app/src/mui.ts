@@ -12,6 +12,15 @@ const theme = createTheme({
       primary: "#434343",
     },
   },
+  components: {
+    MuiLink: {
+      styleOverrides: {
+        root: {
+          textDecoration: "none",
+        },
+      },
+    },
+  },
 });
 
 export { theme };
