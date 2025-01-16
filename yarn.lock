@@ -5771,13 +5771,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prop-types@npm:*":
-  version: 15.7.5
-  resolution: "@types/prop-types@npm:15.7.5"
-  checksum: 10/5b43b8b15415e1f298243165f1d44390403bb2bd42e662bca3b5b5633fdd39c938e91b7fce3a9483699db0f7a715d08cef220c121f723a634972fdf596aec980
-  languageName: node
-  linkType: hard
-
 "@types/prop-types@npm:^15.7.14":
   version: 15.7.14
   resolution: "@types/prop-types@npm:15.7.14"
@@ -5793,11 +5786,11 @@ __metadata:
   linkType: hard
 
 "@types/react-dom@npm:^19.0.2":
-  version: 19.0.2
-  resolution: "@types/react-dom@npm:19.0.2"
+  version: 19.0.3
+  resolution: "@types/react-dom@npm:19.0.3"
   peerDependencies:
     "@types/react": ^19.0.0
-  checksum: 10/d2ae81ec0b8eee7a4bf31918796fdaa34e8db68f69682163bc212d759de76783e6ffcc02c02722dcf508429067148841e6da81414cc730ca2a28c9c2b350c880
+  checksum: 10/815907f7adaa078acbf1d1ae7b6bf69cebe86bd301b8b9744e392bc0f16feb31bfb9fe0bfa2681d7d86678c83d52dedba5ed9bc7776736d4050cdd426b8b2d2b
   languageName: node
   linkType: hard
 
@@ -5819,23 +5812,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*":
-  version: 18.2.14
-  resolution: "@types/react@npm:18.2.14"
-  dependencies:
-    "@types/prop-types": "npm:*"
-    "@types/scheduler": "npm:*"
-    csstype: "npm:^3.0.2"
-  checksum: 10/9a8e9a6e6d39dba32a449ac986add435ee30d1f5af336efa7b0cb0e8e31eefa2b85ab2ef921284b373e820c47d184c7161f826cc77f1e528cc13642be3596110
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:^19.0.2":
-  version: 19.0.2
-  resolution: "@types/react@npm:19.0.2"
+"@types/react@npm:*, @types/react@npm:^19.0.2":
+  version: 19.0.7
+  resolution: "@types/react@npm:19.0.7"
   dependencies:
     csstype: "npm:^3.0.2"
-  checksum: 10/b355cfa22814e934b381c4f6de67c66652255377c3ddc6a757ea195ccbd0e7095aadfe1a28713d8ab1221222b8f2ec237903f4ec0e54eaf656ac832782d25dd2
+  checksum: 10/09522132bde715888e57c61fc89a87db06699872535450296f1c975c5014a7953ff08c3bff6b37d4a4515ceeb65b09cc5f841513cc8fede65fec788790b21154
   languageName: node
   linkType: hard
 
@@ -5843,13 +5825,6 @@ __metadata:
   version: 0.12.2
   resolution: "@types/retry@npm:0.12.2"
   checksum: 10/e5675035717b39ce4f42f339657cae9637cf0c0051cf54314a6a2c44d38d91f6544be9ddc0280587789b6afd056be5d99dbe3e9f4df68c286c36321579b1bf4a
-  languageName: node
-  linkType: hard
-
-"@types/scheduler@npm:*":
-  version: 0.16.3
-  resolution: "@types/scheduler@npm:0.16.3"
-  checksum: 10/2b0aec39c24268e3ce938c5db2f2e77f5c3dd280e05c262d9c2fe7d890929e4632a6b8e94334017b66b45e4f92a5aa42ba3356640c2a1175fa37bef2f5200767
   languageName: node
   linkType: hard
 
