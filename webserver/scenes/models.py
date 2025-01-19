@@ -24,23 +24,33 @@ items_schema = jtd.Schema.from_dict(
 )
 
 
+KEY_ALPHABET = "123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNPQRSTUVWXYZ"
+
+
+def _random_key(length):
+    return "".join(random.choices(KEY_ALPHABET, k=length))
+
+
+def random_key(length=10, depth=0):
+    key = _random_key(length)
+    if (
+        Scene.objects.filter(key=key).exists()
+        or LegacyScene.objects.filter(key=key).exists()
+    ):
+        return random_key(length, depth + 1)
+    return key
+
+
 class LegacyScene(models.Model):
     """
     A scene that was created in the legacy system.
     """
 
-    key = models.CharField(max_length=80, unique=True)
+    key = models.CharField(max_length=80, unique=True, default=random_key)
     times_accessed = models.IntegerField(default=0)
     last_accessed = models.DateTimeField(auto_now=True)
     dehydrated = models.JSONField()
     migration_note = models.TextField(default="")
-
-
-KEY_ALPHABET = "123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNPQRSTUVWXYZ"
-
-
-def random_key(length=9):
-    return "".join(random.choices(KEY_ALPHABET, k=length))
 
 
 class TimestampedModel(models.Model):

@@ -1,8 +1,8 @@
 import re
 
-import scenes.management.commands.legacy_migration.legacy_data as old
+import scenes.legacy_scene_utils.legacy_data as old
 import scenes.math_items as new
-from scenes.management.commands.legacy_migration.IssueLog import IssueLog
+from scenes.legacy_scene_utils.IssueLog import IssueLog
 
 
 def stringify(obj: bool):

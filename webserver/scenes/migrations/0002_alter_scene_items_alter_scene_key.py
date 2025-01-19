@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             model_name="scene",
             name="key",
             field=models.CharField(
-                default=scenes.models.random_key, max_length=80, unique=True
+                default=scenes.models._random_key, max_length=80, unique=True
             ),
         ),
     ]

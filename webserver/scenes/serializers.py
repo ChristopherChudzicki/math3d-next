@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from scenes.models import Scene
+from scenes.models import Scene, LegacyScene
 
 
 class CurrentUserDefaultOrNone:
@@ -53,3 +53,12 @@ class MiniSceneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scene
         fields = ["title", "key", "author", "createdDate", "modifiedDate", "archived"]
+
+
+class LegacySceneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LegacyScene
+        fields = [
+            "key",
+            "dehydrated",
+        ]
