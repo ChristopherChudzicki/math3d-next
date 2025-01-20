@@ -6159,7 +6159,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:^5.58.0":
+"@typescript-eslint/utils@npm:^5.62.0":
   version: 5.62.0
   resolution: "@typescript-eslint/utils@npm:5.62.0"
   dependencies:
@@ -10995,13 +10995,13 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-testing-library@npm:^6.2.0":
-  version: 6.3.0
-  resolution: "eslint-plugin-testing-library@npm:6.3.0"
+  version: 6.5.0
+  resolution: "eslint-plugin-testing-library@npm:6.5.0"
   dependencies:
-    "@typescript-eslint/utils": "npm:^5.58.0"
+    "@typescript-eslint/utils": "npm:^5.62.0"
   peerDependencies:
-    eslint: ^7.5.0 || ^8.0.0
-  checksum: 10/192b112f84f90cc7eee28965b3e7792e8d4cda71aa29690d8180f1ae9cd0e8d6a8851ee992d37285a76750f8638c04e76f768e1885168f060ca169b72ac9ec6c
+    eslint: ^7.5.0 || ^8.0.0 || ^9.0.0
+  checksum: 10/5ce5f71aed5dc39315f7fa2e987c7e1ffc78f7d35164c2d8769ad29000558828dc13c04bfef289c28faf57749ce7720e5ab17869780b743bc1d8cd59a5052a43
   languageName: node
   linkType: hard
 
