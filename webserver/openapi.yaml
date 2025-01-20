@@ -439,6 +439,81 @@ paths:
               schema:
                 $ref: '#/components/schemas/SetPasswordRetype'
           description: ''
+  /v0/legacy_scenes/:
+    get:
+      operationId: legacy_scenes_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - legacy_scenes
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLegacySceneList'
+          description: ''
+    post:
+      operationId: legacy_scenes_create
+      tags:
+      - legacy_scenes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LegacySceneRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LegacySceneRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LegacySceneRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegacyScene'
+          description: ''
+  /v0/legacy_scenes/{key}/:
+    get:
+      operationId: legacy_scenes_retrieve
+      parameters:
+      - in: path
+        name: key
+        schema:
+          type: string
+        required: true
+      tags:
+      - legacy_scenes
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegacyScene'
+          description: ''
   /v0/scenes/:
     get:
       operationId: scenes_list
@@ -623,6 +698,25 @@ components:
       required:
       - token
       - uid
+    LegacyScene:
+      type: object
+      properties:
+        key:
+          type: string
+          maxLength: 80
+        dehydrated: {}
+      required:
+      - dehydrated
+    LegacySceneRequest:
+      type: object
+      properties:
+        key:
+          type: string
+          minLength: 1
+          maxLength: 80
+        dehydrated: {}
+      required:
+      - dehydrated
     MiniScene:
       type: object
       properties:
@@ -647,6 +741,29 @@ components:
       required:
       - createdDate
       - modifiedDate
+    PaginatedLegacySceneList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LegacyScene'
     PaginatedMiniSceneList:
       type: object
       required:

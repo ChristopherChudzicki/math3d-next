@@ -80,6 +80,44 @@ export interface ActivationRequest {
 /**
  *
  * @export
+ * @interface LegacyScene
+ */
+export interface LegacyScene {
+  /**
+   *
+   * @type {string}
+   * @memberof LegacyScene
+   */
+  key?: string;
+  /**
+   *
+   * @type {any}
+   * @memberof LegacyScene
+   */
+  dehydrated: any;
+}
+/**
+ *
+ * @export
+ * @interface LegacySceneRequest
+ */
+export interface LegacySceneRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof LegacySceneRequest
+   */
+  key?: string;
+  /**
+   *
+   * @type {any}
+   * @memberof LegacySceneRequest
+   */
+  dehydrated: any;
+}
+/**
+ *
+ * @export
  * @interface MiniScene
  */
 export interface MiniScene {
@@ -119,6 +157,37 @@ export interface MiniScene {
    * @memberof MiniScene
    */
   archived?: boolean;
+}
+/**
+ *
+ * @export
+ * @interface PaginatedLegacySceneList
+ */
+export interface PaginatedLegacySceneList {
+  /**
+   *
+   * @type {number}
+   * @memberof PaginatedLegacySceneList
+   */
+  count: number;
+  /**
+   *
+   * @type {string}
+   * @memberof PaginatedLegacySceneList
+   */
+  next?: string | null;
+  /**
+   *
+   * @type {string}
+   * @memberof PaginatedLegacySceneList
+   */
+  previous?: string | null;
+  /**
+   *
+   * @type {Array<LegacyScene>}
+   * @memberof PaginatedLegacySceneList
+   */
+  results: Array<LegacyScene>;
 }
 /**
  *
@@ -2959,6 +3028,454 @@ export class AuthApi extends BaseAPI {
         requestParameters.UserRequest,
         options,
       )
+      .then((request) => request(this.axios, this.basePath));
+  }
+}
+
+/**
+ * LegacyScenesApi - axios parameter creator
+ * @export
+ */
+export const LegacyScenesApiAxiosParamCreator = function (
+  configuration?: Configuration,
+) {
+  return {
+    /**
+     *
+     * @param {LegacySceneRequest} LegacySceneRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    legacyScenesCreate: async (
+      LegacySceneRequest: LegacySceneRequest,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'LegacySceneRequest' is not null or undefined
+      assertParamExists(
+        "legacyScenesCreate",
+        "LegacySceneRequest",
+        LegacySceneRequest,
+      );
+      const localVarPath = `/v0/legacy_scenes/`;
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = {
+        method: "POST",
+        ...baseOptions,
+        ...options,
+      };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication tokenAuth required
+      await setApiKeyToObject(
+        localVarHeaderParameter,
+        "Authorization",
+        configuration,
+      );
+
+      localVarHeaderParameter["Content-Type"] = "application/json";
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        LegacySceneRequest,
+        localVarRequestOptions,
+        configuration,
+      );
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
+     * @param {number} [limit] Number of results to return per page.
+     * @param {number} [offset] The initial index from which to return the results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    legacyScenesList: async (
+      limit?: number,
+      offset?: number,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/v0/legacy_scenes/`;
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = {
+        method: "GET",
+        ...baseOptions,
+        ...options,
+      };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication tokenAuth required
+      await setApiKeyToObject(
+        localVarHeaderParameter,
+        "Authorization",
+        configuration,
+      );
+
+      if (limit !== undefined) {
+        localVarQueryParameter["limit"] = limit;
+      }
+
+      if (offset !== undefined) {
+        localVarQueryParameter["offset"] = offset;
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
+     * @param {string} key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    legacyScenesRetrieve: async (
+      key: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'key' is not null or undefined
+      assertParamExists("legacyScenesRetrieve", "key", key);
+      const localVarPath = `/v0/legacy_scenes/{key}/`.replace(
+        `{${"key"}}`,
+        encodeURIComponent(String(key)),
+      );
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = {
+        method: "GET",
+        ...baseOptions,
+        ...options,
+      };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication tokenAuth required
+      await setApiKeyToObject(
+        localVarHeaderParameter,
+        "Authorization",
+        configuration,
+      );
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+  };
+};
+
+/**
+ * LegacyScenesApi - functional programming interface
+ * @export
+ */
+export const LegacyScenesApiFp = function (configuration?: Configuration) {
+  const localVarAxiosParamCreator =
+    LegacyScenesApiAxiosParamCreator(configuration);
+  return {
+    /**
+     *
+     * @param {LegacySceneRequest} LegacySceneRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async legacyScenesCreate(
+      LegacySceneRequest: LegacySceneRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<LegacyScene>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.legacyScenesCreate(
+          LegacySceneRequest,
+          options,
+        );
+      const index = configuration?.serverIndex ?? 0;
+      const operationBasePath =
+        operationServerMap["LegacyScenesApi.legacyScenesCreate"]?.[index]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath);
+    },
+    /**
+     *
+     * @param {number} [limit] Number of results to return per page.
+     * @param {number} [offset] The initial index from which to return the results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async legacyScenesList(
+      limit?: number,
+      offset?: number,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string,
+      ) => AxiosPromise<PaginatedLegacySceneList>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.legacyScenesList(
+          limit,
+          offset,
+          options,
+        );
+      const index = configuration?.serverIndex ?? 0;
+      const operationBasePath =
+        operationServerMap["LegacyScenesApi.legacyScenesList"]?.[index]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath);
+    },
+    /**
+     *
+     * @param {string} key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async legacyScenesRetrieve(
+      key: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<LegacyScene>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.legacyScenesRetrieve(key, options);
+      const index = configuration?.serverIndex ?? 0;
+      const operationBasePath =
+        operationServerMap["LegacyScenesApi.legacyScenesRetrieve"]?.[index]
+          ?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath);
+    },
+  };
+};
+
+/**
+ * LegacyScenesApi - factory interface
+ * @export
+ */
+export const LegacyScenesApiFactory = function (
+  configuration?: Configuration,
+  basePath?: string,
+  axios?: AxiosInstance,
+) {
+  const localVarFp = LegacyScenesApiFp(configuration);
+  return {
+    /**
+     *
+     * @param {LegacyScenesApiLegacyScenesCreateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    legacyScenesCreate(
+      requestParameters: LegacyScenesApiLegacyScenesCreateRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<LegacyScene> {
+      return localVarFp
+        .legacyScenesCreate(requestParameters.LegacySceneRequest, options)
+        .then((request) => request(axios, basePath));
+    },
+    /**
+     *
+     * @param {LegacyScenesApiLegacyScenesListRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    legacyScenesList(
+      requestParameters: LegacyScenesApiLegacyScenesListRequest = {},
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<PaginatedLegacySceneList> {
+      return localVarFp
+        .legacyScenesList(
+          requestParameters.limit,
+          requestParameters.offset,
+          options,
+        )
+        .then((request) => request(axios, basePath));
+    },
+    /**
+     *
+     * @param {LegacyScenesApiLegacyScenesRetrieveRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    legacyScenesRetrieve(
+      requestParameters: LegacyScenesApiLegacyScenesRetrieveRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<LegacyScene> {
+      return localVarFp
+        .legacyScenesRetrieve(requestParameters.key, options)
+        .then((request) => request(axios, basePath));
+    },
+  };
+};
+
+/**
+ * Request parameters for legacyScenesCreate operation in LegacyScenesApi.
+ * @export
+ * @interface LegacyScenesApiLegacyScenesCreateRequest
+ */
+export interface LegacyScenesApiLegacyScenesCreateRequest {
+  /**
+   *
+   * @type {LegacySceneRequest}
+   * @memberof LegacyScenesApiLegacyScenesCreate
+   */
+  readonly LegacySceneRequest: LegacySceneRequest;
+}
+
+/**
+ * Request parameters for legacyScenesList operation in LegacyScenesApi.
+ * @export
+ * @interface LegacyScenesApiLegacyScenesListRequest
+ */
+export interface LegacyScenesApiLegacyScenesListRequest {
+  /**
+   * Number of results to return per page.
+   * @type {number}
+   * @memberof LegacyScenesApiLegacyScenesList
+   */
+  readonly limit?: number;
+
+  /**
+   * The initial index from which to return the results.
+   * @type {number}
+   * @memberof LegacyScenesApiLegacyScenesList
+   */
+  readonly offset?: number;
+}
+
+/**
+ * Request parameters for legacyScenesRetrieve operation in LegacyScenesApi.
+ * @export
+ * @interface LegacyScenesApiLegacyScenesRetrieveRequest
+ */
+export interface LegacyScenesApiLegacyScenesRetrieveRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof LegacyScenesApiLegacyScenesRetrieve
+   */
+  readonly key: string;
+}
+
+/**
+ * LegacyScenesApi - object-oriented interface
+ * @export
+ * @class LegacyScenesApi
+ * @extends {BaseAPI}
+ */
+export class LegacyScenesApi extends BaseAPI {
+  /**
+   *
+   * @param {LegacyScenesApiLegacyScenesCreateRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof LegacyScenesApi
+   */
+  public legacyScenesCreate(
+    requestParameters: LegacyScenesApiLegacyScenesCreateRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return LegacyScenesApiFp(this.configuration)
+      .legacyScenesCreate(requestParameters.LegacySceneRequest, options)
+      .then((request) => request(this.axios, this.basePath));
+  }
+
+  /**
+   *
+   * @param {LegacyScenesApiLegacyScenesListRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof LegacyScenesApi
+   */
+  public legacyScenesList(
+    requestParameters: LegacyScenesApiLegacyScenesListRequest = {},
+    options?: RawAxiosRequestConfig,
+  ) {
+    return LegacyScenesApiFp(this.configuration)
+      .legacyScenesList(
+        requestParameters.limit,
+        requestParameters.offset,
+        options,
+      )
+      .then((request) => request(this.axios, this.basePath));
+  }
+
+  /**
+   *
+   * @param {LegacyScenesApiLegacyScenesRetrieveRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof LegacyScenesApi
+   */
+  public legacyScenesRetrieve(
+    requestParameters: LegacyScenesApiLegacyScenesRetrieveRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return LegacyScenesApiFp(this.configuration)
+      .legacyScenesRetrieve(requestParameters.key, options)
       .then((request) => request(this.axios, this.basePath));
   }
 }
