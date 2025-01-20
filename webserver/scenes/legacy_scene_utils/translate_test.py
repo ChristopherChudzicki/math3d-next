@@ -1,6 +1,6 @@
 import pytest
 
-from scenes.management.commands.legacy_migration.translate import ItemMigrator
+from scenes.legacy_scene_utils.translate import ItemMigrator
 
 
 def test_axis():

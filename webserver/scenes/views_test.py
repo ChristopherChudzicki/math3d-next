@@ -2,7 +2,7 @@ import pytest
 from django.urls import reverse
 from utils.test_utils import JsonAPIClient
 
-from scenes.models import Scene
+from scenes.models import LegacyScene, Scene
 from scenes.factories import SceneFactory
 from authentication.factories import CustomUserFactory
 
@@ -152,3 +152,37 @@ def test_scenes_me_list_filtering():
         scene_dogbark.title,
         scene_dogwoof.title,
     }
+
+
+@pytest.mark.django_db
+def test_legacy_scene_create_retrieve():
+    client = JsonAPIClient()
+
+    payload = {"dehydrated": {"Whatever": "it's not validated"}}
+    response = client.post(reverse("legacy_scenes-list"), payload)
+    print(response.data)
+    assert response.status_code == 201
+    scene = LegacyScene.objects.get(key=response.data["key"])
+    assert scene.dehydrated == payload["dehydrated"]
+
+    retrieved = client.get(reverse("legacy_scenes-detail", kwargs={"key": scene.key}))
+    assert retrieved.data == response.data
+
+
+@pytest.mark.django_db
+def test_legacy_scene_not_implemented_methods():
+    client = JsonAPIClient()
+
+    assert client.get(reverse("legacy_scenes-list")).status_code == 405
+    assert (
+        client.patch(
+            reverse("legacy_scenes-detail", kwargs={"key": "whatever"})
+        ).status_code
+        == 405
+    )
+    assert (
+        client.put(
+            reverse("legacy_scenes-detail", kwargs={"key": "whatever"})
+        ).status_code
+        == 405
+    )

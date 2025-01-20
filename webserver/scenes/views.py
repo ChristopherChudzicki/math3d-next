@@ -1,19 +1,23 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status, mixins
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 
-from scenes.models import Scene
+
+from scenes.models import Scene, LegacyScene
 from scenes.serializers import (
     SceneSerializer,
+    LegacySceneSerializer,
     MiniSceneSerializer,
     SceneCreateSerializer,
 )
 from scenes.permissions import ScenePermissions
 from scenes.filters import SceneFilterSet
 from django_filters import rest_framework as filters
+
+from scenes.legacy_scene_utils.migrate_scene import migrate_scene
 
 
 # Create your views here.
@@ -49,3 +53,25 @@ class ScenesView(viewsets.ModelViewSet):
         page = self.paginate_queryset(filtered_queryset)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        if LegacyScene.objects.filter(key=kwargs["key"]).exists():
+            legacy = LegacyScene.objects.get(key=kwargs["key"])
+            migrate_scene(legacy)
+        return super().retrieve(request, *args, **kwargs)
+
+
+class LegacyScenesView(
+    viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.RetrieveModelMixin
+):
+    queryset = LegacyScene.objects.all()
+
+    serializer_class = LegacySceneSerializer
+
+    lookup_field = "key"
+
+    http_method_names = ["get", "post"]
+
+    def list(self, request, pk=None):
+        response = {"message": "Listing is not offered in this path."}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
