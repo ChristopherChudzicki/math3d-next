@@ -15,6 +15,9 @@ jobs:
       AWS_S3_BUCKET: ${{ vars.AWS_S3_BUCKET }}
       SKIP_YARN_COREPACK_CHECK: true
     steps:
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
