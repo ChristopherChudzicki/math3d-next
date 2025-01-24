@@ -139,7 +139,7 @@ const config: IMathItemConfig<
       name: "divisions",
       label: "Divisions",
       widget: WidgetType.MathValue,
-      validate: validators.positive,
+      validate: validators.nonnegative,
     },
   },
   settingsProperties: [
