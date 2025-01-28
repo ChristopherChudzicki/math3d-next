@@ -24,47 +24,48 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "--filter",
-            dest="filter",
-            type=str,
-            help="Filter the scenes fetched by a SQL WHERE clause",
+            "-s",
+            "--itersize",
+            dest="itersize",
+            default=1000,
+            type=int,
+            help="Cursor iteration size",
         )
-
-    def get_cursor(self):
-        conn = psycopg2.connect(
-            os.environ["LEGACY_DATABASE_URL"], cursor_factory=DictCursor
-        )
-        return conn.cursor()
 
     def handle(self, *args, **options):
-        limit = options["limit"]
-        cursor = self.get_cursor()
-        if options["filter"]:
-            query = cursor.mogrify(
-                """
-        SELECT url_key, dehydrated, times_accessed, last_accessed
-        FROM graphs WHERE url_key IN (%s)
-        """,
-                options["filter"].split(","),
-            )
-        elif limit:
-            sql.SQL(
-                """
-        SELECT url_key, dehydrated, times_accessed, last_accessed
-        FROM graphs LIMIT %s;
-        """
-            )
-        else:
-            query = sql.SQL("SELECT * FROM graphs;")
+        with psycopg2.connect(
+            os.environ["LEGACY_DATABASE_URL"], cursor_factory=DictCursor
+        ) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT COUNT(*) FROM graphs;")
+                total_rows = cursor.fetchone()[0]
+                total = (
+                    total_rows
+                    if not options["limit"]
+                    else min(options["limit"], total_rows)
+                )
 
-        cursor.execute(query)
+            with conn.cursor(name="legacy_fetcher") as cursor:
+                cursor.itersize = options["itersize"]
 
-        for scene in tqdm.tqdm(cursor.fetchall()):
-            LegacyScene.objects.update_or_create(
-                key=scene["url_key"],
-                defaults={
-                    "dehydrated": scene["dehydrated"],
-                    "times_accessed": scene["times_accessed"],
-                    "last_accessed": scene["last_accessed"],
-                },
-            )
+                if options["limit"]:
+                    query = cursor.mogrify(
+                        """
+                        SELECT * FROM graphs LIMIT %s;
+                        """,
+                        (options["limit"],),
+                    )
+                else:
+                    query = sql.SQL("SELECT * FROM graphs;")
+
+                cursor.execute(query)
+
+                for scene in tqdm.tqdm(cursor, total=total):
+                    LegacyScene.objects.update_or_create(
+                        key=scene["url_key"],
+                        defaults={
+                            "dehydrated": scene["dehydrated"],
+                            "times_accessed": scene["times_accessed"],
+                            "last_accessed": scene["last_accessed"],
+                        },
+                    )
