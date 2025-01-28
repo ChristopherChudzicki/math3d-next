@@ -25,21 +25,21 @@ const grid1: PropertyConfig<"grid1", number> = {
   name: "grid1",
   label: "Grid (1st parameter)",
   widget: WidgetType.MathValue,
-  validate: validators.positive,
+  validate: validators.nonnegative,
 };
 
 const grid2: PropertyConfig<"grid2", number> = {
   name: "grid2",
   label: "Grid (2nd parameter)",
   widget: WidgetType.MathValue,
-  validate: validators.positive,
+  validate: validators.nonnegative,
 };
 
 const gridWidth: PropertyConfig<"gridWidth", number> = {
   name: "gridWidth",
   label: "Grid Width",
   widget: WidgetType.MathValue,
-  validate: validators.positive,
+  validate: validators.nonnegative,
 };
 
 const label: PropertyConfig<"label"> = {
@@ -59,7 +59,7 @@ const opacity: PropertyConfig<"opacity", number> = {
   name: "opacity",
   label: "Opacity",
   widget: WidgetType.MathValue,
-  validate: validators.positive,
+  validate: validators.nonnegative,
 };
 
 const range1: PropertyConfig<"range1", [number, number]> = {
@@ -156,7 +156,7 @@ const size: PropertyConfig<"size", number> = {
   name: "size",
   label: "Size",
   widget: WidgetType.MathValue,
-  validate: validators.positive,
+  validate: validators.nonnegative,
 };
 
 const samples1: PropertyConfig<"samples1", number> = {
@@ -191,7 +191,7 @@ const width: PropertyConfig<"width", number> = {
   name: "width",
   label: "Width",
   widget: WidgetType.MathValue,
-  validate: validators.positive,
+  validate: validators.nonnegative,
 };
 
 const zBias: PropertyConfig<"zBias", number> = {
