@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
+from django.shortcuts import get_object_or_404
 
 
 from scenes.models import Scene, LegacyScene
@@ -57,7 +58,13 @@ class ScenesView(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         if LegacyScene.objects.filter(key=kwargs["key"]).exists():
             legacy = LegacyScene.objects.get(key=kwargs["key"])
+            legacy.times_accessed += 1
+            legacy.save()
             migrate_scene(legacy)
+
+        scene = get_object_or_404(Scene, key=kwargs["key"])
+        scene.times_accessed += 1
+
         return super().retrieve(request, *args, **kwargs)
 
 
@@ -71,6 +78,13 @@ class LegacyScenesView(
     lookup_field = "key"
 
     http_method_names = ["get", "post"]
+
+    def retrieve(self, request, *args, **kwargs):
+        key = kwargs["key"]
+        scene = get_object_or_404(LegacyScene, key=key)
+        scene.times_accessed += 1
+        scene.save()
+        return super().retrieve(request, *args, **kwargs)
 
     def list(self, request, pk=None):
         response = {"message": "Listing is not offered in this path."}

@@ -96,6 +96,8 @@ class Scene(TimestampedModel):
 
     archived = models.BooleanField(default=False)
 
+    times_accessed = models.IntegerField(default=0)
+
     class Meta:
         indexes = [
             GinIndex(
