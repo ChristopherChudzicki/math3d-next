@@ -6,6 +6,7 @@ declare const styles: {
   readonly "flex1": string;
   readonly "justifyContentCenter": string;
   readonly "justifyContentEnd": string;
+  readonly "mlAuto": string;
   readonly "mr2": string;
   readonly "positionRelative": string;
   readonly "px1": string;

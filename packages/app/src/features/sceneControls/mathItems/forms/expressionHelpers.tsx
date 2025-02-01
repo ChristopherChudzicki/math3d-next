@@ -36,7 +36,10 @@ interface ParameterFormProps {
 const ParameterForm: React.FC<ParameterFormProps> = (props) => {
   return (
     <>
-      <div className={classNames(u.dFlex, u.justifyContentEnd)}>
+      <div
+        style={{ marginLeft: "auto" }}
+        className={classNames(u.dFlex, u.mlAuto)}
+      >
         {props.nameInput}
         <ReadonlyMathField value="\in" />
       </div>

@@ -3,8 +3,7 @@
   padding-left: 6px;
   padding-top: 6px;
   padding-bottom: 6px;
-  grid-template-columns: min-content min-content;
-  justify-content: end;
+  grid-template-columns: auto min-content;
   align-items: center;
 }
 
