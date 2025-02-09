@@ -23,6 +23,9 @@
   width: fit-content;
   min-width: calc(100% - 2px);
 }
+.container:not(:focus-within) > * {
+  overflow: hidden;
+}
 
 .description {
   /** Make description lighter so that mathfields draw more visual focus */
