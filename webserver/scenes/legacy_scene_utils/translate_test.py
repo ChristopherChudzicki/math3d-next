@@ -31,8 +31,27 @@ def test_axis():
             "zIndex": "0",
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
-    assert actual_out == expected_out
+    assert migrator.translate_item(data_in, "axis-x").to_json_data() == {
+        **expected_out,
+        "id": "axis-x",
+        "properties": {
+            **expected_out["properties"],
+            "axis": "x",
+        },
+    }
+    assert migrator.translate_item(data_in, "axis-y").to_json_data() == {
+        **expected_out,
+        "id": "axis-y",
+        "properties": {
+            **expected_out["properties"],
+            "axis": "y",
+        },
+    }
+    assert migrator.translate_item(data_in, "axis-z").to_json_data() == {
+        **expected_out,
+        "id": "axis-z",
+        "properties": {**expected_out["properties"], "axis": "z", "scale": "1/2"},
+    }
 
 
 def test_boolean_variable():

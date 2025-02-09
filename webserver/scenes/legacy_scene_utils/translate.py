@@ -3,6 +3,7 @@ import re
 import scenes.legacy_scene_utils.legacy_data as old
 import scenes.math_items as new
 from scenes.legacy_scene_utils.IssueLog import IssueLog
+from copy import deepcopy
 
 
 def stringify(obj: bool):
@@ -412,117 +413,133 @@ class ItemMigrator:
         )
 
     def translate_item(self, item, item_id) -> new.MathItem:
-        item_type = item["type"]
-        del item["type"]
+        copy = deepcopy(item)
+        item_type = copy["type"]
+        del copy["type"]
 
         if item_type == "AXIS":
+            extra_defaults = {}
+            if item_id == "axis-x":
+                extra_defaults = {"axis": "x"}
+            elif item_id == "axis-y":
+                extra_defaults = {"axis": "y"}
+            elif item_id == "axis-z":
+                extra_defaults = {"axis": "z", "scale": "1/2"}
+
             return new.MathItemAxis(
-                id=item_id, type="AXIS", properties=self.translate_axis(item)
+                id=item_id,
+                type="AXIS",
+                properties=self.translate_axis(
+                    {
+                        **extra_defaults,
+                        **copy,
+                    }
+                ),
             )
 
         if item_type == "BOOLEAN_VARIABLE":
             return new.MathItemBooleanVariable(
                 id=item_id,
                 type="BOOLEAN_VARIABLE",
-                properties=self.translate_boolean_variable(item),
+                properties=self.translate_boolean_variable(copy),
             )
 
         if item_type == "CAMERA":
             return new.MathItemCamera(
                 id=item_id,
                 type="CAMERA",
-                properties=self.translate_camera(item),
+                properties=self.translate_camera(copy),
             )
 
         if item_type == "EXPLICIT_SURFACE":
             return new.MathItemExplicitSurface(
                 id=item_id,
                 type="EXPLICIT_SURFACE",
-                properties=self.translate_explicit_surface(item),
+                properties=self.translate_explicit_surface(copy),
             )
 
         if item_type == "EXPLICIT_SURFACE_POLAR":
             return new.MathItemExplicitSurfacePolar(
                 id=item_id,
                 type="EXPLICIT_SURFACE_POLAR",
-                properties=self.translate_explicit_surface_polar(item),
+                properties=self.translate_explicit_surface_polar(copy),
             )
 
         if item_type == "FOLDER":
             return new.MathItemFolder(
                 id=item_id,
                 type="FOLDER",
-                properties=self.translate_folder(item),
+                properties=self.translate_folder(copy),
             )
 
         if item_type == "GRID":
             return new.MathItemGrid(
                 id=item_id,
                 type="GRID",
-                properties=self.translate_grid(item),
+                properties=self.translate_grid(copy),
             )
 
         if item_type == "IMPLICIT_SURFACE":
             return new.MathItemImplicitSurface(
                 id=item_id,
                 type="IMPLICIT_SURFACE",
-                properties=self.translate_implicit_surface(item),
+                properties=self.translate_implicit_surface(copy),
             )
 
         if item_type == "LINE":
             return new.MathItemLine(
                 id=item_id,
                 type="LINE",
-                properties=self.translate_line(item),
+                properties=self.translate_line(copy),
             )
 
         if item_type == "PARAMETRIC_CURVE":
             return new.MathItemParametricCurve(
                 id=item_id,
                 type="PARAMETRIC_CURVE",
-                properties=self.translate_parametric_curve(item),
+                properties=self.translate_parametric_curve(copy),
             )
 
         if item_type == "PARAMETRIC_SURFACE":
             return new.MathItemParametricSurface(
                 id=item_id,
                 type="PARAMETRIC_SURFACE",
-                properties=self.translate_parametric_surface(item),
+                properties=self.translate_parametric_surface(copy),
             )
 
         if item_type == "POINT":
             return new.MathItemPoint(
                 id=item_id,
                 type="POINT",
-                properties=self.translate_point(item),
+                properties=self.translate_point(copy),
             )
 
         if item_type == "VARIABLE":
             return new.MathItemVariable(
                 id=item_id,
                 type="VARIABLE",
-                properties=self.translate_variable(item),
+                properties=self.translate_variable(copy),
             )
 
         if item_type == "VARIABLE_SLIDER":
             return new.MathItemVariableSlider(
                 id=item_id,
                 type="VARIABLE_SLIDER",
-                properties=self.translate_variable_slider(item),
+                properties=self.translate_variable_slider(copy),
             )
 
         if item_type == "VECTOR":
             return new.MathItemVector(
                 id=item_id,
                 type="VECTOR",
-                properties=self.translate_vector(item),
+                properties=self.translate_vector(copy),
             )
 
         if item_type == "VECTOR_FIELD":
             return new.MathItemVectorField(
                 id=item_id,
                 type="VECTOR_FIELD",
-                properties=self.translate_vector_field(item),
+                properties=self.translate_vector_field(copy),
             )
 
-        raise NotImplementedError(f"Unknown item type: {item['type']}")
+        raise NotImplementedError(f"Unknown item type: {copy['type']}")

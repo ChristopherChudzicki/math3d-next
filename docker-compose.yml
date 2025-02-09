@@ -31,7 +31,7 @@ services:
       - .env
     environment:
       DATABASE_URL: postgresql://docker:docker@db:5432/math3d
-      CORS_ALLOWED_ORIGINS: http://localhost:3000
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
     command: make devserver
     volumes:
       - ./webserver:/src/webserver
