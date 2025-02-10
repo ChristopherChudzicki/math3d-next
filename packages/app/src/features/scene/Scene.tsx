@@ -84,7 +84,12 @@ const SceneContent = () => {
 
   return (
     <MB.Cartesian range={range} scale={scale}>
-      <Camera item={camera} range={range} onMoveEnd={onCameraChange} />
+      <Camera
+        item={camera}
+        range={range}
+        scale={scale}
+        onMoveEnd={onCameraChange}
+      />
       {items.filter(isMathGraphic).map((item) => {
         const others = {
           ...(graphicNeedsRange(item.type) ? { range } : {}),
