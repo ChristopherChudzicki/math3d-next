@@ -22,12 +22,6 @@ const props = [
   "isOrthographic",
 ] as const;
 
-const THREEJS_RANGE: AxesRange = [
-  [-1, 1],
-  [-1, 1],
-  [-1, 1],
-];
-
 type OnControlsChangeEnd = NonNullable<
   React.ComponentProps<typeof Controls>["onEnd"]
 >;
@@ -42,23 +36,30 @@ type OnMoveEnd = ({
 
 const useCoordinates = ({
   range,
+  scale,
   useRelative = false,
 }: {
   range: AxesRange;
+  scale: [number, number, number];
   useRelative?: boolean;
 }) => {
   const convert = useMemo(() => {
+    const threeJsRange: AxesRange = [
+      [-scale[0], scale[0]],
+      [-scale[1], scale[1]],
+      [-scale[2], scale[2]],
+    ];
     return {
       fromUi: (pos: Coords) => {
-        if (useRelative) return pos;
-        return project(pos, range, THREEJS_RANGE);
+        if (useRelative) return pos.map((p, i) => p * scale[i]) as Coords;
+        return project(pos, range, threeJsRange);
       },
       toUi: (pos: Coords) => {
-        if (useRelative) return pos;
-        return project(pos, THREEJS_RANGE, range);
+        if (useRelative) return pos.map((p, i) => p / scale[i]) as Coords;
+        return project(pos, threeJsRange, range);
       },
     };
-  }, [range, useRelative]);
+  }, [range, useRelative, scale]);
 
   return { convert };
 };
@@ -66,9 +67,10 @@ const useCoordinates = ({
 type CameraProps = {
   item: MathItem<MathItemType.Camera>;
   range: AxesRange;
+  scale: [number, number, number];
   onMoveEnd?: OnMoveEnd;
 };
-const Camera: React.FC<CameraProps> = ({ item, range, onMoveEnd }) => {
+const Camera: React.FC<CameraProps> = ({ item, range, scale, onMoveEnd }) => {
   invariant(range !== undefined, "Camera must have a range");
   const scope = useMathScope();
   const {
@@ -82,7 +84,7 @@ const Camera: React.FC<CameraProps> = ({ item, range, onMoveEnd }) => {
     target,
   } = useMathItemResults(scope, item, props);
 
-  const { convert } = useCoordinates({ useRelative, range });
+  const { convert } = useCoordinates({ useRelative, range, scale });
 
   const controlsTarget = useMemo(() => {
     return new Vector3(...convert.fromUi(target ?? [0, 0, 0]));

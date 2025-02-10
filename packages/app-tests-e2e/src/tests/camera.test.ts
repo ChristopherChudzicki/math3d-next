@@ -14,6 +14,14 @@ const getCameraPosition = async (
     return window.mathbox.three.camera.position;
   });
 };
+const expectCameraPos = async (page: Page, vec: Vector3) => {
+  return expect(async () => {
+    const position = await getCameraPosition(page);
+    expect(position.x).toBeCloseTo(vec.x);
+    expect(position.y).toBeCloseTo(vec.y);
+    expect(position.z).toBeCloseTo(vec.z);
+  }).toPass();
+};
 
 const getControlsTarget = async (
   page: Page,
@@ -24,6 +32,14 @@ const getControlsTarget = async (
     return window.mathbox.three.controls.target;
   });
 };
+const expectControlsTarget = async (page: Page, vec: Vector3) => {
+  return expect(async () => {
+    const target = await getControlsTarget(page);
+    expect(target.x).toBeCloseTo(vec.x);
+    expect(target.y).toBeCloseTo(vec.y);
+    expect(target.z).toBeCloseTo(vec.z);
+  }).toPass();
+};
 
 const user = makeUserInfo();
 test.use({ user });
@@ -33,21 +49,18 @@ test("Setting camera position/target using UI coordinates", async ({
   prepareScene,
 }) => {
   const scene = new SceneBuilder();
-  scene.axis("x", { min: "-2", max: "2" });
-  scene.axis("y", { min: "-4", max: "4" });
-  scene.axis("z", { min: "-8", max: "8" });
+  scene.axis("x", { min: "-2", max: "2", scale: "1/2" });
+  scene.axis("y", { min: "-4", max: "4", scale: "2" });
+  scene.axis("z", { min: "-8", max: "8", scale: "3/2" });
   scene.camera({ position: "[1, 3, 2]", target: "[-0.5, 2, 6]" });
   const key = await prepareScene(scene.json());
   await page.goto(`/${key}`);
-  const position = await getCameraPosition(page);
-  expect(position.x).toBeCloseTo(0.5);
-  expect(position.y).toBeCloseTo(0.75);
-  expect(position.z).toBeCloseTo(0.25);
-
-  const target = await getControlsTarget(page);
-  expect(target.x).toBeCloseTo(-0.25);
-  expect(target.y).toBeCloseTo(0.5);
-  expect(target.z).toBeCloseTo(0.75);
+  const scales = new Vector3(1 / 2, 2, 3 / 2);
+  await expectCameraPos(page, new Vector3(0.5, 0.75, 0.25).multiply(scales));
+  await expectControlsTarget(
+    page,
+    new Vector3(-0.25, 0.5, 0.75).multiply(scales),
+  );
 });
 
 test("`useRelative: true` sets camera position/target using ThreeJS coordinates", async ({
@@ -55,9 +68,9 @@ test("`useRelative: true` sets camera position/target using ThreeJS coordinates"
   prepareScene,
 }) => {
   const scene = new SceneBuilder();
-  scene.axis("x", { min: "-2", max: "2" });
-  scene.axis("y", { min: "-4", max: "4" });
-  scene.axis("z", { min: "-8", max: "8" });
+  scene.axis("x", { min: "-2", max: "2", scale: "1/2" });
+  scene.axis("y", { min: "-4", max: "4", scale: "2" });
+  scene.axis("z", { min: "-8", max: "8", scale: "3/2" });
   scene.camera({
     position: "[1, 3, 2]",
     target: "[-0.5, 2, 6]",
@@ -66,15 +79,9 @@ test("`useRelative: true` sets camera position/target using ThreeJS coordinates"
   const key = await prepareScene(scene.json());
   await page.goto(`/${key}`);
 
-  const position = await getCameraPosition(page);
-  expect(position.x).toBeCloseTo(1);
-  expect(position.y).toBeCloseTo(3);
-  expect(position.z).toBeCloseTo(2);
-
-  const target = await getControlsTarget(page);
-  expect(target.x).toBeCloseTo(-0.5);
-  expect(target.y).toBeCloseTo(2);
-  expect(target.z).toBeCloseTo(6);
+  const scales = new Vector3(1 / 2, 2, 3 / 2);
+  await expectCameraPos(page, new Vector3(1, 3, 2).multiply(scales));
+  await expectControlsTarget(page, new Vector3(-0.5, 2, 6).multiply(scales));
 });
 
 test("isOrthographic: true does a dollyZoom", async ({
@@ -82,9 +89,9 @@ test("isOrthographic: true does a dollyZoom", async ({
   prepareScene,
 }) => {
   const scene = new SceneBuilder();
-  scene.axis("x", { min: "-2", max: "2" });
-  scene.axis("y", { min: "-4", max: "4" });
-  scene.axis("z", { min: "-8", max: "8" });
+  scene.axis("x", { min: "-2", max: "2", scale: "1/2" });
+  scene.axis("y", { min: "-4", max: "4", scale: "2" });
+  scene.axis("z", { min: "-8", max: "8", scale: "3/2" });
   scene.camera({
     position: "[1, 3, 2]",
     target: "[-0.5, 2, 6]",
@@ -94,21 +101,15 @@ test("isOrthographic: true does a dollyZoom", async ({
   await page.goto(`/${key}`);
 
   // position and target in scaled coordinates
-  const expectedPos = new Vector3(1 / 2, 3 / 4, 2 / 8);
-  const expectedTarget = new Vector3(-0.5 / 2, 2 / 4, 6 / 8);
+  const scales = new Vector3(1 / 2, 2, 3 / 2);
+  const expectedPos = new Vector3(1 / 2, 3 / 4, 2 / 8).multiply(scales);
+  const expectedTarget = new Vector3(-0.5 / 2, 2 / 4, 6 / 8).multiply(scales);
   const diff = expectedPos.clone().sub(expectedTarget);
   const zoomFactor = 40 - 1;
   const expectedCameraPos = expectedPos.add(diff.multiplyScalar(zoomFactor));
 
-  const cameraPos = await getCameraPosition(page);
-  expect(cameraPos.x).toBeCloseTo(expectedCameraPos.x);
-  expect(cameraPos.y).toBeCloseTo(expectedCameraPos.y);
-  expect(cameraPos.z).toBeCloseTo(expectedCameraPos.z);
-
-  const cameraTarget = await getControlsTarget(page);
-  expect(cameraTarget.x).toBeCloseTo(expectedTarget.x);
-  expect(cameraTarget.y).toBeCloseTo(expectedTarget.y);
-  expect(cameraTarget.z).toBeCloseTo(expectedTarget.z);
+  await expectCameraPos(page, expectedCameraPos);
+  await expectControlsTarget(page, expectedTarget);
 });
 
 test("isOrthographic: true does a dollyZoom with useRelative: true", async ({
@@ -116,9 +117,9 @@ test("isOrthographic: true does a dollyZoom with useRelative: true", async ({
   prepareScene,
 }) => {
   const scene = new SceneBuilder();
-  scene.axis("x", { min: "-2", max: "2" });
-  scene.axis("y", { min: "-4", max: "4" });
-  scene.axis("z", { min: "-8", max: "8" });
+  scene.axis("x", { min: "-2", max: "2", scale: "1/2" });
+  scene.axis("y", { min: "-4", max: "4", scale: "2" });
+  scene.axis("z", { min: "-8", max: "8", scale: "3/2" });
   scene.camera({
     position: "[1, 3, 2]",
     target: "[-0.5, 2, 6]",
@@ -128,20 +129,15 @@ test("isOrthographic: true does a dollyZoom with useRelative: true", async ({
   const key = await prepareScene(scene.json());
 
   // position and target in scaled coordinates
-  const expectedPos = new Vector3(1, 3, 2);
-  const expectedTarget = new Vector3(-0.5, 2, 6);
+  const scales = new Vector3(1 / 2, 2, 3 / 2);
+  const expectedPos = new Vector3(1, 3, 2).multiply(scales);
+  const expectedTarget = new Vector3(-0.5, 2, 6).multiply(scales);
   const diff = expectedPos.clone().sub(expectedTarget);
   const zoomFactor = 40 - 1;
   const expectedCameraPos = expectedPos.add(diff.multiplyScalar(zoomFactor));
 
   await page.goto(`/${key}`);
-  const cameraPos = await getCameraPosition(page);
-  expect(cameraPos.x).toBeCloseTo(expectedCameraPos.x);
-  expect(cameraPos.y).toBeCloseTo(expectedCameraPos.y);
-  expect(cameraPos.z).toBeCloseTo(expectedCameraPos.z);
 
-  const cameraTarget = await getControlsTarget(page);
-  expect(cameraTarget.x).toBeCloseTo(expectedTarget.x);
-  expect(cameraTarget.y).toBeCloseTo(expectedTarget.y);
-  expect(cameraTarget.z).toBeCloseTo(expectedTarget.z);
+  await expectCameraPos(page, expectedCameraPos);
+  await expectControlsTarget(page, expectedTarget);
 });
