@@ -22,12 +22,6 @@ const props = [
   "isOrthographic",
 ] as const;
 
-const UNIT_RANGE: AxesRange = [
-  [-1, 1],
-  [-1, 1],
-  [-1, 1],
-];
-
 type OnControlsChangeEnd = NonNullable<
   React.ComponentProps<typeof Controls>["onEnd"]
 >;
