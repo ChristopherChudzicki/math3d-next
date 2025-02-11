@@ -115,7 +115,7 @@
     "typescript": "^5.7.2",
     "vite": "^5.0.10",
     "vite-plugin-compile-time": "^0.4.6",
-    "vite-tsconfig-paths": "^4.2.2",
+    "vite-tsconfig-paths": "^5.0.0",
     "vitest": "^1.4.0"
   },
   "proxy": "http://localhost:3001",
