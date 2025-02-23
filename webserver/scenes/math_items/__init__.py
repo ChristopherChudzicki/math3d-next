@@ -22,6 +22,7 @@ class MathItems:
 @dataclass
 class ItemPropertiesAxis:
     axis: "PropAxis"
+    calculated_visibility: "str"
     color: "str"
     description: "str"
     divisions: "str"
@@ -35,7 +36,8 @@ class ItemPropertiesAxis:
     size: "str"
     start: "str"
     ticks_visible: "str"
-    visible: "str"
+    use_calculated_visibility: "bool"
+    visible: "bool"
     width: "str"
     z_bias: "str"
     z_index: "str"
@@ -44,6 +46,7 @@ class ItemPropertiesAxis:
     def from_json_data(cls, data: Any) -> "ItemPropertiesAxis":
         return cls(
             _from_json_data(PropAxis, data.get("axis")),
+            _from_json_data(str, data.get("calculatedVisibility")),
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("description")),
             _from_json_data(str, data.get("divisions")),
@@ -57,7 +60,8 @@ class ItemPropertiesAxis:
             _from_json_data(str, data.get("size")),
             _from_json_data(str, data.get("start")),
             _from_json_data(str, data.get("ticksVisible")),
-            _from_json_data(str, data.get("visible")),
+            _from_json_data(bool, data.get("useCalculatedVisibility")),
+            _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("width")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
@@ -66,6 +70,7 @@ class ItemPropertiesAxis:
     def to_json_data(self) -> Any:
         data: Dict[str, Any] = {}
         data["axis"] = _to_json_data(self.axis)
+        data["calculatedVisibility"] = _to_json_data(self.calculated_visibility)
         data["color"] = _to_json_data(self.color)
         data["description"] = _to_json_data(self.description)
         data["divisions"] = _to_json_data(self.divisions)
@@ -79,6 +84,7 @@ class ItemPropertiesAxis:
         data["size"] = _to_json_data(self.size)
         data["start"] = _to_json_data(self.start)
         data["ticksVisible"] = _to_json_data(self.ticks_visible)
+        data["useCalculatedVisibility"] = _to_json_data(self.use_calculated_visibility)
         data["visible"] = _to_json_data(self.visible)
         data["width"] = _to_json_data(self.width)
         data["zBias"] = _to_json_data(self.z_bias)
@@ -147,6 +153,7 @@ class ItemPropertiesCamera:
 
 @dataclass
 class ItemPropertiesExplicitSurface:
+    calculated_visibility: "str"
     color: "str"
     color_expr: "ParseableFunctionAssignment"
     description: "str"
@@ -160,13 +167,15 @@ class ItemPropertiesExplicitSurface:
     samples1: "str"
     samples2: "str"
     shaded: "str"
-    visible: "str"
+    use_calculated_visibility: "bool"
+    visible: "bool"
     z_bias: "str"
     z_index: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesExplicitSurface":
         return cls(
+            _from_json_data(str, data.get("calculatedVisibility")),
             _from_json_data(str, data.get("color")),
             _from_json_data(ParseableFunctionAssignment, data.get("colorExpr")),
             _from_json_data(str, data.get("description")),
@@ -180,13 +189,15 @@ class ItemPropertiesExplicitSurface:
             _from_json_data(str, data.get("samples1")),
             _from_json_data(str, data.get("samples2")),
             _from_json_data(str, data.get("shaded")),
-            _from_json_data(str, data.get("visible")),
+            _from_json_data(bool, data.get("useCalculatedVisibility")),
+            _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
         )
 
     def to_json_data(self) -> Any:
         data: Dict[str, Any] = {}
+        data["calculatedVisibility"] = _to_json_data(self.calculated_visibility)
         data["color"] = _to_json_data(self.color)
         data["colorExpr"] = _to_json_data(self.color_expr)
         data["description"] = _to_json_data(self.description)
@@ -200,6 +211,7 @@ class ItemPropertiesExplicitSurface:
         data["samples1"] = _to_json_data(self.samples1)
         data["samples2"] = _to_json_data(self.samples2)
         data["shaded"] = _to_json_data(self.shaded)
+        data["useCalculatedVisibility"] = _to_json_data(self.use_calculated_visibility)
         data["visible"] = _to_json_data(self.visible)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
@@ -228,12 +240,14 @@ class ItemPropertiesFolder:
 @dataclass
 class ItemPropertiesGrid:
     axes: "PropAxes"
+    calculated_visibility: "str"
     color: "str"
     description: "str"
     divisions: "str"
     opacity: "str"
     snap: "str"
-    visible: "str"
+    use_calculated_visibility: "bool"
+    visible: "bool"
     width: "str"
     z_bias: "str"
     z_index: "str"
@@ -242,12 +256,14 @@ class ItemPropertiesGrid:
     def from_json_data(cls, data: Any) -> "ItemPropertiesGrid":
         return cls(
             _from_json_data(PropAxes, data.get("axes")),
+            _from_json_data(str, data.get("calculatedVisibility")),
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("description")),
             _from_json_data(str, data.get("divisions")),
             _from_json_data(str, data.get("opacity")),
             _from_json_data(str, data.get("snap")),
-            _from_json_data(str, data.get("visible")),
+            _from_json_data(bool, data.get("useCalculatedVisibility")),
+            _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("width")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
@@ -256,11 +272,13 @@ class ItemPropertiesGrid:
     def to_json_data(self) -> Any:
         data: Dict[str, Any] = {}
         data["axes"] = _to_json_data(self.axes)
+        data["calculatedVisibility"] = _to_json_data(self.calculated_visibility)
         data["color"] = _to_json_data(self.color)
         data["description"] = _to_json_data(self.description)
         data["divisions"] = _to_json_data(self.divisions)
         data["opacity"] = _to_json_data(self.opacity)
         data["snap"] = _to_json_data(self.snap)
+        data["useCalculatedVisibility"] = _to_json_data(self.use_calculated_visibility)
         data["visible"] = _to_json_data(self.visible)
         data["width"] = _to_json_data(self.width)
         data["zBias"] = _to_json_data(self.z_bias)
@@ -270,6 +288,7 @@ class ItemPropertiesGrid:
 
 @dataclass
 class ItemPropertiesImplicitSurface:
+    calculated_visibility: "str"
     color: "str"
     description: "str"
     domain: "ParseableExprArray"
@@ -278,13 +297,15 @@ class ItemPropertiesImplicitSurface:
     rhs: "ParseableFunctionAssignment"
     samples: "str"
     shaded: "str"
-    visible: "str"
+    use_calculated_visibility: "bool"
+    visible: "bool"
     z_bias: "str"
     z_index: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesImplicitSurface":
         return cls(
+            _from_json_data(str, data.get("calculatedVisibility")),
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("description")),
             _from_json_data(ParseableExprArray, data.get("domain")),
@@ -293,13 +314,15 @@ class ItemPropertiesImplicitSurface:
             _from_json_data(ParseableFunctionAssignment, data.get("rhs")),
             _from_json_data(str, data.get("samples")),
             _from_json_data(str, data.get("shaded")),
-            _from_json_data(str, data.get("visible")),
+            _from_json_data(bool, data.get("useCalculatedVisibility")),
+            _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
         )
 
     def to_json_data(self) -> Any:
         data: Dict[str, Any] = {}
+        data["calculatedVisibility"] = _to_json_data(self.calculated_visibility)
         data["color"] = _to_json_data(self.color)
         data["description"] = _to_json_data(self.description)
         data["domain"] = _to_json_data(self.domain)
@@ -308,6 +331,7 @@ class ItemPropertiesImplicitSurface:
         data["rhs"] = _to_json_data(self.rhs)
         data["samples"] = _to_json_data(self.samples)
         data["shaded"] = _to_json_data(self.shaded)
+        data["useCalculatedVisibility"] = _to_json_data(self.use_calculated_visibility)
         data["visible"] = _to_json_data(self.visible)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
@@ -316,6 +340,7 @@ class ItemPropertiesImplicitSurface:
 
 @dataclass
 class ItemPropertiesLine:
+    calculated_visibility: "str"
     color: "str"
     coords: "str"
     description: "str"
@@ -325,7 +350,8 @@ class ItemPropertiesLine:
     opacity: "str"
     size: "str"
     start: "str"
-    visible: "str"
+    use_calculated_visibility: "bool"
+    visible: "bool"
     width: "str"
     z_bias: "str"
     z_index: "str"
@@ -333,6 +359,7 @@ class ItemPropertiesLine:
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesLine":
         return cls(
+            _from_json_data(str, data.get("calculatedVisibility")),
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("coords")),
             _from_json_data(str, data.get("description")),
@@ -342,7 +369,8 @@ class ItemPropertiesLine:
             _from_json_data(str, data.get("opacity")),
             _from_json_data(str, data.get("size")),
             _from_json_data(str, data.get("start")),
-            _from_json_data(str, data.get("visible")),
+            _from_json_data(bool, data.get("useCalculatedVisibility")),
+            _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("width")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
@@ -350,6 +378,7 @@ class ItemPropertiesLine:
 
     def to_json_data(self) -> Any:
         data: Dict[str, Any] = {}
+        data["calculatedVisibility"] = _to_json_data(self.calculated_visibility)
         data["color"] = _to_json_data(self.color)
         data["coords"] = _to_json_data(self.coords)
         data["description"] = _to_json_data(self.description)
@@ -359,6 +388,7 @@ class ItemPropertiesLine:
         data["opacity"] = _to_json_data(self.opacity)
         data["size"] = _to_json_data(self.size)
         data["start"] = _to_json_data(self.start)
+        data["useCalculatedVisibility"] = _to_json_data(self.use_calculated_visibility)
         data["visible"] = _to_json_data(self.visible)
         data["width"] = _to_json_data(self.width)
         data["zBias"] = _to_json_data(self.z_bias)
@@ -368,6 +398,7 @@ class ItemPropertiesLine:
 
 @dataclass
 class ItemPropertiesParametricCurve:
+    calculated_visibility: "str"
     color: "str"
     description: "str"
     domain: "ParseableExprArray"
@@ -377,7 +408,8 @@ class ItemPropertiesParametricCurve:
     samples1: "str"
     size: "str"
     start: "str"
-    visible: "str"
+    use_calculated_visibility: "bool"
+    visible: "bool"
     width: "str"
     z_bias: "str"
     z_index: "str"
@@ -385,6 +417,7 @@ class ItemPropertiesParametricCurve:
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesParametricCurve":
         return cls(
+            _from_json_data(str, data.get("calculatedVisibility")),
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("description")),
             _from_json_data(ParseableExprArray, data.get("domain")),
@@ -394,7 +427,8 @@ class ItemPropertiesParametricCurve:
             _from_json_data(str, data.get("samples1")),
             _from_json_data(str, data.get("size")),
             _from_json_data(str, data.get("start")),
-            _from_json_data(str, data.get("visible")),
+            _from_json_data(bool, data.get("useCalculatedVisibility")),
+            _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("width")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
@@ -402,6 +436,7 @@ class ItemPropertiesParametricCurve:
 
     def to_json_data(self) -> Any:
         data: Dict[str, Any] = {}
+        data["calculatedVisibility"] = _to_json_data(self.calculated_visibility)
         data["color"] = _to_json_data(self.color)
         data["description"] = _to_json_data(self.description)
         data["domain"] = _to_json_data(self.domain)
@@ -411,6 +446,7 @@ class ItemPropertiesParametricCurve:
         data["samples1"] = _to_json_data(self.samples1)
         data["size"] = _to_json_data(self.size)
         data["start"] = _to_json_data(self.start)
+        data["useCalculatedVisibility"] = _to_json_data(self.use_calculated_visibility)
         data["visible"] = _to_json_data(self.visible)
         data["width"] = _to_json_data(self.width)
         data["zBias"] = _to_json_data(self.z_bias)
@@ -420,6 +456,7 @@ class ItemPropertiesParametricCurve:
 
 @dataclass
 class ItemPropertiesParametricSurface:
+    calculated_visibility: "str"
     color: "str"
     color_expr: "ParseableFunctionAssignment"
     description: "str"
@@ -433,13 +470,15 @@ class ItemPropertiesParametricSurface:
     samples1: "str"
     samples2: "str"
     shaded: "str"
-    visible: "str"
+    use_calculated_visibility: "bool"
+    visible: "bool"
     z_bias: "str"
     z_index: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesParametricSurface":
         return cls(
+            _from_json_data(str, data.get("calculatedVisibility")),
             _from_json_data(str, data.get("color")),
             _from_json_data(ParseableFunctionAssignment, data.get("colorExpr")),
             _from_json_data(str, data.get("description")),
@@ -453,13 +492,15 @@ class ItemPropertiesParametricSurface:
             _from_json_data(str, data.get("samples1")),
             _from_json_data(str, data.get("samples2")),
             _from_json_data(str, data.get("shaded")),
-            _from_json_data(str, data.get("visible")),
+            _from_json_data(bool, data.get("useCalculatedVisibility")),
+            _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
         )
 
     def to_json_data(self) -> Any:
         data: Dict[str, Any] = {}
+        data["calculatedVisibility"] = _to_json_data(self.calculated_visibility)
         data["color"] = _to_json_data(self.color)
         data["colorExpr"] = _to_json_data(self.color_expr)
         data["description"] = _to_json_data(self.description)
@@ -473,6 +514,7 @@ class ItemPropertiesParametricSurface:
         data["samples1"] = _to_json_data(self.samples1)
         data["samples2"] = _to_json_data(self.samples2)
         data["shaded"] = _to_json_data(self.shaded)
+        data["useCalculatedVisibility"] = _to_json_data(self.use_calculated_visibility)
         data["visible"] = _to_json_data(self.visible)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
@@ -481,6 +523,7 @@ class ItemPropertiesParametricSurface:
 
 @dataclass
 class ItemPropertiesPoint:
+    calculated_visibility: "str"
     color: "str"
     coords: "str"
     description: "str"
@@ -488,13 +531,15 @@ class ItemPropertiesPoint:
     label_visible: "str"
     opacity: "str"
     size: "str"
-    visible: "str"
+    use_calculated_visibility: "bool"
+    visible: "bool"
     z_bias: "str"
     z_index: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesPoint":
         return cls(
+            _from_json_data(str, data.get("calculatedVisibility")),
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("coords")),
             _from_json_data(str, data.get("description")),
@@ -502,13 +547,15 @@ class ItemPropertiesPoint:
             _from_json_data(str, data.get("labelVisible")),
             _from_json_data(str, data.get("opacity")),
             _from_json_data(str, data.get("size")),
-            _from_json_data(str, data.get("visible")),
+            _from_json_data(bool, data.get("useCalculatedVisibility")),
+            _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
         )
 
     def to_json_data(self) -> Any:
         data: Dict[str, Any] = {}
+        data["calculatedVisibility"] = _to_json_data(self.calculated_visibility)
         data["color"] = _to_json_data(self.color)
         data["coords"] = _to_json_data(self.coords)
         data["description"] = _to_json_data(self.description)
@@ -516,6 +563,7 @@ class ItemPropertiesPoint:
         data["labelVisible"] = _to_json_data(self.label_visible)
         data["opacity"] = _to_json_data(self.opacity)
         data["size"] = _to_json_data(self.size)
+        data["useCalculatedVisibility"] = _to_json_data(self.use_calculated_visibility)
         data["visible"] = _to_json_data(self.visible)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
@@ -577,6 +625,7 @@ class ItemPropertiesVariableSlider:
 
 @dataclass
 class ItemPropertiesVector:
+    calculated_visibility: "str"
     color: "str"
     components: "str"
     description: "str"
@@ -587,7 +636,8 @@ class ItemPropertiesVector:
     size: "str"
     start: "str"
     tail: "str"
-    visible: "str"
+    use_calculated_visibility: "bool"
+    visible: "bool"
     width: "str"
     z_bias: "str"
     z_index: "str"
@@ -595,6 +645,7 @@ class ItemPropertiesVector:
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesVector":
         return cls(
+            _from_json_data(str, data.get("calculatedVisibility")),
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("components")),
             _from_json_data(str, data.get("description")),
@@ -605,7 +656,8 @@ class ItemPropertiesVector:
             _from_json_data(str, data.get("size")),
             _from_json_data(str, data.get("start")),
             _from_json_data(str, data.get("tail")),
-            _from_json_data(str, data.get("visible")),
+            _from_json_data(bool, data.get("useCalculatedVisibility")),
+            _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("width")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
@@ -613,6 +665,7 @@ class ItemPropertiesVector:
 
     def to_json_data(self) -> Any:
         data: Dict[str, Any] = {}
+        data["calculatedVisibility"] = _to_json_data(self.calculated_visibility)
         data["color"] = _to_json_data(self.color)
         data["components"] = _to_json_data(self.components)
         data["description"] = _to_json_data(self.description)
@@ -623,6 +676,7 @@ class ItemPropertiesVector:
         data["size"] = _to_json_data(self.size)
         data["start"] = _to_json_data(self.start)
         data["tail"] = _to_json_data(self.tail)
+        data["useCalculatedVisibility"] = _to_json_data(self.use_calculated_visibility)
         data["visible"] = _to_json_data(self.visible)
         data["width"] = _to_json_data(self.width)
         data["zBias"] = _to_json_data(self.z_bias)
@@ -632,6 +686,7 @@ class ItemPropertiesVector:
 
 @dataclass
 class ItemPropertiesVectorField:
+    calculated_visibility: "str"
     color: "str"
     description: "str"
     domain: "ParseableExprArray"
@@ -644,7 +699,8 @@ class ItemPropertiesVectorField:
     scale: "str"
     size: "str"
     start: "str"
-    visible: "str"
+    use_calculated_visibility: "bool"
+    visible: "bool"
     width: "str"
     z_bias: "str"
     z_index: "str"
@@ -652,6 +708,7 @@ class ItemPropertiesVectorField:
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesVectorField":
         return cls(
+            _from_json_data(str, data.get("calculatedVisibility")),
             _from_json_data(str, data.get("color")),
             _from_json_data(str, data.get("description")),
             _from_json_data(ParseableExprArray, data.get("domain")),
@@ -664,7 +721,8 @@ class ItemPropertiesVectorField:
             _from_json_data(str, data.get("scale")),
             _from_json_data(str, data.get("size")),
             _from_json_data(str, data.get("start")),
-            _from_json_data(str, data.get("visible")),
+            _from_json_data(bool, data.get("useCalculatedVisibility")),
+            _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("width")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
@@ -672,6 +730,7 @@ class ItemPropertiesVectorField:
 
     def to_json_data(self) -> Any:
         data: Dict[str, Any] = {}
+        data["calculatedVisibility"] = _to_json_data(self.calculated_visibility)
         data["color"] = _to_json_data(self.color)
         data["description"] = _to_json_data(self.description)
         data["domain"] = _to_json_data(self.domain)
@@ -684,6 +743,7 @@ class ItemPropertiesVectorField:
         data["scale"] = _to_json_data(self.scale)
         data["size"] = _to_json_data(self.size)
         data["start"] = _to_json_data(self.start)
+        data["useCalculatedVisibility"] = _to_json_data(self.use_calculated_visibility)
         data["visible"] = _to_json_data(self.visible)
         data["width"] = _to_json_data(self.width)
         data["zBias"] = _to_json_data(self.z_bias)
@@ -1272,19 +1332,19 @@ def _from_json_data(cls: Any, data: Any) -> Any:
 
 
 def _to_json_data(data: Any) -> Any:
-    if data is None or isinstance(data, (bool, int, float, str)):
+    if data is None or type(data) in [bool, int, float, str, object]:
         return data
-    if isinstance(data, datetime):
+    if type(data) is datetime:
         return data.isoformat()
-    if isinstance(data, list):
+    if type(data) is list:
         return [_to_json_data(d) for d in data]
-    if isinstance(data, dict):
+    if type(data) is dict:
         return {k: _to_json_data(v) for k, v in data.items()}
     return data.to_json_data()
 
 
 def _parse_rfc3339(s: str) -> datetime:
-    datetime_re = r"^(\d{4})-(\d{2})-(\d{2})[tT](\d{2}):(\d{2}):(\d{2})(\.\d+)?([zZ]|((\+|-)(\d{2}):(\d{2})))$"
+    datetime_re = "^(\d{4})-(\d{2})-(\d{2})[tT](\d{2}):(\d{2}):(\d{2})(\.\d+)?([zZ]|((\+|-)(\d{2}):(\d{2})))$"
     match = re.match(datetime_re, s)
     if not match:
         raise ValueError("Invalid RFC3339 date/time", s)
