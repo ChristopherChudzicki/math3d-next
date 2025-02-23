@@ -22,7 +22,7 @@ const Vector: MathItemForm<MIT.BooleanVariable> = ({ item }) => {
   const mathScope = useMathScope();
   const results = useMathItemResults(mathScope, item, resultNames);
   const errors = useMathErrors(mathScope, item.id, resultNames);
-  const onChangeName: OnWidgetChange = useCallback(
+  const onChangeName: OnWidgetChange<string> = useCallback(
     (e) => {
       onWidgetChange({
         name: e.name,

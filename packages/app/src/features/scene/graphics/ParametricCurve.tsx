@@ -2,13 +2,15 @@ import React, { useCallback } from "react";
 import * as MB from "mathbox-react";
 import type { IntervalEmitter } from "mathbox";
 import { MathItemType } from "@math3d/mathitem-configs";
-import { useMathItemResults } from "../../sceneControls/mathItems/mathScope";
+import {
+  useFinalVisibility,
+  useMathItemResults,
+} from "../../sceneControls/mathItems/mathScope";
 import { useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import { GraphicComponent } from "./interfaces";
 
 const props = [
   "opacity",
-  "visible",
   "size",
   "width",
   "zBias",
@@ -29,7 +31,6 @@ const ParametricCurve: GraphicComponent<MathItemType.ParametricCurve> = ({
   const { color } = item.properties;
   const {
     opacity,
-    visible,
     size,
     width,
     zBias,
@@ -51,9 +52,10 @@ const ParametricCurve: GraphicComponent<MathItemType.ParametricCurve> = ({
     },
     [expr, domain],
   );
+  const finalVisibility = useFinalVisibility(scope, item);
 
-  return (
-    <MB.Group visible={visible}>
+  return !finalVisibility ? null : (
+    <MB.Group>
       <MB.Interval
         live={false}
         expr={emitter}

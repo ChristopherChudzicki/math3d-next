@@ -12,7 +12,7 @@ import {
   labelVisible,
   opacity,
   size,
-  visible,
+  visibilityProps,
   zBias,
   zIndex,
 } from "../shared";
@@ -20,7 +20,10 @@ import {
 interface PointProperties {
   description: string;
   color: string;
-  visible: string;
+  visible: boolean;
+  calculatedVisibility: string;
+  useCalculatedVisibility: boolean;
+
   opacity: string;
   zIndex: string;
   zBias: string;
@@ -33,7 +36,7 @@ interface PointProperties {
 
 interface EvaluatedProperties {
   color: string;
-  visible: boolean;
+  calculatedVisibility: boolean;
   opacity: number;
   zIndex: number;
   zBias: number;
@@ -47,7 +50,9 @@ const defaultValues: PointProperties = {
   coords: "[0, 0, 0]",
   description: "Point",
   size: "8",
-  visible: "true",
+  visible: true,
+  calculatedVisibility: "",
+  useCalculatedVisibility: false,
   color: "#3090ff",
   opacity: "1",
   zIndex: "0",
@@ -81,17 +86,17 @@ const config: IMathItemConfig<
     label,
     labelVisible,
     opacity,
-    visible,
     size,
     zBias,
     zIndex,
+    ...visibilityProps,
   },
   settingsProperties: [
     "label",
     "labelVisible",
     "opacity",
     "size",
-    "visible",
+    "calculatedVisibility",
     "zBias",
     "zIndex",
   ],

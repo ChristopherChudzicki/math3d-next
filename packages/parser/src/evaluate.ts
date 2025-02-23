@@ -93,6 +93,7 @@ const getValidatedEvaluate = (
       if (err instanceof EvaluationError) {
         throw err;
       }
+      // eslint-disable-next-line no-console
       console.warn(err);
       throw new EvaluationError(err.message);
     }

@@ -14,7 +14,7 @@ import {
   opacity,
   size,
   start,
-  visible,
+  visibilityProps,
   width,
   zBias,
   zIndex,
@@ -23,7 +23,9 @@ import {
 interface VectorProperties {
   description: string;
   color: string;
-  visible: string;
+  visible: boolean;
+  calculatedVisibility: string;
+  useCalculatedVisibility: boolean;
   opacity: string;
   zIndex: string;
   zBias: string;
@@ -40,7 +42,9 @@ interface VectorProperties {
 const defaultValues: VectorProperties = {
   description: "Vector",
   color: "#3090FF",
-  visible: "true",
+  visible: true,
+  calculatedVisibility: "",
+  useCalculatedVisibility: false,
   opacity: "1",
   zIndex: "0",
   zBias: "0",
@@ -63,7 +67,7 @@ const make: MathItemGenerator<MathItemType.Vector, VectorProperties> = (
 });
 
 type EvaluatedProperties = {
-  visible: boolean;
+  calculatedVisibility: boolean;
   size: number;
   width: number;
   zBias: number;
@@ -101,7 +105,7 @@ const config: IMathItemConfig<
       widget: WidgetType.MathValue,
       validate: validators.realVec[3],
     },
-    visible,
+    ...visibilityProps,
     size,
     width,
     zBias,
@@ -110,6 +114,7 @@ const config: IMathItemConfig<
     end,
   },
   settingsProperties: [
+    "calculatedVisibility",
     "label",
     "labelVisible",
     "opacity",

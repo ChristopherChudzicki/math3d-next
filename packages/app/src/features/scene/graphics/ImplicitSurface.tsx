@@ -2,7 +2,10 @@ import React, { useMemo } from "react";
 import * as MB from "mathbox-react";
 import { MathItemType } from "@math3d/mathitem-configs";
 import { marchingCubes } from "@/util/marchingCubes";
-import { useMathItemResults } from "../../sceneControls/mathItems/mathScope";
+import {
+  useFinalVisibility,
+  useMathItemResults,
+} from "../../sceneControls/mathItems/mathScope";
 import { useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import { GraphicComponent } from "./interfaces";
 
@@ -10,7 +13,6 @@ const props = [
   "opacity",
   "domain",
   "shaded",
-  "visible",
   "zBias",
   "zIndex",
   "lhs",
@@ -25,8 +27,9 @@ const ImplicitSurface: GraphicComponent<MathItemType.ImplicitSurface> = ({
 }) => {
   const scope = useMathScope();
   const { color } = item.properties;
-  const { opacity, domain, shaded, visible, zBias, zIndex, lhs, rhs, samples } =
+  const { opacity, domain, shaded, zBias, zIndex, lhs, rhs, samples } =
     useMathItemResults(scope, item, props);
+  const finalVisibility = useFinalVisibility(scope, item);
 
   const data = useMemo(() => {
     if (!domain || !lhs || !rhs) return null;
@@ -55,7 +58,7 @@ const ImplicitSurface: GraphicComponent<MathItemType.ImplicitSurface> = ({
 
     return implicitTriangles;
   }, [lhs, rhs, domain, samples]);
-  return !visible ? null : (
+  return !finalVisibility ? null : (
     <MB.Group>
       <MB.Array data={data} channels={3} items={3} width={0} live={false} />
       <MB.Strip

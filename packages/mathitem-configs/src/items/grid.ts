@@ -8,7 +8,7 @@ import {
   color,
   description,
   opacity,
-  visible,
+  visibilityProps,
   width,
   zBias,
   zIndex,
@@ -17,7 +17,9 @@ import {
 interface GridProperties {
   description: string;
   color: string;
-  visible: string;
+  visible: boolean;
+  calculatedVisibility: "";
+  useCalculatedVisibility: boolean;
   opacity: string;
   zIndex: string;
   zBias: string;
@@ -32,7 +34,9 @@ const defaultValues: GridProperties = {
   description: "Grid",
   axes: "xy",
   color: "#808080",
-  visible: "true",
+  visible: true,
+  calculatedVisibility: "",
+  useCalculatedVisibility: false,
   opacity: "1",
   zIndex: "0",
   zBias: "0",
@@ -50,7 +54,7 @@ const make: MathItemGenerator<MathItemType.Grid, GridProperties> = (id) => ({
 type EvaluatedProperties = {
   divisions: number[];
   opacity: number;
-  visible: boolean;
+  calculatedVisibility: boolean;
   width: number;
   zBias: number;
   zIndex: number;
@@ -84,12 +88,13 @@ const config: IMathItemConfig<
       label: "Snap",
       widget: WidgetType.MathBoolean,
     },
-    visible,
+    ...visibilityProps,
     width,
     zBias,
     zIndex,
   },
   settingsProperties: [
+    "calculatedVisibility",
     "divisions",
     "opacity",
     "snap",

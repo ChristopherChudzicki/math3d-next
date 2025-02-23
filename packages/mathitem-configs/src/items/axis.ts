@@ -14,7 +14,7 @@ import {
   opacity,
   size,
   start,
-  visible,
+  visibilityProps,
   width,
   zBias,
   zIndex,
@@ -23,7 +23,9 @@ import {
 interface AxisProperties {
   description: string;
   color: string;
-  visible: string;
+  visible: boolean;
+  calculatedVisibility: "";
+  useCalculatedVisibility: boolean;
   opacity: string;
   zIndex: string;
   zBias: string;
@@ -45,7 +47,9 @@ interface AxisProperties {
 const defaultValues: AxisProperties = {
   description: "Axis",
   color: "#808080",
-  visible: "true",
+  visible: true,
+  calculatedVisibility: "",
+  useCalculatedVisibility: false,
   opacity: "1",
   zIndex: "0",
   zBias: "0",
@@ -74,7 +78,7 @@ type EvaluatedProperties = {
   ticksVisible: boolean;
   opacity: number;
   size: number;
-  visible: boolean;
+  calculatedVisibility: boolean;
   width: number;
   zBias: number;
   zIndex: number;
@@ -129,7 +133,7 @@ const config: IMathItemConfig<
       widget: WidgetType.MathBoolean,
       validate: validators.boolean,
     },
-    visible,
+    ...visibilityProps,
     width,
     zBias,
     zIndex,
@@ -143,6 +147,7 @@ const config: IMathItemConfig<
     },
   },
   settingsProperties: [
+    "calculatedVisibility",
     "label",
     "labelVisible",
     "opacity",

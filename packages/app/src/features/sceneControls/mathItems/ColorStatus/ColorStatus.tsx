@@ -4,16 +4,15 @@ import {
   makeColorConfig,
   colorsAndGradients,
 } from "@math3d/mathitem-configs";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useToggle } from "@/util/hooks";
 import Popover, { rightStartEnd } from "@/util/components/Popover";
 import { useLongAndShortPress } from "@/util/hooks/useLongAndShortPress";
 
 import { positioning } from "@/util/styles";
 import { useOnWidgetChange } from "../FieldWidget";
-import { WidgetChangeEvent } from "../FieldWidget/types";
 import { useMathScope } from "../sceneSlice";
-import { useMathResults } from "../mathScope";
+import { useMathItemResults } from "../mathScope";
 import ColorDialog from "./ColorDialog";
 import styles from "./ColorStatus.module.css";
 
@@ -26,17 +25,34 @@ interface Props {
   item: MathGraphic;
 }
 
-const VISIBLE = ["visible"];
+const useEffectEcent = (cb: () => void, deps: unknown[]) => {
+  const cbRef = useRef(cb);
+  useEffect(() => {
+    cbRef.current = cb;
+  });
+  useEffect(() => {
+    cbRef.current();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+};
+
+const EVALUATED_PROPS = ["calculatedVisibility"] as const;
 
 const popperModifiers = [rightStartEnd];
 const ColorStatus: React.FC<Props> = (props) => {
   const { item } = props;
   const [dialogVisible, setDialogVisible] = useToggle(false);
-  const { color } = item.properties;
+  const { color, visible, useCalculatedVisibility } = item.properties;
   const mathScope = useMathScope();
-  const results = useMathResults(mathScope, item.id, VISIBLE);
+  const { calculatedVisibility } = useMathItemResults(
+    mathScope,
+    item,
+    EVALUATED_PROPS,
+  );
+  const finalVisibility = useCalculatedVisibility
+    ? !!calculatedVisibility
+    : visible;
   const onChange = useOnWidgetChange(item);
-  const visible = !!results.visible;
   const colorAndStyle = useMemo(() => getColor(color), [color]);
   const style = useMemo(
     () =>
@@ -49,12 +65,24 @@ const ColorStatus: React.FC<Props> = (props) => {
 
   const handleButtonClick = useCallback(() => {
     if (lastPressWasLong()) return;
-    const event: WidgetChangeEvent = {
+    onChange({
       name: "visible",
-      value: `${!visible}`,
-    };
-    onChange(event);
+      value: !visible,
+    });
+    onChange({
+      name: "useCalculatedVisibility",
+      value: false,
+    });
   }, [visible, onChange, lastPressWasLong]);
+  useEffectEcent(() => {
+    if (item.properties.calculatedVisibility !== "") {
+      onChange({
+        name: "useCalculatedVisibility",
+        value: true,
+      });
+    }
+  }, [calculatedVisibility, item.properties.calculatedVisibility]);
+
   const handlePointerAway = useCallback(() => {
     if (lastPressWasLong()) return;
     setDialogVisible.off();
@@ -72,7 +100,7 @@ const ColorStatus: React.FC<Props> = (props) => {
             styles.circle,
             positioning["absolute-centered"],
             {
-              [styles.empty]: !visible,
+              [styles.empty]: !finalVisibility,
             },
           )}
           onClick={handleButtonClick}

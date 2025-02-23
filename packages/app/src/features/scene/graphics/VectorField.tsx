@@ -2,13 +2,15 @@ import React, { useCallback } from "react";
 import * as MB from "mathbox-react";
 import type { VolumeEmitter } from "mathbox";
 import { MathItemType } from "@math3d/mathitem-configs";
-import { useMathItemResults } from "../../sceneControls/mathItems/mathScope";
+import {
+  useFinalVisibility,
+  useMathItemResults,
+} from "../../sceneControls/mathItems/mathScope";
 import { useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import { GraphicComponent } from "./interfaces";
 
 const props = [
   "opacity",
-  "visible",
   "zBias",
   "zIndex",
   "size",
@@ -31,7 +33,6 @@ const Vector: GraphicComponent<MathItemType.VectorField> = ({
   const { color } = item.properties;
   const {
     opacity,
-    visible,
     zBias,
     zIndex,
     size,
@@ -59,8 +60,9 @@ const Vector: GraphicComponent<MathItemType.VectorField> = ({
     [expr, scale],
   );
 
-  return (
-    <MB.Group visible={visible}>
+  const finalVisibility = useFinalVisibility(scope, item);
+  return !finalVisibility ? null : (
+    <MB.Group>
       <MB.Volume
         width={samples1}
         height={samples2}

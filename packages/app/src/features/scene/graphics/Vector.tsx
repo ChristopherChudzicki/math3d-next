@@ -1,7 +1,10 @@
 import React, { useMemo } from "react";
 import * as MB from "mathbox-react";
 import { MathItemType } from "@math3d/mathitem-configs";
-import { useMathItemResults } from "../../sceneControls/mathItems/mathScope";
+import {
+  useFinalVisibility,
+  useMathItemResults,
+} from "../../sceneControls/mathItems/mathScope";
 import { useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import { GraphicComponent } from "./interfaces";
 
@@ -10,7 +13,6 @@ const props = [
   "tail",
   "labelVisible",
   "opacity",
-  "visible",
   "size",
   "width",
   "zBias",
@@ -27,7 +29,6 @@ const Vector: GraphicComponent<MathItemType.Vector> = ({ item, zOrder }) => {
     components,
     tail,
     size,
-    visible,
     opacity,
     zIndex,
     zBias,
@@ -48,8 +49,10 @@ const Vector: GraphicComponent<MathItemType.Vector> = ({ item, zOrder }) => {
   const labels = useMemo(() => {
     return [label];
   }, [label]);
-  return (
-    <MB.Group visible={visible}>
+
+  const finalVisibility = useFinalVisibility(scope, item);
+  return !finalVisibility ? null : (
+    <MB.Group>
       <MB.Array data={coords} items={1} channels={3} />
       <MB.Line
         size={size}

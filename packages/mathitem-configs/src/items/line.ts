@@ -14,7 +14,7 @@ import {
   opacity,
   size,
   start,
-  visible,
+  visibilityProps,
   width,
   zBias,
   zIndex,
@@ -23,7 +23,9 @@ import {
 interface LineProperties {
   description: string;
   color: string;
-  visible: string;
+  visible: boolean;
+  calculatedVisibility: "";
+  useCalculatedVisibility: boolean;
   opacity: string;
   zIndex: string;
   zBias: string;
@@ -39,7 +41,9 @@ interface LineProperties {
 const defaultValues: LineProperties = {
   description: "Line",
   color: "#3090FF",
-  visible: "true",
+  visible: true,
+  calculatedVisibility: "",
+  useCalculatedVisibility: false,
   opacity: "1",
   zIndex: "0",
   zBias: "0",
@@ -62,7 +66,7 @@ type EvaluatedProperties = {
   coords: [number, number, number][];
   labelVisible: boolean;
   opacity: number;
-  visible: boolean;
+  calculatedVisibility: boolean;
   size: number;
   width: number;
   zBias: number;
@@ -90,7 +94,7 @@ const config: IMathItemConfig<
     label,
     labelVisible,
     opacity,
-    visible,
+    ...visibilityProps,
     size,
     width,
     zBias,
@@ -99,6 +103,7 @@ const config: IMathItemConfig<
     end,
   },
   settingsProperties: [
+    "calculatedVisibility",
     "label",
     "labelVisible",
     "opacity",

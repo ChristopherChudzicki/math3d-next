@@ -18,12 +18,14 @@ interface IWidgetProps<V extends Parseable = string> {
   onBlur?: React.FocusEventHandler;
 }
 
-interface WidgetChangeEvent<V extends Parseable = string> {
+type PropertyValue = number | boolean | Parseable;
+
+interface WidgetChangeEvent<V extends PropertyValue = PropertyValue> {
   name: string;
   value: V;
   oldValue?: V;
 }
-type OnWidgetChange<V extends Parseable = string> = (
+type OnWidgetChange<V extends PropertyValue = PropertyValue> = (
   e: WidgetChangeEvent<V>,
   clean?: boolean,
 ) => void;

@@ -180,11 +180,26 @@ const samples3: PropertyConfig<"samples3", number> = {
   validate: validators.positive,
 };
 
-const visible: PropertyConfig<"visible", boolean> = {
+const visible: PropertyConfig<"visible"> = {
   name: "visible",
   label: "Visible",
-  widget: WidgetType.MathBoolean,
+  widget: WidgetType.Custom,
+};
+const calculatedVisibility: PropertyConfig<"calculatedVisibility", boolean> = {
+  name: "calculatedVisibility",
+  label: "Calculated Visibility",
+  widget: WidgetType.MathValue,
   validate: validators.boolean,
+};
+const useCalculatedVisibility: PropertyConfig<"useCalculatedVisibility"> = {
+  name: "useCalculatedVisibility",
+  label: "Use Calculated Visibility",
+  widget: WidgetType.Custom,
+};
+const visibilityProps = {
+  visible,
+  calculatedVisibility,
+  useCalculatedVisibility,
 };
 
 const width: PropertyConfig<"width", number> = {
@@ -242,6 +257,9 @@ export {
   size,
   start,
   visible,
+  calculatedVisibility,
+  useCalculatedVisibility,
+  visibilityProps,
   width,
   zBias,
   zIndex,

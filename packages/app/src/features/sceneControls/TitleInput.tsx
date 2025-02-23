@@ -8,7 +8,7 @@ import styles from "./TitleInput.module.css";
 const TitleInput: React.FC = () => {
   const title = useAppSelector(select.title);
   const setTitle = useSetTitle();
-  const onChange: OnWidgetChange = useCallback(
+  const onChange: OnWidgetChange<string> = useCallback(
     (e) => {
       setTitle(e.value);
     },

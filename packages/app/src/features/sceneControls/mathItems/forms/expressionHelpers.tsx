@@ -160,8 +160,8 @@ type ExpressionProps = {
    *  - One `param` handler for each parameter name in the expression LHS
    */
   handlers: {
-    rhs: OnWidgetChange[];
-    param: OnWidgetChange[];
+    rhs: OnWidgetChange<string>[];
+    param: OnWidgetChange<string>[];
   };
   /**
    * One error object for each exprName
@@ -255,17 +255,17 @@ const useExpressionsAndParameters = (
   );
 
   const handlers = useMemo(() => {
-    const rhs: OnWidgetChange[] = exprNames.map((name, i) => {
-      const handler: OnWidgetChange = (e) => {
+    const rhs: OnWidgetChange<string>[] = exprNames.map((name, i) => {
+      const handler: OnWidgetChange<string> = (e) => {
         const newAssignment = { ...assignments[i], rhs: e.value };
         updateExpr(newAssignment, name);
       };
       return handler;
     });
-    const param: OnWidgetChange[] = Array(numParams)
+    const param: OnWidgetChange<string>[] = Array(numParams)
       .fill(null)
       .map((_null, handlerIndex) => {
-        const handler: OnWidgetChange = (e) => {
+        const handler: OnWidgetChange<string> = (e) => {
           assignments.forEach((expr, i) => {
             const newParams = [...expr.params];
             newParams[handlerIndex] = e.value.replaceAll(/[,=]/g, "");

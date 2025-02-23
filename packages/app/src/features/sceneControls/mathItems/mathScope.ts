@@ -1,5 +1,6 @@
 import {
   EvaluatedProperties,
+  MathGraphic,
   MathItem,
   MathItemConfig,
   MathItemType,
@@ -97,6 +98,17 @@ const useMathItemResults = <
   >;
 };
 
+const CALCULATED_VIS = ["calculatedVisibility"] as const;
+const useFinalVisibility = (mathScope: AppMathScope, item: MathGraphic) => {
+  const { visible, useCalculatedVisibility } = item.properties;
+  const { calculatedVisibility } = useMathItemResults(
+    mathScope,
+    item,
+    CALCULATED_VIS,
+  );
+  return useCalculatedVisibility ? !!calculatedVisibility : visible;
+};
+
 const useMathErrors = <K extends string>(
   scope: AppMathScope,
   idPrefix: string,
@@ -142,4 +154,10 @@ const getMathProperties = <T extends MathItemType>(
 ): PropertyConfig<string, unknown>[] =>
   collectionFilter(config.properties, (p) => MATH_WIDGETS.has(p.widget));
 
-export { getMathProperties, useMathErrors, useMathResults, useMathItemResults };
+export {
+  getMathProperties,
+  useMathErrors,
+  useMathResults,
+  useMathItemResults,
+  useFinalVisibility,
+};

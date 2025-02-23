@@ -8,14 +8,16 @@ import {
   isGradientName,
 } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
-import { useMathItemResults } from "../../sceneControls/mathItems/mathScope";
+import {
+  useFinalVisibility,
+  useMathItemResults,
+} from "../../sceneControls/mathItems/mathScope";
 import { useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import { GraphicComponent, AxesRange } from "./interfaces";
 import { project } from "./util";
 
 const props = [
   "opacity",
-  "visible",
   "zBias",
   "zIndex",
   "samples1",
@@ -168,8 +170,8 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
     return c.lerp(new Color("black"), 0.5).getHex();
   }, [hasColorFunc, color]);
 
-  return (
-    <MB.Group visible={visible}>
+  return !visible ? null : (
+    <MB.Group>
       <MB.Area {...STATIC_COLOR_PROPS} {...colorProps} ref={setColor} />
       <MB.Area
         ref={setData}
@@ -236,6 +238,7 @@ const ParametricSurface: GraphicComponent<MIT.ParametricSurface> = ({
     ...others
   } = useMathItemResults(scope, item, props);
 
+  const finalVisibility = useFinalVisibility(scope, item);
   return (
     <MathboxParametricSurface
       func={func}
@@ -243,6 +246,7 @@ const ParametricSurface: GraphicComponent<MIT.ParametricSurface> = ({
       color={color}
       range={range}
       zOrder={zOrder}
+      visible={finalVisibility}
       {...others}
     />
   );
@@ -266,6 +270,7 @@ const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({
     if (!expr) return undefined;
     return (x: number, y: number) => [x, y, +expr(x, y)];
   }, [expr]);
+  const finalVisibility = useFinalVisibility(scope, item);
   return (
     <MathboxParametricSurface
       func={func}
@@ -273,6 +278,7 @@ const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({
       color={color}
       range={range}
       zOrder={zOrder}
+      visible={finalVisibility}
       {...others}
     />
   );
@@ -300,6 +306,7 @@ const ExplicitSurfacePolar: GraphicComponent<MIT.ExplicitSurfacePolar> = ({
       expr(r, q),
     ];
   }, [expr]);
+  const finalVisibility = useFinalVisibility(scope, item);
   return (
     <MathboxParametricSurface
       func={func}
@@ -307,6 +314,7 @@ const ExplicitSurfacePolar: GraphicComponent<MIT.ExplicitSurfacePolar> = ({
       color={color}
       range={range}
       zOrder={zOrder}
+      visible={finalVisibility}
       {...others}
     />
   );

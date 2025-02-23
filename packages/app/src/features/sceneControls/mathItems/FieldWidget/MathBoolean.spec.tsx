@@ -17,7 +17,7 @@ import { seedDb, makeItem } from "@math3d/mock-api";
  *  3. Return form as HTML element `settings`
  */
 const setup = async (initialValue: string) => {
-  const point = makeItem(MIT.Point, { visible: initialValue });
+  const point = makeItem(MIT.Point, { labelVisible: initialValue });
   const id = nodeId(point);
   const scene = seedDb.withSceneFromItems([point]);
   const { store } = await renderTestApp(`/${scene.key}`);
@@ -30,15 +30,15 @@ const setup = async (initialValue: string) => {
   // eslint-disable-next-line testing-library/no-node-access
   const settings = settingsTitle.closest("section");
   assertInstanceOf(settings, HTMLElement);
-  const visibleControl = within(settings).getByLabelText("Visible");
+  const booleanControl = within(settings).getByLabelText("Label Visible");
 
-  const getValue = () => mathScope.results.get(id("visible"));
+  const getValue = () => mathScope.results.get(id("labelVisible"));
 
   /**
    * Find and return the Switch button
    */
   const findToggle = async (): Promise<HTMLInputElement> => {
-    const label = "Toggle property: Visible";
+    const label = "Toggle property: Label Visible";
     const labeled = await within(settings).findByLabelText(label);
     const toggle = within(labeled).getByRole("checkbox");
     assertInstanceOf(toggle, HTMLInputElement);
@@ -46,28 +46,28 @@ const setup = async (initialValue: string) => {
   };
   const getReset = (): HTMLButtonElement => {
     const label = "Reset";
-    const toggle = within(visibleControl).getByText(label);
+    const toggle = within(booleanControl).getByText(label);
     assertInstanceOf(toggle, HTMLButtonElement);
     return toggle;
   };
   const queryReset = (): HTMLElement | null => {
     const label = "Reset";
-    return within(visibleControl).queryByText(label);
+    return within(booleanControl).queryByText(label);
   };
 
   const findUseExpr = async (): Promise<HTMLButtonElement> => {
     const text = "Use Expression";
-    const toggle = await within(visibleControl).findByText(text);
+    const toggle = await within(booleanControl).findByText(text);
     assertInstanceOf(toggle, HTMLButtonElement);
     return toggle;
   };
   const queryUseExpr = (): HTMLElement | null => {
     const text = "Use Expression";
-    return within(visibleControl).queryByText(text);
+    return within(booleanControl).queryByText(text);
   };
 
   const findExpr = async (): Promise<HTMLTextAreaElement> => {
-    const title = "Math Expression for: Visible";
+    const title = "Math Expression for: Label Visible";
     const expr = await within(settings).findByLabelText(title);
     assertInstanceOf(expr, HTMLTextAreaElement);
     return expr;
@@ -105,7 +105,7 @@ test.each([
   async ({ initialValue, showUseExpression }) => {
     const { settings } = await setup(initialValue);
     const text = "Use Expression";
-    const visible = within(settings).getByLabelText("Visible");
+    const visible = within(settings).getByLabelText("Label Visible");
     const useExpression = within(visible).queryByText(text);
     expect(useExpression instanceof HTMLButtonElement).toBe(showUseExpression);
   },
