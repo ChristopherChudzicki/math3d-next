@@ -9,6 +9,12 @@ export interface MathItemProperties {
 
 export interface PropertyConfig<K, V = never> {
   readonly name: K;
+  /**
+   * The default widget used to display/edit the property in UI.
+   *
+   * If the widge is a MathWidget, the property will additionally be parsed and
+   * evaluated via MathScope.
+   */
   readonly widget: WidgetType;
   readonly label: string;
   /**
