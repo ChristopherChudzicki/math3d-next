@@ -90,7 +90,9 @@ class ItemMigrator:
             color=x.color,
             visible=x.visible,
             calculated_visibility=x.calculatedVisibility,
-            use_calculated_visibility=x.useCalculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             opacity=x.opacity,
             z_index=x.zIndex,
             z_bias=x.zBias,
@@ -161,7 +163,9 @@ class ItemMigrator:
             shaded=stringify(x.shaded),
             visible=x.visible,
             calculated_visibility=x.calculatedVisibility,
-            use_calculated_visibility=x.useCalculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             z_bias=x.zBias,
             z_index=x.zIndex,
         )
@@ -190,7 +194,9 @@ class ItemMigrator:
             shaded=stringify(x.shaded),
             visible=x.visible,
             calculated_visibility=x.calculatedVisibility,
-            use_calculated_visibility=x.useCalculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             z_bias=x.zBias,
             z_index=x.zIndex,
         )
@@ -203,7 +209,9 @@ class ItemMigrator:
             opacity=x.opacity,
             visible=x.visible,
             calculated_visibility=x.calculatedVisibility,
-            use_calculated_visibility=x.useCalculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             z_bias=x.zBias,
             z_index=x.zIndex,
             divisions=x.divisions,
@@ -247,7 +255,9 @@ class ItemMigrator:
             shaded=stringify(x.shaded),
             visible=x.visible,
             calculated_visibility=x.calculatedVisibility,
-            use_calculated_visibility=x.useCalculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             z_bias=x.zBias,
             z_index=x.zIndex,
         )
@@ -266,7 +276,9 @@ class ItemMigrator:
             start=stringify(x.start),
             visible=x.visible,
             calculated_visibility=x.calculatedVisibility,
-            use_calculated_visibility=x.useCalculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             width=x.width,
             z_bias=x.zBias,
             z_index=x.zIndex,
@@ -294,7 +306,9 @@ class ItemMigrator:
             size=x.size,
             visible=x.visible,
             calculated_visibility=x.calculatedVisibility,
-            use_calculated_visibility=x.useCalculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             width=x.width,
             z_bias=x.zBias,
             z_index=x.zIndex,
@@ -324,7 +338,9 @@ class ItemMigrator:
             shaded=stringify(x.shaded),
             visible=x.visible,
             calculated_visibility=x.calculatedVisibility,
-            use_calculated_visibility=x.useCalculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             z_bias=x.zBias,
             z_index=x.zIndex,
         )
@@ -341,7 +357,9 @@ class ItemMigrator:
             size=x.size,
             visible=x.visible,
             calculated_visibility=x.calculatedVisibility,
-            use_calculated_visibility=x.useCalculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             z_bias=x.zBias,
             z_index=x.zIndex,
         )
@@ -382,7 +400,9 @@ class ItemMigrator:
             tail=x.tail,
             visible=x.visible,
             calculated_visibility=x.calculatedVisibility,
-            use_calculated_visibility=x.useCalculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             width=x.width,
             z_bias=x.zBias,
             z_index=x.zIndex,
@@ -422,7 +442,9 @@ class ItemMigrator:
             start=stringify(x.start),
             visible=x.visible,
             calculated_visibility=x.calculatedVisibility,
-            use_calculated_visibility=x.useCalculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             width=x.width,
             z_bias=x.zBias,
             z_index=x.zIndex,
@@ -436,11 +458,11 @@ class ItemMigrator:
         if item_type == "AXIS":
             extra_defaults = {}
             if item_id == "axis-x":
-                extra_defaults = {"axis": "x"}
+                extra_defaults = {"axis": "x", "label": "x"}
             elif item_id == "axis-y":
-                extra_defaults = {"axis": "y"}
+                extra_defaults = {"axis": "y", "label": "y"}
             elif item_id == "axis-z":
-                extra_defaults = {"axis": "z", "scale": "1/2"}
+                extra_defaults = {"axis": "z", "scale": "1/2", "label": "z"}
 
             return new.MathItemAxis(
                 id=item_id,
