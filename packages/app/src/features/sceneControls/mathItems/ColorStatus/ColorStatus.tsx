@@ -10,11 +10,14 @@ import Popover, { rightStartEnd } from "@/util/components/Popover";
 import { useLongAndShortPress } from "@/util/hooks/useLongAndShortPress";
 
 import { positioning } from "@/util/styles";
+import Tooltip from "@mui/material/Tooltip";
 import { useOnWidgetChange } from "../FieldWidget";
 import { useMathScope } from "../sceneSlice";
 import { useMathItemResults } from "../mathScope";
 import ColorDialog from "./ColorDialog";
 import styles from "./ColorStatus.module.css";
+
+const TOOLTIP_DELAY = 800;
 
 const getColor = (colorText: string) => {
   const color = colorsAndGradients.find((c) => c.value === colorText);
@@ -44,11 +47,13 @@ const ColorStatus: React.FC<Props> = (props) => {
   const [dialogVisible, setDialogVisible] = useToggle(false);
   const { color, visible, useCalculatedVisibility } = item.properties;
   const mathScope = useMathScope();
+  const [calcVisInit, setCalcVisInit] = useToggle(false);
   const { calculatedVisibility } = useMathItemResults(
     mathScope,
     item,
     EVALUATED_PROPS,
   );
+
   const finalVisibility = useCalculatedVisibility
     ? !!calculatedVisibility
     : visible;
@@ -74,7 +79,14 @@ const ColorStatus: React.FC<Props> = (props) => {
       value: false,
     });
   }, [visible, onChange, lastPressWasLong]);
+
+  useEffect(() => {
+    if (calculatedVisibility && !calcVisInit) {
+      setCalcVisInit.on();
+    }
+  }, [calculatedVisibility, calcVisInit, setCalcVisInit]);
   useEffectEcent(() => {
+    if (!calcVisInit) return;
     if (item.properties.calculatedVisibility !== "") {
       onChange({
         name: "useCalculatedVisibility",
@@ -91,21 +103,28 @@ const ColorStatus: React.FC<Props> = (props) => {
     <Popover
       modifiers={popperModifiers}
       trigger={
-        <button
-          type="button"
-          style={style}
-          title="Color and Visibility"
-          aria-label="Color and Visibility"
-          className={classNames(
-            styles.circle,
-            positioning["absolute-centered"],
-            {
-              [styles.empty]: !finalVisibility,
-            },
-          )}
-          onClick={handleButtonClick}
-          {...bind()}
-        />
+        <Tooltip
+          title="Long press to change color"
+          enterDelay={TOOLTIP_DELAY}
+          enterNextDelay={TOOLTIP_DELAY}
+          describeChild
+        >
+          <button
+            type="button"
+            style={style}
+            aria-pressed={finalVisibility}
+            aria-label="Show Graphic"
+            className={classNames(
+              styles.circle,
+              positioning["absolute-centered"],
+              {
+                [styles.empty]: !finalVisibility,
+              },
+            )}
+            onClick={handleButtonClick}
+            {...bind()}
+          />
+        </Tooltip>
       }
       visible={dialogVisible}
       onPointerAway={handlePointerAway}

@@ -33,9 +33,9 @@ const setup = async <R extends MIT>(
   const { store } = await renderTestApp(`/${scene.key}`);
 
   const mathScope = store.getState().scene.mathScope();
-  const findButton = () => screen.findByTitle("Color and Visibility");
-  const getButton = () =>
-    screen.getByRole("button", { name: "Color and Visibility" });
+  const findButton = () =>
+    screen.findByRole("button", { name: "Show Graphic" });
+  const getButton = () => screen.getByRole("button", { name: "Show Graphic" });
   const findTextInput = () => screen.findByTitle("Custom Color Input");
   const getAllSwatches = () => {
     const dialog = screen.getByRole("dialog");
