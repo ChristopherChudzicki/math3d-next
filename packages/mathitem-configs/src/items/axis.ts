@@ -150,6 +150,7 @@ const config: IMathItemConfig<
     "calculatedVisibility",
     "label",
     "labelVisible",
+    "ticksVisible",
     "opacity",
     "size",
     "width",
