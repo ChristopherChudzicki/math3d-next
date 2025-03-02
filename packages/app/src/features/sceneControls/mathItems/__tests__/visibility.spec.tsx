@@ -1,16 +1,8 @@
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import { renderTestApp, screen, user, within } from "@/test_util";
+import { renderTestApp, user, within } from "@/test_util";
 import * as _ from "lodash-es";
 import { seedDb, makeItem } from "@math3d/mock-api";
-import type { MathItem, MathItemType } from "@math3d/mathitem-configs";
-import {
-  addItem,
-  clickRemoveItem,
-  getActiveItem,
-  getItemByDescription,
-  getItemByTestId,
-  findItemByTestId,
-} from "./__utils__";
+import { findItemByTestId } from "./__utils__";
 
 describe("Visible and calculatedVisibility", () => {
   const setup = async ({
