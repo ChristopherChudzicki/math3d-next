@@ -188,7 +188,9 @@
         "zBias": "0",
         "zIndex": "0",
         "opacity": "1",
-        "visible": "false",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
         "divisions": "\\left[10,\\ 10\\right]",
         "description": "Grid"
       }
@@ -204,7 +206,9 @@
         "zBias": "0",
         "zIndex": "0",
         "opacity": "1",
-        "visible": "false",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
         "divisions": "\\left[10,\\ 10\\right]",
         "description": "Grid"
       }
