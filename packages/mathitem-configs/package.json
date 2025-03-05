@@ -4,7 +4,7 @@
   "main": "./src/index.ts",
   "type": "module",
   "devDependencies": {
-    "@faker-js/faker": "^8.4.1",
+    "@faker-js/faker": "^9.0.0",
     "@math3d/eslint-config": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
     "@types/js-yaml": "^4.0.5",
