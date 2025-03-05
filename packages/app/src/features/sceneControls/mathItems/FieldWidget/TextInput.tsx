@@ -11,7 +11,7 @@ const TextInput: React.FC<
     props;
   const onInputChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
-      const event: WidgetChangeEvent = {
+      const event: WidgetChangeEvent<string> = {
         name,
         value: e.target.value,
       };

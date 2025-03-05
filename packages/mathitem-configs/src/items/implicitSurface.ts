@@ -13,7 +13,7 @@ import {
   EvaluatedDomain3,
   opacity,
   shaded,
-  visible,
+  visibilityProps,
   zBias,
   zIndex,
 } from "../shared";
@@ -21,7 +21,9 @@ import {
 interface ImplicitSurfaceProperties {
   description: string;
   color: string;
-  visible: string;
+  visible: boolean;
+  calculatedVisibility: "";
+  useCalculatedVisibility: boolean;
   opacity: string;
   zIndex: string;
   zBias: string;
@@ -35,7 +37,9 @@ interface ImplicitSurfaceProperties {
 const defaultValues: ImplicitSurfaceProperties = {
   description: "Implicit Surface",
   color: "#3090FF",
-  visible: "true",
+  visible: true,
+  calculatedVisibility: "",
+  useCalculatedVisibility: false,
   opacity: "1",
   zIndex: "0",
   zBias: "0",
@@ -85,7 +89,7 @@ type EvaluatedProperties = {
   opacity: number;
   domain: EvaluatedDomain3;
   shaded: boolean;
-  visible: boolean;
+  calculatedVisibility: boolean;
   zBias: number;
   zIndex: number;
   samples: number;
@@ -104,7 +108,7 @@ const config: IMathItemConfig<
     color,
     description,
     opacity,
-    visible,
+    ...visibilityProps,
     samples: {
       name: "samples",
       label: "Samples",
@@ -129,6 +133,7 @@ const config: IMathItemConfig<
     zIndex,
   },
   settingsProperties: [
+    "calculatedVisibility",
     "opacity",
     "samples",
     "shaded",

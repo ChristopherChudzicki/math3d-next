@@ -13,6 +13,6 @@
     "test": "vitest --run",
     "typecheck": "tsc --noEmit",
     "test-watch": "vitest",
-    "lint": "eslint \"**/*.ts?(x)\""
+    "lint": "eslint --max-warnings 0 \"**/*.ts?(x)\""
   }
 }

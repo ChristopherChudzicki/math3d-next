@@ -13,7 +13,7 @@ import MathAssignment from "./MathAssignment";
 import MathBoolean from "./MathBoolean";
 import MathValue from "./MathValue";
 import TextInput from "./TextInput";
-import { IWidgetProps, OnWidgetChange, Parseable } from "./types";
+import { IWidgetProps, OnWidgetChange } from "./types";
 import ErrorTooltip from "./ErrorTooltip";
 
 type WidgetProps = IWidgetProps & {
@@ -42,7 +42,7 @@ export default FieldWidget;
 
 export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {
   const dispatch = useAppDispatch();
-  const onWidgetChange: OnWidgetChange<Parseable> = useCallback(
+  const onWidgetChange: OnWidgetChange = useCallback(
     (e, clean) => {
       const properties = { [e.name]: e.value };
       const patch = { id: item.id, properties, type: item.type };

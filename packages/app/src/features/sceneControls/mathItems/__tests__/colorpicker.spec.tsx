@@ -33,9 +33,9 @@ const setup = async <R extends MIT>(
   const { store } = await renderTestApp(`/${scene.key}`);
 
   const mathScope = store.getState().scene.mathScope();
-  const findButton = () => screen.findByTitle("Color and Visibility");
-  const getButton = () =>
-    screen.getByRole("button", { name: "Color and Visibility" });
+  const findButton = () =>
+    screen.findByRole("button", { name: "Show Graphic" });
+  const getButton = () => screen.getByRole("button", { name: "Show Graphic" });
   const findTextInput = () => screen.findByTitle("Custom Color Input");
   const getAllSwatches = () => {
     const dialog = screen.getByRole("dialog");
@@ -57,24 +57,22 @@ const setup = async <R extends MIT>(
 };
 
 test("short clicks on indicator toggle visibility", async () => {
-  const { findButton, getCalculatedProp } = await setup(MIT.Point);
-  expect(getCalculatedProp("visible")).toBe(true);
+  const { findButton, getItem } = await setup(MIT.Point);
+  expect(getItem().properties.visible).toBe(true);
   await user.click(await findButton());
-  expect(getCalculatedProp("visible")).toBe(false);
+  expect(getItem().properties.visible).toBe(false);
   await user.click(await findButton());
-  expect(getCalculatedProp("visible")).toBe(true);
+  expect(getItem().properties.visible).toBe(true);
 });
 
 test("long press opens color picker dialog", async () => {
-  const { findButton, getCalculatedProp, getAllSwatches } = await setup(
-    MIT.Point,
-  );
-  expect(getCalculatedProp("visible")).toBe(true);
+  const { findButton, getItem, getAllSwatches } = await setup(MIT.Point);
+  expect(getItem().properties.visible).toBe(true);
   expect(screen.queryByRole("dialog")).toBe(null);
   await longClick(await findButton(), 500);
   expect(screen.getByRole("dialog")).toBeDefined();
   // Still visible; long-press does not trigger normal click handler
-  expect(getCalculatedProp("visible")).toBe(true);
+  expect(getItem().properties.visible).toBe(true);
   const swatches = await getAllSwatches();
   expect(swatches).toHaveLength(10);
 });

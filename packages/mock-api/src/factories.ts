@@ -144,17 +144,17 @@ class SceneBuilder implements IScene {
     );
     const gridXY = makeItem(
       MathItemType.Grid,
-      { axes: "xy", visible: "true" },
+      { axes: "xy", visible: true },
       ids.gridXY,
     );
     const gridYZ = makeItem(
       MathItemType.Grid,
-      { axes: "yz", visible: "false" },
+      { axes: "yz", visible: false },
       ids.gridYZ,
     );
     const gridZX = makeItem(
       MathItemType.Grid,
-      { axes: "zx", visible: "false" },
+      { axes: "zx", visible: false },
       ids.gridZX,
     );
     addItemToScene(this, ids.axesFolder, axisX);

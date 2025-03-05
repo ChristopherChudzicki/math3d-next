@@ -18,12 +18,14 @@ export enum MathItemType {
 }
 
 export enum WidgetType {
-  MathBoolean = "math-boolean",
-  MathValue = "math-value",
-  MathAssignment = "math-assignment",
   Color = "color-picker",
   AutosizeText = "autosize-text",
   Text = "text",
   Custom = "custom",
+  // Math widgets
+  // Properties that use a math widget will be added to MathScope
+  MathBoolean = "math-boolean",
+  MathValue = "math-value",
+  MathAssignment = "math-assignment",
   CustomMath = "custom-math",
 }

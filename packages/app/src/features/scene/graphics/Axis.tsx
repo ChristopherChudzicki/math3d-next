@@ -1,12 +1,14 @@
 import React, { useMemo } from "react";
 import * as MB from "mathbox-react";
 import { MathItemType } from "@math3d/mathitem-configs";
-import { useMathItemResults } from "../../sceneControls/mathItems/mathScope";
+import {
+  useFinalVisibility,
+  useMathItemResults,
+} from "../../sceneControls/mathItems/mathScope";
 import { useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import { GraphicComponent } from "./interfaces";
 
 const props = [
-  "visible",
   "labelVisible",
   "ticksVisible",
   "opacity",
@@ -25,7 +27,6 @@ const Axis: GraphicComponent<MathItemType.Axis> = ({ item, zOrder }) => {
   const scope = useMathScope();
   const { color, axis, label } = item.properties;
   const {
-    visible,
     opacity,
     width,
     zIndex,
@@ -38,6 +39,7 @@ const Axis: GraphicComponent<MathItemType.Axis> = ({ item, zOrder }) => {
     ticksVisible,
     labelVisible,
   } = useMathItemResults(scope, item, props);
+  const finalVisibility = useFinalVisibility(scope, item);
   const tickLabelProps = axis === "z" ? { offset: [20, 0, 0] } : {};
   const labelPosData = useMemo(() => {
     if (axis === "x") return [max, 0, 0];
@@ -45,14 +47,13 @@ const Axis: GraphicComponent<MathItemType.Axis> = ({ item, zOrder }) => {
     if (axis === "z") return [0, 0, max];
     return [];
   }, [axis, max]);
-  return !visible ? null : (
+  return !finalVisibility ? null : (
     <MB.Group>
       <MB.Axis
         axis={axis}
         color={color}
         width={width}
         opacity={opacity}
-        visible={visible}
         zIndex={zIndex}
         zBias={zBias}
         zOrder={zOrder}

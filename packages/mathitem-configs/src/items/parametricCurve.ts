@@ -14,7 +14,7 @@ import {
   opacity,
   size,
   start,
-  visible,
+  visibilityProps,
   width,
   zBias,
   zIndex,
@@ -25,7 +25,9 @@ import {
 interface ParametricCurveProperties {
   description: string;
   color: string;
-  visible: string;
+  visible: boolean;
+  calculatedVisibility: "";
+  useCalculatedVisibility: boolean;
   opacity: string;
   zIndex: string;
   zBias: string;
@@ -41,7 +43,9 @@ interface ParametricCurveProperties {
 const defaultValues: ParametricCurveProperties = {
   description: "Parametric Curve",
   color: "#3090FF",
-  visible: "true",
+  visible: true,
+  calculatedVisibility: "",
+  useCalculatedVisibility: false,
   opacity: "1",
   zIndex: "0",
   zBias: "0",
@@ -78,7 +82,7 @@ const make: MathItemGenerator<
 
 type EvaluatedProperties = {
   opacity: number;
-  visible: boolean;
+  calculatedVisibility: boolean;
   size: number;
   width: number;
   zBias: number;
@@ -107,7 +111,7 @@ const config: IMathItemConfig<
       validate: validators.realFunc[1][3],
     },
     opacity,
-    visible,
+    ...visibilityProps,
     size,
     width,
     zBias,
@@ -118,6 +122,7 @@ const config: IMathItemConfig<
     samples1: { ...samples1, label: "Samples" },
   },
   settingsProperties: [
+    "calculatedVisibility",
     "opacity",
     "size",
     "start",

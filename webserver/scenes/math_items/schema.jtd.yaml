@@ -73,7 +73,11 @@ definitions:
       color:
         type: string
       visible:
+        type: boolean
+      calculatedVisibility:
         type: string
+      useCalculatedVisibility:
+        type: boolean
       opacity:
         type: string
       zIndex:
@@ -137,7 +141,11 @@ definitions:
       color:
         type: string
       visible:
+        type: boolean
+      calculatedVisibility:
         type: string
+      useCalculatedVisibility:
+        type: boolean
       opacity:
         type: string
       zIndex:
@@ -177,7 +185,11 @@ definitions:
       color:
         type: string
       visible:
+        type: boolean
+      calculatedVisibility:
         type: string
+      useCalculatedVisibility:
+        type: boolean
       opacity:
         type: string
       zIndex:
@@ -199,7 +211,11 @@ definitions:
       color:
         type: string
       visible:
+        type: boolean
+      calculatedVisibility:
         type: string
+      useCalculatedVisibility:
+        type: boolean
       opacity:
         type: string
       zIndex:
@@ -223,7 +239,11 @@ definitions:
       color:
         type: string
       visible:
+        type: boolean
+      calculatedVisibility:
         type: string
+      useCalculatedVisibility:
+        type: boolean
       opacity:
         type: string
       zIndex:
@@ -251,7 +271,11 @@ definitions:
       color:
         type: string
       visible:
+        type: boolean
+      calculatedVisibility:
         type: string
+      useCalculatedVisibility:
+        type: boolean
       opacity:
         type: string
       zIndex:
@@ -279,7 +303,11 @@ definitions:
       color:
         type: string
       visible:
+        type: boolean
+      calculatedVisibility:
         type: string
+      useCalculatedVisibility:
+        type: boolean
       opacity:
         type: string
       zIndex:
@@ -313,7 +341,11 @@ definitions:
       color:
         type: string
       visible:
+        type: boolean
+      calculatedVisibility:
         type: string
+      useCalculatedVisibility:
+        type: boolean
       opacity:
         type: string
       zIndex:
@@ -357,7 +389,11 @@ definitions:
       color:
         type: string
       visible:
+        type: boolean
+      calculatedVisibility:
         type: string
+      useCalculatedVisibility:
+        type: boolean
       opacity:
         type: string
       zIndex:
@@ -387,7 +423,11 @@ definitions:
       color:
         type: string
       visible:
+        type: boolean
+      calculatedVisibility:
         type: string
+      useCalculatedVisibility:
+        type: boolean
       opacity:
         type: string
       zIndex:

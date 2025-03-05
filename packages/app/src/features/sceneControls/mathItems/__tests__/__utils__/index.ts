@@ -26,6 +26,8 @@ const findItemByDescription = (description: string): Promise<HTMLElement> =>
 
 const getItemByTestId = (id: string): HTMLElement =>
   screen.getByTestId(`settings-${id}`);
+const findItemByTestId = (id: string): Promise<HTMLElement> =>
+  screen.findByTestId(`settings-${id}`);
 
 const clickRemoveItem = async (itemElement: HTMLElement): Promise<void> => {
   const remove = within(itemElement).getByLabelText("Remove Item");
@@ -75,4 +77,5 @@ export {
   setupItemTest,
   getActiveItem,
   getItemByTestId,
+  findItemByTestId,
 };

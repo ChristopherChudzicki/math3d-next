@@ -27,7 +27,7 @@ const AutosizeText: React.FC<
   const onInputChange: React.ChangeEventHandler<HTMLTextAreaElement> =
     useCallback(
       (e) => {
-        const event: WidgetChangeEvent = {
+        const event: WidgetChangeEvent<string> = {
           name,
           value: e.target.value,
         };

@@ -13,12 +13,6 @@ def stringify(obj: bool):
         return "false"
 
 
-def get_visible(x) -> str:
-    if hasattr(x, "useCalculatedVisibility") and x.useCalculatedVisibility:
-        return x.calculatedVisibility
-    return stringify(x.visible)
-
-
 class ItemMigrator:
     def __init__(self, log: IssueLog | None = None):
         if log is None:
@@ -94,7 +88,11 @@ class ItemMigrator:
         x = old.AxisProperties(**props)
         return new.ItemPropertiesAxis(
             color=x.color,
-            visible=get_visible(x),
+            visible=x.visible,
+            calculated_visibility=x.calculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             opacity=x.opacity,
             z_index=x.zIndex,
             z_bias=x.zBias,
@@ -163,7 +161,11 @@ class ItemMigrator:
             samples1=x.uSamples,
             samples2=x.vSamples,
             shaded=stringify(x.shaded),
-            visible=get_visible(x),
+            visible=x.visible,
+            calculated_visibility=x.calculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             z_bias=x.zBias,
             z_index=x.zIndex,
         )
@@ -190,7 +192,11 @@ class ItemMigrator:
             samples1=x.uSamples,
             samples2=x.vSamples,
             shaded=stringify(x.shaded),
-            visible=get_visible(x),
+            visible=x.visible,
+            calculated_visibility=x.calculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             z_bias=x.zBias,
             z_index=x.zIndex,
         )
@@ -201,7 +207,11 @@ class ItemMigrator:
             color=x.color,
             description=x.description,
             opacity=x.opacity,
-            visible=get_visible(x),
+            visible=x.visible,
+            calculated_visibility=x.calculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             z_bias=x.zBias,
             z_index=x.zIndex,
             divisions=x.divisions,
@@ -243,7 +253,11 @@ class ItemMigrator:
             opacity=x.opacity,
             samples=x.samples,
             shaded=stringify(x.shaded),
-            visible=get_visible(x),
+            visible=x.visible,
+            calculated_visibility=x.calculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             z_bias=x.zBias,
             z_index=x.zIndex,
         )
@@ -260,7 +274,11 @@ class ItemMigrator:
             opacity=x.opacity,
             size=x.size,
             start=stringify(x.start),
-            visible=get_visible(x),
+            visible=x.visible,
+            calculated_visibility=x.calculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             width=x.width,
             z_bias=x.zBias,
             z_index=x.zIndex,
@@ -286,7 +304,11 @@ class ItemMigrator:
             samples1=x.samples,
             start=stringify(x.start),
             size=x.size,
-            visible=get_visible(x),
+            visible=x.visible,
+            calculated_visibility=x.calculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             width=x.width,
             z_bias=x.zBias,
             z_index=x.zIndex,
@@ -314,7 +336,11 @@ class ItemMigrator:
             samples1=x.uSamples,
             samples2=x.vSamples,
             shaded=stringify(x.shaded),
-            visible=get_visible(x),
+            visible=x.visible,
+            calculated_visibility=x.calculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             z_bias=x.zBias,
             z_index=x.zIndex,
         )
@@ -329,7 +355,11 @@ class ItemMigrator:
             label_visible=stringify(x.labelVisible),
             opacity=x.opacity,
             size=x.size,
-            visible=get_visible(x),
+            visible=x.visible,
+            calculated_visibility=x.calculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             z_bias=x.zBias,
             z_index=x.zIndex,
         )
@@ -368,7 +398,11 @@ class ItemMigrator:
             size=x.size,
             start=stringify(x.start),
             tail=x.tail,
-            visible=get_visible(x),
+            visible=x.visible,
+            calculated_visibility=x.calculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             width=x.width,
             z_bias=x.zBias,
             z_index=x.zIndex,
@@ -406,7 +440,11 @@ class ItemMigrator:
             scale=x.scale,
             size=x.size,
             start=stringify(x.start),
-            visible=get_visible(x),
+            visible=x.visible,
+            calculated_visibility=x.calculatedVisibility,
+            use_calculated_visibility=bool(
+                x.calculatedVisibility and x.useCalculatedVisibility
+            ),
             width=x.width,
             z_bias=x.zBias,
             z_index=x.zIndex,
@@ -420,11 +458,11 @@ class ItemMigrator:
         if item_type == "AXIS":
             extra_defaults = {}
             if item_id == "axis-x":
-                extra_defaults = {"axis": "x"}
+                extra_defaults = {"axis": "x", "label": "x"}
             elif item_id == "axis-y":
-                extra_defaults = {"axis": "y"}
+                extra_defaults = {"axis": "y", "label": "y"}
             elif item_id == "axis-z":
-                extra_defaults = {"axis": "z", "scale": "1/2"}
+                extra_defaults = {"axis": "z", "scale": "1/2", "label": "z"}
 
             return new.MathItemAxis(
                 id=item_id,

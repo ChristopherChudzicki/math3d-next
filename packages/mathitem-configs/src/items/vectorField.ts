@@ -18,7 +18,7 @@ import {
   samples3,
   size,
   start,
-  visible,
+  visibilityProps,
   width,
   zBias,
   zIndex,
@@ -27,7 +27,9 @@ import {
 interface VectorFieldProperties {
   description: string;
   color: string;
-  visible: string;
+  visible: boolean;
+  calculatedVisibility: string;
+  useCalculatedVisibility: boolean;
   opacity: string;
   zIndex: string;
   zBias: string;
@@ -47,7 +49,9 @@ interface VectorFieldProperties {
 const defaultValues: VectorFieldProperties = {
   description: "Vector Field",
   color: "#3090FF",
-  visible: "true",
+  visible: true,
+  calculatedVisibility: "",
+  useCalculatedVisibility: false,
   opacity: "1",
   zIndex: "0",
   zBias: "0",
@@ -95,7 +99,7 @@ const make: MathItemGenerator<
 
 type EvaluatedProperties = {
   opacity: number;
-  visible: boolean;
+  calculatedVisibility: boolean;
   zBias: number;
   zIndex: number;
   size: number;
@@ -121,7 +125,7 @@ const config: IMathItemConfig<
     color,
     description,
     opacity,
-    visible,
+    ...visibilityProps,
     zBias,
     zIndex,
     size,
@@ -146,6 +150,7 @@ const config: IMathItemConfig<
     },
   },
   settingsProperties: [
+    "calculatedVisibility",
     "opacity",
     "size",
     "start",

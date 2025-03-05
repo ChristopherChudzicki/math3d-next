@@ -22,7 +22,7 @@ const Vector: MathItemForm<MIT.BooleanVariable> = ({ item }) => {
   const mathScope = useMathScope();
   const results = useMathItemResults(mathScope, item, resultNames);
   const errors = useMathErrors(mathScope, item.id, resultNames);
-  const onChangeName: OnWidgetChange = useCallback(
+  const onChangeName: OnWidgetChange<string> = useCallback(
     (e) => {
       onWidgetChange({
         name: e.name,
@@ -62,7 +62,7 @@ const Vector: MathItemForm<MIT.BooleanVariable> = ({ item }) => {
         />
         <div className={style["switch-container"]}>
           <Switch
-            aria-label={config.properties.value.label}
+            inputProps={{ "aria-label": config.properties.value.label }}
             checked={!!results.value}
             onChange={onToggle}
           />
