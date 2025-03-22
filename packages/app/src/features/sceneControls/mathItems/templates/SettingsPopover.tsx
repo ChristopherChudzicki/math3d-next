@@ -1,5 +1,6 @@
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import { Popover, SubtleButton } from "@/util/components";
+import { SubtleButton } from "@/util/components";
+import Popover from "@mui/material/Popover";
 import type {
   MathItem,
   MathItemConfig,
@@ -66,13 +67,6 @@ const SettingsForm = <T extends MathItemType>({
   );
 };
 
-/**
- * This is just a normal section element, but with data-dndkit-no-drag attr
- */
-const PopoverContainer: React.FC<
-  React.HTMLAttributes<HTMLElement> & { ref?: React.Ref<HTMLElement> }
-> = (props) => <section {...props} data-dndkit-no-drag />;
-
 interface SettingsPopoverProps {
   config: MathItemConfig;
   item: MathItem;
@@ -80,29 +74,36 @@ interface SettingsPopoverProps {
 
 const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
   const [visible, setVisible] = useToggle(false);
+  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   return (
-    <Popover
-      as={PopoverContainer}
-      visible={visible}
-      className={styles.container}
-      onPointerAway={setVisible.off}
-      placement="right"
-      trigger={
-        <SubtleButton
-          onClick={setVisible.toggle}
-          aria-label="Show Settings"
-          className={styles["settings-button"]}
-          centered
-        >
-          <SettingsOutlinedIcon />
-        </SubtleButton>
-      }
-    >
-      <CloseButton className={styles.close} onClick={setVisible.off} />
-      <h3 className={styles.title}>{config.label} Settings</h3>
-      <hr className={styles.divider} />
-      <SettingsForm item={item} config={config} />
-    </Popover>
+    <>
+      <Popover
+        anchorEl={anchorEl}
+        open={visible}
+        className={styles.container}
+        onClose={setVisible.off}
+        anchorOrigin={{
+          vertical: "center",
+          horizontal: "right",
+        }}
+      >
+        <section data-dndkit-no-drag className={styles.container}>
+          <CloseButton className={styles.close} onClick={setVisible.off} />
+          <h3 className={styles.title}>{config.label} Settings</h3>
+          <hr className={styles.divider} />
+          <SettingsForm item={item} config={config} />
+        </section>
+      </Popover>
+      <SubtleButton
+        ref={setAnchorEl}
+        onClick={setVisible.toggle}
+        aria-label="Show Settings"
+        className={styles["settings-button"]}
+        centered
+      >
+        <SettingsOutlinedIcon />
+      </SubtleButton>
+    </>
   );
 };
 

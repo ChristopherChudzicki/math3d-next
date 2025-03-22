@@ -4,9 +4,16 @@ import {
   makeColorConfig,
   colorsAndGradients,
 } from "@math3d/mathitem-configs";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useToggle } from "@/util/hooks";
-import Popover, { rightStartEnd } from "@/util/components/Popover";
+// import Popover, { rightStartEnd } from "@/util/components/Popover";
+import Popover, { PopoverPaper } from "@mui/material/Popover";
 import { useLongAndShortPress } from "@/util/hooks/useLongAndShortPress";
 
 import { positioning } from "@/util/styles";
@@ -28,7 +35,7 @@ interface Props {
   item: MathGraphic;
 }
 
-const useEffectEcent = (cb: () => void, deps: unknown[]) => {
+const useEffectEvent = (cb: () => void, deps: unknown[]) => {
   const cbRef = useRef(cb);
   useEffect(() => {
     cbRef.current = cb;
@@ -41,10 +48,10 @@ const useEffectEcent = (cb: () => void, deps: unknown[]) => {
 
 const EVALUATED_PROPS = ["calculatedVisibility"] as const;
 
-const popperModifiers = [rightStartEnd];
 const ColorStatus: React.FC<Props> = (props) => {
   const { item } = props;
   const [dialogVisible, setDialogVisible] = useToggle(false);
+  const [buttonEl, setButtonEl] = useState<HTMLElement | null>(null);
   const { color, visible, useCalculatedVisibility } = item.properties;
   const mathScope = useMathScope();
   const [calcVisInit, setCalcVisInit] = useToggle(false);
@@ -85,7 +92,7 @@ const ColorStatus: React.FC<Props> = (props) => {
       setCalcVisInit.on();
     }
   }, [calculatedVisibility, calcVisInit, setCalcVisInit]);
-  useEffectEcent(() => {
+  useEffectEvent(() => {
     if (!calcVisInit) return;
     if (item.properties.calculatedVisibility !== "") {
       onChange({
@@ -95,42 +102,46 @@ const ColorStatus: React.FC<Props> = (props) => {
     }
   }, [calculatedVisibility, item.properties.calculatedVisibility]);
 
-  const handlePointerAway = useCallback(() => {
-    if (lastPressWasLong()) return;
+  const handleCLose = useCallback(() => {
     setDialogVisible.off();
-  }, [lastPressWasLong, setDialogVisible]);
+  }, [setDialogVisible]);
   return (
-    <Popover
-      modifiers={popperModifiers}
-      trigger={
-        <Tooltip
-          title="Long press to change color"
-          enterDelay={TOOLTIP_DELAY}
-          enterNextDelay={TOOLTIP_DELAY}
-          describeChild
-        >
-          <button
-            type="button"
-            style={style}
-            aria-pressed={finalVisibility}
-            aria-label="Show Graphic"
-            className={classNames(
-              styles.circle,
-              positioning["absolute-centered"],
-              {
-                [styles.empty]: !finalVisibility,
-              },
-            )}
-            onClick={handleButtonClick}
-            {...bind()}
-          />
-        </Tooltip>
-      }
-      visible={dialogVisible}
-      onPointerAway={handlePointerAway}
-    >
-      <ColorDialog className={styles.dialog} item={item} />
-    </Popover>
+    <>
+      <Tooltip
+        title="Long press to change color"
+        enterDelay={TOOLTIP_DELAY}
+        enterNextDelay={TOOLTIP_DELAY}
+        describeChild
+      >
+        <button
+          type="button"
+          style={style}
+          ref={setButtonEl}
+          aria-pressed={finalVisibility}
+          aria-label="Show Graphic"
+          className={classNames(
+            styles.circle,
+            positioning["absolute-centered"],
+            {
+              [styles.empty]: !finalVisibility,
+            },
+          )}
+          onClick={handleButtonClick}
+          {...bind()}
+        />
+      </Tooltip>
+      <Popover
+        open={dialogVisible}
+        anchorEl={buttonEl}
+        onClose={handleCLose}
+        anchorOrigin={{
+          vertical: "center",
+          horizontal: "right",
+        }}
+      >
+        <ColorDialog className={styles.dialog} item={item} />
+      </Popover>
+    </>
   );
 };
 
