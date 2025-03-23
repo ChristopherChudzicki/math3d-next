@@ -12,9 +12,8 @@ import React, {
   useState,
 } from "react";
 import { useToggle } from "@/util/hooks";
-// import Popover, { rightStartEnd } from "@/util/components/Popover";
-import Popover, { PopoverPaper } from "@mui/material/Popover";
-import { useLongAndShortPress } from "@/util/hooks/useLongAndShortPress";
+import Popover from "@mui/material/Popover";
+import { useLongAndShortClick } from "@/util/hooks/useLongAndShortClick";
 
 import { positioning } from "@/util/styles";
 import Tooltip from "@mui/material/Tooltip";
@@ -73,19 +72,15 @@ const ColorStatus: React.FC<Props> = (props) => {
       }) as React.CSSProperties,
     [colorAndStyle],
   );
-  const { bind, lastPressWasLong } = useLongAndShortPress(setDialogVisible.on);
 
   const handleButtonClick = useCallback(() => {
-    if (lastPressWasLong()) return;
-    onChange({
-      name: "visible",
-      value: !visible,
-    });
-    onChange({
-      name: "useCalculatedVisibility",
-      value: false,
-    });
-  }, [visible, onChange, lastPressWasLong]);
+    onChange({ name: "visible", value: !visible });
+    onChange({ name: "useCalculatedVisibility", value: false });
+  }, [visible, onChange]);
+  const longAndShortClick = useLongAndShortClick({
+    onLongClick: setDialogVisible.on,
+    onClick: handleButtonClick,
+  });
 
   useEffect(() => {
     if (calculatedVisibility && !calcVisInit) {
@@ -126,8 +121,7 @@ const ColorStatus: React.FC<Props> = (props) => {
               [styles.empty]: !finalVisibility,
             },
           )}
-          onClick={handleButtonClick}
-          {...bind()}
+          {...longAndShortClick.handlers}
         />
       </Tooltip>
       <Popover
@@ -137,6 +131,12 @@ const ColorStatus: React.FC<Props> = (props) => {
         anchorOrigin={{
           vertical: "center",
           horizontal: "right",
+        }}
+        slotProps={{
+          paper: {
+            // @ts-expect-error https://github.com/mui/material-ui/issues/33175
+            "data-dndkit-no-drag": true,
+          },
         }}
       >
         <ColorDialog className={styles.dialog} item={item} />
