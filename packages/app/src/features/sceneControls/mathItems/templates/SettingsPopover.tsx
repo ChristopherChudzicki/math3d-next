@@ -86,6 +86,12 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
           vertical: "center",
           horizontal: "right",
         }}
+        slotProps={{
+          root: {
+            // @ts-expect-error https://github.com/mui/material-ui/issues/33175
+            "data-dndkit-no-drag": true,
+          },
+        }}
       >
         <section data-dndkit-no-drag className={styles.container}>
           <CloseButton className={styles.close} onClick={setVisible.off} />

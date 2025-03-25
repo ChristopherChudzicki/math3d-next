@@ -133,7 +133,7 @@ const ColorStatus: React.FC<Props> = (props) => {
           horizontal: "right",
         }}
         slotProps={{
-          paper: {
+          root: {
             // @ts-expect-error https://github.com/mui/material-ui/issues/33175
             "data-dndkit-no-drag": true,
           },
