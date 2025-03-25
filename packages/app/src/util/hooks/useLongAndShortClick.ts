@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   LongPressCallback,
   LongPressReactEvents,
@@ -12,7 +12,7 @@ const DEFAULT_OPTS: Required<Pick<LongPressOptions, "threshold">> = {
   threshold: 400,
 };
 
-type LongAndShortClickProps<T extends Element> = {
+type LongAndShortClickProps<T extends Element = Element> = {
   onLongClick: (ev: LongPressReactEvents<T> | React.KeyboardEvent<T>) => void;
   onClick?: (ev: React.MouseEvent<T>) => void;
   threshold?: number;
@@ -101,6 +101,15 @@ export const useLongAndShortClick = <T extends Element = Element>(
           handlerCalled = true;
         }
       },
+      onKeyUp: (event: React.KeyboardEvent) => {
+        if (
+          event.key === "Enter" &&
+          new Date().getTime() - (keyboardDownAt as number) < threshold &&
+          event.target instanceof HTMLElement
+        ) {
+          event.target.click();
+        }
+      },
       onClick: (event: React.MouseEvent<T>) => {
         if (wasLongPressedRef.current) {
           event.stopPropagation();
@@ -113,3 +122,5 @@ export const useLongAndShortClick = <T extends Element = Element>(
 
   return { handlers };
 };
+
+export type { LongAndShortClickProps, LongAndShortClickResult };
