@@ -1,5 +1,5 @@
 import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
-import { nodeId, renderTestApp, screen, act, within } from "@/test_util";
+import { nodeId, renderTestApp, screen, within } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
 import userEvent from "@testing-library/user-event";
 import { getTimedEvents } from "@math3d/test-utils";
