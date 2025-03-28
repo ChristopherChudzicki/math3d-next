@@ -238,7 +238,7 @@ const DroppableArea: React.FC<DroppableAreaProps> = ({
 }) => {
   const { setNodeRef } = useDroppable({ id, data });
   return (
-    <div data-no-drag={noDrag} className={className} ref={setNodeRef}>
+    <div data-dndkit-no-drag={noDrag} className={className} ref={setNodeRef}>
       {children}
     </div>
   );

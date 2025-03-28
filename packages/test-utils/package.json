@@ -6,6 +6,7 @@
   "devDependencies": {
     "@math3d/eslint-config": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
+    "@types/react": "^19.0.2",
     "eslint": "^8.54.0",
     "vitest": "^1.4.0"
   },
@@ -16,7 +17,10 @@
     "lint": "eslint --max-warnings 0 \"**/*.ts?(x)\""
   },
   "dependencies": {
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
     "jest-get-type": "^29.4.3",
+    "react": "^19.0.0",
     "tiny-invariant": "^1.3.1"
   }
 }
