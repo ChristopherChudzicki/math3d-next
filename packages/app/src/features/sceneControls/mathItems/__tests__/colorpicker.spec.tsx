@@ -1,23 +1,8 @@
 import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
-import { nodeId, renderTestApp, screen, user, act, within } from "@/test_util";
+import { nodeId, renderTestApp, screen, act, within } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
-
-/**
- * Press and hold pointer on element for `ms` seconds.
- */
-const longClick = async (element: HTMLElement, ms: number) => {
-  await user.pointer({ keys: "[MouseLeft>]", target: element }); // press the left mouse button
-  await user.pointer({ keys: "[/MouseLeft]", target: element }); // release the left mouse button
-  /**
-   * Confused why the waiting happens after pointer-up, but putting it between does not work...
-   */
-  await act(
-    () =>
-      new Promise((res) => {
-        setTimeout(res, ms);
-      }),
-  );
-};
+import userEvent from "@testing-library/user-event";
+import { getTimedEvents } from "@math3d/test-utils";
 
 /**
  * Add an item to mathItems store and return some helpers for finding relevant
@@ -27,6 +12,7 @@ const setup = async <R extends MIT>(
   type: R,
   itemProps: Partial<MathItem<R>["properties"]> = {},
 ) => {
+  const user = userEvent.setup();
   const item = makeItem(type, itemProps);
   const id = nodeId(item);
   const scene = seedDb.withSceneFromItems([item]);
@@ -47,6 +33,7 @@ const setup = async <R extends MIT>(
     mathScope.results.get(id(prop));
 
   return {
+    user,
     getItem,
     findButton,
     getButton,
@@ -57,7 +44,7 @@ const setup = async <R extends MIT>(
 };
 
 test("short clicks on indicator toggle visibility", async () => {
-  const { findButton, getItem } = await setup(MIT.Point);
+  const { findButton, getItem, user } = await setup(MIT.Point);
   expect(getItem().properties.visible).toBe(true);
   await user.click(await findButton());
   expect(getItem().properties.visible).toBe(false);
@@ -66,10 +53,14 @@ test("short clicks on indicator toggle visibility", async () => {
 });
 
 test("long press opens color picker dialog", async () => {
-  const { findButton, getItem, getAllSwatches } = await setup(MIT.Point);
+  const { findButton, getItem, getAllSwatches, user } = await setup(MIT.Point);
+  const timedEvents = getTimedEvents(user);
   expect(getItem().properties.visible).toBe(true);
   expect(screen.queryByRole("dialog")).toBe(null);
-  await longClick(await findButton(), 500);
+  await timedEvents.pointerPrimary({
+    target: await findButton(),
+    duration: 500,
+  });
   expect(screen.getByRole("dialog")).toBeDefined();
   // Still visible; long-press does not trigger normal click handler
   expect(getItem().properties.visible).toBe(true);
@@ -78,16 +69,21 @@ test("long press opens color picker dialog", async () => {
 });
 
 test("clicking a swatch sets item to that color", async () => {
-  const { findButton, getItem, getAllSwatches } = await setup(MIT.Point);
+  const { findButton, getItem, getAllSwatches, user } = await setup(MIT.Point);
+  const timedEvents = getTimedEvents(user);
+
   expect(getItem().properties.color).toBe("#3090ff");
-  await longClick(await findButton(), 500);
+  await timedEvents.pointerPrimary({
+    target: await findButton(),
+    duration: 500,
+  });
   const swatches = await getAllSwatches();
   await user.click(swatches[8]);
   expect(getItem().properties.color).toBe("#e74c3c");
 });
 
 test("Setting colorExpr for surfaces", async () => {
-  const { getButton, getItem } = await setup(MIT.ExplicitSurface, {
+  const { getButton, getItem, user } = await setup(MIT.ExplicitSurface, {
     colorExpr: {
       type: "function-assignment",
       name: "_f",
@@ -118,7 +114,11 @@ test("Setting colorExpr for surfaces", async () => {
       ],
     },
   });
-  await longClick(getButton(), 500);
+  const timedEvents = getTimedEvents(user);
+  await timedEvents.pointerPrimary({
+    target: await getButton(),
+    duration: 500,
+  });
 
   const dialog = await screen.findByRole("dialog");
 

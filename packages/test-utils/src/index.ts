@@ -6,4 +6,6 @@ export type { ToNearlyEqualOptions, CustomMatchers };
 
 export { default as ControlledPromise } from "./ControlledPromise";
 
+export { default as getTimedEvents } from "./getTimedEvents";
+
 /// <reference path="./vitest.d.ts" />

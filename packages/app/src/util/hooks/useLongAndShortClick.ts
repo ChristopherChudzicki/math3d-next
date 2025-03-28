@@ -98,6 +98,7 @@ export const useLongAndShortClick = <T extends Element = Element>(
           new Date().getTime() - (keyboardDownAt as number) > threshold
         ) {
           onLongClick(event);
+          wasLongPressedRef.current = true;
           handlerCalled = true;
         }
       },
