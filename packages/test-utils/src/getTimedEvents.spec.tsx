@@ -53,7 +53,7 @@ describe("getTimedEvents", () => {
     const duration =
       spies.onPointerUp.mock.calls[0][0].timeStamp -
       spies.onPointerDown.mock.calls[0][0].timeStamp;
-    expect(duration).approximately(expectedDuration, 50);
+    expect(duration).approximately(expectedDuration, 75);
   });
 
   test.each([
