@@ -7,11 +7,11 @@ describe("getTimedEvents", () => {
   const setup = () => {
     const user = userEvent.setup();
     const timed = getTimedEvents(user);
-    const onPointerDown = vi.fn<[React.PointerEvent]>();
-    const onPointerUp = vi.fn<[React.PointerEvent]>();
-    const onClick = vi.fn<[React.MouseEvent]>();
-    const onKeyDown = vi.fn<[React.KeyboardEvent]>();
-    const onKeyUp = vi.fn<[React.KeyboardEvent]>();
+    const onPointerDown = vi.fn<React.PointerEventHandler>();
+    const onPointerUp = vi.fn<React.PointerEventHandler>();
+    const onClick = vi.fn<React.MouseEventHandler>();
+    const onKeyDown = vi.fn<React.KeyboardEventHandler>();
+    const onKeyUp = vi.fn<React.KeyboardEventHandler>();
     render(
       <button
         type="button"
