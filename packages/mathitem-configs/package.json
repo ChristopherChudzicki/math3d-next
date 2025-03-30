@@ -12,7 +12,7 @@
     "eslint": "^8.54.0",
     "js-yaml": "^4.1.0",
     "mathjs": "^14.0.1",
-    "vitest": "^1.4.0"
+    "vitest": "^3.0.0"
   },
   "scripts": {
     "test": "vitest --run",
