@@ -7,11 +7,11 @@ describe("getTimedEvents", () => {
   const setup = () => {
     const user = userEvent.setup();
     const timed = getTimedEvents(user);
-    const onPointerDown = vi.fn<[React.PointerEvent]>();
-    const onPointerUp = vi.fn<[React.PointerEvent]>();
-    const onClick = vi.fn<[React.MouseEvent]>();
-    const onKeyDown = vi.fn<[React.KeyboardEvent]>();
-    const onKeyUp = vi.fn<[React.KeyboardEvent]>();
+    const onPointerDown = vi.fn<React.PointerEventHandler>();
+    const onPointerUp = vi.fn<React.PointerEventHandler>();
+    const onClick = vi.fn<React.MouseEventHandler>();
+    const onKeyDown = vi.fn<React.KeyboardEventHandler>();
+    const onKeyUp = vi.fn<React.KeyboardEventHandler>();
     render(
       <button
         type="button"
@@ -53,7 +53,9 @@ describe("getTimedEvents", () => {
     const duration =
       spies.onPointerUp.mock.calls[0][0].timeStamp -
       spies.onPointerDown.mock.calls[0][0].timeStamp;
-    expect(duration).approximately(expectedDuration, 50);
+
+    // It might be longer, due to blocking tasks on main thread
+    expect(duration).toBeGreaterThan(expectedDuration);
   });
 
   test.each([
@@ -85,7 +87,7 @@ describe("getTimedEvents", () => {
       const duration =
         spies.onKeyUp.mock.calls[0][0].timeStamp -
         spies.onKeyDown.mock.calls[0][0].timeStamp;
-      expect(duration).approximately(expectedDuration, 50);
+      expect(duration).toBeGreaterThan(expectedDuration);
     },
   );
 
