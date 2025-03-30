@@ -35,8 +35,8 @@ describe("useLongAndShortClick", () => {
   };
 
   test("Short mouse click fires click handler only", async () => {
-    const { timed, target, spies } = setup({ threshold: 200 });
-    await timed.pointerPrimary({ target, duration: 150 });
+    const { timed, target, spies } = setup({ threshold: 400 });
+    await timed.pointerPrimary({ target, duration: 50 });
     expect(spies.onClick).toHaveBeenCalledTimes(1);
     expect(spies.onLongClick).toHaveBeenCalledTimes(0);
   });
@@ -47,8 +47,8 @@ describe("useLongAndShortClick", () => {
   ])(
     "Short keyboard click ($label) fires click handler only",
     async ({ key }) => {
-      const { timed, target, spies } = setup({ threshold: 200 });
-      await timed.keypress({ key, target, duration: 150 });
+      const { timed, target, spies } = setup({ threshold: 400 });
+      await timed.keypress({ key, target, duration: 50 });
       expect(spies.onClick).toHaveBeenCalledTimes(1);
       expect(spies.onLongClick).toHaveBeenCalledTimes(0);
     },
@@ -56,19 +56,20 @@ describe("useLongAndShortClick", () => {
 
   test("Long mouse click fires longpress handler only", async () => {
     const { timed, target, spies } = setup({ threshold: 200 });
-    await timed.pointerPrimary({ target, duration: 250 });
+    await timed.pointerPrimary({ target, duration: 300 });
     expect(spies.onClick).toHaveBeenCalledTimes(0);
     expect(spies.onLongClick).toHaveBeenCalledTimes(1);
   });
 
   test.each([
-    { key: " ", label: "Spacebar" },
-    { key: "Enter", label: "Enter" },
+    { key: " ", label: "Spacebar", duration: 201 },
+    { key: "Enter", label: "Enter", duration: 201 }, // longclick triggers on keyup
+    { key: "Enter", label: "Enter", duration: 500 }, // longclick triggers on repeated keydown
   ])(
     "Long keyboard press ($label) fires longpress handler only",
-    async ({ key }) => {
+    async ({ key, duration }) => {
       const { timed, target, spies } = setup({ threshold: 200 });
-      await timed.keypress({ key, target, duration: 300 });
+      await timed.keypress({ key, target, duration });
       expect(spies.onClick).toHaveBeenCalledTimes(0);
       expect(spies.onLongClick).toHaveBeenCalledTimes(1);
     },

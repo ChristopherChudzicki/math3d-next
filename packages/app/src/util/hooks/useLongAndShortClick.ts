@@ -94,6 +94,7 @@ export const useLongAndShortClick = <T extends Element = Element>(
           keyboardDownAt = new Date().getTime();
         } else if (
           event.repeat &&
+          keyboardDownAt &&
           !handlerCalled &&
           new Date().getTime() - (keyboardDownAt as number) > threshold
         ) {
@@ -102,7 +103,17 @@ export const useLongAndShortClick = <T extends Element = Element>(
           handlerCalled = true;
         }
       },
-      onKeyUp: (event: React.KeyboardEvent) => {
+      onKeyUp: (event: React.KeyboardEvent<T>) => {
+        if (
+          (event.key === "Enter" || event.key === " ") &&
+          keyboardDownAt &&
+          !handlerCalled &&
+          new Date().getTime() - (keyboardDownAt as number) > threshold
+        ) {
+          onLongClick(event);
+          wasLongPressedRef.current = true;
+          handlerCalled = true;
+        }
         if (
           event.key === "Enter" &&
           new Date().getTime() - (keyboardDownAt as number) < threshold &&
