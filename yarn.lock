@@ -4056,13 +4056,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remix-run/router@npm:1.15.3":
-  version: 1.15.3
-  resolution: "@remix-run/router@npm:1.15.3"
-  checksum: 10/43d402b4ad3dff6dee5c1bc0822aeeb4d885d11c74c45fca7f2f4d7e57853fddbbb813c372919bb3fcc63f95fbcffdd1d4ac1c406857ea07b9d09a09d0562c8e
-  languageName: node
-  linkType: hard
-
 "@rollup/rollup-android-arm-eabi@npm:4.37.0":
   version: 4.37.0
   resolution: "@rollup/rollup-android-arm-eabi@npm:4.37.0"
@@ -7164,8 +7157,8 @@ __metadata:
     react-hook-form: "npm:^7.48.2"
     react-infinite-scroll-component: "npm:^6.1.0"
     react-redux: "npm:^9.1.0"
-    react-router: "npm:^6.21.1"
-    react-router-dom: "npm:^6.21.1"
+    react-router: "npm:^7.4.1"
+    react-router-dom: "npm:^7.4.1"
     redaxios: "npm:0.5.1"
     rollup-plugin-visualizer: "npm:5.14.0"
     showdown: "npm:^2.1.0"
@@ -9079,6 +9072,13 @@ __metadata:
   version: 0.7.2
   resolution: "cookie@npm:0.7.2"
   checksum: 10/24b286c556420d4ba4e9bc09120c9d3db7d28ace2bd0f8ccee82422ce42322f73c8312441271e5eefafbead725980e5996cc02766dbb89a90ac7f5636ede608f
+  languageName: node
+  linkType: hard
+
+"cookie@npm:^1.0.1":
+  version: 1.0.2
+  resolution: "cookie@npm:1.0.2"
+  checksum: 10/f5817cdc84d8977761b12549eba29435e675e65c7fef172bc31737788cd8adc83796bf8abe6d950554e7987325ad2d9ac2971c5bd8ff0c4f81c145f82e4ab1be
   languageName: node
   linkType: hard
 
@@ -17880,27 +17880,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^6.21.1":
-  version: 6.22.3
-  resolution: "react-router-dom@npm:6.22.3"
+"react-router-dom@npm:^7.4.1":
+  version: 7.4.1
+  resolution: "react-router-dom@npm:7.4.1"
   dependencies:
-    "@remix-run/router": "npm:1.15.3"
-    react-router: "npm:6.22.3"
+    react-router: "npm:7.4.1"
   peerDependencies:
-    react: ">=16.8"
-    react-dom: ">=16.8"
-  checksum: 10/868a530c3167e1903f170818c0162760b8fbe9b10a7a7a79e5998990df341cd7127ba7819af4a9105af72c13453c7c4d76b2b07a70b56fff012fa0508b51940e
+    react: ">=18"
+    react-dom: ">=18"
+  checksum: 10/5e839da47ca55eefb36766f115bf9dfca133fa7e1a573a590c34d3bbe980431edee8d3cc553a901e5869ecddda22a5af80987fcf8e59babb6853d945c7a6600b
   languageName: node
   linkType: hard
 
-"react-router@npm:6.22.3, react-router@npm:^6.21.1":
-  version: 6.22.3
-  resolution: "react-router@npm:6.22.3"
+"react-router@npm:7.4.1, react-router@npm:^7.4.1":
+  version: 7.4.1
+  resolution: "react-router@npm:7.4.1"
   dependencies:
-    "@remix-run/router": "npm:1.15.3"
+    "@types/cookie": "npm:^0.6.0"
+    cookie: "npm:^1.0.1"
+    set-cookie-parser: "npm:^2.6.0"
+    turbo-stream: "npm:2.4.0"
   peerDependencies:
-    react: ">=16.8"
-  checksum: 10/df3948afd6500faf4b82a72375b9177536d878d54cad18e20a175efcbfdd0d94852aac59660d786946636ed325284d94a8f46652d898df304d6a29c9a3932afd
+    react: ">=18"
+    react-dom: ">=18"
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+  checksum: 10/5873187abcd1d898f4bf7c0f31af48d7a867ec35bfa030d582c03bfb390fdf6ebfb252732a200d2212771319133124279b7c8ba034df0cde77daf9140345a1c6
   languageName: node
   linkType: hard
 
@@ -19022,6 +19028,13 @@ __metadata:
   version: 2.0.0
   resolution: "set-blocking@npm:2.0.0"
   checksum: 10/8980ebf7ae9eb945bb036b6e283c547ee783a1ad557a82babf758a065e2fb6ea337fd82cac30dd565c1e606e423f30024a19fff7afbf4977d784720c4026a8ef
+  languageName: node
+  linkType: hard
+
+"set-cookie-parser@npm:^2.6.0":
+  version: 2.7.1
+  resolution: "set-cookie-parser@npm:2.7.1"
+  checksum: 10/c92b1130032693342bca13ea1b1bc93967ab37deec4387fcd8c2a843c0ef2fd9a9f3df25aea5bb3976cd05a91c2cf4632dd6164d6e1814208fb7d7e14edd42b4
   languageName: node
   linkType: hard
 
@@ -20865,6 +20878,13 @@ __metadata:
   version: 2.4.4
   resolution: "turbo-linux-arm64@npm:2.4.4"
   conditions: os=linux & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"turbo-stream@npm:2.4.0":
+  version: 2.4.0
+  resolution: "turbo-stream@npm:2.4.0"
+  checksum: 10/7079bbc82b58340f783144cd669cc7e598288523103a8d68bb8a4c6bb28c64eccb71d389b33aab07788d3a9030638b795709e15cb8486f722b1cdac59cb58afc
   languageName: node
   linkType: hard
 

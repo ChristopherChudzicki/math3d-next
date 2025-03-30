@@ -34,7 +34,9 @@ test("Login form logs user in", async () => {
 
   // Re-routed and dialog closed
   expect(location.current.pathname).toBe("/");
-  expect(dialog).not.toBeInTheDocument();
+  await waitFor(() => {
+    expect(dialog).not.toBeInTheDocument();
+  });
 });
 
 test("Login form displays error if password/email wrong", async () => {
