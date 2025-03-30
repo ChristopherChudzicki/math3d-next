@@ -4,7 +4,7 @@ import {
   useNavigate,
   useParams,
   useSearchParams,
-} from "react-router-dom";
+} from "react-router";
 import Scene from "@/features/scene";
 import SceneControls from "@/features/sceneControls";
 import Sidebar from "@/util/components/sidebar";

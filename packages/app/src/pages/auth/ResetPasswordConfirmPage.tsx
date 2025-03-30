@@ -1,6 +1,6 @@
 import React, { useCallback, useId } from "react";
 import TextField from "@mui/material/TextField";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import { useResetPasswordConfirm } from "@math3d/api";

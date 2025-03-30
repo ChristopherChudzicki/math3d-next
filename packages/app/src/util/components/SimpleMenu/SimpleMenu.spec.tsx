@@ -1,12 +1,12 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import user from "@testing-library/user-event";
-import type { LinkProps } from "react-router-dom";
+import type { LinkProps } from "react-router";
 import SimpleMenu from "./SimpleMenu";
 import type { SimpleMenuItem } from "./SimpleMenu";
 
 // Mock react-router-dom's Link so we don't need to set up a Router
-vi.mock("react-router-dom", () => {
+vi.mock("react-router", () => {
   return {
     Link: vi.fn(({ children, ...others }: LinkProps) => {
       return (

@@ -8,7 +8,7 @@ import type { PopoverProps } from "@mui/material/Popover";
 import { useToggle } from "@/util/hooks";
 import TextField from "@mui/material/TextField";
 import classNames from "classnames";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import Dialog from "@mui/material/Dialog";
 import Alert from "@mui/material/Alert";
 import styles from "./ShareButton.module.css";

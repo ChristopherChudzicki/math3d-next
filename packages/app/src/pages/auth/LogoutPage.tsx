@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useLogout } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
 import { BasicDialog } from "./components/BasicDialog";

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useId } from "react";
 import TextField from "@mui/material/TextField";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import { useCreateUser, UserCreatePasswordRetypeRequest } from "@math3d/api";

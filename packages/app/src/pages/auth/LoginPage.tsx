@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useId } from "react";
 import TextField from "@mui/material/TextField";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { useLogin } from "@math3d/api";
 import { yupResolver } from "@hookform/resolvers/yup";
