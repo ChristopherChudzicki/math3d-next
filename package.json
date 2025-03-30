@@ -7,7 +7,7 @@
   "devDependencies": {
     "@math3d/eslint-config": "workspace:*",
     "ts-node": "^10.9.1",
-    "turbo": "^1.6.3",
+    "turbo": "^2.0.0",
     "typescript": "^5.7.2"
   },
   "scripts": {
