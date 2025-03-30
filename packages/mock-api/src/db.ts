@@ -28,7 +28,7 @@ const db = factory({
   },
   user: {
     id: primaryKey(faker.number.int),
-    public_nickname: faker.internet.userName,
+    public_nickname: faker.internet.username,
     email: faker.internet.email,
     password: faker.internet.password,
     auth_token: faker.string.uuid,
