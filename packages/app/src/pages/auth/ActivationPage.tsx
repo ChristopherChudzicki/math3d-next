@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router";
 import Link from "@/util/components/Link";
 import { useActivateUser } from "@math3d/api";
 import { useToggle } from "@/util/hooks";

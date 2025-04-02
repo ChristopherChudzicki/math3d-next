@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import Header from "@/util/components/Header";
 
 import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";

@@ -1,6 +1,6 @@
 import React from "react";
 import MuiLink from "@mui/material/Link";
-import { Link as ReactRouterLink } from "react-router-dom";
+import { Link as ReactRouterLink } from "react-router";
 import type { LinkProps } from "@mui/material/Link";
 import invariant from "tiny-invariant";
 

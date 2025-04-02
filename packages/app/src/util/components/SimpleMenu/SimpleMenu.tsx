@@ -2,8 +2,8 @@ import React, { useCallback, useMemo, useState } from "react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import { Link as RouterLink } from "react-router-dom";
-import type { LinkProps as RouterLinkProps } from "react-router-dom";
+import { Link as RouterLink } from "react-router";
+import type { LinkProps as RouterLinkProps } from "react-router";
 
 type LinkBehaviorProps = Omit<RouterLinkProps, "to"> & {
   href: RouterLinkProps["to"];
