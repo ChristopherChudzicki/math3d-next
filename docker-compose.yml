@@ -6,7 +6,7 @@ networks:
 
 services:
   db:
-    image: postgres:16.6
+    image: postgres:16.8
     environment:
       - POSTGRES_USER=docker
       - POSTGRES_PASSWORD=docker
