@@ -32,7 +32,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.0",
-    "@hookform/resolvers": "^3.3.2",
+    "@hookform/resolvers": "^5.0.0",
     "@math3d/api": "workspace:^",
     "@math3d/custom-mathjs": "workspace:^",
     "@math3d/mathitem-configs": "workspace:^",
