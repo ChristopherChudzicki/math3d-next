@@ -20169,11 +20169,11 @@ __metadata:
   linkType: hard
 
 "use-long-press@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "use-long-press@npm:3.2.0"
+  version: 3.3.0
+  resolution: "use-long-press@npm:3.3.0"
   peerDependencies:
     react: ">=16.8.0"
-  checksum: 10/41aa278bb1b4a3fc304da5f8064caa38d24e726de4e1de39d54ab8da2ab80cb9a9257911469568ce6322a76bdb28aee6091fb3cc301aea3c5133f4304f7163b9
+  checksum: 10/316997521e173c8404dd17a1539b174c24597af2bd0272082a892c0b0b6ea590e3cde20cd155a913c112c53e390e95270fd57337b8a23e00abe5344092553e51
   languageName: node
   linkType: hard
 
