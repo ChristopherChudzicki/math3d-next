@@ -14452,11 +14452,11 @@ __metadata:
   linkType: hard
 
 "mathlive@npm:^0.105.0":
-  version: 0.105.0
-  resolution: "mathlive@npm:0.105.0"
+  version: 0.105.2
+  resolution: "mathlive@npm:0.105.2"
   dependencies:
     "@cortex-js/compute-engine": "npm:0.28.0"
-  checksum: 10/be9657e9b3cac45630041ec483580c9a1c96e425f1681f2b593df629f1df0f08f5521177f0b3059de780ddd2ab7d56ca6d04caebce87e933a6e3a84e2edac9c9
+  checksum: 10/d2c4c71867feddbc4df37bf6f2d33fa5f6428bc92ede3869fd2ea86f59d2be994a3d2a0c52e92bc1b226fa853a585cd0f1230da26feca6fac1037f7f178bb8b1
   languageName: node
   linkType: hard
 
