@@ -27,6 +27,7 @@ env = environ.Env(
     DEFAULT_FROM_EMAIL=(str, ""),
     SERVER_EMAIL=(str, ""),
     APP_BASE_URL=(str, ""),
+    INGESTION_DATABASE_URL=(str, ""),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -256,3 +257,5 @@ if os.environ.get("IS_HEROKU"):
     import django_heroku  # type: ignore
 
     django_heroku.settings(locals())
+
+INGESTION_DATABASE_URL = env("INGESTION_DATABASE_URL")
