@@ -40,6 +40,26 @@ def migrate_scene(legacy_scene: LegacyScene):
     item_order["main"] = item_order["root"]
     del item_order["root"]
 
+    # In mathbox-react, if a folder has 100% default settings, the item won't
+    # even exist in the dehydrated folder data, only in item_order.
+    for folder_id in item_order["main"]:
+        if folder_id not in set(item["id"] for item in items):
+            items.append(
+                migrator.translate_item(
+                    {
+                        "type": "FOLDER",
+                    },
+                    folder_id,
+                ).to_json_data()
+            )
+
+    # Mathbox-react can have orphaned folders in the item_order that don't
+    # exist in the main tree. This seems to happen if you add then delete a
+    # folder. Let's remove them.
+    for folder_id in list(item_order):
+        if not item_order[folder_id] and folder_id not in item_order["main"]:
+            del item_order[folder_id]
+
     scene, _created = Scene.objects.update_or_create(
         key=legacy_scene.key,
         defaults={
