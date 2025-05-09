@@ -21,7 +21,7 @@ class ItemMigrator:
 
     def assignment(self, expr: str) -> new.ParseableAssignment:
         lhs, *rhs_pieces = expr.split("=")
-        rhs = "".join(rhs_pieces)
+        rhs = "=".join(rhs_pieces)
         if len(rhs_pieces) != 1:
             self.log.error("Expected one rhs. Value: {expr}")
 
@@ -33,7 +33,7 @@ class ItemMigrator:
 
     def function_assignment(self, expr: str) -> new.ParseableFunctionAssignment:
         lhs, *rhs_pieces = expr.split("=")
-        rhs = "".join(rhs_pieces)
+        rhs = "=".join(rhs_pieces)
 
         if len(rhs_pieces) != 1:
             self.log.error("Expected one rhs. Value: {expr}")
