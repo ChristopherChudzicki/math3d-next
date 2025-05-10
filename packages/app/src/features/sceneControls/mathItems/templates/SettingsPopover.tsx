@@ -38,7 +38,9 @@ const SettingsForm = <T extends MathItemType>({
       // @ts-expect-error ts does not know that config and item are correlated
       const value = item.properties[name];
       if (typeof value !== "string") {
-        throw new Error(`value should be a string; received ${typeof value}`);
+        throw new Error(
+          `properties[${name}] should be a string; received ${typeof value}`,
+        );
       }
       return { field, value };
     });
