@@ -1,8 +1,6 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
-import AppPage from "@/utils/pages/AppPage";
-import env from "@/env";
 import { getItemForm, getLatex } from "@/utils/selectors";
 
 const user = makeUserInfo();
@@ -25,17 +23,6 @@ test("Building a custom scene", async ({ page, prepareScene }) => {
   const key = await prepareScene(scene);
   await page.goto(`/${key}`);
 
-  await test.step("Check z-oder of F1_surfaceA (uses placeholder value)", async () => {
-    const description = "F1_surfaceA";
-    const item = getItemForm(page, description);
-    await item.getByRole("button", { name: "More Settings" }).click();
-
-    const zOrder = page.getByLabel("Z-Order");
-    expect(await zOrder.evaluate(getLatex)).toBe("");
-    expect(await page.getByLabel("Z-Order")).toHaveText("13");
-    await page.keyboard.press("Escape");
-  });
-
   /**
    * NOTE: Expected z-order order for this scene is:
    *
@@ -57,6 +44,28 @@ test("Building a custom scene", async ({ page, prepareScene }) => {
    * F2_surfaceB    10              10
    */
 
+  await test.step("Check z-oder of F2_point (uses placeholder value)", async () => {
+    const description = "F2_point";
+    const item = getItemForm(page, description);
+    await item.getByRole("button", { name: "More Settings" }).click();
+
+    const zOrder = page.getByLabel("Z-Order");
+    expect(await zOrder.evaluate(getLatex)).toBe("");
+    expect(await page.getByLabel("Z-Order")).toHaveText("7");
+    await page.keyboard.press("Escape");
+  });
+
+  await test.step("Check z-oder of F1_surfaceA (uses placeholder value)", async () => {
+    const description = "F1_surfaceA";
+    const item = getItemForm(page, description);
+    await item.getByRole("button", { name: "More Settings" }).click();
+
+    const zOrder = page.getByLabel("Z-Order");
+    expect(await zOrder.evaluate(getLatex)).toBe("");
+    expect(await page.getByLabel("Z-Order")).toHaveText("13");
+    await page.keyboard.press("Escape");
+  });
+
   await test.step("Check z-oder of F2_surfaceA (uses set value)", async () => {
     const description = "F2_surfaceA";
     const item = getItemForm(page, description);
@@ -65,5 +74,6 @@ test("Building a custom scene", async ({ page, prepareScene }) => {
     const zOrder = page.getByLabel("Z-Order");
     expect(await zOrder.evaluate(getLatex)).toBe("100");
     expect(await page.getByLabel("Z-Order")).toHaveText("100");
+    await page.keyboard.press("Escape");
   });
 });
