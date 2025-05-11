@@ -55,7 +55,8 @@ const isSurface = (item: MathItem) => {
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 const SceneContent = () => {
   const dispatch = useAppDispatch();
-  const items = useAppSelector(select.orderedMathItems);
+  const items = useAppSelector(select.stableOrderedMathItems);
+  const graphicOrder = useAppSelector(select.graphicOrder);
   const [x, y, z, camera] = useAppSelector((state) =>
     select.getItems(state, REQUIRED_ITEMS),
   );
@@ -93,9 +94,15 @@ const SceneContent = () => {
       {items.filter(isMathGraphic).map((item) => {
         const others = {
           ...(graphicNeedsRange(item.type) ? { range } : {}),
-          ...(isSurface(item) ? { zOrder: 1 } : {}),
         };
-        return <Graphic key={item.id} item={item} {...others} />;
+        return (
+          <Graphic
+            key={item.id}
+            item={item}
+            zOrder={graphicOrder[item.id]}
+            {...others}
+          />
+        );
       })}
     </MB.Cartesian>
   );

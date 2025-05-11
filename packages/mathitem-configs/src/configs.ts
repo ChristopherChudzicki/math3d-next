@@ -124,10 +124,19 @@ const addableTypes = [
 const isMathGraphic = (item: MathItem): item is MathGraphic => {
   return (MATH_GRAPHIC_TYPES as readonly MathItemType[]).includes(item.type);
 };
+const isSurface = (item: MathItem): item is MathGraphic => {
+  return [
+    MathItemType.ParametricSurface,
+    MathItemType.ExplicitSurface,
+    MathItemType.ExplicitSurfacePolar,
+    MathItemType.ImplicitSurface,
+  ].includes(item.type);
+};
 
 export {
   addableTypes,
   isMathGraphic,
+  isSurface,
   mathItemConfigs,
   MathItemType,
   WidgetType,
