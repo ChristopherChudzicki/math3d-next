@@ -164,7 +164,6 @@ const config: IMathItemConfig<
     "shaded",
     "samples1",
     "samples2",
-    "visible",
     "zBias",
     "zIndex",
   ],
