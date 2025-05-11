@@ -14,6 +14,10 @@ class IdGenerator {
     this.currentValue = initialValue;
   }
 
+  setCurrentValue(value: number): void {
+    this.currentValue = value;
+  }
+
   next(): string {
     const next = `${this.prefix}${this.currentValue}`;
     this.currentValue += 1;

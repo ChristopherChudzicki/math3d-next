@@ -2,6 +2,7 @@ import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { renderTestApp, screen, user, within } from "@/test_util";
 import * as _ from "lodash-es";
 import { seedDb, makeItem } from "@math3d/mock-api";
+import { faker } from "@faker-js/faker/locale/en";
 import {
   addItem,
   clickRemoveItem,
@@ -204,4 +205,17 @@ test.each([
     name: "Remove Item",
   }) as HTMLButtonElement;
   expect(removeBtn.disabled).toBe(isRemoveDisabled);
+});
+
+test("Inserted item id is not already used", async () => {
+  const count = faker.number.int({ min: 1, max: 10 });
+  const items = _.times(count, () => makeItem(MIT.Point));
+  const scene = seedDb.withSceneFromItems(items);
+  const { store } = await renderTestApp(`/${scene.key}`);
+  const idsA = Object.keys(store.getState().scene.items).map((x) => +x);
+
+  await addItem("Point");
+  const idsB = Object.keys(store.getState().scene.items).map((x) => +x);
+  const maxIdA = Math.max(...idsA);
+  expect([...idsA, maxIdA + 1]).toEqual(idsB);
 });

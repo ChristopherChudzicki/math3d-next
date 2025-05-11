@@ -106,6 +106,12 @@ const slice = createSlice({
 
       const mathScope = makeMathScope();
       state.mathScope = () => mathScope;
+
+      const ids = items
+        .map((item) => +item.id)
+        .filter((id) => !Number.isNaN(id));
+      const maxId = Math.max(...ids);
+      idGenerator.setCurrentValue(maxId > 0 ? maxId + 1 : 1);
       syncItemsToMathScope(mathScope, items);
     }),
     initializeMathScope: withClean(true)<void>((state) => {
@@ -114,6 +120,7 @@ const slice = createSlice({
     }),
     addNewItem: (state, action: PayloadAction<{ type: MathItemType }>) => {
       const id = idGenerator.next();
+      invariant(state.items[id] === undefined, "id should be unique");
       const { type } = action.payload;
       const item = mathItemConfigs[type].make(id);
       state.items[id] = item;
