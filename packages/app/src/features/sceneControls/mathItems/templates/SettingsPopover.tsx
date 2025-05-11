@@ -114,7 +114,7 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
       <SubtleButton
         ref={setAnchorEl}
         onClick={setVisible.toggle}
-        aria-label="Show Settings"
+        aria-label="More Settings"
         className={styles["settings-button"]}
         centered
       >

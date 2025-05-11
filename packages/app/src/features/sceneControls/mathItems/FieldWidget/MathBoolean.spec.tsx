@@ -23,7 +23,7 @@ const setup = async (initialValue: string) => {
   const { store } = await renderTestApp(`/${scene.key}`);
 
   const mathScope = store.getState().scene.mathScope();
-  await user.click(await screen.findByLabelText("Show Settings"), {
+  await user.click(await screen.findByLabelText("More Settings"), {
     pointerEventsCheck: 0,
   });
   const settingsTitle = await screen.findByText("Settings", { exact: false });
