@@ -118,7 +118,7 @@ type EvaluatedProperties = {
   calculatedVisibility: boolean;
   zBias: number;
   zIndex: number;
-  zOrder: number;
+  zOrder: number | undefined;
   expr: (u: number, v: number) => [number, number, number];
   colorExpr: (X: number, Y: number, Z: number, u: number, v: number) => number;
 };

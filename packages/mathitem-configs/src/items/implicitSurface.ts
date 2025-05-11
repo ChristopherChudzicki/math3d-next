@@ -95,7 +95,7 @@ type EvaluatedProperties = {
   calculatedVisibility: boolean;
   zBias: number;
   zIndex: number;
-  zOrder: number;
+  zOrder: number | undefined;
   samples: number;
   lhs: (x: number, y: number, z: number) => number;
   rhs: (x: number, y: number, z: number) => number;

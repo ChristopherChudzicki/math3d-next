@@ -105,7 +105,7 @@ type EvaluatedProperties = {
   calculatedVisibility: boolean;
   zBias: number;
   zIndex: number;
-  zOrder: number;
+  zOrder: number | undefined;
   size: number;
   width: number;
   start: boolean;

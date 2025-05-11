@@ -216,7 +216,7 @@ const zBias: PropertyConfig<"zBias", number> = {
   validate: validators.real,
 };
 
-const zIndex: PropertyConfig<"zIndex", number | undefined> = {
+const zIndex: PropertyConfig<"zIndex", number> = {
   name: "zIndex",
   label: "Z-Index",
   widget: WidgetType.MathValue,

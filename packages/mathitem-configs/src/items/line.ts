@@ -74,7 +74,7 @@ type EvaluatedProperties = {
   width: number;
   zBias: number;
   zIndex: number;
-  zOrder: number;
+  zOrder: number | undefined;
   start: boolean;
   end: boolean;
 };

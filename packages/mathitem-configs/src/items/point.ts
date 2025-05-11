@@ -40,9 +40,9 @@ interface EvaluatedProperties {
   color: string;
   calculatedVisibility: boolean;
   opacity: number;
-  zIndex: number;
   zBias: number;
-  zOrder: number;
+  zIndex: number;
+  zOrder: number | undefined;
   labelVisible: boolean;
   coords: [number, number, number][];
   size: number;

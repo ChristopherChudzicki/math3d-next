@@ -85,7 +85,7 @@ type EvaluatedProperties = {
   width: number;
   zBias: number;
   zIndex: number;
-  zOrder: number;
+  zOrder: number | undefined;
   min: number;
   max: number;
   scale: number;

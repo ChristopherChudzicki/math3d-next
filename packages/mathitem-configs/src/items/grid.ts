@@ -61,7 +61,7 @@ type EvaluatedProperties = {
   width: number;
   zBias: number;
   zIndex: number;
-  zOrder: number;
+  zOrder: number | undefined;
   snap: boolean;
 };
 
