@@ -8,6 +8,7 @@ interface IWidgetProps<V extends Parseable = string> {
   itemId?: string;
   name: string;
   label: string;
+  placeholder?: string;
   "aria-labelledby"?: string;
   value: V;
   onChange: OnWidgetChange<V>;

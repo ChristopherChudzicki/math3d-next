@@ -3,6 +3,7 @@ import type { SelectorReturn, RootState } from "@/store/store";
 import type { MathGraphic, MathItem } from "@math3d/mathitem-configs";
 import { isMathGraphic, isSurface } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
+import { shallowEqual } from "react-redux";
 import type { SceneState, AppMathScope, Subtree } from "./interfaces";
 import * as utils from "./util";
 import { SETTINGS_FOLDER } from "./util";
@@ -117,41 +118,47 @@ const dirty = (state: RootState) => state.scene.dirty;
 
 const itemOrder = (state: RootState) => state.scene.order;
 
-const graphicOrder: SelectorReturn<Record<string, number>> = createSelector(
-  [mathItems, itemOrder],
-  (items, itemOrderDict) => {
-    const { main, setup } = itemOrderDict;
-    if (!main || !setup) {
-      return {};
-    }
-    invariant(main, "Main item order not found.");
-    invariant(setup, "Setup item order not found.");
-    const graphics = [...main, ...setup].flatMap((folderId) => {
-      const itemIds = itemOrderDict[folderId];
-      invariant(itemIds, `Item order for ${folderId} not found.`);
-      return itemIds.map((id) => items[id]).filter(isMathGraphic);
-    });
-    const reversed = [...graphics].reverse();
-    const ordered = reversed.sort((a, b) => {
-      if (isSurface(a) && isSurface(b)) {
+const defaultGraphicOrder: SelectorReturn<Record<string, number>> =
+  createSelector(
+    [mathItems, itemOrder],
+    (items, itemOrderDict) => {
+      const { main, setup } = itemOrderDict;
+      if (!main || !setup) {
+        return {};
+      }
+      invariant(main, "Main item order not found.");
+      invariant(setup, "Setup item order not found.");
+      const graphics = [...main, ...setup].flatMap((folderId) => {
+        const itemIds = itemOrderDict[folderId];
+        invariant(itemIds, `Item order for ${folderId} not found.`);
+        return itemIds.map((id) => items[id]).filter(isMathGraphic);
+      });
+      const reversed = [...graphics].reverse();
+      const ordered = reversed.sort((a, b) => {
+        if (isSurface(a) && isSurface(b)) {
+          return 0;
+        }
+        if (isSurface(a)) {
+          return 1; // draw surfaces last
+        }
+        if (isSurface(b)) {
+          return -1; // draw surfaces last
+        }
         return 0;
-      }
-      if (isSurface(a)) {
-        return 1; // draw surfaces last
-      }
-      if (isSurface(b)) {
-        return -1; // draw surfaces last
-      }
-      return 0;
-    });
-    const orders = Object.fromEntries(
-      ordered.map((item, index) => {
-        return [item.id, index];
-      }),
-    );
-    return orders;
-  },
-);
+      });
+      const orders = Object.fromEntries(
+        ordered.map((item, index) => {
+          return [item.id, index];
+        }),
+      );
+      return orders;
+    },
+    {
+      memoizeOptions: {
+        resultEqualityCheck: shallowEqual,
+      },
+    },
+  );
 
 const sceneInfo = createSelector(
   [title, author, stableOrderedMathItems, itemOrder, key],
@@ -173,7 +180,7 @@ export {
   mathScope,
   stableOrderedMathItems,
   mathGraphics,
-  graphicOrder,
+  defaultGraphicOrder,
   hasItems,
   getItems,
   sceneInfo,

@@ -2,17 +2,19 @@ import React, { useCallback } from "react";
 import * as MB from "mathbox-react";
 import type { VolumeEmitter } from "mathbox";
 import { MathItemType } from "@math3d/mathitem-configs";
+import { useSelector } from "react-redux";
+import { select, useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import {
   useFinalVisibility,
   useMathItemResults,
 } from "../../sceneControls/mathItems/mathScope";
-import { useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import { GraphicComponent } from "./interfaces";
 
 const props = [
   "opacity",
   "zBias",
   "zIndex",
+  "zOrder",
   "size",
   "width",
   "start",
@@ -25,16 +27,15 @@ const props = [
   "expr",
 ] as const;
 
-const Vector: GraphicComponent<MathItemType.VectorField> = ({
-  item,
-  zOrder,
-}) => {
+const Vector: GraphicComponent<MathItemType.VectorField> = ({ item }) => {
   const scope = useMathScope();
+  const defaultZOrder = useSelector(select.defaultGraphicOrder);
   const { color } = item.properties;
   const {
     opacity,
     zBias,
     zIndex,
+    zOrder = defaultZOrder[item.id],
     size,
     width,
     start,

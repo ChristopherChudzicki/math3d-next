@@ -52,11 +52,13 @@ const isSurface = (item: MathItem) => {
   ].includes(item.type);
 };
 
+window.graphicOrders = [];
+
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 const SceneContent = () => {
   const dispatch = useAppDispatch();
   const items = useAppSelector(select.stableOrderedMathItems);
-  const graphicOrder = useAppSelector(select.graphicOrder);
+  const graphicOrder = useAppSelector(select.defaultGraphicOrder);
   const [x, y, z, camera] = useAppSelector((state) =>
     select.getItems(state, REQUIRED_ITEMS),
   );

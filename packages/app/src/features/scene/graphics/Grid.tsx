@@ -1,11 +1,12 @@
 import React from "react";
 import * as MB from "mathbox-react";
 import { MathItemType } from "@math3d/mathitem-configs";
+import { useSelector } from "react-redux";
 import {
   useFinalVisibility,
   useMathItemResults,
 } from "../../sceneControls/mathItems/mathScope";
-import { useMathScope } from "../../sceneControls/mathItems/sceneSlice";
+import { select, useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import { GraphicComponent } from "./interfaces";
 
 const props = [
@@ -14,17 +15,23 @@ const props = [
   "width",
   "zBias",
   "zIndex",
+  "zOrder",
   "snap",
 ] as const;
 
-const Grid: GraphicComponent<MathItemType.Grid> = ({ item, zOrder }) => {
+const Grid: GraphicComponent<MathItemType.Grid> = ({ item }) => {
   const scope = useMathScope();
+  const defaultZOrder = useSelector(select.defaultGraphicOrder);
   const { color, axes } = item.properties;
-  const { divisions, opacity, width, zIndex, zBias, snap } = useMathItemResults(
-    scope,
-    item,
-    props,
-  );
+  const {
+    divisions,
+    opacity,
+    width,
+    zIndex = defaultZOrder[item.id],
+    zBias,
+    zOrder,
+    snap,
+  } = useMathItemResults(scope, item, props);
   const finalVisibility = useFinalVisibility(scope, item);
   return !finalVisibility ? null : (
     <MB.Grid

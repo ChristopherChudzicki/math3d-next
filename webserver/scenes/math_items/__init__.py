@@ -41,6 +41,7 @@ class ItemPropertiesAxis:
     width: "str"
     z_bias: "str"
     z_index: "str"
+    z_order: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesAxis":
@@ -65,6 +66,7 @@ class ItemPropertiesAxis:
             _from_json_data(str, data.get("width")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
+            _from_json_data(str, data.get("zOrder")),
         )
 
     def to_json_data(self) -> Any:
@@ -89,6 +91,7 @@ class ItemPropertiesAxis:
         data["width"] = _to_json_data(self.width)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
+        data["zOrder"] = _to_json_data(self.z_order)
         return data
 
 
@@ -171,6 +174,7 @@ class ItemPropertiesExplicitSurface:
     visible: "bool"
     z_bias: "str"
     z_index: "str"
+    z_order: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesExplicitSurface":
@@ -193,6 +197,7 @@ class ItemPropertiesExplicitSurface:
             _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
+            _from_json_data(str, data.get("zOrder")),
         )
 
     def to_json_data(self) -> Any:
@@ -215,6 +220,7 @@ class ItemPropertiesExplicitSurface:
         data["visible"] = _to_json_data(self.visible)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
+        data["zOrder"] = _to_json_data(self.z_order)
         return data
 
 
@@ -251,6 +257,7 @@ class ItemPropertiesGrid:
     width: "str"
     z_bias: "str"
     z_index: "str"
+    z_order: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesGrid":
@@ -267,6 +274,7 @@ class ItemPropertiesGrid:
             _from_json_data(str, data.get("width")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
+            _from_json_data(str, data.get("zOrder")),
         )
 
     def to_json_data(self) -> Any:
@@ -283,6 +291,7 @@ class ItemPropertiesGrid:
         data["width"] = _to_json_data(self.width)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
+        data["zOrder"] = _to_json_data(self.z_order)
         return data
 
 
@@ -301,6 +310,7 @@ class ItemPropertiesImplicitSurface:
     visible: "bool"
     z_bias: "str"
     z_index: "str"
+    z_order: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesImplicitSurface":
@@ -318,6 +328,7 @@ class ItemPropertiesImplicitSurface:
             _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
+            _from_json_data(str, data.get("zOrder")),
         )
 
     def to_json_data(self) -> Any:
@@ -335,6 +346,7 @@ class ItemPropertiesImplicitSurface:
         data["visible"] = _to_json_data(self.visible)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
+        data["zOrder"] = _to_json_data(self.z_order)
         return data
 
 
@@ -355,6 +367,7 @@ class ItemPropertiesLine:
     width: "str"
     z_bias: "str"
     z_index: "str"
+    z_order: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesLine":
@@ -374,6 +387,7 @@ class ItemPropertiesLine:
             _from_json_data(str, data.get("width")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
+            _from_json_data(str, data.get("zOrder")),
         )
 
     def to_json_data(self) -> Any:
@@ -393,6 +407,7 @@ class ItemPropertiesLine:
         data["width"] = _to_json_data(self.width)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
+        data["zOrder"] = _to_json_data(self.z_order)
         return data
 
 
@@ -413,6 +428,7 @@ class ItemPropertiesParametricCurve:
     width: "str"
     z_bias: "str"
     z_index: "str"
+    z_order: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesParametricCurve":
@@ -432,6 +448,7 @@ class ItemPropertiesParametricCurve:
             _from_json_data(str, data.get("width")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
+            _from_json_data(str, data.get("zOrder")),
         )
 
     def to_json_data(self) -> Any:
@@ -451,6 +468,7 @@ class ItemPropertiesParametricCurve:
         data["width"] = _to_json_data(self.width)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
+        data["zOrder"] = _to_json_data(self.z_order)
         return data
 
 
@@ -474,6 +492,7 @@ class ItemPropertiesParametricSurface:
     visible: "bool"
     z_bias: "str"
     z_index: "str"
+    z_order: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesParametricSurface":
@@ -496,6 +515,7 @@ class ItemPropertiesParametricSurface:
             _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
+            _from_json_data(str, data.get("zOrder")),
         )
 
     def to_json_data(self) -> Any:
@@ -518,6 +538,7 @@ class ItemPropertiesParametricSurface:
         data["visible"] = _to_json_data(self.visible)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
+        data["zOrder"] = _to_json_data(self.z_order)
         return data
 
 
@@ -535,6 +556,7 @@ class ItemPropertiesPoint:
     visible: "bool"
     z_bias: "str"
     z_index: "str"
+    z_order: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesPoint":
@@ -551,6 +573,7 @@ class ItemPropertiesPoint:
             _from_json_data(bool, data.get("visible")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
+            _from_json_data(str, data.get("zOrder")),
         )
 
     def to_json_data(self) -> Any:
@@ -567,6 +590,7 @@ class ItemPropertiesPoint:
         data["visible"] = _to_json_data(self.visible)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
+        data["zOrder"] = _to_json_data(self.z_order)
         return data
 
 
@@ -641,6 +665,7 @@ class ItemPropertiesVector:
     width: "str"
     z_bias: "str"
     z_index: "str"
+    z_order: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesVector":
@@ -661,6 +686,7 @@ class ItemPropertiesVector:
             _from_json_data(str, data.get("width")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
+            _from_json_data(str, data.get("zOrder")),
         )
 
     def to_json_data(self) -> Any:
@@ -681,6 +707,7 @@ class ItemPropertiesVector:
         data["width"] = _to_json_data(self.width)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
+        data["zOrder"] = _to_json_data(self.z_order)
         return data
 
 
@@ -704,6 +731,7 @@ class ItemPropertiesVectorField:
     width: "str"
     z_bias: "str"
     z_index: "str"
+    z_order: "str"
 
     @classmethod
     def from_json_data(cls, data: Any) -> "ItemPropertiesVectorField":
@@ -726,6 +754,7 @@ class ItemPropertiesVectorField:
             _from_json_data(str, data.get("width")),
             _from_json_data(str, data.get("zBias")),
             _from_json_data(str, data.get("zIndex")),
+            _from_json_data(str, data.get("zOrder")),
         )
 
     def to_json_data(self) -> Any:
@@ -748,6 +777,7 @@ class ItemPropertiesVectorField:
         data["width"] = _to_json_data(self.width)
         data["zBias"] = _to_json_data(self.z_bias)
         data["zIndex"] = _to_json_data(self.z_index)
+        data["zOrder"] = _to_json_data(self.z_order)
         return data
 
 

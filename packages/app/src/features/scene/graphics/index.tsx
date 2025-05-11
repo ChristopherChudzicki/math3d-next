@@ -47,9 +47,9 @@ const getGraphic = (item: MathGraphic): GraphicComponent => {
   return Graphic;
 };
 
-const Graphic: GraphicComponent = React.memo(({ item, range, zOrder }) => {
+const Graphic: GraphicComponent = React.memo(({ item, range }) => {
   const Component = getGraphic(item);
-  return <Component item={item} range={range} zOrder={zOrder} />;
+  return <Component item={item} range={range} />;
 });
 Graphic.displayName = "Graphic";
 

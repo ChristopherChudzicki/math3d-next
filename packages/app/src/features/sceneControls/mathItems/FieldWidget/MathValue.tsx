@@ -24,6 +24,7 @@ const MathValue: React.FC<
     className,
     itemId,
     ref,
+    placeholder,
     ...others
   } = props;
 
@@ -52,6 +53,7 @@ const MathValue: React.FC<
       aria-invalid={error ? "true" : "false"}
       onChange={handleChange}
       value={value}
+      options={{ placeholder }}
     />
   );
 };

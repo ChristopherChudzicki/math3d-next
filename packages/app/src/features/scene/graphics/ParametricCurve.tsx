@@ -2,11 +2,12 @@ import React, { useCallback } from "react";
 import * as MB from "mathbox-react";
 import type { IntervalEmitter } from "mathbox";
 import { MathItemType } from "@math3d/mathitem-configs";
+import { useSelector } from "react-redux";
+import { select, useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import {
   useFinalVisibility,
   useMathItemResults,
 } from "../../sceneControls/mathItems/mathScope";
-import { useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import { GraphicComponent } from "./interfaces";
 
 const props = [
@@ -15,6 +16,7 @@ const props = [
   "width",
   "zBias",
   "zIndex",
+  "zOrder",
   "start",
   "end",
   "samples1",
@@ -25,9 +27,9 @@ const props = [
 const RANGE = [0, 1];
 const ParametricCurve: GraphicComponent<MathItemType.ParametricCurve> = ({
   item,
-  zOrder,
 }) => {
   const scope = useMathScope();
+  const defaultZOrder = useSelector(select.defaultGraphicOrder);
   const { color } = item.properties;
   const {
     opacity,
@@ -35,6 +37,7 @@ const ParametricCurve: GraphicComponent<MathItemType.ParametricCurve> = ({
     width,
     zBias,
     zIndex,
+    zOrder = defaultZOrder[item.id],
     start,
     end,
     samples1,

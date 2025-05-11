@@ -16,6 +16,7 @@ import {
   visibilityProps,
   zBias,
   zIndex,
+  zOrder,
 } from "../shared";
 
 interface ImplicitSurfaceProperties {
@@ -27,6 +28,7 @@ interface ImplicitSurfaceProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
+  zOrder: string;
   shaded: string;
   domain: ParseableArray<ParseableObjs["expr"]>;
   lhs: ParseableObjs["function-assignment"];
@@ -43,6 +45,7 @@ const defaultValues: ImplicitSurfaceProperties = {
   opacity: "1",
   zIndex: "0",
   zBias: "0",
+  zOrder: "",
   shaded: "true",
   domain: {
     type: "array",
@@ -92,6 +95,7 @@ type EvaluatedProperties = {
   calculatedVisibility: boolean;
   zBias: number;
   zIndex: number;
+  zOrder: number;
   samples: number;
   lhs: (x: number, y: number, z: number) => number;
   rhs: (x: number, y: number, z: number) => number;
@@ -131,6 +135,7 @@ const config: IMathItemConfig<
     },
     zBias,
     zIndex,
+    zOrder,
   },
   settingsProperties: [
     "calculatedVisibility",
@@ -140,6 +145,7 @@ const config: IMathItemConfig<
     "visible",
     "zBias",
     "zIndex",
+    "zOrder",
   ],
   make,
 };

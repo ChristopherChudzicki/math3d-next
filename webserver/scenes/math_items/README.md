@@ -10,7 +10,7 @@ Prerequisites (MacOS):
 Then manually generate the dataclass file:
 
 ```sh
-yq -o=json eval packages/mathitem-configs/src/schema.jtd.yaml |  jtd-codegen - --root-name MathItems --python-out webserver/scenes/math_items
+yq -o=json eval webserver/scenes/math_items/schema.jtd.yaml |  jtd-codegen - --root-name MathItems --python-out webserver/scenes/math_items
 ```
 
 **Note:** Dependency installation is not currently managed (e.g., by Docker). This is not ideal, but these dataclasses should be irrelevant after the legacy data migration.

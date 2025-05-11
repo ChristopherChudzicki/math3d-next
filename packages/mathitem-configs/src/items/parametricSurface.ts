@@ -21,6 +21,7 @@ import {
   samples2,
   zBias,
   zIndex,
+  zOrder,
 } from "../shared";
 import type { EvaluatedDomain2 } from "../shared";
 
@@ -33,6 +34,7 @@ interface ParametricSurfaceProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
+  zOrder: string;
 
   shaded: string; // eval to boolean;
   expr: ParseableObjs["function-assignment"];
@@ -55,6 +57,7 @@ const defaultValues: ParametricSurfaceProperties = {
   opacity: "0.75",
   zIndex: "0",
   zBias: "0",
+  zOrder: "",
   shaded: "true",
   expr: {
     type: "function-assignment",
@@ -115,6 +118,7 @@ type EvaluatedProperties = {
   calculatedVisibility: boolean;
   zBias: number;
   zIndex: number;
+  zOrder: number;
   expr: (u: number, v: number) => [number, number, number];
   colorExpr: (X: number, Y: number, Z: number, u: number, v: number) => number;
 };
@@ -153,6 +157,7 @@ const config: IMathItemConfig<
     ...visibilityProps,
     zBias,
     zIndex,
+    zOrder,
   },
   settingsProperties: [
     "calculatedVisibility",
@@ -166,6 +171,7 @@ const config: IMathItemConfig<
     "samples2",
     "zBias",
     "zIndex",
+    "zOrder",
   ],
   make,
 };

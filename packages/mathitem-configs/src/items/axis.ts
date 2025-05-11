@@ -18,6 +18,7 @@ import {
   width,
   zBias,
   zIndex,
+  zOrder,
 } from "../shared";
 
 interface AxisProperties {
@@ -29,6 +30,7 @@ interface AxisProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
+  zOrder: string;
 
   label: string;
   labelVisible: string;
@@ -53,6 +55,7 @@ const defaultValues: AxisProperties = {
   opacity: "1",
   zIndex: "0",
   zBias: "0",
+  zOrder: "",
   label: "x",
   labelVisible: "true",
   min: "-5",
@@ -82,6 +85,7 @@ type EvaluatedProperties = {
   width: number;
   zBias: number;
   zIndex: number;
+  zOrder: number;
   min: number;
   max: number;
   scale: number;
@@ -137,6 +141,7 @@ const config: IMathItemConfig<
     width,
     zBias,
     zIndex,
+    zOrder,
     start,
     end,
     divisions: {
@@ -157,6 +162,7 @@ const config: IMathItemConfig<
     "scale",
     "zBias",
     "zIndex",
+    "zOrder",
     "start",
     "end",
     "divisions",

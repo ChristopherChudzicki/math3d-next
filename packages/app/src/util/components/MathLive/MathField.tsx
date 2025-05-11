@@ -8,7 +8,7 @@ import type { MathFieldWebComponentProps } from "./types";
 
 type MathfieldPropsOptions = Pick<
   MathfieldElement,
-  "inlineShortcuts" | "readOnly" | "menuItems"
+  "inlineShortcuts" | "readOnly" | "menuItems" | "placeholder"
 >;
 interface MathfieldProps extends MathFieldWebComponentProps {
   value?: string;

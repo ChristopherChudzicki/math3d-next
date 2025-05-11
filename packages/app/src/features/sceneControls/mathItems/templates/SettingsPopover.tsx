@@ -9,8 +9,9 @@ import type {
 } from "@math3d/mathitem-configs";
 import React, { useMemo } from "react";
 import { useToggle } from "@/util/hooks";
+import { useSelector } from "react-redux";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
-import { useMathScope } from "../sceneSlice";
+import { useMathScope, select } from "../sceneSlice";
 import { getMathProperties, useMathErrors } from "../mathScope";
 import CloseButton from "./CloseButton";
 import styles from "./SettingsPopover.module.css";
@@ -45,26 +46,34 @@ const SettingsForm = <T extends MathItemType>({
       return { field, value };
     });
   }, [config, item.properties]);
+  const defaultZOrder = useSelector(select.defaultGraphicOrder);
   return (
     <div className={styles["settings-form"]}>
-      {fields.map(({ field, value }) => (
-        <React.Fragment key={field.name}>
-          <label id={`${item.id}-${field.name}`} htmlFor={field.name}>
-            {field.label}
-          </label>
-          <FieldWidget
-            className={styles["settings-item"]}
-            aria-labelledby={`${item.id}-${field.name}`}
-            itemId={item.id}
-            label={field.label}
-            error={errors[field.name]}
-            widget={field.widget}
-            name={field.name}
-            value={value}
-            onChange={onWidgetChange}
-          />
-        </React.Fragment>
-      ))}
+      {fields.map(({ field, value }) => {
+        const extras =
+          field.name === "zOrder"
+            ? { placeholder: `${defaultZOrder[item.id]}` }
+            : {};
+        return (
+          <React.Fragment key={field.name}>
+            <label id={`${item.id}-${field.name}`} htmlFor={field.name}>
+              {field.label}
+            </label>
+            <FieldWidget
+              className={styles["settings-item"]}
+              aria-labelledby={`${item.id}-${field.name}`}
+              itemId={item.id}
+              label={field.label}
+              error={errors[field.name]}
+              widget={field.widget}
+              name={field.name}
+              value={value}
+              onChange={onWidgetChange}
+              {...extras}
+            />
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 };

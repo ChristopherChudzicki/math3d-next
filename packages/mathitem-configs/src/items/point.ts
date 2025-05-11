@@ -15,6 +15,7 @@ import {
   visibilityProps,
   zBias,
   zIndex,
+  zOrder,
 } from "../shared";
 
 interface PointProperties {
@@ -27,6 +28,7 @@ interface PointProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
+  zOrder: string;
 
   label: string;
   labelVisible: string;
@@ -40,7 +42,7 @@ interface EvaluatedProperties {
   opacity: number;
   zIndex: number;
   zBias: number;
-
+  zOrder: number;
   labelVisible: boolean;
   coords: [number, number, number][];
   size: number;
@@ -57,6 +59,7 @@ const defaultValues: PointProperties = {
   opacity: "1",
   zIndex: "0",
   zBias: "0",
+  zOrder: "",
   label: "",
   labelVisible: "false",
 };
@@ -89,6 +92,7 @@ const config: IMathItemConfig<
     size,
     zBias,
     zIndex,
+    zOrder,
     ...visibilityProps,
   },
   settingsProperties: [
@@ -99,6 +103,7 @@ const config: IMathItemConfig<
     "calculatedVisibility",
     "zBias",
     "zIndex",
+    "zOrder",
   ],
   make,
 };

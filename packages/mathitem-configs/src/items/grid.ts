@@ -12,6 +12,7 @@ import {
   width,
   zBias,
   zIndex,
+  zOrder,
 } from "../shared";
 
 interface GridProperties {
@@ -23,6 +24,7 @@ interface GridProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
+  zOrder: string;
 
   width: string;
   divisions: string;
@@ -40,6 +42,7 @@ const defaultValues: GridProperties = {
   opacity: "1",
   zIndex: "0",
   zBias: "0",
+  zOrder: "",
   width: "1/2",
   divisions: "[10, 10]",
   snap: "false",
@@ -58,6 +61,7 @@ type EvaluatedProperties = {
   width: number;
   zBias: number;
   zIndex: number;
+  zOrder: number;
   snap: boolean;
 };
 
@@ -92,6 +96,7 @@ const config: IMathItemConfig<
     width,
     zBias,
     zIndex,
+    zOrder,
   },
   settingsProperties: [
     "calculatedVisibility",
@@ -101,6 +106,7 @@ const config: IMathItemConfig<
     "width",
     "zBias",
     "zIndex",
+    "zOrder",
   ],
   make,
 };

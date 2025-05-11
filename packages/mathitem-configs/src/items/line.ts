@@ -18,6 +18,7 @@ import {
   width,
   zBias,
   zIndex,
+  zOrder,
 } from "../shared";
 
 interface LineProperties {
@@ -29,6 +30,7 @@ interface LineProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
+  zOrder: string;
   label: string;
   labelVisible: string;
   size: string;
@@ -47,6 +49,7 @@ const defaultValues: LineProperties = {
   opacity: "1",
   zIndex: "0",
   zBias: "0",
+  zOrder: "",
   label: "",
   labelVisible: "false",
   size: "6",
@@ -71,6 +74,7 @@ type EvaluatedProperties = {
   width: number;
   zBias: number;
   zIndex: number;
+  zOrder: number;
   start: boolean;
   end: boolean;
 };
@@ -99,6 +103,7 @@ const config: IMathItemConfig<
     width,
     zBias,
     zIndex,
+    zOrder,
     start,
     end,
   },
@@ -113,6 +118,7 @@ const config: IMathItemConfig<
     "width",
     "zBias",
     "zIndex",
+    "zOrder",
   ],
   make,
 };

@@ -2,6 +2,7 @@ import classNames from "classnames";
 import React, { useCallback } from "react";
 import { TextareaAutoWidthHeight } from "@/util/components";
 
+import invariant from "tiny-invariant";
 import { IWidgetProps, WidgetChangeEvent } from "./types";
 import styles from "./widget.module.css";
 
@@ -21,6 +22,7 @@ const AutosizeText: React.FC<
     style = {},
     className,
     ref,
+    placeholder,
     ...others
   } = props;
   const { width, height, ...styleWithoutSize } = style;
