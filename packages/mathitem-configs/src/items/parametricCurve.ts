@@ -135,7 +135,6 @@ const config: IMathItemConfig<
     "samples1",
     "width",
     "zBias",
-    "zIndex",
     "zOrder",
   ],
   make,

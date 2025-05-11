@@ -169,7 +169,6 @@ const config: IMathItemConfig<
     "samples2",
     "calculatedVisibility",
     "zBias",
-    "zIndex",
     "zOrder",
   ],
   make,

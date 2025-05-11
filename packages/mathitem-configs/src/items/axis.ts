@@ -161,7 +161,6 @@ const config: IMathItemConfig<
     "width",
     "scale",
     "zBias",
-    "zIndex",
     "zOrder",
     "start",
     "end",

@@ -144,7 +144,6 @@ const config: IMathItemConfig<
     "shaded",
     "visible",
     "zBias",
-    "zIndex",
     "zOrder",
   ],
   make,

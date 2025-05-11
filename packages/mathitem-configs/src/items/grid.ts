@@ -105,7 +105,6 @@ const config: IMathItemConfig<
     "snap",
     "width",
     "zBias",
-    "zIndex",
     "zOrder",
   ],
   make,
