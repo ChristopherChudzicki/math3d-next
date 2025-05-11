@@ -203,7 +203,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
             color={gridColor}
             width={gridWidth}
             opacity={gridOpacity}
-            zOrder={(zOrder ?? 0) + 1}
+            zOrder={(zOrder ?? 0) + 0.1}
           />
         </MB.Group>
       )}
