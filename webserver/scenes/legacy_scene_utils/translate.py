@@ -14,10 +14,19 @@ def stringify(obj: bool):
 
 
 class ItemMigrator:
-    def __init__(self, log: IssueLog | None = None):
+    def __init__(
+        self,
+        log: IssueLog | None = None,
+        x_scale: float = 1.0,
+        y_scale: float = 1.0,
+        z_scale: float = 0.5,
+    ):
         if log is None:
             log = IssueLog()
         self.log = log
+        self.x_scale = x_scale
+        self.y_scale = y_scale
+        self.z_scale = z_scale
 
     def assignment(self, expr: str) -> new.ParseableAssignment:
         lhs, *rhs_pieces = expr.split("=")
@@ -125,8 +134,20 @@ class ItemMigrator:
 
     def translate_camera(self, props) -> new.ItemPropertiesCamera:
         x = old.CameraProperties(**props)
-        position = str(x.relativePosition)
-        target = str(x.relativeLookAt)
+
+        relativePosition = [
+            # Some legacy data has relativePosition as [null, null, null]
+            (x.relativePosition[0] or 0.5) / self.x_scale,
+            (x.relativePosition[1] or -2) / self.y_scale,
+            (x.relativePosition[2] or 0.5) / self.z_scale,
+        ]
+        relativeLookAt = [
+            (x.relativeLookAt[0] or 0) / self.x_scale,
+            (x.relativeLookAt[1] or 0) / self.y_scale,
+            (x.relativeLookAt[2] or 0) / self.z_scale,
+        ]
+        position = str(relativePosition)
+        target = str(relativeLookAt)
         if x.useComputed:
             position = x.computedPosition
             target = x.computedLookAt
