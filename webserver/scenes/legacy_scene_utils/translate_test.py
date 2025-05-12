@@ -30,6 +30,7 @@ def test_axis():
             "width": "1",
             "zBias": "0",
             "zIndex": "0",
+            "zOrder": "",
         },
     }
     assert migrator.translate_item(data_in, "axis-x").to_json_data() == {
@@ -216,6 +217,7 @@ def test_explicit_surface(in_patch, out_patch):
             "useCalculatedVisibility": False,
             "zBias": "0",
             "zIndex": "0",
+            "zOrder": "",
             **out_patch,
         },
     }
@@ -289,6 +291,7 @@ def test_explicit_surface_polar(in_patch, out_patch):
             "visible": "false",
             "zBias": "0",
             "zIndex": "0",
+            "zOrder": "",
             **out_patch,
         },
     }
@@ -331,6 +334,7 @@ def test_grid():
             "width": "1/2",
             "zBias": "0",
             "zIndex": "0",
+            "zOrder": "",
         },
     }
     actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
@@ -376,6 +380,7 @@ def test_implicit_surface():
             "useCalculatedVisibility": False,
             "zBias": "0",
             "zIndex": "0",
+            "zOrder": "",
         },
     }
     actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
@@ -406,6 +411,7 @@ def test_line():
             "width": "4",
             "zBias": "0",
             "zIndex": "0",
+            "zOrder": "",
         },
     }
     actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
@@ -444,6 +450,7 @@ def test_parametric_curve():
             "width": "4",
             "zBias": "0",
             "zIndex": "0",
+            "zOrder": "",
         },
     }
     actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
@@ -503,6 +510,7 @@ def test_parametric_surface():
             "useCalculatedVisibility": False,
             "zBias": "0",
             "zIndex": "0",
+            "zOrder": "",
         },
     }
     actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
@@ -530,6 +538,7 @@ def test_point():
             "useCalculatedVisibility": False,
             "zBias": "0",
             "zIndex": "0",
+            "zOrder": "",
         },
     }
     actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
@@ -603,6 +612,7 @@ def test_vector():
             "width": "4",
             "zBias": "0",
             "zIndex": "0",
+            "zOrder": "",
         },
     }
     actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
@@ -663,6 +673,7 @@ def test_vector_field(in_patch, out_patch):
             "width": "2",
             "zBias": "0",
             "zIndex": "0",
+            "zOrder": "",
             **out_patch,
         },
     }
