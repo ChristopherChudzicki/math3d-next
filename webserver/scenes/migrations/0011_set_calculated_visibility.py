@@ -33,6 +33,8 @@ def unset_item_visibility(item):
             props["visible"] = "true"
         else:
             props["visible"] = "false"
+    del props["calculatedVisibility"]
+    del props["useCalculatedVisibility"]
 
 
 def set_calculated_visibility(apps, schema_editor):

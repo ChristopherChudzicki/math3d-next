@@ -5,8 +5,8 @@ import React, { useCallback, useMemo, useState } from "react";
 import { SubtleButton } from "@/util/components";
 import type { OnMathFieldChange } from "@/util/components/MathLive";
 import SmallMathField from "@/util/components/SmallMathField";
-import { assertNotNil } from "@/util/predicates";
 import * as u from "@/util/styles/utils.module.css";
+import invariant from "tiny-invariant";
 import { useMathScope } from "../sceneSlice";
 
 import { useMathResults } from "../mathScope";
@@ -30,9 +30,11 @@ const MathBoolean: React.FC<
     className,
     itemId,
     ref,
+    placeholder,
     ...others
   } = props;
-  assertNotNil(itemId);
+  invariant(!placeholder, "placeholder not supported by MathBoolean");
+  invariant(itemId);
   const [shouldUseExpression, setShouldUseExpression] = useState(
     !LITERAL_BOOLEAN_STRINGS.includes(value),
   );

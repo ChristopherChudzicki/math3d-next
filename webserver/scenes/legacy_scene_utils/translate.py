@@ -96,6 +96,7 @@ class ItemMigrator:
             opacity=x.opacity,
             z_index=x.zIndex,
             z_bias=x.zBias,
+            z_order="",
             label=x.label,
             label_visible=stringify(x.labelVisible),
             min=x.min,
@@ -167,6 +168,7 @@ class ItemMigrator:
                 x.calculatedVisibility and x.useCalculatedVisibility
             ),
             z_bias=x.zBias,
+            z_order="",
             z_index=x.zIndex,
         )
 
@@ -198,6 +200,7 @@ class ItemMigrator:
                 x.calculatedVisibility and x.useCalculatedVisibility
             ),
             z_bias=x.zBias,
+            z_order="",
             z_index=x.zIndex,
         )
 
@@ -213,6 +216,7 @@ class ItemMigrator:
                 x.calculatedVisibility and x.useCalculatedVisibility
             ),
             z_bias=x.zBias,
+            z_order="",
             z_index=x.zIndex,
             divisions=x.divisions,
             width="1/2",
@@ -259,6 +263,7 @@ class ItemMigrator:
                 x.calculatedVisibility and x.useCalculatedVisibility
             ),
             z_bias=x.zBias,
+            z_order="",
             z_index=x.zIndex,
         )
 
@@ -281,6 +286,7 @@ class ItemMigrator:
             ),
             width=x.width,
             z_bias=x.zBias,
+            z_order="",
             z_index=x.zIndex,
         )
 
@@ -311,6 +317,7 @@ class ItemMigrator:
             ),
             width=x.width,
             z_bias=x.zBias,
+            z_order="",
             z_index=x.zIndex,
         )
 
@@ -342,6 +349,7 @@ class ItemMigrator:
                 x.calculatedVisibility and x.useCalculatedVisibility
             ),
             z_bias=x.zBias,
+            z_order="",
             z_index=x.zIndex,
         )
 
@@ -361,6 +369,7 @@ class ItemMigrator:
                 x.calculatedVisibility and x.useCalculatedVisibility
             ),
             z_bias=x.zBias,
+            z_order="",
             z_index=x.zIndex,
         )
 
@@ -405,6 +414,7 @@ class ItemMigrator:
             ),
             width=x.width,
             z_bias=x.zBias,
+            z_order="",
             z_index=x.zIndex,
         )
 
@@ -447,6 +457,7 @@ class ItemMigrator:
             ),
             width=x.width,
             z_bias=x.zBias,
+            z_order="",
             z_index=x.zIndex,
         )
 

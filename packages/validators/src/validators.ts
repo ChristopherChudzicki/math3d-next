@@ -250,6 +250,10 @@ const oneOrMany: <T>(itemValidator: Validator<T>) => Validator<T[]> =
     }
   };
 
+export const schemas = {
+  real,
+};
+
 export const validators = {
   real: firstArg(real.validateSync.bind(real)),
   nonnegative: firstArg(positive.validateSync.bind(nonnegative)),

@@ -1,7 +1,9 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { SelectorReturn, RootState } from "@/store/store";
-import type { MathItem } from "@math3d/mathitem-configs";
+import type { MathGraphic, MathItem } from "@math3d/mathitem-configs";
+import { isMathGraphic, isSurface } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
+import { shallowEqual } from "react-redux";
 import type { SceneState, AppMathScope, Subtree } from "./interfaces";
 import * as utils from "./util";
 import { SETTINGS_FOLDER } from "./util";
@@ -15,9 +17,16 @@ const author: SelectorReturn<SceneState["author"]> = (state: RootState) =>
 const mathItems: SelectorReturn<SceneState["items"]> = (state: RootState) =>
   state.scene.items;
 
-const orderedMathItems: SelectorReturn<MathItem[]> = createSelector(
+const stableOrderedMathItems: SelectorReturn<MathItem[]> = createSelector(
   [mathItems],
   (items) => Object.values(items).sort((a, b) => a.id.localeCompare(b.id)),
+);
+const mathGraphics: SelectorReturn<MathGraphic[]> = createSelector(
+  [mathItems],
+  (items) =>
+    Object.values(items)
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .filter(isMathGraphic),
 );
 
 const mathItem =
@@ -109,8 +118,50 @@ const dirty = (state: RootState) => state.scene.dirty;
 
 const itemOrder = (state: RootState) => state.scene.order;
 
+const defaultGraphicOrder: SelectorReturn<Record<string, number>> =
+  createSelector(
+    [mathItems, itemOrder],
+    (items, itemOrderDict) => {
+      const { main, setup } = itemOrderDict;
+      if (!main || !setup) {
+        return {};
+      }
+      invariant(main, "Main item order not found.");
+      invariant(setup, "Setup item order not found.");
+      const graphics = [...main, ...setup].flatMap((folderId) => {
+        const itemIds = itemOrderDict[folderId];
+        invariant(itemIds, `Item order for ${folderId} not found.`);
+        return itemIds.map((id) => items[id]).filter(isMathGraphic);
+      });
+      const reversed = [...graphics].reverse();
+      const ordered = reversed.sort((a, b) => {
+        if (isSurface(a) && isSurface(b)) {
+          return 0;
+        }
+        if (isSurface(a)) {
+          return 1; // draw surfaces last
+        }
+        if (isSurface(b)) {
+          return -1; // draw surfaces last
+        }
+        return 0;
+      });
+      const orders = Object.fromEntries(
+        ordered.map((item, index) => {
+          return [item.id, index];
+        }),
+      );
+      return orders;
+    },
+    {
+      memoizeOptions: {
+        resultEqualityCheck: shallowEqual,
+      },
+    },
+  );
+
 const sceneInfo = createSelector(
-  [title, author, orderedMathItems, itemOrder, key],
+  [title, author, stableOrderedMathItems, itemOrder, key],
   (sceneTitle, sceneAuthor, items, order, sceneKey) => ({
     title: sceneTitle,
     author: sceneAuthor,
@@ -127,7 +178,9 @@ export {
   mathItems,
   mathItem,
   mathScope,
-  orderedMathItems,
+  stableOrderedMathItems,
+  mathGraphics,
+  defaultGraphicOrder,
   hasItems,
   getItems,
   sceneInfo,

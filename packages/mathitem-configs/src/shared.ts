@@ -223,6 +223,16 @@ const zIndex: PropertyConfig<"zIndex", number> = {
   validate: validators.real,
 };
 
+const zOrder: PropertyConfig<"zOrder", number | undefined> = {
+  name: "zOrder",
+  label: "Z-Order",
+  widget: WidgetType.MathValue,
+  validate: (v) => {
+    if (v === undefined) return undefined;
+    return validators.real(v);
+  },
+};
+
 const start: PropertyConfig<"start", boolean> = {
   name: "start",
   label: "Arrow (start)",
@@ -263,6 +273,7 @@ export {
   width,
   zBias,
   zIndex,
+  zOrder,
   domain1,
   domain2,
   domain3,

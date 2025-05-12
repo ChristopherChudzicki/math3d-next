@@ -18,6 +18,7 @@ import {
   width,
   zBias,
   zIndex,
+  zOrder,
   samples1,
   EvaluatedDomain1,
 } from "../shared";
@@ -31,6 +32,7 @@ interface ParametricCurveProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
+  zOrder: string;
   size: string;
   width: string;
   start: string;
@@ -49,6 +51,7 @@ const defaultValues: ParametricCurveProperties = {
   opacity: "1",
   zIndex: "0",
   zBias: "0",
+  zOrder: "",
   size: "6",
   width: "4",
   start: "false",
@@ -87,6 +90,7 @@ type EvaluatedProperties = {
   width: number;
   zBias: number;
   zIndex: number;
+  zOrder: number | undefined;
   start: boolean;
   end: boolean;
   samples1: number;
@@ -116,6 +120,7 @@ const config: IMathItemConfig<
     width,
     zBias,
     zIndex,
+    zOrder,
     start,
     end,
     domain: domain1,
@@ -130,7 +135,7 @@ const config: IMathItemConfig<
     "samples1",
     "width",
     "zBias",
-    "zIndex",
+    "zOrder",
   ],
   make,
 };

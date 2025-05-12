@@ -8,11 +8,12 @@ import {
   isGradientName,
 } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
+import { useSelector } from "react-redux";
+import { select, useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import {
   useFinalVisibility,
   useMathItemResults,
 } from "../../sceneControls/mathItems/mathScope";
-import { useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import { GraphicComponent, AxesRange } from "./interfaces";
 import { project } from "./util";
 
@@ -20,6 +21,7 @@ const props = [
   "opacity",
   "zBias",
   "zIndex",
+  "zOrder",
   "samples1",
   "samples2",
   "grid1",
@@ -203,7 +205,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
             color={gridColor}
             width={gridWidth}
             opacity={gridOpacity}
-            zOrder={(zOrder ?? 0) + 1}
+            zOrder={(zOrder ?? 0) + 0.1}
           />
         </MB.Group>
       )}
@@ -227,14 +229,15 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
 const ParametricSurface: GraphicComponent<MIT.ParametricSurface> = ({
   item,
   range,
-  zOrder,
 }) => {
   invariant(range);
   const scope = useMathScope();
+  const defaultZOrder = useSelector(select.defaultGraphicOrder);
   const { color } = item.properties;
   const {
     expr: func,
     colorExpr: colorFunc,
+    zOrder = defaultZOrder[item.id],
     ...others
   } = useMathItemResults(scope, item, props);
 
@@ -255,14 +258,15 @@ const ParametricSurface: GraphicComponent<MIT.ParametricSurface> = ({
 const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({
   item,
   range,
-  zOrder,
 }) => {
   invariant(range);
   const scope = useMathScope();
+  const defaultZOrder = useSelector(select.defaultGraphicOrder);
   const { color } = item.properties;
   const {
     expr,
     colorExpr: colorFunc,
+    zOrder = defaultZOrder[item.id],
     ...others
   } = useMathItemResults(scope, item, props);
 
@@ -287,14 +291,15 @@ const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({
 const ExplicitSurfacePolar: GraphicComponent<MIT.ExplicitSurfacePolar> = ({
   item,
   range,
-  zOrder,
 }) => {
   invariant(range);
   const scope = useMathScope();
+  const defaultZOrder = useSelector(select.defaultGraphicOrder);
   const { color } = item.properties;
   const {
     expr,
     colorExpr: colorFunc,
+    zOrder = defaultZOrder[item.id],
     ...others
   } = useMathItemResults(scope, item, props);
 

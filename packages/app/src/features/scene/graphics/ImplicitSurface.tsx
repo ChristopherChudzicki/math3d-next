@@ -2,11 +2,12 @@ import React, { useMemo } from "react";
 import * as MB from "mathbox-react";
 import { MathItemType } from "@math3d/mathitem-configs";
 import { marchingCubes } from "@/util/marchingCubes";
+import { useSelector } from "react-redux";
+import { select, useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import {
   useFinalVisibility,
   useMathItemResults,
 } from "../../sceneControls/mathItems/mathScope";
-import { useMathScope } from "../../sceneControls/mathItems/sceneSlice";
 import { GraphicComponent } from "./interfaces";
 
 const props = [
@@ -15,6 +16,7 @@ const props = [
   "shaded",
   "zBias",
   "zIndex",
+  "zOrder",
   "lhs",
   "rhs",
   "domain",
@@ -23,12 +25,21 @@ const props = [
 
 const ImplicitSurface: GraphicComponent<MathItemType.ImplicitSurface> = ({
   item,
-  zOrder,
 }) => {
   const scope = useMathScope();
+  const defaultZOrder = useSelector(select.defaultGraphicOrder);
   const { color } = item.properties;
-  const { opacity, domain, shaded, zBias, zIndex, lhs, rhs, samples } =
-    useMathItemResults(scope, item, props);
+  const {
+    opacity,
+    domain,
+    shaded,
+    zBias,
+    zIndex,
+    zOrder = defaultZOrder[item.id],
+    lhs,
+    rhs,
+    samples,
+  } = useMathItemResults(scope, item, props);
   const finalVisibility = useFinalVisibility(scope, item);
 
   const data = useMemo(() => {

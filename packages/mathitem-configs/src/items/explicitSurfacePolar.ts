@@ -20,6 +20,7 @@ import {
   samples2,
   zBias,
   zIndex,
+  zOrder,
   domain2,
   EvaluatedDomain2,
 } from "../shared";
@@ -33,6 +34,7 @@ interface ExplicitSurfacePolarProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
+  zOrder: string;
   shaded: string; // eval to boolean;
   expr: ParseableObjs["function-assignment"];
   domain: ParseableArray<ParseableObjs["function-assignment"]>;
@@ -54,6 +56,7 @@ const defaultValues: ExplicitSurfacePolarProperties = {
   opacity: "0.75",
   zIndex: "0",
   zBias: "0",
+  zOrder: "",
   shaded: "true",
   expr: {
     type: "function-assignment",
@@ -114,6 +117,7 @@ type EvaluatedProperties = {
   calculatedVisibility: boolean;
   zBias: number;
   zIndex: number;
+  zOrder: number | undefined;
   expr: (x: number, y: number) => number;
   colorExpr: (X: number, Y: number, Z: number, u: number, v: number) => number;
 };
@@ -152,6 +156,7 @@ const config: IMathItemConfig<
     ...visibilityProps,
     zBias,
     zIndex,
+    zOrder,
   },
   settingsProperties: [
     "gridOpacity",
@@ -164,7 +169,7 @@ const config: IMathItemConfig<
     "samples2",
     "calculatedVisibility",
     "zBias",
-    "zIndex",
+    "zOrder",
   ],
   make,
 };

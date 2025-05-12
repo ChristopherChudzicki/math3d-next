@@ -9,8 +9,9 @@ import type {
 } from "@math3d/mathitem-configs";
 import React, { useMemo } from "react";
 import { useToggle } from "@/util/hooks";
+import { useSelector } from "react-redux";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
-import { useMathScope } from "../sceneSlice";
+import { useMathScope, select } from "../sceneSlice";
 import { getMathProperties, useMathErrors } from "../mathScope";
 import CloseButton from "./CloseButton";
 import styles from "./SettingsPopover.module.css";
@@ -38,31 +39,41 @@ const SettingsForm = <T extends MathItemType>({
       // @ts-expect-error ts does not know that config and item are correlated
       const value = item.properties[name];
       if (typeof value !== "string") {
-        throw new Error(`value should be a string; received ${typeof value}`);
+        throw new Error(
+          `properties[${name}] should be a string; received ${typeof value}`,
+        );
       }
       return { field, value };
     });
   }, [config, item.properties]);
+  const defaultZOrder = useSelector(select.defaultGraphicOrder);
   return (
     <div className={styles["settings-form"]}>
-      {fields.map(({ field, value }) => (
-        <React.Fragment key={field.name}>
-          <label id={`${item.id}-${field.name}`} htmlFor={field.name}>
-            {field.label}
-          </label>
-          <FieldWidget
-            className={styles["settings-item"]}
-            aria-labelledby={`${item.id}-${field.name}`}
-            itemId={item.id}
-            label={field.label}
-            error={errors[field.name]}
-            widget={field.widget}
-            name={field.name}
-            value={value}
-            onChange={onWidgetChange}
-          />
-        </React.Fragment>
-      ))}
+      {fields.map(({ field, value }) => {
+        const extras =
+          field.name === "zOrder"
+            ? { placeholder: `${defaultZOrder[item.id]}` }
+            : {};
+        return (
+          <React.Fragment key={field.name}>
+            <label id={`${item.id}-${field.name}`} htmlFor={field.name}>
+              {field.label}
+            </label>
+            <FieldWidget
+              className={styles["settings-item"]}
+              aria-labelledby={`${item.id}-${field.name}`}
+              itemId={item.id}
+              label={field.label}
+              error={errors[field.name]}
+              widget={field.widget}
+              name={field.name}
+              value={value}
+              onChange={onWidgetChange}
+              {...extras}
+            />
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 };
@@ -103,7 +114,7 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
       <SubtleButton
         ref={setAnchorEl}
         onClick={setVisible.toggle}
-        aria-label="Show Settings"
+        aria-label="More Settings"
         className={styles["settings-button"]}
         centered
       >

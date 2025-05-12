@@ -3,11 +3,6 @@
 # Used in the webserver for validating data before storing in database, and for
 # assisting in data migration.
 #
-# We store this in a frontend node package because:
-# - it's nice to co-locate with the typescript definitions
-# - it's easy to run simple heuristic tests that this schema accurately reflects
-#   what the frontend expects.
-#
 # These schemas only validate basic shape. Almost all of these properties are
 # strings that will be evaluated via the math parser. Additional constraints,
 # like "string should evaluate to a vector in R3" are not expressed in this
@@ -84,6 +79,8 @@ definitions:
         type: string
       zBias:
         type: string
+      zOrder:
+        type: string
       label:
         type: string
       labelVisible:
@@ -152,6 +149,8 @@ definitions:
         type: string
       zBias:
         type: string
+      zOrder:
+        type: string
       shaded:
         type: string
       expr:
@@ -196,6 +195,8 @@ definitions:
         type: string
       zBias:
         type: string
+      zOrder:
+        type: string
       width:
         type: string
       divisions:
@@ -221,6 +222,8 @@ definitions:
       zIndex:
         type: string
       zBias:
+        type: string
+      zOrder:
         type: string
       shaded:
         type: string
@@ -249,6 +252,8 @@ definitions:
       zIndex:
         type: string
       zBias:
+        type: string
+      zOrder:
         type: string
       label:
         type: string
@@ -282,6 +287,8 @@ definitions:
         type: string
       zBias:
         type: string
+      zOrder:
+        type: string
       size:
         type: string
       width:
@@ -313,6 +320,8 @@ definitions:
       zIndex:
         type: string
       zBias:
+        type: string
+      zOrder:
         type: string
       shaded:
         type: string
@@ -351,6 +360,8 @@ definitions:
       zIndex:
         type: string
       zBias:
+        type: string
+      zOrder:
         type: string
       label:
         type: string
@@ -400,6 +411,8 @@ definitions:
         type: string
       zBias:
         type: string
+      zOrder:
+        type: string
       label:
         type: string
       labelVisible:
@@ -433,6 +446,8 @@ definitions:
       zIndex:
         type: string
       zBias:
+        type: string
+      zOrder:
         type: string
       size:
         type: string

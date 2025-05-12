@@ -22,6 +22,7 @@ import {
   width,
   zBias,
   zIndex,
+  zOrder,
 } from "../shared";
 
 interface VectorFieldProperties {
@@ -33,6 +34,7 @@ interface VectorFieldProperties {
   opacity: string;
   zIndex: string;
   zBias: string;
+  zOrder: string;
 
   size: string;
   width: string;
@@ -55,6 +57,7 @@ const defaultValues: VectorFieldProperties = {
   opacity: "1",
   zIndex: "0",
   zBias: "0",
+  zOrder: "",
   size: "6",
   width: "2",
   start: "false",
@@ -102,6 +105,7 @@ type EvaluatedProperties = {
   calculatedVisibility: boolean;
   zBias: number;
   zIndex: number;
+  zOrder: number | undefined;
   size: number;
   width: number;
   start: boolean;
@@ -128,6 +132,7 @@ const config: IMathItemConfig<
     ...visibilityProps,
     zBias,
     zIndex,
+    zOrder,
     size,
     width,
     start,
@@ -161,7 +166,7 @@ const config: IMathItemConfig<
     "scale",
     "width",
     "zBias",
-    "zIndex",
+    "zOrder",
   ],
   make,
 };

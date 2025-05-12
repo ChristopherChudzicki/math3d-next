@@ -21,6 +21,7 @@ const AutosizeText: React.FC<
     style = {},
     className,
     ref,
+    placeholder,
     ...others
   } = props;
   const { width, height, ...styleWithoutSize } = style;
