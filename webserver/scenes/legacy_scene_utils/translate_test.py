@@ -94,8 +94,8 @@ def test_boolean_variable():
             },
             {
                 "useRelative": "true",
-                "position": "[0.1, 0.2, 0.3]",
-                "target": "[0, 0, -0.1]",
+                "position": "[0.1, 0.2, 0.6]",
+                "target": "[0.0, 0.0, -0.2]",
             },
         ),
         (

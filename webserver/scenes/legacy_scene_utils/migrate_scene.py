@@ -4,9 +4,40 @@ from scenes.models import Scene, LegacyScene
 from scenes.legacy_scene_utils.default_data import set_defaults
 
 
+def parse_value(value: str, default: float) -> float:
+    """
+    Parse a value from a string to a float. The value can be a fraction or a
+    decimal number.
+    """
+    try:
+        if "/" in value:
+            numerator, denominator = value.split("/")
+            return float(numerator) / float(denominator)
+        return float(value)
+    except ValueError:
+        # If the value cannot be parsed, return the default value
+        return default
+
+
+def get_axis_scales(old_items: dict) -> tuple[float, float, float]:
+    """
+    Get the axis scales from the old items. The axis scales are stored in the
+    properties of the axis items.
+    """
+    x_scale = y_scale = z_scale = 1.0
+    for item_id, item in old_items.items():
+        if item_id == "axis-x":
+            x_scale = parse_value(item.get("properties", {}).get("scale", "1"), 1)
+        elif item_id == "axis-y":
+            y_scale = parse_value(item.get("properties", {}).get("scale", "1"), 1)
+        elif item_id == "axis-z":
+            z_scale = parse_value(item.get("properties", {}).get("scale", "1/2"), 0.5)
+
+    return x_scale, y_scale, z_scale
+
+
 def migrate_scene(legacy_scene: LegacyScene):
     set_defaults(legacy_scene)
-    migrator = ItemMigrator()
 
     for item_id, item in legacy_scene.dehydrated["folders"].items():
         item["type"] = "FOLDER"
@@ -32,6 +63,13 @@ def migrate_scene(legacy_scene: LegacyScene):
         **legacy_scene.dehydrated["mathSymbols"],
     }
 
+    axis_scales = get_axis_scales(old_items)
+
+    migrator = ItemMigrator(
+        x_scale=axis_scales[0],
+        y_scale=axis_scales[1],
+        z_scale=axis_scales[2],
+    )
     items = []
     for item_id, item in old_items.items():
         items.append(migrator.translate_item(item, item_id).to_json_data())
