@@ -1,3 +1,4 @@
+from typing import Annotated
 from scenes.legacy_scene_utils.translate import ItemMigrator
 from scenes.models import Scene, LegacyScene
 
@@ -19,7 +20,7 @@ def parse_value(value: str, default: float) -> float:
         return default
 
 
-def get_axis_scales(old_items: dict) -> tuple[float, float, float]:
+def get_axis_scales(old_items: dict) -> Annotated[list[float], 3]:
     """
     Get the axis scales from the old items. The axis scales are stored in the
     properties of the axis items.
