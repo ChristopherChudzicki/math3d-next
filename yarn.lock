@@ -5531,12 +5531,12 @@ __metadata:
   linkType: hard
 
 "@types/mailparser@npm:^3.4.4":
-  version: 3.4.5
-  resolution: "@types/mailparser@npm:3.4.5"
+  version: 3.4.6
+  resolution: "@types/mailparser@npm:3.4.6"
   dependencies:
     "@types/node": "npm:*"
     iconv-lite: "npm:^0.6.3"
-  checksum: 10/8caeb4f164d11960c0439fe80ea029d54f7b4fa86455b8922813813e8cd3233e4b6f67908ed75111fc9394998020bee30805f38020a7c0bf197eddb2e3692a64
+  checksum: 10/9a003d472acb51bcc012a3de560c82394414ffb495223213eb580dc1ecb8bae9443b54aa917ad6475d5a1a22a7cd7290cb81baf26238fc22446cde436cd82404
   languageName: node
   linkType: hard
 
