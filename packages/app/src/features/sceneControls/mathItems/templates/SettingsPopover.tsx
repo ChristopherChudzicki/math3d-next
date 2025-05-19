@@ -49,6 +49,7 @@ const SettingsField: React.FC<SettingsFieldProps> = ({
         {field.label}
       </label>
       <FieldWidget
+        aria-labelledby={labelId}
         className={styles["settings-item"]}
         {...(showTip ? { "aria-describedby": tipId } : {})}
         itemId={itemId}
