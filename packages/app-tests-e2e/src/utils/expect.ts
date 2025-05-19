@@ -11,6 +11,7 @@ const expect = baseExpect.extend({
   ) {
     const assertionName = "toHaveDescription";
     let pass: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let matcherResult: any;
     try {
       await baseExpect(locator).toHaveAttribute(
@@ -63,6 +64,7 @@ const expect = baseExpect.extend({
   async toBeInvalid(locator: Locator, options?: { timeout?: number }) {
     const assertionName = "toBeInvalid";
     let pass: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let matcherResult: any;
     try {
       await baseExpect(locator).toHaveAttribute(
@@ -71,6 +73,7 @@ const expect = baseExpect.extend({
         options,
       );
       pass = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       matcherResult = e.matcherResult;
       pass = false;

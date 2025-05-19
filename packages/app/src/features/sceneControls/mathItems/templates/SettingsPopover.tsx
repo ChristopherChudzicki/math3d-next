@@ -10,16 +10,74 @@ import type {
 import React, { useMemo } from "react";
 import { useToggle } from "@/util/hooks";
 import { useSelector } from "react-redux";
+import { IconButton } from "@mui/material";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
+import Markdown from "@/util/components/Markdown";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { useMathScope, select } from "../sceneSlice";
 import { getMathProperties, useMathErrors } from "../mathScope";
 import CloseButton from "./CloseButton";
 import styles from "./SettingsPopover.module.css";
+import { OnWidgetChange } from "../FieldWidget/types";
 
 interface FormProps<T extends MathItemType> {
   config: MathItemConfig<T>;
   item: MathItem<T>;
 }
+
+type SettingsFieldProps = {
+  itemId: string;
+  field: PropertyConfig<string>;
+  value: string;
+  error?: Error;
+  onWidgetChange: OnWidgetChange;
+  placeholder?: string;
+};
+const SettingsField: React.FC<SettingsFieldProps> = ({
+  itemId,
+  field,
+  onWidgetChange,
+  ...others
+}) => {
+  const labelId = `${itemId}-${field.name}`;
+  const tipId = `${itemId}-${field.name}-tip`;
+  const [showTip, setShowTip] = React.useState(false);
+  return (
+    <>
+      <label id={labelId} htmlFor={field.name}>
+        {field.label}
+      </label>
+      <FieldWidget
+        className={styles["settings-item"]}
+        {...(showTip ? { "aria-describedby": tipId } : {})}
+        itemId={itemId}
+        label={field.label}
+        widget={field.widget}
+        name={field.name}
+        onChange={onWidgetChange}
+        {...others}
+      />
+      {field.description ? (
+        <IconButton
+          size="small"
+          aria-label={`Show ${field.label} Description`}
+          aria-pressed={showTip}
+          onClick={() => setShowTip((current) => !current)}
+        >
+          {showTip ? <HelpRoundedIcon /> : <HelpOutlineIcon />}
+        </IconButton>
+      ) : (
+        <span />
+      )}
+      {showTip ? (
+        <Markdown id={tipId} className={styles["tip-row"]}>
+          {field.description}
+        </Markdown>
+      ) : null}
+    </>
+  );
+};
 
 const SettingsForm = <T extends MathItemType>({
   config,
@@ -47,6 +105,7 @@ const SettingsForm = <T extends MathItemType>({
     });
   }, [config, item.properties]);
   const defaultZOrder = useSelector(select.defaultGraphicOrder);
+
   return (
     <div className={styles["settings-form"]}>
       {fields.map(({ field, value }) => {
@@ -55,23 +114,15 @@ const SettingsForm = <T extends MathItemType>({
             ? { placeholder: `${defaultZOrder[item.id]}` }
             : {};
         return (
-          <React.Fragment key={field.name}>
-            <label id={`${item.id}-${field.name}`} htmlFor={field.name}>
-              {field.label}
-            </label>
-            <FieldWidget
-              className={styles["settings-item"]}
-              aria-labelledby={`${item.id}-${field.name}`}
-              itemId={item.id}
-              label={field.label}
-              error={errors[field.name]}
-              widget={field.widget}
-              name={field.name}
-              value={value}
-              onChange={onWidgetChange}
-              {...extras}
-            />
-          </React.Fragment>
+          <SettingsField
+            key={field.name}
+            itemId={item.id}
+            field={field}
+            value={value}
+            error={errors[field.name]}
+            onWidgetChange={onWidgetChange}
+            {...extras}
+          />
         );
       })}
     </div>
@@ -104,8 +155,16 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
           },
         }}
       >
-        <section data-dndkit-no-drag className={styles.container}>
-          <CloseButton className={styles.close} onClick={setVisible.off} />
+        <section
+          data-dndkit-no-drag
+          className={styles.container}
+          data-testid="more-settings-form"
+        >
+          <CloseButton
+            aria-label="Close"
+            className={styles.close}
+            onClick={setVisible.off}
+          />
           <h3 className={styles.title}>{config.label} Settings</h3>
           <hr className={styles.divider} />
           <SettingsForm item={item} config={config} />

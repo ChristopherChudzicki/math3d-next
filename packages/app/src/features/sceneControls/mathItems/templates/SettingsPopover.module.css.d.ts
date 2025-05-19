@@ -5,6 +5,7 @@ declare const styles: {
   readonly "settings-button": string;
   readonly "settings-form": string;
   readonly "settings-item": string;
+  readonly "tip-row": string;
   readonly "title": string;
 };
 export = styles;

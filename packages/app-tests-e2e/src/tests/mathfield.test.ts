@@ -1,8 +1,8 @@
 import type { Page } from "@playwright/test";
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import { getItemForm, getLatex } from "@/utils/selectors";
 import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
+import AppPage from "@/utils/pages/AppPage";
 
 const user = makeUserInfo();
 test.use({ user });
@@ -18,11 +18,13 @@ test("Typing arrays into an empty <math-field />", async ({
   });
   const key = await prepareScene(scene.json());
   await page.goto(`/${key}`);
+  const app = new AppPage(page);
 
-  const form = getItemForm(page, "SomePoint");
-  const mf = await form.locator('css=[aria-label="Coordinates"]');
+  const item = await app.getUniqueItemSettings({ description: "SomePoint" });
+  const mf = item.field("Coordinates");
   await mf.type("[1,2,3,]");
-  expect(await mf.evaluate(getLatex)).toBe(
+  await expect(mf).toHaveJSProperty(
+    "value",
     String.raw`\left\lbrack1,2,3,\right\rbrack`,
   );
 });
@@ -44,30 +46,30 @@ test("Toggling keyboard visibility auto-focuses a math-field and shows virtual k
 
   // Arrow points "down" now
   await expect(toggler.getByTestId("KeyboardArrowDownIcon")).toBeVisible();
-  await expect(toggler.getByTestId("KeyboardArrowUpIcon")).toHaveCount(0);
+  await expect(toggler.getByTestId("KeyboardArrowUpIcon")).toBeHidden();
   // Toggling the keyboard should auto-focus a mathfield
   await expect(activeElement(page)).resolves.toBe("MATH-FIELD");
   await expect(page.locator(".ML__keyboard")).toBeVisible();
 
   // Clicking away should hide the virtual keyboard
   await page.getByTestId("scene").click();
-  await expect(page.locator(".ML__keyboard")).toHaveCount(0);
+  await expect(page.locator(".ML__keyboard")).toBeHidden();
 
   // Clicking on the math-field should show the virtual keyboard
   await page.locator("math-field").first().click();
   await expect(page.locator(".ML__keyboard")).toBeVisible();
 
   // We add a CSS transition to the backdrop, so double check that it actually exists
-  await expect(page.locator(".ML__keyboard > .MLK__backdrop")).toHaveCount(1);
+  await expect(page.locator(".ML__keyboard > .MLK__backdrop")).toBeVisible();
 
   /**
    * Turn "auto-expand" OFF
    */
   await page.getByTestId("toggle-keyboard-button").click();
   // Arrow points "up" now.
-  await expect(toggler.getByTestId("KeyboardArrowDownIcon")).toHaveCount(0);
-  await expect(toggler.getByTestId("KeyboardArrowUpIcon")).toBeVisible;
-  await expect(page.locator(".ML__keyboard")).toHaveCount(0);
+  await expect(toggler.getByTestId("KeyboardArrowDownIcon")).toBeHidden();
+  await expect(toggler.getByTestId("KeyboardArrowUpIcon")).toBeVisible();
+  await expect(page.locator(".ML__keyboard")).toBeHidden();
   await page.locator("math-field").first().click();
-  await expect(page.locator(".ML__keyboard")).toHaveCount(0);
+  await expect(page.locator(".ML__keyboard")).toBeHidden();
 });

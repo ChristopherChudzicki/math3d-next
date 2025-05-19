@@ -46,7 +46,7 @@ test("Building a custom scene", async ({ page, prepareScene }) => {
 
   await test.step("Check z-oder of F2_point (uses placeholder value)", async () => {
     const description = "F2_point";
-    const item = getItemForm(page, description);
+    const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
 
     const zOrder = page.getByLabel("Z-Order");
@@ -57,7 +57,7 @@ test("Building a custom scene", async ({ page, prepareScene }) => {
 
   await test.step("Check z-oder of F1_surfaceA (uses placeholder value)", async () => {
     const description = "F1_surfaceA";
-    const item = getItemForm(page, description);
+    const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
 
     const zOrder = page.getByLabel("Z-Order");
@@ -68,7 +68,7 @@ test("Building a custom scene", async ({ page, prepareScene }) => {
 
   await test.step("Check z-oder of F2_surfaceA (uses set value)", async () => {
     const description = "F2_surfaceA";
-    const item = getItemForm(page, description);
+    const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
 
     const zOrder = page.getByLabel("Z-Order");

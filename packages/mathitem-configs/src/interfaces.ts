@@ -24,6 +24,7 @@ export interface PropertyConfig<K, V = never> {
    * Appropriate for un-evaluated properties like `description` or `label`.
    */
   readonly validate?: Validate<V>;
+  readonly description?: string;
 }
 
 export interface IMathItemConfig<

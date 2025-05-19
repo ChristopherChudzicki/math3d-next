@@ -1,11 +1,10 @@
 .settings-form {
   display: grid;
-  grid-template-columns: auto minmax(100px, auto);
+  grid-template-columns: auto minmax(100px, 1fr) 32px;
   align-items: center;
-
-  align-items: baseline;
   row-gap: 0.5em;
   column-gap: 2em;
+  width: min(425px, 90vw);
 }
 
 .settings-item {
@@ -40,4 +39,11 @@
   border-color: var(--color-secondary-light);
   margin-left: -1em;
   margin-right: -1em;
+}
+
+.tip-row {
+  grid-area: auto / 1 / auto / 4;
+  color: var(--color-text-light);
+  font-size: var(--font-size-small);
+  width: "100%";
 }

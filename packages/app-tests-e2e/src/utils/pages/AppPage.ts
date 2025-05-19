@@ -5,7 +5,7 @@ import SigninPage from "./SigninPage";
 import SignupPage from "./SignupPage";
 import SignoutPage from "./SignoutPage";
 import UserSettingsPage from "./UserSettingsPage";
-import ItemSettings from "./ItemSettings";
+import ItemSettings, { UniqueItemSettingsOpts } from "./ItemSettings";
 import SharePopover from "./SharePopover";
 import MyScenes from "./MyScenes";
 
@@ -88,8 +88,8 @@ class AppPage {
     await this.userMenu().root.press("Escape");
   }
 
-  getUniqueItemSettings(description: string): Promise<ItemSettings> {
-    return ItemSettings.getUniqueItemSettings(this.page, description);
+  getUniqueItemSettings(opts: UniqueItemSettingsOpts): Promise<ItemSettings> {
+    return ItemSettings.getUniqueItemSettings(this.page, opts);
   }
 }
 

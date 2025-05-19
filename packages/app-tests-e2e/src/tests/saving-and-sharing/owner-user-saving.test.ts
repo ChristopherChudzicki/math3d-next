@@ -12,7 +12,9 @@ test("Saving a new scene", async ({ page }) => {
   await page.goto("");
   const app = new AppPage(page);
   const title = faker.lorem.words(3);
-  const item = await app.getUniqueItemSettings("Explicit Surface");
+  const item = await app.getUniqueItemSettings({
+    description: "Explicit Surface",
+  });
   const newDescription = faker.lorem.words(3);
 
   await test.step("Making a change enables saving", async () => {
@@ -72,7 +74,9 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
   await page.goto(`/${key}`);
   const app = new AppPage(page);
 
-  const item = await app.getUniqueItemSettings(initialDescription);
+  const item = await app.getUniqueItemSettings({
+    description: initialDescription,
+  });
 
   await test.step("Making a change enables saving", async () => {
     await expect(app.saveButton()).toBeDisabled();
