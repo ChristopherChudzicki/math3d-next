@@ -5531,12 +5531,12 @@ __metadata:
   linkType: hard
 
 "@types/mailparser@npm:^3.4.4":
-  version: 3.4.5
-  resolution: "@types/mailparser@npm:3.4.5"
+  version: 3.4.6
+  resolution: "@types/mailparser@npm:3.4.6"
   dependencies:
     "@types/node": "npm:*"
     iconv-lite: "npm:^0.6.3"
-  checksum: 10/8caeb4f164d11960c0439fe80ea029d54f7b4fa86455b8922813813e8cd3233e4b6f67908ed75111fc9394998020bee30805f38020a7c0bf197eddb2e3692a64
+  checksum: 10/9a003d472acb51bcc012a3de560c82394414ffb495223213eb580dc1ecb8bae9443b54aa917ad6475d5a1a22a7cd7290cb81baf26238fc22446cde436cd82404
   languageName: node
   linkType: hard
 
@@ -14280,8 +14280,8 @@ __metadata:
   linkType: hard
 
 "mailparser@npm:^3.7.1":
-  version: 3.7.2
-  resolution: "mailparser@npm:3.7.2"
+  version: 3.7.3
+  resolution: "mailparser@npm:3.7.3"
   dependencies:
     encoding-japanese: "npm:2.2.0"
     he: "npm:1.2.0"
@@ -14289,22 +14289,22 @@ __metadata:
     iconv-lite: "npm:0.6.3"
     libmime: "npm:5.3.6"
     linkify-it: "npm:5.0.0"
-    mailsplit: "npm:5.4.2"
-    nodemailer: "npm:6.9.16"
+    mailsplit: "npm:5.4.3"
+    nodemailer: "npm:7.0.3"
     punycode.js: "npm:2.3.1"
-    tlds: "npm:1.255.0"
-  checksum: 10/3677df620cce0c7f0fd93943eacbdec3662dab6c4119c4c3b5f93f034186aa8771aebb9a9e14f8cc133eeb50dbc0e09152c6662947b28e450cc0ec1b8e88f422
+    tlds: "npm:1.259.0"
+  checksum: 10/8729884c3c59f37c449cfab37a48987dae8c20e3f749ddd26c30e8d10c3b18e48ff68c7d090f800ec4b49271f5251c06d03b6eb84c8cd69df8e9ab6b172bdf4e
   languageName: node
   linkType: hard
 
-"mailsplit@npm:5.4.2":
-  version: 5.4.2
-  resolution: "mailsplit@npm:5.4.2"
+"mailsplit@npm:5.4.3":
+  version: 5.4.3
+  resolution: "mailsplit@npm:5.4.3"
   dependencies:
     libbase64: "npm:1.3.0"
     libmime: "npm:5.3.6"
     libqp: "npm:2.1.1"
-  checksum: 10/7557ef6a9961a0da50537fc46a7175e473dec3f27aba18412174dea6c66046f880b7b248a682d34b1aa1de492310ab5f1a5e2083b3578a521bfa5fd57d27dffc
+  checksum: 10/d15d4d1ed266bc4592246a320f6065fe8190c5db4afab25e6a50eea6674cd6a096c4c9f1ab09a1ed186f202456c986585493ab4c7627e74b895e55863081ff3c
   languageName: node
   linkType: hard
 
@@ -15188,10 +15188,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:6.9.16":
-  version: 6.9.16
-  resolution: "nodemailer@npm:6.9.16"
-  checksum: 10/f131888d3111238fde4ee03539e62f1764b99365ff31d556dde0367dfefcee1f2eb8948558f35ba84fe5cd805f2d01294eee63a5675d3aa501e7df548a2518ce
+"nodemailer@npm:7.0.3":
+  version: 7.0.3
+  resolution: "nodemailer@npm:7.0.3"
+  checksum: 10/d51e9b30753c982c35cf77839f3b7c1f138eb3fb5607c34f724ddc32360e56c3d631ff5b4eba5491f1f8805b428b945850441b4bd893bd2283c55be615f020c5
   languageName: node
   linkType: hard
 
@@ -19262,12 +19262,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tlds@npm:1.255.0":
-  version: 1.255.0
-  resolution: "tlds@npm:1.255.0"
+"tlds@npm:1.259.0":
+  version: 1.259.0
+  resolution: "tlds@npm:1.259.0"
   bin:
     tlds: bin.js
-  checksum: 10/ec42c9e913ded4cdce26cc95343be444850ac23ed6193944d7eb5b6e0a2978fb597956aaed1e9e22f1cd5c562aed94a6664c4779048593b8d3170e7a54c62f75
+  checksum: 10/58e365baf5121d855bb11303dd1ebeec5df6233fbf2cf66ef951e6d8be2fbae225474c9dc64098046f4858ad7769274d1bbbf9736c407788636a064b80909c27
   languageName: node
   linkType: hard
 
