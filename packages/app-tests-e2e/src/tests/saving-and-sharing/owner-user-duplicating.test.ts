@@ -11,7 +11,6 @@ test.setTimeout(60_000);
 test("Saving an existing scene scene", async ({ page, prepareScene }) => {
   const scene = new SceneBuilder();
   const initialDescription = faker.lorem.words(3);
-  const newDescription = faker.lorem.words(3);
   scene //
     .folder({ description: "Folder 1" })
     .point({ description: initialDescription });
@@ -21,7 +20,7 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
   await page.goto(`/${key}`);
   const app = new AppPage(page);
 
-  const item = await app.getUniqueItemSettings(initialDescription);
+  await app.getUniqueItemSettings({ description: initialDescription });
 
   await test.step("Save scene", async () => {
     await app

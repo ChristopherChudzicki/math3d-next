@@ -41,7 +41,9 @@ test("Sharing before save...just like anon users", () => {});
 
     await test.step("Share with edit...warn unsaved changes", async () => {
       const description = faker.lorem.words();
-      const item = await app.getUniqueItemSettings(itemDescription);
+      const item = await app.getUniqueItemSettings({
+        description: itemDescription,
+      });
       await item.field("description").fill(description);
 
       const shareButton = app.sharePopover().trigger();

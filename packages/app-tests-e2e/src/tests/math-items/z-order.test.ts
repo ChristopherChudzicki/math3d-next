@@ -46,34 +46,34 @@ test("Building a custom scene", async ({ page, prepareScene }) => {
 
   await test.step("Check z-oder of F2_point (uses placeholder value)", async () => {
     const description = "F2_point";
-    const item = getItemForm(page, description);
+    const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
 
-    const zOrder = page.getByLabel("Z-Order");
+    const zOrder = page.getByLabel("Z-Order", { exact: true });
     expect(await zOrder.evaluate(getLatex)).toBe("");
-    expect(await page.getByLabel("Z-Order")).toHaveText("7");
+    expect(zOrder).toHaveText("7");
     await page.keyboard.press("Escape");
   });
 
   await test.step("Check z-oder of F1_surfaceA (uses placeholder value)", async () => {
     const description = "F1_surfaceA";
-    const item = getItemForm(page, description);
+    const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
 
-    const zOrder = page.getByLabel("Z-Order");
+    const zOrder = page.getByLabel("Z-Order", { exact: true });
     expect(await zOrder.evaluate(getLatex)).toBe("");
-    expect(await page.getByLabel("Z-Order")).toHaveText("13");
+    expect(await zOrder).toHaveText("13");
     await page.keyboard.press("Escape");
   });
 
   await test.step("Check z-oder of F2_surfaceA (uses set value)", async () => {
     const description = "F2_surfaceA";
-    const item = getItemForm(page, description);
+    const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
 
-    const zOrder = page.getByLabel("Z-Order");
+    const zOrder = page.getByLabel("Z-Order", { exact: true });
     expect(await zOrder.evaluate(getLatex)).toBe("100");
-    expect(await page.getByLabel("Z-Order")).toHaveText("100");
+    expect(zOrder).toHaveText("100");
     await page.keyboard.press("Escape");
   });
 });

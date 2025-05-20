@@ -8,7 +8,9 @@ test("Anon users can share but not save", async ({ page }) => {
   const app = new AppPage(page);
 
   const description = faker.lorem.words();
-  const item = await app.getUniqueItemSettings("Explicit Surface");
+  const item = await app.getUniqueItemSettings({
+    description: "Explicit Surface",
+  });
   await item.field("description").fill(description);
 
   // Anon users get no 'Save' button

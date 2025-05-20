@@ -1,7 +1,6 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import AppPage from "@/utils/pages/AppPage";
-import { makeUserInfo } from "@math3d/mock-api";
 
 test("Does not show username", async ({ page }) => {
   await page.goto("");

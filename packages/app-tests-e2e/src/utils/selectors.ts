@@ -1,8 +1,20 @@
 import type { Page, Locator } from "@playwright/test";
 import type { Mathfield } from "mathlive";
 import { expect } from "@playwright/test";
+import invariant from "tiny-invariant";
 
-const getItemForm = (page: Page, description: string): Locator => {
+type GetItemFormOpts = {
+  description?: string;
+  id?: string;
+};
+const getItemForm = (
+  page: Page,
+  { description, id }: GetItemFormOpts,
+): Locator => {
+  invariant(description || id, "Either description or id must be provided");
+  if (id) {
+    return page.getByTestId(`settings-${id}`);
+  }
   return page.locator(`css=form[aria-label="Settings for ${description}"]`);
 };
 

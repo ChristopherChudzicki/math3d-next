@@ -214,6 +214,8 @@ const zBias: PropertyConfig<"zBias", number> = {
   label: "Z-Bias",
   widget: WidgetType.MathValue,
   validate: validators.real,
+  description:
+    "Offset the object toward (positive) or away (negative) from the camera.",
 };
 
 const zIndex: PropertyConfig<"zIndex", number> = {
@@ -231,6 +233,10 @@ const zOrder: PropertyConfig<"zOrder", number | undefined> = {
     if (v === undefined) return undefined;
     return validators.real(v);
   },
+  description: `Browser limitations mean transparency won't always look correct
+from all directions, particulary for surfaces. You will be able to see objects
+drawn first through objects drawn last. Higher values are drawn last. By default,
+surfaces are drawn last; ties are broken by the order of appearence in folders.`,
 };
 
 const start: PropertyConfig<"start", boolean> = {

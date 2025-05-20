@@ -57,7 +57,7 @@ html {
   --color-secondary-lighter: rgb(var(--color-secondary-lighter-rgb));
   --color-secondary-light-rgb: 191, 191, 191;
   --color-secondary-light: rgb(var(--color-secondary-light-rgb));
-  --color-secondary-rgb: 140, 140, 140;
+  --color-secondary-rgb: 118, 118, 118;
   --color-secondary: rgb(var(--color-secondary-rgb));
 
   --color-background-rgb: 255, 255, 255;
@@ -65,13 +65,14 @@ html {
 
   --color-error: red;
   --color-text-lighter: rgb(191, 191, 191);
-  --color-text-light: rgb(140, 140, 140);
+  --color-text-light: rgb(118, 118, 118);
   --color-text-primary: rgb(67, 67, 67);
 
   --border-radius: 4px;
   --transition-duration: 300ms;
   --transition-timing-function: ease;
   font-size: 14px;
+  --font-size-small: 12px;
   color: var(--color-text-primary);
 }
 

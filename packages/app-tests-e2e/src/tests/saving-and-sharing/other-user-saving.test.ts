@@ -35,7 +35,9 @@ test("Saving an existing scene scene", async ({
   await page.goto(`/${key}`);
   const app = new AppPage(page);
 
-  const item = await app.getUniqueItemSettings(initialDescription);
+  const item = await app.getUniqueItemSettings({
+    description: initialDescription,
+  });
 
   await test.step("'Save a Copy' is initially enabled", async () => {
     await expect(app.saveButton()).toBeEnabled();
