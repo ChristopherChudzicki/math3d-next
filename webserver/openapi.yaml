@@ -886,9 +886,13 @@ components:
           readOnly: true
         archived:
           type: boolean
+        isLegacy:
+          type: boolean
+          readOnly: true
       required:
       - author
       - createdDate
+      - isLegacy
       - itemOrder
       - items
       - key
@@ -913,8 +917,12 @@ components:
           readOnly: true
         archived:
           type: boolean
+        isLegacy:
+          type: boolean
+          readOnly: true
       required:
       - createdDate
+      - isLegacy
       - itemOrder
       - items
       - key
