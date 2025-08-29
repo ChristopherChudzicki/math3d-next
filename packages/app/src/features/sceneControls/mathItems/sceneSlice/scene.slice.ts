@@ -27,6 +27,7 @@ const getInitialState = (): SceneState => {
     author: null,
     mathScope: () => mathScope,
     items: {},
+    isLegacy: false,
     activeItemId: undefined,
     activeTabId: MAIN_FOLDER,
     order: {},
@@ -85,14 +86,15 @@ const slice = createSlice({
   name: "scene",
   initialState: getInitialState,
   reducers: {
-    setItems: withClean(true)<{
+    setScene: withClean(true)<{
       items: MathItem[];
       order: SceneState["order"];
       title: SceneState["title"];
+      isLegacy: SceneState["isLegacy"];
       author: SceneState["author"];
       key: SceneState["key"];
     }>((state, action) => {
-      const { items, order, title, author, key } = action.payload;
+      const { items, order, title, author, key, isLegacy } = action.payload;
       state.title = title;
       state.items = keyBy(items, (item) => item.id);
       state.order = order;
@@ -100,6 +102,7 @@ const slice = createSlice({
       state.activeTabId = MAIN_FOLDER;
       state.author = author;
       state.key = key;
+      state.isLegacy = isLegacy;
 
       invariant(state.order[MAIN_FOLDER], "Main folder should exist.");
       invariant(state.order[SETTINGS_FOLDER], "Settings folder should exist.");

@@ -20,6 +20,18 @@ const theme = createTheme({
         },
       },
     },
+    MuiDialogContent: {
+      styleOverrides: {
+        root: {
+          "> p:first-child": {
+            marginTop: 0,
+          },
+          "> p:last-child": {
+            marginBottom: 0,
+          },
+        },
+      },
+    },
   },
 });
 

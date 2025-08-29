@@ -118,6 +118,8 @@ const dirty = (state: RootState) => state.scene.dirty;
 
 const itemOrder = (state: RootState) => state.scene.order;
 
+const isLegacy = (state: RootState) => state.scene.isLegacy;
+
 const defaultGraphicOrder: SelectorReturn<Record<string, number>> =
   createSelector(
     [mathItems, itemOrder],
@@ -185,6 +187,7 @@ export {
   getItems,
   sceneInfo,
   isPermanent,
+  isLegacy,
   hasChildren,
   dirty,
 };

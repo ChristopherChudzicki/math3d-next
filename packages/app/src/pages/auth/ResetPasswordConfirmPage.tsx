@@ -10,7 +10,7 @@ import Alert from "@mui/material/Alert";
 import Link from "@/util/components/Link";
 import { setFieldErrors } from "@/util/forms";
 import styles from "./styles.module.css";
-import { BasicDialog } from "./components/BasicDialog";
+import BasicDialog from "@/util/components/BasicDialog";
 
 const schema = yup.object({
   new_password: yup.string().min(9).label("Password").required(),

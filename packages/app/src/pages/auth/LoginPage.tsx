@@ -9,7 +9,7 @@ import { useAuthStatus } from "@/features/auth";
 import Link from "@/util/components/Link";
 import { OverallError, setFieldErrors } from "@/util/forms";
 import styles from "./styles.module.css";
-import { BasicDialog } from "./components/BasicDialog";
+import BasicDialog from "@/util/components/BasicDialog";
 
 const schema = yup.object({
   email: yup.string().email().required(),

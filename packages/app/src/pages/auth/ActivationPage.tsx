@@ -5,7 +5,7 @@ import { useActivateUser } from "@math3d/api";
 import { useToggle } from "@/util/hooks";
 import Alert from "@mui/material/Alert";
 import LoadingSpinner from "@/util/components/LoadingSpinner/LoadingSpinner";
-import { BasicDialog } from "./components/BasicDialog";
+import BasicDialog from "@/util/components/BasicDialog";
 
 const ActivationMessage: React.FC<{ success: boolean; error: boolean }> = ({
   success,

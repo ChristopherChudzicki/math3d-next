@@ -10,7 +10,7 @@ import Alert from "@mui/material/Alert";
 import { useToggle } from "@/util/hooks";
 import { OverallError, setFieldErrors } from "@/util/forms";
 import styles from "./styles.module.css";
-import { BasicDialog } from "./components/BasicDialog";
+import BasicDialog from "@/util/components/BasicDialog";
 
 const schema = yup.object({
   email: yup.string().email().required(),
