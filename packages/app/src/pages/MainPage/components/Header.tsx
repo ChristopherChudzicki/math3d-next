@@ -95,6 +95,7 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       shouldShow: isAuthenticated,
     },
     {
+      type: "link",
       key: "signin",
       label: "Sign in",
       icon: <AccountCircleOutlinedIcon fontSize="small" />,
@@ -102,6 +103,7 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       shouldShow: !isAuthenticated,
     },
     {
+      type: "link",
       label: "Sign up",
       key: "signup",
       icon: <AccountCircleOutlinedIcon fontSize="small" />,
@@ -109,6 +111,7 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       shouldShow: !isAuthenticated,
     },
     {
+      type: "link",
       label: "My Scenes",
       key: "scenes-me",
       icon: <ListIcon fontSize="small" />,
@@ -116,6 +119,7 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       shouldShow: isAuthenticated,
     },
     {
+      type: "link",
       label: "Examples",
       key: "examples",
       icon: <LightbulbOutlined fontSize="small" />,
@@ -123,13 +127,16 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       shouldShow: true,
     },
     {
+      type: "link",
       label: "Function Reference",
       key: "reference",
       icon: <FunctionsIcon fontSize="small" />,
-      href: "help/reference",
+      href: "/help/reference",
       shouldShow: true,
+      target: "_blank",
     },
     {
+      type: "link",
       label: "Contact",
       key: "contact",
       icon: <HelpOutlineOutlinedIcon fontSize="small" />,
@@ -137,6 +144,7 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       shouldShow: true,
     },
     {
+      type: "link",
       label: "Account Settings",
       key: "settings",
       icon: <ManageAccountsIcon fontSize="small" />,
@@ -144,6 +152,7 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       shouldShow: isAuthenticated,
     },
     {
+      type: "link",
       label: "Sign out",
       key: "signout",
       icon: <AccountCircleOutlinedIcon fontSize="small" />,
