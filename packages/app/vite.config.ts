@@ -38,6 +38,7 @@ export default defineConfig({
     ValidateEnv({
       VITE_API_BASE_URL: Schema.string(),
       VITE_LEGACY_APP_BASE_URL: Schema.string(),
+      VITE_ISSUE_URL: Schema.string(),
     }),
     react(),
     viteTsconfigPaths(),

@@ -4,7 +4,8 @@ import invariant from "tiny-invariant";
 import { Button } from "@mui/material";
 import Link from "@/util/components/Link";
 
-const ISSUE_URL = "https://github.com/christopherchudzicki/math3d/issues";
+const ISSUE_URL = import.meta.env.VITE_ISSUE_URL;
+invariant(ISSUE_URL, "VITE_ISSUE_URL is not set");
 const LEGACY_APP_BASE_URL = import.meta.env.VITE_LEGACY_APP_BASE_URL;
 invariant(LEGACY_APP_BASE_URL, "VITE_LEGACY_APP_BASE_URL is not set");
 

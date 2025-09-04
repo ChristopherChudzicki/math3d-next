@@ -44,5 +44,9 @@ class SceneFactory(BaseFactory[Scene]):
 
     author = factory.SubFactory(CustomUserFactory)  # type: ignore
 
+    archived = factory.LazyFunction(lambda: fake.boolean())
+
+    is_legacy = factory.LazyFunction(lambda: fake.boolean())
+
     class Meta:
         model = Scene
