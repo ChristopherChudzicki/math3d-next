@@ -23,10 +23,10 @@ const theme = createTheme({
     MuiDialogContent: {
       styleOverrides: {
         root: {
-          "> p:first-child": {
+          "> p:first-of-type": {
             marginTop: 0,
           },
-          "> p:last-child": {
+          "> p:last-of-type": {
             marginBottom: 0,
           },
         },

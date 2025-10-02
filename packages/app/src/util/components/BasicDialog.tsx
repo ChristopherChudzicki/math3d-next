@@ -94,11 +94,7 @@ const BasicDialog: React.FC<BasicDialogProps> = ({
       onClose={onClose}
       TransitionProps={TransitionProps}
       maxWidth={maxWidth}
-      sx={{
-        "> *:first-child": {
-          marginTop: 0,
-        },
-      }}
+      sx={{}}
     >
       <div style={topRightStyle}>
         <IconButton onClick={onClose}>
