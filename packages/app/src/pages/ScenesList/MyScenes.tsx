@@ -159,11 +159,13 @@ const MyScenesList: React.FC = () => {
           {allItems.map((item) => {
             const menuItems: SimpleMenuItem[] = [
               {
+                type: "button",
                 key: "archive",
                 label: item.archived ? "Unarchive" : "Archive",
                 onClick: () => archiveScene(item),
               },
               {
+                type: "button",
                 key: "delete",
                 label: "Delete",
                 onClick: () => destroyScene(item),

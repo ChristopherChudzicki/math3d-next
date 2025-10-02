@@ -26,6 +26,7 @@ jobs:
       - run: yarn lint
       - run: yarn fmt-check
       - run: yarn workspace app css-types --list-different
+      - run: yarn typecheck
       - run: yarn test -- --test-timeout=10000
 
   webserver-tests:

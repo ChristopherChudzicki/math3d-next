@@ -221,6 +221,7 @@ const SaveButton: React.FC = () => {
   const menuItems: SimpleMenuItem[] = useMemo(
     () => [
       {
+        type: "button",
         key: "duplicate",
         label: "Duplicate",
         onClick: () => {

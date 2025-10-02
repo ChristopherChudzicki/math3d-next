@@ -19,26 +19,28 @@ const LinkBehavior: React.FC<LinkBehaviorProps> = (props) => {
   return <RouterLink to={href} {...other} />;
 };
 
-interface SimpleMenuItemBase {
+type SimpleMenuItemButton = {
+  type: "button";
   key: string;
   label: React.ReactNode;
   icon?: React.ReactNode;
-  LinkComponent?: React.ElementType;
-}
-
-type SimpleMenuItemOnClick = SimpleMenuItemBase & {
   onClick: () => void;
-  href?: string;
 };
 
-type SimpleMenuItemHref = SimpleMenuItemBase & {
+type SimpleMenuItemLink = {
+  type: "link";
+  key: string;
+  label: React.ReactNode;
+  icon?: React.ReactNode;
   onClick?: () => void;
   href: string;
+  LinkComponent?: React.ElementType;
+  target?: HTMLAnchorElement["target"];
 };
 
 type SimpleMenuItem =
-  | SimpleMenuItemOnClick
-  | SimpleMenuItemHref
+  | SimpleMenuItemButton
+  | SimpleMenuItemLink
   | {
       element: React.ReactNode;
     };
@@ -99,9 +101,11 @@ const SimpleMenu: React.FC<SimpleMenuProps> = ({
       <Menu
         className={className}
         open={open}
-        MenuListProps={{
-          "aria-label": ariaLabel,
-          className,
+        slotProps={{
+          list: {
+            "aria-label": ariaLabel,
+            className,
+          },
         }}
         anchorEl={el}
         onClose={() => setOpen(false)}
@@ -110,25 +114,27 @@ const SimpleMenu: React.FC<SimpleMenuProps> = ({
           if ("element" in item) {
             return item.element;
           }
-          const linkProps = item.href
-            ? {
-                /**
-                 * Used to render the MenuItem as a react router link (or
-                 * specified link component) instead of a <li>.
-                 *
-                 * This is technically invalid HTML: The child of a <ul> should
-                 * be a <li>. However, this seems to be the most accessible way
-                 * to render a link inside MUI's <Menu /> components.
-                 *
-                 * See:
-                 *  - https://github.com/mui/material-ui/issues/33268
-                 *  - https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-links/
-                 *    shows a more correct implementation.
-                 */
-                component: item.LinkComponent ?? LinkBehavior,
-                href: item.href,
-              }
-            : {};
+          const linkProps =
+            item.type === "link"
+              ? {
+                  /**
+                   * Used to render the MenuItem as a react router link (or
+                   * specified link component) instead of a <li>.
+                   *
+                   * This is technically invalid HTML: The child of a <ul> should
+                   * be a <li>. However, this seems to be the most accessible way
+                   * to render a link inside MUI's <Menu /> components.
+                   *
+                   * See:
+                   *  - https://github.com/mui/material-ui/issues/33268
+                   *  - https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/examples/menu-button-links/
+                   *    shows a more correct implementation.
+                   */
+                  component: item.LinkComponent ?? LinkBehavior,
+                  href: item.href,
+                  target: item.target,
+                }
+              : {};
           const onClick = () => {
             item.onClick?.();
             setOpen(false);

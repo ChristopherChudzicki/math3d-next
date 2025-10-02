@@ -25,8 +25,8 @@ vi.mock("react-router", () => {
 describe("SimpleMenu", () => {
   it("Opens the menu when trigger is clicked", async () => {
     const items: SimpleMenuItem[] = [
-      { key: "one", label: "Item 1", onClick: vi.fn() },
-      { key: "two", label: "Item 2", onClick: vi.fn() },
+      { type: "button", key: "one", label: "Item 1", onClick: vi.fn() },
+      { type: "button", key: "two", label: "Item 2", onClick: vi.fn() },
     ];
 
     render(
@@ -43,8 +43,8 @@ describe("SimpleMenu", () => {
 
   it("Calls the menuitem's event andler when clicked and closes menu", async () => {
     const items = [
-      { key: "one", label: "Item 1", onClick: vi.fn() },
-      { key: "two", label: "Item 2", onClick: vi.fn() },
+      { type: "button", key: "one", label: "Item 1", onClick: vi.fn() },
+      { type: "button", key: "two", label: "Item 2", onClick: vi.fn() },
     ] satisfies SimpleMenuItem[];
 
     render(
@@ -65,8 +65,8 @@ describe("SimpleMenu", () => {
 
   it("Calls the trigger's event handler when clicked, in addition to opening the menu", async () => {
     const items: SimpleMenuItem[] = [
-      { key: "one", label: "Item 1", onClick: vi.fn() },
-      { key: "two", label: "Item 2", onClick: vi.fn() },
+      { type: "button", key: "one", label: "Item 1", onClick: vi.fn() },
+      { type: "button", key: "two", label: "Item 2", onClick: vi.fn() },
     ];
 
     const triggerHandler = vi.fn();
@@ -89,8 +89,8 @@ describe("SimpleMenu", () => {
 
   it("Calls onVisibilityChange when menu opens/closes", async () => {
     const items: SimpleMenuItem[] = [
-      { key: "one", label: "Item 1", onClick: vi.fn() },
-      { key: "two", label: "Item 2", onClick: vi.fn() },
+      { type: "button", key: "one", label: "Item 1", onClick: vi.fn() },
+      { type: "button", key: "two", label: "Item 2", onClick: vi.fn() },
     ];
 
     const visibilityHandler = vi.fn();
@@ -118,8 +118,8 @@ describe("SimpleMenu", () => {
 
   it("Renders link items using React Router's Link", async () => {
     const items: SimpleMenuItem[] = [
-      { key: "one", label: "Item 1", onClick: vi.fn() },
-      { key: "two", label: "Item 2", href: "./woof" },
+      { type: "button", key: "one", label: "Item 1", onClick: vi.fn() },
+      { type: "link", key: "two", label: "Item 2", href: "./woof" },
     ];
 
     render(
@@ -147,8 +147,14 @@ describe("SimpleMenu", () => {
     };
 
     const items: SimpleMenuItem[] = [
-      { key: "one", label: "Item 1", onClick: vi.fn() },
-      { key: "two", label: "Item 2", href: "./woof", LinkComponent },
+      { type: "button", key: "one", label: "Item 1", onClick: vi.fn() },
+      {
+        type: "link",
+        key: "two",
+        label: "Item 2",
+        href: "./woof",
+        LinkComponent,
+      },
     ];
 
     render(
