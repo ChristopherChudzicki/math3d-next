@@ -64,7 +64,7 @@ const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
   const { sceneKey } = useParams();
   const isLegacy = useSelector(select.isLegacy);
-  console.log({ isLegacy });
+
   const [controlsVisibility, setControlsVisibility] = useSearchEnum({
     name: "controls",
     values: CONTROLS_VALUES,

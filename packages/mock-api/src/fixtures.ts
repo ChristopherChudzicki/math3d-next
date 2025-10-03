@@ -48,6 +48,7 @@ const makeFolderScene = (
   const [f0, f1, f2] = folders.map((f) => f.id);
   return {
     key: sceneKey,
+    isLegacy: false,
     title: "Test data for folders",
     items,
     itemOrder: {

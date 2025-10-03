@@ -97,7 +97,7 @@ const BasicDialog: React.FC<BasicDialogProps> = ({
       sx={{}}
     >
       <div style={topRightStyle}>
-        <IconButton onClick={onClose}>
+        <IconButton onClick={onClose} aria-label="Close">
           <Close />
         </IconButton>
       </div>

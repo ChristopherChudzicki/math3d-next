@@ -25,6 +25,7 @@ const db = factory({
     archived: faker.datatype.boolean,
     createdDate: () => faker.date.recent().toUTCString(),
     modifiedDate: () => faker.date.recent().toUTCString(),
+    isLegacy: faker.datatype.boolean,
   },
   user: {
     id: primaryKey(faker.number.int),
@@ -80,8 +81,8 @@ const seedDb = {
   /**
    * Create a schene with given items in a single folder, in the given order
    */
-  withSceneFromItems: (items: MathItem[], { key }: { key?: string } = {}) => {
-    const scene = makeSceneFromItems(items, { key });
+  withSceneFromItems: (items: MathItem[], overrides: Partial<Scene> = {}) => {
+    const scene = makeSceneFromItems(items, overrides);
     return addScene(scene);
   },
   withUser: addUser,
