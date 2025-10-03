@@ -3,7 +3,6 @@ import { renderTestApp, screen, user } from "@/test_util";
 import { makeItem, seedDb } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { findItemByTestId } from "@/features/sceneControls/mathItems/__tests__/__utils__";
-import { use } from "react";
 import { waitForElementToBeRemoved } from "@testing-library/react";
 
 test.each([
