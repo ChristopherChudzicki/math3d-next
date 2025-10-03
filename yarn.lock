@@ -3838,9 +3838,11 @@ __metadata:
   linkType: hard
 
 "@reduxjs/toolkit@npm:^2.2.3":
-  version: 2.6.1
-  resolution: "@reduxjs/toolkit@npm:2.6.1"
+  version: 2.9.0
+  resolution: "@reduxjs/toolkit@npm:2.9.0"
   dependencies:
+    "@standard-schema/spec": "npm:^1.0.0"
+    "@standard-schema/utils": "npm:^0.3.0"
     immer: "npm:^10.0.3"
     redux: "npm:^5.0.1"
     redux-thunk: "npm:^3.1.0"
@@ -3853,7 +3855,7 @@ __metadata:
       optional: true
     react-redux:
       optional: true
-  checksum: 10/62ad00b875115eb2fb5b776665d2dbe71b1ad98f4342f409c67dfb27bd0cd7a13dffd7343bee6f232d0498429361f95541993bb2ecd747ad09a55069bc43303e
+  checksum: 10/d2f1b59c96638d9a36c3709f31f24ec1ce25604f2010eebb89506e6782142dfa3a97bd64f6b4650d9230d1a8a7f09a2dfed5ee2eb7a4454cbeb08fcb8cc6cf36
   languageName: node
   linkType: hard
 
@@ -4020,6 +4022,13 @@ __metadata:
   dependencies:
     glsl-tokenizer: "npm:^2.1.4"
   checksum: 10/67bf67c0fffeafcca61f44739f624766cbe3d30c78bbedc7bbcb4a78b96187483aeb9804d5b5c09c8f0ad11379c7bf5f67dd51ded64434c9b3397dc33faeffe5
+  languageName: node
+  linkType: hard
+
+"@standard-schema/spec@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@standard-schema/spec@npm:1.0.0"
+  checksum: 10/aee780cc1431888ca4b9aba9b24ffc8f3073fc083acc105e3951481478a2f4dc957796931b2da9e2d8329584cf211e4542275f188296c1cdff3ed44fd93a8bc8
   languageName: node
   linkType: hard
 
