@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
-import { BasicDialog } from "@/pages/auth/components/BasicDialog";
-import type { BasicDialogProps } from "@/pages/auth/components/BasicDialog";
+import BasicDialog from "@/util/components/BasicDialog";
+import type { BasicDialogProps } from "@/util/components/BasicDialog";
 import {
   Alert,
   ButtonGroup,

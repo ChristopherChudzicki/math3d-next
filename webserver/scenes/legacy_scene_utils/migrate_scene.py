@@ -105,6 +105,7 @@ def migrate_scene(legacy_scene: LegacyScene):
             "item_order": legacy_scene.dehydrated["sortableTree"],
             "title": legacy_scene.dehydrated["metadata"].get("title", "Untitled"),
             "times_accessed": legacy_scene.times_accessed,
+            "is_legacy": True,
         },
     )
     # These are auto_now_add, auto_now columns and can't be modified

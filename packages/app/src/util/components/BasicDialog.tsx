@@ -94,9 +94,10 @@ const BasicDialog: React.FC<BasicDialogProps> = ({
       onClose={onClose}
       TransitionProps={TransitionProps}
       maxWidth={maxWidth}
+      sx={{}}
     >
       <div style={topRightStyle}>
-        <IconButton onClick={onClose}>
+        <IconButton onClick={onClose} aria-label="Close">
           <Close />
         </IconButton>
       </div>
@@ -135,5 +136,5 @@ const BasicDialog: React.FC<BasicDialogProps> = ({
   );
 };
 
-export { BasicDialog };
+export default BasicDialog;
 export type { BasicDialogProps };

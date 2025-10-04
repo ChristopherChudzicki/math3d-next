@@ -23,6 +23,7 @@ class SceneSerializer(serializers.ModelSerializer):
     )
     createdDate = serializers.DateTimeField(source="created_date", read_only=True)
     modifiedDate = serializers.DateTimeField(source="modified_date", read_only=True)
+    isLegacy = serializers.BooleanField(source="is_legacy", read_only=True)
 
     class Meta:
         model = Scene
@@ -35,6 +36,7 @@ class SceneSerializer(serializers.ModelSerializer):
             "createdDate",
             "modifiedDate",
             "archived",
+            "isLegacy",
         ]
 
         read_only_fields = ["key"]

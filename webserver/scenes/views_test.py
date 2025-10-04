@@ -8,6 +8,26 @@ from authentication.factories import CustomUserFactory
 
 
 @pytest.mark.django_db
+def test_scenes_detail_retrieve():
+    scene = SceneFactory.create()
+    client = JsonAPIClient()
+
+    response = client.get(reverse("scenes-detail", kwargs={"key": scene.key}))
+    data = response.json()
+    assert data == {
+        "key": scene.key,
+        "title": scene.title,
+        "items": scene.items,
+        "itemOrder": scene.item_order,
+        "author": (scene.author.id if scene.author else None),
+        "isLegacy": scene.is_legacy,
+        "archived": scene.archived,
+        "createdDate": scene.created_date.isoformat().replace("+00:00", "Z"),
+        "modifiedDate": scene.modified_date.isoformat().replace("+00:00", "Z"),
+    }
+
+
+@pytest.mark.django_db
 def test_scenes_list_returns_paginated_scenes():
     SceneFactory.create()
     SceneFactory.create(author=None)

@@ -411,6 +411,12 @@ export interface Scene {
    * @memberof Scene
    */
   archived?: boolean;
+  /**
+   *
+   * @type {boolean}
+   * @memberof Scene
+   */
+  isLegacy: boolean;
 }
 /**
  *
@@ -460,6 +466,12 @@ export interface SceneCreate {
    * @memberof SceneCreate
    */
   archived?: boolean;
+  /**
+   *
+   * @type {boolean}
+   * @memberof SceneCreate
+   */
+  isLegacy: boolean;
 }
 /**
  *

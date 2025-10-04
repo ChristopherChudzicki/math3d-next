@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useLogout } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
-import { BasicDialog } from "./components/BasicDialog";
+import BasicDialog from "@/util/components/BasicDialog";
 
 const LogoutPage: React.FC = () => {
   const navigate = useNavigate();

@@ -20,7 +20,7 @@ test("defaultGraphicOrder returns expected values", () => {
     .explicitSurfacePolar({ description: "F2_surfaceB" });
 
   const store = getStore();
-  store.dispatch(actions.setItems({ ...scene, order: scene.itemOrder }));
+  store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
   const state = store.getState();
   const result = defaultGraphicOrder(state);
   const readableResult = Object.fromEntries(

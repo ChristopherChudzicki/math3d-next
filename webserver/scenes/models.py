@@ -98,6 +98,8 @@ class Scene(TimestampedModel):
 
     times_accessed = models.IntegerField(default=0)
 
+    is_legacy = models.BooleanField(default=False)
+
     class Meta:
         indexes = [
             GinIndex(

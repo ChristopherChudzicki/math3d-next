@@ -13,8 +13,12 @@ import TitleInput from "@/features/sceneControls/TitleInput";
 
 import { ToggleKeyboardButton } from "@/features/virtualKeyboard";
 
+import { useSelector } from "react-redux";
+
+import { select } from "@/features/sceneControls/mathItems/sceneSlice";
 import styles from "./MainPage.module.css";
 import Header from "./components/Header";
+import LegacyDialog from "./components/LegacyDialog";
 
 type UseSearchEnumOptions<T extends string = string> = {
   name: string;
@@ -59,6 +63,8 @@ const CONTROLS_VALUES = ["0", "1"] as const;
 const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
   const { sceneKey } = useParams();
+  const isLegacy = useSelector(select.isLegacy);
+
   const [controlsVisibility, setControlsVisibility] = useSearchEnum({
     name: "controls",
     values: CONTROLS_VALUES,
@@ -97,6 +103,7 @@ const MainPage: React.FC = () => {
         />
       </div>
       <ToggleKeyboardButton />
+      {sceneKey && isLegacy ? <LegacyDialog sceneKey={sceneKey} /> : null}
     </div>
   );
 };

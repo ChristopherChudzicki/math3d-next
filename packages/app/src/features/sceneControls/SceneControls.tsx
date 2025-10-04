@@ -53,8 +53,9 @@ const useLoadSceneIntoRedux = (sceneKey?: string) => {
       items: scene.items,
       order: scene.itemOrder,
       title: scene.title ?? "",
+      isLegacy: scene.isLegacy ?? false,
     };
-    dispatch(itemActions.setItems(payload));
+    dispatch(itemActions.setScene(payload));
   }, [dispatch, scene]);
   return { isLoading };
 };
