@@ -36,13 +36,8 @@ interface ParameterFormProps {
 const ParameterForm: React.FC<ParameterFormProps> = (props) => {
   return (
     <>
-      <div
-        style={{ marginLeft: "auto" }}
-        className={classNames(u.dFlex, u.mlAuto)}
-      >
-        {props.nameInput}
-        <ReadonlyMathField value="\in" />
-      </div>
+      {props.nameInput}
+      <ReadonlyMathField value="\in" />
       <div className={u.dFlex}>{props.rangeInput}</div>
     </>
   );
@@ -118,7 +113,7 @@ const DomainForm: React.FC<DomainFormProps> = ({
             key={`param-${i}`}
             nameInput={
               <FieldWidget
-                className={styles["param-input"]}
+                className={classNames(styles["param-input"])}
                 widget={WidgetType.MathValue}
                 error={assignmentErrors[0].paramErrors?.[i]}
                 label={`Name for ${ordinal(i + 1)} parameter`}

@@ -3,8 +3,18 @@
   padding-left: 6px;
   padding-top: 6px;
   padding-bottom: 6px;
-  grid-template-columns: auto min-content;
+  grid-template-columns: min-content min-content min-content;
   align-items: center;
+  justify-content: end;
+}
+
+.parameters > * {
+  max-width: 100px;
+  overflow: auto;
+}
+.parameters > *:focus-within {
+  max-width: 50vw;
+  overflow: auto;
 }
 
 .param-input {
