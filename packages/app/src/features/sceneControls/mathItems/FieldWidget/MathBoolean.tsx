@@ -73,7 +73,6 @@ const MathBoolean: React.FC<
     setShouldUseExpression(false);
   }, [triggerChange]);
   const useExpression = useCallback(() => setShouldUseExpression(true), []);
-
   return (
     <div
       className={classNames(u.dFlex, u.alignItemsCenter, className)}
@@ -82,12 +81,16 @@ const MathBoolean: React.FC<
     >
       <Tooltip arrow title={tooltipTitle}>
         <Switch
-          aria-label={`Toggle property: ${label}`}
           checked={result}
           disabled={shouldUseExpression}
           size="small"
           className={u.mr2}
           onChange={handleSwitchChange}
+          slotProps={{
+            input: {
+              "aria-label": `Toggle property: ${label}`,
+            },
+          }}
         />
       </Tooltip>
       {shouldUseExpression && (

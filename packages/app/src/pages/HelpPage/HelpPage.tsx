@@ -4,7 +4,7 @@ import Container from "@mui/material/Container";
 import Header from "@/util/components/Header";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import ReferencePanel from "./ReferencePanel";
 import { entries } from "./data.compile";
 import { groupEntries } from "./util";

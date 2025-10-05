@@ -39,8 +39,7 @@ const setup = async (initialValue: string) => {
    */
   const findToggle = async (): Promise<HTMLInputElement> => {
     const label = "Toggle property: Label Visible";
-    const labeled = await within(settings).findByLabelText(label);
-    const toggle = within(labeled).getByRole("checkbox");
+    const toggle = await within(settings).findByLabelText(label);
     assertInstanceOf(toggle, HTMLInputElement);
     return toggle;
   };
