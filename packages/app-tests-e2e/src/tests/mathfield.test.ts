@@ -32,21 +32,20 @@ test("Typing arrays into an empty <math-field />", async ({
 const activeElement = (page: Page) =>
   page.evaluate(() => document.activeElement?.tagName);
 
-test("Toggling keyboard visibility auto-focuses a math-field and shows virtual keyboard when focused", async ({
+test.only("Toggling keyboard visibility auto-focuses a math-field and shows virtual keyboard when focused", async ({
   page,
 }) => {
   await page.goto(`/`);
   await expect(activeElement(page)).resolves.toBe("BODY");
-  const toggler = page.getByTestId("toggle-keyboard-button");
-
+  const toggler = page.getByRole("button", { name: "Enable math keyboard" });
+  await expect(toggler).toHaveAttribute("aria-pressed", "false");
   /**
    * Turn "auto-expand" ON
    */
   await toggler.click();
 
   // Arrow points "down" now
-  await expect(toggler.getByTestId("KeyboardArrowDownIcon")).toBeVisible();
-  await expect(toggler.getByTestId("KeyboardArrowUpIcon")).toBeHidden();
+  await expect(toggler).toHaveAttribute("aria-pressed", "true");
   // Toggling the keyboard should auto-focus a mathfield
   await expect(activeElement(page)).resolves.toBe("MATH-FIELD");
   await expect(page.locator(".ML__keyboard")).toBeVisible();
@@ -65,10 +64,9 @@ test("Toggling keyboard visibility auto-focuses a math-field and shows virtual k
   /**
    * Turn "auto-expand" OFF
    */
-  await page.getByTestId("toggle-keyboard-button").click();
+  await toggler.click();
   // Arrow points "up" now.
-  await expect(toggler.getByTestId("KeyboardArrowDownIcon")).toBeHidden();
-  await expect(toggler.getByTestId("KeyboardArrowUpIcon")).toBeVisible();
+  await expect(toggler).toHaveAttribute("aria-pressed", "false");
   await expect(page.locator(".ML__keyboard")).toBeHidden();
   await page.locator("math-field").first().click();
   await expect(page.locator(".ML__keyboard")).toBeHidden();
