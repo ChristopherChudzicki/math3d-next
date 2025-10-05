@@ -32,7 +32,7 @@ test("Typing arrays into an empty <math-field />", async ({
 const activeElement = (page: Page) =>
   page.evaluate(() => document.activeElement?.tagName);
 
-test.only("Toggling keyboard visibility auto-focuses a math-field and shows virtual keyboard when focused", async ({
+test("Toggling keyboard visibility auto-focuses a math-field and shows virtual keyboard when focused", async ({
   page,
 }) => {
   await page.goto(`/`);
