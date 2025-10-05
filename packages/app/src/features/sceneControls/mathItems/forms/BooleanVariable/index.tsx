@@ -62,7 +62,11 @@ const Vector: MathItemForm<MIT.BooleanVariable> = ({ item }) => {
         />
         <div className={style["switch-container"]}>
           <Switch
-            inputProps={{ "aria-label": config.properties.value.label }}
+            slotProps={{
+              input: {
+                "aria-label": config.properties.value.label,
+              },
+            }}
             checked={!!results.value}
             onChange={onToggle}
           />

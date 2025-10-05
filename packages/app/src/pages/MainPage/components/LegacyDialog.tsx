@@ -23,9 +23,8 @@ const LegacyDialog: React.FC<LegacyDialogProps> = ({ sceneKey }) => {
       <Button
         sx={{
           position: "absolute",
-          bottom: 0,
-          right: 0,
-          zIndex: 5000,
+          bottom: 6,
+          right: 6,
         }}
         variant="text"
         size="small"

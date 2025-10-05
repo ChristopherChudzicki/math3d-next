@@ -61,7 +61,9 @@ const ToggleKeyboardButton = () => {
         variant="contained"
         disableElevation
         data-testid="toggle-keyboard-button"
+        aria-label="Enable math keyboard"
         onClick={handleClick}
+        aria-pressed={autoExpand}
       >
         <KeyboardAltOutlinedIcon />
         {autoExpand ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}

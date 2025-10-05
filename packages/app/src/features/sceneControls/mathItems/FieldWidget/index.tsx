@@ -22,14 +22,12 @@ type WidgetProps = IWidgetProps & {
   widget: WidgetType;
 };
 
-const getWidgetComponent = (props: WidgetProps) => {
-  if (props.widget === WidgetType.MathValue) return <MathValue {...props} />;
-  if (props.widget === WidgetType.MathBoolean)
-    return <MathBoolean {...props} />;
-  if (props.widget === WidgetType.Color) return <ColorWidget {...props} />;
-  if (props.widget === WidgetType.AutosizeText)
-    return <AutosizeText {...props} />;
-  if (props.widget === WidgetType.Text) return <TextInput {...props} />;
+const getWidgetComponent = ({ widget, ...props }: WidgetProps) => {
+  if (widget === WidgetType.MathValue) return <MathValue {...props} />;
+  if (widget === WidgetType.MathBoolean) return <MathBoolean {...props} />;
+  if (widget === WidgetType.Color) return <ColorWidget {...props} />;
+  if (widget === WidgetType.AutosizeText) return <AutosizeText {...props} />;
+  if (widget === WidgetType.Text) return <TextInput {...props} />;
   throw new Error(`Unrecognized form widget`);
 };
 
