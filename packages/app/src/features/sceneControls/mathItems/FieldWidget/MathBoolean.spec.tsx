@@ -39,7 +39,7 @@ const setup = async (initialValue: string) => {
    */
   const findToggle = async (): Promise<HTMLInputElement> => {
     const label = "Toggle property: Label Visible";
-    const toggle = await within(settings).findByLabelText(label);
+    const toggle = await within(booleanControl).findByLabelText(label);
     assertInstanceOf(toggle, HTMLInputElement);
     return toggle;
   };

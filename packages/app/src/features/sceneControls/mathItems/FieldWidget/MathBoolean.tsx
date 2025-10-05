@@ -77,6 +77,7 @@ const MathBoolean: React.FC<
     <div
       className={classNames(u.dFlex, u.alignItemsCenter, className)}
       ref={ref}
+      role="group"
       {...others}
     >
       <Tooltip arrow title={tooltipTitle}>
