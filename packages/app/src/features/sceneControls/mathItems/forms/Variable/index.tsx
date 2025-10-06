@@ -48,12 +48,13 @@ const Variable: MathItemForm<MIT.Variable> = ({ item }) => {
   return (
     <ItemTemplate item={item} config={config}>
       <MathAssignment
+        lhsClassName={styles.lhs}
+        rhsClassName={styles.rhs}
         label={configProps.value.label}
         error={errors.value}
         name="value"
         value={item.properties.value}
         onChange={onWidgetChange}
-        rhsClassName={u.flex1}
       />
       <div className={classNames(u.dFlex, u.justifyContentEnd)}>
         <ValueDisplay item={item} className={styles.display} />

@@ -91,7 +91,7 @@ const SliderControls: React.FC<SliderControlsProps> = ({
   const onStepDown = useCallback(() => onStep(-1), [onStep]);
 
   return (
-    <div className={classNames(u.dFlex, u.alignItemsCenter, className)}>
+    <div className={className}>
       <IconButton
         size="small"
         className={styles.playButton}

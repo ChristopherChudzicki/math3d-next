@@ -1,7 +1,14 @@
 .container {
+  --left-gutter-width: 40px;
+  --right-gutter-width: 35px;
+  --leftright-gutter-total: calc(
+    var(--left-gutter-width) + var(--right-gutter-width)
+  );
   background-color: var(--color-background);
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) 35px;
+  grid-template-columns: var(--left-gutter-width) minmax(0, 1fr) var(
+      --right-gutter-width
+    );
   grid-template-rows: auto auto;
   /*
   avoid border-doubling. See https://stackoverflow.com/q/12692089/2747370
@@ -19,7 +26,12 @@
   margin-right: 1px;
 }
 .container:focus-within {
-  grid-template-columns: 40px minmax(auto, calc(100vw - 75px)) 35px;
+  grid-template-columns:
+    var(--left-gutter-width) minmax(
+      auto,
+      calc(100vw - var(--leftright-gutter-total))
+    )
+    var(--right-gutter-width);
   width: fit-content;
   min-width: calc(100% - 2px);
 }
