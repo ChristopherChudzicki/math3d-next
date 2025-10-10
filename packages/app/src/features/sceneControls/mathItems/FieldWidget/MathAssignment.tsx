@@ -14,6 +14,7 @@ import style from "./widget.module.css";
 type ExtraProps = {
   lhsClassName?: string;
   rhsClassName?: string;
+  separatorClassName?: string;
   numDecimalDigits?: number;
 };
 
@@ -47,6 +48,7 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
     className,
     lhsClassName,
     rhsClassName,
+    separatorClassName,
     itemId,
     numDecimalDigits,
     ...others
@@ -93,7 +95,7 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
       </ErrorTooltip>
       {/** Wrapper div similar to ErrorTooltips */}
       <div>
-        <ReadonlyMathField value="=" />
+        <ReadonlyMathField className={separatorClassName} value="=" />
       </div>
       <ErrorTooltip error={errors.rhs}>
         <SmallMathField

@@ -257,6 +257,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
           error={errors.value}
           lhsClassName={styles.displayValueLhs}
           rhsClassName={styles.displayValueRhs}
+          separatorClassName={styles.separator}
           name="value"
           value={item.properties.value}
           onChange={onManualChange}

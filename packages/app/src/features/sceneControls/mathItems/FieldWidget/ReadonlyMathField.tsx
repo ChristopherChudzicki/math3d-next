@@ -16,7 +16,6 @@ const ReadonlyMathField: React.FC<Props> = ({ value, className }) => (
     tabIndex={-1}
     className={classNames(
       u.alignSelfCenter,
-      u.px1,
       styles["readonly-mathfield"],
       styles["field-widget"],
       className,
