@@ -1,3 +1,20 @@
 .display {
   color: var(--color-text-light);
 }
+
+.rhs {
+  overflow: auto;
+  /*
+  Assign some max widths to prevent overflow when active item.
+
+  66px = lhs max width with padding
+  33px = equal sign width (plus a little)
+  12px = a little extra, unsure why...borders?
+  */
+  max-width: calc(100vw - 66px - var(--leftright-gutter-total) - 35px - 12px);
+}
+
+.lhs {
+  overflow: auto;
+  max-width: 60px;
+}

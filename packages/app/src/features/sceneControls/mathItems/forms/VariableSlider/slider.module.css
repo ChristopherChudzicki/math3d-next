@@ -21,10 +21,13 @@
 }
 
 .displayValueLhs {
-  min-width: 20px;
+  width: 36px;
 }
 .displayValueRhs {
-  min-width: 20px;
+  width: 52px;
+}
+.separator {
+  width: 24px;
 }
 
 .sliderRow {
@@ -35,4 +38,8 @@
 
 .sliderControls {
   margin-top: 10px;
+  display: flex;
+  align-items: center;
+  row-gap: 16px;
+  flex-wrap: wrap;
 }
