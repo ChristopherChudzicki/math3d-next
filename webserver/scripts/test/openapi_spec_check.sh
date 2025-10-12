@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 TMPFILE=$(mktemp)
 
-./manage.py spectacular \
+uv run ./manage.py spectacular \
 	--urlconf=main.urls \
 	--file $TMPFILE
 
