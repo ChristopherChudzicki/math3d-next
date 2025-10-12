@@ -45,6 +45,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
 
+ALLOWED_HOSTS: list[str]
 if env("IS_HEROKU"):
     DEBUG = False
     SECURE_SSL_REDIRECT = True
@@ -53,12 +54,10 @@ if env("IS_HEROKU"):
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     # Set ALLOWED_HOSTS for production
-    ALLOWED_HOSTS: list[str] = (
-        env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["api.math3d.org"]
-    )
+    ALLOWED_HOSTS = env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["api.math3d.org"]
 else:
     DEBUG = True
-    ALLOWED_HOSTS: list[str] = (
+    ALLOWED_HOSTS = (
         env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["localhost", "127.0.0.1"]
     )
 
