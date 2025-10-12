@@ -1,13 +1,11 @@
 .PHONY: setup_python
 setup_python: export PIP_DEFAULT_TIMEOUT = 100
 setup_python: export PIP_DISABLE_PIP_VERSION_CHECK = 1
-setup_python: export PIP_DISABLE_PIP_VERSION_CHECK = 1
-setup_python: export POETRY_VERSION = 1.8.3
 setup_python:
-	pip install "poetry==${POETRY_VERSION}"
-	poetry config virtualenvs.create false
-	poetry install
-	poetry build
+	python -m pip install --upgrade pip
+	python -m pip install uv
+	uv sync --all-groups --frozen
+	uv build
 
 .PHONY: help
 # Adapted from https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
@@ -16,13 +14,13 @@ help: ## Show help
 
 .PHONY: devserver
 devserver: ## Start django webserver in dev mode; restarts when crashes
-	./manage.py migrate
-	bash -c "while true; do python ./manage.py runserver 0.0.0.0:8000; sleep 2; done"
+	uv run ./manage.py migrate
+	bash -c "while true; do uv run ./manage.py runserver 0.0.0.0:8000; sleep 2; done"
 
 .PHONY: test
 test: ## Run tests
-	pytest -sv --ds main.test_settings $(ARGS)
+	uv run pytest -sv --ds main.test_settings $(ARGS)
 
 .PHONY: typecheck
 typecheck: ## Run MyPy typechecker
-	mypy .
+	uv run mypy .

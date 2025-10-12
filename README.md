@@ -33,9 +33,34 @@ The math3d backend and database are managed by docker containers. The frontend i
 > docker compose run --rm webserver bash
 > ```
 
-| Command          | Notes               |
-| ---------------- | ------------------- |
-| `make tests`     | Run tests           |
-| `make typecheck` | Typecheck with Mypy |
+The backend now uses [uv](https://docs.astral.sh/uv/) for dependency management. Dependencies are defined in `webserver/pyproject.toml` (PEP 621 format) and locked in `webserver/uv.lock` (generated locally after first sync).
+
+Initial install (one-off) inside the container:
+
+```
+docker compose run --rm webserver make setup_python
+```
+
+Common commands:
+
+| Command          | Notes                               |
+| ---------------- | ----------------------------------- |
+| `make test`      | Run tests (pytest)                  |
+| `make typecheck` | Typecheck with MyPy                 |
+| `make devserver` | Run Django dev server w/ autoreload |
+
+To add a new runtime dependency (inside container):
+
+```
+uv add <package>
+```
+
+To add a dev-only dependency:
+
+```
+uv add --group dev <package>
+```
+
+After modifying dependencies, commit both `pyproject.toml` and the updated `uv.lock`.
 
 See [webserver/Makefile](./webserver/Makefile) for more `make` commands.

@@ -10,7 +10,7 @@ fi
 # Generate OpenAPI Schema
 ##################################################
 docker compose run --rm webserver \
-	./manage.py spectacular \
+	uv run ./manage.py spectacular \
 	--urlconf main.urls \
 	--file ./openapi.yaml \
 	--validate

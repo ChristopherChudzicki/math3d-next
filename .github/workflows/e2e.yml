@@ -50,9 +50,9 @@ jobs:
       - name: Build docker stack
         run: docker compose build
       - name: Migrate backend database
-        run: docker compose run --rm webserver ./manage.py migrate
+        run: docker compose run --rm webserver uv run ./manage.py migrate
       - name: Seed database
-        run: docker compose run --rm webserver ./manage.py seed_test_data
+        run: docker compose run --rm webserver uv run ./manage.py seed_test_data
       - name: Start docker stack
         run: docker compose up -d
       - name: Install dependencies
