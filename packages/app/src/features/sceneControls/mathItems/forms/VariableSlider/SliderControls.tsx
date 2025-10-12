@@ -10,7 +10,6 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
 import { assertNotNil } from "@/util";
 import classNames from "classnames";
-import u from "@/util/styles/utils.module.css";
 import styles from "./SliderControls.module.css";
 
 const btnLabels = {
