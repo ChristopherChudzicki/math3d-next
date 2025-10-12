@@ -22,12 +22,17 @@ logger = logging.getLogger(__name__)
 
 env = environ.Env(
     CORS_ALLOWED_ORIGINS=(list, []),
+    SECRET_KEY=(str, ""),
     MAILJET_API_KEY=(str, ""),
     MAILJET_SECRET_KEY=(str, ""),
     DEFAULT_FROM_EMAIL=(str, ""),
     SERVER_EMAIL=(str, ""),
     APP_BASE_URL=(str, ""),
     INGESTION_DATABASE_URL=(str, ""),
+    ALLOWED_HOSTS=(list, []),
+    # Heroku
+    IS_HEROKU=(bool, False),
+    #
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -38,14 +43,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-g4fiiz=+pm)76t@vm1l0694kpcm5t1yb#5k2lb_l6uyn7fd$dk"
+SECRET_KEY = env("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS: list[str] = []
+if env("IS_HEROKU"):
+    DEBUG = False
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    # Set ALLOWED_HOSTS for production
+    ALLOWED_HOSTS: list[str] = (
+        env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["api.math3d.org"]
+    )
+else:
+    DEBUG = True
+    ALLOWED_HOSTS: list[str] = (
+        env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["localhost", "127.0.0.1"]
+    )
 
 SITE_NAME = "Math3d"
+
 
 # Application definition
 
@@ -80,6 +98,7 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -231,11 +250,11 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
-
+### Static files (CSS, JavaScript, Images)
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATIC_URL = "static/"
+# Enable WhiteNoise's GZip compression of static assets.
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -251,11 +270,5 @@ SPECTACULAR_SETTINGS = {
     "ENUM_GENERATE_CHOICE_DESCRIPTION": True,
     "COMPONENT_SPLIT_REQUEST": True,
 }
-
-# Configure Django App for Heroku.
-if os.environ.get("IS_HEROKU"):
-    import django_heroku  # type: ignore
-
-    django_heroku.settings(locals())
 
 INGESTION_DATABASE_URL = env("INGESTION_DATABASE_URL")
