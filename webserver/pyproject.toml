@@ -1,9 +1,3 @@
-############################################################
-# Migrated from Poetry to uv (PEP 621 + Hatch build backend)
-# Runtime dependencies live in [project]. Development / test
-# dependencies live under [tool.uv.dependency-groups].
-############################################################
-
 [project]
 name = "math3d-webserver"
 version = "0.1.0"

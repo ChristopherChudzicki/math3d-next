@@ -33,7 +33,7 @@ The math3d backend and database are managed by docker containers. The frontend i
 > docker compose run --rm webserver bash
 > ```
 
-The backend now uses [uv](https://docs.astral.sh/uv/) for dependency management (migrated from Poetry). Dependencies are defined in `webserver/pyproject.toml` (PEP 621 format) and locked in `webserver/uv.lock` (generated locally after first sync).
+The backend now uses [uv](https://docs.astral.sh/uv/) for dependency management. Dependencies are defined in `webserver/pyproject.toml` (PEP 621 format) and locked in `webserver/uv.lock` (generated locally after first sync).
 
 Initial install (one-off) inside the container:
 
