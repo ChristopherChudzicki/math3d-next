@@ -15,6 +15,7 @@ help: ## Show help
 .PHONY: devserver
 devserver: ## Start django webserver in dev mode; restarts when crashes
 	uv run ./manage.py migrate
+	uv run ./manage.py collectstatic --noinput --verbosity=2
 	bash -c "while true; do uv run ./manage.py runserver 0.0.0.0:8000; sleep 2; done"
 
 .PHONY: test

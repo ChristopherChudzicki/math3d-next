@@ -59,7 +59,7 @@ if env("IS_HEROKU"):
     # Set ALLOWED_HOSTS for production
     ALLOWED_HOSTS = env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["api.math3d.org"]
 else:
-    DEBUG = True
+    DEBUG = False
     ALLOWED_HOSTS = (
         env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["localhost", "127.0.0.1"]
     )
@@ -317,6 +317,12 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+# Ensure DRF static files are collected
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
