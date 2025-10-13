@@ -20,6 +20,7 @@ dependencies = [
 	"django-anymail[mailjet]>=10.2,<11.0",
 	"django-filter>=23.5,<24.0.0",
 	"psycopg>=3.2.10",
+	"whitenoise>=6.11.0",
 ]
 
 [dependency-groups]
@@ -61,4 +62,4 @@ ignore_missing_imports = true
 django_settings_module = "main.settings"
 
 [tool.pytest.ini_options]
-testpaths = []
+DJANGO_SETTINGS_MODULE = "main.test_settings"

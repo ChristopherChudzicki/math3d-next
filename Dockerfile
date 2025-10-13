@@ -9,6 +9,8 @@ RUN pip install --no-cache-dir uv
 COPY webserver/pyproject.toml ./
 COPY webserver/uv.lock ./
 
+# Set virtual environment location outside the mounted directory
+ENV UV_PROJECT_ENVIRONMENT=/app/.venv
 # Sync dependencies (no project source yet so this layer caches if deps unchanged)
 RUN uv sync --frozen --all-groups || uv sync --all-groups
 

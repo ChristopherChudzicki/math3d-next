@@ -19,7 +19,7 @@ devserver: ## Start django webserver in dev mode; restarts when crashes
 
 .PHONY: test
 test: ## Run tests
-	uv run pytest -sv --ds main.test_settings $(ARGS)
+	uv run pytest -sv $(ARGS)
 
 .PHONY: typecheck
 typecheck: ## Run MyPy typechecker

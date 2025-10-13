@@ -35,6 +35,7 @@ services:
     command: make devserver
     volumes:
       - ./webserver:/src/webserver
+      - venv-data:/app/.venv # Preserve virtual environment
     networks:
       default-network:
     depends_on:
@@ -42,3 +43,6 @@ services:
         condition: service_healthy
     ports:
       - "8000:8000"
+
+volumes:
+  venv-data:
