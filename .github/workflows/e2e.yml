@@ -88,8 +88,27 @@ jobs:
         run: yarn preview &
 
       # Install Playwright browsers while services are starting
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "PLAYWRIGHT_VERSION=$(yarn workspace app-tests-e2e list --pattern @playwright/test --depth=0 --json | jq -r '.data.trees[0].children[0].version')" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}-${{ runner.os }}
+          restore-keys: |
+            playwright-browsers-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}-
+            playwright-browsers-
+
       - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: yarn workspace app-tests-e2e playwright install --with-deps
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: yarn workspace app-tests-e2e playwright install-deps
 
       # Wait for services to be ready
       - name: Wait for webserver
