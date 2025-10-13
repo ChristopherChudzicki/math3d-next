@@ -30,6 +30,7 @@ env = environ.Env(
     APP_BASE_URL=(str, ""),
     INGESTION_DATABASE_URL=(str, ""),
     ALLOWED_HOSTS=(list, []),
+    ENV=(str, ""),
     # Heroku
     IS_HEROKU=(bool, False),
     #
@@ -60,6 +61,8 @@ else:
     ALLOWED_HOSTS = (
         env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["localhost", "127.0.0.1"]
     )
+if env("ENV") == "ci":
+    DEBUG = False
 
 SITE_NAME = "Math3d"
 

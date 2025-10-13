@@ -33,6 +33,7 @@ jobs:
       DEFAULT_FROM_EMAIL: "no-reply@math3d-local.org"
       SERVER_EMAIL: "maintainers@math3d-local.org"
       CORS_ALLOWED_ORIGINS: "http://localhost:3000"
+      ENV: "ci"
 
     services:
       postgres:
