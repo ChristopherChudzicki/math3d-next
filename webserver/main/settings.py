@@ -32,7 +32,10 @@ env = environ.Env(
     ALLOWED_HOSTS=(list, []),
     # Heroku
     IS_HEROKU=(bool, False),
-    #
+    # Logging
+    LOG_LEVEL=(str, "INFO"),
+    DJANGO_LOG_LEVEL=(str, "INFO"),
+    DRF_LOG_LEVEL=(str, "INFO"),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -63,6 +66,58 @@ else:
 
 SITE_NAME = "Math3d"
 
+# Logging configuration
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose" if not DEBUG else "simple",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": env("LOG_LEVEL"),
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": env("DJANGO_LOG_LEVEL"),
+            "propagate": False,
+        },
+        "rest_framework": {
+            "handlers": ["console"],
+            "level": env("DRF_LOG_LEVEL"),
+            "propagate": False,
+        },
+        "authentication": {
+            "handlers": ["console"],
+            "level": env("LOG_LEVEL"),
+            "propagate": False,
+        },
+        "scenes": {
+            "handlers": ["console"],
+            "level": env("LOG_LEVEL"),
+            "propagate": False,
+        },
+        "main": {
+            "handlers": ["console"],
+            "level": env("LOG_LEVEL"),
+            "propagate": False,
+        },
+    },
+}
 
 # Application definition
 
