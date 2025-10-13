@@ -94,7 +94,7 @@ jobs:
       # Wait for services to be ready
       - name: Wait for webserver
         run: |
-          timeout 60s bash -c 'until curl -f http://localhost:8000/api/; do sleep 2; done'
+          timeout 60s bash -c 'until curl -f http://localhost:8000/v0/; do sleep 2; done'
       - name: Wait for frontend
         run: |
           timeout 60s bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
