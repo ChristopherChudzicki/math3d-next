@@ -27,42 +27,79 @@ jobs:
       TEST_USER_ADMIN_PASSWORD: ${{ vars.TEST_USER_ADMIN_PASSWORD }}
       TEST_USER_STATIC_EMAIL: ${{ vars.TEST_USER_STATIC_EMAIL }}
       TEST_USER_STATIC_PASSWORD: ${{ vars.TEST_USER_STATIC_PASSWORD }}
+      # Database configuration
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/math3d # pragma: allowlist secret
+      SECRET_KEY: "test-secret-key" # pragma: allowlist secret
+      DEFAULT_FROM_EMAIL: "no-reply@math3d-local.org"
+      SERVER_EMAIL: "maintainers@math3d-local.org"
+      CORS_ALLOWED_ORIGINS: "http://localhost:3000"
+
+    services:
+      postgres:
+        image: postgres:16.8
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres # pragma: allowlist secret
+          POSTGRES_DB: math3d
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "20.19.5"
           cache: "yarn"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - run: corepack enable
-      - name: Write env file for docker
-        run: |
-          echo "APP_BASE_URL=$APP_BASE_URL" >> .env
-          echo "VITE_API_BASE_URL=$VITE_API_BASE_URL" >> .env
-          echo "VITE_LEGACY_APP_BASE_URL=$VITE_LEGACY_APP_BASE_URL" >> .env
-          echo ""
-          echo "TEST_API_URL=$TEST_API_URL" >> .env
-          echo "TEST_APP_URL=$TEST_APP_URL" >> .env
-          echo "TEST_EMAIL_PROVIDER=$TEST_EMAIL_PROVIDER" >> .env
-          echo "TEST_USER_ADMIN_EMAIL=$TEST_USER_ADMIN_EMAIL" >> .env
-          echo "TEST_USER_ADMIN_PASSWORD=$TEST_USER_ADMIN_PASSWORD" >> .env
-          echo "TEST_USER_STATIC_EMAIL=$TEST_USER_STATIC_EMAIL" >> .env
-          echo "TEST_USER_STATIC_PASSWORD=$TEST_USER_STATIC_PASSWORD" >> .env
-      - name: Build docker stack
-        run: docker compose build
-      - name: Migrate backend database
-        run: docker compose run --rm webserver uv run ./manage.py migrate
+
+      # Install Python dependencies and set up webserver
+      - name: Install uv
+        run: pip install uv
+      - name: Install Python dependencies
+        working-directory: ./webserver
+        run: uv sync --all-groups --frozen
+
+      # Run database migrations and seed data
+      - name: Run database migrations
+        working-directory: ./webserver
+        run: uv run ./manage.py migrate
       - name: Seed database
-        run: docker compose run --rm webserver uv run ./manage.py seed_test_data
-      - name: Start docker stack
-        run: docker compose up -d
+        working-directory: ./webserver
+        run: uv run ./manage.py seed_test_data
+
+      # Start webserver in background
+      - name: Start webserver
+        working-directory: ./webserver
+        run: uv run ./manage.py runserver 0.0.0.0:8000 &
+
+      # Frontend setup and build
       - name: Install dependencies
         run: yarn install --immutable
       - name: Build Frontend
         run: yarn build
       - name: Start Frontend
         run: yarn preview &
+
+      # Install Playwright browsers while services are starting
       - name: Install Playwright Browsers
         run: yarn workspace app-tests-e2e playwright install --with-deps
+
+      # Wait for services to be ready
+      - name: Wait for webserver
+        run: |
+          timeout 60s bash -c 'until curl -f http://localhost:8000/api/; do sleep 2; done'
+      - name: Wait for frontend
+        run: |
+          timeout 60s bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
+
+      # Run tests
       - name: Run Playwright tests
         run: yarn test-e2e
         env:
