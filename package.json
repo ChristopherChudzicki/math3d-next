@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "package": "^1.0.1",
-    "prettier": "4.0.0-alpha.8"
+    "prettier": "4.0.0-alpha.13"
   },
   "msw": {
     "workerDirectory": "packages/app/public"
