@@ -1,0 +1,103 @@
+name: Promote RC to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      rc_tag:
+        description: "RC tag to promote (e.g., rc/2025.12.20.1)"
+        required: true
+        type: string
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  validate-rc:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract_version.outputs.version }}
+      prod_tag: ${{ steps.extract_version.outputs.prod_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate RC tag exists
+        run: |
+          if ! git rev-parse "${{ github.event.inputs.rc_tag }}" >/dev/null 2>&1; then
+            echo "Error: RC tag '${{ github.event.inputs.rc_tag }}' does not exist"
+            exit 1
+          fi
+          echo "RC tag '${{ github.event.inputs.rc_tag }}' found"
+
+      - name: Extract version from RC tag
+        id: extract_version
+        run: |
+          RC_TAG="${{ github.event.inputs.rc_tag }}"
+          # Remove 'rc/' prefix to get version
+          VERSION=$(echo $RC_TAG | sed 's/^rc\///')
+          PROD_TAG="v$VERSION"
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "prod_tag=$PROD_TAG" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Production tag: $PROD_TAG"
+
+      - name: Check if production tag already exists
+        run: |
+          if git rev-parse "${{ steps.extract_version.outputs.prod_tag }}" >/dev/null 2>&1; then
+            echo "Error: Production tag '${{ steps.extract_version.outputs.prod_tag }}' already exists"
+            exit 1
+          fi
+          echo "Production tag is available"
+
+  create-prod-tag:
+    needs: validate-rc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Create production tag from RC
+        run: |
+          # Get the commit SHA that the RC tag points to
+          RC_SHA=$(git rev-parse "${{ github.event.inputs.rc_tag }}")
+
+          # Create production tag pointing to the same commit
+          git tag -a "${{ needs.validate-rc.outputs.prod_tag }}" $RC_SHA -m "Production release ${{ needs.validate-rc.outputs.version }}"
+          git push origin "${{ needs.validate-rc.outputs.prod_tag }}"
+
+      - name: Update GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.validate-rc.outputs.prod_tag }}
+          name: Release ${{ needs.validate-rc.outputs.version }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          body: |
+            ## Production Release ${{ needs.validate-rc.outputs.version }}
+
+            This release was promoted from RC tag `${{ github.event.inputs.rc_tag }}`.
+
+            ---
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    needs: [validate-rc, create-prod-tag]
+    uses: ./.github/workflows/deploy-reusable.yml
+    with:
+      environment: production
+      version: ${{ needs.validate-rc.outputs.version }}
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}

@@ -39,6 +39,7 @@ export default defineConfig({
       VITE_API_BASE_URL: Schema.string(),
       VITE_LEGACY_APP_BASE_URL: Schema.string(),
       VITE_ISSUE_URL: Schema.string(),
+      VITE_APP_VERSION: Schema.string.optional(),
     }),
     react(),
     viteTsconfigPaths(),
@@ -74,5 +75,6 @@ export default defineConfig({
   },
   define: {
     __PLAYWRIGHT__: process.env.PLAYWRIGHT,
+    __APP_VERSION__: JSON.stringify(process.env.VITE_APP_VERSION ?? "unknown"),
   },
 });
