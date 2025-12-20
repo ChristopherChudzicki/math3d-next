@@ -75,6 +75,5 @@ export default defineConfig({
   },
   define: {
     __PLAYWRIGHT__: process.env.PLAYWRIGHT,
-    __APP_VERSION__: JSON.stringify(process.env.VITE_APP_VERSION ?? "unknown"),
   },
 });
