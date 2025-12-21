@@ -11,6 +11,11 @@ on:
         description: "Version number to deploy"
         required: true
         type: string
+      dry_run:
+        description: "If true, build artifacts but skip deployment"
+        required: false
+        type: boolean
+        default: false
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
@@ -20,19 +25,13 @@ on:
         required: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
-      AWS_S3_BUCKET: ${{ vars.AWS_S3_BUCKET }}
       SKIP_YARN_COREPACK_CHECK: true
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -51,6 +50,32 @@ jobs:
           VITE_LEGACY_APP_BASE_URL: ${{ vars.VITE_LEGACY_APP_BASE_URL }}
           VITE_ISSUE_URL: ${{ vars.VITE_ISSUE_URL }}
           VITE_APP_VERSION: ${{ inputs.version }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.dry_run && format('frontend-build-{0}', inputs.version) || 'frontend-build' }}
+          path: packages/app/dist/
+          retention-days: ${{ inputs.dry_run && 30 || 1 }}
+
+  deploy:
+    needs: build
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+      AWS_S3_BUCKET: ${{ vars.AWS_S3_BUCKET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: packages/app/dist/
 
       - name: Deploy to AWS S3
         run: aws s3 cp --recursive packages/app/dist s3://${{ vars.AWS_S3_BUCKET }}/
