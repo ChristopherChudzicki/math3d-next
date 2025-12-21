@@ -1,4 +1,4 @@
-name: Deploy (Reusable)
+name: 🔒 _reusable deploy
 
 on:
   workflow_call:
