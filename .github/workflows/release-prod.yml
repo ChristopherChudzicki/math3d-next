@@ -17,6 +17,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Validate branch is main
+        run: |
+          if [ "${{ github.ref_name }}" != "main" ]; then
+            echo "Error: This workflow must be run from the 'main' branch"
+            echo "Current branch: ${{ github.ref_name }}"
+            exit 1
+          fi
+          echo "Running from main branch ✓"
+
       - name: Fetch tags
         run: git fetch --tags --force
 
