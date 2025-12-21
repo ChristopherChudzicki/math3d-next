@@ -53,6 +53,20 @@ jobs:
           echo "Version: $VERSION"
           echo "Production tag: $PROD_TAG"
 
+      - name: Display version in summary
+        run: |
+          echo "# 🚀 Production Release Version" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ steps.extract_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Production Tag:** \`${{ steps.extract_version.outputs.prod_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Promoted from RC:** \`${{ steps.find_latest_rc.outputs.rc_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** Deploying to production..." >> $GITHUB_STEP_SUMMARY
+
       - name: Check if production tag already exists
         run: |
           if git rev-parse "${{ steps.extract_version.outputs.prod_tag }}" >/dev/null 2>&1; then
