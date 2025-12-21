@@ -68,6 +68,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**RC Tag:** \`${{ steps.generate_version.outputs.rc_tag }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release:** [View Pre-release](https://github.com/${{ github.repository }}/releases/tag/${{ steps.generate_version.outputs.rc_tag }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Next step:** Review the pre-release and artifacts, then promote to production." >> $GITHUB_STEP_SUMMARY

@@ -63,6 +63,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Promoted from RC:** \`${{ steps.find_latest_rc.outputs.rc_tag }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release:** [View Release](https://github.com/${{ github.repository }}/releases/tag/${{ steps.extract_version.outputs.prod_tag }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status:** Deploying to production..." >> $GITHUB_STEP_SUMMARY
