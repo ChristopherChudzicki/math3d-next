@@ -1,4 +1,4 @@
-name: Promote RC to Production
+name: Release (Production)
 
 on:
   workflow_dispatch:

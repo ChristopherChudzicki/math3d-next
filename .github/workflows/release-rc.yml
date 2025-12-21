@@ -1,4 +1,4 @@
-name: Release RC
+name: Release (RC)
 
 on:
   workflow_dispatch:
