@@ -16,8 +16,9 @@ jobs:
       rc_tag: ${{ steps.generate_version.outputs.rc_tag }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+
+      - name: Fetch tags
+        run: git fetch --tags --force
 
       - name: Configure Git
         run: |
