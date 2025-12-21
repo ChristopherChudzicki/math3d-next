@@ -1,12 +1,7 @@
-name: Release Production
+name: Promote RC to Production
 
 on:
   workflow_dispatch:
-    inputs:
-      rc_tag:
-        description: "RC tag to promote (e.g., rc/2025.12.20.1)"
-        required: true
-        type: string
 
 concurrency:
   group: production
@@ -16,6 +11,7 @@ jobs:
   validate-rc:
     runs-on: ubuntu-latest
     outputs:
+      rc_tag: ${{ steps.find_latest_rc.outputs.rc_tag }}
       version: ${{ steps.extract_version.outputs.version }}
       prod_tag: ${{ steps.extract_version.outputs.prod_tag }}
     steps:
@@ -24,18 +20,21 @@ jobs:
       - name: Fetch tags
         run: git fetch --tags --force
 
-      - name: Validate RC tag exists
+      - name: Find latest RC tag
+        id: find_latest_rc
         run: |
-          if ! git rev-parse "${{ github.event.inputs.rc_tag }}" >/dev/null 2>&1; then
-            echo "Error: RC tag '${{ github.event.inputs.rc_tag }}' does not exist"
+          LATEST_RC=$(git tag -l "rc/*" | sort -V | tail -n 1)
+          if [ -z "$LATEST_RC" ]; then
+            echo "Error: No RC tags found"
             exit 1
           fi
-          echo "RC tag '${{ github.event.inputs.rc_tag }}' found"
+          echo "rc_tag=$LATEST_RC" >> $GITHUB_OUTPUT
+          echo "Latest RC tag: $LATEST_RC"
 
       - name: Extract version from RC tag
         id: extract_version
         run: |
-          RC_TAG="${{ github.event.inputs.rc_tag }}"
+          RC_TAG="${{ steps.find_latest_rc.outputs.rc_tag }}"
           # Remove 'rc/' prefix to get version
           VERSION=$(echo $RC_TAG | sed 's/^rc\///')
           PROD_TAG="v$VERSION"
@@ -70,7 +69,7 @@ jobs:
       - name: Create production tag from RC
         run: |
           # Get the commit SHA that the RC tag points to
-          RC_SHA=$(git rev-parse "${{ github.event.inputs.rc_tag }}")
+          RC_SHA=$(git rev-parse "${{ needs.validate-rc.outputs.rc_tag }}")
 
           # Create production tag pointing to the same commit
           git tag -a "${{ needs.validate-rc.outputs.prod_tag }}" $RC_SHA -m "Production release ${{ needs.validate-rc.outputs.version }}"
@@ -87,10 +86,7 @@ jobs:
           body: |
             ## Production Release ${{ needs.validate-rc.outputs.version }}
 
-            This release was promoted from RC tag `${{ github.event.inputs.rc_tag }}`.
-
-            ---
-        env:
+            This release was promoted from RC tag `${{ needs.validate-rc.outputs.rc_tag }}`.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
