@@ -1,0 +1,99 @@
+name: Create RC Release
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: rc-release
+  cancel-in-progress: false
+
+jobs:
+  create-rc:
+    runs-on: ubuntu-latest
+    environment: rc
+    outputs:
+      version: ${{ steps.generate_version.outputs.version }}
+      rc_tag: ${{ steps.generate_version.outputs.rc_tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch tags
+        run: git fetch --tags --force
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Generate version number
+        id: generate_version
+        run: |
+          # Generate date-based version: YYYY.MM.DD.N
+          DATE=$(date -u +"%Y.%m.%d")
+
+          # Find the latest RC tag for today
+          LATEST_RC=$(git tag -l "rc/$DATE.*" | sort -V | tail -n 1)
+
+          if [ -z "$LATEST_RC" ]; then
+            # No RC for today yet, start with .1
+            SEQUENCE=1
+          else
+            # Extract sequence number and increment
+            SEQUENCE=$(echo $LATEST_RC | sed "s/rc\/$DATE\.//")
+            SEQUENCE=$((SEQUENCE + 1))
+          fi
+
+          VERSION="$DATE.$SEQUENCE"
+          RC_TAG="rc/$VERSION"
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "rc_tag=$RC_TAG" >> $GITHUB_OUTPUT
+          echo "Generated version: $VERSION"
+          echo "RC tag: $RC_TAG"
+
+      - name: Create RC tag
+        run: |
+          git tag -a "${{ steps.generate_version.outputs.rc_tag }}" -m "Release Candidate ${{ steps.generate_version.outputs.version }}"
+          git push origin "${{ steps.generate_version.outputs.rc_tag }}"
+
+      - name: Find last production tag
+        id: last_prod_tag
+        run: |
+          LAST_PROD_TAG=$(git tag -l "v*" | sort -V | tail -n 1)
+          if [ -z "$LAST_PROD_TAG" ]; then
+            echo "last_tag=" >> $GITHUB_OUTPUT
+          else
+            echo "last_tag=$LAST_PROD_TAG" >> $GITHUB_OUTPUT
+          fi
+          echo "Last production tag: $LAST_PROD_TAG"
+
+      - name: Create GitHub pre-release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.generate_version.outputs.rc_tag }}
+          name: Release Candidate ${{ steps.generate_version.outputs.version }}
+          generate_release_notes: true
+          draft: false
+          prerelease: true
+          body: |
+            ## Release Candidate ${{ steps.generate_version.outputs.version }}
+
+            This is a release candidate. Review the changes below and test before promoting to production.
+
+            **To promote to production**: Run the "Promote RC to Production" workflow with tag `${{ steps.generate_version.outputs.rc_tag }}`
+
+            ---
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    needs: create-rc
+    uses: ./.github/workflows/deploy-reusable.yml
+    with:
+      environment: rc
+      version: ${{ needs.create-rc.outputs.version }}
+      dry_run: true
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}

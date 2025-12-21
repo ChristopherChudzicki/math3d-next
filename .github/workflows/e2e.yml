@@ -18,6 +18,7 @@ jobs:
       SKIP_YARN_COREPACK_CHECK: true
       APP_BASE_URL: ${{ vars.APP_BASE_URL }}
       VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+      VITE_APP_VERSION: ci
       VITE_LEGACY_APP_BASE_URL: ${{ vars.VITE_LEGACY_APP_BASE_URL }}
       VITE_ISSUE_URL: ${{ vars.VITE_ISSUE_URL }}
       TEST_API_URL: ${{ vars.TEST_API_URL }}
@@ -38,6 +39,7 @@ jobs:
         run: |
           echo "APP_BASE_URL=$APP_BASE_URL" >> .env
           echo "VITE_API_BASE_URL=$VITE_API_BASE_URL" >> .env
+          echo "VITE_APP_VERSION=$VITE_APP_VERSION" >> .env
           echo "VITE_LEGACY_APP_BASE_URL=$VITE_LEGACY_APP_BASE_URL" >> .env
           echo ""
           echo "TEST_API_URL=$TEST_API_URL" >> .env

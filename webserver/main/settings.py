@@ -36,6 +36,8 @@ env = environ.Env(
     LOG_LEVEL=(str, "INFO"),
     DJANGO_LOG_LEVEL=(str, "INFO"),
     DRF_LOG_LEVEL=(str, "INFO"),
+    # Version
+    APP_VERSION=(str, "unknown"),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,6 +49,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
+
+# Application version
+APP_VERSION = env("APP_VERSION")
 
 ALLOWED_HOSTS: list[str]
 if env("IS_HEROKU"):
