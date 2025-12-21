@@ -60,6 +60,18 @@ jobs:
           echo "Generated version: $VERSION"
           echo "RC tag: $RC_TAG"
 
+      - name: Display version in summary
+        run: |
+          echo "# 🎯 RC Release Version" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ steps.generate_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**RC Tag:** \`${{ steps.generate_version.outputs.rc_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Next step:** Review the pre-release and artifacts, then promote to production." >> $GITHUB_STEP_SUMMARY
+
       - name: Create RC tag
         run: |
           git tag -a "${{ steps.generate_version.outputs.rc_tag }}" -m "Release Candidate ${{ steps.generate_version.outputs.version }}"
