@@ -12,7 +12,7 @@
     "@math3d/api": "workspace:^",
     "@math3d/eslint-config": "workspace:^",
     "@math3d/mock-api": "workspace:^",
-    "@playwright/test": "^1.52.0",
+    "@playwright/test": "^1.57.0",
     "axios": "^1.6.7",
     "dotenv": "^16.3.1",
     "envalid": "^8.0.0",

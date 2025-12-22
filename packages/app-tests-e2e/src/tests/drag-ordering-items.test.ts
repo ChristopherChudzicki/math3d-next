@@ -14,7 +14,7 @@ const drag = async (
   {
     sourceOffset = { x: 100, y: 5 },
     targetOffset = { x: 25, y: 25 },
-    steps = 25,
+    steps = 10, // Reduced from 25 to avoid timeout under load
     downTimeout = 150,
   } = {},
 ) => {
@@ -95,10 +95,15 @@ test.use({ user });
 test("Dragging item X after item Y", async ({ page, prepareScene }) => {
   const key = await prepareScene(makeFolderScene());
   await page.goto(`/${key}`);
+  // Wait for sortable items to be ready
+  await page.locator("css=[aria-roledescription='sortable']").first().waitFor();
   const source = getItem(page, "F2", "P2a");
   const target = getItem(page, "F3", "P3b");
 
   await expect(await getAllItemDescriptions(page)).toEqual(initialOrder);
+  // Ensure elements are visible and stable before dragging
+  await expect(source).toBeVisible();
+  await expect(target).toBeVisible();
   await drag(page, source, target);
   const after = await getAllItemDescriptions(page);
   expect(after).toEqual("F1 P1a P1b F2 P2b F3 P3a P3b P2a".split(" "));
@@ -107,10 +112,15 @@ test("Dragging item X after item Y", async ({ page, prepareScene }) => {
 test("Dragging item X before item Y", async ({ page, prepareScene }) => {
   const key = await prepareScene(makeFolderScene());
   await page.goto(`/${key}`);
+  // Wait for sortable items to be ready
+  await page.locator("css=[aria-roledescription='sortable']").first().waitFor();
   const source = getItem(page, "F3", "P3b");
   const target = getItem(page, "F2", "P2b");
 
   await expect(await getAllItemDescriptions(page)).toEqual(initialOrder);
+  // Ensure elements are visible and stable before dragging
+  await expect(source).toBeVisible();
+  await expect(target).toBeVisible();
   await drag(page, source, target);
   const after = await getAllItemDescriptions(page);
   expect(after).toEqual("F1 P1a P1b F2 P2a P3b P2b F3 P3a".split(" "));
@@ -119,10 +129,15 @@ test("Dragging item X before item Y", async ({ page, prepareScene }) => {
 test("Dragging folder X after folder Y", async ({ page, prepareScene }) => {
   const key = await prepareScene(makeFolderScene());
   await page.goto(`/${key}`);
+  // Wait for sortable items to be ready
+  await page.locator("css=[aria-roledescription='sortable']").first().waitFor();
   const source = getItem(page, "F2");
   const target = getItem(page, "F3");
 
   await expect(await getAllItemDescriptions(page)).toEqual(initialOrder);
+  // Ensure elements are visible and stable before dragging
+  await expect(source).toBeVisible();
+  await expect(target).toBeVisible();
   await drag(page, source, target);
   const after = await getAllItemDescriptions(page);
   expect(after).toEqual("F1 P1a P1b F3 P3a P3b F2 P2a P2b".split(" "));
@@ -131,10 +146,15 @@ test("Dragging folder X after folder Y", async ({ page, prepareScene }) => {
 test("Dragging folder X before folder Y", async ({ page, prepareScene }) => {
   const key = await prepareScene(makeFolderScene());
   await page.goto(`/${key}`);
+  // Wait for sortable items to be ready
+  await page.locator("css=[aria-roledescription='sortable']").first().waitFor();
   const source = getItem(page, "F3");
   const target = getItem(page, "F2");
 
   await expect(await getAllItemDescriptions(page)).toEqual(initialOrder);
+  // Ensure elements are visible and stable before dragging
+  await expect(source).toBeVisible();
+  await expect(target).toBeVisible();
   await drag(page, source, target, { targetOffset: { x: 5, y: -40 } });
   const after = await getAllItemDescriptions(page);
   expect(after).toEqual("F1 P1a P1b F3 P3a P3b F2 P2a P2b".split(" "));

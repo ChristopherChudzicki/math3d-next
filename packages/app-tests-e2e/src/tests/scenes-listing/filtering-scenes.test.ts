@@ -66,6 +66,8 @@ test("Archiving and unarchiving scenes", async ({ page, prepareScene }) => {
   await expect(sceneItem1.root).not.toBeVisible();
   await expect(sceneItem2.root).toBeVisible();
 
+  // Wait for checkbox to be available after archive action
+  await expect(includeArchived).toBeEnabled();
   await includeArchived.click();
   await expect(includeArchived).toBeChecked();
 
@@ -76,6 +78,8 @@ test("Archiving and unarchiving scenes", async ({ page, prepareScene }) => {
   await sceneItem1.menuTrigger().click();
   await sceneItem1.menuItem.unarchive().click();
 
+  // Wait for checkbox to be available after unarchive action
+  await expect(includeArchived).toBeEnabled();
   await includeArchived.click();
   await expect(includeArchived).not.toBeChecked();
 

@@ -51,7 +51,7 @@ test("Building a custom scene", async ({ page, prepareScene }) => {
 
     const zOrder = page.getByLabel("Z-Order", { exact: true });
     expect(await zOrder.evaluate(getLatex)).toBe("");
-    expect(zOrder).toHaveText("7");
+    await expect(zOrder).toHaveText("7");
     await page.keyboard.press("Escape");
   });
 
@@ -62,7 +62,7 @@ test("Building a custom scene", async ({ page, prepareScene }) => {
 
     const zOrder = page.getByLabel("Z-Order", { exact: true });
     expect(await zOrder.evaluate(getLatex)).toBe("");
-    expect(await zOrder).toHaveText("13");
+    await expect(zOrder).toHaveText("13");
     await page.keyboard.press("Escape");
   });
 
@@ -73,7 +73,7 @@ test("Building a custom scene", async ({ page, prepareScene }) => {
 
     const zOrder = page.getByLabel("Z-Order", { exact: true });
     expect(await zOrder.evaluate(getLatex)).toBe("100");
-    expect(zOrder).toHaveText("100");
+    await expect(zOrder).toHaveText("100");
     await page.keyboard.press("Escape");
   });
 });
