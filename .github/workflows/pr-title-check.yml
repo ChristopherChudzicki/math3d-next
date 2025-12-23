@@ -21,7 +21,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: marocchino/sticky-pull-request-comment@v2
-        if: ${{ failure() && steps.lint_pr_title.outputs.error_message != '' }}
+        if: ${{ failure() }}
         with:
           header: pr-title-lint-error
           message: |
@@ -37,3 +37,10 @@ jobs:
             > `type(scope?): subject`
             >
             > For more details, see https://www.conventionalcommits.org
+
+      - name: Delete comment on success
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: ${{ success() }}
+        with:
+          header: pr-title-lint-error
+          message: ""
