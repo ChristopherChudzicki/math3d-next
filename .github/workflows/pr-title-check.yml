@@ -1,0 +1,39 @@
+name: "Semantic commit PR title"
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - synchronize
+
+permissions:
+  pull-requests: write
+
+jobs:
+  main:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        id: lint_pr_title
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: ${{ failure() && steps.lint_pr_title.outputs.error_message != '' }}
+        with:
+          header: pr-title-lint-error
+          message: |
+            > [!IMPORTANT]
+            > Your PR title does not match the required format.
+            >
+            > ```
+            > ${{ steps.lint_pr_title.outputs.error_message }}
+            > ```
+            >
+            > Please update your PR title to match the format below.
+            >
+            > `type(scope?): subject`
+            >
+            > For more details, see https://www.conventionalcommits.org
