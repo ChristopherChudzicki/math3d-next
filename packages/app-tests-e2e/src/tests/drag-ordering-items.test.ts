@@ -1,6 +1,6 @@
 import { Locator, Page, expect } from "@playwright/test";
 import { test } from "@/fixtures/users";
-import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
+import { SceneBuilder } from "@math3d/mock-api";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
@@ -89,11 +89,12 @@ const makeFolderScene = () => {
   return scene.json();
 };
 
-const user = makeUserInfo();
-test.use({ user });
+let key: string;
+test.beforeAll(async ({ prepareScene }) => {
+  key = await prepareScene(makeFolderScene());
+});
 
-test("Dragging item X after item Y", async ({ page, prepareScene }) => {
-  const key = await prepareScene(makeFolderScene());
+test("Dragging item X after item Y", async ({ page }) => {
   await page.goto(`/${key}`);
   // Wait for sortable items to be ready
   await page.locator("css=[aria-roledescription='sortable']").first().waitFor();
@@ -109,8 +110,7 @@ test("Dragging item X after item Y", async ({ page, prepareScene }) => {
   expect(after).toEqual("F1 P1a P1b F2 P2b F3 P3a P3b P2a".split(" "));
 });
 
-test("Dragging item X before item Y", async ({ page, prepareScene }) => {
-  const key = await prepareScene(makeFolderScene());
+test("Dragging item X before item Y", async ({ page }) => {
   await page.goto(`/${key}`);
   // Wait for sortable items to be ready
   await page.locator("css=[aria-roledescription='sortable']").first().waitFor();
@@ -126,8 +126,7 @@ test("Dragging item X before item Y", async ({ page, prepareScene }) => {
   expect(after).toEqual("F1 P1a P1b F2 P2a P3b P2b F3 P3a".split(" "));
 });
 
-test("Dragging folder X after folder Y", async ({ page, prepareScene }) => {
-  const key = await prepareScene(makeFolderScene());
+test("Dragging folder X after folder Y", async ({ page }) => {
   await page.goto(`/${key}`);
   // Wait for sortable items to be ready
   await page.locator("css=[aria-roledescription='sortable']").first().waitFor();
@@ -143,8 +142,7 @@ test("Dragging folder X after folder Y", async ({ page, prepareScene }) => {
   expect(after).toEqual("F1 P1a P1b F3 P3a P3b F2 P2a P2b".split(" "));
 });
 
-test("Dragging folder X before folder Y", async ({ page, prepareScene }) => {
-  const key = await prepareScene(makeFolderScene());
+test("Dragging folder X before folder Y", async ({ page }) => {
   await page.goto(`/${key}`);
   // Wait for sortable items to be ready
   await page.locator("css=[aria-roledescription='sortable']").first().waitFor();

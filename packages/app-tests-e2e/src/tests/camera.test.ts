@@ -41,9 +41,6 @@ const expectControlsTarget = async (page: Page, vec: Vector3) => {
   }).toPass();
 };
 
-const user = makeUserInfo();
-test.use({ user });
-
 test("Setting camera position/target using UI coordinates", async ({
   page,
   prepareScene,
