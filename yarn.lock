@@ -10028,11 +10028,11 @@ __metadata:
   linkType: hard
 
 "envalid@npm:^8.0.0":
-  version: 8.1.0
-  resolution: "envalid@npm:8.1.0"
+  version: 8.1.1
+  resolution: "envalid@npm:8.1.1"
   dependencies:
     tslib: "npm:2.8.1"
-  checksum: 10/4a2d635ebdae430b867d5c307e6a3f5c4bae9334cbc0d9f0de0f59eecdf865f304a054c3ddcae1715b97b823620c7e94f7c9ae5813e993244631b85eee7cab17
+  checksum: 10/19ff9f5ac2c4d75205af7c635f45683d991a92f73f77693482f57614c16f3e224312922eb9cd7df9a099300a62ca28ad0708d21754f15d0cbb7081e4ca539343
   languageName: node
   linkType: hard
 
