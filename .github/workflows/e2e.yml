@@ -14,6 +14,10 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     environment: "ci"
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     env:
       SKIP_YARN_COREPACK_CHECK: true
       APP_BASE_URL: ${{ vars.APP_BASE_URL }}
@@ -66,7 +70,7 @@ jobs:
       - name: Install Playwright Browsers
         run: yarn workspace app-tests-e2e playwright install --with-deps
       - name: Run Playwright tests
-        run: yarn test-e2e
+        run: yarn test-e2e --shard=${{ matrix.shard }}/4
         env:
           CI: True
       - uses: actions/upload-artifact@v4
