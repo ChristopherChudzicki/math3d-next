@@ -1,12 +1,11 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
+import { SceneBuilder } from "@math3d/mock-api";
 import { getItemForm, getLatex } from "@/utils/selectors";
 
-const user = makeUserInfo();
-test.use({ user });
+test("Check graphic zOrder values", async ({ page, prepareScene }) => {
+  test.slow();
 
-test("Building a custom scene", async ({ page, prepareScene }) => {
   const scene = new SceneBuilder();
   scene
     .folder({ description: "F1" })

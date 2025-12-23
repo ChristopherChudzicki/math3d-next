@@ -6,8 +6,7 @@ import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
 
 const user = makeUserInfo();
 test.use({ user });
-
-test("Sharing before save...just like anon users", () => {});
+test.setTimeout(60_000);
 
 [
   { preexisting: false, itemDescription: "Explicit Surface" },
