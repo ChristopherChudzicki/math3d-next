@@ -34,7 +34,7 @@ class SigninPage {
     password: string;
   }): Promise<void> {
     if (!this.page.url().includes("auth/login")) {
-      this.page.getByRole("link", { name: "Sign in" }).click();
+      await this.page.getByRole("link", { name: "Sign in" }).click();
     }
     await this.email().fill(email);
     await this.password().fill(password);

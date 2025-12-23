@@ -46,7 +46,7 @@ class SigninPage {
     confirmPassword?: string;
   }): Promise<void> {
     if (!this.page.url().includes("auth/register")) {
-      this.page.getByRole("link", { name: "Sign up" }).click();
+      await this.page.getByRole("link", { name: "Sign up" }).click();
     }
     await this.email().fill(email);
     await this.publicNickname().fill(publicNickname);

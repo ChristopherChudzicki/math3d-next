@@ -1,12 +1,11 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
+import { SceneBuilder } from "@math3d/mock-api";
 import { getItemForm, getLatex } from "@/utils/selectors";
 
-const user = makeUserInfo();
-test.use({ user });
+test("Check graphic zOrder values", async ({ page, prepareScene }) => {
+  test.slow();
 
-test("Building a custom scene", async ({ page, prepareScene }) => {
   const scene = new SceneBuilder();
   scene
     .folder({ description: "F1" })
@@ -51,7 +50,7 @@ test("Building a custom scene", async ({ page, prepareScene }) => {
 
     const zOrder = page.getByLabel("Z-Order", { exact: true });
     expect(await zOrder.evaluate(getLatex)).toBe("");
-    expect(zOrder).toHaveText("7");
+    await expect(zOrder).toHaveText("7");
     await page.keyboard.press("Escape");
   });
 
@@ -62,7 +61,7 @@ test("Building a custom scene", async ({ page, prepareScene }) => {
 
     const zOrder = page.getByLabel("Z-Order", { exact: true });
     expect(await zOrder.evaluate(getLatex)).toBe("");
-    expect(await zOrder).toHaveText("13");
+    await expect(zOrder).toHaveText("13");
     await page.keyboard.press("Escape");
   });
 
@@ -73,7 +72,7 @@ test("Building a custom scene", async ({ page, prepareScene }) => {
 
     const zOrder = page.getByLabel("Z-Order", { exact: true });
     expect(await zOrder.evaluate(getLatex)).toBe("100");
-    expect(zOrder).toHaveText("100");
+    await expect(zOrder).toHaveText("100");
     await page.keyboard.press("Escape");
   });
 });

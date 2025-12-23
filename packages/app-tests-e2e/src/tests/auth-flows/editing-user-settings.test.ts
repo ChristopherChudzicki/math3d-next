@@ -11,7 +11,7 @@ test.describe("User settings profile form", () => {
   test("Editing user profile", async ({ page }) => {
     const app = new AppPage(page);
     await page.goto("");
-    app.userMenu().activate("settings");
+    await app.userMenu().activate("settings");
 
     const newNickname = faker.person.firstName();
     await test.step("Fill out form", async () => {
@@ -32,7 +32,7 @@ test.describe("User settings profile form", () => {
   test("Editing profile form validation", async ({ page }) => {
     const app = new AppPage(page);
     await page.goto("");
-    app.userMenu().activate("settings");
+    await app.userMenu().activate("settings");
 
     const form = app.userSettings().profileForm();
     await expect(form.email()).toBeDisabled();

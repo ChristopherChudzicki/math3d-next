@@ -63,7 +63,7 @@ test.describe("User sign up flow and account deletion", () => {
         const link = await messagePage.getByTestId("activation-link");
         const href = await link.getAttribute("href");
         invariant(href, "Expected link to have href");
-        messagePage.close();
+        await messagePage.close();
         return href;
       });
 
