@@ -17097,13 +17097,13 @@ __metadata:
   linkType: hard
 
 "react-infinite-scroll-component@npm:^6.1.0":
-  version: 6.1.0
-  resolution: "react-infinite-scroll-component@npm:6.1.0"
+  version: 6.1.1
+  resolution: "react-infinite-scroll-component@npm:6.1.1"
   dependencies:
     throttle-debounce: "npm:^2.1.0"
   peerDependencies:
     react: ">=16.0.0"
-  checksum: 10/78e27e46c38353c2cf3f6838255f48a0a1333155d6c551e78778366e6b162c86991cc38b1c756760ca1f9f276118f6611e5f8a942371c6780c67861dc8561173
+  checksum: 10/8605b53dd2ac8e13b38aa7006a840caa6aa229d4f016bb8426a5a34f35ecb81ae3fd6ab16fb0331e67ece54442106ba6d9b474eac5c86ea11aa164cdd9a8a58c
   languageName: node
   linkType: hard
 
