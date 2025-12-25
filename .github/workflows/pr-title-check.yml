@@ -43,4 +43,4 @@ jobs:
         if: ${{ success() }}
         with:
           header: pr-title-lint-error
-          message: ""
+          delete: true
