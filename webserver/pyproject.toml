@@ -3,7 +3,7 @@ name = "math3d-webserver"
 version = "0.1.0"
 description = ""
 authors = [ { name = "Chris Chudzicki" } ]
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.14,<3.15"
 dependencies = [
 	"Django>=5.0.0,<6.0.0",
 	"djangorestframework>=3.15.1,<4.0.0",
