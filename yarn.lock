@@ -14773,8 +14773,8 @@ __metadata:
   linkType: hard
 
 "mathjs@npm:^14.0.1":
-  version: 14.4.0
-  resolution: "mathjs@npm:14.4.0"
+  version: 14.9.1
+  resolution: "mathjs@npm:14.9.1"
   dependencies:
     "@babel/runtime": "npm:^7.26.10"
     complex.js: "npm:^2.2.5"
@@ -14787,7 +14787,7 @@ __metadata:
     typed-function: "npm:^4.2.1"
   bin:
     mathjs: bin/cli.js
-  checksum: 10/4d51f9b6ee0d0647d2a6d1e9bb2b41335b84e23dafe0c0a7cc643a9ccde63c24f398eb85e04b37a93bab33c04c8bf40a82aa83855dfa1d2e104c85dce1c11ba0
+  checksum: 10/fe99edd5a27ebeb01a44338220016053f7982bcc0195f173a3835d75766d7296c10b1d3deab508abaecc53f2999778a1cd7178b5eac4043538bdee1411aa50b4
   languageName: node
   linkType: hard
 
