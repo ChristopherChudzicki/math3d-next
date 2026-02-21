@@ -2,7 +2,8 @@ FROM python:3.12.5
 
 WORKDIR /src/webserver
 
-# Install uv first (single static binary install pattern)
+# Install just (task runner) and uv (package manager)
+RUN curl -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
 RUN pip install --no-cache-dir uv
 
 # Copy only dependency metadata first for better layer caching
@@ -20,4 +21,4 @@ COPY webserver/ ./
 # Build wheel (optional; also ensures hatch metadata is valid)
 RUN uv build
 
-# Default command will be supplied by docker-compose (make devserver)
+# Default command will be supplied by docker-compose (just devserver)
