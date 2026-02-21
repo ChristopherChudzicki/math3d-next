@@ -39,7 +39,7 @@ env = environ.Env(
     # Version
     APP_VERSION=(str, "unknown"),
     # Feature flags
-    ENABLE_REGISTRATION=(bool, True),
+    ENABLE_REGISTRATION=(bool, False),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

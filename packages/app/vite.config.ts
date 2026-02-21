@@ -65,6 +65,9 @@ export default defineConfig({
     clearMocks: true,
     setupFiles: ["./src/setupTests.ts"],
     environment: "jsdom",
+    env: {
+      VITE_DISPLAY_AUTH_FLOWS: "true",
+    },
     exclude: ["**/playwright/**"],
     include: ["./src/**/*.{test,spec}.{ts,tsx}"],
     css: {

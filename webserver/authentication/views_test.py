@@ -46,6 +46,7 @@ def get_parsed_url_from_html(
 
 
 @pytest.mark.django_db
+@override_settings(ENABLE_REGISTRATION=True)
 def test_create_and_activate_user():
     client = APIClient()
     email = faker.email()
