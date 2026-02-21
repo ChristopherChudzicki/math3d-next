@@ -64,6 +64,7 @@ module.exports = {
         ],
       },
     ],
+    "no-underscore-dangle": ["off"],
   },
   settings: {
     "import/parsers": {

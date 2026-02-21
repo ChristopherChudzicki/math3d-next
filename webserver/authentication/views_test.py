@@ -4,6 +4,7 @@ import lxml.etree
 import pytest
 from django.core import mail
 from django.core.mail.message import EmailMultiAlternatives
+from django.test import override_settings
 from django.urls import reverse
 from djoser.conf import settings
 from faker import Faker
@@ -45,6 +46,7 @@ def get_parsed_url_from_html(
 
 
 @pytest.mark.django_db
+@override_settings(ENABLE_REGISTRATION=True)
 def test_create_and_activate_user():
     client = APIClient()
     email = faker.email()
@@ -220,6 +222,33 @@ def test_cannot_change_email_via_users_me():
         "email": user.email,
         "public_nickname": "new-nickname",
     }
+
+
+@pytest.mark.django_db
+@override_settings(ENABLE_REGISTRATION=False)
+def test_registration_disabled_blocks_user_creation():
+    client = APIClient()
+    creation_url = reverse("customuser-list")
+    creation_request = {
+        "email": faker.email(),
+        "password": faker.password(),
+        "re_password": faker.password(),
+        "public_nickname": faker.name(),
+    }
+    response = client.post(creation_url, creation_request)
+    assert response.status_code == 403
+    assert response.data["detail"] == "User registration is currently disabled."
+
+
+@pytest.mark.django_db
+@override_settings(ENABLE_REGISTRATION=False)
+def test_registration_disabled_login_still_works():
+    client = APIClient()
+    user = CustomUserFactory.create(is_active=True)
+    login_url = reverse("login")
+    response = client.post(login_url, {"email": user.email, "password": "testpassword"})
+    assert response.status_code == 200
+    assert "auth_token" in response.data
 
 
 @pytest.mark.django_db

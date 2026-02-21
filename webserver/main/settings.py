@@ -38,6 +38,8 @@ env = environ.Env(
     DRF_LOG_LEVEL=(str, "INFO"),
     # Version
     APP_VERSION=(str, "unknown"),
+    # Feature flags
+    ENABLE_REGISTRATION=(bool, False),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -345,3 +347,6 @@ SPECTACULAR_SETTINGS = {
 }
 
 INGESTION_DATABASE_URL = env("INGESTION_DATABASE_URL")
+
+# Feature flags
+ENABLE_REGISTRATION = env("ENABLE_REGISTRATION")

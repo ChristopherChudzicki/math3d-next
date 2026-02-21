@@ -40,6 +40,7 @@ export default defineConfig({
       VITE_LEGACY_APP_BASE_URL: Schema.string(),
       VITE_ISSUE_URL: Schema.string(),
       VITE_APP_VERSION: Schema.string.optional(),
+      VITE_DISPLAY_AUTH_FLOWS: Schema.string.optional(),
     }),
     react(),
     viteTsconfigPaths(),
@@ -64,6 +65,9 @@ export default defineConfig({
     clearMocks: true,
     setupFiles: ["./src/setupTests.ts"],
     environment: "jsdom",
+    env: {
+      VITE_DISPLAY_AUTH_FLOWS: "true",
+    },
     exclude: ["**/playwright/**"],
     include: ["./src/**/*.{test,spec}.{ts,tsx}"],
     css: {

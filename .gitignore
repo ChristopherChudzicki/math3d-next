@@ -29,3 +29,5 @@ webserver/staticfiles/*
 !webserver/private/email/.gitkeep
 .mypy_cache
 .pytest_cache
+
+.claude

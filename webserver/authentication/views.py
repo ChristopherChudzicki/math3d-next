@@ -1,3 +1,4 @@
+from django.conf import settings as django_settings
 from djoser.views import UserViewSet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from authentication.serializers import CustomUserSerializer
@@ -33,6 +34,14 @@ class CustomUserViewSet(UserViewSet):
 
     def reset_username_confirm(self):
         pass
+
+    def create(self, request, *args, **kwargs):
+        if not django_settings.ENABLE_REGISTRATION:
+            return Response(
+                {"detail": "User registration is currently disabled."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().create(request, *args, **kwargs)
 
     @action(["post"], detail=False)
     def reset_password(self, request, *args, **kwargs):
