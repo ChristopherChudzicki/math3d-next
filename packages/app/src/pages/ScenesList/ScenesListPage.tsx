@@ -8,6 +8,7 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import Box from "@mui/material/Box";
 import invariant from "tiny-invariant";
+import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import ExamplesListing from "./ExamplesListing";
 import MyScenes from "./MyScenes";
 import styles from "./ScenesList.module.css";
@@ -16,7 +17,13 @@ enum ListType {
   Examples = "examples",
   Me = "me",
 }
-const normalizeListType = (listType: string): ListType => {
+const normalizeListType = (
+  listType: string,
+  showMyScenes: boolean,
+): ListType => {
+  if (!showMyScenes && listType === ListType.Me) {
+    return ListType.Examples;
+  }
   if (Object.values(ListType).includes(listType as ListType)) {
     return listType as ListType;
   }
@@ -26,7 +33,9 @@ const normalizeListType = (listType: string): ListType => {
 const ScenesList: React.FC = () => {
   const params = useParams<{ listType: ListType }>();
   invariant(params.listType);
-  const listType = normalizeListType(params.listType);
+  const [isAuthenticated] = useAuthStatus();
+  const showMyScenes = DISPLAY_AUTH_FLOWS || isAuthenticated;
+  const listType = normalizeListType(params.listType, showMyScenes);
   const navigate = useNavigate();
   const activateListType = useCallback(
     (aListType: ListType) => {
@@ -60,7 +69,7 @@ const ScenesList: React.FC = () => {
             aria-label="Scenes"
           >
             <Tab label="Examples" value={ListType.Examples} />
-            <Tab label="My Scenes" value={ListType.Me} />
+            {showMyScenes && <Tab label="My Scenes" value={ListType.Me} />}
           </TabList>
         </Box>
         <TabPanel value={ListType.Examples} className={styles.tabPanel}>

@@ -11,7 +11,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useAuthStatus } from "@/features/auth";
+import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import Button from "@mui/material/Button";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
@@ -28,7 +28,7 @@ const LoginButtons: React.FC<{
   smallScreen: boolean;
   isAuthenticated: boolean;
 }> = ({ smallScreen, isAuthenticated }) => {
-  if (isAuthenticated) return null;
+  if (isAuthenticated || !DISPLAY_AUTH_FLOWS) return null;
   if (smallScreen) {
     return (
       <>
@@ -100,7 +100,7 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       label: "Sign in",
       icon: <AccountCircleOutlinedIcon fontSize="small" />,
       href: "auth/login",
-      shouldShow: !isAuthenticated,
+      shouldShow: !isAuthenticated && DISPLAY_AUTH_FLOWS,
     },
     {
       type: "link",
@@ -108,7 +108,7 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       key: "signup",
       icon: <AccountCircleOutlinedIcon fontSize="small" />,
       href: "auth/register",
-      shouldShow: !isAuthenticated,
+      shouldShow: !isAuthenticated && DISPLAY_AUTH_FLOWS,
     },
     {
       type: "link",
