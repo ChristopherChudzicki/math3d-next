@@ -1,6 +1,6 @@
 import { test as setup, expect } from "@playwright/test";
-import { getInbox } from "./utils/inbox/emails";
 import env from "@/env";
+import { getInbox } from "./utils/inbox/emails";
 
 const inbox = getInbox();
 
@@ -11,7 +11,9 @@ setup("Clear emails", async () => {
 setup("Verify DISPLAY_AUTH_FLOWS is enabled", async ({ page }) => {
   await page.goto(env.TEST_APP_URL);
   const flag = await page.evaluate(
-    () => (window as any).__DISPLAY_AUTH_FLOWS__,
+    () =>
+      // @ts-expect-error Accessing test flag set in main.tsx
+      window.__DISPLAY_AUTH_FLOWS__,
   );
   expect(
     flag,
