@@ -23,6 +23,7 @@ jobs:
       APP_BASE_URL: ${{ vars.APP_BASE_URL }}
       VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
       VITE_APP_VERSION: ci
+      VITE_DISPLAY_AUTH_FLOWS: "true"
       VITE_LEGACY_APP_BASE_URL: ${{ vars.VITE_LEGACY_APP_BASE_URL }}
       VITE_ISSUE_URL: ${{ vars.VITE_ISSUE_URL }}
       TEST_API_URL: ${{ vars.TEST_API_URL }}
@@ -53,6 +54,7 @@ jobs:
           echo "TEST_USER_ADMIN_PASSWORD=$TEST_USER_ADMIN_PASSWORD" >> .env
           echo "TEST_USER_STATIC_EMAIL=$TEST_USER_STATIC_EMAIL" >> .env
           echo "TEST_USER_STATIC_PASSWORD=$TEST_USER_STATIC_PASSWORD" >> .env
+          echo "ENABLE_REGISTRATION=true" >> .env
       - name: Build docker stack
         run: docker compose build
       - name: Migrate backend database
