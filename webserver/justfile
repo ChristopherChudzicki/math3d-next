@@ -1,0 +1,28 @@
+# Backend commands — run inside the webserver container
+# Usage (from repo root): just be <recipe>
+# Usage (inside container): just <recipe>
+
+# List available recipes
+default:
+    @just --list
+
+# Initial Python setup
+setup_python:
+    python -m pip install --upgrade pip
+    python -m pip install uv
+    uv sync --all-groups --frozen
+    uv build
+
+# Start Django dev server (auto-restarts on crash)
+devserver:
+    uv run ./manage.py migrate
+    uv run ./manage.py collectstatic --noinput --verbosity=2
+    bash -c "while true; do uv run ./manage.py runserver 0.0.0.0:8000; sleep 2; done"
+
+# Run tests
+test *args:
+    uv run pytest -sv {{ args }}
+
+# Run MyPy typechecker
+typecheck:
+    uv run mypy .

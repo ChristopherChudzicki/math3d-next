@@ -10,6 +10,7 @@ The repository represents the next generation of math3d, the current source code
 
 The math3d backend and database are managed by docker containers. The frontend is not currently containerized. You'll need:
 
+- [just](https://github.com/casey/just), our task runner (`brew install just`)
 - [Yarn](https://yarnpkg.com/getting-started/install), our JS package manager
 - [nvm](https://github.com/nvm-sh/nvm), for managing node versions
 - [Docker](https://docs.docker.com/get-docker/), for containerization during development
@@ -21,33 +22,38 @@ The math3d backend and database are managed by docker containers. The frontend i
   dotenv_if_exists .env             # customizations
   ```
 
-### Webserver Commands
+### Task Runner
 
-> **Note**
-> The commands below should be run in a `webserver` container, e.g., via
->
-> ```
-> # one-off
-> docker compose run --rm webserver <COMMAND>
-> # run commands in docker shell
-> docker compose run --rm webserver bash
-> ```
+We use [just](https://github.com/casey/just) as a task runner. Run `just` to see available commands.
 
-The backend now uses [uv](https://docs.astral.sh/uv/) for dependency management. Dependencies are defined in `webserver/pyproject.toml` (PEP 621 format) and locked in `webserver/uv.lock` (generated locally after first sync).
-
-Initial install (one-off) inside the container:
-
-```
-docker compose run --rm webserver make setup_python
+```bash
+just start          # Start frontend + backend dev servers
+just be <command>   # Run a backend command in Docker (delegates to webserver/justfile)
+just fe <command>   # Run a frontend command via yarn
 ```
 
-Common commands:
+Examples:
 
-| Command          | Notes                               |
-| ---------------- | ----------------------------------- |
-| `make test`      | Run tests (pytest)                  |
-| `make typecheck` | Typecheck with MyPy                 |
-| `make devserver` | Run Django dev server w/ autoreload |
+| Command             | Notes                               |
+| ------------------- | ----------------------------------- |
+| `just start`        | Start frontend + backend            |
+| `just be test`      | Run backend tests (pytest)          |
+| `just be typecheck` | Typecheck backend with MyPy         |
+| `just be devserver` | Run Django dev server w/ autoreload |
+| `just fe test`      | Run frontend tests (Vitest)         |
+| `just fe lint`      | Lint frontend                       |
+
+Extra args are forwarded: `just be test -k my_test` runs `pytest -sv -k my_test`.
+
+### Backend Setup
+
+The backend uses [uv](https://docs.astral.sh/uv/) for dependency management. Dependencies are defined in `webserver/pyproject.toml` (PEP 621 format) and locked in `webserver/uv.lock`.
+
+Initial install (one-off):
+
+```
+just be setup_python
+```
 
 To add a new runtime dependency (inside container):
 
@@ -63,4 +69,4 @@ uv add --group dev <package>
 
 After modifying dependencies, commit both `pyproject.toml` and the updated `uv.lock`.
 
-See [webserver/Makefile](./webserver/Makefile) for more `make` commands.
+See [webserver/justfile](./webserver/justfile) for all backend recipes.
