@@ -10,7 +10,7 @@ start:
     docker compose up -d
     yarn start
 
-# Run a backend command inside Docker (e.g., just be test, just be typecheck)
+# Run a backend command in Docker (just be test, just be typecheck, just be --list)
 be *args:
     docker compose run --rm webserver just {{ args }}
 
