@@ -111,6 +111,7 @@ Feature-based organization in `packages/app/src/features/` (auth, sceneControls,
 
 ## Conventions
 
+- Pull requests must follow the template in `.github/pull_request_template.md`
 - Frontend tests: `*.test.tsx` / `*.spec.ts`
 - Backend tests: `*_test.py`
 - CSS Modules: `Component.module.css`

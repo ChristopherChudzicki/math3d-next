@@ -8,7 +8,7 @@
     "@math3d/eslint-config": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
     "eslint": "^8.54.0",
-    "vitest": "^3.0.9"
+    "vitest": "^4.0.18"
   },
   "scripts": {
     "test": "vitest --run",
