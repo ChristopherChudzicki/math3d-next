@@ -436,8 +436,7 @@ class Folder {
   }
 }
 
-const DEFAULT_EMAIL_PROVIDER =
-  import.meta?.env?.TEST_EMAIL_PROVIDER ?? process.env.TEST_EMAIL_PROVIDER;
+const DEFAULT_EMAIL_PROVIDER = import.meta.env?.TEST_EMAIL_PROVIDER;
 const makeUserInfo = (
   info?: UserCreatePasswordRetypeRequest,
 ): UserCreatePasswordRetypeRequest => {
