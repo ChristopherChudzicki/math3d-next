@@ -436,7 +436,10 @@ class Folder {
   }
 }
 
-const DEFAULT_EMAIL_PROVIDER = import.meta.env?.TEST_EMAIL_PROVIDER;
+// import.meta.env is Vite-specific; the process.env fallback is needed
+// when this module runs in plain Node (e.g., Playwright E2E tests).
+const DEFAULT_EMAIL_PROVIDER =
+  import.meta.env?.TEST_EMAIL_PROVIDER ?? process.env.TEST_EMAIL_PROVIDER;
 const makeUserInfo = (
   info?: UserCreatePasswordRetypeRequest,
 ): UserCreatePasswordRetypeRequest => {
