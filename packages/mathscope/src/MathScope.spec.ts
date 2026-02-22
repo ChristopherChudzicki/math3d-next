@@ -102,7 +102,9 @@ describe('MathScope "change" Events', () => {
       },
     };
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith(event);
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ detail: event }),
+    );
   });
 
   test("Deleting expressions triggers a change", () => {
@@ -135,7 +137,9 @@ describe('MathScope "change" Events', () => {
       },
     };
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith(event);
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ detail: event }),
+    );
   });
 
   test("Removing event listeners", () => {
@@ -191,7 +195,9 @@ describe('MathScope "change-errors" Events', () => {
       },
     };
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenLastCalledWith(event1);
+    expect(spy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ detail: event1 }),
+    );
 
     mathScope.setExpressions([{ id: "a", parseable: "a = 4 + +" }]);
     const event2: ScopeChangeErrorsEvent<Parseable> = {
@@ -207,7 +213,9 @@ describe('MathScope "change-errors" Events', () => {
     };
 
     expect(spy).toHaveBeenCalledTimes(2);
-    expect(spy).toHaveBeenLastCalledWith(event2);
+    expect(spy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ detail: event2 }),
+    );
 
     mathScope.setExpressions([{ id: "a", parseable: "a = 4" }]);
     const event3: ScopeChangeErrorsEvent<Parseable> = {
@@ -223,7 +231,9 @@ describe('MathScope "change-errors" Events', () => {
     };
 
     expect(spy).toHaveBeenCalledTimes(3);
-    expect(spy).toHaveBeenLastCalledWith(event3);
+    expect(spy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ detail: event3 }),
+    );
   });
 
   test("Adding with eval errors does trigger the event", () => {
@@ -251,7 +261,9 @@ describe('MathScope "change-errors" Events', () => {
       },
     };
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith(event);
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ detail: event }),
+    );
   });
 
   test("Deleting without eval errors does not trigger the event", () => {
@@ -293,7 +305,9 @@ describe('MathScope "change-errors" Events', () => {
       },
     };
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith(event);
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ detail: event }),
+    );
   });
 
   test("Removing event listeners", () => {
