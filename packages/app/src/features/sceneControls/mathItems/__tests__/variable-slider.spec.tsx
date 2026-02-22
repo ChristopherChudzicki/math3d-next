@@ -101,7 +101,7 @@ const setupTest = async (overrides: Overrides = {}) => {
   const valueId = mathScopeId(item.id, "value");
   const mathScope = store.getState().scene.mathScope();
   mathScope.addEventListener("change", (e) => {
-    if (e.changes.results.updated.has(mathScopeId(item.id, "value"))) {
+    if (e.detail.changes.results.updated.has(mathScopeId(item.id, "value"))) {
       const v = mathScope.results.get(valueId);
       if (typeof v !== "number") {
         throw new Error(`Value should be a number; received ${value}`);

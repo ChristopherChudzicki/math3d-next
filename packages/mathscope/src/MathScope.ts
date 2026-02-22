@@ -1,4 +1,3 @@
-import { EventEmitter } from "events";
 import Evaluator from "./Evaluator";
 import type {
   Diff,
@@ -15,8 +14,6 @@ export type IdentifiedParseable<P> = {
   parseable: P;
 };
 
-export type OnChangeListener<P> = (event: ScopeChangeEvent<P>) => void;
-
 interface ScopeChange {
   results: Diff<string>;
   errors: Diff<string>;
@@ -28,22 +25,26 @@ export interface ScopeChangeEvent<P> {
   mathScope: MathScope<P>;
 }
 
-export type OnChangeErrorsListener<P> = (
-  event: ScopeChangeErrorsEvent<P>,
-) => void;
-
 export interface ScopeChangeErrorsEvent<P> {
   type: "change-errors";
   changes: Omit<ScopeChange, "results">;
   mathScope: MathScope<P>;
 }
 
+export type OnChangeListener<P> = (
+  event: CustomEvent<ScopeChangeEvent<P>>,
+) => void;
+
+export type OnChangeErrorsListener<P> = (
+  event: CustomEvent<ScopeChangeErrorsEvent<P>>,
+) => void;
+
 /**
  * Parse and evaluate a dynamic scope of mathematical expressions, possibly
  * containing errors. Fires `change` events when the scope changes.
  */
 export default class MathScope<P> {
-  private events = new EventEmitter();
+  private events = new EventTarget();
 
   private evaluator: Evaluator;
 
@@ -73,8 +74,6 @@ export default class MathScope<P> {
     this.deleteExpressions = this.deleteExpressions.bind(this);
     this.addEventListener = this.addEventListener.bind(this);
     this.removeEventListener = this.removeEventListener.bind(this);
-
-    this.events.setMaxListeners(Infinity);
   }
 
   private syncEvalErrors(
@@ -163,7 +162,7 @@ export default class MathScope<P> {
       mathScope: this,
     };
 
-    this.events.emit("change", event);
+    this.events.dispatchEvent(new CustomEvent("change", { detail: event }));
   }
 
   private emitChangeErrorsEvent(fullChanges: ScopeChange) {
@@ -176,7 +175,9 @@ export default class MathScope<P> {
       mathScope: this,
     };
 
-    this.events.emit("change-errors", event);
+    this.events.dispatchEvent(
+      new CustomEvent("change-errors", { detail: event }),
+    );
   }
 
   addEventListener(
@@ -189,7 +190,7 @@ export default class MathScope<P> {
     type: "change" | "change-errors",
     listener: OnChangeListener<P> | OnChangeErrorsListener<P>,
   ) {
-    this.events.addListener(type, listener);
+    this.events.addEventListener(type, listener as EventListener);
     return this;
   }
 
@@ -203,7 +204,7 @@ export default class MathScope<P> {
     type: "change" | "change-errors",
     listener: OnChangeListener<P> | OnChangeErrorsListener<P>,
   ): this {
-    this.events.removeListener(type, listener);
+    this.events.removeEventListener(type, listener as EventListener);
     return this;
   }
 }

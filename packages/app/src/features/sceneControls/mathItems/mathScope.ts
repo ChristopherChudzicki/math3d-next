@@ -60,8 +60,8 @@ const useMathResults = <K extends string>(
 
   const onChange = useCallback<OnChangeListener<AppParseable>>(
     (event) => {
-      const { mathScope } = event;
-      const { results } = event.changes;
+      const { mathScope } = event.detail;
+      const { results } = event.detail.changes;
       if (names.some((name) => results.touched.has(ids[name]))) {
         const patch = pickBy(
           extractResults(mathScope, ids),
@@ -123,8 +123,8 @@ const useMathErrors = <K extends string>(
 
   const onChange = useCallback<OnChangeListener<AppParseable>>(
     (event) => {
-      const { mathScope } = event;
-      const { errors } = event.changes;
+      const { mathScope } = event.detail;
+      const { errors } = event.detail.changes;
       if (names.some((name) => errors.touched.has(ids[name]))) {
         setErrors(extractErrors(mathScope, ids));
       }
