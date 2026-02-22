@@ -28,13 +28,23 @@ yarn workspace app test
 yarn workspace @math3d/parser test
 ```
 
+### Task Runner (just)
+
+```bash
+just start                # Start frontend + backend dev servers
+just be test              # Run backend tests (pytest)
+just be typecheck         # MyPy
+just fe test              # Run frontend tests (via yarn)
+just fe lint              # Lint frontend (via yarn)
+```
+
 ### Backend (Docker-based)
 
 ```bash
-docker compose run --rm webserver make setup_python   # Initial setup
-docker compose run --rm webserver make devserver       # Django dev server on :8000
-docker compose run --rm webserver make test            # Run pytest
-docker compose run --rm webserver make typecheck       # MyPy
+just be setup_python      # Initial setup
+just be devserver         # Django dev server on :8000
+just be test              # Run pytest
+just be typecheck         # MyPy
 ```
 
 ### API Client Generation
