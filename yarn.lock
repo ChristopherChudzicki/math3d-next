@@ -5622,12 +5622,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.11.28":
-  version: 20.19.27
-  resolution: "@types/node@npm:20.19.27"
+"@types/node@npm:^24.0.0":
+  version: 24.10.13
+  resolution: "@types/node@npm:24.10.13"
   dependencies:
-    undici-types: "npm:~6.21.0"
-  checksum: 10/a36bdbbf3c3e25bd75454f295b01c72729128a7ab38e99b75dba5fad2ff44fb96179462197345381a086c85de462c10d994fe32868c9a07d42b852566a2e63a7
+    undici-types: "npm:~7.16.0"
+  checksum: 10/c779d14cf17758a9d603e0c0978c8045bd070e259617ec16f4ddac419ec11aac0e0cf2bb013dab008fdbd2f46c39f82397884662bbdfabeb19bef0079679ea48
   languageName: node
   linkType: hard
 
@@ -7106,7 +7106,7 @@ __metadata:
     "@testing-library/react": "npm:^16.1.0"
     "@testing-library/user-event": "npm:^14.5.2"
     "@types/lodash-es": "npm:^4.17.12"
-    "@types/node": "npm:^20.11.28"
+    "@types/node": "npm:^24.0.0"
     "@types/react": "npm:^19.2.0"
     "@types/react-dom": "npm:^19.2.0"
     "@types/react-window": "npm:^1.8.8"
@@ -20090,13 +20090,6 @@ __metadata:
     quansync: "npm:^1.0.0"
     unconfig-core: "npm:7.5.0"
   checksum: 10/5f06db143babd7187d49c347b74bb55ec7c2a4f9f05c38271762209d3c353c6c394ffe3acd6ab6d913710ffd6dc1f86c03e9bcdbd51497f421bf8ad4ca56ddc4
-  languageName: node
-  linkType: hard
-
-"undici-types@npm:~6.21.0":
-  version: 6.21.0
-  resolution: "undici-types@npm:6.21.0"
-  checksum: 10/ec8f41aa4359d50f9b59fa61fe3efce3477cc681908c8f84354d8567bb3701fafdddf36ef6bff307024d3feb42c837cf6f670314ba37fc8145e219560e473d14
   languageName: node
   linkType: hard
 
