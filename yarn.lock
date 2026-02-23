@@ -7124,7 +7124,7 @@ __metadata:
     history: "npm:5.3.0"
     htmlparser2: "npm:^10.0.0"
     identity-obj-proxy: "npm:3.0.0"
-    jest-fail-on-console: "npm:3.3.1"
+    jest-fail-on-console: "npm:3.3.4"
     jsdom: "npm:^26.0.0"
     lodash-es: "npm:4.17.23"
     mathbox: "npm:^2.3.1"
@@ -13670,10 +13670,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-fail-on-console@npm:3.3.1":
-  version: 3.3.1
-  resolution: "jest-fail-on-console@npm:3.3.1"
-  checksum: 10/59d72906c20390dcd79be51c2ff0d65fe66fb68c2a4633339b95c3bd5dce5745adb06ac91b095de03f367cc2b4d6868d44abf97e1fb21d7e7835a9710b0630cd
+"jest-fail-on-console@npm:3.3.4":
+  version: 3.3.4
+  resolution: "jest-fail-on-console@npm:3.3.4"
+  peerDependencies:
+    "@jest/globals": ">=27.5.1"
+  checksum: 10/846961b4315b9edb1434822dde4681b81c4766dc2f6c58560ee5a25f832db48ece5951e448d97e4e32f4e4610072b41df4423db2dbfaa3938198c253d6e77a9a
   languageName: node
   linkType: hard
 
