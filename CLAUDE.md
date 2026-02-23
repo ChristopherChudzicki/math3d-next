@@ -105,7 +105,7 @@ Feature-based organization in `packages/app/src/features/` (auth, sceneControls,
 
 ### Environment
 
-- Node 20.20.0 (see `.nvmrc`), Yarn 4.8.1 (corepack)
+- Node 24.13.1 (see `.nvmrc`), Yarn 4.8.1 (corepack)
 - Dev env vars in `.env.development` (committed); local overrides in `.env` (gitignored)
 - Pre-commit hooks: Prettier (JS/TS), Ruff (Python), trailing whitespace, secret detection
 

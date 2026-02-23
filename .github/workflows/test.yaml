@@ -20,9 +20,9 @@ jobs:
       VITE_ISSUE_URL: ${{ vars.VITE_ISSUE_URL }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: ""
+          node-version-file: ".nvmrc"
           cache: "yarn"
       - run: corepack enable
       - run: yarn install --immutable
@@ -66,9 +66,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: "20.20.0"
+          node-version-file: ".nvmrc"
           cache: "yarn"
       - run: corepack enable
       - name: Setup env variables
