@@ -135,11 +135,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",  # Required by allauth
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
     "authentication",  # custom app
     "djoser",
+    "allauth",
+    "allauth.account",
+    "allauth.headless",
     "corsheaders",
     "drf_spectacular",
     ## Custom apps
@@ -147,12 +151,15 @@ INSTALLED_APPS = [
     "scenes",
 ]
 
+SITE_ID = 1
+
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.TokenAuthentication",  # Kept during transition; removed in Phase 2
+        "rest_framework.authentication.SessionAuthentication",
     ),
 }
 
@@ -164,11 +171,18 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [env("APP_BASE_URL")] if env("APP_BASE_URL") else []
+
+AUTHENTICATION_BACKENDS = [
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
 
 ROOT_URLCONF = "main.urls"
 
@@ -239,6 +253,26 @@ DJOSER = {
         "ACTIVATION_URL": f"{env('APP_BASE_URL')}/auth/activate-account?uid={{uid}}&token={{token}}",
         "PASSWORD_RESET_CONFIRM_URL": f"{env('APP_BASE_URL')}/auth/reset-password/confirm/?uid={{uid}}&token={{token}}",  # pragma: allowlist secret
     },
+}
+
+##################################################
+# allauth settings
+##################################################
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_LOGIN_BY_CODE_ENABLED = False
+ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
+ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"
+
+# allauth headless configuration
+HEADLESS_ONLY = True
+HEADLESS_CLIENTS = ["browser"]
+HEADLESS_SERVE_SPECIFICATION = True
+HEADLESS_FRONTEND_URLS = {
+    "account_confirm_email": f"{env('APP_BASE_URL')}/auth/activate-account?key={{key}}",
+    "account_reset_password_from_key": f"{env('APP_BASE_URL')}/auth/reset-password/confirm/?key={{key}}",
 }
 
 ##################################################

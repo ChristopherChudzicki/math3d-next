@@ -1,0 +1,10 @@
+{% load i18n %}
+{% autoescape off %}
+<p>{% blocktrans with site_name=current_site.name %}You're receiving this email because your email address was used to register an account at {{ site_name }}.{% endblocktrans %}</p>
+
+<p>{% trans "To activate the account, please visit:" %} <a href="{{ activate_url }}" data-testid="activation-link">{{ activate_url }}</a></p>
+
+<p>{% trans "Thanks for using" %} {{ current_site.name }}!</p>
+
+<p>{% blocktrans with site_name=current_site.name %}The {{ site_name }} team{% endblocktrans %}</p>
+{% endautoescape %}
