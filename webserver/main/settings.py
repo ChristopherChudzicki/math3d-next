@@ -140,7 +140,6 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_filters",
     "authentication",  # custom app
-    "djoser",
     "allauth",
     "allauth.account",
     "allauth.headless",
@@ -158,7 +157,6 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.TokenAuthentication",  # Kept during transition; removed in Phase 2
         "rest_framework.authentication.SessionAuthentication",
     ),
 }
@@ -203,57 +201,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "main.wsgi.application"
-
-##################################################
-# Start auth settings
-##################################################
-DJOSER = {
-    "LOGIN_FIELD": "email",
-    # Send notifications / confirmations
-    "SEND_ACTIVATION_EMAIL": True,
-    "SEND_CONFIRMATION_EMAIL": True,
-    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
-    "USERNAME_CHANGED_EMAIL_CONFIRMATION": True,
-    # Require retyping password
-    "USER_CREATE_PASSWORD_RETYPE": True,
-    "SET_PASSWORD_RETYPE": True,
-    "PASSWORD_RESET_CONFIRM_RETYPE": True,
-    # Emails
-    "EMAIL": {
-        "activation": "authentication.email.ActivationEmail",
-        "confirmation": "authentication.email.ConfirmationEmail",
-        "password_reset": "authentication.email.PasswordResetEmail",
-        "password_changed_confirmation": "authentication.email.PasswordChangedConfirmationEmail",
-        "username_changed_confirmation": "authentication.email.UsernameChangedConfirmationEmail",
-        "username_reset": "authentication.email.UsernameResetEmail",
-    },
-    # Limit endpoints we don't want to just admin users.
-    # Not ideal, but it's the best solution for now.
-    # See https://github.com/sunscrapers/djoser/issues/549
-    "PERMISSIONS": {
-        # 'activation': ['rest_framework.permissions.AllowAny'],
-        # 'password_reset': ['rest_framework.permissions.AllowAny'],
-        # 'password_reset_confirm': ['rest_framework.permissions.AllowAny'],
-        # 'set_password': ['djoser.permissions.CurrentUserOrAdmin'],
-        "username_reset": ["rest_framework.permissions.IsAdminUser"],
-        "username_reset_confirm": ["rest_framework.permissions.IsAdminUser"],
-        "set_username": ["rest_framework.permissions.IsAdminUser"],
-        # 'user_create': ['rest_framework.permissions.AllowAny'],
-        # 'user_delete': ['djoser.permissions.CurrentUserOrAdmin'],
-        # 'user': ['djoser.permissions.CurrentUserOrAdmin'],
-        "user_list": ["rest_framework.permissions.IsAdminUser"],
-        # 'token_create': ['rest_framework.permissions.AllowAny'],
-        # 'token_destroy': ['rest_framework.permissions.IsAuthenticated'],
-    },
-    "SERIALIZERS": {
-        "user": "authentication.serializers.CustomUserSerializer",
-        "current_user": "authentication.serializers.CustomUserSerializer",
-    },
-    "_CUSTOM": {
-        "ACTIVATION_URL": f"{env('APP_BASE_URL')}/auth/activate-account?uid={{uid}}&token={{token}}",
-        "PASSWORD_RESET_CONFIRM_URL": f"{env('APP_BASE_URL')}/auth/reset-password/confirm/?uid={{uid}}&token={{token}}",  # pragma: allowlist secret
-    },
-}
 
 ##################################################
 # allauth settings

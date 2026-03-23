@@ -13,7 +13,7 @@ def test_create_user():
     password = faker.password()
     user = User.objects.create_user(email=email, password=password)
     assert user.email == email
-    assert user.is_active is False
+    assert user.is_active is True
     assert user.is_staff is False
     assert user.is_superuser is False
     with pytest.raises(AttributeError):
