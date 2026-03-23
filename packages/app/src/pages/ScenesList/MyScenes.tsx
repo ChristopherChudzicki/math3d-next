@@ -92,7 +92,7 @@ const MyScenesList: React.FC = () => {
       archived: includeArchived ? undefined : false,
     },
     {
-      enabled: isAuthenticated,
+      enabled: !!isAuthenticated,
     },
   );
 

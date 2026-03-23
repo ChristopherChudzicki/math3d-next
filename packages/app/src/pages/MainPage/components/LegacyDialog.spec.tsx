@@ -24,7 +24,7 @@ test.each([
 test("Legacy Dialog opens and closes", async () => {
   const item = makeItem(MIT.Point);
   const scene = seedDb.withSceneFromItems([item], { isLegacy: true });
-  renderTestApp(`/${scene.key}`);
+  await renderTestApp(`/${scene.key}`);
 
   const legacyButton = await screen.findByRole("button", {
     name: "Legacy Scene",

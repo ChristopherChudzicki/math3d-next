@@ -1,5 +1,12 @@
 import { test, expect } from "vitest";
-import { renderTestApp, screen, user, within, waitFor } from "@/test_util";
+import {
+  renderTestApp,
+  screen,
+  user,
+  within,
+  waitFor,
+  getDescribedBy,
+} from "@/test_util";
 import { seedDb } from "@math3d/mock-api";
 
 const findSignInLink = async () => {
@@ -56,9 +63,9 @@ test("Login form displays error if password/email wrong", async () => {
   await user.paste("foo");
 
   await user.click(submit);
-  const alert = within(dialog).getByRole("alert");
-  expect(alert).toHaveTextContent(
-    "Unable to log in with provided credentials.",
+  // allauth returns the error with param: "password", so it appears on the password field
+  expect(getDescribedBy(password)).toHaveTextContent(
+    "The email address and/or password you specified are not correct.",
   );
 
   // Sign-in link still visible

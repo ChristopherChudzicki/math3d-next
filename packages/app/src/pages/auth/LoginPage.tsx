@@ -33,7 +33,7 @@ const LoginPage: React.FC = () => {
   const formId = useId();
   const login = useLogin();
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated === true) {
       navigate("../");
     }
   }, [isAuthenticated, navigate]);

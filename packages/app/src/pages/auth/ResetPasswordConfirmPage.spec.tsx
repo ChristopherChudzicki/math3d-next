@@ -38,11 +38,10 @@ const submitForm = async (data: FormValues) => {
   return controls;
 };
 
-test("Hapy path: Expected API call and form states", async () => {
-  const token = faker.string.uuid();
-  const uid = faker.string.alpha({ length: { min: 2, max: 2 } });
+test("Happy path: Expected API call and form states", async () => {
+  const key = `${faker.string.alpha({ length: 2 })}-${faker.string.uuid()}`;
   const { location } = await renderTestApp(
-    `/auth/reset-password/confirm?uid=${uid}&token=${token}`,
+    `/auth/reset-password/confirm?key=${key}`,
   );
 
   const dialog = await screen.findByRole("dialog");
@@ -68,9 +67,8 @@ test("Hapy path: Expected API call and form states", async () => {
 });
 
 test("Requires passwords match", async () => {
-  const token = faker.string.uuid();
-  const uid = faker.string.alpha({ length: { min: 2, max: 2 } });
-  await renderTestApp(`/auth/reset-password/confirm?uid=${uid}&token=${token}`);
+  const key = `${faker.string.alpha({ length: 2 })}-${faker.string.uuid()}`;
+  await renderTestApp(`/auth/reset-password/confirm?key=${key}`);
 
   const controls = await submitForm({
     password: "Password1234", // pragma: allowlist secret
@@ -82,16 +80,22 @@ test("Requires passwords match", async () => {
 });
 
 test("Reports API errors (password field)", async () => {
-  const token = faker.string.uuid();
-  const uid = faker.string.alpha({ length: { min: 2, max: 2 } });
-  await renderTestApp(`/auth/reset-password/confirm?uid=${uid}&token=${token}`);
+  const key = `${faker.string.alpha({ length: 2 })}-${faker.string.uuid()}`;
+  await renderTestApp(`/auth/reset-password/confirm?key=${key}`);
 
   mockResponseOnce({
     status: 400,
-    url: urls.auth.resetPasswordConfirm,
+    url: urls.auth.resetPassword,
     method: "post",
     data: {
-      new_password: ["password field error"],
+      status: 400,
+      errors: [
+        {
+          code: "invalid",
+          message: "password field error",
+          param: "password",
+        },
+      ],
     },
   });
 
@@ -105,18 +109,24 @@ test("Reports API errors (password field)", async () => {
   );
 });
 
-test.each([
-  { errData: { uid: ["uid error"] } },
-  { errData: { token: ["token error"] } },
-])("token or uid errors suggest to check link", async ({ errData }) => {
-  const token = faker.string.uuid();
-  const uid = faker.string.alpha({ length: { min: 2, max: 2 } });
-  await renderTestApp(`/auth/reset-password/confirm?uid=${uid}&token=${token}`);
+test("key errors suggest to check link", async () => {
+  const key = `${faker.string.alpha({ length: 2 })}-${faker.string.uuid()}`;
+  await renderTestApp(`/auth/reset-password/confirm?key=${key}`);
+
   mockResponseOnce({
     status: 400,
-    url: urls.auth.resetPasswordConfirm,
+    url: urls.auth.resetPassword,
     method: "post",
-    data: errData,
+    data: {
+      status: 400,
+      errors: [
+        {
+          code: "token_invalid",
+          message: "The password reset token was invalid.",
+          param: "key",
+        },
+      ],
+    },
   });
 
   await submitForm({

@@ -5,9 +5,8 @@ import { urls } from "@math3d/mock-api";
 import { mockResponseOnce } from "@math3d/mock-api/node";
 
 test("Authorization form happy path: API call, success indication, & log in", async () => {
-  const token = faker.string.uuid();
-  const uid = faker.string.sample(2);
-  const url = `/auth/activate-account?uid=${uid}&token=${token}`;
+  const key = faker.string.uuid();
+  const url = `/auth/activate-account?key=${key}`;
   const { location } = await renderTestApp(url, {});
   const dialog = screen.getByRole("dialog", { name: "Account Activation" });
   const alert = await within(dialog).findByRole("alert");
@@ -18,14 +17,23 @@ test("Authorization form happy path: API call, success indication, & log in", as
   expect(location.current.pathname).toBe("/auth/login");
 });
 
-test("Error message for invalid token/uid", async () => {
+test("Error message for invalid key", async () => {
   mockResponseOnce({
     status: 400,
-    url: urls.auth.activation,
+    url: urls.auth.verifyEmail,
     method: "post",
-    data: {},
+    data: {
+      status: 400,
+      errors: [
+        {
+          code: "invalid",
+          message: "Invalid or expired key.",
+          param: "key",
+        },
+      ],
+    },
   });
-  await renderTestApp("/auth/activate-account?uid=fake&token=faker", {});
+  await renderTestApp("/auth/activate-account?key=fake-key", {});
   const dialog = await screen.findByRole("dialog", {
     name: "Account Activation",
   });

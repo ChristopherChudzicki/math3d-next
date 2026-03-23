@@ -26,9 +26,10 @@ import SaveButton from "./SaveButton";
 
 const LoginButtons: React.FC<{
   smallScreen: boolean;
-  isAuthenticated: boolean;
+  isAuthenticated: boolean | null;
 }> = ({ smallScreen, isAuthenticated }) => {
-  if (isAuthenticated || !DISPLAY_AUTH_FLOWS) return null;
+  if (isAuthenticated || isAuthenticated === null || !DISPLAY_AUTH_FLOWS)
+    return null;
   if (smallScreen) {
     return (
       <>
