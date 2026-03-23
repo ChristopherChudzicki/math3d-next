@@ -1,11 +1,12 @@
-from django.urls import include, path
-from authentication.views import CustomUserViewSet
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
-router = DefaultRouter()
-router.register("users", CustomUserViewSet)
+from authentication.views import AdminActivateView, UserMeView
 
 urlpatterns = [
-    *router.urls,
-    path("", include("djoser.urls.authtoken")),
+    path("users/me/", UserMeView.as_view(), name="user-me"),
+    path(
+        "users/<int:id>/activation/",
+        AdminActivateView.as_view(),
+        name="admin-activate",
+    ),
 ]
