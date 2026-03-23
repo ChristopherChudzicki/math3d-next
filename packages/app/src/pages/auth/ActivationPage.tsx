@@ -47,11 +47,9 @@ const AccountActivationPage: React.FC = () => {
   useEffect(() => {
     // This runs twice during development in StrictMode, which is annoying, but
     // does not seem to be actually problematic.
+    const key = searchParams.get("key") ?? "";
     activateUserMutate(
-      {
-        uid: searchParams.get("uid") ?? "",
-        token: searchParams.get("token") ?? "",
-      },
+      { key },
       {
         onSuccess: setSuccess.on,
       },

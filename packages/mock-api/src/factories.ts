@@ -4,10 +4,7 @@ import {
   mathItemConfigs,
   MathItemType,
 } from "@math3d/mathitem-configs";
-import type {
-  StrictScene as IScene,
-  UserCreatePasswordRetypeRequest,
-} from "@math3d/api";
+import type { StrictScene as IScene } from "@math3d/api";
 import { faker } from "@faker-js/faker/locale/en";
 import { uniqueId } from "lodash-es";
 import invariant from "tiny-invariant";
@@ -440,15 +437,18 @@ class Folder {
 // when this module runs in plain Node (e.g., Playwright E2E tests).
 const DEFAULT_EMAIL_PROVIDER =
   import.meta.env?.TEST_EMAIL_PROVIDER ?? process.env.TEST_EMAIL_PROVIDER;
-const makeUserInfo = (
-  info?: UserCreatePasswordRetypeRequest,
-): UserCreatePasswordRetypeRequest => {
+interface UserSignupInfo {
+  email: string;
+  password: string;
+  public_nickname: string;
+}
+
+const makeUserInfo = (info?: Partial<UserSignupInfo>): UserSignupInfo => {
   const password = faker.internet.password();
 
   return {
     email: faker.internet.email({ provider: DEFAULT_EMAIL_PROVIDER }),
     password,
-    re_password: password,
     public_nickname: faker.person.firstName(),
     ...info,
   };

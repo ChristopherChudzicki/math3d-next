@@ -42,44 +42,6 @@ import {
 /**
  *
  * @export
- * @interface Activation
- */
-export interface Activation {
-  /**
-   *
-   * @type {string}
-   * @memberof Activation
-   */
-  uid: string;
-  /**
-   *
-   * @type {string}
-   * @memberof Activation
-   */
-  token: string;
-}
-/**
- *
- * @export
- * @interface ActivationRequest
- */
-export interface ActivationRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof ActivationRequest
-   */
-  uid: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ActivationRequest
-   */
-  token: string;
-}
-/**
- *
- * @export
  * @interface LegacyScene
  */
 export interface LegacyScene {
@@ -219,99 +181,6 @@ export interface PaginatedMiniSceneList {
    * @memberof PaginatedMiniSceneList
    */
   results: Array<MiniScene>;
-}
-/**
- *
- * @export
- * @interface PaginatedUserList
- */
-export interface PaginatedUserList {
-  /**
-   *
-   * @type {number}
-   * @memberof PaginatedUserList
-   */
-  count: number;
-  /**
-   *
-   * @type {string}
-   * @memberof PaginatedUserList
-   */
-  next?: string | null;
-  /**
-   *
-   * @type {string}
-   * @memberof PaginatedUserList
-   */
-  previous?: string | null;
-  /**
-   *
-   * @type {Array<User>}
-   * @memberof PaginatedUserList
-   */
-  results: Array<User>;
-}
-/**
- *
- * @export
- * @interface PasswordResetConfirmRetype
- */
-export interface PasswordResetConfirmRetype {
-  /**
-   *
-   * @type {string}
-   * @memberof PasswordResetConfirmRetype
-   */
-  uid: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PasswordResetConfirmRetype
-   */
-  token: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PasswordResetConfirmRetype
-   */
-  new_password: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PasswordResetConfirmRetype
-   */
-  re_new_password: string;
-}
-/**
- *
- * @export
- * @interface PasswordResetConfirmRetypeRequest
- */
-export interface PasswordResetConfirmRetypeRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof PasswordResetConfirmRetypeRequest
-   */
-  uid: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PasswordResetConfirmRetypeRequest
-   */
-  token: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PasswordResetConfirmRetypeRequest
-   */
-  new_password: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PasswordResetConfirmRetypeRequest
-   */
-  re_new_password: string;
 }
 /**
  *
@@ -507,120 +376,6 @@ export interface SceneCreateRequest {
 /**
  *
  * @export
- * @interface SendEmailReset
- */
-export interface SendEmailReset {
-  /**
-   *
-   * @type {string}
-   * @memberof SendEmailReset
-   */
-  email: string;
-}
-/**
- *
- * @export
- * @interface SendEmailResetRequest
- */
-export interface SendEmailResetRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof SendEmailResetRequest
-   */
-  email: string;
-}
-/**
- *
- * @export
- * @interface SetPasswordRetype
- */
-export interface SetPasswordRetype {
-  /**
-   *
-   * @type {string}
-   * @memberof SetPasswordRetype
-   */
-  new_password: string;
-  /**
-   *
-   * @type {string}
-   * @memberof SetPasswordRetype
-   */
-  re_new_password: string;
-  /**
-   *
-   * @type {string}
-   * @memberof SetPasswordRetype
-   */
-  current_password: string;
-}
-/**
- *
- * @export
- * @interface SetPasswordRetypeRequest
- */
-export interface SetPasswordRetypeRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof SetPasswordRetypeRequest
-   */
-  new_password: string;
-  /**
-   *
-   * @type {string}
-   * @memberof SetPasswordRetypeRequest
-   */
-  re_new_password: string;
-  /**
-   *
-   * @type {string}
-   * @memberof SetPasswordRetypeRequest
-   */
-  current_password: string;
-}
-/**
- *
- * @export
- * @interface TokenCreate
- */
-export interface TokenCreate {
-  /**
-   *
-   * @type {string}
-   * @memberof TokenCreate
-   */
-  password?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof TokenCreate
-   */
-  email?: string;
-}
-/**
- *
- * @export
- * @interface TokenCreateRequest
- */
-export interface TokenCreateRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof TokenCreateRequest
-   */
-  password?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof TokenCreateRequest
-   */
-  email?: string;
-}
-/**
- *
- * @export
  * @interface User
  */
 export interface User {
@@ -643,50 +398,6 @@ export interface User {
    */
   public_nickname: string;
 }
-/**
- *
- * @export
- * @interface UserCreatePasswordRetypeRequest
- */
-export interface UserCreatePasswordRetypeRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof UserCreatePasswordRetypeRequest
-   */
-  public_nickname: string;
-  /**
-   *
-   * @type {string}
-   * @memberof UserCreatePasswordRetypeRequest
-   */
-  email: string;
-  /**
-   *
-   * @type {string}
-   * @memberof UserCreatePasswordRetypeRequest
-   */
-  password: string;
-  /**
-   *
-   * @type {string}
-   * @memberof UserCreatePasswordRetypeRequest
-   */
-  re_password: string;
-}
-/**
- *
- * @export
- * @interface UserRequest
- */
-export interface UserRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof UserRequest
-   */
-  public_nickname: string;
-}
 
 /**
  * AuthApi - axios parameter creator
@@ -697,17 +408,17 @@ export const AuthApiAxiosParamCreator = function (
 ) {
   return {
     /**
-     * Activate a user. Intended for admin use only, primarily in the e2e tests.
-     * @param {number} id A unique integer value identifying this User.
+     * Admin-only endpoint to activate a user and mark their email as verified.
+     * @param {number} id
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    activateOther: async (
+    authUsersActivationCreate: async (
       id: number,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'id' is not null or undefined
-      assertParamExists("activateOther", "id", id);
+      assertParamExists("authUsersActivationCreate", "id", id);
       const localVarPath = `/v0/auth/users/{id}/activation/`.replace(
         `{${"id"}}`,
         encodeURIComponent(String(id)),
@@ -727,12 +438,7 @@ export const AuthApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
+      // authentication cookieAuth required
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -749,341 +455,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     * Use this endpoint to obtain user authentication token.
-     * @param {TokenCreateRequest} [TokenCreateRequest]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authTokenLoginCreate: async (
-      TokenCreateRequest?: TokenCreateRequest,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      const localVarPath = `/v0/auth/token/login/`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      localVarHeaderParameter["Content-Type"] = "application/json";
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        TokenCreateRequest,
-        localVarRequestOptions,
-        configuration,
-      );
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Use this endpoint to logout user (remove user authentication token).
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authTokenLogoutCreate: async (
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      const localVarPath = `/v0/auth/token/logout/`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {ActivationRequest} ActivationRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersActivationCreate: async (
-      ActivationRequest: ActivationRequest,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'ActivationRequest' is not null or undefined
-      assertParamExists(
-        "authUsersActivationCreate",
-        "ActivationRequest",
-        ActivationRequest,
-      );
-      const localVarPath = `/v0/auth/users/activation/`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      localVarHeaderParameter["Content-Type"] = "application/json";
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        ActivationRequest,
-        localVarRequestOptions,
-        configuration,
-      );
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {UserCreatePasswordRetypeRequest} UserCreatePasswordRetypeRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersCreate: async (
-      UserCreatePasswordRetypeRequest: UserCreatePasswordRetypeRequest,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'UserCreatePasswordRetypeRequest' is not null or undefined
-      assertParamExists(
-        "authUsersCreate",
-        "UserCreatePasswordRetypeRequest",
-        UserCreatePasswordRetypeRequest,
-      );
-      const localVarPath = `/v0/auth/users/`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      localVarHeaderParameter["Content-Type"] = "application/json";
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        UserCreatePasswordRetypeRequest,
-        localVarRequestOptions,
-        configuration,
-      );
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {number} id A unique integer value identifying this User.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersDestroy: async (
-      id: number,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists("authUsersDestroy", "id", id);
-      const localVarPath = `/v0/auth/users/{id}/`.replace(
-        `{${"id"}}`,
-        encodeURIComponent(String(id)),
-      );
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "DELETE",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {string} [email]
-     * @param {number} [limit] Number of results to return per page.
-     * @param {number} [offset] The initial index from which to return the results.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersList: async (
-      email?: string,
-      limit?: number,
-      offset?: number,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      const localVarPath = `/v0/auth/users/`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      if (email !== undefined) {
-        localVarQueryParameter["email"] = email;
-      }
-
-      if (limit !== undefined) {
-        localVarQueryParameter["limit"] = limit;
-      }
-
-      if (offset !== undefined) {
-        localVarQueryParameter["offset"] = offset;
-      }
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
+     * GET, PATCH, and DELETE the current user\'s profile.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1106,12 +478,7 @@ export const AuthApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
+      // authentication cookieAuth required
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -1128,7 +495,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
+     * GET, PATCH, and DELETE the current user\'s profile.
      * @param {PatchedUserRequest} [PatchedUserRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1153,12 +520,7 @@ export const AuthApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
+      // authentication cookieAuth required
 
       localVarHeaderParameter["Content-Type"] = "application/json";
 
@@ -1182,7 +544,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
+     * GET, PATCH, and DELETE the current user\'s profile.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1205,12 +567,7 @@ export const AuthApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
+      // authentication cookieAuth required
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -1220,478 +577,6 @@ export const AuthApiAxiosParamCreator = function (
         ...headersFromBaseOptions,
         ...options.headers,
       };
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {UserRequest} UserRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersMeUpdate: async (
-      UserRequest: UserRequest,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'UserRequest' is not null or undefined
-      assertParamExists("authUsersMeUpdate", "UserRequest", UserRequest);
-      const localVarPath = `/v0/auth/users/me/`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "PUT",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      localVarHeaderParameter["Content-Type"] = "application/json";
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        UserRequest,
-        localVarRequestOptions,
-        configuration,
-      );
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {number} id A unique integer value identifying this User.
-     * @param {PatchedUserRequest} [PatchedUserRequest]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersPartialUpdate: async (
-      id: number,
-      PatchedUserRequest?: PatchedUserRequest,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists("authUsersPartialUpdate", "id", id);
-      const localVarPath = `/v0/auth/users/{id}/`.replace(
-        `{${"id"}}`,
-        encodeURIComponent(String(id)),
-      );
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "PATCH",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      localVarHeaderParameter["Content-Type"] = "application/json";
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        PatchedUserRequest,
-        localVarRequestOptions,
-        configuration,
-      );
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {SendEmailResetRequest} SendEmailResetRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersResendActivationCreate: async (
-      SendEmailResetRequest: SendEmailResetRequest,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'SendEmailResetRequest' is not null or undefined
-      assertParamExists(
-        "authUsersResendActivationCreate",
-        "SendEmailResetRequest",
-        SendEmailResetRequest,
-      );
-      const localVarPath = `/v0/auth/users/resend_activation/`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      localVarHeaderParameter["Content-Type"] = "application/json";
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        SendEmailResetRequest,
-        localVarRequestOptions,
-        configuration,
-      );
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {PasswordResetConfirmRetypeRequest} PasswordResetConfirmRetypeRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersResetPasswordConfirmCreate: async (
-      PasswordResetConfirmRetypeRequest: PasswordResetConfirmRetypeRequest,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'PasswordResetConfirmRetypeRequest' is not null or undefined
-      assertParamExists(
-        "authUsersResetPasswordConfirmCreate",
-        "PasswordResetConfirmRetypeRequest",
-        PasswordResetConfirmRetypeRequest,
-      );
-      const localVarPath = `/v0/auth/users/reset_password_confirm/`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      localVarHeaderParameter["Content-Type"] = "application/json";
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        PasswordResetConfirmRetypeRequest,
-        localVarRequestOptions,
-        configuration,
-      );
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {SendEmailResetRequest} SendEmailResetRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersResetPasswordCreate: async (
-      SendEmailResetRequest: SendEmailResetRequest,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'SendEmailResetRequest' is not null or undefined
-      assertParamExists(
-        "authUsersResetPasswordCreate",
-        "SendEmailResetRequest",
-        SendEmailResetRequest,
-      );
-      const localVarPath = `/v0/auth/users/reset_password/`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      localVarHeaderParameter["Content-Type"] = "application/json";
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        SendEmailResetRequest,
-        localVarRequestOptions,
-        configuration,
-      );
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {number} id A unique integer value identifying this User.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersRetrieve: async (
-      id: number,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists("authUsersRetrieve", "id", id);
-      const localVarPath = `/v0/auth/users/{id}/`.replace(
-        `{${"id"}}`,
-        encodeURIComponent(String(id)),
-      );
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {SetPasswordRetypeRequest} SetPasswordRetypeRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersSetPasswordCreate: async (
-      SetPasswordRetypeRequest: SetPasswordRetypeRequest,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'SetPasswordRetypeRequest' is not null or undefined
-      assertParamExists(
-        "authUsersSetPasswordCreate",
-        "SetPasswordRetypeRequest",
-        SetPasswordRetypeRequest,
-      );
-      const localVarPath = `/v0/auth/users/set_password/`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      localVarHeaderParameter["Content-Type"] = "application/json";
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        SetPasswordRetypeRequest,
-        localVarRequestOptions,
-        configuration,
-      );
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {number} id A unique integer value identifying this User.
-     * @param {UserRequest} UserRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersUpdate: async (
-      id: number,
-      UserRequest: UserRequest,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists("authUsersUpdate", "id", id);
-      // verify required parameter 'UserRequest' is not null or undefined
-      assertParamExists("authUsersUpdate", "UserRequest", UserRequest);
-      const localVarPath = `/v0/auth/users/{id}/`.replace(
-        `{${"id"}}`,
-        encodeURIComponent(String(id)),
-      );
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = {
-        method: "PUT",
-        ...baseOptions,
-        ...options,
-      };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
-
-      localVarHeaderParameter["Content-Type"] = "application/json";
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        UserRequest,
-        localVarRequestOptions,
-        configuration,
-      );
 
       return {
         url: toPathString(localVarUrlObj),
@@ -1709,100 +594,19 @@ export const AuthApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = AuthApiAxiosParamCreator(configuration);
   return {
     /**
-     * Activate a user. Intended for admin use only, primarily in the e2e tests.
-     * @param {number} id A unique integer value identifying this User.
+     * Admin-only endpoint to activate a user and mark their email as verified.
+     * @param {number} id
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async activateOther(
+    async authUsersActivationCreate(
       id: number,
       options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
     > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.activateOther(
-        id,
-        options,
-      );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.activateOther"]?.[index]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * Use this endpoint to obtain user authentication token.
-     * @param {TokenCreateRequest} [TokenCreateRequest]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authTokenLoginCreate(
-      TokenCreateRequest?: TokenCreateRequest,
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<TokenCreate>
-    > {
       const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authTokenLoginCreate(
-          TokenCreateRequest,
-          options,
-        );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authTokenLoginCreate"]?.[index]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * Use this endpoint to logout user (remove user authentication token).
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authTokenLogoutCreate(
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authTokenLogoutCreate(options);
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authTokenLogoutCreate"]?.[index]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {ActivationRequest} ActivationRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersActivationCreate(
-      ActivationRequest: ActivationRequest,
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Activation>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersActivationCreate(
-          ActivationRequest,
-          options,
-        );
+        await localVarAxiosParamCreator.authUsersActivationCreate(id, options);
       const index = configuration?.serverIndex ?? 0;
       const operationBasePath =
         operationServerMap["AuthApi.authUsersActivationCreate"]?.[index]?.url;
@@ -1815,95 +619,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {UserCreatePasswordRetypeRequest} UserCreatePasswordRetypeRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersCreate(
-      UserCreatePasswordRetypeRequest: UserCreatePasswordRetypeRequest,
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.authUsersCreate(
-        UserCreatePasswordRetypeRequest,
-        options,
-      );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersCreate"]?.[index]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {number} id A unique integer value identifying this User.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersDestroy(
-      id: number,
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersDestroy(id, options);
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersDestroy"]?.[index]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {string} [email]
-     * @param {number} [limit] Number of results to return per page.
-     * @param {number} [offset] The initial index from which to return the results.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersList(
-      email?: string,
-      limit?: number,
-      offset?: number,
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string,
-      ) => AxiosPromise<PaginatedUserList>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.authUsersList(
-        email,
-        limit,
-        offset,
-        options,
-      );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersList"]?.[index]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
+     * GET, PATCH, and DELETE the current user\'s profile.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1926,7 +642,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
+     * GET, PATCH, and DELETE the current user\'s profile.
      * @param {PatchedUserRequest} [PatchedUserRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1954,7 +670,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
+     * GET, PATCH, and DELETE the current user\'s profile.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1968,239 +684,6 @@ export const AuthApiFp = function (configuration?: Configuration) {
       const index = configuration?.serverIndex ?? 0;
       const operationBasePath =
         operationServerMap["AuthApi.authUsersMeRetrieve"]?.[index]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {UserRequest} UserRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersMeUpdate(
-      UserRequest: UserRequest,
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersMeUpdate(UserRequest, options);
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersMeUpdate"]?.[index]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {number} id A unique integer value identifying this User.
-     * @param {PatchedUserRequest} [PatchedUserRequest]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersPartialUpdate(
-      id: number,
-      PatchedUserRequest?: PatchedUserRequest,
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersPartialUpdate(
-          id,
-          PatchedUserRequest,
-          options,
-        );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersPartialUpdate"]?.[index]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {SendEmailResetRequest} SendEmailResetRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersResendActivationCreate(
-      SendEmailResetRequest: SendEmailResetRequest,
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<SendEmailReset>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersResendActivationCreate(
-          SendEmailResetRequest,
-          options,
-        );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersResendActivationCreate"]?.[index]
-          ?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {PasswordResetConfirmRetypeRequest} PasswordResetConfirmRetypeRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersResetPasswordConfirmCreate(
-      PasswordResetConfirmRetypeRequest: PasswordResetConfirmRetypeRequest,
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string,
-      ) => AxiosPromise<PasswordResetConfirmRetype>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersResetPasswordConfirmCreate(
-          PasswordResetConfirmRetypeRequest,
-          options,
-        );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersResetPasswordConfirmCreate"]?.[
-          index
-        ]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {SendEmailResetRequest} SendEmailResetRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersResetPasswordCreate(
-      SendEmailResetRequest: SendEmailResetRequest,
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<SendEmailReset>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersResetPasswordCreate(
-          SendEmailResetRequest,
-          options,
-        );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersResetPasswordCreate"]?.[index]
-          ?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {number} id A unique integer value identifying this User.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersRetrieve(
-      id: number,
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersRetrieve(id, options);
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersRetrieve"]?.[index]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {SetPasswordRetypeRequest} SetPasswordRetypeRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersSetPasswordCreate(
-      SetPasswordRetypeRequest: SetPasswordRetypeRequest,
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string,
-      ) => AxiosPromise<SetPasswordRetype>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersSetPasswordCreate(
-          SetPasswordRetypeRequest,
-          options,
-        );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersSetPasswordCreate"]?.[index]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, operationBasePath || basePath);
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {number} id A unique integer value identifying this User.
-     * @param {UserRequest} UserRequest
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async authUsersUpdate(
-      id: number,
-      UserRequest: UserRequest,
-      options?: RawAxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.authUsersUpdate(
-        id,
-        UserRequest,
-        options,
-      );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersUpdate"]?.[index]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -2224,45 +707,7 @@ export const AuthApiFactory = function (
   const localVarFp = AuthApiFp(configuration);
   return {
     /**
-     * Activate a user. Intended for admin use only, primarily in the e2e tests.
-     * @param {AuthApiActivateOtherRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    activateOther(
-      requestParameters: AuthApiActivateOtherRequest,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .activateOther(requestParameters.id, options)
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * Use this endpoint to obtain user authentication token.
-     * @param {AuthApiAuthTokenLoginCreateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authTokenLoginCreate(
-      requestParameters: AuthApiAuthTokenLoginCreateRequest = {},
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<TokenCreate> {
-      return localVarFp
-        .authTokenLoginCreate(requestParameters.TokenCreateRequest, options)
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * Use this endpoint to logout user (remove user authentication token).
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authTokenLogoutCreate(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp
-        .authTokenLogoutCreate(options)
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
+     * Admin-only endpoint to activate a user and mark their email as verified.
      * @param {AuthApiAuthUsersActivationCreateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2270,63 +715,13 @@ export const AuthApiFactory = function (
     authUsersActivationCreate(
       requestParameters: AuthApiAuthUsersActivationCreateRequest,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Activation> {
-      return localVarFp
-        .authUsersActivationCreate(requestParameters.ActivationRequest, options)
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {AuthApiAuthUsersCreateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersCreate(
-      requestParameters: AuthApiAuthUsersCreateRequest,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<User> {
-      return localVarFp
-        .authUsersCreate(
-          requestParameters.UserCreatePasswordRetypeRequest,
-          options,
-        )
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {AuthApiAuthUsersDestroyRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersDestroy(
-      requestParameters: AuthApiAuthUsersDestroyRequest,
-      options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .authUsersDestroy(requestParameters.id, options)
+        .authUsersActivationCreate(requestParameters.id, options)
         .then((request) => request(axios, basePath));
     },
     /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {AuthApiAuthUsersListRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersList(
-      requestParameters: AuthApiAuthUsersListRequest = {},
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<PaginatedUserList> {
-      return localVarFp
-        .authUsersList(
-          requestParameters.email,
-          requestParameters.limit,
-          requestParameters.offset,
-          options,
-        )
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
+     * GET, PATCH, and DELETE the current user\'s profile.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -2336,7 +731,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
+     * GET, PATCH, and DELETE the current user\'s profile.
      * @param {AuthApiAuthUsersMePartialUpdateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2350,7 +745,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
+     * GET, PATCH, and DELETE the current user\'s profile.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -2359,168 +754,8 @@ export const AuthApiFactory = function (
         .authUsersMeRetrieve(options)
         .then((request) => request(axios, basePath));
     },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {AuthApiAuthUsersMeUpdateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersMeUpdate(
-      requestParameters: AuthApiAuthUsersMeUpdateRequest,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<User> {
-      return localVarFp
-        .authUsersMeUpdate(requestParameters.UserRequest, options)
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {AuthApiAuthUsersPartialUpdateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersPartialUpdate(
-      requestParameters: AuthApiAuthUsersPartialUpdateRequest,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<User> {
-      return localVarFp
-        .authUsersPartialUpdate(
-          requestParameters.id,
-          requestParameters.PatchedUserRequest,
-          options,
-        )
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {AuthApiAuthUsersResendActivationCreateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersResendActivationCreate(
-      requestParameters: AuthApiAuthUsersResendActivationCreateRequest,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<SendEmailReset> {
-      return localVarFp
-        .authUsersResendActivationCreate(
-          requestParameters.SendEmailResetRequest,
-          options,
-        )
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {AuthApiAuthUsersResetPasswordConfirmCreateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersResetPasswordConfirmCreate(
-      requestParameters: AuthApiAuthUsersResetPasswordConfirmCreateRequest,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<PasswordResetConfirmRetype> {
-      return localVarFp
-        .authUsersResetPasswordConfirmCreate(
-          requestParameters.PasswordResetConfirmRetypeRequest,
-          options,
-        )
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {AuthApiAuthUsersResetPasswordCreateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersResetPasswordCreate(
-      requestParameters: AuthApiAuthUsersResetPasswordCreateRequest,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<SendEmailReset> {
-      return localVarFp
-        .authUsersResetPasswordCreate(
-          requestParameters.SendEmailResetRequest,
-          options,
-        )
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {AuthApiAuthUsersRetrieveRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersRetrieve(
-      requestParameters: AuthApiAuthUsersRetrieveRequest,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<User> {
-      return localVarFp
-        .authUsersRetrieve(requestParameters.id, options)
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {AuthApiAuthUsersSetPasswordCreateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersSetPasswordCreate(
-      requestParameters: AuthApiAuthUsersSetPasswordCreateRequest,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<SetPasswordRetype> {
-      return localVarFp
-        .authUsersSetPasswordCreate(
-          requestParameters.SetPasswordRetypeRequest,
-          options,
-        )
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * A version of Djoser\'s UserViewSet with some actions removed.
-     * @param {AuthApiAuthUsersUpdateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersUpdate(
-      requestParameters: AuthApiAuthUsersUpdateRequest,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<User> {
-      return localVarFp
-        .authUsersUpdate(
-          requestParameters.id,
-          requestParameters.UserRequest,
-          options,
-        )
-        .then((request) => request(axios, basePath));
-    },
   };
 };
-
-/**
- * Request parameters for activateOther operation in AuthApi.
- * @export
- * @interface AuthApiActivateOtherRequest
- */
-export interface AuthApiActivateOtherRequest {
-  /**
-   * A unique integer value identifying this User.
-   * @type {number}
-   * @memberof AuthApiActivateOther
-   */
-  readonly id: number;
-}
-
-/**
- * Request parameters for authTokenLoginCreate operation in AuthApi.
- * @export
- * @interface AuthApiAuthTokenLoginCreateRequest
- */
-export interface AuthApiAuthTokenLoginCreateRequest {
-  /**
-   *
-   * @type {TokenCreateRequest}
-   * @memberof AuthApiAuthTokenLoginCreate
-   */
-  readonly TokenCreateRequest?: TokenCreateRequest;
-}
 
 /**
  * Request parameters for authUsersActivationCreate operation in AuthApi.
@@ -2530,66 +765,10 @@ export interface AuthApiAuthTokenLoginCreateRequest {
 export interface AuthApiAuthUsersActivationCreateRequest {
   /**
    *
-   * @type {ActivationRequest}
+   * @type {number}
    * @memberof AuthApiAuthUsersActivationCreate
    */
-  readonly ActivationRequest: ActivationRequest;
-}
-
-/**
- * Request parameters for authUsersCreate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersCreateRequest
- */
-export interface AuthApiAuthUsersCreateRequest {
-  /**
-   *
-   * @type {UserCreatePasswordRetypeRequest}
-   * @memberof AuthApiAuthUsersCreate
-   */
-  readonly UserCreatePasswordRetypeRequest: UserCreatePasswordRetypeRequest;
-}
-
-/**
- * Request parameters for authUsersDestroy operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersDestroyRequest
- */
-export interface AuthApiAuthUsersDestroyRequest {
-  /**
-   * A unique integer value identifying this User.
-   * @type {number}
-   * @memberof AuthApiAuthUsersDestroy
-   */
   readonly id: number;
-}
-
-/**
- * Request parameters for authUsersList operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersListRequest
- */
-export interface AuthApiAuthUsersListRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof AuthApiAuthUsersList
-   */
-  readonly email?: string;
-
-  /**
-   * Number of results to return per page.
-   * @type {number}
-   * @memberof AuthApiAuthUsersList
-   */
-  readonly limit?: number;
-
-  /**
-   * The initial index from which to return the results.
-   * @type {number}
-   * @memberof AuthApiAuthUsersList
-   */
-  readonly offset?: number;
 }
 
 /**
@@ -2607,132 +786,6 @@ export interface AuthApiAuthUsersMePartialUpdateRequest {
 }
 
 /**
- * Request parameters for authUsersMeUpdate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersMeUpdateRequest
- */
-export interface AuthApiAuthUsersMeUpdateRequest {
-  /**
-   *
-   * @type {UserRequest}
-   * @memberof AuthApiAuthUsersMeUpdate
-   */
-  readonly UserRequest: UserRequest;
-}
-
-/**
- * Request parameters for authUsersPartialUpdate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersPartialUpdateRequest
- */
-export interface AuthApiAuthUsersPartialUpdateRequest {
-  /**
-   * A unique integer value identifying this User.
-   * @type {number}
-   * @memberof AuthApiAuthUsersPartialUpdate
-   */
-  readonly id: number;
-
-  /**
-   *
-   * @type {PatchedUserRequest}
-   * @memberof AuthApiAuthUsersPartialUpdate
-   */
-  readonly PatchedUserRequest?: PatchedUserRequest;
-}
-
-/**
- * Request parameters for authUsersResendActivationCreate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersResendActivationCreateRequest
- */
-export interface AuthApiAuthUsersResendActivationCreateRequest {
-  /**
-   *
-   * @type {SendEmailResetRequest}
-   * @memberof AuthApiAuthUsersResendActivationCreate
-   */
-  readonly SendEmailResetRequest: SendEmailResetRequest;
-}
-
-/**
- * Request parameters for authUsersResetPasswordConfirmCreate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersResetPasswordConfirmCreateRequest
- */
-export interface AuthApiAuthUsersResetPasswordConfirmCreateRequest {
-  /**
-   *
-   * @type {PasswordResetConfirmRetypeRequest}
-   * @memberof AuthApiAuthUsersResetPasswordConfirmCreate
-   */
-  readonly PasswordResetConfirmRetypeRequest: PasswordResetConfirmRetypeRequest;
-}
-
-/**
- * Request parameters for authUsersResetPasswordCreate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersResetPasswordCreateRequest
- */
-export interface AuthApiAuthUsersResetPasswordCreateRequest {
-  /**
-   *
-   * @type {SendEmailResetRequest}
-   * @memberof AuthApiAuthUsersResetPasswordCreate
-   */
-  readonly SendEmailResetRequest: SendEmailResetRequest;
-}
-
-/**
- * Request parameters for authUsersRetrieve operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersRetrieveRequest
- */
-export interface AuthApiAuthUsersRetrieveRequest {
-  /**
-   * A unique integer value identifying this User.
-   * @type {number}
-   * @memberof AuthApiAuthUsersRetrieve
-   */
-  readonly id: number;
-}
-
-/**
- * Request parameters for authUsersSetPasswordCreate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersSetPasswordCreateRequest
- */
-export interface AuthApiAuthUsersSetPasswordCreateRequest {
-  /**
-   *
-   * @type {SetPasswordRetypeRequest}
-   * @memberof AuthApiAuthUsersSetPasswordCreate
-   */
-  readonly SetPasswordRetypeRequest: SetPasswordRetypeRequest;
-}
-
-/**
- * Request parameters for authUsersUpdate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersUpdateRequest
- */
-export interface AuthApiAuthUsersUpdateRequest {
-  /**
-   * A unique integer value identifying this User.
-   * @type {number}
-   * @memberof AuthApiAuthUsersUpdate
-   */
-  readonly id: number;
-
-  /**
-   *
-   * @type {UserRequest}
-   * @memberof AuthApiAuthUsersUpdate
-   */
-  readonly UserRequest: UserRequest;
-}
-
-/**
  * AuthApi - object-oriented interface
  * @export
  * @class AuthApi
@@ -2740,51 +793,7 @@ export interface AuthApiAuthUsersUpdateRequest {
  */
 export class AuthApi extends BaseAPI {
   /**
-   * Activate a user. Intended for admin use only, primarily in the e2e tests.
-   * @param {AuthApiActivateOtherRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public activateOther(
-    requestParameters: AuthApiActivateOtherRequest,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .activateOther(requestParameters.id, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * Use this endpoint to obtain user authentication token.
-   * @param {AuthApiAuthTokenLoginCreateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authTokenLoginCreate(
-    requestParameters: AuthApiAuthTokenLoginCreateRequest = {},
-    options?: RawAxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authTokenLoginCreate(requestParameters.TokenCreateRequest, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * Use this endpoint to logout user (remove user authentication token).
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authTokenLogoutCreate(options?: RawAxiosRequestConfig) {
-    return AuthApiFp(this.configuration)
-      .authTokenLogoutCreate(options)
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
+   * Admin-only endpoint to activate a user and mark their email as verified.
    * @param {AuthApiAuthUsersActivationCreateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -2795,68 +804,12 @@ export class AuthApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
-      .authUsersActivationCreate(requestParameters.ActivationRequest, options)
+      .authUsersActivationCreate(requestParameters.id, options)
       .then((request) => request(this.axios, this.basePath));
   }
 
   /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
-   * @param {AuthApiAuthUsersCreateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersCreate(
-    requestParameters: AuthApiAuthUsersCreateRequest,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersCreate(
-        requestParameters.UserCreatePasswordRetypeRequest,
-        options,
-      )
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
-   * @param {AuthApiAuthUsersDestroyRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersDestroy(
-    requestParameters: AuthApiAuthUsersDestroyRequest,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersDestroy(requestParameters.id, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
-   * @param {AuthApiAuthUsersListRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersList(
-    requestParameters: AuthApiAuthUsersListRequest = {},
-    options?: RawAxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersList(
-        requestParameters.email,
-        requestParameters.limit,
-        requestParameters.offset,
-        options,
-      )
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
+   * GET, PATCH, and DELETE the current user\'s profile.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof AuthApi
@@ -2868,7 +821,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
+   * GET, PATCH, and DELETE the current user\'s profile.
    * @param {AuthApiAuthUsersMePartialUpdateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -2884,7 +837,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
+   * GET, PATCH, and DELETE the current user\'s profile.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof AuthApi
@@ -2892,154 +845,6 @@ export class AuthApi extends BaseAPI {
   public authUsersMeRetrieve(options?: RawAxiosRequestConfig) {
     return AuthApiFp(this.configuration)
       .authUsersMeRetrieve(options)
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
-   * @param {AuthApiAuthUsersMeUpdateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersMeUpdate(
-    requestParameters: AuthApiAuthUsersMeUpdateRequest,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersMeUpdate(requestParameters.UserRequest, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
-   * @param {AuthApiAuthUsersPartialUpdateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersPartialUpdate(
-    requestParameters: AuthApiAuthUsersPartialUpdateRequest,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersPartialUpdate(
-        requestParameters.id,
-        requestParameters.PatchedUserRequest,
-        options,
-      )
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
-   * @param {AuthApiAuthUsersResendActivationCreateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersResendActivationCreate(
-    requestParameters: AuthApiAuthUsersResendActivationCreateRequest,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersResendActivationCreate(
-        requestParameters.SendEmailResetRequest,
-        options,
-      )
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
-   * @param {AuthApiAuthUsersResetPasswordConfirmCreateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersResetPasswordConfirmCreate(
-    requestParameters: AuthApiAuthUsersResetPasswordConfirmCreateRequest,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersResetPasswordConfirmCreate(
-        requestParameters.PasswordResetConfirmRetypeRequest,
-        options,
-      )
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
-   * @param {AuthApiAuthUsersResetPasswordCreateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersResetPasswordCreate(
-    requestParameters: AuthApiAuthUsersResetPasswordCreateRequest,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersResetPasswordCreate(
-        requestParameters.SendEmailResetRequest,
-        options,
-      )
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
-   * @param {AuthApiAuthUsersRetrieveRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersRetrieve(
-    requestParameters: AuthApiAuthUsersRetrieveRequest,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersRetrieve(requestParameters.id, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
-   * @param {AuthApiAuthUsersSetPasswordCreateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersSetPasswordCreate(
-    requestParameters: AuthApiAuthUsersSetPasswordCreateRequest,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersSetPasswordCreate(
-        requestParameters.SetPasswordRetypeRequest,
-        options,
-      )
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * A version of Djoser\'s UserViewSet with some actions removed.
-   * @param {AuthApiAuthUsersUpdateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuthApi
-   */
-  public authUsersUpdate(
-    requestParameters: AuthApiAuthUsersUpdateRequest,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return AuthApiFp(this.configuration)
-      .authUsersUpdate(
-        requestParameters.id,
-        requestParameters.UserRequest,
-        options,
-      )
       .then((request) => request(this.axios, this.basePath));
   }
 }
@@ -3084,12 +889,7 @@ export const LegacyScenesApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
+      // authentication cookieAuth required
 
       localVarHeaderParameter["Content-Type"] = "application/json";
 
@@ -3140,12 +940,7 @@ export const LegacyScenesApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
+      // authentication cookieAuth required
 
       if (limit !== undefined) {
         localVarQueryParameter["limit"] = limit;
@@ -3200,12 +995,7 @@ export const LegacyScenesApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
+      // authentication cookieAuth required
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -3532,12 +1322,7 @@ export const ScenesApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
+      // authentication cookieAuth required
 
       localVarHeaderParameter["Content-Type"] = "application/json";
 
@@ -3591,12 +1376,7 @@ export const ScenesApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
+      // authentication cookieAuth required
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -3644,12 +1424,7 @@ export const ScenesApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
+      // authentication cookieAuth required
 
       if (archived !== undefined) {
         localVarQueryParameter["archived"] = archived;
@@ -3713,12 +1488,7 @@ export const ScenesApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
+      // authentication cookieAuth required
 
       if (archived !== undefined) {
         localVarQueryParameter["archived"] = archived;
@@ -3783,12 +1553,7 @@ export const ScenesApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
+      // authentication cookieAuth required
 
       localVarHeaderParameter["Content-Type"] = "application/json";
 
@@ -3842,12 +1607,7 @@ export const ScenesApiAxiosParamCreator = function (
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
-      // authentication tokenAuth required
-      await setApiKeyToObject(
-        localVarHeaderParameter,
-        "Authorization",
-        configuration,
-      );
+      // authentication cookieAuth required
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =

@@ -12,12 +12,14 @@ const LogoutPage: React.FC = () => {
   }, [navigate]);
   const logout = useLogout();
   const handleSubmit = useCallback(async () => {
-    logout.mutateAsync();
+    await logout.mutateAsync();
     setIsAuthenticated(false);
     handleClose();
   }, [handleClose, logout, setIsAuthenticated]);
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Only redirect if we know the user is NOT authenticated (false).
+    // When auth status is null (loading), don't redirect yet.
+    if (isAuthenticated === false) {
       navigate("../");
     }
   }, [isAuthenticated, navigate]);

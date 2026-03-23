@@ -24,20 +24,20 @@ const AppProviders: React.FC<AppProps> = ({
   router,
   theme,
 }) => (
-  <AuthStatusProvider>
-    <Provider store={store}>
-      <NotificationsProvider>
-        <QueryClientProvider client={queryClient}>
+  <Provider store={store}>
+    <NotificationsProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthStatusProvider>
           <StyledEngineProvider injectFirst>
             <ThemeProvider theme={theme}>
               <RouterProvider router={router} />
               <NotificationsDisplay />
             </ThemeProvider>
           </StyledEngineProvider>
-        </QueryClientProvider>
-      </NotificationsProvider>
-    </Provider>
-  </AuthStatusProvider>
+        </AuthStatusProvider>
+      </QueryClientProvider>
+    </NotificationsProvider>
+  </Provider>
 );
 
 export default AppProviders;

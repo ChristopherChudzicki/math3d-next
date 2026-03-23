@@ -32,7 +32,9 @@ const ChangePasswordForm: React.FC<{
         event?.preventDefault();
         try {
           setDisabled(true);
-          await updatePassword.mutateAsync(data);
+          // Send only the fields allauth expects (no re_new_password)
+          const { current_password, new_password } = data;
+          await updatePassword.mutateAsync({ current_password, new_password });
         } finally {
           setDisabled(false);
         }

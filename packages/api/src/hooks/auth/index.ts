@@ -1,32 +1,41 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AuthApi, SendEmailResetRequest } from "../../generated";
-import type {
-  TokenCreateRequest,
-  UserCreatePasswordRetypeRequest,
-  ActivationRequest,
-  PasswordResetConfirmRetypeRequest,
-  PatchedUserRequest,
-  SetPasswordRetypeRequest,
-} from "../../generated";
+import { AxiosError } from "axios";
+import { AuthApi } from "../../generated";
+import type { PatchedUserRequest } from "../../generated";
 import { getConfig } from "../util";
 import { deleteUser, deleteUserMe } from "./api";
 import type { DeleteUserMeParams } from "./api";
+import {
+  allAuthLogin,
+  allAuthLogout,
+  allAuthGetSession,
+  allAuthSignup,
+  allAuthVerifyEmail,
+  allAuthRequestPasswordReset,
+  allAuthResetPassword,
+  allAuthChangePassword,
+} from "./allauth-api";
+import type {
+  AllAuthLoginRequest,
+  AllAuthSignupRequest,
+  AllAuthVerifyEmailRequest,
+  AllAuthRequestPasswordResetRequest,
+  AllAuthResetPasswordRequest,
+  AllAuthChangePasswordRequest,
+} from "./allauth-types";
 
 const authApi = new AuthApi(getConfig());
 
 const keys = {
   userMe: ["me"],
+  session: ["session"],
 };
 
 const useLogin = () => {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (data: TokenCreateRequest) =>
-      authApi.authTokenLoginCreate({ TokenCreateRequest: data }),
-    onSuccess: (data) => {
-      // @ts-expect-error drf-spectacular issue
-      const token = data.data.auth_token;
-      localStorage.setItem("apiToken", JSON.stringify(token));
+    mutationFn: (data: AllAuthLoginRequest) => allAuthLogin(data),
+    onSuccess: () => {
       client.resetQueries();
     },
   });
@@ -35,54 +44,106 @@ const useLogin = () => {
 const useLogout = () => {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: () => authApi.authTokenLogoutCreate(),
+    mutationFn: async () => {
+      try {
+        await allAuthLogout();
+      } catch (err) {
+        // allauth returns 401 after logout (confirming you're unauthenticated).
+        // This is expected behavior, not an error.
+        if (err instanceof AxiosError && err.response?.status === 401) {
+          return;
+        }
+        throw err;
+      }
+    },
     onSuccess: () => {
-      localStorage.removeItem("apiToken");
       client.resetQueries();
     },
   });
 };
 
+const useSession = () => {
+  return useQuery({
+    queryKey: keys.session,
+    queryFn: async () => {
+      try {
+        const res = await allAuthGetSession();
+        return res.data;
+      } catch {
+        // 401 means not authenticated — return null
+        return null;
+      }
+    },
+  });
+};
+
+/**
+ * Fetch the current user's profile from the custom DRF endpoint.
+ * This provides public_nickname which allauth's session endpoint does not.
+ */
 const useUserMe = (opts?: { enabled?: boolean }) => {
   return useQuery({
-    queryKey: ["me"],
-    queryFn: () => {
-      if (!localStorage.getItem("apiToken")) {
-        return Promise.resolve(null);
+    queryKey: keys.userMe,
+    queryFn: async () => {
+      try {
+        const res = await authApi.authUsersMeRetrieve();
+        return res.data;
+      } catch (err) {
+        // 401/403 means not authenticated — return null instead of erroring
+        if (
+          err instanceof AxiosError &&
+          [401, 403].includes(err.response?.status ?? 0)
+        ) {
+          return null;
+        }
+        throw err;
       }
-      return authApi.authUsersMeRetrieve().then((res) => res.data);
     },
+    retry: false,
     ...opts,
   });
 };
 
 const useCreateUser = () => {
   return useMutation({
-    mutationFn: (data: UserCreatePasswordRetypeRequest) =>
-      authApi.authUsersCreate({ UserCreatePasswordRetypeRequest: data }),
+    mutationFn: async (data: AllAuthSignupRequest) => {
+      try {
+        return await allAuthSignup(data);
+      } catch (err) {
+        // allauth returns 401 with verify_email flow when email verification
+        // is mandatory. This is expected — treat it as success.
+        if (err instanceof AxiosError && err.response?.status === 401) {
+          const responseData = err.response.data as {
+            data?: { flows?: Array<{ id: string }> };
+          };
+          const flows = responseData?.data?.flows ?? [];
+          if (flows.some((f) => f.id === "verify_email")) {
+            return err.response;
+          }
+        }
+        throw err;
+      }
+    },
   });
 };
 
 const useActivateUser = () => {
   return useMutation({
-    mutationFn: (data: ActivationRequest) =>
-      authApi.authUsersActivationCreate({ ActivationRequest: data }),
+    mutationFn: (data: AllAuthVerifyEmailRequest) => allAuthVerifyEmail(data),
   });
 };
 
 const useResetPassword = () => {
   return useMutation({
-    mutationFn: (data: SendEmailResetRequest) =>
-      authApi.authUsersResetPasswordCreate({ SendEmailResetRequest: data }),
+    mutationFn: (data: AllAuthRequestPasswordResetRequest) =>
+      allAuthRequestPasswordReset(data),
   });
 };
 
 const useResetPasswordConfirm = () => {
   return useMutation({
-    mutationFn: (data: PasswordResetConfirmRetypeRequest) =>
-      authApi.authUsersResetPasswordConfirmCreate({
-        PasswordResetConfirmRetypeRequest: data,
-      }),
+    mutationFn: (data: AllAuthResetPasswordRequest) =>
+      allAuthResetPassword(data),
   });
 };
 
@@ -103,19 +164,18 @@ const useUserMePatch = () => {
 
 const useUpdatePassword = () => {
   return useMutation({
-    mutationFn: (data: SetPasswordRetypeRequest) =>
-      authApi.authUsersSetPasswordCreate({
-        SetPasswordRetypeRequest: data,
-      }),
+    mutationFn: (data: AllAuthChangePasswordRequest) =>
+      allAuthChangePassword(data),
   });
 };
 
 const useUserMeDelete = () => {
   const client = useQueryClient();
+  const config = getConfig();
   return useMutation({
-    mutationFn: (data: DeleteUserMeParams) => deleteUserMe(data, getConfig()),
+    mutationFn: (data: DeleteUserMeParams) =>
+      deleteUserMe(data, config.basePath ?? ""),
     onSuccess: () => {
-      localStorage.removeItem("apiToken");
       client.resetQueries();
     },
   });
@@ -124,6 +184,7 @@ const useUserMeDelete = () => {
 export {
   useLogin,
   useLogout,
+  useSession,
   useUserMe,
   useCreateUser,
   useActivateUser,
@@ -134,3 +195,12 @@ export {
   useUpdatePassword,
   useUserMeDelete,
 };
+
+export type {
+  AllAuthLoginRequest,
+  AllAuthSignupRequest,
+  AllAuthVerifyEmailRequest,
+  AllAuthRequestPasswordResetRequest,
+  AllAuthResetPasswordRequest,
+  AllAuthChangePasswordRequest,
+} from "./allauth-types";

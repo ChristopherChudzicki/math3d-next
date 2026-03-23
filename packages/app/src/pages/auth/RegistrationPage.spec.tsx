@@ -73,11 +73,18 @@ test("Displays client-side form errors", async () => {
 test("Server errors are reflected in form", async () => {
   mockResponseOnce({
     status: 400,
-    url: urls.auth.users,
+    url: urls.auth.signup,
     method: "post",
     data: {
-      email: ["email field error"],
-      password: ["password field error"],
+      status: 400,
+      errors: [
+        { code: "invalid", message: "email field error", param: "email" },
+        {
+          code: "invalid",
+          message: "password field error",
+          param: "password",
+        },
+      ],
     },
   });
 
@@ -95,13 +102,14 @@ test("Server errors are reflected in form", async () => {
   );
 });
 
-test("non_field_errors are shown in an alert", async () => {
+test("non-field errors are shown in an alert", async () => {
   mockResponseOnce({
     status: 400,
-    url: urls.auth.users,
+    url: urls.auth.signup,
     method: "post",
     data: {
-      non_field_errors: ["overall error message"],
+      status: 400,
+      errors: [{ code: "error", message: "overall error message" }],
     },
   });
 

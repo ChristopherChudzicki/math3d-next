@@ -6,10 +6,9 @@ import { getStore } from "@/store/store";
 
 import { InitialEntry } from "history";
 import { QueryClient } from "@tanstack/react-query";
-import { API_TOKEN_KEY } from "@math3d/api";
+import { mockAuth, seedDb } from "@math3d/mock-api";
 import AppProviders from "@/AppProviders";
 import routes from "@/routes";
-import { seedDb } from "@math3d/mock-api";
 
 const waitForNotBusy = () =>
   waitFor(
@@ -46,7 +45,8 @@ const renderTestApp = async (
 
   const user = isAuthenticated ? seedDb.withUser() : null;
   if (user) {
-    localStorage.setItem(API_TOKEN_KEY, `"${user.auth_token}"`);
+    // Set the mock API's current user to simulate session auth
+    mockAuth.setCurrentUser(user.id);
   }
 
   const router = createMemoryRouter(routes, { initialEntries });
@@ -63,6 +63,18 @@ const renderTestApp = async (
   if (waitForReady) {
     await waitForNotBusy();
   }
+
+  // Wait for the session query to resolve so auth status is reflected in
+  // the UI before test assertions run.
+  await waitFor(
+    () => {
+      const sessionState = queryClient.getQueryState(["session"]);
+      if (!sessionState || sessionState.status === "pending") {
+        throw new Error("Session query not yet resolved");
+      }
+    },
+    { timeout: 3000 },
+  );
 
   const location = {
     get current() {
