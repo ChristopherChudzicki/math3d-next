@@ -33,6 +33,7 @@ const docsHotReload = (filepath: string): PluginOption => {
 export default defineConfig({
   server: {
     port: 3000,
+    allowedHosts: ["math3d.localdev"],
   },
   plugins: [
     ValidateEnv({

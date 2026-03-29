@@ -40,6 +40,7 @@ env = environ.Env(
     APP_VERSION=(str, "unknown"),
     # Feature flags
     ENABLE_REGISTRATION=(bool, False),
+    CSRF_COOKIE_DOMAIN=(str, ""),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -68,7 +69,9 @@ if env("IS_HEROKU"):
 else:
     DEBUG = False
     ALLOWED_HOSTS = (
-        env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["localhost", "127.0.0.1"]
+        env("ALLOWED_HOSTS")
+        if env("ALLOWED_HOSTS")
+        else ["localhost", "127.0.0.1", "api.math3d.localdev"]
     )
 
 SITE_NAME = "Math3d"
@@ -177,6 +180,11 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [env("APP_BASE_URL")] if env("APP_BASE_URL") else []
+
+_csrf_cookie_domain = env("CSRF_COOKIE_DOMAIN")
+if _csrf_cookie_domain:
+    CSRF_COOKIE_DOMAIN = _csrf_cookie_domain
+
 
 AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",

@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useSession } from "@math3d/api";
+import { useUserMe } from "@math3d/api";
 import invariant from "tiny-invariant";
 
 type AuthStatus = boolean | null; // null = loading/unknown
@@ -18,16 +18,16 @@ const AuthStatusProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<AuthStatus>(null);
-  const sessionQuery = useSession();
+  const userMeQuery = useUserMe();
 
-  // Derive auth status from session query result
+  // Derive auth status from useUserMe query result
   useEffect(() => {
-    if (sessionQuery.data && sessionQuery.data.status === 200) {
+    if (userMeQuery.data) {
       setIsAuthenticated(true);
-    } else if (sessionQuery.data === null || sessionQuery.isError) {
+    } else if (userMeQuery.data === null) {
       setIsAuthenticated(false);
     }
-  }, [sessionQuery.data, sessionQuery.isError]);
+  }, [userMeQuery.data]);
 
   const authState = useMemo<
     [AuthStatus, React.Dispatch<React.SetStateAction<AuthStatus>>]

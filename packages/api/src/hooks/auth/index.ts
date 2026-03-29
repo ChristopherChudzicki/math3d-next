@@ -129,7 +129,19 @@ const useCreateUser = () => {
 
 const useActivateUser = () => {
   return useMutation({
-    mutationFn: (data: AllAuthVerifyEmailRequest) => allAuthVerifyEmail(data),
+    mutationFn: async (data: AllAuthVerifyEmailRequest) => {
+      try {
+        return await allAuthVerifyEmail(data);
+      } catch (err) {
+        // allauth returns 401 after successful email verification when the
+        // user is not logged in. This is expected — the email is verified,
+        // user just needs to log in.
+        if (err instanceof AxiosError && err.response?.status === 401) {
+          return err.response;
+        }
+        throw err;
+      }
+    },
   });
 };
 
