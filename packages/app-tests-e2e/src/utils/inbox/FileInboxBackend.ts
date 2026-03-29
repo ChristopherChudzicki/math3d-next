@@ -31,7 +31,7 @@ const match = (text: string, matcher: string | RegExp) => {
   if (matcher instanceof RegExp) {
     return matcher.test(text);
   }
-  return text.includes(matcher);
+  return text.toLowerCase().includes(matcher.toLowerCase());
 };
 
 const standardizeTo = (
