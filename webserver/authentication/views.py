@@ -1,6 +1,8 @@
 import logging
 
 from allauth.account.models import EmailAddress
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema
 from rest_framework import permissions, serializers, status
 from rest_framework.authentication import SessionAuthentication
@@ -18,6 +20,7 @@ class DeleteAccountSerializer(serializers.Serializer):
     current_password = serializers.CharField(required=True)
 
 
+@method_decorator(ensure_csrf_cookie, name="dispatch")
 class UserMeView(APIView):
     """GET, PATCH, and DELETE the current user's profile."""
 
