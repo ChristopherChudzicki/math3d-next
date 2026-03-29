@@ -22,6 +22,19 @@ The math3d backend and database are managed by docker containers. The frontend i
   dotenv_if_exists .env             # customizations
   ```
 
+### Local Domain Setup
+
+The dev environment uses custom local domains to better emulate the production setup, where the frontend and API live on separate subdomains. Add these entries to `/etc/hosts` (one-time setup):
+
+```bash
+sudo sh -c 'printf "127.0.0.1 math3d.localdev\n127.0.0.1 api.math3d.localdev\n::1 math3d.localdev\n::1 api.math3d.localdev\n" >> /etc/hosts'
+```
+
+After this, access the app at:
+
+- **Frontend**: http://math3d.localdev:3000
+- **API**: http://api.math3d.localdev:8000
+
 ### Task Runner
 
 We use [just](https://github.com/casey/just) as a task runner. Run `just` to see available commands.

@@ -14,7 +14,7 @@ Full-stack monorepo: React 19 + Redux Toolkit frontend, Django REST Framework + 
 
 ```bash
 yarn install              # Install all dependencies
-yarn start                # Dev server on port 3000 (proxies API to :8000)
+yarn start                # Dev server at http://math3d.localdev:3000
 yarn build                # Production build
 yarn lint                 # Lint all packages (via Turbo)
 yarn typecheck            # TypeScript checking (via Turbo)
