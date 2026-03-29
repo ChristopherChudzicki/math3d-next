@@ -64,13 +64,13 @@ const renderTestApp = async (
     await waitForNotBusy();
   }
 
-  // Wait for the session query to resolve so auth status is reflected in
+  // Wait for the user-me query to resolve so auth status is reflected in
   // the UI before test assertions run.
   await waitFor(
     () => {
-      const sessionState = queryClient.getQueryState(["session"]);
-      if (!sessionState || sessionState.status === "pending") {
-        throw new Error("Session query not yet resolved");
+      const meState = queryClient.getQueryState(["me"]);
+      if (!meState || meState.status === "pending") {
+        throw new Error("User me query not yet resolved");
       }
     },
     { timeout: 3000 },
