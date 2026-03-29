@@ -38,5 +38,5 @@ test("Error message for invalid key", async () => {
     name: "Account Activation",
   });
   const alert = await within(dialog).findByRole("alert");
-  expect(alert).toHaveTextContent(/activated/);
+  expect(alert).toHaveTextContent(/activation link/);
 });
