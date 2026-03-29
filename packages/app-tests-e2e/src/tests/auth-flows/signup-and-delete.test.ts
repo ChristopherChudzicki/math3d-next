@@ -5,9 +5,8 @@ import { getInbox } from "@/utils/inbox/emails";
 import env from "@/env";
 import invariant from "tiny-invariant";
 import { faker } from "@faker-js/faker/locale/en";
-import { getAuthToken } from "@/utils/api/auth";
-import { getConfig, axios } from "@/utils/api/config";
-import { AuthApi, deleteUser } from "@math3d/api";
+import { getSessionCookies } from "@/utils/api/auth";
+import { axios } from "@/utils/api/config";
 import { makeUserInfo } from "@math3d/mock-api";
 
 test.setTimeout(60_000);
@@ -16,23 +15,20 @@ test.describe("User sign up flow and account deletion", () => {
   const { email, public_nickname: publicNickname, password } = makeUserInfo();
 
   test.afterAll(async () => {
-    const authToken = await getAuthToken(users.admin);
-    invariant(authToken, "Expected an auth token");
-    const config = getConfig(authToken);
-    const api = new AuthApi(config);
-    const { data: response } = await api.authUsersList({ email });
-    const { results: usersList } = response;
-    invariant(usersList, "Expected users to be defined");
-    invariant(
-      usersList.length <= 1,
-      "Expected at most one user with this email",
-    );
-    if (usersList.length === 1) {
-      await deleteUser(
-        { id: usersList[0].id, currentPassword: env.TEST_USER_ADMIN_PASSWORD },
-        config,
-        axios,
-      );
+    // Clean up: if the test user still exists, log in as them and self-delete.
+    // If login fails (user already deleted or never activated), that's fine.
+    try {
+      const cookies = await getSessionCookies({ email, password });
+      const cookieHeader = `sessionid=${cookies.sessionid}; csrftoken=${cookies.csrftoken}`;
+      await axios.delete(`/v0/auth/users/me/`, {
+        data: { current_password: password },
+        headers: {
+          Cookie: cookieHeader,
+          "X-CSRFToken": cookies.csrftoken,
+        },
+      });
+    } catch {
+      // User doesn't exist or can't log in — that's OK
     }
   });
 

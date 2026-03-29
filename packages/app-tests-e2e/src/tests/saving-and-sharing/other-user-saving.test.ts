@@ -3,7 +3,7 @@ import { expect } from "@playwright/test";
 import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
 import AppPage from "@/utils/pages/AppPage";
 import { faker } from "@faker-js/faker/locale/en";
-import { getAuthToken } from "@/utils/api/auth";
+import { getSessionCookies } from "@/utils/api/auth";
 
 const user = makeUserInfo();
 test.use({ user });
@@ -22,8 +22,8 @@ test("Saving an existing scene scene", async ({
 
   const key = await test.step("Prepare scene as user 'owner'", async () => {
     const owner = await createUser(sceneOwner);
-    const ownerAuthToken = await getAuthToken(owner);
-    const prepareScene = getPrepareScene({ authToken: ownerAuthToken });
+    const ownerCookies = await getSessionCookies(owner);
+    const prepareScene = getPrepareScene({ sessionCookies: ownerCookies });
     const scene = new SceneBuilder({ title });
     scene //
       .folder({ description: "Folder 1" })
