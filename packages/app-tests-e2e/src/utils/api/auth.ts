@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker/locale/en";
-import { axios } from "@/utils/api/config";
+import { axios, parseCookies } from "@/utils/api/config";
 import { getInbox } from "@/utils/inbox/emails";
 import env from "@/env";
 import invariant from "tiny-invariant";
@@ -35,15 +35,7 @@ const getSessionCookies = async (
     email: user.email,
     password: user.password,
   });
-  // Extract cookies from the Set-Cookie response headers
-  const setCookieHeaders: string[] = response.headers["set-cookie"] ?? [];
-  const cookies: Record<string, string> = {};
-  for (const header of setCookieHeaders) {
-    const match = header.match(/^([^=]+)=([^;]*)/);
-    if (match) {
-      cookies[match[1]] = match[2];
-    }
-  }
+  const cookies = parseCookies(response.headers["set-cookie"]);
   invariant(cookies.sessionid, "Expected sessionid cookie from login response");
   invariant(cookies.csrftoken, "Expected csrftoken cookie from login response");
   return { sessionid: cookies.sessionid, csrftoken: cookies.csrftoken };
@@ -131,6 +123,7 @@ const createActiveUser = async (user: UserInfo = {}) => {
   const message = await inbox.waitForEmail({
     subject: "Activate your account",
     to: request.email,
+    after: new Date(Date.now() - 30_000), // Only find recent emails
   });
   invariant(message.html, "Expected activation email to have HTML content");
   const key = extractVerificationKey(message.html);

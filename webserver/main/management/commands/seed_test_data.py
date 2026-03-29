@@ -1,6 +1,7 @@
 import os
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
+from allauth.account.models import EmailAddress
 from scenes.models import Scene
 import environ
 import json
@@ -33,6 +34,11 @@ def create_test_user(
     user.is_staff = is_staff
     user.set_password(password)
     user.save()
+    EmailAddress.objects.update_or_create(
+        user=user,
+        email=email,
+        defaults={"verified": True, "primary": True},
+    )
     return user
 
 

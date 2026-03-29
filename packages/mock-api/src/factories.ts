@@ -447,7 +447,9 @@ const makeUserInfo = (info?: Partial<UserSignupInfo>): UserSignupInfo => {
   const password = faker.internet.password();
 
   return {
-    email: faker.internet.email({ provider: DEFAULT_EMAIL_PROVIDER }),
+    email: faker.internet
+      .email({ provider: DEFAULT_EMAIL_PROVIDER })
+      .toLowerCase(),
     password,
     public_nickname: faker.person.firstName(),
     ...info,
