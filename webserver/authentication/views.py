@@ -62,10 +62,15 @@ class AdminActivateView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [permissions.IsAdminUser]
 
-    @extend_schema(request=None, responses={204: None, 404: None})
-    def post(self, request: Request, id: int) -> Response:
+    class ActivateSerializer(serializers.Serializer):
+        email = serializers.EmailField(required=True)
+
+    @extend_schema(request=ActivateSerializer, responses={204: None, 404: None})
+    def post(self, request: Request) -> Response:
+        serializer = self.ActivateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         try:
-            target = CustomUser.objects.get(pk=id)
+            target = CustomUser.objects.get(email=serializer.validated_data["email"])
         except CustomUser.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 

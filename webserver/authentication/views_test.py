@@ -472,8 +472,10 @@ def test_admin_activation(is_staff):
     admin_user = CustomUserFactory.create(is_staff=is_staff)
     client.force_login(admin_user)
 
-    url = f"/v0/auth/users/{target_user.id}/activation/"
-    response = client.post(url)
+    url = "/v0/auth/users/activation/"
+    response = client.post(
+        url, {"email": target_user.email}, content_type="application/json"
+    )
 
     if is_staff:
         assert response.status_code == 204
@@ -505,8 +507,10 @@ def test_admin_activation_updates_existing_email_address():
     admin_user = CustomUserFactory.create(is_staff=True)
     client.force_login(admin_user)
 
-    url = f"/v0/auth/users/{target_user.id}/activation/"
-    response = client.post(url)
+    url = "/v0/auth/users/activation/"
+    response = client.post(
+        url, {"email": target_user.email}, content_type="application/json"
+    )
     assert response.status_code == 204
 
     email_address = EmailAddress.objects.get(user=target_user, email=target_user.email)

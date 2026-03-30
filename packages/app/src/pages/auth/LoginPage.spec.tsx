@@ -63,8 +63,9 @@ test("Login form displays error if password/email wrong", async () => {
   await user.paste("foo");
 
   await user.click(submit);
-  // allauth returns the error with param: "password", so it appears on the password field
-  expect(getDescribedBy(password)).toHaveTextContent(
+  // allauth's email_password_mismatch error is treated as a form-level error
+  const alert = within(dialog).getByRole("alert");
+  expect(alert).toHaveTextContent(
     "The email address and/or password you specified are not correct.",
   );
 
