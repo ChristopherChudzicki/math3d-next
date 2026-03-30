@@ -1,6 +1,5 @@
 import { faker } from "@faker-js/faker/locale/en";
 import { axios, parseCookies } from "@/utils/api/config";
-import { getInbox } from "@/utils/inbox/emails";
 import env from "@/env";
 import invariant from "tiny-invariant";
 
@@ -41,28 +40,6 @@ const getSessionCookies = async (
   return { sessionid: cookies.sessionid, csrftoken: cookies.csrftoken };
 };
 
-/**
- * Extract the verification key from an activation email's HTML content.
- * The activation link has `data-testid="activation-link"` and the URL
- * contains `?key=...`.
- */
-const extractVerificationKey = (html: string): string => {
-  // Match the href of an element with data-testid="activation-link"
-  const linkMatch = html.match(
-    /data-testid=["']activation-link["'][^>]*href=["']([^"']+)["']/,
-  );
-  // Also try href before data-testid
-  const linkMatch2 = html.match(
-    /href=["']([^"']+)["'][^>]*data-testid=["']activation-link["']/,
-  );
-  const href = linkMatch?.[1] ?? linkMatch2?.[1];
-  invariant(href, "Expected activation-link with href in email HTML");
-  const url = new URL(href);
-  const key = url.searchParams.get("key");
-  invariant(key, "Expected activation link to have ?key= parameter");
-  return key;
-};
-
 type UserInfo = {
   email?: string;
   password?: string;
@@ -70,13 +47,12 @@ type UserInfo = {
 };
 
 /**
- * Create a user, verify their email, and return credentials + cleanup function.
+ * Create a user, activate via admin, and return credentials + cleanup function.
  *
  * Flow:
  * 1. Sign up via allauth (returns 401 because email verification is mandatory)
- * 2. Retrieve the verification email from the file inbox
- * 3. Extract the verification key and verify the email via allauth
- * 4. User can now log in
+ * 2. Admin activates the user (marks email as verified, sets is_active=True)
+ * 3. User can now log in
  *
  * Cleanup deletes the user by logging in as them and calling DELETE /v0/auth/users/me/.
  */
@@ -118,45 +94,39 @@ const createActiveUser = async (user: UserInfo = {}) => {
     }
   }
 
-  // Retrieve the verification email and extract the key
-  const inbox = getInbox();
-  const message = await inbox.waitForEmail({
-    subject: "Activate your account",
-    to: request.email,
-    after: new Date(Date.now() - 30_000), // Only find recent emails
-  });
-  invariant(message.html, "Expected activation email to have HTML content");
-  const key = extractVerificationKey(message.html);
-
-  // Verify the email via allauth
-  try {
-    await axios.post(`/_allauth/browser/v1/auth/email/verify`, { key });
-  } catch (err: unknown) {
-    // allauth returns 401 after verification (user not logged in) — that's OK.
-    const isExpected401 =
-      err &&
-      typeof err === "object" &&
-      "response" in err &&
-      (err as { response?: { status?: number } }).response?.status === 401;
-    if (!isExpected401) {
-      throw err;
-    }
-  }
+  // Admin-activate the user (marks email as verified, sets is_active=True)
+  const adminCookies = await getSessionCookies(users.admin);
+  await axios.post(
+    `/v0/auth/users/activation/`,
+    { email: request.email },
+    {
+      headers: {
+        Cookie: `sessionid=${adminCookies.sessionid}; csrftoken=${adminCookies.csrftoken}`,
+        "X-CSRFToken": adminCookies.csrftoken,
+      },
+    },
+  );
 
   const cleanup = async () => {
-    // Log in as the user and self-delete
-    const userCookies = await getSessionCookies({
-      email: request.email,
-      password: request.password,
-    });
-    const cookieHeader = `sessionid=${userCookies.sessionid}; csrftoken=${userCookies.csrftoken}`;
-    await axios.delete(`/v0/auth/users/me/`, {
-      data: { current_password: request.password },
-      headers: {
-        Cookie: cookieHeader,
-        "X-CSRFToken": userCookies.csrftoken,
-      },
-    });
+    // Log in as the user and self-delete.
+    // If login fails (e.g., the test changed the password), ignore the error.
+    // The user has a test email provider domain and will be cleaned up by
+    // seed_test_data on the next test run.
+    try {
+      const userCookies = await getSessionCookies({
+        email: request.email,
+        password: request.password,
+      });
+      await axios.delete(`/v0/auth/users/me/`, {
+        data: { current_password: request.password },
+        headers: {
+          Cookie: `sessionid=${userCookies.sessionid}; csrftoken=${userCookies.csrftoken}`,
+          "X-CSRFToken": userCookies.csrftoken,
+        },
+      });
+    } catch {
+      // User may already be deleted or password was changed — ignore
+    }
   };
 
   const userAuth: UserCredentials = {

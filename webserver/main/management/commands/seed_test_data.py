@@ -12,14 +12,6 @@ env = environ.Env(
     TEST_ADMIN_USER_PASSWORD=(str, ""),
     TEST_USER_STATIC_EMAIL=(str, ""),
     TEST_USER_STATIC_PASSWORD=(str, ""),
-    TEST_USER_DYNAMIC_EMAIL=(str, ""),
-    TEST_USER_DYNAMIC_PASSWORD=(str, ""),
-    TEST_USER_EDITABLE_EMAIL=(str, ""),
-    TEST_USER_EDITABLE_PASSWORD=(str, ""),
-    TEST_USER_PW_CHANGER_EMAIL=(str, ""),
-    TEST_USER_PW_CHANGER_PASSWORD=(str, ""),
-    TEST_USER_NOT_CREATED_EMAIL=(str, ""),
-    TEST_USER_NOT_CREATED_PASSWORD=(str, ""),
 )
 
 User = get_user_model()
@@ -42,14 +34,6 @@ def create_test_user(
     return user
 
 
-def delete_test_user(email: str):
-    try:
-        user = User.objects.get(email=email)
-        user.delete()
-    except User.DoesNotExist:
-        pass
-
-
 TEST_SCENE_COUNT = 100
 
 
@@ -69,23 +53,6 @@ class Command(BaseCommand):
             password=env("TEST_USER_STATIC_PASSWORD"),
             public_nickname="Static Test User",
         )
-        create_test_user(
-            email=env("TEST_USER_DYNAMIC_EMAIL"),
-            password=env("TEST_USER_DYNAMIC_PASSWORD"),
-            public_nickname="Dynamic Test User",
-        )
-        create_test_user(
-            email=env("TEST_USER_EDITABLE_EMAIL"),
-            password=env("TEST_USER_EDITABLE_PASSWORD"),
-            public_nickname="Editable Test User",
-        )
-        create_test_user(
-            email=env("TEST_USER_PW_CHANGER_EMAIL"),
-            password=env("TEST_USER_PW_CHANGER_PASSWORD"),
-            public_nickname="Password Changing Test User",
-        )
-
-        delete_test_user(env("TEST_USER_NOT_CREATED_EMAIL"))
 
         dirname = os.path.dirname(__file__)
         filename = os.path.join(dirname, "./test_scene.json")

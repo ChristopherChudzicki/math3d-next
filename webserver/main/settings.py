@@ -218,6 +218,7 @@ ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_LOGIN_BY_CODE_ENABLED = False
+ACCOUNT_PREVENT_ENUMERATION = False
 ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
 ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"
 

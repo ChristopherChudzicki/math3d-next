@@ -101,7 +101,9 @@ test.describe("User sign up flow and account deletion", () => {
 
       await app.signinPage().signin({ email, password });
 
-      await expect(dialog.getByRole("alert")).toContainText(/Unable to log in/);
+      await expect(dialog.getByRole("alert")).toContainText(
+        /email address and\/or password you specified are not correct/,
+      );
     });
   });
 });
@@ -116,6 +118,6 @@ test("Existing accounts cause error on signup", async ({ page }) => {
   });
   await expect(app.signupPage().email()).toBeInvalid();
   await expect(app.signupPage().email()).toHaveDescription(
-    "User with this email address already exists.",
+    "A user is already registered with this email address.",
   );
 });
