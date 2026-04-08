@@ -1,4 +1,4 @@
-FROM python:3.12.5
+FROM python:3.14.4
 
 WORKDIR /src/webserver
 
