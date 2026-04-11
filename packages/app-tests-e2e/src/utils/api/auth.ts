@@ -46,6 +46,15 @@ type UserInfo = {
   public_nickname?: string;
 };
 
+let cachedAdminCookies: { sessionid: string; csrftoken: string } | null = null;
+
+const getAdminCookies = async () => {
+  if (!cachedAdminCookies) {
+    cachedAdminCookies = await getSessionCookies(users.admin);
+  }
+  return cachedAdminCookies;
+};
+
 /**
  * Create a user, activate via admin, and return credentials + cleanup function.
  *
@@ -95,7 +104,7 @@ const createActiveUser = async (user: UserInfo = {}) => {
   }
 
   // Admin-activate the user (marks email as verified, sets is_active=True)
-  const adminCookies = await getSessionCookies(users.admin);
+  const adminCookies = await getAdminCookies();
   await axios.post(
     `/v0/auth/users/activation/`,
     { email: request.email },
