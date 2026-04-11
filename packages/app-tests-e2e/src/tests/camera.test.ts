@@ -5,6 +5,8 @@ import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
 import { whenMathboxRendered } from "@/utils/selectors";
 
+test.use({ disable3d: false });
+
 const getCameraPosition = async (
   page: Page,
 ): Promise<{ x: number; y: number; z: number }> => {

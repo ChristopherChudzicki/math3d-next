@@ -37,6 +37,12 @@ type Fixtures = {
    */
   userInfo: Required<UserInfo> | null;
   /**
+   * When true, disables 3D MathBox rendering in the app. Defaults to true
+   * since most E2E tests only interact with the controls sidebar.
+   * Set to false for tests that need the 3D canvas (e.g., camera tests).
+   */
+  disable3d: boolean;
+  /**
    * Create an active user.
    */
   createUser: (user: UserCredentials) => Promise<UserCredentials>;
@@ -64,6 +70,7 @@ const test = base.extend<Fixtures, WorkerFixtures>({
 
   user: null,
   userInfo: null,
+  disable3d: true,
   // eslint-disable-next-line no-empty-pattern
   createUser: async ({}, use) => {
     const requests: Promise<{
@@ -100,7 +107,7 @@ const test = base.extend<Fixtures, WorkerFixtures>({
   /**
    * authenticated page for `user` fixture.
    */
-  page: async ({ page: basePage, browser, sessionCookies }, use) => {
+  page: async ({ page: basePage, browser, sessionCookies, disable3d }, use) => {
     let page: Page;
     if (sessionCookies) {
       const apiUrl = new URL(env.TEST_API_URL);
@@ -135,6 +142,11 @@ const test = base.extend<Fixtures, WorkerFixtures>({
       page = await context.newPage();
     } else {
       page = basePage;
+    }
+    if (disable3d) {
+      await page.addInitScript(() => {
+        localStorage.setItem("disable3dScene", "true");
+      });
     }
     await use(page);
   },
