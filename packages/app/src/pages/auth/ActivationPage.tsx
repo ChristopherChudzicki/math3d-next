@@ -22,8 +22,8 @@ const ActivationMessage: React.FC<{ success: boolean; error: boolean }> = ({
   if (error) {
     return (
       <Alert severity="error">
-        Error: Please check that the activation email to ensure the activation
-        link was correct.
+        Error: Please check the activation email to ensure the activation link
+        was correct.
       </Alert>
     );
   }

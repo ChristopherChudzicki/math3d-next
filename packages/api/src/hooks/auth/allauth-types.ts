@@ -29,17 +29,6 @@ export interface AllAuthAuthenticatedResponse {
   };
 }
 
-export interface AllAuthError {
-  code: string;
-  message: string;
-  param?: string;
-}
-
-export interface AllAuthErrorResponse {
-  status: 400;
-  errors: AllAuthError[];
-}
-
 export interface AllAuthLoginRequest {
   email: string;
   password: string;

@@ -34,7 +34,8 @@ const ScenesList: React.FC = () => {
   const params = useParams<{ listType: ListType }>();
   invariant(params.listType);
   const [isAuthenticated] = useAuthStatus();
-  const showMyScenes = DISPLAY_AUTH_FLOWS || !!isAuthenticated;
+  const showMyScenes =
+    DISPLAY_AUTH_FLOWS || isAuthenticated === "authenticated";
   const listType = normalizeListType(params.listType, showMyScenes);
   const navigate = useNavigate();
   const activateListType = useCallback(

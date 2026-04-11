@@ -55,8 +55,8 @@ type UserInfo = {
 
 let cachedAdminCookies: { sessionid: string; csrftoken: string } | null = null;
 
-const getAdminCookies = async () => {
-  if (!cachedAdminCookies) {
+const getAdminCookies = async ({ forceRefresh = false } = {}) => {
+  if (!cachedAdminCookies || forceRefresh) {
     cachedAdminCookies = await getSessionCookies(users.admin);
   }
   return cachedAdminCookies;
@@ -110,15 +110,28 @@ const createActiveUser = async (user: UserInfo = {}) => {
     }
   }
 
-  // Admin-activate the user (marks email as verified, sets is_active=True)
-  const adminCookies = await getAdminCookies();
-  await axios.post(
-    `/v0/auth/users/activation/`,
-    { email: request.email },
-    {
-      headers: authHeaders(adminCookies),
-    },
-  );
+  // Admin-activate the user (marks email as verified, sets is_active=True).
+  // Retry once with fresh admin cookies if the cached session has expired.
+  const activate = async (cookies: SessionCookies) =>
+    axios.post(
+      `/v0/auth/users/activation/`,
+      { email: request.email },
+      { headers: authHeaders(cookies) },
+    );
+  try {
+    await activate(await getAdminCookies());
+  } catch (err: unknown) {
+    const status =
+      err &&
+      typeof err === "object" &&
+      "response" in err &&
+      (err as { response?: { status?: number } }).response?.status;
+    if (status === 401 || status === 403) {
+      await activate(await getAdminCookies({ forceRefresh: true }));
+    } else {
+      throw err;
+    }
+  }
 
   const cleanup = async () => {
     // Log in as the user and self-delete.

@@ -2,25 +2,28 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
 import { useUserMe } from "@math3d/api";
 import invariant from "tiny-invariant";
 
-type AuthStatus = boolean | null; // null = loading/unknown
+type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 
-const AuthStatusContext = createContext<
-  [AuthStatus, React.Dispatch<React.SetStateAction<AuthStatus>>]
->([null, () => invariant(false, "AuthContext not initialized")]);
+type SetAuthStatus = (status: AuthStatus) => void;
+
+const AuthStatusContext = createContext<[AuthStatus, SetAuthStatus]>([
+  "loading",
+  () => invariant(false, "AuthContext not initialized"),
+]);
 
 const AuthStatusProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   // Override allows optimistic updates from login/logout actions before the
   // useUserMe query refetches.
-  const [override, setOverride] = useState<AuthStatus>(null);
-  const [hasOverride, setHasOverride] = useState(false);
+  const [override, setOverride] = useState<AuthStatus | null>(null);
   const userMeQuery = useUserMe();
 
   // Derive auth status directly from query data (no useEffect delay).
@@ -29,25 +32,28 @@ const AuthStatusProvider: React.FC<{ children: React.ReactNode }> = ({
   // - data is undefined while the query is still pending
   let derived: AuthStatus;
   if (userMeQuery.data) {
-    derived = true;
+    derived = "authenticated";
   } else if (userMeQuery.data === null) {
-    derived = false;
+    derived = "unauthenticated";
   } else {
-    derived = null; // still loading
+    derived = "loading";
   }
 
-  // Use override only while query is still catching up.
-  const isAuthenticated = hasOverride ? override : derived;
+  // Clear the override once the query catches up, so the query becomes
+  // the source of truth again (e.g., if the session expires server-side).
+  useEffect(() => {
+    if (override !== null && derived !== "loading" && derived === override) {
+      setOverride(null);
+    }
+  }, [derived, override]);
 
-  const setIsAuthenticated: React.Dispatch<React.SetStateAction<AuthStatus>> =
-    useCallback((value: React.SetStateAction<AuthStatus>) => {
-      setOverride(value);
-      setHasOverride(true);
-    }, []);
+  const isAuthenticated = override ?? derived;
 
-  const authState = useMemo<
-    [AuthStatus, React.Dispatch<React.SetStateAction<AuthStatus>>]
-  >(
+  const setIsAuthenticated: SetAuthStatus = useCallback((value: AuthStatus) => {
+    setOverride(value);
+  }, []);
+
+  const authState = useMemo<[AuthStatus, SetAuthStatus]>(
     () => [isAuthenticated, setIsAuthenticated],
     [isAuthenticated, setIsAuthenticated],
   );

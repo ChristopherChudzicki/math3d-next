@@ -149,7 +149,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",  # Required by allauth
     "rest_framework",
-    "rest_framework.authtoken",
+    "rest_framework.authtoken",  # Unused; kept to avoid dropping the token table until DRF removal (#1125)
     "django_filters",
     "authentication",  # custom app
     "allauth",
@@ -224,13 +224,17 @@ WSGI_APPLICATION = "main.wsgi.application"
 ##################################################
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+# No password2: headless mode doesn't use it (password confirmation is
+# handled client-side). See https://docs.allauth.org/en/latest/headless/faq.html
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*"]
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_LOGIN_BY_CODE_ENABLED = False
 # Allow revealing whether an email is registered. Acceptable tradeoff for a
 # math visualization tool: usability > preventing enumeration.
 ACCOUNT_PREVENT_ENUMERATION = False
 ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
+# ACCOUNT_SIGNUP_FORM_CLASS (not ACCOUNT_FORMS) is the correct setting for
+# injecting extra fields alongside allauth's built-in signup form.
 ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"
 
 if env("DISABLE_ALLAUTH_RATE_LIMITS"):

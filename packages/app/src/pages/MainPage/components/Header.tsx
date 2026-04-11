@@ -12,6 +12,7 @@ import ListItemText from "@mui/material/ListItemText";
 
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
+import type { AuthStatus } from "@/features/auth";
 import Button from "@mui/material/Button";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
@@ -26,10 +27,9 @@ import SaveButton from "./SaveButton";
 
 const LoginButtons: React.FC<{
   smallScreen: boolean;
-  isAuthenticated: boolean | null;
+  isAuthenticated: AuthStatus;
 }> = ({ smallScreen, isAuthenticated }) => {
-  if (isAuthenticated || isAuthenticated === null || !DISPLAY_AUTH_FLOWS)
-    return null;
+  if (isAuthenticated !== "unauthenticated" || !DISPLAY_AUTH_FLOWS) return null;
   if (smallScreen) {
     return (
       <>

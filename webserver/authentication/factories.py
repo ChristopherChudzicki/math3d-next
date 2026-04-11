@@ -20,7 +20,7 @@ class BaseFactory(DjangoModelFactory, Generic[T]):
 
 
 class CustomUserFactory(BaseFactory[models.CustomUser]):
-    """Factory for LearningResourceContentTag objects"""
+    """Factory for CustomUser objects."""
 
     email = factory.LazyFunction(fake.email)
     public_nickname = factory.LazyFunction(fake.first_name)

@@ -40,7 +40,7 @@ const DeleteAccountForm: React.FC<{
         try {
           setDisabled(true);
           await deleteAccount.mutateAsync(data);
-          setAuthenticated(false);
+          setAuthenticated("unauthenticated");
           addNotification({
             title: "Account Deleted",
             body: "Your account has been deleted.",
