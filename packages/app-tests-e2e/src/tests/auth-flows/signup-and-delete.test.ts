@@ -5,7 +5,7 @@ import { getInbox } from "@/utils/inbox/emails";
 import env from "@/env";
 import invariant from "tiny-invariant";
 import { faker } from "@faker-js/faker/locale/en";
-import { getSessionCookies } from "@/utils/api/auth";
+import { authHeaders, getSessionCookies } from "@/utils/api/auth";
 import { axios } from "@/utils/api/config";
 import { makeUserInfo } from "@math3d/mock-api";
 
@@ -19,13 +19,9 @@ test.describe("User sign up flow and account deletion", () => {
     // If login fails (user already deleted or never activated), that's fine.
     try {
       const cookies = await getSessionCookies({ email, password });
-      const cookieHeader = `sessionid=${cookies.sessionid}; csrftoken=${cookies.csrftoken}`;
       await axios.delete(`/v0/auth/users/me/`, {
         data: { current_password: password },
-        headers: {
-          Cookie: cookieHeader,
-          "X-CSRFToken": cookies.csrftoken,
-        },
+        headers: authHeaders(cookies),
       });
     } catch {
       // User doesn't exist or can't log in — that's OK

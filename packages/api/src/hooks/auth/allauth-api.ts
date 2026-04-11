@@ -11,7 +11,6 @@ import type {
   AllAuthResetPasswordRequest,
   AllAuthChangePasswordRequest,
   AllAuthAuthenticatedResponse,
-  AllAuthSessionResponse,
 } from "./allauth-types";
 
 const getAllAuthBaseUrl = () => {
@@ -27,9 +26,6 @@ export const allAuthLogin = (data: AllAuthLoginRequest) =>
 
 export const allAuthLogout = () =>
   axios.delete(`${getAllAuthBaseUrl()}/auth/session`);
-
-export const allAuthGetSession = () =>
-  axios.get<AllAuthSessionResponse>(`${getAllAuthBaseUrl()}/auth/session`);
 
 export const allAuthSignup = (data: AllAuthSignupRequest) =>
   axios.post<AllAuthAuthenticatedResponse>(

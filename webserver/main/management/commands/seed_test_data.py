@@ -8,8 +8,8 @@ import json
 
 
 env = environ.Env(
-    TEST_ADMIN_USER_EMAIL=(str, ""),
-    TEST_ADMIN_USER_PASSWORD=(str, ""),
+    TEST_USER_ADMIN_EMAIL=(str, ""),
+    TEST_USER_ADMIN_PASSWORD=(str, ""),
     TEST_USER_STATIC_EMAIL=(str, ""),
     TEST_USER_STATIC_PASSWORD=(str, ""),
 )

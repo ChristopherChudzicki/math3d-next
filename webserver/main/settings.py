@@ -59,6 +59,10 @@ SECRET_KEY = env("SECRET_KEY")
 # Application version
 APP_VERSION = env("APP_VERSION")
 
+# Secure cookie defaults — only relaxed for local dev (no TLS).
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 ALLOWED_HOSTS: list[str]
 if env("IS_HEROKU"):
     DEBUG = False
@@ -71,6 +75,8 @@ if env("IS_HEROKU"):
     ALLOWED_HOSTS = env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["api.math3d.org"]
 else:
     DEBUG = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
     ALLOWED_HOSTS = (
         env("ALLOWED_HOSTS")
         if env("ALLOWED_HOSTS")
@@ -221,6 +227,8 @@ ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_LOGIN_BY_CODE_ENABLED = False
+# Allow revealing whether an email is registered. Acceptable tradeoff for a
+# math visualization tool: usability > preventing enumeration.
 ACCOUNT_PREVENT_ENUMERATION = False
 ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
 ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"

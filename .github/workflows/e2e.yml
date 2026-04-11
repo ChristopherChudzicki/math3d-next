@@ -51,7 +51,6 @@ jobs:
           echo "VITE_API_BASE_URL=$VITE_API_BASE_URL" >> .env
           echo "VITE_APP_VERSION=$VITE_APP_VERSION" >> .env
           echo "VITE_LEGACY_APP_BASE_URL=$VITE_LEGACY_APP_BASE_URL" >> .env
-          echo ""
           echo "TEST_API_URL=$TEST_API_URL" >> .env
           echo "TEST_APP_URL=$TEST_APP_URL" >> .env
           echo "TEST_EMAIL_PROVIDER=$TEST_EMAIL_PROVIDER" >> .env

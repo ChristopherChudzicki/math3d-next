@@ -8,6 +8,13 @@ type UserCredentials = {
   password: string;
 };
 
+type SessionCookies = { sessionid: string; csrftoken: string };
+
+const authHeaders = (cookies: SessionCookies) => ({
+  Cookie: `sessionid=${cookies.sessionid}; csrftoken=${cookies.csrftoken}`,
+  "X-CSRFToken": cookies.csrftoken,
+});
+
 const users = {
   /**
    * This admin user should not be necessary in actual tests, but is useful for
@@ -109,10 +116,7 @@ const createActiveUser = async (user: UserInfo = {}) => {
     `/v0/auth/users/activation/`,
     { email: request.email },
     {
-      headers: {
-        Cookie: `sessionid=${adminCookies.sessionid}; csrftoken=${adminCookies.csrftoken}`,
-        "X-CSRFToken": adminCookies.csrftoken,
-      },
+      headers: authHeaders(adminCookies),
     },
   );
 
@@ -128,10 +132,7 @@ const createActiveUser = async (user: UserInfo = {}) => {
       });
       await axios.delete(`/v0/auth/users/me/`, {
         data: { current_password: request.password },
-        headers: {
-          Cookie: `sessionid=${userCookies.sessionid}; csrftoken=${userCookies.csrftoken}`,
-          "X-CSRFToken": userCookies.csrftoken,
-        },
+        headers: authHeaders(userCookies),
       });
     } catch {
       // User may already be deleted or password was changed — ignore
@@ -150,5 +151,5 @@ const createActiveUser = async (user: UserInfo = {}) => {
   return { auth: userAuth, info: userInfo, cleanup };
 };
 
-export { getSessionCookies, users, createActiveUser };
-export type { UserInfo, UserCredentials };
+export { authHeaders, getSessionCookies, users, createActiveUser };
+export type { SessionCookies, UserInfo, UserCredentials };

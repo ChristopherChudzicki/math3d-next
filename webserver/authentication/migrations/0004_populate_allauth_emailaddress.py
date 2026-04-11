@@ -22,12 +22,6 @@ def populate_email_addresses(apps, schema_editor):
         )
 
 
-def reverse_populate(apps, schema_editor):
-    """Remove EmailAddress rows that were created by this migration."""
-    EmailAddress = apps.get_model("account", "EmailAddress")
-    EmailAddress.objects.all().delete()
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ("authentication", "0003_change_is_active_default_to_true"),
@@ -35,5 +29,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(populate_email_addresses, reverse_populate),
+        migrations.RunPython(populate_email_addresses, migrations.RunPython.noop),
     ]
