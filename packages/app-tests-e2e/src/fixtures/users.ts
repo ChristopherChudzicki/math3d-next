@@ -4,7 +4,8 @@ import { ScenesApi, Configuration, isAxiosError } from "@math3d/api";
 import type { Scene } from "@math3d/api";
 import env from "@/env";
 import { createActiveUser, getSessionCookies, users } from "@/utils/api/auth";
-import type { UserCredentials } from "@/utils/api/auth";
+import type { UserCredentials, UserInfo } from "@/utils/api/auth";
+import { makeUserInfo } from "@math3d/mock-api";
 import invariant from "tiny-invariant";
 
 const TEST_SCENE_PREFIX = "[TEST-E2E-SCENE]";
@@ -19,8 +20,22 @@ type PrepareScene = (
 
 type SessionCookies = { sessionid: string; csrftoken: string };
 
+type WorkerUser = {
+  credentials: UserCredentials;
+  info: Required<UserInfo>;
+};
+
+type WorkerFixtures = {
+  workerUser: WorkerUser;
+};
+
 type Fixtures = {
-  user: UserCredentials | "static" | null;
+  user: UserCredentials | "static" | "worker" | null;
+  /**
+   * Info for the current test's user. Available when user is "worker" or
+   * a UserCredentials object passed through createUser.
+   */
+  userInfo: Required<UserInfo> | null;
   /**
    * Create an active user.
    */
@@ -35,11 +50,25 @@ type Fixtures = {
   prepareScene: PrepareScene;
 };
 
-const test = base.extend<Fixtures>({
+const test = base.extend<Fixtures, WorkerFixtures>({
+  // Worker-scoped: one user per Playwright worker, shared across tests.
+  workerUser: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      const { auth, info, cleanup } = await createActiveUser(makeUserInfo());
+      await use({ credentials: auth, info });
+      await cleanup();
+    },
+    { scope: "worker" },
+  ],
+
   user: null,
+  userInfo: null,
   // eslint-disable-next-line no-empty-pattern
   createUser: async ({}, use) => {
-    const requests: Promise<{ cleanup: () => Promise<void> }>[] = [];
+    const requests: Promise<{
+      cleanup: () => Promise<void>;
+    }>[] = [];
     const createUser: Fixtures["createUser"] = async (user) => {
       const request = createActiveUser(user);
       requests.push(request);
@@ -53,11 +82,17 @@ const test = base.extend<Fixtures>({
   /**
    * Session cookies for `user` fixture.
    */
-  sessionCookies: async ({ user, createUser }, use) => {
+  sessionCookies: async ({ user, workerUser, createUser }, use) => {
     let cookies: SessionCookies | null = null;
     if (user) {
-      const creds =
-        typeof user === "string" ? users[user] : await createUser(user);
+      let creds: UserCredentials;
+      if (user === "static") {
+        creds = users.static;
+      } else if (user === "worker") {
+        creds = workerUser.credentials;
+      } else {
+        creds = await createUser(user);
+      }
       cookies = await getSessionCookies(creds);
     }
     await use(cookies);
@@ -164,4 +199,4 @@ const test = base.extend<Fixtures>({
 });
 
 export { test, users };
-export type { Fixtures };
+export type { Fixtures, WorkerUser };

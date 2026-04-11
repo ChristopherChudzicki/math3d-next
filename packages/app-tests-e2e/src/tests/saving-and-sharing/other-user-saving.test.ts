@@ -5,8 +5,7 @@ import AppPage from "@/utils/pages/AppPage";
 import { faker } from "@faker-js/faker/locale/en";
 import { getSessionCookies } from "@/utils/api/auth";
 
-const user = makeUserInfo();
-test.use({ user });
+test.use({ user: "worker" });
 const sceneOwner = makeUserInfo();
 
 test.setTimeout(60_000);

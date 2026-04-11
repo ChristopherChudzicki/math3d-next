@@ -1,11 +1,10 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
+import { SceneBuilder } from "@math3d/mock-api";
 import AppPage from "@/utils/pages/AppPage";
 import { faker } from "@faker-js/faker/locale/en";
 
-const user = makeUserInfo();
-test.use({ user });
+test.use({ user: "worker" });
 test.setTimeout(60_000);
 
 test("Saving a new scene", async ({ page }) => {

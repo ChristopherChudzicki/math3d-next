@@ -1,22 +1,20 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import AppPage from "@/utils/pages/AppPage";
-import { makeUserInfo } from "@math3d/mock-api";
 
-const user = makeUserInfo();
-test.use({ user });
+test.use({ user: "worker" });
 
-test("Shows username in usermenu", async ({ page }) => {
+test("Shows username in usermenu", async ({ page, workerUser }) => {
   await page.goto("");
   const app = new AppPage(page);
 
   const trigger = await app.userMenu().opener();
   await expect(trigger).toBeVisible();
-  await expect(trigger).toHaveText(user.public_nickname[0]);
+  await expect(trigger).toHaveText(workerUser.info.public_nickname[0]);
 
   await trigger.click();
   const username = app.userMenu().username();
-  await expect(username).toHaveText(user.email);
+  await expect(username).toHaveText(workerUser.info.email);
 });
 
 test("Header and usermenu links", async ({ page }) => {
