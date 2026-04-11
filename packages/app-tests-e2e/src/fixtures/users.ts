@@ -3,8 +3,17 @@ import type { Page } from "@playwright/test";
 import { ScenesApi, Configuration, isAxiosError } from "@math3d/api";
 import type { Scene } from "@math3d/api";
 import env from "@/env";
-import { createActiveUser, getSessionCookies, users } from "@/utils/api/auth";
-import type { UserCredentials, UserInfo } from "@/utils/api/auth";
+import {
+  authHeaders,
+  createActiveUser,
+  getSessionCookies,
+  users,
+} from "@/utils/api/auth";
+import type {
+  SessionCookies,
+  UserCredentials,
+  UserInfo,
+} from "@/utils/api/auth";
 import { makeUserInfo } from "@math3d/mock-api";
 import invariant from "tiny-invariant";
 
@@ -17,8 +26,6 @@ type PrepareScene = (
   scene: Scene,
   opts?: Partial<PrepareSceneOpts>,
 ) => Promise<string>;
-
-type SessionCookies = { sessionid: string; csrftoken: string };
 
 type WorkerUser = {
   credentials: UserCredentials;
@@ -160,10 +167,7 @@ const test = base.extend<Fixtures, WorkerFixtures>({
         basePath: env.TEST_API_URL,
         baseOptions: cookies
           ? {
-              headers: {
-                Cookie: `sessionid=${cookies.sessionid}; csrftoken=${cookies.csrftoken}`,
-                "X-CSRFToken": cookies.csrftoken,
-              },
+              headers: authHeaders(cookies),
               withCredentials: true,
             }
           : { withCredentials: true },

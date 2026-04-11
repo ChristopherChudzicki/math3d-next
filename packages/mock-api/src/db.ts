@@ -32,15 +32,13 @@ const db = factory({
     public_nickname: faker.internet.username,
     email: faker.internet.email,
     password: faker.internet.password,
-    auth_token: faker.string.uuid,
   },
 });
 
 type UserWithPassword = User & {
-  // Real API response does not include password/token, of course, but we need it for
+  // Real API response does not include password, of course, but we need it for
   // the msw model & handler.
   password: string;
-  auth_token: string;
 };
 
 const addUser = (user?: Partial<UserWithPassword>): UserWithPassword => {

@@ -8,7 +8,7 @@ import {
   within,
 } from "@/test_util";
 
-test("Hapy path: Expected API call and form states", async () => {
+test("Happy path: Expected API call and form states", async () => {
   const { location } = await renderTestApp("/auth/reset-password");
 
   const dialog = await screen.findByRole("dialog");

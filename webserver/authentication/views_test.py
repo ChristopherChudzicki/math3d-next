@@ -9,7 +9,7 @@ from django.test import Client, override_settings
 from faker import Faker
 from lxml.html import fragment_fromstring
 
-from authentication.factories import CustomUserFactory
+from authentication.factories import FACTORY_PASSWORD, CustomUserFactory
 from authentication.models import CustomUser
 
 faker = Faker()
@@ -223,7 +223,7 @@ def test_login_and_logout():
     # Login
     login_resp = client.post(
         LOGIN_URL,
-        {"email": user.email, "password": "testpassword"},  # pragma: allowlist secret
+        {"email": user.email, "password": FACTORY_PASSWORD},  # pragma: allowlist secret
         content_type="application/json",
     )
     assert login_resp.status_code == 200
@@ -273,7 +273,7 @@ def test_password_reset_flow():
         content_type="application/json",
     )
     # allauth resets the password but returns 401 (user not logged in)
-    assert reset_resp.status_code in (200, 401)
+    assert reset_resp.status_code == 401
 
     # Can log in with new password
     login_resp = client.post(
@@ -334,7 +334,7 @@ def test_registration_disabled_login_still_works():
 
     login_resp = client.post(
         LOGIN_URL,
-        {"email": user.email, "password": "testpassword"},  # pragma: allowlist secret
+        {"email": user.email, "password": FACTORY_PASSWORD},  # pragma: allowlist secret
         content_type="application/json",
     )
     assert login_resp.status_code == 200
@@ -421,7 +421,7 @@ def test_delete_account():
 
     response = client.delete(
         USER_ME_URL,
-        {"current_password": "testpassword"},  # pragma: allowlist secret
+        {"current_password": FACTORY_PASSWORD},  # pragma: allowlist secret
         content_type="application/json",
     )
     assert response.status_code == 204

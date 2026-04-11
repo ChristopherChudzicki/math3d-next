@@ -23,23 +23,13 @@ export const mockAuth = {
   },
 };
 
-const getUser = (_req: Request) => {
+const getUser = () => {
   // Session-based auth: check module-level current user
   if (currentUserId !== null) {
     const user = db.user.findFirst({
       where: { id: { equals: currentUserId } },
     });
     if (user) return user;
-  }
-  // Fallback: check Authorization header for backward compat with e2e tests
-  const authHeader = _req.headers.get("Authorization");
-  if (authHeader) {
-    const prefix = "Token ";
-    const token = authHeader.slice(prefix.length);
-    const user = db.user.findFirst({
-      where: { auth_token: { equals: token } },
-    });
-    return user;
   }
   return false;
 };
@@ -96,8 +86,8 @@ const makeAuthenticatedResponse = (user: {
 export const handlers = [
   http.get<NoParams, ErrorResponseBody | PaginatedMiniSceneList>(
     urls.scenes.meList,
-    async ({ request }) => {
-      const user = getUser(request);
+    async () => {
+      const user = getUser();
       if (!user) {
         return HttpResponse.json(
           {
@@ -303,26 +293,23 @@ export const handlers = [
     return HttpResponse.json({ status: 200 });
   }),
   // DRF custom: users/me GET
-  http.get<NoParams, ErrorResponseBody | User>(
-    urls.auth.usersMe,
-    async ({ request }) => {
-      const user = getUser(request);
-      if (!user) {
-        return HttpResponse.json(
-          {
-            errorMessage: "Invalid token",
-          },
-          { status: 401 },
-        );
-      }
+  http.get<NoParams, ErrorResponseBody | User>(urls.auth.usersMe, async () => {
+    const user = getUser();
+    if (!user) {
       return HttpResponse.json(
         {
-          id: user.id,
-          email: user.email,
-          public_nickname: user.public_nickname,
+          errorMessage: "Invalid token",
         },
-        { status: 200 },
+        { status: 401 },
       );
-    },
-  ),
+    }
+    return HttpResponse.json(
+      {
+        id: user.id,
+        email: user.email,
+        public_nickname: user.public_nickname,
+      },
+      { status: 200 },
+    );
+  }),
 ];

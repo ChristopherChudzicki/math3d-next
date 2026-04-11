@@ -8,7 +8,6 @@ import type { DeleteUserMeParams } from "./api";
 import {
   allAuthLogin,
   allAuthLogout,
-  allAuthGetSession,
   allAuthSignup,
   allAuthVerifyEmail,
   allAuthRequestPasswordReset,
@@ -28,7 +27,6 @@ const authApi = new AuthApi(getConfig());
 
 const keys = {
   userMe: ["me"],
-  session: ["session"],
 };
 
 const useLogin = () => {
@@ -58,21 +56,6 @@ const useLogout = () => {
     },
     onSuccess: () => {
       client.resetQueries();
-    },
-  });
-};
-
-const useSession = () => {
-  return useQuery({
-    queryKey: keys.session,
-    queryFn: async () => {
-      try {
-        const res = await allAuthGetSession();
-        return res.data;
-      } catch {
-        // 401 means not authenticated — return null
-        return null;
-      }
     },
   });
 };
@@ -196,7 +179,6 @@ const useUserMeDelete = () => {
 export {
   useLogin,
   useLogout,
-  useSession,
   useUserMe,
   useCreateUser,
   useActivateUser,

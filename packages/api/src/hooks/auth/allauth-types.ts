@@ -16,11 +16,6 @@ export interface AllAuthAuthenticationMethod {
   email?: string;
 }
 
-export interface AllAuthFlow {
-  id: string;
-  providers?: string[];
-}
-
 export interface AllAuthAuthenticated {
   user: AllAuthUser;
   methods: AllAuthAuthenticationMethod[];
@@ -34,16 +29,6 @@ export interface AllAuthAuthenticatedResponse {
   };
 }
 
-export interface AllAuthUnauthenticatedResponse {
-  status: 401;
-  data: {
-    flows: AllAuthFlow[];
-  };
-  meta: {
-    is_authenticated: false;
-  };
-}
-
 export interface AllAuthError {
   code: string;
   message: string;
@@ -54,10 +39,6 @@ export interface AllAuthErrorResponse {
   status: 400;
   errors: AllAuthError[];
 }
-
-export type AllAuthSessionResponse =
-  | AllAuthAuthenticatedResponse
-  | AllAuthUnauthenticatedResponse;
 
 export interface AllAuthLoginRequest {
   email: string;
