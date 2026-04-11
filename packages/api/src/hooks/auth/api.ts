@@ -1,33 +1,8 @@
 import axios from "axios";
 import type { AxiosInstance } from "axios";
 
-type DeleteUserParams = {
-  id: number;
-  currentPassword: string;
-};
-
 type DeleteUserMeParams = {
   current_password: string;
-};
-
-/**
- * Delete specified user.
- *
- * NOTES
- * =====
- * - This exists because our generated API spec+client does not include the
- * delete request body.
- * - This request requires admin privileges.
- */
-const deleteUser = async (
-  { id, currentPassword }: DeleteUserParams,
-  basePath: string,
-  instance: AxiosInstance = axios,
-) => {
-  return instance.delete(`v0/auth/users/${id}/`, {
-    data: { current_password: currentPassword },
-    baseURL: basePath,
-  });
 };
 
 /**
@@ -49,5 +24,5 @@ const deleteUserMe = async (
   });
 };
 
-export { deleteUser, deleteUserMe };
+export { deleteUserMe };
 export type { DeleteUserMeParams };

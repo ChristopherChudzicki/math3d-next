@@ -40,7 +40,9 @@ async function ensureCsrfToken(): Promise<string> {
   return csrfToken;
 }
 
-// Attach CSRF token to all unsafe requests
+// Attach CSRF token to all unsafe requests.
+// Note: requests using authHeaders() already have Cookie and X-CSRFToken set;
+// the guards below (checking for existing headers) avoid duplicating them.
 axios.interceptors.request.use(async (config) => {
   const method = (config.method ?? "get").toLowerCase();
   if (["post", "put", "patch", "delete"].includes(method)) {

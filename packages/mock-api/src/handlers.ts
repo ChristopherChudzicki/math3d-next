@@ -91,7 +91,7 @@ export const handlers = [
       if (!user) {
         return HttpResponse.json(
           {
-            errorMessage: "Invalid token",
+            errorMessage: "Authentication required",
           },
           { status: 401 },
         );
@@ -298,7 +298,7 @@ export const handlers = [
     if (!user) {
       return HttpResponse.json(
         {
-          errorMessage: "Invalid token",
+          errorMessage: "Authentication required",
         },
         { status: 401 },
       );

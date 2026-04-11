@@ -17,8 +17,8 @@ const LogoutPage: React.FC = () => {
     handleClose();
   }, [handleClose, logout, setIsAuthenticated]);
   useEffect(() => {
-    // Only redirect if we know the user is NOT authenticated (false).
-    // When auth status is null (loading), don't redirect yet.
+    // Only redirect if we know the user is NOT authenticated.
+    // When auth status is "loading", don't redirect yet.
     if (isAuthenticated === "unauthenticated") {
       navigate("../");
     }

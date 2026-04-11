@@ -53,6 +53,7 @@ class UserMeView(APIView):
             )
 
         request.user.delete()
+        request.session.flush()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
