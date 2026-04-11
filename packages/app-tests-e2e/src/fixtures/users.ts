@@ -39,11 +39,6 @@ type WorkerFixtures = {
 type Fixtures = {
   user: UserCredentials | "static" | "worker" | null;
   /**
-   * Info for the current test's user. Available when user is "worker" or
-   * a UserCredentials object passed through createUser.
-   */
-  userInfo: Required<UserInfo> | null;
-  /**
    * When true, disables 3D MathBox rendering in the app. Defaults to true
    * since most E2E tests only interact with the controls sidebar.
    * Set to false for tests that need the 3D canvas (e.g., camera tests).
@@ -76,7 +71,6 @@ const test = base.extend<Fixtures, WorkerFixtures>({
   ],
 
   user: null,
-  userInfo: null,
   disable3d: true,
   // eslint-disable-next-line no-empty-pattern
   createUser: async ({}, use) => {
@@ -123,6 +117,7 @@ const test = base.extend<Fixtures, WorkerFixtures>({
         storageState: {
           cookies: [
             {
+              // sessionid scoped to API domain (Django's default, no SESSION_COOKIE_DOMAIN set)
               name: "sessionid",
               value: sessionCookies.sessionid,
               domain: apiUrl.hostname,
@@ -133,6 +128,8 @@ const test = base.extend<Fixtures, WorkerFixtures>({
               expires: -1,
             },
             {
+              // csrftoken on parent domain so it's readable by both the app
+              // and API subdomains (matches CSRF_COOKIE_DOMAIN setting)
               name: "csrftoken",
               value: sessionCookies.csrftoken,
               domain: `.${appUrl.hostname}`,

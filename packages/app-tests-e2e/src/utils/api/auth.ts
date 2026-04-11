@@ -36,7 +36,7 @@ const users = {
  */
 const getSessionCookies = async (
   user: UserCredentials,
-): Promise<{ sessionid: string; csrftoken: string }> => {
+): Promise<SessionCookies> => {
   const response = await axios.post(`/_allauth/browser/v1/auth/login`, {
     email: user.email,
     password: user.password,
@@ -53,7 +53,7 @@ type UserInfo = {
   public_nickname?: string;
 };
 
-let cachedAdminCookies: { sessionid: string; csrftoken: string } | null = null;
+let cachedAdminCookies: SessionCookies | null = null;
 
 const getAdminCookies = async ({ forceRefresh = false } = {}) => {
   if (!cachedAdminCookies || forceRefresh) {
