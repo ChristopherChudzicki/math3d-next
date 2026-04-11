@@ -142,7 +142,12 @@ const createActiveUser = async (user: UserInfo = {}) => {
     email: request.email,
     password: request.password,
   };
-  return { auth: userAuth, cleanup };
+  const userInfo: Required<UserInfo> = {
+    email: request.email,
+    password: request.password,
+    public_nickname: request.public_nickname,
+  };
+  return { auth: userAuth, info: userInfo, cleanup };
 };
 
 export { getSessionCookies, users, createActiveUser };

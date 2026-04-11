@@ -1,6 +1,6 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
+import { SceneBuilder } from "@math3d/mock-api";
 import AppPage from "@/utils/pages/AppPage";
 import env from "@/env";
 
@@ -25,15 +25,14 @@ test.describe("Authorized user (static)", () => {
 });
 
 test.describe("Authorized user (dynamic)", () => {
-  const user = makeUserInfo();
-  test.use({ user });
+  test.use({ user: "worker" });
 
-  test("Check user info", async ({ page }) => {
+  test("Check user info", async ({ page, workerUser }) => {
     await page.goto("");
     const app = new AppPage(page);
     await app.userMenu().opener().click();
     const username = app.userMenu().username();
-    expect(await username.textContent()).toBe(user.email);
+    expect(await username.textContent()).toBe(workerUser.info.email);
   });
 
   test("Building a custom scene", async ({ page, prepareScene }) => {
