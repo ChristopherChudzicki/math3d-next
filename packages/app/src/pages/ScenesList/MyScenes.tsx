@@ -92,7 +92,7 @@ const MyScenesList: React.FC = () => {
       archived: includeArchived ? undefined : false,
     },
     {
-      enabled: !!isAuthenticated,
+      enabled: isAuthenticated === "authenticated",
     },
   );
 
@@ -104,7 +104,7 @@ const MyScenesList: React.FC = () => {
   };
 
   const allItems = data ? data.pages.flatMap((d) => d.results ?? []) : [];
-  if (!isAuthenticated) {
+  if (isAuthenticated !== "authenticated") {
     return (
       <p className={styles["with-margin"]}>
         To view scenes you have saved, <Link href="../auth/login">log in</Link>{" "}

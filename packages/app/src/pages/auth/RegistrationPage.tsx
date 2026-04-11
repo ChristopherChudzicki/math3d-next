@@ -45,7 +45,7 @@ const RegistrationPage: React.FC = () => {
   }, [navigate]);
   const createUser = useCreateUser();
   useEffect(() => {
-    if (isAuthenticated === true) {
+    if (isAuthenticated === "authenticated") {
       navigateAway();
     }
   }, [isAuthenticated, navigateAway]);

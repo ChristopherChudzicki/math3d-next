@@ -33,7 +33,7 @@ const LoginPage: React.FC = () => {
   const formId = useId();
   const login = useLogin();
   useEffect(() => {
-    if (isAuthenticated === true) {
+    if (isAuthenticated === "authenticated") {
       navigate("../");
     }
   }, [isAuthenticated, navigate]);
@@ -54,7 +54,7 @@ const LoginPage: React.FC = () => {
           event?.preventDefault();
           try {
             await login.mutateAsync(data, {});
-            setIsAuthenticated(true);
+            setIsAuthenticated("authenticated");
             handleClose();
           } catch (err) {
             setFieldErrors(data, err, setError);
