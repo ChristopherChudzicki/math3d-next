@@ -6,16 +6,17 @@ import BasicDialog from "@/util/components/BasicDialog";
 
 const LogoutPage: React.FC = () => {
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useAuthStatus();
+  const isAuthenticated = useAuthStatus();
   const handleClose = useCallback(() => {
     navigate("../");
   }, [navigate]);
   const logout = useLogout();
   const handleSubmit = useCallback(async () => {
     await logout.mutateAsync();
-    setIsAuthenticated("unauthenticated");
+    // mutateAsync awaits onSuccess which resets queries (including
+    // useUserMe), so auth status is already up-to-date.
     handleClose();
-  }, [handleClose, logout, setIsAuthenticated]);
+  }, [handleClose, logout]);
   useEffect(() => {
     // Only redirect if we know the user is NOT authenticated.
     // When auth status is "loading", don't redirect yet.

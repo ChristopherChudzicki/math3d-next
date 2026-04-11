@@ -30,7 +30,7 @@ const RegistrationPage: React.FC = () => {
   const formId = useId();
   const [registering, setRegistering] = useToggle(true);
 
-  const [isAuthenticated] = useAuthStatus();
+  const isAuthenticated = useAuthStatus();
   const resolver = yupResolver(schema);
   const {
     register,

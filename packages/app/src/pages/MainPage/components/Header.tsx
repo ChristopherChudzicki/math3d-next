@@ -169,7 +169,7 @@ type AppHeaderProps = {
 
 const AppHeader: React.FC<AppHeaderProps> = (props) => {
   const smallScreen = useMediaQuery("(max-width: 600px)");
-  const [isAuthenticated] = useAuthStatus();
+  const isAuthenticated = useAuthStatus();
   const userQuery = useUserMe();
   const filteredItems = useMemo(
     () =>

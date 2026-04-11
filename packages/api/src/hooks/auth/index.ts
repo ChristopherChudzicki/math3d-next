@@ -33,8 +33,8 @@ const useLogin = () => {
   const client = useQueryClient();
   return useMutation({
     mutationFn: (data: AllAuthLoginRequest) => allAuthLogin(data),
-    onSuccess: () => {
-      client.resetQueries();
+    onSuccess: async () => {
+      await client.resetQueries();
     },
   });
 };
@@ -54,8 +54,8 @@ const useLogout = () => {
         throw err;
       }
     },
-    onSuccess: () => {
-      client.resetQueries();
+    onSuccess: async () => {
+      await client.resetQueries();
     },
   });
 };
@@ -169,8 +169,8 @@ const useUserMeDelete = () => {
   return useMutation({
     mutationFn: (data: DeleteUserMeParams) =>
       deleteUserMe(data, config.basePath ?? ""),
-    onSuccess: () => {
-      client.resetQueries();
+    onSuccess: async () => {
+      await client.resetQueries();
     },
   });
 };
