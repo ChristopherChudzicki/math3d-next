@@ -36,7 +36,7 @@ import styles from "./ScenesList.module.css";
 const { format } = new Intl.DateTimeFormat(navigator.languages[0]);
 
 const MyScenesList: React.FC = () => {
-  const [isAuthenticated] = useAuthStatus();
+  const isAuthenticated = useAuthStatus();
   const { sceneKey } = useParams();
   const navigate = useNavigate();
   const { add: addNotification } = useNotifications();

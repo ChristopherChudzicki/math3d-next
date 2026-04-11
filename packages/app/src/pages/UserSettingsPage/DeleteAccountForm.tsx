@@ -3,7 +3,6 @@ import * as yup from "yup";
 import { useUserMe, useUserMeDelete } from "@math3d/api";
 import { Alert, TextField } from "@mui/material";
 import { useValidatedForm } from "@/util/forms";
-import { useAuthStatus } from "@/features/auth";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 import { useNavigate } from "react-router";
 
@@ -19,7 +18,6 @@ const DeleteAccountForm: React.FC<{
   setDisabled: (disabled: boolean) => void;
 }> = ({ id, setDisabled }) => {
   const userQuery = useUserMe();
-  const [_authenticated, setAuthenticated] = useAuthStatus();
   const deleteAccount = useUserMeDelete();
   const {
     register,
@@ -40,7 +38,8 @@ const DeleteAccountForm: React.FC<{
         try {
           setDisabled(true);
           await deleteAccount.mutateAsync(data);
-          setAuthenticated("unauthenticated");
+          // mutateAsync awaits onSuccess which resets queries, so auth
+          // status is already up-to-date.
           addNotification({
             title: "Account Deleted",
             body: "Your account has been deleted.",
