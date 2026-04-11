@@ -14,6 +14,8 @@ import os
 from pathlib import Path
 import logging
 
+from django.core.exceptions import ImproperlyConfigured
+
 import dj_database_url
 import environ
 
@@ -41,6 +43,7 @@ env = environ.Env(
     # Feature flags
     ENABLE_REGISTRATION=(bool, False),
     CSRF_COOKIE_DOMAIN=(str, ""),
+    DISABLE_ALLAUTH_RATE_LIMITS=(bool, False),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -221,6 +224,13 @@ ACCOUNT_LOGIN_BY_CODE_ENABLED = False
 ACCOUNT_PREVENT_ENUMERATION = False
 ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
 ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"
+
+if env("DISABLE_ALLAUTH_RATE_LIMITS"):
+    if env("IS_HEROKU"):
+        raise ImproperlyConfigured(
+            "DISABLE_ALLAUTH_RATE_LIMITS must not be enabled in production."
+        )
+    ACCOUNT_RATE_LIMITS = False
 
 # allauth headless configuration
 HEADLESS_ONLY = True
