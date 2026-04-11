@@ -61,6 +61,7 @@ jobs:
           echo "TEST_USER_STATIC_PASSWORD=$TEST_USER_STATIC_PASSWORD" >> .env
           echo "ENABLE_REGISTRATION=true" >> .env
           echo "CSRF_COOKIE_DOMAIN=math3d.localdev" >> .env
+          echo "DISABLE_ALLAUTH_RATE_LIMITS=true" >> .env
       - name: Build docker stack
         run: docker compose build
       - name: Migrate backend database
