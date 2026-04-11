@@ -71,6 +71,10 @@ if env("IS_HEROKU"):
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    if not env("APP_BASE_URL"):
+        raise ImproperlyConfigured(
+            "APP_BASE_URL is required in production (used for CSRF_TRUSTED_ORIGINS and email links)."
+        )
     # Set ALLOWED_HOSTS for production
     ALLOWED_HOSTS = env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["api.math3d.org"]
 else:

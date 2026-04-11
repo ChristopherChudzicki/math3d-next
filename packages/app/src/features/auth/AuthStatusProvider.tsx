@@ -35,6 +35,8 @@ const AuthStatusProvider: React.FC<{ children: React.ReactNode }> = ({
     derived = "authenticated";
   } else if (userMeQuery.data === null) {
     derived = "unauthenticated";
+  } else if (userMeQuery.isError) {
+    derived = "unauthenticated";
   } else {
     derived = "loading";
   }

@@ -3,7 +3,7 @@ import { AxiosError } from "axios";
 import { AuthApi } from "../../generated";
 import type { PatchedUserRequest } from "../../generated";
 import { getConfig } from "../util";
-import { deleteUser, deleteUserMe } from "./api";
+import { deleteUserMe } from "./api";
 import type { DeleteUserMeParams } from "./api";
 import {
   allAuthLogin,
@@ -82,7 +82,6 @@ const useUserMe = (opts?: { enabled?: boolean }) => {
         throw err;
       }
     },
-    retry: false,
     ...opts,
   });
 };
@@ -184,7 +183,6 @@ export {
   useActivateUser,
   useResetPassword,
   useResetPasswordConfirm,
-  deleteUser,
   useUserMePatch,
   useUpdatePassword,
   useUserMeDelete,
