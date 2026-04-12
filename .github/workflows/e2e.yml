@@ -39,6 +39,7 @@ jobs:
           APP_HOST=$(echo "$TEST_APP_URL" | sed -E 's|https?://||; s|:[0-9]+$||')
           API_HOST=$(echo "$TEST_API_URL" | sed -E 's|https?://||; s|:[0-9]+$||')
           echo "127.0.0.1 $APP_HOST $API_HOST" | sudo tee -a /etc/hosts
+          echo "::1       $APP_HOST $API_HOST" | sudo tee -a /etc/hosts
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v6
         with:
