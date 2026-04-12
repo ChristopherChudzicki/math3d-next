@@ -33,10 +33,6 @@ const docsHotReload = (filepath: string): PluginOption => {
 export default defineConfig({
   server: {
     port: 3000,
-    // Bind to 0.0.0.0 so the server accepts connections via math3d.localdev
-    // (which resolves to 127.0.0.1 via /etc/hosts). Without this, Vite binds
-    // to "localhost" which may resolve to ::1 (IPv6) on some systems.
-    host: true,
     allowedHosts: ["math3d.localdev"],
   },
   plugins: [
