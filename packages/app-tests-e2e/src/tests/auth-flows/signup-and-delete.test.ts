@@ -1,4 +1,4 @@
-import { test, users } from "@/fixtures/users";
+import { test } from "@/fixtures/users";
 import { expect } from "@/utils/expect";
 import AppPage from "@/utils/pages/AppPage";
 import { getInbox } from "@/utils/inbox/emails";

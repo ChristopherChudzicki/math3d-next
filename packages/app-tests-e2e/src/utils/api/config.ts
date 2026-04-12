@@ -13,12 +13,13 @@ function parseCookies(
   setCookieHeaders: string[] | undefined,
 ): Record<string, string> {
   const cookies: Record<string, string> = {};
-  for (const header of setCookieHeaders ?? []) {
+  (setCookieHeaders ?? []).forEach((header) => {
     const match = header.match(/^([^=]+)=([^;]*)/);
     if (match) {
-      cookies[match[1]] = match[2];
+      const [, name, value] = match;
+      cookies[name] = value;
     }
-  }
+  });
   return cookies;
 }
 
