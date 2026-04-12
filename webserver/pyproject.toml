@@ -54,6 +54,10 @@ plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
 module = "environ.*"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "allauth.*"
+ignore_missing_imports = true
+
 [tool.django-stubs]
 django_settings_module = "main.settings"
 
