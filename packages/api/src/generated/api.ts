@@ -42,6 +42,19 @@ import {
 /**
  *
  * @export
+ * @interface ActivateRequest
+ */
+export interface ActivateRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof ActivateRequest
+   */
+  email: string;
+}
+/**
+ *
+ * @export
  * @interface LegacyScene
  */
 export interface LegacyScene {
@@ -409,20 +422,21 @@ export const AuthApiAxiosParamCreator = function (
   return {
     /**
      * Admin-only endpoint to activate a user and mark their email as verified.
-     * @param {number} id
+     * @param {ActivateRequest} ActivateRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     authUsersActivationCreate: async (
-      id: number,
+      ActivateRequest: ActivateRequest,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists("authUsersActivationCreate", "id", id);
-      const localVarPath = `/v0/auth/users/{id}/activation/`.replace(
-        `{${"id"}}`,
-        encodeURIComponent(String(id)),
+      // verify required parameter 'ActivateRequest' is not null or undefined
+      assertParamExists(
+        "authUsersActivationCreate",
+        "ActivateRequest",
+        ActivateRequest,
       );
+      const localVarPath = `/v0/auth/users/activation/`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
       let baseOptions;
@@ -440,6 +454,8 @@ export const AuthApiAxiosParamCreator = function (
 
       // authentication cookieAuth required
 
+      localVarHeaderParameter["Content-Type"] = "application/json";
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
         baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -448,6 +464,11 @@ export const AuthApiAxiosParamCreator = function (
         ...headersFromBaseOptions,
         ...options.headers,
       };
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        ActivateRequest,
+        localVarRequestOptions,
+        configuration,
+      );
 
       return {
         url: toPathString(localVarUrlObj),
@@ -595,18 +616,21 @@ export const AuthApiFp = function (configuration?: Configuration) {
   return {
     /**
      * Admin-only endpoint to activate a user and mark their email as verified.
-     * @param {number} id
+     * @param {ActivateRequest} ActivateRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async authUsersActivationCreate(
-      id: number,
+      ActivateRequest: ActivateRequest,
       options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
     > {
       const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersActivationCreate(id, options);
+        await localVarAxiosParamCreator.authUsersActivationCreate(
+          ActivateRequest,
+          options,
+        );
       const index = configuration?.serverIndex ?? 0;
       const operationBasePath =
         operationServerMap["AuthApi.authUsersActivationCreate"]?.[index]?.url;
@@ -717,7 +741,7 @@ export const AuthApiFactory = function (
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .authUsersActivationCreate(requestParameters.id, options)
+        .authUsersActivationCreate(requestParameters.ActivateRequest, options)
         .then((request) => request(axios, basePath));
     },
     /**
@@ -765,10 +789,10 @@ export const AuthApiFactory = function (
 export interface AuthApiAuthUsersActivationCreateRequest {
   /**
    *
-   * @type {number}
+   * @type {ActivateRequest}
    * @memberof AuthApiAuthUsersActivationCreate
    */
-  readonly id: number;
+  readonly ActivateRequest: ActivateRequest;
 }
 
 /**
@@ -804,7 +828,7 @@ export class AuthApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return AuthApiFp(this.configuration)
-      .authUsersActivationCreate(requestParameters.id, options)
+      .authUsersActivationCreate(requestParameters.ActivateRequest, options)
       .then((request) => request(this.axios, this.basePath));
   }
 

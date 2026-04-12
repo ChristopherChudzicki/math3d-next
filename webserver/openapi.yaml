@@ -4,19 +4,25 @@ info:
   version: 0.0.1
   description: Math3d API
 paths:
-  /v0/auth/users/{id}/activation/:
+  /v0/auth/users/activation/:
     post:
       operationId: auth_users_activation_create
       description: Admin-only endpoint to activate a user and mark their email as
         verified.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
       tags:
       - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ActivateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ActivateRequest'
+        required: true
       security:
       - cookieAuth: []
       responses:
@@ -311,6 +317,15 @@ paths:
           description: ''
 components:
   schemas:
+    ActivateRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
     LegacyScene:
       type: object
       properties:
