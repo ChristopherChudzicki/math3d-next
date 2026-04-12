@@ -35,10 +35,6 @@ export default defineConfig({
     port: 3000,
     allowedHosts: ["math3d.localdev"],
   },
-  preview: {
-    port: 3000,
-    allowedHosts: ["math3d.localdev"],
-  },
   plugins: [
     ValidateEnv({
       VITE_API_BASE_URL: Schema.string(),
