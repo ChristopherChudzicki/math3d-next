@@ -14,6 +14,8 @@ import os
 from pathlib import Path
 import logging
 
+from django.core.exceptions import ImproperlyConfigured
+
 import dj_database_url
 import environ
 
@@ -40,6 +42,8 @@ env = environ.Env(
     APP_VERSION=(str, "unknown"),
     # Feature flags
     ENABLE_REGISTRATION=(bool, False),
+    CSRF_COOKIE_DOMAIN=(str, ""),
+    DISABLE_ALLAUTH_RATE_LIMITS=(bool, False),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -55,6 +59,10 @@ SECRET_KEY = env("SECRET_KEY")
 # Application version
 APP_VERSION = env("APP_VERSION")
 
+# Secure cookie defaults — only relaxed for local dev (no TLS).
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 ALLOWED_HOSTS: list[str]
 if env("IS_HEROKU"):
     DEBUG = False
@@ -63,12 +71,20 @@ if env("IS_HEROKU"):
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    if not env("APP_BASE_URL"):
+        raise ImproperlyConfigured(
+            "APP_BASE_URL is required in production (used for CSRF_TRUSTED_ORIGINS and email links)."
+        )
     # Set ALLOWED_HOSTS for production
     ALLOWED_HOSTS = env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["api.math3d.org"]
 else:
     DEBUG = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
     ALLOWED_HOSTS = (
-        env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["localhost", "127.0.0.1"]
+        env("ALLOWED_HOSTS")
+        if env("ALLOWED_HOSTS")
+        else ["localhost", "127.0.0.1", "api.math3d.localdev"]
     )
 
 SITE_NAME = "Math3d"
@@ -135,11 +151,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",  # Required by allauth
     "rest_framework",
-    "rest_framework.authtoken",
+    "rest_framework.authtoken",  # Unused; kept to avoid dropping the token table until DRF removal (#1125)
     "django_filters",
     "authentication",  # custom app
-    "djoser",
+    "allauth",
+    "allauth.account",
+    "allauth.headless",
     "corsheaders",
     "drf_spectacular",
     ## Custom apps
@@ -147,12 +166,14 @@ INSTALLED_APPS = [
     "scenes",
 ]
 
+SITE_ID = 1
+
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ),
 }
 
@@ -164,11 +185,23 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [env("APP_BASE_URL")] if env("APP_BASE_URL") else []
+
+_csrf_cookie_domain = env("CSRF_COOKIE_DOMAIN")
+if _csrf_cookie_domain:
+    CSRF_COOKIE_DOMAIN = _csrf_cookie_domain
+
+
+AUTHENTICATION_BACKENDS = [
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
 
 ROOT_URLCONF = "main.urls"
 
@@ -191,54 +224,37 @@ TEMPLATES = [
 WSGI_APPLICATION = "main.wsgi.application"
 
 ##################################################
-# Start auth settings
+# allauth settings
 ##################################################
-DJOSER = {
-    "LOGIN_FIELD": "email",
-    # Send notifications / confirmations
-    "SEND_ACTIVATION_EMAIL": True,
-    "SEND_CONFIRMATION_EMAIL": True,
-    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
-    "USERNAME_CHANGED_EMAIL_CONFIRMATION": True,
-    # Require retyping password
-    "USER_CREATE_PASSWORD_RETYPE": True,
-    "SET_PASSWORD_RETYPE": True,
-    "PASSWORD_RESET_CONFIRM_RETYPE": True,
-    # Emails
-    "EMAIL": {
-        "activation": "authentication.email.ActivationEmail",
-        "confirmation": "authentication.email.ConfirmationEmail",
-        "password_reset": "authentication.email.PasswordResetEmail",
-        "password_changed_confirmation": "authentication.email.PasswordChangedConfirmationEmail",
-        "username_changed_confirmation": "authentication.email.UsernameChangedConfirmationEmail",
-        "username_reset": "authentication.email.UsernameResetEmail",
-    },
-    # Limit endpoints we don't want to just admin users.
-    # Not ideal, but it's the best solution for now.
-    # See https://github.com/sunscrapers/djoser/issues/549
-    "PERMISSIONS": {
-        # 'activation': ['rest_framework.permissions.AllowAny'],
-        # 'password_reset': ['rest_framework.permissions.AllowAny'],
-        # 'password_reset_confirm': ['rest_framework.permissions.AllowAny'],
-        # 'set_password': ['djoser.permissions.CurrentUserOrAdmin'],
-        "username_reset": ["rest_framework.permissions.IsAdminUser"],
-        "username_reset_confirm": ["rest_framework.permissions.IsAdminUser"],
-        "set_username": ["rest_framework.permissions.IsAdminUser"],
-        # 'user_create': ['rest_framework.permissions.AllowAny'],
-        # 'user_delete': ['djoser.permissions.CurrentUserOrAdmin'],
-        # 'user': ['djoser.permissions.CurrentUserOrAdmin'],
-        "user_list": ["rest_framework.permissions.IsAdminUser"],
-        # 'token_create': ['rest_framework.permissions.AllowAny'],
-        # 'token_destroy': ['rest_framework.permissions.IsAuthenticated'],
-    },
-    "SERIALIZERS": {
-        "user": "authentication.serializers.CustomUserSerializer",
-        "current_user": "authentication.serializers.CustomUserSerializer",
-    },
-    "_CUSTOM": {
-        "ACTIVATION_URL": f"{env('APP_BASE_URL')}/auth/activate-account?uid={{uid}}&token={{token}}",
-        "PASSWORD_RESET_CONFIRM_URL": f"{env('APP_BASE_URL')}/auth/reset-password/confirm/?uid={{uid}}&token={{token}}",  # pragma: allowlist secret
-    },
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_LOGIN_METHODS = {"email"}
+# No password2: headless mode doesn't use it (password confirmation is
+# handled client-side). See https://docs.allauth.org/en/latest/headless/faq.html
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*"]
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_LOGIN_BY_CODE_ENABLED = False
+# Allow revealing whether an email is registered. Acceptable tradeoff for a
+# math visualization tool: usability > preventing enumeration.
+ACCOUNT_PREVENT_ENUMERATION = False
+ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
+# ACCOUNT_SIGNUP_FORM_CLASS (not ACCOUNT_FORMS) is the correct setting for
+# injecting extra fields alongside allauth's built-in signup form.
+ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"
+
+if env("DISABLE_ALLAUTH_RATE_LIMITS"):
+    if env("IS_HEROKU"):
+        raise ImproperlyConfigured(
+            "DISABLE_ALLAUTH_RATE_LIMITS must not be enabled in production."
+        )
+    ACCOUNT_RATE_LIMITS = False
+
+# allauth headless configuration
+HEADLESS_ONLY = True
+HEADLESS_CLIENTS = ["browser"]
+HEADLESS_SERVE_SPECIFICATION = True
+HEADLESS_FRONTEND_URLS = {
+    "account_confirm_email": f"{env('APP_BASE_URL')}/auth/activate-account?key={{key}}",
+    "account_reset_password_from_key": f"{env('APP_BASE_URL')}/auth/reset-password/confirm/?key={{key}}",
 }
 
 ##################################################

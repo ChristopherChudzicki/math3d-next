@@ -1,7 +1,7 @@
 import React from "react";
 import * as yup from "yup";
 import { useUpdatePassword } from "@math3d/api";
-import { TextField } from "@mui/material";
+import { Alert, TextField } from "@mui/material";
 import { OverallError, useValidatedForm } from "@/util/forms";
 
 const schema = yup.object({
@@ -32,7 +32,9 @@ const ChangePasswordForm: React.FC<{
         event?.preventDefault();
         try {
           setDisabled(true);
-          await updatePassword.mutateAsync(data);
+          // Send only the fields allauth expects (no re_new_password)
+          const { current_password, new_password } = data;
+          await updatePassword.mutateAsync({ current_password, new_password });
         } finally {
           setDisabled(false);
         }
@@ -66,6 +68,9 @@ const ChangePasswordForm: React.FC<{
         {...register("re_new_password")}
       />
       <OverallError />
+      {updatePassword.isSuccess && (
+        <Alert severity="success">Password changed successfully.</Alert>
+      )}
     </form>
   );
 };

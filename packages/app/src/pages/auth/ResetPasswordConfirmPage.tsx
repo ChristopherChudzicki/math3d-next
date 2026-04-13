@@ -13,18 +13,17 @@ import BasicDialog from "@/util/components/BasicDialog";
 import styles from "./styles.module.css";
 
 const schema = yup.object({
-  new_password: yup.string().min(9).label("Password").required(),
-  re_new_password: yup
+  password: yup.string().min(9).label("Password").required(),
+  re_password: yup
     .string()
-    .oneOf([yup.ref("new_password")], "Passwords must match")
+    .oneOf([yup.ref("password")], "Passwords must match")
     .required("Must confirm password"),
-  uid: yup.string().required(),
-  token: yup.string().required(),
+  key: yup.string().required(),
 });
 
 type FormData = yup.InferType<typeof schema>;
 
-const RegistrationPage: React.FC = () => {
+const ResetPasswordConfirmPage: React.FC = () => {
   const navigate = useNavigate();
   const formId = useId();
 
@@ -39,8 +38,7 @@ const RegistrationPage: React.FC = () => {
   } = useForm({
     resolver,
     defaultValues: {
-      uid: searchParams.get("uid") ?? "",
-      token: searchParams.get("token") ?? "",
+      key: searchParams.get("key") ?? "",
     },
   });
 
@@ -52,7 +50,9 @@ const RegistrationPage: React.FC = () => {
     async (data, event) => {
       event?.preventDefault();
       try {
-        await resetPassword.mutateAsync(data);
+        // Send only the fields allauth expects (no re_password)
+        const { key, password } = data;
+        await resetPassword.mutateAsync({ key, password });
       } catch (err) {
         setFieldErrors(data, err, setError);
       }
@@ -94,23 +94,23 @@ const RegistrationPage: React.FC = () => {
           onSubmit={handleSubmit(changePassword)}
         >
           <TextField
-            error={!!errors.new_password?.message}
-            helperText={errors.new_password?.message}
+            error={!!errors.password?.message}
+            helperText={errors.password?.message}
             label="New Password"
             type="password"
-            {...register("new_password")}
+            {...register("password")}
           />
           <TextField
-            error={!!errors.re_new_password?.message}
-            helperText={errors.re_new_password?.message}
+            error={!!errors.re_password?.message}
+            helperText={errors.re_password?.message}
             label="Confirm New Password"
             type="password"
-            {...register("re_new_password")}
+            {...register("re_password")}
           />
           {errors.root?.message ? (
             <Alert severity="error">{errors.root?.message}</Alert>
           ) : null}
-          {errors.token || errors.uid ? (
+          {errors.key ? (
             <Alert severity="error">
               Error: Please check that the password reset link is correct.
             </Alert>
@@ -121,4 +121,4 @@ const RegistrationPage: React.FC = () => {
   );
 };
 
-export default RegistrationPage;
+export default ResetPasswordConfirmPage;

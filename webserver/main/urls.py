@@ -26,6 +26,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("v0/", include(scenes.urls)),
     path("v0/auth/", include(authentication.urls)),
+    path("_allauth/", include("allauth.headless.urls")),
     path("", lambda request: HttpResponseRedirect("/v0/schema/swagger")),
     path("v0/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(

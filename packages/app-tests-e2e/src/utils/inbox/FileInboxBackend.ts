@@ -31,7 +31,8 @@ const match = (text: string, matcher: string | RegExp) => {
   if (matcher instanceof RegExp) {
     return matcher.test(text);
   }
-  return text.includes(matcher);
+  // Case-insensitive: allauth email subjects may differ in casing from Djoser
+  return text.toLowerCase().includes(matcher.toLowerCase());
 };
 
 const standardizeTo = (

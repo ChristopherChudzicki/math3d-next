@@ -25,18 +25,21 @@ const showKeyboard = (event: FocusEvent) => {
 const ToggleKeyboardButton = () => {
   const [autoExpand, setAutoExpand] = useState(false);
   const [mfEl, setMfEl] = useState<HTMLElement | null>(null);
+
+  // Clean up the focusin listener on unmount.
   useEffect(() => {
-    if (autoExpand) {
-      document.addEventListener("focusin", showKeyboard);
-      return () => document.removeEventListener("focusin", showKeyboard);
-    }
-    return () => null;
-  }, [autoExpand]);
+    return () => document.removeEventListener("focusin", showKeyboard);
+  }, []);
 
   const handleClick = useCallback(() => {
     const currentAutoExpand = !autoExpand;
     setAutoExpand(currentAutoExpand);
+    // Attach/detach the focusin listener synchronously in the click handler
+    // rather than in a useEffect. If done in an effect, the listener removal
+    // is deferred until after render, creating a window where focusin events
+    // (from focus shifts during the click) can re-show the keyboard.
     if (currentAutoExpand) {
+      document.addEventListener("focusin", showKeyboard);
       if (mfEl) {
         mfEl.focus();
         mathVirtualKeyboard.show();
@@ -45,6 +48,9 @@ const ToggleKeyboardButton = () => {
         document.querySelector<HTMLElement>("math-field")?.focus();
         mathVirtualKeyboard.show();
       }
+    } else {
+      document.removeEventListener("focusin", showKeyboard);
+      mathVirtualKeyboard.hide();
     }
   }, [autoExpand, mfEl]);
   return createPortal(

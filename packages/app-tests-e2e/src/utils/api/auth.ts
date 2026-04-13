@@ -1,19 +1,19 @@
-import { AuthApi, deleteUser } from "@math3d/api";
-import type { UserCreatePasswordRetypeRequest } from "@math3d/api";
 import { faker } from "@faker-js/faker/locale/en";
-import { getConfig } from "@/utils/api/config";
+import { axios, parseCookies } from "@/utils/api/config";
 import env from "@/env";
 import invariant from "tiny-invariant";
-
-/**
- * Anonymouse user authentication API
- */
-const authApi = new AuthApi(getConfig(null));
 
 type UserCredentials = {
   email: string;
   password: string;
 };
+
+type SessionCookies = { sessionid: string; csrftoken: string };
+
+const authHeaders = (cookies: SessionCookies) => ({
+  Cookie: `sessionid=${cookies.sessionid}; csrftoken=${cookies.csrftoken}`,
+  "X-CSRFToken": cookies.csrftoken,
+});
 
 const users = {
   /**
@@ -31,16 +31,47 @@ const users = {
   },
 } satisfies Record<string, UserCredentials>;
 
-const getAuthToken = async (user: UserCredentials): Promise<string> => {
-  const response = await authApi.authTokenLoginCreate({
-    TokenCreateRequest: user,
+/**
+ * Log in via allauth and return session cookies (plus CSRF cookie).
+ */
+const getSessionCookies = async (
+  user: UserCredentials,
+): Promise<SessionCookies> => {
+  const response = await axios.post(`/_allauth/browser/v1/auth/login`, {
+    email: user.email,
+    password: user.password,
   });
-  // @ts-expect-error drf-spectacular issue
-  return response.data.auth_token;
+  const cookies = parseCookies(response.headers["set-cookie"]);
+  invariant(cookies.sessionid, "Expected sessionid cookie from login response");
+  invariant(cookies.csrftoken, "Expected csrftoken cookie from login response");
+  return { sessionid: cookies.sessionid, csrftoken: cookies.csrftoken };
 };
 
-type UserInfo = Partial<Omit<UserCreatePasswordRetypeRequest, "re_password">>;
+type UserInfo = {
+  email?: string;
+  password?: string;
+  public_nickname?: string;
+};
 
+let cachedAdminCookies: SessionCookies | null = null;
+
+const getAdminCookies = async ({ forceRefresh = false } = {}) => {
+  if (!cachedAdminCookies || forceRefresh) {
+    cachedAdminCookies = await getSessionCookies(users.admin);
+  }
+  return cachedAdminCookies;
+};
+
+/**
+ * Create a user, activate via admin, and return credentials + cleanup function.
+ *
+ * Flow:
+ * 1. Sign up via allauth (returns 401 because email verification is mandatory)
+ * 2. Admin activates the user (marks email as verified, sets is_active=True)
+ * 3. User can now log in
+ *
+ * Cleanup deletes the user by logging in as them and calling DELETE /v0/auth/users/me/.
+ */
 const createActiveUser = async (user: UserInfo = {}) => {
   const defaults = {
     email: faker.internet.email({
@@ -53,7 +84,6 @@ const createActiveUser = async (user: UserInfo = {}) => {
   const request = {
     ...defaults,
     ...user,
-    re_password: user.password ?? defaults.password,
   };
 
   invariant(
@@ -61,27 +91,78 @@ const createActiveUser = async (user: UserInfo = {}) => {
     `Dynamically generated users in e2e tests must have emails ending with the test email provider (${env.TEST_EMAIL_PROVIDER}). Email: ${request.email}`,
   );
 
-  const [inactive, adminToken] = await Promise.all([
-    authApi.authUsersCreate({
-      UserCreatePasswordRetypeRequest: request,
-    }),
-    getAuthToken(users.admin),
-  ]);
-  const adminConfig = getConfig(adminToken);
-  const adminApi = new AuthApi(adminConfig);
-  await adminApi.activateOther({ id: inactive.data.id });
-  const cleanup = async () => {
-    await deleteUser(
-      { id: inactive.data.id, currentPassword: users.admin.password },
-      adminConfig,
+  // Sign up via allauth. Returns 401 when email verification is mandatory.
+  try {
+    await axios.post(`/_allauth/browser/v1/auth/signup`, {
+      email: request.email,
+      password: request.password,
+      public_nickname: request.public_nickname,
+    });
+  } catch (err: unknown) {
+    // allauth returns 401 when email verification is mandatory — that's expected.
+    const isExpected401 =
+      err &&
+      typeof err === "object" &&
+      "response" in err &&
+      (err as { response?: { status?: number } }).response?.status === 401;
+    if (!isExpected401) {
+      throw err;
+    }
+  }
+
+  // Admin-activate the user (marks email as verified, sets is_active=True).
+  // Retry once with fresh admin cookies if the cached session has expired.
+  const activate = async (cookies: SessionCookies) =>
+    axios.post(
+      `/v0/auth/users/activation/`,
+      { email: request.email },
+      { headers: authHeaders(cookies) },
     );
+  try {
+    await activate(await getAdminCookies());
+  } catch (err: unknown) {
+    const status =
+      err &&
+      typeof err === "object" &&
+      "response" in err &&
+      (err as { response?: { status?: number } }).response?.status;
+    if (status === 401 || status === 403) {
+      await activate(await getAdminCookies({ forceRefresh: true }));
+    } else {
+      throw err;
+    }
+  }
+
+  const cleanup = async () => {
+    // Log in as the user and self-delete.
+    // If login fails (e.g., the test changed the password), ignore the error.
+    // The user has a test email provider domain and will be cleaned up by
+    // seed_test_data on the next test run.
+    try {
+      const userCookies = await getSessionCookies({
+        email: request.email,
+        password: request.password,
+      });
+      await axios.delete(`/v0/auth/users/me/`, {
+        data: { current_password: request.password },
+        headers: authHeaders(userCookies),
+      });
+    } catch {
+      // User may already be deleted or password was changed — ignore
+    }
   };
+
   const userAuth: UserCredentials = {
     email: request.email,
     password: request.password,
   };
-  return { auth: userAuth, cleanup };
+  const userInfo: Required<UserInfo> = {
+    email: request.email,
+    password: request.password,
+    public_nickname: request.public_nickname,
+  };
+  return { auth: userAuth, info: userInfo, cleanup };
 };
 
-export { authApi, getAuthToken, users, createActiveUser };
-export type { UserInfo, UserCredentials };
+export { authHeaders, getSessionCookies, users, createActiveUser };
+export type { SessionCookies, UserInfo, UserCredentials };

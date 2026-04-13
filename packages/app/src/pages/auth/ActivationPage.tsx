@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import Link from "@/util/components/Link";
-import { useActivateUser } from "@math3d/api";
+import { useActivateUser, useUserMe } from "@math3d/api";
 import { useToggle } from "@/util/hooks";
 import Alert from "@mui/material/Alert";
 import LoadingSpinner from "@/util/components/LoadingSpinner/LoadingSpinner";
@@ -22,8 +22,8 @@ const ActivationMessage: React.FC<{ success: boolean; error: boolean }> = ({
   if (error) {
     return (
       <Alert severity="error">
-        Error: Please check that the activation email to ensure the activation
-        link was correct.
+        Error: Please check the activation email to ensure the activation link
+        was correct.
       </Alert>
     );
   }
@@ -44,19 +44,23 @@ const AccountActivationPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const activateUser = useActivateUser();
   const activateUserMutate = activateUser.mutate;
+  const hasFired = useRef(false);
+
+  // Wait for useUserMe to complete so the CSRF cookie is set before POSTing.
+  const userMeQuery = useUserMe();
+  const csrfReady = userMeQuery.isFetched;
+
   useEffect(() => {
-    // This runs twice during development in StrictMode, which is annoying, but
-    // does not seem to be actually problematic.
+    if (!csrfReady || hasFired.current) return;
+    hasFired.current = true;
+    const key = searchParams.get("key") ?? "";
     activateUserMutate(
-      {
-        uid: searchParams.get("uid") ?? "",
-        token: searchParams.get("token") ?? "",
-      },
+      { key },
       {
         onSuccess: setSuccess.on,
       },
     );
-  }, [activateUserMutate, searchParams, setSuccess]);
+  }, [csrfReady, activateUserMutate, searchParams, setSuccess]);
   return (
     <BasicDialog
       title="Account Activation"

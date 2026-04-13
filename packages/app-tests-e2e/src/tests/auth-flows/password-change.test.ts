@@ -1,4 +1,5 @@
 import { test } from "@/fixtures/users";
+import { expect } from "@playwright/test";
 import AppPage from "@/utils/pages/AppPage";
 import { faker } from "@faker-js/faker/locale/en";
 import { makeUserInfo } from "@math3d/mock-api";
@@ -20,6 +21,9 @@ test.describe("Password changes", () => {
       await form.newPassword().fill(newPassword);
       await form.confirmNewPassword().fill(newPassword);
       await form.submit().click();
+      await expect(page.getByRole("alert")).toContainText(
+        "Password changed successfully",
+      );
       await app.userSettings().close().click();
     });
 

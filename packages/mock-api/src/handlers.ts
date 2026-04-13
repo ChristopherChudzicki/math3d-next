@@ -1,28 +1,37 @@
 import { http, HttpResponse } from "msw";
-import type {
-  PaginatedMiniSceneList,
-  Scene,
-  TokenCreate,
-  TokenCreateRequest,
-  UserCreatePasswordRetypeRequest,
-  User,
-  ActivationRequest,
-} from "@math3d/api";
+import type { PaginatedMiniSceneList, Scene, User } from "@math3d/api";
 import db from "./db";
 
 type ErrorResponseBody = Record<string, string | string[]>;
 
-const getUser = (req: Request) => {
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) {
-    return false;
+/**
+ * In the mock API, we simulate session auth by tracking the "logged in" user
+ * via a module-level variable. The real app uses cookies, but MSW intercepts
+ * don't have real cookie support, so this is the simplest approach for tests.
+ */
+let currentUserId: number | null = null;
+
+export const mockAuth = {
+  setCurrentUser: (userId: number | null) => {
+    currentUserId = userId;
+  },
+  getCurrentUser: () => {
+    if (currentUserId === null) return null;
+    return db.user.findFirst({
+      where: { id: { equals: currentUserId } },
+    });
+  },
+};
+
+const getUser = () => {
+  // Session-based auth: check module-level current user
+  if (currentUserId !== null) {
+    const user = db.user.findFirst({
+      where: { id: { equals: currentUserId } },
+    });
+    if (user) return user;
   }
-  const prefix = "Token ";
-  const token = authHeader.slice(prefix.length);
-  const user = db.user.findFirst({
-    where: { auth_token: { equals: token } },
-  });
-  return user;
+  return false;
 };
 
 const BASE_URL: string = import.meta.env?.VITE_API_BASE_URL ?? "";
@@ -35,25 +44,54 @@ export const urls = {
     meList: `${BASE_URL}/v0/scenes/me/`,
   },
   auth: {
-    users: `${BASE_URL}/v0/auth/users/`,
     usersMe: `${BASE_URL}/v0/auth/users/me/`,
-    tokenLogin: `${BASE_URL}/v0/auth/token/login/`,
-    tokenLogout: `${BASE_URL}/v0/auth/token/logout/`,
-    activation: `${BASE_URL}/v0/auth/users/activation/`,
-    resetPassword: `${BASE_URL}/v0/auth/users/reset_password/`,
-    resetPasswordConfirm: `${BASE_URL}/v0/auth/users/reset_password_confirm/`,
+    // allauth headless endpoints
+    login: `${BASE_URL}/_allauth/browser/v1/auth/login`,
+    logout: `${BASE_URL}/_allauth/browser/v1/auth/session`,
+    session: `${BASE_URL}/_allauth/browser/v1/auth/session`,
+    signup: `${BASE_URL}/_allauth/browser/v1/auth/signup`,
+    verifyEmail: `${BASE_URL}/_allauth/browser/v1/auth/email/verify`,
+    requestPasswordReset: `${BASE_URL}/_allauth/browser/v1/auth/password/request`,
+    resetPassword: `${BASE_URL}/_allauth/browser/v1/auth/password/reset`,
+    changePassword: `${BASE_URL}/_allauth/browser/v1/account/password/change`,
   },
 } as const;
+
+const makeAuthenticatedResponse = (user: {
+  id: number;
+  email: string;
+  public_nickname: string;
+}) => ({
+  status: 200,
+  data: {
+    user: {
+      id: user.id,
+      display: user.public_nickname,
+      email: user.email,
+      has_usable_password: true,
+    },
+    methods: [
+      {
+        method: "password",
+        at: Date.now() / 1000,
+        email: user.email,
+      },
+    ],
+  },
+  meta: {
+    is_authenticated: true,
+  },
+});
 
 export const handlers = [
   http.get<NoParams, ErrorResponseBody | PaginatedMiniSceneList>(
     urls.scenes.meList,
-    async ({ request }) => {
-      const user = getUser(request);
+    async () => {
+      const user = getUser();
       if (!user) {
         return HttpResponse.json(
           {
-            errorMessage: "Invalid token",
+            errorMessage: "Authentication required",
           },
           { status: 401 },
         );
@@ -128,125 +166,150 @@ export const handlers = [
       return HttpResponse.json(scene, { status: 201 });
     },
   ),
-  http.post<NoParams, TokenCreateRequest, ErrorResponseBody | TokenCreate>(
-    urls.auth.tokenLogin,
-    async ({ request }) => {
-      const { email, password } = await request.json();
-      if (typeof email !== "string") {
-        throw new Error("email should be string");
-      }
-      if (typeof password !== "string" /** # pragma: allowlist secret */) {
-        throw new Error("password should be string");
-      }
-      const user = db.user.findFirst({
-        where: { email: { equals: email } },
-      });
-      if (!user || user.password !== password) {
-        return HttpResponse.json(
-          {
-            non_field_errors: ["Unable to log in with provided credentials."],
-          },
-          { status: 400 },
-        );
-      }
-      return HttpResponse.json({
-        auth_token: "fake-token",
-      });
-    },
-  ),
-  http.post(urls.auth.tokenLogout, async ({ request }) => {
-    const user = getUser(request);
+  // allauth login
+  http.post(urls.auth.login, async ({ request }) => {
+    const { email, password } = (await request.json()) as {
+      email: string;
+      password: string;
+    };
+    if (typeof email !== "string") {
+      throw new Error("email should be string");
+    }
+    if (typeof password !== "string" /** # pragma: allowlist secret */) {
+      throw new Error("password should be string");
+    }
+    const user = db.user.findFirst({
+      where: { email: { equals: email } },
+    });
+    if (!user || user.password !== password) {
+      return HttpResponse.json(
+        {
+          status: 400,
+          errors: [
+            {
+              code: "email_password_mismatch",
+              message:
+                "The email address and/or password you specified are not correct.",
+              param: "password",
+            },
+          ],
+        },
+        { status: 400 },
+      );
+    }
+    currentUserId = user.id;
+    return HttpResponse.json(makeAuthenticatedResponse(user));
+  }),
+  // allauth session (GET = check session, DELETE = logout)
+  http.get(urls.auth.session, async () => {
+    const user = mockAuth.getCurrentUser();
     if (!user) {
       return HttpResponse.json(
         {
-          errorMessage: "Invalid token",
+          status: 401,
+          data: {
+            flows: [{ id: "login" }, { id: "signup" }],
+          },
+          meta: {
+            is_authenticated: false,
+          },
         },
         { status: 401 },
       );
     }
-    // The real API deletes the token, but that's not important for our tests.
-    return new HttpResponse(null, { status: 204 });
+    return HttpResponse.json(makeAuthenticatedResponse(user));
   }),
-  http.post<
-    NoParams,
-    UserCreatePasswordRetypeRequest,
-    ErrorResponseBody | User
-  >(urls.auth.users, async ({ request }) => {
-    const { email, password } = await request.json();
+  http.delete(urls.auth.logout, async () => {
+    currentUserId = null;
+    return HttpResponse.json(
+      {
+        status: 401,
+        data: {
+          flows: [{ id: "login" }, { id: "signup" }],
+        },
+        meta: {
+          is_authenticated: false,
+        },
+      },
+      { status: 401 },
+    );
+  }),
+  // allauth signup
+  http.post(urls.auth.signup, async ({ request }) => {
+    const { email, password, public_nickname } = (await request.json()) as {
+      email: string;
+      password: string;
+      public_nickname?: string;
+    };
     if (typeof email !== "string") {
       throw new Error("email should be string");
     }
     if (typeof password !== "string" /** # pragma: allowlist secret */) {
       throw new Error("password should be string");
     }
-    const user = db.user.create({
+    db.user.create({
       email,
       password,
+      public_nickname: public_nickname ?? "",
     });
+    // allauth returns 401 when email verification is required
     return HttpResponse.json(
       {
-        public_nickname: user.public_nickname,
-        email: user.email,
+        status: 401,
+        data: {
+          flows: [{ id: "verify_email" }],
+        },
+        meta: {
+          is_authenticated: false,
+        },
       },
-      { status: 201 },
+      { status: 401 },
     );
   }),
-  http.post<
-    NoParams,
-    UserCreatePasswordRetypeRequest,
-    ErrorResponseBody | User
-  >(urls.auth.users, async ({ request }) => {
-    const { email, password } = await request.json();
-    if (typeof email !== "string") {
-      throw new Error("email should be string");
+  // allauth verify email
+  http.post(urls.auth.verifyEmail, async ({ request }) => {
+    const { key } = (await request.json()) as { key: string };
+    if (typeof key !== "string") {
+      throw new Error("key should be string");
     }
-    if (typeof password !== "string" /** # pragma: allowlist secret */) {
-      throw new Error("password should be string");
+    // In mock, just return success with a fake authenticated user
+    const user = db.user.getAll()[0];
+    if (user) {
+      currentUserId = user.id;
+      return HttpResponse.json(makeAuthenticatedResponse(user));
     }
-    const user = db.user.create({
-      email,
-      password,
-    });
-    return HttpResponse.json(
-      {
-        public_nickname: user.public_nickname,
-        email: user.email,
-      },
-      { status: 201 },
-    );
+    return new HttpResponse(null, { status: 200 });
   }),
-  http.get<NoParams, UserCreatePasswordRetypeRequest, ErrorResponseBody | User>(
-    urls.auth.usersMe,
-    async ({ request }) => {
-      const user = getUser(request);
-      if (!user) {
-        return HttpResponse.json(
-          {
-            errorMessage: "Invalid token",
-          },
-          { status: 401 },
-        );
-      }
-      return HttpResponse.json(user, { status: 201 });
-    },
-  ),
-  http.post<NoParams, ActivationRequest>(
-    urls.auth.activation,
-    async ({ request }) => {
-      const { uid, token } = await request.json();
-      if (typeof uid !== "string") {
-        throw new Error("uid should be string");
-      }
-      if (typeof token !== "string") {
-        throw new Error("token should be string");
-      }
-      return new HttpResponse(null, { status: 204 });
-    },
-  ),
+  // allauth request password reset
+  http.post(urls.auth.requestPasswordReset, async () => {
+    return HttpResponse.json({ status: 200 });
+  }),
+  // allauth reset password with key
   http.post(urls.auth.resetPassword, async () => {
-    return new HttpResponse(null, { status: 204 });
+    return HttpResponse.json({ status: 200 });
   }),
-  http.post(urls.auth.resetPasswordConfirm, async () => {
-    return new HttpResponse(null, { status: 204 });
+  // allauth change password
+  http.post(urls.auth.changePassword, async () => {
+    return HttpResponse.json({ status: 200 });
+  }),
+  // DRF custom: users/me GET
+  http.get<NoParams, ErrorResponseBody | User>(urls.auth.usersMe, async () => {
+    const user = getUser();
+    if (!user) {
+      return HttpResponse.json(
+        {
+          errorMessage: "Authentication required",
+        },
+        { status: 401 },
+      );
+    }
+    return HttpResponse.json(
+      {
+        id: user.id,
+        email: user.email,
+        public_nickname: user.public_nickname,
+      },
+      { status: 200 },
+    );
   }),
 ];

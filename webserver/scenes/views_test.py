@@ -63,7 +63,7 @@ def test_scenes_me_errors_for_anon_users():
     client = JsonAPIClient()
 
     response = client.get(reverse("scenes-me"))
-    assert response.status_code == 401
+    assert response.status_code == 403
 
 
 @pytest.mark.django_db
@@ -102,7 +102,7 @@ def test_scene_partial_update(authenticated, authorized):
     response = client.patch(url, data)
 
     if not authenticated:
-        expected_status_code = 401
+        expected_status_code = 403  # SessionAuth: anonymous → 403
     elif not authorized:
         expected_status_code = 403
     else:
@@ -140,7 +140,7 @@ def test_scene_delete_update(authenticated, authorized):
     data = {"title": new_title}
     response = client.delete(url, data)
     if not authenticated:
-        expected_status_code = 401
+        expected_status_code = 403  # SessionAuth: anonymous → 403
     elif not authorized:
         expected_status_code = 403
     else:
