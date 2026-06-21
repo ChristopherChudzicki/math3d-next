@@ -20,11 +20,15 @@ test("Logout dialog logs user out", async () => {
 
   await user.click(logout);
 
-  expect(querySignInLink()).toBeInTheDocument();
+  await waitFor(() => {
+    expect(querySignInLink()).toBeInTheDocument();
+  });
 
   // Re-routed and dialog closed
   expect(location.current.pathname).toBe("/");
-  expect(dialog).not.toBeInTheDocument();
+  await waitFor(() => {
+    expect(dialog).not.toBeInTheDocument();
+  });
 });
 
 test("Does not log user out if dialog is cancelled", async () => {

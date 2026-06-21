@@ -1,4 +1,5 @@
 import { server } from "@math3d/mock-api/node";
+import { mockAuth } from "@math3d/mock-api";
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:
@@ -45,6 +46,7 @@ beforeAll(() => {
 });
 beforeEach(() => {
   localStorage.clear();
+  mockAuth.setCurrentUser(null);
 });
 afterEach(() => {
   server.resetHandlers();

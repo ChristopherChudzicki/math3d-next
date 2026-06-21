@@ -3,7 +3,7 @@ import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
-import { useCreateUser, UserCreatePasswordRetypeRequest } from "@math3d/api";
+import { useCreateUser } from "@math3d/api";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useAuthStatus } from "@/features/auth";
@@ -23,12 +23,14 @@ const schema = yup.object({
   public_nickname: yup.string().label("Public nickname").required(),
 });
 
+type FormData = yup.InferType<typeof schema>;
+
 const RegistrationPage: React.FC = () => {
   const navigate = useNavigate();
   const formId = useId();
   const [registering, setRegistering] = useToggle(true);
 
-  const [isAuthenticated] = useAuthStatus();
+  const isAuthenticated = useAuthStatus();
   const resolver = yupResolver(schema);
   const {
     register,
@@ -43,24 +45,25 @@ const RegistrationPage: React.FC = () => {
   }, [navigate]);
   const createUser = useCreateUser();
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated === "authenticated") {
       navigateAway();
     }
   }, [isAuthenticated, navigateAway]);
 
-  const createAccount: SubmitHandler<UserCreatePasswordRetypeRequest> =
-    useCallback(
-      async (data, event) => {
-        event?.preventDefault();
-        try {
-          await createUser.mutateAsync(data);
-          setRegistering(false);
-        } catch (err) {
-          setFieldErrors(data, err, setError);
-        }
-      },
-      [createUser, setError, setRegistering],
-    );
+  const createAccount: SubmitHandler<FormData> = useCallback(
+    async (data, event) => {
+      event?.preventDefault();
+      try {
+        // Send only the fields allauth expects (no re_password)
+        const { email, password, public_nickname } = data;
+        await createUser.mutateAsync({ email, password, public_nickname });
+        setRegistering(false);
+      } catch (err) {
+        setFieldErrors(data, err, setError);
+      }
+    },
+    [createUser, setError, setRegistering],
+  );
 
   const title = registering ? "Create Account" : "Confirmation Required";
   const cancelButton = registering ? undefined : null; // null will suppress normal button

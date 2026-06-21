@@ -5,7 +5,7 @@ import react from "@vitejs/plugin-react";
 import viteTsconfigPaths from "vite-tsconfig-paths";
 import { Schema, ValidateEnv } from "@julr/vite-plugin-validate-env";
 import compileTime from "vite-plugin-compile-time";
-import { PluginOption } from "vite";
+import type { PluginOption } from "vite";
 import fs from "fs/promises";
 
 /**
@@ -30,9 +30,21 @@ const docsHotReload = (filepath: string): PluginOption => {
   };
 };
 
+// Derive server host/port from APP_BASE_URL so local dev and CI can share
+// the same config without hardcoding math3d.localdev. Locally this comes
+// from direnv loading .env.development; in CI it comes from a GitHub var.
+const appUrl = new URL(process.env.APP_BASE_URL ?? "http://localhost:3000");
+
 export default defineConfig({
   server: {
-    port: 3000,
+    port: Number(appUrl.port) || 3000,
+    host: appUrl.hostname,
+    allowedHosts: [appUrl.hostname],
+  },
+  // `vite preview` inherits host/allowedHosts from `server` but not port, so
+  // derive it here too to keep the port single-sourced from APP_BASE_URL.
+  preview: {
+    port: Number(appUrl.port) || 3000,
   },
   plugins: [
     ValidateEnv({

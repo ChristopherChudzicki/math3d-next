@@ -7,7 +7,6 @@ import { Provider } from "react-redux";
 import { RouterProvider } from "react-router";
 import type { RouterProviderProps } from "react-router";
 import { AppStore } from "@/store/store";
-import { AuthStatusProvider } from "./features/auth";
 import { NotificationsProvider } from "./features/notifications/NotificationsContext";
 import NotificationsDisplay from "./features/notifications/NotificationsDisplay";
 
@@ -24,20 +23,18 @@ const AppProviders: React.FC<AppProps> = ({
   router,
   theme,
 }) => (
-  <AuthStatusProvider>
-    <Provider store={store}>
-      <NotificationsProvider>
-        <QueryClientProvider client={queryClient}>
-          <StyledEngineProvider injectFirst>
-            <ThemeProvider theme={theme}>
-              <RouterProvider router={router} />
-              <NotificationsDisplay />
-            </ThemeProvider>
-          </StyledEngineProvider>
-        </QueryClientProvider>
-      </NotificationsProvider>
-    </Provider>
-  </AuthStatusProvider>
+  <Provider store={store}>
+    <NotificationsProvider>
+      <QueryClientProvider client={queryClient}>
+        <StyledEngineProvider injectFirst>
+          <ThemeProvider theme={theme}>
+            <RouterProvider router={router} />
+            <NotificationsDisplay />
+          </ThemeProvider>
+        </StyledEngineProvider>
+      </QueryClientProvider>
+    </NotificationsProvider>
+  </Provider>
 );
 
 export default AppProviders;

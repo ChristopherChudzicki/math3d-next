@@ -1,11 +1,20 @@
 import { test as base } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { API_TOKEN_KEY, ScenesApi, isAxiosError } from "@math3d/api";
+import { ScenesApi, Configuration, isAxiosError } from "@math3d/api";
 import type { Scene } from "@math3d/api";
 import env from "@/env";
-import { getConfig } from "@/utils/api/config";
-import { createActiveUser, getAuthToken, users } from "@/utils/api/auth";
-import type { UserCredentials } from "@/utils/api/auth";
+import {
+  authHeaders,
+  createActiveUser,
+  getSessionCookies,
+  users,
+} from "@/utils/api/auth";
+import type {
+  SessionCookies,
+  UserCredentials,
+  UserInfo,
+} from "@/utils/api/auth";
+import { makeUserInfo } from "@math3d/mock-api";
 import invariant from "tiny-invariant";
 
 const TEST_SCENE_PREFIX = "[TEST-E2E-SCENE]";
@@ -18,27 +27,56 @@ type PrepareScene = (
   opts?: Partial<PrepareSceneOpts>,
 ) => Promise<string>;
 
+type WorkerUser = {
+  credentials: UserCredentials;
+  info: Required<UserInfo>;
+};
+
+type WorkerFixtures = {
+  workerUser: WorkerUser;
+};
+
 type Fixtures = {
-  user: UserCredentials | "static" | null;
+  user: UserCredentials | "static" | "worker" | null;
   /**
-   * Create an activte user.
+   * When true, disables 3D MathBox rendering in the app. Defaults to true
+   * since most E2E tests only interact with the controls sidebar.
+   * Set to false for tests that need the 3D canvas (e.g., camera tests).
+   */
+  disable3d: boolean;
+  /**
+   * Create an active user.
    */
   createUser: (user: UserCredentials) => Promise<UserCredentials>;
-  authToken: string | null;
+  sessionCookies: SessionCookies | null;
   page: Page;
   getPrepareScene: ({
-    authToken,
+    sessionCookies,
   }: {
-    authToken: string | null;
+    sessionCookies: SessionCookies | null;
   }) => PrepareScene;
   prepareScene: PrepareScene;
 };
 
-const test = base.extend<Fixtures>({
+const test = base.extend<Fixtures, WorkerFixtures>({
+  // Worker-scoped: one user per Playwright worker, shared across tests.
+  workerUser: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      const { auth, info, cleanup } = await createActiveUser(makeUserInfo());
+      await use({ credentials: auth, info });
+      await cleanup();
+    },
+    { scope: "worker" },
+  ],
+
   user: null,
+  disable3d: true,
   // eslint-disable-next-line no-empty-pattern
   createUser: async ({}, use) => {
-    const requests: Promise<{ cleanup: () => Promise<void> }>[] = [];
+    const requests: Promise<{
+      cleanup: () => Promise<void>;
+    }>[] = [];
     const createUser: Fixtures["createUser"] = async (user) => {
       const request = createActiveUser(user);
       requests.push(request);
@@ -50,53 +88,91 @@ const test = base.extend<Fixtures>({
     await Promise.all(cleanups.map((r) => r.cleanup()));
   },
   /**
-   * Auth token for `user` fixture.
+   * Session cookies for `user` fixture.
    */
-  authToken: async ({ user, createUser }, use) => {
-    let authToken: string | null = null;
+  sessionCookies: async ({ user, workerUser, createUser }, use) => {
+    let cookies: SessionCookies | null = null;
     if (user) {
-      const creds =
-        typeof user === "string" ? users[user] : await createUser(user);
-      authToken = await getAuthToken(creds);
+      let creds: UserCredentials;
+      if (user === "static") {
+        creds = users.static;
+      } else if (user === "worker") {
+        creds = workerUser.credentials;
+      } else {
+        creds = await createUser(user);
+      }
+      cookies = await getSessionCookies(creds);
     }
-    await use(authToken);
+    await use(cookies);
   },
   /**
    * authenticated page for `user` fixture.
    */
-  page: async ({ page: basePage, browser, authToken }, use) => {
+  page: async ({ page: basePage, browser, sessionCookies, disable3d }, use) => {
     let page: Page;
-    if (authToken) {
+    if (sessionCookies) {
+      const apiUrl = new URL(env.TEST_API_URL);
+      const appUrl = new URL(env.TEST_APP_URL);
       const context = await browser.newContext({
         storageState: {
-          cookies: [],
-          origins: [
+          cookies: [
             {
-              origin: env.TEST_APP_URL,
-              localStorage: [
-                {
-                  name: API_TOKEN_KEY,
-                  value: `"${authToken}"`,
-                },
-              ],
+              // sessionid scoped to API domain (Django's default, no SESSION_COOKIE_DOMAIN set)
+              name: "sessionid",
+              value: sessionCookies.sessionid,
+              domain: apiUrl.hostname,
+              path: "/",
+              httpOnly: true,
+              secure: false,
+              sameSite: "Lax",
+              expires: -1,
+            },
+            {
+              // csrftoken on parent domain so it's readable by both the app
+              // and API subdomains (matches CSRF_COOKIE_DOMAIN setting)
+              name: "csrftoken",
+              value: sessionCookies.csrftoken,
+              domain: `.${appUrl.hostname}`,
+              path: "/",
+              httpOnly: false,
+              secure: false,
+              sameSite: "Lax",
+              expires: -1,
             },
           ],
+          origins: [],
         },
       });
       page = await context.newPage();
     } else {
       page = basePage;
     }
+    if (disable3d) {
+      await page.addInitScript(() => {
+        localStorage.setItem("disable3dScene", "true");
+      });
+    }
     await use(page);
   },
   // eslint-disable-next-line no-empty-pattern
   getPrepareScene: async ({}, user) => {
     const cleanups: (() => Promise<void>)[] = [];
-    const getPrepareScene: Fixtures["getPrepareScene"] = ({ authToken }) => {
-      const scenesApi = new ScenesApi(getConfig(authToken));
+    const getPrepareScene: Fixtures["getPrepareScene"] = ({
+      sessionCookies: cookies,
+    }) => {
+      const config = new Configuration({
+        basePath: env.TEST_API_URL,
+        baseOptions: cookies
+          ? {
+              headers: authHeaders(cookies),
+              withCredentials: true,
+            }
+          : { withCredentials: true },
+      });
+      const scenesApi = new ScenesApi(config);
       const create: Fixtures["prepareScene"] = async (s, opts) => {
         const { allowCleanup404 = false } = opts ?? {};
-        const title = authToken ? s.title : `${TEST_SCENE_PREFIX} ${s.title}`;
+        const title = cookies ? s.title : `${TEST_SCENE_PREFIX} ${s.title}`;
         const response = await scenesApi.scenesCreate({
           SceneCreateRequest: { ...s, title },
         });
@@ -125,15 +201,15 @@ const test = base.extend<Fixtures>({
   /**
    * pre-create scenes owned by `user` fixture.
    */
-  prepareScene: async ({ user, authToken, getPrepareScene }, use) => {
+  prepareScene: async ({ user, sessionCookies, getPrepareScene }, use) => {
     invariant(
       user !== "static",
       "Static user should not create data during the e2e tests.",
     );
-    const prepareScene = getPrepareScene({ authToken });
+    const prepareScene = getPrepareScene({ sessionCookies });
     await use(prepareScene);
   },
 });
 
 export { test, users };
-export type { Fixtures };
+export type { Fixtures, WorkerUser };

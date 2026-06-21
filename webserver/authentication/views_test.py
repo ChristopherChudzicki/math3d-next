@@ -2,19 +2,29 @@ from urllib.parse import ParseResult, parse_qs, urlparse
 
 import lxml.etree
 import pytest
+from allauth.account.models import EmailAddress
 from django.core import mail
 from django.core.mail.message import EmailMultiAlternatives
-from django.test import override_settings
-from django.urls import reverse
-from djoser.conf import settings
+from django.test import Client, override_settings
 from faker import Faker
 from lxml.html import fragment_fromstring
-from rest_framework.test import APIClient
 
-from authentication.factories import CustomUserFactory
+from authentication.factories import FACTORY_PASSWORD, CustomUserFactory
 from authentication.models import CustomUser
 
 faker = Faker()
+
+# allauth headless endpoints
+SIGNUP_URL = "/_allauth/browser/v1/auth/signup"
+LOGIN_URL = "/_allauth/browser/v1/auth/login"
+SESSION_URL = "/_allauth/browser/v1/auth/session"
+EMAIL_VERIFY_URL = "/_allauth/browser/v1/auth/email/verify"
+PASSWORD_REQUEST_URL = "/_allauth/browser/v1/auth/password/request"
+PASSWORD_RESET_URL = "/_allauth/browser/v1/auth/password/reset"
+
+# Custom DRF endpoints
+USER_ME_URL = "/v0/auth/users/me/"
+DELETE_ACCOUNT_URL = "/v0/auth/users/me/delete/"
 
 
 class AnchorData:
@@ -45,163 +55,253 @@ def get_parsed_url_from_html(
     return AnchorData(link)
 
 
+def _extract_email_verification_key(message: EmailMultiAlternatives) -> str:
+    """Extract the verification key from the activation email."""
+    link = get_parsed_url_from_html(message, "activation-link")
+    return link.query["key"][0]
+
+
+def _extract_password_reset_key(message: EmailMultiAlternatives) -> str:
+    """Extract the password reset key from the password reset email."""
+    link = get_parsed_url_from_html(message, "password-reset-link")
+    return link.query["key"][0]
+
+
+def _make_client() -> Client:
+    """Create a Django test client with CSRF enforcement disabled."""
+    return Client(enforce_csrf_checks=False)
+
+
+def _create_verified_user(**kwargs) -> CustomUser:
+    """Create a user with a verified email address (can log in via allauth)."""
+    user = CustomUserFactory.create(is_active=True, **kwargs)
+    EmailAddress.objects.create(
+        user=user, email=user.email, verified=True, primary=True
+    )
+    return user
+
+
+def _strong_password() -> str:
+    """Generate a password that passes Django's validators."""
+    return faker.password(length=16, special_chars=True, digits=True, upper_case=True)
+
+
+# --------------------------------------------------------------------------
+# allauth headless: Registration + Email Verification
+# --------------------------------------------------------------------------
+
+
 @pytest.mark.django_db
 @override_settings(ENABLE_REGISTRATION=True)
-def test_create_and_activate_user():
-    client = APIClient()
+def test_signup_and_verify_email():
+    """Register via allauth, verify email, then log in."""
+    client = _make_client()
     email = faker.email()
-    password = faker.password()
-    creation_url = reverse("customuser-list")
-    creation_request = {
-        "email": email,
-        "password": password,
-        "re_password": password,
-        "public_nickname": faker.name(),
-    }
-    response = client.post(creation_url, creation_request)
+    password = _strong_password()
+    nickname = faker.first_name()
 
-    user_id = response.data["id"]
-
-    assert response.status_code == 201
-
-    message = mail.outbox[0]
-    link = get_parsed_url_from_html(message, "activation-link")
-
-    # HTML has the url we expected
-    assert link.raw == settings._CUSTOM["ACTIVATION_URL"].format(
-        uid=link.query["uid"][0], token=link.query["token"][0]
+    # Sign up
+    response = client.post(
+        SIGNUP_URL,
+        {"email": email, "password": password, "public_nickname": nickname},
+        content_type="application/json",
     )
-    # Raw text email has same url
-    assert str(link.raw) in message.body
+    assert response.status_code == 401  # email verification required
 
-    # Initially NOT active
-    created_user = CustomUser.objects.get(id=user_id)
-    assert created_user.is_active is False
+    # User created and active, but email not verified
+    user = CustomUser.objects.get(email=email)
+    assert user.is_active is True
+    assert user.public_nickname == nickname
 
-    # Activate user
-    activation_url = reverse("customuser-activation")
-    activation_request = {
-        "uid": link.query["uid"][0],
-        "token": link.query["token"][0],
-    }
-    activation_response = client.post(activation_url, activation_request)
-    assert activation_response.status_code == 204
+    # Verification email sent
+    assert len(mail.outbox) == 1
+    key = _extract_email_verification_key(mail.outbox[0])
 
-    # Now active
-    activated_user = CustomUser.objects.get(id=user_id)
-    assert activated_user.is_active is True
+    # Cannot log in before verification
+    login_resp = client.post(
+        LOGIN_URL,
+        {"email": email, "password": password},
+        content_type="application/json",
+    )
+    assert login_resp.status_code == 401
+
+    # Verify email — allauth verifies but returns 401 (user not logged in yet)
+    verify_resp = client.post(
+        EMAIL_VERIFY_URL,
+        {"key": key},
+        content_type="application/json",
+    )
+    assert verify_resp.status_code == 401
+    email_addr = EmailAddress.objects.get(email=email)
+    assert email_addr.verified is True
+
+    # Now can log in
+    login_resp2 = client.post(
+        LOGIN_URL,
+        {"email": email, "password": password},
+        content_type="application/json",
+    )
+    assert login_resp2.status_code == 200
 
 
 @pytest.mark.django_db
-def test_resend_activation():
-    client = APIClient()
-    user = CustomUserFactory()
+@override_settings(ENABLE_REGISTRATION=True)
+def test_signup_sends_activation_email_with_correct_link():
+    """Activation email contains the expected URL with key parameter."""
+    client = _make_client()
+    email = faker.email()
+    password = _strong_password()
 
-    assert user.is_active is False
-    resend_url = reverse("customuser-resend-activation")
-    resent_request = {
-        "email": user.email,
-    }
-    resend_response = client.post(resend_url, resent_request)
+    client.post(
+        SIGNUP_URL,
+        {"email": email, "password": password},
+        content_type="application/json",
+    )
+
+    # public_nickname is optional and defaults to empty when omitted at signup
+    user = CustomUser.objects.get(email=email)
+    assert user.public_nickname == ""
+
     message = mail.outbox[0]
     link = get_parsed_url_from_html(message, "activation-link")
-    assert resend_response.status_code == 204
 
-    # Activate user
-    activation_url = reverse("customuser-activation")
-    activation_request = {
-        "uid": link.query["uid"][0],
-        "token": link.query["token"][0],
-    }
-    activation_response = client.post(activation_url, activation_request)
-    assert activation_response.status_code == 204
+    # URL contains key parameter
+    assert "key" in link.query
+    # URL is in both HTML and plain text
+    assert link.raw in message.body
 
-    # Now active
-    activated_user = CustomUser.objects.get(id=user.id)
-    assert activated_user.is_active is True
+
+# --------------------------------------------------------------------------
+# allauth headless: Login / Logout
+# --------------------------------------------------------------------------
 
 
 @pytest.mark.django_db
-def test_reset_password_active_user():
-    client = APIClient()
-    user = CustomUserFactory.create(is_active=True)
-    url = reverse("customuser-reset-password")
-    request = {
-        "email": user.email,
-    }
-    response = client.post(url, request)
-    message = mail.outbox[0]
+def test_login_and_logout():
+    """Login via allauth, check session, then logout."""
+    client = _make_client()
+    user = _create_verified_user()
 
+    # Login
+    login_resp = client.post(
+        LOGIN_URL,
+        {"email": user.email, "password": FACTORY_PASSWORD},  # pragma: allowlist secret
+        content_type="application/json",
+    )
+    assert login_resp.status_code == 200
+
+    # Session is active
+    session_resp = client.get(SESSION_URL)
+    assert session_resp.status_code == 200
+
+    # Logout — allauth returns 401 (unauthenticated) after successful logout
+    logout_resp = client.delete(SESSION_URL)
+    assert logout_resp.status_code == 401
+    assert logout_resp.json()["meta"]["is_authenticated"] is False
+
+    # Session is gone
+    session_resp2 = client.get(SESSION_URL)
+    assert session_resp2.status_code == 401
+
+
+# --------------------------------------------------------------------------
+# allauth headless: Password Reset
+# --------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_password_reset_flow():
+    """Request password reset, use key to set new password."""
+    client = _make_client()
+    user = _create_verified_user()
+
+    # Request reset
+    resp = client.post(
+        PASSWORD_REQUEST_URL,
+        {"email": user.email},
+        content_type="application/json",
+    )
+    assert resp.status_code == 200
+
+    # Extract key from email
+    assert len(mail.outbox) == 1
+    key = _extract_password_reset_key(mail.outbox[0])
+
+    # Reset password
+    new_password = _strong_password()
+    reset_resp = client.post(
+        PASSWORD_RESET_URL,
+        {"key": key, "password": new_password},
+        content_type="application/json",
+    )
+    # allauth resets the password but returns 401 (user not logged in)
+    assert reset_resp.status_code == 401
+
+    # Can log in with new password
+    login_resp = client.post(
+        LOGIN_URL,
+        {"email": user.email, "password": new_password},
+        content_type="application/json",
+    )
+    assert login_resp.status_code == 200
+
+
+@pytest.mark.django_db
+def test_password_reset_email_has_correct_link():
+    """Password reset email contains expected URL format."""
+    client = _make_client()
+    user = _create_verified_user()
+
+    client.post(
+        PASSWORD_REQUEST_URL,
+        {"email": user.email},
+        content_type="application/json",
+    )
+
+    message = mail.outbox[0]
     link = get_parsed_url_from_html(message, "password-reset-link")
-    assert response.status_code == 204
 
-    # HTML has the url we expected
-    assert link.raw == settings._CUSTOM["PASSWORD_RESET_CONFIRM_URL"].format(
-        uid=link.query["uid"][0], token=link.query["token"][0]
-    )
+    assert "key" in link.query
+    assert link.raw in message.body
 
-    new_password = faker.password()
-    assert user.check_password(new_password) is False
 
-    confirmation_url = reverse("customuser-reset-password-confirm")
-    confirmation_request = {
-        "uid": link.query["uid"][0],
-        "token": link.query["token"][0],
-        "new_password": new_password,
-        "re_new_password": new_password,
-    }
-    confirmation_response = client.post(confirmation_url, confirmation_request)
-    assert confirmation_response.status_code == 204
-
-    user.refresh_from_db()
-    assert user.check_password(new_password)
+# --------------------------------------------------------------------------
+# Registration gating
+# --------------------------------------------------------------------------
 
 
 @pytest.mark.django_db
-def test_reset_password_inactive_user():
-    client = APIClient()
-    user = CustomUserFactory.create(is_active=False)
-    url = reverse("customuser-reset-password")
-    request = {
-        "email": user.email,
-    }
-    response = client.post(url, request)
-    message = mail.outbox[0]
-
-    link = get_parsed_url_from_html(message, "activation-link")
-    assert response.status_code == 204
-
-    # HTML has the url we expected
-    assert link.raw == settings._CUSTOM["ACTIVATION_URL"].format(
-        uid=link.query["uid"][0], token=link.query["token"][0]
+@override_settings(ENABLE_REGISTRATION=False)
+def test_registration_disabled_blocks_signup():
+    """When ENABLE_REGISTRATION=False, signup returns an error."""
+    client = _make_client()
+    response = client.post(
+        SIGNUP_URL,
+        {
+            "email": faker.email(),
+            "password": _strong_password(),
+            "public_nickname": faker.first_name(),
+        },
+        content_type="application/json",
     )
+    assert response.status_code == 403
 
-    new_password = faker.password()
-    assert user.check_password(new_password) is False
 
-    # Activate user
-    activation_url = reverse("customuser-activation")
-    activation_request = {
-        "uid": link.query["uid"][0],
-        "token": link.query["token"][0],
-    }
-    activation_response = client.post(activation_url, activation_request)
-    assert activation_response.status_code == 204
-
-    # Now active
-    activated_user = CustomUser.objects.get(id=user.id)
-    assert activated_user.is_active is True
+# --------------------------------------------------------------------------
+# Custom DRF endpoints: User profile (GET / PATCH)
+# --------------------------------------------------------------------------
 
 
 @pytest.mark.django_db
-def test_can_retrieve_own_user():
-    client = APIClient()
-    user = CustomUserFactory.create(is_active=True)
-    url = reverse("customuser-me")
-    client.force_authenticate(user)
-    response = client.get(url)
+def test_get_user_profile():
+    """GET /v0/auth/users/me/ returns current user data."""
+    client = _make_client()
+    user = _create_verified_user()
+    client.force_login(user)
+
+    response = client.get(USER_ME_URL)
     assert response.status_code == 200
-    assert response.data == {
+    assert response.json() == {
         "id": user.id,
         "email": user.email,
         "public_nickname": user.public_nickname,
@@ -209,15 +309,19 @@ def test_can_retrieve_own_user():
 
 
 @pytest.mark.django_db
-def test_cannot_change_email_via_users_me():
-    client = APIClient()
-    user = CustomUserFactory.create(is_active=True)
-    url = reverse("customuser-me")
-    client.force_authenticate(user)
-    request = {"public_nickname": "new-nickname", "email": "new-email@foo.com"}
-    response = client.patch(url, request)
+def test_patch_user_profile():
+    """PATCH /v0/auth/users/me/ updates public_nickname."""
+    client = _make_client()
+    user = _create_verified_user()
+    client.force_login(user)
+
+    response = client.patch(
+        USER_ME_URL,
+        {"public_nickname": "new-nickname"},
+        content_type="application/json",
+    )
     assert response.status_code == 200
-    assert response.data == {
+    assert response.json() == {
         "id": user.id,
         "email": user.email,
         "public_nickname": "new-nickname",
@@ -225,47 +329,182 @@ def test_cannot_change_email_via_users_me():
 
 
 @pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=False)
-def test_registration_disabled_blocks_user_creation():
-    client = APIClient()
-    creation_url = reverse("customuser-list")
-    creation_request = {
-        "email": faker.email(),
-        "password": faker.password(),
-        "re_password": faker.password(),
-        "public_nickname": faker.name(),
-    }
-    response = client.post(creation_url, creation_request)
-    assert response.status_code == 403
-    assert response.data["detail"] == "User registration is currently disabled."
+def test_cannot_change_email_via_users_me():
+    """Email is read-only on PATCH /v0/auth/users/me/."""
+    client = _make_client()
+    user = _create_verified_user()
+    client.force_login(user)
+
+    response = client.patch(
+        USER_ME_URL,
+        {"public_nickname": "new-nickname", "email": "new-email@foo.com"},
+        content_type="application/json",
+    )
+    assert response.status_code == 200
+    assert response.json()["email"] == user.email
+    assert response.json()["public_nickname"] == "new-nickname"
 
 
 @pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=False)
-def test_registration_disabled_login_still_works():
-    client = APIClient()
-    user = CustomUserFactory.create(is_active=True)
-    login_url = reverse("login")
-    response = client.post(login_url, {"email": user.email, "password": "testpassword"})
-    assert response.status_code == 200
-    assert "auth_token" in response.data
+def test_csrf_token_required_for_unsafe_requests():
+    """Session auth enforces CSRF: unsafe requests need a valid token."""
+    # enforce_csrf_checks=True so DRF's SessionAuthentication CSRF check runs
+    client = Client(enforce_csrf_checks=True)
+    user = _create_verified_user()
+    client.force_login(user)
+
+    # A GET to UserMeView sets the csrftoken cookie via @ensure_csrf_cookie
+    get_resp = client.get(USER_ME_URL)
+    assert get_resp.status_code == 200
+    assert "csrftoken" in get_resp.cookies
+
+    # PATCH without the X-CSRFToken header is rejected
+    no_token = client.patch(
+        USER_ME_URL,
+        {"public_nickname": "new-nickname"},
+        content_type="application/json",
+    )
+    assert no_token.status_code == 403
+
+    # PATCH with the token from the cookie succeeds
+    token = client.cookies["csrftoken"].value
+    with_token = client.patch(
+        USER_ME_URL,
+        {"public_nickname": "new-nickname"},
+        content_type="application/json",
+        HTTP_X_CSRFTOKEN=token,
+    )
+    assert with_token.status_code == 200
+
+
+@pytest.mark.django_db
+def test_user_me_requires_authentication():
+    """GET /v0/auth/users/me/ returns 403 for unauthenticated requests."""
+    client = _make_client()
+    response = client.get(USER_ME_URL)
+    assert response.status_code == 403
+
+
+# --------------------------------------------------------------------------
+# Custom DRF endpoint: Delete account
+# --------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_delete_account():
+    """POST /v0/auth/users/me/delete/ deletes the user with correct password."""
+    client = _make_client()
+    user = _create_verified_user()
+    user_id = user.id
+    client.force_login(user)
+
+    response = client.post(
+        DELETE_ACCOUNT_URL,
+        {"current_password": FACTORY_PASSWORD},  # pragma: allowlist secret
+        content_type="application/json",
+    )
+    assert response.status_code == 204
+    assert not CustomUser.objects.filter(id=user_id).exists()
+
+
+@pytest.mark.django_db
+def test_delete_account_wrong_password():
+    """POST /v0/auth/users/me/delete/ fails with wrong password."""
+    client = _make_client()
+    user = _create_verified_user()
+    client.force_login(user)
+
+    response = client.post(
+        DELETE_ACCOUNT_URL,
+        {"current_password": "wrongpassword"},  # pragma: allowlist secret
+        content_type="application/json",
+    )
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_delete_account_missing_password():
+    """POST /v0/auth/users/me/delete/ fails without password."""
+    client = _make_client()
+    user = _create_verified_user()
+    client.force_login(user)
+
+    response = client.post(
+        DELETE_ACCOUNT_URL,
+        {},
+        content_type="application/json",
+    )
+    assert response.status_code == 400
+
+
+# --------------------------------------------------------------------------
+# Custom DRF endpoint: Admin Activate
+# --------------------------------------------------------------------------
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("is_staff", [False, True])
-def test_admin_activation_api(is_staff):
-    client = APIClient()
-    user_targeted = CustomUserFactory.create(is_active=False)
-    user_requesting = CustomUserFactory.create(is_staff=is_staff)
-    url = reverse("customuser-activate-other", kwargs={"id": user_targeted.id})
-    client.force_authenticate(user_requesting)
-    response = client.post(url)
+def test_admin_activation(is_staff):
+    """Admin activate endpoint sets is_active and creates verified EmailAddress."""
+    client = _make_client()
+    target_user = CustomUserFactory.create(is_active=False)
+    admin_user = CustomUserFactory.create(is_staff=is_staff)
+    client.force_login(admin_user)
+
+    url = "/v0/auth/users/activation/"
+    response = client.post(
+        url, {"email": target_user.email}, content_type="application/json"
+    )
 
     if is_staff:
         assert response.status_code == 204
-        user_targeted.refresh_from_db()
-        assert user_targeted.is_active is True
+        target_user.refresh_from_db()
+        assert target_user.is_active is True
+
+        # Email is marked as verified in allauth
+        email_address = EmailAddress.objects.get(
+            user=target_user, email=target_user.email
+        )
+        assert email_address.verified is True
+        assert email_address.primary is True
     else:
         assert response.status_code == 403
-        user_targeted.refresh_from_db()
-        assert user_targeted.is_active is False
+        target_user.refresh_from_db()
+        assert target_user.is_active is False
+
+
+@pytest.mark.django_db
+def test_admin_activation_nonexistent_email_returns_404():
+    """Activating an email with no matching user returns 404."""
+    client = _make_client()
+    admin_user = CustomUserFactory.create(is_staff=True)
+    client.force_login(admin_user)
+
+    url = "/v0/auth/users/activation/"
+    response = client.post(
+        url, {"email": faker.email()}, content_type="application/json"
+    )
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_admin_activation_updates_existing_email_address():
+    """Admin activate updates an existing unverified EmailAddress to verified."""
+    client = _make_client()
+    target_user = CustomUserFactory.create(is_active=False)
+    # Pre-create an unverified EmailAddress (as would exist from signup)
+    EmailAddress.objects.create(
+        user=target_user, email=target_user.email, verified=False, primary=True
+    )
+
+    admin_user = CustomUserFactory.create(is_staff=True)
+    client.force_login(admin_user)
+
+    url = "/v0/auth/users/activation/"
+    response = client.post(
+        url, {"email": target_user.email}, content_type="application/json"
+    )
+    assert response.status_code == 204
+
+    email_address = EmailAddress.objects.get(user=target_user, email=target_user.email)
+    assert email_address.verified is True

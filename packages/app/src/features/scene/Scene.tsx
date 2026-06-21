@@ -94,6 +94,12 @@ const useIsOrthographic = () => {
   return !!isOrthographic;
 };
 
+// E2E tests set this flag via Playwright's `disable3d` fixture to skip
+// MathBox/WebGL initialization. Most E2E tests only interact with the
+// controls sidebar, and disabling 3D rendering cuts test runtime from
+// ~5 minutes to ~45 seconds.
+const is3dDisabled = localStorage.getItem("disable3dScene") === "true";
+
 const Scene: React.FC<Props> = (props) => {
   const [container, setContainer] = React.useState<HTMLDivElement | null>(null);
   const hasRequired = useAppSelector(select.hasItems(REQUIRED_ITEMS));
@@ -107,7 +113,7 @@ const Scene: React.FC<Props> = (props) => {
       style={{ width: "100%", height: "100%" }}
       ref={setContainer}
     >
-      {container && hasRequired && (
+      {container && hasRequired && !is3dDisabled && (
         <MB.Mathbox
           container={container}
           options={mathboxOptions}

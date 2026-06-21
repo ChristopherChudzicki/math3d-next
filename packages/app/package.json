@@ -6,7 +6,7 @@
     "start": "concurrently 'yarn css-types --watch' 'vite'",
     "css-types": "tcm src",
     "build": "tsc && vite build",
-    "preview": "vite preview --port 3000",
+    "preview": "vite preview",
     "build-storybook": "build-storybook -s public",
     "lint": "eslint --max-warnings 0 \"**/*.ts?(x)\"",
     "storybook": "start-storybook -p 6006 -s public",

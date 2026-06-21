@@ -18,7 +18,7 @@ const schema = yup.object({
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useAuthStatus();
+  const isAuthenticated = useAuthStatus();
   const resolver = yupResolver(schema);
   const {
     register,
@@ -33,7 +33,7 @@ const LoginPage: React.FC = () => {
   const formId = useId();
   const login = useLogin();
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated === "authenticated") {
       navigate("../");
     }
   }, [isAuthenticated, navigate]);
@@ -54,7 +54,8 @@ const LoginPage: React.FC = () => {
           event?.preventDefault();
           try {
             await login.mutateAsync(data, {});
-            setIsAuthenticated(true);
+            // mutateAsync awaits onSuccess which resets queries (including
+            // useUserMe), so auth status is already up-to-date.
             handleClose();
           } catch (err) {
             setFieldErrors(data, err, setError);

@@ -34,6 +34,12 @@ jobs:
       TEST_USER_STATIC_EMAIL: ${{ vars.TEST_USER_STATIC_EMAIL }}
       TEST_USER_STATIC_PASSWORD: ${{ vars.TEST_USER_STATIC_PASSWORD }}
     steps:
+      - name: Add local domain entries to /etc/hosts
+        run: |
+          APP_HOST=$(echo "$TEST_APP_URL" | sed -E 's|https?://||; s|:[0-9]+$||')
+          API_HOST=$(echo "$TEST_API_URL" | sed -E 's|https?://||; s|:[0-9]+$||')
+          echo "127.0.0.1 $APP_HOST $API_HOST" | sudo tee -a /etc/hosts
+          echo "::1       $APP_HOST $API_HOST" | sudo tee -a /etc/hosts
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v6
         with:
@@ -46,7 +52,6 @@ jobs:
           echo "VITE_API_BASE_URL=$VITE_API_BASE_URL" >> .env
           echo "VITE_APP_VERSION=$VITE_APP_VERSION" >> .env
           echo "VITE_LEGACY_APP_BASE_URL=$VITE_LEGACY_APP_BASE_URL" >> .env
-          echo ""
           echo "TEST_API_URL=$TEST_API_URL" >> .env
           echo "TEST_APP_URL=$TEST_APP_URL" >> .env
           echo "TEST_EMAIL_PROVIDER=$TEST_EMAIL_PROVIDER" >> .env
@@ -55,6 +60,8 @@ jobs:
           echo "TEST_USER_STATIC_EMAIL=$TEST_USER_STATIC_EMAIL" >> .env
           echo "TEST_USER_STATIC_PASSWORD=$TEST_USER_STATIC_PASSWORD" >> .env
           echo "ENABLE_REGISTRATION=true" >> .env
+          echo "CSRF_COOKIE_DOMAIN=math3d.localdev" >> .env
+          echo "DISABLE_ALLAUTH_RATE_LIMITS=true" >> .env
       - name: Build docker stack
         run: docker compose build
       - name: Migrate backend database
