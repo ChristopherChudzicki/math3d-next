@@ -19,10 +19,11 @@ test.describe("User sign up flow and account deletion", () => {
     // If login fails (user already deleted or never activated), that's fine.
     try {
       const cookies = await getSessionCookies({ email, password });
-      await axios.delete(`/v0/auth/users/me/`, {
-        data: { current_password: password },
-        headers: authHeaders(cookies),
-      });
+      await axios.post(
+        `/v0/auth/users/me/delete/`,
+        { current_password: password },
+        { headers: authHeaders(cookies) },
+      );
     } catch {
       // User doesn't exist or can't log in — that's OK
     }

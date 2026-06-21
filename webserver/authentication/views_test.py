@@ -24,6 +24,7 @@ PASSWORD_RESET_URL = "/_allauth/browser/v1/auth/password/reset"
 
 # Custom DRF endpoints
 USER_ME_URL = "/v0/auth/users/me/"
+DELETE_ACCOUNT_URL = "/v0/auth/users/me/delete/"
 
 
 class AnchorData:
@@ -391,14 +392,14 @@ def test_user_me_requires_authentication():
 
 @pytest.mark.django_db
 def test_delete_account():
-    """DELETE /v0/auth/users/me/ deletes the user with correct password."""
+    """POST /v0/auth/users/me/delete/ deletes the user with correct password."""
     client = _make_client()
     user = _create_verified_user()
     user_id = user.id
     client.force_login(user)
 
-    response = client.delete(
-        USER_ME_URL,
+    response = client.post(
+        DELETE_ACCOUNT_URL,
         {"current_password": FACTORY_PASSWORD},  # pragma: allowlist secret
         content_type="application/json",
     )
@@ -408,13 +409,13 @@ def test_delete_account():
 
 @pytest.mark.django_db
 def test_delete_account_wrong_password():
-    """DELETE /v0/auth/users/me/ fails with wrong password."""
+    """POST /v0/auth/users/me/delete/ fails with wrong password."""
     client = _make_client()
     user = _create_verified_user()
     client.force_login(user)
 
-    response = client.delete(
-        USER_ME_URL,
+    response = client.post(
+        DELETE_ACCOUNT_URL,
         {"current_password": "wrongpassword"},  # pragma: allowlist secret
         content_type="application/json",
     )
@@ -423,13 +424,13 @@ def test_delete_account_wrong_password():
 
 @pytest.mark.django_db
 def test_delete_account_missing_password():
-    """DELETE /v0/auth/users/me/ fails without password."""
+    """POST /v0/auth/users/me/delete/ fails without password."""
     client = _make_client()
     user = _create_verified_user()
     client.force_login(user)
 
-    response = client.delete(
-        USER_ME_URL,
+    response = client.post(
+        DELETE_ACCOUNT_URL,
         {},
         content_type="application/json",
     )

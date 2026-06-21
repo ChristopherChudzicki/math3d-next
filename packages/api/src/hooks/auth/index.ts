@@ -1,10 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { AuthApi } from "../../generated";
-import type { PatchedUserRequest } from "../../generated";
+import type { DeleteAccountRequest, PatchedUserRequest } from "../../generated";
 import { getConfig } from "../util";
-import { deleteUserMe } from "./api";
-import type { DeleteUserMeParams } from "./api";
 import {
   allAuthLogin,
   allAuthLogout,
@@ -165,10 +163,11 @@ const useUpdatePassword = () => {
 
 const useUserMeDelete = () => {
   const client = useQueryClient();
-  const config = getConfig();
   return useMutation({
-    mutationFn: (data: DeleteUserMeParams) =>
-      deleteUserMe(data, config.basePath ?? ""),
+    mutationFn: ({ current_password }: DeleteAccountRequest) =>
+      authApi.authUsersMeDeleteCreate({
+        DeleteAccountRequest: { current_password },
+      }),
     onSuccess: async () => {
       await client.resetQueries();
     },

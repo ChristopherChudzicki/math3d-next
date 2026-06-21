@@ -33,7 +33,7 @@ paths:
   /v0/auth/users/me/:
     get:
       operationId: auth_users_me_retrieve
-      description: GET, PATCH, and DELETE the current user's profile.
+      description: GET and PATCH the current user's profile.
       tags:
       - auth
       security:
@@ -47,7 +47,7 @@ paths:
           description: ''
     patch:
       operationId: auth_users_me_partial_update
-      description: GET, PATCH, and DELETE the current user's profile.
+      description: GET and PATCH the current user's profile.
       tags:
       - auth
       requestBody:
@@ -70,11 +70,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
           description: ''
-    delete:
-      operationId: auth_users_me_destroy
-      description: GET, PATCH, and DELETE the current user's profile.
+  /v0/auth/users/me/delete/:
+    post:
+      operationId: auth_users_me_delete_create
+      description: |-
+        Delete the current user's account (requires the current password).
+
+        Modeled as a POST action rather than DELETE-with-body: drf-spectacular only
+        emits request bodies for PUT/PATCH/POST, and per HTTP semantics a DELETE
+        payload "has no defined semantics" (RFC 9110). A POST keeps the password
+        requirement fully described by the OpenAPI spec and generated client.
       tags:
       - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteAccountRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DeleteAccountRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DeleteAccountRequest'
+        required: true
       security:
       - cookieAuth: []
       responses:
@@ -326,6 +345,14 @@ components:
           minLength: 1
       required:
       - email
+    DeleteAccountRequest:
+      type: object
+      properties:
+        current_password:
+          type: string
+          minLength: 1
+      required:
+      - current_password
     LegacyScene:
       type: object
       properties:

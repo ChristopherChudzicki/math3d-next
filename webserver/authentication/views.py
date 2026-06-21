@@ -22,7 +22,7 @@ class DeleteAccountSerializer(serializers.Serializer):
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
 class UserMeView(APIView):
-    """GET, PATCH, and DELETE the current user's profile."""
+    """GET and PATCH the current user's profile."""
 
     authentication_classes = [SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
@@ -39,8 +39,22 @@ class UserMeView(APIView):
         serializer.save()
         return Response(serializer.data)
 
+
+@method_decorator(ensure_csrf_cookie, name="dispatch")
+class DeleteAccountView(APIView):
+    """Delete the current user's account (requires the current password).
+
+    Modeled as a POST action rather than DELETE-with-body: drf-spectacular only
+    emits request bodies for PUT/PATCH/POST, and per HTTP semantics a DELETE
+    payload "has no defined semantics" (RFC 9110). A POST keeps the password
+    requirement fully described by the OpenAPI spec and generated client.
+    """
+
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
     @extend_schema(request=DeleteAccountSerializer, responses={204: None})
-    def delete(self, request: Request) -> Response:
+    def post(self, request: Request) -> Response:
         serializer = DeleteAccountSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

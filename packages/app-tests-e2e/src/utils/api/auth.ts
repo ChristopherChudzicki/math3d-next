@@ -70,7 +70,8 @@ const getAdminCookies = async ({ forceRefresh = false } = {}) => {
  * 2. Admin activates the user (marks email as verified, sets is_active=True)
  * 3. User can now log in
  *
- * Cleanup deletes the user by logging in as them and calling DELETE /v0/auth/users/me/.
+ * Cleanup deletes the user by logging in as them and calling
+ * POST /v0/auth/users/me/delete/.
  */
 const createActiveUser = async (user: UserInfo = {}) => {
   const defaults = {
@@ -143,10 +144,11 @@ const createActiveUser = async (user: UserInfo = {}) => {
         email: request.email,
         password: request.password,
       });
-      await axios.delete(`/v0/auth/users/me/`, {
-        data: { current_password: request.password },
-        headers: authHeaders(userCookies),
-      });
+      await axios.post(
+        `/v0/auth/users/me/delete/`,
+        { current_password: request.password },
+        { headers: authHeaders(userCookies) },
+      );
     } catch {
       // User may already be deleted or password was changed — ignore
     }

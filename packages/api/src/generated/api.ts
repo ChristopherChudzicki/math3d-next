@@ -55,6 +55,19 @@ export interface ActivateRequest {
 /**
  *
  * @export
+ * @interface DeleteAccountRequest
+ */
+export interface DeleteAccountRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof DeleteAccountRequest
+   */
+  current_password: string;
+}
+/**
+ *
+ * @export
  * @interface LegacyScene
  */
 export interface LegacyScene {
@@ -476,14 +489,22 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     * GET, PATCH, and DELETE the current user\'s profile.
+     * Delete the current user\'s account (requires the current password).  Modeled as a POST action rather than DELETE-with-body: drf-spectacular only emits request bodies for PUT/PATCH/POST, and per HTTP semantics a DELETE payload \"has no defined semantics\" (RFC 9110). A POST keeps the password requirement fully described by the OpenAPI spec and generated client.
+     * @param {DeleteAccountRequest} DeleteAccountRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    authUsersMeDestroy: async (
+    authUsersMeDeleteCreate: async (
+      DeleteAccountRequest: DeleteAccountRequest,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      const localVarPath = `/v0/auth/users/me/`;
+      // verify required parameter 'DeleteAccountRequest' is not null or undefined
+      assertParamExists(
+        "authUsersMeDeleteCreate",
+        "DeleteAccountRequest",
+        DeleteAccountRequest,
+      );
+      const localVarPath = `/v0/auth/users/me/delete/`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
       let baseOptions;
@@ -492,7 +513,7 @@ export const AuthApiAxiosParamCreator = function (
       }
 
       const localVarRequestOptions = {
-        method: "DELETE",
+        method: "POST",
         ...baseOptions,
         ...options,
       };
@@ -500,6 +521,8 @@ export const AuthApiAxiosParamCreator = function (
       const localVarQueryParameter = {} as any;
 
       // authentication cookieAuth required
+
+      localVarHeaderParameter["Content-Type"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -509,6 +532,11 @@ export const AuthApiAxiosParamCreator = function (
         ...headersFromBaseOptions,
         ...options.headers,
       };
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        DeleteAccountRequest,
+        localVarRequestOptions,
+        configuration,
+      );
 
       return {
         url: toPathString(localVarUrlObj),
@@ -516,7 +544,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     * GET, PATCH, and DELETE the current user\'s profile.
+     * GET and PATCH the current user\'s profile.
      * @param {PatchedUserRequest} [PatchedUserRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -565,7 +593,7 @@ export const AuthApiAxiosParamCreator = function (
       };
     },
     /**
-     * GET, PATCH, and DELETE the current user\'s profile.
+     * GET and PATCH the current user\'s profile.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -643,20 +671,25 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     * GET, PATCH, and DELETE the current user\'s profile.
+     * Delete the current user\'s account (requires the current password).  Modeled as a POST action rather than DELETE-with-body: drf-spectacular only emits request bodies for PUT/PATCH/POST, and per HTTP semantics a DELETE payload \"has no defined semantics\" (RFC 9110). A POST keeps the password requirement fully described by the OpenAPI spec and generated client.
+     * @param {DeleteAccountRequest} DeleteAccountRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async authUsersMeDestroy(
+    async authUsersMeDeleteCreate(
+      DeleteAccountRequest: DeleteAccountRequest,
       options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
     > {
       const localVarAxiosArgs =
-        await localVarAxiosParamCreator.authUsersMeDestroy(options);
+        await localVarAxiosParamCreator.authUsersMeDeleteCreate(
+          DeleteAccountRequest,
+          options,
+        );
       const index = configuration?.serverIndex ?? 0;
       const operationBasePath =
-        operationServerMap["AuthApi.authUsersMeDestroy"]?.[index]?.url;
+        operationServerMap["AuthApi.authUsersMeDeleteCreate"]?.[index]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -666,7 +699,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     * GET, PATCH, and DELETE the current user\'s profile.
+     * GET and PATCH the current user\'s profile.
      * @param {PatchedUserRequest} [PatchedUserRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -694,7 +727,7 @@ export const AuthApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath);
     },
     /**
-     * GET, PATCH, and DELETE the current user\'s profile.
+     * GET and PATCH the current user\'s profile.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -745,17 +778,24 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     * GET, PATCH, and DELETE the current user\'s profile.
+     * Delete the current user\'s account (requires the current password).  Modeled as a POST action rather than DELETE-with-body: drf-spectacular only emits request bodies for PUT/PATCH/POST, and per HTTP semantics a DELETE payload \"has no defined semantics\" (RFC 9110). A POST keeps the password requirement fully described by the OpenAPI spec and generated client.
+     * @param {AuthApiAuthUsersMeDeleteCreateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    authUsersMeDestroy(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+    authUsersMeDeleteCreate(
+      requestParameters: AuthApiAuthUsersMeDeleteCreateRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
       return localVarFp
-        .authUsersMeDestroy(options)
+        .authUsersMeDeleteCreate(
+          requestParameters.DeleteAccountRequest,
+          options,
+        )
         .then((request) => request(axios, basePath));
     },
     /**
-     * GET, PATCH, and DELETE the current user\'s profile.
+     * GET and PATCH the current user\'s profile.
      * @param {AuthApiAuthUsersMePartialUpdateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -769,7 +809,7 @@ export const AuthApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     * GET, PATCH, and DELETE the current user\'s profile.
+     * GET and PATCH the current user\'s profile.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -793,6 +833,20 @@ export interface AuthApiAuthUsersActivationCreateRequest {
    * @memberof AuthApiAuthUsersActivationCreate
    */
   readonly ActivateRequest: ActivateRequest;
+}
+
+/**
+ * Request parameters for authUsersMeDeleteCreate operation in AuthApi.
+ * @export
+ * @interface AuthApiAuthUsersMeDeleteCreateRequest
+ */
+export interface AuthApiAuthUsersMeDeleteCreateRequest {
+  /**
+   *
+   * @type {DeleteAccountRequest}
+   * @memberof AuthApiAuthUsersMeDeleteCreate
+   */
+  readonly DeleteAccountRequest: DeleteAccountRequest;
 }
 
 /**
@@ -833,19 +887,23 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   * GET, PATCH, and DELETE the current user\'s profile.
+   * Delete the current user\'s account (requires the current password).  Modeled as a POST action rather than DELETE-with-body: drf-spectacular only emits request bodies for PUT/PATCH/POST, and per HTTP semantics a DELETE payload \"has no defined semantics\" (RFC 9110). A POST keeps the password requirement fully described by the OpenAPI spec and generated client.
+   * @param {AuthApiAuthUsersMeDeleteCreateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof AuthApi
    */
-  public authUsersMeDestroy(options?: RawAxiosRequestConfig) {
+  public authUsersMeDeleteCreate(
+    requestParameters: AuthApiAuthUsersMeDeleteCreateRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
     return AuthApiFp(this.configuration)
-      .authUsersMeDestroy(options)
+      .authUsersMeDeleteCreate(requestParameters.DeleteAccountRequest, options)
       .then((request) => request(this.axios, this.basePath));
   }
 
   /**
-   * GET, PATCH, and DELETE the current user\'s profile.
+   * GET and PATCH the current user\'s profile.
    * @param {AuthApiAuthUsersMePartialUpdateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -861,7 +919,7 @@ export class AuthApi extends BaseAPI {
   }
 
   /**
-   * GET, PATCH, and DELETE the current user\'s profile.
+   * GET and PATCH the current user\'s profile.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof AuthApi
