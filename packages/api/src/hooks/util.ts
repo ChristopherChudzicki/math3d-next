@@ -9,7 +9,7 @@ axios.defaults.withCredentials = true;
 // (e.g., math3d.localdev:3000 can read cookies set by api.math3d.localdev:8000).
 function getCsrfToken(): string {
   if (typeof document === "undefined") return "";
-  const match = document.cookie.match(/csrftoken=([^;]+)/);
+  const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
   return match ? match[1] : "";
 }
 

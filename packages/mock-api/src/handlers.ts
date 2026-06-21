@@ -272,13 +272,12 @@ export const handlers = [
     if (typeof key !== "string") {
       throw new Error("key should be string");
     }
-    // In mock, just return success with a fake authenticated user
-    const user = db.user.getAll()[0];
-    if (user) {
-      currentUserId = user.id;
-      return HttpResponse.json(makeAuthenticatedResponse(user));
-    }
-    return new HttpResponse(null, { status: 200 });
+    // Real allauth verifies the email but returns 401 because the user is not
+    // logged in yet — it does not auto-authenticate. Mirror that here.
+    return HttpResponse.json(
+      { status: 401, meta: { is_authenticated: false } },
+      { status: 401 },
+    );
   }),
   // allauth request password reset
   http.post(urls.auth.requestPasswordReset, async () => {

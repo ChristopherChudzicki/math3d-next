@@ -136,8 +136,8 @@ const createActiveUser = async (user: UserInfo = {}) => {
   const cleanup = async () => {
     // Log in as the user and self-delete.
     // If login fails (e.g., the test changed the password), ignore the error.
-    // The user has a test email provider domain and will be cleaned up by
-    // seed_test_data on the next test run.
+    // Leaked users are not actively reclaimed; this is harmless in CI only
+    // because the database is recreated fresh each run.
     try {
       const userCookies = await getSessionCookies({
         email: request.email,

@@ -41,6 +41,11 @@ export default defineConfig({
     host: appUrl.hostname,
     allowedHosts: [appUrl.hostname],
   },
+  // `vite preview` inherits host/allowedHosts from `server` but not port, so
+  // derive it here too to keep the port single-sourced from APP_BASE_URL.
+  preview: {
+    port: Number(appUrl.port) || 3000,
+  },
   plugins: [
     ValidateEnv({
       VITE_API_BASE_URL: Schema.string(),

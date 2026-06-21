@@ -47,17 +47,21 @@ async function ensureCsrfToken(): Promise<string> {
 axios.interceptors.request.use(async (config) => {
   const method = (config.method ?? "get").toLowerCase();
   if (["post", "put", "patch", "delete"].includes(method)) {
-    const token = await ensureCsrfToken();
-    if (token) {
-      if (!config.headers.get("X-CSRFToken")) {
+    // Requests built with authHeaders() already carry X-CSRFToken (and the
+    // csrftoken cookie), so only bootstrap a token when one is missing.
+    if (!config.headers.get("X-CSRFToken")) {
+      const token = await ensureCsrfToken();
+      if (token) {
         config.headers.set("X-CSRFToken", token);
-      }
-      // Append csrftoken to existing Cookie header if present
-      const existingCookie = config.headers.get("Cookie") as string | undefined;
-      if (existingCookie && !existingCookie.includes("csrftoken=")) {
-        config.headers.set("Cookie", `${existingCookie}; csrftoken=${token}`);
-      } else if (!existingCookie) {
-        config.headers.set("Cookie", `csrftoken=${token}`);
+        // Append csrftoken to existing Cookie header if present
+        const existingCookie = config.headers.get("Cookie") as
+          | string
+          | undefined;
+        if (existingCookie && !existingCookie.includes("csrftoken=")) {
+          config.headers.set("Cookie", `${existingCookie}; csrftoken=${token}`);
+        } else if (!existingCookie) {
+          config.headers.set("Cookie", `csrftoken=${token}`);
+        }
       }
     }
   }

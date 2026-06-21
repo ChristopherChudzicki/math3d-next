@@ -14,6 +14,13 @@ test("My Scenes tab is hidden for unauthenticated users when DISPLAY_AUTH_FLOWS 
   ).toBeTruthy();
 });
 
+test("My Scenes tab is shown for authenticated users even when DISPLAY_AUTH_FLOWS is false", async () => {
+  // Admin-created users who log in get the full experience despite the flag.
+  await renderTestApp("/scenes/examples", { isAuthenticated: true });
+  const tablist = await screen.findByRole("tablist", { name: "Scenes" });
+  expect(within(tablist).getByRole("tab", { name: "My Scenes" })).toBeTruthy();
+});
+
 test("Navigating to /scenes/me redirects to /scenes/examples when DISPLAY_AUTH_FLOWS is false", async () => {
   const { location } = await renderTestApp("/scenes/me");
   const tablist = await screen.findByRole("tablist", { name: "Scenes" });

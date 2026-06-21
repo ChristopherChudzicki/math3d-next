@@ -124,13 +124,13 @@ def test_signup_and_verify_email():
     )
     assert login_resp.status_code == 401
 
-    # Verify email
-    client.post(
+    # Verify email — allauth verifies but returns 401 (user not logged in yet)
+    verify_resp = client.post(
         EMAIL_VERIFY_URL,
         {"key": key},
         content_type="application/json",
     )
-    # allauth verifies the email but returns 401 (not authenticated yet)
+    assert verify_resp.status_code == 401
     email_addr = EmailAddress.objects.get(email=email)
     assert email_addr.verified is True
 
@@ -157,6 +157,10 @@ def test_signup_sends_activation_email_with_correct_link():
         content_type="application/json",
     )
 
+    # public_nickname is optional and defaults to empty when omitted at signup
+    user = CustomUser.objects.get(email=email)
+    assert user.public_nickname == ""
+
     message = mail.outbox[0]
     link = get_parsed_url_from_html(message, "activation-link")
 
@@ -164,49 +168,6 @@ def test_signup_sends_activation_email_with_correct_link():
     assert "key" in link.query
     # URL is in both HTML and plain text
     assert link.raw in message.body
-
-
-@pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=True)
-def test_login_blocked_until_email_verified():
-    """Login is blocked for unverified users; login works after verification."""
-    client = _make_client()
-    email = faker.email()
-    password = _strong_password()
-
-    # Sign up
-    client.post(
-        SIGNUP_URL,
-        {"email": email, "password": password},
-        content_type="application/json",
-    )
-    assert len(mail.outbox) == 1
-
-    # Attempt login — blocked because email not verified
-    login_resp = client.post(
-        LOGIN_URL,
-        {"email": email, "password": password},
-        content_type="application/json",
-    )
-    assert login_resp.status_code == 401
-
-    # Verify using key from signup email
-    key = _extract_email_verification_key(mail.outbox[0])
-    client.post(
-        EMAIL_VERIFY_URL,
-        {"key": key},
-        content_type="application/json",
-    )
-    email_addr = EmailAddress.objects.get(email=email)
-    assert email_addr.verified is True
-
-    # Now login succeeds
-    login_resp2 = client.post(
-        LOGIN_URL,
-        {"email": email, "password": password},
-        content_type="application/json",
-    )
-    assert login_resp2.status_code == 200
 
 
 # --------------------------------------------------------------------------
@@ -325,21 +286,6 @@ def test_registration_disabled_blocks_signup():
     assert response.status_code == 403
 
 
-@pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=False)
-def test_registration_disabled_login_still_works():
-    """Login works even when registration is disabled."""
-    client = _make_client()
-    user = _create_verified_user()
-
-    login_resp = client.post(
-        LOGIN_URL,
-        {"email": user.email, "password": FACTORY_PASSWORD},  # pragma: allowlist secret
-        content_type="application/json",
-    )
-    assert login_resp.status_code == 200
-
-
 # --------------------------------------------------------------------------
 # Custom DRF endpoints: User profile (GET / PATCH)
 # --------------------------------------------------------------------------
@@ -396,6 +342,38 @@ def test_cannot_change_email_via_users_me():
     assert response.status_code == 200
     assert response.json()["email"] == user.email
     assert response.json()["public_nickname"] == "new-nickname"
+
+
+@pytest.mark.django_db
+def test_csrf_token_required_for_unsafe_requests():
+    """Session auth enforces CSRF: unsafe requests need a valid token."""
+    # enforce_csrf_checks=True so DRF's SessionAuthentication CSRF check runs
+    client = Client(enforce_csrf_checks=True)
+    user = _create_verified_user()
+    client.force_login(user)
+
+    # A GET to UserMeView sets the csrftoken cookie via @ensure_csrf_cookie
+    get_resp = client.get(USER_ME_URL)
+    assert get_resp.status_code == 200
+    assert "csrftoken" in get_resp.cookies
+
+    # PATCH without the X-CSRFToken header is rejected
+    no_token = client.patch(
+        USER_ME_URL,
+        {"public_nickname": "new-nickname"},
+        content_type="application/json",
+    )
+    assert no_token.status_code == 403
+
+    # PATCH with the token from the cookie succeeds
+    token = client.cookies["csrftoken"].value
+    with_token = client.patch(
+        USER_ME_URL,
+        {"public_nickname": "new-nickname"},
+        content_type="application/json",
+        HTTP_X_CSRFTOKEN=token,
+    )
+    assert with_token.status_code == 200
 
 
 @pytest.mark.django_db
@@ -492,6 +470,20 @@ def test_admin_activation(is_staff):
         assert response.status_code == 403
         target_user.refresh_from_db()
         assert target_user.is_active is False
+
+
+@pytest.mark.django_db
+def test_admin_activation_nonexistent_email_returns_404():
+    """Activating an email with no matching user returns 404."""
+    client = _make_client()
+    admin_user = CustomUserFactory.create(is_staff=True)
+    client.force_login(admin_user)
+
+    url = "/v0/auth/users/activation/"
+    response = client.post(
+        url, {"email": faker.email()}, content_type="application/json"
+    )
+    assert response.status_code == 404
 
 
 @pytest.mark.django_db

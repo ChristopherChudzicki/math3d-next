@@ -194,6 +194,9 @@ CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [env("APP_BASE_URL")] if env("APP_BASE_URL") else []
 
+# Cookie auth requires the SPA (next.math3d.org) and API (api.next.math3d.org)
+# to share a registrable domain: default SameSite=Lax sends the session cookie,
+# and CSRF_COOKIE_DOMAIN (.math3d.org) lets the SPA read the CSRF token.
 _csrf_cookie_domain = env("CSRF_COOKIE_DOMAIN")
 if _csrf_cookie_domain:
     CSRF_COOKIE_DOMAIN = _csrf_cookie_domain

@@ -78,7 +78,10 @@ class AdminActivateView(APIView):
         target.is_active = True
         target.save()
 
-        # Mark email as verified in allauth's EmailAddress table
+        # Mark email as verified in allauth's EmailAddress table. Keyed on
+        # (user, email); this assumes email is immutable (there is no
+        # email-change flow). If one is ever added, key on user alone to avoid
+        # leaving a stale primary EmailAddress row.
         EmailAddress.objects.update_or_create(
             user=target,
             email=target.email,
