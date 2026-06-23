@@ -40,9 +40,6 @@ git ls-files packages/api/src/generated | xargs pre-commit run --files openapi.y
 docker compose run --rm webserver \
 	uv run ./manage.py dump_openapi_v1
 
-# Format the v1 spec with the workspace-pinned prettier (single pin site).
-yarn prettier "webserver/openapi.v1.yaml" --write
-
 ##################################################
 # Generate v1 API Client
 ##################################################

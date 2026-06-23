@@ -2,4 +2,5 @@
 packages/app/public/mockServiceWorker.js
 **/*.css.d.ts
 openapi.yaml
+openapi.v1.yaml
 webserver/**/*.html
