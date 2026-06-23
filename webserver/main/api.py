@@ -19,3 +19,8 @@ def on_validation_error(request: HttpRequest, exc: ValidationError):
     # divergence; the FE adapts in #1125). Exercised by the missing-password test
     # in Task 2; no other in-scope route asserts this body.
     return api.create_response(request, {"detail": exc.errors}, status=400)
+
+
+from authentication.api import router as auth_router  # noqa: E402
+
+api.add_router("/auth", auth_router)
