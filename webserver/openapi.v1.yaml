@@ -9,6 +9,17 @@ components:
       - email
       title: ActivationSchema
       type: object
+    DeleteAccountError:
+      properties:
+        current_password:
+          items:
+            type: string
+          title: Current Password
+          type: array
+      required:
+      - current_password
+      title: DeleteAccountError
+      type: object
     DeleteAccountSchema:
       properties:
         current_password:
@@ -111,7 +122,6 @@ components:
           anyOf:
           - type: string
           - type: 'null'
-          q: title__icontains
           title: Title
       title: SceneFilterSchema
       type: object
@@ -169,6 +179,8 @@ paths:
       responses:
         '204':
           description: No Content
+        '404':
+          description: Not Found
       security:
       - StaffSessionAuth: []
       summary: Activate
@@ -218,6 +230,12 @@ paths:
       responses:
         '204':
           description: No Content
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteAccountError'
+          description: Bad Request
       security:
       - SessionAuth: []
       summary: Delete Me
@@ -268,7 +286,6 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          q: title__icontains
           title: Title
       - in: query
         name: archived
@@ -313,7 +330,6 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          q: title__icontains
           title: Title
       - in: query
         name: archived

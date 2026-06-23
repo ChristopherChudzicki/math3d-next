@@ -55,6 +55,19 @@ export interface ActivationSchema {
 /**
  *
  * @export
+ * @interface DeleteAccountError
+ */
+export interface DeleteAccountError {
+  /**
+   *
+   * @type {Array<string>}
+   * @memberof DeleteAccountError
+   */
+  current_password: Array<string>;
+}
+/**
+ *
+ * @export
  * @interface DeleteAccountSchema
  */
 export interface DeleteAccountSchema {

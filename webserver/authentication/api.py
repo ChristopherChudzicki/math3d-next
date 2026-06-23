@@ -1,9 +1,9 @@
 from typing import cast
 
 from allauth.account.models import EmailAddress
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpRequest
 from django.middleware.csrf import get_token
-from ninja import Router, Schema
+from ninja import Router, Schema, Status
 
 from authentication.models import CustomUser
 from main.ninja_auth import session_auth, staff_auth
@@ -26,7 +26,14 @@ class DeleteAccountSchema(Schema):
     current_password: str
 
 
+class DeleteAccountError(Schema):
+    current_password: list[str]
+
+
 class ActivationSchema(Schema):
+    # Deliberately a plain str, not EmailStr: avoids adding the email-validator
+    # dependency for this admin-only endpoint. Malformed input falls through to
+    # the 404 path (a documented relaxation of v0's EmailField 400).
     email: str
 
 
@@ -47,25 +54,26 @@ def patch_me(request: HttpRequest, payload: UserUpdateSchema):
     return user
 
 
-@router.post("/users/me/delete/", response={204: None}, auth=session_auth)
+@router.post(
+    "/users/me/delete/",
+    response={204: None, 400: DeleteAccountError},
+    auth=session_auth,
+)
 def delete_me(request: HttpRequest, payload: DeleteAccountSchema):
     user = cast(CustomUser, request.user)
     if not user.check_password(payload.current_password):
-        # Plain JsonResponse (not api.create_response) so this router module need
-        # not import `api` from main.api — avoids a main.api ↔ authentication.api
-        # import cycle. Emits the same body/status as v0.
-        return JsonResponse({"current_password": ["Invalid password."]}, status=400)
+        return Status(400, {"current_password": ["Invalid password."]})
     user.delete()
     request.session.flush()
-    return 204, None
+    return Status(204, None)
 
 
-@router.post("/users/activation/", response={204: None}, auth=staff_auth)
+@router.post("/users/activation/", response={204: None, 404: None}, auth=staff_auth)
 def activate(request: HttpRequest, payload: ActivationSchema):
     try:
         target = CustomUser.objects.get(email=payload.email)
     except CustomUser.DoesNotExist:
-        return HttpResponse(status=404)  # empty body, matches v0
+        return Status(404, None)  # empty body, matches v0
 
     target.is_active = True
     target.save()
@@ -74,4 +82,4 @@ def activate(request: HttpRequest, payload: ActivationSchema):
         email=target.email,
         defaults={"verified": True, "primary": True},
     )
-    return 204, None
+    return Status(204, None)

@@ -3,9 +3,11 @@ from django.test import Client
 
 from authentication.factories import CustomUserFactory
 from scenes.factories import SceneFactory
+from scenes.models import LegacyScene
 
 LIST_URL = "/v1/scenes/"
 ME_URL = "/v1/scenes/me/"
+LEGACY_URL = "/v1/legacy_scenes/"
 
 
 @pytest.mark.django_db
@@ -84,11 +86,6 @@ def test_me_returns_only_my_scenes():
     client.force_login(me)
     body = client.get(ME_URL).json()
     assert [i["key"] for i in body["items"]] == [mine.key]
-
-
-from scenes.models import LegacyScene  # noqa: E402
-
-LEGACY_URL = "/v1/legacy_scenes/"
 
 
 @pytest.mark.django_db

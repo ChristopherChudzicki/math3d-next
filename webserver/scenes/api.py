@@ -1,10 +1,10 @@
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Annotated, Any, List, Optional
 
-from ninja import Field, FilterSchema, Query, Router, Schema
-from pydantic import ConfigDict
-from ninja.pagination import LimitOffsetPagination, paginate
 from django.shortcuts import get_object_or_404
+from ninja import Field, FilterSchema, FilterLookup, Query, Router, Schema, Status
+from ninja.pagination import LimitOffsetPagination, paginate
+from pydantic import ConfigDict
 
 from main.ninja_auth import session_auth
 from scenes.models import LegacyScene, Scene
@@ -30,9 +30,7 @@ class MiniSceneSchema(Schema):
 
 
 class SceneFilterSchema(FilterSchema):
-    # NOTE: Field(q=...) is the deprecated-but-functional form in ninja 1.6.2
-    # (emits a DeprecationWarning; no `-W error` in pyproject.toml, so it's benign).
-    title: Optional[str] = Field(default=None, q="title__icontains")  # type: ignore[call-overload]
+    title: Annotated[Optional[str], FilterLookup("title__icontains")] = None
     archived: Optional[bool] = (
         None  # exact match; ignore_none default skips when absent
     )
@@ -67,7 +65,7 @@ class LegacySceneOutSchema(Schema):
 @legacy_router.post("/", response={201: LegacySceneOutSchema}, auth=None)
 def create_legacy(request, payload: LegacySceneInSchema):
     scene = LegacyScene.objects.create(dehydrated=payload.dehydrated)
-    return 201, scene
+    return Status(201, scene)
 
 
 @legacy_router.get("/{key}/", response=LegacySceneOutSchema, auth=None)
