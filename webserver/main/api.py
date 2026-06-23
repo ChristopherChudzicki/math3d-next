@@ -22,5 +22,7 @@ def on_validation_error(request: HttpRequest, exc: ValidationError):
 
 
 from authentication.api import router as auth_router  # noqa: E402
+from scenes.api import scenes_router  # noqa: E402
 
 api.add_router("/auth", auth_router)
+api.add_router("/scenes", scenes_router)

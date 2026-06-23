@@ -177,6 +177,9 @@ REST_FRAMEWORK = {
     ),
 }
 
+# Ninja's default page size is 100; match v0's effective default of 20.
+NINJA_PAGINATION_PER_PAGE = 20
+
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
