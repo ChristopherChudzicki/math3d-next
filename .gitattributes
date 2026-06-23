@@ -1,0 +1,4 @@
+webserver/openapi.yaml               text eol=lf merge=binary
+webserver/openapi.v1.yaml            text eol=lf merge=binary
+packages/api/src/generated/**        text eol=lf merge=binary
+packages/api/src/generated-v1/**     text eol=lf merge=binary
