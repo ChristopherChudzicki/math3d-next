@@ -84,3 +84,37 @@ def test_me_returns_only_my_scenes():
     client.force_login(me)
     body = client.get(ME_URL).json()
     assert [i["key"] for i in body["items"]] == [mine.key]
+
+
+from scenes.models import LegacyScene  # noqa: E402
+
+LEGACY_URL = "/v1/legacy_scenes/"
+
+
+@pytest.mark.django_db
+def test_legacy_post_creates_and_returns_201():
+    response = Client().post(
+        LEGACY_URL,
+        data={"dehydrated": {"some": "blob"}},
+        content_type="application/json",
+    )
+    assert response.status_code == 201
+    body = response.json()
+    assert body["dehydrated"] == {"some": "blob"}
+    assert LegacyScene.objects.filter(key=body["key"]).exists()
+
+
+@pytest.mark.django_db
+def test_legacy_get_increments_and_saves_times_accessed():
+    scene = LegacyScene.objects.create(dehydrated={"a": 1})
+    assert scene.times_accessed == 0
+    response = Client().get(f"{LEGACY_URL}{scene.key}/")
+    assert response.status_code == 200
+    assert response.json() == {"key": scene.key, "dehydrated": {"a": 1}}
+    scene.refresh_from_db()
+    assert scene.times_accessed == 1
+
+
+@pytest.mark.django_db
+def test_legacy_list_returns_405():
+    assert Client().get(LEGACY_URL).status_code == 405

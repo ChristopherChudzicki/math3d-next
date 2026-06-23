@@ -1,12 +1,13 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from ninja import Field, FilterSchema, Query, Router, Schema
 from pydantic import ConfigDict
 from ninja.pagination import LimitOffsetPagination, paginate
+from django.shortcuts import get_object_or_404
 
 from main.ninja_auth import session_auth
-from scenes.models import Scene
+from scenes.models import LegacyScene, Scene
 
 scenes_router = Router()
 
@@ -49,3 +50,29 @@ def list_scenes(request, filters: SceneFilterSchema = Query(...)):
 @paginate(LimitOffsetPagination)
 def my_scenes(request, filters: SceneFilterSchema = Query(...)):
     return filters.filter(Scene.objects.filter(author_id=request.user.id))
+
+
+legacy_router = Router()
+
+
+class LegacySceneInSchema(Schema):
+    dehydrated: Any
+
+
+class LegacySceneOutSchema(Schema):
+    key: str
+    dehydrated: Any
+
+
+@legacy_router.post("/", response={201: LegacySceneOutSchema}, auth=None)
+def create_legacy(request, payload: LegacySceneInSchema):
+    scene = LegacyScene.objects.create(dehydrated=payload.dehydrated)
+    return 201, scene
+
+
+@legacy_router.get("/{key}/", response=LegacySceneOutSchema, auth=None)
+def get_legacy(request, key: str):
+    scene = get_object_or_404(LegacyScene, key=key)
+    scene.times_accessed += 1
+    scene.save()
+    return scene
