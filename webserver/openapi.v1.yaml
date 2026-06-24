@@ -1,0 +1,368 @@
+components:
+  schemas:
+    ActivationSchema:
+      properties:
+        email:
+          title: Email
+          type: string
+      required:
+      - email
+      title: ActivationSchema
+      type: object
+    DeleteAccountError:
+      properties:
+        current_password:
+          items:
+            type: string
+          title: Current Password
+          type: array
+      required:
+      - current_password
+      title: DeleteAccountError
+      type: object
+    DeleteAccountSchema:
+      properties:
+        current_password:
+          title: Current Password
+          type: string
+      required:
+      - current_password
+      title: DeleteAccountSchema
+      type: object
+    Input:
+      properties:
+        limit:
+          default: 20
+          minimum: 1
+          title: Limit
+          type: integer
+        offset:
+          default: 0
+          minimum: 0
+          title: Offset
+          type: integer
+      title: Input
+      type: object
+    LegacySceneInSchema:
+      properties:
+        dehydrated:
+          title: Dehydrated
+      required:
+      - dehydrated
+      title: LegacySceneInSchema
+      type: object
+    LegacySceneOutSchema:
+      properties:
+        dehydrated:
+          title: Dehydrated
+        key:
+          title: Key
+          type: string
+      required:
+      - key
+      - dehydrated
+      title: LegacySceneOutSchema
+      type: object
+    MiniSceneSchema:
+      properties:
+        archived:
+          title: Archived
+          type: boolean
+        author:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Author
+        createdDate:
+          format: date-time
+          title: Createddate
+          type: string
+        key:
+          title: Key
+          type: string
+        modifiedDate:
+          format: date-time
+          title: Modifieddate
+          type: string
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+      required:
+      - key
+      - createdDate
+      - modifiedDate
+      - archived
+      title: MiniSceneSchema
+      type: object
+    PagedMiniSceneSchema:
+      properties:
+        count:
+          title: Count
+          type: integer
+        items:
+          items:
+            $ref: '#/components/schemas/MiniSceneSchema'
+          title: Items
+          type: array
+      required:
+      - items
+      - count
+      title: PagedMiniSceneSchema
+      type: object
+    SceneFilterSchema:
+      properties:
+        archived:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Archived
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+      title: SceneFilterSchema
+      type: object
+    UserSchema:
+      properties:
+        email:
+          title: Email
+          type: string
+        id:
+          title: Id
+          type: integer
+        public_nickname:
+          title: Public Nickname
+          type: string
+      required:
+      - id
+      - email
+      - public_nickname
+      title: UserSchema
+      type: object
+    UserUpdateSchema:
+      properties:
+        public_nickname:
+          title: Public Nickname
+          type: string
+      required:
+      - public_nickname
+      title: UserUpdateSchema
+      type: object
+  securitySchemes:
+    SessionAuth:
+      in: cookie
+      name: sessionid
+      type: apiKey
+    StaffSessionAuth:
+      in: cookie
+      name: sessionid
+      type: apiKey
+info:
+  description: ''
+  title: Math3d API
+  version: 1.0.0
+openapi: 3.1.0
+paths:
+  /v1/auth/users/activation/:
+    post:
+      operationId: authentication_api_activate
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivationSchema'
+        required: true
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+      security:
+      - StaffSessionAuth: []
+      summary: Activate
+  /v1/auth/users/me/:
+    get:
+      operationId: authentication_api_get_me
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSchema'
+          description: OK
+      security:
+      - SessionAuth: []
+      summary: Get Me
+    patch:
+      operationId: authentication_api_patch_me
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateSchema'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSchema'
+          description: OK
+      security:
+      - SessionAuth: []
+      summary: Patch Me
+  /v1/auth/users/me/delete/:
+    post:
+      operationId: authentication_api_delete_me
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteAccountSchema'
+        required: true
+      responses:
+        '204':
+          description: No Content
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteAccountError'
+          description: Bad Request
+      security:
+      - SessionAuth: []
+      summary: Delete Me
+  /v1/legacy_scenes/:
+    post:
+      operationId: scenes_api_create_legacy
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LegacySceneInSchema'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegacySceneOutSchema'
+          description: Created
+      summary: Create Legacy
+  /v1/legacy_scenes/{key}/:
+    get:
+      operationId: scenes_api_get_legacy
+      parameters:
+      - in: path
+        name: key
+        required: true
+        schema:
+          title: Key
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegacySceneOutSchema'
+          description: OK
+      summary: Get Legacy
+  /v1/scenes/:
+    get:
+      operationId: scenes_api_list_scenes
+      parameters:
+      - in: query
+        name: title
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+      - in: query
+        name: archived
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Archived
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          minimum: 1
+          title: Limit
+          type: integer
+      - in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          title: Offset
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedMiniSceneSchema'
+          description: OK
+      summary: List Scenes
+  /v1/scenes/me/:
+    get:
+      operationId: scenes_api_my_scenes
+      parameters:
+      - in: query
+        name: title
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+      - in: query
+        name: archived
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Archived
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          minimum: 1
+          title: Limit
+          type: integer
+      - in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          title: Offset
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedMiniSceneSchema'
+          description: OK
+      security:
+      - SessionAuth: []
+      summary: My Scenes
+servers: []
