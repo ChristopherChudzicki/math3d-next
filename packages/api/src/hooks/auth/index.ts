@@ -134,8 +134,20 @@ const useResetPassword = () => {
 
 const useResetPasswordConfirm = () => {
   return useMutation({
-    mutationFn: (data: AllAuthResetPasswordRequest) =>
-      allAuthResetPassword(data),
+    mutationFn: async (data: AllAuthResetPasswordRequest) => {
+      try {
+        return await allAuthResetPassword(data);
+      } catch (err) {
+        // allauth returns 401 after a successful password reset when the user
+        // is not logged in (ACCOUNT_LOGIN_ON_PASSWORD_RESET is False). The
+        // password has been changed — the user just needs to log in. An
+        // invalid/expired key returns 400, so it still surfaces as an error.
+        if (err instanceof AxiosError && err.response?.status === 401) {
+          return err.response;
+        }
+        throw err;
+      }
+    },
   });
 };
 

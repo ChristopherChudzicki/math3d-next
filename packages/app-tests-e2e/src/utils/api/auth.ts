@@ -47,6 +47,25 @@ const getSessionCookies = async (
   return { sessionid: cookies.sessionid, csrftoken: cookies.csrftoken };
 };
 
+/**
+ * Log in as the given user and self-delete their account. Resolves silently if
+ * login fails (e.g. the account is already gone or the password is no longer
+ * valid). Leaked users are not actively reclaimed; this is harmless in CI,
+ * where the database is recreated fresh each run.
+ */
+const deleteUser = async (user: UserCredentials): Promise<void> => {
+  try {
+    const cookies = await getSessionCookies(user);
+    await axios.post(
+      `/v0/auth/users/me/delete/`,
+      { current_password: user.password },
+      { headers: authHeaders(cookies) },
+    );
+  } catch {
+    // Account already deleted or password no longer valid — ignore.
+  }
+};
+
 type UserInfo = {
   email?: string;
   password?: string;
@@ -134,30 +153,11 @@ const createActiveUser = async (user: UserInfo = {}) => {
     }
   }
 
-  const cleanup = async () => {
-    // Log in as the user and self-delete.
-    // If login fails (e.g., the test changed the password), ignore the error.
-    // Leaked users are not actively reclaimed; this is harmless in CI only
-    // because the database is recreated fresh each run.
-    try {
-      const userCookies = await getSessionCookies({
-        email: request.email,
-        password: request.password,
-      });
-      await axios.post(
-        `/v0/auth/users/me/delete/`,
-        { current_password: request.password },
-        { headers: authHeaders(userCookies) },
-      );
-    } catch {
-      // User may already be deleted or password was changed — ignore
-    }
-  };
-
   const userAuth: UserCredentials = {
     email: request.email,
     password: request.password,
   };
+  const cleanup = () => deleteUser(userAuth);
   const userInfo: Required<UserInfo> = {
     email: request.email,
     password: request.password,
@@ -166,5 +166,5 @@ const createActiveUser = async (user: UserInfo = {}) => {
   return { auth: userAuth, info: userInfo, cleanup };
 };
 
-export { authHeaders, getSessionCookies, users, createActiveUser };
+export { authHeaders, getSessionCookies, deleteUser, users, createActiveUser };
 export type { SessionCookies, UserInfo, UserCredentials };

@@ -285,7 +285,12 @@ export const handlers = [
   }),
   // allauth reset password with key
   http.post(urls.auth.resetPassword, async () => {
-    return HttpResponse.json({ status: 200 });
+    // Real allauth resets the password but returns 401 because the user is not
+    // logged in yet — it does not auto-authenticate. Mirror that here.
+    return HttpResponse.json(
+      { status: 401, meta: { is_authenticated: false } },
+      { status: 401 },
+    );
   }),
   // allauth change password
   http.post(urls.auth.changePassword, async () => {
