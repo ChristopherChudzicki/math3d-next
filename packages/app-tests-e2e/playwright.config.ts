@@ -6,7 +6,7 @@ export default defineConfig({
   testMatch: "**/?(*.)+(test).ts",
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : "25%",
+  workers: process.env.CI ? 2 : "25%",
   reporter: "html",
   use: {
     baseURL: env.TEST_APP_URL,
