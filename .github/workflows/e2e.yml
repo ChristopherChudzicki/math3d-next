@@ -14,12 +14,6 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     environment: "ci"
-    # TEMPORARY: flakiness check for workers:2 — run the job 3× in parallel,
-    # each repeating every test 3× (9 full-suite passes). Revert before merge.
-    strategy:
-      fail-fast: false
-      matrix:
-        attempt: [1, 2, 3]
     env:
       SKIP_YARN_COREPACK_CHECK: true
       APP_BASE_URL: ${{ vars.APP_BASE_URL }}
@@ -81,15 +75,12 @@ jobs:
       - name: Install Playwright Browsers
         run: yarn workspace app-tests-e2e playwright install --with-deps
       - name: Run Playwright tests
-        # TEMPORARY: --repeat-each=3 and --retries=0 for the flakiness check
-        # (retries:2 would mask 2-worker races). Revert to `yarn test-e2e`
-        # before merge.
-        run: yarn test-e2e --repeat-each=3 --retries=0
+        run: yarn test-e2e
         env:
           CI: True
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report-${{ matrix.attempt }}
+          name: playwright-report
           path: packages/app-tests-e2e/playwright-report/
           retention-days: 30
