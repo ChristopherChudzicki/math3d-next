@@ -63,3 +63,6 @@ django_settings_module = "main.settings"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "main.test_settings"
+# Promote DeprecationWarnings to errors so deprecated django-ninja / Pydantic usage
+# fails the suite instead of scrolling past unnoticed.
+filterwarnings = ["error::DeprecationWarning"]
