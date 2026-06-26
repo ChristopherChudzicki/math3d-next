@@ -78,7 +78,7 @@ def update_scene(request, key: str, payload: ScenePatchSchema):
     if "items" in data:
         scene.items = [item.model_dump(mode="json") for item in payload.items]
     if "item_order" in data:
-        scene.item_order = payload.item_order
+        scene.item_order = data["item_order"]
     if "title" in data:
         scene.title = data["title"]
     if "archived" in data:

@@ -16,9 +16,7 @@ const loadSpec = () => {
 const spec = loadSpec();
 const { schemas } = spec.components;
 
-// The math-item union schema. Location is spike-confirmed (Task 4 Step 1b): if the
-// generator inlined the oneOf it lives on SceneSchema.items' element schema (below);
-// if it emitted a named union, use `schemas.MathItem` instead.
+// The math-item union schema: the element (oneOf) schema of SceneSchema.items.
 const itemSchema = schemas.SceneSchema.properties.items
   .items as AnySchemaObject;
 

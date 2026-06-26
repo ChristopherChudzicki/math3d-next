@@ -218,12 +218,18 @@ def test_get_legacy_key_migrates_then_returns_scene():
 def test_patch_author_can_update_title():
     me = CustomUserFactory.create()
     scene = SceneFactory.create(author=me)
+    original_items = scene.items
+    original_item_order = scene.item_order
     client = Client()
     client.force_login(me)
     out = client.patch(
         _detail(scene.key), data={"title": "Renamed"}, content_type="application/json"
     ).json()
     assert out["title"] == "Renamed"
+    # A title-only PATCH must not wipe items/item_order (the default_factory contract).
+    scene.refresh_from_db()
+    assert scene.items == original_items
+    assert scene.item_order == original_item_order
 
 
 @pytest.mark.django_db
