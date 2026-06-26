@@ -35,10 +35,16 @@ const _b: SerializedMathItem = {} as GeneratedMathItem;
 // Scene-level assignability (so envelope drift can't escape the item check).
 const _items: SerializedMathItem[] = {} as GeneratedV1Scene["items"];
 const _itemsBack: GeneratedV1Scene["items"] = {} as SerializedMathItem[];
-// itemOrder value-shape (string[]) is NOT asserted here: openapi-generator v7.2.0
-// emits `itemOrder` as `{ [key: string]: any }`, so any assignability check is vacuous
-// (`any` is bidirectionally assignable). The runtime ajv check in schema.spec.ts covers
-// the spec shape; tightening the generated type is tracked for #1125.
+
+// itemOrder value-shape. Guard the same any-regression as the items union above
+// (an `any` value would make the shape pin below vacuous), then pin the value
+// type to `string[]`. The generated client now emits
+// `itemOrder: { [key: string]: Array<string> }` via the ItemOrderValue RootModel.
+type GeneratedItemOrderValue = GeneratedV1Scene["itemOrder"][string];
+const _itemOrderNotAny: IsAny<GeneratedItemOrderValue> extends false
+  ? true
+  : never = true;
+const _itemOrderShape: string[] = {} as GeneratedItemOrderValue;
 
 // FE union-completeness: a new MathItemType with no union variant fails CI.
 // (Backstop — a missing variant usually fails configs.ts first, since MathItems

@@ -1325,6 +1325,28 @@ export type LinePropertiesCalculatedVisibilityEnum =
   (typeof LinePropertiesCalculatedVisibilityEnum)[keyof typeof LinePropertiesCalculatedVisibilityEnum];
 
 /**
+ * @type MathItem
+ * @export
+ */
+export type MathItem =
+  | ({ type: "AXIS" } & AxisItem)
+  | ({ type: "BOOLEAN_VARIABLE" } & BooleanVariableItem)
+  | ({ type: "CAMERA" } & CameraItem)
+  | ({ type: "EXPLICIT_SURFACE" } & ExplicitSurfaceItem)
+  | ({ type: "EXPLICIT_SURFACE_POLAR" } & ExplicitSurfacePolarItem)
+  | ({ type: "FOLDER" } & FolderItem)
+  | ({ type: "GRID" } & GridItem)
+  | ({ type: "IMPLICIT_SURFACE" } & ImplicitSurfaceItem)
+  | ({ type: "LINE" } & LineItem)
+  | ({ type: "PARAMETRIC_CURVE" } & ParametricCurveItem)
+  | ({ type: "PARAMETRIC_SURFACE" } & ParametricSurfaceItem)
+  | ({ type: "POINT" } & PointItem)
+  | ({ type: "VARIABLE" } & VariableItem)
+  | ({ type: "VARIABLE_SLIDER" } & VariableSliderItem)
+  | ({ type: "VECTOR" } & VectorItem)
+  | ({ type: "VECTOR_FIELD" } & VectorFieldItem);
+
+/**
  *
  * @export
  * @interface MiniSceneSchema
@@ -1792,16 +1814,16 @@ export interface SceneCreateSchema {
   archived?: boolean;
   /**
    *
-   * @type {{ [key: string]: any; }}
+   * @type {{ [key: string]: Array<string>; }}
    * @memberof SceneCreateSchema
    */
-  itemOrder: { [key: string]: any };
+  itemOrder: { [key: string]: Array<string> };
   /**
    *
-   * @type {Array<SceneCreateSchemaItemsInner>}
+   * @type {Array<MathItem>}
    * @memberof SceneCreateSchema
    */
-  items: Array<SceneCreateSchemaItemsInner>;
+  items: Array<MathItem>;
   /**
    *
    * @type {string}
@@ -1809,28 +1831,6 @@ export interface SceneCreateSchema {
    */
   title?: string | null;
 }
-/**
- * @type SceneCreateSchemaItemsInner
- * @export
- */
-export type SceneCreateSchemaItemsInner =
-  | ({ type: "AXIS" } & AxisItem)
-  | ({ type: "BOOLEAN_VARIABLE" } & BooleanVariableItem)
-  | ({ type: "CAMERA" } & CameraItem)
-  | ({ type: "EXPLICIT_SURFACE" } & ExplicitSurfaceItem)
-  | ({ type: "EXPLICIT_SURFACE_POLAR" } & ExplicitSurfacePolarItem)
-  | ({ type: "FOLDER" } & FolderItem)
-  | ({ type: "GRID" } & GridItem)
-  | ({ type: "IMPLICIT_SURFACE" } & ImplicitSurfaceItem)
-  | ({ type: "LINE" } & LineItem)
-  | ({ type: "PARAMETRIC_CURVE" } & ParametricCurveItem)
-  | ({ type: "PARAMETRIC_SURFACE" } & ParametricSurfaceItem)
-  | ({ type: "POINT" } & PointItem)
-  | ({ type: "VARIABLE" } & VariableItem)
-  | ({ type: "VARIABLE_SLIDER" } & VariableSliderItem)
-  | ({ type: "VECTOR" } & VectorItem)
-  | ({ type: "VECTOR_FIELD" } & VectorFieldItem);
-
 /**
  *
  * @export
@@ -1864,16 +1864,16 @@ export interface ScenePatchSchema {
   archived?: boolean | null;
   /**
    *
-   * @type {{ [key: string]: any; }}
+   * @type {{ [key: string]: Array<string>; }}
    * @memberof ScenePatchSchema
    */
-  itemOrder?: { [key: string]: any };
+  itemOrder?: { [key: string]: Array<string> };
   /**
    *
-   * @type {Array<SceneCreateSchemaItemsInner>}
+   * @type {Array<MathItem>}
    * @memberof ScenePatchSchema
    */
-  items?: Array<SceneCreateSchemaItemsInner>;
+  items?: Array<MathItem>;
   /**
    *
    * @type {string}
@@ -1913,16 +1913,16 @@ export interface SceneSchema {
   isLegacy: boolean;
   /**
    *
-   * @type {{ [key: string]: any; }}
+   * @type {{ [key: string]: Array<string>; }}
    * @memberof SceneSchema
    */
-  itemOrder: { [key: string]: any };
+  itemOrder: { [key: string]: Array<string> };
   /**
    *
-   * @type {Array<SceneCreateSchemaItemsInner>}
+   * @type {Array<MathItem>}
    * @memberof SceneSchema
    */
-  items: Array<SceneCreateSchemaItemsInner>;
+  items: Array<MathItem>;
   /**
    *
    * @type {string}

@@ -16,9 +16,9 @@ const loadSpec = () => {
 const spec = loadSpec();
 const { schemas } = spec.components;
 
-// The math-item union schema: the element (oneOf) schema of SceneSchema.items.
-const itemSchema = schemas.SceneSchema.properties.items
-  .items as AnySchemaObject;
+// The math-item union schema: the named `MathItem` component (a oneOf over the
+// 16 item types). Scene schemas reference it via `$ref`.
+const itemSchema = schemas.MathItem as AnySchemaObject;
 
 const ajv = new Ajv({ strict: false, allErrors: true });
 // Register every component schema so internal $refs resolve.

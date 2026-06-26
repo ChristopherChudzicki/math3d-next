@@ -11,7 +11,14 @@ a `from scenes.models import ...` here would raise AppRegistryNotReady.
 from enum import Enum
 from typing import Annotated, Literal, Union
 
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, WithJsonSchema
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    RootModel,
+    TypeAdapter,
+    WithJsonSchema,
+)
 
 
 class MathItemType(str, Enum):
@@ -478,7 +485,7 @@ class VectorFieldItem(_Strict):
     properties: VectorFieldProperties
 
 
-MathItem = Annotated[
+_MathItemUnion = Annotated[
     Union[
         AxisItem,
         BooleanVariableItem,
@@ -500,6 +507,24 @@ MathItem = Annotated[
     Field(discriminator="type"),
 ]
 
+
+# Names the discriminated union as a single OpenAPI component (`MathItem`).
+# Without this wrapper the union is inlined under the first schema that
+# references it, so openapi-generator-cli names it `SceneCreateSchemaItemsInner`
+# and reuses that misleading name for the GET/PATCH item type too. The RootModel
+# gives it a stable `#/components/schemas/MathItem` component, which the client
+# emits as `export type MathItem = ...` and references from every scene schema's
+# `items` array.
+# NB: this is a `#` comment, not a docstring — a docstring becomes the schema
+# `description` and would propagate this backend-only rationale into the
+# generated client's JSDoc.
+class MathItem(RootModel[_MathItemUnion]):
+    root: _MathItemUnion
+
+
+# Built from the raw union, NOT the RootModel: `list[_MathItemUnion]` validates
+# to the concrete *Item models the handlers dump via `model_dump(mode="json")`;
+# `list[MathItem]` would wrap each element in a RootModel instance instead.
 # No bare `: TypeAdapter` annotation — it trips mypy's var-annotated; the
 # inferred type is correct.
-MATH_ITEM_LIST_ADAPTER = TypeAdapter(list[MathItem])
+MATH_ITEM_LIST_ADAPTER = TypeAdapter(list[_MathItemUnion])

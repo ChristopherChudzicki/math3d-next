@@ -5,15 +5,17 @@ from pydantic import ValidationError
 
 from scenes.schemas.math_items import (
     MATH_ITEM_LIST_ADAPTER,
-    MathItem,
     MathItemType,
+    _MathItemUnion,
 )
 
 
 def _variant_classes():
-    # MathItem == Annotated[Union[...], FieldInfo]; first get_args peels the
-    # Annotated, second peels the Union into its member classes.
-    return get_args(get_args(MathItem)[0])
+    # _MathItemUnion == Annotated[Union[...], FieldInfo]; first get_args peels
+    # the Annotated, second peels the Union into its member classes. (The public
+    # `MathItem` is now a RootModel wrapping this union, so we introspect the
+    # raw union directly.)
+    return get_args(get_args(_MathItemUnion)[0])
 
 
 def test_union_covers_every_math_item_type():

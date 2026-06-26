@@ -737,6 +737,11 @@ components:
           type: integer
       title: Input
       type: object
+    ItemOrderValue:
+      items:
+        type: string
+      title: ItemOrderValue
+      type: array
     LegacySceneInSchema:
       properties:
         dehydrated:
@@ -847,6 +852,44 @@ components:
       - coords
       title: LineProperties
       type: object
+    MathItem:
+      discriminator:
+        mapping:
+          AXIS: '#/components/schemas/AxisItem'
+          BOOLEAN_VARIABLE: '#/components/schemas/BooleanVariableItem'
+          CAMERA: '#/components/schemas/CameraItem'
+          EXPLICIT_SURFACE: '#/components/schemas/ExplicitSurfaceItem'
+          EXPLICIT_SURFACE_POLAR: '#/components/schemas/ExplicitSurfacePolarItem'
+          FOLDER: '#/components/schemas/FolderItem'
+          GRID: '#/components/schemas/GridItem'
+          IMPLICIT_SURFACE: '#/components/schemas/ImplicitSurfaceItem'
+          LINE: '#/components/schemas/LineItem'
+          PARAMETRIC_CURVE: '#/components/schemas/ParametricCurveItem'
+          PARAMETRIC_SURFACE: '#/components/schemas/ParametricSurfaceItem'
+          POINT: '#/components/schemas/PointItem'
+          VARIABLE: '#/components/schemas/VariableItem'
+          VARIABLE_SLIDER: '#/components/schemas/VariableSliderItem'
+          VECTOR: '#/components/schemas/VectorItem'
+          VECTOR_FIELD: '#/components/schemas/VectorFieldItem'
+        propertyName: type
+      oneOf:
+      - $ref: '#/components/schemas/AxisItem'
+      - $ref: '#/components/schemas/BooleanVariableItem'
+      - $ref: '#/components/schemas/CameraItem'
+      - $ref: '#/components/schemas/ExplicitSurfaceItem'
+      - $ref: '#/components/schemas/ExplicitSurfacePolarItem'
+      - $ref: '#/components/schemas/FolderItem'
+      - $ref: '#/components/schemas/GridItem'
+      - $ref: '#/components/schemas/ImplicitSurfaceItem'
+      - $ref: '#/components/schemas/LineItem'
+      - $ref: '#/components/schemas/ParametricCurveItem'
+      - $ref: '#/components/schemas/ParametricSurfaceItem'
+      - $ref: '#/components/schemas/PointItem'
+      - $ref: '#/components/schemas/VariableItem'
+      - $ref: '#/components/schemas/VariableSliderItem'
+      - $ref: '#/components/schemas/VectorItem'
+      - $ref: '#/components/schemas/VectorFieldItem'
+      title: MathItem
     MiniSceneSchema:
       properties:
         archived:
@@ -1164,49 +1207,12 @@ components:
           type: boolean
         itemOrder:
           additionalProperties:
-            items:
-              type: string
-            type: array
+            $ref: '#/components/schemas/ItemOrderValue'
           title: Itemorder
           type: object
         items:
           items:
-            discriminator:
-              mapping:
-                AXIS: '#/components/schemas/AxisItem'
-                BOOLEAN_VARIABLE: '#/components/schemas/BooleanVariableItem'
-                CAMERA: '#/components/schemas/CameraItem'
-                EXPLICIT_SURFACE: '#/components/schemas/ExplicitSurfaceItem'
-                EXPLICIT_SURFACE_POLAR: '#/components/schemas/ExplicitSurfacePolarItem'
-                FOLDER: '#/components/schemas/FolderItem'
-                GRID: '#/components/schemas/GridItem'
-                IMPLICIT_SURFACE: '#/components/schemas/ImplicitSurfaceItem'
-                LINE: '#/components/schemas/LineItem'
-                PARAMETRIC_CURVE: '#/components/schemas/ParametricCurveItem'
-                PARAMETRIC_SURFACE: '#/components/schemas/ParametricSurfaceItem'
-                POINT: '#/components/schemas/PointItem'
-                VARIABLE: '#/components/schemas/VariableItem'
-                VARIABLE_SLIDER: '#/components/schemas/VariableSliderItem'
-                VECTOR: '#/components/schemas/VectorItem'
-                VECTOR_FIELD: '#/components/schemas/VectorFieldItem'
-              propertyName: type
-            oneOf:
-            - $ref: '#/components/schemas/AxisItem'
-            - $ref: '#/components/schemas/BooleanVariableItem'
-            - $ref: '#/components/schemas/CameraItem'
-            - $ref: '#/components/schemas/ExplicitSurfaceItem'
-            - $ref: '#/components/schemas/ExplicitSurfacePolarItem'
-            - $ref: '#/components/schemas/FolderItem'
-            - $ref: '#/components/schemas/GridItem'
-            - $ref: '#/components/schemas/ImplicitSurfaceItem'
-            - $ref: '#/components/schemas/LineItem'
-            - $ref: '#/components/schemas/ParametricCurveItem'
-            - $ref: '#/components/schemas/ParametricSurfaceItem'
-            - $ref: '#/components/schemas/PointItem'
-            - $ref: '#/components/schemas/VariableItem'
-            - $ref: '#/components/schemas/VariableSliderItem'
-            - $ref: '#/components/schemas/VectorItem'
-            - $ref: '#/components/schemas/VectorFieldItem'
+            $ref: '#/components/schemas/MathItem'
           title: Items
           type: array
         title:
@@ -1242,49 +1248,12 @@ components:
           title: Archived
         itemOrder:
           additionalProperties:
-            items:
-              type: string
-            type: array
+            $ref: '#/components/schemas/ItemOrderValue'
           title: Itemorder
           type: object
         items:
           items:
-            discriminator:
-              mapping:
-                AXIS: '#/components/schemas/AxisItem'
-                BOOLEAN_VARIABLE: '#/components/schemas/BooleanVariableItem'
-                CAMERA: '#/components/schemas/CameraItem'
-                EXPLICIT_SURFACE: '#/components/schemas/ExplicitSurfaceItem'
-                EXPLICIT_SURFACE_POLAR: '#/components/schemas/ExplicitSurfacePolarItem'
-                FOLDER: '#/components/schemas/FolderItem'
-                GRID: '#/components/schemas/GridItem'
-                IMPLICIT_SURFACE: '#/components/schemas/ImplicitSurfaceItem'
-                LINE: '#/components/schemas/LineItem'
-                PARAMETRIC_CURVE: '#/components/schemas/ParametricCurveItem'
-                PARAMETRIC_SURFACE: '#/components/schemas/ParametricSurfaceItem'
-                POINT: '#/components/schemas/PointItem'
-                VARIABLE: '#/components/schemas/VariableItem'
-                VARIABLE_SLIDER: '#/components/schemas/VariableSliderItem'
-                VECTOR: '#/components/schemas/VectorItem'
-                VECTOR_FIELD: '#/components/schemas/VectorFieldItem'
-              propertyName: type
-            oneOf:
-            - $ref: '#/components/schemas/AxisItem'
-            - $ref: '#/components/schemas/BooleanVariableItem'
-            - $ref: '#/components/schemas/CameraItem'
-            - $ref: '#/components/schemas/ExplicitSurfaceItem'
-            - $ref: '#/components/schemas/ExplicitSurfacePolarItem'
-            - $ref: '#/components/schemas/FolderItem'
-            - $ref: '#/components/schemas/GridItem'
-            - $ref: '#/components/schemas/ImplicitSurfaceItem'
-            - $ref: '#/components/schemas/LineItem'
-            - $ref: '#/components/schemas/ParametricCurveItem'
-            - $ref: '#/components/schemas/ParametricSurfaceItem'
-            - $ref: '#/components/schemas/PointItem'
-            - $ref: '#/components/schemas/VariableItem'
-            - $ref: '#/components/schemas/VariableSliderItem'
-            - $ref: '#/components/schemas/VectorItem'
-            - $ref: '#/components/schemas/VectorFieldItem'
+            $ref: '#/components/schemas/MathItem'
           title: Items
           type: array
         title:
@@ -1313,49 +1282,12 @@ components:
           type: boolean
         itemOrder:
           additionalProperties:
-            items:
-              type: string
-            type: array
+            $ref: '#/components/schemas/ItemOrderValue'
           title: Itemorder
           type: object
         items:
           items:
-            discriminator:
-              mapping:
-                AXIS: '#/components/schemas/AxisItem'
-                BOOLEAN_VARIABLE: '#/components/schemas/BooleanVariableItem'
-                CAMERA: '#/components/schemas/CameraItem'
-                EXPLICIT_SURFACE: '#/components/schemas/ExplicitSurfaceItem'
-                EXPLICIT_SURFACE_POLAR: '#/components/schemas/ExplicitSurfacePolarItem'
-                FOLDER: '#/components/schemas/FolderItem'
-                GRID: '#/components/schemas/GridItem'
-                IMPLICIT_SURFACE: '#/components/schemas/ImplicitSurfaceItem'
-                LINE: '#/components/schemas/LineItem'
-                PARAMETRIC_CURVE: '#/components/schemas/ParametricCurveItem'
-                PARAMETRIC_SURFACE: '#/components/schemas/ParametricSurfaceItem'
-                POINT: '#/components/schemas/PointItem'
-                VARIABLE: '#/components/schemas/VariableItem'
-                VARIABLE_SLIDER: '#/components/schemas/VariableSliderItem'
-                VECTOR: '#/components/schemas/VectorItem'
-                VECTOR_FIELD: '#/components/schemas/VectorFieldItem'
-              propertyName: type
-            oneOf:
-            - $ref: '#/components/schemas/AxisItem'
-            - $ref: '#/components/schemas/BooleanVariableItem'
-            - $ref: '#/components/schemas/CameraItem'
-            - $ref: '#/components/schemas/ExplicitSurfaceItem'
-            - $ref: '#/components/schemas/ExplicitSurfacePolarItem'
-            - $ref: '#/components/schemas/FolderItem'
-            - $ref: '#/components/schemas/GridItem'
-            - $ref: '#/components/schemas/ImplicitSurfaceItem'
-            - $ref: '#/components/schemas/LineItem'
-            - $ref: '#/components/schemas/ParametricCurveItem'
-            - $ref: '#/components/schemas/ParametricSurfaceItem'
-            - $ref: '#/components/schemas/PointItem'
-            - $ref: '#/components/schemas/VariableItem'
-            - $ref: '#/components/schemas/VariableSliderItem'
-            - $ref: '#/components/schemas/VectorItem'
-            - $ref: '#/components/schemas/VectorFieldItem'
+            $ref: '#/components/schemas/MathItem'
           title: Items
           type: array
         key:

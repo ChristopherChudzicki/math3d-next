@@ -41,7 +41,9 @@ def create_scene(request, payload: SceneCreateSchema):
     author = request.user if request.user.is_authenticated else None
     scene = Scene(
         items=[item.model_dump(mode="json") for item in payload.items],
-        item_order=payload.item_order,
+        # .dict() unwraps the ItemOrderValue RootModel values to plain lists so
+        # the JSONField stores `{str: [str]}`, not RootModel instances.
+        item_order=payload.dict(by_alias=False)["item_order"],
         archived=payload.archived,
         author=author,
     )
