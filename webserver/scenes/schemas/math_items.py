@@ -11,7 +11,7 @@ a `from scenes.models import ...` here would raise AppRegistryNotReady.
 from enum import Enum
 from typing import Annotated, Literal, Union
 
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, WithJsonSchema
 
 
 class MathItemType(str, Enum):
@@ -43,19 +43,38 @@ class _Strict(BaseModel):
 # the optional non-serializable `validate` function field is omitted). ---
 
 
+# Single-value `Literal` fields emit as JSON-schema `{const: X}`, which
+# openapi-generator-cli v7.2.0 (typescript-axios) collapses to a bare `string`
+# in the client — discarding the literal value the FE sync check needs. Emitting
+# them as `{enum: [X], type: string}` via WithJsonSchema makes the generator
+# produce a usable string-literal type instead. WithJsonSchema *replaces* the
+# field schema, so `type: string` is included explicitly. (The 16 item-level
+# `type` discriminants are left as bare `Literal` — the union's
+# `discriminator.mapping` already intersects the literal back in, e.g.
+# `({ type: "AXIS" } & AxisItem)`, so they stay usable without annotation.)
+
+
 class ExprObj(_Strict):
-    type: Literal["expr"]
+    type: Annotated[
+        Literal["expr"], WithJsonSchema({"enum": ["expr"], "type": "string"})
+    ]
     expr: str
 
 
 class AssignmentObj(_Strict):
-    type: Literal["assignment"]
+    type: Annotated[
+        Literal["assignment"],
+        WithJsonSchema({"enum": ["assignment"], "type": "string"}),
+    ]
     lhs: str
     rhs: str
 
 
 class FunctionAssignmentObj(_Strict):
-    type: Literal["function-assignment"]
+    type: Annotated[
+        Literal["function-assignment"],
+        WithJsonSchema({"enum": ["function-assignment"], "type": "string"}),
+    ]
     name: str
     params: list[str]
     rhs: str
@@ -64,17 +83,23 @@ class FunctionAssignmentObj(_Strict):
 # Concrete array types (NOT a Pydantic Generic — a generic emits mangled
 # parametrized $ref names into the OpenAPI/client).
 class FunctionAssignmentArray(_Strict):
-    type: Literal["array"]
+    type: Annotated[
+        Literal["array"], WithJsonSchema({"enum": ["array"], "type": "string"})
+    ]
     items: list[FunctionAssignmentObj]
 
 
 class ExprArray(_Strict):
-    type: Literal["array"]
+    type: Annotated[
+        Literal["array"], WithJsonSchema({"enum": ["array"], "type": "string"})
+    ]
     items: list[ExprObj]
 
 
 class StrArray(_Strict):
-    type: Literal["array"]
+    type: Annotated[
+        Literal["array"], WithJsonSchema({"enum": ["array"], "type": "string"})
+    ]
     items: list[str]
 
 
@@ -85,7 +110,9 @@ class AxisProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Literal[""]
+    calculatedVisibility: Annotated[
+        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
+    ]
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -126,7 +153,9 @@ class ExplicitSurfaceProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Literal[""]
+    calculatedVisibility: Annotated[
+        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
+    ]
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -151,7 +180,9 @@ class ExplicitSurfacePolarProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Literal[""]
+    calculatedVisibility: Annotated[
+        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
+    ]
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -178,7 +209,9 @@ class GridProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Literal[""]
+    calculatedVisibility: Annotated[
+        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
+    ]
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -194,7 +227,9 @@ class ImplicitSurfaceProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Literal[""]
+    calculatedVisibility: Annotated[
+        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
+    ]
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -211,7 +246,9 @@ class LineProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Literal[""]
+    calculatedVisibility: Annotated[
+        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
+    ]
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -230,7 +267,9 @@ class ParametricCurveProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Literal[""]
+    calculatedVisibility: Annotated[
+        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
+    ]
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str

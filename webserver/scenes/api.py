@@ -75,7 +75,7 @@ def update_scene(request, key: str, payload: ScenePatchSchema):
     if scene.author_id != request.user.id:
         raise HttpError(403, "You do not have permission to modify this scene.")
     data = payload.dict(exclude_unset=True)
-    if "items" in data and payload.items is not None:
+    if "items" in data:
         scene.items = [item.model_dump(mode="json") for item in payload.items]
     if "item_order" in data:
         scene.item_order = payload.item_order
