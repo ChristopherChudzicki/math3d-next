@@ -15,8 +15,6 @@ type GeneratedMathItem = GeneratedV1Scene["items"][number];
 // silently passes (any is bidirectionally assignable). This makes the check
 // inert. Fail `tsc` here instead, so the compile-time gate is self-sufficient
 // and not solely reliant on schema.spec.ts's runtime oneOf-length assertion.
-// Guards against an `items: any` regression in the generated client, which would
-// otherwise satisfy every assertion below and silently neuter the check.
 // (type-fest's IsAny, inlined to avoid the dependency.)
 type IsAny<T> = 0 extends 1 & NoInfer<T> ? true : false;
 const _notAny: IsAny<GeneratedMathItem> extends false ? true : never = true;
@@ -37,6 +35,8 @@ const _b: SerializedMathItem = {} as GeneratedMathItem;
 // Scene-level assignability (so envelope drift can't escape the item check).
 const _items: SerializedMathItem[] = {} as GeneratedV1Scene["items"];
 const _itemsBack: GeneratedV1Scene["items"] = {} as SerializedMathItem[];
+// Weak: generator emits `itemOrder` as `{ [key: string]: any }`, so these only
+// check key-presence, not the `string[]` value shape.
 const _order: Record<string, string[]> = {} as GeneratedV1Scene["itemOrder"];
 const _orderBack: GeneratedV1Scene["itemOrder"] = {} as Record<
   string,

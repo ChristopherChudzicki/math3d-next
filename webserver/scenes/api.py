@@ -80,9 +80,9 @@ def update_scene(request, key: str, payload: ScenePatchSchema):
     if "item_order" in data:
         scene.item_order = payload.item_order
     if "title" in data:
-        scene.title = payload.title
+        scene.title = data["title"]
     if "archived" in data:
-        scene.archived = payload.archived
+        scene.archived = data["archived"]
     scene.save()
     return scene
 

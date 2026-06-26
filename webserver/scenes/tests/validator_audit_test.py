@@ -23,6 +23,7 @@ def test_validator_accepts_factory_items():
 
 
 def test_validator_raises_django_validation_error_on_bad_item():
+    # D7 missing-required-key branch: FOLDER requires `color`; omitting it fails.
     bad = [{"id": "x", "type": "FOLDER", "properties": {"description": "d"}}]
     with pytest.raises(DjangoValidationError):
         validate_math_items(bad)
@@ -30,6 +31,7 @@ def test_validator_raises_django_validation_error_on_bad_item():
 
 @pytest.mark.django_db
 def test_scene_save_still_validates_items():
+    # D7 extra/unknown-key branch: an unrecognised property key is rejected on save.
     data = default_scene()
     data["items"][0]["properties"]["surprise"] = "boom"
     scene = Scene(key="bad", items=data["items"], item_order=data["itemOrder"])

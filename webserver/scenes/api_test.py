@@ -269,10 +269,15 @@ def test_patch_non_author_gets_403_with_well_formed_body():
 
 
 @pytest.mark.django_db
-def test_delete_author_gets_204_and_anonymous_gets_403():
+def test_delete_anonymous_gets_403():
+    scene = SceneFactory.create(author=CustomUserFactory.create())
+    assert Client().delete(_detail(scene.key)).status_code == 403
+
+
+@pytest.mark.django_db
+def test_delete_author_gets_204():
     me = CustomUserFactory.create()
     scene = SceneFactory.create(author=me)
-    assert Client().delete(_detail(scene.key)).status_code == 403  # anonymous
     client = Client()
     client.force_login(me)
     assert client.delete(_detail(scene.key)).status_code == 204
