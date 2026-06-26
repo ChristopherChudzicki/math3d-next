@@ -1,30 +1,17 @@
-import jtd  # type: ignore
 from django.core.exceptions import ValidationError
-from django.core.validators import BaseValidator
+from pydantic import ValidationError as PydanticValidationError
 
-options = jtd.ValidationOptions(max_errors=1)
+from scenes.schemas.math_items import MATH_ITEM_LIST_ADAPTER
 
 
-class JtdValidator(BaseValidator):
+def validate_math_items(value):
+    """Validate Scene.items against the Pydantic math-item union.
+
+    Runs as a model-field validator via Scene.save() -> full_clean(), so it
+    guards both the v0 (DRF) and v1 (Ninja) write paths. Re-raises Pydantic's
+    error as a Django ValidationError so full_clean() collects it.
     """
-    Validate a Django field against a JSON Type Def schema.
-
-    See https://jsontypedef.com/ for more.
-    """
-
-    def compare(self, value, schema):
-        errors = jtd.validate(schema=schema, instance=value, options=options)
-        if errors:
-            raise ValidationError(f"{value} failed JTD schema check")
-
-    def deconstruct(self):
-        return (
-            "scenes.validators.JtdValidator",
-            (),
-            {"limit_value": str(self.limit_value)},
-        )
-
-    def __eq__(self, other):
-        return (
-            isinstance(other, self.__class__) and self.limit_value == other.limit_value
-        )
+    try:
+        MATH_ITEM_LIST_ADAPTER.validate_python(value)
+    except PydanticValidationError as exc:
+        raise ValidationError(str(exc)) from exc

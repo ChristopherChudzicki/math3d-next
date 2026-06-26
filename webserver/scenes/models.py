@@ -1,27 +1,11 @@
-import os
 import random
-from pathlib import Path
 
-import jtd  # type: ignore
-import yaml
 from django.db import models
 from django.contrib.postgres.indexes import GinIndex
 from django.utils import timezone
 
-from scenes.validators import JtdValidator
+from scenes.validators import validate_math_items
 from authentication.models import CustomUser
-
-
-items_schema = jtd.Schema.from_dict(
-    yaml.safe_load(
-        Path(
-            os.path.join(
-                os.path.dirname(__file__),
-                "./math_items/schema.jtd.yaml",
-            )
-        ).read_text()
-    )
-)
 
 
 KEY_ALPHABET = "123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNPQRSTUVWXYZ"
@@ -86,7 +70,7 @@ class Scene(TimestampedModel):
     """
 
     key = models.CharField(max_length=80, unique=True, default=random_key)
-    items = models.JSONField(validators=[JtdValidator(limit_value=items_schema)])
+    items = models.JSONField(validators=[validate_math_items])
     item_order = models.JSONField()
 
     title = models.TextField(blank=True, default="Untitled")
