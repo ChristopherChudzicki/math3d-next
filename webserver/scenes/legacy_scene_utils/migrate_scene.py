@@ -72,7 +72,7 @@ def migrate_scene(legacy_scene: LegacyScene):
     )
     items = []
     for item_id, item in old_items.items():
-        items.append(migrator.translate_item(item, item_id).to_json_data())
+        items.append(migrator.translate_item(item, item_id).model_dump(mode="json"))
 
     item_order = legacy_scene.dehydrated["sortableTree"]
     item_order["main"] = item_order["root"]
@@ -88,7 +88,7 @@ def migrate_scene(legacy_scene: LegacyScene):
                         "type": "FOLDER",
                     },
                     folder_id,
-                ).to_json_data()
+                ).model_dump(mode="json")
             )
 
     # Mathbox-react can have orphaned folders in the item_order that don't
