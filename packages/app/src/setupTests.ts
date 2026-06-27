@@ -7,7 +7,7 @@ import { mockAuth } from "@math3d/mock-api";
 // learn more: https://github.com/testing-library/jest-dom
 import "@testing-library/jest-dom";
 
-import failOnConsole from "jest-fail-on-console";
+import { failOnConsole } from "@math3d/test-utils";
 
 failOnConsole();
 
