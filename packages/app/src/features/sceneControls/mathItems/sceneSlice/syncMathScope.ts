@@ -10,7 +10,7 @@ import {
 import { filter as collectionFilter } from "lodash-es";
 import { isNotNil } from "@/util/predicates";
 import type { IdentifiedParseable } from "@math3d/mathscope";
-import type { Parseable } from "@math3d/parser";
+import type { Parseable, ValidatedParseable } from "@math3d/parser";
 import { AppMathScope } from "./interfaces";
 
 const mathScopeId = (itemId: string, propName: string) =>
@@ -30,7 +30,7 @@ const getMathProperties = <T extends MathItemType>(
 
 const getIdentifiedExpressions = (
   items: MathItemPatch[],
-): IdentifiedParseable<Parseable>[] =>
+): IdentifiedParseable<ValidatedParseable>[] =>
   items.flatMap((item) => {
     const config = mathItemConfigs[item.type];
     const mathProperties = getMathProperties(config);

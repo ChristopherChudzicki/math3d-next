@@ -1,8 +1,11 @@
 import type { MathItem } from "@math3d/mathitem-configs";
 import type MathScope from "@math3d/mathscope";
-import { Parseable } from "@math3d/parser";
+import { ValidatedParseable } from "@math3d/parser";
 
-type AppParseable = Parseable;
+// The app parses validator-bearing parseables: syncMathScope attaches each math
+// property's config validator to the stored (validate-free) parseable before
+// handing it to MathScope. The stored item shape stays validate-free.
+type AppParseable = ValidatedParseable;
 type AppMathScope = MathScope<AppParseable>;
 
 interface SceneState {
