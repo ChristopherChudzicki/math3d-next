@@ -58,8 +58,6 @@ components:
           title: Axis
           type: string
         calculatedVisibility:
-          enum:
-          - ''
           title: Calculatedvisibility
           type: string
         color:
@@ -294,8 +292,6 @@ components:
       additionalProperties: false
       properties:
         calculatedVisibility:
-          enum:
-          - ''
           title: Calculatedvisibility
           type: string
         color:
@@ -375,8 +371,6 @@ components:
       additionalProperties: false
       properties:
         calculatedVisibility:
-          enum:
-          - ''
           title: Calculatedvisibility
           type: string
         color:
@@ -591,8 +585,6 @@ components:
           title: Axes
           type: string
         calculatedVisibility:
-          enum:
-          - ''
           title: Calculatedvisibility
           type: string
         color:
@@ -666,8 +658,6 @@ components:
       additionalProperties: false
       properties:
         calculatedVisibility:
-          enum:
-          - ''
           title: Calculatedvisibility
           type: string
         color:
@@ -784,8 +774,6 @@ components:
       additionalProperties: false
       properties:
         calculatedVisibility:
-          enum:
-          - ''
           title: Calculatedvisibility
           type: string
         color:
@@ -960,8 +948,6 @@ components:
       additionalProperties: false
       properties:
         calculatedVisibility:
-          enum:
-          - ''
           title: Calculatedvisibility
           type: string
         color:

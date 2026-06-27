@@ -127,7 +127,7 @@ export interface AxisProperties {
    * @type {string}
    * @memberof AxisProperties
    */
-  calculatedVisibility: AxisPropertiesCalculatedVisibilityEnum;
+  calculatedVisibility: string;
   /**
    *
    * @type {string}
@@ -252,12 +252,6 @@ export const AxisPropertiesAxisEnum = {
 
 export type AxisPropertiesAxisEnum =
   (typeof AxisPropertiesAxisEnum)[keyof typeof AxisPropertiesAxisEnum];
-export const AxisPropertiesCalculatedVisibilityEnum = {
-  Empty: "",
-} as const;
-
-export type AxisPropertiesCalculatedVisibilityEnum =
-  (typeof AxisPropertiesCalculatedVisibilityEnum)[keyof typeof AxisPropertiesCalculatedVisibilityEnum];
 
 /**
  *
@@ -476,7 +470,7 @@ export interface ExplicitSurfacePolarProperties {
    * @type {string}
    * @memberof ExplicitSurfacePolarProperties
    */
-  calculatedVisibility: ExplicitSurfacePolarPropertiesCalculatedVisibilityEnum;
+  calculatedVisibility: string;
   /**
    *
    * @type {string}
@@ -586,14 +580,6 @@ export interface ExplicitSurfacePolarProperties {
    */
   zOrder: string;
 }
-
-export const ExplicitSurfacePolarPropertiesCalculatedVisibilityEnum = {
-  Empty: "",
-} as const;
-
-export type ExplicitSurfacePolarPropertiesCalculatedVisibilityEnum =
-  (typeof ExplicitSurfacePolarPropertiesCalculatedVisibilityEnum)[keyof typeof ExplicitSurfacePolarPropertiesCalculatedVisibilityEnum];
-
 /**
  *
  * @export
@@ -605,7 +591,7 @@ export interface ExplicitSurfaceProperties {
    * @type {string}
    * @memberof ExplicitSurfaceProperties
    */
-  calculatedVisibility: ExplicitSurfacePropertiesCalculatedVisibilityEnum;
+  calculatedVisibility: string;
   /**
    *
    * @type {string}
@@ -715,14 +701,6 @@ export interface ExplicitSurfaceProperties {
    */
   zOrder: string;
 }
-
-export const ExplicitSurfacePropertiesCalculatedVisibilityEnum = {
-  Empty: "",
-} as const;
-
-export type ExplicitSurfacePropertiesCalculatedVisibilityEnum =
-  (typeof ExplicitSurfacePropertiesCalculatedVisibilityEnum)[keyof typeof ExplicitSurfacePropertiesCalculatedVisibilityEnum];
-
 /**
  *
  * @export
@@ -929,7 +907,7 @@ export interface GridProperties {
    * @type {string}
    * @memberof GridProperties
    */
-  calculatedVisibility: GridPropertiesCalculatedVisibilityEnum;
+  calculatedVisibility: string;
   /**
    *
    * @type {string}
@@ -1006,12 +984,6 @@ export const GridPropertiesAxesEnum = {
 
 export type GridPropertiesAxesEnum =
   (typeof GridPropertiesAxesEnum)[keyof typeof GridPropertiesAxesEnum];
-export const GridPropertiesCalculatedVisibilityEnum = {
-  Empty: "",
-} as const;
-
-export type GridPropertiesCalculatedVisibilityEnum =
-  (typeof GridPropertiesCalculatedVisibilityEnum)[keyof typeof GridPropertiesCalculatedVisibilityEnum];
 
 /**
  *
@@ -1049,7 +1021,7 @@ export interface ImplicitSurfaceProperties {
    * @type {string}
    * @memberof ImplicitSurfaceProperties
    */
-  calculatedVisibility: ImplicitSurfacePropertiesCalculatedVisibilityEnum;
+  calculatedVisibility: string;
   /**
    *
    * @type {string}
@@ -1129,14 +1101,6 @@ export interface ImplicitSurfaceProperties {
    */
   zOrder: string;
 }
-
-export const ImplicitSurfacePropertiesCalculatedVisibilityEnum = {
-  Empty: "",
-} as const;
-
-export type ImplicitSurfacePropertiesCalculatedVisibilityEnum =
-  (typeof ImplicitSurfacePropertiesCalculatedVisibilityEnum)[keyof typeof ImplicitSurfacePropertiesCalculatedVisibilityEnum];
-
 /**
  *
  * @export
@@ -1224,7 +1188,7 @@ export interface LineProperties {
    * @type {string}
    * @memberof LineProperties
    */
-  calculatedVisibility: LinePropertiesCalculatedVisibilityEnum;
+  calculatedVisibility: string;
   /**
    *
    * @type {string}
@@ -1316,14 +1280,6 @@ export interface LineProperties {
    */
   zOrder: string;
 }
-
-export const LinePropertiesCalculatedVisibilityEnum = {
-  Empty: "",
-} as const;
-
-export type LinePropertiesCalculatedVisibilityEnum =
-  (typeof LinePropertiesCalculatedVisibilityEnum)[keyof typeof LinePropertiesCalculatedVisibilityEnum];
-
 /**
  * @type MathItem
  * @export
@@ -1444,7 +1400,7 @@ export interface ParametricCurveProperties {
    * @type {string}
    * @memberof ParametricCurveProperties
    */
-  calculatedVisibility: ParametricCurvePropertiesCalculatedVisibilityEnum;
+  calculatedVisibility: string;
   /**
    *
    * @type {string}
@@ -1536,14 +1492,6 @@ export interface ParametricCurveProperties {
    */
   zOrder: string;
 }
-
-export const ParametricCurvePropertiesCalculatedVisibilityEnum = {
-  Empty: "",
-} as const;
-
-export type ParametricCurvePropertiesCalculatedVisibilityEnum =
-  (typeof ParametricCurvePropertiesCalculatedVisibilityEnum)[keyof typeof ParametricCurvePropertiesCalculatedVisibilityEnum];
-
 /**
  *
  * @export

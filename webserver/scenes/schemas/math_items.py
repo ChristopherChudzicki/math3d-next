@@ -117,9 +117,7 @@ class AxisProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Annotated[
-        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
-    ]
+    calculatedVisibility: str
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -160,9 +158,7 @@ class ExplicitSurfaceProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Annotated[
-        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
-    ]
+    calculatedVisibility: str
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -187,9 +183,7 @@ class ExplicitSurfacePolarProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Annotated[
-        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
-    ]
+    calculatedVisibility: str
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -216,9 +210,7 @@ class GridProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Annotated[
-        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
-    ]
+    calculatedVisibility: str
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -234,9 +226,7 @@ class ImplicitSurfaceProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Annotated[
-        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
-    ]
+    calculatedVisibility: str
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -253,9 +243,7 @@ class LineProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Annotated[
-        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
-    ]
+    calculatedVisibility: str
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -274,9 +262,7 @@ class ParametricCurveProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: Annotated[
-        Literal[""], WithJsonSchema({"enum": [""], "type": "string"})
-    ]
+    calculatedVisibility: str
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -295,7 +281,7 @@ class ParametricSurfaceProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: str  # NOTE: str here, not Literal[""].
+    calculatedVisibility: str
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -317,7 +303,7 @@ class PointProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: str  # str, not Literal[""].
+    calculatedVisibility: str
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -348,7 +334,7 @@ class VectorProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: str  # str, not Literal[""].
+    calculatedVisibility: str
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
@@ -368,7 +354,7 @@ class VectorFieldProperties(_Strict):
     description: str
     color: str
     visible: bool
-    calculatedVisibility: str  # str, not Literal[""].
+    calculatedVisibility: str
     useCalculatedVisibility: bool
     opacity: str
     zIndex: str
