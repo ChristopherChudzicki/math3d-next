@@ -17,9 +17,18 @@ class ItemOrderValue(RootModel[List[str]]):
     root: List[str]
 
 
-class MiniSceneSchema(Schema):
+class _AuthoredSceneSchema(Schema):
+    """Shared config + author resolver for the scene output schemas
+    (`author` is the FK's id, resolved off `author_id`)."""
+
     model_config = ConfigDict(populate_by_name=True)
 
+    @staticmethod
+    def resolve_author(obj) -> Optional[int]:
+        return obj.author_id
+
+
+class MiniSceneSchema(_AuthoredSceneSchema):
     title: Optional[str] = None
     key: str
     author: Optional[int] = None
@@ -27,14 +36,8 @@ class MiniSceneSchema(Schema):
     modified_date: datetime = Field(alias="modifiedDate")
     archived: bool
 
-    @staticmethod
-    def resolve_author(obj) -> Optional[int]:
-        return obj.author_id
 
-
-class SceneSchema(Schema):
-    model_config = ConfigDict(populate_by_name=True)
-
+class SceneSchema(_AuthoredSceneSchema):
     items: List[MathItem]
     item_order: Dict[str, ItemOrderValue] = Field(alias="itemOrder")
     title: Optional[str] = None
@@ -44,10 +47,6 @@ class SceneSchema(Schema):
     modified_date: datetime = Field(alias="modifiedDate")
     archived: bool
     is_legacy: bool = Field(alias="isLegacy")
-
-    @staticmethod
-    def resolve_author(obj) -> Optional[int]:
-        return obj.author_id
 
 
 class SceneCreateSchema(Schema):

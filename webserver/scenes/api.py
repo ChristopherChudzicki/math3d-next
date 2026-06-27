@@ -22,6 +22,12 @@ from scenes.schemas import (
 scenes_router = Router()
 
 
+def _require_owner(scene: Scene, request, action: str) -> None:
+    """Raise 403 unless the requester owns the scene."""
+    if scene.author_id != request.user.id:
+        raise HttpError(403, f"You do not have permission to {action} this scene.")
+
+
 @scenes_router.get("/", response=List[MiniSceneSchema], auth=None, by_alias=True)
 @paginate(LimitOffsetPagination)
 def list_scenes(request, filters: SceneFilterSchema = Query(...)):
@@ -41,9 +47,9 @@ def create_scene(request, payload: SceneCreateSchema):
     author = request.user if request.user.is_authenticated else None
     scene = Scene(
         items=[item.model_dump(mode="json") for item in payload.items],
-        # .dict() unwraps the ItemOrderValue RootModel values to plain lists so
-        # the JSONField stores `{str: [str]}`, not RootModel instances.
-        item_order=payload.dict(by_alias=False)["item_order"],
+        # Unwrap each ItemOrderValue RootModel to its plain list so the
+        # JSONField stores `{str: [str]}`, not RootModel instances.
+        item_order={k: v.root for k, v in payload.item_order.items()},
         archived=payload.archived,
         author=author,
     )
@@ -74,8 +80,7 @@ def get_scene(request, key: str):
 @scenes_router.patch("/{key}/", response=SceneSchema, auth=session_auth, by_alias=True)
 def update_scene(request, key: str, payload: ScenePatchSchema):
     scene = get_object_or_404(Scene, key=key)
-    if scene.author_id != request.user.id:
-        raise HttpError(403, "You do not have permission to modify this scene.")
+    _require_owner(scene, request, "modify")
     data = payload.dict(exclude_unset=True)
     if "items" in data:
         scene.items = [item.model_dump(mode="json") for item in payload.items]
@@ -92,8 +97,7 @@ def update_scene(request, key: str, payload: ScenePatchSchema):
 @scenes_router.delete("/{key}/", response={204: None}, auth=session_auth)
 def delete_scene(request, key: str):
     scene = get_object_or_404(Scene, key=key)
-    if scene.author_id != request.user.id:
-        raise HttpError(403, "You do not have permission to delete this scene.")
+    _require_owner(scene, request, "delete")
     scene.delete()
     return Status(204, None)  # matches authentication/api.py's Status(204, None)
 
