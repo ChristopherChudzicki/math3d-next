@@ -1,39 +1,31 @@
-from datetime import datetime
-from typing import Annotated, Any, List, Optional
+from typing import List
 
+from django.db.models import F
 from django.shortcuts import get_object_or_404
-from ninja import Field, FilterSchema, FilterLookup, Query, Router, Schema, Status
+from ninja import Query, Router, Status
+from ninja.errors import HttpError
 from ninja.pagination import LimitOffsetPagination, paginate
-from pydantic import ConfigDict
 
 from main.ninja_auth import session_auth
+from scenes.legacy_scene_utils.migrate_scene import migrate_scene
 from scenes.models import LegacyScene, Scene
+from scenes.schemas import (
+    LegacySceneInSchema,
+    LegacySceneOutSchema,
+    MiniSceneSchema,
+    SceneCreateSchema,
+    SceneFilterSchema,
+    ScenePatchSchema,
+    SceneSchema,
+)
 
 scenes_router = Router()
 
 
-class MiniSceneSchema(Schema):
-    model_config = ConfigDict(populate_by_name=True)
-
-    title: Optional[str] = None
-    key: str
-    author: Optional[int] = None
-    created_date: datetime = Field(alias="createdDate")
-    modified_date: datetime = Field(alias="modifiedDate")
-    archived: bool
-
-    @staticmethod
-    def resolve_author(obj) -> Optional[int]:
-        # Required: from_attributes would otherwise read obj.author (a CustomUser
-        # instance) and fail int validation. v0 emits the id via SlugRelatedField.
-        return obj.author_id
-
-
-class SceneFilterSchema(FilterSchema):
-    title: Annotated[Optional[str], FilterLookup("title__icontains")] = None
-    archived: Optional[bool] = (
-        None  # exact match; ignore_none default skips when absent
-    )
+def _require_owner(scene: Scene, request, action: str) -> None:
+    """Raise 403 unless the requester owns the scene."""
+    if scene.author_id != request.user.id:
+        raise HttpError(403, f"You do not have permission to {action} this scene.")
 
 
 @scenes_router.get("/", response=List[MiniSceneSchema], auth=None, by_alias=True)
@@ -50,16 +42,67 @@ def my_scenes(request, filters: SceneFilterSchema = Query(...)):
     return filters.filter(Scene.objects.filter(author_id=request.user.id))
 
 
+@scenes_router.post("/", response={201: SceneSchema}, auth=None, by_alias=True)
+def create_scene(request, payload: SceneCreateSchema):
+    author = request.user if request.user.is_authenticated else None
+    scene = Scene(
+        items=[item.model_dump(mode="json") for item in payload.items],
+        # Unwrap each ItemOrderValue RootModel to its plain list so the
+        # JSONField stores `{str: [str]}`, not RootModel instances.
+        item_order={k: v.root for k, v in payload.item_order.items()},
+        archived=payload.archived,
+        author=author,
+    )
+    if payload.title is not None:
+        scene.title = payload.title
+    scene.save()  # full_clean() re-validates items (defense in depth)
+    return Status(201, scene)
+
+
+@scenes_router.get("/{key}/", response=SceneSchema, auth=None, by_alias=True)
+def get_scene(request, key: str):
+    if LegacyScene.objects.filter(key=key).exists():
+        # v0 parity: re-migrate on every legacy-key GET. The .update() below then
+        # stacks on the count migrate_scene carries over — harmless for a view counter.
+        legacy = LegacyScene.objects.get(key=key)
+        legacy.times_accessed += 1
+        legacy.save()
+        migrate_scene(legacy)
+
+    scene = get_object_or_404(Scene, key=key)
+    # Atomic counter that skips Scene.save()'s full_clean() and modified_date
+    # bump (viewing is not modifying); fixes the v0 no-save bug.
+    Scene.objects.filter(pk=scene.pk).update(times_accessed=F("times_accessed") + 1)
+    scene.times_accessed += 1  # reflect on the in-memory instance for the response
+    return scene
+
+
+@scenes_router.patch("/{key}/", response=SceneSchema, auth=session_auth, by_alias=True)
+def update_scene(request, key: str, payload: ScenePatchSchema):
+    scene = get_object_or_404(Scene, key=key)
+    _require_owner(scene, request, "modify")
+    data = payload.dict(exclude_unset=True)
+    if "items" in data:
+        scene.items = [item.model_dump(mode="json") for item in payload.items]
+    if "item_order" in data:
+        scene.item_order = data["item_order"]
+    if "title" in data:
+        scene.title = data["title"]
+    if "archived" in data:
+        scene.archived = data["archived"]
+    scene.save()
+    return scene
+
+
+@scenes_router.delete("/{key}/", response={204: None}, auth=session_auth)
+def delete_scene(request, key: str):
+    scene = get_object_or_404(Scene, key=key)
+    _require_owner(scene, request, "delete")
+    scene.delete()
+    return Status(204, None)  # matches authentication/api.py's Status(204, None)
+
+
 legacy_router = Router()
-
-
-class LegacySceneInSchema(Schema):
-    dehydrated: Any
-
-
-class LegacySceneOutSchema(Schema):
-    key: str
-    dehydrated: Any
 
 
 @legacy_router.post("/", response={201: LegacySceneOutSchema}, auth=None)

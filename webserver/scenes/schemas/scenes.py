@@ -1,0 +1,95 @@
+from datetime import datetime
+from typing import Annotated, Any, Dict, List, Optional
+
+from ninja import Field, FilterLookup, FilterSchema, Schema
+from pydantic import ConfigDict, RootModel
+
+from scenes.schemas.math_items import MathItem
+
+
+# Names the inner `list[str]` so the generated client emits
+# `{ [key: string]: Array<string> }` for `itemOrder`. Without the RootModel,
+# openapi-generator-cli v7.2.0 can't recurse into a complex inline
+# `additionalProperties` schema and degrades the value type to `any`.
+# A `#` comment, not a docstring — keeps this rationale out of the schema
+# `description` (see the matching note on MathItem).
+class ItemOrderValue(RootModel[List[str]]):
+    root: List[str]
+
+
+class _AuthoredSceneSchema(Schema):
+    """Shared config + author resolver for the scene output schemas
+    (`author` is the FK's id, resolved off `author_id`)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    @staticmethod
+    def resolve_author(obj) -> Optional[int]:
+        return obj.author_id
+
+
+class MiniSceneSchema(_AuthoredSceneSchema):
+    title: Optional[str] = None
+    key: str
+    author: Optional[int] = None
+    created_date: datetime = Field(alias="createdDate")
+    modified_date: datetime = Field(alias="modifiedDate")
+    archived: bool
+
+
+class SceneSchema(_AuthoredSceneSchema):
+    items: List[MathItem]
+    item_order: Dict[str, ItemOrderValue] = Field(alias="itemOrder")
+    title: Optional[str] = None
+    key: str
+    author: Optional[int] = None
+    created_date: datetime = Field(alias="createdDate")
+    modified_date: datetime = Field(alias="modifiedDate")
+    archived: bool
+    is_legacy: bool = Field(alias="isLegacy")
+
+
+class SceneCreateSchema(Schema):
+    # populate_by_name + aliases so the endpoint accepts camelCase request bodies.
+    model_config = ConfigDict(populate_by_name=True)
+
+    items: List[MathItem]
+    item_order: Dict[str, ItemOrderValue] = Field(alias="itemOrder")
+    title: Optional[str] = None
+    archived: bool = False
+
+
+class ScenePatchSchema(Schema):
+    # Partial-update schema (NOT ninja.PatchDict). Presence is detected via
+    # `exclude_unset` in the handler, so `items`/`item_order` use non-nullable
+    # defaults rather than `Optional[...] = None`. This is deliberate: an
+    # `Optional[List[MathItem]]` emits `anyOf: [<array-of-$ref>, null]`, and
+    # openapi-generator-cli v7.2.0 (typescript-axios) can't resolve the union
+    # nested inside that `anyOf` and degrades the field to `null` in the client.
+    # A bare `List[MathItem]` default emits the same plain `Array<MathItem>` as
+    # the POST body, so the generated `ScenePatchSchema.items` references the
+    # real `MathItem` union component. Side effect: an explicit `items: null`
+    # (or `itemOrder: null`) in the body now 422s instead of silently
+    # no-op'ing, which is the desired strictness.
+    model_config = ConfigDict(populate_by_name=True)
+
+    items: List[MathItem] = Field(default_factory=list)
+    item_order: Dict[str, ItemOrderValue] = Field(
+        default_factory=dict, alias="itemOrder"
+    )
+    title: Optional[str] = None
+    archived: Optional[bool] = None
+
+
+class SceneFilterSchema(FilterSchema):
+    title: Annotated[Optional[str], FilterLookup("title__icontains")] = None
+    archived: Optional[bool] = None  # exact; ignore_none default skips when absent
+
+
+class LegacySceneInSchema(Schema):
+    dehydrated: Any
+
+
+class LegacySceneOutSchema(Schema):
+    key: str
+    dehydrated: Any

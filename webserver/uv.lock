@@ -367,15 +367,6 @@ wheels = [
 ]
 
 [[package]]
-name = "jtd"
-version = "0.1.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "strict-rfc3339" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/05/ee/ad8b9b899025761abdec2d10a69ae16fe7d3a8f239b23d841fc1e4b80414/jtd-0.1.1.tar.gz", hash = "sha256:12abb97806644c14e74ceed2e875efdaee72620769bb0529e9c584a99e8d48ab", size = 10801, upload-time = "2020-09-21T21:08:50.822Z" }
-
-[[package]]
 name = "lxml"
 version = "5.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -426,7 +417,6 @@ dependencies = [
     { name = "drf-spectacular" },
     { name = "faker" },
     { name = "gunicorn" },
-    { name = "jtd" },
     { name = "psycopg" },
     { name = "pyyaml" },
     { name = "tqdm" },
@@ -464,7 +454,6 @@ requires-dist = [
     { name = "drf-spectacular", specifier = ">=0.28.0,<0.29.0" },
     { name = "faker", specifier = ">=24.0.0,<25.0.0" },
     { name = "gunicorn", specifier = ">=23.0.0,<24.0.0" },
-    { name = "jtd", specifier = ">=0.1.1,<0.2.0" },
     { name = "psycopg", specifier = ">=3.2.10" },
     { name = "pyyaml", specifier = ">=6.0,<7.0" },
     { name = "tqdm", specifier = ">=4.64.1,<5.0.0" },
@@ -738,12 +727,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/e5/40/edede8dd6977b0d3d
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a9/5c/bfd6bd0bf979426d405cc6e71eceb8701b148b16c21d2dc3c261efc61c7b/sqlparse-0.5.3-py3-none-any.whl", hash = "sha256:cf2196ed3418f3ba5de6af7e82c694a9fbdbfecccdfc72e281548517081f16ca", size = 44415, upload-time = "2024-12-10T12:05:27.824Z" },
 ]
-
-[[package]]
-name = "strict-rfc3339"
-version = "0.7"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/56/e4/879ef1dbd6ddea1c77c0078cd59b503368b0456bcca7d063a870ca2119d3/strict-rfc3339-0.7.tar.gz", hash = "sha256:5cad17bedfc3af57b399db0fed32771f18fc54bbd917e85546088607ac5e1277", size = 17552, upload-time = "2016-04-24T04:24:04.403Z" }
 
 [[package]]
 name = "tqdm"

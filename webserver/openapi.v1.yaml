@@ -9,6 +9,229 @@ components:
       - email
       title: ActivationSchema
       type: object
+    AssignmentObj:
+      additionalProperties: false
+      properties:
+        lhs:
+          title: Lhs
+          type: string
+        rhs:
+          title: Rhs
+          type: string
+        type:
+          enum:
+          - assignment
+          title: Type
+          type: string
+      required:
+      - type
+      - lhs
+      - rhs
+      title: AssignmentObj
+      type: object
+    AxisItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/AxisProperties'
+        type:
+          const: AXIS
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: AxisItem
+      type: object
+    AxisProperties:
+      additionalProperties: false
+      properties:
+        axis:
+          enum:
+          - x
+          - y
+          - z
+          title: Axis
+          type: string
+        calculatedVisibility:
+          title: Calculatedvisibility
+          type: string
+        color:
+          title: Color
+          type: string
+        description:
+          title: Description
+          type: string
+        divisions:
+          title: Divisions
+          type: string
+        end:
+          title: End
+          type: string
+        label:
+          title: Label
+          type: string
+        labelVisible:
+          title: Labelvisible
+          type: string
+        max:
+          title: Max
+          type: string
+        min:
+          title: Min
+          type: string
+        opacity:
+          title: Opacity
+          type: string
+        scale:
+          title: Scale
+          type: string
+        size:
+          title: Size
+          type: string
+        start:
+          title: Start
+          type: string
+        ticksVisible:
+          title: Ticksvisible
+          type: string
+        useCalculatedVisibility:
+          title: Usecalculatedvisibility
+          type: boolean
+        visible:
+          title: Visible
+          type: boolean
+        width:
+          title: Width
+          type: string
+        zBias:
+          title: Zbias
+          type: string
+        zIndex:
+          title: Zindex
+          type: string
+        zOrder:
+          title: Zorder
+          type: string
+      required:
+      - description
+      - color
+      - visible
+      - calculatedVisibility
+      - useCalculatedVisibility
+      - opacity
+      - zIndex
+      - zBias
+      - zOrder
+      - label
+      - labelVisible
+      - min
+      - max
+      - axis
+      - scale
+      - ticksVisible
+      - size
+      - width
+      - start
+      - end
+      - divisions
+      title: AxisProperties
+      type: object
+    BooleanVariableItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/BooleanVariableProperties'
+        type:
+          const: BOOLEAN_VARIABLE
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: BooleanVariableItem
+      type: object
+    BooleanVariableProperties:
+      additionalProperties: false
+      properties:
+        description:
+          title: Description
+          type: string
+        value:
+          $ref: '#/components/schemas/AssignmentObj'
+      required:
+      - value
+      - description
+      title: BooleanVariableProperties
+      type: object
+    CameraItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/CameraProperties'
+        type:
+          const: CAMERA
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: CameraItem
+      type: object
+    CameraProperties:
+      additionalProperties: false
+      properties:
+        description:
+          title: Description
+          type: string
+        isOrthographic:
+          title: Isorthographic
+          type: string
+        isPanEnabled:
+          title: Ispanenabled
+          type: string
+        isRotateEnabled:
+          title: Isrotateenabled
+          type: string
+        isZoomEnabled:
+          title: Iszoomenabled
+          type: string
+        position:
+          title: Position
+          type: string
+        target:
+          title: Target
+          type: string
+        updateOnDrag:
+          title: Updateondrag
+          type: string
+        useRelative:
+          title: Userelative
+          type: string
+      required:
+      - description
+      - isOrthographic
+      - isPanEnabled
+      - isZoomEnabled
+      - isRotateEnabled
+      - position
+      - target
+      - updateOnDrag
+      - useRelative
+      title: CameraProperties
+      type: object
     DeleteAccountError:
       properties:
         current_password:
@@ -29,6 +252,467 @@ components:
       - current_password
       title: DeleteAccountSchema
       type: object
+    ExplicitSurfaceItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/ExplicitSurfaceProperties'
+        type:
+          const: EXPLICIT_SURFACE
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: ExplicitSurfaceItem
+      type: object
+    ExplicitSurfacePolarItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/ExplicitSurfacePolarProperties'
+        type:
+          const: EXPLICIT_SURFACE_POLAR
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: ExplicitSurfacePolarItem
+      type: object
+    ExplicitSurfacePolarProperties:
+      additionalProperties: false
+      properties:
+        calculatedVisibility:
+          title: Calculatedvisibility
+          type: string
+        color:
+          title: Color
+          type: string
+        colorExpr:
+          $ref: '#/components/schemas/FunctionAssignmentObj'
+        description:
+          title: Description
+          type: string
+        domain:
+          $ref: '#/components/schemas/FunctionAssignmentArray'
+        expr:
+          $ref: '#/components/schemas/FunctionAssignmentObj'
+        grid1:
+          title: Grid1
+          type: string
+        grid2:
+          title: Grid2
+          type: string
+        gridOpacity:
+          title: Gridopacity
+          type: string
+        gridWidth:
+          title: Gridwidth
+          type: string
+        opacity:
+          title: Opacity
+          type: string
+        samples1:
+          title: Samples1
+          type: string
+        samples2:
+          title: Samples2
+          type: string
+        shaded:
+          title: Shaded
+          type: string
+        useCalculatedVisibility:
+          title: Usecalculatedvisibility
+          type: boolean
+        visible:
+          title: Visible
+          type: boolean
+        zBias:
+          title: Zbias
+          type: string
+        zIndex:
+          title: Zindex
+          type: string
+        zOrder:
+          title: Zorder
+          type: string
+      required:
+      - description
+      - color
+      - visible
+      - calculatedVisibility
+      - useCalculatedVisibility
+      - opacity
+      - zIndex
+      - zBias
+      - zOrder
+      - shaded
+      - expr
+      - domain
+      - colorExpr
+      - gridOpacity
+      - gridWidth
+      - samples1
+      - samples2
+      - grid1
+      - grid2
+      title: ExplicitSurfacePolarProperties
+      type: object
+    ExplicitSurfaceProperties:
+      additionalProperties: false
+      properties:
+        calculatedVisibility:
+          title: Calculatedvisibility
+          type: string
+        color:
+          title: Color
+          type: string
+        colorExpr:
+          $ref: '#/components/schemas/FunctionAssignmentObj'
+        description:
+          title: Description
+          type: string
+        domain:
+          $ref: '#/components/schemas/FunctionAssignmentArray'
+        expr:
+          $ref: '#/components/schemas/FunctionAssignmentObj'
+        grid1:
+          title: Grid1
+          type: string
+        grid2:
+          title: Grid2
+          type: string
+        gridOpacity:
+          title: Gridopacity
+          type: string
+        gridWidth:
+          title: Gridwidth
+          type: string
+        opacity:
+          title: Opacity
+          type: string
+        samples1:
+          title: Samples1
+          type: string
+        samples2:
+          title: Samples2
+          type: string
+        shaded:
+          title: Shaded
+          type: string
+        useCalculatedVisibility:
+          title: Usecalculatedvisibility
+          type: boolean
+        visible:
+          title: Visible
+          type: boolean
+        zBias:
+          title: Zbias
+          type: string
+        zIndex:
+          title: Zindex
+          type: string
+        zOrder:
+          title: Zorder
+          type: string
+      required:
+      - description
+      - color
+      - visible
+      - calculatedVisibility
+      - useCalculatedVisibility
+      - opacity
+      - zIndex
+      - zBias
+      - zOrder
+      - shaded
+      - expr
+      - domain
+      - colorExpr
+      - gridOpacity
+      - gridWidth
+      - samples1
+      - samples2
+      - grid1
+      - grid2
+      title: ExplicitSurfaceProperties
+      type: object
+    ExprArray:
+      additionalProperties: false
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/ExprObj'
+          title: Items
+          type: array
+        type:
+          enum:
+          - array
+          title: Type
+          type: string
+      required:
+      - type
+      - items
+      title: ExprArray
+      type: object
+    ExprObj:
+      additionalProperties: false
+      properties:
+        expr:
+          title: Expr
+          type: string
+        type:
+          enum:
+          - expr
+          title: Type
+          type: string
+      required:
+      - type
+      - expr
+      title: ExprObj
+      type: object
+    FolderItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/FolderProperties'
+        type:
+          const: FOLDER
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: FolderItem
+      type: object
+    FolderProperties:
+      additionalProperties: false
+      properties:
+        description:
+          title: Description
+          type: string
+        isCollapsed:
+          title: Iscollapsed
+          type: string
+      required:
+      - description
+      - isCollapsed
+      title: FolderProperties
+      type: object
+    FunctionAssignmentArray:
+      additionalProperties: false
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/FunctionAssignmentObj'
+          title: Items
+          type: array
+        type:
+          enum:
+          - array
+          title: Type
+          type: string
+      required:
+      - type
+      - items
+      title: FunctionAssignmentArray
+      type: object
+    FunctionAssignmentObj:
+      additionalProperties: false
+      properties:
+        name:
+          title: Name
+          type: string
+        params:
+          items:
+            type: string
+          title: Params
+          type: array
+        rhs:
+          title: Rhs
+          type: string
+        type:
+          enum:
+          - function-assignment
+          title: Type
+          type: string
+      required:
+      - type
+      - name
+      - params
+      - rhs
+      title: FunctionAssignmentObj
+      type: object
+    GridItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/GridProperties'
+        type:
+          const: GRID
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: GridItem
+      type: object
+    GridProperties:
+      additionalProperties: false
+      properties:
+        axes:
+          enum:
+          - xy
+          - yz
+          - zx
+          title: Axes
+          type: string
+        calculatedVisibility:
+          title: Calculatedvisibility
+          type: string
+        color:
+          title: Color
+          type: string
+        description:
+          title: Description
+          type: string
+        divisions:
+          title: Divisions
+          type: string
+        opacity:
+          title: Opacity
+          type: string
+        snap:
+          title: Snap
+          type: string
+        useCalculatedVisibility:
+          title: Usecalculatedvisibility
+          type: boolean
+        visible:
+          title: Visible
+          type: boolean
+        width:
+          title: Width
+          type: string
+        zBias:
+          title: Zbias
+          type: string
+        zIndex:
+          title: Zindex
+          type: string
+        zOrder:
+          title: Zorder
+          type: string
+      required:
+      - description
+      - color
+      - visible
+      - calculatedVisibility
+      - useCalculatedVisibility
+      - opacity
+      - zIndex
+      - zBias
+      - zOrder
+      - width
+      - divisions
+      - snap
+      - axes
+      title: GridProperties
+      type: object
+    ImplicitSurfaceItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/ImplicitSurfaceProperties'
+        type:
+          const: IMPLICIT_SURFACE
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: ImplicitSurfaceItem
+      type: object
+    ImplicitSurfaceProperties:
+      additionalProperties: false
+      properties:
+        calculatedVisibility:
+          title: Calculatedvisibility
+          type: string
+        color:
+          title: Color
+          type: string
+        description:
+          title: Description
+          type: string
+        domain:
+          $ref: '#/components/schemas/ExprArray'
+        lhs:
+          $ref: '#/components/schemas/FunctionAssignmentObj'
+        opacity:
+          title: Opacity
+          type: string
+        rhs:
+          $ref: '#/components/schemas/FunctionAssignmentObj'
+        samples:
+          title: Samples
+          type: string
+        shaded:
+          title: Shaded
+          type: string
+        useCalculatedVisibility:
+          title: Usecalculatedvisibility
+          type: boolean
+        visible:
+          title: Visible
+          type: boolean
+        zBias:
+          title: Zbias
+          type: string
+        zIndex:
+          title: Zindex
+          type: string
+        zOrder:
+          title: Zorder
+          type: string
+      required:
+      - description
+      - color
+      - visible
+      - calculatedVisibility
+      - useCalculatedVisibility
+      - opacity
+      - zIndex
+      - zBias
+      - zOrder
+      - shaded
+      - domain
+      - lhs
+      - rhs
+      - samples
+      title: ImplicitSurfaceProperties
+      type: object
     Input:
       properties:
         limit:
@@ -43,6 +727,11 @@ components:
           type: integer
       title: Input
       type: object
+    ItemOrderValue:
+      items:
+        type: string
+      title: ItemOrderValue
+      type: array
     LegacySceneInSchema:
       properties:
         dehydrated:
@@ -63,6 +752,132 @@ components:
       - dehydrated
       title: LegacySceneOutSchema
       type: object
+    LineItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/LineProperties'
+        type:
+          const: LINE
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: LineItem
+      type: object
+    LineProperties:
+      additionalProperties: false
+      properties:
+        calculatedVisibility:
+          title: Calculatedvisibility
+          type: string
+        color:
+          title: Color
+          type: string
+        coords:
+          title: Coords
+          type: string
+        description:
+          title: Description
+          type: string
+        end:
+          title: End
+          type: string
+        label:
+          title: Label
+          type: string
+        labelVisible:
+          title: Labelvisible
+          type: string
+        opacity:
+          title: Opacity
+          type: string
+        size:
+          title: Size
+          type: string
+        start:
+          title: Start
+          type: string
+        useCalculatedVisibility:
+          title: Usecalculatedvisibility
+          type: boolean
+        visible:
+          title: Visible
+          type: boolean
+        width:
+          title: Width
+          type: string
+        zBias:
+          title: Zbias
+          type: string
+        zIndex:
+          title: Zindex
+          type: string
+        zOrder:
+          title: Zorder
+          type: string
+      required:
+      - description
+      - color
+      - visible
+      - calculatedVisibility
+      - useCalculatedVisibility
+      - opacity
+      - zIndex
+      - zBias
+      - zOrder
+      - label
+      - labelVisible
+      - size
+      - width
+      - start
+      - end
+      - coords
+      title: LineProperties
+      type: object
+    MathItem:
+      discriminator:
+        mapping:
+          AXIS: '#/components/schemas/AxisItem'
+          BOOLEAN_VARIABLE: '#/components/schemas/BooleanVariableItem'
+          CAMERA: '#/components/schemas/CameraItem'
+          EXPLICIT_SURFACE: '#/components/schemas/ExplicitSurfaceItem'
+          EXPLICIT_SURFACE_POLAR: '#/components/schemas/ExplicitSurfacePolarItem'
+          FOLDER: '#/components/schemas/FolderItem'
+          GRID: '#/components/schemas/GridItem'
+          IMPLICIT_SURFACE: '#/components/schemas/ImplicitSurfaceItem'
+          LINE: '#/components/schemas/LineItem'
+          PARAMETRIC_CURVE: '#/components/schemas/ParametricCurveItem'
+          PARAMETRIC_SURFACE: '#/components/schemas/ParametricSurfaceItem'
+          POINT: '#/components/schemas/PointItem'
+          VARIABLE: '#/components/schemas/VariableItem'
+          VARIABLE_SLIDER: '#/components/schemas/VariableSliderItem'
+          VECTOR: '#/components/schemas/VectorItem'
+          VECTOR_FIELD: '#/components/schemas/VectorFieldItem'
+        propertyName: type
+      oneOf:
+      - $ref: '#/components/schemas/AxisItem'
+      - $ref: '#/components/schemas/BooleanVariableItem'
+      - $ref: '#/components/schemas/CameraItem'
+      - $ref: '#/components/schemas/ExplicitSurfaceItem'
+      - $ref: '#/components/schemas/ExplicitSurfacePolarItem'
+      - $ref: '#/components/schemas/FolderItem'
+      - $ref: '#/components/schemas/GridItem'
+      - $ref: '#/components/schemas/ImplicitSurfaceItem'
+      - $ref: '#/components/schemas/LineItem'
+      - $ref: '#/components/schemas/ParametricCurveItem'
+      - $ref: '#/components/schemas/ParametricSurfaceItem'
+      - $ref: '#/components/schemas/PointItem'
+      - $ref: '#/components/schemas/VariableItem'
+      - $ref: '#/components/schemas/VariableSliderItem'
+      - $ref: '#/components/schemas/VectorItem'
+      - $ref: '#/components/schemas/VectorFieldItem'
+      title: MathItem
     MiniSceneSchema:
       properties:
         archived:
@@ -111,6 +926,291 @@ components:
       - count
       title: PagedMiniSceneSchema
       type: object
+    ParametricCurveItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/ParametricCurveProperties'
+        type:
+          const: PARAMETRIC_CURVE
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: ParametricCurveItem
+      type: object
+    ParametricCurveProperties:
+      additionalProperties: false
+      properties:
+        calculatedVisibility:
+          title: Calculatedvisibility
+          type: string
+        color:
+          title: Color
+          type: string
+        description:
+          title: Description
+          type: string
+        domain:
+          $ref: '#/components/schemas/ExprArray'
+        end:
+          title: End
+          type: string
+        expr:
+          $ref: '#/components/schemas/FunctionAssignmentObj'
+        opacity:
+          title: Opacity
+          type: string
+        samples1:
+          title: Samples1
+          type: string
+        size:
+          title: Size
+          type: string
+        start:
+          title: Start
+          type: string
+        useCalculatedVisibility:
+          title: Usecalculatedvisibility
+          type: boolean
+        visible:
+          title: Visible
+          type: boolean
+        width:
+          title: Width
+          type: string
+        zBias:
+          title: Zbias
+          type: string
+        zIndex:
+          title: Zindex
+          type: string
+        zOrder:
+          title: Zorder
+          type: string
+      required:
+      - description
+      - color
+      - visible
+      - calculatedVisibility
+      - useCalculatedVisibility
+      - opacity
+      - zIndex
+      - zBias
+      - zOrder
+      - size
+      - width
+      - start
+      - end
+      - expr
+      - domain
+      - samples1
+      title: ParametricCurveProperties
+      type: object
+    ParametricSurfaceItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/ParametricSurfaceProperties'
+        type:
+          const: PARAMETRIC_SURFACE
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: ParametricSurfaceItem
+      type: object
+    ParametricSurfaceProperties:
+      additionalProperties: false
+      properties:
+        calculatedVisibility:
+          title: Calculatedvisibility
+          type: string
+        color:
+          title: Color
+          type: string
+        colorExpr:
+          $ref: '#/components/schemas/FunctionAssignmentObj'
+        description:
+          title: Description
+          type: string
+        domain:
+          $ref: '#/components/schemas/FunctionAssignmentArray'
+        expr:
+          $ref: '#/components/schemas/FunctionAssignmentObj'
+        grid1:
+          title: Grid1
+          type: string
+        grid2:
+          title: Grid2
+          type: string
+        gridOpacity:
+          title: Gridopacity
+          type: string
+        gridWidth:
+          title: Gridwidth
+          type: string
+        opacity:
+          title: Opacity
+          type: string
+        samples1:
+          title: Samples1
+          type: string
+        samples2:
+          title: Samples2
+          type: string
+        shaded:
+          title: Shaded
+          type: string
+        useCalculatedVisibility:
+          title: Usecalculatedvisibility
+          type: boolean
+        visible:
+          title: Visible
+          type: boolean
+        zBias:
+          title: Zbias
+          type: string
+        zIndex:
+          title: Zindex
+          type: string
+        zOrder:
+          title: Zorder
+          type: string
+      required:
+      - description
+      - color
+      - visible
+      - calculatedVisibility
+      - useCalculatedVisibility
+      - opacity
+      - zIndex
+      - zBias
+      - zOrder
+      - shaded
+      - expr
+      - domain
+      - colorExpr
+      - gridOpacity
+      - gridWidth
+      - samples1
+      - samples2
+      - grid1
+      - grid2
+      title: ParametricSurfaceProperties
+      type: object
+    PointItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/PointProperties'
+        type:
+          const: POINT
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: PointItem
+      type: object
+    PointProperties:
+      additionalProperties: false
+      properties:
+        calculatedVisibility:
+          title: Calculatedvisibility
+          type: string
+        color:
+          title: Color
+          type: string
+        coords:
+          title: Coords
+          type: string
+        description:
+          title: Description
+          type: string
+        label:
+          title: Label
+          type: string
+        labelVisible:
+          title: Labelvisible
+          type: string
+        opacity:
+          title: Opacity
+          type: string
+        size:
+          title: Size
+          type: string
+        useCalculatedVisibility:
+          title: Usecalculatedvisibility
+          type: boolean
+        visible:
+          title: Visible
+          type: boolean
+        zBias:
+          title: Zbias
+          type: string
+        zIndex:
+          title: Zindex
+          type: string
+        zOrder:
+          title: Zorder
+          type: string
+      required:
+      - description
+      - color
+      - visible
+      - calculatedVisibility
+      - useCalculatedVisibility
+      - opacity
+      - zIndex
+      - zBias
+      - zOrder
+      - label
+      - labelVisible
+      - coords
+      - size
+      title: PointProperties
+      type: object
+    SceneCreateSchema:
+      properties:
+        archived:
+          default: false
+          title: Archived
+          type: boolean
+        itemOrder:
+          additionalProperties:
+            $ref: '#/components/schemas/ItemOrderValue'
+          title: Itemorder
+          type: object
+        items:
+          items:
+            $ref: '#/components/schemas/MathItem'
+          title: Items
+          type: array
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+      required:
+      - items
+      - itemOrder
+      title: SceneCreateSchema
+      type: object
     SceneFilterSchema:
       properties:
         archived:
@@ -124,6 +1224,97 @@ components:
           - type: 'null'
           title: Title
       title: SceneFilterSchema
+      type: object
+    ScenePatchSchema:
+      properties:
+        archived:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Archived
+        itemOrder:
+          additionalProperties:
+            $ref: '#/components/schemas/ItemOrderValue'
+          title: Itemorder
+          type: object
+        items:
+          items:
+            $ref: '#/components/schemas/MathItem'
+          title: Items
+          type: array
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+      title: ScenePatchSchema
+      type: object
+    SceneSchema:
+      properties:
+        archived:
+          title: Archived
+          type: boolean
+        author:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Author
+        createdDate:
+          format: date-time
+          title: Createddate
+          type: string
+        isLegacy:
+          title: Islegacy
+          type: boolean
+        itemOrder:
+          additionalProperties:
+            $ref: '#/components/schemas/ItemOrderValue'
+          title: Itemorder
+          type: object
+        items:
+          items:
+            $ref: '#/components/schemas/MathItem'
+          title: Items
+          type: array
+        key:
+          title: Key
+          type: string
+        modifiedDate:
+          format: date-time
+          title: Modifieddate
+          type: string
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+      required:
+      - items
+      - itemOrder
+      - key
+      - createdDate
+      - modifiedDate
+      - archived
+      - isLegacy
+      title: SceneSchema
+      type: object
+    StrArray:
+      additionalProperties: false
+      properties:
+        items:
+          items:
+            type: string
+          title: Items
+          type: array
+        type:
+          enum:
+          - array
+          title: Type
+          type: string
+      required:
+      - type
+      - items
+      title: StrArray
       type: object
     UserSchema:
       properties:
@@ -150,6 +1341,277 @@ components:
       required:
       - public_nickname
       title: UserUpdateSchema
+      type: object
+    VariableItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/VariableProperties'
+        type:
+          const: VARIABLE
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: VariableItem
+      type: object
+    VariableProperties:
+      additionalProperties: false
+      properties:
+        description:
+          title: Description
+          type: string
+        value:
+          $ref: '#/components/schemas/AssignmentObj'
+      required:
+      - value
+      - description
+      title: VariableProperties
+      type: object
+    VariableSliderItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/VariableSliderProperties'
+        type:
+          const: VARIABLE_SLIDER
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: VariableSliderItem
+      type: object
+    VariableSliderProperties:
+      additionalProperties: false
+      properties:
+        description:
+          title: Description
+          type: string
+        duration:
+          title: Duration
+          type: string
+        fps:
+          title: Fps
+          type: string
+        isAnimating:
+          title: Isanimating
+          type: string
+        range:
+          $ref: '#/components/schemas/StrArray'
+        speedMultiplier:
+          title: Speedmultiplier
+          type: string
+        value:
+          $ref: '#/components/schemas/AssignmentObj'
+      required:
+      - value
+      - fps
+      - range
+      - duration
+      - description
+      - isAnimating
+      - speedMultiplier
+      title: VariableSliderProperties
+      type: object
+    VectorFieldItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/VectorFieldProperties'
+        type:
+          const: VECTOR_FIELD
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: VectorFieldItem
+      type: object
+    VectorFieldProperties:
+      additionalProperties: false
+      properties:
+        calculatedVisibility:
+          title: Calculatedvisibility
+          type: string
+        color:
+          title: Color
+          type: string
+        description:
+          title: Description
+          type: string
+        domain:
+          $ref: '#/components/schemas/ExprArray'
+        end:
+          title: End
+          type: string
+        expr:
+          $ref: '#/components/schemas/FunctionAssignmentObj'
+        opacity:
+          title: Opacity
+          type: string
+        samples1:
+          title: Samples1
+          type: string
+        samples2:
+          title: Samples2
+          type: string
+        samples3:
+          title: Samples3
+          type: string
+        scale:
+          title: Scale
+          type: string
+        size:
+          title: Size
+          type: string
+        start:
+          title: Start
+          type: string
+        useCalculatedVisibility:
+          title: Usecalculatedvisibility
+          type: boolean
+        visible:
+          title: Visible
+          type: boolean
+        width:
+          title: Width
+          type: string
+        zBias:
+          title: Zbias
+          type: string
+        zIndex:
+          title: Zindex
+          type: string
+        zOrder:
+          title: Zorder
+          type: string
+      required:
+      - description
+      - color
+      - visible
+      - calculatedVisibility
+      - useCalculatedVisibility
+      - opacity
+      - zIndex
+      - zBias
+      - zOrder
+      - size
+      - width
+      - start
+      - end
+      - domain
+      - expr
+      - samples1
+      - samples2
+      - samples3
+      - scale
+      title: VectorFieldProperties
+      type: object
+    VectorItem:
+      additionalProperties: false
+      properties:
+        id:
+          title: Id
+          type: string
+        properties:
+          $ref: '#/components/schemas/VectorProperties'
+        type:
+          const: VECTOR
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - properties
+      title: VectorItem
+      type: object
+    VectorProperties:
+      additionalProperties: false
+      properties:
+        calculatedVisibility:
+          title: Calculatedvisibility
+          type: string
+        color:
+          title: Color
+          type: string
+        components:
+          title: Components
+          type: string
+        description:
+          title: Description
+          type: string
+        end:
+          title: End
+          type: string
+        label:
+          title: Label
+          type: string
+        labelVisible:
+          title: Labelvisible
+          type: string
+        opacity:
+          title: Opacity
+          type: string
+        size:
+          title: Size
+          type: string
+        start:
+          title: Start
+          type: string
+        tail:
+          title: Tail
+          type: string
+        useCalculatedVisibility:
+          title: Usecalculatedvisibility
+          type: boolean
+        visible:
+          title: Visible
+          type: boolean
+        width:
+          title: Width
+          type: string
+        zBias:
+          title: Zbias
+          type: string
+        zIndex:
+          title: Zindex
+          type: string
+        zOrder:
+          title: Zorder
+          type: string
+      required:
+      - description
+      - color
+      - visible
+      - calculatedVisibility
+      - useCalculatedVisibility
+      - opacity
+      - zIndex
+      - zBias
+      - zOrder
+      - label
+      - labelVisible
+      - size
+      - width
+      - start
+      - end
+      - components
+      - tail
+      title: VectorProperties
       type: object
   securitySchemes:
     SessionAuth:
@@ -319,6 +1781,23 @@ paths:
                 $ref: '#/components/schemas/PagedMiniSceneSchema'
           description: OK
       summary: List Scenes
+    post:
+      operationId: scenes_api_create_scene
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SceneCreateSchema'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SceneSchema'
+          description: Created
+      summary: Create Scene
   /v1/scenes/me/:
     get:
       operationId: scenes_api_my_scenes
@@ -365,4 +1844,62 @@ paths:
       security:
       - SessionAuth: []
       summary: My Scenes
+  /v1/scenes/{key}/:
+    delete:
+      operationId: scenes_api_delete_scene
+      parameters:
+      - in: path
+        name: key
+        required: true
+        schema:
+          title: Key
+          type: string
+      responses:
+        '204':
+          description: No Content
+      security:
+      - SessionAuth: []
+      summary: Delete Scene
+    get:
+      operationId: scenes_api_get_scene
+      parameters:
+      - in: path
+        name: key
+        required: true
+        schema:
+          title: Key
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SceneSchema'
+          description: OK
+      summary: Get Scene
+    patch:
+      operationId: scenes_api_update_scene
+      parameters:
+      - in: path
+        name: key
+        required: true
+        schema:
+          title: Key
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenePatchSchema'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SceneSchema'
+          description: OK
+      security:
+      - SessionAuth: []
+      summary: Update Scene
 servers: []

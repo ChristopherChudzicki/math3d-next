@@ -29,7 +29,7 @@ interface ExplicitSurfacePolarProperties {
   description: string;
   color: string;
   visible: boolean;
-  calculatedVisibility: "";
+  calculatedVisibility: string;
   useCalculatedVisibility: boolean;
   opacity: string;
   zIndex: string;
