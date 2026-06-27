@@ -1,4 +1,5 @@
 import re
+from copy import deepcopy
 from typing import Literal, cast
 
 import scenes.legacy_scene_utils.legacy_data as old
@@ -27,6 +28,7 @@ from scenes.schemas.math_items import (
     ImplicitSurfaceProperties,
     LineItem,
     LineProperties,
+    MathItemUnion,
     ParametricCurveItem,
     ParametricCurveProperties,
     ParametricSurfaceItem,
@@ -42,9 +44,7 @@ from scenes.schemas.math_items import (
     VectorFieldProperties,
     VectorItem,
     VectorProperties,
-    _MathItemUnion,
 )
-from copy import deepcopy
 
 
 def stringify(obj: bool):
@@ -149,6 +149,8 @@ class ItemMigrator:
             labelVisible=stringify(x.labelVisible),
             min=x.min,
             max=x.max,
+            # cast narrows the legacy str for mypy; Pydantic validates the
+            # Literal at runtime when AxisProperties is constructed.
             axis=cast(Literal["x", "y", "z"], x.axis),
             scale=x.scale,
             ticksVisible=stringify(x.ticksVisible),
@@ -279,6 +281,8 @@ class ItemMigrator:
             divisions=x.divisions,
             width="1/2",
             snap="false",
+            # cast narrows the legacy str for mypy; Pydantic validates the
+            # Literal at runtime when GridProperties is constructed.
             axes=cast(Literal["xy", "yz", "zx"], x.axes),
         )
 
@@ -515,7 +519,7 @@ class ItemMigrator:
             zIndex=x.zIndex,
         )
 
-    def translate_item(self, item, item_id) -> _MathItemUnion:
+    def translate_item(self, item, item_id) -> MathItemUnion:
         copy = deepcopy(item)
         item_type = copy["type"]
         del copy["type"]

@@ -514,3 +514,11 @@ class MathItem(RootModel[_MathItemUnion]):
 # No bare `: TypeAdapter` annotation — it trips mypy's var-annotated; the
 # inferred type is correct.
 MATH_ITEM_LIST_ADAPTER = TypeAdapter(list[_MathItemUnion])
+
+
+# Public alias of the raw discriminated union, for use as an annotation by code
+# outside this module (e.g. the legacy translator's `translate_item` return
+# type). Distinct from `MathItem` (the RootModel): the translator returns
+# concrete *Item instances, which are not RootModel instances, so `MathItem`
+# cannot annotate that return.
+MathItemUnion = _MathItemUnion
