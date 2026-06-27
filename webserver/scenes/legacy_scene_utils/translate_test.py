@@ -33,7 +33,7 @@ def test_axis():
             "zOrder": "",
         },
     }
-    assert migrator.translate_item(data_in, "axis-x").to_json_data() == {
+    assert migrator.translate_item(data_in, "axis-x").model_dump(mode="json") == {
         **expected_out,
         "id": "axis-x",
         "properties": {
@@ -42,7 +42,7 @@ def test_axis():
             "label": "x",
         },
     }
-    assert migrator.translate_item(data_in, "axis-y").to_json_data() == {
+    assert migrator.translate_item(data_in, "axis-y").model_dump(mode="json") == {
         **expected_out,
         "id": "axis-y",
         "properties": {
@@ -51,7 +51,7 @@ def test_axis():
             "label": "y",
         },
     }
-    assert migrator.translate_item(data_in, "axis-z").to_json_data() == {
+    assert migrator.translate_item(data_in, "axis-z").model_dump(mode="json") == {
         **expected_out,
         "id": "axis-z",
         "properties": {
@@ -77,7 +77,7 @@ def test_boolean_variable():
             "value": {"lhs": "switch", "rhs": "true", "type": "assignment"},
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -133,7 +133,7 @@ def test_camera(in_patch, out_patch):
             **out_patch,
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -221,7 +221,7 @@ def test_explicit_surface(in_patch, out_patch):
             **out_patch,
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -295,7 +295,7 @@ def test_explicit_surface_polar(in_patch, out_patch):
             **out_patch,
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -311,7 +311,7 @@ def test_folder():
         "type": "FOLDER",
         "properties": {"description": "test folder", "isCollapsed": "true"},
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -337,7 +337,7 @@ def test_grid():
             "zOrder": "",
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -383,7 +383,7 @@ def test_implicit_surface():
             "zOrder": "",
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -414,7 +414,7 @@ def test_line():
             "zOrder": "",
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -453,7 +453,7 @@ def test_parametric_curve():
             "zOrder": "",
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -513,7 +513,7 @@ def test_parametric_surface():
             "zOrder": "",
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -541,7 +541,7 @@ def test_point():
             "zOrder": "",
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -558,7 +558,7 @@ def test_variable():
             "value": {"lhs": "f(x)", "rhs": "e^x", "type": "assignment"},
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -583,7 +583,7 @@ def test_variable_slider(in_patch, out_patch):
             **out_patch,
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -615,7 +615,7 @@ def test_vector():
             "zOrder": "",
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
 
 
@@ -677,5 +677,5 @@ def test_vector_field(in_patch, out_patch):
             **out_patch,
         },
     }
-    actual_out = migrator.translate_item(data_in, "some-id").to_json_data()
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
