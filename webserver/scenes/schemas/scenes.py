@@ -2,19 +2,9 @@ from datetime import datetime
 from typing import Annotated, Any, Dict, List, Optional
 
 from ninja import Field, FilterLookup, FilterSchema, Schema
-from pydantic import ConfigDict, RootModel
+from pydantic import ConfigDict
 
 from scenes.schemas.math_items import MathItem
-
-
-# Names the inner `list[str]` so the generated client emits
-# `{ [key: string]: Array<string> }` for `itemOrder`. Without the RootModel,
-# openapi-generator-cli v7.2.0 can't recurse into a complex inline
-# `additionalProperties` schema and degrades the value type to `any`.
-# A `#` comment, not a docstring — keeps this rationale out of the schema
-# `description` (see the matching note on MathItem).
-class ItemOrderValue(RootModel[List[str]]):
-    root: List[str]
 
 
 class _AuthoredSceneSchema(Schema):
@@ -39,7 +29,7 @@ class MiniSceneSchema(_AuthoredSceneSchema):
 
 class SceneSchema(_AuthoredSceneSchema):
     items: List[MathItem]
-    item_order: Dict[str, ItemOrderValue] = Field(alias="itemOrder")
+    item_order: Dict[str, List[str]] = Field(alias="itemOrder")
     title: Optional[str] = None
     key: str
     author: Optional[int] = None
@@ -54,7 +44,7 @@ class SceneCreateSchema(Schema):
     model_config = ConfigDict(populate_by_name=True)
 
     items: List[MathItem]
-    item_order: Dict[str, ItemOrderValue] = Field(alias="itemOrder")
+    item_order: Dict[str, List[str]] = Field(alias="itemOrder")
     title: Optional[str] = None
     archived: bool = False
 
@@ -74,9 +64,7 @@ class ScenePatchSchema(Schema):
     model_config = ConfigDict(populate_by_name=True)
 
     items: List[MathItem] = Field(default_factory=list)
-    item_order: Dict[str, ItemOrderValue] = Field(
-        default_factory=dict, alias="itemOrder"
-    )
+    item_order: Dict[str, List[str]] = Field(default_factory=dict, alias="itemOrder")
     title: Optional[str] = None
     archived: Optional[bool] = None
 

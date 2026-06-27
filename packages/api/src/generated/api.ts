@@ -28,6 +28,7 @@ import {
   serializeDataIfNeeded,
   toPathString,
   createRequestFunction,
+  replaceWithSerializableTypeIfNeeded,
 } from "./common";
 import type { RequestArgs } from "./base";
 // @ts-ignore
@@ -39,395 +40,84 @@ import {
   operationServerMap,
 } from "./base";
 
-/**
- *
- * @export
- * @interface ActivateRequest
- */
 export interface ActivateRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof ActivateRequest
-   */
   email: string;
 }
-/**
- *
- * @export
- * @interface DeleteAccountRequest
- */
 export interface DeleteAccountRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteAccountRequest
-   */
   current_password: string;
 }
-/**
- *
- * @export
- * @interface LegacyScene
- */
 export interface LegacyScene {
-  /**
-   *
-   * @type {string}
-   * @memberof LegacyScene
-   */
   key?: string;
-  /**
-   *
-   * @type {any}
-   * @memberof LegacyScene
-   */
   dehydrated: any;
 }
-/**
- *
- * @export
- * @interface LegacySceneRequest
- */
 export interface LegacySceneRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof LegacySceneRequest
-   */
   key?: string;
-  /**
-   *
-   * @type {any}
-   * @memberof LegacySceneRequest
-   */
   dehydrated: any;
 }
-/**
- *
- * @export
- * @interface MiniScene
- */
 export interface MiniScene {
-  /**
-   *
-   * @type {string}
-   * @memberof MiniScene
-   */
   title?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof MiniScene
-   */
   key?: string;
-  /**
-   *
-   * @type {number}
-   * @memberof MiniScene
-   */
   author?: number | null;
-  /**
-   *
-   * @type {string}
-   * @memberof MiniScene
-   */
   createdDate: string;
-  /**
-   *
-   * @type {string}
-   * @memberof MiniScene
-   */
   modifiedDate: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof MiniScene
-   */
   archived?: boolean;
 }
-/**
- *
- * @export
- * @interface PaginatedLegacySceneList
- */
 export interface PaginatedLegacySceneList {
-  /**
-   *
-   * @type {number}
-   * @memberof PaginatedLegacySceneList
-   */
   count: number;
-  /**
-   *
-   * @type {string}
-   * @memberof PaginatedLegacySceneList
-   */
   next?: string | null;
-  /**
-   *
-   * @type {string}
-   * @memberof PaginatedLegacySceneList
-   */
   previous?: string | null;
-  /**
-   *
-   * @type {Array<LegacyScene>}
-   * @memberof PaginatedLegacySceneList
-   */
   results: Array<LegacyScene>;
 }
-/**
- *
- * @export
- * @interface PaginatedMiniSceneList
- */
 export interface PaginatedMiniSceneList {
-  /**
-   *
-   * @type {number}
-   * @memberof PaginatedMiniSceneList
-   */
   count: number;
-  /**
-   *
-   * @type {string}
-   * @memberof PaginatedMiniSceneList
-   */
   next?: string | null;
-  /**
-   *
-   * @type {string}
-   * @memberof PaginatedMiniSceneList
-   */
   previous?: string | null;
-  /**
-   *
-   * @type {Array<MiniScene>}
-   * @memberof PaginatedMiniSceneList
-   */
   results: Array<MiniScene>;
 }
-/**
- *
- * @export
- * @interface PatchedSceneRequest
- */
 export interface PatchedSceneRequest {
-  /**
-   *
-   * @type {any}
-   * @memberof PatchedSceneRequest
-   */
   items?: any;
-  /**
-   *
-   * @type {any}
-   * @memberof PatchedSceneRequest
-   */
   itemOrder?: any;
-  /**
-   *
-   * @type {string}
-   * @memberof PatchedSceneRequest
-   */
   title?: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof PatchedSceneRequest
-   */
   archived?: boolean;
 }
-/**
- *
- * @export
- * @interface PatchedUserRequest
- */
 export interface PatchedUserRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof PatchedUserRequest
-   */
   public_nickname?: string;
 }
-/**
- *
- * @export
- * @interface Scene
- */
 export interface Scene {
-  /**
-   *
-   * @type {any}
-   * @memberof Scene
-   */
   items: any;
-  /**
-   *
-   * @type {any}
-   * @memberof Scene
-   */
   itemOrder: any;
-  /**
-   *
-   * @type {string}
-   * @memberof Scene
-   */
   title?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof Scene
-   */
   key: string;
-  /**
-   *
-   * @type {number}
-   * @memberof Scene
-   */
   author: number | null;
-  /**
-   *
-   * @type {string}
-   * @memberof Scene
-   */
   createdDate: string;
-  /**
-   *
-   * @type {string}
-   * @memberof Scene
-   */
   modifiedDate: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof Scene
-   */
   archived?: boolean;
-  /**
-   *
-   * @type {boolean}
-   * @memberof Scene
-   */
   isLegacy: boolean;
 }
-/**
- *
- * @export
- * @interface SceneCreate
- */
 export interface SceneCreate {
-  /**
-   *
-   * @type {any}
-   * @memberof SceneCreate
-   */
   items: any;
-  /**
-   *
-   * @type {any}
-   * @memberof SceneCreate
-   */
   itemOrder: any;
-  /**
-   *
-   * @type {string}
-   * @memberof SceneCreate
-   */
   title?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof SceneCreate
-   */
   key: string;
-  /**
-   *
-   * @type {string}
-   * @memberof SceneCreate
-   */
   createdDate: string;
-  /**
-   *
-   * @type {string}
-   * @memberof SceneCreate
-   */
   modifiedDate: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof SceneCreate
-   */
   archived?: boolean;
-  /**
-   *
-   * @type {boolean}
-   * @memberof SceneCreate
-   */
   isLegacy: boolean;
 }
-/**
- *
- * @export
- * @interface SceneCreateRequest
- */
 export interface SceneCreateRequest {
-  /**
-   *
-   * @type {any}
-   * @memberof SceneCreateRequest
-   */
   items: any;
-  /**
-   *
-   * @type {any}
-   * @memberof SceneCreateRequest
-   */
   itemOrder: any;
-  /**
-   *
-   * @type {string}
-   * @memberof SceneCreateRequest
-   */
   title?: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof SceneCreateRequest
-   */
   archived?: boolean;
 }
-/**
- *
- * @export
- * @interface User
- */
 export interface User {
-  /**
-   *
-   * @type {number}
-   * @memberof User
-   */
   id: number;
-  /**
-   *
-   * @type {string}
-   * @memberof User
-   */
   email: string;
-  /**
-   *
-   * @type {string}
-   * @memberof User
-   */
   public_nickname: string;
 }
 
 /**
  * AuthApi - axios parameter creator
- * @export
  */
 export const AuthApiAxiosParamCreator = function (
   configuration?: Configuration,
@@ -572,6 +262,7 @@ export const AuthApiAxiosParamCreator = function (
       // authentication cookieAuth required
 
       localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -618,6 +309,8 @@ export const AuthApiAxiosParamCreator = function (
 
       // authentication cookieAuth required
 
+      localVarHeaderParameter["Accept"] = "application/json";
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
         baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -637,7 +330,6 @@ export const AuthApiAxiosParamCreator = function (
 
 /**
  * AuthApi - functional programming interface
- * @export
  */
 export const AuthApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = AuthApiAxiosParamCreator(configuration);
@@ -659,16 +351,18 @@ export const AuthApiFp = function (configuration?: Configuration) {
           ActivateRequest,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersActivationCreate"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["AuthApi.authUsersActivationCreate"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      * Delete the current user\'s account (requires the current password).  Modeled as a POST action rather than DELETE-with-body: drf-spectacular only emits request bodies for PUT/PATCH/POST, and per HTTP semantics a DELETE payload \"has no defined semantics\" (RFC 9110). A POST keeps the password requirement fully described by the OpenAPI spec and generated client.
@@ -687,16 +381,18 @@ export const AuthApiFp = function (configuration?: Configuration) {
           DeleteAccountRequest,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersMeDeleteCreate"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["AuthApi.authUsersMeDeleteCreate"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      * GET and PATCH the current user\'s profile.
@@ -715,16 +411,18 @@ export const AuthApiFp = function (configuration?: Configuration) {
           PatchedUserRequest,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersMePartialUpdate"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["AuthApi.authUsersMePartialUpdate"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      * GET and PATCH the current user\'s profile.
@@ -738,23 +436,24 @@ export const AuthApiFp = function (configuration?: Configuration) {
     > {
       const localVarAxiosArgs =
         await localVarAxiosParamCreator.authUsersMeRetrieve(options);
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["AuthApi.authUsersMeRetrieve"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["AuthApi.authUsersMeRetrieve"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
   };
 };
 
 /**
  * AuthApi - factory interface
- * @export
  */
 export const AuthApiFactory = function (
   configuration?: Configuration,
@@ -823,51 +522,27 @@ export const AuthApiFactory = function (
 
 /**
  * Request parameters for authUsersActivationCreate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersActivationCreateRequest
  */
 export interface AuthApiAuthUsersActivationCreateRequest {
-  /**
-   *
-   * @type {ActivateRequest}
-   * @memberof AuthApiAuthUsersActivationCreate
-   */
   readonly ActivateRequest: ActivateRequest;
 }
 
 /**
  * Request parameters for authUsersMeDeleteCreate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersMeDeleteCreateRequest
  */
 export interface AuthApiAuthUsersMeDeleteCreateRequest {
-  /**
-   *
-   * @type {DeleteAccountRequest}
-   * @memberof AuthApiAuthUsersMeDeleteCreate
-   */
   readonly DeleteAccountRequest: DeleteAccountRequest;
 }
 
 /**
  * Request parameters for authUsersMePartialUpdate operation in AuthApi.
- * @export
- * @interface AuthApiAuthUsersMePartialUpdateRequest
  */
 export interface AuthApiAuthUsersMePartialUpdateRequest {
-  /**
-   *
-   * @type {PatchedUserRequest}
-   * @memberof AuthApiAuthUsersMePartialUpdate
-   */
   readonly PatchedUserRequest?: PatchedUserRequest;
 }
 
 /**
  * AuthApi - object-oriented interface
- * @export
- * @class AuthApi
- * @extends {BaseAPI}
  */
 export class AuthApi extends BaseAPI {
   /**
@@ -875,7 +550,6 @@ export class AuthApi extends BaseAPI {
    * @param {AuthApiAuthUsersActivationCreateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof AuthApi
    */
   public authUsersActivationCreate(
     requestParameters: AuthApiAuthUsersActivationCreateRequest,
@@ -891,7 +565,6 @@ export class AuthApi extends BaseAPI {
    * @param {AuthApiAuthUsersMeDeleteCreateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof AuthApi
    */
   public authUsersMeDeleteCreate(
     requestParameters: AuthApiAuthUsersMeDeleteCreateRequest,
@@ -907,7 +580,6 @@ export class AuthApi extends BaseAPI {
    * @param {AuthApiAuthUsersMePartialUpdateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof AuthApi
    */
   public authUsersMePartialUpdate(
     requestParameters: AuthApiAuthUsersMePartialUpdateRequest = {},
@@ -922,7 +594,6 @@ export class AuthApi extends BaseAPI {
    * GET and PATCH the current user\'s profile.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof AuthApi
    */
   public authUsersMeRetrieve(options?: RawAxiosRequestConfig) {
     return AuthApiFp(this.configuration)
@@ -933,7 +604,6 @@ export class AuthApi extends BaseAPI {
 
 /**
  * LegacyScenesApi - axios parameter creator
- * @export
  */
 export const LegacyScenesApiAxiosParamCreator = function (
   configuration?: Configuration,
@@ -974,6 +644,7 @@ export const LegacyScenesApiAxiosParamCreator = function (
       // authentication cookieAuth required
 
       localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -1032,6 +703,8 @@ export const LegacyScenesApiAxiosParamCreator = function (
         localVarQueryParameter["offset"] = offset;
       }
 
+      localVarHeaderParameter["Accept"] = "application/json";
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
         baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -1059,7 +732,7 @@ export const LegacyScenesApiAxiosParamCreator = function (
       // verify required parameter 'key' is not null or undefined
       assertParamExists("legacyScenesRetrieve", "key", key);
       const localVarPath = `/v0/legacy_scenes/{key}/`.replace(
-        `{${"key"}}`,
+        "{key}",
         encodeURIComponent(String(key)),
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -1078,6 +751,8 @@ export const LegacyScenesApiAxiosParamCreator = function (
       const localVarQueryParameter = {} as any;
 
       // authentication cookieAuth required
+
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -1098,7 +773,6 @@ export const LegacyScenesApiAxiosParamCreator = function (
 
 /**
  * LegacyScenesApi - functional programming interface
- * @export
  */
 export const LegacyScenesApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator =
@@ -1121,16 +795,18 @@ export const LegacyScenesApiFp = function (configuration?: Configuration) {
           LegacySceneRequest,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["LegacyScenesApi.legacyScenesCreate"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["LegacyScenesApi.legacyScenesCreate"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -1155,16 +831,18 @@ export const LegacyScenesApiFp = function (configuration?: Configuration) {
           offset,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["LegacyScenesApi.legacyScenesList"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["LegacyScenesApi.legacyScenesList"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -1180,24 +858,24 @@ export const LegacyScenesApiFp = function (configuration?: Configuration) {
     > {
       const localVarAxiosArgs =
         await localVarAxiosParamCreator.legacyScenesRetrieve(key, options);
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["LegacyScenesApi.legacyScenesRetrieve"]?.[index]
-          ?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["LegacyScenesApi.legacyScenesRetrieve"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
   };
 };
 
 /**
  * LegacyScenesApi - factory interface
- * @export
  */
 export const LegacyScenesApiFactory = function (
   configuration?: Configuration,
@@ -1257,58 +935,35 @@ export const LegacyScenesApiFactory = function (
 
 /**
  * Request parameters for legacyScenesCreate operation in LegacyScenesApi.
- * @export
- * @interface LegacyScenesApiLegacyScenesCreateRequest
  */
 export interface LegacyScenesApiLegacyScenesCreateRequest {
-  /**
-   *
-   * @type {LegacySceneRequest}
-   * @memberof LegacyScenesApiLegacyScenesCreate
-   */
   readonly LegacySceneRequest: LegacySceneRequest;
 }
 
 /**
  * Request parameters for legacyScenesList operation in LegacyScenesApi.
- * @export
- * @interface LegacyScenesApiLegacyScenesListRequest
  */
 export interface LegacyScenesApiLegacyScenesListRequest {
   /**
    * Number of results to return per page.
-   * @type {number}
-   * @memberof LegacyScenesApiLegacyScenesList
    */
   readonly limit?: number;
 
   /**
    * The initial index from which to return the results.
-   * @type {number}
-   * @memberof LegacyScenesApiLegacyScenesList
    */
   readonly offset?: number;
 }
 
 /**
  * Request parameters for legacyScenesRetrieve operation in LegacyScenesApi.
- * @export
- * @interface LegacyScenesApiLegacyScenesRetrieveRequest
  */
 export interface LegacyScenesApiLegacyScenesRetrieveRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof LegacyScenesApiLegacyScenesRetrieve
-   */
   readonly key: string;
 }
 
 /**
  * LegacyScenesApi - object-oriented interface
- * @export
- * @class LegacyScenesApi
- * @extends {BaseAPI}
  */
 export class LegacyScenesApi extends BaseAPI {
   /**
@@ -1316,7 +971,6 @@ export class LegacyScenesApi extends BaseAPI {
    * @param {LegacyScenesApiLegacyScenesCreateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof LegacyScenesApi
    */
   public legacyScenesCreate(
     requestParameters: LegacyScenesApiLegacyScenesCreateRequest,
@@ -1332,7 +986,6 @@ export class LegacyScenesApi extends BaseAPI {
    * @param {LegacyScenesApiLegacyScenesListRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof LegacyScenesApi
    */
   public legacyScenesList(
     requestParameters: LegacyScenesApiLegacyScenesListRequest = {},
@@ -1352,7 +1005,6 @@ export class LegacyScenesApi extends BaseAPI {
    * @param {LegacyScenesApiLegacyScenesRetrieveRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof LegacyScenesApi
    */
   public legacyScenesRetrieve(
     requestParameters: LegacyScenesApiLegacyScenesRetrieveRequest,
@@ -1366,7 +1018,6 @@ export class LegacyScenesApi extends BaseAPI {
 
 /**
  * ScenesApi - axios parameter creator
- * @export
  */
 export const ScenesApiAxiosParamCreator = function (
   configuration?: Configuration,
@@ -1407,6 +1058,7 @@ export const ScenesApiAxiosParamCreator = function (
       // authentication cookieAuth required
 
       localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -1440,7 +1092,7 @@ export const ScenesApiAxiosParamCreator = function (
       // verify required parameter 'key' is not null or undefined
       assertParamExists("scenesDestroy", "key", key);
       const localVarPath = `/v0/scenes/{key}/`.replace(
-        `{${"key"}}`,
+        "{key}",
         encodeURIComponent(String(key)),
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -1524,6 +1176,8 @@ export const ScenesApiAxiosParamCreator = function (
         localVarQueryParameter["title"] = title;
       }
 
+      localVarHeaderParameter["Accept"] = "application/json";
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
         baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -1588,6 +1242,8 @@ export const ScenesApiAxiosParamCreator = function (
         localVarQueryParameter["title"] = title;
       }
 
+      localVarHeaderParameter["Accept"] = "application/json";
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
         baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -1617,7 +1273,7 @@ export const ScenesApiAxiosParamCreator = function (
       // verify required parameter 'key' is not null or undefined
       assertParamExists("scenesPartialUpdate", "key", key);
       const localVarPath = `/v0/scenes/{key}/`.replace(
-        `{${"key"}}`,
+        "{key}",
         encodeURIComponent(String(key)),
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -1638,6 +1294,7 @@ export const ScenesApiAxiosParamCreator = function (
       // authentication cookieAuth required
 
       localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -1671,7 +1328,7 @@ export const ScenesApiAxiosParamCreator = function (
       // verify required parameter 'key' is not null or undefined
       assertParamExists("scenesRetrieve", "key", key);
       const localVarPath = `/v0/scenes/{key}/`.replace(
-        `{${"key"}}`,
+        "{key}",
         encodeURIComponent(String(key)),
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -1690,6 +1347,8 @@ export const ScenesApiAxiosParamCreator = function (
       const localVarQueryParameter = {} as any;
 
       // authentication cookieAuth required
+
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -1710,7 +1369,6 @@ export const ScenesApiAxiosParamCreator = function (
 
 /**
  * ScenesApi - functional programming interface
- * @export
  */
 export const ScenesApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = ScenesApiAxiosParamCreator(configuration);
@@ -1731,16 +1389,18 @@ export const ScenesApiFp = function (configuration?: Configuration) {
         SceneCreateRequest,
         options,
       );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["ScenesApi.scenesCreate"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["ScenesApi.scenesCreate"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -1758,16 +1418,18 @@ export const ScenesApiFp = function (configuration?: Configuration) {
         key,
         options,
       );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["ScenesApi.scenesDestroy"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["ScenesApi.scenesDestroy"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -1797,16 +1459,18 @@ export const ScenesApiFp = function (configuration?: Configuration) {
         title,
         options,
       );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["ScenesApi.scenesList"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["ScenesApi.scenesList"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -1836,16 +1500,18 @@ export const ScenesApiFp = function (configuration?: Configuration) {
         title,
         options,
       );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["ScenesApi.scenesMeList"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["ScenesApi.scenesMeList"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -1867,16 +1533,18 @@ export const ScenesApiFp = function (configuration?: Configuration) {
           PatchedSceneRequest,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["ScenesApi.scenesPartialUpdate"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["ScenesApi.scenesPartialUpdate"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -1894,23 +1562,24 @@ export const ScenesApiFp = function (configuration?: Configuration) {
         key,
         options,
       );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["ScenesApi.scenesRetrieve"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["ScenesApi.scenesRetrieve"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
   };
 };
 
 /**
  * ScenesApi - factory interface
- * @export
  */
 export const ScenesApiFactory = function (
   configuration?: Configuration,
@@ -2024,142 +1693,74 @@ export const ScenesApiFactory = function (
 
 /**
  * Request parameters for scenesCreate operation in ScenesApi.
- * @export
- * @interface ScenesApiScenesCreateRequest
  */
 export interface ScenesApiScenesCreateRequest {
-  /**
-   *
-   * @type {SceneCreateRequest}
-   * @memberof ScenesApiScenesCreate
-   */
   readonly SceneCreateRequest: SceneCreateRequest;
 }
 
 /**
  * Request parameters for scenesDestroy operation in ScenesApi.
- * @export
- * @interface ScenesApiScenesDestroyRequest
  */
 export interface ScenesApiScenesDestroyRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof ScenesApiScenesDestroy
-   */
   readonly key: string;
 }
 
 /**
  * Request parameters for scenesList operation in ScenesApi.
- * @export
- * @interface ScenesApiScenesListRequest
  */
 export interface ScenesApiScenesListRequest {
-  /**
-   *
-   * @type {boolean}
-   * @memberof ScenesApiScenesList
-   */
   readonly archived?: boolean;
 
   /**
    * Number of results to return per page.
-   * @type {number}
-   * @memberof ScenesApiScenesList
    */
   readonly limit?: number;
 
   /**
    * The initial index from which to return the results.
-   * @type {number}
-   * @memberof ScenesApiScenesList
    */
   readonly offset?: number;
 
-  /**
-   *
-   * @type {string}
-   * @memberof ScenesApiScenesList
-   */
   readonly title?: string;
 }
 
 /**
  * Request parameters for scenesMeList operation in ScenesApi.
- * @export
- * @interface ScenesApiScenesMeListRequest
  */
 export interface ScenesApiScenesMeListRequest {
-  /**
-   *
-   * @type {boolean}
-   * @memberof ScenesApiScenesMeList
-   */
   readonly archived?: boolean;
 
   /**
    * Number of results to return per page.
-   * @type {number}
-   * @memberof ScenesApiScenesMeList
    */
   readonly limit?: number;
 
   /**
    * The initial index from which to return the results.
-   * @type {number}
-   * @memberof ScenesApiScenesMeList
    */
   readonly offset?: number;
 
-  /**
-   *
-   * @type {string}
-   * @memberof ScenesApiScenesMeList
-   */
   readonly title?: string;
 }
 
 /**
  * Request parameters for scenesPartialUpdate operation in ScenesApi.
- * @export
- * @interface ScenesApiScenesPartialUpdateRequest
  */
 export interface ScenesApiScenesPartialUpdateRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof ScenesApiScenesPartialUpdate
-   */
   readonly key: string;
 
-  /**
-   *
-   * @type {PatchedSceneRequest}
-   * @memberof ScenesApiScenesPartialUpdate
-   */
   readonly PatchedSceneRequest?: PatchedSceneRequest;
 }
 
 /**
  * Request parameters for scenesRetrieve operation in ScenesApi.
- * @export
- * @interface ScenesApiScenesRetrieveRequest
  */
 export interface ScenesApiScenesRetrieveRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof ScenesApiScenesRetrieve
-   */
   readonly key: string;
 }
 
 /**
  * ScenesApi - object-oriented interface
- * @export
- * @class ScenesApi
- * @extends {BaseAPI}
  */
 export class ScenesApi extends BaseAPI {
   /**
@@ -2167,7 +1768,6 @@ export class ScenesApi extends BaseAPI {
    * @param {ScenesApiScenesCreateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof ScenesApi
    */
   public scenesCreate(
     requestParameters: ScenesApiScenesCreateRequest,
@@ -2183,7 +1783,6 @@ export class ScenesApi extends BaseAPI {
    * @param {ScenesApiScenesDestroyRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof ScenesApi
    */
   public scenesDestroy(
     requestParameters: ScenesApiScenesDestroyRequest,
@@ -2199,7 +1798,6 @@ export class ScenesApi extends BaseAPI {
    * @param {ScenesApiScenesListRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof ScenesApi
    */
   public scenesList(
     requestParameters: ScenesApiScenesListRequest = {},
@@ -2221,7 +1819,6 @@ export class ScenesApi extends BaseAPI {
    * @param {ScenesApiScenesMeListRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof ScenesApi
    */
   public scenesMeList(
     requestParameters: ScenesApiScenesMeListRequest = {},
@@ -2243,7 +1840,6 @@ export class ScenesApi extends BaseAPI {
    * @param {ScenesApiScenesPartialUpdateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof ScenesApi
    */
   public scenesPartialUpdate(
     requestParameters: ScenesApiScenesPartialUpdateRequest,
@@ -2263,7 +1859,6 @@ export class ScenesApi extends BaseAPI {
    * @param {ScenesApiScenesRetrieveRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof ScenesApi
    */
   public scenesRetrieve(
     requestParameters: ScenesApiScenesRetrieveRequest,

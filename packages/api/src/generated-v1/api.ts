@@ -28,6 +28,7 @@ import {
   serializeDataIfNeeded,
   toPathString,
   createRequestFunction,
+  replaceWithSerializableTypeIfNeeded,
 } from "./common";
 import type { RequestArgs } from "./base";
 // @ts-ignore
@@ -39,42 +40,12 @@ import {
   operationServerMap,
 } from "./base";
 
-/**
- *
- * @export
- * @interface ActivationSchema
- */
 export interface ActivationSchema {
-  /**
-   *
-   * @type {string}
-   * @memberof ActivationSchema
-   */
   email: string;
 }
-/**
- *
- * @export
- * @interface AssignmentObj
- */
 export interface AssignmentObj {
-  /**
-   *
-   * @type {string}
-   * @memberof AssignmentObj
-   */
   lhs: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AssignmentObj
-   */
   rhs: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AssignmentObj
-   */
   type: AssignmentObjTypeEnum;
 }
 
@@ -85,162 +56,40 @@ export const AssignmentObjTypeEnum = {
 export type AssignmentObjTypeEnum =
   (typeof AssignmentObjTypeEnum)[keyof typeof AssignmentObjTypeEnum];
 
-/**
- *
- * @export
- * @interface AxisItem
- */
 export interface AxisItem {
-  /**
-   *
-   * @type {string}
-   * @memberof AxisItem
-   */
   id: string;
-  /**
-   *
-   * @type {AxisProperties}
-   * @memberof AxisItem
-   */
   properties: AxisProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisItem
-   */
-  type: string;
+  type: AxisItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface AxisProperties
- */
+
+export const AxisItemTypeEnum = {
+  Axis: "AXIS",
+} as const;
+
+export type AxisItemTypeEnum =
+  (typeof AxisItemTypeEnum)[keyof typeof AxisItemTypeEnum];
+
 export interface AxisProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   axis: AxisPropertiesAxisEnum;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   calculatedVisibility: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   color: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   description: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   divisions: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   end: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   label: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   labelVisible: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   max: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   min: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   opacity: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   scale: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   size: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   start: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   ticksVisible: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof AxisProperties
-   */
   useCalculatedVisibility: boolean;
-  /**
-   *
-   * @type {boolean}
-   * @memberof AxisProperties
-   */
   visible: boolean;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   width: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   zBias: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   zIndex: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AxisProperties
-   */
   zOrder: string;
 }
 
@@ -253,471 +102,123 @@ export const AxisPropertiesAxisEnum = {
 export type AxisPropertiesAxisEnum =
   (typeof AxisPropertiesAxisEnum)[keyof typeof AxisPropertiesAxisEnum];
 
-/**
- *
- * @export
- * @interface BooleanVariableItem
- */
 export interface BooleanVariableItem {
-  /**
-   *
-   * @type {string}
-   * @memberof BooleanVariableItem
-   */
   id: string;
-  /**
-   *
-   * @type {BooleanVariableProperties}
-   * @memberof BooleanVariableItem
-   */
   properties: BooleanVariableProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof BooleanVariableItem
-   */
-  type: string;
+  type: BooleanVariableItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface BooleanVariableProperties
- */
+
+export const BooleanVariableItemTypeEnum = {
+  BooleanVariable: "BOOLEAN_VARIABLE",
+} as const;
+
+export type BooleanVariableItemTypeEnum =
+  (typeof BooleanVariableItemTypeEnum)[keyof typeof BooleanVariableItemTypeEnum];
+
 export interface BooleanVariableProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof BooleanVariableProperties
-   */
   description: string;
-  /**
-   *
-   * @type {AssignmentObj}
-   * @memberof BooleanVariableProperties
-   */
   value: AssignmentObj;
 }
-/**
- *
- * @export
- * @interface CameraItem
- */
 export interface CameraItem {
-  /**
-   *
-   * @type {string}
-   * @memberof CameraItem
-   */
   id: string;
-  /**
-   *
-   * @type {CameraProperties}
-   * @memberof CameraItem
-   */
   properties: CameraProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof CameraItem
-   */
-  type: string;
+  type: CameraItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface CameraProperties
- */
+
+export const CameraItemTypeEnum = {
+  Camera: "CAMERA",
+} as const;
+
+export type CameraItemTypeEnum =
+  (typeof CameraItemTypeEnum)[keyof typeof CameraItemTypeEnum];
+
 export interface CameraProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof CameraProperties
-   */
   description: string;
-  /**
-   *
-   * @type {string}
-   * @memberof CameraProperties
-   */
   isOrthographic: string;
-  /**
-   *
-   * @type {string}
-   * @memberof CameraProperties
-   */
   isPanEnabled: string;
-  /**
-   *
-   * @type {string}
-   * @memberof CameraProperties
-   */
   isRotateEnabled: string;
-  /**
-   *
-   * @type {string}
-   * @memberof CameraProperties
-   */
   isZoomEnabled: string;
-  /**
-   *
-   * @type {string}
-   * @memberof CameraProperties
-   */
   position: string;
-  /**
-   *
-   * @type {string}
-   * @memberof CameraProperties
-   */
   target: string;
-  /**
-   *
-   * @type {string}
-   * @memberof CameraProperties
-   */
   updateOnDrag: string;
-  /**
-   *
-   * @type {string}
-   * @memberof CameraProperties
-   */
   useRelative: string;
 }
-/**
- *
- * @export
- * @interface DeleteAccountError
- */
 export interface DeleteAccountError {
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof DeleteAccountError
-   */
   current_password: Array<string>;
 }
-/**
- *
- * @export
- * @interface DeleteAccountSchema
- */
 export interface DeleteAccountSchema {
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteAccountSchema
-   */
   current_password: string;
 }
-/**
- *
- * @export
- * @interface ExplicitSurfaceItem
- */
 export interface ExplicitSurfaceItem {
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceItem
-   */
   id: string;
-  /**
-   *
-   * @type {ExplicitSurfaceProperties}
-   * @memberof ExplicitSurfaceItem
-   */
   properties: ExplicitSurfaceProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceItem
-   */
-  type: string;
+  type: ExplicitSurfaceItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface ExplicitSurfacePolarItem
- */
+
+export const ExplicitSurfaceItemTypeEnum = {
+  ExplicitSurface: "EXPLICIT_SURFACE",
+} as const;
+
+export type ExplicitSurfaceItemTypeEnum =
+  (typeof ExplicitSurfaceItemTypeEnum)[keyof typeof ExplicitSurfaceItemTypeEnum];
+
 export interface ExplicitSurfacePolarItem {
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarItem
-   */
   id: string;
-  /**
-   *
-   * @type {ExplicitSurfacePolarProperties}
-   * @memberof ExplicitSurfacePolarItem
-   */
   properties: ExplicitSurfacePolarProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarItem
-   */
-  type: string;
+  type: ExplicitSurfacePolarItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface ExplicitSurfacePolarProperties
- */
+
+export const ExplicitSurfacePolarItemTypeEnum = {
+  ExplicitSurfacePolar: "EXPLICIT_SURFACE_POLAR",
+} as const;
+
+export type ExplicitSurfacePolarItemTypeEnum =
+  (typeof ExplicitSurfacePolarItemTypeEnum)[keyof typeof ExplicitSurfacePolarItemTypeEnum];
+
 export interface ExplicitSurfacePolarProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   calculatedVisibility: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   color: string;
-  /**
-   *
-   * @type {FunctionAssignmentObj}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   colorExpr: FunctionAssignmentObj;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   description: string;
-  /**
-   *
-   * @type {FunctionAssignmentArray}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   domain: FunctionAssignmentArray;
-  /**
-   *
-   * @type {FunctionAssignmentObj}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   expr: FunctionAssignmentObj;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   grid1: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   grid2: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   gridOpacity: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   gridWidth: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   opacity: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   samples1: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   samples2: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   shaded: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   useCalculatedVisibility: boolean;
-  /**
-   *
-   * @type {boolean}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   visible: boolean;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   zBias: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   zIndex: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfacePolarProperties
-   */
   zOrder: string;
 }
-/**
- *
- * @export
- * @interface ExplicitSurfaceProperties
- */
 export interface ExplicitSurfaceProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   calculatedVisibility: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   color: string;
-  /**
-   *
-   * @type {FunctionAssignmentObj}
-   * @memberof ExplicitSurfaceProperties
-   */
   colorExpr: FunctionAssignmentObj;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   description: string;
-  /**
-   *
-   * @type {FunctionAssignmentArray}
-   * @memberof ExplicitSurfaceProperties
-   */
   domain: FunctionAssignmentArray;
-  /**
-   *
-   * @type {FunctionAssignmentObj}
-   * @memberof ExplicitSurfaceProperties
-   */
   expr: FunctionAssignmentObj;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   grid1: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   grid2: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   gridOpacity: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   gridWidth: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   opacity: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   samples1: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   samples2: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   shaded: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof ExplicitSurfaceProperties
-   */
   useCalculatedVisibility: boolean;
-  /**
-   *
-   * @type {boolean}
-   * @memberof ExplicitSurfaceProperties
-   */
   visible: boolean;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   zBias: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   zIndex: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExplicitSurfaceProperties
-   */
   zOrder: string;
 }
-/**
- *
- * @export
- * @interface ExprArray
- */
 export interface ExprArray {
-  /**
-   *
-   * @type {Array<ExprObj>}
-   * @memberof ExprArray
-   */
   items: Array<ExprObj>;
-  /**
-   *
-   * @type {string}
-   * @memberof ExprArray
-   */
   type: ExprArrayTypeEnum;
 }
 
@@ -728,23 +229,8 @@ export const ExprArrayTypeEnum = {
 export type ExprArrayTypeEnum =
   (typeof ExprArrayTypeEnum)[keyof typeof ExprArrayTypeEnum];
 
-/**
- *
- * @export
- * @interface ExprObj
- */
 export interface ExprObj {
-  /**
-   *
-   * @type {string}
-   * @memberof ExprObj
-   */
   expr: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ExprObj
-   */
   type: ExprObjTypeEnum;
 }
 
@@ -755,67 +241,25 @@ export const ExprObjTypeEnum = {
 export type ExprObjTypeEnum =
   (typeof ExprObjTypeEnum)[keyof typeof ExprObjTypeEnum];
 
-/**
- *
- * @export
- * @interface FolderItem
- */
 export interface FolderItem {
-  /**
-   *
-   * @type {string}
-   * @memberof FolderItem
-   */
   id: string;
-  /**
-   *
-   * @type {FolderProperties}
-   * @memberof FolderItem
-   */
   properties: FolderProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof FolderItem
-   */
-  type: string;
+  type: FolderItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface FolderProperties
- */
+
+export const FolderItemTypeEnum = {
+  Folder: "FOLDER",
+} as const;
+
+export type FolderItemTypeEnum =
+  (typeof FolderItemTypeEnum)[keyof typeof FolderItemTypeEnum];
+
 export interface FolderProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof FolderProperties
-   */
   description: string;
-  /**
-   *
-   * @type {string}
-   * @memberof FolderProperties
-   */
   isCollapsed: string;
 }
-/**
- *
- * @export
- * @interface FunctionAssignmentArray
- */
 export interface FunctionAssignmentArray {
-  /**
-   *
-   * @type {Array<FunctionAssignmentObj>}
-   * @memberof FunctionAssignmentArray
-   */
   items: Array<FunctionAssignmentObj>;
-  /**
-   *
-   * @type {string}
-   * @memberof FunctionAssignmentArray
-   */
   type: FunctionAssignmentArrayTypeEnum;
 }
 
@@ -826,35 +270,10 @@ export const FunctionAssignmentArrayTypeEnum = {
 export type FunctionAssignmentArrayTypeEnum =
   (typeof FunctionAssignmentArrayTypeEnum)[keyof typeof FunctionAssignmentArrayTypeEnum];
 
-/**
- *
- * @export
- * @interface FunctionAssignmentObj
- */
 export interface FunctionAssignmentObj {
-  /**
-   *
-   * @type {string}
-   * @memberof FunctionAssignmentObj
-   */
   name: string;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof FunctionAssignmentObj
-   */
   params: Array<string>;
-  /**
-   *
-   * @type {string}
-   * @memberof FunctionAssignmentObj
-   */
   rhs: string;
-  /**
-   *
-   * @type {string}
-   * @memberof FunctionAssignmentObj
-   */
   type: FunctionAssignmentObjTypeEnum;
 }
 
@@ -865,114 +284,32 @@ export const FunctionAssignmentObjTypeEnum = {
 export type FunctionAssignmentObjTypeEnum =
   (typeof FunctionAssignmentObjTypeEnum)[keyof typeof FunctionAssignmentObjTypeEnum];
 
-/**
- *
- * @export
- * @interface GridItem
- */
 export interface GridItem {
-  /**
-   *
-   * @type {string}
-   * @memberof GridItem
-   */
   id: string;
-  /**
-   *
-   * @type {GridProperties}
-   * @memberof GridItem
-   */
   properties: GridProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof GridItem
-   */
-  type: string;
+  type: GridItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface GridProperties
- */
+
+export const GridItemTypeEnum = {
+  Grid: "GRID",
+} as const;
+
+export type GridItemTypeEnum =
+  (typeof GridItemTypeEnum)[keyof typeof GridItemTypeEnum];
+
 export interface GridProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof GridProperties
-   */
   axes: GridPropertiesAxesEnum;
-  /**
-   *
-   * @type {string}
-   * @memberof GridProperties
-   */
   calculatedVisibility: string;
-  /**
-   *
-   * @type {string}
-   * @memberof GridProperties
-   */
   color: string;
-  /**
-   *
-   * @type {string}
-   * @memberof GridProperties
-   */
   description: string;
-  /**
-   *
-   * @type {string}
-   * @memberof GridProperties
-   */
   divisions: string;
-  /**
-   *
-   * @type {string}
-   * @memberof GridProperties
-   */
   opacity: string;
-  /**
-   *
-   * @type {string}
-   * @memberof GridProperties
-   */
   snap: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof GridProperties
-   */
   useCalculatedVisibility: boolean;
-  /**
-   *
-   * @type {boolean}
-   * @memberof GridProperties
-   */
   visible: boolean;
-  /**
-   *
-   * @type {string}
-   * @memberof GridProperties
-   */
   width: string;
-  /**
-   *
-   * @type {string}
-   * @memberof GridProperties
-   */
   zBias: string;
-  /**
-   *
-   * @type {string}
-   * @memberof GridProperties
-   */
   zIndex: string;
-  /**
-   *
-   * @type {string}
-   * @memberof GridProperties
-   */
   zOrder: string;
 }
 
@@ -985,304 +322,79 @@ export const GridPropertiesAxesEnum = {
 export type GridPropertiesAxesEnum =
   (typeof GridPropertiesAxesEnum)[keyof typeof GridPropertiesAxesEnum];
 
-/**
- *
- * @export
- * @interface ImplicitSurfaceItem
- */
 export interface ImplicitSurfaceItem {
-  /**
-   *
-   * @type {string}
-   * @memberof ImplicitSurfaceItem
-   */
   id: string;
-  /**
-   *
-   * @type {ImplicitSurfaceProperties}
-   * @memberof ImplicitSurfaceItem
-   */
   properties: ImplicitSurfaceProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof ImplicitSurfaceItem
-   */
-  type: string;
+  type: ImplicitSurfaceItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface ImplicitSurfaceProperties
- */
+
+export const ImplicitSurfaceItemTypeEnum = {
+  ImplicitSurface: "IMPLICIT_SURFACE",
+} as const;
+
+export type ImplicitSurfaceItemTypeEnum =
+  (typeof ImplicitSurfaceItemTypeEnum)[keyof typeof ImplicitSurfaceItemTypeEnum];
+
 export interface ImplicitSurfaceProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof ImplicitSurfaceProperties
-   */
   calculatedVisibility: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ImplicitSurfaceProperties
-   */
   color: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ImplicitSurfaceProperties
-   */
   description: string;
-  /**
-   *
-   * @type {ExprArray}
-   * @memberof ImplicitSurfaceProperties
-   */
   domain: ExprArray;
-  /**
-   *
-   * @type {FunctionAssignmentObj}
-   * @memberof ImplicitSurfaceProperties
-   */
   lhs: FunctionAssignmentObj;
-  /**
-   *
-   * @type {string}
-   * @memberof ImplicitSurfaceProperties
-   */
   opacity: string;
-  /**
-   *
-   * @type {FunctionAssignmentObj}
-   * @memberof ImplicitSurfaceProperties
-   */
   rhs: FunctionAssignmentObj;
-  /**
-   *
-   * @type {string}
-   * @memberof ImplicitSurfaceProperties
-   */
   samples: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ImplicitSurfaceProperties
-   */
   shaded: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof ImplicitSurfaceProperties
-   */
   useCalculatedVisibility: boolean;
-  /**
-   *
-   * @type {boolean}
-   * @memberof ImplicitSurfaceProperties
-   */
   visible: boolean;
-  /**
-   *
-   * @type {string}
-   * @memberof ImplicitSurfaceProperties
-   */
   zBias: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ImplicitSurfaceProperties
-   */
   zIndex: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ImplicitSurfaceProperties
-   */
   zOrder: string;
 }
-/**
- *
- * @export
- * @interface Input
- */
 export interface Input {
-  /**
-   *
-   * @type {number}
-   * @memberof Input
-   */
   limit?: number;
-  /**
-   *
-   * @type {number}
-   * @memberof Input
-   */
   offset?: number;
 }
-/**
- *
- * @export
- * @interface LegacySceneInSchema
- */
 export interface LegacySceneInSchema {
-  /**
-   *
-   * @type {any}
-   * @memberof LegacySceneInSchema
-   */
   dehydrated: any;
 }
-/**
- *
- * @export
- * @interface LegacySceneOutSchema
- */
 export interface LegacySceneOutSchema {
-  /**
-   *
-   * @type {any}
-   * @memberof LegacySceneOutSchema
-   */
   dehydrated: any;
-  /**
-   *
-   * @type {string}
-   * @memberof LegacySceneOutSchema
-   */
   key: string;
 }
-/**
- *
- * @export
- * @interface LineItem
- */
 export interface LineItem {
-  /**
-   *
-   * @type {string}
-   * @memberof LineItem
-   */
   id: string;
-  /**
-   *
-   * @type {LineProperties}
-   * @memberof LineItem
-   */
   properties: LineProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof LineItem
-   */
-  type: string;
+  type: LineItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface LineProperties
- */
+
+export const LineItemTypeEnum = {
+  Line: "LINE",
+} as const;
+
+export type LineItemTypeEnum =
+  (typeof LineItemTypeEnum)[keyof typeof LineItemTypeEnum];
+
 export interface LineProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   calculatedVisibility: string;
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   color: string;
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   coords: string;
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   description: string;
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   end: string;
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   label: string;
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   labelVisible: string;
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   opacity: string;
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   size: string;
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   start: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof LineProperties
-   */
   useCalculatedVisibility: boolean;
-  /**
-   *
-   * @type {boolean}
-   * @memberof LineProperties
-   */
   visible: boolean;
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   width: string;
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   zBias: string;
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   zIndex: string;
-  /**
-   *
-   * @type {string}
-   * @memberof LineProperties
-   */
   zOrder: string;
 }
 /**
  * @type MathItem
- * @export
  */
 export type MathItem =
   | ({ type: "AXIS" } & AxisItem)
@@ -1302,611 +414,140 @@ export type MathItem =
   | ({ type: "VECTOR" } & VectorItem)
   | ({ type: "VECTOR_FIELD" } & VectorFieldItem);
 
-/**
- *
- * @export
- * @interface MiniSceneSchema
- */
 export interface MiniSceneSchema {
-  /**
-   *
-   * @type {boolean}
-   * @memberof MiniSceneSchema
-   */
   archived: boolean;
-  /**
-   *
-   * @type {number}
-   * @memberof MiniSceneSchema
-   */
   author?: number | null;
-  /**
-   *
-   * @type {string}
-   * @memberof MiniSceneSchema
-   */
   createdDate: string;
-  /**
-   *
-   * @type {string}
-   * @memberof MiniSceneSchema
-   */
   key: string;
-  /**
-   *
-   * @type {string}
-   * @memberof MiniSceneSchema
-   */
   modifiedDate: string;
-  /**
-   *
-   * @type {string}
-   * @memberof MiniSceneSchema
-   */
   title?: string | null;
 }
-/**
- *
- * @export
- * @interface PagedMiniSceneSchema
- */
 export interface PagedMiniSceneSchema {
-  /**
-   *
-   * @type {number}
-   * @memberof PagedMiniSceneSchema
-   */
   count: number;
-  /**
-   *
-   * @type {Array<MiniSceneSchema>}
-   * @memberof PagedMiniSceneSchema
-   */
   items: Array<MiniSceneSchema>;
 }
-/**
- *
- * @export
- * @interface ParametricCurveItem
- */
 export interface ParametricCurveItem {
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveItem
-   */
   id: string;
-  /**
-   *
-   * @type {ParametricCurveProperties}
-   * @memberof ParametricCurveItem
-   */
   properties: ParametricCurveProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveItem
-   */
-  type: string;
+  type: ParametricCurveItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface ParametricCurveProperties
- */
+
+export const ParametricCurveItemTypeEnum = {
+  ParametricCurve: "PARAMETRIC_CURVE",
+} as const;
+
+export type ParametricCurveItemTypeEnum =
+  (typeof ParametricCurveItemTypeEnum)[keyof typeof ParametricCurveItemTypeEnum];
+
 export interface ParametricCurveProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveProperties
-   */
   calculatedVisibility: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveProperties
-   */
   color: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveProperties
-   */
   description: string;
-  /**
-   *
-   * @type {ExprArray}
-   * @memberof ParametricCurveProperties
-   */
   domain: ExprArray;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveProperties
-   */
   end: string;
-  /**
-   *
-   * @type {FunctionAssignmentObj}
-   * @memberof ParametricCurveProperties
-   */
   expr: FunctionAssignmentObj;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveProperties
-   */
   opacity: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveProperties
-   */
   samples1: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveProperties
-   */
   size: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveProperties
-   */
   start: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof ParametricCurveProperties
-   */
   useCalculatedVisibility: boolean;
-  /**
-   *
-   * @type {boolean}
-   * @memberof ParametricCurveProperties
-   */
   visible: boolean;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveProperties
-   */
   width: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveProperties
-   */
   zBias: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveProperties
-   */
   zIndex: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricCurveProperties
-   */
   zOrder: string;
 }
-/**
- *
- * @export
- * @interface ParametricSurfaceItem
- */
 export interface ParametricSurfaceItem {
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceItem
-   */
   id: string;
-  /**
-   *
-   * @type {ParametricSurfaceProperties}
-   * @memberof ParametricSurfaceItem
-   */
   properties: ParametricSurfaceProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceItem
-   */
-  type: string;
+  type: ParametricSurfaceItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface ParametricSurfaceProperties
- */
+
+export const ParametricSurfaceItemTypeEnum = {
+  ParametricSurface: "PARAMETRIC_SURFACE",
+} as const;
+
+export type ParametricSurfaceItemTypeEnum =
+  (typeof ParametricSurfaceItemTypeEnum)[keyof typeof ParametricSurfaceItemTypeEnum];
+
 export interface ParametricSurfaceProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   calculatedVisibility: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   color: string;
-  /**
-   *
-   * @type {FunctionAssignmentObj}
-   * @memberof ParametricSurfaceProperties
-   */
   colorExpr: FunctionAssignmentObj;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   description: string;
-  /**
-   *
-   * @type {FunctionAssignmentArray}
-   * @memberof ParametricSurfaceProperties
-   */
   domain: FunctionAssignmentArray;
-  /**
-   *
-   * @type {FunctionAssignmentObj}
-   * @memberof ParametricSurfaceProperties
-   */
   expr: FunctionAssignmentObj;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   grid1: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   grid2: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   gridOpacity: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   gridWidth: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   opacity: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   samples1: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   samples2: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   shaded: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof ParametricSurfaceProperties
-   */
   useCalculatedVisibility: boolean;
-  /**
-   *
-   * @type {boolean}
-   * @memberof ParametricSurfaceProperties
-   */
   visible: boolean;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   zBias: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   zIndex: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ParametricSurfaceProperties
-   */
   zOrder: string;
 }
-/**
- *
- * @export
- * @interface PointItem
- */
 export interface PointItem {
-  /**
-   *
-   * @type {string}
-   * @memberof PointItem
-   */
   id: string;
-  /**
-   *
-   * @type {PointProperties}
-   * @memberof PointItem
-   */
   properties: PointProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof PointItem
-   */
-  type: string;
+  type: PointItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface PointProperties
- */
+
+export const PointItemTypeEnum = {
+  Point: "POINT",
+} as const;
+
+export type PointItemTypeEnum =
+  (typeof PointItemTypeEnum)[keyof typeof PointItemTypeEnum];
+
 export interface PointProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof PointProperties
-   */
   calculatedVisibility: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PointProperties
-   */
   color: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PointProperties
-   */
   coords: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PointProperties
-   */
   description: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PointProperties
-   */
   label: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PointProperties
-   */
   labelVisible: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PointProperties
-   */
   opacity: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PointProperties
-   */
   size: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof PointProperties
-   */
   useCalculatedVisibility: boolean;
-  /**
-   *
-   * @type {boolean}
-   * @memberof PointProperties
-   */
   visible: boolean;
-  /**
-   *
-   * @type {string}
-   * @memberof PointProperties
-   */
   zBias: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PointProperties
-   */
   zIndex: string;
-  /**
-   *
-   * @type {string}
-   * @memberof PointProperties
-   */
   zOrder: string;
 }
-/**
- *
- * @export
- * @interface SceneCreateSchema
- */
 export interface SceneCreateSchema {
-  /**
-   *
-   * @type {boolean}
-   * @memberof SceneCreateSchema
-   */
   archived?: boolean;
-  /**
-   *
-   * @type {{ [key: string]: Array<string>; }}
-   * @memberof SceneCreateSchema
-   */
   itemOrder: { [key: string]: Array<string> };
-  /**
-   *
-   * @type {Array<MathItem>}
-   * @memberof SceneCreateSchema
-   */
   items: Array<MathItem>;
-  /**
-   *
-   * @type {string}
-   * @memberof SceneCreateSchema
-   */
   title?: string | null;
 }
-/**
- *
- * @export
- * @interface SceneFilterSchema
- */
 export interface SceneFilterSchema {
-  /**
-   *
-   * @type {boolean}
-   * @memberof SceneFilterSchema
-   */
   archived?: boolean | null;
-  /**
-   *
-   * @type {string}
-   * @memberof SceneFilterSchema
-   */
   title?: string | null;
 }
-/**
- *
- * @export
- * @interface ScenePatchSchema
- */
 export interface ScenePatchSchema {
-  /**
-   *
-   * @type {boolean}
-   * @memberof ScenePatchSchema
-   */
   archived?: boolean | null;
-  /**
-   *
-   * @type {{ [key: string]: Array<string>; }}
-   * @memberof ScenePatchSchema
-   */
   itemOrder?: { [key: string]: Array<string> };
-  /**
-   *
-   * @type {Array<MathItem>}
-   * @memberof ScenePatchSchema
-   */
   items?: Array<MathItem>;
-  /**
-   *
-   * @type {string}
-   * @memberof ScenePatchSchema
-   */
   title?: string | null;
 }
-/**
- *
- * @export
- * @interface SceneSchema
- */
 export interface SceneSchema {
-  /**
-   *
-   * @type {boolean}
-   * @memberof SceneSchema
-   */
   archived: boolean;
-  /**
-   *
-   * @type {number}
-   * @memberof SceneSchema
-   */
   author?: number | null;
-  /**
-   *
-   * @type {string}
-   * @memberof SceneSchema
-   */
   createdDate: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof SceneSchema
-   */
   isLegacy: boolean;
-  /**
-   *
-   * @type {{ [key: string]: Array<string>; }}
-   * @memberof SceneSchema
-   */
   itemOrder: { [key: string]: Array<string> };
-  /**
-   *
-   * @type {Array<MathItem>}
-   * @memberof SceneSchema
-   */
   items: Array<MathItem>;
-  /**
-   *
-   * @type {string}
-   * @memberof SceneSchema
-   */
   key: string;
-  /**
-   *
-   * @type {string}
-   * @memberof SceneSchema
-   */
   modifiedDate: string;
-  /**
-   *
-   * @type {string}
-   * @memberof SceneSchema
-   */
   title?: string | null;
 }
-/**
- *
- * @export
- * @interface StrArray
- */
 export interface StrArray {
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof StrArray
-   */
   items: Array<string>;
-  /**
-   *
-   * @type {string}
-   * @memberof StrArray
-   */
   type: StrArrayTypeEnum;
 }
 
@@ -1917,446 +558,122 @@ export const StrArrayTypeEnum = {
 export type StrArrayTypeEnum =
   (typeof StrArrayTypeEnum)[keyof typeof StrArrayTypeEnum];
 
-/**
- *
- * @export
- * @interface UserSchema
- */
 export interface UserSchema {
-  /**
-   *
-   * @type {string}
-   * @memberof UserSchema
-   */
   email: string;
-  /**
-   *
-   * @type {number}
-   * @memberof UserSchema
-   */
   id: number;
-  /**
-   *
-   * @type {string}
-   * @memberof UserSchema
-   */
   public_nickname: string;
 }
-/**
- *
- * @export
- * @interface UserUpdateSchema
- */
 export interface UserUpdateSchema {
-  /**
-   *
-   * @type {string}
-   * @memberof UserUpdateSchema
-   */
   public_nickname: string;
 }
-/**
- *
- * @export
- * @interface VariableItem
- */
 export interface VariableItem {
-  /**
-   *
-   * @type {string}
-   * @memberof VariableItem
-   */
   id: string;
-  /**
-   *
-   * @type {VariableProperties}
-   * @memberof VariableItem
-   */
   properties: VariableProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof VariableItem
-   */
-  type: string;
+  type: VariableItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface VariableProperties
- */
+
+export const VariableItemTypeEnum = {
+  Variable: "VARIABLE",
+} as const;
+
+export type VariableItemTypeEnum =
+  (typeof VariableItemTypeEnum)[keyof typeof VariableItemTypeEnum];
+
 export interface VariableProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof VariableProperties
-   */
   description: string;
-  /**
-   *
-   * @type {AssignmentObj}
-   * @memberof VariableProperties
-   */
   value: AssignmentObj;
 }
-/**
- *
- * @export
- * @interface VariableSliderItem
- */
 export interface VariableSliderItem {
-  /**
-   *
-   * @type {string}
-   * @memberof VariableSliderItem
-   */
   id: string;
-  /**
-   *
-   * @type {VariableSliderProperties}
-   * @memberof VariableSliderItem
-   */
   properties: VariableSliderProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof VariableSliderItem
-   */
-  type: string;
+  type: VariableSliderItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface VariableSliderProperties
- */
+
+export const VariableSliderItemTypeEnum = {
+  VariableSlider: "VARIABLE_SLIDER",
+} as const;
+
+export type VariableSliderItemTypeEnum =
+  (typeof VariableSliderItemTypeEnum)[keyof typeof VariableSliderItemTypeEnum];
+
 export interface VariableSliderProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof VariableSliderProperties
-   */
   description: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VariableSliderProperties
-   */
   duration: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VariableSliderProperties
-   */
   fps: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VariableSliderProperties
-   */
   isAnimating: string;
-  /**
-   *
-   * @type {StrArray}
-   * @memberof VariableSliderProperties
-   */
   range: StrArray;
-  /**
-   *
-   * @type {string}
-   * @memberof VariableSliderProperties
-   */
   speedMultiplier: string;
-  /**
-   *
-   * @type {AssignmentObj}
-   * @memberof VariableSliderProperties
-   */
   value: AssignmentObj;
 }
-/**
- *
- * @export
- * @interface VectorFieldItem
- */
 export interface VectorFieldItem {
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldItem
-   */
   id: string;
-  /**
-   *
-   * @type {VectorFieldProperties}
-   * @memberof VectorFieldItem
-   */
   properties: VectorFieldProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldItem
-   */
-  type: string;
+  type: VectorFieldItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface VectorFieldProperties
- */
+
+export const VectorFieldItemTypeEnum = {
+  VectorField: "VECTOR_FIELD",
+} as const;
+
+export type VectorFieldItemTypeEnum =
+  (typeof VectorFieldItemTypeEnum)[keyof typeof VectorFieldItemTypeEnum];
+
 export interface VectorFieldProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   calculatedVisibility: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   color: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   description: string;
-  /**
-   *
-   * @type {ExprArray}
-   * @memberof VectorFieldProperties
-   */
   domain: ExprArray;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   end: string;
-  /**
-   *
-   * @type {FunctionAssignmentObj}
-   * @memberof VectorFieldProperties
-   */
   expr: FunctionAssignmentObj;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   opacity: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   samples1: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   samples2: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   samples3: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   scale: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   size: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   start: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof VectorFieldProperties
-   */
   useCalculatedVisibility: boolean;
-  /**
-   *
-   * @type {boolean}
-   * @memberof VectorFieldProperties
-   */
   visible: boolean;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   width: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   zBias: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   zIndex: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorFieldProperties
-   */
   zOrder: string;
 }
-/**
- *
- * @export
- * @interface VectorItem
- */
 export interface VectorItem {
-  /**
-   *
-   * @type {string}
-   * @memberof VectorItem
-   */
   id: string;
-  /**
-   *
-   * @type {VectorProperties}
-   * @memberof VectorItem
-   */
   properties: VectorProperties;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorItem
-   */
-  type: string;
+  type: VectorItemTypeEnum;
 }
-/**
- *
- * @export
- * @interface VectorProperties
- */
+
+export const VectorItemTypeEnum = {
+  Vector: "VECTOR",
+} as const;
+
+export type VectorItemTypeEnum =
+  (typeof VectorItemTypeEnum)[keyof typeof VectorItemTypeEnum];
+
 export interface VectorProperties {
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   calculatedVisibility: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   color: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   components: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   description: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   end: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   label: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   labelVisible: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   opacity: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   size: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   start: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   tail: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof VectorProperties
-   */
   useCalculatedVisibility: boolean;
-  /**
-   *
-   * @type {boolean}
-   * @memberof VectorProperties
-   */
   visible: boolean;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   width: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   zBias: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   zIndex: string;
-  /**
-   *
-   * @type {string}
-   * @memberof VectorProperties
-   */
   zOrder: string;
 }
 
 /**
  * DefaultApi - axios parameter creator
- * @export
  */
 export const DefaultApiAxiosParamCreator = function (
   configuration?: Configuration,
@@ -2454,6 +771,7 @@ export const DefaultApiAxiosParamCreator = function (
       // authentication SessionAuth required
 
       localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -2500,6 +818,8 @@ export const DefaultApiAxiosParamCreator = function (
       const localVarQueryParameter = {} as any;
 
       // authentication SessionAuth required
+
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -2551,6 +871,7 @@ export const DefaultApiAxiosParamCreator = function (
       // authentication SessionAuth required
 
       localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -2605,6 +926,7 @@ export const DefaultApiAxiosParamCreator = function (
       const localVarQueryParameter = {} as any;
 
       localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -2659,6 +981,7 @@ export const DefaultApiAxiosParamCreator = function (
       const localVarQueryParameter = {} as any;
 
       localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -2693,7 +1016,7 @@ export const DefaultApiAxiosParamCreator = function (
       // verify required parameter 'key' is not null or undefined
       assertParamExists("scenesApiDeleteScene", "key", key);
       const localVarPath = `/v1/scenes/{key}/`.replace(
-        `{${"key"}}`,
+        "{key}",
         encodeURIComponent(String(key)),
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -2741,7 +1064,7 @@ export const DefaultApiAxiosParamCreator = function (
       // verify required parameter 'key' is not null or undefined
       assertParamExists("scenesApiGetLegacy", "key", key);
       const localVarPath = `/v1/legacy_scenes/{key}/`.replace(
-        `{${"key"}}`,
+        "{key}",
         encodeURIComponent(String(key)),
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -2758,6 +1081,8 @@ export const DefaultApiAxiosParamCreator = function (
       };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
+
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -2787,7 +1112,7 @@ export const DefaultApiAxiosParamCreator = function (
       // verify required parameter 'key' is not null or undefined
       assertParamExists("scenesApiGetScene", "key", key);
       const localVarPath = `/v1/scenes/{key}/`.replace(
-        `{${"key"}}`,
+        "{key}",
         encodeURIComponent(String(key)),
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -2804,6 +1129,8 @@ export const DefaultApiAxiosParamCreator = function (
       };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
+
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -2867,6 +1194,8 @@ export const DefaultApiAxiosParamCreator = function (
       if (offset !== undefined) {
         localVarQueryParameter["offset"] = offset;
       }
+
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -2933,6 +1262,8 @@ export const DefaultApiAxiosParamCreator = function (
         localVarQueryParameter["offset"] = offset;
       }
 
+      localVarHeaderParameter["Accept"] = "application/json";
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
         baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -2969,7 +1300,7 @@ export const DefaultApiAxiosParamCreator = function (
         ScenePatchSchema,
       );
       const localVarPath = `/v1/scenes/{key}/`.replace(
-        `{${"key"}}`,
+        "{key}",
         encodeURIComponent(String(key)),
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -2990,6 +1321,7 @@ export const DefaultApiAxiosParamCreator = function (
       // authentication SessionAuth required
 
       localVarHeaderParameter["Content-Type"] = "application/json";
+      localVarHeaderParameter["Accept"] = "application/json";
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions =
@@ -3015,7 +1347,6 @@ export const DefaultApiAxiosParamCreator = function (
 
 /**
  * DefaultApi - functional programming interface
- * @export
  */
 export const DefaultApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = DefaultApiAxiosParamCreator(configuration);
@@ -3038,17 +1369,18 @@ export const DefaultApiFp = function (configuration?: Configuration) {
           ActivationSchema,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["DefaultApi.authenticationApiActivate"]?.[index]
-          ?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["DefaultApi.authenticationApiActivate"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -3068,17 +1400,18 @@ export const DefaultApiFp = function (configuration?: Configuration) {
           DeleteAccountSchema,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["DefaultApi.authenticationApiDeleteMe"]?.[index]
-          ?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["DefaultApi.authenticationApiDeleteMe"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -3093,16 +1426,18 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     > {
       const localVarAxiosArgs =
         await localVarAxiosParamCreator.authenticationApiGetMe(options);
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["DefaultApi.authenticationApiGetMe"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["DefaultApi.authenticationApiGetMe"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -3122,16 +1457,18 @@ export const DefaultApiFp = function (configuration?: Configuration) {
           UserUpdateSchema,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["DefaultApi.authenticationApiPatchMe"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["DefaultApi.authenticationApiPatchMe"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -3154,16 +1491,18 @@ export const DefaultApiFp = function (configuration?: Configuration) {
           LegacySceneInSchema,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["DefaultApi.scenesApiCreateLegacy"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["DefaultApi.scenesApiCreateLegacy"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -3183,16 +1522,18 @@ export const DefaultApiFp = function (configuration?: Configuration) {
           SceneCreateSchema,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["DefaultApi.scenesApiCreateScene"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["DefaultApi.scenesApiCreateScene"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -3209,16 +1550,18 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     > {
       const localVarAxiosArgs =
         await localVarAxiosParamCreator.scenesApiDeleteScene(key, options);
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["DefaultApi.scenesApiDeleteScene"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["DefaultApi.scenesApiDeleteScene"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -3238,16 +1581,18 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     > {
       const localVarAxiosArgs =
         await localVarAxiosParamCreator.scenesApiGetLegacy(key, options);
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["DefaultApi.scenesApiGetLegacy"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["DefaultApi.scenesApiGetLegacy"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -3264,16 +1609,18 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     > {
       const localVarAxiosArgs =
         await localVarAxiosParamCreator.scenesApiGetScene(key, options);
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["DefaultApi.scenesApiGetScene"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["DefaultApi.scenesApiGetScene"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -3305,16 +1652,18 @@ export const DefaultApiFp = function (configuration?: Configuration) {
           offset,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["DefaultApi.scenesApiListScenes"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["DefaultApi.scenesApiListScenes"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -3346,16 +1695,18 @@ export const DefaultApiFp = function (configuration?: Configuration) {
           offset,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["DefaultApi.scenesApiMyScenes"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["DefaultApi.scenesApiMyScenes"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
      *
@@ -3378,23 +1729,24 @@ export const DefaultApiFp = function (configuration?: Configuration) {
           ScenePatchSchema,
           options,
         );
-      const index = configuration?.serverIndex ?? 0;
-      const operationBasePath =
-        operationServerMap["DefaultApi.scenesApiUpdateScene"]?.[index]?.url;
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["DefaultApi.scenesApiUpdateScene"]?.[
+          localVarOperationServerIndex
+        ]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
           globalAxios,
           BASE_PATH,
           configuration,
-        )(axios, operationBasePath || basePath);
+        )(axios, localVarOperationServerBasePath || basePath);
     },
   };
 };
 
 /**
  * DefaultApi - factory interface
- * @export
  */
 export const DefaultApiFactory = function (
   configuration?: Configuration,
@@ -3605,212 +1957,97 @@ export const DefaultApiFactory = function (
 
 /**
  * Request parameters for authenticationApiActivate operation in DefaultApi.
- * @export
- * @interface DefaultApiAuthenticationApiActivateRequest
  */
 export interface DefaultApiAuthenticationApiActivateRequest {
-  /**
-   *
-   * @type {ActivationSchema}
-   * @memberof DefaultApiAuthenticationApiActivate
-   */
   readonly ActivationSchema: ActivationSchema;
 }
 
 /**
  * Request parameters for authenticationApiDeleteMe operation in DefaultApi.
- * @export
- * @interface DefaultApiAuthenticationApiDeleteMeRequest
  */
 export interface DefaultApiAuthenticationApiDeleteMeRequest {
-  /**
-   *
-   * @type {DeleteAccountSchema}
-   * @memberof DefaultApiAuthenticationApiDeleteMe
-   */
   readonly DeleteAccountSchema: DeleteAccountSchema;
 }
 
 /**
  * Request parameters for authenticationApiPatchMe operation in DefaultApi.
- * @export
- * @interface DefaultApiAuthenticationApiPatchMeRequest
  */
 export interface DefaultApiAuthenticationApiPatchMeRequest {
-  /**
-   *
-   * @type {UserUpdateSchema}
-   * @memberof DefaultApiAuthenticationApiPatchMe
-   */
   readonly UserUpdateSchema: UserUpdateSchema;
 }
 
 /**
  * Request parameters for scenesApiCreateLegacy operation in DefaultApi.
- * @export
- * @interface DefaultApiScenesApiCreateLegacyRequest
  */
 export interface DefaultApiScenesApiCreateLegacyRequest {
-  /**
-   *
-   * @type {LegacySceneInSchema}
-   * @memberof DefaultApiScenesApiCreateLegacy
-   */
   readonly LegacySceneInSchema: LegacySceneInSchema;
 }
 
 /**
  * Request parameters for scenesApiCreateScene operation in DefaultApi.
- * @export
- * @interface DefaultApiScenesApiCreateSceneRequest
  */
 export interface DefaultApiScenesApiCreateSceneRequest {
-  /**
-   *
-   * @type {SceneCreateSchema}
-   * @memberof DefaultApiScenesApiCreateScene
-   */
   readonly SceneCreateSchema: SceneCreateSchema;
 }
 
 /**
  * Request parameters for scenesApiDeleteScene operation in DefaultApi.
- * @export
- * @interface DefaultApiScenesApiDeleteSceneRequest
  */
 export interface DefaultApiScenesApiDeleteSceneRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof DefaultApiScenesApiDeleteScene
-   */
   readonly key: string;
 }
 
 /**
  * Request parameters for scenesApiGetLegacy operation in DefaultApi.
- * @export
- * @interface DefaultApiScenesApiGetLegacyRequest
  */
 export interface DefaultApiScenesApiGetLegacyRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof DefaultApiScenesApiGetLegacy
-   */
   readonly key: string;
 }
 
 /**
  * Request parameters for scenesApiGetScene operation in DefaultApi.
- * @export
- * @interface DefaultApiScenesApiGetSceneRequest
  */
 export interface DefaultApiScenesApiGetSceneRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof DefaultApiScenesApiGetScene
-   */
   readonly key: string;
 }
 
 /**
  * Request parameters for scenesApiListScenes operation in DefaultApi.
- * @export
- * @interface DefaultApiScenesApiListScenesRequest
  */
 export interface DefaultApiScenesApiListScenesRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof DefaultApiScenesApiListScenes
-   */
   readonly title?: string | null;
 
-  /**
-   *
-   * @type {boolean}
-   * @memberof DefaultApiScenesApiListScenes
-   */
   readonly archived?: boolean | null;
 
-  /**
-   *
-   * @type {number}
-   * @memberof DefaultApiScenesApiListScenes
-   */
   readonly limit?: number;
 
-  /**
-   *
-   * @type {number}
-   * @memberof DefaultApiScenesApiListScenes
-   */
   readonly offset?: number;
 }
 
 /**
  * Request parameters for scenesApiMyScenes operation in DefaultApi.
- * @export
- * @interface DefaultApiScenesApiMyScenesRequest
  */
 export interface DefaultApiScenesApiMyScenesRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof DefaultApiScenesApiMyScenes
-   */
   readonly title?: string | null;
 
-  /**
-   *
-   * @type {boolean}
-   * @memberof DefaultApiScenesApiMyScenes
-   */
   readonly archived?: boolean | null;
 
-  /**
-   *
-   * @type {number}
-   * @memberof DefaultApiScenesApiMyScenes
-   */
   readonly limit?: number;
 
-  /**
-   *
-   * @type {number}
-   * @memberof DefaultApiScenesApiMyScenes
-   */
   readonly offset?: number;
 }
 
 /**
  * Request parameters for scenesApiUpdateScene operation in DefaultApi.
- * @export
- * @interface DefaultApiScenesApiUpdateSceneRequest
  */
 export interface DefaultApiScenesApiUpdateSceneRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof DefaultApiScenesApiUpdateScene
-   */
   readonly key: string;
 
-  /**
-   *
-   * @type {ScenePatchSchema}
-   * @memberof DefaultApiScenesApiUpdateScene
-   */
   readonly ScenePatchSchema: ScenePatchSchema;
 }
 
 /**
  * DefaultApi - object-oriented interface
- * @export
- * @class DefaultApi
- * @extends {BaseAPI}
  */
 export class DefaultApi extends BaseAPI {
   /**
@@ -3819,7 +2056,6 @@ export class DefaultApi extends BaseAPI {
    * @param {DefaultApiAuthenticationApiActivateRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof DefaultApi
    */
   public authenticationApiActivate(
     requestParameters: DefaultApiAuthenticationApiActivateRequest,
@@ -3836,7 +2072,6 @@ export class DefaultApi extends BaseAPI {
    * @param {DefaultApiAuthenticationApiDeleteMeRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof DefaultApi
    */
   public authenticationApiDeleteMe(
     requestParameters: DefaultApiAuthenticationApiDeleteMeRequest,
@@ -3852,7 +2087,6 @@ export class DefaultApi extends BaseAPI {
    * @summary Get Me
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof DefaultApi
    */
   public authenticationApiGetMe(options?: RawAxiosRequestConfig) {
     return DefaultApiFp(this.configuration)
@@ -3866,7 +2100,6 @@ export class DefaultApi extends BaseAPI {
    * @param {DefaultApiAuthenticationApiPatchMeRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof DefaultApi
    */
   public authenticationApiPatchMe(
     requestParameters: DefaultApiAuthenticationApiPatchMeRequest,
@@ -3883,7 +2116,6 @@ export class DefaultApi extends BaseAPI {
    * @param {DefaultApiScenesApiCreateLegacyRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof DefaultApi
    */
   public scenesApiCreateLegacy(
     requestParameters: DefaultApiScenesApiCreateLegacyRequest,
@@ -3900,7 +2132,6 @@ export class DefaultApi extends BaseAPI {
    * @param {DefaultApiScenesApiCreateSceneRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof DefaultApi
    */
   public scenesApiCreateScene(
     requestParameters: DefaultApiScenesApiCreateSceneRequest,
@@ -3917,7 +2148,6 @@ export class DefaultApi extends BaseAPI {
    * @param {DefaultApiScenesApiDeleteSceneRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof DefaultApi
    */
   public scenesApiDeleteScene(
     requestParameters: DefaultApiScenesApiDeleteSceneRequest,
@@ -3934,7 +2164,6 @@ export class DefaultApi extends BaseAPI {
    * @param {DefaultApiScenesApiGetLegacyRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof DefaultApi
    */
   public scenesApiGetLegacy(
     requestParameters: DefaultApiScenesApiGetLegacyRequest,
@@ -3951,7 +2180,6 @@ export class DefaultApi extends BaseAPI {
    * @param {DefaultApiScenesApiGetSceneRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof DefaultApi
    */
   public scenesApiGetScene(
     requestParameters: DefaultApiScenesApiGetSceneRequest,
@@ -3968,7 +2196,6 @@ export class DefaultApi extends BaseAPI {
    * @param {DefaultApiScenesApiListScenesRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof DefaultApi
    */
   public scenesApiListScenes(
     requestParameters: DefaultApiScenesApiListScenesRequest = {},
@@ -3991,7 +2218,6 @@ export class DefaultApi extends BaseAPI {
    * @param {DefaultApiScenesApiMyScenesRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof DefaultApi
    */
   public scenesApiMyScenes(
     requestParameters: DefaultApiScenesApiMyScenesRequest = {},
@@ -4014,7 +2240,6 @@ export class DefaultApi extends BaseAPI {
    * @param {DefaultApiScenesApiUpdateSceneRequest} requestParameters Request parameters.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof DefaultApi
    */
   public scenesApiUpdateScene(
     requestParameters: DefaultApiScenesApiUpdateSceneRequest,

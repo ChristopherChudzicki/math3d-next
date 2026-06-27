@@ -727,11 +727,6 @@ components:
           type: integer
       title: Input
       type: object
-    ItemOrderValue:
-      items:
-        type: string
-      title: ItemOrderValue
-      type: array
     LegacySceneInSchema:
       properties:
         dehydrated:
@@ -1193,7 +1188,9 @@ components:
           type: boolean
         itemOrder:
           additionalProperties:
-            $ref: '#/components/schemas/ItemOrderValue'
+            items:
+              type: string
+            type: array
           title: Itemorder
           type: object
         items:
@@ -1234,7 +1231,9 @@ components:
           title: Archived
         itemOrder:
           additionalProperties:
-            $ref: '#/components/schemas/ItemOrderValue'
+            items:
+              type: string
+            type: array
           title: Itemorder
           type: object
         items:
@@ -1268,7 +1267,9 @@ components:
           type: boolean
         itemOrder:
           additionalProperties:
-            $ref: '#/components/schemas/ItemOrderValue'
+            items:
+              type: string
+            type: array
           title: Itemorder
           type: object
         items:

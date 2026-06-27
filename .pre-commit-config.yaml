@@ -29,6 +29,10 @@ repos:
         args:
           - --baseline
           - .secrets.baseline
+        # Generated API clients are not hand-written and hold no real secrets;
+        # the generator's `common.ts` trips the apiKey keyword heuristic and its
+        # line numbers churn the baseline on every regeneration. Skip them.
+        exclude: ^packages/api/src/generated
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: "v0.14.10"
     hooks:
