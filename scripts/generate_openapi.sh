@@ -31,7 +31,7 @@ docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:${GENERATO
 
 # We expect pre-commit to exit with a non-zero status since it is reformatting
 # the generated code.
-git ls-files packages/api/src/generated | xargs pre-commit run --files openapi.yaml ||
+git ls-files packages/api/src/generated | xargs pre-commit run --files ||
 	echo "OpenAPI generation complete."
 
 ##################################################
@@ -51,8 +51,9 @@ docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:${GENERATO
 	--ignore-file-override /local/packages/api/.openapi-generator-ignore \
 	--additional-properties=useSingleRequestParameter=true,paramNaming=original
 
-# Ensure the VERSION file ends with a newline (the generator omits it).
-echo >>packages/api/src/generated-v1/.openapi-generator/VERSION
-
-# Format the generated v1 client with the workspace-pinned prettier (single pin site).
-yarn prettier "packages/api/src/generated-v1/**/*.ts" --write
+# Format the generated v1 client via pre-commit (prettier over .ts + .md docs,
+# end-of-file-fixer on VERSION), mirroring the v0 step above so a single run of
+# this script leaves a clean working tree. pre-commit exits non-zero when it
+# reformats, which is expected.
+git ls-files packages/api/src/generated-v1 | xargs pre-commit run --files ||
+	echo "v1 OpenAPI generation complete."
