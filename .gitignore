@@ -31,3 +31,6 @@ webserver/staticfiles/*
 .pytest_cache
 
 .claude
+
+# Local DB snapshots (may contain prod-derived user data — never commit)
+db-snapshots/
