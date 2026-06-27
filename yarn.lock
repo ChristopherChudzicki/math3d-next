@@ -5567,7 +5567,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mailparser@npm:^3.4.4":
+"@types/mailparser@npm:^3.4.6":
   version: 3.4.6
   resolution: "@types/mailparser@npm:3.4.6"
   dependencies:
@@ -7079,12 +7079,12 @@ __metadata:
     "@math3d/eslint-config": "workspace:^"
     "@math3d/mock-api": "workspace:^"
     "@playwright/test": "npm:^1.57.0"
-    "@types/mailparser": "npm:^3.4.4"
+    "@types/mailparser": "npm:^3.4.6"
     axios: "npm:^1.6.7"
     dotenv: "npm:^16.3.1"
     envalid: "npm:^8.0.0"
     eslint: "npm:^8.54.0"
-    mailparser: "npm:^3.7.1"
+    mailparser: "npm:^3.9.12"
     mathlive: "npm:^0.105.0"
     p-retry: "npm:^6.2.0"
     three: "npm:^0.147.0"
@@ -14412,7 +14412,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mailparser@npm:^3.7.1":
+"mailparser@npm:^3.9.12":
   version: 3.9.12
   resolution: "mailparser@npm:3.9.12"
   dependencies:
