@@ -19,8 +19,7 @@ components:
           title: Rhs
           type: string
         type:
-          enum:
-          - assignment
+          const: assignment
           title: Type
           type: string
       required:
@@ -455,8 +454,7 @@ components:
           title: Items
           type: array
         type:
-          enum:
-          - array
+          const: array
           title: Type
           type: string
       required:
@@ -471,8 +469,7 @@ components:
           title: Expr
           type: string
         type:
-          enum:
-          - expr
+          const: expr
           title: Type
           type: string
       required:
@@ -521,8 +518,7 @@ components:
           title: Items
           type: array
         type:
-          enum:
-          - array
+          const: array
           title: Type
           type: string
       required:
@@ -545,8 +541,7 @@ components:
           title: Rhs
           type: string
         type:
-          enum:
-          - function-assignment
+          const: function-assignment
           title: Type
           type: string
       required:
@@ -1308,8 +1303,7 @@ components:
           title: Items
           type: array
         type:
-          enum:
-          - array
+          const: array
           title: Type
           type: string
       required:

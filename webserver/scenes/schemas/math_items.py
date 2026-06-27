@@ -17,7 +17,6 @@ from pydantic import (
     Field,
     RootModel,
     TypeAdapter,
-    WithJsonSchema,
 )
 
 
@@ -50,38 +49,26 @@ class _Strict(BaseModel):
 # the optional non-serializable `validate` function field is omitted). ---
 
 
-# Single-value `Literal` fields emit as JSON-schema `{const: X}`, which
-# openapi-generator-cli v7.2.0 (typescript-axios) collapses to a bare `string`
-# in the client — discarding the literal value the FE sync check needs. Emitting
-# them as `{enum: [X], type: string}` via WithJsonSchema makes the generator
-# produce a usable string-literal type instead. WithJsonSchema *replaces* the
-# field schema, so `type: string` is included explicitly. (The 16 item-level
-# `type` discriminants are left as bare `Literal` — the union's
-# `discriminator.mapping` already intersects the literal back in, e.g.
-# `({ type: "AXIS" } & AxisItem)`, so they stay usable without annotation.)
+# Single-value `Literal` fields emit as JSON-schema `{const: X}`.
+# openapi-generator-cli v7.23.0 (typescript-axios) renders that as a usable
+# string-literal const-enum, so the bare `Literal` carries the value through to
+# the client unaided (the v7.2.0 `WithJsonSchema({enum, type})` workaround that
+# papered over the old collapse-to-`string` behavior is no longer needed).
 
 
 class ExprObj(_Strict):
-    type: Annotated[
-        Literal["expr"], WithJsonSchema({"enum": ["expr"], "type": "string"})
-    ]
+    type: Literal["expr"]
     expr: str
 
 
 class AssignmentObj(_Strict):
-    type: Annotated[
-        Literal["assignment"],
-        WithJsonSchema({"enum": ["assignment"], "type": "string"}),
-    ]
+    type: Literal["assignment"]
     lhs: str
     rhs: str
 
 
 class FunctionAssignmentObj(_Strict):
-    type: Annotated[
-        Literal["function-assignment"],
-        WithJsonSchema({"enum": ["function-assignment"], "type": "string"}),
-    ]
+    type: Literal["function-assignment"]
     name: str
     params: list[str]
     rhs: str
@@ -90,23 +77,17 @@ class FunctionAssignmentObj(_Strict):
 # Concrete array types (NOT a Pydantic Generic — a generic emits mangled
 # parametrized $ref names into the OpenAPI/client).
 class FunctionAssignmentArray(_Strict):
-    type: Annotated[
-        Literal["array"], WithJsonSchema({"enum": ["array"], "type": "string"})
-    ]
+    type: Literal["array"]
     items: list[FunctionAssignmentObj]
 
 
 class ExprArray(_Strict):
-    type: Annotated[
-        Literal["array"], WithJsonSchema({"enum": ["array"], "type": "string"})
-    ]
+    type: Literal["array"]
     items: list[ExprObj]
 
 
 class StrArray(_Strict):
-    type: Annotated[
-        Literal["array"], WithJsonSchema({"enum": ["array"], "type": "string"})
-    ]
+    type: Literal["array"]
     items: list[str]
 
 
