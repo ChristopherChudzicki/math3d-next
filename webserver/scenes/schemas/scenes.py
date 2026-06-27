@@ -52,15 +52,13 @@ class SceneCreateSchema(Schema):
 class ScenePatchSchema(Schema):
     # Partial-update schema (NOT ninja.PatchDict). Presence is detected via
     # `exclude_unset` in the handler, so `items`/`item_order` use non-nullable
-    # defaults rather than `Optional[...] = None`. This is deliberate: an
-    # `Optional[List[MathItem]]` emits `anyOf: [<array-of-$ref>, null]`, and
-    # openapi-generator-cli v7.2.0 (typescript-axios) can't resolve the union
-    # nested inside that `anyOf` and degrades the field to `null` in the client.
-    # A bare `List[MathItem]` default emits the same plain `Array<MathItem>` as
-    # the POST body, so the generated `ScenePatchSchema.items` references the
-    # real `MathItem` union component. Side effect: an explicit `items: null`
-    # (or `itemOrder: null`) in the body now 422s instead of silently
-    # no-op'ing, which is the desired strictness.
+    # defaults rather than `Optional[...] = None`. This is deliberate for
+    # strictness: a non-nullable field rejects an explicit `items: null` (or
+    # `itemOrder: null`) in the body with a 422 instead of silently no-op'ing.
+    # (Historically this also dodged an openapi-generator-cli v7.2.0 bug that
+    # degraded the `anyOf: [<array-of-$ref>, null]` union to `null` in the
+    # client; v7.23.0 resolves that union correctly, so only the strictness
+    # rationale remains.)
     model_config = ConfigDict(populate_by_name=True)
 
     items: List[MathItem] = Field(default_factory=list)
