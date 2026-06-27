@@ -3,7 +3,7 @@ import type * as mjs from "mathjs";
 import type { EvaluationScope, AnonMathNode } from "@math3d/mathscope";
 import { EvaluationError } from "@math3d/mathscope";
 import invariant from "tiny-invariant";
-import type { Validate } from "./interfaces";
+import type { ParseValidate } from "./interfaces";
 
 class FunctionEvaluationError extends EvaluationError {
   innerError: Error;
@@ -55,7 +55,7 @@ const identity = <T>(x: T): T => x;
 
 const getValidatedEvaluate = (
   mjsNode: mjs.MathNode,
-  validate: Validate = identity,
+  validate: ParseValidate = identity,
 ): AnonMathNode["evaluate"] => {
   const compiled = mjsNode.compile();
   const unvalidatedEvaluate = (scope?: EvaluationScope) => {

@@ -13,8 +13,8 @@ import { getValidatedEvaluate } from "./evaluate";
 import {
   IMathJsParser,
   MathJsRule,
-  Parseable,
-  ParseableObjs,
+  ValidatedParseable,
+  ValidatedParseableObjs,
   ParserRule,
   ParserRuleType,
   TextParserRule,
@@ -83,7 +83,7 @@ class MathJsParser implements IMathJsParser {
     lhs,
     rhs,
     validate,
-  }: Omit<ParseableObjs["assignment"], "type">): readonly [
+  }: Omit<ValidatedParseableObjs["assignment"], "type">): readonly [
     AnonMathNode,
     mjs.MathNode,
   ] => {
@@ -121,7 +121,7 @@ class MathJsParser implements IMathJsParser {
     params,
     rhs,
     validate,
-  }: Omit<ParseableObjs["function-assignment"], "type">): readonly [
+  }: Omit<ValidatedParseableObjs["function-assignment"], "type">): readonly [
     AnonMathNode,
     mjs.MathNode,
   ] => {
@@ -132,7 +132,10 @@ class MathJsParser implements IMathJsParser {
   private parseArray = ({
     items,
     validate,
-  }: ParseableObjs["array"]): readonly [AnonMathNode, mjs.MathNode] => {
+  }: ValidatedParseableObjs["array"]): readonly [
+    AnonMathNode,
+    mjs.MathNode,
+  ] => {
     const parsed = aggregate(items, (item) => this.$parse(item));
     const nodes = parsed.map((p) => p[0]);
     const mjsNodes = parsed.map((p) => p[1]);
@@ -144,9 +147,9 @@ class MathJsParser implements IMathJsParser {
   };
 
   private $parse = (
-    parseable: Parseable,
+    parseable: ValidatedParseable,
   ): readonly [AnonMathNode, mjs.MathNode] => {
-    const parseableObj: Parseable =
+    const parseableObj: ValidatedParseable =
       typeof parseable === "string"
         ? { expr: parseable, type: "expr" }
         : parseable;
@@ -173,7 +176,8 @@ class MathJsParser implements IMathJsParser {
   private static aggregateNodes = (
     nodes: AnonMathNode[],
     mjsNode: mjs.ArrayNode,
-    validate: NonNullable<ParseableObjs["array"]["validate"]> = (x) => x,
+    validate: NonNullable<ValidatedParseableObjs["array"]["validate"]> = (x) =>
+      x,
   ): AnonMathNode => {
     const evaluate: AnonMathNode["evaluate"] = (scope) => {
       const result = aggregate(nodes, (node) => node.evaluate(scope));
