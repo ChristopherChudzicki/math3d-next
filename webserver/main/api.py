@@ -16,8 +16,8 @@ def on_authentication_error(request: HttpRequest, exc: AuthenticationError):
 def on_validation_error(request: HttpRequest, exc: ValidationError):
     # Ninja's default is 422; map to 400 for status-parity with DRF. The body
     # shape ({"detail": [...]}) is NOT v0-matched (like the 405 body, a documented
-    # divergence; the FE adapts in #1125). Exercised by the missing-password test
-    # in Task 2; no other in-scope route asserts this body.
+    # divergence; the FE adapts in #1125). The body shape is pinned by
+    # test_validation_error_maps_to_400_detail_body in main/api_test.py.
     return api.create_response(request, {"detail": exc.errors}, status=400)
 
 

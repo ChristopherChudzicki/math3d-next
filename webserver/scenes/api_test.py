@@ -253,6 +253,27 @@ def test_patch_updates_item_order_only():
 
 
 @pytest.mark.django_db
+def test_patch_ignores_author_field():
+    # v0 parity (test_scene_partial_update_no_author_update): `author` is not a
+    # writable field. Sending it in the body is silently ignored (extra fields are
+    # not forbidden on ScenePatchSchema, and the handler never assigns author), so
+    # ownership is unchanged.
+    me = CustomUserFactory.create()
+    scene = SceneFactory.create(author=me)
+    other = CustomUserFactory.create()
+    client = Client()
+    client.force_login(me)
+    out = client.patch(
+        _detail(scene.key),
+        data={"title": "Renamed", "author": other.id},
+        content_type="application/json",
+    ).json()
+    assert out["author"] == me.id
+    scene.refresh_from_db()
+    assert scene.author_id == me.id
+
+
+@pytest.mark.django_db
 def test_patch_anonymous_gets_403():
     scene = SceneFactory.create(author=CustomUserFactory.create())
     response = Client().patch(
@@ -278,6 +299,18 @@ def test_patch_non_author_gets_403_with_well_formed_body():
 def test_delete_anonymous_gets_403():
     scene = SceneFactory.create(author=CustomUserFactory.create())
     assert Client().delete(_detail(scene.key)).status_code == 403
+
+
+@pytest.mark.django_db
+def test_delete_non_author_gets_403():
+    # v0 parity: the ownership check (_require_owner) must fire on DELETE, not just
+    # PATCH — a logged-in non-owner cannot delete someone else's scene.
+    scene = SceneFactory.create(author=CustomUserFactory.create())
+    other = CustomUserFactory.create()
+    client = Client()
+    client.force_login(other)
+    assert client.delete(_detail(scene.key)).status_code == 403
+    assert Scene.objects.filter(key=scene.key).exists()
 
 
 @pytest.mark.django_db

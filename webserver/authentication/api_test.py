@@ -1,4 +1,5 @@
 import pytest
+from allauth.account.models import EmailAddress
 from django.test import Client
 
 from authentication.factories import FACTORY_PASSWORD, CustomUserFactory
@@ -68,6 +69,40 @@ def test_me_patch_updates_public_nickname_and_ignores_readonly_fields():
 
 
 @pytest.mark.django_db
+def test_me_patch_enforces_csrf():
+    # v0 parity (test_csrf_token_required_for_unsafe_requests): Ninja's SessionAuth
+    # must reject an unsafe request lacking the CSRF token. The other patch tests
+    # use force_login, which bypasses CSRF *enforcement*, so this uses
+    # enforce_csrf_checks=True to actually exercise the check.
+    client = Client(enforce_csrf_checks=True)
+    user = CustomUserFactory.create()
+    client.force_login(user)
+
+    # GET seeds the csrftoken cookie (get_me calls get_token()).
+    get_resp = client.get(ME_URL)
+    assert get_resp.status_code == 200
+    assert "csrftoken" in get_resp.cookies
+
+    # PATCH without the X-CSRFToken header is rejected.
+    no_token = client.patch(
+        ME_URL,
+        data={"public_nickname": "newnick"},
+        content_type="application/json",
+    )
+    assert no_token.status_code == 403
+
+    # PATCH with the token from the cookie succeeds.
+    token = client.cookies["csrftoken"].value
+    with_token = client.patch(
+        ME_URL,
+        data={"public_nickname": "newnick"},
+        content_type="application/json",
+        HTTP_X_CSRFTOKEN=token,
+    )
+    assert with_token.status_code == 200
+
+
+@pytest.mark.django_db
 def test_delete_missing_password_returns_400():
     # A schema-validation failure routes through the ValidationError handler (422→400).
     user = CustomUserFactory.create()
@@ -106,6 +141,34 @@ def test_delete_correct_password_removes_account():
 
 
 @pytest.mark.django_db
+def test_delete_requires_auth():
+    # delete_me is auth=session_auth; an anonymous POST is rejected.
+    response = Client().post(
+        DELETE_URL,
+        data={"current_password": FACTORY_PASSWORD},
+        content_type="application/json",
+    )
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_delete_flushes_session():
+    # delete_me calls request.session.flush(); without it the session would retain
+    # _auth_user_id pointing at the now-deleted user. Asserting the key is gone
+    # distinguishes the flush from the user-row deletion alone.
+    user = CustomUserFactory.create()
+    client = Client()
+    client.force_login(user)
+    response = client.post(
+        DELETE_URL,
+        data={"current_password": FACTORY_PASSWORD},
+        content_type="application/json",
+    )
+    assert response.status_code == 204
+    assert "_auth_user_id" not in client.session
+
+
+@pytest.mark.django_db
 def test_activation_requires_admin():
     user = CustomUserFactory.create()  # non-staff
     client = Client()
@@ -128,3 +191,43 @@ def test_activation_unknown_email_returns_empty_404():
     )
     assert response.status_code == 404
     assert response.content == b""
+
+
+@pytest.mark.django_db
+def test_activation_activates_user_and_creates_verified_email():
+    target = CustomUserFactory.create(is_active=False)
+    admin = CustomUserFactory.create(is_staff=True)
+    client = Client()
+    client.force_login(admin)
+    response = client.post(
+        ACTIVATION_URL,
+        data={"email": target.email},
+        content_type="application/json",
+    )
+    assert response.status_code == 204
+    target.refresh_from_db()
+    assert target.is_active is True
+    email_address = EmailAddress.objects.get(user=target, email=target.email)
+    assert email_address.verified is True
+    assert email_address.primary is True
+
+
+@pytest.mark.django_db
+def test_activation_updates_existing_unverified_email_address():
+    # update_or_create path: a signup leaves an unverified EmailAddress; activation
+    # must flip it to verified rather than error on the duplicate.
+    target = CustomUserFactory.create(is_active=False)
+    EmailAddress.objects.create(
+        user=target, email=target.email, verified=False, primary=True
+    )
+    admin = CustomUserFactory.create(is_staff=True)
+    client = Client()
+    client.force_login(admin)
+    response = client.post(
+        ACTIVATION_URL,
+        data={"email": target.email},
+        content_type="application/json",
+    )
+    assert response.status_code == 204
+    email_address = EmailAddress.objects.get(user=target, email=target.email)
+    assert email_address.verified is True
