@@ -6,33 +6,7 @@ if [ -z "$(which docker)" ]; then
 	exit 1
 fi
 
-##################################################
-# Generate OpenAPI Schema
-##################################################
-docker compose run --rm webserver \
-	uv run ./manage.py spectacular \
-	--urlconf main.urls \
-	--file ./openapi.yaml \
-	--validate
-
-##################################################
-# Generate API Client
-##################################################
-
 GENERATOR_VERSION=v7.23.0
-
-docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:${GENERATOR_VERSION} \
-	generate \
-	-i /local/webserver/openapi.yaml \
-	-g typescript-axios \
-	-o /local/packages/api/src/generated \
-	--ignore-file-override /local/packages/api/.openapi-generator-ignore \
-	--additional-properties=useSingleRequestParameter=true,paramNaming=original
-
-# We expect pre-commit to exit with a non-zero status since it is reformatting
-# the generated code.
-git ls-files packages/api/src/generated | xargs pre-commit run --files ||
-	echo "OpenAPI generation complete."
 
 ##################################################
 # Generate v1 OpenAPI Schema (Ninja, raw 3.1)
@@ -52,8 +26,7 @@ docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:${GENERATO
 	--additional-properties=useSingleRequestParameter=true,paramNaming=original
 
 # Format the generated v1 client via pre-commit (prettier over .ts + .md docs,
-# end-of-file-fixer on VERSION), mirroring the v0 step above so a single run of
-# this script leaves a clean working tree. pre-commit exits non-zero when it
-# reformats, which is expected.
+# end-of-file-fixer on VERSION) so a single run of this script leaves a clean
+# working tree. pre-commit exits non-zero when it reformats, which is expected.
 git ls-files packages/api/src/generated-v1 | xargs pre-commit run --files ||
 	echo "v1 OpenAPI generation complete."
