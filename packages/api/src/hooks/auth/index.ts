@@ -1,27 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import {
+  AllauthApi,
+  Configuration as AllauthConfiguration,
+  FlowIdEnum,
+} from "../../generated-allauth";
+import type {
+  AuthenticationResponse,
+  ChangePasswordRequest,
+  Login,
+  RequestPassword,
+  ResetPassword,
+  Signup,
+  VerifyEmail,
+} from "../../generated-allauth";
 import { DefaultApi } from "../../generated-v1";
 import type { DeleteAccountSchema, UserUpdateSchema } from "../../generated-v1";
-import { getConfig } from "../util";
-import {
-  allAuthLogin,
-  allAuthLogout,
-  allAuthSignup,
-  allAuthVerifyEmail,
-  allAuthRequestPasswordReset,
-  allAuthResetPassword,
-  allAuthChangePassword,
-} from "./allauth-api";
-import type {
-  AllAuthLoginRequest,
-  AllAuthSignupRequest,
-  AllAuthVerifyEmailRequest,
-  AllAuthRequestPasswordResetRequest,
-  AllAuthResetPasswordRequest,
-  AllAuthChangePasswordRequest,
-} from "./allauth-types";
+import { isAxiosError } from "../../util";
+import { getBasePath, getConfig } from "../util";
 
 const authApi = new DefaultApi(getConfig());
+// allauth gets its own Configuration (not the v1 one) — the two generated
+// Configuration classes are separate types; sharing works only by structural
+// luck and would break the moment either gains a private member.
+const allauthApi = new AllauthApi(
+  new AllauthConfiguration({ basePath: getBasePath() }),
+);
 
 const keys = {
   userMe: ["me"],
@@ -30,7 +33,7 @@ const keys = {
 const useLogin = () => {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (data: AllAuthLoginRequest) => allAuthLogin(data),
+    mutationFn: (data: Login) => allauthApi.login({ Login: data }),
     onSuccess: async () => {
       await client.resetQueries();
     },
@@ -42,13 +45,11 @@ const useLogout = () => {
   return useMutation({
     mutationFn: async () => {
       try {
-        await allAuthLogout();
+        await allauthApi.logout();
       } catch (err) {
         // allauth returns 401 after logout (confirming you're unauthenticated).
         // This is expected behavior, not an error.
-        if (err instanceof AxiosError && err.response?.status === 401) {
-          return;
-        }
+        if (isAxiosError(err, [401])) return;
         throw err;
       }
     },
@@ -59,7 +60,7 @@ const useLogout = () => {
 };
 
 /**
- * Fetch the current user's profile from the custom DRF endpoint.
+ * Fetch the current user's profile from the custom v1 endpoint.
  * This provides public_nickname which allauth's session endpoint does not.
  */
 const useUserMe = (opts?: { enabled?: boolean }) => {
@@ -71,12 +72,7 @@ const useUserMe = (opts?: { enabled?: boolean }) => {
         return res.data;
       } catch (err) {
         // 401/403 means not authenticated — return null instead of erroring
-        if (
-          err instanceof AxiosError &&
-          [401, 403].includes(err.response?.status ?? 0)
-        ) {
-          return null;
-        }
+        if (isAxiosError(err, [401, 403])) return null;
         throw err;
       }
     },
@@ -86,18 +82,16 @@ const useUserMe = (opts?: { enabled?: boolean }) => {
 
 const useCreateUser = () => {
   return useMutation({
-    mutationFn: async (data: AllAuthSignupRequest) => {
+    mutationFn: async (data: Signup) => {
       try {
-        return await allAuthSignup(data);
+        return await allauthApi.signup({ Signup: data });
       } catch (err) {
-        // allauth returns 401 with verify_email flow when email verification
+        // allauth returns 401 with a verify_email flow when email verification
         // is mandatory. This is expected — treat it as success.
-        if (err instanceof AxiosError && err.response?.status === 401) {
-          const responseData = err.response.data as {
-            data?: { flows?: Array<{ id: string }> };
-          };
-          const flows = responseData?.data?.flows ?? [];
-          if (flows.some((f) => f.id === "verify_email")) {
+        if (isAxiosError(err, [401])) {
+          const body = err.response?.data as AuthenticationResponse;
+          const flows = body?.data?.flows ?? [];
+          if (flows.some((f) => f.id === FlowIdEnum.VerifyEmail)) {
             return err.response;
           }
         }
@@ -109,16 +103,14 @@ const useCreateUser = () => {
 
 const useActivateUser = () => {
   return useMutation({
-    mutationFn: async (data: AllAuthVerifyEmailRequest) => {
+    mutationFn: async (data: VerifyEmail) => {
       try {
-        return await allAuthVerifyEmail(data);
+        return await allauthApi.verifyEmail({ VerifyEmail: data });
       } catch (err) {
         // allauth returns 401 after successful email verification when the
         // user is not logged in. This is expected — the email is verified,
         // user just needs to log in.
-        if (err instanceof AxiosError && err.response?.status === 401) {
-          return err.response;
-        }
+        if (isAxiosError(err, [401])) return err.response;
         throw err;
       }
     },
@@ -127,24 +119,22 @@ const useActivateUser = () => {
 
 const useResetPassword = () => {
   return useMutation({
-    mutationFn: (data: AllAuthRequestPasswordResetRequest) =>
-      allAuthRequestPasswordReset(data),
+    mutationFn: (data: RequestPassword) =>
+      allauthApi.requestPassword({ RequestPassword: data }),
   });
 };
 
 const useResetPasswordConfirm = () => {
   return useMutation({
-    mutationFn: async (data: AllAuthResetPasswordRequest) => {
+    mutationFn: async (data: ResetPassword) => {
       try {
-        return await allAuthResetPassword(data);
+        return await allauthApi.resetPassword({ ResetPassword: data });
       } catch (err) {
         // allauth returns 401 after a successful password reset when the user
         // is not logged in (ACCOUNT_LOGIN_ON_PASSWORD_RESET is False). The
         // password has been changed — the user just needs to log in. An
         // invalid/expired key returns 400, so it still surfaces as an error.
-        if (err instanceof AxiosError && err.response?.status === 401) {
-          return err.response;
-        }
+        if (isAxiosError(err, [401])) return err.response;
         throw err;
       }
     },
@@ -168,8 +158,8 @@ const useUserMePatch = () => {
 
 const useUpdatePassword = () => {
   return useMutation({
-    mutationFn: (data: AllAuthChangePasswordRequest) =>
-      allAuthChangePassword(data),
+    mutationFn: (data: ChangePasswordRequest) =>
+      allauthApi.changePassword({ ChangePasswordRequest: data }),
   });
 };
 
@@ -198,12 +188,3 @@ export {
   useUpdatePassword,
   useUserMeDelete,
 };
-
-export type {
-  AllAuthLoginRequest,
-  AllAuthSignupRequest,
-  AllAuthVerifyEmailRequest,
-  AllAuthRequestPasswordResetRequest,
-  AllAuthResetPasswordRequest,
-  AllAuthChangePasswordRequest,
-} from "./allauth-types";

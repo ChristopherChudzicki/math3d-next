@@ -21,9 +21,8 @@ axios.interceptors.request.use((config) => {
   return config;
 });
 
-const getConfig = () =>
-  new Configuration({
-    basePath: import.meta.env?.VITE_API_BASE_URL as string,
-  });
+const getBasePath = () => import.meta.env?.VITE_API_BASE_URL as string;
 
-export { getConfig };
+const getConfig = () => new Configuration({ basePath: getBasePath() });
+
+export { getConfig, getBasePath };
