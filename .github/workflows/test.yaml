@@ -49,6 +49,8 @@ jobs:
         run: just setup_python
       - name: Check v1 OpenAPI up-to-date
         run: ./scripts/test/openapi_v1_spec_check.sh
+      - name: Check allauth OpenAPI up-to-date
+        run: ./scripts/test/openapi_allauth_spec_check.sh
       - name: Typecheck Python
         run: just typecheck
       - name: Test Python
@@ -56,7 +58,10 @@ jobs:
 
   openapi-generated-client-check:
     # This job checks that the output of openapi-generator-typescript-axios that
-    # is checked into version control is up-to-date.
+    # is checked into version control is up-to-date. The diff steps below are
+    # intentionally non-recursive: they compare only the top-level *.ts client
+    # files (which CI re-formats) and skip docs/ + .openapi-generator/, whose
+    # committed copies are prettier-formatted but aren't reformatted here.
     env:
       SKIP_YARN_COREPACK_CHECK: true # https://github.com/actions/setup-node/issues/531#issuecomment-1819151412
     runs-on: ubuntu-latest
@@ -87,3 +92,19 @@ jobs:
         run: |
           diff ./packages/api/tmp/generated-v1 ./packages/api/src/generated-v1 \
           || { echo "v1 OpenAPI client is out of date. Please regenerate via ./scripts/generate_openapi.sh"; exit 1; }
+      - name: Generate Fresh allauth API Client
+        uses: openapi-generators/openapitools-generator-action@v1
+        with:
+          generator: typescript-axios
+          openapi-file: ./webserver/openapi.allauth.yaml
+          generator-tag: v7.23.0
+          command-args: |
+            --output ./packages/api/tmp/generated-allauth \
+            --ignore-file-override ./packages/api/.openapi-generator-ignore \
+            --additional-properties=useSingleRequestParameter=true,paramNaming=original
+      - name: Format freshly generated allauth client
+        run: yarn prettier ./packages/api/tmp/generated-allauth/**/*.ts --write
+      - name: Check VC allauth client is up-to-date
+        run: |
+          diff ./packages/api/tmp/generated-allauth ./packages/api/src/generated-allauth \
+          || { echo "allauth OpenAPI client is out of date. Please regenerate via ./scripts/generate_openapi.sh"; exit 1; }

@@ -10,7 +10,11 @@ module.exports = {
     "prettier/prettier",
   ],
   plugins: ["react", "@typescript-eslint"],
-  ignorePatterns: ["**/generated/", "**/generated-v1/"],
+  ignorePatterns: [
+    "**/generated/",
+    "**/generated-v1/",
+    "**/generated-allauth/",
+  ],
   rules: {
     "@typescript-eslint/naming-convention": [
       "warn",

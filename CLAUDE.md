@@ -51,7 +51,12 @@ just be typecheck         # MyPy
 
 ### API Client Generation
 
-The frontend API client (`packages/api/src/generated/`) is auto-generated from `webserver/openapi.yaml`. CI validates it matches. Regenerate with:
+Two frontend API clients are auto-generated, and CI validates each matches its spec:
+
+- **v1** (Ninja app API): `packages/api/src/generated-v1/` from `webserver/openapi.v1.yaml` (dumped via `dump_openapi_v1`)
+- **allauth** (headless browser auth): `packages/api/src/generated-allauth/` from `webserver/openapi.allauth.yaml` (dumped via `dump_openapi_allauth`, a trimmed subset of allauth's headless spec)
+
+Regenerate both with:
 
 ```bash
 ./scripts/generate_openapi.sh
