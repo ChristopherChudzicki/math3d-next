@@ -134,7 +134,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[SessionAuth](../README.md#SessionAuth)
+No authorization required
 
 ### HTTP request headers
 
@@ -146,6 +146,7 @@ This endpoint does not have any parameters.
 | Status code | Description | Response headers |
 | ----------- | ----------- | ---------------- |
 | **200**     | OK          | -                |
+| **403**     | Forbidden   | -                |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

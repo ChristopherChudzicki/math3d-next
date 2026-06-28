@@ -1652,8 +1652,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserSchema'
           description: OK
-      security:
-      - SessionAuth: []
+        '403':
+          description: Forbidden
       summary: Get Me
     patch:
       operationId: authentication_api_patch_me

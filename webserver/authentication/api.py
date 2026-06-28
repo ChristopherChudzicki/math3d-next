@@ -37,10 +37,18 @@ class ActivationSchema(Schema):
     email: str
 
 
-@router.get("/users/me/", response=UserSchema, auth=session_auth)
+@router.get("/users/me/", response={200: UserSchema, 403: None}, auth=None)
 def get_me(request: HttpRequest):
-    get_token(request)  # seed the csrftoken cookie (the SPA relies on this GET)
-    return request.user
+    # Seed the csrftoken cookie BEFORE the auth gate. The SPA relies on this GET
+    # to obtain a CSRF token, and anonymous users need it most (to log in / sign
+    # up / reset). Mirrors v0's @ensure_csrf_cookie, which set the cookie even on
+    # the anonymous 403. With auth=session_auth the handler body never runs for
+    # anonymous requests, so we seed here and gate manually (403, matching the
+    # prior SessionAuth-rejection status the SPA already handles).
+    get_token(request)
+    if not request.user.is_authenticated:
+        return Status(403, None)
+    return Status(200, request.user)
 
 
 @router.patch("/users/me/", response=UserSchema, auth=session_auth)
