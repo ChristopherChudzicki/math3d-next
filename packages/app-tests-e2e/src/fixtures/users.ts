@@ -1,6 +1,6 @@
 import { test as base } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { ScenesApi, Configuration, isAxiosError } from "@math3d/api";
+import { DefaultApi, Configuration, isAxiosError } from "@math3d/api";
 import type { Scene } from "@math3d/api";
 import env from "@/env";
 import {
@@ -169,17 +169,17 @@ const test = base.extend<Fixtures, WorkerFixtures>({
             }
           : { withCredentials: true },
       });
-      const scenesApi = new ScenesApi(config);
+      const scenesApi = new DefaultApi(config);
       const create: Fixtures["prepareScene"] = async (s, opts) => {
         const { allowCleanup404 = false } = opts ?? {};
         const title = cookies ? s.title : `${TEST_SCENE_PREFIX} ${s.title}`;
-        const response = await scenesApi.scenesCreate({
-          SceneCreateRequest: { ...s, title },
+        const response = await scenesApi.scenesApiCreateScene({
+          SceneCreateSchema: { ...s, title },
         });
         const { key } = response.data;
         const cleanup = async () => {
           try {
-            await scenesApi.scenesDestroy({ key });
+            await scenesApi.scenesApiDeleteScene({ key });
           } catch (err) {
             if (isAxiosError(err, [404])) {
               if (!allowCleanup404) {

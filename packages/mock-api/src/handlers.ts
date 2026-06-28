@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import type { PaginatedMiniSceneList, Scene, User } from "@math3d/api";
+import type { PagedMiniSceneSchema, Scene, User } from "@math3d/api";
 import db from "./db";
 
 type ErrorResponseBody = Record<string, string | string[]>;
@@ -39,12 +39,12 @@ const BASE_URL: string = import.meta.env?.VITE_API_BASE_URL ?? "";
 type NoParams = Record<string, never>;
 export const urls = {
   scenes: {
-    detail: `${BASE_URL}/v0/scenes/:key/`,
-    list: `${BASE_URL}/v0/scenes/`,
-    meList: `${BASE_URL}/v0/scenes/me/`,
+    detail: `${BASE_URL}/v1/scenes/:key/`,
+    list: `${BASE_URL}/v1/scenes/`,
+    meList: `${BASE_URL}/v1/scenes/me/`,
   },
   auth: {
-    usersMe: `${BASE_URL}/v0/auth/users/me/`,
+    usersMe: `${BASE_URL}/v1/auth/users/me/`,
     // allauth headless endpoints
     login: `${BASE_URL}/_allauth/browser/v1/auth/login`,
     logout: `${BASE_URL}/_allauth/browser/v1/auth/session`,
@@ -84,7 +84,7 @@ const makeAuthenticatedResponse = (user: {
 });
 
 export const handlers = [
-  http.get<NoParams, ErrorResponseBody | PaginatedMiniSceneList>(
+  http.get<NoParams, ErrorResponseBody | PagedMiniSceneSchema>(
     urls.scenes.meList,
     async () => {
       const user = getUser();
@@ -104,15 +104,17 @@ export const handlers = [
           },
         },
       });
-      const mini = scenes.map((s) => ({
+      const items = scenes.map((s) => ({
         title: s.title,
         key: s.key,
+        author: s.author,
+        archived: s.archived,
+        createdDate: s.createdDate,
+        modifiedDate: s.modifiedDate,
       }));
       return HttpResponse.json({
-        count: mini.length,
-        next: null,
-        previous: null,
-        results: mini,
+        count: items.length,
+        items,
       });
     },
   ),

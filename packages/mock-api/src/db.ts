@@ -2,7 +2,7 @@ import { cloneDeep } from "lodash-es";
 import { factory, primaryKey, nullable } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
 import { MathItem } from "@math3d/mathitem-configs";
-import type { StrictScene as Scene, User } from "@math3d/api";
+import type { Scene, User } from "@math3d/api";
 
 import { makeSceneFromItems } from "./factories";
 import { sceneFixtures } from "./fixtures";

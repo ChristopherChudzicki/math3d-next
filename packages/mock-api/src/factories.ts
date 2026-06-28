@@ -4,7 +4,7 @@ import {
   mathItemConfigs,
   MathItemType,
 } from "@math3d/mathitem-configs";
-import type { StrictScene as IScene } from "@math3d/api";
+import type { Scene as IScene } from "@math3d/api";
 import { faker } from "@faker-js/faker/locale/en";
 import { uniqueId } from "lodash-es";
 import invariant from "tiny-invariant";

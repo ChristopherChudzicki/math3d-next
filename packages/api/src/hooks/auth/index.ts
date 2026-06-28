@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { AuthApi } from "../../generated";
-import type { DeleteAccountRequest, PatchedUserRequest } from "../../generated";
+import { DefaultApi } from "../../generated-v1";
+import type { DeleteAccountSchema, UserUpdateSchema } from "../../generated-v1";
 import { getConfig } from "../util";
 import {
   allAuthLogin,
@@ -21,7 +21,7 @@ import type {
   AllAuthChangePasswordRequest,
 } from "./allauth-types";
 
-const authApi = new AuthApi(getConfig());
+const authApi = new DefaultApi(getConfig());
 
 const keys = {
   userMe: ["me"],
@@ -67,7 +67,7 @@ const useUserMe = (opts?: { enabled?: boolean }) => {
     queryKey: keys.userMe,
     queryFn: async () => {
       try {
-        const res = await authApi.authUsersMeRetrieve();
+        const res = await authApi.authenticationApiGetMe();
         return res.data;
       } catch (err) {
         // 401/403 means not authenticated — return null instead of erroring
@@ -154,9 +154,9 @@ const useResetPasswordConfirm = () => {
 const useUserMePatch = () => {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (data: PatchedUserRequest) =>
-      authApi.authUsersMePartialUpdate({
-        PatchedUserRequest: data,
+    mutationFn: (data: UserUpdateSchema) =>
+      authApi.authenticationApiPatchMe({
+        UserUpdateSchema: data,
       }),
     onSettled: () => {
       client.invalidateQueries({
@@ -176,9 +176,9 @@ const useUpdatePassword = () => {
 const useUserMeDelete = () => {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: ({ current_password }: DeleteAccountRequest) =>
-      authApi.authUsersMeDeleteCreate({
-        DeleteAccountRequest: { current_password },
+    mutationFn: ({ current_password }: DeleteAccountSchema) =>
+      authApi.authenticationApiDeleteMe({
+        DeleteAccountSchema: { current_password },
       }),
     onSuccess: async () => {
       await client.resetQueries();

@@ -49,7 +49,7 @@ const useLoadSceneIntoRedux = (sceneKey?: string) => {
     if (!scene) return;
     const payload = {
       key: scene.key,
-      author: scene.author,
+      author: scene.author ?? null,
       items: scene.items,
       order: scene.itemOrder,
       title: scene.title ?? "",

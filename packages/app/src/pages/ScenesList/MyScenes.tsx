@@ -103,7 +103,7 @@ const MyScenesList: React.FC = () => {
     debouncedSetFilterValue(e.target.value);
   };
 
-  const allItems = data ? data.pages.flatMap((d) => d.results ?? []) : [];
+  const allItems = data ? data.pages.flatMap((d) => d.items) : [];
   if (isAuthenticated !== "authenticated") {
     return (
       <p className={styles["with-margin"]}>

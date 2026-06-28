@@ -1,6 +1,6 @@
 import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
 import { faker } from "@faker-js/faker/locale/en";
-import type { StrictScene as Scene } from "@math3d/api";
+import type { Scene } from "@math3d/api";
 
 import { makeItem, makeSceneFromItems } from "./factories";
 
