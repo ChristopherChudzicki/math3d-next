@@ -15,6 +15,17 @@ def test_me_get_requires_auth():
 
 
 @pytest.mark.django_db
+def test_me_get_anonymous_seeds_csrf_cookie():
+    # The SPA's bootstrap GET runs while anonymous (on the login/signup/reset
+    # pages) and relies on this response to obtain a CSRF token for the ensuing
+    # allauth POST. Seeding must happen before the auth gate — regression guard
+    # for the cookie being skipped on the rejected anonymous request.
+    response = Client().get(ME_URL)
+    assert response.status_code == 403
+    assert "csrftoken" in response.cookies
+
+
+@pytest.mark.django_db
 def test_me_get_returns_user_shape():
     user = CustomUserFactory.create()
     client = Client()

@@ -20,7 +20,7 @@ test.describe("User sign up flow and account deletion", () => {
     try {
       const cookies = await getSessionCookies({ email, password });
       await axios.post(
-        `/v0/auth/users/me/delete/`,
+        `/v1/auth/users/me/delete/`,
         { current_password: password },
         { headers: authHeaders(cookies) },
       );

@@ -57,7 +57,7 @@ const deleteUser = async (user: UserCredentials): Promise<void> => {
   try {
     const cookies = await getSessionCookies(user);
     await axios.post(
-      `/v0/auth/users/me/delete/`,
+      `/v1/auth/users/me/delete/`,
       { current_password: user.password },
       { headers: authHeaders(cookies) },
     );
@@ -90,7 +90,7 @@ const getAdminCookies = async ({ forceRefresh = false } = {}) => {
  * 3. User can now log in
  *
  * Cleanup deletes the user by logging in as them and calling
- * POST /v0/auth/users/me/delete/.
+ * POST /v1/auth/users/me/delete/.
  */
 const createActiveUser = async (user: UserInfo = {}) => {
   const defaults = {
@@ -134,7 +134,7 @@ const createActiveUser = async (user: UserInfo = {}) => {
   // Retry once with fresh admin cookies if the cached session has expired.
   const activate = async (cookies: SessionCookies) =>
     axios.post(
-      `/v0/auth/users/activation/`,
+      `/v1/auth/users/activation/`,
       { email: request.email },
       { headers: authHeaders(cookies) },
     );

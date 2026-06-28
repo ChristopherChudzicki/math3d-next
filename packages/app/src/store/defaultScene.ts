@@ -1,5 +1,5 @@
 import { MathItemType } from "@math3d/mathitem-configs";
-import type { StrictScene as Scene } from "@math3d/api";
+import type { Scene } from "@math3d/api";
 
 const defaultScene: Pick<
   Scene,

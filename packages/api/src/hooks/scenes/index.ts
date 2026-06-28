@@ -5,11 +5,11 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
-import { ScenesApi } from "../../generated";
-import type { PatchedSceneRequest, SceneCreateRequest } from "../../generated";
+import { DefaultApi } from "../../generated-v1";
+import type { SceneCreateSchema, ScenePatchSchema } from "../../generated-v1";
 import { getConfig } from "../util";
 
-const scenesApi = new ScenesApi(getConfig());
+const scenesApi = new DefaultApi(getConfig());
 
 const detailKey = (key?: string) => ["scenes", "detail", String(key)];
 
@@ -21,7 +21,7 @@ const useScene = (
     queryKey: detailKey(key),
     queryFn: () => {
       invariant(key, "When useScene is enabled, key is required");
-      return scenesApi.scenesRetrieve({ key }).then((res) => res.data);
+      return scenesApi.scenesApiGetScene({ key }).then((res) => res.data);
     },
     ...opts,
   });
@@ -45,20 +45,22 @@ const useInfiniteScenesMe = (
 ) => {
   return useInfiniteQuery({
     queryKey: [...meListKey(), { limit, offset, title, archived }],
-    initialPageParam: offset,
+    initialPageParam: offset ?? 0,
     queryFn: ({ pageParam }) =>
       scenesApi
-        .scenesMeList({
+        .scenesApiMyScenes({
           limit,
           offset: pageParam,
           title,
           archived,
         })
         .then((res) => res.data),
-    getNextPageParam: (lastPage) => {
-      if (!lastPage.next) return undefined;
-      const url = new URL(lastPage.next);
-      return Number(url.searchParams.get("offset"));
+    getNextPageParam: (lastPage, allPages, lastPageParam) => {
+      // Empty page => nothing more to load (also guards against an infinite
+      // loop if a malformed `count` ever exceeds the returnable item total).
+      if (lastPage.items.length === 0) return undefined;
+      const loaded = (lastPageParam ?? 0) + lastPage.items.length;
+      return loaded < lastPage.count ? loaded : undefined;
     },
     ...opts,
   });
@@ -67,10 +69,10 @@ const useInfiniteScenesMe = (
 const useCreateScene = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: SceneCreateRequest) => {
+    mutationFn: (data: SceneCreateSchema) => {
       return scenesApi
-        .scenesCreate({
-          SceneCreateRequest: data,
+        .scenesApiCreateScene({
+          SceneCreateSchema: data,
         })
         .then((res) => res.data);
     },
@@ -85,8 +87,8 @@ const useCreateScene = () => {
 const usePatchScene = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ key, patch }: { key: string; patch: PatchedSceneRequest }) =>
-      scenesApi.scenesPartialUpdate({ key, PatchedSceneRequest: patch }),
+    mutationFn: ({ key, patch }: { key: string; patch: ScenePatchSchema }) =>
+      scenesApi.scenesApiUpdateScene({ key, ScenePatchSchema: patch }),
     onSuccess: (data, vars) => {
       queryClient.invalidateQueries({
         queryKey: detailKey(vars.key),
@@ -103,7 +105,7 @@ const usePatchScene = () => {
 const useDestroyScene = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (key: string) => scenesApi.scenesDestroy({ key }),
+    mutationFn: (key: string) => scenesApi.scenesApiDeleteScene({ key }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: meListKey(),

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Configuration } from "../generated";
+import { Configuration } from "../generated-v1";
 
 // Send cookies on all requests (needed for cross-origin session auth)
 axios.defaults.withCredentials = true;
