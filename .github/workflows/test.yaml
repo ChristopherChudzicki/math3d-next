@@ -61,10 +61,7 @@ jobs:
     # is checked into version control is up-to-date.
     env:
       SKIP_YARN_COREPACK_CHECK: true # https://github.com/actions/setup-node/issues/531#issuecomment-1819151412
-      OPENAPI_SCHEMA: ./webserver/openapi.yaml
       GENERATOR_IGNORE_FILE: ./packages/api/.openapi-generator-ignore
-      GENERATOR_OUTPUT_DIR_CI: ./packages/api/tmp/generated
-      GENERATOR_OUTPUT_DIR_VC: ./packages/api/src/generated
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

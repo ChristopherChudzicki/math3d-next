@@ -37,7 +37,6 @@ env = environ.Env(
     # Logging
     LOG_LEVEL=(str, "INFO"),
     DJANGO_LOG_LEVEL=(str, "INFO"),
-    DRF_LOG_LEVEL=(str, "INFO"),
     # Version
     APP_VERSION=(str, "unknown"),
     # Feature flags
@@ -119,11 +118,6 @@ LOGGING = {
             "level": env("DJANGO_LOG_LEVEL"),
             "propagate": False,
         },
-        "rest_framework": {
-            "handlers": ["console"],
-            "level": env("DRF_LOG_LEVEL"),
-            "propagate": False,
-        },
         "authentication": {
             "handlers": ["console"],
             "level": env("LOG_LEVEL"),
@@ -152,30 +146,17 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",  # Required by allauth
-    "rest_framework",
-    "rest_framework.authtoken",  # Unused; kept to avoid dropping the token table until DRF removal (#1125)
-    "django_filters",
     "authentication",  # custom app
     "allauth",
     "allauth.account",
     "allauth.headless",
     "corsheaders",
-    "drf_spectacular",
     ## Custom apps
     "main",
     "scenes",
 ]
 
 SITE_ID = 1
-
-REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 20,
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.SessionAuthentication",
-    ),
-}
 
 # Ninja's default page size is 100; match v0's effective default of 20.
 NINJA_PAGINATION_PER_PAGE = 20
@@ -347,7 +328,6 @@ STORAGES = {
     },
 }
 
-# Ensure DRF static files are collected
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
@@ -357,16 +337,6 @@ STATICFILES_FINDERS = [
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-SPECTACULAR_SETTINGS = {
-    "TITLE": "Math3d API",
-    "DESCRIPTION": "Math3d API",
-    "VERSION": "0.0.1",
-    "SERVE_INCLUDE_SCHEMA": False,
-    "SERVE_URLCONF": "main.urls",
-    "ENUM_GENERATE_CHOICE_DESCRIPTION": True,
-    "COMPONENT_SPLIT_REQUEST": True,
-}
 
 INGESTION_DATABASE_URL = env("INGESTION_DATABASE_URL")
 
