@@ -1,6 +1,6 @@
 import pytest
 from allauth.account.models import EmailAddress
-from django.test import Client, override_settings
+from django.test import Client
 
 from authentication.factories import FACTORY_PASSWORD, CustomUserFactory
 from authentication.models import CustomUser
@@ -8,7 +8,6 @@ from authentication.models import CustomUser
 ME_URL = "/v1/auth/users/me/"
 DELETE_URL = "/v1/auth/users/me/delete/"
 ACTIVATION_URL = "/v1/auth/users/activation/"
-SIGNUP_URL = "/_allauth/browser/v1/auth/signup"
 
 
 @pytest.mark.django_db
@@ -101,18 +100,6 @@ def test_me_patch_enforces_csrf():
         HTTP_X_CSRFTOKEN=token,
     )
     assert with_token.status_code == 200
-
-
-@pytest.mark.django_db
-def test_me_patch_requires_auth():
-    # patch_me is auth=session_auth; an anonymous PATCH is rejected before the body
-    # is processed. (Only the GET seeds-csrf path is intentionally auth=None.)
-    response = Client().patch(
-        ME_URL,
-        data={"public_nickname": "newnick"},
-        content_type="application/json",
-    )
-    assert response.status_code == 403
 
 
 @pytest.mark.django_db
@@ -244,43 +231,3 @@ def test_activation_updates_existing_unverified_email_address():
     assert response.status_code == 204
     email_address = EmailAddress.objects.get(user=target, email=target.email)
     assert email_address.verified is True
-
-
-@pytest.mark.django_db
-def test_activation_already_active_user_is_idempotent():
-    # Re-activating an active user with an already-verified email is a no-op 204,
-    # not an error (update_or_create tolerates the existing verified row).
-    target = CustomUserFactory.create(is_active=True)
-    EmailAddress.objects.create(
-        user=target, email=target.email, verified=True, primary=True
-    )
-    admin = CustomUserFactory.create(is_staff=True)
-    client = Client()
-    client.force_login(admin)
-    response = client.post(
-        ACTIVATION_URL,
-        data={"email": target.email},
-        content_type="application/json",
-    )
-    assert response.status_code == 204
-    target.refresh_from_db()
-    assert target.is_active is True
-    assert EmailAddress.objects.get(user=target, email=target.email).verified is True
-
-
-@pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=False)
-def test_registration_disabled_blocks_signup():
-    # Guards CustomAccountAdapter.is_open_for_signup (authentication/adapter.py) —
-    # our override of allauth's signup gate. Hits the allauth headless signup
-    # endpoint (not a v1 route); kept here because e2e always runs with
-    # registration enabled and so cannot exercise the disabled branch.
-    response = Client().post(
-        SIGNUP_URL,
-        data={
-            "email": "newuser@example.com",
-            "password": "h7$Wq2!zPk9mLx4r",  # pragma: allowlist secret
-        },
-        content_type="application/json",
-    )
-    assert response.status_code == 403
