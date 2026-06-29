@@ -32,9 +32,11 @@ const csrfMiddleware: Middleware = {
 
 const getBasePath = () => import.meta.env?.VITE_API_BASE_URL as string;
 
-// Late-bind fetch. openapi-fetch captures `globalThis.fetch` when the client is
-// constructed (here, at module load); resolving it per-call instead lets
-// test-time interceptors that replace `globalThis.fetch` (MSW) take effect.
+// Late-bind fetch. openapi-fetch captures the `fetch` it is given when the
+// client is constructed (here, at module load). Passing `globalThis.fetch`
+// directly would freeze that reference before MSW swaps it in tests; passing
+// this wrapper instead resolves `globalThis.fetch` per call, so test-time
+// interceptors take effect.
 const lateBoundFetch = (...args: Parameters<typeof fetch>) =>
   globalThis.fetch(...args);
 

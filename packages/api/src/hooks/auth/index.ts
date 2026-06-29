@@ -91,9 +91,9 @@ const useCreateUser = () => {
       if (!result.error) return result.data;
       // allauth returns 401 with a verify_email flow when email verification
       // is mandatory. This is expected — treat it as success. `error` is the
-      // typed union of non-2xx bodies; each declares a literal `status`, so
-      // narrowing on `error.status === 401` selects AuthenticationResponse and
-      // gives typed `error.data.flows` with no cast.
+      // typed union of non-2xx bodies; the 401 body (AuthenticationResponse)
+      // declares a literal `status: 401`, so narrowing on `error.status === 401`
+      // selects it and gives typed `error.data.flows` with no cast.
       if (result.error.status === 401) {
         const { flows } = result.error.data;
         if (flows.some((f) => f.id === "verify_email")) return result.error;
