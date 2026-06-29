@@ -13,10 +13,11 @@ import ResetPasswordConfirmPage from "./pages/auth/ResetPasswordConfirmPage";
 import ScenesList from "./pages/ScenesList/ScenesListPage";
 import UserSettingsPage from "./pages/UserSettingsPage/UserSettingsPage";
 import HelpPage from "./pages/HelpPage/HelpPage";
+import ErrorPage from "./pages/ErrorPage/ErrorPage";
 
 const routes: RouteObject[] = [
   {
-    // Saving a slot for errorElement
+    errorElement: <ErrorPage />,
     children: [
       {
         path: "/help/reference",
