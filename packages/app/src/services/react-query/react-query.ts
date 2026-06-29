@@ -1,10 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
-
-type MaybeHasStatus = {
-  response?: {
-    status?: number;
-  };
-};
+import { isApiError } from "@math3d/api";
 
 const RETRY_STATUS_CODES = [408, 429, 502, 503, 504];
 const MAX_RETRIES = 3;
@@ -15,7 +10,7 @@ const createQueryClient = (): QueryClient => {
       queries: {
         staleTime: Infinity,
         retry: (failureCount, error) => {
-          const status = (error as MaybeHasStatus)?.response?.status;
+          const status = isApiError(error) ? error.status : undefined;
           /**
            * React Query's default behavior is to retry all failed queries 3
            * times. Many things (e.g., 403, 404) are not worth retrying. Let's

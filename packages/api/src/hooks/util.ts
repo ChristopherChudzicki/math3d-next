@@ -19,8 +19,8 @@ function getCsrfToken(): string {
 const CSRF_SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS", "TRACE"]);
 const csrfMiddleware: Middleware = {
   onRequest({ request }) {
-    // Django only enforces CSRF on unsafe methods; skip the header on safe ones
-    // so GETs don't needlessly carry the cookie value (matches the e2e harness).
+    // Django only enforces CSRF on unsafe methods; skip the X-CSRFToken header
+    // on safe ones so GETs don't needlessly send it (matches the e2e harness).
     if (CSRF_SAFE_METHODS.has(request.method)) return request;
     const token = getCsrfToken();
     if (token) {
@@ -38,15 +38,14 @@ const getBasePath = () => import.meta.env?.VITE_API_BASE_URL as string;
 const lateBoundFetch = (...args: Parameters<typeof fetch>) =>
   globalThis.fetch(...args);
 
-/**
- * Create an openapi-fetch client for the v1 (Ninja) API. The app uses the
- * default `v1Client`; callers that need a different origin or explicit auth
- * headers (e.g. the e2e suite running in Node) can pass `baseUrl`/`headers`.
- */
-const createV1Client = (
+// Build an openapi-fetch client with our shared cross-origin wiring: the API
+// base URL, cookie credentials, a late-bound fetch (so MSW intercepts in
+// tests), and the CSRF middleware. Both clients go through here so the wiring
+// can't drift between them.
+const createApiClient = <Paths extends object>(
   opts: { baseUrl?: string; headers?: Record<string, string> } = {},
-): ReturnType<typeof createClient<V1Paths>> => {
-  const client = createClient<V1Paths>({
+) => {
+  const client = createClient<Paths>({
     baseUrl: opts.baseUrl ?? getBasePath(),
     credentials: "include",
     headers: opts.headers,
@@ -56,14 +55,18 @@ const createV1Client = (
   return client;
 };
 
+/**
+ * Create an openapi-fetch client for the v1 (Ninja) API. The app uses the
+ * default `v1Client`; callers that need a different origin or explicit auth
+ * headers (e.g. the e2e suite running in Node) can pass `baseUrl`/`headers`.
+ */
+const createV1Client = (
+  opts: { baseUrl?: string; headers?: Record<string, string> } = {},
+): ReturnType<typeof createClient<V1Paths>> => createApiClient<V1Paths>(opts);
+
 const v1Client = createV1Client();
 
-const allauthClient = createClient<AllauthPaths>({
-  baseUrl: getBasePath(),
-  credentials: "include",
-  fetch: lateBoundFetch,
-});
-allauthClient.use(csrfMiddleware);
+const allauthClient = createApiClient<AllauthPaths>();
 
 /** Build an ApiError from an openapi-fetch result's `response` + `error` body. */
 const toApiError = (response: Response, error: unknown) =>
@@ -87,7 +90,7 @@ async function unwrap<T>(
 }
 
 export {
-  getBasePath,
+  csrfMiddleware,
   createV1Client,
   v1Client,
   allauthClient,

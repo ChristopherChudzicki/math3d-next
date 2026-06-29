@@ -82,6 +82,22 @@ test("v1 field errors: maps field errors and non_field_errors to fields and root
   });
 });
 
+test("handles 409 (conflict) errors, not just 400", () => {
+  const setError = vi.fn();
+  const err = makeApiError(409, {
+    status: 409,
+    errors: [{ code: "conflict", message: "Already exists.", param: "email" }],
+  });
+
+  const result = setFieldErrors({ email: "" }, err, setError);
+
+  expect(result).toBe(true);
+  expect(setError).toHaveBeenCalledWith("email", {
+    type: "400",
+    message: "Already exists.",
+  });
+});
+
 test("non-400/409 errors set a generic root message and rethrow", () => {
   const setError = vi.fn();
   const err = makeApiError(500, { detail: "server error" });

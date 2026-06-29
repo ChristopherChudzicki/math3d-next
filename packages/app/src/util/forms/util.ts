@@ -48,7 +48,6 @@ const setFieldErrors = <TFieldValues extends FieldValues>(
 ) => {
   let hasSetErrors = false;
 
-  // The hooks throw ApiError carrying the typed response body on `.data`.
   let errData: unknown;
   if (isApiError(err, [400, 409])) {
     errData = err.data;
