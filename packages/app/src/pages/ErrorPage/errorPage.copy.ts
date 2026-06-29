@@ -5,7 +5,7 @@
 const errorPageCopy = {
   eyebrow: "Application error",
   title: "We hit a discontinuity.",
-  body: "Math3d ran into an unexpected error and couldn't finish rendering. Reloading the page usually fixes it.",
+  body: "Math3d ran into an unexpected error and couldn't finish rendering. Reloading might clear it — if not, report the problem below and we'll take a look.",
   reload: "Reload page",
   home: "Back to home",
   detailsSummary: "Technical details",
