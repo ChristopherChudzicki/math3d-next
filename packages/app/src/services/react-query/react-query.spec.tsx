@@ -1,6 +1,7 @@
 import React from "react";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { ApiError } from "@math3d/api";
 import { createQueryClient } from "./react-query";
 
 const getWrapper = () => {
@@ -23,7 +24,11 @@ test.each([
   "should retry $status failures $retries times",
   async ({ status, retries }) => {
     const wrapper = getWrapper();
-    const queryFn = vi.fn().mockRejectedValue({ response: { status } });
+    const queryFn = vi
+      .fn()
+      .mockRejectedValue(
+        new ApiError(status, {}, new Response(null, { status })),
+      );
     const { result } = renderHook(
       () =>
         useQuery({

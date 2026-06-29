@@ -4,7 +4,7 @@ from pathlib import Path
 import yaml
 from allauth.headless.spec.internal.schema import get_schema
 from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 DEFAULT_OUTPUT = Path(settings.BASE_DIR) / "openapi.allauth.yaml"
 
@@ -37,25 +37,14 @@ DROP_PARAM_REFS = {
 # `AllauthApi` class instead of one per allauth tag grouping.
 TAG = "allauth"
 
-# Override allauth's `Login` request schema. allauth models it as
-# password + anyOf[username|email|phone]; typescript-axios mishandles anyOf —
-# it merges the branches and marks all three identifiers required
-# (OpenAPITools/openapi-generator#8894, #14803). This anyOf is static in
-# allauth's shipped spec (not driven by ACCOUNT_LOGIN_METHODS), so we pin it
-# here to the only identifier our deployment accepts: email (+ password).
-# NOTE: `Signup` is intentionally NOT overridden — get_schema() injects our
-# custom-form `public_nickname` (optional, maxLength 64) and the required
-# email/password from ACCOUNT_SIGNUP_FIELDS, so it is already correct.
-SCHEMA_OVERRIDES = {
-    "Login": {
-        "type": "object",
-        "properties": {
-            "email": {"$ref": "#/components/schemas/Email"},
-            "password": {"$ref": "#/components/schemas/Password"},
-        },
-        "required": ["email", "password"],
-    },
-}
+# We do not override any request schema. allauth models `Login` as
+# password + anyOf[username|email|phone]; openapi-typescript renders that as a
+# faithful union, and we narrow it to our supported identifier (email) at the
+# single consuming call site — `useLogin` in packages/api/src/hooks/auth/index.ts
+# — where TypeScript enforces the narrowing (and surfaces any upstream Login
+# reshape as a compile error). `Signup` likewise needs no override: get_schema()
+# already injects our custom-form `public_nickname` (optional, maxLength 64) and
+# the required email/password from ACCOUNT_SIGNUP_FIELDS.
 
 
 def _strip_examples(node):
@@ -115,7 +104,7 @@ class Command(BaseCommand):
         "client (deterministic). Sources allauth's own get_schema() (which pins "
         "the browser client, drops the client param, and injects our custom "
         "signup fields), then trims to the enabled flows, injects operationIds, "
-        "collapses tags, overrides the Login request schema, and prunes."
+        "collapses tags, and prunes."
     )
 
     def add_arguments(self, parser):
@@ -135,29 +124,6 @@ class Command(BaseCommand):
         # KeyError, not silent drift).
         source = get_schema()
         _strip_examples(source)
-
-        # Our Login override pins the request to {email, password}. That is only
-        # a faithful trim of allauth's real Login schema as long as that schema
-        # still accepts email + password. If an allauth upgrade reshapes Login
-        # (renamed/added required field), the wholesale override would otherwise
-        # silently paper over the change while the live endpoint rejects our
-        # body. Assert the upstream shape still references Email + Password so a
-        # divergence fails the dump loudly instead of rotting behind green CI.
-        login_refs = set(_iter_refs(source["components"]["schemas"]["Login"]))
-        required_login_refs = {
-            "#/components/schemas/Email",
-            "#/components/schemas/Password",
-        }
-        if not required_login_refs <= login_refs:
-            raise CommandError(
-                "allauth's upstream Login schema no longer references "
-                f"{sorted(required_login_refs - login_refs)}. Re-check "
-                "SCHEMA_OVERRIDES['Login'] against the new upstream shape "
-                "(see feature_work/TODOS_AND_IDEAS.md)."
-            )
-
-        for name, schema in SCHEMA_OVERRIDES.items():
-            source["components"]["schemas"][name] = schema
 
         paths: dict[str, dict] = {}
         for (path, method), operation_id in ENABLED.items():

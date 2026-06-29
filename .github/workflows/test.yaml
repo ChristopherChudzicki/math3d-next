@@ -57,11 +57,9 @@ jobs:
         run: just test
 
   openapi-generated-client-check:
-    # This job checks that the output of openapi-generator-typescript-axios that
-    # is checked into version control is up-to-date. The diff steps below are
-    # intentionally non-recursive: they compare only the top-level *.ts client
-    # files (which CI re-formats) and skip docs/ + .openapi-generator/, whose
-    # committed copies are prettier-formatted but aren't reformatted here.
+    # This job checks that the generated clients checked into version control are
+    # up-to-date. Both clients are types-only (openapi-typescript) — a single
+    # index.ts each, regenerated, prettier-formatted, and diffed directly.
     env:
       SKIP_YARN_COREPACK_CHECK: true # https://github.com/actions/setup-node/issues/531#issuecomment-1819151412
     runs-on: ubuntu-latest
@@ -76,35 +74,25 @@ jobs:
         run: cp .env.development .env
       - name: Install dependencies
         run: yarn install --immutable
-      - name: Generate Fresh v1 API Client
-        uses: openapi-generators/openapitools-generator-action@v1
-        with:
-          generator: typescript-axios
-          openapi-file: ./webserver/openapi.v1.yaml
-          generator-tag: v7.23.0
-          command-args: |
-            --output ./packages/api/tmp/generated-v1 \
-            --ignore-file-override ./packages/api/.openapi-generator-ignore \
-            --additional-properties=useSingleRequestParameter=true,paramNaming=original
+      - name: Generate Fresh v1 API Client (types-only)
+        run: |
+          mkdir -p ./packages/api/tmp/generated-v1
+          npx openapi-typescript ./webserver/openapi.v1.yaml --default-non-nullable false \
+            --output ./packages/api/tmp/generated-v1/index.ts
       - name: Format freshly generated v1 client
-        run: yarn prettier ./packages/api/tmp/generated-v1/**/*.ts --write
+        run: yarn prettier ./packages/api/tmp/generated-v1/index.ts --write
       - name: Check VC v1 client is up-to-date
         run: |
-          diff ./packages/api/tmp/generated-v1 ./packages/api/src/generated-v1 \
+          diff ./packages/api/tmp/generated-v1/index.ts ./packages/api/src/generated-v1/index.ts \
           || { echo "v1 OpenAPI client is out of date. Please regenerate via ./scripts/generate_openapi.sh"; exit 1; }
-      - name: Generate Fresh allauth API Client
-        uses: openapi-generators/openapitools-generator-action@v1
-        with:
-          generator: typescript-axios
-          openapi-file: ./webserver/openapi.allauth.yaml
-          generator-tag: v7.23.0
-          command-args: |
-            --output ./packages/api/tmp/generated-allauth \
-            --ignore-file-override ./packages/api/.openapi-generator-ignore \
-            --additional-properties=useSingleRequestParameter=true,paramNaming=original
+      - name: Generate Fresh allauth API Client (types-only)
+        run: |
+          mkdir -p ./packages/api/tmp/generated-allauth
+          npx openapi-typescript ./webserver/openapi.allauth.yaml --default-non-nullable false \
+            --output ./packages/api/tmp/generated-allauth/index.ts
       - name: Format freshly generated allauth client
-        run: yarn prettier ./packages/api/tmp/generated-allauth/**/*.ts --write
+        run: yarn prettier ./packages/api/tmp/generated-allauth/index.ts --write
       - name: Check VC allauth client is up-to-date
         run: |
-          diff ./packages/api/tmp/generated-allauth ./packages/api/src/generated-allauth \
+          diff ./packages/api/tmp/generated-allauth/index.ts ./packages/api/src/generated-allauth/index.ts \
           || { echo "allauth OpenAPI client is out of date. Please regenerate via ./scripts/generate_openapi.sh"; exit 1; }

@@ -5,18 +5,17 @@
 //
 // We assert an invariant `Equal` (each member structurally identical, not merely
 // mutually assignable), via type-fest's `IsEqual` over `SimplifyDeep`-normalized
-// types. The normalization is load-bearing:
-//   - The generated client renders its discriminated union as
-//     `({ type: "POINT" } & PointItem) | ...` intersections, whereas the frontend
-//     type is a flat `{ id; type; properties }`. `IsEqual` compares type
-//     *representation*, not assignability, so it reports the unreduced
-//     intersection and the flat object as different even though they describe the
-//     same values.
-//   - `SimplifyDeep` materializes each intersection into a single resolved object
-//     (recursively — the parametric/field members carry the mismatch nested inside
-//     `properties`, so shallow `Simplify` is not enough). After deep normalization
-//     both sides have identical representations and `IsEqual` matches them. This
-//     is deterministic across compiler runs and assertion orderings.
+// types. The normalization is load-bearing: the generated types reach their
+// members through indexed access into `components["schemas"][...]` and don't
+// share the frontend types' concrete object representation, whereas the frontend
+// type is a flat `{ id; type; properties }`. `IsEqual` compares type
+// *representation*, not assignability, so it reports the two as different even
+// though they describe the same values. `SimplifyDeep` resolves both sides into a
+// single materialized object (recursively — the parametric/field members carry
+// the mismatch nested inside `properties`, so shallow `Simplify` is not enough).
+// After deep normalization both sides have identical representations and
+// `IsEqual` matches them, deterministically across compiler runs and assertion
+// orderings.
 // `IsEqual` also distinguishes `any` from a concrete type, so if the generator
 // ever collapsed `items`/`itemOrder` to `any` the assertion fails — no separate
 // any-guard needed (unlike mutual assignability, which is any-blind).
@@ -32,7 +31,9 @@
 // real drift (e.g. temporarily add a field to one side) before trusting green.
 import type { IsEqual, SimplifyDeep } from "type-fest";
 import type { MathItem } from "@math3d/mathitem-configs";
-import type { SceneSchema as GeneratedV1Scene } from "./generated-v1";
+import type { components } from "./generated-v1";
+
+type GeneratedV1Scene = components["schemas"]["SceneSchema"];
 
 type Assert<T extends true> = T;
 type DeepEqual<A, B> = IsEqual<SimplifyDeep<A>, SimplifyDeep<B>>;

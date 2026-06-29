@@ -31,7 +31,12 @@ const renderTestApp = async (
 ) => {
   const initialEntries: InitialEntry[] = [initialRoute];
   const store = getStore();
-  const queryClient = new QueryClient();
+  // Disable retries so error-state behavior (e.g. a 404 surfacing) settles
+  // immediately; the production client retries some statuses with backoff, which
+  // would otherwise stall tests well past their timeouts.
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   const theme = createTheme({
     transitions: {
       create: () => "none",
