@@ -66,16 +66,15 @@ const useUserMe = (opts?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: keys.userMe,
     queryFn: async () => {
-      // Narrow on the result object (not destructured fields) so `data` is the
-      // success type on the happy path; destructuring decorrelates the
-      // data/error discriminants and would widen `data` to `User | undefined`.
-      const result = await v1Client.GET("/v1/auth/users/me/");
-      if (!result.error) return result.data;
-      // 401/403 means not authenticated — return null instead of erroring
-      if (result.response.status === 401 || result.response.status === 403) {
-        return null;
-      }
-      throw toApiError(result.response, result.error);
+      const { data, error, response } =
+        await v1Client.GET("/v1/auth/users/me/");
+      // Key on HTTP status, NOT error-body presence: a 401/403 may carry an
+      // empty/unparseable body, in which case openapi-fetch leaves `error`
+      // undefined. We must still return null — useAuthStatus reads `undefined`
+      // as "loading", which would hide the sign-in UI indefinitely.
+      if (response.status === 401 || response.status === 403) return null;
+      if (!response.ok) throw toApiError(response, error);
+      return data ?? null;
     },
     ...opts,
   });
@@ -84,21 +83,24 @@ const useUserMe = (opts?: { enabled?: boolean }) => {
 const useCreateUser = () => {
   return useMutation({
     mutationFn: async (data: Signup) => {
-      const result = await allauthClient.POST(
-        "/_allauth/browser/v1/auth/signup",
-        { body: data },
-      );
-      if (!result.error) return result.data;
-      // allauth returns 401 with a verify_email flow when email verification
-      // is mandatory. This is expected — treat it as success. `error` is the
-      // typed union of non-2xx bodies; the 401 body (AuthenticationResponse)
-      // declares a literal `status: 401`, so narrowing on `error.status === 401`
-      // selects it and gives typed `error.data.flows` with no cast.
-      if (result.error.status === 401) {
-        const { flows } = result.error.data;
-        if (flows.some((f) => f.id === "verify_email")) return result.error;
+      const {
+        data: res,
+        error,
+        response,
+      } = await allauthClient.POST("/_allauth/browser/v1/auth/signup", {
+        body: data,
+      });
+      if (response.ok) return res;
+      // allauth returns 401 with a verify_email flow when email verification is
+      // mandatory — treat that as success. Narrow on the 401 body's literal
+      // `status` (AuthenticationResponse) to read typed `data.flows` with no
+      // cast; a non-allauth/empty 401 has no such body and falls through to
+      // throw (keyed on HTTP status, never on error-body presence).
+      if (error?.status === 401) {
+        const { flows } = error.data;
+        if (flows.some((f) => f.id === "verify_email")) return error;
       }
-      throw toApiError(result.response, result.error);
+      throw toApiError(response, error);
     },
   });
 };
@@ -106,17 +108,20 @@ const useCreateUser = () => {
 const useActivateUser = () => {
   return useMutation({
     mutationFn: async (data: VerifyEmail) => {
-      const result = await allauthClient.POST(
-        "/_allauth/browser/v1/auth/email/verify",
-        { body: data },
-      );
-      if (!result.error) return result.data;
+      const {
+        data: res,
+        error,
+        response,
+      } = await allauthClient.POST("/_allauth/browser/v1/auth/email/verify", {
+        body: data,
+      });
+      if (response.ok) return res;
       // allauth returns 401 after successful email verification when the user
       // is not logged in. This is expected — the email is verified, user just
       // needs to log in. Narrow on the body's `status` discriminant (the 401
       // body is AuthenticationResponse), consistent with useCreateUser.
-      if (result.error.status === 401) return result.error;
-      throw toApiError(result.response, result.error);
+      if (error?.status === 401) return error;
+      throw toApiError(response, error);
     },
   });
 };
@@ -135,17 +140,20 @@ const useResetPassword = () => {
 const useResetPasswordConfirm = () => {
   return useMutation({
     mutationFn: async (data: ResetPassword) => {
-      const result = await allauthClient.POST(
-        "/_allauth/browser/v1/auth/password/reset",
-        { body: data },
-      );
-      if (!result.error) return result.data;
+      const {
+        data: res,
+        error,
+        response,
+      } = await allauthClient.POST("/_allauth/browser/v1/auth/password/reset", {
+        body: data,
+      });
+      if (response.ok) return res;
       // allauth returns 401 after a successful password reset when the user is
       // not logged in (ACCOUNT_LOGIN_ON_PASSWORD_RESET is False). The password
       // has been changed — the user just needs to log in. An invalid/expired
       // key returns 400, so it still surfaces as an error.
-      if (result.error.status === 401) return result.error;
-      throw toApiError(result.response, result.error);
+      if (error?.status === 401) return error;
+      throw toApiError(response, error);
     },
   });
 };
