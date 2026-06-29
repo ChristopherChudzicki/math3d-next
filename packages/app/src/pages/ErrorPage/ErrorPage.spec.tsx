@@ -60,4 +60,23 @@ describe("normalizeError", () => {
     };
     expect(normalizeError(routeError)).toEqual({ message: "404 Not Found" });
   });
+
+  test("surfaces a route error response's string data as detail", () => {
+    const routeError = {
+      status: 422,
+      statusText: "Unprocessable",
+      internal: false,
+      data: "Scene payload failed validation",
+    };
+    expect(normalizeError(routeError)).toEqual({
+      message: "422 Unprocessable",
+      stack: "Scene payload failed validation",
+    });
+  });
+
+  test("uses a plain object's message when present", () => {
+    expect(normalizeError({ message: "non-Error throwable" })).toEqual({
+      message: "non-Error throwable",
+    });
+  });
 });

@@ -4,9 +4,9 @@ declare const styles: {
   readonly "brand": string;
   readonly "brandbar": string;
   readonly "card": string;
-  readonly "copy-button": string;
   readonly "details": string;
   readonly "details-body": string;
+  readonly "details-toolbar": string;
   readonly "eyebrow": string;
   readonly "footer": string;
   readonly "main": string;

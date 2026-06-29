@@ -1,10 +1,7 @@
 import React, { useMemo } from "react";
-import brokenTorusPaths, {
-  BrokenTorusOptions,
-  StrokeRole,
-} from "./brokenTorusGeometry";
+import brokenTorusPaths, { StrokeRole } from "./brokenTorusGeometry";
 
-/** Default stroke colour per role — wired to the app's brand tokens. */
+/** Stroke colour per role — wired to the app's brand tokens. */
 const ROLE_COLORS: Record<StrokeRole, string> = {
   main: "var(--color-primary)",
   accent: "var(--color-primary-dark)",
@@ -13,22 +10,15 @@ const ROLE_COLORS: Record<StrokeRole, string> = {
 
 interface BrokenTorusProps {
   className?: string;
-  /** Override geometry (radii, tilt, wedge, …); merged over the defaults. */
-  options?: Partial<BrokenTorusOptions>;
-  colors?: Partial<Record<StrokeRole, string>>;
 }
 
 /**
  * Decorative broken-torus wireframe. Purely presentational and `aria-hidden`;
- * the surrounding error message carries the meaning.
+ * the surrounding error message carries the meaning. Tune the look via
+ * `DEFAULT_OPTIONS` in ./brokenTorusGeometry and `ROLE_COLORS` above.
  */
-const BrokenTorus: React.FC<BrokenTorusProps> = ({
-  className,
-  options,
-  colors,
-}) => {
-  const paths = useMemo(() => brokenTorusPaths(options), [options]);
-  const roleColor = { ...ROLE_COLORS, ...colors };
+const BrokenTorus: React.FC<BrokenTorusProps> = ({ className }) => {
+  const paths = useMemo(() => brokenTorusPaths(), []);
   return (
     <svg
       className={className}
@@ -43,7 +33,7 @@ const BrokenTorus: React.FC<BrokenTorusProps> = ({
           // eslint-disable-next-line react/no-array-index-key
           key={i}
           d={p.d}
-          stroke={roleColor[p.role]}
+          stroke={ROLE_COLORS[p.role]}
           strokeWidth={p.width}
           strokeLinecap="round"
           strokeLinejoin="round"

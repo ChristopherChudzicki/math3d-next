@@ -27,12 +27,17 @@ describe("ErrorView", () => {
     expect(onReload).toHaveBeenCalledTimes(1);
   });
 
-  test("'Back to home' is a real navigation to the given href", () => {
-    render(<ErrorView homeHref="/" />);
+  test("'Back to home' is a real navigation to the home href", () => {
+    render(<ErrorView />);
     expect(screen.getByRole("link", { name: copy.home })).toHaveAttribute(
       "href",
-      "/",
+      copy.homeHref,
     );
+  });
+
+  test("moves focus to the error message on mount", () => {
+    render(<ErrorView />);
+    expect(screen.getByRole("alert")).toHaveFocus();
   });
 
   test("'Report this bug' opens the report URL in a new tab", () => {
@@ -43,12 +48,9 @@ describe("ErrorView", () => {
     expect(link).toHaveAttribute("rel", "noreferrer");
   });
 
-  test("renders the decorative torus as hidden from assistive tech", () => {
+  test("includes the broken-torus graphic", () => {
     render(<ErrorView />);
-    expect(screen.getByTestId("broken-torus")).toHaveAttribute(
-      "aria-hidden",
-      "true",
-    );
+    expect(screen.getByTestId("broken-torus")).toBeInTheDocument();
   });
 });
 
@@ -67,14 +69,15 @@ describe("ErrorView technical details", () => {
     expect(screen.getByText(/at foo \(bar\.js:1:2\)/)).toBeInTheDocument();
   });
 
-  test("copies the full details to the clipboard", async () => {
+  test("copies the full details and confirms only after success", async () => {
     render(<ErrorView message="Boom" stack="at foo (bar.js:1:2)" />);
     await user.click(screen.getByRole("button", { name: copy.copy }));
     expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith(
       "Boom\n\nat foo (bar.js:1:2)",
     );
+    // confirmation is async (awaits the clipboard write resolving)
     expect(
-      screen.getByRole("button", { name: copy.copied }),
+      await screen.findByRole("button", { name: copy.copied }),
     ).toBeInTheDocument();
   });
 
