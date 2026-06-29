@@ -1,6 +1,6 @@
 import { FieldPath } from "react-hook-form";
 import type { UseFormSetError, FieldValues } from "react-hook-form";
-import { isAxiosError } from "@math3d/api";
+import { isApiError } from "@math3d/api";
 
 /**
  * allauth error format:
@@ -31,11 +31,12 @@ const isAllAuthErrorResponse = (
 };
 
 /**
- * Error handler for use with react-hooks-forms. Handles both allauth and DRF
- * error response formats:
+ * Error handler for use with react-hooks-forms. The API hooks throw `ApiError`
+ * (carrying the typed response body on `.data`) for non-2xx responses from both
+ * the v1 and allauth clients. Handles the two error-body shapes our APIs produce:
  *
  * - allauth: `{ status: 400, errors: [{ code, message, param? }] }`
- * - DRF: `Record<FieldName | "non_field_errors", string[]>`
+ * - v1 field errors: `Record<FieldName | "non_field_errors", string[]>`
  *
  * Maps field-level errors to individual fields and non-field errors to "root".
  * Other errors display an overall message "Something went wrong...".
@@ -47,9 +48,12 @@ const setFieldErrors = <TFieldValues extends FieldValues>(
 ) => {
   let hasSetErrors = false;
 
-  if (isAxiosError(err, [400, 409])) {
-    const errData = err.response?.data;
+  let errData: unknown;
+  if (isApiError(err, [400, 409])) {
+    errData = err.data;
+  }
 
+  if (errData !== undefined) {
     // allauth error format
     if (isAllAuthErrorResponse(errData)) {
       errData.errors.forEach((error) => {
@@ -78,10 +82,10 @@ const setFieldErrors = <TFieldValues extends FieldValues>(
         }
       }
     } else {
-      // DRF error format
-      const drfData = errData as Record<string, string[]>;
+      // v1 field-error format
+      const fieldData = errData as Record<string, string[]>;
       Object.keys(data).forEach((key) => {
-        const fieldErrors = drfData[key];
+        const fieldErrors = fieldData[key];
         if (fieldErrors) {
           setError(key as FieldPath<TFieldValues>, {
             type: "400",
@@ -90,10 +94,10 @@ const setFieldErrors = <TFieldValues extends FieldValues>(
           hasSetErrors = true;
         }
       });
-      if (drfData.non_field_errors) {
+      if (fieldData.non_field_errors) {
         setError("root", {
           type: "400",
-          message: drfData.non_field_errors[0],
+          message: fieldData.non_field_errors[0],
         });
         hasSetErrors = true;
       }

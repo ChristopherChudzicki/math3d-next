@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker/locale/en";
-import { axios, parseCookies } from "@/utils/api/config";
+import { apiFetch, parseCookies } from "@/utils/api/config";
 import env from "@/env";
 import invariant from "tiny-invariant";
 
@@ -37,11 +37,11 @@ const users = {
 const getSessionCookies = async (
   user: UserCredentials,
 ): Promise<SessionCookies> => {
-  const response = await axios.post(`/_allauth/browser/v1/auth/login`, {
-    email: user.email,
-    password: user.password,
+  const response = await apiFetch(`/_allauth/browser/v1/auth/login`, {
+    method: "POST",
+    body: { email: user.email, password: user.password },
   });
-  const cookies = parseCookies(response.headers["set-cookie"]);
+  const cookies = parseCookies(response.headers.getSetCookie());
   invariant(cookies.sessionid, "Expected sessionid cookie from login response");
   invariant(cookies.csrftoken, "Expected csrftoken cookie from login response");
   return { sessionid: cookies.sessionid, csrftoken: cookies.csrftoken };
@@ -56,11 +56,11 @@ const getSessionCookies = async (
 const deleteUser = async (user: UserCredentials): Promise<void> => {
   try {
     const cookies = await getSessionCookies(user);
-    await axios.post(
-      `/v1/auth/users/me/delete/`,
-      { current_password: user.password },
-      { headers: authHeaders(cookies) },
-    );
+    await apiFetch(`/v1/auth/users/me/delete/`, {
+      method: "POST",
+      headers: authHeaders(cookies),
+      body: { current_password: user.password },
+    });
   } catch {
     // Account already deleted or password no longer valid — ignore.
   }
@@ -111,46 +111,34 @@ const createActiveUser = async (user: UserInfo = {}) => {
     `Dynamically generated users in e2e tests must have emails ending with the test email provider (${env.TEST_EMAIL_PROVIDER}). Email: ${request.email}`,
   );
 
-  // Sign up via allauth. Returns 401 when email verification is mandatory.
-  try {
-    await axios.post(`/_allauth/browser/v1/auth/signup`, {
+  // Sign up via allauth. Returns 401 when email verification is mandatory —
+  // that's expected; any other non-2xx is a real failure.
+  const signupResponse = await apiFetch(`/_allauth/browser/v1/auth/signup`, {
+    method: "POST",
+    body: {
       email: request.email,
       password: request.password,
       public_nickname: request.public_nickname,
-    });
-  } catch (err: unknown) {
-    // allauth returns 401 when email verification is mandatory — that's expected.
-    const isExpected401 =
-      err &&
-      typeof err === "object" &&
-      "response" in err &&
-      (err as { response?: { status?: number } }).response?.status === 401;
-    if (!isExpected401) {
-      throw err;
-    }
+    },
+  });
+  if (!signupResponse.ok && signupResponse.status !== 401) {
+    throw new Error(`Unexpected signup status ${signupResponse.status}`);
   }
 
   // Admin-activate the user (marks email as verified, sets is_active=True).
   // Retry once with fresh admin cookies if the cached session has expired.
-  const activate = async (cookies: SessionCookies) =>
-    axios.post(
-      `/v1/auth/users/activation/`,
-      { email: request.email },
-      { headers: authHeaders(cookies) },
-    );
-  try {
-    await activate(await getAdminCookies());
-  } catch (err: unknown) {
-    const status =
-      err &&
-      typeof err === "object" &&
-      "response" in err &&
-      (err as { response?: { status?: number } }).response?.status;
-    if (status === 401 || status === 403) {
-      await activate(await getAdminCookies({ forceRefresh: true }));
-    } else {
-      throw err;
-    }
+  const activate = (cookies: SessionCookies) =>
+    apiFetch(`/v1/auth/users/activation/`, {
+      method: "POST",
+      headers: authHeaders(cookies),
+      body: { email: request.email },
+    });
+  let activation = await activate(await getAdminCookies());
+  if (activation.status === 401 || activation.status === 403) {
+    activation = await activate(await getAdminCookies({ forceRefresh: true }));
+  }
+  if (!activation.ok) {
+    throw new Error(`Activation failed with status ${activation.status}`);
   }
 
   const userAuth: UserCredentials = {

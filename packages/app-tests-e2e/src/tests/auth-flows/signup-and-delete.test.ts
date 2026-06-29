@@ -5,8 +5,7 @@ import { getInbox } from "@/utils/inbox/emails";
 import env from "@/env";
 import invariant from "tiny-invariant";
 import { faker } from "@faker-js/faker/locale/en";
-import { authHeaders, getSessionCookies } from "@/utils/api/auth";
-import { axios } from "@/utils/api/config";
+import { deleteUser } from "@/utils/api/auth";
 import { makeUserInfo } from "@math3d/mock-api";
 
 test.setTimeout(60_000);
@@ -16,17 +15,9 @@ test.describe("User sign up flow and account deletion", () => {
 
   test.afterAll(async () => {
     // Clean up: if the test user still exists, log in as them and self-delete.
-    // If login fails (user already deleted or never activated), that's fine.
-    try {
-      const cookies = await getSessionCookies({ email, password });
-      await axios.post(
-        `/v1/auth/users/me/delete/`,
-        { current_password: password },
-        { headers: authHeaders(cookies) },
-      );
-    } catch {
-      // User doesn't exist or can't log in — that's OK
-    }
+    // deleteUser resolves silently if login fails (user already deleted or
+    // never activated).
+    await deleteUser({ email, password });
   });
 
   test("User sign up flow and account deletion", async ({ page, context }) => {

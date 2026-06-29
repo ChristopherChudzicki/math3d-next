@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
+set -uo pipefail
 TMPFILE=$(mktemp)
+trap 'rm -f "$TMPFILE"' EXIT
 
-uv run ./manage.py dump_openapi_v1 --output "$TMPFILE"
+if ! uv run ./manage.py dump_openapi_v1 --output "$TMPFILE"; then
+	echo "Failed to generate v1 OpenAPI spec"
+	exit 1
+fi
 
-diff "$TMPFILE" ./openapi.v1.yaml
-
-if [ $? -eq 0 ]; then
+if diff "$TMPFILE" ./openapi.v1.yaml; then
 	echo "v1 OpenAPI spec is up to date!"
-	exit 0
 else
 	echo "v1 OpenAPI spec is out of date. Please regenerate via ./scripts/generate_openapi.sh"
 	exit 1

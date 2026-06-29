@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { renderTestApp, screen, user } from "@/test_util";
+import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
 import invariant from "tiny-invariant";
 
 test.each([
@@ -60,5 +60,24 @@ test("Clicking the 'Expand/Collapse Controls' button toggles the controls and pr
   expect(location.current).toMatchObject({
     hash: "#foo",
     search: "",
+  });
+});
+
+test("Alerts and redirects home when the scene key is not found", async () => {
+  // MSW returns 404 for an unknown scene key; useScene surfaces it as an
+  // ApiError, which SceneControls maps to a "Not found" alert + redirect to "/".
+  // waitForReady is skipped: the scene never loads, so the controls stay busy —
+  // we key off the alert dialog instead.
+  const { location } = await renderTestApp("/nonexistent-scene-key", {
+    waitForReady: false,
+  });
+
+  const dialog = await screen.findByRole("dialog");
+  expect(dialog).toHaveTextContent("Not found");
+
+  await user.click(within(dialog).getByRole("button", { name: "OK" }));
+
+  await waitFor(() => {
+    expect(location.current.pathname).toBe("/");
   });
 });

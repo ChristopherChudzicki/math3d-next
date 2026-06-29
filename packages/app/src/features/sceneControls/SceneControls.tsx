@@ -1,10 +1,9 @@
-import { useScene } from "@math3d/api";
+import { useScene, isApiError } from "@math3d/api";
 
 import React, { useEffect } from "react";
 import { useAppDispatch } from "@/store/hooks";
 
 import defaultScene from "@/store/defaultScene";
-import { isAxiosError } from "axios";
 import { useNavigate } from "react-router";
 import AddObjectButton from "./AddObjectButton";
 import ControlTabs from "./controlTabs";
@@ -29,7 +28,7 @@ const useLoadSceneIntoRedux = (sceneKey?: string) => {
   const { add: addNotification } = useNotifications();
   const navigate = useNavigate();
   useEffect(() => {
-    if (isAxiosError(error) && error.response?.status === 404) {
+    if (isApiError(error, [404])) {
       const { confirmed } = addNotification({
         type: "alert",
         title: "Not found",

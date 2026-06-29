@@ -5,6 +5,9 @@
     "baseUrl": "src",
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    // The workspace API/mock-api source consumed here reads `import.meta.env`;
+    // pull in Vite's client types so a standalone `tsc` resolves it.
+    "types": ["vite/client"]
   }
 }
