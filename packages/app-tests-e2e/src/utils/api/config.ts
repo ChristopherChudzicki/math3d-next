@@ -1,13 +1,9 @@
 import env from "@/env";
-import rootAxios from "axios";
 
-const axios = rootAxios.create({
-  baseURL: env.TEST_API_URL,
-  withCredentials: true,
-});
+const BASE_URL = env.TEST_API_URL.replace(/\/+$/, "");
 
 /**
- * Extract cookies from Set-Cookie response headers into a Record.
+ * Extract cookies from a list of Set-Cookie header values into a Record.
  */
 function parseCookies(
   setCookieHeaders: string[] | undefined,
@@ -23,58 +19,69 @@ function parseCookies(
   return cookies;
 }
 
-// CSRF token management for server-side axios calls (Node.js).
-// The browser handles this via document.cookie, but in Node.js we need
-// to manually fetch and attach the CSRF token.
+// CSRF token management for server-side API calls (Node.js). The browser
+// handles this via document.cookie; in Node there is no cookie jar, so we
+// fetch a token once, cache it, and attach it to unsafe requests by hand.
 let csrfToken = "";
 
 async function ensureCsrfToken(): Promise<string> {
   if (csrfToken) return csrfToken;
-  // Any GET request to the API will return a csrftoken cookie
-  const response = await axios.get("/_allauth/browser/v1/auth/session", {
-    validateStatus: () => true,
-  });
-  const cookies = parseCookies(response.headers["set-cookie"]);
+  // Any GET to the API returns a csrftoken cookie.
+  const response = await fetch(`${BASE_URL}/_allauth/browser/v1/auth/session`);
+  const cookies = parseCookies(response.headers.getSetCookie());
   if (cookies.csrftoken) {
     csrfToken = cookies.csrftoken;
   }
   return csrfToken;
 }
 
-// Attach CSRF token to all unsafe requests.
-// Note: requests using authHeaders() already have Cookie and X-CSRFToken set;
-// the guards below (checking for existing headers) avoid duplicating them.
-axios.interceptors.request.use(async (config) => {
-  const method = (config.method ?? "get").toLowerCase();
-  if (["post", "put", "patch", "delete"].includes(method)) {
+const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+/**
+ * `fetch` against the test API: resolves a path against the API base URL, sends
+ * a JSON body, and — for unsafe methods — bootstraps and attaches the CSRF
+ * token (header + cookie) unless the caller already supplied one (e.g. via
+ * `authHeaders()`). Mirrors the cross-origin CSRF dance the browser does
+ * automatically. Does NOT throw on non-2xx; callers branch on `response.status`.
+ */
+async function apiFetch(
+  path: string,
+  {
+    body,
+    headers,
+    method = "GET",
+  }: { body?: unknown; headers?: Record<string, string>; method?: string } = {},
+): Promise<Response> {
+  const finalHeaders = new Headers(headers);
+  if (body !== undefined && !finalHeaders.has("Content-Type")) {
+    finalHeaders.set("Content-Type", "application/json");
+  }
+  if (UNSAFE_METHODS.has(method) && !finalHeaders.has("X-CSRFToken")) {
     // Requests built with authHeaders() already carry X-CSRFToken (and the
     // csrftoken cookie), so only bootstrap a token when one is missing.
-    if (!config.headers.get("X-CSRFToken")) {
-      const token = await ensureCsrfToken();
-      if (token) {
-        config.headers.set("X-CSRFToken", token);
-        // Append csrftoken to existing Cookie header if present
-        const existingCookie = config.headers.get("Cookie") as
-          | string
-          | undefined;
-        if (existingCookie && !existingCookie.includes("csrftoken=")) {
-          config.headers.set("Cookie", `${existingCookie}; csrftoken=${token}`);
-        } else if (!existingCookie) {
-          config.headers.set("Cookie", `csrftoken=${token}`);
-        }
+    const token = await ensureCsrfToken();
+    if (token) {
+      finalHeaders.set("X-CSRFToken", token);
+      // Append csrftoken to an existing Cookie header if present.
+      const existingCookie = finalHeaders.get("Cookie");
+      if (existingCookie && !existingCookie.includes("csrftoken=")) {
+        finalHeaders.set("Cookie", `${existingCookie}; csrftoken=${token}`);
+      } else if (!existingCookie) {
+        finalHeaders.set("Cookie", `csrftoken=${token}`);
       }
     }
   }
-  return config;
-});
-
-// Update CSRF token from response cookies
-axios.interceptors.response.use((response) => {
-  const cookies = parseCookies(response.headers["set-cookie"]);
+  const response = await fetch(`${BASE_URL}${path}`, {
+    method,
+    headers: finalHeaders,
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  // Refresh the cached token if the response rotated it.
+  const cookies = parseCookies(response.headers.getSetCookie());
   if (cookies.csrftoken) {
     csrfToken = cookies.csrftoken;
   }
   return response;
-});
+}
 
-export { axios, parseCookies };
+export { apiFetch, parseCookies };
