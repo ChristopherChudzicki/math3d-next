@@ -10,6 +10,7 @@ import ScenesList from "./pages/ScenesList/ScenesListPage";
 import HelpPage from "./pages/HelpPage/HelpPage";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
 import ErrorTrigger from "./pages/ErrorPage/ErrorTrigger";
+import NotFoundPage from "./pages/NotFound/NotFoundPage";
 
 /**
  * Root layout: hosts the `?test-sync-error` trigger on every route (see ErrorTrigger)
@@ -34,6 +35,14 @@ const routes: RouteObject[] = [
         element: <HelpPage />,
       },
       {
+        path: "app",
+        children: [
+          { index: true, element: <NotFoundPage /> },
+          // help + auth pages added in D2/D3
+          { path: "*", element: <NotFoundPage /> },
+        ],
+      },
+      {
         path: "/:sceneKey?",
         element: (
           <>
@@ -56,6 +65,12 @@ const routes: RouteObject[] = [
           },
         ],
       },
+      // ROOT-level catch-all: any path that is neither `/app/...` nor a single-segment
+      // scene key (e.g. a 2+ segment `/.well-known/foo`) renders the soft-404 NotFound.
+      // Without this, an unmatched path throws a 404 that the errorElement (ErrorPage)
+      // would render as the scary "something broke" view — wrong for a benign mistyped URL.
+      // `/:sceneKey?` only matches a single optional segment, so multi-segment junk falls here.
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ];
