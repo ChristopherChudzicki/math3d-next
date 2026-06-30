@@ -45,6 +45,7 @@
     "@mui/icons-material": "^7.3.4",
     "@mui/lab": "^7.0.1-beta.18",
     "@mui/material": "^7.3.4",
+    "@mui/utils": "^7.3.4",
     "@popperjs/core": "2.11.8",
     "@reduxjs/toolkit": "^2.2.3",
     "@tanstack/react-query": "^5.62.10",

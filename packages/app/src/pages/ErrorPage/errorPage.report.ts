@@ -9,8 +9,14 @@ import { APP_VERSION } from "@/version";
 const ISSUE_BASE_FALLBACK =
   "https://github.com/ChristopherChudzicki/math3d-next/issues";
 
-/** Keep the prefilled body well under GitHub's URL length limit. */
-const MAX_BODY = 4000;
+/**
+ * Cap the trace itself (not the assembled body) so the diagnostic footer
+ * (page/version/browser) and the closing code fence always survive truncation —
+ * that footer is the context the prefill exists to capture. Counted in raw
+ * chars; URL-encoding inflates the final query, so the budget is deliberately
+ * conservative to stay well under GitHub's new-issue URL limit (~8 KB).
+ */
+const MAX_TRACE = 2500;
 
 interface ReportInput {
   message?: string;
@@ -29,7 +35,11 @@ const buildReportUrl = ({ message = "", stack }: ReportInput): string => {
   try {
     const pageUrl = typeof window !== "undefined" ? window.location.href : "";
     const browser = typeof navigator !== "undefined" ? navigator.userAgent : "";
-    const errorBlock = [message, stack].filter(Boolean).join("\n\n");
+    const rawError = [message, stack].filter(Boolean).join("\n\n");
+    const errorBlock =
+      rawError.length > MAX_TRACE
+        ? `${rawError.slice(0, MAX_TRACE)}\n…(trace truncated)`
+        : rawError;
     const body = [
       "**What were you doing when this happened?**",
       "",
@@ -44,9 +54,7 @@ const buildReportUrl = ({ message = "", stack }: ReportInput): string => {
       `- Page: ${pageUrl}`,
       `- Version: ${APP_VERSION}`,
       `- Browser: ${browser}`,
-    ]
-      .join("\n")
-      .slice(0, MAX_BODY);
+    ].join("\n");
     const title = `Unexpected error: ${message.split("\n")[0]}`
       .trim()
       .slice(0, 120);

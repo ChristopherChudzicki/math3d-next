@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { visuallyHidden } from "@mui/utils";
 import Button from "@mui/material/Button";
 import ReplayRoundedIcon from "@mui/icons-material/ReplayRounded";
 import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
@@ -22,19 +23,6 @@ interface ErrorViewProps {
 }
 
 const defaultReload = () => window.location.reload();
-
-/** Hide content visually while keeping it available to screen readers. */
-const visuallyHidden: React.CSSProperties = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  padding: 0,
-  margin: -1,
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-  border: 0,
-};
 
 const TechnicalDetails: React.FC<{ text: string }> = ({ text }) => {
   const [copied, setCopied] = useState(false);

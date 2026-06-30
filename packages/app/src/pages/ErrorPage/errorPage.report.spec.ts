@@ -27,9 +27,15 @@ describe("buildReportUrl", () => {
     expect(body).toContain("at foo (x.js:1:2)");
   });
 
-  test("caps the prefilled body so a huge stack can't blow up the URL", () => {
+  test("truncates a huge stack but keeps the diagnostic footer intact", () => {
     const href = buildReportUrl({ message: "Boom", stack: "x".repeat(50_000) });
     const body = new URL(href).searchParams.get("body") ?? "";
     expect(body.length).toBeLessThanOrEqual(4000);
+    expect(body).toContain("(trace truncated)");
+    // The footer is the context the prefill exists to capture; it must survive
+    // truncation, and the code fence around the trace must stay closed.
+    expect(body).toContain("- Version:");
+    expect(body).toContain("- Browser:");
+    expect(body).toMatch(/```[\s\S]*```/);
   });
 });
