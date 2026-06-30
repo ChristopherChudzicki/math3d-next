@@ -44,9 +44,9 @@ class Command(BaseCommand):
         """
         Fetch and process scenes from the external database.
 
-        Returns the list of keys skipped because they are reserved. Reporting is
-        deferred to ``handle()`` so the legacy-scene pull still runs — a reserved
-        key in the source must not abort the rest of the ingest.
+        Returns the reserved keys that were skipped. Reporting is deferred to
+        ``handle()`` so the legacy-scene pull still runs — a reserved key in the
+        source must not abort the rest of the ingest.
         """
 
         # Create temporary model that uses the external database
@@ -66,7 +66,7 @@ class Command(BaseCommand):
         # Use iterator() to avoid loading all records into memory at once
         scene_iterator = external_scenes.iterator(chunk_size=chunk_size)
 
-        skipped = []
+        reserved_keys = []
         for external_scene in tqdm(
             scene_iterator, total=total_scenes, desc="Fetching scenes"
         ):
@@ -79,8 +79,8 @@ class Command(BaseCommand):
                 "times_accessed": external_scene.times_accessed,
             }
             if not upsert_scene(scene_dict):
-                skipped.append(scene_dict["key"])
-        return skipped
+                reserved_keys.append(scene_dict["key"])
+        return reserved_keys
 
     def fetch_legacy_scenes(self, source_db, chunk_size):
         """Fetch and process legacy scenes from the external database."""
@@ -144,13 +144,13 @@ class Command(BaseCommand):
 
         # Fetch scenes and legacy scenes. Reserved keys are skipped (not fatal
         # mid-run) so both pulls complete; report them at the very end.
-        skipped = self.fetch_scenes(source_db, chunk_size)
+        reserved_keys = self.fetch_scenes(source_db, chunk_size)
         self.fetch_legacy_scenes(source_db, chunk_size)
 
         self.stdout.write(self.style.SUCCESS("Successfully fetched all scenes."))
 
-        if skipped:
+        if reserved_keys:
             raise CommandError(
-                f"Pull completed, but skipped {len(skipped)} scene(s) with "
-                f"reserved keys: {skipped!r}"
+                f"Pull completed, but skipped {len(reserved_keys)} scene(s) with "
+                f"reserved keys: {reserved_keys!r}"
             )
