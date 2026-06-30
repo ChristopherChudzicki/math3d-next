@@ -240,8 +240,8 @@ HEADLESS_ONLY = True
 HEADLESS_CLIENTS = ["browser"]
 HEADLESS_SERVE_SPECIFICATION = True
 HEADLESS_FRONTEND_URLS = {
-    "account_confirm_email": f"{env('APP_BASE_URL')}/auth/activate-account?key={{key}}",
-    "account_reset_password_from_key": f"{env('APP_BASE_URL')}/auth/reset-password/confirm/?key={{key}}",
+    "account_confirm_email": f"{env('APP_BASE_URL')}/app/auth/activate-account?key={{key}}",
+    "account_reset_password_from_key": f"{env('APP_BASE_URL')}/app/auth/reset-password/confirm/?key={{key}}",
 }
 
 ##################################################
