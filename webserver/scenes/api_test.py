@@ -1,8 +1,10 @@
 import pytest
+from django.core.exceptions import ValidationError
 from django.test import Client
 
 from authentication.factories import CustomUserFactory
 from scenes.factories import SceneFactory
+from scenes.legacy_scene_utils.migrate_scene import migrate_scene
 from scenes.models import LegacyScene, Scene
 from scenes.tests.data import default_scene
 
@@ -225,6 +227,21 @@ def test_get_reserved_legacy_key_returns_404_not_500():
     LegacyScene.objects.create(key="a", dehydrated=LEGACY_DEHYDRATED_FIXTURE)
     resp = Client().get(_detail("a"))
     assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_migrate_scene_reraises_non_key_validation_error(monkeypatch):
+    # A legacy scene with a valid key but invalid items must fail loudly — the
+    # reserved-key skip path must not swallow unrelated validation errors and
+    # silently drop the scene (which would surface as a misleading 404).
+    legacy = LegacyScene.objects.create(dehydrated=LEGACY_DEHYDRATED_FIXTURE)
+
+    def raise_items_error(*args, **kwargs):
+        raise ValidationError({"items": ["Invalid math items"]})
+
+    monkeypatch.setattr(Scene.objects, "update_or_create", raise_items_error)
+    with pytest.raises(ValidationError):
+        migrate_scene(legacy)
 
 
 @pytest.mark.django_db

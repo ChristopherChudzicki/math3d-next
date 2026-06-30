@@ -1,5 +1,6 @@
 import random
 
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.contrib.postgres.indexes import GinIndex
@@ -19,6 +20,19 @@ RESERVED_KEY_VALIDATOR = RegexValidator(
     regex=r"^(?!app$).{2,}$",
     message="Scene key must be at least 2 characters and not a reserved word.",
 )
+
+
+def is_reserved_key_error(error: ValidationError) -> bool:
+    """
+    True iff a ValidationError from ``Scene.save()`` was caused by the key.
+
+    ``full_clean()`` runs every field validator (including ``validate_math_items``
+    on ``items``), so a ValidationError can mean a reserved key *or* invalid
+    items. ``error_dict`` is keyed by field name; only treat the key as the
+    cause when "key" is present. Errors raised without a dict (no ``error_dict``)
+    are not key errors.
+    """
+    return "key" in getattr(error, "error_dict", {})
 
 
 KEY_ALPHABET = "123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNPQRSTUVWXYZ"

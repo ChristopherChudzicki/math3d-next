@@ -4,16 +4,23 @@ from django.db import connections
 from django.conf import settings
 import dj_database_url
 from tqdm import tqdm
-from scenes.models import Scene, LegacyScene
+from scenes.models import Scene, LegacyScene, is_reserved_key_error
 
 
 def upsert_scene(scene_dict) -> bool:
-    """Upsert one Scene; return False (and skip) if the key is reserved."""
+    """
+    Upsert one Scene; return False (and skip) if the key is reserved.
+
+    Non-key validation failures (e.g. invalid items) re-raise so the pull fails
+    loudly rather than silently skipping corrupt data as if it were reserved.
+    """
     try:
         Scene.objects.update_or_create(key=scene_dict["key"], defaults=scene_dict)
         return True
-    except ValidationError:
-        return False
+    except ValidationError as e:
+        if is_reserved_key_error(e):
+            return False
+        raise
 
 
 class Command(BaseCommand):
@@ -34,7 +41,13 @@ class Command(BaseCommand):
         )
 
     def fetch_scenes(self, source_db, chunk_size):
-        """Fetch and process scenes from the external database."""
+        """
+        Fetch and process scenes from the external database.
+
+        Returns the list of keys skipped because they are reserved. Reporting is
+        deferred to ``handle()`` so the legacy-scene pull still runs — a reserved
+        key in the source must not abort the rest of the ingest.
+        """
 
         # Create temporary model that uses the external database
         class ExternalScene(Scene):
@@ -67,10 +80,7 @@ class Command(BaseCommand):
             }
             if not upsert_scene(scene_dict):
                 skipped.append(scene_dict["key"])
-        if skipped:
-            raise CommandError(
-                f"Skipped {len(skipped)} scene(s) with reserved keys: {skipped!r}"
-            )
+        return skipped
 
     def fetch_legacy_scenes(self, source_db, chunk_size):
         """Fetch and process legacy scenes from the external database."""
@@ -132,8 +142,15 @@ class Command(BaseCommand):
         connections.databases[temp_db_alias] = db_config
         source_db = temp_db_alias
 
-        # Fetch scenes and legacy scenes
-        self.fetch_scenes(source_db, chunk_size)
+        # Fetch scenes and legacy scenes. Reserved keys are skipped (not fatal
+        # mid-run) so both pulls complete; report them at the very end.
+        skipped = self.fetch_scenes(source_db, chunk_size)
         self.fetch_legacy_scenes(source_db, chunk_size)
 
         self.stdout.write(self.style.SUCCESS("Successfully fetched all scenes."))
+
+        if skipped:
+            raise CommandError(
+                f"Pull completed, but skipped {len(skipped)} scene(s) with "
+                f"reserved keys: {skipped!r}"
+            )

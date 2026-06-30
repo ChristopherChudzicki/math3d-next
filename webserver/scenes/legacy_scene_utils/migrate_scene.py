@@ -3,7 +3,7 @@ import logging
 from django.core.exceptions import ValidationError
 
 from scenes.legacy_scene_utils.translate import ItemMigrator
-from scenes.models import Scene, LegacyScene
+from scenes.models import Scene, LegacyScene, is_reserved_key_error
 
 from scenes.legacy_scene_utils.default_data import set_defaults
 
@@ -115,7 +115,11 @@ def migrate_scene(legacy_scene: LegacyScene):
                 "is_legacy": True,
             },
         )
-    except ValidationError:
+    except ValidationError as e:
+        if not is_reserved_key_error(e):
+            # Invalid items (or any non-key validation failure) keep the old
+            # loud-failure contract — don't mislabel them as a reserved key.
+            raise
         logger.warning(
             "Skipping migration of legacy scene with reserved key %r", legacy_scene.key
         )

@@ -1,7 +1,7 @@
 import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from scenes.models import Scene
+from scenes.models import Scene, is_reserved_key_error
 from scenes.factories import SceneFactory
 
 
@@ -37,3 +37,22 @@ def test_uppercase_app_allowed():
     # Reservation is case-sensitive; only lowercase `app` collides with /app/.
     Scene(**_valid_scene_kwargs("App")).save()
     assert Scene.objects.filter(key="App").exists()
+
+
+@pytest.mark.django_db
+def test_is_reserved_key_error_true_for_reserved_key():
+    # full_clean() keys the error under "key" when the reserved-key validator fails.
+    with pytest.raises(ValidationError) as exc_info:
+        Scene(**_valid_scene_kwargs("a")).save()
+    assert is_reserved_key_error(exc_info.value)
+
+
+@pytest.mark.django_db
+def test_is_reserved_key_error_false_for_invalid_items():
+    # A valid key with invalid items fails full_clean() under "items", not "key";
+    # this must not be mistaken for a reserved-key error.
+    kwargs = _valid_scene_kwargs("goodkey")
+    kwargs["items"] = [{"unexpected": "shape"}]
+    with pytest.raises(ValidationError) as exc_info:
+        Scene(**kwargs).save()
+    assert not is_reserved_key_error(exc_info.value)
