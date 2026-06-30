@@ -1,9 +1,19 @@
-from django.core.management.base import BaseCommand
+from django.core.exceptions import ValidationError
+from django.core.management.base import BaseCommand, CommandError
 from django.db import connections
 from django.conf import settings
 import dj_database_url
 from tqdm import tqdm
 from scenes.models import Scene, LegacyScene
+
+
+def upsert_scene(scene_dict) -> bool:
+    """Upsert one Scene; return False (and skip) if the key is reserved."""
+    try:
+        Scene.objects.update_or_create(key=scene_dict["key"], defaults=scene_dict)
+        return True
+    except ValidationError:
+        return False
 
 
 class Command(BaseCommand):
@@ -43,6 +53,7 @@ class Command(BaseCommand):
         # Use iterator() to avoid loading all records into memory at once
         scene_iterator = external_scenes.iterator(chunk_size=chunk_size)
 
+        skipped = []
         for external_scene in tqdm(
             scene_iterator, total=total_scenes, desc="Fetching scenes"
         ):
@@ -54,7 +65,12 @@ class Command(BaseCommand):
                 "archived": external_scene.archived,
                 "times_accessed": external_scene.times_accessed,
             }
-            Scene.objects.update_or_create(key=scene_dict["key"], defaults=scene_dict)
+            if not upsert_scene(scene_dict):
+                skipped.append(scene_dict["key"])
+        if skipped:
+            raise CommandError(
+                f"Skipped {len(skipped)} scene(s) with reserved keys: {skipped!r}"
+            )
 
     def fetch_legacy_scenes(self, source_db, chunk_size):
         """Fetch and process legacy scenes from the external database."""
