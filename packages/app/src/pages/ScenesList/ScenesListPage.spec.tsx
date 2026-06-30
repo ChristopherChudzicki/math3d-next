@@ -8,6 +8,17 @@ test("scenes drawer opens via ?overlay=scenes&list=examples", async () => {
   expect(await screen.findByRole("tab", { name: "Examples" })).toBeVisible();
 });
 
+test("an unknown ?list= value self-corrects to list=examples", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const { location } = await renderTestApp(
+    `/${scene.key}?overlay=scenes&list=garbage`,
+  );
+  expect(await screen.findByRole("tab", { name: "Examples" })).toBeVisible();
+  await waitFor(() =>
+    expect(location.current.search).toContain("list=examples"),
+  );
+});
+
 test("closing the drawer (Escape) returns to the scene", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const { location } = await renderTestApp(
