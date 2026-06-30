@@ -1,11 +1,24 @@
 import random
 
+from django.core.validators import RegexValidator
 from django.db import models
 from django.contrib.postgres.indexes import GinIndex
+from django.db.models.functions import Length
 from django.utils import timezone
 
 from scenes.validators import validate_math_items
 from authentication.models import CustomUser
+
+
+# Enable the `key__length` lookup used by the reserved-key CHECK constraint.
+models.CharField.register_lookup(Length)
+
+# Reserve `app` (collides with the /app/ route prefix) and keys under two
+# characters (empty/single-char are not legitimate shareable keys). Case-sensitive.
+RESERVED_KEY_VALIDATOR = RegexValidator(
+    regex=r"^(?!app$).{2,}$",
+    message="Scene key must be at least 2 characters and not a reserved word.",
+)
 
 
 KEY_ALPHABET = "123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNPQRSTUVWXYZ"
@@ -69,7 +82,12 @@ class Scene(TimestampedModel):
     A Scene.
     """
 
-    key = models.CharField(max_length=80, unique=True, default=random_key)
+    key = models.CharField(
+        max_length=80,
+        unique=True,
+        default=random_key,
+        validators=[RESERVED_KEY_VALIDATOR],
+    )
     items = models.JSONField(validators=[validate_math_items])
     item_order = models.JSONField()
 
@@ -85,6 +103,12 @@ class Scene(TimestampedModel):
     is_legacy = models.BooleanField(default=False)
 
     class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(key__length__gte=2) & ~models.Q(key="app"),
+                name="scene_key_not_reserved",
+            ),
+        ]
         indexes = [
             GinIndex(
                 name="title_gin_trgm_index",
@@ -92,7 +116,6 @@ class Scene(TimestampedModel):
                 opclasses=["gin_trgm_ops"],
             )
         ]
-
         ordering = ["id"]
 
     def save(self, *args, **kwargs):
