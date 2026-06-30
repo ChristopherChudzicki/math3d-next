@@ -4,12 +4,9 @@ import { Outlet } from "react-router";
 
 import OverlayHost from "@/features/overlays/OverlayHost";
 import MainPage from "./pages/MainPage";
-import LogoutPage from "./pages/auth/LogoutPage";
-
 import AccountActivationPage from "./pages/auth/ActivationPage";
 import ResetPasswordConfirmPage from "./pages/auth/ResetPasswordConfirmPage";
 import ScenesList from "./pages/ScenesList/ScenesListPage";
-import UserSettingsPage from "./pages/UserSettingsPage/UserSettingsPage";
 import HelpPage from "./pages/HelpPage/HelpPage";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
 import ErrorTrigger from "./pages/ErrorPage/ErrorTrigger";
@@ -50,20 +47,12 @@ const routes: RouteObject[] = [
             element: <ScenesList />,
           },
           {
-            path: "auth/logout",
-            element: <LogoutPage />,
-          },
-          {
             path: "auth/activate-account",
             element: <AccountActivationPage />,
           },
           {
             path: "auth/reset-password/confirm",
             element: <ResetPasswordConfirmPage />,
-          },
-          {
-            path: "user/settings",
-            element: <UserSettingsPage />,
           },
         ],
       },

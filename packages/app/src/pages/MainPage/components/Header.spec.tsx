@@ -62,11 +62,20 @@ test("Contact links to the GitHub issues page in a new tab", async () => {
   expect(contact).toHaveAttribute("rel", "noreferrer");
 });
 
-test("Logout link goes to login page", async () => {
+test("Sign out opens logout overlay", async () => {
   const { location } = await renderTestApp("", { isAuthenticated: true });
   const button = screen.getByRole("button", { name: "Open User Menu" });
   await user.click(button);
-  const signin = screen.getByRole("menuitem", { name: "Sign out" });
-  await user.click(signin);
-  expect(location.current.pathname).toBe(`/auth/logout`);
+  const signout = screen.getByRole("menuitem", { name: "Sign out" });
+  await user.click(signout);
+  expect(location.current.search).toContain("overlay=logout");
+});
+
+test("Account Settings opens settings overlay", async () => {
+  const { location } = await renderTestApp("", { isAuthenticated: true });
+  const button = screen.getByRole("button", { name: "Open User Menu" });
+  await user.click(button);
+  const settings = screen.getByRole("menuitem", { name: "Account Settings" });
+  await user.click(settings);
+  expect(location.current.search).toContain("overlay=settings");
 });

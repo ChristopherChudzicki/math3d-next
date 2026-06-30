@@ -7,12 +7,12 @@ import type { ButtonProps } from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import Close from "@mui/icons-material/Close";
-import { useNavigate } from "react-router";
 import Tab from "@mui/material/Tab";
 import TabPanel from "@mui/lab/TabPanel";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import invariant from "tiny-invariant";
+import { useOverlay } from "@/features/overlays/useOverlay";
 import ProfileForm from "./ProfilleForm";
 import ChangePasswordForm from "./ChangePasswordForm";
 import DeleteAccountForm from "./DeleteAccountForm";
@@ -64,10 +64,10 @@ const UserSettingsPage: React.FC = () => {
   const tab = TABS.find((t) => t.id === activeTab);
   invariant(tab);
   const [disabled, setDisabled] = useState(false);
-  const navigate = useNavigate();
+  const { close } = useOverlay();
   const handleClose = useCallback(() => {
-    navigate("../");
-  }, [navigate]);
+    close();
+  }, [close]);
 
   return (
     <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>

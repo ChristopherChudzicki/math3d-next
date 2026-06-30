@@ -158,19 +158,19 @@ const getItems = ({
       shouldShow: true,
     },
     {
-      type: "link",
+      type: "button",
       label: "Account Settings",
       key: "settings",
       icon: <ManageAccountsIcon fontSize="small" />,
-      href: "user/settings",
+      onClick: () => open("settings"),
       shouldShow: isAuthenticated,
     },
     {
-      type: "link",
+      type: "button",
       label: "Sign out",
       key: "signout",
       icon: <AccountCircleOutlinedIcon fontSize="small" />,
-      href: "auth/logout",
+      onClick: () => open("logout"),
       shouldShow: isAuthenticated,
     },
   ];
