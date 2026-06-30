@@ -26,9 +26,11 @@ test.describe("Fallback error page", () => {
     await page.getByText("Technical details").click();
     await expect(page.getByText(/e2e trigger/)).toBeVisible();
 
-    // The report link is a prefilled GitHub "new issue" URL.
+    // The report link is a prefilled "new issue" URL. The host/path come from
+    // the per-environment VITE_ISSUE_URL, so assert only the env-independent
+    // shape: a `/new?…` form with prefilled query params.
     await expect(
       page.getByRole("link", { name: /Report this bug/ }),
-    ).toHaveAttribute("href", /\/issues\/new\?/);
+    ).toHaveAttribute("href", /\/new\?.*title=/);
   });
 });

@@ -1,12 +1,12 @@
 import { APP_VERSION } from "@/version";
 
 /**
- * Base URL for filing issues. Reuses the app-wide `VITE_ISSUE_URL` (also used by
- * the legacy dialog) so there is a single source of truth, with a hard fallback
- * so the error page never depends on env being present.
+ * Hard fallback so the error page never depends on env being present. The live
+ * base comes from `VITE_ISSUE_URL` (also used by the legacy dialog) so there is a
+ * single source of truth; its value already points at the issues page (e.g.
+ * `…/math3d-next/issues`), and we append `/new` to reach the new-issue form.
  */
-const ISSUE_BASE =
-  import.meta.env.VITE_ISSUE_URL ??
+const ISSUE_BASE_FALLBACK =
   "https://github.com/ChristopherChudzicki/math3d-next/issues";
 
 /** Keep the prefilled body well under GitHub's URL length limit. */
@@ -23,7 +23,9 @@ interface ReportInput {
  * construction must never throw — this renders on the app's last line of defense.
  */
 const buildReportUrl = ({ message = "", stack }: ReportInput): string => {
-  const base = `${ISSUE_BASE.replace(/\/+$/, "")}/new`;
+  // Read env at call time (not module load) so tests can stub it deterministically.
+  const issueBase = import.meta.env.VITE_ISSUE_URL ?? ISSUE_BASE_FALLBACK;
+  const base = `${issueBase.replace(/\/+$/, "")}/new`;
   try {
     const pageUrl = typeof window !== "undefined" ? window.location.href : "";
     const browser = typeof navigator !== "undefined" ? navigator.userAgent : "";
