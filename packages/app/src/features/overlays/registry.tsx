@@ -1,4 +1,11 @@
 import type React from "react";
+import LoginPage from "@/pages/auth/LoginPage";
+import RegistrationPage from "@/pages/auth/RegistrationPage";
+import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 
-// Overlay name → component. Populated in later phases. Unknown values render nothing.
-export const OVERLAYS: Record<string, React.FC> = {};
+// Overlay name → component. Unknown values render nothing.
+export const OVERLAYS: Record<string, React.FC> = {
+  login: LoginPage,
+  register: RegistrationPage,
+  "reset-request": ResetPasswordPage,
+};

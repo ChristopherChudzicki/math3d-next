@@ -1,6 +1,5 @@
 import React, { useCallback, useId } from "react";
 import TextField from "@mui/material/TextField";
-import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import { useResetPassword } from "@math3d/api";
@@ -10,6 +9,7 @@ import Alert from "@mui/material/Alert";
 import { useToggle } from "@/util/hooks";
 import { OverallError, setFieldErrors } from "@/util/forms";
 import BasicDialog from "@/util/components/BasicDialog";
+import { useOverlay } from "@/features/overlays/useOverlay";
 import styles from "./styles.module.css";
 
 const schema = yup.object({
@@ -19,7 +19,7 @@ const schema = yup.object({
 type FormData = yup.InferType<typeof schema>;
 
 const ResetPasswordPage: React.FC = () => {
-  const navigate = useNavigate();
+  const { close } = useOverlay();
   const formId = useId();
   const resolver = yupResolver(schema);
   const [pendingSubmit, setPendingSubmit] = useToggle(true);
@@ -30,10 +30,6 @@ const ResetPasswordPage: React.FC = () => {
     setError,
     getValues,
   } = useForm({ resolver });
-
-  const navigateAway = useCallback(() => {
-    navigate("../");
-  }, [navigate]);
 
   const resetPassword = useResetPassword();
 
@@ -57,11 +53,11 @@ const ResetPasswordPage: React.FC = () => {
     <BasicDialog
       title={title}
       open
-      onClose={navigateAway}
+      onClose={close}
       confirmText={submitButtonContent}
       confirmButtonProps={
         resetPassword.isSuccess
-          ? { type: "button", onClick: navigateAway }
+          ? { type: "button", onClick: close }
           : { type: "submit", form: formId }
       }
       fullWidth

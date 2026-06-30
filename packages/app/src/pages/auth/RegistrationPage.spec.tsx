@@ -48,7 +48,7 @@ const submitForm = async (data: FormValues) => {
 };
 
 test("Displays client-side form errors", async () => {
-  await renderTestApp("/auth/register");
+  await renderTestApp("/?overlay=register");
   const fields = await submitForm({
     email: "",
     nickname: "",
@@ -88,7 +88,7 @@ test("Server errors are reflected in form", async () => {
     },
   });
 
-  await renderTestApp("/auth/register");
+  await renderTestApp("/?overlay=register");
   const fields = await submitForm({
     email: "leo@dog.com",
     nickname: "leo",
@@ -113,7 +113,7 @@ test("non-field errors are shown in an alert", async () => {
     },
   });
 
-  await renderTestApp("/auth/register");
+  await renderTestApp("/?overlay=register");
   await submitForm({
     email: "leo@dog.com",
     nickname: "leo",
@@ -125,7 +125,7 @@ test("non-field errors are shown in an alert", async () => {
 });
 
 test("Informs user about confirmation email", async () => {
-  const { location } = await renderTestApp("/auth/register");
+  const { location } = await renderTestApp("/?overlay=register");
   const userInfo = {
     email: faker.internet.email(),
     nickname: faker.person.firstName(),

@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useId } from "react";
 import TextField from "@mui/material/TextField";
-import { useNavigate } from "react-router";
+import MuiLink from "@mui/material/Link";
 import { useForm } from "react-hook-form";
 import { useLogin } from "@math3d/api";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useAuthStatus } from "@/features/auth";
-import Link from "@/util/components/Link";
 import { OverallError, setFieldErrors } from "@/util/forms";
 import BasicDialog from "@/util/components/BasicDialog";
+import { useOverlay } from "@/features/overlays/useOverlay";
 import styles from "./styles.module.css";
 
 const schema = yup.object({
@@ -17,7 +17,7 @@ const schema = yup.object({
 });
 
 const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
+  const { open, close } = useOverlay();
   const isAuthenticated = useAuthStatus();
   const resolver = yupResolver(schema);
   const {
@@ -27,16 +27,14 @@ const LoginPage: React.FC = () => {
     setError,
   } = useForm({ resolver });
 
-  const handleClose = useCallback(() => {
-    navigate("../");
-  }, [navigate]);
+  const handleClose = useCallback(() => close(), [close]);
   const formId = useId();
   const login = useLogin();
   useEffect(() => {
     if (isAuthenticated === "authenticated") {
-      navigate("../");
+      close();
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, close]);
   return (
     <BasicDialog
       title="Sign in"
@@ -78,8 +76,20 @@ const LoginPage: React.FC = () => {
         <OverallError error={errors.root} />
       </form>
       <div className={styles["sign-in-footer"]}>
-        <Link href="../auth/reset-password">Forgot password?</Link>
-        <Link href="../auth/register">Create Account</Link>
+        <MuiLink
+          component="button"
+          type="button"
+          onClick={() => open("reset-request")}
+        >
+          Forgot password?
+        </MuiLink>
+        <MuiLink
+          component="button"
+          type="button"
+          onClick={() => open("register")}
+        >
+          Create Account
+        </MuiLink>
       </div>
     </BasicDialog>
   );
