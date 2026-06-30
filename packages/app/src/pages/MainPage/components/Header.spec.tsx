@@ -59,6 +59,7 @@ test("Contact links to the GitHub issues page in a new tab", async () => {
   const contact = await screen.findByRole("menuitem", { name: "Contact" });
   expect(contact).toHaveAttribute("href", import.meta.env.VITE_ISSUE_URL);
   expect(contact).toHaveAttribute("target", "_blank");
+  expect(contact).toHaveAttribute("rel", "noreferrer");
 });
 
 test("Logout link goes to login page", async () => {

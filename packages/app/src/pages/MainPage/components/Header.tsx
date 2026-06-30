@@ -148,6 +148,7 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       href: ISSUE_URL,
       LinkComponent: "a",
       target: "_blank",
+      rel: "noreferrer",
       shouldShow: true,
     },
     {

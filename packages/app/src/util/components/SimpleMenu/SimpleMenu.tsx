@@ -36,6 +36,7 @@ type SimpleMenuItemLink = {
   href: string;
   LinkComponent?: React.ElementType;
   target?: HTMLAnchorElement["target"];
+  rel?: HTMLAnchorElement["rel"];
 };
 
 type SimpleMenuItem =
@@ -133,6 +134,7 @@ const SimpleMenu: React.FC<SimpleMenuProps> = ({
                   component: item.LinkComponent ?? LinkBehavior,
                   href: item.href,
                   target: item.target,
+                  rel: item.rel,
                 }
               : {};
           const onClick = () => {
