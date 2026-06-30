@@ -48,6 +48,16 @@ describe("ErrorView", () => {
     expect(link).toHaveAttribute("rel", "noreferrer");
   });
 
+  test("prefills a new-issue report link with the error when no href is given", () => {
+    render(<ErrorView message="Boom kaboom" />);
+    const href = screen
+      .getByRole("link", { name: new RegExp(copy.report) })
+      .getAttribute("href");
+    const url = new URL(href ?? "");
+    expect(url.pathname).toMatch(/\/new$/);
+    expect(url.searchParams.get("title")).toContain("Boom kaboom");
+  });
+
   test("includes the broken-torus graphic", () => {
     render(<ErrorView />);
     expect(screen.getByTestId("broken-torus")).toBeInTheDocument();

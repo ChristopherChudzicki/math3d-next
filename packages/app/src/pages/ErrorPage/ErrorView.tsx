@@ -4,6 +4,7 @@ import ReplayRoundedIcon from "@mui/icons-material/ReplayRounded";
 import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import copy from "./errorPage.copy";
+import buildReportUrl from "./errorPage.report";
 import BrokenTorus from "./BrokenTorus";
 import * as styles from "./ErrorPage.module.css";
 
@@ -89,13 +90,16 @@ const ErrorView: React.FC<ErrorViewProps> = ({
   stack,
   onReload = defaultReload,
   homeHref = copy.homeHref,
-  reportHref = copy.reportHref,
+  reportHref,
 }) => {
   // `error.stack` usually already begins with the message, so avoid repeating it.
   const detailsText =
     stack && message && stack.includes(message)
       ? stack
       : [message, stack].filter(Boolean).join("\n\n");
+
+  // Prefill a GitHub issue with the error + context unless a href is supplied.
+  const finalReportHref = reportHref ?? buildReportUrl({ message, stack });
 
   // Move focus to the message on mount so the swapped-in error is announced and
   // keyboard users aren't left on a detached node from the crashed view.
@@ -139,7 +143,7 @@ const ErrorView: React.FC<ErrorViewProps> = ({
             {detailsText ? <TechnicalDetails text={detailsText} /> : null}
             <a
               className={styles.report}
-              href={reportHref}
+              href={finalReportHref}
               target="_blank"
               rel="noreferrer"
             >
