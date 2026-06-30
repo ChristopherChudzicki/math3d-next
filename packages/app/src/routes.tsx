@@ -13,10 +13,25 @@ import ResetPasswordConfirmPage from "./pages/auth/ResetPasswordConfirmPage";
 import ScenesList from "./pages/ScenesList/ScenesListPage";
 import UserSettingsPage from "./pages/UserSettingsPage/UserSettingsPage";
 import HelpPage from "./pages/HelpPage/HelpPage";
+import ErrorPage from "./pages/ErrorPage/ErrorPage";
+import ErrorTrigger from "./pages/ErrorPage/ErrorTrigger";
+
+/**
+ * Root layout: hosts the `?test-sync-error` trigger on every route (see ErrorTrigger)
+ * and renders the matched child. Its own `errorElement` catches render errors
+ * from anywhere in the tree.
+ */
+const RootLayout: React.FC = () => (
+  <>
+    <ErrorTrigger />
+    <Outlet />
+  </>
+);
 
 const routes: RouteObject[] = [
   {
-    // Saving a slot for errorElement
+    element: <RootLayout />,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: "/help/reference",

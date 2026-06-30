@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import user from "@testing-library/user-event";
 import type { LinkProps } from "react-router";
 import SimpleMenu from "./SimpleMenu";
@@ -60,7 +60,10 @@ describe("SimpleMenu", () => {
     expect(items[0].onClick).toHaveBeenCalled();
     expect(items[1].onClick).not.toHaveBeenCalled();
 
-    expect(menu).not.toBeInTheDocument();
+    // MUI's Menu unmounts via an exit transition, so the <ul> can linger
+    // briefly after the click. Wait for removal rather than asserting it
+    // synchronously (the synchronous assertion races the transition under load).
+    await waitFor(() => expect(menu).not.toBeInTheDocument());
   });
 
   it("Calls the trigger's event handler when clicked, in addition to opening the menu", async () => {
