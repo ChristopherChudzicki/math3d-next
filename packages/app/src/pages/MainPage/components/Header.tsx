@@ -84,7 +84,7 @@ const getItems = ({
   open,
 }: {
   user?: User | null;
-  open: (name: OverlayName) => void;
+  open: (name: OverlayName, companion?: { list?: string }) => void;
 }): FilterableItem[] => {
   const isAuthenticated = !!user;
   return [
@@ -122,19 +122,19 @@ const getItems = ({
       shouldShow: !isAuthenticated && DISPLAY_AUTH_FLOWS,
     },
     {
-      type: "link",
+      type: "button",
       label: "My Scenes",
       key: "scenes-me",
       icon: <ListIcon fontSize="small" />,
-      href: "scenes/me",
+      onClick: () => open("scenes", { list: "me" }),
       shouldShow: isAuthenticated,
     },
     {
-      type: "link",
+      type: "button",
       label: "Examples",
       key: "examples",
       icon: <LightbulbOutlined fontSize="small" />,
-      href: "scenes/examples",
+      onClick: () => open("scenes", { list: "examples" }),
       shouldShow: true,
     },
     {

@@ -11,6 +11,7 @@ import {
   useInfiniteScenesMe,
   usePatchScene,
 } from "@math3d/api";
+import MuiLink from "@mui/material/Link";
 import Link from "@/util/components/Link";
 import LoadingSpinner from "@/util/components/LoadingSpinner/LoadingSpinner";
 import Alert from "@mui/material/Alert";
@@ -30,6 +31,7 @@ import SimpleMenu, {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useNavigate, useParams } from "react-router";
 import invariant from "tiny-invariant";
+import { useOverlay } from "@/features/overlays/useOverlay";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 import styles from "./ScenesList.module.css";
 
@@ -39,6 +41,7 @@ const MyScenesList: React.FC = () => {
   const isAuthenticated = useAuthStatus();
   const { sceneKey } = useParams();
   const navigate = useNavigate();
+  const { open } = useOverlay();
   const { add: addNotification } = useNotifications();
   const [filterText, setFilterText] = useState("");
   const [filterValue, setFilterValue] = useState("");
@@ -74,7 +77,7 @@ const MyScenesList: React.FC = () => {
       if (await confirmed) {
         await destroyMutateAsync(scene.key);
         if (scene.key === sceneKey) {
-          navigate("/scenes/me");
+          navigate("/?overlay=scenes&list=me");
         }
       }
     },
@@ -107,8 +110,19 @@ const MyScenesList: React.FC = () => {
   if (isAuthenticated !== "authenticated") {
     return (
       <p className={styles["with-margin"]}>
-        To view scenes you have saved, <Link href="../auth/login">log in</Link>{" "}
-        or <Link href="../auth/register">create an account</Link>.
+        To view scenes you have saved,{" "}
+        <MuiLink component="button" type="button" onClick={() => open("login")}>
+          log in
+        </MuiLink>{" "}
+        or{" "}
+        <MuiLink
+          component="button"
+          type="button"
+          onClick={() => open("register")}
+        >
+          create an account
+        </MuiLink>
+        .
       </p>
     );
   }
@@ -188,7 +202,7 @@ const MyScenesList: React.FC = () => {
               >
                 <ListItemButton
                   LinkComponent={Link}
-                  href={`/${item.key}/scenes/me`}
+                  href={`/${item.key}?overlay=scenes&list=me`}
                 >
                   <ListItemText
                     primary={

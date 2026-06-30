@@ -6,7 +6,6 @@ import OverlayHost from "@/features/overlays/OverlayHost";
 import MainPage from "./pages/MainPage";
 import AccountActivationPage from "./pages/auth/ActivationPage";
 import ResetPasswordConfirmPage from "./pages/auth/ResetPasswordConfirmPage";
-import ScenesList from "./pages/ScenesList/ScenesListPage";
 import HelpPage from "./pages/HelpPage/HelpPage";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
 import ErrorTrigger from "./pages/ErrorPage/ErrorTrigger";
@@ -45,18 +44,7 @@ const routes: RouteObject[] = [
       },
       {
         path: "/:sceneKey?",
-        element: (
-          <>
-            <MainPage />
-            <Outlet />
-          </>
-        ),
-        children: [
-          {
-            path: "scenes/:listType",
-            element: <ScenesList />,
-          },
-        ],
+        element: <MainPage />,
       },
       // ROOT-level catch-all: any path that is neither `/app/...` nor a single-segment
       // scene key (e.g. a 2+ segment `/.well-known/foo`) renders the soft-404 NotFound.
