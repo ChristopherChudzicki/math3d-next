@@ -1,20 +1,30 @@
 import { test, expect } from "vitest";
-import { renderTestApp, screen, user, within } from "@/test_util";
+import { renderTestApp, screen, user, waitFor } from "@/test_util";
 import { faker } from "@faker-js/faker/locale/en";
 import { urls } from "@math3d/mock-api";
 import { mockResponseOnce } from "@math3d/mock-api/node";
 
+test("activation page loads at the exact email-link path", async () => {
+  await renderTestApp(`/app/auth/activate-account?key=${faker.string.uuid()}`);
+  expect(
+    await screen.findByRole("heading", { name: "Account Activation" }),
+  ).toBeVisible();
+});
+
 test("Authorization form happy path: API call, success indication, & log in", async () => {
-  const key = faker.string.uuid();
-  const url = `/auth/activate-account?key=${key}`;
-  const { location } = await renderTestApp(url, {});
-  const dialog = screen.getByRole("dialog", { name: "Account Activation" });
-  const alert = await within(dialog).findByRole("alert");
+  const { location } = await renderTestApp(
+    `/app/auth/activate-account?key=${faker.string.uuid()}`,
+  );
+  const alert = await screen.findByRole("alert");
   expect(alert).toHaveTextContent(/activated/);
-  within(dialog).getByRole("link", { name: "log in" });
-  const button = within(dialog).getByRole("button", { name: "Go to login" });
+  expect(screen.getByRole("link", { name: "log in" })).toHaveAttribute(
+    "href",
+    "/?overlay=login",
+  );
+  const button = screen.getByRole("button", { name: "Go to login" });
   await user.click(button);
-  expect(location.current.pathname).toBe("/auth/login");
+  await waitFor(() => expect(location.current.pathname).toBe("/"));
+  expect(location.current.search).toContain("overlay=login");
 });
 
 test("Error message for invalid key", async () => {
@@ -33,10 +43,7 @@ test("Error message for invalid key", async () => {
       ],
     },
   });
-  await renderTestApp("/auth/activate-account?key=fake-key", {});
-  const dialog = await screen.findByRole("dialog", {
-    name: "Account Activation",
-  });
-  const alert = await within(dialog).findByRole("alert");
+  await renderTestApp(`/app/auth/activate-account?key=${faker.string.uuid()}`);
+  const alert = await screen.findByRole("alert");
   expect(alert).toHaveTextContent(/activation link/);
 });

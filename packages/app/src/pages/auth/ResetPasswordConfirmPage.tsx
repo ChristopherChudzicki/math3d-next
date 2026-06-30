@@ -1,4 +1,4 @@
-import React, { useCallback, useId } from "react";
+import React, { useCallback } from "react";
 import TextField from "@mui/material/TextField";
 import { useNavigate, useSearchParams } from "react-router";
 import { useForm } from "react-hook-form";
@@ -7,9 +7,11 @@ import { useResetPasswordConfirm } from "@math3d/api";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 import Link from "@/util/components/Link";
 import { setFieldErrors } from "@/util/forms";
-import BasicDialog from "@/util/components/BasicDialog";
+import AppPageLayout from "@/pages/AppPageLayout/AppPageLayout";
 import styles from "./styles.module.css";
 
 const schema = yup.object({
@@ -25,7 +27,6 @@ type FormData = yup.InferType<typeof schema>;
 
 const ResetPasswordConfirmPage: React.FC = () => {
   const navigate = useNavigate();
-  const formId = useId();
 
   const resolver = yupResolver(schema);
   const [searchParams] = useSearchParams();
@@ -42,9 +43,6 @@ const ResetPasswordConfirmPage: React.FC = () => {
     },
   });
 
-  const navigateAway = useCallback(() => {
-    navigate("../");
-  }, [navigate]);
   const resetPassword = useResetPasswordConfirm();
   const changePassword: SubmitHandler<FormData> = useCallback(
     async (data, event) => {
@@ -59,37 +57,25 @@ const ResetPasswordConfirmPage: React.FC = () => {
     },
     [resetPassword, setError],
   );
-  const goToLogin = useCallback(() => navigate("/auth/login"), [navigate]);
+  const goToLogin = useCallback(() => navigate("/?overlay=login"), [navigate]);
 
-  const cancelButton = resetPassword.isSuccess ? null : undefined; // null will suppress normal button
-  const submitButtonContent = resetPassword.isSuccess
-    ? "Go to login"
-    : "Change Password";
   return (
-    <BasicDialog
-      title="Change Password"
-      open
-      onClose={navigateAway}
-      cancelButton={cancelButton}
-      confirmText={submitButtonContent}
-      fullWidth
-      confirmButtonProps={
-        resetPassword.isSuccess
-          ? { type: "button", onClick: goToLogin }
-          : {
-              form: formId,
-              type: "submit",
-            }
+    <AppPageLayout
+      title={
+        <Typography component="h1" variant="h5">
+          Change Password
+        </Typography>
       }
-      maxWidth="xs"
     >
       {resetPassword.isSuccess ? (
-        <Alert severity="success">
-          Password changed. Please <Link href="../auth/login">log in</Link>.
-        </Alert>
+        <>
+          <Alert severity="success">
+            Password changed. Please <Link href="/?overlay=login">log in</Link>.
+          </Alert>
+          <Button onClick={goToLogin}>Go to login</Button>
+        </>
       ) : (
         <form
-          id={formId}
           className={styles["form-content"]}
           onSubmit={handleSubmit(changePassword)}
         >
@@ -115,9 +101,10 @@ const ResetPasswordConfirmPage: React.FC = () => {
               Error: Please check that the password reset link is correct.
             </Alert>
           ) : null}
+          <Button type="submit">Change Password</Button>
         </form>
       )}
-    </BasicDialog>
+    </AppPageLayout>
   );
 };
 

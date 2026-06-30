@@ -4,8 +4,10 @@ import Link from "@/util/components/Link";
 import { useActivateUser, useUserMe } from "@math3d/api";
 import { useToggle } from "@/util/hooks";
 import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 import LoadingSpinner from "@/util/components/LoadingSpinner/LoadingSpinner";
-import BasicDialog from "@/util/components/BasicDialog";
+import AppPageLayout from "@/pages/AppPageLayout/AppPageLayout";
 
 const ActivationMessage: React.FC<{ success: boolean; error: boolean }> = ({
   success,
@@ -15,7 +17,7 @@ const ActivationMessage: React.FC<{ success: boolean; error: boolean }> = ({
     return (
       <Alert severity="success">
         Account successfully activated. Please{" "}
-        <Link href="../auth/login">log in</Link>.
+        <Link href="/?overlay=login">log in</Link>.
       </Alert>
     );
   }
@@ -38,8 +40,8 @@ const ActivationMessage: React.FC<{ success: boolean; error: boolean }> = ({
 const AccountActivationPage: React.FC = () => {
   const [success, setSuccess] = useToggle(false);
   const navigate = useNavigate();
-  const handleClose = useCallback(() => {
-    navigate("../auth/login");
+  const goToLogin = useCallback(() => {
+    navigate("/?overlay=login");
   }, [navigate]);
   const [searchParams] = useSearchParams();
   const activateUser = useActivateUser();
@@ -61,20 +63,20 @@ const AccountActivationPage: React.FC = () => {
       },
     );
   }, [csrfReady, activateUserMutate, searchParams, setSuccess]);
+
   return (
-    <BasicDialog
-      title="Account Activation"
-      open
-      fullWidth
-      maxWidth="xs"
-      cancelButton={null}
-      onClose={handleClose}
-      onConfirm={handleClose}
-      confirmButtonProps={{ disabled: !success }}
-      confirmText="Go to login"
+    <AppPageLayout
+      title={
+        <Typography component="h1" variant="h5">
+          Account Activation
+        </Typography>
+      }
     >
       <ActivationMessage success={success} error={activateUser.isError} />
-    </BasicDialog>
+      <Button disabled={!success} onClick={goToLogin}>
+        Go to login
+      </Button>
+    </AppPageLayout>
   );
 };
 

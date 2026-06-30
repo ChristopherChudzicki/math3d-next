@@ -5,9 +5,8 @@ import {
   renderTestApp,
   screen,
   user,
-  within,
+  waitFor,
 } from "@/test_util";
-import invariant from "tiny-invariant";
 import { urls } from "@math3d/mock-api";
 import { mockResponseOnce } from "@math3d/mock-api/node";
 
@@ -16,13 +15,14 @@ type FormValues = {
   rePassword: string;
 };
 
+const makeKey = () =>
+  `${faker.string.alpha({ length: 2 })}-${faker.string.uuid()}`;
+
 const submitForm = async (data: FormValues) => {
-  const dialog = screen.getByRole("dialog");
   const controls = {
-    password: within(dialog).getByLabelText("New Password"),
-    rePassword: within(dialog).getByLabelText("Confirm New Password"),
-    cancel: within(dialog).getByRole("button", { name: "Cancel" }),
-    submit: within(dialog).getByRole("button", { name: "Change Password" }),
+    password: screen.getByLabelText("New Password"),
+    rePassword: screen.getByLabelText("Confirm New Password"),
+    submit: screen.getByRole("button", { name: "Change Password" }),
   };
 
   await user.click(controls.password);
@@ -31,44 +31,45 @@ const submitForm = async (data: FormValues) => {
   await user.click(controls.rePassword);
   await user.paste(data.rePassword);
 
-  await user.click(
-    within(dialog).getByRole("button", { name: "Change Password" }),
-  );
+  await user.click(controls.submit);
 
   return controls;
 };
 
+test("reset-confirm page loads at the exact email-link path (trailing slash)", async () => {
+  await renderTestApp(
+    `/app/auth/reset-password/confirm/?key=${faker.string.uuid()}`,
+  );
+  expect(
+    await screen.findByRole("heading", { name: "Change Password" }),
+  ).toBeVisible();
+});
+
 test("Happy path: Expected API call and form states", async () => {
-  const key = `${faker.string.alpha({ length: 2 })}-${faker.string.uuid()}`;
+  const key = makeKey();
   const { location } = await renderTestApp(
-    `/auth/reset-password/confirm?key=${key}`,
+    `/app/auth/reset-password/confirm?key=${key}`,
   );
 
-  const dialog = await screen.findByRole("dialog");
-
-  within(dialog).getByRole("heading", {
-    name: "Change Password",
-  });
+  await screen.findByRole("heading", { name: "Change Password" });
 
   const password = faker.internet.password();
-  const controls = await submitForm({ password, rePassword: password });
+  await submitForm({ password, rePassword: password });
 
-  const alert = within(dialog).getByRole("alert");
+  const alert = screen.getByRole("alert");
   expect(alert.textContent).toMatch(/Password changed./);
-  const link = within(alert).getByRole("link", { name: "log in" });
-  invariant(link instanceof HTMLAnchorElement);
-  expect(link.href).toBe(`${window.origin}/auth/login`);
+  const link = screen.getByRole("link", { name: "log in" });
+  expect(link).toHaveAttribute("href", "/?overlay=login");
 
-  expect(controls.submit.textContent).toBe("Go to login");
-  expect(controls.cancel).not.toBeInTheDocument();
-
-  await user.click(controls.submit);
-  expect(location.current.pathname).toBe("/auth/login");
+  const goToLoginButton = screen.getByRole("button", { name: "Go to login" });
+  await user.click(goToLoginButton);
+  await waitFor(() => expect(location.current.pathname).toBe("/"));
+  expect(location.current.search).toContain("overlay=login");
 });
 
 test("Requires passwords match", async () => {
-  const key = `${faker.string.alpha({ length: 2 })}-${faker.string.uuid()}`;
-  await renderTestApp(`/auth/reset-password/confirm?key=${key}`);
+  const key = makeKey();
+  await renderTestApp(`/app/auth/reset-password/confirm?key=${key}`);
 
   const controls = await submitForm({
     password: "Password1234", // pragma: allowlist secret
@@ -80,8 +81,8 @@ test("Requires passwords match", async () => {
 });
 
 test("Reports API errors (password field)", async () => {
-  const key = `${faker.string.alpha({ length: 2 })}-${faker.string.uuid()}`;
-  await renderTestApp(`/auth/reset-password/confirm?key=${key}`);
+  const key = makeKey();
+  await renderTestApp(`/app/auth/reset-password/confirm?key=${key}`);
 
   mockResponseOnce({
     status: 400,
@@ -110,8 +111,8 @@ test("Reports API errors (password field)", async () => {
 });
 
 test("key errors suggest to check link", async () => {
-  const key = `${faker.string.alpha({ length: 2 })}-${faker.string.uuid()}`;
-  await renderTestApp(`/auth/reset-password/confirm?key=${key}`);
+  const key = makeKey();
+  await renderTestApp(`/app/auth/reset-password/confirm?key=${key}`);
 
   mockResponseOnce({
     status: 400,

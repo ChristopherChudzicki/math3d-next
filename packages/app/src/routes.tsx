@@ -35,7 +35,11 @@ const routes: RouteObject[] = [
         children: [
           { index: true, element: <NotFoundPage /> },
           { path: "help/reference", element: <HelpPage /> },
-          // auth pages added in D3
+          { path: "auth/activate-account", element: <AccountActivationPage /> },
+          {
+            path: "auth/reset-password/confirm",
+            element: <ResetPasswordConfirmPage />,
+          },
           { path: "*", element: <NotFoundPage /> },
         ],
       },
@@ -51,14 +55,6 @@ const routes: RouteObject[] = [
           {
             path: "scenes/:listType",
             element: <ScenesList />,
-          },
-          {
-            path: "auth/activate-account",
-            element: <AccountActivationPage />,
-          },
-          {
-            path: "auth/reset-password/confirm",
-            element: <ResetPasswordConfirmPage />,
           },
         ],
       },
