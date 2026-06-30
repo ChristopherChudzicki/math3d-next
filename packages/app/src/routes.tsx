@@ -15,6 +15,7 @@ import UserSettingsPage from "./pages/UserSettingsPage/UserSettingsPage";
 import HelpPage from "./pages/HelpPage/HelpPage";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
 import ErrorTrigger from "./pages/ErrorPage/ErrorTrigger";
+import OverlayHost from "@/features/overlays/OverlayHost";
 
 /**
  * Root layout: hosts the `?test-sync-error` trigger on every route (see ErrorTrigger)
@@ -25,6 +26,7 @@ const RootLayout: React.FC = () => (
   <>
     <ErrorTrigger />
     <Outlet />
+    <OverlayHost />
   </>
 );
 
