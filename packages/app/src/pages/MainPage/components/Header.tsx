@@ -142,7 +142,7 @@ const getItems = ({
       label: "Function Reference",
       key: "reference",
       icon: <FunctionsIcon fontSize="small" />,
-      href: "/help/reference",
+      href: "/app/help/reference",
       shouldShow: true,
       target: "_blank",
     },

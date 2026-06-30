@@ -31,14 +31,11 @@ const routes: RouteObject[] = [
     errorElement: <ErrorPage />,
     children: [
       {
-        path: "/help/reference",
-        element: <HelpPage />,
-      },
-      {
         path: "app",
         children: [
           { index: true, element: <NotFoundPage /> },
-          // help + auth pages added in D2/D3
+          { path: "help/reference", element: <HelpPage /> },
+          // auth pages added in D3
           { path: "*", element: <NotFoundPage /> },
         ],
       },
