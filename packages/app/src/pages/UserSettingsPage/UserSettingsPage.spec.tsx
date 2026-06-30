@@ -14,3 +14,13 @@ test("Settings dialog opens via overlay param and closes by clearing it", async 
     expect(location.current.search).not.toContain("overlay="),
   );
 });
+
+test("If not authenticated, redirects to the login overlay", async () => {
+  const { location } = await renderTestApp("/?overlay=settings", {
+    isAuthenticated: false,
+  });
+  await waitFor(() =>
+    expect(location.current.search).toContain("overlay=login"),
+  );
+  expect(screen.queryByRole("dialog", { name: "Account Settings" })).toBe(null);
+});

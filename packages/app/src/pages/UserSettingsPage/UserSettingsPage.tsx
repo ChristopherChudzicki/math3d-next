@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -12,6 +12,7 @@ import TabPanel from "@mui/lab/TabPanel";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import invariant from "tiny-invariant";
+import { useAuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import ProfileForm from "./ProfilleForm";
 import ChangePasswordForm from "./ChangePasswordForm";
@@ -64,10 +65,21 @@ const UserSettingsPage: React.FC = () => {
   const tab = TABS.find((t) => t.id === activeTab);
   invariant(tab);
   const [disabled, setDisabled] = useState(false);
-  const { close } = useOverlay();
+  const { open, close } = useOverlay();
+  const isAuthenticated = useAuthStatus();
   const handleClose = useCallback(() => {
     close();
   }, [close]);
+
+  // Settings acts on the signed-in user; if there's none, send them to login.
+  // Switching overlays replaces history, so no junk back-stack entry.
+  useEffect(() => {
+    if (isAuthenticated === "unauthenticated") open("login");
+  }, [isAuthenticated, open]);
+
+  // Don't mount the forms until we know there's a user — otherwise they fire
+  // requests against a missing account during the redirect / auth check.
+  if (isAuthenticated !== "authenticated") return null;
 
   return (
     <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>
