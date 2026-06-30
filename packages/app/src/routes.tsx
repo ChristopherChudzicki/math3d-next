@@ -17,7 +17,7 @@ import ErrorPage from "./pages/ErrorPage/ErrorPage";
 import ErrorTrigger from "./pages/ErrorPage/ErrorTrigger";
 
 /**
- * Root layout: hosts the `?boom` error trigger on every route (see ErrorTrigger)
+ * Root layout: hosts the `?test-sync-error` trigger on every route (see ErrorTrigger)
  * and renders the matched child. Its own `errorElement` catches render errors
  * from anywhere in the tree.
  */
