@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router";
+import invariant from "tiny-invariant";
 import Header from "@/util/components/Header";
 
 import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
@@ -72,6 +73,9 @@ const LoginButtons: React.FC<{
   );
 };
 
+const ISSUE_URL = import.meta.env.VITE_ISSUE_URL;
+invariant(ISSUE_URL, "VITE_ISSUE_URL is not set");
+
 type FilterableItem = SimpleMenuItem & {
   shouldShow: boolean;
 };
@@ -141,7 +145,9 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       label: "Contact",
       key: "contact",
       icon: <HelpOutlineOutlinedIcon fontSize="small" />,
-      href: "contact",
+      href: ISSUE_URL,
+      LinkComponent: "a",
+      target: "_blank",
       shouldShow: true,
     },
     {

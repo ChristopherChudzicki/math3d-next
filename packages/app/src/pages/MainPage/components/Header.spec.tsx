@@ -52,6 +52,15 @@ test("Login link goes to login page", async () => {
   expect(location.current.pathname).toBe(`/auth/login`);
 });
 
+test("Contact links to the GitHub issues page in a new tab", async () => {
+  await renderTestApp("", { isAuthenticated: false });
+  const button = screen.getByRole("button", { name: "Open User Menu" });
+  await user.click(button);
+  const contact = await screen.findByRole("menuitem", { name: "Contact" });
+  expect(contact).toHaveAttribute("href", import.meta.env.VITE_ISSUE_URL);
+  expect(contact).toHaveAttribute("target", "_blank");
+});
+
 test("Logout link goes to login page", async () => {
   const { location } = await renderTestApp("", { isAuthenticated: true });
   const button = screen.getByRole("button", { name: "Open User Menu" });
