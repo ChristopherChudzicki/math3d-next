@@ -1,5 +1,6 @@
 import { test, expect, vi } from "vitest";
 import { renderTestApp, screen } from "@/test_util";
+import { seedDb } from "@math3d/mock-api";
 
 // Force the "loading" auth state to pin LogoutPage's guard: it must NOT
 // redirect away while auth status is still loading (only once it resolves
@@ -9,10 +10,11 @@ vi.mock("@/features/auth/useAuthStatus", () => ({
 }));
 
 test("Does not redirect while auth status is loading", async () => {
-  const { location } = await renderTestApp("/auth/logout", {
+  const scene = seedDb.withSceneFromItems([]);
+  const { location } = await renderTestApp(`/${scene.key}?overlay=logout`, {
     isAuthenticated: true,
   });
 
   expect(screen.getByRole("dialog", { name: "Sign out" })).toBeInTheDocument();
-  expect(location.current.pathname).toBe("/auth/logout");
+  expect(location.current.search).toContain("overlay=logout");
 });

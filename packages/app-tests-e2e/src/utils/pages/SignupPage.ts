@@ -45,8 +45,8 @@ class SigninPage {
     password: string;
     confirmPassword?: string;
   }): Promise<void> {
-    if (!this.page.url().includes("auth/register")) {
-      await this.page.getByRole("link", { name: "Sign up" }).click();
+    if (!this.page.url().includes("overlay=register")) {
+      await this.page.getByRole("button", { name: "Sign up" }).click();
     }
     await this.email().fill(email);
     await this.publicNickname().fill(publicNickname);

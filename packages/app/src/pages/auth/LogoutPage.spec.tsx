@@ -1,60 +1,40 @@
 import { test, expect } from "vitest";
 import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import { seedDb } from "@math3d/mock-api";
 
-const querySignInLink = () => {
-  const signin = screen.queryByRole("link", {
-    name: "Sign in",
-    hidden: true,
-  });
-  return signin;
-};
-
-test("Logout dialog logs user out", async () => {
-  const { location } = await renderTestApp("/auth/logout", {
+test("Sign out closes the overlay and signs the user out", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const { location } = await renderTestApp(`/${scene.key}?overlay=logout`, {
     isAuthenticated: true,
   });
-  expect(querySignInLink()).toBe(null);
-
-  const dialog = screen.getByRole("dialog");
-  const logout = within(dialog).getByRole("button", { name: "Yes, sign out" });
-
-  await user.click(logout);
-
-  await waitFor(() => {
-    expect(querySignInLink()).toBeInTheDocument();
-  });
-
-  // Re-routed and dialog closed
-  expect(location.current.pathname).toBe("/");
-  await waitFor(() => {
-    expect(dialog).not.toBeInTheDocument();
-  });
+  const dialog = await screen.findByRole("dialog", { name: "Sign out" });
+  await user.click(
+    within(dialog).getByRole("button", { name: "Yes, sign out" }),
+  );
+  await waitFor(() =>
+    expect(location.current.search).not.toContain("overlay="),
+  );
+  expect(location.current.pathname).toBe(`/${scene.key}`);
 });
 
-test("Does not log user out if dialog is cancelled", async () => {
-  const { location } = await renderTestApp("/auth/logout", {
+test("Cancel closes the overlay without signing the user out", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const { location } = await renderTestApp(`/${scene.key}?overlay=logout`, {
     isAuthenticated: true,
   });
-  expect(querySignInLink()).toBe(null);
-
-  const dialog = screen.getByRole("dialog");
-  const cancel = within(dialog).getByRole("button", { name: "Cancel" });
-
-  await user.click(cancel);
-
-  expect(querySignInLink()).toBe(null);
-
-  // Re-routed and dialog closed
-  expect(location.current.pathname).toBe("/");
-  expect(dialog).not.toBeInTheDocument();
+  const dialog = await screen.findByRole("dialog", { name: "Sign out" });
+  await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+  await waitFor(() =>
+    expect(location.current.search).not.toContain("overlay="),
+  );
+  expect(location.current.pathname).toBe(`/${scene.key}`);
 });
 
-test("If not authenticated already, redirects to main", async () => {
-  const { location } = await renderTestApp("/auth/logout", {
+test("If not authenticated, closes the overlay", async () => {
+  const { location } = await renderTestApp("/?overlay=logout", {
     isAuthenticated: false,
   });
-
-  await waitFor(() => {
-    expect(location.current.pathname).toBe("/");
-  });
+  await waitFor(() =>
+    expect(location.current.search).not.toContain("overlay="),
+  );
 });

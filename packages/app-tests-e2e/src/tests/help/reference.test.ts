@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("Has expected headers and links", async ({ page }) => {
-  await page.goto("/help/reference");
+  await page.goto("/app/help/reference");
   const nav = page.getByRole("navigation", {
     name: "Reference Sections",
   });

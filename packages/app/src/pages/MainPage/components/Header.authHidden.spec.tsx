@@ -9,8 +9,8 @@ test("Sign in and Sign up header buttons are hidden when DISPLAY_AUTH_FLOWS is f
   await renderTestApp("", { isAuthenticated: false });
   await screen.findByRole("button", { name: "Open User Menu" });
 
-  expect(screen.queryByRole("link", { name: "Sign in" })).toBeNull();
-  expect(screen.queryByRole("link", { name: "Sign up" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Sign in" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Sign up" })).toBeNull();
 });
 
 test("Sign in and Sign up menu items are hidden when DISPLAY_AUTH_FLOWS is false", async () => {

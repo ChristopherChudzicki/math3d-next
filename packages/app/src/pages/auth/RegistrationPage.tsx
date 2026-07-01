@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useId } from "react";
 import TextField from "@mui/material/TextField";
-import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import { useCreateUser } from "@math3d/api";
@@ -11,6 +10,7 @@ import Alert from "@mui/material/Alert";
 import { useToggle } from "@/util/hooks";
 import { setFieldErrors, OverallError } from "@/util/forms";
 import BasicDialog from "@/util/components/BasicDialog";
+import { useOverlay } from "@/features/overlays/useOverlay";
 import styles from "./styles.module.css";
 
 const schema = yup.object({
@@ -26,7 +26,7 @@ const schema = yup.object({
 type FormData = yup.InferType<typeof schema>;
 
 const RegistrationPage: React.FC = () => {
-  const navigate = useNavigate();
+  const { close } = useOverlay();
   const formId = useId();
   const [registering, setRegistering] = useToggle(true);
 
@@ -40,15 +40,12 @@ const RegistrationPage: React.FC = () => {
     getValues,
   } = useForm({ resolver });
 
-  const navigateAway = useCallback(() => {
-    navigate("../");
-  }, [navigate]);
   const createUser = useCreateUser();
   useEffect(() => {
     if (isAuthenticated === "authenticated") {
-      navigateAway();
+      close();
     }
-  }, [isAuthenticated, navigateAway]);
+  }, [isAuthenticated, close]);
 
   const createAccount: SubmitHandler<FormData> = useCallback(
     async (data, event) => {
@@ -72,7 +69,7 @@ const RegistrationPage: React.FC = () => {
     <BasicDialog
       title={title}
       open
-      onClose={navigateAway}
+      onClose={close}
       cancelButton={cancelButton}
       confirmText={submitButtonContent}
       fullWidth
@@ -82,7 +79,7 @@ const RegistrationPage: React.FC = () => {
               form: formId,
               type: "submit",
             }
-          : { type: "button", onClick: navigateAway }
+          : { type: "button", onClick: close }
       }
       maxWidth="xs"
     >

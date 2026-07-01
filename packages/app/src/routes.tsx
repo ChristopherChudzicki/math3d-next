@@ -2,19 +2,12 @@ import React from "react";
 import type { RouteObject } from "react-router";
 import { Outlet } from "react-router";
 
+import OverlayHost from "@/features/overlays/OverlayHost";
 import MainPage from "./pages/MainPage";
-import LoginPage from "./pages/auth/LoginPage";
-import LogoutPage from "./pages/auth/LogoutPage";
-
-import RegistrationPage from "./pages/auth/RegistrationPage";
-import AccountActivationPage from "./pages/auth/ActivationPage";
-import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
-import ResetPasswordConfirmPage from "./pages/auth/ResetPasswordConfirmPage";
-import ScenesList from "./pages/ScenesList/ScenesListPage";
-import UserSettingsPage from "./pages/UserSettingsPage/UserSettingsPage";
 import HelpPage from "./pages/HelpPage/HelpPage";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
 import ErrorTrigger from "./pages/ErrorPage/ErrorTrigger";
+import NotFoundPage from "./pages/NotFound/NotFoundPage";
 
 /**
  * Root layout: hosts the `?test-sync-error` trigger on every route (see ErrorTrigger)
@@ -25,6 +18,7 @@ const RootLayout: React.FC = () => (
   <>
     <ErrorTrigger />
     <Outlet />
+    <OverlayHost />
   </>
 );
 
@@ -34,52 +28,23 @@ const routes: RouteObject[] = [
     errorElement: <ErrorPage />,
     children: [
       {
-        path: "/help/reference",
-        element: <HelpPage />,
+        path: "app",
+        children: [
+          { index: true, element: <NotFoundPage /> },
+          { path: "help/reference", element: <HelpPage /> },
+          { path: "*", element: <NotFoundPage /> },
+        ],
       },
       {
         path: "/:sceneKey?",
-        element: (
-          <>
-            <MainPage />
-            <Outlet />
-          </>
-        ),
-        children: [
-          {
-            path: "scenes/:listType",
-            element: <ScenesList />,
-          },
-          {
-            path: "auth/login",
-            element: <LoginPage />,
-          },
-          {
-            path: "auth/logout",
-            element: <LogoutPage />,
-          },
-          {
-            path: "auth/register",
-            element: <RegistrationPage />,
-          },
-          {
-            path: "auth/activate-account",
-            element: <AccountActivationPage />,
-          },
-          {
-            path: "auth/reset-password",
-            element: <ResetPasswordPage />,
-          },
-          {
-            path: "auth/reset-password/confirm",
-            element: <ResetPasswordConfirmPage />,
-          },
-          {
-            path: "user/settings",
-            element: <UserSettingsPage />,
-          },
-        ],
+        element: <MainPage />,
       },
+      // ROOT-level catch-all: any path that is neither `/app/...` nor a single-segment
+      // scene key (e.g. a 2+ segment `/.well-known/foo`) renders the soft-404 NotFound.
+      // Without this, an unmatched path throws a 404 that the errorElement (ErrorPage)
+      // would render as the scary "something broke" view — wrong for a benign mistyped URL.
+      // `/:sceneKey?` only matches a single optional segment, so multi-segment junk falls here.
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ];

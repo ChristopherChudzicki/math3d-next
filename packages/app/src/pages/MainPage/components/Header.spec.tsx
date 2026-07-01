@@ -12,7 +12,7 @@ test.each([
     await renderTestApp("", { isAuthenticated: authStatus });
     await screen.findByRole("button", { name: "Open User Menu" });
 
-    const signin = screen.queryByRole("link", { name: "Sign in" });
+    const signin = screen.queryByRole("button", { name: "Sign in" });
 
     const button = screen.getByRole("button", { name: "Open User Menu" });
     await user.click(button);
@@ -41,15 +41,15 @@ test("treats an empty-bodied 403 from /me as unauthenticated, not 'loading'", as
   await renderTestApp("", { isAuthenticated: false });
 
   expect(
-    await screen.findByRole("link", { name: "Sign in" }),
+    await screen.findByRole("button", { name: "Sign in" }),
   ).toBeInTheDocument();
 });
 
-test("Login link goes to login page", async () => {
+test("Login button opens login overlay", async () => {
   const { location } = await renderTestApp("", { isAuthenticated: false });
-  const signin = screen.getByRole("link", { name: "Sign in" });
+  const signin = screen.getByRole("button", { name: "Sign in" });
   await user.click(signin);
-  expect(location.current.pathname).toBe(`/auth/login`);
+  expect(location.current.search).toContain("overlay=login");
 });
 
 test("Contact links to the GitHub issues page in a new tab", async () => {
@@ -62,11 +62,20 @@ test("Contact links to the GitHub issues page in a new tab", async () => {
   expect(contact).toHaveAttribute("rel", "noreferrer");
 });
 
-test("Logout link goes to login page", async () => {
+test("Sign out opens logout overlay", async () => {
   const { location } = await renderTestApp("", { isAuthenticated: true });
   const button = screen.getByRole("button", { name: "Open User Menu" });
   await user.click(button);
-  const signin = screen.getByRole("menuitem", { name: "Sign out" });
-  await user.click(signin);
-  expect(location.current.pathname).toBe(`/auth/logout`);
+  const signout = screen.getByRole("menuitem", { name: "Sign out" });
+  await user.click(signout);
+  expect(location.current.search).toContain("overlay=logout");
+});
+
+test("Account Settings opens settings overlay", async () => {
+  const { location } = await renderTestApp("", { isAuthenticated: true });
+  const button = screen.getByRole("button", { name: "Open User Menu" });
+  await user.click(button);
+  const settings = screen.getByRole("menuitem", { name: "Account Settings" });
+  await user.click(settings);
+  expect(location.current.search).toContain("overlay=settings");
 });

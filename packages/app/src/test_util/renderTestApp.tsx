@@ -70,11 +70,12 @@ const renderTestApp = async (
   }
 
   // Wait for the user-me query to resolve so auth status is reflected in
-  // the UI before test assertions run.
+  // the UI before test assertions run. If the query was never initiated
+  // (e.g. a page that doesn't render MainPage), skip the wait.
   await waitFor(
     () => {
       const meState = queryClient.getQueryState(["me"]);
-      if (!meState || meState.status === "pending") {
+      if (meState?.status === "pending") {
         throw new Error("User me query not yet resolved");
       }
     },
@@ -87,7 +88,7 @@ const renderTestApp = async (
     },
   };
 
-  return { result, store, location, user };
+  return { result, store, location, user, router, queryClient };
 };
 
 export default renderTestApp;

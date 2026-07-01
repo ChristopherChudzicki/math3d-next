@@ -7,6 +7,7 @@ import { useResetPasswordConfirm } from "@math3d/api";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
 import Link from "@/util/components/Link";
 import { setFieldErrors } from "@/util/forms";
 import BasicDialog from "@/util/components/BasicDialog";
@@ -23,6 +24,11 @@ const schema = yup.object({
 
 type FormData = yup.InferType<typeof schema>;
 
+/**
+ * Cold-entry password-reset overlay (`?overlay=reset-confirm&key=...`), opened
+ * directly from the reset email over the app. Closing drops the overlay and the
+ * one-time key by navigating to `/`.
+ */
 const ResetPasswordConfirmPage: React.FC = () => {
   const navigate = useNavigate();
   const formId = useId();
@@ -42,9 +48,6 @@ const ResetPasswordConfirmPage: React.FC = () => {
     },
   });
 
-  const navigateAway = useCallback(() => {
-    navigate("../");
-  }, [navigate]);
   const resetPassword = useResetPasswordConfirm();
   const changePassword: SubmitHandler<FormData> = useCallback(
     async (data, event) => {
@@ -59,64 +62,66 @@ const ResetPasswordConfirmPage: React.FC = () => {
     },
     [resetPassword, setError],
   );
-  const goToLogin = useCallback(() => navigate("/auth/login"), [navigate]);
+  const goToLogin = useCallback(() => navigate("/?overlay=login"), [navigate]);
+  const handleClose = useCallback(() => navigate("/"), [navigate]);
 
-  const cancelButton = resetPassword.isSuccess ? null : undefined; // null will suppress normal button
-  const submitButtonContent = resetPassword.isSuccess
-    ? "Go to login"
-    : "Change Password";
+  if (resetPassword.isSuccess) {
+    return (
+      <BasicDialog
+        open
+        title="Change Password"
+        onClose={handleClose}
+        fullWidth
+        maxWidth="xs"
+        cancelButton={null}
+        confirmButton={<Button onClick={goToLogin}>Go to login</Button>}
+      >
+        <Alert severity="success">
+          Password changed. Please <Link href="/?overlay=login">log in</Link>.
+        </Alert>
+      </BasicDialog>
+    );
+  }
+
   return (
     <BasicDialog
-      title="Change Password"
       open
-      onClose={navigateAway}
-      cancelButton={cancelButton}
-      confirmText={submitButtonContent}
+      title="Change Password"
+      onClose={handleClose}
       fullWidth
-      confirmButtonProps={
-        resetPassword.isSuccess
-          ? { type: "button", onClick: goToLogin }
-          : {
-              form: formId,
-              type: "submit",
-            }
-      }
       maxWidth="xs"
+      cancelButton={null}
+      confirmText="Change Password"
+      confirmButtonProps={{ type: "submit", form: formId }}
     >
-      {resetPassword.isSuccess ? (
-        <Alert severity="success">
-          Password changed. Please <Link href="../auth/login">log in</Link>.
-        </Alert>
-      ) : (
-        <form
-          id={formId}
-          className={styles["form-content"]}
-          onSubmit={handleSubmit(changePassword)}
-        >
-          <TextField
-            error={!!errors.password?.message}
-            helperText={errors.password?.message}
-            label="New Password"
-            type="password"
-            {...register("password")}
-          />
-          <TextField
-            error={!!errors.re_password?.message}
-            helperText={errors.re_password?.message}
-            label="Confirm New Password"
-            type="password"
-            {...register("re_password")}
-          />
-          {errors.root?.message ? (
-            <Alert severity="error">{errors.root?.message}</Alert>
-          ) : null}
-          {errors.key ? (
-            <Alert severity="error">
-              Error: Please check that the password reset link is correct.
-            </Alert>
-          ) : null}
-        </form>
-      )}
+      <form
+        id={formId}
+        className={styles["form-content"]}
+        onSubmit={handleSubmit(changePassword)}
+      >
+        <TextField
+          error={!!errors.password?.message}
+          helperText={errors.password?.message}
+          label="New Password"
+          type="password"
+          {...register("password")}
+        />
+        <TextField
+          error={!!errors.re_password?.message}
+          helperText={errors.re_password?.message}
+          label="Confirm New Password"
+          type="password"
+          {...register("re_password")}
+        />
+        {errors.root?.message ? (
+          <Alert severity="error">{errors.root?.message}</Alert>
+        ) : null}
+        {errors.key ? (
+          <Alert severity="error">
+            Error: Please check that the password reset link is correct.
+          </Alert>
+        ) : null}
+      </form>
     </BasicDialog>
   );
 };

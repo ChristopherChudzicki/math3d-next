@@ -1,39 +1,33 @@
-import { renderTestApp, screen, waitFor, within } from "@/test_util";
-import { test, describe, expect } from "vitest";
+import { renderTestApp, screen, waitFor, user } from "@/test_util";
+import { seedDb } from "@math3d/mock-api";
+import { test, expect } from "vitest";
 
-describe("ScenesListPage", () => {
-  test.each([
-    {
-      initialRoute: "/scenes/examples",
-      selectedTab: "Examples",
-    },
-    {
-      initialRoute: "/scenes/me",
-      selectedTab: "My Scenes",
-    },
-  ])(
-    "Active tab is determined by route",
-    async ({ selectedTab, initialRoute }) => {
-      await renderTestApp(initialRoute);
-      const tablist = await screen.findByRole("tablist", { name: "Scenes" });
-      await within(tablist).findByRole("tab", {
-        selected: true,
-        name: selectedTab,
-      });
-    },
+test("scenes drawer opens via ?overlay=scenes&list=examples", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  await renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
+  expect(await screen.findByRole("tab", { name: "Examples" })).toBeVisible();
+});
+
+test("an unknown ?list= value self-corrects to list=examples", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const { location } = await renderTestApp(
+    `/${scene.key}?overlay=scenes&list=garbage`,
   );
+  expect(await screen.findByRole("tab", { name: "Examples" })).toBeVisible();
+  await waitFor(() =>
+    expect(location.current.search).toContain("list=examples"),
+  );
+});
 
-  test("Invalid routes route to examples tab", async () => {
-    const { location } = await renderTestApp("/scenes/invalid-tabname");
-    const tablist = await screen.findByRole("tablist", { name: "Scenes" });
-    await within(tablist).findByRole("tab", {
-      selected: true,
-      name: "Examples",
-    });
-    await waitFor(() => {
-      expect(location.current.pathname).toBe("/scenes/examples");
-    });
-  });
-
-  test("On the 'My Scenes' tab, unauthenticated users see login prompt", () => {});
+test("closing the drawer (Escape) returns to the scene", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const { location } = await renderTestApp(
+    `/${scene.key}?overlay=scenes&list=examples`,
+  );
+  await screen.findByRole("tab", { name: "Examples" });
+  await user.keyboard("{Escape}");
+  await waitFor(() =>
+    expect(location.current.search).not.toContain("overlay="),
+  );
+  expect(location.current.pathname).toBe(`/${scene.key}`);
 });

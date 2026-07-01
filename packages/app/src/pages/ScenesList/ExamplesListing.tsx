@@ -12,7 +12,7 @@ const ExamplesListing: React.FC = () => {
         <ListItemButton
           key={e.id}
           LinkComponent={Link}
-          href={`/${e.id}/scenes/examples`}
+          href={`/${e.id}?overlay=scenes&list=examples`}
         >
           <ListItemText primary={e.text.primary} secondary={e.text.secondary} />
         </ListItemButton>

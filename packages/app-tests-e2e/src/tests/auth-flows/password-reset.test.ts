@@ -21,7 +21,7 @@ test.describe("Password reset flow", () => {
 
     try {
       await test.step("Request password reset", async () => {
-        await page.goto("/auth/reset-password");
+        await page.goto("/?overlay=reset-request");
         const dialog = page.getByRole("dialog", { name: "Reset Password" });
         await dialog.getByLabel("Email").fill(auth.email);
         await dialog.getByRole("button", { name: "Reset Password" }).click();

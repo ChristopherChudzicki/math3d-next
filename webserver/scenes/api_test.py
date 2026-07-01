@@ -1,14 +1,25 @@
 import pytest
+from django.core.exceptions import ValidationError
 from django.test import Client
 
 from authentication.factories import CustomUserFactory
 from scenes.factories import SceneFactory
+from scenes.legacy_scene_utils.migrate_scene import migrate_scene
 from scenes.models import LegacyScene, Scene
 from scenes.tests.data import default_scene
 
 LIST_URL = "/v1/scenes/"
 ME_URL = "/v1/scenes/me/"
 LEGACY_URL = "/v1/legacy_scenes/"
+
+LEGACY_DEHYDRATED_FIXTURE = {
+    "folders": {},
+    "mathSymbols": {},
+    "mathGraphics": {},
+    "sliderValues": {},
+    "sortableTree": {"root": []},
+    "metadata": {"creationDate": '"2020-01-01T00:00:00Z"', "title": "Old"},
+}
 
 
 @pytest.mark.django_db
@@ -199,19 +210,38 @@ def test_get_archived_scene_is_returned():
 
 @pytest.mark.django_db
 def test_get_legacy_key_migrates_then_returns_scene():
-    legacy = LegacyScene.objects.create(
-        dehydrated={
-            "folders": {},
-            "mathSymbols": {},
-            "mathGraphics": {},
-            "sliderValues": {},
-            "sortableTree": {"root": []},
-            "metadata": {"creationDate": '"2020-01-01T00:00:00Z"', "title": "Old"},
-        }
-    )
+    legacy = LegacyScene.objects.create(dehydrated=LEGACY_DEHYDRATED_FIXTURE)
     response = Client().get(_detail(legacy.key))
     assert response.status_code == 200
     assert response.json()["isLegacy"] is True
+
+
+@pytest.mark.django_db
+def test_get_reserved_legacy_key_returns_404_not_500():
+    # A legacy scene with a reserved key must not 500 the GET (constraint blocks creation).
+    # IMPORTANT: dehydrated must be a *realistic* blob — migrate_scene()/set_defaults()
+    # dereferences dehydrated["sortableTree"], ["metadata"]["title"], ["metadata"]["creationDate"];
+    # an empty {} raises KeyError (500) BEFORE the reserved-key ValidationError path is reached.
+    # Reuse the dehydrated payload from the existing
+    # `test_get_legacy_key_migrates_then_returns_scene` (api_test.py), but with key="a".
+    LegacyScene.objects.create(key="a", dehydrated=LEGACY_DEHYDRATED_FIXTURE)
+    resp = Client().get(_detail("a"))
+    assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_migrate_scene_reraises_non_key_validation_error(monkeypatch):
+    # A legacy scene with a valid key but invalid items must fail loudly — the
+    # reserved-key skip path must not swallow unrelated validation errors and
+    # silently drop the scene (which would surface as a misleading 404).
+    legacy = LegacyScene.objects.create(dehydrated=LEGACY_DEHYDRATED_FIXTURE)
+
+    def raise_items_error(*args, **kwargs):
+        raise ValidationError({"items": ["Invalid math items"]})
+
+    monkeypatch.setattr(Scene.objects, "update_or_create", raise_items_error)
+    with pytest.raises(ValidationError):
+        migrate_scene(legacy)
 
 
 @pytest.mark.django_db

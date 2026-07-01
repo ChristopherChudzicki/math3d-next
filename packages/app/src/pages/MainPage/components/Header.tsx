@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import { Link } from "react-router";
 import invariant from "tiny-invariant";
 import Header from "@/util/components/Header";
 
@@ -7,13 +6,11 @@ import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import ShareButton from "@/features/sceneControls/mathItems/ShareButton";
 
-import MenuItem from "@mui/material/MenuItem";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import type { AuthStatus } from "@/features/auth";
+import { useOverlay } from "@/features/overlays/useOverlay";
+import type { OverlayName } from "@/features/overlays/useOverlay";
 import Button from "@mui/material/Button";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
@@ -27,35 +24,16 @@ import UserMenu from "./UserMenu";
 import SaveButton from "./SaveButton";
 
 const LoginButtons: React.FC<{
-  smallScreen: boolean;
   isAuthenticated: AuthStatus;
-}> = ({ smallScreen, isAuthenticated }) => {
+}> = ({ isAuthenticated }) => {
+  const { open } = useOverlay();
   if (isAuthenticated !== "unauthenticated" || !DISPLAY_AUTH_FLOWS) return null;
-  if (smallScreen) {
-    return (
-      <>
-        <MenuItem to="auth/login" component={Link}>
-          <ListItemIcon>
-            <AccountCircleOutlinedIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Sign in</ListItemText>
-        </MenuItem>
-        <MenuItem to="auth/register" component={Link}>
-          <ListItemIcon>
-            <AccountCircleOutlinedIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Sign up</ListItemText>
-        </MenuItem>
-      </>
-    );
-  }
   return (
     <>
       <Button
         variant="text"
         color="secondary"
-        component={Link}
-        to="auth/register"
+        onClick={() => open("register")}
         startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
       >
         Sign up
@@ -63,8 +41,7 @@ const LoginButtons: React.FC<{
       <Button
         variant="text"
         color="secondary"
-        component={Link}
-        to="auth/login"
+        onClick={() => open("login")}
         startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
       >
         Sign in
@@ -79,7 +56,13 @@ invariant(ISSUE_URL, "VITE_ISSUE_URL is not set");
 type FilterableItem = SimpleMenuItem & {
   shouldShow: boolean;
 };
-const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
+const getItems = ({
+  user,
+  open,
+}: {
+  user?: User | null;
+  open: (name: OverlayName, companion?: { list?: string }) => void;
+}): FilterableItem[] => {
   const isAuthenticated = !!user;
   return [
     {
@@ -100,35 +83,35 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       shouldShow: isAuthenticated,
     },
     {
-      type: "link",
+      type: "button",
       key: "signin",
       label: "Sign in",
       icon: <AccountCircleOutlinedIcon fontSize="small" />,
-      href: "auth/login",
+      onClick: () => open("login"),
       shouldShow: !isAuthenticated && DISPLAY_AUTH_FLOWS,
     },
     {
-      type: "link",
+      type: "button",
       label: "Sign up",
       key: "signup",
       icon: <AccountCircleOutlinedIcon fontSize="small" />,
-      href: "auth/register",
+      onClick: () => open("register"),
       shouldShow: !isAuthenticated && DISPLAY_AUTH_FLOWS,
     },
     {
-      type: "link",
+      type: "button",
       label: "My Scenes",
       key: "scenes-me",
       icon: <ListIcon fontSize="small" />,
-      href: "scenes/me",
+      onClick: () => open("scenes", { list: "me" }),
       shouldShow: isAuthenticated,
     },
     {
-      type: "link",
+      type: "button",
       label: "Examples",
       key: "examples",
       icon: <LightbulbOutlined fontSize="small" />,
-      href: "scenes/examples",
+      onClick: () => open("scenes", { list: "examples" }),
       shouldShow: true,
     },
     {
@@ -136,7 +119,7 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       label: "Function Reference",
       key: "reference",
       icon: <FunctionsIcon fontSize="small" />,
-      href: "/help/reference",
+      href: "/app/help/reference",
       shouldShow: true,
       target: "_blank",
     },
@@ -152,19 +135,19 @@ const getItems = ({ user }: { user?: User | null }): FilterableItem[] => {
       shouldShow: true,
     },
     {
-      type: "link",
+      type: "button",
       label: "Account Settings",
       key: "settings",
       icon: <ManageAccountsIcon fontSize="small" />,
-      href: "user/settings",
+      onClick: () => open("settings"),
       shouldShow: isAuthenticated,
     },
     {
-      type: "link",
+      type: "button",
       label: "Sign out",
       key: "signout",
       icon: <AccountCircleOutlinedIcon fontSize="small" />,
-      href: "auth/logout",
+      onClick: () => open("logout"),
       shouldShow: isAuthenticated,
     },
   ];
@@ -178,10 +161,13 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
   const smallScreen = useMediaQuery("(max-width: 600px)");
   const isAuthenticated = useAuthStatus();
   const userQuery = useUserMe();
+  const { open } = useOverlay();
   const filteredItems = useMemo(
     () =>
-      getItems({ user: userQuery.data }).filter((item) => !!item.shouldShow),
-    [userQuery.data],
+      getItems({ user: userQuery.data, open }).filter(
+        (item) => !!item.shouldShow,
+      ),
+    [userQuery.data, open],
   );
   return (
     <Header
@@ -191,10 +177,7 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
           <SaveButton />
           <ShareButton variant={smallScreen ? "mobile" : "desktop"} />
           {smallScreen ? null : (
-            <LoginButtons
-              isAuthenticated={isAuthenticated}
-              smallScreen={false}
-            />
+            <LoginButtons isAuthenticated={isAuthenticated} />
           )}
           <UserMenu items={filteredItems} user={userQuery.data} />
         </>

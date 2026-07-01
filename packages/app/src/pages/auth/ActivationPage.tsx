@@ -4,6 +4,7 @@ import Link from "@/util/components/Link";
 import { useActivateUser, useUserMe } from "@math3d/api";
 import { useToggle } from "@/util/hooks";
 import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
 import LoadingSpinner from "@/util/components/LoadingSpinner/LoadingSpinner";
 import BasicDialog from "@/util/components/BasicDialog";
 
@@ -15,7 +16,7 @@ const ActivationMessage: React.FC<{ success: boolean; error: boolean }> = ({
     return (
       <Alert severity="success">
         Account successfully activated. Please{" "}
-        <Link href="../auth/login">log in</Link>.
+        <Link href="/?overlay=login">log in</Link>.
       </Alert>
     );
   }
@@ -35,12 +36,18 @@ const ActivationMessage: React.FC<{ success: boolean; error: boolean }> = ({
   );
 };
 
+/**
+ * Cold-entry activation overlay (`?overlay=activate&key=...`), opened directly
+ * from the account-confirmation email over the app. Closing drops the overlay
+ * and the one-time key by navigating to `/`.
+ */
 const AccountActivationPage: React.FC = () => {
   const [success, setSuccess] = useToggle(false);
   const navigate = useNavigate();
-  const handleClose = useCallback(() => {
-    navigate("../auth/login");
+  const goToLogin = useCallback(() => {
+    navigate("/?overlay=login");
   }, [navigate]);
+  const handleClose = useCallback(() => navigate("/"), [navigate]);
   const [searchParams] = useSearchParams();
   const activateUser = useActivateUser();
   const activateUserMutate = activateUser.mutate;
@@ -61,17 +68,20 @@ const AccountActivationPage: React.FC = () => {
       },
     );
   }, [csrfReady, activateUserMutate, searchParams, setSuccess]);
+
   return (
     <BasicDialog
-      title="Account Activation"
       open
+      title="Account Activation"
+      onClose={handleClose}
       fullWidth
       maxWidth="xs"
       cancelButton={null}
-      onClose={handleClose}
-      onConfirm={handleClose}
-      confirmButtonProps={{ disabled: !success }}
-      confirmText="Go to login"
+      confirmButton={
+        <Button disabled={!success} onClick={goToLogin}>
+          Go to login
+        </Button>
+      }
     >
       <ActivationMessage success={success} error={activateUser.isError} />
     </BasicDialog>

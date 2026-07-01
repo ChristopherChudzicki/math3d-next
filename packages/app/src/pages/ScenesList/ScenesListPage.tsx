@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect } from "react";
 import Drawer from "@mui/material/Drawer";
 
-import { useNavigate, useParams } from "react-router";
+import { useSearchParams } from "react-router";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import Box from "@mui/material/Box";
-import invariant from "tiny-invariant";
 import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
+import { useOverlay } from "@/features/overlays/useOverlay";
 import ExamplesListing from "./ExamplesListing";
 import MyScenes from "./MyScenes";
 import styles from "./ScenesList.module.css";
@@ -31,28 +31,23 @@ const normalizeListType = (
 };
 
 const ScenesList: React.FC = () => {
-  const params = useParams<{ listType: ListType }>();
-  invariant(params.listType);
+  const [search] = useSearchParams();
+  const { open, close } = useOverlay();
   const isAuthenticated = useAuthStatus();
   const showMyScenes =
     DISPLAY_AUTH_FLOWS || isAuthenticated === "authenticated";
-  const listType = normalizeListType(params.listType, showMyScenes);
-  const navigate = useNavigate();
-  const activateListType = useCallback(
-    (aListType: ListType) => {
-      navigate(`../scenes/${aListType}`);
-    },
-    [navigate],
-  );
-  useEffect(() => {
-    if (listType !== params.listType) {
-      activateListType(listType);
-    }
-  }, [activateListType, params.listType, listType]);
+  const rawList = search.get("list") ?? ListType.Examples;
+  const listType = normalizeListType(rawList, showMyScenes);
 
-  const handleClose = useCallback(() => {
-    navigate("../");
-  }, [navigate]);
+  const handleClose = useCallback(() => close(), [close]);
+  const activateListType = useCallback(
+    (t: ListType) => open("scenes", { list: t }),
+    [open],
+  );
+
+  useEffect(() => {
+    if (listType !== rawList) open("scenes", { list: listType });
+  }, [open, rawList, listType]);
 
   const handleChangeTab = (_e: React.SyntheticEvent, newValue: ListType) => {
     activateListType(newValue);

@@ -45,6 +45,7 @@ export const urls = {
   },
   auth: {
     usersMe: `${BASE_URL}/v1/auth/users/me/`,
+    usersMeDelete: `${BASE_URL}/v1/auth/users/me/delete/`,
     // allauth headless endpoints
     login: `${BASE_URL}/_allauth/browser/v1/auth/login`,
     logout: `${BASE_URL}/_allauth/browser/v1/auth/session`,
@@ -297,6 +298,11 @@ export const handlers = [
   // allauth change password
   http.post(urls.auth.changePassword, async () => {
     return HttpResponse.json({ status: 200 });
+  }),
+  // DRF custom: delete own account (204 No Content; signs the user out)
+  http.post(urls.auth.usersMeDelete, async () => {
+    currentUserId = null;
+    return new HttpResponse(null, { status: 204 });
   }),
   // DRF custom: users/me GET
   http.get<NoParams, ErrorResponseBody | User>(urls.auth.usersMe, async () => {

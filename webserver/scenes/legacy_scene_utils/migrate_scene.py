@@ -1,7 +1,13 @@
+import logging
+
+from django.core.exceptions import ValidationError
+
 from scenes.legacy_scene_utils.translate import ItemMigrator
-from scenes.models import Scene, LegacyScene
+from scenes.models import Scene, LegacyScene, is_reserved_key_error
 
 from scenes.legacy_scene_utils.default_data import set_defaults
+
+logger = logging.getLogger(__name__)
 
 
 def parse_value(value: str, default: float) -> float:
@@ -98,16 +104,26 @@ def migrate_scene(legacy_scene: LegacyScene):
         if not item_order[folder_id] and folder_id not in item_order["main"]:
             del item_order[folder_id]
 
-    scene, _created = Scene.objects.update_or_create(
-        key=legacy_scene.key,
-        defaults={
-            "items": items,
-            "item_order": legacy_scene.dehydrated["sortableTree"],
-            "title": legacy_scene.dehydrated["metadata"].get("title", "Untitled"),
-            "times_accessed": legacy_scene.times_accessed,
-            "is_legacy": True,
-        },
-    )
+    try:
+        scene, _created = Scene.objects.update_or_create(
+            key=legacy_scene.key,
+            defaults={
+                "items": items,
+                "item_order": legacy_scene.dehydrated["sortableTree"],
+                "title": legacy_scene.dehydrated["metadata"].get("title", "Untitled"),
+                "times_accessed": legacy_scene.times_accessed,
+                "is_legacy": True,
+            },
+        )
+    except ValidationError as e:
+        if not is_reserved_key_error(e):
+            # Invalid items (or any non-key validation failure) keep the old
+            # loud-failure contract — don't mislabel them as a reserved key.
+            raise
+        logger.warning(
+            "Skipping migration of legacy scene with reserved key %r", legacy_scene.key
+        )
+        return None
     # These are auto_now_add, auto_now columns and can't be modified
     # in save()
     Scene.objects.filter(pk=scene.id).update(
