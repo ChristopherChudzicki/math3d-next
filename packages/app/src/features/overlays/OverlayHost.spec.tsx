@@ -1,12 +1,12 @@
 import { test, expect } from "vitest";
 import { renderTestApp, screen } from "@/test_util";
 
-test("no overlay param renders no dialog", async () => {
+test("no overlay param renders no dialog", () => {
   renderTestApp("/");
   expect(screen.queryByRole("dialog")).toBe(null);
 });
 
-test("unknown overlay value renders nothing and is left in the URL", async () => {
+test("unknown overlay value renders nothing and is left in the URL", () => {
   const { location } = renderTestApp("/?overlay=bogus");
   expect(screen.queryByRole("dialog")).toBe(null);
   expect(location.current.search).toContain("overlay=bogus");
@@ -17,7 +17,7 @@ test("unknown overlay value renders nothing and is left in the URL", async () =>
 // app to the branded ErrorPage. They must be treated like any other unknown value.
 test.each(["constructor", "__proto__"])(
   "prototype-chain overlay value %s renders nothing and is left untouched",
-  async (value) => {
+  (value) => {
     const { location } = renderTestApp(`/?overlay=${value}`);
     expect(screen.queryByRole("dialog")).toBe(null);
     expect(location.current.search).toContain(`overlay=${value}`);
