@@ -4,9 +4,7 @@ import userEvent from "@testing-library/user-event";
 import ReferencePanel from "./ReferencePanel";
 import type { ReferenceEntry } from "./util";
 
-const makeEntry = (
-  overrides: Partial<ReferenceEntry> = {},
-): ReferenceEntry => ({
+const entry: ReferenceEntry = {
   id: "sin",
   name: "sine",
   latex: "\\sin",
@@ -14,26 +12,20 @@ const makeEntry = (
   summaryInnerHtml: "The sine function.",
   detailsHtml: "<p>More about sine.</p>",
   tags: ["trig"],
-  ...overrides,
-});
+};
 
-describe("ReferencePanel show more/less focus", () => {
-  test("focus moves to the Show less button after expanding", async () => {
-    const user = userEvent.setup();
-    render(<ReferencePanel entries={[makeEntry()]} />);
+// "Show more" and "Show less" are deliberately one persistent element whose
+// label toggles, so activating it keeps keyboard focus. This guards against a
+// regression if it's ever split back into two elements swapped in/out of the
+// DOM, which would drop focus to <body> on each click.
+test("the show more/less toggle keeps focus when activated", async () => {
+  const user = userEvent.setup();
+  render(<ReferencePanel entries={[entry]} />);
 
-    await user.click(screen.getByRole("button", { name: "Show more" }));
+  const toggle = screen.getByRole("button", { name: "Show more" });
+  await user.click(toggle);
+  expect(screen.getByRole("button", { name: "Show less" })).toHaveFocus();
 
-    expect(screen.getByRole("button", { name: "Show less" })).toHaveFocus();
-  });
-
-  test("focus moves to the Show more button after collapsing", async () => {
-    const user = userEvent.setup();
-    render(<ReferencePanel entries={[makeEntry()]} />);
-
-    await user.click(screen.getByRole("button", { name: "Show more" }));
-    await user.click(screen.getByRole("button", { name: "Show less" }));
-
-    expect(screen.getByRole("button", { name: "Show more" })).toHaveFocus();
-  });
+  await user.click(screen.getByRole("button", { name: "Show less" }));
+  expect(screen.getByRole("button", { name: "Show more" })).toHaveFocus();
 });
