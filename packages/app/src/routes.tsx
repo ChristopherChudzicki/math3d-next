@@ -4,8 +4,6 @@ import { Outlet } from "react-router";
 
 import OverlayHost from "@/features/overlays/OverlayHost";
 import MainPage from "./pages/MainPage";
-import AccountActivationPage from "./pages/auth/ActivationPage";
-import ResetPasswordConfirmPage from "./pages/auth/ResetPasswordConfirmPage";
 import HelpPage from "./pages/HelpPage/HelpPage";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
 import ErrorTrigger from "./pages/ErrorPage/ErrorTrigger";
@@ -34,11 +32,6 @@ const routes: RouteObject[] = [
         children: [
           { index: true, element: <NotFoundPage /> },
           { path: "help/reference", element: <HelpPage /> },
-          { path: "auth/activate-account", element: <AccountActivationPage /> },
-          {
-            path: "auth/reset-password/confirm",
-            element: <ResetPasswordConfirmPage />,
-          },
           { path: "*", element: <NotFoundPage /> },
         ],
       },

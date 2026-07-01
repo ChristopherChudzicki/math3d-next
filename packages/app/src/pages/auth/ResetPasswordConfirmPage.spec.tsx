@@ -36,22 +36,20 @@ const submitForm = async (data: FormValues) => {
   return controls;
 };
 
-test("reset-confirm page loads at the exact email-link path (trailing slash)", async () => {
-  await renderTestApp(
-    `/app/auth/reset-password/confirm/?key=${faker.string.uuid()}`,
-  );
+test("reset-confirm opens as an overlay from the email link", async () => {
+  await renderTestApp(`/?overlay=reset-confirm&key=${faker.string.uuid()}`);
   expect(
-    await screen.findByRole("heading", { name: "Change Password" }),
+    await screen.findByRole("dialog", { name: "Change Password" }),
   ).toBeVisible();
 });
 
 test("Happy path: Expected API call and form states", async () => {
   const key = makeKey();
   const { location } = await renderTestApp(
-    `/app/auth/reset-password/confirm?key=${key}`,
+    `/?overlay=reset-confirm&key=${key}`,
   );
 
-  await screen.findByRole("heading", { name: "Change Password" });
+  await screen.findByRole("dialog", { name: "Change Password" });
 
   const password = faker.internet.password();
   await submitForm({ password, rePassword: password });
@@ -63,13 +61,15 @@ test("Happy path: Expected API call and form states", async () => {
 
   const goToLoginButton = screen.getByRole("button", { name: "Go to login" });
   await user.click(goToLoginButton);
-  await waitFor(() => expect(location.current.pathname).toBe("/"));
-  expect(location.current.search).toContain("overlay=login");
+  await waitFor(() =>
+    expect(location.current.search).toContain("overlay=login"),
+  );
+  expect(location.current.pathname).toBe("/");
 });
 
 test("Requires passwords match", async () => {
   const key = makeKey();
-  await renderTestApp(`/app/auth/reset-password/confirm?key=${key}`);
+  await renderTestApp(`/?overlay=reset-confirm&key=${key}`);
 
   const controls = await submitForm({
     password: "Password1234", // pragma: allowlist secret
@@ -82,7 +82,7 @@ test("Requires passwords match", async () => {
 
 test("Reports API errors (password field)", async () => {
   const key = makeKey();
-  await renderTestApp(`/app/auth/reset-password/confirm?key=${key}`);
+  await renderTestApp(`/?overlay=reset-confirm&key=${key}`);
 
   mockResponseOnce({
     status: 400,
@@ -112,7 +112,7 @@ test("Reports API errors (password field)", async () => {
 
 test("key errors suggest to check link", async () => {
   const key = makeKey();
-  await renderTestApp(`/app/auth/reset-password/confirm?key=${key}`);
+  await renderTestApp(`/?overlay=reset-confirm&key=${key}`);
 
   mockResponseOnce({
     status: 400,

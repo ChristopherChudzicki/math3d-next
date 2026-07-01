@@ -5,9 +5,8 @@ import { useActivateUser, useUserMe } from "@math3d/api";
 import { useToggle } from "@/util/hooks";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import LoadingSpinner from "@/util/components/LoadingSpinner/LoadingSpinner";
-import AppPageLayout from "@/pages/AppPageLayout/AppPageLayout";
+import BasicDialog from "@/util/components/BasicDialog";
 
 const ActivationMessage: React.FC<{ success: boolean; error: boolean }> = ({
   success,
@@ -37,12 +36,18 @@ const ActivationMessage: React.FC<{ success: boolean; error: boolean }> = ({
   );
 };
 
+/**
+ * Cold-entry activation overlay (`?overlay=activate&key=...`), opened directly
+ * from the account-confirmation email over the app. Closing drops the overlay
+ * and the one-time key by navigating to `/`.
+ */
 const AccountActivationPage: React.FC = () => {
   const [success, setSuccess] = useToggle(false);
   const navigate = useNavigate();
   const goToLogin = useCallback(() => {
     navigate("/?overlay=login");
   }, [navigate]);
+  const handleClose = useCallback(() => navigate("/"), [navigate]);
   const [searchParams] = useSearchParams();
   const activateUser = useActivateUser();
   const activateUserMutate = activateUser.mutate;
@@ -65,18 +70,21 @@ const AccountActivationPage: React.FC = () => {
   }, [csrfReady, activateUserMutate, searchParams, setSuccess]);
 
   return (
-    <AppPageLayout
-      title={
-        <Typography component="h1" variant="h5">
-          Account Activation
-        </Typography>
+    <BasicDialog
+      open
+      title="Account Activation"
+      onClose={handleClose}
+      fullWidth
+      maxWidth="xs"
+      cancelButton={null}
+      confirmButton={
+        <Button disabled={!success} onClick={goToLogin}>
+          Go to login
+        </Button>
       }
     >
       <ActivationMessage success={success} error={activateUser.isError} />
-      <Button disabled={!success} onClick={goToLogin}>
-        Go to login
-      </Button>
-    </AppPageLayout>
+    </BasicDialog>
   );
 };
 

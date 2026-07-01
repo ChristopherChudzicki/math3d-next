@@ -4,16 +4,16 @@ import { faker } from "@faker-js/faker/locale/en";
 import { urls } from "@math3d/mock-api";
 import { mockResponseOnce } from "@math3d/mock-api/node";
 
-test("activation page loads at the exact email-link path", async () => {
-  await renderTestApp(`/app/auth/activate-account?key=${faker.string.uuid()}`);
+test("activation opens as an overlay from the email link", async () => {
+  await renderTestApp(`/?overlay=activate&key=${faker.string.uuid()}`);
   expect(
-    await screen.findByRole("heading", { name: "Account Activation" }),
+    await screen.findByRole("dialog", { name: "Account Activation" }),
   ).toBeVisible();
 });
 
 test("Authorization form happy path: API call, success indication, & log in", async () => {
   const { location } = await renderTestApp(
-    `/app/auth/activate-account?key=${faker.string.uuid()}`,
+    `/?overlay=activate&key=${faker.string.uuid()}`,
   );
   const alert = await screen.findByRole("alert");
   expect(alert).toHaveTextContent(/activated/);
@@ -23,8 +23,10 @@ test("Authorization form happy path: API call, success indication, & log in", as
   );
   const button = screen.getByRole("button", { name: "Go to login" });
   await user.click(button);
-  await waitFor(() => expect(location.current.pathname).toBe("/"));
-  expect(location.current.search).toContain("overlay=login");
+  await waitFor(() =>
+    expect(location.current.search).toContain("overlay=login"),
+  );
+  expect(location.current.pathname).toBe("/");
 });
 
 test("Error message for invalid key", async () => {
@@ -43,7 +45,7 @@ test("Error message for invalid key", async () => {
       ],
     },
   });
-  await renderTestApp(`/app/auth/activate-account?key=${faker.string.uuid()}`);
+  await renderTestApp(`/?overlay=activate&key=${faker.string.uuid()}`);
   const alert = await screen.findByRole("alert");
   expect(alert).toHaveTextContent(/activation link/);
 });

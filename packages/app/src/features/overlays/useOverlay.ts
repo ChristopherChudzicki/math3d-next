@@ -8,7 +8,10 @@ export type OverlayName =
   | "logout"
   | "settings"
   | "reset-request"
-  | "scenes";
+  | "scenes"
+  // Cold-entry auth flows reached from an email link, carrying a `?key=`.
+  | "activate"
+  | "reset-confirm";
 
 export const useOverlay = () => {
   const [search] = useSearchParams();
