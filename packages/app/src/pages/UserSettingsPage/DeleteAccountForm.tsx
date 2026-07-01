@@ -16,7 +16,8 @@ const schema = yup.object({
 const DeleteAccountForm: React.FC<{
   id: string;
   setDisabled: (disabled: boolean) => void;
-}> = ({ id, setDisabled }) => {
+  onSelfDelete: () => void;
+}> = ({ id, setDisabled, onSelfDelete }) => {
   const userQuery = useUserMe();
   const deleteAccount = useUserMeDelete();
   const {
@@ -35,6 +36,11 @@ const DeleteAccountForm: React.FC<{
       onSubmit={handleSubmit(async (data, event) => {
         if (deleteAccount.isPending) return;
         event?.preventDefault();
+        // Signal before the mutation: its onSuccess resets the me-query, which
+        // flips auth to unauthenticated — the flag must already be set so the
+        // dialog's redirect guard treats this sign-out as deliberate. Harmless
+        // if the delete then fails (only matters while unauthenticated).
+        onSelfDelete();
         try {
           setDisabled(true);
           await deleteAccount.mutateAsync(data);

@@ -25,10 +25,21 @@ const topRightStyle: React.CSSProperties = {
   right: 0,
 };
 
+type TabComponentProps = {
+  id: string;
+  setDisabled: (disabled: boolean) => void;
+  /**
+   * Called by the Delete Account tab when the user submits deletion, so the
+   * dialog knows the coming sign-out is deliberate and skips the login redirect.
+   * A no-op for the other tabs.
+   */
+  onSelfDelete: () => void;
+};
+
 type TabConfig = {
   id: string;
   label: string;
-  Component: React.FC<{ id: string; setDisabled: (disabled: boolean) => void }>;
+  Component: React.FC<TabComponentProps>;
   submitButtonProps: ButtonProps;
 };
 
@@ -71,30 +82,29 @@ const UserSettingsPage: React.FC = () => {
     close();
   }, [close]);
 
-  // Latch whether the user was ever authenticated in this dialog session, so we
-  // only redirect a *cold* visitor (see below) and not someone who transitions
-  // authenticated → unauthenticated via an in-dialog action. The `authenticated`
-  // render commits (and runs this effect) before any later `unauthenticated`
-  // render, so the ref is set in time for the transition check below.
-  const wasAuthenticated = useRef(false);
-  useEffect(() => {
-    if (isAuthenticated === "authenticated") wasAuthenticated.current = true;
-  }, [isAuthenticated]);
-  // Cold entry: a hand-typed /?overlay=settings while logged out. Redirect to
-  // login (switching overlays replaces history, so no junk back-stack entry).
-  // NOT an authenticated→unauthenticated transition from deleting your account
-  // or signing out — that has its own flow (e.g. the "Account Deleted" notice)
-  // and we must not hijack it with a login redirect.
-  const isColdVisitor =
-    !wasAuthenticated.current && isAuthenticated !== "authenticated";
+  // Deleting your account is the only in-dialog action that signs you out, and
+  // it flips auth authenticated → unauthenticated. Flag that deliberate case so
+  // the redirect below doesn't treat it like a logged-out visitor: it has its
+  // own flow (the "Account Deleted" notice + navigate away) that a login
+  // redirect would hijack. Set imperatively from the tab's submit handler.
+  const selfDeleted = useRef(false);
+  const handleSelfDelete = useCallback(() => {
+    selfDeleted.current = true;
+  }, []);
 
+  // Redirect anyone who is unauthenticated *without* deliberately deleting — a
+  // hand-typed /?overlay=settings while logged out, or a session that expired
+  // mid-dialog — to the login overlay (a switch, so it replaces history).
   useEffect(() => {
-    if (isColdVisitor && isAuthenticated === "unauthenticated") open("login");
-  }, [isColdVisitor, isAuthenticated, open]);
+    if (isAuthenticated === "unauthenticated" && !selfDeleted.current) {
+      open("login");
+    }
+  }, [isAuthenticated, open]);
 
-  // Don't mount the forms for a cold visitor — they'd fire requests against a
-  // missing account while we redirect / wait for the auth check to resolve.
-  if (isColdVisitor) return null;
+  // Don't mount the forms unless we have a user — a cold/expired visitor would
+  // otherwise fire requests against a missing account while we redirect. The
+  // deliberate self-delete case keeps rendering so its own flow can finish.
+  if (isAuthenticated !== "authenticated" && !selfDeleted.current) return null;
 
   return (
     <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>
@@ -118,7 +128,11 @@ const UserSettingsPage: React.FC = () => {
           </TabList>
           {TABS.map((t) => (
             <TabPanel className={styles.panel} key={t.id} value={t.id}>
-              <t.Component id={t.id} setDisabled={setDisabled} />
+              <t.Component
+                id={t.id}
+                setDisabled={setDisabled}
+                onSelfDelete={handleSelfDelete}
+              />
             </TabPanel>
           ))}
         </DialogContent>
