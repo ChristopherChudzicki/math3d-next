@@ -31,8 +31,12 @@ const UserMenu: React.FC<{
   const [visible, setVisible] = useState(false);
 
   const useHamburger = !DISPLAY_AUTH_FLOWS && !user;
+  // The hamburger (no user, auth flows hidden) and the avatar (signed-in user)
+  // carry distinct accessible names: they open different menus, and the name
+  // difference lets tests await the avatar specifically rather than matching
+  // the hamburger that is shown transiently while the ["me"] query resolves.
   const trigger = useHamburger ? (
-    <IconButton aria-label="Open User Menu" color="inherit">
+    <IconButton aria-label="Open Menu" color="inherit">
       <MenuIcon />
     </IconButton>
   ) : (
