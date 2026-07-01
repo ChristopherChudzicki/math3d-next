@@ -16,25 +16,6 @@ type ReferencePanelProps = {
 const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
   const hasDetails = !!entry.detailsHtml;
   const [expanded, setExpanded] = useToggle(false);
-  const showMoreRef = React.useRef<HTMLButtonElement>(null);
-  const showLessRef = React.useRef<HTMLButtonElement>(null);
-  const interacted = React.useRef(false);
-
-  // Toggling swaps "Show more" for "Show less" (and vice versa), which are
-  // separate elements in different positions. Without intervention the focused
-  // toggle unmounts and focus falls back to <body>, stranding keyboard users.
-  // Move focus to whichever toggle just appeared, but only after a real click.
-  React.useEffect(() => {
-    if (!interacted.current) return;
-    const target = expanded ? showLessRef.current : showMoreRef.current;
-    target?.focus();
-  }, [expanded]);
-
-  const toggle = () => {
-    interacted.current = true;
-    setExpanded.toggle();
-  };
-
   return (
     <tr className={styles.row}>
       <td dangerouslySetInnerHTML={{ __html: entry.latex }} />
@@ -47,32 +28,22 @@ const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
             <span
               dangerouslySetInnerHTML={{ __html: entry.summaryInnerHtml }}
             />
-            {hasDetails && !expanded && (
+            {hasDetails && (
+              // A single toggle that stays mounted across expand/collapse, so
+              // it keeps keyboard focus when activated.
               // eslint-disable-next-line jsx-a11y/anchor-is-valid
               <Link
-                ref={showMoreRef}
-                onClick={toggle}
+                onClick={setExpanded.toggle}
                 sx={{ verticalAlign: "baseline", marginLeft: "0.5em" }}
                 component="button"
               >
-                Show more
+                {expanded ? "Show less" : "Show more"}
               </Link>
             )}
           </p>
         </div>
         {expanded && entry.detailsHtml && (
-          <>
-            <div dangerouslySetInnerHTML={{ __html: entry.detailsHtml }} />
-            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <Link
-              ref={showLessRef}
-              onClick={toggle}
-              sx={{ verticalAlign: "baseline" }}
-              component="button"
-            >
-              Show less
-            </Link>
-          </>
+          <div dangerouslySetInnerHTML={{ __html: entry.detailsHtml }} />
         )}
       </td>
     </tr>
