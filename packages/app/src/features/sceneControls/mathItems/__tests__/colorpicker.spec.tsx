@@ -21,7 +21,6 @@ const setup = async <R extends MIT>(
   const mathScope = store.getState().scene.mathScope();
   const findButton = () =>
     screen.findByRole("button", { name: "Show Graphic" });
-  const getButton = () => screen.getByRole("button", { name: "Show Graphic" });
   const findTextInput = () => screen.findByTitle("Custom Color Input");
   const getAllSwatches = () => {
     const dialog = screen.getByRole("dialog");
@@ -36,7 +35,6 @@ const setup = async <R extends MIT>(
     user,
     getItem,
     findButton,
-    getButton,
     findTextInput,
     getAllSwatches,
     getCalculatedProp,
