@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -71,15 +71,28 @@ const UserSettingsPage: React.FC = () => {
     close();
   }, [close]);
 
-  // Settings acts on the signed-in user; if there's none, send them to login.
-  // Switching overlays replaces history, so no junk back-stack entry.
-  useEffect(() => {
-    if (isAuthenticated === "unauthenticated") open("login");
-  }, [isAuthenticated, open]);
+  // Latch whether the user was ever authenticated in this dialog session, so we
+  // only redirect a *cold* visitor (see below) and not someone who transitions
+  // authenticated → unauthenticated via an in-dialog action.
+  const wasAuthenticated = useRef(false);
+  if (isAuthenticated === "authenticated") {
+    wasAuthenticated.current = true;
+  }
+  // Cold entry: a hand-typed /?overlay=settings while logged out. Redirect to
+  // login (switching overlays replaces history, so no junk back-stack entry).
+  // NOT an authenticated→unauthenticated transition from deleting your account
+  // or signing out — that has its own flow (e.g. the "Account Deleted" notice)
+  // and we must not hijack it with a login redirect.
+  const isColdVisitor =
+    !wasAuthenticated.current && isAuthenticated !== "authenticated";
 
-  // Don't mount the forms until we know there's a user — otherwise they fire
-  // requests against a missing account during the redirect / auth check.
-  if (isAuthenticated !== "authenticated") return null;
+  useEffect(() => {
+    if (isColdVisitor && isAuthenticated === "unauthenticated") open("login");
+  }, [isColdVisitor, isAuthenticated, open]);
+
+  // Don't mount the forms for a cold visitor — they'd fire requests against a
+  // missing account while we redirect / wait for the auth check to resolve.
+  if (isColdVisitor) return null;
 
   return (
     <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>
