@@ -88,7 +88,7 @@ const renderTestApp = async (
     },
   };
 
-  return { result, store, location, user, router };
+  return { result, store, location, user, router, queryClient };
 };
 
 export default renderTestApp;
