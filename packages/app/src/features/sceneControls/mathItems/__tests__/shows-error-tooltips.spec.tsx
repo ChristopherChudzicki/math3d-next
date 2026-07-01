@@ -17,14 +17,14 @@ const queryTooltip = () => screen.queryByRole("tooltip");
 
 test.each([
   {
-    getInput: () => screen.getByLabelText("Value (left-hand side)"),
+    getInput: () => screen.findByLabelText("Value (left-hand side)"),
     item: makeItem(MIT.Variable, {
       value: { lhs: "a + ", rhs: "1", type: "assignment" },
     }),
     errMatcher: /Invalid left-hand side/,
   },
   {
-    getInput: () => screen.getByLabelText("Value (right-hand side)"),
+    getInput: () => screen.findByLabelText("Value (right-hand side)"),
     item: makeItem(MIT.Variable, {
       value: { lhs: "a", rhs: "1 + ", type: "assignment" },
     }),
@@ -39,8 +39,8 @@ test.each([
   "Widgets display error message in tooltip only when focused",
   async ({ getInput, item, errMatcher }) => {
     const scene = seedDb.withSceneFromItems([item]);
-    await renderTestApp(`/${scene.key}`);
-    const theInput = getInput();
+    renderTestApp(`/${scene.key}`);
+    const theInput = await getInput();
 
     // not initially shown
     expect(queryTooltip()).not.toBeInTheDocument();
@@ -60,9 +60,9 @@ test.each([
 test("Widget does not show a tooltip when focused if no error", async () => {
   const item = makeItem(MIT.Point, { coords: "[1,2,3] + 1" });
   const scene = seedDb.withSceneFromItems([item]);
-  await renderTestApp(`/${scene.key}`);
+  renderTestApp(`/${scene.key}`);
 
-  const theInput = screen.getByLabelText("Coordinates");
+  const theInput = await screen.findByLabelText("Coordinates");
 
   // not initially shown
   expect(queryTooltip()).not.toBeInTheDocument();

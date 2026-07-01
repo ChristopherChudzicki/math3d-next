@@ -8,7 +8,7 @@ vi.mock("@/features/auth/displayAuthFlows", () => ({
 
 test("My Scenes tab is hidden for unauthenticated users when DISPLAY_AUTH_FLOWS is false", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  await renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
+  renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
   const tablist = await screen.findByRole("tablist", { name: "Scenes" });
   expect(within(tablist).queryByRole("tab", { name: "My Scenes" })).toBeNull();
   expect(
@@ -18,18 +18,18 @@ test("My Scenes tab is hidden for unauthenticated users when DISPLAY_AUTH_FLOWS 
 
 test("My Scenes tab is shown for authenticated users even when DISPLAY_AUTH_FLOWS is false", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  await renderTestApp(`/${scene.key}?overlay=scenes&list=examples`, {
+  renderTestApp(`/${scene.key}?overlay=scenes&list=examples`, {
     isAuthenticated: true,
   });
   const tablist = await screen.findByRole("tablist", { name: "Scenes" });
-  expect(within(tablist).getByRole("tab", { name: "My Scenes" })).toBeTruthy();
+  expect(
+    await within(tablist).findByRole("tab", { name: "My Scenes" }),
+  ).toBeTruthy();
 });
 
 test("?overlay=scenes&list=me redirects to list=examples when DISPLAY_AUTH_FLOWS is false", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { location } = await renderTestApp(
-    `/${scene.key}?overlay=scenes&list=me`,
-  );
+  const { location } = renderTestApp(`/${scene.key}?overlay=scenes&list=me`);
   const tablist = await screen.findByRole("tablist", { name: "Scenes" });
   await within(tablist).findByRole("tab", {
     selected: true,

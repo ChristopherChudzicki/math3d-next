@@ -123,12 +123,10 @@ test.each([
     });
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
-    const { store } = await renderTestApp(`/${scene.key}`);
+    const { store } = renderTestApp(`/${scene.key}`);
 
+    await screen.findByLabelText("Name for 1st parameter");
     const mathScope = store.getState().scene.mathScope();
-    await new Promise((resolve) => {
-      setTimeout(resolve);
-    });
     // initiall there is an error since the expr RHS contains "abc" which is not a param name or defined variable
     expect(mathScope.errors.has(id("expr"))).toBe(true);
     const inputs = getParamNameInputs();
@@ -182,8 +180,9 @@ test.each([
     const item = makeItem(MIT.ParametricSurface, { expr: expression.initial });
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
-    const { store } = await renderTestApp(`/${scene.key}`);
+    const { store } = renderTestApp(`/${scene.key}`);
 
+    await screen.findByLabelText("Name for 1st parameter");
     const mathScope = store.getState().scene.mathScope();
     const inputs = getParamNameInputs();
 

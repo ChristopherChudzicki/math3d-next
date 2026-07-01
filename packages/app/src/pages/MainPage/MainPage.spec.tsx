@@ -24,7 +24,7 @@ test.each([
 ])(
   "'controls' URL query parameter controls whether the controls are visible",
   async ({ controlsVisible, url, expectedHidden, expectedInert }) => {
-    await renderTestApp(url);
+    renderTestApp(url);
     const expandBtn = screen.queryByRole("button", { name: "Expand Controls" });
     const collapseBtn = screen.queryByRole("button", {
       name: "Collapse Controls",
@@ -45,7 +45,7 @@ test.each([
 );
 
 test("Clicking the 'Expand/Collapse Controls' button toggles the controls and preserves hash", async () => {
-  const { location } = await renderTestApp("#foo");
+  const { location } = renderTestApp("#foo");
   const btn = screen.getByRole("button", { name: "Collapse Controls" });
   expect(location.current).toMatchObject({
     hash: "#foo",
@@ -66,11 +66,8 @@ test("Clicking the 'Expand/Collapse Controls' button toggles the controls and pr
 test("Alerts and redirects home when the scene key is not found", async () => {
   // MSW returns 404 for an unknown scene key; useScene surfaces it as an
   // ApiError, which SceneControls maps to a "Not found" alert + redirect to "/".
-  // waitForReady is skipped: the scene never loads, so the controls stay busy —
-  // we key off the alert dialog instead.
-  const { location } = await renderTestApp("/nonexistent-scene-key", {
-    waitForReady: false,
-  });
+  // The scene never loads (controls stay busy), so we key off the alert dialog.
+  const { location } = renderTestApp("/nonexistent-scene-key");
 
   const dialog = await screen.findByRole("dialog");
   expect(dialog).toHaveTextContent("Not found");

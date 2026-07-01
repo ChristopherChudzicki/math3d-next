@@ -5,14 +5,14 @@ import { urls } from "@math3d/mock-api";
 import { mockResponseOnce } from "@math3d/mock-api/node";
 
 test("activation opens as an overlay from the email link", async () => {
-  await renderTestApp(`/?overlay=activate&key=${faker.string.uuid()}`);
+  renderTestApp(`/?overlay=activate&key=${faker.string.uuid()}`);
   expect(
     await screen.findByRole("dialog", { name: "Account Activation" }),
   ).toBeVisible();
 });
 
 test("Authorization form happy path: API call, success indication, & log in", async () => {
-  const { location } = await renderTestApp(
+  const { location } = renderTestApp(
     `/?overlay=activate&key=${faker.string.uuid()}`,
   );
   const alert = await screen.findByRole("alert");
@@ -45,7 +45,7 @@ test("Error message for invalid key", async () => {
       ],
     },
   });
-  await renderTestApp(`/?overlay=activate&key=${faker.string.uuid()}`);
+  renderTestApp(`/?overlay=activate&key=${faker.string.uuid()}`);
   const alert = await screen.findByRole("alert");
   expect(alert).toHaveTextContent(/activation link/);
 });

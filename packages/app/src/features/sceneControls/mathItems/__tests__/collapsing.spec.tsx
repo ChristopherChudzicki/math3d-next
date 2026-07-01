@@ -1,6 +1,10 @@
 import { renderTestApp, screen, user, within } from "@/test_util";
 import * as _ from "lodash-es";
-import { addItem, getItemByDescription } from "./__utils__";
+import {
+  addItem,
+  findItemByDescription,
+  getItemByDescription,
+} from "./__utils__";
 
 /**
  * Detect whether an element or one of its ancestors is hidden based on its
@@ -35,8 +39,9 @@ test.each([
 ])(
   "When isCollapsed is initially $isCollapsed, items are $adjective",
   async ({ route, expectHidden }) => {
-    await renderTestApp(route);
+    renderTestApp(route);
 
+    await findItemByDescription("P2a");
     const els = screen.getAllByLabelText("Description");
     expect(els[4]).toBeVisible();
 
@@ -46,8 +51,8 @@ test.each([
 );
 
 test("Collapsing and expanding folders", async () => {
-  await renderTestApp("/test_folders");
-  await user.click(getExpandCollapse(getItemByDescription("F2")));
+  renderTestApp("/test_folders");
+  await user.click(getExpandCollapse(await findItemByDescription("F2")));
 
   const els = screen.getAllByLabelText("Description");
   expect(els[4]).toBeVisible();
@@ -70,9 +75,9 @@ test("Collapsing and expanding folders", async () => {
 });
 
 test("Inserting into a collapsed folder expands the folder", async () => {
-  await renderTestApp("/test_folders");
+  renderTestApp("/test_folders");
 
-  const folder = getItemByDescription("F2");
+  const folder = await findItemByDescription("F2");
   const toggle = getExpandCollapse(folder);
   await user.click(toggle);
 

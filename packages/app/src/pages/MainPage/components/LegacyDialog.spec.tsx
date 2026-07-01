@@ -13,7 +13,7 @@ test.each([
   async ({ isLegacy }) => {
     const item = makeItem(MIT.Point);
     const scene = seedDb.withSceneFromItems([item], { isLegacy });
-    await renderTestApp(`/${scene.key}`);
+    renderTestApp(`/${scene.key}`);
 
     await findItemByTestId(item.id);
     const legacyButton = screen.queryByRole("button", { name: "Legacy Scene" });
@@ -24,7 +24,7 @@ test.each([
 test("Legacy Dialog opens and closes", async () => {
   const item = makeItem(MIT.Point);
   const scene = seedDb.withSceneFromItems([item], { isLegacy: true });
-  await renderTestApp(`/${scene.key}`);
+  renderTestApp(`/${scene.key}`);
 
   const legacyButton = await screen.findByRole("button", {
     name: "Legacy Scene",

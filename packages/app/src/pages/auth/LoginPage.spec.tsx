@@ -4,7 +4,7 @@ import { seedDb } from "@math3d/mock-api";
 
 test("Login form logs user in", async () => {
   const userData = seedDb.withUser();
-  const { location } = await renderTestApp("/?overlay=login");
+  const { location } = renderTestApp("/?overlay=login");
 
   const dialog = await screen.findByRole("dialog");
   const email = within(dialog).getByRole("textbox", { name: "Email" });
@@ -24,7 +24,7 @@ test("Login form logs user in", async () => {
 test("Login form displays error if password/email wrong", async () => {
   const userData = seedDb.withUser();
 
-  await renderTestApp("/?overlay=login");
+  renderTestApp("/?overlay=login");
 
   const dialog = await screen.findByRole("dialog");
 
@@ -49,7 +49,7 @@ test("Login form displays error if password/email wrong", async () => {
 });
 
 test("If authenticated already, closes the overlay", async () => {
-  const { location } = await renderTestApp("/?overlay=login", {
+  const { location } = renderTestApp("/?overlay=login", {
     isAuthenticated: true,
   });
   await waitFor(() =>
@@ -62,7 +62,7 @@ test("Create Account link switches to the register overlay (replace, no extra hi
   // notification <Dialog> mounts alongside the overlay and a bare findByRole("dialog")
   // throws "multiple elements". (Always seed, or scope dialog queries by name.)
   const scene = seedDb.withSceneFromItems([]);
-  const { location } = await renderTestApp(`/${scene.key}?overlay=login`);
+  const { location } = renderTestApp(`/${scene.key}?overlay=login`);
   await screen.findByRole("dialog", { name: "Sign in" });
   await user.click(screen.getByRole("button", { name: "Create Account" }));
   await waitFor(() =>
@@ -73,7 +73,7 @@ test("Create Account link switches to the register overlay (replace, no extra hi
 
 test("open pushes one history entry; Back returns to the underlying view", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { location, router } = await renderTestApp(`/${scene.key}`);
+  const { location, router } = renderTestApp(`/${scene.key}`);
   // open login from the header trigger
   await user.click(
     await screen.findByRole("button", { name: "Sign in", hidden: true }),
@@ -89,7 +89,7 @@ test("open pushes one history entry; Back returns to the underlying view", async
 
 test("switching login → register does not add a history entry (Back skips both)", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { location, router } = await renderTestApp(`/${scene.key}`);
+  const { location, router } = renderTestApp(`/${scene.key}`);
   // Open login overlay (push → now 2 history entries)
   await user.click(
     await screen.findByRole("button", { name: "Sign in", hidden: true }),
@@ -107,7 +107,7 @@ test("switching login → register does not add a history entry (Back skips both
 
 test("opening/closing an overlay preserves other params and the hash", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { location } = await renderTestApp(`/${scene.key}?controls=0#frag`);
+  const { location } = renderTestApp(`/${scene.key}?controls=0#frag`);
   await user.click(
     await screen.findByRole("button", { name: "Sign in", hidden: true }),
   );
