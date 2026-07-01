@@ -60,7 +60,7 @@ class MyScenes {
   }
 
   async goTo(): Promise<void> {
-    await this.page.goto("/scenes/me");
+    await this.page.goto("/?overlay=scenes&list=me");
   }
 }
 

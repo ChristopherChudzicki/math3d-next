@@ -33,8 +33,8 @@ class SigninPage {
     email: string;
     password: string;
   }): Promise<void> {
-    if (!this.page.url().includes("auth/login")) {
-      await this.page.getByRole("link", { name: "Sign in" }).click();
+    if (!this.page.url().includes("overlay=login")) {
+      await this.page.getByRole("button", { name: "Sign in" }).click();
     }
     await this.email().fill(email);
     await this.password().fill(password);
