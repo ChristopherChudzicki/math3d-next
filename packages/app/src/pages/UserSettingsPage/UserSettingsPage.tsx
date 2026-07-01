@@ -73,11 +73,13 @@ const UserSettingsPage: React.FC = () => {
 
   // Latch whether the user was ever authenticated in this dialog session, so we
   // only redirect a *cold* visitor (see below) and not someone who transitions
-  // authenticated → unauthenticated via an in-dialog action.
+  // authenticated → unauthenticated via an in-dialog action. The `authenticated`
+  // render commits (and runs this effect) before any later `unauthenticated`
+  // render, so the ref is set in time for the transition check below.
   const wasAuthenticated = useRef(false);
-  if (isAuthenticated === "authenticated") {
-    wasAuthenticated.current = true;
-  }
+  useEffect(() => {
+    if (isAuthenticated === "authenticated") wasAuthenticated.current = true;
+  }, [isAuthenticated]);
   // Cold entry: a hand-typed /?overlay=settings while logged out. Redirect to
   // login (switching overlays replaces history, so no junk back-stack entry).
   // NOT an authenticated→unauthenticated transition from deleting your account
