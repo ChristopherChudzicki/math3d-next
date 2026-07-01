@@ -16,6 +16,25 @@ type ReferencePanelProps = {
 const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
   const hasDetails = !!entry.detailsHtml;
   const [expanded, setExpanded] = useToggle(false);
+  const showMoreRef = React.useRef<HTMLButtonElement>(null);
+  const showLessRef = React.useRef<HTMLButtonElement>(null);
+  const interacted = React.useRef(false);
+
+  // Toggling swaps "Show more" for "Show less" (and vice versa), which are
+  // separate elements in different positions. Without intervention the focused
+  // toggle unmounts and focus falls back to <body>, stranding keyboard users.
+  // Move focus to whichever toggle just appeared, but only after a real click.
+  React.useEffect(() => {
+    if (!interacted.current) return;
+    const target = expanded ? showLessRef.current : showMoreRef.current;
+    target?.focus();
+  }, [expanded]);
+
+  const toggle = () => {
+    interacted.current = true;
+    setExpanded.toggle();
+  };
+
   return (
     <tr className={styles.row}>
       <td dangerouslySetInnerHTML={{ __html: entry.latex }} />
@@ -31,7 +50,8 @@ const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
             {hasDetails && !expanded && (
               // eslint-disable-next-line jsx-a11y/anchor-is-valid
               <Link
-                onClick={setExpanded.on}
+                ref={showMoreRef}
+                onClick={toggle}
                 sx={{ verticalAlign: "baseline", marginLeft: "0.5em" }}
                 component="button"
               >
@@ -45,7 +65,8 @@ const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
             <div dangerouslySetInnerHTML={{ __html: entry.detailsHtml }} />
             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
             <Link
-              onClick={setExpanded.off}
+              ref={showLessRef}
+              onClick={toggle}
               sx={{ verticalAlign: "baseline" }}
               component="button"
             >
