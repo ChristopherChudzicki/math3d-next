@@ -6,10 +6,6 @@ import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import ShareButton from "@/features/sceneControls/mathItems/ShareButton";
 
-import MenuItem from "@mui/material/MenuItem";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import type { AuthStatus } from "@/features/auth";
@@ -28,29 +24,10 @@ import UserMenu from "./UserMenu";
 import SaveButton from "./SaveButton";
 
 const LoginButtons: React.FC<{
-  smallScreen: boolean;
   isAuthenticated: AuthStatus;
-}> = ({ smallScreen, isAuthenticated }) => {
+}> = ({ isAuthenticated }) => {
   const { open } = useOverlay();
   if (isAuthenticated !== "unauthenticated" || !DISPLAY_AUTH_FLOWS) return null;
-  if (smallScreen) {
-    return (
-      <>
-        <MenuItem onClick={() => open("login")}>
-          <ListItemIcon>
-            <AccountCircleOutlinedIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Sign in</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => open("register")}>
-          <ListItemIcon>
-            <AccountCircleOutlinedIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Sign up</ListItemText>
-        </MenuItem>
-      </>
-    );
-  }
   return (
     <>
       <Button
@@ -200,10 +177,7 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
           <SaveButton />
           <ShareButton variant={smallScreen ? "mobile" : "desktop"} />
           {smallScreen ? null : (
-            <LoginButtons
-              isAuthenticated={isAuthenticated}
-              smallScreen={false}
-            />
+            <LoginButtons isAuthenticated={isAuthenticated} />
           )}
           <UserMenu items={filteredItems} user={userQuery.data} />
         </>
