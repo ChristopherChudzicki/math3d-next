@@ -28,30 +28,22 @@ const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
             <span
               dangerouslySetInnerHTML={{ __html: entry.summaryInnerHtml }}
             />
-            {hasDetails && !expanded && (
+            {hasDetails && (
+              // A single toggle that stays mounted across expand/collapse, so
+              // it keeps keyboard focus when activated.
               // eslint-disable-next-line jsx-a11y/anchor-is-valid
               <Link
-                onClick={setExpanded.on}
+                onClick={setExpanded.toggle}
                 sx={{ verticalAlign: "baseline", marginLeft: "0.5em" }}
                 component="button"
               >
-                Show more
+                {expanded ? "Show less" : "Show more"}
               </Link>
             )}
           </p>
         </div>
         {expanded && entry.detailsHtml && (
-          <>
-            <div dangerouslySetInnerHTML={{ __html: entry.detailsHtml }} />
-            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <Link
-              onClick={setExpanded.off}
-              sx={{ verticalAlign: "baseline" }}
-              component="button"
-            >
-              Show less
-            </Link>
-          </>
+          <div dangerouslySetInnerHTML={{ __html: entry.detailsHtml }} />
         )}
       </td>
     </tr>
