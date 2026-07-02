@@ -4,8 +4,9 @@ import { getInbox } from "./utils/inbox/emails";
 
 const inbox = getInbox();
 
-setup("Clear emails", async () => {
-  await inbox.deleteAll();
+setup("Sweep stale emails", async () => {
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  await inbox.deleteOlderThan(oneHourAgo);
 });
 
 setup("Verify DISPLAY_AUTH_FLOWS is enabled", async ({ page }) => {

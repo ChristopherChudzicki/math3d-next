@@ -19,6 +19,8 @@ from django.core.exceptions import ImproperlyConfigured
 import dj_database_url
 import environ
 
+from main.origins import csrf_trusted_origins
+
 
 logger = logging.getLogger(__name__)
 
@@ -176,7 +178,13 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = [env("APP_BASE_URL")] if env("APP_BASE_URL") else []
+# Prod trusts only APP_BASE_URL; local dev also trusts the CORS origins
+# (worktree frontend ports). See the function's docstring.
+CSRF_TRUSTED_ORIGINS = csrf_trusted_origins(
+    is_heroku=env("IS_HEROKU"),
+    app_base_url=env("APP_BASE_URL"),
+    cors_allowed_origins=CORS_ALLOWED_ORIGINS,
+)
 
 # Cookie auth requires the SPA (next.math3d.org) and API (api.next.math3d.org)
 # to share a registrable domain: default SameSite=Lax sends the session cookie,

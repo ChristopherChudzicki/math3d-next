@@ -38,6 +38,10 @@ const appUrl = new URL(process.env.APP_BASE_URL ?? "http://localhost:3000");
 export default defineConfig({
   server: {
     port: Number(appUrl.port) || 3000,
+    // The exact port is load-bearing: backend CORS/CSRF trust and Playwright's
+    // server-reuse probe both key on it. Fail loudly rather than silently
+    // serving on port+1.
+    strictPort: true,
     host: appUrl.hostname,
     allowedHosts: [appUrl.hostname],
   },
@@ -45,6 +49,7 @@ export default defineConfig({
   // derive it here too to keep the port single-sourced from APP_BASE_URL.
   preview: {
     port: Number(appUrl.port) || 3000,
+    strictPort: true,
   },
   plugins: [
     ValidateEnv({

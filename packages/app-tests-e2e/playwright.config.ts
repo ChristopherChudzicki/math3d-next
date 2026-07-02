@@ -12,6 +12,17 @@ export default defineConfig({
     baseURL: env.TEST_APP_URL,
     trace: "on-first-retry",
   },
+  // Start the frontend if nothing is serving TEST_APP_URL yet. Locally an
+  // already-running dev server is reused (or one is started); in CI the
+  // production build from the preceding `yarn build` step is served via
+  // `vite preview`.
+  webServer: {
+    command: process.env.CI ? "yarn preview" : "yarn start",
+    url: env.TEST_APP_URL,
+    reuseExistingServer: !process.env.CI,
+    cwd: env.PROJECT_CWD,
+    timeout: 120_000,
+  },
   projects: [
     {
       name: "setup",

@@ -17,7 +17,7 @@ const env = cleanEnv(process.env, {
     default: "FileEmailBackend",
   }),
   EMAIL_DIR: str({
-    desc: "The directory where FileEmailBackend emails are stored, relative to the project root",
+    desc: "The directory where FileEmailBackend emails are stored, relative to the project root (or absolute; worktrees point this at the main checkout's email dir, since the backend container mounts the main checkout)",
     default: "webserver/private/email",
   }),
 });

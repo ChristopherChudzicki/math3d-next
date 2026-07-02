@@ -1,7 +1,7 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@/utils/expect";
 import AppPage from "@/utils/pages/AppPage";
-import { getInbox } from "@/utils/inbox/emails";
+import { getInbox, emailCutoff } from "@/utils/inbox/emails";
 import { createActiveUser, deleteUser } from "@/utils/api/auth";
 import { makeUserInfo } from "@math3d/mock-api";
 import { faker } from "@faker-js/faker/locale/en";
@@ -18,6 +18,7 @@ test.describe("Password reset flow", () => {
     const app = new AppPage(page);
     const { auth, cleanup } = await createActiveUser(makeUserInfo());
     const newPassword = faker.internet.password();
+    const emailsAfter = emailCutoff();
 
     try {
       await test.step("Request password reset", async () => {
@@ -34,6 +35,7 @@ test.describe("Password reset flow", () => {
         const message = await inbox.waitForEmail({
           subject: /Password reset/,
           to: auth.email,
+          after: emailsAfter,
         });
         invariant(message.html, "Expected email to have HTML content");
         const messagePage = await context.newPage();
