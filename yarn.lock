@@ -7149,7 +7149,6 @@ __metadata:
     "@math3d/mock-api": "workspace:^"
     "@playwright/test": "npm:^1.57.0"
     "@types/mailparser": "npm:^3.4.6"
-    dotenv: "npm:^16.3.1"
     envalid: "npm:^8.0.0"
     eslint: "npm:^8.54.0"
     mailparser: "npm:^3.9.12"
@@ -9809,13 +9808,6 @@ __metadata:
   version: 5.1.0
   resolution: "dotenv-expand@npm:5.1.0"
   checksum: 10/d52af2a6e4642979ae4221408f1b75102508dbe4f5bac1c0613f92a3cf3880d5c31f86b2f5cff3273f7c23e10421e75028546e8b6cd0376fcd20e3803b374e15
-  languageName: node
-  linkType: hard
-
-"dotenv@npm:^16.3.1":
-  version: 16.6.1
-  resolution: "dotenv@npm:16.6.1"
-  checksum: 10/1d1897144344447ffe62aa1a6d664f4cd2e0784e0aff787eeeec1940ded32f8e4b5b506d665134fc87157baa086fce07ec6383970a2b6d2e7985beaed6a4cc14
   languageName: node
   linkType: hard
 

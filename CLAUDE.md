@@ -130,7 +130,7 @@ The E2E tests hit a real backend and a real frontend server, and the full suite 
 1. Backend up: `docker compose up -d` (from the main checkout). One-time DB prep (also after test credentials change): `docker compose run --rm webserver uv run ./manage.py migrate` and `... seed_test_data`.
 2. The main checkout needs a gitignored `.env` with `VITE_DISPLAY_AUTH_FLOWS=true` and `ENABLE_REGISTRATION=True` (the committed `.env.development` defaults both off; global setup and the signup tests require them).
 3. Frontend: handled automatically — Playwright's `webServer` config reuses a dev server already running at `TEST_APP_URL`, or starts one (`yarn start`) if nothing is serving it. No production build needed locally; CI serves a production build via `yarn preview` to test the real artifact.
-4. `just e2e` runs the full suite (`just e2e src/tests/<path>` for one file). It loads `.env.development` + `.env` into the environment first, so it works even in shells that didn't get direnv's exports. Plain `yarn test-e2e` works too, but only when the shell's env vars point at _this_ checkout — in worktrees always use `just e2e`, since inherited vars pointing at `:3000` would silently test the main checkout's code.
+4. `yarn test-e2e` runs the full suite (`yarn test-e2e src/tests/<path>` for one file; `just e2e` is an alias). It is self-sufficient in any shell and any checkout: the script runs Playwright under Node's `--env-file-if-exists` flags, so the checkout's `.env.development` + `.env` fill in whatever the environment doesn't already set (real env vars win, so ad-hoc overrides like `TEST_APP_URL=... yarn test-e2e` still work). Global setup also verifies the server at `TEST_APP_URL` actually serves _this_ checkout (via the `X-Checkout-Root` header the Vite dev/preview server emits) and fails with instructions if not — so testing the wrong checkout's code is loud, never silent.
 
 Concurrent suite runs (e.g. main checkout + worktrees at once) are supported: the backend/DB/inbox are shared, but tests use per-run-unique users and email recipients, and global setup only sweeps emails older than an hour. Keep it that way — inbox lookups must always match on a per-run-unique `to` recipient (the `EmailMatchers` type enforces this).
 
@@ -140,13 +140,14 @@ Worktrees get their own frontend port so they never test the main checkout's cod
 
 1. `yarn install` (once per worktree)
 2. `./scripts/setup_worktree_env.sh` (once) — writes a `.env` with a dedicated port (3002–3009, already trusted by the backend) and points the e2e email inbox at the main checkout
-3. `just e2e` — starts this worktree's own dev server on its port; the main checkout's `:3000` server is untouched (`just e2e` refuses to run in a worktree that skipped step 2)
+3. `yarn test-e2e` (or `just e2e`) — starts this worktree's own dev server on its port; the main checkout's `:3000` server is untouched. If the suite ends up pointed at another checkout's server, the global-setup identity check fails with instructions.
 
 The docker backend and database are shared with the main checkout — never `docker compose up` from a worktree. That rules out `just start` here too (it wraps `docker compose up`); for a standalone dev server use `yarn start` in a direnv-enabled shell, which picks up the worktree's port.
 
 Troubleshooting:
 
-- `TEST_*` env vars come from `.env.development` + `.env`. If envalid reports missing environment variables, run via `just e2e` (or source those files). In a worktree, inherited shell vars may point at `:3000` — `just e2e` fixes that too, since the checkout's own files win.
+- "The server at ... serves ..., but this suite is testing ..." from global setup means a stale env var (usually `TEST_APP_URL` exported by another checkout's direnv) is pointing the suite at the wrong server — env vars beat the checkout's env files by design. Unset it or start a fresh shell in this checkout.
+- "sent no X-Checkout-Root header" means the dev server predates the identity header — restart it.
 - Widespread `Expected sessionid cookie from login response` failures mean the seeded test users are out of sync with `.env.development` credentials — re-run `seed_test_data` (idempotent).
 - Widespread CORS/CSRF failures from a worktree port mean the backend container predates the multi-port trust config — re-run `docker compose up -d` from an up-to-date main checkout.
 
