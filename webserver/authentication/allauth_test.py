@@ -13,7 +13,6 @@ from urllib.parse import ParseResult, parse_qs, urlparse
 import lxml.etree
 import pytest
 from allauth.account.models import EmailAddress
-from django.conf import settings
 from django.core import mail
 from django.core.mail.message import EmailMultiAlternatives
 from django.test import Client, override_settings
@@ -280,11 +279,24 @@ def test_password_reset_email_has_correct_link():
 # CSRF-trusted, else the configured HEADLESS_FRONTEND_URLS origin. In
 # production CSRF_TRUSTED_ORIGINS == [APP_BASE_URL] exactly (see
 # settings_test.py), so the swap can never leave the canonical origin.
+#
+# HEADLESS_FRONTEND_URLS is pinned per-test: the ambient value derives from
+# APP_BASE_URL, which the test environment may leave unset (CI does).
 # --------------------------------------------------------------------------
+
+CANONICAL_FRONTEND_URLS = {
+    "account_confirm_email": "http://canonical.example/?overlay=activate&key={key}",
+    "account_reset_password_from_key": (
+        "http://canonical.example/?overlay=reset-confirm&key={key}"
+    ),
+}
 
 
 @pytest.mark.django_db
-@override_settings(CSRF_TRUSTED_ORIGINS=["http://math3d.localdev:3002"])
+@override_settings(
+    HEADLESS_FRONTEND_URLS=CANONICAL_FRONTEND_URLS,
+    CSRF_TRUSTED_ORIGINS=["http://math3d.localdev:3002"],
+)
 def test_email_links_use_requesting_origin_when_csrf_trusted():
     client = _make_client()
     user = _create_verified_user()
@@ -303,6 +315,7 @@ def test_email_links_use_requesting_origin_when_csrf_trusted():
 
 
 @pytest.mark.django_db
+@override_settings(HEADLESS_FRONTEND_URLS=CANONICAL_FRONTEND_URLS)
 def test_email_links_fall_back_to_configured_origin_for_untrusted_origin():
     client = _make_client()
     user = _create_verified_user()
@@ -314,14 +327,8 @@ def test_email_links_fall_back_to_configured_origin_for_untrusted_origin():
         HTTP_ORIGIN="https://evil.example",
     )
 
-    configured = urlparse(
-        settings.HEADLESS_FRONTEND_URLS["account_reset_password_from_key"]
-    )
     link = get_parsed_url_from_html(mail.outbox[0], "password-reset-link")
-    assert (link.parsed.scheme, link.parsed.netloc) == (
-        configured.scheme,
-        configured.netloc,
-    )
+    assert (link.parsed.scheme, link.parsed.netloc) == ("http", "canonical.example")
 
 
 # --------------------------------------------------------------------------

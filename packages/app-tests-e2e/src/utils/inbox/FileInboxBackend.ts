@@ -65,8 +65,16 @@ export const findEmail = async (
   const files = await getSortedFiles(emailDir);
   // eslint-disable-next-line no-restricted-syntax
   for (const { path: file } of files) {
-    // eslint-disable-next-line no-await-in-loop
-    const content = await fs.readFile(file);
+    let content: Buffer;
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      content = await fs.readFile(file);
+    } catch (err) {
+      // A concurrent suite run's sweep may have removed the file.
+      if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+      // eslint-disable-next-line no-continue
+      continue;
+    }
     // eslint-disable-next-line no-await-in-loop
     const parsed = await simpleParser(content.toString());
     invariant(parsed.to, "Email must have a 'to' field");
