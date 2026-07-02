@@ -128,7 +128,7 @@ Feature-based organization in `packages/app/src/features/` (auth, notifications,
 The E2E tests hit a real backend and a real frontend server, and the full suite takes only ~1 minute (3D/WebGL rendering is disabled by default via the `disable3d` fixture). Lint, typecheck, and unit tests do NOT catch E2E breakage — **run `yarn test-e2e` before declaring work on `packages/app` complete**. CI runs the suite on every PR.
 
 1. Backend up: `docker compose up -d`. One-time DB prep (also after test credentials change): `docker compose run --rm webserver uv run ./manage.py migrate` and `... seed_test_data`.
-2. Frontend serving `http://math3d.localdev:3000`: the normal dev server (`yarn start`) is fine — no production build needed. (CI serves a production build via `yarn preview` to test the real artifact; both use port 3000, so stop one before starting the other.)
+2. Frontend: handled automatically — Playwright's `webServer` config reuses a dev server already running at `http://math3d.localdev:3000`, or starts one (`yarn start`) if nothing is serving it. No production build needed locally; CI serves a production build via `yarn preview` to test the real artifact.
 3. `yarn test-e2e` runs the full suite; `yarn workspace app-tests-e2e playwright test src/tests/<path>` runs one file.
 
 Troubleshooting:
