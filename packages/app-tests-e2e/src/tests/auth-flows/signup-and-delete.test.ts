@@ -23,6 +23,10 @@ test.describe("User sign up flow and account deletion", () => {
   test("User sign up flow and account deletion", async ({ page, context }) => {
     const inbox = getInbox();
     const app = new AppPage(page);
+    // Only match emails sent by this test. 2s back-buffer: the Date header
+    // has second resolution, so a bare "now" could exclude an email sent
+    // within the same second.
+    const emailsAfter = new Date(Date.now() - 2000);
 
     await test.step("Create account", async () => {
       await page.goto("/");
@@ -40,6 +44,7 @@ test.describe("User sign up flow and account deletion", () => {
         const message = await inbox.waitForEmail({
           subject: "Activate your account",
           to: email,
+          after: emailsAfter,
         });
         invariant(message.html, "Expected email to have HTML content");
         const messagePage = await context.newPage();

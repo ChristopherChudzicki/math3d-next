@@ -1,9 +1,42 @@
-from django.conf import settings
+from main.origins import csrf_trusted_origins
 
 
-def test_csrf_trusted_origins_cover_cors_origins():
+def test_prod_csrf_trust_ignores_cors_origins():
     """
-    Locally, worktree frontends on alternate ports make credentialed writes,
-    so every CORS origin must also pass Django's CSRF origin check.
+    Adding a read-only CORS consumer in production must not grant it
+    CSRF-trusted write access.
     """
-    assert set(settings.CORS_ALLOWED_ORIGINS) <= set(settings.CSRF_TRUSTED_ORIGINS)
+    origins = csrf_trusted_origins(
+        is_heroku=True,
+        app_base_url="https://next.math3d.org",
+        cors_allowed_origins=["https://next.math3d.org", "https://partner.example"],
+    )
+    assert origins == ["https://next.math3d.org"]
+
+
+def test_local_csrf_trust_covers_cors_origins():
+    """
+    Local worktree frontends on alternate ports make credentialed writes, so
+    every CORS origin must also pass Django's CSRF origin check.
+    """
+    origins = csrf_trusted_origins(
+        is_heroku=False,
+        app_base_url="http://math3d.localdev:3000",
+        cors_allowed_origins=[
+            "http://math3d.localdev:3000",
+            "http://math3d.localdev:3002",
+        ],
+    )
+    assert origins == [
+        "http://math3d.localdev:3000",
+        "http://math3d.localdev:3002",
+    ]
+
+
+def test_local_csrf_trust_handles_unset_app_base_url():
+    origins = csrf_trusted_origins(
+        is_heroku=False,
+        app_base_url="",
+        cors_allowed_origins=["http://math3d.localdev:3000"],
+    )
+    assert origins == ["http://math3d.localdev:3000"]

@@ -18,6 +18,10 @@ test.describe("Password reset flow", () => {
     const app = new AppPage(page);
     const { auth, cleanup } = await createActiveUser(makeUserInfo());
     const newPassword = faker.internet.password();
+    // Only match emails sent by this test. 2s back-buffer: the Date header
+    // has second resolution, so a bare "now" could exclude an email sent
+    // within the same second.
+    const emailsAfter = new Date(Date.now() - 2000);
 
     try {
       await test.step("Request password reset", async () => {
@@ -34,6 +38,7 @@ test.describe("Password reset flow", () => {
         const message = await inbox.waitForEmail({
           subject: /Password reset/,
           to: auth.email,
+          after: emailsAfter,
         });
         invariant(message.html, "Expected email to have HTML content");
         const messagePage = await context.newPage();

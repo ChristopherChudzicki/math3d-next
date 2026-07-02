@@ -22,14 +22,17 @@ fe *args:
 e2e *args:
     #!/usr/bin/env bash
     set -euo pipefail
-    # A worktree without its generated .env would inherit TEST_APP_URL=:3000
-    # from .env.development and silently test the main checkout's server.
-    if [ "$(git rev-parse --path-format=absolute --git-dir)" != "$(git rev-parse --path-format=absolute --git-common-dir)" ] && [ ! -f ./.env ]; then
-        echo "This worktree has no .env — run ./scripts/setup_worktree_env.sh first." >&2
-        exit 1
-    fi
     set -a
     source ./.env.development
     if [ -f ./.env ]; then source ./.env; fi
     set +a
+    # In a worktree, TEST_APP_URL must point at this checkout's own port —
+    # against :3000 the suite would silently test the main checkout's server.
+    # (Catches both a missing .env and a hand-copied one without TEST_APP_URL.)
+    if [ "$(git rev-parse --path-format=absolute --git-dir)" != "$(git rev-parse --path-format=absolute --git-common-dir)" ] && [ "${TEST_APP_URL##*:}" = "3000" ]; then
+        echo "TEST_APP_URL points at :3000, the main checkout's port. Run" >&2
+        echo "./scripts/setup_worktree_env.sh — or if this worktree already has a" >&2
+        echo ".env, add a TEST_APP_URL/APP_BASE_URL with its own port (3002-3009)." >&2
+        exit 1
+    fi
     yarn test-e2e {{ args }}
