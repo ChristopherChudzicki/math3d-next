@@ -96,7 +96,14 @@ class FileEmailBackend extends InboxBackend {
 
   async deleteAll() {
     const files = await getSortedFiles(this.emailDir);
-    await Promise.all(files.map((file) => fs.unlink(file)));
+    // EMAIL_DIR is user-configurable (worktrees point it at another checkout),
+    // so only remove what Django's file email backend writes (*.log), never
+    // arbitrary directory contents.
+    await Promise.all(
+      files
+        .filter((file) => file.endsWith(".log"))
+        .map((file) => fs.unlink(file)),
+    );
   }
 }
 

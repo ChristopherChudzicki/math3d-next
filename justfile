@@ -22,6 +22,12 @@ fe *args:
 e2e *args:
     #!/usr/bin/env bash
     set -euo pipefail
+    # A worktree without its generated .env would inherit TEST_APP_URL=:3000
+    # from .env.development and silently test the main checkout's server.
+    if [ "$(git rev-parse --path-format=absolute --git-dir)" != "$(git rev-parse --path-format=absolute --git-common-dir)" ] && [ ! -f ./.env ]; then
+        echo "This worktree has no .env — run ./scripts/setup_worktree_env.sh first." >&2
+        exit 1
+    fi
     set -a
     source ./.env.development
     if [ -f ./.env ]; then source ./.env; fi
