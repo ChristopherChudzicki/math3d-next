@@ -2661,7 +2661,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@faker-js/faker@npm:^9.6.0":
+"@faker-js/faker@npm:^9.9.0":
   version: 9.9.0
   resolution: "@faker-js/faker@npm:9.9.0"
   checksum: 10/b24b1be0fb3090d54abaaa3a814f37d1a7551f1207dcd330a1af2c70f6312a8b95ebb82653577757dd62f4cbbb56caa3c83513053253654dc3e286a05040ecbe
@@ -3074,7 +3074,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math3d/mathitem-configs@workspace:packages/mathitem-configs"
   dependencies:
-    "@faker-js/faker": "npm:^9.6.0"
+    "@faker-js/faker": "npm:^9.9.0"
     "@math3d/eslint-config": "workspace:^"
     "@math3d/parser": "workspace:^"
     "@math3d/tsconfig": "workspace:^"
@@ -3123,7 +3123,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math3d/mock-api@workspace:packages/mock-api"
   dependencies:
-    "@faker-js/faker": "npm:^9.6.0"
+    "@faker-js/faker": "npm:^9.9.0"
     "@math3d/eslint-config": "workspace:^"
     "@math3d/mathitem-configs": "workspace:^"
     "@math3d/tsconfig": "workspace:^"
@@ -3218,7 +3218,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math3d/validators@workspace:packages/validators"
   dependencies:
-    "@faker-js/faker": "npm:^9.6.0"
+    "@faker-js/faker": "npm:^9.9.0"
     "@math3d/eslint-config": "workspace:^"
     "@math3d/mathjs-utils": "workspace:^"
     "@math3d/tsconfig": "workspace:^"
@@ -7143,7 +7143,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "app-tests-e2e@workspace:packages/app-tests-e2e"
   dependencies:
-    "@faker-js/faker": "npm:^9.6.0"
+    "@faker-js/faker": "npm:^9.9.0"
     "@math3d/api": "workspace:^"
     "@math3d/eslint-config": "workspace:^"
     "@math3d/mock-api": "workspace:^"
@@ -7169,7 +7169,7 @@ __metadata:
     "@dnd-kit/utilities": "npm:^3.2.2"
     "@emotion/react": "npm:11.14.0"
     "@emotion/styled": "npm:11.14.1"
-    "@faker-js/faker": "npm:^9.6.0"
+    "@faker-js/faker": "npm:^9.9.0"
     "@hookform/resolvers": "npm:^5.0.1"
     "@julr/vite-plugin-validate-env": "npm:^2.2.0"
     "@math3d/api": "workspace:^"
