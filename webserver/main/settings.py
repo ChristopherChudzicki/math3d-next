@@ -245,6 +245,7 @@ if env("DISABLE_ALLAUTH_RATE_LIMITS"):
 
 # allauth headless configuration
 HEADLESS_ONLY = True
+HEADLESS_ADAPTER = "authentication.adapter.CustomHeadlessAdapter"
 HEADLESS_CLIENTS = ["browser"]
 HEADLESS_SERVE_SPECIFICATION = True
 HEADLESS_FRONTEND_URLS = {
