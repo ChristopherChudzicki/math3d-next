@@ -9,7 +9,7 @@ import {
 } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
 import { assertNotNil } from "@/util/predicates";
-import { getItemByDescription } from "./__utils__";
+import { findItemByDescription, getItemByDescription } from "./__utils__";
 
 test.each([
   {
@@ -37,8 +37,9 @@ test.each([
     const item = makeItem(MIT.Point, { coords: coordsString });
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
-    const { store } = await renderTestApp(`/${scene.key}`);
+    const { store } = renderTestApp(`/${scene.key}`);
 
+    await findItemByDescription(item.properties.description);
     const mathScope = store.getState().scene.mathScope();
     expect(mathScope.errors.size).toBe(numEvalErrors + numParseErrors);
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);
@@ -71,10 +72,10 @@ test.each([
     const item = makeItem(MIT.Point);
     const id = nodeId(item);
     const scene = seedDb.withSceneFromItems([item]);
-    const { store } = await renderTestApp(`/${scene.key}`);
+    const { store } = renderTestApp(`/${scene.key}`);
 
-    const mathScope = store.getState().scene.mathScope();
     const coordsInput = await screen.findByLabelText("Coordinates");
+    const mathScope = store.getState().scene.mathScope();
 
     pasteText(coordsInput, coordsString);
     expect(mathScope.errors.size).toBe(numEvalErrors + numParseErrors);
@@ -84,9 +85,8 @@ test.each([
 
 test("Adding items adds to mathScope", async () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { store } = await renderTestApp(`/${scene.key}`);
+  const { store } = renderTestApp(`/${scene.key}`);
 
-  const mathScope = store.getState().scene.mathScope();
   await user.click(await screen.findByText("Add Object"));
   const menu = await screen.findByRole("menu");
   const addPoint = await within(menu).findByText("Point");
@@ -100,6 +100,7 @@ test("Adding items adds to mathScope", async () => {
   assertNotNil(point);
   const id = nodeId(point);
   getItemByDescription(point.properties.description);
+  const mathScope = store.getState().scene.mathScope();
   expect(mathScope.results.get(id("coords"))).toStrictEqual([[0, 0, 0]]);
   expect(mathScope.errors.size).toBe(0);
 });
@@ -113,13 +114,13 @@ test("Deleting items removes them from mathScope", async () => {
     opacity: "2^[1,2,3]",
   });
   const scene = seedDb.withSceneFromItems([point]);
-  const { store } = await renderTestApp(`/${scene.key}`);
+  const { store } = renderTestApp(`/${scene.key}`);
 
+  const item = await findItemByDescription(point.properties.description);
   const mathScope = store.getState().scene.mathScope();
   expect(mathScope.results.size).toBeGreaterThan(1); // point + folder visibility
   expect(mathScope.errors.size).toBeGreaterThan(0);
 
-  const item = getItemByDescription(point.properties.description);
   const remove = within(item).getByLabelText("Remove Item");
   await user.click(remove);
   expect(mathScope.results.size).toBe(1); // folder visibility

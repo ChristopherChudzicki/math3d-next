@@ -8,7 +8,7 @@ import {
 import { act } from "react";
 import user from "@testing-library/user-event";
 
-import renderTestApp from "./renderTestApp";
+import renderTestApp, { waitForAppReady } from "./renderTestApp";
 
 export * from "./test_util";
 export {
@@ -20,4 +20,5 @@ export {
   waitFor,
   within,
   renderTestApp,
+  waitForAppReady,
 };

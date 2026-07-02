@@ -25,7 +25,7 @@ describe("Visible and calculatedVisibility", () => {
       initialItems.boolean,
       initialItems.point,
     ]);
-    const { store } = await renderTestApp(`/${scene.key}`);
+    const { store } = renderTestApp(`/${scene.key}`);
 
     const getPointData = () =>
       store.getState().scene.items[initialItems.point.id];

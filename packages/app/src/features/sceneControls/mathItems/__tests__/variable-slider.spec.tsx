@@ -14,7 +14,7 @@ import {
 import { seedDb, makeItem } from "@math3d/mock-api";
 import type { ResolvePromise } from "@math3d/utils";
 import { ParseableObjs } from "@math3d/parser";
-import { getItemByDescription, findBtn } from "./__utils__";
+import { findItemByDescription, findBtn } from "./__utils__";
 import { mathScopeId } from "../mathScope";
 
 const valueObj = (v: string): ParseableObjs["assignment"] => {
@@ -60,9 +60,9 @@ const setupTest = async (overrides: Overrides = {}) => {
 
   const item = makeItem(MIT.VariableSlider, props);
   const scene = seedDb.withSceneFromItems([item]);
-  const { store } = await renderTestApp(`/${scene.key}`);
+  const { store } = renderTestApp(`/${scene.key}`);
 
-  const itemEl = getItemByDescription(item.properties.description);
+  const itemEl = await findItemByDescription(item.properties.description);
   const btnToggle = await findBtn(itemEl, /(Pause)|(Play)/);
   const btnFaster = await findBtn(itemEl, btnLabels.faster);
   const btnSlower = await findBtn(itemEl, btnLabels.slower);

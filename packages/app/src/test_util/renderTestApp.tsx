@@ -10,8 +10,24 @@ import { mockAuth, seedDb } from "@math3d/mock-api";
 import AppProviders from "@/AppProviders";
 import routes from "@/routes";
 
-const waitForNotBusy = () =>
-  waitFor(
+/**
+ * Wait until the app has settled: no `[aria-busy="true"]` element remains and
+ * the `["me"]` auth query is no longer `pending`.
+ *
+ * Prefer awaiting a positive observable at the assertion instead — `findBy*`
+ * (which is `getBy*` + `waitFor`) names what's missing when it times out. Use
+ * this helper only for an **async-gated negative assertion** that has no
+ * natural positive anchor to await first, e.g.:
+ *
+ *   await waitForAppReady(queryClient);
+ *   expect(screen.queryByRole("dialog")).toBeNull();
+ *
+ * A bare `queryBy*` after a synchronous render can pass because nothing has
+ * rendered *yet*, not because the app is correct; anchoring on "app ready"
+ * before asserting absence prevents that false-green.
+ */
+export const waitForAppReady = async (queryClient: QueryClient) => {
+  await waitFor(
     () => {
       const busy = document.querySelector('[aria-busy="true"]');
       if (busy !== null) {
@@ -20,14 +36,29 @@ const waitForNotBusy = () =>
     },
     { timeout: 2000 },
   );
+  await waitFor(
+    () => {
+      const meState = queryClient.getQueryState(["me"]);
+      if (meState?.status === "pending") {
+        throw new Error("User me query not yet resolved");
+      }
+    },
+    { timeout: 3000 },
+  );
+};
 
 /**
  * Render the app using a MemoryRouter instead of a BrowserRouter.
  * Optionally, provide an initial route.
+ *
+ * Returns synchronously: waiting is co-located with assertions (`findBy*` /
+ * explicit `waitFor`), not hoisted into setup. See {@link waitForAppReady} for
+ * the one case (async-gated negative assertions) where an explicit settle is
+ * still the right tool.
  */
-const renderTestApp = async (
+const renderTestApp = (
   initialRoute: InitialEntry = "/",
-  { waitForReady = true, isAuthenticated = false } = {},
+  { isAuthenticated = false } = {},
 ) => {
   const initialEntries: InitialEntry[] = [initialRoute];
   const store = getStore();
@@ -64,22 +95,6 @@ const renderTestApp = async (
         router={router}
       />
     </React.StrictMode>,
-  );
-  if (waitForReady) {
-    await waitForNotBusy();
-  }
-
-  // Wait for the user-me query to resolve so auth status is reflected in
-  // the UI before test assertions run. If the query was never initiated
-  // (e.g. a page that doesn't render MainPage), skip the wait.
-  await waitFor(
-    () => {
-      const meState = queryClient.getQueryState(["me"]);
-      if (meState?.status === "pending") {
-        throw new Error("User me query not yet resolved");
-      }
-    },
-    { timeout: 3000 },
   );
 
   const location = {

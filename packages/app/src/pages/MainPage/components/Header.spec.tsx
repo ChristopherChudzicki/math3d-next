@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
-import { renderTestApp, screen, user } from "@/test_util";
+import { renderTestApp, screen, user, waitForAppReady } from "@/test_util";
 
 test.each([
   { authStatus: true, expected: { hasSigin: false, hasSigout: true } },
@@ -9,8 +9,12 @@ test.each([
 ])(
   "Header includes signin / signout links based on current auth status (authenticated=$authStatus)",
   async ({ authStatus, expected }) => {
-    await renderTestApp("", { isAuthenticated: authStatus });
-    await screen.findByRole("button", { name: "Open User Menu" });
+    const { queryClient } = renderTestApp("", { isAuthenticated: authStatus });
+    // Sign in/out visibility is gated on the ["me"] auth query resolving, and
+    // the header has no positive anchor for the absent state (e.g. "Sign in"
+    // is simply absent when authenticated). Wait for auth to settle so these
+    // presence/absence assertions aren't false-greens.
+    await waitForAppReady(queryClient);
 
     const signin = screen.queryByRole("button", { name: "Sign in" });
 
@@ -38,7 +42,7 @@ test("treats an empty-bodied 403 from /me as unauthenticated, not 'loading'", as
     ),
   );
 
-  await renderTestApp("", { isAuthenticated: false });
+  renderTestApp("", { isAuthenticated: false });
 
   expect(
     await screen.findByRole("button", { name: "Sign in" }),
@@ -46,14 +50,14 @@ test("treats an empty-bodied 403 from /me as unauthenticated, not 'loading'", as
 });
 
 test("Login button opens login overlay", async () => {
-  const { location } = await renderTestApp("", { isAuthenticated: false });
-  const signin = screen.getByRole("button", { name: "Sign in" });
+  const { location } = renderTestApp("", { isAuthenticated: false });
+  const signin = await screen.findByRole("button", { name: "Sign in" });
   await user.click(signin);
   expect(location.current.search).toContain("overlay=login");
 });
 
 test("Contact links to the GitHub issues page in a new tab", async () => {
-  await renderTestApp("", { isAuthenticated: false });
+  renderTestApp("", { isAuthenticated: false });
   const button = screen.getByRole("button", { name: "Open User Menu" });
   await user.click(button);
   const contact = await screen.findByRole("menuitem", { name: "Contact" });
@@ -63,7 +67,7 @@ test("Contact links to the GitHub issues page in a new tab", async () => {
 });
 
 test("Sign out opens logout overlay", async () => {
-  const { location } = await renderTestApp("", { isAuthenticated: true });
+  const { location } = renderTestApp("", { isAuthenticated: true });
   const button = screen.getByRole("button", { name: "Open User Menu" });
   await user.click(button);
   const signout = screen.getByRole("menuitem", { name: "Sign out" });
@@ -72,7 +76,7 @@ test("Sign out opens logout overlay", async () => {
 });
 
 test("Account Settings opens settings overlay", async () => {
-  const { location } = await renderTestApp("", { isAuthenticated: true });
+  const { location } = renderTestApp("", { isAuthenticated: true });
   const button = screen.getByRole("button", { name: "Open User Menu" });
   await user.click(button);
   const settings = screen.getByRole("menuitem", { name: "Account Settings" });

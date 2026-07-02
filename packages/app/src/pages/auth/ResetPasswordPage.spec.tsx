@@ -9,7 +9,7 @@ import {
 } from "@/test_util";
 
 test("Happy path: Expected API call and form states", async () => {
-  const { location } = await renderTestApp("/?overlay=reset-request");
+  const { location } = renderTestApp("/?overlay=reset-request");
 
   const dialog = await screen.findByRole("dialog");
   const controls = {
@@ -39,7 +39,7 @@ test("Happy path: Expected API call and form states", async () => {
 });
 
 test("Form requires email", async () => {
-  await renderTestApp("/?overlay=reset-request");
+  renderTestApp("/?overlay=reset-request");
 
   const dialog = await screen.findByRole("dialog");
   const controls = {

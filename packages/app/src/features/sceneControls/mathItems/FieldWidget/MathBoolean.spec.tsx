@@ -20,12 +20,12 @@ const setup = async (initialValue: string) => {
   const point = makeItem(MIT.Point, { labelVisible: initialValue });
   const id = nodeId(point);
   const scene = seedDb.withSceneFromItems([point]);
-  const { store } = await renderTestApp(`/${scene.key}`);
+  const { store } = renderTestApp(`/${scene.key}`);
 
-  const mathScope = store.getState().scene.mathScope();
   await user.click(await screen.findByLabelText("More Settings"), {
     pointerEventsCheck: 0,
   });
+  const mathScope = store.getState().scene.mathScope();
   const settingsTitle = await screen.findByText("Settings", { exact: false });
   // eslint-disable-next-line testing-library/no-node-access
   const settings = settingsTitle.closest("section");

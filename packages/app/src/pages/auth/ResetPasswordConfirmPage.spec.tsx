@@ -37,7 +37,7 @@ const submitForm = async (data: FormValues) => {
 };
 
 test("reset-confirm opens as an overlay from the email link", async () => {
-  await renderTestApp(`/?overlay=reset-confirm&key=${faker.string.uuid()}`);
+  renderTestApp(`/?overlay=reset-confirm&key=${faker.string.uuid()}`);
   expect(
     await screen.findByRole("dialog", { name: "Change Password" }),
   ).toBeVisible();
@@ -45,9 +45,7 @@ test("reset-confirm opens as an overlay from the email link", async () => {
 
 test("Happy path: Expected API call and form states", async () => {
   const key = makeKey();
-  const { location } = await renderTestApp(
-    `/?overlay=reset-confirm&key=${key}`,
-  );
+  const { location } = renderTestApp(`/?overlay=reset-confirm&key=${key}`);
 
   await screen.findByRole("dialog", { name: "Change Password" });
 
@@ -69,7 +67,7 @@ test("Happy path: Expected API call and form states", async () => {
 
 test("Requires passwords match", async () => {
   const key = makeKey();
-  await renderTestApp(`/?overlay=reset-confirm&key=${key}`);
+  renderTestApp(`/?overlay=reset-confirm&key=${key}`);
 
   const controls = await submitForm({
     password: "Password1234", // pragma: allowlist secret
@@ -82,7 +80,7 @@ test("Requires passwords match", async () => {
 
 test("Reports API errors (password field)", async () => {
   const key = makeKey();
-  await renderTestApp(`/?overlay=reset-confirm&key=${key}`);
+  renderTestApp(`/?overlay=reset-confirm&key=${key}`);
 
   mockResponseOnce({
     status: 400,
@@ -112,7 +110,7 @@ test("Reports API errors (password field)", async () => {
 
 test("key errors suggest to check link", async () => {
   const key = makeKey();
-  await renderTestApp(`/?overlay=reset-confirm&key=${key}`);
+  renderTestApp(`/?overlay=reset-confirm&key=${key}`);
 
   mockResponseOnce({
     status: 400,

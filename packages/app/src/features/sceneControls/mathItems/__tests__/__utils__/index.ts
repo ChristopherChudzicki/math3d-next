@@ -49,7 +49,7 @@ const setupItemTest = async <T extends MathItemType>(
 ) => {
   const item = makeItem(type, props);
   const scene = seedDb.withSceneFromItems([item]);
-  const { store } = await renderTestApp(`/${scene.key}`);
+  const { store } = renderTestApp(`/${scene.key}`);
 
   const form = await findItemByDescription(item.properties.description);
   invariant(

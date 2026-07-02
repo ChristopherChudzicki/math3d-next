@@ -9,9 +9,9 @@ vi.mock("@/features/auth/useAuthStatus", () => ({
   useAuthStatus: () => "loading",
 }));
 
-test("Does not redirect while auth status is loading", async () => {
+test("Does not redirect while auth status is loading", () => {
   const scene = seedDb.withSceneFromItems([]);
-  const { location } = await renderTestApp(`/${scene.key}?overlay=logout`, {
+  const { location } = renderTestApp(`/${scene.key}?overlay=logout`, {
     isAuthenticated: true,
   });
 

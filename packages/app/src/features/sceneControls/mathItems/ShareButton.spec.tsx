@@ -19,17 +19,17 @@ describe("Share Button", () => {
   test("Clicking Share button sends correct POST request", async () => {
     const item = makeItem(MIT.Point);
     const scene = seedDb.withSceneFromItems([item]);
-    await renderTestApp(`/${scene.key}`);
-    const shareButton = screen.getByRole("button", { name: "Share" });
+    renderTestApp(`/${scene.key}`);
+    const shareButton = await screen.findByRole("button", { name: "Share" });
     await user.click(shareButton);
   });
 
   test("Clicking Share button shows dialog with shareable URL", async () => {
     const item = makeItem(MIT.Point);
     const scene = seedDb.withSceneFromItems([item]);
-    await renderTestApp(`/${scene.key}`);
+    renderTestApp(`/${scene.key}`);
 
-    const shareButton = screen.getByRole("button", { name: "Share" });
+    const shareButton = await screen.findByRole("button", { name: "Share" });
     await user.click(shareButton);
 
     const input =
@@ -47,9 +47,9 @@ describe("Share Button", () => {
   });
 
   test("Clicking Copy button copies the URL", async () => {
-    await renderTestApp();
+    renderTestApp();
 
-    const shareButton = screen.getByRole("button", { name: "Share" });
+    const shareButton = await screen.findByRole("button", { name: "Share" });
     await user.click(shareButton);
 
     const input =

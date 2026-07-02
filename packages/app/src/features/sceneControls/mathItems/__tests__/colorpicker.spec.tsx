@@ -16,12 +16,11 @@ const setup = async <R extends MIT>(
   const item = makeItem(type, itemProps);
   const id = nodeId(item);
   const scene = seedDb.withSceneFromItems([item]);
-  const { store } = await renderTestApp(`/${scene.key}`);
+  const { store } = renderTestApp(`/${scene.key}`);
 
   const mathScope = store.getState().scene.mathScope();
   const findButton = () =>
     screen.findByRole("button", { name: "Show Graphic" });
-  const getButton = () => screen.getByRole("button", { name: "Show Graphic" });
   const findTextInput = () => screen.findByTitle("Custom Color Input");
   const getAllSwatches = () => {
     const dialog = screen.getByRole("dialog");
@@ -36,7 +35,6 @@ const setup = async <R extends MIT>(
     user,
     getItem,
     findButton,
-    getButton,
     findTextInput,
     getAllSwatches,
     getCalculatedProp,
@@ -45,8 +43,9 @@ const setup = async <R extends MIT>(
 
 test("short clicks on indicator toggle visibility", async () => {
   const { findButton, getItem, user } = await setup(MIT.Point);
+  const button = await findButton();
   expect(getItem().properties.visible).toBe(true);
-  await user.click(await findButton());
+  await user.click(button);
   expect(getItem().properties.visible).toBe(false);
   await user.click(await findButton());
   expect(getItem().properties.visible).toBe(true);
@@ -55,10 +54,11 @@ test("short clicks on indicator toggle visibility", async () => {
 test("long press opens color picker dialog", async () => {
   const { findButton, getItem, getAllSwatches, user } = await setup(MIT.Point);
   const timedEvents = getTimedEvents(user);
+  const button = await findButton();
   expect(getItem().properties.visible).toBe(true);
   expect(screen.queryByRole("dialog")).toBe(null);
   await timedEvents.pointerPrimary({
-    target: await findButton(),
+    target: button,
     duration: 500,
   });
   expect(screen.getByRole("dialog")).toBeDefined();
@@ -72,9 +72,10 @@ test("clicking a swatch sets item to that color", async () => {
   const { findButton, getItem, getAllSwatches, user } = await setup(MIT.Point);
   const timedEvents = getTimedEvents(user);
 
+  const button = await findButton();
   expect(getItem().properties.color).toBe("#3090ff");
   await timedEvents.pointerPrimary({
-    target: await findButton(),
+    target: button,
     duration: 500,
   });
   const swatches = await getAllSwatches();
@@ -83,7 +84,7 @@ test("clicking a swatch sets item to that color", async () => {
 });
 
 test("Setting colorExpr for surfaces", async () => {
-  const { getButton, getItem, user } = await setup(MIT.ExplicitSurface, {
+  const { findButton, getItem, user } = await setup(MIT.ExplicitSurface, {
     colorExpr: {
       type: "function-assignment",
       name: "_f",
@@ -116,7 +117,7 @@ test("Setting colorExpr for surfaces", async () => {
   });
   const timedEvents = getTimedEvents(user);
   await timedEvents.pointerPrimary({
-    target: await getButton(),
+    target: await findButton(),
     duration: 500,
   });
 
