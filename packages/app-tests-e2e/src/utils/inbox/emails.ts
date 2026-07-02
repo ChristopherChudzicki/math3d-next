@@ -10,4 +10,13 @@ const getInbox = (): InboxBackend => {
   throw new Error("Unknown email backend");
 };
 
-export { getInbox };
+/**
+ * Cutoff for `EmailMatchers.after`, scoping a lookup to emails this test
+ * sent. Call it BEFORE the action that triggers the email, so the cutoff
+ * cannot postdate the email. The 2s back-buffer covers the Date header's
+ * second resolution: a bare "now" could exclude an email sent within the
+ * same second.
+ */
+const emailCutoff = () => new Date(Date.now() - 2000);
+
+export { getInbox, emailCutoff };

@@ -1,4 +1,15 @@
+from django.conf import settings
+
 from main.origins import csrf_trusted_origins
+
+
+def test_settings_wire_csrf_trust_from_cors_origins():
+    """
+    Pins that settings.py actually derives CSRF trust via
+    csrf_trusted_origins — the function tests alone would stay green if the
+    wiring broke.
+    """
+    assert set(settings.CORS_ALLOWED_ORIGINS) <= set(settings.CSRF_TRUSTED_ORIGINS)
 
 
 def test_prod_csrf_trust_ignores_cors_origins():

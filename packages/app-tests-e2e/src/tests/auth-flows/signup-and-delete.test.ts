@@ -1,7 +1,7 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@/utils/expect";
 import AppPage from "@/utils/pages/AppPage";
-import { getInbox } from "@/utils/inbox/emails";
+import { getInbox, emailCutoff } from "@/utils/inbox/emails";
 import env from "@/env";
 import invariant from "tiny-invariant";
 import { faker } from "@faker-js/faker/locale/en";
@@ -23,10 +23,7 @@ test.describe("User sign up flow and account deletion", () => {
   test("User sign up flow and account deletion", async ({ page, context }) => {
     const inbox = getInbox();
     const app = new AppPage(page);
-    // Only match emails sent by this test. 2s back-buffer: the Date header
-    // has second resolution, so a bare "now" could exclude an email sent
-    // within the same second.
-    const emailsAfter = new Date(Date.now() - 2000);
+    const emailsAfter = emailCutoff();
 
     await test.step("Create account", async () => {
       await page.goto("/");

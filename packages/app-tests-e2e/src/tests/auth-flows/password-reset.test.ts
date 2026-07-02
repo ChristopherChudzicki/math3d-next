@@ -1,7 +1,7 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@/utils/expect";
 import AppPage from "@/utils/pages/AppPage";
-import { getInbox } from "@/utils/inbox/emails";
+import { getInbox, emailCutoff } from "@/utils/inbox/emails";
 import { createActiveUser, deleteUser } from "@/utils/api/auth";
 import { makeUserInfo } from "@math3d/mock-api";
 import { faker } from "@faker-js/faker/locale/en";
@@ -18,10 +18,7 @@ test.describe("Password reset flow", () => {
     const app = new AppPage(page);
     const { auth, cleanup } = await createActiveUser(makeUserInfo());
     const newPassword = faker.internet.password();
-    // Only match emails sent by this test. 2s back-buffer: the Date header
-    // has second resolution, so a bare "now" could exclude an email sent
-    // within the same second.
-    const emailsAfter = new Date(Date.now() - 2000);
+    const emailsAfter = emailCutoff();
 
     try {
       await test.step("Request password reset", async () => {

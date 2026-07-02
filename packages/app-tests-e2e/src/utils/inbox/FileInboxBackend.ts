@@ -71,7 +71,7 @@ export const findEmail = async (
     const parsed = await simpleParser(content.toString());
     invariant(parsed.to, "Email must have a 'to' field");
     invariant(parsed.date, "Email must have a 'date' field");
-    invariant(parsed.subject, "Email must have a 'date' field");
+    invariant(parsed.subject, "Email must have a 'subject' field");
     const recipients = standardizeTo(parsed.to).flatMap(({ value }) => value);
     const date = new Date(parsed.date);
     if (
