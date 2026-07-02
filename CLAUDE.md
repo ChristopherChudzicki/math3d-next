@@ -127,13 +127,25 @@ Feature-based organization in `packages/app/src/features/` (auth, notifications,
 
 The E2E tests hit a real backend and a real frontend server, and the full suite takes only ~1 minute (3D/WebGL rendering is disabled by default via the `disable3d` fixture). Lint, typecheck, and unit tests do NOT catch E2E breakage — **run `yarn test-e2e` before declaring work on `packages/app` complete**. CI runs the suite on every PR.
 
-1. Backend up: `docker compose up -d`. One-time DB prep (also after test credentials change): `docker compose run --rm webserver uv run ./manage.py migrate` and `... seed_test_data`.
-2. Frontend: handled automatically — Playwright's `webServer` config reuses a dev server already running at `http://math3d.localdev:3000`, or starts one (`yarn start`) if nothing is serving it. No production build needed locally; CI serves a production build via `yarn preview` to test the real artifact.
-3. `yarn test-e2e` runs the full suite; `yarn workspace app-tests-e2e playwright test src/tests/<path>` runs one file.
+1. Backend up: `docker compose up -d` (from the main checkout). One-time DB prep (also after test credentials change): `docker compose run --rm webserver uv run ./manage.py migrate` and `... seed_test_data`.
+2. Frontend: handled automatically — Playwright's `webServer` config reuses a dev server already running at `TEST_APP_URL`, or starts one (`yarn start`) if nothing is serving it. No production build needed locally; CI serves a production build via `yarn preview` to test the real artifact.
+3. `just e2e` runs the full suite (`just e2e src/tests/<path>` for one file). It loads `.env.development` + `.env` into the environment first, so it works even in shells that didn't get direnv's exports. Plain `yarn test-e2e` also works when the env vars are already in the shell.
+
+Only run one e2e suite at a time: the backend (and its email inbox, which the suite's global setup clears) is shared.
+
+##### E2E from a git worktree
+
+Worktrees get their own frontend port so they never test the main checkout's code by accident:
+
+1. `yarn install` (once per worktree)
+2. `./scripts/setup_worktree_env.sh` (once) — writes a `.env` with a dedicated port (3001–3009, already trusted by the backend) and points the e2e email inbox at the main checkout
+3. `just e2e` — starts this worktree's own dev server on its port; the main checkout's `:3000` server is untouched
+
+The docker backend and database are shared with the main checkout — never `docker compose up` from a worktree.
 
 Troubleshooting:
 
-- `TEST_*` env vars come from `.env.development` + `.env`, loaded into the shell by direnv (`.envrc`). If envalid reports missing environment variables, the shell didn't load them — source those files or run via direnv.
+- `TEST_*` env vars come from `.env.development` + `.env`. If envalid reports missing environment variables, run via `just e2e` (or source those files). In a worktree, inherited shell vars may point at `:3000` — `just e2e` fixes that too, since the checkout's own files win.
 - Widespread `Expected sessionid cookie from login response` failures mean the seeded test users are out of sync with `.env.development` credentials — re-run `seed_test_data` (idempotent).
 
 ### Environment

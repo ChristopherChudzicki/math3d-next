@@ -176,7 +176,14 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = [env("APP_BASE_URL")] if env("APP_BASE_URL") else []
+# Any origin allowed to make credentialed CORS requests must also pass Django's
+# CSRF origin check, so trust the CORS origins alongside APP_BASE_URL. Locally
+# this covers alternate frontend ports used by git worktrees.
+CSRF_TRUSTED_ORIGINS = list(
+    dict.fromkeys(
+        ([env("APP_BASE_URL")] if env("APP_BASE_URL") else []) + CORS_ALLOWED_ORIGINS
+    )
+)
 
 # Cookie auth requires the SPA (next.math3d.org) and API (api.next.math3d.org)
 # to share a registrable domain: default SameSite=Lax sends the session cookie,

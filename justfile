@@ -17,3 +17,13 @@ be *args:
 # Run a frontend command via yarn (e.g., just fe test, just fe lint)
 fe *args:
     yarn {{ args }}
+
+# Run e2e tests with env loaded from this checkout's env files (works in worktrees)
+e2e *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    set -a
+    source ./.env.development
+    if [ -f ./.env ]; then source ./.env; fi
+    set +a
+    yarn test-e2e {{ args }}

@@ -31,7 +31,9 @@ services:
       - .env
     environment:
       DATABASE_URL: postgresql://docker:docker@db:5432/math3d
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://math3d.localdev:3000}
+      # Ports 3000-3009: 3000 is the main checkout's dev server; 3001+ are
+      # frontends started by git worktrees (see scripts/setup_worktree_env.sh).
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://math3d.localdev:3000,http://math3d.localdev:3001,http://math3d.localdev:3002,http://math3d.localdev:3003,http://math3d.localdev:3004,http://math3d.localdev:3005,http://math3d.localdev:3006,http://math3d.localdev:3007,http://math3d.localdev:3008,http://math3d.localdev:3009}
     command: just devserver
     volumes:
       - ./webserver:/src/webserver
