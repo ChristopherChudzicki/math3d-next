@@ -83,7 +83,7 @@
     "@math3d/mock-api": "workspace:^",
     "@math3d/test-utils": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
-    "@mswjs/data": "^0.16.1",
+    "@mswjs/data": "^0.16.2",
     "@storybook/addon-actions": "6.5.16",
     "@storybook/addon-essentials": "6.5.16",
     "@storybook/addon-links": "6.5.16",
