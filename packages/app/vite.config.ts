@@ -7,6 +7,7 @@ import { Schema, ValidateEnv } from "@julr/vite-plugin-validate-env";
 import compileTime from "vite-plugin-compile-time";
 import type { PluginOption } from "vite";
 import fs from "fs/promises";
+import { realpathSync } from "node:fs";
 
 /**
  * ./src/pages/HelpPage/data.compile.ts
@@ -26,6 +27,35 @@ const docsHotReload = (filepath: string): PluginOption => {
       if (file.includes("docs") && file.endsWith(".md")) {
         await fs.writeFile(filepath, await fs.readFile(filepath));
       }
+    },
+  };
+};
+
+/**
+ * Identify which checkout this server serves, so the e2e suite can refuse to
+ * run against another checkout's server (git worktrees share the backend and
+ * can inherit each other's ports; see global.setup.ts in app-tests-e2e).
+ * Dev/preview servers only — production is a static build on a CDN, which
+ * never runs these hooks.
+ */
+const checkoutIdentity = (): PluginOption => {
+  // realpath'd so symlinked checkout paths compare equal.
+  const checkoutRoot = realpathSync(path.resolve(__dirname, "../.."));
+  const addHeader: import("vite").Connect.NextHandleFunction = (
+    _req,
+    res,
+    next,
+  ) => {
+    res.setHeader("X-Checkout-Root", checkoutRoot);
+    next();
+  };
+  return {
+    name: "checkout-identity",
+    configureServer(server) {
+      server.middlewares.use(addHeader);
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(addHeader);
     },
   };
 };
@@ -68,6 +98,7 @@ export default defineConfig({
       gzipSize: true,
     }),
     compileTime(),
+    checkoutIdentity(),
     docsHotReload(
       path.resolve(__dirname, "./src/pages/HelpPage/data.compile.ts"),
     ),
