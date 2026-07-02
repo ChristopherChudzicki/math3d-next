@@ -6328,7 +6328,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitejs/plugin-react@npm:^4.3.4":
+"@vitejs/plugin-react@npm:^4.7.0":
   version: 4.7.0
   resolution: "@vitejs/plugin-react@npm:4.7.0"
   dependencies:
@@ -7212,7 +7212,7 @@ __metadata:
     "@types/three": "npm:^0.146.0"
     "@types/tinycolor2": "npm:1.4.6"
     "@types/toposort": "npm:2.0.7"
-    "@vitejs/plugin-react": "npm:^4.3.4"
+    "@vitejs/plugin-react": "npm:^4.7.0"
     classnames: "npm:2.5.1"
     concurrently: "npm:^9.0.0"
     eslint: "npm:^8.54.0"
