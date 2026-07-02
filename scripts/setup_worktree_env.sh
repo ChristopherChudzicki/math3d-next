@@ -6,8 +6,8 @@
 # 3001) and pointing the e2e email inbox at the main checkout, whose
 # webserver/ directory the shared docker backend mounts. The backend is NOT
 # duplicated: worktrees talk to the docker stack started from the main
-# checkout, which already trusts localdev ports 3000-3009 (see
-# CORS_ALLOWED_ORIGINS in docker-compose.yml).
+# checkout, which already trusts the worktree ports (see WORKTREE_PORTS in
+# webserver/main/origins.py).
 set -euo pipefail
 cd "$(cd "$(dirname "$0")/.." && pwd)"
 
@@ -46,6 +46,7 @@ port_in_use() {
 }
 
 port=""
+# Keep this range in sync with WORKTREE_PORTS in webserver/main/origins.py.
 for p in 3002 3003 3004 3005 3006 3007 3008 3009; do
 	case "$claimed" in *" $p "*) continue ;; esac
 	if ! port_in_use "$p"; then

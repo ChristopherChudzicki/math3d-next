@@ -1,6 +1,37 @@
 from django.conf import settings
 
-from main.origins import csrf_trusted_origins
+from main.origins import csrf_trusted_origins, default_cors_allowed_origins
+
+
+def test_default_cors_origins_cover_app_and_worktree_ports():
+    """
+    Locally the one docker backend serves the main checkout's frontend plus
+    git-worktree frontends on sibling ports, all of which must be
+    CORS-trusted. 3001 is excluded: the legacy app's dev server owns that
+    port and is not a CORS consumer.
+    """
+    origins = default_cors_allowed_origins(
+        is_heroku=False,
+        app_base_url="http://math3d.localdev:3000",
+    )
+    assert origins == [
+        "http://math3d.localdev:3000",
+        *(f"http://math3d.localdev:{port}" for port in range(3002, 3010)),
+    ]
+
+
+def test_default_cors_origins_empty_in_prod():
+    """Production must configure CORS origins explicitly."""
+    origins = default_cors_allowed_origins(
+        is_heroku=True,
+        app_base_url="https://next.math3d.org",
+    )
+    assert origins == []
+
+
+def test_default_cors_origins_empty_without_app_base_url():
+    origins = default_cors_allowed_origins(is_heroku=False, app_base_url="")
+    assert origins == []
 
 
 def test_settings_wire_csrf_trust_from_cors_origins():
