@@ -132,7 +132,7 @@ The E2E tests hit a real backend and a real frontend server, and the full suite 
 3. Frontend: handled automatically — Playwright's `webServer` config reuses a dev server already running at `TEST_APP_URL`, or starts one (`yarn start`) if nothing is serving it. No production build needed locally; CI serves a production build via `yarn preview` to test the real artifact.
 4. `just e2e` runs the full suite (`just e2e src/tests/<path>` for one file). It loads `.env.development` + `.env` into the environment first, so it works even in shells that didn't get direnv's exports. Plain `yarn test-e2e` works too, but only when the shell's env vars point at _this_ checkout — in worktrees always use `just e2e`, since inherited vars pointing at `:3000` would silently test the main checkout's code.
 
-Only run one e2e suite at a time: the backend (and its email inbox, which the suite's global setup clears) is shared.
+Concurrent suite runs (e.g. main checkout + worktrees at once) are supported: the backend/DB/inbox are shared, but tests use per-run-unique users and email recipients, and global setup only sweeps emails older than an hour. Keep it that way — inbox lookups must always match on a per-run-unique `to` recipient (the `EmailMatchers` type enforces this).
 
 ##### E2E from a git worktree
 

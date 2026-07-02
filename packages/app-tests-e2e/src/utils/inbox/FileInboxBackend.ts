@@ -94,15 +94,24 @@ class FileEmailBackend extends InboxBackend {
     return findEmail(this.emailDir, matchers);
   }
 
-  async deleteAll() {
-    const files = await getSortedFiles(this.emailDir);
-    // EMAIL_DIR is user-configurable (worktrees point it at another checkout),
-    // so only remove what Django's file email backend writes (*.log), never
-    // arbitrary directory contents.
+  async deleteOlderThan(cutoff: Date) {
+    const files = await fs.readdir(this.emailDir);
     await Promise.all(
       files
+        // EMAIL_DIR is user-configurable (worktrees point it at another
+        // checkout), so only remove what Django's file email backend writes
+        // (*.log), never arbitrary directory contents.
         .filter((file) => file.endsWith(".log"))
-        .map((file) => fs.unlink(file)),
+        .map(async (fileName) => {
+          const file = path.join(this.emailDir, fileName);
+          try {
+            const stats = await fs.stat(file);
+            if (stats.mtime < cutoff) await fs.unlink(file);
+          } catch (err) {
+            // A concurrent suite run may sweep the same file first.
+            if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+          }
+        }),
     );
   }
 }
