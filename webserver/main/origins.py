@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 WORKTREE_PORTS = range(3002, 3010)
 
 
-def dev_cors_allowed_origins(*, is_heroku: bool, app_base_url: str) -> list[str]:
+def dev_cors_allowed_origins(*, is_production: bool, app_base_url: str) -> list[str]:
     """
     Compute the development-only CORS origins (empty in production).
 
@@ -21,7 +21,7 @@ def dev_cors_allowed_origins(*, is_heroku: bool, app_base_url: str) -> list[str]
 
     In production, origins must be configured explicitly; return none.
     """
-    if is_heroku or not app_base_url:
+    if is_production or not app_base_url:
         return []
     base = urlparse(app_base_url)
     return [app_base_url] + [
@@ -48,7 +48,7 @@ def cors_allowed_origins(
 
 def csrf_trusted_origins(
     *,
-    is_heroku: bool,
+    is_production: bool,
     app_base_url: str,
     cors_allowed_origins: list[str],
 ) -> list[str]:
@@ -63,7 +63,7 @@ def csrf_trusted_origins(
     scripts/setup_worktree_env.sh) make credentialed writes, so every CORS
     origin must also pass the CSRF origin check.
     """
-    if is_heroku:
+    if is_production:
         return [app_base_url]
     return list(
         dict.fromkeys(([app_base_url] if app_base_url else []) + cors_allowed_origins)

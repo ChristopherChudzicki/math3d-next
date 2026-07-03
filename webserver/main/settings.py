@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 import logging
 
 from django.core.exceptions import ImproperlyConfigured
@@ -38,7 +39,10 @@ env = environ.Env(
     APP_BASE_URL=(str, ""),
     INGESTION_DATABASE_URL=(str, ""),
     ALLOWED_HOSTS=(list, []),
-    # Heroku
+    # Deployment environment. IS_PRODUCTION drives all production hardening;
+    # IS_HEROKU is its deprecated predecessor, read only to fail loudly if a
+    # deployment still relies on it.
+    IS_PRODUCTION=(bool, False),
     IS_HEROKU=(bool, False),
     # Logging
     LOG_LEVEL=(str, "INFO"),
@@ -64,26 +68,46 @@ SECRET_KEY = env("SECRET_KEY")
 # Application version
 APP_VERSION = env("APP_VERSION")
 
+# Deployment environment: an explicit flag, not an inference from the hosting
+# platform, so a deploy that forgets it fails loudly below instead of silently
+# starting with dev-grade security.
+IS_PRODUCTION = env("IS_PRODUCTION")
+if env("IS_HEROKU") and not IS_PRODUCTION:
+    raise ImproperlyConfigured(
+        "IS_HEROKU is deprecated and no longer drives production hardening. "
+        "Set IS_PRODUCTION=True on this deployment (and remove IS_HEROKU)."
+    )
+
+# The SPA origin, e.g. https://next.math3d.org. Normalized (no trailing slash)
+# because paths are appended to it below (HEADLESS_FRONTEND_URLS) and it is
+# used verbatim as an origin (CORS/CSRF trust).
+APP_BASE_URL = env("APP_BASE_URL").rstrip("/")
+
+DEBUG = False
+
 # Secure cookie defaults — only relaxed for local dev (no TLS).
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 ALLOWED_HOSTS: list[str]
-if env("IS_HEROKU"):
-    DEBUG = False
+if IS_PRODUCTION:
     SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    if not env("APP_BASE_URL"):
+    if not APP_BASE_URL:
         raise ImproperlyConfigured(
             "APP_BASE_URL is required in production (used for CSRF_TRUSTED_ORIGINS and email links)."
+        )
+    if not env("CSRF_COOKIE_DOMAIN"):
+        raise ImproperlyConfigured(
+            "CSRF_COOKIE_DOMAIN is required in production; without it the SPA "
+            "cannot read the CSRF token and all authenticated writes fail."
         )
     # Set ALLOWED_HOSTS for production
     ALLOWED_HOSTS = env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["api.math3d.org"]
 else:
-    DEBUG = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
     ALLOWED_HOSTS = (
@@ -187,25 +211,37 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = cors_allowed_origins(
     configured=env("CORS_ALLOWED_ORIGINS"),
     dev=dev_cors_allowed_origins(
-        is_heroku=env("IS_HEROKU"),
-        app_base_url=env("APP_BASE_URL"),
+        is_production=IS_PRODUCTION,
+        app_base_url=APP_BASE_URL,
     ),
 )
 CORS_ALLOW_CREDENTIALS = True
 # Prod trusts only APP_BASE_URL; local dev also trusts the CORS origins
 # (worktree frontend ports). See the function's docstring.
 CSRF_TRUSTED_ORIGINS = csrf_trusted_origins(
-    is_heroku=env("IS_HEROKU"),
-    app_base_url=env("APP_BASE_URL"),
+    is_production=IS_PRODUCTION,
+    app_base_url=APP_BASE_URL,
     cors_allowed_origins=CORS_ALLOWED_ORIGINS,
 )
 
 # Cookie auth requires the SPA (next.math3d.org) and API (api.next.math3d.org)
 # to share a registrable domain: default SameSite=Lax sends the session cookie,
-# and CSRF_COOKIE_DOMAIN (.math3d.org) lets the SPA read the CSRF token.
+# and CSRF_COOKIE_DOMAIN (.math3d.org) lets the SPA read the CSRF token. The
+# check below makes the shared-domain constraint explicit for the CSRF half.
 _csrf_cookie_domain = env("CSRF_COOKIE_DOMAIN")
 if _csrf_cookie_domain:
     CSRF_COOKIE_DOMAIN = _csrf_cookie_domain
+    _registrable_domain = _csrf_cookie_domain.lstrip(".")
+    _spa_host = urlparse(APP_BASE_URL).hostname or ""
+    if APP_BASE_URL and not (
+        _spa_host == _registrable_domain
+        or _spa_host.endswith("." + _registrable_domain)
+    ):
+        raise ImproperlyConfigured(
+            f"CSRF_COOKIE_DOMAIN {_csrf_cookie_domain!r} does not cover the SPA "
+            f"host {_spa_host!r} (from APP_BASE_URL), so the SPA could not read "
+            "the CSRF token."
+        )
 
 
 AUTHENTICATION_BACKENDS = [
@@ -251,9 +287,10 @@ ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
 ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"
 
 if env("DISABLE_ALLAUTH_RATE_LIMITS"):
-    if env("IS_HEROKU"):
+    if SESSION_COOKIE_SECURE:
         raise ImproperlyConfigured(
-            "DISABLE_ALLAUTH_RATE_LIMITS must not be enabled in production."
+            "DISABLE_ALLAUTH_RATE_LIMITS must not be enabled on a secure-cookie "
+            "(TLS/production) deployment."
         )
     ACCOUNT_RATE_LIMITS = False
 
@@ -266,8 +303,8 @@ HEADLESS_SERVE_SPECIFICATION = True
 # API's /v1/docs; the default is Redoc (headless/spec/redoc_cdn.html).
 HEADLESS_SPECIFICATION_TEMPLATE_NAME = "headless/spec/swagger_cdn.html"
 HEADLESS_FRONTEND_URLS = {
-    "account_confirm_email": f"{env('APP_BASE_URL')}/?overlay=activate&key={{key}}",
-    "account_reset_password_from_key": f"{env('APP_BASE_URL')}/?overlay=reset-confirm&key={{key}}",
+    "account_confirm_email": f"{APP_BASE_URL}/?overlay=activate&key={{key}}",
+    "account_reset_password_from_key": f"{APP_BASE_URL}/?overlay=reset-confirm&key={{key}}",
 }
 
 ##################################################

@@ -96,3 +96,8 @@ jobs:
           heroku_email: ${{ vars.HEROKU_EMAIL }}
         env:
           HD_APP_VERSION: ${{ inputs.version }}
+          # HD_-prefixed vars become Heroku config vars. IS_PRODUCTION drives
+          # the backend's security hardening (settings.py); setting it here
+          # means every deployed environment is production-hardened without a
+          # manual config step.
+          HD_IS_PRODUCTION: "True"
