@@ -39,10 +39,12 @@ env = environ.Env(
     APP_BASE_URL=(str, ""),
     INGESTION_DATABASE_URL=(str, ""),
     ALLOWED_HOSTS=(list, []),
-    # Deployment environment. IS_PRODUCTION drives all production hardening;
-    # IS_HEROKU is its deprecated predecessor, read only to fail loudly if a
-    # deployment still relies on it.
-    IS_PRODUCTION=(bool, False),
+    # Deployment environment. IS_PRODUCTION drives all production hardening
+    # and DEFAULTS TO TRUE: an unconfigured deploy is secure (or fails loudly
+    # on the required-config guards); dev environments opt out explicitly via
+    # IS_PRODUCTION=False (.env.development, CI). IS_HEROKU is the deprecated
+    # predecessor, read only to reject contradictory config.
+    IS_PRODUCTION=(bool, True),
     IS_HEROKU=(bool, False),
     # Logging
     LOG_LEVEL=(str, "INFO"),
@@ -68,14 +70,15 @@ SECRET_KEY = env("SECRET_KEY")
 # Application version
 APP_VERSION = env("APP_VERSION")
 
-# Deployment environment: an explicit flag, not an inference from the hosting
-# platform, so a deploy that forgets it fails loudly below instead of silently
-# starting with dev-grade security.
+# Deployment environment: an explicit flag (not an inference from the hosting
+# platform) that defaults to production, so an unconfigured deploy comes up
+# hardened or fails loudly below — never silently with dev-grade security.
 IS_PRODUCTION = env("IS_PRODUCTION")
 if env("IS_HEROKU") and not IS_PRODUCTION:
     raise ImproperlyConfigured(
-        "IS_HEROKU is deprecated and no longer drives production hardening. "
-        "Set IS_PRODUCTION=True on this deployment (and remove IS_HEROKU)."
+        "Contradictory config: IS_HEROKU (the deprecated production flag) is set "
+        "but IS_PRODUCTION is explicitly False. Remove IS_HEROKU; production "
+        "hardening is now the default."
     )
 
 # The SPA origin, e.g. https://next.math3d.org. Normalized (no trailing slash)

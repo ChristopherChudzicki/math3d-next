@@ -34,6 +34,11 @@ jobs:
 
   webserver-tests:
     runs-on: ubuntu-latest
+    env:
+      # This job runs directly on the runner (no .env.development), and the
+      # backend defaults to production hardening, which requires config this
+      # job doesn't have — opt out like any dev environment.
+      IS_PRODUCTION: "False"
     defaults:
       run:
         working-directory: ./webserver
