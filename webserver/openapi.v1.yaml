@@ -1641,6 +1641,8 @@ paths:
       security:
       - StaffSessionAuth: []
       summary: Activate
+      tags:
+      - Auth
   /v1/auth/users/me/:
     get:
       operationId: authentication_api_get_me
@@ -1655,6 +1657,8 @@ paths:
         '403':
           description: Forbidden
       summary: Get Me
+      tags:
+      - Auth
     patch:
       operationId: authentication_api_patch_me
       parameters: []
@@ -1674,6 +1678,8 @@ paths:
       security:
       - SessionAuth: []
       summary: Patch Me
+      tags:
+      - Auth
   /v1/auth/users/me/delete/:
     post:
       operationId: authentication_api_delete_me
@@ -1696,6 +1702,8 @@ paths:
       security:
       - SessionAuth: []
       summary: Delete Me
+      tags:
+      - Auth
   /v1/legacy_scenes/:
     post:
       operationId: scenes_api_create_legacy
@@ -1714,6 +1722,8 @@ paths:
                 $ref: '#/components/schemas/LegacySceneOutSchema'
           description: Created
       summary: Create Legacy
+      tags:
+      - Legacy Scenes
   /v1/legacy_scenes/{key}/:
     get:
       operationId: scenes_api_get_legacy
@@ -1732,6 +1742,8 @@ paths:
                 $ref: '#/components/schemas/LegacySceneOutSchema'
           description: OK
       summary: Get Legacy
+      tags:
+      - Legacy Scenes
   /v1/scenes/:
     get:
       operationId: scenes_api_list_scenes
@@ -1776,6 +1788,8 @@ paths:
                 $ref: '#/components/schemas/PagedMiniSceneSchema'
           description: OK
       summary: List Scenes
+      tags:
+      - Scenes
     post:
       operationId: scenes_api_create_scene
       parameters: []
@@ -1793,6 +1807,8 @@ paths:
                 $ref: '#/components/schemas/SceneSchema'
           description: Created
       summary: Create Scene
+      tags:
+      - Scenes
   /v1/scenes/me/:
     get:
       operationId: scenes_api_my_scenes
@@ -1839,6 +1855,8 @@ paths:
       security:
       - SessionAuth: []
       summary: My Scenes
+      tags:
+      - Scenes
   /v1/scenes/{key}/:
     delete:
       operationId: scenes_api_delete_scene
@@ -1855,6 +1873,8 @@ paths:
       security:
       - SessionAuth: []
       summary: Delete Scene
+      tags:
+      - Scenes
     get:
       operationId: scenes_api_get_scene
       parameters:
@@ -1872,6 +1892,8 @@ paths:
                 $ref: '#/components/schemas/SceneSchema'
           description: OK
       summary: Get Scene
+      tags:
+      - Scenes
     patch:
       operationId: scenes_api_update_scene
       parameters:
@@ -1897,4 +1919,13 @@ paths:
       security:
       - SessionAuth: []
       summary: Update Scene
+      tags:
+      - Scenes
 servers: []
+tags:
+- description: 'Saved 3D scenes: create, read, update, and delete.'
+  name: Scenes
+- description: Current-user profile and account management. Authentication *flows* — login, signup, email verification, and password reset — are served by the separate allauth headless API; see its [interactive API docs](/_allauth/openapi.html).
+  name: Auth
+- description: Legacy v0-format scenes (`dehydrated` blobs), retained for backward compatibility. Prefer **Scenes** for new work.
+  name: Legacy Scenes

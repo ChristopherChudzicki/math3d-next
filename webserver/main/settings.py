@@ -253,6 +253,9 @@ HEADLESS_ONLY = True
 HEADLESS_ADAPTER = "authentication.adapter.CustomHeadlessAdapter"
 HEADLESS_CLIENTS = ["browser"]
 HEADLESS_SERVE_SPECIFICATION = True
+# Serve the headless spec via Swagger UI (ships with allauth) to match the v1
+# API's /v1/docs; the default is Redoc (headless/spec/redoc_cdn.html).
+HEADLESS_SPECIFICATION_TEMPLATE_NAME = "headless/spec/swagger_cdn.html"
 HEADLESS_FRONTEND_URLS = {
     "account_confirm_email": f"{env('APP_BASE_URL')}/?overlay=activate&key={{key}}",
     "account_reset_password_from_key": f"{env('APP_BASE_URL')}/?overlay=reset-confirm&key={{key}}",
