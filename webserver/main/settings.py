@@ -19,7 +19,11 @@ from django.core.exceptions import ImproperlyConfigured
 import dj_database_url
 import environ
 
-from main.origins import csrf_trusted_origins, default_cors_allowed_origins
+from main.origins import (
+    cors_allowed_origins,
+    csrf_trusted_origins,
+    dev_cors_allowed_origins,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -176,11 +180,16 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# Explicit config wins (Heroku config vars, or a local .env); otherwise local
-# dev trusts APP_BASE_URL's origin plus the worktree frontend ports.
-CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS") or default_cors_allowed_origins(
-    is_heroku=env("IS_HEROKU"),
-    app_base_url=env("APP_BASE_URL"),
+# Explicitly configured origins (Heroku config vars, or a local .env — e.g. the
+# legacy math3d-react frontend) are unioned with the dev-only origins
+# (APP_BASE_URL plus the worktree frontend ports). In production the dev list is
+# empty, so CORS_ALLOWED_ORIGINS is exactly what's configured.
+CORS_ALLOWED_ORIGINS = cors_allowed_origins(
+    configured=env("CORS_ALLOWED_ORIGINS"),
+    dev=dev_cors_allowed_origins(
+        is_heroku=env("IS_HEROKU"),
+        app_base_url=env("APP_BASE_URL"),
+    ),
 )
 CORS_ALLOW_CREDENTIALS = True
 # Prod trusts only APP_BASE_URL; local dev also trusts the CORS origins

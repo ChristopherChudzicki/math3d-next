@@ -2,19 +2,19 @@ from django.conf import settings
 
 from main.origins import (
     WORKTREE_PORTS,
+    cors_allowed_origins,
     csrf_trusted_origins,
-    default_cors_allowed_origins,
+    dev_cors_allowed_origins,
 )
 
 
-def test_default_cors_origins_cover_app_and_worktree_ports():
+def test_dev_cors_origins_cover_app_and_worktree_ports():
     """
     Locally the one docker backend serves the main checkout's frontend plus
     git-worktree frontends on sibling ports, all of which must be
-    CORS-trusted. 3001 is excluded: the legacy app's dev server owns that
-    port and is not a CORS consumer.
+    CORS-trusted.
     """
-    origins = default_cors_allowed_origins(
+    origins = dev_cors_allowed_origins(
         is_heroku=False,
         app_base_url="http://math3d.localdev:3000",
     )
@@ -23,18 +23,34 @@ def test_default_cors_origins_cover_app_and_worktree_ports():
     assert origins == ["http://math3d.localdev:3000", *worktree_origins]
 
 
-def test_default_cors_origins_empty_in_prod():
+def test_dev_cors_origins_empty_in_prod():
     """Production must configure CORS origins explicitly."""
-    origins = default_cors_allowed_origins(
+    origins = dev_cors_allowed_origins(
         is_heroku=True,
         app_base_url="https://next.math3d.org",
     )
     assert origins == []
 
 
-def test_default_cors_origins_empty_without_app_base_url():
-    origins = default_cors_allowed_origins(is_heroku=False, app_base_url="")
+def test_dev_cors_origins_empty_without_app_base_url():
+    origins = dev_cors_allowed_origins(is_heroku=False, app_base_url="")
     assert origins == []
+
+
+def test_cors_origins_union_adds_configured_without_dropping_dev():
+    """
+    A configured origin (e.g. the legacy math3d-react frontend) must add to,
+    not replace, the dev defaults — and duplicates collapse.
+    """
+    origins = cors_allowed_origins(
+        configured=["http://localhost:3141", "http://math3d.localdev:3000"],
+        dev=["http://math3d.localdev:3000", "http://math3d.localdev:3002"],
+    )
+    assert origins == [
+        "http://localhost:3141",
+        "http://math3d.localdev:3000",
+        "http://math3d.localdev:3002",
+    ]
 
 
 def test_settings_wire_csrf_trust_from_cors_origins():
