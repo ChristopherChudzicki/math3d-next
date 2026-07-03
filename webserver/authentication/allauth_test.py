@@ -272,13 +272,7 @@ def test_password_reset_email_has_correct_link():
 
 
 # --------------------------------------------------------------------------
-# Email link origins
-#
-# One backend serves multiple trusted frontends locally (git worktrees on
-# alternate ports), so email links target the requesting origin when it is
-# CSRF-trusted, else the configured HEADLESS_FRONTEND_URLS origin. In
-# production CSRF_TRUSTED_ORIGINS == [APP_BASE_URL] exactly (see
-# settings_test.py), so the swap can never leave the canonical origin.
+# Email link origins (behavior: CustomHeadlessAdapter.get_frontend_url)
 #
 # HEADLESS_FRONTEND_URLS is pinned per-test: the ambient value derives from
 # APP_BASE_URL, which the test environment may leave unset (CI does).

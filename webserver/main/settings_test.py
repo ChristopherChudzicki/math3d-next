@@ -1,6 +1,10 @@
 from django.conf import settings
 
-from main.origins import csrf_trusted_origins, default_cors_allowed_origins
+from main.origins import (
+    WORKTREE_PORTS,
+    csrf_trusted_origins,
+    default_cors_allowed_origins,
+)
 
 
 def test_default_cors_origins_cover_app_and_worktree_ports():
@@ -14,10 +18,9 @@ def test_default_cors_origins_cover_app_and_worktree_ports():
         is_heroku=False,
         app_base_url="http://math3d.localdev:3000",
     )
-    assert origins == [
-        "http://math3d.localdev:3000",
-        *(f"http://math3d.localdev:{port}" for port in range(3002, 3010)),
-    ]
+    worktree_origins = [f"http://math3d.localdev:{port}" for port in WORKTREE_PORTS]
+    assert worktree_origins  # else the equality below is vacuous
+    assert origins == ["http://math3d.localdev:3000", *worktree_origins]
 
 
 def test_default_cors_origins_empty_in_prod():

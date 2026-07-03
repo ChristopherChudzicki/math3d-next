@@ -13,11 +13,10 @@ const getInbox = (): InboxBackend => {
 /**
  * Cutoff for `EmailMatchers.after`, scoping a lookup to emails this test
  * sent. Call it BEFORE the action that triggers the email, so the cutoff
- * cannot postdate the email. The back-buffer covers the Date header's
- * second resolution plus clock skew between this host and the docker VM
- * that stamps the header (which can lag by seconds after host sleep). A
- * larger buffer is safe: recipients are unique per test attempt, so no
- * earlier email can slip inside the window.
+ * cannot postdate the email. The back-buffer absorbs the Date header's
+ * second resolution and clock skew between this host and the docker VM that
+ * stamps it. A larger buffer is safe: recipients are unique per test
+ * attempt, so no earlier email can slip inside the window.
  */
 const emailCutoff = () => new Date(Date.now() - 30_000);
 
