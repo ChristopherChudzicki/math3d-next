@@ -1,7 +1,7 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@/utils/expect";
 import AppPage from "@/utils/pages/AppPage";
-import { getInbox } from "@/utils/inbox/emails";
+import { getInbox, emailCutoff } from "@/utils/inbox/emails";
 import env from "@/env";
 import invariant from "tiny-invariant";
 import { faker } from "@faker-js/faker/locale/en";
@@ -23,6 +23,7 @@ test.describe("User sign up flow and account deletion", () => {
   test("User sign up flow and account deletion", async ({ page, context }) => {
     const inbox = getInbox();
     const app = new AppPage(page);
+    const emailsAfter = emailCutoff();
 
     await test.step("Create account", async () => {
       await page.goto("/");
@@ -40,6 +41,7 @@ test.describe("User sign up flow and account deletion", () => {
         const message = await inbox.waitForEmail({
           subject: "Activate your account",
           to: email,
+          after: emailsAfter,
         });
         invariant(message.html, "Expected email to have HTML content");
         const messagePage = await context.newPage();

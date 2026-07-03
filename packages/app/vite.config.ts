@@ -7,6 +7,7 @@ import { Schema, ValidateEnv } from "@julr/vite-plugin-validate-env";
 import compileTime from "vite-plugin-compile-time";
 import type { PluginOption } from "vite";
 import fs from "fs/promises";
+import { realpathSync } from "node:fs";
 
 /**
  * ./src/pages/HelpPage/data.compile.ts
@@ -30,6 +31,35 @@ const docsHotReload = (filepath: string): PluginOption => {
   };
 };
 
+/**
+ * Identify which checkout this server serves, so the e2e suite can refuse to
+ * run against another checkout's server (git worktrees share the backend and
+ * can inherit each other's ports; see global.setup.ts in app-tests-e2e).
+ * Dev/preview servers only — production is a static build on a CDN, which
+ * never runs these hooks.
+ */
+const checkoutIdentity = (): PluginOption => {
+  // realpath'd so symlinked checkout paths compare equal.
+  const checkoutRoot = realpathSync(path.resolve(__dirname, "../.."));
+  const addHeader: import("vite").Connect.NextHandleFunction = (
+    _req,
+    res,
+    next,
+  ) => {
+    res.setHeader("X-Checkout-Root", checkoutRoot);
+    next();
+  };
+  return {
+    name: "checkout-identity",
+    configureServer(server) {
+      server.middlewares.use(addHeader);
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(addHeader);
+    },
+  };
+};
+
 // Derive server host/port from APP_BASE_URL so local dev and CI can share
 // the same config without hardcoding math3d.localdev. Locally this comes
 // from direnv loading .env.development; in CI it comes from a GitHub var.
@@ -38,6 +68,10 @@ const appUrl = new URL(process.env.APP_BASE_URL ?? "http://localhost:3000");
 export default defineConfig({
   server: {
     port: Number(appUrl.port) || 3000,
+    // The exact port is load-bearing: backend CORS/CSRF trust and Playwright's
+    // server-reuse probe both key on it. Fail loudly rather than silently
+    // serving on port+1.
+    strictPort: true,
     host: appUrl.hostname,
     allowedHosts: [appUrl.hostname],
   },
@@ -45,6 +79,7 @@ export default defineConfig({
   // derive it here too to keep the port single-sourced from APP_BASE_URL.
   preview: {
     port: Number(appUrl.port) || 3000,
+    strictPort: true,
   },
   plugins: [
     ValidateEnv({
@@ -63,6 +98,7 @@ export default defineConfig({
       gzipSize: true,
     }),
     compileTime(),
+    checkoutIdentity(),
     docsHotReload(
       path.resolve(__dirname, "./src/pages/HelpPage/data.compile.ts"),
     ),

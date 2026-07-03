@@ -17,3 +17,7 @@ be *args:
 # Run a frontend command via yarn (e.g., just fe test, just fe lint)
 fe *args:
     yarn {{ args }}
+
+# Run e2e tests (alias for yarn test-e2e, which is self-sufficient in any shell)
+e2e *args:
+    yarn test-e2e {{ args }}

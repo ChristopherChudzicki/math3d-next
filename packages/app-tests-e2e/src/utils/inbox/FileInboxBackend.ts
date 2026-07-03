@@ -6,25 +6,34 @@ import invariant from "tiny-invariant";
 import InboxBackend from "./InboxBackend";
 import type { EmailData, EmailMatchers } from "./InboxBackend";
 /**
- * Returns a list of files in a directory sorted (descending) by their
- * modification time.
+ * Returns the email files in a directory sorted (descending) by their
+ * modification time. This is the single definition of "email file": only
+ * *.log (what Django's file email backend writes) counts, so strays like
+ * .gitkeep or .DS_Store are neither parsed nor swept. EMAIL_DIR is also
+ * user-configurable (worktrees point it at another checkout), so the sweep
+ * must never touch arbitrary directory contents.
  */
 const getSortedFiles = async (dir: string) => {
   const files = await fs.readdir(dir);
 
   const times = await Promise.all(
-    files.map(async (fileName) => {
-      const stats = await fs.stat(`${dir}/${fileName}`);
-      return {
-        name: fileName,
-        time: stats.mtime.getTime(),
-      };
-    }),
+    files
+      .filter((fileName) => fileName.endsWith(".log"))
+      .map(async (fileName) => {
+        try {
+          const stats = await fs.stat(`${dir}/${fileName}`);
+          return {
+            path: path.join(dir, fileName),
+            time: stats.mtime.getTime(),
+          };
+        } catch (err) {
+          // A concurrent suite run's sweep may have removed the file.
+          if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+          return null;
+        }
+      }),
   );
-  return times
-    .filter((file) => file.name !== ".gitkeep")
-    .sort((a, b) => b.time - a.time)
-    .map((file) => path.join(dir, file.name));
+  return times.filter((file) => file !== null).sort((a, b) => b.time - a.time);
 };
 
 const match = (text: string, matcher: string | RegExp) => {
@@ -55,14 +64,22 @@ export const findEmail = async (
 ): Promise<EmailData> => {
   const files = await getSortedFiles(emailDir);
   // eslint-disable-next-line no-restricted-syntax
-  for (const file of files) {
-    // eslint-disable-next-line no-await-in-loop
-    const content = await fs.readFile(file);
+  for (const { path: file } of files) {
+    let content: Buffer;
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      content = await fs.readFile(file);
+    } catch (err) {
+      // A concurrent suite run's sweep may have removed the file.
+      if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+      // eslint-disable-next-line no-continue
+      continue;
+    }
     // eslint-disable-next-line no-await-in-loop
     const parsed = await simpleParser(content.toString());
     invariant(parsed.to, "Email must have a 'to' field");
     invariant(parsed.date, "Email must have a 'date' field");
-    invariant(parsed.subject, "Email must have a 'date' field");
+    invariant(parsed.subject, "Email must have a 'subject' field");
     const recipients = standardizeTo(parsed.to).flatMap(({ value }) => value);
     const date = new Date(parsed.date);
     if (
@@ -94,9 +111,20 @@ class FileEmailBackend extends InboxBackend {
     return findEmail(this.emailDir, matchers);
   }
 
-  async deleteAll() {
+  async deleteOlderThan(cutoff: Date) {
     const files = await getSortedFiles(this.emailDir);
-    await Promise.all(files.map((file) => fs.unlink(file)));
+    await Promise.all(
+      files
+        .filter((file) => file.time < cutoff.getTime())
+        .map(async (file) => {
+          try {
+            await fs.unlink(file.path);
+          } catch (err) {
+            // A concurrent suite run may sweep the same file first.
+            if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+          }
+        }),
+    );
   }
 }
 

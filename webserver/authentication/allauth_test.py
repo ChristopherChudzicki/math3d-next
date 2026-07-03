@@ -272,6 +272,60 @@ def test_password_reset_email_has_correct_link():
 
 
 # --------------------------------------------------------------------------
+# Email link origins (behavior: CustomHeadlessAdapter.get_frontend_url)
+#
+# HEADLESS_FRONTEND_URLS is pinned per-test: the ambient value derives from
+# APP_BASE_URL, which the test environment may leave unset (CI does).
+# --------------------------------------------------------------------------
+
+CANONICAL_FRONTEND_URLS = {
+    "account_confirm_email": "http://canonical.example/?overlay=activate&key={key}",
+    "account_reset_password_from_key": (
+        "http://canonical.example/?overlay=reset-confirm&key={key}"
+    ),
+}
+
+
+@pytest.mark.django_db
+@override_settings(
+    HEADLESS_FRONTEND_URLS=CANONICAL_FRONTEND_URLS,
+    CSRF_TRUSTED_ORIGINS=["http://math3d.localdev:3002"],
+)
+def test_email_links_use_requesting_origin_when_csrf_trusted():
+    client = _make_client()
+    user = _create_verified_user()
+
+    client.post(
+        PASSWORD_REQUEST_URL,
+        {"email": user.email},
+        content_type="application/json",
+        HTTP_ORIGIN="http://math3d.localdev:3002",
+    )
+
+    link = get_parsed_url_from_html(mail.outbox[0], "password-reset-link")
+    assert (
+        f"{link.parsed.scheme}://{link.parsed.netloc}" == "http://math3d.localdev:3002"
+    )
+
+
+@pytest.mark.django_db
+@override_settings(HEADLESS_FRONTEND_URLS=CANONICAL_FRONTEND_URLS)
+def test_email_links_fall_back_to_configured_origin_for_untrusted_origin():
+    client = _make_client()
+    user = _create_verified_user()
+
+    client.post(
+        PASSWORD_REQUEST_URL,
+        {"email": user.email},
+        content_type="application/json",
+        HTTP_ORIGIN="https://evil.example",
+    )
+
+    link = get_parsed_url_from_html(mail.outbox[0], "password-reset-link")
+    assert (link.parsed.scheme, link.parsed.netloc) == ("http", "canonical.example")
+
+
+# --------------------------------------------------------------------------
 # Registration gating
 # --------------------------------------------------------------------------
 
