@@ -19,9 +19,11 @@ from django.http import HttpResponseRedirect
 from django.urls import include, path
 
 from main.api import api
+from main.views import health
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("health", health),
     path("v1/", api.urls),
     path("_allauth/", include("allauth.headless.urls")),
     path("", lambda request: HttpResponseRedirect("/v1/docs")),
