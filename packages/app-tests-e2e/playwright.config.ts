@@ -29,6 +29,14 @@ export default defineConfig({
       testMatch: /global.setup\.ts/,
     },
     {
+      // Pure-Node unit tests for the test utilities themselves: no browser and
+      // no `setup` dependency. Named *.unit.ts so the default `test.ts`
+      // testMatch (inherited by chromium) skips them and only this project runs
+      // them.
+      name: "unit",
+      testMatch: /\.unit\.ts$/,
+    },
+    {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
       dependencies: ["setup"],
