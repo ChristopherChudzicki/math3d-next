@@ -14,7 +14,7 @@
     "@math3d/mock-api": "workspace:^",
     "@playwright/test": "^1.57.0",
     "envalid": "^8.0.0",
-    "eslint": "^8.54.0",
+    "eslint": "^8.57.1",
     "mathlive": "^0.105.0",
     "p-retry": "^6.2.0",
     "three": "^0.147.0",
