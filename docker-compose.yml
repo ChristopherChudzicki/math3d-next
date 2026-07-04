@@ -31,9 +31,9 @@ services:
       - .env
     environment:
       DATABASE_URL: postgresql://docker:docker@db:5432/math3d
-      # CORS_ALLOWED_ORIGINS is not pinned here: unless .env sets it, the
-      # default derives from APP_BASE_URL (main checkout + worktree frontend
-      # ports) in webserver/main/origins.py.
+      # CORS_ALLOWED_ORIGINS is not pinned here: the dev defaults derive from
+      # APP_BASE_URL (main checkout + worktree frontend ports) in
+      # webserver/main/origins.py, and anything .env sets is unioned on top.
     command: just devserver
     volumes:
       - ./webserver:/src/webserver
