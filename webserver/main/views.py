@@ -1,7 +1,9 @@
 from django.conf import settings
 from django.http import HttpRequest, JsonResponse
+from django.views.decorators.http import require_safe
 
 
+@require_safe
 def health(request: HttpRequest) -> JsonResponse:
     """Unversioned healthcheck for uptime monitors and post-deploy smoke checks.
 
