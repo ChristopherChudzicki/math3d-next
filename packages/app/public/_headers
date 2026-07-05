@@ -1,0 +1,6 @@
+# Cloudflare Workers Static Assets reads this file from the deployed root
+# (Vite copies public/ → dist/). Content-hashed build assets are immutable, so
+# cache them aggressively; index.html and other root files keep the default
+# revalidating policy (max-age=0, must-revalidate) so deploys go live immediately.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
