@@ -1,11 +1,207 @@
-from django.conf import settings
+import importlib.util
+from pathlib import Path
 
+import pytest
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+
+from main.env import EnvConfig
 from main.origins import (
     WORKTREE_PORTS,
     cors_allowed_origins,
     csrf_trusted_origins,
     dev_cors_allowed_origins,
 )
+
+SETTINGS_PATH = Path(__file__).parent / "settings.py"
+
+# Every env var settings.py reads — derived from the EnvConfig schema so it
+# cannot drift — cleared before each load so ambient values (docker-compose
+# env, developer shells) can't leak into the scenario under test.
+SETTINGS_ENV_VARS = list(EnvConfig.model_fields)
+
+# Minimal valid production environment — production is the DEFAULT posture, so
+# no flag is needed; tests remove or override entries to exercise each guard.
+PROD_ENV = {
+    "APP_BASE_URL": "https://app.example.org",
+    "CSRF_COOKIE_DOMAIN": ".example.org",
+}
+
+
+def load_settings(monkeypatch, **env_vars):
+    """
+    Execute settings.py fresh under a fully controlled environment and return
+    the resulting module. Guards raising at import time surface as exceptions.
+    """
+    for var in SETTINGS_ENV_VARS:
+        monkeypatch.delenv(var, raising=False)
+    for key, value in env_vars.items():
+        monkeypatch.setenv(key, value)
+    spec = importlib.util.spec_from_file_location(
+        "main_settings_under_test", SETTINGS_PATH
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_production_hardening_is_the_default(monkeypatch):
+    """Secure by default: hardening applies unless a deploy explicitly opts out."""
+    loaded = load_settings(monkeypatch, **PROD_ENV)
+    assert loaded.SECURE_SSL_REDIRECT is True
+    assert loaded.SECURE_HSTS_SECONDS > 0
+    assert loaded.SESSION_COOKIE_SECURE is True
+    assert loaded.CSRF_COOKIE_SECURE is True
+
+
+def test_bare_environment_fails_closed(monkeypatch):
+    """
+    An entirely unconfigured environment must refuse to boot (it defaults to
+    production and trips the required-config guards) rather than silently
+    start with dev-grade security (issue #1130).
+    """
+    with pytest.raises(ImproperlyConfigured):
+        load_settings(monkeypatch)
+
+
+def test_local_dev_opt_out_relaxes_cookie_security(monkeypatch):
+    loaded = load_settings(monkeypatch, IS_DEVELOPMENT="True")
+    assert loaded.SESSION_COOKIE_SECURE is False
+    assert loaded.CSRF_COOKIE_SECURE is False
+    assert not getattr(loaded, "SECURE_SSL_REDIRECT", False)
+
+
+def test_is_heroku_with_dev_opt_out_is_contradictory(monkeypatch):
+    """
+    IS_HEROKU (the legacy prod flag) combined with an explicit IS_DEVELOPMENT
+    opt-out is contradictory config — refuse to guess which one is stale.
+    """
+    with pytest.raises(ImproperlyConfigured, match="IS_DEVELOPMENT"):
+        load_settings(monkeypatch, **PROD_ENV, IS_HEROKU="True", IS_DEVELOPMENT="True")
+
+
+def test_legacy_is_heroku_alone_still_gets_hardened(monkeypatch):
+    """
+    An app still carrying the legacy IS_HEROKU config var (and nothing else
+    new) lands on the production default — the migration cannot degrade it.
+    """
+    loaded = load_settings(monkeypatch, **PROD_ENV, IS_HEROKU="True")
+    assert loaded.SECURE_SSL_REDIRECT is True
+
+
+def test_production_requires_app_base_url(monkeypatch):
+    env = {**PROD_ENV}
+    del env["APP_BASE_URL"]
+    with pytest.raises(ImproperlyConfigured, match="APP_BASE_URL"):
+        load_settings(monkeypatch, **env)
+
+
+def test_production_requires_csrf_cookie_domain(monkeypatch):
+    """
+    Without CSRF_COOKIE_DOMAIN the SPA cannot read the CSRF token and all
+    authed mutations fail closed (issue #1130).
+    """
+    env = {**PROD_ENV}
+    del env["CSRF_COOKIE_DOMAIN"]
+    with pytest.raises(ImproperlyConfigured, match="CSRF_COOKIE_DOMAIN"):
+        load_settings(monkeypatch, **env)
+
+
+def test_csrf_cookie_domain_must_cover_spa_host(monkeypatch):
+    """
+    Cookie auth only works because the SPA and API share a registrable
+    domain; a CSRF_COOKIE_DOMAIN that doesn't cover the SPA host means the
+    SPA can never read the CSRF token.
+    """
+    with pytest.raises(ImproperlyConfigured, match="CSRF_COOKIE_DOMAIN"):
+        load_settings(
+            monkeypatch, **{**PROD_ENV, "CSRF_COOKIE_DOMAIN": ".unrelated.example"}
+        )
+
+
+def test_rate_limit_disable_rejected_when_cookies_secure(monkeypatch):
+    """
+    DISABLE_ALLAUTH_RATE_LIMITS must be rejected on any secure-cookie (TLS)
+    deploy, not just under a particular hosting flag (issue #1130).
+    """
+    with pytest.raises(ImproperlyConfigured, match="DISABLE_ALLAUTH_RATE_LIMITS"):
+        load_settings(monkeypatch, **PROD_ENV, DISABLE_ALLAUTH_RATE_LIMITS="True")
+
+
+def test_rate_limit_disable_allowed_in_local_dev(monkeypatch):
+    loaded = load_settings(
+        monkeypatch, IS_DEVELOPMENT="True", DISABLE_ALLAUTH_RATE_LIMITS="True"
+    )
+    assert loaded.ACCOUNT_RATE_LIMITS is False
+
+
+def test_local_dev_unions_explicit_cors_origins_with_defaults(monkeypatch):
+    """
+    A local CORS override (e.g. trusting the legacy frontend's dev server)
+    must extend the derived defaults, not replace them — otherwise setting it
+    silently un-trusts the main dev frontend and worktree ports.
+    """
+    loaded = load_settings(
+        monkeypatch,
+        IS_DEVELOPMENT="True",
+        APP_BASE_URL="http://math3d.localdev:3000",
+        CORS_ALLOWED_ORIGINS="http://localhost:3141",
+    )
+    assert "http://localhost:3141" in loaded.CORS_ALLOWED_ORIGINS
+    assert "http://math3d.localdev:3000" in loaded.CORS_ALLOWED_ORIGINS
+
+
+def test_production_cors_origins_are_exactly_the_explicit_config(monkeypatch):
+    loaded = load_settings(
+        monkeypatch, **PROD_ENV, CORS_ALLOWED_ORIGINS="https://app.example.org"
+    )
+    assert loaded.CORS_ALLOWED_ORIGINS == ["https://app.example.org"]
+
+
+def test_app_base_url_must_be_a_bare_origin(monkeypatch):
+    """
+    APP_BASE_URL is used verbatim as a CORS/CSRF origin, and a browser's
+    Origin header never carries a path — a path-bearing or scheme-less value
+    would boot fine and then silently fail every credentialed request.
+    """
+    for bad in ["https://app.example.org/app", "app.example.org"]:
+        with pytest.raises(ImproperlyConfigured, match="APP_BASE_URL"):
+            load_settings(monkeypatch, IS_DEVELOPMENT="True", APP_BASE_URL=bad)
+
+
+def test_csrf_cookie_domain_coverage_is_case_insensitive(monkeypatch):
+    """Domain matching is case-insensitive; unusual casing must not fail boot."""
+    loaded = load_settings(
+        monkeypatch, **{**PROD_ENV, "CSRF_COOKIE_DOMAIN": ".Example.org"}
+    )
+    assert loaded.CSRF_COOKIE_DOMAIN == ".Example.org"
+
+
+def test_csrf_cookie_domain_covers_subdomains_without_leading_dot(monkeypatch):
+    """
+    Browsers ignore a leading dot on the cookie Domain attribute (RFC 6265):
+    'example.org' covers app.example.org just like '.example.org' does.
+    """
+    loaded = load_settings(
+        monkeypatch, **{**PROD_ENV, "CSRF_COOKIE_DOMAIN": "example.org"}
+    )
+    assert loaded.CSRF_COOKIE_DOMAIN == "example.org"
+
+
+def test_app_base_url_trailing_slash_is_normalized(monkeypatch):
+    """
+    A trailing slash on APP_BASE_URL must not corrupt the auth email links
+    built from it (issue #829).
+    """
+    loaded = load_settings(
+        monkeypatch, IS_DEVELOPMENT="True", APP_BASE_URL="http://math3d.localdev:3000/"
+    )
+    assert loaded.APP_BASE_URL == "http://math3d.localdev:3000"
+    assert (
+        loaded.HEADLESS_FRONTEND_URLS["account_confirm_email"]
+        == "http://math3d.localdev:3000/?overlay=activate&key={key}"
+    )
 
 
 def test_dev_cors_origins_cover_app_and_worktree_ports():
@@ -15,7 +211,7 @@ def test_dev_cors_origins_cover_app_and_worktree_ports():
     CORS-trusted.
     """
     origins = dev_cors_allowed_origins(
-        is_heroku=False,
+        is_development=True,
         app_base_url="http://math3d.localdev:3000",
     )
     worktree_origins = [f"http://math3d.localdev:{port}" for port in WORKTREE_PORTS]
@@ -26,14 +222,14 @@ def test_dev_cors_origins_cover_app_and_worktree_ports():
 def test_dev_cors_origins_empty_in_prod():
     """Production must configure CORS origins explicitly."""
     origins = dev_cors_allowed_origins(
-        is_heroku=True,
-        app_base_url="https://next.math3d.org",
+        is_development=False,
+        app_base_url="https://app.example.org",
     )
     assert origins == []
 
 
 def test_dev_cors_origins_empty_without_app_base_url():
-    origins = dev_cors_allowed_origins(is_heroku=False, app_base_url="")
+    origins = dev_cors_allowed_origins(is_development=True, app_base_url="")
     assert origins == []
 
 
@@ -68,11 +264,11 @@ def test_prod_csrf_trust_ignores_cors_origins():
     CSRF-trusted write access.
     """
     origins = csrf_trusted_origins(
-        is_heroku=True,
-        app_base_url="https://next.math3d.org",
-        cors_allowed_origins=["https://next.math3d.org", "https://partner.example"],
+        is_development=False,
+        app_base_url="https://app.example.org",
+        cors_allowed_origins=["https://app.example.org", "https://partner.example"],
     )
-    assert origins == ["https://next.math3d.org"]
+    assert origins == ["https://app.example.org"]
 
 
 def test_local_csrf_trust_covers_cors_origins():
@@ -81,7 +277,7 @@ def test_local_csrf_trust_covers_cors_origins():
     every CORS origin must also pass Django's CSRF origin check.
     """
     origins = csrf_trusted_origins(
-        is_heroku=False,
+        is_development=True,
         app_base_url="http://math3d.localdev:3000",
         cors_allowed_origins=[
             "http://math3d.localdev:3000",
@@ -96,7 +292,7 @@ def test_local_csrf_trust_covers_cors_origins():
 
 def test_local_csrf_trust_handles_unset_app_base_url():
     origins = csrf_trusted_origins(
-        is_heroku=False,
+        is_development=True,
         app_base_url="",
         cors_allowed_origins=["http://math3d.localdev:3000"],
     )

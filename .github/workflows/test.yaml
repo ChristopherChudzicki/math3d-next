@@ -34,6 +34,11 @@ jobs:
 
   webserver-tests:
     runs-on: ubuntu-latest
+    env:
+      # CI is a dev environment: the tests speak plain http (production
+      # posture would 301 everything), and production behavior is pinned
+      # hermetically by the load_settings tests, not by this job's env.
+      IS_DEVELOPMENT: "True"
     defaults:
       run:
         working-directory: ./webserver
