@@ -113,8 +113,25 @@ jobs:
     # A Cloudflare deploy failure should surface as a red check on THIS job but must
     # not fail the overall release (which already succeeded on AWS/Heroku).
     continue-on-error: true
+    env:
+      SKIP_YARN_COREPACK_CHECK: true
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: "yarn"
+
+      # Install with yarn, not npm: this is a Yarn-workspaces monorepo whose
+      # package.json files use the `workspace:` protocol, which npm can't parse
+      # (cloudflare/wrangler-action's own `npm i wrangler` fails with
+      # EUNSUPPORTEDPROTOCOL here). Running the workspace-pinned wrangler is also
+      # the single source of truth for the version — no duplicated version string.
+      - name: Install dependencies
+        run: |
+          corepack enable
+          yarn install --immutable
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -123,11 +140,8 @@ jobs:
           path: packages/app/dist/
 
       - name: Deploy to Cloudflare Workers
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: packages/app
-          command: deploy
-          # Keep in sync with wrangler in packages/app/package.json for local/CI parity.
-          wranglerVersion: "4.107.0"
+        working-directory: packages/app
+        run: yarn wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
