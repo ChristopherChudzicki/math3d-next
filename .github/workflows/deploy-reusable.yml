@@ -109,6 +109,10 @@ jobs:
     if: ${{ !inputs.dry_run && inputs.environment == 'production' }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    # During the dual-publish bake, AWS/CloudFront is the authoritative live origin.
+    # A Cloudflare deploy failure should surface as a red check on THIS job but must
+    # not fail the overall release (which already succeeded on AWS/Heroku).
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 

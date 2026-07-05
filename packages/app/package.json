@@ -115,7 +115,7 @@
     "vite-plugin-compile-time": "^0.4.6",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.0.18",
-    "wrangler": "^4.107.0"
+    "wrangler": "4.107.0"
   },
   "proxy": "http://localhost:3001",
   "msw": {
