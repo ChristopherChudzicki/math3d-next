@@ -23,6 +23,9 @@ on:
         required: true
       HEROKU_API_KEY:
         required: true
+      CLOUDFLARE_API_TOKEN:
+        # Only used for production (dual-publish to Cloudflare Workers); rc builds don't deploy.
+        required: false
 
 jobs:
   build:
@@ -96,3 +99,31 @@ jobs:
           heroku_email: ${{ vars.HEROKU_EMAIL }}
         env:
           HD_APP_VERSION: ${{ inputs.version }}
+
+  # Dual-publish: deploy the same build artifact to Cloudflare Workers in parallel
+  # with the AWS/Heroku deploy above. Production-only for now — rc builds are dry runs
+  # (see release-rc.yml) and stay on AWS. Independent job so a Cloudflare failure never
+  # blocks the proven AWS/Heroku path (and vice versa) during the bake period.
+  deploy-cloudflare:
+    needs: build
+    if: ${{ !inputs.dry_run && inputs.environment == 'production' }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: packages/app/dist/
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: packages/app
+          command: deploy
+          # Keep in sync with wrangler in packages/app/package.json for local/CI parity.
+          wranglerVersion: "4.107.0"
