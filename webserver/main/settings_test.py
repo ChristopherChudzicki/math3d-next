@@ -5,6 +5,7 @@ import pytest
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
+from main.env import EnvConfig
 from main.origins import (
     WORKTREE_PORTS,
     cors_allowed_origins,
@@ -14,27 +15,10 @@ from main.origins import (
 
 SETTINGS_PATH = Path(__file__).parent / "settings.py"
 
-# Every env var settings.py reads; cleared before each load so ambient values
-# (docker-compose env, developer shells) can't leak into the scenario under test.
-SETTINGS_ENV_VARS = [
-    "CORS_ALLOWED_ORIGINS",
-    "SECRET_KEY",
-    "MAILJET_API_KEY",
-    "MAILJET_SECRET_KEY",
-    "DEFAULT_FROM_EMAIL",
-    "SERVER_EMAIL",
-    "APP_BASE_URL",
-    "INGESTION_DATABASE_URL",
-    "ALLOWED_HOSTS",
-    "IS_HEROKU",
-    "IS_PRODUCTION",
-    "LOG_LEVEL",
-    "DJANGO_LOG_LEVEL",
-    "APP_VERSION",
-    "ENABLE_REGISTRATION",
-    "CSRF_COOKIE_DOMAIN",
-    "DISABLE_ALLAUTH_RATE_LIMITS",
-]
+# Every env var settings.py reads — derived from the EnvConfig schema so it
+# cannot drift — cleared before each load so ambient values (docker-compose
+# env, developer shells) can't leak into the scenario under test.
+SETTINGS_ENV_VARS = list(EnvConfig.model_fields)
 
 # Minimal valid production environment — production is the DEFAULT posture, so
 # no flag is needed; tests remove or override entries to exercise each guard.
@@ -173,6 +157,36 @@ def test_production_cors_origins_are_exactly_the_explicit_config(monkeypatch):
         monkeypatch, **PROD_ENV, CORS_ALLOWED_ORIGINS="https://app.example.org"
     )
     assert loaded.CORS_ALLOWED_ORIGINS == ["https://app.example.org"]
+
+
+def test_app_base_url_must_be_a_bare_origin(monkeypatch):
+    """
+    APP_BASE_URL is used verbatim as a CORS/CSRF origin, and a browser's
+    Origin header never carries a path — a path-bearing or scheme-less value
+    would boot fine and then silently fail every credentialed request.
+    """
+    for bad in ["https://app.example.org/app", "app.example.org"]:
+        with pytest.raises(ImproperlyConfigured, match="APP_BASE_URL"):
+            load_settings(monkeypatch, IS_PRODUCTION="False", APP_BASE_URL=bad)
+
+
+def test_csrf_cookie_domain_coverage_is_case_insensitive(monkeypatch):
+    """Domain matching is case-insensitive; unusual casing must not fail boot."""
+    loaded = load_settings(
+        monkeypatch, **{**PROD_ENV, "CSRF_COOKIE_DOMAIN": ".Example.org"}
+    )
+    assert loaded.CSRF_COOKIE_DOMAIN == ".Example.org"
+
+
+def test_csrf_cookie_domain_covers_subdomains_without_leading_dot(monkeypatch):
+    """
+    Browsers ignore a leading dot on the cookie Domain attribute (RFC 6265):
+    'example.org' covers app.example.org just like '.example.org' does.
+    """
+    loaded = load_settings(
+        monkeypatch, **{**PROD_ENV, "CSRF_COOKIE_DOMAIN": "example.org"}
+    )
+    assert loaded.CSRF_COOKIE_DOMAIN == "example.org"
 
 
 def test_app_base_url_trailing_slash_is_normalized(monkeypatch):

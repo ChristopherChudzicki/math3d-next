@@ -2,17 +2,19 @@ import os
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from allauth.account.models import EmailAddress
+from pydantic_settings import BaseSettings
 from scenes.models import Scene
-import environ
 import json
 
 
-env = environ.Env(
-    TEST_USER_ADMIN_EMAIL=(str, ""),
-    TEST_USER_ADMIN_PASSWORD=(str, ""),
-    TEST_USER_STATIC_EMAIL=(str, ""),
-    TEST_USER_STATIC_PASSWORD=(str, ""),
-)
+class SeedEnv(BaseSettings):
+    TEST_USER_ADMIN_EMAIL: str = ""
+    TEST_USER_ADMIN_PASSWORD: str = ""
+    TEST_USER_STATIC_EMAIL: str = ""
+    TEST_USER_STATIC_PASSWORD: str = ""
+
+
+env = SeedEnv()
 
 User = get_user_model()
 
@@ -42,15 +44,15 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         create_test_user(
-            email=env("TEST_USER_ADMIN_EMAIL"),
-            password=env("TEST_USER_ADMIN_PASSWORD"),
+            email=env.TEST_USER_ADMIN_EMAIL,
+            password=env.TEST_USER_ADMIN_PASSWORD,
             public_nickname="Admin Test User",
             is_staff=True,
         )
 
         user_1 = create_test_user(
-            email=env("TEST_USER_STATIC_EMAIL"),
-            password=env("TEST_USER_STATIC_PASSWORD"),
+            email=env.TEST_USER_STATIC_EMAIL,
+            password=env.TEST_USER_STATIC_PASSWORD,
             public_nickname="Static Test User",
         )
 

@@ -12,14 +12,14 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 import os
 from pathlib import Path
-from urllib.parse import urlparse
 import logging
 
 from django.core.exceptions import ImproperlyConfigured
 
 import dj_database_url
-import environ
+from pydantic import ValidationError
 
+from main.env import EnvConfig
 from main.origins import (
     cors_allowed_origins,
     csrf_trusted_origins,
@@ -29,33 +29,13 @@ from main.origins import (
 
 logger = logging.getLogger(__name__)
 
-env = environ.Env(
-    CORS_ALLOWED_ORIGINS=(list, []),
-    SECRET_KEY=(str, ""),
-    MAILJET_API_KEY=(str, ""),
-    MAILJET_SECRET_KEY=(str, ""),
-    DEFAULT_FROM_EMAIL=(str, ""),
-    SERVER_EMAIL=(str, ""),
-    APP_BASE_URL=(str, ""),
-    INGESTION_DATABASE_URL=(str, ""),
-    ALLOWED_HOSTS=(list, []),
-    # Deployment environment. IS_PRODUCTION drives all production hardening
-    # and DEFAULTS TO TRUE: an unconfigured deploy is secure (or fails loudly
-    # on the required-config guards); dev environments opt out explicitly via
-    # IS_PRODUCTION=False (.env.development, CI). IS_HEROKU is the deprecated
-    # predecessor, read only to reject contradictory config.
-    IS_PRODUCTION=(bool, True),
-    IS_HEROKU=(bool, False),
-    # Logging
-    LOG_LEVEL=(str, "INFO"),
-    DJANGO_LOG_LEVEL=(str, "INFO"),
-    # Version
-    APP_VERSION=(str, "unknown"),
-    # Feature flags
-    ENABLE_REGISTRATION=(bool, False),
-    CSRF_COOKIE_DOMAIN=(str, ""),
-    DISABLE_ALLAUTH_RATE_LIMITS=(bool, False),
-)
+# Every env var this module reads, with types, defaults, and the cross-variable
+# boot guards (see main/env.py). Validation errors become the Django-idiomatic
+# ImproperlyConfigured so a misconfigured deploy still fails loudly at import.
+try:
+    ENV = EnvConfig()
+except ValidationError as exc:
+    raise ImproperlyConfigured(str(exc)) from exc
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -65,26 +45,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = ENV.SECRET_KEY
 
 # Application version
-APP_VERSION = env("APP_VERSION")
+APP_VERSION = ENV.APP_VERSION
 
 # Deployment environment: an explicit flag (not an inference from the hosting
 # platform) that defaults to production, so an unconfigured deploy comes up
-# hardened or fails loudly below — never silently with dev-grade security.
-IS_PRODUCTION = env("IS_PRODUCTION")
-if env("IS_HEROKU") and not IS_PRODUCTION:
-    raise ImproperlyConfigured(
-        "Contradictory config: IS_HEROKU (the deprecated production flag) is set "
-        "but IS_PRODUCTION is explicitly False. Remove IS_HEROKU; production "
-        "hardening is now the default."
-    )
+# hardened or fails loudly (EnvConfig guards) — never silently with dev-grade
+# security.
+IS_PRODUCTION = ENV.IS_PRODUCTION
 
-# The SPA origin, e.g. https://next.math3d.org. Normalized (no trailing slash)
-# because paths are appended to it below (HEADLESS_FRONTEND_URLS) and it is
-# used verbatim as an origin (CORS/CSRF trust).
-APP_BASE_URL = env("APP_BASE_URL").rstrip("/")
+# The SPA origin, e.g. https://next.math3d.org — validated and normalized to a
+# bare origin by EnvConfig.
+APP_BASE_URL = ENV.APP_BASE_URL
 
 DEBUG = False
 
@@ -99,23 +73,14 @@ if IS_PRODUCTION:
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    if not APP_BASE_URL:
-        raise ImproperlyConfigured(
-            "APP_BASE_URL is required in production (used for CSRF_TRUSTED_ORIGINS and email links)."
-        )
-    if not env("CSRF_COOKIE_DOMAIN"):
-        raise ImproperlyConfigured(
-            "CSRF_COOKIE_DOMAIN is required in production; without it the SPA "
-            "cannot read the CSRF token and all authenticated writes fail."
-        )
     # Set ALLOWED_HOSTS for production
-    ALLOWED_HOSTS = env("ALLOWED_HOSTS") if env("ALLOWED_HOSTS") else ["api.math3d.org"]
+    ALLOWED_HOSTS = ENV.ALLOWED_HOSTS if ENV.ALLOWED_HOSTS else ["api.math3d.org"]
 else:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
     ALLOWED_HOSTS = (
-        env("ALLOWED_HOSTS")
-        if env("ALLOWED_HOSTS")
+        ENV.ALLOWED_HOSTS
+        if ENV.ALLOWED_HOSTS
         else ["localhost", "127.0.0.1", "api.math3d.localdev"]
     )
 
@@ -143,27 +108,27 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": env("LOG_LEVEL"),
+        "level": ENV.LOG_LEVEL,
     },
     "loggers": {
         "django": {
             "handlers": ["console"],
-            "level": env("DJANGO_LOG_LEVEL"),
+            "level": ENV.DJANGO_LOG_LEVEL,
             "propagate": False,
         },
         "authentication": {
             "handlers": ["console"],
-            "level": env("LOG_LEVEL"),
+            "level": ENV.LOG_LEVEL,
             "propagate": False,
         },
         "scenes": {
             "handlers": ["console"],
-            "level": env("LOG_LEVEL"),
+            "level": ENV.LOG_LEVEL,
             "propagate": False,
         },
         "main": {
             "handlers": ["console"],
-            "level": env("LOG_LEVEL"),
+            "level": ENV.LOG_LEVEL,
             "propagate": False,
         },
     },
@@ -212,7 +177,7 @@ MIDDLEWARE = [
 # (APP_BASE_URL plus the worktree frontend ports). In production the dev list is
 # empty, so CORS_ALLOWED_ORIGINS is exactly what's configured.
 CORS_ALLOWED_ORIGINS = cors_allowed_origins(
-    configured=env("CORS_ALLOWED_ORIGINS"),
+    configured=ENV.CORS_ALLOWED_ORIGINS,
     dev=dev_cors_allowed_origins(
         is_production=IS_PRODUCTION,
         app_base_url=APP_BASE_URL,
@@ -229,22 +194,10 @@ CSRF_TRUSTED_ORIGINS = csrf_trusted_origins(
 
 # Cookie auth requires the SPA (next.math3d.org) and API (api.next.math3d.org)
 # to share a registrable domain: default SameSite=Lax sends the session cookie,
-# and CSRF_COOKIE_DOMAIN (.math3d.org) lets the SPA read the CSRF token. The
-# check below makes the shared-domain constraint explicit for the CSRF half.
-_csrf_cookie_domain = env("CSRF_COOKIE_DOMAIN")
-if _csrf_cookie_domain:
-    CSRF_COOKIE_DOMAIN = _csrf_cookie_domain
-    _registrable_domain = _csrf_cookie_domain.lstrip(".")
-    _spa_host = urlparse(APP_BASE_URL).hostname or ""
-    if APP_BASE_URL and not (
-        _spa_host == _registrable_domain
-        or _spa_host.endswith("." + _registrable_domain)
-    ):
-        raise ImproperlyConfigured(
-            f"CSRF_COOKIE_DOMAIN {_csrf_cookie_domain!r} does not cover the SPA "
-            f"host {_spa_host!r} (from APP_BASE_URL), so the SPA could not read "
-            "the CSRF token."
-        )
+# and CSRF_COOKIE_DOMAIN (.math3d.org) lets the SPA read the CSRF token.
+# EnvConfig enforces that the domain covers the SPA host.
+if ENV.CSRF_COOKIE_DOMAIN:
+    CSRF_COOKIE_DOMAIN = ENV.CSRF_COOKIE_DOMAIN
 
 
 AUTHENTICATION_BACKENDS = [
@@ -289,7 +242,7 @@ ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
 # injecting extra fields alongside allauth's built-in signup form.
 ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"
 
-if env("DISABLE_ALLAUTH_RATE_LIMITS"):
+if ENV.DISABLE_ALLAUTH_RATE_LIMITS:
     if SESSION_COOKIE_SECURE:
         raise ImproperlyConfigured(
             "DISABLE_ALLAUTH_RATE_LIMITS must not be enabled on a secure-cookie "
@@ -318,11 +271,8 @@ HEADLESS_FRONTEND_URLS = {
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    "default": dj_database_url.config(
-        default=os.environ.get(
-            "DATABASE_URL",
-            f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}",
-        )
+    "default": dj_database_url.parse(
+        ENV.DATABASE_URL or f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}"
     )
 }
 
@@ -350,12 +300,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "authentication.CustomUser"
 
-MAILJET_API_KEY = env("MAILJET_API_KEY")
-MAILJET_SECRET_KEY = env("MAILJET_SECRET_KEY")
+MAILJET_API_KEY = ENV.MAILJET_API_KEY
+MAILJET_SECRET_KEY = ENV.MAILJET_SECRET_KEY
 
 ANYMAIL = {
-    "MAILJET_API_KEY": env("MAILJET_API_KEY"),
-    "MAILJET_SECRET_KEY": env("MAILJET_SECRET_KEY"),
+    "MAILJET_API_KEY": ENV.MAILJET_API_KEY,
+    "MAILJET_SECRET_KEY": ENV.MAILJET_SECRET_KEY,
 }
 if MAILJET_API_KEY and MAILJET_SECRET_KEY:
     EMAIL_BACKEND = "anymail.backends.mailjet.EmailBackend"
@@ -366,8 +316,8 @@ else:
     EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
     EMAIL_FILE_PATH = "./private/email/"
 
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
-SERVER_EMAIL = env("SERVER_EMAIL")
+DEFAULT_FROM_EMAIL = ENV.DEFAULT_FROM_EMAIL
+SERVER_EMAIL = ENV.SERVER_EMAIL
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -404,7 +354,7 @@ STATICFILES_FINDERS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-INGESTION_DATABASE_URL = env("INGESTION_DATABASE_URL")
+INGESTION_DATABASE_URL = ENV.INGESTION_DATABASE_URL
 
 # Feature flags
-ENABLE_REGISTRATION = env("ENABLE_REGISTRATION")
+ENABLE_REGISTRATION = ENV.ENABLE_REGISTRATION
