@@ -35,9 +35,9 @@ jobs:
   webserver-tests:
     runs-on: ubuntu-latest
     env:
-      # This job runs directly on the runner (no .env.development), and the
-      # backend defaults to production hardening, which requires config this
-      # job doesn't have — opt out like any dev environment.
+      # CI is a dev environment: the tests speak plain http (production
+      # posture would 301 everything), and production behavior is pinned
+      # hermetically by the load_settings tests, not by this job's env.
       IS_DEVELOPMENT: "True"
     defaults:
       run:
