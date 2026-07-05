@@ -320,7 +320,7 @@ dev = [
     { name = "cssselect", specifier = ">=1.2.0,<2.0.0" },
     { name = "django-stubs", specifier = ">=5.2.9,<6.0.0" },
     { name = "factory-boy", specifier = ">=3.3.3,<4.0.0" },
-    { name = "lxml", specifier = ">=5.0.0,<6.0.0" },
+    { name = "lxml", specifier = ">=5.4.0,<6.0.0" },
     { name = "lxml-stubs", specifier = ">=0.5.0,<0.6.0" },
     { name = "mypy", specifier = ">=1.0.0,<2.0.0" },
     { name = "pytest", specifier = ">=9.0.3,<9.1.0" },
