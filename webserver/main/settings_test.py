@@ -66,19 +66,19 @@ def test_bare_environment_fails_closed(monkeypatch):
 
 
 def test_local_dev_opt_out_relaxes_cookie_security(monkeypatch):
-    loaded = load_settings(monkeypatch, IS_PRODUCTION="False")
+    loaded = load_settings(monkeypatch, IS_DEVELOPMENT="True")
     assert loaded.SESSION_COOKIE_SECURE is False
     assert loaded.CSRF_COOKIE_SECURE is False
     assert not getattr(loaded, "SECURE_SSL_REDIRECT", False)
 
 
-def test_is_heroku_with_production_opt_out_is_contradictory(monkeypatch):
+def test_is_heroku_with_dev_opt_out_is_contradictory(monkeypatch):
     """
-    IS_HEROKU (the legacy prod flag) combined with an explicit IS_PRODUCTION
+    IS_HEROKU (the legacy prod flag) combined with an explicit IS_DEVELOPMENT
     opt-out is contradictory config — refuse to guess which one is stale.
     """
-    with pytest.raises(ImproperlyConfigured, match="IS_PRODUCTION"):
-        load_settings(monkeypatch, **PROD_ENV, IS_HEROKU="True", IS_PRODUCTION="False")
+    with pytest.raises(ImproperlyConfigured, match="IS_DEVELOPMENT"):
+        load_settings(monkeypatch, **PROD_ENV, IS_HEROKU="True", IS_DEVELOPMENT="True")
 
 
 def test_legacy_is_heroku_alone_still_gets_hardened(monkeypatch):
@@ -131,7 +131,7 @@ def test_rate_limit_disable_rejected_when_cookies_secure(monkeypatch):
 
 def test_rate_limit_disable_allowed_in_local_dev(monkeypatch):
     loaded = load_settings(
-        monkeypatch, IS_PRODUCTION="False", DISABLE_ALLAUTH_RATE_LIMITS="True"
+        monkeypatch, IS_DEVELOPMENT="True", DISABLE_ALLAUTH_RATE_LIMITS="True"
     )
     assert loaded.ACCOUNT_RATE_LIMITS is False
 
@@ -144,7 +144,7 @@ def test_local_dev_unions_explicit_cors_origins_with_defaults(monkeypatch):
     """
     loaded = load_settings(
         monkeypatch,
-        IS_PRODUCTION="False",
+        IS_DEVELOPMENT="True",
         APP_BASE_URL="http://math3d.localdev:3000",
         CORS_ALLOWED_ORIGINS="http://localhost:3141",
     )
@@ -167,7 +167,7 @@ def test_app_base_url_must_be_a_bare_origin(monkeypatch):
     """
     for bad in ["https://app.example.org/app", "app.example.org"]:
         with pytest.raises(ImproperlyConfigured, match="APP_BASE_URL"):
-            load_settings(monkeypatch, IS_PRODUCTION="False", APP_BASE_URL=bad)
+            load_settings(monkeypatch, IS_DEVELOPMENT="True", APP_BASE_URL=bad)
 
 
 def test_csrf_cookie_domain_coverage_is_case_insensitive(monkeypatch):
@@ -195,7 +195,7 @@ def test_app_base_url_trailing_slash_is_normalized(monkeypatch):
     built from it (issue #829).
     """
     loaded = load_settings(
-        monkeypatch, IS_PRODUCTION="False", APP_BASE_URL="http://math3d.localdev:3000/"
+        monkeypatch, IS_DEVELOPMENT="True", APP_BASE_URL="http://math3d.localdev:3000/"
     )
     assert loaded.APP_BASE_URL == "http://math3d.localdev:3000"
     assert (
@@ -211,7 +211,7 @@ def test_dev_cors_origins_cover_app_and_worktree_ports():
     CORS-trusted.
     """
     origins = dev_cors_allowed_origins(
-        is_production=False,
+        is_development=True,
         app_base_url="http://math3d.localdev:3000",
     )
     worktree_origins = [f"http://math3d.localdev:{port}" for port in WORKTREE_PORTS]
@@ -222,14 +222,14 @@ def test_dev_cors_origins_cover_app_and_worktree_ports():
 def test_dev_cors_origins_empty_in_prod():
     """Production must configure CORS origins explicitly."""
     origins = dev_cors_allowed_origins(
-        is_production=True,
+        is_development=False,
         app_base_url="https://app.example.org",
     )
     assert origins == []
 
 
 def test_dev_cors_origins_empty_without_app_base_url():
-    origins = dev_cors_allowed_origins(is_production=False, app_base_url="")
+    origins = dev_cors_allowed_origins(is_development=True, app_base_url="")
     assert origins == []
 
 
@@ -264,7 +264,7 @@ def test_prod_csrf_trust_ignores_cors_origins():
     CSRF-trusted write access.
     """
     origins = csrf_trusted_origins(
-        is_production=True,
+        is_development=False,
         app_base_url="https://app.example.org",
         cors_allowed_origins=["https://app.example.org", "https://partner.example"],
     )
@@ -277,7 +277,7 @@ def test_local_csrf_trust_covers_cors_origins():
     every CORS origin must also pass Django's CSRF origin check.
     """
     origins = csrf_trusted_origins(
-        is_production=False,
+        is_development=True,
         app_base_url="http://math3d.localdev:3000",
         cors_allowed_origins=[
             "http://math3d.localdev:3000",
@@ -292,7 +292,7 @@ def test_local_csrf_trust_covers_cors_origins():
 
 def test_local_csrf_trust_handles_unset_app_base_url():
     origins = csrf_trusted_origins(
-        is_production=False,
+        is_development=True,
         app_base_url="",
         cors_allowed_origins=["http://math3d.localdev:3000"],
     )

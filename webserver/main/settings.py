@@ -50,11 +50,11 @@ SECRET_KEY = ENV.SECRET_KEY
 # Application version
 APP_VERSION = ENV.APP_VERSION
 
-# Deployment environment: an explicit flag (not an inference from the hosting
-# platform) that defaults to production, so an unconfigured deploy comes up
+# Deployment environment: an explicit dev opt-out (not an inference from the
+# hosting platform) that defaults to False, so an unconfigured deploy comes up
 # hardened or fails loudly (EnvConfig guards) — never silently with dev-grade
-# security.
-IS_PRODUCTION = ENV.IS_PRODUCTION
+# security. Production-like deploys (prod, rc) leave it unset.
+IS_DEVELOPMENT = ENV.IS_DEVELOPMENT
 
 # The SPA origin, e.g. https://next.math3d.org — validated and normalized to a
 # bare origin by EnvConfig.
@@ -67,7 +67,7 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 ALLOWED_HOSTS: list[str]
-if IS_PRODUCTION:
+if not IS_DEVELOPMENT:
     SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_HSTS_SECONDS = 31536000  # 1 year
@@ -179,7 +179,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = cors_allowed_origins(
     configured=ENV.CORS_ALLOWED_ORIGINS,
     dev=dev_cors_allowed_origins(
-        is_production=IS_PRODUCTION,
+        is_development=IS_DEVELOPMENT,
         app_base_url=APP_BASE_URL,
     ),
 )
@@ -187,7 +187,7 @@ CORS_ALLOW_CREDENTIALS = True
 # Prod trusts only APP_BASE_URL; local dev also trusts the CORS origins
 # (worktree frontend ports). See the function's docstring.
 CSRF_TRUSTED_ORIGINS = csrf_trusted_origins(
-    is_production=IS_PRODUCTION,
+    is_development=IS_DEVELOPMENT,
     app_base_url=APP_BASE_URL,
     cors_allowed_origins=CORS_ALLOWED_ORIGINS,
 )

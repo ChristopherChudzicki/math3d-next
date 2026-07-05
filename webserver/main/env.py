@@ -34,12 +34,13 @@ class EnvConfig(BaseSettings):
     # pydantic-settings' JSON pre-parse and let the field validator split them.
     ALLOWED_HOSTS: Annotated[list[str], NoDecode] = []
     CORS_ALLOWED_ORIGINS: Annotated[list[str], NoDecode] = []
-    # Deployment environment. IS_PRODUCTION drives all production hardening
-    # and DEFAULTS TO TRUE: an unconfigured deploy is secure (or fails loudly
-    # on the required-config guards); dev environments opt out explicitly via
-    # IS_PRODUCTION=False (.env.development, CI). IS_HEROKU is the deprecated
-    # predecessor, read only to reject contradictory config.
-    IS_PRODUCTION: bool = True
+    # Deployment environment. Production hardening is the DEFAULT: an
+    # unconfigured deploy is secure (or fails loudly on the required-config
+    # guards). Dev environments opt out explicitly via IS_DEVELOPMENT=True
+    # (.env.development, CI); production-like deploys (prod, rc) set nothing.
+    # IS_HEROKU is the deprecated production flag, read only to reject
+    # contradictory config.
+    IS_DEVELOPMENT: bool = False
     IS_HEROKU: bool = False
     # Logging
     LOG_LEVEL: str = "INFO"
@@ -80,17 +81,17 @@ class EnvConfig(BaseSettings):
 
     @model_validator(mode="after")
     def _reject_contradictory_legacy_flag(self) -> "EnvConfig":
-        if self.IS_HEROKU and not self.IS_PRODUCTION:
+        if self.IS_HEROKU and self.IS_DEVELOPMENT:
             raise ValueError(
                 "Contradictory config: IS_HEROKU (the deprecated production flag) "
-                "is set but IS_PRODUCTION is explicitly False. Remove IS_HEROKU; "
+                "is set but IS_DEVELOPMENT is also set. Remove IS_HEROKU; "
                 "production hardening is now the default."
             )
         return self
 
     @model_validator(mode="after")
     def _require_production_config(self) -> "EnvConfig":
-        if self.IS_PRODUCTION:
+        if not self.IS_DEVELOPMENT:
             if not self.APP_BASE_URL:
                 raise ValueError(
                     "APP_BASE_URL is required in production (used for "
