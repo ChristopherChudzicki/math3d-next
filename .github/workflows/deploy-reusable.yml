@@ -100,10 +100,6 @@ jobs:
         env:
           HD_APP_VERSION: ${{ inputs.version }}
 
-  # Cloudflare Workers is the live origin (DNS serves Cloudflare), so a failure here
-  # fails the release. The AWS/Heroku deploy above still runs in parallel as a legacy
-  # dual-publish target until it is removed. Production-only — rc builds are dry runs
-  # (see release-rc.yml).
   deploy-cloudflare:
     needs: build
     if: ${{ !inputs.dry_run && inputs.environment == 'production' }}
