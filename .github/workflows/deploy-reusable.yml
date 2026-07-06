@@ -100,19 +100,15 @@ jobs:
         env:
           HD_APP_VERSION: ${{ inputs.version }}
 
-  # Dual-publish: deploy the same build artifact to Cloudflare Workers in parallel
-  # with the AWS/Heroku deploy above. Production-only for now — rc builds are dry runs
-  # (see release-rc.yml) and stay on AWS. Independent job so a Cloudflare failure never
-  # blocks the proven AWS/Heroku path (and vice versa) during the bake period.
+  # Cloudflare Workers is the live origin (DNS serves Cloudflare), so a failure here
+  # fails the release. The AWS/Heroku deploy above still runs in parallel as a legacy
+  # dual-publish target until it is removed. Production-only — rc builds are dry runs
+  # (see release-rc.yml).
   deploy-cloudflare:
     needs: build
     if: ${{ !inputs.dry_run && inputs.environment == 'production' }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-    # During the dual-publish bake, AWS/CloudFront is the authoritative live origin.
-    # A Cloudflare deploy failure should surface as a red check on THIS job but must
-    # not fail the overall release (which already succeeded on AWS/Heroku).
-    continue-on-error: true
     env:
       SKIP_YARN_COREPACK_CHECK: true
     steps:
