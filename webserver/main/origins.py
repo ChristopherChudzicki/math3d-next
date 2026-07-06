@@ -68,3 +68,34 @@ def csrf_trusted_origins(
     return list(
         dict.fromkeys(([app_base_url] if app_base_url else []) + cors_allowed_origins)
     )
+
+
+def credentialed_cors_origins(
+    *,
+    is_development: bool,
+    app_base_url: str,
+    cors_allowed_origins: list[str],
+) -> list[str]:
+    """
+    Compute CREDENTIALED_CORS_ORIGINS: the origins allowed credentialed CORS.
+    Every other CORS origin gets anonymous access only — see
+    ScopedCorsCredentialsMiddleware.
+
+    In production, only the SPA may send credentials and read authenticated
+    responses; a read-only CORS consumer (e.g. the legacy frontend) must not
+    gain that just by being CORS-allowed.
+
+    In local dev, alternate frontend ports (git worktrees, see
+    scripts/setup_worktree_env.sh) log in and make credentialed requests, so
+    every CORS origin keeps credentials.
+
+    Credentialed reads and CSRF-trusted writes are distinct grants (a
+    read-only consumer could deserve one without the other), so this policy
+    is deliberately not derived from csrf_trusted_origins even though the two
+    currently coincide.
+    """
+    if not is_development:
+        return [app_base_url]
+    return list(
+        dict.fromkeys(([app_base_url] if app_base_url else []) + cors_allowed_origins)
+    )

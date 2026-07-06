@@ -22,6 +22,7 @@ from pydantic import ValidationError
 from main.env import EnvConfig
 from main.origins import (
     cors_allowed_origins,
+    credentialed_cors_origins,
     csrf_trusted_origins,
     dev_cors_allowed_origins,
 )
@@ -160,6 +161,8 @@ SITE_ID = 1
 NINJA_PAGINATION_PER_PAGE = 20
 
 MIDDLEWARE = [
+    # Must precede CorsMiddleware; see the class docstring.
+    "main.middleware.ScopedCorsCredentialsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -187,6 +190,15 @@ CORS_ALLOW_CREDENTIALS = True
 # Prod trusts only APP_BASE_URL; local dev also trusts the CORS origins
 # (worktree frontend ports). See the function's docstring.
 CSRF_TRUSTED_ORIGINS = csrf_trusted_origins(
+    is_development=IS_DEVELOPMENT,
+    app_base_url=APP_BASE_URL,
+    cors_allowed_origins=CORS_ALLOWED_ORIGINS,
+)
+# Origins allowed credentialed CORS: ScopedCorsCredentialsMiddleware strips
+# Access-Control-Allow-Credentials for origins outside this list, so other
+# CORS origins (e.g. the legacy frontend) get anonymous CORS only. A distinct
+# grant from CSRF write trust, though the two policies currently coincide.
+CREDENTIALED_CORS_ORIGINS = credentialed_cors_origins(
     is_development=IS_DEVELOPMENT,
     app_base_url=APP_BASE_URL,
     cors_allowed_origins=CORS_ALLOWED_ORIGINS,

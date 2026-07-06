@@ -290,6 +290,32 @@ def test_local_csrf_trust_covers_cors_origins():
     ]
 
 
+def test_prod_credentialed_cors_is_exactly_the_spa_origin(monkeypatch):
+    """
+    Adding a read-only CORS consumer in production must not let it make
+    credentialed requests — same principle as CSRF trust (issue #1184).
+    """
+    loaded = load_settings(
+        monkeypatch, **PROD_ENV, CORS_ALLOWED_ORIGINS="https://legacy.example.org"
+    )
+    assert loaded.CREDENTIALED_CORS_ORIGINS == ["https://app.example.org"]
+    assert "https://legacy.example.org" in loaded.CORS_ALLOWED_ORIGINS
+
+
+def test_dev_credentialed_cors_covers_all_cors_origins(monkeypatch):
+    """
+    Local worktree frontends (and any explicitly configured dev origins) make
+    credentialed requests, so in dev every CORS origin keeps credentials.
+    """
+    loaded = load_settings(
+        monkeypatch,
+        IS_DEVELOPMENT="True",
+        APP_BASE_URL="http://math3d.localdev:3000",
+        CORS_ALLOWED_ORIGINS="http://localhost:3141",
+    )
+    assert set(loaded.CORS_ALLOWED_ORIGINS) <= set(loaded.CREDENTIALED_CORS_ORIGINS)
+
+
 def test_local_csrf_trust_handles_unset_app_base_url():
     origins = csrf_trusted_origins(
         is_development=True,
