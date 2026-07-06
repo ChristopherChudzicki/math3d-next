@@ -95,7 +95,7 @@ def credentialed_cors_origins(
     currently coincide.
     """
     if not is_development:
-        return [app_base_url]
+        return [app_base_url] if app_base_url else []
     return list(
         dict.fromkeys(([app_base_url] if app_base_url else []) + cors_allowed_origins)
     )
