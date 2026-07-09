@@ -3421,7 +3421,7 @@ __metadata:
     "@mswjs/data": "npm:^0.16.2"
     "@types/lodash-es": "npm:^4.17.12"
     eslint: "npm:^8.57.1"
-    lodash-es: "npm:^4.17.21"
+    lodash-es: "npm:^4.18.1"
     msw: "npm:^2.0.14"
     tiny-invariant: "npm:^1.3.1"
     vitest: "npm:^4.0.18"
@@ -14657,7 +14657,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash-es@npm:4.18.1, lodash-es@npm:^4.17.21":
+"lodash-es@npm:4.18.1, lodash-es@npm:^4.18.1":
   version: 4.18.1
   resolution: "lodash-es@npm:4.18.1"
   checksum: 10/8bfad225ef09ef42b04283cdaf7830efcc2ba29ae41b56501c74422155ee1ccaa1f0f6e8319def3451a1fe54dec501c8e4bee622bae2b2d98ac993731e0a5cce
