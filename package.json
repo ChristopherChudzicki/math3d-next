@@ -6,7 +6,7 @@
   "packageManager": "yarn@4.8.1",
   "devDependencies": {
     "@math3d/eslint-config": "workspace:*",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "turbo": "^2.4.4",
     "typescript": "^5.7.2"
   },
