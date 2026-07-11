@@ -38,6 +38,17 @@ vitest.mock("./util/hooks/useShadowStylesheet");
 vitest.mock("./util/components/TextareaAutoWidthHeight/TextMeasurer");
 
 /**
+ * JSDOM does not implement ResizeObserver. A no-op stand-in is enough for
+ * tests: layout dimensions aren't meaningful in JSDOM anyway, so components
+ * that use ResizeObserver for resize side effects are exercised manually in
+ * a real browser instead.
+ */
+function ResizeObserverMock() {
+  return { observe() {}, unobserve() {}, disconnect() {} };
+}
+vi.stubGlobal("ResizeObserver", ResizeObserverMock);
+
+/**
  * API mocking for our tests.
  * Reset any test-specific handlers between tests.
  */

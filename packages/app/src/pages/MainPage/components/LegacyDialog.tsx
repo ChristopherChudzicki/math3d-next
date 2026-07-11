@@ -11,11 +11,17 @@ invariant(LEGACY_APP_BASE_URL, "VITE_LEGACY_APP_BASE_URL is not set");
 
 type LegacyDialogProps = {
   sceneKey: string;
+  open: boolean;
+  onOpen: () => void;
+  onClose: () => void;
 };
 
-const LegacyDialog: React.FC<LegacyDialogProps> = ({ sceneKey }) => {
-  const [open, setOpen] = React.useState(false);
-
+const LegacyDialog: React.FC<LegacyDialogProps> = ({
+  sceneKey,
+  open,
+  onOpen,
+  onClose,
+}) => {
   const legacyHref = `${LEGACY_APP_BASE_URL}/${sceneKey}`;
 
   return (
@@ -25,11 +31,12 @@ const LegacyDialog: React.FC<LegacyDialogProps> = ({ sceneKey }) => {
           position: "absolute",
           bottom: 6,
           right: 6,
+          borderRadius: 999,
         }}
-        variant="text"
+        variant="outlined"
         size="small"
         color="warning"
-        onClick={() => setOpen(true)}
+        onClick={onOpen}
       >
         Legacy Scene
       </Button>
@@ -39,7 +46,7 @@ const LegacyDialog: React.FC<LegacyDialogProps> = ({ sceneKey }) => {
         fullWidth
         maxWidth="xs"
         cancelButton={null}
-        onClose={() => setOpen(false)}
+        onClose={onClose}
       >
         <p>
           This scene was created with an older version of Math3d. It should load
