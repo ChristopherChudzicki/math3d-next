@@ -1,127 +1,62 @@
-import React, { useCallback, useEffect, useState } from "react";
-import Alert from "@mui/material/Alert";
+import React, { useEffect } from "react";
 import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import IconButton from "@mui/material/IconButton";
-import Close from "@mui/icons-material/Close";
-import { useToggle } from "@/util/hooks";
-import styles from "./LegacyBanner.module.css";
+import { useBanners } from "@/features/banners/BannerContext";
 
 const DISMISSED_KEY = "legacyBannerDismissed";
-const DEFAULT_CONFIRMATION_DURATION_MS = 7000;
-// Keep in sync with LegacyBanner.module.css's `.banner { min-height: ... }` —
-// this is the value ControlTabs subtracts via the --banner-height var below.
-const BANNER_HEIGHT_PX = 48;
-
-const sleep = (ms: number) =>
-  new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-
-type Stage = "warning" | "confirming" | "closed";
+const BANNER_ID = "legacy-scene";
 
 type LegacyBannerProps = {
+  sceneKey: string;
   onViewDetails: () => void;
   /**
-   * How long the "you can find this again in the corner" confirmation stays
-   * up before auto-closing. Overridable so tests don't need to wait out the
-   * real duration.
+   * How long the confirmation message stays up before auto-closing.
+   * Overridable so tests don't need to wait out the real duration.
    */
   confirmationDurationMs?: number;
 };
 
+// Registers this scene's legacy notice with the shared banner system rather
+// than rendering anything itself. sceneKey is only used as an effect
+// dependency: it re-registers on navigation to a different legacy scene, so
+// a plain (not "remember"-checked) dismissal on one scene doesn't suppress
+// the notice on the next one. Permanent dismissal is checked fresh from
+// localStorage on every registration via persistKey, so it stays suppressed
+// across scenes as intended.
 const LegacyBanner: React.FC<LegacyBannerProps> = ({
+  sceneKey,
   onViewDetails,
-  confirmationDurationMs = DEFAULT_CONFIRMATION_DURATION_MS,
+  confirmationDurationMs,
 }) => {
-  const [dismissedForever] = useState(
-    () => localStorage.getItem(DISMISSED_KEY) === "true",
-  );
-  const [stage, setStage] = useState<Stage>("warning");
-  const [remember, rememberToggle] = useToggle(false);
+  const { show, dismiss } = useBanners();
 
-  const visible = !dismissedForever && stage !== "closed";
-
-  // The Scene's WebGL canvas is sized once by MathBox/threestrap and only
-  // re-measures on a native window "resize" event, not on ordinary layout
-  // reflows (verified: dismissing the banner without this left the canvas
-  // stuck at its old height). Since this banner is what changes the scene's
-  // available height, set --banner-height directly (avoiding any ambiguity
-  // from two stylesheets both targeting the same custom property) and fire
-  // a synthetic resize so the canvas picks up the new size — on every
-  // visibility change, including the first time the banner appears.
   useEffect(() => {
-    if (!visible) return undefined;
-    document.body.style.setProperty("--banner-height", `${BANNER_HEIGHT_PX}px`);
-    window.dispatchEvent(new Event("resize"));
-    return () => {
-      document.body.style.removeProperty("--banner-height");
-      window.dispatchEvent(new Event("resize"));
-    };
-  }, [visible]);
-
-  const handleClose = useCallback(async () => {
-    if (stage === "confirming") {
-      setStage("closed");
-      return;
-    }
-    if (remember) {
-      localStorage.setItem(DISMISSED_KEY, "true");
-      setStage("confirming");
-      await sleep(confirmationDurationMs);
-      setStage("closed");
-    } else {
-      setStage("closed");
-    }
-  }, [stage, remember, confirmationDurationMs]);
-
-  if (!visible) return null;
-
-  return (
-    <Alert
-      className={styles.banner}
-      severity={stage === "warning" ? "warning" : "info"}
-      action={
-        <div className={styles.actions}>
-          {stage === "warning" ? (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  size="small"
-                  checked={remember}
-                  onChange={(e) => rememberToggle.set(e.target.checked)}
-                />
-              }
-              label="Don't show this automatically again"
-            />
-          ) : null}
-          <IconButton
-            size="small"
-            color="inherit"
-            aria-label="Dismiss legacy scene notice"
-            onClick={handleClose}
-          >
-            <Close fontSize="small" />
-          </IconButton>
-        </div>
-      }
-    >
-      {stage === "warning" ? (
+    show({
+      id: BANNER_ID,
+      severity: "warning",
+      persistKey: DISMISSED_KEY,
+      ariaLabel: "Dismiss legacy scene notice",
+      rememberLabel: "Don't show this automatically again for any legacy scene",
+      confirmationDurationMs,
+      content: (
         <>
           This scene was created with an older version of Math3d.{" "}
           <Button size="small" onClick={onViewDetails}>
             View details
           </Button>
         </>
-      ) : (
+      ),
+      confirmedContent: (
         <>
-          Got it — the old-site link is still available from the small
+          Got it — this won&apos;t show automatically again on any legacy scene
+          in this browser. The old-site link is still available from the small
           &quot;Legacy Scene&quot; button in the bottom-right corner.
         </>
-      )}
-    </Alert>
-  );
+      ),
+    });
+    return () => dismiss(BANNER_ID);
+  }, [sceneKey, onViewDetails, confirmationDurationMs, show, dismiss]);
+
+  return null;
 };
 
 export default LegacyBanner;

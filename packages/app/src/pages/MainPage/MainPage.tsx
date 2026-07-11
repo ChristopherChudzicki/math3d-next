@@ -16,6 +16,7 @@ import { ToggleKeyboardButton } from "@/features/virtualKeyboard";
 import { useSelector } from "react-redux";
 
 import { select } from "@/features/sceneControls/mathItems/sceneSlice";
+import BannerDisplay from "@/features/banners/BannerDisplay";
 import styles from "./MainPage.module.css";
 import Header from "./components/Header";
 import LegacyDialog from "./components/LegacyDialog";
@@ -94,11 +95,9 @@ const MainPage: React.FC = () => {
   return (
     <div className={styles.container}>
       <Header title={<TitleInput />} />
+      <BannerDisplay />
       {sceneKey && isLegacy ? (
-        // Keyed by sceneKey: this instance owns its own dismiss/remember
-        // state, which must reset when navigating to a different scene
-        // rather than carrying over (MainPage doesn't remount on its own).
-        <LegacyBanner key={sceneKey} onViewDetails={legacyDialog.on} />
+        <LegacyBanner sceneKey={sceneKey} onViewDetails={legacyDialog.on} />
       ) : null}
       <div className={styles.body}>
         <Sidebar

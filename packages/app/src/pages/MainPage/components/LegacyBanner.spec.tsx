@@ -1,10 +1,12 @@
 import React from "react";
 import { test, expect, vi } from "vitest";
 import { act, renderTestApp, screen, user } from "@/test_util";
-import { render, waitFor } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { makeItem, seedDb } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { findItemByTestId } from "@/features/sceneControls/mathItems/__tests__/__utils__";
+import { BannersProvider } from "@/features/banners/BannerContext";
+import BannerDisplay from "@/features/banners/BannerDisplay";
 import LegacyBanner from "./LegacyBanner";
 
 const DISMISSED_KEY = "legacyBannerDismissed";
@@ -71,11 +73,9 @@ test("dismissing the banner on one legacy scene does not suppress it on a differ
     name: "Dismiss legacy scene notice",
   });
   await user.click(dismiss);
-  await waitFor(() =>
-    expect(
-      screen.queryByText(/This scene was created with an older version/),
-    ).not.toBeInTheDocument(),
-  );
+  expect(
+    screen.queryByText(/This scene was created with an older version/),
+  ).not.toBeInTheDocument();
 
   await act(async () => {
     await router.navigate(`/${sceneB.key}`);
@@ -87,29 +87,26 @@ test("dismissing the banner on one legacy scene does not suppress it on a differ
   ).toBeVisible();
 });
 
-// The remaining tests exercise LegacyBanner's own dismiss/remember lifecycle
-// in isolation (rather than via renderTestApp), so that advancing fake timers
-// doesn't also tick unrelated timers elsewhere in the full app.
+// LegacyBanner registers legacy-specific copy/persistKey with the shared
+// banner system; the generic dismiss/remember/confirm lifecycle itself is
+// covered by BannerDisplay.spec.tsx. These tests exercise it in isolation
+// (rather than via renderTestApp) so they can inspect the exact copy.
+const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <BannersProvider>
+    <BannerDisplay />
+    {children}
+  </BannersProvider>
+);
 
-test("dismissing without the checkbox closes the banner without persisting", async () => {
-  render(<LegacyBanner onViewDetails={vi.fn()} />);
-
-  const dismiss = await screen.findByRole("button", {
-    name: "Dismiss legacy scene notice",
-  });
-  await user.click(dismiss);
-
-  expect(
-    screen.queryByText(/This scene was created with an older version/),
-  ).not.toBeInTheDocument();
-  expect(localStorage.getItem(DISMISSED_KEY)).not.toBe("true");
-});
-
-test("dismissing with the checkbox shows a confirmation then persists and auto-closes", async () => {
-  render(<LegacyBanner onViewDetails={vi.fn()} confirmationDurationMs={20} />);
+test("remembering a dismissal persists under legacyBannerDismissed and says the notice won't show on any legacy scene", async () => {
+  render(
+    <Wrapper>
+      <LegacyBanner sceneKey="scene-a" onViewDetails={vi.fn()} />
+    </Wrapper>,
+  );
 
   const checkbox = await screen.findByRole("checkbox", {
-    name: "Don't show this automatically again",
+    name: "Don't show this automatically again for any legacy scene",
   });
   await user.click(checkbox);
   const dismiss = await screen.findByRole("button", {
@@ -119,31 +116,6 @@ test("dismissing with the checkbox shows a confirmation then persists and auto-c
 
   expect(localStorage.getItem(DISMISSED_KEY)).toBe("true");
   expect(
-    await screen.findByText(/Got it — the old-site link is still/),
+    await screen.findByText(/won't show automatically again on any legacy/),
   ).toBeVisible();
-
-  await waitFor(() =>
-    expect(
-      screen.queryByText(/Got it — the old-site link is still/),
-    ).not.toBeInTheDocument(),
-  );
-});
-
-test("clicking dismiss again during the confirmation closes immediately", async () => {
-  render(<LegacyBanner onViewDetails={vi.fn()} />);
-
-  const checkbox = await screen.findByRole("checkbox", {
-    name: "Don't show this automatically again",
-  });
-  await user.click(checkbox);
-  const dismiss = await screen.findByRole("button", {
-    name: "Dismiss legacy scene notice",
-  });
-  await user.click(dismiss);
-  await screen.findByText(/Got it — the old-site link is still/);
-
-  await user.click(dismiss);
-  expect(
-    screen.queryByText(/Got it — the old-site link is still/),
-  ).not.toBeInTheDocument();
 });

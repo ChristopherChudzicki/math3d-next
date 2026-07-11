@@ -1,5 +1,5 @@
 import mergeClassNames from "classnames";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import * as MB from "mathbox-react";
 import type { MathboxSelection } from "mathbox";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -106,6 +106,24 @@ const Scene: React.FC<Props> = (props) => {
 
   const isOrthographic = useIsOrthographic();
   const focus = isOrthographic ? ZOOM_FACTOR : 1;
+
+  // threestrap's size plugin (mathbox's resize pipeline) already listens for
+  // a "resize" event on this container element directly, not just on
+  // `window` - it's just that plain elements never natively fire one. CSS
+  // Grid/flex layout changes (e.g. a sibling banner appearing/disappearing)
+  // resize this container without ever firing a window resize, which left
+  // the WebGL canvas stuck at its old size. Dispatching a synthetic "resize"
+  // on the container itself activates that existing listener for any such
+  // layout-only resize, with no overlap with genuine window resizes.
+  useEffect(() => {
+    if (!container) return undefined;
+    const observer = new ResizeObserver(() => {
+      container.dispatchEvent(new Event("resize"));
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [container]);
+
   return (
     <div
       data-testid="scene"
