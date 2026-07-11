@@ -145,6 +145,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",  # Required by allauth
+    # Django 6.0 requires this app be installed to use GinIndex (see scenes.Scene).
+    "django.contrib.postgres",
     "authentication",  # custom app
     "allauth",
     "allauth.account",
