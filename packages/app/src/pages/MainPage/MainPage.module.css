@@ -1,13 +1,14 @@
 .container {
   display: grid;
   grid-template-columns: 100vw;
-  grid-template-rows: var(--header-height) 1fr;
+  grid-template-rows: var(--header-height) auto 1fr;
   height: 100%;
   overflow: hidden;
 }
 
 .bodyVariables {
   --header-height: 50px;
+  --banner-height: 0px;
   --sidebar-width: min(375px, calc(100vw - 50px));
   --sidebar-z: 10;
   --sidebar-duration: 0.5s;
@@ -22,7 +23,7 @@
 
 .body {
   grid-column: 1 / 2;
-  grid-row: 2 / 3;
+  grid-row: 3 / 4;
   max-height: calc(100vh - var(--header-height));
   position: relative;
 }

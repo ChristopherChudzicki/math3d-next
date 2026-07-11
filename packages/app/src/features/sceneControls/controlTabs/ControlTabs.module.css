@@ -15,7 +15,10 @@
 
 .scrollingOverflow {
   composes: tabContext;
-  height: calc(100vh - var(--tabListHeight) - var(--header-height));
+  height: calc(
+    100vh - var(--tabListHeight) - var(--header-height) -
+      var(--banner-height, 0px)
+  );
 }
 
 .tabListExtra {

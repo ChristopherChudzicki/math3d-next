@@ -1,0 +1,9 @@
+.banner {
+  min-height: 48px;
+  box-sizing: border-box;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+}
