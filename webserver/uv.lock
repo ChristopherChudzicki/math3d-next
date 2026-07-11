@@ -300,7 +300,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dj-database-url", specifier = ">=2.0.0,<3.0.0" },
+    { name = "dj-database-url", specifier = ">=2.3.0,<3.0.0" },
     { name = "django", specifier = ">=5.2.16,<6.0.0" },
     { name = "django-allauth", specifier = ">=65.0,<66.0" },
     { name = "django-anymail", extras = ["mailjet"], specifier = ">=10.2,<11.0" },
