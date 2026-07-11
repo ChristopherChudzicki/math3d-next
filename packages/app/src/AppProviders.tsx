@@ -9,7 +9,6 @@ import type { RouterProviderProps } from "react-router";
 import { AppStore } from "@/store/store";
 import { NotificationsProvider } from "./features/notifications/NotificationsContext";
 import NotificationsDisplay from "./features/notifications/NotificationsDisplay";
-import { BannersProvider } from "./features/banners/BannerContext";
 
 interface AppProps {
   store: AppStore;
@@ -26,16 +25,14 @@ const AppProviders: React.FC<AppProps> = ({
 }) => (
   <Provider store={store}>
     <NotificationsProvider>
-      <BannersProvider>
-        <QueryClientProvider client={queryClient}>
-          <StyledEngineProvider injectFirst>
-            <ThemeProvider theme={theme}>
-              <RouterProvider router={router} />
-              <NotificationsDisplay />
-            </ThemeProvider>
-          </StyledEngineProvider>
-        </QueryClientProvider>
-      </BannersProvider>
+      <QueryClientProvider client={queryClient}>
+        <StyledEngineProvider injectFirst>
+          <ThemeProvider theme={theme}>
+            <RouterProvider router={router} />
+            <NotificationsDisplay />
+          </ThemeProvider>
+        </StyledEngineProvider>
+      </QueryClientProvider>
     </NotificationsProvider>
   </Provider>
 );
