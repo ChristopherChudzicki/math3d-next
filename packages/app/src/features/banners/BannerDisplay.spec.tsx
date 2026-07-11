@@ -91,7 +91,7 @@ describe("BannerDisplay and useBanners", () => {
         content: "Hi",
         persistKey: "test-dismissed",
         confirmedContent: "Bye",
-        confirmationDurationMs: 20,
+        confirmationDurationMs: 300,
       });
     });
     await user.click(screen.getByRole("checkbox"));

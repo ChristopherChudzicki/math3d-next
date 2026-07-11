@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import IconButton from "@mui/material/IconButton";
 import Close from "@mui/icons-material/Close";
-import { useToggle } from "@/util/hooks";
+import { useElementResize, useToggle } from "@/util/hooks";
 import { useBanners } from "./BannerContext";
 import type { Banner } from "./BannerContext";
 import styles from "./BannerDisplay.module.css";
@@ -68,26 +68,26 @@ const BannerItem: React.FC<{
 // scroll-height calc (ControlTabs.module.css) stays correct.
 const BannerDisplay: React.FC = () => {
   const { banners, dismiss } = useBanners();
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const lastHeightRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return undefined;
-    const observer = new ResizeObserver(() => {
-      document.body.style.setProperty(
-        "--banner-height",
-        `${container.offsetHeight}px`,
-      );
-    });
-    observer.observe(container);
-    return () => {
-      observer.disconnect();
+  useElementResize(container, () => {
+    if (!container) return;
+    const { offsetHeight } = container;
+    if (lastHeightRef.current === offsetHeight) return;
+    lastHeightRef.current = offsetHeight;
+    document.body.style.setProperty("--banner-height", `${offsetHeight}px`);
+  });
+
+  useEffect(
+    () => () => {
       document.body.style.removeProperty("--banner-height");
-    };
-  }, []);
+    },
+    [],
+  );
 
   return (
-    <div ref={containerRef}>
+    <div ref={setContainer}>
       {banners.map((banner) => (
         <BannerItem
           key={banner.id}

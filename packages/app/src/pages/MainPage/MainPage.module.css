@@ -24,7 +24,7 @@
 .body {
   grid-column: 1 / 2;
   grid-row: 3 / 4;
-  max-height: calc(100vh - var(--header-height));
+  max-height: calc(100vh - var(--header-height) - var(--banner-height, 0px));
   position: relative;
 }
 

@@ -33,6 +33,7 @@ const LegacyBanner: React.FC<LegacyBannerProps> = ({
     show({
       id: BANNER_ID,
       severity: "warning",
+      confirmedSeverity: "info",
       persistKey: DISMISSED_KEY,
       ariaLabel: "Dismiss legacy scene notice",
       rememberLabel: "Don't show this automatically again for any legacy scene",

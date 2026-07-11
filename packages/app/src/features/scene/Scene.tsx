@@ -1,5 +1,5 @@
 import mergeClassNames from "classnames";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import * as MB from "mathbox-react";
 import type { MathboxSelection } from "mathbox";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -8,6 +8,7 @@ import { isMathGraphic, MathItemType } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import { debounce } from "lodash-es";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useElementResize } from "@/util/hooks";
 import {
   actions,
   select,
@@ -115,14 +116,9 @@ const Scene: React.FC<Props> = (props) => {
   // the WebGL canvas stuck at its old size. Dispatching a synthetic "resize"
   // on the container itself activates that existing listener for any such
   // layout-only resize, with no overlap with genuine window resizes.
-  useEffect(() => {
-    if (!container) return undefined;
-    const observer = new ResizeObserver(() => {
-      container.dispatchEvent(new Event("resize"));
-    });
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, [container]);
+  useElementResize(container, () => {
+    container?.dispatchEvent(new Event("resize"));
+  });
 
   return (
     <div

@@ -2,7 +2,9 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import invariant from "tiny-invariant";
@@ -56,10 +58,38 @@ const BannersProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [banners, setBanners] = useState<Banner[]>([]);
+  // Mirrors `banners` so dismiss() can read current state to decide on side
+  // effects (localStorage, timers) without performing them inside a
+  // setBanners updater, which React may invoke more than once per commit.
+  const bannersRef = useRef(banners);
+  bannersRef.current = banners;
 
-  const remove = useCallback((id: string) => {
-    setBanners((prev) => prev.filter((b) => b.id !== id));
+  const pendingRemovalsRef = useRef(
+    new Map<string, ReturnType<typeof setTimeout>>(),
+  );
+  useEffect(() => {
+    const pendingRemovals = pendingRemovalsRef.current;
+    return () => {
+      pendingRemovals.forEach((timeout) => clearTimeout(timeout));
+      pendingRemovals.clear();
+    };
   }, []);
+
+  const cancelScheduledRemoval = useCallback((id: string) => {
+    const timeout = pendingRemovalsRef.current.get(id);
+    if (timeout !== undefined) {
+      clearTimeout(timeout);
+      pendingRemovalsRef.current.delete(id);
+    }
+  }, []);
+
+  const remove = useCallback(
+    (id: string) => {
+      cancelScheduledRemoval(id);
+      setBanners((prev) => prev.filter((b) => b.id !== id));
+    },
+    [cancelScheduledRemoval],
+  );
 
   const show: BannersContextResult["show"] = useCallback((spec) => {
     if (spec.persistKey && localStorage.getItem(spec.persistKey) === "true") {
@@ -73,29 +103,37 @@ const BannersProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const dismiss: BannersContextResult["dismiss"] = useCallback(
     (id, remember = false) => {
-      setBanners((prev) => {
-        const entry = prev.find((b) => b.id === id);
-        if (!entry) return prev;
-        // Already confirming a remembered dismissal: a second dismiss click
-        // always closes immediately, regardless of the checkbox state.
-        if (entry.stage === "confirming") {
-          return prev.filter((b) => b.id !== id);
+      const entry = bannersRef.current.find((b) => b.id === id);
+      if (!entry) return;
+
+      cancelScheduledRemoval(id);
+
+      // Already confirming a remembered dismissal: a second dismiss click
+      // always closes immediately, regardless of the checkbox state.
+      if (entry.stage === "confirming") {
+        remove(id);
+        return;
+      }
+
+      if (remember) {
+        if (entry.persistKey) localStorage.setItem(entry.persistKey, "true");
+        if (entry.confirmedContent) {
+          const duration =
+            entry.confirmationDurationMs ?? DEFAULT_CONFIRMATION_DURATION_MS;
+          pendingRemovalsRef.current.set(
+            id,
+            setTimeout(() => remove(id), duration),
+          );
+          setBanners((prev) =>
+            prev.map((b) => (b.id === id ? { ...b, stage: "confirming" } : b)),
+          );
+          return;
         }
-        if (remember) {
-          if (entry.persistKey) localStorage.setItem(entry.persistKey, "true");
-          if (entry.confirmedContent) {
-            const duration =
-              entry.confirmationDurationMs ?? DEFAULT_CONFIRMATION_DURATION_MS;
-            setTimeout(() => remove(id), duration);
-            return prev.map((b) =>
-              b.id === id ? { ...b, stage: "confirming" } : b,
-            );
-          }
-        }
-        return prev.filter((b) => b.id !== id);
-      });
+      }
+
+      remove(id);
     },
-    [remove],
+    [cancelScheduledRemoval, remove],
   );
 
   const result = useMemo(
