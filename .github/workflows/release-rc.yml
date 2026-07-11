@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   create-rc:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     environment: rc
     outputs:
       version: ${{ steps.generate_version.outputs.version }}

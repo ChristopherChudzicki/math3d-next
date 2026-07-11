@@ -12,7 +12,7 @@ env:
 jobs:
   e2e-tests:
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     environment: "ci"
     env:
       SKIP_YARN_COREPACK_CHECK: true

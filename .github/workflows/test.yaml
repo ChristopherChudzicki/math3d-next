@@ -9,7 +9,7 @@ on:
 
 jobs:
   frontend-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     environment: "ci"
     env:
       SKIP_YARN_COREPACK_CHECK: true
@@ -33,7 +33,7 @@ jobs:
       - run: yarn test -- --test-timeout=10000
 
   webserver-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     env:
       # CI is a dev environment: the tests speak plain http (production
       # posture would 301 everything), and production behavior is pinned
@@ -47,7 +47,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12.5
+          # Single source of truth, shared with local dev and the Heroku build,
+          # which both read webserver/.python-version. `3.12` resolves to the
+          # latest available 3.12 patch, matching Heroku's runtime selection.
+          python-version-file: webserver/.python-version
       - name: Install just
         uses: extractions/setup-just@v3
       - name: Install python dependencies
@@ -67,7 +70,7 @@ jobs:
     # index.ts each, regenerated, prettier-formatted, and diffed directly.
     env:
       SKIP_YARN_COREPACK_CHECK: true # https://github.com/actions/setup-node/issues/531#issuecomment-1819151412
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v6
