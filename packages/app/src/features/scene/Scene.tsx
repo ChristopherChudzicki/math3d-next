@@ -1,5 +1,5 @@
 import mergeClassNames from "classnames";
-import React, { useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import * as MB from "mathbox-react";
 import type { MathboxSelection } from "mathbox";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -23,10 +23,16 @@ import { useMathResults } from "../sceneControls/mathItems/mathScope";
 
 type Props = {
   className?: string;
+  /**
+   * Render a single still frame: warm up briefly, halt the render loop (rather
+   * than looping at ~60fps forever), and mark the container `data-scene-ready`
+   * for a headless screenshotter. Used by the `/app/frame` render page.
+   */
+  still?: boolean;
 };
 
 const mathboxOptions = {
-  plugins: ["core", "controls", "cursor", "stats"],
+  plugins: ["core", "controls", "cursor"],
   controls: {
     klass: OrbitControls,
   },
@@ -35,10 +41,17 @@ const mathboxOptions = {
   },
 };
 
-const setup = (mathbox: MathboxSelection | null) => {
-  // @ts-expect-error For debugging
-  window.mathbox = mathbox;
+// The mathbox root selection proxies three's render Loop via start()/stop() at
+// runtime (see mathbox's index.js), but these aren't in mathbox's TS types.
+type MathboxRoot = MathboxSelection & {
+  stop: () => void;
+  start: () => void;
 };
+
+// Frames to render before halting the loop in `still` mode. With the controls
+// sidebar (and its slider timers) unmounted the scene is deterministic, so a
+// small fixed warmup is enough to settle one clean frame.
+const STILL_WARMUP_FRAMES = 10;
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 const SceneContent = () => {
@@ -101,12 +114,38 @@ const useIsOrthographic = () => {
 // ~5 minutes to ~45 seconds.
 const is3dDisabled = localStorage.getItem("disable3dScene") === "true";
 
-const Scene: React.FC<Props> = (props) => {
-  const [container, setContainer] = React.useState<HTMLDivElement | null>(null);
+const Scene: React.FC<Props> = ({ className, still }) => {
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const [mathbox, setMathbox] = useState<MathboxSelection | null>(null);
+  const [stillReady, setStillReady] = useState(false);
   const hasRequired = useAppSelector(select.hasItems(REQUIRED_ITEMS));
 
   const isOrthographic = useIsOrthographic();
   const focus = isOrthographic ? ZOOM_FACTOR : 1;
+
+  const handleMathbox = useCallback((mb: MathboxSelection | null) => {
+    // @ts-expect-error Exposed for debugging
+    window.mathbox = mb;
+    setMathbox(mb);
+  }, []);
+
+  // In `still` mode, let the scene warm up for a few frames, then halt the
+  // render loop and flag readiness so a screenshotter can capture a static,
+  // CPU-idle frame.
+  useEffect(() => {
+    if (!still || !mathbox) return undefined;
+    let frame = 0;
+    let raf = requestAnimationFrame(function tick() {
+      frame += 1;
+      if (frame >= STILL_WARMUP_FRAMES) {
+        (mathbox as MathboxRoot).stop();
+        setStillReady(true);
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [still, mathbox]);
 
   // threestrap's size plugin (mathbox's resize pipeline) already listens for
   // a "resize" event on this container element directly, not just on
@@ -123,7 +162,8 @@ const Scene: React.FC<Props> = (props) => {
   return (
     <div
       data-testid="scene"
-      className={mergeClassNames(props.className)}
+      data-scene-ready={still && stillReady ? "true" : undefined}
+      className={mergeClassNames(className)}
       style={{ width: "100%", height: "100%" }}
       ref={setContainer}
     >
@@ -132,7 +172,7 @@ const Scene: React.FC<Props> = (props) => {
           container={container}
           options={mathboxOptions}
           focus={focus}
-          ref={setup}
+          ref={handleMathbox}
         >
           <SceneContent />
         </MB.Mathbox>
