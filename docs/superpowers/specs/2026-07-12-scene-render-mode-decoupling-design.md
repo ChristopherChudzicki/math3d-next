@@ -106,15 +106,20 @@ const FramePage: React.FC = () => {
 
 No `Header`, `Sidebar`/`SceneControls`, `ToggleKeyboardButton`, banners, or legacy dialog. `<Scene>` fills the viewport (100% width/height, no sidebar margin).
 
+### Removing the FPS overlay (both modes)
+
+The stats.js FPS overlay (`stats` in `mathboxOptions.plugins`, `Scene.tsx:29`) is dropped from **all** scene rendering — it doesn't fit the rest of the UI and is usually obscured by the controls. `mathboxOptions.plugins` becomes `["core", "controls", "cursor"]` for interactive and frame modes alike. `controls` and `cursor` stay: `<Camera>` applies the scene's stored camera _target_ via MathBox's `<Threestrap.Controls target={controlsTarget}>` (`Camera.tsx:127–134`), which is part of the `controls` plugin — dropping it would break framing (the camera would ignore the stored target and look at the origin). The `up: Vector3(0,0,1)` camera option is retained.
+
+Because the plugin set is now identical in both modes, the `still` seam does **not** touch plugins.
+
 ### A `still` seam on `<Scene>`
 
-Add an optional `still?: boolean` prop to `<Scene>`. (The prop describes the _behavior_ — a frozen, single frame; the route is named `/app/frame/` as a URL choice. They intentionally read slightly differently.) When `still` is set:
+Add an optional `still?: boolean` prop to `<Scene>`. (The prop describes the _behavior_ — a frozen, single frame; the route is named `/app/frame/` as a URL choice. They intentionally read slightly differently.) When `still` is set, it does exactly two things:
 
-1. **Drop the FPS overlay plugin.** Interactive `mathboxOptions.plugins` is `["core", "controls", "cursor", "stats"]`; still mode uses `["core", "controls", "cursor"]` — dropping only `stats` (the stats.js FPS overlay). `controls` is **retained**: `<Camera>` applies the scene's stored camera _target_ via MathBox's `<Threestrap.Controls target={controlsTarget}>` (`Camera.tsx:127–134`), which is part of the `controls` plugin — dropping it would break framing (the camera would ignore the stored target and look at the origin). `cursor` is harmless and kept for simplicity. No user input occurs in a headless capture regardless, so keeping OrbitControls mounted costs nothing; the loop still halts via `mathbox.stop()`. The `up: Vector3(0,0,1)` camera option is retained.
-2. **Halt the render loop once settled.** There is no MathBox idle event, and with sliders unmounted the scene is deterministic, so "settled" is approximated by a **fixed warmup**: after MathBox mounts, allow a small fixed number of post-render frames (a tunable constant), then call `mathbox.stop()` (`window.mathbox` is already assigned in `Scene.tsx:37`). This ends the perpetual loop so the screenshot-taker's CPU isn't pegged.
-3. **Expose a readiness signal.** Once stopped, set `data-scene-ready="true"` on the scene container `<div>`. A headless screenshotter waits on this selector before capturing. (Neutral name — a property of "the static scene is drawn and stopped", independent of the route name.)
+1. **Halt the render loop once settled.** There is no MathBox idle event, and with sliders unmounted the scene is deterministic, so "settled" is approximated by a **fixed warmup**: after MathBox mounts, allow a small fixed number of post-render frames (a tunable constant), then call `mathbox.stop()` (`window.mathbox` is already assigned in `Scene.tsx:37`). This ends the perpetual loop so the screenshot-taker's CPU isn't pegged.
+2. **Expose a readiness signal.** Once stopped, set `data-scene-ready="true"` on the scene container `<div>`. A headless screenshotter waits on this selector before capturing. (Neutral name — a property of "the static scene is drawn and stopped", independent of the route name.)
 
-Interactive `<Scene>` (no `still`) is completely unchanged.
+Interactive `<Scene>` (no `still`) behaves as before, minus the now-removed FPS overlay.
 
 ### Determinism / freeze — verified
 
@@ -123,7 +128,7 @@ The only auto-advancing timer in the app is the slider's `useInterval` (`Variabl
 ## Files touched
 
 - **New:** `features/scene/useSceneLoader.ts`, `pages/FramePage/FramePage.tsx` (+ index), and any `FramePage.module.css` for full-viewport layout.
-- **Edit:** `features/sceneControls/SceneControls.tsx` (remove data hook + `sceneKey` prop; accept `loading`), `features/scene/Scene.tsx` (add `still` prop: plugin set, loop halt, ready attribute), `pages/MainPage/MainPage.tsx` (call `useSceneLoader`, pass `loading`), `routes.tsx` (add `frame/:sceneKey` under the `app` route → `/app/frame/:sceneKey`).
+- **Edit:** `features/sceneControls/SceneControls.tsx` (remove data hook + `sceneKey` prop; accept `loading`), `features/scene/Scene.tsx` (remove `stats` from `mathboxOptions.plugins`; add `still` prop: loop halt + ready attribute), `pages/MainPage/MainPage.tsx` (call `useSceneLoader`, pass `loading`), `routes.tsx` (add `frame/:sceneKey` under the `app` route → `/app/frame/:sceneKey`).
 
 ## Testing
 
@@ -138,3 +143,4 @@ The only auto-advancing timer in the app is the slider's `useInterval` (`Variabl
 - Scene data loads via `useSceneLoader`, independent of `SceneControls`.
 - `/app/frame/:sceneKey` renders a chrome-less, full-viewport scene with real data; the render loop stops after warmup and `data-scene-ready` appears.
 - Normal `MainPage` behavior (loading, 404 redirect, title, default-scene fallback) is unchanged, verified by unit + e2e.
+- The stats.js FPS overlay no longer appears in the interactive scene (`stats` removed from `mathboxOptions.plugins`).
