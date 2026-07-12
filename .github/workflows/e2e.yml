@@ -12,7 +12,11 @@ env:
 jobs:
   e2e-tests:
     timeout-minutes: 60
-    runs-on: ubuntu-26.04
+    # Pinned to 24.04 (not 26.04 like the other jobs) because Playwright 1.57
+    # can't install browser deps on ubuntu-26.04-x64 yet. The backend under test
+    # runs in Docker, so this runner's OS has no Heroku-parity relevance. Bump to
+    # ubuntu-26.04 once a Playwright release supports it.
+    runs-on: ubuntu-24.04
     environment: "ci"
     env:
       SKIP_YARN_COREPACK_CHECK: true
