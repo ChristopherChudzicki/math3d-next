@@ -42,16 +42,30 @@ const mathboxOptions = {
 };
 
 // The mathbox root selection proxies three's render Loop via start()/stop() at
-// runtime (see mathbox's index.js), but these aren't in mathbox's TS types.
+// runtime (see mathbox's index.js), and carries the internal render Context on
+// `_context`. Neither is in mathbox's TS types.
+type MathboxContext = {
+  // Number of scene objects still queued in mathbox's warmup pipeline. mathbox
+  // inserts them a few per frame, pre-warming each off-screen; it reaches 0 once
+  // every object has been inserted and drawn (mathbox render/scene.js).
+  getPending: () => number;
+};
 type MathboxRoot = MathboxSelection & {
   stop: () => void;
   start: () => void;
+  _context?: MathboxContext;
 };
 
-// Frames to render before halting the loop in `still` mode. With the controls
-// sidebar (and its slider timers) unmounted the scene is deterministic, so a
-// small fixed warmup is enough to settle one clean frame.
-const STILL_WARMUP_FRAMES = 10;
+// `still`-mode readiness. mathbox drains its warmup queue a couple objects per
+// frame, so a fixed frame count under-renders any scene with more objects than
+// the count covers (e.g. a 40-object scene needs ~20 frames; at 10 it screenshots
+// half-drawn). Instead we poll `getPending()` and halt once the queue has been
+// empty for a few consecutive frames — scaling with scene complexity, and (since
+// it keys off drain state, not wall-clock) unaffected by the slow software-GL the
+// headless screenshotter runs on.
+const STILL_SETTLE_FRAMES = 3; // consecutive drained frames confirming quiescence
+const STILL_MAX_FRAMES = 300; // frame-based backstop so we never spin forever
+const STILL_FALLBACK_FRAMES = 30; // used only if `getPending` is ever unavailable
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 const SceneContent = () => {
@@ -129,15 +143,33 @@ const Scene: React.FC<Props> = ({ className, still }) => {
     setMathbox(mb);
   }, []);
 
-  // In `still` mode, let the scene warm up for a few frames, then halt the
+  // In `still` mode, wait for mathbox's warmup queue to drain, then halt the
   // render loop and flag readiness so a screenshotter can capture a static,
-  // CPU-idle frame.
+  // fully-rendered, CPU-idle frame.
   useEffect(() => {
     if (!still || !mathbox) return undefined;
+    const context = (mathbox as MathboxRoot)._context;
+    const readPending =
+      typeof context?.getPending === "function"
+        ? () => context.getPending()
+        : null;
+
     let frame = 0;
+    let settled = 0;
+    // Guard against halting at frame 1, before any object has been queued: only
+    // count "drained" frames once we've seen the queue non-empty at least once.
+    let sawPending = false;
     let raf = requestAnimationFrame(function tick() {
       frame += 1;
-      if (frame >= STILL_WARMUP_FRAMES) {
+      if (readPending) {
+        const pending = readPending();
+        if (pending > 0) sawPending = true;
+        settled = sawPending && pending === 0 ? settled + 1 : 0;
+      }
+      const drained = readPending
+        ? settled >= STILL_SETTLE_FRAMES
+        : frame >= STILL_FALLBACK_FRAMES;
+      if (drained || frame >= STILL_MAX_FRAMES) {
         (mathbox as MathboxRoot).stop();
         setStillReady(true);
         return;
