@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   validate-rc:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       rc_tag: ${{ steps.find_latest_rc.outputs.rc_tag }}
       version: ${{ steps.extract_version.outputs.version }}
@@ -79,7 +79,7 @@ jobs:
 
   create-prod-tag:
     needs: validate-rc
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v4
 
