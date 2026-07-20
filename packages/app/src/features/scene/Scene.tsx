@@ -59,11 +59,22 @@ type MathboxRoot = MathboxSelection & {
 // `still`-mode readiness. mathbox drains its warmup queue a couple objects per
 // frame, so a fixed frame count under-renders any scene with more objects than
 // the count covers (e.g. a 40-object scene needs ~20 frames; at 10 it screenshots
-// half-drawn). Instead we poll `getPending()` and halt once the queue has been
-// empty for a few consecutive frames — scaling with scene complexity, and (since
-// it keys off drain state, not wall-clock) unaffected by the slow software-GL the
-// headless screenshotter runs on.
-const STILL_SETTLE_FRAMES = 3; // consecutive drained frames confirming quiescence
+// half-drawn). Instead we poll `getPending()` and halt once the queue has stayed
+// empty for a short while — scaling with scene complexity, and (since it keys off
+// drain state, not a frame count) unaffected by the slow software-GL the headless
+// screenshotter runs on.
+//
+// mathbox-react builds the scene tree in more than one React commit (a
+// child-before-parent `forceUpdate` cascade), and the browser runs warmup frames
+// between those commits. So `getPending()` is NOT monotonic: it can drain to 0
+// between commit bursts before the next burst enqueues the rest (measured:
+// 2 -> 0 -> 8 -> 36 for a ~40-object scene). That transient zero is why we can't
+// halt on the first empty frame. We gate on WALL-CLOCK quiescence rather than a
+// frame count because the transient window is made of cheap idle frames (~8ms,
+// independent of GL speed): a few frames barely outlast it, but a few hundred
+// milliseconds clears it with margin on any hardware, including Cloudflare's
+// slower vCPUs.
+const STILL_QUIET_MS = 500; // queue must stay empty this long to count as drained
 const STILL_MAX_FRAMES = 300; // frame-based backstop so we never spin forever
 const STILL_FALLBACK_FRAMES = 30; // used only if `getPending` is ever unavailable
 
@@ -155,19 +166,24 @@ const Scene: React.FC<Props> = ({ className, still }) => {
         : null;
 
     let frame = 0;
-    let settled = 0;
-    // Guard against halting at frame 1, before any object has been queued: only
-    // count "drained" frames once we've seen the queue non-empty at least once.
+    // Timestamp of the last frame the queue was non-empty. Once the queue has
+    // been empty for `STILL_QUIET_MS` past this, the scene has drained.
+    let lastNonEmpty = performance.now();
+    // Guard against halting before any object has been queued: only trust an
+    // empty queue once we've seen it non-empty at least once.
     let sawPending = false;
     let raf = requestAnimationFrame(function tick() {
       frame += 1;
+      const now = performance.now();
       if (readPending) {
         const pending = readPending();
-        if (pending > 0) sawPending = true;
-        settled = sawPending && pending === 0 ? settled + 1 : 0;
+        if (pending > 0) {
+          sawPending = true;
+          lastNonEmpty = now;
+        }
       }
       const drained = readPending
-        ? settled >= STILL_SETTLE_FRAMES
+        ? sawPending && now - lastNonEmpty >= STILL_QUIET_MS
         : frame >= STILL_FALLBACK_FRAMES;
       if (drained || frame >= STILL_MAX_FRAMES) {
         (mathbox as MathboxRoot).stop();
