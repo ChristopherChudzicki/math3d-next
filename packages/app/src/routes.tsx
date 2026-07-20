@@ -4,6 +4,7 @@ import { Outlet } from "react-router";
 
 import OverlayHost from "@/features/overlays/OverlayHost";
 import MainPage from "./pages/MainPage";
+import FramePage from "./pages/FramePage/FramePage";
 import HelpPage from "./pages/HelpPage/HelpPage";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
 import ErrorTrigger from "./pages/ErrorPage/ErrorTrigger";
@@ -32,6 +33,9 @@ const routes: RouteObject[] = [
         children: [
           { index: true, element: <NotFoundPage /> },
           { path: "help/reference", element: <HelpPage /> },
+          // Scene-only render page for headless screenshots. Lives under /app/
+          // (the non-scene-key namespace) so it can't be mistaken for a scene.
+          { path: "frame/:sceneKey", element: <FramePage /> },
           { path: "*", element: <NotFoundPage /> },
         ],
       },

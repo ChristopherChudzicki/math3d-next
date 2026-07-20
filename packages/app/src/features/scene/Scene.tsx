@@ -1,5 +1,5 @@
 import mergeClassNames from "classnames";
-import React, { useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import * as MB from "mathbox-react";
 import type { MathboxSelection } from "mathbox";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -23,10 +23,16 @@ import { useMathResults } from "../sceneControls/mathItems/mathScope";
 
 type Props = {
   className?: string;
+  /**
+   * Render a single still frame: warm up briefly, halt the render loop (rather
+   * than looping at ~60fps forever), and mark the container `data-scene-ready`
+   * for a headless screenshotter. Used by the `/app/frame` render page.
+   */
+  still?: boolean;
 };
 
 const mathboxOptions = {
-  plugins: ["core", "controls", "cursor", "stats"],
+  plugins: ["core", "controls", "cursor"],
   controls: {
     klass: OrbitControls,
   },
@@ -35,10 +41,42 @@ const mathboxOptions = {
   },
 };
 
-const setup = (mathbox: MathboxSelection | null) => {
-  // @ts-expect-error For debugging
-  window.mathbox = mathbox;
+// The mathbox root selection proxies three's render Loop via start()/stop() at
+// runtime (see mathbox's index.js), and carries the internal render Context on
+// `_context`. Neither is in mathbox's TS types.
+type MathboxContext = {
+  // Number of scene objects still queued in mathbox's warmup pipeline. mathbox
+  // inserts them a few per frame, pre-warming each off-screen; it reaches 0 once
+  // every object has been inserted and drawn (mathbox render/scene.js).
+  getPending: () => number;
 };
+type MathboxRoot = MathboxSelection & {
+  stop: () => void;
+  start: () => void;
+  _context?: MathboxContext;
+};
+
+// `still`-mode readiness. mathbox drains its warmup queue a couple objects per
+// frame, so a fixed frame count under-renders any scene with more objects than
+// the count covers (e.g. a 40-object scene needs ~20 frames; at 10 it screenshots
+// half-drawn). Instead we poll `getPending()` and halt once the queue has stayed
+// empty for a short while — scaling with scene complexity, and (since it keys off
+// drain state, not a frame count) unaffected by the slow software-GL the headless
+// screenshotter runs on.
+//
+// mathbox-react builds the scene tree in more than one React commit (a
+// child-before-parent `forceUpdate` cascade), and the browser runs warmup frames
+// between those commits. So `getPending()` is NOT monotonic: it can drain to 0
+// between commit bursts before the next burst enqueues the rest (measured:
+// 2 -> 0 -> 8 -> 36 for a ~40-object scene). That transient zero is why we can't
+// halt on the first empty frame. We gate on WALL-CLOCK quiescence rather than a
+// frame count because the transient window is made of cheap idle frames (~8ms,
+// independent of GL speed): a few frames barely outlast it, but a few hundred
+// milliseconds clears it with margin on any hardware, including Cloudflare's
+// slower vCPUs.
+const STILL_QUIET_MS = 500; // queue must stay empty this long to count as drained
+const STILL_MAX_FRAMES = 300; // frame-based backstop so we never spin forever
+const STILL_FALLBACK_FRAMES = 30; // used only if `getPending` is ever unavailable
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 const SceneContent = () => {
@@ -101,12 +139,61 @@ const useIsOrthographic = () => {
 // ~5 minutes to ~45 seconds.
 const is3dDisabled = localStorage.getItem("disable3dScene") === "true";
 
-const Scene: React.FC<Props> = (props) => {
-  const [container, setContainer] = React.useState<HTMLDivElement | null>(null);
+const Scene: React.FC<Props> = ({ className, still }) => {
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const [mathbox, setMathbox] = useState<MathboxSelection | null>(null);
+  const [stillReady, setStillReady] = useState(false);
   const hasRequired = useAppSelector(select.hasItems(REQUIRED_ITEMS));
 
   const isOrthographic = useIsOrthographic();
   const focus = isOrthographic ? ZOOM_FACTOR : 1;
+
+  const handleMathbox = useCallback((mb: MathboxSelection | null) => {
+    // @ts-expect-error Exposed for debugging
+    window.mathbox = mb;
+    setMathbox(mb);
+  }, []);
+
+  // In `still` mode, wait for mathbox's warmup queue to drain, then halt the
+  // render loop and flag readiness so a screenshotter can capture a static,
+  // fully-rendered, CPU-idle frame.
+  useEffect(() => {
+    if (!still || !mathbox) return undefined;
+    const context = (mathbox as MathboxRoot)._context;
+    const readPending =
+      typeof context?.getPending === "function"
+        ? () => context.getPending()
+        : null;
+
+    let frame = 0;
+    // Timestamp of the last frame the queue was non-empty. Once the queue has
+    // been empty for `STILL_QUIET_MS` past this, the scene has drained.
+    let lastNonEmpty = performance.now();
+    // Guard against halting before any object has been queued: only trust an
+    // empty queue once we've seen it non-empty at least once.
+    let sawPending = false;
+    let raf = requestAnimationFrame(function tick() {
+      frame += 1;
+      const now = performance.now();
+      if (readPending) {
+        const pending = readPending();
+        if (pending > 0) {
+          sawPending = true;
+          lastNonEmpty = now;
+        }
+      }
+      const drained = readPending
+        ? sawPending && now - lastNonEmpty >= STILL_QUIET_MS
+        : frame >= STILL_FALLBACK_FRAMES;
+      if (drained || frame >= STILL_MAX_FRAMES) {
+        (mathbox as MathboxRoot).stop();
+        setStillReady(true);
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [still, mathbox]);
 
   // threestrap's size plugin (mathbox's resize pipeline) already listens for
   // a "resize" event on this container element directly, not just on
@@ -123,7 +210,8 @@ const Scene: React.FC<Props> = (props) => {
   return (
     <div
       data-testid="scene"
-      className={mergeClassNames(props.className)}
+      data-scene-ready={still && stillReady ? "true" : undefined}
+      className={mergeClassNames(className)}
       style={{ width: "100%", height: "100%" }}
       ref={setContainer}
     >
@@ -132,7 +220,7 @@ const Scene: React.FC<Props> = (props) => {
           container={container}
           options={mathboxOptions}
           focus={focus}
-          ref={setup}
+          ref={handleMathbox}
         >
           <SceneContent />
         </MB.Mathbox>

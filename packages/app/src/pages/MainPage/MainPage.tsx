@@ -6,6 +6,7 @@ import {
   useSearchParams,
 } from "react-router";
 import Scene from "@/features/scene";
+import useSceneLoader from "@/features/scene/useSceneLoader";
 import SceneControls from "@/features/sceneControls";
 import Sidebar from "@/util/components/sidebar";
 import { useBodyClass, useToggle } from "@/util/hooks";
@@ -66,6 +67,7 @@ const CONTROLS_VALUES = ["0", "1"] as const;
 const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
   const { sceneKey } = useParams();
+  const { isLoading } = useSceneLoader(sceneKey);
   const isLegacy = useSelector(select.isLegacy);
   const [legacyDialogOpen, legacyDialog] = useToggle(false);
   // legacyDialogOpen lives here (not in LegacyDialog) so the banner's "View
@@ -113,7 +115,7 @@ const MainPage: React.FC = () => {
             onVisibleChange={handleControlsClick}
             label="Controls"
           >
-            <SceneControls sceneKey={sceneKey} />
+            <SceneControls loading={isLoading} />
           </Sidebar>
           <Scene
             className={

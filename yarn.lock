@@ -7546,7 +7546,7 @@ __metadata:
     jsdom: "npm:^26.1.0"
     lodash-es: "npm:4.18.1"
     mathbox: "npm:^2.3.1"
-    mathbox-react: "npm:^0.3.0"
+    mathbox-react: "npm:^1.0.1"
     mathlive: "npm:^0.105.0"
     msw: "npm:^2.0.14"
     ordinal: "npm:1.0.3"
@@ -14945,16 +14945,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"mathbox-react@npm:^0.3.0":
-  version: 0.3.0
-  resolution: "mathbox-react@npm:0.3.0"
+"mathbox-react@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "mathbox-react@npm:1.0.1"
   dependencies:
     lodash: "npm:^4.17.21"
   peerDependencies:
     mathbox: ^2.3.1
     react: ^17.0.2 || ^18.0.0
-    three: ">=0.118.0"
-  checksum: 10/b1a0952271a9ce421f6873d116f87a1db34db01f4fa98668672b5bae0ac7e9b5c51f7db6072cf3fa88674a8f5993f80db3d91434b302aa2f0447be9fffecd144
+    three: ">=0.118.0 <0.163"
+  checksum: 10/57edf6186eaca9e90f1a045edc1f2dc75584b252f91dced6bb9bcc3b8f2b5ee670ba7016e6717d41365521a9be8852569bd14ae096722af541fce879e3a8e640
   languageName: node
   linkType: hard
 
