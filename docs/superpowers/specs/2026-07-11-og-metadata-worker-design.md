@@ -403,46 +403,52 @@ Client-side capture (screenshot in the sharer's browser) was **rejected**: nonde
 framing, attacker-controlled uploaded bytes served as public previews, can't regenerate on
 graphics changes, and only covers scenes someone actually shares.
 
-### App-side prerequisite — a deterministic "render mode"
+### App-side prerequisite — a deterministic render mode
 
-_(Being pulled forward — see Build sequencing: the next thing we build, ahead of the metadata
-Worker, and the tool for authoring the static default `og:image`.)_
+_Implemented in PR #1209 (the `/app/frame/:sceneKey` render page). Design:
+`docs/superpowers/specs/2026-07-12-scene-render-mode-decoupling-design.md`. Summarized here
+as-built; a few details diverged from the original sketch and are noted inline._
 
 A headless screenshot of the app as-is has three problems — the first two confirmed by the
 fidelity spike, the third about the screenshot-taker's resource use:
 
-1. **UI chrome.** The controls sidebar/header/toolbar occupy the left third of the frame and
-   shove the scene off-center — not a clean scene image. (Also the stats.js FPS overlay:
-   `mathboxOptions.plugins` includes `"stats"` in `Scene.tsx:28`.)
+1. **Editor UI.** The controls sidebar/header/toolbar occupy the left third of the frame and
+   shove the scene off-center — not a clean scene image. (The stats.js FPS overlay was in
+   `mathboxOptions.plugins` too; it's now dropped from all scene rendering.)
 2. **Animation.** Sliders can be auto-playing on load. Slider playback is a `useInterval` in the
-   **sidebar** (`.../VariableSlider/index.tsx:116`) that advances the value into Redux — it is
-   **not** part of the Three.js render loop, and there is **no** global clock/`t` parameter.
+   **sidebar** (`VariableSlider`) that advances the value into Redux — it is **not** part of the
+   Three.js render loop, and there is **no** global clock/`t` parameter.
 3. **Continuous rendering.** MathBox/Three.js runs a ~60 fps render loop. A static screenshot
    needs exactly one settled frame; the loop is otherwise pure wasted CPU on whatever takes the
-   shot (a Browser Rendering session, a Heroku dyno). This is the main motivation.
+   shot (a Browser Rendering session, a Heroku dyno). This was the main motivation.
 
-The app needs a **render mode**, toggled by a query param (name TBD — need not contain "og";
-candidates `?render` / `?screenshot` / `?still`), that:
+As built, render mode is a **dedicated route** — `/app/frame/:sceneKey` → `FramePage`, rendering
+`<Scene still>` full-viewport — **not** a query param on the scene URL (a route keeps the
+frame-mode conditionals out of `MainPage`'s Header/Sidebar/banner tree; see the decoupling design
+doc). It:
 
-- **hides all UI chrome** by **not mounting** `Header` / `Sidebar`+`SceneControls` /
-  `ToggleKeyboardButton` (`MainPage.tsx:86–105`), and drops the stats overlay. Note the existing
-  `?controls=0` param only **CSS-hides** the sidebar while leaving it mounted
-  (`Sidebar.tsx:43,74`) — so it does **not** stop slider timers and can't be reused for this.
-  **Blocking dependency:** scene _data-loading_ currently lives inside `SceneControls`
-  (`useLoadSceneIntoRedux` — the sole `setScene` dispatcher), so not-mounting it would render a
-  _blank_ scene. Decoupling that is a precursor refactor tracked separately —
-  see `2026-07-12-scene-render-mode-decoupling-handoff.md`;
-- **stops the render loop** after the scene settles. MathBox exposes `mathbox.stop()`/`start()`
-  (→ `three.Loop.stop()`); `window.mathbox` is already wired (`Scene.tsx:37`), so it's a one-liner.
-- **freezes animation** — achieved for free by not mounting the sliders (removes the `useInterval`),
-  which also freezes each variable at its stored value;
+- **hides the editor UI** by **not mounting** `Header` / `Sidebar`+`SceneControls` /
+  `ToggleKeyboardButton` — `FramePage` mounts only the scene. (The existing `?controls=0` param
+  only **CSS-hides** the sidebar while leaving it mounted, so it does not stop slider timers and
+  couldn't be reused for this.) The **blocking dependency** — scene _data-loading_ used to live
+  inside `SceneControls`, so not-mounting it rendered a _blank_ scene — was removed by extracting
+  a `useSceneLoader` hook that both the editor and the render page call;
+- **stops the render loop** after the scene settles, via `mathbox.stop()` (→ `three.Loop.stop()`),
+  and sets `data-scene-ready` on the container for a screenshotter to wait on;
+- **freezes animation** for free by not mounting the sliders (removes the `useInterval`), which
+  also freezes each variable at its stored value;
 - does all of the above **without mutating persisted/Redux UI state**.
 
-Likely also wants a canonical default camera framing for scenes the author never re-oriented.
-Feasibility read: **moderate, no blockers.** The one fuzzy piece is **"settled" detection** —
-MathBox exposes no idle event, so render a fixed number of frames past `warmup` (or a short
-timeout) then `stop()`; with sliders unmounted the scene is deterministic, so a fixed warmup is
-likely sufficient.
+**"Settled" detection was the one hard part — and the original guess (a fixed frame count past
+`warmup`) proved insufficient.** MathBox exposes no idle event, and mathbox-react built the scene
+tree across more than one React commit, so its warmup queue (`getPending()`) was non-monotonic:
+it could hit 0 _between_ commit bursts before the rest of the scene enqueued, so a fixed
+frame-count settle risked a blank/half-drawn capture. Two fixes shipped — readiness gates on
+**wall-clock queue quiescence** (`STILL_QUIET_MS`) rather than a frame count, and mathbox-react
+was bumped to `1.0.1`, which creates nodes in a `useLayoutEffect` so the tree builds in one
+synchronous commit burst (removing the transient at the source). A committed e2e regression test
+(`frame-render.test.ts`) asserts the capture is content-present, not blank. A canonical default
+camera framing for un-oriented scenes remains a possible follow-up.
 
 **Social-cache implications for images:** updating an image later reaches only _future_ shares
 and platforms that re-scrape soon (Slack ~30 min); already-posted links on FB/LinkedIn/X keep
