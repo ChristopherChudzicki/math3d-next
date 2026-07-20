@@ -450,6 +450,13 @@ synchronous commit burst (removing the transient at the source). A committed e2e
 (`frame-render.test.ts`) asserts the capture is content-present, not blank. A canonical default
 camera framing for un-oriented scenes remains a possible follow-up.
 
+**Worker-side item — not-found timeout.** The render page loads scenes with `onNotFound:
+"silent"` (no dialog/redirect for a headless viewer), so a missing or deleted scene simply never
+populates Redux and `data-scene-ready` **never fires**. The image-capture worker must therefore
+apply a **short not-found timeout** (and ideally distinguish it — e.g. probe `GET /scenes/{key}/`
+first, or cap the wait well under its full render budget) so a dead key doesn't cost a full
+browser-hold per request. Do **not** raise the worker's readiness wait to cover this case.
+
 **Social-cache implications for images:** updating an image later reaches only _future_ shares
 and platforms that re-scrape soon (Slack ~30 min); already-posted links on FB/LinkedIn/X keep
 the old image until they expire or are manually refreshed (FB Sharing Debugger / LinkedIn Post
