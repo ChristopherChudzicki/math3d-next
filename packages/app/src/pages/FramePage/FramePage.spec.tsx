@@ -5,7 +5,7 @@ import { select } from "@/features/sceneControls/mathItems/sceneSlice";
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 
-test("renders the scene with its data loaded and no editor chrome", async () => {
+test("renders the scene with its data loaded and no editor UI", async () => {
   const scene = new SceneBuilder();
   seedDb.withScene(scene.json());
 
@@ -19,7 +19,7 @@ test("renders the scene with its data loaded and no editor chrome", async () => 
   // The 3D scene container is present...
   expect(screen.getByTestId("scene")).toBeInTheDocument();
 
-  // ...but none of the editor chrome is.
+  // ...but none of the editor UI is.
   expect(
     screen.queryByRole("button", { name: "Collapse Controls" }),
   ).toBeNull();

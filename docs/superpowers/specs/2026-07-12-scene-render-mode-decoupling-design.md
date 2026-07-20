@@ -1,8 +1,7 @@
-# Design: Decouple scene-loading from chrome + a scene-only `/app/frame/` render page
+# Design: Decouple scene-loading from the editor UI + a scene-only `/app/frame/` render page
 
 **Date:** 2026-07-12
 **Branch:** `scene-render-mode-decoupling`
-**Supersedes the investigation in:** `docs/superpowers/specs/2026-07-12-scene-render-mode-decoupling-handoff.md`
 **Unblocks:** `docs/superpowers/specs/2026-07-11-og-metadata-worker-design.md` (per-scene social-share images)
 
 ## Problem
@@ -10,9 +9,9 @@
 `SceneControls` conflates two unrelated responsibilities:
 
 1. **Data** — `useLoadSceneIntoRedux` (`SceneControls.tsx:16`) fetches the scene (React Query), dispatches `setScene` into Redux, sets `document.title`, and handles 404 (notification + redirect).
-2. **Presentation** — renders the editor chrome (`ControlTabs`, `AddObjectButton`, `MathItemsList`).
+2. **Presentation** — renders the editor UI (`ControlTabs`, `AddObjectButton`, `MathItemsList`).
 
-`<Scene>` renders purely from Redux — it gates on `select.hasItems(REQUIRED_ITEMS)` (`Scene.tsx:106`) and only mounts MathBox once those items exist. So `<Scene>` structurally depends on responsibility #1 having run, but #1 only runs as a side-effect of mounting the chrome for #2. You cannot hide the chrome by unmounting it without also killing scene-loading.
+`<Scene>` renders purely from Redux — it gates on `select.hasItems(REQUIRED_ITEMS)` (`Scene.tsx:106`) and only mounts MathBox once those items exist. So `<Scene>` structurally depends on responsibility #1 having run, but #1 only runs as a side-effect of mounting the editor UI for #2. You cannot hide that UI by unmounting it without also killing scene-loading.
 
 The existing `?controls=0` param does **not** address this: `Sidebar` keeps its children mounted and merely toggles an `inert`/`aria-hidden` CSS state (`Sidebar.tsx:43,74`). `SceneControls` — and any running timer — stays mounted. It hides pixels, not the coupling.
 
@@ -90,7 +89,7 @@ Register the route as a **child of the existing `app` route** (`routes.tsx`), al
 
 `/app/` is the deliberate namespace for non-scene routes (established in #1159): scene keys own the root single-segment namespace (`/:sceneKey?`), so everything else lives under `/app/` — as `help/reference` already does. Putting the render page at `/app/frame/:sceneKey` follows that convention and avoids the root-level ambiguity a `/frame/…` route would create (a scene literally keyed `frame` sits at `/frame`).
 
-A **dedicated route** is chosen over a `?frame=1` flag on `MainPage`: frame mode hides _all_ chrome and changes render-loop behavior, so a flag would scatter conditionals through MainPage's Header / Sidebar / banners / legacy-dialog tree. A separate thin page leaves `MainPage` completely untouched — and both pages calling the same `useSceneLoader` is exactly the payoff of Part 1.
+A **dedicated route** is chosen over a `?frame=1` flag on `MainPage`: frame mode hides _all_ editor UI and changes render-loop behavior, so a flag would scatter conditionals through MainPage's Header / Sidebar / banners / legacy-dialog tree. A separate thin page leaves `MainPage` completely untouched — and both pages calling the same `useSceneLoader` is exactly the payoff of Part 1.
 
 ### `FramePage`
 
@@ -136,11 +135,11 @@ The only auto-advancing timer in the app is the slider's `useInterval` (`Variabl
 - **Unit (`SceneControls`):** renders controls from Redux state and reflects the injected `loading` prop; no longer performs any fetch.
 - **Unit (`FramePage`):** with a loaded scene in Redux, renders the scene container and none of Header / Sidebar / ToggleKeyboardButton.
 - **Unit (`MainPage`):** unchanged behavior — loads, redirects on 404, sets title, default-scene fallback.
-- **E2E:** the suite disables 3D by default (`disable3d`), so a `/app/frame/:sceneKey` e2e asserts the _chrome is absent_ and the scene container/data are present. The actual 3D render, loop-halt, and `data-scene-ready` signal must be **eyeballed manually with 3D enabled** (run `yarn test-e2e` before declaring `packages/app` work done, per repo convention, then manually verify a real 3D frame).
+- **E2E:** the suite disables 3D by default (`disable3d`), so a `/app/frame/:sceneKey` e2e asserts the _editor UI is absent_ and the scene container/data are present. The actual 3D render, loop-halt, and `data-scene-ready` signal must be **eyeballed manually with 3D enabled** (run `yarn test-e2e` before declaring `packages/app` work done, per repo convention, then manually verify a real 3D frame).
 
 ## Definition of done
 
 - Scene data loads via `useSceneLoader`, independent of `SceneControls`.
-- `/app/frame/:sceneKey` renders a chrome-less, full-viewport scene with real data; the render loop stops after warmup and `data-scene-ready` appears.
+- `/app/frame/:sceneKey` renders a bare, full-viewport scene with real data; the render loop stops after warmup and `data-scene-ready` appears.
 - Normal `MainPage` behavior (loading, 404 redirect, title, default-scene fallback) is unchanged, verified by unit + e2e.
 - The stats.js FPS overlay no longer appears in the interactive scene (`stats` removed from `mathboxOptions.plugins`).

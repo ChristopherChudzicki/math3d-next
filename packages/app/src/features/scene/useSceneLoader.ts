@@ -20,8 +20,8 @@ const { actions: itemActions } = sceneSlice;
 type OnNotFound = "redirect" | "silent";
 
 /**
- * Fetches a scene by key and loads it into Redux, independently of any UI
- * chrome. This is the single place scene data-loading happens: fetch (React
+ * Fetches a scene by key and loads it into Redux, independently of any editor
+ * UI. This is the single place scene data-loading happens: fetch (React
  * Query) → `setScene` dispatch → `document.title`, plus 404 handling.
  *
  * `SceneControls` and `<Scene>` both read the resulting Redux state; neither
