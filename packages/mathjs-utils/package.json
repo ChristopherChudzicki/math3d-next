@@ -4,7 +4,7 @@
   "main": "./src/index.ts",
   "type": "module",
   "dependencies": {
-    "mathjs": "^14.0.1"
+    "mathjs": "^15.0.0"
   },
   "devDependencies": {
     "@math3d/eslint-config": "workspace:^",
