@@ -309,7 +309,7 @@ requires-dist = [
     { name = "faker", specifier = ">=24.14.1,<25.0.0" },
     { name = "gunicorn", specifier = ">=23.0.0,<24.0.0" },
     { name = "psycopg", specifier = ">=3.2.10" },
-    { name = "pydantic-settings", specifier = ">=2.7,<3.0" },
+    { name = "pydantic-settings", specifier = ">=2.14.2,<3.0" },
     { name = "pyyaml", specifier = ">=6.0,<7.0" },
     { name = "tqdm", specifier = ">=4.64.1,<5.0.0" },
     { name = "whitenoise", specifier = ">=6.11.0" },
