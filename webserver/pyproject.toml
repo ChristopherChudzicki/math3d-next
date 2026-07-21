@@ -23,7 +23,7 @@ dependencies = [
 [dependency-groups]
 dev = [
 	"mypy>=1.0.0,<2.0.0",
-	"django-stubs>=6.0.6,<7.0.0",
+	"django-stubs>=6.0.7,<7.0.0",
 	"types-tqdm>=4.64.7.15,<5.0.0",
 	"pytest>=9.0.3,<9.1.0",
 	"pytest-django>=4.5.2,<5.0.0",
