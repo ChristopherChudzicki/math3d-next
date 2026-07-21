@@ -19,6 +19,7 @@ import useAxesInfo from "./useAxesInfo";
 import Camera from "./Camera";
 import type { OnMoveEnd } from "./Camera";
 import { ZOOM_FACTOR } from "./dollyZoom";
+import { initDrainState, stepDrain } from "./stillReadiness";
 import { useMathResults } from "../sceneControls/mathItems/mathScope";
 
 type Props = {
@@ -55,28 +56,6 @@ type MathboxRoot = MathboxSelection & {
   start: () => void;
   _context?: MathboxContext;
 };
-
-// `still`-mode readiness. mathbox drains its warmup queue a couple objects per
-// frame, so a fixed frame count under-renders any scene with more objects than
-// the count covers (e.g. a 40-object scene needs ~20 frames; at 10 it screenshots
-// half-drawn). Instead we poll `getPending()` and halt once the queue has stayed
-// empty for a short while — scaling with scene complexity, and (since it keys off
-// drain state, not a frame count) unaffected by the slow software-GL the headless
-// screenshotter runs on.
-//
-// mathbox-react builds the scene tree in more than one React commit (a
-// child-before-parent `forceUpdate` cascade), and the browser runs warmup frames
-// between those commits. So `getPending()` is NOT monotonic: it can drain to 0
-// between commit bursts before the next burst enqueues the rest (measured:
-// 2 -> 0 -> 8 -> 36 for a ~40-object scene). That transient zero is why we can't
-// halt on the first empty frame. We gate on WALL-CLOCK quiescence rather than a
-// frame count because the transient window is made of cheap idle frames (~8ms,
-// independent of GL speed): a few frames barely outlast it, but a few hundred
-// milliseconds clears it with margin on any hardware, including Cloudflare's
-// slower vCPUs.
-const STILL_QUIET_MS = 500; // queue must stay empty this long to count as drained
-const STILL_MAX_FRAMES = 300; // frame-based backstop so we never spin forever
-const STILL_FALLBACK_FRAMES = 30; // used only if `getPending` is ever unavailable
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 const SceneContent = () => {
@@ -142,6 +121,10 @@ const is3dDisabled = localStorage.getItem("disable3dScene") === "true";
 const Scene: React.FC<Props> = ({ className, still }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [mathbox, setMathbox] = useState<MathboxSelection | null>(null);
+  // Single-shot latch: once ready, it stays ready for this component's life.
+  // Correct for the frame page (one load, one mathbox instance, no refetch). A
+  // future "re-render this frame" feature that swaps the mathbox instance would
+  // need to reset this so a new warmup isn't advertised as ready.
   const [stillReady, setStillReady] = useState(false);
   const hasRequired = useAppSelector(select.hasItems(REQUIRED_ITEMS));
 
@@ -165,27 +148,15 @@ const Scene: React.FC<Props> = ({ className, still }) => {
         ? () => context.getPending()
         : null;
 
-    let frame = 0;
-    // Timestamp of the last frame the queue was non-empty. Once the queue has
-    // been empty for `STILL_QUIET_MS` past this, the scene has drained.
-    let lastNonEmpty = performance.now();
-    // Guard against halting before any object has been queued: only trust an
-    // empty queue once we've seen it non-empty at least once.
-    let sawPending = false;
+    let state = initDrainState(performance.now());
     let raf = requestAnimationFrame(function tick() {
-      frame += 1;
-      const now = performance.now();
-      if (readPending) {
-        const pending = readPending();
-        if (pending > 0) {
-          sawPending = true;
-          lastNonEmpty = now;
-        }
-      }
-      const drained = readPending
-        ? sawPending && now - lastNonEmpty >= STILL_QUIET_MS
-        : frame >= STILL_FALLBACK_FRAMES;
-      if (drained || frame >= STILL_MAX_FRAMES) {
+      const pending = readPending ? readPending() : null;
+      const result = stepDrain(state, { pending, now: performance.now() });
+      state = result.state;
+      if (result.ready) {
+        // `stop()` is mathbox's documented loop control (start()/stop() on the
+        // root selection, see index.js) — stable enough to call bare, unlike
+        // the internal `_context.getPending` we feature-detect above.
         (mathbox as MathboxRoot).stop();
         setStillReady(true);
         return;
