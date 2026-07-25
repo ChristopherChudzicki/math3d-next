@@ -7,6 +7,7 @@ default:
 
 # Start frontend and backend dev servers
 start:
+    yarn install
     docker compose up -d
     yarn start
 
