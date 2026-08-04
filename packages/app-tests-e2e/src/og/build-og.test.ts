@@ -1,8 +1,9 @@
 /**
  * Generates the default OG social-share image
  * (`packages/app/public/og/default.png`, 1200x630) from the committed torus
- * scene + card layout. This is a build step, not an assertion, so it is guarded
- * behind OG_BUILD and skipped by the normal suite. Run it with:
+ * scene + card layout. This is a build step, not an assertion, so the whole file
+ * is skipped unless OG_BUILD is set (the file-scope `test.skip` below skips it
+ * at collection, before any fixture/browser setup). Run it with:
  *
  *   yarn workspace app-tests-e2e og:build
  *
@@ -16,6 +17,7 @@ import { createRequire } from "node:module";
 import sharp from "sharp";
 import { expect } from "@playwright/test";
 import { test } from "@/fixtures/users";
+import { colorfulPixelRatio } from "@/utils/colorfulPixelRatio";
 import { buildTorusScene } from "./scene";
 import { buildCardHtml, type CardFont } from "./card";
 
@@ -39,6 +41,15 @@ const outPath = () => {
   return path.join(root, "packages/app/public/og/default.png");
 };
 
+// Skip the whole file unless building the OG image. At file scope this runs at
+// collection, so on a normal `yarn test-e2e` run no fixture or browser context
+// is created for it (unlike a `test.skip` inside the body, which skips only
+// after fixtures resolve).
+test.skip(
+  !process.env.OG_BUILD,
+  "OG image build step; run via `yarn og:build`",
+);
+
 // The frame page renders the 3D scene, so we need WebGL on and a large viewport.
 test.use({
   disable3d: false,
@@ -46,11 +57,6 @@ test.use({
 });
 
 test("build default OG image", async ({ page, prepareScene }) => {
-  test.skip(
-    !process.env.OG_BUILD,
-    "OG image build step; run via `yarn og:build`",
-  );
-
   // 1. Render the torus scene and screenshot it.
   const key = await prepareScene({ ...buildTorusScene(), title: "OG default" });
   await page.goto(`/app/frame/${key}`);
@@ -58,6 +64,16 @@ test("build default OG image", async ({ page, prepareScene }) => {
     timeout: 60_000,
   });
   const raw = await page.getByTestId("scene").screenshot();
+
+  // `data-scene-ready` is a wall-clock quiescence heuristic, not a hard paint
+  // guarantee, and this asset ships to production — so verify the torus actually
+  // drew before we trim and compose. A blank or axes/grid-only capture (gray
+  // lines carry ~0 chroma) reads ~0; the fully-rendered torus + helix fills
+  // ~0.086 of this 2x frame. 0.04 sits well above the blank floor and well below
+  // the real render for GL-backend variance. Assert on `raw`: after setContent
+  // the page is the card, not the scene.
+  const ratio = await colorfulPixelRatio(page, raw.toString("base64"));
+  expect(ratio).toBeGreaterThan(0.04);
 
   // 2. Trim the uniform background so the torus fills the card's lower band.
   const trimmed = await sharp(raw).trim().png().toBuffer();

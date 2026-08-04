@@ -68,33 +68,42 @@ const torus = `\\left[\\left(${R}+${r}\\cos(v)\\right)\\cos(u),\\ \\left(${R}+${
 /** Helix lying ON the tube (radius r), rotated about z by HELIX_PHASE. */
 const helix = `\\left[\\left(${R}+${r}\\cos(${HELIX_LOOPS}t)\\right)\\cos(t${HELIX_PHASE}),\\ \\left(${R}+${r}\\cos(${HELIX_LOOPS}t)\\right)\\sin(t${HELIX_PHASE}),\\ ${r}\\sin(${HELIX_LOOPS}t)\\right]`;
 
-// The scene JSON is untyped per-item; these helpers reach into item properties.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const props = (it: unknown) => (it as any).properties;
-const axes = (json: Scene) =>
-  json.items.filter((it) => it.type === MathItemType.Axis);
-const grids = (json: Scene) =>
-  json.items.filter((it) => it.type === MathItemType.Grid);
+// Scene items are a discriminated union on `type`. These predicates narrow to
+// the member whose `properties` we mutate, so the string-valued writes below are
+// checked against the real per-item schemas (a mistyped key won't compile).
+type Item = Scene["items"][number];
+const isAxis = (it: Item): it is Extract<Item, { type: MathItemType.Axis }> =>
+  it.type === MathItemType.Axis;
+const isGrid = (it: Item): it is Extract<Item, { type: MathItemType.Grid }> =>
+  it.type === MathItemType.Grid;
+const isCamera = (
+  it: Item,
+): it is Extract<Item, { type: MathItemType.Camera }> =>
+  it.type === MathItemType.Camera;
+
+const axes = (json: Scene) => json.items.filter(isAxis);
+const grids = (json: Scene) => json.items.filter(isGrid);
 const zAxis = (json: Scene) => {
-  const z = axes(json).find((it) => props(it).axis === "z");
+  const z = axes(json).find((it) => it.properties.axis === "z");
   if (!z) throw new Error("no z-axis item");
   return z;
 };
 
 /** Override the seeded camera for deterministic framing. */
 const setCamera = (json: Scene): Scene => {
-  const cam = json.items.find((it) => it.type === MathItemType.Camera);
+  const cam = json.items.find(isCamera);
   if (!cam) throw new Error("no camera item");
-  props(cam).position = `[${camera.join(", ")}]`;
-  props(cam).target = "[0, 0, 0]";
+  cam.properties.position = `[${camera.join(", ")}]`;
+  cam.properties.target = "[0, 0, 0]";
   return json;
 };
 
 /** Strip axis letter-labels and number ticks — the main card clutter. */
 const cleanAxes = (json: Scene): Scene => {
   axes(json).forEach((it) => {
-    props(it).labelVisible = "false";
-    props(it).ticksVisible = "false";
+    const p = it.properties;
+    p.labelVisible = "false";
+    p.ticksVisible = "false";
   });
   return json;
 };
@@ -102,33 +111,36 @@ const cleanAxes = (json: Scene): Scene => {
 /** Thicken all axes / grids (defaults read thin and pixelated). */
 const setAxisWidth = (json: Scene, w: string): Scene => {
   axes(json).forEach((it) => {
-    props(it).width = w;
+    const p = it.properties;
+    p.width = w;
   });
   return json;
 };
 const setGridWidth = (json: Scene, w: string): Scene => {
   grids(json).forEach((it) => {
-    props(it).width = w;
+    const p = it.properties;
+    p.width = w;
   });
   return json;
 };
 
 /**
  * Shorten the z-AXIS LINE to +/-max (data coords) WITHOUT stretching geometry.
- * Geometry maps world_z = scale_z * v / halfwidth_z; x/y use scale 1, halfwidth
- * 5 (one data-unit = 1/5 world). To keep z isometric while halfwidth_z shrinks
- * to `max`, scale_z must = max/5. The axis line (drawn to data +/-max) then
- * reaches world +/-(max/5) — shorter — but the torus is unchanged. (The default
- * scene ships z scale "1/2", which instead squashes z to half.)
+ * mathbox maps world_z = scale_z * (2*(v - min)/(max - min) - 1); for a range
+ * symmetric about zero that reduces to scale_z * v / halfwidth_z. We set a
+ * symmetric range (min = -max) below, and x/y keep the default symmetric +/-5
+ * (scale 1, halfwidth 5 -> one data-unit = 1/5 world), so to keep z isometric
+ * while halfwidth_z shrinks to `max`, scale_z must = max/5. The axis line (drawn
+ * to data +/-max) then reaches world +/-(max/5) — shorter — but the torus is
+ * unchanged. (The default scene ships z scale "1/2", which squashes z to half.)
  */
 const shortenZ = (json: Scene, max: number): Scene => {
-  const p = props(zAxis(json));
+  const p = zAxis(json).properties;
   p.min = `${-max}`;
   p.max = `${max}`;
   p.scale = `${max}/5`;
   return json;
 };
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /** Build the locked torus-hero scene for the default OG card. */
 export const buildTorusScene = (): Scene => {
