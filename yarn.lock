@@ -2770,6 +2770,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource/roboto@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource/roboto@npm:5.3.0"
+  checksum: 10/d9f968fb239a16acdd3976a106f1ec8b530a6577ea5b1437dbeab3f782b7c189468dbaabdad3b2e68b75d63316bb48e2e905f661dec59a9a9353846eec04d35d
+  languageName: node
+  linkType: hard
+
 "@gar/promisify@npm:^1.0.1":
   version: 1.1.3
   resolution: "@gar/promisify@npm:1.1.3"
@@ -7467,8 +7474,10 @@ __metadata:
   resolution: "app-tests-e2e@workspace:packages/app-tests-e2e"
   dependencies:
     "@faker-js/faker": "npm:^9.9.0"
+    "@fontsource/roboto": "npm:^5.3.0"
     "@math3d/api": "workspace:^"
     "@math3d/eslint-config": "workspace:^"
+    "@math3d/mathitem-configs": "workspace:^"
     "@math3d/mock-api": "workspace:^"
     "@playwright/test": "npm:^1.57.0"
     "@types/mailparser": "npm:^3.4.6"
@@ -7477,6 +7486,7 @@ __metadata:
     mailparser: "npm:^3.9.12"
     mathlive: "npm:^0.105.0"
     p-retry: "npm:^6.2.1"
+    sharp: "npm:^0.34.5"
     three: "npm:^0.147.0"
     tiny-invariant: "npm:^1.3.1"
   languageName: unknown
@@ -18638,7 +18648,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sharp@npm:0.34.5":
+"sharp@npm:0.34.5, sharp@npm:^0.34.5":
   version: 0.34.5
   resolution: "sharp@npm:0.34.5"
   dependencies:
