@@ -8,6 +8,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="app-version" content="%VITE_APP_VERSION%" />
     <title>Math3d: Online 3d Graphing Calculator</title>
+    <!--
+      Worker-stable copy of the default <title>. The metadata Worker rewrites
+      <title> per-scene at the edge but never touches default-title, so the SPA
+      loader reads the true site default from here regardless of whether the
+      Worker ran. Keep this content identical to <title> above.
+    -->
+    <meta
+      name="default-title"
+      content="Math3d: Online 3d Graphing Calculator"
+    />
     <meta
       name="description"
       content="An interactive 3D graphing calculator in your browser. Draw, animate, and share surfaces, curves, points, lines, and vectors."
