@@ -10,6 +10,8 @@
  *
  * Design: docs/superpowers/specs/2026-07-11-og-metadata-worker-design.md
  */
+import { sceneDisplayName } from "../features/scene/sceneTitle";
+
 interface Env {
   ASSETS: Fetcher;
   API_BASE: string;
@@ -19,7 +21,6 @@ interface Env {
 /** Superset of the real key charset; cheap defense-in-depth before any backend touch. */
 const KEY_RE = /^[A-Za-z0-9_-]{2,80}$/;
 const META_TIMEOUT_MS = 800;
-const TITLE_MAX_CODEPOINTS = 200;
 
 /** A single non-asset path segment that could be a scene key, else null. */
 const sceneKeyFromPath = (pathname: string): string | null => {
@@ -60,35 +61,34 @@ const fetchTitle = async (env: Env, key: string): Promise<string | null> => {
   }
 };
 
-/** Clamp to a code-point boundary so a surrogate pair / emoji isn't split. */
-const clampCodePoints = (value: string, max: number): string => {
-  const cps = Array.from(value);
-  return cps.length <= max ? value : cps.slice(0, max).join("");
-};
+/**
+ * Rewrite the shell's crawler-facing <head> tags for a scene. og:url is always
+ * set to the scene's canonical URL. The <title>/og:title/twitter:title are
+ * rewritten only for a *titled* scene; an untitled scene (blank or the literal
+ * default "Untitled") keeps the shell's static rich defaults — matching the
+ * home page and the SPA's own client-side title.
+ *
+ * The title is user-controlled: inject it ONLY via HTMLRewriter's escaping
+ * setters (setInnerContent {html:false} / setAttribute) — never concatenate it
+ * into raw HTML. All state here is request-local (no module globals).
+ */
+const rewriteShell = (
+  shell: Response,
+  rawTitle: string,
+  key: string,
+  env: Env,
+): Response => {
+  const ogUrl = `${env.SITE_ORIGIN}/${key}`;
+  let rewriter = new HTMLRewriter().on('meta[property="og:url"]', {
+    element(el) {
+      el.setAttribute("content", ogUrl);
+    },
+  });
 
-/** Trim + clamp; empty or the literal "Untitled" collapses to a generic name. */
-const displayName = (raw: string): string => {
-  const name = clampCodePoints(raw.trim(), TITLE_MAX_CODEPOINTS);
-  return name === "" || name === "Untitled" ? "Untitled scene" : name;
-};
-
-export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    const key = sceneKeyFromPath(new URL(request.url).pathname);
-    if (key === null) return env.ASSETS.fetch(request);
-
-    const rawTitle = await fetchTitle(env, key);
-    if (rawTitle === null) return env.ASSETS.fetch(request); // graceful default
-
-    const name = displayName(rawTitle);
+  const name = sceneDisplayName(rawTitle);
+  if (name !== null) {
     const tabTitle = `${name} | Math3d`;
-    const ogUrl = `${env.SITE_ORIGIN}/${key}`;
-
-    const shell = await env.ASSETS.fetch(request);
-    // The title is user-controlled: inject it ONLY via HTMLRewriter's escaping
-    // setters (setInnerContent {html:false} / setAttribute) — never concatenate
-    // it into raw HTML. All state here is request-local (no module globals).
-    const rewritten = new HTMLRewriter()
+    rewriter = rewriter
       .on("title", {
         element(el) {
           el.setInnerContent(tabTitle, { html: false });
@@ -103,17 +103,33 @@ export default {
         element(el) {
           el.setAttribute("content", name);
         },
-      })
-      .on('meta[property="og:url"]', {
-        element(el) {
-          el.setAttribute("content", ogUrl);
-        },
-      })
-      .transform(shell);
+      });
+  }
 
-    // Don't let an intermediary over-cache this per-scene HTML (the shell's own
-    // Cache-Control would otherwise carry through).
-    const response = new Response(rewritten.body, rewritten);
+  const rewritten = rewriter.transform(shell);
+  return new Response(rewritten.body, rewritten);
+};
+
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const key = sceneKeyFromPath(new URL(request.url).pathname);
+    if (key === null) return env.ASSETS.fetch(request);
+
+    // Scene-key path: fetch the shell and the title in parallel so the lookup
+    // never adds its full latency on top of the shell fetch.
+    const [shell, rawTitle] = await Promise.all([
+      env.ASSETS.fetch(request),
+      fetchTitle(env, key),
+    ]);
+
+    const response =
+      rawTitle === null
+        ? new Response(shell.body, shell) // fail-open: serve the default shell
+        : rewriteShell(shell, rawTitle, key, env);
+
+    // Anything served under a scene URL — a rewrite or a transient fail-open
+    // shell — is per-scene and must not be cached by shared intermediaries.
+    // (The real passthrough above keeps the asset's own caching.)
     response.headers.set(
       "Cache-Control",
       "private, max-age=0, must-revalidate",

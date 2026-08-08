@@ -289,14 +289,17 @@ title as a JS constant (works, but puts a second copy of the string in a differe
    failure paths.
    - Valid `200` → extract `title`, use it.
    - `404` / non-2xx / **malformed or missing-title 200** / timeout / network error →
-     passthrough defaults. **The page must never block or error on the lookup.**
-4. Fetch the SPA shell (`env.ASSETS.fetch`) and pipe it through `HTMLRewriter`, rewriting (see
-   Title handling for the exact strings): the `<title>` element text (→ `{title} | Math3d`),
-   `meta[property="og:title"]` / `meta[name="twitter:title"]` `content` (→ **bare** `{title}`),
-   and `meta[property="og:url"]` `content` (= `${SITE_ORIGIN}/<key>`).
-   Return the transformed response, setting an explicit **short/`private` `Cache-Control`** rather
-   than inheriting `index.html`'s (so no intermediary over-caches per-scene HTML). HTMLRewriter
-   preserves status/headers otherwise.
+     serve the default shell (fail open). **The page must never block or error on the lookup.**
+4. Fetch the SPA shell (`env.ASSETS.fetch`) — in parallel with the `/meta/` lookup — and, for a
+   scene that exists, pipe it through `HTMLRewriter` (see Title handling for the exact strings):
+   `meta[property="og:url"]` `content` (= `${SITE_ORIGIN}/<key>`) always; plus, for a **titled**
+   scene, the `<title>` element text (→ `{name} | Math3d`) and
+   `meta[property="og:title"]` / `meta[name="twitter:title"]` `content` (→ **bare** `{name}`).
+   On **every** scene-key response — the rewrite path _and_ the fail-open shell (a transient
+   failure must not let a titleless generic shell be cached under a scene URL) — set an explicit
+   **short/`private` `Cache-Control`** rather than inheriting `index.html`'s. The real passthrough
+   (non-scene-key paths) keeps the asset's own caching. HTMLRewriter preserves status/headers
+   otherwise.
 
 **Security notes (hard constraints):**
 
@@ -312,26 +315,37 @@ title as a JS constant (works, but puts a second copy of the string in a differe
 Trim the fetched title, then **clamp to ~200 chars** on a **code-point boundary** (`Scene.title`
 is an uncapped `TextField`; cards truncate ~60–90 anyway, and the clamp bounds the rewritten
 value — clamp by code point, not code unit, so a surrogate pair / emoji isn't split). Let
-`name` = the trimmed+clamped title, or `"Untitled scene"` if it's empty or the literal
-`"Untitled"` (a user who deliberately names a scene `"Untitled"` gets the generic text —
+`name` = the trimmed+clamped title, or **`null`** (an "untitled" scene) if it's empty/whitespace
+or the literal default `"Untitled"` (`Scene.title` defaults to `"Untitled"`, so an unrenamed
+scene is untitled by design; a user who deliberately types `"Untitled"` is treated the same —
 acceptable).
 
-**String format (D1) — two surfaces, one brand suffix, `|` separator:**
+**An untitled scene reads like the home page:** it shows the rich site default title, not a
+scene-specific one. On such a scene the card looks brand-generic (`og:site_name` still says
+Math3d) — which is the desired behavior for a scene the author never named.
 
-- `<title>` element (tab + non-JS SEO): `` `${name} | Math3d` `` (e.g. `My Torus | Math3d`,
-  `Untitled scene | Math3d`).
-- `og:title` / `twitter:title` (card headline): **bare `name`** (e.g. `My Torus`,
-  `Untitled scene`) — the card already shows "Math3d" via `og:site_name`, so no redundant suffix.
+**String format (D1) — titled scenes only; one brand suffix, `|` separator:**
+
+- `<title>` element (tab + non-JS SEO): `` `${name} | Math3d` `` (e.g. `My Torus | Math3d`).
+- `og:title` / `twitter:title` (card headline): **bare `name`** (e.g. `My Torus`) — the card
+  already shows "Math3d" via `og:site_name`, so no redundant suffix.
+- **Untitled scene (`name === null`):** the Worker leaves the shell's static rich defaults in
+  place for `<title>`/`og:title`/`twitter:title` (it does **not** substitute an "Untitled scene"
+  string) — so an untitled deep-link matches the home page exactly.
 - **Home / no-scene** keeps the shipped rich defaults unchanged: `<title>` =
   `Math3d: Online 3d Graphing Calculator`, and `og:title` stays that same descriptive string
   (the Worker only rewrites on scene pages). `default-title` = that rich `<title>` verbatim.
-- **Client parity (required):** `useSceneLoader` must set `document.title` to the **same**
-  `` `${data.title} | Math3d` `` (changed from `` `Math3d - ${data.title}` ``) so the Worker's
-  pre-boot `<title>` and the client's post-boot value match — no format flash on deep-links.
-  Update its assertion in `MainPage.spec.tsx`. The no-scene branch restores `default-title`
-  (the rich home title), as before.
+- **Client parity (required):** `useSceneLoader` applies the **same** rule via the shared
+  `sceneTabTitle(rawTitle, siteDefault)` helper (`features/scene/sceneTitle.ts`, imported by both
+  the client and the Worker): a titled scene → `` `${name} | Math3d` `` (changed from
+  `` `Math3d - ${data.title}` ``), an untitled scene → the rich site default read from
+  `default-title`. This keeps the Worker's pre-boot `<title>` and the client's post-boot value
+  identical on deep-links — no format flash, including the common `"Untitled"` case. Assertions in
+  `MainPage.spec.tsx` cover both.
 
-`og:url` = `${SITE_ORIGIN}/<key>` (fixed canonical, regardless of the requested host).
+`og:url` = `${SITE_ORIGIN}/<key>` (fixed canonical, regardless of the requested host). This is
+rewritten for **every** scene that exists — titled or untitled — so a shared untitled scene still
+links to its own canonical URL.
 
 ### URL classification (why it's safe)
 
@@ -467,9 +481,11 @@ Worker cases (assert the **exact** strings, not just "rewritten"):
 - scene key, `/meta/` `200` `{title:"My Torus"}` → `<title>` = `My Torus | Math3d`,
   `og:title` = `twitter:title` = **bare** `My Torus`, `og:url` = `${SITE_ORIGIN}/<key>`;
   `default-title` and `og:description` left untouched;
-- empty / whitespace / `"Untitled"` title → `<title>` = `Untitled scene | Math3d`,
-  `og:title`/`twitter:title` = `Untitled scene`;
-- over-long title → clamped to ~200 chars on a code-point boundary (no split surrogate);
+- empty / whitespace / `"Untitled"` title → `<title>`/`og:title`/`twitter:title` left at the
+  shell's rich defaults (untitled reads like the home page), but `og:url` still rewritten to the
+  scene's canonical URL;
+- over-long title → clamped to ~200 chars on a code-point boundary (no split surrogate); the
+  clamp lives in the shared `sceneTitle.ts` helper and is unit-tested there;
 - **hostile title** (`"><img src=x onerror=alert(1)>` and `&"<>`) → escaped, no attribute
   breakout (round-trips JSON-decode → HTML-escape);
 - invalid key (bad charset, too long, `%2F`, CRLF) → passthrough, **no** `/meta/` touch;

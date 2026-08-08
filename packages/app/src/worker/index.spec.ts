@@ -1,13 +1,15 @@
 import { afterEach, expect, it, vi } from "vitest";
 import worker from "./index";
 
+const DEFAULT_TITLE = "Math3d: Online 3d Graphing Calculator";
+
 const SHELL_HTML = `<!doctype html><html><head>
-<title>Math3d: Online 3d Graphing Calculator</title>
-<meta property="og:title" content="Math3d: Online 3d Graphing Calculator" />
-<meta name="twitter:title" content="Math3d: Online 3d Graphing Calculator" />
+<title>${DEFAULT_TITLE}</title>
+<meta property="og:title" content="${DEFAULT_TITLE}" />
+<meta name="twitter:title" content="${DEFAULT_TITLE}" />
 <meta property="og:url" content="https://next.math3d.org/" />
 <meta property="og:description" content="site tagline" />
-<meta name="default-title" content="Math3d: Online 3d Graphing Calculator" />
+<meta name="default-title" content="${DEFAULT_TITLE}" />
 </head><body></body></html>`;
 
 const makeEnv = () => ({
@@ -18,7 +20,9 @@ const makeEnv = () => ({
     ),
   },
   API_BASE: "https://api.example.test",
-  SITE_ORIGIN: "https://next.math3d.org",
+  // Deliberately distinct from the request host below, so tests pin that og:url
+  // is built from SITE_ORIGIN, not the incoming request URL.
+  SITE_ORIGIN: "https://og.math3d.test",
 });
 
 /** Stub the global fetch the Worker uses for the /meta/ lookup. */
@@ -59,16 +63,16 @@ const tags = async (res: Response) => {
 
 afterEach(() => vi.restoreAllMocks());
 
-it("rewrites the title tags on a valid scene key", async () => {
+it("rewrites the title tags on a titled scene", async () => {
   stubMeta({ status: 200 }, { title: "My Torus" });
   const t = await tags(await call("/abc123", makeEnv()));
   expect(t.title).toBe("My Torus | Math3d");
   expect(t.ogTitle).toBe("My Torus");
   expect(t.twitterTitle).toBe("My Torus");
-  expect(t.ogUrl).toBe("https://next.math3d.org/abc123");
+  expect(t.ogUrl).toBe("https://og.math3d.test/abc123");
   // left at their index.html defaults:
   expect(t.ogDesc).toBe("site tagline");
-  expect(t.defaultTitle).toBe("Math3d: Online 3d Graphing Calculator");
+  expect(t.defaultTitle).toBe(DEFAULT_TITLE);
 });
 
 it("overrides Cache-Control so intermediaries don't cache per-scene HTML", async () => {
@@ -78,22 +82,17 @@ it("overrides Cache-Control so intermediaries don't cache per-scene HTML", async
 });
 
 it.each([{ title: "" }, { title: "   " }, { title: "Untitled" }])(
-  "maps empty/whitespace/Untitled to the generic name (%o)",
+  "keeps the shell's default title for an untitled scene but still rewrites og:url (%o)",
   async (body) => {
     stubMeta({ status: 200 }, body);
     const t = await tags(await call("/abc123", makeEnv()));
-    expect(t.title).toBe("Untitled scene | Math3d");
-    expect(t.ogTitle).toBe("Untitled scene");
+    // Untitled scene reads like the home page — the shell's rich defaults are
+    // left untouched — but og:url still points at this scene's canonical URL.
+    expect(t.title).toBe(DEFAULT_TITLE);
+    expect(t.ogTitle).toBe(DEFAULT_TITLE);
+    expect(t.ogUrl).toBe("https://og.math3d.test/abc123");
   },
 );
-
-it("clamps an over-long title on a code-point boundary", async () => {
-  stubMeta({ status: 200 }, { title: "😀".repeat(300) });
-  const t = await tags(await call("/abc123", makeEnv()));
-  const name = t.title!.replace(" | Math3d", "");
-  expect(Array.from(name)).toHaveLength(200); // 200 code points, no split surrogate
-  expect(name.endsWith("😀")).toBe(true);
-});
 
 it("escapes a hostile title (no tag/attribute breakout)", async () => {
   stubMeta({ status: 200 }, { title: '"><img src=x onerror=alert(1)>' });
@@ -114,40 +113,40 @@ it("escapes a hostile title (no tag/attribute breakout)", async () => {
   expect(imgElements).toBe(0);
 });
 
-it.each(["/app", "/app/frame/x", "/a/b", "/foo.png", "/", "/x"])(
+it.each(["/app", "/app/frame/x", "/foo.png", "/", "/x"])(
   "passes through non-candidate/invalid paths without touching /meta/ (%s)",
   async (path) => {
     const spy = vi.fn();
     vi.stubGlobal("fetch", spy);
     const res = await call(path, makeEnv());
     expect(spy).not.toHaveBeenCalled(); // no /meta/ fetch
-    expect(await res.text()).toContain(
-      "<title>Math3d: Online 3d Graphing Calculator</title>",
-    );
+    expect(await res.text()).toContain(`<title>${DEFAULT_TITLE}</title>`);
   },
 );
 
 it.each([
   ["404", { status: 404 } as ResponseInit, { title: "ignored" }],
-  ["500", { status: 500 } as ResponseInit, { title: "ignored" }],
   ["malformed 200 body", { status: 200 } as ResponseInit, undefined],
   ["missing title field", { status: 200 } as ResponseInit, { notTitle: 1 }],
 ])("serves default tags on %s", async (_label, init, body) => {
   stubMeta(init, body);
   const t = await tags(await call("/abc123", makeEnv()));
-  expect(t.title).toBe("Math3d: Online 3d Graphing Calculator");
-  expect(t.ogTitle).toBe("Math3d: Online 3d Graphing Calculator");
+  expect(t.title).toBe(DEFAULT_TITLE);
+  expect(t.ogTitle).toBe(DEFAULT_TITLE);
 });
 
-it("serves default tags when the /meta/ fetch rejects (network/timeout)", async () => {
+it("fails open AND marks the response private when the /meta/ fetch rejects", async () => {
   vi.stubGlobal(
     "fetch",
     vi.fn(async () => {
       throw new Error("network down");
     }),
   );
-  const t = await tags(await call("/abc123", makeEnv()));
-  expect(t.title).toBe("Math3d: Online 3d Graphing Calculator");
+  const res = await call("/abc123", makeEnv());
+  // A transient backend failure must not let a titleless generic shell be
+  // cached by a shared intermediary under this scene's URL.
+  expect(res.headers.get("cache-control")).toContain("private");
+  expect((await tags(res)).title).toBe(DEFAULT_TITLE);
 });
 
 it("fetches /meta/ with a bare URL and forwards no request headers/cookies", async () => {

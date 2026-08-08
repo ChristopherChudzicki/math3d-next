@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 import { useAppDispatch } from "@/store/hooks";
 import defaultScene from "@/store/defaultScene";
 import { sceneSlice } from "@/features/sceneControls/mathItems";
+import { sceneTabTitle } from "@/features/scene/sceneTitle";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 
 const { actions: itemActions } = sceneSlice;
@@ -52,10 +53,11 @@ const useSceneLoader = (
   );
 
   useEffect(() => {
-    // Keep this format identical to the Worker's edge-rewritten <title> so a
-    // deep-linked scene shows the same tab title before and after app boot.
-    document.title = data?.title
-      ? `${data.title} | Math3d`
+    // Shared with the Worker's edge <title> rewrite (sceneTitle.ts) so a
+    // deep-linked scene shows the same tab title before and after app boot,
+    // including the untitled case → the rich site default.
+    document.title = data
+      ? sceneTabTitle(data.title ?? "", defaultTitle.current)
       : defaultTitle.current;
   }, [data]);
 

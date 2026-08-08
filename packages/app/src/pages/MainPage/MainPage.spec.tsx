@@ -81,6 +81,17 @@ test("Sets the document title from the loaded scene's title", async () => {
   });
 });
 
+test("Uses the site default title for a scene left at the default 'Untitled'", async () => {
+  // A scene at the DB default "Untitled" reads like the home page — the rich
+  // site default — matching what the OG Worker leaves in <title> at the edge
+  // (no "Untitled | Math3d" flash on boot).
+  document.title = "Math3d: Online 3d Graphing Calculator";
+  const scene = seedDb.withSceneFromItems([], { title: "Untitled" });
+  const { queryClient } = renderTestApp(`/${scene.key}`);
+  await waitForAppReady(queryClient);
+  expect(document.title).toBe("Math3d: Online 3d Graphing Calculator");
+});
+
 test("No-scene default falls back to document.title when default-title meta is absent", async () => {
   // Dev/tests may ship no <meta name="default-title">; the loader then falls
   // back to the static <title> and must not clobber it on the home route.
