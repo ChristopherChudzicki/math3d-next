@@ -70,7 +70,9 @@ def get_scene_meta(request, key: str):
     if scene is not None:
         return {"title": scene.title}
     legacy = get_object_or_404(LegacyScene, key=key)
-    return {"title": legacy.dehydrated.get("metadata", {}).get("title")}
+    # `metadata` can be present-but-null in a legacy blob; `or {}` keeps that
+    # from raising instead of failing open to a null title.
+    return {"title": (legacy.dehydrated.get("metadata") or {}).get("title")}
 
 
 @scenes_router.get("/{key}/", response=SceneSchema, auth=None, by_alias=True)

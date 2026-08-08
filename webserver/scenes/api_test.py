@@ -171,6 +171,18 @@ def test_meta_legacy_key_returns_title_without_migrating():
 
 
 @pytest.mark.django_db
+def test_meta_legacy_key_with_null_metadata_returns_null_title():
+    # A legacy blob whose "metadata" is present-but-null must fail open
+    # (title=None → the Worker serves the default card), not raise a 500.
+    legacy = LegacyScene.objects.create(
+        dehydrated={**LEGACY_DEHYDRATED_FIXTURE, "metadata": None}
+    )
+    resp = Client().get(_meta(legacy.key))
+    assert resp.status_code == 200
+    assert resp.json() == {"title": None}
+
+
+@pytest.mark.django_db
 def test_post_anonymous_creates_with_null_author_and_server_key():
     data = default_scene()
     body = {"items": data["items"], "itemOrder": data["itemOrder"], "title": "Mine"}
