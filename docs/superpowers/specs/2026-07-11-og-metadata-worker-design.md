@@ -2,33 +2,89 @@
 
 **Date:** 2026-07-11
 **Status:** Approved design, pre-implementation
+**Revised:** 2026-08-07 — split into two passes; reconciled with shipped work
+(#1222 default image, #1223 static head + `VITE_SITE_ORIGIN`, #1209 render mode);
+added the abandonability invariant; landed the `<title>` decision; moved KV +
+API caching out of pass 1 into deferred levers.
 
 ## Problem
 
 Math3d is a client-rendered SPA served from Cloudflare Workers Static Assets. Social
 scrapers (Facebook, X/Twitter, Slack, Discord, LinkedIn) do not execute JavaScript, so a
-shared scene link currently unfurls with whatever static `<head>` ships in `index.html` —
-today that's a placeholder (`<title>Vite + React + TS</title>`, no OG tags at all). Every
-shared scene looks identical and broken.
+shared scene link unfurls with whatever static `<head>` ships in `index.html`. As of #1223
+that head carries sensible **site-level defaults** (title, description, branded default
+`og:image`) — so every scene now unfurls with a real, branded card, but they all look
+**identical**: none shows the specific scene's title.
 
 We want per-scene Open Graph metadata (starting with the scene **title**) injected at the
 edge, without server-side rendering the app.
 
-## Goals (v1)
+## Already shipped (context)
 
-- A shared scene URL unfurls with that scene's **title**.
-- Home page and all non-scene routes unfurl with sensible **site-level defaults**.
-- A single **static, branded default `og:image`** on every card (per-scene screenshots are
-  a deferred fast-follow — see below).
+The pieces this Worker builds on top of are already merged to `main`:
+
+- **#1209 — render-mode route** (`/app/frame/:sceneKey` → `FramePage`). A headless,
+  settle-detecting, single-frame scene render. It's the prerequisite/tool for pass 2
+  (per-scene images), not needed by pass 1. Design:
+  `docs/superpowers/specs/2026-07-12-scene-render-mode-decoupling-design.md`.
+- **#1222 — static branded default `og:image`** (`packages/app/public/og/default.png`,
+  1200×630) plus a committed generator pipeline under `packages/app-tests-e2e/src/og/`.
+- **#1223 — static `<head>` OG/Twitter defaults + `VITE_SITE_ORIGIN`** (commit `d2ea6c0f`).
+  `index.html` now ships the full default tag block (copy reused verbatim from live prod);
+  `%VITE_SITE_ORIGIN%` is substituted at build time and wired through every Vite-running
+  workflow (`test.yaml`, `e2e.yml`, `deploy-reusable.yml`) plus `.env.development`. It also
+  reworked `useSceneLoader` to capture the shipped `document.title` on first render and
+  restore it as the no-scene default (see "The `<title>` decision" — pass 1 changes how the
+  loader sources that default).
+
+So pass 1 is **purely the Worker**: the head defaults, the origin var, and the default
+image already exist.
+
+## The two passes
+
+The remaining work splits into two independent PRs, deliberately kept separate so the
+harder image pipeline can never gate the cheap text win:
+
+- **Pass 1 — per-scene text** (this doc's main design). Worker rewrites `<title>` /
+  `og:title` / `twitter:title` / `og:url` from the scene title. Ships with the existing
+  static default image on every card.
+- **Pass 2 — per-scene image** (see "Pass 2: per-scene images"). Adds `og:image` /
+  `twitter:image` rewrites backed by a rendered-per-scene PNG. Separate PR, separate compute
+  decision.
+
+## Abandonability invariant (hard constraint)
+
+**The SPA must remain fully functional with the entire edge layer removed.** If we drop the
+Worker in a month and serve the built `./dist` from any dumb static host (backend still on
+Django), everything works: the app boots, fetches scene data from the API exactly as it
+does today, and link previews still unfurl — just with the static default image/title
+instead of per-scene values. Graceful degradation, already true after #1223.
+
+The rule that keeps it true: **the SPA may _opportunistically consume_ edge-provided data
+purely as an optimization (hydrate-if-present, else fetch), but must never _depend_ on it.**
+Concretely for pass 1, the Worker only writes crawler-facing `<head>` tags; the SPA gets its
+data from Django and never reads anything the Worker injected as state. The one spot this
+touches — `useSceneLoader`'s default-title source — is handled below by pointing it at a
+Worker-_stable_ value, so the loader behaves identically whether or not the Worker ran.
+
+## Goals (pass 1)
+
+- A shared scene URL unfurls with that scene's **title** (`og:title` / `twitter:title`).
+- A scene URL's **browser tab and `<title>` element** show the scene title at TTFB, before
+  the app boots — and for non-JS crawlers/search.
+- Home page and all non-scene routes keep the shipped site-level **defaults**.
+- The branded **static default `og:image`** stays on every card (per-scene images are pass 2).
 - Everything config-as-code, deployed by the existing `wrangler deploy` CI step.
 
-## Non-goals (v1)
+## Non-goals (pass 1)
 
-- Per-scene screenshot images (deferred — see "Images: deferred fast-follow").
-- Per-scene `og:description` (a static site-tagline default covers every card — this default
-  is load-bearing, see Tag set, and must not be dropped).
-- Instant cache invalidation on scene edits — v1 relies on TTL; edits are admin-only and rare,
-  so ≤ TTL staleness is acceptable. A push-invalidation design is sketched for later.
+- Per-scene screenshot images (pass 2 — see "Pass 2: per-scene images").
+- Per-scene `og:description` (the static site-tagline default covers every card — this
+  default is load-bearing, see Tag set, and must not be dropped).
+- Edge caching of any kind (KV title cache, CDN-cached scene GET). Pass 1 accepts a fetch
+  per scene navigation. See "Deferred backend-load & perf levers" for why and when.
+- Instant cache invalidation on scene edits (only relevant once a cache exists — deferred
+  with KV).
 
 ## Canonical origin & the domain migration
 
@@ -37,12 +93,12 @@ The new app (this repo) is currently served at **`https://next.math3d.org`**. Ap
 canonical origin for the new app is `next.math3d.org` **for now**, not apex.
 
 The intended end state is apex-as-canonical. The origin is consumed in two places — the static
-`index.html` defaults (as `%VITE_SITE_ORIGIN%`, substituted at build time; Vite already does this
-for `%VITE_APP_VERSION%`) and the Worker's per-scene `og:url` (a `SITE_ORIGIN` `var` in
-`wrangler.jsonc`). **To avoid the two drifting, source them from one value in CI**: `vite build`
-reads `VITE_SITE_ORIGIN`, and `wrangler deploy --var SITE_ORIGIN:$SITE_ORIGIN` injects the same
-value. Both are `https://next.math3d.org` now. (Do **not** bake apex into `og:url` yet: a scraper
-hitting `math3d.org/<key>` today is redirected to the legacy site and would unfurl the wrong page.)
+`index.html` defaults (as `%VITE_SITE_ORIGIN%`, substituted at build time; shipped in #1223)
+and the Worker's per-scene `og:url` (a `SITE_ORIGIN` `var` in `wrangler.jsonc`). **To avoid the
+two drifting, source them from one value in CI**: `vite build` reads `VITE_SITE_ORIGIN`, and
+`wrangler deploy --var SITE_ORIGIN:$SITE_ORIGIN` injects the same value. Both are
+`https://next.math3d.org` now. (Do **not** bake apex into `og:url` yet: a scraper hitting
+`math3d.org/<key>` today is redirected to the legacy site and would unfurl the wrong page.)
 
 The apex cutover is **not** a one-line flip — two constraints:
 
@@ -53,23 +109,9 @@ The apex cutover is **not** a one-line flip — two constraints:
   (keyed to `next`) and post-flip shares (keyed to apex) are distinct identities — likes/shares
   won't merge. Acceptable, but know it before flipping.
 
-## Build sequencing
-
-Decided 2026-07-12: build the **render-mode route first**, _before_ the metadata Worker.
-Rationale — it's a self-contained app feature, it's the hard prerequisite for per-scene images,
-and it doubles as the tool for authoring the static default `og:image` (screenshot a nice scene
-in render mode rather than hand-designing a card). Order:
-
-1. **Render-mode route** (app) — the "App-side prerequisite" section under Images below; gets its
-   own plan. Built next.
-2. **v1 metadata Worker** (the main design in this doc) — ships with the static default image,
-   which step 1 helps produce.
-3. **Per-scene image generation** (fast-follow) — pick a compute path; SwiftShader fidelity is
-   already cleared (see Images below).
-
 ## Key facts established during design
 
-- **Scene URL shape:** `/:sceneKey?` at the root (`packages/app/src/routes.tsx:39`). A scene
+- **Scene URL shape:** `/:sceneKey?` at the root (`packages/app/src/routes.tsx`). A scene
   is a single path segment: `<origin>/<key>`. The only other routes are `/app/*` and a
   multi-segment catch-all — no other single-segment routes exist, so "single non-asset segment =
   candidate scene key" is sound.
@@ -77,12 +119,14 @@ in render mode rather than hand-designing a card). Order:
   length 10; the backend reserves only `app` and keys < 2 chars
   (`webserver/scenes/models.py`). Keys never contain `.` or `/`. Legacy scene keys also fit
   `[A-Za-z0-9_-]` (confirmed), so the Worker's validation regex covers them too.
-- **Metadata source:** `GET /scenes/{key}/`, `auth=None` (public) — returns the scene incl.
-  `title` (`webserver/scenes/api.py:60`). Despite `by_alias=True`, `title` has **no alias**
+- **Metadata source:** `GET /scenes/{key}/`, `auth=None` (public) — returns the full scene
+  incl. `title` (`webserver/scenes/api.py`). Despite `by_alias=True`, `title` has **no alias**
   (verified in `webserver/openapi.v1.yaml`), so the Worker reads the JSON field `title`
-  directly. Production host: **`https://api.math3d.org`**.
+  directly. Pass 1 reads `.title` off this full response (the double API call is accepted — see
+  Non-goals; a lean `MiniSceneSchema` exists but is only wired to the list route, so there is no
+  by-key title-only endpoint today). Production host: **`https://api.math3d.org`**.
 - **Title default:** `title` is `TextField(blank=True, default="Untitled")`
-  (`webserver/scenes/models.py:108`) — the API effectively always returns a non-empty title,
+  (`webserver/scenes/models.py`) — the API effectively always returns a non-empty title,
   often the literal `"Untitled"`.
 - **Static Assets + Worker routing (IMPORTANT):** with our `compatibility_date` (≥ 2025-04-01),
   the `assets_navigation_prefers_asset_serving` flag is **on by default**. That means a
@@ -98,68 +142,111 @@ in render mode rather than hand-designing a card). Order:
   cache/engagement identity — verified against FB docs ("Likes and Shares for this URL will
   aggregate at this URL").
 - **No head-manager in the app:** `packages/app` has no react-helmet/unhead; the only runtime
-  `<head>` write is `document.title` in `SceneControls`. So the Worker-injected meta tags are
-  never clobbered or duplicated for real users. (Moot for scrapers, but confirms correctness.)
+  `<head>` write is `document.title` in `useSceneLoader`. So the Worker-injected meta tags are
+  never clobbered or duplicated for real users, and the `<title>` element is the single tag the
+  client and Worker both touch (reconciled by the decision below).
 
-## Architecture
+## Architecture (pass 1)
 
 Convert `packages/app/wrangler.jsonc` from Static-Assets-only to Static-Assets + a Worker.
 The Worker's sole job: for a scene-key navigation, look up the title and rewrite a small,
 fixed set of `<meta>`/`<title>` elements in the SPA shell via `HTMLRewriter`. Everything else
 passes through to `env.ASSETS` untouched.
 
-### Tag set — defaults live in `index.html`, per-scene values rewritten by the Worker
+### Tag set — defaults ship in `index.html`, per-scene values rewritten by the Worker
 
-`packages/app/index.html` ships baked-in defaults (also fixes the placeholder `<title>`).
-`%VITE_SITE_ORIGIN%` is substituted at build time (`https://next.math3d.org` now):
+`packages/app/index.html` already ships the baked-in defaults (#1223), with
+`%VITE_SITE_ORIGIN%` substituted at build time:
 
 ```html
-<title>Math3d — Interactive 3D Math Visualization</title>
+<title>Math3d: Online 3d Graphing Calculator</title>
+<meta
+  name="description"
+  content="An interactive 3D graphing calculator in your browser. Draw, animate, and share surfaces, curves, points, lines, and vectors."
+/>
 <meta property="og:site_name" content="Math3d" />
 <meta property="og:type" content="website" />
+<meta property="og:title" content="Math3d: Online 3d Graphing Calculator" />
 <meta
-  property="og:title"
-  content="Math3d — Interactive 3D Math Visualization"
+  property="og:description"
+  content="An interactive 3D graphing calculator in your browser. Draw, animate, and share surfaces, curves, points, lines, and vectors."
 />
-<meta property="og:description" content="Interactive 3D math visualization." />
 <meta property="og:url" content="%VITE_SITE_ORIGIN%/" />
 <meta property="og:image" content="%VITE_SITE_ORIGIN%/og/default.png" />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Math3d — 3D math visualization" />
-<meta name="twitter:card" content="summary_large_image" />
 <meta
-  name="twitter:title"
-  content="Math3d — Interactive 3D Math Visualization"
+  property="og:image:alt"
+  content="Math3d — interactive 3D graphing calculator"
 />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Math3d: Online 3d Graphing Calculator" />
 <meta name="twitter:image" content="%VITE_SITE_ORIGIN%/og/default.png" />
-<meta name="twitter:image:alt" content="Math3d — 3D math visualization" />
+<meta
+  name="twitter:image:alt"
+  content="Math3d — interactive 3D graphing calculator"
+/>
 ```
 
-Notes:
+**Pass 1 adds one tag** to `index.html` — a Worker-stable copy of the default title for the
+client to read (see the decision below):
+
+```html
+<meta name="default-title" content="Math3d: Online 3d Graphing Calculator" />
+```
+
+`default-title` holds the **identical** string to `<title>` in the shipped shell — the two are
+the home/default view's title, co-located so a human editing one sees the other. The Worker
+rewrites `<title>` per-scene but **never touches `default-title`**, so it remains the true
+site default at runtime regardless of whether the Worker ran.
+
+Notes (unchanged from #1223):
 
 - **`og:image:width`/`height`/`type`** matter: without them the _first_ share of a URL (before
   any scraper has fetched+measured the PNG) can render blank/mis-cropped, fixed only on a later
   re-scrape. The default image is a known 1200×630 PNG, so these are free to state.
 - **Keep the static `og:description`** — Discord/LinkedIn need a non-empty description to render
-  an embed at all. v1 doesn't vary it per scene; every card shares this text, which is fine.
+  an embed at all. Pass 1 doesn't vary it per scene; every card shares this text, which is fine.
 - **No `twitter:site`/`twitter:creator`** — Math3d has no X handle. (X inherits `og:*` via its
   fallback chain, so `twitter:description` is unnecessary.)
 - Home page and non-scene routes are covered by these defaults: the Worker either isn't invoked
   (a matched asset bypasses it) or runs and passes the request straight through (e.g. `/`, whose
   step-1 filter rejects the empty segment → `env.ASSETS.fetch` serves `index.html`).
 
-The Worker, on a scene page, **overwrites the `content` attribute** of `og:title`,
+On a scene page the Worker **overwrites the `content` attribute** of `og:title`,
 `twitter:title`, and `og:url`, and rewrites the **`<title>` element** text. It leaves
-`og:image*`/`og:site_name`/`og:description` at their defaults in v1. (The images fast-follow
-adds `og:image`/`twitter:image` rewrites.) HTMLRewriter mutates existing elements — no
+`og:image*` / `og:site_name` / `og:description` / `default-title` at their defaults. (Pass 2
+adds `og:image` / `twitter:image` rewrites.) HTMLRewriter mutates existing elements — no
 duplicate tags.
 
-> The static default `og:image` asset (`/og/default.png`, 1200×630, branded) must be
-> produced and committed to `packages/app/public/og/` before launch. **TODO: source/design
-> this image** (the render-mode route is the intended tool for this) — a launch prerequisite,
-> not a blocker for building the Worker.
+### The `<title>` decision
+
+**Chosen: the Worker rewrites the `<title>` element per-scene** (option b), because a
+per-scene `<title>` sets the **browser tab** to the scene name at TTFB — before the heavy
+MathBox app boots and the client would otherwise set it seconds later — and gives non-JS
+crawlers/search the scene title too. `og:title`/`twitter:title` already drive the social card;
+`<title>` adds the tab + SEO win.
+
+The cost is the "strand bug": #1223's loader captures its no-scene default from
+`document.title` via `useRef`, which on a scene-deep-link first load would capture the
+Worker-written _scene_ title as if it were the site default. **Resolution — the loader sources
+its default from the Worker-stable `<meta name="default-title">`** instead of `document.title`:
+
+- `useSceneLoader` reads `meta[name="default-title"]`'s `content` (falling back to
+  `document.title` for dev/tests where the meta may be absent) as its no-scene default, once,
+  via the existing `useRef`.
+- The Worker never rewrites `default-title`, so the loader gets the true site title whether or
+  not the Worker ran — preserving the abandonability invariant.
+
+This is a latent-landmine fix, not a live-bug fix: the strand path (navigating a loaded scene
+back to no-scene while `MainPage` stays mounted) has **no UI affordance today** (verified: no
+home/logo/new-scene control in `MainPage`'s `Header`). It's cheap to fix now and a future
+"New scene" button would otherwise silently reintroduce stale tab titles.
+
+Rejected alternatives: leaving `<title>` static (loses the tab/SEO win); hardcoding the default
+title as a JS constant (works, but puts a second copy of the string in a different file — the
+`default-title` meta keeps both copies co-located in `index.html`).
 
 ### Request flow (Worker `fetch` handler)
 
@@ -167,20 +254,16 @@ duplicate tags.
    is a single non-asset segment: reject `/app` or `/app/*`, empty/`/`, multi-segment (interior
    `/`), and dotted (contains `.`). Otherwise it's a **candidate scene key**.
 2. **Validate the key** against `^[A-Za-z0-9_-]{2,80}$` (a superset of the real key charset). On
-   failure → passthrough defaults with **zero KV/Heroku cost**. (Cheap defense-in-depth: caps the
+   failure → passthrough defaults with zero backend cost. (Cheap defense-in-depth: caps the
    junk-path amplification surface before any backend touch.)
-3. Read the title from KV (`OG_CACHE`, key `title:<key>`):
-   - **Hit** → use the cached title.
-   - **Miss** → `fetch(`${API_BASE}/scenes/${key}/`)` with `AbortSignal.timeout(~1000ms)`. The
-     fetch uses a **bare URL string, not the incoming `request`** — no cookies/headers are
-     forwarded (the endpoint is public `auth=None`; this also rules out any header-based
-     cache-poisoning). On `200`, parse the body **defensively**: wrap `response.json()` and a
-     `typeof body.title === "string"` check in the same try/catch as the failure paths.
-     - Valid `200` → extract `title`, write it to KV behind
-       `ctx.waitUntil(put(...).catch(log))` with an `expirationTtl` (see Caching), and use it.
-     - `404` / non-2xx / **malformed or missing-title 200** / timeout / network error →
-       passthrough defaults, **no KV write** (see Caching rationale). **The page must never block
-       or error on the lookup.**
+3. `fetch(`${API_BASE}/scenes/${key}/`)` with `AbortSignal.timeout(~1000ms)`. The fetch uses a
+   **bare URL string, not the incoming `request`** — no cookies/headers are forwarded (the
+   endpoint is public `auth=None`; this also rules out any header-based cache-poisoning). On
+   `200`, parse the body **defensively**: wrap `response.json()` and a
+   `typeof body.title === "string"` check in the same try/catch as the failure paths.
+   - Valid `200` → extract `title`, use it.
+   - `404` / non-2xx / **malformed or missing-title 200** / timeout / network error →
+     passthrough defaults. **The page must never block or error on the lookup.**
 4. Fetch the SPA shell (`env.ASSETS.fetch`) and pipe it through `HTMLRewriter`, rewriting:
    `meta[property="og:title"]` / `meta[name="twitter:title"]` `content` (the title), the
    `<title>` element text, and `meta[property="og:url"]` `content` (= `${SITE_ORIGIN}/<key>`).
@@ -200,7 +283,7 @@ duplicate tags.
 ### Title handling
 
 - Trim the fetched title, then **clamp to ~200 chars** (`Scene.title` is an uncapped `TextField`;
-  cards truncate ~60–90 anyway, and the clamp bounds the HTML/KV value). If empty or the literal
+  cards truncate ~60–90 anyway, and the clamp bounds the rewritten value). If empty or the literal
   `"Untitled"` → `"Untitled scene — Math3d"`. (A user who deliberately names a scene `"Untitled"`
   gets the generic card — acceptable.)
 - `og:url` = `${SITE_ORIGIN}/<key>` (fixed canonical, regardless of the requested host).
@@ -209,60 +292,12 @@ duplicate tags.
 
 Malformed keys are rejected by the regex (step 2). Well-formed-but-nonexistent keys (e.g.
 `/help`, `/about`, a deleted scene) 404 at the API → passthrough defaults. Reserved routes
-(`/app/*`), asset-like, and multi-segment paths are filtered before any fetch. So the common
-cases never touch KV or Heroku.
+(`/app/*`), asset-like, and multi-segment paths are filtered before any fetch. Every scene
+navigation costs one Heroku fetch (no cache in pass 1); junk valid-charset single-segment paths
+each cost one cheap Heroku 404 — bound abusive volume with a Cloudflare Rate-Limiting/WAF rule
+on the scene route (see Launch prerequisites), which is the right place for it, not the cache.
 
-## Caching rationale
-
-With `run_worker_first`, the Worker runs for **all** scene navigations (humans + scrapers), so
-the KV cache keeps human scene-loads on a ~single-ms edge read instead of a synchronous Heroku
-round-trip, and bounds Heroku load to one fetch per scene per TTL window.
-
-**Positive-cache only — no negative sentinels.** KV's free tier allows only ~1,000 writes/day.
-Writing a sentinel per 404 would let junk/crawler traffic exhaust that budget (a cheap
-amplification). Instead we only write KV on a `200`, so misses cost at most a fast Heroku 404.
-
-**The trade this makes — and its mitigation.** Positive-only means many _distinct_ junk
-single-segment paths (`/aaaa`, `/aaab`, …) are each an uncacheable Heroku 404. The key-regex
-rejects malformed junk, but valid-charset junk still reaches the origin — a new amplification
-surface that didn't exist when Static Assets served every unmatched path at zero origin cost.
-Heroku's 404 is a single indexed-key miss (cheap), so this is acceptable at our scale, but the
-right place to bound abusive volume is **a Cloudflare Rate-Limiting/WAF rule on the scene route**,
-not the cache. (Add such a rule — see Launch prerequisites.)
-
-**TTL.** Since edits are admin-only and rare, a longer TTL is fine and cuts origin load; start
-around **1 hour**, tunable. Keep it bounded even after push-invalidation ships — it's the backstop
-that self-heals the read/write race noted in Cache invalidation, so don't raise it toward infinity.
-
-## Cache invalidation (future — not in v1)
-
-v1 accepts ≤ TTL title staleness. When instant edits are wanted, use **push invalidation from
-the backend** (no polling, no separate infra):
-
-- On scene `PATCH` (`webserver/scenes/api.py:78`), after saving, the Django handler **DELETEs**
-  the key via the KV REST API (`DELETE …/storage/kv/namespaces/{ns}/values/title:<key>`). DELETE
-  (not overwrite) keeps the **Worker the sole formatter** of the KV value — the backend needn't
-  replicate the Worker's trim/`"Untitled"`-normalization; the next read repopulates from Heroku
-  (one cheap re-fetch, negligible for rare admin edits).
-- **Token:** Cloudflare KV write tokens are **account-scoped, not per-namespace** (the
-  `Workers KV Storage Write` permission group is account-wide). So the Heroku token is a single
-  account-scoped, write-only secret — acceptable, but it can write _any_ KV namespace in the
-  account. Endpoint verified: `PUT/DELETE /accounts/{account_id}/storage/kv/namespaces/{ns}/values/{key}`,
-  Bearer auth.
-- **Call it best-effort, in-request, with a strict ~1–2 s timeout**, swallowing all
-  errors/timeouts (there's no task queue — a save must never fail on a Cloudflare hiccup, and a
-  _slow_ Cloudflare must not tie up the WSGI worker for long). Don't reuse this synchronous path
-  for a high-volume write endpoint without revisiting.
-- **Residual race (document, don't over-engineer):** a Worker KV miss reads the old title from
-  Heroku and writes it via `ctx.waitUntil`; if a `PATCH` DELETE lands _between_ that read and the
-  deferred write, the stale value is repopulated and persists until TTL. DELETE doesn't eliminate
-  this. It self-heals at the TTL backstop — so **keep a bounded TTL (~1 h)** rather than raising it
-  toward infinity while this race exists. A true fix (locks/timestamps) is overkill for admin-only
-  rare edits.
-- This same PATCH hook is where the **images fast-follow** bumps `graphicsVersion` / enqueues a
-  re-render — so it's worth building once, for both.
-
-## Config-as-code changes
+## Config-as-code changes (pass 1)
 
 `packages/app/wrangler.jsonc`:
 
@@ -288,9 +323,6 @@ the backend** (no polling, no separate infra):
       "!/index.html"
     ]
   },
-  "kv_namespaces": [
-    { "binding": "OG_CACHE", "id": "<prod-id>", "preview_id": "<preview-id>" }
-  ],
   "vars": {
     "API_BASE": "https://api.math3d.org",
     // Committed default; overridden at deploy via `--var SITE_ORIGIN:$SITE_ORIGIN`, sourced from
@@ -300,25 +332,21 @@ the backend** (no polling, no separate infra):
 }
 ```
 
-One-time setup (documented in the plan, run once):
-
-```bash
-yarn wrangler kv namespace create OG_CACHE
-yarn wrangler kv namespace create OG_CACHE --preview
-```
+(No `kv_namespaces` in pass 1 — KV is a deferred lever.)
 
 New/changed files:
 
 - `packages/app/src/worker/index.ts` — the Worker + `HTMLRewriter` handlers.
 - `packages/app/src/worker/*.test.ts` — Worker unit tests (workers pool — see Testing).
-- `packages/app/index.html` — real `<title>` + default OG/Twitter tags (with `%VITE_SITE_ORIGIN%`).
-- `packages/app/public/og/default.png` — static branded default card (launch prerequisite).
-- `.env.development` (+ build env) — add `VITE_SITE_ORIGIN`.
+- `packages/app/index.html` — add `<meta name="default-title">` (= `<title>`); the existing
+  head-comment should note the Worker leaves `default-title` untouched.
+- `packages/app/src/features/scene/useSceneLoader.ts` — source the no-scene default from
+  `meta[name="default-title"]` instead of `document.title`.
 
 No CI pipeline change: `deploy-reusable.yml` already runs `yarn wrangler deploy` after
 `yarn build` produces `./dist`.
 
-## Testing
+## Testing (pass 1)
 
 Worker unit tests via `@cloudflare/vitest-pool-workers` (runs in workerd — `HTMLRewriter` doesn't
 exist under jsdom).
@@ -344,19 +372,25 @@ Test shell: worker tests run without a build, so `./dist` (the `ASSETS` director
 provide the HTML shell explicitly (a fixture string fed through `HTMLRewriter`, or a mocked
 `env.ASSETS.fetch`) rather than relying on the real asset binding.
 
-Cases:
+Worker cases:
 
 - scene key, API `200` → `og:title`/`twitter:title`/`<title>`/`og:url` all rewritten correctly;
+  `default-title` and `og:description` left untouched;
 - empty / whitespace / `"Untitled"` title → `"Untitled scene — Math3d"` fallback;
 - over-long title → clamped to ~200 chars;
 - **hostile title** (`"><img src=x onerror=alert(1)>` and `&"<>`) → escaped, no attribute
   breakout (round-trips JSON-decode → HTML-escape);
-- invalid key (bad charset, too long, `%2F`, CRLF) → passthrough, **no** KV/Heroku touch;
-- API `404` / timeout / 500 → shell served with default tags (no error, no KV write);
-- **malformed 200** (non-JSON body, or JSON missing a string `title`) → default tags, no KV write;
+- invalid key (bad charset, too long, `%2F`, CRLF) → passthrough, **no** Heroku touch;
+- API `404` / timeout / 500 → shell served with default tags (no error);
+- **malformed 200** (non-JSON body, or JSON missing a string `title`) → default tags;
 - `/app/x`, multi-segment, dotted paths → passthrough, no fetch;
-- KV hit path → no Heroku fetch;
 - no incoming request header/cookie is forwarded to the API fetch.
+
+App-side case (jsdom project):
+
+- `useSceneLoader` no-scene default reads `meta[name="default-title"]`: with the meta present
+  (and a distinct `document.title`, simulating a Worker-rewritten `<title>`), leaving a loaded
+  scene restores the meta value, not the scene title. (#1223's two title tests remain.)
 
 Notes:
 
@@ -365,10 +399,64 @@ Notes:
   globs).
 - The Playwright e2e suite does not exercise the Worker.
 
-## Images: deferred fast-follow (not in v1)
+## Deferred backend-load & perf levers (not in pass 1)
 
-v1 ships the static default `og:image`. Per-scene screenshots of the MathBox scene are a
-separate effort.
+Pass 1 accepts one Heroku fetch per scene navigation (the Worker's) on top of the client's own
+scene fetch — the "double API call." At current traffic each is a cheap indexed-key lookup, and
+the app already does one such fetch per scene load. These levers exist for **if/when** origin
+load or scene-page TTFB is measured to be a problem — none is built now (YAGNI), and each is
+compatible with the abandonability invariant (all are optional optimizations the SPA doesn't
+depend on):
+
+### KV title cache (Worker-side)
+
+Cache the title at the edge in **Cloudflare Workers KV** (`OG_CACHE`, key `title:<key>`) so
+repeat scene navigations read the title in ~1ms instead of re-hitting Heroku, bounding Heroku
+load to one fetch per scene per TTL window and cutting scene-page TTFB after the first load.
+Design details (preserved from the original v1 sketch, for when this lands):
+
+- **Positive-cache only — no negative sentinels.** KV's free tier allows only ~1,000 writes/day.
+  Writing a sentinel per 404 would let junk/crawler traffic exhaust that budget. Write KV only on
+  a `200` (`ctx.waitUntil(put(..., { expirationTtl }).catch(log))`); misses cost at most a fast
+  Heroku 404. Trade-off: distinct valid-charset junk paths are each an uncacheable Heroku 404 —
+  bound with the WAF rule, not the cache.
+- **TTL** ~1 hour, tunable; keep it bounded (it's the self-healing backstop for the invalidation
+  race below).
+- Adds `kv_namespaces` to `wrangler.jsonc` and a one-time
+  `yarn wrangler kv namespace create OG_CACHE` (+ `--preview`).
+- **Cache invalidation (push, optional):** on scene `PATCH` (`webserver/scenes/api.py`), after
+  saving, the Django handler best-effort **DELETEs** `title:<key>` via the KV REST API
+  (`DELETE …/storage/kv/namespaces/{ns}/values/title:<key>`), strict ~1–2 s timeout, swallowing
+  all errors (a save must never fail on a Cloudflare hiccup). DELETE (not overwrite) keeps the
+  Worker the sole formatter of the value. **Token:** KV write tokens are account-scoped, not
+  per-namespace — a single write-only secret that can write any KV namespace in the account.
+  **Residual race:** a Worker miss that reads-then-`waitUntil`-writes can repopulate a stale
+  title if a PATCH DELETE lands between; it self-heals at the TTL backstop, so keep TTL bounded.
+  This same PATCH hook is where pass 2's image invalidation (`graphicsVersion` bump / re-render
+  enqueue) would live — worth building once for both.
+
+### CDN-cached scene GET
+
+Put `Cache-Control` on the public `GET /scenes/{key}/` and let Cloudflare cache it (free on all
+plans; no Cache Reserve). Offloads origin for **every** consumer (Worker, client, direct API
+users), not just navigations. Prerequisites/costs: `api.math3d.org` must be **proxied** through
+Cloudflare (orange-cloud), not DNS-only (unverified today); and invalidation (short TTL +
+stale-while-revalidate, or CF purge on PATCH). More decoupled than the KV cache and survives
+Worker removal, but carries the invalidation + proxying complexity — hence deferred.
+
+### Narrow meta endpoint
+
+Add `GET /scenes/{key}/meta/` returning just `{title}` (later `{title, description}`) so the
+Worker depends on a tiny, stable shape instead of the full item schema (which churns). Cheap
+(`MiniSceneSchema` already models it). Not "edge work" — a normal Django endpoint that survives
+Worker removal. Contract-narrowing, not a load win on its own; fold in if/when we revisit the
+Worker's fetch.
+
+## Pass 2: per-scene images (separate PR)
+
+Pass 1 ships the static default `og:image`. Per-scene screenshots of the MathBox scene are a
+separate effort: the Worker additionally rewrites `og:image` / `twitter:image` to a
+per-scene PNG.
 
 **Fidelity spike — PASSED (2026-07-12).** The open question was whether GPU-less SwiftShader
 (Cloudflare Browser Rendering's environment) renders MathBox scenes acceptably. Tested locally
@@ -403,7 +491,7 @@ Client-side capture (screenshot in the sharer's browser) was **rejected**: nonde
 framing, attacker-controlled uploaded bytes served as public previews, can't regenerate on
 graphics changes, and only covers scenes someone actually shares.
 
-### App-side prerequisite — a deterministic render mode
+### App-side prerequisite — a deterministic render mode (shipped, #1209)
 
 _Implemented in PR #1209 (the `/app/frame/:sceneKey` render page). Design:
 `docs/superpowers/specs/2026-07-12-scene-render-mode-decoupling-design.md`. Summarized here
@@ -467,15 +555,22 @@ when picking the compute path.
 
 ## Launch prerequisites / open items
 
-- [ ] Produce the static branded default `og:image` (1200×630) → `public/og/default.png`.
-- [ ] At apex cutover: flip the single CI origin value to apex, **and** keep `next.math3d.org`
-      resolving (path-preserving `301 → apex`) so already-shared links survive (see Canonical
-      origin & the domain migration).
-- [ ] Create the `OG_CACHE` KV namespace (prod + preview) and paste ids into `wrangler.jsonc`.
+Pass 1:
+
+- [ ] Add `<meta name="default-title">` to `index.html` and point `useSceneLoader`'s no-scene
+      default at it.
 - [ ] Validate the `run_worker_first` globs with `wrangler dev` (confirm `/*` matches
       single-segment scene keys and the asset exclusions bypass correctly; confirm
       `env.ASSETS.fetch` doesn't re-enter the Worker — one invocation per scene nav, no loop).
-- [ ] Add a Cloudflare Rate-Limiting/WAF rule on the scene route to bound origin-404 abuse
-      (see Caching rationale).
+- [ ] Add a Cloudflare Rate-Limiting/WAF rule on the scene route to bound origin-404 abuse.
 - [ ] Wire origin config from a single CI value (`VITE_SITE_ORIGIN` → build; same value →
-      `wrangler deploy --var SITE_ORIGIN:$SITE_ORIGIN`).
+      `wrangler deploy --var SITE_ORIGIN:$SITE_ORIGIN`). (`VITE_SITE_ORIGIN` already shipped
+      in #1223; add the `SITE_ORIGIN` deploy `--var`.)
+
+Cross-cutting / later:
+
+- [ ] At apex cutover: flip the single CI origin value to apex, **and** keep `next.math3d.org`
+      resolving (path-preserving `301 → apex`) so already-shared links survive (see Canonical
+      origin & the domain migration).
+- [ ] Pass 2: pick the image compute path; produce per-scene PNGs; add image rewrites + URL
+      versioning (`/og/<key>-<graphicsVersion>.png`).
