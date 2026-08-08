@@ -133,6 +133,43 @@ def _detail(key):
     return f"/v1/scenes/{key}/"
 
 
+def _meta(key):
+    return f"/v1/scenes/{key}/meta/"
+
+
+@pytest.mark.django_db
+def test_meta_returns_title_only():
+    scene = SceneFactory.create(title="My Torus")
+    resp = Client().get(_meta(scene.key))
+    assert resp.status_code == 200
+    assert resp.json() == {"title": "My Torus"}
+
+
+@pytest.mark.django_db
+def test_meta_does_not_increment_times_accessed():
+    scene = SceneFactory.create()
+    Client().get(_meta(scene.key))
+    scene.refresh_from_db()
+    assert scene.times_accessed == 0
+
+
+@pytest.mark.django_db
+def test_meta_unknown_key_returns_404():
+    assert Client().get(_meta("nonexistent")).status_code == 404
+
+
+@pytest.mark.django_db
+def test_meta_legacy_key_returns_title_without_migrating():
+    legacy = LegacyScene.objects.create(dehydrated=LEGACY_DEHYDRATED_FIXTURE)
+    resp = Client().get(_meta(legacy.key))
+    assert resp.status_code == 200
+    assert resp.json() == {"title": "Old"}  # from dehydrated["metadata"]["title"]
+    # The point of the endpoint: it must NOT persist a migration.
+    assert not Scene.objects.filter(key=legacy.key).exists()
+    legacy.refresh_from_db()
+    assert legacy.times_accessed == 0
+
+
 @pytest.mark.django_db
 def test_post_anonymous_creates_with_null_author_and_server_key():
     data = default_scene()

@@ -15,6 +15,7 @@ from scenes.schemas import (
     MiniSceneSchema,
     SceneCreateSchema,
     SceneFilterSchema,
+    SceneMetaSchema,
     ScenePatchSchema,
     SceneSchema,
 )
@@ -55,6 +56,21 @@ def create_scene(request, payload: SceneCreateSchema):
         scene.title = payload.title
     scene.save()  # full_clean() re-validates items (defense in depth)
     return Status(201, scene)
+
+
+@scenes_router.get("/{key}/meta/", response=SceneMetaSchema, auth=None)
+def get_scene_meta(request, key: str):
+    """Read-only title lookup for the edge OG Worker.
+
+    No side effects: unlike ``get_scene`` it never increments ``times_accessed``
+    and never migrates a legacy key. Legacy titles are read out of the
+    dehydrated blob directly, without persisting a migration.
+    """
+    scene = Scene.objects.filter(key=key).only("title").first()
+    if scene is not None:
+        return {"title": scene.title}
+    legacy = get_object_or_404(LegacyScene, key=key)
+    return {"title": legacy.dehydrated.get("metadata", {}).get("title")}
 
 
 @scenes_router.get("/{key}/", response=SceneSchema, auth=None, by_alias=True)

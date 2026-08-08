@@ -1217,6 +1217,16 @@ components:
           title: Title
       title: SceneFilterSchema
       type: object
+    SceneMetaSchema:
+      description: Title-only shape for the read-only meta endpoint the edge OG Worker calls.
+      properties:
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+      title: SceneMetaSchema
+      type: object
     ScenePatchSchema:
       properties:
         archived:
@@ -1919,6 +1929,34 @@ paths:
       security:
       - SessionAuth: []
       summary: Update Scene
+      tags:
+      - Scenes
+  /v1/scenes/{key}/meta/:
+    get:
+      description: 'Read-only title lookup for the edge OG Worker.
+
+
+        No side effects: unlike ``get_scene`` it never increments ``times_accessed``
+
+        and never migrates a legacy key. Legacy titles are read out of the
+
+        dehydrated blob directly, without persisting a migration.'
+      operationId: scenes_api_get_scene_meta
+      parameters:
+      - in: path
+        name: key
+        required: true
+        schema:
+          title: Key
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SceneMetaSchema'
+          description: OK
+      summary: Get Scene Meta
       tags:
       - Scenes
 servers: []
