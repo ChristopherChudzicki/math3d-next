@@ -1,5 +1,13 @@
 import { test, expect } from "vitest";
-import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import { seedDb } from "@math3d/mock-api";
+import {
+  renderTestApp,
+  screen,
+  user,
+  waitFor,
+  waitForAppReady,
+  within,
+} from "@/test_util";
 import invariant from "tiny-invariant";
 
 test.each([
@@ -61,6 +69,23 @@ test("Clicking the 'Expand/Collapse Controls' button toggles the controls and pr
     hash: "#foo",
     search: "",
   });
+});
+
+test("Sets the document title from the loaded scene's title", async () => {
+  const scene = seedDb.withSceneFromItems([], { title: "My Torus" });
+  renderTestApp(`/${scene.key}`);
+  await waitFor(() => {
+    expect(document.title).toBe("Math3d - My Torus");
+  });
+});
+
+test("Leaves the static document title untouched when no scene is loaded", async () => {
+  // The static <title> baked into index.html is the crawler/link-preview title.
+  // On the home/new-scene route (no scene key) the loader must not clobber it.
+  document.title = "Static Head Title";
+  const { queryClient } = renderTestApp("/");
+  await waitForAppReady(queryClient);
+  expect(document.title).toBe("Static Head Title");
 });
 
 test("Alerts and redirects home when the scene key is not found", async () => {

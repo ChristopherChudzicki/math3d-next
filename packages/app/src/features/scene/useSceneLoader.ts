@@ -1,5 +1,5 @@
 import { useScene, isApiError } from "@math3d/api";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 
 import { useAppDispatch } from "@/store/hooks";
@@ -38,9 +38,18 @@ const useSceneLoader = (
     staleTime: Infinity,
   });
 
+  // The static <title> baked into index.html is the crawler / link-preview
+  // title for the site. Capture it on first render (before the effect below can
+  // overwrite it) so we can restore it whenever no scene title applies, rather
+  // than clobbering it with a hardcoded default. Restoring (not just skipping
+  // the write) also keeps SPA navigation correct: leaving from a titled scene
+  // back home resets the tab instead of leaving the previous scene's title.
+  const defaultTitle = useRef(document.title);
+
   useEffect(() => {
-    const title = data?.title ? `Math3d - ${data.title}` : "Math3d";
-    document.title = title;
+    document.title = data?.title
+      ? `Math3d - ${data.title}`
+      : defaultTitle.current;
   }, [data]);
 
   const { add: addNotification } = useNotifications();
