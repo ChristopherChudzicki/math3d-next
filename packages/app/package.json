@@ -12,7 +12,7 @@
     "storybook": "start-storybook -p 6006 -s public",
     "test": "vitest --run",
     "test-watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p src/worker/tsconfig.json"
   },
   "browserslist": {
     "production": [
@@ -78,6 +78,7 @@
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.20.3",
+    "@cloudflare/workers-types": "^5.20260808.1",
     "@faker-js/faker": "^9.9.0",
     "@julr/vite-plugin-validate-env": "^2.2.2",
     "@math3d/eslint-config": "workspace:^",

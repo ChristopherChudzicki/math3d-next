@@ -2038,6 +2038,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cloudflare/workers-types@npm:^5.20260808.1":
+  version: 5.20260808.1
+  resolution: "@cloudflare/workers-types@npm:5.20260808.1"
+  checksum: 10/5725345aabe6ce69b40459b09571c8141c285cc11737d0b8869b2f80afc17ac069ca3f9be2ede24b85289912572cac94eb4437c01db9384046f4f0ba4fb52e63
+  languageName: node
+  linkType: hard
+
 "@cnakazawa/watch@npm:^1.0.3":
   version: 1.0.4
   resolution: "@cnakazawa/watch@npm:1.0.4"
@@ -7910,6 +7917,7 @@ __metadata:
   resolution: "app@workspace:packages/app"
   dependencies:
     "@cloudflare/vitest-pool-workers": "npm:^0.20.3"
+    "@cloudflare/workers-types": "npm:^5.20260808.1"
     "@dnd-kit/core": "npm:^6.3.1"
     "@dnd-kit/sortable": "npm:^10.0.0"
     "@dnd-kit/utilities": "npm:^3.2.2"

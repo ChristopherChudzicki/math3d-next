@@ -1,0 +1,12 @@
+{
+  // The edge Worker runs in workerd, not the browser: its Request/Response/fetch
+  // and globals like HTMLRewriter come from @cloudflare/workers-types and would
+  // conflict with the app's DOM lib. So this directory is typechecked on its own,
+  // excluded from the app's main tsconfig, with the DOM lib swapped out.
+  "extends": "@math3d/tsconfig/base.json",
+  "compilerOptions": {
+    "lib": ["esnext"],
+    "types": ["@cloudflare/workers-types"]
+  },
+  "include": ["."]
+}

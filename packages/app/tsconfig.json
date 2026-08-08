@@ -8,5 +8,13 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["src", "vite.config.ts", "src/pages/HelpPage/data.compile.ts"]
+  "include": [
+    "src",
+    "vite.config.ts",
+    "vitest.worker.config.ts",
+    "src/pages/HelpPage/data.compile.ts"
+  ],
+  // The Worker is typechecked separately with Workers (not DOM) types; see
+  // src/worker/tsconfig.json.
+  "exclude": ["src/worker"]
 }
