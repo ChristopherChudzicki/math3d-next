@@ -159,27 +159,16 @@ def test_meta_unknown_key_returns_404():
 
 
 @pytest.mark.django_db
-def test_meta_legacy_key_returns_title_without_migrating():
+def test_meta_unmigrated_legacy_key_returns_404_without_migrating():
+    # /meta/ only serves migrated (Scene) scenes: an un-migrated legacy key
+    # 404s (the Worker then serves the default card) and — like the rest of the
+    # endpoint — must NOT trigger or persist a migration.
     legacy = LegacyScene.objects.create(dehydrated=LEGACY_DEHYDRATED_FIXTURE)
     resp = Client().get(_meta(legacy.key))
-    assert resp.status_code == 200
-    assert resp.json() == {"title": "Old"}  # from dehydrated["metadata"]["title"]
-    # The point of the endpoint: it must NOT persist a migration.
+    assert resp.status_code == 404
     assert not Scene.objects.filter(key=legacy.key).exists()
     legacy.refresh_from_db()
     assert legacy.times_accessed == 0
-
-
-@pytest.mark.django_db
-def test_meta_legacy_key_with_null_metadata_returns_null_title():
-    # A legacy blob whose "metadata" is present-but-null must fail open
-    # (title=None → the Worker serves the default card), not raise a 500.
-    legacy = LegacyScene.objects.create(
-        dehydrated={**LEGACY_DEHYDRATED_FIXTURE, "metadata": None}
-    )
-    resp = Client().get(_meta(legacy.key))
-    assert resp.status_code == 200
-    assert resp.json() == {"title": None}
 
 
 @pytest.mark.django_db

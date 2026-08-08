@@ -343,9 +343,10 @@ Math3d) — which is the desired behavior for a scene the author never named.
   identical on deep-links — no format flash, including the common `"Untitled"` case. Assertions in
   `MainPage.spec.tsx` cover both.
 
-`og:url` = `${SITE_ORIGIN}/<key>` (fixed canonical, regardless of the requested host). This is
-rewritten for **every** scene that exists — titled or untitled — so a shared untitled scene still
-links to its own canonical URL.
+`og:url` = `${SITE_ORIGIN}/<key>` (fixed canonical, regardless of the requested host). It is
+rewritten for **every** scene `/meta/` serves — titled or untitled — so a shared untitled scene
+still links to its own canonical URL. (Un-migrated legacy keys `404` and pass through to the
+default card, `og:url` included — see Backend below.)
 
 ### URL classification (why it's safe)
 
@@ -364,12 +365,16 @@ Add `GET /scenes/{key}/meta/`, `auth=None`, response `{ title: string | null }`
 It is a **pure read** — crucially, it must **not** increment `times_accessed` and must **not**
 call `migrate_scene`, the two write side effects that rule out the full GET for the Worker.
 
-- **Legacy-key title source (settle in the plan):** the full GET surfaces a legacy scene's title
-  only by migrating it into a `Scene` row first. The meta endpoint must avoid that. Resolve
-  without persisting a migration: return the migrated `Scene.title` if a row exists; otherwise
-  read the title out of `LegacyScene.dehydrated` (the legacy blob) directly. (Acceptable
-  fallback if that's fiddly: `404`/empty for un-migrated legacy keys → the Worker serves the
-  default card, graceful; but prefer surfacing the title.)
+- **Legacy keys — serve migrated scenes only (settled):** the endpoint looks up a `Scene` row
+  (`get_object_or_404(Scene…)`) and returns its `title`; an un-migrated legacy key `404`s and the
+  Worker serves the branded default card. It deliberately does **not** read the title out of
+  `LegacyScene.dehydrated`. Rationale: the full GET only surfaces a legacy title by _migrating_
+  the scene (a write side effect the meta endpoint must avoid), and reading the raw blob instead
+  means defensively parsing arbitrary old-system JSON — a real 500 surface for malformed blobs, as
+  the pass-1 reviews found. The graceful fallback (default card until first in-app open migrates
+  the scene) is worth that simplification: the endpoint stays a trivial, total, always-string read.
+  This also means `og:url` is rewritten for exactly the scenes `/meta/` serves — every `Scene`
+  row — with no null-title edge.
 - **Contract-narrowing bonus:** the Worker now depends on a tiny `{ title }` shape, not the full
   item schema (which churns) — the abandonability instinct pointed at the API surface. It's also
   the natural attach point for the deferred CDN cache.

@@ -81,18 +81,17 @@ it("overrides Cache-Control so intermediaries don't cache per-scene HTML", async
   expect(res.headers.get("cache-control")).toContain("private");
 });
 
-it.each([{ title: "" }, { title: "   " }, { title: "Untitled" }])(
-  "keeps the shell's default title for an untitled scene but still rewrites og:url (%o)",
-  async (body) => {
-    stubMeta({ status: 200 }, body);
-    const t = await tags(await call("/abc123", makeEnv()));
-    // Untitled scene reads like the home page — the shell's rich defaults are
-    // left untouched — but og:url still points at this scene's canonical URL.
-    expect(t.title).toBe(DEFAULT_TITLE);
-    expect(t.ogTitle).toBe(DEFAULT_TITLE);
-    expect(t.ogUrl).toBe("https://og.math3d.test/abc123");
-  },
-);
+it("keeps the shell's default title for an untitled scene but still rewrites og:url", async () => {
+  // "Untitled" (the DB default) represents the untitled branch; that blank and
+  // whitespace also collapse to untitled is the shared helper's job, pinned in
+  // sceneTitle.spec.ts. Here the Worker leaves the shell's rich defaults for
+  // the title tags but still points og:url at this scene's canonical URL.
+  stubMeta({ status: 200 }, { title: "Untitled" });
+  const t = await tags(await call("/abc123", makeEnv()));
+  expect(t.title).toBe(DEFAULT_TITLE);
+  expect(t.ogTitle).toBe(DEFAULT_TITLE);
+  expect(t.ogUrl).toBe("https://og.math3d.test/abc123");
+});
 
 it("escapes a hostile title (no tag/attribute breakout)", async () => {
   stubMeta({ status: 200 }, { title: '"><img src=x onerror=alert(1)>' });

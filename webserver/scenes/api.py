@@ -62,17 +62,14 @@ def create_scene(request, payload: SceneCreateSchema):
 def get_scene_meta(request, key: str):
     """Read-only title lookup for the edge OG Worker.
 
-    No side effects: unlike ``get_scene`` it never increments ``times_accessed``
-    and never migrates a legacy key. Legacy titles are read out of the
-    dehydrated blob directly, without persisting a migration.
+    Serves only migrated (``Scene``) scenes, and does so with no side effects:
+    unlike ``get_scene`` it never increments ``times_accessed`` and never
+    migrates a legacy key. An un-migrated legacy key 404s here — the Worker
+    then serves the branded default card, and the scene picks up per-scene
+    metadata once it's opened in-app (which migrates it).
     """
-    scene = Scene.objects.filter(key=key).only("title").first()
-    if scene is not None:
-        return {"title": scene.title}
-    legacy = get_object_or_404(LegacyScene, key=key)
-    # `metadata` can be present-but-null in a legacy blob; `or {}` keeps that
-    # from raising instead of failing open to a null title.
-    return {"title": (legacy.dehydrated.get("metadata") or {}).get("title")}
+    scene = get_object_or_404(Scene.objects.only("title"), key=key)
+    return {"title": scene.title}
 
 
 @scenes_router.get("/{key}/", response=SceneSchema, auth=None, by_alias=True)
