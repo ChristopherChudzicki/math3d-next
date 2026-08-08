@@ -2,8 +2,33 @@
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "math3d-next",
   "compatibility_date": "2026-07-04",
+  "main": "./src/worker/index.ts",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    "binding": "ASSETS",
+    // With our compatibility_date, assets_navigation_prefers_asset_serving is on
+    // by default, so a scene navigation would be served the SPA fallback WITHOUT
+    // invoking the Worker. Force the Worker to run for navigations, but keep real
+    // assets bypassing it (zero Worker invocations for assets). Validate with
+    // `wrangler dev` when changing these globs.
+    "run_worker_first": [
+      "/*",
+      "!/assets/*",
+      "!/og/*",
+      "!/favicon.ico",
+      "!/favicon.svg",
+      "!/apple-touch-icon.png",
+      "!/robots.txt",
+      "!/mockServiceWorker.js",
+      "!/index.html"
+    ]
+  },
+  "vars": {
+    "API_BASE": "https://api.math3d.org",
+    // Committed default; overridden at deploy via `--var SITE_ORIGIN:$SITE_ORIGIN`,
+    // sourced from the same CI value as VITE_SITE_ORIGIN so og:url and the static
+    // head defaults can't drift.
+    "SITE_ORIGIN": "https://next.math3d.org"
   }
 }

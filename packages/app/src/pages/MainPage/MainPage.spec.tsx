@@ -75,17 +75,49 @@ test("Sets the document title from the loaded scene's title", async () => {
   const scene = seedDb.withSceneFromItems([], { title: "My Torus" });
   renderTestApp(`/${scene.key}`);
   await waitFor(() => {
-    expect(document.title).toBe("Math3d - My Torus");
+    // Matches the format the OG Worker writes into <title> at the edge, so a
+    // deep-linked scene shows the same tab title before and after app boot.
+    expect(document.title).toBe("My Torus | Math3d");
   });
 });
 
-test("Leaves the static document title untouched when no scene is loaded", async () => {
-  // The static <title> baked into index.html is the crawler/link-preview title.
-  // On the home/new-scene route (no scene key) the loader must not clobber it.
+test("Uses the site default title for a scene left at the default 'Untitled'", async () => {
+  // A scene at the DB default "Untitled" reads like the home page — the rich
+  // site default — matching what the OG Worker leaves in <title> at the edge
+  // (no "Untitled | Math3d" flash on boot).
+  document.title = "Math3d: Online 3d Graphing Calculator";
+  const scene = seedDb.withSceneFromItems([], { title: "Untitled" });
+  const { queryClient } = renderTestApp(`/${scene.key}`);
+  await waitForAppReady(queryClient);
+  expect(document.title).toBe("Math3d: Online 3d Graphing Calculator");
+});
+
+test("No-scene default falls back to document.title when default-title meta is absent", async () => {
+  // Dev/tests may ship no <meta name="default-title">; the loader then falls
+  // back to the static <title> and must not clobber it on the home route.
   document.title = "Static Head Title";
   const { queryClient } = renderTestApp("/");
   await waitForAppReady(queryClient);
   expect(document.title).toBe("Static Head Title");
+});
+
+test("No-scene default reads the default-title meta when present", async () => {
+  // The OG Worker rewrites <title> per-scene but leaves <meta name="default-title">
+  // untouched, so the loader sources its no-scene default from the meta — not from
+  // a possibly Worker-rewritten <title>.
+  document.title = "Some Scene | Math3d"; // simulate a Worker-rewritten <title>
+  const meta = document.createElement("meta");
+  meta.setAttribute("name", "default-title");
+  meta.setAttribute("content", "Math3d: Online 3d Graphing Calculator");
+  document.head.appendChild(meta);
+
+  try {
+    const { queryClient } = renderTestApp("/");
+    await waitForAppReady(queryClient);
+    expect(document.title).toBe("Math3d: Online 3d Graphing Calculator");
+  } finally {
+    meta.remove();
+  }
 });
 
 test("Alerts and redirects home when the scene key is not found", async () => {

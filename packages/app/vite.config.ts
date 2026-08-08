@@ -110,20 +110,33 @@ export default defineConfig({
     },
   },
   test: {
-    globals: true,
-    clearMocks: true,
-    setupFiles: ["./src/setupTests.ts"],
-    environment: "jsdom",
-    env: {
-      VITE_DISPLAY_AUTH_FLOWS: "true",
-    },
-    exclude: ["**/playwright/**"],
-    include: ["./src/**/*.{test,spec}.{ts,tsx}"],
-    css: {
-      include: /\*.module.css/,
-      modules: {
-        classNameStrategy: "non-scoped",
+    projects: [
+      {
+        // The app's jsdom tests. `extends: true` inherits this file's plugins
+        // and resolve (react, tsconfig paths, validate-env). The worker tests
+        // live in a separate workerd project (vitest.worker.config.ts) and are
+        // excluded here so they don't run under jsdom.
+        extends: true,
+        test: {
+          name: "jsdom",
+          globals: true,
+          clearMocks: true,
+          setupFiles: ["./src/setupTests.ts"],
+          environment: "jsdom",
+          env: {
+            VITE_DISPLAY_AUTH_FLOWS: "true",
+          },
+          exclude: ["**/playwright/**", "./src/worker/**"],
+          include: ["./src/**/*.{test,spec}.{ts,tsx}"],
+          css: {
+            include: /\*.module.css/,
+            modules: {
+              classNameStrategy: "non-scoped",
+            },
+          },
+        },
       },
-    },
+      "./vitest.worker.config.ts",
+    ],
   },
 });

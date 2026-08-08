@@ -27,6 +27,12 @@ class MiniSceneSchema(_AuthoredSceneSchema):
     archived: bool
 
 
+class SceneMetaSchema(Schema):
+    """Title-only shape for the read-only meta endpoint the edge OG Worker calls."""
+
+    title: Optional[str] = None
+
+
 class SceneSchema(_AuthoredSceneSchema):
     items: List[MathItem]
     item_order: Dict[str, List[str]] = Field(alias="itemOrder")

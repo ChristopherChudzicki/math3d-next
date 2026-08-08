@@ -10,6 +10,7 @@ from scenes.schemas.scenes import (
     MiniSceneSchema,
     SceneCreateSchema,
     SceneFilterSchema,
+    SceneMetaSchema,
     ScenePatchSchema,
     SceneSchema,
 )
@@ -24,6 +25,7 @@ __all__ = [
     "MiniSceneSchema",
     "SceneCreateSchema",
     "SceneFilterSchema",
+    "SceneMetaSchema",
     "ScenePatchSchema",
     "SceneSchema",
 ]

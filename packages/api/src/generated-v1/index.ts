@@ -144,6 +144,32 @@ export interface paths {
     patch: operations["scenes_api_update_scene"];
     trace?: never;
   };
+  "/v1/scenes/{key}/meta/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Scene Meta
+     * @description Read-only title lookup for the edge OG Worker.
+     *
+     *     Serves only migrated (``Scene``) scenes, and does so with no side effects:
+     *     unlike ``get_scene`` it never increments ``times_accessed`` and never
+     *     migrates a legacy key. An un-migrated legacy key 404s here — the Worker
+     *     then serves the branded default card, and the scene picks up per-scene
+     *     metadata once it's opened in-app (which migrates it).
+     */
+    get: operations["scenes_api_get_scene_meta"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -798,6 +824,14 @@ export interface components {
       /** Title */
       title?: string | null;
     };
+    /**
+     * SceneMetaSchema
+     * @description Title-only shape for the read-only meta endpoint the edge OG Worker calls.
+     */
+    SceneMetaSchema: {
+      /** Title */
+      title?: string | null;
+    };
     /** ScenePatchSchema */
     ScenePatchSchema: {
       /** Archived */
@@ -1309,6 +1343,28 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SceneSchema"];
+        };
+      };
+    };
+  };
+  scenes_api_get_scene_meta: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SceneMetaSchema"];
         };
       };
     };

@@ -15,6 +15,7 @@ from scenes.schemas import (
     MiniSceneSchema,
     SceneCreateSchema,
     SceneFilterSchema,
+    SceneMetaSchema,
     ScenePatchSchema,
     SceneSchema,
 )
@@ -55,6 +56,20 @@ def create_scene(request, payload: SceneCreateSchema):
         scene.title = payload.title
     scene.save()  # full_clean() re-validates items (defense in depth)
     return Status(201, scene)
+
+
+@scenes_router.get("/{key}/meta/", response=SceneMetaSchema, auth=None)
+def get_scene_meta(request, key: str):
+    """Read-only title lookup for the edge OG Worker.
+
+    Serves only migrated (``Scene``) scenes, and does so with no side effects:
+    unlike ``get_scene`` it never increments ``times_accessed`` and never
+    migrates a legacy key. An un-migrated legacy key 404s here — the Worker
+    then serves the branded default card, and the scene picks up per-scene
+    metadata once it's opened in-app (which migrates it).
+    """
+    scene = get_object_or_404(Scene.objects.only("title"), key=key)
+    return {"title": scene.title}
 
 
 @scenes_router.get("/{key}/", response=SceneSchema, auth=None, by_alias=True)

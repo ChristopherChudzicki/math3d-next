@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 import { useAppDispatch } from "@/store/hooks";
 import defaultScene from "@/store/defaultScene";
 import { sceneSlice } from "@/features/sceneControls/mathItems";
+import { sceneTabTitle } from "@/features/scene/sceneTitle";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 
 const { actions: itemActions } = sceneSlice;
@@ -38,17 +39,25 @@ const useSceneLoader = (
     staleTime: Infinity,
   });
 
-  // The static <title> baked into index.html is the crawler / link-preview
-  // title for the site. Capture it on first render (before the effect below can
-  // overwrite it) so we can restore it whenever no scene title applies, rather
-  // than clobbering it with a hardcoded default. Restoring (not just skipping
-  // the write) also keeps SPA navigation correct: leaving from a titled scene
-  // back home resets the tab instead of leaving the previous scene's title.
-  const defaultTitle = useRef(document.title);
+  // The site's crawler / link-preview default lives in
+  // <meta name="default-title">, which the metadata Worker leaves untouched
+  // (it only rewrites <title> per-scene at the edge). Read it once as the
+  // no-scene default so the loader gets the true site title whether or not the
+  // Worker ran; fall back to document.title for dev/tests where the meta may be
+  // absent. Restoring it (not just skipping the write) also keeps SPA
+  // navigation correct: leaving a titled scene back home resets the tab instead
+  // of stranding the previous scene's title.
+  const defaultTitle = useRef(
+    document.querySelector<HTMLMetaElement>('meta[name="default-title"]')
+      ?.content ?? document.title,
+  );
 
   useEffect(() => {
-    document.title = data?.title
-      ? `Math3d - ${data.title}`
+    // Shared with the Worker's edge <title> rewrite (sceneTitle.ts) so a
+    // deep-linked scene shows the same tab title before and after app boot,
+    // including the untitled case → the rich site default.
+    document.title = data
+      ? sceneTabTitle(data.title ?? "", defaultTitle.current)
       : defaultTitle.current;
   }, [data]);
 
