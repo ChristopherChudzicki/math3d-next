@@ -4,8 +4,10 @@
 **Status:** Approved design, pre-implementation
 **Revised:** 2026-08-07 — split into two passes; reconciled with shipped work
 (#1222 default image, #1223 static head + `VITE_SITE_ORIGIN`, #1209 render mode);
-added the abandonability invariant; landed the `<title>` decision; moved KV +
-API caching out of pass 1 into deferred levers.
+added the abandonability invariant; landed the `<title>` decision and the title
+**string format** (`{title} | Math3d`); pulled a read-only `GET /scenes/{key}/meta/`
+into pass 1 (the full GET has write side effects); named the human-TTFB cost of
+running the Worker on every navigation; moved KV + CDN caching into deferred levers.
 
 ## Problem
 
@@ -117,14 +119,23 @@ The apex cutover is **not** a one-line flip — two constraints:
   candidate scene key" is sound.
 - **Key charset:** generated keys use `KEY_ALPHABET` (alphanumeric, no `0OlI`-type ambiguities),
   length 10; the backend reserves only `app` and keys < 2 chars
-  (`webserver/scenes/models.py`). Keys never contain `.` or `/`. Legacy scene keys also fit
-  `[A-Za-z0-9_-]` (confirmed), so the Worker's validation regex covers them too.
-- **Metadata source:** `GET /scenes/{key}/`, `auth=None` (public) — returns the full scene
-  incl. `title` (`webserver/scenes/api.py`). Despite `by_alias=True`, `title` has **no alias**
-  (verified in `webserver/openapi.v1.yaml`), so the Worker reads the JSON field `title`
-  directly. Pass 1 reads `.title` off this full response (the double API call is accepted — see
-  Non-goals; a lean `MiniSceneSchema` exists but is only wired to the list route, so there is no
-  by-key title-only endpoint today). Production host: **`https://api.math3d.org`**.
+  (`webserver/scenes/models.py`). Keys never contain `.` or `/`. **Legacy keys:**
+  `LegacyScene.key` is an unconstrained `CharField(max_length=80)`, so "legacy keys fit
+  `[A-Za-z0-9_-]`" rests on old-system data, not the model — **spot-check before relying on it**:
+  `SELECT count(*) FROM scenes_legacyscene WHERE key !~ '^[A-Za-z0-9_-]{2,80}$';`. Blast radius
+  if some don't fit is low: a rejected legacy key just passes through to the default card
+  (graceful), never breakage. Note underscore-leading single segments (e.g. `_headers`) match the
+  regex and are candidate keys by design — harmless (they aren't URL-served, or 404 → passthrough).
+- **Metadata source — a new read-only `GET /scenes/{key}/meta/`** (pass 1 adds it; see
+  "Backend: read-only meta endpoint"). The Worker must **not** use the existing
+  `GET /scenes/{key}/`: that handler has **write side effects on every GET** — it increments
+  `times_accessed` via `F()+1`, and for a **legacy** key it re-runs `migrate_scene(legacy)`
+  (a full re-migration write) _each time_ (`webserver/scenes/api.py`). With `run_worker_first`
+  firing the Worker on every navigation + every crawl, hitting that endpoint would double the
+  view counter and trigger a re-migration storm on legacy scenes. The `/meta/` endpoint is a
+  pure read (no increment, no migration) returning `{ title }`. `title` has **no alias**
+  (single-word field), so the Worker reads the JSON field `title` directly. Endpoint is public
+  (`auth=None`). Production host: **`https://api.math3d.org`**.
 - **Title default:** `title` is `TextField(blank=True, default="Untitled")`
   (`webserver/scenes/models.py`) — the API effectively always returns a non-empty title,
   often the literal `"Untitled"`.
@@ -136,6 +147,18 @@ The apex cutover is **not** a one-line flip — two constraints:
   navigations unless we force it. **`run_worker_first` (a glob-pattern array) is required** — see
   Config. Requests that match a real static asset (`/assets/*`, `/og/*`, `/favicon.*`) should be
   excluded so they keep bypassing the Worker (zero invocations for assets).
+  - **Cost of running for _all_ navigations (accepted, D3):** because `run_worker_first` fires the
+    Worker for humans too (not just crawlers — the two are indistinguishable at the edge without
+    UA/`Sec-Fetch` heuristics), every scene page's **first byte now blocks on the Worker's
+    `/meta/` fetch**. Today the shell ships from the CF edge independent of the backend. Typical
+    added latency is small (~100–300 ms; Heroku Basic dynos don't sleep) and dwarfed by the
+    seconds-long MathBox boot that follows; the timeout (below) is the ceiling, not the expected
+    cost. During a Heroku brownout every scene load waits up to the timeout, then serves the
+    default-tag shell (still functional — the client would fail its own fetch too). Accepted over
+    crawler-gating, which would protect human TTFB but add a bot-detection heuristic to maintain
+    (and, since humans would then never receive a Worker-rewritten `<title>`, would moot the
+    `default-title`/strand-bug machinery). If TTFB is later measured to matter, the KV lever cuts
+    it to a ~1 ms edge read after the first load.
 - **Social caches** are URL-keyed; lifetimes vary (Facebook/LinkedIn effectively cache by URL
   for days-to-indefinite; Slack re-scrapes ~every 30 min; Discord is short). Facebook (and
   others) canonicalize on `og:url`, so pinning `og:url` to a fixed canonical consolidates
@@ -256,17 +279,21 @@ title as a JS constant (works, but puts a second copy of the string in a differe
 2. **Validate the key** against `^[A-Za-z0-9_-]{2,80}$` (a superset of the real key charset). On
    failure → passthrough defaults with zero backend cost. (Cheap defense-in-depth: caps the
    junk-path amplification surface before any backend touch.)
-3. `fetch(`${API_BASE}/scenes/${key}/`)` with `AbortSignal.timeout(~1000ms)`. The fetch uses a
-   **bare URL string, not the incoming `request`** — no cookies/headers are forwarded (the
-   endpoint is public `auth=None`; this also rules out any header-based cache-poisoning). On
-   `200`, parse the body **defensively**: wrap `response.json()` and a
-   `typeof body.title === "string"` check in the same try/catch as the failure paths.
+3. `fetch(`${API_BASE}/scenes/${key}/meta/`)` (the read-only endpoint — never the
+   side-effecting full GET) with `AbortSignal.timeout(~800ms)` (sub-second: bounds the
+   worst-case TTFB add during a Heroku brownout while leaving headroom over the typical
+   ~100–300 ms). The fetch uses a **bare URL string, not the incoming `request`** — no
+   cookies/headers are forwarded (the endpoint is public `auth=None`; this also rules out any
+   header-based cache-poisoning). On `200`, parse the body **defensively**: wrap
+   `response.json()` and a `typeof body.title === "string"` check in the same try/catch as the
+   failure paths.
    - Valid `200` → extract `title`, use it.
    - `404` / non-2xx / **malformed or missing-title 200** / timeout / network error →
      passthrough defaults. **The page must never block or error on the lookup.**
-4. Fetch the SPA shell (`env.ASSETS.fetch`) and pipe it through `HTMLRewriter`, rewriting:
-   `meta[property="og:title"]` / `meta[name="twitter:title"]` `content` (the title), the
-   `<title>` element text, and `meta[property="og:url"]` `content` (= `${SITE_ORIGIN}/<key>`).
+4. Fetch the SPA shell (`env.ASSETS.fetch`) and pipe it through `HTMLRewriter`, rewriting (see
+   Title handling for the exact strings): the `<title>` element text (→ `{title} | Math3d`),
+   `meta[property="og:title"]` / `meta[name="twitter:title"]` `content` (→ **bare** `{title}`),
+   and `meta[property="og:url"]` `content` (= `${SITE_ORIGIN}/<key>`).
    Return the transformed response, setting an explicit **short/`private` `Cache-Control`** rather
    than inheriting `index.html`'s (so no intermediary over-caches per-scene HTML). HTMLRewriter
    preserves status/headers otherwise.
@@ -282,20 +309,59 @@ title as a JS constant (works, but puts a second copy of the string in a differe
 
 ### Title handling
 
-- Trim the fetched title, then **clamp to ~200 chars** (`Scene.title` is an uncapped `TextField`;
-  cards truncate ~60–90 anyway, and the clamp bounds the rewritten value). If empty or the literal
-  `"Untitled"` → `"Untitled scene — Math3d"`. (A user who deliberately names a scene `"Untitled"`
-  gets the generic card — acceptable.)
-- `og:url` = `${SITE_ORIGIN}/<key>` (fixed canonical, regardless of the requested host).
+Trim the fetched title, then **clamp to ~200 chars** on a **code-point boundary** (`Scene.title`
+is an uncapped `TextField`; cards truncate ~60–90 anyway, and the clamp bounds the rewritten
+value — clamp by code point, not code unit, so a surrogate pair / emoji isn't split). Let
+`name` = the trimmed+clamped title, or `"Untitled scene"` if it's empty or the literal
+`"Untitled"` (a user who deliberately names a scene `"Untitled"` gets the generic text —
+acceptable).
+
+**String format (D1) — two surfaces, one brand suffix, `|` separator:**
+
+- `<title>` element (tab + non-JS SEO): `` `${name} | Math3d` `` (e.g. `My Torus | Math3d`,
+  `Untitled scene | Math3d`).
+- `og:title` / `twitter:title` (card headline): **bare `name`** (e.g. `My Torus`,
+  `Untitled scene`) — the card already shows "Math3d" via `og:site_name`, so no redundant suffix.
+- **Home / no-scene** keeps the shipped rich defaults unchanged: `<title>` =
+  `Math3d: Online 3d Graphing Calculator`, and `og:title` stays that same descriptive string
+  (the Worker only rewrites on scene pages). `default-title` = that rich `<title>` verbatim.
+- **Client parity (required):** `useSceneLoader` must set `document.title` to the **same**
+  `` `${data.title} | Math3d` `` (changed from `` `Math3d - ${data.title}` ``) so the Worker's
+  pre-boot `<title>` and the client's post-boot value match — no format flash on deep-links.
+  Update its assertion in `MainPage.spec.tsx`. The no-scene branch restores `default-title`
+  (the rich home title), as before.
+
+`og:url` = `${SITE_ORIGIN}/<key>` (fixed canonical, regardless of the requested host).
 
 ### URL classification (why it's safe)
 
 Malformed keys are rejected by the regex (step 2). Well-formed-but-nonexistent keys (e.g.
 `/help`, `/about`, a deleted scene) 404 at the API → passthrough defaults. Reserved routes
 (`/app/*`), asset-like, and multi-segment paths are filtered before any fetch. Every scene
-navigation costs one Heroku fetch (no cache in pass 1); junk valid-charset single-segment paths
-each cost one cheap Heroku 404 — bound abusive volume with a Cloudflare Rate-Limiting/WAF rule
-on the scene route (see Launch prerequisites), which is the right place for it, not the cache.
+navigation costs one read-only `/meta/` fetch (no cache in pass 1); junk valid-charset
+single-segment paths each cost one cheap `/meta/` 404 — bound abusive volume with a Cloudflare
+Rate-Limiting/WAF rule on the scene route (see Launch prerequisites), which is the right place
+for it, not the cache.
+
+### Backend: read-only meta endpoint
+
+Add `GET /scenes/{key}/meta/`, `auth=None`, response `{ title: string | null }`
+(`MiniSceneSchema` already models a title-only shape, or a purpose-built `SceneMetaSchema`).
+It is a **pure read** — crucially, it must **not** increment `times_accessed` and must **not**
+call `migrate_scene`, the two write side effects that rule out the full GET for the Worker.
+
+- **Legacy-key title source (settle in the plan):** the full GET surfaces a legacy scene's title
+  only by migrating it into a `Scene` row first. The meta endpoint must avoid that. Resolve
+  without persisting a migration: return the migrated `Scene.title` if a row exists; otherwise
+  read the title out of `LegacyScene.dehydrated` (the legacy blob) directly. (Acceptable
+  fallback if that's fiddly: `404`/empty for un-migrated legacy keys → the Worker serves the
+  default card, graceful; but prefer surfacing the title.)
+- **Contract-narrowing bonus:** the Worker now depends on a tiny `{ title }` shape, not the full
+  item schema (which churns) — the abandonability instinct pointed at the API surface. It's also
+  the natural attach point for the deferred CDN cache.
+- Adds the endpoint to `webserver/openapi.v1.yaml` (regenerate via `./scripts/generate_openapi.sh`;
+  CI's spec + generated-client checks enforce it). The generated FE client will include it,
+  unused by the app — harmless.
 
 ## Config-as-code changes (pass 1)
 
@@ -313,6 +379,9 @@ on the scene route (see Launch prerequisites), which is the right place for it, 
     "binding": "ASSETS",
     // Force the Worker to run for scene navigations; keep real assets bypassing it.
     // Exact globs to be validated with `wrangler dev` (multi-segment matching of `/*`).
+    // The dotted root files (robots.txt, mockServiceWorker.js) would pass through anyway via
+    // step-1's dotted filter, but excluding them keeps "zero invocations for assets" literal.
+    // (mockServiceWorker.js is dev-only — ideally it isn't in the prod `./dist` at all.)
     "run_worker_first": [
       "/*",
       "!/assets/*",
@@ -320,6 +389,8 @@ on the scene route (see Launch prerequisites), which is the right place for it, 
       "!/favicon.ico",
       "!/favicon.svg",
       "!/apple-touch-icon.png",
+      "!/robots.txt",
+      "!/mockServiceWorker.js",
       "!/index.html"
     ]
   },
@@ -334,6 +405,12 @@ on the scene route (see Launch prerequisites), which is the right place for it, 
 
 (No `kv_namespaces` in pass 1 — KV is a deferred lever.)
 
+`public/_headers` sets `Cache-Control: public, max-age=31536000, immutable` on `/assets/*` only;
+it does not touch the SPA HTML, whose default is `max-age=0, must-revalidate`. The Worker's
+per-scene response overriding to a short/`private` `Cache-Control` (request-flow step 4) is what
+keeps a rewritten scene page from inheriting that revalidating default — no conflict with
+`_headers`, which governs a disjoint path.
+
 New/changed files:
 
 - `packages/app/src/worker/index.ts` — the Worker + `HTMLRewriter` handlers.
@@ -341,10 +418,19 @@ New/changed files:
 - `packages/app/index.html` — add `<meta name="default-title">` (= `<title>`); the existing
   head-comment should note the Worker leaves `default-title` untouched.
 - `packages/app/src/features/scene/useSceneLoader.ts` — source the no-scene default from
-  `meta[name="default-title"]` instead of `document.title`.
+  `meta[name="default-title"]` instead of `document.title`, **and** change the per-scene
+  `document.title` format to `` `${data.title} | Math3d` `` (D1).
+- `packages/app/src/pages/MainPage/MainPage.spec.tsx` — update the title assertion to the new
+  `{title} | Math3d` format.
+- `webserver/scenes/api.py` (+ `webserver/scenes/schemas/scenes.py`) — the read-only
+  `GET /scenes/{key}/meta/` endpoint (no increment / no migration).
+- `webserver/scenes/api_test.py` — endpoint tests, incl. an assertion that it does **not** bump
+  `times_accessed` or migrate a legacy key.
+- `webserver/openapi.v1.yaml` + `packages/api/src/generated-v1/` — regenerated
+  (`./scripts/generate_openapi.sh`) for the new endpoint; CI enforces both.
 
-No CI pipeline change: `deploy-reusable.yml` already runs `yarn wrangler deploy` after
-`yarn build` produces `./dist`.
+CI: `deploy-reusable.yml` already runs `yarn wrangler deploy` after `yarn build` produces
+`./dist` (no frontend pipeline change). The backend endpoint rides the normal Django deploy.
 
 ## Testing (pass 1)
 
@@ -358,33 +444,42 @@ _matches_ `src/worker/*.test.ts`. Introduce a Vitest **`projects`** split:
 - **jsdom project** — the existing app tests. Move the current root `test` options
   (`globals`, `clearMocks`, `setupFiles: ["./src/setupTests.ts"]`, `env`, `css.modules`,
   `include`) _into_ this project, and add `exclude: ["./src/worker/**"]`.
-- **workers project** — scoped to `src/worker/**`, using the **`cloudflareTest()` Vite plugin**
-  from `@cloudflare/vitest-pool-workers` (options — e.g. `{ wrangler: { configPath: "./wrangler.jsonc" } }`
-  — passed to the plugin). **Do not** load `setupTests.ts` here (it pulls in jsdom/Testing-Library
-  globals absent under workerd, and the pool disallows a custom `environment`/`runner`).
+- **workers project** — scoped to `src/worker/**`, wired to `@cloudflare/vitest-pool-workers`
+  pointed at `./wrangler.jsonc`. **Do not** load `setupTests.ts` here (it pulls in
+  jsdom/Testing-Library globals absent under workerd, and the pool disallows a custom
+  `environment`/`runner`).
 
-Versions: `@cloudflare/vitest-pool-workers` **≥ 0.13** (the Vitest-4 line; the older
-`defineWorkersProject`/`test.poolOptions.workers` API is **removed**) and **Vitest ≥ 4.1** (the app
-pins `^4.0.18` — raise the floor). `yarn test`/Turbo run `vitest --run`, which executes both
-projects in one invocation.
+> **VERIFY before writing the config — the pool's API and version floors are unconfirmed here.**
+> The package is not yet a dependency. The exact wiring (the long-standing API is
+> `defineWorkersProject` + `test.poolOptions.workers.wrangler.configPath`; whether a newer
+> `cloudflareTest()` Vite-plugin form exists / has replaced it), and the claimed floors
+> (`@cloudflare/vitest-pool-workers ≥ 0.13`, `Vitest ≥ 4.1`), must be checked against the pinned
+> package's current README at implementation time. The app already pins `vitest ^4.0.18`, which
+> _resolves_ to ≥ 4.1 — a floor bump only matters as a hard guarantee, not for install
+> correctness. `yarn test`/Turbo run `vitest --run`, which executes both projects in one invocation.
 
 Test shell: worker tests run without a build, so `./dist` (the `ASSETS` directory) may be absent —
 provide the HTML shell explicitly (a fixture string fed through `HTMLRewriter`, or a mocked
 `env.ASSETS.fetch`) rather than relying on the real asset binding.
 
-Worker cases:
+Worker cases (assert the **exact** strings, not just "rewritten"):
 
-- scene key, API `200` → `og:title`/`twitter:title`/`<title>`/`og:url` all rewritten correctly;
+- scene key, `/meta/` `200` `{title:"My Torus"}` → `<title>` = `My Torus | Math3d`,
+  `og:title` = `twitter:title` = **bare** `My Torus`, `og:url` = `${SITE_ORIGIN}/<key>`;
   `default-title` and `og:description` left untouched;
-- empty / whitespace / `"Untitled"` title → `"Untitled scene — Math3d"` fallback;
-- over-long title → clamped to ~200 chars;
+- empty / whitespace / `"Untitled"` title → `<title>` = `Untitled scene | Math3d`,
+  `og:title`/`twitter:title` = `Untitled scene`;
+- over-long title → clamped to ~200 chars on a code-point boundary (no split surrogate);
 - **hostile title** (`"><img src=x onerror=alert(1)>` and `&"<>`) → escaped, no attribute
   breakout (round-trips JSON-decode → HTML-escape);
-- invalid key (bad charset, too long, `%2F`, CRLF) → passthrough, **no** Heroku touch;
-- API `404` / timeout / 500 → shell served with default tags (no error);
+- invalid key (bad charset, too long, `%2F`, CRLF) → passthrough, **no** `/meta/` touch;
+- `/meta/` `404` / timeout / 500 → shell served with default tags (no error);
 - **malformed 200** (non-JSON body, or JSON missing a string `title`) → default tags;
 - `/app/x`, multi-segment, dotted paths → passthrough, no fetch;
-- no incoming request header/cookie is forwarded to the API fetch.
+- no incoming request header/cookie is forwarded to the `/meta/` fetch.
+
+Backend (pytest): `GET /scenes/{key}/meta/` returns the title and — the point of the endpoint —
+does **not** increment `times_accessed` and does **not** migrate a legacy key.
 
 App-side case (jsdom project):
 
@@ -401,19 +496,19 @@ Notes:
 
 ## Deferred backend-load & perf levers (not in pass 1)
 
-Pass 1 accepts one Heroku fetch per scene navigation (the Worker's) on top of the client's own
-scene fetch — the "double API call." At current traffic each is a cheap indexed-key lookup, and
-the app already does one such fetch per scene load. These levers exist for **if/when** origin
-load or scene-page TTFB is measured to be a problem — none is built now (YAGNI), and each is
-compatible with the abandonability invariant (all are optional optimizations the SPA doesn't
-depend on):
+Pass 1 accepts one read-only `/meta/` fetch per scene navigation (the Worker's) on top of the
+client's own full scene fetch — the "double API call." The Worker's call is now write-free and
+tiny (`{ title }`); the client's full GET is the one that increments `times_accessed` (once per
+view, as today). These levers exist for **if/when** origin load or scene-page TTFB is measured to
+be a problem — none is built now (YAGNI), and each is compatible with the abandonability invariant
+(all are optional optimizations the SPA doesn't depend on):
 
 ### KV title cache (Worker-side)
 
 Cache the title at the edge in **Cloudflare Workers KV** (`OG_CACHE`, key `title:<key>`) so
 repeat scene navigations read the title in ~1ms instead of re-hitting Heroku, bounding Heroku
 load to one fetch per scene per TTL window and cutting scene-page TTFB after the first load.
-Design details (preserved from the original v1 sketch, for when this lands):
+Design details (preserved from the original single-pass sketch, for when this lands):
 
 - **Positive-cache only — no negative sentinels.** KV's free tier allows only ~1,000 writes/day.
   Writing a sentinel per 404 would let junk/crawler traffic exhaust that budget. Write KV only on
@@ -435,22 +530,16 @@ Design details (preserved from the original v1 sketch, for when this lands):
   This same PATCH hook is where pass 2's image invalidation (`graphicsVersion` bump / re-render
   enqueue) would live — worth building once for both.
 
-### CDN-cached scene GET
+### CDN-cached scene GET (or `/meta/`)
 
-Put `Cache-Control` on the public `GET /scenes/{key}/` and let Cloudflare cache it (free on all
-plans; no Cache Reserve). Offloads origin for **every** consumer (Worker, client, direct API
-users), not just navigations. Prerequisites/costs: `api.math3d.org` must be **proxied** through
-Cloudflare (orange-cloud), not DNS-only (unverified today); and invalidation (short TTL +
+Put `Cache-Control` on the public read endpoints (the Worker's `/meta/` is the obvious first
+target; the full `GET /scenes/{key}/` too) and let Cloudflare cache them (free on all plans; no
+Cache Reserve). Offloads origin for **every** consumer (Worker, client, direct API users), not
+just navigations. Prerequisites/costs: `api.math3d.org` must be **proxied** through Cloudflare
+(orange-cloud), not DNS-only (unverified today); and invalidation (short TTL +
 stale-while-revalidate, or CF purge on PATCH). More decoupled than the KV cache and survives
-Worker removal, but carries the invalidation + proxying complexity — hence deferred.
-
-### Narrow meta endpoint
-
-Add `GET /scenes/{key}/meta/` returning just `{title}` (later `{title, description}`) so the
-Worker depends on a tiny, stable shape instead of the full item schema (which churns). Cheap
-(`MiniSceneSchema` already models it). Not "edge work" — a normal Django endpoint that survives
-Worker removal. Contract-narrowing, not a load win on its own; fold in if/when we revisit the
-Worker's fetch.
+Worker removal, but carries the invalidation + proxying complexity — hence deferred. (The
+read-only `/meta/` endpoint itself lands in pass 1; only its _caching_ is deferred here.)
 
 ## Pass 2: per-scene images (separate PR)
 
@@ -557,8 +646,11 @@ when picking the compute path.
 
 Pass 1:
 
-- [ ] Add `<meta name="default-title">` to `index.html` and point `useSceneLoader`'s no-scene
-      default at it.
+- [ ] Build the read-only `GET /scenes/{key}/meta/` endpoint (no increment / no migration; legacy
+      title without persisting a migration), with tests, and regenerate the OpenAPI spec + client.
+- [ ] Add `<meta name="default-title">` to `index.html`; point `useSceneLoader`'s no-scene default
+      at it **and** switch its per-scene `document.title` to `{title} | Math3d` (update the test).
+- [ ] Spot-check the legacy-key charset (`SELECT count(*) … WHERE key !~ '^[A-Za-z0-9_-]{2,80}$'`).
 - [ ] Validate the `run_worker_first` globs with `wrangler dev` (confirm `/*` matches
       single-segment scene keys and the asset exclusions bypass correctly; confirm
       `env.ASSETS.fetch` doesn't re-enter the Worker — one invocation per scene nav, no loop).
