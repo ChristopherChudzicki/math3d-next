@@ -161,6 +161,6 @@ it("fetches /meta/ with a bare URL and forwards no request headers/cookies", asy
   await call("/abc123", makeEnv());
   expect(spy).toHaveBeenCalledTimes(1);
   const [input, init] = spy.mock.calls[0] as unknown as [string, RequestInit?];
-  expect(input).toBe("https://api.example.test/scenes/abc123/meta/");
+  expect(input).toBe("https://api.example.test/v1/scenes/abc123/meta/");
   expect(init?.headers).toBeUndefined();
 });

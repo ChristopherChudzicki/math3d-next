@@ -37,11 +37,12 @@ const sceneKeyFromPath = (pathname: string): string | null => {
  * defaults": the page must never block or error on this lookup.
  *
  * Uses a bare URL string (not the incoming request), so no cookies or headers
- * are forwarded to the public endpoint.
+ * are forwarded to the public endpoint. API_BASE is the bare API origin; the
+ * ninja API is mounted under /v1 (matching the generated client's paths).
  */
 const fetchTitle = async (env: Env, key: string): Promise<string | null> => {
   try {
-    const res = await fetch(`${env.API_BASE}/scenes/${key}/meta/`, {
+    const res = await fetch(`${env.API_BASE}/v1/scenes/${key}/meta/`, {
       signal: AbortSignal.timeout(META_TIMEOUT_MS),
     });
     if (!res.ok) return null;
