@@ -44,7 +44,8 @@ it("skips (fail-open) when meta errors (5xx)", async () => {
 });
 
 it("no-ops AND preserves the existing lock when already held", async () => {
-  await env.OG_BUCKET.put(lockKey("k"), "1");
+  // Fresh timestamp: a currently-held (not stale) lock must block and survive.
+  await env.OG_BUCKET.put(lockKey("k"), String(Date.now()));
   stubMeta(200);
   const render = vi.fn();
   await renderAndCache(env as never, "k", render);
@@ -62,14 +63,21 @@ it("releases the lock and writes nothing when render throws", async () => {
   expect(await env.OG_BUCKET.get(lockKey("k"))).toBeNull();
 });
 
-it("never rejects even if an R2 op throws (release fails)", async () => {
+it("never rejects even if an R2 op throws, and logs the failure", async () => {
   stubMeta(200);
   const render = vi.fn().mockResolvedValue(PNG);
   const delSpy = vi
     .spyOn(env.OG_BUCKET, "delete")
     .mockRejectedValueOnce(new Error("r2 down"));
+  const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   await expect(
     renderAndCache(env as never, "k", render),
   ).resolves.toBeUndefined();
+  // The silent fire-and-forget path must leave a trace when it fails.
+  expect(errorSpy).toHaveBeenCalledWith(
+    "renderAndCache failed for key=k",
+    expect.any(Error),
+  );
   delSpy.mockRestore();
+  errorSpy.mockRestore();
 });

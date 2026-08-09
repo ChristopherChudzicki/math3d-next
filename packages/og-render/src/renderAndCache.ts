@@ -60,9 +60,13 @@ export const renderAndCache = async (
     } finally {
       await releaseLock(env, key);
     }
-  } catch {
+  } catch (err) {
     // swallow everything: acquireLock/releaseLock R2 hiccups, quota 429,
     // launch throttle, nav error, timeout, meta hiccup. Never propagates —
-    // safe for ctx.waitUntil. Next unfurl retries naturally.
+    // safe for ctx.waitUntil. Next unfurl retries naturally. But LOG first:
+    // this path is fire-and-forget inside ctx.waitUntil, so a silent failure
+    // is why a scene's image would "just never appear" with nothing to see.
+    // eslint-disable-next-line no-console
+    console.error(`renderAndCache failed for key=${key}`, err);
   }
 };
