@@ -132,6 +132,13 @@ jobs:
           name: frontend-build
           path: packages/app/dist/
 
+      - name: Deploy OG render Worker
+        working-directory: packages/og-render
+        run: yarn wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+
       - name: Deploy to Cloudflare Workers
         working-directory: packages/app
         run: yarn wrangler deploy
