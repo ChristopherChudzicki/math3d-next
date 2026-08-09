@@ -16,6 +16,9 @@ interface Env {
   ASSETS: Fetcher;
   API_BASE: string;
   SITE_ORIGIN: string;
+  /** Origin of the dedicated render Worker. Unset → no per-scene og:image
+   * rewrite (static default card). This var is the entire abandon switch. */
+  OG_RENDER_ORIGIN?: string;
 }
 
 /** Superset of the real key charset; cheap defense-in-depth before any backend touch. */
@@ -85,6 +88,25 @@ const rewriteShell = (
     },
   });
 
+  // Per-scene image, gated on the render Worker's origin being configured.
+  // Runs for every scene key (titled or untitled — untitled scenes still have
+  // geometry to render). Unset OG_RENDER_ORIGIN → no rewrite at all, i.e. the
+  // static default card from the shell.
+  if (env.OG_RENDER_ORIGIN) {
+    const imageUrl = `${env.OG_RENDER_ORIGIN}/og/scene/${key}.png`;
+    rewriter = rewriter
+      .on('meta[property="og:image"]', {
+        element(el) {
+          el.setAttribute("content", imageUrl);
+        },
+      })
+      .on('meta[name="twitter:image"]', {
+        element(el) {
+          el.setAttribute("content", imageUrl);
+        },
+      });
+  }
+
   const name = sceneDisplayName(rawTitle);
   if (name !== null) {
     const tabTitle = `${name} | Math3d`;
@@ -100,6 +122,16 @@ const rewriteShell = (
         },
       })
       .on('meta[name="twitter:title"]', {
+        element(el) {
+          el.setAttribute("content", name);
+        },
+      })
+      .on('meta[property="og:image:alt"]', {
+        element(el) {
+          el.setAttribute("content", name);
+        },
+      })
+      .on('meta[name="twitter:image:alt"]', {
         element(el) {
           el.setAttribute("content", name);
         },

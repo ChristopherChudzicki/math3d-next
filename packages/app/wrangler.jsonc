@@ -30,5 +30,8 @@
     // sourced from the same CI value as VITE_SITE_ORIGIN so og:url and the static
     // head defaults can't drift.
     "SITE_ORIGIN": "https://next.math3d.org"
+    // TODO(og pass-2): set after deploying the render Worker (packages/og-render);
+    // its *.workers.dev host. Unset → static default card (pass-1 behavior).
+    // "OG_RENDER_ORIGIN": "https://<deployed-render-worker-host>"
   }
 }
