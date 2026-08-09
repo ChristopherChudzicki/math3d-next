@@ -61,3 +61,15 @@ it("releases the lock and writes nothing when render throws", async () => {
   expect(await env.OG_BUCKET.get(sceneImageKey("k"))).toBeNull();
   expect(await env.OG_BUCKET.get(lockKey("k"))).toBeNull();
 });
+
+it("never rejects even if an R2 op throws (release fails)", async () => {
+  stubMeta(200);
+  const render = vi.fn().mockResolvedValue(PNG);
+  const delSpy = vi
+    .spyOn(env.OG_BUCKET, "delete")
+    .mockRejectedValueOnce(new Error("r2 down"));
+  await expect(
+    renderAndCache(env as never, "k", render),
+  ).resolves.toBeUndefined();
+  delSpy.mockRestore();
+});

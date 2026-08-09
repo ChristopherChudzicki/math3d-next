@@ -35,27 +35,34 @@ const sceneExists = async (env: Env, key: string): Promise<boolean> => {
 
 /**
  * Background render flow. Guarded by the per-key lock; existence-gated; all
- * failures swallowed so the already-served default/cached response stands. Never
- * throws (safe for ctx.waitUntil). `render` is injected for testability;
- * production uses the real Browser Rendering path by default.
+ * failures swallowed — including R2 hiccups from acquireLock/releaseLock
+ * themselves, not just render/put — so the already-served default/cached
+ * response stands. Structurally never throws (safe for ctx.waitUntil): the
+ * outer try/catch wraps the entire body, including lock acquisition and
+ * release, so no exception from any awaited call can escape. `render` is
+ * injected for testability; production uses the real Browser Rendering path
+ * by default.
  */
 export const renderAndCache = async (
   env: Env,
   key: string,
   render: Renderer = defaultRenderScene,
 ): Promise<void> => {
-  if (!(await acquireLock(env, key))) return;
   try {
-    if (!(await sceneExists(env, key))) return;
-    const png = await render(env, key);
-    await env.OG_BUCKET.put(sceneImageKey(key), png, {
-      httpMetadata: { contentType: "image/png" },
-      customMetadata: { renderedAt: new Date().toISOString() },
-    });
+    if (!(await acquireLock(env, key))) return;
+    try {
+      if (!(await sceneExists(env, key))) return;
+      const png = await render(env, key);
+      await env.OG_BUCKET.put(sceneImageKey(key), png, {
+        httpMetadata: { contentType: "image/png" },
+        customMetadata: { renderedAt: new Date().toISOString() },
+      });
+    } finally {
+      await releaseLock(env, key);
+    }
   } catch {
-    // swallow: quota 429, launch throttle, nav error, timeout, meta hiccup.
-    // Next unfurl retries naturally.
-  } finally {
-    await releaseLock(env, key);
+    // swallow everything: acquireLock/releaseLock R2 hiccups, quota 429,
+    // launch throttle, nav error, timeout, meta hiccup. Never propagates —
+    // safe for ctx.waitUntil. Next unfurl retries naturally.
   }
 };
