@@ -1,5 +1,6 @@
 import type { Env } from "./env";
 import { sceneImageKey, sceneImagePathToKey } from "./keys";
+import { renderAndCache } from "./renderAndCache";
 
 const DEFAULT_IMAGE_PATH = "/og/default.png";
 
@@ -24,13 +25,8 @@ const serveDefault = async (env: Env): Promise<Response> => {
   }
 };
 
-/** Real render scheduling lands in Task 4; stub keeps the wiring in place. */
-const scheduleRender = (
-  _env: Env,
-  ctx: ExecutionContext,
-  _key: string,
-): void => {
-  ctx.waitUntil(Promise.resolve());
+const scheduleRender = (env: Env, ctx: ExecutionContext, key: string): void => {
+  ctx.waitUntil(renderAndCache(env, key));
 };
 
 export default {
