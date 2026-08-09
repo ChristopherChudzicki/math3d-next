@@ -1,0 +1,29 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "math3d-og-render",
+  "main": "./src/index.ts",
+  "compatibility_date": "2026-07-04",
+  // Required: @cloudflare/puppeteer statically imports node:buffer (and other
+  // node builtins) from its Cloudflare entrypoint. Without this flag the bundle
+  // uploads with only a warning but the Worker fails to START ("No such module
+  // node:buffer") — 500ing EVERY request, including /health and the R2 cache-hit
+  // path. vitest-pool-workers can't catch it (it resolves node:buffer via Vite,
+  // not the wrangler bundle), so this must not be removed.
+  "compatibility_flags": ["nodejs_compat"],
+  // workers.dev subdomain for the free-tier experiment (zero DNS). The deployed
+  // URL becomes the app Worker's OG_RENDER_ORIGIN (Task 7). A branded custom
+  // domain is later polish.
+  "workers_dev": true,
+  // Retain invocation logs in Workers Logs. The render/existence-gate failures
+  // are logged via console.error on a fire-and-forget ctx.waitUntil path — set
+  // this explicitly (rather than rely on an account default) so those traces
+  // survive for after-the-fact debugging instead of being live-`wrangler tail`
+  // only, which nobody is running at the moment a render quietly fails.
+  "observability": { "enabled": true },
+  "browser": { "binding": "BROWSER" },
+  "r2_buckets": [{ "binding": "OG_BUCKET", "bucket_name": "math3d-og-images" }],
+  "vars": {
+    "FRAME_ORIGIN": "https://next.math3d.org",
+    "API_BASE": "https://api.math3d.org"
+  }
+}

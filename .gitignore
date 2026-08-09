@@ -17,6 +17,9 @@ node_modules
 # turborepo
 .turbo
 
+# wrangler build cache
+**/.wrangler/
+
 #Python
 __pycache__
 

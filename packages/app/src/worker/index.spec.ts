@@ -2,6 +2,8 @@ import { afterEach, expect, it, vi } from "vitest";
 import worker from "./index";
 
 const DEFAULT_TITLE = "Math3d: Online 3d Graphing Calculator";
+const DEFAULT_ALT = "Math3d — interactive 3D graphing calculator";
+const DEFAULT_OG_IMAGE = "https://next.math3d.org/og/default.png";
 
 const SHELL_HTML = `<!doctype html><html><head>
 <title>${DEFAULT_TITLE}</title>
@@ -10,6 +12,10 @@ const SHELL_HTML = `<!doctype html><html><head>
 <meta property="og:url" content="https://next.math3d.org/" />
 <meta property="og:description" content="site tagline" />
 <meta name="default-title" content="${DEFAULT_TITLE}" />
+<meta property="og:image" content="${DEFAULT_OG_IMAGE}" />
+<meta property="og:image:alt" content="${DEFAULT_ALT}" />
+<meta name="twitter:image" content="${DEFAULT_OG_IMAGE}" />
+<meta name="twitter:image:alt" content="${DEFAULT_ALT}" />
 </head><body></body></html>`;
 
 const makeEnv = () => ({
@@ -58,6 +64,10 @@ const tags = async (res: Response) => {
     ogUrl: g(/property="og:url" content="([^"]*)"/),
     ogDesc: g(/property="og:description" content="([^"]*)"/),
     defaultTitle: g(/name="default-title" content="([^"]*)"/),
+    ogImage: g(/property="og:image" content="([^"]*)"/),
+    twitterImage: g(/name="twitter:image" content="([^"]*)"/),
+    ogImageAlt: g(/property="og:image:alt" content="([^"]*)"/),
+    twitterImageAlt: g(/name="twitter:image:alt" content="([^"]*)"/),
   };
 };
 
@@ -161,4 +171,53 @@ it("fetches /meta/ with a bare URL and forwards no request headers/cookies", asy
   const [input, init] = spy.mock.calls[0] as unknown as [string, RequestInit?];
   expect(input).toBe("https://api.example.test/v1/scenes/abc123/meta/");
   expect(init?.headers).toBeUndefined();
+});
+
+it("rewrites og:image/twitter:image + both alts when OG_RENDER_ORIGIN is set", async () => {
+  const env = { ...makeEnv(), OG_RENDER_ORIGIN: "https://render.math3d.test" };
+  stubMeta({ status: 200 }, { title: "My Scene" });
+  const res = await call("/abc123", env);
+  const t = await tags(res);
+  expect(t.ogImage).toBe("https://render.math3d.test/og/scene/abc123.png");
+  expect(t.twitterImage).toBe("https://render.math3d.test/og/scene/abc123.png");
+  expect(t.ogImageAlt).toBe("My Scene");
+  expect(t.twitterImageAlt).toBe("My Scene"); // twitter alt is a plausible copy-paste miss
+});
+
+it("normalizes a trailing slash on OG_RENDER_ORIGIN so the image URL stays valid", async () => {
+  // A stray trailing slash is the most ordinary paste error on the one
+  // hand-typed rollout step; it must not double the slash and break the render
+  // Worker's `^/og/scene/` matcher (which would serve the default forever).
+  const env = { ...makeEnv(), OG_RENDER_ORIGIN: "https://render.math3d.test/" };
+  stubMeta({ status: 200 }, { title: "My Scene" });
+  const t = await tags(await call("/abc123", env));
+  expect(t.ogImage).toBe("https://render.math3d.test/og/scene/abc123.png");
+  expect(t.twitterImage).toBe("https://render.math3d.test/og/scene/abc123.png");
+});
+
+it("rewrites og:image for an untitled scene but leaves the alt at the default", async () => {
+  const env = { ...makeEnv(), OG_RENDER_ORIGIN: "https://render.math3d.test" };
+  stubMeta({ status: 200 }, { title: "" });
+  const res = await call("/abc123", env);
+  const t = await tags(res);
+  // Image is rewritten unconditionally; alt is title-gated (untitled → keep the
+  // generic shell alt, not an empty string). Pins alt-gated-but-image-not.
+  expect(t.ogImage).toBe("https://render.math3d.test/og/scene/abc123.png");
+  expect(t.ogImageAlt).toBe(DEFAULT_ALT);
+  expect(t.twitterImageAlt).toBe(DEFAULT_ALT);
+});
+
+it("leaves og:image AND both alts at the static defaults for a titled scene when OG_RENDER_ORIGIN is unset", async () => {
+  // Titled scene deliberately: the image and its alt must move together. With
+  // the render Worker not configured, a titled scene must still show the static
+  // default card — so its alt must stay the default too, not describe a
+  // per-scene image that was never substituted (abandonability invariant).
+  stubMeta({ status: 200 }, { title: "My Scene" });
+  const res = await call("/abc123", makeEnv()); // no OG_RENDER_ORIGIN
+  const t = await tags(res);
+  expect(t.ogImage).toBe(DEFAULT_OG_IMAGE); // unchanged static default from SHELL_HTML
+  expect(t.ogImageAlt).toBe(DEFAULT_ALT);
+  expect(t.twitterImageAlt).toBe(DEFAULT_ALT);
+  // Title tags still rewrite — those are pass-1 behavior, ungated by the origin.
+  expect(t.ogTitle).toBe("My Scene");
 });

@@ -1,12 +1,15 @@
 /**
- * OG metadata Worker (pass 1: per-scene text).
+ * OG metadata Worker (pass 1: per-scene text; pass 2: per-scene image).
  *
  * Fronts the Static-Assets deployment. For a single-segment scene-key
  * navigation it looks up the scene title via the read-only
  * `GET /scenes/{key}/meta/` endpoint and rewrites a fixed set of <head> tags in
- * the SPA shell via HTMLRewriter. Every other request passes straight through
- * to env.ASSETS untouched. The SPA never reads anything this injects — it's
- * crawler-facing metadata only (abandonability invariant).
+ * the SPA shell via HTMLRewriter. It also rewrites og:image/twitter:image
+ * (plus their alt text) to point at a per-scene render, gated on the
+ * OG_RENDER_ORIGIN env var — unset, the shell's static default card is left
+ * untouched. Every other request passes straight through to env.ASSETS
+ * untouched. The SPA never reads anything this injects — it's crawler-facing
+ * metadata only (abandonability invariant).
  *
  * Design: docs/superpowers/specs/2026-07-11-og-metadata-worker-design.md
  */
@@ -16,6 +19,9 @@ interface Env {
   ASSETS: Fetcher;
   API_BASE: string;
   SITE_ORIGIN: string;
+  /** Origin of the dedicated render Worker. Unset → no per-scene og:image
+   * rewrite (static default card). This var is the entire abandon switch. */
+  OG_RENDER_ORIGIN?: string;
 }
 
 /** Superset of the real key charset; cheap defense-in-depth before any backend touch. */
@@ -86,6 +92,48 @@ const rewriteShell = (
   });
 
   const name = sceneDisplayName(rawTitle);
+
+  // Per-scene image, gated on the render Worker's origin being configured.
+  // The image itself runs for every scene key (titled or untitled — untitled
+  // scenes still have geometry to render). The alt text describes that image,
+  // so it is *also* gated on OG_RENDER_ORIGIN: with the var unset the shell's
+  // static default card AND its matching default alt are both left untouched
+  // (abandonability invariant — a titled scene must not get an alt describing
+  // a per-scene image that was never substituted). A titled render-on scene
+  // also gets a scene-specific alt; an untitled one keeps the shell default.
+  if (env.OG_RENDER_ORIGIN) {
+    // Normalize a trailing slash: this var is the one hand-typed step of the
+    // rollout, and a stray slash yields `host//og/scene/k.png`, which the render
+    // Worker's `^/og/scene/` matcher rejects — every scene would serve the
+    // default forever with no render and no error anywhere (finding 6).
+    const renderOrigin = env.OG_RENDER_ORIGIN.replace(/\/+$/, "");
+    const imageUrl = `${renderOrigin}/og/scene/${key}.png`;
+    rewriter = rewriter
+      .on('meta[property="og:image"]', {
+        element(el) {
+          el.setAttribute("content", imageUrl);
+        },
+      })
+      .on('meta[name="twitter:image"]', {
+        element(el) {
+          el.setAttribute("content", imageUrl);
+        },
+      });
+    if (name !== null) {
+      rewriter = rewriter
+        .on('meta[property="og:image:alt"]', {
+          element(el) {
+            el.setAttribute("content", name);
+          },
+        })
+        .on('meta[name="twitter:image:alt"]', {
+          element(el) {
+            el.setAttribute("content", name);
+          },
+        });
+    }
+  }
+
   if (name !== null) {
     const tabTitle = `${name} | Math3d`;
     rewriter = rewriter
