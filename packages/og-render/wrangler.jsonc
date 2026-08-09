@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "math3d-og-render",
+  "main": "./src/index.ts",
+  "compatibility_date": "2026-07-04",
+  // workers.dev subdomain for the free-tier experiment (zero DNS). The deployed
+  // URL becomes the app Worker's OG_RENDER_ORIGIN (Task 7). A branded custom
+  // domain is later polish.
+  "workers_dev": true,
+  "browser": { "binding": "BROWSER" },
+  "r2_buckets": [
+    { "binding": "OG_BUCKET", "bucket_name": "math3d-og-images" }
+  ],
+  "vars": {
+    "FRAME_ORIGIN": "https://next.math3d.org",
+    "API_BASE": "https://api.math3d.org"
+  }
+}
