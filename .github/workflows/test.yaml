@@ -20,7 +20,7 @@ jobs:
       VITE_ISSUE_URL: ${{ vars.VITE_ISSUE_URL }}
       VITE_SITE_ORIGIN: ${{ vars.VITE_SITE_ORIGIN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version-file: ".nvmrc"
@@ -44,16 +44,16 @@ jobs:
       run:
         working-directory: ./webserver
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           # Single source of truth, shared with local dev and the Heroku build,
           # which both read webserver/.python-version. `3.12` resolves to the
           # latest available 3.12 patch, matching Heroku's runtime selection.
           python-version-file: webserver/.python-version
       - name: Install just
-        uses: extractions/setup-just@v3
+        uses: extractions/setup-just@v4
       - name: Install python dependencies
         run: just setup_python
       - name: Check v1 OpenAPI up-to-date
@@ -73,7 +73,7 @@ jobs:
       SKIP_YARN_COREPACK_CHECK: true # https://github.com/actions/setup-node/issues/531#issuecomment-1819151412
     runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version-file: ".nvmrc"

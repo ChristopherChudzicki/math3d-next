@@ -15,7 +15,7 @@ jobs:
       version: ${{ steps.extract_version.outputs.version }}
       prod_tag: ${{ steps.extract_version.outputs.prod_tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Validate branch is main
         run: |
@@ -81,7 +81,7 @@ jobs:
     needs: validate-rc
     runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Fetch tags
         run: git fetch --tags --force
@@ -100,8 +100,8 @@ jobs:
           git tag -a "${{ needs.validate-rc.outputs.prod_tag }}" $RC_SHA -m "Production release ${{ needs.validate-rc.outputs.version }}"
           git push origin "${{ needs.validate-rc.outputs.prod_tag }}"
 
-      - name: Update GitHub Release
-        uses: softprops/action-gh-release@v1
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.validate-rc.outputs.prod_tag }}
           name: Release ${{ needs.validate-rc.outputs.version }}
@@ -112,7 +112,6 @@ jobs:
             ## Production Release ${{ needs.validate-rc.outputs.version }}
 
             This release was promoted from RC tag `${{ needs.validate-rc.outputs.rc_tag }}`.
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     needs: [validate-rc, create-prod-tag]
