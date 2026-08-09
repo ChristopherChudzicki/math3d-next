@@ -14,6 +14,12 @@
   // URL becomes the app Worker's OG_RENDER_ORIGIN (Task 7). A branded custom
   // domain is later polish.
   "workers_dev": true,
+  // Retain invocation logs in Workers Logs. The render/existence-gate failures
+  // are logged via console.error on a fire-and-forget ctx.waitUntil path — set
+  // this explicitly (rather than rely on an account default) so those traces
+  // survive for after-the-fact debugging instead of being live-`wrangler tail`
+  // only, which nobody is running at the moment a render quietly fails.
+  "observability": { "enabled": true },
   "browser": { "binding": "BROWSER" },
   "r2_buckets": [{ "binding": "OG_BUCKET", "bucket_name": "math3d-og-images" }],
   "vars": {

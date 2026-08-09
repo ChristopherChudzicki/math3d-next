@@ -67,6 +67,33 @@ it("serves cached PNG on an R2 hit with a long cache header, without any subrequ
   expect(await env.OG_BUCKET.get(lockKey("hit"))).toBeNull();
 });
 
+it("serves the default (not a 500) and schedules no render when the R2 cache read fails", async () => {
+  const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  const getSpy = vi
+    .spyOn(env.OG_BUCKET, "get")
+    .mockRejectedValueOnce(new Error("r2 down"));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(
+      async () =>
+        new Response(DEFAULT_PNG, { headers: { "content-type": "image/png" } }),
+    ),
+  );
+  const res = await call("/og/scene/hit.png");
+  // An R2 read failure degrades to the default card, never 500s...
+  expect(res.status).toBe(200);
+  expect(new Uint8Array(await res.arrayBuffer())).toEqual(DEFAULT_PNG);
+  // ...and does NOT schedule a render (we can't conclude the image is absent):
+  // only the default-PNG fetch fires, never the /meta/ existence check.
+  expect(fetch).toHaveBeenCalledTimes(1);
+  expect(fetch).toHaveBeenCalledWith(
+    "https://next.math3d.org/og/default.png",
+    expect.anything(),
+  );
+  getSpy.mockRestore();
+  errorSpy.mockRestore();
+});
+
 it("serves the branded default on a miss with a short cache header", async () => {
   stubFetch();
   const res = await call("/og/scene/missing.png");

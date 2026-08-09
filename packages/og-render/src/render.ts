@@ -4,7 +4,14 @@ import { sceneFrameUrl } from "./keys";
 
 const READY_SELECTOR = '[data-scene-ready="true"]';
 const NAV_TIMEOUT_MS = 30_000;
-const READY_TIMEOUT_MS = 20_000;
+// The only in-repo calibration of how long data-scene-ready takes is the e2e
+// waiting on the same selector with a 60s budget (frame-render.test.ts).
+// `networkidle0` above absorbs page load before this wait begins, which narrows
+// the gap, but data-scene-ready is a wall-clock quiescence heuristic on mathbox
+// warmup — so give it real headroom. A too-tight budget fails the render
+// silently and, per the render-failure cooldown, defers a retry by the full
+// lock window. Kept below LOCK_STALE_MS so a live render is never taken over.
+const READY_TIMEOUT_MS = 45_000;
 
 /**
  * Render {FRAME_ORIGIN}/app/frame/{key} to a 1200x630 PNG. Waits for the

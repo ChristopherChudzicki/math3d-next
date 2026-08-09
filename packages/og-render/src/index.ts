@@ -27,7 +27,12 @@ const serveDefault = async (env: Env): Promise<Response> => {
   try {
     const res = await fetch(defaultUrl, { signal: AbortSignal.timeout(3000) });
     if (!res.ok) throw new Error(`default image ${res.status}`);
-    return new Response(res.body, {
+    // Buffer the whole (small) card before responding: streaming res.body keeps
+    // the 3s abort signal attached, which would error a still-streaming body and
+    // hand a slow crawler a truncated 200 image/png — the exact corrupt card the
+    // catch below exists to prevent, but occurring outside it (finding 5).
+    const body = await res.arrayBuffer();
+    return new Response(body, {
       status: 200,
       headers: {
         "content-type": "image/png",
@@ -61,7 +66,18 @@ export default {
     const key = sceneImagePathToKey(pathname);
     if (key === null) return serveDefault(env);
 
-    const cached = await env.OG_BUCKET.get(sceneImageKey(key));
+    let cached: R2ObjectBody | null;
+    try {
+      cached = await env.OG_BUCKET.get(sceneImageKey(key));
+    } catch (err) {
+      // A cache read failing (R2 outage/throttle/5xx) is operationally
+      // identical to a miss — degrade to the default card, never let it 500 out
+      // of fetch (finding 1). Don't schedule a render: we couldn't read the
+      // cache, so we can't conclude the image is actually absent.
+      // eslint-disable-next-line no-console
+      console.error(`cache read failed for key=${key}`, err);
+      return serveDefault(env);
+    }
     if (cached !== null) {
       return new Response(cached.body, {
         status: 200,

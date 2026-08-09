@@ -36,11 +36,37 @@ it("skips rendering when the scene does not exist (meta 404)", async () => {
   expect(await env.OG_BUCKET.get(lockKey("k"))).toBeNull(); // released on skip
 });
 
-it("skips (fail-open) when meta errors (5xx)", async () => {
+it("skips (fail-open) AND logs when meta returns an unexpected status", async () => {
   stubMeta(503);
   const render = vi.fn();
+  const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   await renderAndCache(env as never, "k", render);
   expect(render).not.toHaveBeenCalled();
+  // A 5xx is uncertainty, not a clean 404 decline — it must leave a trace.
+  expect(errorSpy).toHaveBeenCalledWith(
+    expect.stringContaining("unexpected /meta/ status 503"),
+  );
+  errorSpy.mockRestore();
+});
+
+it("skips AND logs distinctly when the /meta/ check errors (timeout/network)", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => {
+      throw new Error("timeout");
+    }),
+  );
+  const render = vi.fn();
+  const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  await renderAndCache(env as never, "k", render);
+  expect(render).not.toHaveBeenCalled();
+  // The background gate giving up on uncertainty is the silent failure the
+  // logging exists to surface (finding 4) — distinct from the quiet 404.
+  expect(errorSpy).toHaveBeenCalledWith(
+    expect.stringContaining("/meta/ check failed for key=k"),
+    expect.any(Error),
+  );
+  errorSpy.mockRestore();
 });
 
 it("no-ops AND preserves the existing lock when already held", async () => {
@@ -55,12 +81,17 @@ it("no-ops AND preserves the existing lock when already held", async () => {
   expect(await env.OG_BUCKET.get(lockKey("k"))).not.toBeNull();
 });
 
-it("releases the lock and writes nothing when render throws", async () => {
+it("retains the lock as a cooldown and writes nothing when render throws", async () => {
   stubMeta(200);
   const render = vi.fn().mockRejectedValue(new Error("boom"));
+  const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   await renderAndCache(env as never, "k", render); // must not throw
-  expect(await env.OG_BUCKET.get(sceneImageKey("k"))).toBeNull();
-  expect(await env.OG_BUCKET.get(lockKey("k"))).toBeNull();
+  expect(await env.OG_BUCKET.get(sceneImageKey("k"))).toBeNull(); // nothing cached
+  // Deliberately NOT released: the lock stands as a cooldown so the next unfurl
+  // can't instantly re-burn a full render on a scene that just failed
+  // (finding 3). Stale-takeover reclaims it after the cooldown window.
+  expect(await env.OG_BUCKET.get(lockKey("k"))).not.toBeNull();
+  errorSpy.mockRestore();
 });
 
 it("never rejects even if an R2 op throws, and logs the failure", async () => {

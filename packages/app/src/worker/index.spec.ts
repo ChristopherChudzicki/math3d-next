@@ -184,6 +184,17 @@ it("rewrites og:image/twitter:image + both alts when OG_RENDER_ORIGIN is set", a
   expect(t.twitterImageAlt).toBe("My Scene"); // twitter alt is a plausible copy-paste miss
 });
 
+it("normalizes a trailing slash on OG_RENDER_ORIGIN so the image URL stays valid", async () => {
+  // A stray trailing slash is the most ordinary paste error on the one
+  // hand-typed rollout step; it must not double the slash and break the render
+  // Worker's `^/og/scene/` matcher (which would serve the default forever).
+  const env = { ...makeEnv(), OG_RENDER_ORIGIN: "https://render.math3d.test/" };
+  stubMeta({ status: 200 }, { title: "My Scene" });
+  const t = await tags(await call("/abc123", env));
+  expect(t.ogImage).toBe("https://render.math3d.test/og/scene/abc123.png");
+  expect(t.twitterImage).toBe("https://render.math3d.test/og/scene/abc123.png");
+});
+
 it("rewrites og:image for an untitled scene but leaves the alt at the default", async () => {
   const env = { ...makeEnv(), OG_RENDER_ORIGIN: "https://render.math3d.test" };
   stubMeta({ status: 200 }, { title: "" });

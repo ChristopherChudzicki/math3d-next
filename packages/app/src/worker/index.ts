@@ -102,7 +102,12 @@ const rewriteShell = (
   // a per-scene image that was never substituted). A titled render-on scene
   // also gets a scene-specific alt; an untitled one keeps the shell default.
   if (env.OG_RENDER_ORIGIN) {
-    const imageUrl = `${env.OG_RENDER_ORIGIN}/og/scene/${key}.png`;
+    // Normalize a trailing slash: this var is the one hand-typed step of the
+    // rollout, and a stray slash yields `host//og/scene/k.png`, which the render
+    // Worker's `^/og/scene/` matcher rejects — every scene would serve the
+    // default forever with no render and no error anywhere (finding 6).
+    const renderOrigin = env.OG_RENDER_ORIGIN.replace(/\/+$/, "");
+    const imageUrl = `${renderOrigin}/og/scene/${key}.png`;
     rewriter = rewriter
       .on('meta[property="og:image"]', {
         element(el) {
