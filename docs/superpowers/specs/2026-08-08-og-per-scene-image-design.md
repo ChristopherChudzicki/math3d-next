@@ -1,7 +1,36 @@
 # Per-Scene OG Image (Pass 2) — Design
 
-**Status:** Design / experiment. Not yet planned or implemented. Three-lens
-review (cost/abuse, UX/product, technical+security) folded in.
+**Status:** Design / experiment. Planned (see
+`docs/superpowers/plans/2026-08-08-og-per-scene-image.md`). Three-lens review
+(cost/abuse, UX/product, technical+security) folded in.
+
+**Validation done (2026-08-08):** #1209 confirmed on real Cloudflare Browser
+Rendering via the REST `/screenshot` path — a content-rich prod scene rendered
+correctly (full WebGL/MathBox geometry, not blank), the `[data-scene-ready]`
+readiness gate fired, and cold-path **render wall-time ≈ 9.7s** (browser
+cold-start included; the binding path with browser reuse should come in lower).
+The Browser Rendering **Workers binding** ("Browser Sessions") is **free-tier**,
+so the faithful `@cloudflare/puppeteer` path costs nothing extra.
+
+**Architecture decision (supersedes "single Worker, path-routed" below):** the
+image endpoint lives in a **dedicated render Worker** (`packages/og-render`) on
+its own hostname, kept fully isolated from the pass-1 app Worker for
+abandonability. The only pass-1 coupling is one var-gated `og:image` rewrite line
+in the app Worker. This **eliminates the routing unknown** (no `run_worker_first`
+re-inclusion needed — the render Worker is a separate hostname) and the
+"can one Worker bind Static Assets + Browser + R2" question.
+
+**v1 scope trims (simpler / more abandonable than the sections below):**
+
+- **No backend changes.** v1 uses the existing pass-1 `/meta/` endpoint
+  (unchanged, `{title}`) only as a cheap **existence gate** before spending a
+  render (404 → skip). Version-based invalidation (extending `/meta/` → version,
+  the `modified_date` hash, hit-path version checks, serve-stale-on-mismatch) is
+  deferred to a **fast-follow** — edited-scene staleness is already rated
+  non-critical.
+- **No global cross-key rate gate in v1.** A correct one wants atomic cross-key
+  state (Durable Object, Paid/roadmap); v1 relies on the per-key R2 lock + the
+  429 hard-stop.
 
 **Goal:** Give each shared scene a per-scene social-card image (`og:image`)
 rendered from the actual 3D scene, produced cheaply enough to run on Cloudflare's
@@ -142,29 +171,33 @@ it becomes correct once the cap exists.
 
 ## Request Flow
 
-### 1. Worker rewrites `og:image` (+ alt) — extends pass-1 `rewriteShell`
+> **Architecture note:** per the decision above, the image endpoint is a
+> **dedicated render Worker** on its own hostname, not a branch in the pass-1 app
+> Worker. §1 below happens in the app Worker; §2's endpoint logic lives in the
+> render Worker. (An earlier draft folded both into one path-routed Worker with a
+> "load-bearing dispatch ordering" and a new `ctx` on the app Worker — both moot
+> now: the render Worker is a separate script whose `fetch` has `ctx` natively,
+> and the app Worker's routing is untouched.)
 
-On a scene-key navigation, in addition to the pass-1 rewrites, set:
+### 1. App Worker rewrites `og:image` (+ alt) — extends pass-1 `rewriteShell`
+
+On a scene-key navigation, in addition to the pass-1 rewrites — **only when the
+`OG_RENDER_ORIGIN` var is set** (the abandon switch) — set:
 
 ```
-og:image = twitter:image = {SITE_ORIGIN}/og/scene/{key}.png
-og:image:alt = twitter:image:alt = <scene title>   (fallback to the generic
-                                                     default alt for untitled)
+og:image = twitter:image = {OG_RENDER_ORIGIN}/og/scene/{key}.png
+og:image:alt = twitter:image:alt = <scene title>   (unconditional image;
+                                                     alt title-gated — untitled
+                                                     keeps the generic shell alt)
 ```
 
 The Worker already has the title in hand (pass-1 `fetchTitle`), so the per-scene
 alt is nearly free and is the correct alt a screen-reader user hears for the
-per-scene image. Values are Worker-constructed (same-origin URL) or the title set
-via escaping-safe `setAttribute` — no user text is interpolated into markup.
+per-scene image. Values are Worker-constructed (the render-Worker URL) or the
+title set via escaping-safe `setAttribute` — no user text is interpolated into
+markup.
 
-### 2. Image endpoint: `GET /og/scene/{key}.png`
-
-**Dispatch ordering (load-bearing):** this branch must be matched on `pathname`
-**before** the pass-1 `sceneKeyFromPath`/`key === null` dispatch —
-`sceneKeyFromPath` returns null for any path containing `/` or `.` (index.ts:28),
-so `/og/scene/foo.png` would otherwise fall straight through to
-`env.ASSETS.fetch`. The `fetch` handler also gains the `ctx: ExecutionContext`
-parameter (currently `(request, env)`), required for `ctx.waitUntil`.
+### 2. Image endpoint: `GET /og/scene/{key}.png` (render Worker)
 
 Logic:
 
@@ -358,50 +391,59 @@ spend cap.
 
 ## Worker / Binding Architecture
 
-- **Single Worker, path-routed** (simplest for the experiment): the existing
-  `packages/app/src/worker/index.ts` gains (a) the `og:image`/alt rewrite in
-  `rewriteShell` and (b) the `GET /og/scene/{key}.png` branch, dispatched
-  **before** the pass-1 `key === null` line. New bindings: R2 bucket, Browser
-  Rendering, and the R2 lock (same bucket or a markers prefix). `fetch` gains
-  `ctx: ExecutionContext`.
-- **Routing is the load-bearing unknown.** The current `run_worker_first` list has
-  `!/og/*`. Making `/og/scene/*` reach the Worker while `/og/default.png` stays
-  static requires a _positive_ `/og/scene/*` glob to override the earlier
-  _negative_ `!/og/*`. Whether wrangler's `run_worker_first` honors
-  positive-overrides-negative (and with what order/specificity rules) is **not**
-  demonstrated by the current config, which only ever removes paths. **Validate
-  with `wrangler dev` early**; if re-inclusion isn't supported, the fallback is a
-  **dedicated render Worker on a `/og/scene/*` route.**
-- **VERIFY AT IMPL:** confirm a single Worker can bind Static Assets **and**
-  Browser Rendering (+ R2) simultaneously. If not — or to isolate the heavy
-  browser binding and its failure profile from the latency-critical navigation
-  path — split the image endpoint into the dedicated render Worker above.
+**Decided: a dedicated render Worker (`packages/og-render`) on its own hostname**,
+isolated from the pass-1 app Worker. Chosen over the single-Worker option below
+for abandonability (a self-contained package + its own deploy — delete the dir and
+unset one var to remove it) and because it eliminates the routing unknown.
+
+- **`packages/og-render`** — a standalone Worker. Bindings: **Browser Rendering**
+  (`@cloudflare/puppeteer`), an **R2 bucket** (`math3d-og-images`) for both the
+  cached PNGs and the per-key lock (a `og/lock/` prefix). Vars: `FRAME_ORIGIN`
+  (`https://next.math3d.org`), `API_BASE` (`https://api.math3d.org`). Deployed to a
+  `workers.dev` subdomain for the experiment (zero DNS; a branded custom domain is
+  later polish). Endpoint: `GET /og/scene/{key}.png`.
+- **App Worker coupling = one var-gated line.** `packages/app/src/worker/index.ts`
+  adds an `og:image`/`twitter:image`(+alt) rewrite pointing at
+  `${OG_RENDER_ORIGIN}/og/scene/{key}.png`, **gated on the `OG_RENDER_ORIGIN` var**.
+  Unset → no rewrite → the static default card (exact pass-1 behavior). This is the
+  entire integration surface and the entire abandon switch.
+- **Routing unknown eliminated.** Because the render Worker is a separate hostname,
+  the app Worker's `run_worker_first` globs (including `!/og/*`) are **untouched** —
+  no positive-overrides-negative re-inclusion is needed. `/og/default.png` stays a
+  static asset on the app origin; per-scene images live on the render Worker's
+  origin.
+- **Single-Worker alternative (rejected):** fold the endpoint into the app Worker,
+  path-routed before the pass-1 `key === null` dispatch. Rejected because it (a)
+  couples the heavy Browser binding + its failure profile to the latency-critical
+  navigation path, (b) is far less abandonable, and (c) depends on the unverified
+  `run_worker_first` re-inclusion behavior.
 
 ---
 
 ## Dependencies & Sequencing
 
-1. **FIRST — validate #1209 on real Cloudflare Browser Rendering.** Everything in
-   #1209 was verified on macOS with forced SwiftShader, **never on real CF Browser
-   Rendering.** Fastest path: the Browser Rendering **REST `/screenshot`
-   endpoint** (no Worker deploy needed) pointed at the live
-   `{SITE_ORIGIN}/app/frame/{key}`, with `waitForSelector:
-'[data-scene-ready="true"]'` and `viewport: {width:1200,height:630}`. Confirms
-   a non-blank render and yields the render-wall-time the cost model needs. (See
-   "Validating #1209" appendix.)
-2. Validate `run_worker_first` re-inclusion (or decide on the dedicated render
-   Worker) with `wrangler dev`.
-3. Extend `/scenes/{key}/meta/` → `{title, version}` (regen OpenAPI — the ninja
-   docstring feeds the spec; CI diff-checks it).
-4. Provision the R2 bucket (+ lock) and wire bindings.
-5. Image endpoint (serve-or-render, serve-stale-on-mismatch, fail-open on meta)
-   and the `og:image`/alt rewrite in the Worker.
-6. `wrangler dev` glob/route validation.
+1. ~~**FIRST — validate #1209 on real CF Browser Rendering.**~~ **DONE
+   (2026-08-08)** via REST `/screenshot` — see Status. Render confirmed correct,
+   readiness gate fires, wall-time ≈ 9.7s.
+2. ~~Validate `run_worker_first` re-inclusion.~~ **Moot** — dedicated render Worker
+   on its own hostname (see Architecture); app-Worker routing untouched.
+3. Scaffold `packages/og-render` (bindings: Browser + R2; `workers.dev`).
+4. Provision the R2 bucket (`math3d-og-images`) + a lifecycle rule sweeping the
+   `og/lock/` prefix (crash-leak backstop).
+5. Image endpoint (serve-cached-or-default, existence-gated background render,
+   per-key R2 lock) + the var-gated `og:image`/alt rewrite in the app Worker.
+6. Deploy the render Worker to `workers.dev`; smoke-test against a real scene
+   (mirrors the #1209 REST validation); then point `OG_RENDER_ORIGIN` at it.
 
 ---
 
 ## Out of Scope (pass 2 v1)
 
+- **Version-based invalidation** (extend `/meta/` → version, `modified_date` hash,
+  hit-path version check, serve-stale-on-mismatch — the "Staleness" section
+  describes this **fast-follow** design). v1 uses `/meta/` only as an existence
+  gate; an edited scene keeps its cached card until manually purged.
+- **Global cross-key rate gate** (wants atomic cross-key state / a DO; roadmap).
 - Warm-on-create and the application-level render budget / per-IP throttle
   (roadmap — the budget is a prerequisite for both).
 - Durable-Object single-flight and in-flight coalesce (Paid-gated; roadmap).
@@ -434,14 +476,19 @@ spend cap.
 
 ## Open Questions (resolve at planning/impl)
 
-- **Render wall-time** on real CF Browser Rendering (drives cost math + the
-  readiness timeout ceiling).
-- **Routing:** does `run_worker_first` re-include `/og/scene/*` over `!/og/*`, or
-  do we need the dedicated render Worker?
-- Can a **single Worker** bind Static Assets + Browser Rendering + R2, or split?
+- ~~Render wall-time~~ — measured ≈ 9.7s cold (REST). Re-measure on the binding
+  path; sets the readiness-wait ceiling.
+- ~~Routing / single-vs-split Worker~~ — resolved: dedicated render Worker (see
+  Architecture).
+- **R2 conditional-put semantics:** confirm `put(..., { onlyIf: { etagDoesNotMatch:
+"*" } })` returns `null` (no-op) rather than throwing when the object exists —
+  the lock's correctness rests on this. Verified by a miniflare R2 test in the
+  plan, not asserted here.
+- **`nodejs_compat`:** confirm whether `@cloudflare/puppeteer` requires the flag in
+  the render Worker's wrangler config (add if the build/deploy needs it).
 - **Screenshot capture rectangle / device scale** to match the default card's
-  visual weight (default is generated at 2× then composed; live render may need
-  tuning).
+  visual weight (default is generated at 2× then composed; the live render sits
+  small/off-center at 1× — see the validation PNG — so framing may need tuning).
 
 ---
 
