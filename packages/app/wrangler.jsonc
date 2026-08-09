@@ -26,9 +26,9 @@
   },
   "vars": {
     "API_BASE": "https://api.math3d.org",
-    // Committed default; overridden at deploy via `--var SITE_ORIGIN:$SITE_ORIGIN`,
-    // sourced from the same CI value as VITE_SITE_ORIGIN so og:url and the static
-    // head defaults can't drift.
+    // Source of truth for the Worker's og:url origin; applied as-is by
+    // `wrangler deploy` (deploy-reusable.yml). Must stay equal to the
+    // production VITE_SITE_ORIGIN so og:url can't drift from the static head.
     "SITE_ORIGIN": "https://next.math3d.org"
     // TODO(og pass-2): set after deploying the render Worker (packages/og-render);
     // its *.workers.dev host. Unset → static default card (pass-1 behavior).
