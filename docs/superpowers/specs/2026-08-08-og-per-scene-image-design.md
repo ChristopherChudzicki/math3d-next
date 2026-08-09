@@ -42,10 +42,12 @@ present and otherwise serves the branded default while a background headless
 render (Cloudflare Browser Rendering of the `/app/frame/:sceneKey` page from
 #1209) populates the cache for next time.
 
-**Tech stack:** Cloudflare Worker (existing `packages/app/src/worker/index.ts`),
-Cloudflare Browser Rendering, Cloudflare R2, the `/app/frame/:sceneKey` headless
-render page (#1209), django-ninja read-only `/scenes/{key}/meta/` (pass 1,
-extended here to return a version marker).
+**Tech stack:** a dedicated Cloudflare Worker (`packages/og-render`), Cloudflare
+Browser Rendering, Cloudflare R2, the `/app/frame/:sceneKey` headless render page
+(#1209), and the pass-1 django-ninja read-only `/scenes/{key}/meta/` endpoint used
+**as-is** (existence gate only). v1 makes no backend change; version-based cache
+invalidation — which would extend `/meta/` with a version marker — is deferred
+(see Out of Scope).
 
 ---
 

@@ -1,3 +1,21 @@
+/**
+ * Dedicated per-scene OG image render Worker (own workers.dev host).
+ *
+ * `GET /og/scene/{key}.png` serves the cached R2 PNG on a hit, or the branded
+ * default card on a miss while scheduling a background render of
+ * `{FRAME_ORIGIN}/app/frame/{key}` (Browser Rendering → R2) via ctx.waitUntil.
+ * Single-flighted by a per-key R2 lock, existence-gated against `/meta/`. The
+ * endpoint never blocks on or 500s from a render — a miss always returns a valid
+ * image immediately.
+ *
+ * Bindings (wrangler.jsonc): BROWSER (Browser Rendering), OG_BUCKET (R2 bucket
+ * `math3d-og-images`), vars FRAME_ORIGIN + API_BASE. Requires the nodejs_compat
+ * compatibility flag (@cloudflare/puppeteer imports node builtins).
+ *
+ * Wired into the app Worker via the single `OG_RENDER_ORIGIN` var; unset there =
+ * the whole feature is dark. Design + teardown: packages/og-render/README.md and
+ * docs/superpowers/specs/2026-08-08-og-per-scene-image-design.md.
+ */
 import type { Env } from "./env";
 import { sceneImageKey, sceneImagePathToKey } from "./keys";
 import { renderAndCache } from "./renderAndCache";

@@ -10,6 +10,8 @@ describe("sceneImagePathToKey", () => {
   });
   it("rejects a bad-charset key", () => {
     expect(sceneImagePathToKey("/og/scene/a b.png")).toBeNull();
+  });
+  it("rejects a nested path (key may not contain a slash)", () => {
     expect(sceneImagePathToKey("/og/scene/a/b.png")).toBeNull();
   });
 });

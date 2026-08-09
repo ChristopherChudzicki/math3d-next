@@ -5,7 +5,7 @@ import {
 } from "cloudflare:test";
 import { afterEach, expect, it, vi } from "vitest";
 import worker from "./index";
-import { sceneImageKey } from "./keys";
+import { sceneImageKey, lockKey } from "./keys";
 
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47]); // "\x89PNG"
 const DEFAULT_PNG = new Uint8Array([1, 2, 3, 4]);
@@ -42,6 +42,7 @@ afterEach(async () => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   await env.OG_BUCKET.delete(sceneImageKey("hit"));
+  await env.OG_BUCKET.delete(lockKey("hit"));
 });
 
 it("responds ok on /health", async () => {
@@ -50,7 +51,8 @@ it("responds ok on /health", async () => {
   expect(await res.text()).toBe("ok");
 });
 
-it("serves cached PNG on an R2 hit with a long cache header", async () => {
+it("serves cached PNG on an R2 hit with a long cache header, without any subrequest or render", async () => {
+  stubFetch();
   await env.OG_BUCKET.put(sceneImageKey("hit"), PNG, {
     httpMetadata: { contentType: "image/png" },
   });
@@ -59,6 +61,10 @@ it("serves cached PNG on an R2 hit with a long cache header", async () => {
   expect(res.headers.get("content-type")).toBe("image/png");
   expect(res.headers.get("cache-control")).toContain("max-age=86400");
   expect(new Uint8Array(await res.arrayBuffer())).toEqual(PNG);
+  // The design requires a hit to serve with no /meta/ call and no scheduled
+  // render: no subrequest fires and no lock object is created.
+  expect(fetch).not.toHaveBeenCalled();
+  expect(await env.OG_BUCKET.get(lockKey("hit"))).toBeNull();
 });
 
 it("serves the branded default on a miss with a short cache header", async () => {
