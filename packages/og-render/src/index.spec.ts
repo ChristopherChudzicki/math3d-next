@@ -73,6 +73,24 @@ it("serves the branded default on a miss with a short cache header", async () =>
   );
 });
 
+it("redirects to the default URL (not a 500 or corrupt body) when the default-PNG fetch itself fails", async () => {
+  const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string) =>
+      String(url).includes("/og/default.png")
+        ? Promise.reject(new Error("network down"))
+        : new Response("{}", { status: 404 }),
+    ),
+  );
+  const res = await call("/og/scene/missing.png");
+  expect(res.status).toBe(302);
+  expect(res.headers.get("location")).toBe(
+    "https://next.math3d.org/og/default.png",
+  );
+  errorSpy.mockRestore();
+});
+
 it("serves default for an invalid key WITHOUT querying R2 or scheduling a render", async () => {
   stubFetch();
   const getSpy = vi.spyOn(env.OG_BUCKET, "get");

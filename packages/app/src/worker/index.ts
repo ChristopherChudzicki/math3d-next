@@ -1,12 +1,15 @@
 /**
- * OG metadata Worker (pass 1: per-scene text).
+ * OG metadata Worker (pass 1: per-scene text; pass 2: per-scene image).
  *
  * Fronts the Static-Assets deployment. For a single-segment scene-key
  * navigation it looks up the scene title via the read-only
  * `GET /scenes/{key}/meta/` endpoint and rewrites a fixed set of <head> tags in
- * the SPA shell via HTMLRewriter. Every other request passes straight through
- * to env.ASSETS untouched. The SPA never reads anything this injects — it's
- * crawler-facing metadata only (abandonability invariant).
+ * the SPA shell via HTMLRewriter. It also rewrites og:image/twitter:image
+ * (plus their alt text) to point at a per-scene render, gated on the
+ * OG_RENDER_ORIGIN env var — unset, the shell's static default card is left
+ * untouched. Every other request passes straight through to env.ASSETS
+ * untouched. The SPA never reads anything this injects — it's crawler-facing
+ * metadata only (abandonability invariant).
  *
  * Design: docs/superpowers/specs/2026-07-11-og-metadata-worker-design.md
  */

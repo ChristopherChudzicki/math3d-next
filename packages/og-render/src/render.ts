@@ -28,7 +28,7 @@ export const renderScene = async (
   const browser = await puppeteer.launch(env.BROWSER);
   try {
     const page = await browser.newPage();
-    await page.setViewport({ width: 1200, height: 630 });
+    await page.setViewport({ width: 1200, height: 630, deviceScaleFactor: 1 });
     await page.goto(sceneFrameUrl(env, key), {
       waitUntil: "networkidle0",
       timeout: NAV_TIMEOUT_MS,

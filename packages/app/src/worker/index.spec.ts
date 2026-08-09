@@ -193,6 +193,7 @@ it("rewrites og:image for an untitled scene but leaves the alt at the default", 
   // generic shell alt, not an empty string). Pins alt-gated-but-image-not.
   expect(t.ogImage).toBe("https://render.math3d.test/og/scene/abc123.png");
   expect(t.ogImageAlt).toBe(DEFAULT_ALT);
+  expect(t.twitterImageAlt).toBe(DEFAULT_ALT);
 });
 
 it("leaves og:image at the static default when OG_RENDER_ORIGIN is unset", async () => {

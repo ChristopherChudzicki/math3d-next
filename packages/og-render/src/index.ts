@@ -16,11 +16,13 @@ const serveDefault = async (env: Env): Promise<Response> => {
         "cache-control": "public, max-age=60",
       },
     });
-  } catch {
+  } catch (err) {
     // This runs on EVERY miss and every invalid key. Never 500 the endpoint and
     // never stream a non-2xx body under an image/png wrapper (a corrupt card):
-    // on any failure, redirect to the static default so the crawler still gets a
-    // valid image.
+    // log the failure for observability, then redirect to the static default
+    // so the crawler still gets a valid image.
+    // eslint-disable-next-line no-console
+    console.error(`serveDefault: failed to fetch ${defaultUrl}`, err);
     return Response.redirect(defaultUrl, 302);
   }
 };
