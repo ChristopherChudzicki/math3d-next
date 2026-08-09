@@ -91,10 +91,16 @@ const rewriteShell = (
     },
   });
 
+  const name = sceneDisplayName(rawTitle);
+
   // Per-scene image, gated on the render Worker's origin being configured.
-  // Runs for every scene key (titled or untitled — untitled scenes still have
-  // geometry to render). Unset OG_RENDER_ORIGIN → no rewrite at all, i.e. the
-  // static default card from the shell.
+  // The image itself runs for every scene key (titled or untitled — untitled
+  // scenes still have geometry to render). The alt text describes that image,
+  // so it is *also* gated on OG_RENDER_ORIGIN: with the var unset the shell's
+  // static default card AND its matching default alt are both left untouched
+  // (abandonability invariant — a titled scene must not get an alt describing
+  // a per-scene image that was never substituted). A titled render-on scene
+  // also gets a scene-specific alt; an untitled one keeps the shell default.
   if (env.OG_RENDER_ORIGIN) {
     const imageUrl = `${env.OG_RENDER_ORIGIN}/og/scene/${key}.png`;
     rewriter = rewriter
@@ -108,9 +114,21 @@ const rewriteShell = (
           el.setAttribute("content", imageUrl);
         },
       });
+    if (name !== null) {
+      rewriter = rewriter
+        .on('meta[property="og:image:alt"]', {
+          element(el) {
+            el.setAttribute("content", name);
+          },
+        })
+        .on('meta[name="twitter:image:alt"]', {
+          element(el) {
+            el.setAttribute("content", name);
+          },
+        });
+    }
   }
 
-  const name = sceneDisplayName(rawTitle);
   if (name !== null) {
     const tabTitle = `${name} | Math3d`;
     rewriter = rewriter
@@ -125,16 +143,6 @@ const rewriteShell = (
         },
       })
       .on('meta[name="twitter:title"]', {
-        element(el) {
-          el.setAttribute("content", name);
-        },
-      })
-      .on('meta[property="og:image:alt"]', {
-        element(el) {
-          el.setAttribute("content", name);
-        },
-      })
-      .on('meta[name="twitter:image:alt"]', {
         element(el) {
           el.setAttribute("content", name);
         },

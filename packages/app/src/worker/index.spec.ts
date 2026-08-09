@@ -196,9 +196,17 @@ it("rewrites og:image for an untitled scene but leaves the alt at the default", 
   expect(t.twitterImageAlt).toBe(DEFAULT_ALT);
 });
 
-it("leaves og:image at the static default when OG_RENDER_ORIGIN is unset", async () => {
+it("leaves og:image AND both alts at the static defaults for a titled scene when OG_RENDER_ORIGIN is unset", async () => {
+  // Titled scene deliberately: the image and its alt must move together. With
+  // the render Worker not configured, a titled scene must still show the static
+  // default card — so its alt must stay the default too, not describe a
+  // per-scene image that was never substituted (abandonability invariant).
   stubMeta({ status: 200 }, { title: "My Scene" });
   const res = await call("/abc123", makeEnv()); // no OG_RENDER_ORIGIN
   const t = await tags(res);
   expect(t.ogImage).toBe(DEFAULT_OG_IMAGE); // unchanged static default from SHELL_HTML
+  expect(t.ogImageAlt).toBe(DEFAULT_ALT);
+  expect(t.twitterImageAlt).toBe(DEFAULT_ALT);
+  // Title tags still rewrite — those are pass-1 behavior, ungated by the origin.
+  expect(t.ogTitle).toBe("My Scene");
 });
