@@ -83,3 +83,7 @@ uv add --group dev <package>
 After modifying dependencies, commit both `pyproject.toml` and the updated `uv.lock`.
 
 See [webserver/justfile](./webserver/justfile) for all backend recipes.
+
+## License
+
+MIT — see [LICENSE](./LICENSE).

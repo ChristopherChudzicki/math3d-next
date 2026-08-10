@@ -1,5 +1,6 @@
 {
   "name": "math3d-next",
+  "license": "MIT",
   "workspaces": [
     "packages/*"
   ],
