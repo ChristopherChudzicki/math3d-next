@@ -1,6 +1,7 @@
 ci:
   skip:
     - prettier
+    - prettier-jsonc
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -64,3 +65,14 @@ repos:
             markdown,
             html,
           ]
+      # `identify`, which supplies pre-commit's `types_or` tags, has no `jsonc`
+      # tag (it reports no tags at all for a .jsonc filename), so .jsonc files
+      # have to be selected by name. `files` and `types_or` are ANDed, hence a
+      # separate hook rather than another entry in the list above. Prettier
+      # also fails on unparseable JSONC, so this doubles as a syntax check —
+      # `check-json` cannot be used here, as it rejects comments.
+      - id: prettier-jsonc
+        name: prettier (jsonc)
+        entry: npx prettier --write --no-error-on-unmatched-pattern
+        language: node
+        files: \.jsonc$
