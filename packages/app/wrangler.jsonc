@@ -29,9 +29,9 @@
     // Source of truth for the Worker's og:url origin; applied as-is by
     // `wrangler deploy` (deploy-reusable.yml). Must stay equal to the
     // production VITE_SITE_ORIGIN so og:url can't drift from the static head.
-    "SITE_ORIGIN": "https://next.math3d.org"
-    // TODO(og pass-2): set after deploying the render Worker (packages/og-render);
-    // its *.workers.dev host. Unset → static default card (pass-1 behavior).
-    // "OG_RENDER_ORIGIN": "https://<deployed-render-worker-host>"
+    "SITE_ORIGIN": "https://next.math3d.org",
+    // Render Worker origin (packages/og-render). Set → per-scene og:image;
+    // unset → static default card (pass-1 behavior).
+    "OG_RENDER_ORIGIN": "https://math3d-og-render.christopher-chudzicki.workers.dev"
   }
 }
