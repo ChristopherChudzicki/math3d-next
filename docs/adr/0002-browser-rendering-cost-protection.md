@@ -13,10 +13,12 @@ Priorities, in order (every trade-off resolves by this list):
 
 1. **Bounded spend** — a ceiling that cannot be exceeded, whatever the traffic.
    Dominates everything below.
-2. **(2a) Simplicity / reliability** — fewer moving parts, easy to abandon.
-3. **(2b) First share shows an image** — the preview usually exists by share time.
-4. **Minimize spend** — $5 ideal, $10 acceptable.
-5. **Universal coverage** — every scene eventually gets an image. Sacrificable.
+2. Tied second:
+   - **(2a) Simplicity / reliability** — fewer moving parts, easy to abandon.
+   - **(2b) First share shows an image** — the preview usually exists by share
+     time.
+3. **Minimize spend** — $5 ideal, $10 acceptable.
+4. **Universal coverage** — every scene eventually gets an image. Sacrificable.
 
 ## Decision
 
@@ -35,7 +37,7 @@ query param so an orphaned session goes CPU-idle even if the Worker dies. With
 `keep_alive` off, Cloudflare then idle-closes — making `MAX_SESSION_SECONDS ≈ 120`
 a hard bound.[^idle-reap]
 
-**Caps:** `MAX_SPEND` = $10 ⇒ `MONTHLY_CAP` ≈ 1,900, `DAILY_CAP` ≈ 150.[^daily-cap]
+**Caps:** `MAX_SPEND` = $10 ⇒ `MONTHLY_CAP` ≈ 1,900[^monthly-cap], `DAILY_CAP` ≈ 150.[^daily-cap]
 
 **Velocity damper:** the render Worker moves to `screenshots.math3d.org` (a
 Workers Custom Domain) with **one zone WAF rate-limiting rule scoped to the
@@ -75,6 +77,11 @@ set to a low threshold.
 [^paid-pricing]:
     Workers Paid is $5/mo, including 10 browser-hours, then
     $0.09/browser-hour thereafter.
+
+[^monthly-cap]:
+    Worst case, every session runs the full `MAX_SESSION_SECONDS`: 1,900 ×
+    120 s ≈ 63 browser-hours ≈ $4.80 overage over the 10 included, + $5 base
+    ≈ $9.80 ≤ $10.
 
 [^idle-reap]:
     The Worker-death case assumes Cloudflare idle-reaps a
