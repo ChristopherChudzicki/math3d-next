@@ -24,7 +24,11 @@ Treat server-side scene rendering as a **general primitive**, not an OG feature:
 
 - A dedicated Cloudflare Worker loads a scene's still-mode frame route via
   Browser Rendering, screenshots it, and stores a PNG in R2 **keyed by scene**.
-- The PNG is served from a keyed endpoint, `GET /screenshots/scene/{key}.png`.
+- The PNG is served from a keyed endpoint, `GET /screenshots/scene/{key}.png`,
+  with a **bounded** cache TTL — `Cache-Control: public, max-age=86400` (24 h)
+  today, never `immutable`/indefinite since an edit can change a scene's image.
+  The TTL may lengthen (e.g. 7 days) once edits bust caches via a versioned URL
+  (see Staleness).[^miss-ttl]
 - Renders are triggered on scene create/edit, not lazily on fetch.
 - **Consumers:** OG first; saved-scene thumbnails and curated galleries follow,
   off the same keyed PNG.
@@ -48,6 +52,10 @@ Treat server-side scene rendering as a **general primitive**, not an OG feature:
 
 - **DOM/SVG OG generators** (`@vercel/og`, Satori): cannot render MathBox/WebGL.
   Rejected.
+
+[^miss-ttl]:
+    A cache miss (no PNG yet) serves the default card with a short
+    `max-age=60`, so the real image replaces it promptly once rendered.
 
 [^still-mode]:
     The app calls `mathbox.stop()` once the scene signals
