@@ -13,8 +13,8 @@ const stubMeta = (status: number) =>
 
 afterEach(async () => {
   vi.unstubAllGlobals();
-  await env.OG_BUCKET.delete(sceneImageKey("k"));
-  await env.OG_BUCKET.delete(lockKey("k"));
+  await env.SCREENSHOTS_BUCKET.delete(sceneImageKey("k"));
+  await env.SCREENSHOTS_BUCKET.delete(lockKey("k"));
 });
 
 it("renders and caches when the scene exists (meta 200)", async () => {
@@ -22,9 +22,9 @@ it("renders and caches when the scene exists (meta 200)", async () => {
   const render = vi.fn().mockResolvedValue(PNG);
   await renderAndCache(env as never, "k", render);
   expect(render).toHaveBeenCalledWith(env, "k");
-  const stored = await env.OG_BUCKET.get(sceneImageKey("k"));
+  const stored = await env.SCREENSHOTS_BUCKET.get(sceneImageKey("k"));
   expect(new Uint8Array(await stored!.arrayBuffer())).toEqual(PNG);
-  expect(await env.OG_BUCKET.get(lockKey("k"))).toBeNull(); // lock released
+  expect(await env.SCREENSHOTS_BUCKET.get(lockKey("k"))).toBeNull(); // lock released
 });
 
 it("skips rendering when the scene does not exist (meta 404)", async () => {
@@ -32,8 +32,8 @@ it("skips rendering when the scene does not exist (meta 404)", async () => {
   const render = vi.fn();
   await renderAndCache(env as never, "k", render);
   expect(render).not.toHaveBeenCalled();
-  expect(await env.OG_BUCKET.get(sceneImageKey("k"))).toBeNull();
-  expect(await env.OG_BUCKET.get(lockKey("k"))).toBeNull(); // released on skip
+  expect(await env.SCREENSHOTS_BUCKET.get(sceneImageKey("k"))).toBeNull();
+  expect(await env.SCREENSHOTS_BUCKET.get(lockKey("k"))).toBeNull(); // released on skip
 });
 
 it("skips (fail-open) AND logs when meta returns an unexpected status", async () => {
@@ -71,14 +71,14 @@ it("skips AND logs distinctly when the /meta/ check errors (timeout/network)", a
 
 it("no-ops AND preserves the existing lock when already held", async () => {
   // Fresh timestamp: a currently-held (not stale) lock must block and survive.
-  await env.OG_BUCKET.put(lockKey("k"), String(Date.now()));
+  await env.SCREENSHOTS_BUCKET.put(lockKey("k"), String(Date.now()));
   stubMeta(200);
   const render = vi.fn();
   await renderAndCache(env as never, "k", render);
   expect(render).not.toHaveBeenCalled();
   // The winner's lock must survive: a mis-impl that acquires INSIDE the
   // try/finally would delete it here, breaking single-flight.
-  expect(await env.OG_BUCKET.get(lockKey("k"))).not.toBeNull();
+  expect(await env.SCREENSHOTS_BUCKET.get(lockKey("k"))).not.toBeNull();
 });
 
 it("retains the lock as a cooldown and writes nothing when render throws", async () => {
@@ -86,11 +86,11 @@ it("retains the lock as a cooldown and writes nothing when render throws", async
   const render = vi.fn().mockRejectedValue(new Error("boom"));
   const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   await renderAndCache(env as never, "k", render); // must not throw
-  expect(await env.OG_BUCKET.get(sceneImageKey("k"))).toBeNull(); // nothing cached
+  expect(await env.SCREENSHOTS_BUCKET.get(sceneImageKey("k"))).toBeNull(); // nothing cached
   // Deliberately NOT released: the lock stands as a cooldown so the next unfurl
   // can't instantly re-burn a full render on a scene that just failed
   // (finding 3). Stale-takeover reclaims it after the cooldown window.
-  expect(await env.OG_BUCKET.get(lockKey("k"))).not.toBeNull();
+  expect(await env.SCREENSHOTS_BUCKET.get(lockKey("k"))).not.toBeNull();
   errorSpy.mockRestore();
 });
 
@@ -98,7 +98,7 @@ it("never rejects even if an R2 op throws, and logs the failure", async () => {
   stubMeta(200);
   const render = vi.fn().mockResolvedValue(PNG);
   const delSpy = vi
-    .spyOn(env.OG_BUCKET, "delete")
+    .spyOn(env.SCREENSHOTS_BUCKET, "delete")
     .mockRejectedValueOnce(new Error("r2 down"));
   const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   await expect(

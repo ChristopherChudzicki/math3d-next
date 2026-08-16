@@ -45,20 +45,20 @@ export const acquireLock = async (
   key: string,
 ): Promise<LockToken | null> => {
   const token = String(Date.now());
-  const created = await env.OG_BUCKET.put(lockKey(key), token, {
+  const created = await env.SCREENSHOTS_BUCKET.put(lockKey(key), token, {
     onlyIf: { etagDoesNotMatch: "*" },
   });
   if (created !== null) return token;
 
   // Lock is held. Reclaim it only if it is stale.
-  const existing = await env.OG_BUCKET.get(lockKey(key));
+  const existing = await env.SCREENSHOTS_BUCKET.get(lockKey(key));
   if (existing === null) return null; // released between our put and get; yield
   const heldAt = Number(await existing.text());
   if (Number.isFinite(heldAt) && Date.now() - heldAt < LOCK_STALE_MS) {
     return null;
   }
 
-  const taken = await env.OG_BUCKET.put(lockKey(key), token, {
+  const taken = await env.SCREENSHOTS_BUCKET.put(lockKey(key), token, {
     onlyIf: { etagMatches: existing.etag },
   });
   return taken !== null ? token : null;
@@ -79,8 +79,8 @@ export const releaseLock = async (
   key: string,
   token: LockToken,
 ): Promise<void> => {
-  const existing = await env.OG_BUCKET.get(lockKey(key));
+  const existing = await env.SCREENSHOTS_BUCKET.get(lockKey(key));
   if (existing === null) return; // already gone
   if ((await existing.text()) !== token) return; // superseded — not ours to delete
-  await env.OG_BUCKET.delete(lockKey(key));
+  await env.SCREENSHOTS_BUCKET.delete(lockKey(key));
 };

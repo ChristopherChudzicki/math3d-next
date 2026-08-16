@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
-  "name": "math3d-og-render",
+  "name": "math3d-screenshots",
   "main": "./src/index.ts",
   "compatibility_date": "2026-07-04",
   // Required: @cloudflare/puppeteer statically imports node:buffer (and other
@@ -11,7 +11,7 @@
   // not the wrangler bundle), so this must not be removed.
   "compatibility_flags": ["nodejs_compat"],
   // workers.dev subdomain for the free-tier experiment (zero DNS). The deployed
-  // URL becomes the app Worker's OG_RENDER_ORIGIN (Task 7). A branded custom
+  // URL becomes the app Worker's SCREENSHOTS_ORIGIN (Task 7). A branded custom
   // domain is later polish.
   "workers_dev": true,
   // Retain invocation logs in Workers Logs. The render/existence-gate failures
@@ -21,7 +21,9 @@
   // only, which nobody is running at the moment a render quietly fails.
   "observability": { "enabled": true },
   "browser": { "binding": "BROWSER" },
-  "r2_buckets": [{ "binding": "OG_BUCKET", "bucket_name": "math3d-og-images" }],
+  "r2_buckets": [
+    { "binding": "SCREENSHOTS_BUCKET", "bucket_name": "math3d-screenshots" }
+  ],
   "vars": {
     "FRAME_ORIGIN": "https://next.math3d.org",
     "API_BASE": "https://api.math3d.org"

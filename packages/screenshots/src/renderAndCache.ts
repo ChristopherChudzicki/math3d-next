@@ -92,7 +92,7 @@ export const renderAndCache = async (
     }
 
     const png = await render(env, key);
-    await env.OG_BUCKET.put(sceneImageKey(key), png, {
+    await env.SCREENSHOTS_BUCKET.put(sceneImageKey(key), png, {
       httpMetadata: { contentType: "image/png" },
       customMetadata: { renderedAt: new Date().toISOString() },
     });

@@ -41,8 +41,8 @@ const call = async (path: string) => {
 afterEach(async () => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
-  await env.OG_BUCKET.delete(sceneImageKey("hit"));
-  await env.OG_BUCKET.delete(lockKey("hit"));
+  await env.SCREENSHOTS_BUCKET.delete(sceneImageKey("hit"));
+  await env.SCREENSHOTS_BUCKET.delete(lockKey("hit"));
 });
 
 it("responds ok on /health", async () => {
@@ -53,10 +53,10 @@ it("responds ok on /health", async () => {
 
 it("serves cached PNG on an R2 hit with a long cache header, without any subrequest or render", async () => {
   stubFetch();
-  await env.OG_BUCKET.put(sceneImageKey("hit"), PNG, {
+  await env.SCREENSHOTS_BUCKET.put(sceneImageKey("hit"), PNG, {
     httpMetadata: { contentType: "image/png" },
   });
-  const res = await call("/og/scene/hit.png");
+  const res = await call("/screenshots/scene/hit.png");
   expect(res.status).toBe(200);
   expect(res.headers.get("content-type")).toBe("image/png");
   expect(res.headers.get("cache-control")).toContain("max-age=86400");
@@ -64,13 +64,13 @@ it("serves cached PNG on an R2 hit with a long cache header, without any subrequ
   // The design requires a hit to serve with no /meta/ call and no scheduled
   // render: no subrequest fires and no lock object is created.
   expect(fetch).not.toHaveBeenCalled();
-  expect(await env.OG_BUCKET.get(lockKey("hit"))).toBeNull();
+  expect(await env.SCREENSHOTS_BUCKET.get(lockKey("hit"))).toBeNull();
 });
 
 it("serves the default (not a 500) and schedules no render when the R2 cache read fails", async () => {
   const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   const getSpy = vi
-    .spyOn(env.OG_BUCKET, "get")
+    .spyOn(env.SCREENSHOTS_BUCKET, "get")
     .mockRejectedValueOnce(new Error("r2 down"));
   vi.stubGlobal(
     "fetch",
@@ -79,7 +79,7 @@ it("serves the default (not a 500) and schedules no render when the R2 cache rea
         new Response(DEFAULT_PNG, { headers: { "content-type": "image/png" } }),
     ),
   );
-  const res = await call("/og/scene/hit.png");
+  const res = await call("/screenshots/scene/hit.png");
   // An R2 read failure degrades to the default card, never 500s...
   expect(res.status).toBe(200);
   expect(new Uint8Array(await res.arrayBuffer())).toEqual(DEFAULT_PNG);
@@ -96,7 +96,7 @@ it("serves the default (not a 500) and schedules no render when the R2 cache rea
 
 it("serves the branded default on a miss with a short cache header", async () => {
   stubFetch();
-  const res = await call("/og/scene/missing.png");
+  const res = await call("/screenshots/scene/missing.png");
   expect(res.status).toBe(200);
   expect(res.headers.get("cache-control")).toContain("max-age=60");
   expect(new Uint8Array(await res.arrayBuffer())).toEqual(DEFAULT_PNG);
@@ -116,7 +116,7 @@ it("redirects to the default URL (not a 500 or corrupt body) when the default-PN
         : new Response("{}", { status: 404 }),
     ),
   );
-  const res = await call("/og/scene/missing.png");
+  const res = await call("/screenshots/scene/missing.png");
   expect(res.status).toBe(302);
   expect(res.headers.get("location")).toBe(
     "https://next.math3d.org/og/default.png",
@@ -126,8 +126,8 @@ it("redirects to the default URL (not a 500 or corrupt body) when the default-PN
 
 it("serves default for an invalid key WITHOUT querying R2 or scheduling a render", async () => {
   stubFetch();
-  const getSpy = vi.spyOn(env.OG_BUCKET, "get");
-  const res = await call("/og/scene/bad key.png");
+  const getSpy = vi.spyOn(env.SCREENSHOTS_BUCKET, "get");
+  const res = await call("/screenshots/scene/bad key.png");
   expect(res.status).toBe(200);
   expect(new Uint8Array(await res.arrayBuffer())).toEqual(DEFAULT_PNG);
   // The invalid-key branch returns before the R2 lookup / render scheduling —
