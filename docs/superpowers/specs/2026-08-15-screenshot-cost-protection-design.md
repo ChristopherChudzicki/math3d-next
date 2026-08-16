@@ -71,28 +71,33 @@ One row per period; the row **is** the historical usage record — no singleton,
 class RenderDay(models.Model):
     day = models.DateField(primary_key=True)      # UTC
     count = models.PositiveIntegerField(default=0)
+    modified = models.DateTimeField(default=timezone.now)  # bumped by the reservation SQL (auto_now won't fire — no .save())
 
 class RenderMonth(models.Model):
     month = models.DateField(primary_key=True)    # first-of-month, UTC
     count = models.PositiveIntegerField(default=0)
+    modified = models.DateTimeField(default=timezone.now)  # ditto
 ```
 
-Migration is `CreateModel` only — no seeding; a period's row is created on its first reservation. `RenderMonth` rows are kept indefinitely (≈12 tiny rows/year = the usage history a singleton would overwrite); `RenderDay` rows are equally tiny — keep them (free daily history) or prune via an optional management command.
+Migration is `CreateModel` only — no seeding; a period's row is created on its first reservation. `RenderMonth` rows are kept indefinitely (≈12 tiny rows/year = the usage history a singleton would overwrite); `RenderDay` rows are equally tiny — keep them (free daily history) or prune via an optional management command. Register both in `scenes/admin.py` (repo convention; direct ops visibility into current usage). `count` is the unambiguous per-period usage record; whether a period was _saturated_ is only meaningful against the cap then in force — we don't store a per-row cap (YAGNI), so post-cap-change saturation analysis is approximate.
 
 ### 2. `reserve_render_slot() -> bool` — `scenes/screenshots.py`
 
 Grant iff **both** the current day and month are under cap; bump both, all-or-nothing, in one short transaction. A missing period row is created at `1` (implicit rollover). Each upsert's `WHERE count < cap` makes the cap atomic under the row lock; the transaction rolls back the month bump if the day is over cap (both-or-neither). Concurrent callers serialize month-then-day → no deadlock, no over-grant.
 
 ```python
+# Raw SQL is deliberate: no ORM idiom expresses insert-or-increment-only-if-
+# under-cap in one atomic round-trip (update_or_create is select-then-write;
+# bulk_create update_conflicts has no WHERE). Do NOT "simplify" to the ORM.
 _MONTH_SQL = """
-    INSERT INTO scenes_rendermonth (month, count) VALUES (%(period)s, 1)
-    ON CONFLICT (month) DO UPDATE SET count = scenes_rendermonth.count + 1
+    INSERT INTO scenes_rendermonth (month, count, modified) VALUES (%(period)s, 1, now())
+    ON CONFLICT (month) DO UPDATE SET count = scenes_rendermonth.count + 1, modified = now()
     WHERE scenes_rendermonth.count < %(cap)s
     RETURNING count
 """
 _DAY_SQL = """
-    INSERT INTO scenes_renderday (day, count) VALUES (%(period)s, 1)
-    ON CONFLICT (day) DO UPDATE SET count = scenes_renderday.count + 1
+    INSERT INTO scenes_renderday (day, count, modified) VALUES (%(period)s, 1, now())
+    ON CONFLICT (day) DO UPDATE SET count = scenes_renderday.count + 1, modified = now()
     WHERE scenes_renderday.count < %(cap)s
     RETURNING count
 """
@@ -116,7 +121,7 @@ def reserve_render_slot() -> bool:
 
 ### 3. `maybe_render()` — reservation + nudge, fully isolated
 
-These views run in autocommit (no `ATOMIC_REQUESTS`/`@transaction.atomic`), so `on_commit` runs **inline, synchronously, before the response**, with `robust=False`. Any exception would otherwise 500 the save, so the **whole body** is isolated:
+These views run in autocommit (no `ATOMIC_REQUESTS`/`@transaction.atomic`), so `on_commit` runs **inline, synchronously, before the response**, with `robust=False`. Any exception would otherwise 500 the save, so the **whole body** is isolated. (This autocommit assumption is load-bearing — `ATOMIC_REQUESTS` would defer the nudge to request-commit and make reserve's `atomic()` a savepoint; a documented invariant, not guarded by a test.)
 
 ```python
 def maybe_render(key: str) -> None:
@@ -247,7 +252,7 @@ The reservation bounds only the legitimate backend path. An attacker holding `RE
 
 ## Testing
 
-**Backend (`scenes/screenshots_test.py`):** `reserve_render_slot` grants under both caps, declines at each cap, creates a fresh day/month row on a new period (count → 1) while retaining the prior month's row as history, and rolls back the month bump when the day cap is hit (both-or-neither); `maybe_render` nudges only when granted, returns early when `OG_RENDER_URL` unset, and **swallows a `reserve_render_slot` exception** (no propagation); `nudge_render` swallows transport errors; `create_scene`/`update_scene` register the `on_commit` nudge (via `captureOnCommitCallbacks`).
+**Backend (`scenes/screenshots_test.py`):** `reserve_render_slot` — grants comfortably under both caps; **cap boundary** per ledger (seed a row at `count = cap-1`: reserve → `True`, `count == cap`; reserve again → `False`, `count` unchanged — pins `<` vs `<=`); creates a fresh day/month row on a new period (count → 1) while retaining the prior month's row as history; rolls back the month bump when the day cap is hit (both-or-neither); **concurrency** — a `TransactionTestCase` with N threads/connections hammering a `cap-1` boundary asserts exactly `cap` total grants (the load-bearing no-over-grant invariant). `maybe_render` nudges only when granted, returns early when `OG_RENDER_URL` unset, and **swallows a `reserve_render_slot` exception so the save still returns 2xx** (the §3 inline-isolation property — use a harness where `on_commit`/`atomic` behave as in production, not a plain savepoint-wrapped test); `nudge_render` swallows transport errors; `create_scene`/`update_scene` register the `on_commit` nudge.
 
 **Worker (`index.spec.ts`):** `POST /render` — valid secret → 202 + render scheduled; bad/missing secret → 403 + no `browser.launch`; invalid key → 400. `GET …png` — hit → PNG+24h; miss → default card+60s, **no** render. Deadline: work exceeding `RENDER_DEADLINE_MS` rejects **and `browser.close()` is called**.
 
