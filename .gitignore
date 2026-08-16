@@ -37,3 +37,10 @@ webserver/staticfiles/*
 
 # Local DB snapshots (may contain prod-derived user data — never commit)
 db-snapshots/
+
+# Superpowers working docs (brainstorm/design specs, handoffs, implementation
+# plans). Ephemeral by convention — the durable, committed architecture record
+# lives in docs/adr/. Design specs already committed here stay tracked; a new
+# spec worth committing needs `git add -f`.
+docs/superpowers/plans/
+docs/superpowers/specs/
