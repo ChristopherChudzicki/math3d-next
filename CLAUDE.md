@@ -120,7 +120,7 @@ Feature-based organization in `packages/app/src/features/` (auth, notifications,
 ### Testing
 
 - **Frontend unit tests**: Vitest + Testing Library + MSW mocks. Config in `packages/app/vite.config.ts`
-- **Backend tests**: pytest + pytest-django + factory-boy. Config in `webserver/pyproject.toml`
+- **Backend tests**: pytest + pytest-django + factory-boy. Config in `webserver/pyproject.toml`. They run against PostgreSQL, like dev and production — run them in the container (`just be test`), which supplies `DATABASE_URL`. `main/test_settings.py` refuses to start on any other engine rather than silently falling back to SQLite. pytest-django creates a separate `test_math3d` database, so the dev database is untouched.
 - **E2E**: Playwright in `packages/app-tests-e2e/`
 
 #### Running E2E tests locally
