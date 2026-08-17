@@ -15,7 +15,7 @@ jobs:
       version: ${{ steps.generate_version.outputs.version }}
       rc_tag: ${{ steps.generate_version.outputs.rc_tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Validate branch is main
         run: |
@@ -91,7 +91,7 @@ jobs:
           echo "Last production tag: $LAST_PROD_TAG"
 
       - name: Create GitHub pre-release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.generate_version.outputs.rc_tag }}
           name: Release Candidate ${{ steps.generate_version.outputs.version }}
@@ -106,8 +106,6 @@ jobs:
             **To promote to production**: Run the "Promote RC to Production" workflow with tag `${{ steps.generate_version.outputs.rc_tag }}`
 
             ---
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     needs: create-rc

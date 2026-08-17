@@ -34,7 +34,7 @@ jobs:
     env:
       SKIP_YARN_COREPACK_CHECK: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v6
         with:
@@ -57,7 +57,7 @@ jobs:
           VITE_APP_VERSION: ${{ inputs.version }}
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.dry_run && format('frontend-build-{0}', inputs.version) || 'frontend-build' }}
           path: packages/app/dist/
@@ -74,10 +74,10 @@ jobs:
       AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
       AWS_S3_BUCKET: ${{ vars.AWS_S3_BUCKET }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frontend-build
           path: packages/app/dist/
@@ -93,7 +93,7 @@ jobs:
           curl https://cli-assets.heroku.com/install.sh | sh
 
       - name: Deploy to Heroku
-        uses: akhileshns/heroku-deploy@v3.14.15
+        uses: akhileshns/heroku-deploy@v3.15.15
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ vars.HEROKU_APP_NAME }}
@@ -109,7 +109,7 @@ jobs:
     env:
       SKIP_YARN_COREPACK_CHECK: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v6
         with:
@@ -127,7 +127,7 @@ jobs:
           yarn install --immutable
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frontend-build
           path: packages/app/dist/
