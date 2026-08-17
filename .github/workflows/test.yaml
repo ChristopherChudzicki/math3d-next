@@ -45,7 +45,8 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/math3d # pragma: allowlist secret
     services:
       db:
-        # Keep in sync with the `db` service in docker-compose.yml.
+        # Keep the image tag in sync with the `db` service in
+        # docker-compose.yml. The credentials intentionally differ.
         image: postgres:16.8
         env:
           POSTGRES_USER: postgres
@@ -58,6 +59,7 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+          --health-start-period 10s
     defaults:
       run:
         working-directory: ./webserver

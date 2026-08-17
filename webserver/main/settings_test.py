@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 from main.env import EnvConfig
+from main.test_settings import require_postgres
 from main.origins import (
     WORKTREE_PORTS,
     cors_allowed_origins,
@@ -323,3 +324,26 @@ def test_local_csrf_trust_handles_unset_app_base_url():
         cors_allowed_origins=["http://math3d.localdev:3000"],
     )
     assert origins == ["http://math3d.localdev:3000"]
+
+
+def test_require_postgres_accepts_postgres():
+    require_postgres("django.db.backends.postgresql")
+
+
+@pytest.mark.parametrize(
+    ("database_url", "expected"),
+    [
+        ("", "DATABASE_URL is not set"),
+        ("sqlite:////tmp/db.sqlite3", "DATABASE_URL resolved to"),
+    ],
+)
+def test_require_postgres_rejects_sqlite(monkeypatch, database_url, expected):
+    """
+    The suite must never fall back to SQLite. The two cases report differently
+    because an unset DATABASE_URL (settings.py's fallback) is the common cause
+    and needs different remediation than a URL explicitly pointing elsewhere.
+    """
+    monkeypatch.setenv("DATABASE_URL", database_url)
+    with pytest.raises(ImproperlyConfigured) as exc_info:
+        require_postgres("django.db.backends.sqlite3")
+    assert expected in str(exc_info.value)

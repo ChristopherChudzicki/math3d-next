@@ -3,7 +3,7 @@ from typing import cast
 from allauth.account.models import EmailAddress
 from django.http import HttpRequest
 from django.middleware.csrf import get_token
-from ninja import Router, Schema, Status
+from ninja import Field, Router, Schema, Status
 
 from authentication.models import CustomUser
 from main.ninja_auth import session_auth, staff_auth
@@ -17,9 +17,15 @@ class UserSchema(Schema):
     public_nickname: str  # snake_case on the wire, intentionally
 
 
+_NICKNAME_MAX_LENGTH = CustomUser._meta.get_field("public_nickname").max_length
+
+
 class UserUpdateSchema(Schema):
     # public_nickname is the only writable field (v0: id/email read-only).
-    public_nickname: str
+    # The bound is read off the model so it cannot drift from the column: an
+    # over-length value would otherwise reach the DB and raise DataError (a
+    # 500) rather than a validation error.
+    public_nickname: str = Field(max_length=_NICKNAME_MAX_LENGTH)
 
 
 class DeleteAccountSchema(Schema):
