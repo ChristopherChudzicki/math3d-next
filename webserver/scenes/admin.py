@@ -4,3 +4,5 @@ import scenes.models as models
 
 admin.site.register(models.LegacyScene)
 admin.site.register(models.Scene)
+admin.site.register(models.RenderDay)
+admin.site.register(models.RenderMonth)

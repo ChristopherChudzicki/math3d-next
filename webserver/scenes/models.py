@@ -135,3 +135,24 @@ class Scene(TimestampedModel):
     def save(self, *args, **kwargs):
         self.full_clean()
         return super().save(*args, **kwargs)
+
+
+class RenderDay(models.Model):
+    """One row per UTC day; ``count`` is that day's reservation total (the
+    historical usage record — never reset). Bumped by the raw upsert in
+    ``scenes.screenshots.reserve_render_slot``; ``modified`` is set by that SQL
+    (``auto_now`` would not fire — no ``.save()`` is called)."""
+
+    day = models.DateField(primary_key=True)
+    count = models.PositiveIntegerField(default=0)
+    modified = models.DateTimeField(default=timezone.now)
+
+
+class RenderMonth(models.Model):
+    """One row per UTC month (first-of-month). See ``RenderDay``; kept
+    indefinitely (~12 tiny rows/year = the usage history a singleton would
+    overwrite)."""
+
+    month = models.DateField(primary_key=True)
+    count = models.PositiveIntegerField(default=0)
+    modified = models.DateTimeField(default=timezone.now)

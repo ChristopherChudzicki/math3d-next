@@ -1,7 +1,9 @@
+import datetime
+
 import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from scenes.models import Scene, is_reserved_key_error
+from scenes.models import RenderDay, RenderMonth, Scene, is_reserved_key_error
 from scenes.factories import SceneFactory
 
 
@@ -56,3 +58,13 @@ def test_is_reserved_key_error_false_for_invalid_items():
     with pytest.raises(ValidationError) as exc_info:
         Scene(**kwargs).save()
     assert not is_reserved_key_error(exc_info.value)
+
+
+@pytest.mark.django_db
+def test_render_ledgers_are_one_row_per_period():
+    day = datetime.date(2026, 8, 16)
+    month = datetime.date(2026, 8, 1)
+    RenderDay.objects.create(day=day, count=3)
+    RenderMonth.objects.create(month=month, count=7)
+    assert RenderDay.objects.get(pk=day).count == 3
+    assert RenderMonth.objects.get(pk=month).count == 7
