@@ -3,10 +3,10 @@ from typing import cast
 from allauth.account.models import EmailAddress
 from django.http import HttpRequest
 from django.middleware.csrf import get_token
+from main.ninja_auth import session_auth, staff_auth
 from ninja import Router, Schema, Status
 
 from authentication.models import CustomUser
-from main.ninja_auth import session_auth, staff_auth
 
 router = Router()
 

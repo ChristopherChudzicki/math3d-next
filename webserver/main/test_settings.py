@@ -1,6 +1,6 @@
-from main.settings import *  # noqa: F403
+from main.settings import *
 
-DATABASES["default"] = {  # noqa: F405
+DATABASES["default"] = {
     "ENGINE": "django.db.backends.sqlite3",
     "NAME": "mydatabase",
 }

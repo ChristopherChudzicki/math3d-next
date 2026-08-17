@@ -10,13 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import logging
 import os
 from pathlib import Path
-import logging
-
-from django.core.exceptions import ImproperlyConfigured
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 from pydantic import ValidationError
 
 from main.env import EnvConfig
@@ -26,7 +25,6 @@ from main.origins import (
     csrf_trusted_origins,
     dev_cors_allowed_origins,
 )
-
 
 logger = logging.getLogger(__name__)
 
