@@ -61,6 +61,17 @@ IS_DEVELOPMENT = ENV.IS_DEVELOPMENT
 # bare origin by EnvConfig.
 APP_BASE_URL = ENV.APP_BASE_URL
 
+# Screenshot render Worker (packages/screenshots). Bare origin; unset ⇒ the
+# render-on-save feature is dark (saves behave as before). See ADR-0002.
+SCREENSHOTS_ORIGIN = ENV.SCREENSHOTS_ORIGIN
+RENDER_SECRET = ENV.RENDER_SECRET  # noqa: S105 (name, not a secret literal) pragma: allowlist secret
+
+# Per-period reservation caps (ADR-0002 cost protection). Plain constants: they
+# rarely change and aren't secret. Monthly ceiling bounds spend to ≤ $10;
+# daily is an anti-burst sub-cap.
+RENDER_MONTHLY_CAP = 1500
+RENDER_DAILY_CAP = 150
+
 DEBUG = False
 
 # Secure cookie defaults — only relaxed for local dev (no TLS).
