@@ -14,8 +14,8 @@
   // URL becomes the app Worker's SCREENSHOTS_ORIGIN (Task 7). A branded custom
   // domain is later polish.
   "workers_dev": true,
-  // Retain invocation logs in Workers Logs. The render/existence-gate failures
-  // are logged via console.error on a fire-and-forget ctx.waitUntil path — set
+  // Retain invocation logs in Workers Logs. Render failures are logged via
+  // console.error on a fire-and-forget ctx.waitUntil path — set
   // this explicitly (rather than rely on an account default) so those traces
   // survive for after-the-fact debugging instead of being live-`wrangler tail`
   // only, which nobody is running at the moment a render quietly fails.
@@ -25,7 +25,6 @@
     { "binding": "SCREENSHOTS_BUCKET", "bucket_name": "math3d-screenshots" }
   ],
   "vars": {
-    "FRAME_ORIGIN": "https://next.math3d.org",
-    "API_BASE": "https://api.math3d.org"
+    "FRAME_ORIGIN": "https://next.math3d.org"
   }
 }

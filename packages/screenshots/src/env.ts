@@ -1,14 +1,12 @@
 import type { BrowserWorker } from "@cloudflare/puppeteer";
 
 interface ScreenshotsEnv {
-  /** R2 bucket holding cached PNGs (screenshots/scene/{key}.png) and locks (screenshots/lock/{key}). */
+  /** R2 bucket holding cached PNGs (screenshots/scene/{key}.png). */
   SCREENSHOTS_BUCKET: R2Bucket;
   /** Cloudflare Browser Rendering binding. */
   BROWSER: BrowserWorker;
   /** Fixed origin of the headless frame page, e.g. https://next.math3d.org. */
   FRAME_ORIGIN: string;
-  /** Fixed API origin (ninja app mounted under /v1), e.g. https://api.math3d.org. */
-  API_BASE: string;
 }
 
 export type Env = ScreenshotsEnv;
