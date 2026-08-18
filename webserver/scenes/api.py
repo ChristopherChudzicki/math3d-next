@@ -1,6 +1,5 @@
 from typing import List
 
-from django.db import transaction
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from ninja import Query, Router, Status
@@ -20,7 +19,7 @@ from scenes.schemas import (
     ScenePatchSchema,
     SceneSchema,
 )
-from scenes.screenshots import maybe_render
+from scenes.screenshots import schedule_render
 
 scenes_router = Router()
 
@@ -57,12 +56,7 @@ def create_scene(request, payload: SceneCreateSchema):
     if payload.title is not None:
         scene.title = payload.title
     scene.save()  # full_clean() re-validates items (defense in depth)
-    # Runs INLINE before the response: these views are autocommit (no
-    # ATOMIC_REQUESTS / @transaction.atomic), so on_commit fires synchronously.
-    # maybe_render is fully isolated (swallows everything) — do NOT wrap these
-    # views in atomic, or the nudge would defer to request-commit and reserve's
-    # atomic() would degrade to a savepoint.
-    transaction.on_commit(lambda: maybe_render(scene.key))
+    schedule_render(scene.key)
     return Status(201, scene)
 
 
@@ -112,12 +106,7 @@ def update_scene(request, key: str, payload: ScenePatchSchema):
     if "archived" in data:
         scene.archived = data["archived"]
     scene.save()
-    # Runs INLINE before the response: these views are autocommit (no
-    # ATOMIC_REQUESTS / @transaction.atomic), so on_commit fires synchronously.
-    # maybe_render is fully isolated (swallows everything) — do NOT wrap these
-    # views in atomic, or the nudge would defer to request-commit and reserve's
-    # atomic() would degrade to a savepoint.
-    transaction.on_commit(lambda: maybe_render(scene.key))
+    schedule_render(scene.key)
     return scene
 
 

@@ -14,23 +14,26 @@ from django.conf import settings
 from django.db import connection, transaction
 from django.utils import timezone
 
+from scenes.models import RenderDay, RenderMonth
+
 logger = logging.getLogger(__name__)
 
 # Raw SQL is deliberate: no ORM idiom expresses insert-or-increment-only-if-
 # under-cap in one atomic round-trip (update_or_create is select-then-write;
 # bulk_create update_conflicts has no WHERE). Do NOT "simplify" to the ORM.
-# Table names are Django's default db_table for scenes.RenderMonth/RenderDay —
-# if either model's Meta.db_table ever changes, update these strings in lockstep.
-_MONTH_SQL = """
-    INSERT INTO scenes_rendermonth (month, count, modified) VALUES (%(period)s, 1, now())
-    ON CONFLICT (month) DO UPDATE SET count = scenes_rendermonth.count + 1, modified = now()
-    WHERE scenes_rendermonth.count < %(cap)s
+# Table names are read from the models so a Meta.db_table change can't desync them.
+_MONTH = RenderMonth._meta.db_table
+_DAY = RenderDay._meta.db_table
+_MONTH_SQL = f"""
+    INSERT INTO {_MONTH} (month, count, modified) VALUES (%(period)s, 1, now())
+    ON CONFLICT (month) DO UPDATE SET count = {_MONTH}.count + 1, modified = now()
+    WHERE {_MONTH}.count < %(cap)s
     RETURNING count
 """
-_DAY_SQL = """
-    INSERT INTO scenes_renderday (day, count, modified) VALUES (%(period)s, 1, now())
-    ON CONFLICT (day) DO UPDATE SET count = scenes_renderday.count + 1, modified = now()
-    WHERE scenes_renderday.count < %(cap)s
+_DAY_SQL = f"""
+    INSERT INTO {_DAY} (day, count, modified) VALUES (%(period)s, 1, now())
+    ON CONFLICT (day) DO UPDATE SET count = {_DAY}.count + 1, modified = now()
+    WHERE {_DAY}.count < %(cap)s
     RETURNING count
 """
 
@@ -81,10 +84,22 @@ def maybe_render(key: str) -> None:
     via on_commit in autocommit views (scenes/api.py), so it must never
     propagate: a failure here must still let the save return 2xx."""
     try:
-        if not settings.SCREENSHOTS_ORIGIN:  # feature dark
+        # Both must be set, or the feature is dark: an origin without a secret
+        # would reserve a slot then 403 at the Worker, burning cap for nothing.
+        if not (settings.SCREENSHOTS_ORIGIN and settings.RENDER_SECRET):
             return
         if not reserve_render_slot():  # over cap → decline (coverage, not spend)
             return
         nudge_render(key)
     except Exception:
         logger.warning("maybe_render failed for key=%s", key, exc_info=True)
+
+
+def schedule_render(key: str) -> None:
+    """Fire maybe_render after the surrounding DB work commits.
+
+    create/update are autocommit views, so this on_commit hook runs inline
+    before the response. Wrapping them in a transaction would defer the nudge to
+    request-commit and demote reserve_render_slot's atomic() to a savepoint.
+    """
+    transaction.on_commit(lambda: maybe_render(key))

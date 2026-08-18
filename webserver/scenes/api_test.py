@@ -400,7 +400,7 @@ def test_create_scene_nudges_render_on_commit():
     # empty items list would 400 on validation and fail for the wrong reason.
     data = default_scene()
     body = {"items": data["items"], "itemOrder": data["itemOrder"]}
-    with mock.patch("scenes.api.maybe_render") as maybe:
+    with mock.patch("scenes.screenshots.maybe_render") as maybe:
         resp = Client().post(LIST_URL, data=body, content_type="application/json")
     assert resp.status_code == 201
     maybe.assert_called_once_with(resp.json()["key"])
@@ -412,7 +412,7 @@ def test_update_scene_nudges_render_on_commit():
     scene = SceneFactory.create(author=me)
     client = Client()
     client.force_login(me)
-    with mock.patch("scenes.api.maybe_render") as maybe:
+    with mock.patch("scenes.screenshots.maybe_render") as maybe:
         resp = client.patch(
             _detail(scene.key),
             data={"title": "Renamed"},

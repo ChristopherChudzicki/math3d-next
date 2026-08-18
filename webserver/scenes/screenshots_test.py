@@ -110,8 +110,19 @@ def test_maybe_render_dark_when_origin_unset(settings):
     reserve.assert_not_called()
 
 
+def test_maybe_render_dark_when_secret_unset(settings):
+    # Origin set but secret empty is still dark: otherwise a save would reserve a
+    # slot and then 403 at the Worker, burning cap with nothing to show for it.
+    settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
+    settings.RENDER_SECRET = ""
+    with mock.patch.object(screenshots, "reserve_render_slot") as reserve:
+        screenshots.maybe_render("abc")
+    reserve.assert_not_called()
+
+
 def test_maybe_render_declines_over_cap_without_nudging(settings):
     settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
+    settings.RENDER_SECRET = "shh"  # pragma: allowlist secret
     with (
         mock.patch.object(screenshots, "reserve_render_slot", return_value=False),
         mock.patch.object(screenshots, "nudge_render") as nudge,
@@ -122,6 +133,7 @@ def test_maybe_render_declines_over_cap_without_nudging(settings):
 
 def test_maybe_render_nudges_when_granted(settings):
     settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
+    settings.RENDER_SECRET = "shh"  # pragma: allowlist secret
     with (
         mock.patch.object(screenshots, "reserve_render_slot", return_value=True),
         mock.patch.object(screenshots, "nudge_render") as nudge,
@@ -134,6 +146,7 @@ def test_maybe_render_swallows_reserve_exception(settings):
     # The isolation invariant: a failure inside maybe_render must not propagate
     # (it runs inline in the save's request cycle — an escape would 500 the save).
     settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
+    settings.RENDER_SECRET = "shh"  # pragma: allowlist secret
     with mock.patch.object(
         screenshots, "reserve_render_slot", side_effect=RuntimeError("db down")
     ):
