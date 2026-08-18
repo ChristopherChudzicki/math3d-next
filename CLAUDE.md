@@ -111,7 +111,7 @@ Feature-based organization in `packages/app/src/features/` (auth, notifications,
 ### Backend Stack
 
 - **Framework**: Django 5 + django-ninja (v1 API), Python 3.12
-- **DB**: PostgreSQL 16 (Docker, port 5431 host / 5432 container)
+- **DB**: PostgreSQL 18 (Docker, port 5431 host / 5432 container)
 - **Auth**: django-allauth headless (browser flows) + Django session auth
 - **API specs**: `webserver/openapi.v1.yaml` and `webserver/openapi.allauth.yaml`, dumped via management commands (see API Client Generation above)
 - **Deps**: Managed with `uv` (`webserver/pyproject.toml` + `webserver/uv.lock`)

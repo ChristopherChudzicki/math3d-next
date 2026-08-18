@@ -47,7 +47,7 @@ jobs:
       db:
         # Keep the image tag in sync with the `db` service in
         # docker-compose.yml. The credentials intentionally differ.
-        image: postgres:16.8
+        image: postgres:18.6
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # pragma: allowlist secret
