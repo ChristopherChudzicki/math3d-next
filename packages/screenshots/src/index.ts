@@ -31,7 +31,7 @@ const serveDefault = async (env: Env): Promise<Response> => {
     // Buffer the whole (small) card before responding: streaming res.body keeps
     // the 3s abort signal attached, which would error a still-streaming body and
     // hand a slow crawler a truncated 200 image/png — the exact corrupt card the
-    // catch below exists to prevent, but occurring outside it (finding 5).
+    // catch below exists to prevent, but occurring outside it.
     const body = await res.arrayBuffer();
     return new Response(body, {
       status: 200,
@@ -61,13 +61,9 @@ export default {
     if (pathname === "/health") return new Response("ok");
 
     if (request.method === "POST" && pathname === "/render") {
-      // Secret gate BEFORE any parsing or render scheduling. Fail CLOSED on an
-      // unset/empty secret: without this, an unbound RENDER_SECRET makes the
-      // required header `Bearer undefined` (and an empty one `Bearer `), both
-      // trivially guessable — so between CI deploying this Worker and the
-      // operator running `wrangler secret put RENDER_SECRET`, anyone who finds
-      // the host could drive uncapped Browser Rendering (there is no Worker-side
-      // cap). An empty secret can never authorize a render.
+      // Secret gate before any parsing/scheduling; fail CLOSED on an unset/empty
+      // secret — otherwise the required header degenerates to a guessable
+      // `Bearer undefined`/`Bearer ` and anyone could drive uncapped rendering.
       const auth = request.headers.get("authorization");
       if (!env.RENDER_SECRET || auth !== `Bearer ${env.RENDER_SECRET}`) {
         return new Response("forbidden", { status: 403 });
@@ -94,7 +90,7 @@ export default {
     } catch (err) {
       // A cache read failing (R2 outage/throttle/5xx) is operationally
       // identical to a miss — degrade to the default card, never let it 500 out
-      // of fetch (finding 1).
+      // of fetch.
       // eslint-disable-next-line no-console
       console.error(`cache read failed for key=${key}`, err);
       return serveDefault(env);

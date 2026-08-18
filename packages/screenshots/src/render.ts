@@ -3,15 +3,10 @@ import type { Env } from "./env";
 import { sceneFrameUrl } from "./keys";
 
 const READY_SELECTOR = '[data-scene-ready="true"]';
-const NAV_TIMEOUT_MS = 15_000; // lowered from 30s; RENDER_DEADLINE_MS is authoritative
-// The only in-repo calibration of how long data-scene-ready takes is the e2e
-// waiting on the same selector with a 60s budget (frame-render.test.ts).
-// `networkidle0` above absorbs page load before this wait begins, which narrows
-// the gap, but data-scene-ready is a wall-clock quiescence heuristic on mathbox
-// warmup — so give it real headroom. Kept below RENDER_DEADLINE_MS (45s < 60s,
-// per the ordering invariant PAGE_DEADLINE_MS > RENDER_DEADLINE_MS >
-// READY_TIMEOUT_MS) so a per-step ready-wait can't outlast the authoritative
-// render deadline, which is what actually bounds and closes the browser.
+const NAV_TIMEOUT_MS = 15_000; // page-load nav bound; RENDER_DEADLINE_MS is authoritative
+// data-scene-ready is a wall-clock quiescence heuristic on mathbox warmup — give it
+// headroom, but keep it below RENDER_DEADLINE_MS (the authoritative bound that closes
+// the browser). Ordering: PAGE_DEADLINE_MS > RENDER_DEADLINE_MS > READY_TIMEOUT_MS.
 const READY_TIMEOUT_MS = 45_000;
 
 export const withTimeout = async <T>(
@@ -34,33 +29,25 @@ export const withTimeout = async <T>(
 
 /**
  * Render {FRAME_ORIGIN}/app/frame/{key} to a 1200x630 PNG. Waits for the
- * still-mode readiness signal (data-scene-ready), validated on real CF Browser
- * Rendering (2026-08-08). Launch/close per render for v1 simplicity; browser
- * reuse is a roadmap optimization. Throws on any failure — the caller swallows.
+ * still-mode readiness signal (data-scene-ready). Launch/close per render for v1
+ * simplicity; browser reuse is a roadmap optimization. Throws on any failure —
+ * the caller swallows.
  *
  * v1 framing decision: render at 1200x630, deviceScaleFactor 1 — exactly the
  * dimensions declared in index.html's og:image:width/height. The scene uses its
- * own saved camera (the validation PNG sat small/off-center); auto-framing and
- * hi-DPI (2x, matching the default card's crispness) are deferred polish, NOT v1.
+ * own saved camera; auto-framing and hi-DPI (2x, matching the default card's
+ * crispness) are deferred polish, NOT v1.
  *
  * No credentials: a fresh puppeteer context navigates a bare same-origin URL, so
  * the browser sends no cookies/headers — it renders only what an anonymous
  * viewer sees (anonymous scenes are immutable, so no version-busting vector).
  *
- * `deadlineMs` (RENDER_DEADLINE_MS from the caller) bounds the whole page-work
- * body via `withTimeout`, and `browser.close()` runs in `finally` — so a hung
- * page operation is aborted by closing the browser at ~deadlineMs, not left
- * running. Headroom note: NAV_TIMEOUT_MS (15s) + READY_TIMEOUT_MS (45s) = 60s =
- * RENDER_DEADLINE_MS, so in the pathological nested-timeout case the per-step
- * guards can sum to the whole deadline, leaving no margin for
- * newPage/screenshot/close. This doesn't break the bound — the deadline still
- * hard-closes the browser, and CF idle-reap backstops `close` — so don't expect
- * RENDER_DEADLINE_MS to fire *before* the step guards in that worst case.
+ * `deadlineMs` (RENDER_DEADLINE_MS) bounds the whole page-work body via
+ * `withTimeout`; `browser.close()` in `finally` closes at ~deadlineMs, aborting a
+ * hung op.
  *
- * `launch` is a defaulted, test-only injection seam so the close-on-timeout
- * behavior can be asserted with a fake browser. Production always uses the
- * default `puppeteer.launch`; the extra defaulted param keeps renderScene
- * assignable to the `Renderer` type `(env, key, deadlineMs) => Promise<…>`.
+ * `launch` is a defaulted test-only injection seam (close-on-timeout can be
+ * asserted with a fake browser); production uses `puppeteer.launch`.
  */
 export const renderScene = async (
   env: Env,
