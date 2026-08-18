@@ -7,14 +7,9 @@ from main.settings import *  # noqa: F403
 
 def require_postgres(engine: str, database_url: str) -> None:
     """
-    Fail loudly unless the test database is PostgreSQL.
-
-    Dev and production both run PostgreSQL, and main.settings falls back to
-    SQLite when DATABASE_URL is unset. That fallback must never reach the test
-    suite: SQLite does not enforce varchar lengths, folds case only over ASCII
-    in LIKE, and degrades the pg_trgm GIN index on Scene.title to a plain
-    B-tree (TrigramExtension is a no-op there), so bugs that fail in
-    production can pass here.
+    Fail loudly unless the test database is PostgreSQL, as dev and production
+    are. main.settings falls back to SQLite when DATABASE_URL is unset, and
+    that fallback hides bugs that would fail in production.
     """
     if engine == "django.db.backends.postgresql":
         return
@@ -33,14 +28,11 @@ def require_postgres(engine: str, database_url: str) -> None:
 
 require_postgres(DATABASES["default"]["ENGINE"], ENV.DATABASE_URL)  # noqa: F405
 
-# pytest-django creates a `test_`-prefixed database, so the dev database is
-# untouched — but that name is fixed, and Django autoclobbers it. Concurrent
-# suites (worktrees, parallel agents) would drop each other's in-flight
-# database, so allow each to claim its own.
+# The test database name is otherwise fixed, and Django autoclobbers it, so
+# concurrent suites (worktrees, parallel agents) would drop each other's.
 if test_db_name := os.environ.get("TEST_DB_NAME"):
     if not test_db_name.startswith("test_"):
-        # Django drops and recreates this database without prompting, so a name
-        # that isn't clearly a test database could destroy the dev one.
+        # Guards against pointing the autoclobber at the dev database.
         raise ImproperlyConfigured(
             f"TEST_DB_NAME must start with 'test_' (got {test_db_name!r})."
         )

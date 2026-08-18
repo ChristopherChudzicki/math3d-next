@@ -335,12 +335,9 @@ def test_local_csrf_trust_handles_unset_app_base_url():
 )
 def test_require_postgres_rejects_sqlite(database_url, expected):
     """
-    The suite must never fall back to SQLite. The two cases report differently
-    because an unset DATABASE_URL (settings.py's fallback) is the common cause
-    and needs different remediation than a URL explicitly pointing elsewhere.
-
-    The accepting case needs no test: require_postgres runs at settings import,
-    so an inverted condition takes the whole suite red.
+    The two cases report differently because an unset DATABASE_URL needs
+    different remediation than one explicitly pointing elsewhere. The accepting
+    case needs no test: it runs at settings import, so inverting it goes red.
     """
     with pytest.raises(ImproperlyConfigured) as exc_info:
         require_postgres("django.db.backends.sqlite3", database_url)

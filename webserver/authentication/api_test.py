@@ -70,9 +70,7 @@ def test_me_patch_updates_public_nickname_and_ignores_readonly_fields():
 
 @pytest.mark.django_db
 def test_me_patch_rejects_over_length_nickname():
-    # public_nickname is a varchar(64); without a schema bound the write reaches
-    # the DB and 500s. Signup already caps it (authentication/forms.py), so the
-    # PATCH path must reject it the same way.
+    # public_nickname is a varchar(64); unbounded, the write reaches the DB and 500s.
     user = CustomUserFactory.create()
     client = Client()
     client.force_login(user)
