@@ -23,3 +23,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         verbose_name = "User"
+
+
+# Read off the field so the API schema and the signup form cannot drift from
+# the column: an over-length value that reaches the DB raises DataError (a 500)
+# rather than a validation error.
+NICKNAME_MAX_LENGTH = CustomUser._meta.get_field("public_nickname").max_length

@@ -5,7 +5,7 @@ from django.core.exceptions import ImproperlyConfigured
 from main.settings import *  # noqa: F403
 
 
-def require_postgres(engine: str) -> None:
+def require_postgres(engine: str, database_url: str) -> None:
     """
     Fail loudly unless the test database is PostgreSQL.
 
@@ -20,7 +20,7 @@ def require_postgres(engine: str) -> None:
         return
     detail = (
         f"DATABASE_URL resolved to {engine!r}"
-        if os.environ.get("DATABASE_URL")
+        if database_url
         else "DATABASE_URL is not set, so settings fell back to SQLite"
     )
     raise ImproperlyConfigured(
@@ -31,13 +31,19 @@ def require_postgres(engine: str) -> None:
     )
 
 
-require_postgres(DATABASES["default"]["ENGINE"])  # noqa: F405
+require_postgres(DATABASES["default"]["ENGINE"], ENV.DATABASE_URL)  # noqa: F405
 
 # pytest-django creates a `test_`-prefixed database, so the dev database is
-# untouched — but that name is fixed, and Django autoclobbers it on startup.
-# Concurrent suites (worktrees, parallel agents) would drop each other's
-# in-flight database, so allow each to claim its own.
+# untouched — but that name is fixed, and Django autoclobbers it. Concurrent
+# suites (worktrees, parallel agents) would drop each other's in-flight
+# database, so allow each to claim its own.
 if test_db_name := os.environ.get("TEST_DB_NAME"):
-    DATABASES["default"]["TEST"] = {"NAME": test_db_name}  # noqa: F405
+    if not test_db_name.startswith("test_"):
+        # Django drops and recreates this database without prompting, so a name
+        # that isn't clearly a test database could destroy the dev one.
+        raise ImproperlyConfigured(
+            f"TEST_DB_NAME must start with 'test_' (got {test_db_name!r})."
+        )
+    DATABASES["default"].setdefault("TEST", {})["NAME"] = test_db_name  # noqa: F405
 
 SECRET_KEY = "not-so-secret-in-tests"  # pragma: allowlist secret

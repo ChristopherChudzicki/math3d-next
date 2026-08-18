@@ -125,21 +125,28 @@ Feature-based organization in `packages/app/src/features/` (auth, notifications,
 
 #### Running backend tests
 
-`just be test` (from the repo root) is the normal path — it runs pytest in the webserver container against the compose postgres.
+`just be test` (from the repo root) is the normal path — it runs pytest in a one-off webserver container against the compose postgres.
 
-pytest-django creates a separate `test_`-prefixed database, so the dev database is never touched. That name is fixed, though, and Django autoclobbers it on startup: **two backend suites must not run at once**, or the second drops the first's database mid-run. Set `TEST_DB_NAME` to give a worktree or parallel agent its own.
+pytest-django creates a separate `test_`-prefixed database, so the dev database is never touched. That name is fixed, though, and Django autoclobbers it on startup: **two backend suites must not run at once**, or the second drops the first's database mid-run. Set `TEST_DB_NAME` (which must start with `test_`) to give a worktree or parallel agent its own — pick a name unique to that checkout, not the one below verbatim.
 
-From a worktree, `just be test` does not work — compose would try to start a duplicate stack on ports the main checkout already holds. Run against the main checkout's database from `webserver/` instead:
+From a worktree, `just be test` does not work — compose would try to start a duplicate stack on ports the main checkout already holds. Run against the main checkout's database from `webserver/`, in a direnv-enabled shell (the settings require the worktree's env; without it you get `ImproperlyConfigured: APP_BASE_URL is required`):
 
 ```bash
-DATABASE_URL=postgresql://docker:docker@localhost:5431/math3d TEST_DB_NAME=test_math3d_wt uv run pytest # pragma: allowlist secret
+DATABASE_URL=postgresql://docker:docker@localhost:5431/math3d TEST_DB_NAME=test_math3d_$(basename $PWD) uv run pytest # pragma: allowlist secret
+```
+
+**After the postgres image version changes** (e.g. the 16 → 18 bump), the `db` service comes up empty: it has no named volume, and the image's data path moves between majors, so the old anonymous volume is orphaned rather than reused. Repopulate it — the old volume is left intact if you need to recover anything first:
+
+```bash
+docker compose run --rm webserver uv run ./manage.py migrate
+docker compose run --rm webserver uv run ./manage.py seed_test_data
 ```
 
 #### Running E2E tests locally
 
 The E2E tests hit a real backend and a real frontend server, and the full suite takes only ~1 minute (3D/WebGL rendering is disabled by default via the `disable3d` fixture). Lint, typecheck, and unit tests do NOT catch E2E breakage — **run `yarn test-e2e` before declaring work on `packages/app` complete**. CI runs the suite on every PR.
 
-1. Backend up: `docker compose up -d` (from the main checkout). One-time DB prep (also after test credentials change): `docker compose run --rm webserver uv run ./manage.py migrate` and `... seed_test_data`.
+1. Backend up: `docker compose up -d` (from the main checkout). One-time DB prep (also after test credentials change, and after the postgres image version changes — see "Running backend tests"): `docker compose run --rm webserver uv run ./manage.py migrate` and `... seed_test_data`.
 2. The main checkout needs a gitignored `.env` with `VITE_DISPLAY_AUTH_FLOWS=true` and `ENABLE_REGISTRATION=True` (the committed `.env.development` defaults both off; global setup and the signup tests require them).
 3. Frontend: handled automatically — Playwright's `webServer` config reuses a dev server already running at `TEST_APP_URL`, or starts one (`yarn start`) if nothing is serving it. No production build needed locally; CI serves a production build via `yarn preview` to test the real artifact.
 4. `yarn test-e2e` runs the full suite (`yarn test-e2e src/tests/<path>` for one file; `just e2e` is an alias). It is self-sufficient in any shell and any checkout: the script runs Playwright under Node's `--env-file-if-exists` flags, so the checkout's `.env.development` + `.env` fill in whatever the environment doesn't already set (real env vars win, so ad-hoc overrides like `TEST_APP_URL=... yarn test-e2e` still work). Global setup also verifies the server at `TEST_APP_URL` actually serves _this_ checkout (via the `X-Checkout-Root` header the Vite dev/preview server emits) and fails with instructions if not — so testing the wrong checkout's code is loud, never silent.

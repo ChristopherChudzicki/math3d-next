@@ -1,5 +1,7 @@
 from django import forms
 
+from authentication.models import NICKNAME_MAX_LENGTH
+
 
 class CustomSignupForm(forms.Form):
     """
@@ -10,7 +12,7 @@ class CustomSignupForm(forms.Form):
     passed through to the adapter's save_user() via form.cleaned_data.
     """
 
-    public_nickname = forms.CharField(max_length=64, required=False)
+    public_nickname = forms.CharField(max_length=NICKNAME_MAX_LENGTH, required=False)
 
     def signup(self, request, user):
         """Called by allauth after user is saved. Nothing extra to do here

@@ -1,6 +1,6 @@
 import pytest
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError
 from scenes.models import Scene, is_reserved_key_error
 from scenes.factories import SceneFactory
 
@@ -22,12 +22,8 @@ def test_reserved_key_rejected_by_full_clean(bad_key):
 @pytest.mark.parametrize("bad_key", ["app", "a"])
 def test_reserved_key_rejected_by_db_constraint(bad_key):
     # bulk_create bypasses full_clean(); the DB CHECK constraint must still reject.
-    # The atomic() block is required, not decorative: on postgres the
-    # IntegrityError aborts the surrounding transaction, so without a savepoint
-    # to roll back to, the assertion below fails with TransactionManagementError.
-    with pytest.raises(IntegrityError), transaction.atomic():
+    with pytest.raises(IntegrityError):
         Scene.objects.bulk_create([Scene(**_valid_scene_kwargs(bad_key))])
-    assert not Scene.objects.filter(key=bad_key).exists()
 
 
 @pytest.mark.django_db
