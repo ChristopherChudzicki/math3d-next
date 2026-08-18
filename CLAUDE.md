@@ -127,15 +127,15 @@ Feature-based organization in `packages/app/src/features/` (auth, notifications,
 
 `just be test` (from the repo root) is the normal path — it runs pytest in a one-off webserver container against the compose postgres.
 
-pytest-django creates a separate `test_`-prefixed database, so the dev database is never touched. That name is fixed, though, and Django autoclobbers it on startup: **two backend suites must not run at once**, or the second drops the first's database mid-run. Set `TEST_DB_NAME` (which must start with `test_`) to give a worktree or parallel agent its own — pick a name unique to that checkout, not the one below verbatim.
+pytest-django creates a separate `test_`-prefixed database, so the dev database is never touched. That name is fixed, though, and Django autoclobbers it on startup: **two backend suites must not run at once**, or the second drops the first's database mid-run. Set `TEST_DB_NAME` (which must start with `test_`) to give a worktree or parallel agent its own; the command below names it after the checkout directory.
 
 From a worktree, `just be test` does not work — compose would try to start a duplicate stack on ports the main checkout already holds. Run against the main checkout's database from `webserver/`, in a direnv-enabled shell (the settings require the worktree's env; without it you get `ImproperlyConfigured: APP_BASE_URL is required`):
 
 ```bash
-DATABASE_URL=postgresql://docker:docker@localhost:5431/math3d TEST_DB_NAME=test_math3d_$(basename $PWD) uv run pytest # pragma: allowlist secret
+DATABASE_URL=postgresql://docker:docker@localhost:5431/math3d TEST_DB_NAME=test_math3d_$(basename $(git rev-parse --show-toplevel)) uv run pytest # pragma: allowlist secret
 ```
 
-**After the postgres image version changes** (e.g. the 16 → 18 bump), the `db` service comes up empty: it has no named volume, and the image's data path moves between majors, so the old anonymous volume is orphaned rather than reused. Repopulate it — the old volume is left intact if you need to recover anything first:
+**After the postgres image major version changes** (e.g. the 16 → 18 bump), the `db` service comes up empty: `PGDATA` is major-versioned (`/var/lib/postgresql/<major>/docker`), so a new major finds no data directory and runs `initdb`. The previous major's files are left intact — in the `db-data` volume, or, for majors predating it, in the orphaned anonymous volume. Repopulate:
 
 ```bash
 docker compose run --rm webserver uv run ./manage.py migrate
