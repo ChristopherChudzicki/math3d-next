@@ -17,6 +17,7 @@ export default defineProject({
         // `import { env } from "cloudflare:test"`.
         bindings: {
           FRAME_ORIGIN: "https://next.math3d.org",
+          RENDER_SECRET: "shh", // pragma: allowlist secret — test fixture, not a real secret
         },
       },
     }),

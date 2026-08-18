@@ -6,6 +6,13 @@ import {
 import { afterEach, expect, it, vi } from "vitest";
 import worker from "./index";
 import { sceneImageKey } from "./keys";
+import { renderScene } from "./render";
+
+// Mock the whole ./render module so POST /render tests never launch a real
+// browser (env.BROWSER isn't a real Browser Rendering binding in tests) — the
+// route calls renderAndCache(env, key) with its default renderer
+// (renderScene from ./render), so this is the seam to stub.
+vi.mock("./render", () => ({ renderScene: vi.fn() }));
 
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47]); // "\x89PNG"
 const DEFAULT_PNG = new Uint8Array([1, 2, 3, 4]);
@@ -35,10 +42,32 @@ const call = async (path: string) => {
   return res;
 };
 
+const post = async (body: unknown, headers: Record<string, string> = {}) => {
+  const ctx = createExecutionContext();
+  const res = await worker.fetch(
+    new Request("https://render.test/render", {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: { "content-type": "application/json", ...headers },
+    }),
+    env as never,
+    ctx,
+  );
+  await waitOnExecutionContext(ctx);
+  return res;
+};
+
 afterEach(async () => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+  // vi.restoreAllMocks() only restores vi.spyOn() spies to their original
+  // implementation — it doesn't reset a plain vi.fn() from a vi.mock()
+  // factory, so the module-level renderScene mock needs an explicit reset or
+  // its call history (and any mockResolvedValueOnce queue) leaks into later
+  // tests.
+  vi.mocked(renderScene).mockReset();
   await env.SCREENSHOTS_BUCKET.delete(sceneImageKey("hit"));
+  await env.SCREENSHOTS_BUCKET.delete(sceneImageKey("good"));
 });
 
 it("responds ok on /health", async () => {
@@ -130,4 +159,30 @@ it("serves default for an invalid key WITHOUT querying R2 or scheduling a render
   expect(getSpy).not.toHaveBeenCalled();
   // Only the default-PNG fetch happened.
   expect(fetch).toHaveBeenCalledTimes(1);
+});
+
+it("202 + schedules a render for a valid secret + key", async () => {
+  vi.mocked(renderScene).mockResolvedValueOnce(PNG);
+  const res = await post({ key: "good" }, { authorization: "Bearer shh" });
+  expect(res.status).toBe(202);
+  const stored = await env.SCREENSHOTS_BUCKET.get(sceneImageKey("good"));
+  expect(new Uint8Array(await stored!.arrayBuffer())).toEqual(PNG);
+});
+
+it("403 and never launches a browser without the secret", async () => {
+  const res = await post({ key: "good" });
+  expect(res.status).toBe(403);
+  expect(renderScene).not.toHaveBeenCalled();
+});
+
+it("403 for a wrong secret", async () => {
+  const res = await post({ key: "good" }, { authorization: "Bearer nope" });
+  expect(res.status).toBe(403);
+  expect(renderScene).not.toHaveBeenCalled();
+});
+
+it("400 for an invalid key", async () => {
+  const res = await post({ key: "bad key" }, { authorization: "Bearer shh" });
+  expect(res.status).toBe(400);
+  expect(renderScene).not.toHaveBeenCalled();
 });

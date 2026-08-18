@@ -17,9 +17,8 @@
  * docs/superpowers/specs/2026-08-08-og-per-scene-image-design.md.
  */
 import type { Env } from "./env";
-import { sceneImageKey, sceneImagePathToKey } from "./keys";
-// NOTE: renderAndCache is unused by the GET (pure cache-serve, ADR-0002) and is
-// deliberately not imported here — Task 7 re-adds it for POST /render.
+import { KEY_RE, sceneImageKey, sceneImagePathToKey } from "./keys";
+import { renderAndCache } from "./renderAndCache";
 
 const DEFAULT_IMAGE_PATH = "/og/default.png";
 
@@ -55,10 +54,29 @@ export default {
   async fetch(
     request: Request,
     env: Env,
-    _ctx: ExecutionContext,
+    ctx: ExecutionContext,
   ): Promise<Response> {
     const { pathname } = new URL(request.url);
     if (pathname === "/health") return new Response("ok");
+
+    if (request.method === "POST" && pathname === "/render") {
+      // Secret gate BEFORE any parsing or render scheduling.
+      const auth = request.headers.get("authorization");
+      if (auth !== `Bearer ${env.RENDER_SECRET}`) {
+        return new Response("forbidden", { status: 403 });
+      }
+      let key: unknown;
+      try {
+        key = ((await request.json()) as { key?: unknown }).key;
+      } catch {
+        key = undefined;
+      }
+      if (typeof key !== "string" || !KEY_RE.test(key)) {
+        return new Response("bad request", { status: 400 });
+      }
+      ctx.waitUntil(renderAndCache(env, key));
+      return new Response(null, { status: 202 });
+    }
 
     const key = sceneImagePathToKey(pathname);
     if (key === null) return serveDefault(env);

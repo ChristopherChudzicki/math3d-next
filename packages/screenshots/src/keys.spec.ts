@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sceneImagePathToKey, sceneImageKey, lockKey } from "./keys";
+import { sceneImagePathToKey, sceneImageKey } from "./keys";
 
 describe("sceneImagePathToKey", () => {
   it("extracts a valid key", () => {
@@ -20,5 +20,4 @@ describe("sceneImagePathToKey", () => {
 
 it("builds storage keys", () => {
   expect(sceneImageKey("abc")).toBe("screenshots/scene/abc.png");
-  expect(lockKey("abc")).toBe("screenshots/lock/abc");
 });

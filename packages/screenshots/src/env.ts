@@ -7,6 +7,13 @@ interface ScreenshotsEnv {
   BROWSER: BrowserWorker;
   /** Fixed origin of the headless frame page, e.g. https://next.math3d.org. */
   FRAME_ORIGIN: string;
+  /**
+   * Shared secret gating `POST /render`. Checked as `Authorization: Bearer
+   * <RENDER_SECRET>` before any body parsing or render scheduling. Set as a
+   * Cloudflare Worker secret in deployment (see wrangler.jsonc) — must match
+   * the backend's RENDER_SECRET for the bearer check to pass (ADR-0002).
+   */
+  RENDER_SECRET: string;
 }
 
 export type Env = ScreenshotsEnv;

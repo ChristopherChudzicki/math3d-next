@@ -27,4 +27,11 @@
   "vars": {
     "FRAME_ORIGIN": "https://next.math3d.org"
   }
+  // RENDER_SECRET (gates POST /render) is intentionally NOT set here as a
+  // plaintext var — it's a Worker secret, set via `wrangler secret put
+  // RENDER_SECRET` (or the Cloudflare dashboard), not committed to this file.
+  // Per ADR-0002, point it at the value of an existing shared secret so it
+  // matches the backend's RENDER_SECRET env — the two must be equal for the
+  // bearer check in src/index.ts to pass. Tests supply their own value via
+  // vitest.config.ts bindings.
 }
