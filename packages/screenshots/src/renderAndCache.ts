@@ -2,7 +2,11 @@ import type { Env } from "./env";
 import { sceneImageKey } from "./keys";
 import { renderScene as defaultRenderScene } from "./render";
 
-type Renderer = (env: Env, key: string) => Promise<Uint8Array>;
+type Renderer = (
+  env: Env,
+  key: string,
+  deadlineMs: number,
+) => Promise<Uint8Array>;
 
 /**
  * Render {key} and cache the PNG in R2. Structurally never throws (safe for
@@ -18,7 +22,7 @@ export const renderAndCache = async (
   render: Renderer = defaultRenderScene,
 ): Promise<void> => {
   try {
-    const png = await render(env, key);
+    const png = await render(env, key, env.RENDER_DEADLINE_MS);
     await env.SCREENSHOTS_BUCKET.put(sceneImageKey(key), png, {
       httpMetadata: { contentType: "image/png" },
       customMetadata: { renderedAt: new Date().toISOString() },

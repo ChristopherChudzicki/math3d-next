@@ -13,7 +13,7 @@ afterEach(async () => {
 it("renders and caches (no lock, no existence gate)", async () => {
   const render = vi.fn().mockResolvedValue(PNG);
   await renderAndCache(env as never, "k", render);
-  expect(render).toHaveBeenCalledWith(env, "k");
+  expect(render).toHaveBeenCalledWith(env, "k", env.RENDER_DEADLINE_MS);
   const stored = await env.SCREENSHOTS_BUCKET.get(sceneImageKey("k"));
   expect(new Uint8Array(await stored!.arrayBuffer())).toEqual(PNG);
 });
