@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 
 import Scene from "@/features/scene";
 import useSceneLoader from "@/features/scene/useSceneLoader";
@@ -13,9 +13,12 @@ import useSceneLoader from "@/features/scene/useSceneLoader";
 const FramePage: React.FC = () => {
   const { sceneKey } = useParams();
   useSceneLoader(sceneKey, { onNotFound: "silent" });
+  const [params] = useSearchParams();
+  const raw = Number(params.get("deadlineMs"));
+  const deadlineMs = Number.isFinite(raw) && raw > 0 ? raw : undefined;
   return (
     <div style={{ position: "fixed", inset: 0 }}>
-      <Scene still />
+      <Scene still deadlineMs={deadlineMs} />
     </div>
   );
 };

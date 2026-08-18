@@ -32,12 +32,15 @@ export type DrainState = {
   lastNonEmpty: number;
   /** Whether the queue has ever been observed non-empty (the halt guard). */
   sawPending: boolean;
+  /** Timestamp passed to initDrainState — the wall-clock zero for deadlineMs. */
+  start: number;
 };
 
 export const initDrainState = (now: number): DrainState => ({
   frame: 0,
   lastNonEmpty: now,
   sawPending: false,
+  start: now,
 });
 
 /**
@@ -56,7 +59,11 @@ export const initDrainState = (now: number): DrainState => ({
  */
 export const stepDrain = (
   state: DrainState,
-  { pending, now }: { pending: number | null; now: number },
+  {
+    pending,
+    now,
+    deadlineMs,
+  }: { pending: number | null; now: number; deadlineMs?: number },
 ): { state: DrainState; ready: boolean } => {
   const frame = state.frame + 1;
   let { lastNonEmpty, sawPending } = state;
@@ -68,8 +75,10 @@ export const stepDrain = (
     pending !== null
       ? sawPending && now - lastNonEmpty >= STILL_QUIET_MS
       : frame >= STILL_FALLBACK_FRAMES;
+  const pastDeadline =
+    deadlineMs !== undefined && now - state.start > deadlineMs;
   return {
-    state: { frame, lastNonEmpty, sawPending },
-    ready: drained || frame >= STILL_MAX_FRAMES,
+    state: { frame, lastNonEmpty, sawPending, start: state.start },
+    ready: drained || pastDeadline || frame >= STILL_MAX_FRAMES,
   };
 };
