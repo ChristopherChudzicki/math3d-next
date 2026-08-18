@@ -20,4 +20,4 @@ export const sceneImagePathToKey = (pathname: string): string | null => {
 };
 
 export const sceneFrameUrl = (env: Env, key: string): string =>
-  `${env.FRAME_ORIGIN}/app/frame/${key}`;
+  `${env.FRAME_ORIGIN}/app/frame/${key}?deadlineMs=${env.PAGE_DEADLINE_MS}`;

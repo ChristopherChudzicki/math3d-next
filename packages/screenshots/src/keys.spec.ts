@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sceneImagePathToKey, sceneImageKey } from "./keys";
+import { sceneFrameUrl, sceneImagePathToKey, sceneImageKey } from "./keys";
 
 describe("sceneImagePathToKey", () => {
   it("extracts a valid key", () => {
@@ -20,4 +20,14 @@ describe("sceneImagePathToKey", () => {
 
 it("builds storage keys", () => {
   expect(sceneImageKey("abc")).toBe("screenshots/scene/abc.png");
+});
+
+it("appends PAGE_DEADLINE_MS as ?deadlineMs to the frame URL", () => {
+  const env = {
+    FRAME_ORIGIN: "https://next.math3d.org",
+    PAGE_DEADLINE_MS: 70000,
+  } as never;
+  expect(sceneFrameUrl(env, "abc")).toBe(
+    "https://next.math3d.org/app/frame/abc?deadlineMs=70000",
+  );
 });
