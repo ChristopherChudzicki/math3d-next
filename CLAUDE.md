@@ -111,7 +111,7 @@ Feature-based organization in `packages/app/src/features/` (auth, notifications,
 ### Backend Stack
 
 - **Framework**: Django 5 + django-ninja (v1 API), Python 3.12
-- **DB**: PostgreSQL 16 (Docker, port 5431 host / 5432 container)
+- **DB**: PostgreSQL 18 (Docker, port 5431 host / 5432 container)
 - **Auth**: django-allauth headless (browser flows) + Django session auth
 - **API specs**: `webserver/openapi.v1.yaml` and `webserver/openapi.allauth.yaml`, dumped via management commands (see API Client Generation above)
 - **Deps**: Managed with `uv` (`webserver/pyproject.toml` + `webserver/uv.lock`)
@@ -120,14 +120,33 @@ Feature-based organization in `packages/app/src/features/` (auth, notifications,
 ### Testing
 
 - **Frontend unit tests**: Vitest + Testing Library + MSW mocks. Config in `packages/app/vite.config.ts`
-- **Backend tests**: pytest + pytest-django + factory-boy. Config in `webserver/pyproject.toml`
+- **Backend tests**: pytest + pytest-django + factory-boy. Config in `webserver/pyproject.toml`. They run against PostgreSQL, like dev and production — `just be test` supplies `DATABASE_URL`. `main/test_settings.py` refuses to start on any other engine rather than silently falling back to SQLite. See "Running backend tests" below.
 - **E2E**: Playwright in `packages/app-tests-e2e/`
+
+#### Running backend tests
+
+`just be test` (from the repo root) is the normal path — it runs pytest in a one-off webserver container against the compose postgres.
+
+pytest-django creates a separate `test_`-prefixed database, so the dev database is never touched. That name is fixed, though, and Django autoclobbers it on startup: **two backend suites must not run at once**, or the second drops the first's database mid-run. Set `TEST_DB_NAME` (which must start with `test_`) to give a worktree or parallel agent its own; the command below names it after the checkout directory.
+
+From a worktree, `just be test` does not work — compose would try to start a duplicate stack on ports the main checkout already holds. Run against the main checkout's database from `webserver/`, in a direnv-enabled shell (the settings require the worktree's env; without it you get `ImproperlyConfigured: APP_BASE_URL is required`):
+
+```bash
+DATABASE_URL=postgresql://docker:docker@localhost:5431/math3d TEST_DB_NAME=test_math3d_$(basename $(git rev-parse --show-toplevel)) uv run pytest # pragma: allowlist secret
+```
+
+**After the postgres image major version changes** (e.g. the 16 → 18 bump), the `db` service comes up empty: `PGDATA` is major-versioned (`/var/lib/postgresql/<major>/docker`), so a new major finds no data directory and runs `initdb`. The previous major's files are left intact — in the `db-data` volume, or, for majors predating it, in the orphaned anonymous volume. Repopulate:
+
+```bash
+docker compose run --rm webserver uv run ./manage.py migrate
+docker compose run --rm webserver uv run ./manage.py seed_test_data
+```
 
 #### Running E2E tests locally
 
 The E2E tests hit a real backend and a real frontend server, and the full suite takes only ~1 minute (3D/WebGL rendering is disabled by default via the `disable3d` fixture). Lint, typecheck, and unit tests do NOT catch E2E breakage — **run `yarn test-e2e` before declaring work on `packages/app` complete**. CI runs the suite on every PR.
 
-1. Backend up: `docker compose up -d` (from the main checkout). One-time DB prep (also after test credentials change): `docker compose run --rm webserver uv run ./manage.py migrate` and `... seed_test_data`.
+1. Backend up: `docker compose up -d` (from the main checkout). One-time DB prep (also after test credentials change, and after the postgres image version changes — see "Running backend tests"): `docker compose run --rm webserver uv run ./manage.py migrate` and `... seed_test_data`.
 2. The main checkout needs a gitignored `.env` with `VITE_DISPLAY_AUTH_FLOWS=true` and `ENABLE_REGISTRATION=True` (the committed `.env.development` defaults both off; global setup and the signup tests require them).
 3. Frontend: handled automatically — Playwright's `webServer` config reuses a dev server already running at `TEST_APP_URL`, or starts one (`yarn start`) if nothing is serving it. No production build needed locally; CI serves a production build via `yarn preview` to test the real artifact.
 4. `yarn test-e2e` runs the full suite (`yarn test-e2e src/tests/<path>` for one file; `just e2e` is an alias). It is self-sufficient in any shell and any checkout: the script runs Playwright under Node's `--env-file-if-exists` flags, so the checkout's `.env.development` + `.env` fill in whatever the environment doesn't already set (real env vars win, so ad-hoc overrides like `TEST_APP_URL=... yarn test-e2e` still work). Global setup also verifies the server at `TEST_APP_URL` actually serves _this_ checkout (via the `X-Checkout-Root` header the Vite dev/preview server emits) and fails with instructions if not — so testing the wrong checkout's code is loud, never silent.

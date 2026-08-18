@@ -3,9 +3,9 @@ from typing import cast
 from allauth.account.models import EmailAddress
 from django.http import HttpRequest
 from django.middleware.csrf import get_token
-from ninja import Router, Schema, Status
+from ninja import Field, Router, Schema, Status
 
-from authentication.models import CustomUser
+from authentication.models import NICKNAME_MAX_LENGTH, CustomUser
 from main.ninja_auth import session_auth, staff_auth
 
 router = Router()
@@ -19,7 +19,7 @@ class UserSchema(Schema):
 
 class UserUpdateSchema(Schema):
     # public_nickname is the only writable field (v0: id/email read-only).
-    public_nickname: str
+    public_nickname: str = Field(max_length=NICKNAME_MAX_LENGTH)
 
 
 class DeleteAccountSchema(Schema):

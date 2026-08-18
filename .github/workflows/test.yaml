@@ -40,6 +40,26 @@ jobs:
       # posture would 301 everything), and production behavior is pinned
       # hermetically by the load_settings tests, not by this job's env.
       IS_DEVELOPMENT: "True"
+      # main/test_settings.py refuses to run on any engine but postgres.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/math3d # pragma: allowlist secret
+    services:
+      db:
+        # Keep the tag in sync with the `db` service in docker-compose.yml.
+        # Actions creates this one, so it uses the image's default superuser
+        # rather than compose's `docker` role.
+        image: postgres:18.6
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres # pragma: allowlist secret
+          POSTGRES_DB: math3d
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -h localhost -U postgres -d math3d"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 10s
     defaults:
       run:
         working-directory: ./webserver

@@ -69,6 +69,20 @@ def test_me_patch_updates_public_nickname_and_ignores_readonly_fields():
 
 
 @pytest.mark.django_db
+def test_me_patch_rejects_over_length_nickname():
+    # public_nickname is a varchar(64); unbounded, the write reaches the DB and 500s.
+    user = CustomUserFactory.create()
+    client = Client()
+    client.force_login(user)
+    response = client.patch(
+        ME_URL,
+        data={"public_nickname": "x" * 65},
+        content_type="application/json",
+    )
+    assert response.status_code == 400  # main/api.py maps ninja's 422 to 400
+
+
+@pytest.mark.django_db
 def test_me_patch_enforces_csrf():
     # v0 parity (test_csrf_token_required_for_unsafe_requests): Ninja's SessionAuth
     # must reject an unsafe request lacking the CSRF token. The other patch tests

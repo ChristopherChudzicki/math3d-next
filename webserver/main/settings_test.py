@@ -12,6 +12,7 @@ from main.origins import (
     csrf_trusted_origins,
     dev_cors_allowed_origins,
 )
+from main.test_settings import require_postgres
 
 SETTINGS_PATH = Path(__file__).parent / "settings.py"
 
@@ -323,3 +324,21 @@ def test_local_csrf_trust_handles_unset_app_base_url():
         cors_allowed_origins=["http://math3d.localdev:3000"],
     )
     assert origins == ["http://math3d.localdev:3000"]
+
+
+@pytest.mark.parametrize(
+    ("database_url", "expected"),
+    [
+        ("", "DATABASE_URL is not set"),
+        ("sqlite:////tmp/db.sqlite3", "DATABASE_URL resolved to"),
+    ],
+)
+def test_require_postgres_rejects_sqlite(database_url, expected):
+    """
+    The two cases report differently because an unset DATABASE_URL needs
+    different remediation than one explicitly pointing elsewhere. The accepting
+    case needs no test: it runs at settings import, so inverting it goes red.
+    """
+    with pytest.raises(ImproperlyConfigured) as exc_info:
+        require_postgres("django.db.backends.sqlite3", database_url)
+    assert expected in str(exc_info.value)
