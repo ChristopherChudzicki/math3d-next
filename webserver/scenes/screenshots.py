@@ -6,9 +6,15 @@ nudging the render Worker. Reservation is atomic and both-caps: renders never
 exceed reservations, reservations never exceed the caps.
 """
 
+import json
+import logging
+import urllib.request
+
 from django.conf import settings
 from django.db import connection, transaction
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 # Raw SQL is deliberate: no ORM idiom expresses insert-or-increment-only-if-
 # under-cap in one atomic round-trip (update_or_create is select-then-write;
@@ -47,3 +53,38 @@ def reserve_render_slot() -> bool:
             transaction.set_rollback(True)  # undo the monthly bump
             return False
         return True
+
+
+def nudge_render(key: str) -> None:
+    """Best-effort fire at the Worker's POST /render (secret-gated → 202).
+    ~2s timeout, no retry. Swallows transport errors — the render is a
+    best-effort side effect of the save."""
+    req = urllib.request.Request(
+        f"{settings.SCREENSHOTS_ORIGIN}/render",
+        data=json.dumps({"key": key}).encode(),
+        headers={
+            "content-type": "application/json",
+            "authorization": f"Bearer {settings.RENDER_SECRET}",
+        },
+        method="POST",
+    )
+    try:
+        urllib.request.urlopen(req, timeout=2.0).close()
+    except Exception:
+        # Log-attribution only (a distinct line from a reserve failure), NOT the
+        # isolation guard — maybe_render's outer try is what protects the save.
+        logger.warning("nudge_render failed for key=%s", key, exc_info=True)
+
+
+def maybe_render(key: str) -> None:
+    """Reserve a slot and nudge the render Worker. Fully isolated — runs inline
+    via on_commit in autocommit views (scenes/api.py), so it must never
+    propagate: a failure here must still let the save return 2xx."""
+    try:
+        if not settings.SCREENSHOTS_ORIGIN:  # feature dark
+            return
+        if not reserve_render_slot():  # over cap → decline (coverage, not spend)
+            return
+        nudge_render(key)
+    except Exception:
+        logger.warning("maybe_render failed for key=%s", key, exc_info=True)
