@@ -42,7 +42,11 @@ const call = async (path: string) => {
   return res;
 };
 
-const post = async (body: unknown, headers: Record<string, string> = {}) => {
+const post = async (
+  body: unknown,
+  headers: Record<string, string> = {},
+  envOverride: Record<string, unknown> = {},
+) => {
   const ctx = createExecutionContext();
   const res = await worker.fetch(
     new Request("https://render.test/render", {
@@ -50,7 +54,7 @@ const post = async (body: unknown, headers: Record<string, string> = {}) => {
       body: JSON.stringify(body),
       headers: { "content-type": "application/json", ...headers },
     }),
-    env as never,
+    { ...env, ...envOverride } as never,
     ctx,
   );
   await waitOnExecutionContext(ctx);
@@ -177,6 +181,21 @@ it("403 and never launches a browser without the secret", async () => {
 
 it("403 for a wrong secret", async () => {
   const res = await post({ key: "good" }, { authorization: "Bearer nope" });
+  expect(res.status).toBe(403);
+  expect(renderScene).not.toHaveBeenCalled();
+});
+
+it("403 (fails closed) when RENDER_SECRET is unset, even for a matching header", async () => {
+  // With an empty secret the required header degenerates to `Bearer ` (and an
+  // unbound secret to `Bearer undefined`) — both guessable. The gate must reject
+  // regardless, so an unprovisioned secret can never authorize an uncapped render.
+  const res = await post(
+    { key: "good" },
+    { authorization: "Bearer " },
+    {
+      RENDER_SECRET: "",
+    },
+  );
   expect(res.status).toBe(403);
   expect(renderScene).not.toHaveBeenCalled();
 });

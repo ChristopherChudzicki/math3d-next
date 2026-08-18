@@ -13,8 +13,9 @@
  * compatibility flag (@cloudflare/puppeteer imports node builtins).
  *
  * Wired into the app Worker via the single `SCREENSHOTS_ORIGIN` var; unset there =
- * the whole feature is dark. Design + teardown: packages/screenshots/README.md and
- * docs/superpowers/specs/2026-08-08-og-per-scene-image-design.md.
+ * the whole feature is dark. Design + teardown: packages/screenshots/README.md,
+ * docs/superpowers/specs/2026-08-15-screenshot-cost-protection-design.md (ADR-0002,
+ * generate-on-POST), building on .../2026-08-08-og-per-scene-image-design.md.
  */
 import type { Env } from "./env";
 import { KEY_RE, sceneImageKey, sceneImagePathToKey } from "./keys";
@@ -60,9 +61,15 @@ export default {
     if (pathname === "/health") return new Response("ok");
 
     if (request.method === "POST" && pathname === "/render") {
-      // Secret gate BEFORE any parsing or render scheduling.
+      // Secret gate BEFORE any parsing or render scheduling. Fail CLOSED on an
+      // unset/empty secret: without this, an unbound RENDER_SECRET makes the
+      // required header `Bearer undefined` (and an empty one `Bearer `), both
+      // trivially guessable — so between CI deploying this Worker and the
+      // operator running `wrangler secret put RENDER_SECRET`, anyone who finds
+      // the host could drive uncapped Browser Rendering (there is no Worker-side
+      // cap). An empty secret can never authorize a render.
       const auth = request.headers.get("authorization");
-      if (auth !== `Bearer ${env.RENDER_SECRET}`) {
+      if (!env.RENDER_SECRET || auth !== `Bearer ${env.RENDER_SECRET}`) {
         return new Response("forbidden", { status: 403 });
       }
       let key: unknown;

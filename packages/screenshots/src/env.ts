@@ -21,9 +21,9 @@ interface ScreenshotsEnv {
    */
   RENDER_DEADLINE_MS: number;
   /**
-   * Frame page's own wall-clock self-halt ceiling (ms), passed to the frame
-   * page (a later task appends it as `?deadlineMs=` — see sceneFrameUrl). Wider
-   * than RENDER_DEADLINE_MS so it fires only for a true orphan — a Worker that
+   * Frame page's own wall-clock self-halt ceiling (ms), appended to the frame
+   * URL as `?deadlineMs=` by `sceneFrameUrl`. Wider than RENDER_DEADLINE_MS so
+   * it fires only for a true orphan — a Worker that
    * died before `browser.close()` ran (ordering invariant: PAGE_DEADLINE_MS >
    * RENDER_DEADLINE_MS > READY_TIMEOUT_MS).
    */
