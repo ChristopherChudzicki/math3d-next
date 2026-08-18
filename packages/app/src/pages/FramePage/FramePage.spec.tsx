@@ -1,7 +1,8 @@
-import { test, expect } from "vitest";
+import { describe, test, expect } from "vitest";
 import { SceneBuilder, seedDb } from "@math3d/mock-api";
 import { renderTestApp, screen, waitFor, waitForAppReady } from "@/test_util";
 import { select } from "@/features/sceneControls/mathItems/sceneSlice";
+import { parseDeadlineMs, DEFAULT_FRAME_DEADLINE_MS } from "./FramePage";
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 
@@ -34,4 +35,18 @@ test("a missing scene neither alerts nor redirects (silent 404)", async () => {
 
   expect(screen.queryByRole("dialog")).toBeNull();
   expect(location.current.pathname).toBe("/app/frame/does-not-exist");
+});
+
+describe("parseDeadlineMs", () => {
+  test("honors a positive numeric deadline", () => {
+    expect(parseDeadlineMs("70000")).toBe(70000);
+  });
+
+  test("falls back to the default when the param is absent", () => {
+    expect(parseDeadlineMs(null)).toBe(DEFAULT_FRAME_DEADLINE_MS);
+  });
+
+  test("falls back to the default for a non-numeric value", () => {
+    expect(parseDeadlineMs("soon")).toBe(DEFAULT_FRAME_DEADLINE_MS);
+  });
 });
