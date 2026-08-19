@@ -22,12 +22,9 @@ it("builds storage keys", () => {
   expect(sceneImageKey("abc")).toBe("screenshots/scene/abc.png");
 });
 
-it("appends PAGE_DEADLINE_MS as ?deadlineMs to the frame URL", () => {
-  const env = {
-    FRAME_ORIGIN: "https://next.math3d.org",
-    PAGE_DEADLINE_MS: 70000,
-  } as never;
+it("builds the frame URL from FRAME_ORIGIN and key", () => {
+  const env = { FRAME_ORIGIN: "https://next.math3d.org" } as never;
   expect(sceneFrameUrl(env, "abc")).toBe(
-    "https://next.math3d.org/app/frame/abc?deadlineMs=70000",
+    "https://next.math3d.org/app/frame/abc",
   );
 });

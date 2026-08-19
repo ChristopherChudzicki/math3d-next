@@ -32,12 +32,17 @@ a slot against its per-period spend caps — tells it to.
    parsing or scheduling.
 2. Body `{ "key": "<key>" }` failing the key charset → `400`.
 3. Otherwise schedule a background render via `ctx.waitUntil` and return `202`
-   immediately. The render screenshots `{FRAME_ORIGIN}/app/frame/{key}?deadlineMs=…`
-   at 1200×630 (waiting for `data-scene-ready`) and writes the PNG to R2. It is
+   immediately. The render screenshots `{FRAME_ORIGIN}/app/frame/{key}` at
+   1200×630 (waiting for `data-scene-ready`) and writes the PNG to R2. It is
    bounded by `RENDER_DEADLINE_MS` (a timeout that closes the browser even on a
-   hung page); the frame page also self-halts at `PAGE_DEADLINE_MS`. All render
-   failures are swallowed and logged — a failed render just leaves the default
-   card in place until the next save re-nudges.
+   hung page). All render failures are swallowed and logged — a failed render
+   just leaves the default card in place until the next save re-nudges.
+
+Renders are not single-flighted: two saves inside one render window launch two
+concurrent renders of the same key, and the later-to-finish wins the R2 write —
+so a slower render of an older save can briefly cache a stale image (corrected on
+the next save). Spend is still capped (each save consumed a reservation), so this
+is a quality edge, not a cost one.
 
 `GET /health` → `200 ok`.
 

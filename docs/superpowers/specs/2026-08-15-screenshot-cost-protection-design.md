@@ -52,8 +52,6 @@ Backend is the **sole gatekeeper** of the legitimate path: `renders ≤ reservat
 | `OG_RENDER_URL`       | `EnvConfig` (env)   | Worker origin, `https://` | Nudge base. Unset ⇒ feature dark.                                   |
 | `RENDER_SECRET`       | `EnvConfig` (env)   | shared secret             | Gates `POST /render`. Reuse an existing secret.                     |
 | `RENDER_DEADLINE_MS`  | Worker var          | `60000`                   | Overall render bound, enforced in `renderScene` (§9).               |
-| `PAGE_DEADLINE_MS`    | Worker var          | `70000`                   | Frame-page wall-clock ceiling; > deadline ⇒ fires only for orphans. |
-| `MAX_SESSION_SECONDS` | derived             | `≈130`                    | `PAGE_DEADLINE_MS` + CF idle-reap (~60s); confirm empirically.      |
 
 Caps are plain `settings.py` constants (rarely change, not secret). `OG_RENDER_URL` and `RENDER_SECRET` go through the typed `main/env.py` `EnvConfig`; `OG_RENDER_URL` gets an `https://`-origin validator (like `APP_BASE_URL`) so the bearer secret isn't sent cleartext. <!-- pragma: allowlist secret -->
 
@@ -175,7 +173,7 @@ These are the only `Scene.save()` paths. `create_legacy` writes no image; legacy
 - Parse `{key}`, validate against `KEY_RE`, else `400`.
 - `ctx.waitUntil(renderAndCache(env, key))`, return `202` immediately.
 
-Add `RENDER_SECRET`, `RENDER_DEADLINE_MS`, `PAGE_DEADLINE_MS` to `env.ts`.
+Add `RENDER_SECRET`, `RENDER_DEADLINE_MS` to `env.ts`.
 
 ### 7. `GET /screenshots/scene/{key}.png` — pure cache-serve
 
@@ -224,13 +222,9 @@ export const renderScene = async (
 
 ---
 
-## 10. Frame page — `?deadlineMs` wall-clock self-halt
+## 10. Frame page halt
 
-`still` mode already halts at `STILL_MAX_FRAMES` (a _frame_ backstop); add a **wall-clock** ceiling so an orphaned session (Worker died before `close`) goes CPU-idle at a known time — the quantity that maps to billed browser-seconds.
-
-- `routes.tsx` → `FramePage` reads `?deadlineMs`, passes it to `Scene`.
-- In the still-mode RAF loop (`Scene.tsx`), if `performance.now() - start > deadlineMs`, force `stop()` + latch ready (same halt path as drain completion).
-- The Worker appends `?deadlineMs=${PAGE_DEADLINE_MS}` (`keys.ts` `sceneFrameUrl`); since `PAGE_DEADLINE_MS > RENDER_DEADLINE_MS > READY_TIMEOUT`, it fires only for a true orphan.
+`still` mode halts its RAF loop once mathbox's warmup queue drains, backstopped by `STILL_MAX_FRAMES` so it always goes CPU-idle within a bounded number of frames. That plus the Worker's `RENDER_DEADLINE_MS` (which closes the browser in `finally`, §9) bounds every render; on the render path the browser is torn down well before any frame-page wall-clock ceiling would fire, so the page carries no separate `?deadlineMs` self-halt.
 
 ---
 

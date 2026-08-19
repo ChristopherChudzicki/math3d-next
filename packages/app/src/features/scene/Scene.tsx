@@ -30,13 +30,6 @@ type Props = {
    * for a headless screenshotter. Used by the `/app/frame` render page.
    */
   still?: boolean;
-  /**
-   * Wall-clock budget (ms) for `still` mode's warmup, measured from the start
-   * of the drain loop. Forces readiness even if the queue never drains, so an
-   * orphaned session goes CPU-idle at a known time. Absent ⇒ unbounded (only
-   * `STILL_MAX_FRAMES`/quiescence gate readiness).
-   */
-  deadlineMs?: number;
 };
 
 const mathboxOptions = {
@@ -125,7 +118,7 @@ const useIsOrthographic = () => {
 // ~5 minutes to ~45 seconds.
 const is3dDisabled = localStorage.getItem("disable3dScene") === "true";
 
-const Scene: React.FC<Props> = ({ className, still, deadlineMs }) => {
+const Scene: React.FC<Props> = ({ className, still }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [mathbox, setMathbox] = useState<MathboxSelection | null>(null);
   // Single-shot latch: once ready, it stays ready for this component's life.
@@ -161,7 +154,6 @@ const Scene: React.FC<Props> = ({ className, still, deadlineMs }) => {
       const result = stepDrain(state, {
         pending,
         now: performance.now(),
-        deadlineMs,
       });
       state = result.state;
       if (result.ready) {
@@ -175,7 +167,7 @@ const Scene: React.FC<Props> = ({ className, still, deadlineMs }) => {
       raf = requestAnimationFrame(tick);
     });
     return () => cancelAnimationFrame(raf);
-  }, [still, mathbox, deadlineMs]);
+  }, [still, mathbox]);
 
   // threestrap's size plugin (mathbox's resize pipeline) already listens for
   // a "resize" event on this container element directly, not just on

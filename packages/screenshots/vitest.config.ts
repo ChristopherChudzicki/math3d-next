@@ -19,7 +19,6 @@ export default defineProject({
           FRAME_ORIGIN: "https://next.math3d.org",
           RENDER_SECRET: "shh", // pragma: allowlist secret — test fixture, not a real secret
           RENDER_DEADLINE_MS: 60000,
-          PAGE_DEADLINE_MS: 70000,
         },
       },
     }),

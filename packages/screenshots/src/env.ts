@@ -20,14 +20,6 @@ interface ScreenshotsEnv {
    * hung page operation is aborted rather than left running (ADR-0002 §9).
    */
   RENDER_DEADLINE_MS: number;
-  /**
-   * Frame page's own wall-clock self-halt ceiling (ms), appended to the frame
-   * URL as `?deadlineMs=` by `sceneFrameUrl`. Wider than RENDER_DEADLINE_MS so
-   * it fires only for a true orphan — a Worker that
-   * died before `browser.close()` ran (ordering invariant: PAGE_DEADLINE_MS >
-   * RENDER_DEADLINE_MS > READY_TIMEOUT_MS).
-   */
-  PAGE_DEADLINE_MS: number;
 }
 
 export type Env = ScreenshotsEnv;

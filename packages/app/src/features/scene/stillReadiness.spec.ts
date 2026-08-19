@@ -77,18 +77,3 @@ test("uses STILL_FALLBACK_FRAMES when getPending is unavailable (pending null)",
   );
   expect(firstReady(0, samples)).toBe(STILL_FALLBACK_FRAMES - 1);
 });
-
-test("force-halts at deadlineMs even if the queue never drains", () => {
-  const s = initDrainState(1000);
-  // queue perpetually pending; without a deadline this never readies before MAX_FRAMES
-  let r = stepDrain(s, { pending: 5, now: 1000, deadlineMs: 500 });
-  expect(r.ready).toBe(false);
-  r = stepDrain(r.state, { pending: 5, now: 1501, deadlineMs: 500 }); // 1501-1000 = 501 > 500
-  expect(r.ready).toBe(true);
-});
-
-test("ignores the deadline when undefined (unchanged behavior)", () => {
-  const s = initDrainState(1000);
-  const r = stepDrain(s, { pending: 5, now: 99999 });
-  expect(r.ready).toBe(false);
-});

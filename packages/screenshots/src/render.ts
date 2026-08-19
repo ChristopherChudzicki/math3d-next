@@ -6,7 +6,7 @@ const READY_SELECTOR = '[data-scene-ready="true"]';
 const NAV_TIMEOUT_MS = 15_000; // page-load nav bound; RENDER_DEADLINE_MS is authoritative
 // data-scene-ready is a wall-clock quiescence heuristic on mathbox warmup — give it
 // headroom, but keep it below RENDER_DEADLINE_MS (the authoritative bound that closes
-// the browser). Ordering: PAGE_DEADLINE_MS > RENDER_DEADLINE_MS > READY_TIMEOUT_MS.
+// the browser). Ordering: RENDER_DEADLINE_MS > READY_TIMEOUT_MS.
 const READY_TIMEOUT_MS = 45_000;
 
 export const withTimeout = async <T>(

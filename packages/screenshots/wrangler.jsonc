@@ -26,8 +26,7 @@
   ],
   "vars": {
     "FRAME_ORIGIN": "https://next.math3d.org",
-    "RENDER_DEADLINE_MS": 60000,
-    "PAGE_DEADLINE_MS": 70000
+    "RENDER_DEADLINE_MS": 60000
   }
   // RENDER_SECRET (gates POST /render) is intentionally NOT set here as a
   // plaintext var — it's a Worker secret, set via `wrangler secret put
