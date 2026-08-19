@@ -20,7 +20,7 @@ flowchart TD
     grant{"granted?"}
     decline["decline<br/>(coverage, not spend)"]
     nudge["POST OG_RENDER_URL/render<br/>best-effort, secret-gated → 202"]
-    worker["Render Worker — ctx.waitUntil → renderAndCache(key)<br/>launch → /app/frame/key?deadlineMs=… → screenshot"]
+    worker["Render Worker — ctx.waitUntil → renderAndCache(key)<br/>launch → /app/frame/key → screenshot"]
     r2[("R2 · screenshots/scene/{key}.png")]
 
     save --> view --> reserve --> grant
@@ -55,7 +55,7 @@ Backend is the **sole gatekeeper** of the legitimate path: `renders ≤ reservat
 
 Caps are plain `settings.py` constants (rarely change, not secret). `OG_RENDER_URL` and `RENDER_SECRET` go through the typed `main/env.py` `EnvConfig`; `OG_RENDER_URL` gets an `https://`-origin validator (like `APP_BASE_URL`) so the bearer secret isn't sent cleartext. <!-- pragma: allowlist secret -->
 
-`RENDER_MONTHLY_CAP` derivation: ≤ $10 = $5 base + ≤ $5 overage ≈ 55.6 overage + 10 included ≈ 65.6 browser-hours; at `MAX_SESSION_SECONDS` that's ≈1800 sessions; `1500` is conservative headroom. (Refines ADR-0002's illustrative 1900/120s — the duration bound in §9 lands the ceiling near 130s.) Calendar-vs-billing-cycle straddle is self-correcting (annual spend stays ≤ `12 × cap`); no logic.
+`RENDER_MONTHLY_CAP` derivation: ≤ $10 = $5 base + ≤ $5 overage ≈ 55.6 overage + 10 included ≈ 65.6 browser-hours. `renderScene` closes the browser at `RENDER_DEADLINE_MS` (§9), so a render bills ≲70s of browser time worst-case (≈10s typical) — even at the worst case 65.6h admits >3000 sessions, so `1500` is conservative headroom. (Refines ADR-0002's illustrative 1900/120s.) Calendar-vs-billing-cycle straddle is self-correcting (annual spend stays ≤ `12 × cap`); no logic.
 
 ---
 
@@ -224,7 +224,7 @@ export const renderScene = async (
 
 ## 10. Frame page halt
 
-`still` mode halts its RAF loop once mathbox's warmup queue drains, backstopped by `STILL_MAX_FRAMES` so it always goes CPU-idle within a bounded number of frames. That plus the Worker's `RENDER_DEADLINE_MS` (which closes the browser in `finally`, §9) bounds every render; on the render path the browser is torn down well before any frame-page wall-clock ceiling would fire, so the page carries no separate `?deadlineMs` self-halt.
+`still` mode halts its RAF loop once mathbox's warmup queue drains, backstopped by `STILL_MAX_FRAMES` so it always goes CPU-idle within a bounded number of frames. That plus the Worker's `RENDER_DEADLINE_MS` (which closes the browser in `finally`, §9) bounds every render; on the render path the browser is torn down well before any frame-page wall-clock ceiling would fire, so the page carries no separate wall-clock self-halt.
 
 ---
 
@@ -250,7 +250,7 @@ The reservation bounds only the legitimate backend path. An attacker holding `RE
 
 **Worker (`index.spec.ts`):** `POST /render` — valid secret → 202 + render scheduled; bad/missing secret → 403 + no `browser.launch`; invalid key → 400. `GET …png` — hit → PNG+24h; miss → default card+60s, **no** render. Deadline: work exceeding `RENDER_DEADLINE_MS` rejects **and `browser.close()` is called**.
 
-**Frame page:** with `?deadlineMs` (fake timers), the still loop force-halts at the bound — `stop()`, `data-scene-ready` latched, RAF stopped — even if drain never completes.
+**Frame page (`stillReadiness.spec.ts`):** the drain state machine readies once the warmup queue stays empty for `STILL_QUIET_MS` (waiting through the transient zero between commit bursts, not halting early), falls back to a fixed frame count when `getPending` is unavailable, and is backstopped by `STILL_MAX_FRAMES`.
 
 ---
 
