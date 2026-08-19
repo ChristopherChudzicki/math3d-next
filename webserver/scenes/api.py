@@ -106,7 +106,10 @@ def update_scene(request, key: str, payload: ScenePatchSchema):
     if "archived" in data:
         scene.archived = data["archived"]
     scene.save()
-    schedule_render(scene.key)
+    # Only content edits change the rendered PNG; a title/archived-only patch
+    # must not burn a render slot (bulk archive/rename would drain the cap).
+    if data.keys() & {"items", "item_order"}:
+        schedule_render(scene.key)
     return scene
 
 

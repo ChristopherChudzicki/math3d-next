@@ -407,7 +407,26 @@ def test_create_scene_nudges_render_on_commit():
 
 
 @pytest.mark.django_db(transaction=True)
-def test_update_scene_nudges_render_on_commit():
+def test_update_scene_nudges_render_on_content_change():
+    me = CustomUserFactory.create()
+    scene = SceneFactory.create(author=me)
+    client = Client()
+    client.force_login(me)
+    data = default_scene()
+    with mock.patch("scenes.screenshots.maybe_render") as maybe:
+        resp = client.patch(
+            _detail(scene.key),
+            data={"items": data["items"], "itemOrder": data["itemOrder"]},
+            content_type="application/json",
+        )
+    assert resp.status_code == 200
+    maybe.assert_called_once_with(scene.key)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_update_scene_skips_render_on_metadata_only_change():
+    # Title/archived don't change the rendered PNG (the frame page draws only the
+    # 3D scene), so a metadata-only patch must not burn a render slot.
     me = CustomUserFactory.create()
     scene = SceneFactory.create(author=me)
     client = Client()
@@ -419,4 +438,4 @@ def test_update_scene_nudges_render_on_commit():
             content_type="application/json",
         )
     assert resp.status_code == 200
-    maybe.assert_called_once_with(scene.key)
+    maybe.assert_not_called()
