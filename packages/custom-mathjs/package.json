@@ -8,7 +8,7 @@
     "@math3d/test-utils": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
     "eslint": "^8.57.1",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.11"
   },
   "dependencies": {
     "mathjs": "^14.0.1"
