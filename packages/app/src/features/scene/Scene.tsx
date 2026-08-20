@@ -151,7 +151,10 @@ const Scene: React.FC<Props> = ({ className, still }) => {
     let state = initDrainState(performance.now());
     let raf = requestAnimationFrame(function tick() {
       const pending = readPending ? readPending() : null;
-      const result = stepDrain(state, { pending, now: performance.now() });
+      const result = stepDrain(state, {
+        pending,
+        now: performance.now(),
+      });
       state = result.state;
       if (result.ready) {
         // `stop()` is mathbox's documented loop control (start()/stop() on the

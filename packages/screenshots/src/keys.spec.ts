@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sceneImagePathToKey, sceneImageKey, lockKey } from "./keys";
+import { sceneFrameUrl, sceneImagePathToKey, sceneImageKey } from "./keys";
 
 describe("sceneImagePathToKey", () => {
   it("extracts a valid key", () => {
@@ -20,5 +20,11 @@ describe("sceneImagePathToKey", () => {
 
 it("builds storage keys", () => {
   expect(sceneImageKey("abc")).toBe("screenshots/scene/abc.png");
-  expect(lockKey("abc")).toBe("screenshots/lock/abc");
+});
+
+it("builds the frame URL from FRAME_ORIGIN and key", () => {
+  const env = { FRAME_ORIGIN: "https://next.math3d.org" } as never;
+  expect(sceneFrameUrl(env, "abc")).toBe(
+    "https://next.math3d.org/app/frame/abc",
+  );
 });

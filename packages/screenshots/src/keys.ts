@@ -10,7 +10,6 @@ export const KEY_RE = /^[A-Za-z0-9_-]{2,80}$/;
 
 export const sceneImageKey = (key: string): string =>
   `screenshots/scene/${key}.png`;
-export const lockKey = (key: string): string => `screenshots/lock/${key}`;
 
 /** Parse "/screenshots/scene/{key}.png" → validated key, else null. */
 export const sceneImagePathToKey = (pathname: string): string | null => {

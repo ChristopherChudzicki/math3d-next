@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 from django.core.exceptions import ValidationError
 from django.test import Client
@@ -389,3 +391,51 @@ def test_delete_author_gets_204():
     client.force_login(me)
     assert client.delete(_detail(scene.key)).status_code == 204
     assert not Scene.objects.filter(key=scene.key).exists()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_create_scene_nudges_render_on_commit():
+    # transaction=True so on_commit fires as in production (autocommit views).
+    # Build the body from default_scene() like the neighboring POST tests — an
+    # empty items list would 400 on validation and fail for the wrong reason.
+    data = default_scene()
+    body = {"items": data["items"], "itemOrder": data["itemOrder"]}
+    with mock.patch("scenes.screenshots.maybe_render") as maybe:
+        resp = Client().post(LIST_URL, data=body, content_type="application/json")
+    assert resp.status_code == 201
+    maybe.assert_called_once_with(resp.json()["key"])
+
+
+@pytest.mark.django_db(transaction=True)
+def test_update_scene_nudges_render_on_content_change():
+    me = CustomUserFactory.create()
+    scene = SceneFactory.create(author=me)
+    client = Client()
+    client.force_login(me)
+    data = default_scene()
+    with mock.patch("scenes.screenshots.maybe_render") as maybe:
+        resp = client.patch(
+            _detail(scene.key),
+            data={"items": data["items"], "itemOrder": data["itemOrder"]},
+            content_type="application/json",
+        )
+    assert resp.status_code == 200
+    maybe.assert_called_once_with(scene.key)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_update_scene_skips_render_on_metadata_only_change():
+    # Title/archived don't change the rendered PNG (the frame page draws only the
+    # 3D scene), so a metadata-only patch must not burn a render slot.
+    me = CustomUserFactory.create()
+    scene = SceneFactory.create(author=me)
+    client = Client()
+    client.force_login(me)
+    with mock.patch("scenes.screenshots.maybe_render") as maybe:
+        resp = client.patch(
+            _detail(scene.key),
+            data={"title": "Renamed"},
+            content_type="application/json",
+        )
+    assert resp.status_code == 200
+    maybe.assert_not_called()
