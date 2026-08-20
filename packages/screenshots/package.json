@@ -20,7 +20,7 @@
     "@math3d/tsconfig": "workspace:*",
     "eslint": "^8.57.1",
     "typescript": "^5.7.2",
-    "vitest": "^4.1.0",
+    "vitest": "^4.1.11",
     "wrangler": "4.110.0"
   }
 }

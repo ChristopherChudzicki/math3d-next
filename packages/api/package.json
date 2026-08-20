@@ -23,6 +23,6 @@
     "eslint": "^8.57.1",
     "openapi-typescript": "^7.13.0",
     "type-fest": "5.7.0",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.11"
   }
 }
