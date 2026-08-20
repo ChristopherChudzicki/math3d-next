@@ -8,12 +8,12 @@ import type { Env } from "./env";
  */
 export const KEY_RE = /^[A-Za-z0-9_-]{2,80}$/;
 
-export const sceneImageKey = (key: string): string => `og/scene/${key}.png`;
-export const lockKey = (key: string): string => `og/lock/${key}`;
+export const sceneImageKey = (key: string): string =>
+  `screenshots/scene/${key}.png`;
 
-/** Parse "/og/scene/{key}.png" → validated key, else null. */
+/** Parse "/screenshots/scene/{key}.png" → validated key, else null. */
 export const sceneImagePathToKey = (pathname: string): string | null => {
-  const m = /^\/og\/scene\/([^/]+)\.png$/.exec(pathname);
+  const m = /^\/screenshots\/scene\/([^/]+)\.png$/.exec(pathname);
   if (m === null) return null;
   const key = m[1];
   return KEY_RE.test(key) ? key : null;

@@ -30,8 +30,8 @@
     // `wrangler deploy` (deploy-reusable.yml). Must stay equal to the
     // production VITE_SITE_ORIGIN so og:url can't drift from the static head.
     "SITE_ORIGIN": "https://next.math3d.org",
-    // Render Worker origin (packages/og-render). Set → per-scene og:image;
+    // Render Worker origin (packages/screenshots). Set → per-scene og:image;
     // unset → static default card (pass-1 behavior).
-    "OG_RENDER_ORIGIN": "https://math3d-og-render.christopher-chudzicki.workers.dev"
+    "SCREENSHOTS_ORIGIN": "https://math3d-screenshots.christopher-chudzicki.workers.dev"
   }
 }

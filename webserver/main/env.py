@@ -28,6 +28,15 @@ class EnvConfig(BaseSettings):
     # (HEADLESS_FRONTEND_URLS) and it is used verbatim as an origin (CORS/CSRF
     # trust), where a browser's Origin header never carries a path.
     APP_BASE_URL: str = ""
+    # Bare origin of the screenshots render Worker, e.g.
+    # https://math3d-screenshots.<sub>.workers.dev. The reservation nudge POSTs
+    # to `{SCREENSHOTS_ORIGIN}/render` with a bearer secret; validated to a bare
+    # origin (no path) so the secret isn't sent to an unexpected path, and
+    # trailing-slash-normalized. Unset ⇒ the render feature is dark.
+    SCREENSHOTS_ORIGIN: str = ""
+    # Shared secret gating the Worker's POST /render. Unset in dev is fine
+    # (feature dark). Not required in production — the feature is optional.
+    RENDER_SECRET: str = ""
     DATABASE_URL: str = ""
     INGESTION_DATABASE_URL: str = ""
     # NoDecode: these env vars hold comma-separated lists, not JSON — skip
@@ -59,7 +68,7 @@ class EnvConfig(BaseSettings):
             return [item.strip() for item in value.split(",") if item.strip()]
         return value
 
-    @field_validator("APP_BASE_URL")
+    @field_validator("APP_BASE_URL", "SCREENSHOTS_ORIGIN")
     @classmethod
     def _normalize_and_validate_origin(cls, value: str) -> str:
         value = value.rstrip("/")
@@ -74,8 +83,8 @@ class EnvConfig(BaseSettings):
             or parsed.fragment
         ):
             raise ValueError(
-                f"APP_BASE_URL {value!r} must be a bare origin — scheme://host[:port] "
-                "with no path, e.g. https://next.math3d.org"
+                f"{value!r} must be a bare origin — scheme://host[:port] with no "
+                "path, e.g. https://next.math3d.org"
             )
         return value
 

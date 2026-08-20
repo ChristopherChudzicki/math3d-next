@@ -139,14 +139,14 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
 
-  # Experimental, var-gated (OG_RENDER_ORIGIN) render Worker — deployed in its OWN
+  # Experimental, var-gated (SCREENSHOTS_ORIGIN) render Worker — deployed in its OWN
   # job, in PARALLEL with the app deploy, and marked continue-on-error so it can
-  # NEVER gate the core app's ship path. The feature is dark until OG_RENDER_ORIGIN
+  # NEVER gate the core app's ship path. The feature is dark until SCREENSHOTS_ORIGIN
   # is set in packages/app/wrangler.jsonc, and its infra (R2 bucket, Browser
   # Rendering entitlement, token scopes) is provisioned out-of-band — so until
   # then this step is expected to fail harmlessly. When the feature graduates,
-  # drop continue-on-error so real regressions surface. See packages/og-render/README.md.
-  deploy-og-render:
+  # drop continue-on-error so real regressions surface. See packages/screenshots/README.md.
+  deploy-screenshots:
     needs: build
     if: ${{ !inputs.dry_run && inputs.environment == 'production' }}
     runs-on: ubuntu-26.04
@@ -167,8 +167,8 @@ jobs:
           corepack enable
           yarn install --immutable
 
-      - name: Deploy OG render Worker
-        working-directory: packages/og-render
+      - name: Deploy screenshots render Worker
+        working-directory: packages/screenshots
         run: yarn wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

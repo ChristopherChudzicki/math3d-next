@@ -342,3 +342,16 @@ def test_require_postgres_rejects_sqlite(database_url, expected):
     with pytest.raises(ImproperlyConfigured) as exc_info:
         require_postgres("django.db.backends.sqlite3", database_url)
     assert expected in str(exc_info.value)
+
+
+def test_screenshots_config_reads_env_and_caps(monkeypatch):
+    module = load_settings(
+        monkeypatch,
+        **PROD_ENV,
+        SCREENSHOTS_ORIGIN="https://s.math3d.org",
+        RENDER_SECRET="shh",  # pragma: allowlist secret
+    )
+    assert module.SCREENSHOTS_ORIGIN == "https://s.math3d.org"
+    assert module.RENDER_SECRET == "shh"  # pragma: allowlist secret
+    assert module.RENDER_MONTHLY_CAP == 1500
+    assert module.RENDER_DAILY_CAP == 150

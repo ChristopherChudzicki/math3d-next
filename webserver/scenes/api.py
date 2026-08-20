@@ -19,6 +19,7 @@ from scenes.schemas import (
     ScenePatchSchema,
     SceneSchema,
 )
+from scenes.screenshots import schedule_render
 
 scenes_router = Router()
 
@@ -55,6 +56,7 @@ def create_scene(request, payload: SceneCreateSchema):
     if payload.title is not None:
         scene.title = payload.title
     scene.save()  # full_clean() re-validates items (defense in depth)
+    schedule_render(scene.key)
     return Status(201, scene)
 
 
@@ -104,6 +106,10 @@ def update_scene(request, key: str, payload: ScenePatchSchema):
     if "archived" in data:
         scene.archived = data["archived"]
     scene.save()
+    # Only content edits change the rendered PNG; a title/archived-only patch
+    # must not burn a render slot (bulk archive/rename would drain the cap).
+    if data.keys() & {"items", "item_order"}:
+        schedule_render(scene.key)
     return scene
 
 
