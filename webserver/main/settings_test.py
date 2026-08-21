@@ -355,3 +355,29 @@ def test_screenshots_config_reads_env_and_caps(monkeypatch):
     assert module.RENDER_SECRET == "shh"  # pragma: allowlist secret
     assert module.RENDER_MONTHLY_CAP == 1500
     assert module.RENDER_DAILY_CAP == 150
+
+
+def test_sentry_not_initialized_without_a_dsn(monkeypatch):
+    """Dev, CI, and tests run with no DSN — init must be a no-op there."""
+    init_calls = []
+    monkeypatch.setattr("sentry_sdk.init", lambda **kwargs: init_calls.append(kwargs))
+    load_settings(monkeypatch, IS_DEVELOPMENT="True")
+    assert init_calls == []
+
+
+def test_sentry_initialized_with_no_pii_and_full_tracing(monkeypatch):
+    init_calls = []
+    monkeypatch.setattr("sentry_sdk.init", lambda **kwargs: init_calls.append(kwargs))
+    load_settings(
+        monkeypatch,
+        IS_DEVELOPMENT="True",
+        SENTRY_DSN="https://abc123@o1.ingest.sentry.io/42",
+        APP_VERSION="1.2.3",
+    )
+    assert len(init_calls) == 1
+    kwargs = init_calls[0]
+    assert kwargs["send_default_pii"] is False
+    assert kwargs["traces_sample_rate"] == 1.0
+    assert kwargs["environment"] == "production"
+    assert kwargs["release"] == "1.2.3"
+    assert kwargs["dsn"] == "https://abc123@o1.ingest.sentry.io/42"
