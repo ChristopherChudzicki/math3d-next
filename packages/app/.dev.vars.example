@@ -1,0 +1,5 @@
+# Local `wrangler dev` vars for the app Worker. Copy to `.dev.vars` (gitignored).
+API_BASE=https://api.math3d.org
+SITE_ORIGIN=https://next.math3d.org
+# Set → per-scene og:image; leave empty → static default card.
+SCREENSHOTS_ORIGIN=https://math3d-screenshots.christopher-chudzicki.workers.dev

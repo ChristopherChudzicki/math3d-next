@@ -1,0 +1,4 @@
+# Local `wrangler dev` vars for the render Worker. Copy to `.dev.vars` (gitignored).
+# RENDER_DEADLINE_MS stays in wrangler.jsonc. RENDER_SECRET is a Worker secret
+# (`wrangler secret put`), not set here.
+FRAME_ORIGIN=https://next.math3d.org

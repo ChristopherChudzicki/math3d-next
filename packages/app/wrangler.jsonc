@@ -23,15 +23,7 @@
       "!/mockServiceWorker.js",
       "!/index.html"
     ]
-  },
-  "vars": {
-    "API_BASE": "https://api.math3d.org",
-    // Source of truth for the Worker's og:url origin; applied as-is by
-    // `wrangler deploy` (deploy-reusable.yml). Must stay equal to the
-    // production VITE_SITE_ORIGIN so og:url can't drift from the static head.
-    "SITE_ORIGIN": "https://next.math3d.org",
-    // Render Worker origin (packages/screenshots). Set → per-scene og:image;
-    // unset → static default card (pass-1 behavior).
-    "SCREENSHOTS_ORIGIN": "https://math3d-screenshots.christopher-chudzicki.workers.dev"
   }
+  // Runtime vars are deploy-injected (see deploy-reusable.yml); local dev: copy
+  // `.dev.vars.example` to `.dev.vars`.
 }

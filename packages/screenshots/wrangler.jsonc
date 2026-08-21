@@ -24,8 +24,9 @@
   "r2_buckets": [
     { "binding": "SCREENSHOTS_BUCKET", "bucket_name": "math3d-screenshots" }
   ],
+  // FRAME_ORIGIN is deploy-injected (see deploy-reusable.yml); RENDER_DEADLINE_MS
+  // is a fixed tuning constant with no cross-system twin, so it stays in-file.
   "vars": {
-    "FRAME_ORIGIN": "https://next.math3d.org",
     "RENDER_DEADLINE_MS": 60000
   }
   // RENDER_SECRET (gates POST /render) is intentionally NOT set here as a
