@@ -26,6 +26,10 @@ on:
       CLOUDFLARE_API_TOKEN:
         # Only used for production (dual-publish to Cloudflare Workers); rc builds don't deploy.
         required: false
+      SENTRY_AUTH_TOKEN:
+        # Source-map upload for the SPA. Absent ⇒ the Vite plugin is skipped and
+        # the build still succeeds (rc dry runs and forks).
+        required: false
 
 jobs:
   build:
@@ -55,6 +59,10 @@ jobs:
           VITE_DISPLAY_AUTH_FLOWS: ${{ vars.VITE_DISPLAY_AUTH_FLOWS }}
           VITE_SITE_ORIGIN: ${{ vars.VITE_SITE_ORIGIN }}
           VITE_APP_VERSION: ${{ inputs.version }}
+          VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
