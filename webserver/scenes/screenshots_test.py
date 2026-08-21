@@ -153,6 +153,17 @@ def test_maybe_render_swallows_reserve_exception(settings):
         screenshots.maybe_render("abc")  # must not raise
 
 
+def test_nudge_render_sends_named_user_agent(settings):
+    # A named UA avoids Cloudflare's Browser Integrity Check, which 1010-blocks
+    # the default `Python-urllib` UA at the edge before the Worker runs.
+    settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
+    settings.RENDER_SECRET = "shh"  # pragma: allowlist secret
+    with mock.patch("scenes.screenshots.urllib.request.urlopen") as urlopen:
+        screenshots.nudge_render("abc")
+    req = urlopen.call_args.args[0]
+    assert req.get_header("User-agent") == "math3d-backend/1.0"
+
+
 def test_nudge_render_swallows_transport_error(settings):
     settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
     settings.RENDER_SECRET = "shh"  # pragma: allowlist secret
