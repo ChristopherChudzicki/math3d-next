@@ -6,6 +6,7 @@ import pytest
 from django.db import connection
 from django.utils import timezone
 
+from main.constants import BACKEND_USER_AGENT
 from scenes import screenshots
 from scenes.models import RenderDay, RenderMonth
 from scenes.screenshots import reserve_render_slot
@@ -161,7 +162,7 @@ def test_nudge_render_sends_named_user_agent(settings):
     with mock.patch("scenes.screenshots.urllib.request.urlopen") as urlopen:
         screenshots.nudge_render("abc")
     req = urlopen.call_args.args[0]
-    assert req.get_header("User-agent") == "math3d-backend/1.0"
+    assert req.get_header("User-agent") == BACKEND_USER_AGENT
 
 
 def test_nudge_render_swallows_transport_error(settings):

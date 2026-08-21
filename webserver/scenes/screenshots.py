@@ -14,6 +14,7 @@ from django.conf import settings
 from django.db import connection, transaction
 from django.utils import timezone
 
+from main.constants import BACKEND_USER_AGENT
 from scenes.models import RenderDay, RenderMonth
 
 logger = logging.getLogger(__name__)
@@ -68,9 +69,7 @@ def nudge_render(key: str) -> None:
         headers={
             "content-type": "application/json",
             "authorization": f"Bearer {settings.RENDER_SECRET}",
-            # Named UA: Cloudflare's Browser Integrity Check 1010-blocks the
-            # default `Python-urllib` UA at the edge, before the Worker.
-            "user-agent": "math3d-backend/1.0",
+            "user-agent": BACKEND_USER_AGENT,
         },
         method="POST",
     )
