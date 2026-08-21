@@ -30,3 +30,24 @@ def test_screenshots_origin_rejects_non_bare_origin():
 
 def test_render_secret_defaults_empty():
     assert _base().RENDER_SECRET == ""
+
+
+def test_sentry_dsn_defaults_empty():
+    assert _base().SENTRY_DSN == ""
+
+
+def test_sentry_traces_sample_rate_defaults_to_one():
+    assert _base().SENTRY_TRACES_SAMPLE_RATE == 1.0
+
+
+def test_sentry_dsn_accepts_a_valid_dsn():
+    dsn = "https://abc123@o1.ingest.sentry.io/42"
+    assert _base(SENTRY_DSN=dsn).SENTRY_DSN == dsn
+
+
+def test_sentry_dsn_rejects_a_malformed_dsn():
+    # sentry_sdk.init() raises BadDsn at settings-import time, which would be an
+    # unhandled gunicorn boot failure; this validator turns it into the same
+    # ImproperlyConfigured path as every other bad config value.
+    with pytest.raises(ValidationError):
+        _base(SENTRY_DSN="not-a-dsn")
