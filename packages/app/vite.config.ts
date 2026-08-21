@@ -5,6 +5,7 @@ import react from "@vitejs/plugin-react";
 import viteTsconfigPaths from "vite-tsconfig-paths";
 import { Schema, ValidateEnv } from "@julr/vite-plugin-validate-env";
 import compileTime from "vite-plugin-compile-time";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import type { PluginOption } from "vite";
 import fs from "fs/promises";
 import { realpathSync } from "node:fs";
@@ -89,6 +90,7 @@ export default defineConfig({
       VITE_SITE_ORIGIN: Schema.string(),
       VITE_APP_VERSION: Schema.string.optional(),
       VITE_DISPLAY_AUTH_FLOWS: Schema.string.optional(),
+      VITE_SENTRY_DSN: Schema.string.optional(),
     }),
     react(),
     viteTsconfigPaths(),
@@ -103,7 +105,32 @@ export default defineConfig({
     docsHotReload(
       path.resolve(__dirname, "./src/pages/HelpPage/data.compile.ts"),
     ),
+    // Only when a token is present: `yarn build` runs tokenless in e2e.yml and
+    // in the rc dry_run, and the jsdom vitest project inherits this array.
+    ...(process.env.SENTRY_AUTH_TOKEN
+      ? [
+          sentryVitePlugin({
+            org: process.env.SENTRY_ORG,
+            project: process.env.SENTRY_PROJECT,
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+            // The plugin creates its own release and would otherwise name it
+            // after the git HEAD SHA, while the SDK reports VITE_APP_VERSION.
+            ...(process.env.VITE_APP_VERSION
+              ? { release: { name: process.env.VITE_APP_VERSION } }
+              : {}),
+            // The plugin throws by default; a Sentry outage must not fail a release.
+            errorHandler: (err) => {
+              // eslint-disable-next-line no-console
+              console.warn("Sentry source map upload failed:", err);
+            },
+          }),
+        ]
+      : []),
   ],
+  build: {
+    // Uploaded to Sentry AND shipped to the CDN — math3d is open source.
+    sourcemap: true,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
