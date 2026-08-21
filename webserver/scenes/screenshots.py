@@ -68,6 +68,9 @@ def nudge_render(key: str) -> None:
         headers={
             "content-type": "application/json",
             "authorization": f"Bearer {settings.RENDER_SECRET}",
+            # Named UA: Cloudflare's Browser Integrity Check 1010-blocks the
+            # default `Python-urllib` UA at the edge, before the Worker.
+            "user-agent": "math3d-backend/1.0",
         },
         method="POST",
     )
