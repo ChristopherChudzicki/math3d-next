@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouteError, isRouteErrorResponse } from "react-router";
+import * as Sentry from "@sentry/react";
 import copy from "./errorPage.copy";
 import ErrorView from "./ErrorView";
 
@@ -41,6 +42,14 @@ const normalizeError = (error: unknown): NormalizedError => {
  */
 const ErrorPage: React.FC = () => {
   const error = useRouteError();
+  // In an effect, not the render body: the body re-runs on every render and
+  // would re-report the same error each time.
+  useEffect(() => {
+    // Route error responses are HTTP statuses (404, loader failures), not
+    // exceptions — reporting them would be noise.
+    if (isRouteErrorResponse(error)) return;
+    Sentry.captureException(error);
+  }, [error]);
   const { message, stack } = normalizeError(error);
   return <ErrorView message={message} stack={stack} />;
 };
