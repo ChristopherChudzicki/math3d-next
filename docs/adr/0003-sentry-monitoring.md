@@ -20,11 +20,12 @@ design is needed.
 **Four Sentry projects, four DSNs** — one per surface, for separate issue
 streams and alert rules.
 
-**Production only.** Dev, CI, and tests leave the DSN unset, which is each
-SDK's own disabled state. No `if (PROD)` branching.
+**Production only.** Dev, CI, and tests leave the DSN unset — each SDK's own
+no-op state. No `if (PROD)` branching.
 
-**`tracesSampleRate` / `traces_sample_rate` = 1.0 everywhere.** The quota
-supports it.
+**`tracesSampleRate` / `traces_sample_rate` = 1.0 everywhere.** The Sponsored
+Business plan's quota has the headroom for full sampling, so no sampling
+design is needed.
 
 **No PII, no user identification.** `send_default_pii=False` (Python) /
 `sendDefaultPii: false` (JS) set explicitly, not relied on as a default. No
@@ -69,9 +70,10 @@ isolation.
 
 ## Alternatives considered
 
-- **A shared `@math3d/sentry` package:** three different SDKs (`@sentry/react`,
-  `sentry-sdk[django]`, `@sentry/cloudflare`) across four risk profiles give a
-  shared wrapper little to abstract. Rejected.
+- **A shared `@math3d/sentry` package:** three SDKs (`@sentry/react`,
+  `sentry-sdk[django]`, `@sentry/cloudflare` — the two Workers share the
+  Cloudflare SDK but count as separate surfaces) across four surfaces with
+  different risk profiles give a shared wrapper little to abstract. Rejected.
 - **Stitch frontend and backend traces now:** the cost (an extra round trip
   before every new scene load) is paid on every request; the benefit (a
   linked waterfall) matters only once backend latency itself is the thing
