@@ -115,6 +115,7 @@ RENDER_SECRET`.
 ```bash
 yarn workspace screenshots test        # vitest under @cloudflare/vitest-pool-workers
 yarn workspace screenshots typecheck
+cp .dev.vars.example .dev.vars          # once: FRAME_ORIGIN for local dev (gitignored)
 yarn wrangler dev                       # from packages/screenshots (needs nodejs_compat)
 ```
 

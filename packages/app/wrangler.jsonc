@@ -24,10 +24,6 @@
       "!/index.html"
     ]
   }
-  // Runtime vars (API_BASE, SITE_ORIGIN, SCREENSHOTS_ORIGIN) are NOT set here.
-  // They come from GitHub Actions variables, injected at deploy time via
-  // `wrangler deploy --var` (deploy-reusable.yml). SITE_ORIGIN reuses the same
-  // VITE_SITE_ORIGIN variable that the Vite build bakes into the static head,
-  // so og:url can't drift from it. For local `wrangler dev`, copy
-  // `.dev.vars.example` to `.dev.vars` (gitignored).
+  // Runtime vars are deploy-injected (see deploy-reusable.yml); local dev: copy
+  // `.dev.vars.example` to `.dev.vars`.
 }

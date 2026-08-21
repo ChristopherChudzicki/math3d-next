@@ -9,8 +9,9 @@
  * immediately.
  *
  * Bindings (wrangler.jsonc): BROWSER (Browser Rendering), SCREENSHOTS_BUCKET (R2
- * bucket `math3d-screenshots`), var FRAME_ORIGIN. Requires the nodejs_compat
- * compatibility flag (@cloudflare/puppeteer imports node builtins).
+ * bucket `math3d-screenshots`). FRAME_ORIGIN is a deploy-injected var (see
+ * deploy-reusable.yml). Requires the nodejs_compat compatibility flag
+ * (@cloudflare/puppeteer imports node builtins).
  *
  * Wired into the app Worker via the single `SCREENSHOTS_ORIGIN` var; unset there =
  * the whole feature is dark. Design + teardown: packages/screenshots/README.md,

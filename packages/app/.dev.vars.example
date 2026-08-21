@@ -1,6 +1,4 @@
 # Local `wrangler dev` vars for the app Worker. Copy to `.dev.vars` (gitignored).
-# In production these come from GitHub Actions variables via `wrangler deploy
-# --var` (see .github/workflows/deploy-reusable.yml); this file is dev-only.
 API_BASE=https://api.math3d.org
 SITE_ORIGIN=https://next.math3d.org
 # Set → per-scene og:image; leave empty → static default card.

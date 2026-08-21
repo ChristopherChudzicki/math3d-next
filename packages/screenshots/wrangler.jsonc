@@ -24,11 +24,7 @@
   "r2_buckets": [
     { "binding": "SCREENSHOTS_BUCKET", "bucket_name": "math3d-screenshots" }
   ],
-  // FRAME_ORIGIN is NOT set here: it's the site origin, injected at deploy time
-  // via `wrangler deploy --var` (deploy-reusable.yml) from the same
-  // VITE_SITE_ORIGIN GitHub Actions variable the app build and app Worker use,
-  // so all three copies of the origin stay in lockstep. For local `wrangler
-  // dev`, copy `.dev.vars.example` to `.dev.vars` (gitignored). RENDER_DEADLINE_MS
+  // FRAME_ORIGIN is deploy-injected (see deploy-reusable.yml); RENDER_DEADLINE_MS
   // is a fixed tuning constant with no cross-system twin, so it stays in-file.
   "vars": {
     "RENDER_DEADLINE_MS": 60000

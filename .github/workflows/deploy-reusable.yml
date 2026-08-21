@@ -132,17 +132,17 @@ jobs:
           name: frontend-build
           path: packages/app/dist/
 
-      # Runtime vars are injected here from GitHub Actions variables (single
-      # source of truth), not committed in wrangler.jsonc. SITE_ORIGIN reuses the
-      # SAME VITE_SITE_ORIGIN the build step bakes into the static head, so the
-      # Worker's og:url can't drift from it.
+      # Reuse the build's VITE_* vars so the Worker values can't drift from the
+      # static head. SCREENSHOTS_ORIGIN may be empty (feature dark); the other
+      # two are required, so fail loudly rather than ship an empty binding.
       - name: Deploy to Cloudflare Workers
         working-directory: packages/app
-        run: >-
-          yarn wrangler deploy
-          --var API_BASE:"$API_BASE"
-          --var SITE_ORIGIN:"$SITE_ORIGIN"
-          --var SCREENSHOTS_ORIGIN:"$SCREENSHOTS_ORIGIN"
+        run: |
+          [ -n "$API_BASE" ] && [ -n "$SITE_ORIGIN" ] || { echo "::error::API_BASE and SITE_ORIGIN must be set (GitHub Actions variables VITE_API_BASE_URL / VITE_SITE_ORIGIN)"; exit 1; }
+          yarn wrangler deploy \
+            --var API_BASE:"$API_BASE" \
+            --var SITE_ORIGIN:"$SITE_ORIGIN" \
+            --var SCREENSHOTS_ORIGIN:"$SCREENSHOTS_ORIGIN"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
@@ -179,13 +179,11 @@ jobs:
           corepack enable
           yarn install --immutable
 
-      # FRAME_ORIGIN reuses the SAME VITE_SITE_ORIGIN variable as the app build
-      # and app Worker, so all three copies of the site origin stay in lockstep.
       - name: Deploy screenshots render Worker
         working-directory: packages/screenshots
-        run: >-
-          yarn wrangler deploy
-          --var FRAME_ORIGIN:"$FRAME_ORIGIN"
+        run: |
+          [ -n "$FRAME_ORIGIN" ] || { echo "::error::FRAME_ORIGIN must be set (GitHub Actions variable VITE_SITE_ORIGIN)"; exit 1; }
+          yarn wrangler deploy --var FRAME_ORIGIN:"$FRAME_ORIGIN"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
