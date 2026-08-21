@@ -66,6 +66,36 @@ const checkoutIdentity = (): PluginOption => {
 // from direnv loading .env.development; in CI it comes from a GitHub var.
 const appUrl = new URL(process.env.APP_BASE_URL ?? "http://localhost:3000");
 
+// Only when a token is present: `yarn build` runs tokenless in e2e.yml and in
+// the rc dry_run, and the jsdom vitest project inherits this plugins array.
+const sentryPlugins = (): PluginOption[] => {
+  const authToken = process.env.SENTRY_AUTH_TOKEN;
+  if (!authToken) return [];
+  // Without this, the plugin names its release after the git HEAD SHA, which
+  // the runtime SDK (reporting VITE_APP_VERSION) would never match — a silent
+  // break in source-map-to-event correlation. The token only exists in CI
+  // release builds, so fail loudly rather than ship that mismatch.
+  const release = process.env.VITE_APP_VERSION;
+  if (!release) {
+    throw new Error(
+      "SENTRY_AUTH_TOKEN is set but VITE_APP_VERSION is not: uploaded source maps would be tagged with a git SHA the runtime SDK never reports.",
+    );
+  }
+  return [
+    sentryVitePlugin({
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken,
+      release: { name: release },
+      // The plugin throws by default; a Sentry outage must not fail a release.
+      errorHandler: (err) => {
+        // eslint-disable-next-line no-console
+        console.warn("Sentry source map upload failed:", err);
+      },
+    }),
+  ];
+};
+
 export default defineConfig({
   server: {
     port: Number(appUrl.port) || 3000,
@@ -105,31 +135,16 @@ export default defineConfig({
     docsHotReload(
       path.resolve(__dirname, "./src/pages/HelpPage/data.compile.ts"),
     ),
-    // Only when a token is present: `yarn build` runs tokenless in e2e.yml and
-    // in the rc dry_run, and the jsdom vitest project inherits this array.
-    ...(process.env.SENTRY_AUTH_TOKEN
-      ? [
-          sentryVitePlugin({
-            org: process.env.SENTRY_ORG,
-            project: process.env.SENTRY_PROJECT,
-            authToken: process.env.SENTRY_AUTH_TOKEN,
-            // The plugin creates its own release and would otherwise name it
-            // after the git HEAD SHA, while the SDK reports VITE_APP_VERSION.
-            ...(process.env.VITE_APP_VERSION
-              ? { release: { name: process.env.VITE_APP_VERSION } }
-              : {}),
-            // The plugin throws by default; a Sentry outage must not fail a release.
-            errorHandler: (err) => {
-              // eslint-disable-next-line no-console
-              console.warn("Sentry source map upload failed:", err);
-            },
-          }),
-        ]
-      : []),
+    ...sentryPlugins(),
   ],
   build: {
     // Uploaded to Sentry AND shipped to the CDN — math3d is open source.
     sourcemap: true,
+    // Expected: vite-plugin-compile-time's "compile-time:import" transform
+    // (for HelpPage/data.compile.ts) emits no map for its own step, so
+    // Rollup warns "Sourcemap is likely to be incorrect" during build. That
+    // file becomes static help-page data before this app runs, so it never
+    // appears in a Sentry stack trace.
   },
   resolve: {
     alias: {
