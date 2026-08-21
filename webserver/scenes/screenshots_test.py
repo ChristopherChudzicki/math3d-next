@@ -1,4 +1,5 @@
 import datetime
+import logging
 import threading
 from unittest import mock
 
@@ -165,10 +166,44 @@ def test_nudge_render_sends_named_user_agent(settings):
     assert req.get_header("User-agent") == BACKEND_USER_AGENT
 
 
-def test_nudge_render_swallows_transport_error(settings):
+@pytest.fixture
+def scenes_caplog(caplog):
+    """`scenes` has propagate=False, so caplog's root handler never sees it."""
+    logger = logging.getLogger("scenes")
+    logger.addHandler(caplog.handler)
+    try:
+        with caplog.at_level(logging.DEBUG):
+            yield caplog
+    finally:
+        logger.removeHandler(caplog.handler)
+
+
+def test_nudge_render_swallows_transport_error(settings, scenes_caplog):
     settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
     settings.RENDER_SECRET = "shh"  # pragma: allowlist secret
     with mock.patch(
         "scenes.screenshots.urllib.request.urlopen", side_effect=OSError("refused")
     ):
         screenshots.nudge_render("abc")  # must not raise
+    (record,) = [r for r in scenes_caplog.records if r.levelno == logging.ERROR]
+    assert record.name == "scenes.screenshots"
+    assert record.getMessage() == "nudge_render failed for key=abc"
+
+
+def test_maybe_render_logs_failures_at_error_level(
+    settings, monkeypatch, scenes_caplog
+):
+    """
+    The save path must still succeed, but the failure has to reach Sentry —
+    which only promotes ERROR and above to events.
+    """
+    settings.SCREENSHOTS_ORIGIN = "https://screenshots.example.org"
+    settings.RENDER_SECRET = "secret"  # pragma: allowlist secret
+    monkeypatch.setattr(
+        "scenes.screenshots.reserve_render_slot",
+        lambda: (_ for _ in ()).throw(RuntimeError("ledger exploded")),
+    )
+    screenshots.maybe_render("some-key")  # must not raise
+    (record,) = [r for r in scenes_caplog.records if r.levelno == logging.ERROR]
+    assert record.name == "scenes.screenshots"
+    assert record.getMessage() == "maybe_render failed for key=some-key"
