@@ -1,5 +1,6 @@
 import React from "react";
-import { describe, test, expect, vi } from "vitest";
+import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
+import type { MockInstance } from "vitest";
 import { render } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import * as Sentry from "@sentry/react";
@@ -13,12 +14,22 @@ const Boom: React.FC = () => {
   throw new Error("Cannot read properties of undefined (reading 'type')");
 };
 
+// React + React Router log caught render errors; every test below triggers
+// one, so silence console.error for all of them. A file-scoped spy managed
+// by beforeEach/afterEach (rather than per-test mockRestore calls) ensures
+// restoration still happens if an assertion throws mid-test.
+let consoleError: MockInstance<typeof console.error>;
+
+beforeEach(() => {
+  consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+});
+
+afterEach(() => {
+  consoleError.mockRestore();
+});
+
 describe("ErrorPage as a route errorElement", () => {
   test("renders the branded fallback when a route throws", async () => {
-    // React + React Router log the caught render error; that's expected here.
-    const consoleError = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
     const router = createMemoryRouter([
       { path: "/", element: <Boom />, errorElement: <ErrorPage /> },
     ]);
@@ -30,15 +41,11 @@ describe("ErrorPage as a route errorElement", () => {
       screen.getByText(/Cannot read properties of undefined/),
     ).toBeInTheDocument();
     expect(consoleError).toHaveBeenCalled();
-    consoleError.mockRestore();
   });
 });
 
 describe("Sentry reporting", () => {
   test("reports a thrown render error", async () => {
-    const consoleError = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
     const router = createMemoryRouter([
       { path: "/", element: <Boom />, errorElement: <ErrorPage /> },
     ]);
@@ -50,13 +57,9 @@ describe("Sentry reporting", () => {
         }),
       );
     });
-    consoleError.mockRestore();
   });
 
   test("does not report a route error response", async () => {
-    const consoleError = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
     // A 404 from the router is an HTTP response, not an exception.
     const router = createMemoryRouter(
       [{ path: "/", element: <div>home</div>, errorElement: <ErrorPage /> }],
@@ -67,7 +70,6 @@ describe("Sentry reporting", () => {
       expect(screen.getByRole("heading", { name: copy.title })).toBeVisible();
     });
     expect(Sentry.captureException).not.toHaveBeenCalled();
-    consoleError.mockRestore();
   });
 });
 
