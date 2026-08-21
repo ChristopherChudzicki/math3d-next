@@ -132,20 +132,32 @@ jobs:
           name: frontend-build
           path: packages/app/dist/
 
+      # Runtime vars are injected here from GitHub Actions variables (single
+      # source of truth), not committed in wrangler.jsonc. SITE_ORIGIN reuses the
+      # SAME VITE_SITE_ORIGIN the build step bakes into the static head, so the
+      # Worker's og:url can't drift from it.
       - name: Deploy to Cloudflare Workers
         working-directory: packages/app
-        run: yarn wrangler deploy
+        run: >-
+          yarn wrangler deploy
+          --var API_BASE:"$API_BASE"
+          --var SITE_ORIGIN:"$SITE_ORIGIN"
+          --var SCREENSHOTS_ORIGIN:"$SCREENSHOTS_ORIGIN"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          API_BASE: ${{ vars.VITE_API_BASE_URL }}
+          SITE_ORIGIN: ${{ vars.VITE_SITE_ORIGIN }}
+          SCREENSHOTS_ORIGIN: ${{ vars.SCREENSHOTS_ORIGIN }}
 
   # Experimental, var-gated (SCREENSHOTS_ORIGIN) render Worker — deployed in its OWN
   # job, in PARALLEL with the app deploy, and marked continue-on-error so it can
-  # NEVER gate the core app's ship path. The feature is dark until SCREENSHOTS_ORIGIN
-  # is set in packages/app/wrangler.jsonc, and its infra (R2 bucket, Browser
-  # Rendering entitlement, token scopes) is provisioned out-of-band — so until
-  # then this step is expected to fail harmlessly. When the feature graduates,
-  # drop continue-on-error so real regressions surface. See packages/screenshots/README.md.
+  # NEVER gate the core app's ship path. The feature is dark until the
+  # SCREENSHOTS_ORIGIN GitHub Actions variable is set (injected into the app
+  # Worker via --var above), and its infra (R2 bucket, Browser Rendering
+  # entitlement, token scopes) is provisioned out-of-band — so until then this
+  # step is expected to fail harmlessly. When the feature graduates, drop
+  # continue-on-error so real regressions surface. See packages/screenshots/README.md.
   deploy-screenshots:
     needs: build
     if: ${{ !inputs.dry_run && inputs.environment == 'production' }}
@@ -167,9 +179,14 @@ jobs:
           corepack enable
           yarn install --immutable
 
+      # FRAME_ORIGIN reuses the SAME VITE_SITE_ORIGIN variable as the app build
+      # and app Worker, so all three copies of the site origin stay in lockstep.
       - name: Deploy screenshots render Worker
         working-directory: packages/screenshots
-        run: yarn wrangler deploy
+        run: >-
+          yarn wrangler deploy
+          --var FRAME_ORIGIN:"$FRAME_ORIGIN"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          FRAME_ORIGIN: ${{ vars.VITE_SITE_ORIGIN }}

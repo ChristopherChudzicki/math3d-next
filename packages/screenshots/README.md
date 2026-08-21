@@ -78,15 +78,18 @@ bundle uploads with only a warning but the Worker then 500s on every request.
 Two independent var gates, both dark by default:
 
 - **Serving:** the app Worker only points `og:image` at this Worker when
-  `SCREENSHOTS_ORIGIN` is set in `packages/app/wrangler.jsonc`. Unset → the app
-  serves its static default card.
+  `SCREENSHOTS_ORIGIN` is set. It comes from the `SCREENSHOTS_ORIGIN` GitHub
+  Actions variable, injected into the app Worker at deploy time via `wrangler
+deploy --var` (`deploy-reusable.yml`). Unset → the app serves its static
+  default card.
 - **Rendering:** the backend only nudges `POST /render` when its own
   `SCREENSHOTS_ORIGIN` env var is set. Unset → saves behave exactly as before and
   nothing is ever rendered.
 
 To enable end-to-end: deploy this Worker, set `RENDER_SECRET` on both sides,
-smoke-test it, then set `SCREENSHOTS_ORIGIN` to its `*.workers.dev` host in both
-the app Worker and the backend and redeploy.
+smoke-test it, then set `SCREENSHOTS_ORIGIN` to its `*.workers.dev` host — as the
+`SCREENSHOTS_ORIGIN` GitHub Actions variable (app Worker) and the backend env —
+and redeploy.
 
 CI deploys this Worker in its own `deploy-screenshots` job
 (`.github/workflows/deploy-reusable.yml`), in parallel with and non-blocking to
@@ -94,8 +97,8 @@ the app deploy, so a failed/unprovisioned render deploy can never gate a release
 
 ## Teardown (abandoning the experiment)
 
-1. Remove `SCREENSHOTS_ORIGIN` from `packages/app/wrangler.jsonc` and the backend
-   env (if set) and redeploy — the app reverts to the static default card and the
+1. Clear the `SCREENSHOTS_ORIGIN` GitHub Actions variable and the backend env
+   (if set) and redeploy — the app reverts to the static default card and the
    backend stops nudging.
 2. Delete the `deploy-screenshots` job from
    `.github/workflows/deploy-reusable.yml`.

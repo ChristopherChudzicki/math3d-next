@@ -19,6 +19,8 @@ node_modules
 
 # wrangler build cache
 **/.wrangler/
+# wrangler local dev vars (real secrets/values; commit the .example instead)
+**/.dev.vars
 
 #Python
 __pycache__
