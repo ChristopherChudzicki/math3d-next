@@ -1,5 +1,6 @@
 import "./globals.css";
-// Import `./sentry` first: Sentry.init() as a side effect must run before React, router, and MSW.
+// Import `./sentry` here: its Sentry.init() side effect then runs before the
+// rest of the app's modules evaluate, and before the first render.
 // eslint-disable-next-line import/order
 import { createRouter } from "./sentry";
 

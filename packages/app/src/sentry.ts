@@ -31,7 +31,7 @@ if (dsn) {
   });
 }
 
-// Scene URLs are `/:sceneKey`, so unwrapped routing would name one transaction
-// per scene key. The wrapper reports the matched route pattern instead.
+// Scene URLs are `/:sceneKey`; the wrapper names transactions by matched route
+// pattern. Must stay below init(), or it returns createBrowserRouter unwrapped.
 export const createRouter =
   Sentry.wrapCreateBrowserRouterV7(createBrowserRouter);

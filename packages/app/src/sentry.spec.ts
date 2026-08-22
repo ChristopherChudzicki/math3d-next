@@ -1,5 +1,12 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import * as Sentry from "@sentry/react";
+import { useEffect } from "react";
+import {
+  createRoutesFromChildren,
+  matchRoutes,
+  useLocation,
+  useNavigationType,
+} from "react-router";
 
 vi.mock("@sentry/react", () => ({
   init: vi.fn(),
@@ -10,7 +17,6 @@ vi.mock("@sentry/react", () => ({
 describe("Sentry init", () => {
   beforeEach(() => {
     vi.resetModules();
-    vi.clearAllMocks();
   });
   afterEach(() => {
     vi.unstubAllEnvs();
@@ -33,7 +39,21 @@ describe("Sentry init", () => {
         release: "1.2.3",
         sendDefaultPii: false,
         tracesSampleRate: 1,
+        integrations: [{ name: "mock" }],
       }),
+    );
+    expect(Sentry.reactRouterV7BrowserTracingIntegration).toHaveBeenCalledWith(
+      expect.objectContaining({
+        useEffect,
+        useLocation,
+        useNavigationType,
+        createRoutesFromChildren,
+        matchRoutes,
+      }),
+    );
+    // The wrapper reads state that init() installs, so init must run first.
+    expect(vi.mocked(Sentry.init).mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(Sentry.wrapCreateBrowserRouterV7).mock.invocationCallOrder[0],
     );
   });
 
