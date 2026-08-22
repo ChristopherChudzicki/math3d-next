@@ -20,19 +20,28 @@ design is needed.
 **Four Sentry projects, four DSNs** — one per surface, for separate issue
 streams and alert rules.
 
-**Production only.** Dev, CI, and tests leave the DSN unset — each SDK's own
-no-op state. No `if (PROD)` branching.
+**Production only.** Dev, CI, and tests leave the DSN unset, and both surfaces
+guard `init()` on the DSN rather than relying on an SDK's no-op state. No
+`if (PROD)` branching.
 
-**`tracesSampleRate` / `traces_sample_rate` = 1.0 everywhere.** The Sponsored
-Business plan's quota has the headroom for full sampling, so no sampling
-design is needed.
+**Full tracing.** The SPA sets `tracesSampleRate: 1`; Django reads
+`SENTRY_TRACES_SAMPLE_RATE`, which defaults to 1.0, so the backend can be
+dialed back by config alone if traffic ever changes that calculus.
 
 **No PII, no user identification.** `send_default_pii=False` (Python) /
 `sendDefaultPii: false` (JS) set explicitly, not relied on as a default. No
-`set_user` / `setUser` code on any surface.
+`set_user` / `setUser` code on any surface. Revisit this on the `@sentry/react`
+v11 upgrade: v11 replaces `sendDefaultPii` with `dataCollection`, which collects
+`userInfo`, `cookies`, and `httpBodies` by default, so a `sendDefaultPii: false`
+carried across that major stops meaning "no PII".
 
 **Source maps are uploaded to Sentry _and_ served publicly.** Math3d is open
-source, and public maps make browser devtools match what Sentry shows.
+source, and public maps make browser devtools match what Sentry shows. Scope
+`SENTRY_AUTH_TOKEN` to the repository or to the `production` GitHub Environment
+only: `deploy-reusable.yml`'s build job binds `environment: ${{ inputs.environment }}`,
+and a called job's own environment secrets win over what the caller forwards, so
+a token scoped to `rc` would upload rc source maps into the production project
+despite `release-rc.yml` deliberately not forwarding it.
 
 **DSNs are deploy-injected, never committed.** The SPA's arrives as a
 build-time `VITE_` var, Django's is a Heroku config var, and the Workers take
@@ -64,9 +73,11 @@ isolation.
   infers the client IP from the connection regardless. Suppressing it is a
   per-project dashboard toggle ("Prevent Storing of IP Addresses"), left as an
   optional follow-up.
-- Malformed `SENTRY_DSN` fails the same way any other bad config value does:
-  `EnvConfig` validates it at boot, so a typo surfaces as
-  `ImproperlyConfigured` rather than crashing gunicorn mid-request.
+- Malformed `SENTRY_DSN` fails the same way any other bad config value does.
+  `sentry_sdk.init()` runs at `settings.py` import time, so an unvalidated typo
+  would already fail the boot — with a raw `BadDsn`. `EnvConfig` validating it
+  first buys a uniform `ImproperlyConfigured` naming the field, not an earlier
+  failure.
 
 ## Alternatives considered
 

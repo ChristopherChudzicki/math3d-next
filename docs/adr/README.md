@@ -12,4 +12,4 @@ acceptance** — to change a decision, add a new ADR that supersedes the old one
 | ------------------------------------------------- | ------------------------------------------------- | -------- |
 | [0001](0001-server-side-scene-screenshots.md)     | Server-side scene screenshots via a render Worker | Accepted |
 | [0002](0002-browser-rendering-cost-protection.md) | Cost protection for paid-tier Browser Rendering   | Accepted |
-| [0003](0003-sentry-monitoring.md)                 | Sentry monitoring for errors and traces           | Accepted |
+| [0003](0003-sentry-monitoring.md)                 | Sentry monitoring (errors + traces)               | Accepted |
