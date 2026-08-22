@@ -61,6 +61,7 @@ jobs:
           VITE_APP_VERSION: ${{ inputs.version }}
           VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          # Required whenever the token is set; the build fails without them.
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
 

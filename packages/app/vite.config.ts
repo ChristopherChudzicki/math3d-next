@@ -71,20 +71,25 @@ const appUrl = new URL(process.env.APP_BASE_URL ?? "http://localhost:3000");
 const sentryPlugins = (): PluginOption[] => {
   const authToken = process.env.SENTRY_AUTH_TOKEN;
   if (!authToken) return [];
-  // Without this, the plugin names its release after the git HEAD SHA, which
-  // the runtime SDK (reporting VITE_APP_VERSION) would never match — a silent
-  // break in source-map-to-event correlation. The token only exists in CI
-  // release builds, so fail loudly rather than ship that mismatch.
+  // A token means this is a release build, so an incomplete upload config is a
+  // bug: `errorHandler` below would otherwise reduce it to a warning.
   const release = process.env.VITE_APP_VERSION;
-  if (!release) {
+  const org = process.env.SENTRY_ORG;
+  const project = process.env.SENTRY_PROJECT;
+  if (!release || !org || !project) {
+    const missing = [
+      !release && "VITE_APP_VERSION",
+      !org && "SENTRY_ORG",
+      !project && "SENTRY_PROJECT",
+    ].filter(Boolean);
     throw new Error(
-      "SENTRY_AUTH_TOKEN is set but VITE_APP_VERSION is not: uploaded source maps would be tagged with a git SHA the runtime SDK never reports.",
+      `SENTRY_AUTH_TOKEN is set but source-map upload is misconfigured (missing: ${missing.join(", ")}); Sentry would show minified stack traces for this release.`,
     );
   }
   return [
     sentryVitePlugin({
-      org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT,
+      org,
+      project,
       authToken,
       release: { name: release },
       // The plugin throws by default; a Sentry outage must not fail a release.
@@ -139,12 +144,9 @@ export default defineConfig({
   ],
   build: {
     // Uploaded to Sentry AND shipped to the CDN — math3d is open source.
+    // Expect a "Sourcemap is likely to be incorrect" warning: it comes from
+    // vite-plugin-compile-time, whose output never appears in a stack trace.
     sourcemap: true,
-    // Expected: vite-plugin-compile-time's "compile-time:import" transform
-    // (for HelpPage/data.compile.ts) emits no map for its own step, so
-    // Rollup warns "Sourcemap is likely to be incorrect" during build. That
-    // file becomes static help-page data before this app runs, so it never
-    // appears in a Sentry stack trace.
   },
   resolve: {
     alias: {
