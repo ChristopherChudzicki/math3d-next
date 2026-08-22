@@ -26,7 +26,7 @@ guard `init()` on the DSN rather than relying on an SDK's no-op state. No
 
 **Full tracing.** The SPA sets `tracesSampleRate: 1`; Django reads
 `SENTRY_TRACES_SAMPLE_RATE`, which defaults to 1.0, so the backend can be
-dialed back by config alone if traffic ever changes that calculus.
+dialed back by config alone.
 
 **No PII, no user identification.** `send_default_pii=False` (Python) /
 `sendDefaultPii: false` (JS) set explicitly, not relied on as a default. No
@@ -39,8 +39,9 @@ carried across that major stops meaning "no PII".
 source, and public maps make browser devtools match what Sentry shows. Scope
 `SENTRY_AUTH_TOKEN` to the repository or to the `production` GitHub Environment
 only: `deploy-reusable.yml`'s build job binds `environment: ${{ inputs.environment }}`,
-and a called job's own environment secrets win over what the caller forwards, so
-a token scoped to `rc` would upload rc source maps into the production project
+which puts that environment's secrets in scope — this is how the existing
+environment-scoped AWS and Heroku secrets resolve. A token scoped to `rc` would
+therefore reach rc builds and upload rc source maps into the production project,
 despite `release-rc.yml` deliberately not forwarding it.
 
 **DSNs are deploy-injected, never committed.** The SPA's arrives as a
