@@ -45,10 +45,13 @@ const ErrorPage: React.FC = () => {
   // In an effect, not the render body: the body re-runs on every render and
   // would re-report the same error each time.
   useEffect(() => {
-    // Route error responses are HTTP statuses (404, loader failures), not
-    // exceptions — reporting them would be noise.
+    // Route error responses carry an HTTP status, not an exception; skip them.
     if (isRouteErrorResponse(error)) return;
-    Sentry.captureException(error);
+    // Not `handled: true` (captureException's default): this error took the
+    // user to the fallback page.
+    Sentry.captureException(error, {
+      mechanism: { type: "react-router.errorElement", handled: false },
+    });
   }, [error]);
   const { message, stack } = normalizeError(error);
   return <ErrorView message={message} stack={stack} />;

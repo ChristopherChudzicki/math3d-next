@@ -14,10 +14,8 @@ const Boom: React.FC = () => {
   throw new Error("Cannot read properties of undefined (reading 'type')");
 };
 
-// React + React Router log caught render errors; every test below triggers
-// one, so silence console.error for all of them. A file-scoped spy managed
-// by beforeEach/afterEach (rather than per-test mockRestore calls) ensures
-// restoration still happens if an assertion throws mid-test.
+// Silence the console.error React and React Router emit for caught render
+// errors. File-scoped so restoration survives an assertion throwing mid-test.
 let consoleError: MockInstance<typeof console.error>;
 
 beforeEach(() => {
@@ -55,6 +53,8 @@ describe("Sentry reporting", () => {
         expect.objectContaining({
           message: "Cannot read properties of undefined (reading 'type')",
         }),
+        // Unhandled: the error took the user to the fallback page.
+        { mechanism: { type: "react-router.errorElement", handled: false } },
       );
     });
   });
