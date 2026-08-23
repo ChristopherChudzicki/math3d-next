@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-import os
 from pathlib import Path
 import logging
 
@@ -307,10 +306,10 @@ HEADLESS_FRONTEND_URLS = {
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# Empty config ⇒ Django's dummy backend: DB-free commands (makemigrations,
+# dump_openapi_*) still run, queries fail loudly. Required in production.
 DATABASES = {
-    "default": dj_database_url.parse(
-        ENV.DATABASE_URL or f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}"
-    )
+    "default": dj_database_url.parse(ENV.DATABASE_URL) if ENV.DATABASE_URL else {}
 }
 
 
