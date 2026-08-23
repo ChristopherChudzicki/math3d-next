@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouteError, isRouteErrorResponse } from "react-router";
+import * as Sentry from "@sentry/react";
 import copy from "./errorPage.copy";
 import ErrorView from "./ErrorView";
 
@@ -41,6 +42,17 @@ const normalizeError = (error: unknown): NormalizedError => {
  */
 const ErrorPage: React.FC = () => {
   const error = useRouteError();
+  // In an effect, not the render body: the body re-runs on every render and
+  // would re-report the same error each time.
+  useEffect(() => {
+    // Route error responses carry an HTTP status, not an exception; skip them.
+    if (isRouteErrorResponse(error)) return;
+    // Not `handled: true` (captureException's default): this error took the
+    // user to the fallback page.
+    Sentry.captureException(error, {
+      mechanism: { type: "react-router.errorElement", handled: false },
+    });
+  }, [error]);
   const { message, stack } = normalizeError(error);
   return <ErrorView message={message} stack={stack} />;
 };

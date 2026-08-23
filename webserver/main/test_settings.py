@@ -1,8 +1,11 @@
 import os
 
+import sentry_sdk
 from django.core.exceptions import ImproperlyConfigured
 
 from main.settings import *  # noqa: F403
+
+sentry_sdk.init(dsn=None)  # tests never report, even if SENTRY_DSN is set
 
 
 def require_postgres(engine: str, database_url: str) -> None:

@@ -78,7 +78,7 @@ def nudge_render(key: str) -> None:
     except Exception:
         # Log-attribution only (a distinct line from a reserve failure), NOT the
         # isolation guard — maybe_render's outer try is what protects the save.
-        logger.warning("nudge_render failed for key=%s", key, exc_info=True)
+        logger.error("nudge_render failed for key=%s", key, exc_info=True)
 
 
 def maybe_render(key: str) -> None:
@@ -94,7 +94,7 @@ def maybe_render(key: str) -> None:
             return
         nudge_render(key)
     except Exception:
-        logger.warning("maybe_render failed for key=%s", key, exc_info=True)
+        logger.error("maybe_render failed for key=%s", key, exc_info=True)
 
 
 def schedule_render(key: str) -> None:

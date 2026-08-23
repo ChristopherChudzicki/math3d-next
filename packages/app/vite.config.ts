@@ -5,6 +5,7 @@ import react from "@vitejs/plugin-react";
 import viteTsconfigPaths from "vite-tsconfig-paths";
 import { Schema, ValidateEnv } from "@julr/vite-plugin-validate-env";
 import compileTime from "vite-plugin-compile-time";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import type { PluginOption } from "vite";
 import fs from "fs/promises";
 import { realpathSync } from "node:fs";
@@ -65,6 +66,45 @@ const checkoutIdentity = (): PluginOption => {
 // from direnv loading .env.development; in CI it comes from a GitHub var.
 const appUrl = new URL(process.env.APP_BASE_URL ?? "http://localhost:3000");
 
+// Only when a token is present: `yarn build` runs tokenless in e2e.yml and in
+// the rc dry_run, and the jsdom vitest project inherits this plugins array.
+const sentryPlugins = (): PluginOption[] => {
+  const authToken = process.env.SENTRY_ORG_TOKEN;
+  if (!authToken) return [];
+  // A token means this is a release build, so an incomplete upload config is a
+  // bug: `errorHandler` below would otherwise reduce it to a warning.
+  const release = process.env.VITE_APP_VERSION;
+  const project = process.env.SENTRY_PROJECT;
+  if (!release || !project) {
+    const missing = [
+      !release && "VITE_APP_VERSION",
+      !project && "SENTRY_PROJECT",
+    ].filter(Boolean);
+    throw new Error(
+      `SENTRY_ORG_TOKEN is set but source-map upload is misconfigured (missing: ${missing.join(", ")}); Sentry would show minified stack traces for this release.`,
+    );
+  }
+  // An org token carries its own org, which is why no SENTRY_ORG is needed; the
+  // plugin skips the org requirement on exactly this prefix.
+  if (!authToken.startsWith("sntrys_")) {
+    throw new Error(
+      "SENTRY_ORG_TOKEN must be a Sentry organization auth token (prefix `sntrys_`); other token types also need an org slug, which this build does not supply.",
+    );
+  }
+  return [
+    sentryVitePlugin({
+      project,
+      authToken,
+      release: { name: release },
+      // The plugin throws by default; a Sentry outage must not fail a release.
+      errorHandler: (err) => {
+        // eslint-disable-next-line no-console
+        console.warn("Sentry source map upload failed:", err);
+      },
+    }),
+  ];
+};
+
 export default defineConfig({
   server: {
     port: Number(appUrl.port) || 3000,
@@ -89,6 +129,7 @@ export default defineConfig({
       VITE_SITE_ORIGIN: Schema.string(),
       VITE_APP_VERSION: Schema.string.optional(),
       VITE_DISPLAY_AUTH_FLOWS: Schema.string.optional(),
+      VITE_SENTRY_DSN: Schema.string.optional(),
     }),
     react(),
     viteTsconfigPaths(),
@@ -103,7 +144,14 @@ export default defineConfig({
     docsHotReload(
       path.resolve(__dirname, "./src/pages/HelpPage/data.compile.ts"),
     ),
+    ...sentryPlugins(),
   ],
+  build: {
+    // Uploaded to Sentry AND shipped to the CDN — math3d is open source.
+    // Expect a "Sourcemap is likely to be incorrect" warning: it comes from
+    // vite-plugin-compile-time, whose output never appears in a stack trace.
+    sourcemap: true,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

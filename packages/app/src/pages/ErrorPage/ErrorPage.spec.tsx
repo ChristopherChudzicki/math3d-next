@@ -1,21 +1,33 @@
 import React from "react";
-import { describe, test, expect, vi } from "vitest";
+import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
+import type { MockInstance } from "vitest";
 import { render } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
+import * as Sentry from "@sentry/react";
 import { screen, waitFor } from "@/test_util";
 import ErrorPage, { normalizeError } from "./ErrorPage";
 import copy from "./errorPage.copy";
+
+vi.mock("@sentry/react", () => ({ captureException: vi.fn() }));
 
 const Boom: React.FC = () => {
   throw new Error("Cannot read properties of undefined (reading 'type')");
 };
 
+// Silence the console.error React and React Router emit for caught render
+// errors. File-scoped so restoration survives an assertion throwing mid-test.
+let consoleError: MockInstance<typeof console.error>;
+
+beforeEach(() => {
+  consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+});
+
+afterEach(() => {
+  consoleError.mockRestore();
+});
+
 describe("ErrorPage as a route errorElement", () => {
   test("renders the branded fallback when a route throws", async () => {
-    // React + React Router log the caught render error; that's expected here.
-    const consoleError = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
     const router = createMemoryRouter([
       { path: "/", element: <Boom />, errorElement: <ErrorPage /> },
     ]);
@@ -27,7 +39,37 @@ describe("ErrorPage as a route errorElement", () => {
       screen.getByText(/Cannot read properties of undefined/),
     ).toBeInTheDocument();
     expect(consoleError).toHaveBeenCalled();
-    consoleError.mockRestore();
+  });
+});
+
+describe("Sentry reporting", () => {
+  test("reports a thrown render error", async () => {
+    const router = createMemoryRouter([
+      { path: "/", element: <Boom />, errorElement: <ErrorPage /> },
+    ]);
+    render(<RouterProvider router={router} />);
+    await waitFor(() => {
+      expect(Sentry.captureException).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Cannot read properties of undefined (reading 'type')",
+        }),
+        // Unhandled: the error took the user to the fallback page.
+        { mechanism: { type: "react-router.errorElement", handled: false } },
+      );
+    });
+  });
+
+  test("does not report a route error response", async () => {
+    // A 404 from the router is an HTTP response, not an exception.
+    const router = createMemoryRouter(
+      [{ path: "/", element: <div>home</div>, errorElement: <ErrorPage /> }],
+      { initialEntries: ["/nope"] },
+    );
+    render(<RouterProvider router={router} />);
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: copy.title })).toBeVisible();
+    });
+    expect(Sentry.captureException).not.toHaveBeenCalled();
   });
 });
 

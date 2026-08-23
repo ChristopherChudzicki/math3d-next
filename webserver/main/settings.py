@@ -17,6 +17,7 @@ import logging
 from django.core.exceptions import ImproperlyConfigured
 
 import dj_database_url
+import sentry_sdk
 from pydantic import ValidationError
 
 from main.env import EnvConfig
@@ -37,6 +38,17 @@ try:
     ENV = EnvConfig()
 except ValidationError as exc:
     raise ImproperlyConfigured(str(exc)) from exc
+
+# Unset DSN ⇒ no-op (dev, CI, tests). EnvConfig already validated the DSN
+# above, so a malformed value fails as ImproperlyConfigured, not BadDsn here.
+if ENV.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=ENV.SENTRY_DSN,
+        environment="production",
+        release=ENV.APP_VERSION,
+        send_default_pii=False,
+        traces_sample_rate=ENV.SENTRY_TRACES_SAMPLE_RATE,
+    )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

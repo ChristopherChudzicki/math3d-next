@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 from django.utils.http import is_same_domain
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+from sentry_sdk.utils import BadDsn, Dsn
 
 
 class EnvConfig(BaseSettings):
@@ -60,6 +61,9 @@ class EnvConfig(BaseSettings):
     ENABLE_REGISTRATION: bool = False
     CSRF_COOKIE_DOMAIN: str = ""
     DISABLE_ALLAUTH_RATE_LIMITS: bool = False
+    # Sentry. Unset ⇒ the SDK is a no-op, which is how dev, CI, and tests run.
+    SENTRY_DSN: str = ""
+    SENTRY_TRACES_SAMPLE_RATE: float = 1.0
 
     @field_validator("ALLOWED_HOSTS", "CORS_ALLOWED_ORIGINS", mode="before")
     @classmethod
@@ -86,6 +90,17 @@ class EnvConfig(BaseSettings):
                 f"{value!r} must be a bare origin — scheme://host[:port] with no "
                 "path, e.g. https://next.math3d.org"
             )
+        return value
+
+    @field_validator("SENTRY_DSN")
+    @classmethod
+    def _validate_sentry_dsn(cls, value: str) -> str:
+        if not value:
+            return value
+        try:
+            Dsn(value)
+        except BadDsn as exc:
+            raise ValueError(f"{value!r} is not a valid Sentry DSN: {exc}") from exc
         return value
 
     @model_validator(mode="after")

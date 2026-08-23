@@ -1,4 +1,5 @@
 import datetime
+import logging
 import threading
 from unittest import mock
 
@@ -143,7 +144,18 @@ def test_maybe_render_nudges_when_granted(settings):
     nudge.assert_called_once_with("abc")
 
 
-def test_maybe_render_swallows_reserve_exception(settings):
+@pytest.fixture
+def scenes_caplog(caplog):
+    """`scenes` has propagate=False, so caplog's root handler never sees it."""
+    logger = logging.getLogger("scenes")
+    logger.addHandler(caplog.handler)
+    try:
+        yield caplog
+    finally:
+        logger.removeHandler(caplog.handler)
+
+
+def test_maybe_render_swallows_reserve_exception(settings, scenes_caplog):
     # The isolation invariant: a failure inside maybe_render must not propagate
     # (it runs inline in the save's request cycle — an escape would 500 the save).
     settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
@@ -152,6 +164,9 @@ def test_maybe_render_swallows_reserve_exception(settings):
         screenshots, "reserve_render_slot", side_effect=RuntimeError("db down")
     ):
         screenshots.maybe_render("abc")  # must not raise
+    (record,) = [r for r in scenes_caplog.records if r.levelno == logging.ERROR]
+    assert record.name == "scenes.screenshots"
+    assert record.getMessage() == "maybe_render failed for key=abc"
 
 
 def test_nudge_render_sends_named_user_agent(settings):
@@ -165,10 +180,13 @@ def test_nudge_render_sends_named_user_agent(settings):
     assert req.get_header("User-agent") == BACKEND_USER_AGENT
 
 
-def test_nudge_render_swallows_transport_error(settings):
+def test_nudge_render_swallows_transport_error(settings, scenes_caplog):
     settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
     settings.RENDER_SECRET = "shh"  # pragma: allowlist secret
     with mock.patch(
         "scenes.screenshots.urllib.request.urlopen", side_effect=OSError("refused")
     ):
         screenshots.nudge_render("abc")  # must not raise
+    (record,) = [r for r in scenes_caplog.records if r.levelno == logging.ERROR]
+    assert record.name == "scenes.screenshots"
+    assert record.getMessage() == "nudge_render failed for key=abc"
