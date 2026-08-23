@@ -69,26 +69,30 @@ const appUrl = new URL(process.env.APP_BASE_URL ?? "http://localhost:3000");
 // Only when a token is present: `yarn build` runs tokenless in e2e.yml and in
 // the rc dry_run, and the jsdom vitest project inherits this plugins array.
 const sentryPlugins = (): PluginOption[] => {
-  const authToken = process.env.SENTRY_AUTH_TOKEN;
+  const authToken = process.env.SENTRY_ORG_TOKEN;
   if (!authToken) return [];
   // A token means this is a release build, so an incomplete upload config is a
   // bug: `errorHandler` below would otherwise reduce it to a warning.
   const release = process.env.VITE_APP_VERSION;
-  const org = process.env.SENTRY_ORG;
   const project = process.env.SENTRY_PROJECT;
-  if (!release || !org || !project) {
+  if (!release || !project) {
     const missing = [
       !release && "VITE_APP_VERSION",
-      !org && "SENTRY_ORG",
       !project && "SENTRY_PROJECT",
     ].filter(Boolean);
     throw new Error(
-      `SENTRY_AUTH_TOKEN is set but source-map upload is misconfigured (missing: ${missing.join(", ")}); Sentry would show minified stack traces for this release.`,
+      `SENTRY_ORG_TOKEN is set but source-map upload is misconfigured (missing: ${missing.join(", ")}); Sentry would show minified stack traces for this release.`,
+    );
+  }
+  // An org token carries its own org, which is why no SENTRY_ORG is needed; the
+  // plugin skips the org requirement on exactly this prefix.
+  if (!authToken.startsWith("sntrys_")) {
+    throw new Error(
+      "SENTRY_ORG_TOKEN must be a Sentry organization auth token (prefix `sntrys_`); other token types also need an org slug, which this build does not supply.",
     );
   }
   return [
     sentryVitePlugin({
-      org,
       project,
       authToken,
       release: { name: release },

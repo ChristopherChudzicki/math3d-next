@@ -124,4 +124,4 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG_TOKEN: ${{ secrets.SENTRY_ORG_TOKEN }}

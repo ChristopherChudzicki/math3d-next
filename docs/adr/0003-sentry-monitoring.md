@@ -36,13 +36,21 @@ v11 upgrade: v11 replaces `sendDefaultPii` with `dataCollection`, which collects
 carried across that major stops meaning "no PII".
 
 **Source maps are uploaded to Sentry _and_ served publicly.** Math3d is open
-source, and public maps make browser devtools match what Sentry shows. Scope
-`SENTRY_AUTH_TOKEN` to the repository or to the `production` GitHub Environment
-only: `deploy-reusable.yml`'s build job binds `environment: ${{ inputs.environment }}`,
-which puts that environment's secrets in scope — this is how the existing
-environment-scoped AWS and Heroku secrets resolve. A token scoped to `rc` would
-therefore reach rc builds and upload rc source maps into the production project,
-despite `release-rc.yml` deliberately not forwarding it.
+source, and public maps make browser devtools match what Sentry shows. Upload
+uses Sentry's web API, not the DSN — the DSN is a runtime ingest credential and
+the Vite plugin has no DSN option at all — so the build needs its own
+credentials. `SENTRY_ORG_TOKEN` must be an _organization_ auth token (`sntrys_`),
+which carries its own org; that is why only `SENTRY_PROJECT` accompanies it. The
+build rejects any other token type rather than letting the plugin skip the
+upload with a warning.
+
+Scope `SENTRY_ORG_TOKEN` to the repository or to the `production` GitHub
+Environment only: `deploy-reusable.yml`'s build job binds
+`environment: ${{ inputs.environment }}`, which puts that environment's secrets
+in scope — this is how the existing environment-scoped AWS and Heroku secrets
+resolve. A token scoped to `rc` would therefore reach rc builds and upload rc
+source maps into the production project, despite `release-rc.yml` deliberately
+not forwarding it.
 
 **DSNs are deploy-injected, never committed.** The SPA's arrives as a
 build-time `VITE_` var, Django's is a Heroku config var, and the Workers take
