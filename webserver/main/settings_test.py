@@ -26,6 +26,7 @@ SETTINGS_ENV_VARS = list(EnvConfig.model_fields)
 PROD_ENV = {
     "APP_BASE_URL": "https://app.example.org",
     "CSRF_COOKIE_DOMAIN": ".example.org",
+    "DATABASE_URL": "postgres://u:p@db.example.org:5432/math3d",  # pragma: allowlist secret
 }
 
 
@@ -107,6 +108,32 @@ def test_production_requires_csrf_cookie_domain(monkeypatch):
     del env["CSRF_COOKIE_DOMAIN"]
     with pytest.raises(ImproperlyConfigured, match="CSRF_COOKIE_DOMAIN"):
         load_settings(monkeypatch, **env)
+
+
+def test_production_requires_database_url(monkeypatch):
+    """
+    Unset, Django falls back to its dummy backend, which boots fine and then
+    fails every query — so production must fail at import instead.
+    """
+    env = {**PROD_ENV}
+    del env["DATABASE_URL"]
+    with pytest.raises(ImproperlyConfigured, match="DATABASE_URL"):
+        load_settings(monkeypatch, **env)
+
+
+def test_database_url_configures_the_default_connection(monkeypatch):
+    loaded = load_settings(monkeypatch, **PROD_ENV)
+    assert loaded.DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql"
+
+
+def test_dev_without_database_url_configures_no_engine(monkeypatch):
+    """
+    An empty config is how Django is told to use its dummy backend, which keeps
+    DB-free commands (makemigrations, dump_openapi_*) working while any query
+    fails loudly.
+    """
+    loaded = load_settings(monkeypatch, IS_DEVELOPMENT="True")
+    assert loaded.DATABASES["default"] == {}
 
 
 def test_csrf_cookie_domain_must_cover_spa_host(monkeypatch):

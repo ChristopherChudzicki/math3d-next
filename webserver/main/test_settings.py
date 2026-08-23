@@ -11,15 +11,16 @@ sentry_sdk.init(dsn=None)  # tests never report, even if SENTRY_DSN is set
 def require_postgres(engine: str, database_url: str) -> None:
     """
     Fail loudly unless the test database is PostgreSQL, as dev and production
-    are. main.settings falls back to SQLite when DATABASE_URL is unset, and
-    that fallback hides bugs that would fail in production.
+    are. Another engine hides bugs that would fail in production, and an unset
+    DATABASE_URL leaves Django's dummy backend, which lets the suite start and
+    then fails every query with a generic message.
     """
     if engine == "django.db.backends.postgresql":
         return
     detail = (
         f"DATABASE_URL resolved to {engine!r}"
         if database_url
-        else "DATABASE_URL is not set, so settings fell back to SQLite"
+        else "DATABASE_URL is not set, so there is no configured database"
     )
     raise ImproperlyConfigured(
         f"The test suite requires PostgreSQL, but {detail}. Run the tests inside "
@@ -29,7 +30,7 @@ def require_postgres(engine: str, database_url: str) -> None:
     )
 
 
-require_postgres(DATABASES["default"]["ENGINE"], ENV.DATABASE_URL)  # noqa: F405
+require_postgres(DATABASES["default"].get("ENGINE", ""), ENV.DATABASE_URL)  # noqa: F405
 
 # The test database name is otherwise fixed, and Django autoclobbers it, so
 # concurrent suites (worktrees, parallel agents) would drop each other's.

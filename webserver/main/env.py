@@ -38,6 +38,8 @@ class EnvConfig(BaseSettings):
     # Shared secret gating the Worker's POST /render. Unset in dev is fine
     # (feature dark). Not required in production — the feature is optional.
     RENDER_SECRET: str = ""
+    # Required in production (below). Unset in dev leaves Django on its dummy
+    # backend: DB-free commands like makemigrations run, queries fail loudly.
     DATABASE_URL: str = ""
     INGESTION_DATABASE_URL: str = ""
     # NoDecode: these env vars hold comma-separated lists, not JSON — skip
@@ -126,6 +128,11 @@ class EnvConfig(BaseSettings):
                     "CSRF_COOKIE_DOMAIN is required in production; without it the "
                     "SPA cannot read the CSRF token and all authenticated writes "
                     "fail."
+                )
+            if not self.DATABASE_URL:
+                raise ValueError(
+                    "DATABASE_URL is required in production; without it Django "
+                    "falls back to a dummy backend that fails on every query."
                 )
         return self
 
