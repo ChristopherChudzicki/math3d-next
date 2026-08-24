@@ -56,3 +56,43 @@ def test_is_reserved_key_error_false_for_invalid_items():
     with pytest.raises(ValidationError) as exc_info:
         Scene(**kwargs).save()
     assert not is_reserved_key_error(exc_info.value)
+
+
+@pytest.mark.django_db
+def test_created_modified_timestamps():
+    scene = Scene(**_valid_scene_kwargs("timestamps"))
+    scene.save()
+
+    assert scene.created_date == scene.modified_date
+
+    scene.save()
+
+    assert scene.modified_date > scene.created_date
+
+
+@pytest.mark.django_db
+def test_save_update_fields_narrows_the_update():
+    """save(update_fields=...) must reach Model.save, and carry modified_date."""
+    scene = SceneFactory.create()
+    before = scene.modified_date
+    was_archived = scene.archived
+
+    scene.title = "New title"
+    scene.archived = not was_archived
+    scene.save(update_fields=["title"])
+
+    scene.refresh_from_db()
+    assert scene.title == "New title"
+    assert scene.archived == was_archived  # unlisted, so never written
+    assert scene.modified_date > before
+
+
+@pytest.mark.django_db
+def test_save_with_empty_update_fields_skips_the_write():
+    scene = SceneFactory.create()
+    before = scene.modified_date
+
+    scene.save(update_fields=[])
+
+    scene.refresh_from_db()
+    assert scene.modified_date == before

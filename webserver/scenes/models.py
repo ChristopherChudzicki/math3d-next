@@ -83,12 +83,16 @@ class TimestampedModel(models.Model):
     class Meta:
         abstract = True
 
-    def save(self, *args, **kwargs):
+    def save(self, **kwargs):
         now = timezone.now()
         if not self.id:
             self.created_date = now
         self.modified_date = now
-        return super().save()
+        # Django writes only the listed columns, so carry the bump along.
+        # Empty stays empty -- that is Django's documented no-op.
+        if update_fields := kwargs.get("update_fields"):
+            kwargs["update_fields"] = {*update_fields, "modified_date"}
+        return super().save(**kwargs)
 
 
 class Scene(TimestampedModel):
@@ -132,9 +136,9 @@ class Scene(TimestampedModel):
         ]
         ordering = ["id"]
 
-    def save(self, *args, **kwargs):
+    def save(self, **kwargs):
         self.full_clean()
-        return super().save(*args, **kwargs)
+        return super().save(**kwargs)
 
 
 class RenderDay(models.Model):
