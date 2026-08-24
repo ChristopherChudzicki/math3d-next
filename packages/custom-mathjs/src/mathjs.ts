@@ -213,7 +213,6 @@ mathjs.import(
     arcsech: mathjs.asech,
     arccsch: mathjs.acsch,
     arccoth: mathjs.acoth,
-    // @ts-expect-error diff is defined above
     grad: mathjs.diff,
   },
   { override: true },
