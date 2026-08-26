@@ -8418,7 +8418,7 @@ __metadata:
     react: "npm:^19.2.7"
     react-dom: "npm:^19.2.7"
     react-hook-form: "npm:^7.56.1"
-    react-infinite-scroll-component: "npm:^6.1.0"
+    react-infinite-scroll-component: "npm:^6.1.1"
     react-redux: "npm:^9.1.0"
     react-router: "npm:^7.18.0"
     react-router-dom: "npm:^7.18.0"
@@ -18777,7 +18777,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-infinite-scroll-component@npm:^6.1.0":
+"react-infinite-scroll-component@npm:^6.1.1":
   version: 6.1.1
   resolution: "react-infinite-scroll-component@npm:6.1.1"
   dependencies:
