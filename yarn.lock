@@ -29,6 +29,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@arnog/colors@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "@arnog/colors@npm:0.5.0"
+  checksum: 10/ca6b5c37a973addd62778853071a1c285e28bb0e51e865ebbda2a352243f7af2abd3a2809976e9fc26091e2baf646d4f89cf8815a9509faedee1c3a487d96c05
+  languageName: node
+  linkType: hard
+
 "@asamuzakjp/css-color@npm:^2.8.2":
   version: 2.8.3
   resolution: "@asamuzakjp/css-color@npm:2.8.3"
@@ -2251,13 +2258,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cortex-js/compute-engine@npm:0.28.0":
-  version: 0.28.0
-  resolution: "@cortex-js/compute-engine@npm:0.28.0"
+"@cortex-js/compute-engine@npm:0.58.0":
+  version: 0.58.0
+  resolution: "@cortex-js/compute-engine@npm:0.58.0"
   dependencies:
+    "@arnog/colors": "npm:^0.5.0"
     complex-esm: "npm:^2.1.1-esm1"
-    decimal.js: "npm:^10.4.3"
-  checksum: 10/c848d6001137d9a5ef9f876db7a0cfb7c9e47b2a14f60bad87bf194e95bd81feac0cb819dbb29b4e73e959daf352bf1c76397fd435e70c432a7e1efb19baba6b
+    decimal.js: "npm:^10.6.0"
+  checksum: 10/fcfd93857f80ac93549d3c84c879afb085aa6c46003382d86b1f408ed6853a4b15f515a68fd4caac18296408255d49a8265fcd3f2c424996da1e22737a7d6136
   languageName: node
   linkType: hard
 
@@ -8335,7 +8343,7 @@ __metadata:
     envalid: "npm:^8.0.0"
     eslint: "npm:^8.57.1"
     mailparser: "npm:^3.9.15"
-    mathlive: "npm:^0.105.0"
+    mathlive: "npm:^0.110.0"
     p-retry: "npm:^6.2.1"
     sharp: "npm:^0.34.5"
     three: "npm:^0.147.0"
@@ -8412,7 +8420,7 @@ __metadata:
     lodash-es: "npm:4.18.1"
     mathbox: "npm:^2.3.1"
     mathbox-react: "npm:^1.0.1"
-    mathlive: "npm:^0.105.0"
+    mathlive: "npm:^0.110.0"
     msw: "npm:^2.0.14"
     ordinal: "npm:1.0.3"
     react: "npm:^19.2.7"
@@ -10746,7 +10754,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"decimal.js@npm:^10.5.0":
+"decimal.js@npm:^10.5.0, decimal.js@npm:^10.6.0":
   version: 10.6.0
   resolution: "decimal.js@npm:10.6.0"
   checksum: 10/c0d45842d47c311d11b38ce7ccc911121953d4df3ebb1465d92b31970eb4f6738a065426a06094af59bee4b0d64e42e7c8984abd57b6767c64ea90cf90bb4a69
@@ -16261,12 +16269,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathlive@npm:^0.105.0":
-  version: 0.105.2
-  resolution: "mathlive@npm:0.105.2"
+"mathlive@npm:^0.110.0":
+  version: 0.110.0
+  resolution: "mathlive@npm:0.110.0"
   dependencies:
-    "@cortex-js/compute-engine": "npm:0.28.0"
-  checksum: 10/d2c4c71867feddbc4df37bf6f2d33fa5f6428bc92ede3869fd2ea86f59d2be994a3d2a0c52e92bc1b226fa853a585cd0f1230da26feca6fac1037f7f178bb8b1
+    "@cortex-js/compute-engine": "npm:0.58.0"
+  checksum: 10/6b8ffb4150e22b1c0067f47188e3ae404e6ad3ab3c92ed2b6ee43323c5ccf4c1d3d0d4c875904a891bc4d16e860e3c38f118deb8d09207ad55513db86bbda40f
   languageName: node
   linkType: hard
 
