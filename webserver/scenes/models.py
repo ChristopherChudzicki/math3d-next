@@ -106,8 +106,10 @@ class Scene(TimestampedModel):
     item_order = models.JSONField()
 
     title = models.TextField(blank=True, default="Untitled")
+    # SET_NULL, not CASCADE: a published scene's link is shared and must survive
+    # its author deleting their account.
     author = models.ForeignKey(
-        CustomUser, blank=True, null=True, on_delete=models.CASCADE
+        CustomUser, blank=True, null=True, on_delete=models.SET_NULL
     )
 
     archived = models.BooleanField(default=False)
