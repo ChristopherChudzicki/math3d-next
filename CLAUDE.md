@@ -135,6 +135,14 @@ From a worktree, `just be test` does not work — compose would try to start a d
 DATABASE_URL=postgresql://docker:docker@localhost:5431/math3d TEST_DB_NAME=test_math3d_$(basename $(git rev-parse --show-toplevel)) uv run pytest # pragma: allowlist secret
 ```
 
+**After a Python dependency change**, the backend comes up with `ModuleNotFoundError` even on a freshly rebuilt image: `docker-compose.yml` mounts the named volume `venv-data` over `/app/.venv`, and Docker seeds a named volume from the image only when the volume is empty. Re-sync the venv in place:
+
+```bash
+docker compose run --rm webserver uv sync --frozen --all-groups
+```
+
+(`docker volume rm math3d-next_venv-data` also works, at the cost of a full rebuild.) CI is unaffected — it has no volume.
+
 **After the postgres image major version changes** (e.g. the 16 → 18 bump), the `db` service comes up empty: `PGDATA` is major-versioned (`/var/lib/postgresql/<major>/docker`), so a new major finds no data directory and runs `initdb`. The previous major's files are left intact — in the `db-data` volume, or, for majors predating it, in the orphaned anonymous volume. Repopulate:
 
 ```bash
