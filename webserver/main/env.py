@@ -61,6 +61,11 @@ class EnvConfig(BaseSettings):
     APP_VERSION: str = "unknown"
     # Feature flags
     ENABLE_REGISTRATION: bool = False
+    # Google OAuth client ID. Public by design (the SPA embeds it too), so this
+    # is config, not a secret. Unset ⇒ the provider is still registered but no
+    # sign-in can succeed (an empty `aud` matches no Google token); required in
+    # production from the PR that ships the sign-in button.
+    GOOGLE_CLIENT_ID: str = ""
     CSRF_COOKIE_DOMAIN: str = ""
     DISABLE_ALLAUTH_RATE_LIMITS: bool = False
     # Sentry. Unset ⇒ the SDK is a no-op, which is how dev, CI, and tests run.
