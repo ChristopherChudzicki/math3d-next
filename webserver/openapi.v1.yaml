@@ -231,24 +231,12 @@ components:
       - useRelative
       title: CameraProperties
       type: object
-    DeleteAccountError:
-      properties:
-        current_password:
-          items:
-            type: string
-          title: Current Password
-          type: array
-      required:
-      - current_password
-      title: DeleteAccountError
-      type: object
     DeleteAccountSchema:
       properties:
         current_password:
+          default: ''
           title: Current Password
           type: string
-      required:
-      - current_password
       title: DeleteAccountSchema
       type: object
     ExplicitSurfaceItem:
@@ -1704,12 +1692,6 @@ paths:
       responses:
         '204':
           description: No Content
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DeleteAccountError'
-          description: Bad Request
       security:
       - SessionAuth: []
       summary: Delete Me
