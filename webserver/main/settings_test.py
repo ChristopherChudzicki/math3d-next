@@ -489,3 +489,46 @@ def test_ambient_env_does_not_reach_the_suite():
     )
     assert proc.returncode == 0, proc.stderr
     assert "DISABLE_CSRF=False" in proc.stdout
+
+
+def test_dummy_provider_is_development_only(monkeypatch):
+    """
+    The dummy provider mints a session from an unsigned payload — anyone who can
+    reach it can become any user. IS_DEPLOYMENT is the entire guard; a
+    dedicated flag was rejected because it could hold no value IS_DEPLOYMENT
+    does not already imply (a deployment sets SESSION_COOKIE_SECURE
+    unconditionally).
+    """
+    dev = load_settings(monkeypatch, IS_DEPLOYMENT="False")
+    assert "allauth.socialaccount.providers.dummy" in dev.INSTALLED_APPS
+
+    deployed = load_settings(monkeypatch, **DEPLOY_ENV)
+    assert "allauth.socialaccount.providers.dummy" not in deployed.INSTALLED_APPS
+
+
+def test_google_app_reads_the_client_id_from_the_environment(monkeypatch):
+    loaded = load_settings(
+        monkeypatch, **DEPLOY_ENV, GOOGLE_CLIENT_ID="abc.apps.googleusercontent.com"
+    )
+    app = loaded.SOCIALACCOUNT_PROVIDERS["google"]["APP"]
+    assert app["client_id"] == "abc.apps.googleusercontent.com"
+    # The popup flow verifies ID tokens against Google's certs and never
+    # exchanges an authorization code, so there is no secret to hold.
+    assert app["secret"] == ""
+
+
+def test_provider_identities_are_never_linked_by_email(monkeypatch):
+    """
+    Email-based linking would let anyone who controls an address take over the
+    matching account. allauth resolves it at two levels: the global setting is
+    OR'd with a per-provider EMAIL_AUTHENTICATION key, and a lowercase
+    email_authentication inside APP["settings"] short-circuits both
+    (socialaccount/adapter.py:347-359). Asserting only the global would pass
+    vacuously while a provider-level key silently re-enabled it.
+    """
+    loaded = load_settings(monkeypatch, **DEPLOY_ENV)
+    assert loaded.SOCIALACCOUNT_EMAIL_AUTHENTICATION is False
+    assert loaded.SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT is False
+    google = loaded.SOCIALACCOUNT_PROVIDERS["google"]
+    assert "EMAIL_AUTHENTICATION" not in google
+    assert "email_authentication" not in google["APP"].get("settings", {})
