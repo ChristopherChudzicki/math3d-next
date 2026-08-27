@@ -22,10 +22,12 @@ test.describe("User settings profile form", () => {
     });
 
     await test.step("Check updated nickname", async () => {
-      // Only the initial is displayed in user menu
-      await expect(app.userMenu().opener({ includeHidden: true })).toHaveText(
-        newNickname[0],
-      );
+      // Reload so the form re-reads from the API: the nickname is no longer
+      // rendered anywhere else (the avatar is always a generic icon).
+      await page.reload();
+      await expect(
+        app.userSettings().profileForm().publicNickname(),
+      ).toHaveValue(newNickname);
     });
   });
 

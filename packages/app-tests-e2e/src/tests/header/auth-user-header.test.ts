@@ -10,7 +10,6 @@ test("Shows username in usermenu", async ({ page, workerUser }) => {
 
   const trigger = await app.userMenu().opener();
   await expect(trigger).toBeVisible();
-  await expect(trigger).toHaveText(workerUser.info.public_nickname[0]);
 
   await trigger.click();
   const username = app.userMenu().username();
