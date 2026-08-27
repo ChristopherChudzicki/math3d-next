@@ -18,11 +18,6 @@ const badgeAnchorOrigin: BadgeProps["anchorOrigin"] = {
   horizontal: "right",
 };
 
-const UserIcon = ({ user }: { user?: User | null }) => {
-  if (!user) return <PersonIcon />;
-  return user.public_nickname[0].toUpperCase() || <PersonIcon />;
-};
-
 const UserMenu: React.FC<{
   items: SimpleMenuItem[];
   user?: User | null;
@@ -51,7 +46,7 @@ const UserMenu: React.FC<{
         component="button"
         aria-label="Open User Menu"
       >
-        <UserIcon user={user} />
+        <PersonIcon />
       </Avatar>
     </Badge>
   );
