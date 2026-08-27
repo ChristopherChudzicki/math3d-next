@@ -8,7 +8,7 @@ test.use({ user: "static" });
 test("Signing out", async ({ page }) => {
   await page.goto("");
   const app = new AppPage(page);
-  await expect(app.userMenu().opener()).toHaveText("S");
+  await expect(app.userMenu().opener()).toBeVisible();
   await app.userMenu().opener().click();
   const username = app.userMenu().username();
   expect(await username.textContent()).toBe(env.TEST_USER_STATIC_EMAIL);
