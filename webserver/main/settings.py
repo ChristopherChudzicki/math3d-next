@@ -173,11 +173,18 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.headless",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
     "corsheaders",
     ## Custom apps
     "main",
     "scenes",
 ]
+
+# The dummy provider mints a session from an unsigned JSON payload, so it must
+# never reach a deployed environment; IS_DEVELOPMENT is the whole guard.
+if IS_DEVELOPMENT:
+    INSTALLED_APPS.append("allauth.socialaccount.providers.dummy")
 
 SITE_ID = 1
 
@@ -289,6 +296,16 @@ ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
 # ACCOUNT_SIGNUP_FORM_CLASS (not ACCOUNT_FORMS) is the correct setting for
 # injecting extra fields alongside allauth's built-in signup form.
 ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"
+
+# No secret: the popup flow verifies Google ID tokens against Google's certs
+# with `aud == client_id` and never exchanges an authorization code.
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {"APP": {"client_id": ENV.GOOGLE_CLIENT_ID, "secret": ""}},
+}
+# Never adopt an existing account just because a provider asserts its email
+# address. Both spellings matter — see main/settings_test.py.
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = False
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = False
 
 if ENV.DISABLE_ALLAUTH_RATE_LIMITS:
     if not IS_DEVELOPMENT:
