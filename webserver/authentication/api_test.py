@@ -2,7 +2,7 @@ import pytest
 from allauth.account.models import EmailAddress
 from django.test import Client
 
-from authentication.factories import FACTORY_PASSWORD, CustomUserFactory
+from authentication.factories import CustomUserFactory
 from authentication.models import CustomUser
 
 ME_URL = "/v1/auth/users/me/"
@@ -117,39 +117,18 @@ def test_me_patch_enforces_csrf():
 
 
 @pytest.mark.django_db
-def test_delete_missing_password_returns_400():
-    # A schema-validation failure routes through the ValidationError handler (422→400).
+def test_delete_removes_account():
+    """
+    The session is the only gate. Provider accounts have unusable passwords, so
+    a password check would lock every OAuth user out of deleting their own
+    account (ADR-0004).
+    """
     user = CustomUserFactory.create()
     client = Client()
     client.force_login(user)
+
     response = client.post(DELETE_URL, data={}, content_type="application/json")
-    assert response.status_code == 400
 
-
-@pytest.mark.django_db
-def test_delete_wrong_password_returns_400_body():
-    user = CustomUserFactory.create()
-    client = Client()
-    client.force_login(user)
-    response = client.post(
-        DELETE_URL,
-        data={"current_password": "wrong"},  # pragma: allowlist secret
-        content_type="application/json",
-    )
-    assert response.status_code == 400
-    assert response.json() == {"current_password": ["Invalid password."]}
-
-
-@pytest.mark.django_db
-def test_delete_correct_password_removes_account():
-    user = CustomUserFactory.create()
-    client = Client()
-    client.force_login(user)
-    response = client.post(
-        DELETE_URL,
-        data={"current_password": FACTORY_PASSWORD},
-        content_type="application/json",
-    )
     assert response.status_code == 204
     assert not CustomUser.objects.filter(id=user.id).exists()
 
@@ -157,11 +136,7 @@ def test_delete_correct_password_removes_account():
 @pytest.mark.django_db
 def test_delete_requires_auth():
     # delete_me is auth=session_auth; an anonymous POST is rejected.
-    response = Client().post(
-        DELETE_URL,
-        data={"current_password": FACTORY_PASSWORD},
-        content_type="application/json",
-    )
+    response = Client().post(DELETE_URL, data={}, content_type="application/json")
     assert response.status_code == 403
 
 
@@ -173,11 +148,9 @@ def test_delete_flushes_session():
     user = CustomUserFactory.create()
     client = Client()
     client.force_login(user)
-    response = client.post(
-        DELETE_URL,
-        data={"current_password": FACTORY_PASSWORD},
-        content_type="application/json",
-    )
+
+    response = client.post(DELETE_URL, data={}, content_type="application/json")
+
     assert response.status_code == 204
     assert "_auth_user_id" not in client.session
 

@@ -23,11 +23,10 @@ class UserUpdateSchema(Schema):
 
 
 class DeleteAccountSchema(Schema):
-    current_password: str
-
-
-class DeleteAccountError(Schema):
-    current_password: list[str]
+    # Ignored: the session is the gate. The field stays until the removal PR so
+    # the generated client keeps a property for the SPA's call site to
+    # destructure — ninja would drop an undeclared key either way.
+    current_password: str = ""
 
 
 class ActivationSchema(Schema):
@@ -62,15 +61,9 @@ def patch_me(request: HttpRequest, payload: UserUpdateSchema):
     return user
 
 
-@router.post(
-    "/users/me/delete/",
-    response={204: None, 400: DeleteAccountError},
-    auth=session_auth,
-)
+@router.post("/users/me/delete/", response={204: None}, auth=session_auth)
 def delete_me(request: HttpRequest, payload: DeleteAccountSchema):
     user = cast(CustomUser, request.user)
-    if not user.check_password(payload.current_password):
-        return Status(400, {"current_password": ["Invalid password."]})
     user.delete()
     request.session.flush()
     return Status(204, None)
