@@ -57,15 +57,16 @@ const getSessionCookies = async (
 /**
  * Self-delete the account owning `cookies`.
  *
- * Tolerates a 403: `delete_me` requires session auth, so an invalid or
+ * Tolerates a 403 only when its body is this API's own auth rejection
+ * (`{"detail": "Forbidden."}`, from the `AuthenticationError` handler in
+ * `main/api.py`): `delete_me` requires session auth, so an invalid or
  * already-flushed session (the account is already gone) fails auth before
- * the handler runs. This API's `AuthenticationError` handler (main/api.py)
- * reports that as 403, matching DRF convention rather than ninja's default
- * 401 — confirmed by `test_delete_requires_auth` in
+ * the handler runs, confirmed by `test_delete_requires_auth` in
  * webserver/authentication/api_test.py. Some tests delete their own user
  * mid-test, so fixture cleanup running into an already-gone account is an
- * expected case, not a dead path. Any other non-2xx is a real failure and
- * is thrown, so a leaked account is loud instead of silently swallowed.
+ * expected case, not a dead path. A 403 with any other body — e.g. Django's
+ * CSRF rejection — is a real failure and is thrown, same as any other
+ * non-2xx, so a leaked account is loud instead of silently swallowed.
  */
 const deleteUser = async (cookies: SessionCookies): Promise<void> => {
   const response = await apiFetch(`/v1/auth/users/me/delete/`, {
@@ -73,10 +74,18 @@ const deleteUser = async (cookies: SessionCookies): Promise<void> => {
     headers: authHeaders(cookies),
     body: {},
   });
-  if (response.ok || response.status === 403) return;
-  throw new Error(
-    `Failed to delete user (status ${response.status}): ${await response.text()}`,
-  );
+  if (response.ok) return;
+  const text = await response.text();
+  if (response.status === 403) {
+    let isAuthRejection = false;
+    try {
+      isAuthRejection = JSON.parse(text)?.detail === "Forbidden.";
+    } catch {
+      // Not JSON: not this API's auth rejection shape.
+    }
+    if (isAuthRejection) return;
+  }
+  throw new Error(`Failed to delete user (status ${response.status}): ${text}`);
 };
 
 /**
