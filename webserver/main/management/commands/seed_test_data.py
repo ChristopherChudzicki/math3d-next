@@ -1,6 +1,6 @@
 import os
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
 from pydantic_settings import BaseSettings
@@ -25,6 +25,15 @@ User = get_user_model()
 def create_test_user(
     email: str, password: str, public_nickname: str, *, uid: str, is_staff=False
 ):
+    if not email:
+        raise CommandError(
+            "Empty email for test user. Set TEST_USER_ADMIN_EMAIL and "
+            "TEST_USER_STATIC_EMAIL."
+        )
+    if not uid:
+        raise CommandError(
+            "Empty uid for test user. Set TEST_USER_ADMIN_UID and TEST_USER_STATIC_UID."
+        )
     user, _ = User.objects.get_or_create(email=email)
     user.is_active = True
     user.public_nickname = public_nickname
