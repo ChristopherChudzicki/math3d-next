@@ -1,7 +1,7 @@
 import { apiFetch, parseCookies } from "@/utils/api/config";
 import env from "@/env";
 import invariant from "tiny-invariant";
-import { makeUserInfo } from "@math3d/mock-api";
+import { makeUserIdentity } from "@math3d/mock-api";
 import type { UserIdentity } from "@math3d/mock-api";
 
 type SessionCookies = { sessionid: string; csrftoken: string };
@@ -88,7 +88,7 @@ const deleteUser = async (cookies: SessionCookies): Promise<void> => {
  * refresh.
  */
 const createActiveUser = async (user: Partial<UserIdentity> = {}) => {
-  const identity = makeUserInfo(user);
+  const identity = makeUserIdentity(user);
   const cookies = await getSessionCookies(identity);
   const cleanup = () => deleteUser(cookies);
   return { identity, cleanup };

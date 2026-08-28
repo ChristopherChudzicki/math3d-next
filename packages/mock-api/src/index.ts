@@ -1,6 +1,6 @@
 import { handlers, urls, mockAuth } from "./handlers";
 import { seedDb } from "./db";
-import { makeItem, SceneBuilder, makeUserInfo } from "./factories";
+import { makeItem, SceneBuilder, makeUserIdentity } from "./factories";
 import type { UserIdentity } from "./factories";
 
 export {
@@ -9,7 +9,7 @@ export {
   makeItem,
   handlers,
   SceneBuilder,
-  makeUserInfo,
+  makeUserIdentity,
   mockAuth,
 };
 export type { UserIdentity };
