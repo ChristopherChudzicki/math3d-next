@@ -45,27 +45,35 @@ const getSessionCookies = async (
   const cookies = parseCookies(response.headers.getSetCookie());
   invariant(
     cookies.sessionid,
-    `Expected sessionid from provider/token for ${user.email} (status ${response.status}). A 403 means ENABLE_REGISTRATION is not true.`,
+    `Expected sessionid from provider/token for ${user.email} (status ${response.status}). ` +
+      "A non-2xx here usually means either ENABLE_REGISTRATION is not true on the backend " +
+      "(required for a first-time uid), or the dummy provider isn't installed at all, which " +
+      "requires IS_DEVELOPMENT=true.",
   );
   invariant(cookies.csrftoken, "Expected csrftoken from provider/token");
   return { sessionid: cookies.sessionid, csrftoken: cookies.csrftoken };
 };
 
 /**
- * Self-delete the account owning `cookies`. Resolves silently if the account
- * is already gone — tests that delete their own user still run fixture
- * cleanup afterwards.
+ * Self-delete the account owning `cookies`.
+ *
+ * Tolerates a 401: `delete_me` requires session auth, so an invalid or
+ * already-flushed session (the account is already gone) fails auth before
+ * the handler runs, and ninja reports that as 401. Some tests delete their
+ * own user mid-test, so fixture cleanup running into an already-gone account
+ * is an expected case, not a dead path. Any other non-2xx is a real failure
+ * and is thrown, so a leaked account is loud instead of silently swallowed.
  */
 const deleteUser = async (cookies: SessionCookies): Promise<void> => {
-  try {
-    await apiFetch(`/v1/auth/users/me/delete/`, {
-      method: "POST",
-      headers: authHeaders(cookies),
-      body: {},
-    });
-  } catch {
-    // Already deleted, or the session no longer resolves — nothing to do.
-  }
+  const response = await apiFetch(`/v1/auth/users/me/delete/`, {
+    method: "POST",
+    headers: authHeaders(cookies),
+    body: {},
+  });
+  if (response.ok || response.status === 401) return;
+  throw new Error(
+    `Failed to delete user (status ${response.status}): ${await response.text()}`,
+  );
 };
 
 /**
@@ -83,5 +91,5 @@ const createActiveUser = async (user: Partial<UserIdentity> = {}) => {
   return { identity, cleanup };
 };
 
-export { authHeaders, getSessionCookies, deleteUser, users, createActiveUser };
+export { authHeaders, getSessionCookies, users, createActiveUser };
 export type { SessionCookies, UserIdentity };
