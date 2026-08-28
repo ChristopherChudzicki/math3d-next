@@ -3,11 +3,9 @@
 #
 # Writes a .env giving this checkout its own frontend port (3002-3009: the
 # main checkout's dev server owns 3000 and the legacy app dev server owns
-# 3001) and pointing the e2e email inbox at the main checkout, whose
-# webserver/ directory the shared docker backend mounts. The backend is NOT
-# duplicated: worktrees talk to the docker stack started from the main
-# checkout, which already trusts the worktree ports (see WORKTREE_PORTS in
-# webserver/main/origins.py).
+# 3001). The backend is NOT duplicated: worktrees talk to the docker stack
+# started from the main checkout, which already trusts the worktree ports
+# (see WORKTREE_PORTS in webserver/main/origins.py).
 set -euo pipefail
 cd "$(cd "$(dirname "$0")/.." && pwd)"
 
@@ -67,7 +65,6 @@ cat >.env <<EOF
 APP_BASE_URL="http://math3d.localdev:$port"
 TEST_APP_URL="http://math3d.localdev:$port"
 VITE_DISPLAY_AUTH_FLOWS=true
-EMAIL_DIR="$main_root/webserver/private/email"
 EOF
 
 # .envrc is untracked in the main checkout, so worktrees don't inherit it.
