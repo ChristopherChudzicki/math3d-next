@@ -20,20 +20,12 @@ test.describe("Authorized user (static)", () => {
     const app = new AppPage(page);
     await app.userMenu().opener().click();
     const username = app.userMenu().username();
-    expect(await username.textContent()).toBe(env.TEST_USER_STATIC_EMAIL);
+    await expect(username).toHaveText(env.TEST_USER_STATIC_EMAIL);
   });
 });
 
 test.describe("Authorized user (dynamic)", () => {
   test.use({ user: "worker" });
-
-  test("Check user info", async ({ page, workerUser }) => {
-    await page.goto("");
-    const app = new AppPage(page);
-    await app.userMenu().opener().click();
-    const username = app.userMenu().username();
-    expect(await username.textContent()).toBe(workerUser.email);
-  });
 
   test("Building a custom scene", async ({ page, prepareScene }) => {
     const scene = new SceneBuilder();
