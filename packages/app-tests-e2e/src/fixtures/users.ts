@@ -35,9 +35,12 @@ type Fixtures = {
    */
   disable3d: boolean;
   /**
-   * Create an active user.
+   * Create an active user, returning the identity and the session cookies
+   * already minted for it.
    */
-  createUser: (user: UserIdentity) => Promise<UserIdentity>;
+  createUser: (
+    user: UserIdentity,
+  ) => Promise<{ identity: UserIdentity; cookies: SessionCookies }>;
   sessionCookies: SessionCookies | null;
   page: Page;
   getPrepareScene: ({
@@ -70,8 +73,8 @@ const test = base.extend<Fixtures, WorkerFixtures>({
     const createUser: Fixtures["createUser"] = async (user) => {
       const request = createActiveUser(user);
       requests.push(request);
-      const { identity } = await request;
-      return identity;
+      const { identity, cookies } = await request;
+      return { identity, cookies };
     };
     await use(createUser);
     const cleanups = await Promise.all(requests);
@@ -83,15 +86,13 @@ const test = base.extend<Fixtures, WorkerFixtures>({
   sessionCookies: async ({ user, workerUser, createUser }, use) => {
     let cookies: SessionCookies | null = null;
     if (user) {
-      let creds: UserIdentity;
       if (user === "static") {
-        creds = users.static;
+        cookies = await getSessionCookies(users.static);
       } else if (user === "worker") {
-        creds = workerUser;
+        cookies = await getSessionCookies(workerUser);
       } else {
-        creds = await createUser(user);
+        ({ cookies } = await createUser(user));
       }
-      cookies = await getSessionCookies(creds);
     }
     await use(cookies);
   },
