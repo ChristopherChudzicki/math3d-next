@@ -32,7 +32,7 @@ test.describe("Authorized user (dynamic)", () => {
     const app = new AppPage(page);
     await app.userMenu().opener().click();
     const username = app.userMenu().username();
-    expect(await username.textContent()).toBe(workerUser.info.email);
+    expect(await username.textContent()).toBe(workerUser.email);
   });
 
   test("Building a custom scene", async ({ page, prepareScene }) => {
