@@ -6,6 +6,7 @@
   "scripts": {
     "test-e2e": "node --env-file-if-exists=../../.env.development --env-file-if-exists=../../.env ../../node_modules/.bin/playwright test",
     "og:build": "OG_BUILD=1 yarn test-e2e --project=chromium src/og/build-og.test.ts",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint --max-warnings 0 \"**/*.ts?(x)\""
   },
   "devDependencies": {
