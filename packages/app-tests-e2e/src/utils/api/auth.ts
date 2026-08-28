@@ -57,12 +57,15 @@ const getSessionCookies = async (
 /**
  * Self-delete the account owning `cookies`.
  *
- * Tolerates a 401: `delete_me` requires session auth, so an invalid or
+ * Tolerates a 403: `delete_me` requires session auth, so an invalid or
  * already-flushed session (the account is already gone) fails auth before
- * the handler runs, and ninja reports that as 401. Some tests delete their
- * own user mid-test, so fixture cleanup running into an already-gone account
- * is an expected case, not a dead path. Any other non-2xx is a real failure
- * and is thrown, so a leaked account is loud instead of silently swallowed.
+ * the handler runs. This API's `AuthenticationError` handler (main/api.py)
+ * reports that as 403, matching DRF convention rather than ninja's default
+ * 401 — confirmed by `test_delete_requires_auth` in
+ * webserver/authentication/api_test.py. Some tests delete their own user
+ * mid-test, so fixture cleanup running into an already-gone account is an
+ * expected case, not a dead path. Any other non-2xx is a real failure and
+ * is thrown, so a leaked account is loud instead of silently swallowed.
  */
 const deleteUser = async (cookies: SessionCookies): Promise<void> => {
   const response = await apiFetch(`/v1/auth/users/me/delete/`, {
@@ -70,7 +73,7 @@ const deleteUser = async (cookies: SessionCookies): Promise<void> => {
     headers: authHeaders(cookies),
     body: {},
   });
-  if (response.ok || response.status === 401) return;
+  if (response.ok || response.status === 403) return;
   throw new Error(
     `Failed to delete user (status ${response.status}): ${await response.text()}`,
   );
