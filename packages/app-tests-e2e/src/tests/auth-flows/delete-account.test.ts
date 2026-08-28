@@ -1,10 +1,10 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import AppPage from "@/utils/pages/AppPage";
-import { makeUserInfo } from "@math3d/mock-api";
+import { makeUserIdentity } from "@math3d/mock-api";
 
 test.describe("Account deletion", () => {
-  test.use({ user: makeUserInfo() });
+  test.use({ user: makeUserIdentity() });
 
   test("A signed-in user can delete their own account", async ({ page }) => {
     const app = new AppPage(page);
