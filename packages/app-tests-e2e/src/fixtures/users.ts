@@ -9,12 +9,7 @@ import {
   getSessionCookies,
   users,
 } from "@/utils/api/auth";
-import type {
-  SessionCookies,
-  UserCredentials,
-  UserInfo,
-} from "@/utils/api/auth";
-import { makeUserInfo } from "@math3d/mock-api";
+import type { SessionCookies, UserIdentity } from "@/utils/api/auth";
 import invariant from "tiny-invariant";
 
 const TEST_SCENE_PREFIX = "[TEST-E2E-SCENE]";
@@ -27,17 +22,12 @@ type PrepareScene = (
   opts?: Partial<PrepareSceneOpts>,
 ) => Promise<string>;
 
-type WorkerUser = {
-  credentials: UserCredentials;
-  info: Required<UserInfo>;
-};
-
 type WorkerFixtures = {
-  workerUser: WorkerUser;
+  workerUser: UserIdentity;
 };
 
 type Fixtures = {
-  user: UserCredentials | "static" | "worker" | null;
+  user: UserIdentity | "static" | "worker" | null;
   /**
    * When true, disables 3D MathBox rendering in the app. Defaults to true
    * since most E2E tests only interact with the controls sidebar.
@@ -47,7 +37,7 @@ type Fixtures = {
   /**
    * Create an active user.
    */
-  createUser: (user: UserCredentials) => Promise<UserCredentials>;
+  createUser: (user: UserIdentity) => Promise<UserIdentity>;
   sessionCookies: SessionCookies | null;
   page: Page;
   getPrepareScene: ({
@@ -63,8 +53,8 @@ const test = base.extend<Fixtures, WorkerFixtures>({
   workerUser: [
     // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
-      const { auth, info, cleanup } = await createActiveUser(makeUserInfo());
-      await use({ credentials: auth, info });
+      const { identity, cleanup } = await createActiveUser();
+      await use(identity);
       await cleanup();
     },
     { scope: "worker" },
@@ -80,8 +70,8 @@ const test = base.extend<Fixtures, WorkerFixtures>({
     const createUser: Fixtures["createUser"] = async (user) => {
       const request = createActiveUser(user);
       requests.push(request);
-      const { auth } = await request;
-      return auth;
+      const { identity } = await request;
+      return identity;
     };
     await use(createUser);
     const cleanups = await Promise.all(requests);
@@ -93,11 +83,11 @@ const test = base.extend<Fixtures, WorkerFixtures>({
   sessionCookies: async ({ user, workerUser, createUser }, use) => {
     let cookies: SessionCookies | null = null;
     if (user) {
-      let creds: UserCredentials;
+      let creds: UserIdentity;
       if (user === "static") {
         creds = users.static;
       } else if (user === "worker") {
-        creds = workerUser.credentials;
+        creds = workerUser;
       } else {
         creds = await createUser(user);
       }
@@ -218,4 +208,4 @@ const test = base.extend<Fixtures, WorkerFixtures>({
 });
 
 export { test, users };
-export type { Fixtures, WorkerUser };
+export type { Fixtures };
