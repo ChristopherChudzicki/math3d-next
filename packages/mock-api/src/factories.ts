@@ -454,10 +454,5 @@ const makeUserIdentity = (info?: Partial<UserIdentity>): UserIdentity => {
   };
 };
 
-export {
-  makeItem,
-  makeSceneFromItems,
-  SceneBuilder,
-  makeUserIdentity as makeUserInfo,
-};
+export { makeItem, makeSceneFromItems, SceneBuilder, makeUserIdentity };
 export type { UserIdentity };
