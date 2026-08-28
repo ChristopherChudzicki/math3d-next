@@ -57,16 +57,11 @@ const getSessionCookies = async (
 /**
  * Self-delete the account owning `cookies`.
  *
- * Tolerates a 403 only when its body is this API's own auth rejection
- * (`{"detail": "Forbidden."}`, from the `AuthenticationError` handler in
- * `main/api.py`): `delete_me` requires session auth, so an invalid or
- * already-flushed session (the account is already gone) fails auth before
- * the handler runs, confirmed by `test_delete_requires_auth` in
- * webserver/authentication/api_test.py. Some tests delete their own user
- * mid-test, so fixture cleanup running into an already-gone account is an
- * expected case, not a dead path. A 403 with any other body — e.g. Django's
- * CSRF rejection — is a real failure and is thrown, same as any other
- * non-2xx, so a leaked account is loud instead of silently swallowed.
+ * A flushed session (the account is already gone, deleted by the test itself)
+ * fails auth before `delete_me` runs, which this API reports as 403 with
+ * `{"detail": "Forbidden."}` rather than ninja's default 401 — so cleanup
+ * tolerates exactly that body. Any other 403, such as Django's CSRF
+ * rejection, throws, keeping a leaked account loud.
  */
 const deleteUser = async (cookies: SessionCookies): Promise<void> => {
   const response = await apiFetch(`/v1/auth/users/me/delete/`, {
@@ -89,12 +84,8 @@ const deleteUser = async (cookies: SessionCookies): Promise<void> => {
 };
 
 /**
- * Create an account and return its identity plus a cleanup function.
- *
- * One request: the dummy token login signs up and logs in together, so the
- * old signup -> admin-activation -> login sequence is gone, and with it the
- * admin user, the /v1/auth/users/activation/ call, and the cached-admin-cookie
- * refresh.
+ * Create an account, returning its identity, session cookies, and a cleanup
+ * function. The dummy token login signs up and logs in with one request.
  */
 const createActiveUser = async (user: Partial<UserIdentity> = {}) => {
   const identity = makeUserIdentity(user);
