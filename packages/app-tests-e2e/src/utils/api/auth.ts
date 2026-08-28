@@ -100,7 +100,7 @@ const createActiveUser = async (user: Partial<UserIdentity> = {}) => {
   const identity = makeUserIdentity(user);
   const cookies = await getSessionCookies(identity);
   const cleanup = () => deleteUser(cookies);
-  return { identity, cleanup };
+  return { identity, cookies, cleanup };
 };
 
 export { authHeaders, getSessionCookies, users, createActiveUser };
