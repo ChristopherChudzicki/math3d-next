@@ -433,27 +433,31 @@ class Folder {
   }
 }
 
-// import.meta.env is Vite-specific; the process.env fallback is needed
-// when this module runs in plain Node (e.g., Playwright E2E tests).
-const DEFAULT_EMAIL_PROVIDER =
-  import.meta.env?.TEST_EMAIL_PROVIDER ?? process.env.TEST_EMAIL_PROVIDER;
-interface UserSignupInfo {
+interface UserIdentity {
   email: string;
-  password: string;
-  public_nickname: string;
+  /**
+   * Dummy-provider account id. A decimal string, not a UUID: allauth's
+   * `AuthenticateForm.id` is an `IntegerField`, so a raw UUID is rejected with
+   * "Enter a whole number." The UUID's entropy is kept by reinterpreting its
+   * hex as an integer — uids must not collide across concurrently running
+   * suites, which share one database.
+   */
+  uid: string;
 }
 
-const makeUserInfo = (info?: Partial<UserSignupInfo>): UserSignupInfo => {
-  const password = faker.internet.password();
-
+const makeUserIdentity = (info?: Partial<UserIdentity>): UserIdentity => {
+  const uuid = crypto.randomUUID();
   return {
-    email: faker.internet
-      .email({ provider: DEFAULT_EMAIL_PROVIDER })
-      .toLowerCase(),
-    password,
-    public_nickname: faker.person.firstName(),
+    email: `${uuid}@example.com`,
+    uid: BigInt(`0x${uuid.replace(/-/g, "")}`).toString(),
     ...info,
   };
 };
 
-export { makeItem, makeSceneFromItems, SceneBuilder, makeUserInfo };
+export {
+  makeItem,
+  makeSceneFromItems,
+  SceneBuilder,
+  makeUserIdentity as makeUserInfo,
+};
+export type { UserIdentity };
