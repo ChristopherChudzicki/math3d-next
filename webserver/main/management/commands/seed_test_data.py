@@ -60,6 +60,12 @@ class Command(BaseCommand):
     help = """Seed test data for e2e tests"""
 
     def handle(self, *args, **options):
+        if env.TEST_USER_ADMIN_UID == env.TEST_USER_STATIC_UID:
+            raise CommandError(
+                "TEST_USER_ADMIN_UID and TEST_USER_STATIC_UID must differ; a "
+                "shared uid gives both users one dummy identity."
+            )
+
         create_test_user(
             email=env.TEST_USER_ADMIN_EMAIL,
             password=env.TEST_USER_ADMIN_PASSWORD,
