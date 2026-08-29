@@ -29,24 +29,14 @@ const LoginButtons: React.FC<{
   const { open } = useOverlay();
   if (isAuthenticated !== "unauthenticated" || !DISPLAY_AUTH_FLOWS) return null;
   return (
-    <>
-      <Button
-        variant="text"
-        color="secondary"
-        onClick={() => open("register")}
-        startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
-      >
-        Sign up
-      </Button>
-      <Button
-        variant="text"
-        color="secondary"
-        onClick={() => open("login")}
-        startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
-      >
-        Sign in
-      </Button>
-    </>
+    <Button
+      variant="text"
+      color="secondary"
+      onClick={() => open("login")}
+      startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
+    >
+      Sign in
+    </Button>
   );
 };
 
@@ -88,14 +78,6 @@ const getItems = ({
       label: "Sign in",
       icon: <AccountCircleOutlinedIcon fontSize="small" />,
       onClick: () => open("login"),
-      shouldShow: !isAuthenticated && DISPLAY_AUTH_FLOWS,
-    },
-    {
-      type: "button",
-      label: "Sign up",
-      key: "signup",
-      icon: <AccountCircleOutlinedIcon fontSize="small" />,
-      onClick: () => open("register"),
       shouldShow: !isAuthenticated && DISPLAY_AUTH_FLOWS,
     },
     {

@@ -4,7 +4,6 @@ type ByRoleOptions = Parameters<Locator["getByRole"]>[1];
 
 type UserMenuOption =
   | "signin"
-  | "signup"
   | "signout"
   | "myScenes"
   | "examples"
@@ -36,10 +35,6 @@ class UserMenu {
 
   signin(): Locator {
     return this.root.getByRole("menuitem", { name: "Sign in" });
-  }
-
-  signup(): Locator {
-    return this.root.getByRole("menuitem", { name: "Sign up" });
   }
 
   myScenes(): Locator {
