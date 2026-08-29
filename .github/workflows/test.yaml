@@ -20,6 +20,7 @@ jobs:
       VITE_LEGACY_APP_BASE_URL: ${{ vars.VITE_LEGACY_APP_BASE_URL }}
       VITE_ISSUE_URL: ${{ vars.VITE_ISSUE_URL }}
       VITE_SITE_ORIGIN: ${{ vars.VITE_SITE_ORIGIN }}
+      VITE_GOOGLE_CLIENT_ID: ci.apps.googleusercontent.com
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
