@@ -55,6 +55,7 @@ export const urls = {
     requestPasswordReset: `${BASE_URL}/_allauth/browser/v1/auth/password/request`,
     resetPassword: `${BASE_URL}/_allauth/browser/v1/auth/password/reset`,
     changePassword: `${BASE_URL}/_allauth/browser/v1/account/password/change`,
+    providerToken: `${BASE_URL}/_allauth/browser/v1/auth/provider/token`,
   },
 } as const;
 
@@ -200,6 +201,35 @@ export const handlers = [
         { status: 400 },
       );
     }
+    currentUserId = user.id;
+    return HttpResponse.json(makeAuthenticatedResponse(user));
+  }),
+  http.post(urls.auth.providerToken, async ({ request }) => {
+    const { token } = (await request.json()) as {
+      token?: { id_token?: string; client_id?: string };
+    };
+    if (typeof token?.id_token !== "string") {
+      return HttpResponse.json(
+        {
+          status: 400,
+          errors: [
+            {
+              code: "token_required",
+              message: "Invalid token.",
+              param: "token",
+            },
+          ],
+        },
+        { status: 400 },
+      );
+    }
+    // The id_token is read as JSON claims, matching the dummy provider the e2e
+    // suite signs in through. A real Google credential is a signed JWT that
+    // only the backend can verify, which no mock can stand in for.
+    const { email } = JSON.parse(token.id_token) as { email: string };
+    const user =
+      db.user.findFirst({ where: { email: { equals: email } } }) ??
+      db.user.create({ email });
     currentUserId = user.id;
     return HttpResponse.json(makeAuthenticatedResponse(user));
   }),
