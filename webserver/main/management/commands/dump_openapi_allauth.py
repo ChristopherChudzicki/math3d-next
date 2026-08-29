@@ -12,7 +12,7 @@ DEFAULT_OUTPUT = Path(settings.BASE_DIR) / "openapi.allauth.yaml"
 # Only these operations are vendored into our client; everything else allauth's
 # get_schema() exposes for the browser client (2FA, phone, reauthenticate,
 # email/phone management, login-by-code, config, verify-resend, ...) is dropped.
-# The frontend uses exactly these seven flows (see
+# The frontend uses exactly these eight flows (see
 # packages/api/src/hooks/auth/index.ts). Paths are already client-pinned to
 # `/browser/` by get_schema(), so we key on the resolved browser paths.
 ENABLED = {
@@ -23,6 +23,7 @@ ENABLED = {
     ("/_allauth/browser/v1/auth/password/reset", "post"): "resetPassword",
     ("/_allauth/browser/v1/auth/session", "delete"): "logout",
     ("/_allauth/browser/v1/account/password/change", "post"): "changePassword",
+    ("/_allauth/browser/v1/auth/provider/token", "post"): "providerToken",
 }
 
 # Param $refs to strip from kept operations. `SessionToken` is the

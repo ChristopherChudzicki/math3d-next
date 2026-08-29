@@ -131,6 +131,31 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/_allauth/browser/v1/auth/provider/token": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Provider token
+     * @description Authenticates with a third-party provider using provider tokens received
+     *     by other means. For example, in case of a mobile app, the authentication
+     *     flow runs completely on the device itself, without any interaction with
+     *     the API. Then, when the (device) authentication completes and the mobile
+     *     app receives an access and/or ID token, it can hand over these tokens
+     *     via this endpoint to authenticate on the server.
+     */
+    post: operations["providerToken"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/_allauth/browser/v1/auth/session": {
     parameters: {
       query?: never;
@@ -262,6 +287,8 @@ export interface components {
       email: components["schemas"]["Email"];
       public_nickname?: string;
     };
+    /** @description The client ID (in case of OAuth2 or OpenID Connect based providers) */
+    ClientID: string;
     ConflictResponse: {
       /** @enum {integer} */
       status: 409;
@@ -321,6 +348,16 @@ export interface components {
     Password: string;
     /** @description The phone number. */
     Phone: string;
+    /**
+     * @description The process to be executed when the user successfully
+     *     authenticates. When set to `login`, the user will be logged into the
+     *     account to which the provider account is connected, or if no such
+     *     account exists, a signup will occur. If set to `connect`, the provider
+     *     account will be connected to the list of provider accounts for the
+     *     currently authenticated user.
+     * @enum {string}
+     */
+    Process: "login" | "connect";
     Provider: {
       /** @description The client ID (in case of OAuth2 or OpenID Connect based providers) */
       client_id?: string;
@@ -337,6 +374,18 @@ export interface components {
     ProviderAccountID: string;
     /** @description The provider ID. */
     ProviderID: string;
+    ProviderToken: {
+      process: components["schemas"]["Process"];
+      provider: components["schemas"]["ProviderID"];
+      /** @description The token. */
+      token: {
+        /** @description The access token. */
+        access_token?: string;
+        client_id: components["schemas"]["ClientID"];
+        /** @description The ID token. */
+        id_token?: string;
+      };
+    };
     RequestPassword: {
       email: components["schemas"]["Email"];
     };
@@ -442,6 +491,11 @@ export interface components {
     Login: {
       content: {
         "application/json": components["schemas"]["Login"];
+      };
+    };
+    ProviderToken: {
+      content: {
+        "application/json": components["schemas"]["ProviderToken"];
       };
     };
     /** @description Request password. */
@@ -604,6 +658,45 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ConflictResponse"];
+        };
+      };
+    };
+  };
+  providerToken: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: components["requestBodies"]["ProviderToken"];
+    responses: {
+      200: components["responses"]["Authenticated"];
+      /** @description An input error occurred. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      /** @description Not authenticated, more steps are required to be completed. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AuthenticationResponse"];
+        };
+      };
+      /** @description Forbidden. For example, when signup is closed. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ForbiddenResponse"];
         };
       };
     };

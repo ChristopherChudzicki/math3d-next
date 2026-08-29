@@ -22,6 +22,12 @@ components:
             $ref: '#/components/schemas/Login'
       description: Login.
       required: true
+    ProviderToken:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProviderToken'
+      required: true
     RequestPassword:
       content:
         application/json:
@@ -322,6 +328,11 @@ components:
       required:
       - email
       type: object
+    ClientID:
+      description: 'The client ID (in case of OAuth2 or OpenID Connect based providers)
+
+        '
+      type: string
     ConflictResponse:
       properties:
         status:
@@ -442,6 +453,24 @@ components:
 
         '
       type: string
+    Process:
+      description: 'The process to be executed when the user successfully
+
+        authenticates. When set to `login`, the user will be logged into the
+
+        account to which the provider account is connected, or if no such
+
+        account exists, a signup will occur. If set to `connect`, the provider
+
+        account will be connected to the list of provider accounts for the
+
+        currently authenticated user.
+
+        '
+      enum:
+      - login
+      - connect
+      type: string
     Provider:
       properties:
         client_id:
@@ -489,6 +518,37 @@ components:
 
         '
       type: string
+    ProviderToken:
+      properties:
+        process:
+          $ref: '#/components/schemas/Process'
+        provider:
+          $ref: '#/components/schemas/ProviderID'
+        token:
+          description: 'The token.
+
+            '
+          properties:
+            access_token:
+              description: 'The access token.
+
+                '
+              type: string
+            client_id:
+              $ref: '#/components/schemas/ClientID'
+            id_token:
+              description: 'The ID token.
+
+                '
+              type: string
+          required:
+          - client_id
+          type: object
+      required:
+      - provider
+      - process
+      - token
+      type: object
     RequestPassword:
       properties:
         email:
@@ -749,6 +809,50 @@ paths:
 
             '
       summary: Reset password
+      tags:
+      - allauth
+  /_allauth/browser/v1/auth/provider/token:
+    post:
+      description: 'Authenticates with a third-party provider using provider tokens received
+
+        by other means. For example, in case of a mobile app, the authentication
+
+        flow runs completely on the device itself, without any interaction with
+
+        the API. Then, when the (device) authentication completes and the mobile
+
+        app receives an access and/or ID token, it can hand over these tokens
+
+        via this endpoint to authenticate on the server.
+
+        '
+      operationId: providerToken
+      requestBody:
+        $ref: '#/components/requestBodies/ProviderToken'
+      responses:
+        '200':
+          $ref: '#/components/responses/Authenticated'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: An input error occurred.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+          description: Not authenticated, more steps are required to be completed.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: 'Forbidden. For example, when signup is closed.
+
+            '
+      summary: Provider token
       tags:
       - allauth
   /_allauth/browser/v1/auth/session:
