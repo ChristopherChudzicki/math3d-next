@@ -124,8 +124,8 @@ def migrate_scene(legacy_scene: LegacyScene):
             "Skipping migration of legacy scene with reserved key %r", legacy_scene.key
         )
         return None
-    # These are auto_now_add, auto_now columns and can't be modified
-    # in save()
+    # TimestampedModel.save() overwrites modified_date on every write (and
+    # created_date on insert), so backdate with a queryset update.
     Scene.objects.filter(pk=scene.id).update(
         created_date=legacy_scene.dehydrated["metadata"]["creationDate"].replace(
             '"', ""
