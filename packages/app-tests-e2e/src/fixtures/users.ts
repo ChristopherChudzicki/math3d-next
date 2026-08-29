@@ -23,7 +23,7 @@ type PrepareScene = (
 ) => Promise<string>;
 
 type WorkerFixtures = {
-  workerUser: UserIdentity;
+  workerUser: { identity: UserIdentity; cookies: SessionCookies };
 };
 
 type Fixtures = {
@@ -56,8 +56,8 @@ const test = base.extend<Fixtures, WorkerFixtures>({
   workerUser: [
     // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
-      const { identity, cleanup } = await createActiveUser();
-      await use(identity);
+      const { identity, cookies, cleanup } = await createActiveUser();
+      await use({ identity, cookies });
       await cleanup();
     },
     { scope: "worker" },
@@ -89,7 +89,7 @@ const test = base.extend<Fixtures, WorkerFixtures>({
       if (user === "static") {
         cookies = await getSessionCookies(users.static);
       } else if (user === "worker") {
-        cookies = await getSessionCookies(workerUser);
+        cookies = workerUser.cookies;
       } else {
         ({ cookies } = await createUser(user));
       }
