@@ -1,95 +1,64 @@
-import React, { useCallback, useEffect, useId } from "react";
-import TextField from "@mui/material/TextField";
-import MuiLink from "@mui/material/Link";
-import { useForm } from "react-hook-form";
-import { useLogin } from "@math3d/api";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { useAuthStatus } from "@/features/auth";
-import { OverallError, setFieldErrors } from "@/util/forms";
+import React, { useCallback, useEffect, useState } from "react";
+import Alert from "@mui/material/Alert";
+import { useProviderTokenLogin } from "@math3d/api";
+import {
+  GOOGLE_CLIENT_ID,
+  GoogleSignInButton,
+  useAuthStatus,
+} from "@/features/auth";
 import BasicDialog from "@/util/components/BasicDialog";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import styles from "./styles.module.css";
 
-const schema = yup.object({
-  email: yup.string().email().required(),
-  password: yup.string().required(),
-});
-
 const LoginPage: React.FC = () => {
-  const { open, close } = useOverlay();
+  const { close } = useOverlay();
   const isAuthenticated = useAuthStatus();
-  const resolver = yupResolver(schema);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setError,
-  } = useForm({ resolver });
-
   const handleClose = useCallback(() => close(), [close]);
-  const formId = useId();
-  const login = useLogin();
+  const login = useProviderTokenLogin();
+  const [rejected, setRejected] = useState(false);
+
   useEffect(() => {
     if (isAuthenticated === "authenticated") {
       close();
     }
   }, [isAuthenticated, close]);
+
+  const handleCredential = useCallback(
+    async (credential: string) => {
+      setRejected(false);
+      try {
+        await login.mutateAsync({
+          provider: "google",
+          client_id: GOOGLE_CLIENT_ID,
+          id_token: credential,
+        });
+        // mutateAsync awaits onSuccess, which resets queries (including
+        // useUserMe), so auth status is already up-to-date.
+        handleClose();
+      } catch {
+        setRejected(true);
+      }
+    },
+    [login, handleClose],
+  );
+
   return (
     <BasicDialog
       title="Sign in"
       open
       onClose={handleClose}
-      confirmText="Sign in"
-      confirmButtonProps={{ type: "submit", form: formId }}
+      confirmButton={null}
       fullWidth
       maxWidth="xs"
     >
-      <form
-        className={styles["form-content"]}
-        id={formId}
-        onSubmit={handleSubmit(async (data, event) => {
-          event?.preventDefault();
-          try {
-            await login.mutateAsync(data, {});
-            // mutateAsync awaits onSuccess which resets queries (including
-            // useUserMe), so auth status is already up-to-date.
-            handleClose();
-          } catch (err) {
-            setFieldErrors(data, err, setError);
-          }
-        })}
-      >
-        <TextField
-          label="Email"
-          error={!!errors.email?.message}
-          helperText={errors.email?.message}
-          {...register("email")}
-        />
-        <TextField
-          error={!!errors.password?.message}
-          helperText={errors.password?.message}
-          label="Password"
-          type="password"
-          {...register("password")}
-        />
-        <OverallError error={errors.root} />
-      </form>
-      <div className={styles["sign-in-footer"]}>
-        <MuiLink
-          component="button"
-          type="button"
-          onClick={() => open("reset-request")}
-        >
-          Forgot password?
-        </MuiLink>
-        <MuiLink
-          component="button"
-          type="button"
-          onClick={() => open("register")}
-        >
-          Create Account
-        </MuiLink>
+      <div className={styles["sign-in-content"]}>
+        <GoogleSignInButton onCredential={handleCredential} />
+        {rejected && (
+          <Alert severity="error">
+            Google signed you in, but this site could not complete the sign-in.
+            Please try again.
+          </Alert>
+        )}
       </div>
     </BasicDialog>
   );
