@@ -29,6 +29,6 @@
     "lint": "eslint --max-warnings 0 \"**/*.ts?(x)\""
   },
   "dependencies": {
-    "tiny-invariant": "^1.3.1"
+    "tiny-invariant": "^1.3.3"
   }
 }
