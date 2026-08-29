@@ -45,3 +45,16 @@ def test_missing_uid_raises_instead_of_colliding():
             public_nickname="Seeded",
             uid="",
         )
+
+
+@pytest.mark.django_db
+def test_missing_email_raises_instead_of_colliding():
+    """An empty email would otherwise collapse every seeded user into one
+    `get_or_create(email="")` row; refuse to seed instead."""
+    with pytest.raises(CommandError, match="email"):
+        create_test_user(
+            email="",
+            password="irrelevant",  # pragma: allowlist secret
+            public_nickname="Seeded",
+            uid="1",
+        )
