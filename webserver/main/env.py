@@ -64,7 +64,7 @@ class EnvConfig(BaseSettings):
     # Google OAuth client ID. Public by design (the SPA embeds it too), so this
     # is config, not a secret. Unset ⇒ the provider is still registered but no
     # sign-in can succeed (an empty `aud` matches no Google token); required in
-    # production from the PR that ships the sign-in button.
+    # production (see _require_production_config).
     GOOGLE_CLIENT_ID: str = ""
     CSRF_COOKIE_DOMAIN: str = ""
     DISABLE_ALLAUTH_RATE_LIMITS: bool = False
@@ -141,6 +141,12 @@ class EnvConfig(BaseSettings):
                 raise ValueError(
                     "DATABASE_URL is required in production; without it Django "
                     "falls back to a dummy backend that fails on every query."
+                )
+            if not self.GOOGLE_CLIENT_ID:
+                raise ValueError(
+                    "GOOGLE_CLIENT_ID is required in production; empty, the "
+                    "Google app's client_id matches no ID token and every "
+                    "sign-in fails."
                 )
         return self
 
