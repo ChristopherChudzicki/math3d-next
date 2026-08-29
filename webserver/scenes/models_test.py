@@ -88,11 +88,12 @@ def test_save_update_fields_narrows_the_update():
 
 
 @pytest.mark.django_db
-def test_save_with_empty_update_fields_skips_the_write():
+def test_save_with_empty_update_fields_skips_the_db_write():
     scene = SceneFactory.create()
     before = scene.modified_date
 
     scene.save(update_fields=[])
 
+    assert scene.modified_date == before  # in memory, not only in the row
     scene.refresh_from_db()
     assert scene.modified_date == before

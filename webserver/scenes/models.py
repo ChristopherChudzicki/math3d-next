@@ -84,13 +84,17 @@ class TimestampedModel(models.Model):
         abstract = True
 
     def save(self, **kwargs):
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None and not update_fields:
+            # Django's documented no-op: no write, no signals. Bump the
+            # timestamps anyway and the instance would disagree with its row.
+            return super().save(**kwargs)
         now = timezone.now()
         if not self.id:
             self.created_date = now
         self.modified_date = now
-        # Django writes only the listed columns, so carry the bump along.
-        # Empty stays empty -- that is Django's documented no-op.
-        if update_fields := kwargs.get("update_fields"):
+        if update_fields:
+            # Django writes only the listed columns, so carry the bump along.
             kwargs["update_fields"] = {*update_fields, "modified_date"}
         return super().save(**kwargs)
 
