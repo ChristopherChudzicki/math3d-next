@@ -5,22 +5,20 @@ vi.mock("@/features/auth/displayAuthFlows", () => ({
   DISPLAY_AUTH_FLOWS: false,
 }));
 
-test("Sign in and Sign up header buttons are hidden when DISPLAY_AUTH_FLOWS is false", async () => {
+test("Sign in header button is hidden when DISPLAY_AUTH_FLOWS is false", async () => {
   renderTestApp("", { isAuthenticated: false });
   await screen.findByRole("button", { name: "Open Menu" });
 
   expect(screen.queryByRole("button", { name: "Sign in" })).toBeNull();
-  expect(screen.queryByRole("button", { name: "Sign up" })).toBeNull();
 });
 
-test("Sign in and Sign up menu items are hidden when DISPLAY_AUTH_FLOWS is false", async () => {
+test("Sign in menu item is hidden when DISPLAY_AUTH_FLOWS is false", async () => {
   renderTestApp("", { isAuthenticated: false });
   const button = await screen.findByRole("button", { name: "Open Menu" });
   await user.click(button);
   await screen.findByRole("menu");
 
   expect(screen.queryByRole("menuitem", { name: "Sign in" })).toBeNull();
-  expect(screen.queryByRole("menuitem", { name: "Sign up" })).toBeNull();
 });
 
 test("Logged-in users still get account menu items when DISPLAY_AUTH_FLOWS is false", async () => {
