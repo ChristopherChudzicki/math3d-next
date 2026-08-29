@@ -1,8 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 import UserMenu from "./UserMenu";
-import SigninPage from "./SigninPage";
-import SignupPage from "./SignupPage";
 import SignoutPage from "./SignoutPage";
 import UserSettingsPage from "./UserSettingsPage";
 import ItemSettings, { UniqueItemSettingsOpts } from "./ItemSettings";
@@ -18,14 +16,6 @@ class AppPage {
 
   userMenu(): UserMenu {
     return new UserMenu(this.page);
-  }
-
-  signupPage(): SignupPage {
-    return new SignupPage(this.page);
-  }
-
-  signinPage(): SigninPage {
-    return new SigninPage(this.page);
   }
 
   signoutPage(): SignoutPage {
@@ -55,18 +45,6 @@ class AppPage {
 
   myScenes(): MyScenes {
     return new MyScenes(this.page);
-  }
-
-  async signin({
-    password,
-    email,
-  }: {
-    email: string;
-    password: string;
-  }): Promise<void> {
-    await this.userMenu().opener().click();
-    await this.userMenu().signin().click();
-    await this.signinPage().signin({ password, email });
   }
 
   async signout(): Promise<void> {
