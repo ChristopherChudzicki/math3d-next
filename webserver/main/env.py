@@ -61,8 +61,8 @@ class EnvConfig(BaseSettings):
     ENABLE_REGISTRATION: bool = False
     # Google OAuth client ID. Public by design (the SPA embeds it too), so this
     # is config, not a secret. Unset ⇒ the provider is still registered but no
-    # sign-in can succeed (an empty `aud` matches no Google token); required in
-    # production from the PR that ships the sign-in button.
+    # sign-in can succeed (an empty `aud` matches no Google token); required on
+    # a deployment (see _require_deployment_config).
     GOOGLE_CLIENT_ID: str = ""
     CSRF_COOKIE_DOMAIN: str = ""
     DISABLE_ALLAUTH_RATE_LIMITS: bool = False
@@ -133,6 +133,11 @@ class EnvConfig(BaseSettings):
             missing.append(
                 "DATABASE_URL (without it Django falls back to a dummy backend "
                 "that fails on every query)"
+            )
+        if not self.GOOGLE_CLIENT_ID:
+            missing.append(
+                "GOOGLE_CLIENT_ID (empty, the Google app's client_id matches no "
+                "ID token's `aud` and every sign-in fails)"
             )
         if missing:
             raise ValueError(
