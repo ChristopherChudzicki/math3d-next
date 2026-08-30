@@ -7,10 +7,10 @@
     "@faker-js/faker": "^9.9.0",
     "@math3d/eslint-config": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
-    "@types/js-yaml": "^4.0.5",
+    "@types/js-yaml": "^4.0.9",
     "ajv": "^8.12.0",
     "eslint": "^8.57.1",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.3.2",
     "mathjs": "^15.2.0",
     "vitest": "^4.1.0"
   },

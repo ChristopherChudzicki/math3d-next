@@ -4117,10 +4117,10 @@ __metadata:
     "@math3d/tsconfig": "workspace:^"
     "@math3d/utils": "workspace:^"
     "@math3d/validators": "workspace:^"
-    "@types/js-yaml": "npm:^4.0.5"
+    "@types/js-yaml": "npm:^4.0.9"
     ajv: "npm:^8.12.0"
     eslint: "npm:^8.57.1"
-    js-yaml: "npm:^4.1.0"
+    js-yaml: "npm:^4.3.2"
     mathjs: "npm:^15.2.0"
     tinycolor2: "npm:^1.6.0"
     vitest: "npm:^4.1.0"
@@ -7048,7 +7048,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/js-yaml@npm:^4.0.5":
+"@types/js-yaml@npm:^4.0.9":
   version: 4.0.9
   resolution: "@types/js-yaml@npm:4.0.9"
   checksum: 10/a0ce595db8a987904badd21fc50f9f444cb73069f4b95a76cc222e0a17b3ff180669059c763ec314bc4c3ce284379177a9da80e83c5f650c6c1310cafbfaa8e6
@@ -15683,7 +15683,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:^4.1.0":
+"js-yaml@npm:^4.1.0, js-yaml@npm:^4.3.2":
   version: 4.3.2
   resolution: "js-yaml@npm:4.3.2"
   dependencies:
