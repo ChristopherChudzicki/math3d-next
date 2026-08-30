@@ -205,11 +205,8 @@ export const handlers = [
     return HttpResponse.json(makeAuthenticatedResponse(user));
   }),
   http.post(urls.auth.providerToken, async ({ request }) => {
-    const { token } = (await request.json()) as {
-      token?: { id_token?: string; client_id?: string };
-    };
-    if (typeof token?.id_token !== "string") {
-      return HttpResponse.json(
+    const invalidToken = () =>
+      HttpResponse.json(
         {
           status: 400,
           errors: [
@@ -222,11 +219,43 @@ export const handlers = [
         },
         { status: 400 },
       );
+    const { process, token } = (await request.json()) as {
+      process?: string;
+      token?: { id_token?: string; client_id?: string };
+    };
+    if (typeof token?.id_token !== "string") {
+      return invalidToken();
+    }
+    // Real allauth rejects a token whose client_id doesn't match the
+    // provider's configured app, or whose process isn't "login" (the SPA only
+    // ever signs in, never links a provider to an existing session).
+    const configuredClientId: string =
+      import.meta.env?.VITE_GOOGLE_CLIENT_ID ?? "";
+    if (token.client_id !== configuredClientId || process !== "login") {
+      return HttpResponse.json(
+        {
+          status: 400,
+          errors: [
+            {
+              code: "client_id_mismatch",
+              message: "The token's client_id does not match this app.",
+              param: "token",
+            },
+          ],
+        },
+        { status: 400 },
+      );
     }
     // The id_token is read as JSON claims, matching the dummy provider the e2e
     // suite signs in through. A real Google credential is a signed JWT that
     // only the backend can verify, which no mock can stand in for.
-    const { email } = JSON.parse(token.id_token) as { email: string };
+    let claims: { email: string };
+    try {
+      claims = JSON.parse(token.id_token) as { email: string };
+    } catch {
+      return invalidToken();
+    }
+    const { email } = claims;
     const user =
       db.user.findFirst({ where: { email: { equals: email } } }) ??
       db.user.create({ email });
