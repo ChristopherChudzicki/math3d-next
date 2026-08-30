@@ -1,6 +1,3 @@
-/* eslint-disable testing-library/no-node-access -- the gsi/client script is
-   injected into document.head, outside any container a testing-library query
-   can reach. */
 import React from "react";
 import { test, expect, afterEach, vi } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
@@ -9,9 +6,13 @@ import GoogleSignInButton from "./GoogleSignInButton";
 
 afterEach(() => {
   delete window.google;
-  document
-    .querySelectorAll('script[src^="https://accounts.google.com"]')
-    .forEach((el) => el.remove());
+  // The gsi/client script the script-failure test below injects lands in
+  // document.head, outside any container a testing-library query can reach.
+  // eslint-disable-next-line testing-library/no-node-access
+  const scripts = document.querySelectorAll(
+    'script[src^="https://accounts.google.com"]',
+  );
+  scripts.forEach((el) => el.remove());
 });
 
 test("initializes Google with the configured client ID and renders into its own container", async () => {
@@ -22,6 +23,9 @@ test("initializes Google with the configured client ID and renders into its own 
   expect(gsi.initialize.mock.calls[0][0].client_id).toBe(
     "test-client-id.apps.googleusercontent.com",
   );
+  // Google draws into the container itself; there is no role/text to query
+  // for, so this reaches for the DOM node directly.
+  // eslint-disable-next-line testing-library/no-node-access
   expect(gsi.renderButton.mock.calls[0][0]).toBe(view.container.firstChild);
 });
 
@@ -36,9 +40,19 @@ test("forwards the credential Google returns", async () => {
 });
 
 test("shows an error instead of a dead button when the script cannot load", async () => {
-  render(<GoogleSignInButton onCredential={vi.fn()} />);
+  // The loader's in-flight promise is memoized at module scope, so this test
+  // needs its own copy of the module graph rather than whatever the tests
+  // above left behind (see googleIdentity.spec.ts for the same treatment).
+  vi.resetModules();
+  const { default: FreshGoogleSignInButton } = await import(
+    "./GoogleSignInButton"
+  );
+  render(<FreshGoogleSignInButton onCredential={vi.fn()} />);
 
   const script = await waitFor(() => {
+    // The gsi/client script is injected into document.head, outside any
+    // container a testing-library query can reach.
+    // eslint-disable-next-line testing-library/no-node-access
     const el = document.querySelector(
       'script[src^="https://accounts.google.com"]',
     );
