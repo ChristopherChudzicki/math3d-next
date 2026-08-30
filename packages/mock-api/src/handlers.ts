@@ -227,8 +227,9 @@ export const handlers = [
       return invalidToken();
     }
     // Real allauth rejects a token whose client_id doesn't match the
-    // provider's configured app, or whose process isn't "login" (the SPA only
-    // ever signs in, never links a provider to an existing session).
+    // provider's configured app. `process` is pinned here as a tripwire, not
+    // a copy of allauth, which also accepts "connect": the SPA only ever signs
+    // in, so a request carrying anything else is a bug.
     const configuredClientId: string =
       import.meta.env?.VITE_GOOGLE_CLIENT_ID ?? "";
     if (token.client_id !== configuredClientId || process !== "login") {

@@ -72,6 +72,27 @@ test("A 403 (sign-ups closed) surfaces copy distinct from a generic failure", as
   );
 });
 
+test("A 401 (address already has an account) tells the user to sign in another way", async () => {
+  server.use(
+    http.post(
+      "*/_allauth/browser/v1/auth/provider/token",
+      () => new HttpResponse(null, { status: 401 }),
+    ),
+  );
+  const gsi = mockGoogleIdentity();
+  renderTestApp("/?overlay=login");
+
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await act(async () => {
+    gsi.fireCredential(JSON.stringify({ email: "existing@example.com" }));
+  });
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /account already exists/i,
+  );
+});
+
 test("If authenticated already, closes the overlay", async () => {
   const { location } = renderTestApp("/?overlay=login", {
     isAuthenticated: true,

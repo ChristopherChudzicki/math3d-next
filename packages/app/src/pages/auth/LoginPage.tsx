@@ -10,7 +10,7 @@ import BasicDialog from "@/util/components/BasicDialog";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import styles from "./styles.module.css";
 
-type LoginFailure = "signups-closed" | "unknown";
+type LoginFailure = "signups-closed" | "needs-existing-method" | "unknown";
 
 const LoginPage: React.FC = () => {
   const { close } = useOverlay();
@@ -38,11 +38,18 @@ const LoginPage: React.FC = () => {
         // useUserMe), so auth status is already up-to-date.
         handleClose();
       } catch (err) {
-        // allauth returns 403 for a first-time provider identity while
-        // registration is closed: signup and login are one request (see
-        // useProviderTokenLogin), so there is no separate "existing user"
-        // signal to tell this apart from any other rejected sign-in.
-        setFailure(isApiError(err, [403]) ? "signups-closed" : "unknown");
+        // Two rejections are worth telling apart from a generic failure,
+        // because retrying either one can never succeed.
+        // 403: a first-time provider identity while registration is closed —
+        // signup and login are one request (see useProviderTokenLogin), so
+        // there is no separate "existing user" signal to distinguish.
+        // 401: the address already belongs to an account this provider is not
+        // linked to. SOCIALACCOUNT_EMAIL_AUTHENTICATION is off, so allauth
+        // stops short of a session rather than adopting the account, and the
+        // SPA offers no linking flow.
+        if (isApiError(err, [403])) setFailure("signups-closed");
+        else if (isApiError(err, [401])) setFailure("needs-existing-method");
+        else setFailure("unknown");
       }
     },
     [login, handleClose],
@@ -63,6 +70,13 @@ const LoginPage: React.FC = () => {
           <Alert severity="error">
             Google signed you in, but sign-ups are currently closed and this
             account has not been registered.
+          </Alert>
+        )}
+        {failure === "needs-existing-method" && (
+          <Alert severity="error">
+            An account already exists for that email address. Sign in the way
+            that account was created, then connect Google from your account
+            settings.
           </Alert>
         )}
         {failure === "unknown" && (
