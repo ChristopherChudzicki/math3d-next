@@ -1,6 +1,6 @@
 const GSI_SRC = "https://accounts.google.com/gsi/client";
 
-export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+export const GOOGLE_CLIENT_ID: string = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export type GoogleCredentialResponse = {
   /** A signed JWT; the backend verifies it against Google's certs. */
