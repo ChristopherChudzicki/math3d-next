@@ -1,4 +1,5 @@
 import { test, expect } from "vitest";
+import { http, HttpResponse } from "msw";
 import {
   renderTestApp,
   screen,
@@ -8,6 +9,7 @@ import {
   mockGoogleIdentity,
 } from "@/test_util";
 import { seedDb } from "@math3d/mock-api";
+import { server } from "@math3d/mock-api/node";
 
 test("A Google credential signs the user in and closes the overlay", async () => {
   const userData = seedDb.withUser();
@@ -30,6 +32,43 @@ test("A Google credential signs the user in and closes the overlay", async () =>
   await user.click(screen.getByRole("button", { name: "Open User Menu" }));
   expect(await screen.findByTestId("username-display")).toHaveTextContent(
     userData.email,
+  );
+});
+
+test("A malformed credential surfaces the error alert and keeps the dialog open", async () => {
+  const gsi = mockGoogleIdentity();
+  renderTestApp("/?overlay=login");
+
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await act(async () => {
+    gsi.fireCredential("not-json");
+  });
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /could not complete the sign-in/i,
+  );
+  expect(screen.getByRole("dialog", { name: "Sign in" })).toBeInTheDocument();
+});
+
+test("A 403 (sign-ups closed) surfaces copy distinct from a generic failure", async () => {
+  server.use(
+    http.post(
+      "*/_allauth/browser/v1/auth/provider/token",
+      () => new HttpResponse(null, { status: 403 }),
+    ),
+  );
+  const gsi = mockGoogleIdentity();
+  renderTestApp("/?overlay=login");
+
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await act(async () => {
+    gsi.fireCredential(JSON.stringify({ email: "new-user@example.com" }));
+  });
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /sign-ups are currently closed/i,
   );
 });
 
