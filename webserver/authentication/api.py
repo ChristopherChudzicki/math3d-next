@@ -13,7 +13,6 @@ router = Router()
 class UserSchema(Schema):
     id: int
     email: str
-    public_nickname: str  # snake_case on the wire, intentionally
 
 
 @router.get("/users/me/", response={200: UserSchema, 403: None}, auth=None)

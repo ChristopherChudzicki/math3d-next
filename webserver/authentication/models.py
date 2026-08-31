@@ -7,14 +7,13 @@ from authentication.managers import CustomUserManager
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    public_nickname = models.CharField(max_length=64)
     email = models.EmailField(gettext_lazy("email address"), unique=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["public_nickname"]
+    REQUIRED_FIELDS = []
 
     objects: CustomUserManager = CustomUserManager()
 
@@ -23,8 +22,3 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         verbose_name = "User"
-
-
-# Read off the field so the API schema and signup form can't drift from the
-# column; an over-length value reaching the DB raises DataError (a 500).
-NICKNAME_MAX_LENGTH = CustomUser._meta.get_field("public_nickname").max_length
