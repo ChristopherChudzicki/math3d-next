@@ -34,7 +34,6 @@ def test_me_get_returns_user_shape():
     assert response.json() == {
         "id": user.id,
         "email": user.email,
-        "public_nickname": user.public_nickname,  # snake_case on the wire
     }
 
 
