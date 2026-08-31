@@ -1,15 +1,14 @@
 import random
 
+from authentication.models import CustomUser
+from django.contrib.postgres.indexes import GinIndex
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
-from django.contrib.postgres.indexes import GinIndex
 from django.db.models.functions import Length
 from django.utils import timezone
 
 from scenes.validators import validate_math_items
-from authentication.models import CustomUser
-
 
 # Enable the `key__length` lookup used by the reserved-key CHECK constraint.
 models.CharField.register_lookup(Length)
