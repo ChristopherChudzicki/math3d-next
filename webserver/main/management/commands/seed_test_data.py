@@ -33,6 +33,9 @@ def create_test_user(email: str, *, uid: str, is_staff=False):
     user, _ = User.objects.get_or_create(email=email)
     user.is_active = True
     user.is_staff = is_staff
+    # get_or_create bypasses CustomUserManager.create_user, leaving the field's default
+    # ("") — which Django's is_password_usable() treats as usable, unlike a real account.
+    user.set_unusable_password()
     user.save()
     EmailAddress.objects.update_or_create(
         user=user,

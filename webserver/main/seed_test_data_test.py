@@ -12,6 +12,8 @@ def test_seeded_user_gets_a_matching_dummy_identity():
     account = SocialAccount.objects.get(user=user)
     assert account.provider == "dummy"
     assert account.uid == "4242"
+    # Matches every account the provider flow creates (see models_test.py).
+    assert not user.has_usable_password()
 
 
 @pytest.mark.django_db
