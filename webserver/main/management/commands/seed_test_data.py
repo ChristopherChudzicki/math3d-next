@@ -10,10 +10,8 @@ import json
 
 class SeedEnv(BaseSettings):
     TEST_USER_ADMIN_EMAIL: str = ""
-    TEST_USER_ADMIN_PASSWORD: str = ""
     TEST_USER_ADMIN_UID: str = ""
     TEST_USER_STATIC_EMAIL: str = ""
-    TEST_USER_STATIC_PASSWORD: str = ""
     TEST_USER_STATIC_UID: str = ""
 
 
@@ -22,9 +20,7 @@ env = SeedEnv()
 User = get_user_model()
 
 
-def create_test_user(
-    email: str, password: str, public_nickname: str, *, uid: str, is_staff=False
-):
+def create_test_user(email: str, *, uid: str, is_staff=False):
     if not email:
         raise CommandError(
             "Empty email for test user. Set TEST_USER_ADMIN_EMAIL and "
@@ -36,9 +32,7 @@ def create_test_user(
         )
     user, _ = User.objects.get_or_create(email=email)
     user.is_active = True
-    user.public_nickname = public_nickname
     user.is_staff = is_staff
-    user.set_password(password)
     user.save()
     EmailAddress.objects.update_or_create(
         user=user,
@@ -68,16 +62,12 @@ class Command(BaseCommand):
 
         create_test_user(
             email=env.TEST_USER_ADMIN_EMAIL,
-            password=env.TEST_USER_ADMIN_PASSWORD,
-            public_nickname="Admin Test User",
             uid=env.TEST_USER_ADMIN_UID,
             is_staff=True,
         )
 
         user_1 = create_test_user(
             email=env.TEST_USER_STATIC_EMAIL,
-            password=env.TEST_USER_STATIC_PASSWORD,
-            public_nickname="Static Test User",
             uid=env.TEST_USER_STATIC_UID,
         )
 
