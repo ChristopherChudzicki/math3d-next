@@ -67,12 +67,15 @@ One row per period; the row **is** the historical usage record — no singleton,
 
 ```python
 class RenderDay(models.Model):
-    day = models.DateField(primary_key=True)      # UTC
+    day = models.DateField(primary_key=True)  # UTC
     count = models.PositiveIntegerField(default=0)
-    modified = models.DateTimeField(default=timezone.now)  # bumped by the reservation SQL (auto_now won't fire — no .save())
+    modified = models.DateTimeField(
+        default=timezone.now
+    )  # bumped by the reservation SQL (auto_now won't fire — no .save())
+
 
 class RenderMonth(models.Model):
-    month = models.DateField(primary_key=True)    # first-of-month, UTC
+    month = models.DateField(primary_key=True)  # first-of-month, UTC
     count = models.PositiveIntegerField(default=0)
     modified = models.DateTimeField(default=timezone.now)  # ditto
 ```
@@ -100,19 +103,21 @@ _DAY_SQL = """
     RETURNING count
 """
 
+
 def _bump(sql: str, period, cap: int) -> bool:
     with connection.cursor() as cur:
         cur.execute(sql, {"period": period, "cap": cap})
         return cur.fetchone() is not None
 
+
 def reserve_render_slot() -> bool:
-    today = timezone.now().date()          # UTC (USE_TZ, TIME_ZONE=UTC)
+    today = timezone.now().date()  # UTC (USE_TZ, TIME_ZONE=UTC)
     month = today.replace(day=1)
     with transaction.atomic():
         if not _bump(_MONTH_SQL, month, settings.RENDER_MONTHLY_CAP):
-            return False                     # over monthly cap (nothing changed)
+            return False  # over monthly cap (nothing changed)
         if not _bump(_DAY_SQL, today, settings.RENDER_DAILY_CAP):
-            transaction.set_rollback(True)   # undo the monthly bump
+            transaction.set_rollback(True)  # undo the monthly bump
             return False
         return True
 ```
@@ -124,9 +129,9 @@ These views run in autocommit (no `ATOMIC_REQUESTS`/`@transaction.atomic`), so `
 ```python
 def maybe_render(key: str) -> None:
     try:
-        if not settings.OG_RENDER_URL:      # feature dark
+        if not settings.OG_RENDER_URL:  # feature dark
             return
-        if not reserve_render_slot():        # over cap → decline (coverage, not spend)
+        if not reserve_render_slot():  # over cap → decline (coverage, not spend)
             return
         nudge_render(key)
     except Exception:
@@ -144,8 +149,10 @@ def nudge_render(key: str) -> None:
     req = urllib.request.Request(
         f"{settings.OG_RENDER_URL}/render",
         data=json.dumps({"key": key}).encode(),
-        headers={"content-type": "application/json",
-                 "authorization": f"Bearer {settings.RENDER_SECRET}"},
+        headers={
+            "content-type": "application/json",
+            "authorization": f"Bearer {settings.RENDER_SECRET}",
+        },
         method="POST",
     )
     urllib.request.urlopen(req, timeout=2.0).close()

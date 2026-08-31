@@ -1,10 +1,11 @@
+import json
 import os
+
+from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
-from allauth.account.models import EmailAddress
 from pydantic_settings import BaseSettings
 from scenes.models import Scene
-import json
 
 
 class SeedEnv(BaseSettings):
