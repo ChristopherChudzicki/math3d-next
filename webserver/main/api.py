@@ -20,9 +20,8 @@ api = NinjaAPI(
             {
                 "name": "Auth",
                 "description": (
-                    "Current-user profile and account management. Authentication "
-                    "*flows* — login, signup, email verification, and password "
-                    "reset — are served by the separate allauth headless API; see "
+                    "Current-user profile and account deletion. Signing in and "
+                    "out is served by the separate allauth headless API; see "
                     "its [interactive API docs](/_allauth/openapi.html)."
                 ),
             },
