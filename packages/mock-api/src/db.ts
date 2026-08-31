@@ -31,17 +31,10 @@ const db = factory({
     id: primaryKey(faker.number.int),
     public_nickname: faker.internet.username,
     email: faker.internet.email,
-    password: faker.internet.password,
   },
 });
 
-type UserWithPassword = User & {
-  // Real API response does not include password, of course, but we need it for
-  // the msw model & handler.
-  password: string;
-};
-
-const addUser = (user?: Partial<UserWithPassword>): UserWithPassword => {
+const addUser = (user?: Partial<User>): User => {
   const created = db.user.create(user);
   return created;
 };
