@@ -29,9 +29,7 @@ playwright-report
 test-results
 
 dist
-webserver/private/email/*
 webserver/staticfiles/*
-!webserver/private/email/.gitkeep
 .mypy_cache
 .pytest_cache
 
