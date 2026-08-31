@@ -1,15 +1,3 @@
-.form-content {
-  margin-top: 0.5rem;
-  display: grid;
-  grid-template-columns: auto;
-  row-gap: 16px;
-}
-
-.email-address {
-  color: var(--color-primary-dark);
-  font-family: monospace;
-}
-
 .sign-in-content {
   padding: 1rem 0;
   display: flex;
