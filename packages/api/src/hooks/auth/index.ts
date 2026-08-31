@@ -20,7 +20,6 @@ type ResetPassword = AllauthSchemas["ResetPassword"];
 type ChangePassword =
   AllauthComponents["requestBodies"]["ChangePassword"]["content"]["application/json"];
 
-type DeleteAccountSchema = V1Components["schemas"]["DeleteAccountSchema"];
 type UserUpdateSchema = V1Components["schemas"]["UserUpdateSchema"];
 
 const keys = {
