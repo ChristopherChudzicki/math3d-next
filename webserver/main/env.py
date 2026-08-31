@@ -25,9 +25,8 @@ class EnvConfig(BaseSettings):
     DEFAULT_FROM_EMAIL: str = ""
     SERVER_EMAIL: str = ""
     # The SPA origin, e.g. https://next.math3d.org. Validated to a bare origin
-    # (and trailing-slash-normalized) because paths are appended to it
-    # (HEADLESS_FRONTEND_URLS) and it is used verbatim as an origin (CORS/CSRF
-    # trust), where a browser's Origin header never carries a path.
+    # (and trailing-slash-normalized) because it is used verbatim as an origin
+    # (CORS/CSRF trust), where a browser's Origin header never carries a path.
     APP_BASE_URL: str = ""
     # Bare origin of the screenshots render Worker, e.g.
     # https://math3d-screenshots.<sub>.workers.dev. The reservation nudge POSTs

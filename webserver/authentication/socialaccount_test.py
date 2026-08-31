@@ -17,6 +17,7 @@ from authentication.factories import CustomUserFactory
 from authentication.models import CustomUser
 
 TOKEN_URL = "/_allauth/browser/v1/auth/provider/token"
+SESSION_URL = "/_allauth/browser/v1/auth/session"
 
 
 def _payload(uid: int, email: str) -> dict:
@@ -125,3 +126,23 @@ def test_provider_identity_is_never_adopted_onto_an_existing_account():
     assert "_auth_user_id" not in client.session
     assert not SocialAccount.objects.filter(user=existing).exists()
     assert CustomUser.objects.filter(email=existing.email).count() == 1
+
+
+@pytest.mark.django_db
+@override_settings(ENABLE_REGISTRATION=True)
+def test_session_delete_signs_out_a_provider_user():
+    """The SPA's only sign-out call. Under SOCIALACCOUNT_ONLY the response is a
+    401 carrying the anonymous session state, which `useLogout` treats as
+    success (allauth/headless/base/response.py)."""
+    client = Client()
+    client.post(
+        TOKEN_URL,
+        _payload(uid=4242, email="signs-out@example.com"),
+        content_type="application/json",
+    )
+    assert client.session["_auth_user_id"]
+
+    response = client.delete(SESSION_URL)
+
+    assert response.status_code == 401
+    assert "_auth_user_id" not in client.session

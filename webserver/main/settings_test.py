@@ -244,21 +244,15 @@ def test_csrf_cookie_domain_covers_subdomains_without_leading_dot(monkeypatch):
 
 def test_app_base_url_trailing_slash_is_normalized(monkeypatch):
     """
-    A trailing slash on APP_BASE_URL must not corrupt the auth email links
-    built from it (issue #829). Both links are cold-entry `?overlay=` dialogs
-    opened over the app, not standalone pages.
+    A trailing slash on APP_BASE_URL must not corrupt the CSRF/CORS origins
+    derived from it (issue #829): a browser's Origin header never carries a
+    path, so an un-stripped trailing slash would silently fail to match.
     """
     loaded = load_settings(
         monkeypatch, IS_DEPLOYMENT="False", APP_BASE_URL="http://math3d.localdev:3000/"
     )
     assert loaded.APP_BASE_URL == "http://math3d.localdev:3000"
-    assert (
-        loaded.HEADLESS_FRONTEND_URLS
-        == {
-            "account_confirm_email": "http://math3d.localdev:3000/?overlay=activate&key={key}",
-            "account_reset_password_from_key": "http://math3d.localdev:3000/?overlay=reset-confirm&key={key}",  # pragma: allowlist secret
-        }
-    )
+    assert "http://math3d.localdev:3000" in loaded.CSRF_TRUSTED_ORIGINS
 
 
 def test_dev_cors_origins_cover_app_and_worktree_ports():
@@ -517,6 +511,18 @@ def test_dummy_provider_is_development_only(monkeypatch):
 
     deployed = load_settings(monkeypatch, **DEPLOY_ENV)
     assert "allauth.socialaccount.providers.dummy" not in deployed.INSTALLED_APPS
+
+
+def test_password_urls_are_not_registered():
+    """SOCIALACCOUNT_ONLY unregisters allauth's password endpoints
+    (allauth/headless/account/urls.py). Pin it: the SPA has no password UI, and
+    a stray reachable signup URL would let an account be created that the
+    sign-in dialog cannot then log into."""
+    from django.urls import NoReverseMatch, reverse
+
+    for name in ("headless:browser:account:login", "headless:browser:account:signup"):
+        with pytest.raises(NoReverseMatch):
+            reverse(name)
 
 
 def test_google_app_reads_the_client_id_from_the_environment(monkeypatch):
