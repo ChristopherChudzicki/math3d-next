@@ -46,11 +46,6 @@ test("deleting your own account does not redirect to login", async () => {
   const dialog = await screen.findByRole("dialog", {
     name: "Account Settings",
   });
-  await user.click(within(dialog).getByRole("tab", { name: "Delete Account" }));
-  await user.type(
-    within(dialog).getByLabelText("Password"),
-    "current-password",
-  );
   await user.type(
     within(dialog).getByLabelText("Confirm"),
     "Yes, permanently delete",
@@ -61,4 +56,20 @@ test("deleting your own account does not redirect to login", async () => {
   // Deleting signs you out; the "Account Deleted" notice must show — not login.
   await screen.findByRole("heading", { name: "Account Deleted" });
   expect(location.current.search).not.toContain("overlay=login");
+});
+
+test("the wrong confirmation phrase does not delete the account", async () => {
+  renderTestApp("/?overlay=settings", { isAuthenticated: true });
+  const dialog = await screen.findByRole("dialog", {
+    name: "Account Settings",
+  });
+
+  await user.type(within(dialog).getByLabelText("Confirm"), "yes delete it");
+  await user.click(
+    within(dialog).getByRole("button", { name: "Delete Account" }),
+  );
+
+  expect(
+    await screen.findByRole("dialog", { name: "Account Settings" }),
+  ).toBeInTheDocument();
 });
