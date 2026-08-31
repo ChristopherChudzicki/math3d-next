@@ -20,10 +20,6 @@ class EnvConfig(BaseSettings):
     model_config = SettingsConfigDict(case_sensitive=True, extra="forbid")
 
     SECRET_KEY: str = ""
-    MAILJET_API_KEY: str = ""
-    MAILJET_SECRET_KEY: str = ""
-    DEFAULT_FROM_EMAIL: str = ""
-    SERVER_EMAIL: str = ""
     # The SPA origin, e.g. https://next.math3d.org. Validated to a bare origin
     # (and trailing-slash-normalized) because it is used verbatim as an origin
     # (CORS/CSRF trust), where a browser's Origin header never carries a path.

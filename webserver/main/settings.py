@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-import logging
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -26,9 +25,6 @@ from main.origins import (
     csrf_trusted_origins,
     dev_cors_allowed_origins,
 )
-
-
-logger = logging.getLogger(__name__)
 
 # Every env var this module reads, with types, defaults, and the cross-variable
 # boot guards (see main/env.py). Validation errors become the Django-idiomatic
@@ -339,25 +335,6 @@ DATABASES = {
 
 
 AUTH_USER_MODEL = "authentication.CustomUser"
-
-MAILJET_API_KEY = ENV.MAILJET_API_KEY
-MAILJET_SECRET_KEY = ENV.MAILJET_SECRET_KEY
-
-ANYMAIL = {
-    "MAILJET_API_KEY": ENV.MAILJET_API_KEY,
-    "MAILJET_SECRET_KEY": ENV.MAILJET_SECRET_KEY,
-}
-if MAILJET_API_KEY and MAILJET_SECRET_KEY:
-    EMAIL_BACKEND = "anymail.backends.mailjet.EmailBackend"
-else:
-    logger.warning(
-        "MAILJET_API_KEY and MAILJET_SECRET_KEY settings not found. Using email console backend."
-    )
-    EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-    EMAIL_FILE_PATH = "./private/email/"
-
-DEFAULT_FROM_EMAIL = ENV.DEFAULT_FROM_EMAIL
-SERVER_EMAIL = ENV.SERVER_EMAIL
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
