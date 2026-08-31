@@ -12,12 +12,10 @@ interface AllAuthErrorItem {
   param?: string;
 }
 
-/**
- * allauth error codes that should be treated as form-level (root) errors
- * even when they have a `param` field. For example, `email_password_mismatch`
- * has param "password" but is really a general credentials error.
- */
-const ROOT_ERROR_CODES = new Set(["email_password_mismatch"]);
+// allauth error codes that describe the submission as a whole rather than one
+// field, so they must land on the form root even though the response names a
+// `param`.
+const ROOT_ERROR_CODES = new Set<string>([]);
 
 const isAllAuthErrorResponse = (
   data: unknown,
