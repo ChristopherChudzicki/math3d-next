@@ -216,10 +216,10 @@ const useUpdatePassword = () => {
 const useUserMeDelete = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ current_password }: DeleteAccountSchema) =>
+    mutationFn: () =>
       unwrap(
         v1Client.POST("/v1/auth/users/me/delete/", {
-          body: { current_password },
+          body: { current_password: "" },
         }),
       ),
     onSuccess: async () => {
