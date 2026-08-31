@@ -41,9 +41,9 @@ def _payload(uid: int, email: str) -> dict:
 def test_provider_token_signs_up_and_logs_in_in_one_request():
     """
     A first-time provider identity gets an account and a session in a single
-    request, with ACCOUNT_EMAIL_VERIFICATION still "mandatory": the provider
-    vouches for the address, so EmailVerificationStage never interrupts. This is
-    what lets PRs 1-3 ship without flipping any allauth setting.
+    request: ACCOUNT_EMAIL_VERIFICATION is "none", so no verification stage
+    ever interrupts, and EmailAddress.verified instead reflects the
+    provider's own `email_verified` assertion.
     """
     client = Client()
 
