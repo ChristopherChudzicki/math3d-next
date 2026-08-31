@@ -10,12 +10,15 @@ const CONFIRM_PROMPT = "Yes, permanently delete";
 
 const schema = yup.object({
   confirm: yup.string().required().oneOf([CONFIRM_PROMPT]),
-  current_password: yup.string().required().label("Current Password"),
 });
 
 const DeleteAccountForm: React.FC<{
   id: string;
   setDisabled: (disabled: boolean) => void;
+  /**
+   * Called when the user submits deletion, so the dialog knows the coming
+   * sign-out is deliberate and skips the login redirect.
+   */
   onSelfDelete: () => void;
 }> = ({ id, setDisabled, onSelfDelete }) => {
   const userQuery = useUserMe();
@@ -33,7 +36,7 @@ const DeleteAccountForm: React.FC<{
   return (
     <form
       id={id}
-      onSubmit={handleSubmit(async (data, event) => {
+      onSubmit={handleSubmit(async (_data, event) => {
         if (deleteAccount.isPending) return;
         event?.preventDefault();
         // Signal before the mutation: its onSuccess resets the me-query, which
@@ -43,7 +46,7 @@ const DeleteAccountForm: React.FC<{
         onSelfDelete();
         try {
           setDisabled(true);
-          await deleteAccount.mutateAsync(data);
+          await deleteAccount.mutateAsync();
           // mutateAsync awaits onSuccess which resets queries, so auth
           // status is already up-to-date.
           addNotification({
@@ -61,15 +64,6 @@ const DeleteAccountForm: React.FC<{
         This action cannot be undone. To confirm, type &ldquo;
         <code>{CONFIRM_PROMPT}</code>&rdquo; exactly.
       </Alert>
-      <TextField
-        fullWidth
-        margin="normal"
-        error={!!errors.current_password?.message}
-        helperText={errors.current_password?.message}
-        label="Password"
-        type="password"
-        {...register("current_password")}
-      />
       <TextField
         fullWidth
         margin="normal"
