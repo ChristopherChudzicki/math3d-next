@@ -283,7 +283,6 @@ export const handlers = [
       {
         id: user.id,
         email: user.email,
-        public_nickname: user.public_nickname,
       },
       { status: 200 },
     );
