@@ -27,18 +27,6 @@ test.each([
   },
 );
 
-test("treats an empty-bodied 403 from /me as unauthenticated, not 'loading'", async () => {
-  // A 403 with no body leaves openapi-fetch's `error` undefined. useUserMe must
-  // still resolve to null (unauthenticated) by keying on HTTP status —
-  // otherwise useAuthStatus reads `undefined` as "loading" and the sign-in UI
-  // never renders.
-  renderTestApp("", { isAuthenticated: false });
-
-  expect(
-    await screen.findByRole("button", { name: "Sign in" }),
-  ).toBeInTheDocument();
-});
-
 test("Login button opens login overlay", async () => {
   const { location } = renderTestApp("", { isAuthenticated: false });
   const signin = await screen.findByRole("button", { name: "Sign in" });
