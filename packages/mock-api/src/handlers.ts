@@ -52,6 +52,14 @@ export const urls = {
   },
 } as const;
 
+// Matches `allauth.headless.socialaccount.response.provider_flows` for a
+// browser client with only Google configured: Google supports both redirect
+// and token authentication, so it appears in both flow entries.
+const ANONYMOUS_FLOWS = [
+  { id: "provider_redirect", providers: ["google"] },
+  { id: "provider_token", providers: ["google"] },
+];
+
 // Matches allauth's socialaccount authentication record (see
 // `allauth.account.internal.flows.login.record_authentication`'s docstring
 // example), the only method this SOCIALACCOUNT_ONLY deployment produces.
@@ -229,7 +237,7 @@ export const handlers = [
         {
           status: 401,
           data: {
-            flows: [],
+            flows: ANONYMOUS_FLOWS,
           },
           meta: {
             is_authenticated: false,
@@ -246,7 +254,7 @@ export const handlers = [
       {
         status: 401,
         data: {
-          flows: [],
+          flows: ANONYMOUS_FLOWS,
         },
         meta: {
           is_authenticated: false,
