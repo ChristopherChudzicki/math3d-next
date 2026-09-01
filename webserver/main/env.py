@@ -117,7 +117,7 @@ class EnvConfig(BaseSettings):
         missing = []
         if not self.APP_BASE_URL:
             missing.append(
-                "APP_BASE_URL (used for CSRF_TRUSTED_ORIGINS)"
+                "APP_BASE_URL (used for CSRF_TRUSTED_ORIGINS and CREDENTIALED_CORS_ORIGINS)"
             )
         if not self.CSRF_COOKIE_DOMAIN:
             missing.append(
