@@ -87,17 +87,15 @@ const makeAuthenticatedResponse = (user: { id: number; email: string }) => ({
 });
 
 export const handlers = [
+  // v1: my scenes. The anonymous response is a 403, not Ninja's default 401:
+  // main/api.py remaps AuthenticationError because session auth cannot send a
+  // compliant WWW-Authenticate challenge.
   http.get<NoParams, ErrorResponseBody | PagedMiniSceneSchema>(
     urls.scenes.meList,
     async () => {
       const user = getUser();
       if (!user) {
-        return HttpResponse.json(
-          {
-            errorMessage: "Authentication required",
-          },
-          { status: 401 },
-        );
+        return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
       }
 
       const scenes = db.scene.findMany({
@@ -132,12 +130,8 @@ export const handlers = [
         where: { key: { equals: key } },
       });
       if (!scene) {
-        return HttpResponse.json(
-          {
-            errorMessage: "Not found",
-          },
-          { status: 404 },
-        );
+        // Ninja's default Http404 body.
+        return HttpResponse.json({ detail: "Not Found" }, { status: 404 });
       }
       const parsedScene = {
         ...scene,
