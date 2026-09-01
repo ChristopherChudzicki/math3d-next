@@ -290,9 +290,6 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_SIGNUP_FIELDS = ["email*"]
 ACCOUNT_EMAIL_NOTIFICATIONS = False
 ACCOUNT_LOGIN_BY_CODE_ENABLED = False
-# Allow revealing whether an email is registered. Acceptable tradeoff for a
-# math visualization tool: usability > preventing enumeration.
-ACCOUNT_PREVENT_ENUMERATION = False
 ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
 
 # No secret: the popup flow verifies Google ID tokens against Google's certs
