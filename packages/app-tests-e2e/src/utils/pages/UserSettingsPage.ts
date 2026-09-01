@@ -26,14 +26,6 @@ class UserSettingsPage {
   deleteAccountForm(): DeleteAccountForm {
     return new DeleteAccountForm(this.root);
   }
-
-  cancel(): Locator {
-    return this.root.getByRole("button", { name: "Cancel" });
-  }
-
-  close(): Locator {
-    return this.root.getByRole("button", { name: "Close" });
-  }
 }
 
 export default UserSettingsPage;
