@@ -15,12 +15,6 @@ export const mockAuth = {
   setCurrentUser: (userId: number | null) => {
     currentUserId = userId;
   },
-  getCurrentUser: () => {
-    if (currentUserId === null) return null;
-    return db.user.findFirst({
-      where: { id: { equals: currentUserId } },
-    });
-  },
 };
 
 const getUser = () => {
@@ -245,13 +239,22 @@ export const handlers = [
     currentUserId = null;
     return new HttpResponse(null, { status: 204 });
   }),
-  // v1: users/me GET. The anonymous 403 carries no body, matching the backend's
-  // AuthenticationError handler — openapi-fetch then leaves `error` undefined,
-  // which useUserMe must survive.
+  // v1: users/me GET. `get_me` gates by hand (`auth=None`, `403: None`) so the
+  // CSRF cookie is seeded before the gate — which also means the anonymous 403
+  // never reaches main/api.py's AuthenticationError handler and so carries no
+  // body. Content-Length is spelled out to match Django's CommonMiddleware:
+  // openapi-fetch keys on it to yield `error: undefined` (without it, `""`),
+  // the shape useUserMe must survive.
   http.get<NoParams, ErrorResponseBody | User>(urls.auth.usersMe, async () => {
     const user = getUser();
     if (!user) {
-      return new HttpResponse(null, { status: 403 });
+      return new HttpResponse(null, {
+        status: 403,
+        headers: {
+          "content-length": "0",
+          "content-type": "application/json",
+        },
+      });
     }
     return HttpResponse.json(
       {
