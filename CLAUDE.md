@@ -175,7 +175,7 @@ Troubleshooting:
 
 - "The server at ... serves ..., but this suite is testing ..." from global setup means a stale env var (usually `TEST_APP_URL` exported by another checkout's direnv) is pointing the suite at the wrong server — env vars beat the checkout's env files by design. Unset it or start a fresh shell in this checkout.
 - "sent no X-Checkout-Root header" means the dev server predates the identity header — restart it.
-- Widespread `Expected sessionid from provider/token` failures mean the seeded users have no dummy identity. Re-run `seed_test_data`, which is idempotent.
+- Widespread `Expected sessionid from provider/token` failures mean either the backend still has `ENABLE_REGISTRATION=false` (restart the compose stack so it picks up `.env.development`) or the seeded users have no dummy identity (re-run `seed_test_data`, which is idempotent).
 - A backend without `IS_DEVELOPMENT=True` (set in `.env.development`) doesn't install the dummy provider, and the whole suite fails.
 - Widespread CORS/CSRF failures from a worktree port mean the backend container predates the multi-port trust config — re-run `docker compose up -d` from an up-to-date main checkout.
 
