@@ -120,18 +120,19 @@ Deleting an account orphans its scenes rather than destroying them: `Scene.autho
 
 ### Rollout
 
-Four pull requests. Password auth keeps working until the last one, and everything before it reverts by redeploying.
+Five pull requests, the first of which is this ADR. Password auth keeps working until the last one, and everything before it reverts by redeploying.
 
-1. **Backend, additive.** The provider, the `[socialaccount]` dependency extra, `dummy` under `IS_DEVELOPMENT`, the URL include, the `SET_NULL` migration, `delete_me`'s password check — dropped early because a session minted through a provider has no password to check, so the E2E fixtures in PR 2 could not clean up after themselves — and the user-menu avatar, which throws on the blank nickname every provider signup produces. Nothing user-visible: Google login works alongside the existing password flow, because a provider-verified address satisfies `ACCOUNT_EMAIL_VERIFICATION = "mandatory"` without a verification stage.[^verified-skip]
-2. **E2E harness.** Fixtures mint sessions through `dummy` rather than password login, and the tests that can only exist on the password path are deleted with them. Still invisible in the product, and it puts every authenticated test on the OAuth path before anything user-facing is touched — the harness rewrite is the largest piece of this change, and it should not land in the same commit as the deletions it would otherwise be blamed for.
-3. **Sign-in UI.** The Google Identity Services button, posting its ID token to `provider/token`, behind the existing display flag. The client ID becomes required config here, which makes creating the OAuth client a prerequisite for this PR rather than the first one.
-4. **Removal.** `SOCIALACCOUNT_ONLY`, verification `none`, `ENABLE_REGISTRATION = True`, and the deletion of the password pages, `public_nickname`, and the Mailjet stack.
+1. **This ADR.** Documentation only, so the plan below can be argued over before any of it is built.
+2. **Backend, additive.** The provider, the `[socialaccount]` dependency extra, `dummy` under `IS_DEVELOPMENT`, the URL include, the `SET_NULL` migration, `delete_me`'s password check — dropped early because a session minted through a provider has no password to check, so the E2E fixtures in PR 3 could not clean up after themselves — and the user-menu avatar, which throws on the blank nickname every provider signup produces. Nothing user-visible: Google login works alongside the existing password flow, because a provider-verified address satisfies `ACCOUNT_EMAIL_VERIFICATION = "mandatory"` without a verification stage.[^verified-skip]
+3. **E2E harness.** Fixtures mint sessions through `dummy` rather than password login, and the tests that can only exist on the password path are deleted with them. Still invisible in the product, and it puts every authenticated test on the OAuth path before anything user-facing is touched — the harness rewrite is the largest piece of this change, and it should not land in the same commit as the deletions it would otherwise be blamed for.
+4. **Sign-in UI.** The Google Identity Services button, posting its ID token to `provider/token`, behind the existing display flag. The client ID becomes required config here, which makes creating the OAuth client a prerequisite for this PR rather than for the backend one.
+5. **Removal.** `SOCIALACCOUNT_ONLY`, verification `none`, `ENABLE_REGISTRATION = True`, and the deletion of the password pages, `public_nickname`, and the Mailjet stack.
 
 The order is forced in three places: the dependency extra must precede the mail backend's removal,[^extra] `ENABLE_REGISTRATION` cannot open before password signup is gone, since one flag gates both,[^signup-hook] and `SET_NULL` must land before deletion is reachable.
 
 Dropping the `public_nickname` column is the one step a redeploy does not undo, and it ships inside PR 5 (the removal PR) rather than trailing it. Separating it would be the textbook expand/contract sequence — the release phase migrates while the previous dynos still serve, so a column disappearing under running code is briefly an error — but that window is measured in seconds on an instance with no users, and there is no traffic for a separated PR to soak in. The rollback is `manage.py migrate authentication <prev>` before the reverted build serves, which belongs in the PR description.
 
-Clearing the existing production accounts is a prerequisite, not a step: it happens by hand, before PR 4, and is not automated anywhere in this change.
+Clearing the existing production accounts is a prerequisite, not a step: it happens by hand, before PR 5, and is not automated anywhere in this change.
 
 ## Consequences
 
