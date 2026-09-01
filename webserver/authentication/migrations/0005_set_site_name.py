@@ -1,7 +1,10 @@
 """
-Sets the django.contrib.sites Site name to "Math3d.org". Retained history: no
-code reads `Site.name` today (settings' own SITE_NAME is unrelated), so this is
-inert data, kept because rewriting an applied migration is not worth the churn.
+Sets the django.contrib.sites Site name to "Math3d.org". Retained history: the
+value is inert on this deployment. allauth surfaces `Site.name` when it renders
+mail (`account/adapter.py`'s `format_email_subject`) or its own HTML pages, and
+this deployment sends no mail and includes only `allauth.headless.urls`. Kept
+because rewriting an applied migration is not worth the churn. (settings' own
+SITE_NAME is a separate, unrelated value.)
 
 We create the row when missing because on a fresh database the default Site is
 created by a post_migrate signal that runs *after* migrations and only creates
