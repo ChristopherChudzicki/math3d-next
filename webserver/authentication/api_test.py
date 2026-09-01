@@ -10,10 +10,10 @@ DELETE_URL = "/v1/auth/users/me/delete/"
 
 @pytest.mark.django_db
 def test_me_get_anonymous_seeds_csrf_cookie():
-    # Every page load makes this GET, and for an anonymous visitor its cookie is
-    # the only source of the CSRF token the ensuing allauth POST needs. Seeding
-    # must happen before the auth gate — regression guard for the cookie being
-    # skipped on the rejected anonymous request.
+    # Any page with an auth surface makes this GET, and for an anonymous visitor
+    # its cookie is the only source of the CSRF token the ensuing allauth POST
+    # needs. Seeding must happen before the auth gate — regression guard for the
+    # cookie being skipped on the rejected anonymous request.
     response = Client().get(ME_URL)
     assert response.status_code == 403
     assert "csrftoken" in response.cookies
