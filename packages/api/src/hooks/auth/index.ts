@@ -82,12 +82,7 @@ const useUserMe = (opts?: { enabled?: boolean }) => {
 const useUserMeDelete = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () =>
-      unwrap(
-        v1Client.POST("/v1/auth/users/me/delete/", {
-          body: { current_password: "" },
-        }),
-      ),
+    mutationFn: () => unwrap(v1Client.POST("/v1/auth/users/me/delete/")),
     onSuccess: async () => {
       await queryClient.resetQueries();
     },
