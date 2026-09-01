@@ -96,7 +96,7 @@ test("A 403 from Django's CSRF middleware surfaces the generic failure", async (
   );
 });
 
-test("A 401 (address already has an account) tells the user to sign in another way", async () => {
+test("A 401 (address has an account with no Google link) says the address cannot sign in", async () => {
   server.use(
     http.post(
       "*/_allauth/browser/v1/auth/provider/token",
@@ -113,7 +113,11 @@ test("A 401 (address already has an account) tells the user to sign in another w
   });
 
   expect(await screen.findByRole("alert")).toHaveTextContent(
-    /account already exists/i,
+    /is not connected to Google, so it cannot be used to sign in/i,
+  );
+  expect(screen.getByRole("link", { name: "Get in touch" })).toHaveAttribute(
+    "href",
+    import.meta.env.VITE_ISSUE_URL,
   );
 });
 
