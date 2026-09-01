@@ -70,6 +70,7 @@ const makeAuthenticatedResponse = (user: { id: number; email: string }) => ({
       id: user.id,
       display: user.email,
       email: user.email,
+      has_usable_password: false,
     },
     methods: [
       {
@@ -229,25 +230,7 @@ export const handlers = [
     currentUserId = user.id;
     return HttpResponse.json(makeAuthenticatedResponse(user));
   }),
-  // allauth session (GET = check session, DELETE = logout)
-  http.get(urls.auth.session, async () => {
-    const user = mockAuth.getCurrentUser();
-    if (!user) {
-      return HttpResponse.json(
-        {
-          status: 401,
-          data: {
-            flows: ANONYMOUS_FLOWS,
-          },
-          meta: {
-            is_authenticated: false,
-          },
-        },
-        { status: 401 },
-      );
-    }
-    return HttpResponse.json(makeAuthenticatedResponse(user));
-  }),
+  // allauth sign-out
   http.delete(urls.auth.session, async () => {
     currentUserId = null;
     return HttpResponse.json(
@@ -263,21 +246,18 @@ export const handlers = [
       { status: 401 },
     );
   }),
-  // DRF custom: delete own account (204 No Content; signs the user out)
+  // v1: delete own account (204 No Content; signs the user out)
   http.post(urls.auth.usersMeDelete, async () => {
     currentUserId = null;
     return new HttpResponse(null, { status: 204 });
   }),
-  // DRF custom: users/me GET
+  // v1: users/me GET. The anonymous 403 carries no body, matching the backend's
+  // AuthenticationError handler — openapi-fetch then leaves `error` undefined,
+  // which useUserMe must survive.
   http.get<NoParams, ErrorResponseBody | User>(urls.auth.usersMe, async () => {
     const user = getUser();
     if (!user) {
-      return HttpResponse.json(
-        {
-          errorMessage: "Authentication required",
-        },
-        { status: 401 },
-      );
+      return new HttpResponse(null, { status: 403 });
     }
     return HttpResponse.json(
       {
