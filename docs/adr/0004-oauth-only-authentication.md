@@ -129,7 +129,7 @@ Four pull requests. Password auth keeps working until the last one, and everythi
 
 The order is forced in three places: the dependency extra must precede the mail backend's removal,[^extra] `ENABLE_REGISTRATION` cannot open before password signup is gone, since one flag gates both,[^signup-hook] and `SET_NULL` must land before deletion is reachable.
 
-Dropping the `public_nickname` column is the one step a redeploy does not undo, and it ships inside PR 4 rather than trailing it. Separating it would be the textbook expand/contract sequence — the release phase migrates while the previous dynos still serve, so a column disappearing under running code is briefly an error — but that window is measured in seconds on an instance with no users, and there is no traffic for a separated PR to soak in. The rollback is `manage.py migrate authentication <prev>` before the reverted build serves, which belongs in the PR description.
+Dropping the `public_nickname` column is the one step a redeploy does not undo, and it ships inside PR 5 (the removal PR) rather than trailing it. Separating it would be the textbook expand/contract sequence — the release phase migrates while the previous dynos still serve, so a column disappearing under running code is briefly an error — but that window is measured in seconds on an instance with no users, and there is no traffic for a separated PR to soak in. The rollback is `manage.py migrate authentication <prev>` before the reverted build serves, which belongs in the PR description.
 
 Clearing the existing production accounts is a prerequisite, not a step: it happens by hand, before PR 4, and is not automated anywhere in this change.
 
