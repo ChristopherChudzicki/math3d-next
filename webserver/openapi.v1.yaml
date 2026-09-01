@@ -1,14 +1,5 @@
 components:
   schemas:
-    ActivationSchema:
-      properties:
-        email:
-          title: Email
-          type: string
-      required:
-      - email
-      title: ActivationSchema
-      type: object
     AssignmentObj:
       additionalProperties: false
       properties:
@@ -230,14 +221,6 @@ components:
       - updateOnDrag
       - useRelative
       title: CameraProperties
-      type: object
-    DeleteAccountSchema:
-      properties:
-        current_password:
-          default: ''
-          title: Current Password
-          type: string
-      title: DeleteAccountSchema
       type: object
     ExplicitSurfaceItem:
       additionalProperties: false
@@ -1317,24 +1300,10 @@ components:
         id:
           title: Id
           type: integer
-        public_nickname:
-          title: Public Nickname
-          type: string
       required:
       - id
       - email
-      - public_nickname
       title: UserSchema
-      type: object
-    UserUpdateSchema:
-      properties:
-        public_nickname:
-          maxLength: 64
-          title: Public Nickname
-          type: string
-      required:
-      - public_nickname
-      title: UserUpdateSchema
       type: object
     VariableItem:
       additionalProperties: false
@@ -1612,36 +1581,12 @@ components:
       in: cookie
       name: sessionid
       type: apiKey
-    StaffSessionAuth:
-      in: cookie
-      name: sessionid
-      type: apiKey
 info:
   description: ''
   title: Math3d API
   version: 1.0.0
 openapi: 3.1.0
 paths:
-  /v1/auth/users/activation/:
-    post:
-      operationId: authentication_api_activate
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ActivationSchema'
-        required: true
-      responses:
-        '204':
-          description: No Content
-        '404':
-          description: Not Found
-      security:
-      - StaffSessionAuth: []
-      summary: Activate
-      tags:
-      - Auth
   /v1/auth/users/me/:
     get:
       operationId: authentication_api_get_me
@@ -1658,37 +1603,10 @@ paths:
       summary: Get Me
       tags:
       - Auth
-    patch:
-      operationId: authentication_api_patch_me
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserUpdateSchema'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserSchema'
-          description: OK
-      security:
-      - SessionAuth: []
-      summary: Patch Me
-      tags:
-      - Auth
   /v1/auth/users/me/delete/:
     post:
       operationId: authentication_api_delete_me
       parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeleteAccountSchema'
-        required: true
       responses:
         '204':
           description: No Content
@@ -1950,7 +1868,7 @@ servers: []
 tags:
 - description: 'Saved 3D scenes: create, read, update, and delete.'
   name: Scenes
-- description: Current-user profile and account management. Authentication *flows* — login, signup, email verification, and password reset — are served by the separate allauth headless API; see its [interactive API docs](/_allauth/openapi.html).
+- description: Current-user profile and account deletion. Signing in and out is served by the separate allauth headless API; see its [interactive API docs](/_allauth/openapi.html).
   name: Auth
 - description: Legacy v0-format scenes (`dehydrated` blobs), retained for backward compatibility. Prefer **Scenes** for new work.
   name: Legacy Scenes
