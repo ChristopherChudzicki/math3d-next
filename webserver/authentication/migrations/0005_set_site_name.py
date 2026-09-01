@@ -1,14 +1,7 @@
 """
-Data migration to set the django.contrib.sites Site name so allauth's
-transactional emails render "Math3d.org" instead of Django's default
-"example.com".
-
-`current_site.name` is what allauth's email templates render (subject + body);
-it is a brand constant, identical across environments, so this carries no
-dependency on the env-powered base URL. We intentionally do NOT manage
-`domain`: it is unused by our headless flows (user-facing URLs come from
-HEADLESS_FRONTEND_URLS / APP_BASE_URL) and is environment-specific, which a
-one-time migration is the wrong place to encode.
+Sets the django.contrib.sites Site name to "Math3d.org". Retained history: no
+code reads `Site.name` today (settings' own SITE_NAME is unrelated), so this is
+inert data, kept because rewriting an applied migration is not worth the churn.
 
 We create the row when missing because on a fresh database the default Site is
 created by a post_migrate signal that runs *after* migrations and only creates
