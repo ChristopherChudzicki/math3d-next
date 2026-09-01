@@ -61,7 +61,7 @@ const useLogout = () => {
  * anonymous visitor's first call is what makes a later state-changing request
  * possible.
  */
-const useUserMe = (opts?: { enabled?: boolean }) => {
+const useUserMe = () => {
   return useQuery({
     queryKey: keys.userMe,
     queryFn: async () => {
@@ -75,7 +75,6 @@ const useUserMe = (opts?: { enabled?: boolean }) => {
       if (!response.ok) throw toApiError(response, error);
       return data ?? null;
     },
-    ...opts,
   });
 };
 

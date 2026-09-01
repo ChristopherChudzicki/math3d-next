@@ -44,13 +44,13 @@ test("allauth: surfaces an error as root when its param is not a form field", ()
 test("v1 field errors: maps field errors and non_field_errors to fields and root", () => {
   const setError = vi.fn();
   const err = makeApiError(400, {
-    password: ["Too short."],
+    title: ["Too short."],
     non_field_errors: ["Something is off."],
   });
 
-  setFieldErrors({ password: "" }, err, setError);
+  setFieldErrors({ title: "" }, err, setError);
 
-  expect(setError).toHaveBeenCalledWith("password", {
+  expect(setError).toHaveBeenCalledWith("title", {
     type: "400",
     message: "Too short.",
   });

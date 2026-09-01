@@ -12,11 +12,6 @@ interface AllAuthErrorItem {
   param?: string;
 }
 
-// allauth error codes that describe the submission as a whole rather than one
-// field, so they must land on the form root even though the response names a
-// `param`.
-const ROOT_ERROR_CODES = new Set<string>([]);
-
 const isAllAuthErrorResponse = (
   data: unknown,
 ): data is { status: number; errors: AllAuthErrorItem[] } => {
@@ -55,7 +50,7 @@ const setFieldErrors = <TFieldValues extends FieldValues>(
     // allauth error format
     if (isAllAuthErrorResponse(errData)) {
       errData.errors.forEach((error) => {
-        if (ROOT_ERROR_CODES.has(error.code) || !error.param) {
+        if (!error.param) {
           setError("root", {
             type: "400",
             message: error.message,
