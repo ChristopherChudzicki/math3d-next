@@ -29,7 +29,6 @@ const db = factory({
   },
   user: {
     id: primaryKey(faker.number.int),
-    public_nickname: faker.internet.username,
     email: faker.internet.email,
   },
 });
