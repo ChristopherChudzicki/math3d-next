@@ -14,8 +14,8 @@ import { setFieldErrors } from "./util";
 
 /**
  * A wrapper around `react-hook-form`'s `useForm` that:
- *  1. requires a yup scehma for client-side validation
- *  2. handles DRF error responses for server-side errors
+ *  1. requires a yup schema for client-side validation
+ *  2. maps the v1 and allauth error bodies onto form fields (see setFieldErrors)
  */
 const useValidatedForm = <TFieldValues extends FieldValues = FieldValues>(
   props: Omit<UseFormProps<TFieldValues>, "resolver"> & {
