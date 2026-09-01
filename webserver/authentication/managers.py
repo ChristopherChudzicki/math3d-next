@@ -25,7 +25,6 @@ class CustomUserManager(BaseUserManager):
         """Create and save a superuser. A password given here stays usable and
         logs in at `/admin/`: allauth's `AuthenticationBackend` checks only
         `ACCOUNT_LOGIN_METHODS` and the password hash, never `SOCIALACCOUNT_ONLY`.
-        That is the break-glass path into an installation with no Google account.
         """
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
