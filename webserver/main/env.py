@@ -124,7 +124,7 @@ class EnvConfig(BaseSettings):
             if not self.APP_BASE_URL:
                 raise ValueError(
                     "APP_BASE_URL is required in production (used for "
-                    "CSRF_TRUSTED_ORIGINS and email links)."
+                    "CSRF_TRUSTED_ORIGINS)."
                 )
             if not self.CSRF_COOKIE_DOMAIN:
                 raise ValueError(
