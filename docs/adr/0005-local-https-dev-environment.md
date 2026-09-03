@@ -1,90 +1,85 @@
 # 0005 — Local HTTPS development environment
 
-**Status:** Accepted (2026-09-02)
+**Status:** Accepted (2026-09-03)
 
 **Contents**
 
 - [Context](#context)
 - [Decision](#decision)
-  - [Resolution: public DNS records](#resolution-public-dns-records)
-  - [Trust: a local CA](#trust-a-local-ca)
-  - [One certificate for every port](#one-certificate-for-every-port)
+  - [Public DNS, not /etc/hosts](#public-dns-not-etchosts)
+  - [A local CA](#a-local-ca)
   - [Terminating TLS](#terminating-tls)
-  - [Secure cookies follow the scheme](#secure-cookies-follow-the-scheme)
+  - [Configuration that moves](#configuration-that-moves)
   - [The Google client](#the-google-client)
   - [CI stays on HTTP](#ci-stays-on-http)
-  - [CA key hygiene](#ca-key-hygiene)
-- [Prior art](#prior-art)
+  - [The CA private key](#the-ca-private-key)
 - [Consequences](#consequences)
 - [Alternatives considered](#alternatives-considered)
 
 ## Context
 
-[ADR-0004](0004-oauth-only-authentication.md) put sign-in behind Google, and recorded that the real flow cannot be exercised locally: Google exempts only bare `localhost` from its HTTPS requirement, and separately requires the host's TLD to be on the public suffix list, so `http://math3d.localdev:3000` fails on both counts.[^redirect-uri] The consequence is that production is the only place the Google button has ever been clicked — and that is part of why ADR-0004 opened `ENABLE_REGISTRATION` there, since "there is no other way to exercise the real Google flow".
+[ADR-0004](0004-oauth-only-authentication.md) put sign-in behind Google and recorded that the flow cannot be exercised on today's development hostnames: Google requires the host's TLD to be on the public suffix list and requires HTTPS outside bare `localhost`,[^origins] so `http://math3d.localdev:3000` fails on both counts.
 
-Development deliberately mirrors production's cookie arrangement: SPA and API on separate hosts under a shared registrable domain, so `CSRF_COOKIE_DOMAIN` does real work rather than sitting inert. Moving both servers to bare `localhost` would satisfy Google and give that up in the same move. The remaining option ADR-0004 named — "terminating TLS locally for a domain math3d owns" — is what this ADR decides.
+It does not follow that the flow cannot be exercised locally at all. Moving both servers to bare `localhost` clears Google's rules with no infrastructure whatsoever, and needs no code: `settings.py:104-107` already lists `localhost` in the development `ALLOWED_HOSTS`, `dev_cors_allowed_origins` derives every CORS and CSRF origin from `APP_BASE_URL`, and `EnvConfig._csrf_cookie_domain_must_cover_spa_host` skips its check when `CSRF_COOKIE_DOMAIN` is empty. Three values in a gitignored `.env` and one authorized origin, and the button works.
 
-Two goals, then: a local environment that keeps production's cookie shape, and one where the Google button works.
+What that leaves is a _mode_ — a configuration you switch into to test Google and out of to do anything else, alongside the `.localdev` hostnames that daily development and the E2E suite use. Modes that are entered rarely are the ones that rot.
 
 ## Decision
 
-Serve local development from `https://local.math3d.org:3000` (SPA) and `https://api.local.math3d.org:8000` (API).
+Serve local development from `https://local.math3d.org:3000` (SPA) and `https://api.local.math3d.org:8000` (API), on a certificate from a local CA.
 
-Two independent questions hide inside that: how the names resolve, and who signs the certificate. They are decided separately because they have separate failure modes and separate exit conditions.
+The argument in one line: the Google button is already reachable on bare `localhost`, so what this buys is not capability but a single environment — one set of hostnames shared by daily development, the E2E suite, and a real sign-in — and the reason it can be that environment is that the hostnames live under a domain math3d owns.
+
+Two independent questions follow: how the names resolve, and who signs the certificate.
 
 ```mermaid
 flowchart TB
     subgraph host["Developer machine"]
-        browser["Browser<br/>(trusts mkcert root CA)"]
-        vite["Vite dev server<br/>:3000 — terminates TLS"]
+        mkcert["mkcert (run once)"]
+        store[("host trust store")]
+        certs[("~/.local/share/math3d/certs/")]
+        browser["Browser"]
+        vite["Vite :3000<br/>terminates TLS"]
+        subgraph compose["docker compose"]
+            caddy["Caddy<br/>host :8000, terminates TLS"]
+            django["Django runserver<br/>container :8000, plain HTTP"]
+        end
     end
-    subgraph compose["docker compose"]
-        caddy["Caddy :8000<br/>terminates TLS<br/>sets X-Forwarded-Proto"]
-        django["Django runserver<br/>webserver:8000 — plain HTTP"]
-    end
-    dns["Cloudflare zone math3d.org<br/>*.local.math3d.org A 127.0.0.1"]
 
-    browser -.->|resolves both names| dns
+    mkcert -->|root| store
+    mkcert -->|"leaf + key"| certs
+    certs -.->|read| vite
+    certs -.->|bind-mount| caddy
     browser -->|"https://local.math3d.org:3000"| vite
     browser -->|"https://api.local.math3d.org:8000"| caddy
-    caddy -->|"http://webserver:8000<br/>(service name, not public host)"| django
+    caddy -->|"http://webserver:8000<br/>service name, not public host"| django
 ```
 
-### Resolution: public DNS records
+### Public DNS, not /etc/hosts
 
-`local.math3d.org` and `*.local.math3d.org` get A records pointing at `127.0.0.1`, DNS-only, in the Cloudflare zone math3d already owns. No `/etc/hosts` entry on any machine, in any worktree, ever.
+`local.math3d.org` and `api.local.math3d.org` get A records pointing at `127.0.0.1`, DNS-only, in the Cloudflare zone math3d already owns — two explicit records, not a wildcard, since nothing needs a third name yet. No `/etc/hosts` entry on any machine or in any worktree, which retires the `sudo` step in `README.md`.
 
-`ol-infrastructure/local-dev` solves the same problem with a marker-delimited `/etc/hosts` block, and it is worth being explicit about why this ADR goes the other way rather than following a precedent that works. That setup defaults to `mit.dev`, a domain the team does not control records for, across many developers including WSL — with no zone to edit, a `sudo`-written hosts block is the only option available. It pays for that: hostnames must be enumerated by hand, because a hosts file has no wildcards.
+`ol-infrastructure/local-dev` uses a marker-delimited `/etc/hosts` block because it defaults to `mit.dev`, a domain the team holds no zone for; a hosts file has no wildcards, so its eight hostnames are enumerated by hand. Owning the zone is what makes the records the cheaper option here — nothing to install, nothing to re-run on a new machine or in a new worktree. Pointing a public name at loopback is well-trodden: `lvh.me` and `localtest.me` are the same trick on domains we do not control.
 
-We own the zone, so the wildcard is available, and it is what makes future hostnames free. Adding one costs no DNS edit, no certificate reissue, no `sudo`, and no re-run on a new machine or in a new worktree. Pointing a public name at loopback is well-trodden — `lvh.me` and `localtest.me` are the same trick on domains we do not control.
+The cost is that resolution needs the network, so the setup script emits the equivalent hosts block under `--write-hosts`.
 
-The cost is that resolution now needs the network. The setup script therefore emits the equivalent hosts block under `--write-hosts` for offline work; it is a fallback, not the default path.
+### A local CA
 
-### Trust: a local CA
+The certificate comes from a **mkcert CA installed in this machine's trust store**, not from a publicly trusted issuer.
 
-The certificate comes from a **mkcert** CA installed in this machine's trust store, not from a publicly-trusted issuer.
+Let's Encrypt would issue over DNS-01, since the names are in a real zone. That buys the whole ACME apparatus for a host that only answers to loopback: a Cloudflare API token with edit rights on the production zone, a custom Caddy build carrying a DNS solver (the stock image has none), 90-day renewals that fail silently on a closed laptop, and a real private key in the working tree for `detect-secrets` to keep finding.
 
-A public certificate is obtainable — the names are in a real zone, so Let's Encrypt would issue over DNS-01 — but it drags in the whole ACME apparatus for a host that only ever answers to loopback: a Cloudflare API token with edit rights on the production zone, a custom Caddy build carrying the DNS plugin (the stock image has no DNS solvers), 90-day renewals that fail silently on a laptop that was closed, and a genuine private key living in the working tree where `detect-secrets` will keep finding it.
+One leaf covers both hostnames and therefore every port — ports are not part of a certificate — so the main checkout on `:3000` and worktree servers on `:3002`–`:3009` share it. It lives machine-global under `~/.local/share/math3d/certs/`, not in a gitignored `certs/` beside the code: a repo-local path means one mkcert run per checkout, and a worktree that skipped it fails at dev-server start for a reason that looks nothing like its cause.
 
-mkcert has none of that, and installing a root into a trust store is a solved, scriptable problem — `ol-infrastructure/local-dev` does it unattended for a whole team, Windows included. The one step that cannot be containerized is `mkcert -install`, because it writes to the _host's_ trust store, which is what the browser reads.
-
-Revisit this if a collaborator joins, or if the flow ever needs testing from a phone or from CI, where the root cannot be installed.
-
-### One certificate for every port
-
-Ports are not part of a certificate. One leaf covering `local.math3d.org` and `*.local.math3d.org` therefore serves the main checkout on `:3000` and every worktree dev server on `:3002`–`:3009` (`WORKTREE_PORTS` in `webserver/main/origins.py`) with nothing per-worktree to generate.
-
-The certificate lives **machine-global**, under `~/.local/share/math3d/certs/`, rather than in a gitignored `certs/` beside the code. A repo-local path would mean one mkcert run per checkout, which is the wrong shape for a repo where worktrees are created routinely and often driven by agents: any checkout that skipped setup would fail at dev-server start for a reason that looks nothing like its cause. One generation per machine, and every checkout — present and future — picks it up. Caddy bind-mounts the directory by absolute path.
+Revisit this if a collaborator joins, or if the flow needs testing from a device that cannot install the root.
 
 ### Terminating TLS
 
-**Vite terminates its own TLS** via `server.https`, pointed at the mkcert files. The SPA needs no proxy in front of it, and `packages/app/vite.config.ts` already derives host and port from `APP_BASE_URL`, so the scheme joins them as a third derived value. A missing certificate fails the server start with a message naming the setup script, in the spirit of the existing `strictPort` comment: fail loudly rather than silently serve something subtly wrong.
+**Vite terminates its own TLS** via `server.https`. The SPA needs no proxy, and `packages/app/vite.config.ts:67` already derives host and port from `APP_BASE_URL`, so the scheme joins them as a third derived value. Reading the certificate must be scoped to an https `APP_BASE_URL` and to `command === "serve"`: that file is also the vitest config, and `yarn test` and `yarn build` run in CI where no certificate exists.
 
-**Django gets a Caddy container**, because `runserver` cannot terminate TLS. Caddy is the right shape here rather than merely an available one: production terminates TLS at Heroku's router and Django reads `X-Forwarded-Proto` behind it, so a local reverse proxy reproduces the deployed topology instead of approximating it.
+Django gets a Caddy container, because `runserver` cannot terminate TLS and because production terminates at Heroku's router with Django reading `X-Forwarded-Proto` behind it. That makes `SECURE_PROXY_SSL_HEADER` — today production-only, `settings.py:95` — necessary in development too. The consequence is specifically about CSRF, not about URL building: Django's `CsrfViewMiddleware` composes its same-origin comparison from `request.is_secure()` and runs the strict `Referer` check _only_ for secure requests,[^csrf] so without the header development exercises a different code path than production.
 
-That makes `SECURE_PROXY_SSL_HEADER` — today set only in the production branch of `settings.py:94-95` — necessary in development too. Without it Django sees plain HTTP behind Caddy: `request.is_secure()` is false and every absolute URL it builds says `http`.
-
-The Caddyfile **matches on the public hostname and forwards to the Docker service name**:
+The Caddyfile matches on the public hostname and forwards to the Docker service name:
 
 ```
 api.local.math3d.org:8000 {
@@ -93,85 +88,69 @@ api.local.math3d.org:8000 {
 }
 ```
 
-The asymmetry is load-bearing. Hostnames resolve per-machine, and inside a container `api.local.math3d.org` is that container's own loopback — `reverse_proxy api.local.math3d.org:8000` would proxy Caddy to itself. The same rule governs any server-side fetch from Django, and it is what production does too: the browser reaches `api.next.math3d.org`, while Heroku's router reaches the dyno internally rather than re-resolving the public name.
+Inside a container `api.local.math3d.org` is that container's own loopback, so `reverse_proxy api.local.math3d.org:8000` would proxy Caddy to itself. The same rule governs any server-side fetch from Django, and production works the same way: the browser reaches `api.next.math3d.org` while Heroku's router reaches the dyno internally.
 
-Caddy sits behind a compose **profile**, and `webserver`'s published port becomes `${WEBSERVER_HOST_PORT:-8000}`. Both default to today's behaviour, so CI — which runs `docker compose up` from the same file — is untouched by a file it now shares with a service it never starts.
+Caddy takes host `:8000` behind a compose profile, and `webserver`'s published port becomes `${WEBSERVER_HOST_PORT:-8001}` so the two cannot collide. Both variables live in the **gitignored project-root `.env`**, because compose interpolation reads only that file and the shell — never the `env_file:` list, which is a different mechanism — so `.env.development` cannot carry them. `just start` passes the profile explicitly; CI never uses `just` and never enables the profile, so its `docker compose up` is unchanged.
 
-### Secure cookies follow the scheme
+### Configuration that moves
 
-Development currently forces `SESSION_COOKIE_SECURE` and `CSRF_COOKIE_SECURE` to `False` (`settings.py:102-103`). Over HTTPS they are derived from the `APP_BASE_URL` scheme instead, so local development runs the same cookie flags production does.
+`.env.development` moves `APP_BASE_URL`, `VITE_API_BASE_URL`, `VITE_SITE_ORIGIN`, `TEST_APP_URL`, and `TEST_API_URL` to the new origins, and `CSRF_COOKIE_DOMAIN` to **`local.math3d.org`** — not `math3d.org`, which the validator would also accept while attaching development cookies to production requests. CORS, CSRF-trusted, and credentialed origins derive from `APP_BASE_URL` in `webserver/main/origins.py`, so they follow for free, worktree ports included.
 
-Leaving them `False` would have worked — `Secure` cookies are a browser-side restriction, and nothing about the Google flow needs them. The reason to flip them is that the cookie arrangement is the one part of production this environment exists to mirror faithfully, and `Secure` is the last attribute it was not exercising. A dev environment that reproduces the domain scoping but not the flags still cannot catch a cookie that production would refuse to send.
+Two consumers do not follow for free:
 
-This forces a second change, and the coupling is the interesting part. The `DISABLE_ALLAUTH_RATE_LIMITS` guard at `settings.py:281-284` refuses to boot when `SESSION_COOKIE_SECURE` is set, using that flag as a stand-in for "this is production". Two distinct policies are aliased onto one setting, and they only ever agreed because development happened to be plaintext. It is re-keyed to `not IS_DEVELOPMENT`, which is what it always meant.
+- `ALLOWED_HOSTS`. The development default at `settings.py:104-107` is `["localhost", "127.0.0.1", "api.math3d.localdev"]`, and Caddy preserves the incoming `Host`, so Django rejects every API request with `DisallowedHost` until `api.local.math3d.org` is added.
+- **Node does not read the macOS trust store.** Playwright's `webServer` readiness probe, `global.setup.ts`'s `request.get`, and — the one no Playwright option reaches — the bare `fetch` calls in `packages/app-tests-e2e/src/utils/api/config.ts` all validate against Node's bundled CA bundle. The fix is `NODE_EXTRA_CA_CERTS` on the `test-e2e` script, which already wraps Playwright in a `node` invocation. `ignoreHTTPSErrors` is not the fix: it would discard the trust this ADR exists to establish.
 
-**This weakens an argument in ADR-0004 and should be recorded as such.** That ADR justified registering the `dummy` provider under `IS_DEVELOPMENT` on the grounds that "production cannot set that flag without simultaneously turning off secure cookies, HSTS, and TLS redirection, and dropping the required-config guards". After this change, `IS_DEVELOPMENT` no longer implies insecure cookies. The other three legs stand — `SECURE_SSL_REDIRECT`, HSTS, and the required-config guards remain strictly production-side — so the conclusion holds on a narrower base. It is worth knowing the base got narrower.
+Development cookie flags are left alone. `SESSION_COOKIE_SECURE` and `CSRF_COOKIE_SECURE` stay `False` (`settings.py:102-103`) even over TLS. Deriving them from the scheme would mirror production more exactly, but `Secure` is a browser-side send restriction that no code branches on, so it buys no bug class — and it would force re-keying the `DISABLE_ALLAUTH_RATE_LIMITS` guard, which uses `SESSION_COOKIE_SECURE` as a proxy for "this is production" (`settings.py:281-287`). That guard is worth fixing on its own merits; it is not this ADR's to spend.
 
 ### The Google client
 
-A **dev-only OAuth client**, in the same Google Cloud project as production. Separate client because development origins churn — worktree ports, hostname changes like this one — and every such edit would otherwise be a change to the client real users authenticate against, one mis-click from deleting a production origin. Same project because the consent screen, its branding, and its publishing status are per-project, and a second project would mean configuring and possibly re-verifying a second one.
+A **dev-only OAuth client**, in the same Google Cloud project as production. Separate client because development origins churn, and every such edit would otherwise touch the client real users authenticate against. Same project because the consent screen, its branding, and its publishing status are per-project.
 
-Authorized JavaScript origins list `https://local.math3d.org:3000` and each of `:3002`–`:3009`. Non-standard ports are permitted in a JavaScript origin,[^ports] so no privileged bind is needed and worktrees are registerable on the same terms as the main checkout. Registering all nine up front costs nothing and means a worktree's sign-in button never fails for a reason unrelated to the work in progress.
+Authorized JavaScript origins list `https://local.math3d.org:3000`, each of `:3002`–`:3009`, and `http://localhost:3000`. Non-standard ports are permitted in a JavaScript origin,[^origins] so no privileged bind is needed and worktrees register on the same terms as the main checkout. The `localhost` entry is deliberate: it keeps the zero-infrastructure fallback from [Context](#context) available as a supported escape hatch rather than a rediscovery, for a machine where the CA cannot be installed.
 
-No redirect URI and no client secret, per ADR-0004: the popup flow obtains no authorization code, so neither field has a consumer.
+No redirect URI and no client secret, per ADR-0004 — the popup flow obtains no authorization code, so neither field has a consumer.
 
-The dev client ID is committed to `.env.development`, replacing the placeholder. A client ID is public by construction — it ships inside the SPA bundle — and its only security property is the origin allowlist, whose entries resolve to loopback for everyone. Committing it means a fresh checkout gets a working Google button from the setup script alone, rather than carrying "create your own OAuth client" as a documented prerequisite. It cannot reach a production build: `deploy-reusable.yml` supplies `VITE_GOOGLE_CLIENT_ID` from a GitHub Actions variable, and the E2E workflow hardcodes its own.
+The client ID is committed to `.env.development`, replacing the placeholder. A client ID is public by construction, and its only security property is the origin allowlist, whose entries all resolve to loopback. Committing it means a fresh checkout gets a working button from the setup script alone. It cannot reach a production build: Vite loads `.env.development` only in development mode, and `deploy-reusable.yml` supplies `VITE_GOOGLE_CLIENT_ID` from an Actions variable regardless.
 
 ### CI stays on HTTP
 
-CI takes `APP_BASE_URL`, `TEST_APP_URL`, and `TEST_API_URL` from Actions variables and writes its own `.env`, so it is already insulated from `.env.development` and needs no change. It stays on `.localdev` over HTTP deliberately: moving it to the HTTPS origin would mean distributing the CA private key to runners as a rotating secret, which is a real credential in exchange for no additional coverage — the suite authenticates through `dummy`, not Google.
+CI takes `APP_BASE_URL` and the `TEST_*` URLs from Actions variables and writes its own `.env`, so it is already insulated from `.env.development`. It stays on `.localdev` over HTTP: moving it would mean shipping the leaf key and certificate to runners as a rotating secret, and installing the root in each runner's trust store, for no additional coverage — the suite authenticates through `dummy`, not Google.
 
-### CA key hygiene
+### The CA private key
 
-A trusted root's private key can mint a certificate for **any** hostname this machine's browsers will accept silently. Two attackers are worth separating: live malware running as the user, which is largely game-over regardless, and **backup exposure** — a stolen disk, a compromised backup provider — which needs no code execution at all and is defeated by rotation.
+A trusted root's private key mints certificates for _any_ hostname this machine accepts silently. Live malware running as the user is game-over regardless; backup exposure — a stolen disk, a compromised backup provider — needs no code execution and is the case worth designing against.
 
-So the setup rotates the CA rather than reusing an existing one, excludes `$(mkcert -CAROOT)` from Time Machine, and parks `rootCA-key.pem` offline once the leaf is issued. Order matters: rotating without first untrusting the old root gains nothing, because the backed-up old key still signs certificates this machine accepts. `rootCA.pem` stays in place — only issuance needs the private half, and mkcert leaves are long-lived.
-
-## Prior art
-
-Wanting real origins over HTTPS locally is a thoroughly solved problem, and most of this ADR assembles existing pieces rather than inventing any. The off-the-shelf options were evaluated on whether they preserve production's cookie shape, since that is the constraint that eliminates most of them.
-
-**Shared public domains pointing at loopback.** `lvh.me`, `localtest.me`, and the wildcard-DNS services `nip.io` / `sslip.io`[^sslip] resolve to `127.0.0.1` (or to any IP encoded in the name) with no setup at all. `localhost.direct`[^lhd] goes further and is the closest thing to a turnkey answer: its author holds a **publicly trusted wildcard certificate** and publishes the private key, so there is no local CA to install anywhere.
-
-They are rejected for the same reason `localhost` is. Cookies would be scoped to somebody else's registrable domain — `.localhost.direct`, shared with every other developer using the service — rather than to one math3d controls, which is precisely the fidelity this environment exists to provide. `localhost.direct` carries a second problem: a deliberately published private key is a mandatory revocation event under CA/Browser Forum rules, so the certificate is one complaint away from disappearing, and its continued existence depends on one volunteer renewing it. The `sslip.io` family also offers no wildcard certificate, leaving the trust half unsolved.
-
-**Caddy's own local CA.** `tls internal` plus `caddy trust`[^caddy-internal] does what mkcert does — generates a CA, installs it into the local trust store — and this design already runs Caddy, so it is the option most obviously worth taking.
-
-It loses on where the files end up. Vite needs the leaf as a **pair of files on the host** it can hand to `server.https`; Caddy keeps its PKI inside its own data directory, which here is a container path backed by a Docker volume, so the certificate is both awkward to hand to Vite and destroyed by `docker compose down -v`. `caddy trust` installs into the trust store of whatever machine it runs on, which for a containerized Caddy is the container's — so the one step that actually matters would have to be done by hand on the host anyway. mkcert writes plain files to a host path that Vite reads directly and Caddy bind-mounts, and automates the host trust install that is the whole difficulty.
-
-**`vite-plugin-mkcert`.**[^vite-mkcert] Wraps mkcert for Vite specifically and would cover the SPA in one line. It only covers the SPA, though: Caddy needs the same certificate for the API host, and the certificate here is deliberately machine-global and shared across worktrees, which is not the lifecycle a per-project plugin manages. The plugin would be solving the easy half.
-
-**Tunnels — `cloudflared`, ngrok.** A different shape entirely, and the strongest alternative. A named Cloudflare Tunnel[^cf-tunnel] would map `local.math3d.org` to `localhost:3000` with a genuinely trusted certificate terminated at Cloudflare's edge: no local CA, no hygiene section, no trust install, and it works from a phone — all on infrastructure math3d already uses.
-
-It is not taken because it changes what is being tested. Every request, including every HMR update, leaves the machine and round-trips through Cloudflare, making an internet dependency out of a workflow that a DNS record only needs at resolution time. The local dev server becomes internet-reachable unless Cloudflare Access is configured in front of it. Each worktree port needs its own hostname and ingress rule, which spends the "one certificate, every port" property this design gets for free. And TLS terminates at an edge whose forwarded-header behaviour is Cloudflare's rather than a proxy we configure, which is the fidelity argument in [Terminating TLS](#terminating-tls) running backwards.
-
-ngrok-style ephemeral tunnels fail on a narrower point: a hostname that changes per run would need re-registering as a Google authorized origin every session.
-
-The tunnel is the right thing to revisit if a collaborator joins or a phone needs to reach the environment — the same trigger as the publicly-trusted-certificate option, and probably the better answer when it arrives.
+So the setup **deletes `rootCA-key.pem` once the leaf is issued**, keeping only `rootCA.pem` in the trust store. Nothing left on disk means nothing to exclude from backups and nothing to rotate later. Reissuing means generating a new CA and re-trusting it, which is the same work as a rotation and is needed roughly once every two years.
 
 ## Consequences
 
-- **mkcert becomes a prerequisite for running a dev server at all,** not just for testing Google. The setup script is idempotent and the certificate is machine-global, so the cost is once per machine — but a checkout on a fresh machine cannot `yarn start` until it runs.
-- **The dev servers are unreachable from other devices.** A phone on the same network resolves `local.math3d.org` to its own loopback, and could not trust the root anyway. Mobile testing against local dev is gone; it was already impractical over `.localdev`.
-- **Offline development needs the hosts fallback,** one `--write-hosts` invocation, undoing part of what the DNS decision buys.
-- **The zone publicly records that this setup exists,** and the names resolve to `127.0.0.1` for the entire internet. Both are true of `lvh.me`; neither grants access to anything.
-- **ADR-0004's `dummy`-provider argument rests on a narrower base,** as described above.
-- **Worktree `.env` files generated before this change carry the old hostnames** and will not pick up HTTPS until regenerated; `scripts/setup_worktree_env.sh` also matches ports against the literal `math3d.localdev` and must change with them.
-- **Google's console is now load-bearing for a local workflow.** Nine authorized origins are configuration living outside the repo, discoverable only by failing.
+- **A checkout on a fresh machine cannot `yarn start` until setup runs.** `mkcert -install` writes to the system keychain and prompts for administrator credentials, so a human must run it once per machine — an agent cannot. The certificate is machine-global, so worktrees created afterwards need nothing.
+- **The E2E suite needs `NODE_EXTRA_CA_CERTS`,** and `packages/app-tests-e2e/src/fixtures/users.ts:117,129` hardcodes `secure: false` on injected cookies, which stops mirroring Django if the cookie flags are ever derived from the scheme.
+- **Worktrees created before this change break rather than degrade.** Their `.env` pins the old origin, which the backend no longer trusts for CORS or CSRF, so every authenticated request fails. `scripts/setup_worktree_env.sh` refuses to overwrite an existing `.env` and matches claimed ports against the literal `math3d.localdev`; both need changing, and the port match should be hostname-agnostic or a regenerated worktree can be handed a port another one already owns.
+- **`.localdev` does not go away.** CI keeps it, and it remains hardcoded in `settings_test.py`, `authentication/allauth_test.py`, `packages/api/src/hooks/util.ts`, and `.github/workflows/e2e.yml`. Two hostname sets are supported indefinitely.
+- **The certificate expires silently.** A missing certificate fails the dev server loudly; an expired one starts cleanly and fails in the browser, roughly two years out, with no reminder mechanism.
+- **A public name resolving to `127.0.0.1` is dropped by DNS-rebinding protection** in some resolvers, consumer routers, and corporate VPNs. The symptom is NXDOMAIN for a name that demonstrably exists.
+- **The dev servers are unreachable from other devices,** and the zone publicly records that this setup exists.
+- **Google's console is now load-bearing for a local workflow** — ten origins living outside the repo, discoverable only by failing.
+- **ADR-0004 opened production registration partly because the Google flow could not run locally.** That reason is gone; whether `ENABLE_REGISTRATION` should close again is a separate decision this ADR does not make.
 
 ## Alternatives considered
 
-- **mkcert on the existing `.localdev` names.** By far the cheapest — a scheme change and nothing else, no DNS, no new hostnames. Dead on the public-suffix rule, which rejects the redirect/origin regardless of transport. `*.localhost` subdomains (`app.localhost:3000`) fail identically; Google's HTTP exemption covers only bare `localhost`.
-- **Both servers on bare `localhost`.** Google-legal with zero infrastructure, and cookies ignore ports so the session cookie is shared for free. Rejected because it abandons the shared-registrable-domain arrangement, leaving `CSRF_COOKIE_DOMAIN` — exactly the machinery the OAuth work touches — unexercised locally. It remains the fallback if this stalls, and costs nothing to add as an extra origin.
-- **A publicly-trusted certificate via DNS-01.** See [Trust](#trust-a-local-ca). Worth revisiting only when a device that cannot install the root needs to reach the dev server.
-- **`runserver_plus --cert-file` (django-extensions).** No new service and no `SECURE_PROXY_SSL_HEADER`, which is precisely the objection: production runs Django behind a TLS-terminating router reading forwarded headers, and this quietly diverges from that topology to save a container.
-- **A name-constrained CA.** X.509 `nameConstraints` limiting the root to `.math3d.org` would reduce "can forge anything" to "can forge our own dev hostnames" — a real improvement on the hygiene section's whole premise. mkcert cannot generate one; it needs `openssl` or `step-ca`. Believed enforced by Apple's verifier, NSS, and Chrome's built-in verifier for user-added roots, but unverified, and the fallback if enforcement is missing is silent. Not taken.
-- **`/etc/hosts`, as `ol-infrastructure/local-dev` does.** See [Resolution](#resolution-public-dns-records).
+- **Both servers on bare `localhost`.** Zero infrastructure, works today, and remains available as a registered origin. Rejected as the primary environment because it is a mode rather than an environment: daily development and the E2E suite would stay on `.localdev`, leaving a configuration exercised only when someone remembers to test Google. It is the right answer if this stalls.
+- **A tunnel (`cloudflared`, `ngrok`).** The strongest alternative — a trusted certificate, no local CA, no trust install, reachable from a phone, on infrastructure math3d already uses.[^cf-tunnel] Rejected because every request including HMR round-trips Cloudflare, the dev server becomes internet-reachable absent Access, each worktree port needs its own hostname and ingress rule, and TLS would terminate at an edge production does not have — `api.math3d.org` is a Heroku CNAME, not proxied. Ephemeral `ngrok` hostnames would also need re-registering as a Google origin each session. Worth revisiting when a device that cannot install the root needs in.
+- **Shared loopback domains** — `lvh.me`, `localtest.me`, `nip.io`/`sslip.io`,[^sslip] and `localhost.direct`,[^lhd] which publishes a publicly trusted wildcard certificate _and its private key_. Rejected for the same reason as bare `localhost`, plus: a published private key lets anyone on the same network MITM every `*.localhost.direct` host with a publicly trusted certificate.
+- **Caddy's own local CA** (`tls internal` + `caddy trust`).[^caddy-internal] The same mechanism on a service already running. Rejected because leaves are generated per-SNI inside Caddy's PKI rather than as files Vite can be handed, and `caddy trust` installs into the trust store of wherever it runs — for a containerized Caddy, the container's — leaving the only hard step manual anyway.
+- **`vite-plugin-mkcert`.**[^vite-mkcert] Covers the SPA only, and manages a per-project certificate rather than the machine-global one Caddy also mounts.
+- **A publicly trusted certificate via DNS-01.** See [A local CA](#a-local-ca).
+- **`runserver_plus --cert-file` (`django-extensions`).** No new service and no `SECURE_PROXY_SSL_HEADER` — which is the objection: production runs Django behind a TLS-terminating router reading forwarded headers, and this diverges from that topology to save a container.
+- **A name-constrained CA.** X.509 `nameConstraints` limiting the root to `.math3d.org` would reduce "can forge anything" to "can forge our own dev hostnames". mkcert cannot generate one, and enforcement on user-added roots is unverified with a silent fallback. Deleting the private key addresses the same threat with no new tooling.
+- **`/etc/hosts`, as `ol-infrastructure/local-dev` does.** See [Public DNS](#public-dns-not-etchosts).
 
-[^redirect-uri]: [Google Identity — Redirect URI validation rules](https://developers.google.com/identity/protocols/oauth2/web-server#uri-validation): the host TLD must belong to the public suffix list, and HTTPS is required except for `localhost`.
-[^ports]: [Google Cloud — Manage OAuth Clients](https://support.google.com/cloud/answer/15549257): "If you use a port other than 80, you must specify it. For example: `https://example.com:8080`".
-[^sslip]: [nip.io](https://nip.io/) / [sslip.io](https://sslip.io/) — wildcard DNS returning the IP address encoded in the hostname.
-[^lhd]: [`Upinel/localhost.direct`](https://github.com/Upinel/localhost.direct) — `*.localhost.direct` resolving to `127.0.0.1`, with a publicly trusted wildcard certificate and its private key published for anyone to use.
-[^caddy-internal]: [Caddy — Automatic HTTPS](https://caddyserver.com/docs/automatic-https#local-https): Caddy generates its own CA, signs leaf certificates with it, and stores the PKI under its data directory; `caddy trust` installs the root into the local trust store.
-[^vite-mkcert]: [`vite-plugin-mkcert`](https://github.com/liuweiGL/vite-plugin-mkcert).
+[^origins]: [Google Cloud — Manage OAuth Clients](https://support.google.com/cloud/answer/15549257), on authorized JavaScript origins: the TLD must be on the public suffix list, HTTPS is required outside `localhost`, and "if you use a port other than 80, you must specify it. For example: `https://example.com:8080`".
+[^csrf]: `django/middleware/csrf.py` — the same-origin comparison is built from `request.is_secure()`, and the `Referer` fallback runs under `elif request.is_secure():`.
 [^cf-tunnel]: [Cloudflare — Create a locally-managed tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/local-management/create-local-tunnel/).
+[^sslip]: [nip.io](https://nip.io/) / [sslip.io](https://sslip.io/) — wildcard DNS returning the IP encoded in the hostname.
+[^lhd]: [`Upinel/localhost.direct`](https://github.com/Upinel/localhost.direct).
+[^caddy-internal]: [Caddy — Automatic HTTPS](https://caddyserver.com/docs/automatic-https#local-https).
+[^vite-mkcert]: [`vite-plugin-mkcert`](https://github.com/liuweiGL/vite-plugin-mkcert).
