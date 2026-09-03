@@ -3,8 +3,9 @@ name: CI/ End-to-end Tests
 on:
   push:
     branches: [main]
+  # No `branches` filter: a stacked PR targets its parent feature branch, and
+  # these checks must run there too.
   pull_request:
-    branches: [main]
 
 env:
   CI: True
