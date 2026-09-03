@@ -4,8 +4,9 @@ env:
   CI: True
 
 on:
+  # No `branches` filter: a stacked PR targets its parent feature branch, and
+  # these checks must run there too.
   pull_request:
-    branches: [main]
 
 jobs:
   frontend-tests:
