@@ -9,7 +9,7 @@
     "lint": "eslint --max-warnings 0 \"**/*.ts?(x)\""
   },
   "devDependencies": {
-    "@faker-js/faker": "^9.9.0",
+    "@faker-js/faker": "^10.0.0",
     "@fontsource/roboto": "^5.3.0",
     "@math3d/api": "workspace:^",
     "@math3d/eslint-config": "workspace:^",
