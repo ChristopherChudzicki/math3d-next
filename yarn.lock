@@ -8709,7 +8709,7 @@ __metadata:
     react-infinite-scroll-component: "npm:^6.1.1"
     react-redux: "npm:^9.1.0"
     react-router: "npm:^7.18.0"
-    react-router-dom: "npm:^7.18.0"
+    react-router-dom: "npm:^7.18.3"
     rollup-plugin-visualizer: "npm:5.14.0"
     showdown: "npm:^2.1.0"
     tarjan-graph: "npm:3.0.0"
@@ -19150,19 +19150,35 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^7.18.0":
-  version: 7.18.0
-  resolution: "react-router-dom@npm:7.18.0"
+"react-router-dom@npm:^7.18.3":
+  version: 7.18.3
+  resolution: "react-router-dom@npm:7.18.3"
   dependencies:
-    react-router: "npm:7.18.0"
+    react-router: "npm:7.18.3"
   peerDependencies:
     react: ">=18"
     react-dom: ">=18"
-  checksum: 10/7725f261e308d2a8131c3857db828820e0f0db3e64ae86b84c8fdf309e112f4373ca5625a66a68105fd16f2159f558563440fd82487fa3818988a69956c851bf
+  checksum: 10/910592ba98ab777e3fd0f05d80c5e4ad41cc372655f14d8fee84fa25f473d5f92a3f50fdd039db16aa4dce63571faa27fff0401683da0a620e42146dacc99dfe
   languageName: node
   linkType: hard
 
-"react-router@npm:7.18.0, react-router@npm:^7.18.0":
+"react-router@npm:7.18.3":
+  version: 7.18.3
+  resolution: "react-router@npm:7.18.3"
+  dependencies:
+    cookie: "npm:^1.0.1"
+    set-cookie-parser: "npm:^2.6.0"
+  peerDependencies:
+    react: ">=18"
+    react-dom: ">=18"
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+  checksum: 10/b7393d5f5b044cda9c922b3f96629abc442d6b1b85224c28d4aa292cda45ef4cf26792b613f2bc0742701da3ddc77dd0d4a181e7e5b85d1abd6982c9eba278f2
+  languageName: node
+  linkType: hard
+
+"react-router@npm:^7.18.0":
   version: 7.18.0
   resolution: "react-router@npm:7.18.0"
   dependencies:
