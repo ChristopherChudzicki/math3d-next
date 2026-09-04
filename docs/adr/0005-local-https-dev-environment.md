@@ -14,6 +14,7 @@
   - [Configuration that would move](#configuration-that-would-move)
   - [The Google client](#the-google-client)
   - [The CA private key](#the-ca-private-key)
+  - [What implementing it would take](#what-implementing-it-would-take)
 - [Consequences](#consequences)
 - [Alternatives considered](#alternatives-considered)
 
@@ -126,6 +127,24 @@ This part survives the rejection: a dev-only client is right under either decisi
 A trusted root's private key mints certificates for _any_ hostname this machine accepts silently. Live malware running as the user is game-over regardless; backup exposure — a stolen disk, a compromised backup provider — needs no code execution and is the case worth designing against.
 
 So the setup **deletes `rootCA-key.pem` once the leaf is issued**, keeping only `rootCA.pem` in the trust store. Nothing left on disk means nothing to exclude from backups and nothing to rotate later. Reissuing means generating a new CA and re-trusting it, which is the same work as a rotation and is needed roughly once every two years.
+
+### What implementing it would take
+
+Beyond the configuration above:
+
+- **A human runs `mkcert -install` once per machine.** It writes to the system keychain and prompts for administrator credentials, so an agent cannot; a checkout on a fresh machine cannot `yarn start` until it happens. The certificate is machine-global, so worktrees created afterwards need nothing.
+- **`just start` gains the compose profile** so Caddy comes up with the stack. CI never invokes `just` and never enables the profile, so its `docker compose up` is unchanged.
+- **`scripts/setup_worktree_env.sh` needs two changes.** It writes the origin into each worktree's `.env` and refuses to overwrite an existing one, so worktrees created before the switch break rather than degrade: the backend no longer trusts their origin for CORS or CSRF, and every authenticated request fails. Its claimed-port match is also the literal `math3d.localdev:[0-9]+`, and left as is a regenerated worktree can be handed a port another one already owns.
+- **Development cookie flags stay `False`** (`settings.py:102-103`) even over TLS. Deriving them from the scheme would mirror production more exactly, but `Secure` is a browser-side send restriction that no code branches on, so it buys no bug class — and it would force re-keying the `DISABLE_ALLAUTH_RATE_LIMITS` guard, which reads `SESSION_COOKIE_SECURE` as a proxy for "this is production" (`settings.py:281-287`). Were they ever derived, `packages/app-tests-e2e/src/fixtures/users.ts:117,129` hardcodes `secure: false` on injected cookies and would stop mirroring Django.
+- **The dev client ID is committed to `.env.development`,** replacing the placeholder, so a fresh checkout gets a working button from the setup script alone. A client ID is public by construction and its only security property is the origin allowlist, whose entries all resolve to loopback. It cannot reach a production build: Vite loads `.env.development` only in development mode, and `deploy-reusable.yml` supplies `VITE_GOOGLE_CLIENT_ID` from an Actions variable regardless.
+- **`.localdev` does not disappear.** CI keeps it, including the literal `CSRF_COOKIE_DOMAIN=math3d.localdev` it writes at `.github/workflows/e2e.yml:65`, and it stays in `README.md`, `CLAUDE.md`, and as fixture literals throughout `webserver/main/settings_test.py` and `webserver/authentication/allauth_test.py`. Those tests pass their own origins in explicitly, so they keep passing — they just stop resembling the configuration they describe.
+
+Two failure modes to expect, both of which start cleanly and fail later:
+
+- **A public name resolving to `127.0.0.1` is dropped by DNS-rebinding protection** in some resolvers, consumer routers, and corporate VPNs. The symptom is NXDOMAIN for a name that demonstrably exists.
+- **The certificate expires silently.** A missing certificate fails the dev server loudly; an expired one starts fine and fails only in the browser, roughly two years out, with no reminder mechanism.
+
+The dev servers remain unreachable from other devices either way, and the zone publicly records that this setup exists.
 
 ## Consequences
 
