@@ -8,7 +8,7 @@
     "@math3d/tsconfig": "workspace:^",
     "@types/react": "^19.2.17",
     "eslint": "^8.57.1",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "test": "vitest --run",
@@ -24,6 +24,6 @@
     "tiny-invariant": "^1.3.3"
   },
   "peerDependencies": {
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.11"
   }
 }
