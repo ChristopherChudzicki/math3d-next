@@ -7,7 +7,7 @@ type UserMenuOption =
   | "signout"
   | "myScenes"
   | "examples"
-  | "settings"
+  | "deleteAccount"
   | "contact";
 
 class UserMenu {
@@ -45,8 +45,8 @@ class UserMenu {
     return this.root.getByRole("menuitem", { name: "Examples" });
   }
 
-  settings(): Locator {
-    return this.root.getByRole("menuitem", { name: "Account Settings" });
+  deleteAccount(): Locator {
+    return this.root.getByRole("menuitem", { name: "Delete Account" });
   }
 
   contact(): Locator {

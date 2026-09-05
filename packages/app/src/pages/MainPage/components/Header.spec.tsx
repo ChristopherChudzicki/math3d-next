@@ -53,11 +53,13 @@ test("Sign out opens logout overlay", async () => {
   expect(location.current.search).toContain("overlay=logout");
 });
 
-test("Account Settings opens settings overlay", async () => {
+test("Delete Account opens the delete-account overlay", async () => {
   const { location } = renderTestApp("", { isAuthenticated: true });
   const button = screen.getByRole("button", { name: "Open User Menu" });
   await user.click(button);
-  const settings = screen.getByRole("menuitem", { name: "Account Settings" });
-  await user.click(settings);
-  expect(location.current.search).toContain("overlay=settings");
+  const deleteAccount = screen.getByRole("menuitem", {
+    name: "Delete Account",
+  });
+  await user.click(deleteAccount);
+  expect(location.current.search).toContain("overlay=delete-account");
 });

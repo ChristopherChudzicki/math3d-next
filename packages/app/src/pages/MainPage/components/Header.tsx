@@ -13,7 +13,7 @@ import { useOverlay } from "@/features/overlays/useOverlay";
 import type { OverlayName } from "@/features/overlays/useOverlay";
 import Button from "@mui/material/Button";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ListIcon from "@mui/icons-material/List";
 import type { SimpleMenuItem } from "@/util/components/SimpleMenu/SimpleMenu";
 import { useUserMe, User } from "@math3d/api";
@@ -118,10 +118,10 @@ const getItems = ({
     },
     {
       type: "button",
-      label: "Account Settings",
-      key: "settings",
-      icon: <ManageAccountsIcon fontSize="small" />,
-      onClick: () => open("settings"),
+      label: "Delete Account",
+      key: "delete-account",
+      icon: <DeleteForeverIcon fontSize="small" />,
+      onClick: () => open("delete-account"),
       shouldShow: isAuthenticated,
     },
     {
