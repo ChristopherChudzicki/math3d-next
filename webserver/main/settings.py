@@ -199,10 +199,12 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# Dropping the middleware is Django's only off switch for CSRF. It exists for
-# one manual test: Google sign-in on bare `localhost`, where a single-label
-# host cannot carry the domain cookie the SPA reads. See ADR-0005.
-if ENV.DISABLE_CSRF:
+# The flag exists for one manual test: Google sign-in on bare `localhost`,
+# where a single-label host cannot carry the domain cookie the SPA reads. See
+# ADR-0005. Dropping the middleware does not cover the v1 API, which runs its
+# own check — main/ninja_auth.py reads the flag too.
+DISABLE_CSRF = ENV.DISABLE_CSRF
+if DISABLE_CSRF:
     if not IS_DEVELOPMENT:
         raise ImproperlyConfigured(
             "DISABLE_CSRF must not be enabled outside development."
