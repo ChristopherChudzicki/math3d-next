@@ -1,5 +1,7 @@
 import { test, expect } from "vitest";
+import { http, HttpResponse } from "msw";
 import { mockAuth } from "@math3d/mock-api";
+import { server } from "@math3d/mock-api/node";
 import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
 
 test("Delete Account dialog opens via overlay param and closes by clearing it", async () => {
@@ -74,4 +76,30 @@ test("the wrong confirmation phrase does not delete the account", async () => {
   // also what a still-in-flight deletion looks like.
   await waitFor(() => expect(confirm).toBeInvalid());
   expect(dialog).toBeInTheDocument();
+});
+
+test("a failed deletion surfaces the error instead of silently reopening", async () => {
+  server.use(
+    http.post("*/v1/auth/users/me/delete/", () =>
+      HttpResponse.json({ detail: "boom" }, { status: 500 }),
+    ),
+  );
+  renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
+  const dialog = await screen.findByRole("dialog", {
+    name: "Delete Account",
+  });
+
+  await user.type(
+    within(dialog).getByLabelText("Confirm"),
+    "Yes, permanently delete",
+  );
+  await user.click(
+    within(dialog).getByRole("button", { name: "Delete Account" }),
+  );
+
+  // The confirmation phrase is the form's only field, so a server-side failure
+  // has no field to attach to and is invisible unless the root error renders.
+  expect(
+    await within(dialog).findByText(/something went wrong/i),
+  ).toBeVisible();
 });
