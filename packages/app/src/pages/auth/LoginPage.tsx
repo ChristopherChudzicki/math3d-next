@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Alert from "@mui/material/Alert";
-import { isApiError, useProviderTokenLogin } from "@math3d/api";
+import { ApiError, isApiError, useProviderTokenLogin } from "@math3d/api";
 import {
   GOOGLE_CLIENT_ID,
   GoogleSignInButton,
@@ -11,6 +11,13 @@ import { useOverlay } from "@/features/overlays/useOverlay";
 import styles from "./styles.module.css";
 
 type LoginFailure = "signups-closed" | "needs-existing-method" | "unknown";
+
+// allauth answers in JSON. Django's CSRF middleware rejects in HTML, from in
+// front of allauth, with the same 403 — so the content type is what says whose
+// verdict this is.
+const isFromAllauth = (err: ApiError): boolean =>
+  err.response.headers.get("content-type")?.includes("application/json") ??
+  false;
 
 const LoginPage: React.FC = () => {
   const { close } = useOverlay();
@@ -40,14 +47,16 @@ const LoginPage: React.FC = () => {
       } catch (err) {
         // Two rejections are worth telling apart from a generic failure,
         // because retrying either one can never succeed.
-        // 403: a first-time provider identity while registration is closed —
-        // signup and login are one request (see useProviderTokenLogin), so
-        // there is no separate "existing user" signal to distinguish.
+        // 403 from allauth: a first-time provider identity while registration
+        // is closed — signup and login are one request (see
+        // useProviderTokenLogin), so there is no separate "existing user"
+        // signal to distinguish. Any other 403 takes the generic copy.
         // 401: the address already belongs to an account this provider is not
         // linked to. SOCIALACCOUNT_EMAIL_AUTHENTICATION is off, so allauth
         // stops short of a session rather than adopting the account, and the
         // SPA offers no linking flow.
-        if (isApiError(err, [403])) setFailure("signups-closed");
+        if (isApiError(err, [403]) && isFromAllauth(err))
+          setFailure("signups-closed");
         else if (isApiError(err, [401])) setFailure("needs-existing-method");
         else setFailure("unknown");
       }
