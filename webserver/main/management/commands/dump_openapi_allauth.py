@@ -9,20 +9,16 @@ from django.core.management.base import BaseCommand
 DEFAULT_OUTPUT = Path(settings.BASE_DIR) / "openapi.allauth.yaml"
 
 # (path, http_method) -> operationId.
-# Only these operations are vendored into our client; everything else allauth's
-# get_schema() exposes for the browser client (2FA, phone, reauthenticate,
-# email/phone management, login-by-code, config, verify-resend, ...) is dropped.
-# The frontend uses exactly these eight flows (see
-# packages/api/src/hooks/auth/index.ts). Paths are already client-pinned to
+# Only these operations are vendored into our client; everything else
+# get_schema() exposes (config, reauthenticate, code/confirm, provider
+# signup/redirect, session GET, ...) is dropped here. The account app's
+# password/email/phone flows aren't dropped here at all: under
+# SOCIALACCOUNT_ONLY, allauth/headless/account/urls.py registers them only
+# `if not SOCIALACCOUNT_ONLY`, so get_schema() never exposes their paths and
+# they can't appear in ENABLED. Paths are already client-pinned to
 # `/browser/` by get_schema(), so we key on the resolved browser paths.
 ENABLED = {
-    ("/_allauth/browser/v1/auth/login", "post"): "login",
-    ("/_allauth/browser/v1/auth/signup", "post"): "signup",
-    ("/_allauth/browser/v1/auth/email/verify", "post"): "verifyEmail",
-    ("/_allauth/browser/v1/auth/password/request", "post"): "requestPassword",
-    ("/_allauth/browser/v1/auth/password/reset", "post"): "resetPassword",
     ("/_allauth/browser/v1/auth/session", "delete"): "logout",
-    ("/_allauth/browser/v1/account/password/change", "post"): "changePassword",
     ("/_allauth/browser/v1/auth/provider/token", "post"): "providerToken",
 }
 
@@ -37,15 +33,6 @@ DROP_PARAM_REFS = {
 # Collapse every operation under a single tag so the generator emits one
 # `AllauthApi` class instead of one per allauth tag grouping.
 TAG = "allauth"
-
-# We do not override any request schema. allauth models `Login` as
-# password + anyOf[username|email|phone]; openapi-typescript renders that as a
-# faithful union, and we narrow it to our supported identifier (email) at the
-# single consuming call site — `useLogin` in packages/api/src/hooks/auth/index.ts
-# — where TypeScript enforces the narrowing (and surfaces any upstream Login
-# reshape as a compile error). `Signup` likewise needs no override: get_schema()
-# already injects our custom-form `public_nickname` (optional, maxLength 64) and
-# the required email/password from ACCOUNT_SIGNUP_FIELDS.
 
 
 def _strip_examples(node):
@@ -103,9 +90,8 @@ class Command(BaseCommand):
     help = (
         "Vendor a trimmed django-allauth headless OpenAPI spec for the browser "
         "client (deterministic). Sources allauth's own get_schema() (which pins "
-        "the browser client, drops the client param, and injects our custom "
-        "signup fields), then trims to the enabled flows, injects operationIds, "
-        "collapses tags, and prunes."
+        "the browser client and drops the client param), then trims to the "
+        "enabled flows, injects operationIds, collapses tags, and prunes."
     )
 
     def add_arguments(self, parser):
@@ -113,9 +99,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, output=None, **options):
         # allauth's own spec builder: loads its bundled spec, pins the single
-        # (browser) client into the paths, drops the client param, trims to the
-        # enabled endpoints, sets the signup required fields, and injects our
-        # custom signup form's `public_nickname`.
+        # (browser) client into the paths, drops the client param, and trims
+        # spec["paths"] to whatever actually resolves against the URLconf —
+        # which is why a path gated off by SOCIALACCOUNT_ONLY simply isn't in
+        # `source["paths"]` below, rather than being dropped by ENABLED.
         # Two dependencies worth knowing: (1) get_schema lives in allauth's
         # `internal` package, so an upgrade could move it — a loud ImportError,
         # acceptable for a build-time tool. (2) The client-pinning above only

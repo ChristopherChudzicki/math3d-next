@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-import logging
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -26,9 +25,6 @@ from main.origins import (
     csrf_trusted_origins,
     dev_cors_allowed_origins,
 )
-
-
-logger = logging.getLogger(__name__)
 
 # Every env var this module reads, with types, defaults, and the cross-variable
 # boot guards (see main/env.py). Validation errors become the Django-idiomatic
@@ -284,18 +280,17 @@ WSGI_APPLICATION = "main.wsgi.application"
 ##################################################
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {"email"}
-# No password2: headless mode doesn't use it (password confirmation is
-# handled client-side). See https://docs.allauth.org/en/latest/headless/faq.html
-ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*"]
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+# Social-only: allauth unregisters every password URL (login, signup, password
+# reset, email verification, password change) and refuses to boot unless email
+# verification is off — the provider already asserts a verified address.
+SOCIALACCOUNT_ONLY = True
+ACCOUNT_EMAIL_VERIFICATION = "none"
+# Trimming below ["email*"] would flip the derived SOCIALACCOUNT_QUERY_EMAIL
+# false and drop the `email` scope from the provider request.
+ACCOUNT_SIGNUP_FIELDS = ["email*"]
+ACCOUNT_EMAIL_NOTIFICATIONS = False
 ACCOUNT_LOGIN_BY_CODE_ENABLED = False
-# Allow revealing whether an email is registered. Acceptable tradeoff for a
-# math visualization tool: usability > preventing enumeration.
-ACCOUNT_PREVENT_ENUMERATION = False
 ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
-# ACCOUNT_SIGNUP_FORM_CLASS (not ACCOUNT_FORMS) is the correct setting for
-# injecting extra fields alongside allauth's built-in signup form.
-ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"
 
 # No secret: the popup flow verifies Google ID tokens against Google's certs
 # with `aud == client_id` and never exchanges an authorization code.
@@ -316,16 +311,11 @@ if ENV.DISABLE_ALLAUTH_RATE_LIMITS:
 
 # allauth headless configuration
 HEADLESS_ONLY = True
-HEADLESS_ADAPTER = "authentication.adapter.CustomHeadlessAdapter"
 HEADLESS_CLIENTS = ["browser"]
 HEADLESS_SERVE_SPECIFICATION = True
 # Serve the headless spec via Swagger UI (ships with allauth) to match the v1
 # API's /v1/docs; the default is Redoc (headless/spec/redoc_cdn.html).
 HEADLESS_SPECIFICATION_TEMPLATE_NAME = "headless/spec/swagger_cdn.html"
-HEADLESS_FRONTEND_URLS = {
-    "account_confirm_email": f"{APP_BASE_URL}/?overlay=activate&key={{key}}",
-    "account_reset_password_from_key": f"{APP_BASE_URL}/?overlay=reset-confirm&key={{key}}",
-}
 
 ##################################################
 # End auth settings
@@ -341,47 +331,7 @@ DATABASES = {
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-        "OPTIONS": {
-            "min_length": 9,
-        },
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
-]
-
 AUTH_USER_MODEL = "authentication.CustomUser"
-
-MAILJET_API_KEY = ENV.MAILJET_API_KEY
-MAILJET_SECRET_KEY = ENV.MAILJET_SECRET_KEY
-
-ANYMAIL = {
-    "MAILJET_API_KEY": ENV.MAILJET_API_KEY,
-    "MAILJET_SECRET_KEY": ENV.MAILJET_SECRET_KEY,
-}
-if MAILJET_API_KEY and MAILJET_SECRET_KEY:
-    EMAIL_BACKEND = "anymail.backends.mailjet.EmailBackend"
-else:
-    logger.warning(
-        "MAILJET_API_KEY and MAILJET_SECRET_KEY settings not found. Using email console backend."
-    )
-    EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-    EMAIL_FILE_PATH = "./private/email/"
-
-DEFAULT_FROM_EMAIL = ENV.DEFAULT_FROM_EMAIL
-SERVER_EMAIL = ENV.SERVER_EMAIL
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/

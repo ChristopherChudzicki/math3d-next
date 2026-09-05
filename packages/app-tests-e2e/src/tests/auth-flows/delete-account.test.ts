@@ -18,13 +18,8 @@ test.describe("Account deletion", () => {
     await page.goto("");
 
     await test.step("Submit the delete form", async () => {
-      await app.userMenu().activate("settings");
-      const form = app.userSettings().deleteAccountForm();
-      await form.activate();
-      // The backend ignores this (the session is the gate), but the SPA's yup
-      // schema still marks it required, and a dummy user has no password.
-      // The field goes with the form in the removal PR.
-      await form.password().fill("ignored");
+      await app.userMenu().activate("deleteAccount");
+      const form = app.deleteAccountPage().deleteAccountForm();
       await form.confirm().fill("Yes, permanently delete");
       await form.submit().click();
     });

@@ -19,8 +19,7 @@ const users = {
  * Sign in through the dummy provider and return session cookies.
  *
  * Signup and login are the same request: an unseen uid creates the account,
- * a known one logs into it. The provider vouches for the address, so
- * ACCOUNT_EMAIL_VERIFICATION="mandatory" never interrupts.
+ * a known one logs into it.
  *
  * Requires ENABLE_REGISTRATION=true for any first-time uid, which is every
  * ephemeral user — so the whole suite depends on it, not just signup tests.

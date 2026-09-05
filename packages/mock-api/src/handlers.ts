@@ -15,12 +15,6 @@ export const mockAuth = {
   setCurrentUser: (userId: number | null) => {
     currentUserId = userId;
   },
-  getCurrentUser: () => {
-    if (currentUserId === null) return null;
-    return db.user.findFirst({
-      where: { id: { equals: currentUserId } },
-    });
-  },
 };
 
 const getUser = () => {
@@ -47,36 +41,37 @@ export const urls = {
     usersMe: `${BASE_URL}/v1/auth/users/me/`,
     usersMeDelete: `${BASE_URL}/v1/auth/users/me/delete/`,
     // allauth headless endpoints
-    login: `${BASE_URL}/_allauth/browser/v1/auth/login`,
-    logout: `${BASE_URL}/_allauth/browser/v1/auth/session`,
     session: `${BASE_URL}/_allauth/browser/v1/auth/session`,
-    signup: `${BASE_URL}/_allauth/browser/v1/auth/signup`,
-    verifyEmail: `${BASE_URL}/_allauth/browser/v1/auth/email/verify`,
-    requestPasswordReset: `${BASE_URL}/_allauth/browser/v1/auth/password/request`,
-    resetPassword: `${BASE_URL}/_allauth/browser/v1/auth/password/reset`,
-    changePassword: `${BASE_URL}/_allauth/browser/v1/account/password/change`,
     providerToken: `${BASE_URL}/_allauth/browser/v1/auth/provider/token`,
   },
 } as const;
 
-const makeAuthenticatedResponse = (user: {
-  id: number;
-  email: string;
-  public_nickname: string;
-}) => ({
+// Matches `allauth.headless.socialaccount.response.provider_flows` for a
+// browser client with only Google configured: Google supports both redirect
+// and token authentication, so it appears in both flow entries.
+const ANONYMOUS_FLOWS = [
+  { id: "provider_redirect", providers: ["google"] },
+  { id: "provider_token", providers: ["google"] },
+];
+
+// Matches allauth's socialaccount authentication record (see
+// `allauth.account.internal.flows.login.record_authentication`'s docstring
+// example), the only method this SOCIALACCOUNT_ONLY deployment produces.
+const makeAuthenticatedResponse = (user: { id: number; email: string }) => ({
   status: 200,
   data: {
     user: {
       id: user.id,
-      display: user.public_nickname,
+      display: user.email,
       email: user.email,
-      has_usable_password: true,
+      has_usable_password: false,
     },
     methods: [
       {
-        method: "password",
+        method: "socialaccount",
         at: Date.now() / 1000,
-        email: user.email,
+        provider: "google",
+        uid: String(user.id),
       },
     ],
   },
@@ -86,17 +81,15 @@ const makeAuthenticatedResponse = (user: {
 });
 
 export const handlers = [
+  // v1: my scenes. The anonymous response is a 403, not Ninja's default 401:
+  // main/api.py remaps AuthenticationError because session auth cannot send a
+  // compliant WWW-Authenticate challenge.
   http.get<NoParams, ErrorResponseBody | PagedMiniSceneSchema>(
     urls.scenes.meList,
     async () => {
       const user = getUser();
       if (!user) {
-        return HttpResponse.json(
-          {
-            errorMessage: "Authentication required",
-          },
-          { status: 401 },
-        );
+        return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
       }
 
       const scenes = db.scene.findMany({
@@ -131,12 +124,8 @@ export const handlers = [
         where: { key: { equals: key } },
       });
       if (!scene) {
-        return HttpResponse.json(
-          {
-            errorMessage: "Not found",
-          },
-          { status: 404 },
-        );
+        // Ninja's default Http404 body.
+        return HttpResponse.json({ detail: "Not Found" }, { status: 404 });
       }
       const parsedScene = {
         ...scene,
@@ -170,40 +159,6 @@ export const handlers = [
       return HttpResponse.json(scene, { status: 201 });
     },
   ),
-  // allauth login
-  http.post(urls.auth.login, async ({ request }) => {
-    const { email, password } = (await request.json()) as {
-      email: string;
-      password: string;
-    };
-    if (typeof email !== "string") {
-      throw new Error("email should be string");
-    }
-    if (typeof password !== "string" /** # pragma: allowlist secret */) {
-      throw new Error("password should be string");
-    }
-    const user = db.user.findFirst({
-      where: { email: { equals: email } },
-    });
-    if (!user || user.password !== password) {
-      return HttpResponse.json(
-        {
-          status: 400,
-          errors: [
-            {
-              code: "email_password_mismatch",
-              message:
-                "The email address and/or password you specified are not correct.",
-              param: "password",
-            },
-          ],
-        },
-        { status: 400 },
-      );
-    }
-    currentUserId = user.id;
-    return HttpResponse.json(makeAuthenticatedResponse(user));
-  }),
   http.post(urls.auth.providerToken, async ({ request }) => {
     const invalidToken = () =>
       HttpResponse.json(
@@ -263,32 +218,14 @@ export const handlers = [
     currentUserId = user.id;
     return HttpResponse.json(makeAuthenticatedResponse(user));
   }),
-  // allauth session (GET = check session, DELETE = logout)
-  http.get(urls.auth.session, async () => {
-    const user = mockAuth.getCurrentUser();
-    if (!user) {
-      return HttpResponse.json(
-        {
-          status: 401,
-          data: {
-            flows: [{ id: "login" }, { id: "signup" }],
-          },
-          meta: {
-            is_authenticated: false,
-          },
-        },
-        { status: 401 },
-      );
-    }
-    return HttpResponse.json(makeAuthenticatedResponse(user));
-  }),
-  http.delete(urls.auth.logout, async () => {
+  // allauth sign-out
+  http.delete(urls.auth.session, async () => {
     currentUserId = null;
     return HttpResponse.json(
       {
         status: 401,
         data: {
-          flows: [{ id: "login" }, { id: "signup" }],
+          flows: ANONYMOUS_FLOWS,
         },
         meta: {
           is_authenticated: false,
@@ -297,89 +234,32 @@ export const handlers = [
       { status: 401 },
     );
   }),
-  // allauth signup
-  http.post(urls.auth.signup, async ({ request }) => {
-    const { email, password, public_nickname } = (await request.json()) as {
-      email: string;
-      password: string;
-      public_nickname?: string;
-    };
-    if (typeof email !== "string") {
-      throw new Error("email should be string");
-    }
-    if (typeof password !== "string" /** # pragma: allowlist secret */) {
-      throw new Error("password should be string");
-    }
-    db.user.create({
-      email,
-      password,
-      public_nickname: public_nickname ?? "",
-    });
-    // allauth returns 401 when email verification is required
-    return HttpResponse.json(
-      {
-        status: 401,
-        data: {
-          flows: [{ id: "verify_email" }],
-        },
-        meta: {
-          is_authenticated: false,
-        },
-      },
-      { status: 401 },
-    );
-  }),
-  // allauth verify email
-  http.post(urls.auth.verifyEmail, async ({ request }) => {
-    const { key } = (await request.json()) as { key: string };
-    if (typeof key !== "string") {
-      throw new Error("key should be string");
-    }
-    // Real allauth verifies the email but returns 401 because the user is not
-    // logged in yet — it does not auto-authenticate. Mirror that here.
-    return HttpResponse.json(
-      { status: 401, meta: { is_authenticated: false } },
-      { status: 401 },
-    );
-  }),
-  // allauth request password reset
-  http.post(urls.auth.requestPasswordReset, async () => {
-    return HttpResponse.json({ status: 200 });
-  }),
-  // allauth reset password with key
-  http.post(urls.auth.resetPassword, async () => {
-    // Real allauth resets the password but returns 401 because the user is not
-    // logged in yet — it does not auto-authenticate. Mirror that here.
-    return HttpResponse.json(
-      { status: 401, meta: { is_authenticated: false } },
-      { status: 401 },
-    );
-  }),
-  // allauth change password
-  http.post(urls.auth.changePassword, async () => {
-    return HttpResponse.json({ status: 200 });
-  }),
-  // DRF custom: delete own account (204 No Content; signs the user out)
+  // v1: delete own account (204 No Content; signs the user out)
   http.post(urls.auth.usersMeDelete, async () => {
     currentUserId = null;
     return new HttpResponse(null, { status: 204 });
   }),
-  // DRF custom: users/me GET
+  // v1: users/me GET. `get_me` gates by hand (`auth=None`, `403: None`) so the
+  // CSRF cookie is seeded before the gate — which also means the anonymous 403
+  // never reaches main/api.py's AuthenticationError handler and so carries no
+  // body. Content-Length is spelled out to match Django's CommonMiddleware:
+  // openapi-fetch keys on it to yield `error: undefined` (without it, `""`),
+  // the shape useUserMe must survive.
   http.get<NoParams, ErrorResponseBody | User>(urls.auth.usersMe, async () => {
     const user = getUser();
     if (!user) {
-      return HttpResponse.json(
-        {
-          errorMessage: "Authentication required",
+      return new HttpResponse(null, {
+        status: 403,
+        headers: {
+          "content-length": "0",
+          "content-type": "application/json",
         },
-        { status: 401 },
-      );
+      });
     }
     return HttpResponse.json(
       {
         id: user.id,
         email: user.email,
-        public_nickname: user.public_nickname,
       },
       { status: 200 },
     );

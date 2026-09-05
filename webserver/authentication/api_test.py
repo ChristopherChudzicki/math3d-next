@@ -1,5 +1,4 @@
 import pytest
-from allauth.account.models import EmailAddress
 from django.test import Client
 
 from authentication.factories import CustomUserFactory
@@ -7,20 +6,14 @@ from authentication.models import CustomUser
 
 ME_URL = "/v1/auth/users/me/"
 DELETE_URL = "/v1/auth/users/me/delete/"
-ACTIVATION_URL = "/v1/auth/users/activation/"
-
-
-@pytest.mark.django_db
-def test_me_get_requires_auth():
-    assert Client().get(ME_URL).status_code == 403
 
 
 @pytest.mark.django_db
 def test_me_get_anonymous_seeds_csrf_cookie():
-    # The SPA's bootstrap GET runs while anonymous (on the login/signup/reset
-    # pages) and relies on this response to obtain a CSRF token for the ensuing
-    # allauth POST. Seeding must happen before the auth gate — regression guard
-    # for the cookie being skipped on the rejected anonymous request.
+    # Any page with an auth surface makes this GET, and for an anonymous visitor
+    # its cookie is the only source of the CSRF token the ensuing allauth POST
+    # needs. Seeding must happen before the auth gate — regression guard for the
+    # cookie being skipped on the rejected anonymous request.
     response = Client().get(ME_URL)
     assert response.status_code == 403
     assert "csrftoken" in response.cookies
@@ -36,7 +29,6 @@ def test_me_get_returns_user_shape():
     assert response.json() == {
         "id": user.id,
         "email": user.email,
-        "public_nickname": user.public_nickname,  # snake_case on the wire
     }
 
 
@@ -49,71 +41,6 @@ def test_me_get_seeds_csrf_cookie():
     client.force_login(user)
     response = client.get(ME_URL)
     assert "csrftoken" in response.cookies
-
-
-@pytest.mark.django_db
-def test_me_patch_updates_public_nickname_and_ignores_readonly_fields():
-    user = CustomUserFactory.create()
-    original_email = user.email
-    client = Client()
-    client.force_login(user)
-    response = client.patch(
-        ME_URL,
-        data={"public_nickname": "newnick", "email": "hacked@example.com"},
-        content_type="application/json",
-    )
-    assert response.status_code == 200
-    user.refresh_from_db()
-    assert user.public_nickname == "newnick"
-    assert user.email == original_email  # id/email read-only (not in UserUpdateSchema)
-
-
-@pytest.mark.django_db
-def test_me_patch_rejects_over_length_nickname():
-    # public_nickname is a varchar(64); unbounded, the write reaches the DB and 500s.
-    user = CustomUserFactory.create()
-    client = Client()
-    client.force_login(user)
-    response = client.patch(
-        ME_URL,
-        data={"public_nickname": "x" * 65},
-        content_type="application/json",
-    )
-    assert response.status_code == 400  # main/api.py maps ninja's 422 to 400
-
-
-@pytest.mark.django_db
-def test_me_patch_enforces_csrf():
-    # v0 parity (test_csrf_token_required_for_unsafe_requests): Ninja's SessionAuth
-    # must reject an unsafe request lacking the CSRF token. The other patch tests
-    # use force_login, which bypasses CSRF *enforcement*, so this uses
-    # enforce_csrf_checks=True to actually exercise the check.
-    client = Client(enforce_csrf_checks=True)
-    user = CustomUserFactory.create()
-    client.force_login(user)
-
-    # GET seeds the csrftoken cookie (get_me calls get_token()).
-    get_resp = client.get(ME_URL)
-    assert get_resp.status_code == 200
-    assert "csrftoken" in get_resp.cookies
-
-    # PATCH without the X-CSRFToken header is rejected.
-    no_token = client.patch(
-        ME_URL,
-        data={"public_nickname": "newnick"},
-        content_type="application/json",
-    )
-    assert no_token.status_code == 403
-
-    # PATCH with the token from the cookie succeeds.
-    token = client.cookies["csrftoken"].value
-    with_token = client.patch(
-        ME_URL,
-        data={"public_nickname": "newnick"},
-        content_type="application/json",
-        HTTP_X_CSRFTOKEN=token,
-    )
-    assert with_token.status_code == 200
 
 
 @pytest.mark.django_db
@@ -156,65 +83,12 @@ def test_delete_flushes_session():
 
 
 @pytest.mark.django_db
-def test_activation_requires_admin():
-    user = CustomUserFactory.create()  # non-staff
-    client = Client()
+def test_delete_enforces_csrf():
+    user = CustomUserFactory.create()
+    client = Client(enforce_csrf_checks=True)
     client.force_login(user)
-    response = client.post(
-        ACTIVATION_URL, data={"email": "x@example.com"}, content_type="application/json"
-    )
+
+    response = client.post(DELETE_URL, content_type="application/json")
+
     assert response.status_code == 403
-
-
-@pytest.mark.django_db
-def test_activation_unknown_email_returns_empty_404():
-    admin = CustomUserFactory.create(is_staff=True)
-    client = Client()
-    client.force_login(admin)
-    response = client.post(
-        ACTIVATION_URL,
-        data={"email": "nobody@example.com"},
-        content_type="application/json",
-    )
-    assert response.status_code == 404
-    assert response.content == b""
-
-
-@pytest.mark.django_db
-def test_activation_activates_user_and_creates_verified_email():
-    target = CustomUserFactory.create(is_active=False)
-    admin = CustomUserFactory.create(is_staff=True)
-    client = Client()
-    client.force_login(admin)
-    response = client.post(
-        ACTIVATION_URL,
-        data={"email": target.email},
-        content_type="application/json",
-    )
-    assert response.status_code == 204
-    target.refresh_from_db()
-    assert target.is_active is True
-    email_address = EmailAddress.objects.get(user=target, email=target.email)
-    assert email_address.verified is True
-    assert email_address.primary is True
-
-
-@pytest.mark.django_db
-def test_activation_updates_existing_unverified_email_address():
-    # update_or_create path: a signup leaves an unverified EmailAddress; activation
-    # must flip it to verified rather than error on the duplicate.
-    target = CustomUserFactory.create(is_active=False)
-    EmailAddress.objects.create(
-        user=target, email=target.email, verified=False, primary=True
-    )
-    admin = CustomUserFactory.create(is_staff=True)
-    client = Client()
-    client.force_login(admin)
-    response = client.post(
-        ACTIVATION_URL,
-        data={"email": target.email},
-        content_type="application/json",
-    )
-    assert response.status_code == 204
-    email_address = EmailAddress.objects.get(user=target, email=target.email)
-    assert email_address.verified is True
+    assert CustomUser.objects.filter(pk=user.pk).exists()

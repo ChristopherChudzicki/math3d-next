@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Alert from "@mui/material/Alert";
+import Link from "@mui/material/Link";
 import { ApiError, isApiError, useProviderTokenLogin } from "@math3d/api";
 import {
   GOOGLE_CLIENT_ID,
@@ -11,6 +12,8 @@ import { useOverlay } from "@/features/overlays/useOverlay";
 import styles from "./styles.module.css";
 
 type LoginFailure = "signups-closed" | "needs-existing-method" | "unknown";
+
+const ISSUE_URL = import.meta.env.VITE_ISSUE_URL;
 
 // allauth answers in JSON. Django's CSRF middleware rejects in HTML, from in
 // front of allauth, with the same 403 — so the content type is what says whose
@@ -83,9 +86,12 @@ const LoginPage: React.FC = () => {
         )}
         {failure === "needs-existing-method" && (
           <Alert severity="error">
-            An account already exists for that email address. Sign in the way
-            that account was created, then connect Google from your account
-            settings.
+            That email address belongs to an account that is not connected to
+            Google, so it cannot be used to sign in.{" "}
+            <Link href={ISSUE_URL} target="_blank" rel="noreferrer">
+              Get in touch
+            </Link>{" "}
+            if you need access to it.
           </Alert>
         )}
         {failure === "unknown" && (

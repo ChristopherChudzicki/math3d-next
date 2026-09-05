@@ -12,13 +12,6 @@ interface AllAuthErrorItem {
   param?: string;
 }
 
-/**
- * allauth error codes that should be treated as form-level (root) errors
- * even when they have a `param` field. For example, `email_password_mismatch`
- * has param "password" but is really a general credentials error.
- */
-const ROOT_ERROR_CODES = new Set(["email_password_mismatch"]);
-
 const isAllAuthErrorResponse = (
   data: unknown,
 ): data is { status: number; errors: AllAuthErrorItem[] } => {
@@ -57,7 +50,7 @@ const setFieldErrors = <TFieldValues extends FieldValues>(
     // allauth error format
     if (isAllAuthErrorResponse(errData)) {
       errData.errors.forEach((error) => {
-        if (ROOT_ERROR_CODES.has(error.code) || !error.param) {
+        if (!error.param) {
           setError("root", {
             type: "400",
             message: error.message,

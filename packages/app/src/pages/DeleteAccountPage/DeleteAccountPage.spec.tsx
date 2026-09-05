@@ -2,12 +2,12 @@ import { test, expect } from "vitest";
 import { mockAuth } from "@math3d/mock-api";
 import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
 
-test("Settings dialog opens via overlay param and closes by clearing it", async () => {
-  const { location } = renderTestApp("/?overlay=settings", {
+test("Delete Account dialog opens via overlay param and closes by clearing it", async () => {
+  const { location } = renderTestApp("/?overlay=delete-account", {
     isAuthenticated: true,
   });
   const dialog = await screen.findByRole("dialog", {
-    name: "Account Settings",
+    name: "Delete Account",
   });
   expect(dialog).toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "Close" }));
@@ -17,20 +17,20 @@ test("Settings dialog opens via overlay param and closes by clearing it", async 
 });
 
 test("If not authenticated, redirects to the login overlay", async () => {
-  const { location } = renderTestApp("/?overlay=settings", {
+  const { location } = renderTestApp("/?overlay=delete-account", {
     isAuthenticated: false,
   });
   await waitFor(() =>
     expect(location.current.search).toContain("overlay=login"),
   );
-  expect(screen.queryByRole("dialog", { name: "Account Settings" })).toBe(null);
+  expect(screen.queryByRole("dialog", { name: "Delete Account" })).toBe(null);
 });
 
 test("session expiring mid-dialog redirects to the login overlay", async () => {
-  const { location, queryClient } = renderTestApp("/?overlay=settings", {
+  const { location, queryClient } = renderTestApp("/?overlay=delete-account", {
     isAuthenticated: true,
   });
-  await screen.findByRole("dialog", { name: "Account Settings" });
+  await screen.findByRole("dialog", { name: "Delete Account" });
   // The session expires server-side — no deliberate action by the user.
   mockAuth.setCurrentUser(null);
   await queryClient.invalidateQueries({ queryKey: ["me"] });
@@ -40,17 +40,12 @@ test("session expiring mid-dialog redirects to the login overlay", async () => {
 });
 
 test("deleting your own account does not redirect to login", async () => {
-  const { location } = renderTestApp("/?overlay=settings", {
+  const { location } = renderTestApp("/?overlay=delete-account", {
     isAuthenticated: true,
   });
   const dialog = await screen.findByRole("dialog", {
-    name: "Account Settings",
+    name: "Delete Account",
   });
-  await user.click(within(dialog).getByRole("tab", { name: "Delete Account" }));
-  await user.type(
-    within(dialog).getByLabelText("Password"),
-    "current-password",
-  );
   await user.type(
     within(dialog).getByLabelText("Confirm"),
     "Yes, permanently delete",
@@ -61,4 +56,22 @@ test("deleting your own account does not redirect to login", async () => {
   // Deleting signs you out; the "Account Deleted" notice must show — not login.
   await screen.findByRole("heading", { name: "Account Deleted" });
   expect(location.current.search).not.toContain("overlay=login");
+});
+
+test("the wrong confirmation phrase does not delete the account", async () => {
+  renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
+  const dialog = await screen.findByRole("dialog", {
+    name: "Delete Account",
+  });
+
+  const confirm = within(dialog).getByLabelText("Confirm");
+  await user.type(confirm, "yes delete it");
+  await user.click(
+    within(dialog).getByRole("button", { name: "Delete Account" }),
+  );
+
+  // Validation failing is the positive signal: the dialog staying mounted is
+  // also what a still-in-flight deletion looks like.
+  await waitFor(() => expect(confirm).toBeInvalid());
+  expect(dialog).toBeInTheDocument();
 });

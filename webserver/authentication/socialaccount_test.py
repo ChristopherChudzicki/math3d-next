@@ -17,6 +17,7 @@ from authentication.factories import CustomUserFactory
 from authentication.models import CustomUser
 
 TOKEN_URL = "/_allauth/browser/v1/auth/provider/token"
+SESSION_URL = "/_allauth/browser/v1/auth/session"
 
 
 def _payload(uid: int, email: str) -> dict:
@@ -40,9 +41,9 @@ def _payload(uid: int, email: str) -> dict:
 def test_provider_token_signs_up_and_logs_in_in_one_request():
     """
     A first-time provider identity gets an account and a session in a single
-    request, with ACCOUNT_EMAIL_VERIFICATION still "mandatory": the provider
-    vouches for the address, so EmailVerificationStage never interrupts. This is
-    what lets PRs 1-3 ship without flipping any allauth setting.
+    request: ACCOUNT_EMAIL_VERIFICATION is "none", so no verification stage
+    ever interrupts, and EmailAddress.verified instead reflects the
+    provider's own `email_verified` assertion.
     """
     client = Client()
 
@@ -125,3 +126,23 @@ def test_provider_identity_is_never_adopted_onto_an_existing_account():
     assert "_auth_user_id" not in client.session
     assert not SocialAccount.objects.filter(user=existing).exists()
     assert CustomUser.objects.filter(email=existing.email).count() == 1
+
+
+@pytest.mark.django_db
+@override_settings(ENABLE_REGISTRATION=True)
+def test_session_delete_signs_out_a_provider_user():
+    """The SPA's only sign-out call. Under SOCIALACCOUNT_ONLY the response is a
+    401 carrying the anonymous session state, which `useLogout` treats as
+    success (allauth/headless/base/response.py)."""
+    client = Client()
+    client.post(
+        TOKEN_URL,
+        _payload(uid=4242, email="signs-out@example.com"),
+        content_type="application/json",
+    )
+    assert client.session["_auth_user_id"]
+
+    response = client.delete(SESSION_URL)
+
+    assert response.status_code == 401
+    assert "_auth_user_id" not in client.session

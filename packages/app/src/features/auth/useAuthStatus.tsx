@@ -5,11 +5,11 @@ type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 /**
  * Derive auth status from the useUserMe query.
  *
- * The user-me check runs regardless of DISPLAY_AUTH_FLOWS. That flag only
- * hides auth UI (sign in/up, registration); an admin-created user who
- * navigates to the login page directly and logs in must still get the full
- * authenticated experience. UI visibility is gated by the flag at the
- * component level (Header, UserMenu, ScenesListPage), not here.
+ * The user-me check runs regardless of DISPLAY_AUTH_FLOWS. That flag is
+ * presentation-only — it hides the sign-in affordances — so a session that
+ * already exists while it is off must still yield the authenticated view. UI
+ * visibility is gated by the flag at the component level (Header, UserMenu,
+ * ScenesListPage), not here.
  *
  * - data is a User object → "authenticated"
  * - data is null (401/403 from server) → "unauthenticated"

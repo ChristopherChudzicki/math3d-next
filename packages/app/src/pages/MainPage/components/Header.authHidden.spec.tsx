@@ -22,8 +22,8 @@ test("Sign in menu item is hidden when DISPLAY_AUTH_FLOWS is false", async () =>
 });
 
 test("Logged-in users still get account menu items when DISPLAY_AUTH_FLOWS is false", async () => {
-  // Admin-created users who reach the login page directly should get the full
-  // authenticated experience even though auth UI is hidden by the flag.
+  // The flag is presentation-only: it hides the sign-in affordances, so a
+  // session that already exists still gets the authenticated view.
   renderTestApp("", { isAuthenticated: true });
   // The trigger swaps from a hamburger ("Open Menu") to the user avatar
   // ("Open User Menu") once the ["me"] query resolves. Anchoring on the
@@ -33,7 +33,7 @@ test("Logged-in users still get account menu items when DISPLAY_AUTH_FLOWS is fa
   await screen.findByRole("menu");
 
   expect(
-    screen.getByRole("menuitem", { name: "Account Settings" }),
+    screen.getByRole("menuitem", { name: "Delete Account" }),
   ).toBeInTheDocument();
   expect(
     screen.getByRole("menuitem", { name: "Sign out" }),

@@ -2,16 +2,7 @@
 import { useCallback } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 
-export type OverlayName =
-  | "login"
-  | "register"
-  | "logout"
-  | "settings"
-  | "reset-request"
-  | "scenes"
-  // Cold-entry auth flows reached from an email link, carrying a `?key=`.
-  | "activate"
-  | "reset-confirm";
+export type OverlayName = "login" | "logout" | "delete-account" | "scenes";
 
 export const useOverlay = () => {
   const [search] = useSearchParams();
