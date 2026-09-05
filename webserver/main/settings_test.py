@@ -29,6 +29,7 @@ PROD_ENV = {
     "APP_BASE_URL": "https://app.example.org",
     "CSRF_COOKIE_DOMAIN": ".example.org",
     "DATABASE_URL": "postgres://u:p@db.example.org:5432/math3d",  # pragma: allowlist secret
+    "GOOGLE_CLIENT_ID": "prod-client-id.apps.googleusercontent.com",
 }
 
 
@@ -120,6 +121,18 @@ def test_production_requires_database_url(monkeypatch):
     env = {**PROD_ENV}
     del env["DATABASE_URL"]
     with pytest.raises(ImproperlyConfigured, match="DATABASE_URL"):
+        load_settings(monkeypatch, **env)
+
+
+def test_production_requires_google_client_id(monkeypatch):
+    """
+    Empty, the Google app's client_id matches no ID token's `aud` and allauth
+    rejects every sign-in with client_id_mismatch, so production must fail at
+    import instead of serving a button that cannot work.
+    """
+    env = {**PROD_ENV}
+    del env["GOOGLE_CLIENT_ID"]
+    with pytest.raises(ImproperlyConfigured, match="GOOGLE_CLIENT_ID"):
         load_settings(monkeypatch, **env)
 
 
@@ -445,7 +458,8 @@ def test_dummy_provider_is_development_only(monkeypatch):
 
 def test_google_app_reads_the_client_id_from_the_environment(monkeypatch):
     loaded = load_settings(
-        monkeypatch, **PROD_ENV, GOOGLE_CLIENT_ID="abc.apps.googleusercontent.com"
+        monkeypatch,
+        **{**PROD_ENV, "GOOGLE_CLIENT_ID": "abc.apps.googleusercontent.com"},
     )
     app = loaded.SOCIALACCOUNT_PROVIDERS["google"]["APP"]
     assert app["client_id"] == "abc.apps.googleusercontent.com"

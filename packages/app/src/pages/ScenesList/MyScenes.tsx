@@ -112,15 +112,7 @@ const MyScenesList: React.FC = () => {
       <p className={styles["with-margin"]}>
         To view scenes you have saved,{" "}
         <MuiLink component="button" type="button" onClick={() => open("login")}>
-          log in
-        </MuiLink>{" "}
-        or{" "}
-        <MuiLink
-          component="button"
-          type="button"
-          onClick={() => open("register")}
-        >
-          create an account
+          sign in
         </MuiLink>
         .
       </p>
