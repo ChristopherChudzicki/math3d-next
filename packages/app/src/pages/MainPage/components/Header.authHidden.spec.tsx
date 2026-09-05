@@ -33,7 +33,7 @@ test("Logged-in users still get account menu items when DISPLAY_AUTH_FLOWS is fa
   await screen.findByRole("menu");
 
   expect(
-    screen.getByRole("menuitem", { name: "Account Settings" }),
+    screen.getByRole("menuitem", { name: "Delete Account" }),
   ).toBeInTheDocument();
   expect(
     screen.getByRole("menuitem", { name: "Sign out" }),

@@ -1,7 +1,7 @@
 import type React from "react";
 import LoginPage from "@/pages/auth/LoginPage";
 import LogoutPage from "@/pages/auth/LogoutPage";
-import UserSettingsPage from "@/pages/UserSettingsPage/UserSettingsPage";
+import DeleteAccountPage from "@/pages/DeleteAccountPage/DeleteAccountPage";
 import ScenesListPage from "@/pages/ScenesList/ScenesListPage";
 import type { OverlayName } from "./useOverlay";
 
@@ -10,6 +10,6 @@ import type { OverlayName } from "./useOverlay";
 export const OVERLAYS: Record<OverlayName, React.FC> = {
   login: LoginPage,
   logout: LogoutPage,
-  settings: UserSettingsPage,
+  "delete-account": DeleteAccountPage,
   scenes: ScenesListPage,
 };
