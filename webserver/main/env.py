@@ -63,6 +63,9 @@ class EnvConfig(BaseSettings):
     ENABLE_REGISTRATION: bool = False
     CSRF_COOKIE_DOMAIN: str = ""
     DISABLE_ALLAUTH_RATE_LIMITS: bool = False
+    # Local-only, for hand-testing Google sign-in on bare `localhost`, which
+    # cannot carry the domain cookie the SPA reads. See ADR-0005.
+    DISABLE_CSRF: bool = False
     # Sentry. Unset ⇒ the SDK is a no-op, which is how dev, CI, and tests run.
     SENTRY_DSN: str = ""
     SENTRY_TRACES_SAMPLE_RATE: float = 1.0

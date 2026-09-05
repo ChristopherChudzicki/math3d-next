@@ -35,6 +35,37 @@ After this, access the app at:
 - **Frontend**: http://math3d.localdev:3000
 - **API**: http://api.math3d.localdev:8000
 
+### Testing Google sign-in locally
+
+Day-to-day development signs in through the `dummy` provider and never reaches
+Google. To exercise the real flow by hand, move both servers to bare `localhost`
+and turn off CSRF — Google rejects `.localdev` (its TLD is not on the public
+suffix list), and `localhost` cannot carry the domain cookie the SPA reads the
+CSRF token from. See [ADR-0005](docs/adr/0005-local-google-sign-in-testing.md).
+
+Add to `.env` (gitignored), using a dev OAuth client from the Google console
+with `http://localhost:3000` as an authorized JavaScript origin:
+
+```sh
+APP_BASE_URL=http://localhost:3000
+VITE_API_BASE_URL=http://localhost:8000
+VITE_SITE_ORIGIN=http://localhost:3000
+CSRF_COOKIE_DOMAIN=
+DISABLE_CSRF=True
+VITE_DISPLAY_AUTH_FLOWS=true
+GOOGLE_CLIENT_ID=<dev client id>
+VITE_GOOGLE_CLIENT_ID=<dev client id>
+```
+
+Then `docker compose up -d` to recreate the backend (a container's environment
+is fixed at creation) and restart the dev server. The two client-ID variables
+must match, or the sign-in POST fails with `client_id_mismatch`.
+
+Delete the block and recreate to switch back. While it is in place, no local
+checkout enforces CSRF and worktrees on `.localdev` cannot authenticate, so
+don't leave it on. `DISABLE_CSRF` refuses to boot unless `IS_DEVELOPMENT` is
+set.
+
 ### Task Runner
 
 We use [just](https://github.com/casey/just) as a task runner. Run `just` to see available commands.

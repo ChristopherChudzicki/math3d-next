@@ -199,6 +199,18 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# Dropping the middleware is Django's only off switch for CSRF. It exists for
+# one manual test: Google sign-in on bare `localhost`, where a single-label
+# host cannot carry the domain cookie the SPA reads. See ADR-0005.
+if ENV.DISABLE_CSRF:
+    if not IS_DEVELOPMENT:
+        raise ImproperlyConfigured(
+            "DISABLE_CSRF must not be enabled outside development."
+        )
+    # .remove() raises if the middleware is renamed; a filtered rebuild would
+    # silently become a no-op.
+    MIDDLEWARE.remove("django.middleware.csrf.CsrfViewMiddleware")
+
 # Explicitly configured origins (Heroku config vars, or a local .env — e.g. the
 # legacy math3d-react frontend) are unioned with the dev-only origins
 # (APP_BASE_URL plus the worktree frontend ports). In production the dev list is
@@ -279,10 +291,9 @@ ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
 ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"
 
 if ENV.DISABLE_ALLAUTH_RATE_LIMITS:
-    if SESSION_COOKIE_SECURE:
+    if not IS_DEVELOPMENT:
         raise ImproperlyConfigured(
-            "DISABLE_ALLAUTH_RATE_LIMITS must not be enabled on a secure-cookie "
-            "(TLS/production) deployment."
+            "DISABLE_ALLAUTH_RATE_LIMITS must not be enabled outside development."
         )
     ACCOUNT_RATE_LIMITS = False
 
