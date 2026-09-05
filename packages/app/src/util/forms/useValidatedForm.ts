@@ -10,6 +10,7 @@ import type {
   SubmitHandler,
 } from "react-hook-form";
 import { useCallback } from "react";
+import * as Sentry from "@sentry/react";
 import { setFieldErrors } from "./util";
 
 /**
@@ -39,7 +40,15 @@ const useValidatedForm = <TFieldValues extends FieldValues = FieldValues>(
         try {
           await rawOnValid(data, event);
         } catch (err) {
-          setFieldErrors(data, err, setError);
+          try {
+            setFieldErrors(data, err, setError);
+          } catch (unmapped) {
+            // setFieldErrors rethrows what it could not map to a field, having
+            // already set a generic "root" message for the user. Report it here:
+            // nothing awaits this handler, so rethrowing would only reach Sentry
+            // as an unhandled rejection.
+            Sentry.captureException(unmapped);
+          }
         }
       };
       return rawHandleSubmit(onValid, onInvalid);
