@@ -1,20 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
-import DialogActions from "@mui/material/DialogActions";
-import IconButton from "@mui/material/IconButton";
-import Close from "@mui/icons-material/Close";
 import { useAuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
+import BasicDialog from "@/util/components/BasicDialog";
 import DeleteAccountForm from "./DeleteAccountForm";
-
-const topRightStyle: React.CSSProperties = {
-  position: "absolute",
-  top: 0,
-  right: 0,
-};
 
 const FORM_ID = "delete_account_form";
 
@@ -51,24 +40,15 @@ const DeleteAccountPage: React.FC = () => {
   if (isAuthenticated !== "authenticated" && !selfDeleted.current) return null;
 
   return (
-    <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>
-      <div style={topRightStyle}>
-        <IconButton onClick={handleClose} aria-label="Close">
-          <Close />
-        </IconButton>
-      </div>
-      <DialogTitle>Delete Account</DialogTitle>
-      <DialogContent>
-        <DeleteAccountForm
-          id={FORM_ID}
-          setDisabled={setDisabled}
-          onSelfDelete={handleSelfDelete}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button variant="outlined" color="secondary" onClick={handleClose}>
-          Cancel
-        </Button>
+    <BasicDialog
+      open
+      fullWidth
+      maxWidth="sm"
+      onClose={handleClose}
+      title="Delete Account"
+      // The form lives in the dialog body, so the footer button reaches it by
+      // id rather than by being inside it.
+      confirmButton={
         <Button
           disabled={disabled}
           variant="contained"
@@ -78,8 +58,14 @@ const DeleteAccountPage: React.FC = () => {
         >
           Delete Account
         </Button>
-      </DialogActions>
-    </Dialog>
+      }
+    >
+      <DeleteAccountForm
+        id={FORM_ID}
+        setDisabled={setDisabled}
+        onSelfDelete={handleSelfDelete}
+      />
+    </BasicDialog>
   );
 };
 
