@@ -18,7 +18,7 @@ const topRightStyle: React.CSSProperties = {
 
 const FORM_ID = "delete_account_form";
 
-const UserSettingsPage: React.FC = () => {
+const DeleteAccountPage: React.FC = () => {
   const [disabled, setDisabled] = useState(false);
   const { open, close } = useOverlay();
   const isAuthenticated = useAuthStatus();
@@ -26,19 +26,19 @@ const UserSettingsPage: React.FC = () => {
     close();
   }, [close]);
 
-  // Deleting your account is the only in-dialog action that signs you out, and
-  // it flips auth authenticated → unauthenticated. Flag that deliberate case so
-  // the redirect below doesn't treat it like a logged-out visitor: it has its
-  // own flow (the "Account Deleted" notice + navigate away) that a login
-  // redirect would hijack. Set imperatively from the form's submit handler.
+  // A successful delete flips auth authenticated → unauthenticated. Flag that
+  // deliberate case so the redirect below doesn't treat it like a logged-out
+  // visitor: it has its own flow (the "Account Deleted" notice + navigate away)
+  // that a login redirect would hijack. Set from the form's submit handler.
   const selfDeleted = useRef(false);
   const handleSelfDelete = useCallback(() => {
     selfDeleted.current = true;
   }, []);
 
   // Redirect anyone who is unauthenticated *without* deliberately deleting — a
-  // hand-typed /?overlay=settings while logged out, or a session that expired
-  // mid-dialog — to the login overlay (a switch, so it replaces history).
+  // hand-typed /?overlay=delete-account while logged out, or a session that
+  // expired mid-dialog — to the login overlay (a switch, so it replaces
+  // history).
   useEffect(() => {
     if (isAuthenticated === "unauthenticated" && !selfDeleted.current) {
       open("login");
@@ -57,7 +57,7 @@ const UserSettingsPage: React.FC = () => {
           <Close />
         </IconButton>
       </div>
-      <DialogTitle>Account Settings</DialogTitle>
+      <DialogTitle>Delete Account</DialogTitle>
       <DialogContent>
         <DeleteAccountForm
           id={FORM_ID}
@@ -83,4 +83,4 @@ const UserSettingsPage: React.FC = () => {
   );
 };
 
-export default UserSettingsPage;
+export default DeleteAccountPage;

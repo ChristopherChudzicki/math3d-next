@@ -2,7 +2,7 @@ import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 import UserMenu from "./UserMenu";
 import SignoutPage from "./SignoutPage";
-import UserSettingsPage from "./UserSettingsPage";
+import DeleteAccountPage from "./DeleteAccountPage";
 import ItemSettings, { UniqueItemSettingsOpts } from "./ItemSettings";
 import SharePopover from "./SharePopover";
 import MyScenes from "./MyScenes";
@@ -39,8 +39,8 @@ class AppPage {
     return header.getByRole("button").and(header.getByTestId("save"));
   }
 
-  userSettings(): UserSettingsPage {
-    return new UserSettingsPage(this.page);
+  deleteAccountPage(): DeleteAccountPage {
+    return new DeleteAccountPage(this.page);
   }
 
   myScenes(): MyScenes {
