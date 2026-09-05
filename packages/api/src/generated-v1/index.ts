@@ -299,15 +299,13 @@ export interface components {
       /** Userelative */
       useRelative: string;
     };
-    /** DeleteAccountError */
-    DeleteAccountError: {
-      /** Current Password */
-      current_password: string[];
-    };
     /** DeleteAccountSchema */
     DeleteAccountSchema: {
-      /** Current Password */
-      current_password: string;
+      /**
+       * Current Password
+       * @default
+       */
+      current_password?: string;
     };
     /** ExplicitSurfaceItem */
     ExplicitSurfaceItem: {
@@ -1147,15 +1145,6 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
-      };
-      /** @description Bad Request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["DeleteAccountError"];
-        };
       };
     };
   };
