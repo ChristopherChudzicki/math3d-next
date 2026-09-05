@@ -27,7 +27,7 @@ test("Header and usermenu links", async ({ page }) => {
     "Examples",
     "Function Reference",
     "Contact",
-    "Account Settings",
+    "Delete Account",
     "Sign out",
   ]);
 });
