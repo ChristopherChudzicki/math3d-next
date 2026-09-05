@@ -1,12 +1,11 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
+import { SceneBuilder, makeUserIdentity } from "@math3d/mock-api";
 import AppPage from "@/utils/pages/AppPage";
 import { faker } from "@faker-js/faker/locale/en";
-import { getSessionCookies } from "@/utils/api/auth";
 
 test.use({ user: "worker" });
-const sceneOwner = makeUserInfo();
+const sceneOwner = makeUserIdentity();
 
 test.setTimeout(60_000);
 
@@ -20,8 +19,7 @@ test("Saving an existing scene scene", async ({
   const title = faker.lorem.words(3);
 
   const key = await test.step("Prepare scene as user 'owner'", async () => {
-    const owner = await createUser(sceneOwner);
-    const ownerCookies = await getSessionCookies(owner);
+    const { cookies: ownerCookies } = await createUser(sceneOwner);
     const prepareScene = getPrepareScene({ sessionCookies: ownerCookies });
     const scene = new SceneBuilder({ title });
     scene //

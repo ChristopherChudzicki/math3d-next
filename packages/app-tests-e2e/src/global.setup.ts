@@ -3,9 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { test as setup, expect } from "@playwright/test";
 import env from "@/env";
-import { getInbox } from "./utils/inbox/emails";
-
-const inbox = getInbox();
+import { createActiveUser } from "@/utils/api/auth";
 
 // This suite's checkout root (packages/app-tests-e2e/src -> repo root),
 // realpath'd so symlinked checkout paths compare equal.
@@ -34,11 +32,6 @@ setup("Verify the server serves this checkout", async ({ request }) => {
   ).toBe(checkoutRoot);
 });
 
-setup("Sweep stale emails", async () => {
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-  await inbox.deleteOlderThan(oneHourAgo);
-});
-
 setup("Verify DISPLAY_AUTH_FLOWS is enabled", async ({ page }) => {
   await page.goto(env.TEST_APP_URL);
   const flag = await page.evaluate(
@@ -54,4 +47,12 @@ setup("Verify DISPLAY_AUTH_FLOWS is enabled", async ({ page }) => {
       "Rebuild with VITE_DISPLAY_AUTH_FLOWS=true.",
     ].join(" "),
   ).toBe(true);
+});
+
+setup("Verify the backend mints dummy-provider sessions", async () => {
+  // Every fixture signs in this way, so a backend missing IS_DEVELOPMENT or
+  // ENABLE_REGISTRATION fails the whole suite. Do it once here, where the
+  // diagnostic is one failure instead of one per test.
+  const { cleanup } = await createActiveUser();
+  await cleanup();
 });

@@ -1,7 +1,8 @@
 import os
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from allauth.account.models import EmailAddress
+from allauth.socialaccount.models import SocialAccount
 from pydantic_settings import BaseSettings
 from scenes.models import Scene
 import json
@@ -10,8 +11,10 @@ import json
 class SeedEnv(BaseSettings):
     TEST_USER_ADMIN_EMAIL: str = ""
     TEST_USER_ADMIN_PASSWORD: str = ""
+    TEST_USER_ADMIN_UID: str = ""
     TEST_USER_STATIC_EMAIL: str = ""
     TEST_USER_STATIC_PASSWORD: str = ""
+    TEST_USER_STATIC_UID: str = ""
 
 
 env = SeedEnv()
@@ -20,8 +23,17 @@ User = get_user_model()
 
 
 def create_test_user(
-    email: str, password: str, public_nickname: str, *, is_staff=False
+    email: str, password: str, public_nickname: str, *, uid: str, is_staff=False
 ):
+    if not email:
+        raise CommandError(
+            "Empty email for test user. Set TEST_USER_ADMIN_EMAIL and "
+            "TEST_USER_STATIC_EMAIL."
+        )
+    if not uid:
+        raise CommandError(
+            "Empty uid for test user. Set TEST_USER_ADMIN_UID and TEST_USER_STATIC_UID."
+        )
     user, _ = User.objects.get_or_create(email=email)
     user.is_active = True
     user.public_nickname = public_nickname
@@ -33,6 +45,11 @@ def create_test_user(
         email=email,
         defaults={"verified": True, "primary": True},
     )
+    # E2E signs these users in through the dummy provider, which matches on
+    # (provider, uid); without a row here the token login 401s.
+    SocialAccount.objects.update_or_create(
+        provider="dummy", uid=uid, defaults={"user": user}
+    )
     return user
 
 
@@ -43,10 +60,17 @@ class Command(BaseCommand):
     help = """Seed test data for e2e tests"""
 
     def handle(self, *args, **options):
+        if env.TEST_USER_ADMIN_UID == env.TEST_USER_STATIC_UID:
+            raise CommandError(
+                "TEST_USER_ADMIN_UID and TEST_USER_STATIC_UID must differ; a "
+                "shared uid gives both users one dummy identity."
+            )
+
         create_test_user(
             email=env.TEST_USER_ADMIN_EMAIL,
             password=env.TEST_USER_ADMIN_PASSWORD,
             public_nickname="Admin Test User",
+            uid=env.TEST_USER_ADMIN_UID,
             is_staff=True,
         )
 
@@ -54,6 +78,7 @@ class Command(BaseCommand):
             email=env.TEST_USER_STATIC_EMAIL,
             password=env.TEST_USER_STATIC_PASSWORD,
             public_nickname="Static Test User",
+            uid=env.TEST_USER_STATIC_UID,
         )
 
         dirname = os.path.dirname(__file__)

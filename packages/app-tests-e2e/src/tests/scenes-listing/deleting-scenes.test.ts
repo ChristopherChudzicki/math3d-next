@@ -1,10 +1,10 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
+import { SceneBuilder, makeUserIdentity } from "@math3d/mock-api";
 import type { Fixtures } from "@/fixtures/users";
 import AppPage from "@/utils/pages/AppPage";
 
-const user = makeUserInfo();
+const user = makeUserIdentity();
 test.use({ user });
 test.setTimeout(60_000);
 

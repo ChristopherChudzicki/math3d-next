@@ -13,7 +13,7 @@ test("Shows username in usermenu", async ({ page, workerUser }) => {
 
   await trigger.click();
   const username = app.userMenu().username();
-  await expect(username).toHaveText(workerUser.info.email);
+  await expect(username).toHaveText(workerUser.identity.email);
 });
 
 test("Header and usermenu links", async ({ page }) => {
