@@ -2,7 +2,7 @@
 import { useCallback } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 
-export type OverlayName = "login" | "logout" | "settings" | "scenes";
+export type OverlayName = "login" | "logout" | "delete-account" | "scenes";
 
 export const useOverlay = () => {
   const [search] = useSearchParams();
