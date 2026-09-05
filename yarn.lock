@@ -19162,7 +19162,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:7.18.3":
+"react-router@npm:7.18.3, react-router@npm:^7.18.0":
   version: 7.18.3
   resolution: "react-router@npm:7.18.3"
   dependencies:
@@ -19175,22 +19175,6 @@ __metadata:
     react-dom:
       optional: true
   checksum: 10/b7393d5f5b044cda9c922b3f96629abc442d6b1b85224c28d4aa292cda45ef4cf26792b613f2bc0742701da3ddc77dd0d4a181e7e5b85d1abd6982c9eba278f2
-  languageName: node
-  linkType: hard
-
-"react-router@npm:^7.18.0":
-  version: 7.18.0
-  resolution: "react-router@npm:7.18.0"
-  dependencies:
-    cookie: "npm:^1.0.1"
-    set-cookie-parser: "npm:^2.6.0"
-  peerDependencies:
-    react: ">=18"
-    react-dom: ">=18"
-  peerDependenciesMeta:
-    react-dom:
-      optional: true
-  checksum: 10/a69b5502a3549de56adce7ba87ae02ac5b052da49eae261124824dd963d047218795706c780e019f366961a7a1e073417a96b295b743f6f57d2a30c68fd78d61
   languageName: node
   linkType: hard
 
