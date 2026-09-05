@@ -77,6 +77,7 @@ A **dev-only OAuth client**, in the same Google Cloud project as production. Sep
 ### The work
 
 - **`DISABLE_CSRF` in `webserver/main/env.py`,** and the guarded branch above in `settings.py`.
+- **The same flag passed to django-ninja's cookie auth** in `webserver/main/ninja_auth.py`. Ninja's `SessionAuth` runs its own CSRF check, instantiating `CsrfViewMiddleware` directly rather than reading `MIDDLEWARE`, so dropping the middleware leaves every authenticated write on the v1 API rejecting with `{"detail": "CSRF check Failed"}`.
 - **`README.md` gains a short section** with the `.env` block and what to expect.
 
 Nothing else: no new service, no compose change, no CI change, no frontend change. The block is
