@@ -53,9 +53,8 @@ test("A malformed credential surfaces the error alert and keeps the dialog open"
 
 test("A 403 (sign-ups closed) surfaces copy distinct from a generic failure", async () => {
   server.use(
-    http.post(
-      "*/_allauth/browser/v1/auth/provider/token",
-      () => new HttpResponse(null, { status: 403 }),
+    http.post("*/_allauth/browser/v1/auth/provider/token", () =>
+      HttpResponse.json({ status: 403 }, { status: 403 }),
     ),
   );
   const gsi = mockGoogleIdentity();
@@ -69,6 +68,31 @@ test("A 403 (sign-ups closed) surfaces copy distinct from a generic failure", as
 
   expect(await screen.findByRole("alert")).toHaveTextContent(
     /sign-ups are currently closed/i,
+  );
+});
+
+test("A 403 from Django's CSRF middleware surfaces the generic failure", async () => {
+  server.use(
+    http.post(
+      "*/_allauth/browser/v1/auth/provider/token",
+      () =>
+        new HttpResponse("<h1>Forbidden</h1>", {
+          status: 403,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        }),
+    ),
+  );
+  const gsi = mockGoogleIdentity();
+  renderTestApp("/?overlay=login");
+
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await act(async () => {
+    gsi.fireCredential(JSON.stringify({ email: "new-user@example.com" }));
+  });
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /could not complete the sign-in/i,
   );
 });
 
