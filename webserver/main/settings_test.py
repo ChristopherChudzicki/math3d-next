@@ -16,6 +16,8 @@ from main.test_settings import require_postgres
 
 SETTINGS_PATH = Path(__file__).parent / "settings.py"
 
+CSRF_MIDDLEWARE = "django.middleware.csrf.CsrfViewMiddleware"
+
 # Every env var settings.py reads — derived from the EnvConfig schema so it
 # cannot drift — cleared before each load so ambient values (docker-compose
 # env, developer shells) can't leak into the scenario under test.
@@ -162,6 +164,22 @@ def test_rate_limit_disable_allowed_in_local_dev(monkeypatch):
         monkeypatch, IS_DEVELOPMENT="True", DISABLE_ALLAUTH_RATE_LIMITS="True"
     )
     assert loaded.ACCOUNT_RATE_LIMITS is False
+
+
+def test_csrf_disable_rejected_outside_development(monkeypatch):
+    """
+    DISABLE_CSRF exists for one manual test on bare localhost (ADR-0005); a
+    deploy reaching real users must refuse to boot with it set.
+    """
+    with pytest.raises(ImproperlyConfigured, match="DISABLE_CSRF"):
+        load_settings(monkeypatch, **PROD_ENV, DISABLE_CSRF="True")
+
+
+def test_csrf_disable_removes_the_middleware_in_local_dev(monkeypatch):
+    default = load_settings(monkeypatch, IS_DEVELOPMENT="True")
+    assert CSRF_MIDDLEWARE in default.MIDDLEWARE  # else the assertion below is vacuous
+    loaded = load_settings(monkeypatch, IS_DEVELOPMENT="True", DISABLE_CSRF="True")
+    assert CSRF_MIDDLEWARE not in loaded.MIDDLEWARE
 
 
 def test_local_dev_unions_explicit_cors_origins_with_defaults(monkeypatch):
