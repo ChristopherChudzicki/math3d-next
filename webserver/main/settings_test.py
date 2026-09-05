@@ -150,10 +150,10 @@ def test_csrf_cookie_domain_must_cover_spa_host(monkeypatch):
         )
 
 
-def test_rate_limit_disable_rejected_when_cookies_secure(monkeypatch):
+def test_rate_limit_disable_rejected_outside_development(monkeypatch):
     """
-    DISABLE_ALLAUTH_RATE_LIMITS must be rejected on any secure-cookie (TLS)
-    deploy, not just under a particular hosting flag (issue #1130).
+    DISABLE_ALLAUTH_RATE_LIMITS must be rejected on any deploy that is not an
+    explicit development opt-out, not just under a hosting flag (issue #1130).
     """
     with pytest.raises(ImproperlyConfigured, match="DISABLE_ALLAUTH_RATE_LIMITS"):
         load_settings(monkeypatch, **PROD_ENV, DISABLE_ALLAUTH_RATE_LIMITS="True")

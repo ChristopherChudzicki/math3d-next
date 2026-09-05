@@ -291,10 +291,9 @@ ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
 ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"
 
 if ENV.DISABLE_ALLAUTH_RATE_LIMITS:
-    if SESSION_COOKIE_SECURE:
+    if not IS_DEVELOPMENT:
         raise ImproperlyConfigured(
-            "DISABLE_ALLAUTH_RATE_LIMITS must not be enabled on a secure-cookie "
-            "(TLS/production) deployment."
+            "DISABLE_ALLAUTH_RATE_LIMITS must not be enabled outside development."
         )
     ACCOUNT_RATE_LIMITS = False
 
