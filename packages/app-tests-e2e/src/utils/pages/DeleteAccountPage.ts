@@ -16,11 +16,11 @@ class DeleteAccountForm {
   }
 }
 
-class UserSettingsPage {
+class DeleteAccountPage {
   private root: Locator;
 
   constructor(page: Page) {
-    this.root = page.getByRole("dialog", { name: "Account Settings" });
+    this.root = page.getByRole("dialog", { name: "Delete Account" });
   }
 
   deleteAccountForm(): DeleteAccountForm {
@@ -28,4 +28,4 @@ class UserSettingsPage {
   }
 }
 
-export default UserSettingsPage;
+export default DeleteAccountPage;
