@@ -13,7 +13,7 @@
   - [Configuration that moves](#configuration-that-moves)
   - [The Google client](#the-google-client)
   - [The CA private key](#the-ca-private-key)
-  - [Keeping both paths honest](#keeping-both-paths-honest)
+  - [What CI runs](#what-ci-runs)
   - [The work](#the-work)
 - [Consequences](#consequences)
 - [Alternatives considered](#alternatives-considered)
@@ -36,7 +36,7 @@ Throughout, the machine is macOS, and the Google integration referred to lands w
 
 **Local development gains an HTTPS configuration — `https://local.math3d.org:3000` for the SPA and `https://api.local.math3d.org:8000` for the API, on a certificate from a CA installed in the developer's own trust store. It is opt-in.** The committed default stays `http://math3d.localdev:3000` and `http://api.math3d.localdev:8000` authenticating through `dummy`, so a fresh clone needs no certificate to do ordinary work.
 
-The two configurations are not two topologies. Caddy fronts Django in both, and every origin-derived setting follows `APP_BASE_URL`, so the difference between them is a scheme, a hostname, and a `tls` directive. CI runs both.
+The two configurations are not two topologies. Caddy fronts Django in both, and every origin-derived setting follows `APP_BASE_URL`, so the difference between them is a scheme, a hostname, and a `tls` directive. CI runs the HTTPS one.
 
 ```mermaid
 flowchart TB
@@ -75,7 +75,7 @@ What makes a rarely-used configuration tolerable is that it not be allowed to ro
 
 **Caddy is always in the request path,** not gated behind a compose profile. In the default configuration it terminates nothing and simply reverse-proxies, which looks redundant and is not: it is what makes `X-Forwarded-Proto` real, so `SECURE_PROXY_SSL_HEADER` becomes a live mechanism in every developer's stack and on every CI run rather than a setting that only matters in the rare configuration. It also removes the conditional publishing of `webserver`'s host port, which is one fewer thing to get wrong.
 
-**CI runs the suite in both configurations,** the HTTPS one against a certificate minted on the runner. See [Keeping both paths honest](#keeping-both-paths-honest).
+**CI runs the HTTPS configuration,** against a certificate minted on the runner. See [What CI runs](#what-ci-runs).
 
 One limit is worth stating plainly, because it is not fixable by configuration: **the two are mutually exclusive per machine.** `CSRF_COOKIE_DOMAIN` is a single Django setting with a single value, and `math3d.localdev` and `local.math3d.org` share no suffix, so one cookie cannot cover both. One backend container serves the main checkout and every worktree, so switching is machine-wide — a `docker compose up -d` to recreate (a container's environment is fixed at creation) plus a Vite restart, after which `.localdev` worktrees fail authenticated requests until it is switched back. The CORS, CSRF-trusted, and credentialed sets could be made to cover both at once — `CORS_ALLOWED_ORIGINS` is unioned into the dev origins and propagates to the other two — but the cookie cannot, so there is no point.
 
@@ -156,11 +156,15 @@ rm "$(mkcert -CAROOT)/rootCA-key.pem"
 
 `rootCA.pem` stays put — in the trust store and on disk at `$(mkcert -CAROOT)`, the path `NODE_EXTRA_CA_CERTS` needs. Nothing sensitive on disk means nothing to exclude from backups and nothing to rotate. The cost is that issuance becomes one-shot: adding a third hostname later is a full CA rotation — new CA, re-trust, reissue — not another `mkcert` run. That is the same work the leaf's roughly two-year lifetime forces anyway.
 
-### Keeping both paths honest
+### What CI runs
 
-The E2E workflow gains a second job running the same suite against the HTTPS origins. It mints its own CA rather than receiving one: on a Linux runner `mkcert -install` is non-interactive, so the job installs `libnss3-tools`, runs `mkcert -install`, issues a leaf for the two hostnames into the path compose bind-mounts, writes the HTTPS block into `.env`, and runs `yarn test-e2e` exactly as the HTTP job does. Nothing is stored and nothing rotates; the CA lives and dies with the runner.[^ci-https]
+**The E2E suite runs over HTTPS in CI, and only over HTTPS.** The workflow already writes its own `.env` from Actions variables and derives its `/etc/hosts` entries from `TEST_APP_URL` and `TEST_API_URL`, so most of the switch is changing those variables. What it adds is the certificate: install `libnss3-tools`, run `mkcert -install` — non-interactive on a Linux runner — and issue a leaf for the two hostnames into the directory compose bind-mounts. Nothing is stored and nothing rotates; the CA lives and dies with the runner.[^ci-https]
 
-This is what makes the opt-in acceptable rather than merely convenient. Without it, the configuration carrying the certificate, the `tls` directive, the Vite TLS branch, and the Node CA flag would be exercised only when someone reached for it, which is the worst possible moment to discover it broke. With it, both paths fail on the pull request that breaks them.
+Running only one configuration is the point, and the choice of which follows from how the two fail. HTTP-specific breakage is loud and immediate: a wrong default in the Caddyfile's site address, or a fault in Vite's certificate branch when no certificate is present, stops `docker compose up` or `yarn start` on the machine of whoever just changed it. HTTPS breakage is silent — the certificate, the `tls` directive, the TLS branch, and Node's trust of the CA are touched only in the sessions that reach for Google, months apart, when something else is already being debugged. So the automated guardian goes where the silence is, and the default configuration is left to the local runs `CLAUDE.md` already requires before `packages/app` work is called done.
+
+That the suite authenticates through `dummy` either way is what makes this a fair swap rather than a loss: no test exercises Google in either configuration, so moving CI to HTTPS costs no auth coverage while adding the whole TLS path — plus `CsrfViewMiddleware`'s secure branch, including the strict `Referer` check, which no automated test reaches today.
+
+Two things get slightly worse and are worth naming. The non-secure CSRF branch stops being machine-checked anywhere, though it is the branch every local run exercises. And minting a certificate puts `mkcert` and `libnss3-tools` on the critical path of every pull request, so the mkcert version should be pinned rather than fetched as "latest".
 
 ### The work
 
@@ -169,7 +173,7 @@ This is what makes the opt-in acceptable rather than merely convenient. Without 
 - **`SECURE_PROXY_SSL_HEADER` in the development branch** of `settings.py`, and `api.local.math3d.org` into the development `ALLOWED_HOSTS` default.
 - **Vite `server.https`,** conditional on an https `APP_BASE_URL` and on `command === "serve"`.
 - **`--use-system-ca` on the `test-e2e` script.**
-- **A second E2E job** per [Keeping both paths honest](#keeping-both-paths-honest).
+- **The E2E workflow moves to HTTPS** per [What CI runs](#what-ci-runs): new Actions variables for the origins, `CSRF_COOKIE_DOMAIN=local.math3d.org` and the two `CADDY_*` values in the `.env` it writes, and a certificate-minting step ahead of `docker compose up`. The `/etc/hosts` step already derives its names from `TEST_APP_URL`/`TEST_API_URL` and needs no change.
 - **`scripts/setup_worktree_env.sh` derives the origin** from the checkout's own environment rather than hardcoding `math3d.localdev`, and its claimed-port scan does the same — it currently greps the literal `math3d.localdev:[0-9]+`, which would find nothing in a worktree written under HTTPS.
 - **Development cookie flags stay `False`** even over TLS, and the `DISABLE_ALLAUTH_RATE_LIMITS` guard stays as it is.[^cookie-flags]
 - **The dev client ID is committed to `.env.development`,** replacing the placeholder, so the button works from the setup script alone.[^client-id]
@@ -181,9 +185,10 @@ This is what makes the opt-in acceptable rather than merely convenient. Without 
 - **Caddy joins every stack, including CI's.** The proxy topology and `X-Forwarded-Proto` become the tested default rather than a rare configuration — at the cost of one more container that can fail during ordinary work, and of `webserver` moving to host port 8001, so anything reaching Django directly at `:8000` now reaches Caddy instead.
 - **Turning HTTPS on is a script run plus a human `mkcert -install`.** The administrator prompt is unavoidable and not automatable, so an agent cannot enable HTTPS unattended — but it also cannot block one, since it gates nothing else.
 - **The two configurations are mutually exclusive per machine.** Switching is `docker compose up -d` plus a Vite restart, and while HTTPS is in effect the `.localdev` worktrees cannot authenticate. Tolerable only because the switch is deliberate and brief.
-- **CI grows a second E2E job,** roughly doubling that workflow's runtime, in exchange for both configurations failing on the pull request that breaks them.
+- **CI covers the HTTPS configuration; local runs cover the default.** One suite, not two, and no duplicated pipeline. The cost is that the plain-HTTP path has no automated guardian — acceptable because its failures stop the dev server on the spot, but it does mean a regression reaching only the default configuration would ship if nobody ran the suite locally.
+- **Every pull request now depends on minting a certificate.** `mkcert` and `libnss3-tools` join the critical path, so an upstream availability problem becomes a CI outage unrelated to the change under test.
 - **The developer's certificate expires silently, roughly two years out.** A missing certificate fails the dev server loudly; an expired one starts fine and fails only in the browser, with no reminder. CI is immune, minting fresh each run. Adding a third hostname before then is a full CA rotation rather than another `mkcert` run.
-- **Production's CSRF branch is exercised in the HTTPS configuration only.** `request.is_secure()` is false under the default, as today, so the strict `Referer` check runs locally only when HTTPS is on — and on the HTTPS CI job, which is where it is actually pinned.
+- **Production's CSRF branch becomes tested for the first time.** `request.is_secure()` is false under the default, as today, so the strict `Referer` check runs locally only when HTTPS is on — but it now runs on every CI pull request, which no configuration achieved before.
 - **The Google console holds ten origins outside the repo,** one per port, discoverable only by failing.
 - **ADR-0004 opened production registration partly because the Google flow could not run locally.** It can now. Whether `ENABLE_REGISTRATION` should close again is a separate decision this ADR does not make.
 
@@ -217,8 +222,8 @@ This is what makes the opt-in acceptable rather than merely convenient. Without 
 [^certs-path]: A gitignored `certs/` beside the code would mean one mkcert run per checkout, and a worktree that skipped it fails at dev-server start for a reason that looks nothing like its cause.
 [^caddy-directives]: Both the environment substitution and an empty `{$CADDY_TLS:}` expanding to no directive are Caddyfile details worth one `docker compose up` to confirm before relying on them; a static two-site Caddyfile is not an option, since a single port cannot serve both a TLS and a plain-HTTP site.
 [^compose-env]: Compose interpolation reads the project-root `.env` and the shell — never the `env_file:` list, which is a different mechanism. The other values in the block are read by Django and Vite through `env_file`/direnv, which read the same file, so one file still carries the whole switch.
-[^chromium]: Linux Chromium reads NSS rather than the system bundle, which is why the CI job installs `libnss3-tools` before `mkcert -install`. Both statements hold only while `playwright.config.ts` runs Chromium alone; a WebKit or Firefox project would need revisiting.
-[^ci-https]: **Assumed, not yet verified:** that `mkcert -install` plus `libnss3-tools` satisfies Playwright's bundled Chromium on an Ubuntu runner. The mechanism is standard, but it should be confirmed on a branch before the second job is relied on. If it does not hold, the alternative is to make HTTPS the only configuration and accept the `mkcert -install` gate, since the rot argument would then have no answer.
+[^chromium]: Linux Chromium reads NSS rather than the system bundle, which is why CI installs `libnss3-tools` before `mkcert -install`. Both statements hold only while `playwright.config.ts` runs Chromium alone; a WebKit or Firefox project would need revisiting.
+[^ci-https]: **Assumed, not yet verified:** that `mkcert -install` plus `libnss3-tools` satisfies Playwright's bundled Chromium on an Ubuntu runner. The mechanism is standard, but it now sits on the critical path of every pull request rather than in an optional extra check, so confirm it on a branch before merging the switch. If it does not hold, CI stays on HTTP and the argument for making HTTPS the only local configuration returns, since the rot argument would then have no answer.
 [^cookie-flags]: Deriving them from the scheme would mirror production more exactly, but `Secure` is a browser-side send restriction that no code branches on, so it buys no bug class — and it would force re-keying the `DISABLE_ALLAUTH_RATE_LIMITS` guard, which reads `SESSION_COOKIE_SECURE` as a proxy for "this is production".
 [^client-id]: A client ID is public by construction, and its only security property is the origin allowlist, whose entries all resolve to loopback. It cannot reach a production build: Vite loads `.env.development` only in development mode, and the deploy workflow supplies `VITE_GOOGLE_CLIENT_ID` from an Actions variable regardless.
 [^origins]: [Google Cloud — Manage OAuth Clients](https://support.google.com/cloud/answer/15549257), on authorized JavaScript origins: the TLD must be on the public suffix list, HTTPS is required outside `localhost`, and "if you use a port other than 80, you must specify it. For example: `https://example.com:8080`".
