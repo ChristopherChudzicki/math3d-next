@@ -66,6 +66,13 @@ checkout enforces CSRF and worktrees on `.localdev` cannot authenticate, so
 don't leave it on. `DISABLE_CSRF` refuses to boot unless `IS_DEVELOPMENT` is
 set.
 
+`yarn test-e2e` cannot run against this configuration, and neither failure
+names the cause. Global setup trips on `TEST_APP_URL` first — `.env.development`
+still points it at `math3d.localdev:3000`, which Vite now 403s, because
+`allowedHosts` follows `APP_BASE_URL`. Repointing it reaches the next failure,
+`Expected csrftoken from provider/token`: with the middleware removed, Django
+sets no CSRF cookie for the suite to read.
+
 ### Task Runner
 
 We use [just](https://github.com/casey/just) as a task runner. Run `just` to see available commands.
