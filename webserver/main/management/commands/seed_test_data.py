@@ -9,8 +9,6 @@ import json
 
 
 class SeedEnv(BaseSettings):
-    TEST_USER_ADMIN_EMAIL: str = ""
-    TEST_USER_ADMIN_UID: str = ""
     TEST_USER_STATIC_EMAIL: str = ""
     TEST_USER_STATIC_UID: str = ""
 
@@ -20,19 +18,13 @@ env = SeedEnv()
 User = get_user_model()
 
 
-def create_test_user(email: str, *, uid: str, is_staff=False):
+def create_test_user(email: str, *, uid: str):
     if not email:
-        raise CommandError(
-            "Empty email for test user. Set TEST_USER_ADMIN_EMAIL and "
-            "TEST_USER_STATIC_EMAIL."
-        )
+        raise CommandError("Empty email for test user. Set TEST_USER_STATIC_EMAIL.")
     if not uid:
-        raise CommandError(
-            "Empty uid for test user. Set TEST_USER_ADMIN_UID and TEST_USER_STATIC_UID."
-        )
+        raise CommandError("Empty uid for test user. Set TEST_USER_STATIC_UID.")
     user, _ = User.objects.get_or_create(email=email)
     user.is_active = True
-    user.is_staff = is_staff
     # get_or_create bypasses CustomUserManager.create_user, leaving the field's default
     # ("") — which Django's is_password_usable() treats as usable, unlike a real account.
     user.set_unusable_password()
@@ -57,18 +49,6 @@ class Command(BaseCommand):
     help = """Seed test data for e2e tests"""
 
     def handle(self, *args, **options):
-        if env.TEST_USER_ADMIN_UID == env.TEST_USER_STATIC_UID:
-            raise CommandError(
-                "TEST_USER_ADMIN_UID and TEST_USER_STATIC_UID must differ; a "
-                "shared uid gives both users one dummy identity."
-            )
-
-        create_test_user(
-            email=env.TEST_USER_ADMIN_EMAIL,
-            uid=env.TEST_USER_ADMIN_UID,
-            is_staff=True,
-        )
-
         user_1 = create_test_user(
             email=env.TEST_USER_STATIC_EMAIL,
             uid=env.TEST_USER_STATIC_UID,
