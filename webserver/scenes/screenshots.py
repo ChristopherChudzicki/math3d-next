@@ -13,8 +13,8 @@ import urllib.request
 from django.conf import settings
 from django.db import connection, transaction
 from django.utils import timezone
-
 from main.constants import BACKEND_USER_AGENT
+
 from scenes.models import RenderDay, RenderMonth
 
 logger = logging.getLogger(__name__)
