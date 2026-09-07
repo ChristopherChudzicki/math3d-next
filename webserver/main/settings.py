@@ -162,7 +162,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.sites",  # Required by allauth
+    # allauth reads Site only behind its own derived SITES_ENABLED; what holds
+    # this app in place is SocialApp.sites and authentication/0005_set_site_name,
+    # both already applied.
+    "django.contrib.sites",
     # Django 6.0 requires this app be installed to use GinIndex (see scenes.Scene).
     "django.contrib.postgres",
     "authentication",  # custom app
@@ -287,11 +290,10 @@ ACCOUNT_LOGIN_METHODS = {"email"}
 # verification is off — the provider already asserts a verified address.
 SOCIALACCOUNT_ONLY = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
-# Trimming below ["email*"] would flip the derived SOCIALACCOUNT_QUERY_EMAIL
-# false and drop the `email` scope from the provider request.
+# Derives SOCIALACCOUNT_EMAIL_REQUIRED: trimming this lets an ID token with no
+# email claim auto-sign-up an account with a blank address.
 ACCOUNT_SIGNUP_FIELDS = ["email*"]
 ACCOUNT_EMAIL_NOTIFICATIONS = False
-ACCOUNT_LOGIN_BY_CODE_ENABLED = False
 ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
 
 # No secret: the popup flow verifies Google ID tokens against Google's certs
@@ -314,6 +316,8 @@ if ENV.DISABLE_ALLAUTH_RATE_LIMITS:
 # allauth headless configuration
 HEADLESS_ONLY = True
 HEADLESS_CLIENTS = ["browser"]
+# Registers headless:openapi_yaml, which allauth's own get_schema() reverses —
+# so dump_openapi_allauth, and the CI spec check with it, needs this on.
 HEADLESS_SERVE_SPECIFICATION = True
 # Serve the headless spec via Swagger UI (ships with allauth) to match the v1
 # API's /v1/docs; the default is Redoc (headless/spec/redoc_cdn.html).
