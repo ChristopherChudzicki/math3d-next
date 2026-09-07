@@ -4,11 +4,11 @@ import factory
 import faker
 from factory.django import DjangoModelFactory
 
-import authentication.models as models
+from authentication import models
 
 fake = faker.Faker()
 
-FACTORY_PASSWORD = "testpassword"  # noqa: S105  # pragma: allowlist secret
+FACTORY_PASSWORD = "testpassword"  # pragma: allowlist secret
 
 T = TypeVar("T")
 

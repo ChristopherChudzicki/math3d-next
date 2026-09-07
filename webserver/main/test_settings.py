@@ -3,7 +3,7 @@ import os
 import sentry_sdk
 from django.core.exceptions import ImproperlyConfigured
 
-from main.settings import *  # noqa: F403
+from main.settings import *
 
 sentry_sdk.init(dsn=None)  # tests never report, even if SENTRY_DSN is set
 
@@ -30,7 +30,7 @@ def require_postgres(engine: str, database_url: str) -> None:
     )
 
 
-require_postgres(DATABASES["default"].get("ENGINE", ""), ENV.DATABASE_URL)  # noqa: F405
+require_postgres(DATABASES["default"].get("ENGINE", ""), ENV.DATABASE_URL)
 
 # The test database name is otherwise fixed, and Django autoclobbers it, so
 # concurrent suites (worktrees, parallel agents) would drop each other's.
@@ -40,6 +40,6 @@ if test_db_name := os.environ.get("TEST_DB_NAME"):
         raise ImproperlyConfigured(
             f"TEST_DB_NAME must start with 'test_' (got {test_db_name!r})."
         )
-    DATABASES["default"].setdefault("TEST", {})["NAME"] = test_db_name  # noqa: F405
+    DATABASES["default"].setdefault("TEST", {})["NAME"] = test_db_name
 
 SECRET_KEY = "not-so-secret-in-tests"  # pragma: allowlist secret

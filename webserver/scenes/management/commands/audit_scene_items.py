@@ -18,7 +18,6 @@ from collections import Counter
 import tqdm
 from django.core.management.base import BaseCommand
 from pydantic import ValidationError as PydanticValidationError
-
 from scenes.models import Scene
 from scenes.schemas.math_items import MATH_ITEM_LIST_ADAPTER, MathItemType
 

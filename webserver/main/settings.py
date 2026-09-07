@@ -10,13 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-from pathlib import Path
 import logging
-
-from django.core.exceptions import ImproperlyConfigured
+from pathlib import Path
 
 import dj_database_url
 import sentry_sdk
+from django.core.exceptions import ImproperlyConfigured
 from pydantic import ValidationError
 
 from main.env import EnvConfig
@@ -26,7 +25,6 @@ from main.origins import (
     csrf_trusted_origins,
     dev_cors_allowed_origins,
 )
-
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +73,7 @@ APP_BASE_URL = ENV.APP_BASE_URL
 # Screenshot render Worker (packages/screenshots). Bare origin; unset ⇒ the
 # render-on-save feature is dark (saves behave as before). See ADR-0002.
 SCREENSHOTS_ORIGIN = ENV.SCREENSHOTS_ORIGIN
-RENDER_SECRET = ENV.RENDER_SECRET  # noqa: S105 (name, not a secret literal) pragma: allowlist secret
+RENDER_SECRET = ENV.RENDER_SECRET
 
 # Per-period reservation caps (ADR-0002 cost protection). Plain constants: they
 # rarely change and aren't secret. Monthly ceiling bounds spend to ≤ $10;

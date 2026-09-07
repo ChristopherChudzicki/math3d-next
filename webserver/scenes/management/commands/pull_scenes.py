@@ -1,10 +1,10 @@
+import dj_database_url
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connections
-from django.conf import settings
-import dj_database_url
+from scenes.models import LegacyScene, Scene, is_reserved_key_error
 from tqdm import tqdm
-from scenes.models import Scene, LegacyScene, is_reserved_key_error
 
 
 def upsert_scene(scene_dict) -> bool:
