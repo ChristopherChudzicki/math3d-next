@@ -55,8 +55,8 @@ class AppPage {
 
   async assertSignedOut() {
     await this.userMenu().opener().click();
-    // "Sign in" exists only signed out. Without it the check below would also
-    // pass against a menu that simply has not rendered yet.
+    // Assert on "Sign in" as well as the username's absence: a menu that has
+    // not rendered satisfies the absence check on its own.
     await expect(this.userMenu().signin()).toBeVisible();
     await expect(this.userMenu().username()).not.toBeVisible();
     await this.userMenu().root.press("Escape");

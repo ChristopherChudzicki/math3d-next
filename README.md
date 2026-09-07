@@ -62,9 +62,10 @@ is fixed at creation) and restart the dev server. The two client-ID variables
 must match, or the sign-in POST fails with `client_id_mismatch`.
 
 Delete the block and recreate to switch back. While it is in place, no local
-checkout enforces CSRF and worktrees on `.localdev` cannot authenticate, so
-don't leave it on. `DISABLE_CSRF` refuses to boot unless `IS_DEVELOPMENT` is
-set.
+checkout enforces CSRF, and the dev CORS origins are derived from
+`APP_BASE_URL`'s hostname — so every `.localdev` frontend is CORS-blocked,
+anonymous reads included. Don't leave it on. `DISABLE_CSRF` refuses to boot
+unless `IS_DEVELOPMENT` is set.
 
 ### Task Runner
 
