@@ -61,8 +61,11 @@ const DeleteAccountForm: React.FC<{
       })}
     >
       <Alert severity="error">
-        This action cannot be undone. To confirm, type &ldquo;
-        <code>{CONFIRM_PROMPT}</code>&rdquo; exactly.
+        This action cannot be undone. Scenes you have saved stay published at
+        their existing links, with no account able to edit or remove them —
+        delete them from <strong>My Scenes</strong> first if you don&rsquo;t
+        want that. To confirm, type &ldquo;<code>{CONFIRM_PROMPT}</code>&rdquo;
+        exactly.
       </Alert>
       <TextField
         fullWidth
