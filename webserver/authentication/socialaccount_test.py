@@ -13,6 +13,7 @@ from allauth.account.models import EmailAddress
 from allauth.socialaccount.adapter import get_adapter as get_socialaccount_adapter
 from allauth.socialaccount.models import SocialAccount, SocialApp
 from django.conf import settings
+from django.contrib import admin
 from django.test import Client, override_settings
 
 from authentication.factories import CustomUserFactory
@@ -143,6 +144,11 @@ def test_a_social_app_row_cannot_shadow_the_configured_google_app():
 
     assert app.pk is None
     assert app.client_id == configured
+
+
+def test_the_social_app_form_is_not_offered_in_the_admin():
+    """Rows added there do nothing, so offering the form only misleads."""
+    assert not admin.site.is_registered(SocialApp)
 
 
 @pytest.mark.django_db
