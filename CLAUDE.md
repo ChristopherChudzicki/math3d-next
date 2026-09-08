@@ -120,7 +120,7 @@ Feature-based organization in `packages/app/src/features/` (auth, notifications,
 ### Testing
 
 - **Frontend unit tests**: Vitest + Testing Library + MSW mocks. Config in `packages/app/vite.config.ts`
-- **Backend tests**: pytest + pytest-django + factory-boy. Config in `webserver/pyproject.toml`. They run against PostgreSQL, like dev and production — `just be test` supplies `DATABASE_URL`. `main/test_settings.py` refuses to start on any other engine, and settings have no SQLite fallback — an unset `DATABASE_URL` leaves Django's dummy backend, which fails on any query. See "Running backend tests" below.
+- **Backend tests**: pytest + pytest-django + factory-boy. Config in `webserver/pyproject.toml`. They run against PostgreSQL, like dev and production — `just be test` supplies `DATABASE_URL`. `main/test_settings.py` refuses to start on any other engine, and settings have no SQLite fallback — an unset `DATABASE_URL` leaves Django's dummy backend, which fails on any query. See "Running backend tests" below. `test_settings.py` also clears every variable in the `EnvConfig` schema before loading `main.settings`, so the suite behaves identically everywhere and a local `.env` — `DISABLE_CSRF=True`, say — cannot change what it asserts.
 - **E2E**: Playwright in `packages/app-tests-e2e/`
 
 #### Running backend tests
@@ -129,7 +129,7 @@ Feature-based organization in `packages/app/src/features/` (auth, notifications,
 
 pytest-django creates a separate `test_`-prefixed database, so the dev database is never touched. That name is fixed, though, and Django autoclobbers it on startup: **two backend suites must not run at once**, or the second drops the first's database mid-run. Set `TEST_DB_NAME` (which must start with `test_`) to give a worktree or parallel agent its own; the command below names it after the checkout directory.
 
-From a worktree, `just be test` does not work — compose would try to start a duplicate stack on ports the main checkout already holds. Run against the main checkout's database from `webserver/`, in a direnv-enabled shell (the settings require the worktree's env; without it you get `ImproperlyConfigured: APP_BASE_URL is required`):
+From a worktree, `just be test` does not work — compose would try to start a duplicate stack on ports the main checkout already holds. Run against the main checkout's database from `webserver/`. No direnv or `.env` is needed: `main/test_settings.py` supplies the suite's whole settings environment, and `DATABASE_URL` plus `TEST_DB_NAME` are the only variables it reads from outside.
 
 ```bash
 DATABASE_URL=postgresql://docker:docker@localhost:5431/math3d TEST_DB_NAME=test_math3d_$(basename $(git rev-parse --show-toplevel)) uv run pytest # pragma: allowlist secret
