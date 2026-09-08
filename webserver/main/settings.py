@@ -162,9 +162,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # allauth reads Site only behind its own derived SITES_ENABLED; what holds
-    # this app in place is SocialApp.sites and authentication/0005_set_site_name,
-    # both already applied.
+    # No runtime reader: allauth guards every Site use behind its own derived
+    # SITES_ENABLED. Removal is what costs — it rewrites applied migrations.
     "django.contrib.sites",
     # Django 6.0 requires this app be installed to use GinIndex (see scenes.Scene).
     "django.contrib.postgres",
