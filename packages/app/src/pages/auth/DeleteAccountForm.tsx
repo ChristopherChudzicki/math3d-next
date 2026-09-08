@@ -36,9 +36,8 @@ const DeleteAccountForm: React.FC<{
   return (
     <form
       id={id}
-      onSubmit={handleSubmit(async (_data, event) => {
+      onSubmit={handleSubmit(async () => {
         if (deleteAccount.isPending) return;
-        event?.preventDefault();
         // Signal before the mutation: its onSuccess resets the me-query, which
         // flips auth to unauthenticated — the flag must already be set so the
         // dialog's redirect guard treats this sign-out as deliberate. Harmless

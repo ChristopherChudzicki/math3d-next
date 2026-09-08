@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
-import type { User } from "@math3d/api";
 import SimpleMenu from "@/util/components/SimpleMenu/SimpleMenu";
 import type { SimpleMenuItem } from "@/util/components/SimpleMenu/SimpleMenu";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -11,6 +10,7 @@ import type { BadgeProps } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import PersonIcon from "@mui/icons-material/Person";
 import { DISPLAY_AUTH_FLOWS } from "@/features/auth";
+import type { AuthStatus } from "@/features/auth";
 import styles from "./UserMenu.module.css";
 
 const badgeAnchorOrigin: BadgeProps["anchorOrigin"] = {
@@ -20,12 +20,12 @@ const badgeAnchorOrigin: BadgeProps["anchorOrigin"] = {
 
 const UserMenu: React.FC<{
   items: SimpleMenuItem[];
-  user?: User | null;
+  authStatus: AuthStatus;
   className?: string;
-}> = ({ items, user, className }) => {
+}> = ({ items, authStatus, className }) => {
   const [visible, setVisible] = useState(false);
 
-  const useHamburger = !DISPLAY_AUTH_FLOWS && !user;
+  const useHamburger = !DISPLAY_AUTH_FLOWS && authStatus !== "authenticated";
   // The hamburger (no user, auth flows hidden) and the avatar (signed-in user)
   // carry distinct accessible names: they open different menus, and the name
   // difference lets tests await the avatar specifically rather than matching
