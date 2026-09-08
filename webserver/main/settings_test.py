@@ -1,8 +1,10 @@
 import importlib.util
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 from main.env import EnvConfig
@@ -295,13 +297,18 @@ def test_cors_origins_union_adds_configured_without_dropping_dev():
     ]
 
 
-def test_settings_wire_csrf_trust_from_cors_origins():
+def test_settings_wire_csrf_trust_from_cors_origins(monkeypatch):
     """
     Pins that settings.py actually derives CSRF trust via
     csrf_trusted_origins — the function tests alone would stay green if the
-    wiring broke.
+    wiring broke. Needs an APP_BASE_URL, which the suite's own settings do not
+    have: without one both lists are empty and the assertion says nothing.
     """
-    assert set(settings.CORS_ALLOWED_ORIGINS) <= set(settings.CSRF_TRUSTED_ORIGINS)
+    loaded = load_settings(
+        monkeypatch, IS_DEVELOPMENT="True", APP_BASE_URL="http://math3d.localdev:3000"
+    )
+    assert loaded.CORS_ALLOWED_ORIGINS  # else the assertion below is vacuous
+    assert set(loaded.CORS_ALLOWED_ORIGINS) <= set(loaded.CSRF_TRUSTED_ORIGINS)
 
 
 def test_prod_csrf_trust_ignores_cors_origins():
@@ -428,14 +435,15 @@ def test_sentry_initialized_with_no_pii_and_full_tracing(monkeypatch):
     assert kwargs["dsn"] == "https://abc123@o1.ingest.sentry.io/42"
 
 
-def test_isolate_environ_clears_what_settings_reads(monkeypatch):
+def test_isolate_environ_pins_the_suites_environment():
     """
     Only DATABASE_URL survives, and only variables in the EnvConfig schema are
     touched — TEST_DB_NAME is how concurrent suites get their own database.
+    Clearing SENTRY_DSN is what keeps the suite from reporting to Sentry.
     """
     environ = {
         "DISABLE_CSRF": "True",
-        "APP_BASE_URL": "http://math3d.localdev:3000",
+        "SENTRY_DSN": "https://abc123@o1.ingest.sentry.io/42",
         "DATABASE_URL": PROD_ENV["DATABASE_URL"],
         "TEST_DB_NAME": "test_worktree",
     }
@@ -443,24 +451,30 @@ def test_isolate_environ_clears_what_settings_reads(monkeypatch):
     assert environ["DATABASE_URL"] == PROD_ENV["DATABASE_URL"]
     assert environ["TEST_DB_NAME"] == "test_worktree"
     assert "DISABLE_CSRF" not in environ
-    assert "APP_BASE_URL" not in environ
-
-
-def test_isolate_environ_pins_development_posture():
-    """
-    Production posture would 301 every test-client request through
-    SECURE_SSL_REDIRECT, so the pin has to beat an ambient IS_DEVELOPMENT.
-    """
-    environ = {"IS_DEVELOPMENT": "False"}
-    isolate_environ(environ)
+    assert "SENTRY_DSN" not in environ
+    # Production posture would 301 every test-client request via SECURE_SSL_REDIRECT.
     assert environ["IS_DEVELOPMENT"] == "True"
 
 
-def test_suite_runs_with_csrf_armed():
+def test_ambient_env_does_not_reach_the_suite():
     """
-    Without the isolate_environ call in test_settings.py, a developer .env
-    carrying DISABLE_CSRF (ADR-0005) would leave every CSRF assertion in the
-    suite passing vacuously.
+    The scrub only counts if it runs before main.settings is imported, which
+    takes a fresh interpreter to observe: re-executing test_settings.py in
+    this one would star-import the already-cached main.settings.
     """
-    assert settings.DISABLE_CSRF is False
-    assert CSRF_MIDDLEWARE in settings.MIDDLEWARE
+    probe = (
+        "import django; django.setup(); "
+        "from django.conf import settings; print(settings.DISABLE_CSRF)"
+    )
+    proc = subprocess.run(
+        [sys.executable, "-c", probe],
+        env={
+            **os.environ,
+            "DISABLE_CSRF": "True",
+            "DJANGO_SETTINGS_MODULE": "main.test_settings",
+        },
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert proc.stdout.strip().splitlines()[-1] == "False"
