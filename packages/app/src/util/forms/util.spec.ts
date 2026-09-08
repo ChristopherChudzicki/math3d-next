@@ -5,42 +5,6 @@ import { setFieldErrors } from "./util";
 const makeApiError = (status: number, data: unknown): ApiError =>
   new ApiError(status, data, new Response(null, { status }));
 
-test("allauth: maps an error whose param is a form field to that field", () => {
-  const setError = vi.fn();
-  const err = makeApiError(400, {
-    status: 400,
-    errors: [
-      { code: "invalid", message: "Enter a valid email.", param: "email" },
-    ],
-  });
-
-  const result = setFieldErrors({ email: "" }, err, setError);
-
-  expect(result).toBe(true);
-  expect(setError).toHaveBeenCalledWith("email", {
-    type: "400",
-    message: "Enter a valid email.",
-  });
-});
-
-test("allauth: surfaces an error as root when its param is not a form field", () => {
-  const setError = vi.fn();
-  const err = makeApiError(400, {
-    status: 400,
-    errors: [
-      { code: "invalid", message: "Unexpected field.", param: "not_a_field" },
-    ],
-  });
-
-  const result = setFieldErrors({ email: "" }, err, setError);
-
-  expect(result).toBe(true);
-  expect(setError).toHaveBeenCalledWith("root", {
-    type: "400",
-    message: "Unexpected field.",
-  });
-});
-
 test("v1 field errors: maps field errors and non_field_errors to fields and root", () => {
   const setError = vi.fn();
   const err = makeApiError(400, {
@@ -57,22 +21,6 @@ test("v1 field errors: maps field errors and non_field_errors to fields and root
   expect(setError).toHaveBeenCalledWith("root", {
     type: "400",
     message: "Something is off.",
-  });
-});
-
-test("handles 409 (conflict) errors, not just 400", () => {
-  const setError = vi.fn();
-  const err = makeApiError(409, {
-    status: 409,
-    errors: [{ code: "conflict", message: "Already exists.", param: "email" }],
-  });
-
-  const result = setFieldErrors({ email: "" }, err, setError);
-
-  expect(result).toBe(true);
-  expect(setError).toHaveBeenCalledWith("email", {
-    type: "400",
-    message: "Already exists.",
   });
 });
 

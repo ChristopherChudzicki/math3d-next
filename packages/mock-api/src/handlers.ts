@@ -46,40 +46,6 @@ export const urls = {
   },
 } as const;
 
-// Matches `allauth.headless.socialaccount.response.provider_flows` for a
-// browser client with only Google configured: Google supports both redirect
-// and token authentication, so it appears in both flow entries.
-const ANONYMOUS_FLOWS = [
-  { id: "provider_redirect", providers: ["google"] },
-  { id: "provider_token", providers: ["google"] },
-];
-
-// Matches allauth's socialaccount authentication record (see
-// `allauth.account.internal.flows.login.record_authentication`'s docstring
-// example), the only method this SOCIALACCOUNT_ONLY deployment produces.
-const makeAuthenticatedResponse = (user: { id: number; email: string }) => ({
-  status: 200,
-  data: {
-    user: {
-      id: user.id,
-      display: user.email,
-      email: user.email,
-      has_usable_password: false,
-    },
-    methods: [
-      {
-        method: "socialaccount",
-        at: Date.now() / 1000,
-        provider: "google",
-        uid: String(user.id),
-      },
-    ],
-  },
-  meta: {
-    is_authenticated: true,
-  },
-});
-
 export const handlers = [
   // v1: my scenes. The anonymous response is a 403, not Ninja's default 401:
   // main/api.py remaps AuthenticationError because session auth cannot send a
@@ -216,23 +182,16 @@ export const handlers = [
       db.user.findFirst({ where: { email: { equals: email } } }) ??
       db.user.create({ email });
     currentUserId = user.id;
-    return HttpResponse.json(makeAuthenticatedResponse(user));
+    // The SPA branches on the status alone and reads nothing out of allauth's
+    // session bodies, so transcribing them here would be fidelity no test or
+    // type could hold to.
+    return HttpResponse.json({ status: 200 });
   }),
-  // allauth sign-out
+  // allauth sign-out. Its 401 confirms the session is gone; `useLogout` treats
+  // it as success.
   http.delete(urls.auth.session, async () => {
     currentUserId = null;
-    return HttpResponse.json(
-      {
-        status: 401,
-        data: {
-          flows: ANONYMOUS_FLOWS,
-        },
-        meta: {
-          is_authenticated: false,
-        },
-      },
-      { status: 401 },
-    );
+    return HttpResponse.json({ status: 401 }, { status: 401 });
   }),
   // v1: delete own account (204 No Content; signs the user out)
   http.post(urls.auth.usersMeDelete, async () => {
