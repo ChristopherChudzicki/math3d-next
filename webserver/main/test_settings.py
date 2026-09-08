@@ -1,11 +1,43 @@
 import os
+from collections.abc import MutableMapping
 
-import sentry_sdk
 from django.core.exceptions import ImproperlyConfigured
 
-from main.settings import *  # noqa: F403
+from main.env import EnvConfig
 
-sentry_sdk.init(dsn=None)  # tests never report, even if SENTRY_DSN is set
+# The suite is pointed at a database from outside (`just be test`, CI, the
+# worktree invocation in CLAUDE.md), and which database that is says nothing
+# about how the app behaves.
+PRESERVED_ENV_VARS = frozenset({"DATABASE_URL"})
+
+# What CI sets, and all it sets. Production posture would 301 every test-client
+# request through SECURE_SSL_REDIRECT, and EnvConfig's production guards refuse
+# to boot without APP_BASE_URL, CSRF_COOKIE_DOMAIN and DATABASE_URL.
+PINNED_ENV = {"IS_DEVELOPMENT": "True"}
+
+
+def isolate_environ(environ: MutableMapping[str, str]) -> None:
+    """
+    Clear every variable settings.py reads, then apply the suite's pinned
+    values, so a run's outcome is the same on CI and on a developer machine.
+    Otherwise a documented local-dev flag silently invalidates tests: with
+    DISABLE_CSRF (ADR-0005) set, settings.py drops CsrfViewMiddleware and
+    ninja_auth builds SessionAuth(csrf=False), so the CSRF assertions in
+    authentication/api_test.py cannot hold.
+
+    Deriving the list from EnvConfig means a variable added later is isolated
+    without anyone remembering to add it here. A test wanting a non-default
+    value overrides it explicitly (see main/ninja_auth_test.py).
+    """
+    for name in EnvConfig.model_fields:
+        if name not in PRESERVED_ENV_VARS:
+            environ.pop(name, None)
+    environ.update(PINNED_ENV)
+
+
+isolate_environ(os.environ)
+
+from main.settings import *  # noqa: E402, F403
 
 
 def require_postgres(engine: str, database_url: str) -> None:

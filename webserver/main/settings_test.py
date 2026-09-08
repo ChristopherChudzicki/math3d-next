@@ -12,7 +12,7 @@ from main.origins import (
     csrf_trusted_origins,
     dev_cors_allowed_origins,
 )
-from main.test_settings import require_postgres
+from main.test_settings import isolate_environ, require_postgres
 
 SETTINGS_PATH = Path(__file__).parent / "settings.py"
 
@@ -426,3 +426,41 @@ def test_sentry_initialized_with_no_pii_and_full_tracing(monkeypatch):
     assert kwargs["environment"] == "production"
     assert kwargs["release"] == "1.2.3"
     assert kwargs["dsn"] == "https://abc123@o1.ingest.sentry.io/42"
+
+
+def test_isolate_environ_clears_what_settings_reads(monkeypatch):
+    """
+    Only DATABASE_URL survives, and only variables in the EnvConfig schema are
+    touched — TEST_DB_NAME is how concurrent suites get their own database.
+    """
+    environ = {
+        "DISABLE_CSRF": "True",
+        "APP_BASE_URL": "http://math3d.localdev:3000",
+        "DATABASE_URL": PROD_ENV["DATABASE_URL"],
+        "TEST_DB_NAME": "test_worktree",
+    }
+    isolate_environ(environ)
+    assert environ["DATABASE_URL"] == PROD_ENV["DATABASE_URL"]
+    assert environ["TEST_DB_NAME"] == "test_worktree"
+    assert "DISABLE_CSRF" not in environ
+    assert "APP_BASE_URL" not in environ
+
+
+def test_isolate_environ_pins_development_posture():
+    """
+    Production posture would 301 every test-client request through
+    SECURE_SSL_REDIRECT, so the pin has to beat an ambient IS_DEVELOPMENT.
+    """
+    environ = {"IS_DEVELOPMENT": "False"}
+    isolate_environ(environ)
+    assert environ["IS_DEVELOPMENT"] == "True"
+
+
+def test_suite_runs_with_csrf_armed():
+    """
+    Without the isolate_environ call in test_settings.py, a developer .env
+    carrying DISABLE_CSRF (ADR-0005) would leave every CSRF assertion in the
+    suite passing vacuously.
+    """
+    assert settings.DISABLE_CSRF is False
+    assert CSRF_MIDDLEWARE in settings.MIDDLEWARE
