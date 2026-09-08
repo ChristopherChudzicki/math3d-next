@@ -20,9 +20,11 @@ test("initializes Google with the configured client ID and renders into its own 
   const view = render(<GoogleSignInButton onCredential={vi.fn()} />);
 
   await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
-  expect(gsi.initialize.mock.calls[0][0].client_id).toBe(
-    import.meta.env.VITE_GOOGLE_CLIENT_ID,
-  );
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  // Both sides read the same variable, so without this the case would pass on
+  // an environment that defines neither.
+  expect(clientId).toBeTruthy();
+  expect(gsi.initialize.mock.calls[0][0].client_id).toBe(clientId);
   // Google draws into the container itself; there is no role/text to query
   // for, so this reaches for the DOM node directly.
   // eslint-disable-next-line testing-library/no-node-access
