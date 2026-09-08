@@ -295,6 +295,7 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_SIGNUP_FIELDS = ["email*"]
 ACCOUNT_EMAIL_NOTIFICATIONS = False
 ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "authentication.adapter.CustomSocialAccountAdapter"
 
 # No secret: the popup flow verifies Google ID tokens against Google's certs
 # with `aud == client_id` and never exchanges an authorization code.
@@ -336,6 +337,27 @@ DATABASES = {
     "default": dj_database_url.parse(ENV.DATABASE_URL) if ENV.DATABASE_URL else {}
 }
 
+
+# The app signs in through Google only, but /admin/ still accepts a password,
+# and createsuperuser and changepassword are the commands that set it — so
+# these run on the one credential that authenticates anything.
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 9,
+        },
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+]
 
 AUTH_USER_MODEL = "authentication.CustomUser"
 
