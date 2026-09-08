@@ -240,15 +240,19 @@ def test_csrf_cookie_domain_covers_subdomains_without_leading_dot(monkeypatch):
 def test_app_base_url_trailing_slash_is_normalized(monkeypatch):
     """
     A trailing slash on APP_BASE_URL must not corrupt the auth email links
-    built from it (issue #829).
+    built from it (issue #829). Both links are cold-entry `?overlay=` dialogs
+    opened over the app, not standalone pages.
     """
     loaded = load_settings(
         monkeypatch, IS_DEVELOPMENT="True", APP_BASE_URL="http://math3d.localdev:3000/"
     )
     assert loaded.APP_BASE_URL == "http://math3d.localdev:3000"
     assert (
-        loaded.HEADLESS_FRONTEND_URLS["account_confirm_email"]
-        == "http://math3d.localdev:3000/?overlay=activate&key={key}"
+        loaded.HEADLESS_FRONTEND_URLS
+        == {
+            "account_confirm_email": "http://math3d.localdev:3000/?overlay=activate&key={key}",
+            "account_reset_password_from_key": "http://math3d.localdev:3000/?overlay=reset-confirm&key={key}",  # pragma: allowlist secret
+        }
     )
 
 
@@ -468,6 +472,8 @@ def test_ambient_env_does_not_reach_the_suite():
     )
     proc = subprocess.run(
         [sys.executable, "-c", probe],
+        # `python -c` puts only the cwd on sys.path, and `main` is imported from it.
+        cwd=Path(__file__).parent.parent,
         env={
             **os.environ,
             "DISABLE_CSRF": "True",
@@ -475,6 +481,8 @@ def test_ambient_env_does_not_reach_the_suite():
         },
         capture_output=True,
         text=True,
-        check=True,
+        timeout=60,
+        check=False,
     )
-    assert proc.stdout.strip().splitlines()[-1] == "False"
+    assert proc.returncode == 0, proc.stderr
+    assert proc.stdout.strip() == "False"

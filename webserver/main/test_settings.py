@@ -10,16 +10,18 @@ from main.env import EnvConfig
 # about how the app behaves.
 PRESERVED_ENV_VARS = frozenset({"DATABASE_URL"})
 
-# What CI sets, and all it sets. Production posture would 301 every test-client
-# request through SECURE_SSL_REDIRECT, and EnvConfig's production guards refuse
-# to boot without APP_BASE_URL, CSRF_COOKIE_DOMAIN and DATABASE_URL.
+# Production posture would 301 every test-client request through
+# SECURE_SSL_REDIRECT, and EnvConfig's production guards refuse to boot without
+# APP_BASE_URL, CSRF_COOKIE_DOMAIN and DATABASE_URL. With DATABASE_URL that
+# makes the suite's environment identical to the CI job's.
 PINNED_ENV = {"IS_DEVELOPMENT": "True"}
 
 
 def isolate_environ(environ: MutableMapping[str, str]) -> None:
     """
-    Clear every variable settings.py reads, then apply the suite's pinned
-    values, so a run's outcome is the same on CI and on a developer machine.
+    Clear every variable settings.py reads bar the preserved ones, then apply
+    the suite's pinned values, so a run's outcome is the same on CI and on a
+    developer machine.
     Otherwise a documented local-dev flag silently invalidates tests: with
     DISABLE_CSRF (ADR-0005) set, settings.py drops CsrfViewMiddleware and
     ninja_auth builds SessionAuth(csrf=False), so the CSRF assertions in
