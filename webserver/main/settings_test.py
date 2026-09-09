@@ -14,7 +14,11 @@ from main.origins import (
     csrf_trusted_origins,
     dev_cors_allowed_origins,
 )
-from main.test_settings import isolate_environ, require_postgres
+from main.test_settings import (
+    isolate_environ,
+    require_postgres,
+    require_test_db_name,
+)
 
 SETTINGS_PATH = Path(__file__).parent / "settings.py"
 
@@ -140,10 +144,10 @@ def test_csrf_cookie_domain_must_cover_spa_host(monkeypatch):
         )
 
 
-def test_rate_limit_disable_rejected_outside_development(monkeypatch):
+def test_rate_limit_disable_rejected_on_a_deployment(monkeypatch):
     """
-    DISABLE_ALLAUTH_RATE_LIMITS must be rejected on any deploy that is not an
-    explicit development opt-out, not just under a hosting flag (issue #1130).
+    DISABLE_ALLAUTH_RATE_LIMITS must be rejected on any deployment, however it
+    came to be one (issue #1130).
     """
     with pytest.raises(ImproperlyConfigured, match="DISABLE_ALLAUTH_RATE_LIMITS"):
         load_settings(monkeypatch, **DEPLOY_ENV, DISABLE_ALLAUTH_RATE_LIMITS="True")
@@ -156,7 +160,7 @@ def test_rate_limit_disable_allowed_in_local_dev(monkeypatch):
     assert loaded.ACCOUNT_RATE_LIMITS is False
 
 
-def test_csrf_disable_rejected_outside_development(monkeypatch):
+def test_csrf_disable_rejected_on_a_deployment(monkeypatch):
     """
     DISABLE_CSRF exists for one manual test on bare localhost (ADR-0005); a
     deploy reaching real users must refuse to boot with it set.
@@ -388,6 +392,16 @@ def test_require_postgres_rejects_sqlite(database_url, expected):
     assert expected in str(exc_info.value)
 
 
+def test_require_test_db_name_rejects_an_unprefixed_name():
+    """
+    Django autoclobbers whatever it is given, so accepting the dev database's
+    own name here would drop it. The accepting case runs at settings import
+    whenever TEST_DB_NAME is set, so inverting it goes red.
+    """
+    with pytest.raises(ImproperlyConfigured, match="must start with 'test_'"):
+        require_test_db_name("math3d")
+
+
 def test_screenshots_config_reads_env_and_caps(monkeypatch):
     module = load_settings(
         monkeypatch,
@@ -433,16 +447,17 @@ def test_isolate_environ_pins_the_suites_environment():
     touched — TEST_DB_NAME is how concurrent suites get their own database.
     Clearing SENTRY_DSN is what keeps the suite from reporting to Sentry.
     """
+    database_url = (
+        "postgres://u:p@db.example.org:5432/math3d"  # pragma: allowlist secret
+    )
     environ = {
-        "DISABLE_CSRF": "True",
         "SENTRY_DSN": "https://abc123@o1.ingest.sentry.io/42",
-        "DATABASE_URL": DEPLOY_ENV["DATABASE_URL"],
+        "DATABASE_URL": database_url,
         "TEST_DB_NAME": "test_worktree",
     }
     isolate_environ(environ)
-    assert environ["DATABASE_URL"] == DEPLOY_ENV["DATABASE_URL"]
+    assert environ["DATABASE_URL"] == database_url
     assert environ["TEST_DB_NAME"] == "test_worktree"
-    assert "DISABLE_CSRF" not in environ
     assert "SENTRY_DSN" not in environ
     # Deployment posture would 301 every test-client request via SECURE_SSL_REDIRECT.
     assert environ["IS_DEPLOYMENT"] == "False"
@@ -455,8 +470,8 @@ def test_ambient_env_does_not_reach_the_suite():
     this one would star-import the already-cached main.settings.
     """
     probe = (
-        "import django; django.setup(); "
-        "from django.conf import settings; print(settings.DISABLE_CSRF)"
+        "import django; django.setup(); from django.conf import settings; "
+        "print(f'DISABLE_CSRF={settings.DISABLE_CSRF}')"
     )
     proc = subprocess.run(
         [sys.executable, "-c", probe],
@@ -473,4 +488,4 @@ def test_ambient_env_does_not_reach_the_suite():
         check=False,
     )
     assert proc.returncode == 0, proc.stderr
-    assert proc.stdout.strip() == "False"
+    assert "DISABLE_CSRF=False" in proc.stdout

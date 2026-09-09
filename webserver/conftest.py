@@ -12,9 +12,11 @@ def pytest_configure() -> None:
     environment isolation, no postgres guard, no TEST_DB_NAME. It is the one
     ambient variable main/test_settings.py cannot defend against itself.
     """
-    if settings.SETTINGS_MODULE != TEST_SETTINGS_MODULE:
+    resolved = settings.SETTINGS_MODULE if settings.configured else None
+    if resolved != TEST_SETTINGS_MODULE:
         raise pytest.UsageError(
             f"The suite must run under {TEST_SETTINGS_MODULE}, but pytest-django "
-            f"resolved {settings.SETTINGS_MODULE!r} — most likely from an "
-            "exported DJANGO_SETTINGS_MODULE. Unset it and rerun."
+            f"resolved {resolved!r} — most likely from an exported "
+            "DJANGO_SETTINGS_MODULE, or from running pytest outside webserver/ "
+            "so that its pyproject.toml config is not picked up."
         )

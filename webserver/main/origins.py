@@ -11,7 +11,7 @@ WORKTREE_PORTS = range(3002, 3010)
 
 def dev_cors_allowed_origins(*, is_deployment: bool, app_base_url: str) -> list[str]:
     """
-    Compute the development-only CORS origins (empty in production).
+    Compute the development-only CORS origins (empty on a deployment).
 
     In local dev, one backend serves the main checkout's frontend
     (APP_BASE_URL) plus git-worktree frontends on sibling ports, so trust
@@ -19,7 +19,7 @@ def dev_cors_allowed_origins(*, is_deployment: bool, app_base_url: str) -> list[
     configured origins (CORS_ALLOWED_ORIGINS) are unioned with these in
     settings.py.
 
-    In production, origins must be configured explicitly; return none.
+    On a deployment, origins must be configured explicitly; return none.
     """
     if is_deployment or not app_base_url:
         return []
@@ -40,7 +40,7 @@ def cors_allowed_origins(
 
     Configured origins add to — never replace — the dev defaults, so setting
     CORS_ALLOWED_ORIGINS (e.g. the legacy math3d-react frontend's origin) in a
-    local .env can't silently drop the worktree frontend ports. In production
+    local .env can't silently drop the worktree frontend ports. On a deployment
     the dev list is empty, so the result is exactly what's configured.
     """
     return list(dict.fromkeys(configured + dev))
@@ -55,7 +55,7 @@ def csrf_trusted_origins(
     """
     Compute CSRF_TRUSTED_ORIGINS.
 
-    In production, only the SPA origin may pass Django's CSRF origin check.
+    On a deployment, only the SPA origin may pass Django's CSRF origin check.
     Deliberately NOT derived from the CORS origins: adding a read-only CORS
     consumer must not grant it CSRF-trusted write access.
 
@@ -81,7 +81,7 @@ def credentialed_cors_origins(
     Every other CORS origin gets anonymous access only — see
     ScopedCorsCredentialsMiddleware.
 
-    In production, only the SPA may send credentials and read authenticated
+    On a deployment, only the SPA may send credentials and read authenticated
     responses; a read-only CORS consumer (e.g. the legacy frontend) must not
     gain that just by being CORS-allowed.
 

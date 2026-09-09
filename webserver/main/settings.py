@@ -85,7 +85,8 @@ RENDER_DAILY_CAP = 150
 
 DEBUG = False
 
-# Secure cookie defaults — relaxed below off a deployment (no TLS locally).
+# Secure cookie defaults; the non-deployment branch below relaxes them (no TLS
+# locally).
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
@@ -213,8 +214,8 @@ if DISABLE_CSRF:
 
 # Explicitly configured origins (Heroku config vars, or a local .env — e.g. the
 # legacy math3d-react frontend) are unioned with the dev-only origins
-# (APP_BASE_URL plus the worktree frontend ports). In production the dev list is
-# empty, so CORS_ALLOWED_ORIGINS is exactly what's configured.
+# (APP_BASE_URL plus the worktree frontend ports). On a deployment the dev list
+# is empty, so CORS_ALLOWED_ORIGINS is exactly what's configured.
 CORS_ALLOWED_ORIGINS = cors_allowed_origins(
     configured=ENV.CORS_ALLOWED_ORIGINS,
     dev=dev_cors_allowed_origins(
@@ -223,7 +224,7 @@ CORS_ALLOWED_ORIGINS = cors_allowed_origins(
     ),
 )
 CORS_ALLOW_CREDENTIALS = True
-# Prod trusts only APP_BASE_URL; local dev also trusts the CORS origins
+# A deployment trusts only APP_BASE_URL; local dev also trusts the CORS origins
 # (worktree frontend ports). See the function's docstring.
 CSRF_TRUSTED_ORIGINS = csrf_trusted_origins(
     is_deployment=IS_DEPLOYMENT,
@@ -318,7 +319,7 @@ HEADLESS_FRONTEND_URLS = {
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 # Empty config ⇒ Django's dummy backend: DB-free commands (makemigrations,
-# dump_openapi_*) still run, queries fail loudly. Required in production.
+# dump_openapi_*) still run, queries fail loudly. Required on a deployment.
 DATABASES = {
     "default": dj_database_url.parse(ENV.DATABASE_URL) if ENV.DATABASE_URL else {}
 }
