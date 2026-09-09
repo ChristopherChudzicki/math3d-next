@@ -5,9 +5,9 @@ from main.env import EnvConfig
 
 
 def _base(**overrides):
-    # IS_DEVELOPMENT=True skips the production-required-config guards, isolating
+    # IS_DEPLOYMENT=False skips the deployment-required-config guards, isolating
     # the field under test.
-    return EnvConfig(IS_DEVELOPMENT=True, **overrides)
+    return EnvConfig(IS_DEPLOYMENT=False, **overrides)
 
 
 def test_screenshots_origin_defaults_empty():

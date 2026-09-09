@@ -25,9 +25,9 @@ CSRF_MIDDLEWARE = "django.middleware.csrf.CsrfViewMiddleware"
 # env, developer shells) can't leak into the scenario under test.
 SETTINGS_ENV_VARS = list(EnvConfig.model_fields)
 
-# Minimal valid production environment — production is the DEFAULT posture, so
+# Minimal valid deployment environment — deployment is the DEFAULT posture, so
 # no flag is needed; tests remove or override entries to exercise each guard.
-PROD_ENV = {
+DEPLOY_ENV = {
     "APP_BASE_URL": "https://app.example.org",
     "CSRF_COOKIE_DOMAIN": ".example.org",
     "DATABASE_URL": "postgres://u:p@db.example.org:5432/math3d",  # pragma: allowlist secret
@@ -52,9 +52,9 @@ def load_settings(monkeypatch, **env_vars):
     return module
 
 
-def test_production_hardening_is_the_default(monkeypatch):
+def test_deployment_hardening_is_the_default(monkeypatch):
     """Secure by default: hardening applies unless a deploy explicitly opts out."""
-    loaded = load_settings(monkeypatch, **PROD_ENV)
+    loaded = load_settings(monkeypatch, **DEPLOY_ENV)
     assert loaded.SECURE_SSL_REDIRECT is True
     assert loaded.SECURE_HSTS_SECONDS > 0
     assert loaded.SESSION_COOKIE_SECURE is True
@@ -64,69 +64,57 @@ def test_production_hardening_is_the_default(monkeypatch):
 def test_bare_environment_fails_closed(monkeypatch):
     """
     An entirely unconfigured environment must refuse to boot (it defaults to
-    production and trips the required-config guards) rather than silently
-    start with dev-grade security (issue #1130).
+    a deployment and trips the required-config guards) rather than silently
+    start with dev-grade security (issue #1130). Every missing variable is
+    named at once, so a misconfigured deploy is not diagnosed one attempt at
+    a time.
     """
-    with pytest.raises(ImproperlyConfigured):
+    with pytest.raises(ImproperlyConfigured) as exc_info:
         load_settings(monkeypatch)
+    message = str(exc_info.value)
+    assert "APP_BASE_URL" in message
+    assert "CSRF_COOKIE_DOMAIN" in message
+    assert "DATABASE_URL" in message
 
 
 def test_local_dev_opt_out_relaxes_cookie_security(monkeypatch):
-    loaded = load_settings(monkeypatch, IS_DEVELOPMENT="True")
+    loaded = load_settings(monkeypatch, IS_DEPLOYMENT="False")
     assert loaded.SESSION_COOKIE_SECURE is False
     assert loaded.CSRF_COOKIE_SECURE is False
     assert not getattr(loaded, "SECURE_SSL_REDIRECT", False)
 
 
-def test_is_heroku_with_dev_opt_out_is_contradictory(monkeypatch):
-    """
-    IS_HEROKU (the legacy prod flag) combined with an explicit IS_DEVELOPMENT
-    opt-out is contradictory config — refuse to guess which one is stale.
-    """
-    with pytest.raises(ImproperlyConfigured, match="IS_DEVELOPMENT"):
-        load_settings(monkeypatch, **PROD_ENV, IS_HEROKU="True", IS_DEVELOPMENT="True")
-
-
-def test_legacy_is_heroku_alone_still_gets_hardened(monkeypatch):
-    """
-    An app still carrying the legacy IS_HEROKU config var (and nothing else
-    new) lands on the production default — the migration cannot degrade it.
-    """
-    loaded = load_settings(monkeypatch, **PROD_ENV, IS_HEROKU="True")
-    assert loaded.SECURE_SSL_REDIRECT is True
-
-
-def test_production_requires_app_base_url(monkeypatch):
-    env = {**PROD_ENV}
+def test_deployment_requires_app_base_url(monkeypatch):
+    env = {**DEPLOY_ENV}
     del env["APP_BASE_URL"]
     with pytest.raises(ImproperlyConfigured, match="APP_BASE_URL"):
         load_settings(monkeypatch, **env)
 
 
-def test_production_requires_csrf_cookie_domain(monkeypatch):
+def test_deployment_requires_csrf_cookie_domain(monkeypatch):
     """
     Without CSRF_COOKIE_DOMAIN the SPA cannot read the CSRF token and all
     authed mutations fail closed (issue #1130).
     """
-    env = {**PROD_ENV}
+    env = {**DEPLOY_ENV}
     del env["CSRF_COOKIE_DOMAIN"]
     with pytest.raises(ImproperlyConfigured, match="CSRF_COOKIE_DOMAIN"):
         load_settings(monkeypatch, **env)
 
 
-def test_production_requires_database_url(monkeypatch):
+def test_deployment_requires_database_url(monkeypatch):
     """
     Unset, Django falls back to its dummy backend, which boots fine and then
-    fails every query — so production must fail at import instead.
+    fails every query — so a deployment must fail at import instead.
     """
-    env = {**PROD_ENV}
+    env = {**DEPLOY_ENV}
     del env["DATABASE_URL"]
     with pytest.raises(ImproperlyConfigured, match="DATABASE_URL"):
         load_settings(monkeypatch, **env)
 
 
 def test_database_url_configures_the_default_connection(monkeypatch):
-    loaded = load_settings(monkeypatch, **PROD_ENV)
+    loaded = load_settings(monkeypatch, **DEPLOY_ENV)
     assert loaded.DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql"
 
 
@@ -136,7 +124,7 @@ def test_dev_without_database_url_configures_no_engine(monkeypatch):
     DB-free commands (makemigrations, dump_openapi_*) working while any query
     fails loudly.
     """
-    loaded = load_settings(monkeypatch, IS_DEVELOPMENT="True")
+    loaded = load_settings(monkeypatch, IS_DEPLOYMENT="False")
     assert loaded.DATABASES["default"] == {}
 
 
@@ -148,7 +136,7 @@ def test_csrf_cookie_domain_must_cover_spa_host(monkeypatch):
     """
     with pytest.raises(ImproperlyConfigured, match="CSRF_COOKIE_DOMAIN"):
         load_settings(
-            monkeypatch, **{**PROD_ENV, "CSRF_COOKIE_DOMAIN": ".unrelated.example"}
+            monkeypatch, **{**DEPLOY_ENV, "CSRF_COOKIE_DOMAIN": ".unrelated.example"}
         )
 
 
@@ -158,12 +146,12 @@ def test_rate_limit_disable_rejected_outside_development(monkeypatch):
     explicit development opt-out, not just under a hosting flag (issue #1130).
     """
     with pytest.raises(ImproperlyConfigured, match="DISABLE_ALLAUTH_RATE_LIMITS"):
-        load_settings(monkeypatch, **PROD_ENV, DISABLE_ALLAUTH_RATE_LIMITS="True")
+        load_settings(monkeypatch, **DEPLOY_ENV, DISABLE_ALLAUTH_RATE_LIMITS="True")
 
 
 def test_rate_limit_disable_allowed_in_local_dev(monkeypatch):
     loaded = load_settings(
-        monkeypatch, IS_DEVELOPMENT="True", DISABLE_ALLAUTH_RATE_LIMITS="True"
+        monkeypatch, IS_DEPLOYMENT="False", DISABLE_ALLAUTH_RATE_LIMITS="True"
     )
     assert loaded.ACCOUNT_RATE_LIMITS is False
 
@@ -174,13 +162,13 @@ def test_csrf_disable_rejected_outside_development(monkeypatch):
     deploy reaching real users must refuse to boot with it set.
     """
     with pytest.raises(ImproperlyConfigured, match="DISABLE_CSRF"):
-        load_settings(monkeypatch, **PROD_ENV, DISABLE_CSRF="True")
+        load_settings(monkeypatch, **DEPLOY_ENV, DISABLE_CSRF="True")
 
 
 def test_csrf_disable_removes_the_middleware_in_local_dev(monkeypatch):
-    default = load_settings(monkeypatch, IS_DEVELOPMENT="True")
+    default = load_settings(monkeypatch, IS_DEPLOYMENT="False")
     assert CSRF_MIDDLEWARE in default.MIDDLEWARE  # else the assertion below is vacuous
-    loaded = load_settings(monkeypatch, IS_DEVELOPMENT="True", DISABLE_CSRF="True")
+    loaded = load_settings(monkeypatch, IS_DEPLOYMENT="False", DISABLE_CSRF="True")
     assert CSRF_MIDDLEWARE not in loaded.MIDDLEWARE
 
 
@@ -192,7 +180,7 @@ def test_local_dev_unions_explicit_cors_origins_with_defaults(monkeypatch):
     """
     loaded = load_settings(
         monkeypatch,
-        IS_DEVELOPMENT="True",
+        IS_DEPLOYMENT="False",
         APP_BASE_URL="http://math3d.localdev:3000",
         CORS_ALLOWED_ORIGINS="http://localhost:3141",
     )
@@ -200,9 +188,9 @@ def test_local_dev_unions_explicit_cors_origins_with_defaults(monkeypatch):
     assert "http://math3d.localdev:3000" in loaded.CORS_ALLOWED_ORIGINS
 
 
-def test_production_cors_origins_are_exactly_the_explicit_config(monkeypatch):
+def test_deployment_cors_origins_are_exactly_the_explicit_config(monkeypatch):
     loaded = load_settings(
-        monkeypatch, **PROD_ENV, CORS_ALLOWED_ORIGINS="https://app.example.org"
+        monkeypatch, **DEPLOY_ENV, CORS_ALLOWED_ORIGINS="https://app.example.org"
     )
     assert loaded.CORS_ALLOWED_ORIGINS == ["https://app.example.org"]
 
@@ -215,13 +203,13 @@ def test_app_base_url_must_be_a_bare_origin(monkeypatch):
     """
     for bad in ["https://app.example.org/app", "app.example.org"]:
         with pytest.raises(ImproperlyConfigured, match="APP_BASE_URL"):
-            load_settings(monkeypatch, IS_DEVELOPMENT="True", APP_BASE_URL=bad)
+            load_settings(monkeypatch, IS_DEPLOYMENT="False", APP_BASE_URL=bad)
 
 
 def test_csrf_cookie_domain_coverage_is_case_insensitive(monkeypatch):
     """Domain matching is case-insensitive; unusual casing must not fail boot."""
     loaded = load_settings(
-        monkeypatch, **{**PROD_ENV, "CSRF_COOKIE_DOMAIN": ".Example.org"}
+        monkeypatch, **{**DEPLOY_ENV, "CSRF_COOKIE_DOMAIN": ".Example.org"}
     )
     assert loaded.CSRF_COOKIE_DOMAIN == ".Example.org"
 
@@ -232,7 +220,7 @@ def test_csrf_cookie_domain_covers_subdomains_without_leading_dot(monkeypatch):
     'example.org' covers app.example.org just like '.example.org' does.
     """
     loaded = load_settings(
-        monkeypatch, **{**PROD_ENV, "CSRF_COOKIE_DOMAIN": "example.org"}
+        monkeypatch, **{**DEPLOY_ENV, "CSRF_COOKIE_DOMAIN": "example.org"}
     )
     assert loaded.CSRF_COOKIE_DOMAIN == "example.org"
 
@@ -244,7 +232,7 @@ def test_app_base_url_trailing_slash_is_normalized(monkeypatch):
     opened over the app, not standalone pages.
     """
     loaded = load_settings(
-        monkeypatch, IS_DEVELOPMENT="True", APP_BASE_URL="http://math3d.localdev:3000/"
+        monkeypatch, IS_DEPLOYMENT="False", APP_BASE_URL="http://math3d.localdev:3000/"
     )
     assert loaded.APP_BASE_URL == "http://math3d.localdev:3000"
     assert (
@@ -263,7 +251,7 @@ def test_dev_cors_origins_cover_app_and_worktree_ports():
     CORS-trusted.
     """
     origins = dev_cors_allowed_origins(
-        is_development=True,
+        is_deployment=False,
         app_base_url="http://math3d.localdev:3000",
     )
     worktree_origins = [f"http://math3d.localdev:{port}" for port in WORKTREE_PORTS]
@@ -271,17 +259,17 @@ def test_dev_cors_origins_cover_app_and_worktree_ports():
     assert origins == ["http://math3d.localdev:3000", *worktree_origins]
 
 
-def test_dev_cors_origins_empty_in_prod():
-    """Production must configure CORS origins explicitly."""
+def test_dev_cors_origins_empty_on_a_deployment():
+    """A deployment must configure CORS origins explicitly."""
     origins = dev_cors_allowed_origins(
-        is_development=False,
+        is_deployment=True,
         app_base_url="https://app.example.org",
     )
     assert origins == []
 
 
 def test_dev_cors_origins_empty_without_app_base_url():
-    origins = dev_cors_allowed_origins(is_development=True, app_base_url="")
+    origins = dev_cors_allowed_origins(is_deployment=False, app_base_url="")
     assert origins == []
 
 
@@ -309,19 +297,19 @@ def test_settings_wire_csrf_trust_from_cors_origins(monkeypatch):
     have: without one both lists are empty and the assertion says nothing.
     """
     loaded = load_settings(
-        monkeypatch, IS_DEVELOPMENT="True", APP_BASE_URL="http://math3d.localdev:3000"
+        monkeypatch, IS_DEPLOYMENT="False", APP_BASE_URL="http://math3d.localdev:3000"
     )
     assert loaded.CORS_ALLOWED_ORIGINS  # else the assertion below is vacuous
     assert set(loaded.CORS_ALLOWED_ORIGINS) <= set(loaded.CSRF_TRUSTED_ORIGINS)
 
 
-def test_prod_csrf_trust_ignores_cors_origins():
+def test_deployment_csrf_trust_ignores_cors_origins():
     """
-    Adding a read-only CORS consumer in production must not grant it
+    Adding a read-only CORS consumer on a deployment must not grant it
     CSRF-trusted write access.
     """
     origins = csrf_trusted_origins(
-        is_development=False,
+        is_deployment=True,
         app_base_url="https://app.example.org",
         cors_allowed_origins=["https://app.example.org", "https://partner.example"],
     )
@@ -334,7 +322,7 @@ def test_local_csrf_trust_covers_cors_origins():
     every CORS origin must also pass Django's CSRF origin check.
     """
     origins = csrf_trusted_origins(
-        is_development=True,
+        is_deployment=False,
         app_base_url="http://math3d.localdev:3000",
         cors_allowed_origins=[
             "http://math3d.localdev:3000",
@@ -347,13 +335,13 @@ def test_local_csrf_trust_covers_cors_origins():
     ]
 
 
-def test_prod_credentialed_cors_is_exactly_the_spa_origin(monkeypatch):
+def test_deployment_credentialed_cors_is_exactly_the_spa_origin(monkeypatch):
     """
-    Adding a read-only CORS consumer in production must not let it make
+    Adding a read-only CORS consumer on a deployment must not let it make
     credentialed requests — same principle as CSRF trust (issue #1184).
     """
     loaded = load_settings(
-        monkeypatch, **PROD_ENV, CORS_ALLOWED_ORIGINS="https://legacy.example.org"
+        monkeypatch, **DEPLOY_ENV, CORS_ALLOWED_ORIGINS="https://legacy.example.org"
     )
     assert loaded.CREDENTIALED_CORS_ORIGINS == ["https://app.example.org"]
     assert "https://legacy.example.org" in loaded.CORS_ALLOWED_ORIGINS
@@ -366,7 +354,7 @@ def test_dev_credentialed_cors_covers_all_cors_origins(monkeypatch):
     """
     loaded = load_settings(
         monkeypatch,
-        IS_DEVELOPMENT="True",
+        IS_DEPLOYMENT="False",
         APP_BASE_URL="http://math3d.localdev:3000",
         CORS_ALLOWED_ORIGINS="http://localhost:3141",
     )
@@ -375,7 +363,7 @@ def test_dev_credentialed_cors_covers_all_cors_origins(monkeypatch):
 
 def test_local_csrf_trust_handles_unset_app_base_url():
     origins = csrf_trusted_origins(
-        is_development=True,
+        is_deployment=False,
         app_base_url="",
         cors_allowed_origins=["http://math3d.localdev:3000"],
     )
@@ -403,7 +391,7 @@ def test_require_postgres_rejects_sqlite(database_url, expected):
 def test_screenshots_config_reads_env_and_caps(monkeypatch):
     module = load_settings(
         monkeypatch,
-        **PROD_ENV,
+        **DEPLOY_ENV,
         SCREENSHOTS_ORIGIN="https://s.math3d.org",
         RENDER_SECRET="shh",  # pragma: allowlist secret
     )
@@ -417,7 +405,7 @@ def test_sentry_not_initialized_without_a_dsn(monkeypatch):
     """Dev, CI, and tests run with no DSN — init must be a no-op there."""
     init_calls = []
     monkeypatch.setattr("sentry_sdk.init", lambda **kwargs: init_calls.append(kwargs))
-    load_settings(monkeypatch, IS_DEVELOPMENT="True")
+    load_settings(monkeypatch, IS_DEPLOYMENT="False")
     assert init_calls == []
 
 
@@ -426,7 +414,7 @@ def test_sentry_initialized_with_no_pii_and_full_tracing(monkeypatch):
     monkeypatch.setattr("sentry_sdk.init", lambda **kwargs: init_calls.append(kwargs))
     load_settings(
         monkeypatch,
-        IS_DEVELOPMENT="True",
+        IS_DEPLOYMENT="False",
         SENTRY_DSN="https://abc123@o1.ingest.sentry.io/42",
         APP_VERSION="1.2.3",
     )
@@ -448,16 +436,16 @@ def test_isolate_environ_pins_the_suites_environment():
     environ = {
         "DISABLE_CSRF": "True",
         "SENTRY_DSN": "https://abc123@o1.ingest.sentry.io/42",
-        "DATABASE_URL": PROD_ENV["DATABASE_URL"],
+        "DATABASE_URL": DEPLOY_ENV["DATABASE_URL"],
         "TEST_DB_NAME": "test_worktree",
     }
     isolate_environ(environ)
-    assert environ["DATABASE_URL"] == PROD_ENV["DATABASE_URL"]
+    assert environ["DATABASE_URL"] == DEPLOY_ENV["DATABASE_URL"]
     assert environ["TEST_DB_NAME"] == "test_worktree"
     assert "DISABLE_CSRF" not in environ
     assert "SENTRY_DSN" not in environ
-    # Production posture would 301 every test-client request via SECURE_SSL_REDIRECT.
-    assert environ["IS_DEVELOPMENT"] == "True"
+    # Deployment posture would 301 every test-client request via SECURE_SSL_REDIRECT.
+    assert environ["IS_DEPLOYMENT"] == "False"
 
 
 def test_ambient_env_does_not_reach_the_suite():

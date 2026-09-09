@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 WORKTREE_PORTS = range(3002, 3010)
 
 
-def dev_cors_allowed_origins(*, is_development: bool, app_base_url: str) -> list[str]:
+def dev_cors_allowed_origins(*, is_deployment: bool, app_base_url: str) -> list[str]:
     """
     Compute the development-only CORS origins (empty in production).
 
@@ -21,7 +21,7 @@ def dev_cors_allowed_origins(*, is_development: bool, app_base_url: str) -> list
 
     In production, origins must be configured explicitly; return none.
     """
-    if not is_development or not app_base_url:
+    if is_deployment or not app_base_url:
         return []
     base = urlparse(app_base_url)
     return [app_base_url] + [
@@ -48,7 +48,7 @@ def cors_allowed_origins(
 
 def csrf_trusted_origins(
     *,
-    is_development: bool,
+    is_deployment: bool,
     app_base_url: str,
     cors_allowed_origins: list[str],
 ) -> list[str]:
@@ -63,7 +63,7 @@ def csrf_trusted_origins(
     scripts/setup_worktree_env.sh) make credentialed writes, so every CORS
     origin must also pass the CSRF origin check.
     """
-    if not is_development:
+    if is_deployment:
         return [app_base_url]
     return list(
         dict.fromkeys(([app_base_url] if app_base_url else []) + cors_allowed_origins)
@@ -72,7 +72,7 @@ def csrf_trusted_origins(
 
 def credentialed_cors_origins(
     *,
-    is_development: bool,
+    is_deployment: bool,
     app_base_url: str,
     cors_allowed_origins: list[str],
 ) -> list[str]:
@@ -94,7 +94,7 @@ def credentialed_cors_origins(
     is deliberately not derived from csrf_trusted_origins even though the two
     currently coincide.
     """
-    if not is_development:
+    if is_deployment:
         return [app_base_url] if app_base_url else []
     return list(
         dict.fromkeys(([app_base_url] if app_base_url else []) + cors_allowed_origins)

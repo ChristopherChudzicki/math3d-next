@@ -53,14 +53,14 @@ So on `localhost` there are three options: disable the check, move the token out
 
 ```python
 if ENV.DISABLE_CSRF:
-    if not IS_DEVELOPMENT:
+    if IS_DEPLOYMENT:
         raise ImproperlyConfigured(
             "DISABLE_CSRF must not be enabled outside development."
         )
     MIDDLEWARE.remove("django.middleware.csrf.CsrfViewMiddleware")
 ```
 
-Two variables must both be wrong for this to reach a real deployment, and production hardening is already the default: `IS_DEVELOPMENT` defaults to `False`, so an unconfigured deploy is the secure one. The guard names `IS_DEVELOPMENT` rather than a derived security setting — `SESSION_COOKIE_SECURE` would read as a second, independent signal and is not one.[^flags] `.remove()` rather than a filtered rebuild is deliberate: it raises `ValueError` if the middleware is ever renamed, so the toggle cannot silently become a no-op.
+Two variables must both be wrong for this to reach a real deployment, and deployment hardening is already the default: `IS_DEPLOYMENT` defaults to `True`, so an unconfigured deploy is the secure one. The guard names `IS_DEPLOYMENT` rather than a derived security setting — `SESSION_COOKIE_SECURE` would read as a second, independent signal and is not one.[^flags] `.remove()` rather than a filtered rebuild is deliberate: it raises `ValueError` if the middleware is ever renamed, so the toggle cannot silently become a no-op.
 
 Django has no switch for this; dropping the middleware is the supported way, and it also stops the `csrftoken` cookie being set at all. The frontend needs no change — `csrfMiddleware` sets `X-CSRFToken` only when `getCsrfToken()` returns something.
 
@@ -116,7 +116,7 @@ followed by `docker compose up -d` to recreate the backend — a container's env
 
 [^obc]: [Chrome Platform Status — Origin-Bound cookies (by default)](https://chromestatus.com/feature/4945698250293248): "In Chrome 148, cookies are bound to their setting origin (by default) such that they're only accessible by that origin… Cookies might ease the host and port binding restrictions through use of the `Domain` attribute but all cookies will be bound to their setting scheme." The temporary `LegacyCookieScopeEnabled` and `LegacyCookieScopeEnabledForDomainList` policies "will stop working in Chrome 150"; Chrome 148 reached stable on 2026-05-05. The [explainer](https://github.com/sbingler/Origin-Bound-Cookies/blob/main/README.md) states that domain cookies "are allowed to be accessed by any port". Scheme binding has no `Domain` opt-out, which is why an HTTPS SPA with a plain-HTTP API is not a halfway option.
 [^csrf-depth]: Neither cookie sets a SameSite value, so Django's `Lax` default applies to both — a cross-site POST carries no `sessionid` at all — and the JSON content type forces a preflight the attacker's origin fails. CORS itself is not the defense: it gates reading the response, not sending the request. What the token still covers is same-site attackers, since SameSite is site-scoped and `CSRF_COOKIE_DOMAIN` widens the cookie to every `math3d.org` subdomain, plus any handler that parses a body without checking its content type. None of that applies to a `localhost` origin on one developer's machine.
-[^flags]: `SESSION_COOKIE_SECURE` has no environment input: `settings.py` sets it `True` and then forces it back to `False` inside the `else:` of `if not IS_DEVELOPMENT:`. Testing it is therefore testing `IS_DEVELOPMENT`, written obliquely and far from where it is computed. The `DISABLE_ALLAUTH_RATE_LIMITS` guard was keyed the same way and is re-keyed alongside this one.
+[^flags]: `SESSION_COOKIE_SECURE` has no environment input: `settings.py` sets it `True` and then forces it back to `False` inside the `else:` of `if IS_DEPLOYMENT:`. Testing it is therefore testing `IS_DEPLOYMENT`, written obliquely and far from where it is computed. The `DISABLE_ALLAUTH_RATE_LIMITS` guard was keyed the same way and is re-keyed alongside this one.
 [^localhost-free]: The development `ALLOWED_HOSTS` default in `webserver/main/settings.py` already lists `localhost`; the development CORS origins are computed from `APP_BASE_URL` in `webserver/main/origins.py`, with the CSRF-trusted and credentialed sets derived from those; `settings.py` applies `CSRF_COOKIE_DOMAIN` only when non-empty; and `EnvConfig._csrf_cookie_domain_must_cover_spa_host` skips its check when it is empty.
 [^client-id]: A client ID is public by construction, and its only security property is the origin allowlist, whose entries all resolve to loopback — so keeping it out of the repository is a matter of it being unused there, not of secrecy. The backend's `GOOGLE_CLIENT_ID` has no development default, and a mismatch with `VITE_GOOGLE_CLIENT_ID` is rejected as `client_id_mismatch`.
 [^https-design]:

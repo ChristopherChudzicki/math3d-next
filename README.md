@@ -63,8 +63,7 @@ must match, or the sign-in POST fails with `client_id_mismatch`.
 
 Delete the block and recreate to switch back. While it is in place, no local
 checkout enforces CSRF and worktrees on `.localdev` cannot authenticate, so
-don't leave it on. `DISABLE_CSRF` refuses to boot unless `IS_DEVELOPMENT` is
-set.
+don't leave it on. `DISABLE_CSRF` refuses to boot on a deployment.
 
 The backend test suite is unaffected — `main/test_settings.py` pins its own
 environment. `yarn test-e2e` cannot run against this configuration, though, and

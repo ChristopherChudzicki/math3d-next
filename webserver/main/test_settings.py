@@ -10,11 +10,11 @@ from main.env import EnvConfig
 # about how the app behaves.
 PRESERVED_ENV_VARS = frozenset({"DATABASE_URL"})
 
-# Production posture would 301 every test-client request through
-# SECURE_SSL_REDIRECT, and EnvConfig's production guards refuse to boot without
+# The suite is not a deployment: deployment posture would 301 every test-client
+# request through SECURE_SSL_REDIRECT, and EnvConfig refuses to boot without
 # APP_BASE_URL, CSRF_COOKIE_DOMAIN and DATABASE_URL. With DATABASE_URL that
 # makes the suite's environment identical to the CI job's.
-PINNED_ENV = {"IS_DEVELOPMENT": "True"}
+PINNED_ENV = {"IS_DEPLOYMENT": "False"}
 
 
 def isolate_environ(environ: MutableMapping[str, str]) -> None:

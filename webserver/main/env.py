@@ -36,9 +36,9 @@ class EnvConfig(BaseSettings):
     # trailing-slash-normalized. Unset ⇒ the render feature is dark.
     SCREENSHOTS_ORIGIN: str = ""
     # Shared secret gating the Worker's POST /render. Unset in dev is fine
-    # (feature dark). Not required in production — the feature is optional.
+    # (feature dark). Not required on a deployment — the feature is optional.
     RENDER_SECRET: str = ""
-    # Required in production (below). Unset in dev leaves Django on its dummy
+    # Required on a deployment (below). Unset in dev leaves Django on its dummy
     # backend: DB-free commands like makemigrations run, queries fail loudly.
     DATABASE_URL: str = ""
     INGESTION_DATABASE_URL: str = ""
@@ -46,14 +46,12 @@ class EnvConfig(BaseSettings):
     # pydantic-settings' JSON pre-parse and let the field validator split them.
     ALLOWED_HOSTS: Annotated[list[str], NoDecode] = []
     CORS_ALLOWED_ORIGINS: Annotated[list[str], NoDecode] = []
-    # Deployment environment. Production hardening is the DEFAULT: an
-    # unconfigured deploy is secure (or fails loudly on the required-config
-    # guards). Dev environments opt out explicitly via IS_DEVELOPMENT=True
-    # (.env.development, CI); production-like deploys (prod, rc) set nothing.
-    # IS_HEROKU is the deprecated production flag, read only to reject
-    # contradictory config.
-    IS_DEVELOPMENT: bool = False
-    IS_HEROKU: bool = False
+    # Whether this process serves a deployment (prod, rc). True by default, so
+    # an unconfigured deploy is hardened and fails loudly on the checks below
+    # rather than silently running with dev-grade security. Anything that is
+    # not a deployment — a developer machine, CI, a schema dump — opts out
+    # explicitly with IS_DEPLOYMENT=False.
+    IS_DEPLOYMENT: bool = True
     # Logging
     LOG_LEVEL: str = "INFO"
     DJANGO_LOG_LEVEL: str = "INFO"
@@ -109,34 +107,34 @@ class EnvConfig(BaseSettings):
         return value
 
     @model_validator(mode="after")
-    def _reject_contradictory_legacy_flag(self) -> "EnvConfig":
-        if self.IS_HEROKU and self.IS_DEVELOPMENT:
-            raise ValueError(
-                "Contradictory config: IS_HEROKU (the deprecated production flag) "
-                "is set but IS_DEVELOPMENT is also set. Remove IS_HEROKU; "
-                "production hardening is now the default."
+    def _require_deployment_config(self) -> "EnvConfig":
+        """
+        Report every missing variable at once. Raising on the first would make
+        a misconfigured deploy take one attempt per variable to diagnose.
+        """
+        if not self.IS_DEPLOYMENT:
+            return self
+        missing = []
+        if not self.APP_BASE_URL:
+            missing.append(
+                "APP_BASE_URL (used for CSRF_TRUSTED_ORIGINS and email links)"
             )
-        return self
-
-    @model_validator(mode="after")
-    def _require_production_config(self) -> "EnvConfig":
-        if not self.IS_DEVELOPMENT:
-            if not self.APP_BASE_URL:
-                raise ValueError(
-                    "APP_BASE_URL is required in production (used for "
-                    "CSRF_TRUSTED_ORIGINS and email links)."
-                )
-            if not self.CSRF_COOKIE_DOMAIN:
-                raise ValueError(
-                    "CSRF_COOKIE_DOMAIN is required in production; without it the "
-                    "SPA cannot read the CSRF token and all authenticated writes "
-                    "fail."
-                )
-            if not self.DATABASE_URL:
-                raise ValueError(
-                    "DATABASE_URL is required in production; without it Django "
-                    "falls back to a dummy backend that fails on every query."
-                )
+        if not self.CSRF_COOKIE_DOMAIN:
+            missing.append(
+                "CSRF_COOKIE_DOMAIN (without it the SPA cannot read the CSRF "
+                "token and all authenticated writes fail)"
+            )
+        if not self.DATABASE_URL:
+            missing.append(
+                "DATABASE_URL (without it Django falls back to a dummy backend "
+                "that fails on every query)"
+            )
+        if missing:
+            raise ValueError(
+                "Missing configuration required to run a deployment: "
+                + "; ".join(missing)
+                + ". Set IS_DEPLOYMENT=False if this is not a deployment."
+            )
         return self
 
     @model_validator(mode="after")
