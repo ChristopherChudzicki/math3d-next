@@ -1,7 +1,7 @@
 import type React from "react";
 import LoginPage from "@/pages/auth/LoginPage";
 import LogoutPage from "@/pages/auth/LogoutPage";
-import DeleteAccountPage from "@/pages/DeleteAccountPage/DeleteAccountPage";
+import DeleteAccountPage from "@/pages/auth/DeleteAccountPage";
 import ScenesListPage from "@/pages/ScenesList/ScenesListPage";
 import type { OverlayName } from "./useOverlay";
 

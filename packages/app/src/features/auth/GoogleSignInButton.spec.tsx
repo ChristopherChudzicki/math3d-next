@@ -20,9 +20,11 @@ test("initializes Google with the configured client ID and renders into its own 
   const view = render(<GoogleSignInButton onCredential={vi.fn()} />);
 
   await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
-  expect(gsi.initialize.mock.calls[0][0].client_id).toBe(
-    "test-client-id.apps.googleusercontent.com",
-  );
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  // Both sides read the same variable, so without this the case would pass on
+  // an environment that defines neither.
+  expect(clientId).toBeTruthy();
+  expect(gsi.initialize.mock.calls[0][0].client_id).toBe(clientId);
   // Google draws into the container itself; there is no role/text to query
   // for, so this reaches for the DOM node directly.
   // eslint-disable-next-line testing-library/no-node-access
@@ -40,14 +42,7 @@ test("forwards the credential Google returns", async () => {
 });
 
 test("shows an error instead of a dead button when the script cannot load", async () => {
-  // The loader's in-flight promise is memoized at module scope, so this test
-  // needs its own copy of the module graph rather than whatever the tests
-  // above left behind (see googleIdentity.spec.ts for the same treatment).
-  vi.resetModules();
-  const { default: FreshGoogleSignInButton } = await import(
-    "./GoogleSignInButton"
-  );
-  render(<FreshGoogleSignInButton onCredential={vi.fn()} />);
+  render(<GoogleSignInButton onCredential={vi.fn()} />);
 
   const script = await waitFor(() => {
     // The gsi/client script is injected into document.head, outside any
