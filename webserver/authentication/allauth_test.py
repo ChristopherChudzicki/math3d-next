@@ -275,7 +275,7 @@ def test_password_reset_email_has_correct_link():
 # Email link origins (behavior: CustomHeadlessAdapter.get_frontend_url)
 #
 # HEADLESS_FRONTEND_URLS is pinned per-test: the ambient value derives from
-# APP_BASE_URL, which the test environment may leave unset (CI does).
+# APP_BASE_URL, which the suite's settings leave unset.
 # --------------------------------------------------------------------------
 
 CANONICAL_FRONTEND_URLS = {

@@ -9,9 +9,9 @@ from urllib.parse import urlparse
 WORKTREE_PORTS = range(3002, 3010)
 
 
-def dev_cors_allowed_origins(*, is_development: bool, app_base_url: str) -> list[str]:
+def dev_cors_allowed_origins(*, is_deployment: bool, app_base_url: str) -> list[str]:
     """
-    Compute the development-only CORS origins (empty in production).
+    Compute the development-only CORS origins (empty on a deployment).
 
     In local dev, one backend serves the main checkout's frontend
     (APP_BASE_URL) plus git-worktree frontends on sibling ports, so trust
@@ -19,9 +19,9 @@ def dev_cors_allowed_origins(*, is_development: bool, app_base_url: str) -> list
     configured origins (CORS_ALLOWED_ORIGINS) are unioned with these in
     settings.py.
 
-    In production, origins must be configured explicitly; return none.
+    On a deployment, origins must be configured explicitly; return none.
     """
-    if not is_development or not app_base_url:
+    if is_deployment or not app_base_url:
         return []
     base = urlparse(app_base_url)
     return [app_base_url] + [
@@ -40,7 +40,7 @@ def cors_allowed_origins(
 
     Configured origins add to — never replace — the dev defaults, so setting
     CORS_ALLOWED_ORIGINS (e.g. the legacy math3d-react frontend's origin) in a
-    local .env can't silently drop the worktree frontend ports. In production
+    local .env can't silently drop the worktree frontend ports. On a deployment
     the dev list is empty, so the result is exactly what's configured.
     """
     return list(dict.fromkeys(configured + dev))
@@ -48,14 +48,14 @@ def cors_allowed_origins(
 
 def csrf_trusted_origins(
     *,
-    is_development: bool,
+    is_deployment: bool,
     app_base_url: str,
     cors_allowed_origins: list[str],
 ) -> list[str]:
     """
     Compute CSRF_TRUSTED_ORIGINS.
 
-    In production, only the SPA origin may pass Django's CSRF origin check.
+    On a deployment, only the SPA origin may pass Django's CSRF origin check.
     Deliberately NOT derived from the CORS origins: adding a read-only CORS
     consumer must not grant it CSRF-trusted write access.
 
@@ -63,7 +63,7 @@ def csrf_trusted_origins(
     scripts/setup_worktree_env.sh) make credentialed writes, so every CORS
     origin must also pass the CSRF origin check.
     """
-    if not is_development:
+    if is_deployment:
         return [app_base_url]
     return list(
         dict.fromkeys(([app_base_url] if app_base_url else []) + cors_allowed_origins)
@@ -72,7 +72,7 @@ def csrf_trusted_origins(
 
 def credentialed_cors_origins(
     *,
-    is_development: bool,
+    is_deployment: bool,
     app_base_url: str,
     cors_allowed_origins: list[str],
 ) -> list[str]:
@@ -81,7 +81,7 @@ def credentialed_cors_origins(
     Every other CORS origin gets anonymous access only — see
     ScopedCorsCredentialsMiddleware.
 
-    In production, only the SPA may send credentials and read authenticated
+    On a deployment, only the SPA may send credentials and read authenticated
     responses; a read-only CORS consumer (e.g. the legacy frontend) must not
     gain that just by being CORS-allowed.
 
@@ -94,7 +94,7 @@ def credentialed_cors_origins(
     is deliberately not derived from csrf_trusted_origins even though the two
     currently coincide.
     """
-    if not is_development:
+    if is_deployment:
         return [app_base_url] if app_base_url else []
     return list(
         dict.fromkeys(([app_base_url] if app_base_url else []) + cors_allowed_origins)

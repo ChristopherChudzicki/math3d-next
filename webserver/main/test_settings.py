@@ -1,11 +1,45 @@
 import os
+from collections.abc import MutableMapping
 
-import sentry_sdk
 from django.core.exceptions import ImproperlyConfigured
 
-from main.settings import *  # noqa: F403
+from main.env import EnvConfig
 
-sentry_sdk.init(dsn=None)  # tests never report, even if SENTRY_DSN is set
+# The suite is pointed at a database from outside (`just be test`, CI, the
+# worktree invocation in CLAUDE.md), and which database that is says nothing
+# about how the app behaves.
+PRESERVED_ENV_VARS = frozenset({"DATABASE_URL"})
+
+# The suite is not a deployment: deployment posture would 301 every test-client
+# request through SECURE_SSL_REDIRECT, and EnvConfig refuses to boot without
+# APP_BASE_URL, CSRF_COOKIE_DOMAIN and DATABASE_URL. With DATABASE_URL that
+# makes the suite's environment identical to the CI job's.
+PINNED_ENV = {"IS_DEPLOYMENT": "False"}
+
+
+def isolate_environ(environ: MutableMapping[str, str]) -> None:
+    """
+    Clear every variable settings.py reads bar the preserved ones, then apply
+    the suite's pinned values, so a run's outcome is the same on CI and on a
+    developer machine.
+    Otherwise a documented local-dev flag silently invalidates tests: with
+    DISABLE_CSRF (ADR-0005) set, settings.py drops CsrfViewMiddleware and
+    ninja_auth builds SessionAuth(csrf=False), so the CSRF assertions in
+    authentication/api_test.py cannot hold.
+
+    Deriving the list from EnvConfig means a variable added later is isolated
+    without anyone remembering to add it here. A test wanting a non-default
+    value sets the Django setting itself, as main/ninja_auth_test.py does.
+    """
+    for name in EnvConfig.model_fields:
+        if name not in PRESERVED_ENV_VARS:
+            environ.pop(name, None)
+    environ.update(PINNED_ENV)
+
+
+isolate_environ(os.environ)
+
+from main.settings import *  # noqa: E402, F403
 
 
 def require_postgres(engine: str, database_url: str) -> None:
@@ -30,16 +64,25 @@ def require_postgres(engine: str, database_url: str) -> None:
     )
 
 
+def require_test_db_name(name: str) -> str:
+    """
+    Django autoclobbers the test database on startup, so a name that is not
+    test-prefixed would point that at the dev database.
+    """
+    if not name.startswith("test_"):
+        raise ImproperlyConfigured(
+            f"TEST_DB_NAME must start with 'test_' (got {name!r})."
+        )
+    return name
+
+
 require_postgres(DATABASES["default"].get("ENGINE", ""), ENV.DATABASE_URL)  # noqa: F405
 
-# The test database name is otherwise fixed, and Django autoclobbers it, so
-# concurrent suites (worktrees, parallel agents) would drop each other's.
+# The test database name is otherwise fixed, so concurrent suites (worktrees,
+# parallel agents) would drop each other's.
 if test_db_name := os.environ.get("TEST_DB_NAME"):
-    if not test_db_name.startswith("test_"):
-        # Guards against pointing the autoclobber at the dev database.
-        raise ImproperlyConfigured(
-            f"TEST_DB_NAME must start with 'test_' (got {test_db_name!r})."
-        )
-    DATABASES["default"].setdefault("TEST", {})["NAME"] = test_db_name  # noqa: F405
+    DATABASES["default"].setdefault("TEST", {})["NAME"] = require_test_db_name(  # noqa: F405
+        test_db_name
+    )
 
 SECRET_KEY = "not-so-secret-in-tests"  # pragma: allowlist secret

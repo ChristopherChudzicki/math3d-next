@@ -63,11 +63,11 @@ must match, or the sign-in POST fails with `client_id_mismatch`.
 
 Delete the block and recreate to switch back. While it is in place, no local
 checkout enforces CSRF and worktrees on `.localdev` cannot authenticate, so
-don't leave it on. `DISABLE_CSRF` refuses to boot unless `IS_DEVELOPMENT` is
-set.
+don't leave it on. `DISABLE_CSRF` refuses to boot on a deployment.
 
-`yarn test-e2e` cannot run against this configuration, and neither failure
-names the cause. Global setup trips on `TEST_APP_URL` first — `.env.development`
+The backend test suite is unaffected — `main/test_settings.py` pins its own
+environment. `yarn test-e2e` cannot run against this configuration, though, and
+neither failure names the cause. Global setup trips on `TEST_APP_URL` first — `.env.development`
 still points it at `math3d.localdev:3000`, which Vite now 403s, because
 `allowedHosts` follows `APP_BASE_URL`. Repointing it reaches the next failure,
 `Expected csrftoken from provider/token`: with the middleware removed, Django

@@ -2,6 +2,8 @@
 
 **Status:** Accepted (2026-08-27)
 
+_Terminology: `IS_DEVELOPMENT` (default `False`) was renamed and inverted to `IS_DEPLOYMENT` (default `True`) after this ADR was accepted. Flag references below read accordingly._
+
 **Contents**
 
 - [Context](#context)

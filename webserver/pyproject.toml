@@ -59,6 +59,9 @@ django_settings_module = "main.settings"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "main.test_settings"
+# Backend tests are named *_test.py. Narrowing from pytest's default keeps it
+# from collecting main/test_settings.py, which is a settings module, not a suite.
+python_files = ["*_test.py"]
 # Promote DeprecationWarnings to errors so deprecated django-ninja / Pydantic usage
 # fails the suite instead of scrolling past unnoticed.
 filterwarnings = ["error::DeprecationWarning"]

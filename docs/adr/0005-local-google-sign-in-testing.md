@@ -2,6 +2,8 @@
 
 **Status:** Accepted (2026-09-05)
 
+_Terminology: `IS_DEVELOPMENT` (default `False`) was renamed and inverted to `IS_DEPLOYMENT` (default `True`) after this ADR was accepted. Flag references below read accordingly._
+
 **Contents**
 
 - [Context](#context)
@@ -69,6 +71,7 @@ Django has no switch for this; dropping the middleware is the supported way, and
 - **It is machine-wide while it is on.** One backend container serves the main checkout and every worktree, so during a Google session no local checkout enforces CSRF. Acceptable because there is no attacker on the laptop, and because the flag is set deliberately and briefly.
 - **Views that opt in keep their protection.** `csrf_protect` applies the same middleware per-view, so Django admin — routed at `admin/`, and wrapped by `admin.site.admin_view` — is unaffected.
 - **CI and the E2E suite never set it.** Both keep `math3d.localdev`, the domain cookie, and full enforcement, which is what keeps the cookie topology machine-tested while this flag exists.
+- **The backend test suite is out of its reach.** `webserver/main/test_settings.py` clears the flag, with the rest of the environment, before loading settings, so `pytest` exercises CSRF even while the block is in `.env`.
 
 ### The Google client
 

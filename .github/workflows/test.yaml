@@ -37,10 +37,13 @@ jobs:
   webserver-tests:
     runs-on: ubuntu-26.04
     env:
-      # CI is a dev environment: the tests speak plain http (production
-      # posture would 301 everything), and production behavior is pinned
-      # hermetically by the load_settings tests, not by this job's env.
-      IS_DEVELOPMENT: "True"
+      # CI is not a deployment. The typecheck and OpenAPI-dump steps load
+      # main.settings, which refuses to boot without APP_BASE_URL and friends
+      # unless told so. The pytest step needs only the DATABASE_URL below:
+      # main/test_settings.py pins its own environment, and deployment behavior
+      # is covered by the load_settings tests, which build each scenario
+      # hermetically.
+      IS_DEPLOYMENT: "False"
       # main/test_settings.py refuses to run on any engine but postgres.
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/math3d # pragma: allowlist secret
     services:

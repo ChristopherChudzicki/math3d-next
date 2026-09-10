@@ -62,11 +62,11 @@ SECRET_KEY = ENV.SECRET_KEY
 # Application version
 APP_VERSION = ENV.APP_VERSION
 
-# Deployment environment: an explicit dev opt-out (not an inference from the
-# hosting platform) that defaults to False, so an unconfigured deploy comes up
-# hardened or fails loudly (EnvConfig guards) — never silently with dev-grade
-# security. Production-like deploys (prod, rc) leave it unset.
-IS_DEVELOPMENT = ENV.IS_DEVELOPMENT
+# Whether this process serves a deployment. Defaults to True (EnvConfig), so an
+# unconfigured deploy comes up hardened or fails loudly on the required-config
+# guards — never silently with dev-grade security. Developer machines, CI, and
+# schema dumps set IS_DEPLOYMENT=False.
+IS_DEPLOYMENT = ENV.IS_DEPLOYMENT
 
 # The SPA origin, e.g. https://next.math3d.org — validated and normalized to a
 # bare origin by EnvConfig.
@@ -85,12 +85,13 @@ RENDER_DAILY_CAP = 150
 
 DEBUG = False
 
-# Secure cookie defaults — only relaxed for local dev (no TLS).
+# Secure cookie defaults; the non-deployment branch below relaxes them (no TLS
+# locally).
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 ALLOWED_HOSTS: list[str]
-if not IS_DEVELOPMENT:
+if IS_DEPLOYMENT:
     SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_HSTS_SECONDS = 31536000  # 1 year
@@ -205,30 +206,28 @@ MIDDLEWARE = [
 # own check — main/ninja_auth.py reads the flag too.
 DISABLE_CSRF = ENV.DISABLE_CSRF
 if DISABLE_CSRF:
-    if not IS_DEVELOPMENT:
-        raise ImproperlyConfigured(
-            "DISABLE_CSRF must not be enabled outside development."
-        )
+    if IS_DEPLOYMENT:
+        raise ImproperlyConfigured("DISABLE_CSRF must not be enabled on a deployment.")
     # .remove() raises if the middleware is renamed; a filtered rebuild would
     # silently become a no-op.
     MIDDLEWARE.remove("django.middleware.csrf.CsrfViewMiddleware")
 
 # Explicitly configured origins (Heroku config vars, or a local .env — e.g. the
 # legacy math3d-react frontend) are unioned with the dev-only origins
-# (APP_BASE_URL plus the worktree frontend ports). In production the dev list is
-# empty, so CORS_ALLOWED_ORIGINS is exactly what's configured.
+# (APP_BASE_URL plus the worktree frontend ports). On a deployment the dev list
+# is empty, so CORS_ALLOWED_ORIGINS is exactly what's configured.
 CORS_ALLOWED_ORIGINS = cors_allowed_origins(
     configured=ENV.CORS_ALLOWED_ORIGINS,
     dev=dev_cors_allowed_origins(
-        is_development=IS_DEVELOPMENT,
+        is_deployment=IS_DEPLOYMENT,
         app_base_url=APP_BASE_URL,
     ),
 )
 CORS_ALLOW_CREDENTIALS = True
-# Prod trusts only APP_BASE_URL; local dev also trusts the CORS origins
+# A deployment trusts only APP_BASE_URL; local dev also trusts the CORS origins
 # (worktree frontend ports). See the function's docstring.
 CSRF_TRUSTED_ORIGINS = csrf_trusted_origins(
-    is_development=IS_DEVELOPMENT,
+    is_deployment=IS_DEPLOYMENT,
     app_base_url=APP_BASE_URL,
     cors_allowed_origins=CORS_ALLOWED_ORIGINS,
 )
@@ -237,7 +236,7 @@ CSRF_TRUSTED_ORIGINS = csrf_trusted_origins(
 # CORS origins (e.g. the legacy frontend) get anonymous CORS only. A distinct
 # grant from CSRF write trust, though the two policies currently coincide.
 CREDENTIALED_CORS_ORIGINS = credentialed_cors_origins(
-    is_development=IS_DEVELOPMENT,
+    is_deployment=IS_DEPLOYMENT,
     app_base_url=APP_BASE_URL,
     cors_allowed_origins=CORS_ALLOWED_ORIGINS,
 )
@@ -293,9 +292,9 @@ ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
 ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"
 
 if ENV.DISABLE_ALLAUTH_RATE_LIMITS:
-    if not IS_DEVELOPMENT:
+    if IS_DEPLOYMENT:
         raise ImproperlyConfigured(
-            "DISABLE_ALLAUTH_RATE_LIMITS must not be enabled outside development."
+            "DISABLE_ALLAUTH_RATE_LIMITS must not be enabled on a deployment."
         )
     ACCOUNT_RATE_LIMITS = False
 
@@ -320,7 +319,7 @@ HEADLESS_FRONTEND_URLS = {
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 # Empty config ⇒ Django's dummy backend: DB-free commands (makemigrations,
-# dump_openapi_*) still run, queries fail loudly. Required in production.
+# dump_openapi_*) still run, queries fail loudly. Required on a deployment.
 DATABASES = {
     "default": dj_database_url.parse(ENV.DATABASE_URL) if ENV.DATABASE_URL else {}
 }
