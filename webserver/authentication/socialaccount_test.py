@@ -10,7 +10,10 @@ import json
 
 import pytest
 from allauth.account.models import EmailAddress
-from allauth.socialaccount.models import SocialAccount
+from allauth.socialaccount.adapter import get_adapter as get_socialaccount_adapter
+from allauth.socialaccount.models import SocialAccount, SocialApp
+from django.conf import settings
+from django.contrib import admin
 from django.test import Client, override_settings
 
 from authentication.factories import CustomUserFactory
@@ -108,10 +111,9 @@ def test_provider_token_still_logs_in_a_known_identity_when_signup_is_closed():
 def test_provider_identity_is_never_adopted_onto_an_existing_account():
     """
     Anyone who controls an email address must not be able to take over the
-    account already using it. Linking is pinned off in settings; this pins the
-    behaviour, which allauth resolves from three sources (the global setting, a
-    per-provider key, and a SocialApp row) that a settings assertion cannot all
-    reach. The login stops short of a session rather than adopting the account.
+    account already using it. Linking is pinned off in settings; this drives
+    the collision down the real login path, where the request stops short of a
+    session rather than adopting the account.
     """
     existing = CustomUserFactory.create(email="collide@example.com")
     client = Client()
@@ -126,6 +128,27 @@ def test_provider_identity_is_never_adopted_onto_an_existing_account():
     assert "_auth_user_id" not in client.session
     assert not SocialAccount.objects.filter(user=existing).exists()
     assert CustomUser.objects.filter(email=existing.email).count() == 1
+
+
+@pytest.mark.django_db
+def test_a_social_app_row_cannot_shadow_the_configured_google_app():
+    """A SocialApp row for google would otherwise blend into the app configured
+    in settings and make get_app raise MultipleObjectsReturned — a 500 on every
+    sign-in, from a row any staff user can add through the admin."""
+    configured = settings.SOCIALACCOUNT_PROVIDERS["google"]["APP"]["client_id"]
+    SocialApp.objects.create(
+        provider="google", name="Added in the admin", client_id=configured, secret=""
+    )
+
+    app = get_socialaccount_adapter().get_app(None, "google", client_id=configured)
+
+    assert app.pk is None
+    assert app.client_id == configured
+
+
+def test_the_social_app_form_is_not_offered_in_the_admin():
+    """Rows added there do nothing, so offering the form only misleads."""
+    assert not admin.site.is_registered(SocialApp)
 
 
 @pytest.mark.django_db
