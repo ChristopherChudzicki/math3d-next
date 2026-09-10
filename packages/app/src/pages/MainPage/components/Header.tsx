@@ -161,7 +161,7 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
           {smallScreen ? null : (
             <LoginButtons isAuthenticated={isAuthenticated} />
           )}
-          <UserMenu items={filteredItems} user={userQuery.data} />
+          <UserMenu items={filteredItems} authStatus={isAuthenticated} />
         </>
       }
     />

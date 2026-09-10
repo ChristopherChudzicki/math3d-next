@@ -36,9 +36,8 @@ const DeleteAccountForm: React.FC<{
   return (
     <form
       id={id}
-      onSubmit={handleSubmit(async (_data, event) => {
+      onSubmit={handleSubmit(async () => {
         if (deleteAccount.isPending) return;
-        event?.preventDefault();
         // Signal before the mutation: its onSuccess resets the me-query, which
         // flips auth to unauthenticated — the flag must already be set so the
         // dialog's redirect guard treats this sign-out as deliberate. Harmless
@@ -61,8 +60,11 @@ const DeleteAccountForm: React.FC<{
       })}
     >
       <Alert severity="error">
-        This action cannot be undone. To confirm, type &ldquo;
-        <code>{CONFIRM_PROMPT}</code>&rdquo; exactly.
+        This action cannot be undone. Scenes you have saved stay published at
+        their existing links, with no account able to edit or remove them —
+        delete them from <strong>My Scenes</strong> first if you don&rsquo;t
+        want that. To confirm, type &ldquo;<code>{CONFIRM_PROMPT}</code>&rdquo;
+        exactly.
       </Alert>
       <TextField
         fullWidth

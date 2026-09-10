@@ -526,12 +526,9 @@ def test_password_urls_are_not_registered():
 
 
 def test_google_app_reads_the_client_id_from_the_environment(monkeypatch):
-    loaded = load_settings(
-        monkeypatch,
-        **{**DEPLOY_ENV, "GOOGLE_CLIENT_ID": "abc.apps.googleusercontent.com"},
-    )
+    loaded = load_settings(monkeypatch, **DEPLOY_ENV)
     app = loaded.SOCIALACCOUNT_PROVIDERS["google"]["APP"]
-    assert app["client_id"] == "abc.apps.googleusercontent.com"
+    assert app["client_id"] == DEPLOY_ENV["GOOGLE_CLIENT_ID"]
     # The popup flow verifies ID tokens against Google's certs and never
     # exchanges an authorization code, so there is no secret to hold.
     assert app["secret"] == ""

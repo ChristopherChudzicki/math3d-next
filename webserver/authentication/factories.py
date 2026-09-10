@@ -24,4 +24,3 @@ class CustomUserFactory(BaseFactory[models.CustomUser]):
 
     class Meta:
         model = models.CustomUser
-        skip_postgeneration_save = True

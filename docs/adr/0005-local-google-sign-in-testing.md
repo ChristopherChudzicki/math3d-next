@@ -19,7 +19,7 @@ _Terminology: `IS_DEVELOPMENT` (default `False`) was renamed and inverted to `IS
 
 ## Context
 
-[ADR-0004](0004-oauth-only-authentication.md) put sign-in behind Google and recorded that the flow cannot be exercised on the hostnames development uses: Google requires the host's TLD to be on the public suffix list and requires HTTPS outside bare `localhost`,[^origins] so `http://api.math3d.localdev:8000` fails on both counts. It named the two ways to run the real flow locally — both servers onto `localhost`, or TLS terminated locally for a domain math3d owns — and picked neither, because it did not have to: ordinary development authenticates through the `dummy` provider and never reaches Google. This ADR picks.
+[ADR-0004](0004-oauth-only-authentication.md) put sign-in behind Google and recorded that the flow cannot be exercised on the hostnames development uses: Google requires the host's TLD to be on the public suffix list and requires HTTPS outside bare `localhost`,[^origins] so `http://math3d.localdev:3000`, the origin Google would have to accept, fails on both counts. It named the two ways to run the real flow locally — both servers onto `localhost`, or TLS terminated locally for a domain math3d owns — and picked neither, because it did not have to: ordinary development authenticates through the `dummy` provider and never reaches Google. This ADR picks.
 
 The constraints are identical under a redirect flow,[^redirect-uri] so a later popup-to-redirect migration does not reopen the choice.
 
@@ -70,7 +70,7 @@ Django has no switch for this; dropping the middleware is the supported way, and
 
 - **It is machine-wide while it is on.** One backend container serves the main checkout and every worktree, so during a Google session no local checkout enforces CSRF. Acceptable because there is no attacker on the laptop, and because the flag is set deliberately and briefly.
 - **Views that opt in keep their protection.** `csrf_protect` applies the same middleware per-view, so Django admin — routed at `admin/`, and wrapped by `admin.site.admin_view` — is unaffected.
-- **CI and the E2E suite never set it.** Both keep `math3d.localdev`, the domain cookie, and full enforcement, which is what keeps the cookie topology machine-tested while this flag exists.
+- **CI never sets it,** so the cookie topology stays machine-tested there: `math3d.localdev`, the domain cookie, full enforcement. Locally the flag takes the E2E suite down with it — no response sets `csrftoken`, and global setup fails on the invariant that one exists.
 - **The backend test suite is out of its reach.** `webserver/main/test_settings.py` clears the flag, with the rest of the environment, before loading settings, so `pytest` exercises CSRF even while the block is in `.env`.
 
 ### The Google client
