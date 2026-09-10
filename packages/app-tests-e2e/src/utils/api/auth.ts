@@ -42,13 +42,16 @@ const getSessionCookies = async (
     },
   });
   const cookies = parseCookies(response.headers.getSetCookie());
-  invariant(
-    cookies.sessionid,
-    `Expected sessionid from provider/token for ${user.email} (status ${response.status}). ` +
-      "A non-2xx here usually means either ENABLE_REGISTRATION is not true on the backend " +
-      "(required for a first-time uid), or the dummy provider isn't installed at all, which " +
-      "requires IS_DEPLOYMENT=False.",
-  );
+  if (!cookies.sessionid) {
+    // The body is what separates the two usual causes: a 403 means
+    // ENABLE_REGISTRATION is not true on the backend (a first-time uid needs
+    // it), while `client_id_required` means the dummy provider isn't installed
+    // at all, which requires IS_DEPLOYMENT=False.
+    throw new Error(
+      `Expected sessionid from provider/token for ${user.email} ` +
+        `(status ${response.status}): ${await response.text()}`,
+    );
+  }
   invariant(cookies.csrftoken, "Expected csrftoken from provider/token");
   return { sessionid: cookies.sessionid, csrftoken: cookies.csrftoken };
 };

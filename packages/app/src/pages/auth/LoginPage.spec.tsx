@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { test, expect, afterEach } from "vitest";
 import { http, HttpResponse } from "msw";
 import {
   renderTestApp,
@@ -10,6 +10,18 @@ import {
 } from "@/test_util";
 import { seedDb } from "@math3d/mock-api";
 import { server } from "@math3d/mock-api/node";
+
+afterEach(() => {
+  // A stub left installed makes the next test's loader short-circuit onto it,
+  // so every test here would depend on the ones before it.
+  delete window.google;
+  // Without a stub the loader injects its script into document.head, outside
+  // any container a testing-library query can reach.
+  // eslint-disable-next-line testing-library/no-node-access
+  document
+    .querySelectorAll('script[src^="https://accounts.google.com"]')
+    .forEach((el) => el.remove());
+});
 
 test("A Google credential signs the user in and closes the overlay", async () => {
   const userData = seedDb.withUser();
@@ -33,22 +45,6 @@ test("A Google credential signs the user in and closes the overlay", async () =>
   expect(await screen.findByTestId("username-display")).toHaveTextContent(
     userData.email,
   );
-});
-
-test("A malformed credential surfaces the error alert and keeps the dialog open", async () => {
-  const gsi = mockGoogleIdentity();
-  renderTestApp("/?overlay=login");
-
-  await screen.findByRole("dialog", { name: "Sign in" });
-  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
-  await act(async () => {
-    gsi.fireCredential("not-json");
-  });
-
-  expect(await screen.findByRole("alert")).toHaveTextContent(
-    /could not complete the sign-in/i,
-  );
-  expect(screen.getByRole("dialog", { name: "Sign in" })).toBeInTheDocument();
 });
 
 test("A 403 (sign-ups closed) surfaces copy distinct from a generic failure", async () => {

@@ -163,7 +163,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.sites",  # Required by allauth
+    # No runtime reader: allauth guards every Site use behind its own derived
+    # SITES_ENABLED. Removal is what costs — it rewrites applied migrations.
+    "django.contrib.sites",
     # Django 6.0 requires this app be installed to use GinIndex (see scenes.Scene).
     "django.contrib.postgres",
     "authentication",  # custom app
@@ -286,12 +288,12 @@ ACCOUNT_LOGIN_METHODS = {"email"}
 # verification is off — the provider already asserts a verified address.
 SOCIALACCOUNT_ONLY = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
-# Trimming below ["email*"] would flip the derived SOCIALACCOUNT_QUERY_EMAIL
-# false and drop the `email` scope from the provider request.
+# Derives SOCIALACCOUNT_EMAIL_REQUIRED: trimming this lets an ID token with no
+# email claim auto-sign-up an account with a blank address.
 ACCOUNT_SIGNUP_FIELDS = ["email*"]
 ACCOUNT_EMAIL_NOTIFICATIONS = False
-ACCOUNT_LOGIN_BY_CODE_ENABLED = False
 ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "authentication.adapter.CustomSocialAccountAdapter"
 
 # No secret: the popup flow verifies Google ID tokens against Google's certs
 # with `aud == client_id` and never exchanges an authorization code.
@@ -313,6 +315,8 @@ if ENV.DISABLE_ALLAUTH_RATE_LIMITS:
 # allauth headless configuration
 HEADLESS_ONLY = True
 HEADLESS_CLIENTS = ["browser"]
+# Registers headless:openapi_yaml, which allauth's own get_schema() reverses —
+# so dump_openapi_allauth, and the CI spec check with it, needs this on.
 HEADLESS_SERVE_SPECIFICATION = True
 # Serve the headless spec via Swagger UI (ships with allauth) to match the v1
 # API's /v1/docs; the default is Redoc (headless/spec/redoc_cdn.html).
@@ -331,6 +335,27 @@ DATABASES = {
     "default": dj_database_url.parse(ENV.DATABASE_URL) if ENV.DATABASE_URL else {}
 }
 
+
+# The app signs in through Google only, but /admin/ still accepts a password,
+# and createsuperuser and changepassword are the commands that set it — so
+# these run on the one credential that authenticates anything.
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 9,
+        },
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+]
 
 AUTH_USER_MODEL = "authentication.CustomUser"
 

@@ -9,7 +9,7 @@ import {
 } from "@/features/auth";
 import BasicDialog from "@/util/components/BasicDialog";
 import { useOverlay } from "@/features/overlays/useOverlay";
-import styles from "./styles.module.css";
+import styles from "./LoginPage.module.css";
 
 type LoginFailure = "signups-closed" | "needs-existing-method" | "unknown";
 
