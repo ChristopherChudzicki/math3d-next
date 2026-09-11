@@ -1,5 +1,5 @@
 // Use `react-router` (not `react-router-dom`) to match the repo convention (21 src files).
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 
 export type OverlayName = "login" | "logout" | "delete-account" | "scenes";
@@ -37,7 +37,15 @@ export const useOverlay = () => {
     [search, location.hash, location.state, navigate],
   );
 
+  // Consumers close from more than one place — LogoutPage both awaits its
+  // mutation and watches auth status — and popping twice would leave the app
+  // entirely. Keyed on the entry rather than a bare flag so a later overlay
+  // still closes, and read through a ref so a stale closure sees it too.
+  const closedKey = useRef<string | null>(null);
+
   const close = useCallback(() => {
+    if (closedKey.current === location.key) return;
+    closedKey.current = location.key;
     if (pushed) {
       // Popping the entry `open` pushed is what keeps Back working: replacing
       // it would leave two consecutive entries with the same URL, so the first
@@ -54,7 +62,7 @@ export const useOverlay = () => {
       { search: next.toString(), hash: location.hash },
       { replace: true },
     );
-  }, [search, location.hash, navigate, pushed]);
+  }, [search, location.hash, location.key, navigate, pushed]);
 
   return { current, open, close } as const;
 };

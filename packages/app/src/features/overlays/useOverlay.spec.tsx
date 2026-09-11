@@ -34,6 +34,20 @@ test("Closing an overlay pops the entry that opened it", async () => {
   expect(router.state.location.pathname).toBe("/first");
 });
 
+test("Closing twice pops once, so a double close does not leave the app", async () => {
+  const { router, api } = renderOverlay(["/first", "/second"]);
+
+  await act(async () => api.current?.open("login"));
+  // LogoutPage closes from two places: its mutation and its auth-status effect.
+  await act(async () => {
+    api.current?.close();
+    api.current?.close();
+  });
+
+  expect(router.state.location.pathname).toBe("/second");
+  expect(router.state.location.search).toBe("");
+});
+
 test("Closing a deep-linked overlay drops the params without leaving the app", async () => {
   const { router, api } = renderOverlay(["/first?overlay=login"]);
 
