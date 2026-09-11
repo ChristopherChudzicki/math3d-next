@@ -3,7 +3,6 @@ from allauth.socialaccount.models import SocialAccount
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
-from main.management.commands import seed_test_data
 from main.management.commands.seed_test_data import create_test_user
 from scenes.models import Scene
 
@@ -38,6 +37,14 @@ def test_missing_uid_raises_instead_of_colliding():
 
 
 @pytest.mark.django_db
+def test_unnormalized_uid_raises_instead_of_seeding_an_unmatchable_row():
+    """The provider matches on str(int(id)), so "02" would seed a row the token
+    login can never find — a red suite with a misleading cause."""
+    with pytest.raises(CommandError, match="normalized"):
+        create_test_user(email="seeded@example.com", uid="02")
+
+
+@pytest.mark.django_db
 def test_missing_email_raises_instead_of_colliding():
     """An empty email would otherwise collapse every seeded user into one
     `get_or_create(email="")` row; refuse to seed instead."""
@@ -46,26 +53,18 @@ def test_missing_email_raises_instead_of_colliding():
 
 
 @pytest.mark.django_db
-def test_reseeding_applies_edits_to_existing_scenes(monkeypatch):
+def test_reseeding_applies_edits_to_existing_scenes():
     """Re-seeding is how an edited test_scene.json reaches a database that
     already holds the scenes; skipping the write leaves the old copy in place."""
-    monkeypatch.setattr(
-        seed_test_data,
-        "env",
-        seed_test_data.SeedEnv(
-            TEST_USER_STATIC_EMAIL="seeded@example.com",
-            TEST_USER_STATIC_UID="4242",
-        ),
-    )
-    monkeypatch.setattr(seed_test_data, "TEST_SCENE_COUNT", 1)
-    call_command("seed_test_data")
+    seed = dict(email="seeded@example.com", uid="4242", scene_count=1)
+    call_command("seed_test_data", **seed)
 
     scene = Scene.objects.get(title="Test Scene 0")
     stale_order = {"main": []}
     scene.item_order = stale_order
     scene.save()
 
-    call_command("seed_test_data")
+    call_command("seed_test_data", **seed)
 
     scene.refresh_from_db()
     assert scene.item_order != stale_order

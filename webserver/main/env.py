@@ -53,6 +53,8 @@ class EnvConfig(BaseSettings):
     # Version
     APP_VERSION: str = "unknown"
     # Feature flags
+    # Open sign-ups. False is a deployment posture, not a misconfiguration: a
+    # closed deployment still logs in identities that already exist.
     ENABLE_REGISTRATION: bool = False
     # Google OAuth client ID. Public by design (the SPA embeds it too), so this
     # is config, not a secret. Empty ⇒ allauth resolves no app for the client_id
