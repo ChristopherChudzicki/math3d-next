@@ -7,8 +7,9 @@ const keys = {
 
 type ProviderTokenLogin = {
   provider: string;
-  /** Must equal the backend's configured client ID for the provider, or
-   * allauth rejects the token with `client_id_mismatch`. */
+  /** Must equal the backend's configured client ID for the provider. allauth
+   * resolves the app *by* client_id, so a mismatch resolves no app and the
+   * token is rejected with `invalid_token`. */
   client_id: string;
   id_token: string;
 };

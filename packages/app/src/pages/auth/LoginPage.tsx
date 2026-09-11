@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Link from "@mui/material/Link";
+import * as Sentry from "@sentry/react";
 import { ApiError, isApiError, useProviderTokenLogin } from "@math3d/api";
 import {
   GOOGLE_CLIENT_ID,
@@ -11,7 +12,12 @@ import BasicDialog from "@/util/components/BasicDialog";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import styles from "./LoginPage.module.css";
 
-type LoginFailure = "signups-closed" | "needs-existing-method" | "unknown";
+type LoginFailure =
+  | "signups-closed"
+  | "needs-existing-method"
+  | "rejected"
+  | "unknown"
+  | "script-unavailable";
 
 const ISSUE_URL = import.meta.env.VITE_ISSUE_URL;
 
@@ -48,8 +54,8 @@ const LoginPage: React.FC = () => {
         // useUserMe), so auth status is already up-to-date.
         handleClose();
       } catch (err) {
-        // Two rejections are worth telling apart from a generic failure,
-        // because retrying either one can never succeed.
+        // Three rejections are worth telling apart from a generic failure,
+        // because retrying none of them can succeed.
         // 403 from allauth: a first-time provider identity while registration
         // is closed — signup and login are one request (see
         // useProviderTokenLogin), so there is no separate "existing user"
@@ -58,13 +64,30 @@ const LoginPage: React.FC = () => {
         // linked to. SOCIALACCOUNT_EMAIL_AUTHENTICATION is off, so allauth
         // stops short of a session rather than adopting the account, and the
         // SPA offers no linking flow.
-        if (isApiError(err, [403]) && isFromAllauth(err))
+        // 400: allauth rejected the credential itself. A GOOGLE_CLIENT_ID that
+        // disagrees with VITE_GOOGLE_CLIENT_ID lands here as `invalid_token`,
+        // and no user action clears it.
+        if (isApiError(err, [403]) && isFromAllauth(err)) {
           setFailure("signups-closed");
-        else if (isApiError(err, [401])) setFailure("needs-existing-method");
-        else setFailure("unknown");
+        } else if (isApiError(err, [401])) {
+          setFailure("needs-existing-method");
+        } else if (isApiError(err, [400])) {
+          setFailure("rejected");
+          Sentry.captureException(err);
+        } else {
+          // A 500, a 429, or Django's CSRF 403 — all of which the copy invites
+          // the user to retry, so nothing else would record them.
+          setFailure("unknown");
+          Sentry.captureException(err);
+        }
       }
     },
     [login, handleClose],
+  );
+
+  const handleUnavailable = useCallback(
+    () => setFailure("script-unavailable"),
+    [],
   );
 
   return (
@@ -77,7 +100,10 @@ const LoginPage: React.FC = () => {
       maxWidth="xs"
     >
       <div className={styles["sign-in-content"]}>
-        <GoogleSignInButton onCredential={handleCredential} />
+        <GoogleSignInButton
+          onCredential={handleCredential}
+          onUnavailable={handleUnavailable}
+        />
         {failure === "signups-closed" && (
           <Alert severity="error">
             Google signed you in, but sign-ups are currently closed and this
@@ -94,10 +120,27 @@ const LoginPage: React.FC = () => {
             if you need access to it.
           </Alert>
         )}
+        {failure === "rejected" && (
+          <Alert severity="error">
+            Google signed you in, but this site rejected the credential — a
+            problem with this site&apos;s configuration rather than with your
+            account, so trying again will not help.{" "}
+            <Link href={ISSUE_URL} target="_blank" rel="noreferrer">
+              Get in touch
+            </Link>{" "}
+            so we can fix it.
+          </Alert>
+        )}
         {failure === "unknown" && (
           <Alert severity="error">
             Google signed you in, but this site could not complete the sign-in.
             Please try again.
+          </Alert>
+        )}
+        {failure === "script-unavailable" && (
+          <Alert severity="error">
+            Could not load Google sign-in. A content blocker or network problem
+            may be stopping it — allow accounts.google.com, then reload.
           </Alert>
         )}
       </div>

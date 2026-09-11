@@ -433,26 +433,4 @@ class Folder {
   }
 }
 
-interface UserIdentity {
-  email: string;
-  /**
-   * Dummy-provider account id. A decimal string, not a UUID: allauth's
-   * `AuthenticateForm.id` is an `IntegerField`, so a raw UUID is rejected with
-   * "Enter a whole number." The UUID's entropy is kept by reinterpreting its
-   * hex as an integer — uids must not collide across concurrently running
-   * suites, which share one database.
-   */
-  uid: string;
-}
-
-const makeUserIdentity = (info?: Partial<UserIdentity>): UserIdentity => {
-  const uuid = crypto.randomUUID();
-  return {
-    email: `${uuid}@example.com`,
-    uid: BigInt(`0x${uuid.replace(/-/g, "")}`).toString(),
-    ...info,
-  };
-};
-
-export { makeItem, makeSceneFromItems, SceneBuilder, makeUserIdentity };
-export type { UserIdentity };
+export { makeItem, makeSceneFromItems, SceneBuilder };

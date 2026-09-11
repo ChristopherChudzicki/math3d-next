@@ -126,14 +126,19 @@ export const handlers = [
     },
   ),
   http.post(urls.auth.providerToken, async ({ request }) => {
-    const invalidToken = () =>
+    // Codes and messages are allauth's own, from
+    // DefaultHeadlessAdapter.error_messages.
+    const badToken = (code: "invalid_token" | "token_required") =>
       HttpResponse.json(
         {
           status: 400,
           errors: [
             {
-              code: "token_required",
-              message: "Invalid token.",
+              code,
+              message:
+                code === "invalid_token"
+                  ? "Invalid token."
+                  : "`id_token` and/or `access_token` required.",
               param: "token",
             },
           ],
@@ -145,43 +150,56 @@ export const handlers = [
       token?: { id_token?: string; client_id?: string };
     };
     if (typeof token?.id_token !== "string") {
-      return invalidToken();
+      return badToken("token_required");
     }
-    // Real allauth rejects a token whose client_id doesn't match the
-    // provider's configured app. `process` is pinned here as a tripwire, not
-    // a copy of allauth, which also accepts "connect": the SPA only ever signs
-    // in, so a request carrying anything else is a bug.
-    const configuredClientId: string =
-      import.meta.env?.VITE_GOOGLE_CLIENT_ID ?? "";
-    if (token.client_id !== configuredClientId || process !== "login") {
+    // `process` is pinned as a tripwire, not a copy of allauth, which also
+    // accepts "connect": the SPA only ever signs in, so anything else is a bug.
+    if (process !== "login") {
       return HttpResponse.json(
         {
           status: 400,
           errors: [
             {
-              code: "client_id_mismatch",
-              message: "The token's client_id does not match this app.",
-              param: "token",
+              code: "invalid_choice",
+              message: `Select a valid choice. ${process} is not one of the available choices.`,
+              param: "process",
             },
           ],
         },
         { status: 400 },
       );
     }
+    // allauth resolves the provider's app *by* client_id, so a mismatch
+    // resolves no app at all and the token is rejected as invalid.
+    const configuredClientId: string =
+      import.meta.env?.VITE_GOOGLE_CLIENT_ID ?? "";
+    if (token.client_id !== configuredClientId) {
+      return badToken("invalid_token");
+    }
     // The id_token is read as JSON claims, matching the dummy provider the e2e
     // suite signs in through. A real Google credential is a signed JWT that
     // only the backend can verify, which no mock can stand in for.
-    let claims: { email: string };
+    let claims: { id?: unknown; email?: unknown };
     try {
-      claims = JSON.parse(token.id_token) as { email: string };
+      claims = JSON.parse(token.id_token) as typeof claims;
     } catch {
-      return invalidToken();
+      return badToken("invalid_token");
     }
-    const { email } = claims;
-    const user =
-      db.user.findFirst({ where: { email: { equals: email } } }) ??
-      db.user.create({ email });
-    currentUserId = user.id;
+    const { id: uid, email } = claims;
+    if (typeof uid !== "string" || typeof email !== "string") {
+      return badToken("invalid_token");
+    }
+    // Identity is the provider uid, as it is in allauth: a known uid signs in,
+    // an unseen one signs up. Keying on the email instead would sign in exactly
+    // the case the real backend refuses, two lines below.
+    const linked = db.user.findFirst({ where: { uid: { equals: uid } } });
+    if (!linked && db.user.findFirst({ where: { email: { equals: email } } })) {
+      // The address already has an account this identity is not linked to.
+      // allauth stages a pending signup behind this 401 rather than adopting
+      // the account; the SPA branches on the status alone.
+      return new HttpResponse(null, { status: 401 });
+    }
+    currentUserId = (linked ?? db.user.create({ uid, email })).id;
     // The SPA branches on the status alone and reads nothing out of allauth's
     // session bodies, so transcribing them here would be fidelity no test or
     // type could hold to.
@@ -195,6 +213,9 @@ export const handlers = [
   }),
   // v1: delete own account (204 No Content; signs the user out)
   http.post(urls.auth.usersMeDelete, async () => {
+    if (!getUser()) {
+      return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
+    }
     currentUserId = null;
     return new HttpResponse(null, { status: 204 });
   }),

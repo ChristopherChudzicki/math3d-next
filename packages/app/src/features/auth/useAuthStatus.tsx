@@ -13,18 +13,20 @@ type AuthStatus = "loading" | "authenticated" | "unauthenticated";
  *
  * - data is a User object → "authenticated"
  * - data is null (401/403 from server) → "unauthenticated"
- * - data is undefined (query pending OR errored) → "loading"
+ * - the query failed and never had data → "unauthenticated"
+ * - otherwise (still in flight) → "loading"
  *
- * A transient backend failure (500, network, CORS) must not look like a
- * logout, so an errored query stays "loading" rather than flipping an
- * authenticated user to "unauthenticated".
+ * "loading" has to be a state the app leaves: consumers hide the sign-in
+ * affordances during it, and `createQueryClient` does not retry a 500. Check
+ * `data` before `isError` — a refetch failure reports `isError` while keeping
+ * the last success — so only a query that never answered reads as signed out.
  */
 const useAuthStatus = (): AuthStatus => {
   const userMeQuery = useUserMe();
   if (userMeQuery.data) {
     return "authenticated";
   }
-  if (userMeQuery.data === null) {
+  if (userMeQuery.data === null || userMeQuery.isError) {
     return "unauthenticated";
   }
   return "loading";
