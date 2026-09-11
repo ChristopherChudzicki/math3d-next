@@ -120,9 +120,9 @@ def test_deployment_requires_database_url(monkeypatch):
 
 def test_deployment_requires_google_client_id(monkeypatch):
     """
-    Empty, the Google app's client_id matches no ID token's `aud` and allauth
-    rejects every sign-in with client_id_mismatch, so a deployment must fail at
-    import instead of serving a button that cannot work.
+    Empty, allauth resolves no app for the client_id the SPA posts and rejects
+    every sign-in with invalid_token, so a deployment must fail at import
+    instead of serving a button that cannot work.
     """
     env = {**DEPLOY_ENV}
     del env["GOOGLE_CLIENT_ID"]

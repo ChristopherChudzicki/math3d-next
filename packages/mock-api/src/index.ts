@@ -1,15 +1,5 @@
 import { handlers, urls, mockAuth } from "./handlers";
 import { seedDb } from "./db";
-import { makeItem, SceneBuilder, makeUserIdentity } from "./factories";
-import type { UserIdentity } from "./factories";
+import { makeItem, SceneBuilder } from "./factories";
 
-export {
-  seedDb,
-  urls,
-  makeItem,
-  handlers,
-  SceneBuilder,
-  makeUserIdentity,
-  mockAuth,
-};
-export type { UserIdentity };
+export { seedDb, urls, makeItem, handlers, SceneBuilder, mockAuth };

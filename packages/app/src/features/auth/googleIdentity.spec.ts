@@ -51,6 +51,20 @@ test("rejects when the script loads without defining google.accounts.id", async 
   await expect(pending).rejects.toThrow(/google\.accounts\.id/);
 });
 
+test("a second call while the first is in flight shares it, injecting one script", async () => {
+  const first = loadGoogleIdentity();
+  const second = loadGoogleIdentity();
+
+  expect(second).toBe(first);
+  expect(
+    document.querySelectorAll('script[src^="https://accounts.google.com"]'),
+  ).toHaveLength(1);
+
+  window.google = { accounts: { id: api } };
+  injectedScript().dispatchEvent(new Event("load"));
+  await expect(first).resolves.toBe(api);
+});
+
 test("a failed load clears the memo so a later call retries and can succeed", async () => {
   const failed = loadGoogleIdentity();
   injectedScript().dispatchEvent(new Event("error"));

@@ -21,7 +21,7 @@ window.math = math;
 window.__DISPLAY_AUTH_FLOWS__ = DISPLAY_AUTH_FLOWS;
 
 const prepare = async () => {
-  if (import.meta.env.DEV && import.meta.env.VITE_USE_MSW) {
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_MSW === "true") {
     // eslint-disable-next-line import/no-extraneous-dependencies
     const { worker } = await import("@math3d/mock-api/browser");
     await worker.start();

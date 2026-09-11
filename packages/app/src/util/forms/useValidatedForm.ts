@@ -11,12 +11,15 @@ import type {
 } from "react-hook-form";
 import { useCallback } from "react";
 import * as Sentry from "@sentry/react";
-import { setFieldErrors } from "./util";
 
 /**
  * A wrapper around `react-hook-form`'s `useForm` that:
  *  1. requires a yup schema for client-side validation
- *  2. maps the v1 and allauth error bodies onto form fields (see setFieldErrors)
+ *  2. turns a rejected submit into a "root" error plus a Sentry event
+ *
+ * There is no per-field mapping: v1 rejects a bad body as ninja's
+ * `{"detail": [...]}`, which names no field, and both consumers are
+ * single-field forms anyway.
  */
 const useValidatedForm = <TFieldValues extends FieldValues = FieldValues>(
   props: Omit<UseFormProps<TFieldValues>, "resolver"> & {
@@ -40,15 +43,12 @@ const useValidatedForm = <TFieldValues extends FieldValues = FieldValues>(
         try {
           await rawOnValid(data, event);
         } catch (err) {
-          try {
-            setFieldErrors(data, err, setError);
-          } catch (unmapped) {
-            // setFieldErrors rethrows what it could not map to a field, having
-            // already set a generic "root" message for the user. Report it here:
-            // nothing awaits this handler, so rethrowing would only reach Sentry
-            // as an unhandled rejection.
-            Sentry.captureException(unmapped);
-          }
+          setError("root", {
+            message: "Something went wrong. Please try again later.",
+          });
+          // Nothing awaits this handler, so rethrowing would reach Sentry only
+          // as an unhandled rejection.
+          Sentry.captureException(err);
         }
       };
       return rawHandleSubmit(onValid, onInvalid);
