@@ -6,8 +6,9 @@ export type OverlayName = "login" | "logout" | "delete-account" | "scenes";
 
 /**
  * Marks a history entry `open` pushed, so `close` knows to pop it rather than
- * write a second entry with the same URL. Set on a switch too: switching
- * replaces, so the pair still occupies the one entry `open` pushed.
+ * write a second entry with the same URL. A switch replaces, so it inherits the
+ * flag from the entry it lands on: that entry may be a deep link the app never
+ * pushed, and popping it would leave the app.
  */
 type OverlayHistoryState = { overlayPushed?: boolean } | null;
 
@@ -30,11 +31,14 @@ export const useOverlay = () => {
         { search: next.toString(), hash: location.hash },
         {
           replace: switching,
-          state: { ...(location.state as object), overlayPushed: true },
+          state: {
+            ...(location.state as object),
+            overlayPushed: switching ? pushed : true,
+          },
         },
       );
     },
-    [search, location.hash, location.state, navigate],
+    [search, location.hash, location.state, navigate, pushed],
   );
 
   // Consumers close from more than one place — LogoutPage both awaits its

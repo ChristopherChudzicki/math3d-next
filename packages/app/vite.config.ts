@@ -131,6 +131,8 @@ export default defineConfig({
       VITE_APP_VERSION: Schema.string.optional(),
       VITE_DISPLAY_AUTH_FLOWS: Schema.string.optional(),
       VITE_SENTRY_DSN: Schema.string.optional(),
+      // Serve the app against @math3d/mock-api instead of a real backend.
+      VITE_USE_MSW: Schema.string.optional(),
     }),
     react(),
     viteTsconfigPaths(),

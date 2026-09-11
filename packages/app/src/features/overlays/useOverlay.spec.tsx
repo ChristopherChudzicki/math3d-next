@@ -56,3 +56,14 @@ test("Closing a deep-linked overlay drops the params without leaving the app", a
   expect(router.state.location.search).toBe("");
   expect(router.state.location.pathname).toBe("/first");
 });
+
+test("Closing an overlay switched into from a deep link stays in the app", async () => {
+  const { router, api } = renderOverlay(["/first?overlay=delete-account"]);
+
+  // Switching replaces, so there is still no entry of ours to pop.
+  await act(async () => api.current?.open("login"));
+  await act(async () => api.current?.close());
+
+  expect(router.state.location.search).toBe("");
+  expect(router.state.location.pathname).toBe("/first");
+});

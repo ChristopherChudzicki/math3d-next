@@ -31,7 +31,7 @@ const db = factory({
     id: primaryKey(faker.number.int),
     email: faker.internet.email,
     // The dummy provider normalizes its uid through an IntegerField, so a uid
-    // is always a decimal string. See UserIdentity in ./factories.
+    // is always a decimal string.
     uid: () => String(faker.number.int()),
   },
 });
@@ -94,6 +94,6 @@ type SeedDb = typeof seedDb;
 
 export default db;
 
-export type { SeedDb, MockUser };
+export type { SeedDb };
 
 export { seedDb };
