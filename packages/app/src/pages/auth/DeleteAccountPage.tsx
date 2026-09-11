@@ -1,43 +1,65 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import Button from "@mui/material/Button";
+import React, { useCallback, useEffect, useId } from "react";
+import * as yup from "yup";
+import { Alert, TextField } from "@mui/material";
+import { useNavigate } from "react-router";
+import { useUserMeDelete } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import BasicDialog from "@/util/components/BasicDialog";
-import DeleteAccountForm from "./DeleteAccountForm";
+import { useValidatedForm } from "@/util/forms";
+import { useNotifications } from "@/features/notifications/NotificationsContext";
 
-const FORM_ID = "delete_account_form";
+const CONFIRM_PROMPT = "Yes, permanently delete";
+
+const schema = yup.object({
+  confirm: yup.string().required().oneOf([CONFIRM_PROMPT]),
+});
 
 const DeleteAccountPage: React.FC = () => {
-  const [disabled, setDisabled] = useState(false);
   const { open, close } = useOverlay();
   const isAuthenticated = useAuthStatus();
+  const deleteAccount = useUserMeDelete();
+  const { add: addNotification } = useNotifications();
+  const navigate = useNavigate();
+  const formId = useId();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useValidatedForm({ schema });
+
   const handleClose = useCallback(() => {
     close();
   }, [close]);
 
-  // A successful delete flips auth authenticated → unauthenticated. Flag that
-  // deliberate case so the redirect below doesn't treat it like a logged-out
-  // visitor: it has its own flow (the "Account Deleted" notice + navigate away)
-  // that a login redirect would hijack. Set from the form's submit handler.
-  const selfDeleted = useRef(false);
-  const handleSelfDelete = useCallback(() => {
-    selfDeleted.current = true;
-  }, []);
-
-  // Redirect anyone who is unauthenticated *without* deliberately deleting — a
-  // hand-typed /?overlay=delete-account while logged out, or a session that
-  // expired mid-dialog — to the login overlay (a switch, so it replaces
-  // history).
+  // A successful delete flips auth authenticated → unauthenticated, and that
+  // deliberate case has its own flow (the "Account Deleted" notice, then
+  // navigate away) which a login redirect would hijack. Anyone else who is
+  // unauthenticated here — a hand-typed /?overlay=delete-account while logged
+  // out, or a session that expired mid-dialog — goes to the login overlay.
   useEffect(() => {
-    if (isAuthenticated === "unauthenticated" && !selfDeleted.current) {
+    if (isAuthenticated === "unauthenticated" && !deleteAccount.isSuccess) {
       open("login");
     }
-  }, [isAuthenticated, open]);
+  }, [isAuthenticated, open, deleteAccount.isSuccess]);
 
-  // Don't mount the form unless we have a user — a cold/expired visitor would
-  // otherwise fire requests against a missing account while we redirect. The
-  // deliberate self-delete case keeps rendering so its own flow can finish.
-  if (isAuthenticated !== "authenticated" && !selfDeleted.current) return null;
+  const onSubmit = handleSubmit(async () => {
+    await deleteAccount.mutateAsync();
+    // mutateAsync awaits onSuccess, which resets queries, so auth status is
+    // already up-to-date.
+    addNotification({
+      title: "Account Deleted",
+      body: "Your account has been deleted.",
+      type: "alert",
+    });
+    navigate("/");
+  });
+
+  // Without a session there is no account to delete, and firing the request
+  // anyway would race the redirect above.
+  if (isAuthenticated !== "authenticated" && !deleteAccount.isSuccess) {
+    return null;
+  }
 
   return (
     <BasicDialog
@@ -46,25 +68,38 @@ const DeleteAccountPage: React.FC = () => {
       maxWidth="sm"
       onClose={handleClose}
       title="Delete Account"
-      // The form lives in the dialog body, so the footer button reaches it by
-      // id rather than by being inside it.
-      confirmButton={
-        <Button
-          disabled={disabled}
-          variant="contained"
-          color="error"
-          type="submit"
-          form={FORM_ID}
-        >
-          Delete Account
-        </Button>
-      }
+      confirmText="Delete Account"
+      // The form is in the dialog body, so the footer button reaches it by id.
+      confirmButtonProps={{
+        type: "submit",
+        form: formId,
+        color: "error",
+        disabled: deleteAccount.isPending || deleteAccount.isSuccess,
+      }}
     >
-      <DeleteAccountForm
-        id={FORM_ID}
-        setDisabled={setDisabled}
-        onSelfDelete={handleSelfDelete}
-      />
+      <form id={formId} onSubmit={onSubmit}>
+        <Alert severity="error">
+          This action cannot be undone. Scenes you have saved stay published at
+          their existing links, with no account able to edit or remove them —
+          delete them from <strong>My Scenes</strong> first if you don&rsquo;t
+          want that. To confirm, type &ldquo;<code>{CONFIRM_PROMPT}</code>
+          &rdquo; exactly.
+        </Alert>
+        <TextField
+          fullWidth
+          margin="normal"
+          error={!!errors.confirm?.message}
+          helperText={`To proceed, enter "${CONFIRM_PROMPT}" exactly.`}
+          label="Confirm"
+          type="text"
+          {...register("confirm")}
+        />
+        {/* The confirmation phrase is the only field, so every server-side
+            failure lands on "root" with nowhere else to surface. */}
+        {errors.root?.message ? (
+          <Alert severity="error">{errors.root.message}</Alert>
+        ) : null}
+      </form>
     </BasicDialog>
   );
 };

@@ -3,3 +3,4 @@ packages/app/public/mockServiceWorker.js
 **/*.css.d.ts
 openapi.v1.yaml
 openapi.allauth.yaml
+webserver/.venv/
