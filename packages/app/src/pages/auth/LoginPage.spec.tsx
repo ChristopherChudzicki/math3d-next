@@ -31,7 +31,9 @@ test("A Google credential signs the user in and closes the overlay", async () =>
   await screen.findByRole("dialog", { name: "Sign in" });
   await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
   await act(async () => {
-    gsi.fireCredential(JSON.stringify({ email: userData.email }));
+    gsi.fireCredential(
+      JSON.stringify({ id: userData.uid, email: userData.email }),
+    );
   });
 
   await waitFor(() =>
@@ -93,19 +95,14 @@ test("A 403 from Django's CSRF middleware surfaces the generic failure", async (
 });
 
 test("A 401 (address has an account with no Google link) says the address cannot sign in", async () => {
-  server.use(
-    http.post(
-      "*/_allauth/browser/v1/auth/provider/token",
-      () => new HttpResponse(null, { status: 401 }),
-    ),
-  );
+  const existing = seedDb.withUser({ uid: "1" });
   const gsi = mockGoogleIdentity();
   renderTestApp("/?overlay=login");
 
   await screen.findByRole("dialog", { name: "Sign in" });
   await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
   await act(async () => {
-    gsi.fireCredential(JSON.stringify({ email: "existing@example.com" }));
+    gsi.fireCredential(JSON.stringify({ id: "2", email: existing.email }));
   });
 
   expect(await screen.findByRole("alert")).toHaveTextContent(

@@ -30,10 +30,20 @@ const db = factory({
   user: {
     id: primaryKey(faker.number.int),
     email: faker.internet.email,
+    // The dummy provider normalizes its uid through an IntegerField, so a uid
+    // is always a decimal string. See UserIdentity in ./factories.
+    uid: () => String(faker.number.int()),
   },
 });
 
-const addUser = (user?: Partial<User>): User => {
+/**
+ * The `User` the v1 API returns, plus the provider uid that identifies the
+ * account to `provider/token`. The uid is local to the mock: `users/me` returns
+ * only what the real endpoint does.
+ */
+type MockUser = User & { uid: string };
+
+const addUser = (user?: Partial<MockUser>): MockUser => {
   const created = db.user.create(user);
   return created;
 };
@@ -84,6 +94,6 @@ type SeedDb = typeof seedDb;
 
 export default db;
 
-export type { SeedDb };
+export type { SeedDb, MockUser };
 
 export { seedDb };
