@@ -1,7 +1,7 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import AppPage from "@/utils/pages/AppPage";
-import { makeUserIdentity } from "@math3d/mock-api";
+import { makeUserIdentity } from "@/utils/api/auth";
 import { authHeaders } from "@/utils/api/auth";
 import { apiFetch } from "@/utils/api/config";
 import invariant from "tiny-invariant";
