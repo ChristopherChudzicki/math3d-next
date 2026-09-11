@@ -107,20 +107,15 @@ const MyScenesList: React.FC = () => {
   };
 
   const allItems = data ? data.pages.flatMap((d) => d.items) : [];
+  if (isAuthenticated === "loading") {
+    return <LoadingSpinner className={styles["with-margin"]} />;
+  }
   if (isAuthenticated !== "authenticated") {
     return (
       <p className={styles["with-margin"]}>
         To view scenes you have saved,{" "}
         <MuiLink component="button" type="button" onClick={() => open("login")}>
-          log in
-        </MuiLink>{" "}
-        or{" "}
-        <MuiLink
-          component="button"
-          type="button"
-          onClick={() => open("register")}
-        >
-          create an account
+          sign in
         </MuiLink>
         .
       </p>

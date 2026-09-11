@@ -2,15 +2,6 @@ import type { Locator, Page } from "@playwright/test";
 
 type ByRoleOptions = Parameters<Locator["getByRole"]>[1];
 
-type UserMenuOption =
-  | "signin"
-  | "signup"
-  | "signout"
-  | "myScenes"
-  | "examples"
-  | "settings"
-  | "contact";
-
 class UserMenu {
   root: Locator;
 
@@ -38,10 +29,6 @@ class UserMenu {
     return this.root.getByRole("menuitem", { name: "Sign in" });
   }
 
-  signup(): Locator {
-    return this.root.getByRole("menuitem", { name: "Sign up" });
-  }
-
   myScenes(): Locator {
     return this.root.getByRole("menuitem", { name: "My Scenes" });
   }
@@ -50,8 +37,8 @@ class UserMenu {
     return this.root.getByRole("menuitem", { name: "Examples" });
   }
 
-  settings(): Locator {
-    return this.root.getByRole("menuitem", { name: "Account Settings" });
+  deleteAccount(): Locator {
+    return this.root.getByRole("menuitem", { name: "Delete Account" });
   }
 
   contact(): Locator {
@@ -60,13 +47,6 @@ class UserMenu {
 
   items(): Locator {
     return this.root.getByRole("menuitem");
-  }
-
-  async activate(option: UserMenuOption): Promise<void> {
-    if (!(await this[option]().isVisible())) {
-      await this.opener().click();
-    }
-    await this[option]().click();
   }
 }
 

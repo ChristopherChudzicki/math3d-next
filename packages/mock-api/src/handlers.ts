@@ -15,12 +15,6 @@ export const mockAuth = {
   setCurrentUser: (userId: number | null) => {
     currentUserId = userId;
   },
-  getCurrentUser: () => {
-    if (currentUserId === null) return null;
-    return db.user.findFirst({
-      where: { id: { equals: currentUserId } },
-    });
-  },
 };
 
 const getUser = () => {
@@ -47,55 +41,21 @@ export const urls = {
     usersMe: `${BASE_URL}/v1/auth/users/me/`,
     usersMeDelete: `${BASE_URL}/v1/auth/users/me/delete/`,
     // allauth headless endpoints
-    login: `${BASE_URL}/_allauth/browser/v1/auth/login`,
-    logout: `${BASE_URL}/_allauth/browser/v1/auth/session`,
     session: `${BASE_URL}/_allauth/browser/v1/auth/session`,
-    signup: `${BASE_URL}/_allauth/browser/v1/auth/signup`,
-    verifyEmail: `${BASE_URL}/_allauth/browser/v1/auth/email/verify`,
-    requestPasswordReset: `${BASE_URL}/_allauth/browser/v1/auth/password/request`,
-    resetPassword: `${BASE_URL}/_allauth/browser/v1/auth/password/reset`,
-    changePassword: `${BASE_URL}/_allauth/browser/v1/account/password/change`,
+    providerToken: `${BASE_URL}/_allauth/browser/v1/auth/provider/token`,
   },
 } as const;
 
-const makeAuthenticatedResponse = (user: {
-  id: number;
-  email: string;
-  public_nickname: string;
-}) => ({
-  status: 200,
-  data: {
-    user: {
-      id: user.id,
-      display: user.public_nickname,
-      email: user.email,
-      has_usable_password: true,
-    },
-    methods: [
-      {
-        method: "password",
-        at: Date.now() / 1000,
-        email: user.email,
-      },
-    ],
-  },
-  meta: {
-    is_authenticated: true,
-  },
-});
-
 export const handlers = [
+  // v1: my scenes. The anonymous response is a 403, not Ninja's default 401:
+  // main/api.py remaps AuthenticationError because session auth cannot send a
+  // compliant WWW-Authenticate challenge.
   http.get<NoParams, ErrorResponseBody | PagedMiniSceneSchema>(
     urls.scenes.meList,
     async () => {
       const user = getUser();
       if (!user) {
-        return HttpResponse.json(
-          {
-            errorMessage: "Authentication required",
-          },
-          { status: 401 },
-        );
+        return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
       }
 
       const scenes = db.scene.findMany({
@@ -130,12 +90,8 @@ export const handlers = [
         where: { key: { equals: key } },
       });
       if (!scene) {
-        return HttpResponse.json(
-          {
-            errorMessage: "Not found",
-          },
-          { status: 404 },
-        );
+        // Ninja's default Http404 body.
+        return HttpResponse.json({ detail: "Not Found" }, { status: 404 });
       }
       const parsedScene = {
         ...scene,
@@ -169,157 +125,121 @@ export const handlers = [
       return HttpResponse.json(scene, { status: 201 });
     },
   ),
-  // allauth login
-  http.post(urls.auth.login, async ({ request }) => {
-    const { email, password } = (await request.json()) as {
-      email: string;
-      password: string;
+  http.post(urls.auth.providerToken, async ({ request }) => {
+    // Codes and messages are allauth's own, from
+    // DefaultHeadlessAdapter.error_messages.
+    const badToken = (code: "invalid_token" | "token_required") =>
+      HttpResponse.json(
+        {
+          status: 400,
+          errors: [
+            {
+              code,
+              message:
+                code === "invalid_token"
+                  ? "Invalid token."
+                  : "`id_token` and/or `access_token` required.",
+              param: "token",
+            },
+          ],
+        },
+        { status: 400 },
+      );
+    const { process, token } = (await request.json()) as {
+      process?: string;
+      token?: { id_token?: string; client_id?: string };
     };
-    if (typeof email !== "string") {
-      throw new Error("email should be string");
+    if (typeof token?.id_token !== "string") {
+      return badToken("token_required");
     }
-    if (typeof password !== "string" /** # pragma: allowlist secret */) {
-      throw new Error("password should be string");
-    }
-    const user = db.user.findFirst({
-      where: { email: { equals: email } },
-    });
-    if (!user || user.password !== password) {
+    // `process` is pinned as a tripwire, not a copy of allauth, which also
+    // accepts "connect": the SPA only ever signs in, so anything else is a bug.
+    if (process !== "login") {
       return HttpResponse.json(
         {
           status: 400,
           errors: [
             {
-              code: "email_password_mismatch",
-              message:
-                "The email address and/or password you specified are not correct.",
-              param: "password",
+              code: "invalid_choice",
+              message: `Select a valid choice. ${process} is not one of the available choices.`,
+              param: "process",
             },
           ],
         },
         { status: 400 },
       );
     }
-    currentUserId = user.id;
-    return HttpResponse.json(makeAuthenticatedResponse(user));
-  }),
-  // allauth session (GET = check session, DELETE = logout)
-  http.get(urls.auth.session, async () => {
-    const user = mockAuth.getCurrentUser();
-    if (!user) {
-      return HttpResponse.json(
-        {
-          status: 401,
-          data: {
-            flows: [{ id: "login" }, { id: "signup" }],
-          },
-          meta: {
-            is_authenticated: false,
-          },
-        },
-        { status: 401 },
-      );
+    // allauth resolves the provider's app *by* client_id, so a mismatch
+    // resolves no app at all and the token is rejected as invalid.
+    const configuredClientId: string =
+      import.meta.env?.VITE_GOOGLE_CLIENT_ID ?? "";
+    if (token.client_id !== configuredClientId) {
+      return badToken("invalid_token");
     }
-    return HttpResponse.json(makeAuthenticatedResponse(user));
+    // The id_token is read as JSON claims, matching the dummy provider the e2e
+    // suite signs in through. A real Google credential is a signed JWT that
+    // only the backend can verify, which no mock can stand in for.
+    let claims: { id?: unknown; email?: unknown };
+    try {
+      claims = JSON.parse(token.id_token) as typeof claims;
+    } catch {
+      return badToken("invalid_token");
+    }
+    const { id: uid, email } = claims;
+    if (typeof uid !== "string" || typeof email !== "string") {
+      return badToken("invalid_token");
+    }
+    // Identity is the provider uid, as it is in allauth: a known uid signs in,
+    // an unseen one signs up. Keying on the email instead would sign in exactly
+    // the case the real backend refuses, two lines below.
+    const linked = db.user.findFirst({ where: { uid: { equals: uid } } });
+    if (!linked && db.user.findFirst({ where: { email: { equals: email } } })) {
+      // The address already has an account this identity is not linked to.
+      // allauth stages a pending signup behind this 401 rather than adopting
+      // the account; the SPA branches on the status alone.
+      return new HttpResponse(null, { status: 401 });
+    }
+    currentUserId = (linked ?? db.user.create({ uid, email })).id;
+    // The SPA branches on the status alone and reads nothing out of allauth's
+    // session bodies, so transcribing them here would be fidelity no test or
+    // type could hold to.
+    return HttpResponse.json({ status: 200 });
   }),
-  http.delete(urls.auth.logout, async () => {
+  // allauth sign-out. Its 401 confirms the session is gone; `useLogout` treats
+  // it as success.
+  http.delete(urls.auth.session, async () => {
     currentUserId = null;
-    return HttpResponse.json(
-      {
-        status: 401,
-        data: {
-          flows: [{ id: "login" }, { id: "signup" }],
-        },
-        meta: {
-          is_authenticated: false,
-        },
-      },
-      { status: 401 },
-    );
+    return HttpResponse.json({ status: 401 }, { status: 401 });
   }),
-  // allauth signup
-  http.post(urls.auth.signup, async ({ request }) => {
-    const { email, password, public_nickname } = (await request.json()) as {
-      email: string;
-      password: string;
-      public_nickname?: string;
-    };
-    if (typeof email !== "string") {
-      throw new Error("email should be string");
-    }
-    if (typeof password !== "string" /** # pragma: allowlist secret */) {
-      throw new Error("password should be string");
-    }
-    db.user.create({
-      email,
-      password,
-      public_nickname: public_nickname ?? "",
-    });
-    // allauth returns 401 when email verification is required
-    return HttpResponse.json(
-      {
-        status: 401,
-        data: {
-          flows: [{ id: "verify_email" }],
-        },
-        meta: {
-          is_authenticated: false,
-        },
-      },
-      { status: 401 },
-    );
-  }),
-  // allauth verify email
-  http.post(urls.auth.verifyEmail, async ({ request }) => {
-    const { key } = (await request.json()) as { key: string };
-    if (typeof key !== "string") {
-      throw new Error("key should be string");
-    }
-    // Real allauth verifies the email but returns 401 because the user is not
-    // logged in yet — it does not auto-authenticate. Mirror that here.
-    return HttpResponse.json(
-      { status: 401, meta: { is_authenticated: false } },
-      { status: 401 },
-    );
-  }),
-  // allauth request password reset
-  http.post(urls.auth.requestPasswordReset, async () => {
-    return HttpResponse.json({ status: 200 });
-  }),
-  // allauth reset password with key
-  http.post(urls.auth.resetPassword, async () => {
-    // Real allauth resets the password but returns 401 because the user is not
-    // logged in yet — it does not auto-authenticate. Mirror that here.
-    return HttpResponse.json(
-      { status: 401, meta: { is_authenticated: false } },
-      { status: 401 },
-    );
-  }),
-  // allauth change password
-  http.post(urls.auth.changePassword, async () => {
-    return HttpResponse.json({ status: 200 });
-  }),
-  // DRF custom: delete own account (204 No Content; signs the user out)
+  // v1: delete own account (204 No Content; signs the user out)
   http.post(urls.auth.usersMeDelete, async () => {
+    if (!getUser()) {
+      return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
+    }
     currentUserId = null;
     return new HttpResponse(null, { status: 204 });
   }),
-  // DRF custom: users/me GET
+  // v1: users/me GET. `get_me` gates by hand (`auth=None`, `403: None`) so the
+  // CSRF cookie is seeded before the gate — which also means the anonymous 403
+  // never reaches main/api.py's AuthenticationError handler and so carries no
+  // body. Content-Length is spelled out to match Django's CommonMiddleware:
+  // openapi-fetch keys on it to yield `error: undefined` (without it, `""`),
+  // the shape useUserMe must survive.
   http.get<NoParams, ErrorResponseBody | User>(urls.auth.usersMe, async () => {
     const user = getUser();
     if (!user) {
-      return HttpResponse.json(
-        {
-          errorMessage: "Authentication required",
+      return new HttpResponse(null, {
+        status: 403,
+        headers: {
+          "content-length": "0",
+          "content-type": "application/json",
         },
-        { status: 401 },
-      );
+      });
     }
     return HttpResponse.json(
       {
         id: user.id,
         email: user.email,
-        public_nickname: user.public_nickname,
       },
       { status: 200 },
     );

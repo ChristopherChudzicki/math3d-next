@@ -135,6 +135,14 @@ From a worktree, `just be test` does not work — compose would try to start a d
 DATABASE_URL=postgresql://docker:docker@localhost:5431/math3d TEST_DB_NAME=test_math3d_$(basename $(git rev-parse --show-toplevel)) uv run pytest # pragma: allowlist secret
 ```
 
+**After a Python dependency change**, the backend comes up with `ModuleNotFoundError` even on a freshly rebuilt image: `docker-compose.yml` mounts the named volume `venv-data` over `/app/.venv`, and Docker seeds a named volume from the image only when the volume is empty. Re-sync the venv in place:
+
+```bash
+docker compose run --rm webserver uv sync --frozen --all-groups
+```
+
+(`docker volume rm math3d-next_venv-data` also works, at the cost of a full rebuild.) CI is unaffected — it has no volume.
+
 **After the postgres image major version changes** (e.g. the 16 → 18 bump), the `db` service comes up empty: `PGDATA` is major-versioned (`/var/lib/postgresql/<major>/docker`), so a new major finds no data directory and runs `initdb`. The previous major's files are left intact — in the `db-data` volume, or, for majors predating it, in the orphaned anonymous volume. Repopulate:
 
 ```bash
@@ -146,19 +154,19 @@ docker compose run --rm webserver uv run ./manage.py seed_test_data
 
 The E2E tests hit a real backend and a real frontend server, and the full suite takes only ~1 minute (3D/WebGL rendering is disabled by default via the `disable3d` fixture). Lint, typecheck, and unit tests do NOT catch E2E breakage — **run `yarn test-e2e` before declaring work on `packages/app` complete**. CI runs the suite on every PR.
 
-1. Backend up: `docker compose up -d` (from the main checkout). One-time DB prep (also after test credentials change, and after the postgres image version changes — see "Running backend tests"): `docker compose run --rm webserver uv run ./manage.py migrate` and `... seed_test_data`.
-2. The main checkout needs a gitignored `.env` with `VITE_DISPLAY_AUTH_FLOWS=true` and `ENABLE_REGISTRATION=True` (the committed `.env.development` defaults both off; global setup and the signup tests require them).
+1. Backend up: `docker compose up -d` (from the main checkout). One-time DB prep (also after test credentials change, and after the postgres image version changes — see "Running backend tests"): `docker compose run --rm webserver uv run ./manage.py migrate` and `... seed_test_data`. `seed_test_data` also writes the seeded user's `SocialAccount` row, so re-run it after pulling in a change to the dummy identity.
+2. The main checkout needs a gitignored `.env` with `VITE_DISPLAY_AUTH_FLOWS=true` (the committed `.env.development` defaults it off). `.env.development`'s placeholder `VITE_GOOGLE_CLIENT_ID` is sufficient for the suite, which never drives the Google button. To exercise Google sign-in by hand, put a real client ID in `.env` as **both** `VITE_GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_ID` — the backend variable has no dev default, and a mismatch between the two is rejected as `invalid_token`.
 3. Frontend: handled automatically — Playwright's `webServer` config reuses a dev server already running at `TEST_APP_URL`, or starts one (`yarn start`) if nothing is serving it. No production build needed locally; CI serves a production build via `yarn preview` to test the real artifact.
 4. `yarn test-e2e` runs the full suite (`yarn test-e2e src/tests/<path>` for one file; `just e2e` is an alias). It is self-sufficient in any shell and any checkout: the script runs Playwright under Node's `--env-file-if-exists` flags, so the checkout's `.env.development` + `.env` fill in whatever the environment doesn't already set (real env vars win, so ad-hoc overrides like `TEST_APP_URL=... yarn test-e2e` still work). Global setup also verifies the server at `TEST_APP_URL` actually serves _this_ checkout (via the `X-Checkout-Root` header the Vite dev/preview server emits) and fails with instructions if not — so testing the wrong checkout's code is loud, never silent.
 
-Concurrent suite runs (e.g. main checkout + worktrees at once) are supported: the backend/DB/inbox are shared, but tests use per-run-unique users and email recipients, and global setup only sweeps emails older than an hour. Keep it that way — inbox lookups must always match on a per-run-unique `to` recipient (the `EmailMatchers` type enforces this).
+Concurrent suite runs (e.g. main checkout + worktrees at once) are supported: the backend and database are shared, but each ephemeral test user gets its own dummy-provider identity — a UUID reinterpreted as a decimal integer uid — so runs never collide without coordination.
 
 ##### E2E from a git worktree
 
 Worktrees get their own frontend port so they never test the main checkout's code by accident:
 
 1. `yarn install` (once per worktree)
-2. `./scripts/setup_worktree_env.sh` (once) — writes a `.env` with a dedicated port (3002–3009, already trusted by the backend) and points the e2e email inbox at the main checkout
+2. `./scripts/setup_worktree_env.sh` (once) — writes a `.env` with a dedicated port (3002–3009, already trusted by the backend)
 3. `yarn test-e2e` (or `just e2e`) — starts this worktree's own dev server on its port; the main checkout's `:3000` server is untouched. If the suite ends up pointed at another checkout's server, the global-setup identity check fails with instructions.
 
 The docker backend and database are shared with the main checkout — never `docker compose up` from a worktree. That rules out `just start` here too (it wraps `docker compose up`); for a standalone dev server use `yarn start` in a direnv-enabled shell, which picks up the worktree's port.
@@ -168,7 +176,8 @@ Troubleshooting:
 - "The server at ... serves ..., but this suite is testing ..." from global setup means a stale env var (usually `TEST_APP_URL` exported by another checkout's direnv) is pointing the suite at the wrong server — env vars beat the checkout's env files by design. Unset it or start a fresh shell in this checkout.
 - "sent no X-Checkout-Root header" means the dev server predates the identity header — restart it.
 - The suite cannot run at all while `.env` carries the `DISABLE_CSRF=True` block from README.md's "Testing Google sign-in locally", and both failures point elsewhere. `TEST_APP_URL` still names `math3d.localdev`, which Vite 403s once `allowedHosts` follows a `localhost` `APP_BASE_URL`; that response carries no identity header, so global setup reports "sent no X-Checkout-Root header". Repoint it and the next failure is `Expected csrftoken from provider/token`, because Django sets no CSRF cookie with the middleware removed. Remove the block to run E2E.
-- Widespread `Expected sessionid cookie from login response` failures mean the seeded test users are out of sync with `.env.development` credentials — re-run `seed_test_data` (idempotent).
+- Widespread `Expected sessionid from provider/token` failures mean either the backend still has `ENABLE_REGISTRATION=false` (re-run `docker compose up -d` from the main checkout; a container's environment is fixed at creation, so `restart` will not pick up `.env.development`) or the seeded users have no dummy identity (re-run `seed_test_data`, which is idempotent).
+- A backend without `IS_DEPLOYMENT=False` (set in `.env.development`) doesn't install the dummy provider, and the whole suite fails.
 - Widespread CORS/CSRF failures from a worktree port mean the backend container predates the multi-port trust config — re-run `docker compose up -d` from an up-to-date main checkout.
 - `ImproperlyConfigured: ... must not be enabled on a deployment` from the backend container means it predates the `IS_DEPLOYMENT` rename and still carries `IS_DEVELOPMENT`; a container's environment is fixed at creation, so `docker compose up -d` to recreate it.
 

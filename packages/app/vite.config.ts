@@ -127,9 +127,12 @@ export default defineConfig({
       VITE_LEGACY_APP_BASE_URL: Schema.string(),
       VITE_ISSUE_URL: Schema.string(),
       VITE_SITE_ORIGIN: Schema.string(),
+      VITE_GOOGLE_CLIENT_ID: Schema.string(),
       VITE_APP_VERSION: Schema.string.optional(),
       VITE_DISPLAY_AUTH_FLOWS: Schema.string.optional(),
       VITE_SENTRY_DSN: Schema.string.optional(),
+      // Serve the app against @math3d/mock-api instead of a real backend.
+      VITE_USE_MSW: Schema.string.optional(),
     }),
     react(),
     viteTsconfigPaths(),
@@ -173,6 +176,7 @@ export default defineConfig({
           environment: "jsdom",
           env: {
             VITE_DISPLAY_AUTH_FLOWS: "true",
+            VITE_GOOGLE_CLIENT_ID: "test-client-id.apps.googleusercontent.com",
           },
           exclude: ["**/playwright/**", "./src/worker/**"],
           include: ["./src/**/*.{test,spec}.{ts,tsx}"],

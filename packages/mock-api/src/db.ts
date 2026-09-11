@@ -29,19 +29,21 @@ const db = factory({
   },
   user: {
     id: primaryKey(faker.number.int),
-    public_nickname: faker.internet.username,
     email: faker.internet.email,
-    password: faker.internet.password,
+    // The dummy provider normalizes its uid through an IntegerField, so a uid
+    // is always a decimal string.
+    uid: () => String(faker.number.int()),
   },
 });
 
-type UserWithPassword = User & {
-  // Real API response does not include password, of course, but we need it for
-  // the msw model & handler.
-  password: string;
-};
+/**
+ * The `User` the v1 API returns, plus the provider uid that identifies the
+ * account to `provider/token`. The uid is local to the mock: `users/me` returns
+ * only what the real endpoint does.
+ */
+type MockUser = User & { uid: string };
 
-const addUser = (user?: Partial<UserWithPassword>): UserWithPassword => {
+const addUser = (user?: Partial<MockUser>): MockUser => {
   const created = db.user.create(user);
   return created;
 };

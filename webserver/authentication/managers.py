@@ -10,10 +10,9 @@ class CustomUserManager(BaseUserManager):
 
     # Based on https://testdriven.io/blog/django-custom-user-model/
 
-    def create_user(self, email, password, **extra_fields):
-        """
-        Create and save a user with the given email and password.
-        """
+    def create_user(self, email, password=None, **extra_fields):
+        """Create and save a user. `password=None` yields an unusable password,
+        matching every account the provider flow creates."""
         if not email:
             raise ValueError(_("The Email must be set"))
         email = self.normalize_email(email)
@@ -22,9 +21,10 @@ class CustomUserManager(BaseUserManager):
         user.save()
         return user
 
-    def create_superuser(self, email, password, **extra_fields):
-        """
-        Create and save a SuperUser with the given email and password.
+    def create_superuser(self, email, password=None, **extra_fields):
+        """Create and save a superuser. A password given here stays usable and
+        logs in at `/admin/`: allauth's `AuthenticationBackend` checks only
+        `ACCOUNT_LOGIN_METHODS` and the password hash, never `SOCIALACCOUNT_ONLY`.
         """
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)

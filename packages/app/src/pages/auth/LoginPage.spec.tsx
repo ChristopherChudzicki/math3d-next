@@ -1,51 +1,157 @@
-import { test, expect } from "vitest";
-import { renderTestApp, screen, user, within, waitFor, act } from "@/test_util";
+import { test, expect, afterEach } from "vitest";
+import { http, HttpResponse } from "msw";
+import {
+  renderTestApp,
+  screen,
+  user,
+  waitFor,
+  act,
+  mockGoogleIdentity,
+} from "@/test_util";
 import { seedDb } from "@math3d/mock-api";
+import { server } from "@math3d/mock-api/node";
 
-test("Login form logs user in", async () => {
-  const userData = seedDb.withUser();
-  const { location } = renderTestApp("/?overlay=login");
-
-  const dialog = await screen.findByRole("dialog");
-  const email = within(dialog).getByRole("textbox", { name: "Email" });
-  const password = within(dialog).getByLabelText("Password");
-  const submit = within(dialog).getByRole("button", { name: "Sign in" });
-
-  await user.click(email);
-  await user.paste(userData.email);
-  await user.click(password);
-  await user.paste(userData.password);
-  await user.click(submit);
-
-  await waitFor(() => expect(dialog).not.toBeInTheDocument());
-  expect(location.current.search).not.toContain("overlay=");
+afterEach(() => {
+  // A stub left installed makes the next test's loader short-circuit onto it,
+  // so every test here would depend on the ones before it.
+  delete window.google;
+  // Without a stub the loader injects its script into document.head, outside
+  // any container a testing-library query can reach.
+  // eslint-disable-next-line testing-library/no-node-access
+  document
+    .querySelectorAll('script[src^="https://accounts.google.com"]')
+    .forEach((el) => el.remove());
 });
 
-test("Login form displays error if password/email wrong", async () => {
+test("A Google credential signs the user in and closes the overlay", async () => {
   const userData = seedDb.withUser();
+  const gsi = mockGoogleIdentity();
+  const { location } = renderTestApp("/?overlay=login");
 
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await act(async () => {
+    gsi.fireCredential(
+      JSON.stringify({ id: userData.uid, email: userData.email }),
+    );
+  });
+
+  await waitFor(() =>
+    expect(location.current.search).not.toContain("overlay="),
+  );
+  // The overlay closes on its own once the session exists. The avatar trigger
+  // is no proof of that — it is also what a signed-out visitor sees while
+  // DISPLAY_AUTH_FLOWS is true — so read the email the menu shows only for an
+  // authenticated user.
+  await user.click(screen.getByRole("button", { name: "Open User Menu" }));
+  expect(await screen.findByTestId("username-display")).toHaveTextContent(
+    userData.email,
+  );
+});
+
+test("A 403 (sign-ups closed) surfaces copy distinct from a generic failure", async () => {
+  server.use(
+    http.post("*/_allauth/browser/v1/auth/provider/token", () =>
+      HttpResponse.json({ status: 403 }, { status: 403 }),
+    ),
+  );
+  const gsi = mockGoogleIdentity();
   renderTestApp("/?overlay=login");
 
-  const dialog = await screen.findByRole("dialog");
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await act(async () => {
+    gsi.fireCredential(JSON.stringify({ email: "new-user@example.com" }));
+  });
 
-  const email = within(dialog).getByRole("textbox", { name: "Email" });
-  const password = within(dialog).getByLabelText("Password");
-  const submit = within(dialog).getByRole("button", { name: "Sign in" });
-  await user.click(email);
-  await user.paste(userData.email);
-
-  await user.click(password);
-  await user.paste("foo");
-
-  await user.click(submit);
-  // allauth's email_password_mismatch error is treated as a form-level error
-  const alert = within(dialog).getByRole("alert");
-  expect(alert).toHaveTextContent(
-    "The email address and/or password you specified are not correct.",
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /sign-ups are currently closed/i,
   );
+});
 
-  // Dialog still open
-  expect(dialog).toBeInTheDocument();
+test("A 403 from Django's CSRF middleware surfaces the generic failure", async () => {
+  server.use(
+    http.post(
+      "*/_allauth/browser/v1/auth/provider/token",
+      () =>
+        new HttpResponse("<h1>Forbidden</h1>", {
+          status: 403,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        }),
+    ),
+  );
+  const gsi = mockGoogleIdentity();
+  renderTestApp("/?overlay=login");
+
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await act(async () => {
+    gsi.fireCredential(JSON.stringify({ email: "new-user@example.com" }));
+  });
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /could not complete the sign-in/i,
+  );
+});
+
+test("A 401 (address has an account with no Google link) says the address cannot sign in", async () => {
+  const existing = seedDb.withUser({ uid: "1" });
+  const gsi = mockGoogleIdentity();
+  renderTestApp("/?overlay=login");
+
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await act(async () => {
+    gsi.fireCredential(JSON.stringify({ id: "2", email: existing.email }));
+  });
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /is not connected to Google, so it cannot be used to sign in/i,
+  );
+  expect(screen.getByRole("link", { name: "Get in touch" })).toHaveAttribute(
+    "href",
+    import.meta.env.VITE_ISSUE_URL,
+  );
+});
+
+test("A 400 (credential rejected) points at configuration instead of a retry", async () => {
+  // An id_token the mock cannot parse is allauth's own `invalid_token` 400,
+  // which is also where a GOOGLE_CLIENT_ID drift lands.
+  const gsi = mockGoogleIdentity();
+  renderTestApp("/?overlay=login");
+
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await act(async () => {
+    gsi.fireCredential("not-a-credential");
+  });
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /rejected the credential/i,
+  );
+});
+
+test("Says so when Google's script never loads", async () => {
+  renderTestApp("/?overlay=login");
+  await screen.findByRole("dialog", { name: "Sign in" });
+
+  const script = await waitFor(() => {
+    // The gsi/client script is injected into document.head, outside any
+    // container a testing-library query can reach.
+    // eslint-disable-next-line testing-library/no-node-access
+    const el = document.querySelector(
+      'script[src^="https://accounts.google.com"]',
+    );
+    if (!el) throw new Error("The gsi/client script was not injected.");
+    return el;
+  });
+  await act(async () => {
+    script.dispatchEvent(new Event("error"));
+  });
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /Could not load Google sign-in/i,
+  );
 });
 
 test("If authenticated already, closes the overlay", async () => {
@@ -55,20 +161,6 @@ test("If authenticated already, closes the overlay", async () => {
   await waitFor(() =>
     expect(location.current.search).not.toContain("overlay="),
   );
-});
-
-test("Create Account link switches to the register overlay (replace, no extra history)", async () => {
-  // Seed the scene so the scene query does NOT 404 — otherwise the "Not found"
-  // notification <Dialog> mounts alongside the overlay and a bare findByRole("dialog")
-  // throws "multiple elements". (Always seed, or scope dialog queries by name.)
-  const scene = seedDb.withSceneFromItems([]);
-  const { location } = renderTestApp(`/${scene.key}?overlay=login`);
-  await screen.findByRole("dialog", { name: "Sign in" });
-  await user.click(screen.getByRole("button", { name: "Create Account" }));
-  await waitFor(() =>
-    expect(location.current.search).toContain("overlay=register"),
-  );
-  expect(location.current.pathname).toBe(`/${scene.key}`); // path (scene) preserved
 });
 
 test("open pushes one history entry; Back returns to the underlying view", async () => {
@@ -85,24 +177,6 @@ test("open pushes one history entry; Back returns to the underlying view", async
     expect(location.current.search).not.toContain("overlay="),
   );
   expect(location.current.pathname).toBe(`/${scene.key}`);
-});
-
-test("switching login → register does not add a history entry (Back skips both)", async () => {
-  const scene = seedDb.withSceneFromItems([]);
-  const { location, router } = renderTestApp(`/${scene.key}`);
-  // Open login overlay (push → now 2 history entries)
-  await user.click(
-    await screen.findByRole("button", { name: "Sign in", hidden: true }),
-  );
-  await screen.findByRole("dialog", { name: "Sign in" });
-  // Switch to register (replace → still 2 entries, login never pushed again)
-  await user.click(screen.getByRole("button", { name: "Create Account" }));
-  await screen.findByRole("dialog", { name: /create account/i });
-  // Back once should skip both overlays (replace means login→register was not a push)
-  await act(() => router.navigate(-1));
-  await waitFor(() =>
-    expect(location.current.search).not.toContain("overlay="),
-  );
 });
 
 test("opening/closing an overlay preserves other params and the hash", async () => {

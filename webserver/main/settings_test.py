@@ -35,6 +35,7 @@ DEPLOY_ENV = {
     "APP_BASE_URL": "https://app.example.org",
     "CSRF_COOKIE_DOMAIN": ".example.org",
     "DATABASE_URL": "postgres://u:p@db.example.org:5432/math3d",  # pragma: allowlist secret
+    "GOOGLE_CLIENT_ID": "deploy-client-id.apps.googleusercontent.com",
 }
 
 
@@ -114,6 +115,18 @@ def test_deployment_requires_database_url(monkeypatch):
     env = {**DEPLOY_ENV}
     del env["DATABASE_URL"]
     with pytest.raises(ImproperlyConfigured, match="DATABASE_URL"):
+        load_settings(monkeypatch, **env)
+
+
+def test_deployment_requires_google_client_id(monkeypatch):
+    """
+    Empty, allauth resolves no app for the client_id the SPA posts and rejects
+    every sign-in with invalid_token, so a deployment must fail at import
+    instead of serving a button that cannot work.
+    """
+    env = {**DEPLOY_ENV}
+    del env["GOOGLE_CLIENT_ID"]
+    with pytest.raises(ImproperlyConfigured, match="GOOGLE_CLIENT_ID"):
         load_settings(monkeypatch, **env)
 
 
@@ -231,21 +244,15 @@ def test_csrf_cookie_domain_covers_subdomains_without_leading_dot(monkeypatch):
 
 def test_app_base_url_trailing_slash_is_normalized(monkeypatch):
     """
-    A trailing slash on APP_BASE_URL must not corrupt the auth email links
-    built from it (issue #829). Both links are cold-entry `?overlay=` dialogs
-    opened over the app, not standalone pages.
+    A trailing slash on APP_BASE_URL must not corrupt the CSRF/CORS origins
+    derived from it (issue #829): a browser's Origin header never carries a
+    path, so an un-stripped trailing slash would silently fail to match.
     """
     loaded = load_settings(
         monkeypatch, IS_DEPLOYMENT="False", APP_BASE_URL="http://math3d.localdev:3000/"
     )
     assert loaded.APP_BASE_URL == "http://math3d.localdev:3000"
-    assert (
-        loaded.HEADLESS_FRONTEND_URLS
-        == {
-            "account_confirm_email": "http://math3d.localdev:3000/?overlay=activate&key={key}",
-            "account_reset_password_from_key": "http://math3d.localdev:3000/?overlay=reset-confirm&key={key}",  # pragma: allowlist secret
-        }
-    )
+    assert "http://math3d.localdev:3000" in loaded.CSRF_TRUSTED_ORIGINS
 
 
 def test_dev_cors_origins_cover_app_and_worktree_ports():
@@ -489,3 +496,56 @@ def test_ambient_env_does_not_reach_the_suite():
     )
     assert proc.returncode == 0, proc.stderr
     assert "DISABLE_CSRF=False" in proc.stdout
+
+
+def test_dummy_provider_is_development_only(monkeypatch):
+    """
+    The dummy provider mints a session from an unsigned payload — anyone who can
+    reach it can become any user. IS_DEPLOYMENT is the entire guard; a
+    dedicated flag was rejected because it could hold no value IS_DEPLOYMENT
+    does not already imply (a deployment sets SESSION_COOKIE_SECURE
+    unconditionally).
+    """
+    dev = load_settings(monkeypatch, IS_DEPLOYMENT="False")
+    assert "allauth.socialaccount.providers.dummy" in dev.INSTALLED_APPS
+
+    deployed = load_settings(monkeypatch, **DEPLOY_ENV)
+    assert "allauth.socialaccount.providers.dummy" not in deployed.INSTALLED_APPS
+
+
+def test_password_urls_are_not_registered():
+    """SOCIALACCOUNT_ONLY unregisters allauth's password endpoints
+    (allauth/headless/account/urls.py). Pin it: the SPA has no password UI, and
+    a stray reachable signup URL would let an account be created that the
+    sign-in dialog cannot then log into."""
+    from django.urls import NoReverseMatch, reverse
+
+    for name in ("headless:browser:account:login", "headless:browser:account:signup"):
+        with pytest.raises(NoReverseMatch):
+            reverse(name)
+
+
+def test_google_app_reads_the_client_id_from_the_environment(monkeypatch):
+    loaded = load_settings(monkeypatch, **DEPLOY_ENV)
+    app = loaded.SOCIALACCOUNT_PROVIDERS["google"]["APP"]
+    assert app["client_id"] == DEPLOY_ENV["GOOGLE_CLIENT_ID"]
+    # The popup flow verifies ID tokens against Google's certs and never
+    # exchanges an authorization code, so there is no secret to hold.
+    assert app["secret"] == ""
+
+
+def test_provider_identities_are_never_linked_by_email(monkeypatch):
+    """
+    Email-based linking would let anyone who controls an address take over the
+    matching account. allauth resolves it at two levels: the global setting is
+    OR'd with a per-provider EMAIL_AUTHENTICATION key, and a lowercase
+    email_authentication inside APP["settings"] short-circuits both
+    (socialaccount/adapter.py:347-359). Asserting only the global would pass
+    vacuously while a provider-level key silently re-enabled it.
+    """
+    loaded = load_settings(monkeypatch, **DEPLOY_ENV)
+    assert loaded.SOCIALACCOUNT_EMAIL_AUTHENTICATION is False
+    assert loaded.SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT is False
+    google = loaded.SOCIALACCOUNT_PROVIDERS["google"]
+    assert "EMAIL_AUTHENTICATION" not in google
+    assert "email_authentication" not in google["APP"].get("settings", {})

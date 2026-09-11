@@ -1,10 +1,8 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 import UserMenu from "./UserMenu";
-import SigninPage from "./SigninPage";
-import SignupPage from "./SignupPage";
 import SignoutPage from "./SignoutPage";
-import UserSettingsPage from "./UserSettingsPage";
+import DeleteAccountPage from "./DeleteAccountPage";
 import ItemSettings, { UniqueItemSettingsOpts } from "./ItemSettings";
 import SharePopover from "./SharePopover";
 import MyScenes from "./MyScenes";
@@ -18,14 +16,6 @@ class AppPage {
 
   userMenu(): UserMenu {
     return new UserMenu(this.page);
-  }
-
-  signupPage(): SignupPage {
-    return new SignupPage(this.page);
-  }
-
-  signinPage(): SigninPage {
-    return new SigninPage(this.page);
   }
 
   signoutPage(): SignoutPage {
@@ -49,42 +39,20 @@ class AppPage {
     return header.getByRole("button").and(header.getByTestId("save"));
   }
 
-  userSettings(): UserSettingsPage {
-    return new UserSettingsPage(this.page);
+  deleteAccountPage(): DeleteAccountPage {
+    return new DeleteAccountPage(this.page);
   }
 
   myScenes(): MyScenes {
     return new MyScenes(this.page);
   }
 
-  async signin({
-    password,
-    email,
-  }: {
-    email: string;
-    password: string;
-  }): Promise<void> {
-    await this.userMenu().opener().click();
-    await this.userMenu().signin().click();
-    await this.signinPage().signin({ password, email });
-  }
-
-  async signout(): Promise<void> {
-    await this.userMenu().opener().click();
-    await this.userMenu().signout().click();
-    await this.signoutPage().confirm().click();
-  }
-
   async assertSignedOut() {
-    await expect(this.userMenu().opener()).toHaveText("");
     await this.userMenu().opener().click();
+    // Assert on "Sign in" as well as the username's absence: a menu that has
+    // not rendered satisfies the absence check on its own.
+    await expect(this.userMenu().signin()).toBeVisible();
     await expect(this.userMenu().username()).not.toBeVisible();
-    await this.userMenu().root.press("Escape");
-  }
-
-  async assertSignedIn() {
-    await this.userMenu().opener().click();
-    await expect(this.userMenu().username()).toBeVisible();
     await this.userMenu().root.press("Escape");
   }
 

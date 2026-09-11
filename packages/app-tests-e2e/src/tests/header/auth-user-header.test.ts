@@ -10,11 +10,10 @@ test("Shows username in usermenu", async ({ page, workerUser }) => {
 
   const trigger = await app.userMenu().opener();
   await expect(trigger).toBeVisible();
-  await expect(trigger).toHaveText(workerUser.info.public_nickname[0]);
 
   await trigger.click();
   const username = app.userMenu().username();
-  await expect(username).toHaveText(workerUser.info.email);
+  await expect(username).toHaveText(workerUser.identity.email);
 });
 
 test("Header and usermenu links", async ({ page }) => {
@@ -28,7 +27,7 @@ test("Header and usermenu links", async ({ page }) => {
     "Examples",
     "Function Reference",
     "Contact",
-    "Account Settings",
+    "Delete Account",
     "Sign out",
   ]);
 });
