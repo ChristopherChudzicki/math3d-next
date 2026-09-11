@@ -10,16 +10,20 @@
     "./fixtures": "./src/fixtures.ts"
   },
   "main": "./src/index.ts",
-  "devDependencies": {
+  "dependencies": {
     "@faker-js/faker": "^10.6.0",
-    "@math3d/eslint-config": "workspace:^",
+    "@math3d/api": "workspace:^",
     "@math3d/mathitem-configs": "workspace:^",
-    "@math3d/tsconfig": "workspace:^",
     "@mswjs/data": "^0.16.2",
     "@types/lodash-es": "^4.17.12",
-    "eslint": "^8.57.1",
     "lodash-es": "^4.18.1",
     "msw": "^2.0.14",
+    "tiny-invariant": "^1.3.3"
+  },
+  "devDependencies": {
+    "@math3d/eslint-config": "workspace:^",
+    "@math3d/tsconfig": "workspace:^",
+    "eslint": "^8.57.1",
     "vitest": "^4.1.11"
   },
   "scripts": {
@@ -27,8 +31,5 @@
     "typecheck": "tsc --noEmit",
     "test-watch": "vitest",
     "lint": "eslint --max-warnings 0 \"**/*.ts?(x)\""
-  },
-  "dependencies": {
-    "tiny-invariant": "^1.3.3"
   }
 }

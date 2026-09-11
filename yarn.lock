@@ -4161,6 +4161,7 @@ __metadata:
   resolution: "@math3d/mock-api@workspace:packages/mock-api"
   dependencies:
     "@faker-js/faker": "npm:^10.6.0"
+    "@math3d/api": "workspace:^"
     "@math3d/eslint-config": "workspace:^"
     "@math3d/mathitem-configs": "workspace:^"
     "@math3d/tsconfig": "workspace:^"
@@ -8620,6 +8621,8 @@ __metadata:
     "@math3d/mock-api": "workspace:^"
     "@playwright/test": "npm:^1.57.0"
     "@types/mailparser": "npm:^3.4.6"
+    "@types/node": "npm:^24.0.0"
+    "@types/three": "npm:^0.146.0"
     envalid: "npm:^8.0.0"
     eslint: "npm:^8.57.1"
     mailparser: "npm:^3.9.15"
