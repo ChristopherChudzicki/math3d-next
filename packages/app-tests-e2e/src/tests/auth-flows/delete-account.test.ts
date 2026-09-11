@@ -20,9 +20,9 @@ test.describe("Account deletion", () => {
     await test.step("Submit the delete form", async () => {
       await app.userMenu().opener().click();
       await app.userMenu().deleteAccount().click();
-      const form = app.deleteAccountPage().deleteAccountForm();
-      await form.confirm().fill("Yes, permanently delete");
-      await form.submit().click();
+      const dialog = app.deleteAccountPage();
+      await dialog.confirm().fill("Yes, permanently delete");
+      await dialog.submit().click();
     });
 
     await test.step("Verify the account is gone", async () => {

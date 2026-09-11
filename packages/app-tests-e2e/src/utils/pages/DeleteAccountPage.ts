@@ -1,10 +1,10 @@
 import type { Locator, Page } from "@playwright/test";
 
-class DeleteAccountForm {
+class DeleteAccountPage {
   private root: Locator;
 
-  constructor(root: Locator) {
-    this.root = root;
+  constructor(page: Page) {
+    this.root = page.getByRole("dialog", { name: "Delete Account" });
   }
 
   confirm(): Locator {
@@ -13,18 +13,6 @@ class DeleteAccountForm {
 
   submit(): Locator {
     return this.root.getByRole("button", { name: "Delete Account" });
-  }
-}
-
-class DeleteAccountPage {
-  private root: Locator;
-
-  constructor(page: Page) {
-    this.root = page.getByRole("dialog", { name: "Delete Account" });
-  }
-
-  deleteAccountForm(): DeleteAccountForm {
-    return new DeleteAccountForm(this.root);
   }
 }
 
