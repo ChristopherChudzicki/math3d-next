@@ -31,7 +31,9 @@ test("A Google credential signs the user in and closes the overlay", async () =>
   await screen.findByRole("dialog", { name: "Sign in" });
   await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
   await act(async () => {
-    gsi.fireCredential(JSON.stringify({ email: userData.email }));
+    gsi.fireCredential(
+      JSON.stringify({ id: userData.uid, email: userData.email }),
+    );
   });
 
   await waitFor(() =>
@@ -93,19 +95,14 @@ test("A 403 from Django's CSRF middleware surfaces the generic failure", async (
 });
 
 test("A 401 (address has an account with no Google link) says the address cannot sign in", async () => {
-  server.use(
-    http.post(
-      "*/_allauth/browser/v1/auth/provider/token",
-      () => new HttpResponse(null, { status: 401 }),
-    ),
-  );
+  const existing = seedDb.withUser({ uid: "1" });
   const gsi = mockGoogleIdentity();
   renderTestApp("/?overlay=login");
 
   await screen.findByRole("dialog", { name: "Sign in" });
   await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
   await act(async () => {
-    gsi.fireCredential(JSON.stringify({ email: "existing@example.com" }));
+    gsi.fireCredential(JSON.stringify({ id: "2", email: existing.email }));
   });
 
   expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -114,6 +111,46 @@ test("A 401 (address has an account with no Google link) says the address cannot
   expect(screen.getByRole("link", { name: "Get in touch" })).toHaveAttribute(
     "href",
     import.meta.env.VITE_ISSUE_URL,
+  );
+});
+
+test("A 400 (credential rejected) points at configuration instead of a retry", async () => {
+  // An id_token the mock cannot parse is allauth's own `invalid_token` 400,
+  // which is also where a GOOGLE_CLIENT_ID drift lands.
+  const gsi = mockGoogleIdentity();
+  renderTestApp("/?overlay=login");
+
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await act(async () => {
+    gsi.fireCredential("not-a-credential");
+  });
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /rejected the credential/i,
+  );
+});
+
+test("Says so when Google's script never loads", async () => {
+  renderTestApp("/?overlay=login");
+  await screen.findByRole("dialog", { name: "Sign in" });
+
+  const script = await waitFor(() => {
+    // The gsi/client script is injected into document.head, outside any
+    // container a testing-library query can reach.
+    // eslint-disable-next-line testing-library/no-node-access
+    const el = document.querySelector(
+      'script[src^="https://accounts.google.com"]',
+    );
+    if (!el) throw new Error("The gsi/client script was not injected.");
+    return el;
+  });
+  await act(async () => {
+    script.dispatchEvent(new Event("error"));
+  });
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /Could not load Google sign-in/i,
   );
 });
 

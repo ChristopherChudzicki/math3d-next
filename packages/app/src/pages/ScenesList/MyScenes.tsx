@@ -107,6 +107,9 @@ const MyScenesList: React.FC = () => {
   };
 
   const allItems = data ? data.pages.flatMap((d) => d.items) : [];
+  if (isAuthenticated === "loading") {
+    return <LoadingSpinner className={styles["with-margin"]} />;
+  }
   if (isAuthenticated !== "authenticated") {
     return (
       <p className={styles["with-margin"]}>

@@ -53,11 +53,13 @@ class EnvConfig(BaseSettings):
     # Version
     APP_VERSION: str = "unknown"
     # Feature flags
+    # Open sign-ups. False is a deployment posture, not a misconfiguration: a
+    # closed deployment still logs in identities that already exist.
     ENABLE_REGISTRATION: bool = False
     # Google OAuth client ID. Public by design (the SPA embeds it too), so this
-    # is config, not a secret. Unset ⇒ the provider is still registered but no
-    # sign-in can succeed (an empty `aud` matches no Google token); required on
-    # a deployment (see _require_deployment_config).
+    # is config, not a secret. Empty ⇒ allauth resolves no app for the client_id
+    # the SPA posts and every sign-in fails with `invalid_token`; required on a
+    # deployment (see _require_deployment_config).
     GOOGLE_CLIENT_ID: str = ""
     CSRF_COOKIE_DOMAIN: str = ""
     DISABLE_ALLAUTH_RATE_LIMITS: bool = False
@@ -131,8 +133,8 @@ class EnvConfig(BaseSettings):
             )
         if not self.GOOGLE_CLIENT_ID:
             missing.append(
-                "GOOGLE_CLIENT_ID (empty, the Google app's client_id matches no "
-                "ID token's `aud` and every sign-in fails)"
+                "GOOGLE_CLIENT_ID (empty, allauth resolves no app for the "
+                "client_id the SPA posts and every sign-in fails)"
             )
         if missing:
             raise ValueError(

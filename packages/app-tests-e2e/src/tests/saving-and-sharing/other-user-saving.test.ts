@@ -1,6 +1,7 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import { SceneBuilder, makeUserIdentity } from "@math3d/mock-api";
+import { SceneBuilder } from "@math3d/mock-api";
+import { makeUserIdentity } from "@/utils/api/auth";
 import AppPage from "@/utils/pages/AppPage";
 import { faker } from "@faker-js/faker/locale/en";
 

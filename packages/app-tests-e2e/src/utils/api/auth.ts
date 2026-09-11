@@ -1,10 +1,30 @@
 import { apiFetch, parseCookies } from "@/utils/api/config";
 import env from "@/env";
 import invariant from "tiny-invariant";
-import { makeUserIdentity } from "@math3d/mock-api";
-import type { UserIdentity } from "@math3d/mock-api";
 
 type SessionCookies = { sessionid: string; csrftoken: string };
+
+/** A dummy-provider identity: what the backend authenticates a test user by. */
+interface UserIdentity {
+  email: string;
+  /**
+   * Dummy-provider account id. A decimal string, not a UUID: allauth's
+   * `AuthenticateForm.id` is an `IntegerField`, so a raw UUID is rejected with
+   * "Enter a whole number." The UUID's entropy is kept by reinterpreting its
+   * hex as an integer — uids must not collide across concurrently running
+   * suites, which share one database.
+   */
+  uid: string;
+}
+
+const makeUserIdentity = (info?: Partial<UserIdentity>): UserIdentity => {
+  const uuid = crypto.randomUUID();
+  return {
+    email: `${uuid}@example.com`,
+    uid: BigInt(`0x${uuid.replace(/-/g, "")}`).toString(),
+    ...info,
+  };
+};
 
 const authHeaders = (cookies: SessionCookies) => ({
   Cookie: `sessionid=${cookies.sessionid}; csrftoken=${cookies.csrftoken}`,
@@ -96,5 +116,11 @@ const createActiveUser = async (user: Partial<UserIdentity> = {}) => {
   return { identity, cookies, cleanup };
 };
 
-export { authHeaders, getSessionCookies, users, createActiveUser };
+export {
+  authHeaders,
+  getSessionCookies,
+  users,
+  createActiveUser,
+  makeUserIdentity,
+};
 export type { SessionCookies, UserIdentity };

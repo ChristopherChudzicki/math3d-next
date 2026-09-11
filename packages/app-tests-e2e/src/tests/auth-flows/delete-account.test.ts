@@ -1,8 +1,7 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import AppPage from "@/utils/pages/AppPage";
-import { makeUserIdentity } from "@math3d/mock-api";
-import { authHeaders } from "@/utils/api/auth";
+import { authHeaders, makeUserIdentity } from "@/utils/api/auth";
 import { apiFetch } from "@/utils/api/config";
 import invariant from "tiny-invariant";
 
@@ -20,9 +19,9 @@ test.describe("Account deletion", () => {
     await test.step("Submit the delete form", async () => {
       await app.userMenu().opener().click();
       await app.userMenu().deleteAccount().click();
-      const form = app.deleteAccountPage().deleteAccountForm();
-      await form.confirm().fill("Yes, permanently delete");
-      await form.submit().click();
+      const dialog = app.deleteAccountPage();
+      await dialog.confirm().fill("Yes, permanently delete");
+      await dialog.submit().click();
     });
 
     await test.step("Verify the account is gone", async () => {

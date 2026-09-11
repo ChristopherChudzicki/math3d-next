@@ -16,7 +16,7 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ListIcon from "@mui/icons-material/List";
 import type { SimpleMenuItem } from "@/util/components/SimpleMenu/SimpleMenu";
-import { useUserMe, User } from "@math3d/api";
+import { useUserMe } from "@math3d/api";
 import ListSubheader from "@mui/material/ListSubheader";
 import FunctionsIcon from "@mui/icons-material/Functions";
 
@@ -47,13 +47,15 @@ type FilterableItem = SimpleMenuItem & {
   shouldShow: boolean;
 };
 const getItems = ({
-  user,
+  authStatus,
+  email,
   open,
 }: {
-  user?: User | null;
+  authStatus: AuthStatus;
+  email?: string;
   open: (name: OverlayName, companion?: { list?: string }) => void;
 }): FilterableItem[] => {
-  const isAuthenticated = !!user;
+  const isAuthenticated = authStatus === "authenticated";
   return [
     {
       element: (
@@ -67,7 +69,7 @@ const getItems = ({
             lineHeight: "unset",
           }}
         >
-          {user?.email}
+          {email}
         </ListSubheader>
       ),
       shouldShow: isAuthenticated,
@@ -78,7 +80,10 @@ const getItems = ({
       label: "Sign in",
       icon: <AccountCircleOutlinedIcon fontSize="small" />,
       onClick: () => open("login"),
-      shouldShow: !isAuthenticated && DISPLAY_AUTH_FLOWS,
+      // Not `!isAuthenticated`: while the me-query is still in flight the
+      // answer is unknown, and offering to sign in is the wrong guess for a
+      // user who already has a session.
+      shouldShow: authStatus === "unauthenticated" && DISPLAY_AUTH_FLOWS,
     },
     {
       type: "button",
@@ -146,10 +151,12 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
   const { open } = useOverlay();
   const filteredItems = useMemo(
     () =>
-      getItems({ user: userQuery.data, open }).filter(
-        (item) => !!item.shouldShow,
-      ),
-    [userQuery.data, open],
+      getItems({
+        authStatus: isAuthenticated,
+        email: userQuery.data?.email,
+        open,
+      }).filter((item) => !!item.shouldShow),
+    [isAuthenticated, userQuery.data, open],
   );
   return (
     <Header
