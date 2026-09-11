@@ -4212,8 +4212,8 @@ __metadata:
   dependencies:
     "@math3d/eslint-config": "workspace:^"
     "@math3d/tsconfig": "workspace:^"
-    "@testing-library/react": "npm:^16.1.0"
-    "@testing-library/user-event": "npm:^14.5.2"
+    "@testing-library/react": "npm:^16.3.3"
+    "@testing-library/user-event": "npm:^14.6.7"
     "@types/react": "npm:^19.2.17"
     eslint: "npm:^8.57.1"
     jest-get-type: "npm:^29.6.3"
@@ -6713,7 +6713,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/dom@npm:^10.4.0":
+"@testing-library/dom@npm:^10.4.1":
   version: 10.4.1
   resolution: "@testing-library/dom@npm:10.4.1"
   dependencies:
@@ -6743,9 +6743,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react@npm:^16.1.0":
-  version: 16.3.2
-  resolution: "@testing-library/react@npm:16.3.2"
+"@testing-library/react@npm:^16.3.3":
+  version: 16.3.3
+  resolution: "@testing-library/react@npm:16.3.3"
   dependencies:
     "@babel/runtime": "npm:^7.12.5"
   peerDependencies:
@@ -6759,16 +6759,16 @@ __metadata:
       optional: true
     "@types/react-dom":
       optional: true
-  checksum: 10/0ca88c6f672d00c2afd1bdedeff9b5382dd8157038efeb9762dc016731030075624be7106b92d2b5e5c52812faea85263e69272c14b6f8700eb48a4a8af6feef
+  checksum: 10/c330e2d8158fd0f4b059cb1cd30f74265c6e80b204cf7245c9b2c4117582d6deb985d51edb62bd1b94e79ef48a2eaba4d002278d06caf725830a8b0f475e0118
   languageName: node
   linkType: hard
 
-"@testing-library/user-event@npm:^14.5.2":
-  version: 14.6.1
-  resolution: "@testing-library/user-event@npm:14.6.1"
+"@testing-library/user-event@npm:^14.6.7":
+  version: 14.6.7
+  resolution: "@testing-library/user-event@npm:14.6.7"
   peerDependencies:
     "@testing-library/dom": ">=7.21.4"
-  checksum: 10/34b74fff56a0447731a94b40d4cf246deb8dbc1c1e3aec93acd1c3377a760bb062e979f1572bb34ec164ad28ee2a391744b42d0d6d6cc16c4ce527e5e09610e1
+  checksum: 10/afeb8ecb496c35c51a5cac0c94266808cfff748022c868a7682712d58cce6a93b649d1a667bb0b134ab93d9ce5bc9d113bfb28436b7f1b89203e589120b087d2
   languageName: node
   linkType: hard
 
@@ -8674,10 +8674,10 @@ __metadata:
     "@storybook/node-logger": "npm:6.5.16"
     "@storybook/react": "npm:6.5.16"
     "@tanstack/react-query": "npm:^5.62.10"
-    "@testing-library/dom": "npm:^10.4.0"
+    "@testing-library/dom": "npm:^10.4.1"
     "@testing-library/jest-dom": "npm:6.9.1"
-    "@testing-library/react": "npm:^16.1.0"
-    "@testing-library/user-event": "npm:^14.5.2"
+    "@testing-library/react": "npm:^16.3.3"
+    "@testing-library/user-event": "npm:^14.6.7"
     "@types/lodash-es": "npm:^4.17.12"
     "@types/node": "npm:^24.0.0"
     "@types/react": "npm:^19.2.17"
