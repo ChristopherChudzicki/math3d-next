@@ -114,6 +114,46 @@ test("A 401 (address has an account with no Google link) says the address cannot
   );
 });
 
+test("A 400 (credential rejected) points at configuration instead of a retry", async () => {
+  // An id_token the mock cannot parse is allauth's own `invalid_token` 400,
+  // which is also where a GOOGLE_CLIENT_ID drift lands.
+  const gsi = mockGoogleIdentity();
+  renderTestApp("/?overlay=login");
+
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await act(async () => {
+    gsi.fireCredential("not-a-credential");
+  });
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /rejected the credential/i,
+  );
+});
+
+test("Says so when Google's script never loads", async () => {
+  renderTestApp("/?overlay=login");
+  await screen.findByRole("dialog", { name: "Sign in" });
+
+  const script = await waitFor(() => {
+    // The gsi/client script is injected into document.head, outside any
+    // container a testing-library query can reach.
+    // eslint-disable-next-line testing-library/no-node-access
+    const el = document.querySelector(
+      'script[src^="https://accounts.google.com"]',
+    );
+    if (!el) throw new Error("The gsi/client script was not injected.");
+    return el;
+  });
+  await act(async () => {
+    script.dispatchEvent(new Event("error"));
+  });
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /Could not load Google sign-in/i,
+  );
+});
+
 test("If authenticated already, closes the overlay", async () => {
   const { location } = renderTestApp("/?overlay=login", {
     isAuthenticated: true,

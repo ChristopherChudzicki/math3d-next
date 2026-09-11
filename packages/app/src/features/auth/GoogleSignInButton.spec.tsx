@@ -1,6 +1,6 @@
 import React from "react";
 import { test, expect, afterEach, vi } from "vitest";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { render, waitFor, act } from "@testing-library/react";
 import { mockGoogleIdentity } from "@/test_util";
 import GoogleSignInButton from "./GoogleSignInButton";
 
@@ -17,7 +17,9 @@ afterEach(() => {
 
 test("initializes Google with the configured client ID and renders into its own container", async () => {
   const gsi = mockGoogleIdentity();
-  const view = render(<GoogleSignInButton onCredential={vi.fn()} />);
+  const view = render(
+    <GoogleSignInButton onCredential={vi.fn()} onUnavailable={vi.fn()} />,
+  );
 
   await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -34,15 +36,20 @@ test("initializes Google with the configured client ID and renders into its own 
 test("forwards the credential Google returns", async () => {
   const gsi = mockGoogleIdentity();
   const onCredential = vi.fn();
-  render(<GoogleSignInButton onCredential={onCredential} />);
+  render(
+    <GoogleSignInButton onCredential={onCredential} onUnavailable={vi.fn()} />,
+  );
 
   await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
   gsi.fireCredential("a-credential");
   expect(onCredential).toHaveBeenCalledWith("a-credential");
 });
 
-test("shows an error instead of a dead button when the script cannot load", async () => {
-  render(<GoogleSignInButton onCredential={vi.fn()} />);
+test("reports that no button can be drawn when the script cannot load", async () => {
+  const onUnavailable = vi.fn();
+  render(
+    <GoogleSignInButton onCredential={vi.fn()} onUnavailable={onUnavailable} />,
+  );
 
   const script = await waitFor(() => {
     // The gsi/client script is injected into document.head, outside any
@@ -58,5 +65,5 @@ test("shows an error instead of a dead button when the script cannot load", asyn
     script.dispatchEvent(new Event("error"));
   });
 
-  expect(await screen.findByRole("alert")).toHaveTextContent(/Google sign-in/i);
+  await waitFor(() => expect(onUnavailable).toHaveBeenCalled());
 });
