@@ -17,9 +17,9 @@ type AuthStatus = "loading" | "authenticated" | "unauthenticated";
  * - otherwise (still in flight) → "loading"
  *
  * "loading" has to be a state the app leaves: consumers hide the sign-in
- * affordances during it, and `createQueryClient` does not retry a 500. An
- * errored query has no data only when no answer ever arrived — a failure after
- * a success leaves `data` in place — so this cannot look like a logout.
+ * affordances during it, and `createQueryClient` does not retry a 500. Check
+ * `data` before `isError` — a refetch failure reports `isError` while keeping
+ * the last success — so only a query that never answered reads as signed out.
  */
 const useAuthStatus = (): AuthStatus => {
   const userMeQuery = useUserMe();
