@@ -100,3 +100,30 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
     await expect(item.field("description")).toHaveValue(newDescription);
   });
 });
+
+test("Saving a new scene keeps the active item selected", async ({ page }) => {
+  await page.goto("");
+  const app = new AppPage(page);
+  const item = await app.getUniqueItemSettings({
+    description: "Explicit Surface",
+  });
+
+  await item.field("description").fill(faker.lorem.words(3));
+  await expect(item.activeMarker()).toHaveCount(1);
+
+  await app.saveButton().click();
+  const dialog = page.getByRole("dialog", { name: "Save Scene" });
+  await dialog
+    .getByRole("textbox", { name: "Title" })
+    .fill(faker.lorem.words(3));
+  await dialog.getByRole("button", { name: "Save" }).click();
+  await page
+    .getByRole("dialog", { name: "Scene Saved!" })
+    .getByRole("button", { name: "OK" })
+    .click();
+
+  // The save navigates to the new key, so the scene reloads from the server.
+  // It is the scene already open, so the selection should survive it.
+  await expect(page).toHaveURL(/\/[^/]+$/);
+  await expect(item.activeMarker()).toHaveCount(1);
+});
