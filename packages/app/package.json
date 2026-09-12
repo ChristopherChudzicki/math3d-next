@@ -79,7 +79,7 @@
     "yup": "^1.3.2"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.20.3",
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
     "@cloudflare/workers-types": "^5.20260808.1",
     "@faker-js/faker": "^10.6.0",
     "@julr/vite-plugin-validate-env": "^2.2.2",
