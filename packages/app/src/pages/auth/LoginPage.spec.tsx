@@ -1,5 +1,5 @@
-import { test, expect, afterEach } from "vitest";
-import { http, HttpResponse } from "msw";
+import { test, expect, afterEach, vi } from "vitest";
+import * as Sentry from "@sentry/react";
 import {
   renderTestApp,
   screen,
@@ -9,7 +9,8 @@ import {
   mockGoogleIdentity,
 } from "@/test_util";
 import { seedDb } from "@math3d/mock-api";
-import { server } from "@math3d/mock-api/node";
+
+vi.mock("@sentry/react", () => ({ captureException: vi.fn() }));
 
 afterEach(() => {
   // A stub left installed makes the next test's loader short-circuit onto it,
@@ -49,74 +50,10 @@ test("A Google credential signs the user in and closes the overlay", async () =>
   );
 });
 
-test("A 403 (sign-ups closed) surfaces copy distinct from a generic failure", async () => {
-  server.use(
-    http.post("*/_allauth/browser/v1/auth/provider/token", () =>
-      HttpResponse.json({ status: 403 }, { status: 403 }),
-    ),
-  );
-  const gsi = mockGoogleIdentity();
-  renderTestApp("/?overlay=login");
-
-  await screen.findByRole("dialog", { name: "Sign in" });
-  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
-  await act(async () => {
-    gsi.fireCredential(JSON.stringify({ email: "new-user@example.com" }));
-  });
-
-  expect(await screen.findByRole("alert")).toHaveTextContent(
-    /sign-ups are currently closed/i,
-  );
-});
-
-test("A 403 from Django's CSRF middleware surfaces the generic failure", async () => {
-  server.use(
-    http.post(
-      "*/_allauth/browser/v1/auth/provider/token",
-      () =>
-        new HttpResponse("<h1>Forbidden</h1>", {
-          status: 403,
-          headers: { "Content-Type": "text/html; charset=utf-8" },
-        }),
-    ),
-  );
-  const gsi = mockGoogleIdentity();
-  renderTestApp("/?overlay=login");
-
-  await screen.findByRole("dialog", { name: "Sign in" });
-  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
-  await act(async () => {
-    gsi.fireCredential(JSON.stringify({ email: "new-user@example.com" }));
-  });
-
-  expect(await screen.findByRole("alert")).toHaveTextContent(
-    /could not complete the sign-in/i,
-  );
-});
-
-test("A 401 (address has an account with no Google link) says the address cannot sign in", async () => {
-  const existing = seedDb.withUser({ uid: "1" });
-  const gsi = mockGoogleIdentity();
-  renderTestApp("/?overlay=login");
-
-  await screen.findByRole("dialog", { name: "Sign in" });
-  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
-  await act(async () => {
-    gsi.fireCredential(JSON.stringify({ id: "2", email: existing.email }));
-  });
-
-  expect(await screen.findByRole("alert")).toHaveTextContent(
-    /is not connected to Google, so it cannot be used to sign in/i,
-  );
-  expect(screen.getByRole("link", { name: "Get in touch" })).toHaveAttribute(
-    "href",
-    import.meta.env.VITE_ISSUE_URL,
-  );
-});
-
-test("A 400 (credential rejected) points at configuration instead of a retry", async () => {
-  // An id_token the mock cannot parse is allauth's own `invalid_token` 400,
-  // which is also where a GOOGLE_CLIENT_ID drift lands.
+test("A rejected sign-in shows one message and reports to Sentry", async () => {
+  // An id_token the mock cannot parse is allauth's own `invalid_token` 400.
+  // Every other rejection — sign-ups closed, an address held by an unlinked
+  // account, a CSRF 403 — shares this branch; Sentry is what tells them apart.
   const gsi = mockGoogleIdentity();
   renderTestApp("/?overlay=login");
 
@@ -127,8 +64,13 @@ test("A 400 (credential rejected) points at configuration instead of a retry", a
   });
 
   expect(await screen.findByRole("alert")).toHaveTextContent(
-    /rejected the credential/i,
+    /could not complete the sign-in/i,
   );
+  expect(screen.getByRole("link", { name: "get in touch" })).toHaveAttribute(
+    "href",
+    import.meta.env.VITE_ISSUE_URL,
+  );
+  expect(Sentry.captureException).toHaveBeenCalled();
 });
 
 test("Says so when Google's script never loads", async () => {
@@ -194,4 +136,49 @@ test("opening/closing an overlay preserves other params and the hash", async () 
   );
   expect(location.current.search).toContain("controls=0"); // merged, not clobbered
   expect(location.current.hash).toBe("#frag");
+});
+
+test("signing in leaves unsaved edits to the open scene intact", async () => {
+  const userData = seedDb.withUser();
+  const scene = seedDb.withSceneFromItems([]);
+  const gsi = mockGoogleIdentity();
+  renderTestApp(`/${scene.key}`);
+
+  const title = await screen.findByLabelText<HTMLInputElement>("Scene Title");
+  await user.type(title, " (unsaved edit)");
+  const edited = title.value;
+
+  await user.click(
+    await screen.findByRole("button", { name: "Sign in", hidden: true }),
+  );
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await act(async () => {
+    gsi.fireCredential(
+      JSON.stringify({ id: userData.uid, email: userData.email }),
+    );
+  });
+
+  await user.click(screen.getByRole("button", { name: "Open User Menu" }));
+  expect(await screen.findByTestId("username-display")).toHaveTextContent(
+    userData.email,
+  );
+  expect(title).toHaveValue(edited);
+});
+
+test("the dev sign-in control signs in as the address it is given", async () => {
+  renderTestApp("/?overlay=login");
+
+  // Not an exact string: `required` appends an asterisk to the label.
+  const email = await screen.findByLabelText(/Dev sign-in email/);
+  await user.clear(email);
+  await user.type(email, "someone@example.com");
+  await user.click(screen.getByRole("button", { name: "Sign in as dev user" }));
+
+  await user.click(
+    await screen.findByRole("button", { name: "Open User Menu" }),
+  );
+  expect(await screen.findByTestId("username-display")).toHaveTextContent(
+    "someone@example.com",
+  );
 });

@@ -1,0 +1,13 @@
+.dummy-sign-in {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.75rem;
+}
+
+.dummy-error {
+  display: block;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  font-size: 0.8125rem;
+}

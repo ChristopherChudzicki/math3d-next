@@ -26,6 +26,9 @@ const useScene = (
         v1Client.GET("/v1/scenes/{key}/", { params: { path: { key } } }),
       );
     },
+    // GET /v1/scenes/{key}/ is unauthenticated and serves every caller the
+    // same body, so this cache survives a change of signed-in user.
+    meta: { sameForAllUsers: true },
     ...opts,
   });
 };
