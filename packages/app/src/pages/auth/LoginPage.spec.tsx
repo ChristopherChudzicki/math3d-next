@@ -195,3 +195,47 @@ test("opening/closing an overlay preserves other params and the hash", async () 
   expect(location.current.search).toContain("controls=0"); // merged, not clobbered
   expect(location.current.hash).toBe("#frag");
 });
+
+test("signing in leaves unsaved edits to the open scene intact", async () => {
+  const userData = seedDb.withUser();
+  const scene = seedDb.withSceneFromItems([]);
+  const gsi = mockGoogleIdentity();
+  renderTestApp(`/${scene.key}`);
+
+  const title = await screen.findByLabelText<HTMLInputElement>("Scene Title");
+  await user.type(title, " (unsaved edit)");
+  const edited = title.value;
+
+  await user.click(
+    await screen.findByRole("button", { name: "Sign in", hidden: true }),
+  );
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await act(async () => {
+    gsi.fireCredential(
+      JSON.stringify({ id: userData.uid, email: userData.email }),
+    );
+  });
+
+  await user.click(screen.getByRole("button", { name: "Open User Menu" }));
+  expect(await screen.findByTestId("username-display")).toHaveTextContent(
+    userData.email,
+  );
+  expect(title).toHaveValue(edited);
+});
+
+test("the dev sign-in control signs in as the address it is given", async () => {
+  renderTestApp("/?overlay=login");
+
+  const email = await screen.findByLabelText("Dev sign-in email");
+  await user.clear(email);
+  await user.type(email, "someone@example.com");
+  await user.click(screen.getByRole("button", { name: "Sign in as dev user" }));
+
+  await user.click(
+    await screen.findByRole("button", { name: "Open User Menu" }),
+  );
+  expect(await screen.findByTestId("username-display")).toHaveTextContent(
+    "someone@example.com",
+  );
+});

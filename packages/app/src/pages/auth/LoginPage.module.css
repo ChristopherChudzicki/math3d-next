@@ -5,3 +5,7 @@
   align-items: center;
   row-gap: 1rem;
 }
+
+.dummy-divider {
+  width: 100%;
+}

@@ -3,7 +3,10 @@ import Alert from "@mui/material/Alert";
 import Link from "@mui/material/Link";
 import * as Sentry from "@sentry/react";
 import { ApiError, isApiError, useProviderTokenLogin } from "@math3d/api";
+import Divider from "@mui/material/Divider";
 import {
+  DummySignInForm,
+  ENABLE_DUMMY_AUTH,
   GOOGLE_CLIENT_ID,
   GoogleSignInButton,
   useAuthStatus,
@@ -104,6 +107,12 @@ const LoginPage: React.FC = () => {
           onCredential={handleCredential}
           onUnavailable={handleUnavailable}
         />
+        {ENABLE_DUMMY_AUTH && (
+          <>
+            <Divider className={styles["dummy-divider"]}>or</Divider>
+            <DummySignInForm />
+          </>
+        )}
         {failure === "signups-closed" && (
           <Alert severity="error">
             Google signed you in, but sign-ups are currently closed and this

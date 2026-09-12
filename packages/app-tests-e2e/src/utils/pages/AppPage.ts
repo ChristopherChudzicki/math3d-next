@@ -2,6 +2,7 @@ import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 import UserMenu from "./UserMenu";
 import SignoutPage from "./SignoutPage";
+import LoginDialog from "./LoginDialog";
 import DeleteAccountPage from "./DeleteAccountPage";
 import ItemSettings, { UniqueItemSettingsOpts } from "./ItemSettings";
 import SharePopover from "./SharePopover";
@@ -20,6 +21,10 @@ class AppPage {
 
   signoutPage(): SignoutPage {
     return new SignoutPage(this.page);
+  }
+
+  loginDialog(): LoginDialog {
+    return new LoginDialog(this.page);
   }
 
   sharePopover(): SharePopover {

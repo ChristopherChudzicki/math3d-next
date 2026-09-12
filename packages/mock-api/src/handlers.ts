@@ -145,7 +145,8 @@ export const handlers = [
         },
         { status: 400 },
       );
-    const { process, token } = (await request.json()) as {
+    const { provider, process, token } = (await request.json()) as {
+      provider?: string;
       process?: string;
       token?: { id_token?: string; client_id?: string };
     };
@@ -170,11 +171,15 @@ export const handlers = [
       );
     }
     // allauth resolves the provider's app *by* client_id, so a mismatch
-    // resolves no app at all and the token is rejected as invalid.
-    const configuredClientId: string =
-      import.meta.env?.VITE_GOOGLE_CLIENT_ID ?? "";
-    if (token.client_id !== configuredClientId) {
-      return badToken("invalid_token");
+    // resolves no app at all and the token is rejected as invalid. Only
+    // providers with `uses_apps` have an app to resolve: the dummy provider
+    // does not, and allauth neither requires nor reads a client_id for it.
+    if (provider !== "dummy") {
+      const configuredClientId: string =
+        import.meta.env?.VITE_GOOGLE_CLIENT_ID ?? "";
+      if (token.client_id !== configuredClientId) {
+        return badToken("invalid_token");
+      }
     }
     // The id_token is read as JSON claims, matching the dummy provider the e2e
     // suite signs in through. A real Google credential is a signed JWT that
