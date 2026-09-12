@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { allauthClient, toApiError, unwrap, v1Client } from "../util";
+import { resetOnAuthChange } from "../queryMeta";
 
 const keys = {
   userMe: ["me"],
@@ -32,7 +33,7 @@ const useProviderTokenLogin = () => {
         }),
       ),
     onSuccess: async () => {
-      await queryClient.resetQueries();
+      await resetOnAuthChange(queryClient);
     },
   });
 };
@@ -50,7 +51,7 @@ const useLogout = () => {
       throw toApiError(response, error);
     },
     onSuccess: async () => {
-      await queryClient.resetQueries();
+      await resetOnAuthChange(queryClient);
     },
   });
 };
@@ -84,7 +85,7 @@ const useUserMeDelete = () => {
   return useMutation({
     mutationFn: () => unwrap(v1Client.POST("/v1/auth/users/me/delete/")),
     onSuccess: async () => {
-      await queryClient.resetQueries();
+      await resetOnAuthChange(queryClient);
     },
   });
 };
