@@ -45,7 +45,7 @@ test("Signing in leaves unsaved edits to the open scene intact", async ({
     await app.userMenu().root.press("Escape");
   });
 
-  // Signing in refetched the scene before; the response overwrote Redux and
-  // took the edit with it.
+  // Sign-in must not refetch the scene: a refetch hands `useSceneLoader` a new
+  // object identity, which replaces Redux wholesale and drops the edit.
   await expect(item.field("description")).toHaveValue(editedDescription);
 });

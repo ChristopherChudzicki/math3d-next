@@ -4,9 +4,9 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import {
+  ApiError,
   dummyIdentity,
   dummyIdToken,
-  isApiError,
   useProviderTokenLogin,
 } from "@math3d/api";
 import styles from "./DummySignInForm.module.css";
@@ -50,22 +50,22 @@ const remember = (email: string): string[] => {
  * Sign in as an arbitrary local account, for development and the e2e suite.
  *
  * Sends the same mutation as the Google button, differing only in its
- * arguments, so exercising this exercises the real sign-in path. The address
- * is the whole identity — see `dummyIdentity` for why it also derives the uid
- * — so any address names an account and the same address always returns to it.
+ * arguments, so exercising this exercises the real sign-in path. The address is
+ * the whole identity — see `dummyIdentity` for why it also derives the uid — so
+ * an address returns to the same account on every use of this control.
  */
 const DummySignInForm: React.FC = () => {
   const [remembered, setRemembered] = useState(readRemembered);
   const [email, setEmail] = useState(() => remembered[0] ?? DEFAULT_EMAIL);
   const login = useProviderTokenLogin();
-  const [failed, setFailed] = useState(false);
+  const [failure, setFailure] = useState<string | null>(null);
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
       const address = email.trim();
       if (!address) return;
-      setFailed(false);
+      setFailure(null);
       try {
         await login.mutateAsync({
           provider: "dummy",
@@ -73,8 +73,10 @@ const DummySignInForm: React.FC = () => {
           id_token: dummyIdToken(dummyIdentity(address)),
         });
         setRemembered(remember(address));
-      } catch {
-        setFailed(true);
+      } catch (err) {
+        // No taxonomy here: the status plus the network response says more than
+        // a guess at the cause, and every case is a local-setup problem.
+        setFailure(err instanceof ApiError ? `HTTP ${err.status}` : "failed");
       }
     },
     [email, login],
@@ -101,11 +103,9 @@ const DummySignInForm: React.FC = () => {
       <Button type="submit" variant="outlined" disabled={login.isPending}>
         Sign in as dev user
       </Button>
-      {failed && (
+      {failure && (
         <Alert severity="error">
-          {isApiError(login.error, [403])
-            ? "Sign-ups are closed on this backend, so a new address cannot be used."
-            : "Dev sign-in failed. Is the backend running with IS_DEPLOYMENT=False?"}
+          Dev sign-in {failure}. See the network response for the cause.
         </Alert>
       )}
     </form>

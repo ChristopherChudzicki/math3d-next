@@ -4,8 +4,12 @@
  * The account is keyed on `uid`, not the address — allauth's `DummyProvider`
  * calls `str(data["id"])` — while `SOCIALACCOUNT_EMAIL_AUTHENTICATION` is off,
  * so a fresh uid carrying an address that already has an account is rejected
- * outright (401). Deriving both from the address keeps that state unreachable
- * and makes an address name the same account every time.
+ * outright (401). Deriving both from the address makes an address name the same
+ * account on every sign-in through this helper.
+ *
+ * Accounts whose uid came from anywhere else still collide: `seed_test_data`
+ * gives the static test user uid 2, which no address hashes to, so signing in
+ * as that address through this helper is a 401.
  */
 type DummyIdentity = {
   email: string;
