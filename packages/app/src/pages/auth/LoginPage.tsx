@@ -75,12 +75,6 @@ const LoginPage: React.FC = () => {
           onCredential={handleCredential}
           onUnavailable={handleUnavailable}
         />
-        {ENABLE_DUMMY_AUTH && (
-          <>
-            <Divider className={styles["dummy-divider"]}>or</Divider>
-            <DummySignInForm />
-          </>
-        )}
         {failure === "failed" && (
           <Alert severity="error">
             Google signed you in, but this site could not complete the sign-in.
@@ -96,6 +90,14 @@ const LoginPage: React.FC = () => {
             Could not load Google sign-in. A content blocker or network problem
             may be stopping it — allow accounts.google.com, then reload.
           </Alert>
+        )}
+        {/* Below the alerts: these belong to the Google button above, and a
+            control between the two reads as their owner. */}
+        {ENABLE_DUMMY_AUTH && (
+          <>
+            <Divider className={styles["dummy-divider"]}>or</Divider>
+            <DummySignInForm />
+          </>
         )}
       </div>
     </BasicDialog>

@@ -169,7 +169,8 @@ test("signing in leaves unsaved edits to the open scene intact", async () => {
 test("the dev sign-in control signs in as the address it is given", async () => {
   renderTestApp("/?overlay=login");
 
-  const email = await screen.findByLabelText("Dev sign-in email");
+  // Not an exact string: `required` appends an asterisk to the label.
+  const email = await screen.findByLabelText(/Dev sign-in email/);
   await user.clear(email);
   await user.type(email, "someone@example.com");
   await user.click(screen.getByRole("button", { name: "Sign in as dev user" }));

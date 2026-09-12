@@ -104,6 +104,7 @@ const DummySignInForm: React.FC = () => {
             label="Dev sign-in email"
             size="small"
             type="email"
+            required
           />
         )}
       />
