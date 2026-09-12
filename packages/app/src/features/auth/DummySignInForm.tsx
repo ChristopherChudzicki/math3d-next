@@ -15,9 +15,11 @@ const DEFAULT_EMAIL = "dev@example.com";
 const STORAGE_KEY = "math3d:dummy-auth-emails";
 const MAX_REMEMBERED = 8;
 
-// allauth resolves an app by client_id only for providers with `uses_apps`;
-// the dummy provider has none, so this value is accepted and never read.
-const IGNORED_CLIENT_ID = "dummy";
+// allauth resolves an app by client_id only for providers with `uses_apps`.
+// The dummy provider has none, so the field is required by the schema and never
+// read. Sending a placeholder beats relaxing the schema, which would drop the
+// requirement from the Google path, where a mismatch is the whole failure mode.
+const UNREAD_CLIENT_ID = "irrelevant";
 
 const readRemembered = (): string[] => {
   try {
@@ -69,14 +71,19 @@ const DummySignInForm: React.FC = () => {
       try {
         await login.mutateAsync({
           provider: "dummy",
-          client_id: IGNORED_CLIENT_ID,
+          client_id: UNREAD_CLIENT_ID,
           id_token: dummyIdToken(dummyIdentity(address)),
         });
         setRemembered(remember(address));
       } catch (err) {
-        // No taxonomy here: the status plus the network response says more than
-        // a guess at the cause, and every case is a local-setup problem.
-        setFailure(err instanceof ApiError ? `HTTP ${err.status}` : "failed");
+        // The raw body, not a classification of it. Every failure here is a
+        // local-setup problem read by whoever caused it, and allauth's own
+        // error codes say more than any copy we could map them to.
+        setFailure(
+          err instanceof ApiError
+            ? `${err.status} ${JSON.stringify(err.data)}`
+            : String(err),
+        );
       }
     },
     [email, login],
@@ -105,7 +112,7 @@ const DummySignInForm: React.FC = () => {
       </Button>
       {failure && (
         <Alert severity="error">
-          Dev sign-in {failure}. See the network response for the cause.
+          <code className={styles["dummy-error"]}>{failure}</code>
         </Alert>
       )}
     </form>
