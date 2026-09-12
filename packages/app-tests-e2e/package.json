@@ -15,7 +15,7 @@
     "@math3d/eslint-config": "workspace:^",
     "@math3d/mathitem-configs": "workspace:^",
     "@math3d/mock-api": "workspace:^",
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "^1.63.0",
     "@types/mailparser": "^3.4.6",
     "@types/node": "^24.0.0",
     "@types/three": "^0.146.0",
