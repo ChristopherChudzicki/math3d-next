@@ -94,8 +94,6 @@ const DeleteAccountPage: React.FC = () => {
           type="text"
           {...register("confirm")}
         />
-        {/* The confirmation phrase is the only field, so every server-side
-            failure lands on "root" with nowhere else to surface. */}
         {errors.root?.message ? (
           <Alert severity="error">{errors.root.message}</Alert>
         ) : null}
