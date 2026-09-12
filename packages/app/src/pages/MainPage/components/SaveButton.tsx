@@ -152,8 +152,6 @@ const SaveDialog: React.FC<SaveDialogProps> = ({
           label="Title"
           {...register("title")}
         />
-        {/* The title is the only field, so every server-side failure lands on
-            "root" with nowhere else to surface. */}
         {errors.root?.message ? (
           <Alert severity="error">{errors.root.message}</Alert>
         ) : null}
