@@ -48,7 +48,12 @@ const SaveDialog: React.FC<SaveDialogProps> = ({
     const title = duplicating ? `Copy of ${scene.title}` : scene.title;
     return { title };
   }, [scene.title, duplicating]);
-  const { register, handleSubmit, reset } = useValidatedForm({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useValidatedForm({
     schema,
     defaultValues,
   });
@@ -147,6 +152,11 @@ const SaveDialog: React.FC<SaveDialogProps> = ({
           label="Title"
           {...register("title")}
         />
+        {/* The title is the only field, so every server-side failure lands on
+            "root" with nowhere else to surface. */}
+        {errors.root?.message ? (
+          <Alert severity="error">{errors.root.message}</Alert>
+        ) : null}
       </form>
     </BasicDialog>
   );
