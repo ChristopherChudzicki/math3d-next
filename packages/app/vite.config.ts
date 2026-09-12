@@ -130,6 +130,10 @@ export default defineConfig({
       VITE_GOOGLE_CLIENT_ID: Schema.string(),
       VITE_APP_VERSION: Schema.string.optional(),
       VITE_DISPLAY_AUTH_FLOWS: Schema.string.optional(),
+      // Offer sign-in through allauth's dummy provider, which mints a session
+      // from an unsigned payload. The backend installs that provider only when
+      // IS_DEPLOYMENT is false; this keeps the button out of deployed bundles.
+      VITE_ENABLE_DUMMY_AUTH: Schema.string.optional(),
       VITE_SENTRY_DSN: Schema.string.optional(),
       // Serve the app against @math3d/mock-api instead of a real backend.
       VITE_USE_MSW: Schema.string.optional(),
@@ -176,6 +180,7 @@ export default defineConfig({
           environment: "jsdom",
           env: {
             VITE_DISPLAY_AUTH_FLOWS: "true",
+            VITE_ENABLE_DUMMY_AUTH: "true",
             VITE_GOOGLE_CLIENT_ID: "test-client-id.apps.googleusercontent.com",
           },
           exclude: ["**/playwright/**", "./src/worker/**"],

@@ -20,6 +20,7 @@ interface ImportMetaEnv {
   readonly VITE_GOOGLE_CLIENT_ID: string;
   readonly VITE_APP_VERSION?: string;
   readonly VITE_DISPLAY_AUTH_FLOWS?: string;
+  readonly VITE_ENABLE_DUMMY_AUTH?: string;
   readonly VITE_SENTRY_DSN?: string;
   readonly VITE_USE_MSW?: string;
 }
