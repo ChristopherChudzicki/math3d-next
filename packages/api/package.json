@@ -2,7 +2,10 @@
   "name": "@math3d/api",
   "version": "0.0.0",
   "private": true,
-  "exports": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./dev": "./src/dev/index.ts"
+  },
   "main": "./src/index.ts",
   "type": "module",
   "scripts": {

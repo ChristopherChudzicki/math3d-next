@@ -91,5 +91,3 @@ const useUserMeDelete = () => {
 };
 
 export { useProviderTokenLogin, useLogout, useUserMe, useUserMeDelete };
-export { dummyIdentity, dummyIdToken } from "./dummyIdentity";
-export type { DummyIdentity } from "./dummyIdentity";

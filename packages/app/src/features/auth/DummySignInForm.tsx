@@ -3,12 +3,8 @@ import Alert from "@mui/material/Alert";
 import Autocomplete from "@mui/material/Autocomplete";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import {
-  ApiError,
-  dummyIdentity,
-  dummyIdToken,
-  useProviderTokenLogin,
-} from "@math3d/api";
+import { ApiError, useProviderTokenLogin } from "@math3d/api";
+import { dummyIdentity, dummyIdToken } from "@math3d/api/dev";
 import styles from "./DummySignInForm.module.css";
 
 const DEFAULT_EMAIL = "dev@example.com";
