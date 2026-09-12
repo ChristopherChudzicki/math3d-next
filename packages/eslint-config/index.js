@@ -65,6 +65,9 @@ module.exports = {
           "**/src/test_util/**/*.ts",
           "**/src/test_util/**/*.tsx",
         ],
+        // Workspace packages are consumed as TS source, so a type-only import
+        // is as load-bearing for a consumer's build as a value import.
+        includeTypes: true,
       },
     ],
     "no-underscore-dangle": ["off"],

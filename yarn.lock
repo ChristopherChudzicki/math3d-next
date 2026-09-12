@@ -8713,6 +8713,7 @@ __metadata:
     react-redux: "npm:^9.1.0"
     react-router: "npm:^7.18.0"
     react-router-dom: "npm:^7.18.3"
+    redux: "npm:^5.0.1"
     rollup-plugin-visualizer: "npm:5.14.0"
     showdown: "npm:^2.1.0"
     tarjan-graph: "npm:3.0.0"
