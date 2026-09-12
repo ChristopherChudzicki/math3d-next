@@ -21,7 +21,7 @@
     "@types/three": "^0.146.0",
     "envalid": "^8.0.0",
     "eslint": "^8.57.1",
-    "mailparser": "^3.9.15",
+    "mailparser": "^3.9.25",
     "mathlive": "^0.110.0",
     "p-retry": "^6.2.1",
     "sharp": "^0.35.4",
