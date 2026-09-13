@@ -8625,7 +8625,7 @@ __metadata:
     "@types/three": "npm:^0.146.0"
     envalid: "npm:^8.0.0"
     eslint: "npm:^8.57.1"
-    mailparser: "npm:^3.9.25"
+    mailparser: "npm:^3.9.26"
     mathlive: "npm:^0.110.0"
     p-retry: "npm:^6.2.1"
     sharp: "npm:^0.35.4"
@@ -16374,9 +16374,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mailparser@npm:^3.9.25":
-  version: 3.9.25
-  resolution: "mailparser@npm:3.9.25"
+"mailparser@npm:^3.9.26":
+  version: 3.9.26
+  resolution: "mailparser@npm:3.9.26"
   dependencies:
     "@zone-eu/mailsplit": "npm:5.4.16"
     encoding-japanese: "npm:2.3.0"
@@ -16385,10 +16385,10 @@ __metadata:
     iconv-lite: "npm:0.7.3"
     libmime: "npm:5.4.3"
     linkify-it: "npm:5.0.2"
-    nodemailer: "npm:10.0.8"
+    nodemailer: "npm:10.0.9"
     punycode.js: "npm:2.3.1"
     tlds: "npm:1.261.0"
-  checksum: 10/5d28bc06dc0421e6700b7d8fe67626e893c1d0b519c9f4b18fbe010a4f6387c2c38f68d0067858bbfd28fd0a2340aaa8a5c3efef9dacf84baf3572dee9370642
+  checksum: 10/b279da398840132c06b95ca180b4ce68c20ad51ab7a2557bb185f61e12b3ae2ad743333f036a056d2fa94be10f624af718f1fa652a0c777a11abfd79bca61cf7
   languageName: node
   linkType: hard
 
@@ -17343,10 +17343,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:10.0.8":
-  version: 10.0.8
-  resolution: "nodemailer@npm:10.0.8"
-  checksum: 10/65bafbb5ee75ee72b2683d88e3919fd3aa971c86f4454a885afa252928cfb60bf951996ca020032c5ce3f7f018d91687d4e03aac27eb8960d086dbaffef82928
+"nodemailer@npm:10.0.9":
+  version: 10.0.9
+  resolution: "nodemailer@npm:10.0.9"
+  checksum: 10/8e758c61612ad87fa1ef8b292277511c0c293edf1b35527bd46bf0b22550f2a2d93abe0cb897a0b4d3047dbd80d522e7e45f7c2c857a66c00c74db6f86c30f9a
   languageName: node
   linkType: hard
 
