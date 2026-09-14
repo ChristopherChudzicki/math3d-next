@@ -62,7 +62,7 @@ const version = import.meta.env.VITE_APP_VERSION; // Set at build time
 **Backend** (`webserver/main/settings.py`):
 
 ```python
-APP_VERSION = os.environ.get('APP_VERSION', 'unknown')  # Set at runtime
+APP_VERSION = os.environ.get("APP_VERSION", "unknown")  # Set at runtime
 ```
 
 ## Architecture
