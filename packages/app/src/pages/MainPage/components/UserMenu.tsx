@@ -9,7 +9,6 @@ import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import type { BadgeProps } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import PersonIcon from "@mui/icons-material/Person";
-import { DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import type { AuthStatus } from "@/features/auth";
 import styles from "./UserMenu.module.css";
 
@@ -25,11 +24,14 @@ const UserMenu: React.FC<{
 }> = ({ items, authStatus, className }) => {
   const [visible, setVisible] = useState(false);
 
-  const useHamburger = !DISPLAY_AUTH_FLOWS && authStatus !== "authenticated";
-  // The hamburger (no user, auth flows hidden) and the avatar (signed-in user)
-  // carry distinct accessible names: they open different menus, and the name
-  // difference lets tests await the avatar specifically rather than matching
-  // the hamburger that is shown transiently while the ["me"] query resolves.
+  // A person avatar would tell a visitor with no account that they have one,
+  // and on desktop it duplicates the header's own "Sign in" button; their menu
+  // is mostly general navigation. The pending ["me"] query keeps the hamburger,
+  // so the majority case — an anonymous visitor — never sees the icon change.
+  const useHamburger = authStatus !== "authenticated";
+  // The two triggers carry distinct accessible names: they open different
+  // menus, and the name difference lets tests await the avatar specifically
+  // rather than matching the hamburger shown while the ["me"] query resolves.
   const trigger = useHamburger ? (
     <IconButton aria-label="Open Menu" color="inherit">
       <MenuIcon />
@@ -55,7 +57,7 @@ const UserMenu: React.FC<{
     <SimpleMenu
       onVisibilityChange={setVisible}
       items={items}
-      aria-label="User Menu"
+      aria-label={useHamburger ? "Menu" : "User Menu"}
       className={className}
       trigger={trigger}
     />
