@@ -285,7 +285,9 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {"email"}
 # Social-only: allauth unregisters every password URL (login, signup, password
 # reset, email verification, password change) and refuses to boot unless email
-# verification is off — the provider already asserts a verified address.
+# verification is off. What makes that safe is the provider's verified
+# assertion, which CustomSocialAccountAdapter.pre_social_login enforces —
+# auth/provider/signup stays mounted either way.
 SOCIALACCOUNT_ONLY = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
 # Derives SOCIALACCOUNT_EMAIL_REQUIRED: trimming this lets an ID token with no
@@ -300,6 +302,9 @@ SOCIALACCOUNT_ADAPTER = "authentication.adapter.CustomSocialAccountAdapter"
 SOCIALACCOUNT_PROVIDERS = {
     "google": {"APP": {"client_id": ENV.GOOGLE_CLIENT_ID, "secret": ""}},
 }
+# Pinned rather than left to the default: off, allauth routes every login
+# through provider/signup, whose form takes any unused address.
+SOCIALACCOUNT_AUTO_SIGNUP = True
 # Never adopt an existing account just because a provider asserts its email
 # address. Both spellings matter — see main/settings_test.py.
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = False

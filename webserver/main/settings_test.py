@@ -534,6 +534,18 @@ def test_google_app_reads_the_client_id_from_the_environment(monkeypatch):
     assert app["secret"] == ""
 
 
+def test_the_signup_form_is_never_reached(monkeypatch):
+    """
+    With auto-signup off, allauth routes every provider login through
+    provider/signup, whose form takes any unused address without comparing it
+    to the provider's — the hole CustomSocialAccountAdapter closes. The adapter
+    refuses that path outright, so this pins the setting that keeps the refusal
+    from firing on every sign-in.
+    """
+    loaded = load_settings(monkeypatch, **DEPLOY_ENV)
+    assert loaded.SOCIALACCOUNT_AUTO_SIGNUP is True
+
+
 def test_provider_identities_are_never_linked_by_email(monkeypatch):
     """
     Email-based linking would let anyone who controls an address take over the
