@@ -9,7 +9,7 @@ import { faker } from "@faker-js/faker/locale/en";
 // The account the dev control will sign into. Created up front so the fixture
 // owns its cleanup: signing up through the UI would leave an account behind.
 // The uid has to be the one the app derives from the address, or allauth sees
-// an unknown identity claiming a taken address and refuses it (401).
+// an unknown identity claiming a taken address and refuses it (400).
 const signInUser = dummyIdentity(makeUserIdentity().email);
 
 test("Signing in leaves unsaved edits to the open scene intact", async ({
