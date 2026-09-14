@@ -39,6 +39,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         Refusing here — before `process_signup` stashes anything — leaves that
         route nothing to resume.
         """
+        super().pre_social_login(request, sociallogin)
         if sociallogin.is_existing:
             return
         if sociallogin.state.get("process") == AuthProcess.CONNECT:
@@ -56,8 +57,6 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         # by `createsuperuser`.
         if assess_unique_email(addresses[0].email) is not True:
             raise self.validation_error("email_taken", provider)
-
-        super().pre_social_login(request, sociallogin)
 
     def save_user(self, request, sociallogin, form=None):
         """Never let the signup form supply the address.

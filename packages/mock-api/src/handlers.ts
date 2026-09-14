@@ -209,8 +209,9 @@ export const handlers = [
           errors: [
             {
               code: "email_taken",
-              message:
-                "An account already exists with this email address. Please sign in to that account first, then connect your Dummy account.",
+              // allauth interpolates `sociallogin.provider.name`, which is the
+              // provider id title-cased for both providers this handler serves.
+              message: `An account already exists with this email address. Please sign in to that account first, then connect your ${(provider ?? "").replace(/^./, (c) => c.toUpperCase())} account.`,
             },
           ],
         },
