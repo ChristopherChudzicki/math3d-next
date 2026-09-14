@@ -14,6 +14,7 @@ from allauth.socialaccount.adapter import get_adapter as get_socialaccount_adapt
 from allauth.socialaccount.models import SocialAccount, SocialApp
 from django.conf import settings
 from django.contrib import admin
+from django.core.exceptions import ImproperlyConfigured
 from django.test import Client, override_settings
 
 from authentication.factories import CustomUserFactory
@@ -203,9 +204,10 @@ def test_provider_signup_cannot_resume_a_refused_collision():
         user=existing, email=existing.email, verified=True, primary=True
     )
     client = Client()
-    client.post(
+    refused = client.post(
         TOKEN_URL, _payload(777, existing.email), content_type="application/json"
     )
+    assert refused.status_code == 400
 
     response = client.post(
         SIGNUP_URL,
@@ -273,3 +275,29 @@ def test_linking_a_second_identity_is_not_mistaken_for_a_collision():
     user = CustomUser.objects.get(email="links@example.com")
     assert SocialAccount.objects.filter(user=user).count() == 2
     assert CustomUser.objects.count() == 1
+
+
+@pytest.mark.django_db
+@override_settings(ENABLE_REGISTRATION=True, SOCIALACCOUNT_AUTO_SIGNUP=False)
+def test_the_signup_form_can_never_supply_the_address():
+    """
+    The invariant must not rest on SOCIALACCOUNT_AUTO_SIGNUP's default. Off, an
+    address the provider asserted is no longer enough to create the account —
+    allauth stashes every login and waits for the form instead, which takes any
+    unused address. save_user refuses rather than let the form's value through.
+    """
+    client = Client()
+    client.post(
+        TOKEN_URL,
+        _payload(333, "newcomer@example.com"),
+        content_type="application/json",
+    )
+
+    with pytest.raises(ImproperlyConfigured):
+        client.post(
+            SIGNUP_URL,
+            {"email": "unclaimed@example.com"},
+            content_type="application/json",
+        )
+
+    assert not CustomUser.objects.exists()

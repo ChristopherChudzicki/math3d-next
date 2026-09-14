@@ -3,6 +3,7 @@ from allauth.account.internal.flows.manage_email import assess_unique_email
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.providers.base.constants import AuthProcess
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import gettext_lazy as _
 
 
@@ -55,3 +56,20 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         # by `createsuperuser`.
         if assess_unique_email(addresses[0].email) is not True:
             raise self.validation_error("email_taken", provider)
+
+        super().pre_social_login(request, sociallogin)
+
+    def save_user(self, request, sociallogin, form=None):
+        """Never let the signup form supply the address.
+
+        The base takes a form only on the `provider/signup` path, so refusing
+        one holds the second half of the invariant — that the address stored is
+        the provider's — without depending on SOCIALACCOUNT_AUTO_SIGNUP, which
+        routes every login through that form when off.
+        """
+        if form is not None:
+            raise ImproperlyConfigured(
+                "provider/signup reached: an account's address must come from "
+                "the provider, so SOCIALACCOUNT_AUTO_SIGNUP cannot be turned off."
+            )
+        return super().save_user(request, sociallogin, form=form)

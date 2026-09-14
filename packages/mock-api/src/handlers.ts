@@ -200,9 +200,22 @@ export const handlers = [
     const linked = db.user.findFirst({ where: { uid: { equals: uid } } });
     if (!linked && db.user.findFirst({ where: { email: { equals: email } } })) {
       // The address already has an account this identity is not linked to.
-      // allauth stages a pending signup behind this 401 rather than adopting
-      // the account; the SPA branches on the status alone.
-      return new HttpResponse(null, { status: 401 });
+      // CustomSocialAccountAdapter.pre_social_login refuses rather than adopt
+      // the account, and ProviderTokenView renders that as allauth's error
+      // envelope. No `param`: the error is raised outside form input.
+      return HttpResponse.json(
+        {
+          status: 400,
+          errors: [
+            {
+              code: "email_taken",
+              message:
+                "An account already exists with this email address. Please sign in to that account first, then connect your Dummy account.",
+            },
+          ],
+        },
+        { status: 400 },
+      );
     }
     currentUserId = (linked ?? db.user.create({ uid, email })).id;
     // The SPA branches on the status alone and reads nothing out of allauth's

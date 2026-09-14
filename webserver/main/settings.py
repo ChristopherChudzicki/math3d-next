@@ -302,6 +302,9 @@ SOCIALACCOUNT_ADAPTER = "authentication.adapter.CustomSocialAccountAdapter"
 SOCIALACCOUNT_PROVIDERS = {
     "google": {"APP": {"client_id": ENV.GOOGLE_CLIENT_ID, "secret": ""}},
 }
+# Pinned rather than left to the default: off, allauth routes every login
+# through provider/signup, whose form takes any unused address.
+SOCIALACCOUNT_AUTO_SIGNUP = True
 # Never adopt an existing account just because a provider asserts its email
 # address. Both spellings matter — see main/settings_test.py.
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = False
