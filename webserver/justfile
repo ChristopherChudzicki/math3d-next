@@ -26,3 +26,12 @@ test *args:
 # Run MyPy typechecker
 typecheck:
     uv run mypy .
+
+# Run Django's system checks. `--fail-level WARNING` because allauth reports
+# its deprecated and renamed settings as `Warning`s.
+check:
+    uv run ./manage.py check --fail-level WARNING
+
+# Fail if a model change has no migration
+check_migrations:
+    uv run ./manage.py makemigrations --check --dry-run

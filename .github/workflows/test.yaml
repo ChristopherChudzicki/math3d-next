@@ -80,6 +80,10 @@ jobs:
         uses: extractions/setup-just@v4
       - name: Install python dependencies
         run: just setup_python
+      - name: Django system checks
+        run: just check
+      - name: Check for missing migrations
+        run: just check_migrations
       - name: Check v1 OpenAPI up-to-date
         run: ./scripts/test/openapi_v1_spec_check.sh
       - name: Check allauth OpenAPI up-to-date
