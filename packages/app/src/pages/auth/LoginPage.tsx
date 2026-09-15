@@ -1,95 +1,104 @@
-import React, { useCallback, useEffect, useId } from "react";
-import TextField from "@mui/material/TextField";
-import MuiLink from "@mui/material/Link";
-import { useForm } from "react-hook-form";
-import { useLogin } from "@math3d/api";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { useAuthStatus } from "@/features/auth";
-import { OverallError, setFieldErrors } from "@/util/forms";
+import React, { useCallback, useEffect, useState } from "react";
+import Alert from "@mui/material/Alert";
+import Link from "@mui/material/Link";
+import * as Sentry from "@sentry/react";
+import { useProviderTokenLogin } from "@math3d/api";
+import Divider from "@mui/material/Divider";
+import {
+  DummySignInForm,
+  ENABLE_DUMMY_AUTH,
+  GOOGLE_CLIENT_ID,
+  GoogleSignInButton,
+  useAuthStatus,
+} from "@/features/auth";
 import BasicDialog from "@/util/components/BasicDialog";
 import { useOverlay } from "@/features/overlays/useOverlay";
-import styles from "./styles.module.css";
+import styles from "./LoginPage.module.css";
 
-const schema = yup.object({
-  email: yup.string().email().required(),
-  password: yup.string().required(),
-});
+type LoginFailure = "failed" | "script-unavailable";
+
+const ISSUE_URL = import.meta.env.VITE_ISSUE_URL;
 
 const LoginPage: React.FC = () => {
-  const { open, close } = useOverlay();
+  const { close } = useOverlay();
   const isAuthenticated = useAuthStatus();
-  const resolver = yupResolver(schema);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setError,
-  } = useForm({ resolver });
-
   const handleClose = useCallback(() => close(), [close]);
-  const formId = useId();
-  const login = useLogin();
+  const login = useProviderTokenLogin();
+  const [failure, setFailure] = useState<LoginFailure | null>(null);
+
   useEffect(() => {
     if (isAuthenticated === "authenticated") {
       close();
     }
   }, [isAuthenticated, close]);
+
+  const handleCredential = useCallback(
+    async (credential: string) => {
+      setFailure(null);
+      try {
+        await login.mutateAsync({
+          provider: "google",
+          client_id: GOOGLE_CLIENT_ID,
+          id_token: credential,
+        });
+        // mutateAsync awaits onSuccess, which resets queries (including
+        // useUserMe), so auth status is already up-to-date.
+        handleClose();
+      } catch (err) {
+        // One message for every rejection. Each cause needs a configured
+        // deployment to be unreachable rather than merely unlikely, so Sentry
+        // is where they are told apart — which means capturing all of them,
+        // including the ones a user could in principle provoke.
+        setFailure("failed");
+        Sentry.captureException(err);
+      }
+    },
+    [login, handleClose],
+  );
+
+  const handleUnavailable = useCallback(
+    () => setFailure("script-unavailable"),
+    [],
+  );
+
   return (
     <BasicDialog
       title="Sign in"
       open
       onClose={handleClose}
-      confirmText="Sign in"
-      confirmButtonProps={{ type: "submit", form: formId }}
+      confirmButton={null}
       fullWidth
       maxWidth="xs"
     >
-      <form
-        className={styles["form-content"]}
-        id={formId}
-        onSubmit={handleSubmit(async (data, event) => {
-          event?.preventDefault();
-          try {
-            await login.mutateAsync(data, {});
-            // mutateAsync awaits onSuccess which resets queries (including
-            // useUserMe), so auth status is already up-to-date.
-            handleClose();
-          } catch (err) {
-            setFieldErrors(data, err, setError);
-          }
-        })}
-      >
-        <TextField
-          label="Email"
-          error={!!errors.email?.message}
-          helperText={errors.email?.message}
-          {...register("email")}
+      <div className={styles["sign-in-content"]}>
+        <GoogleSignInButton
+          onCredential={handleCredential}
+          onUnavailable={handleUnavailable}
         />
-        <TextField
-          error={!!errors.password?.message}
-          helperText={errors.password?.message}
-          label="Password"
-          type="password"
-          {...register("password")}
-        />
-        <OverallError error={errors.root} />
-      </form>
-      <div className={styles["sign-in-footer"]}>
-        <MuiLink
-          component="button"
-          type="button"
-          onClick={() => open("reset-request")}
-        >
-          Forgot password?
-        </MuiLink>
-        <MuiLink
-          component="button"
-          type="button"
-          onClick={() => open("register")}
-        >
-          Create Account
-        </MuiLink>
+        {failure === "failed" && (
+          <Alert severity="error">
+            Google signed you in, but this site could not complete the sign-in.
+            Please try again, and{" "}
+            <Link href={ISSUE_URL} target="_blank" rel="noreferrer">
+              get in touch
+            </Link>{" "}
+            if it keeps happening.
+          </Alert>
+        )}
+        {failure === "script-unavailable" && (
+          <Alert severity="error">
+            Could not load Google sign-in. A content blocker or network problem
+            may be stopping it — allow accounts.google.com, then reload.
+          </Alert>
+        )}
+        {/* Below the alerts: these belong to the Google button above, and a
+            control between the two reads as their owner. */}
+        {ENABLE_DUMMY_AUTH && (
+          <>
+            <Divider className={styles["dummy-divider"]}>or</Divider>
+            <DummySignInForm />
+          </>
+        )}
       </div>
     </BasicDialog>
   );

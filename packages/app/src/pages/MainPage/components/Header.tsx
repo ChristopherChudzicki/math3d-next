@@ -13,10 +13,10 @@ import { useOverlay } from "@/features/overlays/useOverlay";
 import type { OverlayName } from "@/features/overlays/useOverlay";
 import Button from "@mui/material/Button";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ListIcon from "@mui/icons-material/List";
 import type { SimpleMenuItem } from "@/util/components/SimpleMenu/SimpleMenu";
-import { useUserMe, User } from "@math3d/api";
+import { useUserMe } from "@math3d/api";
 import ListSubheader from "@mui/material/ListSubheader";
 import FunctionsIcon from "@mui/icons-material/Functions";
 
@@ -29,24 +29,14 @@ const LoginButtons: React.FC<{
   const { open } = useOverlay();
   if (isAuthenticated !== "unauthenticated" || !DISPLAY_AUTH_FLOWS) return null;
   return (
-    <>
-      <Button
-        variant="text"
-        color="secondary"
-        onClick={() => open("register")}
-        startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
-      >
-        Sign up
-      </Button>
-      <Button
-        variant="text"
-        color="secondary"
-        onClick={() => open("login")}
-        startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
-      >
-        Sign in
-      </Button>
-    </>
+    <Button
+      variant="text"
+      color="secondary"
+      onClick={() => open("login")}
+      startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
+    >
+      Sign in
+    </Button>
   );
 };
 
@@ -57,13 +47,15 @@ type FilterableItem = SimpleMenuItem & {
   shouldShow: boolean;
 };
 const getItems = ({
-  user,
+  authStatus,
+  email,
   open,
 }: {
-  user?: User | null;
+  authStatus: AuthStatus;
+  email?: string;
   open: (name: OverlayName, companion?: { list?: string }) => void;
 }): FilterableItem[] => {
-  const isAuthenticated = !!user;
+  const isAuthenticated = authStatus === "authenticated";
   return [
     {
       element: (
@@ -77,7 +69,7 @@ const getItems = ({
             lineHeight: "unset",
           }}
         >
-          {user?.email}
+          {email}
         </ListSubheader>
       ),
       shouldShow: isAuthenticated,
@@ -88,15 +80,10 @@ const getItems = ({
       label: "Sign in",
       icon: <AccountCircleOutlinedIcon fontSize="small" />,
       onClick: () => open("login"),
-      shouldShow: !isAuthenticated && DISPLAY_AUTH_FLOWS,
-    },
-    {
-      type: "button",
-      label: "Sign up",
-      key: "signup",
-      icon: <AccountCircleOutlinedIcon fontSize="small" />,
-      onClick: () => open("register"),
-      shouldShow: !isAuthenticated && DISPLAY_AUTH_FLOWS,
+      // Not `!isAuthenticated`: while the me-query is still in flight the
+      // answer is unknown, and offering to sign in is the wrong guess for a
+      // user who already has a session.
+      shouldShow: authStatus === "unauthenticated" && DISPLAY_AUTH_FLOWS,
     },
     {
       type: "button",
@@ -136,10 +123,10 @@ const getItems = ({
     },
     {
       type: "button",
-      label: "Account Settings",
-      key: "settings",
-      icon: <ManageAccountsIcon fontSize="small" />,
-      onClick: () => open("settings"),
+      label: "Delete Account",
+      key: "delete-account",
+      icon: <DeleteForeverIcon fontSize="small" />,
+      onClick: () => open("delete-account"),
       shouldShow: isAuthenticated,
     },
     {
@@ -164,10 +151,12 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
   const { open } = useOverlay();
   const filteredItems = useMemo(
     () =>
-      getItems({ user: userQuery.data, open }).filter(
-        (item) => !!item.shouldShow,
-      ),
-    [userQuery.data, open],
+      getItems({
+        authStatus: isAuthenticated,
+        email: userQuery.data?.email,
+        open,
+      }).filter((item) => !!item.shouldShow),
+    [isAuthenticated, userQuery.data, open],
   );
   return (
     <Header
@@ -179,7 +168,7 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
           {smallScreen ? null : (
             <LoginButtons isAuthenticated={isAuthenticated} />
           )}
-          <UserMenu items={filteredItems} user={userQuery.data} />
+          <UserMenu items={filteredItems} authStatus={isAuthenticated} />
         </>
       }
     />

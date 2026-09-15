@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-  "/_allauth/browser/v1/account/password/change": {
+  "/_allauth/browser/v1/auth/provider/token": {
     parameters: {
       query?: never;
       header?: never;
@@ -14,117 +14,15 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * Change password
-     * @description In order to change the password of an account, the current and new
-     *     password must be provider.  However, accounts that were created by
-     *     signing up using a third-party provider do not have a password set. In
-     *     that case, the current password is not required.
+     * Provider token
+     * @description Authenticates with a third-party provider using provider tokens received
+     *     by other means. For example, in case of a mobile app, the authentication
+     *     flow runs completely on the device itself, without any interaction with
+     *     the API. Then, when the (device) authentication completes and the mobile
+     *     app receives an access and/or ID token, it can hand over these tokens
+     *     via this endpoint to authenticate on the server.
      */
-    post: operations["changePassword"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/_allauth/browser/v1/auth/email/verify": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Verify an email
-     * @description Complete the email verification process. Depending on the configuration,
-     *     email addresses are either verified by opening a link that is sent to
-     *     their email address, or, by inputting a code that is sent. On the API,
-     *     both cases are handled identically. Meaning, the required key is either
-     *     the one from the link, or, the code itself.
-     *
-     *     Note that a status code of 401 does not imply failure. It indicates that
-     *     the email verification was successful, yet, the user is still not signed
-     *     in. For example, in case `ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION` is set to
-     *     `False`, a 401 is returned when verifying as part of login/signup.
-     */
-    post: operations["verifyEmail"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/_allauth/browser/v1/auth/login": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Login
-     * @description Login using a username-password or email-password combination.
-     */
-    post: operations["login"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/_allauth/browser/v1/auth/password/request": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Request password
-     * @description Initiates the password reset procedure. Depending on whether or not
-     *     `ACCOUNT_PASSWORD_RESET_BY_CODE_ENABLED` is `True`, the procedure is
-     *     either stateless or stateful.
-     *
-     *     In case codes are used, it is stateful, and a new
-     *     `password_reset_by_code` flow is started. In this case, on a successful
-     *     password reset request, you will receive a 401 indicating the pending
-     *     status of this flow.
-     *
-     *     In case password reset is configured to use (stateless) links, you will
-     *     receive a 200 on a successful password reset request.
-     */
-    post: operations["requestPassword"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/_allauth/browser/v1/auth/password/reset": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Reset password
-     * @description Perform the password reset, by handing over the password reset key and
-     *     the new password. After successfully completing the password reset, the
-     *     user is either logged in (in case `ACCOUNT_LOGIN_ON_PASSWORD_RESET` is
-     *     `True`), or, the user will need to proceed to the login page.  In case
-     *     of the former, a `200` status code is returned, in case of the latter a
-     *     401.
-     */
-    post: operations["resetPassword"];
+    post: operations["providerToken"];
     delete?: never;
     options?: never;
     head?: never;
@@ -146,29 +44,6 @@ export interface paths {
      * @description Logs out the user from the current session.
      */
     delete: operations["logout"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/_allauth/browser/v1/auth/signup": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Signup
-     * @description Whether or not `username`, `email`, `phone` or combination of those are
-     *     required depends on the configuration of django-allauth. Additionally,
-     *     if a custom signup form is used there may be other custom properties
-     *     required.
-     */
-    post: operations["signup"];
-    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -258,14 +133,8 @@ export interface components {
       /** @description The session token (`app` clients only). */
       session_token?: string;
     };
-    BaseSignup: {
-      email: components["schemas"]["Email"];
-      public_nickname?: string;
-    };
-    ConflictResponse: {
-      /** @enum {integer} */
-      status: 409;
-    };
+    /** @description The client ID (in case of OAuth2 or OpenID Connect based providers) */
+    ClientID: string;
     /** @description The email address. */
     Email: string;
     ErrorResponse: {
@@ -304,23 +173,18 @@ export interface components {
       /** @enum {integer} */
       status: 403;
     };
-    Login: {
-      password: components["schemas"]["Password"];
-    } & (
-      | {
-          username: components["schemas"]["Username"];
-        }
-      | {
-          email: components["schemas"]["Email"];
-        }
-      | {
-          phone: components["schemas"]["Phone"];
-        }
-    );
-    /** @description The password. */
-    Password: string;
     /** @description The phone number. */
     Phone: string;
+    /**
+     * @description The process to be executed when the user successfully
+     *     authenticates. When set to `login`, the user will be logged into the
+     *     account to which the provider account is connected, or if no such
+     *     account exists, a signup will occur. If set to `connect`, the provider
+     *     account will be connected to the list of provider accounts for the
+     *     currently authenticated user.
+     * @enum {string}
+     */
+    Process: "login" | "connect";
     Provider: {
       /** @description The client ID (in case of OAuth2 or OpenID Connect based providers) */
       client_id?: string;
@@ -337,16 +201,17 @@ export interface components {
     ProviderAccountID: string;
     /** @description The provider ID. */
     ProviderID: string;
-    RequestPassword: {
-      email: components["schemas"]["Email"];
-    };
-    ResetPassword: {
-      /** @description The password reset key */
-      key: string;
-      password: components["schemas"]["Password"];
-    };
-    Signup: components["schemas"]["BaseSignup"] & {
-      password: components["schemas"]["Password"];
+    ProviderToken: {
+      process: components["schemas"]["Process"];
+      provider: components["schemas"]["ProviderID"];
+      /** @description The token. */
+      token: {
+        /** @description The access token. */
+        access_token?: string;
+        client_id: components["schemas"]["ClientID"];
+        /** @description The ID token. */
+        id_token?: string;
+      };
     };
     /** @enum {integer} */
     StatusOK: 200;
@@ -364,10 +229,6 @@ export interface components {
     };
     /** @description The username. */
     Username: string;
-    VerifyEmail: {
-      /** @description The email verification key */
-      key: string;
-    };
   };
   responses: {
     /** @description The user is authenticated. */
@@ -377,44 +238,6 @@ export interface components {
       };
       content: {
         "application/json": components["schemas"]["AuthenticatedResponse"];
-      };
-    };
-    /** @description Authenticated by password. */
-    AuthenticatedByPassword: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": components["schemas"]["AuthenticatedResponse"];
-      };
-    };
-    /** @description Not authenticated. */
-    Authentication: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": components["schemas"]["AuthenticationResponse"];
-      };
-    };
-    /** @description An input error occurred. */
-    Error: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": components["schemas"]["ErrorResponse"];
-      };
-    };
-    /** @description A success response. */
-    StatusOK: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": {
-          status: components["schemas"]["StatusOK"];
-        };
       };
     };
     /** @description There is no authenticated session. */
@@ -429,41 +252,9 @@ export interface components {
   };
   parameters: never;
   requestBodies: {
-    ChangePassword: {
+    ProviderToken: {
       content: {
-        "application/json": {
-          current_password?: components["schemas"]["Password"];
-          /** @description The current password. */
-          new_password: string;
-        };
-      };
-    };
-    /** @description Login. */
-    Login: {
-      content: {
-        "application/json": components["schemas"]["Login"];
-      };
-    };
-    /** @description Request password. */
-    RequestPassword: {
-      content: {
-        "application/json": components["schemas"]["RequestPassword"];
-      };
-    };
-    ResetPassword: {
-      content: {
-        "application/json": components["schemas"]["ResetPassword"];
-      };
-    };
-    /** @description Signup */
-    Signup: {
-      content: {
-        "application/json": components["schemas"]["Signup"];
-      };
-    };
-    VerifyEmail: {
-      content: {
-        "application/json": components["schemas"]["VerifyEmail"];
+        "application/json": components["schemas"]["ProviderToken"];
       };
     };
   };
@@ -472,27 +263,14 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  changePassword: {
+  providerToken: {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    requestBody?: components["requestBodies"]["ChangePassword"];
-    responses: {
-      400: components["responses"]["Error"];
-      401: components["responses"]["Authentication"];
-    };
-  };
-  verifyEmail: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: components["requestBodies"]["VerifyEmail"];
+    requestBody: components["requestBodies"]["ProviderToken"];
     responses: {
       200: components["responses"]["Authenticated"];
       /** @description An input error occurred. */
@@ -504,142 +282,7 @@ export interface operations {
           "application/json": components["schemas"]["ErrorResponse"];
         };
       };
-      401: components["responses"]["Unauthenticated"];
-      /** @description Conflict. The email verification (by code) flow is not pending. */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ConflictResponse"];
-        };
-      };
-    };
-  };
-  login: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: components["requestBodies"]["Login"];
-    responses: {
-      200: components["responses"]["AuthenticatedByPassword"];
-      /** @description An input error occurred. */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description Not authenticated. */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AuthenticationResponse"];
-        };
-      };
-      /** @description Conflict. For example, when logging in when a user is already logged in. */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ConflictResponse"];
-        };
-      };
-    };
-  };
-  requestPassword: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: components["requestBodies"]["RequestPassword"];
-    responses: {
-      200: components["responses"]["StatusOK"];
-      /** @description An input error occurred. */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      401: components["responses"]["Authentication"];
-    };
-  };
-  resetPassword: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: components["requestBodies"]["ResetPassword"];
-    responses: {
-      200: components["responses"]["AuthenticatedByPassword"];
-      /** @description An input error occurred. */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      401: components["responses"]["Authentication"];
-      /** @description Conflict. There is no password reset (by code) flow pending. */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ConflictResponse"];
-        };
-      };
-    };
-  };
-  logout: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      401: components["responses"]["Unauthenticated"];
-    };
-  };
-  signup: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: components["requestBodies"]["Signup"];
-    responses: {
-      200: components["responses"]["AuthenticatedByPassword"];
-      /** @description An input error occurred. */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description Not authenticated. */
+      /** @description Not authenticated, more steps are required to be completed. */
       401: {
         headers: {
           [name: string]: unknown;
@@ -657,15 +300,18 @@ export interface operations {
           "application/json": components["schemas"]["ForbiddenResponse"];
         };
       };
-      /** @description Conflict. For example, when signing up while user is logged in. */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ConflictResponse"];
-        };
-      };
+    };
+  };
+  logout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      401: components["responses"]["Unauthenticated"];
     };
   };
 }

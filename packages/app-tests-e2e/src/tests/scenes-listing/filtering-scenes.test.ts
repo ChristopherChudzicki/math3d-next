@@ -1,10 +1,11 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
-import { SceneBuilder, makeUserInfo } from "@math3d/mock-api";
+import { SceneBuilder } from "@math3d/mock-api";
+import { makeUserIdentity } from "@/utils/api/auth";
 import { faker } from "@faker-js/faker";
 import AppPage from "@/utils/pages/AppPage";
 
-const user = makeUserInfo();
+const user = makeUserIdentity();
 test.use({ user });
 
 test("Filtering scenes by titles", async ({ page, prepareScene }) => {
