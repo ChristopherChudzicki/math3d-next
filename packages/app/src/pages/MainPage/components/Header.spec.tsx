@@ -2,11 +2,21 @@ import { test, expect } from "vitest";
 import { renderTestApp, screen, user, waitForAppReady } from "@/test_util";
 
 test.each([
-  { authStatus: true, expected: { hasSigin: false, hasSigout: true } },
-  { authStatus: false, expected: { hasSigin: true, hasSigout: false } },
+  {
+    authStatus: true,
+    trigger: "Open User Menu",
+    otherTrigger: "Open Menu",
+    expected: { hasSigin: false, hasSigout: true },
+  },
+  {
+    authStatus: false,
+    trigger: "Open Menu",
+    otherTrigger: "Open User Menu",
+    expected: { hasSigin: true, hasSigout: false },
+  },
 ])(
   "Header includes signin / signout links based on current auth status (authenticated=$authStatus)",
-  async ({ authStatus, expected }) => {
+  async ({ authStatus, trigger, otherTrigger, expected }) => {
     const { queryClient } = renderTestApp("", { isAuthenticated: authStatus });
     // Sign in/out visibility is gated on the ["me"] auth query resolving, and
     // the header has no positive anchor for the absent state (e.g. "Sign in"
@@ -16,7 +26,11 @@ test.each([
 
     const signin = screen.queryByRole("button", { name: "Sign in" });
 
-    const button = screen.getByRole("button", { name: "Open User Menu" });
+    // The avatar is the signed-in trigger and the hamburger every other state,
+    // including the pending one waited out above.
+    expect(screen.queryByRole("button", { name: otherTrigger })).toBeNull();
+
+    const button = screen.getByRole("button", { name: trigger });
     await user.click(button);
     await screen.findByRole("menu");
 
@@ -36,7 +50,7 @@ test("Login button opens login overlay", async () => {
 
 test("Contact links to the GitHub issues page in a new tab", async () => {
   renderTestApp("", { isAuthenticated: false });
-  const button = screen.getByRole("button", { name: "Open User Menu" });
+  const button = screen.getByRole("button", { name: "Open Menu" });
   await user.click(button);
   const contact = await screen.findByRole("menuitem", { name: "Contact" });
   expect(contact).toHaveAttribute("href", import.meta.env.VITE_ISSUE_URL);
@@ -46,7 +60,7 @@ test("Contact links to the GitHub issues page in a new tab", async () => {
 
 test("Sign out opens logout overlay", async () => {
   const { location } = renderTestApp("", { isAuthenticated: true });
-  const button = screen.getByRole("button", { name: "Open User Menu" });
+  const button = await screen.findByRole("button", { name: "Open User Menu" });
   await user.click(button);
   const signout = screen.getByRole("menuitem", { name: "Sign out" });
   await user.click(signout);
@@ -55,7 +69,7 @@ test("Sign out opens logout overlay", async () => {
 
 test("Delete Account opens the delete-account overlay", async () => {
   const { location } = renderTestApp("", { isAuthenticated: true });
-  const button = screen.getByRole("button", { name: "Open User Menu" });
+  const button = await screen.findByRole("button", { name: "Open User Menu" });
   await user.click(button);
   const deleteAccount = screen.getByRole("menuitem", {
     name: "Delete Account",

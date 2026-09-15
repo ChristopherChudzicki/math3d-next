@@ -35,12 +35,9 @@ test("closing the drawer (Escape) returns to the scene", async () => {
 test("switching tabs replaces history; Back leaves the drawer entirely", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const { location, router } = renderTestApp(`/${scene.key}`);
-  // Open the drawer from the user menu (a push → 2 entries). The trigger is the
-  // avatar, not the hamburger: UserMenu shows the hamburger only when
-  // DISPLAY_AUTH_FLOWS is false, and the jsdom project pins it true.
-  await user.click(
-    await screen.findByRole("button", { name: "Open User Menu" }),
-  );
+  // Open the drawer from the user menu (a push → 2 entries). This scene is
+  // viewed signed out, so the trigger is the hamburger.
+  await user.click(await screen.findByRole("button", { name: "Open Menu" }));
   await user.click(await screen.findByRole("menuitem", { name: "Examples" }));
   await screen.findByRole("tab", { name: "Examples", selected: true });
   // Switch lists (a replace → still 2 entries).

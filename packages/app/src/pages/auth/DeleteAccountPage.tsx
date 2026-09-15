@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useId } from "react";
 import * as yup from "yup";
 import { Alert, TextField } from "@mui/material";
 import { useNavigate } from "react-router";
-import { useUserMeDelete } from "@math3d/api";
+import { isApiError, useUserMeDelete } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import BasicDialog from "@/util/components/BasicDialog";
@@ -44,7 +44,24 @@ const DeleteAccountPage: React.FC = () => {
   }, [isAuthenticated, open, deleteAccount.isSuccess]);
 
   const onSubmit = handleSubmit(async () => {
-    await deleteAccount.mutateAsync();
+    try {
+      await deleteAccount.mutateAsync();
+    } catch (err) {
+      // Anything else is a genuine failure: the form's generic message and its
+      // Sentry event are the right answer.
+      if (!isApiError(err, [403])) throw err;
+      // mutateAsync awaits onError, which has already cleared the cached
+      // identity; when the session is what failed, the effect above is
+      // switching this dialog to sign-in, and the change needs a word for it.
+      // A CSRF token that did not check out is answered 403 too, so the
+      // message names neither cause.
+      addNotification({
+        title: "Could not delete your account",
+        body: "Your sign-in could not be verified, so nothing was deleted. Try again — you may be asked to sign in first.",
+        type: "alert",
+      });
+      return;
+    }
     // mutateAsync awaits onSuccess, which resets queries, so auth status is
     // already up-to-date.
     addNotification({
