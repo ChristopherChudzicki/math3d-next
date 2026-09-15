@@ -1,5 +1,5 @@
 // Use `react-router` (not `react-router-dom`) to match the repo convention (21 src files).
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 
 export type OverlayName = "login" | "logout" | "delete-account" | "scenes";
@@ -47,7 +47,23 @@ export const useOverlay = () => {
   // still closes, and read through a ref so a stale closure sees it too.
   const closedKey = useRef<string | null>(null);
 
+  // OverlayHost swaps the component when `?overlay=` changes, so a consumer's
+  // `close` can outlive it — Google's popup calls back into a LoginPage that is
+  // already gone, and a mutation can resolve after Back unmounted its dialog.
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
   const close = useCallback(() => {
+    // Every entry this closure knows about belongs to a component that is gone,
+    // so navigating would act on the user's current one instead: `navigate(-1)`
+    // pops the overlay they have open now, and the deep-link branch rewrites
+    // today's URL from a stale `search`.
+    if (!mounted.current) return;
     if (closedKey.current === location.key) return;
     closedKey.current = location.key;
     if (pushed) {

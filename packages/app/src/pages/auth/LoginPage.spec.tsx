@@ -40,11 +40,13 @@ test("A Google credential signs the user in and closes the overlay", async () =>
   await waitFor(() =>
     expect(location.current.search).not.toContain("overlay="),
   );
-  // The overlay closes on its own once the session exists. The avatar trigger
-  // is no proof of that — it is also what a signed-out visitor sees while
-  // DISPLAY_AUTH_FLOWS is true — so read the email the menu shows only for an
-  // authenticated user.
-  await user.click(screen.getByRole("button", { name: "Open User Menu" }));
+  // The overlay closes on its own once the session exists. Read the email the
+  // menu shows only for an authenticated user, rather than trusting the
+  // trigger: the avatar renders as soon as ["me"] resolves, which it would
+  // also do if the dialog had stayed open.
+  await user.click(
+    await screen.findByRole("button", { name: "Open User Menu" }),
+  );
   expect(await screen.findByTestId("username-display")).toHaveTextContent(
     userData.email,
   );
@@ -159,7 +161,9 @@ test("signing in leaves unsaved edits to the open scene intact", async () => {
     );
   });
 
-  await user.click(screen.getByRole("button", { name: "Open User Menu" }));
+  await user.click(
+    await screen.findByRole("button", { name: "Open User Menu" }),
+  );
   expect(await screen.findByTestId("username-display")).toHaveTextContent(
     userData.email,
   );
@@ -181,4 +185,36 @@ test("the dev sign-in control signs in as the address it is given", async () => 
   expect(await screen.findByTestId("username-display")).toHaveTextContent(
     "someone@example.com",
   );
+});
+
+test("A credential arriving after the dialog is dismissed still signs the user in", async () => {
+  const userData = seedDb.withUser();
+  const gsi = mockGoogleIdentity();
+  const { location } = renderTestApp("/?overlay=login");
+
+  await screen.findByRole("dialog", { name: "Sign in" });
+  await waitFor(() => expect(gsi.initialize).toHaveBeenCalled());
+  await user.keyboard("{Escape}");
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog", { name: "Sign in" })).toBeNull(),
+  );
+
+  // `google.initialize` registers its callback globally, so a consent the user
+  // finishes after dismissing the dialog still arrives. They consented, so the
+  // session is what they asked for.
+  await act(async () => {
+    gsi.fireCredential(
+      JSON.stringify({ id: userData.uid, email: userData.email }),
+    );
+  });
+
+  await user.click(
+    await screen.findByRole("button", { name: "Open User Menu" }),
+  );
+  expect(await screen.findByTestId("username-display")).toHaveTextContent(
+    userData.email,
+  );
+  // The handler's `close` belongs to an entry the user has already left.
+  expect(location.current.pathname).toBe("/");
+  expect(location.current.search).toBe("");
 });

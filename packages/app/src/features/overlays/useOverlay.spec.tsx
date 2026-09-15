@@ -15,8 +15,8 @@ const renderOverlay = (initialEntries: string[]) => {
   const router = createMemoryRouter([{ path: "*", element: <Probe /> }], {
     initialEntries,
   });
-  render(<RouterProvider router={router} />);
-  return { router, api };
+  const { unmount } = render(<RouterProvider router={router} />);
+  return { router, api, unmount };
 };
 
 test("Closing an overlay pops the entry that opened it", async () => {
@@ -66,4 +66,20 @@ test("Closing an overlay switched into from a deep link stays in the app", async
 
   expect(router.state.location.search).toBe("");
   expect(router.state.location.pathname).toBe("/first");
+});
+
+test("A close from an unmounted overlay does nothing", async () => {
+  const { router, api, unmount } = renderOverlay(["/first", "/second"]);
+
+  await act(async () => api.current?.open("login"));
+  // Google's popup can deliver a credential long after the sign-in dialog is
+  // gone, and the handler it calls still holds that render's `close`.
+  const staleClose = api.current?.close;
+
+  unmount();
+  await act(async () => staleClose?.());
+
+  // Popping here would take the entry the user is on now, whatever that is.
+  expect(router.state.location.search).toBe("?overlay=login");
+  expect(router.state.location.pathname).toBe("/second");
 });
