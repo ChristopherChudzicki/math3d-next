@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { allauthClient, toApiError, unwrap, v1Client } from "../util";
+import { isApiError } from "../../util";
 import { resetOnAuthChange } from "../queryMeta";
 
 const keys = {
@@ -86,6 +87,16 @@ const useUserMeDelete = () => {
     mutationFn: () => unwrap(v1Client.POST("/v1/auth/users/me/delete/")),
     onSuccess: async () => {
       await resetOnAuthChange(queryClient);
+    },
+    // Two things answer 403 here: no session, and a session whose CSRF token
+    // did not check out (authentication/api_test.py::test_delete_enforces_csrf).
+    // Clearing the cache serves both — it moves `useAuthStatus` off
+    // "authenticated" when the session is gone, and refetches `users/me`, which
+    // seeds `csrftoken`, when it is not.
+    onError: async (error) => {
+      if (isApiError(error, [403])) {
+        await resetOnAuthChange(queryClient);
+      }
     },
   });
 };
