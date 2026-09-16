@@ -49,6 +49,9 @@ packages = ["main"]
 
 [tool.mypy]
 plugins = ["mypy_django_plugin.main"]
+# Without this, mypy skips the body of any function with no annotations at all
+# — which is most `handle()` implementations under management/commands/.
+check_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = "allauth.*"

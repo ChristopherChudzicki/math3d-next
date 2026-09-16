@@ -46,6 +46,14 @@ class AnchorData:
         self.raw = element.attrib["href"]
 
 
+def _outbox_message(index: int) -> EmailMultiAlternatives:
+    """django-stubs types `mail.outbox` as `EmailMessage | EmailMultiAlternatives`;
+    every flow here sends the multipart variant, and the helpers below need it."""
+    message = mail.outbox[index]
+    assert isinstance(message, EmailMultiAlternatives)
+    return message
+
+
 def get_parsed_url_from_html(
     message: EmailMultiAlternatives, data_testid
 ) -> AnchorData:
@@ -121,7 +129,7 @@ def test_signup_and_verify_email():
 
     # Verification email sent
     assert len(mail.outbox) == 1
-    key = _extract_email_verification_key(mail.outbox[0])
+    key = _extract_email_verification_key(_outbox_message(0))
 
     # Cannot log in before verification
     login_resp = client.post(
@@ -168,7 +176,7 @@ def test_signup_sends_activation_email_with_correct_link():
     user = CustomUser.objects.get(email=email)
     assert user.public_nickname == ""
 
-    message = mail.outbox[0]
+    message = _outbox_message(0)
     link = get_parsed_url_from_html(message, "activation-link")
 
     # URL contains key parameter
@@ -231,7 +239,7 @@ def test_password_reset_flow():
 
     # Extract key from email
     assert len(mail.outbox) == 1
-    key = _extract_password_reset_key(mail.outbox[0])
+    key = _extract_password_reset_key(_outbox_message(0))
 
     # Reset password
     new_password = _strong_password()
@@ -264,7 +272,7 @@ def test_password_reset_email_has_correct_link():
         content_type="application/json",
     )
 
-    message = mail.outbox[0]
+    message = _outbox_message(0)
     link = get_parsed_url_from_html(message, "password-reset-link")
 
     assert "key" in link.query
@@ -302,7 +310,7 @@ def test_email_links_use_requesting_origin_when_csrf_trusted():
         HTTP_ORIGIN="http://math3d.localdev:3002",
     )
 
-    link = get_parsed_url_from_html(mail.outbox[0], "password-reset-link")
+    link = get_parsed_url_from_html(_outbox_message(0), "password-reset-link")
     assert (
         f"{link.parsed.scheme}://{link.parsed.netloc}" == "http://math3d.localdev:3002"
     )
@@ -321,7 +329,7 @@ def test_email_links_fall_back_to_configured_origin_for_untrusted_origin():
         HTTP_ORIGIN="https://evil.example",
     )
 
-    link = get_parsed_url_from_html(mail.outbox[0], "password-reset-link")
+    link = get_parsed_url_from_html(_outbox_message(0), "password-reset-link")
     assert (link.parsed.scheme, link.parsed.netloc) == ("http", "canonical.example")
 
 

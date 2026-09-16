@@ -19,9 +19,9 @@ def test_create_user():
     with pytest.raises(AttributeError):
         user.username
     with pytest.raises(TypeError):
-        User.objects.create_user()
+        User.objects.create_user()  # type: ignore[call-arg]
     with pytest.raises(TypeError):
-        User.objects.create_user(email="")
+        User.objects.create_user(email="")  # type: ignore[call-arg]
     with pytest.raises(ValueError):
         User.objects.create_user(email="", password="foo")
 

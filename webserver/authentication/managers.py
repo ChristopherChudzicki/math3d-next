@@ -1,8 +1,15 @@
+from typing import TYPE_CHECKING
+
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
+if TYPE_CHECKING:
+    # models.py imports this module, so this cannot be a runtime import; the
+    # noqa is because ruff doesn't read the class subscript below as a use.
+    from authentication.models import CustomUser  # noqa: F401
 
-class CustomUserManager(BaseUserManager):
+
+class CustomUserManager(BaseUserManager["CustomUser"]):
     """
     Custom user model manager where email is the unique identifiers
     for authentication instead of usernames.

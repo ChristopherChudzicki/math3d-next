@@ -90,7 +90,7 @@ class TimestampedModel(models.Model):
             # timestamps anyway and the instance would disagree with its row.
             return super().save(**kwargs)
         now = timezone.now()
-        if not self.id:
+        if not self.pk:
             self.created_date = now
         self.modified_date = now
         if update_fields:

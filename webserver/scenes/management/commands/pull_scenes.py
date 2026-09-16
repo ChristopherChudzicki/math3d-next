@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connections
@@ -127,7 +129,7 @@ class Command(BaseCommand):
             )
 
         # Parse the database URL using dj_database_url
-        db_config = dj_database_url.parse(database_url)
+        db_config: dict[str, Any] = dict(dj_database_url.parse(database_url))
 
         # Ensure the config has all required Django database settings
         db_config.setdefault("OPTIONS", {})
