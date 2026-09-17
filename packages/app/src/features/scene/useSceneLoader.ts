@@ -81,8 +81,18 @@ const useSceneLoader = (
 
   const scene = sceneKey === undefined ? defaultScene : data;
 
+  // Which scene Redux holds. `null` is the default scene's own key, so the
+  // "nothing loaded yet" sentinel has to be a value `scene.key` never takes.
+  const loaded = useRef<string | null | undefined>(undefined);
+
   useEffect(() => {
     if (!scene) return;
+    // Load on navigation only. React Query hands back a fresh object for every
+    // refetch of the same scene, and `setScene` replaces items/order/title
+    // wholesale, so dispatching on identity discards unsaved edits whenever
+    // anything refetches — signing in, or the GET that follows a save.
+    if (loaded.current === scene.key) return;
+    loaded.current = scene.key;
     const payload = {
       key: scene.key,
       author: scene.author ?? null,

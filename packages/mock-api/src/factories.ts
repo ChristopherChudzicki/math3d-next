@@ -433,27 +433,4 @@ class Folder {
   }
 }
 
-// import.meta.env is Vite-specific; the process.env fallback is needed
-// when this module runs in plain Node (e.g., Playwright E2E tests).
-const DEFAULT_EMAIL_PROVIDER =
-  import.meta.env?.TEST_EMAIL_PROVIDER ?? process.env.TEST_EMAIL_PROVIDER;
-interface UserSignupInfo {
-  email: string;
-  password: string;
-  public_nickname: string;
-}
-
-const makeUserInfo = (info?: Partial<UserSignupInfo>): UserSignupInfo => {
-  const password = faker.internet.password();
-
-  return {
-    email: faker.internet
-      .email({ provider: DEFAULT_EMAIL_PROVIDER })
-      .toLowerCase(),
-    password,
-    public_nickname: faker.person.firstName(),
-    ...info,
-  };
-};
-
-export { makeItem, makeSceneFromItems, SceneBuilder, makeUserInfo };
+export { makeItem, makeSceneFromItems, SceneBuilder };
