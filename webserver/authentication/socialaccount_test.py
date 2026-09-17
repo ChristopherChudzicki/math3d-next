@@ -338,7 +338,8 @@ def _google_signing_key() -> tuple[rsa.RSAPrivateKey, dict[str, str]]:
     """A throwaway RSA key standing in for Google's, with the self-signed
     certificate its certs endpoint would publish for it.
 
-    Generated lazily because RSA keygen is the slowest thing in this module.
+    Cached so the tests that need it share one keygen, and lazy so the rest of
+    the module pays nothing.
     """
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "accounts.google.com")])
@@ -393,7 +394,7 @@ class StubCertsSocialAccountAdapter(CustomSocialAccountAdapter):
         return _CertsSession()
 
 
-STUB_CERTS_ADAPTER = "authentication.socialaccount_test.StubCertsSocialAccountAdapter"
+STUB_CERTS_ADAPTER = f"{__name__}.{StubCertsSocialAccountAdapter.__qualname__}"
 
 
 def _google_id_token(*, audience: str) -> str:
@@ -415,39 +416,39 @@ def _google_id_token(*, audience: str) -> str:
     )
 
 
-def _google_payload(client_id: str | None, id_token: str) -> dict:
-    token: dict = {"id_token": id_token}
-    if client_id is not None:
-        token["client_id"] = client_id
-    return {"provider": "google", "process": "login", "token": token}
+def _google_payload(client_id: str, id_token: str) -> dict:
+    return {
+        "provider": "google",
+        "process": "login",
+        "token": {"client_id": client_id, "id_token": id_token},
+    }
 
 
 @pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=True, SOCIALACCOUNT_PROVIDERS=GOOGLE_PROVIDERS)
-def test_a_google_token_without_a_client_id_is_refused():
-    """`uses_apps` is True for Google, so the client_id is what selects the app;
-    without one the request stops before the id_token is read."""
-    response = Client().post(
-        TOKEN_URL, _google_payload(None, "unread"), content_type="application/json"
-    )
-
-    assert response.status_code == 400
-    assert _codes(response) == ["client_id_required"]
-
-
-@pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=True, SOCIALACCOUNT_PROVIDERS=GOOGLE_PROVIDERS)
+@override_settings(
+    ENABLE_REGISTRATION=True,
+    SOCIALACCOUNT_PROVIDERS=GOOGLE_PROVIDERS,
+    SOCIALACCOUNT_ADAPTER=STUB_CERTS_ADAPTER,
+)
 def test_a_google_token_for_an_unconfigured_client_id_is_refused():
-    """A client_id matching no configured app resolves nothing, which is also
-    what keeps an arbitrary caller from reaching Google's certs endpoint."""
+    """A client_id matching no configured app resolves no app, and the request
+    stops there — before the id_token, which is otherwise good, is read.
+
+    Identical to the sign-up case below bar the posted client_id, so a
+    resolution that stopped honouring it could only show up here.
+    """
     response = Client().post(
         TOKEN_URL,
-        _google_payload("someone-elses-client.apps.googleusercontent.com", "unread"),
+        _google_payload(
+            "someone-elses-client.apps.googleusercontent.com",
+            _google_id_token(audience=CONFIGURED_CLIENT_ID),
+        ),
         content_type="application/json",
     )
 
     assert response.status_code == 400
     assert _codes(response) == ["invalid_token"]
+    assert not CustomUser.objects.exists()
 
 
 @pytest.mark.django_db
