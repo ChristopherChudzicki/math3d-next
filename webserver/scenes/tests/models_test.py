@@ -40,6 +40,7 @@ def test_deleting_an_author_preserves_their_scenes():
     cascaded.
     """
     scene = SceneFactory.create()
+    assert scene.author is not None
 
     scene.author.delete()
 
