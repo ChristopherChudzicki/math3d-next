@@ -119,8 +119,11 @@ const test = base.extend<Fixtures, WorkerFixtures>({
               expires: -1,
             },
             {
-              // csrftoken on parent domain so it's readable by both the app
-              // and API subdomains (matches CSRF_COOKIE_DOMAIN setting)
+              // csrftoken on the parent domain so both the app and the API
+              // subdomain can read it — an assumption about CSRF_COOKIE_DOMAIN
+              // that the server never checks, since Django only compares the
+              // cookie's value to the header. What proves the real cookie is
+              // reachable is signin-enables-authenticated-writes.test.ts.
               name: "csrftoken",
               value: sessionCookies.csrftoken,
               domain: `.${appUrl.hostname}`,
