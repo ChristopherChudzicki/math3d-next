@@ -81,11 +81,11 @@ class Command(BaseCommand):
         qs = Scene.objects.all()
         if options["legacy_only"]:
             qs = qs.filter(is_legacy=True)
-        qs = qs.values("key", "items")
+        rows_qs = qs.values("key", "items")
         if options["limit"]:
-            qs = qs[: options["limit"]]
+            rows_qs = rows_qs[: options["limit"]]
 
-        total = qs.count()
+        total = rows_qs.count()
         self.stdout.write(f"Auditing {total} scenes...")
 
         scanned = passed = failed = 0
@@ -99,7 +99,7 @@ class Command(BaseCommand):
             out = open(options["out"], "w")
 
         try:
-            rows = qs.iterator(chunk_size=options["chunk_size"])
+            rows = rows_qs.iterator(chunk_size=options["chunk_size"])
             for row in tqdm.tqdm(rows, total=total, desc="Validating"):
                 scanned += 1
                 try:

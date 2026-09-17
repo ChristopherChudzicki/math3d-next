@@ -27,8 +27,10 @@ class CustomUserFactory(BaseFactory[models.CustomUser]):
 
     @factory.post_generation
     def set_password(self, create, extracted, **kwargs):
-        self.set_password(FACTORY_PASSWORD)
-        self.save()
+        # factory_boy passes the built CustomUser here, not the factory, so
+        # mypy resolves both names against the wrong class.
+        self.set_password(FACTORY_PASSWORD)  # type: ignore[operator]
+        self.save()  # type: ignore[attr-defined]
 
     class Meta:
         model = models.CustomUser

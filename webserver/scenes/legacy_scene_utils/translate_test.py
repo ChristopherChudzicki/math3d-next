@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from scenes.legacy_scene_utils.translate import ItemMigrator
@@ -7,7 +9,7 @@ def test_axis():
     migrator = ItemMigrator()
     migrator = ItemMigrator()
     data_in = {"type": "AXIS", "description": "test axis"}
-    expected_out = {
+    expected_out: dict[str, Any] = {
         "id": "some-id",
         "type": "AXIS",
         "properties": {
