@@ -60,7 +60,7 @@ def test_reseeding_applies_edits_to_existing_scenes():
     call_command("seed_test_data", **seed)
 
     scene = Scene.objects.get(title="Test Scene 0")
-    stale_order = {"main": []}
+    stale_order: dict[str, list] = {"main": []}
     scene.item_order = stale_order
     scene.save()
 
