@@ -17,4 +17,3 @@ class CustomSignupForm(forms.Form):
     def signup(self, request, user):
         """Called by allauth after user is saved. Nothing extra to do here
         since public_nickname is handled in the adapter's save_user()."""
-        pass

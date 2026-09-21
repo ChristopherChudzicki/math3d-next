@@ -17,11 +17,11 @@ from scenes.schemas.scenes import (
 
 __all__ = [
     "MATH_ITEM_LIST_ADAPTER",
+    "LegacySceneInSchema",
+    "LegacySceneOutSchema",
     "MathItem",
     "MathItemType",
     "MathItemUnion",
-    "LegacySceneInSchema",
-    "LegacySceneOutSchema",
     "MiniSceneSchema",
     "SceneCreateSchema",
     "SceneFilterSchema",
