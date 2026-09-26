@@ -150,6 +150,17 @@ def test_deployment_refuses_wildcard_allowed_hosts(monkeypatch, pattern):
         )
 
 
+def test_a_refused_boot_does_not_print_secrets(monkeypatch):
+    """The ImproperlyConfigured message lands in the release log."""
+    secret_key = "boot-secret-key-value"  # pragma: allowlist secret
+    with pytest.raises(ImproperlyConfigured) as exc_info:
+        load_settings(
+            monkeypatch, **DEPLOY_ENV, SECRET_KEY=secret_key, ALLOWED_HOSTS="*"
+        )
+    assert secret_key not in str(exc_info.value)
+    assert DEPLOY_ENV["GOOGLE_CLIENT_SECRET"] not in str(exc_info.value)
+
+
 def test_database_url_configures_the_default_connection(monkeypatch):
     loaded = load_settings(monkeypatch, **DEPLOY_ENV)
     assert loaded.DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql"
@@ -548,7 +559,8 @@ def test_password_urls_are_not_registered():
 def test_google_token_login_is_not_registered():
     """
     allauth.urls and google.urls mount google/login/token/, a CSRF-exempt view
-    that turns a Google ID token into a session; only the callback is mounted.
+    that turns a Google ID token into a session; only login and its callback
+    are mounted.
     """
     from django.urls import NoReverseMatch, reverse
 

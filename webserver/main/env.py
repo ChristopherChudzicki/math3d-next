@@ -17,7 +17,10 @@ from sentry_sdk.utils import BadDsn, Dsn
 
 
 class EnvConfig(BaseSettings):
-    model_config = SettingsConfigDict(case_sensitive=True, extra="forbid")
+    # A refused boot's message lands in the release log; keep values out of it.
+    model_config = SettingsConfigDict(
+        case_sensitive=True, extra="forbid", hide_input_in_errors=True
+    )
 
     SECRET_KEY: str = ""
     # The SPA origin, e.g. https://next.math3d.org. Validated to a bare origin

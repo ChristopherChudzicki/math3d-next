@@ -14,13 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from allauth.socialaccount.providers.google.provider import GoogleProvider
 from allauth.socialaccount.providers.oauth2.urls import default_urlpatterns
 from django.conf import settings
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import include, path
 
+from authentication.providers import GoogleProvider
 from main.api import api
 from main.views import health
 
@@ -30,8 +30,7 @@ urlpatterns = [
     path("v1/", api.urls),
     path("_allauth/", include("allauth.headless.urls")),
     # Google's login and callback views only: allauth.urls and google.urls also
-    # mount the CSRF-exempt google/login/token/. Takes allauth's class, whose
-    # package holds the views (ADR-0004).
+    # mount the CSRF-exempt google/login/token/ (ADR-0004).
     path("_allauth/", include(default_urlpatterns(GoogleProvider))),
 ]
 
