@@ -6,12 +6,21 @@ without contacting anyone. Google's own path — the callback, state, PKCE and
 the code exchange — is tested separately below with its token endpoint stubbed.
 """
 
+import base64
+import hashlib
 import json
+import logging
+import time
+from unittest import mock
+from urllib.parse import parse_qs, urlparse
 
+import jwt
 import pytest
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.adapter import get_adapter as get_socialaccount_adapter
 from allauth.socialaccount.models import SocialAccount, SocialApp
+from allauth.socialaccount.providers.google.views import ID_TOKEN_ISSUER
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client, OAuth2Error
 from django.conf import settings
 from django.contrib import admin
 from django.core.exceptions import ImproperlyConfigured
@@ -337,3 +346,183 @@ def test_provider_token_refuses_google_before_reading_the_token():
 
     assert response.status_code == 400
     assert _codes(response) == ["token_authentication_not_supported"]
+
+
+# Google through the redirect flow. Only Google's token endpoint is stubbed:
+# state, PKCE, the callback view and the ID-token checks all run for real.
+
+REDIRECT_URL = "/_allauth/browser/v1/auth/provider/redirect"
+GOOGLE_CALLBACK_URL = "/_allauth/google/login/callback/"
+# Absolute, as the SPA sends it; allauth accepts it because the SPA's origin is
+# CSRF-trusted. APP_BASE_URL is empty under test_settings, so it's set here.
+SPA_ORIGIN = "https://app.example.org"
+SPA_CALLBACK = f"{SPA_ORIGIN}/some-scene"
+GOOGLE_REDIRECT_SETTINGS = override_settings(
+    SOCIALACCOUNT_PROVIDERS=GOOGLE_PROVIDERS, CSRF_TRUSTED_ORIGINS=[SPA_ORIGIN]
+)
+
+
+def _start_google_sign_in(client: Client) -> dict[str, str]:
+    """POST the form the SPA submits; return Google's authorization query."""
+    response = client.post(
+        REDIRECT_URL,
+        {"provider": "google", "process": "login", "callback_url": SPA_CALLBACK},
+    )
+    assert response.status_code == 302
+    location = urlparse(response["Location"])
+    assert location.netloc == "accounts.google.com"
+    return {key: values[0] for key, values in parse_qs(location.query).items()}
+
+
+def _google_token_response(*, sub: str, email: str) -> dict:
+    # The ID token arrives over TLS from the token endpoint, so allauth skips
+    # its signature; aud, iss and exp are still checked.
+    now = int(time.time())
+    id_token = jwt.encode(
+        {
+            "iss": ID_TOKEN_ISSUER,
+            "aud": CONFIGURED_CLIENT_ID,
+            "sub": sub,
+            "email": email,
+            "email_verified": True,
+            "iat": now,
+            "exp": now + 3600,
+        },
+        key="k" * 32,
+        algorithm="HS256",
+    )
+    return {"access_token": "access", "expires_in": 3600, "id_token": id_token}
+
+
+def _finish_google_sign_in(client: Client, authorize: dict[str, str], **exchange):
+    with mock.patch.object(OAuth2Client, "get_access_token", **exchange) as stub:
+        response = client.get(
+            GOOGLE_CALLBACK_URL, {"code": "one-time-code", "state": authorize["state"]}
+        )
+    return response, stub
+
+
+@pytest.mark.django_db
+@GOOGLE_REDIRECT_SETTINGS
+@override_settings(ENABLE_REGISTRATION=True)
+def test_google_sign_in_round_trip_signs_up_and_returns_to_the_spa():
+    client = Client()
+    authorize = _start_google_sign_in(client)
+
+    assert authorize["redirect_uri"] == f"http://testserver{GOOGLE_CALLBACK_URL}"
+    assert "email" in authorize["scope"].split()
+    assert authorize["prompt"] == "select_account"
+    assert authorize["code_challenge_method"] == "S256"
+
+    response, exchange = _finish_google_sign_in(
+        client,
+        authorize,
+        return_value=_google_token_response(sub="104729", email="googler@example.com"),
+    )
+
+    assert response.status_code == 302
+    assert response["Location"] == SPA_CALLBACK
+    verifier = exchange.call_args.kwargs["pkce_code_verifier"]
+    challenge = (
+        base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())
+        .rstrip(b"=")
+        .decode()
+    )
+    assert challenge == authorize["code_challenge"]
+    user = CustomUser.objects.get(email="googler@example.com")
+    assert SocialAccount.objects.get(user=user, provider="google").uid == "104729"
+    assert client.session["_auth_user_id"] == str(user.pk)
+
+
+@pytest.mark.django_db
+@GOOGLE_REDIRECT_SETTINGS
+def test_a_denied_consent_returns_to_the_spa_with_cancelled():
+    client = Client()
+    authorize = _start_google_sign_in(client)
+
+    response = client.get(
+        GOOGLE_CALLBACK_URL, {"error": "access_denied", "state": authorize["state"]}
+    )
+
+    assert response.status_code == 302
+    assert response["Location"] == f"{SPA_CALLBACK}?error=cancelled&error_process=login"
+
+
+@pytest.mark.django_db
+@GOOGLE_REDIRECT_SETTINGS
+@override_settings(ENABLE_REGISTRATION=True)
+def test_an_adapter_refusal_returns_its_code_to_the_spa():
+    """The SPA maps these codes to text, so the redirect path must carry the
+    adapter's own code, not a generic one."""
+    CustomUserFactory.create(email="collide@example.com")
+    client = Client()
+    authorize = _start_google_sign_in(client)
+
+    response, _ = _finish_google_sign_in(
+        client,
+        authorize,
+        return_value=_google_token_response(sub="555", email="collide@example.com"),
+    )
+
+    assert (
+        response["Location"] == f"{SPA_CALLBACK}?error=email_taken&error_process=login"
+    )
+    assert "_auth_user_id" not in client.session
+
+
+@pytest.mark.django_db
+@GOOGLE_REDIRECT_SETTINGS
+@override_settings(ENABLE_REGISTRATION=False)
+def test_closed_registration_returns_signup_closed_to_the_spa():
+    """allauth raises this outside the adapter, on a path of its own."""
+    client = Client()
+    authorize = _start_google_sign_in(client)
+
+    response, _ = _finish_google_sign_in(
+        client,
+        authorize,
+        return_value=_google_token_response(sub="777", email="newcomer@example.com"),
+    )
+
+    assert (
+        response["Location"]
+        == f"{SPA_CALLBACK}?error=signup_closed&error_process=login"
+    )
+
+
+@pytest.mark.django_db
+@GOOGLE_REDIRECT_SETTINGS
+def test_a_failed_code_exchange_is_logged_with_its_cause(caplog, monkeypatch):
+    """The SPA only sees `unknown`; a wrong client secret must be diagnosable
+    from the server's error log (and so from Sentry)."""
+    # LOGGING stops `authentication` at its own handler; caplog listens at root.
+    monkeypatch.setattr(logging.getLogger("authentication"), "propagate", True)
+    client = Client()
+    authorize = _start_google_sign_in(client)
+
+    with caplog.at_level(logging.ERROR, logger="authentication.adapter"):
+        response, _ = _finish_google_sign_in(
+            client, authorize, side_effect=OAuth2Error("invalid_client")
+        )
+
+    assert response["Location"] == f"{SPA_CALLBACK}?error=unknown&error_process=login"
+    [record] = caplog.records
+    assert record.exc_info is not None
+    assert isinstance(record.exc_info[1], OAuth2Error)
+
+
+@pytest.mark.django_db
+@GOOGLE_REDIRECT_SETTINGS
+def test_a_callback_with_unknown_state_lands_on_the_sign_in_error_page():
+    """Without its state allauth can't know callback_url, so it falls back to
+    socialaccount_login_error. A forged or replayed callback signs no one in."""
+    client = Client()
+
+    with mock.patch.object(OAuth2Client, "get_access_token") as exchange:
+        response = client.get(
+            GOOGLE_CALLBACK_URL, {"code": "one-time-code", "state": "forged"}
+        )
+
+    assert urlparse(response["Location"]).path == "/app/sign-in-error"
+    exchange.assert_not_called()
+    assert "_auth_user_id" not in client.session

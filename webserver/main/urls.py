@@ -14,6 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from allauth.socialaccount.providers.google.provider import GoogleProvider
+from allauth.socialaccount.providers.oauth2.urls import default_urlpatterns
+from django.conf import settings
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import include, path
@@ -26,5 +29,15 @@ urlpatterns = [
     path("health", health),
     path("v1/", api.urls),
     path("_allauth/", include("allauth.headless.urls")),
-    path("", lambda request: HttpResponseRedirect("/v1/docs")),
+    # Google's login and callback views only: allauth.urls and google.urls also
+    # mount the CSRF-exempt google/login/token/. Takes allauth's class, whose
+    # package holds the views (ADR-0004).
+    path("_allauth/", include(default_urlpatterns(GoogleProvider))),
 ]
+
+if "allauth.socialaccount.providers.dummy" in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        path("_allauth/", include("allauth.socialaccount.providers.dummy.urls"))
+    )
+
+urlpatterns.append(path("", lambda request: HttpResponseRedirect("/v1/docs")))

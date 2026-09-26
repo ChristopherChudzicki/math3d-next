@@ -545,6 +545,18 @@ def test_password_urls_are_not_registered():
             reverse(name)
 
 
+def test_google_token_login_is_not_registered():
+    """
+    allauth.urls and google.urls mount google/login/token/, a CSRF-exempt view
+    that turns a Google ID token into a session; only the callback is mounted.
+    """
+    from django.urls import NoReverseMatch, reverse
+
+    reverse("google_callback")
+    with pytest.raises(NoReverseMatch):
+        reverse("google_login_by_token")
+
+
 def test_google_app_reads_its_credentials_from_the_environment(monkeypatch):
     loaded = load_settings(monkeypatch, **DEPLOY_ENV)
     app = loaded.SOCIALACCOUNT_PROVIDERS["google"]["APP"]

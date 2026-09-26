@@ -1,3 +1,5 @@
+import logging
+
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account.internal.flows.manage_email import assess_unique_email
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
@@ -5,6 +7,8 @@ from allauth.socialaccount.providers.base.constants import AuthProcess
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import gettext_lazy as _
+
+logger = logging.getLogger(__name__)
 
 
 class CustomAccountAdapter(DefaultAccountAdapter):
@@ -29,6 +33,21 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         """
         apps = super().list_apps(request, provider=provider, client_id=client_id)
         return [app for app in apps if app.pk is None]
+
+    def on_authentication_error(
+        self, request, provider, error=None, exception=None, extra_context=None
+    ):
+        """allauth gives the SPA only an error code; keep the cause of a failed
+        code exchange, such as a wrong client secret."""
+        if exception is not None:
+            logger.error("Sign-in with %s failed", provider.id, exc_info=exception)
+        super().on_authentication_error(
+            request,
+            provider,
+            error=error,
+            exception=exception,
+            extra_context=extra_context,
+        )
 
     def pre_social_login(self, request, sociallogin):
         """Enforce that an account's email is one the provider vouched for.
