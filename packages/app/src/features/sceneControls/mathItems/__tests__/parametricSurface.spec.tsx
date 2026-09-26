@@ -126,7 +126,7 @@ test.each([
     const { store } = renderTestApp(`/${scene.key}`);
 
     await screen.findByLabelText("Name for 1st parameter");
-    const mathScope = store.getState().scene.mathScope();
+    const mathScope = store.mathScope.get();
     // initiall there is an error since the expr RHS contains "abc" which is not a param name or defined variable
     expect(mathScope.errors.has(id("expr"))).toBe(true);
     const inputs = getParamNameInputs();
@@ -183,7 +183,7 @@ test.each([
     const { store } = renderTestApp(`/${scene.key}`);
 
     await screen.findByLabelText("Name for 1st parameter");
-    const mathScope = store.getState().scene.mathScope();
+    const mathScope = store.mathScope.get();
     const inputs = getParamNameInputs();
 
     await user.clear(inputs[param.index]);
@@ -311,7 +311,7 @@ test.each([
     await user.clear(domainInput);
     await user.paste(change.value);
 
-    const mathScope = store.getState().scene.mathScope();
+    const mathScope = store.mathScope.get();
     const id = nodeId(item);
     const domExpectedEval = domain.expectedEval;
     const domActualEval = mathScope.results.get(id("domain")) as {
@@ -344,7 +344,7 @@ test.each([0, 1, 2])("Updating domain arrays (ImplicitSurface)", async (i) => {
   await user.clear(domainInput);
   await user.paste("[-2,2]");
 
-  const mathScope = store.getState().scene.mathScope();
+  const mathScope = store.mathScope.get();
   const id = nodeId(item);
   const domExpectedEval = [
     [-5, 5],
@@ -418,7 +418,7 @@ test.each([
       expect(domainInputs[i]).toHaveAttribute("aria-invalid", "true");
     });
 
-    const mathScope = store.getState().scene.mathScope();
+    const mathScope = store.mathScope.get();
     const id = nodeId(item);
 
     const error = mathScope.errors.get(id("domain"));

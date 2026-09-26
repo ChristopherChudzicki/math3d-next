@@ -99,7 +99,7 @@ const setupTest = async (overrides: Overrides = {}) => {
 
   const valueUpdates: number[] = [];
   const valueId = mathScopeId(item.id, "value");
-  const mathScope = store.getState().scene.mathScope();
+  const mathScope = store.mathScope.get();
   mathScope.addEventListener("change", (e) => {
     if (e.detail.changes.results.updated.has(mathScopeId(item.id, "value"))) {
       const v = mathScope.results.get(valueId);
@@ -312,7 +312,7 @@ describe("Variable Slider", () => {
       value: valueObj("X=1"),
       range: { items: ["-2", "+3"], type: "array" },
     });
-    const mathsScope = store.getState().scene.mathScope();
+    const mathsScope = store.mathScope.get();
     expect(mathsScope.evalScope).toEqual(new Map(Object.entries({ X: 1 })));
 
     act(() => el.inputLhs.focus());

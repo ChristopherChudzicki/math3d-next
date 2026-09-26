@@ -18,7 +18,7 @@ const setup = async <R extends MIT>(
   const scene = seedDb.withSceneFromItems([item]);
   const { store } = renderTestApp(`/${scene.key}`);
 
-  const mathScope = store.getState().scene.mathScope();
+  const mathScope = store.mathScope.get();
   const findButton = () =>
     screen.findByRole("button", { name: "Show Graphic" });
   const findTextInput = () => screen.findByTitle("Custom Color Input");

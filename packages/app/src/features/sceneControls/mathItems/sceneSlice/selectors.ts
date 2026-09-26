@@ -4,7 +4,7 @@ import type { MathGraphic, MathItem } from "@math3d/mathitem-configs";
 import { isMathGraphic, isSurface } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import { shallowEqual } from "react-redux";
-import type { SceneState, AppMathScope, Subtree } from "./interfaces";
+import type { SceneState, Subtree } from "./interfaces";
 import * as utils from "./util";
 import { SETTINGS_FOLDER } from "./util";
 
@@ -77,9 +77,6 @@ const isActive =
   (id: string): SelectorReturn<boolean> =>
   (state: RootState) =>
     state.scene.activeItemId === id;
-
-const mathScope = (): SelectorReturn<AppMathScope> => (state: RootState) =>
-  state.scene.mathScope();
 
 const isPermanent =
   (id: string): SelectorReturn<boolean> =>
@@ -179,7 +176,6 @@ export {
   isActive,
   mathItems,
   mathItem,
-  mathScope,
   stableOrderedMathItems,
   mathGraphics,
   defaultGraphicOrder,

@@ -15,20 +15,17 @@ interface SceneState {
   items: {
     [id: string]: MathItem;
   };
+  /**
+   * Id for the next item created by `addNewItem`. Kept in state rather than a
+   * module-level counter so a store restored from `preloadedState` is
+   * self-contained.
+   */
+  nextItemId: number;
   order: Record<string, string[]>;
   activeItemId: string | undefined;
   activeTabId: string;
   title: string;
   isLegacy: boolean;
-  /**
-   * We need to sync the expressions in MathItem.properties with the MathScope.
-   * Putting mathScope in the redux store is a very convenient way to do this
-   * since actions are the centralized place for editing MathItem properties.
-   *
-   * This is a nonserializable value, so comes with some caveats. See
-   * https://redux-toolkit.js.org/usage/usage-guide#working-with-non-serializable-data
-   */
-  mathScope: () => AppMathScope;
 }
 
 interface Subtree {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback, useRef } from "react";
+import React, { useMemo, useCallback, useRef } from "react";
 import classNames from "classnames";
 import { MathItemType, MathItem } from "@math3d/mathitem-configs";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
@@ -126,9 +126,6 @@ const MathItemsList: React.FC<{ rootId: string }> = ({ rootId }) => {
   const { children: folders = [] } = root;
   const mathItems = useAppSelector(select.mathItems);
   const dispatch = useAppDispatch();
-  useEffect(() => {
-    dispatch(actions.initializeMathScope());
-  }, [dispatch]);
   const itemsByFolder: Map<string, MathItem[]> = useMemo(() => {
     const entries = folders.map((subtree) => {
       const items = subtree.children?.map(({ id }) => mathItems[id]) ?? [];

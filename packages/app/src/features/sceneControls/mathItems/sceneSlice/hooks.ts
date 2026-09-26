@@ -1,11 +1,11 @@
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { useCallback } from "react";
+import { useAppDispatch, useAppStore } from "@/store/hooks";
+import { useCallback, useSyncExternalStore } from "react";
 import type { AppMathScope } from "./interfaces";
-import * as select from "./selectors";
 import { actions } from "./scene.slice";
 
 const useMathScope = (): AppMathScope => {
-  return useAppSelector(select.mathScope());
+  const { mathScope } = useAppStore();
+  return useSyncExternalStore(mathScope.subscribe, mathScope.get);
 };
 
 const useSetTitle = () => {

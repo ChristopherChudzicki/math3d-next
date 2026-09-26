@@ -25,7 +25,7 @@ const setup = async (initialValue: string) => {
   await user.click(await screen.findByLabelText("More Settings"), {
     pointerEventsCheck: 0,
   });
-  const mathScope = store.getState().scene.mathScope();
+  const mathScope = store.mathScope.get();
   const settingsTitle = await screen.findByText("Settings", { exact: false });
   // eslint-disable-next-line testing-library/no-node-access
   const settings = settingsTitle.closest("section");
