@@ -40,7 +40,7 @@ test.each([
     const { store } = renderTestApp(`/${scene.key}`);
 
     await findItemByDescription(item.properties.description);
-    const mathScope = store.getState().scene.mathScope();
+    const mathScope = store.mathScope.get();
     expect(mathScope.errors.size).toBe(numEvalErrors + numParseErrors);
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);
   },
@@ -75,7 +75,7 @@ test.each([
     const { store } = renderTestApp(`/${scene.key}`);
 
     const coordsInput = await screen.findByLabelText("Coordinates");
-    const mathScope = store.getState().scene.mathScope();
+    const mathScope = store.mathScope.get();
 
     pasteText(coordsInput, coordsString);
     expect(mathScope.errors.size).toBe(numEvalErrors + numParseErrors);
@@ -100,7 +100,7 @@ test("Adding items adds to mathScope", async () => {
   assertNotNil(point);
   const id = nodeId(point);
   getItemByDescription(point.properties.description);
-  const mathScope = store.getState().scene.mathScope();
+  const mathScope = store.mathScope.get();
   expect(mathScope.results.get(id("coords"))).toStrictEqual([[0, 0, 0]]);
   expect(mathScope.errors.size).toBe(0);
 });
@@ -117,7 +117,7 @@ test("Deleting items removes them from mathScope", async () => {
   const { store } = renderTestApp(`/${scene.key}`);
 
   const item = await findItemByDescription(point.properties.description);
-  const mathScope = store.getState().scene.mathScope();
+  const mathScope = store.mathScope.get();
   expect(mathScope.results.size).toBeGreaterThan(1); // point + folder visibility
   expect(mathScope.errors.size).toBeGreaterThan(0);
 

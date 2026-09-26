@@ -8,32 +8,21 @@ import jsonPatch from "fast-json-patch";
 
 import invariant from "tiny-invariant";
 import { assertNotNil } from "@/util/predicates";
-import IdGenerator from "@/util/idGenerator";
-import {
-  syncItemsToMathScope,
-  removeItemsFromMathScope,
-} from "./syncMathScope";
 import type { SceneState } from "./interfaces";
-import { makeMathScope } from "./mathScopeInstance";
 import { isDescendantOf, MAIN_FOLDER, SETTINGS_FOLDER } from "./util";
 
-const idGenerator = new IdGenerator({ initialValue: 100 });
-
-const getInitialState = (): SceneState => {
-  const mathScope = makeMathScope();
-  return {
-    key: null,
-    dirty: false,
-    author: null,
-    mathScope: () => mathScope,
-    items: {},
-    isLegacy: false,
-    activeItemId: undefined,
-    activeTabId: MAIN_FOLDER,
-    order: {},
-    title: "Untitled",
-  };
-};
+const getInitialState = (): SceneState => ({
+  key: null,
+  dirty: false,
+  author: null,
+  items: {},
+  nextItemId: 1,
+  isLegacy: false,
+  activeItemId: undefined,
+  activeTabId: MAIN_FOLDER,
+  order: {},
+  title: "Untitled",
+});
 
 const getInsertionFolder = (
   order: SceneState["order"],
@@ -107,22 +96,15 @@ const slice = createSlice({
       invariant(state.order[MAIN_FOLDER], "Main folder should exist.");
       invariant(state.order[SETTINGS_FOLDER], "Settings folder should exist.");
 
-      const mathScope = makeMathScope();
-      state.mathScope = () => mathScope;
-
       const ids = items
         .map((item) => +item.id)
         .filter((id) => !Number.isNaN(id));
       const maxId = Math.max(...ids);
-      idGenerator.setCurrentValue(maxId > 0 ? maxId + 1 : 1);
-      syncItemsToMathScope(mathScope, items);
-    }),
-    initializeMathScope: withClean(true)<void>((state) => {
-      const items = Object.values(state.items);
-      syncItemsToMathScope(state.mathScope(), items);
+      state.nextItemId = maxId > 0 ? maxId + 1 : 1;
     }),
     addNewItem: (state, action: PayloadAction<{ type: MathItemType }>) => {
-      const id = idGenerator.next();
+      const id = `${state.nextItemId}`;
+      state.nextItemId += 1;
       invariant(state.items[id] === undefined, "id should be unique");
       const { type } = action.payload;
       const item = mathItemConfigs[type].make(id);
@@ -148,15 +130,11 @@ const slice = createSlice({
         const folder = state.items[targetFolderId];
         invariant(folder.type === MathItemType.Folder, "expected folder");
         folder.properties.isCollapsed = "false";
-        syncItemsToMathScope(state.mathScope(), [folder]);
       }
       state.activeItemId = id;
-
-      syncItemsToMathScope(state.mathScope(), [item]);
     },
     remove: (state, action: PayloadAction<{ id: string }>) => {
       const { id } = action.payload;
-      const item = state.items[id];
       delete state.items[id];
 
       const { order } = state;
@@ -168,8 +146,6 @@ const slice = createSlice({
       if (state.activeItemId === id) {
         state.activeItemId = undefined;
       }
-
-      removeItemsFromMathScope(state.mathScope(), [item]);
     },
     setProperties: withClean(false)<MathItemPatch<MathItemType>>(
       (state, action) => {
@@ -177,9 +153,6 @@ const slice = createSlice({
         const { properties: oldProperties } = state.items[id];
         // @ts-expect-error TODO figure this out + reconisder the unions
         state.items[id].properties = { ...oldProperties, ...newProperties };
-
-        const item = state.items[id];
-        syncItemsToMathScope(state.mathScope(), [item]);
       },
     ),
     patchProperty: withClean(false)<{
@@ -199,9 +172,6 @@ const slice = createSlice({
         result.removed !== undefined,
         "patch should have replaced and existing property.",
       );
-
-      const item = state.items[id];
-      syncItemsToMathScope(state.mathScope(), [item]);
     }),
     move: (
       state,

@@ -4,6 +4,7 @@ import sceneSlice, {
   reducer,
   actions,
   select,
+  createMathScopeSync,
   MAIN_FOLDER,
   SETTINGS_FOLDER,
 } from "./sceneSlice";
@@ -17,6 +18,7 @@ export {
   reducer,
   actions,
   select,
+  createMathScopeSync,
   MAIN_FOLDER,
   SETTINGS_FOLDER,
 };

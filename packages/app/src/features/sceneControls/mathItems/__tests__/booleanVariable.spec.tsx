@@ -13,7 +13,7 @@ test("left-hand parse errors are indicated on left-hand side", async () => {
   const lhs = await screen.findByLabelText("Switch name", {
     exact: false,
   });
-  const mathScope = store.getState().scene.mathScope();
+  const mathScope = store.mathScope.get();
   expect(mathScope.errors.size).toBe(1);
   expect(lhs).toHaveClass("has-error");
 });
@@ -27,7 +27,7 @@ test("Clicking switch on Boolean variable toggles value", async () => {
   const id = nodeId(variable);
   const { store } = renderTestApp(`/${scene.key}`);
   const form = await findItemByDescription("Test Switch");
-  const mathScope = store.getState().scene.mathScope();
+  const mathScope = store.mathScope.get();
   const checkboxEl = await within(form).findByRole("checkbox", {
     name: "Value",
   });
