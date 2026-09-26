@@ -1,65 +1,32 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import Alert from "@mui/material/Alert";
-import Link from "@mui/material/Link";
-import * as Sentry from "@sentry/react";
-import { useProviderTokenLogin } from "@math3d/api";
 import Divider from "@mui/material/Divider";
+import { useLocation } from "react-router";
 import {
-  DummySignInForm,
   ENABLE_DUMMY_AUTH,
-  GOOGLE_CLIENT_ID,
-  GoogleSignInButton,
+  ProviderSignInButton,
   useAuthStatus,
 } from "@/features/auth";
+import GoogleLogo from "@/features/auth/GoogleLogo";
+import { SIGN_IN_ERROR_MESSAGES } from "@/features/auth/signInErrors";
+import type { SignInError } from "@/features/auth/signInErrors";
 import BasicDialog from "@/util/components/BasicDialog";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import styles from "./LoginPage.module.css";
-
-type LoginFailure = "failed" | "script-unavailable";
-
-const ISSUE_URL = import.meta.env.VITE_ISSUE_URL;
 
 const LoginPage: React.FC = () => {
   const { close } = useOverlay();
   const isAuthenticated = useAuthStatus();
   const handleClose = useCallback(() => close(), [close]);
-  const login = useProviderTokenLogin();
-  const [failure, setFailure] = useState<LoginFailure | null>(null);
+  const signInError = (
+    useLocation().state as { signInError?: SignInError } | null
+  )?.signInError;
 
   useEffect(() => {
     if (isAuthenticated === "authenticated") {
       close();
     }
   }, [isAuthenticated, close]);
-
-  const handleCredential = useCallback(
-    async (credential: string) => {
-      setFailure(null);
-      try {
-        await login.mutateAsync({
-          provider: "google",
-          client_id: GOOGLE_CLIENT_ID,
-          id_token: credential,
-        });
-        // mutateAsync awaits onSuccess, which resets queries (including
-        // useUserMe), so auth status is already up-to-date.
-        handleClose();
-      } catch (err) {
-        // One message for every rejection. Each cause needs a configured
-        // deployment to be unreachable rather than merely unlikely, so Sentry
-        // is where they are told apart — which means capturing all of them,
-        // including the ones a user could in principle provoke.
-        setFailure("failed");
-        Sentry.captureException(err);
-      }
-    },
-    [login, handleClose],
-  );
-
-  const handleUnavailable = useCallback(
-    () => setFailure("script-unavailable"),
-    [],
-  );
 
   return (
     <BasicDialog
@@ -71,32 +38,27 @@ const LoginPage: React.FC = () => {
       maxWidth="xs"
     >
       <div className={styles["sign-in-content"]}>
-        <GoogleSignInButton
-          onCredential={handleCredential}
-          onUnavailable={handleUnavailable}
-        />
-        {failure === "failed" && (
-          <Alert severity="error">
-            Google signed you in, but this site could not complete the sign-in.
-            Please try again, and{" "}
-            <Link href={ISSUE_URL} target="_blank" rel="noreferrer">
-              get in touch
-            </Link>{" "}
-            if it keeps happening.
+        <ProviderSignInButton
+          provider="google"
+          variant="outlined"
+          startIcon={<GoogleLogo />}
+          className={styles["google-button"]}
+        >
+          Sign in with Google
+        </ProviderSignInButton>
+        {signInError && (
+          <Alert severity={signInError === "cancelled" ? "info" : "error"}>
+            {SIGN_IN_ERROR_MESSAGES[signInError]}
           </Alert>
         )}
-        {failure === "script-unavailable" && (
-          <Alert severity="error">
-            Could not load Google sign-in. A content blocker or network problem
-            may be stopping it — allow accounts.google.com, then reload.
-          </Alert>
-        )}
-        {/* Below the alerts: these belong to the Google button above, and a
-            control between the two reads as their owner. */}
+        {/* Below the alert: it belongs to the Google button above, and a
+            control between the two reads as its owner. */}
         {ENABLE_DUMMY_AUTH && (
           <>
             <Divider className={styles["dummy-divider"]}>or</Divider>
-            <DummySignInForm />
+            <ProviderSignInButton provider="dummy" variant="outlined">
+              Sign in as dev user
+            </ProviderSignInButton>
           </>
         )}
       </div>

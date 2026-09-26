@@ -9,3 +9,23 @@
 .dummy-divider {
   width: 100%;
 }
+
+/* Google's light-theme button (Sign in with Google branding guidelines). */
+.google-button {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 4px;
+  border: 1px solid #747775;
+  background-color: #fff;
+  color: #1f1f1f;
+  font-family: Roboto, var(--mui-font-family, sans-serif);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  text-transform: none;
+}
+
+.google-button:hover {
+  border-color: #747775;
+  background-color: #f7f8f8;
+}

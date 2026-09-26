@@ -72,8 +72,8 @@ test("A close from an unmounted overlay does nothing", async () => {
   const { router, api, unmount } = renderOverlay(["/first", "/second"]);
 
   await act(async () => api.current?.open("login"));
-  // Google's popup can deliver a credential long after the sign-in dialog is
-  // gone, and the handler it calls still holds that render's `close`.
+  // A mutation can resolve after Back unmounted the dialog, and its handler
+  // still holds that render's `close`.
   const staleClose = api.current?.close;
 
   unmount();

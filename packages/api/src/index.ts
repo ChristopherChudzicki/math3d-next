@@ -11,5 +11,5 @@ export type ScenePatchSchema = V1Schemas["ScenePatchSchema"];
 
 export * from "./hooks/auth";
 export * from "./hooks/scenes";
-export { createV1Client, v1Client } from "./hooks/util";
+export { createV1Client, getCsrfToken, v1Client } from "./hooks/util";
 export { isApiError, ApiError } from "./util";

@@ -48,8 +48,8 @@ export const useOverlay = () => {
   const closedKey = useRef<string | null>(null);
 
   // OverlayHost swaps the component when `?overlay=` changes, so a consumer's
-  // `close` can outlive it — Google's popup calls back into a LoginPage that is
-  // already gone, and a mutation can resolve after Back unmounted its dialog.
+  // `close` can outlive it — a mutation can resolve after Back unmounted its
+  // dialog.
   const mounted = useRef(true);
   useEffect(() => {
     mounted.current = true;
@@ -69,7 +69,7 @@ export const useOverlay = () => {
     if (pushed) {
       // Popping the entry `open` pushed is what keeps Back working: replacing
       // it would leave two consecutive entries with the same URL, so the first
-      // Back press after signing in would do nothing visible.
+      // Back press after closing would do nothing visible.
       navigate(-1);
       return;
     }

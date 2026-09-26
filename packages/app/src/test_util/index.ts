@@ -11,7 +11,6 @@ import user from "@testing-library/user-event";
 import renderTestApp, { waitForAppReady } from "./renderTestApp";
 
 export * from "./test_util";
-export { mockGoogleIdentity } from "./googleIdentity";
 export {
   act,
   fireEvent,

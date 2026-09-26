@@ -3,21 +3,24 @@ import type { RouteObject } from "react-router";
 import { Outlet } from "react-router";
 
 import OverlayHost from "@/features/overlays/OverlayHost";
+import SignInErrorHandler from "@/features/auth/SignInErrorHandler";
 import MainPage from "./pages/MainPage";
 import FramePage from "./pages/FramePage/FramePage";
 import HelpPage from "./pages/HelpPage/HelpPage";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
 import ErrorTrigger from "./pages/ErrorPage/ErrorTrigger";
 import NotFoundPage from "./pages/NotFound/NotFoundPage";
+import SignInErrorPage from "./pages/auth/SignInErrorPage";
 
 /**
- * Root layout: hosts the `?test-sync-error` trigger on every route (see ErrorTrigger)
- * and renders the matched child. Its own `errorElement` catches render errors
+ * Root layout: hosts the `?test-sync-error` trigger and the sign-in `?error=`
+ * handler on every route, and renders the matched child. Its own `errorElement` catches render errors
  * from anywhere in the tree.
  */
 const RootLayout: React.FC = () => (
   <>
     <ErrorTrigger />
+    <SignInErrorHandler />
     <Outlet />
     <OverlayHost />
   </>
@@ -36,6 +39,7 @@ const routes: RouteObject[] = [
           // Scene-only render page for headless screenshots. Lives under /app/
           // (the non-scene-key namespace) so it can't be mistaken for a scene.
           { path: "frame/:sceneKey", element: <FramePage /> },
+          { path: "sign-in-error", element: <SignInErrorPage /> },
           { path: "*", element: <NotFoundPage /> },
         ],
       },
