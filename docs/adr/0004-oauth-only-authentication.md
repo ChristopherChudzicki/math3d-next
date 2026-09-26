@@ -83,7 +83,7 @@ sequenceDiagram
     U->>G: choose account
     G-->>B: 302 to redirect_uri with code, state
     B->>A: GET /_allauth/google/login/callback/?code&state<br/>(session cookie: SameSite=Lax allows a top-level GET)
-    Note over A: unstash state by id; unknown state → sign-in error page
+    Note over A: unstash state by id,<br/>unknown state → sign-in error page
     A->>G: POST token endpoint<br/>code, client_secret, code_verifier
     G-->>A: access_token, id_token
     Note over A: decode id_token (TLS, no signature check),<br/>adapter checks, find or create account, log in
