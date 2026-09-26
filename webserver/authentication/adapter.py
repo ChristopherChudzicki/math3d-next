@@ -40,7 +40,10 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         """allauth gives the SPA only an error code; keep the cause of a failed
         code exchange, such as a wrong client secret."""
         if exception is not None:
-            logger.error("Sign-in with %s failed", provider.id, exc_info=exception)
+            # provider/redirect passes the raw POSTed name (or None) when it
+            # rejects its input; the callback passes a Provider.
+            name = getattr(provider, "id", provider)
+            logger.error("Sign-in with %s failed", name, exc_info=exception)
         super().on_authentication_error(
             request,
             provider,

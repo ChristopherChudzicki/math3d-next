@@ -526,3 +526,23 @@ def test_a_callback_with_unknown_state_lands_on_the_sign_in_error_page():
     assert urlparse(response["Location"]).path == "/app/sign-in-error"
     exchange.assert_not_called()
     assert "_auth_user_id" not in client.session
+
+
+@pytest.mark.django_db
+@GOOGLE_REDIRECT_SETTINGS
+def test_a_rejected_redirect_request_lands_on_the_sign_in_error_page():
+    """provider/redirect refuses a callback_url off the trusted origins before
+    any state exists, so allauth falls back to socialaccount_login_error."""
+    response = Client().post(
+        REDIRECT_URL,
+        {
+            "provider": "google",
+            "process": "login",
+            "callback_url": "https://elsewhere.example/scene",
+        },
+    )
+
+    assert response.status_code == 302
+    location = urlparse(response["Location"])
+    assert location.path == "/app/sign-in-error"
+    assert parse_qs(location.query)["error"] == ["unknown"]
