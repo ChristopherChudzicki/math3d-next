@@ -170,7 +170,7 @@ The session cookie is host-only on the API host, where `/admin/` is served, and 
 
 ### Rollout
 
-The whole change, redirect flow included, merges as one commit in #1284. Before release:
+The whole change, redirect flow included, merges as one commit in #1312. Before release:
 
 - delete the existing production accounts by hand;
 - set up the production Google client: the redirect URI above, and no JavaScript origins;
