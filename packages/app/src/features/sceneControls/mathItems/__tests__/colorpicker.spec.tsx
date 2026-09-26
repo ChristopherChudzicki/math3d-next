@@ -1,5 +1,5 @@
 import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
-import { nodeId, renderTestApp, screen, within } from "@/test_util";
+import { renderTestApp, screen, within } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
 import userEvent from "@testing-library/user-event";
 import { getTimedEvents } from "@math3d/test-utils";
@@ -14,11 +14,9 @@ const setup = async <R extends MIT>(
 ) => {
   const user = userEvent.setup();
   const item = makeItem(type, itemProps);
-  const id = nodeId(item);
   const scene = seedDb.withSceneFromItems([item]);
   const { store } = renderTestApp(`/${scene.key}`);
 
-  const mathScope = store.mathScope.get();
   const findButton = () =>
     screen.findByRole("button", { name: "Show Graphic" });
   const findTextInput = () => screen.findByTitle("Custom Color Input");
@@ -28,8 +26,6 @@ const setup = async <R extends MIT>(
     return swatches;
   };
   const getItem = () => store.getState().scene.items[item.id] as MathItem<R>;
-  const getCalculatedProp = (prop: keyof MathItem<R>["properties"] & string) =>
-    mathScope.results.get(id(prop));
 
   return {
     user,
@@ -37,7 +33,6 @@ const setup = async <R extends MIT>(
     findButton,
     findTextInput,
     getAllSwatches,
-    getCalculatedProp,
   };
 };
 

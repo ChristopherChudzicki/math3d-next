@@ -1,7 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import type { SceneState } from "@/features/sceneControls/mathItems";
-import { sceneSlice } from "@/features/sceneControls/mathItems";
-import { createMathScopeSync } from "@/features/sceneControls/mathItems/sceneSlice/mathScopeSync";
+import {
+  sceneSlice,
+  createMathScopeSync,
+} from "@/features/sceneControls/mathItems";
 
 type RootState = {
   scene: SceneState;

@@ -16,9 +16,8 @@ interface SceneState {
     [id: string]: MathItem;
   };
   /**
-   * Id for the next item created by `addNewItem`. Kept in state rather than a
-   * module-level counter so a store restored from `preloadedState` is
-   * self-contained.
+   * Id for the next `addNewItem`; in state so a store restored from
+   * `preloadedState` doesn't reissue existing ids.
    */
   nextItemId: number;
   order: Record<string, string[]>;
