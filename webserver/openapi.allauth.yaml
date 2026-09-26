@@ -1,18 +1,5 @@
 components:
-  requestBodies:
-    ProviderToken:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ProviderToken'
-      required: true
   responses:
-    Authenticated:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AuthenticatedResponse'
-      description: The user is authenticated.
     Unauthenticated:
       content:
         application/json:
@@ -22,34 +9,6 @@ components:
 
         '
   schemas:
-    Authenticated:
-      properties:
-        methods:
-          description: 'A list of methods used to authenticate.
-
-            '
-          items:
-            $ref: '#/components/schemas/AuthenticationMethod'
-          type: array
-        user:
-          $ref: '#/components/schemas/User'
-      required:
-      - user
-      - methods
-      type: object
-    AuthenticatedResponse:
-      properties:
-        data:
-          $ref: '#/components/schemas/Authenticated'
-        meta:
-          $ref: '#/components/schemas/AuthenticationMeta'
-        status:
-          $ref: '#/components/schemas/StatusOK'
-      required:
-      - status
-      - data
-      - meta
-      type: object
     AuthenticationMeta:
       allOf:
       - $ref: '#/components/schemas/BaseAuthenticationMeta'
@@ -61,136 +20,6 @@ components:
             type: boolean
         required:
         - is_authenticated
-        type: object
-    AuthenticationMethod:
-      oneOf:
-      - properties:
-          at:
-            $ref: '#/components/schemas/Timestamp'
-          email:
-            $ref: '#/components/schemas/Email'
-          method:
-            enum:
-            - password
-            type: string
-          username:
-            $ref: '#/components/schemas/Username'
-        required:
-        - method
-        - at
-        title: 'Authenticated by username/email login
-
-          '
-        type: object
-      - properties:
-          at:
-            $ref: '#/components/schemas/Timestamp'
-          email:
-            $ref: '#/components/schemas/Email'
-          method:
-            enum:
-            - password_reset
-            type: string
-        required:
-        - at
-        - email
-        - method
-        title: 'Authenticated after password reset
-
-          '
-        type: object
-      - properties:
-          at:
-            $ref: '#/components/schemas/Timestamp'
-          email:
-            $ref: '#/components/schemas/Email'
-          method:
-            enum:
-            - code
-            type: string
-        required:
-        - at
-        - email
-        - method
-        title: 'Authenticated by confirming a code sent by email.
-
-          '
-        type: object
-      - properties:
-          at:
-            $ref: '#/components/schemas/Timestamp'
-          method:
-            enum:
-            - code
-            type: string
-          phone:
-            $ref: '#/components/schemas/Phone'
-        required:
-        - at
-        - method
-        - phone
-        title: 'Authenticated by confirming a code sent by phone.
-
-          '
-        type: object
-      - properties:
-          at:
-            $ref: '#/components/schemas/Timestamp'
-          method:
-            enum:
-            - password
-            type: string
-          reauthenticated:
-            enum:
-            - true
-            type: boolean
-        required:
-        - method
-        - reauthenticated
-        - at
-        title: 'Reauthenticated by password
-
-          '
-        type: object
-      - properties:
-          at:
-            $ref: '#/components/schemas/Timestamp'
-          method:
-            enum:
-            - socialaccount
-            type: string
-          provider:
-            $ref: '#/components/schemas/ProviderID'
-          uid:
-            $ref: '#/components/schemas/ProviderAccountID'
-        required:
-        - method
-        - reauthenticated
-        - at
-        - provider
-        - uid
-        title: 'Authenticated by third-party provider
-
-          '
-        type: object
-      - properties:
-          at:
-            $ref: '#/components/schemas/Timestamp'
-          method:
-            enum:
-            - mfa
-            type: string
-          reauthenticated:
-            type: boolean
-          type:
-            $ref: '#/components/schemas/AuthenticatorType'
-        required:
-        - method
-        - at
-        - type
-        title: '(Re)authenticated by 2FA
-
-          '
         type: object
     AuthenticationResponse:
       description: 'An authentication related response.
@@ -239,46 +68,6 @@ components:
             '
           type: string
       type: object
-    ClientID:
-      description: 'The client ID (in case of OAuth2 or OpenID Connect based providers)
-
-        '
-      type: string
-    Email:
-      description: 'The email address.
-
-        '
-      type: string
-    ErrorResponse:
-      properties:
-        errors:
-          items:
-            properties:
-              code:
-                description: 'An error code.
-
-                  '
-                type: string
-              message:
-                description: 'A human readable error message.
-
-                  '
-                type: string
-              param:
-                description: 'The name of the input parameter that was incorrect.
-
-                  '
-                type: string
-            required:
-            - code
-            - message
-            type: object
-          type: array
-        status:
-          enum:
-          - 400
-          type: integer
-      type: object
     Flow:
       properties:
         id:
@@ -309,38 +98,6 @@ components:
       required:
       - id
       type: object
-    ForbiddenResponse:
-      properties:
-        status:
-          enum:
-          - 403
-          type: integer
-      required:
-      - status
-      type: object
-    Phone:
-      description: 'The phone number.
-
-        '
-      type: string
-    Process:
-      description: 'The process to be executed when the user successfully
-
-        authenticates. When set to `login`, the user will be logged into the
-
-        account to which the provider account is connected, or if no such
-
-        account exists, a signup will occur. If set to `connect`, the provider
-
-        account will be connected to the list of provider accounts for the
-
-        currently authenticated user.
-
-        '
-      enum:
-      - login
-      - connect
-      type: string
     Provider:
       properties:
         client_id:
@@ -378,129 +135,12 @@ components:
       - name
       - flows
       type: object
-    ProviderAccountID:
-      description: 'The provider specific account ID.
-
-        '
-      type: string
-    ProviderID:
-      description: 'The provider ID.
-
-        '
-      type: string
-    ProviderToken:
-      properties:
-        process:
-          $ref: '#/components/schemas/Process'
-        provider:
-          $ref: '#/components/schemas/ProviderID'
-        token:
-          description: 'The token.
-
-            '
-          properties:
-            access_token:
-              description: 'The access token.
-
-                '
-              type: string
-            client_id:
-              $ref: '#/components/schemas/ClientID'
-            id_token:
-              description: 'The ID token.
-
-                '
-              type: string
-          required:
-          - client_id
-          type: object
-      required:
-      - provider
-      - process
-      - token
-      type: object
-    StatusOK:
-      enum:
-      - 200
-      type: integer
-    Timestamp:
-      description: 'An epoch based timestamp (trivial to parse using: `new Date(value)*1000`)
-
-        '
-      type: number
-    User:
-      properties:
-        display:
-          description: The display name for the user.
-          type: string
-        email:
-          description: The email address.
-          type: string
-        has_usable_password:
-          description: Whether or not the account has a password set.
-          type: boolean
-        id:
-          description: The user ID.
-          type: integer
-      required:
-      - display
-      - has_usable_password
-      type: object
-    Username:
-      description: 'The username.
-
-        '
-      type: string
 info:
   description: Trimmed django-allauth headless browser API. Vendored via `manage.py dump_openapi_allauth`.
   title: 'django-allauth: Headless API'
   version: '1'
 openapi: 3.0.3
 paths:
-  /_allauth/browser/v1/auth/provider/token:
-    post:
-      description: 'Authenticates with a third-party provider using provider tokens received
-
-        by other means. For example, in case of a mobile app, the authentication
-
-        flow runs completely on the device itself, without any interaction with
-
-        the API. Then, when the (device) authentication completes and the mobile
-
-        app receives an access and/or ID token, it can hand over these tokens
-
-        via this endpoint to authenticate on the server.
-
-        '
-      operationId: providerToken
-      requestBody:
-        $ref: '#/components/requestBodies/ProviderToken'
-      responses:
-        '200':
-          $ref: '#/components/responses/Authenticated'
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: An input error occurred.
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuthenticationResponse'
-          description: Not authenticated, more steps are required to be completed.
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ForbiddenResponse'
-          description: 'Forbidden. For example, when signup is closed.
-
-            '
-      summary: Provider token
-      tags:
-      - allauth
   /_allauth/browser/v1/auth/session:
     delete:
       description: 'Logs out the user from the current session.

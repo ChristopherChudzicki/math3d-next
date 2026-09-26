@@ -11,7 +11,7 @@ DEFAULT_OUTPUT = Path(settings.BASE_DIR) / "openapi.allauth.yaml"
 # (path, http_method) -> operationId.
 # Only these operations are vendored into our client; everything else
 # get_schema() exposes (config, reauthenticate, code/confirm, provider
-# signup/redirect, session GET, ...) is dropped here. The account app's
+# signup/redirect/token, session GET, ...) is dropped here. The account app's
 # password/email/phone flows aren't dropped here at all: under
 # SOCIALACCOUNT_ONLY, allauth/headless/account/urls.py registers them only
 # `if not SOCIALACCOUNT_ONLY`, so get_schema() never exposes their paths and
@@ -19,7 +19,6 @@ DEFAULT_OUTPUT = Path(settings.BASE_DIR) / "openapi.allauth.yaml"
 # `/browser/` by get_schema(), so we key on the resolved browser paths.
 ENABLED = {
     ("/_allauth/browser/v1/auth/session", "delete"): "logout",
-    ("/_allauth/browser/v1/auth/provider/token", "post"): "providerToken",
 }
 
 # Param $refs to strip from kept operations. `SessionToken` is the

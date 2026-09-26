@@ -42,7 +42,6 @@ export const urls = {
     usersMeDelete: `${BASE_URL}/v1/auth/users/me/delete/`,
     // allauth headless endpoints
     session: `${BASE_URL}/_allauth/browser/v1/auth/session`,
-    providerToken: `${BASE_URL}/_allauth/browser/v1/auth/provider/token`,
   },
 } as const;
 
@@ -125,105 +124,6 @@ export const handlers = [
       return HttpResponse.json(scene, { status: 201 });
     },
   ),
-  http.post(urls.auth.providerToken, async ({ request }) => {
-    // Codes and messages are allauth's own, from
-    // DefaultHeadlessAdapter.error_messages.
-    const badToken = (code: "invalid_token" | "token_required") =>
-      HttpResponse.json(
-        {
-          status: 400,
-          errors: [
-            {
-              code,
-              message:
-                code === "invalid_token"
-                  ? "Invalid token."
-                  : "`id_token` and/or `access_token` required.",
-              param: "token",
-            },
-          ],
-        },
-        { status: 400 },
-      );
-    const { provider, process, token } = (await request.json()) as {
-      provider?: string;
-      process?: string;
-      token?: { id_token?: string; client_id?: string };
-    };
-    if (typeof token?.id_token !== "string") {
-      return badToken("token_required");
-    }
-    // `process` is pinned as a tripwire, not a copy of allauth, which also
-    // accepts "connect": the SPA only ever signs in, so anything else is a bug.
-    if (process !== "login") {
-      return HttpResponse.json(
-        {
-          status: 400,
-          errors: [
-            {
-              code: "invalid_choice",
-              message: `Select a valid choice. ${process} is not one of the available choices.`,
-              param: "process",
-            },
-          ],
-        },
-        { status: 400 },
-      );
-    }
-    // allauth resolves the provider's app *by* client_id, so a mismatch
-    // resolves no app at all and the token is rejected as invalid. Only
-    // providers with `uses_apps` have an app to resolve: the dummy provider
-    // does not, and allauth neither requires nor reads a client_id for it.
-    if (provider !== "dummy") {
-      const configuredClientId: string =
-        import.meta.env?.VITE_GOOGLE_CLIENT_ID ?? "";
-      if (token.client_id !== configuredClientId) {
-        return badToken("invalid_token");
-      }
-    }
-    // The id_token is read as JSON claims, matching the dummy provider the e2e
-    // suite signs in through. A real Google credential is a signed JWT that
-    // only the backend can verify, which no mock can stand in for.
-    let claims: { id?: unknown; email?: unknown };
-    try {
-      claims = JSON.parse(token.id_token) as typeof claims;
-    } catch {
-      return badToken("invalid_token");
-    }
-    const { id: uid, email } = claims;
-    if (typeof uid !== "string" || typeof email !== "string") {
-      return badToken("invalid_token");
-    }
-    // Identity is the provider uid, as it is in allauth: a known uid signs in,
-    // an unseen one signs up. Keying on the email instead would sign in exactly
-    // the case the real backend refuses, two lines below.
-    const linked = db.user.findFirst({ where: { uid: { equals: uid } } });
-    if (!linked && db.user.findFirst({ where: { email: { equals: email } } })) {
-      // The address already has an account this identity is not linked to.
-      // CustomSocialAccountAdapter.pre_social_login refuses rather than adopt
-      // the account, and ProviderTokenView renders that as allauth's error
-      // envelope. No `param`: the error is raised outside form input.
-      return HttpResponse.json(
-        {
-          status: 400,
-          errors: [
-            {
-              code: "email_taken",
-              // allauth interpolates `sociallogin.provider.name`, which is the
-              // provider id title-cased for both providers this handler serves.
-              message: `An account already exists with this email address. Please sign in to that account first, then connect your ${(provider ?? "").replace(/^./, (c) => c.toUpperCase())} account.`,
-            },
-          ],
-        },
-        { status: 400 },
-      );
-    }
-    currentUserId = (linked ?? db.user.create({ uid, email })).id;
-    // The SPA branches on the status alone and reads nothing out of allauth's
-    // session bodies, so transcribing them here would be fidelity no test or
-    // type could hold to.
-    return HttpResponse.json({ status: 200 });
-  }),
   // allauth sign-out. Its 401 confirms the session is gone; `useLogout` treats
   // it as success.
   http.delete(urls.auth.session, async () => {

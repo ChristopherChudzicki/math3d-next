@@ -3,8 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    ".": "./src/index.ts",
-    "./dev": "./src/dev/index.ts"
+    ".": "./src/index.ts"
   },
   "main": "./src/index.ts",
   "type": "module",

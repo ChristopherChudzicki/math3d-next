@@ -7,38 +7,6 @@ const keys = {
   userMe: ["me"],
 };
 
-type ProviderTokenLogin = {
-  provider: string;
-  /** Must equal the backend's configured client ID for the provider. allauth
-   * resolves the app *by* client_id, so a mismatch resolves no app and the
-   * token is rejected with `invalid_token`. */
-  client_id: string;
-  id_token: string;
-};
-
-/**
- * Sign in with an ID token obtained client-side from a social provider.
- *
- * Signup and login are one request: an unseen provider identity creates the
- * account, a known one logs into it. `process` is pinned to "login" because
- * the only alternative, "connect", links a provider to an existing session,
- * which this app never does.
- */
-const useProviderTokenLogin = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ provider, client_id, id_token }: ProviderTokenLogin) =>
-      unwrap(
-        allauthClient.POST("/_allauth/browser/v1/auth/provider/token", {
-          body: { provider, process: "login", token: { client_id, id_token } },
-        }),
-      ),
-    onSuccess: async () => {
-      await resetOnAuthChange(queryClient);
-    },
-  });
-};
-
 const useLogout = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -101,4 +69,4 @@ const useUserMeDelete = () => {
   });
 };
 
-export { useProviderTokenLogin, useLogout, useUserMe, useUserMeDelete };
+export { useLogout, useUserMe, useUserMeDelete };

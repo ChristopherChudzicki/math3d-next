@@ -4,31 +4,6 @@
  */
 
 export interface paths {
-  "/_allauth/browser/v1/auth/provider/token": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Provider token
-     * @description Authenticates with a third-party provider using provider tokens received
-     *     by other means. For example, in case of a mobile app, the authentication
-     *     flow runs completely on the device itself, without any interaction with
-     *     the API. Then, when the (device) authentication completes and the mobile
-     *     app receives an access and/or ID token, it can hand over these tokens
-     *     via this endpoint to authenticate on the server.
-     */
-    post: operations["providerToken"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/_allauth/browser/v1/auth/session": {
     parameters: {
       query?: never;
@@ -53,66 +28,9 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    Authenticated: {
-      /** @description A list of methods used to authenticate. */
-      methods: components["schemas"]["AuthenticationMethod"][];
-      user: components["schemas"]["User"];
-    };
-    AuthenticatedResponse: {
-      data: components["schemas"]["Authenticated"];
-      meta: components["schemas"]["AuthenticationMeta"];
-      status: components["schemas"]["StatusOK"];
-    };
     AuthenticationMeta: components["schemas"]["BaseAuthenticationMeta"] & {
       is_authenticated: boolean;
     };
-    AuthenticationMethod:
-      | {
-          at: components["schemas"]["Timestamp"];
-          email?: components["schemas"]["Email"];
-          /** @enum {string} */
-          method: "password";
-          username?: components["schemas"]["Username"];
-        }
-      | {
-          at: components["schemas"]["Timestamp"];
-          email: components["schemas"]["Email"];
-          /** @enum {string} */
-          method: "password_reset";
-        }
-      | {
-          at: components["schemas"]["Timestamp"];
-          email: components["schemas"]["Email"];
-          /** @enum {string} */
-          method: "code";
-        }
-      | {
-          at: components["schemas"]["Timestamp"];
-          /** @enum {string} */
-          method: "code";
-          phone: components["schemas"]["Phone"];
-        }
-      | {
-          at: components["schemas"]["Timestamp"];
-          /** @enum {string} */
-          method: "password";
-          /** @enum {boolean} */
-          reauthenticated: true;
-        }
-      | {
-          at: components["schemas"]["Timestamp"];
-          /** @enum {string} */
-          method: "socialaccount";
-          provider: components["schemas"]["ProviderID"];
-          uid: components["schemas"]["ProviderAccountID"];
-        }
-      | {
-          at: components["schemas"]["Timestamp"];
-          /** @enum {string} */
-          method: "mfa";
-          reauthenticated?: boolean;
-          type: components["schemas"]["AuthenticatorType"];
-        };
     /** @description An authentication related response. */
     AuthenticationResponse: {
       data: {
@@ -132,22 +50,6 @@ export interface components {
       access_token?: string;
       /** @description The session token (`app` clients only). */
       session_token?: string;
-    };
-    /** @description The client ID (in case of OAuth2 or OpenID Connect based providers) */
-    ClientID: string;
-    /** @description The email address. */
-    Email: string;
-    ErrorResponse: {
-      errors?: {
-        /** @description An error code. */
-        code: string;
-        /** @description A human readable error message. */
-        message: string;
-        /** @description The name of the input parameter that was incorrect. */
-        param?: string;
-      }[];
-      /** @enum {integer} */
-      status?: 400;
     };
     Flow: {
       /** @enum {string} */
@@ -169,22 +71,6 @@ export interface components {
       /** @description Matches `settings.MFA_SUPPORTED_TYPES`. */
       types?: components["schemas"]["AuthenticatorType"][];
     };
-    ForbiddenResponse: {
-      /** @enum {integer} */
-      status: 403;
-    };
-    /** @description The phone number. */
-    Phone: string;
-    /**
-     * @description The process to be executed when the user successfully
-     *     authenticates. When set to `login`, the user will be logged into the
-     *     account to which the provider account is connected, or if no such
-     *     account exists, a signup will occur. If set to `connect`, the provider
-     *     account will be connected to the list of provider accounts for the
-     *     currently authenticated user.
-     * @enum {string}
-     */
-    Process: "login" | "connect";
     Provider: {
       /** @description The client ID (in case of OAuth2 or OpenID Connect based providers) */
       client_id?: string;
@@ -197,49 +83,8 @@ export interface components {
       /** @description The OIDC discovery or well-known URL (in case of OAuth2 or OpenID Connect based providers) */
       openid_configuration_url?: string;
     };
-    /** @description The provider specific account ID. */
-    ProviderAccountID: string;
-    /** @description The provider ID. */
-    ProviderID: string;
-    ProviderToken: {
-      process: components["schemas"]["Process"];
-      provider: components["schemas"]["ProviderID"];
-      /** @description The token. */
-      token: {
-        /** @description The access token. */
-        access_token?: string;
-        client_id: components["schemas"]["ClientID"];
-        /** @description The ID token. */
-        id_token?: string;
-      };
-    };
-    /** @enum {integer} */
-    StatusOK: 200;
-    /** @description An epoch based timestamp (trivial to parse using: `new Date(value)*1000`) */
-    Timestamp: number;
-    User: {
-      /** @description The display name for the user. */
-      display: string;
-      /** @description The email address. */
-      email?: string;
-      /** @description Whether or not the account has a password set. */
-      has_usable_password: boolean;
-      /** @description The user ID. */
-      id?: number;
-    };
-    /** @description The username. */
-    Username: string;
   };
   responses: {
-    /** @description The user is authenticated. */
-    Authenticated: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": components["schemas"]["AuthenticatedResponse"];
-      };
-    };
     /** @description There is no authenticated session. */
     Unauthenticated: {
       headers: {
@@ -251,57 +96,12 @@ export interface components {
     };
   };
   parameters: never;
-  requestBodies: {
-    ProviderToken: {
-      content: {
-        "application/json": components["schemas"]["ProviderToken"];
-      };
-    };
-  };
+  requestBodies: never;
   headers: never;
   pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  providerToken: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: components["requestBodies"]["ProviderToken"];
-    responses: {
-      200: components["responses"]["Authenticated"];
-      /** @description An input error occurred. */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description Not authenticated, more steps are required to be completed. */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AuthenticationResponse"];
-        };
-      };
-      /** @description Forbidden. For example, when signup is closed. */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ForbiddenResponse"];
-        };
-      };
-    };
-  };
   logout: {
     parameters: {
       query?: never;
