@@ -25,7 +25,7 @@ const SIGN_IN_ERROR_MESSAGES: Record<SignInError, React.ReactNode> = {
   signup_closed: "New sign-ups are closed right now.",
   email_taken: (
     <>
-      This email address already belongs to another math3d account. If it&apos;s
+      This email address already belongs to another Math3d account. If it&apos;s
       yours, <ContactLink>get in touch</ContactLink>.
     </>
   ),

@@ -47,12 +47,15 @@ const LoginPage: React.FC = () => {
           Sign in with Google
         </ProviderSignInButton>
         {signInError && (
-          <Alert severity={signInError === "cancelled" ? "info" : "error"}>
+          <Alert
+            severity={signInError === "cancelled" ? "info" : "error"}
+            className={styles["sign-in-alert"]}
+          >
             {SIGN_IN_ERROR_MESSAGES[signInError]}
           </Alert>
         )}
-        {/* Below the alert: it belongs to the Google button above, and a
-            control between the two reads as its owner. */}
+        {/* Last, so the dialog reads the same with or without this
+            dev-only button. */}
         {ENABLE_DUMMY_AUTH && (
           <>
             <Divider className={styles["dummy-divider"]}>or</Divider>

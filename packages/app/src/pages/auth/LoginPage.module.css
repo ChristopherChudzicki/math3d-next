@@ -6,6 +6,10 @@
   row-gap: 1rem;
 }
 
+.sign-in-alert {
+  align-self: stretch;
+}
+
 .dummy-divider {
   width: 100%;
 }
@@ -18,7 +22,6 @@
   border: 1px solid #747775;
   background-color: #fff;
   color: #1f1f1f;
-  font-family: Roboto, var(--mui-font-family, sans-serif);
   font-weight: 500;
   font-size: 14px;
   line-height: 20px;
@@ -28,4 +31,24 @@
 .google-button:hover {
   border-color: #747775;
   background-color: #f7f8f8;
+}
+
+/* The spec's 12px inset before the logo and 10px gap after it. */
+.google-button :global(.MuiButton-startIcon) {
+  margin-left: 0;
+  margin-right: 10px;
+}
+
+.google-button:disabled :global(.MuiButton-startIcon) {
+  opacity: 0.38;
+}
+
+/* MUI's ripple greys the logo; an outline marks focus instead. */
+.google-button :global(.MuiTouchRipple-root) {
+  display: none;
+}
+
+.google-button:focus-visible {
+  outline: 2px solid #1890ff;
+  outline-offset: 2px;
 }
