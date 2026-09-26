@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import { SceneBuilder } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { getStore } from "@/store/store";
+import { restoreStore } from "@/store/restoreStore";
 import type { AppStore } from "@/store/store";
 import { actions } from "./scene.slice";
 import { useMathScope } from "./hooks";
@@ -62,4 +63,19 @@ test("a store restored from JSON continues its own item ids", () => {
   expect(restored.getState().scene.items).toHaveProperty(
     `${preloadedState.scene.nextItemId}`,
   );
+});
+
+test("restoreStore replaces the whole store and evaluates it in a fresh MathScope", () => {
+  const source = getStore();
+  const { scene, valueId } = sceneWithVariable();
+  loadScene(source, scene);
+  const saved = JSON.parse(JSON.stringify(source.getState()));
+  const store = getStore();
+  const before = store.mathScope.get();
+
+  store.dispatch(restoreStore(saved));
+
+  expect(store.getState()).toEqual(saved);
+  expect(store.mathScope.get()).not.toBe(before);
+  expect(store.mathScope.get().results.has(valueId)).toBe(true);
 });

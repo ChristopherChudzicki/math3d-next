@@ -1,4 +1,5 @@
 import type { Middleware } from "@reduxjs/toolkit";
+import { restoreStore } from "@/store/restoreStore";
 import type { SceneState, AppMathScope } from "./interfaces";
 import { actions } from "./scene.slice";
 import { makeMathScope } from "./mathScopeInstance";
@@ -28,8 +29,9 @@ const syncChangedItems = (scope: AppMathScope, prev: Items, next: Items) => {
  * Immer gives every edited item a new reference, so re-syncing items whose
  * reference changed covers every edit.
  *
- * Each `setScene` needs a fresh MathScope: item ids recur across scenes, and a
- * reused scope would keep the old scene's expressions and results for them.
+ * Each `setScene` or `restoreStore` needs a fresh MathScope: item ids recur
+ * across scenes, and a reused scope would keep the old scene's expressions and
+ * results for them.
  */
 const createMathScopeSync = () => {
   let scope = makeMathScope();
@@ -42,7 +44,7 @@ const createMathScopeSync = () => {
     return (next) => (action) => {
       const result = next(action);
       const { items } = api.getState().scene;
-      if (actions.setScene.match(action)) {
+      if (actions.setScene.match(action) || restoreStore.match(action)) {
         scope = makeMathScope();
         syncItemsToMathScope(scope, Object.values(items));
         listeners.forEach((listener) => listener());

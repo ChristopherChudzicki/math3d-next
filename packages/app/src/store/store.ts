@@ -1,9 +1,11 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import type { UnknownAction } from "@reduxjs/toolkit";
 import type { SceneState } from "@/features/sceneControls/mathItems";
 import {
   sceneSlice,
   createMathScopeSync,
 } from "@/features/sceneControls/mathItems";
+import { restoreStore } from "./restoreStore";
 
 type RootState = {
   scene: SceneState;
@@ -13,6 +15,13 @@ const getInitialState = (): RootState => ({
   scene: sceneSlice.getInitialState(),
 });
 
+const combinedReducer = combineReducers({
+  [sceneSlice.name]: sceneSlice.reducer,
+});
+
+const rootReducer = (state: RootState | undefined, action: UnknownAction) =>
+  restoreStore.match(action) ? action.payload : combinedReducer(state, action);
+
 type ConfigureStoreOptions = {
   preloadedState?: RootState;
 };
@@ -20,9 +29,7 @@ type ConfigureStoreOptions = {
 const getStore = ({ preloadedState }: ConfigureStoreOptions = {}) => {
   const mathScopeSync = createMathScopeSync();
   const store = configureStore({
-    reducer: {
-      [sceneSlice.name]: sceneSlice.reducer,
-    },
+    reducer: rootReducer,
     preloadedState,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat(mathScopeSync.middleware),
