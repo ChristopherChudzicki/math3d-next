@@ -20,14 +20,9 @@ class EnvConfig(BaseSettings):
     model_config = SettingsConfigDict(case_sensitive=True, extra="forbid")
 
     SECRET_KEY: str = ""
-    MAILJET_API_KEY: str = ""
-    MAILJET_SECRET_KEY: str = ""
-    DEFAULT_FROM_EMAIL: str = ""
-    SERVER_EMAIL: str = ""
     # The SPA origin, e.g. https://next.math3d.org. Validated to a bare origin
-    # (and trailing-slash-normalized) because paths are appended to it
-    # (HEADLESS_FRONTEND_URLS) and it is used verbatim as an origin (CORS/CSRF
-    # trust), where a browser's Origin header never carries a path.
+    # (and trailing-slash-normalized) because it is used verbatim as an origin
+    # (CORS/CSRF trust), where a browser's Origin header never carries a path.
     APP_BASE_URL: str = ""
     # Bare origin of the screenshots render Worker, e.g.
     # https://math3d-screenshots.<sub>.workers.dev. The reservation nudge POSTs
@@ -58,7 +53,14 @@ class EnvConfig(BaseSettings):
     # Version
     APP_VERSION: str = "unknown"
     # Feature flags
+    # Open sign-ups. False is a deployment posture, not a misconfiguration: a
+    # closed deployment still logs in identities that already exist.
     ENABLE_REGISTRATION: bool = False
+    # Google OAuth client ID. Public by design (the SPA embeds it too), so this
+    # is config, not a secret. Empty ⇒ allauth resolves no app for the client_id
+    # the SPA posts and every sign-in fails with `invalid_token`; required on a
+    # deployment (see _require_deployment_config).
+    GOOGLE_CLIENT_ID: str = ""
     CSRF_COOKIE_DOMAIN: str = ""
     DISABLE_ALLAUTH_RATE_LIMITS: bool = False
     # Local-only, for hand-testing Google sign-in on bare `localhost`, which
@@ -117,7 +119,7 @@ class EnvConfig(BaseSettings):
         missing = []
         if not self.APP_BASE_URL:
             missing.append(
-                "APP_BASE_URL (used for CSRF_TRUSTED_ORIGINS and email links)"
+                "APP_BASE_URL (used for CSRF_TRUSTED_ORIGINS and CREDENTIALED_CORS_ORIGINS)"
             )
         if not self.CSRF_COOKIE_DOMAIN:
             missing.append(
@@ -128,6 +130,11 @@ class EnvConfig(BaseSettings):
             missing.append(
                 "DATABASE_URL (without it Django falls back to a dummy backend "
                 "that fails on every query)"
+            )
+        if not self.GOOGLE_CLIENT_ID:
+            missing.append(
+                "GOOGLE_CLIENT_ID (empty, allauth resolves no app for the "
+                "client_id the SPA posts and every sign-in fails)"
             )
         if missing:
             raise ValueError(

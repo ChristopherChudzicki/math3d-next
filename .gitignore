@@ -29,9 +29,10 @@ playwright-report
 test-results
 
 dist
-webserver/private/email/*
+# Message bodies the removed file-based email backend wrote, including
+# activation URLs carrying signed keys. Left behind on any checkout that ran it.
+webserver/private/
 webserver/staticfiles/*
-!webserver/private/email/.gitkeep
 .mypy_cache
 .pytest_cache
 

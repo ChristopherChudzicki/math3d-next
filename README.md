@@ -59,11 +59,13 @@ VITE_GOOGLE_CLIENT_ID=<dev client id>
 
 Then `docker compose up -d` to recreate the backend (a container's environment
 is fixed at creation) and restart the dev server. The two client-ID variables
-must match, or the sign-in POST fails with `client_id_mismatch`.
+must match, or the sign-in POST fails with `invalid_token`.
 
 Delete the block and recreate to switch back. While it is in place, no local
-checkout enforces CSRF and worktrees on `.localdev` cannot authenticate, so
-don't leave it on. `DISABLE_CSRF` refuses to boot on a deployment.
+checkout enforces CSRF, and the dev CORS origins are derived from
+`APP_BASE_URL`'s hostname — so every `.localdev` frontend is CORS-blocked,
+anonymous reads included. Don't leave it on. `DISABLE_CSRF` refuses to boot on
+a deployment.
 
 The backend test suite is unaffected — `main/test_settings.py` pins its own
 environment. `yarn test-e2e` cannot run against this configuration, though, and
