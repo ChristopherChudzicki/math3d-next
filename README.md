@@ -35,6 +35,15 @@ After this, access the app at:
 - **Frontend**: http://math3d.localdev:3000
 - **API**: http://api.math3d.localdev:8000
 
+### Signing in during development
+
+The sign-in dialog's "Sign in as dev user" (`VITE_ENABLE_DUMMY_AUTH`) opens
+allauth's `dummy` provider form. Enter an integer Account ID and an Email, and
+tick Email verified, or the sign-in is refused as an unverified address.
+`seed_test_data` creates one such user: ID `2`,
+`test-user-static@math3d-local.org`. A new ID with an email another account
+already uses is refused as `email_taken`.
+
 ### Testing Google sign-in locally
 
 Day-to-day development signs in through the `dummy` provider and never reaches

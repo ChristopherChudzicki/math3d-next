@@ -77,7 +77,7 @@ sequenceDiagram
     Note over B: save draft (store + pathname) to sessionStorage
     B->>A: POST /_allauth/browser/v1/auth/provider/redirect<br/>provider, process=login, callback_url, csrfmiddlewaretoken
     Note over A: stash state in the session:<br/>state id, PKCE verifier, callback_url
-    A-->>B: 302 to Google's authorize URL<br/>client_id, redirect_uri, scope, state,<br/>code_challenge, prompt=select_account
+    A-->>B: 302 to Google's authorize URL<br/>client_id, redirect_uri, scope, state,<br/>code_challenge, prompt=select_account<br/>Set-Cookie: sessionid (anonymous, holds the state)
     B->>G: GET authorize
     G->>U: account chooser, consent
     U->>G: choose account
@@ -87,7 +87,7 @@ sequenceDiagram
     A->>G: POST token endpoint<br/>code, client_secret, code_verifier
     G-->>A: access_token, id_token
     Note over A: decode id_token (TLS, no signature check),<br/>adapter checks, find or create account, log in
-    A-->>B: 302 to callback_url (+ ?error=code on failure)<br/>Set-Cookie: sessionid
+    A-->>B: 302 to callback_url (+ ?error=code on failure)<br/>Set-Cookie: sessionid (rotated on login)
     Note over B: fresh page load: restore draft on its pathname,<br/>read session via users/me
 ```
 
@@ -101,7 +101,7 @@ Why redirect rather than Google Identity Services (GIS), whose popup hands JavaS
 
 The cost is that leaving the page discards the editor's in-memory state — covered next.
 
-**Mounting the callback.** allauth's usual `include("allauth.urls")` also mounts `google/login/token/`: a second, CSRF-exempt login endpoint on the host that serves `/admin/`.[^login-by-token] So `main/urls.py` mounts only Google's own OAuth views — `include(default_urlpatterns(GoogleProvider))` under `_allauth/`, which adds `google/login/` (a 404 under `HEADLESS_ONLY`) and `google/login/callback/`, with no namespace, since allauth reverses `google_callback` unqualified[^callback-view] — plus the dummy provider's routes in development. Each provider added later gets the same one-line mount and its own callback path, `<provider>/login/callback/`, which is the redirect URI registered with that provider.
+**Mounting the callback.** allauth's usual `include("allauth.urls")` also mounts `google/login/token/`: a second, CSRF-exempt login endpoint on the host that serves `/admin/`.[^login-by-token] So `main/urls.py` mounts only Google's own OAuth views — `include(default_urlpatterns(GoogleProvider))` under `_allauth/`, which adds `google/login/` (a 404 under `HEADLESS_ONLY`) and `google/login/callback/`, with no namespace, since allauth reverses `google_callback` unqualified[^callback-view] — plus the dummy provider's routes in development. An OAuth2 provider added later mounts the same way, with its callback at `<slug>/login/callback/`, the redirect URI registered with that provider. Not every provider fits that mount: Apple adds a finish route, OpenID Connect and OAuth1 providers ship their own URL modules, so each new provider starts from its own `urls.py`.
 
 **Settings for the redirect:**
 
@@ -117,12 +117,12 @@ The cost is that leaving the page discards the editor's in-memory state — cove
 An anonymous user can build a scene and then sign in to keep it, so the redirect often lands on unsaved work. The SPA carries the editor across it in `sessionStorage`:
 
 - **What:** a draft holding the whole Redux store and the pathname it was saved from, written on every sign-in. The store holds only plain data, including the scene's unsaved flag, so restoring it puts the editor back as it was.
-- **Restore:** when the app boots on the draft's pathname within an hour of it being written, it restores the draft and deletes it. Any other boot leaves the draft alone. Matching the path rather than carrying a key in `callback_url` also covers two returns that bypass `callback_url`: Back from Google when the browser reloads the page instead of restoring it from its back/forward cache, and a failed sign-in that lands on the error page, which can link back to the draft's pathname.
+- **Restore:** the first scene load after the app starts restores the draft if it was written within the hour, by the same app version, on this pathname, while the store held this route's scene; the draft is then deleted. A draft from another version or older than an hour is deleted unrestored; one from another pathname is left alone. Requiring the route's scene covers a sign-in clicked before that scene had loaded, whose draft holds some other store. Matching the path rather than carrying a key in `callback_url` also covers two returns that bypass `callback_url`: Back from Google when the browser reloads the page instead of restoring it from its back/forward cache, and a failed sign-in that lands on the error page, which forwards to the draft's pathname.
 - **Back/forward cache:** a page restored from it (`pageshow` with `persisted`) still has its live state, at least as new as the draft, so the draft is deleted unrestored. Otherwise a later reload in that tab would bring back the older draft. When the cache works, Back needs no draft at all.
 - **Where it returns:** `callback_url` is the current URL without the sign-in overlay.
 - **Precedence:** a restored draft wins over the scene fetched for the URL.
 - **Why `sessionStorage`:** it is per tab, survives the round trip within that tab, and is cleared when the tab closes. The one-hour limit keeps a draft from resurfacing long after a sign-in was abandoned.
-- **Errors:** `?error=` is shown only as a known code mapped to fixed text, since anyone can craft that URL. A failed code exchange is logged on the backend with its cause; the SPA only ever sees the code.
+- **Errors:** `?error=` is shown only as a known code mapped to fixed text, since anyone can craft that URL. A failed code exchange is logged on the backend with its cause, as text rather than a traceback, since Sentry would attach the frames' client secret and tokens; the SPA only ever sees the code.
 
 ### Adding providers later
 
