@@ -14,8 +14,8 @@ import SignInErrorPage from "./pages/auth/SignInErrorPage";
 
 /**
  * Root layout: hosts the `?test-sync-error` trigger and the sign-in `?error=`
- * handler on every route, and renders the matched child. Its own `errorElement` catches render errors
- * from anywhere in the tree.
+ * handler on every route, and renders the matched child. Its own
+ * `errorElement` catches render errors from anywhere in the tree.
  */
 const RootLayout: React.FC = () => (
   <>

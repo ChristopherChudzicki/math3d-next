@@ -16,8 +16,8 @@ type SignInDraft = {
   state: RootState;
 };
 
-// Private windows and blocked site data throw on any storage access; losing
-// the draft beats failing the sign-in.
+// Blocked site data makes storage access throw, and a full quota makes writes
+// throw; losing the draft beats failing the sign-in.
 const read = (): SignInDraft | undefined => {
   try {
     const raw = sessionStorage.getItem(SIGN_IN_DRAFT_KEY);
