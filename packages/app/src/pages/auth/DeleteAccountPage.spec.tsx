@@ -102,7 +102,13 @@ test("a 403 sends the user to sign in again instead of a generic failure", async
     within(dialog).getByRole("button", { name: "Delete Account" }),
   );
 
-  await screen.findByRole("heading", { name: "Could not delete your account" });
+  // The notice comes first; a sign-in dialog opened over it would hide it.
+  const notice = await screen.findByRole("dialog", {
+    name: "Could not delete your account",
+  });
+  expect(location.current.search).not.toContain("overlay=login");
+
+  await user.click(within(notice).getByRole("button", { name: "OK" }));
   await waitFor(() =>
     expect(location.current.search).toContain("overlay=login"),
   );

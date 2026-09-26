@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId } from "react";
+import React, { useCallback, useEffect, useId, useState } from "react";
 import * as yup from "yup";
 import { Alert, TextField } from "@mui/material";
 import { useNavigate } from "react-router";
@@ -22,6 +22,9 @@ const DeleteAccountPage: React.FC = () => {
   const { add: addNotification } = useNotifications();
   const navigate = useNavigate();
   const formId = useId();
+  // While the 403 notice shows, sign-in waits: a dialog opened over the notice
+  // would hide it.
+  const [noticeOpen, setNoticeOpen] = useState(false);
   const {
     register,
     handleSubmit,
@@ -38,10 +41,14 @@ const DeleteAccountPage: React.FC = () => {
   // unauthenticated here — a hand-typed /?overlay=delete-account while logged
   // out, or a session that expired mid-dialog — goes to the login overlay.
   useEffect(() => {
-    if (isAuthenticated === "unauthenticated" && !deleteAccount.isSuccess) {
+    if (
+      isAuthenticated === "unauthenticated" &&
+      !deleteAccount.isSuccess &&
+      !noticeOpen
+    ) {
       open("login");
     }
-  }, [isAuthenticated, open, deleteAccount.isSuccess]);
+  }, [isAuthenticated, open, deleteAccount.isSuccess, noticeOpen]);
 
   const onSubmit = handleSubmit(async () => {
     try {
@@ -51,15 +58,16 @@ const DeleteAccountPage: React.FC = () => {
       // Sentry event are the right answer.
       if (!isApiError(err, [403])) throw err;
       // mutateAsync awaits onError, which has already cleared the cached
-      // identity; when the session is what failed, the effect above is
-      // switching this dialog to sign-in, and the change needs a word for it.
-      // A CSRF token that did not check out is answered 403 too, so the
-      // message names neither cause.
-      addNotification({
+      // identity; when the session is what failed, the effect above switches
+      // this dialog to sign-in once the notice closes. A CSRF token that did
+      // not check out is answered 403 too, so the message names neither cause.
+      setNoticeOpen(true);
+      const { confirmed } = addNotification({
         title: "Could not delete your account",
         body: "Your sign-in could not be verified, so nothing was deleted. Try again — you may be asked to sign in first.",
         type: "alert",
       });
+      confirmed.then(() => setNoticeOpen(false));
       return;
     }
     // mutateAsync awaits onSuccess, which resets queries, so auth status is
