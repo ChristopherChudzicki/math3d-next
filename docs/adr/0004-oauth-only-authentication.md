@@ -80,11 +80,11 @@ The cost is that leaving the page discards the editor's in-memory state — cove
 **Settings for the redirect:**
 
 - `SOCIALACCOUNT_PROVIDERS["google"]["OAUTH_PKCE_ENABLED"] = True`. allauth leaves PKCE off by default for Google.[^pkce]
-- `HEADLESS_FRONTEND_URLS["socialaccount_login_error"]` points at the SPA's sign-in error page. allauth uses it when it doesn't know `callback_url`: `provider/redirect` rejected its own input, or the callback couldn't recover the flow's state. It is required — unset, those cases 500 under `HEADLESS_ONLY` — so the settings test pins it.[^headless-errors]
+- `HEADLESS_FRONTEND_URLS["socialaccount_login_error"]` points at the SPA's sign-in error page. allauth uses it when it doesn't know `callback_url`: `provider/redirect` rejected its own input, or the callback couldn't recover the flow's state. It is required — unset, those cases 500 under `HEADLESS_ONLY` — so a backend test that forges the callback's state pins it.[^headless-errors]
 - `ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"` on deployments. allauth builds the redirect URI from the request, so otherwise its scheme rests on `SECURE_PROXY_SSL_HEADER` alone, and a proxy change would surface as Google's `redirect_uri_mismatch`.
-- `callback_url` needs no extra allowlist: allauth accepts the request host, `ALLOWED_HOSTS`, and hosts from `CSRF_TRUSTED_ORIGINS`,[^safe-url] which already lists the SPA's origins. Production `ALLOWED_HOSTS` must stay free of wildcards, since a wildcard there widens where sign-in may redirect.
+- `callback_url` needs no extra allowlist: allauth accepts the request host, `ALLOWED_HOSTS`, and hosts from `CSRF_TRUSTED_ORIGINS`,[^safe-url] which already lists the SPA's origins. `EnvConfig` refuses a wildcard in `ALLOWED_HOSTS` on a deployment, since one would widen where sign-in may redirect.
 
-**`provider/token` is closed to Google.** The headless API always mounts it, and E2E needs it for `dummy`, but left alone it would turn any Google ID token issued for our client into a session. No setting turns it off per provider: whether a provider accepts it is the class attribute `supports_token_authentication`. allauth does let settings swap in a provider class, so `SOCIALACCOUNT_PROVIDERS["google"]["provider_class"]` names a `GoogleProvider` subclass in `authentication` with the attribute `False`.[^provider-class] `provider/token` then answers 400 `token_authentication_not_supported` before reading the token, and the headless config stops listing it for Google. The settings test asserts the registered class has the attribute `False`, so an allauth upgrade that stops honoring the setting fails CI.
+**`provider/token` is closed to Google.** The headless API always mounts it, and E2E needs it for `dummy`, but left alone it would turn any Google ID token issued for our client into a session. No setting turns it off per provider: whether a provider accepts it is the class attribute `supports_token_authentication`. allauth does let settings swap in a provider class, so `SOCIALACCOUNT_PROVIDERS["google"]["provider_class"]` names a `GoogleProvider` subclass in `authentication` with the attribute `False`.[^provider-class] `provider/token` then answers 400 `token_authentication_not_supported` before reading the token, and the headless config stops listing it for Google. A backend test posts a Google token to `provider/token` and expects that refusal, so an allauth upgrade that stops honoring the setting fails CI.
 
 ### Keeping unsaved work across the redirect
 
@@ -96,7 +96,7 @@ An anonymous user can build a scene and then sign in to keep it, so the redirect
 - **Where it returns:** `callback_url` is the current URL without the sign-in overlay.
 - **Precedence:** a restored draft wins over the scene fetched for the URL.
 - **Why `sessionStorage`:** it is per tab, survives the round trip within that tab, and is cleared when the tab closes. The one-hour limit keeps a draft from resurfacing long after a sign-in was abandoned.
-- **Errors:** `?error=` is shown only as a known code mapped to fixed text, since anyone can craft that URL.
+- **Errors:** `?error=` is shown only as a known code mapped to fixed text, since anyone can craft that URL. A failed code exchange is logged on the backend with its cause; the SPA only ever sees the code.
 
 ### Adding providers later
 

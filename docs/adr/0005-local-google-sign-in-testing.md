@@ -52,7 +52,7 @@ if ENV.DISABLE_CSRF:
 
 Two variables must both be wrong for this to reach a deployment, and `IS_DEPLOYMENT` defaults to `True`, so an unconfigured deploy is the safe one. The guard checks `IS_DEPLOYMENT` directly rather than a setting derived from it, like `SESSION_COOKIE_SECURE`, which would look like a second, independent check but isn't.[^flags] `.remove()` raises if the middleware is ever renamed, so the flag can't silently stop working.
 
-Removing the middleware is Django's supported way to turn CSRF off, and it also stops the `csrftoken` cookie being set. The frontend must send a token only when it can read one — `packages/api` already does, and the form that starts sign-in follows the same rule.
+Removing the middleware is Django's supported way to turn CSRF off, and it also stops the `csrftoken` cookie being set. With the middleware gone nothing checks the token, so the frontend sends whatever it can read, including nothing.
 
 ### Limits of the deviation
 

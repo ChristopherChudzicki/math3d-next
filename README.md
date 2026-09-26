@@ -43,8 +43,10 @@ and turn off CSRF — Google rejects `.localdev` (its TLD is not on the public
 suffix list), and `localhost` cannot carry the domain cookie the SPA reads the
 CSRF token from. See [ADR-0005](docs/adr/0005-local-google-sign-in-testing.md).
 
-Add to `.env` (gitignored), using a dev OAuth client from the Google console
-with `http://localhost:3000` as an authorized JavaScript origin:
+Add to `.env` (gitignored), using a dev OAuth web client from the Google
+console whose only authorized redirect URI is
+`http://localhost:8000/_allauth/google/login/callback/` (it needs no JavaScript
+origins):
 
 ```sh
 APP_BASE_URL=http://localhost:3000
@@ -54,12 +56,11 @@ CSRF_COOKIE_DOMAIN=
 DISABLE_CSRF=True
 VITE_DISPLAY_AUTH_FLOWS=true
 GOOGLE_CLIENT_ID=<dev client id>
-VITE_GOOGLE_CLIENT_ID=<dev client id>
+GOOGLE_CLIENT_SECRET=<dev client secret>
 ```
 
 Then `docker compose up -d` to recreate the backend (a container's environment
-is fixed at creation) and restart the dev server. The two client-ID variables
-must match, or the sign-in POST fails with `invalid_token`.
+is fixed at creation) and restart the dev server.
 
 Delete the block and recreate to switch back. While it is in place, no local
 checkout enforces CSRF, and the dev CORS origins are derived from
