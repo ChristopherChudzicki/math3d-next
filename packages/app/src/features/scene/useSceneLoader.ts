@@ -1,8 +1,10 @@
 import { useScene, isApiError } from "@math3d/api";
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 import { useAppDispatch } from "@/store/hooks";
+import { restoreStore } from "@/store/restoreStore";
+import { takeSignInDraft } from "@/features/auth/signInDraft";
 import defaultScene from "@/store/defaultScene";
 import { sceneSlice } from "@/features/sceneControls/mathItems";
 import { sceneTabTitle } from "@/features/scene/sceneTitle";
@@ -80,19 +82,33 @@ const useSceneLoader = (
   }, [error, onNotFound, addNotification, navigate]);
 
   const scene = sceneKey === undefined ? defaultScene : data;
+  const routeKey = sceneKey ?? null;
+  const { pathname } = useLocation();
 
   // Which scene Redux holds. `null` is the default scene's own key, so the
   // "nothing loaded yet" sentinel has to be a value `scene.key` never takes.
   const loaded = useRef<string | null | undefined>(undefined);
+  // The draft belongs to the page load that follows a sign-in redirect, so
+  // only the first load may restore it, never a later in-app navigation.
+  const draftChecked = useRef(false);
 
   useEffect(() => {
-    if (!scene) return;
     // Load on navigation only. React Query hands back a fresh object for every
     // refetch of the same scene, and `setScene` replaces items/order/title
     // wholesale, so dispatching on identity discards unsaved edits whenever
-    // anything refetches — signing in, or the GET that follows a save.
-    if (loaded.current === scene.key) return;
-    loaded.current = scene.key;
+    // anything refetches, such as the GET that follows a save.
+    if (loaded.current === routeKey) return;
+    if (!draftChecked.current) {
+      draftChecked.current = true;
+      const draft = takeSignInDraft(pathname);
+      if (draft) {
+        loaded.current = routeKey;
+        dispatch(restoreStore(draft));
+        return;
+      }
+    }
+    if (!scene) return;
+    loaded.current = routeKey;
     const payload = {
       key: scene.key,
       author: scene.author ?? null,
@@ -102,7 +118,7 @@ const useSceneLoader = (
       isLegacy: scene.isLegacy ?? false,
     };
     dispatch(itemActions.setScene(payload));
-  }, [dispatch, scene]);
+  }, [dispatch, scene, routeKey, pathname]);
 
   return { isLoading };
 };
