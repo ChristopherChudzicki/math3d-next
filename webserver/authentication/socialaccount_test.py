@@ -6,8 +6,6 @@ without contacting anyone. Google's own path — the callback, state, PKCE and
 the code exchange — is tested separately below with its token endpoint stubbed.
 """
 
-import base64
-import hashlib
 import json
 import logging
 import time
@@ -16,11 +14,11 @@ from urllib.parse import parse_qs, urlparse
 
 import jwt
 import pytest
+import requests
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.adapter import get_adapter as get_socialaccount_adapter
 from allauth.socialaccount.models import SocialAccount, SocialApp
 from allauth.socialaccount.providers.google.views import ID_TOKEN_ISSUER
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client, OAuth2Error
 from django.conf import settings
 from django.contrib import admin
 from django.core.exceptions import ImproperlyConfigured
@@ -316,6 +314,7 @@ def test_the_signup_form_can_never_supply_the_address():
 # the only way in.
 
 CONFIGURED_CLIENT_ID = "test-client.apps.googleusercontent.com"
+CONFIGURED_SECRET = "test-secret"  # pragma: allowlist secret
 # The real Google settings with a known client, so PKCE and AUTH_PARAMS are
 # the ones production runs with.
 GOOGLE_PROVIDERS = {
@@ -323,7 +322,7 @@ GOOGLE_PROVIDERS = {
         **settings.SOCIALACCOUNT_PROVIDERS["google"],
         "APP": {
             "client_id": CONFIGURED_CLIENT_ID,
-            "secret": "test-secret",  # pragma: allowlist secret
+            "secret": CONFIGURED_SECRET,
         },
     }
 }
@@ -348,8 +347,9 @@ def test_provider_token_refuses_google_before_reading_the_token():
     assert _codes(response) == ["token_authentication_not_supported"]
 
 
-# Google through the redirect flow. Only Google's token endpoint is stubbed:
-# state, PKCE, the callback view and the ID-token checks all run for real.
+# Google through the redirect flow. Only Google's token endpoint is stubbed, at
+# the HTTP layer: state, PKCE, the exchange request, the callback view and the
+# ID-token checks all run for real.
 
 REDIRECT_URL = "/_allauth/browser/v1/auth/provider/redirect"
 GOOGLE_CALLBACK_URL = "/_allauth/google/login/callback/"
@@ -394,8 +394,19 @@ def _google_token_response(*, sub: str, email: str) -> dict:
     return {"access_token": "access", "expires_in": 3600, "id_token": id_token}
 
 
-def _finish_google_sign_in(client: Client, authorize: dict[str, str], **exchange):
-    with mock.patch.object(OAuth2Client, "get_access_token", **exchange) as stub:
+def _token_endpoint_reply(body: dict, status: int = 200) -> requests.Response:
+    reply = requests.Response()
+    reply.status_code = status
+    reply.headers["content-type"] = "application/json"
+    reply._content = json.dumps(body).encode()
+    return reply
+
+
+def _finish_google_sign_in(
+    client: Client, authorize: dict[str, str], reply: requests.Response
+):
+    """Answer the callback's one outbound request, the code exchange."""
+    with mock.patch.object(requests.Session, "request", return_value=reply) as stub:
         response = client.get(
             GOOGLE_CALLBACK_URL, {"code": "one-time-code", "state": authorize["state"]}
         )
@@ -417,18 +428,18 @@ def test_google_sign_in_round_trip_signs_up_and_returns_to_the_spa():
     response, exchange = _finish_google_sign_in(
         client,
         authorize,
-        return_value=_google_token_response(sub="104729", email="googler@example.com"),
+        _token_endpoint_reply(
+            _google_token_response(sub="104729", email="googler@example.com")
+        ),
     )
 
     assert response.status_code == 302
     assert response["Location"] == SPA_CALLBACK
-    verifier = exchange.call_args.kwargs["pkce_code_verifier"]
-    challenge = (
-        base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())
-        .rstrip(b"=")
-        .decode()
-    )
-    assert challenge == authorize["code_challenge"]
+    sent = exchange.call_args.kwargs["data"]
+    assert sent["client_id"] == CONFIGURED_CLIENT_ID
+    assert sent["client_secret"] == CONFIGURED_SECRET
+    assert sent["redirect_uri"] == authorize["redirect_uri"]
+    assert sent["code"] == "one-time-code"
     user = CustomUser.objects.get(email="googler@example.com")
     assert SocialAccount.objects.get(user=user, provider="google").uid == "104729"
     assert client.session["_auth_user_id"] == str(user.pk)
@@ -461,7 +472,9 @@ def test_an_adapter_refusal_returns_its_code_to_the_spa():
     response, _ = _finish_google_sign_in(
         client,
         authorize,
-        return_value=_google_token_response(sub="555", email="collide@example.com"),
+        _token_endpoint_reply(
+            _google_token_response(sub="555", email="collide@example.com")
+        ),
     )
 
     assert (
@@ -481,7 +494,9 @@ def test_closed_registration_returns_signup_closed_to_the_spa():
     response, _ = _finish_google_sign_in(
         client,
         authorize,
-        return_value=_google_token_response(sub="777", email="newcomer@example.com"),
+        _token_endpoint_reply(
+            _google_token_response(sub="777", email="newcomer@example.com")
+        ),
     )
 
     assert (
@@ -500,15 +515,18 @@ def test_a_failed_code_exchange_is_logged_with_its_cause(caplog, monkeypatch):
     client = Client()
     authorize = _start_google_sign_in(client)
 
-    with caplog.at_level(logging.ERROR, logger="authentication.adapter"):
+    with caplog.at_level(logging.INFO, logger="authentication.adapter"):
         response, _ = _finish_google_sign_in(
-            client, authorize, side_effect=OAuth2Error("invalid_client")
+            client, authorize, _token_endpoint_reply({"error": "invalid_client"}, 401)
         )
 
     assert response["Location"] == f"{SPA_CALLBACK}?error=unknown&error_process=login"
     [record] = caplog.records
-    assert record.exc_info is not None
-    assert isinstance(record.exc_info[1], OAuth2Error)
+    assert record.levelno == logging.ERROR
+    assert "invalid_client" in record.getMessage()
+    # Sentry attaches a traceback's frame locals, and the exchange's frames
+    # hold the client secret and the user's tokens.
+    assert record.exc_info is None
 
 
 @pytest.mark.django_db
@@ -518,7 +536,7 @@ def test_a_callback_with_unknown_state_lands_on_the_sign_in_error_page():
     socialaccount_login_error. A forged or replayed callback signs no one in."""
     client = Client()
 
-    with mock.patch.object(OAuth2Client, "get_access_token") as exchange:
+    with mock.patch.object(requests.Session, "request") as exchange:
         response = client.get(
             GOOGLE_CALLBACK_URL, {"code": "one-time-code", "state": "forged"}
         )
@@ -546,3 +564,17 @@ def test_a_rejected_redirect_request_lands_on_the_sign_in_error_page():
     location = urlparse(response["Location"])
     assert location.path == "/app/sign-in-error"
     assert parse_qs(location.query)["error"] == ["unknown"]
+
+
+@pytest.mark.django_db
+@GOOGLE_REDIRECT_SETTINGS
+def test_a_rejected_redirect_request_is_logged_as_a_warning(caplog, monkeypatch):
+    """Anyone can send provider/redirect bad input; it must not page anyone."""
+    monkeypatch.setattr(logging.getLogger("authentication"), "propagate", True)
+
+    with caplog.at_level(logging.INFO, logger="authentication.adapter"):
+        Client().post(REDIRECT_URL, {"provider": "google\nforged line"})
+
+    [record] = caplog.records
+    assert record.levelno == logging.WARNING
+    assert "\n" not in record.getMessage()

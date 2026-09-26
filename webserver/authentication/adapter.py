@@ -5,7 +5,7 @@ from allauth.account.internal.flows.manage_email import assess_unique_email
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.providers.base.constants import AuthProcess
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
@@ -38,12 +38,28 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         self, request, provider, error=None, exception=None, extra_context=None
     ):
         """allauth gives the SPA only an error code; keep the cause of a failed
-        code exchange, such as a wrong client secret."""
+        code exchange, such as a wrong client secret.
+
+        No traceback: Sentry attaches its frames' locals, which hold the client
+        secret and the user's tokens.
+        """
         if exception is not None:
             # provider/redirect passes the raw POSTed name (or None) when it
             # rejects its input; the callback passes a Provider.
             name = getattr(provider, "id", provider)
-            logger.error("Sign-in with %s failed", name, exc_info=exception)
+            # Rejected input is anyone's to send; only a failed exchange is ours.
+            level = (
+                logging.WARNING
+                if isinstance(exception, ValidationError)
+                else logging.ERROR
+            )
+            logger.log(
+                level,
+                "Sign-in with %r failed: %r (cause: %r)",
+                name,
+                exception,
+                exception.__cause__,
+            )
         super().on_authentication_error(
             request,
             provider,
