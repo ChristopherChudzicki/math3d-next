@@ -101,7 +101,9 @@ const useSceneLoader = (
     if (!draftChecked.current) {
       draftChecked.current = true;
       const draft = takeSignInDraft(pathname);
-      if (draft) {
+      // A sign-in clicked before this route's scene loaded saved some other
+      // scene, or none.
+      if (draft && draft.scene.key === routeKey) {
         loaded.current = routeKey;
         dispatch(restoreStore(draft));
         return;

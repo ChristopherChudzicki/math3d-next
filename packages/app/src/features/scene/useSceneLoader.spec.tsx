@@ -29,12 +29,26 @@ test("a draft saved on this scene wins over the fetched copy", async () => {
   const scene = seedDb.withSceneFromItems([]);
   saveSignInDraft(editedDraftOf(scene), `/${scene.key}`);
 
-  const { store } = renderTestApp(`/${scene.key}`);
+  const { store, queryClient } = renderTestApp(`/${scene.key}`);
 
   await waitFor(() =>
-    expect(store.getState().scene.title).toBe(`${scene.title} (edited)`),
+    expect(
+      queryClient.getQueryState(["scenes", "detail", scene.key])?.status,
+    ).toBe("success"),
   );
+  expect(store.getState().scene.title).toBe(`${scene.title} (edited)`);
   expect(store.getState().scene.dirty).toBe(true);
+});
+
+test("a draft saved before its page's scene loaded is not applied", async () => {
+  // Signing in while the scene is still loading saves the empty store.
+  const scene = seedDb.withSceneFromItems([]);
+  saveSignInDraft(getStore().getState(), `/${scene.key}`);
+
+  const { store } = renderTestApp(`/${scene.key}`);
+
+  await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
+  expect(store.getState().scene.title).toBe(scene.title);
 });
 
 test("a draft saved on another scene is not applied here", async () => {
