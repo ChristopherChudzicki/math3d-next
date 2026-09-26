@@ -1,4 +1,3 @@
-import { dummyIdentity } from "@math3d/api/dev";
 import { apiFetch, parseCookies } from "@/utils/api/config";
 import env from "@/env";
 import invariant from "tiny-invariant";
@@ -26,16 +25,6 @@ const makeUserIdentity = (info?: Partial<UserIdentity>): UserIdentity => {
     ...info,
   };
 };
-
-/**
- * An identity the app's dev sign-in form can sign into.
- *
- * That form derives the whole identity from the address typed into it, so the
- * uid has to be the one it would derive; any other uid is an unknown identity
- * claiming a taken address, which allauth refuses (400).
- */
-const makeSignInIdentity = (): UserIdentity =>
-  dummyIdentity(makeUserIdentity().email);
 
 const authHeaders = (cookies: SessionCookies) => ({
   Cookie: `sessionid=${cookies.sessionid}; csrftoken=${cookies.csrftoken}`,
@@ -133,6 +122,5 @@ export {
   users,
   createActiveUser,
   makeUserIdentity,
-  makeSignInIdentity,
 };
 export type { SessionCookies, UserIdentity };

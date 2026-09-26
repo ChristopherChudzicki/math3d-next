@@ -3,6 +3,7 @@ import { expect } from "@playwright/test";
 import UserMenu from "./UserMenu";
 import SignoutPage from "./SignoutPage";
 import LoginDialog from "./LoginDialog";
+import DummyProviderPage from "./DummyProviderPage";
 import DeleteAccountPage from "./DeleteAccountPage";
 import ItemSettings, { UniqueItemSettingsOpts } from "./ItemSettings";
 import SharePopover from "./SharePopover";
@@ -25,6 +26,10 @@ class AppPage {
 
   loginDialog(): LoginDialog {
     return new LoginDialog(this.page);
+  }
+
+  dummyProvider(): DummyProviderPage {
+    return new DummyProviderPage(this.page);
   }
 
   sharePopover(): SharePopover {

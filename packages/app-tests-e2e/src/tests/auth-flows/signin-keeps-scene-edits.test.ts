@@ -1,13 +1,13 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
-import { makeSignInIdentity } from "@/utils/api/auth";
+import { makeUserIdentity } from "@/utils/api/auth";
 import AppPage from "@/utils/pages/AppPage";
 import { faker } from "@faker-js/faker/locale/en";
 
 // Created up front so the fixture owns its cleanup: signing up through the UI
 // would leave an account behind.
-const signInUser = makeSignInIdentity();
+const signInUser = makeUserIdentity();
 
 test("Signing in leaves unsaved edits to the open scene intact", async ({
   page,
@@ -34,15 +34,15 @@ test("Signing in leaves unsaved edits to the open scene intact", async ({
   await test.step("Sign in from the editor", async () => {
     await app.userMenu().opener().click();
     await app.userMenu().signin().click();
-    await app.loginDialog().devEmail().fill(signInUser.email);
-    await app.loginDialog().devSubmit().click();
+    await app.loginDialog().devSignIn().click();
+    await app.dummyProvider().signIn(signInUser);
 
     await app.userMenu().avatarOpener().click();
     await expect(app.userMenu().username()).toHaveText(signInUser.email);
     await app.userMenu().root.press("Escape");
   });
 
-  // Sign-in must not refetch the scene: a refetch hands `useSceneLoader` a new
-  // object identity, which replaces Redux wholesale and drops the edit.
+  // The redirect discards the page; the draft restores the edit.
+  await expect(page).toHaveURL(new RegExp(`/${key}$`));
   await expect(item.field("description")).toHaveValue(editedDescription);
 });

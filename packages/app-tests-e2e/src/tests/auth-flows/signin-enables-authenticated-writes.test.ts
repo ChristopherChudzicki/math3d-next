@@ -1,13 +1,13 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
-import { makeSignInIdentity } from "@/utils/api/auth";
+import { makeUserIdentity } from "@/utils/api/auth";
 import AppPage from "@/utils/pages/AppPage";
 import { faker } from "@faker-js/faker/locale/en";
 
 // Created up front so the fixture owns its cleanup: signing up through the UI
 // would leave an account behind.
-const signInUser = makeSignInIdentity();
+const signInUser = makeUserIdentity();
 
 // Reaching Django's own cookies is the whole point, so keep out the variant of
 // the `page` fixture that injects them.
@@ -45,8 +45,8 @@ test("Saving an owned scene works on the cookies a real sign-in sets", async ({
   await test.step("Sign in from the editor", async () => {
     await app.userMenu().opener().click();
     await app.userMenu().signin().click();
-    await app.loginDialog().devEmail().fill(signInUser.email);
-    await app.loginDialog().devSubmit().click();
+    await app.loginDialog().devSignIn().click();
+    await app.dummyProvider().signIn(signInUser);
 
     // Only the owner's button reads "Save"; a signed-in non-owner gets
     // "Save a Copy", which saves a new scene through the exempt POST.
