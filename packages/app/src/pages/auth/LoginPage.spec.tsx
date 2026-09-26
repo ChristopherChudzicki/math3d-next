@@ -2,7 +2,7 @@ import { afterEach, beforeEach, expect, test } from "vitest";
 import { delay, http } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { seedDb, urls } from "@math3d/mock-api";
-import { act, renderTestApp, screen, user, waitFor } from "@/test_util";
+import { act, renderTestApp, screen, user, waitFor, within } from "@/test_util";
 import { getStore } from "@/store/store";
 import {
   SIGN_IN_DRAFT_KEY,
@@ -34,19 +34,21 @@ test("Google sign-in posts allauth's redirect form, returning to this page", asy
   });
 });
 
-test("Submitting saves a draft and sends the CSRF token", async () => {
-  document.cookie = "csrftoken=token-from-cookie";
+test("Submitting saves a draft and sends the CSRF token current at submit", async () => {
+  document.cookie = "csrftoken=token-at-render";
   renderTestApp("/?overlay=login");
 
   const button = await screen.findByRole("button", {
     name: "Sign in with Google",
   });
   await waitFor(() => expect(button).toBeEnabled());
+  // Django rotates the token on any sign-in, such as one in another tab.
+  document.cookie = "csrftoken=token-at-submit";
   await user.click(button);
 
   expect(
     screen.getByRole("form", { name: "Sign in with Google" }),
-  ).toHaveFormValues({ csrfmiddlewaretoken: "token-from-cookie" });
+  ).toHaveFormValues({ csrfmiddlewaretoken: "token-at-submit" });
   expect(
     JSON.parse(sessionStorage.getItem(SIGN_IN_DRAFT_KEY) ?? "{}").pathname,
   ).toBe("/");
@@ -71,6 +73,24 @@ test("A returned error opens the dialog with fixed text and leaves the URL clean
   expect(location.current.search).toBe("?overlay=login");
 });
 
+test("A cancelled sign-in is reported as information, not an error", async () => {
+  renderTestApp("/?error=cancelled&error_process=login");
+
+  const dialog = await screen.findByRole("dialog", { name: "Sign in" });
+  expect(within(dialog).getByRole("alert")).toHaveClass("MuiAlert-colorInfo");
+});
+
+test("A returned error opens no dialog for someone already signed in", async () => {
+  const { location } = renderTestApp("/?error=unknown&error_process=login", {
+    isAuthenticated: true,
+  });
+
+  await expect(
+    screen.findByRole("dialog", { name: "Sign in" }, { timeout: 500 }),
+  ).rejects.toThrow();
+  expect(location.current.search).toBe("");
+});
+
 test("An unrecognized error is never echoed", async () => {
   renderTestApp("/?error=%3Cb%3Eowned%3C%2Fb%3E&error_process=login");
 
@@ -93,6 +113,16 @@ test("The sign-in error page returns to the draft's page with its error", async 
   const dialog = await screen.findByRole("dialog", { name: "Sign in" });
   expect(dialog).toHaveTextContent(/sign-ups are closed/i);
   expect(location.current.pathname).toBe(`/${scene.key}`);
+});
+
+test("The sign-in error page returns home when no draft names a page", async () => {
+  const { location } = renderTestApp(
+    "/app/sign-in-error?error=signup_closed&error_process=login",
+  );
+
+  const dialog = await screen.findByRole("dialog", { name: "Sign in" });
+  expect(dialog).toHaveTextContent(/sign-ups are closed/i);
+  expect(location.current.pathname).toBe("/");
 });
 
 test("If authenticated already, closes the overlay", async () => {

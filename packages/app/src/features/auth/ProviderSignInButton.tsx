@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import Button from "@mui/material/Button";
 import type { ButtonProps } from "@mui/material/Button";
 import { useLocation } from "react-router";
@@ -41,18 +41,23 @@ const ProviderSignInButton: React.FC<Props> = ({
   const location = useLocation();
   // `users/me` seeds the csrftoken cookie; until it answers, the POST would 403.
   const ready = useAuthStatus() !== "loading";
+  const csrfInput = useRef<HTMLInputElement>(null);
 
   return (
     <form
       method="post"
       action={PROVIDER_REDIRECT_URL}
       aria-label={children}
-      onSubmit={() => saveSignInDraft(store.getState(), location.pathname)}
+      onSubmit={() => {
+        // Read at submit: any sign-in, such as one in another tab, rotates it.
+        csrfInput.current!.value = getCsrfToken();
+        saveSignInDraft(store.getState(), location.pathname);
+      }}
     >
       <input type="hidden" name="provider" value={provider} />
       <input type="hidden" name="process" value="login" />
       <input type="hidden" name="callback_url" value={callbackUrl(location)} />
-      <input type="hidden" name="csrfmiddlewaretoken" value={getCsrfToken()} />
+      <input type="hidden" name="csrfmiddlewaretoken" ref={csrfInput} />
       <Button
         type="submit"
         variant={variant}
