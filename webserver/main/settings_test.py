@@ -36,6 +36,7 @@ DEPLOY_ENV = {
     "CSRF_COOKIE_DOMAIN": ".example.org",
     "DATABASE_URL": "postgres://u:p@db.example.org:5432/math3d",  # pragma: allowlist secret
     "GOOGLE_CLIENT_ID": "deploy-client-id.apps.googleusercontent.com",
+    "GOOGLE_CLIENT_SECRET": "deploy-client-secret",  # pragma: allowlist secret
 }
 
 
@@ -120,14 +121,33 @@ def test_deployment_requires_database_url(monkeypatch):
 
 def test_deployment_requires_google_client_id(monkeypatch):
     """
-    Empty, allauth resolves no app for the client_id the SPA posts and rejects
-    every sign-in with invalid_token, so a deployment must fail at import
-    instead of serving a button that cannot work.
+    Empty, Google rejects the authorization request, so a deployment must fail
+    at import instead of on the first sign-in.
     """
     env = {**DEPLOY_ENV}
     del env["GOOGLE_CLIENT_ID"]
     with pytest.raises(ImproperlyConfigured, match="GOOGLE_CLIENT_ID"):
         load_settings(monkeypatch, **env)
+
+
+def test_deployment_requires_google_client_secret(monkeypatch):
+    """Google's token endpoint requires the secret for a web client, PKCE or not."""
+    env = {**DEPLOY_ENV}
+    del env["GOOGLE_CLIENT_SECRET"]
+    with pytest.raises(ImproperlyConfigured, match="GOOGLE_CLIENT_SECRET"):
+        load_settings(monkeypatch, **env)
+
+
+@pytest.mark.parametrize("pattern", ["*", ".example.org"])
+def test_deployment_refuses_wildcard_allowed_hosts(monkeypatch, pattern):
+    """
+    allauth accepts a sign-in callback_url on any host ALLOWED_HOSTS matches,
+    so a wildcard would let sign-in redirect off-site.
+    """
+    with pytest.raises(ImproperlyConfigured, match="ALLOWED_HOSTS"):
+        load_settings(
+            monkeypatch, **DEPLOY_ENV, ALLOWED_HOSTS=f"api.example.org,{pattern}"
+        )
 
 
 def test_database_url_configures_the_default_connection(monkeypatch):
@@ -525,13 +545,20 @@ def test_password_urls_are_not_registered():
             reverse(name)
 
 
-def test_google_app_reads_the_client_id_from_the_environment(monkeypatch):
+def test_google_app_reads_its_credentials_from_the_environment(monkeypatch):
     loaded = load_settings(monkeypatch, **DEPLOY_ENV)
     app = loaded.SOCIALACCOUNT_PROVIDERS["google"]["APP"]
     assert app["client_id"] == DEPLOY_ENV["GOOGLE_CLIENT_ID"]
-    # The popup flow verifies ID tokens against Google's certs and never
-    # exchanges an authorization code, so there is no secret to hold.
-    assert app["secret"] == ""
+    assert app["secret"] == DEPLOY_ENV["GOOGLE_CLIENT_SECRET"]
+
+
+def test_deployment_builds_https_redirect_uris(monkeypatch):
+    """
+    The redirect URI registered with Google is https; this keeps it from
+    resting on SECURE_PROXY_SSL_HEADER alone.
+    """
+    loaded = load_settings(monkeypatch, **DEPLOY_ENV)
+    assert loaded.ACCOUNT_DEFAULT_HTTP_PROTOCOL == "https"
 
 
 def test_the_signup_form_is_never_reached(monkeypatch):

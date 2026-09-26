@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+from typing import Any
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -93,6 +94,8 @@ if IS_DEPLOYMENT:
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    # allauth builds the redirect URI from the request; pin its scheme.
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
     # Set ALLOWED_HOSTS for production
     ALLOWED_HOSTS = ENV.ALLOWED_HOSTS if ENV.ALLOWED_HOSTS else ["api.math3d.org"]
 else:
@@ -297,10 +300,16 @@ ACCOUNT_EMAIL_NOTIFICATIONS = False
 ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
 SOCIALACCOUNT_ADAPTER = "authentication.adapter.CustomSocialAccountAdapter"
 
-# No secret: the popup flow verifies Google ID tokens against Google's certs
-# with `aud == client_id` and never exchanges an authorization code.
-SOCIALACCOUNT_PROVIDERS = {
-    "google": {"APP": {"client_id": ENV.GOOGLE_CLIENT_ID, "secret": ""}},
+SOCIALACCOUNT_PROVIDERS: dict[str, dict[str, Any]] = {
+    "google": {
+        # Refuses provider/token, so Google signs in by redirect only.
+        "provider_class": "authentication.providers.GoogleProvider",
+        "APP": {"client_id": ENV.GOOGLE_CLIENT_ID, "secret": ENV.GOOGLE_CLIENT_SECRET},
+        "OAUTH_PKCE_ENABLED": True,
+        # Always show the account chooser: otherwise a browser already signed in
+        # to Google (a shared school computer) goes straight through as that account.
+        "AUTH_PARAMS": {"prompt": "select_account"},
+    },
 }
 # Pinned rather than left to the default: off, allauth routes every login
 # through provider/signup, whose form takes any unused address.
@@ -326,6 +335,11 @@ HEADLESS_SERVE_SPECIFICATION = True
 # Serve the headless spec via Swagger UI (ships with allauth) to match the v1
 # API's /v1/docs; the default is Redoc (headless/spec/redoc_cdn.html).
 HEADLESS_SPECIFICATION_TEMPLATE_NAME = "headless/spec/swagger_cdn.html"
+# Where allauth sends a sign-in error it can't return to callback_url. Required
+# under HEADLESS_ONLY.
+HEADLESS_FRONTEND_URLS = {
+    "socialaccount_login_error": f"{APP_BASE_URL}/app/sign-in-error",
+}
 
 ##################################################
 # End auth settings

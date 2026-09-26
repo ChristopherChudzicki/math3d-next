@@ -56,11 +56,10 @@ class EnvConfig(BaseSettings):
     # Open sign-ups. False is a deployment posture, not a misconfiguration: a
     # closed deployment still logs in identities that already exist.
     ENABLE_REGISTRATION: bool = False
-    # Google OAuth client ID. Public by design (the SPA embeds it too), so this
-    # is config, not a secret. Empty ⇒ allauth resolves no app for the client_id
-    # the SPA posts and every sign-in fails with `invalid_token`; required on a
-    # deployment (see _require_deployment_config).
+    # Google OAuth web client; both are required on a deployment (see
+    # _require_deployment_config).
     GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
     CSRF_COOKIE_DOMAIN: str = ""
     DISABLE_ALLAUTH_RATE_LIMITS: bool = False
     # Local-only, for hand-testing Google sign-in on bare `localhost`, which
@@ -132,15 +131,32 @@ class EnvConfig(BaseSettings):
                 "that fails on every query)"
             )
         if not self.GOOGLE_CLIENT_ID:
+            missing.append("GOOGLE_CLIENT_ID (empty, Google rejects every sign-in)")
+        if not self.GOOGLE_CLIENT_SECRET:
             missing.append(
-                "GOOGLE_CLIENT_ID (empty, allauth resolves no app for the "
-                "client_id the SPA posts and every sign-in fails)"
+                "GOOGLE_CLIENT_SECRET (empty, Google refuses to exchange the "
+                "authorization code)"
             )
         if missing:
             raise ValueError(
                 "Missing configuration required to run a deployment: "
                 + "; ".join(missing)
                 + ". Set IS_DEPLOYMENT=False if this is not a deployment."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _no_wildcard_hosts_on_a_deployment(self) -> "EnvConfig":
+        """
+        allauth accepts a sign-in `callback_url` on any host ALLOWED_HOSTS
+        matches, so a wildcard would let sign-in redirect off-site.
+        """
+        if not self.IS_DEPLOYMENT:
+            return self
+        wildcards = [h for h in self.ALLOWED_HOSTS if h == "*" or h.startswith(".")]
+        if wildcards:
+            raise ValueError(
+                f"ALLOWED_HOSTS must list exact hosts on a deployment; got {wildcards}"
             )
         return self
 
