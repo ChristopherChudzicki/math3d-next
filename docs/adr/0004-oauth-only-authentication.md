@@ -65,6 +65,32 @@ Sign-in is OAuth's authorization-code flow, run by allauth:
 2. allauth redirects the tab to Google. Google sends it back to allauth's callback view on the API host, which exchanges the one-time code for tokens, finds or creates the account, and sets the session cookie.
 3. allauth redirects to `callback_url`, adding `?error=<code>` if sign-in failed.[^headless-errors] The SPA then reads the session as it does on any page load.
 
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant B as Browser tab (SPA)
+    participant A as API (allauth)
+    participant G as Google
+
+    U->>B: Sign in with Google
+    Note over B: save draft (store + pathname) to sessionStorage
+    B->>A: POST /_allauth/browser/v1/auth/provider/redirect<br/>provider, process=login, callback_url, csrfmiddlewaretoken
+    Note over A: stash state in the session:<br/>state id, PKCE verifier, callback_url
+    A-->>B: 302 to Google's authorize URL<br/>client_id, redirect_uri, scope, state,<br/>code_challenge, prompt=select_account
+    B->>G: GET authorize
+    G->>U: account chooser, consent
+    U->>G: choose account
+    G-->>B: 302 to redirect_uri with code, state
+    B->>A: GET /_allauth/google/login/callback/?code&state<br/>(session cookie: SameSite=Lax allows a top-level GET)
+    Note over A: unstash state by id; unknown state → sign-in error page
+    A->>G: POST token endpoint<br/>code, client_secret, code_verifier
+    G-->>A: access_token, id_token
+    Note over A: decode id_token (TLS, no signature check),<br/>adapter checks, find or create account, log in
+    A-->>B: 302 to callback_url (+ ?error=code on failure)<br/>Set-Cookie: sessionid
+    Note over B: fresh page load: restore draft on its pathname,<br/>read session via users/me
+```
+
 Why redirect rather than Google Identity Services (GIS), whose popup hands JavaScript an ID token to post to `provider/token`:
 
 - **It works for every provider.** allauth supports the redirect flow for all its OAuth2 providers. Only Google, Apple, Facebook and generic OpenID Connect accept `provider/token` (plus the `dummy` test provider), and only once JavaScript already holds a token from the provider, usually via the provider's SDK. GitHub has neither.
@@ -75,7 +101,7 @@ Why redirect rather than Google Identity Services (GIS), whose popup hands JavaS
 
 The cost is that leaving the page discards the editor's in-memory state — covered next.
 
-**Mounting the callback.** allauth's usual `include("allauth.urls")` also mounts `google/login/token/`: a second, CSRF-exempt login endpoint on the host that serves `/admin/`.[^login-by-token] So `main/urls.py` mounts only Google's callback route — `include(default_urlpatterns(GoogleProvider))` under `_allauth/`, with no namespace, since allauth reverses `google_callback` unqualified[^callback-view] — plus the dummy provider's routes in development.
+**Mounting the callback.** allauth's usual `include("allauth.urls")` also mounts `google/login/token/`: a second, CSRF-exempt login endpoint on the host that serves `/admin/`.[^login-by-token] So `main/urls.py` mounts only Google's own OAuth views — `include(default_urlpatterns(GoogleProvider))` under `_allauth/`, which adds `google/login/` (a 404 under `HEADLESS_ONLY`) and `google/login/callback/`, with no namespace, since allauth reverses `google_callback` unqualified[^callback-view] — plus the dummy provider's routes in development. Each provider added later gets the same one-line mount and its own callback path, `<provider>/login/callback/`, which is the redirect URI registered with that provider.
 
 **Settings for the redirect:**
 
