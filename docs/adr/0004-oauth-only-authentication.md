@@ -166,7 +166,7 @@ The session cookie is host-only on the API host, where `/admin/` is served, and 
 
 **`public_nickname` is dropped** — the column, the form that edited it, and `PATCH /v1/auth/users/me/`, whose only writable field it was. Under OAuth, filling it at signup means either silently copying Google's real name (ruled out by constraint 4) or interrupting sign-in to ask for a value whose purpose the user can't see yet.[^nickname] Nothing public renders it. A signed-in user is identified by their email address, shown only to them. The header shows a hamburger for anonymous visitors and a generic avatar for signed-in users. If public attribution is added later, it defaults to a generated, editable label — never a provider-supplied name.
 
-**Deleting an account** (`POST /v1/auth/users/me/delete/`) needs only the session, since no account has a password. It orphans the user's scenes rather than deleting them: `Scene.author` is `SET_NULL`, so a departed user's scenes become ordinary anonymous ones and shared links keep working. The migration emits no SQL.[^setnull]
+**Deleting an account** (`DELETE /v1/auth/users/me/`) needs only the session, since no account has a password. It orphans the user's scenes rather than deleting them: `Scene.author` is `SET_NULL`, so a departed user's scenes become ordinary anonymous ones and shared links keep working. The migration emits no SQL.[^setnull]
 
 ### Rollout
 

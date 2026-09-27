@@ -1,10 +1,8 @@
-from typing import cast
-
+from django.contrib.auth import logout
 from django.http import HttpRequest
 from django.middleware.csrf import get_token
 from ninja import Router, Schema, Status
 
-from authentication.models import CustomUser
 from main.ninja_auth import session_auth
 
 router = Router()
@@ -27,9 +25,9 @@ def get_me(request: HttpRequest):
     return Status(200, request.user)
 
 
-@router.post("/users/me/delete/", response={204: None}, auth=session_auth)
+@router.delete("/users/me/", response={204: None}, auth=session_auth)
 def delete_me(request: HttpRequest):
-    user = cast(CustomUser, request.user)
+    user = request.user
+    logout(request)
     user.delete()
-    request.session.flush()
     return Status(204, None)

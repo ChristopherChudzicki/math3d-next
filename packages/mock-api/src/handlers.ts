@@ -39,7 +39,6 @@ export const urls = {
   },
   auth: {
     usersMe: `${BASE_URL}/v1/auth/users/me/`,
-    usersMeDelete: `${BASE_URL}/v1/auth/users/me/delete/`,
     // allauth headless endpoints
     session: `${BASE_URL}/_allauth/browser/v1/auth/session`,
   },
@@ -131,7 +130,7 @@ export const handlers = [
     return HttpResponse.json({ status: 401 }, { status: 401 });
   }),
   // v1: delete own account (204 No Content; signs the user out)
-  http.post(urls.auth.usersMeDelete, async () => {
+  http.delete(urls.auth.usersMe, async () => {
     if (!getUser()) {
       return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
     }

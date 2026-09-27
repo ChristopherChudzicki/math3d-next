@@ -52,7 +52,7 @@ const useUserMe = () => {
 const useUserMeDelete = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => unwrap(v1Client.POST("/v1/auth/users/me/delete/")),
+    mutationFn: () => unwrap(v1Client.DELETE("/v1/auth/users/me/")),
     onSuccess: async () => {
       await resetOnAuthChange(queryClient);
     },

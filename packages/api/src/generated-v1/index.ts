@@ -15,24 +15,8 @@ export interface paths {
     get: operations["authentication_api_get_me"];
     put?: never;
     post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/auth/users/me/delete/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
     /** Delete Me */
-    post: operations["authentication_api_delete_me"];
-    delete?: never;
+    delete: operations["authentication_api_delete_me"];
     options?: never;
     head?: never;
     patch?: never;

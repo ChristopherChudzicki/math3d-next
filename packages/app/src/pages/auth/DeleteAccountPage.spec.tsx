@@ -53,7 +53,7 @@ test("the wrong confirmation phrase does not delete the account", async () => {
 
 test("a failed deletion surfaces the error instead of silently reopening", async () => {
   server.use(
-    http.post("*/v1/auth/users/me/delete/", () =>
+    http.delete("*/v1/auth/users/me/", () =>
       HttpResponse.json({ detail: "boom" }, { status: 500 }),
     ),
   );
@@ -82,7 +82,7 @@ test("a 403 sends the user to sign in again instead of a generic failure", async
   // what the redirect reads, and a session that is still good there would keep
   // the dialog where it is.
   server.use(
-    http.post("*/v1/auth/users/me/delete/", () => {
+    http.delete("*/v1/auth/users/me/", () => {
       mockAuth.setCurrentUser(null);
       return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
     }),

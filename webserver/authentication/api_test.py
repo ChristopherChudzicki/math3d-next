@@ -5,7 +5,6 @@ from authentication.factories import CustomUserFactory
 from authentication.models import CustomUser
 
 ME_URL = "/v1/auth/users/me/"
-DELETE_URL = "/v1/auth/users/me/delete/"
 
 
 @pytest.mark.django_db
@@ -54,7 +53,7 @@ def test_delete_removes_account():
     client = Client()
     client.force_login(user)
 
-    response = client.post(DELETE_URL, data={}, content_type="application/json")
+    response = client.delete(ME_URL)
 
     assert response.status_code == 204
     assert not CustomUser.objects.filter(id=user.id).exists()
@@ -62,21 +61,21 @@ def test_delete_removes_account():
 
 @pytest.mark.django_db
 def test_delete_requires_auth():
-    # delete_me is auth=session_auth; an anonymous POST is rejected.
-    response = Client().post(DELETE_URL, data={}, content_type="application/json")
+    # delete_me is auth=session_auth; an anonymous DELETE is rejected.
+    response = Client().delete(ME_URL)
     assert response.status_code == 403
 
 
 @pytest.mark.django_db
-def test_delete_flushes_session():
-    # delete_me calls request.session.flush(); without it the session would retain
-    # _auth_user_id pointing at the now-deleted user. Asserting the key is gone
-    # distinguishes the flush from the user-row deletion alone.
+def test_delete_signs_the_user_out():
+    # Without it the session would retain _auth_user_id pointing at the
+    # now-deleted user. Asserting the key is gone distinguishes signing out
+    # from the user-row deletion alone.
     user = CustomUserFactory.create()
     client = Client()
     client.force_login(user)
 
-    response = client.post(DELETE_URL, data={}, content_type="application/json")
+    response = client.delete(ME_URL)
 
     assert response.status_code == 204
     assert "_auth_user_id" not in client.session
@@ -88,7 +87,7 @@ def test_delete_enforces_csrf():
     client = Client(enforce_csrf_checks=True)
     client.force_login(user)
 
-    response = client.post(DELETE_URL, content_type="application/json")
+    response = client.delete(ME_URL)
 
     assert response.status_code == 403
     assert CustomUser.objects.filter(pk=user.pk).exists()

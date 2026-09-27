@@ -1588,6 +1588,17 @@ info:
 openapi: 3.1.0
 paths:
   /v1/auth/users/me/:
+    delete:
+      operationId: authentication_api_delete_me
+      parameters: []
+      responses:
+        '204':
+          description: No Content
+      security:
+      - SessionAuth: []
+      summary: Delete Me
+      tags:
+      - Auth
     get:
       operationId: authentication_api_get_me
       parameters: []
@@ -1601,18 +1612,6 @@ paths:
         '403':
           description: Forbidden
       summary: Get Me
-      tags:
-      - Auth
-  /v1/auth/users/me/delete/:
-    post:
-      operationId: authentication_api_delete_me
-      parameters: []
-      responses:
-        '204':
-          description: No Content
-      security:
-      - SessionAuth: []
-      summary: Delete Me
       tags:
       - Auth
   /v1/legacy_scenes/:

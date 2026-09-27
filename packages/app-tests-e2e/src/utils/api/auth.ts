@@ -86,10 +86,9 @@ const getSessionCookies = async (
  * rejection, throws, keeping a leaked account loud.
  */
 const deleteUser = async (cookies: SessionCookies): Promise<void> => {
-  const response = await apiFetch(`/v1/auth/users/me/delete/`, {
-    method: "POST",
+  const response = await apiFetch(`/v1/auth/users/me/`, {
+    method: "DELETE",
     headers: authHeaders(cookies),
-    body: {},
   });
   if (response.ok) return;
   const text = await response.text();
