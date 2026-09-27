@@ -600,3 +600,16 @@ def test_provider_identities_are_never_linked_by_email(monkeypatch):
     google = loaded.SOCIALACCOUNT_PROVIDERS["google"]
     assert "EMAIL_AUTHENTICATION" not in google
     assert "email_authentication" not in google["APP"].get("settings", {})
+
+
+def test_the_pre_cutover_registration_flag_does_not_open_signup(monkeypatch):
+    """Releases before ADR-0004 read ENABLE_REGISTRATION as password signup, so
+    a separate variable can open Google signup before deploying, and a rollback
+    doesn't reopen password signup."""
+    loaded = load_settings(
+        monkeypatch, IS_DEPLOYMENT="False", ENABLE_REGISTRATION="true"
+    )
+    assert loaded.ENABLE_SIGNUP is False
+    assert load_settings(
+        monkeypatch, IS_DEPLOYMENT="False", ENABLE_SIGNUP="true"
+    ).ENABLE_SIGNUP

@@ -59,8 +59,9 @@ class EnvConfig(BaseSettings):
     APP_VERSION: str = "unknown"
     # Feature flags
     # Open sign-ups. False is a deployment posture, not a misconfiguration: a
-    # closed deployment still logs in identities that already exist.
-    ENABLE_REGISTRATION: bool = False
+    # closed deployment still logs in identities that already exist. Not
+    # ENABLE_REGISTRATION: releases before ADR-0004 read that as password signup.
+    ENABLE_SIGNUP: bool = False
     # Google OAuth web client; both are required on a deployment (see
     # _require_deployment_config).
     GOOGLE_CLIENT_ID: str = ""

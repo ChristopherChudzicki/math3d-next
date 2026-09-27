@@ -41,7 +41,7 @@ const users = {
  * Signup and login are the same request: an unseen uid creates the account,
  * a known one logs into it.
  *
- * Requires ENABLE_REGISTRATION=true for any first-time uid, which is every
+ * Requires ENABLE_SIGNUP=true for any first-time uid, which is every
  * ephemeral user — so the whole suite depends on it, not just signup tests.
  */
 const getSessionCookies = async (
@@ -64,7 +64,7 @@ const getSessionCookies = async (
   const cookies = parseCookies(response.headers.getSetCookie());
   if (!cookies.sessionid) {
     // The body is what separates the two usual causes: a 403 means
-    // ENABLE_REGISTRATION is not true on the backend (a first-time uid needs
+    // ENABLE_SIGNUP is not true on the backend (a first-time uid needs
     // it), while `client_id_required` means the dummy provider isn't installed
     // at all, which requires IS_DEPLOYMENT=False.
     throw new Error(

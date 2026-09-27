@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class CustomAccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
-        return settings.ENABLE_REGISTRATION
+        return settings.ENABLE_SIGNUP
 
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):

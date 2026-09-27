@@ -144,7 +144,7 @@ The Google client registers one redirect URI per API host, `https://<api host>/_
 
 ### Registration opens
 
-`ENABLE_REGISTRATION` becomes `True` in production. That is a policy change: `next.math3d.org` goes from a closed beta to something anyone with a Google account can join — in the same change that removes our ability to email them. That is the intent; the point is to let people save scenes. With it `False`, every new Google sign-in fails with `signup_closed`.[^signup-hook]
+`ENABLE_SIGNUP` becomes `True` in production. That is a policy change: `next.math3d.org` goes from a closed beta to something anyone with a Google account can join — in the same change that removes our ability to email them. That is the intent; the point is to let people save scenes. With it `False`, every new Google sign-in fails with `signup_closed`.[^signup-hook]
 
 It's reversible without stranding anyone. Closing registration blocks only _new_ identities; an existing `SocialAccount` logs in without reaching the signup check.[^signup-gate]
 
@@ -174,7 +174,7 @@ The whole change, redirect flow included, merges as one commit in #1312. Before 
 
 - delete the existing production accounts by hand;
 - set up the production Google client: the redirect URI above, and no JavaScript origins;
-- set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and `ENABLE_REGISTRATION=true` on Heroku.
+- set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and `ENABLE_SIGNUP=true` on Heroku.
 
 Dropping `public_nickname` is the one step a redeploy doesn't undo: the release phase only migrates forward, and a reverted build no longer contains the migration. To roll back, first run `manage.py migrate authentication <previous>` on the build that has it, then revert.
 
@@ -218,7 +218,7 @@ Dropping `public_nickname` is the one step a redeploy doesn't undo: the release 
 [^pkce]: [`oauth2/provider.py:17,30-38`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/oauth2/provider.py#L17-L38) — `pkce_enabled_default = False`, overridable per provider with `OAUTH_PKCE_ENABLED`; Google doesn't override the default.
 [^safe-url]: [`account/adapter.py:598-619`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/account/adapter.py#L598-L619) — `is_safe_url` allows relative URLs, the request host, `ALLOWED_HOSTS` (wildcards included), and the hosts in `CSRF_TRUSTED_ORIGINS`.
 [^creds]: `EnvConfig._require_deployment_config` (`main/env.py`) already requires `GOOGLE_CLIENT_ID`; `GOOGLE_CLIENT_SECRET` joins it. Both reach allauth through `SOCIALACCOUNT_PROVIDERS["google"]["APP"]`, the same dict the linking settings test guards.
-[^signup-hook]: [`socialaccount/adapter.py:163`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/adapter.py#L163) delegates to our account adapter's `is_open_for_signup`, which returns `settings.ENABLE_REGISTRATION`. On the callback path, `SignupClosedException` becomes `?error=signup_closed` ([`headless/socialaccount/internal.py:64-65`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/internal.py#L64-L65)).
+[^signup-hook]: [`socialaccount/adapter.py:163`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/adapter.py#L163) delegates to our account adapter's `is_open_for_signup`, which returns `settings.ENABLE_SIGNUP`. On the callback path, `SignupClosedException` becomes `?error=signup_closed` ([`headless/socialaccount/internal.py:64-65`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/internal.py#L64-L65)).
 [^signup-gate]: [`socialaccount/internal/flows/login.py:72-81`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/internal/flows/login.py#L72-L81) — only the new-identity branch calls `process_signup`, whose first step is the `is_open_for_signup` check.
 [^dev-flag]: `IS_DEPLOYMENT` is this project's own `EnvConfig` field, defaulting to `True`. When false, `settings.py` skips `SECURE_SSL_REDIRECT` and HSTS, turns off `SESSION_COOKIE_SECURE` and `CSRF_COOKIE_SECURE`, and widens `ALLOWED_HOSTS`, and `EnvConfig._require_deployment_config` stops requiring production config. A deployment that set it false would break in far louder ways than an extra test provider.
 [^admin-redirect]: `AdminSite.admin_view` calls `redirect_to_login(request.get_full_path(), reverse("admin:login"))` whenever `has_permission` is false (`django/contrib/admin/sites.py:243-246`).

@@ -62,7 +62,7 @@ def _codes(response) -> list[str]:
 
 
 @pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=True)
+@override_settings(ENABLE_SIGNUP=True)
 def test_provider_token_signs_up_and_logs_in_in_one_request():
     """
     A first-time provider identity gets an account and a session in a single
@@ -92,7 +92,7 @@ def test_provider_token_still_logs_in_a_known_identity_when_signup_is_closed():
     new-identity branch, which is what makes closing it reversible (ADR-0004).
     """
     client = Client()
-    with override_settings(ENABLE_REGISTRATION=True):
+    with override_settings(ENABLE_SIGNUP=True):
         first = client.post(
             TOKEN_URL,
             _payload(4242, "returning@example.com"),
@@ -101,7 +101,7 @@ def test_provider_token_still_logs_in_a_known_identity_when_signup_is_closed():
     assert first.status_code == 200
     client.logout()
 
-    with override_settings(ENABLE_REGISTRATION=False):
+    with override_settings(ENABLE_SIGNUP=False):
         second = client.post(
             TOKEN_URL,
             _payload(4242, "returning@example.com"),
@@ -113,7 +113,7 @@ def test_provider_token_still_logs_in_a_known_identity_when_signup_is_closed():
 
 
 @pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=True)
+@override_settings(ENABLE_SIGNUP=True)
 def test_provider_identity_is_never_adopted_onto_an_existing_account():
     """
     Anyone who controls an email address must not be able to take over the
@@ -143,7 +143,7 @@ def test_the_social_app_form_is_not_offered_in_the_admin():
 
 
 @pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=True)
+@override_settings(ENABLE_SIGNUP=True)
 def test_session_delete_signs_out_a_provider_user():
     """The SPA's only sign-out call. Under SOCIALACCOUNT_ONLY the response is a
     401 carrying the anonymous session state, which `useLogout` treats as
@@ -163,7 +163,7 @@ def test_session_delete_signs_out_a_provider_user():
 
 
 @pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=True)
+@override_settings(ENABLE_SIGNUP=True)
 def test_provider_signup_cannot_resume_a_refused_collision():
     """
     The collision is refused before a pending login is stashed, so allauth's
@@ -198,7 +198,7 @@ def test_provider_signup_cannot_resume_a_refused_collision():
 
 
 @pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=True)
+@override_settings(ENABLE_SIGNUP=True)
 def test_an_unverified_provider_address_is_refused():
     """The provider's `email_verified` claim is the entire basis for running
     without verification of our own, so a token that withholds it must not mint
@@ -215,7 +215,7 @@ def test_an_unverified_provider_address_is_refused():
 
 
 @pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=True)
+@override_settings(ENABLE_SIGNUP=True)
 def test_a_provider_that_sends_no_address_is_refused():
     """A provider may legitimately return no email at all, which allauth also
     answers with the signup form."""
@@ -229,7 +229,7 @@ def test_a_provider_that_sends_no_address_is_refused():
 
 
 @pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=True)
+@override_settings(ENABLE_SIGNUP=True)
 def test_linking_a_second_identity_is_not_mistaken_for_a_collision():
     """
     `process=connect` reaches the same hook with an address that is already
@@ -255,7 +255,7 @@ def test_linking_a_second_identity_is_not_mistaken_for_a_collision():
 
 
 @pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=True, SOCIALACCOUNT_AUTO_SIGNUP=False)
+@override_settings(ENABLE_SIGNUP=True, SOCIALACCOUNT_AUTO_SIGNUP=False)
 def test_the_signup_form_can_never_supply_the_address():
     """
     The invariant must not rest on SOCIALACCOUNT_AUTO_SIGNUP's default. Off, an
@@ -299,7 +299,7 @@ GOOGLE_PROVIDERS = {
 
 
 @pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=True, SOCIALACCOUNT_PROVIDERS=GOOGLE_PROVIDERS)
+@override_settings(ENABLE_SIGNUP=True, SOCIALACCOUNT_PROVIDERS=GOOGLE_PROVIDERS)
 def test_provider_token_refuses_google_before_verifying_the_token():
     """Rests on allauth honoring `provider_class`; an upgrade that stopped would
     reopen provider/token to any Google ID token issued for our client."""
@@ -399,7 +399,7 @@ def _finish_google_sign_in(
 
 @pytest.mark.django_db
 @GOOGLE_REDIRECT_SETTINGS
-@override_settings(ENABLE_REGISTRATION=True)
+@override_settings(ENABLE_SIGNUP=True)
 def test_google_sign_in_round_trip_signs_up_and_returns_to_the_spa():
     client = Client()
     authorize = _start_google_sign_in(client)
@@ -450,7 +450,7 @@ def test_a_denied_consent_returns_to_the_spa_with_cancelled():
 
 @pytest.mark.django_db
 @GOOGLE_REDIRECT_SETTINGS
-@override_settings(ENABLE_REGISTRATION=True)
+@override_settings(ENABLE_SIGNUP=True)
 def test_an_adapter_refusal_returns_its_code_to_the_spa():
     """The SPA maps these codes to text, so the redirect path must carry the
     adapter's own code, not a generic one."""
@@ -474,7 +474,7 @@ def test_an_adapter_refusal_returns_its_code_to_the_spa():
 
 @pytest.mark.django_db
 @GOOGLE_REDIRECT_SETTINGS
-@override_settings(ENABLE_REGISTRATION=False)
+@override_settings(ENABLE_SIGNUP=False)
 def test_closed_registration_returns_signup_closed_to_the_spa():
     """allauth raises this outside the adapter, on a path of its own."""
     client = Client()

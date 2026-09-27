@@ -51,7 +51,7 @@ setup("Verify DISPLAY_AUTH_FLOWS is enabled", async ({ page }) => {
 
 setup("Verify the backend mints dummy-provider sessions", async () => {
   // Every fixture signs in this way, so a backend without IS_DEPLOYMENT=False or
-  // ENABLE_REGISTRATION fails the whole suite. Do it once here, where the
+  // ENABLE_SIGNUP fails the whole suite. Do it once here, where the
   // diagnostic is one failure instead of one per test.
   const { cleanup } = await createActiveUser();
   await cleanup();
