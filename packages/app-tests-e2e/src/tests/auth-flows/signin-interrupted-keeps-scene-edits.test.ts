@@ -11,9 +11,7 @@ const editAndStartSignIn = async (
 ) => {
   const item = await app.getUniqueItemSettings({ description });
   await item.field("description").fill(edited);
-  await app.userMenu().opener().click();
-  await app.userMenu().signin().click();
-  await app.loginDialog().devSignIn().click();
+  await app.startDevSignIn();
   return item;
 };
 

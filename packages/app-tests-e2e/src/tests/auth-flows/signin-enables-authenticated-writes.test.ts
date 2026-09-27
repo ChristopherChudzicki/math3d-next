@@ -43,10 +43,7 @@ test("Saving an owned scene works on the cookies a real sign-in sets", async ({
   const app = new AppPage(page);
 
   await test.step("Sign in from the editor", async () => {
-    await app.userMenu().opener().click();
-    await app.userMenu().signin().click();
-    await app.loginDialog().devSignIn().click();
-    await app.dummyProvider().signIn(signInUser);
+    await app.signInAsDevUser(signInUser);
 
     // Only the owner's button reads "Save"; a signed-in non-owner gets
     // "Save a Copy", which saves a new scene through the exempt POST.

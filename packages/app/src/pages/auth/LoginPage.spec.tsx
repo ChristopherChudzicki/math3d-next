@@ -23,7 +23,10 @@ afterEach(() => {
 test("Google sign-in posts allauth's redirect form, returning to this page", async () => {
   renderTestApp("/?controls=0&overlay=login#h");
 
-  const form = await screen.findByRole("form", { name: "Sign in with Google" });
+  const button = await screen.findByRole("button", {
+    name: "Sign in with Google",
+  });
+  const form = button.closest("form");
 
   expect(form).toHaveAttribute("method", "post");
   expect(form).toHaveAttribute(
@@ -49,9 +52,9 @@ test("Submitting saves a draft and sends the CSRF token current at submit", asyn
   document.cookie = "csrftoken=token-at-submit";
   await user.click(button);
 
-  expect(
-    screen.getByRole("form", { name: "Sign in with Google" }),
-  ).toHaveFormValues({ csrfmiddlewaretoken: "token-at-submit" });
+  expect(button.closest("form")).toHaveFormValues({
+    csrfmiddlewaretoken: "token-at-submit",
+  });
   expect(
     JSON.parse(sessionStorage.getItem(SIGN_IN_DRAFT_KEY) ?? "{}").url,
   ).toBe(`${window.location.origin}/`);

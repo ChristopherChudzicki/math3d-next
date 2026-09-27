@@ -29,7 +29,7 @@ const LogoutPage: React.FC = () => {
       onConfirm={handleSubmit}
       confirmText="Yes, sign out"
     >
-      Are you sure you want to log out?
+      Are you sure you want to sign out?
     </BasicDialog>
   );
 };

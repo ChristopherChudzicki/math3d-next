@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect } from "react";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
 import { useLocation } from "react-router";
 import {
   ENABLE_DUMMY_AUTH,
@@ -38,14 +39,6 @@ const LoginPage: React.FC = () => {
       maxWidth="xs"
     >
       <div className={styles["sign-in-content"]}>
-        <ProviderSignInButton
-          provider="google"
-          variant="outlined"
-          startIcon={<GoogleLogo />}
-          className={styles["google-button"]}
-        >
-          Sign in with Google
-        </ProviderSignInButton>
         {signInError && (
           <Alert
             severity={signInError === "cancelled" ? "info" : "error"}
@@ -54,6 +47,18 @@ const LoginPage: React.FC = () => {
             {SIGN_IN_ERROR_MESSAGES[signInError]}
           </Alert>
         )}
+        <Typography variant="body2">
+          Sign in to save your scenes and find them later in My Scenes. New to
+          Math3d? Signing in with Google creates your account.
+        </Typography>
+        <ProviderSignInButton
+          provider="google"
+          variant="outlined"
+          startIcon={<GoogleLogo />}
+          className={styles["google-button"]}
+        >
+          Sign in with Google
+        </ProviderSignInButton>
         {/* Last, so the dialog reads the same with or without this
             dev-only button. */}
         {ENABLE_DUMMY_AUTH && (

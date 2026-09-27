@@ -47,7 +47,6 @@ const ProviderSignInButton: React.FC<Props> = ({
     <form
       method="post"
       action={PROVIDER_REDIRECT_URL}
-      aria-label={children}
       onSubmit={() => {
         // Read at submit: any sign-in, such as one in another tab, rotates it.
         csrfInput.current!.value = getCsrfToken();

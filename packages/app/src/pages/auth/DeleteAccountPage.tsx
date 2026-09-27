@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useId, useState } from "react";
 import * as yup from "yup";
 import { Alert, TextField } from "@mui/material";
+import MuiLink from "@mui/material/Link";
 import { useNavigate } from "react-router";
 import { isApiError, useUserMeDelete } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
@@ -106,9 +107,16 @@ const DeleteAccountPage: React.FC = () => {
         <Alert severity="error">
           This action cannot be undone. Scenes you have saved stay published at
           their existing links, with no account able to edit or remove them —
-          delete them from <strong>My Scenes</strong> first if you don&rsquo;t
-          want that. To confirm, type &ldquo;<code>{CONFIRM_PROMPT}</code>
-          &rdquo; exactly.
+          delete them from{" "}
+          <MuiLink
+            component="button"
+            type="button"
+            onClick={() => open("scenes", { list: "me" })}
+          >
+            My Scenes
+          </MuiLink>{" "}
+          first if you don&rsquo;t want that. Signing in with Google again later
+          creates a new, empty account.
         </Alert>
         <TextField
           fullWidth

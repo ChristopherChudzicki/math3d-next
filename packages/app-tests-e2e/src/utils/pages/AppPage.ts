@@ -1,5 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
+import type { UserIdentity } from "@/utils/api/auth";
 import UserMenu from "./UserMenu";
 import SignoutPage from "./SignoutPage";
 import LoginDialog from "./LoginDialog";
@@ -55,6 +56,18 @@ class AppPage {
 
   myScenes(): MyScenes {
     return new MyScenes(this.page);
+  }
+
+  /** Opens sign-in from the user menu and leaves for the dummy provider. */
+  async startDevSignIn(): Promise<void> {
+    await this.userMenu().opener().click();
+    await this.userMenu().signin().click();
+    await this.loginDialog().devSignIn().click();
+  }
+
+  async signInAsDevUser(identity: UserIdentity): Promise<void> {
+    await this.startDevSignIn();
+    await this.dummyProvider().signIn(identity);
   }
 
   async assertSignedOut() {

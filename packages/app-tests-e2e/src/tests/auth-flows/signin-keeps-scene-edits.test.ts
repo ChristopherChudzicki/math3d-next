@@ -32,10 +32,7 @@ test("Signing in leaves unsaved edits to the open scene intact", async ({
   await item.field("description").fill(editedDescription);
 
   await test.step("Sign in from the editor", async () => {
-    await app.userMenu().opener().click();
-    await app.userMenu().signin().click();
-    await app.loginDialog().devSignIn().click();
-    await app.dummyProvider().signIn(signInUser);
+    await app.signInAsDevUser(signInUser);
 
     await app.userMenu().avatarOpener().click();
     await expect(app.userMenu().username()).toHaveText(signInUser.email);

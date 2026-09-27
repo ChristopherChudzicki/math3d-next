@@ -1,13 +1,17 @@
-import { test, expect } from "vitest";
+import { test, expect, vi } from "vitest";
+import * as Sentry from "@sentry/react";
 import { http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { mockAuth } from "@math3d/mock-api";
 import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
 
+vi.mock("@sentry/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@sentry/react")>()),
+  captureException: vi.fn(),
+}));
+
 test("If not authenticated, redirects to the login overlay", async () => {
-  const { location } = renderTestApp("/?overlay=delete-account", {
-    isAuthenticated: false,
-  });
+  const { location } = renderTestApp("/?overlay=delete-account");
   await waitFor(() =>
     expect(location.current.search).toContain("overlay=login"),
   );
@@ -75,6 +79,9 @@ test("a failed deletion surfaces the error instead of silently reopening", async
   expect(
     await within(dialog).findByText(/something went wrong/i),
   ).toBeVisible();
+  expect(Sentry.captureException).toHaveBeenCalledWith(
+    expect.objectContaining({ status: 500 }),
+  );
 });
 
 test("a 403 sends the user to sign in again instead of a generic failure", async () => {
@@ -112,4 +119,17 @@ test("a 403 sends the user to sign in again instead of a generic failure", async
   await waitFor(() =>
     expect(location.current.search).toContain("overlay=login"),
   );
+});
+
+test("My Scenes in the warning opens the user's scene list", async () => {
+  const { location } = renderTestApp("/?overlay=delete-account", {
+    isAuthenticated: true,
+  });
+  const dialog = await screen.findByRole("dialog", {
+    name: "Delete Account",
+  });
+
+  await user.click(within(dialog).getByRole("button", { name: "My Scenes" }));
+
+  expect(location.current.search).toBe("?overlay=scenes&list=me");
 });
