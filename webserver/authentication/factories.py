@@ -2,6 +2,7 @@ from typing import Generic, TypeVar
 
 import factory
 import faker
+from django.contrib.auth.hashers import make_password
 from factory.django import DjangoModelFactory
 
 import authentication.models as models
@@ -23,7 +24,7 @@ class CustomUserFactory(BaseFactory[models.CustomUser]):
     email = factory.LazyFunction(fake.email)
     # DjangoModelFactory bypasses create_user, which would leave a blank password
     # that Django counts as usable; real accounts have an unusable one.
-    password = factory.django.Password(None)
+    password = factory.LazyFunction(lambda: make_password(None))
 
     class Meta:
         model = models.CustomUser
