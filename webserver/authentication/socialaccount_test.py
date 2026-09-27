@@ -6,6 +6,8 @@ without contacting anyone. Google's own path — the callback, state, PKCE and
 the code exchange — is tested separately below with its token endpoint stubbed.
 """
 
+import base64
+import hashlib
 import json
 import logging
 import time
@@ -421,7 +423,7 @@ def test_google_sign_in_round_trip_signs_up_and_returns_to_the_spa():
     authorize = _start_google_sign_in(client)
 
     assert authorize["redirect_uri"] == f"http://testserver{GOOGLE_CALLBACK_URL}"
-    assert "email" in authorize["scope"].split()
+    assert set(authorize["scope"].split()) == {"openid", "email"}
     assert authorize["prompt"] == "select_account"
     assert authorize["code_challenge_method"] == "S256"
 
@@ -440,6 +442,11 @@ def test_google_sign_in_round_trip_signs_up_and_returns_to_the_spa():
     assert sent["client_secret"] == CONFIGURED_SECRET
     assert sent["redirect_uri"] == authorize["redirect_uri"]
     assert sent["code"] == "one-time-code"
+    verifier_hash = hashlib.sha256(sent["code_verifier"].encode()).digest()
+    assert (
+        base64.urlsafe_b64encode(verifier_hash).rstrip(b"=").decode()
+        == authorize["code_challenge"]
+    )
     user = CustomUser.objects.get(email="googler@example.com")
     assert SocialAccount.objects.get(user=user, provider="google").uid == "104729"
     assert client.session["_auth_user_id"] == str(user.pk)

@@ -8,6 +8,7 @@ import pytest
 from django.core.exceptions import ImproperlyConfigured
 
 from main.env import EnvConfig
+from main.sentry import drop_sign_in_frame_locals
 from main.origins import (
     WORKTREE_PORTS,
     cors_allowed_origins,
@@ -477,6 +478,7 @@ def test_sentry_initialized_with_no_pii_and_full_tracing(monkeypatch):
     assert kwargs["environment"] == "production"
     assert kwargs["release"] == "1.2.3"
     assert kwargs["dsn"] == "https://abc123@o1.ingest.sentry.io/42"
+    assert kwargs["before_send"] is drop_sign_in_frame_locals
 
 
 def test_isolate_environ_pins_the_suites_environment():

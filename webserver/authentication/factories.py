@@ -21,6 +21,9 @@ class CustomUserFactory(BaseFactory[models.CustomUser]):
     """Factory for CustomUser objects."""
 
     email = factory.LazyFunction(fake.email)
+    # DjangoModelFactory bypasses create_user, which would leave a blank password
+    # that Django counts as usable; real accounts have an unusable one.
+    password = factory.django.Password(None)
 
     class Meta:
         model = models.CustomUser

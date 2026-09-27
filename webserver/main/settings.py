@@ -20,6 +20,7 @@ import sentry_sdk
 from pydantic import ValidationError
 
 from main.env import EnvConfig
+from main.sentry import drop_sign_in_frame_locals
 from main.origins import (
     cors_allowed_origins,
     credentialed_cors_origins,
@@ -44,6 +45,7 @@ if ENV.SENTRY_DSN:
         release=ENV.APP_VERSION,
         send_default_pii=False,
         traces_sample_rate=ENV.SENTRY_TRACES_SAMPLE_RATE,
+        before_send=drop_sign_in_frame_locals,
     )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -293,8 +295,8 @@ ACCOUNT_LOGIN_METHODS = {"email"}
 # auth/provider/signup stays mounted either way.
 SOCIALACCOUNT_ONLY = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
-# Derives SOCIALACCOUNT_EMAIL_REQUIRED: trimming this lets an ID token with no
-# email claim auto-sign-up an account with a blank address.
+# allauth's default adds username and password fields this model lacks, which
+# manage.py check refuses.
 ACCOUNT_SIGNUP_FIELDS = ["email*"]
 ACCOUNT_EMAIL_NOTIFICATIONS = False
 ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
@@ -305,6 +307,9 @@ SOCIALACCOUNT_PROVIDERS: dict[str, dict[str, Any]] = {
         # Refuses provider/token, so Google signs in by redirect only.
         "provider_class": "authentication.providers.GoogleProvider",
         "APP": {"client_id": ENV.GOOGLE_CLIENT_ID, "secret": ENV.GOOGLE_CLIENT_SECRET},
+        # Not the default `profile`: allauth stores the ID token's claims in
+        # SocialAccount.extra_data, and nothing here uses a name or photo.
+        "SCOPE": ["openid", "email"],
         "OAUTH_PKCE_ENABLED": True,
         # Always show the account chooser: otherwise a browser already signed in
         # to Google (a shared school computer) goes straight through as that account.
