@@ -141,7 +141,7 @@ DATABASE_URL=postgresql://docker:docker@localhost:5431/math3d TEST_DB_NAME=test_
 docker compose run --rm webserver uv sync --frozen --all-groups
 ```
 
-(`docker volume rm math3d-next_venv-data` also works, at the cost of a full rebuild.) CI is unaffected — it has no volume.
+(`docker volume rm math3d-next_venv-data` also works, at the cost of a full rebuild.) CI is unaffected: each run starts with an empty volume.
 
 **After the postgres image major version changes** (e.g. the 16 → 18 bump), the `db` service comes up empty: `PGDATA` is major-versioned (`/var/lib/postgresql/<major>/docker`), so a new major finds no data directory and runs `initdb`. The previous major's files are left intact — in the `db-data` volume, or, for majors predating it, in the orphaned anonymous volume. Repopulate:
 

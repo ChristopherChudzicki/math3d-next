@@ -1,6 +1,6 @@
 # 0004 — OAuth-only authentication
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Contents**
 
@@ -33,7 +33,7 @@ Math3d does not want to handle passwords at all. A leak of stored hashes puts at
 1. **Accounts are never merged** — not now, not later. Attaching a second provider to an existing account is a different operation, covered below.
 2. **One provider until explicit linking exists.** `CustomUser.email` is unique, so one person signing in through two providers is a collision, and there is no flow yet to resolve it.
 3. **No password hashes and no transactional mail.** This is the point of the change.
-4. **A real name never becomes public.** Google returns one with every sign-in. No publicly visible field is ever filled from provider profile data.
+4. **A real name never becomes public.** Google offers one to any app that asks. No publicly visible field is ever filled from provider profile data.
 
 Deleting code and rewriting tests is ordinary work, not a cost to weigh, and there is no user data to preserve. That leaves two irreversible mistakes available — merging two accounts, and publishing a name nobody chose to publish — and constraints 1 and 4 rule both out. `next.math3d.org` is an unadvertised beta, so UX mistakes are cheap to undo.
 
@@ -45,13 +45,13 @@ A second provider brings email collisions that nothing resolves yet (constraint 
 
 ### Settings
 
-`SOCIALACCOUNT_ONLY = True` removes the password and email-verification endpoints from the headless API.[^only-urls] `ACCOUNT_SIGNUP_FIELDS = ["email*"]` keeps email required, so a provider that returns none can't create an account.[^signup-fields] allauth then refuses to boot unless `ACCOUNT_EMAIL_VERIFICATION = "none"`,[^verif-check] which enforces constraint 3 — under `OPTIONAL`, allauth would still send mail at signup.[^optional-mail] `ACCOUNT_EMAIL_NOTIFICATIONS` is pinned `False` so a future allauth default can't start sending mail either.
+`SOCIALACCOUNT_ONLY = True` removes the password and email-verification endpoints from the headless API.[^only-urls] `ACCOUNT_SIGNUP_FIELDS = ["email*"]` replaces allauth's default signup fields, whose username and passwords this user model doesn't have.[^signup-fields] allauth then refuses to boot unless `ACCOUNT_EMAIL_VERIFICATION = "none"`,[^verif-check] which enforces constraint 3 — under `OPTIONAL`, allauth would still send mail at signup.[^optional-mail] `ACCOUNT_EMAIL_NOTIFICATIONS` is pinned `False` so a future allauth default can't start sending mail either.
 
 Account linking by email is pinned off explicitly and guarded by a settings test, because a provider entry can turn it back on independently of the global setting.[^email-auth]
 
 ### Google alone
 
-Google is asked for the `profile` and `email` scopes,[^scopes] and returns the user's identifier, email address and basic profile. None of that is a sensitive scope, so the app needs no verification review from Google. With one provider, every returning user is matched on `uid`,[^uid-match] so linking never comes up.
+Google is asked for the `openid` and `email` scopes only,[^scopes] and returns the user's identifier and email address. allauth's default adds `profile`, and allauth stores whatever the ID token carries in `SocialAccount.extra_data`; a name and photo that nothing reads have no place there (constraint 4). Neither scope is sensitive, so the app needs no verification review from Google. With one provider, every returning user is matched on `uid`,[^uid-match] so linking never comes up.
 
 No signup form is ever shown. allauth sends a new identity whose email is already taken to `auth/provider/signup`,[^dupe-stage] whose form accepts any unused address without comparing it to the one the provider asserted. `CustomSocialAccountAdapter.pre_social_login` refuses such a login instead, so an account's address is always one the provider vouched for. `SOCIALACCOUNT_AUTO_SIGNUP` stays `True` and the adapter's `save_user` refuses any signup form, so that form can't be reached another way; a test pins both.
 
@@ -110,7 +110,7 @@ The cost is that leaving the page discards the editor's in-memory state — cove
 - `ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"` on deployments. allauth builds the redirect URI from the request, so otherwise its scheme rests on `SECURE_PROXY_SSL_HEADER` alone, and a proxy change would surface as Google's `redirect_uri_mismatch`.
 - `callback_url` needs no extra allowlist: allauth accepts the request host, `ALLOWED_HOSTS`, and hosts from `CSRF_TRUSTED_ORIGINS`,[^safe-url] which already lists the SPA's origins. `EnvConfig` refuses a wildcard in `ALLOWED_HOSTS` on a deployment, since one would widen where sign-in may redirect.
 
-**`provider/token` is closed to Google.** The headless API always mounts it, and E2E needs it for `dummy`, but left alone it would turn any Google ID token issued for our client into a session. No setting turns it off per provider: whether a provider accepts it is the class attribute `supports_token_authentication`. allauth does let settings swap in a provider class, so `SOCIALACCOUNT_PROVIDERS["google"]["provider_class"]` names a `GoogleProvider` subclass in `authentication` with the attribute `False`.[^provider-class] `provider/token` then answers 400 `token_authentication_not_supported` before reading the token, and the headless config stops listing it for Google. A backend test posts a Google token to `provider/token` and expects that refusal, so an allauth upgrade that stops honoring the setting fails CI.
+**`provider/token` is closed to Google.** The headless API always mounts it, and E2E needs it for `dummy`, but left alone it would turn any Google ID token issued for our client into a session. No setting turns it off per provider: whether a provider accepts it is the class attribute `supports_token_authentication`. allauth does let settings swap in a provider class, so `SOCIALACCOUNT_PROVIDERS["google"]["provider_class"]` names a `GoogleProvider` subclass in `authentication` with the attribute `False`.[^provider-class] `provider/token` then answers 400 `token_authentication_not_supported` before verifying the token, and the headless config stops listing it for Google. A backend test posts a Google token to `provider/token` and expects that refusal, so an allauth upgrade that stops honoring the setting fails CI.
 
 ### Keeping unsaved work across the redirect
 
@@ -122,7 +122,7 @@ An anonymous user can build a scene and then sign in to keep it, so the redirect
 - **Back/forward cache:** a page restored from it keeps its live state and takes no draft. The draft stays, so Back then Forward through Google still restores it; a later reload of the page restores the pre-sign-in snapshot, which is closer to the lost live state than the saved scene.
 - **Where it returns:** `callback_url` is the current URL without the sign-in overlay.
 - **Why `sessionStorage`:** it is per tab, survives the round trip within that tab, and is cleared when the tab closes. The one-hour limit keeps a draft from resurfacing long after a sign-in was abandoned.
-- **Errors:** `?error=` is shown only as a known code mapped to fixed text, since anyone can craft that URL. A failed code exchange is logged on the backend with its cause, as text rather than a traceback, since Sentry would attach the frames' client secret and tokens; the SPA only ever sees the code.
+- **Errors:** `?error=` is shown only as a known code mapped to fixed text, since anyone can craft that URL. A failed code exchange is logged on the backend with its cause, as text rather than a traceback, since Sentry would attach the frames' client secret and tokens; for the same reason, Sentry drops frame locals from any event raised while serving an `/_allauth/` route. The SPA only ever sees the code.
 
 ### Adding providers later
 
@@ -148,7 +148,7 @@ The Google client registers one redirect URI per API host, `https://<api host>/_
 
 It's reversible without stranding anyone. Closing registration blocks only _new_ identities; an existing `SocialAccount` logs in without reaching the signup check.[^signup-gate]
 
-**`VITE_DISPLAY_AUTH_FLOWS` stays** for now. It is presentation-only: it hides the signed-out entry points and chooses hamburger vs. avatar for anonymous visitors (`UserMenu.tsx`), and the My Scenes gate is an OR (`ScenesListPage.tsx`), so a signed-in user keeps everything. That makes turning auth on in production a GitHub Actions variable flip, decoupled from shipping code. Remove it once auth has been live long enough to be boring.
+**`VITE_DISPLAY_AUTH_FLOWS` stays** for now. It is presentation-only: it hides the signed-out entry points (`Header.tsx`), and the My Scenes gate is an OR (`ScenesListPage.tsx`), so a signed-in user keeps everything. It is read at build time, so turning auth on in production is the GitHub Actions variable plus a release: a new RC, promoted, which ships whatever `main` holds then. Remove it once auth has been live long enough to be boring.
 
 ### The dummy provider
 
@@ -164,19 +164,21 @@ The session cookie is host-only on the API host, where `/admin/` is served, and 
 
 ### User fields and deletion
 
-**`public_nickname` is dropped** — the column, the form that edited it, and `PATCH /v1/auth/users/me/`, whose only writable field it was. Under OAuth, filling it at signup means either silently copying Google's real name (ruled out by constraint 4) or interrupting sign-in to ask for a value whose purpose the user can't see yet.[^nickname] Nothing public renders it. A signed-in user is identified by their email address, shown only to them. The header shows a hamburger for anonymous visitors and a generic avatar for signed-in users. If public attribution is added later, it defaults to a generated, editable label — never a provider-supplied name.
+**`public_nickname` is dropped** — the form that edited it and `PATCH /v1/auth/users/me/`, whose only writable field it was. The column stays, unused, for one release, so rolled-back code finds it (see Rollout). Under OAuth, filling it at signup means either silently copying Google's real name (ruled out by constraint 4) or interrupting sign-in to ask for a value whose purpose the user can't see yet.[^nickname] Nothing public renders it. A signed-in user is identified by their email address, shown only to them. The header shows a hamburger for anonymous visitors and a generic avatar for signed-in users. If public attribution is added later, it defaults to a generated, editable label — never a provider-supplied name.
 
 **Deleting an account** (`DELETE /v1/auth/users/me/`) needs only the session, since no account has a password. It orphans the user's scenes rather than deleting them: `Scene.author` is `SET_NULL`, so a departed user's scenes become ordinary anonymous ones and shared links keep working. The migration emits no SQL.[^setnull]
 
 ### Rollout
 
-The whole change, redirect flow included, merges as one commit in #1312. Before release:
+The whole change, redirect flow included, merges as one commit in #1312. Before deploying:
 
 - delete the existing production accounts by hand;
 - set up the production Google client: the redirect URI above, and no JavaScript origins;
-- set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and `ENABLE_SIGNUP=true` on Heroku.
+- set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and `ENABLE_SIGNUP=true` on Heroku. Releases before this change read none of them; `ENABLE_SIGNUP` is deliberately not the older `ENABLE_REGISTRATION`, which they read as "open password signup".
 
-Dropping `public_nickname` is the one step a redeploy doesn't undo: the release phase only migrates forward, and a reverted build no longer contains the migration. To roll back, first run `manage.py migrate authentication <previous>` on the build that has it, then revert.
+After deploying, sign in with Google at `/?overlay=login` (it works with `VITE_DISPLAY_AUTH_FLOWS` off). The boot guards check that the Google credentials are present, not that they're right, and a redirect URI mismatch shows up only on Google's page. Then promote that account (see Consequences).
+
+Rolling back is a plain revert of the backend and of the Cloudflare Worker, which deploys separately. No migration needs reversing: this release keeps the `public_nickname` column, and a later one drops it.
 
 ## Consequences
 
@@ -206,18 +208,18 @@ Dropping `public_nickname` is the one step a redeploy doesn't undo: the release 
 [^only-urls]: [`headless/account/urls.py:27`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/account/urls.py#L27) — the remaining patterns are added only `if not allauth_settings.SOCIALACCOUNT_ONLY`.
 [^verif-check]: [`account/checks.py:38-43`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/account/checks.py#L38-L43) — a `Critical` check, so it fails the boot.
 [^optional-mail]: [`account/stages.py:154-156`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/account/stages.py#L154-L156) — under `OPTIONAL`, `EmailVerificationStage` still sends mail; only `MANDATORY` blocks the login.
-[^signup-fields]: `ACCOUNT_SIGNUP_FIELDS = ["email*"]`. Removing it turns off the derived [`SOCIALACCOUNT_EMAIL_REQUIRED`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/app_settings.py#L63-L71), which is the only thing stopping a provider response with no email from auto-creating an account with a blank address ([`flows/signup.py:83-87`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/internal/flows/signup.py#L83-L87)).
-[^scopes]: [`google/provider.py:61-65`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/google/provider.py#L61-L65) — `email` is added when `SOCIALACCOUNT_QUERY_EMAIL` is true, which defaults to `SOCIALACCOUNT_EMAIL_REQUIRED` ([`socialaccount/app_settings.py:11-16`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/app_settings.py#L11-L16)), true here.
+[^signup-fields]: allauth's default lists `username*`, `password1*` and `password2*`; with `ACCOUNT_USER_MODEL_USERNAME_FIELD = None`, `manage.py check` refuses to start on it (a CRITICAL system check). A sign-in that brings no email address never reaches signup either way: `pre_social_login` refuses it first.
+[^scopes]: `SOCIALACCOUNT_PROVIDERS["google"]["SCOPE"]` replaces the default ([`oauth2/provider.py:70-78`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/oauth2/provider.py#L70-L78)), which is `profile`, plus `email` when `SOCIALACCOUNT_QUERY_EMAIL` is true ([`google/provider.py:61-65`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/google/provider.py#L61-L65)). `extract_extra_data` keeps the whole payload ([`base/provider.py:172`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/base/provider.py#L172)).
 [^uid-match]: [`socialaccount/models.py:343-348`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/models.py#L343-L348) — `_lookup_by_socialaccount` matches on `(provider, uid)` alone.
 [^dupe-stage]: [`socialaccount/internal/flows/signup.py:52-88`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/internal/flows/signup.py#L52-L88) — when the address already belongs to someone, auto-signup is abandoned in favour of the signup form.
 [^headless-errors]: [`headless/socialaccount/internal.py`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/internal.py#L16-L94) — `complete_login` redirects to the flow's `next` URL (our `callback_url`) with `error` and `error_process` added on failure. `on_authentication_error` falls back to `socialaccount_login_error` when there is no state: an invalid `provider/redirect` form ([`views.py:58-65`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/views.py#L58-L65)) or unrecoverable callback state. Under `HEADLESS_ONLY` an unset key raises `ImproperlyConfigured` ([`core/internal/httpkit.py:118-119`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/core/internal/httpkit.py#L118-L119)).
 [^decode]: [`google/views.py:95-104`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/google/views.py#L95-L104) — `verify_signature = not self.did_fetch_access_token`, citing [OpenID Connect Core §3.1.3.7](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation).
 [^login-by-token]: [`google/urls.py`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/google/urls.py) adds `google/login/token/` after `default_urlpatterns`. [`LoginByTokenView`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/google/views.py#L119-L159) is `csrf_exempt` and `login_not_required`, isn't gated by `HEADLESS_ONLY`, and checks only a `g_csrf_token` double-submit cookie before turning a POSTed credential into a session.
 [^callback-view]: `default_urlpatterns` mounts `login/` and `login/callback/`. `login/` 404s under `HEADLESS_ONLY` ([`base/views.py:12-14`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/base/views.py#L12-L14)); `OAuth2CallbackView` doesn't inherit that check. The redirect URI is built with an unqualified `reverse("google_callback")` ([`oauth2/views.py:55-58`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/oauth2/views.py#L55-L58)).
-[^provider-class]: The registry registers `SOCIALACCOUNT_PROVIDERS[<id>]["provider_class"]` in place of the built-in class ([`providers/__init__.py:47-52`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/__init__.py#L47-L52)); `provider/token` checks the attribute before calling `verify_token` ([`headless/socialaccount/inputs.py:78-84`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/inputs.py#L78-L84)), and the config lists the flow only when it is set ([`headless/socialaccount/response.py:22-23`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/response.py#L22-L23)). `urls.py` still passes allauth's own `GoogleProvider` to `default_urlpatterns`, which finds the views by the class's package ([`oauth2/urls.py:6-8`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/oauth2/urls.py#L6-L8)).
+[^provider-class]: The registry registers `SOCIALACCOUNT_PROVIDERS[<id>]["provider_class"]` in place of the built-in class ([`providers/__init__.py:47-52`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/__init__.py#L47-L52)); `provider/token` checks the attribute before calling `verify_token` ([`headless/socialaccount/inputs.py:78-84`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/inputs.py#L78-L84)), and the config lists the flow only when it is set ([`headless/socialaccount/response.py:22-23`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/response.py#L22-L23)). `urls.py` passes this subclass to `default_urlpatterns`, which imports views from the package the subclass's `package` attribute names: allauth's Google package ([`oauth2/urls.py:6-8`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/oauth2/urls.py#L6-L8)).
 [^pkce]: [`oauth2/provider.py:17,30-38`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/oauth2/provider.py#L17-L38) — `pkce_enabled_default = False`, overridable per provider with `OAUTH_PKCE_ENABLED`; Google doesn't override the default.
 [^safe-url]: [`account/adapter.py:598-619`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/account/adapter.py#L598-L619) — `is_safe_url` allows relative URLs, the request host, `ALLOWED_HOSTS` (wildcards included), and the hosts in `CSRF_TRUSTED_ORIGINS`.
-[^creds]: `EnvConfig._require_deployment_config` (`main/env.py`) already requires `GOOGLE_CLIENT_ID`; `GOOGLE_CLIENT_SECRET` joins it. Both reach allauth through `SOCIALACCOUNT_PROVIDERS["google"]["APP"]`, the same dict the linking settings test guards.
+[^creds]: `EnvConfig._require_deployment_config` (`main/env.py`) requires both. Both reach allauth through `SOCIALACCOUNT_PROVIDERS["google"]["APP"]`, the same dict the linking settings test guards.
 [^signup-hook]: [`socialaccount/adapter.py:163`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/adapter.py#L163) delegates to our account adapter's `is_open_for_signup`, which returns `settings.ENABLE_SIGNUP`. On the callback path, `SignupClosedException` becomes `?error=signup_closed` ([`headless/socialaccount/internal.py:64-65`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/internal.py#L64-L65)).
 [^signup-gate]: [`socialaccount/internal/flows/login.py:72-81`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/internal/flows/login.py#L72-L81) — only the new-identity branch calls `process_signup`, whose first step is the `is_open_for_signup` check.
 [^dev-flag]: `IS_DEPLOYMENT` is this project's own `EnvConfig` field, defaulting to `True`. When false, `settings.py` skips `SECURE_SSL_REDIRECT` and HSTS, turns off `SESSION_COOKIE_SECURE` and `CSRF_COOKIE_SECURE`, and widens `ALLOWED_HOSTS`, and `EnvConfig._require_deployment_config` stops requiring production config. A deployment that set it false would break in far louder ways than an extra test provider.

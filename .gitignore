@@ -29,8 +29,8 @@ playwright-report
 test-results
 
 dist
-# Message bodies the removed file-based email backend wrote, including
-# activation URLs carrying signed keys. Left behind on any checkout that ran it.
+# Old dev email dumps (activation URLs with signed keys) may remain here;
+# nothing writes to it.
 webserver/private/
 webserver/staticfiles/*
 .mypy_cache

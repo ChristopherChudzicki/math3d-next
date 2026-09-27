@@ -8,7 +8,7 @@ type AuthStatus = "loading" | "authenticated" | "unauthenticated";
  * The user-me check runs regardless of DISPLAY_AUTH_FLOWS. That flag is
  * presentation-only — it hides the sign-in affordances — so a session that
  * already exists while it is off must still yield the authenticated view. UI
- * visibility is gated by the flag at the component level (Header, UserMenu,
+ * visibility is gated by the flag at the component level (Header,
  * ScenesListPage), not here.
  *
  * - data is a User object → "authenticated"

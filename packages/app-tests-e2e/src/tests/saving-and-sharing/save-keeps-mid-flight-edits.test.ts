@@ -22,7 +22,8 @@ test("Editing while a save is in flight keeps the newer edit", async ({
   await item.field("description").fill(`${description} saved`);
 
   // The scene's only GET so far was the page load, so the next one is the
-  // refetch the save triggers — the response that used to overwrite the editor.
+  // refetch the save triggers, which would overwrite the editor if the loader
+  // dispatched on it.
   // Assert after it lands, or the assertion passes in the window before it.
   const refetched = page.waitForResponse(
     (r) =>

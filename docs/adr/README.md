@@ -18,5 +18,5 @@ ADRs are numbered and committed alongside the code. Statuses:
 | [0001](0001-server-side-scene-screenshots.md)     | Server-side scene screenshots via a render Worker | Accepted |
 | [0002](0002-browser-rendering-cost-protection.md) | Cost protection for paid-tier Browser Rendering   | Accepted |
 | [0003](0003-sentry-monitoring.md)                 | Sentry monitoring (errors + traces)               | Accepted |
-| [0004](0004-oauth-only-authentication.md)         | OAuth-only authentication                         | Proposed |
-| [0005](0005-local-google-sign-in-testing.md)      | Exercising Google sign-in in local development    | Proposed |
+| [0004](0004-oauth-only-authentication.md)         | OAuth-only authentication                         | Accepted |
+| [0005](0005-local-google-sign-in-testing.md)      | Exercising Google sign-in in local development    | Accepted |

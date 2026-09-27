@@ -1,6 +1,6 @@
 # 0005 — Exercising Google sign-in in local development
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Contents**
 
@@ -110,7 +110,7 @@ followed by `docker compose up -d` to recreate the backend (a container's enviro
 [^redirect-uri]: [Google — Using OAuth 2.0 for Web Server Applications](https://developers.google.com/identity/protocols/oauth2/web-server): "Redirect URIs must use the HTTPS scheme, not plain HTTP. Localhost URIs (including localhost IP address URIs) are exempt from this rule", and "Host TLDs (Top Level Domains) must belong to the public suffix list."
 [^obc]: [Chrome Platform Status — Origin-Bound cookies (by default)](https://chromestatus.com/feature/4945698250293248): from Chrome 148, cookies are bound to the origin that set them unless a `Domain` attribute relaxes host and port binding; the temporary opt-out policies "will stop working in Chrome 150". Chrome 148 reached stable on 2026-05-05. The [explainer](https://github.com/sbingler/Origin-Bound-Cookies/blob/main/README.md) confirms domain cookies are readable from any port. Scheme binding has no opt-out, so an HTTPS SPA with a plain-HTTP API isn't a halfway option.
 [^csrf-depth]: Neither cookie sets `SameSite`, so Django's `Lax` default applies: a cross-site POST carries no `sessionid`, and JSON requests need a preflight the attacker's origin fails. What the token adds is protection from same-site attackers (`CSRF_COOKIE_DOMAIN` covers every `math3d.org` subdomain) and from handlers that parse a body without checking its content type. None of that applies to `localhost` on one developer's machine.
-[^flags]: `SESSION_COOKIE_SECURE` has no input of its own: `settings.py` sets it `True`, then `False` when `IS_DEPLOYMENT` is false. Checking it is checking `IS_DEPLOYMENT` indirectly. The `DISABLE_ALLAUTH_RATE_LIMITS` guard checks `IS_DEPLOYMENT` the same way.
+[^flags]: `SESSION_COOKIE_SECURE` has no input of its own: `settings.py` sets it `True`, then `False` when `IS_DEPLOYMENT` is false. Checking it is checking `IS_DEPLOYMENT` indirectly. The `DISABLE_ALLAUTH_RATE_LIMITS` guard checks `IS_DEPLOYMENT` directly.
 [^localhost-free]: Development's `ALLOWED_HOSTS` default in `webserver/main/settings.py` includes `localhost`; development CORS and CSRF-trusted origins are computed from `APP_BASE_URL` in `webserver/main/origins.py`; `settings.py` applies `CSRF_COOKIE_DOMAIN` only when non-empty; and `EnvConfig._csrf_cookie_domain_must_cover_spa_host` skips its check when it's empty.
 [^cf-tunnel]: [Cloudflare — Create a locally-managed tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/local-management/create-local-tunnel/).
 [^https-design]: If revisited (on macOS): hostnames in a marked `/etc/hosts` block rather than public DNS (some resolvers' DNS-rebinding protection drops public records pointing at loopback); an `mkcert` CA with its root key deleted after issuing one certificate covering both hostnames, stored machine-wide; Vite terminating its own TLS and Caddy terminating for Django, mirroring production's split. Shared loopback domains (`lvh.me`, `localtest.me`, `nip.io`, `localhost.direct`) were rejected for the same reason as bare `localhost` — math3d doesn't own them — and `localhost.direct` publishes its private key.

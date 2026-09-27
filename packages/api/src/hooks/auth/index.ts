@@ -40,8 +40,8 @@ const useUserMe = () => {
         await v1Client.GET("/v1/auth/users/me/");
       // Key on HTTP status, NOT error-body presence: a 401/403 may carry an
       // empty/unparseable body, in which case openapi-fetch leaves `error`
-      // undefined. We must still return null — useAuthStatus reads `undefined`
-      // as "loading", which would hide the sign-in UI indefinitely.
+      // undefined. We must still return null: a 401/403 means signed out, not a
+      // failed check.
       if (response.status === 401 || response.status === 403) return null;
       if (!response.ok) throw toApiError(response, error);
       return data ?? null;
