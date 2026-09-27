@@ -14,14 +14,20 @@ import AppRoutes from "./AppProviders";
 import { getStore } from "./store/store";
 import routes from "./routes";
 import { DISPLAY_AUTH_FLOWS } from "./features/auth";
+import {
+  discardSignInDraftOnPageRestore,
+  takeSignInDraft,
+} from "./features/auth/signInDraft";
 
 // @ts-expect-error Allow accessing math on window in dev for debugging
 window.math = math;
 // @ts-expect-error Expose feature flags for E2E test validation
 window.__DISPLAY_AUTH_FLOWS__ = DISPLAY_AUTH_FLOWS;
 
+discardSignInDraftOnPageRestore();
+
 const prepare = async () => {
-  if (import.meta.env.DEV && import.meta.env.VITE_USE_MSW) {
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_MSW === "true") {
     // eslint-disable-next-line import/no-extraneous-dependencies
     const { worker } = await import("@math3d/mock-api/browser");
     await worker.start();
@@ -35,7 +41,9 @@ prepare().then(() => {
   }
   const root = createRoot(container);
 
-  const store = getStore();
+  const store = getStore({
+    preloadedState: takeSignInDraft(window.location.pathname),
+  });
   if (import.meta.env.DEV) {
     // @ts-expect-error Allow accessing store on widnow in dev for debugging
     window.store = store;

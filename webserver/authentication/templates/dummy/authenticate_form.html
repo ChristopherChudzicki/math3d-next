@@ -1,0 +1,54 @@
+{% comment %}
+Replaces allauth's dummy provider page, which lists every optional field its
+form accepts. The field names are that form's (allauth dummy/forms.py).
+{% endcomment %}
+{% load seeded_user %}
+{% seeded_user as seed %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dev sign-in</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 26rem; margin: 3rem auto; padding: 0 1rem; }
+      label { display: block; margin-top: 1rem; }
+      input[type="text"], input[type="email"] { display: block; width: 100%; box-sizing: border-box; padding: 0.4rem; }
+      .hint, .errorlist { font-size: 0.85rem; color: #555; margin: 0.25rem 0 0; }
+      .errorlist { color: #b00020; padding: 0; list-style: none; }
+      .actions { margin-top: 1.5rem; display: flex; gap: 0.5rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Dev sign-in</h1>
+    <p class="hint">
+      Stands in for Google's account chooser. Prefilled with the user
+      <code>seed_test_data</code> creates.
+    </p>
+    <form method="post" action="{{ action_url }}">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <label for="id">Account ID</label>
+      <input id="id" type="text" name="id" inputmode="numeric" required
+             value="{% if form.is_bound %}{{ form.id.value|default_if_none:'' }}{% else %}{{ seed.TEST_USER_STATIC_UID }}{% endif %}" />
+      <p class="hint">The provider's account ID, not the Django user ID.</p>
+      {{ form.id.errors }}
+      <label for="email">Email</label>
+      <input id="email" type="email" name="email"
+             value="{% if form.is_bound %}{{ form.email.value|default_if_none:'' }}{% else %}{{ seed.TEST_USER_STATIC_EMAIL }}{% endif %}" />
+      {{ form.email.errors }}
+      <label>
+        <input type="checkbox" name="email_verified"{% if not form.is_bound or form.email_verified.value %} checked{% endif %} />
+        Email verified
+      </label>
+      <div class="actions">
+        <button type="submit">Sign in</button>
+        <button type="submit" form="cancel-form">Cancel</button>
+      </div>
+    </form>
+    <form id="cancel-form" method="post" action="{{ action_url }}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="cancel" />
+    </form>
+  </body>
+</html>

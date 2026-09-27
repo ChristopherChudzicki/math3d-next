@@ -29,9 +29,10 @@ playwright-report
 test-results
 
 dist
-webserver/private/email/*
+# Old dev email dumps (activation URLs with signed keys) may remain here;
+# nothing writes to it.
+webserver/private/
 webserver/staticfiles/*
-!webserver/private/email/.gitkeep
 .mypy_cache
 .pytest_cache
 

@@ -57,6 +57,11 @@ class ItemSettings {
     return this.root.getByLabel(name);
   }
 
+  /** The gutter highlight marking this item as the active one. */
+  activeMarker(): Locator {
+    return this.root.locator('[class*="item-active"]');
+  }
+
   moreSettings(): MoreSettings {
     return new MoreSettings(this.root, this.page);
   }

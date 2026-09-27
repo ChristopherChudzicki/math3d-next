@@ -5,8 +5,13 @@ Format is [Michael Nygard's](https://cognitect.com/blog/2011/11/15/documenting-a
 (Status / Context / Decision / Consequences), with a short _Alternatives
 considered_ section where the rejected options matter.
 
-ADRs are numbered, committed alongside the code, and **not edited after
-acceptance** — to change a decision, add a new ADR that supersedes the old one.
+ADRs are numbered and committed alongside the code. Statuses:
+
+- **Proposed** — the decision is written down, but its implementation has not
+  yet substantially landed on `main`. It may be revised freely, in place.
+- **Accepted** — its implementation has substantially landed on `main`. From
+  here it is **not edited**: a changed decision gets a new ADR that supersedes it.
+- **Superseded by NNNN** — replaced by a later ADR, kept for the record.
 
 | #                                                 | Title                                             | Status   |
 | ------------------------------------------------- | ------------------------------------------------- | -------- |

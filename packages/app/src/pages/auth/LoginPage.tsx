@@ -1,95 +1,74 @@
-import React, { useCallback, useEffect, useId } from "react";
-import TextField from "@mui/material/TextField";
-import MuiLink from "@mui/material/Link";
-import { useForm } from "react-hook-form";
-import { useLogin } from "@math3d/api";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { useAuthStatus } from "@/features/auth";
-import { OverallError, setFieldErrors } from "@/util/forms";
+import React, { useCallback, useEffect } from "react";
+import Alert from "@mui/material/Alert";
+import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
+import { useLocation } from "react-router";
+import {
+  ENABLE_DUMMY_AUTH,
+  ProviderSignInButton,
+  useAuthStatus,
+} from "@/features/auth";
+import GoogleLogo from "@/features/auth/GoogleLogo";
+import { SIGN_IN_ERROR_MESSAGES } from "@/features/auth/signInErrors";
+import type { SignInError } from "@/features/auth/signInErrors";
 import BasicDialog from "@/util/components/BasicDialog";
 import { useOverlay } from "@/features/overlays/useOverlay";
-import styles from "./styles.module.css";
-
-const schema = yup.object({
-  email: yup.string().email().required(),
-  password: yup.string().required(),
-});
+import styles from "./LoginPage.module.css";
 
 const LoginPage: React.FC = () => {
-  const { open, close } = useOverlay();
+  const { close } = useOverlay();
   const isAuthenticated = useAuthStatus();
-  const resolver = yupResolver(schema);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setError,
-  } = useForm({ resolver });
-
   const handleClose = useCallback(() => close(), [close]);
-  const formId = useId();
-  const login = useLogin();
+  const signInError = (
+    useLocation().state as { signInError?: SignInError } | null
+  )?.signInError;
+
   useEffect(() => {
     if (isAuthenticated === "authenticated") {
       close();
     }
   }, [isAuthenticated, close]);
+
   return (
     <BasicDialog
       title="Sign in"
       open
       onClose={handleClose}
-      confirmText="Sign in"
-      confirmButtonProps={{ type: "submit", form: formId }}
+      confirmButton={null}
       fullWidth
       maxWidth="xs"
     >
-      <form
-        className={styles["form-content"]}
-        id={formId}
-        onSubmit={handleSubmit(async (data, event) => {
-          event?.preventDefault();
-          try {
-            await login.mutateAsync(data, {});
-            // mutateAsync awaits onSuccess which resets queries (including
-            // useUserMe), so auth status is already up-to-date.
-            handleClose();
-          } catch (err) {
-            setFieldErrors(data, err, setError);
-          }
-        })}
-      >
-        <TextField
-          label="Email"
-          error={!!errors.email?.message}
-          helperText={errors.email?.message}
-          {...register("email")}
-        />
-        <TextField
-          error={!!errors.password?.message}
-          helperText={errors.password?.message}
-          label="Password"
-          type="password"
-          {...register("password")}
-        />
-        <OverallError error={errors.root} />
-      </form>
-      <div className={styles["sign-in-footer"]}>
-        <MuiLink
-          component="button"
-          type="button"
-          onClick={() => open("reset-request")}
+      <div className={styles["sign-in-content"]}>
+        {signInError && (
+          <Alert
+            severity={signInError === "cancelled" ? "info" : "error"}
+            className={styles["sign-in-alert"]}
+          >
+            {SIGN_IN_ERROR_MESSAGES[signInError]}
+          </Alert>
+        )}
+        <Typography variant="body2">
+          Sign in to save your scenes and find them later in My Scenes. New to
+          Math3d? Signing in with Google creates your account.
+        </Typography>
+        <ProviderSignInButton
+          provider="google"
+          variant="outlined"
+          startIcon={<GoogleLogo />}
+          className={styles["google-button"]}
         >
-          Forgot password?
-        </MuiLink>
-        <MuiLink
-          component="button"
-          type="button"
-          onClick={() => open("register")}
-        >
-          Create Account
-        </MuiLink>
+          Sign in with Google
+        </ProviderSignInButton>
+        {/* Last, so the dialog reads the same with or without this
+            dev-only button. */}
+        {ENABLE_DUMMY_AUTH && (
+          <>
+            <Divider className={styles["dummy-divider"]}>or</Divider>
+            <ProviderSignInButton provider="dummy" variant="outlined">
+              Sign in as dev user
+            </ProviderSignInButton>
+          </>
+        )}
       </div>
     </BasicDialog>
   );

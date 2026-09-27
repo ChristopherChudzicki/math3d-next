@@ -17,13 +17,13 @@ from sentry_sdk.utils import BadDsn, Dsn
 
 
 class EnvConfig(BaseSettings):
-    model_config = SettingsConfigDict(case_sensitive=True, extra="forbid")
+    # Otherwise a model validator's error echoes the whole environment, secrets
+    # included, into the release log.
+    model_config = SettingsConfigDict(
+        case_sensitive=True, extra="forbid", hide_input_in_errors=True
+    )
 
     SECRET_KEY: str = ""
-    MAILJET_API_KEY: str = ""
-    MAILJET_SECRET_KEY: str = ""
-    DEFAULT_FROM_EMAIL: str = ""
-    SERVER_EMAIL: str = ""
     # The SPA origin, e.g. https://next.math3d.org. Validated to a bare origin
     # (and trailing-slash-normalized) because paths are appended to it
     # (HEADLESS_FRONTEND_URLS) and it is used verbatim as an origin (CORS/CSRF
@@ -58,7 +58,14 @@ class EnvConfig(BaseSettings):
     # Version
     APP_VERSION: str = "unknown"
     # Feature flags
-    ENABLE_REGISTRATION: bool = False
+    # Open sign-ups. False is a deployment posture, not a misconfiguration: a
+    # closed deployment still logs in identities that already exist. Not
+    # ENABLE_REGISTRATION: releases before ADR-0004 read that as password signup.
+    ENABLE_SIGNUP: bool = False
+    # Google OAuth web client; both are required on a deployment (see
+    # _require_deployment_config).
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
     CSRF_COOKIE_DOMAIN: str = ""
     DISABLE_ALLAUTH_RATE_LIMITS: bool = False
     # Local-only, for hand-testing Google sign-in on bare `localhost`, which
@@ -103,7 +110,8 @@ class EnvConfig(BaseSettings):
         try:
             Dsn(value)
         except BadDsn as exc:
-            raise ValueError(f"{value!r} is not a valid Sentry DSN: {exc}") from exc
+            # Neither the value nor BadDsn's message, which quotes its parts.
+            raise ValueError("SENTRY_DSN is not a valid Sentry DSN") from exc
         return value
 
     @model_validator(mode="after")
@@ -117,7 +125,7 @@ class EnvConfig(BaseSettings):
         missing = []
         if not self.APP_BASE_URL:
             missing.append(
-                "APP_BASE_URL (used for CSRF_TRUSTED_ORIGINS and email links)"
+                "APP_BASE_URL (used for CSRF_TRUSTED_ORIGINS and CREDENTIALED_CORS_ORIGINS)"
             )
         if not self.CSRF_COOKIE_DOMAIN:
             missing.append(
@@ -129,11 +137,33 @@ class EnvConfig(BaseSettings):
                 "DATABASE_URL (without it Django falls back to a dummy backend "
                 "that fails on every query)"
             )
+        if not self.GOOGLE_CLIENT_ID:
+            missing.append("GOOGLE_CLIENT_ID (empty, Google rejects every sign-in)")
+        if not self.GOOGLE_CLIENT_SECRET:
+            missing.append(
+                "GOOGLE_CLIENT_SECRET (empty, Google refuses to exchange the "
+                "authorization code)"
+            )
         if missing:
             raise ValueError(
                 "Missing configuration required to run a deployment: "
                 + "; ".join(missing)
                 + ". Set IS_DEPLOYMENT=False if this is not a deployment."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _no_wildcard_hosts_on_a_deployment(self) -> "EnvConfig":
+        """
+        allauth accepts a sign-in `callback_url` on any host ALLOWED_HOSTS
+        matches, so a wildcard would let sign-in redirect off-site.
+        """
+        if not self.IS_DEPLOYMENT:
+            return self
+        wildcards = [h for h in self.ALLOWED_HOSTS if h == "*" or h.startswith(".")]
+        if wildcards:
+            raise ValueError(
+                f"ALLOWED_HOSTS must list exact hosts on a deployment; got {wildcards}"
             )
         return self
 

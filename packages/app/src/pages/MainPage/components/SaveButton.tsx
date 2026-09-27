@@ -24,7 +24,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import styles from "./SaveButton.module.css";
 
 const schema = yup.object({
-  title: yup.string().required(),
+  title: yup.string().required("Please enter a title."),
 });
 
 type SaveDialogProps = Pick<BasicDialogProps, "open"> & {
@@ -48,7 +48,12 @@ const SaveDialog: React.FC<SaveDialogProps> = ({
     const title = duplicating ? `Copy of ${scene.title}` : scene.title;
     return { title };
   }, [scene.title, duplicating]);
-  const { register, handleSubmit, reset } = useValidatedForm({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useValidatedForm({
     schema,
     defaultValues,
   });
@@ -145,8 +150,14 @@ const SaveDialog: React.FC<SaveDialogProps> = ({
           margin="dense"
           fullWidth
           label="Title"
+          error={!!errors.title?.message}
+          // A space keeps the row height stable when the message appears.
+          helperText={errors.title?.message ?? " "}
           {...register("title")}
         />
+        {errors.root?.message ? (
+          <Alert severity="error">{errors.root.message}</Alert>
+        ) : null}
       </form>
     </BasicDialog>
   );

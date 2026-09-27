@@ -1,51 +1,137 @@
-import { test, expect } from "vitest";
-import { renderTestApp, screen, user, within, waitFor, act } from "@/test_util";
-import { seedDb } from "@math3d/mock-api";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
+import { delay, http } from "msw";
+import { server } from "@math3d/mock-api/node";
+import { seedDb, urls } from "@math3d/mock-api";
+import { act, renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import { getStore } from "@/store/store";
+import {
+  SIGN_IN_DRAFT_KEY,
+  saveSignInDraft,
+} from "@/features/auth/signInDraft";
+import { replaceLocation } from "@/util/replaceLocation";
 
-test("Login form logs user in", async () => {
-  const userData = seedDb.withUser();
-  const { location } = renderTestApp("/?overlay=login");
+vi.mock("@/util/replaceLocation");
 
-  const dialog = await screen.findByRole("dialog");
-  const email = within(dialog).getByRole("textbox", { name: "Email" });
-  const password = within(dialog).getByLabelText("Password");
-  const submit = within(dialog).getByRole("button", { name: "Sign in" });
-
-  await user.click(email);
-  await user.paste(userData.email);
-  await user.click(password);
-  await user.paste(userData.password);
-  await user.click(submit);
-
-  await waitFor(() => expect(dialog).not.toBeInTheDocument());
-  expect(location.current.search).not.toContain("overlay=");
+// jsdom can't navigate; stop the native submission after React's handler ran.
+const stopNavigation = (event: Event) => event.preventDefault();
+beforeEach(() => document.addEventListener("submit", stopNavigation));
+afterEach(() => {
+  document.removeEventListener("submit", stopNavigation);
+  document.cookie = "csrftoken=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 });
 
-test("Login form displays error if password/email wrong", async () => {
-  const userData = seedDb.withUser();
+test("Google sign-in posts allauth's redirect form, returning to this page", async () => {
+  renderTestApp("/?controls=0&overlay=login#h");
 
+  const button = await screen.findByRole("button", {
+    name: "Sign in with Google",
+  });
+  const form = button.closest("form");
+
+  expect(form).toHaveAttribute("method", "post");
+  expect(form).toHaveAttribute(
+    "action",
+    `${import.meta.env.VITE_API_BASE_URL}/_allauth/browser/v1/auth/provider/redirect`,
+  );
+  expect(form).toHaveFormValues({
+    provider: "google",
+    process: "login",
+    callback_url: `${window.location.origin}/?controls=0#h`,
+  });
+});
+
+test("Submitting saves a draft and sends the CSRF token current at submit", async () => {
+  document.cookie = "csrftoken=token-at-render";
   renderTestApp("/?overlay=login");
 
-  const dialog = await screen.findByRole("dialog");
+  const button = await screen.findByRole("button", {
+    name: "Sign in with Google",
+  });
+  await waitFor(() => expect(button).toBeEnabled());
+  // Django rotates the token on any sign-in, such as one in another tab.
+  document.cookie = "csrftoken=token-at-submit";
+  await user.click(button);
 
-  const email = within(dialog).getByRole("textbox", { name: "Email" });
-  const password = within(dialog).getByLabelText("Password");
-  const submit = within(dialog).getByRole("button", { name: "Sign in" });
-  await user.click(email);
-  await user.paste(userData.email);
+  expect(button.closest("form")).toHaveFormValues({
+    csrfmiddlewaretoken: "token-at-submit",
+  });
+  expect(
+    JSON.parse(sessionStorage.getItem(SIGN_IN_DRAFT_KEY) ?? "{}").url,
+  ).toBe(`${window.location.origin}/`);
+});
 
-  await user.click(password);
-  await user.paste("foo");
+test("Sign-in waits for the session check that seeds the CSRF cookie", async () => {
+  server.use(http.get(urls.auth.usersMe, () => delay("infinite")));
+  renderTestApp("/?overlay=login");
 
-  await user.click(submit);
-  // allauth's email_password_mismatch error is treated as a form-level error
-  const alert = within(dialog).getByRole("alert");
-  expect(alert).toHaveTextContent(
-    "The email address and/or password you specified are not correct.",
+  expect(
+    await screen.findByRole("button", { name: "Sign in with Google" }),
+  ).toBeDisabled();
+});
+
+test("A returned error opens the dialog with fixed text and leaves the URL clean", async () => {
+  const { location } = renderTestApp(
+    "/?error=signup_closed&error_process=login",
   );
 
-  // Dialog still open
-  expect(dialog).toBeInTheDocument();
+  const dialog = await screen.findByRole("dialog", { name: "Sign in" });
+  expect(dialog).toHaveTextContent(/sign-ups are closed/i);
+  expect(location.current.search).toBe("?overlay=login");
+});
+
+test("A cancelled sign-in is reported as information, not an error", async () => {
+  renderTestApp("/?error=cancelled&error_process=login");
+
+  const dialog = await screen.findByRole("dialog", { name: "Sign in" });
+  expect(within(dialog).getByRole("alert")).toHaveClass("MuiAlert-colorInfo");
+});
+
+test("A returned error opens no dialog for someone already signed in", async () => {
+  const { location } = renderTestApp("/?error=unknown&error_process=login", {
+    isAuthenticated: true,
+  });
+
+  await expect(
+    screen.findByRole("dialog", { name: "Sign in" }, { timeout: 500 }),
+  ).rejects.toThrow();
+  expect(location.current.search).toBe("");
+});
+
+test("An unrecognized error is never echoed", async () => {
+  renderTestApp("/?error=%3Cb%3Eowned%3C%2Fb%3E&error_process=login");
+
+  const dialog = await screen.findByRole("dialog", { name: "Sign in" });
+  expect(dialog).not.toHaveTextContent("owned");
+  expect(screen.getByRole("link", { name: "get in touch" })).toHaveAttribute(
+    "href",
+    import.meta.env.VITE_ISSUE_URL,
+  );
+});
+
+test("The sign-in error page loads the draft's page, query kept, with its error", async () => {
+  saveSignInDraft(
+    getStore().getState(),
+    `${window.location.origin}/abc?controls=0`,
+  );
+
+  renderTestApp("/app/sign-in-error?error=signup_closed&error_process=login");
+
+  // A full load, so the draft restores the way any return from sign-in does.
+  await waitFor(() =>
+    expect(replaceLocation).toHaveBeenCalledWith(
+      `${window.location.origin}/abc?controls=0&error=signup_closed&error_process=login`,
+    ),
+  );
+});
+
+test("The sign-in error page returns home when no draft names a page", async () => {
+  renderTestApp("/app/sign-in-error?error=signup_closed&error_process=login");
+
+  await waitFor(() =>
+    expect(replaceLocation).toHaveBeenCalledWith(
+      `${window.location.origin}/?error=signup_closed&error_process=login`,
+    ),
+  );
 });
 
 test("If authenticated already, closes the overlay", async () => {
@@ -55,20 +141,6 @@ test("If authenticated already, closes the overlay", async () => {
   await waitFor(() =>
     expect(location.current.search).not.toContain("overlay="),
   );
-});
-
-test("Create Account link switches to the register overlay (replace, no extra history)", async () => {
-  // Seed the scene so the scene query does NOT 404 — otherwise the "Not found"
-  // notification <Dialog> mounts alongside the overlay and a bare findByRole("dialog")
-  // throws "multiple elements". (Always seed, or scope dialog queries by name.)
-  const scene = seedDb.withSceneFromItems([]);
-  const { location } = renderTestApp(`/${scene.key}?overlay=login`);
-  await screen.findByRole("dialog", { name: "Sign in" });
-  await user.click(screen.getByRole("button", { name: "Create Account" }));
-  await waitFor(() =>
-    expect(location.current.search).toContain("overlay=register"),
-  );
-  expect(location.current.pathname).toBe(`/${scene.key}`); // path (scene) preserved
 });
 
 test("open pushes one history entry; Back returns to the underlying view", async () => {
@@ -85,24 +157,6 @@ test("open pushes one history entry; Back returns to the underlying view", async
     expect(location.current.search).not.toContain("overlay="),
   );
   expect(location.current.pathname).toBe(`/${scene.key}`);
-});
-
-test("switching login → register does not add a history entry (Back skips both)", async () => {
-  const scene = seedDb.withSceneFromItems([]);
-  const { location, router } = renderTestApp(`/${scene.key}`);
-  // Open login overlay (push → now 2 history entries)
-  await user.click(
-    await screen.findByRole("button", { name: "Sign in", hidden: true }),
-  );
-  await screen.findByRole("dialog", { name: "Sign in" });
-  // Switch to register (replace → still 2 entries, login never pushed again)
-  await user.click(screen.getByRole("button", { name: "Create Account" }));
-  await screen.findByRole("dialog", { name: /create account/i });
-  // Back once should skip both overlays (replace means login→register was not a push)
-  await act(() => router.navigate(-1));
-  await waitFor(() =>
-    expect(location.current.search).not.toContain("overlay="),
-  );
 });
 
 test("opening/closing an overlay preserves other params and the hash", async () => {

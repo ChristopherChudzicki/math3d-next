@@ -6,7 +6,7 @@ import { ApiError } from "../util";
 // Read CSRF token from cookie before each request.
 // The cookie is set with CSRF_COOKIE_DOMAIN so it's readable across subdomains
 // (e.g., math3d.localdev:3000 can read cookies set by api.math3d.localdev:8000).
-function getCsrfToken(): string {
+export function getCsrfToken(): string {
   if (typeof document === "undefined") return "";
   const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
   return match ? match[1] : "";

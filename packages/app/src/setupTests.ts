@@ -57,6 +57,7 @@ beforeAll(() => {
 });
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
   mockAuth.setCurrentUser(null);
 });
 afterEach(() => {

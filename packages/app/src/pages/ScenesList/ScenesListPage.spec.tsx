@@ -1,4 +1,4 @@
-import { renderTestApp, screen, waitFor, user } from "@/test_util";
+import { renderTestApp, screen, waitFor, user, act } from "@/test_util";
 import { seedDb } from "@math3d/mock-api";
 import { test, expect } from "vitest";
 
@@ -26,6 +26,25 @@ test("closing the drawer (Escape) returns to the scene", async () => {
   );
   await screen.findByRole("tab", { name: "Examples" });
   await user.keyboard("{Escape}");
+  await waitFor(() =>
+    expect(location.current.search).not.toContain("overlay="),
+  );
+  expect(location.current.pathname).toBe(`/${scene.key}`);
+});
+
+test("switching tabs replaces history; Back leaves the drawer entirely", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const { location, router } = renderTestApp(`/${scene.key}`);
+  // Open the drawer from the user menu (a push → 2 entries). This scene is
+  // viewed signed out, so the trigger is the hamburger.
+  await user.click(await screen.findByRole("button", { name: "Open Menu" }));
+  await user.click(await screen.findByRole("menuitem", { name: "Examples" }));
+  await screen.findByRole("tab", { name: "Examples", selected: true });
+  // Switch lists (a replace → still 2 entries).
+  await user.click(screen.getByRole("tab", { name: "My Scenes" }));
+  await screen.findByRole("tab", { name: "My Scenes", selected: true });
+
+  await act(() => router.navigate(-1));
   await waitFor(() =>
     expect(location.current.search).not.toContain("overlay="),
   );

@@ -8,6 +8,7 @@ import pytest
 from django.core.exceptions import ImproperlyConfigured
 
 from main.env import EnvConfig
+from main.sentry import drop_sign_in_frame_locals
 from main.origins import (
     WORKTREE_PORTS,
     cors_allowed_origins,
@@ -35,6 +36,8 @@ DEPLOY_ENV = {
     "APP_BASE_URL": "https://app.example.org",
     "CSRF_COOKIE_DOMAIN": ".example.org",
     "DATABASE_URL": "postgres://u:p@db.example.org:5432/math3d",  # pragma: allowlist secret
+    "GOOGLE_CLIENT_ID": "deploy-client-id.apps.googleusercontent.com",
+    "GOOGLE_CLIENT_SECRET": "deploy-client-secret",  # pragma: allowlist secret
 }
 
 
@@ -115,6 +118,48 @@ def test_deployment_requires_database_url(monkeypatch):
     del env["DATABASE_URL"]
     with pytest.raises(ImproperlyConfigured, match="DATABASE_URL"):
         load_settings(monkeypatch, **env)
+
+
+def test_deployment_requires_google_client_id(monkeypatch):
+    """
+    Empty, Google rejects the authorization request, so a deployment must fail
+    at import instead of on the first sign-in.
+    """
+    env = {**DEPLOY_ENV}
+    del env["GOOGLE_CLIENT_ID"]
+    with pytest.raises(ImproperlyConfigured, match="GOOGLE_CLIENT_ID"):
+        load_settings(monkeypatch, **env)
+
+
+def test_deployment_requires_google_client_secret(monkeypatch):
+    """Google's token endpoint requires the secret for a web client, PKCE or not."""
+    env = {**DEPLOY_ENV}
+    del env["GOOGLE_CLIENT_SECRET"]
+    with pytest.raises(ImproperlyConfigured, match="GOOGLE_CLIENT_SECRET"):
+        load_settings(monkeypatch, **env)
+
+
+@pytest.mark.parametrize("pattern", ["*", ".example.org"])
+def test_deployment_refuses_wildcard_allowed_hosts(monkeypatch, pattern):
+    """
+    allauth accepts a sign-in callback_url on any host ALLOWED_HOSTS matches,
+    so a wildcard would let sign-in redirect off-site.
+    """
+    with pytest.raises(ImproperlyConfigured, match="ALLOWED_HOSTS"):
+        load_settings(
+            monkeypatch, **DEPLOY_ENV, ALLOWED_HOSTS=f"api.example.org,{pattern}"
+        )
+
+
+def test_a_refused_boot_does_not_print_secrets(monkeypatch):
+    """The ImproperlyConfigured message lands in the release log."""
+    secret_key = "boot-secret-key-value"  # pragma: allowlist secret
+    with pytest.raises(ImproperlyConfigured) as exc_info:
+        load_settings(
+            monkeypatch, **DEPLOY_ENV, SECRET_KEY=secret_key, ALLOWED_HOSTS="*"
+        )
+    assert secret_key not in str(exc_info.value)
+    assert DEPLOY_ENV["GOOGLE_CLIENT_SECRET"] not in str(exc_info.value)
 
 
 def test_database_url_configures_the_default_connection(monkeypatch):
@@ -231,21 +276,15 @@ def test_csrf_cookie_domain_covers_subdomains_without_leading_dot(monkeypatch):
 
 def test_app_base_url_trailing_slash_is_normalized(monkeypatch):
     """
-    A trailing slash on APP_BASE_URL must not corrupt the auth email links
-    built from it (issue #829). Both links are cold-entry `?overlay=` dialogs
-    opened over the app, not standalone pages.
+    A trailing slash on APP_BASE_URL must not corrupt the CSRF/CORS origins
+    derived from it (issue #829): a browser's Origin header never carries a
+    path, so an un-stripped trailing slash would silently fail to match.
     """
     loaded = load_settings(
         monkeypatch, IS_DEPLOYMENT="False", APP_BASE_URL="http://math3d.localdev:3000/"
     )
     assert loaded.APP_BASE_URL == "http://math3d.localdev:3000"
-    assert (
-        loaded.HEADLESS_FRONTEND_URLS
-        == {
-            "account_confirm_email": "http://math3d.localdev:3000/?overlay=activate&key={key}",
-            "account_reset_password_from_key": "http://math3d.localdev:3000/?overlay=reset-confirm&key={key}",  # pragma: allowlist secret
-        }
-    )
+    assert "http://math3d.localdev:3000" in loaded.CSRF_TRUSTED_ORIGINS
 
 
 def test_dev_cors_origins_cover_app_and_worktree_ports():
@@ -439,6 +478,7 @@ def test_sentry_initialized_with_no_pii_and_full_tracing(monkeypatch):
     assert kwargs["environment"] == "production"
     assert kwargs["release"] == "1.2.3"
     assert kwargs["dsn"] == "https://abc123@o1.ingest.sentry.io/42"
+    assert kwargs["before_send"] is drop_sign_in_frame_locals
 
 
 def test_isolate_environ_pins_the_suites_environment():
@@ -489,3 +529,87 @@ def test_ambient_env_does_not_reach_the_suite():
     )
     assert proc.returncode == 0, proc.stderr
     assert "DISABLE_CSRF=False" in proc.stdout
+
+
+def test_dummy_provider_is_development_only(monkeypatch):
+    """
+    The dummy provider mints a session from an unsigned payload — anyone who can
+    reach it can become any user. IS_DEPLOYMENT is the entire guard (ADR-0004,
+    "The dummy provider").
+    """
+    dev = load_settings(monkeypatch, IS_DEPLOYMENT="False")
+    assert "allauth.socialaccount.providers.dummy" in dev.INSTALLED_APPS
+
+    deployed = load_settings(monkeypatch, **DEPLOY_ENV)
+    assert "allauth.socialaccount.providers.dummy" not in deployed.INSTALLED_APPS
+
+
+def test_password_urls_are_not_registered():
+    """SOCIALACCOUNT_ONLY unregisters allauth's password endpoints
+    (allauth/headless/account/urls.py). Pin it: the SPA has no password UI, and
+    a stray reachable signup URL would let an account be created that the
+    sign-in dialog cannot then log into."""
+    from django.urls import NoReverseMatch, reverse
+
+    for name in ("headless:browser:account:login", "headless:browser:account:signup"):
+        with pytest.raises(NoReverseMatch):
+            reverse(name)
+
+
+def test_google_token_login_is_not_registered():
+    """
+    allauth.urls and google.urls mount google/login/token/, a CSRF-exempt view
+    that turns a Google ID token into a session; only login and its callback
+    are mounted.
+    """
+    from django.urls import NoReverseMatch, reverse
+
+    reverse("google_callback")
+    with pytest.raises(NoReverseMatch):
+        reverse("google_login_by_token")
+
+
+def test_google_app_reads_its_credentials_from_the_environment(monkeypatch):
+    loaded = load_settings(monkeypatch, **DEPLOY_ENV)
+    app = loaded.SOCIALACCOUNT_PROVIDERS["google"]["APP"]
+    assert app["client_id"] == DEPLOY_ENV["GOOGLE_CLIENT_ID"]
+    assert app["secret"] == DEPLOY_ENV["GOOGLE_CLIENT_SECRET"]
+
+
+def test_deployment_builds_https_redirect_uris(monkeypatch):
+    """
+    The redirect URI registered with Google is https; this keeps it from
+    resting on SECURE_PROXY_SSL_HEADER alone.
+    """
+    loaded = load_settings(monkeypatch, **DEPLOY_ENV)
+    assert loaded.ACCOUNT_DEFAULT_HTTP_PROTOCOL == "https"
+
+
+def test_provider_identities_are_never_linked_by_email(monkeypatch):
+    """
+    Email-based linking would let anyone who controls an address take over the
+    matching account. allauth resolves it at two levels: the global setting is
+    OR'd with a per-provider EMAIL_AUTHENTICATION key, and a lowercase
+    email_authentication inside APP["settings"] short-circuits both
+    (socialaccount/adapter.py:351-359). Asserting only the global would pass
+    vacuously while a provider-level key silently re-enabled it.
+    """
+    loaded = load_settings(monkeypatch, **DEPLOY_ENV)
+    assert loaded.SOCIALACCOUNT_EMAIL_AUTHENTICATION is False
+    assert loaded.SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT is False
+    google = loaded.SOCIALACCOUNT_PROVIDERS["google"]
+    assert "EMAIL_AUTHENTICATION" not in google
+    assert "email_authentication" not in google["APP"].get("settings", {})
+
+
+def test_the_pre_cutover_registration_flag_does_not_open_signup(monkeypatch):
+    """Releases before ADR-0004 read ENABLE_REGISTRATION as password signup, so
+    a separate variable can open Google signup before deploying, and a rollback
+    doesn't reopen password signup."""
+    loaded = load_settings(
+        monkeypatch, IS_DEPLOYMENT="False", ENABLE_REGISTRATION="true"
+    )
+    assert loaded.ENABLE_SIGNUP is False
+    assert load_settings(
+        monkeypatch, IS_DEPLOYMENT="False", ENABLE_SIGNUP="true"
+    ).ENABLE_SIGNUP

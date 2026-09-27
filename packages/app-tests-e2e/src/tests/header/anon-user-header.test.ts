@@ -6,8 +6,11 @@ test("Does not show username", async ({ page }) => {
   await page.goto("");
   const app = new AppPage(page);
 
-  const trigger = await app.userMenu().opener();
+  // The hamburger: an avatar would offer an account affordance to a visitor
+  // who has no account, next to the header's own "Sign in" button.
+  const trigger = app.userMenu().hamburgerOpener();
   await expect(trigger).toBeVisible();
+  await expect(app.userMenu().avatarOpener()).toHaveCount(0);
   expect(await trigger.textContent()).toBe("");
 
   await trigger.click();
@@ -21,7 +24,6 @@ test("Header and usermenu links", async ({ page }) => {
   await app.userMenu().opener().click();
   await expect(app.userMenu().items()).toHaveText([
     "Sign in",
-    "Sign up",
     "Examples",
     "Function Reference",
     "Contact",

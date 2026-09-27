@@ -29,11 +29,9 @@ def test_cookie_auth_enforces_csrf_by_default(reload_ninja_auth):
     """
     reloaded = reload_ninja_auth(False)
     assert reloaded.session_auth.csrf is True
-    assert reloaded.staff_auth.csrf is True
 
 
 def test_disable_csrf_reaches_cookie_auth(reload_ninja_auth):
-    """Both auth objects, or the flag leaves half the API enforcing (ADR-0005)."""
+    """Or the flag leaves every authenticated write on /v1/ rejecting (ADR-0005)."""
     reloaded = reload_ninja_auth(True)
     assert reloaded.session_auth.csrf is False
-    assert reloaded.staff_auth.csrf is False

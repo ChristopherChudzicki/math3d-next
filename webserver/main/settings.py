@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-import logging
+from typing import Any
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -20,15 +20,13 @@ import sentry_sdk
 from pydantic import ValidationError
 
 from main.env import EnvConfig
+from main.sentry import drop_sign_in_frame_locals
 from main.origins import (
     cors_allowed_origins,
     credentialed_cors_origins,
     csrf_trusted_origins,
     dev_cors_allowed_origins,
 )
-
-
-logger = logging.getLogger(__name__)
 
 # Every env var this module reads, with types, defaults, and the cross-variable
 # boot guards (see main/env.py). Validation errors become the Django-idiomatic
@@ -47,6 +45,7 @@ if ENV.SENTRY_DSN:
         release=ENV.APP_VERSION,
         send_default_pii=False,
         traces_sample_rate=ENV.SENTRY_TRACES_SAMPLE_RATE,
+        before_send=drop_sign_in_frame_locals,
     )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -97,6 +96,8 @@ if IS_DEPLOYMENT:
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    # allauth builds the redirect URI from the request; pin its scheme.
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
     # Set ALLOWED_HOSTS for production
     ALLOWED_HOSTS = ENV.ALLOWED_HOSTS if ENV.ALLOWED_HOSTS else ["api.math3d.org"]
 else:
@@ -108,7 +109,6 @@ else:
         else ["localhost", "127.0.0.1", "api.math3d.localdev"]
     )
 
-SITE_NAME = "Math3d"
 
 # Logging configuration
 LOGGING = {
@@ -167,18 +167,27 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.sites",  # Required by allauth
+    # allauth reads the current Site only to filter SocialApp rows (it checks
+    # SITES_ENABLED). Removing the app would rewrite applied migrations.
+    "django.contrib.sites",
     # Django 6.0 requires this app be installed to use GinIndex (see scenes.Scene).
     "django.contrib.postgres",
     "authentication",  # custom app
     "allauth",
     "allauth.account",
     "allauth.headless",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
     "corsheaders",
     ## Custom apps
     "main",
     "scenes",
 ]
+
+# The dummy provider mints a session from an unsigned JSON payload, so it must
+# never reach a deployed environment; IS_DEPLOYMENT is the whole guard.
+if not IS_DEPLOYMENT:
+    INSTALLED_APPS.append("allauth.socialaccount.providers.dummy")
 
 SITE_ID = 1
 
@@ -278,18 +287,41 @@ WSGI_APPLICATION = "main.wsgi.application"
 ##################################################
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {"email"}
-# No password2: headless mode doesn't use it (password confirmation is
-# handled client-side). See https://docs.allauth.org/en/latest/headless/faq.html
-ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*"]
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-ACCOUNT_LOGIN_BY_CODE_ENABLED = False
-# Allow revealing whether an email is registered. Acceptable tradeoff for a
-# math visualization tool: usability > preventing enumeration.
-ACCOUNT_PREVENT_ENUMERATION = False
+# Social-only: allauth unregisters every password login, signup, reset and
+# change URL (and email verification) and refuses to boot unless email
+# verification is off. What makes that safe is the provider's verified
+# assertion, which CustomSocialAccountAdapter.pre_social_login enforces —
+# auth/provider/signup stays mounted either way.
+SOCIALACCOUNT_ONLY = True
+ACCOUNT_EMAIL_VERIFICATION = "none"
+# allauth's default adds username and password fields this model lacks, which
+# manage.py check refuses.
+ACCOUNT_SIGNUP_FIELDS = ["email*"]
+ACCOUNT_EMAIL_NOTIFICATIONS = False
 ACCOUNT_ADAPTER = "authentication.adapter.CustomAccountAdapter"
-# ACCOUNT_SIGNUP_FORM_CLASS (not ACCOUNT_FORMS) is the correct setting for
-# injecting extra fields alongside allauth's built-in signup form.
-ACCOUNT_SIGNUP_FORM_CLASS = "authentication.forms.CustomSignupForm"
+SOCIALACCOUNT_ADAPTER = "authentication.adapter.CustomSocialAccountAdapter"
+
+SOCIALACCOUNT_PROVIDERS: dict[str, dict[str, Any]] = {
+    "google": {
+        # Refuses provider/token, so Google signs in by redirect only.
+        "provider_class": "authentication.providers.GoogleProvider",
+        "APP": {"client_id": ENV.GOOGLE_CLIENT_ID, "secret": ENV.GOOGLE_CLIENT_SECRET},
+        # Not the default `profile`: allauth stores the ID token's claims in
+        # SocialAccount.extra_data, and nothing here uses a name or photo.
+        "SCOPE": ["openid", "email"],
+        "OAUTH_PKCE_ENABLED": True,
+        # Always show the account chooser: otherwise a browser already signed in
+        # to Google (a shared school computer) goes straight through as that account.
+        "AUTH_PARAMS": {"prompt": "select_account"},
+    },
+}
+# Pinned rather than left to the default: off, allauth routes every login
+# through provider/signup, whose form takes any unused address.
+SOCIALACCOUNT_AUTO_SIGNUP = True
+# Never adopt an existing account just because a provider asserts its email
+# address. Both spellings matter — see main/settings_test.py.
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = False
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = False
 
 if ENV.DISABLE_ALLAUTH_RATE_LIMITS:
     if IS_DEPLOYMENT:
@@ -300,15 +332,17 @@ if ENV.DISABLE_ALLAUTH_RATE_LIMITS:
 
 # allauth headless configuration
 HEADLESS_ONLY = True
-HEADLESS_ADAPTER = "authentication.adapter.CustomHeadlessAdapter"
 HEADLESS_CLIENTS = ["browser"]
+# Registers headless:openapi_yaml, which allauth's own get_schema() reverses —
+# so dump_openapi_allauth, and the CI spec check with it, needs this on.
 HEADLESS_SERVE_SPECIFICATION = True
 # Serve the headless spec via Swagger UI (ships with allauth) to match the v1
 # API's /v1/docs; the default is Redoc (headless/spec/redoc_cdn.html).
 HEADLESS_SPECIFICATION_TEMPLATE_NAME = "headless/spec/swagger_cdn.html"
+# Where allauth sends a sign-in error it can't return to callback_url. Required
+# under HEADLESS_ONLY.
 HEADLESS_FRONTEND_URLS = {
-    "account_confirm_email": f"{APP_BASE_URL}/?overlay=activate&key={{key}}",
-    "account_reset_password_from_key": f"{APP_BASE_URL}/?overlay=reset-confirm&key={{key}}",
+    "socialaccount_login_error": f"{APP_BASE_URL}/app/sign-in-error",
 }
 
 ##################################################
@@ -325,9 +359,9 @@ DATABASES = {
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
-
+# The app signs in through Google only, but /admin/ still accepts a password,
+# and createsuperuser and changepassword are the commands that set it — so
+# these run on the one credential that authenticates anything.
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -347,25 +381,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTH_USER_MODEL = "authentication.CustomUser"
-
-MAILJET_API_KEY = ENV.MAILJET_API_KEY
-MAILJET_SECRET_KEY = ENV.MAILJET_SECRET_KEY
-
-ANYMAIL = {
-    "MAILJET_API_KEY": ENV.MAILJET_API_KEY,
-    "MAILJET_SECRET_KEY": ENV.MAILJET_SECRET_KEY,
-}
-if MAILJET_API_KEY and MAILJET_SECRET_KEY:
-    EMAIL_BACKEND = "anymail.backends.mailjet.EmailBackend"
-else:
-    logger.warning(
-        "MAILJET_API_KEY and MAILJET_SECRET_KEY settings not found. Using email console backend."
-    )
-    EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-    EMAIL_FILE_PATH = "./private/email/"
-
-DEFAULT_FROM_EMAIL = ENV.DEFAULT_FROM_EMAIL
-SERVER_EMAIL = ENV.SERVER_EMAIL
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -405,4 +420,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 INGESTION_DATABASE_URL = ENV.INGESTION_DATABASE_URL
 
 # Feature flags
-ENABLE_REGISTRATION = ENV.ENABLE_REGISTRATION
+ENABLE_SIGNUP = ENV.ENABLE_SIGNUP

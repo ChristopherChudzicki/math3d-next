@@ -2,7 +2,7 @@ import { useScene, isApiError } from "@math3d/api";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import defaultScene from "@/store/defaultScene";
 import { sceneSlice } from "@/features/sceneControls/mathItems";
 import { sceneTabTitle } from "@/features/scene/sceneTitle";
@@ -80,19 +80,29 @@ const useSceneLoader = (
   }, [error, onNotFound, addNotification, navigate]);
 
   const scene = sceneKey === undefined ? defaultScene : data;
+  const routeKey = sceneKey ?? null;
+  const held = useAppSelector(({ scene: { loaded, key } }) =>
+    loaded ? key : undefined,
+  );
 
   useEffect(() => {
+    // Load only a scene the store doesn't already hold: it may carry unsaved
+    // edits or a restored sign-in draft, and `setScene` replaces items/order/
+    // title wholesale. Any refetch whose body changed, such as the GET after a
+    // save, hands back a new `scene`.
+    if (held === routeKey) return;
     if (!scene) return;
-    const payload = {
-      key: scene.key,
-      author: scene.author ?? null,
-      items: scene.items,
-      order: scene.itemOrder,
-      title: scene.title ?? "",
-      isLegacy: scene.isLegacy ?? false,
-    };
-    dispatch(itemActions.setScene(payload));
-  }, [dispatch, scene]);
+    dispatch(
+      itemActions.setScene({
+        key: scene.key,
+        author: scene.author ?? null,
+        items: scene.items,
+        order: scene.itemOrder,
+        title: scene.title ?? "",
+        isLegacy: scene.isLegacy ?? false,
+      }),
+    );
+  }, [dispatch, scene, routeKey, held]);
 
   return { isLoading };
 };

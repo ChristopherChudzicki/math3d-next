@@ -28,8 +28,9 @@ const syncChangedItems = (scope: AppMathScope, prev: Items, next: Items) => {
  * Immer gives every edited item a new reference, so re-syncing items whose
  * reference changed covers every edit.
  *
- * Each `setScene` needs a fresh MathScope: item ids recur across scenes, and a
- * reused scope would keep the old scene's expressions and results for them.
+ * Each `setScene` needs a fresh MathScope: item ids recur
+ * across scenes, and a reused scope would keep the old scene's expressions and
+ * results for them.
  */
 const createMathScopeSync = () => {
   let scope = makeMathScope();
