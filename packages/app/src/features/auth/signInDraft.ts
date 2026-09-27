@@ -1,5 +1,6 @@
 import type { RootState } from "@/store/store";
 import { APP_VERSION } from "@/version";
+import { SIGN_IN_ERROR_PATH } from "./signInErrors";
 
 /**
  * The editor's state, carried across the sign-in redirect in `sessionStorage`
@@ -11,7 +12,8 @@ const SIGN_IN_DRAFT_MAX_AGE_MS = 60 * 60 * 1000;
 type SignInDraft = {
   // A deploy between save and restore may change the store's shape.
   version: string;
-  pathname: string;
+  // The callback_url sign-in returns to.
+  url: string;
   savedAt: number;
   state: RootState;
 };
@@ -37,59 +39,47 @@ const discard = (): void => {
 
 const saveSignInDraft = (
   state: RootState,
-  pathname: string,
+  url: string,
   now = Date.now(),
 ): void => {
-  const draft: SignInDraft = {
-    version: APP_VERSION,
-    pathname,
-    savedAt: now,
-    state,
-  };
+  const draft: SignInDraft = { version: APP_VERSION, url, savedAt: now, state };
   try {
     sessionStorage.setItem(SIGN_IN_DRAFT_KEY, JSON.stringify(draft));
   } catch {
-    // See `read`.
+    // An older draft for the same page would otherwise restore instead.
+    discard();
   }
 };
 
+/**
+ * Called once per page load, before the first render: the draft's own page
+ * restores it and every other page discards it, except the sign-in error page,
+ * which forwards to the draft's page with a full load.
+ */
 const takeSignInDraft = (
   pathname: string,
   now = Date.now(),
 ): RootState | undefined => {
+  if (pathname === SIGN_IN_ERROR_PATH) return undefined;
   const draft = read();
   if (!draft) return undefined;
+  discard();
   if (
     draft.version !== APP_VERSION ||
-    now - draft.savedAt > SIGN_IN_DRAFT_MAX_AGE_MS
+    now - draft.savedAt > SIGN_IN_DRAFT_MAX_AGE_MS ||
+    new URL(draft.url).pathname !== pathname
   ) {
-    discard();
     return undefined;
   }
-  if (draft.pathname !== pathname) return undefined;
-  discard();
   return draft.state;
 };
 
-const peekSignInDraftPathname = (): string | undefined => read()?.pathname;
-
-/**
- * A page restored from the back/forward cache still holds its live state,
- * which is newer than any draft; a later reload must not bring the draft back.
- */
-const discardSignInDraftOnPageRestore = (): (() => void) => {
-  const onPageShow = (event: PageTransitionEvent) => {
-    if (event.persisted) discard();
-  };
-  window.addEventListener("pageshow", onPageShow);
-  return () => window.removeEventListener("pageshow", onPageShow);
-};
+const peekSignInDraftUrl = (): string | undefined => read()?.url;
 
 export {
   SIGN_IN_DRAFT_KEY,
   SIGN_IN_DRAFT_MAX_AGE_MS,
-  discardSignInDraftOnPageRestore,
-  peekSignInDraftPathname,
+  peekSignInDraftUrl,
   saveSignInDraft,
   takeSignInDraft,
 };

@@ -51,7 +51,7 @@ const ProviderSignInButton: React.FC<Props> = ({
       onSubmit={() => {
         // Read at submit: any sign-in, such as one in another tab, rotates it.
         csrfInput.current!.value = getCsrfToken();
-        saveSignInDraft(store.getState(), location.pathname);
+        saveSignInDraft(store.getState(), callbackUrl(location));
       }}
     >
       <input type="hidden" name="provider" value={provider} />

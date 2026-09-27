@@ -1,10 +1,8 @@
 import { useScene, isApiError } from "@math3d/api";
 import { useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
-import { useAppDispatch } from "@/store/hooks";
-import { restoreStore } from "@/store/restoreStore";
-import { takeSignInDraft } from "@/features/auth/signInDraft";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import defaultScene from "@/store/defaultScene";
 import { sceneSlice } from "@/features/sceneControls/mathItems";
 import { sceneTabTitle } from "@/features/scene/sceneTitle";
@@ -83,44 +81,28 @@ const useSceneLoader = (
 
   const scene = sceneKey === undefined ? defaultScene : data;
   const routeKey = sceneKey ?? null;
-  const { pathname } = useLocation();
-
-  // Which scene Redux holds. `null` is the default scene's own key, so the
-  // "nothing loaded yet" sentinel has to be a value `scene.key` never takes.
-  const loaded = useRef<string | null | undefined>(undefined);
-  // The draft belongs to the page load that follows a sign-in redirect, so
-  // only the first load may restore it, never a later in-app navigation.
-  const draftChecked = useRef(false);
+  const held = useAppSelector(({ scene: { loaded, key } }) =>
+    loaded ? key : undefined,
+  );
 
   useEffect(() => {
-    // Load on navigation only. React Query hands back a fresh object for every
-    // refetch of the same scene, and `setScene` replaces items/order/title
-    // wholesale, so dispatching on identity discards unsaved edits whenever
-    // anything refetches, such as the GET that follows a save.
-    if (loaded.current === routeKey) return;
-    if (!draftChecked.current) {
-      draftChecked.current = true;
-      const draft = takeSignInDraft(pathname);
-      // A sign-in clicked before this route's scene loaded saved some other
-      // scene, or none.
-      if (draft && draft.scene.key === routeKey) {
-        loaded.current = routeKey;
-        dispatch(restoreStore(draft));
-        return;
-      }
-    }
+    // Load only a scene the store doesn't already hold: it may carry unsaved
+    // edits or a restored sign-in draft, and `setScene` replaces items/order/
+    // title wholesale. Any refetch whose body changed, such as the GET after a
+    // save, hands back a new `scene`.
+    if (held === routeKey) return;
     if (!scene) return;
-    loaded.current = routeKey;
-    const payload = {
-      key: scene.key,
-      author: scene.author ?? null,
-      items: scene.items,
-      order: scene.itemOrder,
-      title: scene.title ?? "",
-      isLegacy: scene.isLegacy ?? false,
-    };
-    dispatch(itemActions.setScene(payload));
-  }, [dispatch, scene, routeKey, pathname]);
+    dispatch(
+      itemActions.setScene({
+        key: scene.key,
+        author: scene.author ?? null,
+        items: scene.items,
+        order: scene.itemOrder,
+        title: scene.title ?? "",
+        isLegacy: scene.isLegacy ?? false,
+      }),
+    );
+  }, [dispatch, scene, routeKey, held]);
 
   return { isLoading };
 };

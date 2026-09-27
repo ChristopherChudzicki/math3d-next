@@ -10,6 +10,11 @@ type AppMathScope = MathScope<AppParseable>;
 
 interface SceneState {
   key: string | null;
+  /**
+   * Whether `key` names a scene loaded into the editor. The default scene's
+   * key is `null`, as is the initial state's, so `key` alone can't say.
+   */
+  loaded: boolean;
   dirty: boolean;
   author: number | null;
   items: {

@@ -74,7 +74,7 @@ sequenceDiagram
     participant G as Google
 
     U->>B: Sign in with Google
-    Note over B: save draft (store + pathname) to sessionStorage
+    Note over B: save draft (store + callback_url) to sessionStorage
     B->>A: POST /_allauth/browser/v1/auth/provider/redirect<br/>provider, process=login, callback_url, csrfmiddlewaretoken
     Note over A: stash state in the session:<br/>state id, PKCE verifier, callback_url
     A-->>B: 302 to Google's authorize URL<br/>client_id, redirect_uri, scope, state,<br/>code_challenge, prompt=select_account<br/>Set-Cookie: sessionid (anonymous, holds the state)
@@ -88,7 +88,7 @@ sequenceDiagram
     G-->>A: access_token, id_token
     Note over A: decode id_token (TLS, no signature check),<br/>adapter checks, find or create account, log in
     A-->>B: 302 to callback_url (+ ?error=code on failure)<br/>Set-Cookie: sessionid (rotated on login)
-    Note over B: fresh page load: restore draft on its pathname,<br/>read session via users/me
+    Note over B: page load: restore the draft before the first render,<br/>read session via users/me
 ```
 
 Why redirect rather than Google Identity Services (GIS), whose popup hands JavaScript an ID token to post to `provider/token`:
@@ -116,11 +116,11 @@ The cost is that leaving the page discards the editor's in-memory state — cove
 
 An anonymous user can build a scene and then sign in to keep it, so the redirect often lands on unsaved work. The SPA carries the editor across it in `sessionStorage`:
 
-- **What:** a draft holding the whole Redux store and the pathname it was saved from, written on every sign-in. The store holds only plain data, including the scene's unsaved flag, so restoring it puts the editor back as it was.
-- **Restore:** the first scene load after the app starts restores the draft if it was written within the hour, by the same app version, on this pathname, while the store held this route's scene; the draft is then deleted. A draft from another version or older than an hour is deleted unrestored; one from another pathname is left alone. Requiring the route's scene covers a sign-in clicked before that scene had loaded, whose draft holds some other store. Matching the path rather than carrying a key in `callback_url` also covers two returns that bypass `callback_url`: Back from Google when the browser reloads the page instead of restoring it from its back/forward cache, and a failed sign-in that lands on the error page, which forwards to the draft's pathname.
-- **Back/forward cache:** a page restored from it (`pageshow` with `persisted`) still has its live state, at least as new as the draft, so the draft is deleted unrestored. Otherwise a later reload in that tab would bring back the older draft. When the cache works, Back needs no draft at all.
+- **What:** a draft holding the whole Redux store and the `callback_url` it was saved with, written on every sign-in. The store holds only plain data, including the scene's unsaved flag and which scene it holds, so restoring it puts the editor back as it was.
+- **Restore:** every page load takes the draft before the first render. On the draft's own pathname, written within the hour by the same app version, it becomes the store's initial state; anywhere else it is deleted unrestored. The scene loader then fetches only a scene the store doesn't already hold, so a restored draft wins over the fetched copy, and a draft saved before its page's scene had loaded is replaced by that scene. Matching the pathname rather than carrying a key in `callback_url` also covers Back from Google when the browser reloads the page instead of restoring it from its back/forward cache.
+- **The error page:** allauth sends an error it can't attach to `callback_url` to `/app/sign-in-error`. That page leaves the draft alone and loads the draft's `callback_url` with the error added, as if allauth had returned there, so the draft restores the usual way.
+- **Back/forward cache:** a page restored from it keeps its live state and takes no draft. The draft stays, so Back then Forward through Google still restores it; a later reload of the page restores the pre-sign-in snapshot, which is closer to the lost live state than the saved scene.
 - **Where it returns:** `callback_url` is the current URL without the sign-in overlay.
-- **Precedence:** a restored draft wins over the scene fetched for the URL.
 - **Why `sessionStorage`:** it is per tab, survives the round trip within that tab, and is cleared when the tab closes. The one-hour limit keeps a draft from resurfacing long after a sign-in was abandoned.
 - **Errors:** `?error=` is shown only as a known code mapped to fixed text, since anyone can craft that URL. A failed code exchange is logged on the backend with its cause, as text rather than a traceback, since Sentry would attach the frames' client secret and tokens; the SPA only ever sees the code.
 

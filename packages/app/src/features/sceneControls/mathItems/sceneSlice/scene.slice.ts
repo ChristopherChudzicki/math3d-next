@@ -13,6 +13,7 @@ import { isDescendantOf, MAIN_FOLDER, SETTINGS_FOLDER } from "./util";
 
 const getInitialState = (): SceneState => ({
   key: null,
+  loaded: false,
   dirty: false,
   author: null,
   items: {},
@@ -101,6 +102,7 @@ const slice = createSlice({
       }
       state.author = author;
       state.key = key;
+      state.loaded = true;
       state.isLegacy = isLegacy;
 
       invariant(state.order[MAIN_FOLDER], "Main folder should exist.");

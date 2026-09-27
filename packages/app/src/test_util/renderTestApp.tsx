@@ -1,8 +1,9 @@
 import { render, waitFor } from "@testing-library/react";
 import { createTheme } from "@mui/material/styles";
 import React from "react";
-import { createMemoryRouter } from "react-router";
+import { createMemoryRouter, parsePath } from "react-router";
 import { getStore } from "@/store/store";
+import { takeSignInDraft } from "@/features/auth/signInDraft";
 
 import { InitialEntry } from "history";
 import { QueryClient } from "@tanstack/react-query";
@@ -61,7 +62,10 @@ const renderTestApp = (
   { isAuthenticated = false } = {},
 ) => {
   const initialEntries: InitialEntry[] = [initialRoute];
-  const store = getStore();
+  // As main.tsx boots: a draft saved before a sign-in redirect is restored here.
+  const { pathname = "/" } =
+    typeof initialRoute === "string" ? parsePath(initialRoute) : initialRoute;
+  const store = getStore({ preloadedState: takeSignInDraft(pathname) });
   // Disable retries so error-state behavior (e.g. a 404 surfacing) settles
   // immediately; the production client retries some statuses with backoff, which
   // would otherwise stall tests well past their timeouts.

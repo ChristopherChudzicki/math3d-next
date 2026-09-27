@@ -1,24 +1,21 @@
 import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router";
-import { peekSignInDraftPathname } from "@/features/auth/signInDraft";
+import { useSearchParams } from "react-router";
+import { peekSignInDraftUrl } from "@/features/auth/signInDraft";
+import { replaceLocation } from "@/util/replaceLocation";
 
 /**
  * allauth's `socialaccount_login_error`: an error it couldn't return to
- * callback_url. Forwards to the page the draft came from, which restores it.
+ * callback_url. Loads the draft's callback_url with the error instead, as if
+ * allauth had returned there; that load restores the draft.
  */
 const SignInErrorPage: React.FC = () => {
   const [search] = useSearchParams();
-  const navigate = useNavigate();
   useEffect(() => {
-    const next = new URLSearchParams({
-      error: search.get("error") ?? "unknown",
-      error_process: "login",
-    });
-    navigate(
-      { pathname: peekSignInDraftPathname() ?? "/", search: next.toString() },
-      { replace: true },
-    );
-  }, [search, navigate]);
+    const next = new URL(peekSignInDraftUrl() ?? "/", window.location.origin);
+    next.searchParams.set("error", search.get("error") ?? "unknown");
+    next.searchParams.set("error_process", "login");
+    replaceLocation(next.href);
+  }, [search]);
   return null;
 };
 

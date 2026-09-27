@@ -1,11 +1,9 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import type { UnknownAction } from "@reduxjs/toolkit";
 import type { SceneState } from "@/features/sceneControls/mathItems";
 import {
   sceneSlice,
   createMathScopeSync,
 } from "@/features/sceneControls/mathItems";
-import { restoreStore } from "./restoreStore";
 
 type RootState = {
   scene: SceneState;
@@ -15,12 +13,9 @@ const getInitialState = (): RootState => ({
   scene: sceneSlice.getInitialState(),
 });
 
-const combinedReducer = combineReducers({
+const rootReducer = combineReducers({
   [sceneSlice.name]: sceneSlice.reducer,
 });
-
-const rootReducer = (state: RootState | undefined, action: UnknownAction) =>
-  restoreStore.match(action) ? action.payload : combinedReducer(state, action);
 
 type ConfigureStoreOptions = {
   preloadedState?: RootState;

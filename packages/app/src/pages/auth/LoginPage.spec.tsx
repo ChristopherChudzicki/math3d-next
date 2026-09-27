@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, expect, test } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { delay, http } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { seedDb, urls } from "@math3d/mock-api";
@@ -8,6 +8,9 @@ import {
   SIGN_IN_DRAFT_KEY,
   saveSignInDraft,
 } from "@/features/auth/signInDraft";
+import { replaceLocation } from "@/util/replaceLocation";
+
+vi.mock("@/util/replaceLocation");
 
 // jsdom can't navigate; stop the native submission after React's handler ran.
 const stopNavigation = (event: Event) => event.preventDefault();
@@ -50,8 +53,8 @@ test("Submitting saves a draft and sends the CSRF token current at submit", asyn
     screen.getByRole("form", { name: "Sign in with Google" }),
   ).toHaveFormValues({ csrfmiddlewaretoken: "token-at-submit" });
   expect(
-    JSON.parse(sessionStorage.getItem(SIGN_IN_DRAFT_KEY) ?? "{}").pathname,
-  ).toBe("/");
+    JSON.parse(sessionStorage.getItem(SIGN_IN_DRAFT_KEY) ?? "{}").url,
+  ).toBe(`${window.location.origin}/`);
 });
 
 test("Sign-in waits for the session check that seeds the CSRF cookie", async () => {
@@ -102,27 +105,30 @@ test("An unrecognized error is never echoed", async () => {
   );
 });
 
-test("The sign-in error page returns to the draft's page with its error", async () => {
-  const scene = seedDb.withSceneFromItems([]);
-  saveSignInDraft(getStore().getState(), `/${scene.key}`);
-
-  const { location } = renderTestApp(
-    "/app/sign-in-error?error=signup_closed&error_process=login",
+test("The sign-in error page loads the draft's page, query kept, with its error", async () => {
+  saveSignInDraft(
+    getStore().getState(),
+    `${window.location.origin}/abc?controls=0`,
   );
 
-  const dialog = await screen.findByRole("dialog", { name: "Sign in" });
-  expect(dialog).toHaveTextContent(/sign-ups are closed/i);
-  expect(location.current.pathname).toBe(`/${scene.key}`);
+  renderTestApp("/app/sign-in-error?error=signup_closed&error_process=login");
+
+  // A full load, so the draft restores the way any return from sign-in does.
+  await waitFor(() =>
+    expect(replaceLocation).toHaveBeenCalledWith(
+      `${window.location.origin}/abc?controls=0&error=signup_closed&error_process=login`,
+    ),
+  );
 });
 
 test("The sign-in error page returns home when no draft names a page", async () => {
-  const { location } = renderTestApp(
-    "/app/sign-in-error?error=signup_closed&error_process=login",
-  );
+  renderTestApp("/app/sign-in-error?error=signup_closed&error_process=login");
 
-  const dialog = await screen.findByRole("dialog", { name: "Sign in" });
-  expect(dialog).toHaveTextContent(/sign-ups are closed/i);
-  expect(location.current.pathname).toBe("/");
+  await waitFor(() =>
+    expect(replaceLocation).toHaveBeenCalledWith(
+      `${window.location.origin}/?error=signup_closed&error_process=login`,
+    ),
+  );
 });
 
 test("If authenticated already, closes the overlay", async () => {
