@@ -11,7 +11,7 @@ def drop_sign_in_frame_locals(event, hint):
     Keyed on the transaction, which DjangoIntegration names after the matched
     URL route by default; `event["request"]` is filled only on the WSGI path.
     """
-    if event.get("transaction", "").startswith(SIGN_IN_ROUTE_PREFIX):
+    if (event.get("transaction") or "").startswith(SIGN_IN_ROUTE_PREFIX):
         for exception in event.get("exception", {}).get("values", []):
             for frame in exception.get("stacktrace", {}).get("frames", []):
                 frame.pop("vars", None)

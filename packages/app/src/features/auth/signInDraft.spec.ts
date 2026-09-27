@@ -3,6 +3,7 @@ import { getStore } from "@/store/store";
 import {
   SIGN_IN_DRAFT_KEY,
   SIGN_IN_DRAFT_MAX_AGE_MS,
+  discardSignInDraftOnPageRestore,
   peekSignInDraftUrl,
   saveSignInDraft,
   takeSignInDraft,
@@ -56,6 +57,34 @@ test("a draft written by another app version is discarded", () => {
 
   expect(takeSignInDraft("/abc", 2000)).toBeUndefined();
   expect(sessionStorage.getItem(SIGN_IN_DRAFT_KEY)).toBeNull();
+});
+
+test("a draft without a usable url is discarded", () => {
+  saveSignInDraft(state(), url, 1000);
+  const stored = JSON.parse(sessionStorage.getItem(SIGN_IN_DRAFT_KEY) ?? "{}");
+  sessionStorage.setItem(
+    SIGN_IN_DRAFT_KEY,
+    JSON.stringify({ ...stored, url: undefined }),
+  );
+
+  expect(takeSignInDraft("/abc", 2000)).toBeUndefined();
+  expect(sessionStorage.getItem(SIGN_IN_DRAFT_KEY)).toBeNull();
+});
+
+test("only a page restored from the back/forward cache discards the draft", () => {
+  const uninstall = discardSignInDraftOnPageRestore();
+  saveSignInDraft(state(), url);
+
+  window.dispatchEvent(
+    new PageTransitionEvent("pageshow", { persisted: false }),
+  );
+  expect(peekSignInDraftUrl()).toBe(url);
+
+  window.dispatchEvent(
+    new PageTransitionEvent("pageshow", { persisted: true }),
+  );
+  expect(peekSignInDraftUrl()).toBeUndefined();
+  uninstall();
 });
 
 test("a failed write leaves no older draft to restore", () => {

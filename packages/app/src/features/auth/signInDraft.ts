@@ -51,6 +51,15 @@ const saveSignInDraft = (
   }
 };
 
+// Drafts come from storage, so the url may be missing or malformed.
+const pathnameOf = (url: string): string | undefined => {
+  try {
+    return new URL(url).pathname;
+  } catch {
+    return undefined;
+  }
+};
+
 /**
  * Called once per page load, before the first render: the draft's own page
  * restores it and every other page discards it, except the sign-in error page,
@@ -67,7 +76,7 @@ const takeSignInDraft = (
   if (
     draft.version !== APP_VERSION ||
     now - draft.savedAt > SIGN_IN_DRAFT_MAX_AGE_MS ||
-    new URL(draft.url).pathname !== pathname
+    pathnameOf(draft.url) !== pathname
   ) {
     return undefined;
   }
@@ -76,9 +85,22 @@ const takeSignInDraft = (
 
 const peekSignInDraftUrl = (): string | undefined => read()?.url;
 
+/**
+ * A page restored from the back/forward cache still holds its live state,
+ * which is newer than any draft; a later load must not bring the draft back.
+ */
+const discardSignInDraftOnPageRestore = (): (() => void) => {
+  const onPageShow = (event: PageTransitionEvent) => {
+    if (event.persisted) discard();
+  };
+  window.addEventListener("pageshow", onPageShow);
+  return () => window.removeEventListener("pageshow", onPageShow);
+};
+
 export {
   SIGN_IN_DRAFT_KEY,
   SIGN_IN_DRAFT_MAX_AGE_MS,
+  discardSignInDraftOnPageRestore,
   peekSignInDraftUrl,
   saveSignInDraft,
   takeSignInDraft,

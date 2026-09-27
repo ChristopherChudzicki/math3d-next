@@ -14,12 +14,17 @@ import AppRoutes from "./AppProviders";
 import { getStore } from "./store/store";
 import routes from "./routes";
 import { DISPLAY_AUTH_FLOWS } from "./features/auth";
-import { takeSignInDraft } from "./features/auth/signInDraft";
+import {
+  discardSignInDraftOnPageRestore,
+  takeSignInDraft,
+} from "./features/auth/signInDraft";
 
 // @ts-expect-error Allow accessing math on window in dev for debugging
 window.math = math;
 // @ts-expect-error Expose feature flags for E2E test validation
 window.__DISPLAY_AUTH_FLOWS__ = DISPLAY_AUTH_FLOWS;
+
+discardSignInDraftOnPageRestore();
 
 const prepare = async () => {
   if (import.meta.env.DEV && import.meta.env.VITE_USE_MSW === "true") {
