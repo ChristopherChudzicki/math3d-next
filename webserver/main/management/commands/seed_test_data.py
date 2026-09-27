@@ -52,9 +52,9 @@ def create_test_user(email: str, *, uid: str):
     )
     # E2E signs these users in through the dummy provider, which matches on
     # (provider, uid); without a row here the token login is refused as
-    # email_taken.
+    # email_taken. Keyed on the user so a changed uid replaces the old one.
     SocialAccount.objects.update_or_create(
-        provider="dummy", uid=uid, defaults={"user": user}
+        provider="dummy", user=user, defaults={"uid": uid}
     )
     return user
 

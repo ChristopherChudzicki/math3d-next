@@ -1,7 +1,10 @@
 import type { Locator, Page } from "@playwright/test";
 import type { UserIdentity } from "@/utils/api/auth";
 
-/** allauth's dummy provider form, served by the API at dummy/authenticate/. */
+/**
+ * allauth's dummy provider form, served by the API at dummy/authenticate/ with
+ * our template (webserver/authentication/templates/dummy/).
+ */
 class DummyProviderPage {
   private page: Page;
 
@@ -9,17 +12,16 @@ class DummyProviderPage {
     this.page = page;
   }
 
-  // Django's `as_p` suffixes each label with ":"; exact matching keeps
-  // "Email:" from also matching "Email verified:".
+  // Exact matching keeps "Email" from also matching "Email verified".
   private field(label: string): Locator {
-    return this.page.getByLabel(`${label}:`, { exact: true });
+    return this.page.getByLabel(label, { exact: true });
   }
 
   async signIn(identity: UserIdentity): Promise<void> {
     await this.field("Account ID").fill(identity.uid);
     await this.field("Email").fill(identity.email);
     await this.field("Email verified").check();
-    await this.page.getByRole("button", { name: "Login" }).click();
+    await this.page.getByRole("button", { name: "Sign in" }).click();
   }
 
   async cancel(): Promise<void> {

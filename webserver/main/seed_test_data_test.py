@@ -29,6 +29,16 @@ def test_seeding_twice_leaves_one_identity():
 
 
 @pytest.mark.django_db
+def test_a_new_uid_replaces_the_seeded_identity():
+    create_test_user(email="seeded@example.com", uid="4242")
+    user = create_test_user(email="seeded@example.com", uid="4343")
+
+    assert list(SocialAccount.objects.filter(user=user).values_list("uid")) == [
+        ("4343",)
+    ]
+
+
+@pytest.mark.django_db
 def test_missing_uid_raises_instead_of_colliding():
     """An empty uid would otherwise re-point every seeded user's SocialAccount
     to the same (provider, uid) row; refuse to seed instead."""

@@ -4,3 +4,5 @@ packages/app/public/mockServiceWorker.js
 openapi.v1.yaml
 openapi.allauth.yaml
 webserver/.venv/
+# Prettier splits Django template tags across lines, which Django cannot parse.
+webserver/**/templates/

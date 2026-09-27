@@ -38,11 +38,11 @@ After this, access the app at:
 ### Signing in during development
 
 The sign-in dialog's "Sign in as dev user" (`VITE_ENABLE_DUMMY_AUTH`) opens
-allauth's `dummy` provider form. Enter an integer Account ID and an Email, and
-tick Email verified, or the sign-in is refused as an unverified address.
-`seed_test_data` creates one such user: ID `2`,
-`test-user-static@math3d-local.org`. A new ID with an email another account
-already uses is refused as `email_taken`.
+allauth's `dummy` provider form, prefilled with the user `seed_test_data`
+creates; submit it to sign in as that user. For another user, enter a new
+integer Account ID and an email no other account uses (a taken one is refused
+as `email_taken`), and leave Email verified ticked, or the sign-in is refused as
+an unverified address.
 
 ### Testing Google sign-in locally
 
