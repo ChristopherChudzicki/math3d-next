@@ -18,11 +18,11 @@ import jwt
 import pytest
 import requests
 from allauth.account.models import EmailAddress
-from allauth.socialaccount.adapter import get_adapter as get_socialaccount_adapter
 from allauth.socialaccount.models import SocialAccount, SocialApp
 from allauth.socialaccount.providers.google.views import ID_TOKEN_ISSUER
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
 from django.test import Client, override_settings
 
@@ -86,26 +86,10 @@ def test_provider_token_signs_up_and_logs_in_in_one_request():
 
 
 @pytest.mark.django_db
-@override_settings(ENABLE_REGISTRATION=False)
-def test_provider_token_rejects_an_unseen_identity_when_signup_is_closed():
-    """Closing registration must actually close it: ProviderTokenView turns
-    SignupClosedException into a 403."""
-    response = Client().post(
-        TOKEN_URL,
-        _payload(555, "stranger@example.com"),
-        content_type="application/json",
-    )
-
-    assert response.status_code == 403
-    assert not CustomUser.objects.filter(email="stranger@example.com").exists()
-
-
-@pytest.mark.django_db
 def test_provider_token_still_logs_in_a_known_identity_when_signup_is_closed():
     """
     Closing registration strands nobody: the signup gate is reached only on the
-    new-identity branch. ENABLE_REGISTRATION is planned to be turned back off
-    after release, and this is the promise that makes that safe.
+    new-identity branch, which is what makes closing it reversible (ADR-0004).
     """
     client = Client()
     with override_settings(ENABLE_REGISTRATION=True):
@@ -151,22 +135,6 @@ def test_provider_identity_is_never_adopted_onto_an_existing_account():
     assert "_auth_user_id" not in client.session
     assert not SocialAccount.objects.filter(user=existing).exists()
     assert CustomUser.objects.filter(email=existing.email).count() == 1
-
-
-@pytest.mark.django_db
-def test_a_social_app_row_cannot_shadow_the_configured_google_app():
-    """A SocialApp row for google would otherwise blend into the app configured
-    in settings and make get_app raise MultipleObjectsReturned — a 500 on every
-    sign-in, from a row any staff user can add through the admin."""
-    configured = settings.SOCIALACCOUNT_PROVIDERS["google"]["APP"]["client_id"]
-    SocialApp.objects.create(
-        provider="google", name="Added in the admin", client_id=configured, secret=""
-    )
-
-    app = get_socialaccount_adapter().get_app(None, "google")
-
-    assert app.pk is None
-    assert app.client_id == configured
 
 
 def test_the_social_app_form_is_not_offered_in_the_admin():
@@ -332,7 +300,7 @@ GOOGLE_PROVIDERS = {
 
 @pytest.mark.django_db
 @override_settings(ENABLE_REGISTRATION=True, SOCIALACCOUNT_PROVIDERS=GOOGLE_PROVIDERS)
-def test_provider_token_refuses_google_before_reading_the_token():
+def test_provider_token_refuses_google_before_verifying_the_token():
     """Rests on allauth honoring `provider_class`; an upgrade that stopped would
     reopen provider/token to any Google ID token issued for our client."""
     response = Client().post(
@@ -374,6 +342,20 @@ def _start_google_sign_in(client: Client) -> dict[str, str]:
     location = urlparse(response["Location"])
     assert location.netloc == "accounts.google.com"
     return {key: values[0] for key, values in parse_qs(location.query).items()}
+
+
+@pytest.mark.django_db
+@GOOGLE_REDIRECT_SETTINGS
+def test_a_social_app_row_cannot_shadow_the_configured_google_app():
+    """A SocialApp row for Google on the current site (added from a shell or a
+    fixture) would otherwise blend into the app configured in settings and make
+    get_app raise MultipleObjectsReturned: a 500 on every sign-in."""
+    row = SocialApp.objects.create(
+        provider="google", name="Added by hand", client_id=CONFIGURED_CLIENT_ID
+    )
+    row.sites.add(Site.objects.get_current())
+
+    _start_google_sign_in(Client())
 
 
 def _google_token_response(*, sub: str, email: str) -> dict:

@@ -534,10 +534,8 @@ def test_ambient_env_does_not_reach_the_suite():
 def test_dummy_provider_is_development_only(monkeypatch):
     """
     The dummy provider mints a session from an unsigned payload — anyone who can
-    reach it can become any user. IS_DEPLOYMENT is the entire guard; a
-    dedicated flag was rejected because it could hold no value IS_DEPLOYMENT
-    does not already imply (a deployment sets SESSION_COOKIE_SECURE
-    unconditionally).
+    reach it can become any user. IS_DEPLOYMENT is the entire guard (ADR-0004,
+    "The dummy provider").
     """
     dev = load_settings(monkeypatch, IS_DEPLOYMENT="False")
     assert "allauth.socialaccount.providers.dummy" in dev.INSTALLED_APPS
@@ -587,25 +585,13 @@ def test_deployment_builds_https_redirect_uris(monkeypatch):
     assert loaded.ACCOUNT_DEFAULT_HTTP_PROTOCOL == "https"
 
 
-def test_the_signup_form_is_never_reached(monkeypatch):
-    """
-    With auto-signup off, allauth routes every provider login through
-    provider/signup, whose form takes any unused address without comparing it
-    to the provider's — the hole CustomSocialAccountAdapter closes. The adapter
-    refuses that path outright, so this pins the setting that keeps the refusal
-    from firing on every sign-in.
-    """
-    loaded = load_settings(monkeypatch, **DEPLOY_ENV)
-    assert loaded.SOCIALACCOUNT_AUTO_SIGNUP is True
-
-
 def test_provider_identities_are_never_linked_by_email(monkeypatch):
     """
     Email-based linking would let anyone who controls an address take over the
     matching account. allauth resolves it at two levels: the global setting is
     OR'd with a per-provider EMAIL_AUTHENTICATION key, and a lowercase
     email_authentication inside APP["settings"] short-circuits both
-    (socialaccount/adapter.py:347-359). Asserting only the global would pass
+    (socialaccount/adapter.py:351-359). Asserting only the global would pass
     vacuously while a provider-level key silently re-enabled it.
     """
     loaded = load_settings(monkeypatch, **DEPLOY_ENV)

@@ -51,7 +51,8 @@ def create_test_user(email: str, *, uid: str):
         defaults={"verified": True, "primary": True},
     )
     # E2E signs these users in through the dummy provider, which matches on
-    # (provider, uid); without a row here the token login 401s.
+    # (provider, uid); without a row here the token login is refused as
+    # email_taken.
     SocialAccount.objects.update_or_create(
         provider="dummy", uid=uid, defaults={"user": user}
     )

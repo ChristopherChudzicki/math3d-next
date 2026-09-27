@@ -2,8 +2,8 @@
 Sets the django.contrib.sites Site name to "Math3d.org". The value is inert on
 this deployment: allauth surfaces `Site.name` only when rendering mail
 (`account/adapter.py`'s `format_email_subject`) or its own HTML pages, and this
-deployment sends no mail and includes only `allauth.headless.urls`. (settings'
-own SITE_NAME is a separate, unrelated value.)
+deployment sends no mail and serves allauth's HTML only for the dev-only dummy
+provider.
 
 We create the row when missing because on a fresh database the default Site is
 created by a post_migrate signal that runs *after* migrations and only creates

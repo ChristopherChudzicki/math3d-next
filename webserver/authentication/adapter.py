@@ -27,8 +27,8 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     def list_apps(self, request, provider=None, client_id=None):
         """Serve provider apps from settings only.
 
-        A SocialApp row — which allauth lets any staff user add through the
-        admin — makes get_app raise MultipleObjectsReturned and 500s every
+        A SocialApp row for a provider on the current site (added from a shell
+        or a fixture) makes get_app raise MultipleObjectsReturned and 500s every
         sign-in. Settings-backed apps are unsaved, so `pk is None` selects them.
         """
         apps = super().list_apps(request, provider=provider, client_id=client_id)
@@ -47,7 +47,9 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             # provider/redirect passes the raw POSTed name (or None) when it
             # rejects its input; the callback passes a Provider.
             name = getattr(provider, "id", provider)
-            # Rejected input is anyone's to send; only a failed exchange is ours.
+            # Rejected redirect input is anyone's to send. A failed exchange is
+            # an ERROR so a wrong client secret alerts, though a junk `code` sent
+            # to the callback fails one too.
             level = (
                 logging.WARNING
                 if isinstance(exception, ValidationError)

@@ -109,7 +109,6 @@ else:
         else ["localhost", "127.0.0.1", "api.math3d.localdev"]
     )
 
-SITE_NAME = "Math3d"
 
 # Logging configuration
 LOGGING = {
@@ -168,8 +167,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # No runtime reader: allauth guards every Site use behind its own derived
-    # SITES_ENABLED. Removal is what costs — it rewrites applied migrations.
+    # allauth reads the current Site only to filter SocialApp rows (it checks
+    # SITES_ENABLED). Removing the app would rewrite applied migrations.
     "django.contrib.sites",
     # Django 6.0 requires this app be installed to use GinIndex (see scenes.Scene).
     "django.contrib.postgres",
@@ -288,8 +287,8 @@ WSGI_APPLICATION = "main.wsgi.application"
 ##################################################
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {"email"}
-# Social-only: allauth unregisters every password URL (login, signup, password
-# reset, email verification, password change) and refuses to boot unless email
+# Social-only: allauth unregisters every password login, signup, reset and
+# change URL (and email verification) and refuses to boot unless email
 # verification is off. What makes that safe is the provider's verified
 # assertion, which CustomSocialAccountAdapter.pre_social_login enforces —
 # auth/provider/signup stays mounted either way.

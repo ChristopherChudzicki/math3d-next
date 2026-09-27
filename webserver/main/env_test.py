@@ -36,9 +36,12 @@ def test_sentry_dsn_defaults_empty():
     assert _base().SENTRY_DSN == ""
 
 
-def test_sentry_dsn_rejects_a_malformed_dsn():
+def test_sentry_dsn_rejects_a_malformed_dsn_without_echoing_it():
     # sentry_sdk.init() raises BadDsn at settings-import time, which would be an
     # unhandled gunicorn boot failure; this validator turns it into the same
-    # ImproperlyConfigured path as every other bad config value.
-    with pytest.raises(ValidationError):
-        _base(SENTRY_DSN="not-a-dsn")
+    # ImproperlyConfigured path as every other bad config value. The message
+    # lands in the release log, and a mis-pasted value may be another secret.
+    pasted = "https://pasted-secret@example.org"
+    with pytest.raises(ValidationError) as exc_info:
+        _base(SENTRY_DSN=pasted)
+    assert "pasted-secret" not in str(exc_info.value)

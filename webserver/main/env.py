@@ -17,15 +17,17 @@ from sentry_sdk.utils import BadDsn, Dsn
 
 
 class EnvConfig(BaseSettings):
-    # A refused boot's message lands in the release log; keep values out of it.
+    # Otherwise a model validator's error echoes the whole environment, secrets
+    # included, into the release log.
     model_config = SettingsConfigDict(
         case_sensitive=True, extra="forbid", hide_input_in_errors=True
     )
 
     SECRET_KEY: str = ""
     # The SPA origin, e.g. https://next.math3d.org. Validated to a bare origin
-    # (and trailing-slash-normalized) because it is used verbatim as an origin
-    # (CORS/CSRF trust), where a browser's Origin header never carries a path.
+    # (and trailing-slash-normalized) because paths are appended to it
+    # (HEADLESS_FRONTEND_URLS) and it is used verbatim as an origin (CORS/CSRF
+    # trust), where a browser's Origin header never carries a path.
     APP_BASE_URL: str = ""
     # Bare origin of the screenshots render Worker, e.g.
     # https://math3d-screenshots.<sub>.workers.dev. The reservation nudge POSTs
@@ -107,7 +109,8 @@ class EnvConfig(BaseSettings):
         try:
             Dsn(value)
         except BadDsn as exc:
-            raise ValueError(f"{value!r} is not a valid Sentry DSN: {exc}") from exc
+            # Neither the value nor BadDsn's message, which quotes its parts.
+            raise ValueError("SENTRY_DSN is not a valid Sentry DSN") from exc
         return value
 
     @model_validator(mode="after")
