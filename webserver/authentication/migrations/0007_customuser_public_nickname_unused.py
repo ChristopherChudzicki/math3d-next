@@ -9,17 +9,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # `blank`/`default` are Python-level, so this emits no forward DDL. It
-        # exists for the reverse: re-adding a NOT NULL column with no default
-        # fails on a table with rows, so `migrate authentication 0006` would
-        # abort without it.
+        # `blank`/`default` are Python-level, so this emits no DDL: the column
+        # stays for releases before ADR-0004, which a rollback runs.
         migrations.AlterField(
             model_name="customuser",
             name="public_nickname",
             field=models.CharField(max_length=64, blank=True, default=""),
-        ),
-        migrations.RemoveField(
-            model_name="customuser",
-            name="public_nickname",
         ),
     ]

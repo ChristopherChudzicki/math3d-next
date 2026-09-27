@@ -7,6 +7,9 @@ from authentication.managers import CustomUserManager
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+    # Unused. Kept for one release so rolled-back code finds its column
+    # (ADR-0004, "Rollout").
+    public_nickname = models.CharField(max_length=64, blank=True, default="")
     email = models.EmailField(gettext_lazy("email address"), unique=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
