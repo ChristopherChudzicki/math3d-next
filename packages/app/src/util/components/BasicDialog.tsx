@@ -48,6 +48,8 @@ type BasicDialogProps = {
    */
   showFooter?: boolean;
   maxWidth?: DialogProps["maxWidth"];
+  /** Disables the close button, Escape, and backdrop clicks. */
+  closeDisabled?: boolean;
 };
 
 /**
@@ -74,6 +76,7 @@ const BasicDialog: React.FC<BasicDialogProps> = ({
   showFooter = true,
   TransitionProps,
   maxWidth,
+  closeDisabled = false,
 }) => {
   const [confirming, setConfirming] = useState(false);
   const handleConfirm = useCallback(async () => {
@@ -91,13 +94,17 @@ const BasicDialog: React.FC<BasicDialogProps> = ({
       className={className}
       fullWidth={fullWidth}
       open={open}
-      onClose={onClose}
+      onClose={closeDisabled ? undefined : onClose}
       TransitionProps={TransitionProps}
       maxWidth={maxWidth}
       sx={{}}
     >
       <div style={topRightStyle}>
-        <IconButton onClick={onClose} aria-label="Close">
+        <IconButton
+          onClick={onClose}
+          aria-label="Close"
+          disabled={closeDisabled}
+        >
           <Close />
         </IconButton>
       </div>

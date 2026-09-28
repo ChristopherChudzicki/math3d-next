@@ -1,11 +1,42 @@
 import React, { useState } from "react";
-import Button from "@mui/material/Button";
-import FormGroup from "@mui/material/FormGroup";
 import TextField from "@mui/material/TextField";
 import BasicDialog from "@/util/components/BasicDialog";
-import u from "@/util/styles/utils.module.css";
 import copyText from "./copyText";
 import styles from "./LinkDialog.module.css";
+
+const COPY_MESSAGES = {
+  copied: "Copied!",
+  failed: "Couldn't copy. Select the link and copy it.",
+};
+
+/** Copies `url` and describes the result for {@link LinkField}. */
+const useLinkCopy = (url: string) => {
+  const [result, setResult] = useState<keyof typeof COPY_MESSAGES>();
+  const copy = async () => {
+    setResult((await copyText(url)) ? "copied" : "failed");
+  };
+  return { copy, message: result ? COPY_MESSAGES[result] : " " };
+};
+
+type LinkFieldProps = { url: string; message: string };
+
+/** The read-only link, with the latest copy result announced below it. */
+const LinkField: React.FC<LinkFieldProps> = ({ url, message }) => (
+  <TextField
+    label="Shareable URL"
+    size="small"
+    fullWidth
+    value={url}
+    className={styles["link-field"]}
+    slotProps={{
+      htmlInput: {
+        readOnly: true,
+        onFocus: (e: React.FocusEvent<HTMLInputElement>) => e.target.select(),
+      },
+    }}
+    helperText={<span role="status">{message}</span>}
+  />
+);
 
 type LinkDialogProps = {
   heading: string;
@@ -14,18 +45,13 @@ type LinkDialogProps = {
   children?: React.ReactNode;
 };
 
-const COPY_MESSAGES = {
-  copied: "Copied!",
-  failed: "Couldn't copy. Select the link and copy it.",
-};
-
 const LinkDialog: React.FC<LinkDialogProps> = ({
   heading,
   url,
   onClose,
   children,
 }) => {
-  const [copyResult, setCopyResult] = useState<keyof typeof COPY_MESSAGES>();
+  const { copy, message } = useLinkCopy(url);
   return (
     <BasicDialog
       open
@@ -33,32 +59,16 @@ const LinkDialog: React.FC<LinkDialogProps> = ({
       maxWidth="xs"
       onClose={onClose}
       title={heading}
-      onConfirm={onClose}
-      confirmText="OK"
-      cancelButton={null}
+      onConfirm={copy}
+      confirmText="Copy link"
+      confirmButtonProps={{ autoFocus: true }}
+      cancelText="Done"
     >
-      <FormGroup row className={styles["link-row"]}>
-        <TextField
-          label="Shareable URL"
-          size="small"
-          value={url}
-          slotProps={{ htmlInput: { readOnly: true } }}
-          helperText={copyResult ? COPY_MESSAGES[copyResult] : " "}
-          className={u.flex1}
-        />
-        <Button
-          variant="text"
-          onClick={async () =>
-            setCopyResult((await copyText(url)) ? "copied" : "failed")
-          }
-          sx={{ alignSelf: "start" }}
-        >
-          Copy
-        </Button>
-      </FormGroup>
+      <LinkField url={url} message={message} />
       {children}
     </BasicDialog>
   );
 };
 
 export default LinkDialog;
+export { LinkField, useLinkCopy };

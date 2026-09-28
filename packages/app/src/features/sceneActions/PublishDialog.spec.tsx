@@ -16,7 +16,7 @@ const openDuplicate = async () => {
     await screen.findByRole("button", { name: "More scene actions" }),
   );
   await user.click(await screen.findByRole("menuitem", { name: "Duplicate" }));
-  return screen.findByRole("dialog", { name: "Save a Copy" });
+  return screen.findByRole("dialog", { name: "Save a copy" });
 };
 
 test("a failed publish shows the error and leaves the scene as it was", async () => {
@@ -39,21 +39,32 @@ test("a failed publish shows the error and leaves the scene as it was", async ()
   });
 });
 
-test.each(["", "   "])(
-  "a blank title (%j) is reported instead of published",
-  async (blank) => {
-    renderOwnedScene();
+test("a blank title is reported instead of published", async () => {
+  renderOwnedScene();
 
-    const dialog = await openDuplicate();
-    const title = within(dialog).getByLabelText("Title");
-    await user.clear(title);
-    if (blank) await user.type(title, blank);
-    await user.click(within(dialog).getByRole("button", { name: "Save" }));
+  const dialog = await openDuplicate();
+  const title = within(dialog).getByLabelText("Title");
+  await user.clear(title);
+  await user.type(title, "   ");
+  await user.click(within(dialog).getByRole("button", { name: "Save" }));
 
-    await waitFor(() => expect(title).toBeInvalid());
-    expect(within(dialog).getByText("Please enter a title.")).toBeVisible();
-  },
-);
+  await waitFor(() => expect(title).toBeInvalid());
+  expect(within(dialog).getByText("Please enter a title.")).toBeVisible();
+});
+
+test("publishing keeps one dialog and moves focus to Copy link", async () => {
+  renderOwnedScene();
+
+  const dialog = await openDuplicate();
+  await user.type(within(dialog).getByLabelText("Title"), "{Enter}");
+
+  expect(await screen.findByRole("dialog", { name: "Scene saved!" })).toBe(
+    dialog,
+  );
+  expect(
+    within(dialog).getByRole("button", { name: "Copy link" }),
+  ).toHaveFocus();
+});
 
 test("a padded title is published trimmed", async () => {
   const { store } = renderOwnedScene();
@@ -64,7 +75,7 @@ test("a padded title is published trimmed", async () => {
   await user.type(title, "  Spaced  ");
   await user.click(within(dialog).getByRole("button", { name: "Save" }));
 
-  await screen.findByRole("dialog", { name: "Scene Saved!" });
+  await screen.findByRole("dialog", { name: "Scene saved!" });
   expect(store.getState().scene.title).toBe("Spaced");
 });
 
@@ -85,11 +96,14 @@ test("while the publish is in flight, the dialog can be neither resubmitted nor 
   const save = within(dialog).getByRole("button", { name: "Save" });
   await user.click(save);
 
-  await waitFor(() => expect(save).toBeDisabled());
-  await user.click(within(dialog).getByRole("button", { name: "Close" }));
+  await waitFor(() => expect(save).toHaveTextContent("Saving..."));
+  expect(save).toBeDisabled();
+  expect(within(dialog).getByRole("button", { name: "Close" })).toBeDisabled();
+  await user.keyboard("{Escape}");
   expect(dialog).toBeInTheDocument();
   release();
   await waitFor(() => expect(save).toBeEnabled());
+  expect(save).toHaveTextContent("Save");
 });
 
 test("a copy of a legacy scene is not legacy", async () => {
@@ -99,6 +113,6 @@ test("a copy of a legacy scene is not legacy", async () => {
   const dialog = await openDuplicate();
   await user.click(within(dialog).getByRole("button", { name: "Save" }));
 
-  await screen.findByRole("dialog", { name: "Scene Saved!" });
+  await screen.findByRole("dialog", { name: "Scene saved!" });
   expect(store.getState().scene.isLegacy).toBe(false);
 });

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import { useNavigate } from "react-router";
 import Alert from "@mui/material/Alert";
 import MuiLink from "@mui/material/Link";
@@ -8,18 +8,34 @@ import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions, select } from "@/features/sceneControls/mathItems";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import { DISPLAY_AUTH_FLOWS } from "@/features/auth";
-import TitleDialog from "./TitleDialog";
-import LinkDialog from "./LinkDialog";
+import BasicDialog from "@/util/components/BasicDialog";
+import useTitleForm from "./useTitleForm";
+import { LinkField, useLinkCopy } from "./LinkDialog";
 
 type PublishMode = "share" | "save" | "copy";
 
 const HEADINGS: Record<
   PublishMode,
-  { title: string; confirm: string; link: string }
+  { title: string; confirm: string; submitting: string; link: string }
 > = {
-  share: { title: "Share Scene", confirm: "Share", link: "Share Scene" },
-  save: { title: "Save Scene", confirm: "Save", link: "Scene Saved!" },
-  copy: { title: "Save a Copy", confirm: "Save", link: "Scene Saved!" },
+  share: {
+    title: "Share scene",
+    confirm: "Share",
+    submitting: "Sharing...",
+    link: "Share scene",
+  },
+  save: {
+    title: "Save scene",
+    confirm: "Save",
+    submitting: "Saving...",
+    link: "Scene saved!",
+  },
+  copy: {
+    title: "Save a copy",
+    confirm: "Save",
+    submitting: "Saving...",
+    link: "Scene saved!",
+  },
 };
 
 const sceneUrl = (key: string) => `${window.location.origin}/${key}`;
@@ -33,6 +49,7 @@ type PublishDialogProps = {
 
 /**
  * Publishes the scene as a new one: asks for a title, then shows the link.
+ * Both steps are one dialog, so assistive tech stays in it across the swap.
  */
 const PublishDialog: React.FC<PublishDialogProps> = ({
   mode,
@@ -55,6 +72,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
     mode === "copy" && author !== null ? `Copy of ${title}` : title,
   );
   const headings = HEADINGS[mode];
+  const copyButtonId = useId();
 
   const publish = async (newTitle: string) => {
     const state = store.getState();
@@ -79,9 +97,35 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
     setPublishedUrl(sceneUrl(result.key));
   };
 
+  const { formId, isSubmitting, renderForm } = useTitleForm({
+    defaultTitle,
+    onSubmit: publish,
+  });
+  const { copy, message } = useLinkCopy(publishedUrl ?? "");
+
+  // The title field unmounts on the swap; land on the step's next action.
+  useEffect(() => {
+    if (publishedUrl) document.getElementById(copyButtonId)?.focus();
+  }, [publishedUrl, copyButtonId]);
+
+  const common = {
+    open: true,
+    fullWidth: true,
+    maxWidth: "xs",
+    onClose,
+  } as const;
+
   if (publishedUrl) {
     return (
-      <LinkDialog heading={headings.link} url={publishedUrl} onClose={onClose}>
+      <BasicDialog
+        {...common}
+        title={headings.link}
+        onConfirm={copy}
+        confirmText="Copy link"
+        confirmButtonProps={{ id: copyButtonId, autoFocus: true }}
+        cancelText="Done"
+      >
+        <LinkField url={publishedUrl} message={message} />
         {mode === "share" && DISPLAY_AUTH_FLOWS ? (
           <Typography variant="body2">
             <MuiLink
@@ -98,25 +142,34 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
             to save scenes you can keep editing.
           </Typography>
         ) : null}
-      </LinkDialog>
+      </BasicDialog>
     );
   }
   return (
-    <TitleDialog
-      heading={headings.title}
-      confirmText={headings.confirm}
-      defaultTitle={defaultTitle}
-      onClose={onClose}
-      onSubmit={publish}
-      note={
+    <BasicDialog
+      {...common}
+      // The submit still completes after a close, so closing mid-submit
+      // would navigate away from under the user.
+      closeDisabled={isSubmitting}
+      title={headings.title}
+      confirmText={isSubmitting ? headings.submitting : headings.confirm}
+      cancelButton={null}
+      confirmButtonProps={{
+        id: copyButtonId,
+        type: "submit",
+        form: formId,
+        disabled: isSubmitting,
+      }}
+    >
+      {renderForm(
         mode === "share" && hasKey ? (
-          <Alert severity="info">
+          <Alert severity="info" role="note">
             This creates a new link showing the scene as it looks now. The
             original link is unchanged.
           </Alert>
-        ) : undefined
-      }
-    />
+        ) : undefined,
+      )}
+    </BasicDialog>
   );
 };
 

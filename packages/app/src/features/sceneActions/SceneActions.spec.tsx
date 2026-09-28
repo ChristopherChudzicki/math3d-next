@@ -206,13 +206,14 @@ test("copying the link with unsaved edits says the link omits them", async () =>
   );
   await user.click(await screen.findByRole("menuitem", { name: "Copy link" }));
 
-  const dialog = await screen.findByRole("dialog", { name: "Copy Link" });
-  expect(within(dialog).getByLabelText("Shareable URL")).toHaveValue(
+  const dialog = await screen.findByRole("dialog", { name: "Copy link" });
+  expect(within(dialog).getByText(/without your changes/i)).toBeVisible();
+  await user.click(within(dialog).getByRole("button", { name: "Copy link" }));
+
+  expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
     `${window.location.origin}/${scene.key}`,
   );
-  expect(
-    within(dialog).getByText(/without your unsaved changes/i),
-  ).toBeVisible();
+  expect(within(dialog).getByRole("status")).toHaveTextContent("Copied!");
 });
 
 test("a refused copy shows the link instead", async () => {
@@ -223,43 +224,44 @@ test("a refused copy shows the link instead", async () => {
 
   await user.click(await primary());
 
-  const dialog = await screen.findByRole("dialog", { name: "Copy Link" });
+  const dialog = await screen.findByRole("dialog", { name: "Copy link" });
   expect(within(dialog).getByLabelText("Shareable URL")).toHaveValue(
     `${window.location.origin}/${scene.key}`,
   );
+  expect(within(dialog).getByText(/didn't allow copying/i)).toBeVisible();
   expect(await primary()).toHaveTextContent(/^Copy link$/);
 });
 
-test("the link dialog's Copy button copies the link", async () => {
+test("the link step copies the link and announces it", async () => {
   const scene = seedDb.withSceneFromItems([]);
   renderTestApp(`/${scene.key}`);
 
   await user.click(await primary());
-  const dialog = await screen.findByRole("dialog", { name: "Share Scene" });
-  await user.click(within(dialog).getByRole("button", { name: "Copy" }));
+  const dialog = await screen.findByRole("dialog", { name: "Share scene" });
+  await user.click(within(dialog).getByRole("button", { name: "Copy link" }));
 
   expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
     `${window.location.origin}/${scene.key}`,
   );
-  expect(within(dialog).getByText("Copied!")).toBeVisible();
+  expect(within(dialog).getByRole("status")).toHaveTextContent("Copied!");
 });
 
-test("someone else's scene offers Save a Copy, prefilled Copy of …", async () => {
+test("someone else's scene offers Save a copy, prefilled Copy of …", async () => {
   const author = seedDb.withUser();
   const scene = seedDb.withSceneFromItems([], { author: author.id });
   renderTestApp(`/${scene.key}`, { isAuthenticated: true });
 
-  expect(await primary()).toHaveTextContent(/^Save a Copy$/);
+  expect(await primary()).toHaveTextContent(/^Save a copy$/);
   expect(await menuEntries()).toEqual(["Copy link"]);
   await user.click(await primary());
 
-  const dialog = await screen.findByRole("dialog", { name: "Save a Copy" });
+  const dialog = await screen.findByRole("dialog", { name: "Save a copy" });
   expect(within(dialog).getByLabelText("Title")).toHaveValue(
     `Copy of ${scene.title}`,
   );
 });
 
-test("Save a Copy of an anonymous scene keeps its title", async () => {
+test("Save a copy of an anonymous scene keeps its title", async () => {
   // Seeded scenes are author-less, like a visitor's own anonymous scene
   // after signing in.
   const scene = seedDb.withSceneFromItems([]);
@@ -267,7 +269,7 @@ test("Save a Copy of an anonymous scene keeps its title", async () => {
 
   await user.click(await primary());
 
-  const dialog = await screen.findByRole("dialog", { name: "Save a Copy" });
+  const dialog = await screen.findByRole("dialog", { name: "Save a copy" });
   expect(within(dialog).getByLabelText("Title")).toHaveValue(scene.title);
 });
 
@@ -276,11 +278,11 @@ test("a signed-out re-share of an unedited published scene reuses its link", asy
   renderTestApp("/");
 
   await user.click(await primary());
-  const titleStep = await screen.findByRole("dialog", { name: "Share Scene" });
+  const titleStep = await screen.findByRole("dialog", { name: "Share scene" });
   await user.click(within(titleStep).getByRole("button", { name: "Share" }));
   const link = await screen.findByLabelText<HTMLInputElement>("Shareable URL");
   const published = link.value;
-  await user.click(screen.getByRole("button", { name: "OK" }));
+  await user.click(screen.getByRole("button", { name: "Done" }));
 
   await user.click(await primary());
 
@@ -306,7 +308,7 @@ test("a signed-out share of an edited scene mints a new link, prefilled with the
   });
 
   await user.click(await primary());
-  const dialog = await screen.findByRole("dialog", { name: "Share Scene" });
+  const dialog = await screen.findByRole("dialog", { name: "Share scene" });
   expect(within(dialog).getByLabelText("Title")).toHaveValue(scene.title);
   expect(within(dialog).getByText(/original link is unchanged/i)).toBeVisible();
   await user.click(within(dialog).getByRole("button", { name: "Share" }));
@@ -316,7 +318,7 @@ test("a signed-out share of an edited scene mints a new link, prefilled with the
   expect(location.current.pathname).not.toBe(`/${scene.key}`);
 });
 
-test("the link step shows the real link on a small screen", async () => {
+test("the scene action works on a small screen", async () => {
   // JSDOM has no matchMedia. Not vi.stubGlobal: undoing it with
   // vi.unstubAllGlobals also drops setupTests' ResizeObserver stub.
   Object.defineProperty(window, "matchMedia", {
@@ -351,11 +353,11 @@ test("the signed-out link step offers sign-in", async () => {
   const { location } = renderTestApp(`/${scene.key}`);
 
   await user.click(await primary());
-  const dialog = await screen.findByRole("dialog", { name: "Share Scene" });
+  const dialog = await screen.findByRole("dialog", { name: "Share scene" });
   await user.click(within(dialog).getByRole("button", { name: "Sign in" }));
 
   expect(location.current.search).toContain("overlay=login");
-  expect(screen.queryByRole("dialog", { name: "Share Scene" })).toBeNull();
+  expect(screen.queryByRole("dialog", { name: "Share scene" })).toBeNull();
 });
 
 test("no scene action is offered while auth is still loading", async () => {

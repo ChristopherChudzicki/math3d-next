@@ -1,5 +1,5 @@
 declare const styles: {
-  readonly "link-row": string;
+  readonly "link-field": string;
 };
 export = styles;
 

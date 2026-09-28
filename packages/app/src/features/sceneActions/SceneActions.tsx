@@ -25,10 +25,10 @@ const LABELS: Record<Primary, string> = {
   "save-new": "Save",
   save: "Save",
   "copy-link": "Copy link",
-  "save-copy": "Save a Copy",
+  "save-copy": "Save a copy",
 };
 
-// Fits the longest label, "Save a Copy", so a label swap never shifts layout.
+// Fits the longest label, "Save a copy", so a label swap never shifts layout.
 const PRIMARY_WIDTH = "7.5rem";
 const MIN_SAVING_DELAY = 500;
 const FLASH_TIMEOUT = 2000;
@@ -64,7 +64,7 @@ const sleep = (ms: number) =>
 
 /**
  * The header's scene action: one button whose label says what it will do
- * (Share, Save, Copy link, Save a Copy), plus a menu of secondary actions.
+ * (Share, Save, Copy link, Save a copy), plus a menu of secondary actions.
  */
 const SceneActions: React.FC = () => {
   const authStatus = useAuthStatus();
@@ -200,6 +200,7 @@ const SceneActions: React.FC = () => {
         </Button>
         {menu.length > 0 ? (
           <SimpleMenu
+            aria-label="More scene actions"
             items={menuItems}
             trigger={
               <Button
@@ -222,13 +223,12 @@ const SceneActions: React.FC = () => {
         />
       ) : null}
       {dialog?.kind === "link" ? (
-        <LinkDialog heading="Copy Link" url={dialog.url} onClose={closeDialog}>
-          {dialog.unsaved ? (
-            <Typography variant="body2">
-              This link shows the last saved version, without your unsaved
-              changes.
-            </Typography>
-          ) : null}
+        <LinkDialog heading="Copy link" url={dialog.url} onClose={closeDialog}>
+          <Typography variant="body2">
+            {dialog.unsaved
+              ? "This link shows the scene as last saved, without your changes."
+              : "Your browser didn't allow copying. Select the link and copy it."}
+          </Typography>
         </LinkDialog>
       ) : null}
     </>
