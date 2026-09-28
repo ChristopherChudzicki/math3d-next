@@ -79,18 +79,24 @@ class Command(BaseCommand):
         with open(filename) as f:
             test_scene = json.load(f)
 
-        for j in range(scene_count):
-            title = f"Test Scene {j}"
+        def seed_scene(title: str, author):
             # (title, author) is not unique, so update_or_create would raise
             # MultipleObjectsReturned on a database that already holds two of
             # them. Re-seeding has to stay safe on whatever is already there.
-            scene = Scene.objects.filter(title=title, author=user_1).first() or Scene(
-                title=title, author=user_1
+            scene = Scene.objects.filter(title=title, author=author).first() or Scene(
+                title=title, author=author
             )
             scene.items = test_scene["items"]
             scene.item_order = test_scene["itemOrder"]
             scene.save()
 
+        for j in range(scene_count):
+            seed_scene(f"Test Scene {j}", user_1)
+        # Owned by no one, as an anonymous visitor's scenes are.
+        seed_scene("Anonymous Scene", None)
+
         self.stdout.write(
-            self.style.SUCCESS(f"Seeded {email} with {scene_count} scenes.")
+            self.style.SUCCESS(
+                f"Seeded {email} with {scene_count} scenes, plus one anonymous scene."
+            )
         )

@@ -78,3 +78,13 @@ def test_reseeding_applies_edits_to_existing_scenes():
 
     scene.refresh_from_db()
     assert scene.item_order != stale_order
+
+
+@pytest.mark.django_db
+def test_seeds_one_anonymous_scene():
+    """An author-less scene, so a signed-in dev user can reach "Save a Copy"."""
+    seed = dict(email="seeded@example.com", uid="4242", scene_count=1)
+    call_command("seed_test_data", **seed)
+    call_command("seed_test_data", **seed)
+
+    assert Scene.objects.filter(title="Anonymous Scene", author=None).count() == 1
