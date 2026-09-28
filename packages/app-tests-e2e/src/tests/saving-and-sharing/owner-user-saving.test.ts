@@ -28,20 +28,20 @@ test("Saving a new scene", async ({ page }) => {
 
   await test.step("Save scene", async () => {
     await app.sceneAction().click();
-    const dialog = page.getByRole("dialog", { name: "Save Scene" });
+    const dialog = page.getByRole("dialog", { name: "Save scene" });
     await dialog.getByRole("textbox", { name: "Title" }).fill(title);
     await page.getByRole("dialog");
     await dialog.getByRole("button", { name: "Save" }).click();
   });
 
   await test.step("Success dialog", async () => {
-    const dialog = page.getByRole("dialog", { name: "Scene Saved!" });
+    const dialog = page.getByRole("dialog", { name: "Scene saved!" });
     await expect(dialog).toBeVisible();
     const url = await dialog
       .getByRole("textbox", { name: "Shareable URL" })
       .inputValue();
 
-    await dialog.getByRole("button", { name: "OK" }).click();
+    await dialog.getByRole("button", { name: "Done" }).click();
     await expect(dialog).not.toBeVisible();
 
     // Check that saving updated the current URL
@@ -105,14 +105,14 @@ test("Saving a new scene keeps the active item selected", async ({ page }) => {
   await expect(item.activeMarker()).toHaveCount(1);
 
   await app.sceneAction().click();
-  const dialog = page.getByRole("dialog", { name: "Save Scene" });
+  const dialog = page.getByRole("dialog", { name: "Save scene" });
   await dialog
     .getByRole("textbox", { name: "Title" })
     .fill(faker.lorem.words(3));
   await dialog.getByRole("button", { name: "Save" }).click();
   await page
-    .getByRole("dialog", { name: "Scene Saved!" })
-    .getByRole("button", { name: "OK" })
+    .getByRole("dialog", { name: "Scene saved!" })
+    .getByRole("button", { name: "Done" })
     .click();
 
   // Publishing moves to the new key without reloading the scene, so the

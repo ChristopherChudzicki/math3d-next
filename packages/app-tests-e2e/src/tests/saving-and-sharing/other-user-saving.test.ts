@@ -37,9 +37,9 @@ test("Saving an existing scene scene", async ({
     description: initialDescription,
   });
 
-  await test.step("'Save a Copy' is initially enabled", async () => {
+  await test.step("'Save a copy' is initially enabled", async () => {
     await expect(app.sceneAction()).toBeEnabled();
-    await expect(app.sceneAction()).toHaveAccessibleName("Save a Copy");
+    await expect(app.sceneAction()).toHaveAccessibleName("Save a copy");
   });
 
   await test.step("Save scene", async () => {
@@ -48,14 +48,14 @@ test("Saving an existing scene scene", async ({
 
     await item.field("description").fill(newDescription);
     await app.sceneAction().click();
-    const dialog = page.getByRole("dialog", { name: "Save a Copy" });
+    const dialog = page.getByRole("dialog", { name: "Save a copy" });
     await expect(dialog.getByRole("textbox", { name: "Title" })).toHaveValue(
       `Copy of ${title}`,
     );
     await dialog.getByRole("button", { name: "Save" }).click();
     await page
-      .getByRole("dialog", { name: "Scene Saved!" })
-      .getByRole("button", { name: "OK" })
+      .getByRole("dialog", { name: "Scene saved!" })
+      .getByRole("button", { name: "Done" })
       .click();
     await expect(item.root).toBeVisible();
 
@@ -76,8 +76,8 @@ test("Saving an existing scene scene", async ({
 
   await test.step("Assert original page unchanged", async () => {
     await page.goto(`/${key}`);
-    // Original still shows 'Save a Copy'
-    await expect(app.sceneAction()).toHaveAccessibleName("Save a Copy");
+    // Original still shows 'Save a copy'
+    await expect(app.sceneAction()).toHaveAccessibleName("Save a copy");
     // item has new description
     await expect(item.field("description")).toHaveValue(initialDescription);
   });

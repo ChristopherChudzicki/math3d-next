@@ -46,7 +46,7 @@ test("Saving an owned scene works on the cookies a real sign-in sets", async ({
     await app.signInAsDevUser(signInUser);
 
     // Only the owner gets Copy link/Save; a signed-in non-owner gets
-    // "Save a Copy", which saves through the exempt POST.
+    // "Save a copy", which saves through the exempt POST.
     await expect(app.sceneAction()).toHaveAccessibleName("Copy link");
   });
 
