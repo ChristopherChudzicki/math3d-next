@@ -102,6 +102,9 @@ const SceneActions: React.FC = () => {
     dirty,
   });
 
+  const label = (saving && "Saving...") || flash?.text || LABELS[primary];
+  const enabled = !saving && !flash && (primary !== "save-new" || dirty);
+
   const copyLink = async () => {
     invariant(key, "Only a saved scene has a link.");
     const url = sceneUrl(key);
@@ -121,10 +124,11 @@ const SceneActions: React.FC = () => {
     const { title, items, itemOrder } = select.sceneInfo(state);
     setSaving(true);
     try {
-      await Promise.all([
+      const [patched] = await Promise.allSettled([
         patchScene.mutateAsync({ key, patch: { title, items, itemOrder } }),
         sleep(MIN_SAVING_DELAY),
       ]);
+      if (patched.status === "rejected") throw patched.reason;
       dispatch(actions.markSaved({ key, author, revision, loadCount }));
       setFlash({ text: "Saved!" });
     } catch (err) {
@@ -136,6 +140,7 @@ const SceneActions: React.FC = () => {
   };
 
   const handlePrimary = () => {
+    if (!enabled) return;
     if (primary === "share") {
       setDialog(
         dirty || key === null
@@ -171,8 +176,6 @@ const SceneActions: React.FC = () => {
         },
   );
 
-  const label = (saving && "Saving...") || flash?.text || LABELS[primary];
-  const enabled = !saving && !flash && (primary !== "save-new" || dirty);
   const closeDialog = () => setDialog(null);
 
   return (
@@ -185,7 +188,11 @@ const SceneActions: React.FC = () => {
           data-testid="scene-action"
           variant="text"
           color="primary"
-          disabled={!enabled}
+          // Not `disabled`: a disabled button drops keyboard focus to the page
+          // after every Save or Copy link.
+          aria-disabled={!enabled}
+          className={enabled ? undefined : "Mui-disabled"}
+          disableRipple={!enabled}
           onClick={handlePrimary}
           sx={{ "&.MuiButtonGroup-grouped": { width: PRIMARY_WIDTH } }}
         >
@@ -199,6 +206,7 @@ const SceneActions: React.FC = () => {
                 variant="text"
                 color="secondary"
                 aria-label="More scene actions"
+                disabled={saving}
               >
                 <ExpandMoreIcon fontSize="small" />
               </Button>

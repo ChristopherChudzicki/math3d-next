@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, expect, onTestFinished, test, vi } from "vitest";
-import { delay, http } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { makeItem, seedDb, urls } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
@@ -33,7 +33,35 @@ const countRequests = (method: string, pathSuffix: string) => {
   return seen;
 };
 
+/** Bodies of the PATCH requests sent for `key`. */
+const capturePatches = (key: string) => {
+  const bodies: unknown[] = [];
+  const listener = async ({ request }: { request: Request }) => {
+    if (
+      request.method === "PATCH" &&
+      new URL(request.url).pathname.endsWith(`/v1/scenes/${key}/`)
+    ) {
+      bodies.push(await request.clone().json());
+    }
+  };
+  server.events.on("request:start", listener);
+  onTestFinished(() => {
+    server.events.removeListener("request:start", listener);
+  });
+  return bodies;
+};
+
 const primary = () => screen.findByTestId("scene-action");
+// The primary button stays focusable while it can't be used, so keyboard
+// users keep their place.
+const expectInert = (el: HTMLElement) => {
+  expect(el).toHaveAttribute("aria-disabled", "true");
+  expect(el).toBeEnabled();
+};
+const pressEnterOn = async (el: HTMLElement) => {
+  act(() => el.focus());
+  await user.keyboard("{Enter}");
+};
 const menuEntries = async () => {
   await user.click(
     await screen.findByRole("button", { name: "More scene actions" }),
@@ -66,35 +94,94 @@ test("an unsaved scene offers Save once edited, and no menu", async () => {
   renderTestApp("/", { isAuthenticated: true });
 
   expect(await primary()).toHaveTextContent(/^Save$/);
-  expect(await primary()).toBeDisabled();
+  expectInert(await primary());
+  await pressEnterOn(await primary());
+  expect(screen.queryByRole("dialog")).toBeNull();
   await user.type(await screen.findByLabelText("Scene Title"), " edited");
-  expect(await primary()).toBeEnabled();
+  expect(await primary()).not.toHaveAttribute("aria-disabled", "true");
   noMenu();
 });
 
 test("an owned scene with edits saves in place", async () => {
-  const { scene } = renderOwnedScene();
-  const patches = countRequests("PATCH", `/v1/scenes/${scene.key}/`);
+  const { scene, store } = renderOwnedScene();
+  const patches = capturePatches(scene.key);
   await user.type(await screen.findByLabelText("Scene Title"), " edited");
 
   expect(await primary()).toHaveTextContent(/^Save$/);
   expect(await menuEntries()).toEqual(["Duplicate", "Copy link"]);
   await user.click(await primary());
 
-  await waitFor(async () =>
-    expect(await primary()).toHaveTextContent(/^Saved!$/),
+  await waitFor(
+    () =>
+      expect(screen.getByTestId("scene-action")).toHaveTextContent("Saved!"),
+    { timeout: 2000 },
   );
   expect(screen.getAllByRole("status").map((el) => el.textContent)).toContain(
     "Saved!",
   );
+  expect(store.getState().scene.dirty).toBe(false);
+  expect(patches).toEqual([
+    expect.objectContaining({ title: `${scene.title} edited` }),
+  ]);
+});
+
+test("an edit made while saving survives the save and stays unsaved", async () => {
+  const gate = Promise.withResolvers<void>();
+  // Returning nothing falls through to the mock API's PATCH handler.
+  server.use(
+    http.patch(urls.scenes.detail, async () => {
+      await gate.promise;
+    }),
+  );
+  const { scene, store } = renderOwnedScene();
+  const patches = capturePatches(scene.key);
+  const title = await screen.findByLabelText("Scene Title");
+  await user.type(title, " saved");
+
+  await user.click(await primary());
+  expect(await primary()).toHaveTextContent(/^Saving\.\.\.$/);
+  expectInert(await primary());
+  expect(
+    screen.getByRole("button", { name: "More scene actions" }),
+  ).toBeDisabled();
+  await pressEnterOn(await primary());
+  await user.type(title, " later");
+  gate.resolve();
+
   await waitFor(
     () =>
-      expect(screen.getByTestId("scene-action")).toHaveTextContent(
-        /^Copy link$/,
-      ),
-    { timeout: 3000 },
+      expect(screen.getByTestId("scene-action")).toHaveTextContent("Saved!"),
+    { timeout: 2000 },
   );
-  expect(patches.count).toBe(1);
+  expect(store.getState().scene).toMatchObject({
+    dirty: true,
+    title: `${scene.title} saved later`,
+  });
+  expect(patches).toHaveLength(1);
+});
+
+test("a failed save frees the button and leaves the edit unsaved", async () => {
+  server.use(
+    http.patch(urls.scenes.detail, () =>
+      HttpResponse.json({ detail: "boom" }, { status: 500 }),
+    ),
+  );
+  const { store } = renderOwnedScene();
+  await user.type(await screen.findByLabelText("Scene Title"), " edited");
+
+  await user.click(await primary());
+  expect(await primary()).toHaveTextContent(/^Saving\.\.\.$/);
+
+  await waitFor(
+    () =>
+      expect(screen.getByTestId("scene-action")).toHaveTextContent(/^Save$/),
+    { timeout: 2000 },
+  );
+  expect(screen.getByTestId("scene-action")).not.toHaveAttribute(
+    "aria-disabled",
+    "true",
+  );
+  expect(store.getState().scene.dirty).toBe(true);
 });
 
 test("an owned scene without edits copies its link", async () => {
