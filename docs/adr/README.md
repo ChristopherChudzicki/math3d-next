@@ -10,7 +10,9 @@ ADRs are numbered and committed alongside the code. Statuses:
 - **Proposed** — the decision is written down, but its implementation has not
   yet substantially landed on `main`. It may be revised freely, in place.
 - **Accepted** — its implementation has substantially landed on `main`. From
-  here it is **not edited**: a changed decision gets a new ADR that supersedes it.
+  here its decision is **not edited**: a changed decision gets a new ADR that
+  supersedes it. Corrections that leave the decision intact (a wrong fact, a
+  renamed host or file) are made in place.
 - **Superseded by NNNN** — replaced by a later ADR, kept for the record.
 
 | #                                                 | Title                                             | Status   |
