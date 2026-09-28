@@ -230,11 +230,11 @@ def test_local_dev_unions_explicit_cors_origins_with_defaults(monkeypatch):
     loaded = load_settings(
         monkeypatch,
         IS_DEPLOYMENT="False",
-        APP_BASE_URL="http://math3d.localdev:3000",
+        APP_BASE_URL="http://math3d.localhost:3000",
         CORS_ALLOWED_ORIGINS="http://localhost:3141",
     )
     assert "http://localhost:3141" in loaded.CORS_ALLOWED_ORIGINS
-    assert "http://math3d.localdev:3000" in loaded.CORS_ALLOWED_ORIGINS
+    assert "http://math3d.localhost:3000" in loaded.CORS_ALLOWED_ORIGINS
 
 
 def test_deployment_cors_origins_are_exactly_the_explicit_config(monkeypatch):
@@ -281,10 +281,10 @@ def test_app_base_url_trailing_slash_is_normalized(monkeypatch):
     path, so an un-stripped trailing slash would silently fail to match.
     """
     loaded = load_settings(
-        monkeypatch, IS_DEPLOYMENT="False", APP_BASE_URL="http://math3d.localdev:3000/"
+        monkeypatch, IS_DEPLOYMENT="False", APP_BASE_URL="http://math3d.localhost:3000/"
     )
-    assert loaded.APP_BASE_URL == "http://math3d.localdev:3000"
-    assert "http://math3d.localdev:3000" in loaded.CSRF_TRUSTED_ORIGINS
+    assert loaded.APP_BASE_URL == "http://math3d.localhost:3000"
+    assert "http://math3d.localhost:3000" in loaded.CSRF_TRUSTED_ORIGINS
 
 
 def test_dev_cors_origins_cover_app_and_worktree_ports():
@@ -295,11 +295,11 @@ def test_dev_cors_origins_cover_app_and_worktree_ports():
     """
     origins = dev_cors_allowed_origins(
         is_deployment=False,
-        app_base_url="http://math3d.localdev:3000",
+        app_base_url="http://math3d.localhost:3000",
     )
-    worktree_origins = [f"http://math3d.localdev:{port}" for port in WORKTREE_PORTS]
+    worktree_origins = [f"http://math3d.localhost:{port}" for port in WORKTREE_PORTS]
     assert worktree_origins  # else the equality below is vacuous
-    assert origins == ["http://math3d.localdev:3000", *worktree_origins]
+    assert origins == ["http://math3d.localhost:3000", *worktree_origins]
 
 
 def test_dev_cors_origins_empty_on_a_deployment():
@@ -322,13 +322,13 @@ def test_cors_origins_union_adds_configured_without_dropping_dev():
     not replace, the dev defaults — and duplicates collapse.
     """
     origins = cors_allowed_origins(
-        configured=["http://localhost:3141", "http://math3d.localdev:3000"],
-        dev=["http://math3d.localdev:3000", "http://math3d.localdev:3002"],
+        configured=["http://localhost:3141", "http://math3d.localhost:3000"],
+        dev=["http://math3d.localhost:3000", "http://math3d.localhost:3002"],
     )
     assert origins == [
         "http://localhost:3141",
-        "http://math3d.localdev:3000",
-        "http://math3d.localdev:3002",
+        "http://math3d.localhost:3000",
+        "http://math3d.localhost:3002",
     ]
 
 
@@ -340,7 +340,7 @@ def test_settings_wire_csrf_trust_from_cors_origins(monkeypatch):
     have: without one both lists are empty and the assertion says nothing.
     """
     loaded = load_settings(
-        monkeypatch, IS_DEPLOYMENT="False", APP_BASE_URL="http://math3d.localdev:3000"
+        monkeypatch, IS_DEPLOYMENT="False", APP_BASE_URL="http://math3d.localhost:3000"
     )
     assert loaded.CORS_ALLOWED_ORIGINS  # else the assertion below is vacuous
     assert set(loaded.CORS_ALLOWED_ORIGINS) <= set(loaded.CSRF_TRUSTED_ORIGINS)
@@ -366,15 +366,15 @@ def test_local_csrf_trust_covers_cors_origins():
     """
     origins = csrf_trusted_origins(
         is_deployment=False,
-        app_base_url="http://math3d.localdev:3000",
+        app_base_url="http://math3d.localhost:3000",
         cors_allowed_origins=[
-            "http://math3d.localdev:3000",
-            "http://math3d.localdev:3002",
+            "http://math3d.localhost:3000",
+            "http://math3d.localhost:3002",
         ],
     )
     assert origins == [
-        "http://math3d.localdev:3000",
-        "http://math3d.localdev:3002",
+        "http://math3d.localhost:3000",
+        "http://math3d.localhost:3002",
     ]
 
 
@@ -398,7 +398,7 @@ def test_dev_credentialed_cors_covers_all_cors_origins(monkeypatch):
     loaded = load_settings(
         monkeypatch,
         IS_DEPLOYMENT="False",
-        APP_BASE_URL="http://math3d.localdev:3000",
+        APP_BASE_URL="http://math3d.localhost:3000",
         CORS_ALLOWED_ORIGINS="http://localhost:3141",
     )
     assert set(loaded.CORS_ALLOWED_ORIGINS) <= set(loaded.CREDENTIALED_CORS_ORIGINS)
@@ -408,9 +408,9 @@ def test_local_csrf_trust_handles_unset_app_base_url():
     origins = csrf_trusted_origins(
         is_deployment=False,
         app_base_url="",
-        cors_allowed_origins=["http://math3d.localdev:3000"],
+        cors_allowed_origins=["http://math3d.localhost:3000"],
     )
-    assert origins == ["http://math3d.localdev:3000"]
+    assert origins == ["http://math3d.localhost:3000"]
 
 
 @pytest.mark.parametrize(
