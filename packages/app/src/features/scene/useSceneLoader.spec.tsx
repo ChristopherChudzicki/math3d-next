@@ -102,3 +102,30 @@ test("a refetch of the open scene keeps unsaved edits", async () => {
 
   expect(store.getState().scene.title).toBe(edited);
 });
+
+test("marking the open scene saved under a new key does not reload the route's scene", async () => {
+  const { store } = renderTestApp("/");
+  await waitFor(() => expect(store.getState().scene.loaded).toBe(true));
+
+  act(() => {
+    store.dispatch(sceneSlice.actions.setTitle({ title: "edited" }));
+  });
+  act(() => {
+    store.dispatch(
+      sceneSlice.actions.markSaved({
+        key: "new-key",
+        author: null,
+        revision: store.getState().scene.revision,
+      }),
+    );
+  });
+  // The route still names "/", whose default scene would replace the edit.
+  await act(
+    () =>
+      new Promise((resolve) => {
+        setTimeout(resolve);
+      }),
+  );
+
+  expect(store.getState().scene.title).toBe("edited");
+});

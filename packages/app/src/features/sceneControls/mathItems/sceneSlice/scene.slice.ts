@@ -1,9 +1,9 @@
-import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { CaseReducer } from "@reduxjs/toolkit";
 import type { Reducer, UnknownAction } from "redux";
 import { mathItemConfigs, MathItemType } from "@math3d/mathitem-configs";
 import type { MathItem, MathItemPatch } from "@math3d/mathitem-configs";
-import { isEqual, keyBy } from "lodash-es";
+import { keyBy } from "lodash-es";
 import jsonPatch from "fast-json-patch";
 
 import invariant from "tiny-invariant";
@@ -86,21 +86,11 @@ const slice = createSlice({
       key: SceneState["key"];
     }>((state, action) => {
       const { items, order, title, author, key, isLegacy } = action.payload;
-      const nextItems = keyBy(items, (item) => item.id);
-      // Saving an unsaved scene mints a key and navigates to it, which loads
-      // back the scene the editor already holds. Identical content means the
-      // selection still names the same things, so keep it. Item ids are unique
-      // only within a scene, so nothing weaker than equality is safe here.
-      const sameContent =
-        isEqual(order, current(state.order)) &&
-        isEqual(nextItems, current(state.items));
       state.title = title;
-      state.items = nextItems;
+      state.items = keyBy(items, (item) => item.id);
       state.order = order;
-      if (!sameContent) {
-        state.activeItemId = undefined;
-        state.activeTabId = MAIN_FOLDER;
-      }
+      state.activeItemId = undefined;
+      state.activeTabId = MAIN_FOLDER;
       state.author = author;
       state.key = key;
       state.loaded = true;
