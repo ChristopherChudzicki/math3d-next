@@ -67,7 +67,9 @@ TEST_APP_URL="http://math3d.localhost:$port"
 VITE_DISPLAY_AUTH_FLOWS=true
 EOF
 
-# .envrc is untracked in the main checkout, so worktrees don't inherit it.
+# Worktrees under .claude/worktrees/ sit inside the main checkout, so without
+# their own .envrc direnv exports the main checkout's env, which then beats
+# this worktree's .env.
 if [ ! -f .envrc ]; then
 	printf 'dotenv_if_exists .env.development\ndotenv_if_exists .env\n' >.envrc
 fi

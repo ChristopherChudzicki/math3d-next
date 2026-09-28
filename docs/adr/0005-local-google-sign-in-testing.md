@@ -17,11 +17,11 @@
 
 ## Context
 
-[ADR-0004](0004-oauth-only-authentication.md) puts sign-in behind Google's OAuth redirect flow. Google requires redirect URIs to use HTTPS (bare `localhost` excepted) and a TLD on the public suffix list.[^redirect-uri] Development's usual hostname, `math3d.localdev`, fails both. Day-to-day development and E2E sign in through the `dummy` provider and never reach Google. This ADR decides how to run the real Google flow by hand when needed.
+[ADR-0004](0004-oauth-only-authentication.md) puts sign-in behind Google's OAuth redirect flow. Google requires redirect URIs to use HTTPS (bare `localhost` excepted) and a TLD on the public suffix list.[^redirect-uri] Development's usual hostname, `math3d.localhost`, is plain HTTP without being bare `localhost`, so Google rejects it. Day-to-day development and E2E sign in through the `dummy` provider and never reach Google. This ADR decides how to run the real Google flow by hand when needed.
 
 ## Decision
 
-**For a manual Google test, move both servers to bare `localhost` and disable Django's CSRF middleware behind a development-only flag.** Nothing else changes: `math3d.localdev` stays the default, `dummy` stays how E2E and daily work sign in, and production is untouched.
+**For a manual Google test, move both servers to bare `localhost` and disable Django's CSRF middleware behind a development-only flag.** Nothing else changes: `math3d.localhost` stays the default, `dummy` stays how E2E and daily work sign in, and production is untouched.
 
 ### What the manual test covers
 
@@ -58,8 +58,8 @@ Removing the middleware is Django's supported way to turn CSRF off, and it also 
 
 - **It applies to the whole machine while on.** One backend container serves the main checkout and every worktree, so no local checkout enforces CSRF during a Google test. Acceptable for a brief, deliberate session: the session cookie is still `SameSite=Lax`, so another site's POST arrives signed out, and only pages served from `localhost` itself could forge a signed-in request.[^csrf-depth]
 - **Views that opt in keep their protection.** `csrf_protect` applies the same check per view, so Django admin is unaffected.
-- **CI never sets it**, so CI keeps testing the real setup: `math3d.localdev`, the domain cookie, full enforcement. Locally, the flag breaks the E2E suite, whose global setup expects a `csrftoken` cookie.
-- **`.localdev` frontends stop working while it's on.** Development's CORS origins follow `APP_BASE_URL`, now `localhost`, so every `.localdev` frontend is CORS-blocked, anonymous reads included.
+- **CI never sets it**, so CI keeps testing the real setup: `math3d.localhost`, the domain cookie, full enforcement. Locally, the flag breaks the E2E suite, whose global setup expects a `csrftoken` cookie.
+- **`math3d.localhost` frontends stop working while it's on.** Development's CORS origins follow `APP_BASE_URL`, now `localhost`, so every `math3d.localhost` frontend is CORS-blocked, anonymous reads included.
 - **The backend test suite ignores it.** `webserver/main/test_settings.py` clears the flag along with the rest of the environment, so `pytest` exercises CSRF even while it's set in `.env`.
 
 ### The Google client
@@ -105,7 +105,7 @@ followed by `docker compose up -d` to recreate the backend (a container's enviro
 - **A tunnel (`cloudflared`, `ngrok`).** A trusted certificate with nothing to install, reachable from a phone.[^cf-tunnel] Rejected: every request (HMR included) goes through the edge, the dev server becomes internet-reachable unless protected, each worktree port needs its own hostname, and a quick tunnel's hostname changes every session, so it must be re-registered with Google each time. Use this if a device that can't install a root certificate needs access.
 - **Guard the flag on `SESSION_COOKIE_SECURE`.** Rejected: it looks like a second check and isn't.[^flags]
 - **A dev-only Django page that renders the sign-in form with `{% csrf_token %}`.** Only the POST that starts sign-in needs a token JavaScript can read, so this would let the Google test run with CSRF on. Rejected for the same reason as the next option — repo-owned security code — and because any authenticated write after sign-in, such as saving a scene, still needs a token.
-- **A dev-only middleware that skips CSRF only for loopback requests,** leaving `.localdev` protected even with the flag on. Tighter, and safe in production, whose `ALLOWED_HOSTS` rejects a `localhost` Host header first. Rejected because hand-written host matching is a security control the repo would then own, which is worse than a deviation limited to a deliberate session on one machine.
+- **A dev-only middleware that skips CSRF only for loopback requests,** leaving `math3d.localhost` protected even with the flag on. Tighter, and safe in production, whose `ALLOWED_HOSTS` rejects a `localhost` Host header first. Rejected because hand-written host matching is a security control the repo would then own, which is worse than a deviation limited to a deliberate session on one machine.
 
 [^redirect-uri]: [Google — Using OAuth 2.0 for Web Server Applications](https://developers.google.com/identity/protocols/oauth2/web-server): "Redirect URIs must use the HTTPS scheme, not plain HTTP. Localhost URIs (including localhost IP address URIs) are exempt from this rule", and "Host TLDs (Top Level Domains) must belong to the public suffix list."
 [^obc]: [Chrome Platform Status — Origin-Bound cookies (by default)](https://chromestatus.com/feature/4945698250293248): from Chrome 148, cookies are bound to the origin that set them unless a `Domain` attribute relaxes host and port binding; the temporary opt-out policies "will stop working in Chrome 150". Chrome 148 reached stable on 2026-05-05. The [explainer](https://github.com/sbingler/Origin-Bound-Cookies/blob/main/README.md) confirms domain cookies are readable from any port. Scheme binding has no opt-out, so an HTTPS SPA with a plain-HTTP API isn't a halfway option.

@@ -173,12 +173,12 @@ The docker backend and database are shared with the main checkout — never `doc
 
 Troubleshooting:
 
-- "The server at ... serves ..., but this suite is testing ..." from global setup means a stale env var (usually `TEST_APP_URL` exported by another checkout's direnv) is pointing the suite at the wrong server — env vars beat the checkout's env files by design. Unset it or start a fresh shell in this checkout.
+- "The server at ... serves ..., but this suite is testing ..." from global setup means a stale env var (usually `TEST_APP_URL` or `APP_BASE_URL` exported by another checkout's direnv, or by an earlier command in the same shell) is pointing the suite at the wrong server — env vars beat the checkout's env files by design. Unset it or start a fresh shell in this checkout.
 - "sent no X-Checkout-Root header" means the dev server predates the identity header — restart it.
 - The suite cannot run at all while `.env` carries the `DISABLE_CSRF=True` block from README.md's "Testing Google sign-in locally": global setup fails with `Expected csrftoken from provider/token`, because Django sets no CSRF cookie with the middleware removed. Remove the block to run E2E.
 - Widespread `Expected sessionid from provider/token` failures mean either the backend still has `ENABLE_SIGNUP=false` (re-run `docker compose up -d` from the main checkout; a container's environment is fixed at creation, so `restart` will not pick up `.env.development`) or the seeded users have no dummy identity (re-run `seed_test_data`, which is idempotent).
 - A backend without `IS_DEPLOYMENT=False` (set in `.env.development`) doesn't install the dummy provider, and the whole suite fails.
-- Widespread CORS/CSRF failures from a worktree port mean the backend container predates the multi-port trust config — re-run `docker compose up -d` from an up-to-date main checkout.
+- Widespread CORS/CSRF failures from a worktree port mean the backend container predates the multi-port trust config — re-run `docker compose up -d` from an up-to-date main checkout — or the worktree's `.env` names a different host than the main checkout's `APP_BASE_URL` (the backend trusts worktree ports only on that host). Fix the host in the worktree's `APP_BASE_URL`/`TEST_APP_URL`.
 - `ImproperlyConfigured: ... must not be enabled on a deployment` from the backend container means it predates the `IS_DEPLOYMENT` rename and still carries `IS_DEVELOPMENT`; a container's environment is fixed at creation, so `docker compose up -d` to recreate it.
 
 ### Environment

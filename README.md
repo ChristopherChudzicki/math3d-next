@@ -23,7 +23,7 @@ Environment variables come from `.env.development` (committed) and `.env` (gitig
 
 ### Local Domain Setup
 
-Like production, the dev environment serves the frontend and API from separate subdomains — here, of `localhost`. No `/etc/hosts` entries are needed: Chrome, and macOS's system resolver (which Node and curl use), map every `*.localhost` name to the loopback address.
+Like production, the dev environment serves the frontend and API from separate subdomains — here, of `localhost`. No `/etc/hosts` entries are needed: Chrome, and macOS's system resolver (which Node and curl use), map every `*.localhost` name to the loopback address. If yours doesn't (e.g. Linux without `systemd-resolved`), add `/etc/hosts` entries for `math3d.localhost` and `api.math3d.localhost`.
 
 - **Frontend**: http://math3d.localhost:3000
 - **API**: http://api.math3d.localhost:8000
