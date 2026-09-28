@@ -129,13 +129,17 @@ export const handlers = [
   http.patch<{ key: string }, Partial<Scene>, ErrorResponseBody | Scene>(
     urls.scenes.detail,
     async ({ params, request }) => {
+      // As the real API: authentication, then existence, then ownership.
+      const user = getUser();
+      if (!user) {
+        return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
+      }
       const where = { key: { equals: params.key } };
       const scene = db.scene.findFirst({ where });
       if (!scene) {
         return HttpResponse.json({ detail: "Not Found" }, { status: 404 });
       }
-      const user = getUser();
-      if (!user || scene.author !== user.id) {
+      if (scene.author !== user.id) {
         return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
       }
       const { title, items, itemOrder, archived } = await request.json();
@@ -146,7 +150,7 @@ export const handlers = [
           ...(items ? { items } : {}),
           ...(itemOrder ? { itemOrder: JSON.stringify(itemOrder) } : {}),
           ...(typeof archived === "boolean" ? { archived } : {}),
-          modifiedDate: new Date().toUTCString(),
+          modifiedDate: new Date().toISOString(),
         },
       });
       if (!updated) throw new Error("scene vanished mid-update");
