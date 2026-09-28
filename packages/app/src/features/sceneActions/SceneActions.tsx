@@ -117,7 +117,7 @@ const SceneActions: React.FC = () => {
   const save = async () => {
     invariant(key, "Only a saved scene is saved in place.");
     const state = store.getState();
-    const { revision } = state.scene;
+    const { revision, loadCount } = state.scene;
     const { title, items, itemOrder } = select.sceneInfo(state);
     setSaving(true);
     try {
@@ -125,7 +125,7 @@ const SceneActions: React.FC = () => {
         patchScene.mutateAsync({ key, patch: { title, items, itemOrder } }),
         sleep(MIN_SAVING_DELAY),
       ]);
-      dispatch(actions.markSaved({ key, author, revision }));
+      dispatch(actions.markSaved({ key, author, revision, loadCount }));
       setFlash({ text: "Saved!" });
     } catch (err) {
       // The scene stays dirty, so Save stays available to retry.

@@ -58,14 +58,13 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
 
   const publish = async (newTitle: string) => {
     const state = store.getState();
-    const { revision } = state.scene;
+    const { revision, loadCount } = state.scene;
     const { items, itemOrder } = select.sceneInfo(state);
     const result = await createScene.mutateAsync({
       title: newTitle,
       items,
       itemOrder,
     });
-    navigate(`/${result.key}`);
     dispatch(
       actions.markSaved({
         key: result.key,
@@ -73,8 +72,10 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
         title: newTitle,
         isLegacy: result.isLegacy ?? false,
         revision,
+        loadCount,
       }),
     );
+    navigate(`/${result.key}`);
     setPublishedUrl(sceneUrl(result.key));
   };
 

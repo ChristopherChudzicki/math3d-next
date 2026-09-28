@@ -16,6 +16,7 @@ const getInitialState = (): SceneState => ({
   loaded: false,
   dirty: false,
   revision: 0,
+  loadCount: 0,
   author: null,
   items: {},
   nextItemId: 1,
@@ -94,6 +95,7 @@ const slice = createSlice({
       state.author = author;
       state.key = key;
       state.loaded = true;
+      state.loadCount += 1;
       state.dirty = false;
       state.isLegacy = isLegacy;
 
@@ -207,8 +209,12 @@ const slice = createSlice({
       title?: string;
       isLegacy?: boolean;
       revision: number;
+      loadCount: number;
     }>((state, action) => {
-      const { key, author, title, isLegacy, revision } = action.payload;
+      const { key, author, title, isLegacy, revision, loadCount } =
+        action.payload;
+      // The user moved on to another scene while the save was in flight.
+      if (state.loadCount !== loadCount) return;
       state.key = key;
       state.author = author;
       state.loaded = true;

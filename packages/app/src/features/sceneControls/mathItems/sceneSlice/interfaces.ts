@@ -21,6 +21,11 @@ interface SceneState {
    * `dirty` only if it is unchanged when the save lands.
    */
   revision: number;
+  /**
+   * Counts scene loads. A save records it before sending and is ignored if
+   * another scene has loaded by the time it lands.
+   */
+  loadCount: number;
   author: number | null;
   items: {
     [id: string]: MathItem;

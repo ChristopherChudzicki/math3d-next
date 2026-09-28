@@ -113,8 +113,6 @@ const key = (state: RootState) => state.scene.key;
 
 const dirty = (state: RootState) => state.scene.dirty;
 
-const revision = (state: RootState) => state.scene.revision;
-
 const itemOrder = (state: RootState) => state.scene.order;
 
 const isLegacy = (state: RootState) => state.scene.isLegacy;
@@ -190,6 +188,5 @@ export {
   dirty,
   key,
   author,
-  revision,
 };
 export type { Subtree };

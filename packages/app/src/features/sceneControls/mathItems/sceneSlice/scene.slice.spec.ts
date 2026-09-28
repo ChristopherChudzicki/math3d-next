@@ -26,6 +26,7 @@ test("markSaved clears dirty when nothing changed since the save began", () => {
       key: scene.key,
       author: null,
       revision: edited.revision,
+      loadCount: edited.loadCount,
     }),
   );
 
@@ -35,7 +36,7 @@ test("markSaved clears dirty when nothing changed since the save began", () => {
 test("markSaved leaves dirty set after an edit made during the save", () => {
   const scene = seedDb.withSceneFromItems([]);
   const edited = reducer(load(scene), actions.setTitle({ title: "edited" }));
-  const { revision } = edited;
+  const { revision, loadCount } = edited;
   // Already dirty: the counter must still move.
   const typedDuringSave = reducer(
     edited,
@@ -44,7 +45,7 @@ test("markSaved leaves dirty set after an edit made during the save", () => {
 
   const saved = reducer(
     typedDuringSave,
-    actions.markSaved({ key: scene.key, author: null, revision }),
+    actions.markSaved({ key: scene.key, author: null, revision, loadCount }),
   );
 
   expect(saved.dirty).toBe(true);
@@ -54,7 +55,7 @@ test("clean actions, like an animating slider's, do not count as edits", () => {
   const item = makeItem(MIT.Point);
   const scene = seedDb.withSceneFromItems([item]);
   const edited = reducer(load(scene), actions.setTitle({ title: "edited" }));
-  const { revision } = edited;
+  const { revision, loadCount } = edited;
   const animated = reducer(
     edited,
     actions.setProperties(
@@ -65,7 +66,7 @@ test("clean actions, like an animating slider's, do not count as edits", () => {
 
   const saved = reducer(
     animated,
-    actions.markSaved({ key: scene.key, author: null, revision }),
+    actions.markSaved({ key: scene.key, author: null, revision, loadCount }),
   );
 
   expect(saved.dirty).toBe(false);
@@ -88,6 +89,7 @@ test("markSaved adopts the published key, author, title, and legacy flag", () =>
       title: "Published",
       isLegacy: false,
       revision: legacy.revision,
+      loadCount: legacy.loadCount,
     }),
   );
 
@@ -98,6 +100,25 @@ test("markSaved adopts the published key, author, title, and legacy flag", () =>
     isLegacy: false,
     loaded: true,
   });
+});
+
+test("markSaved does nothing once another scene has loaded", () => {
+  const saving = seedDb.withSceneFromItems([]);
+  const opened = seedDb.withSceneFromItems([]);
+  const edited = reducer(load(saving), actions.setTitle({ title: "edited" }));
+  const { revision, loadCount } = edited;
+  const openedDuringSave = reducer(edited, setSceneFrom(opened));
+  const editedAgain = reducer(
+    openedDuringSave,
+    actions.setTitle({ title: "edited too" }),
+  );
+
+  const saved = reducer(
+    editedAgain,
+    actions.markSaved({ key: saving.key, author: 7, revision, loadCount }),
+  );
+
+  expect(saved).toBe(editedAgain);
 });
 
 test("loading a scene clears dirty", () => {

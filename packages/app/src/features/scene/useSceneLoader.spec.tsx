@@ -116,6 +116,7 @@ test("marking the open scene saved under a new key does not reload the route's s
         key: "new-key",
         author: null,
         revision: store.getState().scene.revision,
+        loadCount: store.getState().scene.loadCount,
       }),
     );
   });
