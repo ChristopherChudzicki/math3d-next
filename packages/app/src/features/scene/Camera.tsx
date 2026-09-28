@@ -8,6 +8,7 @@ import { useMathScope } from "../sceneControls/mathItems/sceneSlice/index";
 import type { AxesRange, Coords } from "./graphics/interfaces";
 import { project } from "./graphics/util";
 import { dolly, FOV_DOLLY_IN, FOV_DOLLY_OUT } from "./dollyZoom";
+import sameCoordinates from "./sameCoordinates";
 
 const { Controls } = MB.Threestrap;
 
@@ -110,12 +111,25 @@ const Camera: React.FC<CameraProps> = ({ item, range, scale, onMoveEnd }) => {
       const withoutDollyZoom = isOrthographic
         ? dolly.in(cameraPosition, cameraTarget).toArray()
         : cameraPosition;
-      onMoveEnd?.({
-        position: convert.toUi(withoutDollyZoom),
-        target: convert.toUi(cameraTarget),
-      });
+      const newPosition = convert.toUi(withoutDollyZoom);
+      const newTarget = convert.toUi(cameraTarget);
+      // A click on the scene ends a "move" that went nowhere; it isn't an edit.
+      const moved =
+        !position ||
+        !sameCoordinates(newPosition, position) ||
+        !sameCoordinates(newTarget, target ?? [0, 0, 0]);
+      if (!moved) return;
+      onMoveEnd?.({ position: newPosition, target: newTarget });
     },
-    [onMoveEnd, convert, updateOnDrag, isOrthographic, threePos],
+    [
+      onMoveEnd,
+      convert,
+      updateOnDrag,
+      isOrthographic,
+      threePos,
+      position,
+      target,
+    ],
   );
   return (
     <>
