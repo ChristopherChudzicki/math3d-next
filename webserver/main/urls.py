@@ -15,12 +15,12 @@ Including another URLconf
 """
 
 from allauth.socialaccount.providers.oauth2.urls import default_urlpatterns
+from authentication.providers import GoogleProvider
 from django.conf import settings
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import include, path
 
-from authentication.providers import GoogleProvider
 from main.api import api
 from main.views import health
 

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-import scenes.models as models
+from scenes import models
 
 admin.site.register(models.LegacyScene)
 admin.site.register(models.Scene)

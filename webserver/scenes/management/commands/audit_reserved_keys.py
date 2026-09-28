@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
-from scenes.models import Scene, LegacyScene
+from scenes.models import LegacyScene, Scene
 
 RESERVED = Q(key="app") | Q(key__length__lt=2)
 

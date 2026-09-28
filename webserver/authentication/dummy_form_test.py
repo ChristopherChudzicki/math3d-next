@@ -3,7 +3,6 @@
 from html.parser import HTMLParser
 
 import pytest
-
 from main.management.commands import seed_test_data
 
 FORM_URL = "/_allauth/dummy/authenticate/?state=any"
