@@ -360,6 +360,18 @@ test("the signed-out link step offers sign-in", async () => {
   expect(screen.queryByRole("dialog", { name: "Share scene" })).toBeNull();
 });
 
+test("no scene action is offered until the route's scene has loaded", async () => {
+  server.use(http.get(urls.scenes.detail, () => delay("infinite")));
+  const scene = seedDb.withSceneFromItems([]);
+  const { queryClient } = renderTestApp(`/${scene.key}`);
+
+  // Auth has settled, so only the scene load holds the action back.
+  await waitFor(() =>
+    expect(queryClient.getQueryState(["me"])?.status).not.toBe("pending"),
+  );
+  expect(screen.queryByTestId("scene-action")).toBeNull();
+});
+
 test("no scene action is offered while auth is still loading", async () => {
   server.use(http.get(urls.auth.usersMe, () => delay("infinite")));
   renderTestApp("/");

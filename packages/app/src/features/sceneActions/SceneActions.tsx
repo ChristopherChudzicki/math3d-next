@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router";
 import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
 import Button from "@mui/material/Button";
@@ -75,6 +76,8 @@ const SceneActions: React.FC = () => {
   const key = useAppSelector(select.key);
   const author = useAppSelector(select.author);
   const dirty = useAppSelector(select.dirty);
+  const loaded = useAppSelector((state) => state.scene.loaded);
+  const routeKey = useParams().sceneKey ?? null;
   const [dialog, setDialog] = useState<DialogState>(null);
   const [saving, setSaving] = useState(false);
   const [flash, setFlash] = useState<{ text: string } | null>(null);
@@ -84,16 +87,6 @@ const SceneActions: React.FC = () => {
     const timeout = setTimeout(() => setFlash(null), FLASH_TIMEOUT);
     return () => clearTimeout(timeout);
   }, [flash]);
-
-  if (authStatus === "loading") {
-    return (
-      <span
-        className={styles.placeholder}
-        style={{ width: PRIMARY_WIDTH }}
-        aria-hidden
-      />
-    );
-  }
 
   const { primary, menu } = getActions({
     userId: me?.id ?? null,
@@ -183,38 +176,49 @@ const SceneActions: React.FC = () => {
       <span role="status" className={styles.status}>
         {flash?.text}
       </span>
-      <ButtonGroup>
-        <Button
-          data-testid="scene-action"
-          variant="text"
-          color="primary"
-          // Not `disabled`: a disabled button drops keyboard focus to the page
-          // after every Save or Copy link.
-          aria-disabled={!enabled}
-          className={enabled ? undefined : "Mui-disabled"}
-          disableRipple={!enabled}
-          onClick={handlePrimary}
-          sx={{ "&.MuiButtonGroup-grouped": { width: PRIMARY_WIDTH } }}
-        >
-          {label}
-        </Button>
-        {menu.length > 0 ? (
-          <SimpleMenu
-            aria-label="More scene actions"
-            items={menuItems}
-            trigger={
-              <Button
-                variant="text"
-                color="secondary"
-                aria-label="More scene actions"
-                disabled={saving}
-              >
-                <ExpandMoreIcon fontSize="small" />
-              </Button>
-            }
-          />
-        ) : null}
-      </ButtonGroup>
+      {/* Wait for auth, which picks the action, and for the route's scene, whose
+          key and author it acts on. The dialogs stay mounted regardless: after
+          a publish, the store's key can reach a render before the route does. */}
+      {authStatus === "loading" || !loaded || key !== routeKey ? (
+        <span
+          className={styles.placeholder}
+          style={{ width: PRIMARY_WIDTH }}
+          aria-hidden
+        />
+      ) : (
+        <ButtonGroup>
+          <Button
+            data-testid="scene-action"
+            variant="text"
+            color="primary"
+            // Not `disabled`: a disabled button drops keyboard focus to the page
+            // after every Save or Copy link.
+            aria-disabled={!enabled}
+            className={enabled ? undefined : "Mui-disabled"}
+            disableRipple={!enabled}
+            onClick={handlePrimary}
+            sx={{ "&.MuiButtonGroup-grouped": { width: PRIMARY_WIDTH } }}
+          >
+            {label}
+          </Button>
+          {menu.length > 0 ? (
+            <SimpleMenu
+              aria-label="More scene actions"
+              items={menuItems}
+              trigger={
+                <Button
+                  variant="text"
+                  color="secondary"
+                  aria-label="More scene actions"
+                  disabled={saving}
+                >
+                  <ExpandMoreIcon fontSize="small" />
+                </Button>
+              }
+            />
+          ) : null}
+        </ButtonGroup>
+      )}
       {dialog?.kind === "publish" ? (
         <PublishDialog
           mode={dialog.mode}
