@@ -22,10 +22,7 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
   await app.getUniqueItemSettings({ description: initialDescription });
 
   await test.step("Save scene", async () => {
-    await app
-      .header()
-      .getByRole("button", { name: "Other Saving Options" })
-      .click();
+    await app.moreSceneActions().click();
     await page.getByRole("menuitem", { name: "Duplicate" }).click();
     const dialog = page.getByRole("dialog", { name: "Save a Copy" });
     const title = dialog.getByRole("textbox", { name: "Title" });
@@ -43,10 +40,6 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
 
     await dialog.getByRole("button", { name: "OK" }).click();
     await expect(dialog).not.toBeVisible();
-
-    await expect(
-      page.getByRole("alert").filter({ hasText: "Saved!" }),
-    ).toBeVisible();
 
     // Check that saving updated the current URL
     await expect(page.url()).toBe(url);

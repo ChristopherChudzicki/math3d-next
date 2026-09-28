@@ -31,7 +31,7 @@ test("Editing while a save is in flight keeps the newer edit", async ({
       r.url().includes(`/v1/scenes/${key}/`) &&
       r.status() === 200,
   );
-  await app.saveButton().click();
+  await app.sceneAction().click();
   await item.field("description").fill(`${description} typed during save`);
   await refetched;
 
@@ -40,4 +40,7 @@ test("Editing while a save is in flight keeps the newer edit", async ({
   await expect(item.field("description")).toHaveValue(
     `${description} typed during save`,
   );
+  // The edit typed during the save is still unsaved.
+  await expect(app.sceneAction()).toHaveAccessibleName("Save");
+  await expect(app.sceneAction()).toBeEnabled();
 });

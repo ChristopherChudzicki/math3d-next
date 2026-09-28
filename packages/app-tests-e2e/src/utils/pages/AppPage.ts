@@ -7,7 +7,6 @@ import LoginDialog from "./LoginDialog";
 import DummyProviderPage from "./DummyProviderPage";
 import DeleteAccountPage from "./DeleteAccountPage";
 import ItemSettings, { UniqueItemSettingsOpts } from "./ItemSettings";
-import SharePopover from "./SharePopover";
 import MyScenes from "./MyScenes";
 
 class AppPage {
@@ -33,10 +32,6 @@ class AppPage {
     return new DummyProviderPage(this.page);
   }
 
-  sharePopover(): SharePopover {
-    return new SharePopover(this.page);
-  }
-
   sceneTitle(): Locator {
     return this.header().getByLabel("Scene title");
   }
@@ -45,9 +40,13 @@ class AppPage {
     return this.page.getByRole("banner");
   }
 
-  saveButton(): Locator {
+  sceneAction(): Locator {
     const header = this.header();
-    return header.getByRole("button").and(header.getByTestId("save"));
+    return header.getByRole("button").and(header.getByTestId("scene-action"));
+  }
+
+  moreSceneActions(): Locator {
+    return this.header().getByRole("button", { name: "More scene actions" });
   }
 
   deleteAccountPage(): DeleteAccountPage {

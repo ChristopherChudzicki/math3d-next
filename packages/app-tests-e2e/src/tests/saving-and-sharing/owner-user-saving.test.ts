@@ -17,17 +17,17 @@ test("Saving a new scene", async ({ page }) => {
   const newDescription = faker.lorem.words(3);
 
   await test.step("Making a change enables saving", async () => {
-    await expect(app.saveButton()).toBeDisabled();
-    await expect(app.saveButton()).toHaveAccessibleName("Save");
+    await expect(app.sceneAction()).toBeDisabled();
+    await expect(app.sceneAction()).toHaveAccessibleName("Save");
 
     await item.field("description").fill(newDescription);
 
-    await expect(app.saveButton()).toBeEnabled();
-    await expect(app.saveButton()).toHaveAccessibleName("Save");
+    await expect(app.sceneAction()).toBeEnabled();
+    await expect(app.sceneAction()).toHaveAccessibleName("Save");
   });
 
   await test.step("Save scene", async () => {
-    await app.saveButton().click();
+    await app.sceneAction().click();
     const dialog = page.getByRole("dialog", { name: "Save Scene" });
     await dialog.getByRole("textbox", { name: "Title" }).fill(title);
     await page.getByRole("dialog");
@@ -43,10 +43,6 @@ test("Saving a new scene", async ({ page }) => {
 
     await dialog.getByRole("button", { name: "OK" }).click();
     await expect(dialog).not.toBeVisible();
-
-    await expect(
-      page.getByRole("alert").filter({ hasText: "Saved!" }),
-    ).toBeVisible();
 
     // Check that saving updated the current URL
     await expect(page.url()).toBe(url);
@@ -78,20 +74,17 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
   });
 
   await test.step("Making a change enables saving", async () => {
-    await expect(app.saveButton()).toBeDisabled();
-    await expect(app.saveButton()).toHaveAccessibleName("Save");
+    await expect(app.sceneAction()).toHaveAccessibleName("Copy link");
 
     await item.field("description").fill(newDescription);
 
-    await expect(app.saveButton()).toBeEnabled();
-    await expect(app.saveButton()).toHaveAccessibleName("Save");
+    await expect(app.sceneAction()).toBeEnabled();
+    await expect(app.sceneAction()).toHaveAccessibleName("Save");
   });
 
   await test.step("Save scene", async () => {
-    await app.saveButton().click();
-    await expect(
-      page.getByRole("alert").filter({ hasText: "Saved!" }),
-    ).toBeVisible();
+    await app.sceneAction().click();
+    await expect(app.sceneAction()).toHaveAccessibleName("Saved!");
     await expect(item.root).toBeVisible();
   });
 
@@ -111,7 +104,7 @@ test("Saving a new scene keeps the active item selected", async ({ page }) => {
   await item.field("description").fill(faker.lorem.words(3));
   await expect(item.activeMarker()).toHaveCount(1);
 
-  await app.saveButton().click();
+  await app.sceneAction().click();
   const dialog = page.getByRole("dialog", { name: "Save Scene" });
   await dialog
     .getByRole("textbox", { name: "Title" })
@@ -122,8 +115,8 @@ test("Saving a new scene keeps the active item selected", async ({ page }) => {
     .getByRole("button", { name: "OK" })
     .click();
 
-  // The save navigates to the new key, so the scene reloads from the server.
-  // It is the scene already open, so the selection should survive it.
+  // Publishing moves to the new key without reloading the scene, so the
+  // selection survives.
   await expect(page).toHaveURL(/\/[^/]+$/);
   await expect(item.activeMarker()).toHaveCount(1);
 });
