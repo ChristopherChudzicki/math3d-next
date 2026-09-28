@@ -2,9 +2,9 @@ import pytest
 from allauth.socialaccount.models import SocialAccount
 from django.core.management import call_command
 from django.core.management.base import CommandError
+from scenes.models import Scene
 
 from main.management.commands.seed_test_data import create_test_user
-from scenes.models import Scene
 
 
 @pytest.mark.django_db

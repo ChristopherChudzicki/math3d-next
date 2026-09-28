@@ -1,8 +1,9 @@
 import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from scenes.models import Scene, is_reserved_key_error
+
 from scenes.factories import SceneFactory
+from scenes.models import Scene, is_reserved_key_error
 
 
 def _valid_scene_kwargs(key):

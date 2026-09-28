@@ -39,7 +39,7 @@ def isolate_environ(environ: MutableMapping[str, str]) -> None:
 
 isolate_environ(os.environ)
 
-from main.settings import *  # noqa: E402, F403
+from main.settings import *
 
 
 def require_postgres(engine: str, database_url: str) -> None:
@@ -76,12 +76,12 @@ def require_test_db_name(name: str) -> str:
     return name
 
 
-require_postgres(DATABASES["default"].get("ENGINE", ""), ENV.DATABASE_URL)  # noqa: F405
+require_postgres(DATABASES["default"].get("ENGINE", ""), ENV.DATABASE_URL)
 
 # The test database name is otherwise fixed, so concurrent suites (worktrees,
 # parallel agents) would drop each other's.
 if test_db_name := os.environ.get("TEST_DB_NAME"):
-    DATABASES["default"].setdefault("TEST", {})["NAME"] = require_test_db_name(  # noqa: F405
+    DATABASES["default"].setdefault("TEST", {})["NAME"] = require_test_db_name(
         test_db_name
     )
 
