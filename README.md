@@ -41,9 +41,10 @@ an unverified address.
 
 Day-to-day development signs in through the `dummy` provider and never reaches
 Google. To exercise the real flow by hand, move both servers to bare `localhost`
-and turn off CSRF — Google accepts a plain-HTTP redirect URI only on bare
-`localhost`, and `localhost` cannot carry the domain cookie the SPA reads the
-CSRF token from. See [ADR-0005](docs/adr/0005-local-google-sign-in-testing.md).
+and turn off CSRF — Google accepts a redirect URI outside a public TLD only on
+bare `localhost` (it refuses `math3d.localhost`), and `localhost` cannot carry
+the domain cookie the SPA reads the CSRF token from. See
+[ADR-0005](docs/adr/0005-local-google-sign-in-testing.md).
 
 Add to `.env` (gitignored), using a dev OAuth web client from the Google
 console whose only authorized redirect URI is
