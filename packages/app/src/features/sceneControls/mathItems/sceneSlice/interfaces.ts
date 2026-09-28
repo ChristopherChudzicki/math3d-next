@@ -16,6 +16,11 @@ interface SceneState {
    */
   loaded: boolean;
   dirty: boolean;
+  /**
+   * Counts dirtying actions. A save records it before sending and clears
+   * `dirty` only if it is unchanged when the save lands.
+   */
+  revision: number;
   author: number | null;
   items: {
     [id: string]: MathItem;

@@ -15,6 +15,7 @@ const getInitialState = (): SceneState => ({
   key: null,
   loaded: false,
   dirty: false,
+  revision: 0,
   author: null,
   items: {},
   nextItemId: 1,
@@ -103,6 +104,7 @@ const slice = createSlice({
       state.author = author;
       state.key = key;
       state.loaded = true;
+      state.dirty = false;
       state.isLegacy = isLegacy;
 
       invariant(state.order[MAIN_FOLDER], "Main folder should exist.");
@@ -211,6 +213,22 @@ const slice = createSlice({
     setClean: withClean(true)<void>((state, _action) => {
       state.dirty = false;
     }),
+    markSaved: withClean(true)<{
+      key: string;
+      author: SceneState["author"];
+      /** Omitted by an in-place save, which must not revert a title typed since. */
+      title?: string;
+      isLegacy?: boolean;
+      revision: number;
+    }>((state, action) => {
+      const { key, author, title, isLegacy, revision } = action.payload;
+      state.key = key;
+      state.author = author;
+      state.loaded = true;
+      if (title !== undefined) state.title = title;
+      if (isLegacy !== undefined) state.isLegacy = isLegacy;
+      if (state.revision === revision) state.dirty = false;
+    }),
   },
 });
 
@@ -222,16 +240,14 @@ const reducer: Reducer<SceneState, UnknownMaybeCleanAction> = (
   state,
   action,
 ) => {
-  if (
-    !state ||
-    state.dirty ||
-    !action.type.startsWith("scene/") ||
-    action?.meta?.clean
-  ) {
+  if (!state || !action.type.startsWith("scene/") || action?.meta?.clean) {
     return slice.reducer(state, action);
   }
 
-  return slice.reducer({ ...state, dirty: true }, action);
+  return slice.reducer(
+    { ...state, dirty: true, revision: state.revision + 1 },
+    action,
+  );
 };
 
 const sceneSlice = { ...slice, reducer };
