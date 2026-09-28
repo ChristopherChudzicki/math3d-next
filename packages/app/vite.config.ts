@@ -62,8 +62,8 @@ const checkoutIdentity = (): PluginOption => {
 };
 
 // Derive server host/port from APP_BASE_URL so local dev and CI can share
-// the same config without hardcoding math3d.localdev. Locally this comes
-// from direnv loading .env.development; in CI it comes from a GitHub var.
+// the same config without hardcoding math3d.localhost. `yarn start` loads it
+// from .env.development / .env; CI sets it in the job environment.
 const appUrl = new URL(process.env.APP_BASE_URL ?? "http://localhost:3000");
 
 // Only when a token is present: `yarn build` runs tokenless in e2e.yml and in

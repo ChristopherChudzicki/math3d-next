@@ -3,15 +3,15 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "concurrently 'yarn css-types --watch' 'vite'",
+    "start": "concurrently 'yarn css-types --watch' 'node --env-file-if-exists=../../.env.development --env-file-if-exists=../../.env ../../node_modules/.bin/vite'",
     "css-types": "tcm src",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "build-storybook": "build-storybook -s public",
     "lint": "eslint --max-warnings 0 \"**/*.ts?(x)\"",
     "storybook": "start-storybook -p 6006 -s public",
-    "test": "vitest --run",
-    "test-watch": "vitest",
+    "test": "node --env-file-if-exists=../../.env.development --env-file-if-exists=../../.env ../../node_modules/.bin/vitest --run",
+    "test-watch": "node --env-file-if-exists=../../.env.development --env-file-if-exists=../../.env ../../node_modules/.bin/vitest",
     "typecheck": "tsc --noEmit && tsc --noEmit -p src/worker/tsconfig.json"
   },
   "browserslist": {

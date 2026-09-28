@@ -21,25 +21,27 @@ jobs:
     environment: "ci"
     env:
       SKIP_YARN_COREPACK_CHECK: true
-      APP_BASE_URL: ${{ vars.APP_BASE_URL }}
-      VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
       VITE_APP_VERSION: ci
       VITE_DISPLAY_AUTH_FLOWS: "true"
       VITE_ENABLE_DUMMY_AUTH: "true"
       VITE_LEGACY_APP_BASE_URL: ${{ vars.VITE_LEGACY_APP_BASE_URL }}
       VITE_ISSUE_URL: ${{ vars.VITE_ISSUE_URL }}
-      VITE_SITE_ORIGIN: ${{ vars.VITE_SITE_ORIGIN }}
-      TEST_API_URL: ${{ vars.TEST_API_URL }}
-      TEST_APP_URL: ${{ vars.TEST_APP_URL }}
       TEST_USER_STATIC_EMAIL: ${{ vars.TEST_USER_STATIC_EMAIL }}
     steps:
+      - uses: actions/checkout@v6
+      # The app/API origins must agree with the backend's ALLOWED_HOSTS default
+      # and CSRF_COOKIE_DOMAIN, so take them from the committed dev config
+      # rather than GitHub variables that can drift from it.
+      - name: Load local origins from .env.development
+        run: grep -E '^(APP_BASE_URL|VITE_API_BASE_URL|VITE_SITE_ORIGIN|TEST_API_URL|TEST_APP_URL)=' .env.development >> "$GITHUB_ENV"
+      # Chromium resolves *.localhost itself; Node goes through the system
+      # resolver, so pin the names rather than rely on the runner's.
       - name: Add local domain entries to /etc/hosts
         run: |
           APP_HOST=$(echo "$TEST_APP_URL" | sed -E 's|https?://||; s|:[0-9]+$||')
           API_HOST=$(echo "$TEST_API_URL" | sed -E 's|https?://||; s|:[0-9]+$||')
           echo "127.0.0.1 $APP_HOST $API_HOST" | sudo tee -a /etc/hosts
           echo "::1       $APP_HOST $API_HOST" | sudo tee -a /etc/hosts
-      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version-file: ".nvmrc"
@@ -47,14 +49,9 @@ jobs:
       - run: corepack enable
       - name: Write env file for docker
         run: |
-          echo "APP_BASE_URL=$APP_BASE_URL" >> .env
-          echo "VITE_API_BASE_URL=$VITE_API_BASE_URL" >> .env
           echo "VITE_APP_VERSION=$VITE_APP_VERSION" >> .env
           echo "VITE_LEGACY_APP_BASE_URL=$VITE_LEGACY_APP_BASE_URL" >> .env
-          echo "TEST_API_URL=$TEST_API_URL" >> .env
-          echo "TEST_APP_URL=$TEST_APP_URL" >> .env
           echo "TEST_USER_STATIC_EMAIL=$TEST_USER_STATIC_EMAIL" >> .env
-          echo "CSRF_COOKIE_DOMAIN=math3d.localdev" >> .env
           echo "DISABLE_ALLAUTH_RATE_LIMITS=true" >> .env
       - name: Build docker stack
         run: docker compose build

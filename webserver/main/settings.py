@@ -106,7 +106,7 @@ else:
     ALLOWED_HOSTS = (
         ENV.ALLOWED_HOSTS
         if ENV.ALLOWED_HOSTS
-        else ["localhost", "127.0.0.1", "api.math3d.localdev"]
+        else ["localhost", "127.0.0.1", "api.math3d.localhost"]
     )
 
 
