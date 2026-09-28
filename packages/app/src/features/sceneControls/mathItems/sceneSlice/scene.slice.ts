@@ -200,9 +200,6 @@ const slice = createSlice({
     setActiveTab: withClean(true)<{ id: string }>((state, action) => {
       state.activeTabId = action.payload.id;
     }),
-    setClean: withClean(true)<void>((state, _action) => {
-      state.dirty = false;
-    }),
     markSaved: withClean(true)<{
       key: string;
       author: SceneState["author"];
