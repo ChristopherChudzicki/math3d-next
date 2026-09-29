@@ -1,7 +1,7 @@
 import React from "react";
 
 import Container from "@mui/material/Container";
-import Header from "@/util/components/Header";
+import Header from "@/ui/Header";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";

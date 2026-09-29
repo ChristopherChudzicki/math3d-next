@@ -3,7 +3,7 @@ import Tab from "@mui/material/Tab";
 import TabPanel from "@mui/lab/TabPanel";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
-import ScrollingYOverflowX from "@/util/components/scrollingOverflow";
+import ScrollingYOverflowX from "@/ui/scrollingOverflow";
 import { useAppSelector } from "@/store/hooks";
 import { useDispatch } from "react-redux";
 import styles from "./ControlTabs.module.css";

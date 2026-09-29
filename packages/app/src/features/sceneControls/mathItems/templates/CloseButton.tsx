@@ -1,9 +1,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import mergeClassNames from "classnames";
 import React from "react";
-import SubtleButton, {
-  SubtleButtonProps,
-} from "@/util/components/SubtleButton";
+import SubtleButton, { SubtleButtonProps } from "@/ui/SubtleButton";
 
 import styles from "./CloseButton.module.css";
 

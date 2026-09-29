@@ -26,7 +26,7 @@ vitest.mock("mathbox-react", () =>
  * JSDOM does not support enough ShadowDOM for MathLive to function properly, so
  * this mocks it with a textarea.
  */
-vitest.mock("./util/components/MathLive/MathField");
+vitest.mock("./ui/MathLive/MathField");
 
 vitest.mock("mathlive", () => vi.importActual("@/__mocks__/mathlive"));
 
@@ -35,7 +35,7 @@ vitest.mock("mathlive", () => vi.importActual("@/__mocks__/mathlive"));
  */
 vitest.mock("./util/hooks/useShadowStylesheet");
 
-vitest.mock("./util/components/TextareaAutoWidthHeight/TextMeasurer");
+vitest.mock("./ui/TextareaAutoWidthHeight/TextMeasurer");
 
 /**
  * JSDOM does not implement ResizeObserver. A no-op stand-in is enough for

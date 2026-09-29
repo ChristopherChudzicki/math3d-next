@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { visuallyHidden } from "@mui/utils";
 import Button from "@mui/material/Button";
 import ReplayRoundedIcon from "@mui/icons-material/ReplayRounded";
 import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
+import { u } from "@/util/styles";
 import copy from "./errorPage.copy";
 import buildReportUrl from "./errorPage.report";
 import BrokenTorus from "./BrokenTorus";
@@ -60,7 +60,7 @@ const TechnicalDetails: React.FC<{ text: string }> = ({ text }) => {
           </Button>
         </div>
         <pre className={styles.trace}>{text}</pre>
-        <span role="status" aria-live="polite" style={visuallyHidden}>
+        <span role="status" aria-live="polite" className={u.visuallyHidden}>
           {copied ? copy.copied : ""}
         </span>
       </div>

@@ -1,8 +1,8 @@
 import React from "react";
-import BasicDialog from "@/util/components/BasicDialog";
+import BasicDialog from "@/ui/BasicDialog";
 import invariant from "tiny-invariant";
 import { Button } from "@mui/material";
-import Link from "@/util/components/Link";
+import Link from "@/ui/Link";
 
 const ISSUE_URL = import.meta.env.VITE_ISSUE_URL;
 invariant(ISSUE_URL, "VITE_ISSUE_URL is not set");
