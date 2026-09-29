@@ -22,12 +22,9 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
   await app.getUniqueItemSettings({ description: initialDescription });
 
   await test.step("Save scene", async () => {
-    await app
-      .header()
-      .getByRole("button", { name: "Other Saving Options" })
-      .click();
+    await app.moreSceneActions().click();
     await page.getByRole("menuitem", { name: "Duplicate" }).click();
-    const dialog = page.getByRole("dialog", { name: "Save a Copy" });
+    const dialog = page.getByRole("dialog", { name: "Save a copy" });
     const title = dialog.getByRole("textbox", { name: "Title" });
     await expect(title).toHaveValue(`Copy of ${scene.title}`);
     await title.fill(newTitle);
@@ -35,18 +32,14 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
   });
 
   await test.step("Success dialog", async () => {
-    const dialog = page.getByRole("dialog", { name: "Scene Saved!" });
+    const dialog = page.getByRole("dialog", { name: "Scene saved!" });
     await expect(dialog).toBeVisible();
     const url = await dialog
       .getByRole("textbox", { name: "Shareable URL" })
       .inputValue();
 
-    await dialog.getByRole("button", { name: "OK" }).click();
+    await dialog.getByRole("button", { name: "Done" }).click();
     await expect(dialog).not.toBeVisible();
-
-    await expect(
-      page.getByRole("alert").filter({ hasText: "Saved!" }),
-    ).toBeVisible();
 
     // Check that saving updated the current URL
     await expect(page.url()).toBe(url);

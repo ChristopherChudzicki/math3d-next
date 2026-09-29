@@ -1,9 +1,9 @@
-import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { CaseReducer } from "@reduxjs/toolkit";
 import type { Reducer, UnknownAction } from "redux";
 import { mathItemConfigs, MathItemType } from "@math3d/mathitem-configs";
 import type { MathItem, MathItemPatch } from "@math3d/mathitem-configs";
-import { isEqual, keyBy } from "lodash-es";
+import { keyBy } from "lodash-es";
 import jsonPatch from "fast-json-patch";
 
 import invariant from "tiny-invariant";
@@ -15,6 +15,8 @@ const getInitialState = (): SceneState => ({
   key: null,
   loaded: false,
   dirty: false,
+  revision: 0,
+  loadCount: 0,
   author: null,
   items: {},
   nextItemId: 1,
@@ -85,24 +87,16 @@ const slice = createSlice({
       key: SceneState["key"];
     }>((state, action) => {
       const { items, order, title, author, key, isLegacy } = action.payload;
-      const nextItems = keyBy(items, (item) => item.id);
-      // Saving an unsaved scene mints a key and navigates to it, which loads
-      // back the scene the editor already holds. Identical content means the
-      // selection still names the same things, so keep it. Item ids are unique
-      // only within a scene, so nothing weaker than equality is safe here.
-      const sameContent =
-        isEqual(order, current(state.order)) &&
-        isEqual(nextItems, current(state.items));
       state.title = title;
-      state.items = nextItems;
+      state.items = keyBy(items, (item) => item.id);
       state.order = order;
-      if (!sameContent) {
-        state.activeItemId = undefined;
-        state.activeTabId = MAIN_FOLDER;
-      }
+      state.activeItemId = undefined;
+      state.activeTabId = MAIN_FOLDER;
       state.author = author;
       state.key = key;
       state.loaded = true;
+      state.loadCount += 1;
+      state.dirty = false;
       state.isLegacy = isLegacy;
 
       invariant(state.order[MAIN_FOLDER], "Main folder should exist.");
@@ -208,8 +202,25 @@ const slice = createSlice({
     setActiveTab: withClean(true)<{ id: string }>((state, action) => {
       state.activeTabId = action.payload.id;
     }),
-    setClean: withClean(true)<void>((state, _action) => {
-      state.dirty = false;
+    markSaved: withClean(true)<{
+      key: string;
+      author: SceneState["author"];
+      /** Omitted by an in-place save, which must not revert a title typed since. */
+      title?: string;
+      isLegacy?: boolean;
+      revision: number;
+      loadCount: number;
+    }>((state, action) => {
+      const { key, author, title, isLegacy, revision, loadCount } =
+        action.payload;
+      // The user moved on to another scene while the save was in flight.
+      if (state.loadCount !== loadCount) return;
+      state.key = key;
+      state.author = author;
+      state.loaded = true;
+      if (title !== undefined) state.title = title;
+      if (isLegacy !== undefined) state.isLegacy = isLegacy;
+      if (state.revision === revision) state.dirty = false;
     }),
   },
 });
@@ -222,16 +233,14 @@ const reducer: Reducer<SceneState, UnknownMaybeCleanAction> = (
   state,
   action,
 ) => {
-  if (
-    !state ||
-    state.dirty ||
-    !action.type.startsWith("scene/") ||
-    action?.meta?.clean
-  ) {
+  if (!state || !action.type.startsWith("scene/") || action?.meta?.clean) {
     return slice.reducer(state, action);
   }
 
-  return slice.reducer({ ...state, dirty: true }, action);
+  return slice.reducer(
+    { ...state, dirty: true, revision: state.revision + 1 },
+    action,
+  );
 };
 
 const sceneSlice = { ...slice, reducer };

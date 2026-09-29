@@ -8,6 +8,7 @@ import { takeSignInDraft } from "@/features/auth/signInDraft";
 import { InitialEntry } from "history";
 import { QueryClient } from "@tanstack/react-query";
 import { mockAuth, seedDb } from "@math3d/mock-api";
+import type { User } from "@math3d/api";
 import AppProviders from "@/AppProviders";
 import routes from "@/routes";
 
@@ -59,7 +60,14 @@ export const waitForAppReady = async (queryClient: QueryClient) => {
  */
 const renderTestApp = (
   initialRoute: InitialEntry = "/",
-  { isAuthenticated = false } = {},
+  {
+    isAuthenticated = false,
+    user: seededUser,
+  }: {
+    isAuthenticated?: boolean;
+    /** Sign in as this already-seeded user, e.g. to own a seeded scene. */
+    user?: User;
+  } = {},
 ) => {
   const initialEntries: InitialEntry[] = [initialRoute];
   // As main.tsx boots: a draft saved before a sign-in redirect is restored here.
@@ -83,7 +91,7 @@ const renderTestApp = (
     },
   });
 
-  const user = isAuthenticated ? seedDb.withUser() : null;
+  const user = seededUser ?? (isAuthenticated ? seedDb.withUser() : null);
   if (user) {
     // Set the mock API's current user to simulate session auth
     mockAuth.setCurrentUser(user.id);

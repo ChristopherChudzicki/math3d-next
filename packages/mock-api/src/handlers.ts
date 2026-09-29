@@ -111,16 +111,53 @@ export const handlers = [
       if (!itemOrder) {
         throw new Error("itemOrder should be object");
       }
+      const user = getUser();
       const sceneRecord = db.scene.create({
         title,
         items,
         itemOrder: JSON.stringify(itemOrder),
+        author: user ? user.id : null,
+        isLegacy: false,
       });
       const scene: Scene = {
         ...sceneRecord,
         itemOrder: JSON.parse(sceneRecord.itemOrder),
       };
       return HttpResponse.json(scene, { status: 201 });
+    },
+  ),
+  http.patch<{ key: string }, Partial<Scene>, ErrorResponseBody | Scene>(
+    urls.scenes.detail,
+    async ({ params, request }) => {
+      // As the real API: authentication, then existence, then ownership.
+      const user = getUser();
+      if (!user) {
+        return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
+      }
+      const where = { key: { equals: params.key } };
+      const scene = db.scene.findFirst({ where });
+      if (!scene) {
+        return HttpResponse.json({ detail: "Not Found" }, { status: 404 });
+      }
+      if (scene.author !== user.id) {
+        return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
+      }
+      const { title, items, itemOrder, archived } = await request.json();
+      const updated = db.scene.update({
+        where,
+        data: {
+          ...(typeof title === "string" ? { title } : {}),
+          ...(items ? { items } : {}),
+          ...(itemOrder ? { itemOrder: JSON.stringify(itemOrder) } : {}),
+          ...(typeof archived === "boolean" ? { archived } : {}),
+          modifiedDate: new Date().toISOString(),
+        },
+      });
+      if (!updated) throw new Error("scene vanished mid-update");
+      return HttpResponse.json({
+        ...updated,
+        itemOrder: JSON.parse(updated.itemOrder),
+      });
     },
   ),
   // allauth sign-out. Its 401 confirms the session is gone; `useLogout` treats

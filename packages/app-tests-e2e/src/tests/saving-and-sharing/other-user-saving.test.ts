@@ -37,9 +37,9 @@ test("Saving an existing scene scene", async ({
     description: initialDescription,
   });
 
-  await test.step("'Save a Copy' is initially enabled", async () => {
-    await expect(app.saveButton()).toBeEnabled();
-    await expect(app.saveButton()).toHaveAccessibleName("Save a Copy");
+  await test.step("'Save a copy' is initially enabled", async () => {
+    await expect(app.sceneAction()).toBeEnabled();
+    await expect(app.sceneAction()).toHaveAccessibleName("Save a copy");
   });
 
   await test.step("Save scene", async () => {
@@ -47,13 +47,18 @@ test("Saving an existing scene scene", async ({
     expect(new URL(page.url()).pathname).toBe(`/${key}`);
 
     await item.field("description").fill(newDescription);
-    await app.saveButton().click();
-    await expect(
-      page.getByRole("alert").filter({ hasText: "Saved!" }),
-    ).toBeVisible();
+    await app.sceneAction().click();
+    const dialog = page.getByRole("dialog", { name: "Save a copy" });
+    await expect(dialog.getByRole("textbox", { name: "Title" })).toHaveValue(
+      `Copy of ${title}`,
+    );
+    await dialog.getByRole("button", { name: "Save" }).click();
+    await page
+      .getByRole("dialog", { name: "Scene saved!" })
+      .getByRole("button", { name: "Done" })
+      .click();
     await expect(item.root).toBeVisible();
 
-    // assert initial URL for sanity
     const newUrl = new URL(page.url());
     expect(newUrl.pathname).not.toBe(`/${key}`);
     return newUrl.pathname;
@@ -61,18 +66,18 @@ test("Saving an existing scene scene", async ({
 
   await test.step("Assert ownership and change", async () => {
     await page.reload();
-    // button shows 'Save' now that we are owner
-    await expect(app.saveButton()).toHaveText("Save");
+    // Owned and unedited, so the primary action copies the link
+    await expect(app.sceneAction()).toHaveAccessibleName("Copy link");
     // item has new description
     await expect(item.field("description")).toHaveValue(newDescription);
-    // original title unchanged... we didn't touch it
-    await expect(app.sceneTitle()).toHaveValue(title);
+    // the copy got the dialog's prefilled title
+    await expect(app.sceneTitle()).toHaveValue(`Copy of ${title}`);
   });
 
   await test.step("Assert original page unchanged", async () => {
     await page.goto(`/${key}`);
-    // Original still shows 'Save a copy
-    await expect(app.saveButton()).toHaveText("Save a Copy");
+    // Original still shows 'Save a copy'
+    await expect(app.sceneAction()).toHaveAccessibleName("Save a copy");
     // item has new description
     await expect(item.field("description")).toHaveValue(initialDescription);
   });

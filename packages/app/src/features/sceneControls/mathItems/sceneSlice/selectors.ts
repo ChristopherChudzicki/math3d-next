@@ -186,5 +186,7 @@ export {
   isLegacy,
   hasChildren,
   dirty,
+  key,
+  author,
 };
 export type { Subtree };

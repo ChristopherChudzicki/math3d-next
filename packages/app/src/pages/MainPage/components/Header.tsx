@@ -4,7 +4,7 @@ import Header from "@/util/components/Header";
 
 import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
-import ShareButton from "@/features/sceneControls/mathItems/ShareButton";
+import { SceneActions } from "@/features/sceneActions";
 
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
@@ -21,7 +21,6 @@ import ListSubheader from "@mui/material/ListSubheader";
 import FunctionsIcon from "@mui/icons-material/Functions";
 
 import UserMenu from "./UserMenu";
-import SaveButton from "./SaveButton";
 
 const LoginButtons: React.FC<{
   isAuthenticated: AuthStatus;
@@ -163,8 +162,7 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
       title={props.title}
       nav={
         <>
-          <SaveButton />
-          <ShareButton variant={smallScreen ? "mobile" : "desktop"} />
+          <SceneActions />
           {smallScreen ? null : (
             <LoginButtons isAuthenticated={isAuthenticated} />
           )}

@@ -45,24 +45,24 @@ test("Saving an owned scene works on the cookies a real sign-in sets", async ({
   await test.step("Sign in from the editor", async () => {
     await app.signInAsDevUser(signInUser);
 
-    // Only the owner's button reads "Save"; a signed-in non-owner gets
-    // "Save a Copy", which saves a new scene through the exempt POST.
-    await expect(app.saveButton()).toHaveAccessibleName("Save");
+    // Only the owner gets Copy link/Save; a signed-in non-owner gets
+    // "Save a copy", which saves through the exempt POST.
+    await expect(app.sceneAction()).toHaveAccessibleName("Copy link");
   });
 
   const item = await app.getUniqueItemSettings({
     description: initialDescription,
   });
   await item.field("description").fill(editedDescription);
+  await expect(app.sceneAction()).toHaveAccessibleName("Save");
 
-  // Assert on the response rather than the "Saved!" alert: a CSRF rejection
-  // leaves the save pending forever, so the alert's absence reports the save
-  // UI instead of the 403.
+  // Assert on the response rather than the "Saved!" label: its absence would
+  // report the save UI instead of the 403.
   const patched = page.waitForResponse(
     (response) =>
       response.request().method() === "PATCH" &&
       response.url().includes(`/v1/scenes/${key}/`),
   );
-  await app.saveButton().click();
+  await app.sceneAction().click();
   expect((await patched).status()).toBe(200);
 });
