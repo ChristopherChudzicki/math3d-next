@@ -9,6 +9,7 @@ import { actions, select } from "@/features/sceneControls/mathItems";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import { DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import BasicDialog from "@/util/components/BasicDialog";
+import { sceneDisplayName } from "@/features/scene/sceneTitle";
 import useTitleForm from "./useTitleForm";
 import { LinkField, useLinkCopy } from "./LinkDialog";
 
@@ -69,7 +70,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
   // An anonymous scene may be the user's own from before signing in, so a
   // copy of it isn't "Copy of"; nor is a copy of an untitled scene.
   const [defaultTitle] = useState(() =>
-    mode === "copy" && author !== null && title.trim() !== ""
+    mode === "copy" && author !== null && sceneDisplayName(title) !== null
       ? `Copy of ${title}`
       : title,
   );

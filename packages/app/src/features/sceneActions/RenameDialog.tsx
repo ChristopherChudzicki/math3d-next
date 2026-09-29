@@ -16,7 +16,9 @@ const RenameDialog: React.FC<RenameDialogProps> = ({ onClose }) => {
     defaultTitle: title,
     onSubmit: async (newTitle) => {
       // setTitle marks the scene dirty even when the title is unchanged.
-      if (newTitle !== title) dispatch(actions.setTitle({ title: newTitle }));
+      if (newTitle !== title.trim()) {
+        dispatch(actions.setTitle({ title: newTitle }));
+      }
       onClose();
     },
   });

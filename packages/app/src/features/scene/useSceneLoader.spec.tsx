@@ -80,7 +80,6 @@ test("a draft saved on another scene is discarded, not applied", async () => {
 test("a refetch of the open scene keeps unsaved edits", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const { store, queryClient } = renderTestApp(`/${scene.key}`);
-  await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
   const edited = `${scene.title} (unsaved edit)`;
   await renameScene(edited);
   // A changed body, like the GET after a save: an unchanged one comes back as

@@ -12,6 +12,9 @@
 
 export const TITLE_MAX_CODEPOINTS = 200;
 
+/** What the SPA shows in place of an untitled scene's title. */
+export const UNTITLED = "Untitled";
+
 /** Clamp on a code-point boundary so an emoji / surrogate pair isn't split. */
 const clampCodePoints = (value: string, max: number): string => {
   const cps = Array.from(value);

@@ -33,9 +33,11 @@ import { useNavigate, useParams } from "react-router";
 import invariant from "tiny-invariant";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
+import { UNTITLED, sceneDisplayName } from "@/features/scene/sceneTitle";
 import styles from "./ScenesList.module.css";
 
-const displayTitle = (title?: string | null) => title?.trim() || "Untitled";
+const displayTitle = (title?: string | null) =>
+  sceneDisplayName(title ?? "") ?? UNTITLED;
 
 const { format } = new Intl.DateTimeFormat(navigator.languages[0]);
 
