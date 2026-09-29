@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-bind */
-import { ComponentMeta, ComponentStory } from "@storybook/react";
+import type { Meta, StoryFn } from "@storybook/react-vite";
 import React, { useState } from "react";
 
 import { colors, gradients } from "@math3d/mathitem-configs";
@@ -14,13 +14,13 @@ export default {
   title: "ColorPicker",
   component: ColorPicker,
   argTypes: { onChange: { action: "onChange" } },
-} as ComponentMeta<typeof ColorPicker>;
+} as Meta<typeof ColorPicker>;
 
-export const Uncontrolled: ComponentStory<typeof ColorPicker> = (args) => (
+export const Uncontrolled: StoryFn<typeof ColorPicker> = (args) => (
   <ColorPicker {...args} value="red" colors={colorsAndGradients} />
 );
 
-export const Controlled: ComponentStory<typeof ColorPicker> = (args) => {
+export const Controlled: StoryFn<typeof ColorPicker> = (args) => {
   const [color, setColor] = useState("blue");
   const onChange: OnColorChange = (event) => {
     setColor(event.value);
