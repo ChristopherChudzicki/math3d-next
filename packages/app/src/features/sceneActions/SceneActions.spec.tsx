@@ -318,36 +318,6 @@ test("a signed-out share of an edited scene mints a new link, prefilled with the
   expect(location.current.pathname).not.toBe(`/${scene.key}`);
 });
 
-test("the scene action works on a small screen", async () => {
-  // JSDOM has no matchMedia. Not vi.stubGlobal: undoing it with
-  // vi.unstubAllGlobals also drops setupTests' ResizeObserver stub.
-  Object.defineProperty(window, "matchMedia", {
-    configurable: true,
-    value: (query: string) => ({
-      matches: query.includes("max-width"),
-      media: query,
-      onchange: null,
-      addListener: () => {},
-      removeListener: () => {},
-      addEventListener: () => {},
-      removeEventListener: () => {},
-      dispatchEvent: () => false,
-    }),
-  });
-  onTestFinished(() => {
-    // @ts-expect-error Removing the stand-in added above
-    delete window.matchMedia;
-  });
-  const scene = seedDb.withSceneFromItems([]);
-  renderTestApp(`/${scene.key}`);
-
-  await user.click(await primary());
-
-  expect(
-    await screen.findByLabelText<HTMLInputElement>("Shareable URL"),
-  ).toHaveValue(`${window.location.origin}/${scene.key}`);
-});
-
 test("the signed-out link step offers sign-in", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const { location } = renderTestApp(`/${scene.key}`);

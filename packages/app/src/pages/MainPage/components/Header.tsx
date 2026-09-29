@@ -6,7 +6,6 @@ import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import { SceneActions } from "@/features/sceneActions";
 
-import useMediaQuery from "@mui/material/useMediaQuery";
 import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import type { AuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
@@ -21,6 +20,7 @@ import ListSubheader from "@mui/material/ListSubheader";
 import FunctionsIcon from "@mui/icons-material/Functions";
 
 import UserMenu from "./UserMenu";
+import * as styles from "./Header.module.css";
 
 const LoginButtons: React.FC<{
   isAuthenticated: AuthStatus;
@@ -29,6 +29,7 @@ const LoginButtons: React.FC<{
   if (isAuthenticated !== "unauthenticated" || !DISPLAY_AUTH_FLOWS) return null;
   return (
     <Button
+      className={styles["sign-in"]}
       variant="text"
       color="secondary"
       onClick={() => open("login")}
@@ -144,7 +145,6 @@ type AppHeaderProps = {
 };
 
 const AppHeader: React.FC<AppHeaderProps> = (props) => {
-  const smallScreen = useMediaQuery("(max-width: 600px)");
   const isAuthenticated = useAuthStatus();
   const userQuery = useUserMe();
   const { open } = useOverlay();
@@ -163,9 +163,7 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
       nav={
         <>
           <SceneActions />
-          {smallScreen ? null : (
-            <LoginButtons isAuthenticated={isAuthenticated} />
-          )}
+          <LoginButtons isAuthenticated={isAuthenticated} />
           <UserMenu items={filteredItems} authStatus={isAuthenticated} />
         </>
       }

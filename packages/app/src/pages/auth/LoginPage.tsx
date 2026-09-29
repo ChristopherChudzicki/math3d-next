@@ -11,7 +11,7 @@ import {
 import GoogleLogo from "@/features/auth/GoogleLogo";
 import { SIGN_IN_ERROR_MESSAGES } from "@/features/auth/signInErrors";
 import type { SignInError } from "@/features/auth/signInErrors";
-import BasicDialog from "@/util/components/BasicDialog";
+import BasicDialog from "@/ui/BasicDialog";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import styles from "./LoginPage.module.css";
 
@@ -42,6 +42,7 @@ const LoginPage: React.FC = () => {
         {signInError && (
           <Alert
             severity={signInError === "cancelled" ? "info" : "error"}
+            role={signInError === "cancelled" ? "status" : "alert"}
             className={styles["sign-in-alert"]}
           >
             {SIGN_IN_ERROR_MESSAGES[signInError]}
