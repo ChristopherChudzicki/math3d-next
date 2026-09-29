@@ -11,6 +11,11 @@ on:
         description: "Version number to deploy"
         required: true
         type: string
+      # Only the checkouts use this; the workflow file itself runs from the caller's commit.
+      ref:
+        description: "Fully-qualified ref to build and deploy (the release's tag, refs/tags/...)"
+        required: true
+        type: string
       dry_run:
         description: "If true, build artifacts but skip deployment"
         required: false
@@ -32,6 +37,9 @@ on:
         # skipped and the build still succeeds (rc dry runs and forks).
         required: false
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-26.04
@@ -40,6 +48,9 @@ jobs:
       SKIP_YARN_COREPACK_CHECK: true
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
 
       - uses: actions/setup-node@v6
         with:
@@ -84,6 +95,9 @@ jobs:
       AWS_S3_BUCKET: ${{ vars.AWS_S3_BUCKET }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
 
       - name: Download build artifacts
         uses: actions/download-artifact@v8
@@ -119,6 +133,9 @@ jobs:
       SKIP_YARN_COREPACK_CHECK: true
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
 
       - uses: actions/setup-node@v6
         with:
@@ -176,7 +193,10 @@ jobs:
     env:
       SKIP_YARN_COREPACK_CHECK: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
 
       - uses: actions/setup-node@v6
         with:
