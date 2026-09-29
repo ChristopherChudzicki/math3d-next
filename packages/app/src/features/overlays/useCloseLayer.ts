@@ -48,8 +48,8 @@ export const useCloseLayer = ({ pushed, params, stateKeys }: Layer) => {
       navigate(-1);
       return;
     }
-    // No entry of ours to pop — the layer was deep-linked — so drop its
-    // params in place rather than navigating out of the app.
+    // No entry of ours to pop (a deep link, or a replace onto one), so drop
+    // its params in place rather than navigating out of the app.
     const next = new URLSearchParams(search);
     params.forEach((param) => next.delete(param));
     const state = { ...(location.state as object | null) } as Record<

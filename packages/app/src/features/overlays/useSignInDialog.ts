@@ -12,7 +12,7 @@ import { useCloseLayer } from "./useCloseLayer";
 export const SIGN_IN_PARAM = "signin";
 
 export type SignInHistoryState = {
-  /** Like `overlayPushed`, for the entry that opened this dialog. */
+  /** Like `overlayPushed`, for the `?signin` entry. */
   signInPushed?: boolean;
   signInError?: SignInError;
 } | null;

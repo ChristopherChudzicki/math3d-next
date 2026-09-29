@@ -20,8 +20,8 @@ afterEach(() => {
   document.cookie = "csrftoken=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 });
 
-test("Google sign-in posts allauth's redirect form, returning to this page", async () => {
-  renderTestApp("/?controls=0&signin#h");
+test("Google sign-in posts allauth's redirect form, returning to this page and its overlay", async () => {
+  renderTestApp("/?controls=0&overlay=scenes&list=me&signin#h");
 
   const button = await screen.findByRole("button", {
     name: "Sign in with Google",
@@ -36,7 +36,7 @@ test("Google sign-in posts allauth's redirect form, returning to this page", asy
   expect(form).toHaveFormValues({
     provider: "google",
     process: "login",
-    callback_url: `${window.location.origin}/?controls=0#h`,
+    callback_url: `${window.location.origin}/?controls=0&overlay=scenes&list=me#h`,
   });
 });
 
@@ -141,25 +141,11 @@ test("If authenticated already, closes the dialog", async () => {
   await waitFor(() => expect(location.current.search).toBe(""));
 });
 
-test("Signing in from My Scenes returns to My Scenes", async () => {
-  renderTestApp("/?overlay=scenes&list=me");
-
-  await user.click(await screen.findByRole("button", { name: "sign in" }));
-
-  const dialog = await screen.findByRole("dialog", { name: "Sign in" });
-  expect(
-    within(dialog)
-      .getByRole("button", { name: "Sign in with Google" })
-      .closest("form"),
-  ).toHaveFormValues({
-    callback_url: `${window.location.origin}/?overlay=scenes&list=me`,
-  });
-});
-
 test("Back from the sign-in dialog returns to the overlay beneath it", async () => {
   const { location, router } = renderTestApp("/?overlay=scenes&list=me");
   await user.click(await screen.findByRole("button", { name: "sign in" }));
   await screen.findByRole("dialog", { name: "Sign in" });
+  expect(location.current.search).toBe("?overlay=scenes&list=me&signin=");
 
   await act(() => router.navigate(-1));
 
@@ -169,6 +155,24 @@ test("Back from the sign-in dialog returns to the overlay beneath it", async () 
   expect(location.current.search).toBe("?overlay=scenes&list=me");
   // My Scenes' prompt, reachable again now nothing covers it.
   expect(screen.getByRole("button", { name: "sign in" })).toBeVisible();
+});
+
+test("Closing a returned error's dialog keeps the overlay and forgets the error", async () => {
+  const { location } = renderTestApp(
+    "/?overlay=scenes&list=me&error=signup_closed&error_process=login#h",
+  );
+  const dialog = await screen.findByRole("dialog", { name: "Sign in" });
+
+  await user.click(within(dialog).getByRole("button", { name: "Close" }));
+
+  await waitFor(() =>
+    expect(location.current.search).toBe("?overlay=scenes&list=me"),
+  );
+  expect(location.current.hash).toBe("#h");
+  await user.click(screen.getByRole("button", { name: "sign in" }));
+  expect(
+    await screen.findByRole("dialog", { name: "Sign in" }),
+  ).not.toHaveTextContent(/sign-ups are closed/i);
 });
 
 test("opening/closing the dialog preserves other params and the hash", async () => {
