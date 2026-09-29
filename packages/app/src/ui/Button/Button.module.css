@@ -1,9 +1,12 @@
 /*
- * `tone` sets --tone; `variant` decides how it is applied.
+ * `tone` sets --tone; `variant` decides how it is applied. Tone colors keep
+ * text at 4.5:1 or better against white in every enabled state.
  *
- * Solid hover/active shift OKLCH lightness by --tone-step (x1, x2). Dark tones
- * step lighter: darkening a near-black has too little room to show. Outline
- * and ghost tints mix in currentColor, so they also read on dark surfaces.
+ * Solid hover/active shift OKLCH lightness by --tone-step (x1, x2), scaling
+ * chroma with it so darker steps stay inside sRGB instead of being clipped,
+ * which would shift their hue. Dark tones step lighter: darkening a near-black
+ * has too little room to show. Outline and ghost tints mix in currentColor, so
+ * they also read on dark surfaces.
  */
 .button {
   display: inline-flex;
@@ -24,16 +27,16 @@
 
 .neutral {
   --tone: var(--color-text-primary);
-  --tone-step: 0.1;
+  --tone-step: 0.08;
 }
 
 .accent {
-  --tone: var(--color-primary);
+  --tone: var(--color-accent);
   --tone-step: -0.08;
 }
 
 .danger {
-  --tone: var(--color-error);
+  --tone: var(--color-danger);
   --tone-step: -0.08;
 }
 
@@ -53,17 +56,34 @@
   color: var(--tone);
 }
 
-.solid:hover:not([data-disabled]) {
-  background-color: oklch(from var(--tone) calc(l + var(--tone-step)) c h);
+/*
+ * Hover only where hover exists: on touch screens it sticks after a tap.
+ * Relative colors are guarded because, with var() inside, an unsupported one
+ * makes the background transparent under white text.
+ */
+@media (hover: hover) {
+  .outline:hover:not([data-disabled]),
+  .ghost:hover:not([data-disabled]) {
+    background-color: color-mix(in srgb, currentColor 8%, transparent);
+  }
 }
 
-.solid:active:not([data-disabled]) {
-  background-color: oklch(from var(--tone) calc(l + 2 * var(--tone-step)) c h);
-}
+@supports (color: oklch(from red l c h)) {
+  @media (hover: hover) {
+    .solid:hover:not([data-disabled]) {
+      background-color: oklch(
+        from var(--tone) calc(l + var(--tone-step))
+          calc(c * (l + var(--tone-step)) / l) h
+      );
+    }
+  }
 
-.outline:hover:not([data-disabled]),
-.ghost:hover:not([data-disabled]) {
-  background-color: color-mix(in srgb, currentColor 8%, transparent);
+  .solid:active:not([data-disabled]) {
+    background-color: oklch(
+      from var(--tone) calc(l + 2 * var(--tone-step))
+        calc(c * (l + 2 * var(--tone-step)) / l) h
+    );
+  }
 }
 
 .outline:active:not([data-disabled]),

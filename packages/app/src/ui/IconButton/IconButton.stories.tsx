@@ -1,5 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Icon } from "@iconify/react/offline";
+import x from "@iconify-icons/lucide/x";
 import IconButton from "./IconButton";
 import type { ButtonVariant, ButtonTone, ButtonSize } from "../Button";
 
@@ -13,17 +15,6 @@ const states = [
   "focus-visible",
   "disabled",
 ] as const;
-
-const CloseIcon = () => (
-  <svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true">
-    <path
-      d="M6 6l12 12M18 6L6 18"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
 
 const cell: React.CSSProperties = { padding: "6px 10px", textAlign: "left" };
 const heading: React.CSSProperties = {
@@ -65,7 +56,7 @@ const AllIconButtons: React.FC = () => (
                     data-pseudo={state}
                     disabled={state === "disabled"}
                   >
-                    <CloseIcon />
+                    <Icon icon={x} />
                   </IconButton>
                 </td>
               )),

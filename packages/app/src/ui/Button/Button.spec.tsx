@@ -19,7 +19,7 @@ test("does not submit an enclosing form unless asked to", async () => {
   expect(onSubmit).toHaveBeenCalledOnce();
 });
 
-test("a loading button keeps focus, reports busy, and ignores clicks", async () => {
+test("a loading button keeps focus, reports disabled, and ignores clicks", async () => {
   const onClick = vi.fn();
   const { rerender } = render(<Button onClick={onClick}>Save</Button>);
   const button = screen.getByRole("button", { name: "Save" });
@@ -32,8 +32,14 @@ test("a loading button keeps focus, reports busy, and ignores clicks", async () 
   );
   expect(button).toHaveFocus();
   expect(button).toHaveAttribute("aria-disabled", "true");
-  expect(button).toHaveAttribute("aria-busy", "true");
 
   await user.click(button);
   expect(onClick).not.toHaveBeenCalled();
+});
+
+test("forwards its ref to the button, as Base UI's render prop requires", () => {
+  const ref = React.createRef<HTMLButtonElement>();
+  render(<Button ref={ref}>Save</Button>);
+
+  expect(ref.current).toBe(screen.getByRole("button", { name: "Save" }));
 });

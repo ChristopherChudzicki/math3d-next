@@ -34,7 +34,6 @@ const Button: React.FC<ButtonProps> = ({
     {...others}
     disabled={disabled || loading}
     focusableWhenDisabled={focusableWhenDisabled || loading}
-    aria-busy={loading || undefined}
     className={classNames(
       styles.button,
       styles[variant],

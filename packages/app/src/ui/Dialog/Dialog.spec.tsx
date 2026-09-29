@@ -1,11 +1,12 @@
 import React from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import user from "@testing-library/user-event";
+import Button from "../Button";
 import { Dialog } from ".";
 
 const TestDialog = () => (
   <Dialog.Root>
-    <Dialog.Trigger>Open</Dialog.Trigger>
+    <Dialog.Trigger render={<Button>Open</Button>} />
     <Dialog.Popup>
       <Dialog.Header>
         <Dialog.Title>Save scene</Dialog.Title>
@@ -28,12 +29,14 @@ test("opens named by its title, with focus inside", async () => {
   );
 });
 
-test("the header's close button closes and unmounts it", async () => {
+test("the header's close button closes it and returns focus to the trigger", async () => {
   render(<TestDialog />);
-  await user.click(screen.getByRole("button", { name: "Open" }));
+  const trigger = screen.getByRole("button", { name: "Open" });
+  await user.click(trigger);
   const dialog = await screen.findByRole("dialog", { name: "Save scene" });
 
   await user.click(screen.getByRole("button", { name: "Close" }));
 
   await waitFor(() => expect(dialog).not.toBeInTheDocument());
+  expect(trigger).toHaveFocus();
 });

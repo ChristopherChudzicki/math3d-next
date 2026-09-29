@@ -1,5 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Icon } from "@iconify/react/offline";
+import plus from "@iconify-icons/lucide/plus";
 import Button from "./Button";
 import type { ButtonVariant, ButtonTone, ButtonSize } from "./Button";
 
@@ -14,17 +16,6 @@ const states = [
   "disabled",
   "loading",
 ] as const;
-
-const PlusIcon = () => (
-  <svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true">
-    <path
-      d="M12 5v14M5 12h14"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-  </svg>
-);
 
 const cell: React.CSSProperties = { padding: "6px 10px", textAlign: "left" };
 const heading: React.CSSProperties = {
@@ -92,7 +83,7 @@ const AllButtons: React.FC = () => (
                 </td>
                 <td style={cell}>
                   <Button size={size} variant={variant} tone="accent">
-                    <PlusIcon />
+                    <Icon icon={plus} />
                     Add object
                   </Button>
                 </td>

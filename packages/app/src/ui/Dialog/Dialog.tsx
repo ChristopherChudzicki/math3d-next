@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from "classnames";
 import { Dialog as BaseDialog } from "@base-ui/react/dialog";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import xIcon from "@iconify-icons/lucide/x";
 import IconButton from "../IconButton";
 import * as styles from "./Dialog.module.css";
@@ -51,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({
     <div className={styles.headerText}>{children}</div>
     <Close
       render={
-        <IconButton label={closeLabel} size="sm">
+        <IconButton label={closeLabel}>
           <Icon icon={xIcon} aria-hidden="true" />
         </IconButton>
       }

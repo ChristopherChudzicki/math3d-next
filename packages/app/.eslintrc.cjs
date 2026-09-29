@@ -1,10 +1,9 @@
-// ESLint replaces, rather than merges, a rule redefined here, so extend
-// airbnb's restricted-syntax list instead of dropping it.
-const {
-  rules: {
-    "no-restricted-syntax": [, ...airbnbRestrictedSyntax],
-  },
-} = require("eslint-config-airbnb-base/rules/style");
+// The online @iconify/react fetches icons named by string ("lucide:x") at
+// runtime; the offline build only renders imported icon data.
+const iconifyOnline = {
+  name: "@iconify/react",
+  message: 'Import from "@iconify/react/offline".',
+};
 
 module.exports = {
   // ESLint skips dot-directories unless un-ignored.
@@ -32,10 +31,12 @@ module.exports = {
         ],
       },
     ],
-    // Base UI is wrapped by components in src/ui; everything else uses those.
     "no-restricted-imports": [
       "error",
       {
+        paths: [iconifyOnline],
+        // Base UI is wrapped by components in src/ui; everything else uses
+        // those.
         patterns: [
           {
             group: ["@base-ui/react", "@base-ui/react/*"],
@@ -44,23 +45,13 @@ module.exports = {
         ],
       },
     ],
-    // A string icon ref ("lucide:x") makes Iconify fetch the icon at runtime;
-    // import the icon data instead so it is bundled.
-    "no-restricted-syntax": [
-      "error",
-      ...airbnbRestrictedSyntax,
-      {
-        selector:
-          "JSXOpeningElement[name.name='Icon'] > JSXAttribute[name.name='icon'] > Literal",
-        message:
-          'Import the icon, e.g. `import x from "@iconify-icons/lucide/x"`.',
-      },
-    ],
   },
   overrides: [
     {
       files: ["src/ui/**"],
-      rules: { "no-restricted-imports": "off" },
+      rules: {
+        "no-restricted-imports": ["error", { paths: [iconifyOnline] }],
+      },
     },
     // The edge Worker (src/worker) is typechecked with Workers types via its
     // own tsconfig, excluded from the app's main tsconfig. Point ESLint's

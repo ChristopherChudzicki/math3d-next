@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react/offline";
 import menuIcon from "@iconify-icons/lucide/menu";
 import circleUser from "@iconify-icons/lucide/circle-user";
 import list from "@iconify-icons/lucide/list";
@@ -23,23 +23,24 @@ const UserMenu: React.FC = () => (
         }
       />
       <Menu.Popup>
-        <Menu.Group>
-          <Menu.GroupLabel>someone@example.com</Menu.GroupLabel>
-          <Menu.Item icon={<Icon icon={list} />}>My Scenes</Menu.Item>
-          <Menu.Item icon={<Icon icon={lightbulb} />}>Examples</Menu.Item>
-          <Menu.LinkItem href="#reference" icon={<Icon icon={sigma} />}>
-            Function Reference
-          </Menu.LinkItem>
-          <Menu.Item icon={<Icon icon={circleHelp} />} disabled>
-            Contact (disabled)
-          </Menu.Item>
-        </Menu.Group>
-        <Menu.Separator />
-        <Menu.Item icon={<Icon icon={circleUser} />}>Account</Menu.Item>
-        <Menu.Item icon={<Icon icon={trash2} />} tone="danger">
-          Delete Account
+        <Menu.Item icon={<Icon icon={list} />}>My Scenes</Menu.Item>
+        <Menu.Item icon={<Icon icon={lightbulb} />}>Examples</Menu.Item>
+        <Menu.LinkItem href="#reference" icon={<Icon icon={sigma} />}>
+          Function Reference
+        </Menu.LinkItem>
+        <Menu.Item icon={<Icon icon={circleHelp} />} disabled>
+          Contact (disabled)
         </Menu.Item>
-        <Menu.Item icon={<Icon icon={logOut} />}>Sign out</Menu.Item>
+        <Menu.Separator />
+        {/* A group label names the group, so it labels the account actions. */}
+        <Menu.Group>
+          <Menu.GroupLabel>Signed in as someone@example.com</Menu.GroupLabel>
+          <Menu.Item icon={<Icon icon={circleUser} />}>Account</Menu.Item>
+          <Menu.Item icon={<Icon icon={trash2} />} tone="danger">
+            Delete Account
+          </Menu.Item>
+          <Menu.Item icon={<Icon icon={logOut} />}>Sign out</Menu.Item>
+        </Menu.Group>
       </Menu.Popup>
     </Menu.Root>
   </div>

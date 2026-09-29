@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Button from "../Button";
 import { Dialog } from ".";
@@ -26,33 +26,41 @@ const Confirm: React.FC = () => (
   </Dialog.Root>
 );
 
-const Form: React.FC = () => (
-  <Dialog.Root>
-    <Dialog.Trigger render={<Button>Form (md)</Button>} />
-    <Dialog.Popup size="md">
-      <Dialog.Header>
-        <Dialog.Title>Save scene</Dialog.Title>
-        <Dialog.Description>Give your scene a title.</Dialog.Description>
-      </Dialog.Header>
-      <Dialog.Body>
-        <label htmlFor="dialog-story-title" style={{ display: "grid", gap: 4 }}>
-          Title
-          <input
-            id="dialog-story-title"
-            defaultValue="Untitled"
-            style={{ font: "inherit" }}
-          />
-        </label>
-      </Dialog.Body>
-      <Dialog.Actions>
-        <Dialog.Close render={<Button variant="ghost">Cancel</Button>} />
-        <Button variant="solid" tone="accent">
-          Save
-        </Button>
-      </Dialog.Actions>
-    </Dialog.Popup>
-  </Dialog.Root>
-);
+const Form: React.FC = () => {
+  const titleRef = useRef<HTMLInputElement>(null);
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger render={<Button>Form (md)</Button>} />
+      {/* Form dialogs start on their first field, not the close button. */}
+      <Dialog.Popup size="md" initialFocus={titleRef}>
+        <Dialog.Header>
+          <Dialog.Title>Save scene</Dialog.Title>
+          <Dialog.Description>Give your scene a title.</Dialog.Description>
+        </Dialog.Header>
+        <Dialog.Body>
+          <label
+            htmlFor="dialog-story-title"
+            style={{ display: "grid", gap: 4 }}
+          >
+            Title
+            <input
+              ref={titleRef}
+              id="dialog-story-title"
+              defaultValue="Untitled"
+              style={{ font: "inherit" }}
+            />
+          </label>
+        </Dialog.Body>
+        <Dialog.Actions>
+          <Dialog.Close render={<Button variant="ghost">Cancel</Button>} />
+          <Button variant="solid" tone="accent">
+            Save
+          </Button>
+        </Dialog.Actions>
+      </Dialog.Popup>
+    </Dialog.Root>
+  );
+};
 
 const Browse: React.FC = () => (
   <Dialog.Root>

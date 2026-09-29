@@ -1,9 +1,5 @@
-/*
- * The positioner sits at 1300, MUI's modal layer, while MUI and Base UI
- * overlays coexist.
- */
 .positioner {
-  z-index: 1300;
+  z-index: var(--z-index-overlay);
   outline: 0;
 }
 
@@ -30,6 +26,13 @@
   transform: scale(0.96);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .popup[data-starting-style],
+  .popup[data-ending-style] {
+    transform: none;
+  }
+}
+
 .item {
   display: flex;
   align-items: center;
@@ -48,15 +51,21 @@
 }
 
 .danger {
-  --item-color: var(--color-error);
+  --item-color: var(--color-danger);
 }
 
 /*
- * Base UI moves [data-highlighted] with the pointer and the arrow keys, so one
- * rule covers hover and keyboard focus.
+ * Base UI moves [data-highlighted] (and focus) with the pointer and the arrow
+ * keys. The tint is too faint to be a focus indicator on its own, so keyboard
+ * focus also gets an outline.
  */
 .item[data-highlighted] {
   background-color: color-mix(in srgb, var(--item-color) 8%, transparent);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }
 
 .item[data-disabled] {

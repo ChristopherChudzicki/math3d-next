@@ -83,16 +83,20 @@ type LinkItemProps = Omit<BaseMenu.LinkItem.Props, "className" | "children"> &
 
 /**
  * A menu item that navigates. For client-side routing, pass the router's
- * link as `render`, e.g. `render={<Link to="/examples" />}`.
+ * link as `render`, e.g. `render={<Link to="/examples" />}`. Closes the menu
+ * on click (Base UI's default is to stay open), since a client-side
+ * navigation leaves the menu mounted.
  */
 const LinkItem: React.FC<LinkItemProps> = ({
   icon,
+  closeOnClick = true,
   className,
   children,
   ...others
 }) => (
   <BaseMenu.LinkItem
     {...others}
+    closeOnClick={closeOnClick}
     className={classNames(styles.item, styles.neutral, className)}
   >
     <ItemContent icon={icon}>{children}</ItemContent>

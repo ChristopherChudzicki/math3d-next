@@ -1,11 +1,7 @@
-/*
- * Overlay layers sit at 1300, MUI's modal layer, while MUI and Base UI
- * overlays coexist.
- */
 .backdrop {
   position: fixed;
   inset: 0;
-  z-index: 1300;
+  z-index: var(--z-index-overlay);
   min-height: 100dvh;
   background-color: rgb(0 0 0 / 35%);
   transition: opacity 150ms;
@@ -16,17 +12,10 @@
   opacity: 0;
 }
 
-/* iOS: cover the whole visible viewport. */
-@supports (-webkit-touch-callout: none) {
-  .backdrop {
-    position: absolute;
-  }
-}
-
 .viewport {
   position: fixed;
   inset: 0;
-  z-index: 1300;
+  z-index: var(--z-index-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,6 +43,13 @@
 .popup[data-ending-style] {
   opacity: 0;
   transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup[data-starting-style],
+  .popup[data-ending-style] {
+    transform: none;
+  }
 }
 
 .popup:focus-visible {
