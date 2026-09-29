@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-bind */
-import { ComponentMeta, ComponentStory } from "@storybook/react";
+import type { Meta, StoryFn } from "@storybook/react-vite";
 import React, { useState } from "react";
 
 import MathField from "./MathField";
@@ -8,9 +8,9 @@ export default {
   title: "MathField",
   component: MathField,
   argTypes: { onChange: { action: "onChange" } },
-} as ComponentMeta<typeof MathField>;
+} as Meta<typeof MathField>;
 
-export const Simple: ComponentStory<typeof MathField> = (args) => (
+export const Simple: StoryFn<typeof MathField> = (args) => (
   <MathField
     {...args}
     style={{
@@ -23,7 +23,7 @@ export const Simple: ComponentStory<typeof MathField> = (args) => (
   />
 );
 
-export const Overflowing: ComponentStory<typeof MathField> = (args) => (
+export const Overflowing: StoryFn<typeof MathField> = (args) => (
   <div style={{ width: 100, border: "1pt solid red" }}>
     <MathField
       {...args}
@@ -37,7 +37,7 @@ export const Overflowing: ComponentStory<typeof MathField> = (args) => (
   </div>
 );
 
-export const Static: ComponentStory<typeof MathField> = (args) => (
+export const Static: StoryFn<typeof MathField> = (args) => (
   <div
     style={{
       border: "1pt solid red",
@@ -55,7 +55,7 @@ export const Static: ComponentStory<typeof MathField> = (args) => (
   </div>
 );
 
-export const Controlled: ComponentStory<typeof MathField> = (args) => {
+export const Controlled: StoryFn<typeof MathField> = (args) => {
   const [latex, setLatex] = useState("E=mc^2");
   return (
     <div>

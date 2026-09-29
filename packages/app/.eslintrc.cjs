@@ -1,4 +1,6 @@
 module.exports = {
+  // ESLint skips dot-directories unless un-ignored.
+  ignorePatterns: ["!.storybook"],
   rules: {
     // src/ui holds generic components that know nothing about the app.
     "import/no-restricted-paths": [
