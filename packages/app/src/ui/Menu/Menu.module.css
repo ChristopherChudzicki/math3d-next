@@ -43,7 +43,6 @@
   text-decoration: none;
   cursor: default;
   user-select: none;
-  outline: 0;
 }
 
 .neutral {
@@ -57,14 +56,13 @@
 /*
  * Base UI moves [data-highlighted] (and focus) with the pointer and the arrow
  * keys. The tint is too faint to be a focus indicator on its own, so keyboard
- * focus also gets an outline.
+ * focus keeps the browser's focus ring, inset to stay inside the popup.
  */
 .item[data-highlighted] {
   background-color: color-mix(in srgb, var(--item-color) 8%, transparent);
 }
 
 .item:focus-visible {
-  outline: 2px solid var(--color-primary);
   outline-offset: -2px;
 }
 
