@@ -209,6 +209,14 @@ def test_post_rejects_malformed_item_with_400():
 
 
 @pytest.mark.django_db
+def test_post_without_title_creates_untitled_scene():
+    data = default_scene()
+    body = {"items": data["items"], "itemOrder": data["itemOrder"]}
+    out = Client().post(LIST_URL, data=body, content_type="application/json").json()
+    assert out["title"] == ""
+
+
+@pytest.mark.django_db
 def test_post_rejects_multiline_title_with_400():
     data = default_scene()
     body = {"items": data["items"], "itemOrder": data["itemOrder"], "title": "a\nb"}
@@ -301,7 +309,7 @@ def test_migrate_scene_reraises_non_key_validation_error(monkeypatch):
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     ("legacy_title", "expected"),
-    [("Untitled", ""), ("Line one\r\nLine two\n", "Line one Line two")],
+    [("Untitled\n", ""), ("Line one\r\nLine two\n", "Line one Line two")],
 )
 def test_migrate_scene_normalizes_legacy_title(legacy_title, expected):
     dehydrated: dict[str, Any] = copy.deepcopy(LEGACY_DEHYDRATED_FIXTURE)
@@ -336,7 +344,7 @@ def test_patch_rejects_multiline_title_with_400():
     client = Client()
     client.force_login(me)
     response = client.patch(
-        _detail(scene.key), data={"title": "a\r\nb"}, content_type="application/json"
+        _detail(scene.key), data={"title": "a\rb"}, content_type="application/json"
     )
     assert response.status_code == 400
     original_title = scene.title

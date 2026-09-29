@@ -36,11 +36,4 @@ class Migration(migrations.Migration):
             field=models.TextField(blank=True, default=""),
         ),
         migrations.RunPython(normalize_titles, migrations.RunPython.noop),
-        migrations.AddConstraint(
-            model_name="scene",
-            constraint=models.CheckConstraint(
-                condition=models.Q(("title__regex", "[\\r\\n]"), _negated=True),
-                name="scene_title_single_line",
-            ),
-        ),
     ]
