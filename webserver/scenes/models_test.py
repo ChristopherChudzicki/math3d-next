@@ -40,6 +40,13 @@ def test_uppercase_app_allowed():
 
 
 @pytest.mark.django_db
+def test_multiline_title_rejected_by_db_constraint():
+    kwargs = {**_valid_scene_kwargs("tnb"), "title": "a\nb"}
+    with pytest.raises(IntegrityError):
+        Scene.objects.bulk_create([Scene(**kwargs)])
+
+
+@pytest.mark.django_db
 def test_is_reserved_key_error_true_for_reserved_key():
     # full_clean() keys the error under "key" when the reserved-key validator fails.
     with pytest.raises(ValidationError) as exc_info:

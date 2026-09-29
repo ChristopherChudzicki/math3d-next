@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 default_scene_data = {
-    "title": "Untitled",
+    "title": "",
     "items": [
         {
             "id": "1",

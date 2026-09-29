@@ -1,4 +1,5 @@
 import logging
+import re
 
 from django.core.exceptions import ValidationError
 
@@ -40,6 +41,13 @@ def get_axis_scales(old_items: dict) -> tuple[float, float, float]:
             z_scale = parse_value(item.get("properties", {}).get("scale", "1/2"), 0.5)
 
     return x_scale, y_scale, z_scale
+
+
+def _legacy_title(metadata: dict) -> str:
+    """Legacy titles may span lines and store "Untitled"; Scene titles are
+    single-line, and blank means untitled."""
+    title = re.sub(r"\r\n|[\r\n]", " ", metadata.get("title", "")).strip()
+    return "" if title == "Untitled" else title
 
 
 def migrate_scene(legacy_scene: LegacyScene):
@@ -110,7 +118,7 @@ def migrate_scene(legacy_scene: LegacyScene):
             defaults={
                 "items": items,
                 "item_order": legacy_scene.dehydrated["sortableTree"],
-                "title": legacy_scene.dehydrated["metadata"].get("title", "Untitled"),
+                "title": _legacy_title(legacy_scene.dehydrated["metadata"]),
                 "times_accessed": legacy_scene.times_accessed,
                 "is_legacy": True,
             },
