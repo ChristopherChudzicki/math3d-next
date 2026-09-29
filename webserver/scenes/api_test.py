@@ -1,4 +1,5 @@
 import copy
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -303,7 +304,7 @@ def test_migrate_scene_reraises_non_key_validation_error(monkeypatch):
     [("Untitled", ""), ("Line one\r\nLine two\n", "Line one Line two")],
 )
 def test_migrate_scene_normalizes_legacy_title(legacy_title, expected):
-    dehydrated = copy.deepcopy(LEGACY_DEHYDRATED_FIXTURE)
+    dehydrated: dict[str, Any] = copy.deepcopy(LEGACY_DEHYDRATED_FIXTURE)
     dehydrated["metadata"]["title"] = legacy_title
     legacy = LegacyScene.objects.create(dehydrated=dehydrated)
     migrate_scene(legacy)
