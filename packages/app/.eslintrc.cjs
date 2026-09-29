@@ -1,3 +1,11 @@
+// ESLint replaces, rather than merges, a rule redefined here, so extend
+// airbnb's restricted-syntax list instead of dropping it.
+const {
+  rules: {
+    "no-restricted-syntax": [, ...airbnbRestrictedSyntax],
+  },
+} = require("eslint-config-airbnb-base/rules/style");
+
 module.exports = {
   // ESLint skips dot-directories unless un-ignored.
   ignorePatterns: ["!.storybook"],
@@ -34,6 +42,18 @@ module.exports = {
             message: "Use a component from src/ui instead of Base UI directly.",
           },
         ],
+      },
+    ],
+    // A string icon ref ("lucide:x") makes Iconify fetch the icon at runtime;
+    // import the icon data instead so it is bundled.
+    "no-restricted-syntax": [
+      "error",
+      ...airbnbRestrictedSyntax,
+      {
+        selector:
+          "JSXOpeningElement[name.name='Icon'] > JSXAttribute[name.name='icon'] > Literal",
+        message:
+          'Import the icon, e.g. `import x from "@iconify-icons/lucide/x"`.',
       },
     ],
   },

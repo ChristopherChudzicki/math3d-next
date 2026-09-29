@@ -34,6 +34,8 @@
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
     "@hookform/resolvers": "^5.0.1",
+    "@iconify-icons/lucide": "^1.2.135",
+    "@iconify/react": "^6.0.2",
     "@math3d/api": "workspace:^",
     "@math3d/custom-mathjs": "workspace:^",
     "@math3d/mathitem-configs": "workspace:^",

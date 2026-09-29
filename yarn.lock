@@ -1836,6 +1836,33 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@iconify-icons/lucide@npm:^1.2.135":
+  version: 1.2.136
+  resolution: "@iconify-icons/lucide@npm:1.2.136"
+  dependencies:
+    "@iconify/types": "npm:*"
+  checksum: 10/da182ffffbb5f8eed339adca1cf6acbf333c25074e46a9822103c37a7a00cd40be48fe183bf8b9341efce8de930969ad0eecd5fcd43c264eff9022f4064e7208
+  languageName: node
+  linkType: hard
+
+"@iconify/react@npm:^6.0.2":
+  version: 6.0.2
+  resolution: "@iconify/react@npm:6.0.2"
+  dependencies:
+    "@iconify/types": "npm:^2.0.0"
+  peerDependencies:
+    react: ">=16"
+  checksum: 10/0eda6d25fc5909ce6cc152707538009c5984485bfeab30ea856ae3c4ac7d95156e9737a522a57f795bfccb9b1343f79d5ad614d85da8307eb23507dc18d9d4e0
+  languageName: node
+  linkType: hard
+
+"@iconify/types@npm:*, @iconify/types@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@iconify/types@npm:2.0.0"
+  checksum: 10/1b3425ecbc0eef44f23d3f27355ae7ef306d5119c566f013ef1849995b016e1fdcc5af6b74c3bc0554485d70cf5179cb9c1095b14d662a55abcae1148e1a13c9
+  languageName: node
+  linkType: hard
+
 "@img/colour@npm:^1.0.0, @img/colour@npm:^1.1.0":
   version: 1.1.0
   resolution: "@img/colour@npm:1.1.0"
@@ -5672,6 +5699,8 @@ __metadata:
     "@emotion/styled": "npm:11.14.1"
     "@faker-js/faker": "npm:^10.6.0"
     "@hookform/resolvers": "npm:^5.0.1"
+    "@iconify-icons/lucide": "npm:^1.2.135"
+    "@iconify/react": "npm:^6.0.2"
     "@julr/vite-plugin-validate-env": "npm:^2.2.2"
     "@math3d/api": "workspace:^"
     "@math3d/custom-mathjs": "workspace:^"

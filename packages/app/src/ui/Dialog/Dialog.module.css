@@ -1,0 +1,117 @@
+/*
+ * Overlay layers sit at 1300, MUI's modal layer, while MUI and Base UI
+ * overlays coexist.
+ */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  min-height: 100dvh;
+  background-color: rgb(0 0 0 / 35%);
+  transition: opacity 150ms;
+}
+
+.backdrop[data-starting-style],
+.backdrop[data-ending-style] {
+  opacity: 0;
+}
+
+/* iOS: cover the whole visible viewport. */
+@supports (-webkit-touch-callout: none) {
+  .backdrop {
+    position: absolute;
+  }
+}
+
+.viewport {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.popup {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  max-height: 100%;
+  min-height: 0;
+  border-radius: calc(2 * var(--border-radius));
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  box-shadow:
+    0 12px 32px rgb(0 0 0 / 18%),
+    0 2px 6px rgb(0 0 0 / 10%);
+  transition:
+    transform 150ms ease-out,
+    opacity 150ms ease-out;
+}
+
+.popup[data-starting-style],
+.popup[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+.popup:focus-visible {
+  outline: none;
+}
+
+.sm {
+  width: 24rem;
+}
+
+.md {
+  width: 36rem;
+}
+
+.lg {
+  width: 64rem;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.5rem 1.25rem;
+}
+
+.headerText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  padding-top: 0.125rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.description {
+  margin: 0;
+  color: var(--color-text-light);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.5rem 1.25rem 1rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem 1rem;
+}
