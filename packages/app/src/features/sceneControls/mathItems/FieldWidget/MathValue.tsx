@@ -1,10 +1,7 @@
 import classNames from "classnames";
 import React, { useCallback } from "react";
-import type {
-  OnMathFieldChange,
-  MathfieldElement,
-} from "@/util/components/MathLive";
-import SmallMathField from "@/util/components/SmallMathField";
+import type { OnMathFieldChange, MathfieldElement } from "@/ui/MathLive";
+import SmallMathField from "@/ui/SmallMathField";
 
 import { IWidgetProps } from "./types";
 import styles from "./widget.module.css";

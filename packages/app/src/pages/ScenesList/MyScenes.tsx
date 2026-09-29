@@ -12,8 +12,8 @@ import {
   usePatchScene,
 } from "@math3d/api";
 import MuiLink from "@mui/material/Link";
-import Link from "@/util/components/Link";
-import LoadingSpinner from "@/util/components/LoadingSpinner/LoadingSpinner";
+import Link from "@/ui/Link";
+import LoadingSpinner from "@/ui/LoadingSpinner/LoadingSpinner";
 import Alert from "@mui/material/Alert";
 import TextField from "@mui/material/TextField";
 import { debounce } from "lodash-es";
@@ -25,9 +25,7 @@ import { useToggle } from "@/util/hooks";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
-import SimpleMenu, {
-  SimpleMenuItem,
-} from "@/util/components/SimpleMenu/SimpleMenu";
+import SimpleMenu, { SimpleMenuItem } from "@/ui/SimpleMenu/SimpleMenu";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useNavigate, useParams } from "react-router";
 import invariant from "tiny-invariant";

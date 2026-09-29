@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
-import BasicDialog from "@/util/components/BasicDialog";
+import BasicDialog from "@/ui/BasicDialog";
 import copyText from "./copyText";
 import styles from "./LinkDialog.module.css";
 

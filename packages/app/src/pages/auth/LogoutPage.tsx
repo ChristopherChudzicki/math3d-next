@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from "react";
 import { useLogout } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
-import BasicDialog from "@/util/components/BasicDialog";
+import BasicDialog from "@/ui/BasicDialog";
 import { useOverlay } from "@/features/overlays/useOverlay";
 
 const LogoutPage: React.FC = () => {

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router";
 import { isApiError, useUserMeDelete } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
-import BasicDialog from "@/util/components/BasicDialog";
+import BasicDialog from "@/ui/BasicDialog";
 import { useValidatedForm } from "@/util/forms";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 

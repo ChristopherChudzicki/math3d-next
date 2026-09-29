@@ -8,7 +8,7 @@ import {
   SortableItem,
   hasSortableData,
   DroppableArea,
-} from "@/util/components/dnd";
+} from "@/ui/dnd";
 import type {
   SortableData,
   Active,
@@ -16,7 +16,7 @@ import type {
   Data,
   UniqueIdentifier,
   OnDragOver,
-} from "@/util/components/dnd";
+} from "@/ui/dnd";
 import { useCollapsible } from "@/util/hooks";
 import invariant from "tiny-invariant";
 import MathItemUI from "../MathItem";

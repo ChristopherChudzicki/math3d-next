@@ -6,7 +6,7 @@ import {
 } from "@math3d/mathitem-configs";
 import React, { useCallback } from "react";
 
-import { SubtleButton } from "@/util/components";
+import { SubtleButton } from "@/ui";
 import { positioning } from "@/util/styles";
 import { useAppSelector } from "@/store/hooks";
 import u from "@/util/styles/utils.module.css";

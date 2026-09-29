@@ -1,7 +1,7 @@
 import React from "react";
 import Paper from "@mui/material/Paper";
-import Header from "@/util/components/Header";
-import Link from "@/util/components/Link";
+import Header from "@/ui/Header";
+import Link from "@/ui/Link";
 import styles from "./AppPageLayout.module.css";
 
 /**

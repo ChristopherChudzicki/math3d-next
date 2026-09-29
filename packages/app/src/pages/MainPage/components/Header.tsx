@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import invariant from "tiny-invariant";
-import Header from "@/util/components/Header";
+import Header from "@/ui/Header";
 
 import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
@@ -15,7 +15,7 @@ import Button from "@mui/material/Button";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ListIcon from "@mui/icons-material/List";
-import type { SimpleMenuItem } from "@/util/components/SimpleMenu/SimpleMenu";
+import type { SimpleMenuItem } from "@/ui/SimpleMenu/SimpleMenu";
 import { useUserMe } from "@math3d/api";
 import ListSubheader from "@mui/material/ListSubheader";
 import FunctionsIcon from "@mui/icons-material/Functions";

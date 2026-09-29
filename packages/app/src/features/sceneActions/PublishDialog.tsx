@@ -8,7 +8,7 @@ import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions, select } from "@/features/sceneControls/mathItems";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import { DISPLAY_AUTH_FLOWS } from "@/features/auth";
-import BasicDialog from "@/util/components/BasicDialog";
+import BasicDialog from "@/ui/BasicDialog";
 import useTitleForm from "./useTitleForm";
 import { LinkField, useLinkCopy } from "./LinkDialog";
 
