@@ -10,6 +10,8 @@
   },
   "include": [
     "src",
+    ".storybook/*.ts",
+    ".storybook/*.tsx",
     "vite.config.ts",
     "vitest.worker.config.ts",
     "src/pages/HelpPage/data.compile.ts"
