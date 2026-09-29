@@ -22,8 +22,8 @@ const renderOverlay = (initialEntries: string[]) => {
 test("Closing an overlay pops the entry that opened it", async () => {
   const { router, api } = renderOverlay(["/first", "/second"]);
 
-  await act(async () => api.current?.open("login"));
-  expect(router.state.location.search).toBe("?overlay=login");
+  await act(async () => api.current?.open("logout"));
+  expect(router.state.location.search).toBe("?overlay=logout");
 
   await act(async () => api.current?.close());
   expect(router.state.location.search).toBe("");
@@ -37,7 +37,7 @@ test("Closing an overlay pops the entry that opened it", async () => {
 test("Closing twice pops once, so a double close does not leave the app", async () => {
   const { router, api } = renderOverlay(["/first", "/second"]);
 
-  await act(async () => api.current?.open("login"));
+  await act(async () => api.current?.open("logout"));
   // LogoutPage closes from two places: its mutation and its auth-status effect.
   await act(async () => {
     api.current?.close();
@@ -49,7 +49,7 @@ test("Closing twice pops once, so a double close does not leave the app", async 
 });
 
 test("Closing a deep-linked overlay drops the params without leaving the app", async () => {
-  const { router, api } = renderOverlay(["/first?overlay=login"]);
+  const { router, api } = renderOverlay(["/first?overlay=logout"]);
 
   await act(async () => api.current?.close());
 
@@ -61,7 +61,7 @@ test("Closing an overlay switched into from a deep link stays in the app", async
   const { router, api } = renderOverlay(["/first?overlay=delete-account"]);
 
   // Switching replaces, so there is still no entry of ours to pop.
-  await act(async () => api.current?.open("login"));
+  await act(async () => api.current?.open("logout"));
   await act(async () => api.current?.close());
 
   expect(router.state.location.search).toBe("");
@@ -71,7 +71,7 @@ test("Closing an overlay switched into from a deep link stays in the app", async
 test("A close from an unmounted overlay does nothing", async () => {
   const { router, api, unmount } = renderOverlay(["/first", "/second"]);
 
-  await act(async () => api.current?.open("login"));
+  await act(async () => api.current?.open("logout"));
   // A mutation can resolve after Back unmounted the dialog, and its handler
   // still holds that render's `close`.
   const staleClose = api.current?.close;
@@ -80,6 +80,6 @@ test("A close from an unmounted overlay does nothing", async () => {
   await act(async () => staleClose?.());
 
   // Popping here would take the entry the user is on now, whatever that is.
-  expect(router.state.location.search).toBe("?overlay=login");
+  expect(router.state.location.search).toBe("?overlay=logout");
   expect(router.state.location.pathname).toBe("/second");
 });

@@ -31,7 +31,7 @@ import SimpleMenu, {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useNavigate, useParams } from "react-router";
 import invariant from "tiny-invariant";
-import { useOverlay } from "@/features/overlays/useOverlay";
+import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 import styles from "./ScenesList.module.css";
 
@@ -41,7 +41,7 @@ const MyScenesList: React.FC = () => {
   const isAuthenticated = useAuthStatus();
   const { sceneKey } = useParams();
   const navigate = useNavigate();
-  const { open } = useOverlay();
+  const signIn = useSignInDialog();
   const { add: addNotification } = useNotifications();
   const [filterText, setFilterText] = useState("");
   const [filterValue, setFilterValue] = useState("");
@@ -114,7 +114,7 @@ const MyScenesList: React.FC = () => {
     return (
       <p className={styles["with-margin"]}>
         To view scenes you have saved,{" "}
-        <MuiLink component="button" type="button" onClick={() => open("login")}>
+        <MuiLink component="button" type="button" onClick={() => signIn.open()}>
           sign in
         </MuiLink>
         .

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import { isApiError, useUserMeDelete } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
+import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import BasicDialog from "@/util/components/BasicDialog";
 import { useValidatedForm } from "@/util/forms";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
@@ -18,6 +19,7 @@ const schema = yup.object({
 
 const DeleteAccountPage: React.FC = () => {
   const { open, close } = useOverlay();
+  const { open: openSignIn } = useSignInDialog();
   const isAuthenticated = useAuthStatus();
   const deleteAccount = useUserMeDelete();
   const { add: addNotification } = useNotifications();
@@ -40,16 +42,18 @@ const DeleteAccountPage: React.FC = () => {
   // deliberate case has its own flow (the "Account Deleted" notice, then
   // navigate away) which a login redirect would hijack. Anyone else who is
   // unauthenticated here — a hand-typed /?overlay=delete-account while logged
-  // out, or a session that expired mid-dialog — goes to the login overlay.
+  // out, or a session that expired mid-dialog — is sent to sign in. Sign-in
+  // replaces this dialog rather than stacking on it: Google offers the account
+  // chooser, and a different account would return to a delete dialog.
   useEffect(() => {
     if (
       isAuthenticated === "unauthenticated" &&
       !deleteAccount.isSuccess &&
       !noticeOpen
     ) {
-      open("login");
+      openSignIn({ replaceOverlay: true });
     }
-  }, [isAuthenticated, open, deleteAccount.isSuccess, noticeOpen]);
+  }, [isAuthenticated, openSignIn, deleteAccount.isSuccess, noticeOpen]);
 
   const onSubmit = handleSubmit(async () => {
     try {

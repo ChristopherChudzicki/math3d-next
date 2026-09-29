@@ -176,7 +176,7 @@ The whole change, redirect flow included, merges as one commit in #1312. Before 
 - set up the production Google client: the redirect URI above, and no JavaScript origins;
 - set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and `ENABLE_SIGNUP=true` on Heroku. Releases before this change read none of them; `ENABLE_SIGNUP` is deliberately not the older `ENABLE_REGISTRATION`, which they read as "open password signup".
 
-After deploying, sign in with Google at `/?overlay=login` (it works with `VITE_DISPLAY_AUTH_FLOWS` off). The boot guards check that the Google credentials are present, not that they're right, and a redirect URI mismatch shows up only on Google's page. Then promote that account (see Consequences).
+After deploying, sign in with Google at `/?signin` (it works with `VITE_DISPLAY_AUTH_FLOWS` off). The boot guards check that the Google credentials are present, not that they're right, and a redirect URI mismatch shows up only on Google's page. Then promote that account (see Consequences).
 
 Rolling back is a plain revert of the backend and of the Cloudflare Worker, which deploys separately. No migration needs reversing: this release keeps the `public_nickname` column, and a later one drops it.
 

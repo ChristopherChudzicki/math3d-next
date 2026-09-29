@@ -1,0 +1,65 @@
+import { useCallback } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
+import type { SignInError } from "@/features/auth/signInErrors";
+import { OVERLAY_PARAMS } from "./useOverlay";
+import type { OverlayHistoryState } from "./useOverlay";
+import { useCloseLayer } from "./useCloseLayer";
+
+/**
+ * `?signin` opens the sign-in dialog above any `?overlay=`, so the page it
+ * returns to after sign-in still has that overlay open.
+ */
+export const SIGN_IN_PARAM = "signin";
+
+export type SignInHistoryState = {
+  /** Like `overlayPushed`, for the entry that opened this dialog. */
+  signInPushed?: boolean;
+  signInError?: SignInError;
+} | null;
+
+const PARAMS = [SIGN_IN_PARAM] as const;
+const STATE_KEYS = ["signInPushed", "signInError"] as const;
+
+export const useSignInDialog = () => {
+  const [search] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const state = location.state as
+    | (SignInHistoryState & OverlayHistoryState)
+    | null;
+  const pushed = state?.signInPushed ?? false;
+
+  /**
+   * `replaceOverlay` closes the overlay instead of stacking on it, for an
+   * overlay that makes no sense to whoever signs in next.
+   */
+  const open = useCallback(
+    (options?: { replaceOverlay?: boolean }) => {
+      const next = new URLSearchParams(search);
+      next.set(SIGN_IN_PARAM, "");
+      if (options?.replaceOverlay) {
+        OVERLAY_PARAMS.forEach((param) => next.delete(param));
+      }
+      const to = { search: next.toString(), hash: location.hash };
+      if (!options?.replaceOverlay) {
+        navigate(to, { state: { ...state, signInPushed: true } });
+        return;
+      }
+      const { overlayPushed, ...rest } = state ?? {};
+      navigate(
+        to,
+        // Replaces the overlay's entry, so closing pops it only if it was ours.
+        { replace: true, state: { ...rest, signInPushed: overlayPushed } },
+      );
+    },
+    [search, location.hash, state, navigate],
+  );
+
+  const close = useCloseLayer({
+    pushed,
+    params: PARAMS,
+    stateKeys: STATE_KEYS,
+  });
+
+  return { isOpen: search.has(SIGN_IN_PARAM), open, close } as const;
+};

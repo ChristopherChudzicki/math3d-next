@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { SIGN_IN_PARAM } from "@/features/overlays/useSignInDialog";
+import type { SignInHistoryState } from "@/features/overlays/useSignInDialog";
 import { SIGN_IN_ERROR_PATH, toSignInError } from "./signInErrors";
 import { useAuthStatus } from "./useAuthStatus";
 
@@ -24,11 +26,9 @@ const SignInErrorHandler: React.FC = () => {
       navigate({ search: next.toString(), hash }, { replace: true });
       return;
     }
-    next.set("overlay", "login");
-    navigate(
-      { search: next.toString(), hash },
-      { replace: true, state: { signInError: toSignInError(code) } },
-    );
+    next.set(SIGN_IN_PARAM, "");
+    const state: SignInHistoryState = { signInError: toSignInError(code) };
+    navigate({ search: next.toString(), hash }, { replace: true, state });
   }, [search, pathname, hash, navigate, authStatus]);
 
   return null;

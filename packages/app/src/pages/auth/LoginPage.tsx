@@ -10,18 +10,16 @@ import {
 } from "@/features/auth";
 import GoogleLogo from "@/features/auth/GoogleLogo";
 import { SIGN_IN_ERROR_MESSAGES } from "@/features/auth/signInErrors";
-import type { SignInError } from "@/features/auth/signInErrors";
 import BasicDialog from "@/util/components/BasicDialog";
-import { useOverlay } from "@/features/overlays/useOverlay";
+import { useSignInDialog } from "@/features/overlays/useSignInDialog";
+import type { SignInHistoryState } from "@/features/overlays/useSignInDialog";
 import styles from "./LoginPage.module.css";
 
 const LoginPage: React.FC = () => {
-  const { close } = useOverlay();
+  const { close } = useSignInDialog();
   const isAuthenticated = useAuthStatus();
   const handleClose = useCallback(() => close(), [close]);
-  const signInError = (
-    useLocation().state as { signInError?: SignInError } | null
-  )?.signInError;
+  const signInError = (useLocation().state as SignInHistoryState)?.signInError;
 
   useEffect(() => {
     if (isAuthenticated === "authenticated") {

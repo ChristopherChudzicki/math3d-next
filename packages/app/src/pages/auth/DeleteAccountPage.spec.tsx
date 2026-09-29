@@ -10,11 +10,10 @@ vi.mock("@sentry/react", async (importOriginal) => ({
   captureException: vi.fn(),
 }));
 
-test("If not authenticated, redirects to the login overlay", async () => {
+test("If not authenticated, switches to the sign-in dialog", async () => {
   const { location } = renderTestApp("/?overlay=delete-account");
-  await waitFor(() =>
-    expect(location.current.search).toContain("overlay=login"),
-  );
+  // Not stacked: whoever signs in might be a different account.
+  await waitFor(() => expect(location.current.search).toBe("?signin="));
   expect(screen.queryByRole("dialog", { name: "Delete Account" })).toBe(null);
 });
 
@@ -34,7 +33,7 @@ test("deleting your own account does not redirect to login", async () => {
   );
   // Deleting signs you out; the "Account Deleted" notice must show — not login.
   await screen.findByRole("heading", { name: "Account Deleted" });
-  expect(location.current.search).not.toContain("overlay=login");
+  expect(location.current.search).not.toContain("signin");
 });
 
 test("the wrong confirmation phrase does not delete the account", async () => {
@@ -113,12 +112,10 @@ test("a 403 sends the user to sign in again instead of a generic failure", async
   const notice = await screen.findByRole("dialog", {
     name: "Could not delete your account",
   });
-  expect(location.current.search).not.toContain("overlay=login");
+  expect(location.current.search).not.toContain("signin");
 
   await user.click(within(notice).getByRole("button", { name: "OK" }));
-  await waitFor(() =>
-    expect(location.current.search).toContain("overlay=login"),
-  );
+  await waitFor(() => expect(location.current.search).toBe("?signin="));
 });
 
 test("My Scenes in the warning opens the user's scene list", async () => {

@@ -356,7 +356,7 @@ test("the signed-out link step offers sign-in", async () => {
   const dialog = await screen.findByRole("dialog", { name: "Share scene" });
   await user.click(within(dialog).getByRole("button", { name: "Sign in" }));
 
-  expect(location.current.search).toContain("overlay=login");
+  expect(location.current.search).toContain("signin");
   expect(screen.queryByRole("dialog", { name: "Share scene" })).toBeNull();
 });
 

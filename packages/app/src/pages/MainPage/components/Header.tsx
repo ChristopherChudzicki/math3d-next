@@ -11,6 +11,7 @@ import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import type { AuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import type { OverlayName } from "@/features/overlays/useOverlay";
+import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import Button from "@mui/material/Button";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -25,13 +26,13 @@ import UserMenu from "./UserMenu";
 const LoginButtons: React.FC<{
   isAuthenticated: AuthStatus;
 }> = ({ isAuthenticated }) => {
-  const { open } = useOverlay();
+  const signIn = useSignInDialog();
   if (isAuthenticated !== "unauthenticated" || !DISPLAY_AUTH_FLOWS) return null;
   return (
     <Button
       variant="text"
       color="secondary"
-      onClick={() => open("login")}
+      onClick={() => signIn.open()}
       startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
     >
       Sign in
@@ -49,10 +50,12 @@ const getItems = ({
   authStatus,
   email,
   open,
+  openSignIn,
 }: {
   authStatus: AuthStatus;
   email?: string;
   open: (name: OverlayName, companion?: { list?: string }) => void;
+  openSignIn: () => void;
 }): FilterableItem[] => {
   const isAuthenticated = authStatus === "authenticated";
   return [
@@ -78,7 +81,7 @@ const getItems = ({
       key: "signin",
       label: "Sign in",
       icon: <AccountCircleOutlinedIcon fontSize="small" />,
-      onClick: () => open("login"),
+      onClick: openSignIn,
       // Not `!isAuthenticated`: while the me-query is still in flight the
       // answer is unknown, and offering to sign in is the wrong guess for a
       // user who already has a session.
@@ -148,14 +151,16 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
   const isAuthenticated = useAuthStatus();
   const userQuery = useUserMe();
   const { open } = useOverlay();
+  const { open: openSignIn } = useSignInDialog();
   const filteredItems = useMemo(
     () =>
       getItems({
         authStatus: isAuthenticated,
         email: userQuery.data?.email,
         open,
+        openSignIn: () => openSignIn(),
       }).filter((item) => !!item.shouldShow),
-    [isAuthenticated, userQuery.data, open],
+    [isAuthenticated, userQuery.data, open, openSignIn],
   );
   return (
     <Header
