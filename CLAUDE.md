@@ -184,7 +184,7 @@ Troubleshooting:
 ### Environment
 
 - Node 24.13.1 (see `.nvmrc`), Yarn 4.8.1 (corepack)
-- Dev env vars in `.env.development` (committed); local overrides in `.env` (gitignored). `yarn start`, `yarn test` and `yarn test-e2e` load both via `node --env-file-if-exists`, so no direnv is needed; `yarn build` deliberately loads neither
+- Dev env vars in `.env.development` (committed); local overrides in `.env` (gitignored). `yarn start`, `yarn test` and `yarn test-e2e` load both via `node --env-file-if-exists`, so no direnv is needed; variables already set in the shell win over both files. `yarn build` deliberately loads neither
 - Pre-commit hooks: Prettier (JS/TS), Ruff (Python), trailing whitespace, secret detection
 
 ## Conventions
