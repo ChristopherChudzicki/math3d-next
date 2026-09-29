@@ -24,8 +24,24 @@ module.exports = {
         ],
       },
     ],
+    // Base UI is wrapped by components in src/ui; everything else uses those.
+    "no-restricted-imports": [
+      "error",
+      {
+        patterns: [
+          {
+            group: ["@base-ui/react", "@base-ui/react/*"],
+            message: "Use a component from src/ui instead of Base UI directly.",
+          },
+        ],
+      },
+    ],
   },
   overrides: [
+    {
+      files: ["src/ui/**"],
+      rules: { "no-restricted-imports": "off" },
+    },
     // The edge Worker (src/worker) is typechecked with Workers types via its
     // own tsconfig, excluded from the app's main tsconfig. Point ESLint's
     // typed-linting parser at that project so worker sources lint under the
