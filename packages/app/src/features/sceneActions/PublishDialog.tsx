@@ -1,6 +1,9 @@
-import React, { useEffect, useId, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import * as Sentry from "@sentry/react";
 import Alert from "@mui/material/Alert";
+import CircularProgress from "@mui/material/CircularProgress";
+import Stack from "@mui/material/Stack";
 import MuiLink from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import { useCreateScene } from "@math3d/api";
@@ -49,8 +52,9 @@ type PublishDialogProps = {
 };
 
 /**
- * Publishes the scene as a new one: asks for a title, then shows the link.
- * Both steps are one dialog, so assistive tech stays in it across the swap.
+ * Publishes the scene as a new one, then shows the link. Only an untitled
+ * scene is asked for a title first. The steps are one dialog, so assistive
+ * tech stays in it across the swap.
  */
 const PublishDialog: React.FC<PublishDialogProps> = ({
   mode,
@@ -64,7 +68,8 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
   const { open: openOverlay } = useOverlay();
   const title = useAppSelector(select.title);
   const author = useAppSelector(select.author);
-  const hasKey = useAppSelector(select.key) !== null;
+  const key = useAppSelector(select.key);
+  const [fromLink] = useState(key !== null);
   const [publishedUrl, setPublishedUrl] = useState(existingUrl);
   // Fixed at open: publishing replaces the store's title with the new one.
   // An anonymous scene may be the user's own from before signing in, so a
@@ -74,6 +79,12 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
       ? `Copy of ${title}`
       : title,
   );
+  const [asksTitle, setAsksTitle] = useState(
+    () => sceneDisplayName(defaultTitle) === null,
+  );
+  const [autoPublishFailed, setAutoPublishFailed] = useState(false);
+  // StrictMode runs effects twice; this keeps it to one POST.
+  const autoPublishStarted = useRef(false);
   const headings = HEADINGS[mode];
   const copyButtonId = useId();
 
@@ -86,6 +97,8 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
       items,
       itemOrder,
     });
+    // The user moved on to another scene while this was in flight.
+    if (store.getState().scene.loadCount !== loadCount) return;
     dispatch(
       actions.markSaved({
         key: result.key,
@@ -102,9 +115,22 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
 
   const { formId, isSubmitting, renderForm } = useTitleForm({
     defaultTitle,
-    onSubmit: publish,
+    onSubmit: (newTitle) => {
+      setAutoPublishFailed(false);
+      return publish(newTitle);
+    },
   });
   const { copy, message } = useLinkCopy(publishedUrl ?? "");
+
+  useEffect(() => {
+    if (publishedUrl || asksTitle || autoPublishStarted.current) return;
+    autoPublishStarted.current = true;
+    publish(defaultTitle).catch((err) => {
+      Sentry.captureException(err);
+      setAutoPublishFailed(true);
+      setAsksTitle(true);
+    });
+  });
 
   // The title field unmounts on the swap; land on the step's next action.
   useEffect(() => {
@@ -129,6 +155,12 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
         cancelText="Done"
       >
         <LinkField url={publishedUrl} message={message} />
+        {mode === "share" && fromLink && !existingUrl ? (
+          <Typography variant="body2" role="note">
+            This is a new link showing the scene as it looks now. The original
+            link is unchanged.
+          </Typography>
+        ) : null}
         {mode === "share" && DISPLAY_AUTH_FLOWS ? (
           <Typography variant="body2">
             <MuiLink
@@ -145,6 +177,21 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
             to save scenes you can keep editing.
           </Typography>
         ) : null}
+      </BasicDialog>
+    );
+  }
+  if (!asksTitle) {
+    return (
+      <BasicDialog
+        {...common}
+        closeDisabled
+        title={headings.title}
+        showFooter={false}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <CircularProgress size="1.5rem" />
+          <Typography>{headings.submitting}</Typography>
+        </Stack>
       </BasicDialog>
     );
   }
@@ -165,10 +212,9 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
       }}
     >
       {renderForm(
-        mode === "share" && hasKey ? (
-          <Alert severity="info" role="note">
-            This creates a new link showing the scene as it looks now. The
-            original link is unchanged.
+        autoPublishFailed ? (
+          <Alert severity="error">
+            Something went wrong. Please try again later.
           </Alert>
         ) : undefined,
       )}

@@ -13,7 +13,7 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
   scene //
     .folder({ description: "Folder 1" })
     .point({ description: initialDescription });
-  const newTitle = `My ${scene.title}`;
+  const newTitle = `Copy of ${scene.title}`;
 
   const key = await prepareScene(scene);
   await page.goto(`/${key}`);
@@ -24,11 +24,6 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
   await test.step("Save scene", async () => {
     await app.moreSceneActions().click();
     await page.getByRole("menuitem", { name: "Duplicate" }).click();
-    const dialog = page.getByRole("dialog", { name: "Save a copy" });
-    const title = dialog.getByRole("textbox", { name: "Title" });
-    await expect(title).toHaveValue(`Copy of ${scene.title}`);
-    await title.fill(newTitle);
-    await dialog.getByRole("button", { name: "Save" }).click();
   });
 
   await test.step("Success dialog", async () => {

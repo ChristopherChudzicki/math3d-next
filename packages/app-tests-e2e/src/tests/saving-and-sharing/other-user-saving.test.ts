@@ -48,11 +48,6 @@ test("Saving an existing scene scene", async ({
 
     await item.field("description").fill(newDescription);
     await app.sceneAction().click();
-    const dialog = page.getByRole("dialog", { name: "Save a copy" });
-    await expect(dialog.getByRole("textbox", { name: "Title" })).toHaveValue(
-      `Copy of ${title}`,
-    );
-    await dialog.getByRole("button", { name: "Save" }).click();
     await page
       .getByRole("dialog", { name: "Scene saved!" })
       .getByRole("button", { name: "Done" })
@@ -70,7 +65,7 @@ test("Saving an existing scene scene", async ({
     await expect(app.sceneAction()).toHaveAccessibleName("Copy link");
     // item has new description
     await expect(item.field("description")).toHaveValue(newDescription);
-    // the copy got the dialog's prefilled title
+    // a copy of a titled scene is titled "Copy of …"
     await expect(app.sceneTitle()).toHaveText(`Copy of ${title}`);
   });
 

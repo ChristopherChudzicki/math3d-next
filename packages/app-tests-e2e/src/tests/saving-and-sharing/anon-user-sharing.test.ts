@@ -58,10 +58,9 @@ test("Anon users publish once, then reuse the link until they edit", async ({
     await item.field("description").fill(faker.lorem.words());
     await app.sceneAction().click();
     const dialog = page.getByRole("dialog", { name: "Share scene" });
-    await expect(dialog.getByText(/original link is unchanged/i)).toBeVisible();
-    await dialog.getByRole("button", { name: "Share" }).click();
     const link = dialog.getByRole("textbox", { name: "Shareable URL" });
     await expect(link).not.toHaveValue("");
     expect(await link.inputValue()).not.toBe(url);
+    await expect(dialog.getByText(/original link is unchanged/i)).toBeVisible();
   });
 });

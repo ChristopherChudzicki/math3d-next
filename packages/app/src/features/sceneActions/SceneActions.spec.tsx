@@ -253,31 +253,29 @@ test("the link step copies the link and announces it", async () => {
   expect(within(dialog).getByRole("status")).toHaveTextContent("Copied!");
 });
 
-test("someone else's scene offers Save a copy, prefilled Copy of …", async () => {
+test("someone else's scene offers Save a copy, saved as Copy of …", async () => {
   const author = seedDb.withUser();
   const scene = seedDb.withSceneFromItems([], { author: author.id });
-  renderTestApp(`/${scene.key}`, { isAuthenticated: true });
+  const { store } = renderTestApp(`/${scene.key}`, { isAuthenticated: true });
 
   expect(await primary()).toHaveTextContent(/^Save a copy$/);
   expect(await menuEntries()).toEqual(["Copy link"]);
   await user.click(await primary());
 
-  const dialog = await screen.findByRole("dialog", { name: "Save a copy" });
-  expect(within(dialog).getByLabelText("Title")).toHaveValue(
-    `Copy of ${scene.title}`,
-  );
+  await screen.findByRole("dialog", { name: "Scene saved!" });
+  expect(store.getState().scene.title).toBe(`Copy of ${scene.title}`);
 });
 
 test("Save a copy of an anonymous scene keeps its title", async () => {
   // Seeded scenes are author-less, like a visitor's own anonymous scene
   // after signing in.
   const scene = seedDb.withSceneFromItems([]);
-  renderTestApp(`/${scene.key}`, { isAuthenticated: true });
+  const { store } = renderTestApp(`/${scene.key}`, { isAuthenticated: true });
 
   await user.click(await primary());
 
-  const dialog = await screen.findByRole("dialog", { name: "Save a copy" });
-  expect(within(dialog).getByLabelText("Title")).toHaveValue(scene.title);
+  await screen.findByRole("dialog", { name: "Scene saved!" });
+  expect(store.getState().scene.title).toBe(scene.title);
 });
 
 test("a signed-out re-share of an unedited published scene reuses its link", async () => {
@@ -299,7 +297,7 @@ test("a signed-out re-share of an unedited published scene reuses its link", asy
   expect(posts.count).toBe(1);
 });
 
-test("a signed-out share of an edited scene mints a new link, prefilled with the scene's title", async () => {
+test("a signed-out share of an edited scene mints a new link under its title", async () => {
   const item = makeItem(MIT.Point);
   const scene = seedDb.withSceneFromItems([item]);
   const { location, store } = renderTestApp(`/${scene.key}`);
@@ -315,14 +313,12 @@ test("a signed-out share of an edited scene mints a new link, prefilled with the
   });
 
   await user.click(await primary());
-  const dialog = await screen.findByRole("dialog", { name: "Share scene" });
-  expect(within(dialog).getByLabelText("Title")).toHaveValue(scene.title);
-  expect(within(dialog).getByText(/original link is unchanged/i)).toBeVisible();
-  await user.click(within(dialog).getByRole("button", { name: "Share" }));
 
   const link = await screen.findByLabelText<HTMLInputElement>("Shareable URL");
   expect(link.value).not.toBe(`${window.location.origin}/${scene.key}`);
   expect(location.current.pathname).not.toBe(`/${scene.key}`);
+  expect(screen.getByText(/original link is unchanged/i)).toBeVisible();
+  expect(store.getState().scene.title).toBe(scene.title);
 });
 
 test("the scene action works on a small screen", async () => {
