@@ -71,7 +71,7 @@ test("Saving an existing scene scene", async ({
     // item has new description
     await expect(item.field("description")).toHaveValue(newDescription);
     // the copy got the dialog's prefilled title
-    await expect(app.sceneTitle()).toHaveValue(`Copy of ${title}`);
+    await expect(app.sceneTitle()).toHaveText(`Copy of ${title}`);
   });
 
   await test.step("Assert original page unchanged", async () => {

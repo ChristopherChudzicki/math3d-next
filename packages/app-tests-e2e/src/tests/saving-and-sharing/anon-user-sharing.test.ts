@@ -51,7 +51,7 @@ test("Anon users publish once, then reuse the link until they edit", async ({
 
   await test.step("The link shows what was published", async () => {
     await page.reload();
-    await expect(app.sceneTitle()).toHaveValue(title);
+    await expect(app.sceneTitle()).toHaveText(title);
   });
 
   await test.step("Sharing after another edit mints a new link", async () => {

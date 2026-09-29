@@ -6,9 +6,8 @@
  * surfaces can never drift (a deep-linked scene must show the same tab title
  * before and after app boot).
  *
- * A scene left at the DB default `"Untitled"` (or blank) is treated as
- * untitled: it reads like the home page — the site's rich default title —
- * rather than carrying a scene-specific tab/card title.
+ * An untitled (blank) scene reads like the home page — the site's rich
+ * default title — rather than carrying a scene-specific tab/card title.
  */
 
 export const TITLE_MAX_CODEPOINTS = 200;
@@ -21,12 +20,12 @@ const clampCodePoints = (value: string, max: number): string => {
 
 /**
  * The scene's display name (trimmed, code-point-clamped), or `null` when the
- * scene is effectively untitled — blank/whitespace or the literal default
- * `"Untitled"`. Callers substitute the site's rich default title for `null`.
+ * scene is untitled (blank or whitespace). Callers substitute the site's rich
+ * default title for `null`.
  */
 export const sceneDisplayName = (rawTitle: string): string | null => {
   const name = clampCodePoints(rawTitle.trim(), TITLE_MAX_CODEPOINTS);
-  return name === "" || name === "Untitled" ? null : name;
+  return name === "" ? null : name;
 };
 
 /**

@@ -35,6 +35,8 @@ import { useOverlay } from "@/features/overlays/useOverlay";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 import styles from "./ScenesList.module.css";
 
+const displayTitle = (title?: string | null) => title?.trim() || "Untitled";
+
 const { format } = new Intl.DateTimeFormat(navigator.languages[0]);
 
 const MyScenesList: React.FC = () => {
@@ -69,7 +71,7 @@ const MyScenesList: React.FC = () => {
         body: (
           <>
             Are you sure you want to delete the scene{" "}
-            <strong>{scene.title}</strong>?
+            <strong>{displayTitle(scene.title)}</strong>?
           </>
         ),
         title: "Delete scene?",
@@ -202,7 +204,7 @@ const MyScenesList: React.FC = () => {
                   <ListItemText
                     primary={
                       <Stack direction="row" justifyContent="space-between">
-                        {item.title}
+                        {displayTitle(item.title)}
                         {item.archived ? (
                           <Chip color="warning" size="small" label="Archived" />
                         ) : null}

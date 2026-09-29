@@ -39,8 +39,8 @@ test("a failed publish shows the error and leaves the scene as it was", async ()
   });
 });
 
-test("a blank title is reported instead of published", async () => {
-  renderOwnedScene();
+test("a blank title publishes the scene untitled", async () => {
+  const { store } = renderOwnedScene();
 
   const dialog = await openDuplicate();
   const title = within(dialog).getByLabelText("Title");
@@ -48,8 +48,18 @@ test("a blank title is reported instead of published", async () => {
   await user.type(title, "   ");
   await user.click(within(dialog).getByRole("button", { name: "Save" }));
 
-  await waitFor(() => expect(title).toBeInvalid());
-  expect(within(dialog).getByText("Please enter a title.")).toBeVisible();
+  await screen.findByRole("dialog", { name: "Scene saved!" });
+  expect(store.getState().scene.title).toBe("");
+});
+
+test("a copy of an untitled scene starts untitled", async () => {
+  renderOwnedScene({ title: "" });
+
+  const dialog = await openDuplicate();
+
+  const title = within(dialog).getByLabelText("Title");
+  expect(title).toHaveValue("");
+  expect(title).toHaveAttribute("placeholder", "Untitled");
 });
 
 test("publishing keeps one dialog and moves focus to Copy link", async () => {

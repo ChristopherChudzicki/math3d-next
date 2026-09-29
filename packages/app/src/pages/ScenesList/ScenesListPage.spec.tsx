@@ -50,3 +50,13 @@ test("switching tabs replaces history; Back leaves the drawer entirely", async (
   );
   expect(location.current.pathname).toBe(`/${scene.key}`);
 });
+
+test("My Scenes lists an untitled scene as Untitled", async () => {
+  const me = seedDb.withUser();
+  const scene = seedDb.withSceneFromItems([], { author: me.id, title: "" });
+  renderTestApp(`/${scene.key}?overlay=scenes&list=me`, { user: me });
+
+  expect(
+    await screen.findByRole("link", { name: /^Untitled/ }),
+  ).toHaveAttribute("href", `/${scene.key}?overlay=scenes&list=me`);
+});

@@ -92,11 +92,10 @@ it("overrides Cache-Control so intermediaries don't cache per-scene HTML", async
 });
 
 it("keeps the shell's default title for an untitled scene but still rewrites og:url", async () => {
-  // "Untitled" (the DB default) represents the untitled branch; that blank and
-  // whitespace also collapse to untitled is the shared helper's job, pinned in
-  // sceneTitle.spec.ts. Here the Worker leaves the shell's rich defaults for
+  // That whitespace also counts as untitled is the shared helper's job, pinned
+  // in sceneTitle.spec.ts. Here the Worker leaves the shell's rich defaults for
   // the title tags but still points og:url at this scene's canonical URL.
-  stubMeta({ status: 200 }, { title: "Untitled" });
+  stubMeta({ status: 200 }, { title: "" });
   const t = await tags(await call("/abc123", makeEnv()));
   expect(t.title).toBe(DEFAULT_TITLE);
   expect(t.ogTitle).toBe(DEFAULT_TITLE);

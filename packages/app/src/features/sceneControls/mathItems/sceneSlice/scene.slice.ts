@@ -24,7 +24,7 @@ const getInitialState = (): SceneState => ({
   activeItemId: undefined,
   activeTabId: MAIN_FOLDER,
   order: {},
-  title: "Untitled",
+  title: "",
 });
 
 const getInsertionFolder = (

@@ -3,7 +3,15 @@ import { delay, http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { makeItem, seedDb, urls } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import { act, renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import {
+  act,
+  renameScene,
+  renderTestApp,
+  screen,
+  user,
+  waitFor,
+  within,
+} from "@/test_util";
 import { actions } from "@/features/sceneControls/mathItems";
 
 beforeAll(() => {
@@ -97,7 +105,7 @@ test("an unsaved scene offers Save once edited, and no menu", async () => {
   expectInert(await primary());
   await pressEnterOn(await primary());
   expect(screen.queryByRole("dialog")).toBeNull();
-  await user.type(await screen.findByLabelText("Scene Title"), " edited");
+  await renameScene("edited");
   expect(await primary()).not.toHaveAttribute("aria-disabled", "true");
   noMenu();
 });
@@ -105,7 +113,7 @@ test("an unsaved scene offers Save once edited, and no menu", async () => {
 test("an owned scene with edits saves in place", async () => {
   const { scene, store } = renderOwnedScene();
   const patches = capturePatches(scene.key);
-  await user.type(await screen.findByLabelText("Scene Title"), " edited");
+  await renameScene(`${scene.title} edited`);
 
   expect(await primary()).toHaveTextContent(/^Save$/);
   expect(await menuEntries()).toEqual(["Duplicate", "Copy link"]);
@@ -135,8 +143,7 @@ test("an edit made while saving survives the save and stays unsaved", async () =
   );
   const { scene, store } = renderOwnedScene();
   const patches = capturePatches(scene.key);
-  const title = await screen.findByLabelText("Scene Title");
-  await user.type(title, " saved");
+  await renameScene(`${scene.title} saved`);
 
   await user.click(await primary());
   expect(await primary()).toHaveTextContent(/^Saving\.\.\.$/);
@@ -145,7 +152,7 @@ test("an edit made while saving survives the save and stays unsaved", async () =
     screen.getByRole("button", { name: "More scene actions" }),
   ).toBeDisabled();
   await pressEnterOn(await primary());
-  await user.type(title, " later");
+  await renameScene(`${scene.title} saved later`);
   gate.resolve();
 
   await waitFor(
@@ -166,8 +173,8 @@ test("a failed save frees the button and leaves the edit unsaved", async () => {
       HttpResponse.json({ detail: "boom" }, { status: 500 }),
     ),
   );
-  const { store } = renderOwnedScene();
-  await user.type(await screen.findByLabelText("Scene Title"), " edited");
+  const { scene, store } = renderOwnedScene();
+  await renameScene(`${scene.title} edited`);
 
   await user.click(await primary());
   expect(await primary()).toHaveTextContent(/^Saving\.\.\.$/);
@@ -199,7 +206,7 @@ test("an owned scene without edits copies its link", async () => {
 
 test("copying the link with unsaved edits says the link omits them", async () => {
   const { scene } = renderOwnedScene();
-  await user.type(await screen.findByLabelText("Scene Title"), " edited");
+  await renameScene(`${scene.title} edited`);
 
   await user.click(
     await screen.findByRole("button", { name: "More scene actions" }),
@@ -376,6 +383,6 @@ test("no scene action is offered while auth is still loading", async () => {
   server.use(http.get(urls.auth.usersMe, () => delay("infinite")));
   renderTestApp("/");
 
-  await screen.findByLabelText("Scene Title");
+  await screen.findByRole("heading", { level: 1 });
   expect(screen.queryByTestId("scene-action")).toBeNull();
 });

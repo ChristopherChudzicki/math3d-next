@@ -10,7 +10,7 @@ import useSceneLoader from "@/features/scene/useSceneLoader";
 import SceneControls from "@/features/sceneControls";
 import Sidebar from "@/util/components/sidebar";
 import { useBodyClass, useToggle } from "@/util/hooks";
-import TitleInput from "@/features/sceneControls/TitleInput";
+import SceneTitle from "@/features/sceneControls/SceneTitle";
 
 import { ToggleKeyboardButton } from "@/features/virtualKeyboard";
 
@@ -102,7 +102,7 @@ const MainPage: React.FC = () => {
     // Keeping the provider here makes that scope truthful.
     <BannersProvider>
       <div className={styles.container}>
-        <Header title={<TitleInput />} />
+        <Header title={<SceneTitle />} />
         <BannerDisplay />
         {sceneKey && isLegacy ? (
           <LegacyBanner sceneKey={sceneKey} onViewDetails={legacyDialog.on} />

@@ -43,16 +43,16 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
 
     // Check that saving updated the current URL
     await expect(page.url()).toBe(url);
-    await expect(app.sceneTitle()).toHaveValue(newTitle);
+    await expect(app.sceneTitle()).toHaveText(newTitle);
     return url;
   });
 
   await test.step("Reload saved scene", async () => {
     await page.reload();
-    await expect(app.sceneTitle()).toHaveValue(newTitle);
+    await expect(app.sceneTitle()).toHaveText(newTitle);
   });
   await test.step("Check old title same", async () => {
     await page.goto(`/${key}`);
-    await expect(app.sceneTitle()).toHaveValue(scene.title);
+    await expect(app.sceneTitle()).toHaveText(scene.title);
   });
 });

@@ -70,6 +70,6 @@ test.describe("Deleting a scene", async () => {
     await page.goto(`/${key1}`);
 
     const app = new AppPage(page);
-    await expect(app.sceneTitle()).toHaveValue(scene1.title);
+    await expect(app.sceneTitle()).toHaveText(scene1.title);
   });
 });

@@ -67,9 +67,11 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
   const [publishedUrl, setPublishedUrl] = useState(existingUrl);
   // Fixed at open: publishing replaces the store's title with the new one.
   // An anonymous scene may be the user's own from before signing in, so a
-  // copy of it isn't "Copy of".
+  // copy of it isn't "Copy of"; nor is a copy of an untitled scene.
   const [defaultTitle] = useState(() =>
-    mode === "copy" && author !== null ? `Copy of ${title}` : title,
+    mode === "copy" && author !== null && title.trim() !== ""
+      ? `Copy of ${title}`
+      : title,
   );
   const headings = HEADINGS[mode];
   const copyButtonId = useId();

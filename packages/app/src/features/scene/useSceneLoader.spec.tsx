@@ -3,7 +3,7 @@ import { HttpResponse, http } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { seedDb, urls } from "@math3d/mock-api";
 import type { Scene } from "@math3d/api";
-import { act, renderTestApp, screen, user, waitFor } from "@/test_util";
+import { act, renameScene, renderTestApp, waitFor } from "@/test_util";
 import { getStore } from "@/store/store";
 import { sceneSlice } from "@/features/sceneControls/mathItems";
 import {
@@ -80,9 +80,9 @@ test("a draft saved on another scene is discarded, not applied", async () => {
 test("a refetch of the open scene keeps unsaved edits", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const { store, queryClient } = renderTestApp(`/${scene.key}`);
-  const title = await screen.findByLabelText<HTMLInputElement>("Scene Title");
-  await user.type(title, " (unsaved edit)");
-  const edited = store.getState().scene.title;
+  await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
+  const edited = `${scene.title} (unsaved edit)`;
+  await renameScene(edited);
   // A changed body, like the GET after a save: an unchanged one comes back as
   // the same object, which no loader would re-dispatch.
   server.use(

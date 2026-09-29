@@ -1,4 +1,5 @@
 import user from "@testing-library/user-event";
+import { screen, within } from "@testing-library/react";
 import { MathItem } from "@math3d/mathitem-configs";
 import { mathScopeId } from "@/features/sceneControls/mathItems/mathScope";
 import { assertInstanceOf } from "@/util/predicates";
@@ -122,6 +123,16 @@ const getDescribedBy = (el: HTMLElement) => {
   return descriptionEl;
 };
 
+/** Renames the scene through the header's rename dialog. */
+const renameScene = async (title: string) => {
+  await user.click(await screen.findByRole("button", { name: "Rename scene" }));
+  const dialog = await screen.findByRole("dialog", { name: "Rename scene" });
+  const field = within(dialog).getByLabelText("Title");
+  await user.clear(field);
+  if (title) await user.type(field, title);
+  await user.click(within(dialog).getByRole("button", { name: "Rename" }));
+};
+
 export {
   assertInstanceOf,
   nodeId,
@@ -131,4 +142,5 @@ export {
   userWaits,
   allowActWarnings,
   getDescribedBy,
+  renameScene,
 };

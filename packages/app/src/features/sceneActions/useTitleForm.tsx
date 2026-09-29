@@ -4,8 +4,9 @@ import Alert from "@mui/material/Alert";
 import TextField from "@mui/material/TextField";
 import { useValidatedForm } from "@/util/forms";
 
+// A blank title means untitled.
 const schema = yup.object({
-  title: yup.string().trim().required("Please enter a title."),
+  title: yup.string().trim().default(""),
 });
 
 type UseTitleFormOptions = {
@@ -34,6 +35,9 @@ const useTitleForm = ({ defaultTitle, onSubmit }: UseTitleFormOptions) => {
         fullWidth
         autoFocus
         label="Title"
+        placeholder="Untitled"
+        // Keep the label above the field so the placeholder always shows.
+        slotProps={{ inputLabel: { shrink: true } }}
         error={!!errors.title?.message}
         // A space keeps the row height stable when the message appears.
         helperText={errors.title?.message ?? " "}

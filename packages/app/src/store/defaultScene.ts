@@ -8,7 +8,7 @@ const defaultScene: Pick<
   key: null;
 } = {
   key: null,
-  title: "Untitled",
+  title: "",
   author: null,
   isLegacy: false,
   items: [
