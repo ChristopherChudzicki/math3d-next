@@ -1,0 +1,73 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-overlay);
+  min-height: 100dvh;
+  background-color: rgb(0 0 0 / 15%);
+  transition: opacity 200ms;
+}
+
+.backdrop[data-starting-style],
+.backdrop[data-ending-style] {
+  opacity: 0;
+}
+
+.viewport {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-overlay);
+  display: flex;
+}
+
+.right {
+  justify-content: flex-end;
+}
+
+.popup {
+  --slide-from: -100%;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  height: 100%;
+  min-height: 0;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  box-shadow:
+    0 12px 32px rgb(0 0 0 / 18%),
+    0 2px 6px rgb(0 0 0 / 10%);
+  transition: transform 200ms ease-out;
+}
+
+.right .popup {
+  --slide-from: 100%;
+}
+
+.popup[data-starting-style],
+.popup[data-ending-style] {
+  transform: translateX(var(--slide-from));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup {
+    transition: opacity 200ms ease-out;
+  }
+
+  .popup[data-starting-style],
+  .popup[data-ending-style] {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+.popup:focus-visible {
+  outline: none;
+}
+
+.md {
+  width: 24rem;
+}
+
+/* Three 14rem cards per row, with Body's padding and a 1rem gap. */
+.lg {
+  width: 48rem;
+}
