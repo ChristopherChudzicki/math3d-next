@@ -29,6 +29,7 @@ playwright-report
 test-results
 
 dist
+storybook-static
 # Old dev email dumps (activation URLs with signed keys) may remain here;
 # nothing writes to it.
 webserver/private/

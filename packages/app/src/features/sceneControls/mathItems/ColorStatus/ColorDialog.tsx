@@ -10,9 +10,9 @@ import {
 } from "@math3d/mathitem-configs";
 import type { ParseableObjs } from "@math3d/parser";
 import React, { useCallback, useState } from "react";
-import ColorPicker, { OnColorChange } from "@/util/components/ColorPicker";
+import ColorPicker, { OnColorChange } from "@/ui/ColorPicker";
 
-import StaticMath from "@/util/components/MathLive/StaticMath";
+import StaticMath from "@/ui/MathLive/StaticMath";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { OnWidgetChange } from "../FieldWidget/types";
 import { useMathScope } from "../sceneSlice";

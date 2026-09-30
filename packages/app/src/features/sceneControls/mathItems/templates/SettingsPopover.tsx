@@ -1,5 +1,5 @@
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import { SubtleButton } from "@/util/components";
+import { SubtleButton } from "@/ui";
 import Popover from "@mui/material/Popover";
 import type {
   MathItem,
@@ -13,7 +13,7 @@ import { useSelector } from "react-redux";
 import { IconButton } from "@mui/material";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
-import Markdown from "@/util/components/Markdown";
+import Markdown from "@/ui/Markdown";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { useMathScope, select } from "../sceneSlice";
 import { getMathProperties, useMathErrors } from "../mathScope";

@@ -2,7 +2,7 @@ import React from "react";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
-import Link from "@/util/components/Link";
+import Link from "@/ui/Link";
 import examplesData from "./examples_data.json";
 
 const ExamplesListing: React.FC = () => {

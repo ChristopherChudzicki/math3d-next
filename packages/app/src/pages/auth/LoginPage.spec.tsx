@@ -75,7 +75,9 @@ test("A returned error opens the dialog over the page it left, with fixed text",
   );
 
   const dialog = await screen.findByRole("dialog", { name: "Sign in" });
-  expect(dialog).toHaveTextContent(/sign-ups are closed/i);
+  expect(within(dialog).getByRole("alert")).toHaveTextContent(
+    /sign-ups are closed/i,
+  );
   expect(location.current.search).toBe("?overlay=scenes&list=me&signin=");
 });
 
@@ -83,7 +85,10 @@ test("A cancelled sign-in is reported as information, not an error", async () =>
   renderTestApp("/?error=cancelled&error_process=login");
 
   const dialog = await screen.findByRole("dialog", { name: "Sign in" });
-  expect(within(dialog).getByRole("alert")).toHaveClass("MuiAlert-colorInfo");
+  expect(within(dialog).getByRole("status")).toHaveTextContent(
+    "Sign-in was cancelled.",
+  );
+  expect(within(dialog).queryByRole("alert")).not.toBeInTheDocument();
 });
 
 test("A returned error opens no dialog for someone already signed in", async () => {

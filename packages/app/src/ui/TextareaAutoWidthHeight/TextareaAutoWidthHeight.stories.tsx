@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from "@storybook/react";
+import type { Meta, StoryFn } from "@storybook/react-vite";
 import React, { useState } from "react";
 
 import TextareaAutoWidthHeight from "./TextareaAutoWidthHeight";
@@ -14,9 +14,9 @@ export default {
       action: "changed",
     },
   },
-} as ComponentMeta<typeof TextareaAutoWidthHeight>;
+} as Meta<typeof TextareaAutoWidthHeight>;
 
-const Template: ComponentStory<typeof TextareaAutoWidthHeight> = (args) => {
+const Template: StoryFn<typeof TextareaAutoWidthHeight> = (args) => {
   const { onChange, value, ...otherArgs } = args;
   const [text, setText] = useState(value);
   return (

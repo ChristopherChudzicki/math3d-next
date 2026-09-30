@@ -2,10 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import KeyboardAltOutlinedIcon from "@mui/icons-material/KeyboardAltOutlined";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import {
-  mathVirtualKeyboard,
-  LAYOUTS,
-} from "@/util/components/MathLive/keyboards";
+import { mathVirtualKeyboard, LAYOUTS } from "@/ui/MathLive/keyboards";
 import { createPortal } from "react-dom";
 import Button from "@mui/material/Button";
 
