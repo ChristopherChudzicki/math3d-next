@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./Header.module.css";
 
 type HeaderProps = {
-  /** Before the brand, e.g. a button that opens a scene. */
+  /** Before the brand, e.g. the button that opens the scenes dialog. */
   start?: React.ReactNode;
   title: React.ReactNode;
   nav: React.ReactNode;

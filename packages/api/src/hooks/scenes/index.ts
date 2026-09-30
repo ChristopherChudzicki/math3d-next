@@ -99,13 +99,12 @@ const usePatchScene = () => {
       queryClient.invalidateQueries({
         queryKey: detailKey(vars.key),
       });
-      // Returned so mutateAsync resolves once the list reflects the change.
-      if (vars.patch.archived !== undefined) {
-        return queryClient.invalidateQueries({
-          queryKey: meListKey(),
-        });
-      }
-      return undefined;
+      // Any patch bumps modified_date, which orders My Scenes. Returned so
+      // mutateAsync resolves once the list reflects the change; it resolves at
+      // once while the list isn't shown.
+      return queryClient.invalidateQueries({
+        queryKey: meListKey(),
+      });
     },
   });
 };

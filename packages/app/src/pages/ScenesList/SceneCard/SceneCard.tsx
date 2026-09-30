@@ -20,7 +20,6 @@ type SceneCardProps = {
   archived?: boolean;
   /** Controls shown above the card's link, e.g. a menu trigger. */
   actions?: React.ReactNode;
-  linkRef?: React.Ref<HTMLAnchorElement>;
 };
 
 const isPlainClick = (e: React.MouseEvent) =>
@@ -39,7 +38,6 @@ const SceneCard: React.FC<SceneCardProps> = ({
   modifiedDate,
   archived = false,
   actions,
-  linkRef,
 }) => {
   const metaId = useId();
   const hasMeta = modifiedDate !== undefined;
@@ -61,15 +59,17 @@ const SceneCard: React.FC<SceneCardProps> = ({
       <div className={styles.text}>
         <h3 className={styles.title}>
           <Link
-            ref={linkRef}
             to={to}
             className={styles.link}
-            title={title}
             aria-current={current ? "page" : undefined}
             aria-describedby={hasMeta ? metaId : undefined}
             onClick={handleClick}
           >
-            <span className={styles.titleText}>{title}</span>
+            {/* title reveals a clamped title; on the link it would become
+                its accessible description and repeat the name. */}
+            <span className={styles.titleText} title={title}>
+              {title}
+            </span>
           </Link>
         </h3>
         {hasMeta ? (

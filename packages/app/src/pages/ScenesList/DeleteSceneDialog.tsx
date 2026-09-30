@@ -1,30 +1,40 @@
 import React, { useRef } from "react";
 import { AlertDialog } from "@/ui/AlertDialog";
 import Button from "@/ui/Button";
+import styles from "./ScenesList.module.css";
 
 type DeleteSceneDialogProps = {
-  /** The scene awaiting confirmation; null keeps the dialog closed. */
-  title: string | null;
+  open: boolean;
+  /** Kept while the dialog animates closed, so its text doesn't blank out. */
+  title: string;
   deleting: boolean;
+  failed: boolean;
   onConfirm: () => void;
   onCancel: () => void;
-  /** Where focus goes on close; the menu item that opened the dialog is gone. */
+  /** After the close animation; clear the scene here. */
+  onClosed: () => void;
   finalFocus: () => HTMLElement | null;
 };
 
 const DeleteSceneDialog: React.FC<DeleteSceneDialogProps> = ({
+  open,
   title,
   deleting,
+  failed,
   onConfirm,
   onCancel,
+  onClosed,
   finalFocus,
 }) => {
   const cancelRef = useRef<HTMLButtonElement>(null);
   return (
     <AlertDialog.Root
-      open={title !== null}
+      open={open}
       onOpenChange={(isOpen) => {
         if (!isOpen && !deleting) onCancel();
+      }}
+      onOpenChangeComplete={(isOpen) => {
+        if (!isOpen) onClosed();
       }}
     >
       <AlertDialog.Popup initialFocus={cancelRef} finalFocus={finalFocus}>
@@ -32,6 +42,11 @@ const DeleteSceneDialog: React.FC<DeleteSceneDialogProps> = ({
         <AlertDialog.Description>
           Delete &ldquo;{title}&rdquo;? This can&rsquo;t be undone.
         </AlertDialog.Description>
+        {failed ? (
+          <p className={styles.error} role="alert">
+            Couldn&rsquo;t delete the scene. Try again.
+          </p>
+        ) : null}
         <AlertDialog.Actions>
           <AlertDialog.Close
             disabled={deleting}

@@ -100,13 +100,17 @@ test.each([
   },
 );
 
-test("closing the scenes dialog returns focus to the scenes button", async () => {
-  renderTestApp("");
-  const button = await screen.findByRole("button", { name: "Open scenes" });
-
-  await user.click(button);
+test("closing the scenes dialog returns focus to the scenes button, even when a menu item opened it", async () => {
+  renderTestApp("", { isAuthenticated: true });
+  await user.click(
+    await screen.findByRole("button", { name: "Open User Menu" }),
+  );
+  await user.click(await screen.findByRole("menuitem", { name: "My Scenes" }));
   await screen.findByRole("dialog", { name: "Scenes" });
+
   await user.keyboard("{Escape}");
 
-  await waitFor(() => expect(button).toHaveFocus());
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Open scenes" })).toHaveFocus(),
+  );
 });

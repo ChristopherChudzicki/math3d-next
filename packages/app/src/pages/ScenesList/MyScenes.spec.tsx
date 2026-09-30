@@ -75,7 +75,7 @@ test("empty states say whether nothing is saved or nothing matches", async () =>
   expect(
     await screen.findByText(/You haven't saved any scenes yet/),
   ).toBeInTheDocument();
-  expect(screen.getByText("Archived scenes are hidden.")).toBeInTheDocument();
+  expect(screen.getByText(/check Include archived/)).toBeInTheDocument();
 
   await user.type(
     screen.getByRole("textbox", { name: "Filter scenes" }),
@@ -174,6 +174,55 @@ test("clicking the open scene's card closes the dialog without a new history ent
   // Back from the first entry goes nowhere; a pushed duplicate would reopen.
   await act(() => router.navigate(-1));
   expect(screen.queryByRole("dialog", { name: "Scenes" })).toBeNull();
+});
+
+test("cancelling a delete returns focus to the card's menu button", async () => {
+  const { owner } = seedScenes(["Alpha"]);
+  await openMyScenes(owner);
+  await screen.findByRole("link", { name: "Alpha" });
+
+  await chooseAction("Alpha", "Delete");
+  const confirm = await screen.findByRole("alertdialog");
+  await user.click(within(confirm).getByRole("button", { name: "Cancel" }));
+
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Actions for Alpha" }),
+    ).toHaveFocus(),
+  );
+  expect(screen.getByRole("link", { name: "Alpha" })).toBeInTheDocument();
+});
+
+test("a failed delete says so in the confirmation, which stays open", async () => {
+  const { owner } = seedScenes(["Alpha"]);
+  server.use(
+    http.delete("*/v1/scenes/:key/", () =>
+      HttpResponse.json({ detail: "boom" }, { status: 500 }),
+    ),
+  );
+  await openMyScenes(owner);
+  await screen.findByRole("link", { name: "Alpha" });
+
+  await chooseAction("Alpha", "Delete");
+  const confirm = await screen.findByRole("alertdialog");
+  await user.click(within(confirm).getByRole("button", { name: "Delete" }));
+
+  expect(await within(confirm).findByRole("alert")).toHaveTextContent(
+    "Couldn’t delete the scene.",
+  );
+  expect(confirm).toBeInTheDocument();
+});
+
+test("filtering announces the result count", async () => {
+  const { owner } = seedScenes(["Alpha", "Beta", "Gamma"]);
+  const { dialog } = await openMyScenes(owner);
+  await screen.findByRole("link", { name: "Alpha" });
+
+  await user.type(screen.getByRole("textbox", { name: "Filter scenes" }), "a");
+
+  await waitFor(() =>
+    expect(within(dialog).getByRole("status")).toHaveTextContent("3 scenes"),
+  );
 });
 
 test("a failed load offers Retry", async () => {

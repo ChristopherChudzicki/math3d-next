@@ -59,7 +59,7 @@
   text-decoration: none;
 }
 
-/* Clamped here rather than on .link, whose overflow would clip its focus ring. */
+/* Clamped inside the link: overflow on an ancestor would clip its focus ring. */
 .titleText {
   display: -webkit-box;
   overflow: hidden;
@@ -100,6 +100,8 @@
   left: 0.5rem;
   background-color: var(--color-accent);
   color: white;
+  /* It paints above the stretched link; let clicks through to it. */
+  pointer-events: none;
 }
 
 /* Above the stretched link, so its clicks go to the actions. */

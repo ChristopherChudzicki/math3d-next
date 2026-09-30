@@ -37,6 +37,18 @@ const countMessage = (count: number) => {
   return count === 1 ? "1 scene" : `${count} scenes`;
 };
 
+/*
+ * Cards are found in the DOM when focus moves, not tracked with refs: Link and
+ * Button merge refs into a new callback each render, so a ref map is briefly
+ * empty during the very commit in which a closing dialog restores focus.
+ */
+const cardLink = (key: string) =>
+  document
+    .getElementById(SCROLL_ID)
+    ?.querySelector<HTMLAnchorElement>(`a[href="/${key}"]`) ?? null;
+const cardMenuButton = (key: string) =>
+  cardLink(key)?.closest("li")?.querySelector("button") ?? null;
+
 const MyScenesList: React.FC = () => {
   const { sceneKey } = useParams();
   const navigate = useNavigate();
@@ -44,21 +56,33 @@ const MyScenesList: React.FC = () => {
   const [filterText, setFilterText] = useState("");
   const [filterValue, setFilterValue] = useState("");
   const [includeArchived, setIncludeArchived] = useState(false);
-  const [status, setStatus] = useState("");
-  const [pendingDelete, setPendingDelete] = useState<MiniScene | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  // Keyed per message, so a repeated message is still announced.
+  const [status, setStatus] = useState({ text: "", id: 0 });
+  const announce = (text: string) =>
+    setStatus((prev) => ({ text, id: prev.id + 1 }));
+  const [deleteTarget, setDeleteTarget] = useState<MiniScene | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteFailed, setDeleteFailed] = useState(false);
   const patch = usePatchScene();
   const destroy = useDestroyScene();
 
   const filterRef = useRef<HTMLInputElement>(null);
-  const linkRefs = useRef(new Map<string, HTMLAnchorElement>());
-  const triggerRefs = useRef(new Map<string, HTMLButtonElement>());
-  // After Delete, the key whose card takes focus (null: the filter field).
-  const deleteFocusKey = useRef<string | null | undefined>(undefined);
+  // Where the delete dialog returns focus: a neighbor's card after a delete
+  // (null: the filter field), else the scene's own menu button.
+  const deleteFocus = useRef<{ deleted: boolean; key: string | null }>({
+    deleted: false,
+    key: null,
+  });
   const announceCount = useRef(false);
 
   const debouncedSetFilterValue = useMemo(
-    () => debounce(setFilterValue, 300),
+    () =>
+      debounce((value: string) => {
+        setFilterValue((prev) => {
+          if (prev !== value) announceCount.current = true;
+          return value;
+        });
+      }, 300),
     [],
   );
   const query = useInfiniteScenesMe({
@@ -73,13 +97,15 @@ const MyScenesList: React.FC = () => {
   const settled = query.isSuccess && !query.isPlaceholderData;
 
   useEffect(() => {
-    if (announceCount.current && settled) {
+    if (!announceCount.current) return;
+    if (query.isError) announceCount.current = false;
+    if (settled) {
       announceCount.current = false;
-      setStatus(countMessage(query.data.pages[0]?.count ?? 0));
+      announce(countMessage(query.data.pages[0]?.count ?? 0));
     }
-  }, [settled, query.data]);
+  }, [settled, query.isError, query.data]);
   useEffect(() => {
-    if (query.isFetchingNextPage) setStatus("Loading more scenes…");
+    if (query.isFetchingNextPage) announce("Loading more scenes…");
   }, [query.isFetchingNextPage]);
 
   const handleFilterChange: React.ChangeEventHandler<HTMLInputElement> = (
@@ -87,7 +113,6 @@ const MyScenesList: React.FC = () => {
   ) => {
     setFilterText(e.target.value);
     debouncedSetFilterValue(e.target.value);
-    announceCount.current = true;
   };
   const handleIncludeArchived = (checked: boolean) => {
     setIncludeArchived(checked);
@@ -100,7 +125,7 @@ const MyScenesList: React.FC = () => {
     return (items[i + 1] ?? items[i - 1])?.key ?? null;
   };
   const elementFor = (key: string | null) =>
-    (key && linkRefs.current.get(key)) || filterRef.current;
+    (key && cardLink(key)) || filterRef.current;
 
   const toggleArchived = async (scene: MiniScene) => {
     const archiving = !scene.archived;
@@ -112,43 +137,45 @@ const MyScenesList: React.FC = () => {
         key: scene.key,
         patch: { archived: archiving },
       });
-      setStatus(`${archiving ? "Archived" : "Unarchived"} ${titleOf(scene)}`);
+      announce(`${archiving ? "Archived" : "Unarchived"} ${titleOf(scene)}`);
       if (disappears) elementFor(focusKey)?.focus();
     } catch {
-      setStatus(
+      announce(
         `Couldn't ${archiving ? "archive" : "unarchive"} ${titleOf(scene)}`,
       );
     }
   };
 
+  const chooseDelete = (scene: MiniScene) => {
+    deleteFocus.current = { deleted: false, key: scene.key };
+    setDeleteTarget(scene);
+    setDeleteFailed(false);
+    setDeleteOpen(true);
+  };
   const confirmDelete = async () => {
-    if (!pendingDelete) return;
-    const scene = pendingDelete;
+    if (!deleteTarget) return;
+    const scene = deleteTarget;
     const focusKey = neighborKey(scene.key);
-    setDeleting(true);
+    setDeleteFailed(false);
     try {
       await destroy.mutateAsync(scene.key);
-      deleteFocusKey.current = focusKey;
-      setPendingDelete(null);
-      setStatus(`Deleted ${titleOf(scene)}`);
-      if (scene.key === sceneKey) {
-        // Replace, so Back doesn't return to the deleted scene.
-        navigate("/?overlay=scenes&list=me", { replace: true });
-      }
     } catch {
-      setStatus(`Couldn't delete ${titleOf(scene)}`);
-    } finally {
-      setDeleting(false);
+      setDeleteFailed(true);
+      return;
+    }
+    deleteFocus.current = { deleted: true, key: focusKey };
+    setDeleteOpen(false);
+    announce(`Deleted ${titleOf(scene)}`);
+    if (scene.key === sceneKey) {
+      // The deleted scene's URL must not stay the current entry. (If the
+      // dialog was opened by a push, the entry below still holds it.)
+      navigate("/?overlay=scenes&list=me", { replace: true });
     }
   };
   const deleteDialogFinalFocus = () => {
-    const focusKey = deleteFocusKey.current;
-    deleteFocusKey.current = undefined;
-    if (focusKey !== undefined) return elementFor(focusKey);
-    // Cancelled: back to the menu button that started it.
-    return (
-      (pendingDelete && triggerRefs.current.get(pendingDelete.key)) ?? null
-    );
+    const { deleted, key } = deleteFocus.current;
+    if (deleted) return elementFor(key);
+    return key ? cardMenuButton(key) : null;
   };
 
   const renderBody = () => {
@@ -174,7 +201,9 @@ const MyScenesList: React.FC = () => {
               : "You haven't saved any scenes yet. Use Save in the header to keep a scene here."}
           </p>
           {includeArchived ? null : (
-            <p className={styles.hint}>Archived scenes are hidden.</p>
+            <p className={styles.hint}>
+              Archived scenes are hidden; check Include archived to see them.
+            </p>
           )}
         </div>
       );
@@ -186,7 +215,8 @@ const MyScenesList: React.FC = () => {
         next={query.fetchNextPage}
         loader={<LoadingSpinner label="Loading more scenes" />}
         scrollableTarget={SCROLL_ID}
-        // The library's own overflow: auto would clip card focus rings.
+        // The library's inner overflow: auto would nest a second scroller
+        // and clip card hover shadows at the grid's edges.
         style={{ overflow: "visible" }}
       >
         <ul role="list" className={styles.grid}>
@@ -199,19 +229,11 @@ const MyScenesList: React.FC = () => {
               archived={item.archived}
               current={item.key === sceneKey}
               onCurrentClick={close}
-              linkRef={(el) => {
-                if (el) linkRefs.current.set(item.key, el);
-                else linkRefs.current.delete(item.key);
-              }}
               actions={
                 <Menu.Root>
                   <Menu.Trigger
                     render={
                       <IconButton
-                        ref={(el: HTMLButtonElement | null) => {
-                          if (el) triggerRefs.current.set(item.key, el);
-                          else triggerRefs.current.delete(item.key);
-                        }}
                         size="sm"
                         label={`Actions for ${titleOf(item)}`}
                       >
@@ -233,7 +255,7 @@ const MyScenesList: React.FC = () => {
                     <Menu.Item
                       icon={<Icon icon={trash2} />}
                       tone="danger"
-                      onClick={() => setPendingDelete(item)}
+                      onClick={() => chooseDelete(item)}
                     >
                       Delete
                     </Menu.Item>
@@ -271,14 +293,17 @@ const MyScenesList: React.FC = () => {
         />
       </div>
       <Dialog.Body id={SCROLL_ID}>{renderBody()}</Dialog.Body>
-      <div role="status" className={u.visuallyHidden}>
-        {status}
+      <div role="status" aria-live="polite" className={u.visuallyHidden}>
+        <span key={status.id}>{status.text}</span>
       </div>
       <DeleteSceneDialog
-        title={pendingDelete ? titleOf(pendingDelete) : null}
-        deleting={deleting}
+        open={deleteOpen}
+        title={deleteTarget ? titleOf(deleteTarget) : ""}
+        deleting={destroy.isPending}
+        failed={deleteFailed}
         onConfirm={confirmDelete}
-        onCancel={() => setPendingDelete(null)}
+        onCancel={() => setDeleteOpen(false)}
+        onClosed={() => setDeleteTarget(null)}
         finalFocus={deleteDialogFinalFocus}
       />
     </>

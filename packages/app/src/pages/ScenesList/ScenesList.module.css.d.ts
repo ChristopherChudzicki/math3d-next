@@ -1,4 +1,5 @@
 declare const styles: {
+  readonly "error": string;
   readonly "filterField": string;
   readonly "filterRow": string;
   readonly "grid": string;
