@@ -45,6 +45,12 @@ module.exports = {
         ],
       },
     ],
+    // Safari drops a <ul>'s list semantics under `list-style: none` unless
+    // role="list" is explicit. nav/navigation is the rule's own default.
+    "jsx-a11y/no-redundant-roles": [
+      "error",
+      { nav: ["navigation"], ul: ["list"] },
+    ],
   },
   overrides: [
     {
