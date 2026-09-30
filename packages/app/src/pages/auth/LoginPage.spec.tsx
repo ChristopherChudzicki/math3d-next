@@ -148,7 +148,7 @@ test("If authenticated already, closes the dialog", async () => {
 
 test("Back from the sign-in dialog returns to the overlay beneath it", async () => {
   const { location, router } = renderTestApp("/?overlay=scenes&list=me");
-  await user.click(await screen.findByRole("button", { name: "sign in" }));
+  await user.click(await screen.findByRole("button", { name: "Sign in" }));
   await screen.findByRole("dialog", { name: "Sign in" });
   expect(location.current.search).toBe("?overlay=scenes&list=me&signin=");
 
@@ -159,7 +159,7 @@ test("Back from the sign-in dialog returns to the overlay beneath it", async () 
   );
   expect(location.current.search).toBe("?overlay=scenes&list=me");
   // My Scenes' prompt, reachable again now nothing covers it.
-  expect(screen.getByRole("button", { name: "sign in" })).toBeVisible();
+  expect(screen.getByRole("button", { name: "Sign in" })).toBeVisible();
 });
 
 test("Closing a returned error's dialog keeps the overlay and forgets the error", async () => {
@@ -174,7 +174,7 @@ test("Closing a returned error's dialog keeps the overlay and forgets the error"
     expect(location.current.search).toBe("?overlay=scenes&list=me"),
   );
   expect(location.current.hash).toBe("#h");
-  await user.click(screen.getByRole("button", { name: "sign in" }));
+  await user.click(screen.getByRole("button", { name: "Sign in" }));
   expect(
     await screen.findByRole("dialog", { name: "Sign in" }),
   ).not.toHaveTextContent(/sign-ups are closed/i);

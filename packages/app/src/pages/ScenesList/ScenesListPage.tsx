@@ -4,6 +4,7 @@ import { Drawer } from "@/ui/Drawer";
 import { Tabs } from "@/ui/Tabs";
 import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
+import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import ExamplesListing from "./ExamplesListing";
 import MyScenes from "./MyScenes";
 import { ListType, OPEN_SCENES_BUTTON_ID } from "./constants";
@@ -30,6 +31,7 @@ const focusOpenScenesButton = () =>
 const ScenesList: React.FC = () => {
   const [search] = useSearchParams();
   const { open, close } = useOverlay();
+  const signIn = useSignInDialog();
   const isAuthenticated = useAuthStatus();
   const showMyScenes =
     DISPLAY_AUTH_FLOWS || isAuthenticated === "authenticated";
@@ -48,8 +50,21 @@ const ScenesList: React.FC = () => {
   );
 
   return (
-    <Drawer.Root open onOpenChange={handleOpenChange}>
-      <Drawer.Popup side="right" size="lg" finalFocus={focusOpenScenesButton}>
+    // Sign-in stacks above as a MUI modal. Two modals fight over focus and
+    // aria-hidden, and on a direct load this one opens last and wins, so it
+    // steps back while sign-in is open: not modal, and not taking focus.
+    <Drawer.Root
+      open
+      modal={!signIn.isOpen}
+      disablePointerDismissal={signIn.isOpen}
+      onOpenChange={handleOpenChange}
+    >
+      <Drawer.Popup
+        side="right"
+        size="lg"
+        initialFocus={!signIn.isOpen}
+        finalFocus={focusOpenScenesButton}
+      >
         <Tabs.Root
           className={styles.tabs}
           value={listType}

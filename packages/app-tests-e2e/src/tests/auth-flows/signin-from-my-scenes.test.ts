@@ -16,7 +16,7 @@ test("Signing in from My Scenes returns to My Scenes", async ({
 
   await app.myScenes().goTo();
   const myScenes = page.getByRole("tabpanel", { name: "My Scenes" });
-  await myScenes.getByRole("button", { name: "sign in" }).click();
+  await myScenes.getByRole("button", { name: "Sign in" }).click();
   await app.loginDialog().devSignIn().click();
   await app.dummyProvider().signIn(signInUser);
 
@@ -24,5 +24,5 @@ test("Signing in from My Scenes returns to My Scenes", async ({
   await expect(
     page.getByRole("tab", { name: "My Scenes", selected: true }),
   ).toBeVisible();
-  await expect(myScenes.getByRole("button", { name: "sign in" })).toBeHidden();
+  await expect(myScenes.getByRole("button", { name: "Sign in" })).toBeHidden();
 });
