@@ -63,7 +63,13 @@ html {
   --color-background-rgb: 255, 255, 255;
   --color-background: rgb(var(--color-background-rgb));
 
+  /*
+   * MathBox's default blue (#3090ff, OKLCH hue 255) darkened to lightness 0.5
+   * at the same hue, for 4.5:1 text contrast against white.
+   */
+  --color-accent: #0061be;
   --color-error: red;
+  --color-danger: rgb(198, 40, 40);
   --color-text-lighter: rgb(191, 191, 191);
   --color-text-light: rgb(118, 118, 118);
   --color-text-primary: rgb(67, 67, 67);
@@ -71,6 +77,8 @@ html {
   --border-radius: 4px;
   --transition-duration: 300ms;
   --transition-timing-function: ease;
+  /* MUI's modal layer, so Base UI and MUI overlays stack alike. */
+  --z-index-overlay: 1300;
   font-size: 14px;
   --font-size-small: 12px;
   color: var(--color-text-primary);

@@ -1,0 +1,8 @@
+/*
+ * storybook-addon-pseudo-states can force our :focus-visible rules but not the
+ * browser's own focus ring, so stories that force the state get a copy of
+ * Chromium's default. Component rules that set an outline still win.
+ */
+[data-pseudo="focus-visible"] {
+  outline: auto 1px -webkit-focus-ring-color;
+}

@@ -1,4 +1,5 @@
 import "../src/globals.css";
+import "./preview.css";
 import React from "react";
 import type { Preview } from "@storybook/react-vite";
 import { ThemeProvider, StyledEngineProvider } from "@mui/material/styles";

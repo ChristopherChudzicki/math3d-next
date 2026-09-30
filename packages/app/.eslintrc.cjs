@@ -1,3 +1,10 @@
+// The online @iconify/react fetches icons named by string ("lucide:x") at
+// runtime; the offline build only renders imported icon data.
+const iconifyOnline = {
+  name: "@iconify/react",
+  message: 'Import from "@iconify/react/offline".',
+};
+
 module.exports = {
   // ESLint skips dot-directories unless un-ignored.
   ignorePatterns: ["!.storybook"],
@@ -24,8 +31,28 @@ module.exports = {
         ],
       },
     ],
+    "no-restricted-imports": [
+      "error",
+      {
+        paths: [iconifyOnline],
+        // Base UI is wrapped by components in src/ui; everything else uses
+        // those.
+        patterns: [
+          {
+            group: ["@base-ui/react", "@base-ui/react/*"],
+            message: "Use a component from src/ui instead of Base UI directly.",
+          },
+        ],
+      },
+    ],
   },
   overrides: [
+    {
+      files: ["src/ui/**"],
+      rules: {
+        "no-restricted-imports": ["error", { paths: [iconifyOnline] }],
+      },
+    },
     // The edge Worker (src/worker) is typechecked with Workers types via its
     // own tsconfig, excluded from the app's main tsconfig. Point ESLint's
     // typed-linting parser at that project so worker sources lint under the
