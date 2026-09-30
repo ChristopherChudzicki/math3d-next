@@ -1,5 +1,11 @@
 import { test, expect } from "vitest";
-import { renderTestApp, screen, user, waitForAppReady } from "@/test_util";
+import {
+  renderTestApp,
+  screen,
+  user,
+  waitFor,
+  waitForAppReady,
+} from "@/test_util";
 
 test.each([
   {
@@ -76,4 +82,31 @@ test("Delete Account opens the delete-account overlay", async () => {
   });
   await user.click(deleteAccount);
   expect(location.current.search).toContain("overlay=delete-account");
+});
+
+test.each([
+  { isAuthenticated: true, list: "me" },
+  { isAuthenticated: false, list: "examples" },
+])(
+  "the scenes button opens list=$list (authenticated=$isAuthenticated)",
+  async ({ isAuthenticated, list }) => {
+    const { location, queryClient } = renderTestApp("", { isAuthenticated });
+    await waitForAppReady(queryClient);
+
+    await user.click(screen.getByRole("button", { name: "Open scenes" }));
+
+    expect(location.current.search).toContain("overlay=scenes");
+    expect(location.current.search).toContain(`list=${list}`);
+  },
+);
+
+test("closing the scenes dialog returns focus to the scenes button", async () => {
+  renderTestApp("");
+  const button = await screen.findByRole("button", { name: "Open scenes" });
+
+  await user.click(button);
+  await screen.findByRole("dialog", { name: "Scenes" });
+  await user.keyboard("{Escape}");
+
+  await waitFor(() => expect(button).toHaveFocus());
 });
