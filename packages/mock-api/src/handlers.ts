@@ -48,22 +48,28 @@ export const handlers = [
   // v1: my scenes. The anonymous response is a 403, not Ninja's default 401:
   // main/api.py remaps AuthenticationError because session auth cannot send a
   // compliant WWW-Authenticate challenge.
+  // Filters, orders and paginates as the real endpoint does.
   http.get<NoParams, ErrorResponseBody | PagedMiniSceneSchema>(
     urls.scenes.meList,
-    async () => {
+    async ({ request }) => {
       const user = getUser();
       if (!user) {
         return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
       }
+      const params = new URL(request.url).searchParams;
+      const title = params.get("title")?.toLowerCase();
+      const archived = params.get("archived");
+      const offset = Number(params.get("offset") ?? 0);
+      const limit = Number(params.get("limit") ?? 100);
 
-      const scenes = db.scene.findMany({
-        where: {
-          author: {
-            equals: user.id,
-          },
-        },
-      });
-      const items = scenes.map((s) => ({
+      const scenes = db.scene
+        .findMany({ where: { author: { equals: user.id } } })
+        .filter((s) => !title || s.title.toLowerCase().includes(title))
+        .filter((s) => archived === null || String(s.archived) === archived)
+        .sort(
+          (a, b) => Date.parse(b.modifiedDate) - Date.parse(a.modifiedDate),
+        );
+      const items = scenes.slice(offset, offset + limit).map((s) => ({
         title: s.title,
         key: s.key,
         author: s.author,
@@ -72,7 +78,7 @@ export const handlers = [
         modifiedDate: s.modifiedDate,
       }));
       return HttpResponse.json({
-        count: items.length,
+        count: scenes.length,
         items,
       });
     },
@@ -158,6 +164,26 @@ export const handlers = [
         ...updated,
         itemOrder: JSON.parse(updated.itemOrder),
       });
+    },
+  ),
+  http.delete<{ key: string }, null, ErrorResponseBody | null>(
+    urls.scenes.detail,
+    ({ params }) => {
+      // As the real API: authentication, then existence, then ownership.
+      const user = getUser();
+      if (!user) {
+        return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
+      }
+      const where = { key: { equals: params.key } };
+      const scene = db.scene.findFirst({ where });
+      if (!scene) {
+        return HttpResponse.json({ detail: "Not Found" }, { status: 404 });
+      }
+      if (scene.author !== user.id) {
+        return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
+      }
+      db.scene.delete({ where });
+      return new HttpResponse(null, { status: 204 });
     },
   ),
   // allauth sign-out. Its 401 confirms the session is gone; `useLogout` treats

@@ -103,6 +103,18 @@ def test_me_returns_only_my_scenes():
 
 
 @pytest.mark.django_db
+def test_me_lists_most_recently_modified_first():
+    me = CustomUserFactory.create()
+    first, second, third = SceneFactory.create_batch(3, author=me)
+    first.save()  # bumps modified_date past the others
+    client = Client()
+    client.force_login(me)
+    body = client.get(ME_URL).json()
+    # Neither id order nor created_date order gives this.
+    assert [i["key"] for i in body["items"]] == [first.key, third.key, second.key]
+
+
+@pytest.mark.django_db
 def test_legacy_post_creates_and_returns_201():
     response = Client().post(
         LEGACY_URL,
