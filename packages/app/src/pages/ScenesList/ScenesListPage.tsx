@@ -1,18 +1,14 @@
 import React, { useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router";
-import { Dialog } from "@/ui/Dialog";
+import { Drawer } from "@/ui/Drawer";
 import { Tabs } from "@/ui/Tabs";
 import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import ExamplesListing from "./ExamplesListing";
 import MyScenes from "./MyScenes";
-import { OPEN_SCENES_BUTTON_ID } from "./constants";
+import { ListType, OPEN_SCENES_BUTTON_ID } from "./constants";
 import styles from "./ScenesList.module.css";
 
-enum ListType {
-  Examples = "examples",
-  Me = "me",
-}
 const normalizeListType = (
   listType: string,
   showMyScenes: boolean,
@@ -52,16 +48,16 @@ const ScenesList: React.FC = () => {
   );
 
   return (
-    <Dialog.Root open onOpenChange={handleOpenChange}>
-      <Dialog.Popup size="lg" finalFocus={focusOpenScenesButton}>
+    <Drawer.Root open onOpenChange={handleOpenChange}>
+      <Drawer.Popup side="right" size="lg" finalFocus={focusOpenScenesButton}>
         <Tabs.Root
           className={styles.tabs}
           value={listType}
           onValueChange={(value) => open("scenes", { list: value })}
         >
-          <Dialog.Header>
+          <Drawer.Header>
             <div className={styles.titleRow}>
-              <Dialog.Title>Scenes</Dialog.Title>
+              <Drawer.Title>Scenes</Drawer.Title>
               <Tabs.List aria-label="Scenes">
                 {showMyScenes && (
                   <Tabs.Tab value={ListType.Me}>My Scenes</Tabs.Tab>
@@ -69,7 +65,7 @@ const ScenesList: React.FC = () => {
                 <Tabs.Tab value={ListType.Examples}>Examples</Tabs.Tab>
               </Tabs.List>
             </div>
-          </Dialog.Header>
+          </Drawer.Header>
           {/*
            * Base UI makes panels tab stops, which APG reserves for panels
            * whose content isn't focusable; these start with a field or a card.
@@ -89,8 +85,8 @@ const ScenesList: React.FC = () => {
             <ExamplesListing />
           </Tabs.Panel>
         </Tabs.Root>
-      </Dialog.Popup>
-    </Dialog.Root>
+      </Drawer.Popup>
+    </Drawer.Root>
   );
 };
 

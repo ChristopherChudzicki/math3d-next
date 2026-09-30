@@ -153,7 +153,7 @@ test("deleting the open scene replaces its URL with the scenes list", async () =
   expect(location.current.search).toContain("list=me");
 });
 
-test("clicking the open scene's card closes the dialog without a new history entry", async () => {
+test("clicking the open scene's card does nothing, so Close still pops the drawer's entry", async () => {
   const { owner, scenes } = seedScenes(["Alpha"]);
   const [{ key }] = scenes;
   const { router, location } = renderTestApp(`/${key}`, { user: owner });
@@ -166,14 +166,16 @@ test("clicking the open scene's card closes the dialog without a new history ent
   );
 
   await user.click(await screen.findByRole("link", { name: "Alpha" }));
+  expect(screen.getByRole("dialog", { name: "Scenes" })).toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Close" }));
 
   await waitFor(() =>
     expect(screen.queryByRole("dialog", { name: "Scenes" })).toBeNull(),
   );
   expect(location.current.search).toBe("");
-  // Back from the first entry goes nowhere; a pushed duplicate would reopen.
-  await act(() => router.navigate(-1));
-  expect(screen.queryByRole("dialog", { name: "Scenes" })).toBeNull();
+  // Popped, not replaced: a replace would leave a duplicate entry behind, and
+  // the next Back would appear to do nothing.
+  expect(router.state.historyAction).toBe("POP");
 });
 
 test("cancelling a delete returns focus to the card's menu button", async () => {

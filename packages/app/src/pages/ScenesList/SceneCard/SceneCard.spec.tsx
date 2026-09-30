@@ -44,12 +44,10 @@ test("actions are a sibling of the link, not inside it", () => {
   expect(screen.getByRole("button", { name: "Actions" })).toBeInTheDocument();
 });
 
-test("a plain click on the current scene's card calls onCurrentClick instead of navigating", async () => {
-  const onCurrentClick = vi.fn();
-  const router = setupCard({ current: true, onCurrentClick });
+test("a plain click on the current scene's card doesn't navigate", async () => {
+  const router = setupCard({ current: true });
 
   await user.click(screen.getByRole("link", { name: "Parametric surfaces" }));
 
-  expect(onCurrentClick).toHaveBeenCalledOnce();
   expect(router.state.location.pathname).toBe("/start");
 });

@@ -11,10 +11,8 @@ type SceneCardProps = {
   title: string;
   to: string;
   imageUrl?: string;
-  /** The scene open behind the dialog. */
+  /** The scene already open; a plain click on its card does nothing. */
   current?: boolean;
-  /** A plain click on the current scene's card calls this instead of navigating. */
-  onCurrentClick?: () => void;
   /** ISO timestamp. With it, the card shows a "Last modified" line. */
   modifiedDate?: string;
   archived?: boolean;
@@ -34,7 +32,6 @@ const SceneCard: React.FC<SceneCardProps> = ({
   to,
   imageUrl,
   current = false,
-  onCurrentClick,
   modifiedDate,
   archived = false,
   actions,
@@ -42,10 +39,9 @@ const SceneCard: React.FC<SceneCardProps> = ({
   const metaId = useId();
   const hasMeta = modifiedDate !== undefined;
   const handleClick = (e: React.MouseEvent) => {
-    if (current && onCurrentClick && isPlainClick(e)) {
-      e.preventDefault();
-      onCurrentClick();
-    }
+    // A same-URL link replaces the entry and drops its history state, which
+    // useOverlay's close() needs.
+    if (current && isPlainClick(e)) e.preventDefault();
   };
   return (
     <li className={classNames(styles.card, current && styles.current)}>

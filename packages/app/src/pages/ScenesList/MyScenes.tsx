@@ -15,17 +15,17 @@ import archiveRestore from "@iconify-icons/lucide/archive-restore";
 import trash2 from "@iconify-icons/lucide/trash-2";
 import Button from "@/ui/Button";
 import Checkbox from "@/ui/Checkbox";
-import { Dialog } from "@/ui/Dialog";
+import { Drawer } from "@/ui/Drawer";
 import IconButton from "@/ui/IconButton";
 import LoadingSpinner from "@/ui/LoadingSpinner/LoadingSpinner";
 import { Menu } from "@/ui/Menu";
 import TextField from "@/ui/TextField";
 import { u } from "@/util/styles";
 import { useAuthStatus } from "@/features/auth";
-import { useOverlay } from "@/features/overlays/useOverlay";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import DeleteSceneDialog from "./DeleteSceneDialog";
 import SceneCard from "./SceneCard/SceneCard";
+import { ListType, sceneHref } from "./constants";
 import styles from "./ScenesList.module.css";
 
 const SCROLL_ID = "my-scenes-scroll";
@@ -45,14 +45,15 @@ const countMessage = (count: number) => {
 const cardLink = (key: string) =>
   document
     .getElementById(SCROLL_ID)
-    ?.querySelector<HTMLAnchorElement>(`a[href="/${key}"]`) ?? null;
+    ?.querySelector<HTMLAnchorElement>(
+      `a[href="${sceneHref(key, ListType.Me)}"]`,
+    ) ?? null;
 const cardMenuButton = (key: string) =>
   cardLink(key)?.closest("li")?.querySelector("button") ?? null;
 
 const MyScenesList: React.FC = () => {
   const { sceneKey } = useParams();
   const navigate = useNavigate();
-  const { close } = useOverlay();
   const [filterText, setFilterText] = useState("");
   const [filterValue, setFilterValue] = useState("");
   const [includeArchived, setIncludeArchived] = useState(false);
@@ -223,12 +224,11 @@ const MyScenesList: React.FC = () => {
           {items.map((item) => (
             <SceneCard
               key={item.key}
-              to={`/${item.key}`}
+              to={sceneHref(item.key, ListType.Me)}
               title={titleOf(item)}
               modifiedDate={item.modifiedDate}
               archived={item.archived}
               current={item.key === sceneKey}
-              onCurrentClick={close}
               actions={
                 <Menu.Root>
                   <Menu.Trigger
@@ -292,7 +292,7 @@ const MyScenesList: React.FC = () => {
           onCheckedChange={handleIncludeArchived}
         />
       </div>
-      <Dialog.Body id={SCROLL_ID}>{renderBody()}</Dialog.Body>
+      <Drawer.Body id={SCROLL_ID}>{renderBody()}</Drawer.Body>
       <div role="status" aria-live="polite" className={u.visuallyHidden}>
         <span key={status.id}>{status.text}</span>
       </div>
@@ -315,21 +315,21 @@ const MyScenes: React.FC = () => {
   const signIn = useSignInDialog();
   if (isAuthenticated === "loading") {
     return (
-      <Dialog.Body>
+      <Drawer.Body>
         <LoadingSpinner label="Loading scenes" />
-      </Dialog.Body>
+      </Drawer.Body>
     );
   }
   if (isAuthenticated !== "authenticated") {
     return (
-      <Dialog.Body>
+      <Drawer.Body>
         <div className={styles.message}>
           <p className={styles.hint}>Sign in to see the scenes you save.</p>
           <Button tone="accent" onClick={() => signIn.open()}>
             Sign in
           </Button>
         </div>
-      </Dialog.Body>
+      </Drawer.Body>
     );
   }
   return <MyScenesList />;

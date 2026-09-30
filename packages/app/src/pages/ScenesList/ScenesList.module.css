@@ -1,5 +1,5 @@
 /*
- * Tabs.Root and each Panel sit between the flex-column popup and Dialog.Body;
+ * Tabs.Root and each Panel sit between the flex-column popup and Body;
  * without these, Body never gets a bounded height and never scrolls.
  */
 .tabs,

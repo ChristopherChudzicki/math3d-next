@@ -38,19 +38,22 @@ test("signed in, My Scenes is the first tab", async () => {
   ]);
 });
 
-test("choosing an example opens it and closes the dialog", async () => {
+test("choosing an example opens it, keeping the drawer open with focus on the card", async () => {
   const scene = seedDb.withSceneFromItems([]);
+  seedDb.withSceneFromItems([], { key: "sliders_intro" });
   const { location } = renderTestApp(
     `/${scene.key}?overlay=scenes&list=examples`,
   );
+  const card = await screen.findByRole("link", {
+    name: "Using Variable Sliders",
+  });
 
-  await user.click(
-    await screen.findByRole("link", { name: "Using Variable Sliders" }),
-  );
+  await user.click(card);
 
   await waitFor(() => expect(location.current.pathname).toBe("/sliders_intro"));
-  expect(location.current.search).not.toContain("overlay=");
-  expect(screen.queryByRole("dialog", { name: "Scenes" })).toBeNull();
+  expect(location.current.search).toBe("?overlay=scenes&list=examples");
+  expect(card).toHaveFocus();
+  expect(card).toHaveAttribute("aria-current", "page");
 });
 
 test("an unknown ?list= value self-corrects to list=examples", async () => {
