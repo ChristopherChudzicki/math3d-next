@@ -17,7 +17,7 @@ class MySceneItem {
   }
 
   menuTrigger(): Locator {
-    return this.root.getByRole("button", { name: "Edit" });
+    return this.root.getByRole("button", { name: /^Actions for / });
   }
 
   menuItem = {
@@ -52,7 +52,9 @@ class MyScenes {
   }
 
   field(name: FieldName): Locator {
-    return this.root.getByLabel(name);
+    // By role: getByLabel also matches the checkbox's hidden native input.
+    const role = name === "Include archived" ? "checkbox" : "textbox";
+    return this.root.getByRole(role, { name });
   }
 
   sceneItem(title: string): MySceneItem {

@@ -1,24 +1,59 @@
-.tabList {
-  height: 48px;
-}
-.infiniteList:global(.MuiList-root) {
-  /* 48 for tabs, 62 for textfield, 60 for checkbox */
-  height: calc(100vh - 48px - 62px - 40px);
-  overflow: auto;
-  padding-top: 0px;
-}
-
-.tabPanel:global(.MuiTabPanel-root) {
-  padding: 0px;
-  width: 300px;
+/*
+ * Tabs.Root and each Panel sit between the flex-column popup and Dialog.Body;
+ * without these, Body never gets a bounded height and never scrolls.
+ */
+.tabs,
+.panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
 }
 
-.with-margin {
-  margin: 1rem;
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.5rem;
 }
 
-.form-row {
-  margin-left: 16px;
-  margin-right: 16px;
-  width: calc(100% - 32px);
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 1.5rem;
+  padding: 0.25rem 1.25rem 0.5rem;
+}
+
+.filterField {
+  flex: 1 1 14rem;
+  max-width: 24rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0.25rem 0 0;
+  list-style: none;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-light);
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0 0;
 }

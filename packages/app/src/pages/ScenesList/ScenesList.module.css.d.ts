@@ -1,9 +1,13 @@
 declare const styles: {
-  readonly "form-row": string;
-  readonly "infiniteList": string;
-  readonly "tabList": string;
-  readonly "tabPanel": string;
-  readonly "with-margin": string;
+  readonly "filterField": string;
+  readonly "filterRow": string;
+  readonly "grid": string;
+  readonly "hint": string;
+  readonly "message": string;
+  readonly "more": string;
+  readonly "panel": string;
+  readonly "tabs": string;
+  readonly "titleRow": string;
 };
 export = styles;
 

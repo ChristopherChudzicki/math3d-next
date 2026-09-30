@@ -1,23 +1,28 @@
 import React from "react";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
-import Link from "@/ui/Link";
+import { useParams } from "react-router";
+import { Dialog } from "@/ui/Dialog";
+import { useOverlay } from "@/features/overlays/useOverlay";
+import SceneCard from "./SceneCard/SceneCard";
 import examplesData from "./examples_data.json";
+import styles from "./ScenesList.module.css";
 
 const ExamplesListing: React.FC = () => {
+  const { sceneKey } = useParams();
+  const { close } = useOverlay();
   return (
-    <List component="nav" dense>
-      {examplesData.map((e) => (
-        <ListItemButton
-          key={e.id}
-          LinkComponent={Link}
-          href={`/${e.id}?overlay=scenes&list=examples`}
-        >
-          <ListItemText primary={e.text.primary} secondary={e.text.secondary} />
-        </ListItemButton>
-      ))}
-    </List>
+    <Dialog.Body>
+      <ul role="list" className={styles.grid}>
+        {examplesData.map((e) => (
+          <SceneCard
+            key={e.id}
+            to={`/${e.id}`}
+            title={e.text.primary}
+            current={e.id === sceneKey}
+            onCurrentClick={close}
+          />
+        ))}
+      </ul>
+    </Dialog.Body>
   );
 };
 
