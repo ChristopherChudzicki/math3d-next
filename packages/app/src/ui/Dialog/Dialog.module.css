@@ -69,6 +69,18 @@
   height: 100%;
 }
 
+/* On phones a large dialog takes the whole screen. */
+@media (max-width: 40rem) {
+  .viewport:has(> .lg) {
+    padding: 0;
+  }
+
+  .lg {
+    width: 100%;
+    border-radius: 0;
+  }
+}
+
 .header {
   display: flex;
   align-items: flex-start;
