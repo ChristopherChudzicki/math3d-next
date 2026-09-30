@@ -1,6 +1,8 @@
 import React from "react";
 import { useSearchParams } from "react-router";
+import LoginPage from "@/pages/auth/LoginPage";
 import { OVERLAYS } from "./registry";
+import { SIGN_IN_PARAM } from "./useSignInDialog";
 import type { OverlayName } from "./useOverlay";
 
 const OverlayHost: React.FC = () => {
@@ -13,7 +15,12 @@ const OverlayHost: React.FC = () => {
     name && Object.hasOwn(OVERLAYS, name)
       ? OVERLAYS[name as OverlayName]
       : undefined;
-  return Overlay ? <Overlay /> : null;
+  return (
+    <>
+      {Overlay ? <Overlay /> : null}
+      {search.has(SIGN_IN_PARAM) ? <LoginPage /> : null}
+    </>
+  );
 };
 
 export default OverlayHost;

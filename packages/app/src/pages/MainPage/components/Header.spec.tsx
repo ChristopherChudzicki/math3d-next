@@ -41,11 +41,11 @@ test.each([
   },
 );
 
-test("Login button opens login overlay", async () => {
+test("Login button opens the sign-in dialog", async () => {
   const { location } = renderTestApp("", { isAuthenticated: false });
   const signin = await screen.findByRole("button", { name: "Sign in" });
   await user.click(signin);
-  expect(location.current.search).toContain("overlay=login");
+  expect(location.current.search).toContain("signin");
 });
 
 test("Contact links to the GitHub issues page in a new tab", async () => {

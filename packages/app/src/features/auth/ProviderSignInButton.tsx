@@ -5,15 +5,16 @@ import { useLocation } from "react-router";
 import type { Location } from "react-router";
 import { getCsrfToken } from "@math3d/api";
 import { useAppStore } from "@/store/hooks";
+import { SIGN_IN_PARAM } from "@/features/overlays/useSignInDialog";
 import { saveSignInDraft } from "./signInDraft";
 import { useAuthStatus } from "./useAuthStatus";
 
 const PROVIDER_REDIRECT_URL = `${import.meta.env.VITE_API_BASE_URL}/_allauth/browser/v1/auth/provider/redirect`;
 
-// This page as it stands under the sign-in dialog.
+// This page as it stands under the sign-in dialog, overlays included.
 const callbackUrl = ({ pathname, search, hash }: Location): string => {
   const params = new URLSearchParams(search);
-  params.delete("overlay");
+  params.delete(SIGN_IN_PARAM);
   const query = params.toString();
   return `${window.location.origin}${pathname}${query ? `?${query}` : ""}${hash}`;
 };

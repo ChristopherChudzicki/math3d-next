@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import { useCreateScene } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions, select } from "@/features/sceneControls/mathItems";
-import { useOverlay } from "@/features/overlays/useOverlay";
+import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import { DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import BasicDialog from "@/ui/BasicDialog";
 import useTitleForm from "./useTitleForm";
@@ -60,7 +60,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const createScene = useCreateScene();
-  const { open: openOverlay } = useOverlay();
+  const signIn = useSignInDialog();
   const title = useAppSelector(select.title);
   const author = useAppSelector(select.author);
   const hasKey = useAppSelector(select.key) !== null;
@@ -134,7 +134,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
               variant="body2"
               onClick={() => {
                 onClose();
-                openOverlay("login");
+                signIn.open();
               }}
             >
               Sign in
