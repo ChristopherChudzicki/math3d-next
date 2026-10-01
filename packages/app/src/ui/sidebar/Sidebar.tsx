@@ -3,7 +3,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import classNames from "classnames";
 import React, { useCallback, useId, useMemo } from "react";
 
-import SubtleButtom from "../SubtleButton";
+import IconButton from "../IconButton";
 import style from "./Sidebar.module.css";
 
 const getButtonDirection = (
@@ -60,16 +60,15 @@ const Sidebar: React.FC<SidebarProps> = ({
           [style["right-sidebar-collapse-button"]]: side === "right",
         })}
       >
-        <SubtleButtom
+        <IconButton
           onClick={handleClick}
           className={style["sidebar-button"]}
-          centered
           aria-controls={regionId}
           aria-expanded={visible}
-          aria-label={isCollapsed ? `Expand ${label}` : `Collapse ${label}`}
+          label={isCollapsed ? `Expand ${label}` : `Collapse ${label}`}
         >
-          <IconComponent />
-        </SubtleButtom>
+          <IconComponent fontSize="inherit" />
+        </IconButton>
       </div>
       <div role="region" id={regionId} {...inertness}>
         {children}

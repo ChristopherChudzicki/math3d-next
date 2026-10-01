@@ -1,9 +1,8 @@
 declare const styles: {
-  readonly "display": string;
-  readonly "playButton": string;
-  readonly "speedControls": string;
-  readonly "speedGroup": string;
-  readonly "stepControls": string;
+  readonly "control": string;
+  readonly "controls": string;
+  readonly "pauseIcon": string;
+  readonly "speed": string;
 };
 export = styles;
 

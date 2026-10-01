@@ -1,9 +1,8 @@
 import React, { useRef } from "react";
-import Button from "@mui/material/Button";
-import type { ButtonProps } from "@mui/material/Button";
 import { useLocation } from "react-router";
 import type { Location } from "react-router";
 import { getCsrfToken } from "@math3d/api";
+import Button from "@/ui/Button";
 import { useAppStore } from "@/store/hooks";
 import { SIGN_IN_PARAM } from "@/features/overlays/useSignInDialog";
 import { saveSignInDraft } from "./signInDraft";
@@ -21,9 +20,7 @@ const callbackUrl = ({ pathname, search, hash }: Location): string => {
 
 type Props = {
   provider: "google" | "dummy";
-  children: string;
-  variant?: ButtonProps["variant"];
-  startIcon?: React.ReactNode;
+  children: React.ReactNode;
   className?: string;
 };
 
@@ -34,8 +31,6 @@ type Props = {
 const ProviderSignInButton: React.FC<Props> = ({
   provider,
   children,
-  variant = "contained",
-  startIcon,
   className,
 }) => {
   const store = useAppStore();
@@ -58,13 +53,7 @@ const ProviderSignInButton: React.FC<Props> = ({
       <input type="hidden" name="process" value="login" />
       <input type="hidden" name="callback_url" value={callbackUrl(location)} />
       <input type="hidden" name="csrfmiddlewaretoken" ref={csrfInput} />
-      <Button
-        type="submit"
-        variant={variant}
-        startIcon={startIcon}
-        className={className}
-        disabled={!ready}
-      >
+      <Button type="submit" className={className} disabled={!ready}>
         {children}
       </Button>
     </form>

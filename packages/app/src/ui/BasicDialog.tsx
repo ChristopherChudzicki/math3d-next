@@ -3,11 +3,11 @@ import Dialog from "@mui/material/Dialog";
 import type { DialogProps } from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import Button from "@mui/material/Button";
-import type { ButtonProps } from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
-import IconButton from "@mui/material/IconButton";
 import Close from "@mui/icons-material/Close";
+import Button from "./Button";
+import type { ButtonProps } from "./Button";
+import IconButton from "./IconButton";
 
 const topRightStyle: React.CSSProperties = {
   position: "absolute",
@@ -100,12 +100,8 @@ const BasicDialog: React.FC<BasicDialogProps> = ({
       sx={{}}
     >
       <div style={topRightStyle}>
-        <IconButton
-          onClick={onClose}
-          aria-label="Close"
-          disabled={closeDisabled}
-        >
-          <Close />
+        <IconButton label="Close" onClick={onClose} disabled={closeDisabled}>
+          <Close fontSize="inherit" />
         </IconButton>
       </div>
       <DialogTitle>{title}</DialogTitle>
@@ -113,12 +109,7 @@ const BasicDialog: React.FC<BasicDialogProps> = ({
       {showFooter && (
         <DialogActions>
           {cancelButton === undefined ? (
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={onClose}
-              {...cancelButtonProps}
-            >
+            <Button onClick={onClose} {...cancelButtonProps}>
               {cancelText}
             </Button>
           ) : (
@@ -126,8 +117,8 @@ const BasicDialog: React.FC<BasicDialogProps> = ({
           )}
           {confirmButton === undefined ? (
             <Button
-              variant="contained"
-              color="primary"
+              variant="solid"
+              tone="accent"
               onClick={handleConfirm}
               disabled={confirming}
               {...confirmButtonProps}

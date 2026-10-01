@@ -52,10 +52,9 @@ const LoginPage: React.FC = () => {
         </Typography>
         <ProviderSignInButton
           provider="google"
-          variant="outlined"
-          startIcon={<GoogleLogo />}
           className={styles["google-button"]}
         >
+          <GoogleLogo />
           Sign in with Google
         </ProviderSignInButton>
         {/* Last, so the dialog reads the same with or without this
@@ -63,7 +62,7 @@ const LoginPage: React.FC = () => {
         {ENABLE_DUMMY_AUTH && (
           <>
             <Divider className={styles["dummy-divider"]}>or</Divider>
-            <ProviderSignInButton provider="dummy" variant="outlined">
+            <ProviderSignInButton provider="dummy">
               Sign in as dev user
             </ProviderSignInButton>
           </>

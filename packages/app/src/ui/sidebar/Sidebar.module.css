@@ -8,7 +8,8 @@
 }
 
 .sidebar-button {
-  color: var(--color-secondary);
+  --tone: var(--color-secondary);
+  font-size: 1.5rem;
 }
 
 .left-sidebar-collapse-button {

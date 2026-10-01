@@ -33,3 +33,7 @@ thead .row:first-of-type {
   padding: 4px;
   white-space: nowrap;
 }
+
+.toggle {
+  margin-left: 0.5em;
+}

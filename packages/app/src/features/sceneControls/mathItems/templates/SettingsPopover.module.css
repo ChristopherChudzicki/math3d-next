@@ -13,8 +13,8 @@
 }
 
 .settings-button {
+  --tone: var(--color-secondary-light);
   font-size: 20px;
-  color: var(--color-secondary-light);
 }
 
 .close {

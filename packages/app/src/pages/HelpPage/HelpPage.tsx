@@ -3,7 +3,7 @@ import React from "react";
 import Container from "@mui/material/Container";
 import Header from "@/ui/Header";
 import Typography from "@mui/material/Typography";
-import Link from "@mui/material/Link";
+import TextLink from "@/ui/TextLink";
 import Grid from "@mui/material/Grid";
 import ReferencePanel from "./ReferencePanel";
 import { entries } from "./data.compile";
@@ -20,7 +20,7 @@ const HelpPage: React.FC = () => {
             Function Reference
           </Typography>
         }
-        nav={<Link href="/">Back to Math3d</Link>}
+        nav={<TextLink to="/">Back to Math3d</TextLink>}
       />
       <Container>
         <Grid container>
@@ -39,7 +39,7 @@ const HelpPage: React.FC = () => {
             <ul>
               {groups.map((group) => (
                 <li key={group.tag}>
-                  <Link href={`#${group.tag}`}>{group.label}</Link>
+                  <TextLink href={`#${group.tag}`}>{group.label}</TextLink>
                 </li>
               ))}
             </ul>

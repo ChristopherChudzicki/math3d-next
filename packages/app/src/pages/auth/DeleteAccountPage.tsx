@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useId, useState } from "react";
 import * as yup from "yup";
 import { Alert, TextField } from "@mui/material";
-import MuiLink from "@mui/material/Link";
 import { useNavigate } from "react-router";
 import { isApiError, useUserMeDelete } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import BasicDialog from "@/ui/BasicDialog";
+import { TextButton } from "@/ui/TextLink";
 import { useValidatedForm } from "@/util/forms";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 
@@ -103,7 +103,7 @@ const DeleteAccountPage: React.FC = () => {
       confirmButtonProps={{
         type: "submit",
         form: formId,
-        color: "error",
+        tone: "danger",
         disabled: deleteAccount.isPending || deleteAccount.isSuccess,
       }}
     >
@@ -112,13 +112,9 @@ const DeleteAccountPage: React.FC = () => {
           This action cannot be undone. Scenes you have saved stay published at
           their existing links, with no account able to edit or remove them —
           delete them from{" "}
-          <MuiLink
-            component="button"
-            type="button"
-            onClick={() => open("scenes", { list: "me" })}
-          >
+          <TextButton onClick={() => open("scenes", { list: "me" })}>
             My Scenes
-          </MuiLink>{" "}
+          </TextButton>{" "}
           first if you don&rsquo;t want that. Signing in with Google again later
           creates a new, empty account.
         </Alert>

@@ -11,7 +11,7 @@ import type { AuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import type { OverlayName } from "@/features/overlays/useOverlay";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
-import Button from "@mui/material/Button";
+import Button from "@/ui/Button";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ListIcon from "@mui/icons-material/List";
@@ -25,7 +25,7 @@ import IconButton from "@/ui/IconButton";
 import { OPEN_SCENES_BUTTON_ID } from "@/pages/ScenesList/constants";
 
 import UserMenu from "./UserMenu";
-import * as styles from "./Header.module.css";
+import styles from "./Header.module.css";
 
 const LoginButtons: React.FC<{
   isAuthenticated: AuthStatus;
@@ -35,11 +35,10 @@ const LoginButtons: React.FC<{
   return (
     <Button
       className={styles["sign-in"]}
-      variant="text"
-      color="secondary"
+      variant="ghost"
       onClick={() => signIn.open()}
-      startIcon={<AccountCircleOutlinedIcon fontSize="small" />}
     >
+      <AccountCircleOutlinedIcon fontSize="inherit" />
       Sign in
     </Button>
   );

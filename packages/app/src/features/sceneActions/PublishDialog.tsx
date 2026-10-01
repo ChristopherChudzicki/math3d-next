@@ -1,7 +1,6 @@
 import React, { useEffect, useId, useState } from "react";
 import { useNavigate } from "react-router";
 import Alert from "@mui/material/Alert";
-import MuiLink from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import { useCreateScene } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
@@ -9,6 +8,7 @@ import { actions, select } from "@/features/sceneControls/mathItems";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import { DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import BasicDialog from "@/ui/BasicDialog";
+import { TextButton } from "@/ui/TextLink";
 import useTitleForm from "./useTitleForm";
 import { LinkField, useLinkCopy } from "./LinkDialog";
 
@@ -128,17 +128,14 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
         <LinkField url={publishedUrl} message={message} />
         {mode === "share" && DISPLAY_AUTH_FLOWS ? (
           <Typography variant="body2">
-            <MuiLink
-              component="button"
-              type="button"
-              variant="body2"
+            <TextButton
               onClick={() => {
                 onClose();
                 signIn.open();
               }}
             >
               Sign in
-            </MuiLink>{" "}
+            </TextButton>{" "}
             to save scenes you can keep editing.
           </Typography>
         ) : null}
