@@ -1,11 +1,5 @@
 import React, { act } from "react";
-import {
-  renderHook,
-  screen,
-  within,
-  waitFor,
-  waitForElementToBeRemoved,
-} from "@testing-library/react";
+import { renderHook, screen, within, waitFor } from "@testing-library/react";
 import user from "@testing-library/user-event";
 import {
   NotificationsProvider,
@@ -44,7 +38,7 @@ describe("NotificationsDisplay and useNotifications", () => {
       });
     });
 
-    const dialog2 = screen.getByRole("dialog");
+    const dialog2 = screen.getByRole("alertdialog");
     expect(dialog2).toHaveTextContent("Confirm 2");
     expect(within(dialog2).getByRole("heading")).toHaveTextContent("Confirm 2");
     const [cancel, confirm, ...others2] =
@@ -58,7 +52,7 @@ describe("NotificationsDisplay and useNotifications", () => {
       expect(dialog2).not.toBeInTheDocument();
     });
 
-    const dialog1 = screen.getByRole("dialog");
+    const dialog1 = screen.getByRole("alertdialog");
     expect(dialog1).toHaveTextContent("Alert 1");
     expect(within(dialog1).getByRole("heading")).toHaveTextContent("Alert 1");
     const [ok, ...others1] = within(dialog1).getAllByRole("button");
@@ -71,7 +65,7 @@ describe("NotificationsDisplay and useNotifications", () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     });
   });
 
@@ -94,15 +88,39 @@ describe("NotificationsDisplay and useNotifications", () => {
 
       await act(() => assertNotResolvedSoon(confirmed));
 
-      const dialog = screen.getByRole("dialog");
+      const dialog = screen.getByRole("alertdialog");
       await user.click(
         within(dialog).getByRole("button", { name: buttonName }),
       );
-      await waitForElementToBeRemoved(dialog);
+      await waitFor(() => expect(dialog).not.toBeInTheDocument());
 
       expect(await confirmed!).toBe(expectedConfirmed);
     },
   );
+
+  test("Escape dismisses a confirmation as not confirmed", async () => {
+    const { result } = renderHook(useNotifications, { wrapper: Wrapper });
+    let confirmed: Promise<boolean>;
+    act(() => {
+      confirmed = result.current.add({
+        title: "Confirm 1",
+        body: "body 1",
+        type: "confirmation",
+      }).confirmed;
+    });
+    const dialog = screen.getByRole("alertdialog", { name: "Confirm 1" });
+    // Focus starts on the safe choice.
+    await waitFor(() =>
+      expect(
+        within(dialog).getByRole("button", { name: "Cancel" }),
+      ).toHaveFocus(),
+    );
+
+    await user.keyboard("{Escape}");
+
+    await waitFor(() => expect(dialog).not.toBeInTheDocument());
+    expect(await confirmed!).toBe(false);
+  });
 
   test("Add, remove, throw errors without NotificationsProvider", async () => {
     const { result } = renderHook(useNotifications);

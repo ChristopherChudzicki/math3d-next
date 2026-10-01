@@ -7,7 +7,7 @@ class SignoutPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.root = page.getByRole("dialog", { name: "Sign out" });
+    this.root = page.getByRole("alertdialog", { name: "Sign out" });
   }
 
   confirm(): Locator {

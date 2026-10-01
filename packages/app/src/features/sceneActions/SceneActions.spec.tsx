@@ -231,6 +231,11 @@ test("a refused copy shows the link instead", async () => {
     `${window.location.origin}/${scene.key}`,
   );
   expect(within(dialog).getByText(/didn't allow copying/i)).toBeVisible();
+  await waitFor(() =>
+    expect(
+      within(dialog).getByRole("button", { name: "Copy link" }),
+    ).toHaveFocus(),
+  );
   expect(await primary()).toHaveTextContent(/^Copy link$/);
 });
 

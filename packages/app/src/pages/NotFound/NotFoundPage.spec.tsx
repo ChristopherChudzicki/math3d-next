@@ -26,10 +26,10 @@ test("unmatched non-app multi-segment path renders soft-404, not a crash", async
 
 test("a non-existent scene key still notifies and redirects to /", async () => {
   // Missing-scene behavior is unchanged (handled in SceneControls), NOT the soft-404 page.
-  // The notification is a plain MUI <Dialog> (role "dialog", not "alertdialog") with an "OK"
-  // button (NotificationsDisplay renders "OK" for type:"alert"; SceneControls uses type:"alert").
+  // The notification is an alertdialog with an "OK" button (NotificationsDisplay
+  // renders "OK" for type:"alert"; SceneControls uses type:"alert").
   const { location } = renderTestApp("/definitelynotascene");
-  const dialog = await screen.findByRole("dialog");
+  const dialog = await screen.findByRole("alertdialog", { name: "Not found" });
   await user.click(within(dialog).getByRole("button", { name: "OK" }));
   await waitFor(() => expect(location.current.pathname).toBe("/"));
 });

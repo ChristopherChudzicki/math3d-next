@@ -109,7 +109,7 @@ test("a 403 sends the user to sign in again instead of a generic failure", async
   );
 
   // The notice comes first; a sign-in dialog opened over it would hide it.
-  const notice = await screen.findByRole("dialog", {
+  const notice = await screen.findByRole("alertdialog", {
     name: "Could not delete your account",
   });
   expect(location.current.search).not.toContain("signin");

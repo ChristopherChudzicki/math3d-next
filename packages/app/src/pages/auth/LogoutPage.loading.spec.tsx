@@ -15,6 +15,8 @@ test("Does not redirect while auth status is loading", () => {
     isAuthenticated: true,
   });
 
-  expect(screen.getByRole("dialog", { name: "Sign out" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("alertdialog", { name: "Sign out" }),
+  ).toBeInTheDocument();
   expect(location.current.search).toContain("overlay=logout");
 });

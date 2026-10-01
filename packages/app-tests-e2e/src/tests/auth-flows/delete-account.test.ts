@@ -25,10 +25,9 @@ test.describe("Account deletion", () => {
     });
 
     await test.step("Verify the account is gone", async () => {
-      const dialog = page.getByRole("dialog");
-      await expect(dialog.getByRole("heading")).toContainText(
-        "Account Deleted",
-      );
+      const dialog = page.getByRole("alertdialog", {
+        name: "Account Deleted",
+      });
       await dialog.getByRole("button", { name: "OK" }).click();
       await app.assertSignedOut();
 

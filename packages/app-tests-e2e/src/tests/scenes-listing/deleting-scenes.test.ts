@@ -53,7 +53,9 @@ test.describe("Deleting a scene", async () => {
     await expect(sceneItem1.root).toHaveCount(0);
 
     await page.goto(`/${key1}`);
-    await expect(page.getByRole("dialog", { name: "Not found" })).toBeVisible();
+    await expect(
+      page.getByRole("alertdialog", { name: "Not found" }),
+    ).toBeVisible();
   });
 
   test("Does not delete scene when canceled", async ({

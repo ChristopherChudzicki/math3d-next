@@ -7,7 +7,7 @@ test("Sign out closes the overlay and signs the user out", async () => {
   const { location } = renderTestApp(`/${scene.key}?overlay=logout`, {
     isAuthenticated: true,
   });
-  const dialog = await screen.findByRole("dialog", { name: "Sign out" });
+  const dialog = await screen.findByRole("alertdialog", { name: "Sign out" });
   await user.click(
     within(dialog).getByRole("button", { name: "Yes, sign out" }),
   );
@@ -22,7 +22,7 @@ test("Cancel closes the overlay without signing the user out", async () => {
   const { location } = renderTestApp(`/${scene.key}?overlay=logout`, {
     isAuthenticated: true,
   });
-  const dialog = await screen.findByRole("dialog", { name: "Sign out" });
+  const dialog = await screen.findByRole("alertdialog", { name: "Sign out" });
   await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
   await waitFor(() =>
     expect(location.current.search).not.toContain("overlay="),

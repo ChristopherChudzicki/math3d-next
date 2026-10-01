@@ -39,6 +39,16 @@ test("a failed publish shows the error and leaves the scene as it was", async ()
   });
 });
 
+test("the title step starts on the title field", async () => {
+  renderOwnedScene();
+
+  const dialog = await openDuplicate();
+
+  await waitFor(() =>
+    expect(within(dialog).getByLabelText("Title")).toHaveFocus(),
+  );
+});
+
 test("a blank title is reported instead of published", async () => {
   renderOwnedScene();
 
@@ -84,8 +94,10 @@ test("while the publish is in flight, the dialog can be neither resubmitted nor 
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
+  let posts = 0;
   server.use(
     http.post(urls.scenes.list, async () => {
+      posts += 1;
       await gate;
       return HttpResponse.json({ detail: "late" }, { status: 500 });
     }),
@@ -97,7 +109,9 @@ test("while the publish is in flight, the dialog can be neither resubmitted nor 
   await user.click(save);
 
   await waitFor(() => expect(save).toHaveTextContent("Saving..."));
-  expect(save).toBeDisabled();
+  await user.click(save);
+  await user.keyboard("{Enter}");
+  expect(posts).toBe(1);
   expect(within(dialog).getByRole("button", { name: "Close" })).toBeDisabled();
   await user.keyboard("{Escape}");
   expect(dialog).toBeInTheDocument();

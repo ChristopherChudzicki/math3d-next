@@ -1,83 +1,76 @@
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import React, { useState } from "react";
-import DialogActions from "@mui/material/DialogActions";
+import { AlertDialog } from "@/ui/AlertDialog";
 import Button from "@/ui/Button";
 import { useNotifications } from "./NotificationsContext";
+import type { Notification } from "./NotificationsContext";
 
-const NotificationsDisplay: React.FC = () => {
-  const [pendingRemovals, setPendingRemovals] = useState(
-    new Map<string, boolean>(),
-  );
-  const { notifications, remove } = useNotifications();
+type NotificationDialogProps = {
+  notification: Notification;
+  onClosed: (id: string, confirmed: boolean) => void;
+};
+
+const NotificationDialog: React.FC<NotificationDialogProps> = ({
+  notification: n,
+  onClosed,
+}) => {
+  // Set when the dialog closes; reported once its exit animation completes.
+  const [confirmed, setConfirmed] = useState<boolean | null>(null);
   return (
-    <>
-      {notifications.map((n) => (
-        <Dialog
-          fullWidth
-          maxWidth="xs"
-          key={n.id}
-          open={!pendingRemovals.has(n.id)}
-          onTransitionExited={() => {
-            remove(n.id, pendingRemovals.get(n.id) ?? false);
-            setPendingRemovals((prev) => {
-              const copy = new Map(prev);
-              copy.delete(n.id);
-              return copy;
-            });
-          }}
-        >
-          <DialogTitle>{n.title}</DialogTitle>
-          <DialogContent>{n.body}</DialogContent>
-          <DialogActions>
-            {n.type === "confirmation" ? (
-              <>
-                <Button
-                  onClick={() => {
-                    setPendingRemovals((prev) => {
-                      const copy = new Map(prev);
-                      copy.set(n.id, false);
-                      return copy;
-                    });
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="solid"
-                  tone="accent"
-                  onClick={() => {
-                    setPendingRemovals((prev) => {
-                      const copy = new Map(prev);
-                      copy.set(n.id, true);
-                      return copy;
-                    });
-                  }}
-                >
-                  Confirm
-                </Button>
-              </>
-            ) : (
+    <AlertDialog.Root
+      open={confirmed === null}
+      onOpenChange={(open) => {
+        // Escape, Cancel, or OK.
+        if (!open) setConfirmed((prev) => prev ?? false);
+      }}
+      onOpenChangeComplete={(open) => {
+        if (!open) onClosed(n.id, confirmed ?? false);
+      }}
+    >
+      <AlertDialog.Popup>
+        <AlertDialog.Title>{n.title}</AlertDialog.Title>
+        <AlertDialog.Description>{n.body}</AlertDialog.Description>
+        <AlertDialog.Actions>
+          {n.type === "confirmation" ? (
+            <>
+              <AlertDialog.Close render={<Button>Cancel</Button>} />
               <Button
                 variant="solid"
                 tone="accent"
-                onClick={() => {
-                  setPendingRemovals((prev) => {
-                    const copy = new Map(prev);
-                    copy.set(n.id, false);
-                    return copy;
-                  });
-                }}
+                onClick={() => setConfirmed((prev) => prev ?? true)}
               >
-                OK
+                Confirm
               </Button>
-            )}
-          </DialogActions>
-        </Dialog>
-      ))}
-    </>
+            </>
+          ) : (
+            <AlertDialog.Close
+              render={
+                <Button variant="solid" tone="accent">
+                  OK
+                </Button>
+              }
+            />
+          )}
+        </AlertDialog.Actions>
+      </AlertDialog.Popup>
+    </AlertDialog.Root>
   );
+};
+
+/**
+ * Shows the newest notification; the one beneath it shows once it resolves.
+ * Base UI modals opened side by side hide each other from assistive tech, so
+ * they take turns rather than stack.
+ */
+const NotificationsDisplay: React.FC = () => {
+  const { notifications, remove } = useNotifications();
+  const current = notifications.at(-1);
+  return current ? (
+    <NotificationDialog
+      key={current.id}
+      notification={current}
+      onClosed={remove}
+    />
+  ) : null;
 };
 
 export default NotificationsDisplay;

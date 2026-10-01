@@ -1,4 +1,4 @@
-import React, { useId } from "react";
+import React, { useRef } from "react";
 import * as yup from "yup";
 import Alert from "@mui/material/Alert";
 import TextField from "@mui/material/TextField";
@@ -14,11 +14,12 @@ type UseTitleFormOptions = {
 };
 
 /**
- * A validated scene-title form for a dialog body. The dialog's confirm button
- * submits it via `formId`.
+ * A validated scene-title form. The dialog renders the form element, with
+ * `onSubmit`, around the fields and its submit button.
  */
 const useTitleForm = ({ defaultTitle, onSubmit }: UseTitleFormOptions) => {
-  const formId = useId();
+  /** The title input, for the dialog's initial focus. */
+  const titleRef = useRef<HTMLInputElement>(null);
   const {
     register,
     handleSubmit,
@@ -26,26 +27,31 @@ const useTitleForm = ({ defaultTitle, onSubmit }: UseTitleFormOptions) => {
   } = useValidatedForm({ schema, defaultValues: { title: defaultTitle } });
 
   /** `note` is shown above the title field. */
-  const renderForm = (note?: React.ReactNode) => (
-    <form id={formId} onSubmit={handleSubmit(({ title }) => onSubmit(title))}>
+  const renderFields = (note?: React.ReactNode) => (
+    <>
       {note}
       <TextField
         margin="dense"
         fullWidth
-        autoFocus
         label="Title"
         error={!!errors.title?.message}
         // A space keeps the row height stable when the message appears.
         helperText={errors.title?.message ?? " "}
+        inputRef={titleRef}
         {...register("title")}
       />
       {errors.root?.message ? (
         <Alert severity="error">{errors.root.message}</Alert>
       ) : null}
-    </form>
+    </>
   );
 
-  return { formId, isSubmitting, renderForm };
+  return {
+    titleRef,
+    isSubmitting,
+    onSubmit: handleSubmit(({ title }) => onSubmit(title)),
+    renderFields,
+  };
 };
 
 export default useTitleForm;
