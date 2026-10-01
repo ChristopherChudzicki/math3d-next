@@ -1,27 +1,41 @@
 /*
- * Children overlap by their 1px border, so adjacent outlines read as one line,
- * and only the outer corners stay rounded. :not() keeps these selectors more
- * specific than the children's own radius.
+ * Children overlap by their 1px border, and each one after the first drops
+ * its own start border, so a seam is one border, not two translucent ones
+ * stacked. Only the outer corners stay rounded.
+ *
+ * "First" and "last" skip the focus guards Base UI puts around an open
+ * menu's trigger, so a trigger keeps its corners while its menu is open.
  */
 .group {
   display: inline-flex;
   align-items: stretch;
 }
 
-.group > :not(:first-child) {
+.group
+  > :not([data-base-ui-focus-guard]):not(
+    :nth-child(1 of :not([data-base-ui-focus-guard]))
+  ) {
   margin-inline-start: -1px;
+  border-inline-start-color: transparent;
   border-start-start-radius: 0;
   border-end-start-radius: 0;
 }
 
-.group > :not(:last-child) {
+.group
+  > :not([data-base-ui-focus-guard]):not(
+    :nth-last-child(1 of :not([data-base-ui-focus-guard]))
+  ) {
   border-start-end-radius: 0;
   border-end-end-radius: 0;
 }
 
-/* Lift the child under the pointer or focus, so its border and ring sit on top. */
-.group > :hover,
-.group > :focus-visible {
+/* Lift the child under the pointer, and the focused one above that. */
+.group > :hover {
   position: relative;
   z-index: 1;
+}
+
+.group > :focus-visible {
+  position: relative;
+  z-index: 2;
 }

@@ -7,8 +7,10 @@
   cursor: pointer;
 }
 
-.text:hover:not([data-disabled]) {
-  text-decoration-color: currentColor;
+@media (hover: hover) {
+  .text:hover:not([data-disabled]) {
+    text-decoration-color: currentColor;
+  }
 }
 
 .text:focus-visible {

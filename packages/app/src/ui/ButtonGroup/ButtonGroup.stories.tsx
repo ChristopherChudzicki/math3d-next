@@ -36,6 +36,7 @@ const AllButtonGroups: React.FC = () => (
         <th style={heading}>variant</th>
         <th style={heading}>split button</th>
         <th style={heading}>split button, loading</th>
+        <th style={heading}>split button, trigger hovered</th>
         <th style={heading}>icon buttons around a readout</th>
         <th style={heading}>icon buttons, one disabled, focus-visible</th>
       </tr>
@@ -49,7 +50,7 @@ const AllButtonGroups: React.FC = () => (
               <Button variant={variant} tone="accent">
                 Save
               </Button>
-              <IconButton variant={variant} label="More actions">
+              <IconButton variant={variant} tone="accent" label="More actions">
                 <Icon icon={chevronDown} aria-hidden="true" />
               </IconButton>
             </ButtonGroup>
@@ -59,7 +60,27 @@ const AllButtonGroups: React.FC = () => (
               <Button variant={variant} tone="accent" loading>
                 Saving...
               </Button>
-              <IconButton variant={variant} label="More actions" disabled>
+              <IconButton
+                variant={variant}
+                tone="accent"
+                label="More actions"
+                disabled
+              >
+                <Icon icon={chevronDown} aria-hidden="true" />
+              </IconButton>
+            </ButtonGroup>
+          </td>
+          <td style={cell}>
+            <ButtonGroup>
+              <Button variant={variant} tone="accent">
+                Save
+              </Button>
+              <IconButton
+                variant={variant}
+                tone="accent"
+                label="More actions"
+                data-pseudo="hover"
+              >
                 <Icon icon={chevronDown} aria-hidden="true" />
               </IconButton>
             </ButtonGroup>
@@ -105,6 +126,7 @@ export default meta;
 export const AllVariants: StoryObj<typeof AllButtonGroups> = {
   parameters: {
     pseudo: {
+      hover: ['[data-pseudo="hover"]'],
       focusVisible: ['[data-pseudo="focus-visible"]'],
     },
   },

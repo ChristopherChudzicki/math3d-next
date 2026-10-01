@@ -8,7 +8,7 @@ import { u } from "@/util/styles";
 import copy from "./errorPage.copy";
 import buildReportUrl from "./errorPage.report";
 import BrokenTorus from "./BrokenTorus";
-import * as styles from "./ErrorPage.module.css";
+import styles from "./ErrorPage.module.css";
 
 interface ErrorViewProps {
   /** Human-readable error message (shown in the collapsible details). */

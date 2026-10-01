@@ -25,7 +25,7 @@ import IconButton from "@/ui/IconButton";
 import { OPEN_SCENES_BUTTON_ID } from "@/pages/ScenesList/constants";
 
 import UserMenu from "./UserMenu";
-import * as styles from "./Header.module.css";
+import styles from "./Header.module.css";
 
 const LoginButtons: React.FC<{
   isAuthenticated: AuthStatus;
@@ -38,7 +38,7 @@ const LoginButtons: React.FC<{
       variant="ghost"
       onClick={() => signIn.open()}
     >
-      <AccountCircleOutlinedIcon fontSize="small" />
+      <AccountCircleOutlinedIcon fontSize="inherit" />
       Sign in
     </Button>
   );

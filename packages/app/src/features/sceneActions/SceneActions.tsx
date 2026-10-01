@@ -205,6 +205,7 @@ const SceneActions: React.FC = () => {
               trigger={
                 <IconButton
                   variant="outline"
+                  tone="accent"
                   label="More scene actions"
                   disabled={saving}
                 >

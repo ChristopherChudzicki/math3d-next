@@ -58,9 +58,11 @@ const expectInert = (el: HTMLElement) => {
   expect(el).toHaveAttribute("aria-disabled", "true");
   expect(el).toBeEnabled();
 };
-const pressEnterOn = async (el: HTMLElement) => {
+// Both ways in: Base UI blocks the keypress and the click separately.
+const tryToActivate = async (el: HTMLElement) => {
   act(() => el.focus());
   await user.keyboard("{Enter}");
+  await user.click(el);
 };
 const menuEntries = async () => {
   await user.click(
@@ -95,7 +97,7 @@ test("an unsaved scene offers Save once edited, and no menu", async () => {
 
   expect(await primary()).toHaveTextContent(/^Save$/);
   expectInert(await primary());
-  await pressEnterOn(await primary());
+  await tryToActivate(await primary());
   expect(screen.queryByRole("dialog")).toBeNull();
   await user.type(await screen.findByLabelText("Scene Title"), " edited");
   expect(await primary()).not.toHaveAttribute("aria-disabled", "true");
@@ -144,7 +146,7 @@ test("an edit made while saving survives the save and stays unsaved", async () =
   expect(
     screen.getByRole("button", { name: "More scene actions" }),
   ).toBeDisabled();
-  await pressEnterOn(await primary());
+  await tryToActivate(await primary());
   await user.type(title, " later");
   gate.resolve();
 

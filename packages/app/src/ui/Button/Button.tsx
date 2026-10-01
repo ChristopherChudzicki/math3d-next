@@ -14,7 +14,7 @@ type ButtonStyleProps = {
   size?: ButtonSize;
 };
 
-/** Button's classes, for elements that look like a button but aren't one. */
+/** Button's classes, for ButtonLink: a link that looks like a button. */
 const buttonClassName = ({
   variant = "outline",
   tone = "neutral",

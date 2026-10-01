@@ -1,27 +1,43 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import user from "@testing-library/user-event";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, Route, Routes } from "react-router";
 import TextLink, { TextButton } from ".";
 
-test("TextLink routes with `to` and is a plain anchor with `href`", () => {
+test("TextLink with `to` navigates through the router", async () => {
+  const ref = React.createRef<HTMLAnchorElement>();
   render(
-    <MemoryRouter>
-      <TextLink to="/app/help">Help</TextLink>
-      <TextLink href="https://example.com" target="_blank" rel="noreferrer">
-        Elsewhere
-      </TextLink>
+    <MemoryRouter initialEntries={["/start"]}>
+      <Routes>
+        <Route
+          path="/start"
+          element={
+            <TextLink to="/app/help" ref={ref}>
+              Help
+            </TextLink>
+          }
+        />
+        <Route path="/app/help" element={<h1>Help page</h1>} />
+      </Routes>
     </MemoryRouter>,
   );
 
-  expect(screen.getByRole("link", { name: "Help" })).toHaveAttribute(
-    "href",
-    "/app/help",
+  const link = screen.getByRole("link", { name: "Help" });
+  expect(ref.current).toBe(link);
+  await user.click(link);
+  expect(screen.getByRole("heading", { name: "Help page" })).toBeVisible();
+});
+
+test("TextLink with `href` is a plain anchor that works outside a router", () => {
+  render(
+    <TextLink href="https://example.com" target="_blank" rel="noreferrer">
+      Elsewhere
+    </TextLink>,
   );
-  expect(screen.getByRole("link", { name: "Elsewhere" })).toHaveAttribute(
-    "target",
-    "_blank",
-  );
+
+  const link = screen.getByRole("link", { name: "Elsewhere" });
+  expect(link).toHaveAttribute("href", "https://example.com");
+  expect(link).toHaveAttribute("target", "_blank");
 });
 
 test("TextButton is a button that does not submit an enclosing form", async () => {

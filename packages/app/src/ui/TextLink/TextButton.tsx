@@ -9,7 +9,8 @@ type TextButtonProps = Omit<BaseButton.Props, "className"> & {
 
 /**
  * A button styled as a TextLink, for an action inside running text ("Sign in
- * to save scenes"). Anything that navigates should be a TextLink.
+ * to save scenes"). Anything that navigates should be a TextLink. Keep the
+ * label short: a button can't wrap across lines the way a link can.
  */
 const TextButton: React.FC<TextButtonProps> = ({ className, ...others }) => (
   <BaseButton
