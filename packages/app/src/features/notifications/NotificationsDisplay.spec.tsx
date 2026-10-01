@@ -1,5 +1,11 @@
 import React, { act } from "react";
-import { renderHook, screen, within, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  renderHook,
+  screen,
+  within,
+  waitFor,
+} from "@testing-library/react";
 import user from "@testing-library/user-event";
 import {
   NotificationsProvider,
@@ -134,11 +140,15 @@ describe("NotificationsDisplay and useNotifications", () => {
     });
     const dialog = screen.getByRole("alertdialog", { name: "Confirm 1" });
 
-    const confirm = within(dialog).getByRole("button", { name: "Confirm" });
-    // The newer notice replaces the first before its exit completes: one
-    // batch, so a native click rather than an awaited user event.
+    // The newer notice must replace the first before the first's exit
+    // completes, so the click and the add have to land in one React batch.
+    // Don't swap in `await user.click(...)`: user-event flushes updates and
+    // timers before it resolves, so the exit has finished by the time the add
+    // runs, and the test passes even with the bug present (checked by removing
+    // NotificationDialog's unmount report).
+    // eslint-disable-next-line testing-library/no-unnecessary-act
     act(() => {
-      confirm.click();
+      fireEvent.click(within(dialog).getByRole("button", { name: "Confirm" }));
       result.current.add({ title: "Alert 2", body: "body 2", type: "alert" });
     });
 
