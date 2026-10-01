@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React from "react";
 
-import Link from "@mui/material/Link";
+import { TextButton } from "@/ui/TextLink";
 import { useToggle } from "@/util/hooks";
 import { Typography } from "@mui/material";
 import type { ReferenceEntry } from "./data.compile";
@@ -31,14 +31,13 @@ const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
             {hasDetails && (
               // A single toggle that stays mounted across expand/collapse, so
               // it keeps keyboard focus when activated.
-              // eslint-disable-next-line jsx-a11y/anchor-is-valid
-              <Link
+              <TextButton
                 onClick={setExpanded.toggle}
-                sx={{ verticalAlign: "baseline", marginLeft: "0.5em" }}
-                component="button"
+                aria-expanded={expanded}
+                className={styles.toggle}
               >
                 {expanded ? "Show less" : "Show more"}
-              </Link>
+              </TextButton>
             )}
           </p>
         </div>

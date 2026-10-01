@@ -14,10 +14,15 @@
   width: 100%;
 }
 
-/* Google's light-theme button (Sign in with Google branding guidelines). */
+/*
+ * Google's light-theme button (Sign in with Google branding guidelines):
+ * 12px inset before the logo, 10px gap after it. :hover and :active match
+ * the specificity of Button's own tints, and win by loading after them.
+ */
 .google-button {
   height: 40px;
   padding: 0 12px;
+  gap: 10px;
   border-radius: 4px;
   border: 1px solid #747775;
   background-color: #fff;
@@ -25,30 +30,10 @@
   font-weight: 500;
   font-size: 14px;
   line-height: 20px;
-  text-transform: none;
 }
 
-.google-button:hover {
+.google-button:hover:not([data-disabled]),
+.google-button:active:not([data-disabled]) {
   border-color: #747775;
   background-color: #f7f8f8;
-}
-
-/* The spec's 12px inset before the logo and 10px gap after it. */
-.google-button :global(.MuiButton-startIcon) {
-  margin-left: 0;
-  margin-right: 10px;
-}
-
-.google-button:disabled :global(.MuiButton-startIcon) {
-  opacity: 0.38;
-}
-
-/* MUI's ripple greys the logo; an outline marks focus instead. */
-.google-button :global(.MuiTouchRipple-root) {
-  display: none;
-}
-
-.google-button:focus-visible {
-  outline: 2px solid #1890ff;
-  outline-offset: 2px;
 }

@@ -7,11 +7,7 @@
   transition-duration: var(--transition-duration);
 }
 
-.color {
-  color: var(--color-secondary);
-}
-
 .toggleButton {
-  height: 25px;
-  width: 25px;
+  --tone: var(--color-secondary);
+  font-size: 1.5rem;
 }

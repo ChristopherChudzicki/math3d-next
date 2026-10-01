@@ -19,6 +19,8 @@
   font-weight: 500;
   line-height: 1.25;
   white-space: nowrap;
+  /* ButtonLink shares these classes on an <a>. */
+  text-decoration: none;
   cursor: pointer;
   transition-property: background-color, border-color, color;
   transition-duration: 120ms;

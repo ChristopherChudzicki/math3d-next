@@ -1,5 +1,5 @@
 import React from "react";
-import Link from "@mui/material/Link";
+import TextLink from "@/ui/TextLink";
 
 type SignInError =
   | "cancelled"
@@ -13,9 +13,13 @@ type SignInError =
 const SIGN_IN_ERROR_PATH = "/app/sign-in-error";
 
 const ContactLink: React.FC<{ children: string }> = ({ children }) => (
-  <Link href={import.meta.env.VITE_ISSUE_URL} target="_blank" rel="noreferrer">
+  <TextLink
+    href={import.meta.env.VITE_ISSUE_URL}
+    target="_blank"
+    rel="noreferrer"
+  >
     {children}
-  </Link>
+  </TextLink>
 );
 
 // allauth's `?error=` codes: AuthError values, SignupClosedException, and

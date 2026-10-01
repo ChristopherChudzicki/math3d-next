@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Badge from "@mui/material/Badge";
-import IconButton from "@mui/material/IconButton";
+import IconButton from "@/ui/IconButton";
 import SimpleMenu from "@/ui/SimpleMenu/SimpleMenu";
 import type { SimpleMenuItem } from "@/ui/SimpleMenu/SimpleMenu";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -33,8 +33,8 @@ const UserMenu: React.FC<{
   // menus, and the name difference lets tests await the avatar specifically
   // rather than matching the hamburger shown while the ["me"] query resolves.
   const trigger = useHamburger ? (
-    <IconButton aria-label="Open Menu" color="inherit">
-      <MenuIcon />
+    <IconButton label="Open Menu">
+      <MenuIcon fontSize="inherit" />
     </IconButton>
   ) : (
     <Badge

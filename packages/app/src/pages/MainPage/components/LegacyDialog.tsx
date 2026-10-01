@@ -1,8 +1,9 @@
 import React from "react";
 import BasicDialog from "@/ui/BasicDialog";
 import invariant from "tiny-invariant";
-import { Button } from "@mui/material";
-import Link from "@/ui/Link";
+import Button from "@/ui/Button";
+import TextLink from "@/ui/TextLink";
+import * as styles from "./LegacyDialog.module.css";
 
 const ISSUE_URL = import.meta.env.VITE_ISSUE_URL;
 invariant(ISSUE_URL, "VITE_ISSUE_URL is not set");
@@ -26,18 +27,7 @@ const LegacyDialog: React.FC<LegacyDialogProps> = ({
 
   return (
     <>
-      <Button
-        sx={{
-          position: "absolute",
-          bottom: 6,
-          right: 6,
-          borderRadius: 999,
-        }}
-        variant="outlined"
-        size="small"
-        color="warning"
-        onClick={onOpen}
-      >
+      <Button size="sm" className={styles.trigger} onClick={onOpen}>
         Legacy Scene
       </Button>
       <BasicDialog
@@ -51,15 +41,18 @@ const LegacyDialog: React.FC<LegacyDialogProps> = ({
         <p>
           This scene was created with an older version of Math3d. It should load
           correctly. If it does not, please{" "}
-          <Link href={ISSUE_URL}>report an issue</Link>.
+          <TextLink href={ISSUE_URL} target="_blank" rel="noreferrer">
+            report an issue
+          </TextLink>
+          .
         </p>
 
         <p>
           <em>
             The scene can also be viewed on the old site at{" "}
-            <Link href={legacyHref} target="_blank">
+            <TextLink href={legacyHref} target="_blank" rel="noreferrer">
               {legacyHref}
-            </Link>
+            </TextLink>
             .
           </em>
         </p>

@@ -2,14 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { usePatchScene, useUserMe } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions, select } from "@/features/sceneControls/mathItems";
 import { useAuthStatus } from "@/features/auth";
+import Button from "@/ui/Button";
+import ButtonGroup from "@/ui/ButtonGroup";
+import IconButton from "@/ui/IconButton";
 import SimpleMenu from "@/ui/SimpleMenu/SimpleMenu";
 import type { SimpleMenuItem } from "@/ui/SimpleMenu/SimpleMenu";
 import PublishDialog, { sceneUrl } from "./PublishDialog";
@@ -133,7 +134,6 @@ const SceneActions: React.FC = () => {
   };
 
   const handlePrimary = () => {
-    if (!enabled) return;
     if (primary === "share") {
       setDialog(
         dirty || key === null
@@ -189,15 +189,12 @@ const SceneActions: React.FC = () => {
         <ButtonGroup>
           <Button
             data-testid="scene-action"
-            variant="text"
-            color="primary"
+            tone="accent"
             // Not `disabled`: a disabled button drops keyboard focus to the page
             // after every Save or Copy link.
-            aria-disabled={!enabled}
-            className={enabled ? undefined : "Mui-disabled"}
-            disableRipple={!enabled}
+            loading={!enabled}
             onClick={handlePrimary}
-            sx={{ "&.MuiButtonGroup-grouped": { width: PRIMARY_WIDTH } }}
+            style={{ width: PRIMARY_WIDTH }}
           >
             {label}
           </Button>
@@ -206,14 +203,13 @@ const SceneActions: React.FC = () => {
               aria-label="More scene actions"
               items={menuItems}
               trigger={
-                <Button
-                  variant="text"
-                  color="secondary"
-                  aria-label="More scene actions"
+                <IconButton
+                  variant="outline"
+                  label="More scene actions"
                   disabled={saving}
                 >
-                  <ExpandMoreIcon fontSize="small" />
-                </Button>
+                  <ExpandMoreIcon fontSize="inherit" />
+                </IconButton>
               }
             />
           ) : null}

@@ -1,17 +1,21 @@
 import CloseIcon from "@mui/icons-material/Close";
-import mergeClassNames from "classnames";
+import classNames from "classnames";
 import React from "react";
-import SubtleButton, { SubtleButtonProps } from "@/ui/SubtleButton";
+import IconButton from "@/ui/IconButton";
+import type { IconButtonProps } from "@/ui/IconButton";
 
 import styles from "./CloseButton.module.css";
 
-const CloseButton: React.FC<SubtleButtonProps> = (props) => {
-  const className = mergeClassNames(props.className, styles["close-button"]);
-  return (
-    <SubtleButton {...props} className={className} centered>
-      <CloseIcon />
-    </SubtleButton>
-  );
-};
+type CloseButtonProps = Omit<IconButtonProps, "children">;
+
+const CloseButton: React.FC<CloseButtonProps> = ({ className, ...others }) => (
+  <IconButton
+    size="sm"
+    {...others}
+    className={classNames(styles["close-button"], className)}
+  >
+    <CloseIcon fontSize="inherit" />
+  </IconButton>
+);
 
 export default CloseButton;

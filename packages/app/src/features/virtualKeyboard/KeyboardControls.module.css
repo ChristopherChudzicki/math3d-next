@@ -20,6 +20,8 @@
 }
 
 .keyboardToggleButton {
+  gap: 0;
   padding-left: 4px;
   padding-right: 4px;
+  font-size: 1.5rem;
 }

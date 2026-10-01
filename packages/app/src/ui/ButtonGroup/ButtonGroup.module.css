@@ -1,0 +1,27 @@
+/*
+ * Children overlap by their 1px border, so adjacent outlines read as one line,
+ * and only the outer corners stay rounded. :not() keeps these selectors more
+ * specific than the children's own radius.
+ */
+.group {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.group > :not(:first-child) {
+  margin-inline-start: -1px;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.group > :not(:last-child) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+/* Lift the child under the pointer or focus, so its border and ring sit on top. */
+.group > :hover,
+.group > :focus-visible {
+  position: relative;
+  z-index: 1;
+}

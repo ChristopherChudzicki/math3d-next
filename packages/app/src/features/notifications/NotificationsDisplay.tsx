@@ -3,7 +3,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import React, { useState } from "react";
 import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
+import Button from "@/ui/Button";
 import { useNotifications } from "./NotificationsContext";
 
 const NotificationsDisplay: React.FC = () => {
@@ -45,6 +45,8 @@ const NotificationsDisplay: React.FC = () => {
                   Cancel
                 </Button>
                 <Button
+                  variant="solid"
+                  tone="accent"
                   onClick={() => {
                     setPendingRemovals((prev) => {
                       const copy = new Map(prev);
@@ -58,6 +60,8 @@ const NotificationsDisplay: React.FC = () => {
               </>
             ) : (
               <Button
+                variant="solid"
+                tone="accent"
                 onClick={() => {
                   setPendingRemovals((prev) => {
                     const copy = new Map(prev);

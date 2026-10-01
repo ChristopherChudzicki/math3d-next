@@ -1,0 +1,8 @@
+/* Floats over the scene's bottom-right corner. */
+.trigger {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  border-radius: 999px;
+  background-color: var(--color-background);
+}
