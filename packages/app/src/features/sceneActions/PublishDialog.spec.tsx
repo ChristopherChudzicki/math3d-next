@@ -109,6 +109,8 @@ test("while the publish is in flight, the dialog can be neither resubmitted nor 
   await user.click(save);
 
   await waitFor(() => expect(save).toHaveTextContent("Saving..."));
+  // `loading`: inert but still focusable, so aria-disabled, not disabled.
+  expect(save).toHaveAttribute("aria-disabled", "true");
   await user.click(save);
   await user.keyboard("{Enter}");
   expect(posts).toBe(1);
@@ -116,7 +118,7 @@ test("while the publish is in flight, the dialog can be neither resubmitted nor 
   await user.keyboard("{Escape}");
   expect(dialog).toBeInTheDocument();
   release();
-  await waitFor(() => expect(save).toBeEnabled());
+  await waitFor(() => expect(save).not.toHaveAttribute("aria-disabled"));
   expect(save).toHaveTextContent("Save");
 });
 

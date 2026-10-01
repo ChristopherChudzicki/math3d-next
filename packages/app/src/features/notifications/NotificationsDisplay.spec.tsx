@@ -32,6 +32,15 @@ const assertNotResolvedSoon = async (
   expect(resolvedFirst).toBe(key);
 };
 
+/** Fails fast, rather than at the test timeout, if `promise` never settles. */
+const settledWithin = <T,>(promise: Promise<T>, timeout = 1000) =>
+  Promise.race([
+    promise,
+    new Promise<never>((_resolve, reject) => {
+      setTimeout(() => reject(new Error("Not settled in time")), timeout);
+    }),
+  ]);
+
 describe("NotificationsDisplay and useNotifications", () => {
   test("NotificationsDisplay should render alerts and confirmations", async () => {
     const { result } = renderHook(useNotifications, { wrapper: Wrapper });
@@ -152,11 +161,37 @@ describe("NotificationsDisplay and useNotifications", () => {
       result.current.add({ title: "Alert 2", body: "body 2", type: "alert" });
     });
 
-    expect(await confirmed!).toBe(true);
+    expect(await settledWithin(confirmed!)).toBe(true);
     expect(
       screen.getByRole("alertdialog", { name: "Alert 2" }),
     ).toBeInTheDocument();
     expect(screen.queryByRole("alertdialog", { name: "Confirm 1" })).toBeNull();
+  });
+
+  test("A newer notification covers an unanswered one, which returns once it resolves", async () => {
+    const { result } = renderHook(useNotifications, { wrapper: Wrapper });
+    let confirmed: Promise<boolean>;
+    act(() => {
+      confirmed = result.current.add({
+        title: "Confirm 1",
+        body: "body 1",
+        type: "confirmation",
+      }).confirmed;
+    });
+    await screen.findByRole("alertdialog", { name: "Confirm 1" });
+    act(() => {
+      result.current.add({ title: "Alert 2", body: "body 2", type: "alert" });
+    });
+
+    const alert = await screen.findByRole("alertdialog", { name: "Alert 2" });
+    expect(screen.queryByRole("alertdialog", { name: "Confirm 1" })).toBeNull();
+    await user.click(within(alert).getByRole("button", { name: "OK" }));
+
+    const confirm = await screen.findByRole("alertdialog", {
+      name: "Confirm 1",
+    });
+    await user.click(within(confirm).getByRole("button", { name: "Confirm" }));
+    expect(await settledWithin(confirmed!)).toBe(true);
   });
 
   test("Add, remove, throw errors without NotificationsProvider", async () => {

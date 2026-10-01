@@ -41,7 +41,7 @@ test("the header's close button closes it and returns focus to the trigger", asy
   expect(trigger).toHaveFocus();
 });
 
-test("Form submits from the footer's submit button and from Enter in a field", async () => {
+test("Form submits from the footer's submit button and from Enter in a field, not from Cancel", async () => {
   const onSubmit = vi.fn((event: React.FormEvent) => event.preventDefault());
   render(
     <Dialog.Root open>

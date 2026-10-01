@@ -293,10 +293,15 @@ test("a signed-out re-share of an unedited published scene reuses its link", asy
 
   await user.click(await primary());
 
-  expect(
-    await screen.findByLabelText<HTMLInputElement>("Shareable URL"),
-  ).toHaveValue(published);
+  const dialog = await screen.findByRole("dialog", { name: "Share scene" });
+  expect(within(dialog).getByLabelText("Shareable URL")).toHaveValue(published);
   expect(posts.count).toBe(1);
+  // Opened straight on the link step, it starts on Copy link.
+  await waitFor(() =>
+    expect(
+      within(dialog).getByRole("button", { name: "Copy link" }),
+    ).toHaveFocus(),
+  );
 });
 
 test("a signed-out share of an edited scene mints a new link, prefilled with the scene's title", async () => {
