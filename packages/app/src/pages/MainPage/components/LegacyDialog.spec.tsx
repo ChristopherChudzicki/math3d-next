@@ -33,11 +33,7 @@ test("Legacy Dialog opens and closes", async () => {
   const dialog = await screen.findByRole("dialog", { name: "Legacy Scene" });
   expect(dialog).toBeVisible();
 
-  // The header's close button, then the footer's.
-  const [, footerClose] = within(dialog).getAllByRole("button", {
-    name: "Close",
-  });
-  await user.click(footerClose);
+  await user.click(within(dialog).getByRole("button", { name: "OK" }));
   await waitFor(() => expect(dialog).not.toBeInTheDocument());
   expect(legacyButton).toHaveFocus();
 });

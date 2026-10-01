@@ -36,8 +36,9 @@ type HeaderProps = React.ComponentProps<"div"> & {
   /** Label for the close button. */
   closeLabel?: string;
   /**
-   * Disables the close button, e.g. while a submit can't be abandoned. Escape
-   * and backdrop clicks still go to `Root`'s `onOpenChange`; ignore them there.
+   * Disables only the header's close button, e.g. while a submit can't be
+   * abandoned. Escape and backdrop clicks still reach `Root`'s `onOpenChange`:
+   * call `eventDetails.cancel()` there, or ignore them if `open` is controlled.
    */
   closeDisabled?: boolean;
 };
@@ -95,7 +96,8 @@ const Body: React.FC<React.ComponentProps<"div">> = ({
 
 /**
  * Wraps `Body` and `Actions` in a form dialog, so a submit button in the
- * footer submits the fields in the body.
+ * footer submits the fields in the body. For Dialog only; AlertDialog has no
+ * form layout.
  */
 const Form: React.FC<React.ComponentProps<"form">> = ({
   className,

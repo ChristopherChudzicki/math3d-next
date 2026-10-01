@@ -122,6 +122,33 @@ describe("NotificationsDisplay and useNotifications", () => {
     expect(await confirmed!).toBe(false);
   });
 
+  test("A confirmation answered just before another arrives keeps its answer", async () => {
+    const { result } = renderHook(useNotifications, { wrapper: Wrapper });
+    let confirmed: Promise<boolean>;
+    act(() => {
+      confirmed = result.current.add({
+        title: "Confirm 1",
+        body: "body 1",
+        type: "confirmation",
+      }).confirmed;
+    });
+    const dialog = screen.getByRole("alertdialog", { name: "Confirm 1" });
+
+    const confirm = within(dialog).getByRole("button", { name: "Confirm" });
+    // The newer notice replaces the first before its exit completes: one
+    // batch, so a native click rather than an awaited user event.
+    act(() => {
+      confirm.click();
+      result.current.add({ title: "Alert 2", body: "body 2", type: "alert" });
+    });
+
+    expect(await confirmed!).toBe(true);
+    expect(
+      screen.getByRole("alertdialog", { name: "Alert 2" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alertdialog", { name: "Confirm 1" })).toBeNull();
+  });
+
   test("Add, remove, throw errors without NotificationsProvider", async () => {
     const { result } = renderHook(useNotifications);
     expect(() =>

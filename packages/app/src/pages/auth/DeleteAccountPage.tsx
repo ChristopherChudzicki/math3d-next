@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as yup from "yup";
 import { Alert, TextField } from "@mui/material";
 import { useNavigate } from "react-router";
@@ -28,6 +28,7 @@ const DeleteAccountPage: React.FC = () => {
   // While the 403 notice shows, sign-in waits: a dialog opened over the notice
   // would hide it.
   const [noticeOpen, setNoticeOpen] = useState(false);
+  const confirmRef = useRef<HTMLInputElement>(null);
   const {
     register,
     handleSubmit,
@@ -94,7 +95,7 @@ const DeleteAccountPage: React.FC = () => {
         if (!isOpen) close();
       }}
     >
-      <Dialog.Popup size="md">
+      <Dialog.Popup size="md" initialFocus={confirmRef}>
         <Dialog.Header>
           <Dialog.Title>Delete Account</Dialog.Title>
         </Dialog.Header>
@@ -117,6 +118,7 @@ const DeleteAccountPage: React.FC = () => {
               helperText={`To proceed, enter "${CONFIRM_PROMPT}" exactly.`}
               label="Confirm"
               type="text"
+              inputRef={confirmRef}
               {...register("confirm")}
             />
             {errors.root?.message ? (

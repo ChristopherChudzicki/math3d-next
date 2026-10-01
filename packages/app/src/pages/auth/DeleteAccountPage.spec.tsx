@@ -36,6 +36,17 @@ test("deleting your own account does not redirect to login", async () => {
   expect(location.current.search).not.toContain("signin");
 });
 
+test("opens on the confirmation field", async () => {
+  renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
+  const dialog = await screen.findByRole("dialog", {
+    name: "Delete Account",
+  });
+
+  await waitFor(() =>
+    expect(within(dialog).getByLabelText("Confirm")).toHaveFocus(),
+  );
+});
+
 test("the wrong confirmation phrase does not delete the account", async () => {
   renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
   const dialog = await screen.findByRole("dialog", {

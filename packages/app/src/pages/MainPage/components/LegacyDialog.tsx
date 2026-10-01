@@ -62,7 +62,7 @@ const LegacyDialog: React.FC<LegacyDialogProps> = ({
           </p>
         </Dialog.Body>
         <Dialog.Actions>
-          <Dialog.Close render={<Button>Close</Button>} />
+          <Dialog.Close render={<Button>OK</Button>} />
         </Dialog.Actions>
       </Dialog.Popup>
     </Dialog.Root>

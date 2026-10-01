@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { AlertDialog } from "@/ui/AlertDialog";
 import Button from "@/ui/Button";
 import { useNotifications } from "./NotificationsContext";
@@ -13,22 +13,45 @@ const NotificationDialog: React.FC<NotificationDialogProps> = ({
   notification: n,
   onClosed,
 }) => {
-  // Set when the dialog closes; reported once its exit animation completes.
-  const [confirmed, setConfirmed] = useState<boolean | null>(null);
+  // The choice is made on close and reported once the exit animation
+  // completes. A ref, so it survives a newer notification replacing this one
+  // in the same render.
+  const choice = useRef<boolean | null>(null);
+  const reported = useRef(false);
+  const [open, setOpen] = useState(true);
+  const choose = (confirmed: boolean) => {
+    if (choice.current !== null) return;
+    choice.current = confirmed;
+    setOpen(false);
+  };
+  const report = useCallback(() => {
+    if (reported.current || choice.current === null) return;
+    reported.current = true;
+    onClosed(n.id, choice.current);
+  }, [onClosed, n.id]);
+  // Replaced mid-exit by a newer notification: a choice already made counts.
+  const reportOnUnmount = useRef(report);
+  useEffect(() => {
+    reportOnUnmount.current = report;
+  }, [report]);
+  useEffect(() => () => reportOnUnmount.current(), []);
   return (
     <AlertDialog.Root
-      open={confirmed === null}
-      onOpenChange={(open) => {
+      open={open}
+      onOpenChange={(next) => {
         // Escape, Cancel, or OK.
-        if (!open) setConfirmed((prev) => prev ?? false);
+        if (!next) choose(false);
       }}
-      onOpenChangeComplete={(open) => {
-        if (!open) onClosed(n.id, confirmed ?? false);
+      onOpenChangeComplete={(next) => {
+        if (!next) report();
       }}
     >
       <AlertDialog.Popup>
         <AlertDialog.Title>{n.title}</AlertDialog.Title>
-        <AlertDialog.Description>{n.body}</AlertDialog.Description>
+        {/* A div: the body may be more than a paragraph. */}
+        <AlertDialog.Description render={<div />}>
+          {n.body}
+        </AlertDialog.Description>
         <AlertDialog.Actions>
           {n.type === "confirmation" ? (
             <>
@@ -36,7 +59,7 @@ const NotificationDialog: React.FC<NotificationDialogProps> = ({
               <Button
                 variant="solid"
                 tone="accent"
-                onClick={() => setConfirmed((prev) => prev ?? true)}
+                onClick={() => choose(true)}
               >
                 Confirm
               </Button>

@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import Button from "../Button";
 import { Dialog } from ".";
 
+/** Confirmations that interrupt use AlertDialog; this is the same footer. */
 const Confirm: React.FC = () => (
   <Dialog.Root>
     <Dialog.Trigger render={<Button>Confirm (sm)</Button>} />
@@ -38,7 +39,8 @@ const FormSubmit: React.FC = () => {
           <Dialog.Title>Save scene</Dialog.Title>
           <Dialog.Description>Give your scene a title.</Dialog.Description>
         </Dialog.Header>
-        {/* The form wraps Body and Actions, so Enter or Save submits it. */}
+        {/* The form wraps Body and Actions, so Enter or Save submits it.
+            Cancel is optional: the header's close button also leaves. */}
         <Dialog.Form
           onSubmit={(event) => {
             event.preventDefault();
@@ -105,7 +107,7 @@ const Informational: React.FC = () => (
         This scene was created with an older version of Math3d.
       </Dialog.Body>
       <Dialog.Actions>
-        <Dialog.Close render={<Button>Close</Button>} />
+        <Dialog.Close render={<Button>OK</Button>} />
       </Dialog.Actions>
     </Dialog.Popup>
   </Dialog.Root>
