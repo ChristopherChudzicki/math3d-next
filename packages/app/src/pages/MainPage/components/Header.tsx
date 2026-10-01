@@ -19,6 +19,10 @@ import type { SimpleMenuItem } from "@/ui/SimpleMenu/SimpleMenu";
 import { useUserMe } from "@math3d/api";
 import ListSubheader from "@mui/material/ListSubheader";
 import FunctionsIcon from "@mui/icons-material/Functions";
+import { Icon } from "@iconify/react/offline";
+import folderOpen from "@iconify-icons/lucide/folder-open";
+import IconButton from "@/ui/IconButton";
+import { OPEN_SCENES_BUTTON_ID } from "@/pages/ScenesList/constants";
 
 import UserMenu from "./UserMenu";
 import * as styles from "./Header.module.css";
@@ -147,6 +151,25 @@ type AppHeaderProps = {
   title: React.ReactNode;
 };
 
+const OpenScenesButton: React.FC<{ authStatus: AuthStatus }> = ({
+  authStatus,
+}) => {
+  const { open } = useOverlay();
+  return (
+    <IconButton
+      id={OPEN_SCENES_BUTTON_ID}
+      label="Open scenes"
+      onClick={() =>
+        open("scenes", {
+          list: authStatus === "authenticated" ? "me" : "examples",
+        })
+      }
+    >
+      <Icon icon={folderOpen} aria-hidden="true" />
+    </IconButton>
+  );
+};
+
 const AppHeader: React.FC<AppHeaderProps> = (props) => {
   const isAuthenticated = useAuthStatus();
   const userQuery = useUserMe();
@@ -164,6 +187,7 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
   );
   return (
     <Header
+      start={<OpenScenesButton authStatus={isAuthenticated} />}
       title={props.title}
       nav={
         <>

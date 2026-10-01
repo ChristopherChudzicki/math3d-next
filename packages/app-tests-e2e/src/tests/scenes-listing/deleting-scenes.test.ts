@@ -33,10 +33,10 @@ test.describe("Deleting a scene", async () => {
     await expect(sceneItem2.root).toBeVisible();
     await sceneItem1.menuTrigger().click();
     await sceneItem1.menuItem.delete().click();
-    const dialog = page.getByRole("dialog", { name: "Delete scene?" });
+    const dialog = page.getByRole("alertdialog", { name: "Delete scene?" });
     await expect(dialog).toBeVisible();
     if (confirm) {
-      await dialog.getByRole("button", { name: "Confirm" }).click();
+      await dialog.getByRole("button", { name: "Delete" }).click();
     } else {
       await dialog.getByRole("button", { name: "Cancel" }).click();
     }

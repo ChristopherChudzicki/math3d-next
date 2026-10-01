@@ -1,0 +1,48 @@
+.list {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.tab {
+  position: relative;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  background: none;
+  /* --color-text-light misses 4.5:1 on the page's off-white background. */
+  color: color-mix(in srgb, var(--color-text-primary) 80%, white);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+
+.tab::after {
+  content: "";
+  position: absolute;
+  inset: auto 0.5rem 0;
+  height: 2px;
+  border-radius: 1px;
+  background-color: transparent;
+}
+
+.tab[data-active] {
+  color: var(--color-text-primary);
+}
+
+.tab[data-active]::after {
+  background-color: var(--color-accent);
+}
+
+@media (hover: hover) {
+  .tab:hover:not([data-disabled]) {
+    background-color: color-mix(in srgb, currentColor 8%, transparent);
+    color: var(--color-text-primary);
+  }
+}
+
+.tab[data-disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

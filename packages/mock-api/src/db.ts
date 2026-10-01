@@ -22,9 +22,9 @@ const db = factory({
      */
     itemOrder: () => JSON.stringify({}),
     author: nullable(faker.number.int),
-    archived: faker.datatype.boolean,
-    createdDate: () => faker.date.recent().toUTCString(),
-    modifiedDate: () => faker.date.recent().toUTCString(),
+    archived: (): boolean => false,
+    createdDate: () => faker.date.recent().toISOString(),
+    modifiedDate: () => faker.date.recent().toISOString(),
     isLegacy: faker.datatype.boolean,
   },
   user: {

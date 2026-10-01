@@ -18,6 +18,17 @@ test("Does not show username", async ({ page }) => {
   await expect(username).not.toBeVisible();
 });
 
+test("The scenes button opens the Examples tab", async ({ page }) => {
+  await page.goto("");
+
+  await page.getByRole("button", { name: "Open scenes" }).click();
+
+  const dialog = page.getByRole("dialog", { name: "Scenes" });
+  await expect(
+    dialog.getByRole("tab", { name: "Examples", selected: true }),
+  ).toBeVisible();
+});
+
 test("Header and usermenu links", async ({ page }) => {
   await page.goto("");
   const app = new AppPage(page);

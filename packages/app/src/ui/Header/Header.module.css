@@ -5,11 +5,21 @@
   border-bottom: 1pt solid var(--color-secondary-light);
 
   display: grid;
-  grid-template-columns: min-content minmax(0, 1fr) auto;
+  grid-template-columns: auto min-content minmax(0, 1fr) auto;
   grid-template-rows: var(--header-height);
   align-items: center;
   padding-left: 1rem;
   padding-right: 1rem;
+}
+
+.start {
+  display: flex;
+  align-items: center;
+}
+
+.start:not(:empty) {
+  margin-right: 0.5rem;
+  margin-left: -0.5rem;
 }
 
 .brand {

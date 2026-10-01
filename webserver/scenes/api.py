@@ -41,7 +41,9 @@ def list_scenes(request, filters: SceneFilterSchema = Query(...)):
 )
 @paginate(LimitOffsetPagination)
 def my_scenes(request, filters: SceneFilterSchema = Query(...)):
-    return filters.filter(Scene.objects.filter(author_id=request.user.id))
+    # -id breaks modified_date ties so pages don't overlap or skip scenes.
+    scenes = Scene.objects.filter(author_id=request.user.id)
+    return filters.filter(scenes).order_by("-modified_date", "-id")
 
 
 @scenes_router.post("/", response={201: SceneSchema}, auth=None, by_alias=True)

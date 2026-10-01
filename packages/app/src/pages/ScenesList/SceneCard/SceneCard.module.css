@@ -1,0 +1,119 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-secondary-lighter);
+  border-radius: calc(2 * var(--border-radius));
+  background-color: var(--color-background);
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+@media (hover: hover) {
+  .card:hover {
+    border-color: var(--color-secondary-light);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+  }
+}
+
+.current {
+  border-color: var(--color-accent);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.91;
+  object-fit: cover;
+  background-color: var(--color-secondary-lightest);
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--color-secondary-light);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.5rem 0.75rem 0.625rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.link {
+  display: block;
+  border-radius: 2px;
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+/* Clamped inside the link: overflow on an ancestor would clip its focus ring. */
+.titleText {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Stretches the link over the whole card. */
+.link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-light);
+}
+
+.badge {
+  padding: 0 0.375rem;
+  border-radius: 999px;
+  background-color: var(--color-secondary-lighter);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-small);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.currentBadge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background-color: var(--color-accent);
+  color: white;
+  /* It paints above the stretched link; let clicks through to it. */
+  pointer-events: none;
+}
+
+/* Above the stretched link, so its clicks go to the actions. */
+.actions {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  z-index: 1;
+  border-radius: var(--border-radius);
+  background-color: color-mix(
+    in srgb,
+    var(--color-background) 85%,
+    transparent
+  );
+}
