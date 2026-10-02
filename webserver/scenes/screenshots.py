@@ -9,13 +9,15 @@ exceed reservations, reservations never exceed the caps.
 import json
 import logging
 import urllib.request
+from typing import Optional
+from urllib.parse import quote, urlencode
 
 from django.conf import settings
 from django.db import connection, transaction
 from django.utils import timezone
 
 from main.constants import BACKEND_USER_AGENT
-from scenes.models import RenderDay, RenderMonth
+from scenes.models import RenderDay, RenderMonth, Scene
 
 logger = logging.getLogger(__name__)
 
@@ -59,13 +61,25 @@ def reserve_render_slot() -> bool:
         return True
 
 
-def nudge_render(key: str) -> None:
+def scene_image_url(key: str, version: str) -> Optional[str]:
+    """The scene's screenshot URL, or None when the feature is dark. Tentative:
+    ``fallback=none`` makes a missing render 404 rather than serve the OG card."""
+    if not settings.SCREENSHOTS_ORIGIN:
+        return None
+    query = urlencode({"fallback": "none", "v": version})
+    return (
+        f"{settings.SCREENSHOTS_ORIGIN}/screenshots/scene/{quote(key, safe='')}.png"
+        f"?{query}"
+    )
+
+
+def nudge_render(key: str, version: str) -> None:
     """Best-effort fire at the Worker's POST /render (secret-gated → 202).
     ~2s timeout, no retry. Swallows transport errors — the render is a
     best-effort side effect of the save."""
     req = urllib.request.Request(
         f"{settings.SCREENSHOTS_ORIGIN}/render",
-        data=json.dumps({"key": key}).encode(),
+        data=json.dumps({"key": key, "version": version}).encode(),
         headers={
             "content-type": "application/json",
             "authorization": f"Bearer {settings.RENDER_SECRET}",
@@ -81,7 +95,7 @@ def nudge_render(key: str) -> None:
         logger.error("nudge_render failed for key=%s", key, exc_info=True)
 
 
-def maybe_render(key: str) -> None:
+def maybe_render(key: str, version: str) -> None:
     """Reserve a slot and nudge the render Worker. Fully isolated — runs inline
     via on_commit in autocommit views (scenes/api.py), so it must never
     propagate: a failure here must still let the save return 2xx."""
@@ -92,16 +106,17 @@ def maybe_render(key: str) -> None:
             return
         if not reserve_render_slot():  # over cap → decline (coverage, not spend)
             return
-        nudge_render(key)
+        nudge_render(key, version)
     except Exception:
         logger.error("maybe_render failed for key=%s", key, exc_info=True)
 
 
-def schedule_render(key: str) -> None:
+def schedule_render(scene: Scene) -> None:
     """Fire maybe_render after the surrounding DB work commits.
 
     create/update are autocommit views, so this on_commit hook runs inline
     before the response. Wrapping them in a transaction would defer the nudge to
     request-commit and demote reserve_render_slot's atomic() to a savepoint.
     """
-    transaction.on_commit(lambda: maybe_render(key))
+    key, version = scene.key, scene.screenshot_version
+    transaction.on_commit(lambda: maybe_render(key, version))

@@ -1,10 +1,11 @@
+import datetime
 import random
 
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.contrib.postgres.indexes import GinIndex
-from django.db.models.functions import Length
+from django.db.models.functions import Length, Now
 from django.utils import timezone
 
 from scenes.validators import validate_math_items
@@ -125,6 +126,18 @@ class Scene(TimestampedModel):
     times_accessed = models.IntegerField(default=0)
 
     is_legacy = models.BooleanField(default=False)
+
+    # Bumped only by the edits that request a screenshot render (create, items,
+    # item_order). db_default serves old dynos' inserts during release.
+    content_modified_date = models.DateTimeField(default=timezone.now, db_default=Now())
+
+    @property
+    def screenshot_version(self) -> str:
+        """The render's version tag and the image URL's ``v``. Canonical UTC, so
+        one instant always gives one string."""
+        return self.content_modified_date.astimezone(datetime.UTC).isoformat(
+            timespec="microseconds"
+        )
 
     class Meta:
         constraints = [

@@ -3,7 +3,7 @@ import {
   waitOnExecutionContext,
   env,
 } from "cloudflare:test";
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import worker from "./index";
 import { sceneImageKey } from "./keys";
 import { renderScene } from "./render";
@@ -165,12 +165,130 @@ it("serves default for an invalid key WITHOUT querying R2 or scheduling a render
   expect(fetch).toHaveBeenCalledTimes(1);
 });
 
-it("202 + schedules a render for a valid secret + key", async () => {
+describe("?fallback=none", () => {
+  it("404s on a miss, with a short cache header and no default-card fetch", async () => {
+    stubFetch();
+    const res = await call("/screenshots/scene/missing.png?fallback=none&v=1");
+    expect(res.status).toBe(404);
+    expect(res.headers.get("cache-control")).toBe("public, max-age=60");
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("404s on an invalid key", async () => {
+    stubFetch();
+    const res = await call("/screenshots/scene/bad key.png?fallback=none");
+    expect(res.status).toBe(404);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("404s (not a 500) when the R2 cache read fails", async () => {
+    stubFetch();
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(env.SCREENSHOTS_BUCKET, "get").mockRejectedValueOnce(
+      new Error("r2 down"),
+    );
+    const res = await call("/screenshots/scene/hit.png?fallback=none");
+    expect(res.status).toBe(404);
+    expect(fetch).not.toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
+  it("still serves the cached PNG on a hit", async () => {
+    stubFetch();
+    await env.SCREENSHOTS_BUCKET.put(sceneImageKey("hit"), PNG, {
+      httpMetadata: { contentType: "image/png" },
+    });
+    const res = await call("/screenshots/scene/hit.png?fallback=none");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("cache-control")).toContain("max-age=86400");
+    expect(new Uint8Array(await res.arrayBuffer())).toEqual(PNG);
+  });
+
+  describe("a hit's cache lifetime", () => {
+    const V = "2026-10-02T01:53:32.123456+00:00";
+    const putHit = (customMetadata?: Record<string, string>) =>
+      env.SCREENSHOTS_BUCKET.put(sceneImageKey("hit"), PNG, {
+        httpMetadata: { contentType: "image/png" },
+        customMetadata,
+      });
+    const cacheControl = async (v: string) =>
+      (
+        await call(
+          `/screenshots/scene/hit.png?fallback=none&v=${encodeURIComponent(v)}`,
+        )
+      ).headers.get("cache-control");
+
+    it("is a day when the render is of the requested version", async () => {
+      await putHit({ version: V });
+      expect(await cacheControl(V)).toBe("public, max-age=86400");
+    });
+
+    it("is a minute when the render is of another version, since the requested one may be in flight", async () => {
+      await putHit({ version: V });
+      const later = "2026-10-02T01:53:32.123457+00:00";
+      expect(await cacheControl(later)).toBe("public, max-age=60");
+    });
+
+    it("is a minute for a render with no version", async () => {
+      await putHit();
+      expect(await cacheControl(V)).toBe("public, max-age=60");
+    });
+
+    it("is a day without v (og:image), whatever the render's version", async () => {
+      await putHit({ version: V });
+      const res = await call("/screenshots/scene/hit.png");
+      expect(res.headers.get("cache-control")).toBe("public, max-age=86400");
+    });
+  });
+
+  it("serves the default card as before for any other fallback value", async () => {
+    stubFetch();
+    const res = await call("/screenshots/scene/missing.png?fallback=nope");
+    expect(res.status).toBe(200);
+    expect(new Uint8Array(await res.arrayBuffer())).toEqual(DEFAULT_PNG);
+  });
+});
+
+it("202 + schedules a render for a valid secret + key, unversioned without a version", async () => {
   vi.mocked(renderScene).mockResolvedValueOnce(PNG);
   const res = await post({ key: "good" }, { authorization: "Bearer shh" });
   expect(res.status).toBe(202);
   const stored = await env.SCREENSHOTS_BUCKET.get(sceneImageKey("good"));
   expect(new Uint8Array(await stored!.arrayBuffer())).toEqual(PNG);
+  // Not the string "undefined", which a `?v=undefined` would match.
+  expect(stored!.customMetadata).not.toHaveProperty("version");
+});
+
+it.each([
+  ["JSON null", null],
+  ["a JSON string", "good"],
+])("400 for a body that is %s", async (_, body) => {
+  const res = await post(body, { authorization: "Bearer shh" });
+  expect(res.status).toBe(400);
+  expect(renderScene).not.toHaveBeenCalled();
+});
+
+it("stores the version a render was requested for", async () => {
+  vi.mocked(renderScene).mockResolvedValueOnce(PNG);
+  const res = await post(
+    { key: "good", version: "2026-10-02T01:53:32+00:00" },
+    { authorization: "Bearer shh" },
+  );
+  expect(res.status).toBe(202);
+  const stored = await env.SCREENSHOTS_BUCKET.head(sceneImageKey("good"));
+  expect(stored!.customMetadata?.version).toBe("2026-10-02T01:53:32+00:00");
+});
+
+it.each([
+  ["a non-string", 1],
+  ["an overlong string", "x".repeat(65)],
+])("400 for %s version, without rendering", async (_, version) => {
+  const res = await post(
+    { key: "good", version },
+    { authorization: "Bearer shh" },
+  );
+  expect(res.status).toBe(400);
+  expect(renderScene).not.toHaveBeenCalled();
 });
 
 it("403 and never launches a browser without the secret", async () => {

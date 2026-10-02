@@ -29,6 +29,12 @@ const cards = [
     modifiedDate: "2026-09-20T10:00:00Z",
   },
   {
+    key: "f",
+    title: "Image fails to load (keeps the placeholder)",
+    imageUrl: "data:image/png;base64,not-a-png",
+    modifiedDate: "2026-09-18T10:00:00Z",
+  },
+  {
     key: "c",
     title: "Archived scene",
     archived: true,

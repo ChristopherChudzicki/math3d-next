@@ -126,13 +126,11 @@ def migrate_scene(legacy_scene: LegacyScene):
         return None
     # TimestampedModel.save() overwrites modified_date on every write (and
     # created_date on insert), so backdate with a queryset update.
+    creation_date = legacy_scene.dehydrated["metadata"]["creationDate"].replace('"', "")
     Scene.objects.filter(pk=scene.id).update(
-        created_date=legacy_scene.dehydrated["metadata"]["creationDate"].replace(
-            '"', ""
-        ),
-        modified_date=legacy_scene.dehydrated["metadata"]["creationDate"].replace(
-            '"', ""
-        ),
+        created_date=creation_date,
+        modified_date=creation_date,
+        content_modified_date=creation_date,
     )
 
     legacy_scene.migration_note = "\n".join(

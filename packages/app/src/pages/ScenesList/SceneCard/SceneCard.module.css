@@ -22,20 +22,36 @@
   border-color: var(--color-accent);
 }
 
+/* The placeholder; a thumbnail, once loaded, covers it. */
 .image {
-  display: block;
-  width: 100%;
-  aspect-ratio: 1.91;
-  object-fit: cover;
-  background-color: var(--color-secondary-lightest);
-}
-
-.placeholder {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  aspect-ratio: 1.91;
+  background-color: var(--color-secondary-lightest);
   font-size: 2rem;
   color: var(--color-secondary-light);
+}
+
+.thumbnail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+
+.thumbnail[data-loaded] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .thumbnail {
+    transition: opacity 150ms ease;
+  }
 }
 
 .text {

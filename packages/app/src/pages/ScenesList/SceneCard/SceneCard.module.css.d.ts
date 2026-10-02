@@ -7,8 +7,8 @@ declare const styles: {
   readonly "image": string;
   readonly "link": string;
   readonly "meta": string;
-  readonly "placeholder": string;
   readonly "text": string;
+  readonly "thumbnail": string;
   readonly "title": string;
   readonly "titleText": string;
 };

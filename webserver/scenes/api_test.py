@@ -1,4 +1,5 @@
 from unittest import mock
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -48,6 +49,7 @@ def test_list_item_shape_aliases_dates():
         "createdDate",
         "modifiedDate",
         "archived",
+        "imageUrl",
     }
     assert "items" not in item and "itemOrder" not in item
 
@@ -100,6 +102,35 @@ def test_me_returns_only_my_scenes():
     client.force_login(me)
     body = client.get(ME_URL).json()
     assert [i["key"] for i in body["items"]] == [mine.key]
+
+
+@pytest.mark.django_db
+def test_me_image_url_points_at_the_screenshot_with_cache_buster(settings):
+    settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
+    me = CustomUserFactory.create()
+    scene = SceneFactory.create(author=me)
+    client = Client()
+    client.force_login(me)
+    [item] = client.get(ME_URL).json()["items"]
+    url = urlsplit(item["imageUrl"])
+    assert f"{url.scheme}://{url.netloc}{url.path}" == (
+        f"https://s.math3d.org/screenshots/scene/{scene.key}.png"
+    )
+    assert parse_qs(url.query) == {
+        "fallback": ["none"],
+        "v": [scene.screenshot_version],
+    }
+
+
+@pytest.mark.django_db
+def test_me_image_url_is_null_when_screenshots_are_dark(settings):
+    settings.SCREENSHOTS_ORIGIN = ""
+    me = CustomUserFactory.create()
+    SceneFactory.create(author=me)
+    client = Client()
+    client.force_login(me)
+    [item] = client.get(ME_URL).json()["items"]
+    assert item["imageUrl"] is None
 
 
 @pytest.mark.django_db
@@ -415,7 +446,36 @@ def test_create_scene_nudges_render_on_commit():
     with mock.patch("scenes.screenshots.maybe_render") as maybe:
         resp = Client().post(LIST_URL, data=body, content_type="application/json")
     assert resp.status_code == 201
-    maybe.assert_called_once_with(resp.json()["key"])
+    key = resp.json()["key"]
+    version = Scene.objects.get(key=key).screenshot_version
+    maybe.assert_called_once_with(key, version)
+
+
+def _image_version(client, key: str) -> str:
+    """The `v` on the scene's imageUrl in the requester's My Scenes list."""
+    [item] = [i for i in client.get(ME_URL).json()["items"] if i["key"] == key]
+    return parse_qs(urlsplit(item["imageUrl"]).query)["v"][0]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_render_version_matches_image_url_version(settings):
+    # The Worker caches a render for a day only when the version it was
+    # rendered for equals the URL's v, so the two must agree exactly, including
+    # after the DB round-trip.
+    settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
+    me = CustomUserFactory.create()
+    client = Client()
+    client.force_login(me)
+    data = default_scene()
+    body = {"items": data["items"], "itemOrder": data["itemOrder"]}
+    with mock.patch("scenes.screenshots.maybe_render") as maybe:
+        key = client.post(LIST_URL, data=body, content_type="application/json").json()[
+            "key"
+        ]
+        assert maybe.call_args.args == (key, _image_version(client, key))
+        client.patch(_detail(key), data=body, content_type="application/json")
+        assert maybe.call_count == 2
+        assert maybe.call_args.args == (key, _image_version(client, key))
 
 
 @pytest.mark.django_db(transaction=True)
@@ -425,6 +485,7 @@ def test_update_scene_nudges_render_on_content_change():
     client = Client()
     client.force_login(me)
     data = default_scene()
+    before = scene.content_modified_date
     with mock.patch("scenes.screenshots.maybe_render") as maybe:
         resp = client.patch(
             _detail(scene.key),
@@ -432,7 +493,9 @@ def test_update_scene_nudges_render_on_content_change():
             content_type="application/json",
         )
     assert resp.status_code == 200
-    maybe.assert_called_once_with(scene.key)
+    scene.refresh_from_db()
+    assert scene.content_modified_date > before
+    maybe.assert_called_once_with(scene.key, scene.screenshot_version)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -451,3 +514,23 @@ def test_update_scene_skips_render_on_metadata_only_change():
         )
     assert resp.status_code == 200
     maybe.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_metadata_only_patch_keeps_the_image_url(settings):
+    # A rename or archive bumps modified_date but leaves the screenshot alone,
+    # so the URL (and the browser's cached image) must stay the same.
+    settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
+    me = CustomUserFactory.create()
+    scene = SceneFactory.create(author=me)
+    client = Client()
+    client.force_login(me)
+    [before] = client.get(ME_URL).json()["items"]
+    for patch in ({"title": "Renamed"}, {"archived": True}):
+        resp = client.patch(
+            _detail(scene.key), data=patch, content_type="application/json"
+        )
+        assert resp.status_code == 200
+    [after] = client.get(ME_URL).json()["items"]
+    assert after["modifiedDate"] != before["modifiedDate"]
+    assert after["imageUrl"] == before["imageUrl"]

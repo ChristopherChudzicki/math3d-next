@@ -226,6 +226,7 @@ const MyScenesList: React.FC = () => {
               key={item.key}
               to={sceneHref(item.key, ListType.Me)}
               title={titleOf(item)}
+              imageUrl={item.imageUrl}
               modifiedDate={item.modifiedDate}
               archived={item.archived}
               current={item.key === sceneKey}
