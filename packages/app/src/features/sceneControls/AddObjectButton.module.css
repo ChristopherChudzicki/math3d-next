@@ -1,0 +1,29 @@
+/* A one-off look, kept from before the move off MUI; not a Button variant. */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 15px;
+  border: 1px solid rgb(140 140 140 / 50%);
+  border-radius: var(--border-radius);
+  background: linear-gradient(
+    var(--color-secondary-lightest),
+    rgb(217 217 217)
+  );
+  color: rgb(98 98 98);
+  font: inherit;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 120ms ease;
+}
+
+@media (hover: hover) {
+  .trigger:hover {
+    border-color: rgb(140 140 140);
+  }
+}
+
+.trigger:focus-visible {
+  outline-offset: 2px;
+}

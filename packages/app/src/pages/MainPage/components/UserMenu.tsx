@@ -1,29 +1,18 @@
-import React, { useState } from "react";
-import Avatar from "@mui/material/Avatar";
-import Badge from "@mui/material/Badge";
+import React from "react";
 import IconButton from "@/ui/IconButton";
-import SimpleMenu from "@/ui/SimpleMenu/SimpleMenu";
-import type { SimpleMenuItem } from "@/ui/SimpleMenu/SimpleMenu";
+import { Menu } from "@/ui/Menu";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
-import type { BadgeProps } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import PersonIcon from "@mui/icons-material/Person";
 import type { AuthStatus } from "@/features/auth";
 import styles from "./UserMenu.module.css";
 
-const badgeAnchorOrigin: BadgeProps["anchorOrigin"] = {
-  vertical: "bottom",
-  horizontal: "right",
-};
-
 const UserMenu: React.FC<{
-  items: SimpleMenuItem[];
   authStatus: AuthStatus;
-  className?: string;
-}> = ({ items, authStatus, className }) => {
-  const [visible, setVisible] = useState(false);
-
+  /** Shown at the top of the menu, labelling its items. */
+  email?: string;
+  children: React.ReactNode;
+}> = ({ authStatus, email, children }) => {
   // A person avatar would tell a visitor with no account that they have one,
   // and on desktop it duplicates the header's own "Sign in" button; their menu
   // is mostly general navigation. The pending ["me"] query keeps the hamburger,
@@ -32,35 +21,42 @@ const UserMenu: React.FC<{
   // The two triggers carry distinct accessible names: they open different
   // menus, and the name difference lets tests await the avatar specifically
   // rather than matching the hamburger shown while the ["me"] query resolves.
+  // The menu takes its name from the trigger.
   const trigger = useHamburger ? (
-    <IconButton label="Open Menu">
-      <MenuIcon fontSize="inherit" />
-    </IconButton>
+    <Menu.Trigger
+      render={
+        <IconButton label="Open Menu">
+          <MenuIcon fontSize="inherit" />
+        </IconButton>
+      }
+    />
   ) : (
-    <Badge
-      className={styles.badge}
-      overlap="circular"
-      anchorOrigin={badgeAnchorOrigin}
-      badgeContent={visible ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
-    >
-      <Avatar
-        className={styles.avatar}
-        component="button"
-        aria-label="Open User Menu"
-      >
-        <PersonIcon />
-      </Avatar>
-    </Badge>
+    <Menu.Trigger className={styles.avatar} aria-label="Open User Menu">
+      <PersonIcon fontSize="inherit" />
+      {/* Points up while the menu is open; see the CSS. */}
+      <ArrowDropDownIcon fontSize="inherit" className={styles.arrow} />
+    </Menu.Trigger>
   );
 
   return (
-    <SimpleMenu
-      onVisibilityChange={setVisible}
-      items={items}
-      aria-label={useHamburger ? "Menu" : "User Menu"}
-      className={className}
-      trigger={trigger}
-    />
+    // Keyed so the menu closes when the trigger swaps (the ["me"] query
+    // settling while the hamburger's menu is open); otherwise it stays open,
+    // anchored to a button that is no longer on the page.
+    <Menu.Root key={useHamburger ? "hamburger" : "avatar"}>
+      {trigger}
+      <Menu.Popup>
+        {email ? (
+          <Menu.Group>
+            <Menu.GroupLabel data-testid="username-display">
+              {email}
+            </Menu.GroupLabel>
+            {children}
+          </Menu.Group>
+        ) : (
+          children
+        )}
+      </Menu.Popup>
+    </Menu.Root>
   );
 };
 

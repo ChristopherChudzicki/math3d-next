@@ -1,6 +1,6 @@
 declare const styles: {
+  readonly "arrow": string;
   readonly "avatar": string;
-  readonly "badge": string;
 };
 export = styles;
 
