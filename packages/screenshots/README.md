@@ -41,9 +41,10 @@ Versions are what make that cache safe. Django bumps a scene's
 order); a rename or archive leaves it, the URL, and the cached image alone.
 `Scene.screenshot_version` is that date in canonical form. Django sends it with
 each `POST /render`, the render is stored with it, and the thumbnail URL carries
-it as `v`, so "is this the render the URL asks for" is an exact match. (Comparing upload time to a save time instead
-would misjudge two quick saves, where the first save's render lands after the
-second save, and would depend on two clocks agreeing.)
+it as `v`, so "is this the render the URL asks for" is an exact match.
+(Comparing upload time to a save time instead would misjudge two quick saves,
+where the first save's render lands after the second save, and would depend on
+two clocks agreeing.)
 
 `POST /render` (secret-gated, backend-only):
 
