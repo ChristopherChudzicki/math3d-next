@@ -19,7 +19,6 @@ from scenes.schemas import (
     SceneMetaSchema,
     ScenePatchSchema,
     SceneSchema,
-    scene_image_version,
 )
 from scenes.screenshots import schedule_render
 
@@ -60,7 +59,7 @@ def create_scene(request, payload: SceneCreateSchema):
     if payload.title is not None:
         scene.title = payload.title
     scene.save()  # full_clean() re-validates items (defense in depth)
-    schedule_render(scene.key, scene_image_version(scene.content_modified_date))
+    schedule_render(scene)
     return Status(201, scene)
 
 
@@ -117,7 +116,7 @@ def update_scene(request, key: str, payload: ScenePatchSchema):
         scene.content_modified_date = timezone.now()
     scene.save()
     if content_changed:
-        schedule_render(scene.key, scene_image_version(scene.content_modified_date))
+        schedule_render(scene)
     return scene
 
 

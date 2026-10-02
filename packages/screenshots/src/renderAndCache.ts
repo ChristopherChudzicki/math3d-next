@@ -10,8 +10,9 @@ type Renderer = (
 
 /**
  * Render {key} and cache the PNG in R2, tagged with the `version` of the scene
- * the backend asked for (see `isCurrentRender` in index.ts). Structurally never throws (safe for
- * ctx.waitUntil): the whole body is wrapped so no awaited call escapes. The
+ * the backend asked for (see `isCurrentRender` in index.ts). Structurally never
+ * throws (safe for ctx.waitUntil): the whole body is wrapped so no awaited call
+ * escapes. The
  * backend only nudges scenes it persisted, so there is no existence gate and no
  * per-key lock (both were crawler-race machinery, deleted in ADR-0002). `render`
  * is injected for testability. LOG on failure — this runs fire-and-forget, so a

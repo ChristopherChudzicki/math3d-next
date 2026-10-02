@@ -2,13 +2,13 @@
 
 Dedicated Cloudflare Worker that renders a per-scene screenshot for each shared
 math3d scene and caches it in R2. Its first consumer is the Open Graph card, but
-the rendered PNG is a general primitive (thumbnails, galleries follow). It is
-**intentionally isolated and abandonable**: it imports nothing from the rest of
-the monorepo (only `@cloudflare/puppeteer` and its own relative modules), and
-nothing in the monorepo imports it. Its couplings to the rest of the system are
-var-gated: the app Worker points `og:image` at the GET, and the Django backend
-nudges the POST when a scene is saved and hands the GET's URL to the app's
-My Scenes cards (`imageUrl`).
+the rendered PNG is a general primitive: My Scenes card thumbnails use it too,
+and galleries may follow. It is **intentionally isolated and abandonable**: it
+imports nothing from the rest of the monorepo (only `@cloudflare/puppeteer` and
+its own relative modules), and nothing in the monorepo imports it. Its couplings
+to the rest of the system are var-gated: the app Worker points `og:image` at the
+GET, and the Django backend nudges the POST when a scene is saved and hands the
+GET's URL to the app's My Scenes cards (`imageUrl`).
 
 Design + rationale: `docs/superpowers/specs/2026-08-15-screenshot-cost-protection-design.md`
 (ADR-0002), building on `docs/superpowers/specs/2026-08-08-og-per-scene-image-design.md`.
@@ -37,9 +37,9 @@ a slot against its per-period spend caps — tells it to.
    versions existed) falls back to comparing its upload time with `v`.
 
 Versions are what make that cache safe. Django bumps a scene's
-`content_modified_date` only when its items change — the same edits that
-trigger a render; a rename or archive leaves it, the URL, and the cached image
-alone. It sends that version with each `POST /render`, the render is stored
+`content_modified_date` only on the edits that trigger a render (items or item
+order); a rename or archive leaves it, the URL, and the cached image alone.
+`Scene.screenshot_version` is that date in canonical form. Django sends it with each `POST /render`, the render is stored
 with it, and the thumbnail URL carries it as `v`, so "is this the render the URL
 asks for" is an exact match. (Comparing upload time to a save time instead
 would misjudge two quick saves, where the first save's render lands after the
@@ -56,8 +56,9 @@ second save, and would depend on two clocks agreeing.)
    immediately. The render screenshots `{FRAME_ORIGIN}/app/frame/{key}` at
    1200×630 (waiting for `data-scene-ready`) and writes the PNG to R2. It is
    bounded by `RENDER_DEADLINE_MS` (a timeout that closes the browser even on a
-   hung page). The R2 object's custom metadata records `version`. All render failures are swallowed and logged — a failed render
-   just leaves the default card in place until the next save re-nudges.
+   hung page). The R2 object's custom metadata records `version`. All render
+   failures are swallowed and logged — a failed render just leaves the default
+   card in place until the next save re-nudges.
 
 Renders are not single-flighted: two saves inside one render window launch two
 concurrent renders of the same key, and the later-to-finish wins the R2 write —
@@ -109,6 +110,13 @@ deploy --var` (`deploy-reusable.yml`). Unset → the app serves its static
   `imageUrl` for My Scenes cards. Unset → saves behave exactly as before, nothing
   is ever rendered, and cards show their placeholder.
 
+**Deploy order:** the Worker must be live (and its deploy green — the
+`deploy-screenshots` job is non-blocking) before the backend's
+`SCREENSHOTS_ORIGIN` is set, or before a backend change that relies on a newer
+Worker ships. An older Worker ignores `?fallback=none` and `?v=`, so cards would
+show the default card for unrendered scenes and could cache a superseded render
+for a day. The reverse (new Worker, old backend) is safe: `version` is optional.
+
 To enable end-to-end: deploy this Worker, set `RENDER_SECRET` on both sides,
 smoke-test it, then set `SCREENSHOTS_ORIGIN` to its `*.workers.dev` host — as the
 `SCREENSHOTS_ORIGIN` GitHub Actions variable (app Worker) and the backend env —
@@ -130,8 +138,11 @@ RENDER_SECRET`.
 4. Delete the R2 bucket `math3d-screenshots`.
 5. Narrow `CLOUDFLARE_API_TOKEN` back to Workers-only scopes.
 6. Delete this package (`packages/screenshots`). Nothing else imports it, so no
-   other code changes are needed. (The backend's `scenes.screenshots` reservation
-   module is a separate teardown — see ADR-0002.)
+   other code changes are needed. (The backend side is a separate teardown and
+   is dark once step 1 is done: the `scenes.screenshots` reservation module —
+   see ADR-0002 — and `MiniScene.imageUrl`, with its OpenAPI types and the
+   SceneCard thumbnail. `Scene.content_modified_date` can stay; it means what
+   its name says without the Worker.)
 
 ## Development
 

@@ -1,3 +1,6 @@
+import datetime
+import zoneinfo
+
 import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
@@ -97,3 +100,25 @@ def test_save_with_empty_update_fields_skips_the_db_write():
     assert scene.modified_date == before  # in memory, not only in the row
     scene.refresh_from_db()
     assert scene.modified_date == before
+
+
+def test_screenshot_version_is_canonical_utc_with_microseconds():
+    # The same instant must always name the same version: the Worker matches
+    # it exactly against the image URL's v.
+    instant = datetime.datetime(2026, 10, 2, 1, 53, 32, tzinfo=datetime.UTC)
+    elsewhere = instant.astimezone(zoneinfo.ZoneInfo("America/New_York"))
+    assert Scene(key="ab", content_modified_date=instant).screenshot_version == (
+        "2026-10-02T01:53:32.000000+00:00"
+    )
+    assert Scene(key="ab", content_modified_date=elsewhere).screenshot_version == (
+        Scene(key="ab", content_modified_date=instant).screenshot_version
+    )
+
+
+def test_screenshot_version_distinguishes_microseconds():
+    instant = datetime.datetime(2026, 10, 2, 1, 53, 32, 1, tzinfo=datetime.UTC)
+    later = instant + datetime.timedelta(microseconds=1)
+    assert (
+        Scene(key="ab", content_modified_date=instant).screenshot_version
+        != Scene(key="ab", content_modified_date=later).screenshot_version
+    )

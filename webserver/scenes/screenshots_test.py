@@ -3,6 +3,7 @@ import json
 import logging
 import threading
 from unittest import mock
+from urllib.parse import urlsplit
 
 import pytest
 from django.db import connection
@@ -200,3 +201,18 @@ def test_nudge_render_swallows_transport_error(settings, scenes_caplog):
     (record,) = [r for r in scenes_caplog.records if r.levelno == logging.ERROR]
     assert record.name == "scenes.screenshots"
     assert record.getMessage() == "nudge_render failed for key=abc"
+
+
+def test_scene_image_url_is_none_when_dark(settings):
+    settings.SCREENSHOTS_ORIGIN = ""
+    assert screenshots.scene_image_url("abc", "v1") is None
+
+
+def test_scene_image_url_escapes_the_key(settings):
+    # A key can't break out of the path and drop fallback=none.
+    settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
+    raw = screenshots.scene_image_url("a?b#c/d", "v1")
+    assert raw is not None
+    url = urlsplit(raw)
+    assert url.path == "/screenshots/scene/a%3Fb%23c%2Fd.png"
+    assert url.query == "fallback=none&v=v1"

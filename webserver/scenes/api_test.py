@@ -118,7 +118,7 @@ def test_me_image_url_points_at_the_screenshot_with_cache_buster(settings):
     )
     assert parse_qs(url.query) == {
         "fallback": ["none"],
-        "v": [scene.content_modified_date.isoformat()],
+        "v": [scene.screenshot_version],
     }
 
 
@@ -447,7 +447,7 @@ def test_create_scene_nudges_render_on_commit():
         resp = Client().post(LIST_URL, data=body, content_type="application/json")
     assert resp.status_code == 201
     key = resp.json()["key"]
-    version = Scene.objects.get(key=key).content_modified_date.isoformat()
+    version = Scene.objects.get(key=key).screenshot_version
     maybe.assert_called_once_with(key, version)
 
 
@@ -474,6 +474,7 @@ def test_render_version_matches_image_url_version(settings):
         ]
         assert maybe.call_args.args == (key, _image_version(client, key))
         client.patch(_detail(key), data=body, content_type="application/json")
+        assert maybe.call_count == 2
         assert maybe.call_args.args == (key, _image_version(client, key))
 
 
@@ -494,7 +495,7 @@ def test_update_scene_nudges_render_on_content_change():
     assert resp.status_code == 200
     scene.refresh_from_db()
     assert scene.content_modified_date > before
-    maybe.assert_called_once_with(scene.key, scene.content_modified_date.isoformat())
+    maybe.assert_called_once_with(scene.key, scene.screenshot_version)
 
 
 @pytest.mark.django_db(transaction=True)

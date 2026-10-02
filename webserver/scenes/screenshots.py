@@ -9,13 +9,15 @@ exceed reservations, reservations never exceed the caps.
 import json
 import logging
 import urllib.request
+from typing import Optional
+from urllib.parse import quote, urlencode
 
 from django.conf import settings
 from django.db import connection, transaction
 from django.utils import timezone
 
 from main.constants import BACKEND_USER_AGENT
-from scenes.models import RenderDay, RenderMonth
+from scenes.models import RenderDay, RenderMonth, Scene
 
 logger = logging.getLogger(__name__)
 
@@ -59,11 +61,29 @@ def reserve_render_slot() -> bool:
         return True
 
 
+def scene_image_url(key: str, version: str) -> Optional[str]:
+    """The scene's screenshot URL on the render Worker, or None when the
+    feature is dark.
+
+    Tentative: nothing records whether a render landed. ``fallback=none`` makes
+    a miss 404 instead of serving the default OG card, so an <img> can fall back
+    to its own placeholder. ``v`` (Scene.screenshot_version) changes only when
+    the content does, and the Worker caches a render for long only when it is
+    of that version."""
+    if not settings.SCREENSHOTS_ORIGIN:
+        return None
+    query = urlencode({"fallback": "none", "v": version})
+    return (
+        f"{settings.SCREENSHOTS_ORIGIN}/screenshots/scene/{quote(key, safe='')}.png"
+        f"?{query}"
+    )
+
+
 def nudge_render(key: str, version: str) -> None:
     """Best-effort fire at the Worker's POST /render (secret-gated → 202).
     ~2s timeout, no retry. Swallows transport errors — the render is a
-    best-effort side effect of the save. The Worker stores ``version`` on the
-    render (scenes.schemas.scenes.scene_image_version)."""
+    best-effort side effect of the save. The Worker stores ``version``
+    (Scene.screenshot_version) on the render."""
     req = urllib.request.Request(
         f"{settings.SCREENSHOTS_ORIGIN}/render",
         data=json.dumps({"key": key, "version": version}).encode(),
@@ -98,11 +118,12 @@ def maybe_render(key: str, version: str) -> None:
         logger.error("maybe_render failed for key=%s", key, exc_info=True)
 
 
-def schedule_render(key: str, version: str) -> None:
+def schedule_render(scene: Scene) -> None:
     """Fire maybe_render after the surrounding DB work commits.
 
     create/update are autocommit views, so this on_commit hook runs inline
     before the response. Wrapping them in a transaction would defer the nudge to
     request-commit and demote reserve_render_slot's atomic() to a savepoint.
     """
+    key, version = scene.key, scene.screenshot_version
     transaction.on_commit(lambda: maybe_render(key, version))

@@ -7,7 +7,9 @@
  * rendering is nudged separately, by the backend, on scene create/update).
  * The endpoint never blocks on or 500s — every response returns a valid image
  * immediately, except that `?fallback=none` (the app's scene-card thumbnails,
- * which draw their own placeholder) turns the default card into a 404.
+ * which draw their own placeholder) turns the default card into a 404. With
+ * `?v=`, a hit is cached for a day only if it is the render of that version
+ * (`isCurrentRender`).
  *
  * Bindings (wrangler.jsonc): BROWSER (Browser Rendering), SCREENSHOTS_BUCKET (R2
  * bucket `math3d-screenshots`). FRAME_ORIGIN is a deploy-injected var (see
@@ -15,7 +17,8 @@
  * (@cloudflare/puppeteer imports node builtins).
  *
  * Wired into the app Worker (og:image) and the backend (render nudges, My Scenes
- * thumbnail URLs) via their `SCREENSHOTS_ORIGIN` vars; unset = that side is dark. Design + teardown: packages/screenshots/README.md,
+ * thumbnail URLs) via their `SCREENSHOTS_ORIGIN` vars; unset = that side is
+ * dark. Design + teardown: packages/screenshots/README.md,
  * docs/superpowers/specs/2026-08-15-screenshot-cost-protection-design.md (ADR-0002,
  * generate-on-POST), building on .../2026-08-08-og-per-scene-image-design.md.
  */
@@ -94,13 +97,17 @@ export default {
       if (!env.RENDER_SECRET || auth !== `Bearer ${env.RENDER_SECRET}`) {
         return new Response("forbidden", { status: 403 });
       }
-      let body: { key?: unknown; version?: unknown } = {};
+      let body: unknown;
       try {
-        body = (await request.json()) as typeof body;
+        body = await request.json();
       } catch {
         // Falls through to the 400 below.
       }
-      const { key, version } = body ?? {};
+      // `?? {}`: the body may be JSON `null`.
+      const { key, version } = (body ?? {}) as {
+        key?: unknown;
+        version?: unknown;
+      };
       if (typeof key !== "string" || !KEY_RE.test(key)) {
         return new Response("bad request", { status: 400 });
       }

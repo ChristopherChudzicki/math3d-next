@@ -268,12 +268,23 @@ describe("?fallback=none", () => {
   });
 });
 
-it("202 + schedules a render for a valid secret + key", async () => {
+it("202 + schedules a render for a valid secret + key, unversioned without a version", async () => {
   vi.mocked(renderScene).mockResolvedValueOnce(PNG);
   const res = await post({ key: "good" }, { authorization: "Bearer shh" });
   expect(res.status).toBe(202);
   const stored = await env.SCREENSHOTS_BUCKET.get(sceneImageKey("good"));
   expect(new Uint8Array(await stored!.arrayBuffer())).toEqual(PNG);
+  // An unversioned render must fall back to upload time, not match "undefined".
+  expect(stored!.customMetadata).not.toHaveProperty("version");
+});
+
+it.each([
+  ["JSON null", null],
+  ["a JSON string", "good"],
+])("400 for a body that is %s", async (_, body) => {
+  const res = await post(body, { authorization: "Bearer shh" });
+  expect(res.status).toBe(400);
+  expect(renderScene).not.toHaveBeenCalled();
 });
 
 it("stores the version a render was requested for", async () => {
@@ -289,9 +300,7 @@ it("stores the version a render was requested for", async () => {
 
 it.each([
   ["a non-string", 1],
-  ["an empty string", ""],
   ["an overlong string", "x".repeat(65)],
-  ["whitespace", "a b"],
 ])("400 for %s version, without rendering", async (_, version) => {
   const res = await post(
     { key: "good", version },

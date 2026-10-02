@@ -25,12 +25,3 @@ it("swallows a render failure without throwing or storing", async () => {
   expect(await env.SCREENSHOTS_BUCKET.get(sceneImageKey("k"))).toBeNull();
   errorSpy.mockRestore();
 });
-
-it("tags the render with the version it was asked for", async () => {
-  const render = vi.fn().mockResolvedValue(PNG);
-  await renderAndCache(env as never, "k", "2026-10-02T01:53:32+00:00", render);
-  const stored = await env.SCREENSHOTS_BUCKET.head(sceneImageKey("k"));
-  expect(stored!.customMetadata).toMatchObject({
-    version: "2026-10-02T01:53:32+00:00",
-  });
-});
