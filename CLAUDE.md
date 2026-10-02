@@ -28,6 +28,7 @@ Run a single package's tasks:
 ```bash
 yarn workspace app test
 yarn workspace @math3d/parser test
+yarn workspace app storybook   # Component stories at http://localhost:6006
 ```
 
 ### Task Runner (just)

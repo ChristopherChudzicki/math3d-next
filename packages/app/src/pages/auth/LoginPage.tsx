@@ -10,18 +10,16 @@ import {
 } from "@/features/auth";
 import GoogleLogo from "@/features/auth/GoogleLogo";
 import { SIGN_IN_ERROR_MESSAGES } from "@/features/auth/signInErrors";
-import type { SignInError } from "@/features/auth/signInErrors";
-import BasicDialog from "@/util/components/BasicDialog";
-import { useOverlay } from "@/features/overlays/useOverlay";
+import BasicDialog from "@/ui/BasicDialog";
+import { useSignInDialog } from "@/features/overlays/useSignInDialog";
+import type { SignInHistoryState } from "@/features/overlays/useSignInDialog";
 import styles from "./LoginPage.module.css";
 
 const LoginPage: React.FC = () => {
-  const { close } = useOverlay();
+  const { close } = useSignInDialog();
   const isAuthenticated = useAuthStatus();
   const handleClose = useCallback(() => close(), [close]);
-  const signInError = (
-    useLocation().state as { signInError?: SignInError } | null
-  )?.signInError;
+  const signInError = (useLocation().state as SignInHistoryState)?.signInError;
 
   useEffect(() => {
     if (isAuthenticated === "authenticated") {
@@ -42,6 +40,7 @@ const LoginPage: React.FC = () => {
         {signInError && (
           <Alert
             severity={signInError === "cancelled" ? "info" : "error"}
+            role={signInError === "cancelled" ? "status" : "alert"}
             className={styles["sign-in-alert"]}
           >
             {SIGN_IN_ERROR_MESSAGES[signInError]}
@@ -53,10 +52,9 @@ const LoginPage: React.FC = () => {
         </Typography>
         <ProviderSignInButton
           provider="google"
-          variant="outlined"
-          startIcon={<GoogleLogo />}
           className={styles["google-button"]}
         >
+          <GoogleLogo />
           Sign in with Google
         </ProviderSignInButton>
         {/* Last, so the dialog reads the same with or without this
@@ -64,7 +62,7 @@ const LoginPage: React.FC = () => {
         {ENABLE_DUMMY_AUTH && (
           <>
             <Divider className={styles["dummy-divider"]}>or</Divider>
-            <ProviderSignInButton provider="dummy" variant="outlined">
+            <ProviderSignInButton provider="dummy">
               Sign in as dev user
             </ProviderSignInButton>
           </>

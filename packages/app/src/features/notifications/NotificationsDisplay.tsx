@@ -1,79 +1,99 @@
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import React, { useState } from "react";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { AlertDialog } from "@/ui/AlertDialog";
+import Button from "@/ui/Button";
 import { useNotifications } from "./NotificationsContext";
+import type { Notification } from "./NotificationsContext";
 
-const NotificationsDisplay: React.FC = () => {
-  const [pendingRemovals, setPendingRemovals] = useState(
-    new Map<string, boolean>(),
-  );
-  const { notifications, remove } = useNotifications();
+type NotificationDialogProps = {
+  notification: Notification;
+  onClosed: (id: string, confirmed: boolean) => void;
+};
+
+const NotificationDialog: React.FC<NotificationDialogProps> = ({
+  notification: n,
+  onClosed,
+}) => {
+  // The choice is made on close and reported once the exit animation
+  // completes. A ref, so it survives a newer notification replacing this one
+  // in the same render.
+  const choice = useRef<boolean | null>(null);
+  const reported = useRef(false);
+  const [open, setOpen] = useState(true);
+  const choose = (confirmed: boolean) => {
+    if (choice.current !== null) return;
+    choice.current = confirmed;
+    setOpen(false);
+  };
+  const report = useCallback(() => {
+    if (reported.current || choice.current === null) return;
+    reported.current = true;
+    onClosed(n.id, choice.current);
+  }, [onClosed, n.id]);
+  // Replaced mid-exit by a newer notification: a choice already made counts.
+  const reportOnUnmount = useRef(report);
+  useEffect(() => {
+    reportOnUnmount.current = report;
+  }, [report]);
+  useEffect(() => () => reportOnUnmount.current(), []);
   return (
-    <>
-      {notifications.map((n) => (
-        <Dialog
-          fullWidth
-          maxWidth="xs"
-          key={n.id}
-          open={!pendingRemovals.has(n.id)}
-          onTransitionExited={() => {
-            remove(n.id, pendingRemovals.get(n.id) ?? false);
-            setPendingRemovals((prev) => {
-              const copy = new Map(prev);
-              copy.delete(n.id);
-              return copy;
-            });
-          }}
-        >
-          <DialogTitle>{n.title}</DialogTitle>
-          <DialogContent>{n.body}</DialogContent>
-          <DialogActions>
-            {n.type === "confirmation" ? (
-              <>
-                <Button
-                  onClick={() => {
-                    setPendingRemovals((prev) => {
-                      const copy = new Map(prev);
-                      copy.set(n.id, false);
-                      return copy;
-                    });
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => {
-                    setPendingRemovals((prev) => {
-                      const copy = new Map(prev);
-                      copy.set(n.id, true);
-                      return copy;
-                    });
-                  }}
-                >
-                  Confirm
-                </Button>
-              </>
-            ) : (
+    <AlertDialog.Root
+      open={open}
+      onOpenChange={(next) => {
+        // Escape, Cancel, or OK.
+        if (!next) choose(false);
+      }}
+      onOpenChangeComplete={(next) => {
+        if (!next) report();
+      }}
+    >
+      <AlertDialog.Popup>
+        <AlertDialog.Title>{n.title}</AlertDialog.Title>
+        {/* A div: the body may be more than a paragraph. */}
+        <AlertDialog.Description render={<div />}>
+          {n.body}
+        </AlertDialog.Description>
+        <AlertDialog.Actions>
+          {n.type === "confirmation" ? (
+            <>
+              <AlertDialog.Close render={<Button>Cancel</Button>} />
               <Button
-                onClick={() => {
-                  setPendingRemovals((prev) => {
-                    const copy = new Map(prev);
-                    copy.set(n.id, false);
-                    return copy;
-                  });
-                }}
+                variant="solid"
+                tone="accent"
+                onClick={() => choose(true)}
               >
-                OK
+                Confirm
               </Button>
-            )}
-          </DialogActions>
-        </Dialog>
-      ))}
-    </>
+            </>
+          ) : (
+            <AlertDialog.Close
+              render={
+                <Button variant="solid" tone="accent">
+                  OK
+                </Button>
+              }
+            />
+          )}
+        </AlertDialog.Actions>
+      </AlertDialog.Popup>
+    </AlertDialog.Root>
   );
+};
+
+/**
+ * Shows the newest notification; the one beneath it shows once it resolves.
+ * Base UI modals opened side by side hide each other from assistive tech, so
+ * they take turns rather than stack.
+ */
+const NotificationsDisplay: React.FC = () => {
+  const { notifications, remove } = useNotifications();
+  const current = notifications.at(-1);
+  return current ? (
+    <NotificationDialog
+      key={current.id}
+      notification={current}
+      onClosed={remove}
+    />
+  ) : null;
 };
 
 export default NotificationsDisplay;

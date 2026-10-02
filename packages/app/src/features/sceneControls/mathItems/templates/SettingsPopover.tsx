@@ -1,5 +1,4 @@
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import { SubtleButton } from "@/util/components";
 import Popover from "@mui/material/Popover";
 import type {
   MathItem,
@@ -10,10 +9,10 @@ import type {
 import React, { useMemo } from "react";
 import { useToggle } from "@/util/hooks";
 import { useSelector } from "react-redux";
-import { IconButton } from "@mui/material";
+import IconButton from "@/ui/IconButton";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
-import Markdown from "@/util/components/Markdown";
+import Markdown from "@/ui/Markdown";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { useMathScope, select } from "../sceneSlice";
 import { getMathProperties, useMathErrors } from "../mathScope";
@@ -61,12 +60,16 @@ const SettingsField: React.FC<SettingsFieldProps> = ({
       />
       {field.description ? (
         <IconButton
-          size="small"
-          aria-label={`Show ${field.label} Description`}
+          size="sm"
+          label={`Show ${field.label} Description`}
           aria-pressed={showTip}
           onClick={() => setShowTip((current) => !current)}
         >
-          {showTip ? <HelpRoundedIcon /> : <HelpOutlineIcon />}
+          {showTip ? (
+            <HelpRoundedIcon fontSize="inherit" />
+          ) : (
+            <HelpOutlineIcon fontSize="inherit" />
+          )}
         </IconButton>
       ) : (
         <span />
@@ -162,7 +165,7 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
           data-testid="more-settings-form"
         >
           <CloseButton
-            aria-label="Close"
+            label="Close"
             className={styles.close}
             onClick={setVisible.off}
           />
@@ -171,15 +174,15 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
           <SettingsForm item={item} config={config} />
         </section>
       </Popover>
-      <SubtleButton
+      <IconButton
         ref={setAnchorEl}
+        size="sm"
         onClick={setVisible.toggle}
-        aria-label="More Settings"
+        label="More Settings"
         className={styles["settings-button"]}
-        centered
       >
-        <SettingsOutlinedIcon />
-      </SubtleButton>
+        <SettingsOutlinedIcon fontSize="inherit" />
+      </IconButton>
     </>
   );
 };

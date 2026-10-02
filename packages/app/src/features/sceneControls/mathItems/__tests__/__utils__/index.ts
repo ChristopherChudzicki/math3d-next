@@ -11,7 +11,7 @@ import type { RootState } from "@/store/store";
 import { seedDb, makeItem } from "@math3d/mock-api";
 
 const addItem = async (itemTypeLabel: string): Promise<void> => {
-  const addNewItemButton = screen.getByText("Add Object");
+  const addNewItemButton = screen.getByRole("button", { name: "Add Object" });
   await user.click(addNewItemButton);
   const menu = await screen.findByRole("menu");
   const itemType = await within(menu).findByText(itemTypeLabel);

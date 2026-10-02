@@ -28,6 +28,15 @@ class MiniSceneSchema(_AuthoredSceneSchema):
     created_date: datetime = Field(alias="createdDate")
     modified_date: datetime = Field(alias="modifiedDate")
     archived: bool
+    image_url: Optional[str] = Field(alias="imageUrl")
+
+    @staticmethod
+    def resolve_image_url(obj) -> Optional[str]:
+        # Imported here: scenes.screenshots imports scenes.models, which imports
+        # this package (via scenes.validators).
+        from scenes.screenshots import scene_image_url
+
+        return scene_image_url(obj.key, obj.screenshot_version)
 
 
 class SceneMetaSchema(Schema):

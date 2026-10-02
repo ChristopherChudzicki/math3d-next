@@ -6,9 +6,8 @@ import {
 } from "@math3d/mathitem-configs";
 import React, { useCallback } from "react";
 
-import { SubtleButton } from "@/util/components";
+import IconButton from "@/ui/IconButton";
 import { positioning } from "@/util/styles";
-import { useAppSelector } from "@/store/hooks";
 import u from "@/util/styles/utils.module.css";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";
@@ -16,54 +15,47 @@ import styles from "./Folder.module.css";
 import { useMathResults } from "../../mathScope";
 import { useOnWidgetChange } from "../../FieldWidget";
 import { WidgetChangeEvent } from "../../FieldWidget/types";
-import { select, useMathScope } from "../../sceneSlice";
+import { useMathScope } from "../../sceneSlice";
 
 interface FolderButtonProps {
   onClick: React.MouseEventHandler;
   isCollapsed: boolean;
-  lighten: boolean;
 }
 
 const FolderButton: React.FC<FolderButtonProps> = ({
   onClick,
   isCollapsed,
-  lighten,
 }) => {
   return (
-    /**
-     * Need an extra container here because SubtleButton also uses transforms
-     */
-    <div className={positioning["absolute-centered"]}>
-      <SubtleButton
-        onClick={onClick}
-        className={styles.toggleButton}
-        aria-label="Expand/Collapse Folder"
-        centered
-        lighten={lighten}
+    <IconButton
+      size="sm"
+      onClick={onClick}
+      className={classNames(
+        positioning["absolute-centered"],
+        styles.toggleButton,
+      )}
+      label="Expand/Collapse Folder"
+    >
+      <span
+        className={classNames(
+          {
+            [styles["rotate-90"]]: isCollapsed,
+            [styles["rotate-0"]]: !isCollapsed,
+          },
+          u.dFlex,
+          u.alignItemsCenter,
+          u.justifyContentCenter,
+        )}
       >
-        <span
-          className={classNames(
-            {
-              [styles["rotate-90"]]: isCollapsed,
-              [styles["rotate-0"]]: !isCollapsed,
-            },
-            styles.color,
-            u.dFlex,
-            u.alignItemsCenter,
-            u.justifyContentCenter,
-          )}
-        >
-          <ExpandMoreIcon />
-        </span>
-      </SubtleButton>
-    </div>
+        <ExpandMoreIcon fontSize="inherit" />
+      </span>
+    </IconButton>
   );
 };
 
 const EVALUATED_PROPS = ["isCollapsed"];
 
 const Folder: MathItemForm<MIT.Folder> = ({ item }) => {
-  const isActive = useAppSelector(select.isActive(item.id));
   const mathScope = useMathScope();
   const evaluated = useMathResults(mathScope, item.id, EVALUATED_PROPS);
   const isCollapsed = !!evaluated.isCollapsed;
@@ -82,13 +74,7 @@ const Folder: MathItemForm<MIT.Folder> = ({ item }) => {
       childItem={false}
       config={configs[MIT.Folder]}
       showAlignmentBar={false}
-      sideContent={
-        <FolderButton
-          lighten={isActive}
-          onClick={onClick}
-          isCollapsed={isCollapsed}
-        />
-      }
+      sideContent={<FolderButton onClick={onClick} isCollapsed={isCollapsed} />}
     />
   );
 };

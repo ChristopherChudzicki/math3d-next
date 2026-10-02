@@ -1,4 +1,5 @@
 import {
+  keepPreviousData,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -65,6 +66,8 @@ const useInfiniteScenesMe = (
       const loaded = (lastPageParam ?? 0) + lastPage.items.length;
       return loaded < lastPage.count ? loaded : undefined;
     },
+    // A new filter keeps showing the previous results until its own arrive.
+    placeholderData: keepPreviousData,
     ...opts,
   });
 };
@@ -96,11 +99,12 @@ const usePatchScene = () => {
       queryClient.invalidateQueries({
         queryKey: detailKey(vars.key),
       });
-      if (vars.patch.archived !== undefined) {
-        queryClient.invalidateQueries({
-          queryKey: meListKey(),
-        });
-      }
+      // Any patch bumps modified_date, which orders My Scenes. Returned so
+      // mutateAsync resolves once the list reflects the change; it resolves at
+      // once while the list isn't shown.
+      return queryClient.invalidateQueries({
+        queryKey: meListKey(),
+      });
     },
   });
 };
@@ -112,11 +116,11 @@ const useDestroyScene = () => {
       unwrap(
         v1Client.DELETE("/v1/scenes/{key}/", { params: { path: { key } } }),
       ),
-    onSuccess: () => {
+    // Returned so mutateAsync resolves once the list reflects the deletion.
+    onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: meListKey(),
-      });
-    },
+      }),
   });
 };
 

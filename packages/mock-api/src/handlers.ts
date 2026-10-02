@@ -17,6 +17,17 @@ export const mockAuth = {
   },
 };
 
+type DbScene = NonNullable<ReturnType<typeof db.scene.findFirst>>;
+
+/**
+ * A stored scene as the detail endpoints return it: no `imageUrl`, which the
+ * real API computes only for its list responses.
+ */
+const toScene = ({ imageUrl: _imageUrl, ...scene }: DbScene): Scene => ({
+  ...scene,
+  itemOrder: JSON.parse(scene.itemOrder),
+});
+
 const getUser = () => {
   // Session-based auth: check module-level current user
   if (currentUserId !== null) {
@@ -48,31 +59,38 @@ export const handlers = [
   // v1: my scenes. The anonymous response is a 403, not Ninja's default 401:
   // main/api.py remaps AuthenticationError because session auth cannot send a
   // compliant WWW-Authenticate challenge.
+  // Filters, orders and paginates as the real endpoint does.
   http.get<NoParams, ErrorResponseBody | PagedMiniSceneSchema>(
     urls.scenes.meList,
-    async () => {
+    async ({ request }) => {
       const user = getUser();
       if (!user) {
         return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
       }
+      const params = new URL(request.url).searchParams;
+      const title = params.get("title")?.toLowerCase();
+      const archived = params.get("archived");
+      const offset = Number(params.get("offset") ?? 0);
+      const limit = Number(params.get("limit") ?? 100);
 
-      const scenes = db.scene.findMany({
-        where: {
-          author: {
-            equals: user.id,
-          },
-        },
-      });
-      const items = scenes.map((s) => ({
+      const scenes = db.scene
+        .findMany({ where: { author: { equals: user.id } } })
+        .filter((s) => !title || s.title.toLowerCase().includes(title))
+        .filter((s) => archived === null || String(s.archived) === archived)
+        .sort(
+          (a, b) => Date.parse(b.modifiedDate) - Date.parse(a.modifiedDate),
+        );
+      const items = scenes.slice(offset, offset + limit).map((s) => ({
         title: s.title,
         key: s.key,
         author: s.author,
         archived: s.archived,
         createdDate: s.createdDate,
         modifiedDate: s.modifiedDate,
+        imageUrl: s.imageUrl,
       }));
       return HttpResponse.json({
-        count: items.length,
+        count: scenes.length,
         items,
       });
     },
@@ -91,11 +109,7 @@ export const handlers = [
         // Ninja's default Http404 body.
         return HttpResponse.json({ detail: "Not Found" }, { status: 404 });
       }
-      const parsedScene = {
-        ...scene,
-        itemOrder: JSON.parse(scene.itemOrder),
-      };
-      return HttpResponse.json(parsedScene);
+      return HttpResponse.json(toScene(scene));
     },
   ),
   http.post<NoParams, Scene, ErrorResponseBody | Scene>(
@@ -119,11 +133,7 @@ export const handlers = [
         author: user ? user.id : null,
         isLegacy: false,
       });
-      const scene: Scene = {
-        ...sceneRecord,
-        itemOrder: JSON.parse(sceneRecord.itemOrder),
-      };
-      return HttpResponse.json(scene, { status: 201 });
+      return HttpResponse.json(toScene(sceneRecord), { status: 201 });
     },
   ),
   http.patch<{ key: string }, Partial<Scene>, ErrorResponseBody | Scene>(
@@ -154,10 +164,27 @@ export const handlers = [
         },
       });
       if (!updated) throw new Error("scene vanished mid-update");
-      return HttpResponse.json({
-        ...updated,
-        itemOrder: JSON.parse(updated.itemOrder),
-      });
+      return HttpResponse.json(toScene(updated));
+    },
+  ),
+  http.delete<{ key: string }, null, ErrorResponseBody | null>(
+    urls.scenes.detail,
+    ({ params }) => {
+      // As the real API: authentication, then existence, then ownership.
+      const user = getUser();
+      if (!user) {
+        return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
+      }
+      const where = { key: { equals: params.key } };
+      const scene = db.scene.findFirst({ where });
+      if (!scene) {
+        return HttpResponse.json({ detail: "Not Found" }, { status: 404 });
+      }
+      if (scene.author !== user.id) {
+        return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
+      }
+      db.scene.delete({ where });
+      return new HttpResponse(null, { status: 204 });
     },
   ),
   // allauth sign-out. Its 401 confirms the session is gone; `useLogout` treats

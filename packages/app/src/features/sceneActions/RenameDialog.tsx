@@ -1,7 +1,8 @@
 import React from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { actions, select } from "@/features/sceneControls/mathItems";
-import BasicDialog from "@/util/components/BasicDialog";
+import { Dialog } from "@/ui/Dialog";
+import Button from "@/ui/Button";
 import useTitleForm from "./useTitleForm";
 
 type RenameDialogProps = {
@@ -12,7 +13,7 @@ type RenameDialogProps = {
 const RenameDialog: React.FC<RenameDialogProps> = ({ onClose }) => {
   const dispatch = useAppDispatch();
   const title = useAppSelector(select.title);
-  const { formId, renderForm } = useTitleForm({
+  const { titleRef, handleSubmit, renderFields } = useTitleForm({
     defaultTitle: title,
     onSubmit: async (newTitle) => {
       // setTitle marks the scene dirty even when the title is unchanged.
@@ -23,17 +24,27 @@ const RenameDialog: React.FC<RenameDialogProps> = ({ onClose }) => {
     },
   });
   return (
-    <BasicDialog
+    <Dialog.Root
       open
-      fullWidth
-      maxWidth="xs"
-      onClose={onClose}
-      title="Rename scene"
-      confirmText="Rename"
-      confirmButtonProps={{ type: "submit", form: formId }}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      {renderForm()}
-    </BasicDialog>
+      <Dialog.Popup size="sm" initialFocus={titleRef}>
+        <Dialog.Header>
+          <Dialog.Title>Rename scene</Dialog.Title>
+        </Dialog.Header>
+        <Dialog.Form onSubmit={handleSubmit}>
+          <Dialog.Body>{renderFields()}</Dialog.Body>
+          <Dialog.Actions>
+            <Dialog.Close render={<Button>Cancel</Button>} />
+            <Button type="submit" variant="solid" tone="accent">
+              Rename
+            </Button>
+          </Dialog.Actions>
+        </Dialog.Form>
+      </Dialog.Popup>
+    </Dialog.Root>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import Button from "@mui/material/Button";
+import { TextButton } from "@/ui/TextLink";
 import { useBanners } from "@/features/banners/BannerContext";
 
 const DISMISSED_KEY = "legacyBannerDismissed";
@@ -41,9 +41,7 @@ const LegacyBanner: React.FC<LegacyBannerProps> = ({
       content: (
         <>
           This scene was created with an older version of Math3d.{" "}
-          <Button size="small" onClick={onViewDetails}>
-            View details
-          </Button>
+          <TextButton onClick={onViewDetails}>View details</TextButton>
         </>
       ),
       confirmedContent: (

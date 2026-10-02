@@ -81,6 +81,22 @@ def test_reseeding_applies_edits_to_existing_scenes():
 
 
 @pytest.mark.django_db
+def test_test_scenes_get_distinct_surface_colors():
+    """So scenes are easy to tell apart in the scenes list and behind it."""
+    call_command(
+        "seed_test_data", email="seeded@example.com", uid="4242", scene_count=3
+    )
+
+    colors = {
+        item["properties"]["color"]
+        for scene in Scene.objects.filter(title__startswith="Test Scene")
+        for item in scene.items
+        if item["type"] == "EXPLICIT_SURFACE"
+    }
+    assert len(colors) == 3
+
+
+@pytest.mark.django_db
 def test_seeds_one_anonymous_scene():
     """An author-less scene, so a signed-in dev user can reach "Save a Copy"."""
     seed = dict(email="seeded@example.com", uid="4242", scene_count=1)

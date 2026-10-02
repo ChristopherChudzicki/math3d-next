@@ -1,0 +1,33 @@
+.text {
+  color: var(--color-accent);
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  text-underline-offset: 0.15em;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .text:hover:not([data-disabled]) {
+    text-decoration-color: currentColor;
+  }
+}
+
+.text:focus-visible {
+  outline-offset: 2px;
+}
+
+/* A button that sits in a line of text like a link. */
+.button {
+  display: inline;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: inherit;
+}
+
+.button[data-disabled] {
+  color: var(--color-text-light);
+  cursor: not-allowed;
+}

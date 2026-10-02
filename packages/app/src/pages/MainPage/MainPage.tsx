@@ -8,7 +8,7 @@ import {
 import Scene from "@/features/scene";
 import useSceneLoader from "@/features/scene/useSceneLoader";
 import SceneControls from "@/features/sceneControls";
-import Sidebar from "@/util/components/sidebar";
+import Sidebar from "@/ui/sidebar";
 import { useBodyClass, useToggle } from "@/util/hooks";
 import SceneTitle from "@/features/sceneControls/SceneTitle";
 

@@ -1,13 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { visuallyHidden } from "@mui/utils";
-import Button from "@mui/material/Button";
 import ReplayRoundedIcon from "@mui/icons-material/ReplayRounded";
 import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
+import Button from "@/ui/Button";
+import ButtonLink from "@/ui/ButtonLink";
+import { u } from "@/util/styles";
 import copy from "./errorPage.copy";
 import buildReportUrl from "./errorPage.report";
 import BrokenTorus from "./BrokenTorus";
-import * as styles from "./ErrorPage.module.css";
+import styles from "./ErrorPage.module.css";
 
 interface ErrorViewProps {
   /** Human-readable error message (shown in the collapsible details). */
@@ -49,18 +50,13 @@ const TechnicalDetails: React.FC<{ text: string }> = ({ text }) => {
       <summary className={styles.summary}>{copy.detailsSummary}</summary>
       <div className={styles["details-body"]}>
         <div className={styles["details-toolbar"]}>
-          <Button
-            variant="text"
-            size="small"
-            color="secondary"
-            startIcon={<ContentCopyRoundedIcon fontSize="inherit" />}
-            onClick={handleCopy}
-          >
+          <Button variant="ghost" size="sm" onClick={handleCopy}>
+            <ContentCopyRoundedIcon fontSize="inherit" />
             {copied ? copy.copied : copy.copy}
           </Button>
         </div>
         <pre className={styles.trace}>{text}</pre>
-        <span role="status" aria-live="polite" style={visuallyHidden}>
+        <span role="status" aria-live="polite" className={u.visuallyHidden}>
           {copied ? copy.copied : ""}
         </span>
       </div>
@@ -115,17 +111,12 @@ const ErrorView: React.FC<ErrorViewProps> = ({
             <p className={styles.body}>{copy.body}</p>
           </div>
           <div className={styles.actions}>
-            <Button
-              variant="contained"
-              disableElevation
-              startIcon={<ReplayRoundedIcon />}
-              onClick={onReload}
-            >
+            <Button variant="solid" tone="accent" onClick={onReload}>
+              <ReplayRoundedIcon fontSize="inherit" />
               {copy.reload}
             </Button>
-            <Button variant="outlined" color="secondary" href={homeHref}>
-              {copy.home}
-            </Button>
+            {/* A full-page load, not a route change: the app just crashed. */}
+            <ButtonLink href={homeHref}>{copy.home}</ButtonLink>
           </div>
           <div className={styles.footer}>
             {detailsText ? <TechnicalDetails text={detailsText} /> : null}

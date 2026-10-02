@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect } from "react";
 import { useLogout } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
-import BasicDialog from "@/util/components/BasicDialog";
+import { AlertDialog } from "@/ui/AlertDialog";
+import Button from "@/ui/Button";
 import { useOverlay } from "@/features/overlays/useOverlay";
 
 const LogoutPage: React.FC = () => {
@@ -22,15 +23,30 @@ const LogoutPage: React.FC = () => {
     }
   }, [isAuthenticated, close]);
   return (
-    <BasicDialog
-      title="Sign out"
+    <AlertDialog.Root
       open
-      onClose={close}
-      onConfirm={handleSubmit}
-      confirmText="Yes, sign out"
+      onOpenChange={(open) => {
+        if (!open) close();
+      }}
     >
-      Are you sure you want to sign out?
-    </BasicDialog>
+      <AlertDialog.Popup>
+        <AlertDialog.Title>Sign out</AlertDialog.Title>
+        <AlertDialog.Description>
+          Are you sure you want to sign out?
+        </AlertDialog.Description>
+        <AlertDialog.Actions>
+          <AlertDialog.Close render={<Button>Cancel</Button>} />
+          <Button
+            variant="solid"
+            tone="accent"
+            loading={logout.isPending}
+            onClick={handleSubmit}
+          >
+            Yes, sign out
+          </Button>
+        </AlertDialog.Actions>
+      </AlertDialog.Popup>
+    </AlertDialog.Root>
   );
 };
 

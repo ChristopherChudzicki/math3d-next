@@ -20,8 +20,8 @@ afterEach(() => {
   document.cookie = "csrftoken=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 });
 
-test("Google sign-in posts allauth's redirect form, returning to this page", async () => {
-  renderTestApp("/?controls=0&overlay=login#h");
+test("Google sign-in posts allauth's redirect form, returning to this page and its overlay", async () => {
+  renderTestApp("/?controls=0&overlay=scenes&list=me&signin#h");
 
   const button = await screen.findByRole("button", {
     name: "Sign in with Google",
@@ -36,13 +36,13 @@ test("Google sign-in posts allauth's redirect form, returning to this page", asy
   expect(form).toHaveFormValues({
     provider: "google",
     process: "login",
-    callback_url: `${window.location.origin}/?controls=0#h`,
+    callback_url: `${window.location.origin}/?controls=0&overlay=scenes&list=me#h`,
   });
 });
 
 test("Submitting saves a draft and sends the CSRF token current at submit", async () => {
   document.cookie = "csrftoken=token-at-render";
-  renderTestApp("/?overlay=login");
+  renderTestApp("/?signin");
 
   const button = await screen.findByRole("button", {
     name: "Sign in with Google",
@@ -62,28 +62,33 @@ test("Submitting saves a draft and sends the CSRF token current at submit", asyn
 
 test("Sign-in waits for the session check that seeds the CSRF cookie", async () => {
   server.use(http.get(urls.auth.usersMe, () => delay("infinite")));
-  renderTestApp("/?overlay=login");
+  renderTestApp("/?signin");
 
   expect(
     await screen.findByRole("button", { name: "Sign in with Google" }),
   ).toBeDisabled();
 });
 
-test("A returned error opens the dialog with fixed text and leaves the URL clean", async () => {
+test("A returned error opens the dialog over the page it left, with fixed text", async () => {
   const { location } = renderTestApp(
-    "/?error=signup_closed&error_process=login",
+    "/?overlay=scenes&list=me&error=signup_closed&error_process=login",
   );
 
   const dialog = await screen.findByRole("dialog", { name: "Sign in" });
-  expect(dialog).toHaveTextContent(/sign-ups are closed/i);
-  expect(location.current.search).toBe("?overlay=login");
+  expect(within(dialog).getByRole("alert")).toHaveTextContent(
+    /sign-ups are closed/i,
+  );
+  expect(location.current.search).toBe("?overlay=scenes&list=me&signin=");
 });
 
 test("A cancelled sign-in is reported as information, not an error", async () => {
   renderTestApp("/?error=cancelled&error_process=login");
 
   const dialog = await screen.findByRole("dialog", { name: "Sign in" });
-  expect(within(dialog).getByRole("alert")).toHaveClass("MuiAlert-colorInfo");
+  expect(within(dialog).getByRole("status")).toHaveTextContent(
+    "Sign-in was cancelled.",
+  );
+  expect(within(dialog).queryByRole("alert")).not.toBeInTheDocument();
 });
 
 test("A returned error opens no dialog for someone already signed in", async () => {
@@ -134,32 +139,48 @@ test("The sign-in error page returns home when no draft names a page", async () 
   );
 });
 
-test("If authenticated already, closes the overlay", async () => {
-  const { location } = renderTestApp("/?overlay=login", {
+test("If authenticated already, closes the dialog", async () => {
+  const { location } = renderTestApp("/?signin", {
     isAuthenticated: true,
   });
-  await waitFor(() =>
-    expect(location.current.search).not.toContain("overlay="),
-  );
+  await waitFor(() => expect(location.current.search).toBe(""));
 });
 
-test("open pushes one history entry; Back returns to the underlying view", async () => {
-  const scene = seedDb.withSceneFromItems([]);
-  const { location, router } = renderTestApp(`/${scene.key}`);
-  // open login from the header trigger
-  await user.click(
-    await screen.findByRole("button", { name: "Sign in", hidden: true }),
-  );
+test("Back from the sign-in dialog returns to the overlay beneath it", async () => {
+  const { location, router } = renderTestApp("/?overlay=scenes&list=me");
+  await user.click(await screen.findByRole("button", { name: "Sign in" }));
   await screen.findByRole("dialog", { name: "Sign in" });
-  expect(location.current.search).toContain("overlay=login");
+  expect(location.current.search).toBe("?overlay=scenes&list=me&signin=");
+
   await act(() => router.navigate(-1));
+
   await waitFor(() =>
-    expect(location.current.search).not.toContain("overlay="),
+    expect(screen.queryByRole("dialog", { name: "Sign in" })).toBeNull(),
   );
-  expect(location.current.pathname).toBe(`/${scene.key}`);
+  expect(location.current.search).toBe("?overlay=scenes&list=me");
+  // My Scenes' prompt, reachable again now nothing covers it.
+  expect(screen.getByRole("button", { name: "Sign in" })).toBeVisible();
 });
 
-test("opening/closing an overlay preserves other params and the hash", async () => {
+test("Closing a returned error's dialog keeps the overlay and forgets the error", async () => {
+  const { location } = renderTestApp(
+    "/?overlay=scenes&list=me&error=signup_closed&error_process=login#h",
+  );
+  const dialog = await screen.findByRole("dialog", { name: "Sign in" });
+
+  await user.click(within(dialog).getByRole("button", { name: "Close" }));
+
+  await waitFor(() =>
+    expect(location.current.search).toBe("?overlay=scenes&list=me"),
+  );
+  expect(location.current.hash).toBe("#h");
+  await user.click(screen.getByRole("button", { name: "Sign in" }));
+  expect(
+    await screen.findByRole("dialog", { name: "Sign in" }),
+  ).not.toHaveTextContent(/sign-ups are closed/i);
+});
+
+test("opening/closing the dialog preserves other params and the hash", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const { location } = renderTestApp(`/${scene.key}?controls=0#frag`);
   await user.click(
@@ -169,9 +190,7 @@ test("opening/closing an overlay preserves other params and the hash", async () 
   expect(location.current.search).toContain("controls=0");
   expect(location.current.hash).toBe("#frag");
   await user.click(screen.getByRole("button", { name: "Close" })); // BasicDialog close
-  await waitFor(() =>
-    expect(location.current.search).not.toContain("overlay="),
-  );
+  await waitFor(() => expect(location.current.search).not.toContain("signin"));
   expect(location.current.search).toContain("controls=0"); // merged, not clobbered
   expect(location.current.hash).toBe("#frag");
 });

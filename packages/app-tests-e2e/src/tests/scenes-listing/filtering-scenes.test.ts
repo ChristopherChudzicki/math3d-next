@@ -35,7 +35,9 @@ test("Filtering scenes by titles", async ({ page, prepareScene }) => {
 
   await myScenes.field("Filter scenes").fill(suffix);
 
-  await expect(page.getByRole("listitem")).toHaveCount(2);
+  await expect(
+    page.getByRole("tabpanel", { name: "My Scenes" }).getByRole("listitem"),
+  ).toHaveCount(2);
   await expect(sceneItem1.root).toBeVisible();
   await expect(sceneItem2.root).toBeVisible();
   await expect(sceneItem3.root).toHaveCount(0);

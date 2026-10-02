@@ -2,6 +2,7 @@ from typing import List
 
 from django.db.models import F
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from ninja import Query, Router, Status
 from ninja.errors import HttpError
 from ninja.pagination import LimitOffsetPagination, paginate
@@ -41,7 +42,9 @@ def list_scenes(request, filters: SceneFilterSchema = Query(...)):
 )
 @paginate(LimitOffsetPagination)
 def my_scenes(request, filters: SceneFilterSchema = Query(...)):
-    return filters.filter(Scene.objects.filter(author_id=request.user.id))
+    # -id breaks modified_date ties so pages don't overlap or skip scenes.
+    scenes = Scene.objects.filter(author_id=request.user.id)
+    return filters.filter(scenes).order_by("-modified_date", "-id")
 
 
 @scenes_router.post("/", response={201: SceneSchema}, auth=None, by_alias=True)
@@ -56,7 +59,7 @@ def create_scene(request, payload: SceneCreateSchema):
     if payload.title is not None:
         scene.title = payload.title
     scene.save()  # full_clean() re-validates items (defense in depth)
-    schedule_render(scene.key)
+    schedule_render(scene)
     return Status(201, scene)
 
 
@@ -105,11 +108,14 @@ def update_scene(request, key: str, payload: ScenePatchSchema):
         scene.title = data["title"]
     if "archived" in data:
         scene.archived = data["archived"]
-    scene.save()
     # Only content edits change the rendered PNG; a title/archived-only patch
     # must not burn a render slot (bulk archive/rename would drain the cap).
-    if data.keys() & {"items", "item_order"}:
-        schedule_render(scene.key)
+    content_changed = bool(data.keys() & {"items", "item_order"})
+    if content_changed:
+        scene.content_modified_date = timezone.now()
+    scene.save()
+    if content_changed:
+        schedule_render(scene)
     return scene
 
 

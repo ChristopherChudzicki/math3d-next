@@ -1,0 +1,27 @@
+/* Floats over the scene's bottom-right corner. */
+.trigger {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  border-radius: 999px;
+  background-color: var(--color-background);
+}
+
+/* Button's own tints are translucent, which would show the scene through. */
+@media (hover: hover) {
+  .trigger:hover:not([data-disabled]) {
+    background-color: color-mix(
+      in srgb,
+      currentColor 8%,
+      var(--color-background)
+    );
+  }
+}
+
+.trigger:active:not([data-disabled]) {
+  background-color: color-mix(
+    in srgb,
+    currentColor 16%,
+    var(--color-background)
+  );
+}

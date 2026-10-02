@@ -7,7 +7,7 @@ from django.db import connection
 from scenes.factories import SceneFactory
 from scenes.models import Scene
 
-migration = import_module("scenes.migrations.0020_normalize_scene_titles")
+migration = import_module("scenes.migrations.0022_normalize_scene_titles")
 
 
 @pytest.mark.django_db

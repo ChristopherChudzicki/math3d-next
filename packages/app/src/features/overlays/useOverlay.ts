@@ -1,8 +1,9 @@
 // Use `react-router` (not `react-router-dom`) to match the repo convention (21 src files).
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { useCloseLayer } from "./useCloseLayer";
 
-export type OverlayName = "login" | "logout" | "delete-account" | "scenes";
+export type OverlayName = "logout" | "delete-account" | "scenes";
 
 /**
  * Marks a history entry `open` pushed, so `close` knows to pop it rather than
@@ -10,7 +11,10 @@ export type OverlayName = "login" | "logout" | "delete-account" | "scenes";
  * flag from the entry it lands on: that entry may be a deep link the app never
  * pushed, and popping it would leave the app.
  */
-type OverlayHistoryState = { overlayPushed?: boolean } | null;
+export type OverlayHistoryState = { overlayPushed?: boolean } | null;
+
+export const OVERLAY_PARAMS = ["overlay", "list"] as const;
+const STATE_KEYS = ["overlayPushed"] as const;
 
 export const useOverlay = () => {
   const [search] = useSearchParams();
@@ -41,48 +45,11 @@ export const useOverlay = () => {
     [search, location.hash, location.state, navigate, pushed],
   );
 
-  // Consumers close from more than one place — LogoutPage both awaits its
-  // mutation and watches auth status — and popping twice would leave the app
-  // entirely. Keyed on the entry rather than a bare flag so a later overlay
-  // still closes, and read through a ref so a stale closure sees it too.
-  const closedKey = useRef<string | null>(null);
-
-  // OverlayHost swaps the component when `?overlay=` changes, so a consumer's
-  // `close` can outlive it — a mutation can resolve after Back unmounted its
-  // dialog.
-  const mounted = useRef(true);
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-
-  const close = useCallback(() => {
-    // Every entry this closure knows about belongs to a component that is gone,
-    // so navigating would act on the user's current one instead: `navigate(-1)`
-    // pops the overlay they have open now, and the deep-link branch rewrites
-    // today's URL from a stale `search`.
-    if (!mounted.current) return;
-    if (closedKey.current === location.key) return;
-    closedKey.current = location.key;
-    if (pushed) {
-      // Popping the entry `open` pushed is what keeps Back working: replacing
-      // it would leave two consecutive entries with the same URL, so the first
-      // Back press after closing would do nothing visible.
-      navigate(-1);
-      return;
-    }
-    // No entry of ours to pop — the overlay was deep-linked — so drop the
-    // params in place rather than navigating out of the app.
-    const next = new URLSearchParams(search);
-    next.delete("overlay");
-    next.delete("list");
-    navigate(
-      { search: next.toString(), hash: location.hash },
-      { replace: true },
-    );
-  }, [search, location.hash, location.key, navigate, pushed]);
+  const close = useCloseLayer({
+    pushed,
+    params: OVERLAY_PARAMS,
+    stateKeys: STATE_KEYS,
+  });
 
   return { current, open, close } as const;
 };

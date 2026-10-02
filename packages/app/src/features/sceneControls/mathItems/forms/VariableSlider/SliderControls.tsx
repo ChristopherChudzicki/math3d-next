@@ -1,13 +1,12 @@
 import React, { useCallback } from "react";
-import ButtonGroup from "@mui/material/ButtonGroup";
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
 import PlayArrowOutlinedIcon from "@mui/icons-material/PlayArrowOutlined";
 import PauseIcon from "@mui/icons-material/Pause";
 import FastRewindOutlinedIcon from "@mui/icons-material/FastRewindOutlined";
 import FastForwardOutlinedIcon from "@mui/icons-material/FastForwardOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
+import ButtonGroup from "@/ui/ButtonGroup";
+import IconButton from "@/ui/IconButton";
 import { assertNotNil } from "@/util";
 import classNames from "classnames";
 import styles from "./SliderControls.module.css";
@@ -62,8 +61,6 @@ interface SliderControlsProps {
   className?: string;
 }
 
-const pauseIconAdjustSx = { transform: "scale(0.8)" };
-
 const SliderControls: React.FC<SliderControlsProps> = ({
   onAnimationChange,
   isAnimating,
@@ -90,72 +87,63 @@ const SliderControls: React.FC<SliderControlsProps> = ({
   const onStepDown = useCallback(() => onStep(-1), [onStep]);
 
   return (
-    <div className={className}>
+    <div className={classNames(styles.controls, className)}>
       <IconButton
-        size="small"
-        className={styles.playButton}
+        variant="outline"
+        size="sm"
+        className={styles.control}
         onClick={handleAnimationChange}
         title={isAnimating ? btnLabels.pause : btnLabels.play}
-        aria-label={isAnimating ? btnLabels.pause : btnLabels.play}
+        label={isAnimating ? btnLabels.pause : btnLabels.play}
       >
         {isAnimating ? (
-          <PauseIcon fontSize="small" sx={pauseIconAdjustSx} />
+          <PauseIcon fontSize="inherit" className={styles.pauseIcon} />
         ) : (
-          <PlayArrowOutlinedIcon fontSize="small" />
+          <PlayArrowOutlinedIcon fontSize="inherit" />
         )}
       </IconButton>
-      <ButtonGroup
-        className={styles.speedGroup}
-        size="small"
-        variant="outlined"
-      >
-        <Button
-          className={styles.speedControls}
-          color="secondary"
-          variant="outlined"
+      <ButtonGroup aria-label="Speed">
+        <IconButton
+          variant="outline"
+          size="sm"
+          className={styles.control}
           onClick={onDecrease}
           disabled={!canDecrease}
-          aria-label={btnLabels.slower}
+          label={btnLabels.slower}
         >
-          <FastRewindOutlinedIcon fontSize="small" />
-        </Button>
-        <Button
-          className={classNames(styles.speedControls, styles.display)}
-          color="secondary"
-          variant="outlined"
-          disabled
-        >
-          {speed.label}x
-        </Button>
-        <Button
-          className={styles.speedControls}
-          color="secondary"
-          variant="outlined"
+          <FastRewindOutlinedIcon fontSize="inherit" />
+        </IconButton>
+        <output className={styles.speed}>{speed.label}x</output>
+        <IconButton
+          variant="outline"
+          size="sm"
+          className={styles.control}
           onClick={onIncrease}
           disabled={!canIncrease}
-          aria-label={btnLabels.faster}
+          label={btnLabels.faster}
         >
-          <FastForwardOutlinedIcon fontSize="small" />
-        </Button>
+          <FastForwardOutlinedIcon fontSize="inherit" />
+        </IconButton>
       </ButtonGroup>
-      <ButtonGroup color="secondary" variant="outlined">
-        <Button
-          className={styles.stepControls}
-          variant="outlined"
+      <ButtonGroup aria-label="Step">
+        <IconButton
+          variant="outline"
+          size="sm"
+          className={styles.control}
           onClick={onStepDown}
-          aria-label={btnLabels.decrement}
+          label={btnLabels.decrement}
         >
-          <RemoveOutlinedIcon fontSize="small" />
-        </Button>
-        <Button
-          className={styles.stepControls}
-          color="secondary"
-          variant="outlined"
-          aria-label={btnLabels.increment}
+          <RemoveOutlinedIcon fontSize="inherit" />
+        </IconButton>
+        <IconButton
+          variant="outline"
+          size="sm"
+          className={styles.control}
           onClick={onStepUp}
+          label={btnLabels.increment}
         >
-          <AddOutlinedIcon fontSize="small" />
-        </Button>
+          <AddOutlinedIcon fontSize="inherit" />
+        </IconButton>
       </ButtonGroup>
     </div>
   );

@@ -1,9 +1,8 @@
 import { test, expect } from "vitest";
-import { act, renderTestApp, screen, user } from "@/test_util";
+import { act, renderTestApp, screen, user, waitFor, within } from "@/test_util";
 import { makeItem, seedDb } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { findItemByTestId } from "@/features/sceneControls/mathItems/__tests__/__utils__";
-import { waitForElementToBeRemoved } from "@testing-library/react";
 
 test.each([
   { isLegacy: true, case: "is" },
@@ -34,9 +33,9 @@ test("Legacy Dialog opens and closes", async () => {
   const dialog = await screen.findByRole("dialog", { name: "Legacy Scene" });
   expect(dialog).toBeVisible();
 
-  const closeButton = await screen.findByRole("button", { name: "Close" });
-  await user.click(closeButton);
-  await waitForElementToBeRemoved(dialog);
+  await user.click(within(dialog).getByRole("button", { name: "OK" }));
+  await waitFor(() => expect(dialog).not.toBeInTheDocument());
+  expect(legacyButton).toHaveFocus();
 });
 
 test("leaving the dialog open on one legacy scene does not pop it open on a different legacy scene navigated to client-side", async () => {
@@ -57,5 +56,5 @@ test("leaving the dialog open on one legacy scene does not pop it open on a diff
   });
   await findItemByTestId(itemB.id);
 
-  await waitForElementToBeRemoved(dialog);
+  await waitFor(() => expect(dialog).not.toBeInTheDocument());
 });

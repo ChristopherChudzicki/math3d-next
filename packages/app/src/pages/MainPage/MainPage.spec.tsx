@@ -125,8 +125,7 @@ test("Alerts and redirects home when the scene key is not found", async () => {
   // The scene never loads (controls stay busy), so we key off the alert dialog.
   const { location } = renderTestApp("/nonexistent-scene-key");
 
-  const dialog = await screen.findByRole("dialog");
-  expect(dialog).toHaveTextContent("Not found");
+  const dialog = await screen.findByRole("alertdialog", { name: "Not found" });
 
   await user.click(within(dialog).getByRole("button", { name: "OK" }));
 

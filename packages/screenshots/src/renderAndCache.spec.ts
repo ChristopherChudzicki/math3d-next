@@ -12,7 +12,7 @@ afterEach(async () => {
 
 it("renders and caches (no lock, no existence gate)", async () => {
   const render = vi.fn().mockResolvedValue(PNG);
-  await renderAndCache(env as never, "k", render);
+  await renderAndCache(env as never, "k", undefined, render);
   expect(render).toHaveBeenCalledWith(env, "k", env.RENDER_DEADLINE_MS);
   const stored = await env.SCREENSHOTS_BUCKET.get(sceneImageKey("k"));
   expect(new Uint8Array(await stored!.arrayBuffer())).toEqual(PNG);
@@ -21,7 +21,7 @@ it("renders and caches (no lock, no existence gate)", async () => {
 it("swallows a render failure without throwing or storing", async () => {
   const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   const render = vi.fn().mockRejectedValue(new Error("boom"));
-  await renderAndCache(env as never, "k", render); // must not reject
+  await renderAndCache(env as never, "k", undefined, render); // must not reject
   expect(await env.SCREENSHOTS_BUCKET.get(sceneImageKey("k"))).toBeNull();
   errorSpy.mockRestore();
 });

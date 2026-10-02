@@ -5,6 +5,7 @@ import { makeItem, seedDb, urls } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import {
   act,
+  countRequests,
   renameScene,
   renderTestApp,
   screen,
@@ -23,23 +24,6 @@ afterAll(() => {
   // @ts-expect-error This is fake clipboard
   delete window.navigator.clipboard;
 });
-
-const countRequests = (method: string, pathSuffix: string) => {
-  const seen = { count: 0 };
-  const listener = ({ request }: { request: Request }) => {
-    if (
-      request.method === method &&
-      new URL(request.url).pathname.endsWith(pathSuffix)
-    ) {
-      seen.count += 1;
-    }
-  };
-  server.events.on("request:start", listener);
-  onTestFinished(() => {
-    server.events.removeListener("request:start", listener);
-  });
-  return seen;
-};
 
 /** Bodies of the PATCH requests sent for `key`. */
 const capturePatches = (key: string) => {
@@ -66,9 +50,11 @@ const expectInert = (el: HTMLElement) => {
   expect(el).toHaveAttribute("aria-disabled", "true");
   expect(el).toBeEnabled();
 };
-const pressEnterOn = async (el: HTMLElement) => {
+// Both ways in: Base UI blocks the keypress and the click separately.
+const tryToActivate = async (el: HTMLElement) => {
   act(() => el.focus());
   await user.keyboard("{Enter}");
+  await user.click(el);
 };
 const menuEntries = async () => {
   await user.click(
@@ -103,7 +89,7 @@ test("an unsaved scene offers Save once edited, and no menu", async () => {
 
   expect(await primary()).toHaveTextContent(/^Save$/);
   expectInert(await primary());
-  await pressEnterOn(await primary());
+  await tryToActivate(await primary());
   expect(screen.queryByRole("dialog")).toBeNull();
   await renameScene("edited");
   expect(await primary()).not.toHaveAttribute("aria-disabled", "true");
@@ -151,7 +137,7 @@ test("an edit made while saving survives the save and stays unsaved", async () =
   expect(
     screen.getByRole("button", { name: "More scene actions" }),
   ).toBeDisabled();
-  await pressEnterOn(await primary());
+  await tryToActivate(await primary());
   await renameScene(`${scene.title} saved later`);
   gate.resolve();
 
@@ -236,6 +222,11 @@ test("a refused copy shows the link instead", async () => {
     `${window.location.origin}/${scene.key}`,
   );
   expect(within(dialog).getByText(/didn't allow copying/i)).toBeVisible();
+  await waitFor(() =>
+    expect(
+      within(dialog).getByRole("button", { name: "Copy link" }),
+    ).toHaveFocus(),
+  );
   expect(await primary()).toHaveTextContent(/^Copy link$/);
 });
 
@@ -291,10 +282,15 @@ test("a signed-out re-share of an unedited published scene reuses its link", asy
 
   await user.click(await primary());
 
-  expect(
-    await screen.findByLabelText<HTMLInputElement>("Shareable URL"),
-  ).toHaveValue(published);
+  const dialog = await screen.findByRole("dialog", { name: "Share scene" });
+  expect(within(dialog).getByLabelText("Shareable URL")).toHaveValue(published);
   expect(posts.count).toBe(1);
+  // Opened straight on the link step, it starts on Copy link.
+  await waitFor(() =>
+    expect(
+      within(dialog).getByRole("button", { name: "Copy link" }),
+    ).toHaveFocus(),
+  );
 });
 
 test("a signed-out share of an edited scene mints a new link under its title", async () => {
@@ -321,36 +317,6 @@ test("a signed-out share of an edited scene mints a new link under its title", a
   expect(store.getState().scene.title).toBe(scene.title);
 });
 
-test("the scene action works on a small screen", async () => {
-  // JSDOM has no matchMedia. Not vi.stubGlobal: undoing it with
-  // vi.unstubAllGlobals also drops setupTests' ResizeObserver stub.
-  Object.defineProperty(window, "matchMedia", {
-    configurable: true,
-    value: (query: string) => ({
-      matches: query.includes("max-width"),
-      media: query,
-      onchange: null,
-      addListener: () => {},
-      removeListener: () => {},
-      addEventListener: () => {},
-      removeEventListener: () => {},
-      dispatchEvent: () => false,
-    }),
-  });
-  onTestFinished(() => {
-    // @ts-expect-error Removing the stand-in added above
-    delete window.matchMedia;
-  });
-  const scene = seedDb.withSceneFromItems([]);
-  renderTestApp(`/${scene.key}`);
-
-  await user.click(await primary());
-
-  expect(
-    await screen.findByLabelText<HTMLInputElement>("Shareable URL"),
-  ).toHaveValue(`${window.location.origin}/${scene.key}`);
-});
-
 test("the signed-out link step offers sign-in", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const { location } = renderTestApp(`/${scene.key}`);
@@ -359,7 +325,7 @@ test("the signed-out link step offers sign-in", async () => {
   const dialog = await screen.findByRole("dialog", { name: "Share scene" });
   await user.click(within(dialog).getByRole("button", { name: "Sign in" }));
 
-  expect(location.current.search).toContain("overlay=login");
+  expect(location.current.search).toContain("signin");
   expect(screen.queryByRole("dialog", { name: "Share scene" })).toBeNull();
 });
 

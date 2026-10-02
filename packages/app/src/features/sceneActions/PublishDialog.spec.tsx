@@ -3,7 +3,15 @@ import { http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { seedDb, urls } from "@math3d/mock-api";
 import type { Scene } from "@math3d/api";
-import { act, renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import {
+  act,
+  countRequests,
+  renderTestApp,
+  screen,
+  user,
+  waitFor,
+  within,
+} from "@/test_util";
 
 const renderOwnedScene = (overrides: Partial<Scene> = {}) => {
   const me = seedDb.withUser();
@@ -53,9 +61,9 @@ test("a failed publish offers the title step to retry, leaving the scene as it w
   expect(
     await within(dialog).findByText(/something went wrong/i),
   ).toBeVisible();
-  expect(within(dialog).getByLabelText("Title")).toHaveValue(
-    `Copy of ${scene.title}`,
-  );
+  const title = within(dialog).getByLabelText("Title");
+  expect(title).toHaveValue(`Copy of ${scene.title}`);
+  await waitFor(() => expect(title).toHaveFocus());
   expect(store.getState().scene).toMatchObject({
     key: scene.key,
     title: scene.title,
@@ -64,11 +72,13 @@ test("a failed publish offers the title step to retry, leaving the scene as it w
 
 test("while the publish is in flight, the dialog can't be closed", async () => {
   const release = holdPosts();
+  const posts = countRequests("POST", "/v1/scenes/");
   renderOwnedScene();
 
   const dialog = await openDuplicate();
 
   expect(within(dialog).getByText("Saving...")).toBeVisible();
+  expect(posts.count).toBe(1);
   expect(within(dialog).queryByLabelText("Title")).toBeNull();
   expect(within(dialog).getByRole("button", { name: "Close" })).toBeDisabled();
   await user.keyboard("{Escape}");
@@ -87,6 +97,31 @@ test("a copy of an untitled scene asks for a title, starting untitled", async ()
   const title = within(dialog).getByLabelText("Title");
   expect(title).toHaveValue("");
   expect(title).toHaveAttribute("placeholder", "Untitled");
+  await waitFor(() => expect(title).toHaveFocus());
+});
+
+test("while a titled publish is in flight, the title step can be neither resubmitted nor closed", async () => {
+  const release = holdPosts();
+  const posts = countRequests("POST", "/v1/scenes/");
+  renderOwnedScene({ title: "" });
+
+  const dialog = await openDuplicate();
+  const save = within(dialog).getByRole("button", { name: "Save" });
+  await user.click(save);
+
+  await waitFor(() => expect(save).toHaveTextContent("Saving..."));
+  // `loading`: inert but still focusable, so aria-disabled, not disabled.
+  expect(save).toHaveAttribute("aria-disabled", "true");
+  await user.click(save);
+  await user.keyboard("{Enter}");
+  expect(posts.count).toBe(1);
+  expect(within(dialog).getByRole("button", { name: "Close" })).toBeDisabled();
+  expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeDisabled();
+  await user.keyboard("{Escape}");
+  expect(dialog).toBeInTheDocument();
+  release();
+  await waitFor(() => expect(save).not.toHaveAttribute("aria-disabled"));
+  expect(save).toHaveTextContent("Save");
 });
 
 test("a blank title publishes the scene untitled", async () => {

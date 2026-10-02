@@ -1,5 +1,5 @@
 import React from "react";
-import SmallMathField from "@/util/components/SmallMathField";
+import SmallMathField from "@/ui/SmallMathField";
 import classNames from "classnames";
 import * as u from "@/util/styles/utils.module.css";
 import styles from "./widget.module.css";

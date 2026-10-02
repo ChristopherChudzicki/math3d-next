@@ -1,0 +1,105 @@
+.positioner {
+  z-index: var(--z-index-overlay);
+  outline: 0;
+}
+
+.popup {
+  min-width: 12rem;
+  /* Stay inside the viewport; a long menu scrolls. */
+  max-width: var(--available-width);
+  max-height: var(--available-height);
+  overflow-y: auto;
+  padding: 0.25rem;
+  border: 1px solid var(--color-secondary-lighter);
+  border-radius: calc(2 * var(--border-radius));
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  box-shadow:
+    0 8px 24px rgb(0 0 0 / 14%),
+    0 2px 4px rgb(0 0 0 / 8%);
+  transform-origin: var(--transform-origin);
+  transition:
+    transform 120ms ease-out,
+    opacity 120ms ease-out;
+  outline: 0;
+}
+
+.popup[data-starting-style],
+.popup[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup[data-starting-style],
+  .popup[data-ending-style] {
+    transform: none;
+  }
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--border-radius);
+  color: var(--item-color);
+  text-decoration: none;
+  cursor: default;
+  user-select: none;
+}
+
+.neutral {
+  --item-color: var(--color-text-primary);
+}
+
+.danger {
+  --item-color: var(--color-danger);
+}
+
+/*
+ * Base UI moves [data-highlighted] (and focus) with the pointer and the arrow
+ * keys. The tint is too faint to be a focus indicator on its own, so keyboard
+ * focus keeps the browser's focus ring, inset to stay inside the popup.
+ */
+.item[data-highlighted] {
+  background-color: color-mix(in srgb, var(--item-color) 8%, transparent);
+}
+
+.item:focus-visible {
+  outline-offset: -2px;
+}
+
+.item[data-disabled] {
+  opacity: 0.45;
+}
+
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 1.125rem;
+  color: color-mix(in srgb, var(--item-color) 75%, transparent);
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.separator {
+  height: 1px;
+  margin: 0.25rem 0.5rem;
+  background-color: var(--color-secondary-lighter);
+}
+
+.groupLabel {
+  padding: 0.375rem 0.75rem 0.25rem;
+  font-size: var(--font-size-small);
+  color: var(--color-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

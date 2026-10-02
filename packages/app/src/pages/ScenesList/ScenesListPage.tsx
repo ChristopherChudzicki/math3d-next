@@ -1,22 +1,15 @@
 import React, { useCallback, useEffect } from "react";
-import Drawer from "@mui/material/Drawer";
-
 import { useSearchParams } from "react-router";
-import Tab from "@mui/material/Tab";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
-import TabPanel from "@mui/lab/TabPanel";
-import Box from "@mui/material/Box";
+import { Drawer } from "@/ui/Drawer";
+import { Tabs } from "@/ui/Tabs";
 import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
+import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import ExamplesListing from "./ExamplesListing";
 import MyScenes from "./MyScenes";
+import { ListType, OPEN_SCENES_BUTTON_ID } from "./constants";
 import styles from "./ScenesList.module.css";
 
-enum ListType {
-  Examples = "examples",
-  Me = "me",
-}
 const normalizeListType = (
   listType: string,
   showMyScenes: boolean,
@@ -30,52 +23,85 @@ const normalizeListType = (
   return ListType.Examples;
 };
 
+// The dialog unmounts on close, and whatever opened it (a menu item, a deep
+// link) may be gone, so focus always returns to the header's scenes button.
+const focusOpenScenesButton = () =>
+  document.getElementById(OPEN_SCENES_BUTTON_ID);
+
 const ScenesList: React.FC = () => {
   const [search] = useSearchParams();
   const { open, close } = useOverlay();
+  const signIn = useSignInDialog();
   const isAuthenticated = useAuthStatus();
   const showMyScenes =
     DISPLAY_AUTH_FLOWS || isAuthenticated === "authenticated";
   const rawList = search.get("list") ?? ListType.Examples;
   const listType = normalizeListType(rawList, showMyScenes);
 
-  const handleClose = useCallback(() => close(), [close]);
-  const activateListType = useCallback(
-    (t: ListType) => open("scenes", { list: t }),
-    [open],
-  );
-
   useEffect(() => {
     if (listType !== rawList) open("scenes", { list: listType });
   }, [open, rawList, listType]);
 
-  const handleChangeTab = (_e: React.SyntheticEvent, newValue: ListType) => {
-    activateListType(newValue);
-  };
+  const handleOpenChange = useCallback(
+    (isOpen: boolean) => {
+      if (!isOpen) close();
+    },
+    [close],
+  );
 
   return (
-    <Drawer open anchor="right" onClose={handleClose}>
-      <TabContext value={listType}>
-        <Box
-          sx={{ minWidth: "300px", borderBottom: 1, borderColor: "divider" }}
+    // Sign-in stacks above as a MUI modal. Two modals fight over focus and
+    // aria-hidden, and on a direct load this one opens last and wins, so it
+    // steps back while sign-in is open: not modal, and not taking focus.
+    <Drawer.Root
+      open
+      modal={!signIn.isOpen}
+      disablePointerDismissal={signIn.isOpen}
+      onOpenChange={handleOpenChange}
+    >
+      <Drawer.Popup
+        side="right"
+        size="lg"
+        initialFocus={!signIn.isOpen}
+        finalFocus={focusOpenScenesButton}
+      >
+        <Tabs.Root
+          className={styles.tabs}
+          value={listType}
+          onValueChange={(value) => open("scenes", { list: value })}
         >
-          <TabList
-            className={styles.tabList}
-            onChange={handleChangeTab}
-            aria-label="Scenes"
+          <Drawer.Header>
+            <div className={styles.titleRow}>
+              <Drawer.Title>Scenes</Drawer.Title>
+              <Tabs.List aria-label="Scenes">
+                {showMyScenes && (
+                  <Tabs.Tab value={ListType.Me}>My Scenes</Tabs.Tab>
+                )}
+                <Tabs.Tab value={ListType.Examples}>Examples</Tabs.Tab>
+              </Tabs.List>
+            </div>
+          </Drawer.Header>
+          {/*
+           * Base UI makes panels tab stops, which APG reserves for panels
+           * whose content isn't focusable; these start with a field or a card.
+           */}
+          <Tabs.Panel
+            value={ListType.Me}
+            className={styles.panel}
+            tabIndex={-1}
           >
-            <Tab label="Examples" value={ListType.Examples} />
-            {showMyScenes && <Tab label="My Scenes" value={ListType.Me} />}
-          </TabList>
-        </Box>
-        <TabPanel value={ListType.Examples} className={styles.tabPanel}>
-          <ExamplesListing />
-        </TabPanel>
-        <TabPanel value={ListType.Me} className={styles.tabPanel}>
-          <MyScenes />
-        </TabPanel>
-      </TabContext>
-    </Drawer>
+            <MyScenes />
+          </Tabs.Panel>
+          <Tabs.Panel
+            value={ListType.Examples}
+            className={styles.panel}
+            tabIndex={-1}
+          >
+            <ExamplesListing />
+          </Tabs.Panel>
+        </Tabs.Root>
+      </Drawer.Popup>
+    </Drawer.Root>
   );
 };
 

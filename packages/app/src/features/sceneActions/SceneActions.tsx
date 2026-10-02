@@ -2,16 +2,16 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { usePatchScene, useUserMe } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions, select } from "@/features/sceneControls/mathItems";
 import { useAuthStatus } from "@/features/auth";
-import SimpleMenu from "@/util/components/SimpleMenu/SimpleMenu";
-import type { SimpleMenuItem } from "@/util/components/SimpleMenu/SimpleMenu";
+import Button from "@/ui/Button";
+import ButtonGroup from "@/ui/ButtonGroup";
+import IconButton from "@/ui/IconButton";
+import { Menu } from "@/ui/Menu";
 import PublishDialog, { sceneUrl } from "./PublishDialog";
 import type { PublishMode } from "./PublishDialog";
 import LinkDialog from "./LinkDialog";
@@ -140,7 +140,6 @@ const SceneActions: React.FC = () => {
   };
 
   const handlePrimary = () => {
-    if (!enabled) return;
     if (primary === "share") {
       setDialog(
         dirty || key === null
@@ -157,24 +156,6 @@ const SceneActions: React.FC = () => {
       copyLink();
     }
   };
-
-  const menuItems: SimpleMenuItem[] = menu.map((action) =>
-    action === "duplicate"
-      ? {
-          type: "button",
-          key: "duplicate",
-          label: "Duplicate",
-          onClick: () => setDialog({ kind: "publish", mode: "copy" }),
-        }
-      : {
-          type: "button",
-          key: "copy-link",
-          label: "Copy link",
-          onClick: () => {
-            copyLink();
-          },
-        },
-  );
 
   const closeDialog = () => setDialog(null);
 
@@ -196,33 +177,48 @@ const SceneActions: React.FC = () => {
         <ButtonGroup>
           <Button
             data-testid="scene-action"
-            variant="text"
-            color="primary"
+            tone="accent"
             // Not `disabled`: a disabled button drops keyboard focus to the page
             // after every Save or Copy link.
-            aria-disabled={!enabled}
-            className={enabled ? undefined : "Mui-disabled"}
-            disableRipple={!enabled}
+            loading={!enabled}
             onClick={handlePrimary}
-            sx={{ "&.MuiButtonGroup-grouped": { width: PRIMARY_WIDTH } }}
+            style={{ width: PRIMARY_WIDTH }}
           >
             {label}
           </Button>
           {menu.length > 0 ? (
-            <SimpleMenu
-              aria-label="More scene actions"
-              items={menuItems}
-              trigger={
-                <Button
-                  variant="text"
-                  color="secondary"
-                  aria-label="More scene actions"
-                  disabled={saving}
-                >
-                  <ExpandMoreIcon fontSize="small" />
-                </Button>
-              }
-            />
+            <Menu.Root>
+              <Menu.Trigger
+                disabled={saving}
+                render={
+                  <IconButton
+                    variant="outline"
+                    tone="accent"
+                    label="More scene actions"
+                  >
+                    <ExpandMoreIcon fontSize="inherit" />
+                  </IconButton>
+                }
+              />
+              <Menu.Popup>
+                {menu.includes("duplicate") ? (
+                  <Menu.Item
+                    onClick={() => setDialog({ kind: "publish", mode: "copy" })}
+                  >
+                    Duplicate
+                  </Menu.Item>
+                ) : null}
+                {menu.includes("copy-link") ? (
+                  <Menu.Item
+                    onClick={() => {
+                      copyLink();
+                    }}
+                  >
+                    Copy link
+                  </Menu.Item>
+                ) : null}
+              </Menu.Popup>
+            </Menu.Root>
           ) : null}
         </ButtonGroup>
       )}

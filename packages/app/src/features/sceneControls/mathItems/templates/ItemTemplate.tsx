@@ -97,7 +97,7 @@ const ItemTemplate = <T extends MIT>({
             [styles.hidden]: permanent,
           })}
           onClick={remove}
-          aria-label="Remove Item"
+          label="Remove Item"
         />
       </div>
       <div className={styles["grid-right-gutter-bottom"]}>

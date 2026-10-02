@@ -2,9 +2,10 @@ import { cloneDeep } from "lodash-es";
 import { factory, primaryKey, nullable } from "@mswjs/data";
 import { faker } from "@faker-js/faker";
 import { MathItem } from "@math3d/mathitem-configs";
-import type { Scene, User } from "@math3d/api";
+import type { User } from "@math3d/api";
 
 import { makeSceneFromItems } from "./factories";
+import type { SceneRecord } from "./factories";
 import { sceneFixtures } from "./fixtures";
 
 const db = factory({
@@ -22,10 +23,11 @@ const db = factory({
      */
     itemOrder: () => JSON.stringify({}),
     author: nullable(faker.number.int),
-    archived: faker.datatype.boolean,
-    createdDate: () => faker.date.recent().toUTCString(),
-    modifiedDate: () => faker.date.recent().toUTCString(),
+    archived: (): boolean => false,
+    createdDate: () => faker.date.recent().toISOString(),
+    modifiedDate: () => faker.date.recent().toISOString(),
     isLegacy: faker.datatype.boolean,
+    imageUrl: nullable<string>(() => null),
   },
   user: {
     id: primaryKey(faker.number.int),
@@ -38,12 +40,10 @@ const addUser = (user?: Partial<User>): User => {
   return created;
 };
 
-type SceneRecord = Scene;
-
 /**
  * A wrapper around `db.scene.create` to fix some ts issues.
  */
-const addScene = (scene?: Partial<SceneRecord>): Scene => {
+const addScene = (scene?: Partial<SceneRecord>): SceneRecord => {
   const { itemOrder } = scene ?? {};
 
   // @ts-expect-error Having trouble with msw types
@@ -52,7 +52,7 @@ const addScene = (scene?: Partial<SceneRecord>): Scene => {
     ...(itemOrder ? { itemOrder: JSON.stringify(itemOrder) } : {}),
   });
   const copy = cloneDeep(created);
-  const theScene: Scene = {
+  const theScene: SceneRecord = {
     ...copy,
     itemOrder: JSON.parse(copy.itemOrder),
   };
@@ -64,14 +64,17 @@ const seedDb = {
     Object.values(sceneFixtures).forEach((f) => addScene(f()));
   },
   withScene: addScene,
-  withScenes(count: number, overrides?: Partial<SceneRecord>): Scene[] {
+  withScenes(count: number, overrides?: Partial<SceneRecord>): SceneRecord[] {
     const scenes = Array.from({ length: count });
     return scenes.map(() => addScene(overrides));
   },
   /**
    * Create a schene with given items in a single folder, in the given order
    */
-  withSceneFromItems: (items: MathItem[], overrides: Partial<Scene> = {}) => {
+  withSceneFromItems: (
+    items: MathItem[],
+    overrides: Partial<SceneRecord> = {},
+  ) => {
     const scene = makeSceneFromItems(items, overrides);
     return addScene(scene);
   },

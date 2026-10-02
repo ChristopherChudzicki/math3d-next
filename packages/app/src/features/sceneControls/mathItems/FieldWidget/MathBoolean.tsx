@@ -2,9 +2,9 @@ import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
 import classNames from "classnames";
 import React, { useCallback, useMemo, useState } from "react";
-import { SubtleButton } from "@/util/components";
-import type { OnMathFieldChange } from "@/util/components/MathLive";
-import SmallMathField from "@/util/components/SmallMathField";
+import Button from "@/ui/Button";
+import type { OnMathFieldChange } from "@/ui/MathLive";
+import SmallMathField from "@/ui/SmallMathField";
 import * as u from "@/util/styles/utils.module.css";
 import invariant from "tiny-invariant";
 import { useMathScope } from "../sceneSlice";
@@ -108,13 +108,23 @@ const MathBoolean: React.FC<
         />
       )}
       {shouldUseExpression ? (
-        <SubtleButton onClick={handleReset} className={styles["detail-text"]}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleReset}
+          className={styles["detail-text"]}
+        >
           Reset
-        </SubtleButton>
+        </Button>
       ) : (
-        <SubtleButton onClick={useExpression} className={styles["detail-text"]}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={useExpression}
+          className={styles["detail-text"]}
+        >
           Use Expression
-        </SubtleButton>
+        </Button>
       )}
     </div>
   );

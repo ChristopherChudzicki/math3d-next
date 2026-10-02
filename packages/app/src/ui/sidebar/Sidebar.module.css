@@ -1,0 +1,33 @@
+.sidebar-container {
+  position: absolute;
+  transition: transform var(--sidebar-duration, 0.5s);
+}
+
+.right-sidebar {
+  right: 0;
+}
+
+.sidebar-button {
+  --tone: var(--color-secondary);
+  font-size: 1.5rem;
+}
+
+.left-sidebar-collapse-button {
+  position: absolute;
+  right: 0;
+  transform: translateX(100%);
+}
+
+.left-sidebar-collapsed {
+  transform: translateX(-100%);
+}
+
+.right-sidebar-collapse-button {
+  position: absolute;
+  left: 0;
+  transform: translateX(-100%);
+}
+
+.right-sidebar-collapsed {
+  transform: translateX(100%);
+}

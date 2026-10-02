@@ -853,6 +853,11 @@ components:
           format: date-time
           title: Createddate
           type: string
+        imageUrl:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Imageurl
         key:
           title: Key
           type: string
@@ -870,6 +875,7 @@ components:
       - createdDate
       - modifiedDate
       - archived
+      - imageUrl
       title: MiniSceneSchema
       type: object
     PagedMiniSceneSchema:

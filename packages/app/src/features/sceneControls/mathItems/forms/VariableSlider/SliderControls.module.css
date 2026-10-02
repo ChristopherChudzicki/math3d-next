@@ -1,38 +1,31 @@
-.speedControls,
-.stepControls,
-.playButton {
-  max-height: 20px;
+/*
+ * The parent lays the controls out; this spaces them, and leaves room at the
+ * end for the last button's focus ring, which the row would otherwise clip.
+ */
+.controls {
+  column-gap: 6px;
+  padding-inline-end: 4px;
 }
 
-.playButton {
-  max-width: 20px;
+/* Compact, to fit the slider's row; the icon sets the width. */
+.control {
+  min-height: 1.5rem;
+  font-size: 1.25rem;
 }
 
-:global(.MuiButton-root.MuiButtonGroup-grouped).speedControls {
-  max-width: 25px;
-  min-width: 25px;
+.pauseIcon {
+  transform: scale(0.8);
 }
-:global(.MuiButton-root.MuiButtonGroup-grouped).speedControls.display {
-  max-width: 40px;
-  min-width: 40px;
+
+.speed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  border: 1px solid
+    color-mix(in srgb, var(--color-text-primary) 45%, transparent);
   background-color: var(--color-secondary-lighter);
-}
-
-:global(.MuiButton-root.MuiButtonGroup-grouped).stepControls {
-  max-width: 25px;
-  min-width: 25px;
-  padding-left: 0px;
-  padding-right: 0px;
-}
-
-.speedGroup {
-  margin-left: 6px;
-  margin-right: 6px;
-}
-
-:global(.MuiIconButton-root).playButton {
-  border: 1px solid rgba(var(--color-secondary-rgb), 0.5);
-}
-.playButton:hover {
-  border: 1px solid rgba(var(--color-secondary-rgb));
+  /* Leave the border clear, so the group's seams read as one line. */
+  background-clip: padding-box;
+  font-size: var(--font-size-small);
 }

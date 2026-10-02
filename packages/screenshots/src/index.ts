@@ -6,20 +6,22 @@
  * cache-read-failure. It NEVER renders or schedules a render (ADR-0002 —
  * rendering is nudged separately, by the backend, on scene create/update).
  * The endpoint never blocks on or 500s — every response returns a valid image
- * immediately.
+ * immediately, except that `?fallback=none` (scene-card thumbnails) turns the
+ * default card into a 404.
  *
  * Bindings (wrangler.jsonc): BROWSER (Browser Rendering), SCREENSHOTS_BUCKET (R2
  * bucket `math3d-screenshots`). FRAME_ORIGIN is a deploy-injected var (see
  * deploy-reusable.yml). Requires the nodejs_compat compatibility flag
  * (@cloudflare/puppeteer imports node builtins).
  *
- * Wired into the app Worker via the single `SCREENSHOTS_ORIGIN` var; unset there =
- * the whole feature is dark. Design + teardown: packages/screenshots/README.md,
+ * Wired into the app Worker (og:image) and the backend (render nudges, My Scenes
+ * thumbnail URLs) via their `SCREENSHOTS_ORIGIN` vars; unset = that side is
+ * dark. Design + teardown: packages/screenshots/README.md,
  * docs/superpowers/specs/2026-08-15-screenshot-cost-protection-design.md (ADR-0002,
  * generate-on-POST), building on .../2026-08-08-og-per-scene-image-design.md.
  */
 import type { Env } from "./env";
-import { KEY_RE, sceneImageKey, sceneImagePathToKey } from "./keys";
+import { KEY_RE, VERSION_RE, sceneImageKey, sceneImagePathToKey } from "./keys";
 import { renderAndCache } from "./renderAndCache";
 
 const DEFAULT_IMAGE_PATH = "/og/default.png";
@@ -52,13 +54,24 @@ const serveDefault = async (env: Env): Promise<Response> => {
   }
 };
 
+/** Without `v` (og:image) any hit is current; an untagged render never is. */
+const isCurrentRender = (cached: R2Object, v: string | null): boolean =>
+  v === null || cached.customMetadata?.version === v;
+
+/** Short-lived, so a render that lands after a save shows on a later load. */
+const serveNotFound = (): Response =>
+  new Response("not found", {
+    status: 404,
+    headers: { "cache-control": "public, max-age=60" },
+  });
+
 export default {
   async fetch(
     request: Request,
     env: Env,
     ctx: ExecutionContext,
   ): Promise<Response> {
-    const { pathname } = new URL(request.url);
+    const { pathname, searchParams } = new URL(request.url);
     if (pathname === "/health") return new Response("ok");
 
     if (request.method === "POST" && pathname === "/render") {
@@ -69,21 +82,38 @@ export default {
       if (!env.RENDER_SECRET || auth !== `Bearer ${env.RENDER_SECRET}`) {
         return new Response("forbidden", { status: 403 });
       }
-      let key: unknown;
+      let body: unknown;
       try {
-        key = ((await request.json()) as { key?: unknown }).key;
+        body = await request.json();
       } catch {
-        key = undefined;
+        // Falls through to the 400 below.
       }
+      // `?? {}`: the body may be JSON `null`.
+      const { key, version } = (body ?? {}) as {
+        key?: unknown;
+        version?: unknown;
+      };
       if (typeof key !== "string" || !KEY_RE.test(key)) {
         return new Response("bad request", { status: 400 });
       }
-      ctx.waitUntil(renderAndCache(env, key));
+      // Optional: an older backend sends none.
+      if (
+        version !== undefined &&
+        (typeof version !== "string" || !VERSION_RE.test(version))
+      ) {
+        return new Response("bad request", { status: 400 });
+      }
+      ctx.waitUntil(renderAndCache(env, key, version));
       return new Response(null, { status: 202 });
     }
 
+    const serveMiss = async (): Promise<Response> =>
+      searchParams.get("fallback") === "none"
+        ? serveNotFound()
+        : serveDefault(env);
+
     const key = sceneImagePathToKey(pathname);
-    if (key === null) return serveDefault(env);
+    if (key === null) return serveMiss();
 
     let cached: R2ObjectBody | null;
     try {
@@ -94,18 +124,21 @@ export default {
       // of fetch.
       // eslint-disable-next-line no-console
       console.error(`cache read failed for key=${key}`, err);
-      return serveDefault(env);
+      return serveMiss();
     }
     if (cached !== null) {
+      // Not the requested version: its render may still be in flight, and a
+      // day-long cache would pin this image to the new URL.
+      const current = isCurrentRender(cached, searchParams.get("v"));
       return new Response(cached.body, {
         status: 200,
         headers: {
           "content-type": "image/png",
-          "cache-control": "public, max-age=86400",
+          "cache-control": `public, max-age=${current ? 86400 : 60}`,
         },
       });
     }
 
-    return serveDefault(env);
+    return serveMiss();
   },
 };

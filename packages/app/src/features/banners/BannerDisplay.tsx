@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import IconButton from "@mui/material/IconButton";
 import Close from "@mui/icons-material/Close";
+import IconButton from "@/ui/IconButton";
 import { useElementResize, useToggle } from "@/util/hooks";
 import { useBanners } from "./BannerContext";
 import type { Banner } from "./BannerContext";
@@ -45,12 +45,12 @@ const BannerItem: React.FC<{
             />
           ) : null}
           <IconButton
-            size="small"
-            color="inherit"
-            aria-label={banner.ariaLabel ?? "Dismiss notice"}
+            size="sm"
+            className={styles.dismiss}
+            label={banner.ariaLabel ?? "Dismiss notice"}
             onClick={() => onDismiss(remember)}
           >
-            <Close fontSize="small" />
+            <Close fontSize="inherit" />
           </IconButton>
         </div>
       }

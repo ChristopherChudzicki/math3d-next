@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useParams } from "react-router";
 import classNames from "classnames";
-import IconButton from "@mui/material/IconButton";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { useAppSelector } from "@/store/hooks";
+import IconButton from "@/ui/IconButton";
 import { RenameDialog } from "@/features/sceneActions";
 import { UNTITLED, sceneDisplayName } from "@/features/scene/sceneTitle";
 import { select } from "./mathItems/sceneSlice";
@@ -27,11 +27,11 @@ const SceneTitle: React.FC = () => {
         {name ?? UNTITLED}
       </h1>
       <IconButton
-        aria-label="Rename scene"
-        size="small"
+        label="Rename scene"
+        size="sm"
         onClick={() => setRenamingLoad(loadCount)}
       >
-        <EditOutlinedIcon fontSize="small" />
+        <EditOutlinedIcon fontSize="inherit" />
       </IconButton>
       {renamingLoad === loadCount ? (
         <RenameDialog onClose={() => setRenamingLoad(null)} />

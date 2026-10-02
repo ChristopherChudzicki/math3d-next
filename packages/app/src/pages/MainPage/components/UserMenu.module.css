@@ -1,12 +1,27 @@
-.badge {
-  pointer-events: none;
+.avatar {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: rgb(189 189 189);
+  color: var(--color-background);
+  font-size: 1.5rem;
+  cursor: pointer;
 }
 
-.avatar:global(.MuiAvatar-root) {
-  pointer-events: all;
-  height: 32px;
-  width: 32px;
-  border: none;
-  font-size: 1rem;
-  cursor: pointer;
+.arrow {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  color: var(--color-text-primary);
+}
+
+.avatar[data-popup-open] .arrow {
+  transform: rotate(180deg);
 }

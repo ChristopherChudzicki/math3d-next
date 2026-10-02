@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import TextField from "@mui/material/TextField";
-import BasicDialog from "@/util/components/BasicDialog";
+import { Dialog } from "@/ui/Dialog";
+import Button from "@/ui/Button";
 import copyText from "./copyText";
 import styles from "./LinkDialog.module.css";
 
@@ -38,6 +39,21 @@ const LinkField: React.FC<LinkFieldProps> = ({ url, message }) => (
   />
 );
 
+type LinkActionsProps = {
+  onCopy: () => void;
+  copyRef: React.Ref<HTMLButtonElement>;
+};
+
+/** The link step's footer: Done, then Copy link, which starts focused. */
+const LinkActions: React.FC<LinkActionsProps> = ({ onCopy, copyRef }) => (
+  <Dialog.Actions>
+    <Dialog.Close render={<Button>Done</Button>} />
+    <Button ref={copyRef} variant="solid" tone="accent" onClick={onCopy}>
+      Copy link
+    </Button>
+  </Dialog.Actions>
+);
+
 type LinkDialogProps = {
   heading: string;
   url: string;
@@ -52,23 +68,27 @@ const LinkDialog: React.FC<LinkDialogProps> = ({
   children,
 }) => {
   const { copy, message } = useLinkCopy(url);
+  const copyRef = useRef<HTMLButtonElement>(null);
   return (
-    <BasicDialog
+    <Dialog.Root
       open
-      fullWidth
-      maxWidth="xs"
-      onClose={onClose}
-      title={heading}
-      onConfirm={copy}
-      confirmText="Copy link"
-      confirmButtonProps={{ autoFocus: true }}
-      cancelText="Done"
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <LinkField url={url} message={message} />
-      {children}
-    </BasicDialog>
+      <Dialog.Popup size="sm" initialFocus={copyRef}>
+        <Dialog.Header>
+          <Dialog.Title>{heading}</Dialog.Title>
+        </Dialog.Header>
+        <Dialog.Body>
+          <LinkField url={url} message={message} />
+          {children}
+        </Dialog.Body>
+        <LinkActions onCopy={copy} copyRef={copyRef} />
+      </Dialog.Popup>
+    </Dialog.Root>
   );
 };
 
 export default LinkDialog;
-export { LinkField, useLinkCopy };
+export { LinkActions, LinkField, useLinkCopy };

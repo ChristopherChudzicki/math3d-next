@@ -60,6 +60,7 @@ module.exports = {
           "**/vite.config.ts",
           "**/vitest.*.config.ts",
           "**/*.stories.tsx",
+          "**/.storybook/**",
           "**/src/setupTests.ts",
           "**/src/playwright/**",
           "**/src/test_util/**/*.ts",

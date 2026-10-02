@@ -1,3 +1,5 @@
+import colorsys
+import copy
 import os
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
@@ -61,6 +63,16 @@ def create_test_user(email: str, *, uid: str):
 
 TEST_SCENE_COUNT = 100
 
+GOLDEN_ANGLE = 137.508
+
+
+def distinct_color(index: int) -> str:
+    """A hex color whose hue is a golden angle past the previous index's, so
+    neighboring scenes never look alike."""
+    hue = (index * GOLDEN_ANGLE % 360) / 360
+    r, g, b = colorsys.hls_to_rgb(hue, 0.5, 0.75)
+    return "#" + "".join(f"{round(c * 255):02x}" for c in (r, g, b))
+
 
 class Command(BaseCommand):
     help = """Seed test data for e2e tests"""
@@ -79,19 +91,23 @@ class Command(BaseCommand):
         with open(filename) as f:
             test_scene = json.load(f)
 
-        def seed_scene(title: str, author):
+        def seed_scene(title: str, author, surface_color: str | None = None):
             # (title, author) is not unique, so update_or_create would raise
             # MultipleObjectsReturned on a database that already holds two of
             # them. Re-seeding has to stay safe on whatever is already there.
             scene = Scene.objects.filter(title=title, author=author).first() or Scene(
                 title=title, author=author
             )
-            scene.items = test_scene["items"]
+            scene.items = copy.deepcopy(test_scene["items"])
+            if surface_color:
+                for item in scene.items:
+                    if item["type"] == "EXPLICIT_SURFACE":
+                        item["properties"]["color"] = surface_color
             scene.item_order = test_scene["itemOrder"]
             scene.save()
 
         for j in range(scene_count):
-            seed_scene(f"Test Scene {j}", user_1)
+            seed_scene(f"Test Scene {j}", user_1, distinct_color(j))
         # Owned by no one, as an anonymous visitor's scenes are.
         seed_scene("Anonymous Scene", None)
 

@@ -10,6 +10,7 @@ declare const styles: {
   readonly "mr2": string;
   readonly "positionRelative": string;
   readonly "px1": string;
+  readonly "visuallyHidden": string;
 };
 export = styles;
 

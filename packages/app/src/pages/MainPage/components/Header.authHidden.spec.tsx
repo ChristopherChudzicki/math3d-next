@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { renderTestApp, screen, user } from "@/test_util";
+import { renderTestApp, screen, user, waitForAppReady } from "@/test_util";
 
 vi.mock("@/features/auth/displayAuthFlows", () => ({
   DISPLAY_AUTH_FLOWS: false,
@@ -13,7 +13,10 @@ test("Sign in header button is hidden when DISPLAY_AUTH_FLOWS is false", async (
 });
 
 test("Sign in menu item is hidden when DISPLAY_AUTH_FLOWS is false", async () => {
-  renderTestApp("", { isAuthenticated: false });
+  const { queryClient } = renderTestApp("", { isAuthenticated: false });
+  // While auth is pending the menu never offers Sign in, so wait it out or the
+  // absence below holds whatever the flag says.
+  await waitForAppReady(queryClient);
   const button = await screen.findByRole("button", { name: "Open Menu" });
   await user.click(button);
   await screen.findByRole("menu");

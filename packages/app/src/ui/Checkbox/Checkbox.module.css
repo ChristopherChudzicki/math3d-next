@@ -1,0 +1,47 @@
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.box {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid var(--color-secondary);
+  border-radius: 3px;
+  background-color: var(--color-background);
+  color: white;
+}
+
+.box:focus-visible {
+  outline-offset: 2px;
+}
+
+.box[data-checked] {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+}
+
+@media (hover: hover) {
+  .label:hover .box[data-unchecked]:not([data-disabled]) {
+    border-color: var(--color-text-primary);
+  }
+}
+
+.indicator {
+  display: flex;
+  font-size: 0.75rem;
+}
+
+.label:has(.box[data-disabled]) {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

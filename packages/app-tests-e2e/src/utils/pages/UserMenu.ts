@@ -8,7 +8,8 @@ class UserMenu {
   page: Page;
 
   constructor(page: Page) {
-    const root = page.getByRole("menu", { name: /^(User )?Menu$/ });
+    // A menu takes its name from the trigger that opened it.
+    const root = page.getByRole("menu", { name: /^Open (User )?Menu$/ });
     this.root = root;
     this.page = page;
   }

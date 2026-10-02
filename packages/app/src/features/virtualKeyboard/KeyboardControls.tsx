@@ -2,12 +2,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import KeyboardAltOutlinedIcon from "@mui/icons-material/KeyboardAltOutlined";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import {
-  mathVirtualKeyboard,
-  LAYOUTS,
-} from "@/util/components/MathLive/keyboards";
+import { mathVirtualKeyboard, LAYOUTS } from "@/ui/MathLive/keyboards";
 import { createPortal } from "react-dom";
-import Button from "@mui/material/Button";
+import Button from "@/ui/Button";
 
 import styles from "./KeyboardControls.module.css";
 
@@ -63,16 +60,18 @@ const ToggleKeyboardButton = () => {
           }
         }}
         className={styles.keyboardToggleButton}
-        color="secondary"
-        variant="contained"
-        disableElevation
+        variant="solid"
         data-testid="toggle-keyboard-button"
         aria-label="Enable math keyboard"
         onClick={handleClick}
         aria-pressed={autoExpand}
       >
-        <KeyboardAltOutlinedIcon />
-        {autoExpand ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
+        <KeyboardAltOutlinedIcon fontSize="inherit" />
+        {autoExpand ? (
+          <KeyboardArrowDownIcon fontSize="inherit" />
+        ) : (
+          <KeyboardArrowUpIcon fontSize="inherit" />
+        )}
       </Button>
     </div>,
     document.body,
