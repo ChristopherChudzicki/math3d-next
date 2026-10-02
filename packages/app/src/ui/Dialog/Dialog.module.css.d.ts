@@ -4,6 +4,7 @@ declare const styles: {
   readonly "backdrop": string;
   readonly "body": string;
   readonly "description": string;
+  readonly "form": string;
   readonly "header": string;
   readonly "headerText": string;
   readonly "lg": string;

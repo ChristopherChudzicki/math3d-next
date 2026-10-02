@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as yup from "yup";
 import { Alert, TextField } from "@mui/material";
 import { useNavigate } from "react-router";
@@ -6,7 +6,8 @@ import { isApiError, useUserMeDelete } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
-import BasicDialog from "@/ui/BasicDialog";
+import { Dialog } from "@/ui/Dialog";
+import Button from "@/ui/Button";
 import { TextButton } from "@/ui/TextLink";
 import { useValidatedForm } from "@/util/forms";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
@@ -24,19 +25,15 @@ const DeleteAccountPage: React.FC = () => {
   const deleteAccount = useUserMeDelete();
   const { add: addNotification } = useNotifications();
   const navigate = useNavigate();
-  const formId = useId();
   // While the 403 notice shows, sign-in waits: a dialog opened over the notice
   // would hide it.
   const [noticeOpen, setNoticeOpen] = useState(false);
+  const confirmRef = useRef<HTMLInputElement>(null);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useValidatedForm({ schema });
-
-  const handleClose = useCallback(() => {
-    close();
-  }, [close]);
 
   // A successful delete flips auth authenticated → unauthenticated, and that
   // deliberate case has its own flow (the "Account Deleted" notice, then
@@ -92,46 +89,60 @@ const DeleteAccountPage: React.FC = () => {
   }
 
   return (
-    <BasicDialog
+    <Dialog.Root
       open
-      fullWidth
-      maxWidth="sm"
-      onClose={handleClose}
-      title="Delete Account"
-      confirmText="Delete Account"
-      // The form is in the dialog body, so the footer button reaches it by id.
-      confirmButtonProps={{
-        type: "submit",
-        form: formId,
-        tone: "danger",
-        disabled: deleteAccount.isPending || deleteAccount.isSuccess,
+      onOpenChange={(isOpen) => {
+        // The delete still completes after a close; stay for its outcome.
+        if (!isOpen && !deleteAccount.isPending) close();
       }}
     >
-      <form id={formId} onSubmit={onSubmit}>
-        <Alert severity="error">
-          This action cannot be undone. Scenes you have saved stay published at
-          their existing links, with no account able to edit or remove them —
-          delete them from{" "}
-          <TextButton onClick={() => open("scenes", { list: "me" })}>
-            My Scenes
-          </TextButton>{" "}
-          first if you don&rsquo;t want that. Signing in with Google again later
-          creates a new, empty account.
-        </Alert>
-        <TextField
-          fullWidth
-          margin="normal"
-          error={!!errors.confirm?.message}
-          helperText={`To proceed, enter "${CONFIRM_PROMPT}" exactly.`}
-          label="Confirm"
-          type="text"
-          {...register("confirm")}
-        />
-        {errors.root?.message ? (
-          <Alert severity="error">{errors.root.message}</Alert>
-        ) : null}
-      </form>
-    </BasicDialog>
+      <Dialog.Popup size="md" initialFocus={confirmRef}>
+        <Dialog.Header closeDisabled={deleteAccount.isPending}>
+          <Dialog.Title>Delete Account</Dialog.Title>
+        </Dialog.Header>
+        <Dialog.Form onSubmit={onSubmit}>
+          <Dialog.Body>
+            <Alert severity="error">
+              This action cannot be undone. Scenes you have saved stay published
+              at their existing links, with no account able to edit or remove
+              them — delete them from{" "}
+              <TextButton onClick={() => open("scenes", { list: "me" })}>
+                My Scenes
+              </TextButton>{" "}
+              first if you don&rsquo;t want that. Signing in with Google again
+              later creates a new, empty account.
+            </Alert>
+            <TextField
+              fullWidth
+              margin="normal"
+              error={!!errors.confirm?.message}
+              helperText={`To proceed, enter "${CONFIRM_PROMPT}" exactly.`}
+              label="Confirm"
+              type="text"
+              inputRef={confirmRef}
+              {...register("confirm")}
+            />
+            {errors.root?.message ? (
+              <Alert severity="error">{errors.root.message}</Alert>
+            ) : null}
+          </Dialog.Body>
+          <Dialog.Actions>
+            <Dialog.Close
+              render={<Button>Cancel</Button>}
+              disabled={deleteAccount.isPending}
+            />
+            <Button
+              type="submit"
+              variant="solid"
+              tone="danger"
+              loading={deleteAccount.isPending || deleteAccount.isSuccess}
+            >
+              Delete Account
+            </Button>
+          </Dialog.Actions>
+        </Dialog.Form>
+      </Dialog.Popup>
+    </Dialog.Root>
   );
 };
 

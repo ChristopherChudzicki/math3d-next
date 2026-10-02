@@ -3,7 +3,15 @@ import { delay, http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { makeItem, seedDb, urls } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import { act, renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import {
+  act,
+  countRequests,
+  renderTestApp,
+  screen,
+  user,
+  waitFor,
+  within,
+} from "@/test_util";
 import { actions } from "@/features/sceneControls/mathItems";
 
 beforeAll(() => {
@@ -15,23 +23,6 @@ afterAll(() => {
   // @ts-expect-error This is fake clipboard
   delete window.navigator.clipboard;
 });
-
-const countRequests = (method: string, pathSuffix: string) => {
-  const seen = { count: 0 };
-  const listener = ({ request }: { request: Request }) => {
-    if (
-      request.method === method &&
-      new URL(request.url).pathname.endsWith(pathSuffix)
-    ) {
-      seen.count += 1;
-    }
-  };
-  server.events.on("request:start", listener);
-  onTestFinished(() => {
-    server.events.removeListener("request:start", listener);
-  });
-  return seen;
-};
 
 /** Bodies of the PATCH requests sent for `key`. */
 const capturePatches = (key: string) => {
@@ -231,6 +222,11 @@ test("a refused copy shows the link instead", async () => {
     `${window.location.origin}/${scene.key}`,
   );
   expect(within(dialog).getByText(/didn't allow copying/i)).toBeVisible();
+  await waitFor(() =>
+    expect(
+      within(dialog).getByRole("button", { name: "Copy link" }),
+    ).toHaveFocus(),
+  );
   expect(await primary()).toHaveTextContent(/^Copy link$/);
 });
 
@@ -288,10 +284,15 @@ test("a signed-out re-share of an unedited published scene reuses its link", asy
 
   await user.click(await primary());
 
-  expect(
-    await screen.findByLabelText<HTMLInputElement>("Shareable URL"),
-  ).toHaveValue(published);
+  const dialog = await screen.findByRole("dialog", { name: "Share scene" });
+  expect(within(dialog).getByLabelText("Shareable URL")).toHaveValue(published);
   expect(posts.count).toBe(1);
+  // Opened straight on the link step, it starts on Copy link.
+  await waitFor(() =>
+    expect(
+      within(dialog).getByRole("button", { name: "Copy link" }),
+    ).toHaveFocus(),
+  );
 });
 
 test("a signed-out share of an edited scene mints a new link, prefilled with the scene's title", async () => {

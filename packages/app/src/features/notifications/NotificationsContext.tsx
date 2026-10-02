@@ -85,3 +85,4 @@ const useNotifications = (): NotificationsContextResult => {
 };
 
 export { NotificationsProvider, useNotifications };
+export type { Notification };

@@ -49,6 +49,7 @@ const Description: React.FC<DescriptionProps> = ({ className, ...others }) => (
   />
 );
 
+/** The footer's buttons, right-aligned. Put the primary action last. */
 const Actions: React.FC<React.ComponentProps<"div">> = ({
   className,
   ...others

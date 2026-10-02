@@ -35,6 +35,12 @@ const Popup: React.FC<PopupProps> = ({ size = "md", className, ...others }) => (
 type HeaderProps = React.ComponentProps<"div"> & {
   /** Label for the close button. */
   closeLabel?: string;
+  /**
+   * Disables only the header's close button, e.g. while a submit can't be
+   * abandoned. Escape and backdrop clicks still reach `Root`'s `onOpenChange`:
+   * call `eventDetails.cancel()` there, or ignore them if `open` is controlled.
+   */
+  closeDisabled?: boolean;
 };
 
 /**
@@ -43,6 +49,7 @@ type HeaderProps = React.ComponentProps<"div"> & {
  */
 const Header: React.FC<HeaderProps> = ({
   closeLabel = "Close",
+  closeDisabled = false,
   className,
   children,
   ...others
@@ -50,6 +57,7 @@ const Header: React.FC<HeaderProps> = ({
   <div {...others} className={classNames(styles.header, className)}>
     <div className={styles.headerText}>{children}</div>
     <Close
+      disabled={closeDisabled}
       render={
         <IconButton label={closeLabel}>
           <Icon icon={xIcon} aria-hidden="true" />
@@ -86,6 +94,20 @@ const Body: React.FC<React.ComponentProps<"div">> = ({
   ...others
 }) => <div {...others} className={classNames(styles.body, className)} />;
 
+/**
+ * Wraps `Body` and `Actions` in a form dialog, so a submit button in the
+ * footer submits the fields in the body. For Dialog only; AlertDialog has no
+ * form layout.
+ */
+const Form: React.FC<React.ComponentProps<"form">> = ({
+  className,
+  ...others
+}) => <form {...others} className={classNames(styles.form, className)} />;
+
+/**
+ * The footer's buttons, right-aligned. Put the primary action last, so it sits
+ * at the trailing edge.
+ */
 const Actions: React.FC<React.ComponentProps<"div">> = ({
   className,
   ...others
@@ -100,6 +122,7 @@ export {
   Title,
   Description,
   Body,
+  Form,
   Actions,
 };
 export type { DialogSize, PopupProps, HeaderProps };

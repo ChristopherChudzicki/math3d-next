@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import Alert from "@mui/material/Alert";
 import Typography from "@mui/material/Typography";
@@ -7,10 +7,11 @@ import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions, select } from "@/features/sceneControls/mathItems";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import { DISPLAY_AUTH_FLOWS } from "@/features/auth";
-import BasicDialog from "@/ui/BasicDialog";
+import { Dialog } from "@/ui/Dialog";
+import Button from "@/ui/Button";
 import { TextButton } from "@/ui/TextLink";
 import useTitleForm from "./useTitleForm";
-import { LinkField, useLinkCopy } from "./LinkDialog";
+import { LinkActions, LinkField, useLinkCopy } from "./LinkDialog";
 
 type PublishMode = "share" | "save" | "copy";
 
@@ -72,7 +73,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
     mode === "copy" && author !== null ? `Copy of ${title}` : title,
   );
   const headings = HEADINGS[mode];
-  const copyButtonId = useId();
+  const copyRef = useRef<HTMLButtonElement>(null);
 
   const publish = async (newTitle: string) => {
     const state = store.getState();
@@ -97,76 +98,82 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
     setPublishedUrl(sceneUrl(result.key));
   };
 
-  const { formId, isSubmitting, renderForm } = useTitleForm({
+  const { titleRef, isSubmitting, handleSubmit, renderFields } = useTitleForm({
     defaultTitle,
     onSubmit: publish,
   });
   const { copy, message } = useLinkCopy(publishedUrl ?? "");
 
-  // The title field unmounts on the swap; land on the step's next action.
+  // The title step unmounts on the swap; land on the link step's action.
   useEffect(() => {
-    if (publishedUrl) document.getElementById(copyButtonId)?.focus();
-  }, [publishedUrl, copyButtonId]);
+    if (publishedUrl) copyRef.current?.focus();
+  }, [publishedUrl]);
 
-  const common = {
-    open: true,
-    fullWidth: true,
-    maxWidth: "xs",
-    onClose,
-  } as const;
-
-  if (publishedUrl) {
-    return (
-      <BasicDialog
-        {...common}
-        title={headings.link}
-        onConfirm={copy}
-        confirmText="Copy link"
-        confirmButtonProps={{ id: copyButtonId, autoFocus: true }}
-        cancelText="Done"
-      >
-        <LinkField url={publishedUrl} message={message} />
-        {mode === "share" && DISPLAY_AUTH_FLOWS ? (
-          <Typography variant="body2">
-            <TextButton
-              onClick={() => {
-                onClose();
-                signIn.open();
-              }}
-            >
-              Sign in
-            </TextButton>{" "}
-            to save scenes you can keep editing.
-          </Typography>
-        ) : null}
-      </BasicDialog>
-    );
-  }
   return (
-    <BasicDialog
-      {...common}
-      // The submit still completes after a close, so closing mid-submit
-      // would navigate away from under the user.
-      closeDisabled={isSubmitting}
-      title={headings.title}
-      confirmText={isSubmitting ? headings.submitting : headings.confirm}
-      cancelButton={null}
-      confirmButtonProps={{
-        id: copyButtonId,
-        type: "submit",
-        form: formId,
-        disabled: isSubmitting,
+    <Dialog.Root
+      open
+      onOpenChange={(open) => {
+        // The submit still completes after a close, so closing mid-submit
+        // would navigate away from under the user.
+        if (!open && !isSubmitting) onClose();
       }}
     >
-      {renderForm(
-        mode === "share" && hasKey ? (
-          <Alert severity="info" role="note">
-            This creates a new link showing the scene as it looks now. The
-            original link is unchanged.
-          </Alert>
-        ) : undefined,
-      )}
-    </BasicDialog>
+      <Dialog.Popup size="sm" initialFocus={publishedUrl ? copyRef : titleRef}>
+        <Dialog.Header closeDisabled={isSubmitting}>
+          <Dialog.Title>
+            {publishedUrl ? headings.link : headings.title}
+          </Dialog.Title>
+        </Dialog.Header>
+        {publishedUrl ? (
+          <>
+            <Dialog.Body>
+              <LinkField url={publishedUrl} message={message} />
+              {mode === "share" && DISPLAY_AUTH_FLOWS ? (
+                <Typography variant="body2">
+                  <TextButton
+                    onClick={() => {
+                      onClose();
+                      signIn.open();
+                    }}
+                  >
+                    Sign in
+                  </TextButton>{" "}
+                  to save scenes you can keep editing.
+                </Typography>
+              ) : null}
+            </Dialog.Body>
+            <LinkActions onCopy={copy} copyRef={copyRef} />
+          </>
+        ) : (
+          <Dialog.Form onSubmit={handleSubmit}>
+            <Dialog.Body>
+              {renderFields(
+                mode === "share" && hasKey ? (
+                  <Alert severity="info" role="note">
+                    This creates a new link showing the scene as it looks now.
+                    The original link is unchanged.
+                  </Alert>
+                ) : undefined,
+              )}
+            </Dialog.Body>
+            <Dialog.Actions>
+              <Dialog.Close
+                render={<Button>Cancel</Button>}
+                disabled={isSubmitting}
+              />
+              <Button
+                type="submit"
+                variant="solid"
+                tone="accent"
+                loading={isSubmitting}
+              >
+                {isSubmitting ? headings.submitting : headings.confirm}
+              </Button>
+            </Dialog.Actions>
+          </Dialog.Form>
+        )}
+      </Dialog.Popup>
+    </Dialog.Root>
   );
 };
 

@@ -1,10 +1,10 @@
 import React, { act } from "react";
 import {
+  fireEvent,
   renderHook,
   screen,
   within,
   waitFor,
-  waitForElementToBeRemoved,
 } from "@testing-library/react";
 import user from "@testing-library/user-event";
 import {
@@ -32,6 +32,15 @@ const assertNotResolvedSoon = async (
   expect(resolvedFirst).toBe(key);
 };
 
+/** Fails fast, rather than at the test timeout, if `promise` never settles. */
+const settledWithin = <T,>(promise: Promise<T>, timeout = 1000) =>
+  Promise.race([
+    promise,
+    new Promise<never>((_resolve, reject) => {
+      setTimeout(() => reject(new Error("Not settled in time")), timeout);
+    }),
+  ]);
+
 describe("NotificationsDisplay and useNotifications", () => {
   test("NotificationsDisplay should render alerts and confirmations", async () => {
     const { result } = renderHook(useNotifications, { wrapper: Wrapper });
@@ -44,7 +53,7 @@ describe("NotificationsDisplay and useNotifications", () => {
       });
     });
 
-    const dialog2 = screen.getByRole("dialog");
+    const dialog2 = screen.getByRole("alertdialog");
     expect(dialog2).toHaveTextContent("Confirm 2");
     expect(within(dialog2).getByRole("heading")).toHaveTextContent("Confirm 2");
     const [cancel, confirm, ...others2] =
@@ -58,7 +67,7 @@ describe("NotificationsDisplay and useNotifications", () => {
       expect(dialog2).not.toBeInTheDocument();
     });
 
-    const dialog1 = screen.getByRole("dialog");
+    const dialog1 = screen.getByRole("alertdialog");
     expect(dialog1).toHaveTextContent("Alert 1");
     expect(within(dialog1).getByRole("heading")).toHaveTextContent("Alert 1");
     const [ok, ...others1] = within(dialog1).getAllByRole("button");
@@ -71,7 +80,7 @@ describe("NotificationsDisplay and useNotifications", () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     });
   });
 
@@ -94,15 +103,96 @@ describe("NotificationsDisplay and useNotifications", () => {
 
       await act(() => assertNotResolvedSoon(confirmed));
 
-      const dialog = screen.getByRole("dialog");
+      const dialog = screen.getByRole("alertdialog");
       await user.click(
         within(dialog).getByRole("button", { name: buttonName }),
       );
-      await waitForElementToBeRemoved(dialog);
+      await waitFor(() => expect(dialog).not.toBeInTheDocument());
 
       expect(await confirmed!).toBe(expectedConfirmed);
     },
   );
+
+  test("Escape dismisses a confirmation as not confirmed", async () => {
+    const { result } = renderHook(useNotifications, { wrapper: Wrapper });
+    let confirmed: Promise<boolean>;
+    act(() => {
+      confirmed = result.current.add({
+        title: "Confirm 1",
+        body: "body 1",
+        type: "confirmation",
+      }).confirmed;
+    });
+    const dialog = screen.getByRole("alertdialog", { name: "Confirm 1" });
+    // Focus starts on the safe choice.
+    await waitFor(() =>
+      expect(
+        within(dialog).getByRole("button", { name: "Cancel" }),
+      ).toHaveFocus(),
+    );
+
+    await user.keyboard("{Escape}");
+
+    await waitFor(() => expect(dialog).not.toBeInTheDocument());
+    expect(await confirmed!).toBe(false);
+  });
+
+  test("A confirmation answered just before another arrives keeps its answer", async () => {
+    const { result } = renderHook(useNotifications, { wrapper: Wrapper });
+    let confirmed: Promise<boolean>;
+    act(() => {
+      confirmed = result.current.add({
+        title: "Confirm 1",
+        body: "body 1",
+        type: "confirmation",
+      }).confirmed;
+    });
+    const dialog = screen.getByRole("alertdialog", { name: "Confirm 1" });
+
+    // The newer notice must replace the first before the first's exit
+    // completes, so the click and the add have to land in one React batch.
+    // Don't swap in `await user.click(...)`: user-event flushes updates and
+    // timers before it resolves, so the exit has finished by the time the add
+    // runs, and the test passes even with the bug present (checked by removing
+    // NotificationDialog's unmount report).
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    act(() => {
+      fireEvent.click(within(dialog).getByRole("button", { name: "Confirm" }));
+      result.current.add({ title: "Alert 2", body: "body 2", type: "alert" });
+    });
+
+    expect(await settledWithin(confirmed!)).toBe(true);
+    expect(
+      screen.getByRole("alertdialog", { name: "Alert 2" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alertdialog", { name: "Confirm 1" })).toBeNull();
+  });
+
+  test("A newer notification covers an unanswered one, which returns once it resolves", async () => {
+    const { result } = renderHook(useNotifications, { wrapper: Wrapper });
+    let confirmed: Promise<boolean>;
+    act(() => {
+      confirmed = result.current.add({
+        title: "Confirm 1",
+        body: "body 1",
+        type: "confirmation",
+      }).confirmed;
+    });
+    await screen.findByRole("alertdialog", { name: "Confirm 1" });
+    act(() => {
+      result.current.add({ title: "Alert 2", body: "body 2", type: "alert" });
+    });
+
+    const alert = await screen.findByRole("alertdialog", { name: "Alert 2" });
+    expect(screen.queryByRole("alertdialog", { name: "Confirm 1" })).toBeNull();
+    await user.click(within(alert).getByRole("button", { name: "OK" }));
+
+    const confirm = await screen.findByRole("alertdialog", {
+      name: "Confirm 1",
+    });
+    await user.click(within(confirm).getByRole("button", { name: "Confirm" }));
+    expect(await settledWithin(confirmed!)).toBe(true);
+  });
 
   test("Add, remove, throw errors without NotificationsProvider", async () => {
     const { result } = renderHook(useNotifications);
