@@ -9,9 +9,9 @@
   padding: 0;
   border: none;
   border-radius: 50%;
-  background-color: rgb(189, 189, 189);
+  background-color: rgb(189 189 189);
   color: var(--color-background);
-  font-size: 21px;
+  font-size: 1.5rem;
   cursor: pointer;
 }
 

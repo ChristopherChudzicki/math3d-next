@@ -46,8 +46,6 @@ const LoginButtons: React.FC<{
 const ISSUE_URL = import.meta.env.VITE_ISSUE_URL;
 invariant(ISSUE_URL, "VITE_ISSUE_URL is not set");
 
-const iconProps = { fontSize: "inherit" } as const;
-
 const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
   authStatus,
 }) => {
@@ -56,41 +54,39 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
   const isAuthenticated = authStatus === "authenticated";
   return (
     <>
-      {
-        // Not `!isAuthenticated`: while the me-query is still in flight the
-        // answer is unknown, and offering to sign in is the wrong guess for a
-        // user who already has a session.
-        authStatus === "unauthenticated" && DISPLAY_AUTH_FLOWS && (
-          <Menu.Item
-            icon={<AccountCircleOutlinedIcon {...iconProps} />}
-            onClick={() => openSignIn()}
-          >
-            Sign in
-          </Menu.Item>
-        )
-      }
+      {/* Not `!isAuthenticated`: while the me-query is still in flight the
+          answer is unknown, and offering to sign in is the wrong guess for a
+          user who already has a session. */}
+      {authStatus === "unauthenticated" && DISPLAY_AUTH_FLOWS && (
+        <Menu.Item
+          icon={<AccountCircleOutlinedIcon fontSize="inherit" />}
+          onClick={() => openSignIn()}
+        >
+          Sign in
+        </Menu.Item>
+      )}
       {isAuthenticated && (
         <Menu.Item
-          icon={<ListIcon {...iconProps} />}
+          icon={<ListIcon fontSize="inherit" />}
           onClick={() => open("scenes", { list: "me" })}
         >
           My Scenes
         </Menu.Item>
       )}
       <Menu.Item
-        icon={<LightbulbOutlined {...iconProps} />}
+        icon={<LightbulbOutlined fontSize="inherit" />}
         onClick={() => open("scenes", { list: "examples" })}
       >
         Examples
       </Menu.Item>
       <Menu.LinkItem
-        icon={<FunctionsIcon {...iconProps} />}
+        icon={<FunctionsIcon fontSize="inherit" />}
         render={<Link to="/app/help/reference" target="_blank" />}
       >
         Function Reference
       </Menu.LinkItem>
       <Menu.LinkItem
-        icon={<HelpOutlineOutlinedIcon {...iconProps} />}
+        icon={<HelpOutlineOutlinedIcon fontSize="inherit" />}
         href={ISSUE_URL}
         target="_blank"
         rel="noreferrer"
@@ -99,7 +95,7 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
       </Menu.LinkItem>
       {isAuthenticated && (
         <Menu.Item
-          icon={<DeleteForeverIcon {...iconProps} />}
+          icon={<DeleteForeverIcon fontSize="inherit" />}
           onClick={() => open("delete-account")}
         >
           Delete Account
@@ -107,7 +103,7 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
       )}
       {isAuthenticated && (
         <Menu.Item
-          icon={<AccountCircleOutlinedIcon {...iconProps} />}
+          icon={<AccountCircleOutlinedIcon fontSize="inherit" />}
           onClick={() => open("logout")}
         >
           Sign out

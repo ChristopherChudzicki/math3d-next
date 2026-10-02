@@ -87,10 +87,10 @@ test("Adding items adds to mathScope", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const { store } = renderTestApp(`/${scene.key}`);
 
-  await user.click(await screen.findByText("Add Object"));
+  await user.click(await screen.findByRole("button", { name: "Add Object" }));
   const menu = await screen.findByRole("menu");
   const addPoint = await within(menu).findByText("Point");
-  await user.click(addPoint, { pointerEventsCheck: 0 });
+  await user.click(addPoint);
 
   const items = Object.values(store.getState().scene.items);
   expect(items).toHaveLength(2); // point + folder

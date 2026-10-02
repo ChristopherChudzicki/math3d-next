@@ -1,4 +1,7 @@
 import { test, expect } from "vitest";
+import { delay, http } from "msw";
+import { server } from "@math3d/mock-api/node";
+import { urls } from "@math3d/mock-api";
 import invariant from "tiny-invariant";
 import {
   renderTestApp,
@@ -11,43 +14,66 @@ import {
 
 test.each([
   {
-    authStatus: true,
+    isAuthenticated: true,
     trigger: "Open User Menu",
     otherTrigger: "Open Menu",
-    expected: { hasSigin: false, hasSigout: true },
+    headerSignIn: false,
+    items: [
+      "My Scenes",
+      "Examples",
+      "Function Reference",
+      "Contact",
+      "Delete Account",
+      "Sign out",
+    ],
   },
   {
-    authStatus: false,
+    isAuthenticated: false,
     trigger: "Open Menu",
     otherTrigger: "Open User Menu",
-    expected: { hasSigin: true, hasSigout: false },
+    headerSignIn: true,
+    items: ["Sign in", "Examples", "Function Reference", "Contact"],
   },
 ])(
-  "Header includes signin / signout links based on current auth status (authenticated=$authStatus)",
-  async ({ authStatus, trigger, otherTrigger, expected }) => {
-    const { queryClient } = renderTestApp("", { isAuthenticated: authStatus });
-    // Sign in/out visibility is gated on the ["me"] auth query resolving, and
-    // the header has no positive anchor for the absent state (e.g. "Sign in"
-    // is simply absent when authenticated). Wait for auth to settle so these
+  "the header offers the items for its auth status (authenticated=$isAuthenticated)",
+  async ({ isAuthenticated, trigger, otherTrigger, headerSignIn, items }) => {
+    const { queryClient } = renderTestApp("", { isAuthenticated });
+    // Item visibility is gated on the ["me"] auth query resolving, and the
+    // header has no positive anchor for the absent state (e.g. "Sign in" is
+    // simply absent when authenticated). Wait for auth to settle so these
     // presence/absence assertions aren't false-greens.
     await waitForAppReady(queryClient);
-
-    const signin = screen.queryByRole("button", { name: "Sign in" });
 
     // The avatar is the signed-in trigger and the hamburger every other state,
     // including the pending one waited out above.
     expect(screen.queryByRole("button", { name: otherTrigger })).toBeNull();
+    expect(!!screen.queryByRole("button", { name: "Sign in" })).toBe(
+      headerSignIn,
+    );
 
-    const button = screen.getByRole("button", { name: trigger });
-    await user.click(button);
-    await screen.findByRole("menu");
-
-    const signout = screen.queryByRole("menuitem", { name: "Sign out" });
-
-    expect(!!signin).toBe(expected.hasSigin);
-    expect(!!signout).toBe(expected.hasSigout);
+    await user.click(screen.getByRole("button", { name: trigger }));
+    const menu = await screen.findByRole("menu", { name: trigger });
+    expect(
+      within(menu)
+        .getAllByRole("menuitem")
+        .map((el) => el.textContent),
+    ).toEqual(items);
   },
 );
+
+test("while auth is loading, the menu doesn't offer Sign in", async () => {
+  // A signed-in user whose ["me"] query hasn't answered yet: offering to sign
+  // in would be the wrong guess.
+  server.use(http.get(urls.auth.usersMe, () => delay("infinite")));
+  renderTestApp("", { isAuthenticated: true });
+  await user.click(await screen.findByRole("button", { name: "Open Menu" }));
+  const menu = await screen.findByRole("menu", { name: "Open Menu" });
+  expect(
+    within(menu)
+      .getAllByRole("menuitem")
+      .map((el) => el.textContent),
+  ).toEqual(["Examples", "Function Reference", "Contact"]);
+});
 
 test("Login button opens the sign-in dialog", async () => {
   const { location } = renderTestApp("", { isAuthenticated: false });
@@ -84,11 +110,8 @@ test("the signed-in menu's items are grouped under the account's email", async (
   );
 
   const account = await screen.findByRole("group", { name: me.email });
-  expect(within(account).getByRole("menuitem", { name: "Sign out" })).toBe(
-    screen.getByRole("menuitem", { name: "Sign out" }),
-  );
-  expect(screen.getByTestId("username-display")).toHaveTextContent(
-    me.email,
+  expect(within(account).getAllByRole("menuitem")).toEqual(
+    screen.getAllByRole("menuitem"),
   );
 });
 
@@ -130,6 +153,30 @@ test.each([
 
     await user.click(screen.getByRole("button", { name: "Open scenes" }));
 
+    expect(location.current.search).toContain("overlay=scenes");
+    expect(location.current.search).toContain(`list=${list}`);
+  },
+);
+
+test.each([
+  {
+    isAuthenticated: true,
+    trigger: "Open User Menu",
+    item: "My Scenes",
+    list: "me",
+  },
+  {
+    isAuthenticated: false,
+    trigger: "Open Menu",
+    item: "Examples",
+    list: "examples",
+  },
+])(
+  "the $item menu item opens list=$list",
+  async ({ isAuthenticated, trigger, item, list }) => {
+    const { location } = renderTestApp("", { isAuthenticated });
+    await user.click(await screen.findByRole("button", { name: trigger }));
+    await user.click(await screen.findByRole("menuitem", { name: item }));
     expect(location.current.search).toContain("overlay=scenes");
     expect(location.current.search).toContain(`list=${list}`);
   },
