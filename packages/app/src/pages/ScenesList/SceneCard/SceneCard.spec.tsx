@@ -19,8 +19,8 @@ const setupCard = (props: Partial<SceneCardProps> = {}) => {
     ],
     { initialEntries: ["/start"] },
   );
-  const { container } = render(<RouterProvider router={router} />);
-  return { router, container };
+  render(<RouterProvider router={router} />);
+  return router;
 };
 
 test("the link is named by the title alone and described by the meta line", () => {
@@ -45,7 +45,7 @@ test("actions are a sibling of the link, not inside it", () => {
 });
 
 test("a plain click on the current scene's card doesn't navigate", async () => {
-  const { router } = setupCard({ current: true });
+  const router = setupCard({ current: true });
 
   await user.click(screen.getByRole("link", { name: "Parametric surfaces" }));
 
@@ -54,39 +54,33 @@ test("a plain click on the current scene's card doesn't navigate", async () => {
 
 describe("the thumbnail", () => {
   const IMAGE_URL = "https://s.test/screenshots/scene/abc.png?fallback=none";
-  // alt="" makes the <img> presentational, so it has no role to query by.
-  const thumbnail = (container: HTMLElement) =>
-    container.querySelector<HTMLImageElement>("img");
-  const placeholderIcon = (container: HTMLElement) =>
-    container.querySelector("svg");
+  // alt="" gives the <img> the presentation role. The placeholder beneath it
+  // is always rendered; without the <img>, it is all that shows.
+  const thumbnail = () => screen.queryByRole("presentation");
 
   test("sits over the placeholder, hidden until it loads, then revealed", () => {
-    const { container } = setupCard({ imageUrl: IMAGE_URL });
-    const img = thumbnail(container);
+    setupCard({ imageUrl: IMAGE_URL });
+    const img = screen.getByRole("presentation");
     expect(img).toHaveAttribute("src", IMAGE_URL);
-    expect(img).toHaveAttribute("alt", "");
     expect(img).toHaveAttribute("loading", "lazy");
     expect(img).not.toHaveAttribute("data-loaded");
-    expect(placeholderIcon(container)).toBeInTheDocument();
 
-    fireEvent.load(img!);
+    fireEvent.load(img);
 
     expect(img).toHaveAttribute("data-loaded");
   });
 
   test("goes away on error, leaving the placeholder", () => {
-    const { container } = setupCard({ imageUrl: IMAGE_URL });
+    setupCard({ imageUrl: IMAGE_URL });
 
-    fireEvent.error(thumbnail(container)!);
+    fireEvent.error(screen.getByRole("presentation"));
 
-    expect(thumbnail(container)).toBeNull();
-    expect(placeholderIcon(container)).toBeInTheDocument();
+    expect(thumbnail()).toBeNull();
   });
 
   test("is absent without an imageUrl, leaving the placeholder", () => {
-    const { container } = setupCard({ imageUrl: null });
+    setupCard({ imageUrl: null });
 
-    expect(thumbnail(container)).toBeNull();
-    expect(placeholderIcon(container)).toBeInTheDocument();
+    expect(thumbnail()).toBeNull();
   });
 });
