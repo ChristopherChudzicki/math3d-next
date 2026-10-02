@@ -98,7 +98,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
     setPublishedUrl(sceneUrl(result.key));
   };
 
-  const { titleRef, isSubmitting, onSubmit, renderFields } = useTitleForm({
+  const { titleRef, isSubmitting, handleSubmit, renderFields } = useTitleForm({
     defaultTitle,
     onSubmit: publish,
   });
@@ -145,7 +145,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
             <LinkActions onCopy={copy} copyRef={copyRef} />
           </>
         ) : (
-          <Dialog.Form onSubmit={onSubmit}>
+          <Dialog.Form onSubmit={handleSubmit}>
             <Dialog.Body>
               {renderFields(
                 mode === "share" && hasKey ? (
@@ -157,6 +157,10 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
               )}
             </Dialog.Body>
             <Dialog.Actions>
+              <Dialog.Close
+                render={<Button>Cancel</Button>}
+                disabled={isSubmitting}
+              />
               <Button
                 type="submit"
                 variant="solid"

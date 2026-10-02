@@ -3,7 +3,15 @@ import { delay, http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { makeItem, seedDb, urls } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import { act, renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import {
+  act,
+  countRequests,
+  renderTestApp,
+  screen,
+  user,
+  waitFor,
+  within,
+} from "@/test_util";
 import { actions } from "@/features/sceneControls/mathItems";
 
 beforeAll(() => {
@@ -15,23 +23,6 @@ afterAll(() => {
   // @ts-expect-error This is fake clipboard
   delete window.navigator.clipboard;
 });
-
-const countRequests = (method: string, pathSuffix: string) => {
-  const seen = { count: 0 };
-  const listener = ({ request }: { request: Request }) => {
-    if (
-      request.method === method &&
-      new URL(request.url).pathname.endsWith(pathSuffix)
-    ) {
-      seen.count += 1;
-    }
-  };
-  server.events.on("request:start", listener);
-  onTestFinished(() => {
-    server.events.removeListener("request:start", listener);
-  });
-  return seen;
-};
 
 /** Bodies of the PATCH requests sent for `key`. */
 const capturePatches = (key: string) => {

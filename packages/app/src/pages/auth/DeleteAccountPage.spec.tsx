@@ -166,6 +166,47 @@ test("a 403 with the session intact keeps the dialog beneath the notice", async 
   expect(location.current.search).toBe("?overlay=delete-account");
 });
 
+test("while the delete is in flight, the dialog can't be closed", async () => {
+  let release: () => void = () => {};
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  server.use(
+    http.delete("*/v1/auth/users/me/", async () => {
+      await gate;
+      return HttpResponse.json({ detail: "late" }, { status: 500 });
+    }),
+  );
+  const { location } = renderTestApp("/?overlay=delete-account", {
+    isAuthenticated: true,
+  });
+  const dialog = await screen.findByRole("dialog", {
+    name: "Delete Account",
+  });
+  await user.type(
+    within(dialog).getByLabelText("Confirm"),
+    "Yes, permanently delete",
+  );
+  const submit = within(dialog).getByRole("button", {
+    name: "Delete Account",
+  });
+  await user.click(submit);
+
+  await waitFor(() => expect(submit).toHaveAttribute("aria-disabled", "true"));
+  expect(within(dialog).getByRole("button", { name: "Close" })).toBeDisabled();
+  expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeDisabled();
+  await user.keyboard("{Escape}");
+  expect(dialog).toBeInTheDocument();
+  expect(location.current.search).toBe("?overlay=delete-account");
+
+  release();
+  await waitFor(() => expect(submit).not.toHaveAttribute("aria-disabled"));
+  await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+  await waitFor(() =>
+    expect(location.current.search).not.toContain("overlay="),
+  );
+});
+
 test("My Scenes in the warning opens the user's scene list", async () => {
   const { location } = renderTestApp("/?overlay=delete-account", {
     isAuthenticated: true,

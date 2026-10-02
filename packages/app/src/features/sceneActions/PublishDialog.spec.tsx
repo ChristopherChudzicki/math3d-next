@@ -115,6 +115,7 @@ test("while the publish is in flight, the dialog can be neither resubmitted nor 
   await user.keyboard("{Enter}");
   expect(posts).toBe(1);
   expect(within(dialog).getByRole("button", { name: "Close" })).toBeDisabled();
+  expect(within(dialog).getByRole("button", { name: "Cancel" })).toBeDisabled();
   await user.keyboard("{Escape}");
   expect(dialog).toBeInTheDocument();
   release();

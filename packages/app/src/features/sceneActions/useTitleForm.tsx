@@ -15,7 +15,7 @@ type UseTitleFormOptions = {
 
 /**
  * A validated scene-title form. The dialog renders the form element, with
- * `onSubmit`, around the fields and its submit button.
+ * `handleSubmit` as its onSubmit, around the fields and its submit button.
  */
 const useTitleForm = ({ defaultTitle, onSubmit }: UseTitleFormOptions) => {
   /** The title input, for the dialog's initial focus. */
@@ -49,7 +49,8 @@ const useTitleForm = ({ defaultTitle, onSubmit }: UseTitleFormOptions) => {
   return {
     titleRef,
     isSubmitting,
-    onSubmit: handleSubmit(({ title }) => onSubmit(title)),
+    /** The form element's submit handler; validates, then calls `onSubmit`. */
+    handleSubmit: handleSubmit(({ title }) => onSubmit(title)),
     renderFields,
   };
 };

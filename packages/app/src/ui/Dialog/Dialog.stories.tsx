@@ -39,8 +39,7 @@ const FormSubmit: React.FC = () => {
           <Dialog.Title>Save scene</Dialog.Title>
           <Dialog.Description>Give your scene a title.</Dialog.Description>
         </Dialog.Header>
-        {/* The form wraps Body and Actions, so Enter or Save submits it.
-            Cancel is optional: the header's close button also leaves. */}
+        {/* The form wraps Body and Actions, so Enter or Save submits it. */}
         <Dialog.Form
           onSubmit={(event) => {
             event.preventDefault();

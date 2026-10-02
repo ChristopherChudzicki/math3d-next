@@ -92,11 +92,12 @@ const DeleteAccountPage: React.FC = () => {
     <Dialog.Root
       open
       onOpenChange={(isOpen) => {
-        if (!isOpen) close();
+        // The delete still completes after a close; stay for its outcome.
+        if (!isOpen && !deleteAccount.isPending) close();
       }}
     >
       <Dialog.Popup size="md" initialFocus={confirmRef}>
-        <Dialog.Header>
+        <Dialog.Header closeDisabled={deleteAccount.isPending}>
           <Dialog.Title>Delete Account</Dialog.Title>
         </Dialog.Header>
         <Dialog.Form onSubmit={onSubmit}>
@@ -126,7 +127,10 @@ const DeleteAccountPage: React.FC = () => {
             ) : null}
           </Dialog.Body>
           <Dialog.Actions>
-            <Dialog.Close render={<Button>Cancel</Button>} />
+            <Dialog.Close
+              render={<Button>Cancel</Button>}
+              disabled={deleteAccount.isPending}
+            />
             <Button
               type="submit"
               variant="solid"
