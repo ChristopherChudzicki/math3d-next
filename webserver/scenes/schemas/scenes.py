@@ -9,16 +9,27 @@ from pydantic import ConfigDict
 from scenes.schemas.math_items import MathItem
 
 
-def scene_image_url(key: str, modified_date: datetime) -> Optional[str]:
+def scene_image_version(content_modified_date: datetime) -> str:
+    """Names one version of a scene's screenshot. The backend sends it with each
+    render request, and the render Worker stores it on the render; the image
+    URL's ``v`` carries it too, so the Worker can tell whether the render it
+    holds is the one asked for (see packages/screenshots/README.md)."""
+    return content_modified_date.isoformat()
+
+
+def scene_image_url(key: str, content_modified_date: datetime) -> Optional[str]:
     """The scene's screenshot URL on the render Worker (packages/screenshots),
     or None when the feature is dark.
 
     Tentative: nothing records whether a render landed. ``fallback=none`` makes
     a miss 404 instead of serving the default OG card, so an <img> can fall back
-    to its own placeholder. ``v`` busts the browser cache after an edit."""
+    to its own placeholder. ``v`` busts the browser cache after a content edit,
+    and only then: a rename or archive leaves the screenshot alone."""
     if not settings.SCREENSHOTS_ORIGIN:
         return None
-    query = urlencode({"fallback": "none", "v": modified_date.isoformat()})
+    query = urlencode(
+        {"fallback": "none", "v": scene_image_version(content_modified_date)}
+    )
     return (
         f"{settings.SCREENSHOTS_ORIGIN}/screenshots/scene/{quote(key, safe='')}.png"
         f"?{query}"
@@ -47,7 +58,7 @@ class MiniSceneSchema(_AuthoredSceneSchema):
 
     @staticmethod
     def resolve_image_url(obj) -> Optional[str]:
-        return scene_image_url(obj.key, obj.modified_date)
+        return scene_image_url(obj.key, obj.content_modified_date)
 
 
 class SceneMetaSchema(Schema):

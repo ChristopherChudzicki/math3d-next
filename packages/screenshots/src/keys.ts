@@ -8,6 +8,12 @@ import type { Env } from "./env";
  */
 export const KEY_RE = /^[A-Za-z0-9_-]{2,80}$/;
 
+/**
+ * A render version from the backend (an ISO timestamp today). Stored as R2
+ * custom metadata, so kept short and printable; the Worker only compares it.
+ */
+export const VERSION_RE = /^[\x21-\x7e]{1,64}$/;
+
 export const sceneImageKey = (key: string): string =>
   `screenshots/scene/${key}.png`;
 

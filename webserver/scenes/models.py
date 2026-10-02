@@ -126,6 +126,11 @@ class Scene(TimestampedModel):
 
     is_legacy = models.BooleanField(default=False)
 
+    # Bumped only when items/item_order change, i.e. when the rendered
+    # screenshot changes (unlike modified_date, which a rename or archive also
+    # bumps). Versions the screenshot: see scenes.schemas.scenes.
+    content_modified_date = models.DateTimeField(default=timezone.now)
+
     class Meta:
         constraints = [
             models.CheckConstraint(

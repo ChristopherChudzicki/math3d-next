@@ -20,7 +20,7 @@
  * generate-on-POST), building on .../2026-08-08-og-per-scene-image-design.md.
  */
 import type { Env } from "./env";
-import { KEY_RE, sceneImageKey, sceneImagePathToKey } from "./keys";
+import { KEY_RE, VERSION_RE, sceneImageKey, sceneImagePathToKey } from "./keys";
 import { renderAndCache } from "./renderAndCache";
 
 const DEFAULT_IMAGE_PATH = "/og/default.png";
@@ -54,6 +54,19 @@ const serveDefault = async (env: Env): Promise<Response> => {
 };
 
 /**
+ * Whether a hit is the render of the scene version `v` names (the app's
+ * thumbnails ask with one; og:image doesn't, and any hit is current for it).
+ * Renders carry the version the backend asked for; ones from before versions
+ * existed fall back to comparing their upload time with `v`, a date.
+ */
+const isCurrentRender = (cached: R2Object, v: string | null): boolean => {
+  if (v === null) return true;
+  const version = cached.customMetadata?.version;
+  if (version !== undefined) return version === v;
+  return !(cached.uploaded.getTime() < Date.parse(v));
+};
+
+/**
  * A miss under `?fallback=none`: the card's <img> errors and keeps its
  * placeholder. Short-lived, like the default card, so a render that lands
  * shortly after a save shows up on a later load.
@@ -81,16 +94,24 @@ export default {
       if (!env.RENDER_SECRET || auth !== `Bearer ${env.RENDER_SECRET}`) {
         return new Response("forbidden", { status: 403 });
       }
-      let key: unknown;
+      let body: { key?: unknown; version?: unknown } = {};
       try {
-        key = ((await request.json()) as { key?: unknown }).key;
+        body = (await request.json()) as typeof body;
       } catch {
-        key = undefined;
+        // Falls through to the 400 below.
       }
+      const { key, version } = body ?? {};
       if (typeof key !== "string" || !KEY_RE.test(key)) {
         return new Response("bad request", { status: 400 });
       }
-      ctx.waitUntil(renderAndCache(env, key));
+      // Optional: a backend from before versions existed sends none.
+      if (
+        version !== undefined &&
+        (typeof version !== "string" || !VERSION_RE.test(version))
+      ) {
+        return new Response("bad request", { status: 400 });
+      }
+      ctx.waitUntil(renderAndCache(env, key, version));
       return new Response(null, { status: 202 });
     }
 
@@ -114,16 +135,14 @@ export default {
       return serveMiss();
     }
     if (cached !== null) {
-      // `v` (the scene's modified date, from the app's thumbnails) postdating
-      // the render means a newer render may be in flight: cache this one
-      // briefly, or the browser would keep the old image under the new URL.
-      const version = Date.parse(searchParams.get("v") ?? "");
-      const maybeStale = cached.uploaded.getTime() < version;
+      // Not the requested version: the save's render may still be in flight.
+      // Cache briefly, or the browser would keep this image under the new URL.
+      const current = isCurrentRender(cached, searchParams.get("v"));
       return new Response(cached.body, {
         status: 200,
         headers: {
           "content-type": "image/png",
-          "cache-control": `public, max-age=${maybeStale ? 60 : 86400}`,
+          "cache-control": `public, max-age=${current ? 86400 : 60}`,
         },
       });
     }

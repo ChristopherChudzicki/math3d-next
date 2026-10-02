@@ -29,28 +29,42 @@ a slot against its per-period spend caps — tells it to.
 3. With `?fallback=none`, step 2 returns `404` (`max-age=60`) instead of the
    default card. The app's scene-card thumbnails ask for this (Django's
    `imageUrl` carries it), so a missing render errors their `<img>` and leaves
-   the card's own placeholder showing. A hit is served as in step 1, except
-   that one older than `?v=` (the scene's modified date) gets `max-age=60`: a
+   the card's own placeholder showing.
+4. With `?v=` (the app's thumbnails send the scene's content version), a hit
+   whose stored `version` differs gets `max-age=60` instead of a day: the
    save's render may still be in flight, and a day-long cache would pin the
-   previous image to the new URL.
+   previous image to the new URL. A render with no stored `version` (made before
+   versions existed) falls back to comparing its upload time with `v`.
+
+Versions are what make that cache safe. Django bumps a scene's
+`content_modified_date` only when its items change — the same edits that
+trigger a render; a rename or archive leaves it, the URL, and the cached image
+alone. It sends that version with each `POST /render`, the render is stored
+with it, and the thumbnail URL carries it as `v`, so "is this the render the URL
+asks for" is an exact match. (Comparing upload time to a save time instead
+would misjudge two quick saves, where the first save's render lands after the
+second save, and would depend on two clocks agreeing.)
 
 `POST /render` (secret-gated, backend-only):
 
 1. `Authorization: Bearer <RENDER_SECRET>` mismatch/missing → `403` before any
    parsing or scheduling.
-2. Body `{ "key": "<key>" }` failing the key charset → `400`.
+2. Body `{ "key": "<key>", "version": "<version>" }` with a key failing the
+   key charset, or a `version` that is present but not 1–64 printable ASCII
+   characters → `400`. `version` is optional, for backends that predate it.
 3. Otherwise schedule a background render via `ctx.waitUntil` and return `202`
    immediately. The render screenshots `{FRAME_ORIGIN}/app/frame/{key}` at
    1200×630 (waiting for `data-scene-ready`) and writes the PNG to R2. It is
    bounded by `RENDER_DEADLINE_MS` (a timeout that closes the browser even on a
-   hung page). All render failures are swallowed and logged — a failed render
+   hung page). The R2 object's custom metadata records `version`. All render failures are swallowed and logged — a failed render
    just leaves the default card in place until the next save re-nudges.
 
 Renders are not single-flighted: two saves inside one render window launch two
 concurrent renders of the same key, and the later-to-finish wins the R2 write —
-so a slower render of an older save can briefly cache a stale image (corrected on
-the next save). Spend is still capped (each save consumed a reservation), so this
-is a quality edge, not a cost one.
+so a slower render of an older save can leave a stale image in R2 (corrected on
+the next save). It carries the older version, so thumbnails cache it for a minute
+at a time rather than a day. Spend is still capped (each save consumed a
+reservation), so this is a quality edge, not a cost one.
 
 `GET /health` → `200 ok`.
 

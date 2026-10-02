@@ -13,6 +13,8 @@ from scenes.schemas.scenes import (
     SceneMetaSchema,
     ScenePatchSchema,
     SceneSchema,
+    scene_image_url,
+    scene_image_version,
 )
 
 __all__ = [
@@ -28,4 +30,6 @@ __all__ = [
     "SceneMetaSchema",
     "ScenePatchSchema",
     "SceneSchema",
+    "scene_image_url",
+    "scene_image_version",
 ]

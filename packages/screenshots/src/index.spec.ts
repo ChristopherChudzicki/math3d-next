@@ -204,27 +204,60 @@ describe("?fallback=none", () => {
     expect(new Uint8Array(await res.arrayBuffer())).toEqual(PNG);
   });
 
-  it("caches a hit briefly when it predates v, since a newer render may be in flight", async () => {
-    await env.SCREENSHOTS_BUCKET.put(sceneImageKey("hit"), PNG, {
-      httpMetadata: { contentType: "image/png" },
-    });
-    const future = new Date(Date.now() + 60_000).toISOString();
-    const res = await call(
-      `/screenshots/scene/hit.png?fallback=none&v=${encodeURIComponent(future)}`,
-    );
-    expect(res.status).toBe(200);
-    expect(res.headers.get("cache-control")).toBe("public, max-age=60");
-    expect(new Uint8Array(await res.arrayBuffer())).toEqual(PNG);
-  });
+  describe("a hit's cache lifetime", () => {
+    const V = "2026-10-02T01:53:32.123456+00:00";
+    const putHit = (customMetadata?: Record<string, string>) =>
+      env.SCREENSHOTS_BUCKET.put(sceneImageKey("hit"), PNG, {
+        httpMetadata: { contentType: "image/png" },
+        customMetadata,
+      });
+    const cacheControl = async (v: string) =>
+      (
+        await call(
+          `/screenshots/scene/hit.png?fallback=none&v=${encodeURIComponent(v)}`,
+        )
+      ).headers.get("cache-control");
 
-  it("caches a hit for a day when it postdates v (Django's microsecond isoformat)", async () => {
-    await env.SCREENSHOTS_BUCKET.put(sceneImageKey("hit"), PNG, {
-      httpMetadata: { contentType: "image/png" },
+    it("is a day when the render is of the requested version", async () => {
+      await putHit({ version: V });
+      expect(await cacheControl(V)).toBe("public, max-age=86400");
     });
-    const res = await call(
-      `/screenshots/scene/hit.png?fallback=none&v=${encodeURIComponent("2020-01-01T00:00:00.123456+00:00")}`,
-    );
-    expect(res.headers.get("cache-control")).toBe("public, max-age=86400");
+
+    it("is a minute when the render is of another version, since the requested one may be in flight", async () => {
+      await putHit({ version: V });
+      const later = "2026-10-02T01:53:32.123457+00:00";
+      expect(await cacheControl(later)).toBe("public, max-age=60");
+    });
+
+    it("is a minute even when another version's render postdates v", async () => {
+      // Two quick saves: the first save's render can land after the second
+      // save. Upload time would call it current; its version says otherwise.
+      await putHit({ version: "2020-01-01T00:00:00+00:00" });
+      expect(await cacheControl("2020-01-01T00:00:01+00:00")).toBe(
+        "public, max-age=60",
+      );
+    });
+
+    describe("for a render from before versions existed", () => {
+      it("is a minute when it was uploaded before v", async () => {
+        await putHit();
+        const future = new Date(Date.now() + 60_000).toISOString();
+        expect(await cacheControl(future)).toBe("public, max-age=60");
+      });
+
+      it("is a day when it was uploaded after v (Django's microsecond isoformat)", async () => {
+        await putHit();
+        expect(await cacheControl("2020-01-01T00:00:00.123456+00:00")).toBe(
+          "public, max-age=86400",
+        );
+      });
+    });
+
+    it("is a day without v (og:image), whatever the render's version", async () => {
+      await putHit({ version: V });
+      const res = await call("/screenshots/scene/hit.png");
+      expect(res.headers.get("cache-control")).toBe("public, max-age=86400");
+    });
   });
 
   it("serves the default card as before for any other fallback value", async () => {
@@ -241,6 +274,31 @@ it("202 + schedules a render for a valid secret + key", async () => {
   expect(res.status).toBe(202);
   const stored = await env.SCREENSHOTS_BUCKET.get(sceneImageKey("good"));
   expect(new Uint8Array(await stored!.arrayBuffer())).toEqual(PNG);
+});
+
+it("stores the version a render was requested for", async () => {
+  vi.mocked(renderScene).mockResolvedValueOnce(PNG);
+  const res = await post(
+    { key: "good", version: "2026-10-02T01:53:32+00:00" },
+    { authorization: "Bearer shh" },
+  );
+  expect(res.status).toBe(202);
+  const stored = await env.SCREENSHOTS_BUCKET.head(sceneImageKey("good"));
+  expect(stored!.customMetadata?.version).toBe("2026-10-02T01:53:32+00:00");
+});
+
+it.each([
+  ["a non-string", 1],
+  ["an empty string", ""],
+  ["an overlong string", "x".repeat(65)],
+  ["whitespace", "a b"],
+])("400 for %s version, without rendering", async (_, version) => {
+  const res = await post(
+    { key: "good", version },
+    { authorization: "Bearer shh" },
+  );
+  expect(res.status).toBe(400);
+  expect(renderScene).not.toHaveBeenCalled();
 });
 
 it("403 and never launches a browser without the secret", async () => {

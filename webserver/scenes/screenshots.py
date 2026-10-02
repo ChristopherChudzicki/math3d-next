@@ -59,13 +59,14 @@ def reserve_render_slot() -> bool:
         return True
 
 
-def nudge_render(key: str) -> None:
+def nudge_render(key: str, version: str) -> None:
     """Best-effort fire at the Worker's POST /render (secret-gated → 202).
     ~2s timeout, no retry. Swallows transport errors — the render is a
-    best-effort side effect of the save."""
+    best-effort side effect of the save. The Worker stores ``version`` on the
+    render (scenes.schemas.scenes.scene_image_version)."""
     req = urllib.request.Request(
         f"{settings.SCREENSHOTS_ORIGIN}/render",
-        data=json.dumps({"key": key}).encode(),
+        data=json.dumps({"key": key, "version": version}).encode(),
         headers={
             "content-type": "application/json",
             "authorization": f"Bearer {settings.RENDER_SECRET}",
@@ -81,7 +82,7 @@ def nudge_render(key: str) -> None:
         logger.error("nudge_render failed for key=%s", key, exc_info=True)
 
 
-def maybe_render(key: str) -> None:
+def maybe_render(key: str, version: str) -> None:
     """Reserve a slot and nudge the render Worker. Fully isolated — runs inline
     via on_commit in autocommit views (scenes/api.py), so it must never
     propagate: a failure here must still let the save return 2xx."""
@@ -92,16 +93,16 @@ def maybe_render(key: str) -> None:
             return
         if not reserve_render_slot():  # over cap → decline (coverage, not spend)
             return
-        nudge_render(key)
+        nudge_render(key, version)
     except Exception:
         logger.error("maybe_render failed for key=%s", key, exc_info=True)
 
 
-def schedule_render(key: str) -> None:
+def schedule_render(key: str, version: str) -> None:
     """Fire maybe_render after the surrounding DB work commits.
 
     create/update are autocommit views, so this on_commit hook runs inline
     before the response. Wrapping them in a transaction would defer the nudge to
     request-commit and demote reserve_render_slot's atomic() to a savepoint.
     """
-    transaction.on_commit(lambda: maybe_render(key))
+    transaction.on_commit(lambda: maybe_render(key, version))

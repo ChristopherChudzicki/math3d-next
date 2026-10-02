@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import threading
 from unittest import mock
@@ -108,7 +109,7 @@ def test_no_over_grant_under_concurrency(settings):
 def test_maybe_render_dark_when_origin_unset(settings):
     settings.SCREENSHOTS_ORIGIN = ""
     with mock.patch.object(screenshots, "reserve_render_slot") as reserve:
-        screenshots.maybe_render("abc")
+        screenshots.maybe_render("abc", "v1")
     reserve.assert_not_called()
 
 
@@ -118,7 +119,7 @@ def test_maybe_render_dark_when_secret_unset(settings):
     settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
     settings.RENDER_SECRET = ""
     with mock.patch.object(screenshots, "reserve_render_slot") as reserve:
-        screenshots.maybe_render("abc")
+        screenshots.maybe_render("abc", "v1")
     reserve.assert_not_called()
 
 
@@ -129,7 +130,7 @@ def test_maybe_render_declines_over_cap_without_nudging(settings):
         mock.patch.object(screenshots, "reserve_render_slot", return_value=False),
         mock.patch.object(screenshots, "nudge_render") as nudge,
     ):
-        screenshots.maybe_render("abc")
+        screenshots.maybe_render("abc", "v1")
     nudge.assert_not_called()
 
 
@@ -140,8 +141,8 @@ def test_maybe_render_nudges_when_granted(settings):
         mock.patch.object(screenshots, "reserve_render_slot", return_value=True),
         mock.patch.object(screenshots, "nudge_render") as nudge,
     ):
-        screenshots.maybe_render("abc")
-    nudge.assert_called_once_with("abc")
+        screenshots.maybe_render("abc", "v1")
+    nudge.assert_called_once_with("abc", "v1")
 
 
 @pytest.fixture
@@ -163,7 +164,7 @@ def test_maybe_render_swallows_reserve_exception(settings, scenes_caplog):
     with mock.patch.object(
         screenshots, "reserve_render_slot", side_effect=RuntimeError("db down")
     ):
-        screenshots.maybe_render("abc")  # must not raise
+        screenshots.maybe_render("abc", "v1")  # must not raise
     (record,) = [r for r in scenes_caplog.records if r.levelno == logging.ERROR]
     assert record.name == "scenes.screenshots"
     assert record.getMessage() == "maybe_render failed for key=abc"
@@ -175,9 +176,18 @@ def test_nudge_render_sends_named_user_agent(settings):
     settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
     settings.RENDER_SECRET = "shh"  # pragma: allowlist secret
     with mock.patch("scenes.screenshots.urllib.request.urlopen") as urlopen:
-        screenshots.nudge_render("abc")
+        screenshots.nudge_render("abc", "v1")
     req = urlopen.call_args.args[0]
     assert req.get_header("User-agent") == BACKEND_USER_AGENT
+
+
+def test_nudge_render_sends_key_and_version(settings):
+    settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
+    settings.RENDER_SECRET = "shh"  # pragma: allowlist secret
+    with mock.patch("scenes.screenshots.urllib.request.urlopen") as urlopen:
+        screenshots.nudge_render("abc", "v1")
+    req = urlopen.call_args.args[0]
+    assert json.loads(req.data) == {"key": "abc", "version": "v1"}
 
 
 def test_nudge_render_swallows_transport_error(settings, scenes_caplog):
@@ -186,7 +196,7 @@ def test_nudge_render_swallows_transport_error(settings, scenes_caplog):
     with mock.patch(
         "scenes.screenshots.urllib.request.urlopen", side_effect=OSError("refused")
     ):
-        screenshots.nudge_render("abc")  # must not raise
+        screenshots.nudge_render("abc", "v1")  # must not raise
     (record,) = [r for r in scenes_caplog.records if r.levelno == logging.ERROR]
     assert record.name == "scenes.screenshots"
     assert record.getMessage() == "nudge_render failed for key=abc"
