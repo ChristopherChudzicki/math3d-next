@@ -109,8 +109,7 @@ def update_scene(request, key: str, payload: ScenePatchSchema):
     if "archived" in data:
         scene.archived = data["archived"]
     # Only content edits change the rendered PNG; a title/archived-only patch
-    # must not burn a render slot (bulk archive/rename would drain the cap), nor
-    # change the screenshot's version.
+    # must not burn a render slot (bulk archive/rename would drain the cap).
     content_changed = bool(data.keys() & {"items", "item_order"})
     if content_changed:
         scene.content_modified_date = timezone.now()

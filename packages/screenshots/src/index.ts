@@ -6,10 +6,8 @@
  * cache-read-failure. It NEVER renders or schedules a render (ADR-0002 —
  * rendering is nudged separately, by the backend, on scene create/update).
  * The endpoint never blocks on or 500s — every response returns a valid image
- * immediately, except that `?fallback=none` (the app's scene-card thumbnails,
- * which draw their own placeholder) turns the default card into a 404. With
- * `?v=`, a hit is cached for a day only if it is the render of that version
- * (`isCurrentRender`).
+ * immediately, except that `?fallback=none` (scene-card thumbnails) turns the
+ * default card into a 404.
  *
  * Bindings (wrangler.jsonc): BROWSER (Browser Rendering), SCREENSHOTS_BUCKET (R2
  * bucket `math3d-screenshots`). FRAME_ORIGIN is a deploy-injected var (see
@@ -56,24 +54,11 @@ const serveDefault = async (env: Env): Promise<Response> => {
   }
 };
 
-/**
- * Whether a hit is the render of the scene version `v` names (the app's
- * thumbnails ask with one; og:image doesn't, and any hit is current for it).
- * Renders carry the version the backend asked for; ones from before versions
- * existed fall back to comparing their upload time with `v`, a date.
- */
-const isCurrentRender = (cached: R2Object, v: string | null): boolean => {
-  if (v === null) return true;
-  const version = cached.customMetadata?.version;
-  if (version !== undefined) return version === v;
-  return !(cached.uploaded.getTime() < Date.parse(v));
-};
+/** Without `v` (og:image) any hit is current; an untagged render never is. */
+const isCurrentRender = (cached: R2Object, v: string | null): boolean =>
+  v === null || cached.customMetadata?.version === v;
 
-/**
- * A miss under `?fallback=none`: the card's <img> errors and keeps its
- * placeholder. Short-lived, like the default card, so a render that lands
- * shortly after a save shows up on a later load.
- */
+/** Short-lived, so a render that lands after a save shows on a later load. */
 const serveNotFound = (): Response =>
   new Response("not found", {
     status: 404,
@@ -111,7 +96,7 @@ export default {
       if (typeof key !== "string" || !KEY_RE.test(key)) {
         return new Response("bad request", { status: 400 });
       }
-      // Optional: a backend from before versions existed sends none.
+      // Optional: an older backend sends none.
       if (
         version !== undefined &&
         (typeof version !== "string" || !VERSION_RE.test(version))
@@ -142,8 +127,8 @@ export default {
       return serveMiss();
     }
     if (cached !== null) {
-      // Not the requested version: the save's render may still be in flight.
-      // Cache briefly, or the browser would keep this image under the new URL.
+      // Not the requested version: its render may still be in flight, and a
+      // day-long cache would pin this image to the new URL.
       const current = isCurrentRender(cached, searchParams.get("v"));
       return new Response(cached.body, {
         status: 200,

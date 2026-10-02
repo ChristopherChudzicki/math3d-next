@@ -62,14 +62,8 @@ def reserve_render_slot() -> bool:
 
 
 def scene_image_url(key: str, version: str) -> Optional[str]:
-    """The scene's screenshot URL on the render Worker, or None when the
-    feature is dark.
-
-    Tentative: nothing records whether a render landed. ``fallback=none`` makes
-    a miss 404 instead of serving the default OG card, so an <img> can fall back
-    to its own placeholder. ``v`` (Scene.screenshot_version) changes only when
-    the content does, and the Worker caches a render for long only when it is
-    of that version."""
+    """The scene's screenshot URL, or None when the feature is dark. Tentative:
+    ``fallback=none`` makes a missing render 404 rather than serve the OG card."""
     if not settings.SCREENSHOTS_ORIGIN:
         return None
     query = urlencode({"fallback": "none", "v": version})
@@ -82,8 +76,7 @@ def scene_image_url(key: str, version: str) -> Optional[str]:
 def nudge_render(key: str, version: str) -> None:
     """Best-effort fire at the Worker's POST /render (secret-gated → 202).
     ~2s timeout, no retry. Swallows transport errors — the render is a
-    best-effort side effect of the save. The Worker stores ``version``
-    (Scene.screenshot_version) on the render."""
+    best-effort side effect of the save."""
     req = urllib.request.Request(
         f"{settings.SCREENSHOTS_ORIGIN}/render",
         data=json.dumps({"key": key, "version": version}).encode(),

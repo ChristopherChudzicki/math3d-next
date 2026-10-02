@@ -127,21 +127,14 @@ class Scene(TimestampedModel):
 
     is_legacy = models.BooleanField(default=False)
 
-    # Set when the scene is created and when update_scene changes its items or
-    # item_order: the edits that request a new screenshot render (a rename or
-    # archive bumps only modified_date). Writers that request no render (admin,
-    # seed_test_data) leave it alone; migrate_scene backdates it with the other
-    # timestamps. db_default keeps inserts by code that predates the column
-    # working (old dynos serve while the release phase migrates).
+    # Bumped only by the edits that request a screenshot render (create, items,
+    # item_order). db_default serves old dynos' inserts during release.
     content_modified_date = models.DateTimeField(default=timezone.now, db_default=Now())
 
     @property
     def screenshot_version(self) -> str:
-        """Names the screenshot of the scene's current content. Sent with each
-        render request and stored on the render by the Worker; the image URL
-        carries it as ``v`` (scenes/screenshots.py, packages/screenshots).
-        Canonical UTC with fixed microseconds, so the same instant always gives
-        the same string, wherever the datetime came from."""
+        """The render's version tag and the image URL's ``v``. Canonical UTC, so
+        one instant always gives one string."""
         return self.content_modified_date.astimezone(datetime.UTC).isoformat(
             timespec="microseconds"
         )

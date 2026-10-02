@@ -198,7 +198,7 @@ describe("?fallback=none", () => {
     await env.SCREENSHOTS_BUCKET.put(sceneImageKey("hit"), PNG, {
       httpMetadata: { contentType: "image/png" },
     });
-    const res = await call("/screenshots/scene/hit.png?fallback=none&v=1");
+    const res = await call("/screenshots/scene/hit.png?fallback=none");
     expect(res.status).toBe(200);
     expect(res.headers.get("cache-control")).toContain("max-age=86400");
     expect(new Uint8Array(await res.arrayBuffer())).toEqual(PNG);
@@ -229,28 +229,9 @@ describe("?fallback=none", () => {
       expect(await cacheControl(later)).toBe("public, max-age=60");
     });
 
-    it("is a minute even when another version's render postdates v", async () => {
-      // Two quick saves: the first save's render can land after the second
-      // save. Upload time would call it current; its version says otherwise.
-      await putHit({ version: "2020-01-01T00:00:00+00:00" });
-      expect(await cacheControl("2020-01-01T00:00:01+00:00")).toBe(
-        "public, max-age=60",
-      );
-    });
-
-    describe("for a render from before versions existed", () => {
-      it("is a minute when it was uploaded before v", async () => {
-        await putHit();
-        const future = new Date(Date.now() + 60_000).toISOString();
-        expect(await cacheControl(future)).toBe("public, max-age=60");
-      });
-
-      it("is a day when it was uploaded after v (Django's microsecond isoformat)", async () => {
-        await putHit();
-        expect(await cacheControl("2020-01-01T00:00:00.123456+00:00")).toBe(
-          "public, max-age=86400",
-        );
-      });
+    it("is a minute for a render with no version", async () => {
+      await putHit();
+      expect(await cacheControl(V)).toBe("public, max-age=60");
     });
 
     it("is a day without v (og:image), whatever the render's version", async () => {
@@ -274,7 +255,7 @@ it("202 + schedules a render for a valid secret + key, unversioned without a ver
   expect(res.status).toBe(202);
   const stored = await env.SCREENSHOTS_BUCKET.get(sceneImageKey("good"));
   expect(new Uint8Array(await stored!.arrayBuffer())).toEqual(PNG);
-  // An unversioned render must fall back to upload time, not match "undefined".
+  // Not the string "undefined", which a `?v=undefined` would match.
   expect(stored!.customMetadata).not.toHaveProperty("version");
 });
 

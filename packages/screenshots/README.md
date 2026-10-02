@@ -34,14 +34,14 @@ a slot against its per-period spend caps — tells it to.
    whose stored `version` differs gets `max-age=60` instead of a day: the
    save's render may still be in flight, and a day-long cache would pin the
    previous image to the new URL. A render with no stored `version` (made before
-   versions existed) falls back to comparing its upload time with `v`.
+   versions existed) is treated as a mismatch.
 
 Versions are what make that cache safe. Django bumps a scene's
 `content_modified_date` only on the edits that trigger a render (items or item
 order); a rename or archive leaves it, the URL, and the cached image alone.
-`Scene.screenshot_version` is that date in canonical form. Django sends it with each `POST /render`, the render is stored
-with it, and the thumbnail URL carries it as `v`, so "is this the render the URL
-asks for" is an exact match. (Comparing upload time to a save time instead
+`Scene.screenshot_version` is that date in canonical form. Django sends it with
+each `POST /render`, the render is stored with it, and the thumbnail URL carries
+it as `v`, so "is this the render the URL asks for" is an exact match. (Comparing upload time to a save time instead
 would misjudge two quick saves, where the first save's render lands after the
 second save, and would depend on two clocks agreeing.)
 

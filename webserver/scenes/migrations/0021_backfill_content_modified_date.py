@@ -5,9 +5,8 @@ BATCH_SIZE = 5000
 
 
 def backfill(apps, schema_editor):
-    # The last content edit is unknown; modified_date is no earlier than it, so
-    # no existing render can look newer than its scene's content. Batched, each
-    # batch its own transaction (atomic = False), so no long-held locks.
+    # The last content edit is unknown; modified_date is the closest bound. Each
+    # batch is its own transaction (atomic = False), so no long-held locks.
     Scene = apps.get_model("scenes", "Scene")
     last_pk = 0
     while True:
