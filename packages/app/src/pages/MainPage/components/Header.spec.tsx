@@ -1,10 +1,12 @@
 import { test, expect } from "vitest";
+import invariant from "tiny-invariant";
 import {
   renderTestApp,
   screen,
   user,
   waitFor,
   waitForAppReady,
+  within,
 } from "@/test_util";
 
 test.each([
@@ -64,11 +66,44 @@ test("Contact links to the GitHub issues page in a new tab", async () => {
   expect(contact).toHaveAttribute("rel", "noreferrer");
 });
 
+test("Function Reference opens the reference page in a new tab", async () => {
+  renderTestApp("", { isAuthenticated: false });
+  await user.click(screen.getByRole("button", { name: "Open Menu" }));
+  const reference = await screen.findByRole("menuitem", {
+    name: "Function Reference",
+  });
+  expect(reference).toHaveAttribute("href", "/app/help/reference");
+  expect(reference).toHaveAttribute("target", "_blank");
+});
+
+test("the signed-in menu's items are grouped under the account's email", async () => {
+  const { user: me } = renderTestApp("", { isAuthenticated: true });
+  invariant(me);
+  await user.click(
+    await screen.findByRole("button", { name: "Open User Menu" }),
+  );
+
+  const account = await screen.findByRole("group", { name: me.email });
+  expect(within(account).getByRole("menuitem", { name: "Sign out" })).toBe(
+    screen.getByRole("menuitem", { name: "Sign out" }),
+  );
+  expect(screen.getByTestId("username-display")).toHaveTextContent(
+    me.email,
+  );
+});
+
+test("Sign in in the menu opens the sign-in dialog", async () => {
+  const { location } = renderTestApp("", { isAuthenticated: false });
+  await user.click(screen.getByRole("button", { name: "Open Menu" }));
+  await user.click(await screen.findByRole("menuitem", { name: "Sign in" }));
+  expect(location.current.search).toContain("signin");
+});
+
 test("Sign out opens logout overlay", async () => {
   const { location } = renderTestApp("", { isAuthenticated: true });
   const button = await screen.findByRole("button", { name: "Open User Menu" });
   await user.click(button);
-  const signout = screen.getByRole("menuitem", { name: "Sign out" });
+  const signout = await screen.findByRole("menuitem", { name: "Sign out" });
   await user.click(signout);
   expect(location.current.search).toContain("overlay=logout");
 });
@@ -77,7 +112,7 @@ test("Delete Account opens the delete-account overlay", async () => {
   const { location } = renderTestApp("", { isAuthenticated: true });
   const button = await screen.findByRole("button", { name: "Open User Menu" });
   await user.click(button);
-  const deleteAccount = screen.getByRole("menuitem", {
+  const deleteAccount = await screen.findByRole("menuitem", {
     name: "Delete Account",
   });
   await user.click(deleteAccount);

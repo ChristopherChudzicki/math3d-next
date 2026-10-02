@@ -11,8 +11,7 @@ import { useAuthStatus } from "@/features/auth";
 import Button from "@/ui/Button";
 import ButtonGroup from "@/ui/ButtonGroup";
 import IconButton from "@/ui/IconButton";
-import SimpleMenu from "@/ui/SimpleMenu/SimpleMenu";
-import type { SimpleMenuItem } from "@/ui/SimpleMenu/SimpleMenu";
+import { Menu } from "@/ui/Menu";
 import PublishDialog, { sceneUrl } from "./PublishDialog";
 import type { PublishMode } from "./PublishDialog";
 import LinkDialog from "./LinkDialog";
@@ -151,24 +150,6 @@ const SceneActions: React.FC = () => {
     }
   };
 
-  const menuItems: SimpleMenuItem[] = menu.map((action) =>
-    action === "duplicate"
-      ? {
-          type: "button",
-          key: "duplicate",
-          label: "Duplicate",
-          onClick: () => setDialog({ kind: "publish", mode: "copy" }),
-        }
-      : {
-          type: "button",
-          key: "copy-link",
-          label: "Copy link",
-          onClick: () => {
-            copyLink();
-          },
-        },
-  );
-
   const closeDialog = () => setDialog(null);
 
   return (
@@ -199,20 +180,38 @@ const SceneActions: React.FC = () => {
             {label}
           </Button>
           {menu.length > 0 ? (
-            <SimpleMenu
-              aria-label="More scene actions"
-              items={menuItems}
-              trigger={
-                <IconButton
-                  variant="outline"
-                  tone="accent"
-                  label="More scene actions"
-                  disabled={saving}
-                >
-                  <ExpandMoreIcon fontSize="inherit" />
-                </IconButton>
-              }
-            />
+            <Menu.Root>
+              <Menu.Trigger
+                disabled={saving}
+                render={
+                  <IconButton
+                    variant="outline"
+                    tone="accent"
+                    label="More scene actions"
+                  >
+                    <ExpandMoreIcon fontSize="inherit" />
+                  </IconButton>
+                }
+              />
+              <Menu.Popup>
+                {menu.includes("duplicate") ? (
+                  <Menu.Item
+                    onClick={() => setDialog({ kind: "publish", mode: "copy" })}
+                  >
+                    Duplicate
+                  </Menu.Item>
+                ) : null}
+                {menu.includes("copy-link") ? (
+                  <Menu.Item
+                    onClick={() => {
+                      copyLink();
+                    }}
+                  >
+                    Copy link
+                  </Menu.Item>
+                ) : null}
+              </Menu.Popup>
+            </Menu.Root>
           ) : null}
         </ButtonGroup>
       )}
