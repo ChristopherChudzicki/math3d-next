@@ -205,6 +205,29 @@ describe("?fallback=none", () => {
     expect(new Uint8Array(await res.arrayBuffer())).toEqual(PNG);
   });
 
+  it("caches a hit briefly when it predates v, since a newer render may be in flight", async () => {
+    await env.SCREENSHOTS_BUCKET.put(sceneImageKey("hit"), PNG, {
+      httpMetadata: { contentType: "image/png" },
+    });
+    const future = new Date(Date.now() + 60_000).toISOString();
+    const res = await call(
+      `/screenshots/scene/hit.png?fallback=none&v=${encodeURIComponent(future)}`,
+    );
+    expect(res.status).toBe(200);
+    expect(res.headers.get("cache-control")).toBe("public, max-age=60");
+    expect(new Uint8Array(await res.arrayBuffer())).toEqual(PNG);
+  });
+
+  it("caches a hit for a day when it postdates v (Django's microsecond isoformat)", async () => {
+    await env.SCREENSHOTS_BUCKET.put(sceneImageKey("hit"), PNG, {
+      httpMetadata: { contentType: "image/png" },
+    });
+    const res = await call(
+      `/screenshots/scene/hit.png?fallback=none&v=${encodeURIComponent("2020-01-01T00:00:00.123456+00:00")}`,
+    );
+    expect(res.headers.get("cache-control")).toBe("public, max-age=86400");
+  });
+
   it("serves the default card as before for any other fallback value", async () => {
     stubFetch();
     const res = await call("/screenshots/scene/missing.png?fallback=nope");

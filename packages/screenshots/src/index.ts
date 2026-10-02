@@ -14,8 +14,8 @@
  * deploy-reusable.yml). Requires the nodejs_compat compatibility flag
  * (@cloudflare/puppeteer imports node builtins).
  *
- * Wired into the app Worker via the single `SCREENSHOTS_ORIGIN` var; unset there =
- * the whole feature is dark. Design + teardown: packages/screenshots/README.md,
+ * Wired into the app Worker (og:image) and the backend (render nudges, My Scenes
+ * thumbnail URLs) via their `SCREENSHOTS_ORIGIN` vars; unset = that side is dark. Design + teardown: packages/screenshots/README.md,
  * docs/superpowers/specs/2026-08-15-screenshot-cost-protection-design.md (ADR-0002,
  * generate-on-POST), building on .../2026-08-08-og-per-scene-image-design.md.
  */
@@ -114,11 +114,16 @@ export default {
       return serveMiss();
     }
     if (cached !== null) {
+      // `v` (the scene's modified date, from the app's thumbnails) postdating
+      // the render means a newer render may be in flight: cache this one
+      // briefly, or the browser would keep the old image under the new URL.
+      const version = Date.parse(searchParams.get("v") ?? "");
+      const maybeStale = cached.uploaded.getTime() < version;
       return new Response(cached.body, {
         status: 200,
         headers: {
           "content-type": "image/png",
-          "cache-control": "public, max-age=86400",
+          "cache-control": `public, max-age=${maybeStale ? 60 : 86400}`,
         },
       });
     }

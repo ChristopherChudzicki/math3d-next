@@ -29,7 +29,10 @@ a slot against its per-period spend caps — tells it to.
 3. With `?fallback=none`, step 2 returns `404` (`max-age=60`) instead of the
    default card. The app's scene-card thumbnails ask for this (Django's
    `imageUrl` carries it), so a missing render errors their `<img>` and leaves
-   the card's own placeholder showing. A hit is served as in step 1.
+   the card's own placeholder showing. A hit is served as in step 1, except
+   that one older than `?v=` (the scene's modified date) gets `max-age=60`: a
+   save's render may still be in flight, and a day-long cache would pin the
+   previous image to the new URL.
 
 `POST /render` (secret-gated, backend-only):
 
