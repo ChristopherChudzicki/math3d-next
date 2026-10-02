@@ -47,8 +47,8 @@ test.each([
     // The avatar is the signed-in trigger and the hamburger every other state,
     // including the pending one waited out above.
     expect(screen.queryByRole("button", { name: otherTrigger })).toBeNull();
-    expect(!!screen.queryByRole("button", { name: "Sign in" })).toBe(
-      headerSignIn,
+    expect(screen.queryAllByRole("button", { name: "Sign in" })).toHaveLength(
+      headerSignIn ? 1 : 0,
     );
 
     await user.click(screen.getByRole("button", { name: trigger }));
@@ -92,6 +92,25 @@ test("Contact links to the GitHub issues page in a new tab", async () => {
   expect(contact).toHaveAttribute("rel", "noreferrer");
 });
 
+test("the menu closes when auth settles and the trigger swaps", async () => {
+  const me = Promise.withResolvers<void>();
+  // Returning nothing falls through to the mock API's handler.
+  server.use(
+    http.get(urls.auth.usersMe, async () => {
+      await me.promise;
+    }),
+  );
+  renderTestApp("", { isAuthenticated: true });
+  await user.click(await screen.findByRole("button", { name: "Open Menu" }));
+  const menu = await screen.findByRole("menu", { name: "Open Menu" });
+
+  me.resolve();
+
+  await screen.findByRole("button", { name: "Open User Menu" });
+  await waitFor(() => expect(menu).not.toBeInTheDocument());
+  expect(screen.queryByRole("menu")).toBeNull();
+});
+
 test("Function Reference opens the reference page in a new tab", async () => {
   renderTestApp("", { isAuthenticated: false });
   await user.click(screen.getByRole("button", { name: "Open Menu" }));
@@ -110,8 +129,9 @@ test("the signed-in menu's items are grouped under the account's email", async (
   );
 
   const account = await screen.findByRole("group", { name: me.email });
-  expect(within(account).getAllByRole("menuitem")).toEqual(
-    screen.getAllByRole("menuitem"),
+  // All of the menu's items, none outside the group.
+  expect(within(account).getAllByRole("menuitem")).toHaveLength(
+    screen.getAllByRole("menuitem").length,
   );
 });
 

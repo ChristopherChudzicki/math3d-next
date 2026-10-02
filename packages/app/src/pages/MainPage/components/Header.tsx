@@ -96,6 +96,7 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
       {isAuthenticated && (
         <Menu.Item
           icon={<DeleteForeverIcon fontSize="inherit" />}
+          tone="danger"
           onClick={() => open("delete-account")}
         >
           Delete Account
@@ -147,12 +148,7 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
         <>
           <SceneActions />
           <LoginButtons isAuthenticated={authStatus} />
-          <UserMenu
-            authStatus={authStatus}
-            email={
-              authStatus === "authenticated" ? userQuery.data?.email : undefined
-            }
-          >
+          <UserMenu authStatus={authStatus} email={userQuery.data?.email}>
             <UserMenuItems authStatus={authStatus} />
           </UserMenu>
         </>

@@ -39,7 +39,10 @@ const UserMenu: React.FC<{
   );
 
   return (
-    <Menu.Root>
+    // Keyed so the menu closes when the trigger swaps (the ["me"] query
+    // settling while the hamburger's menu is open); otherwise it stays open,
+    // anchored to a button that is no longer on the page.
+    <Menu.Root key={useHamburger ? "hamburger" : "avatar"}>
       {trigger}
       <Menu.Popup>
         {email ? (
