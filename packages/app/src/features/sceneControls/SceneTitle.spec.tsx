@@ -1,5 +1,7 @@
 import { expect, test } from "vitest";
-import { seedDb } from "@math3d/mock-api";
+import { http } from "msw";
+import { server } from "@math3d/mock-api/node";
+import { seedDb, urls } from "@math3d/mock-api";
 import type { Scene } from "@math3d/api";
 import {
   act,
@@ -63,4 +65,45 @@ test("loading another scene closes the rename dialog", async () => {
 
   await screen.findByRole("heading", { level: 1, name: other.title ?? "" });
   expect(dialog).not.toBeInTheDocument();
+});
+
+test("the heading and rename control wait for the route's scene to load", async () => {
+  const other = seedDb.withSceneFromItems([]);
+  const { scene, router } = renderScene();
+  await screen.findByRole("heading", { level: 1, name: scene.title ?? "" });
+  const gate = Promise.withResolvers<void>();
+  // Returning nothing falls through to the mock API's GET handler.
+  server.use(
+    http.get(urls.scenes.detail, async () => {
+      await gate.promise;
+    }),
+  );
+
+  await act(() => router.navigate(`/${other.key}`));
+
+  expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Rename scene" })).toBeNull();
+  gate.resolve();
+  expect(
+    await screen.findByRole("heading", { level: 1, name: other.title ?? "" }),
+  ).toBeVisible();
+});
+
+test("publishing keeps the heading in place", async () => {
+  const me = seedDb.withUser();
+  const scene = seedDb.withSceneFromItems([], { author: me.id });
+  renderTestApp(`/${scene.key}`, { user: me });
+  const heading = await screen.findByRole("heading", {
+    level: 1,
+    name: scene.title ?? "",
+  });
+
+  await user.click(
+    await screen.findByRole("button", { name: "More scene actions" }),
+  );
+  await user.click(await screen.findByRole("menuitem", { name: "Duplicate" }));
+  await screen.findByRole("dialog", { name: "Scene saved!" });
+
+  expect(heading).toBeInTheDocument();
+  expect(heading).toHaveTextContent(`Copy of ${scene.title}`);
 });

@@ -18,7 +18,12 @@ def test_normalize_titles():
     )
     with connection.schema_editor() as editor:
         editor.remove_constraint(Scene, constraint)
-    expected = {"Untitled\n": "", "a\r\nb\nc\r": "a b c", "Mine": "Mine"}
+    expected = {
+        "Untitled\n": "",
+        " Untitled ": "",
+        "a\r\nb\nc\r": "a b c",
+        "Mine": "Mine",
+    }
     scenes = Scene.objects.bulk_create(
         [SceneFactory.build(title=title, author=None) for title in expected]
     )

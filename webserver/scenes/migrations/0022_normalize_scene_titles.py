@@ -7,7 +7,8 @@ from django.db.models.functions import Trim
 
 
 def normalize_titles(apps, schema_editor):
-    """Replace line breaks with spaces, then store "Untitled" as blank."""
+    """Replace line breaks with spaces, then store "Untitled" (ignoring
+    surrounding spaces) as blank."""
     Scene = apps.get_model("scenes", "Scene")
     Scene.objects.filter(title__regex=r"[\r\n]").update(
         title=Trim(
@@ -20,7 +21,9 @@ def normalize_titles(apps, schema_editor):
             )
         )
     )
-    Scene.objects.filter(title="Untitled").update(title="")
+    Scene.objects.annotate(trimmed=Trim("title")).filter(trimmed="Untitled").update(
+        title=""
+    )
 
 
 class Migration(migrations.Migration):
