@@ -94,7 +94,7 @@ export default {
       return new Response(null, { status: 202 });
     }
 
-    const serveMiss = (): Promise<Response> | Response =>
+    const serveMiss = async (): Promise<Response> =>
       searchParams.get("fallback") === "none"
         ? serveNotFound()
         : serveDefault(env);

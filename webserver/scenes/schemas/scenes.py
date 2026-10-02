@@ -10,7 +10,7 @@ from scenes.schemas.math_items import MathItem
 
 
 def scene_image_url(key: str, modified_date: datetime) -> Optional[str]:
-    """The scene's screenshot URL on the render Worker (scenes/screenshots.py),
+    """The scene's screenshot URL on the render Worker (packages/screenshots),
     or None when the feature is dark.
 
     Tentative: nothing records whether a render landed. ``fallback=none`` makes
@@ -43,9 +43,6 @@ class MiniSceneSchema(_AuthoredSceneSchema):
     created_date: datetime = Field(alias="createdDate")
     modified_date: datetime = Field(alias="modifiedDate")
     archived: bool
-    # Tentative: Django never learns whether a render succeeded, so this may
-    # 404 (the URL opts out of the Worker's default card). Null when the
-    # screenshots feature is dark.
     image_url: Optional[str] = Field(alias="imageUrl")
 
     @staticmethod

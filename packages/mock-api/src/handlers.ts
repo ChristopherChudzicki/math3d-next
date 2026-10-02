@@ -19,8 +19,10 @@ export const mockAuth = {
 
 type DbScene = NonNullable<ReturnType<typeof db.scene.findFirst>>;
 
-/** A stored scene as the detail endpoints return it: no `imageUrl`, which
- * the real API computes only for its list responses. */
+/**
+ * A stored scene as the detail endpoints return it: no `imageUrl`, which the
+ * real API computes only for its list responses.
+ */
 const toScene = ({ imageUrl: _imageUrl, ...scene }: DbScene): Scene => ({
   ...scene,
   itemOrder: JSON.parse(scene.itemOrder),

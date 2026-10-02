@@ -24,7 +24,8 @@ const makeItem = <T extends MathItemType>(
 
 /**
  * A scene as the mock db stores it. `imageUrl` is computed per response by the
- * real API and only appears in its list responses (MiniScene).
+ * real API and only appears in its list responses (MiniScene). Here it is
+ * stored, so unlike the real one it doesn't change when the scene is saved.
  */
 type SceneRecord = IScene & { imageUrl: string | null };
 

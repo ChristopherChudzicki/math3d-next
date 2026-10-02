@@ -1,7 +1,7 @@
 import React from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import user from "@testing-library/user-event";
-import { createMemoryRouter, RouterProvider } from "react-router";
+import { createMemoryRouter, MemoryRouter, RouterProvider } from "react-router";
 import SceneCard from "./SceneCard";
 import type { SceneCardProps } from "./SceneCard";
 
@@ -58,7 +58,7 @@ describe("the thumbnail", () => {
   // is always rendered; without the <img>, it is all that shows.
   const thumbnail = () => screen.queryByRole("presentation");
 
-  test("sits over the placeholder, hidden until it loads, then revealed", () => {
+  test("is hidden until it loads, then revealed", () => {
     setupCard({ imageUrl: IMAGE_URL });
     const img = screen.getByRole("presentation");
     expect(img).toHaveAttribute("src", IMAGE_URL);
@@ -76,6 +76,30 @@ describe("the thumbnail", () => {
     fireEvent.error(screen.getByRole("presentation"));
 
     expect(thumbnail()).toBeNull();
+  });
+
+  test("starts over when its URL changes, e.g. after the scene is saved", () => {
+    const card = (imageUrl: string) => (
+      <MemoryRouter>
+        <ul>
+          <SceneCard
+            title="Parametric surfaces"
+            to="/abc"
+            imageUrl={imageUrl}
+          />
+        </ul>
+      </MemoryRouter>
+    );
+    const { rerender } = render(card(`${IMAGE_URL}&v=1`));
+    fireEvent.error(screen.getByRole("presentation"));
+    expect(thumbnail()).toBeNull();
+
+    rerender(card(`${IMAGE_URL}&v=2`));
+
+    expect(screen.getByRole("presentation")).toHaveAttribute(
+      "src",
+      `${IMAGE_URL}&v=2`,
+    );
   });
 
   test("is absent without an imageUrl, leaving the placeholder", () => {

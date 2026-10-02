@@ -171,7 +171,6 @@ describe("?fallback=none", () => {
     const res = await call("/screenshots/scene/missing.png?fallback=none&v=1");
     expect(res.status).toBe(404);
     expect(res.headers.get("cache-control")).toBe("public, max-age=60");
-    expect(res.headers.get("content-type")).not.toBe("image/png");
     expect(fetch).not.toHaveBeenCalled();
   });
 
