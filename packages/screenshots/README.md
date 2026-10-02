@@ -6,8 +6,9 @@ the rendered PNG is a general primitive (thumbnails, galleries follow). It is
 **intentionally isolated and abandonable**: it imports nothing from the rest of
 the monorepo (only `@cloudflare/puppeteer` and its own relative modules), and
 nothing in the monorepo imports it. Its couplings to the rest of the system are
-two var-gated blocks: the app Worker points `og:image` at the GET, and the
-Django backend nudges the POST when a scene is saved.
+var-gated: the app Worker points `og:image` at the GET, and the Django backend
+nudges the POST when a scene is saved and hands the GET's URL to the app's
+My Scenes cards (`imageUrl`).
 
 Design + rationale: `docs/superpowers/specs/2026-08-15-screenshot-cost-protection-design.md`
 (ADR-0002), building on `docs/superpowers/specs/2026-08-08-og-per-scene-image-design.md`.
@@ -25,6 +26,10 @@ a slot against its per-period spend caps — tells it to.
 2. Miss, invalid key, or a cache-read error → serve the branded default card
    (`max-age=60`). It does **not** render, schedule, or lock — a miss just means
    "no image yet".
+3. With `?fallback=none`, step 2 returns `404` (`max-age=60`) instead of the
+   default card. The app's scene-card thumbnails ask for this (Django's
+   `imageUrl` carries it), so a missing render errors their `<img>` and leaves
+   the card's own placeholder showing. A hit is served as in step 1.
 
 `POST /render` (secret-gated, backend-only):
 
@@ -82,9 +87,10 @@ Two independent var gates, both dark by default:
   Actions variable, injected into the app Worker at deploy time via `wrangler
 deploy --var` (`deploy-reusable.yml`). Unset → the app serves its static
   default card.
-- **Rendering:** the backend only nudges `POST /render` when its own
-  `SCREENSHOTS_ORIGIN` env var is set. Unset → saves behave exactly as before and
-  nothing is ever rendered.
+- **Rendering and thumbnails:** the backend only nudges `POST /render` when its
+  own `SCREENSHOTS_ORIGIN` env var is set, and only then returns a non-null
+  `imageUrl` for My Scenes cards. Unset → saves behave exactly as before, nothing
+  is ever rendered, and cards show their placeholder.
 
 To enable end-to-end: deploy this Worker, set `RENDER_SECRET` on both sides,
 smoke-test it, then set `SCREENSHOTS_ORIGIN` to its `*.workers.dev` host — as the
@@ -98,8 +104,8 @@ the app deploy, so a failed/unprovisioned render deploy can never gate a release
 ## Teardown (abandoning the experiment)
 
 1. Clear the `SCREENSHOTS_ORIGIN` GitHub Actions variable and the backend env
-   (if set) and redeploy — the app reverts to the static default card and the
-   backend stops nudging.
+   (if set) and redeploy — the app reverts to the static default card, the
+   backend stops nudging, and My Scenes cards go back to their placeholder.
 2. Delete the `deploy-screenshots` job from
    `.github/workflows/deploy-reusable.yml`.
 3. `wrangler delete` the `math3d-screenshots` Worker and `wrangler secret delete

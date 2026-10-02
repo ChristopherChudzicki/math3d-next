@@ -6,7 +6,8 @@
  * cache-read-failure. It NEVER renders or schedules a render (ADR-0002 —
  * rendering is nudged separately, by the backend, on scene create/update).
  * The endpoint never blocks on or 500s — every response returns a valid image
- * immediately.
+ * immediately, except that `?fallback=none` (the app's scene-card thumbnails,
+ * which draw their own placeholder) turns the default card into a 404.
  *
  * Bindings (wrangler.jsonc): BROWSER (Browser Rendering), SCREENSHOTS_BUCKET (R2
  * bucket `math3d-screenshots`). FRAME_ORIGIN is a deploy-injected var (see
@@ -52,13 +53,24 @@ const serveDefault = async (env: Env): Promise<Response> => {
   }
 };
 
+/**
+ * A miss under `?fallback=none`: the card's <img> errors and keeps its
+ * placeholder. Short-lived, like the default card, so a render that lands
+ * shortly after a save shows up on a later load.
+ */
+const serveNotFound = (): Response =>
+  new Response("not found", {
+    status: 404,
+    headers: { "cache-control": "public, max-age=60" },
+  });
+
 export default {
   async fetch(
     request: Request,
     env: Env,
     ctx: ExecutionContext,
   ): Promise<Response> {
-    const { pathname } = new URL(request.url);
+    const { pathname, searchParams } = new URL(request.url);
     if (pathname === "/health") return new Response("ok");
 
     if (request.method === "POST" && pathname === "/render") {
@@ -82,8 +94,13 @@ export default {
       return new Response(null, { status: 202 });
     }
 
+    const serveMiss = (): Promise<Response> | Response =>
+      searchParams.get("fallback") === "none"
+        ? serveNotFound()
+        : serveDefault(env);
+
     const key = sceneImagePathToKey(pathname);
-    if (key === null) return serveDefault(env);
+    if (key === null) return serveMiss();
 
     let cached: R2ObjectBody | null;
     try {
@@ -94,7 +111,7 @@ export default {
       // of fetch.
       // eslint-disable-next-line no-console
       console.error(`cache read failed for key=${key}`, err);
-      return serveDefault(env);
+      return serveMiss();
     }
     if (cached !== null) {
       return new Response(cached.body, {
@@ -106,6 +123,6 @@ export default {
       });
     }
 
-    return serveDefault(env);
+    return serveMiss();
   },
 };

@@ -17,6 +17,15 @@ export const mockAuth = {
   },
 };
 
+type DbScene = NonNullable<ReturnType<typeof db.scene.findFirst>>;
+
+/** A stored scene as the detail endpoints return it: no `imageUrl`, which
+ * the real API computes only for its list responses. */
+const toScene = ({ imageUrl: _imageUrl, ...scene }: DbScene): Scene => ({
+  ...scene,
+  itemOrder: JSON.parse(scene.itemOrder),
+});
+
 const getUser = () => {
   // Session-based auth: check module-level current user
   if (currentUserId !== null) {
@@ -76,6 +85,7 @@ export const handlers = [
         archived: s.archived,
         createdDate: s.createdDate,
         modifiedDate: s.modifiedDate,
+        imageUrl: s.imageUrl,
       }));
       return HttpResponse.json({
         count: scenes.length,
@@ -97,11 +107,7 @@ export const handlers = [
         // Ninja's default Http404 body.
         return HttpResponse.json({ detail: "Not Found" }, { status: 404 });
       }
-      const parsedScene = {
-        ...scene,
-        itemOrder: JSON.parse(scene.itemOrder),
-      };
-      return HttpResponse.json(parsedScene);
+      return HttpResponse.json(toScene(scene));
     },
   ),
   http.post<NoParams, Scene, ErrorResponseBody | Scene>(
@@ -125,11 +131,7 @@ export const handlers = [
         author: user ? user.id : null,
         isLegacy: false,
       });
-      const scene: Scene = {
-        ...sceneRecord,
-        itemOrder: JSON.parse(sceneRecord.itemOrder),
-      };
-      return HttpResponse.json(scene, { status: 201 });
+      return HttpResponse.json(toScene(sceneRecord), { status: 201 });
     },
   ),
   http.patch<{ key: string }, Partial<Scene>, ErrorResponseBody | Scene>(
@@ -160,10 +162,7 @@ export const handlers = [
         },
       });
       if (!updated) throw new Error("scene vanished mid-update");
-      return HttpResponse.json({
-        ...updated,
-        itemOrder: JSON.parse(updated.itemOrder),
-      });
+      return HttpResponse.json(toScene(updated));
     },
   ),
   http.delete<{ key: string }, null, ErrorResponseBody | null>(

@@ -244,3 +244,17 @@ test("a failed load offers Retry", async () => {
     await screen.findByRole("link", { name: "Alpha" }),
   ).toBeInTheDocument();
 });
+
+test("cards show the scene's imageUrl as their thumbnail", async () => {
+  const owner = seedDb.withUser();
+  const imageUrl = "https://s.test/screenshots/scene/x.png?fallback=none&v=1";
+  seedDb.withSceneFromItems([], { title: "Alpha", author: owner.id, imageUrl });
+  seedDb.withSceneFromItems([], { title: "Beta", author: owner.id });
+  await openMyScenes(owner);
+
+  const card = (title: string) =>
+    screen.getByRole("link", { name: title }).closest("li")!;
+  await screen.findByRole("link", { name: "Alpha" });
+  expect(card("Alpha").querySelector("img")).toHaveAttribute("src", imageUrl);
+  expect(card("Beta").querySelector("img")).toBeNull();
+});

@@ -3,7 +3,7 @@ import {
   waitOnExecutionContext,
   env,
 } from "cloudflare:test";
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import worker from "./index";
 import { sceneImageKey } from "./keys";
 import { renderScene } from "./render";
@@ -163,6 +163,54 @@ it("serves default for an invalid key WITHOUT querying R2 or scheduling a render
   expect(getSpy).not.toHaveBeenCalled();
   // Only the default-PNG fetch happened.
   expect(fetch).toHaveBeenCalledTimes(1);
+});
+
+describe("?fallback=none", () => {
+  it("404s on a miss, with a short cache header and no default-card fetch", async () => {
+    stubFetch();
+    const res = await call("/screenshots/scene/missing.png?fallback=none&v=1");
+    expect(res.status).toBe(404);
+    expect(res.headers.get("cache-control")).toBe("public, max-age=60");
+    expect(res.headers.get("content-type")).not.toBe("image/png");
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("404s on an invalid key", async () => {
+    stubFetch();
+    const res = await call("/screenshots/scene/bad key.png?fallback=none");
+    expect(res.status).toBe(404);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("404s (not a 500) when the R2 cache read fails", async () => {
+    stubFetch();
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(env.SCREENSHOTS_BUCKET, "get").mockRejectedValueOnce(
+      new Error("r2 down"),
+    );
+    const res = await call("/screenshots/scene/hit.png?fallback=none");
+    expect(res.status).toBe(404);
+    expect(fetch).not.toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
+  it("still serves the cached PNG on a hit", async () => {
+    stubFetch();
+    await env.SCREENSHOTS_BUCKET.put(sceneImageKey("hit"), PNG, {
+      httpMetadata: { contentType: "image/png" },
+    });
+    const res = await call("/screenshots/scene/hit.png?fallback=none&v=1");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("cache-control")).toContain("max-age=86400");
+    expect(new Uint8Array(await res.arrayBuffer())).toEqual(PNG);
+  });
+
+  it("serves the default card as before for any other fallback value", async () => {
+    stubFetch();
+    const res = await call("/screenshots/scene/missing.png?fallback=nope");
+    expect(res.status).toBe(200);
+    expect(new Uint8Array(await res.arrayBuffer())).toEqual(DEFAULT_PNG);
+  });
 });
 
 it("202 + schedules a render for a valid secret + key", async () => {

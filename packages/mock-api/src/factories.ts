@@ -22,12 +22,18 @@ const makeItem = <T extends MathItemType>(
   return item;
 };
 
+/**
+ * A scene as the mock db stores it. `imageUrl` is computed per response by the
+ * real API and only appears in its list responses (MiniScene).
+ */
+type SceneRecord = IScene & { imageUrl: string | null };
+
 const makeSceneFromItems = (
   items: MathItem[],
-  sceneProps: Partial<Omit<IScene, "items" | "itemOrder">> = {},
+  sceneProps: Partial<Omit<SceneRecord, "items" | "itemOrder">> = {},
 ) => {
   const folder = makeItem(MathItemType.Folder);
-  const scene: IScene = {
+  const scene: SceneRecord = {
     items: [folder, ...items].sort((a, b) => a.id.localeCompare(b.id)),
     itemOrder: {
       main: [folder.id],
@@ -41,6 +47,7 @@ const makeSceneFromItems = (
     author: null,
     archived: false,
     isLegacy: false,
+    imageUrl: null,
     ...sceneProps,
   };
   return scene;
@@ -434,3 +441,4 @@ class Folder {
 }
 
 export { makeItem, makeSceneFromItems, SceneBuilder };
+export type { SceneRecord };

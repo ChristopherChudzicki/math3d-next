@@ -1,4 +1,4 @@
-import React, { useId } from "react";
+import React, { useId, useState } from "react";
 import classNames from "classnames";
 import { Link } from "react-router";
 import { Icon } from "@iconify/react/offline";
@@ -10,7 +10,8 @@ const { format } = new Intl.DateTimeFormat(navigator.languages[0]);
 type SceneCardProps = {
   title: string;
   to: string;
-  imageUrl?: string;
+  /** May 404 (no render yet); the placeholder stays until it loads. */
+  imageUrl?: string | null;
   /** The scene already open; a plain click on its card does nothing. */
   current?: boolean;
   /** ISO timestamp. With it, the card shows a "Last modified" line. */
@@ -18,6 +19,28 @@ type SceneCardProps = {
   archived?: boolean;
   /** Controls shown above the card's link, e.g. a menu trigger. */
   actions?: React.ReactNode;
+};
+
+/**
+ * Sits over the placeholder, revealed once loaded. On error it goes away and
+ * the placeholder stays. Keyed by URL, so a new URL starts over.
+ */
+const Thumbnail: React.FC<{ src: string }> = ({ src }) => {
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">(
+    "loading",
+  );
+  if (status === "error") return null;
+  return (
+    <img
+      className={styles.thumbnail}
+      src={src}
+      alt=""
+      loading="lazy"
+      data-loaded={status === "loaded" ? "" : undefined}
+      onLoad={() => setStatus("loaded")}
+      onError={() => setStatus("error")}
+    />
+  );
 };
 
 const isPlainClick = (e: React.MouseEvent) =>
@@ -45,13 +68,10 @@ const SceneCard: React.FC<SceneCardProps> = ({
   };
   return (
     <li className={classNames(styles.card, current && styles.current)}>
-      {imageUrl ? (
-        <img className={styles.image} src={imageUrl} alt="" />
-      ) : (
-        <div className={classNames(styles.image, styles.placeholder)}>
-          <Icon icon={axis3d} aria-hidden="true" />
-        </div>
-      )}
+      <div className={styles.image}>
+        <Icon icon={axis3d} aria-hidden="true" />
+        {imageUrl ? <Thumbnail key={imageUrl} src={imageUrl} /> : null}
+      </div>
       <div className={styles.text}>
         <h3 className={styles.title}>
           <Link

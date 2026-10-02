@@ -1,4 +1,5 @@
 from unittest import mock
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -48,6 +49,7 @@ def test_list_item_shape_aliases_dates():
         "createdDate",
         "modifiedDate",
         "archived",
+        "imageUrl",
     }
     assert "items" not in item and "itemOrder" not in item
 
@@ -100,6 +102,35 @@ def test_me_returns_only_my_scenes():
     client.force_login(me)
     body = client.get(ME_URL).json()
     assert [i["key"] for i in body["items"]] == [mine.key]
+
+
+@pytest.mark.django_db
+def test_me_image_url_points_at_the_screenshot_with_cache_buster(settings):
+    settings.SCREENSHOTS_ORIGIN = "https://s.math3d.org"
+    me = CustomUserFactory.create()
+    scene = SceneFactory.create(author=me)
+    client = Client()
+    client.force_login(me)
+    [item] = client.get(ME_URL).json()["items"]
+    url = urlsplit(item["imageUrl"])
+    assert f"{url.scheme}://{url.netloc}{url.path}" == (
+        f"https://s.math3d.org/screenshots/scene/{scene.key}.png"
+    )
+    assert parse_qs(url.query) == {
+        "fallback": ["none"],
+        "v": [scene.modified_date.isoformat()],
+    }
+
+
+@pytest.mark.django_db
+def test_me_image_url_is_null_when_screenshots_are_dark(settings):
+    settings.SCREENSHOTS_ORIGIN = ""
+    me = CustomUserFactory.create()
+    SceneFactory.create(author=me)
+    client = Client()
+    client.force_login(me)
+    [item] = client.get(ME_URL).json()["items"]
+    assert item["imageUrl"] is None
 
 
 @pytest.mark.django_db

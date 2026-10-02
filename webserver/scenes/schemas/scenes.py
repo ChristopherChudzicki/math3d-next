@@ -1,10 +1,28 @@
 from datetime import datetime
 from typing import Annotated, Any, Dict, List, Optional
+from urllib.parse import quote, urlencode
 
+from django.conf import settings
 from ninja import Field, FilterLookup, FilterSchema, Schema
 from pydantic import ConfigDict
 
 from scenes.schemas.math_items import MathItem
+
+
+def scene_image_url(key: str, modified_date: datetime) -> Optional[str]:
+    """The scene's screenshot URL on the render Worker (scenes/screenshots.py),
+    or None when the feature is dark.
+
+    Tentative: nothing records whether a render landed. ``fallback=none`` makes
+    a miss 404 instead of serving the default OG card, so an <img> can fall back
+    to its own placeholder. ``v`` busts the browser cache after an edit."""
+    if not settings.SCREENSHOTS_ORIGIN:
+        return None
+    query = urlencode({"fallback": "none", "v": modified_date.isoformat()})
+    return (
+        f"{settings.SCREENSHOTS_ORIGIN}/screenshots/scene/{quote(key, safe='')}.png"
+        f"?{query}"
+    )
 
 
 class _AuthoredSceneSchema(Schema):
@@ -25,6 +43,14 @@ class MiniSceneSchema(_AuthoredSceneSchema):
     created_date: datetime = Field(alias="createdDate")
     modified_date: datetime = Field(alias="modifiedDate")
     archived: bool
+    # Tentative: Django never learns whether a render succeeded, so this may
+    # 404 (the URL opts out of the Worker's default card). Null when the
+    # screenshots feature is dark.
+    image_url: Optional[str] = Field(alias="imageUrl")
+
+    @staticmethod
+    def resolve_image_url(obj) -> Optional[str]:
+        return scene_image_url(obj.key, obj.modified_date)
 
 
 class SceneMetaSchema(Schema):

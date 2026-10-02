@@ -602,6 +602,8 @@ export interface components {
        * Format: date-time
        */
       createdDate: string;
+      /** Imageurl */
+      imageUrl: string | null;
       /** Key */
       key: string;
       /**
