@@ -783,10 +783,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cloudflare/workers-types@npm:^5.20260911.1":
-  version: 5.20260911.1
-  resolution: "@cloudflare/workers-types@npm:5.20260911.1"
-  checksum: 10/bc19a30a780bb5a6716ace7f05f7519947dc7e4dafc7d44900bf87caf3a08a8502ceda5444a90ed282ba8d705365e1701686842f8072f2a6268722f9d66550da
+"@cloudflare/workers-types@npm:^5.20261003.1":
+  version: 5.20261003.1
+  resolution: "@cloudflare/workers-types@npm:5.20261003.1"
+  checksum: 10/32af266c8ce65b168598921c1cf9bb355333b2bb943b9da05ef25fdeadc02e15ede64e1c18c3b2a94d574dea467c040d9421f358ed8f211cd41c4f1383efc191
   languageName: node
   linkType: hard
 
@@ -5691,7 +5691,7 @@ __metadata:
   dependencies:
     "@base-ui/react": "npm:^1.8.0"
     "@cloudflare/vitest-pool-workers": "npm:^0.22.0"
-    "@cloudflare/workers-types": "npm:^5.20260911.1"
+    "@cloudflare/workers-types": "npm:^5.20261003.1"
     "@dnd-kit/core": "npm:^6.3.1"
     "@dnd-kit/sortable": "npm:^10.0.0"
     "@dnd-kit/utilities": "npm:^3.2.2"
@@ -12138,7 +12138,7 @@ __metadata:
   dependencies:
     "@cloudflare/puppeteer": "npm:^1.3.0"
     "@cloudflare/vitest-pool-workers": "npm:^0.22.0"
-    "@cloudflare/workers-types": "npm:^5.20260911.1"
+    "@cloudflare/workers-types": "npm:^5.20261003.1"
     "@math3d/eslint-config": "workspace:^"
     "@math3d/tsconfig": "workspace:*"
     eslint: "npm:^8.57.1"
