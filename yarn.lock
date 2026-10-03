@@ -5759,7 +5759,7 @@ __metadata:
     react-hook-form: "npm:^7.56.1"
     react-infinite-scroll-component: "npm:^6.1.1"
     react-redux: "npm:^9.1.0"
-    react-router: "npm:^7.18.0"
+    react-router: "npm:^7.18.4"
     react-router-dom: "npm:^7.18.4"
     redux: "npm:^5.0.1"
     rollup-plugin-visualizer: "npm:5.14.0"
@@ -11547,7 +11547,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:7.18.4, react-router@npm:^7.18.0":
+"react-router@npm:7.18.4, react-router@npm:^7.18.4":
   version: 7.18.4
   resolution: "react-router@npm:7.18.4"
   dependencies:
