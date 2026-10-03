@@ -33,7 +33,7 @@ class AppPage {
   }
 
   sceneTitle(): Locator {
-    return this.header().getByLabel("Scene title");
+    return this.header().getByRole("heading", { level: 1 });
   }
 
   header(): Locator {

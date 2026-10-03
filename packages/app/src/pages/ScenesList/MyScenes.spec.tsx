@@ -269,3 +269,12 @@ test("cards show the scene's imageUrl as their thumbnail", async () => {
   );
   expect(within(beta).queryByRole("presentation")).toBeNull();
 });
+
+test("an untitled scene's card reads Untitled", async () => {
+  const { owner } = seedScenes([""]);
+  await openMyScenes(owner);
+
+  expect(
+    await screen.findByRole("link", { name: "Untitled" }),
+  ).toBeInTheDocument();
+});

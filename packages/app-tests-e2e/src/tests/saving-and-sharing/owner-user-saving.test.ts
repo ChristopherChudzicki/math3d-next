@@ -46,13 +46,13 @@ test("Saving a new scene", async ({ page }) => {
 
     // Check that saving updated the current URL
     await expect(page.url()).toBe(url);
-    await expect(app.sceneTitle()).toHaveValue(title);
+    await expect(app.sceneTitle()).toHaveText(title);
     return url;
   });
 
   await test.step("Reload saved scene", async () => {
     await page.reload();
-    await expect(app.sceneTitle()).toHaveValue(title);
+    await expect(app.sceneTitle()).toHaveText(title);
     await expect(item.field("description")).toHaveValue(newDescription);
   });
 });
@@ -119,4 +119,26 @@ test("Saving a new scene keeps the active item selected", async ({ page }) => {
   // selection survives.
   await expect(page).toHaveURL(/\/[^/]+$/);
   await expect(item.activeMarker()).toHaveCount(1);
+});
+
+test("Renaming a scene and saving it", async ({ page, prepareScene }) => {
+  const scene = new SceneBuilder();
+  scene.folder().point();
+  const key = await prepareScene(scene);
+  await page.goto(`/${key}`);
+  const app = new AppPage(page);
+  const newTitle = faker.lorem.words(3);
+
+  await app.header().getByRole("button", { name: "Rename scene" }).click();
+  const dialog = page.getByRole("dialog", { name: "Rename scene" });
+  await dialog.getByRole("textbox", { name: "Title" }).fill(newTitle);
+  await dialog.getByRole("button", { name: "Rename" }).click();
+
+  await expect(app.sceneTitle()).toHaveText(newTitle);
+  await expect(app.sceneAction()).toHaveAccessibleName("Save");
+  await app.sceneAction().click();
+  await expect(app.sceneAction()).toHaveAccessibleName("Saved!");
+
+  await page.reload();
+  await expect(app.sceneTitle()).toHaveText(newTitle);
 });

@@ -70,9 +70,9 @@ const fetchTitle = async (env: Env, key: string): Promise<string | null> => {
 /**
  * Rewrite the shell's crawler-facing <head> tags for a scene. og:url is always
  * set to the scene's canonical URL. The <title>/og:title/twitter:title are
- * rewritten only for a *titled* scene; an untitled scene (blank or the literal
- * default "Untitled") keeps the shell's static rich defaults — matching the
- * home page and the SPA's own client-side title.
+ * rewritten only for a *titled* scene; an untitled (blank) scene keeps the
+ * shell's static rich defaults — matching the home page and the SPA's own
+ * client-side title.
  *
  * The title is user-controlled: inject it ONLY via HTMLRewriter's escaping
  * setters (setInnerContent {html:false} / setAttribute) — never concatenate it

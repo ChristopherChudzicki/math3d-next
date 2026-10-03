@@ -6,6 +6,9 @@ from pydantic import ConfigDict
 
 from scenes.schemas.math_items import MathItem
 
+# Titles are single-line; blank means untitled.
+SceneTitle = Annotated[str, Field(pattern=r"^[^\r\n]*$")]
+
 
 class _AuthoredSceneSchema(Schema):
     """Shared config + author resolver for the scene output schemas
@@ -60,7 +63,7 @@ class SceneCreateSchema(Schema):
 
     items: List[MathItem]
     item_order: Dict[str, List[str]] = Field(alias="itemOrder")
-    title: Optional[str] = None
+    title: Optional[SceneTitle] = None
     archived: bool = False
 
 
@@ -69,7 +72,7 @@ class ScenePatchSchema(Schema):
     # `exclude_unset` in the handler, so `items`/`item_order` use non-nullable
     # defaults rather than `Optional[...] = None`. This is deliberate for
     # strictness: a non-nullable field rejects an explicit `items: null` (or
-    # `itemOrder: null`) in the body with a 422 instead of silently no-op'ing.
+    # `itemOrder: null`) in the body with a 400 instead of silently no-op'ing.
     # (Historically this also dodged an openapi-generator-cli v7.2.0 bug that
     # degraded the `anyOf: [<array-of-$ref>, null]` union to `null` in the
     # client; v7.23.0 resolves that union correctly, so only the strictness
@@ -78,7 +81,7 @@ class ScenePatchSchema(Schema):
 
     items: List[MathItem] = Field(default_factory=list)
     item_order: Dict[str, List[str]] = Field(default_factory=dict, alias="itemOrder")
-    title: Optional[str] = None
+    title: Optional[SceneTitle] = None
     archived: Optional[bool] = None
 
 

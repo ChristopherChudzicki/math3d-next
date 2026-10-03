@@ -1172,7 +1172,8 @@ components:
           type: array
         title:
           anyOf:
-          - type: string
+          - pattern: ^[^\r\n]*$
+            type: string
           - type: 'null'
           title: Title
       required:
@@ -1225,7 +1226,8 @@ components:
           type: array
         title:
           anyOf:
-          - type: string
+          - pattern: ^[^\r\n]*$
+            type: string
           - type: 'null'
           title: Title
       title: ScenePatchSchema

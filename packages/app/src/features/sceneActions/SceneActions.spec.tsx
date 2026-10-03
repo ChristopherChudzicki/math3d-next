@@ -6,6 +6,7 @@ import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import {
   act,
   countRequests,
+  renameScene,
   renderTestApp,
   screen,
   user,
@@ -90,7 +91,7 @@ test("an unsaved scene offers Save once edited, and no menu", async () => {
   expectInert(await primary());
   await tryToActivate(await primary());
   expect(screen.queryByRole("dialog")).toBeNull();
-  await user.type(await screen.findByLabelText("Scene Title"), " edited");
+  await renameScene("edited");
   expect(await primary()).not.toHaveAttribute("aria-disabled", "true");
   noMenu();
 });
@@ -98,7 +99,7 @@ test("an unsaved scene offers Save once edited, and no menu", async () => {
 test("an owned scene with edits saves in place", async () => {
   const { scene, store } = renderOwnedScene();
   const patches = capturePatches(scene.key);
-  await user.type(await screen.findByLabelText("Scene Title"), " edited");
+  await renameScene(`${scene.title} edited`);
 
   expect(await primary()).toHaveTextContent(/^Save$/);
   expect(await menuEntries()).toEqual(["Duplicate", "Copy link"]);
@@ -128,8 +129,7 @@ test("an edit made while saving survives the save and stays unsaved", async () =
   );
   const { scene, store } = renderOwnedScene();
   const patches = capturePatches(scene.key);
-  const title = await screen.findByLabelText("Scene Title");
-  await user.type(title, " saved");
+  await renameScene(`${scene.title} saved`);
 
   await user.click(await primary());
   expect(await primary()).toHaveTextContent(/^Saving\.\.\.$/);
@@ -138,7 +138,7 @@ test("an edit made while saving survives the save and stays unsaved", async () =
     screen.getByRole("button", { name: "More scene actions" }),
   ).toBeDisabled();
   await tryToActivate(await primary());
-  await user.type(title, " later");
+  await renameScene(`${scene.title} saved later`);
   gate.resolve();
 
   await waitFor(
@@ -159,8 +159,8 @@ test("a failed save frees the button and leaves the edit unsaved", async () => {
       HttpResponse.json({ detail: "boom" }, { status: 500 }),
     ),
   );
-  const { store } = renderOwnedScene();
-  await user.type(await screen.findByLabelText("Scene Title"), " edited");
+  const { scene, store } = renderOwnedScene();
+  await renameScene(`${scene.title} edited`);
 
   await user.click(await primary());
   expect(await primary()).toHaveTextContent(/^Saving\.\.\.$/);
@@ -192,7 +192,7 @@ test("an owned scene without edits copies its link", async () => {
 
 test("copying the link with unsaved edits says the link omits them", async () => {
   const { scene } = renderOwnedScene();
-  await user.type(await screen.findByLabelText("Scene Title"), " edited");
+  await renameScene(`${scene.title} edited`);
 
   await user.click(
     await screen.findByRole("button", { name: "More scene actions" }),
@@ -244,31 +244,29 @@ test("the link step copies the link and announces it", async () => {
   expect(within(dialog).getByRole("status")).toHaveTextContent("Copied!");
 });
 
-test("someone else's scene offers Save a copy, prefilled Copy of …", async () => {
+test("someone else's scene offers Save a copy, saved as Copy of …", async () => {
   const author = seedDb.withUser();
   const scene = seedDb.withSceneFromItems([], { author: author.id });
-  renderTestApp(`/${scene.key}`, { isAuthenticated: true });
+  const { store } = renderTestApp(`/${scene.key}`, { isAuthenticated: true });
 
   expect(await primary()).toHaveTextContent(/^Save a copy$/);
   expect(await menuEntries()).toEqual(["Copy link"]);
   await user.click(await primary());
 
-  const dialog = await screen.findByRole("dialog", { name: "Save a copy" });
-  expect(within(dialog).getByLabelText("Title")).toHaveValue(
-    `Copy of ${scene.title}`,
-  );
+  await screen.findByRole("dialog", { name: "Scene saved!" });
+  expect(store.getState().scene.title).toBe(`Copy of ${scene.title}`);
 });
 
 test("Save a copy of an anonymous scene keeps its title", async () => {
   // Seeded scenes are author-less, like a visitor's own anonymous scene
   // after signing in.
   const scene = seedDb.withSceneFromItems([]);
-  renderTestApp(`/${scene.key}`, { isAuthenticated: true });
+  const { store } = renderTestApp(`/${scene.key}`, { isAuthenticated: true });
 
   await user.click(await primary());
 
-  const dialog = await screen.findByRole("dialog", { name: "Save a copy" });
-  expect(within(dialog).getByLabelText("Title")).toHaveValue(scene.title);
+  await screen.findByRole("dialog", { name: "Scene saved!" });
+  expect(store.getState().scene.title).toBe(scene.title);
 });
 
 test("a signed-out re-share of an unedited published scene reuses its link", async () => {
@@ -295,7 +293,7 @@ test("a signed-out re-share of an unedited published scene reuses its link", asy
   );
 });
 
-test("a signed-out share of an edited scene mints a new link, prefilled with the scene's title", async () => {
+test("a signed-out share of an edited scene mints a new link under its title", async () => {
   const item = makeItem(MIT.Point);
   const scene = seedDb.withSceneFromItems([item]);
   const { location, store } = renderTestApp(`/${scene.key}`);
@@ -311,14 +309,12 @@ test("a signed-out share of an edited scene mints a new link, prefilled with the
   });
 
   await user.click(await primary());
-  const dialog = await screen.findByRole("dialog", { name: "Share scene" });
-  expect(within(dialog).getByLabelText("Title")).toHaveValue(scene.title);
-  expect(within(dialog).getByText(/original link is unchanged/i)).toBeVisible();
-  await user.click(within(dialog).getByRole("button", { name: "Share" }));
 
   const link = await screen.findByLabelText<HTMLInputElement>("Shareable URL");
   expect(link.value).not.toBe(`${window.location.origin}/${scene.key}`);
   expect(location.current.pathname).not.toBe(`/${scene.key}`);
+  expect(screen.getByText(/original link is unchanged/i)).toBeVisible();
+  expect(store.getState().scene.title).toBe(scene.title);
 });
 
 test("the signed-out link step offers sign-in", async () => {
@@ -349,6 +345,6 @@ test("no scene action is offered while auth is still loading", async () => {
   server.use(http.get(urls.auth.usersMe, () => delay("infinite")));
   renderTestApp("/");
 
-  await screen.findByLabelText("Scene Title");
+  await screen.findByRole("heading", { level: 1 });
   expect(screen.queryByTestId("scene-action")).toBeNull();
 });

@@ -81,12 +81,11 @@ test("Sets the document title from the loaded scene's title", async () => {
   });
 });
 
-test("Uses the site default title for a scene left at the default 'Untitled'", async () => {
-  // A scene at the DB default "Untitled" reads like the home page — the rich
-  // site default — matching what the OG Worker leaves in <title> at the edge
-  // (no "Untitled | Math3d" flash on boot).
+test("Uses the site default title for an untitled scene", async () => {
+  // An untitled scene reads like the home page — the rich site default —
+  // matching what the OG Worker leaves in <title> at the edge.
   document.title = "Math3d: Online 3d Graphing Calculator";
-  const scene = seedDb.withSceneFromItems([], { title: "Untitled" });
+  const scene = seedDb.withSceneFromItems([], { title: "" });
   const { queryClient } = renderTestApp(`/${scene.key}`);
   await waitForAppReady(queryClient);
   expect(document.title).toBe("Math3d: Online 3d Graphing Calculator");

@@ -23,6 +23,7 @@ import TextField from "@/ui/TextField";
 import { u } from "@/util/styles";
 import { useAuthStatus } from "@/features/auth";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
+import { UNTITLED, sceneDisplayName } from "@/features/scene/sceneTitle";
 import DeleteSceneDialog from "./DeleteSceneDialog";
 import SceneCard from "./SceneCard/SceneCard";
 import { ListType, sceneHref } from "./constants";
@@ -30,7 +31,8 @@ import styles from "./ScenesList.module.css";
 
 const SCROLL_ID = "my-scenes-scroll";
 
-const titleOf = (scene: MiniScene) => scene.title || "Untitled";
+const titleOf = (scene: MiniScene) =>
+  sceneDisplayName(scene.title ?? "") ?? UNTITLED;
 
 const countMessage = (count: number) => {
   if (count === 0) return "No scenes";

@@ -1,5 +1,5 @@
 declare const styles: {
-  readonly "scene-title": string;
+  readonly "publishing": string;
 };
 export = styles;
 

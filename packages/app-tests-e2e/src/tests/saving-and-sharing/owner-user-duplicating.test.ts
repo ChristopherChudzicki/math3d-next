@@ -13,7 +13,7 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
   scene //
     .folder({ description: "Folder 1" })
     .point({ description: initialDescription });
-  const newTitle = `My ${scene.title}`;
+  const newTitle = `Copy of ${scene.title}`;
 
   const key = await prepareScene(scene);
   await page.goto(`/${key}`);
@@ -24,11 +24,6 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
   await test.step("Save scene", async () => {
     await app.moreSceneActions().click();
     await page.getByRole("menuitem", { name: "Duplicate" }).click();
-    const dialog = page.getByRole("dialog", { name: "Save a copy" });
-    const title = dialog.getByRole("textbox", { name: "Title" });
-    await expect(title).toHaveValue(`Copy of ${scene.title}`);
-    await title.fill(newTitle);
-    await dialog.getByRole("button", { name: "Save" }).click();
   });
 
   await test.step("Success dialog", async () => {
@@ -43,16 +38,16 @@ test("Saving an existing scene scene", async ({ page, prepareScene }) => {
 
     // Check that saving updated the current URL
     await expect(page.url()).toBe(url);
-    await expect(app.sceneTitle()).toHaveValue(newTitle);
+    await expect(app.sceneTitle()).toHaveText(newTitle);
     return url;
   });
 
   await test.step("Reload saved scene", async () => {
     await page.reload();
-    await expect(app.sceneTitle()).toHaveValue(newTitle);
+    await expect(app.sceneTitle()).toHaveText(newTitle);
   });
   await test.step("Check old title same", async () => {
     await page.goto(`/${key}`);
-    await expect(app.sceneTitle()).toHaveValue(scene.title);
+    await expect(app.sceneTitle()).toHaveText(scene.title);
   });
 });

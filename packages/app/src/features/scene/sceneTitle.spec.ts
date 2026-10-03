@@ -6,12 +6,9 @@ describe("sceneDisplayName", () => {
     expect(sceneDisplayName("  My Torus  ")).toBe("My Torus");
   });
 
-  it("treats blank and the default 'Untitled' as untitled (null)", () => {
-    // A scene left at the DB default should read like the home page, not carry
-    // a scene-specific title.
+  it("treats a blank title as untitled (null)", () => {
     expect(sceneDisplayName("")).toBeNull();
     expect(sceneDisplayName("   ")).toBeNull();
-    expect(sceneDisplayName("Untitled")).toBeNull();
   });
 
   it("clamps to 200 code points without splitting a surrogate pair", () => {
@@ -27,6 +24,6 @@ describe("sceneTabTitle", () => {
   });
 
   it("uses the provided site default for an untitled scene", () => {
-    expect(sceneTabTitle("Untitled", "SITE DEFAULT")).toBe("SITE DEFAULT");
+    expect(sceneTabTitle("", "SITE DEFAULT")).toBe("SITE DEFAULT");
   });
 });

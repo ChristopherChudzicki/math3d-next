@@ -3,9 +3,11 @@ import * as yup from "yup";
 import Alert from "@mui/material/Alert";
 import TextField from "@mui/material/TextField";
 import { useValidatedForm } from "@/util/forms";
+import { UNTITLED } from "@/features/scene/sceneTitle";
 
+// A blank title means untitled.
 const schema = yup.object({
-  title: yup.string().trim().required("Please enter a title."),
+  title: yup.string().trim().default(""),
 });
 
 type UseTitleFormOptions = {
@@ -14,7 +16,7 @@ type UseTitleFormOptions = {
 };
 
 /**
- * A validated scene-title form. The dialog renders the form element, with
+ * A scene-title form. The dialog renders the form element, with
  * `handleSubmit` as its onSubmit, around the fields and its submit button.
  */
 const useTitleForm = ({ defaultTitle, onSubmit }: UseTitleFormOptions) => {
@@ -34,9 +36,9 @@ const useTitleForm = ({ defaultTitle, onSubmit }: UseTitleFormOptions) => {
         margin="dense"
         fullWidth
         label="Title"
-        error={!!errors.title?.message}
-        // A space keeps the row height stable when the message appears.
-        helperText={errors.title?.message ?? " "}
+        placeholder={UNTITLED}
+        // Keep the label above the field so the placeholder always shows.
+        slotProps={{ inputLabel: { shrink: true } }}
         inputRef={titleRef}
         {...register("title")}
       />
@@ -49,7 +51,7 @@ const useTitleForm = ({ defaultTitle, onSubmit }: UseTitleFormOptions) => {
   return {
     titleRef,
     isSubmitting,
-    /** The form element's submit handler; validates, then calls `onSubmit`. */
+    /** The form element's submit handler; trims, then calls `onSubmit`. */
     handleSubmit: handleSubmit(({ title }) => onSubmit(title)),
     renderFields,
   };

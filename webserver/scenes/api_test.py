@@ -1,3 +1,5 @@
+import copy
+from typing import Any
 from unittest import mock
 from urllib.parse import parse_qs, urlsplit
 
@@ -250,6 +252,23 @@ def test_post_rejects_malformed_item_with_400():
 
 
 @pytest.mark.django_db
+def test_post_without_title_creates_untitled_scene():
+    data = default_scene()
+    body = {"items": data["items"], "itemOrder": data["itemOrder"]}
+    out = Client().post(LIST_URL, data=body, content_type="application/json").json()
+    assert out["title"] == ""
+
+
+@pytest.mark.django_db
+def test_post_rejects_multiline_title_with_400():
+    data = default_scene()
+    body = {"items": data["items"], "itemOrder": data["itemOrder"], "title": "a\nb"}
+    response = Client().post(LIST_URL, data=body, content_type="application/json")
+    assert response.status_code == 400
+    assert not Scene.objects.exists()
+
+
+@pytest.mark.django_db
 def test_get_returns_full_scene_with_typed_items():
     scene = SceneFactory.create()
     out = Client().get(_detail(scene.key)).json()
@@ -317,7 +336,10 @@ def test_migrate_scene_reraises_non_key_validation_error(monkeypatch):
     # A legacy scene with a valid key but invalid items must fail loudly — the
     # reserved-key skip path must not swallow unrelated validation errors and
     # silently drop the scene (which would surface as a misleading 404).
-    legacy = LegacyScene.objects.create(dehydrated=LEGACY_DEHYDRATED_FIXTURE)
+    # migrate_scene mutates `dehydrated` in place.
+    legacy = LegacyScene.objects.create(
+        dehydrated=copy.deepcopy(LEGACY_DEHYDRATED_FIXTURE)
+    )
 
     def raise_items_error(*args, **kwargs):
         raise ValidationError({"items": ["Invalid math items"]})
@@ -325,6 +347,19 @@ def test_migrate_scene_reraises_non_key_validation_error(monkeypatch):
     monkeypatch.setattr(Scene.objects, "update_or_create", raise_items_error)
     with pytest.raises(ValidationError):
         migrate_scene(legacy)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("legacy_title", "expected"),
+    [("Untitled\n", ""), ("Line one\r\nLine two\n", "Line one Line two")],
+)
+def test_migrate_scene_normalizes_legacy_title(legacy_title, expected):
+    dehydrated: dict[str, Any] = copy.deepcopy(LEGACY_DEHYDRATED_FIXTURE)
+    dehydrated["metadata"]["title"] = legacy_title
+    legacy = LegacyScene.objects.create(dehydrated=dehydrated)
+    migrate_scene(legacy)
+    assert Scene.objects.get(key=legacy.key).title == expected
 
 
 @pytest.mark.django_db
@@ -343,6 +378,21 @@ def test_patch_author_can_update_title():
     scene.refresh_from_db()
     assert scene.items == original_items
     assert scene.item_order == original_item_order
+
+
+@pytest.mark.django_db
+def test_patch_rejects_multiline_title_with_400():
+    me = CustomUserFactory.create()
+    scene = SceneFactory.create(author=me)
+    client = Client()
+    client.force_login(me)
+    response = client.patch(
+        _detail(scene.key), data={"title": "a\rb"}, content_type="application/json"
+    )
+    assert response.status_code == 400
+    original_title = scene.title
+    scene.refresh_from_db()
+    assert scene.title == original_title
 
 
 @pytest.mark.django_db

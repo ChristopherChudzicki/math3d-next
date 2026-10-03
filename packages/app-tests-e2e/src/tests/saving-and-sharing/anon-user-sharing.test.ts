@@ -51,17 +51,16 @@ test("Anon users publish once, then reuse the link until they edit", async ({
 
   await test.step("The link shows what was published", async () => {
     await page.reload();
-    await expect(app.sceneTitle()).toHaveValue(title);
+    await expect(app.sceneTitle()).toHaveText(title);
   });
 
   await test.step("Sharing after another edit mints a new link", async () => {
     await item.field("description").fill(faker.lorem.words());
     await app.sceneAction().click();
     const dialog = page.getByRole("dialog", { name: "Share scene" });
-    await expect(dialog.getByText(/original link is unchanged/i)).toBeVisible();
-    await dialog.getByRole("button", { name: "Share" }).click();
     const link = dialog.getByRole("textbox", { name: "Shareable URL" });
     await expect(link).not.toHaveValue("");
     expect(await link.inputValue()).not.toBe(url);
+    await expect(dialog.getByText(/original link is unchanged/i)).toBeVisible();
   });
 });

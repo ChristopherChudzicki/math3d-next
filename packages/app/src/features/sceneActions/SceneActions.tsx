@@ -53,10 +53,9 @@ const getActions = ({
     : { primary: "copy-link", menu: ["duplicate"] };
 };
 
-type DialogState =
+type Dialog =
   | { kind: "publish"; mode: PublishMode; existingUrl?: string }
-  | { kind: "link"; url: string; unsaved: boolean }
-  | null;
+  | { kind: "link"; url: string; unsaved: boolean };
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
@@ -77,8 +76,16 @@ const SceneActions: React.FC = () => {
   const author = useAppSelector(select.author);
   const dirty = useAppSelector(select.dirty);
   const loaded = useAppSelector((state) => state.scene.loaded);
+  const sceneLoad = useAppSelector((state) => state.scene.loadCount);
   const routeKey = useParams().sceneKey ?? null;
-  const [dialog, setDialog] = useState<DialogState>(null);
+  // Tied to the load it was opened on: loading another scene closes it.
+  const [opened, setOpened] = useState<{
+    dialog: Dialog;
+    load: number;
+  } | null>(null);
+  const dialog = opened?.load === sceneLoad ? opened.dialog : null;
+  const setDialog = (next: Dialog | null) =>
+    setOpened(next && { dialog: next, load: sceneLoad });
   const [saving, setSaving] = useState(false);
   const [flash, setFlash] = useState<{ text: string } | null>(null);
 

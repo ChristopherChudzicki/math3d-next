@@ -114,7 +114,8 @@ class Scene(TimestampedModel):
     items = models.JSONField(validators=[validate_math_items])
     item_order = models.JSONField()
 
-    title = models.TextField(blank=True, default="Untitled")
+    # Blank means untitled.
+    title = models.TextField(blank=True, default="")
     # SET_NULL, not CASCADE: a published scene's link is shared and must survive
     # its author deleting their account.
     author = models.ForeignKey(
@@ -144,6 +145,10 @@ class Scene(TimestampedModel):
             models.CheckConstraint(
                 condition=models.Q(key__length__gte=2) & ~models.Q(key="app"),
                 name="scene_key_not_reserved",
+            ),
+            models.CheckConstraint(
+                condition=~models.Q(title__regex=r"[\r\n]"),
+                name="scene_title_single_line",
             ),
         ]
         indexes = [
