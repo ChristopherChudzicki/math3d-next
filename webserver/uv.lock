@@ -359,7 +359,7 @@ requires-dist = [
     { name = "django", specifier = ">=6.1.1,<7.0.0" },
     { name = "django-allauth", extras = ["socialaccount"], specifier = ">=65.15,<66.0" },
     { name = "django-cors-headers", specifier = ">=4.9.0,<5.0.0" },
-    { name = "django-ninja", specifier = ">=1.6.2,<2.0" },
+    { name = "django-ninja", specifier = ">=1.7.1,<2.0" },
     { name = "faker", specifier = ">=24.14.1,<25.0.0" },
     { name = "gunicorn", specifier = ">=23.0.0,<24.0.0" },
     { name = "psycopg", specifier = ">=3.2.10" },
