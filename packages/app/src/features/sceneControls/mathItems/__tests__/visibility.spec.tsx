@@ -114,7 +114,7 @@ describe("Visible and calculatedVisibility", () => {
         useCalculatedVisibility: false,
       });
       await user.click(
-        within(ui.boolean).getByRole("checkbox", { name: "Value" }),
+        within(ui.boolean).getByRole("switch", { name: "Value" }),
       );
       expect(getPointData().properties).toEqual(
         expect.objectContaining({

@@ -11,9 +11,8 @@ import React, {
   useMemo,
 } from "react";
 
-import Slider, { SliderProps } from "@mui/material/Slider";
+import Slider from "@/ui/Slider";
 import { useInterval } from "@/util/hooks/useInterval";
-import classNames from "classnames";
 import { ParseableObjs } from "@math3d/parser";
 import SliderControls, { mustFindSpeed } from "./SliderControls";
 import type { SliderControlsProps } from "./SliderControls";
@@ -102,11 +101,8 @@ const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
     valueRef.current = wrap(valueRef.current + increment, min, max);
     onChange(valueRef.current, true);
   }, [increment, onChange, min, max]);
-  const handleChange: NonNullable<SliderProps["onChange"]> = useCallback(
-    (_e, v) => {
-      if (!(typeof v === "number")) {
-        throw new Error(`Expected a number, received ${JSON.stringify(v)}`);
-      }
+  const handleChange = useCallback(
+    (v: number) => {
       valueRef.current = v;
       onChange(valueRef.current);
     },
@@ -118,13 +114,10 @@ const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
   return (
     <Slider
       aria-label={label}
-      size="small"
-      className={classNames(styles.slider, {
-        [styles.animating]: isAnimating,
-      })}
       data-dndkit-no-drag
-      onChange={handleChange}
+      onValueChange={handleChange}
       step={baseIncrement}
+      largeStep={(max - min) / 10}
       min={min}
       max={max}
       value={value}

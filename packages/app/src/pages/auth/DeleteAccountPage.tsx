@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as yup from "yup";
-import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router";
 import { isApiError, useUserMeDelete } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
@@ -9,7 +8,9 @@ import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import { Dialog } from "@/ui/Dialog";
 import Alert from "@/ui/Alert";
 import Button from "@/ui/Button";
+import TextField from "@/ui/TextField";
 import { TextButton } from "@/ui/TextLink";
+import { composeRefs } from "@/util";
 import { useValidatedForm } from "@/util/forms";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 
@@ -35,6 +36,7 @@ const DeleteAccountPage: React.FC = () => {
     handleSubmit,
     formState: { errors },
   } = useValidatedForm({ schema });
+  const { ref: registerRef, ...confirmField } = register("confirm");
 
   // A successful delete flips auth authenticated → unauthenticated, and that
   // deliberate case has its own flow (the "Account Deleted" notice, then
@@ -114,14 +116,11 @@ const DeleteAccountPage: React.FC = () => {
               later creates a new, empty account.
             </Alert>
             <TextField
-              fullWidth
-              margin="normal"
-              error={!!errors.confirm?.message}
-              helperText={`To proceed, enter "${CONFIRM_PROMPT}" exactly.`}
+              invalid={!!errors.confirm?.message}
+              description={`To proceed, enter "${CONFIRM_PROMPT}" exactly.`}
               label="Confirm"
-              type="text"
-              inputRef={confirmRef}
-              {...register("confirm")}
+              ref={composeRefs(confirmRef, registerRef)}
+              {...confirmField}
             />
             {errors.root?.message ? (
               <Alert severity="error">{errors.root.message}</Alert>

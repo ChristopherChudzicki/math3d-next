@@ -11,3 +11,17 @@ test("is a textbox named by its label, and reports typing", async () => {
 
   expect(onChange).toHaveBeenCalledOnce();
 });
+
+test("is described by its description, and marked invalid when invalid", () => {
+  render(
+    <TextField
+      label="Confirm"
+      description="Type the phrase exactly."
+      invalid
+    />,
+  );
+
+  const input = screen.getByRole("textbox", { name: "Confirm" });
+  expect(input).toHaveAccessibleDescription("Type the phrase exactly.");
+  expect(input).toBeInvalid();
+});

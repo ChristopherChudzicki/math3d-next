@@ -3008,37 +3008,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/lab@npm:^7.0.1-beta.18":
-  version: 7.0.1-beta.23
-  resolution: "@mui/lab@npm:7.0.1-beta.23"
-  dependencies:
-    "@babel/runtime": "npm:^7.28.6"
-    "@mui/system": "npm:^7.3.9"
-    "@mui/types": "npm:^7.4.12"
-    "@mui/utils": "npm:^7.3.9"
-    clsx: "npm:^2.1.1"
-    prop-types: "npm:^15.8.1"
-  peerDependencies:
-    "@emotion/react": ^11.5.0
-    "@emotion/styled": ^11.3.0
-    "@mui/material": ^7.3.9
-    "@mui/material-pigment-css": ^7.3.9
-    "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
-    react: ^17.0.0 || ^18.0.0 || ^19.0.0
-    react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
-  peerDependenciesMeta:
-    "@emotion/react":
-      optional: true
-    "@emotion/styled":
-      optional: true
-    "@mui/material-pigment-css":
-      optional: true
-    "@types/react":
-      optional: true
-  checksum: 10/1618779f8e18bc266d350bd4899ba36b97c4f30a3a6b73a63b1e6c95ec89f0e4cd0da30854dbebd9a270079f172f48156e867e1e232fa80984c5a823f1ea3e54
-  languageName: node
-  linkType: hard
-
 "@mui/material@npm:^7.3.4":
   version: 7.3.9
   resolution: "@mui/material@npm:7.3.9"
@@ -5699,7 +5668,6 @@ __metadata:
     "@math3d/tsconfig": "workspace:^"
     "@math3d/utils": "workspace:^"
     "@mswjs/data": "npm:^0.16.2"
-    "@mui/lab": "npm:^7.0.1-beta.18"
     "@mui/material": "npm:^7.3.4"
     "@mui/utils": "npm:^7.3.4"
     "@reduxjs/toolkit": "npm:^2.2.3"

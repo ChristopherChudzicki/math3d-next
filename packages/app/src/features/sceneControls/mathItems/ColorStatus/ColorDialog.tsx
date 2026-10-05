@@ -1,7 +1,3 @@
-import Tab from "@mui/material/Tab";
-import TabPanel from "@mui/lab/TabPanel";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
 import {
   MathGraphic,
   WidgetType,
@@ -11,6 +7,7 @@ import {
 import type { ParseableObjs } from "@math3d/parser";
 import React, { useCallback, useState } from "react";
 import ColorPicker, { OnColorChange } from "@/ui/ColorPicker";
+import { Tabs } from "@/ui/Tabs";
 
 import StaticMath from "@/ui/MathLive/StaticMath";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
@@ -79,8 +76,6 @@ interface ColorDialogProps {
   className?: string;
 }
 
-const lessPadding = { padding: "0.5em" };
-
 const ColorDialog: React.FC<ColorDialogProps> = (props) => {
   const { item } = props;
   const onWidgetChange = useOnWidgetChange(item);
@@ -90,31 +85,26 @@ const ColorDialog: React.FC<ColorDialogProps> = (props) => {
   );
   const pickerColors = hasColorExpr(item) ? colorsAndGradients : colors;
   const [tab, setTab] = useState("color");
-  const handleChange = useCallback(
-    (_event: React.SyntheticEvent, newValue: string) => {
-      setTab(newValue);
-    },
-    [],
-  );
   return (
     <div role="dialog" className={props.className} data-dndkit-no-drag>
       {hasColorExpr(item) ? (
-        <TabContext value={tab}>
-          <TabList onChange={handleChange} aria-label="lab API tabs example">
-            <Tab label="Color" value="color" />
-            <Tab label="Color Map" value="colormap" />
-          </TabList>
-          <TabPanel sx={lessPadding} value="color">
+        <Tabs.Root value={tab} onValueChange={setTab}>
+          <Tabs.List aria-label="Color mode">
+            <Tabs.Tab value="color">Color</Tabs.Tab>
+            <Tabs.Tab value="colormap">Color Map</Tabs.Tab>
+          </Tabs.List>
+          {/* Base UI makes panels tab stops; these start with controls. */}
+          <Tabs.Panel value="color" className={styles.panel} tabIndex={-1}>
             <ColorPicker
               colors={pickerColors}
               value={item.properties.color}
               onChange={onColorChange}
             />
-          </TabPanel>
-          <TabPanel sx={lessPadding} value="colormap">
+          </Tabs.Panel>
+          <Tabs.Panel value="colormap" className={styles.panel} tabIndex={-1}>
             <ColorExprInput item={item} onChange={onWidgetChange} />
-          </TabPanel>
-        </TabContext>
+          </Tabs.Panel>
+        </Tabs.Root>
       ) : (
         <ColorPicker
           colors={pickerColors}

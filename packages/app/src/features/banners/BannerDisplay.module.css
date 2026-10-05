@@ -8,6 +8,11 @@
   align-items: center;
 }
 
+.remember {
+  margin-right: 0.5rem;
+  color: inherit;
+}
+
 /* Takes the alert's own text color, which tracks its severity. */
 .dismiss {
   --tone: currentColor;

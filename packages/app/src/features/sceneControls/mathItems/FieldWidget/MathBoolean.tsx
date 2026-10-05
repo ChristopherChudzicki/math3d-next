@@ -1,8 +1,8 @@
-import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
 import classNames from "classnames";
 import React, { useCallback, useMemo, useState } from "react";
 import Button from "@/ui/Button";
+import Switch from "@/ui/Switch";
 import type { OnMathFieldChange } from "@/ui/MathLive";
 import SmallMathField from "@/ui/SmallMathField";
 import * as u from "@/util/styles/utils.module.css";
@@ -59,11 +59,10 @@ const MathBoolean: React.FC<
   const names = useMemo(() => [name], [name]);
   const result = !!useMathResults(mathScope, itemId, names)[name];
 
-  const handleSwitchChange: React.ChangeEventHandler<HTMLInputElement> =
-    useCallback(
-      (e) => triggerChange(e.target.checked ? "true" : "false"),
-      [triggerChange],
-    );
+  const handleSwitchChange = useCallback(
+    (checked: boolean) => triggerChange(checked ? "true" : "false"),
+    [triggerChange],
+  );
 
   const tooltipTitle = shouldUseExpression
     ? "Value is computed by expression. Reset to re-enable toggle switch control."
@@ -84,14 +83,9 @@ const MathBoolean: React.FC<
         <Switch
           checked={result}
           disabled={shouldUseExpression}
-          size="small"
           className={u.mr2}
-          onChange={handleSwitchChange}
-          slotProps={{
-            input: {
-              "aria-label": `Toggle property: ${label}`,
-            },
-          }}
+          onCheckedChange={handleSwitchChange}
+          aria-label={`Toggle property: ${label}`}
         />
       </Tooltip>
       {shouldUseExpression && (

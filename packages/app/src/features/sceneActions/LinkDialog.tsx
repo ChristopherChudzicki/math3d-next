@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
-import TextField from "@mui/material/TextField";
 import { Dialog } from "@/ui/Dialog";
 import Button from "@/ui/Button";
+import TextField from "@/ui/TextField";
 import copyText from "./copyText";
 import styles from "./LinkDialog.module.css";
 
@@ -25,17 +25,11 @@ type LinkFieldProps = { url: string; message: string };
 const LinkField: React.FC<LinkFieldProps> = ({ url, message }) => (
   <TextField
     label="Shareable URL"
-    size="small"
-    fullWidth
     value={url}
+    readOnly
+    onFocus={(e) => e.target.select()}
     className={styles["link-field"]}
-    slotProps={{
-      htmlInput: {
-        readOnly: true,
-        onFocus: (e: React.FocusEvent<HTMLInputElement>) => e.target.select(),
-      },
-    }}
-    helperText={<span role="status">{message}</span>}
+    description={<span role="status">{message}</span>}
   />
 );
 

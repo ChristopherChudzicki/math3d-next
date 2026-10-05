@@ -9,8 +9,13 @@
   flex-direction: row;
 }
 
+.tabList {
+  align-items: flex-end;
+}
+
 .tab {
   height: var(--tabListHeight);
+  line-height: 1.2;
 }
 
 .scrollingOverflow {

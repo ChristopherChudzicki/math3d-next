@@ -37,12 +37,10 @@ const setup = async (initialValue: string) => {
   /**
    * Find and return the Switch button
    */
-  const findToggle = async (): Promise<HTMLInputElement> => {
-    const label = "Toggle property: Label Visible";
-    const toggle = await within(booleanControl).findByLabelText(label);
-    assertInstanceOf(toggle, HTMLInputElement);
-    return toggle;
-  };
+  const findToggle = () =>
+    within(booleanControl).findByRole("switch", {
+      name: "Toggle property: Label Visible",
+    });
   const getReset = (): HTMLButtonElement => {
     const label = "Reset";
     const toggle = within(booleanControl).getByText(label);
@@ -90,7 +88,7 @@ test("clicking switch toggles the value when switch is enabled", async () => {
   expect(getValue()).toBe(false);
 
   const toggle = await findToggle();
-  expect(toggle.disabled).toBe(false);
+  expect(toggle).not.toHaveAttribute("aria-disabled", "true");
   await user.click(toggle, { pointerEventsCheck: 0 });
   expect(getValue()).toBe(true);
 });
@@ -115,13 +113,13 @@ describe("When the switch is initially enabled", () => {
     'enabled if value is "false" or "true"',
     async (initialValue) => {
       const { findToggle } = await setup(initialValue);
-      expect(await findToggle()).toBeEnabled();
+      expect(await findToggle()).not.toHaveAttribute("aria-disabled", "true");
     },
   );
 
   test('disabled if value is not "false" or "true"', async () => {
     const { findToggle } = await setup("!false");
-    expect(await findToggle()).toBeDisabled();
+    expect(await findToggle()).toHaveAttribute("aria-disabled", "true");
   });
 });
 

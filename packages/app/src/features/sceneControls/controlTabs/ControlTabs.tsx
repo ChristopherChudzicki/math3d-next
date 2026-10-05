@@ -1,8 +1,5 @@
 import React, { useCallback } from "react";
-import Tab from "@mui/material/Tab";
-import TabPanel from "@mui/lab/TabPanel";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
+import { Tabs } from "@/ui/Tabs";
 import ScrollingYOverflowX from "@/ui/scrollingOverflow";
 import { useAppSelector } from "@/store/hooks";
 import { useDispatch } from "react-redux";
@@ -18,60 +15,51 @@ type Props = {
   tabBarExtraContent: React.ReactNode;
 };
 
-const noPadding = { padding: 0 };
-
 const SceneControls: React.FC<Props> = (props) => {
   const activeTab = useAppSelector((state) => state.scene.activeTabId);
   const dispatch = useDispatch();
   const handleChange = useCallback(
-    (
-      _event: React.SyntheticEvent,
-      newValue: typeof MAIN_FOLDER | typeof SETTINGS_FOLDER,
-    ) => {
-      dispatch(
-        actions.setActiveTab({
-          id: newValue,
-        }),
-      );
+    (newValue: string) => {
+      dispatch(actions.setActiveTab({ id: newValue }));
     },
     [dispatch],
   );
   return (
-    <TabContext value={activeTab}>
+    <Tabs.Root value={activeTab} onValueChange={handleChange}>
       <div className={styles.tabsHeader}>
-        <TabList onChange={handleChange} aria-label="lab API tabs example">
-          <Tab
-            className={styles.tab}
-            label={props.mainNav}
-            value={MAIN_FOLDER}
-          />
-          <Tab
-            className={styles.tab}
-            label={props.axesNav}
-            value={SETTINGS_FOLDER}
-          />
-        </TabList>
+        <Tabs.List aria-label="Scene controls" className={styles.tabList}>
+          <Tabs.Tab className={styles.tab} value={MAIN_FOLDER}>
+            {props.mainNav}
+          </Tabs.Tab>
+          <Tabs.Tab className={styles.tab} value={SETTINGS_FOLDER}>
+            {props.axesNav}
+          </Tabs.Tab>
+        </Tabs.List>
         <div className={styles.tabListExtra}>{props.tabBarExtraContent}</div>
       </div>
-      <TabPanel
+      {/*
+       * Base UI makes panels tab stops, which APG reserves for panels whose
+       * content isn't focusable; these start with item controls.
+       */}
+      <Tabs.Panel
         aria-busy={props.loading && activeTab === MAIN_FOLDER}
-        sx={noPadding}
         value={MAIN_FOLDER}
+        tabIndex={-1}
       >
         <ScrollingYOverflowX className={styles.scrollingOverflow}>
           {props.mainContent}
         </ScrollingYOverflowX>
-      </TabPanel>
-      <TabPanel
-        aria-busy={props.loading && activeTab === "setup"}
-        sx={noPadding}
+      </Tabs.Panel>
+      <Tabs.Panel
+        aria-busy={props.loading && activeTab === SETTINGS_FOLDER}
         value={SETTINGS_FOLDER}
+        tabIndex={-1}
       >
         <ScrollingYOverflowX className={styles.scrollingOverflow}>
           {props.axesdContent}
         </ScrollingYOverflowX>
-      </TabPanel>
-    </TabContext>
+      </Tabs.Panel>
+    </Tabs.Root>
   );
 };
 
