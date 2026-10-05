@@ -7,10 +7,7 @@
   padding-inline-end: 4px;
 }
 
-/*
- * Compact, to fit the slider's row. Lucide's glyphs fill more of their box
- * than filled icons do, so they run a size smaller than other icon buttons.
- */
+/* Smaller than size="sm" (1.75rem) to fit the slider's row; the icon shrinks with it. */
 .control {
   min-height: 1.5rem;
   font-size: 1rem;
