@@ -18,10 +18,3 @@
   margin-left: 8px;
   z-index: calc(var(--sidebar-z) + 12000);
 }
-
-.keyboardToggleButton {
-  gap: 0;
-  padding-left: 4px;
-  padding-right: 4px;
-  font-size: 1.5rem;
-}

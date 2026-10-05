@@ -3,21 +3,16 @@
  * end for the last button's focus ring, which the row would otherwise clip.
  */
 .controls {
-  column-gap: 6px;
+  column-gap: 4px;
   padding-inline-end: 4px;
 }
 
-/* Smaller than size="sm" (1.75rem) to fit the slider's row; the icon shrinks with it. */
-.control {
-  min-height: 1.5rem;
-  font-size: 1rem;
-}
-
+/* Wide enough for the longest label, "1⁄16x", so the row doesn't shift. */
 .speed {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.75rem;
+  min-width: 2.25rem;
   border: 1px solid
     color-mix(in srgb, var(--color-text-primary) 45%, transparent);
   background-color: var(--color-secondary-lighter);

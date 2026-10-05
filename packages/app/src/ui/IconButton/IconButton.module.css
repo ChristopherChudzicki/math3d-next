@@ -1,6 +1,20 @@
-/* Square: the size's min-height doubles as the width. */
-.iconButton {
-  aspect-ratio: 1;
-  padding: 0;
+/*
+ * Each size sets the box and the icon together (icons are 1em). Two classes,
+ * so these beat Button's single-class size rules whatever the load order.
+ * min-width keeps one icon square and lets a second widen the button.
+ */
+.iconButton.sm,
+.iconButton.md {
+  gap: 0;
+  padding: 0 0.125rem;
+}
+
+.iconButton.sm {
+  min-width: 1.75rem;
   font-size: 1.25rem;
+}
+
+.iconButton.md {
+  min-width: 2.25rem;
+  font-size: 1.5rem;
 }

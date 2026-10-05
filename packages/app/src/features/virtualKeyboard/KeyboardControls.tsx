@@ -5,7 +5,7 @@ import chevronDown from "@iconify-icons/lucide/chevron-down";
 import chevronUp from "@iconify-icons/lucide/chevron-up";
 import { mathVirtualKeyboard, LAYOUTS } from "@/ui/MathLive/keyboards";
 import { createPortal } from "react-dom";
-import Button from "@/ui/Button";
+import IconButton from "@/ui/IconButton";
 
 import styles from "./KeyboardControls.module.css";
 
@@ -53,17 +53,16 @@ const ToggleKeyboardButton = () => {
   }, [autoExpand, mfEl]);
   return createPortal(
     <div className={styles.keyboardToggle}>
-      <Button
+      <IconButton
         tabIndex={-1}
         onPointerDown={() => {
           if (document.activeElement?.tagName === "MATH-FIELD") {
             setMfEl(document.activeElement as HTMLElement);
           }
         }}
-        className={styles.keyboardToggleButton}
         variant="solid"
         data-testid="toggle-keyboard-button"
-        aria-label="Enable math keyboard"
+        label="Enable math keyboard"
         onClick={handleClick}
         aria-pressed={autoExpand}
       >
@@ -73,7 +72,7 @@ const ToggleKeyboardButton = () => {
         ) : (
           <Icon icon={chevronUp} aria-hidden="true" />
         )}
-      </Button>
+      </IconButton>
     </div>,
     document.body,
   );

@@ -9,5 +9,4 @@
 
 .toggleButton {
   --tone: var(--color-secondary);
-  font-size: 1.5rem;
 }
