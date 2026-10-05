@@ -8,8 +8,8 @@ from urllib.parse import urlsplit
 import pytest
 from django.db import connection
 from django.utils import timezone
-
 from main.constants import BACKEND_USER_AGENT
+
 from scenes import screenshots
 from scenes.models import RenderDay, RenderMonth
 from scenes.screenshots import reserve_render_slot

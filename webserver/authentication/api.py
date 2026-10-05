@@ -1,9 +1,8 @@
 from django.contrib.auth import logout
 from django.http import HttpRequest
 from django.middleware.csrf import get_token
-from ninja import Router, Schema, Status
-
 from main.ninja_auth import session_auth
+from ninja import Router, Schema, Status
 
 router = Router()
 
