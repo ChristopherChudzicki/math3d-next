@@ -17,7 +17,7 @@ import Button from "@/ui/Button";
 import Checkbox from "@/ui/Checkbox";
 import { Drawer } from "@/ui/Drawer";
 import IconButton from "@/ui/IconButton";
-import LoadingSpinner from "@/ui/LoadingSpinner/LoadingSpinner";
+import LoadingSpinner from "@/ui/LoadingSpinner";
 import { Menu } from "@/ui/Menu";
 import TextField from "@/ui/TextField";
 import { u } from "@/util/styles";

@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import * as yup from "yup";
-import Alert from "@mui/material/Alert";
 import TextField from "@mui/material/TextField";
+import Alert from "@/ui/Alert";
 import { useValidatedForm } from "@/util/forms";
 import { UNTITLED } from "@/features/scene/sceneTitle";
 

@@ -1,0 +1,53 @@
+/* Each severity sets --tone; the surface and text are mixed from it. */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0 1rem;
+  border-radius: var(--border-radius);
+  background-color: color-mix(
+    in oklch,
+    var(--tone) 10%,
+    var(--color-background)
+  );
+  color: color-mix(in oklch, var(--tone) 55%, black);
+  font-size: var(--font-size-small);
+  line-height: 1.43;
+}
+
+.error {
+  --tone: var(--color-danger);
+}
+
+.warning {
+  --tone: var(--color-warning);
+}
+
+.info {
+  --tone: var(--color-accent);
+}
+
+.success {
+  --tone: var(--color-success);
+}
+
+.icon {
+  flex: none;
+  margin-block: 0.5rem;
+  font-size: 1.25rem;
+  /* Darkened so the warning tone clears 3:1 against its surface. */
+  color: color-mix(in oklch, var(--tone) 85%, black);
+}
+
+.message {
+  flex: 1;
+  min-width: 0;
+  padding: 0.6rem 0;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  margin-right: -0.5rem;
+}

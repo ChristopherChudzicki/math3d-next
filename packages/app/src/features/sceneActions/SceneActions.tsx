@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
-import Typography from "@mui/material/Typography";
 import { Icon } from "@iconify/react/offline";
 import chevronDown from "@iconify-icons/lucide/chevron-down";
 import { usePatchScene, useUserMe } from "@math3d/api";
@@ -232,11 +231,11 @@ const SceneActions: React.FC = () => {
       ) : null}
       {dialog?.kind === "link" ? (
         <LinkDialog heading="Copy link" url={dialog.url} onClose={closeDialog}>
-          <Typography variant="body2">
+          <p>
             {dialog.unsaved
               ? "This link shows the scene as last saved, without your changes."
               : "Your browser didn't allow copying. Select the link and copy it."}
-          </Typography>
+          </p>
         </LinkDialog>
       ) : null}
     </>

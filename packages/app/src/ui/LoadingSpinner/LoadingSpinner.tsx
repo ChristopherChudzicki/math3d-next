@@ -1,7 +1,21 @@
-import CircularProgress from "@mui/material/CircularProgress";
 import classNames from "classnames";
 import React from "react";
 import styles from "./LoadingSpinner.module.css";
+
+type SpinnerProps = {
+  /** A CSS length; defaults to 40px. */
+  size?: string;
+  className?: string;
+};
+
+/** A decorative spinner, for beside text that says what is loading. */
+const Spinner: React.FC<SpinnerProps> = ({ size, className }) => (
+  <span
+    className={classNames(styles.spinner, className)}
+    style={size ? ({ "--size": size } as React.CSSProperties) : undefined}
+    aria-hidden="true"
+  />
+);
 
 type LoadingSpinnerProps = {
   className?: string;
@@ -15,9 +29,12 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 }) => {
   return (
     <div className={classNames(styles["loading-container"], className)}>
-      <CircularProgress aria-label={label} />
+      <div role="progressbar" aria-label={label}>
+        <Spinner />
+      </div>
     </div>
   );
 };
 
 export default LoadingSpinner;
+export { Spinner };

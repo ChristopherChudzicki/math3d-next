@@ -1,9 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import * as Sentry from "@sentry/react";
-import Alert from "@mui/material/Alert";
-import CircularProgress from "@mui/material/CircularProgress";
-import Typography from "@mui/material/Typography";
 import { useCreateScene } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions, select } from "@/features/sceneControls/mathItems";
@@ -11,6 +8,8 @@ import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import { DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import { sceneDisplayName } from "@/features/scene/sceneTitle";
 import { Dialog } from "@/ui/Dialog";
+import Alert from "@/ui/Alert";
+import { Spinner } from "@/ui/LoadingSpinner";
 import Button from "@/ui/Button";
 import { TextButton } from "@/ui/TextLink";
 import useTitleForm from "./useTitleForm";
@@ -148,13 +147,13 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
           <Dialog.Body>
             <LinkField url={publishedUrl} message={message} />
             {mode === "share" && fromLink && !existingUrl ? (
-              <Typography variant="body2" role="note">
+              <p role="note">
                 This is a new link showing the scene as it looks now. The
                 original link is unchanged.
-              </Typography>
+              </p>
             ) : null}
             {mode === "share" && DISPLAY_AUTH_FLOWS ? (
-              <Typography variant="body2">
+              <p>
                 <TextButton
                   onClick={() => {
                     onClose();
@@ -164,7 +163,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
                   Sign in
                 </TextButton>{" "}
                 to save scenes you can keep editing.
-              </Typography>
+              </p>
             ) : null}
           </Dialog.Body>
           <LinkActions onCopy={copy} copyRef={copyRef} />
@@ -174,8 +173,8 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
     if (autoPublishing) {
       return (
         <Dialog.Body className={styles.publishing}>
-          <CircularProgress size="1.5rem" aria-hidden="true" />
-          <Typography>{headings.submitting}</Typography>
+          <Spinner size="1.5rem" />
+          <span>{headings.submitting}</span>
         </Dialog.Body>
       );
     }

@@ -1,16 +1,10 @@
 import React from "react";
-import Typography from "@mui/material/Typography";
+import { HeaderTitle } from "@/ui/Header";
 import AppPageLayout from "@/pages/AppPageLayout/AppPageLayout";
 
 const NotFoundPage: React.FC = () => (
-  <AppPageLayout
-    title={
-      <Typography component="h1" variant="h5">
-        Page not found
-      </Typography>
-    }
-  >
-    <Typography>That page doesn&apos;t exist.</Typography>
+  <AppPageLayout title={<HeaderTitle>Page not found</HeaderTitle>}>
+    <p>That page doesn&apos;t exist.</p>
   </AppPageLayout>
 );
 

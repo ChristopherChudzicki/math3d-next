@@ -4,7 +4,6 @@ import React from "react";
 
 import { TextButton } from "@/ui/TextLink";
 import { useToggle } from "@/util/hooks";
-import { Typography } from "@mui/material";
 import type { ReferenceEntry } from "./data.compile";
 import * as styles from "./ReferencePanel.module.css";
 import { groupEntries } from "./util";
@@ -73,14 +72,9 @@ const ReferencePanel: React.FC<ReferencePanelProps> = ({ entries }) => {
 
   return groups.map((group) => (
     <React.Fragment key={group.tag}>
-      <Typography
-        component="h2"
-        variant="h5"
-        id={group.tag}
-        sx={{ marginBottom: "16px", marginTop: "16px" }}
-      >
+      <h2 className={styles.heading} id={group.tag}>
         {group.label}
-      </Typography>
+      </h2>
       <ReferenceTable entries={group.entries} />
     </React.Fragment>
   ));

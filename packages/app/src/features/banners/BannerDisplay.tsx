@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import Alert from "@mui/material/Alert";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { Icon } from "@iconify/react/offline";
 import xIcon from "@iconify-icons/lucide/x";
+import Alert from "@/ui/Alert";
 import IconButton from "@/ui/IconButton";
 import { useElementResize, useToggle } from "@/util/hooks";
 import { useBanners } from "./BannerContext";
@@ -29,6 +29,7 @@ const BannerItem: React.FC<{
     <Alert
       className={styles.banner}
       severity={severity}
+      announce={false}
       action={
         <div className={styles.actions}>
           {showRememberOption ? (
@@ -88,7 +89,9 @@ const BannerDisplay: React.FC = () => {
   );
 
   return (
-    <div ref={setContainer}>
+    // The live region is this always-mounted container: a region inserted
+    // with its text already inside isn't reliably announced.
+    <div ref={setContainer} aria-live="polite">
       {banners.map((banner) => (
         <BannerItem
           key={banner.id}
