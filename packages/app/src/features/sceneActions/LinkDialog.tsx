@@ -16,7 +16,8 @@ const useLinkCopy = (url: string) => {
   const copy = async () => {
     setResult((await copyText(url)) ? "copied" : "failed");
   };
-  return { copy, message: result ? COPY_MESSAGES[result] : " " };
+  // A non-breaking space holds the message's line, so the dialog doesn't grow.
+  return { copy, message: result ? COPY_MESSAGES[result] : "\u00a0" };
 };
 
 type LinkFieldProps = { url: string; message: string };
