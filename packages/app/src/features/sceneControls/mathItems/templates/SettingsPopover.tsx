@@ -1,4 +1,5 @@
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import { Icon } from "@iconify/react/offline";
+import settings from "@iconify-icons/lucide/settings";
 import Popover from "@mui/material/Popover";
 import type {
   MathItem,
@@ -10,8 +11,7 @@ import React, { useMemo } from "react";
 import { useToggle } from "@/util/hooks";
 import { useSelector } from "react-redux";
 import IconButton from "@/ui/IconButton";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
+import circleHelp from "@iconify-icons/lucide/circle-help";
 import Markdown from "@/ui/Markdown";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
 import { useMathScope, select } from "../sceneSlice";
@@ -65,11 +65,7 @@ const SettingsField: React.FC<SettingsFieldProps> = ({
           aria-pressed={showTip}
           onClick={() => setShowTip((current) => !current)}
         >
-          {showTip ? (
-            <HelpRoundedIcon fontSize="inherit" />
-          ) : (
-            <HelpOutlineIcon fontSize="inherit" />
-          )}
+          <Icon icon={circleHelp} aria-hidden="true" />
         </IconButton>
       ) : (
         <span />
@@ -181,7 +177,7 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
         label="More Settings"
         className={styles["settings-button"]}
       >
-        <SettingsOutlinedIcon fontSize="inherit" />
+        <Icon icon={settings} aria-hidden="true" />
       </IconButton>
     </>
   );

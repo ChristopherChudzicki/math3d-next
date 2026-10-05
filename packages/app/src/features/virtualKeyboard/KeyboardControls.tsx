@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import KeyboardAltOutlinedIcon from "@mui/icons-material/KeyboardAltOutlined";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { Icon } from "@iconify/react/offline";
+import keyboard from "@iconify-icons/lucide/keyboard";
+import chevronDown from "@iconify-icons/lucide/chevron-down";
+import chevronUp from "@iconify-icons/lucide/chevron-up";
 import { mathVirtualKeyboard, LAYOUTS } from "@/ui/MathLive/keyboards";
 import { createPortal } from "react-dom";
 import Button from "@/ui/Button";
@@ -66,11 +67,11 @@ const ToggleKeyboardButton = () => {
         onClick={handleClick}
         aria-pressed={autoExpand}
       >
-        <KeyboardAltOutlinedIcon fontSize="inherit" />
+        <Icon icon={keyboard} aria-hidden="true" />
         {autoExpand ? (
-          <KeyboardArrowDownIcon fontSize="inherit" />
+          <Icon icon={chevronDown} aria-hidden="true" />
         ) : (
-          <KeyboardArrowUpIcon fontSize="inherit" />
+          <Icon icon={chevronUp} aria-hidden="true" />
         )}
       </Button>
     </div>,

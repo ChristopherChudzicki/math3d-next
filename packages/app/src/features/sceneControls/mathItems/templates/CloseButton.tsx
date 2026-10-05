@@ -1,4 +1,5 @@
-import CloseIcon from "@mui/icons-material/Close";
+import { Icon } from "@iconify/react/offline";
+import xIcon from "@iconify-icons/lucide/x";
 import classNames from "classnames";
 import React from "react";
 import IconButton from "@/ui/IconButton";
@@ -14,7 +15,7 @@ const CloseButton: React.FC<CloseButtonProps> = ({ className, ...others }) => (
     {...others}
     className={classNames(styles["close-button"], className)}
   >
-    <CloseIcon fontSize="inherit" />
+    <Icon icon={xIcon} aria-hidden="true" />
   </IconButton>
 );
 

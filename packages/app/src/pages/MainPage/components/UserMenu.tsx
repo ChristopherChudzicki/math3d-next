@@ -1,9 +1,10 @@
 import React from "react";
 import IconButton from "@/ui/IconButton";
 import { Menu } from "@/ui/Menu";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import MenuIcon from "@mui/icons-material/Menu";
-import PersonIcon from "@mui/icons-material/Person";
+import { Icon } from "@iconify/react/offline";
+import chevronDown from "@iconify-icons/lucide/chevron-down";
+import menuIcon from "@iconify-icons/lucide/menu";
+import user from "@iconify-icons/lucide/user";
 import type { AuthStatus } from "@/features/auth";
 import styles from "./UserMenu.module.css";
 
@@ -26,15 +27,15 @@ const UserMenu: React.FC<{
     <Menu.Trigger
       render={
         <IconButton label="Open Menu">
-          <MenuIcon fontSize="inherit" />
+          <Icon icon={menuIcon} aria-hidden="true" />
         </IconButton>
       }
     />
   ) : (
     <Menu.Trigger className={styles.avatar} aria-label="Open User Menu">
-      <PersonIcon fontSize="inherit" />
+      <Icon icon={user} aria-hidden="true" />
       {/* Points up while the menu is open; see the CSS. */}
-      <ArrowDropDownIcon fontSize="inherit" className={styles.arrow} />
+      <Icon icon={chevronDown} aria-hidden="true" className={styles.arrow} />
     </Menu.Trigger>
   );
 

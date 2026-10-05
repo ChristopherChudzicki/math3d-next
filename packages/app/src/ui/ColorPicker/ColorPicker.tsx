@@ -1,4 +1,5 @@
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import { Icon } from "@iconify/react/offline";
+import triangleAlert from "@iconify-icons/lucide/triangle-alert";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import Tooltip from "@mui/material/Tooltip";
@@ -50,7 +51,7 @@ const ColorSquare: React.FC<ColorSquareProps> = (props) => {
 
 const ColorWarning: React.FC<{ value: string }> = ({ value }) => (
   <Tooltip arrow title={`${value} is not a valid color`}>
-    <WarningAmberIcon />
+    <Icon icon={triangleAlert} aria-hidden="true" />
   </Tooltip>
 );
 

@@ -3008,22 +3008,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/icons-material@npm:^7.3.4":
-  version: 7.3.9
-  resolution: "@mui/icons-material@npm:7.3.9"
-  dependencies:
-    "@babel/runtime": "npm:^7.28.6"
-  peerDependencies:
-    "@mui/material": ^7.3.9
-    "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
-    react: ^17.0.0 || ^18.0.0 || ^19.0.0
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: 10/8d80e85984f443e8e7b89265eed442fb24486d27f43c4e1e776824d1c51711d0dbd09ee2cc4ffae0ab23298d3b4970c90566bfb797816bf7e8a2ab666c126a56
-  languageName: node
-  linkType: hard
-
 "@mui/lab@npm:^7.0.1-beta.18":
   version: 7.0.1-beta.23
   resolution: "@mui/lab@npm:7.0.1-beta.23"
@@ -5715,7 +5699,6 @@ __metadata:
     "@math3d/tsconfig": "workspace:^"
     "@math3d/utils": "workspace:^"
     "@mswjs/data": "npm:^0.16.2"
-    "@mui/icons-material": "npm:^7.3.4"
     "@mui/lab": "npm:^7.0.1-beta.18"
     "@mui/material": "npm:^7.3.4"
     "@mui/utils": "npm:^7.3.4"

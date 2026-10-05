@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useParams } from "react-router";
 import classNames from "classnames";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import { Icon } from "@iconify/react/offline";
+import pencil from "@iconify-icons/lucide/pencil";
 import { useAppSelector } from "@/store/hooks";
 import IconButton from "@/ui/IconButton";
 import { RenameDialog } from "@/features/sceneActions";
@@ -36,7 +37,7 @@ const SceneTitle: React.FC = () => {
         size="sm"
         onClick={() => setRenamingLoad(loadCount)}
       >
-        <EditOutlinedIcon fontSize="inherit" />
+        <Icon icon={pencil} aria-hidden="true" />
       </IconButton>
       {renamingLoad === loadCount ? (
         <RenameDialog onClose={() => setRenamingLoad(null)} />

@@ -1,5 +1,6 @@
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { Icon } from "@iconify/react/offline";
+import chevronLeft from "@iconify-icons/lucide/chevron-left";
+import chevronRight from "@iconify-icons/lucide/chevron-right";
 import classNames from "classnames";
 import React, { useCallback, useId, useMemo } from "react";
 
@@ -33,10 +34,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const isCollapsed = !visible;
   const regionId = useId();
-  const IconComponent = useMemo(() => {
+  const icon = useMemo(() => {
     const direction = getButtonDirection(visible, side);
-    if (direction === "left") return ChevronLeftIcon;
-    if (direction === "right") return ChevronRightIcon;
+    if (direction === "left") return chevronLeft;
+    if (direction === "right") return chevronRight;
     throw new Error(`Unexpected direction: ${direction}`);
   }, [visible, side]);
 
@@ -67,7 +68,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           aria-expanded={visible}
           label={isCollapsed ? `Expand ${label}` : `Collapse ${label}`}
         >
-          <IconComponent fontSize="inherit" />
+          <Icon icon={icon} aria-hidden="true" />
         </IconButton>
       </div>
       <div role="region" id={regionId} {...inertness}>

@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import ReplayRoundedIcon from "@mui/icons-material/ReplayRounded";
-import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
-import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
+import { Icon } from "@iconify/react/offline";
+import rotateCcw from "@iconify-icons/lucide/rotate-ccw";
+import externalLink from "@iconify-icons/lucide/external-link";
+import copyIcon from "@iconify-icons/lucide/copy";
 import Button from "@/ui/Button";
 import ButtonLink from "@/ui/ButtonLink";
 import { u } from "@/util/styles";
@@ -51,7 +52,7 @@ const TechnicalDetails: React.FC<{ text: string }> = ({ text }) => {
       <div className={styles["details-body"]}>
         <div className={styles["details-toolbar"]}>
           <Button variant="ghost" size="sm" onClick={handleCopy}>
-            <ContentCopyRoundedIcon fontSize="inherit" />
+            <Icon icon={copyIcon} aria-hidden="true" />
             {copied ? copy.copied : copy.copy}
           </Button>
         </div>
@@ -112,7 +113,7 @@ const ErrorView: React.FC<ErrorViewProps> = ({
           </div>
           <div className={styles.actions}>
             <Button variant="solid" tone="accent" onClick={onReload}>
-              <ReplayRoundedIcon fontSize="inherit" />
+              <Icon icon={rotateCcw} aria-hidden="true" />
               {copy.reload}
             </Button>
             {/* A full-page load, not a route change: the app just crashed. */}
@@ -127,9 +128,10 @@ const ErrorView: React.FC<ErrorViewProps> = ({
               rel="noreferrer"
             >
               {copy.report}
-              <OpenInNewRoundedIcon
+              <Icon
+                icon={externalLink}
+                aria-hidden="true"
                 className={styles["report-icon"]}
-                fontSize="inherit"
               />
             </a>
           </div>

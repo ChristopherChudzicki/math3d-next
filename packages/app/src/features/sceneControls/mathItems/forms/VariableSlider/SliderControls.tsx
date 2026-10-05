@@ -1,10 +1,11 @@
 import React, { useCallback } from "react";
-import PlayArrowOutlinedIcon from "@mui/icons-material/PlayArrowOutlined";
-import PauseIcon from "@mui/icons-material/Pause";
-import FastRewindOutlinedIcon from "@mui/icons-material/FastRewindOutlined";
-import FastForwardOutlinedIcon from "@mui/icons-material/FastForwardOutlined";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
+import { Icon } from "@iconify/react/offline";
+import play from "@iconify-icons/lucide/play";
+import pause from "@iconify-icons/lucide/pause";
+import rewind from "@iconify-icons/lucide/rewind";
+import fastForward from "@iconify-icons/lucide/fast-forward";
+import plus from "@iconify-icons/lucide/plus";
+import minus from "@iconify-icons/lucide/minus";
 import ButtonGroup from "@/ui/ButtonGroup";
 import IconButton from "@/ui/IconButton";
 import { assertNotNil } from "@/util";
@@ -97,9 +98,9 @@ const SliderControls: React.FC<SliderControlsProps> = ({
         label={isAnimating ? btnLabels.pause : btnLabels.play}
       >
         {isAnimating ? (
-          <PauseIcon fontSize="inherit" className={styles.pauseIcon} />
+          <Icon icon={pause} aria-hidden="true" />
         ) : (
-          <PlayArrowOutlinedIcon fontSize="inherit" />
+          <Icon icon={play} aria-hidden="true" />
         )}
       </IconButton>
       <ButtonGroup aria-label="Speed">
@@ -111,7 +112,7 @@ const SliderControls: React.FC<SliderControlsProps> = ({
           disabled={!canDecrease}
           label={btnLabels.slower}
         >
-          <FastRewindOutlinedIcon fontSize="inherit" />
+          <Icon icon={rewind} aria-hidden="true" />
         </IconButton>
         <output className={styles.speed}>{speed.label}x</output>
         <IconButton
@@ -122,7 +123,7 @@ const SliderControls: React.FC<SliderControlsProps> = ({
           disabled={!canIncrease}
           label={btnLabels.faster}
         >
-          <FastForwardOutlinedIcon fontSize="inherit" />
+          <Icon icon={fastForward} aria-hidden="true" />
         </IconButton>
       </ButtonGroup>
       <ButtonGroup aria-label="Step">
@@ -133,7 +134,7 @@ const SliderControls: React.FC<SliderControlsProps> = ({
           onClick={onStepDown}
           label={btnLabels.decrement}
         >
-          <RemoveOutlinedIcon fontSize="inherit" />
+          <Icon icon={minus} aria-hidden="true" />
         </IconButton>
         <IconButton
           variant="outline"
@@ -142,7 +143,7 @@ const SliderControls: React.FC<SliderControlsProps> = ({
           onClick={onStepUp}
           label={btnLabels.increment}
         >
-          <AddOutlinedIcon fontSize="inherit" />
+          <Icon icon={plus} aria-hidden="true" />
         </IconButton>
       </ButtonGroup>
     </div>

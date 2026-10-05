@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Close from "@mui/icons-material/Close";
+import { Icon } from "@iconify/react/offline";
+import xIcon from "@iconify-icons/lucide/x";
 import IconButton from "@/ui/IconButton";
 import { useElementResize, useToggle } from "@/util/hooks";
 import { useBanners } from "./BannerContext";
@@ -50,7 +51,7 @@ const BannerItem: React.FC<{
             label={banner.ariaLabel ?? "Dismiss notice"}
             onClick={() => onDismiss(remember)}
           >
-            <Close fontSize="inherit" />
+            <Icon icon={xIcon} aria-hidden="true" />
           </IconButton>
         </div>
       }
