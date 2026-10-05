@@ -12,12 +12,14 @@ test.each<[AlertSeverity, "alert" | "status"]>([
   expect(screen.getByRole(role)).toHaveTextContent("Message");
 });
 
-test("role can be overridden", () => {
+test("announce={false} renders no live region", () => {
   render(
-    <Alert severity="error" role="status">
+    <Alert severity="error" announce={false}>
       Message
     </Alert>,
   );
 
-  expect(screen.getByRole("status")).toHaveTextContent("Message");
+  expect(screen.getByText("Message")).toBeInTheDocument();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
 });

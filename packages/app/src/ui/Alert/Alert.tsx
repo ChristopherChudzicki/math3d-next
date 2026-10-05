@@ -23,22 +23,26 @@ type AlertProps = {
   /** Controls at the end, such as a dismiss button. */
   action?: React.ReactNode;
   /**
-   * `alert` interrupts a screen reader; `status` waits for it to finish.
-   * Defaults to `alert` for errors and `status` otherwise.
+   * Whether a screen reader announces it: an error interrupts (`alert`),
+   * anything else waits its turn (`status`). Pass `false` for content that
+   * isn't news, or that sits inside a live region already.
    */
-  role?: "alert" | "status";
+  announce?: boolean;
   className?: string;
 };
+
+const roleFor = (severity: AlertSeverity) =>
+  severity === "error" ? "alert" : "status";
 
 const Alert: React.FC<AlertProps> = ({
   severity,
   children,
   action,
-  role = severity === "error" ? "alert" : "status",
+  announce = true,
   className,
 }) => (
   <div
-    role={role}
+    role={announce ? roleFor(severity) : undefined}
     className={classNames(styles.alert, styles[severity], className)}
   >
     <Icon icon={ICONS[severity]} className={styles.icon} aria-hidden="true" />

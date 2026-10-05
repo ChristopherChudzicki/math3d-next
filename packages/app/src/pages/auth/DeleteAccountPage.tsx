@@ -103,7 +103,7 @@ const DeleteAccountPage: React.FC = () => {
         </Dialog.Header>
         <Dialog.Form onSubmit={onSubmit}>
           <Dialog.Body>
-            <Alert severity="error">
+            <Alert severity="error" announce={false}>
               This action cannot be undone. Scenes you have saved stay published
               at their existing links, with no account able to edit or remove
               them — delete them from{" "}

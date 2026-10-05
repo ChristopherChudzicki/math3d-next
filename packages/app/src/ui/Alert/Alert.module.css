@@ -35,7 +35,8 @@
   flex: none;
   margin-block: 0.5rem;
   font-size: 1.25rem;
-  color: var(--tone);
+  /* Darkened so the warning tone clears 3:1 against its surface. */
+  color: color-mix(in oklch, var(--tone) 85%, black);
 }
 
 .message {

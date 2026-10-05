@@ -9,7 +9,7 @@ import { DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import { sceneDisplayName } from "@/features/scene/sceneTitle";
 import { Dialog } from "@/ui/Dialog";
 import Alert from "@/ui/Alert";
-import { Spinner } from "@/ui/LoadingSpinner/LoadingSpinner";
+import { Spinner } from "@/ui/LoadingSpinner";
 import Button from "@/ui/Button";
 import { TextButton } from "@/ui/TextLink";
 import useTitleForm from "./useTitleForm";

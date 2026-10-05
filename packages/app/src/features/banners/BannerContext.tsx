@@ -8,10 +8,11 @@ import React, {
   useState,
 } from "react";
 import invariant from "tiny-invariant";
+import type { AlertSeverity } from "@/ui/Alert";
 
 const DEFAULT_CONFIRMATION_DURATION_MS = 7000;
 
-type BannerSeverity = "error" | "warning" | "info" | "success";
+type BannerSeverity = AlertSeverity;
 
 type BannerSpec = {
   /** Stable identity. Calling show() again with an id already present is a no-op. */
