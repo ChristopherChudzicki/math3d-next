@@ -148,7 +148,7 @@ test.each(permanentItems)(
     // insertion should be allowed but should be into default folder and refocus tab
     const { store } = renderTestApp("/");
     await findItemByDescription("Explicit Surface");
-    await user.click(screen.getByRole("tab", { name: "Axes & Camera" }));
+    await user.click(screen.getByRole("tab", { name: "Setup" }));
     const item = getItemByTestId(itemId);
     const description = within(item).getByLabelText("Description");
     await user.click(description);
@@ -169,7 +169,7 @@ test.each(permanentItems)("Removing items", async ({ itemId }) => {
   within(await findItemByDescription("Explicit Surface")).getByRole("button", {
     name: removeBtnLabel,
   });
-  await user.click(screen.getByRole("tab", { name: "Axes & Camera" }));
+  await user.click(screen.getByRole("tab", { name: "Setup" }));
   const item = getItemByTestId(itemId);
   const removeBtn = within(item).getByRole("button", {
     name: removeBtnLabel,
@@ -186,7 +186,7 @@ test.each(permanentItems)(
     expect(
       surface.closest('[aria-roledescription="sortable"]'),
     ).not.toHaveAttribute("aria-disabled", "true");
-    await user.click(screen.getByRole("tab", { name: "Axes & Camera" }));
+    await user.click(screen.getByRole("tab", { name: "Setup" }));
     expect(
       getItemByTestId(itemId).closest('[aria-roledescription="sortable"]'),
     ).toHaveAttribute("aria-disabled", "true");

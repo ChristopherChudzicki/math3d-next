@@ -1,9 +1,11 @@
 import React, { useRef } from "react";
 import * as yup from "yup";
-import TextField from "@mui/material/TextField";
 import Alert from "@/ui/Alert";
+import TextField from "@/ui/TextField";
+import composeRefs from "@/util/composeRefs";
 import { useValidatedForm } from "@/util/forms";
 import { UNTITLED } from "@/features/scene/sceneTitle";
+import styles from "./useTitleForm.module.css";
 
 // A blank title means untitled.
 const schema = yup.object({
@@ -28,24 +30,22 @@ const useTitleForm = ({ defaultTitle, onSubmit }: UseTitleFormOptions) => {
     formState: { errors, isSubmitting },
   } = useValidatedForm({ schema, defaultValues: { title: defaultTitle } });
 
+  const { ref: registerRef, ...titleField } = register("title");
+
   /** `note` is shown above the title field. */
   const renderFields = (note?: React.ReactNode) => (
-    <>
+    <div className={styles.fields}>
       {note}
       <TextField
-        margin="dense"
-        fullWidth
         label="Title"
         placeholder={UNTITLED}
-        // Keep the label above the field so the placeholder always shows.
-        slotProps={{ inputLabel: { shrink: true } }}
-        inputRef={titleRef}
-        {...register("title")}
+        ref={composeRefs(titleRef, registerRef)}
+        {...titleField}
       />
       {errors.root?.message ? (
         <Alert severity="error">{errors.root.message}</Alert>
       ) : null}
-    </>
+    </div>
   );
 
   return {

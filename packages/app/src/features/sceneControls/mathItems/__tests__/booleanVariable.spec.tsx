@@ -28,13 +28,13 @@ test("Clicking switch on Boolean variable toggles value", async () => {
   const { store } = renderTestApp(`/${scene.key}`);
   const form = await findItemByDescription("Test Switch");
   const mathScope = store.mathScope.get();
-  const checkboxEl = await within(form).findByRole("checkbox", {
+  const switchEl = await within(form).findByRole("switch", {
     name: "Value",
   });
 
   expect(mathScope.results.get(id("value"))).toBe(true);
-  await user.click(checkboxEl);
+  await user.click(switchEl);
   expect(mathScope.results.get(id("value"))).toBe(false);
-  await user.click(checkboxEl);
+  await user.click(switchEl);
   expect(mathScope.results.get(id("value"))).toBe(true);
 });

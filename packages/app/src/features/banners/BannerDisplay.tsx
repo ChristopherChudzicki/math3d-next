@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import { Icon } from "@iconify/react/offline";
 import xIcon from "@iconify-icons/lucide/x";
 import Alert from "@/ui/Alert";
+import Checkbox from "@/ui/Checkbox";
 import IconButton from "@/ui/IconButton";
 import { useElementResize, useToggle } from "@/util/hooks";
 import { useBanners } from "./BannerContext";
@@ -33,14 +32,10 @@ const BannerItem: React.FC<{
       action={
         <div className={styles.actions}>
           {showRememberOption ? (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  size="small"
-                  checked={remember}
-                  onChange={(e) => rememberToggle.set(e.target.checked)}
-                />
-              }
+            <Checkbox
+              className={styles.remember}
+              checked={remember}
+              onCheckedChange={(checked) => rememberToggle.set(checked)}
               label={
                 banner.rememberLabel ?? "Don't show this automatically again"
               }

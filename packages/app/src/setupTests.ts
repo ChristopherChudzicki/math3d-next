@@ -49,6 +49,13 @@ function ResizeObserverMock() {
 vi.stubGlobal("ResizeObserver", ResizeObserverMock);
 
 /**
+ * JSDOM does not implement PointerEvent, and Base UI's Switch forwards its
+ * clicks to a hidden input as constructed PointerEvents, using only fields
+ * MouseEvent also has.
+ */
+vi.stubGlobal("PointerEvent", MouseEvent);
+
+/**
  * API mocking for our tests.
  * Reset any test-specific handlers between tests.
  */

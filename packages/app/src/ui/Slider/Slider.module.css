@@ -1,0 +1,59 @@
+.root {
+  --thumb-size: 12px;
+  --halo: color-mix(in srgb, var(--color-accent) 16%, transparent);
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  /* Room for the thumb and its halo, and a taller hit area than the track. */
+  min-height: 1.75rem;
+  padding: 0 calc(var(--thumb-size) / 2);
+  touch-action: none;
+  cursor: pointer;
+}
+
+.track {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  /* 3:1 against white, the contrast WCAG asks of a control's boundary. */
+  background-color: color-mix(in srgb, var(--color-secondary) 85%, white);
+}
+
+.indicator {
+  border-radius: inherit;
+  background-color: var(--color-accent);
+}
+
+.thumb {
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}
+
+.thumb:has(:focus-visible) {
+  box-shadow: 0 0 0 6px var(--halo);
+  outline: auto;
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .thumb:hover:not([data-disabled]) {
+    box-shadow: 0 0 0 6px var(--halo);
+  }
+}
+
+.thumb[data-dragging] {
+  box-shadow: 0 0 0 8px var(--halo);
+}
+
+.root[data-disabled] {
+  opacity: 0.45;
+}
+
+.root[data-disabled] .control {
+  cursor: not-allowed;
+}

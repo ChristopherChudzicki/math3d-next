@@ -1,0 +1,73 @@
+.root {
+  --track-width: 28px;
+  --track-height: 16px;
+  --inset: 2px;
+
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  width: var(--track-width);
+  height: var(--track-height);
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--track-height) / 2);
+  /* 3:1 against white, the contrast WCAG asks of a control's boundary. */
+  background-color: color-mix(in srgb, var(--color-secondary) 85%, white);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+/* A hit area larger than the visible track, largest for touch. */
+.root::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+
+@media (pointer: coarse) {
+  .root::before {
+    inset: -10px -8px;
+  }
+}
+
+.root[data-checked] {
+  background-color: var(--color-accent);
+}
+
+.root:focus-visible {
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .root:hover[data-unchecked]:not([data-disabled]) {
+    background-color: var(--color-text-primary);
+  }
+}
+
+.root[data-disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.thumb {
+  position: absolute;
+  top: var(--inset);
+  left: var(--inset);
+  width: calc(var(--track-height) - 2 * var(--inset));
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-color: white;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 25%);
+  transition: translate 120ms ease;
+}
+
+.thumb[data-checked] {
+  translate: calc(var(--track-width) - var(--track-height)) 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .thumb {
+    transition: none;
+  }
+}

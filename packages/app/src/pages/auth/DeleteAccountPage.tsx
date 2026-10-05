@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as yup from "yup";
-import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router";
 import { isApiError, useUserMeDelete } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
@@ -9,9 +8,12 @@ import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import { Dialog } from "@/ui/Dialog";
 import Alert from "@/ui/Alert";
 import Button from "@/ui/Button";
+import TextField from "@/ui/TextField";
 import { TextButton } from "@/ui/TextLink";
+import composeRefs from "@/util/composeRefs";
 import { useValidatedForm } from "@/util/forms";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
+import styles from "./DeleteAccountPage.module.css";
 
 const CONFIRM_PROMPT = "Yes, permanently delete";
 
@@ -35,6 +37,7 @@ const DeleteAccountPage: React.FC = () => {
     handleSubmit,
     formState: { errors },
   } = useValidatedForm({ schema });
+  const { ref: registerRef, ...confirmField } = register("confirm");
 
   // A successful delete flips auth authenticated → unauthenticated, and that
   // deliberate case has its own flow (the "Account Deleted" notice, then
@@ -102,7 +105,7 @@ const DeleteAccountPage: React.FC = () => {
           <Dialog.Title>Delete Account</Dialog.Title>
         </Dialog.Header>
         <Dialog.Form onSubmit={onSubmit}>
-          <Dialog.Body>
+          <Dialog.Body className={styles.fields}>
             <Alert severity="error" announce={false}>
               This action cannot be undone. Scenes you have saved stay published
               at their existing links, with no account able to edit or remove
@@ -114,14 +117,11 @@ const DeleteAccountPage: React.FC = () => {
               later creates a new, empty account.
             </Alert>
             <TextField
-              fullWidth
-              margin="normal"
-              error={!!errors.confirm?.message}
-              helperText={`To proceed, enter "${CONFIRM_PROMPT}" exactly.`}
+              invalid={!!errors.confirm?.message}
+              description={`To proceed, enter "${CONFIRM_PROMPT}" exactly.`}
               label="Confirm"
-              type="text"
-              inputRef={confirmRef}
-              {...register("confirm")}
+              ref={composeRefs(confirmRef, registerRef)}
+              {...confirmField}
             />
             {errors.root?.message ? (
               <Alert severity="error">{errors.root.message}</Alert>

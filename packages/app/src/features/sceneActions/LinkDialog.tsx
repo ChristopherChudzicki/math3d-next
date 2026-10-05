@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
-import TextField from "@mui/material/TextField";
 import { Dialog } from "@/ui/Dialog";
 import Button from "@/ui/Button";
+import TextField from "@/ui/TextField";
 import copyText from "./copyText";
 import styles from "./LinkDialog.module.css";
 
@@ -16,7 +16,8 @@ const useLinkCopy = (url: string) => {
   const copy = async () => {
     setResult((await copyText(url)) ? "copied" : "failed");
   };
-  return { copy, message: result ? COPY_MESSAGES[result] : " " };
+  // A non-breaking space holds the message's line, so the dialog doesn't grow.
+  return { copy, message: result ? COPY_MESSAGES[result] : "\u00a0" };
 };
 
 type LinkFieldProps = { url: string; message: string };
@@ -25,17 +26,11 @@ type LinkFieldProps = { url: string; message: string };
 const LinkField: React.FC<LinkFieldProps> = ({ url, message }) => (
   <TextField
     label="Shareable URL"
-    size="small"
-    fullWidth
     value={url}
+    readOnly
+    onFocus={(e) => e.target.select()}
     className={styles["link-field"]}
-    slotProps={{
-      htmlInput: {
-        readOnly: true,
-        onFocus: (e: React.FocusEvent<HTMLInputElement>) => e.target.select(),
-      },
-    }}
-    helperText={<span role="status">{message}</span>}
+    description={<span role="status">{message}</span>}
   />
 );
 

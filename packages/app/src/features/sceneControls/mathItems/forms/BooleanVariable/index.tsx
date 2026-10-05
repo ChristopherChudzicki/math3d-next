@@ -1,10 +1,10 @@
-import React, { ChangeEvent, useCallback } from "react";
-import Switch from "@mui/material/Switch";
+import React, { useCallback } from "react";
 import {
   mathItemConfigs as configs,
   MathItemType as MIT,
   WidgetType,
 } from "@math3d/mathitem-configs";
+import Switch from "@/ui/Switch";
 import FieldWidget, { useOnWidgetChange } from "../../FieldWidget";
 import { useMathScope } from "../../sceneSlice";
 import { useMathErrors, useMathItemResults } from "../../mathScope";
@@ -36,12 +36,12 @@ const Vector: MathItemForm<MIT.BooleanVariable> = ({ item }) => {
   );
 
   const onToggle = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
+    (checked: boolean) => {
       onWidgetChange({
         name: "value",
         value: {
           ...item.properties.value,
-          rhs: `${e.target.checked}`,
+          rhs: `${checked}`,
         },
       });
     },
@@ -62,13 +62,9 @@ const Vector: MathItemForm<MIT.BooleanVariable> = ({ item }) => {
         />
         <div className={style["switch-container"]}>
           <Switch
-            slotProps={{
-              input: {
-                "aria-label": config.properties.value.label,
-              },
-            }}
+            aria-label={config.properties.value.label}
             checked={!!results.value}
-            onChange={onToggle}
+            onCheckedChange={onToggle}
           />
         </div>
       </div>

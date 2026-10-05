@@ -1,16 +1,10 @@
 import { Icon } from "@iconify/react/offline";
 import triangleAlert from "@iconify-icons/lucide/triangle-alert";
-import TextField from "@mui/material/TextField";
-import InputAdornment from "@mui/material/InputAdornment";
 import Tooltip from "@mui/material/Tooltip";
 import classNames from "classnames";
-import React, {
-  MouseEventHandler,
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
+import React, { MouseEventHandler, useCallback, useState } from "react";
 import tinycolor from "tinycolor2";
+import TextField from "../TextField";
 
 import styles from "./ColorPicker.module.css";
 
@@ -119,19 +113,6 @@ const ColorPicker: React.FC<ColorPickerProps> = (props: ColorPickerProps) => {
     [handleColor],
   );
 
-  const InputProps = useMemo(() => {
-    const adornment = (
-      <InputAdornment position="start">
-        {isValidColor(current) ? (
-          <ColorSquare color={normalizeColor(current)} textOnly />
-        ) : (
-          <ColorWarning value={current} />
-        )}
-      </InputAdornment>
-    );
-    return { startAdornment: adornment };
-  }, [current, isValidColor, normalizeColor]);
-
   return (
     <div
       style={style}
@@ -147,14 +128,18 @@ const ColorPicker: React.FC<ColorPickerProps> = (props: ColorPickerProps) => {
         );
       })}
       <TextField
-        size="small"
-        title="Custom Color"
         className={styles["color-input"]}
         onChange={handleChange}
         value={current}
         label="Custom Color"
-        margin="dense"
-        InputProps={InputProps}
+        invalid={!isValidColor(current)}
+        startAdornment={
+          isValidColor(current) ? (
+            <ColorSquare color={normalizeColor(current)} textOnly />
+          ) : (
+            <ColorWarning value={current} />
+          )
+        }
       />
     </div>
   );

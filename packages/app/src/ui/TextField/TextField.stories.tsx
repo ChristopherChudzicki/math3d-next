@@ -16,6 +16,34 @@ const AllTextFields: React.FC = () => (
       />
     ))}
     <TextField label="With a value" defaultValue="Parametric surfaces" />
+    <TextField
+      label="With a description"
+      description="Shown below the input."
+    />
+    {(["rest", "hover"] as const).map((state) => (
+      <TextField
+        key={state}
+        label={`Invalid (${state})`}
+        defaultValue="Yes, delete"
+        description='To proceed, enter "Yes, permanently delete" exactly.'
+        invalid
+        data-pseudo={state}
+      />
+    ))}
+    <TextField
+      label="With a start adornment"
+      defaultValue="#3090ff"
+      startAdornment={
+        <span
+          style={{
+            width: 14,
+            height: 14,
+            borderRadius: 3,
+            background: "#3090ff",
+          }}
+        />
+      }
+    />
   </div>
 );
 
@@ -28,7 +56,8 @@ export default meta;
 export const AllVariants: StoryObj<typeof AllTextFields> = {
   parameters: {
     pseudo: {
-      hover: ['[data-pseudo="hover"]'],
+      // Hover is styled on the input's bordered wrapper.
+      hover: ['div:has(> [data-pseudo="hover"])'],
       focusVisible: ['[data-pseudo="focus-visible"]'],
     },
   },

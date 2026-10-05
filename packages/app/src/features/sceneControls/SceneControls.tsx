@@ -21,14 +21,8 @@ const SceneControls: React.FC<Props> = ({ loading }) => {
       tabBarExtraContent={
         <AddObjectButton className={styles.AddObjectButton} />
       }
-      mainNav="Main"
       mainContent={<MathItemsList rootId="main" />}
-      axesNav={
-        <div>
-          Axes &amp; <br /> Camera
-        </div>
-      }
-      axesdContent={<MathItemsList rootId="setup" />}
+      setupContent={<MathItemsList rootId="setup" />}
     />
   );
 };
