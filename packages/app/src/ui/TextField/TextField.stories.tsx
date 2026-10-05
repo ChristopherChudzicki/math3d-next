@@ -20,12 +20,16 @@ const AllTextFields: React.FC = () => (
       label="With a description"
       description="Shown below the input."
     />
-    <TextField
-      label="Invalid"
-      defaultValue="Yes, delete"
-      description='To proceed, enter "Yes, permanently delete" exactly.'
-      invalid
-    />
+    {(["rest", "hover"] as const).map((state) => (
+      <TextField
+        key={state}
+        label={`Invalid (${state})`}
+        defaultValue="Yes, delete"
+        description='To proceed, enter "Yes, permanently delete" exactly.'
+        invalid
+        data-pseudo={state}
+      />
+    ))}
     <TextField
       label="With a start adornment"
       defaultValue="#3090ff"

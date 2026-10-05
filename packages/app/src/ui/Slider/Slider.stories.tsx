@@ -17,7 +17,7 @@ const AllSliders: React.FC = () => (
           largeStep={1}
           defaultValue={1.5}
           disabled={state === "disabled"}
-          data-pseudo={state}
+          data-story-state={state}
         />
       </div>
     ))}
@@ -32,9 +32,11 @@ export default meta;
 
 export const AllVariants: StoryObj<typeof AllSliders> = {
   parameters: {
+    // Not data-pseudo: preview.css outlines that element, and the root
+    // isn't what takes focus here; the thumb and its hidden input are.
     pseudo: {
-      hover: ['[data-pseudo="hover"] [data-index]'],
-      focusVisible: ['[data-pseudo="focus-visible"] input'],
+      hover: ['[data-story-state="hover"] [data-index]'],
+      focusVisible: ['[data-story-state="focus-visible"] input'],
     },
   },
 };

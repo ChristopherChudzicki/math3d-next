@@ -19,13 +19,24 @@
   aspect-ratio: 1;
   cursor: pointer;
   border: none;
+  transition: transform var(--transition-duration)
+    var(--transition-timing-function);
 }
 
-.color-swatch:hover,
-.color-swatch:focus {
+@media (hover: hover) {
+  .color-swatch:hover {
+    transform: scale(115%);
+  }
+}
+
+.color-swatch:focus-visible {
   transform: scale(115%);
-  transition-duration: var(--transition-duration);
-  transition-timing-function: var(--transition-timing-function);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .color-swatch {
+    transition: none;
+  }
 }
 
 .light-colored-swatch {

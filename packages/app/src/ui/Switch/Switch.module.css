@@ -1,6 +1,6 @@
 .root {
-  --track-width: 1.875rem;
-  --track-height: 1.125rem;
+  --track-width: 28px;
+  --track-height: 16px;
   --inset: 2px;
 
   position: relative;
@@ -15,6 +15,19 @@
   background-color: color-mix(in srgb, var(--color-secondary) 85%, white);
   cursor: pointer;
   transition: background-color 120ms ease;
+}
+
+/* A hit area larger than the visible track, largest for touch. */
+.root::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+
+@media (pointer: coarse) {
+  .root::before {
+    inset: -10px -8px;
+  }
 }
 
 .root[data-checked] {

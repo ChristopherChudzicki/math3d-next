@@ -27,7 +27,7 @@
 }
 
 @media (hover: hover) {
-  .box:hover:not(:has([data-disabled])) {
+  .box:hover:not(:has([data-disabled], [data-invalid])) {
     border-color: var(--color-text-primary);
   }
 }
@@ -58,6 +58,10 @@
   color: var(--color-text-primary);
   font: inherit;
   outline: none;
+}
+
+.input::placeholder {
+  color: var(--color-text-light);
 }
 
 .adornment + .input {

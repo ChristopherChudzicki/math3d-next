@@ -1,5 +1,5 @@
 .root {
-  --thumb-size: 0.875rem;
+  --thumb-size: 12px;
   --halo: color-mix(in srgb, var(--color-accent) 16%, transparent);
 }
 
@@ -18,7 +18,8 @@
   flex: 1;
   height: 4px;
   border-radius: 2px;
-  background-color: color-mix(in srgb, var(--color-accent) 25%, white);
+  /* 3:1 against white, the contrast WCAG asks of a control's boundary. */
+  background-color: color-mix(in srgb, var(--color-secondary) 85%, white);
 }
 
 .indicator {
@@ -40,7 +41,7 @@
 }
 
 @media (hover: hover) {
-  .thumb:hover {
+  .thumb:hover:not([data-disabled]) {
     box-shadow: 0 0 0 6px var(--halo);
   }
 }

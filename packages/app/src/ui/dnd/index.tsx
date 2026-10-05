@@ -25,6 +25,7 @@ import { CSS } from "@dnd-kit/utilities";
 import classNames from "classnames";
 import PointerSensor from "./PointerSensor";
 import KeyboardSensor from "./KeyboardSensor";
+import isDraggableElement from "./isDraggableElement";
 
 interface SortableItemProps {
   id: UniqueIdentifier;
@@ -105,40 +106,6 @@ type OnDragMove = NonNullable<DndContextProps["onDragMove"]>;
 type OnDragOver = NonNullable<DndContextProps["onDragOver"]>;
 type OnDragEnd = NonNullable<DndContextProps["onDragEnd"]>;
 type OnDragCancel = NonNullable<DndContextProps["onDragCancel"]>;
-
-const interactiveTags = [
-  "textarea",
-  "input",
-  "button",
-  "select",
-  "option",
-  "optgroup",
-  "video",
-  "audio",
-];
-
-const getPathToRoot = (el: HTMLElement): HTMLElement[] => {
-  const path = [el];
-  let current = el;
-  while (current.parentElement) {
-    path.push(current.parentElement);
-    current = current.parentElement;
-  }
-  return path;
-};
-
-const isInteractive = (el: HTMLElement) => {
-  if (el.isContentEditable) return true;
-  return interactiveTags.includes(el.tagName.toLowerCase());
-};
-const isDraggableElement = (el: HTMLElement) => {
-  const path = getPathToRoot(el);
-  return !path.some((pathEl) => {
-    if (isInteractive(pathEl)) return true;
-    if (pathEl.dataset.dndkitNoDrag) return true;
-    return false;
-  });
-};
 
 interface MultiContainerDndContextProps {
   children?: React.ReactNode;

@@ -10,9 +10,10 @@ import Alert from "@/ui/Alert";
 import Button from "@/ui/Button";
 import TextField from "@/ui/TextField";
 import { TextButton } from "@/ui/TextLink";
-import { composeRefs } from "@/util";
+import composeRefs from "@/util/composeRefs";
 import { useValidatedForm } from "@/util/forms";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
+import styles from "./DeleteAccountPage.module.css";
 
 const CONFIRM_PROMPT = "Yes, permanently delete";
 
@@ -104,7 +105,7 @@ const DeleteAccountPage: React.FC = () => {
           <Dialog.Title>Delete Account</Dialog.Title>
         </Dialog.Header>
         <Dialog.Form onSubmit={onSubmit}>
-          <Dialog.Body>
+          <Dialog.Body className={styles.fields}>
             <Alert severity="error" announce={false}>
               This action cannot be undone. Scenes you have saved stay published
               at their existing links, with no account able to edit or remove

@@ -8,6 +8,7 @@
   align-items: center;
 }
 
+/* Like .dismiss, takes the alert's text color over the checkbox label's. */
 .remember {
   margin-right: 0.5rem;
   color: inherit;

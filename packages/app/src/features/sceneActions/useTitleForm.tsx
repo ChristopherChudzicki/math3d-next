@@ -2,9 +2,10 @@ import React, { useRef } from "react";
 import * as yup from "yup";
 import Alert from "@/ui/Alert";
 import TextField from "@/ui/TextField";
-import { composeRefs } from "@/util";
+import composeRefs from "@/util/composeRefs";
 import { useValidatedForm } from "@/util/forms";
 import { UNTITLED } from "@/features/scene/sceneTitle";
+import styles from "./useTitleForm.module.css";
 
 // A blank title means untitled.
 const schema = yup.object({
@@ -33,7 +34,7 @@ const useTitleForm = ({ defaultTitle, onSubmit }: UseTitleFormOptions) => {
 
   /** `note` is shown above the title field. */
   const renderFields = (note?: React.ReactNode) => (
-    <>
+    <div className={styles.fields}>
       {note}
       <TextField
         label="Title"
@@ -44,7 +45,7 @@ const useTitleForm = ({ defaultTitle, onSubmit }: UseTitleFormOptions) => {
       {errors.root?.message ? (
         <Alert severity="error">{errors.root.message}</Alert>
       ) : null}
-    </>
+    </div>
   );
 
   return {

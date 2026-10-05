@@ -132,6 +132,7 @@ const ColorPicker: React.FC<ColorPickerProps> = (props: ColorPickerProps) => {
         onChange={handleChange}
         value={current}
         label="Custom Color"
+        invalid={!isValidColor(current)}
         startAdornment={
           isValidColor(current) ? (
             <ColorSquare color={normalizeColor(current)} textOnly />

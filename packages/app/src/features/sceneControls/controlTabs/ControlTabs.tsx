@@ -8,14 +8,12 @@ import { actions, MAIN_FOLDER, SETTINGS_FOLDER } from "../mathItems";
 
 type Props = {
   loading: boolean;
-  mainNav: React.ReactNode;
-  axesNav: React.ReactNode;
   mainContent: React.ReactNode;
-  axesdContent: React.ReactNode;
+  setupContent: React.ReactNode;
   tabBarExtraContent: React.ReactNode;
 };
 
-const SceneControls: React.FC<Props> = (props) => {
+const ControlTabs: React.FC<Props> = (props) => {
   const activeTab = useAppSelector((state) => state.scene.activeTabId);
   const dispatch = useDispatch();
   const handleChange = useCallback(
@@ -27,20 +25,17 @@ const SceneControls: React.FC<Props> = (props) => {
   return (
     <Tabs.Root value={activeTab} onValueChange={handleChange}>
       <div className={styles.tabsHeader}>
-        <Tabs.List aria-label="Scene controls" className={styles.tabList}>
+        <Tabs.List aria-label="Scene controls">
           <Tabs.Tab className={styles.tab} value={MAIN_FOLDER}>
-            {props.mainNav}
+            Main
           </Tabs.Tab>
           <Tabs.Tab className={styles.tab} value={SETTINGS_FOLDER}>
-            {props.axesNav}
+            Setup
           </Tabs.Tab>
         </Tabs.List>
         <div className={styles.tabListExtra}>{props.tabBarExtraContent}</div>
       </div>
-      {/*
-       * Base UI makes panels tab stops, which APG reserves for panels whose
-       * content isn't focusable; these start with item controls.
-       */}
+      {/* Base UI makes panels tab stops; these start with controls. */}
       <Tabs.Panel
         aria-busy={props.loading && activeTab === MAIN_FOLDER}
         value={MAIN_FOLDER}
@@ -56,11 +51,11 @@ const SceneControls: React.FC<Props> = (props) => {
         tabIndex={-1}
       >
         <ScrollingYOverflowX className={styles.scrollingOverflow}>
-          {props.axesdContent}
+          {props.setupContent}
         </ScrollingYOverflowX>
       </Tabs.Panel>
     </Tabs.Root>
   );
 };
 
-export default SceneControls;
+export default ControlTabs;

@@ -14,6 +14,14 @@ export default {
   title: "ColorPicker",
   component: ColorPicker,
   argTypes: { onChange: { action: "onChange" } },
+  // The picker fills its container; the app's color popover is 18rem wide.
+  decorators: [
+    (Story) => (
+      <div style={{ width: "18rem" }}>
+        <Story />
+      </div>
+    ),
+  ],
 } as Meta<typeof ColorPicker>;
 
 export const Uncontrolled: StoryFn<typeof ColorPicker> = (args) => (

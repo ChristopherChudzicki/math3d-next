@@ -34,9 +34,6 @@ const setup = async (initialValue: string) => {
 
   const getValue = () => mathScope.results.get(id("labelVisible"));
 
-  /**
-   * Find and return the Switch button
-   */
   const findToggle = () =>
     within(booleanControl).findByRole("switch", {
       name: "Toggle property: Label Visible",
