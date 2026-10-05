@@ -7,14 +7,10 @@
   padding-inline-end: 4px;
 }
 
-/* Compact, to fit the slider's row; the icon sets the width. */
+/* Smaller than size="sm" (1.75rem) to fit the slider's row; the icon shrinks with it. */
 .control {
   min-height: 1.5rem;
-  font-size: 1.25rem;
-}
-
-.pauseIcon {
-  transform: scale(0.8);
+  font-size: 1rem;
 }
 
 .speed {

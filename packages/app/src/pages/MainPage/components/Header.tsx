@@ -3,8 +3,8 @@ import { Link } from "react-router";
 import invariant from "tiny-invariant";
 import Header from "@/ui/Header";
 
-import LightbulbOutlined from "@mui/icons-material/LightbulbOutlined";
-import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import lightbulb from "@iconify-icons/lucide/lightbulb";
+import circleHelp from "@iconify-icons/lucide/circle-help";
 import { SceneActions } from "@/features/sceneActions";
 
 import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
@@ -12,11 +12,11 @@ import type { AuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import Button from "@/ui/Button";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import ListIcon from "@mui/icons-material/List";
+import circleUser from "@iconify-icons/lucide/circle-user";
+import trash2 from "@iconify-icons/lucide/trash-2";
+import list from "@iconify-icons/lucide/list";
 import { useUserMe } from "@math3d/api";
-import FunctionsIcon from "@mui/icons-material/Functions";
+import sigma from "@iconify-icons/lucide/sigma";
 import { Icon } from "@iconify/react/offline";
 import folderOpen from "@iconify-icons/lucide/folder-open";
 import IconButton from "@/ui/IconButton";
@@ -37,7 +37,7 @@ const LoginButtons: React.FC<{
       variant="ghost"
       onClick={() => signIn.open()}
     >
-      <AccountCircleOutlinedIcon fontSize="inherit" />
+      <Icon icon={circleUser} aria-hidden="true" />
       Sign in
     </Button>
   );
@@ -59,7 +59,7 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
           user who already has a session. */}
       {authStatus === "unauthenticated" && DISPLAY_AUTH_FLOWS && (
         <Menu.Item
-          icon={<AccountCircleOutlinedIcon fontSize="inherit" />}
+          icon={<Icon icon={circleUser} aria-hidden="true" />}
           onClick={() => openSignIn()}
         >
           Sign in
@@ -67,26 +67,26 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
       )}
       {isAuthenticated && (
         <Menu.Item
-          icon={<ListIcon fontSize="inherit" />}
+          icon={<Icon icon={list} aria-hidden="true" />}
           onClick={() => open("scenes", { list: "me" })}
         >
           My Scenes
         </Menu.Item>
       )}
       <Menu.Item
-        icon={<LightbulbOutlined fontSize="inherit" />}
+        icon={<Icon icon={lightbulb} aria-hidden="true" />}
         onClick={() => open("scenes", { list: "examples" })}
       >
         Examples
       </Menu.Item>
       <Menu.LinkItem
-        icon={<FunctionsIcon fontSize="inherit" />}
+        icon={<Icon icon={sigma} aria-hidden="true" />}
         render={<Link to="/app/help/reference" target="_blank" />}
       >
         Function Reference
       </Menu.LinkItem>
       <Menu.LinkItem
-        icon={<HelpOutlineOutlinedIcon fontSize="inherit" />}
+        icon={<Icon icon={circleHelp} aria-hidden="true" />}
         href={ISSUE_URL}
         target="_blank"
         rel="noreferrer"
@@ -95,7 +95,7 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
       </Menu.LinkItem>
       {isAuthenticated && (
         <Menu.Item
-          icon={<DeleteForeverIcon fontSize="inherit" />}
+          icon={<Icon icon={trash2} aria-hidden="true" />}
           tone="danger"
           onClick={() => open("delete-account")}
         >
@@ -104,7 +104,7 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
       )}
       {isAuthenticated && (
         <Menu.Item
-          icon={<AccountCircleOutlinedIcon fontSize="inherit" />}
+          icon={<Icon icon={circleUser} aria-hidden="true" />}
           onClick={() => open("logout")}
         >
           Sign out
