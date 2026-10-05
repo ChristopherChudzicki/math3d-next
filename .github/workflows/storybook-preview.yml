@@ -2,9 +2,10 @@
 # linked from the PR as the `storybook` environment's deployment. storybook-cleanup.yml deletes it when
 # the PR closes.
 #
-# Needs a Cloudflare account API token with Workers Scripts Edit, as the `storybook` environment secret
-# CLOUDFLARE_STORYBOOK_API_TOKEN, and a repository variable CLOUDFLARE_ACCOUNT_ID. The first deploy
-# creates the math3d-storybook Worker (packages/app/.storybook/wrangler.jsonc).
+# Setup: the math3d-storybook Worker (packages/app/.storybook/wrangler.jsonc) with Preview URLs turned on
+# in the dashboard — `wrangler preview` doesn't set that, and this Worker is never `wrangler deploy`ed.
+# The `storybook` environment holds a Cloudflare account API token with the Admin role on that Worker
+# (secret CLOUDFLARE_STORYBOOK_API_TOKEN) and the variable CLOUDFLARE_ACCOUNT_ID.
 name: Storybook preview
 
 on:
@@ -28,8 +29,8 @@ concurrency:
 
 jobs:
   build:
-    # Fork PRs get no secrets. Skipped until the repository variable is set.
-    if: github.event.pull_request.head.repo.full_name == github.repository && vars.CLOUDFLARE_ACCOUNT_ID != ''
+    # Fork PRs get no secrets.
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-26.04
     env:
       SKIP_YARN_COREPACK_CHECK: true
@@ -92,7 +93,9 @@ jobs:
         working-directory: packages/app
         run: |
           yarn wrangler preview --config .storybook/wrangler.jsonc --name "pr-$PR_NUMBER"
-          url=$(jq -r 'select(.type == "preview") | .preview_urls[0]' "$WRANGLER_OUTPUT_FILE_PATH")
+          # wrangler succeeds without a URL when the Worker's Preview URLs are off.
+          url=$(jq -er 'select(.type == "preview") | .preview_urls[0]' "$WRANGLER_OUTPUT_FILE_PATH") ||
+            { echo "::error::No preview URL; turn on Preview URLs for the math3d-storybook Worker"; exit 1; }
           echo "url=$url" >> "$GITHUB_OUTPUT"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_STORYBOOK_API_TOKEN }}
