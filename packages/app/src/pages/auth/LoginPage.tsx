@@ -1,7 +1,4 @@
 import React, { useCallback, useEffect } from "react";
-import Alert from "@mui/material/Alert";
-import Divider from "@mui/material/Divider";
-import Typography from "@mui/material/Typography";
 import { useLocation } from "react-router";
 import {
   ENABLE_DUMMY_AUTH,
@@ -10,6 +7,7 @@ import {
 } from "@/features/auth";
 import GoogleLogo from "@/features/auth/GoogleLogo";
 import { SIGN_IN_ERROR_MESSAGES } from "@/features/auth/signInErrors";
+import Alert from "@/ui/Alert";
 import BasicDialog from "@/ui/BasicDialog";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import type { SignInHistoryState } from "@/features/overlays/useSignInDialog";
@@ -40,16 +38,15 @@ const LoginPage: React.FC = () => {
         {signInError && (
           <Alert
             severity={signInError === "cancelled" ? "info" : "error"}
-            role={signInError === "cancelled" ? "status" : "alert"}
             className={styles["sign-in-alert"]}
           >
             {SIGN_IN_ERROR_MESSAGES[signInError]}
           </Alert>
         )}
-        <Typography variant="body2">
+        <p className={styles.intro}>
           Sign in to save your scenes and find them later in My Scenes. New to
           Math3d? Signing in with Google creates your account.
-        </Typography>
+        </p>
         <ProviderSignInButton
           provider="google"
           className={styles["google-button"]}
@@ -61,7 +58,7 @@ const LoginPage: React.FC = () => {
             dev-only button. */}
         {ENABLE_DUMMY_AUTH && (
           <>
-            <Divider className={styles["dummy-divider"]}>or</Divider>
+            <div className={styles["dummy-divider"]}>or</div>
             <ProviderSignInButton provider="dummy">
               Sign in as dev user
             </ProviderSignInButton>

@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as yup from "yup";
-import { Alert, TextField } from "@mui/material";
+import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router";
 import { isApiError, useUserMeDelete } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import { Dialog } from "@/ui/Dialog";
+import Alert from "@/ui/Alert";
 import Button from "@/ui/Button";
 import { TextButton } from "@/ui/TextLink";
 import { useValidatedForm } from "@/util/forms";

@@ -18,4 +18,10 @@ const Header: React.FC<HeaderProps> = (props) => (
   </header>
 );
 
+/** The page's heading, for Header's `title`. */
+const HeaderTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <h1 className={styles.title}>{children}</h1>
+);
+
 export default Header;
+export { HeaderTitle };

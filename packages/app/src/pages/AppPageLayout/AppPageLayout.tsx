@@ -1,5 +1,4 @@
 import React from "react";
-import Paper from "@mui/material/Paper";
 import Header from "@/ui/Header";
 import TextLink from "@/ui/TextLink";
 import styles from "./AppPageLayout.module.css";
@@ -16,9 +15,7 @@ const AppPageLayout: React.FC<{
   <>
     <Header title={title} nav={<TextLink to="/">Back to Math3d</TextLink>} />
     <main className={styles.main}>
-      <Paper variant="outlined" className={styles.card}>
-        {children}
-      </Paper>
+      <div className={styles.card}>{children}</div>
     </main>
   </>
 );

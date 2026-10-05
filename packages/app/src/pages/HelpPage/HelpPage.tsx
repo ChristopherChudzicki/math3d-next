@@ -1,10 +1,7 @@
 import React from "react";
 
-import Container from "@mui/material/Container";
-import Header from "@/ui/Header";
-import Typography from "@mui/material/Typography";
+import Header, { HeaderTitle } from "@/ui/Header";
 import TextLink from "@/ui/TextLink";
-import Grid from "@mui/material/Grid";
 import ReferencePanel from "./ReferencePanel";
 import { entries } from "./data.compile";
 import { groupEntries } from "./util";
@@ -15,40 +12,23 @@ const HelpPage: React.FC = () => {
   return (
     <>
       <Header
-        title={
-          <Typography component="h1" variant="h6">
-            Function Reference
-          </Typography>
-        }
+        title={<HeaderTitle>Function Reference</HeaderTitle>}
         nav={<TextLink to="/">Back to Math3d</TextLink>}
       />
-      <Container>
-        <Grid container>
-          <Grid
-            className={styles.sidebar}
-            component="nav"
-            aria-label="Reference Sections"
-            sx={{
-              position: "sticky",
-              top: "1rem",
-              marginTop: "1rem",
-              maxHeight: "calc(100vh - 50px)",
-            }}
-            size={{ xs: 12, sm: 3 }}
-          >
-            <ul>
-              {groups.map((group) => (
-                <li key={group.tag}>
-                  <TextLink href={`#${group.tag}`}>{group.label}</TextLink>
-                </li>
-              ))}
-            </ul>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 9 }}>
-            <ReferencePanel entries={entries} />
-          </Grid>
-        </Grid>
-      </Container>
+      <div className={styles.layout}>
+        <nav className={styles.sidebar} aria-label="Reference Sections">
+          <ul>
+            {groups.map((group) => (
+              <li key={group.tag}>
+                <TextLink href={`#${group.tag}`}>{group.label}</TextLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div>
+          <ReferencePanel entries={entries} />
+        </div>
+      </div>
     </>
   );
 };

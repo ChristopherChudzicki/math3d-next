@@ -1,3 +1,30 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.sidebar {
+  margin-top: 1rem;
+}
+
 .sidebar li {
   list-style: none;
+}
+
+@media (min-width: 600px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+    padding: 0 24px;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 1rem;
+    align-self: start;
+    max-height: calc(100vh - 50px);
+    overflow-y: auto;
+  }
 }
