@@ -1,0 +1,43 @@
+# Deletes a closed PR's Storybook previews (see storybook-preview.yml). Unfiltered by path,
+# so a PR whose later commits leave the preview's paths still gets cleaned up.
+name: Storybook cleanup
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions: {}
+
+concurrency:
+  group: storybook-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  cleanup:
+    if: github.event.pull_request.head.repo.full_name == github.repository && vars.CLOUDFLARE_ACCOUNT_ID != ''
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Delete the PR's Pages deployments
+        shell: bash
+        run: |
+          base="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/math3d-storybook/deployments"
+          auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          # Collect before deleting: deletions would shift the pages. 25 is the API's maximum.
+          ids=()
+          page=1
+          while :; do
+            resp=$(curl -fsS --retry 3 -H "$auth" "$base?env=preview&per_page=25&page=$page")
+            ids+=($(jq -r --arg branch "pr-$PR_NUMBER" \
+              '.result[] | select(.deployment_trigger.metadata.branch == $branch) | .id' <<<"$resp"))
+            [ "$(jq '.result | length' <<<"$resp")" -lt 25 ] && break
+            page=$((page + 1))
+          done
+          # The branch alias points at the newest deployment, which needs force.
+          for id in "${ids[@]}"; do
+            curl -fsS --retry 3 -X DELETE -H "$auth" "$base/$id?force=true" >/dev/null
+          done
+          echo "Deleted ${#ids[@]} deployment(s) for pr-$PR_NUMBER"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}

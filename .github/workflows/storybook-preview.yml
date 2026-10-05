@@ -1,0 +1,70 @@
+# Deploys each PR's Storybook to Cloudflare Pages at https://pr-<number>.<project>.pages.dev,
+# linked from the PR as the `storybook` environment's deployment. storybook-cleanup.yml
+# deletes those deployments when the PR closes; Pages itself never does.
+#
+# Needs a repository secret CLOUDFLARE_PAGES_API_TOKEN (Account › Cloudflare Pages › Edit
+# only — not the production deploy token) and a repository variable CLOUDFLARE_ACCOUNT_ID.
+# The Pages project is created once, by hand:
+#   yarn workspace app wrangler pages project create math3d-storybook --production-branch main
+name: Storybook preview
+
+on:
+  pull_request:
+    paths:
+      - "packages/**"
+      - "package.json"
+      - "yarn.lock"
+      - ".github/workflows/storybook-preview.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  # Shared with storybook-cleanup.yml, so closing a PR cancels its in-flight deploy.
+  group: storybook-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    # Fork PRs get no secrets. Skipped until the repository variable is set.
+    if: github.event.pull_request.head.repo.full_name == github.repository && vars.CLOUDFLARE_ACCOUNT_ID != ''
+    runs-on: ubuntu-26.04
+    environment:
+      name: storybook
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      SKIP_YARN_COREPACK_CHECK: true
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: |
+          corepack enable
+          yarn install --immutable
+
+      - name: Build Storybook
+        run: yarn workspace app build-storybook
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        working-directory: packages/app
+        run: |
+          yarn wrangler pages deploy storybook-static \
+            --project-name math3d-storybook \
+            --branch "pr-$PR_NUMBER" \
+            --commit-hash "$HEAD_SHA"
+          url=$(jq -r 'select(.type == "pages-deploy-detailed") | .alias // .url' "$WRANGLER_OUTPUT_FILE_PATH")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
