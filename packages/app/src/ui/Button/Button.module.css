@@ -127,13 +127,16 @@
   cursor: not-allowed;
 }
 
+/* IconButton reads --button-size for its width, so its buttons stay square. */
 .sm {
-  min-height: 1.75rem;
+  --button-size: 1.75rem;
+  min-height: var(--button-size);
   padding: 0.125rem 0.5rem;
   font-size: var(--font-size-small);
 }
 
 .md {
-  min-height: 2.25rem;
+  --button-size: 2.25rem;
+  min-height: var(--button-size);
   padding: 0.375rem 0.875rem;
 }

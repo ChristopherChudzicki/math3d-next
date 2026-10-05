@@ -1,10 +1,11 @@
 /*
  * The parent lays the controls out; this spaces them, and leaves room at the
- * end for the last button's focus ring, which the row would otherwise clip.
+ * end and bottom for focus rings, which the row would otherwise clip.
  */
 .controls {
   column-gap: 4px;
   padding-inline-end: 4px;
+  padding-block-end: 4px;
 }
 
 /* Wide enough for the longest label, "1⁄16x", so the row doesn't shift. */

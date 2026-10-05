@@ -2,6 +2,8 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Icon } from "@iconify/react/offline";
 import x from "@iconify-icons/lucide/x";
+import keyboard from "@iconify-icons/lucide/keyboard";
+import chevronUp from "@iconify-icons/lucide/chevron-up";
 import IconButton from "./IconButton";
 import type { ButtonVariant, ButtonTone, ButtonSize } from "../Button";
 
@@ -82,4 +84,23 @@ export const AllVariants: StoryObj<typeof AllIconButtons> = {
       focusVisible: ['[data-pseudo="focus-visible"]'],
     },
   },
+};
+
+/** One icon is square; a second widens the button. */
+export const TwoIcons: StoryObj<typeof AllIconButtons> = {
+  render: () => (
+    <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+      {sizes.map((size) => (
+        <IconButton
+          key={size}
+          label="Enable math keyboard"
+          variant="solid"
+          size={size}
+        >
+          <Icon icon={keyboard} aria-hidden="true" />
+          <Icon icon={chevronUp} aria-hidden="true" />
+        </IconButton>
+      ))}
+    </div>
+  ),
 };

@@ -32,11 +32,23 @@ const UserMenu: React.FC<{
       }
     />
   ) : (
-    <Menu.Trigger className={styles.avatar} aria-label="Open User Menu">
-      <Icon icon={user} aria-hidden="true" />
-      {/* Points up while the menu is open; see the CSS. */}
-      <Icon icon={chevronDown} aria-hidden="true" className={styles.arrow} />
-    </Menu.Trigger>
+    <Menu.Trigger
+      render={
+        <IconButton
+          variant="solid"
+          label="Open User Menu"
+          className={styles.avatar}
+        >
+          <Icon icon={user} aria-hidden="true" />
+          {/* Points up while the menu is open; see the CSS. */}
+          <Icon
+            icon={chevronDown}
+            aria-hidden="true"
+            className={styles.arrow}
+          />
+        </IconButton>
+      }
+    />
   );
 
   return (
