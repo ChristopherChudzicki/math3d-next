@@ -23,11 +23,7 @@ const SceneControls: React.FC<Props> = ({ loading }) => {
       }
       mainNav="Main"
       mainContent={<MathItemsList rootId="main" />}
-      axesNav={
-        <div>
-          Axes &amp; <br /> Camera
-        </div>
-      }
+      axesNav="Setup"
       axesdContent={<MathItemsList rootId="setup" />}
     />
   );
