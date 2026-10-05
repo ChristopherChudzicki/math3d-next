@@ -93,6 +93,27 @@
   background-color: color-mix(in srgb, currentColor 16%, transparent);
 }
 
+/*
+ * A pressed toggle (aria-pressed) keeps a tint while on, so its state does not
+ * rest on the icon alone. Hover and press still darken it from there.
+ */
+.outline[aria-pressed="true"],
+.ghost[aria-pressed="true"] {
+  background-color: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+@media (hover: hover) {
+  .outline[aria-pressed="true"]:hover:not([data-disabled]),
+  .ghost[aria-pressed="true"]:hover:not([data-disabled]) {
+    background-color: color-mix(in srgb, currentColor 18%, transparent);
+  }
+}
+
+.outline[aria-pressed="true"]:active:not([data-disabled]),
+.ghost[aria-pressed="true"]:active:not([data-disabled]) {
+  background-color: color-mix(in srgb, currentColor 24%, transparent);
+}
+
 .button:focus-visible {
   outline-offset: 2px;
 }

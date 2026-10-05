@@ -4,7 +4,8 @@ import type { DialogProps } from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
-import Close from "@mui/icons-material/Close";
+import { Icon } from "@iconify/react/offline";
+import xIcon from "@iconify-icons/lucide/x";
 import Button from "./Button";
 import type { ButtonProps } from "./Button";
 import IconButton from "./IconButton";
@@ -101,7 +102,7 @@ const BasicDialog: React.FC<BasicDialogProps> = ({
     >
       <div style={topRightStyle}>
         <IconButton label="Close" onClick={onClose} disabled={closeDisabled}>
-          <Close fontSize="inherit" />
+          <Icon icon={xIcon} aria-hidden="true" />
         </IconButton>
       </div>
       <DialogTitle>{title}</DialogTitle>

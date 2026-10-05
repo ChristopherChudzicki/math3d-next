@@ -1,5 +1,6 @@
 import classNames from "classnames";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Icon } from "@iconify/react/offline";
+import chevronDown from "@iconify-icons/lucide/chevron-down";
 import {
   mathItemConfigs as configs,
   MathItemType as MIT,
@@ -47,7 +48,7 @@ const FolderButton: React.FC<FolderButtonProps> = ({
           u.justifyContentCenter,
         )}
       >
-        <ExpandMoreIcon fontSize="inherit" />
+        <Icon icon={chevronDown} aria-hidden="true" />
       </span>
     </IconButton>
   );

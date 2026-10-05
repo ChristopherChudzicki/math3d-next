@@ -3,7 +3,8 @@ import { useParams } from "react-router";
 import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
 import Typography from "@mui/material/Typography";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Icon } from "@iconify/react/offline";
+import chevronDown from "@iconify-icons/lucide/chevron-down";
 import { usePatchScene, useUserMe } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions, select } from "@/features/sceneControls/mathItems";
@@ -196,7 +197,7 @@ const SceneActions: React.FC = () => {
                     tone="accent"
                     label="More scene actions"
                   >
-                    <ExpandMoreIcon fontSize="inherit" />
+                    <Icon icon={chevronDown} aria-hidden="true" />
                   </IconButton>
                 }
               />
