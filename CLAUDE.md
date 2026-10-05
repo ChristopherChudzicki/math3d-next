@@ -31,6 +31,8 @@ yarn workspace @math3d/parser test
 yarn workspace app storybook   # Component stories at http://localhost:6006
 ```
 
+A PR touching `packages/` also gets a hosted Storybook, linked from the PR as its `storybook` deployment and deleted when the PR closes (`.github/workflows/storybook-preview.yml`).
+
 ### Task Runner (just)
 
 ```bash
