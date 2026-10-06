@@ -18,13 +18,15 @@ jobs:
       version: ${{ steps.extract_version.outputs.version }}
       prod_tag: ${{ steps.extract_version.outputs.prod_tag }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       - name: Validate branch is main
         run: |
-          if [ "${{ github.ref_name }}" != "main" ]; then
+          if [ "$GITHUB_REF_NAME" != "main" ]; then
             echo "Error: This workflow must be run from the 'main' branch"
-            echo "Current branch: ${{ github.ref_name }}"
+            echo "Current branch: $GITHUB_REF_NAME"
             exit 1
           fi
           echo "Running from main branch ✓"
@@ -86,7 +88,9 @@ jobs:
     needs: validate-rc
     runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: true # zizmor: ignore[artipacked] -- this job pushes the tag
 
       - name: Fetch tags
         run: git fetch --tags --force
@@ -106,7 +110,7 @@ jobs:
           git push origin "${{ needs.validate-rc.outputs.prod_tag }}"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3.0.3
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: ${{ needs.validate-rc.outputs.prod_tag }}
           name: Release ${{ needs.validate-rc.outputs.version }}
