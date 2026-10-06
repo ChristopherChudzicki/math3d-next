@@ -55,7 +55,7 @@ test.each([
     // not shown after blur
     act(() => theInput.blur());
     await waitFor(() => expect(tooltip).not.toBeInTheDocument());
-    expect(theInput).not.toHaveAccessibleDescription();
+    expect(theInput).not.toHaveAttribute("aria-describedby");
   },
 );
 

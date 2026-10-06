@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useId, useMemo, useState } from "react";
 import Button from "@/ui/Button";
 import Switch from "@/ui/Switch";
 import { Tooltip } from "@/ui/Tooltip";
@@ -14,6 +14,8 @@ import { IWidgetProps } from "./types";
 import styles from "./widget.module.css";
 
 const LITERAL_BOOLEAN_STRINGS = ["false", "true"];
+const COMPUTED_NOTE =
+  "Value is computed by expression. Reset to re-enable toggle switch control.";
 
 const MathBoolean: React.FC<
   IWidgetProps & {
@@ -31,10 +33,12 @@ const MathBoolean: React.FC<
     itemId,
     ref,
     placeholder,
+    "aria-describedby": describedBy,
     ...others
   } = props;
   invariant(!placeholder, "placeholder not supported by MathBoolean");
   invariant(itemId);
+  const computedNoteId = useId();
   const [shouldUseExpression, setShouldUseExpression] = useState(
     !LITERAL_BOOLEAN_STRINGS.includes(value),
   );
@@ -78,6 +82,7 @@ const MathBoolean: React.FC<
     >
       <Tooltip.Root disabled={!shouldUseExpression}>
         <Tooltip.Trigger
+          aria-describedby={shouldUseExpression ? computedNoteId : undefined}
           render={
             <Switch
               checked={result}
@@ -88,14 +93,17 @@ const MathBoolean: React.FC<
             />
           }
         />
-        <Tooltip.Popup>
-          Value is computed by expression. Reset to re-enable toggle switch
-          control.
-        </Tooltip.Popup>
+        <Tooltip.Popup>{COMPUTED_NOTE}</Tooltip.Popup>
       </Tooltip.Root>
+      {shouldUseExpression && (
+        <span id={computedNoteId} className={u.visuallyHidden}>
+          {COMPUTED_NOTE}
+        </span>
+      )}
       {shouldUseExpression && (
         <SmallMathField
           aria-label={`Math Expression for: ${label}`}
+          aria-describedby={describedBy}
           style={style}
           className={classNames(
             { [styles["has-error"]]: error },

@@ -117,6 +117,17 @@ describe("When the switch is initially enabled", () => {
     const { findToggle } = await setup("!false");
     expect(await findToggle()).toHaveAttribute("aria-disabled", "true");
   });
+  test("a computed switch explains why it is disabled", async () => {
+    const { findToggle } = await setup("!false");
+    const toggle = await findToggle();
+    expect(toggle).toHaveAccessibleDescription(/computed by expression/);
+
+    await user.hover(toggle);
+
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      /computed by expression/,
+    );
+  });
 });
 
 test('Clicking "Use Expression" shows MathField and Reset', async () => {

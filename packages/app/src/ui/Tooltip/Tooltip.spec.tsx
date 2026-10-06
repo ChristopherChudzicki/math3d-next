@@ -6,12 +6,12 @@ import { Tooltip } from ".";
 test("describes its trigger while open", async () => {
   render(
     <Tooltip.Root>
-      <Tooltip.Trigger delay={0}>Show Graphic</Tooltip.Trigger>
+      <Tooltip.Trigger>Show Graphic</Tooltip.Trigger>
       <Tooltip.Popup>Long press to change color</Tooltip.Popup>
     </Tooltip.Root>,
   );
   const trigger = screen.getByRole("button", { name: "Show Graphic" });
-  expect(trigger).not.toHaveAccessibleDescription();
+  expect(trigger).not.toHaveAttribute("aria-describedby");
 
   await user.hover(trigger);
 
@@ -22,5 +22,5 @@ test("describes its trigger while open", async () => {
   await user.unhover(trigger);
 
   await waitFor(() => expect(tooltip).not.toBeInTheDocument());
-  expect(trigger).not.toHaveAccessibleDescription();
+  expect(trigger).not.toHaveAttribute("aria-describedby");
 });

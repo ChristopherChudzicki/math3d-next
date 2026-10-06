@@ -29,11 +29,6 @@
   padding-right: 1em;
 }
 
-.title {
-  margin: 0;
-  font-size: 1.17em;
-}
-
 .divider {
   border-width: 0 0 1px 0;
   border-color: var(--color-secondary-light);

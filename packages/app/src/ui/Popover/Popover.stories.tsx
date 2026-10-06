@@ -16,9 +16,7 @@ const SettingsPopover: React.FC = () => (
       }
     />
     <Popover.Popup side="right" style={{ padding: "0.5rem 1rem 1rem" }}>
-      <Popover.Title style={{ fontSize: "1.17em" }}>
-        Point Settings
-      </Popover.Title>
+      <Popover.Title>Point Settings</Popover.Title>
       <TextField label="Opacity" defaultValue="0.75" />
     </Popover.Popup>
   </Popover.Root>

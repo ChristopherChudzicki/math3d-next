@@ -70,6 +70,9 @@ describe("ColorPicker", () => {
     await user.paste("not-a-color");
     expect(onChange).not.toHaveBeenCalled();
     expect(textInput).toBeInvalid();
+    expect(textInput).toHaveAccessibleDescription(
+      "not-a-color is not a valid color",
+    );
 
     // missing '#'
     await user.clear(textInput);

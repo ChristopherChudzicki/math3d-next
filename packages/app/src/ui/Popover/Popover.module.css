@@ -3,10 +3,16 @@
   outline: 0;
 }
 
+/* The anchor scrolled out of view, e.g. within the sidebar. */
+.positioner[data-anchor-hidden] {
+  visibility: hidden;
+}
+
 .popup {
   position: relative;
   max-width: var(--available-width);
   max-height: var(--available-height);
+  overflow-x: hidden;
   overflow-y: auto;
   border: 1px solid var(--color-secondary-lighter);
   border-radius: calc(2 * var(--border-radius));
@@ -33,4 +39,11 @@
   .popup[data-ending-style] {
     transform: none;
   }
+}
+
+.title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.4;
 }

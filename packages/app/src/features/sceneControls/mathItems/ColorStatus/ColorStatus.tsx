@@ -16,10 +16,12 @@ import { useLongAndShortClick } from "@/util/hooks/useLongAndShortClick";
 
 import { positioning } from "@/util/styles";
 import { Popover } from "@/ui/Popover";
+import type { PopoverRootProps } from "@/ui/Popover";
 import { Tooltip } from "@/ui/Tooltip";
 import { useOnWidgetChange } from "../FieldWidget";
 import { useMathScope } from "../sceneSlice";
 import { useMathItemResults } from "../mathScope";
+import CloseButton from "../templates/CloseButton";
 import ColorDialog from "./ColorDialog";
 import styles from "./ColorStatus.module.css";
 
@@ -74,9 +76,29 @@ const ColorStatus: React.FC<Props> = (props) => {
   );
 
   const handleButtonClick = useCallback(() => {
+    if (dialogVisible) {
+      setDialogVisible.off();
+      return;
+    }
     onChange({ name: "visible", value: !visible });
     onChange({ name: "useCalculatedVisibility", value: false });
-  }, [visible, onChange]);
+  }, [dialogVisible, setDialogVisible, visible, onChange]);
+  const handleOpenChange: PopoverRootProps["onOpenChange"] = (
+    open,
+    eventDetails,
+  ) => {
+    // A press on the dot is left to handleButtonClick, so it doesn't also
+    // toggle visibility.
+    if (
+      eventDetails.reason === "outside-press" &&
+      eventDetails.event.target instanceof Node &&
+      buttonEl?.contains(eventDetails.event.target)
+    ) {
+      eventDetails.cancel();
+      return;
+    }
+    setDialogVisible(open);
+  };
   const longAndShortClick = useLongAndShortClick({
     onLongClick: setDialogVisible.on,
     onClick: handleButtonClick,
@@ -122,13 +144,16 @@ const ColorStatus: React.FC<Props> = (props) => {
         />
         <Tooltip.Popup>Long press to change color</Tooltip.Popup>
       </Tooltip.Root>
-      <Popover.Root open={dialogVisible} onOpenChange={setDialogVisible.set}>
-        <Popover.Popup
-          anchor={buttonEl}
-          side="right"
-          aria-label="Color"
-          data-dndkit-no-drag
-        >
+      <Popover.Root
+        open={dialogVisible}
+        onOpenChange={handleOpenChange}
+        modal="trap-focus"
+      >
+        <Popover.Popup anchor={buttonEl} side="right" data-dndkit-no-drag>
+          <div className={styles.header}>
+            <Popover.Title>Color</Popover.Title>
+            <Popover.Close render={<CloseButton label="Close" />} />
+          </div>
           <ColorDialog className={styles.dialog} item={item} />
         </Popover.Popup>
       </Popover.Root>

@@ -9,8 +9,6 @@ import classNames from "classnames";
 import { Tooltip as BaseTooltip } from "@base-ui/react/tooltip";
 import * as styles from "./Tooltip.module.css";
 
-const { Provider } = BaseTooltip;
-
 type TooltipContextValue = { popupId: string; open: boolean };
 const TooltipContext = createContext<TooltipContextValue | null>(null);
 
@@ -22,7 +20,10 @@ const useTooltipContext = () => {
 
 type RootProps = BaseTooltip.Root.Props;
 
-/** Groups the tooltip's parts. */
+/**
+ * Groups the tooltip's parts. Always controlled, so `Trigger` knows when to
+ * point `aria-describedby` at the popup.
+ */
 const Root: React.FC<RootProps> = ({
   open: openProp,
   defaultOpen = false,
@@ -53,14 +54,15 @@ type TriggerProps = BaseTooltip.Trigger.Props;
  * The element the tooltip describes; pass it as `render`. While the tooltip
  * is open, its text is the trigger's accessible description.
  */
-const Trigger: React.FC<TriggerProps> = (props) => {
+const Trigger: React.FC<TriggerProps> = ({ delay = 100, ...others }) => {
   const { popupId, open } = useTooltipContext();
-  const describedBy = [props["aria-describedby"], open && popupId]
+  const describedBy = [others["aria-describedby"], open && popupId]
     .filter(Boolean)
     .join(" ");
   return (
     <BaseTooltip.Trigger
-      {...props}
+      {...others}
+      delay={delay}
       aria-describedby={describedBy || undefined}
     />
   );
@@ -112,5 +114,5 @@ const Popup: React.FC<PopupProps> = ({
   );
 };
 
-export { Provider, Root, Trigger, Popup };
+export { Root, Trigger, Popup };
 export type { RootProps, TriggerProps, PopupProps };

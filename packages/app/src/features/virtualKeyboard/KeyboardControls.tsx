@@ -60,6 +60,8 @@ const ToggleKeyboardButton = () => {
             setMfEl(document.activeElement as HTMLElement);
           }
         }}
+        // Keep focus in the math field, so popovers around it stay open.
+        onMouseDown={(event) => event.preventDefault()}
         variant="solid"
         data-testid="toggle-keyboard-button"
         label="Enable math keyboard"

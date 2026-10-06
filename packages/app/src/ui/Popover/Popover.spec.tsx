@@ -3,6 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import user from "@testing-library/user-event";
 import { Popover } from ".";
 
+const keepFocus = (event: React.MouseEvent) => event.preventDefault();
+
 const TestPopover = () => (
   <>
     <Popover.Root>
@@ -13,12 +15,17 @@ const TestPopover = () => (
       </Popover.Popup>
     </Popover.Root>
     <button type="button">Elsewhere</button>
-    {/* Stand-ins for MathLive's virtual keyboard and the app's toggle. */}
+    {/* Stand-ins for MathLive's virtual keyboard and the app's toggle,
+        which keep focus in the math field. */}
     <div className="ML__keyboard">
-      <button type="button">7</button>
+      <button type="button" onMouseDown={keepFocus}>
+        7
+      </button>
     </div>
     <div data-virtual-keyboard-control>
-      <button type="button">Toggle keyboard</button>
+      <button type="button" onMouseDown={keepFocus}>
+        Toggle keyboard
+      </button>
     </div>
   </>
 );
@@ -35,6 +42,14 @@ test("a press outside closes it", async () => {
   const popover = await openPopover();
 
   await user.click(screen.getByRole("button", { name: "Elsewhere" }));
+
+  await waitFor(() => expect(popover).not.toBeInTheDocument());
+});
+
+test("tabbing out closes it", async () => {
+  const popover = await openPopover();
+
+  await user.tab();
 
   await waitFor(() => expect(popover).not.toBeInTheDocument());
 });

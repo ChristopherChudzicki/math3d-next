@@ -3,12 +3,16 @@
 }
 
 .popup {
-  --tooltip-background: rgb(67 67 67 / 95%);
+  --tooltip-background: color-mix(
+    in srgb,
+    var(--color-text-primary) 95%,
+    transparent
+  );
   max-width: min(18rem, var(--available-width));
   padding: 0.25rem 0.5rem;
   border-radius: var(--border-radius);
   background-color: var(--tooltip-background);
-  color: white;
+  color: var(--color-background);
   font-size: var(--font-size-small);
   line-height: 1.4;
   transform-origin: var(--transform-origin);

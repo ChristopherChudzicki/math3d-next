@@ -4,34 +4,22 @@ import { Popover as BasePopover } from "@base-ui/react/popover";
 import { isVirtualKeyboardTarget } from "../MathLive/virtualKeyboard";
 import * as styles from "./Popover.module.css";
 
-const { Trigger, Close, Title, Description } = BasePopover;
+const { Trigger, Close, Description } = BasePopover;
 
 type RootProps = BasePopover.Root.Props;
 
-/** Whether a dismissal came from using MathLive's virtual keyboard. */
-const isVirtualKeyboardDismissal = ({
-  reason,
-  event,
-}: BasePopover.Root.ChangeEventDetails) => {
-  if (reason === "outside-press") return isVirtualKeyboardTarget(event.target);
-  if (reason === "focus-out" && event instanceof FocusEvent) {
-    return isVirtualKeyboardTarget(event.relatedTarget);
-  }
-  return false;
-};
-
 /**
- * Groups the popover's parts. Non-modal by default: the page stays usable,
- * and a press outside the popover, or tabbing out of it, closes it.
- *
- * Using MathLive's virtual keyboard doesn't count as leaving the popover, so
- * a math field inside it can be typed into with the keyboard.
+ * Groups the popover's parts. Presses on MathLive's virtual keyboard don't
+ * count as outside the popover, so its math fields can be typed into with it.
  */
 const Root: React.FC<RootProps> = ({ onOpenChange, ...others }) => (
   <BasePopover.Root
     {...others}
     onOpenChange={(open, eventDetails) => {
-      if (isVirtualKeyboardDismissal(eventDetails)) {
+      if (
+        eventDetails.reason === "outside-press" &&
+        isVirtualKeyboardTarget(eventDetails.event.target)
+      ) {
         eventDetails.cancel();
         return;
       }
@@ -78,5 +66,16 @@ const Popup: React.FC<PopupProps> = ({
   </BasePopover.Portal>
 );
 
+type TitleProps = Omit<BasePopover.Title.Props, "className"> & {
+  className?: string;
+};
+
+const Title: React.FC<TitleProps> = ({ className, ...others }) => (
+  <BasePopover.Title
+    {...others}
+    className={classNames(styles.title, className)}
+  />
+);
+
 export { Root, Trigger, Popup, Close, Title, Description };
-export type { RootProps, PopupProps };
+export type { RootProps, PopupProps, TitleProps };

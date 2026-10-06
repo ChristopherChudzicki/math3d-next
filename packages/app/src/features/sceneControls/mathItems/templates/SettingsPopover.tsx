@@ -155,9 +155,7 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => (
       <Popover.Close
         render={<CloseButton label="Close" className={styles.close} />}
       />
-      <Popover.Title className={styles.title}>
-        {config.label} Settings
-      </Popover.Title>
+      <Popover.Title>{config.label} Settings</Popover.Title>
       <hr className={styles.divider} />
       <SettingsForm item={item} config={config} />
     </Popover.Popup>

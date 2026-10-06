@@ -4,7 +4,6 @@ import classNames from "classnames";
 import React, { MouseEventHandler, useCallback, useState } from "react";
 import tinycolor from "tinycolor2";
 import TextField from "../TextField";
-import { Tooltip } from "../Tooltip";
 
 import styles from "./ColorPicker.module.css";
 
@@ -42,15 +41,6 @@ const ColorSquare: React.FC<ColorSquareProps> = (props) => {
   }
   return <div {...childProps} />;
 };
-
-const ColorWarning: React.FC<{ value: string }> = ({ value }) => (
-  <Tooltip.Root>
-    <Tooltip.Trigger render={<span />}>
-      <Icon icon={triangleAlert} aria-hidden="true" />
-    </Tooltip.Trigger>
-    <Tooltip.Popup>{value} is not a valid color</Tooltip.Popup>
-  </Tooltip.Root>
-);
 
 type OnColorChange = (event: ColorPickerEvent) => void;
 
@@ -136,11 +126,14 @@ const ColorPicker: React.FC<ColorPickerProps> = (props: ColorPickerProps) => {
         value={current}
         label="Custom Color"
         invalid={!isValidColor(current)}
+        description={
+          isValidColor(current) ? undefined : `${current} is not a valid color`
+        }
         startAdornment={
           isValidColor(current) ? (
             <ColorSquare color={normalizeColor(current)} textOnly />
           ) : (
-            <ColorWarning value={current} />
+            <Icon icon={triangleAlert} aria-hidden="true" />
           )
         }
       />
