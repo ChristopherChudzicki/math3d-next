@@ -1,6 +1,19 @@
-/* Square: the size's min-height doubles as the width. */
-.iconButton {
-  aspect-ratio: 1;
-  padding: 0;
+/* Two classes, so these beat Button's single-class size rules in any load order. */
+.iconButton.sm,
+.iconButton.md {
+  /* One icon is square; a second widens the button. */
+  min-width: var(--button-size);
+  gap: 0;
+  padding: 0 0.125rem;
+  /* A grid cell would otherwise stretch it wide. */
+  justify-self: center;
+}
+
+/* Icons are 1em, so font-size sizes them. */
+.iconButton.sm {
   font-size: 1.25rem;
+}
+
+.iconButton.md {
+  font-size: 1.5rem;
 }

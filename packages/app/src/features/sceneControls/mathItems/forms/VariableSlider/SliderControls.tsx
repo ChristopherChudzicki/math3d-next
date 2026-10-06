@@ -92,7 +92,6 @@ const SliderControls: React.FC<SliderControlsProps> = ({
       <IconButton
         variant="outline"
         size="sm"
-        className={styles.control}
         onClick={handleAnimationChange}
         title={isAnimating ? btnLabels.pause : btnLabels.play}
         label={isAnimating ? btnLabels.pause : btnLabels.play}
@@ -107,7 +106,6 @@ const SliderControls: React.FC<SliderControlsProps> = ({
         <IconButton
           variant="outline"
           size="sm"
-          className={styles.control}
           onClick={onDecrease}
           disabled={!canDecrease}
           label={btnLabels.slower}
@@ -118,7 +116,6 @@ const SliderControls: React.FC<SliderControlsProps> = ({
         <IconButton
           variant="outline"
           size="sm"
-          className={styles.control}
           onClick={onIncrease}
           disabled={!canIncrease}
           label={btnLabels.faster}
@@ -130,7 +127,6 @@ const SliderControls: React.FC<SliderControlsProps> = ({
         <IconButton
           variant="outline"
           size="sm"
-          className={styles.control}
           onClick={onStepDown}
           label={btnLabels.decrement}
         >
@@ -139,7 +135,6 @@ const SliderControls: React.FC<SliderControlsProps> = ({
         <IconButton
           variant="outline"
           size="sm"
-          className={styles.control}
           onClick={onStepUp}
           label={btnLabels.increment}
         >

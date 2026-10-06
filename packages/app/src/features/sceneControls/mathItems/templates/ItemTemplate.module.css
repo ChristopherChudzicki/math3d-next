@@ -84,6 +84,7 @@
   grid-column-end: 4;
   grid-row-start: 1;
   grid-row-end: 2;
+  align-items: flex-start;
   padding-top: 0.25em;
   padding-right: 0.25em;
 }

@@ -1,18 +1,9 @@
 .avatar {
+  --tone: rgb(189 189 189);
+  /* Darken on hover and press: lightening a light gray hides the white icon. */
+  --tone-step: -0.08;
   position: relative;
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: none;
   border-radius: 50%;
-  background-color: rgb(189 189 189);
-  color: var(--color-background);
-  font-size: 1.5rem;
-  cursor: pointer;
 }
 
 /* A small badge on the avatar's corner, so the chevron's stroke stays clear. */

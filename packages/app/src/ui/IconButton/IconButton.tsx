@@ -5,21 +5,23 @@ import type { ButtonProps } from "../Button";
 import * as styles from "./IconButton.module.css";
 
 type IconButtonProps = Omit<ButtonProps, "aria-label" | "aria-labelledby"> & {
-  /** Accessible name; required because the button shows only an icon. */
+  /** Accessible name; required because the button shows only icons. */
   label: string;
 };
 
 const IconButton: React.FC<IconButtonProps> = ({
   label,
   variant = "ghost",
+  size = "md",
   className,
   ...others
 }) => (
   <Button
     {...others}
     variant={variant}
+    size={size}
     aria-label={label}
-    className={classNames(styles.iconButton, className)}
+    className={classNames(styles.iconButton, styles[size], className)}
   />
 );
 
