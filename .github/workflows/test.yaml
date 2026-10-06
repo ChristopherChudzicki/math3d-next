@@ -24,8 +24,10 @@ jobs:
       VITE_ISSUE_URL: ${{ vars.VITE_ISSUE_URL }}
       VITE_SITE_ORIGIN: ${{ vars.VITE_SITE_ORIGIN }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: ".nvmrc"
           cache: "yarn"
@@ -71,16 +73,20 @@ jobs:
       run:
         working-directory: ./webserver
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           # Single source of truth, shared with local dev and the Heroku build,
           # which both read webserver/.python-version. `3.12` resolves to the
           # latest available 3.12 patch, matching Heroku's runtime selection.
           python-version-file: webserver/.python-version
       - name: Install just
-        uses: extractions/setup-just@v4
+        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
+        with:
+          just-version: 1.58.0
       - name: Install python dependencies
         run: just setup_python
       - name: Django system checks
@@ -104,8 +110,10 @@ jobs:
       SKIP_YARN_COREPACK_CHECK: true # https://github.com/actions/setup-node/issues/531#issuecomment-1819151412
     runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: ".nvmrc"
           cache: "yarn"
