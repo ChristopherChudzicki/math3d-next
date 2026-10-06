@@ -189,7 +189,7 @@ test("opening/closing the dialog preserves other params and the hash", async () 
   await screen.findByRole("dialog", { name: "Sign in" });
   expect(location.current.search).toContain("controls=0");
   expect(location.current.hash).toBe("#frag");
-  await user.click(screen.getByRole("button", { name: "Close" })); // BasicDialog close
+  await user.click(screen.getByRole("button", { name: "Close" }));
   await waitFor(() => expect(location.current.search).not.toContain("signin"));
   expect(location.current.search).toContain("controls=0"); // merged, not clobbered
   expect(location.current.hash).toBe("#frag");

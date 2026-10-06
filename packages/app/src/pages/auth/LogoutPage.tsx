@@ -4,8 +4,9 @@ import { useAuthStatus } from "@/features/auth";
 import { AlertDialog } from "@/ui/AlertDialog";
 import Button from "@/ui/Button";
 import { useOverlay } from "@/features/overlays/useOverlay";
+import type { OverlayProps } from "@/features/overlays/useOverlay";
 
-const LogoutPage: React.FC = () => {
+const LogoutPage: React.FC<OverlayProps> = ({ children }) => {
   const { close } = useOverlay();
   const isAuthenticated = useAuthStatus();
   const logout = useLogout();
@@ -45,6 +46,7 @@ const LogoutPage: React.FC = () => {
             Yes, sign out
           </Button>
         </AlertDialog.Actions>
+        {children}
       </AlertDialog.Popup>
     </AlertDialog.Root>
   );

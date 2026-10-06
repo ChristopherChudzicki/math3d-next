@@ -5,6 +5,7 @@ import { isApiError, useUserMeDelete } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
+import type { OverlayProps } from "@/features/overlays/useOverlay";
 import { Dialog } from "@/ui/Dialog";
 import Alert from "@/ui/Alert";
 import Button from "@/ui/Button";
@@ -21,7 +22,7 @@ const schema = yup.object({
   confirm: yup.string().required().oneOf([CONFIRM_PROMPT]),
 });
 
-const DeleteAccountPage: React.FC = () => {
+const DeleteAccountPage: React.FC<OverlayProps> = ({ children }) => {
   const { open, close } = useOverlay();
   const { open: openSignIn } = useSignInDialog();
   const isAuthenticated = useAuthStatus();
@@ -87,9 +88,9 @@ const DeleteAccountPage: React.FC = () => {
   });
 
   // Without a session there is no account to delete, and firing the request
-  // anyway would race the redirect above.
+  // anyway would race the redirect above. Sign-in, if open, still renders.
   if (isAuthenticated !== "authenticated" && !deleteAccount.isSuccess) {
-    return null;
+    return children;
   }
 
   return (
@@ -142,6 +143,7 @@ const DeleteAccountPage: React.FC = () => {
             </Button>
           </Dialog.Actions>
         </Dialog.Form>
+        {children}
       </Dialog.Popup>
     </Dialog.Root>
   );

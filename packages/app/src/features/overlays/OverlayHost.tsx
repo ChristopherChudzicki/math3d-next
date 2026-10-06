@@ -15,12 +15,8 @@ const OverlayHost: React.FC = () => {
     name && Object.hasOwn(OVERLAYS, name)
       ? OVERLAYS[name as OverlayName]
       : undefined;
-  return (
-    <>
-      {Overlay ? <Overlay /> : null}
-      {search.has(SIGN_IN_PARAM) ? <LoginPage /> : null}
-    </>
-  );
+  const signIn = search.has(SIGN_IN_PARAM) ? <LoginPage /> : null;
+  return Overlay ? <Overlay>{signIn}</Overlay> : signIn;
 };
 
 export default OverlayHost;
