@@ -43,9 +43,7 @@ const SettingsField: React.FC<SettingsFieldProps> = ({
   const [showTip, setShowTip] = React.useState(false);
   return (
     <>
-      <label id={labelId} htmlFor={field.name}>
-        {field.label}
-      </label>
+      <span id={labelId}>{field.label}</span>
       <FieldWidget
         aria-labelledby={labelId}
         className={styles["settings-item"]}
@@ -148,6 +146,7 @@ const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => (
     />
     <Popover.Popup
       side="right"
+      align="start"
       data-dndkit-no-drag
       data-testid="more-settings-form"
       className={styles.container}

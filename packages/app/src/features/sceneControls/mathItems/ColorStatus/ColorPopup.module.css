@@ -2,7 +2,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.25rem 0.25rem 0 0.5em;
+  /* Left edge in line with ColorPicker's content (its 5px padding). */
+  padding: 0.25rem 0.25rem 0 calc(0.5em + 5px);
 }
 
 /* Fixed, so the popover keeps its width when switching tabs. */

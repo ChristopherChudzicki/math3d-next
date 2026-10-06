@@ -1,4 +1,5 @@
 import classNames from "classnames";
+import { getColorConfig } from "@math3d/mathitem-configs";
 import type { MathGraphic } from "@math3d/mathitem-configs";
 import React, {
   useCallback,
@@ -14,10 +15,10 @@ import { positioning } from "@/util/styles";
 import { Popover } from "@/ui/Popover";
 import type { PopoverRootProps } from "@/ui/Popover";
 import { Tooltip } from "@/ui/Tooltip";
-import { useOnWidgetChange } from "../FieldWidget/hooks";
+import { useOnWidgetChange } from "../FieldWidget";
 import { useMathScope } from "../sceneSlice";
 import { useMathItemResults } from "../mathScope";
-import ColorPopup, { getColor } from "./ColorPopup";
+import ColorPopup from "./ColorPopup";
 import styles from "./ColorStatus.module.css";
 
 const TOOLTIP_DELAY = 800;
@@ -56,7 +57,7 @@ const ColorStatus: React.FC<Props> = (props) => {
     ? !!calculatedVisibility
     : visible;
   const onChange = useOnWidgetChange(item);
-  const colorAndStyle = useMemo(() => getColor(color), [color]);
+  const colorAndStyle = useMemo(() => getColorConfig(color), [color]);
   const style = useMemo(
     () =>
       ({
@@ -77,8 +78,8 @@ const ColorStatus: React.FC<Props> = (props) => {
     open,
     eventDetails,
   ) => {
-    // A press on the dot is left to handleButtonClick, so it doesn't also
-    // toggle visibility.
+    // Leave a press on the dot to handleButtonClick, which closes the
+    // popover instead of toggling visibility.
     if (
       eventDetails.reason === "outside-press" &&
       eventDetails.event.target instanceof Node &&

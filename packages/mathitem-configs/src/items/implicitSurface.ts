@@ -143,7 +143,6 @@ const config: IMathItemConfig<
     "opacity",
     "samples",
     "shaded",
-    "visible",
     "zBias",
     "zOrder",
   ],

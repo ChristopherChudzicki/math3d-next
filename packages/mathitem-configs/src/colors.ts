@@ -112,11 +112,16 @@ const isGradientName = (name: string): name is keyof typeof gradients => {
 
 const colorsAndGradients = [...colors, ...[rainbow, bluered, temperature]];
 
+/** The predefined color or gradient for `text`, else a plain color config. */
+const getColorConfig = (text: string) =>
+  colorsAndGradients.find((c) => c.value === text) ?? makeColorConfig(text, "");
+
 export type { ColorOrGradientConfig };
 
 export {
   colors,
   colorsAndGradients,
+  getColorConfig,
   gradients,
   isGradientName,
   makeColorConfig,

@@ -9,6 +9,7 @@ import ColorPicker, { OnColorChange } from "@/ui/ColorPicker";
 import { Tabs } from "@/ui/Tabs";
 
 import StaticMath from "@/ui/MathLive/StaticMath";
+// Not from FieldWidget's index: it renders ColorWidget, which renders this.
 import { useOnWidgetChange } from "../FieldWidget/hooks";
 import ErrorTooltip from "../FieldWidget/ErrorTooltip";
 import MathValue from "../FieldWidget/MathValue";
