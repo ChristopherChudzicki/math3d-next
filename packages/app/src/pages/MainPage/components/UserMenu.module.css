@@ -1,5 +1,7 @@
 .avatar {
   --tone: rgb(189 189 189);
+  /* Darken on hover and press: lightening a light gray hides the white icon. */
+  --tone-step: -0.08;
   position: relative;
   border-radius: 50%;
 }
