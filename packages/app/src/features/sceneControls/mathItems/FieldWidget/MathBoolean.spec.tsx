@@ -26,10 +26,9 @@ const setup = async (initialValue: string) => {
     pointerEventsCheck: 0,
   });
   const mathScope = store.mathScope.get();
-  const settingsTitle = await screen.findByText("Settings", { exact: false });
-  // eslint-disable-next-line testing-library/no-node-access
-  const settings = settingsTitle.closest("section");
-  assertInstanceOf(settings, HTMLElement);
+  const settings = await screen.findByRole("dialog", {
+    name: "Point Settings",
+  });
   const booleanControl = within(settings).getByLabelText("Label Visible");
 
   const getValue = () => mathScope.results.get(id("labelVisible"));

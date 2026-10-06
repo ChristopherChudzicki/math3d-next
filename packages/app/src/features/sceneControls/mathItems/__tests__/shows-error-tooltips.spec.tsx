@@ -1,4 +1,4 @@
-import { waitForElementToBeRemoved } from "@testing-library/react";
+import { waitFor } from "@testing-library/react";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { screen, renderTestApp, act } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
@@ -36,7 +36,7 @@ test.each([
   //   errMatcher: /Unexpected end of expression/,
   // },
 ])(
-  "Widgets display error message in tooltip only when focused",
+  "Widgets display error message in tooltip, as their description, only when focused",
   async ({ getInput, item, errMatcher }) => {
     const scene = seedDb.withSceneFromItems([item]);
     renderTestApp(`/${scene.key}`);
@@ -50,10 +50,12 @@ test.each([
 
     const tooltip = await findTooltip();
     expect(tooltip).toHaveTextContent(errMatcher);
+    expect(theInput).toHaveAccessibleDescription(errMatcher);
 
     // not shown after blur
     act(() => theInput.blur());
-    await waitForElementToBeRemoved(tooltip);
+    await waitFor(() => expect(tooltip).not.toBeInTheDocument());
+    expect(theInput).not.toHaveAccessibleDescription();
   },
 );
 

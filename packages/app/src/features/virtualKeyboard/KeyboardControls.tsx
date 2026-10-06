@@ -52,7 +52,7 @@ const ToggleKeyboardButton = () => {
     }
   }, [autoExpand, mfEl]);
   return createPortal(
-    <div className={styles.keyboardToggle}>
+    <div className={styles.keyboardToggle} data-virtual-keyboard-control>
       <IconButton
         tabIndex={-1}
         onPointerDown={() => {

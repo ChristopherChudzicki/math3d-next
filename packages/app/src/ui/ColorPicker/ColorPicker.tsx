@@ -1,10 +1,10 @@
 import { Icon } from "@iconify/react/offline";
 import triangleAlert from "@iconify-icons/lucide/triangle-alert";
-import Tooltip from "@mui/material/Tooltip";
 import classNames from "classnames";
 import React, { MouseEventHandler, useCallback, useState } from "react";
 import tinycolor from "tinycolor2";
 import TextField from "../TextField";
+import { Tooltip } from "../Tooltip";
 
 import styles from "./ColorPicker.module.css";
 
@@ -44,9 +44,12 @@ const ColorSquare: React.FC<ColorSquareProps> = (props) => {
 };
 
 const ColorWarning: React.FC<{ value: string }> = ({ value }) => (
-  <Tooltip arrow title={`${value} is not a valid color`}>
-    <Icon icon={triangleAlert} aria-hidden="true" />
-  </Tooltip>
+  <Tooltip.Root>
+    <Tooltip.Trigger render={<span />}>
+      <Icon icon={triangleAlert} aria-hidden="true" />
+    </Tooltip.Trigger>
+    <Tooltip.Popup>{value} is not a valid color</Tooltip.Popup>
+  </Tooltip.Root>
 );
 
 type OnColorChange = (event: ColorPickerEvent) => void;

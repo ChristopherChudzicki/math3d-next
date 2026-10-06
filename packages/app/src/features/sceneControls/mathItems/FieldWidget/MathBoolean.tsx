@@ -1,8 +1,8 @@
-import Tooltip from "@mui/material/Tooltip";
 import classNames from "classnames";
 import React, { useCallback, useMemo, useState } from "react";
 import Button from "@/ui/Button";
 import Switch from "@/ui/Switch";
+import { Tooltip } from "@/ui/Tooltip";
 import type { OnMathFieldChange } from "@/ui/MathLive";
 import SmallMathField from "@/ui/SmallMathField";
 import * as u from "@/util/styles/utils.module.css";
@@ -64,9 +64,6 @@ const MathBoolean: React.FC<
     [triggerChange],
   );
 
-  const tooltipTitle = shouldUseExpression
-    ? "Value is computed by expression. Reset to re-enable toggle switch control."
-    : "";
   const handleReset = useCallback(() => {
     triggerChange("false");
     setShouldUseExpression(false);
@@ -79,15 +76,23 @@ const MathBoolean: React.FC<
       role="group"
       {...others}
     >
-      <Tooltip arrow title={tooltipTitle}>
-        <Switch
-          checked={result}
-          disabled={shouldUseExpression}
-          className={u.mr2}
-          onCheckedChange={handleSwitchChange}
-          aria-label={`Toggle property: ${label}`}
+      <Tooltip.Root disabled={!shouldUseExpression}>
+        <Tooltip.Trigger
+          render={
+            <Switch
+              checked={result}
+              disabled={shouldUseExpression}
+              className={u.mr2}
+              onCheckedChange={handleSwitchChange}
+              aria-label={`Toggle property: ${label}`}
+            />
+          }
         />
-      </Tooltip>
+        <Tooltip.Popup>
+          Value is computed by expression. Reset to re-enable toggle switch
+          control.
+        </Tooltip.Popup>
+      </Tooltip.Root>
       {shouldUseExpression && (
         <SmallMathField
           aria-label={`Math Expression for: ${label}`}

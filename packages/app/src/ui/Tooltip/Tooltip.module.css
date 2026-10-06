@@ -1,0 +1,59 @@
+.positioner {
+  z-index: var(--z-index-overlay);
+}
+
+.popup {
+  --tooltip-background: rgb(67 67 67 / 95%);
+  max-width: min(18rem, var(--available-width));
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius);
+  background-color: var(--tooltip-background);
+  color: white;
+  font-size: var(--font-size-small);
+  line-height: 1.4;
+  transform-origin: var(--transform-origin);
+  transition:
+    transform 100ms ease-out,
+    opacity 100ms ease-out;
+}
+
+.popup[data-starting-style],
+.popup[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+.popup[data-instant] {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup[data-starting-style],
+  .popup[data-ending-style] {
+    transform: none;
+  }
+}
+
+/* A square turned 45°, half of it outside the popup. */
+.arrow {
+  width: 8px;
+  height: 8px;
+  background-color: var(--tooltip-background);
+  transform: rotate(45deg);
+}
+
+.arrow[data-side="top"] {
+  bottom: -4px;
+}
+
+.arrow[data-side="bottom"] {
+  top: -4px;
+}
+
+.arrow[data-side="left"] {
+  right: -4px;
+}
+
+.arrow[data-side="right"] {
+  left: -4px;
+}

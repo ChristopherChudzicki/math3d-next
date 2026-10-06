@@ -1,0 +1,36 @@
+.positioner {
+  z-index: var(--z-index-overlay);
+  outline: 0;
+}
+
+.popup {
+  position: relative;
+  max-width: var(--available-width);
+  max-height: var(--available-height);
+  overflow-y: auto;
+  border: 1px solid var(--color-secondary-lighter);
+  border-radius: calc(2 * var(--border-radius));
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  box-shadow:
+    0 8px 24px rgb(0 0 0 / 14%),
+    0 2px 4px rgb(0 0 0 / 8%);
+  transform-origin: var(--transform-origin);
+  transition:
+    transform 120ms ease-out,
+    opacity 120ms ease-out;
+  outline: 0;
+}
+
+.popup[data-starting-style],
+.popup[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup[data-starting-style],
+  .popup[data-ending-style] {
+    transform: none;
+  }
+}

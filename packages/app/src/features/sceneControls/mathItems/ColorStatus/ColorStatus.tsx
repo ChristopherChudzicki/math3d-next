@@ -12,11 +12,11 @@ import React, {
   useState,
 } from "react";
 import { useToggle } from "@/util/hooks";
-import Popover from "@mui/material/Popover";
 import { useLongAndShortClick } from "@/util/hooks/useLongAndShortClick";
 
 import { positioning } from "@/util/styles";
-import Tooltip from "@mui/material/Tooltip";
+import { Popover } from "@/ui/Popover";
+import { Tooltip } from "@/ui/Tooltip";
 import { useOnWidgetChange } from "../FieldWidget";
 import { useMathScope } from "../sceneSlice";
 import { useMathItemResults } from "../mathScope";
@@ -97,50 +97,41 @@ const ColorStatus: React.FC<Props> = (props) => {
     }
   }, [calculatedVisibility, item.properties.calculatedVisibility]);
 
-  const handleCLose = useCallback(() => {
-    setDialogVisible.off();
-  }, [setDialogVisible]);
   return (
     <>
-      <Tooltip
-        title="Long press to change color"
-        enterDelay={TOOLTIP_DELAY}
-        enterNextDelay={TOOLTIP_DELAY}
-        describeChild
-      >
-        <button
-          type="button"
-          style={style}
-          ref={setButtonEl}
-          aria-pressed={finalVisibility}
-          aria-label="Show Graphic"
-          className={classNames(
-            styles.circle,
-            positioning["absolute-centered"],
-            {
-              [styles.empty]: !finalVisibility,
-            },
-          )}
-          {...longAndShortClick.handlers}
+      <Tooltip.Root>
+        <Tooltip.Trigger
+          delay={TOOLTIP_DELAY}
+          render={
+            <button
+              type="button"
+              style={style}
+              ref={setButtonEl}
+              aria-pressed={finalVisibility}
+              aria-label="Show Graphic"
+              className={classNames(
+                styles.circle,
+                positioning["absolute-centered"],
+                {
+                  [styles.empty]: !finalVisibility,
+                },
+              )}
+              {...longAndShortClick.handlers}
+            />
+          }
         />
-      </Tooltip>
-      <Popover
-        open={dialogVisible}
-        anchorEl={buttonEl}
-        onClose={handleCLose}
-        anchorOrigin={{
-          vertical: "center",
-          horizontal: "right",
-        }}
-        slotProps={{
-          root: {
-            // @ts-expect-error https://github.com/mui/material-ui/issues/33175
-            "data-dndkit-no-drag": true,
-          },
-        }}
-      >
-        <ColorDialog className={styles.dialog} item={item} />
-      </Popover>
+        <Tooltip.Popup>Long press to change color</Tooltip.Popup>
+      </Tooltip.Root>
+      <Popover.Root open={dialogVisible} onOpenChange={setDialogVisible.set}>
+        <Popover.Popup
+          anchor={buttonEl}
+          side="right"
+          aria-label="Color"
+          data-dndkit-no-drag
+        >
+          <ColorDialog className={styles.dialog} item={item} />
+        </Popover.Popup>
+      </Popover.Root>
     </>
   );
 };

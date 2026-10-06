@@ -83,11 +83,6 @@ const renderTestApp = (
   const theme = createTheme({
     transitions: {
       create: () => "none",
-      /**
-       * This prevents our Popover from using transitions. Transitions in our
-       * Popover seemed to be causing un-acted state updates in our tests.
-       */
-      duration: { standard: 0 },
     },
   });
 
