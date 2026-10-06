@@ -1,9 +1,16 @@
 // Use `react-router` (not `react-router-dom`) to match the repo convention (21 src files).
+import type React from "react";
 import { useCallback } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { useCloseLayer } from "./useCloseLayer";
 
 export type OverlayName = "logout" | "delete-account" | "scenes";
+
+/**
+ * `children` is a dialog stacked above the overlay, such as sign-in. Render it
+ * inside the popup so Base UI nests it; sibling modals each aria-hide the other.
+ */
+export type OverlayProps = { children?: React.ReactNode };
 
 /**
  * Marks a history entry `open` pushed, so `close` knows to pop it rather than

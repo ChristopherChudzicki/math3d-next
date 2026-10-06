@@ -17,7 +17,8 @@ type PopupProps = Omit<BaseAlertDialog.Popup.Props, "className"> & {
  */
 const Popup: React.FC<PopupProps> = ({ className, ...others }) => (
   <BaseAlertDialog.Portal>
-    <BaseAlertDialog.Backdrop className={styles.backdrop} />
+    {/* Rendered when nested too, so each stacked dialog dims the one beneath. */}
+    <BaseAlertDialog.Backdrop className={styles.backdrop} forceRender />
     <BaseAlertDialog.Viewport className={styles.viewport}>
       <BaseAlertDialog.Popup
         {...others}

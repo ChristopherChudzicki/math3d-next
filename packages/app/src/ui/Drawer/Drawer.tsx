@@ -26,7 +26,8 @@ const Popup: React.FC<PopupProps> = ({
   ...others
 }) => (
   <BaseDialog.Portal>
-    <BaseDialog.Backdrop className={styles.backdrop} />
+    {/* Rendered when nested too, so each stacked dialog dims the one beneath. */}
+    <BaseDialog.Backdrop className={styles.backdrop} forceRender />
     <BaseDialog.Viewport
       className={classNames(styles.viewport, side === "right" && styles.right)}
     >

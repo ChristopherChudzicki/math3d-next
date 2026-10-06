@@ -2,11 +2,11 @@ import type React from "react";
 import LogoutPage from "@/pages/auth/LogoutPage";
 import DeleteAccountPage from "@/pages/auth/DeleteAccountPage";
 import ScenesListPage from "@/pages/ScenesList/ScenesListPage";
-import type { OverlayName } from "./useOverlay";
+import type { OverlayName, OverlayProps } from "./useOverlay";
 
 // Overlay name → component. Unknown values render nothing.
 // Typed by OverlayName so the registry and the `open(...)` union can't drift.
-export const OVERLAYS: Record<OverlayName, React.FC> = {
+export const OVERLAYS: Record<OverlayName, React.FC<OverlayProps>> = {
   logout: LogoutPage,
   "delete-account": DeleteAccountPage,
   scenes: ScenesListPage,

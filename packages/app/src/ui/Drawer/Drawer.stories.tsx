@@ -1,6 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import Button from "../Button";
+import { Dialog } from "../Dialog";
 import { Drawer } from ".";
 import type { DrawerSide, DrawerSize } from ".";
 
@@ -63,3 +64,30 @@ const meta: Meta<typeof AllDrawers> = {
 export default meta;
 
 export const AllVariants: StoryObj<typeof AllDrawers> = {};
+
+/** A dialog nested in the drawer dims it as well as the page. */
+export const NestedDialog: StoryObj<typeof AllDrawers> = {
+  render: () => (
+    <Drawer.Root>
+      <Drawer.Trigger render={<Button>Open drawer</Button>} />
+      <Drawer.Popup side="right" size="lg">
+        <Drawer.Header>
+          <Drawer.Title>Scenes</Drawer.Title>
+        </Drawer.Header>
+        <Drawer.Body>
+          <Dialog.Root>
+            <Dialog.Trigger render={<Button>Open dialog</Button>} />
+            <Dialog.Popup size="sm">
+              <Dialog.Header>
+                <Dialog.Title>Sign in</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                <p>Escape closes only this dialog.</p>
+              </Dialog.Body>
+            </Dialog.Popup>
+          </Dialog.Root>
+        </Drawer.Body>
+      </Drawer.Popup>
+    </Drawer.Root>
+  ),
+};
