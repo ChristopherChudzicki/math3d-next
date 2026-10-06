@@ -1,0 +1,104 @@
+# Deploys each PR's Storybook as a Worker Preview, https://pr-<number>-math3d-storybook.<subdomain>.workers.dev,
+# linked from the PR as the `storybook` environment's deployment. storybook-cleanup.yml deletes it when
+# the PR closes.
+#
+# Setup: the math3d-storybook Worker (packages/app/.storybook/wrangler.jsonc) with Preview URLs turned on
+# in the dashboard — `wrangler preview` doesn't set that, and this Worker is never `wrangler deploy`ed.
+# The `storybook` environment holds a Cloudflare account API token with the Admin role on that Worker
+# (secret CLOUDFLARE_STORYBOOK_API_TOKEN) and the variable CLOUDFLARE_ACCOUNT_ID.
+name: Storybook preview
+
+on:
+  pull_request:
+    paths:
+      - "packages/**"
+      - "package.json"
+      - "yarn.lock"
+      - ".env.development"
+      - ".nvmrc"
+      - ".yarnrc.yml"
+      - ".github/workflows/storybook-preview.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  # Shared with storybook-cleanup.yml, so closing a PR cancels its in-flight deploy.
+  group: storybook-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # Fork PRs get no secrets.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-26.04
+    env:
+      SKIP_YARN_COREPACK_CHECK: true
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: |
+          corepack enable
+          yarn install --immutable
+
+      - name: Build Storybook
+        run: yarn workspace app build-storybook
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: storybook-static
+          path: packages/app/storybook-static/
+          retention-days: 1
+
+  # A separate job, so the token is never in a job that runs build-time code (Storybook, Vite
+  # plugins, the PR's stories). Its install runs no package code: .yarnrc.yml disables scripts.
+  deploy:
+    needs: build
+    runs-on: ubuntu-26.04
+    environment:
+      name: storybook
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      SKIP_YARN_COREPACK_CHECK: true
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: |
+          corepack enable
+          yarn install --immutable
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: storybook-static
+          path: packages/app/storybook-static/
+
+      - name: Deploy Worker Preview
+        id: deploy
+        working-directory: packages/app
+        run: |
+          yarn wrangler preview --config .storybook/wrangler.jsonc --name "pr-$PR_NUMBER"
+          # wrangler succeeds without a URL when the Worker's Preview URLs are off.
+          url=$(jq -er 'select(.type == "preview") | .preview_urls[0]' "$WRANGLER_OUTPUT_FILE_PATH") ||
+            { echo "::error::No preview URL; turn on Preview URLs for the math3d-storybook Worker"; exit 1; }
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_STORYBOOK_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson

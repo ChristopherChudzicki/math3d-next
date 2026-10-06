@@ -1,0 +1,55 @@
+# Deletes a closed PR's Storybook Preview (see storybook-preview.yml) and retires its deployment link.
+# pull_request_target, unlike pull_request, also fires for PRs closed with merge conflicts. It runs
+# this file as it is on the default branch, and the job checks out nothing, so no PR code sees the token.
+name: Storybook cleanup
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions: {}
+
+concurrency:
+  group: storybook-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  cleanup:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-26.04
+    permissions:
+      deployments: write
+    environment:
+      name: storybook
+      deployment: false
+    steps:
+      - name: Delete the PR's Preview
+        run: |
+          status=$(curl -sS --retry 3 -o "$RUNNER_TEMP/response.json" -w '%{http_code}' -X DELETE \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/workers/math3d-storybook/previews/pr-$PR_NUMBER")
+          # Most PRs never deploy a Preview. Not found: 10007 is the Worker, 10025 the Preview.
+          if [ "$status" = 200 ]; then
+            echo "Deleted Preview pr-$PR_NUMBER"
+          elif [ "$status" = 404 ] || jq -e '[.errors[]?.code] | any(. == 10007 or . == 10025)' "$RUNNER_TEMP/response.json" >/dev/null; then
+            echo "No Preview pr-$PR_NUMBER to delete"
+          else
+            cat "$RUNNER_TEMP/response.json"
+            exit 1
+          fi
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_STORYBOOK_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      # Otherwise the PR keeps a "View deployment" link to the deleted Preview.
+      - name: Mark the PR's deployments inactive
+        run: |
+          gh api -X GET "repos/$GITHUB_REPOSITORY/deployments" -f environment=storybook -f ref="$HEAD_REF" \
+            --paginate --jq '.[].id' |
+            while read -r id; do
+              gh api -X POST "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" -f state=inactive --silent
+            done
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
