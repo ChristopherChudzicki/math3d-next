@@ -1,4 +1,4 @@
-# Deletes a closed PR's Storybook Preview (see storybook-preview.yml).
+# Deletes a closed PR's Storybook Preview (see storybook-preview.yml) and retires its deployment link.
 # pull_request_target, unlike pull_request, also fires for PRs closed with merge conflicts. It runs
 # this file as it is on the default branch, and the job checks out nothing, so no PR code sees the token.
 name: Storybook cleanup
@@ -17,6 +17,8 @@ jobs:
   cleanup:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-26.04
+    permissions:
+      deployments: write
     environment:
       name: storybook
       deployment: false
@@ -39,3 +41,15 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_STORYBOOK_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      # Otherwise the PR keeps a "View deployment" link to the deleted Preview.
+      - name: Mark the PR's deployments inactive
+        run: |
+          gh api -X GET "repos/$GITHUB_REPOSITORY/deployments" -f environment=storybook -f ref="$HEAD_REF" \
+            --paginate --jq '.[].id' |
+            while read -r id; do
+              gh api -X POST "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" -f state=inactive --silent
+            done
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
