@@ -8,6 +8,9 @@ on:
   # these checks must run there too.
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   frontend-tests:
     runs-on: ubuntu-26.04
