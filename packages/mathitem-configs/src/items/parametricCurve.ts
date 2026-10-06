@@ -127,6 +127,7 @@ const config: IMathItemConfig<
     samples1: { ...samples1, label: "Samples" },
   },
   settingsProperties: [
+    "color",
     "calculatedVisibility",
     "opacity",
     "size",

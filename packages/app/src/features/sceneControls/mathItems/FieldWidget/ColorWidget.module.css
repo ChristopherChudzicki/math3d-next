@@ -1,0 +1,9 @@
+.swatch {
+  display: block;
+  width: 1.75rem;
+  aspect-ratio: 1;
+  border: 1px solid var(--color-secondary-lighter);
+  border-radius: var(--border-radius);
+  background: var(--swatch-color);
+  cursor: pointer;
+}

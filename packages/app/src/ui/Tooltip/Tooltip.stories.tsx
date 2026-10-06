@@ -10,7 +10,9 @@ const AllSides: React.FC = () => (
     {sides.map((side) => (
       <Tooltip.Root key={side} defaultOpen>
         <Tooltip.Trigger render={<Button>{side}</Button>} />
-        <Tooltip.Popup side={side}>Long press to change color</Tooltip.Popup>
+        <Tooltip.Popup side={side}>
+          Press and hold to change color
+        </Tooltip.Popup>
       </Tooltip.Root>
     ))}
   </div>

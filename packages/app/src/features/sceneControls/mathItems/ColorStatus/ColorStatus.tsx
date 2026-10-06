@@ -1,9 +1,5 @@
 import classNames from "classnames";
-import {
-  MathGraphic,
-  makeColorConfig,
-  colorsAndGradients,
-} from "@math3d/mathitem-configs";
+import type { MathGraphic } from "@math3d/mathitem-configs";
 import React, {
   useCallback,
   useEffect,
@@ -18,19 +14,13 @@ import { positioning } from "@/util/styles";
 import { Popover } from "@/ui/Popover";
 import type { PopoverRootProps } from "@/ui/Popover";
 import { Tooltip } from "@/ui/Tooltip";
-import { useOnWidgetChange } from "../FieldWidget";
+import { useOnWidgetChange } from "../FieldWidget/hooks";
 import { useMathScope } from "../sceneSlice";
 import { useMathItemResults } from "../mathScope";
-import CloseButton from "../templates/CloseButton";
-import ColorDialog from "./ColorDialog";
+import ColorPopup, { getColor } from "./ColorPopup";
 import styles from "./ColorStatus.module.css";
 
 const TOOLTIP_DELAY = 800;
-
-const getColor = (colorText: string) => {
-  const color = colorsAndGradients.find((c) => c.value === colorText);
-  return color ?? makeColorConfig(colorText, "");
-};
 
 interface Props {
   item: MathGraphic;
@@ -142,20 +132,14 @@ const ColorStatus: React.FC<Props> = (props) => {
             />
           }
         />
-        <Tooltip.Popup>Long press to change color</Tooltip.Popup>
+        <Tooltip.Popup>Press and hold to change color</Tooltip.Popup>
       </Tooltip.Root>
       <Popover.Root
         open={dialogVisible}
         onOpenChange={handleOpenChange}
         modal="trap-focus"
       >
-        <Popover.Popup anchor={buttonEl} side="right" data-dndkit-no-drag>
-          <div className={styles.header}>
-            <Popover.Title>Color</Popover.Title>
-            <Popover.Close render={<CloseButton label="Close" />} />
-          </div>
-          <ColorDialog className={styles.dialog} item={item} />
-        </Popover.Popup>
+        <ColorPopup item={item} anchor={buttonEl} />
       </Popover.Root>
     </>
   );

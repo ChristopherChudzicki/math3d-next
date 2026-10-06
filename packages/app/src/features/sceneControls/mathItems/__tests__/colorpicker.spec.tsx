@@ -134,6 +134,19 @@ test("clicking the indicator while the color dialog is open only closes the dial
   expect(getItem().properties.visible).toBe(true);
 });
 
+test("the Color setting in More Settings opens the color dialog", async () => {
+  const { getAllSwatches, getItem, user } = await setup(MIT.Point);
+  await user.click(
+    await screen.findByRole("button", { name: "More Settings" }),
+  );
+
+  await user.click(await screen.findByRole("button", { name: "Color" }));
+  await screen.findByRole("dialog", { name: "Color" });
+  await user.click(getAllSwatches()[8]);
+
+  expect(getItem().properties.color).toBe("#e74c3c");
+});
+
 test("Setting colorExpr for surfaces", async () => {
   const { findButton, getItem, user } = await setup(MIT.ExplicitSurface, {
     colorExpr: {

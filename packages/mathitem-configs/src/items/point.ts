@@ -96,6 +96,7 @@ const config: IMathItemConfig<
     ...visibilityProps,
   },
   settingsProperties: [
+    "color",
     "label",
     "labelVisible",
     "opacity",
