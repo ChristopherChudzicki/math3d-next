@@ -1,4 +1,6 @@
 ci:
+  # PR titles must be conventional commits (pr-title-check.yml).
+  autoupdate_commit_msg: "chore(deps): pre-commit autoupdate"
   skip:
     - prettier
     - prettier-jsonc
@@ -49,8 +51,8 @@ repos:
     rev: v1.30.1
     hooks:
       - id: zizmor
-        # --offline: pre-commit.ci hooks have no GitHub token, so online audits
-        # would run locally but never in CI.
+        # Online audits run in .github/workflows/zizmor.yml. --offline keeps this hook
+        # deterministic whether or not a local GH_TOKEN is set.
         args: [--no-progress, --offline, --min-severity=medium]
   - repo: local
     hooks:
