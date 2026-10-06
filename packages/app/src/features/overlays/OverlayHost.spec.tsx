@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { renderTestApp, screen, user, waitFor } from "@/test_util";
+import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
 
 test("no overlay param renders no dialog", () => {
   renderTestApp("/");
@@ -30,7 +30,9 @@ test("Sign-in loaded over an overlay hides the overlay and takes focus", async (
   renderTestApp("/?overlay=scenes&list=me&signin");
 
   const signIn = await screen.findByRole("dialog", { name: "Sign in" });
-  await waitFor(() => expect(signIn).toContainElement(document.activeElement));
+  await waitFor(() =>
+    expect(within(signIn).getByRole("button", { name: "Close" })).toHaveFocus(),
+  );
   expect(screen.queryByRole("dialog", { name: "Scenes" })).toBe(null);
   expect(
     screen.getByRole("dialog", { name: "Scenes", hidden: true }),
@@ -40,7 +42,9 @@ test("Sign-in loaded over an overlay hides the overlay and takes focus", async (
 test("Escape closes sign-in and leaves the overlay beneath it open", async () => {
   const { location } = renderTestApp("/?overlay=scenes&list=me&signin");
   const signIn = await screen.findByRole("dialog", { name: "Sign in" });
-  await waitFor(() => expect(signIn).toContainElement(document.activeElement));
+  await waitFor(() =>
+    expect(within(signIn).getByRole("button", { name: "Close" })).toHaveFocus(),
+  );
 
   await user.keyboard("{Escape}");
 

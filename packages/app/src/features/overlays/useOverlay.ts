@@ -8,9 +8,7 @@ export type OverlayName = "logout" | "delete-account" | "scenes";
 
 /**
  * `children` is a dialog stacked above the overlay, such as sign-in. Render it
- * inside the overlay's popup: Base UI coordinates focus and `aria-hidden` only
- * between dialogs nested in one React tree, and sibling modals each hide the
- * other.
+ * inside the popup so Base UI nests it; sibling modals each aria-hide the other.
  */
 export type OverlayProps = { children?: React.ReactNode };
 
