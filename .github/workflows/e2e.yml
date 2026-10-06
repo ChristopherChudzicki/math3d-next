@@ -7,6 +7,9 @@ on:
   # these checks must run there too.
   pull_request:
 
+permissions:
+  contents: read
+
 env:
   CI: True
 
