@@ -73,6 +73,14 @@ const MathBoolean: React.FC<
     setShouldUseExpression(false);
   }, [triggerChange]);
   const useExpression = useCallback(() => setShouldUseExpression(true), []);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  // The open tooltip describes the switch itself; don't repeat its text.
+  const switchDescribedBy = [
+    describedBy,
+    shouldUseExpression && !tooltipOpen && computedNoteId,
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
     <div
       className={classNames(u.dFlex, u.alignItemsCenter, className)}
@@ -80,9 +88,12 @@ const MathBoolean: React.FC<
       role="group"
       {...others}
     >
-      <Tooltip.Root disabled={!shouldUseExpression}>
+      <Tooltip.Root
+        disabled={!shouldUseExpression}
+        onOpenChange={setTooltipOpen}
+      >
         <Tooltip.Trigger
-          aria-describedby={shouldUseExpression ? computedNoteId : undefined}
+          aria-describedby={switchDescribedBy || undefined}
           render={
             <Switch
               checked={result}

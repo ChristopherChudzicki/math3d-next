@@ -43,7 +43,12 @@ const ToggleKeyboardButton = () => {
         mathVirtualKeyboard.show();
         setMfEl(null);
       } else {
-        document.querySelector<HTMLElement>("math-field")?.focus();
+        // Prefer a field in the open popover, which may trap focus.
+        const dialog = document.activeElement?.closest("[role=dialog]");
+        const field =
+          dialog?.querySelector<HTMLElement>("math-field") ??
+          document.querySelector<HTMLElement>("math-field");
+        field?.focus();
         mathVirtualKeyboard.show();
       }
     } else {

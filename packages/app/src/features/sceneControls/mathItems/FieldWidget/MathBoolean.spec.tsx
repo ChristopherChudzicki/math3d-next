@@ -120,13 +120,14 @@ describe("When the switch is initially enabled", () => {
   test("a computed switch explains why it is disabled", async () => {
     const { findToggle } = await setup("!false");
     const toggle = await findToggle();
-    expect(toggle).toHaveAccessibleDescription(/computed by expression/);
+    const note =
+      "Value is computed by expression. Reset to re-enable toggle switch control.";
+    expect(toggle).toHaveAccessibleDescription(note);
 
     await user.hover(toggle);
 
-    expect(await screen.findByRole("tooltip")).toHaveTextContent(
-      /computed by expression/,
-    );
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(note);
+    expect(toggle).toHaveAccessibleDescription(note);
   });
 });
 

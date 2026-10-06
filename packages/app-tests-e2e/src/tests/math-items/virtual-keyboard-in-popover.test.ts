@@ -70,6 +70,26 @@ test("Typing into a settings popover with the virtual keyboard", async ({
   await expect(moreSettings.opener()).toBeFocused();
 });
 
+test("Turning on the keyboard from a popover focuses a field in that popover", async ({
+  page,
+  prepareScene,
+}) => {
+  const key = await prepareScene(makeScene());
+  await page.goto(`/${key}`);
+  const app = new AppPage(page);
+  const item = await app.getUniqueItemSettings({ id: "the_point" });
+  const moreSettings = item.moreSettings();
+  await moreSettings.opener().click();
+  await expect(
+    moreSettings.root.getByRole("button", { name: "Close" }),
+  ).toBeFocused();
+
+  await page.getByRole("button", { name: "Enable math keyboard" }).click();
+
+  await expect(moreSettings.root).toBeVisible();
+  await expect(moreSettings.root.locator("math-field").first()).toBeFocused();
+});
+
 test.describe("on a touch screen", () => {
   test.use({ hasTouch: true });
 

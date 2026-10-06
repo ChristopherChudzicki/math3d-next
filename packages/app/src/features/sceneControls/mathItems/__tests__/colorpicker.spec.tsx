@@ -1,5 +1,5 @@
 import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
-import { renderTestApp, screen, within } from "@/test_util";
+import { act, renderTestApp, screen, waitFor, within } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
 import userEvent from "@testing-library/user-event";
 import { getTimedEvents } from "@math3d/test-utils";
@@ -85,6 +85,24 @@ test("clicking a swatch sets item to that color", async () => {
   const swatches = await getAllSwatches();
   await user.click(swatches[8]);
   expect(getItem().properties.color).toBe("#e74c3c");
+});
+
+test("holding Enter on the indicator opens the color dialog and leaves it open", async () => {
+  const { findButton, getItem } = await setup(MIT.Point);
+  // Spaced keydowns, so the held key repeats past the long-press threshold.
+  const user = userEvent.setup({ delay: 100 });
+  const button = await findButton();
+  const { color, visible } = getItem().properties;
+  act(() => button.focus());
+
+  await user.keyboard("{Enter>8}{/Enter}");
+
+  const dialog = await screen.findByRole("dialog", { name: "Color" });
+  await waitFor(() =>
+    expect(within(dialog).getByRole("button", { name: "Close" })).toHaveFocus(),
+  );
+  expect(dialog).toBeInTheDocument();
+  expect(getItem().properties).toMatchObject({ color, visible });
 });
 
 test("Escape closes the color dialog", async () => {

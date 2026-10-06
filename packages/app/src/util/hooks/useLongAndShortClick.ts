@@ -92,17 +92,11 @@ export const useLongAndShortClick = <T extends Element = Element>(
         if (!event.repeat) {
           handlerCalled = false;
           keyboardDownAt = new Date().getTime();
-        } else if (
-          event.repeat &&
-          keyboardDownAt &&
-          !handlerCalled &&
-          new Date().getTime() - (keyboardDownAt as number) > threshold
-        ) {
-          onLongClick(event);
-          wasLongPressedRef.current = true;
-          handlerCalled = true;
         }
       },
+      // A keyboard long press fires on release. Firing on a repeat keydown
+      // would let the remaining repeats, or Space's release click, land on
+      // whatever onLongClick moves focus to.
       onKeyUp: (event: React.KeyboardEvent<T>) => {
         if (
           (event.key === "Enter" || event.key === " ") &&
