@@ -83,7 +83,7 @@
     "@math3d/test-utils": "workspace:^",
     "@math3d/tsconfig": "workspace:^",
     "@mswjs/data": "^0.16.2",
-    "@sentry/vite-plugin": "^5.4.0",
+    "@sentry/vite-plugin": "^5.4.1",
     "@storybook/addon-a11y": "^10.6.1",
     "@storybook/react-vite": "^10.6.1",
     "@testing-library/jest-dom": "6.9.1",
