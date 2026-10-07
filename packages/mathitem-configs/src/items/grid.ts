@@ -99,6 +99,7 @@ const config: IMathItemConfig<
     zOrder,
   },
   settingsProperties: [
+    "color",
     "calculatedVisibility",
     "divisions",
     "opacity",

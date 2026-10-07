@@ -7,7 +7,7 @@ test("describes its trigger while open", async () => {
   render(
     <Tooltip.Root>
       <Tooltip.Trigger>Show Graphic</Tooltip.Trigger>
-      <Tooltip.Popup>Long press to change color</Tooltip.Popup>
+      <Tooltip.Popup>Press and hold to change color</Tooltip.Popup>
     </Tooltip.Root>,
   );
   const trigger = screen.getByRole("button", { name: "Show Graphic" });
@@ -16,8 +16,8 @@ test("describes its trigger while open", async () => {
   await user.hover(trigger);
 
   const tooltip = await screen.findByRole("tooltip");
-  expect(tooltip).toHaveTextContent("Long press to change color");
-  expect(trigger).toHaveAccessibleDescription("Long press to change color");
+  expect(tooltip).toHaveTextContent("Press and hold to change color");
+  expect(trigger).toHaveAccessibleDescription("Press and hold to change color");
 
   await user.unhover(trigger);
 

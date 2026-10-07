@@ -155,6 +155,7 @@ const config: IMathItemConfig<
     },
   },
   settingsProperties: [
+    "color",
     "calculatedVisibility",
     "opacity",
     "size",

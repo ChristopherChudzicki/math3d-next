@@ -1,6 +1,6 @@
 import { waitFor } from "@testing-library/react";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import { screen, renderTestApp, act } from "@/test_util";
+import { screen, renderTestApp, act, user } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
 
 /**
@@ -28,6 +28,16 @@ test.each([
     item: makeItem(MIT.Variable, {
       value: { lhs: "a", rhs: "1 + ", type: "assignment" },
     }),
+    errMatcher: /Unexpected end of expression/,
+  },
+  {
+    getInput: async () => {
+      await user.click(
+        await screen.findByRole("button", { name: "More Settings" }),
+      );
+      return screen.findByLabelText("Math Expression for: Label Visible");
+    },
+    item: makeItem(MIT.Point, { labelVisible: "true +" }),
     errMatcher: /Unexpected end of expression/,
   },
   // {

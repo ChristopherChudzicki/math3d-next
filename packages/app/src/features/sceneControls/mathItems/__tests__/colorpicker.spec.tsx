@@ -1,4 +1,8 @@
-import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
+import {
+  MathItem,
+  MathItemType as MIT,
+  isMathGraphic,
+} from "@math3d/mathitem-configs";
 import { act, renderTestApp, screen, waitFor, within } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
 import userEvent from "@testing-library/user-event";
@@ -120,7 +124,21 @@ test("Escape closes the color dialog", async () => {
 
   await user.keyboard("{Escape}");
 
-  expect(dialog).not.toBeInTheDocument();
+  await waitFor(() => expect(dialog).not.toBeInTheDocument());
+});
+
+test("Tab cycles within the color dialog", async () => {
+  const { openDialog, user } = await setup(MIT.Point);
+  const dialog = await openDialog();
+  await user.click(
+    within(dialog).getByRole("textbox", { name: "Custom Color" }),
+  );
+
+  await user.tab();
+
+  await waitFor(() =>
+    expect(within(dialog).getByRole("button", { name: "Close" })).toHaveFocus(),
+  );
 });
 
 test("clicking the indicator while the color dialog is open only closes the dialog", async () => {
@@ -130,8 +148,46 @@ test("clicking the indicator while the color dialog is open only closes the dial
 
   await user.click(button);
 
-  expect(dialog).not.toBeInTheDocument();
+  await waitFor(() => expect(dialog).not.toBeInTheDocument());
   expect(getItem().properties.visible).toBe(true);
+});
+
+test("the Color setting in More Settings opens a nested color dialog", async () => {
+  const { getItem, user } = await setup(MIT.Point);
+  await user.click(
+    await screen.findByRole("button", { name: "More Settings" }),
+  );
+  const settings = await screen.findByRole("dialog", {
+    name: "Point Settings",
+  });
+
+  await user.click(
+    within(settings).getByRole("button", { name: "Color Blue" }),
+  );
+  const colorDialog = await screen.findByRole("dialog", { name: "Color" });
+  await user.click(within(colorDialog).getByRole("button", { name: "Red" }));
+  expect(getItem().properties.color).toBe("#e74c3c");
+
+  await user.keyboard("{Escape}");
+
+  await waitFor(() => expect(colorDialog).not.toBeInTheDocument());
+  expect(settings).toBeInTheDocument();
+  within(settings).getByRole("button", { name: "Color Red" });
+});
+
+const graphicTypes = Object.values(MIT).filter((type) =>
+  isMathGraphic(makeItem(type)),
+);
+
+test.each(graphicTypes)("More Settings for %s lists Color", async (type) => {
+  const { user } = await setup(type);
+
+  await user.click(
+    await screen.findByRole("button", { name: "More Settings" }),
+  );
+
+  const settings = await screen.findByRole("dialog", { name: /Settings$/ });
+  within(settings).getByRole("button", { name: /^Color / });
 });
 
 test("Setting colorExpr for surfaces", async () => {

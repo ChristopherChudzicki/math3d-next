@@ -159,6 +159,7 @@ const config: IMathItemConfig<
     zOrder,
   },
   settingsProperties: [
+    "color",
     "gridOpacity",
     "grid1",
     "grid2",

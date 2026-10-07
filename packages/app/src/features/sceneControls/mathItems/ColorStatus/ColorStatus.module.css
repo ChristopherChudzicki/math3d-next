@@ -21,18 +21,3 @@
 .empty.circle::before {
   background: var(--color-background);
 }
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.25rem 0.25rem 0 0.5em;
-}
-
-/* Fixed, so the popover keeps its width when switching tabs. */
-.dialog {
-  width: 18rem;
-  padding-left: 0.5em;
-  padding-right: 0.5em;
-  padding-bottom: 0.5em;
-}

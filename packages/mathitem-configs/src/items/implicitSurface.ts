@@ -138,11 +138,11 @@ const config: IMathItemConfig<
     zOrder,
   },
   settingsProperties: [
+    "color",
     "calculatedVisibility",
     "opacity",
     "samples",
     "shaded",
-    "visible",
     "zBias",
     "zOrder",
   ],

@@ -1,6 +1,5 @@
 import {
   MathGraphic,
-  WidgetType,
   colorsAndGradients,
   colors,
 } from "@math3d/mathitem-configs";
@@ -10,7 +9,10 @@ import ColorPicker, { OnColorChange } from "@/ui/ColorPicker";
 import { Tabs } from "@/ui/Tabs";
 
 import StaticMath from "@/ui/MathLive/StaticMath";
-import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
+// Not from FieldWidget's index: it renders ColorWidget, which renders this.
+import { useOnWidgetChange } from "../FieldWidget/hooks";
+import ErrorTooltip from "../FieldWidget/ErrorTooltip";
+import MathValue from "../FieldWidget/MathValue";
 import { OnWidgetChange } from "../FieldWidget/types";
 import { useMathScope } from "../sceneSlice";
 import { useMathErrors } from "../mathScope";
@@ -54,15 +56,16 @@ const ColorExprInput: React.FC<ColorExprProps> = (props) => {
   return (
     <div>
       <ReadonlyMathField value={lhs} />
-      <FieldWidget
-        widget={WidgetType.MathValue}
-        label="Color Expression"
-        name="colorExpr"
-        className={styles.expression}
-        onChange={onWidgetChange}
-        error={colorExpr}
-        value={item.properties.colorExpr.rhs}
-      />
+      <ErrorTooltip error={colorExpr}>
+        <MathValue
+          label="Color Expression"
+          name="colorExpr"
+          className={styles.expression}
+          onChange={onWidgetChange}
+          error={colorExpr}
+          value={item.properties.colorExpr.rhs}
+        />
+      </ErrorTooltip>
       <p className={styles.note}>
         Note: <StaticMath value="X, Y, Z" mode="inline" /> (capitals) refer to
         normalized coordinates ranging from 0 to 1.

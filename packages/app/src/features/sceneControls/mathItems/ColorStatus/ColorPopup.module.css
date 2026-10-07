@@ -1,0 +1,15 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Left edge in line with ColorPicker's content (its 5px padding). */
+  padding: 0.25rem 0.25rem 0 calc(0.5em + 5px);
+}
+
+/* Fixed, so the popover keeps its width when switching tabs. */
+.dialog {
+  width: 18rem;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  padding-bottom: 0.5em;
+}

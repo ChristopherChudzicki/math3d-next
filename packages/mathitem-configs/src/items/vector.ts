@@ -119,6 +119,7 @@ const config: IMathItemConfig<
     end,
   },
   settingsProperties: [
+    "color",
     "calculatedVisibility",
     "label",
     "labelVisible",
