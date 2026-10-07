@@ -74,17 +74,20 @@ describe("useLongAndShortClick", () => {
     },
   );
 
-  test("Long keyboard press fires on release, not while the key repeats", () => {
+  test("Long keyboard press fires once, while the key is held", () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     try {
       const { target, spies } = setup({ threshold: 200 });
       fireEvent.keyDown(target, { key: "Enter" });
       vi.setSystemTime(Date.now() + 500);
-      fireEvent.keyDown(target, { key: "Enter", repeat: true });
-      expect(spies.onLongClick).not.toHaveBeenCalled();
 
+      fireEvent.keyDown(target, { key: "Enter", repeat: true });
+      expect(spies.onLongClick).toHaveBeenCalledOnce();
+
+      fireEvent.keyDown(target, { key: "Enter", repeat: true });
       fireEvent.keyUp(target, { key: "Enter" });
       expect(spies.onLongClick).toHaveBeenCalledOnce();
+      expect(spies.onClick).not.toHaveBeenCalled();
     } finally {
       vi.useRealTimers();
     }

@@ -87,23 +87,32 @@ test("clicking a swatch sets item to that color", async () => {
   expect(getItem().properties.color).toBe("#e74c3c");
 });
 
-test("holding Enter on the indicator opens the color dialog and leaves it open", async () => {
-  const { findButton, getItem } = await setup(MIT.Point);
-  // Spaced keydowns, so the held key repeats past the long-press threshold.
-  const user = userEvent.setup({ delay: 100 });
-  const button = await findButton();
-  const { color, visible } = getItem().properties;
-  act(() => button.focus());
+test.each([
+  { key: "Enter", hold: "{Enter>8}", release: "{/Enter}" },
+  { key: "Space", hold: "[Space>8]", release: "[/Space]" },
+])(
+  "holding $key on the indicator opens the color dialog while held and leaves it open",
+  async ({ hold, release }) => {
+    const { findButton, getItem } = await setup(MIT.Point);
+    // Spaced keydowns, so the held key repeats past the long-press threshold.
+    const user = userEvent.setup({ delay: 100 });
+    const button = await findButton();
+    const { color, visible } = getItem().properties;
+    act(() => button.focus());
 
-  await user.keyboard("{Enter>8}{/Enter}");
+    await user.keyboard(hold);
+    const dialog = await screen.findByRole("dialog", { name: "Color" });
+    await waitFor(() =>
+      expect(
+        within(dialog).getByRole("button", { name: "Close" }),
+      ).toHaveFocus(),
+    );
+    await user.keyboard(release);
 
-  const dialog = await screen.findByRole("dialog", { name: "Color" });
-  await waitFor(() =>
-    expect(within(dialog).getByRole("button", { name: "Close" })).toHaveFocus(),
-  );
-  expect(dialog).toBeInTheDocument();
-  expect(getItem().properties).toMatchObject({ color, visible });
-});
+    expect(dialog).toBeInTheDocument();
+    expect(getItem().properties).toMatchObject({ color, visible });
+  },
+);
 
 test("Escape closes the color dialog", async () => {
   const { openDialog, user } = await setup(MIT.Point);
