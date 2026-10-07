@@ -5,6 +5,12 @@ const iconifyOnline = {
   message: 'Import from "@iconify/react/offline".',
 };
 
+// The app is built on Base UI + CSS Modules (docs/adr/0006).
+const noMui = {
+  group: ["@mui/*", "@emotion/*"],
+  message: "MUI and Emotion are not dependencies; build on Base UI via src/ui.",
+};
+
 module.exports = {
   // ESLint skips dot-directories unless un-ignored.
   ignorePatterns: ["!.storybook"],
@@ -42,6 +48,7 @@ module.exports = {
             group: ["@base-ui/react", "@base-ui/react/*"],
             message: "Use a component from src/ui instead of Base UI directly.",
           },
+          noMui,
         ],
       },
     ],
@@ -56,7 +63,10 @@ module.exports = {
     {
       files: ["src/ui/**"],
       rules: {
-        "no-restricted-imports": ["error", { paths: [iconifyOnline] }],
+        "no-restricted-imports": [
+          "error",
+          { paths: [iconifyOnline], patterns: [noMui] },
+        ],
       },
     },
     // The edge Worker (src/worker) is typechecked with Workers types via its

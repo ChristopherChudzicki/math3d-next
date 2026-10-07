@@ -1,5 +1,4 @@
 import { render, waitFor } from "@testing-library/react";
-import { createTheme } from "@mui/material/styles";
 import React from "react";
 import { createMemoryRouter, parsePath } from "react-router";
 import { getStore } from "@/store/store";
@@ -80,11 +79,6 @@ const renderTestApp = (
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  const theme = createTheme({
-    transitions: {
-      create: () => "none",
-    },
-  });
 
   const user = seededUser ?? (isAuthenticated ? seedDb.withUser() : null);
   if (user) {
@@ -95,12 +89,7 @@ const renderTestApp = (
   const router = createMemoryRouter(routes, { initialEntries });
   const result = render(
     <React.StrictMode>
-      <AppProviders
-        queryClient={queryClient}
-        store={store}
-        theme={theme}
-        router={router}
-      />
+      <AppProviders queryClient={queryClient} store={store} router={router} />
     </React.StrictMode>,
   );
 
