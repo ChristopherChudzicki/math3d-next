@@ -24,7 +24,7 @@
 }
 
 .info {
-  --tone: var(--color-accent);
+  --tone: var(--color-primary);
 }
 
 .success {

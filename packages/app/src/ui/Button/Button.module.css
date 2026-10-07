@@ -32,8 +32,8 @@
   --tone-step: 0.08;
 }
 
-.accent {
-  --tone: var(--color-accent);
+.primary {
+  --tone: var(--color-primary);
   --tone-step: -0.08;
 }
 

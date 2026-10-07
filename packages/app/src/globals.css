@@ -56,7 +56,7 @@ html {
    * MathBox's default blue (#3090ff, OKLCH hue 255) darkened to lightness 0.5
    * at the same hue, for 4.5:1 text contrast against white.
    */
-  --color-accent: #0061be;
+  --color-primary: #0061be;
   --color-error: red;
   --color-danger: rgb(198, 40, 40);
   --color-warning: rgb(237, 108, 2);

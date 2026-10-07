@@ -43,7 +43,7 @@ type LinkActionsProps = {
 const LinkActions: React.FC<LinkActionsProps> = ({ onCopy, copyRef }) => (
   <Dialog.Actions>
     <Dialog.Close render={<Button>Done</Button>} />
-    <Button ref={copyRef} variant="solid" tone="accent" onClick={onCopy}>
+    <Button ref={copyRef} variant="solid" tone="primary" onClick={onCopy}>
       Copy link
     </Button>
   </Dialog.Actions>

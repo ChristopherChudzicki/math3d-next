@@ -328,7 +328,7 @@ const MyScenes: React.FC = () => {
       <Drawer.Body>
         <div className={styles.message}>
           <p className={styles.hint}>Sign in to see the scenes you save.</p>
-          <Button tone="accent" onClick={() => signIn.open()}>
+          <Button tone="primary" onClick={() => signIn.open()}>
             Sign in
           </Button>
         </div>

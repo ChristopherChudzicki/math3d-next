@@ -4,7 +4,7 @@ import brokenTorusPaths, { StrokeRole } from "./brokenTorusGeometry";
 /** Stroke colour per role, all at MathBox's blue hue (OKLCH 255). */
 const ROLE_COLORS: Record<StrokeRole, string> = {
   main: "#3090ff",
-  accent: "var(--color-accent)",
+  accent: "var(--color-primary)",
   cut: "oklch(45% 0.17 255)",
 };
 

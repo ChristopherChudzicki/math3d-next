@@ -26,8 +26,8 @@
 }
 
 .box[data-checked] {
-  border-color: var(--color-accent);
-  background-color: var(--color-accent);
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
 }
 
 @media (hover: hover) {

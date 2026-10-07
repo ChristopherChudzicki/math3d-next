@@ -177,7 +177,7 @@ const SceneActions: React.FC = () => {
         <ButtonGroup>
           <Button
             data-testid="scene-action"
-            tone="accent"
+            tone="primary"
             // Not `disabled`: a disabled button drops keyboard focus to the page
             // after every Save or Copy link.
             loading={!enabled}
@@ -193,7 +193,7 @@ const SceneActions: React.FC = () => {
                 render={
                   <IconButton
                     variant="outline"
-                    tone="accent"
+                    tone="primary"
                     label="More scene actions"
                   >
                     <Icon icon={chevronDown} aria-hidden="true" />

@@ -1,5 +1,5 @@
 .text {
-  color: var(--color-accent);
+  color: var(--color-primary);
   text-decoration-line: underline;
   text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
   text-underline-offset: 0.15em;

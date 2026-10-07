@@ -58,7 +58,7 @@ const NotificationDialog: React.FC<NotificationDialogProps> = ({
               <AlertDialog.Close render={<Button>Cancel</Button>} />
               <Button
                 variant="solid"
-                tone="accent"
+                tone="primary"
                 onClick={() => choose(true)}
               >
                 Confirm
@@ -67,7 +67,7 @@ const NotificationDialog: React.FC<NotificationDialogProps> = ({
           ) : (
             <AlertDialog.Close
               render={
-                <Button variant="solid" tone="accent">
+                <Button variant="solid" tone="primary">
                   OK
                 </Button>
               }

@@ -8,7 +8,7 @@ import IconButton from "./IconButton";
 import type { ButtonVariant, ButtonTone, ButtonSize } from "../Button";
 
 const variants: ButtonVariant[] = ["ghost", "outline", "solid"];
-const tones: ButtonTone[] = ["neutral", "accent", "danger"];
+const tones: ButtonTone[] = ["neutral", "primary", "danger"];
 const sizes: ButtonSize[] = ["sm", "md"];
 const states = [
   "rest",

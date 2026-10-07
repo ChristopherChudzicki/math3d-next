@@ -7,7 +7,7 @@ import ButtonLink from "./ButtonLink";
 import type { ButtonVariant, ButtonTone, ButtonSize } from "../Button";
 
 const variants: ButtonVariant[] = ["solid", "outline", "ghost"];
-const tones: ButtonTone[] = ["neutral", "accent", "danger"];
+const tones: ButtonTone[] = ["neutral", "primary", "danger"];
 const sizes: ButtonSize[] = ["sm", "md"];
 const states = ["rest", "hover", "active", "focus-visible"] as const;
 
@@ -80,7 +80,7 @@ const AllButtonLinks: React.FC = () => (
                   rel="noreferrer"
                   size={size}
                   variant="ghost"
-                  tone="accent"
+                  tone="primary"
                 >
                   Open site
                   <Icon icon={externalLink} aria-hidden="true" />

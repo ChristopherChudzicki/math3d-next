@@ -194,7 +194,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
           <Button
             type="submit"
             variant="solid"
-            tone="accent"
+            tone="primary"
             loading={isSubmitting}
           >
             {isSubmitting ? headings.submitting : headings.confirm}

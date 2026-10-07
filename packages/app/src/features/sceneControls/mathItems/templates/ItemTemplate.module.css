@@ -110,7 +110,7 @@
 /* The bar carries the 3:1 state contrast; the fill alone is about 1.1:1. */
 .item-active {
   background-color: oklch(96% 0.025 255);
-  box-shadow: inset 3px 0 0 var(--color-accent);
+  box-shadow: inset 3px 0 0 var(--color-primary);
   transition-property: background-color, box-shadow;
   transition-duration: var(--transition-duration);
 }
