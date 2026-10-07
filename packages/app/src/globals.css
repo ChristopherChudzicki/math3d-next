@@ -68,7 +68,7 @@ html {
   --border-radius: 4px;
   --transition-duration: 300ms;
   --transition-timing-function: ease;
-  /* MUI's modal layer, so Base UI and MUI overlays stack alike. */
+  /* Every overlay primitive in src/ui; above the sidebar (--sidebar-z). */
   --z-index-overlay: 1300;
   /* Read by MathLive (default 105); its keyboard must draw over overlays. */
   --keyboard-zindex: calc(var(--z-index-overlay) + 100);
@@ -79,10 +79,6 @@ html {
 
 #root {
   height: 100vh;
-}
-
-.MuiTab-root {
-  text-transform: none;
 }
 
 math-field {

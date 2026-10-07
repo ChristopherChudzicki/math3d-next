@@ -1,6 +1,4 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { ThemeProvider, StyledEngineProvider } from "@mui/material/styles";
-import type { Theme } from "@mui/material/styles";
 import { QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import { Provider } from "react-redux";
@@ -13,25 +11,15 @@ import NotificationsDisplay from "./features/notifications/NotificationsDisplay"
 interface AppProps {
   store: AppStore;
   queryClient: QueryClient;
-  theme: Theme;
   router: RouterProviderProps["router"];
 }
 
-const AppProviders: React.FC<AppProps> = ({
-  store,
-  queryClient,
-  router,
-  theme,
-}) => (
+const AppProviders: React.FC<AppProps> = ({ store, queryClient, router }) => (
   <Provider store={store}>
     <NotificationsProvider>
       <QueryClientProvider client={queryClient}>
-        <StyledEngineProvider injectFirst>
-          <ThemeProvider theme={theme}>
-            <RouterProvider router={router} />
-            <NotificationsDisplay />
-          </ThemeProvider>
-        </StyledEngineProvider>
+        <RouterProvider router={router} />
+        <NotificationsDisplay />
       </QueryClientProvider>
     </NotificationsProvider>
   </Provider>

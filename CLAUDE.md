@@ -101,7 +101,7 @@ This app is deployed as a true react SPA hosted on a CDN with APIs powered by Dj
 
 - **Rendering**: Vite dev/build, React 19, TypeScript (strict)
 - **State**: Redux Toolkit. Main slice: `scene`. Store: `packages/app/src/store/store.ts`
-- **UI**: MUI 7 + Emotion. Theme: `packages/app/src/mui.ts`
+- **UI**: [Base UI](https://base-ui.com), wrapped by the generic components in `packages/app/src/ui/` ([ADR-0006](docs/adr/0006-base-ui-and-css-modules.md)). Color tokens: `packages/app/src/globals.css`. Icons: Iconify (Lucide)
 - **3D Visualization**: MathBox + Three.js, via [mathbox-react](https://github.com/ChristopherChudzicki/mathbox-react) bindings
 - **Math Input**: MathLive (LaTeX-style input fields)
 - **Data Fetching**: TanStack React Query + openapi-fetch

@@ -11,7 +11,7 @@ test("help reference loads at /app/help/reference", async () => {
 test("an overlay opens over an /app page (host wraps both subtrees)", async () => {
   // R3 AC: overlays are openable from any route, including /app/... pages.
   renderTestApp("/app/help/reference?overlay=scenes");
-  // HelpPage is in the tree — MUI Dialog sets aria-hidden on the background, so
+  // HelpPage is in the tree — the modal overlay aria-hides the background, so
   // query with { hidden: true } to reach it; toBeInTheDocument() confirms presence.
   expect(
     await screen.findByRole("heading", {

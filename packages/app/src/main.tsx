@@ -8,7 +8,6 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import math from "@math3d/custom-mathjs";
 import { createQueryClient } from "./services/react-query/react-query";
-import { theme } from "./mui";
 
 import AppRoutes from "./AppProviders";
 import { getStore } from "./store/store";
@@ -54,12 +53,7 @@ prepare().then(() => {
 
   root.render(
     <React.StrictMode>
-      <AppRoutes
-        queryClient={queryClient}
-        store={store}
-        theme={theme}
-        router={router}
-      />
+      <AppRoutes queryClient={queryClient} store={store} router={router} />
     </React.StrictMode>,
   );
 });
