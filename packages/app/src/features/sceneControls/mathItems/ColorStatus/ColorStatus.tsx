@@ -12,14 +12,16 @@ import React, {
   useState,
 } from "react";
 import { useToggle } from "@/util/hooks";
-import Popover from "@mui/material/Popover";
 import { useLongAndShortClick } from "@/util/hooks/useLongAndShortClick";
 
 import { positioning } from "@/util/styles";
-import Tooltip from "@mui/material/Tooltip";
+import { Popover } from "@/ui/Popover";
+import type { PopoverRootProps } from "@/ui/Popover";
+import { Tooltip } from "@/ui/Tooltip";
 import { useOnWidgetChange } from "../FieldWidget";
 import { useMathScope } from "../sceneSlice";
 import { useMathItemResults } from "../mathScope";
+import CloseButton from "../templates/CloseButton";
 import ColorDialog from "./ColorDialog";
 import styles from "./ColorStatus.module.css";
 
@@ -74,9 +76,29 @@ const ColorStatus: React.FC<Props> = (props) => {
   );
 
   const handleButtonClick = useCallback(() => {
+    if (dialogVisible) {
+      setDialogVisible.off();
+      return;
+    }
     onChange({ name: "visible", value: !visible });
     onChange({ name: "useCalculatedVisibility", value: false });
-  }, [visible, onChange]);
+  }, [dialogVisible, setDialogVisible, visible, onChange]);
+  const handleOpenChange: PopoverRootProps["onOpenChange"] = (
+    open,
+    eventDetails,
+  ) => {
+    // A press on the dot is left to handleButtonClick, so it doesn't also
+    // toggle visibility.
+    if (
+      eventDetails.reason === "outside-press" &&
+      eventDetails.event.target instanceof Node &&
+      buttonEl?.contains(eventDetails.event.target)
+    ) {
+      eventDetails.cancel();
+      return;
+    }
+    setDialogVisible(open);
+  };
   const longAndShortClick = useLongAndShortClick({
     onLongClick: setDialogVisible.on,
     onClick: handleButtonClick,
@@ -97,50 +119,44 @@ const ColorStatus: React.FC<Props> = (props) => {
     }
   }, [calculatedVisibility, item.properties.calculatedVisibility]);
 
-  const handleCLose = useCallback(() => {
-    setDialogVisible.off();
-  }, [setDialogVisible]);
   return (
     <>
-      <Tooltip
-        title="Long press to change color"
-        enterDelay={TOOLTIP_DELAY}
-        enterNextDelay={TOOLTIP_DELAY}
-        describeChild
-      >
-        <button
-          type="button"
-          style={style}
-          ref={setButtonEl}
-          aria-pressed={finalVisibility}
-          aria-label="Show Graphic"
-          className={classNames(
-            styles.circle,
-            positioning["absolute-centered"],
-            {
-              [styles.empty]: !finalVisibility,
-            },
-          )}
-          {...longAndShortClick.handlers}
+      <Tooltip.Root>
+        <Tooltip.Trigger
+          delay={TOOLTIP_DELAY}
+          render={
+            <button
+              type="button"
+              style={style}
+              ref={setButtonEl}
+              aria-pressed={finalVisibility}
+              aria-label="Show Graphic"
+              className={classNames(
+                styles.circle,
+                positioning["absolute-centered"],
+                {
+                  [styles.empty]: !finalVisibility,
+                },
+              )}
+              {...longAndShortClick.handlers}
+            />
+          }
         />
-      </Tooltip>
-      <Popover
+        <Tooltip.Popup>Long press to change color</Tooltip.Popup>
+      </Tooltip.Root>
+      <Popover.Root
         open={dialogVisible}
-        anchorEl={buttonEl}
-        onClose={handleCLose}
-        anchorOrigin={{
-          vertical: "center",
-          horizontal: "right",
-        }}
-        slotProps={{
-          root: {
-            // @ts-expect-error https://github.com/mui/material-ui/issues/33175
-            "data-dndkit-no-drag": true,
-          },
-        }}
+        onOpenChange={handleOpenChange}
+        modal="trap-focus"
       >
-        <ColorDialog className={styles.dialog} item={item} />
-      </Popover>
+        <Popover.Popup anchor={buttonEl} side="right" data-dndkit-no-drag>
+          <div className={styles.header}>
+            <Popover.Title>Color</Popover.Title>
+            <Popover.Close render={<CloseButton label="Close" />} />
+          </div>
+          <ColorDialog className={styles.dialog} item={item} />
+        </Popover.Popup>
+      </Popover.Root>
     </>
   );
 };

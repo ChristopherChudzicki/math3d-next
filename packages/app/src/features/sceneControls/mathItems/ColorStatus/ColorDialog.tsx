@@ -86,7 +86,7 @@ const ColorDialog: React.FC<ColorDialogProps> = (props) => {
   const pickerColors = hasColorExpr(item) ? colorsAndGradients : colors;
   const [tab, setTab] = useState("color");
   return (
-    <div role="dialog" className={props.className} data-dndkit-no-drag>
+    <div className={props.className}>
       {hasColorExpr(item) ? (
         <Tabs.Root value={tab} onValueChange={setTab}>
           <Tabs.List aria-label="Color mode">

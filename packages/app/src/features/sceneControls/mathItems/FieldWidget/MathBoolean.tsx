@@ -1,8 +1,8 @@
-import Tooltip from "@mui/material/Tooltip";
 import classNames from "classnames";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useId, useMemo, useState } from "react";
 import Button from "@/ui/Button";
 import Switch from "@/ui/Switch";
+import { Tooltip } from "@/ui/Tooltip";
 import type { OnMathFieldChange } from "@/ui/MathLive";
 import SmallMathField from "@/ui/SmallMathField";
 import * as u from "@/util/styles/utils.module.css";
@@ -14,6 +14,8 @@ import { IWidgetProps } from "./types";
 import styles from "./widget.module.css";
 
 const LITERAL_BOOLEAN_STRINGS = ["false", "true"];
+const COMPUTED_NOTE =
+  "Value is computed by expression. Reset to re-enable toggle switch control.";
 
 const MathBoolean: React.FC<
   IWidgetProps & {
@@ -31,10 +33,12 @@ const MathBoolean: React.FC<
     itemId,
     ref,
     placeholder,
+    "aria-describedby": describedBy,
     ...others
   } = props;
   invariant(!placeholder, "placeholder not supported by MathBoolean");
   invariant(itemId);
+  const computedNoteId = useId();
   const [shouldUseExpression, setShouldUseExpression] = useState(
     !LITERAL_BOOLEAN_STRINGS.includes(value),
   );
@@ -64,14 +68,19 @@ const MathBoolean: React.FC<
     [triggerChange],
   );
 
-  const tooltipTitle = shouldUseExpression
-    ? "Value is computed by expression. Reset to re-enable toggle switch control."
-    : "";
   const handleReset = useCallback(() => {
     triggerChange("false");
     setShouldUseExpression(false);
   }, [triggerChange]);
   const useExpression = useCallback(() => setShouldUseExpression(true), []);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  // The open tooltip describes the switch itself; don't repeat its text.
+  const switchDescribedBy = [
+    describedBy,
+    shouldUseExpression && !tooltipOpen && computedNoteId,
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
     <div
       className={classNames(u.dFlex, u.alignItemsCenter, className)}
@@ -79,18 +88,33 @@ const MathBoolean: React.FC<
       role="group"
       {...others}
     >
-      <Tooltip arrow title={tooltipTitle}>
-        <Switch
-          checked={result}
-          disabled={shouldUseExpression}
-          className={u.mr2}
-          onCheckedChange={handleSwitchChange}
-          aria-label={`Toggle property: ${label}`}
+      <Tooltip.Root
+        disabled={!shouldUseExpression}
+        onOpenChange={setTooltipOpen}
+      >
+        <Tooltip.Trigger
+          aria-describedby={switchDescribedBy || undefined}
+          render={
+            <Switch
+              checked={result}
+              disabled={shouldUseExpression}
+              className={u.mr2}
+              onCheckedChange={handleSwitchChange}
+              aria-label={`Toggle property: ${label}`}
+            />
+          }
         />
-      </Tooltip>
+        <Tooltip.Popup>{COMPUTED_NOTE}</Tooltip.Popup>
+      </Tooltip.Root>
+      {shouldUseExpression && (
+        <span id={computedNoteId} className={u.visuallyHidden}>
+          {COMPUTED_NOTE}
+        </span>
+      )}
       {shouldUseExpression && (
         <SmallMathField
           aria-label={`Math Expression for: ${label}`}
+          aria-describedby={describedBy}
           style={style}
           className={classNames(
             { [styles["has-error"]]: error },

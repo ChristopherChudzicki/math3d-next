@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { getTimedEvents } from "@math3d/test-utils";
 import { useLongAndShortClick } from "./useLongAndShortClick";
@@ -63,8 +63,7 @@ describe("useLongAndShortClick", () => {
 
   test.each([
     { key: " ", label: "Spacebar", duration: 201 },
-    { key: "Enter", label: "Enter", duration: 201 }, // longclick triggers on keyup
-    { key: "Enter", label: "Enter", duration: 500 }, // longclick triggers on repeated keydown
+    { key: "Enter", label: "Enter", duration: 500 },
   ])(
     "Long keyboard press ($label) fires longpress handler only",
     async ({ key, duration }) => {
@@ -74,4 +73,23 @@ describe("useLongAndShortClick", () => {
       expect(spies.onLongClick).toHaveBeenCalledTimes(1);
     },
   );
+
+  test("Long keyboard press fires once, while the key is held", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      const { target, spies } = setup({ threshold: 200 });
+      fireEvent.keyDown(target, { key: "Enter" });
+      vi.setSystemTime(Date.now() + 500);
+
+      fireEvent.keyDown(target, { key: "Enter", repeat: true });
+      expect(spies.onLongClick).toHaveBeenCalledOnce();
+
+      fireEvent.keyDown(target, { key: "Enter", repeat: true });
+      fireEvent.keyUp(target, { key: "Enter" });
+      expect(spies.onLongClick).toHaveBeenCalledOnce();
+      expect(spies.onClick).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

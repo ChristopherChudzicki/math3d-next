@@ -10,6 +10,7 @@ interface IWidgetProps<V extends Parseable = string> {
   label: string;
   placeholder?: string;
   "aria-labelledby"?: string;
+  "aria-describedby"?: string;
   value: V;
   onChange: OnWidgetChange<V>;
   style?: React.CSSProperties;

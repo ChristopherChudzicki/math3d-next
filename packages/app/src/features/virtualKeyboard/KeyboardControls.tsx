@@ -43,7 +43,12 @@ const ToggleKeyboardButton = () => {
         mathVirtualKeyboard.show();
         setMfEl(null);
       } else {
-        document.querySelector<HTMLElement>("math-field")?.focus();
+        // Prefer a field in the open popover, which may trap focus.
+        const dialog = document.activeElement?.closest("[role=dialog]");
+        const field =
+          dialog?.querySelector<HTMLElement>("math-field") ??
+          document.querySelector<HTMLElement>("math-field");
+        field?.focus();
         mathVirtualKeyboard.show();
       }
     } else {
@@ -52,7 +57,7 @@ const ToggleKeyboardButton = () => {
     }
   }, [autoExpand, mfEl]);
   return createPortal(
-    <div className={styles.keyboardToggle}>
+    <div className={styles.keyboardToggle} data-virtual-keyboard-control>
       <IconButton
         tabIndex={-1}
         onPointerDown={() => {
@@ -60,6 +65,8 @@ const ToggleKeyboardButton = () => {
             setMfEl(document.activeElement as HTMLElement);
           }
         }}
+        // Keep focus in the math field, so popovers around it stay open.
+        onMouseDown={(event) => event.preventDefault()}
         variant="solid"
         data-testid="toggle-keyboard-button"
         label="Enable math keyboard"

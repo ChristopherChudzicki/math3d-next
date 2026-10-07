@@ -41,14 +41,14 @@ type TimedEvents = {
 };
 const getTimedEvents = (user: UserEvent): TimedEvents => {
   return {
-    pointerPrimary: async ({ target, duration }) =>
-      act(async () => {
-        await user.pointer({ keys: "[MouseLeft>]", target }); // press the left mouse button
-        await new Promise((res) => {
-          setTimeout(res, duration);
-        });
-        await user.pointer({ keys: "[/MouseLeft]", target }); // release the left mouse button
-      }),
+    pointerPrimary: async ({ target, duration }) => {
+      // user-event (via RTL's asyncWrapper) wraps its own events in act and
+      // turns the act environment off while it runs, so only the wait goes in
+      // act here.
+      await user.pointer({ keys: "[MouseLeft>]", target }); // press the left mouse button
+      await act(() => sleep(duration));
+      await user.pointer({ keys: "[/MouseLeft]", target }); // release the left mouse button
+    },
     keypress: async ({ key, duration, target, repetitions = 3 }) =>
       act(async () => {
         invariant(

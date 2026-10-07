@@ -1,6 +1,5 @@
 import { Icon } from "@iconify/react/offline";
 import settings from "@iconify-icons/lucide/settings";
-import Popover from "@mui/material/Popover";
 import type {
   MathItem,
   MathItemConfig,
@@ -8,9 +7,9 @@ import type {
   PropertyConfig,
 } from "@math3d/mathitem-configs";
 import React, { useMemo } from "react";
-import { useToggle } from "@/util/hooks";
 import { useSelector } from "react-redux";
 import IconButton from "@/ui/IconButton";
+import { Popover } from "@/ui/Popover";
 import circleHelp from "@iconify-icons/lucide/circle-help";
 import Markdown from "@/ui/Markdown";
 import FieldWidget, { useOnWidgetChange } from "../FieldWidget";
@@ -134,53 +133,33 @@ interface SettingsPopoverProps {
   item: MathItem;
 }
 
-const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => {
-  const [visible, setVisible] = useToggle(false);
-  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
-  return (
-    <>
-      <Popover
-        anchorEl={anchorEl}
-        open={visible}
-        className={styles.container}
-        onClose={setVisible.off}
-        anchorOrigin={{
-          vertical: "center",
-          horizontal: "right",
-        }}
-        slotProps={{
-          root: {
-            // @ts-expect-error https://github.com/mui/material-ui/issues/33175
-            "data-dndkit-no-drag": true,
-          },
-        }}
-      >
-        <section
-          data-dndkit-no-drag
-          className={styles.container}
-          data-testid="more-settings-form"
+const SettingsPopover: React.FC<SettingsPopoverProps> = ({ config, item }) => (
+  <Popover.Root>
+    <Popover.Trigger
+      render={
+        <IconButton
+          size="sm"
+          label="More Settings"
+          className={styles["settings-button"]}
         >
-          <CloseButton
-            label="Close"
-            className={styles.close}
-            onClick={setVisible.off}
-          />
-          <h3 className={styles.title}>{config.label} Settings</h3>
-          <hr className={styles.divider} />
-          <SettingsForm item={item} config={config} />
-        </section>
-      </Popover>
-      <IconButton
-        ref={setAnchorEl}
-        size="sm"
-        onClick={setVisible.toggle}
-        label="More Settings"
-        className={styles["settings-button"]}
-      >
-        <Icon icon={settings} aria-hidden="true" />
-      </IconButton>
-    </>
-  );
-};
+          <Icon icon={settings} aria-hidden="true" />
+        </IconButton>
+      }
+    />
+    <Popover.Popup
+      side="right"
+      data-dndkit-no-drag
+      data-testid="more-settings-form"
+      className={styles.container}
+    >
+      <Popover.Close
+        render={<CloseButton label="Close" className={styles.close} />}
+      />
+      <Popover.Title>{config.label} Settings</Popover.Title>
+      <hr className={styles.divider} />
+      <SettingsForm item={item} config={config} />
+    </Popover.Popup>
+  </Popover.Root>
+);
 
 export default SettingsPopover;

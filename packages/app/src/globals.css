@@ -73,6 +73,8 @@ html {
   --transition-timing-function: ease;
   /* MUI's modal layer, so Base UI and MUI overlays stack alike. */
   --z-index-overlay: 1300;
+  /* Read by MathLive (default 105); its keyboard must draw over overlays. */
+  --keyboard-zindex: calc(var(--z-index-overlay) + 100);
   font-size: 14px;
   --font-size-small: 12px;
   color: var(--color-text-primary);

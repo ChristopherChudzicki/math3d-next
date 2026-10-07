@@ -1,5 +1,5 @@
 import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
-import { renderTestApp, screen, within } from "@/test_util";
+import { act, renderTestApp, screen, waitFor, within } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
 import userEvent from "@testing-library/user-event";
 import { getTimedEvents } from "@math3d/test-utils";
@@ -21,9 +21,17 @@ const setup = async <R extends MIT>(
     screen.findByRole("button", { name: "Show Graphic" });
   const findTextInput = () => screen.findByTitle("Custom Color Input");
   const getAllSwatches = () => {
-    const dialog = screen.getByRole("dialog");
-    const swatches = within(dialog).getAllByRole("button");
-    return swatches;
+    const dialog = screen.getByRole("dialog", { name: "Color" });
+    return within(dialog).getAllByRole("button", {
+      name: (name) => name !== "Close",
+    });
+  };
+  const openDialog = async () => {
+    await getTimedEvents(user).pointerPrimary({
+      target: await findButton(),
+      duration: 500,
+    });
+    return screen.findByRole("dialog", { name: "Color" });
   };
   const getItem = () => store.getState().scene.items[item.id] as MathItem<R>;
 
@@ -33,6 +41,7 @@ const setup = async <R extends MIT>(
     findButton,
     findTextInput,
     getAllSwatches,
+    openDialog,
   };
 };
 
@@ -76,6 +85,53 @@ test("clicking a swatch sets item to that color", async () => {
   const swatches = await getAllSwatches();
   await user.click(swatches[8]);
   expect(getItem().properties.color).toBe("#e74c3c");
+});
+
+test.each([
+  { key: "Enter", hold: "{Enter>8}", release: "{/Enter}" },
+  { key: "Space", hold: "[Space>8]", release: "[/Space]" },
+])(
+  "holding $key on the indicator opens the color dialog while held and leaves it open",
+  async ({ hold, release }) => {
+    const { findButton, getItem } = await setup(MIT.Point);
+    // Spaced keydowns, so the held key repeats past the long-press threshold.
+    const user = userEvent.setup({ delay: 100 });
+    const button = await findButton();
+    const { color, visible } = getItem().properties;
+    act(() => button.focus());
+
+    await user.keyboard(hold);
+    const dialog = await screen.findByRole("dialog", { name: "Color" });
+    await waitFor(() =>
+      expect(
+        within(dialog).getByRole("button", { name: "Close" }),
+      ).toHaveFocus(),
+    );
+    await user.keyboard(release);
+
+    expect(dialog).toBeInTheDocument();
+    expect(getItem().properties).toMatchObject({ color, visible });
+  },
+);
+
+test("Escape closes the color dialog", async () => {
+  const { openDialog, user } = await setup(MIT.Point);
+  const dialog = await openDialog();
+
+  await user.keyboard("{Escape}");
+
+  expect(dialog).not.toBeInTheDocument();
+});
+
+test("clicking the indicator while the color dialog is open only closes the dialog", async () => {
+  const { findButton, getItem, openDialog, user } = await setup(MIT.Point);
+  const button = await findButton();
+  const dialog = await openDialog();
+
+  await user.click(button);
+
+  expect(dialog).not.toBeInTheDocument();
+  expect(getItem().properties.visible).toBe(true);
 });
 
 test("Setting colorExpr for surfaces", async () => {

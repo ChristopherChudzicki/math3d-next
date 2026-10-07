@@ -25,6 +25,32 @@ type LongAndShortClickResult<T extends Element> = {
 };
 
 /**
+ * Ignores the rest of a held key's press: its repeats and its release.
+ * Otherwise they reach whatever a long press moved focus to (Enter activates
+ * buttons on keydown, Space on keyup).
+ */
+const swallowRestOfPress = (key: string) => {
+  const listening = new AbortController();
+  const swallow = (event: KeyboardEvent) => {
+    if (event.key !== key) return;
+    // A fresh press means the release was missed (e.g. focus left the page).
+    if (event.type === "keydown" && !event.repeat) {
+      listening.abort();
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.type === "keyup") listening.abort();
+  };
+  const options = { capture: true, signal: listening.signal };
+  window.addEventListener("keydown", swallow, options);
+  window.addEventListener("keyup", swallow, options);
+  window.addEventListener("blur", () => listening.abort(), {
+    signal: listening.signal,
+  });
+};
+
+/**
  * A wrapper around [use-long-press](https://github.com/minwork/use-long-press)
  * to help distinguish when a press is short. (I.e., a click.)
  *
@@ -93,14 +119,14 @@ export const useLongAndShortClick = <T extends Element = Element>(
           handlerCalled = false;
           keyboardDownAt = new Date().getTime();
         } else if (
-          event.repeat &&
           keyboardDownAt &&
           !handlerCalled &&
-          new Date().getTime() - (keyboardDownAt as number) > threshold
+          new Date().getTime() - keyboardDownAt > threshold
         ) {
           onLongClick(event);
           wasLongPressedRef.current = true;
           handlerCalled = true;
+          swallowRestOfPress(event.key);
         }
       },
       onKeyUp: (event: React.KeyboardEvent<T>) => {

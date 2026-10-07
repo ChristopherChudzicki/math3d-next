@@ -26,10 +26,9 @@ const setup = async (initialValue: string) => {
     pointerEventsCheck: 0,
   });
   const mathScope = store.mathScope.get();
-  const settingsTitle = await screen.findByText("Settings", { exact: false });
-  // eslint-disable-next-line testing-library/no-node-access
-  const settings = settingsTitle.closest("section");
-  assertInstanceOf(settings, HTMLElement);
+  const settings = await screen.findByRole("dialog", {
+    name: "Point Settings",
+  });
   const booleanControl = within(settings).getByLabelText("Label Visible");
 
   const getValue = () => mathScope.results.get(id("labelVisible"));
@@ -117,6 +116,18 @@ describe("When the switch is initially enabled", () => {
   test('disabled if value is not "false" or "true"', async () => {
     const { findToggle } = await setup("!false");
     expect(await findToggle()).toHaveAttribute("aria-disabled", "true");
+  });
+  test("a computed switch explains why it is disabled", async () => {
+    const { findToggle } = await setup("!false");
+    const toggle = await findToggle();
+    const note =
+      "Value is computed by expression. Reset to re-enable toggle switch control.";
+    expect(toggle).toHaveAccessibleDescription(note);
+
+    await user.hover(toggle);
+
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(note);
+    expect(toggle).toHaveAccessibleDescription(note);
   });
 });
 
