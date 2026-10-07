@@ -13,7 +13,7 @@
 }
 
 .settings-button {
-  --tone: var(--color-secondary-light);
+  --tone: var(--color-secondary);
 }
 
 .close {
