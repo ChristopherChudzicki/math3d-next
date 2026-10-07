@@ -1,11 +1,11 @@
 import React, { useMemo } from "react";
 import brokenTorusPaths, { StrokeRole } from "./brokenTorusGeometry";
 
-/** Stroke colour per role — wired to the app's brand tokens. */
+/** Stroke colour per role, all at MathBox's blue hue (OKLCH 255). */
 const ROLE_COLORS: Record<StrokeRole, string> = {
-  main: "var(--color-primary)",
-  accent: "var(--color-primary-dark)",
-  cut: "#0050b3",
+  main: "#3090ff",
+  accent: "var(--color-accent)",
+  cut: "oklch(45% 0.17 255)",
 };
 
 interface BrokenTorusProps {
