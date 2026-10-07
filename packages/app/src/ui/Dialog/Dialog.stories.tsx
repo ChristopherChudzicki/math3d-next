@@ -62,7 +62,7 @@ const FormSubmit: React.FC = () => {
           </Dialog.Body>
           <Dialog.Actions>
             <Dialog.Close render={<Button>Cancel</Button>} />
-            <Button type="submit" variant="solid" tone="accent">
+            <Button type="submit" variant="solid" tone="primary">
               Save
             </Button>
           </Dialog.Actions>
@@ -86,7 +86,7 @@ const CopyLink: React.FC = () => {
         </Dialog.Body>
         <Dialog.Actions>
           <Dialog.Close render={<Button>Done</Button>} />
-          <Button ref={copyRef} variant="solid" tone="accent">
+          <Button ref={copyRef} variant="solid" tone="primary">
             Copy link
           </Button>
         </Dialog.Actions>

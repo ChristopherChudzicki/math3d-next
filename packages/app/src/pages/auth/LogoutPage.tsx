@@ -39,7 +39,7 @@ const LogoutPage: React.FC<OverlayProps> = ({ children }) => {
           <AlertDialog.Close render={<Button>Cancel</Button>} />
           <Button
             variant="solid"
-            tone="accent"
+            tone="primary"
             loading={logout.isPending}
             onClick={handleSubmit}
           >

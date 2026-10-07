@@ -38,7 +38,7 @@ const RenameDialog: React.FC<RenameDialogProps> = ({ onClose }) => {
           <Dialog.Body>{renderFields()}</Dialog.Body>
           <Dialog.Actions>
             <Dialog.Close render={<Button>Cancel</Button>} />
-            <Button type="submit" variant="solid" tone="accent">
+            <Button type="submit" variant="solid" tone="primary">
               Rename
             </Button>
           </Dialog.Actions>

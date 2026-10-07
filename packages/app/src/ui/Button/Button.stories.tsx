@@ -6,7 +6,7 @@ import Button from "./Button";
 import type { ButtonVariant, ButtonTone, ButtonSize } from "./Button";
 
 const variants: ButtonVariant[] = ["solid", "outline", "ghost"];
-const tones: ButtonTone[] = ["neutral", "accent", "danger"];
+const tones: ButtonTone[] = ["neutral", "primary", "danger"];
 const sizes: ButtonSize[] = ["sm", "md"];
 const states = [
   "rest",
@@ -77,12 +77,12 @@ const AllButtons: React.FC = () => (
             {variants.map((variant) => (
               <React.Fragment key={variant}>
                 <td style={cell}>
-                  <Button size={size} variant={variant} tone="accent">
+                  <Button size={size} variant={variant} tone="primary">
                     Save
                   </Button>
                 </td>
                 <td style={cell}>
-                  <Button size={size} variant={variant} tone="accent">
+                  <Button size={size} variant={variant} tone="primary">
                     <Icon icon={plus} />
                     Add object
                   </Button>

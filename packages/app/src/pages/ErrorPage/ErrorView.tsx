@@ -112,7 +112,7 @@ const ErrorView: React.FC<ErrorViewProps> = ({
             <p className={styles.body}>{copy.body}</p>
           </div>
           <div className={styles.actions}>
-            <Button variant="solid" tone="accent" onClick={onReload}>
+            <Button variant="solid" tone="primary" onClick={onReload}>
               <Icon icon={rotateCcw} aria-hidden="true" />
               {copy.reload}
             </Button>

@@ -31,7 +31,7 @@
 }
 
 .root[data-checked] {
-  background-color: var(--color-accent);
+  background-color: var(--color-primary);
 }
 
 .root:focus-visible {

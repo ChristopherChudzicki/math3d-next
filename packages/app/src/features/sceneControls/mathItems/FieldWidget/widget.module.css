@@ -62,8 +62,8 @@
   border: none;
   background-image: linear-gradient(
     to top,
-    var(--color-accent),
-    var(--color-accent) 2pt,
+    var(--color-primary),
+    var(--color-primary) 2pt,
     transparent 2pt,
     transparent
   );

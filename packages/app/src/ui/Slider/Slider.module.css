@@ -1,6 +1,6 @@
 .root {
   --thumb-size: 12px;
-  --halo: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  --halo: color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
 .control {
@@ -24,14 +24,14 @@
 
 .indicator {
   border-radius: inherit;
-  background-color: var(--color-accent);
+  background-color: var(--color-primary);
 }
 
 .thumb {
   width: var(--thumb-size);
   height: var(--thumb-size);
   border-radius: 50%;
-  background-color: var(--color-accent);
+  background-color: var(--color-primary);
 }
 
 .thumb:has(:focus-visible) {

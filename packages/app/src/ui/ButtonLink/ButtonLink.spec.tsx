@@ -12,7 +12,7 @@ test("with `to`, is a link that navigates through the router", async () => {
         <Route
           path="/start"
           element={
-            <ButtonLink to="/next" ref={ref} variant="solid" tone="accent">
+            <ButtonLink to="/next" ref={ref} variant="solid" tone="primary">
               Next
             </ButtonLink>
           }

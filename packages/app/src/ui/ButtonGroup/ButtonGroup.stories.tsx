@@ -47,22 +47,22 @@ const AllButtonGroups: React.FC = () => (
           <th style={heading}>{variant}</th>
           <td style={cell}>
             <ButtonGroup>
-              <Button variant={variant} tone="accent">
+              <Button variant={variant} tone="primary">
                 Save
               </Button>
-              <IconButton variant={variant} tone="accent" label="More actions">
+              <IconButton variant={variant} tone="primary" label="More actions">
                 <Icon icon={chevronDown} aria-hidden="true" />
               </IconButton>
             </ButtonGroup>
           </td>
           <td style={cell}>
             <ButtonGroup>
-              <Button variant={variant} tone="accent" loading>
+              <Button variant={variant} tone="primary" loading>
                 Saving...
               </Button>
               <IconButton
                 variant={variant}
-                tone="accent"
+                tone="primary"
                 label="More actions"
                 disabled
               >
@@ -72,12 +72,12 @@ const AllButtonGroups: React.FC = () => (
           </td>
           <td style={cell}>
             <ButtonGroup>
-              <Button variant={variant} tone="accent">
+              <Button variant={variant} tone="primary">
                 Save
               </Button>
               <IconButton
                 variant={variant}
-                tone="accent"
+                tone="primary"
                 label="More actions"
                 data-pseudo="hover"
               >

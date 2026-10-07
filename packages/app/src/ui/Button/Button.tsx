@@ -4,7 +4,7 @@ import { Button as BaseButton } from "@base-ui/react/button";
 import * as styles from "./Button.module.css";
 
 type ButtonVariant = "solid" | "outline" | "ghost";
-type ButtonTone = "neutral" | "accent" | "danger";
+type ButtonTone = "neutral" | "primary" | "danger";
 type ButtonSize = "sm" | "md";
 
 type ButtonStyleProps = {

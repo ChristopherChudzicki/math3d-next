@@ -19,7 +19,7 @@
 }
 
 .current {
-  border-color: var(--color-accent);
+  border-color: var(--color-primary);
 }
 
 /* The placeholder; a thumbnail, once loaded, covers it. */
@@ -114,7 +114,7 @@
   position: absolute;
   top: 0.5rem;
   left: 0.5rem;
-  background-color: var(--color-accent);
+  background-color: var(--color-primary);
   color: white;
   /* It paints above the stretched link; let clicks through to it. */
   pointer-events: none;

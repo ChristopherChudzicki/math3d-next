@@ -32,7 +32,7 @@
 }
 
 .tab[data-active]::after {
-  background-color: var(--color-accent);
+  background-color: var(--color-primary);
 }
 
 @media (hover: hover) {
