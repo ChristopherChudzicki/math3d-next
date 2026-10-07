@@ -44,9 +44,6 @@ textarea {
 body,
 html {
   --font-family-monospace: "roboto mono", monospace;
-  --color-primary-dark: rgb(16, 100, 178);
-  --color-primary: rgb(24, 144, 255);
-  --color-primary-light: rgb(186, 231, 255);
 
   --color-secondary-lightest: rgb(250, 250, 250);
   --color-secondary-lighter: rgb(235, 235, 235);
