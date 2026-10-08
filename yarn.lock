@@ -5312,7 +5312,7 @@ __metadata:
     "@playwright/test": "npm:^1.63.0"
     "@types/node": "npm:^24.0.0"
     "@types/three": "npm:^0.146.0"
-    envalid: "npm:^8.0.0"
+    envalid: "npm:^8.2.0"
     eslint: "npm:^8.57.1"
     mathlive: "npm:^0.110.0"
     sharp: "npm:^0.35.5"
@@ -6818,12 +6818,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"envalid@npm:^8.0.0":
-  version: 8.1.1
-  resolution: "envalid@npm:8.1.1"
+"envalid@npm:^8.2.0":
+  version: 8.2.0
+  resolution: "envalid@npm:8.2.0"
   dependencies:
     tslib: "npm:2.8.1"
-  checksum: 10/19ff9f5ac2c4d75205af7c635f45683d991a92f73f77693482f57614c16f3e224312922eb9cd7df9a099300a62ca28ad0708d21754f15d0cbb7081e4ca539343
+  checksum: 10/46bb91c8a0cfe3755d17be8c4e82a5872abf4679dafe3659883c74a205d39b7317304b3cc7a5e5589fadb48bf4ccfbad2919616d86d392a1b7cb06ba3b5abf1e
   languageName: node
   linkType: hard
 
