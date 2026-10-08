@@ -1,8 +1,7 @@
 import tqdm
 from django.core.management.base import BaseCommand
-
-from scenes.models import LegacyScene
 from scenes.legacy_scene_utils.migrate_scene import migrate_scene
+from scenes.models import LegacyScene
 
 
 class Command(BaseCommand):

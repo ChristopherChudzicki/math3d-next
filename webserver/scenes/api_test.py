@@ -4,10 +4,10 @@ from unittest import mock
 from urllib.parse import parse_qs, urlsplit
 
 import pytest
+from authentication.factories import CustomUserFactory
 from django.core.exceptions import ValidationError
 from django.test import Client
 
-from authentication.factories import CustomUserFactory
 from scenes.factories import SceneFactory
 from scenes.legacy_scene_utils.migrate_scene import migrate_scene
 from scenes.models import LegacyScene, Scene
