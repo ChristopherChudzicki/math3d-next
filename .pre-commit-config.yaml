@@ -51,6 +51,9 @@ repos:
     rev: v1.7.12.25
     hooks:
       - id: actionlint
+        # Same as the hook's own; Renovate updates additional_dependencies
+        # only when the hook declares its language.
+        language: python
         # actionlint lints `run:` blocks only if shellcheck is on PATH, and
         # otherwise skips them silently.
         additional_dependencies: [shellcheck-py==0.11.0.1]
