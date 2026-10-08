@@ -47,6 +47,13 @@ repos:
     hooks:
       - id: shellcheck
         args: ["--severity=warning"]
+  - repo: https://github.com/Mateusz-Grzelinski/actionlint-py
+    rev: v1.7.12.25
+    hooks:
+      - id: actionlint
+        # actionlint lints `run:` blocks only if shellcheck is on PATH, and
+        # otherwise skips them silently.
+        additional_dependencies: [shellcheck-py==0.11.0.1]
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
     rev: v1.30.1
     hooks:
