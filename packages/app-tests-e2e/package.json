@@ -19,7 +19,7 @@
     "@playwright/test": "^1.63.0",
     "@types/node": "^24.0.0",
     "@types/three": "^0.146.0",
-    "envalid": "^8.0.0",
+    "envalid": "^8.2.0",
     "eslint": "^8.57.1",
     "mathlive": "^0.110.0",
     "sharp": "^0.35.5",
