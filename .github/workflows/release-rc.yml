@@ -55,31 +55,33 @@ jobs:
             SEQUENCE=1
           else
             # Extract sequence number and increment
-            SEQUENCE=$(echo $LATEST_RC | sed "s/rc\/$DATE\.//")
+            SEQUENCE=$(echo "$LATEST_RC" | sed "s/rc\/$DATE\.//")
             SEQUENCE=$((SEQUENCE + 1))
           fi
 
           VERSION="$DATE.$SEQUENCE"
           RC_TAG="rc/$VERSION"
 
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "rc_tag=$RC_TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "rc_tag=$RC_TAG" >> "$GITHUB_OUTPUT"
           echo "Generated version: $VERSION"
           echo "RC tag: $RC_TAG"
 
       - name: Display version in summary
         run: |
-          echo "# 🎯 RC Release Version" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** \`${{ steps.generate_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**RC Tag:** \`${{ steps.generate_version.outputs.rc_tag }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Release:** [View Pre-release](https://github.com/${{ github.repository }}/releases/tag/${{ steps.generate_version.outputs.rc_tag }})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "---" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Next step:** Review the pre-release and artifacts, then promote to production." >> $GITHUB_STEP_SUMMARY
+          {
+            echo "# 🎯 RC Release Version"
+            echo ""
+            echo "**Version:** \`${{ steps.generate_version.outputs.version }}\`"
+            echo ""
+            echo "**RC Tag:** \`${{ steps.generate_version.outputs.rc_tag }}\`"
+            echo ""
+            echo "**Release:** [View Pre-release](https://github.com/${{ github.repository }}/releases/tag/${{ steps.generate_version.outputs.rc_tag }})"
+            echo ""
+            echo "---"
+            echo ""
+            echo "**Next step:** Review the pre-release and artifacts, then promote to production."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Create RC tag
         run: |
@@ -91,9 +93,9 @@ jobs:
         run: |
           LAST_PROD_TAG=$(git tag -l "v*" | sort -V | tail -n 1)
           if [ -z "$LAST_PROD_TAG" ]; then
-            echo "last_tag=" >> $GITHUB_OUTPUT
+            echo "last_tag=" >> "$GITHUB_OUTPUT"
           else
-            echo "last_tag=$LAST_PROD_TAG" >> $GITHUB_OUTPUT
+            echo "last_tag=$LAST_PROD_TAG" >> "$GITHUB_OUTPUT"
           fi
           echo "Last production tag: $LAST_PROD_TAG"
 
