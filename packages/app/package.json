@@ -100,7 +100,7 @@
     "concurrently": "^9.2.4",
     "eslint": "^8.57.1",
     "gray-matter": "^4.0.3",
-    "htmlparser2": "^10.0.0",
+    "htmlparser2": "^10.1.0",
     "identity-obj-proxy": "3.0.0",
     "jsdom": "^26.1.0",
     "msw": "^2.0.14",
