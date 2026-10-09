@@ -7,7 +7,7 @@ import {
   useLayerLiveRef,
   useLayerLocation,
   useLayerSearchParams,
-} from "./OverlayLayer";
+} from "./UrlLayer";
 
 export type OverlayName = "logout" | "delete-account" | "scenes";
 

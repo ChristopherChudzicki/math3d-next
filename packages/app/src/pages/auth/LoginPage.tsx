@@ -10,8 +10,7 @@ import Alert from "@/ui/Alert";
 import { Dialog } from "@/ui/Dialog";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import type { SignInHistoryState } from "@/features/overlays/useSignInDialog";
-import type { OverlayProps } from "@/features/overlays/useOverlay";
-import { useLayerLocation } from "@/features/overlays/OverlayLayer";
+import { useLayerLocation } from "@/features/overlays/UrlLayer";
 import styles from "./LoginPage.module.css";
 
 const LoginContent: React.FC<{ close: () => void }> = ({ close }) => {
@@ -66,7 +65,7 @@ const LoginContent: React.FC<{ close: () => void }> = ({ close }) => {
 };
 
 /** The sign-in dialog. `open` follows the URL's `?signin` param. */
-const LoginPage: React.FC<Omit<OverlayProps, "children">> = ({ open }) => {
+const LoginPage: React.FC<{ open: boolean }> = ({ open }) => {
   const { close } = useSignInDialog();
   return (
     <Dialog.Root

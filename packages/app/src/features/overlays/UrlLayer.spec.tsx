@@ -3,7 +3,7 @@ import { test, expect } from "vitest";
 import { render, act } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider, useLocation } from "react-router";
 import { useOverlay } from "./useOverlay";
-import { OverlayLayer, useLayerLocation } from "./OverlayLayer";
+import { UrlLayer, useLayerLocation } from "./UrlLayer";
 
 /**
  * Mounts a probe inside a layer that is open while `?overlay=` is set, the way
@@ -24,11 +24,9 @@ const renderLayer = (initialEntries: string[]) => {
   const Layer: React.FC = () => {
     api.open = useOverlay().open;
     return (
-      <OverlayLayer
-        open={new URLSearchParams(useLocation().search).has("overlay")}
-      >
+      <UrlLayer open={new URLSearchParams(useLocation().search).has("overlay")}>
         <Probe />
-      </OverlayLayer>
+      </UrlLayer>
     );
   };
   const router = createMemoryRouter([{ path: "*", element: <Layer /> }], {

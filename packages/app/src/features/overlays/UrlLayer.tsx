@@ -14,8 +14,9 @@ type Layer = { open: boolean; location: Location };
 const LayerContext = createContext<Layer | null>(null);
 
 /**
- * The location an overlay reads. While it closes, that is the location it last
- * had open, so its content doesn't react to params that already left the URL.
+ * The location a layer's dialog reads. While it closes, that is the location
+ * it last had open, so its content doesn't react to params that already left
+ * the URL.
  */
 export const useLayerLocation = (): Location => {
   const live = useLocation();
@@ -27,12 +28,12 @@ export const useLayerSearchParams = (): URLSearchParams => {
   return useMemo(() => new URLSearchParams(search), [search]);
 };
 
-/** Whether the surrounding overlay is open. True outside any overlay. */
+/** Whether the surrounding layer is open. True outside any layer. */
 export const useLayerOpen = (): boolean =>
   useContext(LayerContext)?.open ?? true;
 
 /**
- * True while the surrounding overlay is open and the caller is mounted; a ref so
+ * True while the surrounding layer is open and the caller is mounted; a ref so
  * stale callbacks read the current value. Set before any passive effect runs.
  */
 export const useLayerLiveRef = () => {
@@ -47,17 +48,14 @@ export const useLayerLiveRef = () => {
   return live;
 };
 
-type OverlayLayerProps = { open: boolean; children: React.ReactNode };
+type UrlLayerProps = { open: boolean; children: React.ReactNode };
 
 /**
- * Wraps one overlay, which stays mounted while closed so Base UI can animate
- * it in and out. Layers nest: a layer inside another reads its parent's
- * location.
+ * Wraps one dialog whose open state lives in the URL — an `?overlay=` entry or
+ * sign-in. It stays mounted while closed so Base UI can animate it in and out.
+ * Layers nest: a layer inside another reads its parent's location.
  */
-export const OverlayLayer: React.FC<OverlayLayerProps> = ({
-  open,
-  children,
-}) => {
+export const UrlLayer: React.FC<UrlLayerProps> = ({ open, children }) => {
   const location = useLayerLocation();
   const [frozen, setFrozen] = useState(location);
   if (open && frozen !== location) setFrozen(location);

@@ -2,7 +2,7 @@ import { useCallback, useLayoutEffect, useRef } from "react";
 import type { RefObject } from "react";
 import { useNavigate } from "react-router";
 import type { Location } from "react-router";
-import { useLayerOpen } from "./OverlayLayer";
+import { useLayerOpen } from "./UrlLayer";
 
 type Layer = {
   /** Whether the app pushed the current history entry to open this layer. */

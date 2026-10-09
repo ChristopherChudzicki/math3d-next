@@ -4,7 +4,7 @@ import { Tabs } from "@/ui/Tabs";
 import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import type { OverlayProps } from "@/features/overlays/useOverlay";
-import { useLayerSearchParams } from "@/features/overlays/OverlayLayer";
+import { useLayerSearchParams } from "@/features/overlays/UrlLayer";
 import ExamplesListing from "./ExamplesListing";
 import MyScenes from "./MyScenes";
 import { ListType, OPEN_SCENES_BUTTON_ID } from "./constants";

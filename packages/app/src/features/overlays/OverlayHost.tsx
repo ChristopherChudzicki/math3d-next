@@ -4,16 +4,12 @@ import LoginPage from "@/pages/auth/LoginPage";
 import { OVERLAYS } from "./registry";
 import { SIGN_IN_PARAM } from "./useSignInDialog";
 import type { OverlayName } from "./useOverlay";
-import {
-  OverlayLayer,
-  useLayerOpen,
-  useLayerSearchParams,
-} from "./OverlayLayer";
+import { UrlLayer, useLayerOpen, useLayerSearchParams } from "./UrlLayer";
 
 const SignInLayer: React.FC<{ open: boolean }> = ({ open }) => (
-  <OverlayLayer open={open}>
+  <UrlLayer open={open}>
     <LoginPage open={open} />
-  </OverlayLayer>
+  </UrlLayer>
 );
 
 /** Sign-in stacked inside an overlay; it closes when the overlay does. */
@@ -44,11 +40,11 @@ const OverlayHost: React.FC = () => {
   return (
     <>
       {OVERLAY_ENTRIES.map(([key, Overlay]) => (
-        <OverlayLayer key={key} open={active === key}>
+        <UrlLayer key={key} open={active === key}>
           <Overlay open={active === key}>
             <NestedSignIn />
           </Overlay>
-        </OverlayLayer>
+        </UrlLayer>
       ))}
       <SignInLayer open={search.has(SIGN_IN_PARAM) && !active} />
     </>
