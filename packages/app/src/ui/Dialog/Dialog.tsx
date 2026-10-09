@@ -4,13 +4,14 @@ import { Dialog as BaseDialog } from "@base-ui/react/dialog";
 import { Icon } from "@iconify/react/offline";
 import xIcon from "@iconify-icons/lucide/x";
 import IconButton from "../IconButton";
+import renderPopup from "./renderPopup";
 import * as styles from "./Dialog.module.css";
 
 const { Root, Trigger, Close } = BaseDialog;
 
 type DialogSize = "sm" | "md" | "lg";
 
-type PopupProps = Omit<BaseDialog.Popup.Props, "className"> & {
+type PopupProps = Omit<BaseDialog.Popup.Props, "className" | "render"> & {
   /** Width: sm for confirmations, md for forms, lg for browsing. */
   size?: DialogSize;
   className?: string;
@@ -27,6 +28,7 @@ const Popup: React.FC<PopupProps> = ({ size = "md", className, ...others }) => (
     <BaseDialog.Viewport className={styles.viewport}>
       <BaseDialog.Popup
         {...others}
+        render={renderPopup}
         className={classNames(styles.popup, styles[size], className)}
       />
     </BaseDialog.Viewport>

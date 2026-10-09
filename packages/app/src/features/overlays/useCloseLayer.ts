@@ -1,5 +1,8 @@
-import { useCallback, useEffect, useRef } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { useCallback, useLayoutEffect, useRef } from "react";
+import type { RefObject } from "react";
+import { useNavigate } from "react-router";
+import type { Location } from "react-router";
+import { useLayerOpen } from "./OverlayLayer";
 
 type Layer = {
   /** Whether the app pushed the current history entry to open this layer. */
@@ -8,12 +11,21 @@ type Layer = {
   params: readonly string[];
   /** History-state keys the layer owns, dropped when it closes in place. */
   stateKeys: readonly string[];
+  /** The caller's layer location and search params, and its live ref. */
+  location: Location;
+  search: URLSearchParams;
+  live: RefObject<boolean>;
 };
 
 /** Closes a dialog that lives in the URL: `?overlay=`, or `?signin` above it. */
-export const useCloseLayer = ({ pushed, params, stateKeys }: Layer) => {
-  const [search] = useSearchParams();
-  const location = useLocation();
+export const useCloseLayer = ({
+  pushed,
+  params,
+  stateKeys,
+  location,
+  search,
+  live,
+}: Layer) => {
   const navigate = useNavigate();
 
   // Consumers close from more than one place — LogoutPage both awaits its
@@ -21,24 +33,20 @@ export const useCloseLayer = ({ pushed, params, stateKeys }: Layer) => {
   // entirely. Keyed on the entry rather than a bare flag so a later layer
   // still closes, and read through a ref so a stale closure sees it too.
   const closedKey = useRef<string | null>(null);
-
-  // OverlayHost unmounts a layer's component when its param changes, so a
-  // consumer's `close` can outlive it — a mutation can resolve after Back
-  // unmounted its dialog.
-  const mounted = useRef(true);
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
+  // Overlays stay mounted while closed, so the guard has to forget a close once
+  // the layer reopens: Forward returns to the very entry it recorded.
+  const layerOpen = useLayerOpen();
+  useLayoutEffect(() => {
+    if (layerOpen) closedKey.current = null;
+  }, [layerOpen]);
 
   return useCallback(() => {
-    // Every entry this closure knows about belongs to a component that is gone,
-    // so navigating would act on the user's current one instead: `navigate(-1)`
-    // pops the layer they have open now, and the deep-link branch rewrites
-    // today's URL from a stale `search`.
-    if (!mounted.current) return;
+    // A closed overlay's entry is no longer the current one — a mutation can
+    // resolve after Back closed its dialog — so navigating would act on the
+    // user's current entry instead: `navigate(-1)` pops whatever they have
+    // open now, and the deep-link branch rewrites today's URL from a stale
+    // `search`.
+    if (!live.current) return;
     if (closedKey.current === location.key) return;
     closedKey.current = location.key;
     if (pushed) {
@@ -70,5 +78,6 @@ export const useCloseLayer = ({ pushed, params, stateKeys }: Layer) => {
     pushed,
     params,
     stateKeys,
+    live,
   ]);
 };

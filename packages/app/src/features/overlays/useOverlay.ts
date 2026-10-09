@@ -1,16 +1,23 @@
 // Use `react-router` (not `react-router-dom`) to match the repo convention (21 src files).
 import type React from "react";
 import { useCallback } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
 import { useCloseLayer } from "./useCloseLayer";
+import {
+  useLayerLiveRef,
+  useLayerLocation,
+  useLayerSearchParams,
+} from "./OverlayLayer";
 
 export type OverlayName = "logout" | "delete-account" | "scenes";
 
 /**
- * `children` is a dialog stacked above the overlay, such as sign-in. Render it
- * inside the popup so Base UI nests it; sibling modals each aria-hide the other.
+ * `open` comes from the URL; the overlay stays mounted while closed so it can
+ * animate. `children` is a dialog stacked above the overlay, such as sign-in.
+ * Render it inside the popup so Base UI nests it; sibling modals each aria-hide
+ * the other.
  */
-export type OverlayProps = { children?: React.ReactNode };
+export type OverlayProps = { open: boolean; children?: React.ReactNode };
 
 /**
  * Marks a history entry `open` pushed, so `close` knows to pop it rather than
@@ -24,15 +31,17 @@ export const OVERLAY_PARAMS = ["overlay", "list"] as const;
 const STATE_KEYS = ["overlayPushed"] as const;
 
 export const useOverlay = () => {
-  const [search] = useSearchParams();
-  const location = useLocation();
+  const search = useLayerSearchParams();
+  const location = useLayerLocation();
   const navigate = useNavigate();
-  const current = search.get("overlay");
+  const live = useLayerLiveRef();
   const pushed =
     (location.state as OverlayHistoryState)?.overlayPushed ?? false;
 
   const open = useCallback(
     (name: OverlayName, companion?: { list?: string }) => {
+      // A closed overlay's location is stale; see useCloseLayer.
+      if (!live.current) return;
       const next = new URLSearchParams(search);
       const switching = next.has("overlay");
       next.set("overlay", name);
@@ -49,14 +58,17 @@ export const useOverlay = () => {
         },
       );
     },
-    [search, location.hash, location.state, navigate, pushed],
+    [search, location.hash, location.state, navigate, pushed, live],
   );
 
   const close = useCloseLayer({
     pushed,
     params: OVERLAY_PARAMS,
     stateKeys: STATE_KEYS,
+    location,
+    search,
+    live,
   });
 
-  return { current, open, close } as const;
+  return { open, close } as const;
 };

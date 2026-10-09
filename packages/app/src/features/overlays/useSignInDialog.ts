@@ -1,9 +1,14 @@
 import { useCallback } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
 import type { SignInError } from "@/features/auth/signInErrors";
 import { OVERLAY_PARAMS } from "./useOverlay";
 import type { OverlayHistoryState } from "./useOverlay";
 import { useCloseLayer } from "./useCloseLayer";
+import {
+  useLayerLiveRef,
+  useLayerLocation,
+  useLayerSearchParams,
+} from "./OverlayLayer";
 
 /**
  * `?signin` opens the sign-in dialog above any `?overlay=`, so the page it
@@ -21,9 +26,10 @@ const PARAMS = [SIGN_IN_PARAM] as const;
 const STATE_KEYS = ["signInPushed", "signInError"] as const;
 
 export const useSignInDialog = () => {
-  const [search] = useSearchParams();
-  const location = useLocation();
+  const search = useLayerSearchParams();
+  const location = useLayerLocation();
   const navigate = useNavigate();
+  const live = useLayerLiveRef();
   const state = location.state as
     | (SignInHistoryState & OverlayHistoryState)
     | null;
@@ -35,6 +41,8 @@ export const useSignInDialog = () => {
    */
   const open = useCallback(
     (options?: { replaceOverlay?: boolean }) => {
+      // A closed overlay's location is stale; see useCloseLayer.
+      if (!live.current) return;
       const next = new URLSearchParams(search);
       next.set(SIGN_IN_PARAM, "");
       if (options?.replaceOverlay) {
@@ -52,14 +60,17 @@ export const useSignInDialog = () => {
         { replace: true, state: { ...rest, signInPushed: overlayPushed } },
       );
     },
-    [search, location.hash, state, navigate],
+    [search, location.hash, state, navigate, live],
   );
 
   const close = useCloseLayer({
     pushed,
     params: PARAMS,
     stateKeys: STATE_KEYS,
+    location,
+    search,
+    live,
   });
 
-  return { isOpen: search.has(SIGN_IN_PARAM), open, close } as const;
+  return { open, close } as const;
 };

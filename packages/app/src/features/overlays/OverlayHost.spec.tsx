@@ -1,5 +1,20 @@
+import React from "react";
 import { test, expect } from "vitest";
-import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import { render } from "@testing-library/react";
+import { QueryClient } from "@tanstack/react-query";
+import { createMemoryRouter } from "react-router";
+import { mockAuth, seedDb } from "@math3d/mock-api";
+import AppProviders from "@/AppProviders";
+import { getStore } from "@/store/store";
+import {
+  renderTestApp,
+  screen,
+  user,
+  waitFor,
+  waitForAppReady,
+  within,
+} from "@/test_util";
+import OverlayHost from "./OverlayHost";
 
 test("no overlay param renders no dialog", () => {
   renderTestApp("/");
@@ -12,17 +27,17 @@ test("unknown overlay value renders nothing and is left in the URL", () => {
   expect(location.current.search).toContain("overlay=bogus");
 });
 
-// `constructor` resolves to a function and `__proto__` to an object via the
-// prototype chain — a bare `OVERLAYS[name]` would render either and crash the
-// app to the branded ErrorPage. They must be treated like any other unknown value.
+// `constructor` and `__proto__` are on every object's prototype chain; an
+// overlay value naming one must still count as unknown, or it would keep the
+// top-level sign-in from opening.
 test.each(["constructor", "__proto__"])(
-  "prototype-chain overlay value %s renders nothing and is left untouched",
-  (value) => {
-    const { location } = renderTestApp(`/?overlay=${value}`);
-    expect(screen.queryByRole("dialog")).toBe(null);
+  "prototype-chain overlay value %s opens nothing and leaves sign-in free",
+  async (value) => {
+    const { location } = renderTestApp(`/?overlay=${value}&signin`);
+    expect(
+      await screen.findByRole("dialog", { name: "Sign in" }),
+    ).toBeInTheDocument();
     expect(location.current.search).toContain(`overlay=${value}`);
-    // The root errorElement (branded ErrorPage) must not have been triggered.
-    expect(screen.queryByText("We hit a discontinuity.")).toBe(null);
   },
 );
 
@@ -54,4 +69,27 @@ test("Escape closes sign-in and leaves the overlay beneath it open", async () =>
   expect(
     await screen.findByRole("dialog", { name: "Scenes" }),
   ).toBeInTheDocument();
+});
+
+test("Shut overlays run no queries and render no dialogs", async () => {
+  mockAuth.setCurrentUser(seedDb.withUser().id);
+  const queryClient = new QueryClient();
+  const router = createMemoryRouter([{ path: "*", element: <OverlayHost /> }]);
+  render(
+    <AppProviders
+      queryClient={queryClient}
+      store={getStore()}
+      router={router}
+    />,
+  );
+
+  await waitForAppReady(queryClient);
+  // Session state is the only query an overlay may run while shut.
+  const queryKeys = queryClient
+    .getQueryCache()
+    .getAll()
+    .map((q) => q.queryKey);
+  expect(queryKeys.filter(([key]) => key !== "me")).toEqual([]);
+  expect(screen.queryAllByRole("dialog", { hidden: true })).toEqual([]);
+  expect(screen.queryAllByRole("alertdialog", { hidden: true })).toEqual([]);
 });

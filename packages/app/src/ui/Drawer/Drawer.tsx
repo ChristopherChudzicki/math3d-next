@@ -1,12 +1,13 @@
 import React from "react";
 import classNames from "classnames";
 import { Dialog as BaseDialog } from "@base-ui/react/dialog";
+import renderPopup from "../Dialog/renderPopup";
 import * as styles from "./Drawer.module.css";
 
 type DrawerSide = "left" | "right";
 type DrawerSize = "md" | "lg";
 
-type PopupProps = Omit<BaseDialog.Popup.Props, "className"> & {
+type PopupProps = Omit<BaseDialog.Popup.Props, "className" | "render"> & {
   /** The screen edge the drawer slides in from. */
   side?: DrawerSide;
   /** Width: md for a form or a list, lg for browsing. */
@@ -33,6 +34,7 @@ const Popup: React.FC<PopupProps> = ({
     >
       <BaseDialog.Popup
         {...others}
+        render={renderPopup}
         className={classNames(styles.popup, styles[size], className)}
       />
     </BaseDialog.Viewport>
