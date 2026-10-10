@@ -10,12 +10,12 @@ import Alert from "@/ui/Alert";
 import { Dialog } from "@/ui/Dialog";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import type { SignInHistoryState } from "@/features/overlays/useSignInDialog";
-import { useLayerLocation } from "@/features/overlays/UrlLayer";
+import { useUrlLayerLocation } from "@/features/overlays/UrlLayer";
 import styles from "./LoginPage.module.css";
 
 const LoginContent: React.FC<{ close: () => void }> = ({ close }) => {
   const isAuthenticated = useAuthStatus();
-  const signInError = (useLayerLocation().state as SignInHistoryState)
+  const signInError = (useUrlLayerLocation().state as SignInHistoryState)
     ?.signInError;
 
   useEffect(() => {

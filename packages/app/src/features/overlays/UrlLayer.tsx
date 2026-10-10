@@ -9,35 +9,35 @@ import React, {
 import { useLocation } from "react-router";
 import type { Location } from "react-router";
 
-type Layer = { open: boolean; location: Location };
+type UrlLayerValue = { open: boolean; location: Location };
 
-const LayerContext = createContext<Layer | null>(null);
+const UrlLayerContext = createContext<UrlLayerValue | null>(null);
 
 /**
  * The location a layer's dialog reads. While it closes, that is the location
  * it last had open, so its content doesn't react to params that already left
  * the URL.
  */
-export const useLayerLocation = (): Location => {
+export const useUrlLayerLocation = (): Location => {
   const live = useLocation();
-  return useContext(LayerContext)?.location ?? live;
+  return useContext(UrlLayerContext)?.location ?? live;
 };
 
-export const useLayerSearchParams = (): URLSearchParams => {
-  const { search } = useLayerLocation();
+export const useUrlLayerSearchParams = (): URLSearchParams => {
+  const { search } = useUrlLayerLocation();
   return useMemo(() => new URLSearchParams(search), [search]);
 };
 
 /** Whether the surrounding layer is open. True outside any layer. */
-export const useLayerOpen = (): boolean =>
-  useContext(LayerContext)?.open ?? true;
+export const useUrlLayerOpen = (): boolean =>
+  useContext(UrlLayerContext)?.open ?? true;
 
 /**
  * True while the surrounding layer is open and the caller is mounted; a ref so
  * stale callbacks read the current value. Set before any passive effect runs.
  */
-export const useLayerLiveRef = () => {
-  const open = useLayerOpen();
+export const useUrlLayerLiveRef = () => {
+  const open = useUrlLayerOpen();
   const live = useRef(open);
   useLayoutEffect(() => {
     live.current = open;
@@ -56,7 +56,7 @@ type UrlLayerProps = { open: boolean; children: React.ReactNode };
  * Layers nest: a layer inside another reads its parent's location.
  */
 export const UrlLayer: React.FC<UrlLayerProps> = ({ open, children }) => {
-  const location = useLayerLocation();
+  const location = useUrlLayerLocation();
   const [frozen, setFrozen] = useState(location);
   if (open && frozen !== location) setFrozen(location);
   const value = useMemo(
@@ -64,6 +64,8 @@ export const UrlLayer: React.FC<UrlLayerProps> = ({ open, children }) => {
     [open, location, frozen],
   );
   return (
-    <LayerContext.Provider value={value}>{children}</LayerContext.Provider>
+    <UrlLayerContext.Provider value={value}>
+      {children}
+    </UrlLayerContext.Provider>
   );
 };

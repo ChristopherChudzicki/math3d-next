@@ -4,7 +4,7 @@ import LoginPage from "@/pages/auth/LoginPage";
 import { OVERLAYS } from "./registry";
 import { SIGN_IN_PARAM } from "./useSignInDialog";
 import type { OverlayName } from "./useOverlay";
-import { UrlLayer, useLayerOpen, useLayerSearchParams } from "./UrlLayer";
+import { UrlLayer, useUrlLayerOpen, useUrlLayerSearchParams } from "./UrlLayer";
 
 const SignInLayer: React.FC<{ open: boolean }> = ({ open }) => (
   <UrlLayer open={open}>
@@ -14,10 +14,10 @@ const SignInLayer: React.FC<{ open: boolean }> = ({ open }) => (
 
 /** Sign-in stacked inside an overlay; it closes when the overlay does. */
 const NestedSignIn: React.FC = () => {
-  const layerOpen = useLayerOpen();
+  const layerOpen = useUrlLayerOpen();
   return (
     <SignInLayer
-      open={useLayerSearchParams().has(SIGN_IN_PARAM) && layerOpen}
+      open={useUrlLayerSearchParams().has(SIGN_IN_PARAM) && layerOpen}
     />
   );
 };

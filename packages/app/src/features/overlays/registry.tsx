@@ -13,7 +13,7 @@ import type { OverlayName, OverlayProps } from "./useOverlay";
  * inside `Popup` that holds everything else. Content exists only while the
  * overlay is open or closing, so its queries never run while it is shut, and
  * its effects need no `open` check. Content reads the URL through
- * `useLayerSearchParams`/`useLayerLocation`, which hold still while it closes.
+ * `useUrlLayerSearchParams`/`useUrlLayerLocation`, which hold still while it closes.
  * `useAuthStatus` may sit in a shell: it is session state every route already
  * loads, not overlay data.
  */

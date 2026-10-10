@@ -3,7 +3,7 @@ import { test, expect } from "vitest";
 import { render, act } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider, useLocation } from "react-router";
 import { useOverlay } from "./useOverlay";
-import { UrlLayer, useLayerLocation } from "./UrlLayer";
+import { UrlLayer, useUrlLayerLocation } from "./UrlLayer";
 
 /**
  * Mounts a probe inside a layer that is open while `?overlay=` is set, the way
@@ -14,14 +14,14 @@ const renderLayer = (initialEntries: string[]) => {
   const api: {
     open: ReturnType<typeof useOverlay>["open"] | null;
     close: ReturnType<typeof useOverlay>["close"] | null;
-    location: ReturnType<typeof useLayerLocation> | null;
+    location: ReturnType<typeof useUrlLayerLocation> | null;
   } = { open: null, close: null, location: null };
   const Probe: React.FC = () => {
     api.close = useOverlay().close;
-    api.location = useLayerLocation();
+    api.location = useUrlLayerLocation();
     return null;
   };
-  const Layer: React.FC = () => {
+  const Host: React.FC = () => {
     api.open = useOverlay().open;
     return (
       <UrlLayer open={new URLSearchParams(useLocation().search).has("overlay")}>
@@ -29,7 +29,7 @@ const renderLayer = (initialEntries: string[]) => {
       </UrlLayer>
     );
   };
-  const router = createMemoryRouter([{ path: "*", element: <Layer /> }], {
+  const router = createMemoryRouter([{ path: "*", element: <Host /> }], {
     initialEntries,
   });
   render(<RouterProvider router={router} />);

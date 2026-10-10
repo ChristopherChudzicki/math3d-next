@@ -2,9 +2,9 @@ import { useCallback, useLayoutEffect, useRef } from "react";
 import type { RefObject } from "react";
 import { useNavigate } from "react-router";
 import type { Location } from "react-router";
-import { useLayerOpen } from "./UrlLayer";
+import { useUrlLayerOpen } from "./UrlLayer";
 
-type Layer = {
+type CloseUrlLayerOptions = {
   /** Whether the app pushed the current history entry to open this layer. */
   pushed: boolean;
   /** Search params the layer owns, dropped when it closes in place. */
@@ -18,14 +18,14 @@ type Layer = {
 };
 
 /** Closes a dialog that lives in the URL: `?overlay=`, or `?signin` above it. */
-export const useCloseLayer = ({
+export const useCloseUrlLayer = ({
   pushed,
   params,
   stateKeys,
   location,
   search,
   live,
-}: Layer) => {
+}: CloseUrlLayerOptions) => {
   const navigate = useNavigate();
 
   // Consumers close from more than one place — LogoutPage both awaits its
@@ -35,7 +35,7 @@ export const useCloseLayer = ({
   const closedKey = useRef<string | null>(null);
   // Overlays stay mounted while closed, so the guard has to forget a close once
   // the layer reopens: Forward returns to the very entry it recorded.
-  const layerOpen = useLayerOpen();
+  const layerOpen = useUrlLayerOpen();
   useLayoutEffect(() => {
     if (layerOpen) closedKey.current = null;
   }, [layerOpen]);

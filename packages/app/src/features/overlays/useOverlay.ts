@@ -2,11 +2,11 @@
 import type React from "react";
 import { useCallback } from "react";
 import { useNavigate } from "react-router";
-import { useCloseLayer } from "./useCloseLayer";
+import { useCloseUrlLayer } from "./useCloseUrlLayer";
 import {
-  useLayerLiveRef,
-  useLayerLocation,
-  useLayerSearchParams,
+  useUrlLayerLiveRef,
+  useUrlLayerLocation,
+  useUrlLayerSearchParams,
 } from "./UrlLayer";
 
 export type OverlayName = "logout" | "delete-account" | "scenes";
@@ -31,16 +31,16 @@ export const OVERLAY_PARAMS = ["overlay", "list"] as const;
 const STATE_KEYS = ["overlayPushed"] as const;
 
 export const useOverlay = () => {
-  const search = useLayerSearchParams();
-  const location = useLayerLocation();
+  const search = useUrlLayerSearchParams();
+  const location = useUrlLayerLocation();
   const navigate = useNavigate();
-  const live = useLayerLiveRef();
+  const live = useUrlLayerLiveRef();
   const pushed =
     (location.state as OverlayHistoryState)?.overlayPushed ?? false;
 
   const open = useCallback(
     (name: OverlayName, companion?: { list?: string }) => {
-      // A closed overlay's location is stale; see useCloseLayer.
+      // A closed layer's location is stale; see useCloseUrlLayer.
       if (!live.current) return;
       const next = new URLSearchParams(search);
       const switching = next.has("overlay");
@@ -61,7 +61,7 @@ export const useOverlay = () => {
     [search, location.hash, location.state, navigate, pushed, live],
   );
 
-  const close = useCloseLayer({
+  const close = useCloseUrlLayer({
     pushed,
     params: OVERLAY_PARAMS,
     stateKeys: STATE_KEYS,
