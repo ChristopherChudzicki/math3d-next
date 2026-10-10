@@ -4,7 +4,7 @@ import { Dialog as BaseDialog } from "@base-ui/react/dialog";
 import { Icon } from "@iconify/react/offline";
 import xIcon from "@iconify-icons/lucide/x";
 import IconButton from "../IconButton";
-import renderPopup from "./renderPopup";
+import renderInertWhileClosing from "./renderInertWhileClosing";
 import * as styles from "./Dialog.module.css";
 
 const { Root, Trigger, Close } = BaseDialog;
@@ -28,7 +28,7 @@ const Popup: React.FC<PopupProps> = ({ size = "md", className, ...others }) => (
     <BaseDialog.Viewport className={styles.viewport}>
       <BaseDialog.Popup
         {...others}
-        render={renderPopup}
+        render={renderInertWhileClosing}
         className={classNames(styles.popup, styles[size], className)}
       />
     </BaseDialog.Viewport>

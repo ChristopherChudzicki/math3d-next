@@ -5,7 +5,7 @@ import { OVERLAY_PARAMS } from "./useOverlay";
 import type { OverlayHistoryState } from "./useOverlay";
 import { useCloseUrlLayer } from "./useCloseUrlLayer";
 import {
-  useUrlLayerLiveRef,
+  useUrlLayerStillOpenRef,
   useUrlLayerLocation,
   useUrlLayerSearchParams,
 } from "./UrlLayer";
@@ -29,7 +29,7 @@ export const useSignInDialog = () => {
   const search = useUrlLayerSearchParams();
   const location = useUrlLayerLocation();
   const navigate = useNavigate();
-  const live = useUrlLayerLiveRef();
+  const stillOpen = useUrlLayerStillOpenRef();
   const state = location.state as
     | (SignInHistoryState & OverlayHistoryState)
     | null;
@@ -42,7 +42,7 @@ export const useSignInDialog = () => {
   const open = useCallback(
     (options?: { replaceOverlay?: boolean }) => {
       // A closed layer's location is stale; see useCloseUrlLayer.
-      if (!live.current) return;
+      if (!stillOpen.current) return;
       const next = new URLSearchParams(search);
       next.set(SIGN_IN_PARAM, "");
       if (options?.replaceOverlay) {
@@ -60,7 +60,7 @@ export const useSignInDialog = () => {
         { replace: true, state: { ...rest, signInPushed: overlayPushed } },
       );
     },
-    [search, location.hash, state, navigate, live],
+    [search, location.hash, state, navigate, stillOpen],
   );
 
   const close = useCloseUrlLayer({
@@ -69,7 +69,7 @@ export const useSignInDialog = () => {
     stateKeys: STATE_KEYS,
     location,
     search,
-    live,
+    stillOpen,
   });
 
   return { open, close } as const;

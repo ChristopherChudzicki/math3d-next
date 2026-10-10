@@ -14,7 +14,7 @@ import {
   waitForAppReady,
   within,
 } from "@/test_util";
-import OverlayHost from "./OverlayHost";
+import UrlLayerHost from "./UrlLayerHost";
 
 test("no overlay param renders no dialog", () => {
   renderTestApp("/");
@@ -71,10 +71,10 @@ test("Escape closes sign-in and leaves the overlay beneath it open", async () =>
   ).toBeInTheDocument();
 });
 
-test("Shut overlays run no queries and render no dialogs", async () => {
+test("Closed overlays run no queries and render no dialogs", async () => {
   mockAuth.setCurrentUser(seedDb.withUser().id);
   const queryClient = new QueryClient();
-  const router = createMemoryRouter([{ path: "*", element: <OverlayHost /> }]);
+  const router = createMemoryRouter([{ path: "*", element: <UrlLayerHost /> }]);
   render(
     <AppProviders
       queryClient={queryClient}
@@ -84,7 +84,7 @@ test("Shut overlays run no queries and render no dialogs", async () => {
   );
 
   await waitForAppReady(queryClient);
-  // Session state is the only query an overlay may run while shut.
+  // Session state is the only query an overlay may run while closed.
   const queryKeys = queryClient
     .getQueryCache()
     .getAll()

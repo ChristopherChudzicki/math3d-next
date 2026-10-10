@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useCloseUrlLayer } from "./useCloseUrlLayer";
 import {
-  useUrlLayerLiveRef,
+  useUrlLayerStillOpenRef,
   useUrlLayerLocation,
   useUrlLayerSearchParams,
 } from "./UrlLayer";
@@ -34,14 +34,14 @@ export const useOverlay = () => {
   const search = useUrlLayerSearchParams();
   const location = useUrlLayerLocation();
   const navigate = useNavigate();
-  const live = useUrlLayerLiveRef();
+  const stillOpen = useUrlLayerStillOpenRef();
   const pushed =
     (location.state as OverlayHistoryState)?.overlayPushed ?? false;
 
   const open = useCallback(
     (name: OverlayName, companion?: { list?: string }) => {
       // A closed layer's location is stale; see useCloseUrlLayer.
-      if (!live.current) return;
+      if (!stillOpen.current) return;
       const next = new URLSearchParams(search);
       const switching = next.has("overlay");
       next.set("overlay", name);
@@ -58,7 +58,7 @@ export const useOverlay = () => {
         },
       );
     },
-    [search, location.hash, location.state, navigate, pushed, live],
+    [search, location.hash, location.state, navigate, pushed, stillOpen],
   );
 
   const close = useCloseUrlLayer({
@@ -67,7 +67,7 @@ export const useOverlay = () => {
     stateKeys: STATE_KEYS,
     location,
     search,
-    live,
+    stillOpen,
   });
 
   return { open, close } as const;

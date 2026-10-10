@@ -9,9 +9,9 @@ import React, {
 import { useLocation } from "react-router";
 import type { Location } from "react-router";
 
-type UrlLayerValue = { open: boolean; location: Location };
+type UrlLayerContextValue = { open: boolean; location: Location };
 
-const UrlLayerContext = createContext<UrlLayerValue | null>(null);
+const UrlLayerContext = createContext<UrlLayerContextValue | null>(null);
 
 /**
  * The location a layer's dialog reads. While it closes, that is the location
@@ -19,8 +19,8 @@ const UrlLayerContext = createContext<UrlLayerValue | null>(null);
  * the URL.
  */
 export const useUrlLayerLocation = (): Location => {
-  const live = useLocation();
-  return useContext(UrlLayerContext)?.location ?? live;
+  const routerLocation = useLocation();
+  return useContext(UrlLayerContext)?.location ?? routerLocation;
 };
 
 export const useUrlLayerSearchParams = (): URLSearchParams => {
@@ -36,16 +36,16 @@ export const useUrlLayerOpen = (): boolean =>
  * True while the surrounding layer is open and the caller is mounted; a ref so
  * stale callbacks read the current value. Set before any passive effect runs.
  */
-export const useUrlLayerLiveRef = () => {
+export const useUrlLayerStillOpenRef = () => {
   const open = useUrlLayerOpen();
-  const live = useRef(open);
+  const stillOpen = useRef(open);
   useLayoutEffect(() => {
-    live.current = open;
+    stillOpen.current = open;
     return () => {
-      live.current = false;
+      stillOpen.current = false;
     };
   }, [open]);
-  return live;
+  return stillOpen;
 };
 
 type UrlLayerProps = { open: boolean; children: React.ReactNode };
@@ -57,11 +57,11 @@ type UrlLayerProps = { open: boolean; children: React.ReactNode };
  */
 export const UrlLayer: React.FC<UrlLayerProps> = ({ open, children }) => {
   const location = useUrlLayerLocation();
-  const [frozen, setFrozen] = useState(location);
-  if (open && frozen !== location) setFrozen(location);
+  const [lastOpenLocation, setLastOpenLocation] = useState(location);
+  if (open && lastOpenLocation !== location) setLastOpenLocation(location);
   const value = useMemo(
-    () => ({ open, location: open ? location : frozen }),
-    [open, location, frozen],
+    () => ({ open, location: open ? location : lastOpenLocation }),
+    [open, location, lastOpenLocation],
   );
   return (
     <UrlLayerContext.Provider value={value}>

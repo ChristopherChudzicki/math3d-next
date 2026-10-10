@@ -11,10 +11,10 @@ type CloseUrlLayerOptions = {
   params: readonly string[];
   /** History-state keys the layer owns, dropped when it closes in place. */
   stateKeys: readonly string[];
-  /** The caller's layer location and search params, and its live ref. */
+  /** The caller's layer location and search params, and its still-open ref. */
   location: Location;
   search: URLSearchParams;
-  live: RefObject<boolean>;
+  stillOpen: RefObject<boolean>;
 };
 
 /** Closes a dialog that lives in the URL: `?overlay=`, or `?signin` above it. */
@@ -24,7 +24,7 @@ export const useCloseUrlLayer = ({
   stateKeys,
   location,
   search,
-  live,
+  stillOpen,
 }: CloseUrlLayerOptions) => {
   const navigate = useNavigate();
 
@@ -33,20 +33,20 @@ export const useCloseUrlLayer = ({
   // entirely. Keyed on the entry rather than a bare flag so a later layer
   // still closes, and read through a ref so a stale closure sees it too.
   const closedKey = useRef<string | null>(null);
-  // Overlays stay mounted while closed, so the guard has to forget a close once
-  // the layer reopens: Forward returns to the very entry it recorded.
-  const layerOpen = useUrlLayerOpen();
+  // URL layers stay mounted while closed, so the guard has to forget a close
+  // once the layer reopens: Forward returns to the very entry it recorded.
+  const urlLayerOpen = useUrlLayerOpen();
   useLayoutEffect(() => {
-    if (layerOpen) closedKey.current = null;
-  }, [layerOpen]);
+    if (urlLayerOpen) closedKey.current = null;
+  }, [urlLayerOpen]);
 
   return useCallback(() => {
-    // A closed overlay's entry is no longer the current one — a mutation can
+    // A closed layer's entry is no longer the current one — a mutation can
     // resolve after Back closed its dialog — so navigating would act on the
     // user's current entry instead: `navigate(-1)` pops whatever they have
     // open now, and the deep-link branch rewrites today's URL from a stale
     // `search`.
-    if (!live.current) return;
+    if (!stillOpen.current) return;
     if (closedKey.current === location.key) return;
     closedKey.current = location.key;
     if (pushed) {
@@ -78,6 +78,6 @@ export const useCloseUrlLayer = ({
     pushed,
     params,
     stateKeys,
-    live,
+    stillOpen,
   ]);
 };

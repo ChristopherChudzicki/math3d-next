@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from "classnames";
 import { AlertDialog as BaseAlertDialog } from "@base-ui/react/alert-dialog";
-import renderPopup from "../Dialog/renderPopup";
+import renderInertWhileClosing from "../Dialog/renderInertWhileClosing";
 import * as styles from "../Dialog/Dialog.module.css";
 
 const { Root, Close } = BaseAlertDialog;
@@ -23,7 +23,7 @@ const Popup: React.FC<PopupProps> = ({ className, ...others }) => (
     <BaseAlertDialog.Viewport className={styles.viewport}>
       <BaseAlertDialog.Popup
         {...others}
-        render={renderPopup}
+        render={renderInertWhileClosing}
         className={classNames(styles.popup, styles.sm, styles.alert, className)}
       />
     </BaseAlertDialog.Viewport>

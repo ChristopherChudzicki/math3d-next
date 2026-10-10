@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from "classnames";
 import { Dialog as BaseDialog } from "@base-ui/react/dialog";
-import renderPopup from "../Dialog/renderPopup";
+import renderInertWhileClosing from "../Dialog/renderInertWhileClosing";
 import * as styles from "./Drawer.module.css";
 
 type DrawerSide = "left" | "right";
@@ -34,7 +34,7 @@ const Popup: React.FC<PopupProps> = ({
     >
       <BaseDialog.Popup
         {...others}
-        render={renderPopup}
+        render={renderInertWhileClosing}
         className={classNames(styles.popup, styles[size], className)}
       />
     </BaseDialog.Viewport>

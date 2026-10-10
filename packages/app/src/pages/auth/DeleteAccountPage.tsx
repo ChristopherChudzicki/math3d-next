@@ -22,7 +22,7 @@ const schema = yup.object({
   confirm: yup.string().required().oneOf([CONFIRM_PROMPT]),
 });
 
-type DeleteAccountFormProps = {
+type DeleteAccountContentProps = {
   onDelete: () => Promise<void>;
   pending: boolean;
   succeeded: boolean;
@@ -31,7 +31,7 @@ type DeleteAccountFormProps = {
 };
 
 /** The form, inside the popup, so the typed phrase resets each time it opens. */
-const DeleteAccountForm: React.FC<DeleteAccountFormProps> = ({
+const DeleteAccountContent: React.FC<DeleteAccountContentProps> = ({
   onDelete,
   pending,
   succeeded,
@@ -155,12 +155,12 @@ const DeleteAccountPage: React.FC<OverlayProps> = ({ open, children }) => {
 
   // Without a session there is no account to delete, and firing the request
   // anyway would race the redirect above.
-  const shown =
+  const dialogOpen =
     open && (isAuthenticated === "authenticated" || deleteAccount.isSuccess);
 
   return (
     <Dialog.Root
-      open={shown}
+      open={dialogOpen}
       onOpenChange={(isOpen) => {
         // The delete still completes after a close; stay for its outcome.
         if (!isOpen && !deleteAccount.isPending) close();
@@ -172,14 +172,14 @@ const DeleteAccountPage: React.FC<OverlayProps> = ({ open, children }) => {
       }}
     >
       <Dialog.Popup size="md" initialFocus={confirmRef}>
-        <DeleteAccountForm
+        <DeleteAccountContent
           onDelete={onDelete}
           pending={deleteAccount.isPending}
           succeeded={deleteAccount.isSuccess}
           confirmRef={confirmRef}
         >
           {children}
-        </DeleteAccountForm>
+        </DeleteAccountContent>
       </Dialog.Popup>
     </Dialog.Root>
   );

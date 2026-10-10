@@ -7,10 +7,10 @@ import { UrlLayer, useUrlLayerLocation } from "./UrlLayer";
 
 /**
  * Mounts a probe inside a layer that is open while `?overlay=` is set, the way
- * OverlayHost keeps an overlay mounted while closed. Overlays open from outside
+ * UrlLayerHost keeps an overlay mounted while closed. Overlays open from outside
  * any layer, as from the header.
  */
-const renderLayer = (initialEntries: string[]) => {
+const renderUrlLayer = (initialEntries: string[]) => {
   const api: {
     open: ReturnType<typeof useOverlay>["open"] | null;
     close: ReturnType<typeof useOverlay>["close"] | null;
@@ -37,7 +37,7 @@ const renderLayer = (initialEntries: string[]) => {
 };
 
 test("A closed layer keeps the location it last had open", async () => {
-  const { router, api } = renderLayer(["/"]);
+  const { router, api } = renderUrlLayer(["/"]);
 
   await act(async () => api.open?.("scenes", { list: "me" }));
   await act(async () => api.close?.());
@@ -47,7 +47,7 @@ test("A closed layer keeps the location it last had open", async () => {
 });
 
 test("A close captured while open does nothing once Back closed the layer", async () => {
-  const { router, api } = renderLayer(["/first", "/second"]);
+  const { router, api } = renderUrlLayer(["/first", "/second"]);
 
   await act(async () => api.open?.("logout"));
   // LogoutPage closes after awaiting its mutation, from this render's `close`.
@@ -60,7 +60,7 @@ test("A close captured while open does nothing once Back closed the layer", asyn
 });
 
 test("An overlay reached again by Forward can still be closed", async () => {
-  const { router, api } = renderLayer(["/first", "/second"]);
+  const { router, api } = renderUrlLayer(["/first", "/second"]);
 
   await act(async () => api.open?.("logout"));
   await act(async () => api.close?.());

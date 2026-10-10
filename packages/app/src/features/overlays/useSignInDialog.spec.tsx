@@ -5,7 +5,7 @@ import { createMemoryRouter, RouterProvider } from "react-router";
 import { useOverlay } from "./useOverlay";
 import { useSignInDialog } from "./useSignInDialog";
 
-const renderLayers = (initialEntries: string[]) => {
+const renderOverlayAndSignIn = (initialEntries: string[]) => {
   const api: {
     overlay: ReturnType<typeof useOverlay> | null;
     signIn: ReturnType<typeof useSignInDialog> | null;
@@ -23,7 +23,7 @@ const renderLayers = (initialEntries: string[]) => {
 };
 
 test("Sign-in that replaced a pushed overlay closes back to the page beneath", async () => {
-  const { router, api } = renderLayers(["/first", "/second"]);
+  const { router, api } = renderOverlayAndSignIn(["/first", "/second"]);
   await act(async () => api.overlay?.open("delete-account"));
 
   await act(async () => api.signIn?.open({ replaceOverlay: true }));
@@ -38,7 +38,9 @@ test("Sign-in that replaced a pushed overlay closes back to the page beneath", a
 });
 
 test("Sign-in that replaced a deep-linked overlay closes in place", async () => {
-  const { router, api } = renderLayers(["/first?overlay=delete-account"]);
+  const { router, api } = renderOverlayAndSignIn([
+    "/first?overlay=delete-account",
+  ]);
 
   await act(async () => api.signIn?.open({ replaceOverlay: true }));
   await act(async () => api.signIn?.close());
