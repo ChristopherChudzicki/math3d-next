@@ -22,8 +22,78 @@ const schema = yup.object({
   confirm: yup.string().required().oneOf([CONFIRM_PROMPT]),
 });
 
-const DeleteAccountPage: React.FC<OverlayProps> = ({ children }) => {
-  const { open, close } = useOverlay();
+type DeleteAccountContentProps = {
+  onDelete: () => Promise<void>;
+  pending: boolean;
+  succeeded: boolean;
+  confirmRef: React.Ref<HTMLInputElement>;
+  children?: React.ReactNode;
+};
+
+/** The form, inside the popup, so the typed phrase resets each time it opens. */
+const DeleteAccountContent: React.FC<DeleteAccountContentProps> = ({
+  onDelete,
+  pending,
+  succeeded,
+  confirmRef,
+  children,
+}) => {
+  const { open } = useOverlay();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useValidatedForm({ schema });
+  const { ref: registerRef, ...confirmField } = register("confirm");
+  const onSubmit = handleSubmit(onDelete);
+
+  return (
+    <>
+      <Dialog.Header closeDisabled={pending}>
+        <Dialog.Title>Delete Account</Dialog.Title>
+      </Dialog.Header>
+      <Dialog.Form onSubmit={onSubmit}>
+        <Dialog.Body className={styles.fields}>
+          <Alert severity="error" announce={false}>
+            This action cannot be undone. Scenes you have saved stay published
+            at their existing links, with no account able to edit or remove them
+            — delete them from{" "}
+            <TextButton onClick={() => open("scenes", { list: "me" })}>
+              My Scenes
+            </TextButton>{" "}
+            first if you don&rsquo;t want that. Signing in with Google again
+            later creates a new, empty account.
+          </Alert>
+          <TextField
+            invalid={!!errors.confirm?.message}
+            description={`To proceed, enter "${CONFIRM_PROMPT}" exactly.`}
+            label="Confirm"
+            ref={composeRefs(confirmRef, registerRef)}
+            {...confirmField}
+          />
+          {errors.root?.message ? (
+            <Alert severity="error">{errors.root.message}</Alert>
+          ) : null}
+        </Dialog.Body>
+        <Dialog.Actions>
+          <Dialog.Close render={<Button>Cancel</Button>} disabled={pending} />
+          <Button
+            type="submit"
+            variant="solid"
+            tone="danger"
+            loading={pending || succeeded}
+          >
+            Delete Account
+          </Button>
+        </Dialog.Actions>
+      </Dialog.Form>
+      {children}
+    </>
+  );
+};
+
+const DeleteAccountPage: React.FC<OverlayProps> = ({ open, children }) => {
+  const { close } = useOverlay();
   const { open: openSignIn } = useSignInDialog();
   const isAuthenticated = useAuthStatus();
   const deleteAccount = useUserMeDelete();
@@ -33,12 +103,6 @@ const DeleteAccountPage: React.FC<OverlayProps> = ({ children }) => {
   // would hide it.
   const [noticeOpen, setNoticeOpen] = useState(false);
   const confirmRef = useRef<HTMLInputElement>(null);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useValidatedForm({ schema });
-  const { ref: registerRef, ...confirmField } = register("confirm");
 
   // A successful delete flips auth authenticated → unauthenticated, and that
   // deliberate case has its own flow (the "Account Deleted" notice, then
@@ -46,18 +110,20 @@ const DeleteAccountPage: React.FC<OverlayProps> = ({ children }) => {
   // unauthenticated here — a hand-typed /?overlay=delete-account while logged
   // out, or a session that expired mid-dialog — is sent to sign in. Sign-in
   // replaces this dialog rather than stacking on it: Google offers the account
-  // chooser, and a different account would return to a delete dialog.
+  // chooser, and a different account would return to a delete dialog. This
+  // runs here, not in the form: without a session the popup never opens.
   useEffect(() => {
     if (
+      open &&
       isAuthenticated === "unauthenticated" &&
       !deleteAccount.isSuccess &&
       !noticeOpen
     ) {
       openSignIn({ replaceOverlay: true });
     }
-  }, [isAuthenticated, openSignIn, deleteAccount.isSuccess, noticeOpen]);
+  }, [open, isAuthenticated, openSignIn, deleteAccount.isSuccess, noticeOpen]);
 
-  const onSubmit = handleSubmit(async () => {
+  const onDelete = async () => {
     try {
       await deleteAccount.mutateAsync();
     } catch (err) {
@@ -85,65 +151,35 @@ const DeleteAccountPage: React.FC<OverlayProps> = ({ children }) => {
       type: "alert",
     });
     navigate("/");
-  });
+  };
 
   // Without a session there is no account to delete, and firing the request
-  // anyway would race the redirect above. Sign-in, if open, still renders.
-  if (isAuthenticated !== "authenticated" && !deleteAccount.isSuccess) {
-    return children;
-  }
+  // anyway would race the redirect above.
+  const dialogOpen =
+    open && (isAuthenticated === "authenticated" || deleteAccount.isSuccess);
 
   return (
     <Dialog.Root
-      open
+      open={dialogOpen}
       onOpenChange={(isOpen) => {
         // The delete still completes after a close; stay for its outcome.
         if (!isOpen && !deleteAccount.isPending) close();
       }}
+      // This component outlives each opening, so a finished delete would
+      // otherwise reopen, spinning, from a Back to this entry.
+      onOpenChangeComplete={(isOpen) => {
+        if (!isOpen) deleteAccount.reset();
+      }}
     >
       <Dialog.Popup size="md" initialFocus={confirmRef}>
-        <Dialog.Header closeDisabled={deleteAccount.isPending}>
-          <Dialog.Title>Delete Account</Dialog.Title>
-        </Dialog.Header>
-        <Dialog.Form onSubmit={onSubmit}>
-          <Dialog.Body className={styles.fields}>
-            <Alert severity="error" announce={false}>
-              This action cannot be undone. Scenes you have saved stay published
-              at their existing links, with no account able to edit or remove
-              them — delete them from{" "}
-              <TextButton onClick={() => open("scenes", { list: "me" })}>
-                My Scenes
-              </TextButton>{" "}
-              first if you don&rsquo;t want that. Signing in with Google again
-              later creates a new, empty account.
-            </Alert>
-            <TextField
-              invalid={!!errors.confirm?.message}
-              description={`To proceed, enter "${CONFIRM_PROMPT}" exactly.`}
-              label="Confirm"
-              ref={composeRefs(confirmRef, registerRef)}
-              {...confirmField}
-            />
-            {errors.root?.message ? (
-              <Alert severity="error">{errors.root.message}</Alert>
-            ) : null}
-          </Dialog.Body>
-          <Dialog.Actions>
-            <Dialog.Close
-              render={<Button>Cancel</Button>}
-              disabled={deleteAccount.isPending}
-            />
-            <Button
-              type="submit"
-              variant="solid"
-              tone="danger"
-              loading={deleteAccount.isPending || deleteAccount.isSuccess}
-            >
-              Delete Account
-            </Button>
-          </Dialog.Actions>
-        </Dialog.Form>
-        {children}
+        <DeleteAccountContent
+          onDelete={onDelete}
+          pending={deleteAccount.isPending}
+          succeeded={deleteAccount.isSuccess}
+          confirmRef={confirmRef}
+        >
+          {children}
+        </DeleteAccountContent>
       </Dialog.Popup>
     </Dialog.Root>
   );

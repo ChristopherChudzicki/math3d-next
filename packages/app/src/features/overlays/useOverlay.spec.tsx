@@ -68,12 +68,12 @@ test("Closing an overlay switched into from a deep link stays in the app", async
   expect(router.state.location.pathname).toBe("/first");
 });
 
-test("A close from an unmounted overlay does nothing", async () => {
+test("A close from an unmounted component does nothing", async () => {
   const { router, api, unmount } = renderOverlay(["/first", "/second"]);
 
   await act(async () => api.current?.open("logout"));
-  // A mutation can resolve after Back unmounted the dialog, and its handler
-  // still holds that render's `close`.
+  // A mutation's handler can outlive the component that called it, still
+  // holding that render's `close`.
   const staleClose = api.current?.close;
 
   unmount();

@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/react";
 import { http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { mockAuth } from "@math3d/mock-api";
-import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import { act, renderTestApp, screen, user, waitFor, within } from "@/test_util";
 
 vi.mock("@sentry/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@sentry/react")>()),
@@ -218,4 +218,46 @@ test("My Scenes in the warning opens the user's scene list", async () => {
   await user.click(within(dialog).getByRole("button", { name: "My Scenes" }));
 
   expect(location.current.search).toBe("?overlay=scenes&list=me");
+});
+
+test("reopening starts with an empty confirmation", async () => {
+  const { location, router } = renderTestApp("/?overlay=delete-account", {
+    isAuthenticated: true,
+  });
+  const dialog = await screen.findByRole("dialog", {
+    name: "Delete Account",
+  });
+  await user.type(within(dialog).getByLabelText("Confirm"), "abc");
+  await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+  await waitFor(() => expect(location.current.search).toBe(""));
+
+  await act(() => router.navigate("/?overlay=delete-account"));
+
+  const reopened = await screen.findByRole("dialog", {
+    name: "Delete Account",
+  });
+  expect(within(reopened).getByLabelText("Confirm")).toHaveValue("");
+});
+
+test("Back to the dialog after a delete sends the user to sign in", async () => {
+  const { location, router } = renderTestApp("/?overlay=delete-account", {
+    isAuthenticated: true,
+  });
+  const dialog = await screen.findByRole("dialog", {
+    name: "Delete Account",
+  });
+  await user.type(
+    within(dialog).getByLabelText("Confirm"),
+    "Yes, permanently delete",
+  );
+  await user.click(
+    within(dialog).getByRole("button", { name: "Delete Account" }),
+  );
+  await screen.findByRole("heading", { name: "Account Deleted" });
+  await waitFor(() => expect(location.current.search).toBe(""));
+
+  await act(() => router.navigate(-1));
+
+  await waitFor(() => expect(location.current.search).toBe("?signin="));
+  expect(screen.queryByRole("dialog", { name: "Delete Account" })).toBe(null);
 });

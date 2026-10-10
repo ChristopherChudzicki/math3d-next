@@ -1,9 +1,14 @@
 import { useCallback } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
 import type { SignInError } from "@/features/auth/signInErrors";
 import { OVERLAY_PARAMS } from "./useOverlay";
 import type { OverlayHistoryState } from "./useOverlay";
-import { useCloseLayer } from "./useCloseLayer";
+import { useCloseUrlLayer } from "./useCloseUrlLayer";
+import {
+  useUrlLayerStillOpenRef,
+  useUrlLayerLocation,
+  useUrlLayerSearchParams,
+} from "./UrlLayer";
 
 /**
  * `?signin` opens the sign-in dialog above any `?overlay=`, so the page it
@@ -21,9 +26,10 @@ const PARAMS = [SIGN_IN_PARAM] as const;
 const STATE_KEYS = ["signInPushed", "signInError"] as const;
 
 export const useSignInDialog = () => {
-  const [search] = useSearchParams();
-  const location = useLocation();
+  const search = useUrlLayerSearchParams();
+  const location = useUrlLayerLocation();
   const navigate = useNavigate();
+  const stillOpen = useUrlLayerStillOpenRef();
   const state = location.state as
     | (SignInHistoryState & OverlayHistoryState)
     | null;
@@ -35,6 +41,8 @@ export const useSignInDialog = () => {
    */
   const open = useCallback(
     (options?: { replaceOverlay?: boolean }) => {
+      // A closed layer's location is stale; see useCloseUrlLayer.
+      if (!stillOpen.current) return;
       const next = new URLSearchParams(search);
       next.set(SIGN_IN_PARAM, "");
       if (options?.replaceOverlay) {
@@ -52,14 +60,17 @@ export const useSignInDialog = () => {
         { replace: true, state: { ...rest, signInPushed: overlayPushed } },
       );
     },
-    [search, location.hash, state, navigate],
+    [search, location.hash, state, navigate, stillOpen],
   );
 
-  const close = useCloseLayer({
+  const close = useCloseUrlLayer({
     pushed,
     params: PARAMS,
     stateKeys: STATE_KEYS,
+    location,
+    search,
+    stillOpen,
   });
 
-  return { isOpen: search.has(SIGN_IN_PARAM), open, close } as const;
+  return { open, close } as const;
 };
