@@ -2,10 +2,10 @@ from typing import Generic, TypeVar
 
 import factory
 import faker
+from authentication.factories import CustomUserFactory
 from factory.django import DjangoModelFactory
 
 from scenes.models import Scene
-from authentication.factories import CustomUserFactory
 
 fake = faker.Faker()
 

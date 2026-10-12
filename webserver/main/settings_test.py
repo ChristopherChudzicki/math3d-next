@@ -8,13 +8,13 @@ import pytest
 from django.core.exceptions import ImproperlyConfigured
 
 from main.env import EnvConfig
-from main.sentry import drop_sign_in_frame_locals
 from main.origins import (
     WORKTREE_PORTS,
     cors_allowed_origins,
     csrf_trusted_origins,
     dev_cors_allowed_origins,
 )
+from main.sentry import drop_sign_in_frame_locals
 from main.test_settings import (
     isolate_environ,
     require_postgres,

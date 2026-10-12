@@ -9,14 +9,13 @@ exceed reservations, reservations never exceed the caps.
 import json
 import logging
 import urllib.request
-from typing import Optional
 from urllib.parse import quote, urlencode
 
 from django.conf import settings
 from django.db import connection, transaction
 from django.utils import timezone
-
 from main.constants import BACKEND_USER_AGENT
+
 from scenes.models import RenderDay, RenderMonth, Scene
 
 logger = logging.getLogger(__name__)
@@ -61,7 +60,7 @@ def reserve_render_slot() -> bool:
         return True
 
 
-def scene_image_url(key: str, version: str) -> Optional[str]:
+def scene_image_url(key: str, version: str) -> str | None:
     """The scene's screenshot URL, or None when the feature is dark. Tentative:
     ``fallback=none`` makes a missing render 404 rather than serve the OG card."""
     if not settings.SCREENSHOTS_ORIGIN:

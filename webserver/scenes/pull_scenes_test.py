@@ -3,9 +3,10 @@ from unittest import mock
 import pytest
 from django.core.exceptions import ValidationError
 from django.core.management.base import CommandError
+
+from scenes.factories import SceneFactory
 from scenes.management.commands.pull_scenes import Command, upsert_scene
 from scenes.models import Scene
-from scenes.factories import SceneFactory
 
 
 @pytest.mark.django_db
