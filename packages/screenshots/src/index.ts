@@ -134,8 +134,8 @@ export default {
         "content-type": "image/png",
         "cache-control": `public, max-age=${current ? 86400 : 60}`,
       });
-      // Which render this is: the backend's render_scenes command skips a scene
-      // whose X-Render-Version is already its current version.
+      // Which render this is, so a caller (or `curl -I`) can tell whether it's
+      // current without the requested v.
       const { version, renderedAt } = cached.customMetadata ?? {};
       if (version !== undefined) headers.set("x-render-version", version);
       if (renderedAt !== undefined) headers.set("x-rendered-at", renderedAt);

@@ -1,3 +1,4 @@
+import http.client
 import time
 import urllib.error
 import urllib.request
@@ -28,14 +29,15 @@ def probe(key: str, version: str) -> Optional[str]:
     # HTTPError subclasses OSError (via URLError), so it must be caught first.
     except urllib.error.HTTPError as e:
         return None if e.code == 404 else f"probe failed: HTTP {e.code}"
-    except OSError as e:
-        return f"probe failed: {e}"
+    except (OSError, http.client.HTTPException) as e:
+        return f"probe failed: {e!r}"
     if headers.get("x-rendered-at") is None:
         # Every render records renderedAt, so only a Worker that predates the
         # headers omits it — and against it every scene would look stale.
         raise CommandError(
-            "The screenshots Worker sent no X-Rendered-At header, so it predates "
-            "the render headers. Deploy packages/screenshots, then re-run."
+            f"The screenshots Worker sent no X-Rendered-At header for {key!r}: it "
+            "predates the render headers, or the object wasn't written by a render. "
+            "Deploy packages/screenshots, then re-run."
         )
     return CURRENT if headers.get("x-render-version") == version else None
 
@@ -58,8 +60,8 @@ class Command(BaseCommand):
             type=float,
             default=30.0,
             help=(
-                "Seconds to wait after each requested render. Workers Free allows "
-                "one new browser every 20s, shared with renders from saves."
+                "Seconds to wait between render requests. Workers Free allows one "
+                "new browser every 20s, shared with renders from saves."
             ),
         )
 
@@ -71,15 +73,25 @@ class Command(BaseCommand):
         # and spend a second slot.
         keys = list(dict.fromkeys(keys))
         failures = []
+        nudged = 0
         for i, key in enumerate(keys):
             status = self.render_one(key, force)
             self.stdout.write(f"{key}: {status}")
             if status == RenderOutcome.NUDGED:
-                if i < len(keys) - 1:
-                    time.sleep(delay)
+                nudged += 1
             elif status != CURRENT:
                 failures.append(f"{key} ({status})")
+            # A failed nudge may still have reached the Worker (e.g. a timeout
+            # after it accepted), so pace it like a successful one.
+            requested = status in (RenderOutcome.NUDGED, RenderOutcome.NUDGE_FAILED)
+            if requested and i < len(keys) - 1:
+                time.sleep(delay)
 
+        if nudged:
+            self.stdout.write(
+                f"{nudged} render(s) requested, not yet confirmed: re-run in a "
+                "minute; a scene whose render landed reports current."
+            )
         if failures:
             raise CommandError(
                 f"{len(failures)} of {len(keys)} key(s) failed: {', '.join(failures)}"

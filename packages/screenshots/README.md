@@ -94,9 +94,10 @@ It takes the same capped path as a save, and skips a scene whose current render
 is already cached, without spending a slot, by checking `X-Render-Version`
 against the scene's version. So re-running is cheap: a scene reports `current`
 once its render has landed, and `nudged` means requested, not yet rendered. It
-pauses `--delay` seconds (default 30) after each render it requests, because
+pauses `--delay` seconds (default 30) between the renders it requests, because
 Workers Free allows one new browser every 20s, shared with renders from saves.
-`--force` skips the check.
+Workers Free also caps browser time at 10 minutes a day, so split a large batch
+across days. `--force` skips the check.
 
 Deploy this Worker before running the command against it: a Worker that predates
 the render headers makes the command stop with an error.

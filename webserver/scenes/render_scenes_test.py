@@ -82,6 +82,14 @@ def test_render_of_another_version_is_rerendered(urlopen, maybe_render):
 
 
 @pytest.mark.django_db
+def test_untagged_render_is_rerendered(urlopen, maybe_render):
+    scene = SceneFactory.create()
+    urlopen.return_value = hit(x_rendered_at=RENDERED_AT)
+    run(scene.key)
+    maybe_render.assert_called_once_with(scene.key, scene.screenshot_version)
+
+
+@pytest.mark.django_db
 def test_missing_render_is_rendered(urlopen, maybe_render):
     scene = SceneFactory.create()
     urlopen.side_effect = http_error(404)
@@ -100,7 +108,9 @@ def test_worker_without_render_headers_is_an_error(urlopen, maybe_render):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "error", [http_error(500), urllib.error.URLError("refused")], ids=["500", "url"]
+    "error",
+    [http_error(500), urllib.error.URLError("refused"), http.client.BadStatusLine("")],
+    ids=["500", "transport", "bad-response"],
 )
 def test_failed_probe_skips_the_render(urlopen, maybe_render, capsys, error):
     scene = SceneFactory.create()
@@ -158,10 +168,14 @@ def test_duplicate_key_is_rendered_once(urlopen, maybe_render):
 
 
 @pytest.mark.django_db
-def test_sleeps_only_between_a_render_and_the_next_key(urlopen, maybe_render, sleep):
-    first, current, last = SceneFactory.create_batch(3)
-    by_key = {
-        first.key: http_error(404),
+def test_sleeps_only_between_a_render_request_and_the_next_key(
+    urlopen, maybe_render, sleep
+):
+    # A failed nudge may still have reached the Worker, so it's paced too.
+    failed, nudged, current, last = SceneFactory.create_batch(4)
+    probes = {
+        failed.key: http_error(404),
+        nudged.key: http_error(404),
         current.key: hit(
             x_render_version=current.screenshot_version, x_rendered_at=RENDERED_AT
         ),
@@ -169,14 +183,18 @@ def test_sleeps_only_between_a_render_and_the_next_key(urlopen, maybe_render, sl
     }
 
     def respond(req, **kwargs):
-        response = next(r for key, r in by_key.items() if f"/{key}.png" in req.full_url)
+        response = next(r for key, r in probes.items() if f"/{key}.png" in req.full_url)
         if isinstance(response, Exception):
             raise response
         return response
 
     urlopen.side_effect = respond
-    run(first.key, current.key, last.key, "--delay", "7")
-    sleep.assert_called_once_with(7.0)
+    maybe_render.side_effect = lambda key, version: (
+        RenderOutcome.NUDGE_FAILED if key == failed.key else RenderOutcome.NUDGED
+    )
+    with pytest.raises(CommandError):  # the failed nudge
+        run(failed.key, nudged.key, current.key, last.key, "--delay", "7")
+    assert sleep.call_args_list == [mock.call(7.0), mock.call(7.0)]
 
 
 @pytest.mark.django_db
