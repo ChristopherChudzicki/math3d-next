@@ -15,7 +15,7 @@ def _valid_scene_kwargs(key):
 
 @pytest.mark.django_db
 # "ab\n": Python's `$` would match before the newline; the pattern uses `\Z`.
-@pytest.mark.parametrize("bad_key", ["app", "a", "a.b", "ab\n"])
+@pytest.mark.parametrize("bad_key", ["app", "App", "a", "a.b", "ab\n"])
 def test_invalid_key_rejected_by_full_clean(bad_key):
     # save() calls full_clean(). The error must come from the key validator, not
     # only the CHECK constraint (a non-field error): callers skip on key errors.
@@ -36,13 +36,6 @@ def test_invalid_key_rejected_by_db_constraint(bad_key):
 def test_normal_key_allowed():
     Scene(**_valid_scene_kwargs("sliders_intro")).save()
     assert Scene.objects.filter(key="sliders_intro").exists()
-
-
-@pytest.mark.django_db
-def test_uppercase_app_allowed():
-    # Reservation is case-sensitive; only lowercase `app` collides with /app/.
-    Scene(**_valid_scene_kwargs("App")).save()
-    assert Scene.objects.filter(key="App").exists()
 
 
 @pytest.mark.django_db

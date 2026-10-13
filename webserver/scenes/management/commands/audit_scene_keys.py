@@ -26,6 +26,6 @@ class Command(BaseCommand):
         if scenes or legacy:
             raise CommandError(
                 f"Invalid keys found on '{db}' — Scene: {scenes!r}, LegacyScene: {legacy!r}. "
-                "Re-key or drop them before enforcing the constraint."
+                "pull_scenes skips such Scenes, and such legacy scenes 404 when opened."
             )
         self.stdout.write(self.style.SUCCESS(f"No invalid keys found on '{db}'."))

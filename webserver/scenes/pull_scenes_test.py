@@ -40,7 +40,7 @@ def test_upsert_scene_skips_invalid_key():
 
 @pytest.mark.django_db
 def test_upsert_scene_raises_on_invalid_items():
-    """A valid key with invalid items must fail loudly, not be mistaken for a
+    """A valid key with invalid items must fail loudly, not be mistaken for an
     invalid-key skip."""
     built = SceneFactory.build()
     d = {

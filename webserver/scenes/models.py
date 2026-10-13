@@ -5,21 +5,19 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.contrib.postgres.indexes import GinIndex
-from django.db.models.functions import Length, Now
+from django.db.models.functions import Now
 from django.utils import timezone
 
 from scenes.validators import validate_math_items
 from authentication.models import CustomUser
 
 
-# Enable the `key__length` lookup used by migration 0017's CHECK constraint.
-models.CharField.register_lookup(Length)
-
-# The authority for scene keys. The screenshots and app Workers check paths
-# against the same charset. `app` collides with the /app/ route prefix
-# (case-sensitive). `\Z`, not `$`: Python's `$` also matches before a trailing
-# newline. Postgres supports both the lookahead and `\Z`.
-SCENE_KEY_PATTERN = r"^(?!app$)[A-Za-z0-9_-]{2,80}\Z"
+# The authority for scene keys, backing both the field validator and the DB
+# CHECK. The screenshots and app Workers check paths against the same charset.
+# `app` in any case collides with the /app/ route prefix: React Router matches
+# paths case-insensitively. `\Z`, not `$`: Python's `$` also matches before a
+# trailing newline. Postgres supports both the lookahead and `\Z`.
+SCENE_KEY_PATTERN = r"^(?![Aa][Pp][Pp]$)[A-Za-z0-9_-]{2,80}\Z"
 SCENE_KEY_VALIDATOR = RegexValidator(
     regex=SCENE_KEY_PATTERN,
     message=(
