@@ -12,23 +12,29 @@ from scenes.validators import validate_math_items
 from authentication.models import CustomUser
 
 
-# Enable the `key__length` lookup used by the reserved-key CHECK constraint.
+# Enable the `key__length` lookup used by migration 0017's CHECK constraint.
 models.CharField.register_lookup(Length)
 
-# Reserve `app` (collides with the /app/ route prefix) and keys under two
-# characters (empty/single-char are not legitimate shareable keys). Case-sensitive.
-RESERVED_KEY_VALIDATOR = RegexValidator(
-    regex=r"^(?!app$).{2,}$",
-    message="Scene key must be at least 2 characters and not a reserved word.",
+# The authority for scene keys. The screenshots and app Workers check paths
+# against the same charset. `app` collides with the /app/ route prefix
+# (case-sensitive). `\Z`, not `$`: Python's `$` also matches before a trailing
+# newline. Postgres supports both the lookahead and `\Z`.
+SCENE_KEY_PATTERN = r"^(?!app$)[A-Za-z0-9_-]{2,80}\Z"
+SCENE_KEY_VALIDATOR = RegexValidator(
+    regex=SCENE_KEY_PATTERN,
+    message=(
+        "Scene key must be 2–80 letters, digits, hyphens or underscores, "
+        "and not a reserved word."
+    ),
 )
 
 
-def is_reserved_key_error(error: ValidationError) -> bool:
+def is_invalid_key_error(error: ValidationError) -> bool:
     """
     True iff a ValidationError from ``Scene.save()`` was caused by the key.
 
     ``full_clean()`` runs every field validator (including ``validate_math_items``
-    on ``items``), so a ValidationError can mean a reserved key *or* invalid
+    on ``items``), so a ValidationError can mean an invalid key *or* invalid
     items. ``error_dict`` is keyed by field name; only treat the key as the
     cause when "key" is present. Errors raised without a dict (no ``error_dict``)
     are not key errors.
@@ -109,7 +115,7 @@ class Scene(TimestampedModel):
         max_length=80,
         unique=True,
         default=random_key,
-        validators=[RESERVED_KEY_VALIDATOR],
+        validators=[SCENE_KEY_VALIDATOR],
     )
     items = models.JSONField(validators=[validate_math_items])
     item_order = models.JSONField()
@@ -143,8 +149,8 @@ class Scene(TimestampedModel):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                condition=models.Q(key__length__gte=2) & ~models.Q(key="app"),
-                name="scene_key_not_reserved",
+                condition=models.Q(key__regex=SCENE_KEY_PATTERN),
+                name="scene_key_valid",
             ),
             models.CheckConstraint(
                 condition=~models.Q(title__regex=r"[\r\n]"),

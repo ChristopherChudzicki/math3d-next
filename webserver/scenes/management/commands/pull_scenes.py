@@ -6,21 +6,21 @@ from django.db import connections
 from django.conf import settings
 import dj_database_url
 from tqdm import tqdm
-from scenes.models import Scene, LegacyScene, is_reserved_key_error
+from scenes.models import Scene, LegacyScene, is_invalid_key_error
 
 
 def upsert_scene(scene_dict) -> bool:
     """
-    Upsert one Scene; return False (and skip) if the key is reserved.
+    Upsert one Scene; return False (and skip) if the key is invalid.
 
     Non-key validation failures (e.g. invalid items) re-raise so the pull fails
-    loudly rather than silently skipping corrupt data as if it were reserved.
+    loudly rather than silently skipping corrupt data as if its key were invalid.
     """
     try:
         Scene.objects.update_or_create(key=scene_dict["key"], defaults=scene_dict)
         return True
     except ValidationError as e:
-        if is_reserved_key_error(e):
+        if is_invalid_key_error(e):
             return False
         raise
 
@@ -46,8 +46,8 @@ class Command(BaseCommand):
         """
         Fetch and process scenes from the external database.
 
-        Returns the reserved keys that were skipped. Reporting is deferred to
-        ``handle()`` so the legacy-scene pull still runs — a reserved key in the
+        Returns the invalid keys that were skipped. Reporting is deferred to
+        ``handle()`` so the legacy-scene pull still runs — an invalid key in the
         source must not abort the rest of the ingest.
         """
 
@@ -68,7 +68,7 @@ class Command(BaseCommand):
         # Use iterator() to avoid loading all records into memory at once
         scene_iterator = external_scenes.iterator(chunk_size=chunk_size)
 
-        reserved_keys = []
+        invalid_keys = []
         for external_scene in tqdm(
             scene_iterator, total=total_scenes, desc="Fetching scenes"
         ):
@@ -81,8 +81,8 @@ class Command(BaseCommand):
                 "times_accessed": external_scene.times_accessed,
             }
             if not upsert_scene(scene_dict):
-                reserved_keys.append(scene_dict["key"])
-        return reserved_keys
+                invalid_keys.append(scene_dict["key"])
+        return invalid_keys
 
     def fetch_legacy_scenes(self, source_db, chunk_size):
         """Fetch and process legacy scenes from the external database."""
@@ -144,15 +144,15 @@ class Command(BaseCommand):
         connections.databases[temp_db_alias] = db_config
         source_db = temp_db_alias
 
-        # Fetch scenes and legacy scenes. Reserved keys are skipped (not fatal
+        # Fetch scenes and legacy scenes. Invalid keys are skipped (not fatal
         # mid-run) so both pulls complete; report them at the very end.
-        reserved_keys = self.fetch_scenes(source_db, chunk_size)
+        invalid_keys = self.fetch_scenes(source_db, chunk_size)
         self.fetch_legacy_scenes(source_db, chunk_size)
 
         self.stdout.write(self.style.SUCCESS("Successfully fetched all scenes."))
 
-        if reserved_keys:
+        if invalid_keys:
             raise CommandError(
-                f"Pull completed, but skipped {len(reserved_keys)} scene(s) with "
-                f"reserved keys: {reserved_keys!r}"
+                f"Pull completed, but skipped {len(invalid_keys)} scene(s) with "
+                f"invalid keys: {invalid_keys!r}"
             )

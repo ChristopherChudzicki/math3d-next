@@ -1,10 +1,11 @@
 import type { Env } from "./env";
 
 /**
- * Superset of the real key charset — the same regex the pass-1 app Worker uses
- * (packages/app/src/worker/index.ts). Copied deliberately to keep this package
- * dependency-free and independently abandonable; the charset is stable. Cheap
- * defense-in-depth before building any URL or navigating a browser.
+ * The charset of Django's `SCENE_KEY_PATTERN` (webserver/scenes/models.py), the
+ * authority for scene keys; the app Worker (packages/app/src/worker/index.ts)
+ * has the same copy. Copied deliberately to keep this package dependency-free
+ * and independently abandonable. Cheap defense-in-depth before building any URL
+ * or navigating a browser.
  */
 export const KEY_RE = /^[A-Za-z0-9_-]{2,80}$/;
 

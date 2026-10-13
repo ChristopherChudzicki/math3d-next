@@ -1,12 +1,12 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
-from scenes.models import Scene, LegacyScene
+from scenes.models import SCENE_KEY_PATTERN, Scene, LegacyScene
 
-RESERVED = Q(key="app") | Q(key__length__lt=2)
+INVALID = ~Q(key__regex=SCENE_KEY_PATTERN)
 
 
 class Command(BaseCommand):
-    help = "Scan for scene keys that collide with the reserved namespace (`app`, sub-2-char)."
+    help = "Scan for scene keys that fail SCENE_KEY_PATTERN (charset, length, `app`)."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -18,14 +18,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         db = options["database"]
         scenes = list(
-            Scene.objects.using(db).filter(RESERVED).values_list("key", flat=True)
+            Scene.objects.using(db).filter(INVALID).values_list("key", flat=True)
         )
         legacy = list(
-            LegacyScene.objects.using(db).filter(RESERVED).values_list("key", flat=True)
+            LegacyScene.objects.using(db).filter(INVALID).values_list("key", flat=True)
         )
         if scenes or legacy:
             raise CommandError(
-                f"Reserved keys found on '{db}' — Scene: {scenes!r}, LegacyScene: {legacy!r}. "
+                f"Invalid keys found on '{db}' — Scene: {scenes!r}, LegacyScene: {legacy!r}. "
                 "Re-key or drop them before enforcing the constraint."
             )
-        self.stdout.write(self.style.SUCCESS(f"No reserved keys found on '{db}'."))
+        self.stdout.write(self.style.SUCCESS(f"No invalid keys found on '{db}'."))
