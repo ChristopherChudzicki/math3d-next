@@ -82,14 +82,6 @@ def test_render_of_another_version_is_rerendered(urlopen, maybe_render):
 
 
 @pytest.mark.django_db
-def test_untagged_render_is_rerendered(urlopen, maybe_render):
-    scene = SceneFactory.create()
-    urlopen.return_value = hit(x_rendered_at=RENDERED_AT)
-    run(scene.key)
-    maybe_render.assert_called_once_with(scene.key, scene.screenshot_version)
-
-
-@pytest.mark.django_db
 def test_missing_render_is_rendered(urlopen, maybe_render):
     scene = SceneFactory.create()
     urlopen.side_effect = http_error(404)

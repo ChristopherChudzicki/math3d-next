@@ -134,8 +134,8 @@ export default {
         "content-type": "image/png",
         "cache-control": `public, max-age=${current ? 86400 : 60}`,
       });
-      // Which render this is, so a caller (or `curl -I`) can tell whether it's
-      // current without the requested v.
+      // Which render this is: a hit of another version is a 200 too, so the
+      // status can't say.
       const { version, renderedAt } = cached.customMetadata ?? {};
       if (version !== undefined) headers.set("x-render-version", version);
       if (renderedAt !== undefined) headers.set("x-rendered-at", renderedAt);

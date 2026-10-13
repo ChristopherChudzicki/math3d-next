@@ -76,8 +76,9 @@ def scene_image_url(key: str, version: str) -> Optional[str]:
 
 def nudge_render(key: str, version: str) -> bool:
     """Best-effort fire at the Worker's POST /render (secret-gated → 202).
-    ~2s timeout, no retry. Swallows transport errors — the render is a
-    best-effort side effect of the save. True iff the Worker accepted it."""
+    ~2s timeout, no retry. Swallows every failure (transport or non-2xx) — the
+    render is a best-effort side effect of the save. True iff the Worker
+    accepted it."""
     req = urllib.request.Request(
         f"{settings.SCREENSHOTS_ORIGIN}/render",
         data=json.dumps({"key": key, "version": version}).encode(),
