@@ -1,10 +1,12 @@
 import type { Env } from "./env";
 
 /**
- * Superset of the real key charset — the same regex the pass-1 app Worker uses
- * (packages/app/src/worker/index.ts). Copied deliberately to keep this package
- * dependency-free and independently abandonable; the charset is stable. Cheap
- * defense-in-depth before building any URL or navigating a browser.
+ * The charset of Django's `SCENE_KEY_PATTERN` (webserver/scenes/models.py), the
+ * authority for scene keys; the app Worker (packages/app/src/worker/index.ts)
+ * has the same copy. Copied deliberately to keep this package dependency-free
+ * and independently abandonable. Matching keys are URL-safe tokens, so they go
+ * into R2 object names and the frame URL unescaped. Not an abuse control: a
+ * well-formed unknown key costs the same R2 read.
  */
 export const KEY_RE = /^[A-Za-z0-9_-]{2,80}$/;
 

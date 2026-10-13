@@ -24,7 +24,9 @@ interface Env {
   SCREENSHOTS_ORIGIN?: string;
 }
 
-/** Superset of the real key charset; cheap defense-in-depth before any backend touch. */
+/** The charset of Django's `SCENE_KEY_PATTERN` (webserver/scenes/models.py), the
+ * authority for scene keys. Skips the meta fetch for paths that can't be a scene;
+ * not an abuse control, since a well-formed unknown key costs the same fetch. */
 const KEY_RE = /^[A-Za-z0-9_-]{2,80}$/;
 const META_TIMEOUT_MS = 800;
 

@@ -4,6 +4,11 @@ import django.core.validators
 import scenes.models
 from django.conf import settings
 from django.db import migrations, models
+from django.db.models.functions import Length
+
+# The `key__length` lookup this migration's CHECK uses (and 0024's reverse
+# re-adds). Registered here so only migrations depend on it.
+models.CharField.register_lookup(Length)
 
 
 class Migration(migrations.Migration):
