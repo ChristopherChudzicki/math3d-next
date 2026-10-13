@@ -1622,6 +1622,36 @@ paths:
       summary: Get Me
       tags:
       - Auth
+  /v1/examples/scenes/:
+    get:
+      operationId: scenes_api_example_scenes
+      parameters:
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          minimum: 1
+          title: Limit
+          type: integer
+      - in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          title: Offset
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedMiniSceneSchema'
+          description: OK
+      summary: Example Scenes
+      tags:
+      - Scenes
   /v1/legacy_scenes/:
     post:
       operationId: scenes_api_create_legacy
@@ -1662,6 +1692,54 @@ paths:
       summary: Get Legacy
       tags:
       - Legacy Scenes
+  /v1/me/scenes/:
+    get:
+      operationId: scenes_api_my_scenes
+      parameters:
+      - in: query
+        name: title
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+      - in: query
+        name: archived
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Archived
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          minimum: 1
+          title: Limit
+          type: integer
+      - in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          title: Offset
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedMiniSceneSchema'
+          description: OK
+      security:
+      - SessionAuth: []
+      summary: My Scenes
+      tags:
+      - Scenes
   /v1/scenes/:
     get:
       operationId: scenes_api_list_scenes
@@ -1725,54 +1803,6 @@ paths:
                 $ref: '#/components/schemas/SceneSchema'
           description: Created
       summary: Create Scene
-      tags:
-      - Scenes
-  /v1/scenes/me/:
-    get:
-      operationId: scenes_api_my_scenes
-      parameters:
-      - in: query
-        name: title
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Title
-      - in: query
-        name: archived
-        required: false
-        schema:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Archived
-      - in: query
-        name: limit
-        required: false
-        schema:
-          default: 20
-          minimum: 1
-          title: Limit
-          type: integer
-      - in: query
-        name: offset
-        required: false
-        schema:
-          default: 0
-          minimum: 0
-          title: Offset
-          type: integer
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PagedMiniSceneSchema'
-          description: OK
-      security:
-      - SessionAuth: []
-      summary: My Scenes
       tags:
       - Scenes
   /v1/scenes/{key}/:

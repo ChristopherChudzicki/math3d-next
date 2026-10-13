@@ -33,6 +33,10 @@ const db = factory({
     id: primaryKey(faker.number.int),
     email: faker.internet.email,
   },
+  exampleScene: {
+    sceneKey: primaryKey(String),
+    position: Number,
+  },
 });
 
 const addUser = (user?: Partial<User>): User => {
@@ -77,6 +81,20 @@ const seedDb = {
   ) => {
     const scene = makeSceneFromItems(items, overrides);
     return addScene(scene);
+  },
+  /**
+   * Create an empty scene listed last among the examples
+   */
+  withExampleScene: (
+    overrides: Partial<SceneRecord> & { title?: string } = {},
+  ) => {
+    const scene = addScene(makeSceneFromItems([], overrides));
+    db.exampleScene.create({
+      sceneKey: scene.key,
+      position: db.exampleScene.count(),
+    });
+    // makeSceneFromItems titles every scene, and the override must be a string.
+    return scene as SceneRecord & { title: string };
   },
   withUser: addUser,
 };

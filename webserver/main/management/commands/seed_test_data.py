@@ -7,7 +7,7 @@ from django.db import transaction
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
 from pydantic_settings import BaseSettings
-from scenes.models import Scene
+from scenes.models import ExampleScene, Scene
 import json
 
 
@@ -62,6 +62,7 @@ def create_test_user(email: str, *, uid: str):
 
 
 TEST_SCENE_COUNT = 100
+EXAMPLE_SCENE_COUNT = 3
 
 GOLDEN_ANGLE = 137.508
 
@@ -105,14 +106,21 @@ class Command(BaseCommand):
                         item["properties"]["color"] = surface_color
             scene.item_order = test_scene["itemOrder"]
             scene.save()
+            return scene
 
         for j in range(scene_count):
             seed_scene(f"Test Scene {j}", user_1, distinct_color(j))
         # Owned by no one, as an anonymous visitor's scenes are.
         seed_scene("Anonymous Scene", None)
+        # Leaves alone a database that already has examples, e.g. pulled ones.
+        if not ExampleScene.objects.exists():
+            for j in range(EXAMPLE_SCENE_COUNT):
+                scene = seed_scene(f"Example Scene {j}", None, distinct_color(j))
+                ExampleScene.objects.create(scene=scene, position=j)
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Seeded {email} with {scene_count} scenes, plus one anonymous scene."
+                f"Seeded {email} with {scene_count} scenes, plus one anonymous "
+                "scene and, if there are none, example scenes."
             )
         )

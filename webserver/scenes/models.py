@@ -171,6 +171,21 @@ class Scene(TimestampedModel):
         return super().save(**kwargs)
 
 
+class ExampleScene(models.Model):
+    """A scene in the Examples list, which is ordered by ``position``."""
+
+    scene = models.OneToOneField(
+        Scene, on_delete=models.CASCADE, related_name="example"
+    )
+    position = models.PositiveSmallIntegerField(unique=True)
+
+    class Meta:
+        ordering = ["position"]
+
+    def __str__(self):
+        return f"{self.position}: {self.scene.key}"
+
+
 class RenderDay(models.Model):
     """One row per UTC day; ``count`` is that day's reservation total (the
     historical usage record — never reset). Bumped by the raw upsert in
