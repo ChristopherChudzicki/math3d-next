@@ -4,6 +4,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 
 from main.management.commands.seed_test_data import create_test_user
+from scenes.factories import ExampleSceneFactory
 from scenes.models import ExampleScene, Scene
 
 
@@ -117,3 +118,14 @@ def test_seeds_examples_once():
         "Example Scene 1",
         "Example Scene 2",
     ]
+
+
+@pytest.mark.django_db
+def test_existing_examples_are_left_alone():
+    """A database with real examples must not get test ones mixed in."""
+    example = ExampleSceneFactory.create()
+    call_command(
+        "seed_test_data", email="seeded@example.com", uid="4242", scene_count=1
+    )
+
+    assert list(ExampleScene.objects.all()) == [example]

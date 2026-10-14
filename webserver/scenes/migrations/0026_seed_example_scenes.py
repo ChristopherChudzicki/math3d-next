@@ -22,8 +22,8 @@ EXAMPLE_KEYS = [
 
 
 def seed(apps, schema_editor):
-    # Keys absent from this database (any but production's, and any example
-    # still only a LegacyScene) are skipped; add those in the admin.
+    # Keys with no Scene row (e.g. a LegacyScene not yet opened, which migrates
+    # it) are skipped; add those in the admin once they exist.
     Scene = apps.get_model("scenes", "Scene")
     ExampleScene = apps.get_model("scenes", "ExampleScene")
     scenes = Scene.objects.in_bulk(EXAMPLE_KEYS, field_name="key")
@@ -35,11 +35,16 @@ def seed(apps, schema_editor):
     )
 
 
+def unseed(apps, schema_editor):
+    ExampleScene = apps.get_model("scenes", "ExampleScene")
+    ExampleScene.objects.filter(scene__key__in=EXAMPLE_KEYS).delete()
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ("scenes", "0025_example_scene"),
     ]
 
     operations = [
-        migrations.RunPython(seed, migrations.RunPython.noop),
+        migrations.RunPython(seed, unseed),
     ]

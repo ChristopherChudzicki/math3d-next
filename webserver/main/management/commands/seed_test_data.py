@@ -112,11 +112,12 @@ class Command(BaseCommand):
             seed_scene(f"Test Scene {j}", user_1, distinct_color(j))
         # Owned by no one, as an anonymous visitor's scenes are.
         seed_scene("Anonymous Scene", None)
-        # Leaves alone a database that already has examples, e.g. pulled ones.
+        # Leaves alone a database that already has examples, e.g. ones 0026
+        # seeded from pulled scenes.
         if not ExampleScene.objects.exists():
             for j in range(EXAMPLE_SCENE_COUNT):
                 scene = seed_scene(f"Example Scene {j}", None, distinct_color(j))
-                ExampleScene.objects.create(scene=scene, position=j)
+                ExampleScene.objects.create(scene=scene, position=10 * (j + 1))
 
         self.stdout.write(
             self.style.SUCCESS(

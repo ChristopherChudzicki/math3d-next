@@ -116,7 +116,7 @@ const usePatchScene = () => {
       queryClient.invalidateQueries({
         queryKey: detailKey(vars.key),
       });
-      // The scene may be an example, whose card shows its title.
+      // The scene may be an example, whose card shows its title and thumbnail.
       queryClient.invalidateQueries({
         queryKey: examplesListKey(),
       });

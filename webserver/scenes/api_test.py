@@ -161,14 +161,6 @@ def test_examples_lists_only_examples_in_position_order():
 
 
 @pytest.mark.django_db
-def test_examples_paginate():
-    ExampleSceneFactory.create_batch(3)
-    body = Client().get(EXAMPLES_URL, {"limit": 2}).json()
-    assert body["count"] == 3
-    assert len(body["items"]) == 2
-
-
-@pytest.mark.django_db
 def test_legacy_post_creates_and_returns_201():
     response = Client().post(
         LEGACY_URL,

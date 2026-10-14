@@ -164,6 +164,9 @@ class Scene(TimestampedModel):
         ]
         ordering = ["id"]
 
+    def __str__(self):
+        return self.key
+
     def save(self, **kwargs):
         # full_clean() validates every field, so update_fields narrows the write
         # but not the validation: an invalid `items` blocks a title-only save.

@@ -60,6 +60,18 @@ test("a failed examples request offers a retry", async () => {
   ).toBeVisible();
 });
 
+test("with no examples, the tab says so", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  server.use(
+    http.get("*/v1/examples/scenes/", () =>
+      HttpResponse.json({ count: 0, items: [] }),
+    ),
+  );
+  renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
+
+  expect(await screen.findByText("No examples yet.")).toBeVisible();
+});
+
 test("signed in, My Scenes is the first tab", async () => {
   const scene = seedDb.withSceneFromItems([]);
   renderTestApp(`/${scene.key}?overlay=scenes&list=examples`, {
