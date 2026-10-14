@@ -61,7 +61,7 @@ from scenes.api import (  # noqa: E402
     scenes_router,
 )
 
-api.add_router("/auth", auth_router, tags=["Auth"])
+api.add_router("/me", auth_router, tags=["Auth"])
 api.add_router("/scenes", scenes_router, tags=["Scenes"])
 api.add_router("/me", me_router, tags=["Scenes"])
 api.add_router("/examples", examples_router, tags=["Scenes"])

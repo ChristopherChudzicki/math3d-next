@@ -60,7 +60,7 @@ export const urls = {
     examplesList: `${BASE_URL}/v1/examples/scenes/`,
   },
   auth: {
-    usersMe: `${BASE_URL}/v1/auth/users/me/`,
+    me: `${BASE_URL}/v1/me/`,
     // allauth headless endpoints
     session: `${BASE_URL}/_allauth/browser/v1/auth/session`,
   },
@@ -216,20 +216,20 @@ export const handlers = [
     return HttpResponse.json({ status: 401 }, { status: 401 });
   }),
   // v1: delete own account (204 No Content; signs the user out)
-  http.delete(urls.auth.usersMe, async () => {
+  http.delete(urls.auth.me, async () => {
     if (!getUser()) {
       return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
     }
     currentUserId = null;
     return new HttpResponse(null, { status: 204 });
   }),
-  // v1: users/me GET. `get_me` gates by hand (`auth=None`, `403: None`) so the
+  // v1: current user (GET). `get_me` gates by hand (`auth=None`, `403: None`) so the
   // CSRF cookie is seeded before the gate — which also means the anonymous 403
   // never reaches main/api.py's AuthenticationError handler and so carries no
   // body. Content-Length is spelled out to match Django's CommonMiddleware:
   // openapi-fetch keys on it to yield `error: undefined` (without it, `""`),
   // the shape useUserMe must survive.
-  http.get<NoParams, ErrorResponseBody | User>(urls.auth.usersMe, async () => {
+  http.get<NoParams, ErrorResponseBody | User>(urls.auth.me, async () => {
     const user = getUser();
     if (!user) {
       return new HttpResponse(null, {

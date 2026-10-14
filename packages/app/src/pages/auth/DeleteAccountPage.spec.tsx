@@ -67,7 +67,7 @@ test("the wrong confirmation phrase does not delete the account", async () => {
 
 test("a failed deletion surfaces the error instead of silently reopening", async () => {
   server.use(
-    http.delete("*/v1/auth/users/me/", () =>
+    http.delete("*/v1/me/", () =>
       HttpResponse.json({ detail: "boom" }, { status: 500 }),
     ),
   );
@@ -99,7 +99,7 @@ test("a 403 sends the user to sign in again instead of a generic failure", async
   // what the redirect reads, and a session that is still good there would keep
   // the dialog where it is.
   server.use(
-    http.delete("*/v1/auth/users/me/", () => {
+    http.delete("*/v1/me/", () => {
       mockAuth.setCurrentUser(null);
       return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
     }),
@@ -133,7 +133,7 @@ test("a 403 with the session intact keeps the dialog beneath the notice", async 
   // A CSRF token that didn't check out: the session is still good, so there
   // is no sign-in to switch to, and the user can try again.
   server.use(
-    http.delete("*/v1/auth/users/me/", () =>
+    http.delete("*/v1/me/", () =>
       HttpResponse.json({ detail: "Forbidden." }, { status: 403 }),
     ),
   );
@@ -172,7 +172,7 @@ test("while the delete is in flight, the dialog can't be closed", async () => {
     release = resolve;
   });
   server.use(
-    http.delete("*/v1/auth/users/me/", async () => {
+    http.delete("*/v1/me/", async () => {
       await gate;
       return HttpResponse.json({ detail: "late" }, { status: 500 });
     }),

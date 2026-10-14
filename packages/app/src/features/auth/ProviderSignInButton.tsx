@@ -35,7 +35,7 @@ const ProviderSignInButton: React.FC<Props> = ({
 }) => {
   const store = useAppStore();
   const location = useLocation();
-  // `users/me` seeds the csrftoken cookie; until it answers, the POST would 403.
+  // `/v1/me/` seeds the csrftoken cookie; until it answers, the POST would 403.
   const ready = useAuthStatus() !== "loading";
   const csrfInput = useRef<HTMLInputElement>(null);
 
