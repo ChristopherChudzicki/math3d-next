@@ -164,11 +164,29 @@ class Scene(TimestampedModel):
         ]
         ordering = ["id"]
 
+    def __str__(self):
+        return self.key
+
     def save(self, **kwargs):
         # full_clean() validates every field, so update_fields narrows the write
         # but not the validation: an invalid `items` blocks a title-only save.
         self.full_clean()
         return super().save(**kwargs)
+
+
+class ExampleScene(models.Model):
+    """A scene in the Examples list, which is ordered by ``position``."""
+
+    scene = models.OneToOneField(
+        Scene, on_delete=models.CASCADE, related_name="example"
+    )
+    position = models.PositiveSmallIntegerField(unique=True)
+
+    class Meta:
+        ordering = ["position"]
+
+    def __str__(self):
+        return f"{self.position}: {self.scene.key}"
 
 
 class RenderDay(models.Model):

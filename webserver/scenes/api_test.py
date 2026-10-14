@@ -8,13 +8,14 @@ from django.core.exceptions import ValidationError
 from django.test import Client
 
 from authentication.factories import CustomUserFactory
-from scenes.factories import SceneFactory
+from scenes.factories import ExampleSceneFactory, SceneFactory
 from scenes.legacy_scene_utils.migrate_scene import migrate_scene
 from scenes.models import LegacyScene, Scene
 from scenes.tests.data import default_scene
 
 LIST_URL = "/v1/scenes/"
-ME_URL = "/v1/scenes/me/"
+ME_URL = "/v1/me/scenes/"
+EXAMPLES_URL = "/v1/examples/scenes/"
 LEGACY_URL = "/v1/legacy_scenes/"
 
 LEGACY_DEHYDRATED_FIXTURE = {
@@ -145,6 +146,18 @@ def test_me_lists_most_recently_modified_first():
     body = client.get(ME_URL).json()
     # Neither id order nor created_date order gives this.
     assert [i["key"] for i in body["items"]] == [first.key, third.key, second.key]
+
+
+@pytest.mark.django_db
+def test_examples_lists_only_examples_in_position_order():
+    second = ExampleSceneFactory.create(position=20)
+    first = ExampleSceneFactory.create(position=10)
+    SceneFactory.create()  # not an example
+    response = Client().get(EXAMPLES_URL)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["count"] == 2
+    assert [i["key"] for i in body["items"]] == [first.scene.key, second.scene.key]
 
 
 @pytest.mark.django_db

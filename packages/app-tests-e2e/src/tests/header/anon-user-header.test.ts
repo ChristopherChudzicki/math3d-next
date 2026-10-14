@@ -18,7 +18,9 @@ test("Does not show username", async ({ page }) => {
   await expect(username).not.toBeVisible();
 });
 
-test("The scenes button opens the Examples tab", async ({ page }) => {
+test("The scenes button opens the Examples tab, listing the examples", async ({
+  page,
+}) => {
   await page.goto("");
 
   await page.getByRole("button", { name: "Open scenes" }).click();
@@ -27,6 +29,8 @@ test("The scenes button opens the Examples tab", async ({ page }) => {
   await expect(
     dialog.getByRole("tab", { name: "Examples", selected: true }),
   ).toBeVisible();
+  // seed_test_data seeds examples into a database that has none.
+  await expect(dialog.getByRole("listitem").first()).toBeVisible();
 });
 
 test("Header and usermenu links", async ({ page }) => {

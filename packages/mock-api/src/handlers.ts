@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import type { PagedMiniSceneSchema, Scene, User } from "@math3d/api";
+import type { MiniScene, PagedMiniSceneSchema, Scene, User } from "@math3d/api";
 import db from "./db";
 
 type ErrorResponseBody = Record<string, string | string[]>;
@@ -28,6 +28,16 @@ const toScene = ({ imageUrl: _imageUrl, ...scene }: DbScene): Scene => ({
   itemOrder: JSON.parse(scene.itemOrder),
 });
 
+const toMiniScene = (s: DbScene): MiniScene => ({
+  title: s.title,
+  key: s.key,
+  author: s.author,
+  archived: s.archived,
+  createdDate: s.createdDate,
+  modifiedDate: s.modifiedDate,
+  imageUrl: s.imageUrl,
+});
+
 const getUser = () => {
   // Session-based auth: check module-level current user
   if (currentUserId !== null) {
@@ -46,7 +56,8 @@ export const urls = {
   scenes: {
     detail: `${BASE_URL}/v1/scenes/:key/`,
     list: `${BASE_URL}/v1/scenes/`,
-    meList: `${BASE_URL}/v1/scenes/me/`,
+    meList: `${BASE_URL}/v1/me/scenes/`,
+    examplesList: `${BASE_URL}/v1/examples/scenes/`,
   },
   auth: {
     usersMe: `${BASE_URL}/v1/auth/users/me/`,
@@ -80,18 +91,29 @@ export const handlers = [
         .sort(
           (a, b) => Date.parse(b.modifiedDate) - Date.parse(a.modifiedDate),
         );
-      const items = scenes.slice(offset, offset + limit).map((s) => ({
-        title: s.title,
-        key: s.key,
-        author: s.author,
-        archived: s.archived,
-        createdDate: s.createdDate,
-        modifiedDate: s.modifiedDate,
-        imageUrl: s.imageUrl,
-      }));
       return HttpResponse.json({
         count: scenes.length,
-        items,
+        items: scenes.slice(offset, offset + limit).map(toMiniScene),
+      });
+    },
+  ),
+  // v1: the examples, in position order, paginated as the real endpoint does.
+  http.get<NoParams, PagedMiniSceneSchema>(
+    urls.scenes.examplesList,
+    ({ request }) => {
+      const params = new URL(request.url).searchParams;
+      const offset = Number(params.get("offset") ?? 0);
+      const limit = Number(params.get("limit") ?? 20);
+      const scenes = db.exampleScene
+        .getAll()
+        .sort((a, b) => a.position - b.position)
+        .map((e) =>
+          db.scene.findFirst({ where: { key: { equals: e.sceneKey } } }),
+        )
+        .filter((s): s is DbScene => s !== null);
+      return HttpResponse.json({
+        count: scenes.length,
+        items: scenes.slice(offset, offset + limit).map(toMiniScene),
       });
     },
   ),
