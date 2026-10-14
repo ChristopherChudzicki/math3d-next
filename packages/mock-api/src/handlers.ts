@@ -223,12 +223,12 @@ export const handlers = [
     currentUserId = null;
     return new HttpResponse(null, { status: 204 });
   }),
-  // v1: current user (GET). `get_me` gates by hand (`auth=None`, `403: None`) so the
-  // CSRF cookie is seeded before the gate — which also means the anonymous 403
-  // never reaches main/api.py's AuthenticationError handler and so carries no
-  // body. Content-Length is spelled out to match Django's CommonMiddleware:
-  // openapi-fetch keys on it to yield `error: undefined` (without it, `""`),
-  // the shape useUserMe must survive.
+  // v1: current user (GET). `get_me` gates by hand (`auth=None`, `403: None`)
+  // so the CSRF cookie is seeded before the gate — which also means the
+  // anonymous 403 never reaches main/api.py's AuthenticationError handler and
+  // so carries no body. Content-Length is spelled out to match Django's
+  // CommonMiddleware: openapi-fetch keys on it to yield `error: undefined`
+  // (without it, `""`), the shape useUserMe must survive.
   http.get<NoParams, ErrorResponseBody | User>(urls.auth.me, async () => {
     const user = getUser();
     if (!user) {
