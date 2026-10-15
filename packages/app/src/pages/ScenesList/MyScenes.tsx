@@ -24,6 +24,7 @@ import { u } from "@/util/styles";
 import { useAuthStatus } from "@/features/auth";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import { UNTITLED, sceneDisplayName } from "@/features/scene/sceneTitle";
+import { dismissToast, showToast } from "@/features/toasts";
 import DeleteSceneDialog from "./DeleteSceneDialog";
 import SceneCard from "./SceneCard/SceneCard";
 import { ListType, sceneHref } from "./constants";
@@ -66,7 +67,9 @@ const MyScenesList: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<MiniScene | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteFailed, setDeleteFailed] = useState(false);
-  const patch = usePatchScene();
+  // Archive builds its own toast: the copy names the scene, which the
+  // mutation's variables don't carry.
+  const patch = usePatchScene({ meta: { errorToast: false } });
   // A failed delete shows in its confirmation dialog.
   const destroy = useDestroyScene({ meta: { errorToast: false } });
 
@@ -135,18 +138,18 @@ const MyScenesList: React.FC = () => {
     const archiving = !scene.archived;
     const disappears = archiving && !includeArchived;
     const focusKey = neighborKey(scene.key);
+    const failure = `Couldn’t ${archiving ? "archive" : "unarchive"} “${titleOf(scene)}”. Try again.`;
     try {
       // Resolves after the list refetches, so a removed card is gone by then.
       await patch.mutateAsync({
         key: scene.key,
         patch: { archived: archiving },
       });
+      dismissToast(failure);
       announce(`${archiving ? "Archived" : "Unarchived"} ${titleOf(scene)}`);
       if (disappears) elementFor(focusKey)?.focus();
     } catch {
-      announce(
-        `Couldn't ${archiving ? "archive" : "unarchive"} ${titleOf(scene)}`,
-      );
+      showToast(failure);
     }
   };
 
