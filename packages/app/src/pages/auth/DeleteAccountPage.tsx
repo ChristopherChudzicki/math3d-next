@@ -26,7 +26,8 @@ const DeleteAccountPage: React.FC<OverlayProps> = ({ children }) => {
   const { open, close } = useOverlay();
   const { open: openSignIn } = useSignInDialog();
   const isAuthenticated = useAuthStatus();
-  const deleteAccount = useUserMeDelete();
+  // Failures show in the form, or as the 403 notice below.
+  const deleteAccount = useUserMeDelete({ meta: { errorToast: false } });
   const { add: addNotification } = useNotifications();
   const navigate = useNavigate();
   // While the 403 notice shows, sign-in waits: a dialog opened over the notice

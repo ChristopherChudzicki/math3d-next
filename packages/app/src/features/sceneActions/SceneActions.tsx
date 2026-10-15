@@ -71,7 +71,9 @@ const SceneActions: React.FC = () => {
   const { data: me } = useUserMe();
   const store = useAppStore();
   const dispatch = useAppDispatch();
-  const patchScene = usePatchScene();
+  const patchScene = usePatchScene({
+    meta: { errorToast: "Couldn’t save your changes. Try again." },
+  });
   const key = useAppSelector(select.key);
   const author = useAppSelector(select.author);
   const dirty = useAppSelector(select.dirty);

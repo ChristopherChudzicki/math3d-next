@@ -6,6 +6,7 @@ import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import {
   act,
   countRequests,
+  expectToast,
   renameScene,
   renderTestApp,
   screen,
@@ -175,6 +176,7 @@ test("a failed save frees the button and leaves the edit unsaved", async () => {
     "true",
   );
   expect(store.getState().scene.dirty).toBe(true);
+  await expectToast("Couldn’t save your changes. Try again.");
 });
 
 test("an owned scene without edits copies its link", async () => {

@@ -67,7 +67,8 @@ const MyScenesList: React.FC = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteFailed, setDeleteFailed] = useState(false);
   const patch = usePatchScene();
-  const destroy = useDestroyScene();
+  // A failed delete shows in its confirmation dialog.
+  const destroy = useDestroyScene({ meta: { errorToast: false } });
 
   const filterRef = useRef<HTMLInputElement>(null);
   // Where the delete dialog returns focus: a neighbor's card after a delete
