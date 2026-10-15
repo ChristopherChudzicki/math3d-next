@@ -2,6 +2,7 @@ import React, { useCallback, useEffect } from "react";
 import { useLogout } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
 import { AlertDialog } from "@/ui/AlertDialog";
+import Alert from "@/ui/Alert";
 import Button from "@/ui/Button";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import type { OverlayProps } from "@/features/overlays/useOverlay";
@@ -9,12 +10,12 @@ import type { OverlayProps } from "@/features/overlays/useOverlay";
 const LogoutPage: React.FC<OverlayProps> = ({ children }) => {
   const { close } = useOverlay();
   const isAuthenticated = useAuthStatus();
-  const logout = useLogout();
-  const handleSubmit = useCallback(async () => {
-    await logout.mutateAsync();
-    // mutateAsync awaits onSuccess which resets queries (including
+  // A failure shows in this dialog, which stays open for a retry.
+  const logout = useLogout({ meta: { errorToast: false } });
+  const handleSubmit = useCallback(() => {
+    // Runs after the hook's onSuccess, which resets queries (including
     // useUserMe), so auth status is already up-to-date.
-    close();
+    logout.mutate(undefined, { onSuccess: close });
   }, [close, logout]);
   useEffect(() => {
     // Only redirect if we know the user is NOT authenticated.
@@ -35,6 +36,9 @@ const LogoutPage: React.FC<OverlayProps> = ({ children }) => {
         <AlertDialog.Description>
           Are you sure you want to sign out?
         </AlertDialog.Description>
+        {logout.isError ? (
+          <Alert severity="error">Couldn’t sign out. Try again.</Alert>
+        ) : null}
         <AlertDialog.Actions>
           <AlertDialog.Close render={<Button>Cancel</Button>} />
           <Button
