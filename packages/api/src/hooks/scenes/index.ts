@@ -8,6 +8,7 @@ import {
 import invariant from "tiny-invariant";
 import type { components } from "../../generated-v1";
 import { unwrap, v1Client } from "../util";
+import type { MutationHookOptions } from "../queryMeta";
 
 type Schemas = components["schemas"];
 type SceneCreateSchema = Schemas["SceneCreateSchema"];
@@ -72,9 +73,10 @@ const useInfiniteScenesMe = (
   });
 };
 
-const useCreateScene = () => {
+const useCreateScene = ({ meta }: MutationHookOptions = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
+    meta,
     mutationFn: (data: SceneCreateSchema) =>
       unwrap(v1Client.POST("/v1/scenes/", { body: data })),
     onSuccess: () => {
@@ -85,9 +87,10 @@ const useCreateScene = () => {
   });
 };
 
-const usePatchScene = () => {
+const usePatchScene = ({ meta }: MutationHookOptions = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
+    meta,
     mutationFn: ({ key, patch }: { key: string; patch: ScenePatchSchema }) =>
       unwrap(
         v1Client.PATCH("/v1/scenes/{key}/", {
@@ -109,9 +112,10 @@ const usePatchScene = () => {
   });
 };
 
-const useDestroyScene = () => {
+const useDestroyScene = ({ meta }: MutationHookOptions = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
+    meta,
     mutationFn: (key: string) =>
       unwrap(
         v1Client.DELETE("/v1/scenes/{key}/", { params: { path: { key } } }),
