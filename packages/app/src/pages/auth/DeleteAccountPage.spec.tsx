@@ -3,7 +3,14 @@ import * as Sentry from "@sentry/react";
 import { http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { mockAuth } from "@math3d/mock-api";
-import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import {
+  expectToast,
+  renderTestApp,
+  screen,
+  user,
+  waitFor,
+  within,
+} from "@/test_util";
 
 vi.mock("@sentry/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@sentry/react")>()),
@@ -119,17 +126,13 @@ test("a 403 sends the user to sign in again instead of a generic failure", async
     within(dialog).getByRole("button", { name: "Delete Account" }),
   );
 
-  // The notice comes first; a sign-in dialog opened over it would hide it.
-  const notice = await screen.findByRole("alertdialog", {
-    name: "Could not delete your account",
-  });
-  expect(location.current.search).not.toContain("signin");
-
-  await user.click(within(notice).getByRole("button", { name: "OK" }));
   await waitFor(() => expect(location.current.search).toBe("?signin="));
+  await expectToast(
+    "Your sign-in couldn’t be verified, so nothing was deleted. Try again.",
+  );
 });
 
-test("a 403 with the session intact keeps the dialog beneath the notice", async () => {
+test("a 403 with the session intact keeps the dialog open under the toast", async () => {
   // A CSRF token that didn't check out: the session is still good, so there
   // is no sign-in to switch to, and the user can try again.
   server.use(
@@ -151,13 +154,9 @@ test("a 403 with the session intact keeps the dialog beneath the notice", async 
     within(dialog).getByRole("button", { name: "Delete Account" }),
   );
 
-  const notice = await screen.findByRole("alertdialog", {
-    name: "Could not delete your account",
-  });
-  // Clicking in the notice is outside the dialog beneath; it mustn't close it.
-  await user.click(within(notice).getByRole("button", { name: "OK" }));
-
-  await waitFor(() => expect(notice).not.toBeInTheDocument());
+  await expectToast(
+    "Your sign-in couldn’t be verified, so nothing was deleted. Try again.",
+  );
   // The same dialog, never remounted: the typed phrase is still there.
   expect(dialog).toBeInTheDocument();
   expect(within(dialog).getByLabelText("Confirm")).toHaveValue(

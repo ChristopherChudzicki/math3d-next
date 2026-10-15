@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import * as yup from "yup";
 import { useNavigate } from "react-router";
 import { isApiError, useUserMeDelete } from "@math3d/api";
@@ -14,6 +14,7 @@ import { TextButton } from "@/ui/TextLink";
 import composeRefs from "@/util/composeRefs";
 import { useValidatedForm } from "@/util/forms";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
+import { showToast } from "@/features/toasts";
 import styles from "./DeleteAccountPage.module.css";
 
 const CONFIRM_PROMPT = "Yes, permanently delete";
@@ -26,13 +27,10 @@ const DeleteAccountPage: React.FC<OverlayProps> = ({ children }) => {
   const { open, close } = useOverlay();
   const { open: openSignIn } = useSignInDialog();
   const isAuthenticated = useAuthStatus();
-  // Failures show in the form, or as the 403 notice below.
+  // Failures show in the form, or as the 403 toast below.
   const deleteAccount = useUserMeDelete({ meta: { errorToast: false } });
   const { add: addNotification } = useNotifications();
   const navigate = useNavigate();
-  // While the 403 notice shows, sign-in waits: a dialog opened over the notice
-  // would hide it.
-  const [noticeOpen, setNoticeOpen] = useState(false);
   const confirmRef = useRef<HTMLInputElement>(null);
   const {
     register,
@@ -49,14 +47,10 @@ const DeleteAccountPage: React.FC<OverlayProps> = ({ children }) => {
   // replaces this dialog rather than stacking on it: Google offers the account
   // chooser, and a different account would return to a delete dialog.
   useEffect(() => {
-    if (
-      isAuthenticated === "unauthenticated" &&
-      !deleteAccount.isSuccess &&
-      !noticeOpen
-    ) {
+    if (isAuthenticated === "unauthenticated" && !deleteAccount.isSuccess) {
       openSignIn({ replaceOverlay: true });
     }
-  }, [isAuthenticated, openSignIn, deleteAccount.isSuccess, noticeOpen]);
+  }, [isAuthenticated, openSignIn, deleteAccount.isSuccess]);
 
   const onSubmit = handleSubmit(async () => {
     try {
@@ -67,15 +61,11 @@ const DeleteAccountPage: React.FC<OverlayProps> = ({ children }) => {
       if (!isApiError(err, [403])) throw err;
       // mutateAsync awaits onError, which has already cleared the cached
       // identity; when the session is what failed, the effect above switches
-      // this dialog to sign-in once the notice closes. A CSRF token that did
-      // not check out is answered 403 too, so the message names neither cause.
-      setNoticeOpen(true);
-      const { confirmed } = addNotification({
-        title: "Could not delete your account",
-        body: "Your sign-in could not be verified, so nothing was deleted. Try again — you may be asked to sign in first.",
-        type: "alert",
-      });
-      confirmed.then(() => setNoticeOpen(false));
+      // this dialog to sign-in, under the toast. A CSRF token that did not
+      // check out is answered 403 too, so the message names neither cause.
+      showToast(
+        "Your sign-in couldn’t be verified, so nothing was deleted. Try again.",
+      );
       return;
     }
     // mutateAsync awaits onSuccess, which resets queries, so auth status is
