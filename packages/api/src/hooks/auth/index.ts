@@ -36,8 +36,7 @@ const useUserMe = () => {
   return useQuery({
     queryKey: keys.userMe,
     queryFn: async () => {
-      const { data, error, response } =
-        await v1Client.GET("/v1/auth/users/me/");
+      const { data, error, response } = await v1Client.GET("/v1/me/");
       // Key on HTTP status, NOT error-body presence: a 401/403 may carry an
       // empty/unparseable body, in which case openapi-fetch leaves `error`
       // undefined. We must still return null: a 401/403 means signed out, not a
@@ -52,14 +51,14 @@ const useUserMe = () => {
 const useUserMeDelete = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => unwrap(v1Client.DELETE("/v1/auth/users/me/")),
+    mutationFn: () => unwrap(v1Client.DELETE("/v1/me/")),
     onSuccess: async () => {
       await resetOnAuthChange(queryClient);
     },
     // Two things answer 403 here: no session, and a session whose CSRF token
     // did not check out (authentication/api_test.py::test_delete_enforces_csrf).
     // Clearing the cache serves both — it moves `useAuthStatus` off
-    // "authenticated" when the session is gone, and refetches `users/me`, which
+    // "authenticated" when the session is gone, and refetches `/v1/me/`, which
     // seeds `csrftoken`, when it is not.
     onError: async (error) => {
       if (isApiError(error, [403])) {

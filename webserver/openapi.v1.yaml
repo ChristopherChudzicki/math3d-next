@@ -1595,33 +1595,6 @@ info:
   version: 1.0.0
 openapi: 3.1.0
 paths:
-  /v1/auth/users/me/:
-    delete:
-      operationId: authentication_api_delete_me
-      parameters: []
-      responses:
-        '204':
-          description: No Content
-      security:
-      - SessionAuth: []
-      summary: Delete Me
-      tags:
-      - Auth
-    get:
-      operationId: authentication_api_get_me
-      parameters: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserSchema'
-          description: OK
-        '403':
-          description: Forbidden
-      summary: Get Me
-      tags:
-      - Auth
   /v1/examples/scenes/:
     get:
       operationId: scenes_api_example_scenes
@@ -1692,6 +1665,33 @@ paths:
       summary: Get Legacy
       tags:
       - Legacy Scenes
+  /v1/me/:
+    delete:
+      operationId: authentication_api_delete_me
+      parameters: []
+      responses:
+        '204':
+          description: No Content
+      security:
+      - SessionAuth: []
+      summary: Delete Me
+      tags:
+      - Auth
+    get:
+      operationId: authentication_api_get_me
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSchema'
+          description: OK
+        '403':
+          description: Forbidden
+      summary: Get Me
+      tags:
+      - Auth
   /v1/me/scenes/:
     get:
       operationId: scenes_api_my_scenes
