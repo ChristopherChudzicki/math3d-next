@@ -17,6 +17,9 @@ vi.mock("@sentry/react", async (importOriginal) => ({
   captureException: vi.fn(),
 }));
 
+const FORBIDDEN_TOAST =
+  "Your sign-in couldn’t be verified, so nothing was deleted. Try again.";
+
 test("If not authenticated, switches to the sign-in dialog", async () => {
   const { location } = renderTestApp("/?overlay=delete-account");
   // Not stacked: whoever signs in might be a different account.
@@ -127,9 +130,7 @@ test("a 403 sends the user to sign in again instead of a generic failure", async
   );
 
   await waitFor(() => expect(location.current.search).toBe("?signin="));
-  await expectToast(
-    "Your sign-in couldn’t be verified, so nothing was deleted. Try again.",
-  );
+  await expectToast(FORBIDDEN_TOAST);
 });
 
 test("a 403 with the session intact keeps the dialog open under the toast", async () => {
@@ -154,15 +155,52 @@ test("a 403 with the session intact keeps the dialog open under the toast", asyn
     within(dialog).getByRole("button", { name: "Delete Account" }),
   );
 
-  await expectToast(
-    "Your sign-in couldn’t be verified, so nothing was deleted. Try again.",
-  );
+  await expectToast(FORBIDDEN_TOAST);
   // The same dialog, never remounted: the typed phrase is still there.
   expect(dialog).toBeInTheDocument();
   expect(within(dialog).getByLabelText("Confirm")).toHaveValue(
     "Yes, permanently delete",
   );
   expect(location.current.search).toBe("?overlay=delete-account");
+
+  // Dismissing the toast is a press outside the dialog; it mustn't close it.
+  // Close stays aria-hidden until hovering expands the toast.
+  const region = screen.getByRole("region", { name: "Notifications" });
+  await user.hover(within(region).getByText(FORBIDDEN_TOAST));
+  await user.click(within(region).getByRole("button", { name: "Dismiss" }));
+  await waitFor(() =>
+    expect(within(region).queryByText(FORBIDDEN_TOAST)).toBeNull(),
+  );
+  expect(dialog).toBeInTheDocument();
+});
+
+test("a successful retry after a 403 clears the toast", async () => {
+  server.use(
+    http.delete(
+      "*/v1/auth/users/me/",
+      () => HttpResponse.json({ detail: "Forbidden." }, { status: 403 }),
+      { once: true },
+    ),
+  );
+  renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
+  const dialog = await screen.findByRole("dialog", {
+    name: "Delete Account",
+  });
+  await user.type(
+    within(dialog).getByLabelText("Confirm"),
+    "Yes, permanently delete",
+  );
+  const submit = within(dialog).getByRole("button", { name: "Delete Account" });
+  await user.click(submit);
+  await expectToast(FORBIDDEN_TOAST);
+
+  await user.click(submit);
+
+  await screen.findByRole("alertdialog", { name: "Account Deleted" });
+  const region = screen.getByRole("region", { name: "Notifications" });
+  await waitFor(() =>
+    expect(within(region).queryByText(FORBIDDEN_TOAST)).toBeNull(),
+  );
 });
 
 test("while the delete is in flight, the dialog can't be closed", async () => {

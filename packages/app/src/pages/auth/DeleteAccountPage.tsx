@@ -14,10 +14,12 @@ import { TextButton } from "@/ui/TextLink";
 import composeRefs from "@/util/composeRefs";
 import { useValidatedForm } from "@/util/forms";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
-import { showToast } from "@/features/toasts";
+import { dismissToast, showToast } from "@/features/toasts";
 import styles from "./DeleteAccountPage.module.css";
 
 const CONFIRM_PROMPT = "Yes, permanently delete";
+const FORBIDDEN_TOAST =
+  "Your sign-in couldn’t be verified, so nothing was deleted. Try again.";
 
 const schema = yup.object({
   confirm: yup.string().required().oneOf([CONFIRM_PROMPT]),
@@ -63,11 +65,10 @@ const DeleteAccountPage: React.FC<OverlayProps> = ({ children }) => {
       // identity; when the session is what failed, the effect above switches
       // this dialog to sign-in, under the toast. A CSRF token that did not
       // check out is answered 403 too, so the message names neither cause.
-      showToast(
-        "Your sign-in couldn’t be verified, so nothing was deleted. Try again.",
-      );
+      showToast(FORBIDDEN_TOAST);
       return;
     }
+    dismissToast(FORBIDDEN_TOAST);
     // mutateAsync awaits onSuccess, which resets queries, so auth status is
     // already up-to-date.
     addNotification({
