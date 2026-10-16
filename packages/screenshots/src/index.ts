@@ -130,13 +130,16 @@ export default {
       // Not the requested version: its render may still be in flight, and a
       // day-long cache would pin this image to the new URL.
       const current = isCurrentRender(cached, searchParams.get("v"));
-      return new Response(cached.body, {
-        status: 200,
-        headers: {
-          "content-type": "image/png",
-          "cache-control": `public, max-age=${current ? 86400 : 60}`,
-        },
+      const headers = new Headers({
+        "content-type": "image/png",
+        "cache-control": `public, max-age=${current ? 86400 : 60}`,
       });
+      // Which render this is: a hit of another version is a 200 too, so the
+      // status can't say.
+      const { version, renderedAt } = cached.customMetadata ?? {};
+      if (version !== undefined) headers.set("x-render-version", version);
+      if (renderedAt !== undefined) headers.set("x-rendered-at", renderedAt);
+      return new Response(cached.body, { status: 200, headers });
     }
 
     return serveMiss();

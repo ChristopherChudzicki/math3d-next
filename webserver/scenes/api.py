@@ -23,6 +23,8 @@ from scenes.schemas import (
 from scenes.screenshots import schedule_render
 
 scenes_router = Router()
+me_router = Router()
+examples_router = Router()
 
 
 def _require_owner(scene: Scene, request, action: str) -> None:
@@ -37,14 +39,22 @@ def list_scenes(request, filters: SceneFilterSchema = Query(...)):
     return filters.filter(Scene.objects.all())
 
 
-@scenes_router.get(
-    "/me/", response=List[MiniSceneSchema], auth=session_auth, by_alias=True
+@me_router.get(
+    "/scenes/", response=List[MiniSceneSchema], auth=session_auth, by_alias=True
 )
 @paginate(LimitOffsetPagination)
 def my_scenes(request, filters: SceneFilterSchema = Query(...)):
     # -id breaks modified_date ties so pages don't overlap or skip scenes.
     scenes = Scene.objects.filter(author_id=request.user.id)
     return filters.filter(scenes).order_by("-modified_date", "-id")
+
+
+@examples_router.get(
+    "/scenes/", response=List[MiniSceneSchema], auth=None, by_alias=True
+)
+@paginate(LimitOffsetPagination)
+def example_scenes(request):
+    return Scene.objects.filter(example__isnull=False).order_by("example__position")
 
 
 @scenes_router.post("/", response={201: SceneSchema}, auth=None, by_alias=True)

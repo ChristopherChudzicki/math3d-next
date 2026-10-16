@@ -366,7 +366,7 @@ test("no scene action is offered until the route's scene has loaded", async () =
 });
 
 test("no scene action is offered while auth is still loading", async () => {
-  server.use(http.get(urls.auth.usersMe, () => delay("infinite")));
+  server.use(http.get(urls.auth.me, () => delay("infinite")));
   renderTestApp("/");
 
   await screen.findByRole("heading", { level: 1 });

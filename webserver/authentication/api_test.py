@@ -4,7 +4,7 @@ from django.test import Client
 from authentication.factories import CustomUserFactory
 from authentication.models import CustomUser
 
-ME_URL = "/v1/auth/users/me/"
+ME_URL = "/v1/me/"
 
 
 @pytest.mark.django_db

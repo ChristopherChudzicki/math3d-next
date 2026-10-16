@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import type { PagedMiniSceneSchema, Scene, User } from "@math3d/api";
+import type { MiniScene, PagedMiniSceneSchema, Scene, User } from "@math3d/api";
 import db from "./db";
 
 type ErrorResponseBody = Record<string, string | string[]>;
@@ -28,6 +28,16 @@ const toScene = ({ imageUrl: _imageUrl, ...scene }: DbScene): Scene => ({
   itemOrder: JSON.parse(scene.itemOrder),
 });
 
+const toMiniScene = (s: DbScene): MiniScene => ({
+  title: s.title,
+  key: s.key,
+  author: s.author,
+  archived: s.archived,
+  createdDate: s.createdDate,
+  modifiedDate: s.modifiedDate,
+  imageUrl: s.imageUrl,
+});
+
 const getUser = () => {
   // Session-based auth: check module-level current user
   if (currentUserId !== null) {
@@ -46,10 +56,11 @@ export const urls = {
   scenes: {
     detail: `${BASE_URL}/v1/scenes/:key/`,
     list: `${BASE_URL}/v1/scenes/`,
-    meList: `${BASE_URL}/v1/scenes/me/`,
+    meList: `${BASE_URL}/v1/me/scenes/`,
+    examplesList: `${BASE_URL}/v1/examples/scenes/`,
   },
   auth: {
-    usersMe: `${BASE_URL}/v1/auth/users/me/`,
+    me: `${BASE_URL}/v1/me/`,
     // allauth headless endpoints
     session: `${BASE_URL}/_allauth/browser/v1/auth/session`,
   },
@@ -80,18 +91,29 @@ export const handlers = [
         .sort(
           (a, b) => Date.parse(b.modifiedDate) - Date.parse(a.modifiedDate),
         );
-      const items = scenes.slice(offset, offset + limit).map((s) => ({
-        title: s.title,
-        key: s.key,
-        author: s.author,
-        archived: s.archived,
-        createdDate: s.createdDate,
-        modifiedDate: s.modifiedDate,
-        imageUrl: s.imageUrl,
-      }));
       return HttpResponse.json({
         count: scenes.length,
-        items,
+        items: scenes.slice(offset, offset + limit).map(toMiniScene),
+      });
+    },
+  ),
+  // v1: the examples, in position order, paginated as the real endpoint does.
+  http.get<NoParams, PagedMiniSceneSchema>(
+    urls.scenes.examplesList,
+    ({ request }) => {
+      const params = new URL(request.url).searchParams;
+      const offset = Number(params.get("offset") ?? 0);
+      const limit = Number(params.get("limit") ?? 20);
+      const scenes = db.exampleScene
+        .getAll()
+        .sort((a, b) => a.position - b.position)
+        .map((e) =>
+          db.scene.findFirst({ where: { key: { equals: e.sceneKey } } }),
+        )
+        .filter((s): s is DbScene => s !== null);
+      return HttpResponse.json({
+        count: scenes.length,
+        items: scenes.slice(offset, offset + limit).map(toMiniScene),
       });
     },
   ),
@@ -194,20 +216,20 @@ export const handlers = [
     return HttpResponse.json({ status: 401 }, { status: 401 });
   }),
   // v1: delete own account (204 No Content; signs the user out)
-  http.delete(urls.auth.usersMe, async () => {
+  http.delete(urls.auth.me, async () => {
     if (!getUser()) {
       return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
     }
     currentUserId = null;
     return new HttpResponse(null, { status: 204 });
   }),
-  // v1: users/me GET. `get_me` gates by hand (`auth=None`, `403: None`) so the
-  // CSRF cookie is seeded before the gate — which also means the anonymous 403
-  // never reaches main/api.py's AuthenticationError handler and so carries no
-  // body. Content-Length is spelled out to match Django's CommonMiddleware:
-  // openapi-fetch keys on it to yield `error: undefined` (without it, `""`),
-  // the shape useUserMe must survive.
-  http.get<NoParams, ErrorResponseBody | User>(urls.auth.usersMe, async () => {
+  // v1: current user (GET). `get_me` gates by hand (`auth=None`, `403: None`)
+  // so the CSRF cookie is seeded before the gate — which also means the
+  // anonymous 403 never reaches main/api.py's AuthenticationError handler and
+  // so carries no body. Content-Length is spelled out to match Django's
+  // CommonMiddleware: openapi-fetch keys on it to yield `error: undefined`
+  // (without it, `""`), the shape useUserMe must survive.
+  http.get<NoParams, ErrorResponseBody | User>(urls.auth.me, async () => {
     const user = getUser();
     if (!user) {
       return new HttpResponse(null, {

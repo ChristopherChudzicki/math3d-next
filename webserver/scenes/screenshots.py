@@ -9,6 +9,7 @@ exceed reservations, reservations never exceed the caps.
 import json
 import logging
 import urllib.request
+from enum import StrEnum
 from typing import Optional
 from urllib.parse import quote, urlencode
 
@@ -73,10 +74,11 @@ def scene_image_url(key: str, version: str) -> Optional[str]:
     )
 
 
-def nudge_render(key: str, version: str) -> None:
+def nudge_render(key: str, version: str) -> bool:
     """Best-effort fire at the Worker's POST /render (secret-gated → 202).
-    ~2s timeout, no retry. Swallows transport errors — the render is a
-    best-effort side effect of the save."""
+    ~2s timeout, no retry. Swallows every failure (transport or non-2xx) — the
+    render is a best-effort side effect of the save. True iff the Worker
+    accepted it."""
     req = urllib.request.Request(
         f"{settings.SCREENSHOTS_ORIGIN}/render",
         data=json.dumps({"key": key, "version": version}).encode(),
@@ -93,9 +95,19 @@ def nudge_render(key: str, version: str) -> None:
         # Log-attribution only (a distinct line from a reserve failure), NOT the
         # isolation guard — maybe_render's outer try is what protects the save.
         logger.error("nudge_render failed for key=%s", key, exc_info=True)
+        return False
+    return True
 
 
-def maybe_render(key: str, version: str) -> None:
+class RenderOutcome(StrEnum):
+    DARK = "dark"
+    OVER_CAP = "over cap"
+    NUDGED = "nudged"
+    NUDGE_FAILED = "nudge failed"
+    ERROR = "error"
+
+
+def maybe_render(key: str, version: str) -> RenderOutcome:
     """Reserve a slot and nudge the render Worker. Fully isolated — runs inline
     via on_commit in autocommit views (scenes/api.py), so it must never
     propagate: a failure here must still let the save return 2xx."""
@@ -103,12 +115,15 @@ def maybe_render(key: str, version: str) -> None:
         # Both must be set, or the feature is dark: an origin without a secret
         # would reserve a slot then 403 at the Worker, burning cap for nothing.
         if not (settings.SCREENSHOTS_ORIGIN and settings.RENDER_SECRET):
-            return
+            return RenderOutcome.DARK
         if not reserve_render_slot():  # over cap → decline (coverage, not spend)
-            return
-        nudge_render(key, version)
+            return RenderOutcome.OVER_CAP
+        if not nudge_render(key, version):
+            return RenderOutcome.NUDGE_FAILED
+        return RenderOutcome.NUDGED
     except Exception:
         logger.error("maybe_render failed for key=%s", key, exc_info=True)
+        return RenderOutcome.ERROR
 
 
 def schedule_render(scene: Scene) -> None:

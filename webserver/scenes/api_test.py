@@ -8,13 +8,14 @@ from django.core.exceptions import ValidationError
 from django.test import Client
 
 from authentication.factories import CustomUserFactory
-from scenes.factories import SceneFactory
+from scenes.factories import ExampleSceneFactory, SceneFactory
 from scenes.legacy_scene_utils.migrate_scene import migrate_scene
 from scenes.models import LegacyScene, Scene
 from scenes.tests.data import default_scene
 
 LIST_URL = "/v1/scenes/"
-ME_URL = "/v1/scenes/me/"
+ME_URL = "/v1/me/scenes/"
+EXAMPLES_URL = "/v1/examples/scenes/"
 LEGACY_URL = "/v1/legacy_scenes/"
 
 LEGACY_DEHYDRATED_FIXTURE = {
@@ -145,6 +146,18 @@ def test_me_lists_most_recently_modified_first():
     body = client.get(ME_URL).json()
     # Neither id order nor created_date order gives this.
     assert [i["key"] for i in body["items"]] == [first.key, third.key, second.key]
+
+
+@pytest.mark.django_db
+def test_examples_lists_only_examples_in_position_order():
+    second = ExampleSceneFactory.create(position=20)
+    first = ExampleSceneFactory.create(position=10)
+    SceneFactory.create()  # not an example
+    response = Client().get(EXAMPLES_URL)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["count"] == 2
+    assert [i["key"] for i in body["items"]] == [first.scene.key, second.scene.key]
 
 
 @pytest.mark.django_db
@@ -319,11 +332,11 @@ def test_get_legacy_key_migrates_then_returns_scene():
 
 
 @pytest.mark.django_db
-def test_get_reserved_legacy_key_returns_404_not_500():
-    # A legacy scene with a reserved key must not 500 the GET (constraint blocks creation).
+def test_get_invalid_legacy_key_returns_404_not_500():
+    # A legacy scene with an invalid key must not 500 the GET (constraint blocks creation).
     # IMPORTANT: dehydrated must be a *realistic* blob — migrate_scene()/set_defaults()
     # dereferences dehydrated["sortableTree"], ["metadata"]["title"], ["metadata"]["creationDate"];
-    # an empty {} raises KeyError (500) BEFORE the reserved-key ValidationError path is reached.
+    # an empty {} raises KeyError (500) BEFORE the invalid-key ValidationError path is reached.
     # Reuse the dehydrated payload from the existing
     # `test_get_legacy_key_migrates_then_returns_scene` (api_test.py), but with key="a".
     LegacyScene.objects.create(key="a", dehydrated=LEGACY_DEHYDRATED_FIXTURE)
@@ -334,7 +347,7 @@ def test_get_reserved_legacy_key_returns_404_not_500():
 @pytest.mark.django_db
 def test_migrate_scene_reraises_non_key_validation_error(monkeypatch):
     # A legacy scene with a valid key but invalid items must fail loudly — the
-    # reserved-key skip path must not swallow unrelated validation errors and
+    # invalid-key skip path must not swallow unrelated validation errors and
     # silently drop the scene (which would surface as a misleading 404).
     # migrate_scene mutates `dehydrated` in place.
     legacy = LegacyScene.objects.create(

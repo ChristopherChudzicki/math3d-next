@@ -15,7 +15,7 @@ def test_authentication_error_maps_to_403_forbidden_body():
     # Global handler (main/api.py) maps Ninja's AuthenticationError to a 403 with a
     # DRF-compatible body, instead of Ninja's default 401. Exercised here via an
     # anonymous hit on a session-auth route.
-    response = Client().get("/v1/scenes/me/")
+    response = Client().get("/v1/me/scenes/")
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden."}
 

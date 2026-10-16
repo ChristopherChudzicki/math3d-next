@@ -56,7 +56,7 @@ const useInfiniteScenesMe = (
     initialPageParam: offset ?? 0,
     queryFn: ({ pageParam }) =>
       unwrap(
-        v1Client.GET("/v1/scenes/me/", {
+        v1Client.GET("/v1/me/scenes/", {
           params: { query: { limit, offset: pageParam, title, archived } },
         }),
       ),
@@ -70,6 +70,23 @@ const useInfiniteScenesMe = (
     // A new filter keeps showing the previous results until its own arrive.
     placeholderData: keepPreviousData,
     ...opts,
+  });
+};
+
+const examplesListKey = () => ["scenes", "examples"];
+
+const useExampleScenes = ({ limit }: { limit?: number } = {}) => {
+  return useQuery({
+    queryKey: [...examplesListKey(), { limit }],
+    queryFn: () =>
+      unwrap(
+        v1Client.GET("/v1/examples/scenes/", {
+          params: { query: { limit } },
+        }),
+      ),
+    // GET /v1/examples/scenes/ is unauthenticated and serves every caller the
+    // same body, so this cache survives a change of signed-in user.
+    meta: { sameForAllUsers: true },
   });
 };
 
@@ -102,6 +119,10 @@ const usePatchScene = ({ meta }: MutationHookOptions = {}) => {
       queryClient.invalidateQueries({
         queryKey: detailKey(vars.key),
       });
+      // The scene may be an example, whose card shows its title and thumbnail.
+      queryClient.invalidateQueries({
+        queryKey: examplesListKey(),
+      });
       // Any patch bumps modified_date, which orders My Scenes. Returned so
       // mutateAsync resolves once the list reflects the change; it resolves at
       // once while the list isn't shown.
@@ -121,15 +142,21 @@ const useDestroyScene = ({ meta }: MutationHookOptions = {}) => {
         v1Client.DELETE("/v1/scenes/{key}/", { params: { path: { key } } }),
       ),
     // Returned so mutateAsync resolves once the list reflects the deletion.
-    onSuccess: () =>
+    onSuccess: () => {
+      // Deleting a scene also removes it from the examples.
       queryClient.invalidateQueries({
+        queryKey: examplesListKey(),
+      });
+      return queryClient.invalidateQueries({
         queryKey: meListKey(),
-      }),
+      });
+    },
   });
 };
 
 export {
   useInfiniteScenesMe,
+  useExampleScenes,
   useCreateScene,
   useScene,
   usePatchScene,

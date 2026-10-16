@@ -19,6 +19,6 @@ test("an overlay opens over an /app page (host wraps both subtrees)", async () =
       hidden: true,
     }),
   ).toBeInTheDocument();
-  // The dialog proves OverlayHost rendered successfully on this /app/... route.
+  // The dialog proves UrlLayerHost rendered successfully on this /app/... route.
   expect(await screen.findByRole("tablist", { name: "Scenes" })).toBeVisible();
 });

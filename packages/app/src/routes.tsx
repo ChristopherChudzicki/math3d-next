@@ -2,7 +2,7 @@ import React from "react";
 import type { RouteObject } from "react-router";
 import { Outlet } from "react-router";
 
-import OverlayHost from "@/features/overlays/OverlayHost";
+import UrlLayerHost from "@/features/overlays/UrlLayerHost";
 import SignInErrorHandler from "@/features/auth/SignInErrorHandler";
 import MainPage from "./pages/MainPage";
 import FramePage from "./pages/FramePage/FramePage";
@@ -22,7 +22,7 @@ const RootLayout: React.FC = () => (
     <ErrorTrigger />
     <SignInErrorHandler />
     <Outlet />
-    <OverlayHost />
+    <UrlLayerHost />
   </>
 );
 

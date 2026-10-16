@@ -12,6 +12,11 @@
   opacity: 0;
 }
 
+/* Still covers the page while it fades out; let clicks through. */
+.backdrop[data-closed] {
+  pointer-events: none;
+}
+
 .viewport {
   position: fixed;
   inset: 0;

@@ -7,8 +7,9 @@ import Button from "@/ui/Button";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import type { OverlayProps } from "@/features/overlays/useOverlay";
 
-const LogoutPage: React.FC<OverlayProps> = ({ children }) => {
-  const { close } = useOverlay();
+type LogoutContentProps = { close: () => void; children?: React.ReactNode };
+
+const LogoutContent: React.FC<LogoutContentProps> = ({ close, children }) => {
   const isAuthenticated = useAuthStatus();
   // A failure shows in this dialog, which stays open for a retry.
   const logout = useLogout({ meta: { errorToast: false } });
@@ -25,32 +26,41 @@ const LogoutPage: React.FC<OverlayProps> = ({ children }) => {
     }
   }, [isAuthenticated, close]);
   return (
+    <>
+      <AlertDialog.Title>Sign out</AlertDialog.Title>
+      <AlertDialog.Description>
+        Are you sure you want to sign out?
+      </AlertDialog.Description>
+      {logout.isError ? (
+        <Alert severity="error">Couldn’t sign out. Try again.</Alert>
+      ) : null}
+      <AlertDialog.Actions>
+        <AlertDialog.Close render={<Button>Cancel</Button>} />
+        <Button
+          variant="solid"
+          tone="primary"
+          loading={logout.isPending}
+          onClick={handleSubmit}
+        >
+          Yes, sign out
+        </Button>
+      </AlertDialog.Actions>
+      {children}
+    </>
+  );
+};
+
+const LogoutPage: React.FC<OverlayProps> = ({ open, children }) => {
+  const { close } = useOverlay();
+  return (
     <AlertDialog.Root
-      open
-      onOpenChange={(open) => {
-        if (!open) close();
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) close();
       }}
     >
       <AlertDialog.Popup>
-        <AlertDialog.Title>Sign out</AlertDialog.Title>
-        <AlertDialog.Description>
-          Are you sure you want to sign out?
-        </AlertDialog.Description>
-        {logout.isError ? (
-          <Alert severity="error">Couldn’t sign out. Try again.</Alert>
-        ) : null}
-        <AlertDialog.Actions>
-          <AlertDialog.Close render={<Button>Cancel</Button>} />
-          <Button
-            variant="solid"
-            tone="primary"
-            loading={logout.isPending}
-            onClick={handleSubmit}
-          >
-            Yes, sign out
-          </Button>
-        </AlertDialog.Actions>
-        {children}
+        <LogoutContent close={close}>{children}</LogoutContent>
       </AlertDialog.Popup>
     </AlertDialog.Root>
   );

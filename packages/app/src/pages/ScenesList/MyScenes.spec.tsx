@@ -12,7 +12,7 @@ import {
   within,
 } from "@/test_util";
 
-const ME_LIST = "*/v1/scenes/me/";
+const ME_LIST = "*/v1/me/scenes/";
 
 /** Seeds scenes for a new user, newest first in the order given. */
 const seedScenes = (titles: string[]) => {

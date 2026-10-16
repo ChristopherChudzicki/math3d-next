@@ -4,6 +4,7 @@ import { http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { mockAuth } from "@math3d/mock-api";
 import {
+  act,
   expectToast,
   renderTestApp,
   screen,
@@ -77,7 +78,7 @@ test("the wrong confirmation phrase does not delete the account", async () => {
 
 test("a failed deletion surfaces the error instead of silently reopening", async () => {
   server.use(
-    http.delete("*/v1/auth/users/me/", () =>
+    http.delete("*/v1/me/", () =>
       HttpResponse.json({ detail: "boom" }, { status: 500 }),
     ),
   );
@@ -109,7 +110,7 @@ test("a 403 sends the user to sign in again instead of a generic failure", async
   // what the redirect reads, and a session that is still good there would keep
   // the dialog where it is.
   server.use(
-    http.delete("*/v1/auth/users/me/", () => {
+    http.delete("*/v1/me/", () => {
       mockAuth.setCurrentUser(null);
       return HttpResponse.json({ detail: "Forbidden." }, { status: 403 });
     }),
@@ -137,7 +138,7 @@ test("a 403 with the session intact keeps the dialog open under the toast", asyn
   // A CSRF token that didn't check out: the session is still good, so there
   // is no sign-in to switch to, and the user can try again.
   server.use(
-    http.delete("*/v1/auth/users/me/", () =>
+    http.delete("*/v1/me/", () =>
       HttpResponse.json({ detail: "Forbidden." }, { status: 403 }),
     ),
   );
@@ -177,7 +178,7 @@ test("a 403 with the session intact keeps the dialog open under the toast", asyn
 test("a successful retry after a 403 clears the toast", async () => {
   server.use(
     http.delete(
-      "*/v1/auth/users/me/",
+      "*/v1/me/",
       () => HttpResponse.json({ detail: "Forbidden." }, { status: 403 }),
       { once: true },
     ),
@@ -209,7 +210,7 @@ test("while the delete is in flight, the dialog can't be closed", async () => {
     release = resolve;
   });
   server.use(
-    http.delete("*/v1/auth/users/me/", async () => {
+    http.delete("*/v1/me/", async () => {
       await gate;
       return HttpResponse.json({ detail: "late" }, { status: 500 });
     }),
@@ -255,4 +256,46 @@ test("My Scenes in the warning opens the user's scene list", async () => {
   await user.click(within(dialog).getByRole("button", { name: "My Scenes" }));
 
   expect(location.current.search).toBe("?overlay=scenes&list=me");
+});
+
+test("reopening starts with an empty confirmation", async () => {
+  const { location, router } = renderTestApp("/?overlay=delete-account", {
+    isAuthenticated: true,
+  });
+  const dialog = await screen.findByRole("dialog", {
+    name: "Delete Account",
+  });
+  await user.type(within(dialog).getByLabelText("Confirm"), "abc");
+  await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+  await waitFor(() => expect(location.current.search).toBe(""));
+
+  await act(() => router.navigate("/?overlay=delete-account"));
+
+  const reopened = await screen.findByRole("dialog", {
+    name: "Delete Account",
+  });
+  expect(within(reopened).getByLabelText("Confirm")).toHaveValue("");
+});
+
+test("Back to the dialog after a delete sends the user to sign in", async () => {
+  const { location, router } = renderTestApp("/?overlay=delete-account", {
+    isAuthenticated: true,
+  });
+  const dialog = await screen.findByRole("dialog", {
+    name: "Delete Account",
+  });
+  await user.type(
+    within(dialog).getByLabelText("Confirm"),
+    "Yes, permanently delete",
+  );
+  await user.click(
+    within(dialog).getByRole("button", { name: "Delete Account" }),
+  );
+  await screen.findByRole("heading", { name: "Account Deleted" });
+  await waitFor(() => expect(location.current.search).toBe(""));
+
+  await act(() => router.navigate(-1));
+
+  await waitFor(() => expect(location.current.search).toBe("?signin="));
+  expect(screen.queryByRole("dialog", { name: "Delete Account" })).toBe(null);
 });

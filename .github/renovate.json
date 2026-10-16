@@ -2,11 +2,20 @@
   "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
   "labels": ["dependencies"],
   "rangeStrategy": "bump",
+  "pre-commit": {
+    "enabled": true
+  },
   "packageRules": [
     {
       "matchDepTypes": ["devDependencies"],
       "automerge": true,
       "automergeType": "branch"
+    },
+    {
+      "description": "pre-commit.ci autoupdate owns hook revs; Renovate only bumps additional_dependencies, which autoupdate never touches.",
+      "matchManagers": ["pre-commit"],
+      "matchDepTypes": ["repository"],
+      "enabled": false
     }
   ]
 }

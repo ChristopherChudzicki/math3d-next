@@ -23,17 +23,15 @@ import TextField from "@/ui/TextField";
 import { u } from "@/util/styles";
 import { useAuthStatus } from "@/features/auth";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
-import { UNTITLED, sceneDisplayName } from "@/features/scene/sceneTitle";
 import { dismissToast, showToast } from "@/features/toasts";
 import DeleteSceneDialog from "./DeleteSceneDialog";
 import SceneCard from "./SceneCard/SceneCard";
-import { ListType, sceneHref } from "./constants";
+import { ListType, cardTitle, sceneHref } from "./constants";
 import styles from "./ScenesList.module.css";
 
 const SCROLL_ID = "my-scenes-scroll";
 
-const titleOf = (scene: MiniScene) =>
-  sceneDisplayName(scene.title ?? "") ?? UNTITLED;
+const titleOf = (scene: MiniScene) => cardTitle(scene.title);
 
 const countMessage = (count: number) => {
   if (count === 0) return "No scenes";
@@ -193,7 +191,11 @@ const MyScenesList: React.FC = () => {
       return (
         <div className={styles.message}>
           <p className={styles.hint}>Couldn&rsquo;t load scenes.</p>
-          <Button size="sm" onClick={() => query.refetch()}>
+          <Button
+            size="sm"
+            loading={query.isFetching}
+            onClick={() => query.refetch()}
+          >
             Retry
           </Button>
         </div>

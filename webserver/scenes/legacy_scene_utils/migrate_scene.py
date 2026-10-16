@@ -4,7 +4,7 @@ import re
 from django.core.exceptions import ValidationError
 
 from scenes.legacy_scene_utils.translate import ItemMigrator
-from scenes.models import Scene, LegacyScene, is_reserved_key_error
+from scenes.models import Scene, LegacyScene, is_invalid_key_error
 
 from scenes.legacy_scene_utils.default_data import set_defaults
 
@@ -124,12 +124,12 @@ def migrate_scene(legacy_scene: LegacyScene):
             },
         )
     except ValidationError as e:
-        if not is_reserved_key_error(e):
+        if not is_invalid_key_error(e):
             # Invalid items (or any non-key validation failure) keep the old
-            # loud-failure contract — don't mislabel them as a reserved key.
+            # loud-failure contract — don't mislabel them as an invalid key.
             raise
         logger.warning(
-            "Skipping migration of legacy scene with reserved key %r", legacy_scene.key
+            "Skipping migration of legacy scene with invalid key %r", legacy_scene.key
         )
         return None
     # TimestampedModel.save() overwrites modified_date on every write (and

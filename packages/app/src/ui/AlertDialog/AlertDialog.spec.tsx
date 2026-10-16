@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import Button from "../Button";
 import { AlertDialog } from ".";
 
@@ -26,5 +26,7 @@ test("is an alertdialog named by its title, focusing the given element", async (
   expect(
     await screen.findByRole("alertdialog", { name: "Delete scene?" }),
   ).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus(),
+  );
 });

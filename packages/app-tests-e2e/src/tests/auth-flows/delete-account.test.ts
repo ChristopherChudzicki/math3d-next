@@ -33,7 +33,7 @@ test.describe("Account deletion", () => {
 
       // The SPA signs itself out locally, so assert against the server too:
       // `delete_me` flushing the session is what this test is really about.
-      const response = await apiFetch("/v1/auth/users/me/", {
+      const response = await apiFetch("/v1/me/", {
         headers: authHeaders(sessionCookies),
       });
       expect(response.status).toBe(403);
