@@ -179,6 +179,28 @@ test("a failed save frees the button and leaves the edit unsaved", async () => {
   await expectToast("Couldn’t save your changes. Try again.");
 });
 
+test("a failed save's toast closes once another scene loads", async () => {
+  server.use(
+    http.patch(urls.scenes.detail, () =>
+      HttpResponse.json({ detail: "boom" }, { status: 500 }),
+    ),
+  );
+  const { scene, router } = renderOwnedScene();
+  const other = seedDb.withSceneFromItems([]);
+  await renameScene(`${scene.title} edited`);
+  await user.click(await primary());
+  await expectToast("Couldn’t save your changes. Try again.");
+
+  await act(() => router.navigate(`/${other.key}`));
+
+  const region = screen.getByRole("region", { name: "Notifications" });
+  await waitFor(() =>
+    expect(
+      within(region).queryByText("Couldn’t save your changes. Try again."),
+    ).toBeNull(),
+  );
+});
+
 test("an owned scene without edits copies its link", async () => {
   const { scene } = renderOwnedScene();
 
