@@ -1,7 +1,7 @@
 .viewport {
   position: fixed;
-  /* MainPage sets --header-height on <body>; other routes have no header. */
-  top: calc(var(--header-height, 50px) + 8px);
+  /* MainPage sets these on <body>; other routes have neither. */
+  top: calc(var(--header-height, 50px) + var(--banner-height, 0px) + 8px);
   left: 50%;
   z-index: var(--z-index-toast);
   display: flex;
@@ -39,9 +39,15 @@
   transform: translateY(-0.5rem);
 }
 
-.toast[data-swiping] {
-  transition: none;
-  transform: translateY(var(--toast-swipe-movement-y));
+/* Past Base UI's limit of 3, the oldest toast is inert; hide it until a newer
+   one closes and frees it. */
+.toast[data-limited] {
+  display: none;
+}
+
+/* Leave from where the swipe let go, rather than snapping back first. */
+.toast[data-ending-style][data-swipe-direction="up"] {
+  transform: translateY(calc(var(--toast-swipe-movement-y) - 100%));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -70,6 +76,8 @@
   min-width: 0;
   margin: 0;
   padding: 0.6rem 0;
+  /* Scene titles can be one long unbroken word. */
+  overflow-wrap: anywhere;
   font-size: var(--font-size-small);
   line-height: 1.43;
 }
