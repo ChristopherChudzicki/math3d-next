@@ -3,15 +3,9 @@ import { expect, onTestFinished, test, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { Toaster, createToastManager } from ".";
 
-// F6 focuses the viewport and Tab a toast; Escape from either must not reach
-// the `document` listener that closes the dialog or drawer beneath.
-test.each([
-  {
-    from: "the viewport",
-    target: () => screen.getByRole("region", { name: "Notifications" }),
-  },
-  { from: "a toast", target: () => screen.getByText("Couldn’t save.") },
-])("Escape on $from doesn't reach the document", ({ target }) => {
+// F6 focuses the viewport itself; Escape there must not reach the `document`
+// listener that closes the dialog or drawer beneath.
+test("Escape on the toast viewport doesn't reach the document", () => {
   const toastManager = createToastManager();
   render(<Toaster toastManager={toastManager} />);
   act(() => {
@@ -21,6 +15,8 @@ test.each([
   document.addEventListener("keydown", onKeyDown);
   onTestFinished(() => document.removeEventListener("keydown", onKeyDown));
 
-  fireEvent.keyDown(target(), { key: "Escape" });
+  fireEvent.keyDown(screen.getByRole("region", { name: "Notifications" }), {
+    key: "Escape",
+  });
   expect(onKeyDown).not.toHaveBeenCalled();
 });

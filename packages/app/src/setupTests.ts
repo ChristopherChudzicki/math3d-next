@@ -1,6 +1,6 @@
 import { server } from "@math3d/mock-api/node";
 import { mockAuth } from "@math3d/mock-api";
-import { shownToasts } from "@/features/toasts";
+import { shownToasts } from "@/features/toasts/toasts";
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:
@@ -76,7 +76,7 @@ beforeEach(() => {
     const unacknowledged = shownToasts.splice(0);
     if (unacknowledged.length > 0) {
       throw new Error(
-        `Unacknowledged toast(s): ${JSON.stringify(unacknowledged)}. Assert with expectToast(text), or opt the call site out with meta: { errorToast: false }.`,
+        `Unacknowledged toast(s): ${JSON.stringify(unacknowledged)}. Assert with expectToast(text), or fix the call site that shows it (a mutation opts out with meta: { errorToast: false }).`,
       );
     }
   });

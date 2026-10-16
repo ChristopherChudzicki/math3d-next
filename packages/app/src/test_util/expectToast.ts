@@ -1,5 +1,5 @@
 import { screen, waitFor, within } from "@testing-library/react";
-import { shownToasts } from "@/features/toasts";
+import { shownToasts } from "@/features/toasts/toasts";
 
 /**
  * Assert a toast shows `text`, and mark it acknowledged for the toast guard in
@@ -9,8 +9,9 @@ import { shownToasts } from "@/features/toasts";
 const expectToast = async (text: string): Promise<void> => {
   const region = await screen.findByRole("region", { name: "Notifications" });
   await waitFor(() => expect(within(region).getByText(text)).toBeVisible());
-  const i = shownToasts.indexOf(text);
-  if (i !== -1) shownToasts.splice(i, 1);
+  // One toast per message, so a message shown twice is acknowledged once.
+  const rest = shownToasts.filter((shown) => shown !== text);
+  shownToasts.splice(0, shownToasts.length, ...rest);
 };
 
 export default expectToast;

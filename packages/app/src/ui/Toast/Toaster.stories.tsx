@@ -5,7 +5,7 @@ import { Toaster, createToastManager } from ".";
 
 const MESSAGES = [
   "Couldn’t save your changes. Try again.",
-  "Your sign-in couldn’t be verified, so nothing was deleted. Sign in and try again.",
+  "Your sign-in couldn’t be verified, so nothing was deleted. Try again.",
 ];
 
 const Toasts: React.FC = () => {

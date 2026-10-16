@@ -62,14 +62,15 @@ dependencies.
   Scenes, use plain markup: an `<li>` with a primary link and a ⋯ menu.
 - **Overlays and MathLive.** Every overlay sits at `--z-index-overlay`, toasts
   at `--z-index-toast` above it, and the keyboard's `--keyboard-zindex` above
-  both. `ui/Popover` cancels
-  outside-press dismissal for presses on the keyboard or its toggle.
+  both. `ui/Popover` cancels outside-press dismissal for presses on the
+  keyboard or its toggle.
   Popovers inside sortable items need `data-dndkit-no-drag` on the popup,
   because portal events bubble through the React tree.
 - **Field errors** show in a tooltip beside the focused field, and the message
   becomes the field's accessible description via `aria-describedby`.
   **Notifications**: a failed action with no inline place to report it is a
   toast (`features/toasts`); a message that needs a decision is an
-  `AlertDialog`.
+  `AlertDialog`. `NotificationsContext`'s remaining notices ("Not found",
+  "Account Deleted") are still `AlertDialog`s.
 - **Storybook 10,** with one omnibus story per component, showing every
   variant in a labeled grid.

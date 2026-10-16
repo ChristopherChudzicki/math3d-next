@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useLogout } from "@math3d/api";
 import { useAuthStatus } from "@/features/auth";
 import { AlertDialog } from "@/ui/AlertDialog";
@@ -12,11 +12,11 @@ const LogoutPage: React.FC<OverlayProps> = ({ children }) => {
   const isAuthenticated = useAuthStatus();
   // A failure shows in this dialog, which stays open for a retry.
   const logout = useLogout({ meta: { errorToast: false } });
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = () => {
     // Runs after the hook's onSuccess, which resets queries (including
     // useUserMe), so auth status is already up-to-date.
     logout.mutate(undefined, { onSuccess: close });
-  }, [close, logout]);
+  };
   useEffect(() => {
     // Only redirect if we know the user is NOT authenticated.
     // When auth status is "loading", don't redirect yet.

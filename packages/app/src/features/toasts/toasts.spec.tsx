@@ -16,5 +16,4 @@ test("showing the same message again replaces the open toast", async () => {
   await waitFor(() => expect(first).not.toBeInTheDocument());
   expect(within(region).getAllByText("Couldn’t save.")).toHaveLength(1);
   await expectToast("Couldn’t save.");
-  await expectToast("Couldn’t save.");
 });

@@ -14,8 +14,9 @@ const dismissToast = (description: string): void => {
 };
 
 /**
- * Show `description` until the user dismisses it. Repeating a message replaces
- * its toast: an `add` reusing the open toast's id updates it without announcing.
+ * Show `description` until the user dismisses it. Repeating a message closes
+ * its toast and adds a new one: an `add` reusing the id would update the toast
+ * in place without announcing it again.
  */
 const showToast = (description: string): void => {
   dismissToast(description);

@@ -16,8 +16,8 @@ export const useCloseLayer = ({ pushed, params, stateKeys }: Layer) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Consumers close from more than one place — LogoutPage both awaits its
-  // mutation and watches auth status — and popping twice would leave the app
+  // Consumers close from more than one place — LogoutPage both closes on its
+  // mutation's success and watches auth status — and popping twice would leave the app
   // entirely. Keyed on the entry rather than a bare flag so a later layer
   // still closes, and read through a ref so a stale closure sees it too.
   const closedKey = useRef<string | null>(null);
