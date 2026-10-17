@@ -1,0 +1,5 @@
+# Commits git blame skips: GitHub applies this file automatically; locally, run
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# refactor(app): adopt the Bulletproof React layout in packages/app/src (#1382)
+4af542425fc9375aa5fcac874e20499ee1834306
