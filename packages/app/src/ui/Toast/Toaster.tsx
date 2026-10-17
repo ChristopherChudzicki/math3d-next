@@ -4,7 +4,7 @@ import type { ToastManager } from "@base-ui/react/toast";
 import { Icon } from "@iconify/react/offline";
 import circleAlert from "@iconify-icons/lucide/circle-alert";
 import x from "@iconify-icons/lucide/x";
-import IconButton from "../IconButton";
+import IconButton from "@/ui/IconButton";
 import * as styles from "./Toaster.module.css";
 
 const ToastList: React.FC = () => {

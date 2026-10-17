@@ -13,7 +13,7 @@
  *
  * Design: docs/superpowers/specs/2026-07-11-og-metadata-worker-design.md
  */
-import { sceneDisplayName } from "../features/scene/sceneTitle";
+import { sceneDisplayName } from "../store/scene/sceneTitle";
 
 interface Env {
   ASSETS: Fetcher;

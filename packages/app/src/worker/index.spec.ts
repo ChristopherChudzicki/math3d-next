@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import worker from "./index";
+import worker from ".";
 
 const DEFAULT_TITLE = "Math3d: Online 3d Graphing Calculator";
 const DEFAULT_ALT = "Math3d — interactive 3D graphing calculator";

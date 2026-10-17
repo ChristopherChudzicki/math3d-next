@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import Button from "../Button";
-import { Dialog } from "../Dialog";
+import Button from "@/ui/Button";
+import { Dialog } from "@/ui/Dialog";
 import { Drawer } from ".";
 import type { DrawerSide, DrawerSize } from ".";
 

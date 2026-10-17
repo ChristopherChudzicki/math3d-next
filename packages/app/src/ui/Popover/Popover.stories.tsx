@@ -2,8 +2,8 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Icon } from "@iconify/react/offline";
 import settings from "@iconify-icons/lucide/settings";
-import IconButton from "../IconButton";
-import TextField from "../TextField";
+import IconButton from "@/ui/IconButton";
+import TextField from "@/ui/TextField";
 import { Popover } from ".";
 
 const SettingsPopover: React.FC = () => (

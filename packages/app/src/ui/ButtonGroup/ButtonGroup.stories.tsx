@@ -4,10 +4,10 @@ import { Icon } from "@iconify/react/offline";
 import chevronDown from "@iconify-icons/lucide/chevron-down";
 import minus from "@iconify-icons/lucide/minus";
 import plus from "@iconify-icons/lucide/plus";
+import Button from "@/ui/Button";
+import IconButton from "@/ui/IconButton";
+import type { ButtonVariant } from "@/ui/Button";
 import ButtonGroup from "./ButtonGroup";
-import Button from "../Button";
-import IconButton from "../IconButton";
-import type { ButtonVariant } from "../Button";
 
 const variants: ButtonVariant[] = ["outline", "solid", "ghost"];
 

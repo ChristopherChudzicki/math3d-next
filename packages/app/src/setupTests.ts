@@ -1,6 +1,6 @@
 import { server } from "@math3d/mock-api/node";
 import { mockAuth } from "@math3d/mock-api";
-import { shownToasts } from "@/features/toasts/toasts";
+import { shownToasts } from "@/ui/Toast/toasts";
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:
@@ -27,16 +27,16 @@ vitest.mock("mathbox-react", () =>
  * JSDOM does not support enough ShadowDOM for MathLive to function properly, so
  * this mocks it with a textarea.
  */
-vitest.mock("./ui/MathLive/MathField");
+vitest.mock("@/ui/MathLive/MathField");
 
 vitest.mock("mathlive", () => vi.importActual("@/__mocks__/mathlive"));
 
 /**
  * And since we're not using a ShadowDOM, we can't change the ShadowDOM styles.
  */
-vitest.mock("./util/hooks/useShadowStylesheet");
+vitest.mock("@/util/hooks/useShadowStylesheet");
 
-vitest.mock("./ui/TextareaAutoWidthHeight/TextMeasurer");
+vitest.mock("@/ui/TextareaAutoWidthHeight/TextMeasurer");
 
 /**
  * JSDOM does not implement ResizeObserver. A no-op stand-in is enough for

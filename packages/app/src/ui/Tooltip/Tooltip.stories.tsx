@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import Button from "../Button";
+import Button from "@/ui/Button";
 import { Tooltip } from ".";
 
 const sides = ["top", "right", "bottom", "left"] as const;
