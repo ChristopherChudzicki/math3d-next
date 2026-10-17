@@ -18,7 +18,7 @@ const wrapperFor = (queryClient: ReturnType<typeof createQueryClient>) => {
 
 const failUserMe = () =>
   server.use(
-    http.get(urls.auth.usersMe, () => new HttpResponse(null, { status: 500 })),
+    http.get(urls.auth.me, () => new HttpResponse(null, { status: 500 })),
   );
 
 test("A me-query that never succeeds settles on unauthenticated", async () => {

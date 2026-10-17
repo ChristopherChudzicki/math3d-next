@@ -9,7 +9,7 @@ a `from scenes.models import ...` here would raise AppRegistryNotReady.
 """
 
 from enum import Enum
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Union
 
 from pydantic import (
     BaseModel,
@@ -453,7 +453,24 @@ class VectorFieldItem(_Strict):
 
 
 _MathItemUnion = Annotated[
-    AxisItem | BooleanVariableItem | CameraItem | ExplicitSurfaceItem | ExplicitSurfacePolarItem | FolderItem | GridItem | ImplicitSurfaceItem | LineItem | ParametricCurveItem | ParametricSurfaceItem | PointItem | VariableItem | VariableSliderItem | VectorItem | VectorFieldItem,
+    Union[
+        AxisItem,
+        BooleanVariableItem,
+        CameraItem,
+        ExplicitSurfaceItem,
+        ExplicitSurfacePolarItem,
+        FolderItem,
+        GridItem,
+        ImplicitSurfaceItem,
+        LineItem,
+        ParametricCurveItem,
+        ParametricSurfaceItem,
+        PointItem,
+        VariableItem,
+        VariableSliderItem,
+        VectorItem,
+        VectorFieldItem,
+    ],
     Field(discriminator="type"),
 ]
 

@@ -5,6 +5,7 @@ from faker import Faker
 
 from authentication.factories import CustomUserFactory
 
+
 faker = Faker()
 
 

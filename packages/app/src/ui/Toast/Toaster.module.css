@@ -1,0 +1,83 @@
+.viewport {
+  position: fixed;
+  /* MainPage sets these on <body>; other routes have neither. */
+  top: calc(var(--header-height, 50px) + var(--banner-height, 0px) + 8px);
+  left: 50%;
+  z-index: var(--z-index-toast);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: min(24rem, 100vw - 2rem);
+  transform: translateX(-50%);
+}
+
+.viewport:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.toast {
+  --tone: var(--color-danger);
+  border-radius: calc(2 * var(--border-radius));
+  background-color: color-mix(
+    in oklch,
+    var(--tone) 10%,
+    var(--color-background)
+  );
+  color: color-mix(in oklch, var(--tone) 55%, black);
+  box-shadow:
+    0 12px 32px rgb(0 0 0 / 18%),
+    0 2px 6px rgb(0 0 0 / 10%);
+  transition:
+    transform 150ms ease-out,
+    opacity 150ms ease-out;
+}
+
+.toast[data-starting-style],
+.toast[data-ending-style] {
+  opacity: 0;
+  transform: translateY(-0.5rem);
+}
+
+/* Past Base UI's limit of 3, the oldest toast is inert; hide it until a newer
+   one closes and frees it. */
+.toast[data-limited] {
+  display: none;
+}
+
+/* Leave from where the swipe let go, rather than snapping back first. */
+.toast[data-ending-style][data-swipe-direction="up"] {
+  transform: translateY(calc(var(--toast-swipe-movement-y) - 100%));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast[data-starting-style],
+  .toast[data-ending-style] {
+    transform: none;
+  }
+}
+
+.content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.25rem 0.25rem 0.25rem 1rem;
+}
+
+.icon {
+  flex: none;
+  margin-block: 0.5rem;
+  font-size: 1.25rem;
+  color: color-mix(in oklch, var(--tone) 85%, black);
+}
+
+.description {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0.6rem 0;
+  /* Scene titles can be one long unbroken word. */
+  overflow-wrap: anywhere;
+  font-size: var(--font-size-small);
+  line-height: 1.43;
+}

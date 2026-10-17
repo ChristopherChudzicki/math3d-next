@@ -64,7 +64,7 @@ test.each([
 test("while auth is loading, the menu doesn't offer Sign in", async () => {
   // A signed-in user whose ["me"] query hasn't answered yet: offering to sign
   // in would be the wrong guess.
-  server.use(http.get(urls.auth.usersMe, () => delay("infinite")));
+  server.use(http.get(urls.auth.me, () => delay("infinite")));
   renderTestApp("", { isAuthenticated: true });
   await user.click(await screen.findByRole("button", { name: "Open Menu" }));
   const menu = await screen.findByRole("menu", { name: "Open Menu" });
@@ -96,7 +96,7 @@ test("the menu closes when auth settles and the trigger swaps", async () => {
   const me = Promise.withResolvers<void>();
   // Returning nothing falls through to the mock API's handler.
   server.use(
-    http.get(urls.auth.usersMe, async () => {
+    http.get(urls.auth.me, async () => {
       await me.promise;
     }),
   );

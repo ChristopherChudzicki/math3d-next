@@ -53,9 +53,16 @@ def on_validation_error(request: HttpRequest, exc: ValidationError):
     return api.create_response(request, {"detail": exc.errors}, status=400)
 
 
-from authentication.api import router as auth_router
-from scenes.api import legacy_router, scenes_router
+from authentication.api import router as auth_router  # noqa: E402
+from scenes.api import (  # noqa: E402
+    examples_router,
+    legacy_router,
+    me_router,
+    scenes_router,
+)
 
-api.add_router("/auth", auth_router, tags=["Auth"])
+api.add_router("/me", auth_router, tags=["Auth"])
 api.add_router("/scenes", scenes_router, tags=["Scenes"])
+api.add_router("/me", me_router, tags=["Scenes"])
+api.add_router("/examples", examples_router, tags=["Scenes"])
 api.add_router("/legacy_scenes", legacy_router, tags=["Legacy Scenes"])

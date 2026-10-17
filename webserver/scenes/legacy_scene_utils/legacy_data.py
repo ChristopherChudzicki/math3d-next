@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Union
 
 
 @dataclass
@@ -19,7 +20,7 @@ class VariableProperties:
 @dataclass
 class VariableSlider:
     name: str = "T"
-    value: None | float = None
+    value: Union[None, float] = None
     min: str = "-5"
     max: str = "5"
     description: str = "Variable Slider"

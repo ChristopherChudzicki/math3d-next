@@ -61,7 +61,7 @@ test("Submitting saves a draft and sends the CSRF token current at submit", asyn
 });
 
 test("Sign-in waits for the session check that seeds the CSRF cookie", async () => {
-  server.use(http.get(urls.auth.usersMe, () => delay("infinite")));
+  server.use(http.get(urls.auth.me, () => delay("infinite")));
   renderTestApp("/?signin");
 
   expect(

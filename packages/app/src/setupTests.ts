@@ -1,5 +1,6 @@
 import { server } from "@math3d/mock-api/node";
 import { mockAuth } from "@math3d/mock-api";
+import { shownToasts } from "@/features/toasts/toasts";
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:
@@ -66,6 +67,19 @@ beforeEach(() => {
   localStorage.clear();
   sessionStorage.clear();
   mockAuth.setCurrentUser(null);
+  // A mutation that failed after the previous test ended isn't this test's.
+  shownToasts.length = 0;
+  // A failed mutation toasts unless its call site opts out, so an unasserted
+  // toast is a missing opt-out or a missing expectToast. onTestFinished runs
+  // after every afterEach, so this throw can't skip RTL's cleanup.
+  onTestFinished(() => {
+    const unacknowledged = shownToasts.splice(0);
+    if (unacknowledged.length > 0) {
+      throw new Error(
+        `Unacknowledged toast(s): ${JSON.stringify(unacknowledged)}. Assert with expectToast(text), or fix the call site that shows it (a mutation opts out with meta: { errorToast: false }).`,
+      );
+    }
+  });
 });
 afterEach(() => {
   server.resetHandlers();

@@ -1,5 +1,5 @@
-from django.core.paginator import Paginator
 from django.db import migrations
+from django.core.paginator import Paginator
 
 
 def set_item_z_order(item):

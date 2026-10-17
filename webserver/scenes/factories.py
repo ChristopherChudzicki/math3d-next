@@ -2,10 +2,10 @@ from typing import Generic, TypeVar
 
 import factory
 import faker
-from authentication.factories import CustomUserFactory
 from factory.django import DjangoModelFactory
 
-from scenes.models import Scene
+from scenes.models import ExampleScene, Scene
+from authentication.factories import CustomUserFactory
 
 fake = faker.Faker()
 
@@ -50,3 +50,11 @@ class SceneFactory(BaseFactory[Scene]):
 
     class Meta:
         model = Scene
+
+
+class ExampleSceneFactory(BaseFactory[ExampleScene]):
+    scene = factory.SubFactory(SceneFactory)  # type: ignore
+    position = factory.Sequence(lambda n: n)
+
+    class Meta:
+        model = ExampleScene

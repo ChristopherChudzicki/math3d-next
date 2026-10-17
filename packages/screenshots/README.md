@@ -35,6 +35,9 @@ a slot against its per-period spend caps — tells it to.
    save's render may still be in flight, and a day-long cache would pin the
    previous image to the new URL. A render with no stored `version` (made before
    versions existed) is treated as a mismatch.
+5. Every hit names the render it serves: `X-Render-Version` (its stored
+   `version`, omitted if it has none) and `X-Rendered-At`. `curl -I` an image
+   URL to see which render it is.
 
 Versions are what make that cache safe. Django bumps a scene's
 `content_modified_date` only on the edits that trigger a render (items or item
@@ -77,6 +80,27 @@ daily+monthly Postgres ledgers (hard-bounding Browser Rendering spend) and, if
 granted, best-effort nudges this Worker's `POST /render`. Over-cap saves simply
 don't nudge — a coverage loss, never a spend risk. There is no crawler-driven
 render path, so this Worker needs no per-key lock or scene-existence gate.
+
+### Rendering scenes on demand
+
+To render scenes that no save has rendered (seeded examples, say), run Django's
+`render_scenes` with their keys:
+
+```bash
+uv run ./manage.py render_scenes sliders_intro vectors tnb
+```
+
+It takes the same capped path as a save, and skips a scene whose current render
+is already cached, without spending a slot, by checking `X-Render-Version`
+against the scene's version. So re-running is cheap: a scene reports `current`
+once its render has landed, and `nudged` means requested, not yet rendered. It
+pauses `--delay` seconds (default 30) between the renders it requests, because
+Workers Free allows one new browser every 20s, shared with renders from saves.
+Workers Free also caps browser time at 10 minutes a day, so split a large batch
+across days. `--force` skips the check.
+
+Deploy this Worker before running the command against it: a Worker that predates
+the render headers makes the command stop with an error.
 
 ## Required infrastructure (not created by `wrangler deploy`)
 

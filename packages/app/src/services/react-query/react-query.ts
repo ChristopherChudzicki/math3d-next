@@ -1,11 +1,34 @@
-import { QueryClient } from "@tanstack/react-query";
+import { MutationCache, QueryClient } from "@tanstack/react-query";
+import * as Sentry from "@sentry/react";
 import { isApiError } from "@math3d/api";
+import { dismissToast, showToast } from "@/features/toasts";
 
 const RETRY_STATUS_CODES = [408, 429, 502, 503, 504];
 const MAX_RETRIES = 3;
 
+const DEFAULT_ERROR_TOAST = "Something went wrong. Please try again later.";
+
+/**
+ * Reports every mutation failure to Sentry, and toasts it unless the call site
+ * opts out with `meta: { errorToast: false }`.
+ */
+const createMutationCache = (): MutationCache =>
+  new MutationCache({
+    onError: (error, _variables, _onMutateResult, mutation) => {
+      Sentry.captureException(error);
+      const copy = mutation.meta?.errorToast;
+      if (copy !== false) showToast(copy ?? DEFAULT_ERROR_TOAST);
+    },
+    onSuccess: (_data, _variables, _onMutateResult, mutation) => {
+      // Only a site's own copy identifies its failure; the default is shared.
+      const copy = mutation.meta?.errorToast;
+      if (typeof copy === "string") dismissToast(copy);
+    },
+  });
+
 const createQueryClient = (): QueryClient => {
   return new QueryClient({
+    mutationCache: createMutationCache(),
     defaultOptions: {
       queries: {
         staleTime: Infinity,
@@ -26,4 +49,4 @@ const createQueryClient = (): QueryClient => {
   });
 };
 
-export { createQueryClient };
+export { createQueryClient, createMutationCache, DEFAULT_ERROR_TOAST };

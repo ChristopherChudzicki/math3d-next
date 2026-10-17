@@ -4,19 +4,18 @@
  */
 
 export interface paths {
-  "/v1/auth/users/me/": {
+  "/v1/examples/scenes/": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get Me */
-    get: operations["authentication_api_get_me"];
+    /** Example Scenes */
+    get: operations["scenes_api_example_scenes"];
     put?: never;
     post?: never;
-    /** Delete Me */
-    delete: operations["authentication_api_delete_me"];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -56,6 +55,41 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/me/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Me */
+    get: operations["authentication_api_get_me"];
+    put?: never;
+    post?: never;
+    /** Delete Me */
+    delete: operations["authentication_api_delete_me"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/me/scenes/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** My Scenes */
+    get: operations["scenes_api_my_scenes"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/scenes/": {
     parameters: {
       query?: never;
@@ -68,23 +102,6 @@ export interface paths {
     put?: never;
     /** Create Scene */
     post: operations["scenes_api_create_scene"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/v1/scenes/me/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** My Scenes */
-    get: operations["scenes_api_my_scenes"];
-    put?: never;
-    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -994,9 +1011,12 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  authentication_api_get_me: {
+  scenes_api_example_scenes: {
     parameters: {
-      query?: never;
+      query?: {
+        limit?: number;
+        offset?: number;
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -1009,33 +1029,8 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["UserSchema"];
+          "application/json": components["schemas"]["PagedMiniSceneSchema"];
         };
-      };
-      /** @description Forbidden */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  authentication_api_delete_me: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No Content */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
       };
     };
   };
@@ -1085,6 +1080,76 @@ export interface operations {
       };
     };
   };
+  authentication_api_get_me: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["UserSchema"];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  authentication_api_delete_me: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  scenes_api_my_scenes: {
+    parameters: {
+      query?: {
+        title?: string | null;
+        archived?: boolean | null;
+        limit?: number;
+        offset?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PagedMiniSceneSchema"];
+        };
+      };
+    };
+  };
   scenes_api_list_scenes: {
     parameters: {
       query?: {
@@ -1130,31 +1195,6 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SceneSchema"];
-        };
-      };
-    };
-  };
-  scenes_api_my_scenes: {
-    parameters: {
-      query?: {
-        title?: string | null;
-        archived?: boolean | null;
-        limit?: number;
-        offset?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["PagedMiniSceneSchema"];
         };
       };
     };

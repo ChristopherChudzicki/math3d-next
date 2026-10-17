@@ -5,7 +5,7 @@ import faker
 from django.contrib.auth.hashers import make_password
 from factory.django import DjangoModelFactory
 
-from authentication import models
+import authentication.models as models
 
 fake = faker.Faker()
 

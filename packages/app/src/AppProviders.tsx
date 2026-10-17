@@ -7,6 +7,7 @@ import type { RouterProviderProps } from "react-router";
 import { AppStore } from "@/store/store";
 import { NotificationsProvider } from "./features/notifications/NotificationsContext";
 import NotificationsDisplay from "./features/notifications/NotificationsDisplay";
+import { ToastHost } from "./features/toasts";
 
 interface AppProps {
   store: AppStore;
@@ -20,6 +21,7 @@ const AppProviders: React.FC<AppProps> = ({ store, queryClient, router }) => (
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
         <NotificationsDisplay />
+        <ToastHost />
       </QueryClientProvider>
     </NotificationsProvider>
   </Provider>

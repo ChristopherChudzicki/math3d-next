@@ -23,16 +23,15 @@ import TextField from "@/ui/TextField";
 import { u } from "@/util/styles";
 import { useAuthStatus } from "@/features/auth";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
-import { UNTITLED, sceneDisplayName } from "@/features/scene/sceneTitle";
+import { dismissToast, showToast } from "@/features/toasts";
 import DeleteSceneDialog from "./DeleteSceneDialog";
 import SceneCard from "./SceneCard/SceneCard";
-import { ListType, sceneHref } from "./constants";
+import { ListType, cardTitle, sceneHref } from "./constants";
 import styles from "./ScenesList.module.css";
 
 const SCROLL_ID = "my-scenes-scroll";
 
-const titleOf = (scene: MiniScene) =>
-  sceneDisplayName(scene.title ?? "") ?? UNTITLED;
+const titleOf = (scene: MiniScene) => cardTitle(scene.title);
 
 const countMessage = (count: number) => {
   if (count === 0) return "No scenes";
@@ -66,8 +65,11 @@ const MyScenesList: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<MiniScene | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteFailed, setDeleteFailed] = useState(false);
-  const patch = usePatchScene();
-  const destroy = useDestroyScene();
+  // Archive builds its own toast: the copy names the scene, which the
+  // mutation's variables don't carry.
+  const patch = usePatchScene({ meta: { errorToast: false } });
+  // A failed delete shows in its confirmation dialog.
+  const destroy = useDestroyScene({ meta: { errorToast: false } });
 
   const filterRef = useRef<HTMLInputElement>(null);
   // Where the delete dialog returns focus: a neighbor's card after a delete
@@ -134,18 +136,18 @@ const MyScenesList: React.FC = () => {
     const archiving = !scene.archived;
     const disappears = archiving && !includeArchived;
     const focusKey = neighborKey(scene.key);
+    const failure = `Couldn’t ${archiving ? "archive" : "unarchive"} “${titleOf(scene)}”. Try again.`;
     try {
       // Resolves after the list refetches, so a removed card is gone by then.
       await patch.mutateAsync({
         key: scene.key,
         patch: { archived: archiving },
       });
+      dismissToast(failure);
       announce(`${archiving ? "Archived" : "Unarchived"} ${titleOf(scene)}`);
       if (disappears) elementFor(focusKey)?.focus();
     } catch {
-      announce(
-        `Couldn't ${archiving ? "archive" : "unarchive"} ${titleOf(scene)}`,
-      );
+      showToast(failure);
     }
   };
 
@@ -189,7 +191,11 @@ const MyScenesList: React.FC = () => {
       return (
         <div className={styles.message}>
           <p className={styles.hint}>Couldn&rsquo;t load scenes.</p>
-          <Button size="sm" onClick={() => query.refetch()}>
+          <Button
+            size="sm"
+            loading={query.isFetching}
+            onClick={() => query.refetch()}
+          >
             Retry
           </Button>
         </div>

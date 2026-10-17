@@ -2,9 +2,17 @@ import { test, expect } from "vitest";
 import { http, HttpResponse } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { seedDb } from "@math3d/mock-api";
-import { act, renderTestApp, screen, user, waitFor, within } from "@/test_util";
+import {
+  act,
+  expectToast,
+  renderTestApp,
+  screen,
+  user,
+  waitFor,
+  within,
+} from "@/test_util";
 
-const ME_LIST = "*/v1/scenes/me/";
+const ME_LIST = "*/v1/me/scenes/";
 
 /** Seeds scenes for a new user, newest first in the order given. */
 const seedScenes = (titles: string[]) => {
@@ -98,6 +106,30 @@ test("archiving hides the card, announces it, and focuses the next card", async 
   expect(within(dialog).getByRole("status")).toHaveTextContent(
     "Archived Alpha",
   );
+});
+
+test("a failed archive toasts, and archiving on retry dismisses the toast", async () => {
+  const { owner } = seedScenes(["Alpha"]);
+  server.use(
+    http.patch(
+      "*/v1/scenes/:key/",
+      () => HttpResponse.json({ detail: "boom" }, { status: 500 }),
+      { once: true },
+    ),
+  );
+  await openMyScenes(owner);
+  await screen.findByRole("link", { name: "Alpha" });
+  const message = "Couldn’t archive “Alpha”. Try again.";
+
+  await chooseAction("Alpha", "Archive");
+  await expectToast(message);
+
+  await chooseAction("Alpha", "Archive");
+  await waitFor(() =>
+    expect(screen.queryByRole("link", { name: "Alpha" })).toBeNull(),
+  );
+  const region = screen.getByRole("region", { name: "Notifications" });
+  await waitFor(() => expect(within(region).queryByText(message)).toBeNull());
 });
 
 test("deleting confirms first, then focuses the next card", async () => {

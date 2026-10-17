@@ -6,6 +6,7 @@ import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import {
   act,
   countRequests,
+  expectToast,
   renameScene,
   renderTestApp,
   screen,
@@ -175,6 +176,29 @@ test("a failed save frees the button and leaves the edit unsaved", async () => {
     "true",
   );
   expect(store.getState().scene.dirty).toBe(true);
+  await expectToast("Couldn’t save your changes. Try again.");
+});
+
+test("a failed save's toast closes once another scene loads", async () => {
+  server.use(
+    http.patch(urls.scenes.detail, () =>
+      HttpResponse.json({ detail: "boom" }, { status: 500 }),
+    ),
+  );
+  const { scene, router } = renderOwnedScene();
+  const other = seedDb.withSceneFromItems([]);
+  await renameScene(`${scene.title} edited`);
+  await user.click(await primary());
+  await expectToast("Couldn’t save your changes. Try again.");
+
+  await act(() => router.navigate(`/${other.key}`));
+
+  const region = screen.getByRole("region", { name: "Notifications" });
+  await waitFor(() =>
+    expect(
+      within(region).queryByText("Couldn’t save your changes. Try again."),
+    ).toBeNull(),
+  );
 });
 
 test("an owned scene without edits copies its link", async () => {
@@ -342,7 +366,7 @@ test("no scene action is offered until the route's scene has loaded", async () =
 });
 
 test("no scene action is offered while auth is still loading", async () => {
-  server.use(http.get(urls.auth.usersMe, () => delay("infinite")));
+  server.use(http.get(urls.auth.me, () => delay("infinite")));
   renderTestApp("/");
 
   await screen.findByRole("heading", { level: 1 });

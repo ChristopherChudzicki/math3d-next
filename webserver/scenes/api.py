@@ -1,12 +1,13 @@
+from typing import List
 
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from main.ninja_auth import session_auth
 from ninja import Query, Router, Status
 from ninja.errors import HttpError
 from ninja.pagination import LimitOffsetPagination, paginate
 
+from main.ninja_auth import session_auth
 from scenes.legacy_scene_utils.migrate_scene import migrate_scene
 from scenes.models import LegacyScene, Scene
 from scenes.schemas import (
@@ -22,6 +23,8 @@ from scenes.schemas import (
 from scenes.screenshots import schedule_render
 
 scenes_router = Router()
+me_router = Router()
+examples_router = Router()
 
 
 def _require_owner(scene: Scene, request, action: str) -> None:
@@ -30,20 +33,28 @@ def _require_owner(scene: Scene, request, action: str) -> None:
         raise HttpError(403, f"You do not have permission to {action} this scene.")
 
 
-@scenes_router.get("/", response=list[MiniSceneSchema], auth=None, by_alias=True)
+@scenes_router.get("/", response=List[MiniSceneSchema], auth=None, by_alias=True)
 @paginate(LimitOffsetPagination)
 def list_scenes(request, filters: SceneFilterSchema = Query(...)):
     return filters.filter(Scene.objects.all())
 
 
-@scenes_router.get(
-    "/me/", response=list[MiniSceneSchema], auth=session_auth, by_alias=True
+@me_router.get(
+    "/scenes/", response=List[MiniSceneSchema], auth=session_auth, by_alias=True
 )
 @paginate(LimitOffsetPagination)
 def my_scenes(request, filters: SceneFilterSchema = Query(...)):
     # -id breaks modified_date ties so pages don't overlap or skip scenes.
     scenes = Scene.objects.filter(author_id=request.user.id)
     return filters.filter(scenes).order_by("-modified_date", "-id")
+
+
+@examples_router.get(
+    "/scenes/", response=List[MiniSceneSchema], auth=None, by_alias=True
+)
+@paginate(LimitOffsetPagination)
+def example_scenes(request):
+    return Scene.objects.filter(example__isnull=False).order_by("example__position")
 
 
 @scenes_router.post("/", response={201: SceneSchema}, auth=None, by_alias=True)

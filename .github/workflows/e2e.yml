@@ -54,10 +54,12 @@ jobs:
       - run: corepack enable
       - name: Write env file for docker
         run: |
-          echo "VITE_APP_VERSION=$VITE_APP_VERSION" >> .env
-          echo "VITE_LEGACY_APP_BASE_URL=$VITE_LEGACY_APP_BASE_URL" >> .env
-          echo "TEST_USER_STATIC_EMAIL=$TEST_USER_STATIC_EMAIL" >> .env
-          echo "DISABLE_ALLAUTH_RATE_LIMITS=true" >> .env
+          {
+            echo "VITE_APP_VERSION=$VITE_APP_VERSION"
+            echo "VITE_LEGACY_APP_BASE_URL=$VITE_LEGACY_APP_BASE_URL"
+            echo "TEST_USER_STATIC_EMAIL=$TEST_USER_STATIC_EMAIL"
+            echo "DISABLE_ALLAUTH_RATE_LIMITS=true"
+          } >> .env
       - name: Build docker stack
         run: docker compose build
       - name: Migrate backend database

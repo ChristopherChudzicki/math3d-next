@@ -3,10 +3,9 @@ from unittest import mock
 import pytest
 from django.core.exceptions import ValidationError
 from django.core.management.base import CommandError
-
-from scenes.factories import SceneFactory
 from scenes.management.commands.pull_scenes import Command, upsert_scene
 from scenes.models import Scene
+from scenes.factories import SceneFactory
 
 
 @pytest.mark.django_db
@@ -25,7 +24,7 @@ def test_upsert_scene_creates_valid():
 
 
 @pytest.mark.django_db
-def test_upsert_scene_skips_reserved():
+def test_upsert_scene_skips_invalid_key():
     built = SceneFactory.build()
     d = {
         "key": "a",
@@ -41,8 +40,8 @@ def test_upsert_scene_skips_reserved():
 
 @pytest.mark.django_db
 def test_upsert_scene_raises_on_invalid_items():
-    """A valid key with invalid items must fail loudly, not be mistaken for a
-    reserved-key skip."""
+    """A valid key with invalid items must fail loudly, not be mistaken for an
+    invalid-key skip."""
     built = SceneFactory.build()
     d = {
         "key": "goodkey",
@@ -58,14 +57,14 @@ def test_upsert_scene_raises_on_invalid_items():
 
 
 def test_handle_runs_legacy_pull_then_reports_skips():
-    """A reserved key in the source must not abort the legacy-scene pull; the
+    """An invalid key in the source must not abort the legacy-scene pull; the
     skip is reported only after both fetch steps complete."""
     cmd = Command()
     with (
         mock.patch.object(cmd, "fetch_scenes", return_value=["app"]) as fetch_scenes,
         mock.patch.object(cmd, "fetch_legacy_scenes") as fetch_legacy,
     ):
-        with pytest.raises(CommandError, match="reserved keys"):
+        with pytest.raises(CommandError, match="invalid keys"):
             cmd.handle(database_url="postgres://u:p@localhost:5432/db", chunk_size=500)
     fetch_scenes.assert_called_once()
     fetch_legacy.assert_called_once()

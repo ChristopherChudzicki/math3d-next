@@ -241,6 +241,33 @@ describe("?fallback=none", () => {
     });
   });
 
+  describe("a hit's render headers", () => {
+    const RENDERED_AT = "2026-10-02T01:53:40.000Z";
+    const put = (customMetadata: Record<string, string>) =>
+      env.SCREENSHOTS_BUCKET.put(sceneImageKey("hit"), PNG, {
+        httpMetadata: { contentType: "image/png" },
+        customMetadata,
+      });
+
+    it("name the stored render, not the requested v", async () => {
+      await put({ version: "stored", renderedAt: RENDERED_AT });
+      const res = await call(
+        "/screenshots/scene/hit.png?fallback=none&v=other",
+      );
+      expect(res.headers.get("x-render-version")).toBe("stored");
+      expect(res.headers.get("x-rendered-at")).toBe(RENDERED_AT);
+    });
+
+    it("omit the version for an untagged render", async () => {
+      await put({ renderedAt: RENDERED_AT });
+      const res = await call(
+        "/screenshots/scene/hit.png?fallback=none&v=other",
+      );
+      expect(res.headers.has("x-render-version")).toBe(false);
+      expect(res.headers.get("x-rendered-at")).toBe(RENDERED_AT);
+    });
+  });
+
   it("serves the default card as before for any other fallback value", async () => {
     stubFetch();
     const res = await call("/screenshots/scene/missing.png?fallback=nope");

@@ -8,6 +8,7 @@ import { usePatchScene, useUserMe } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions, select } from "@/features/sceneControls/mathItems";
 import { useAuthStatus } from "@/features/auth";
+import { dismissToast } from "@/features/toasts";
 import Button from "@/ui/Button";
 import ButtonGroup from "@/ui/ButtonGroup";
 import IconButton from "@/ui/IconButton";
@@ -17,6 +18,8 @@ import type { PublishMode } from "./PublishDialog";
 import LinkDialog from "./LinkDialog";
 import copyText from "./copyText";
 import styles from "./SceneActions.module.css";
+
+const SAVE_FAILED = "Couldn’t save your changes. Try again.";
 
 type Primary = "share" | "save-new" | "save" | "copy-link" | "save-copy";
 type MenuAction = "duplicate" | "copy-link";
@@ -71,10 +74,15 @@ const SceneActions: React.FC = () => {
   const { data: me } = useUserMe();
   const store = useAppStore();
   const dispatch = useAppDispatch();
-  const patchScene = usePatchScene();
+  const patchScene = usePatchScene({ meta: { errorToast: SAVE_FAILED } });
   const key = useAppSelector(select.key);
   const author = useAppSelector(select.author);
   const dirty = useAppSelector(select.dirty);
+  // A successful retry dismisses it too, but so does any other way out of the
+  // unsaved state: Save a copy, or loading another scene.
+  useEffect(() => {
+    if (!dirty) dismissToast(SAVE_FAILED);
+  }, [dirty]);
   const loaded = useAppSelector((state) => state.scene.loaded);
   const sceneLoad = useAppSelector((state) => state.scene.loadCount);
   const routeKey = useParams().sceneKey ?? null;
