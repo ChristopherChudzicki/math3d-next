@@ -5,10 +5,11 @@ import Header from "@/ui/Header";
 
 import lightbulb from "@iconify-icons/lucide/lightbulb";
 import circleHelp from "@iconify-icons/lucide/circle-help";
-import { SceneActions } from "@/features/sceneActions";
+import SceneActions from "@/features/sceneActions/SceneActions";
 
-import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
-import type { AuthStatus } from "@/features/auth";
+import { useAuthStatus } from "@/features/auth/useAuthStatus";
+import { DISPLAY_AUTH_FLOWS } from "@/features/auth/displayAuthFlows";
+import type { AuthStatus } from "@/features/auth/useAuthStatus";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import Button from "@/ui/Button";

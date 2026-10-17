@@ -4,7 +4,8 @@ import ScrollingYOverflowX from "@/ui/scrollingOverflow";
 import { useAppSelector } from "@/store/hooks";
 import { useDispatch } from "react-redux";
 import styles from "./ControlTabs.module.css";
-import { actions, MAIN_FOLDER, SETTINGS_FOLDER } from "../mathItems";
+import { actions } from "../mathItems/sceneSlice/scene.slice";
+import { MAIN_FOLDER, SETTINGS_FOLDER } from "../mathItems/sceneSlice/util";
 
 type Props = {
   loading: boolean;

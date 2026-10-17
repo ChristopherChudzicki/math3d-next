@@ -5,9 +5,9 @@ import { Icon } from "@iconify/react/offline";
 import pencil from "@iconify-icons/lucide/pencil";
 import { useAppSelector } from "@/store/hooks";
 import IconButton from "@/ui/IconButton";
-import { RenameDialog } from "@/features/sceneActions";
+import RenameDialog from "@/features/sceneActions/RenameDialog";
 import { UNTITLED, sceneDisplayName } from "@/features/scene/sceneTitle";
-import { select } from "./mathItems/sceneSlice";
+import * as select from "./mathItems/sceneSlice/selectors";
 import styles from "./SceneTitle.module.css";
 
 const SceneTitle: React.FC = () => {

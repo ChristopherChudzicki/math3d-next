@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect } from "react";
 import { Drawer } from "@/ui/Drawer";
 import { Tabs } from "@/ui/Tabs";
-import { useAuthStatus, DISPLAY_AUTH_FLOWS } from "@/features/auth";
+import { useAuthStatus } from "@/features/auth/useAuthStatus";
+import { DISPLAY_AUTH_FLOWS } from "@/features/auth/displayAuthFlows";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import type { OverlayProps } from "@/features/overlays/useOverlay";
 import { useUrlLayerSearchParams } from "@/features/overlays/UrlLayer";

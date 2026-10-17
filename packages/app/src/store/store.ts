@@ -1,9 +1,7 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import type { SceneState } from "@/features/sceneControls/mathItems";
-import {
-  sceneSlice,
-  createMathScopeSync,
-} from "@/features/sceneControls/mathItems";
+import type { SceneState } from "@/features/sceneControls/mathItems/sceneSlice/interfaces";
+import sceneSlice from "@/features/sceneControls/mathItems/sceneSlice/scene.slice";
+import { createMathScopeSync } from "@/features/sceneControls/mathItems/sceneSlice/mathScopeSync";
 
 type RootState = {
   scene: SceneState;

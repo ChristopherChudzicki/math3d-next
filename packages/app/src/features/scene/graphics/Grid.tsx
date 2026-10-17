@@ -6,7 +6,8 @@ import {
   useFinalVisibility,
   useMathItemResults,
 } from "../../sceneControls/mathItems/mathScope";
-import { select, useMathScope } from "../../sceneControls/mathItems/sceneSlice";
+import * as select from "../../sceneControls/mathItems/sceneSlice/selectors";
+import { useMathScope } from "../../sceneControls/mathItems/sceneSlice/hooks";
 import { GraphicComponent } from "./interfaces";
 
 const props = [

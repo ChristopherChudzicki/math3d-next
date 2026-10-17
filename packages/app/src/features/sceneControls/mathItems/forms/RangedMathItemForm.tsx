@@ -8,7 +8,7 @@ import React, { useMemo } from "react";
 
 import * as u from "@/util/styles/utils.module.css";
 import FieldWidget from "../FieldWidget";
-import { useMathScope } from "../sceneSlice";
+import { useMathScope } from "../sceneSlice/hooks";
 import { useMathErrors } from "../mathScope";
 import ItemTemplate from "../templates/ItemTemplate";
 import { DomainForm, useExpressionsAndParameters } from "./expressionHelpers";

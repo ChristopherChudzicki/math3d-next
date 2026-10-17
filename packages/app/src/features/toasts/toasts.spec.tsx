@@ -2,7 +2,8 @@ import React from "react";
 import { expect, test } from "vitest";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import { expectToast } from "@/test_util";
-import { ToastHost, showToast } from ".";
+import ToastHost from "./ToastHost";
+import { showToast } from "./toasts";
 
 test("showing the same message again replaces the open toast", async () => {
   render(<ToastHost />);

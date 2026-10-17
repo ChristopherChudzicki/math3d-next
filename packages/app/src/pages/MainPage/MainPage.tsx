@@ -5,18 +5,18 @@ import {
   useParams,
   useSearchParams,
 } from "react-router";
-import Scene from "@/features/scene";
+import Scene from "@/features/scene/Scene";
 import useSceneLoader from "@/features/scene/useSceneLoader";
-import SceneControls from "@/features/sceneControls";
+import SceneControls from "@/features/sceneControls/SceneControls";
 import Sidebar from "@/ui/sidebar";
 import { useBodyClass, useToggle } from "@/util/hooks";
 import SceneTitle from "@/features/sceneControls/SceneTitle";
 
-import { ToggleKeyboardButton } from "@/features/virtualKeyboard";
+import ToggleKeyboardButton from "@/features/virtualKeyboard/KeyboardControls";
 
 import { useSelector } from "react-redux";
 
-import { select } from "@/features/sceneControls/mathItems/sceneSlice";
+import * as select from "@/features/sceneControls/mathItems/sceneSlice/selectors";
 import { BannersProvider } from "@/features/banners/BannerContext";
 import BannerDisplay from "@/features/banners/BannerDisplay";
 import styles from "./MainPage.module.css";

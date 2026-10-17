@@ -2,7 +2,8 @@ import React, { useMemo } from "react";
 import * as MB from "mathbox-react";
 import { MathItemType } from "@math3d/mathitem-configs";
 import { useSelector } from "react-redux";
-import { select, useMathScope } from "../../sceneControls/mathItems/sceneSlice";
+import * as select from "../../sceneControls/mathItems/sceneSlice/selectors";
+import { useMathScope } from "../../sceneControls/mathItems/sceneSlice/hooks";
 import {
   useFinalVisibility,
   useMathItemResults,

@@ -5,7 +5,7 @@ import { Icon } from "@iconify/react/offline";
 import chevronDown from "@iconify-icons/lucide/chevron-down";
 import menuIcon from "@iconify-icons/lucide/menu";
 import user from "@iconify-icons/lucide/user";
-import type { AuthStatus } from "@/features/auth";
+import type { AuthStatus } from "@/features/auth/useAuthStatus";
 import styles from "./UserMenu.module.css";
 
 const UserMenu: React.FC<{

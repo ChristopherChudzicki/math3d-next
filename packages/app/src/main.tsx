@@ -12,7 +12,7 @@ import { createQueryClient } from "./services/react-query/react-query";
 import AppRoutes from "./AppProviders";
 import { getStore } from "./store/store";
 import routes from "./routes";
-import { DISPLAY_AUTH_FLOWS } from "./features/auth";
+import { DISPLAY_AUTH_FLOWS } from "./features/auth/displayAuthFlows";
 import {
   discardSignInDraftOnPageRestore,
   takeSignInDraft,

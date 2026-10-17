@@ -5,7 +5,7 @@ import {
   WidgetType,
 } from "@math3d/mathitem-configs";
 import FieldWidget, { useOnWidgetChange } from "../../FieldWidget";
-import { useMathScope } from "../../sceneSlice";
+import { useMathScope } from "../../sceneSlice/hooks";
 import { useMathErrors } from "../../mathScope";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";

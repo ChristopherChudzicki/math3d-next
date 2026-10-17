@@ -7,7 +7,7 @@ import type { RouterProviderProps } from "react-router";
 import { AppStore } from "@/store/store";
 import { NotificationsProvider } from "./features/notifications/NotificationsContext";
 import NotificationsDisplay from "./features/notifications/NotificationsDisplay";
-import { ToastHost } from "./features/toasts";
+import ToastHost from "./features/toasts/ToastHost";
 
 interface AppProps {
   store: AppStore;

@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import * as yup from "yup";
 import { useNavigate } from "react-router";
 import { isApiError, useUserMeDelete } from "@math3d/api";
-import { useAuthStatus } from "@/features/auth";
+import { useAuthStatus } from "@/features/auth/useAuthStatus";
 import { useOverlay } from "@/features/overlays/useOverlay";
 import { useSignInDialog } from "@/features/overlays/useSignInDialog";
 import type { OverlayProps } from "@/features/overlays/useOverlay";
@@ -14,7 +14,7 @@ import { TextButton } from "@/ui/TextLink";
 import composeRefs from "@/util/composeRefs";
 import { useValidatedForm } from "@/util/forms";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
-import { dismissToast, showToast } from "@/features/toasts";
+import { dismissToast, showToast } from "@/features/toasts/toasts";
 import styles from "./DeleteAccountPage.module.css";
 
 const CONFIRM_PROMPT = "Yes, permanently delete";

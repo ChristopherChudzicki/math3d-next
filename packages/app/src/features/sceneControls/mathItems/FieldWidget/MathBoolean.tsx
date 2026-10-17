@@ -7,7 +7,7 @@ import type { OnMathFieldChange } from "@/ui/MathLive";
 import SmallMathField from "@/ui/SmallMathField";
 import * as u from "@/util/styles/utils.module.css";
 import invariant from "tiny-invariant";
-import { useMathScope } from "../sceneSlice";
+import { useMathScope } from "../sceneSlice/hooks";
 
 import { useMathResults } from "../mathScope";
 import { IWidgetProps } from "./types";

@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router";
 
-import Scene from "@/features/scene";
+import Scene from "@/features/scene/Scene";
 import useSceneLoader from "@/features/scene/useSceneLoader";
 
 /**

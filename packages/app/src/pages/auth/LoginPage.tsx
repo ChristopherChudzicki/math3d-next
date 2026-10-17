@@ -1,9 +1,7 @@
 import React, { useEffect } from "react";
-import {
-  ENABLE_DUMMY_AUTH,
-  ProviderSignInButton,
-  useAuthStatus,
-} from "@/features/auth";
+import { ENABLE_DUMMY_AUTH } from "@/features/auth/enableDummyAuth";
+import ProviderSignInButton from "@/features/auth/ProviderSignInButton";
+import { useAuthStatus } from "@/features/auth/useAuthStatus";
 import GoogleLogo from "@/features/auth/GoogleLogo";
 import { SIGN_IN_ERROR_MESSAGES } from "@/features/auth/signInErrors";
 import Alert from "@/ui/Alert";

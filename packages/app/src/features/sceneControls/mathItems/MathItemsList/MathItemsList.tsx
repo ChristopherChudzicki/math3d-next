@@ -20,7 +20,9 @@ import type {
 import { useCollapsible } from "@/util/hooks";
 import invariant from "tiny-invariant";
 import MathItemUI from "../MathItem";
-import { select, actions, useMathScope } from "../sceneSlice";
+import * as select from "../sceneSlice/selectors";
+import { actions } from "../sceneSlice/scene.slice";
+import { useMathScope } from "../sceneSlice/hooks";
 import style from "./MathItemsList.module.css";
 import { useMathItemResults } from "../mathScope";
 

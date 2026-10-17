@@ -2,7 +2,7 @@ import React from "react";
 
 import AddObjectButton from "./AddObjectButton";
 import ControlTabs from "./controlTabs";
-import { MathItemsList } from "./mathItems";
+import MathItemsList from "./mathItems/MathItemsList/MathItemsList";
 import styles from "./SceneControls.module.css";
 
 type Props = {

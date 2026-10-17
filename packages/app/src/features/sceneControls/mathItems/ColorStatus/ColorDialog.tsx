@@ -14,7 +14,7 @@ import { useOnWidgetChange } from "../FieldWidget/hooks";
 import ErrorTooltip from "../FieldWidget/ErrorTooltip";
 import MathValue from "../FieldWidget/MathValue";
 import { OnWidgetChange } from "../FieldWidget/types";
-import { useMathScope } from "../sceneSlice";
+import { useMathScope } from "../sceneSlice/hooks";
 import { useMathErrors } from "../mathScope";
 import ReadonlyMathField from "../FieldWidget/ReadonlyMathField";
 import styles from "./ColorDialog.module.css";

@@ -9,11 +9,9 @@ import invariant from "tiny-invariant";
 import { debounce } from "lodash-es";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useElementResize } from "@/util/hooks";
-import {
-  actions,
-  select,
-  useMathScope,
-} from "../sceneControls/mathItems/sceneSlice";
+import { actions } from "../sceneControls/mathItems/sceneSlice/scene.slice";
+import * as select from "../sceneControls/mathItems/sceneSlice/selectors";
+import { useMathScope } from "../sceneControls/mathItems/sceneSlice/hooks";
 import { Graphic, graphicNeedsRange } from "./graphics";
 import useAxesInfo from "./useAxesInfo";
 import Camera from "./Camera";

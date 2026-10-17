@@ -16,7 +16,7 @@ import { Popover } from "@/ui/Popover";
 import type { PopoverRootProps } from "@/ui/Popover";
 import { Tooltip } from "@/ui/Tooltip";
 import { useOnWidgetChange } from "../FieldWidget";
-import { useMathScope } from "../sceneSlice";
+import { useMathScope } from "../sceneSlice/hooks";
 import { useMathItemResults } from "../mathScope";
 import ColorPopup from "./ColorPopup";
 import styles from "./ColorStatus.module.css";

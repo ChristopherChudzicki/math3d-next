@@ -3,7 +3,7 @@ import React from "react";
 import { useAppDispatch } from "@/store/hooks";
 import Button from "@/ui/Button";
 import { Menu } from "@/ui/Menu";
-import { sceneSlice } from "./mathItems";
+import sceneSlice from "./mathItems/sceneSlice/scene.slice";
 import styles from "./AddObjectButton.module.css";
 
 const { actions } = sceneSlice;

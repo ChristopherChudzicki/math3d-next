@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { SceneBuilder, seedDb } from "@math3d/mock-api";
 import { renderTestApp, screen, waitFor, waitForAppReady } from "@/test_util";
-import { select } from "@/features/sceneControls/mathItems/sceneSlice";
+import * as select from "@/features/sceneControls/mathItems/sceneSlice/selectors";
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 

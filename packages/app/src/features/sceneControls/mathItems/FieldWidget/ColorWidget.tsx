@@ -6,7 +6,7 @@ import { useAppSelector } from "@/store/hooks";
 import { Popover } from "@/ui/Popover";
 import * as u from "@/util/styles/utils.module.css";
 import ColorPopup from "../ColorStatus/ColorPopup";
-import { select } from "../sceneSlice";
+import * as select from "../sceneSlice/selectors";
 import { IWidgetProps } from "./types";
 import styles from "./ColorWidget.module.css";
 

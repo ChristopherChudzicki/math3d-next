@@ -5,7 +5,7 @@ import { seedDb, urls } from "@math3d/mock-api";
 import type { Scene } from "@math3d/api";
 import { act, renameScene, renderTestApp, waitFor } from "@/test_util";
 import { getStore } from "@/store/store";
-import { sceneSlice } from "@/features/sceneControls/mathItems";
+import sceneSlice from "@/features/sceneControls/mathItems/sceneSlice/scene.slice";
 import {
   SIGN_IN_DRAFT_KEY,
   saveSignInDraft,

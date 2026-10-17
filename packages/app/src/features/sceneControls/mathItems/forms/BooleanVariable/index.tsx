@@ -6,7 +6,7 @@ import {
 } from "@math3d/mathitem-configs";
 import Switch from "@/ui/Switch";
 import FieldWidget, { useOnWidgetChange } from "../../FieldWidget";
-import { useMathScope } from "../../sceneSlice";
+import { useMathScope } from "../../sceneSlice/hooks";
 import { useMathErrors, useMathItemResults } from "../../mathScope";
 import ItemTemplate from "../../templates/ItemTemplate";
 import { MathItemForm } from "../interfaces";

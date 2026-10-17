@@ -4,7 +4,7 @@ import { Outlet } from "react-router";
 
 import UrlLayerHost from "@/features/overlays/UrlLayerHost";
 import SignInErrorHandler from "@/features/auth/SignInErrorHandler";
-import MainPage from "./pages/MainPage";
+import MainPage from "./pages/MainPage/MainPage";
 import FramePage from "./pages/FramePage/FramePage";
 import HelpPage from "./pages/HelpPage/HelpPage";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";

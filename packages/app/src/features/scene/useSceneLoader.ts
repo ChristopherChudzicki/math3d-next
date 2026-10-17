@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 
 import { useAppDispatch, useAppStore } from "@/store/hooks";
 import defaultScene from "@/store/defaultScene";
-import { sceneSlice } from "@/features/sceneControls/mathItems";
+import sceneSlice from "@/features/sceneControls/mathItems/sceneSlice/scene.slice";
 import { sceneTabTitle } from "@/features/scene/sceneTitle";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 

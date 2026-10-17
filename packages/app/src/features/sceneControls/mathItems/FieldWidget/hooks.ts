@@ -1,7 +1,7 @@
 import { MathItem, MathItemType as MIT } from "@math3d/mathitem-configs";
 import { useCallback } from "react";
 import { useAppDispatch } from "@/store/hooks";
-import { actions } from "../sceneSlice";
+import { actions } from "../sceneSlice/scene.slice";
 import { OnWidgetChange } from "./types";
 
 export const useOnWidgetChange = <T extends MIT>(item: MathItem<T>) => {

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useLogout } from "@math3d/api";
-import { useAuthStatus } from "@/features/auth";
+import { useAuthStatus } from "@/features/auth/useAuthStatus";
 import { AlertDialog } from "@/ui/AlertDialog";
 import Alert from "@/ui/Alert";
 import Button from "@/ui/Button";
