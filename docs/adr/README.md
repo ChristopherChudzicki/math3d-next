@@ -23,3 +23,4 @@ ADRs are numbered and committed alongside the code. Statuses:
 | [0004](0004-oauth-only-authentication.md)         | OAuth-only authentication                         | Accepted |
 | [0005](0005-local-google-sign-in-testing.md)      | Exercising Google sign-in in local development    | Accepted |
 | [0006](0006-base-ui-and-css-modules.md)           | Base UI + CSS Modules instead of MUI              | Accepted |
+| [0007](0007-bulletproof-react-layout.md)          | Bulletproof React layout for `packages/app/src`   | Proposed |
