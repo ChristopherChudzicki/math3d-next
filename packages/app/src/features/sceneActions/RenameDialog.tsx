@@ -1,7 +1,7 @@
 import React from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { actions } from "@/features/sceneControls/mathItems/sceneSlice/scene.slice";
-import * as select from "@/features/sceneControls/mathItems/sceneSlice/selectors";
+import { actions } from "@/store/scene/state/scene.slice";
+import * as select from "@/store/scene/state/selectors";
 import { Dialog } from "@/ui/Dialog";
 import Button from "@/ui/Button";
 import useTitleForm from "./useTitleForm";

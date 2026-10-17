@@ -11,7 +11,7 @@ import fs from "fs/promises";
 import { realpathSync } from "node:fs";
 
 /**
- * ./src/pages/HelpPage/data.compile.ts
+ * ./src/app/pages/HelpPage/data.compile.ts
  * file is generated at compile-time.
  *
  * It uses fs.readFileSync to load dependencies.
@@ -148,7 +148,7 @@ export default defineConfig({
     compileTime(),
     checkoutIdentity(),
     docsHotReload(
-      path.resolve(__dirname, "./src/pages/HelpPage/data.compile.ts"),
+      path.resolve(__dirname, "./src/app/pages/HelpPage/data.compile.ts"),
     ),
     ...sentryPlugins(),
   ],

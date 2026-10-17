@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { Dialog as BaseDialog } from "@base-ui/react/dialog";
 import { Icon } from "@iconify/react/offline";
 import xIcon from "@iconify-icons/lucide/x";
-import IconButton from "../IconButton";
+import IconButton from "@/ui/IconButton";
 import renderInertWhileClosing from "./renderInertWhileClosing";
 import * as styles from "./Dialog.module.css";
 

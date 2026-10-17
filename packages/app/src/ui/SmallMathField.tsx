@@ -1,8 +1,8 @@
 import classNames from "classnames";
 import React, { useMemo, useState } from "react";
-import { MathField, MathfieldElement, MathfieldProps } from "@/ui/MathLive";
-import * as mfOptions from "@/ui/MathLive/options";
 import composeRefs from "@/util/composeRefs";
+import { MathField, MathfieldElement, MathfieldProps } from "./MathLive";
+import * as mfOptions from "./MathLive/options";
 
 const SmallMathField: React.FC<
   MathfieldProps & { ref?: React.Ref<MathfieldElement> }

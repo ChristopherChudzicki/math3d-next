@@ -14,7 +14,7 @@ import {
   waitFor,
   within,
 } from "@/test_util";
-import { actions } from "@/features/sceneControls/mathItems/sceneSlice/scene.slice";
+import { actions } from "@/store/scene/state/scene.slice";
 
 beforeAll(() => {
   Object.assign(window.navigator, {

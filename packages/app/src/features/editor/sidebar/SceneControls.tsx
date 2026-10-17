@@ -1,0 +1,30 @@
+import React from "react";
+
+import MathItemsList from "@/features/editor/items/MathItemsList/MathItemsList";
+import AddObjectButton from "./AddObjectButton";
+import ControlTabs from "./controlTabs";
+import styles from "./SceneControls.module.css";
+
+type Props = {
+  /**
+   * Whether the scene is still loading. Scene data-loading lives in
+   * `useSceneLoader` (mounted by the page), not here — `SceneControls` is
+   * presentation-only and reads scene state from Redux.
+   */
+  loading: boolean;
+};
+
+const SceneControls: React.FC<Props> = ({ loading }) => {
+  return (
+    <ControlTabs
+      loading={loading}
+      tabBarExtraContent={
+        <AddObjectButton className={styles.AddObjectButton} />
+      }
+      mainContent={<MathItemsList rootId="main" />}
+      setupContent={<MathItemsList rootId="setup" />}
+    />
+  );
+};
+
+export default SceneControls;

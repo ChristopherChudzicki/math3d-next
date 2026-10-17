@@ -4,7 +4,7 @@ import chevronRight from "@iconify-icons/lucide/chevron-right";
 import classNames from "classnames";
 import React, { useCallback, useId, useMemo } from "react";
 
-import IconButton from "../IconButton";
+import IconButton from "@/ui/IconButton";
 import style from "./Sidebar.module.css";
 
 const getButtonDirection = (

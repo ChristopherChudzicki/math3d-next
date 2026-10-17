@@ -3,7 +3,7 @@ import triangleAlert from "@iconify-icons/lucide/triangle-alert";
 import classNames from "classnames";
 import React, { MouseEventHandler, useCallback, useState } from "react";
 import tinycolor from "tinycolor2";
-import TextField from "../TextField";
+import TextField from "@/ui/TextField";
 
 import styles from "./ColorPicker.module.css";
 

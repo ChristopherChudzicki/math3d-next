@@ -1,6 +1,6 @@
 import React from "react";
 
-import { MathfieldProps } from "..";
+import { MathfieldProps } from "@/ui/MathLive";
 
 const MockMathField = (
   props: MathfieldProps & {

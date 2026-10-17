@@ -1,9 +1,9 @@
 import React from "react";
 import classNames from "classnames";
-import Anchor from "../Anchor";
-import type { AnchorProps } from "../Anchor";
-import { buttonClassName } from "../Button/Button";
-import type { ButtonStyleProps } from "../Button";
+import Anchor from "@/ui/Anchor";
+import type { AnchorProps } from "@/ui/Anchor";
+import { buttonClassName } from "@/ui/Button/Button";
+import type { ButtonStyleProps } from "@/ui/Button";
 
 /**
  * `to` for a route in the app, or `href` for a plain anchor (another site, or

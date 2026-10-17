@@ -8,7 +8,7 @@ import {
   useMutation,
 } from "@tanstack/react-query";
 import type { MutationMeta } from "@math3d/api";
-import ToastHost from "@/features/toasts/ToastHost";
+import ToastHost from "@/ui/Toast/ToastHost";
 import { expectToast, screen, waitFor, within } from "@/test_util";
 import { createMutationCache, DEFAULT_ERROR_TOAST } from "./react-query";
 

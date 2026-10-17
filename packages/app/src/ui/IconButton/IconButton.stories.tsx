@@ -4,8 +4,8 @@ import { Icon } from "@iconify/react/offline";
 import x from "@iconify-icons/lucide/x";
 import keyboard from "@iconify-icons/lucide/keyboard";
 import chevronUp from "@iconify-icons/lucide/chevron-up";
+import type { ButtonVariant, ButtonTone, ButtonSize } from "@/ui/Button";
 import IconButton from "./IconButton";
-import type { ButtonVariant, ButtonTone, ButtonSize } from "../Button";
 
 const variants: ButtonVariant[] = ["ghost", "outline", "solid"];
 const tones: ButtonTone[] = ["neutral", "primary", "danger"];

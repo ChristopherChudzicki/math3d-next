@@ -3,8 +3,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { MemoryRouter } from "react-router";
 import { Icon } from "@iconify/react/offline";
 import externalLink from "@iconify-icons/lucide/external-link";
+import type { ButtonVariant, ButtonTone, ButtonSize } from "@/ui/Button";
 import ButtonLink from "./ButtonLink";
-import type { ButtonVariant, ButtonTone, ButtonSize } from "../Button";
 
 const variants: ButtonVariant[] = ["solid", "outline", "ghost"];
 const tones: ButtonTone[] = ["neutral", "primary", "danger"];

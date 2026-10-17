@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import Button from "../Button";
+import Button from "@/ui/Button";
 import { Dialog } from ".";
 
 /** Confirmations that interrupt use AlertDialog; this is the same footer. */

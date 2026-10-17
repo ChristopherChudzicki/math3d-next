@@ -2,21 +2,21 @@ import "./globals.css";
 // Import `./sentry` here: its Sentry.init() side effect then runs before the
 // rest of the app's modules evaluate, and before the first render.
 // eslint-disable-next-line import/order
-import { createRouter } from "./sentry";
+import { createRouter } from "@/services/sentry";
 
 import React from "react";
 import { createRoot } from "react-dom/client";
 import math from "@math3d/custom-mathjs";
-import { createQueryClient } from "./services/react-query/react-query";
+import { createQueryClient } from "@/services/react-query/react-query";
 
-import AppRoutes from "./AppProviders";
-import { getStore } from "./store/store";
-import routes from "./routes";
-import { DISPLAY_AUTH_FLOWS } from "./features/auth/displayAuthFlows";
+import AppRoutes from "@/app/AppProviders";
+import { getStore } from "@/store/store";
+import routes from "@/app/routes";
+import { DISPLAY_AUTH_FLOWS } from "@/config/displayAuthFlows";
 import {
   discardSignInDraftOnPageRestore,
   takeSignInDraft,
-} from "./features/auth/signInDraft";
+} from "@/services/auth/signInDraft";
 
 // @ts-expect-error Allow accessing math on window in dev for debugging
 window.math = math;

@@ -1,7 +1,7 @@
 import { MutationCache, QueryClient } from "@tanstack/react-query";
 import * as Sentry from "@sentry/react";
 import { isApiError } from "@math3d/api";
-import { dismissToast, showToast } from "@/features/toasts/toasts";
+import { dismissToast, showToast } from "@/ui/Toast/toasts";
 
 const RETRY_STATUS_CODES = [408, 429, 502, 503, 504];
 const MAX_RETRIES = 3;

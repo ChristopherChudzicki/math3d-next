@@ -1,8 +1,8 @@
 import React from "react";
 import classNames from "classnames";
 import { AlertDialog as BaseAlertDialog } from "@base-ui/react/alert-dialog";
-import renderInertWhileClosing from "../Dialog/renderInertWhileClosing";
-import * as styles from "../Dialog/Dialog.module.css";
+import renderInertWhileClosing from "@/ui/Dialog/renderInertWhileClosing";
+import * as styles from "@/ui/Dialog/Dialog.module.css";
 
 const { Root, Close } = BaseAlertDialog;
 

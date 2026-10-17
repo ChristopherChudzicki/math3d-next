@@ -24,13 +24,11 @@ module.exports = {
           {
             target: "./src/ui",
             from: [
+              "./src/app",
               "./src/features",
-              "./src/pages",
               "./src/store",
               "./src/services",
               "./src/worker",
-              "./src/routes.tsx",
-              "./src/AppProviders.tsx",
             ],
             message: "src/ui must not depend on app code.",
           },

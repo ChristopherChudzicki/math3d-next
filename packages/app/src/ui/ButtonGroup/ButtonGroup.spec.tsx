@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, within } from "@testing-library/react";
+import Button from "@/ui/Button";
 import ButtonGroup from "./ButtonGroup";
-import Button from "../Button";
 
 test("is a named group that holds buttons and other content", () => {
   render(
