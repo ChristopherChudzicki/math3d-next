@@ -5,7 +5,6 @@ from faker import Faker
 
 from authentication.factories import CustomUserFactory
 
-
 faker = Faker()
 
 
@@ -23,7 +22,7 @@ def test_create_user():
     # manager is the only other way one is made, so it must match.
     assert not user.has_usable_password()
     with pytest.raises(AttributeError):
-        user.username
+        _ = user.username
     with pytest.raises(TypeError):
         User.objects.create_user()  # type: ignore[call-arg]
     with pytest.raises(ValueError):

@@ -3,9 +3,10 @@ from unittest import mock
 import pytest
 from django.core.exceptions import ValidationError
 from django.core.management.base import CommandError
+
+from scenes.factories import SceneFactory
 from scenes.management.commands.pull_scenes import Command, upsert_scene
 from scenes.models import Scene
-from scenes.factories import SceneFactory
 
 
 @pytest.mark.django_db
@@ -63,8 +64,8 @@ def test_handle_runs_legacy_pull_then_reports_skips():
     with (
         mock.patch.object(cmd, "fetch_scenes", return_value=["app"]) as fetch_scenes,
         mock.patch.object(cmd, "fetch_legacy_scenes") as fetch_legacy,
+        pytest.raises(CommandError, match="invalid keys"),
     ):
-        with pytest.raises(CommandError, match="invalid keys"):
-            cmd.handle(database_url="postgres://u:p@localhost:5432/db", chunk_size=500)
+        cmd.handle(database_url="postgres://u:p@localhost:5432/db", chunk_size=500)
     fetch_scenes.assert_called_once()
     fetch_legacy.assert_called_once()

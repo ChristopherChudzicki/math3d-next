@@ -1,18 +1,14 @@
-from typing import Generic, TypeVar
-
 import factory
 import faker
 from factory.django import DjangoModelFactory
 
-from scenes.models import ExampleScene, Scene
 from authentication.factories import CustomUserFactory
+from scenes.models import ExampleScene, Scene
 
 fake = faker.Faker()
 
-T = TypeVar("T")
 
-
-class BaseFactory(DjangoModelFactory, Generic[T]):
+class BaseFactory[T](DjangoModelFactory):
     # Type hinting for Factory.create()
     @classmethod
     def create(cls, **kwargs) -> T:

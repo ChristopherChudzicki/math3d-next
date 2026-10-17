@@ -1,5 +1,3 @@
-from typing import List
-
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -33,14 +31,14 @@ def _require_owner(scene: Scene, request, action: str) -> None:
         raise HttpError(403, f"You do not have permission to {action} this scene.")
 
 
-@scenes_router.get("/", response=List[MiniSceneSchema], auth=None, by_alias=True)
+@scenes_router.get("/", response=list[MiniSceneSchema], auth=None, by_alias=True)
 @paginate(LimitOffsetPagination)
 def list_scenes(request, filters: SceneFilterSchema = Query(...)):
     return filters.filter(Scene.objects.all())
 
 
 @me_router.get(
-    "/scenes/", response=List[MiniSceneSchema], auth=session_auth, by_alias=True
+    "/scenes/", response=list[MiniSceneSchema], auth=session_auth, by_alias=True
 )
 @paginate(LimitOffsetPagination)
 def my_scenes(request, filters: SceneFilterSchema = Query(...)):
@@ -50,7 +48,7 @@ def my_scenes(request, filters: SceneFilterSchema = Query(...)):
 
 
 @examples_router.get(
-    "/scenes/", response=List[MiniSceneSchema], auth=None, by_alias=True
+    "/scenes/", response=list[MiniSceneSchema], auth=None, by_alias=True
 )
 @paginate(LimitOffsetPagination)
 def example_scenes(request):

@@ -11,6 +11,7 @@ and buckets failures by `(item type, error type, field path)` so a corpus of
     docker compose run --rm webserver uv run ./manage.py audit_scene_items --out db-snapshots/audit.jsonl
 """
 
+import contextlib
 import json
 import os
 from collections import Counter
@@ -91,14 +92,14 @@ class Command(BaseCommand):
         scanned = passed = failed = 0
         buckets: Counter = Counter()
         examples: dict = {}
-        out = None
-        if options["out"]:
-            parent = os.path.dirname(options["out"])
-            if parent:
-                os.makedirs(parent, exist_ok=True)
-            out = open(options["out"], "w")
+        with contextlib.ExitStack() as stack:
+            out = None
+            if options["out"]:
+                parent = os.path.dirname(options["out"])
+                if parent:
+                    os.makedirs(parent, exist_ok=True)
+                out = stack.enter_context(open(options["out"], "w"))
 
-        try:
             rows = rows_qs.iterator(chunk_size=options["chunk_size"])
             for row in tqdm.tqdm(rows, total=total, desc="Validating"):
                 scanned += 1
@@ -119,9 +120,6 @@ class Command(BaseCommand):
                             )
                             + "\n"
                         )
-        finally:
-            if out:
-                out.close()
 
         self._report(scanned, passed, failed, buckets, examples)
         if options["out"]:

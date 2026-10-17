@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
-from scenes.models import SCENE_KEY_PATTERN, Scene, LegacyScene
+
+from scenes.models import SCENE_KEY_PATTERN, LegacyScene, Scene
 
 INVALID = ~Q(key__regex=SCENE_KEY_PATTERN)
 
