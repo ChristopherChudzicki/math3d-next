@@ -22,7 +22,7 @@ def test_seeded_user_gets_a_matching_dummy_identity():
 @pytest.mark.django_db
 def test_seeding_twice_leaves_one_identity():
     """Re-seeding is routine locally; it must not collide on (provider, uid)."""
-    kwargs = dict(email="seeded@example.com", uid="4242")
+    kwargs = {"email": "seeded@example.com", "uid": "4242"}
     create_test_user(**kwargs)
     user = create_test_user(**kwargs)
 
@@ -67,7 +67,7 @@ def test_missing_email_raises_instead_of_colliding():
 def test_reseeding_applies_edits_to_existing_scenes():
     """Re-seeding is how an edited test_scene.json reaches a database that
     already holds the scenes; skipping the write leaves the old copy in place."""
-    seed = dict(email="seeded@example.com", uid="4242", scene_count=1)
+    seed = {"email": "seeded@example.com", "uid": "4242", "scene_count": 1}
     call_command("seed_test_data", **seed)
 
     scene = Scene.objects.get(title="Test Scene 0")
@@ -100,7 +100,7 @@ def test_test_scenes_get_distinct_surface_colors():
 @pytest.mark.django_db
 def test_seeds_one_anonymous_scene():
     """An author-less scene, so a signed-in dev user can reach "Save a Copy"."""
-    seed = dict(email="seeded@example.com", uid="4242", scene_count=1)
+    seed = {"email": "seeded@example.com", "uid": "4242", "scene_count": 1}
     call_command("seed_test_data", **seed)
     call_command("seed_test_data", **seed)
 
@@ -109,7 +109,7 @@ def test_seeds_one_anonymous_scene():
 
 @pytest.mark.django_db
 def test_seeds_examples_once():
-    seed = dict(email="seeded@example.com", uid="4242", scene_count=1)
+    seed = {"email": "seeded@example.com", "uid": "4242", "scene_count": 1}
     call_command("seed_test_data", **seed)
     call_command("seed_test_data", **seed)
 

@@ -53,8 +53,8 @@ def on_validation_error(request: HttpRequest, exc: ValidationError):
     return api.create_response(request, {"detail": exc.errors}, status=400)
 
 
-from authentication.api import router as auth_router  # noqa: E402
-from scenes.api import (  # noqa: E402
+from authentication.api import router as auth_router
+from scenes.api import (
     examples_router,
     legacy_router,
     me_router,

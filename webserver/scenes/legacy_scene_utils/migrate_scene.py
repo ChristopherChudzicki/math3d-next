@@ -3,10 +3,9 @@ import re
 
 from django.core.exceptions import ValidationError
 
-from scenes.legacy_scene_utils.translate import ItemMigrator
-from scenes.models import Scene, LegacyScene, is_invalid_key_error
-
 from scenes.legacy_scene_utils.default_data import set_defaults
+from scenes.legacy_scene_utils.translate import ItemMigrator
+from scenes.models import LegacyScene, Scene, is_invalid_key_error
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +94,7 @@ def migrate_scene(legacy_scene: LegacyScene):
     # In mathbox-react, if a folder has 100% default settings, the item won't
     # even exist in the dehydrated folder data, only in item_order.
     for folder_id in item_order["main"]:
-        if folder_id not in set(item["id"] for item in items):
+        if folder_id not in {item["id"] for item in items}:
             items.append(
                 migrator.translate_item(
                     {
@@ -131,7 +130,7 @@ def migrate_scene(legacy_scene: LegacyScene):
         logger.warning(
             "Skipping migration of legacy scene with invalid key %r", legacy_scene.key
         )
-        return None
+        return
     # TimestampedModel.save() overwrites modified_date on every write (and
     # created_date on insert), so backdate with a queryset update.
     creation_date = legacy_scene.dehydrated["metadata"]["creationDate"].replace('"', "")
@@ -142,6 +141,6 @@ def migrate_scene(legacy_scene: LegacyScene):
     )
 
     legacy_scene.migration_note = "\n".join(
-        (issue.message for issue in migrator.log.issues())
+        issue.message for issue in migrator.log.issues()
     )
     legacy_scene.save(update_fields=["migration_note"])

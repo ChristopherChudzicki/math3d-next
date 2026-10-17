@@ -2,7 +2,6 @@ import http.client
 import time
 import urllib.error
 import urllib.request
-from typing import Optional
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -14,7 +13,7 @@ from scenes.screenshots import RenderOutcome, maybe_render, scene_image_url
 CURRENT = "current"
 
 
-def probe(key: str, version: str) -> Optional[str]:
+def probe(key: str, version: str) -> str | None:
     """Ask the screenshots Worker which render it holds for ``key``.
 
     Returns ``CURRENT``, ``"probe failed: …"``, or None when the scene needs a

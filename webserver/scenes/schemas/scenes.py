@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated, Any, Dict, List, Optional
+from typing import Annotated, Any
 
 from ninja import Field, FilterLookup, FilterSchema, Schema
 from pydantic import ConfigDict
@@ -17,21 +17,21 @@ class _AuthoredSceneSchema(Schema):
     model_config = ConfigDict(populate_by_name=True)
 
     @staticmethod
-    def resolve_author(obj) -> Optional[int]:
+    def resolve_author(obj) -> int | None:
         return obj.author_id
 
 
 class MiniSceneSchema(_AuthoredSceneSchema):
-    title: Optional[str] = None
+    title: str | None = None
     key: str
-    author: Optional[int] = None
+    author: int | None = None
     created_date: datetime = Field(alias="createdDate")
     modified_date: datetime = Field(alias="modifiedDate")
     archived: bool
-    image_url: Optional[str] = Field(alias="imageUrl")
+    image_url: str | None = Field(alias="imageUrl")
 
     @staticmethod
-    def resolve_image_url(obj) -> Optional[str]:
+    def resolve_image_url(obj) -> str | None:
         # Imported here: scenes.screenshots imports scenes.models, which imports
         # this package (via scenes.validators).
         from scenes.screenshots import scene_image_url
@@ -42,15 +42,15 @@ class MiniSceneSchema(_AuthoredSceneSchema):
 class SceneMetaSchema(Schema):
     """Title-only shape for the read-only meta endpoint the edge OG Worker calls."""
 
-    title: Optional[str] = None
+    title: str | None = None
 
 
 class SceneSchema(_AuthoredSceneSchema):
-    items: List[MathItem]
-    item_order: Dict[str, List[str]] = Field(alias="itemOrder")
-    title: Optional[str] = None
+    items: list[MathItem]
+    item_order: dict[str, list[str]] = Field(alias="itemOrder")
+    title: str | None = None
     key: str
-    author: Optional[int] = None
+    author: int | None = None
     created_date: datetime = Field(alias="createdDate")
     modified_date: datetime = Field(alias="modifiedDate")
     archived: bool
@@ -61,9 +61,9 @@ class SceneCreateSchema(Schema):
     # populate_by_name + aliases so the endpoint accepts camelCase request bodies.
     model_config = ConfigDict(populate_by_name=True)
 
-    items: List[MathItem]
-    item_order: Dict[str, List[str]] = Field(alias="itemOrder")
-    title: Optional[SceneTitle] = None
+    items: list[MathItem]
+    item_order: dict[str, list[str]] = Field(alias="itemOrder")
+    title: SceneTitle | None = None
     archived: bool = False
 
 
@@ -79,15 +79,15 @@ class ScenePatchSchema(Schema):
     # rationale remains.)
     model_config = ConfigDict(populate_by_name=True)
 
-    items: List[MathItem] = Field(default_factory=list)
-    item_order: Dict[str, List[str]] = Field(default_factory=dict, alias="itemOrder")
-    title: Optional[SceneTitle] = None
-    archived: Optional[bool] = None
+    items: list[MathItem] = Field(default_factory=list)
+    item_order: dict[str, list[str]] = Field(default_factory=dict, alias="itemOrder")
+    title: SceneTitle | None = None
+    archived: bool | None = None
 
 
 class SceneFilterSchema(FilterSchema):
-    title: Annotated[Optional[str], FilterLookup("title__icontains")] = None
-    archived: Optional[bool] = None  # exact; ignore_none default skips when absent
+    title: Annotated[str | None, FilterLookup("title__icontains")] = None
+    archived: bool | None = None  # exact; ignore_none default skips when absent
 
 
 class LegacySceneInSchema(Schema):
