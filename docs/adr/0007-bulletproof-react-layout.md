@@ -61,12 +61,17 @@ three tiers — shared → features → app — imported one way, enforced by it
 - **Departures from Bulletproof:** feature internals are split by sub-area
   (`editor/{sidebar,items}`), not file type; shared folders keep their names;
   file names are not kebab-case.
-- **`config/` holds one module per flag** (`displayAuthFlows`, …) so a spec
-  can `vi.mock` one; reads that specs stub with `vi.stubEnv` at call time stay
-  inline.
-- **Known debt:** the slider animation clock ticks from the `VariableSlider`
-  form, so it stops when the form unmounts; `activeItemId`/`activeTabId`
-  (session state) share the scene slice with the document.
+- **`config/` holds one module per env value that a spec mocks or several
+  files read** (`displayAuthFlows`, `issueUrl`, …), so a spec can `vi.mock`
+  one. A single consumer's read, or a call-time read a spec `vi.stubEnv`s,
+  stays inline.
+- **Known debt:**
+  - the slider animation clock ticks from the `VariableSlider` form, so it
+    stops when the form unmounts;
+  - `activeItemId`/`activeTabId` (session state) share the scene slice with
+    the document;
+  - `OverlayName` in `services/overlays/useOverlay.ts` names app pages from
+    the shared tier.
 
 ## Alternatives considered
 

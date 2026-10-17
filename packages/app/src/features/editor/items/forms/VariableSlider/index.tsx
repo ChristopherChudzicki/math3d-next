@@ -29,9 +29,9 @@ import {
   OnWidgetChange,
   WidgetChangeEvent,
 } from "@/features/editor/items/FieldWidget/types";
-import styles from "./slider.module.css";
 import type { SliderControlsProps } from "./SliderControls";
 import SliderControls, { mustFindSpeed } from "./SliderControls";
+import styles from "./slider.module.css";
 
 const config = configs[MIT.VariableSlider];
 const configProps = config.properties;

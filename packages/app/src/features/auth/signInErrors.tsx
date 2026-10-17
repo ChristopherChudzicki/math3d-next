@@ -1,13 +1,10 @@
 import React from "react";
+import { ISSUE_URL } from "@/config/issueUrl";
 import type { SignInError } from "@/services/auth/signInErrorCodes";
 import TextLink from "@/ui/TextLink";
 
 const ContactLink: React.FC<{ children: string }> = ({ children }) => (
-  <TextLink
-    href={import.meta.env.VITE_ISSUE_URL}
-    target="_blank"
-    rel="noreferrer"
-  >
+  <TextLink href={ISSUE_URL} target="_blank" rel="noreferrer">
     {children}
   </TextLink>
 );

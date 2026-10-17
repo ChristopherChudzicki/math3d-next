@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router";
-import invariant from "tiny-invariant";
 import Header from "@/ui/Header";
 
 import lightbulb from "@iconify-icons/lucide/lightbulb";
@@ -9,6 +8,7 @@ import SceneActions from "@/features/sceneActions/SceneActions";
 
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { DISPLAY_AUTH_FLOWS } from "@/config/displayAuthFlows";
+import { ISSUE_URL } from "@/config/issueUrl";
 import type { AuthStatus } from "@/services/auth/useAuthStatus";
 import { useOverlay } from "@/services/overlays/useOverlay";
 import { useSignInDialog } from "@/services/overlays/useSignInDialog";
@@ -43,9 +43,6 @@ const LoginButtons: React.FC<{
     </Button>
   );
 };
-
-const ISSUE_URL = import.meta.env.VITE_ISSUE_URL;
-invariant(ISSUE_URL, "VITE_ISSUE_URL is not set");
 
 const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
   authStatus,

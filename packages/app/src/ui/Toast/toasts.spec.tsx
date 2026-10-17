@@ -1,7 +1,7 @@
 import React from "react";
 import { expect, test } from "vitest";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
-import { expectToast } from "@/test_util";
+import expectToast from "@/test_util/expectToast";
 import ToastHost from "./ToastHost";
 import { showToast } from "./toasts";
 

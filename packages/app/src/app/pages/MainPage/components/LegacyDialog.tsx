@@ -3,10 +3,9 @@ import invariant from "tiny-invariant";
 import Button from "@/ui/Button";
 import { Dialog } from "@/ui/Dialog";
 import TextLink from "@/ui/TextLink";
+import { ISSUE_URL } from "@/config/issueUrl";
 import * as styles from "./LegacyDialog.module.css";
 
-const ISSUE_URL = import.meta.env.VITE_ISSUE_URL;
-invariant(ISSUE_URL, "VITE_ISSUE_URL is not set");
 const LEGACY_APP_BASE_URL = import.meta.env.VITE_LEGACY_APP_BASE_URL;
 invariant(LEGACY_APP_BASE_URL, "VITE_LEGACY_APP_BASE_URL is not set");
 

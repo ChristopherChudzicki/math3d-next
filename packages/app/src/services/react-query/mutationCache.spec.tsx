@@ -1,7 +1,13 @@
 import React from "react";
 import { expect, test, vi } from "vitest";
 import * as Sentry from "@sentry/react";
-import { act, renderHook } from "@testing-library/react";
+import {
+  act,
+  renderHook,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import {
   QueryClient,
   QueryClientProvider,
@@ -9,7 +15,7 @@ import {
 } from "@tanstack/react-query";
 import type { MutationMeta } from "@math3d/api";
 import ToastHost from "@/ui/Toast/ToastHost";
-import { expectToast, screen, waitFor, within } from "@/test_util";
+import expectToast from "@/test_util/expectToast";
 import { createMutationCache, DEFAULT_ERROR_TOAST } from "./react-query";
 
 vi.mock("@sentry/react", async (importOriginal) => ({
