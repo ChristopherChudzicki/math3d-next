@@ -57,9 +57,9 @@ const BannerItem: React.FC<{
   );
 };
 
-// The Scene's WebGL canvas only re-measures on a native window "resize"
+// The Viewport's WebGL canvas only re-measures on a native window "resize"
 // event, which a banner appearing/disappearing doesn't fire on its own
-// (Scene.tsx handles that generally via a ResizeObserver on its own
+// (Viewport.tsx handles that generally via a ResizeObserver on its own
 // container). This component's only layout responsibility is keeping
 // --banner-height in sync with its own rendered height so the sidebar's
 // scroll-height calc (ControlTabs.module.css) stays correct.

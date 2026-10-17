@@ -35,7 +35,7 @@ const features = fs
 // Imports leaving a module's own folder use @/ paths (Bulletproof's "absolute
 // imports"). The Worker is exempt: its tsconfig has no @/ alias.
 const noParentImports = {
-  group: ["../*"],
+  group: [".."],
   message: "Import from outside this folder with an @/ path.",
 };
 

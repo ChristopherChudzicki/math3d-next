@@ -1,7 +1,7 @@
 // `still`-mode readiness: deciding when a warming-up mathbox scene has settled
 // enough to screenshot. Extracted as a pure state machine (no rAF, no mathbox)
 // so the branching — which is subtle — can be unit-tested against synthetic
-// sample sequences. `Scene.tsx` drives it once per animation frame.
+// sample sequences. `Viewport.tsx` drives it once per animation frame.
 //
 // mathbox drains its warmup queue a couple objects per frame, so a fixed frame
 // count under-renders any scene with more objects than the count covers (e.g. a

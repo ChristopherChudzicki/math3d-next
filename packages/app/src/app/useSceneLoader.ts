@@ -25,7 +25,7 @@ type OnNotFound = "redirect" | "silent";
  * UI. This is the single place scene data-loading happens: fetch (React
  * Query) → `setScene` dispatch → `document.title`, plus 404 handling.
  *
- * `SceneControls` and `<Scene>` both read the resulting Redux state; neither
+ * `SceneControls` and `<Viewport>` both read the resulting Redux state; neither
  * needs to be mounted for the load to occur.
  */
 const useSceneLoader = (

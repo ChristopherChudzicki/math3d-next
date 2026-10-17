@@ -1,5 +1,5 @@
 import "./globals.css";
-// Import `./sentry` here: its Sentry.init() side effect then runs before the
+// Import `@/services/sentry` here: its Sentry.init() side effect then runs before the
 // rest of the app's modules evaluate, and before the first render.
 // eslint-disable-next-line import/order
 import { createRouter } from "@/services/sentry";
