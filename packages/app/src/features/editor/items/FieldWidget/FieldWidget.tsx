@@ -3,7 +3,6 @@ import React from "react";
 
 import AutosizeText from "./AutosizeText";
 import ColorWidget from "./ColorWidget";
-import MathAssignment from "./MathAssignment";
 import MathBoolean from "./MathBoolean";
 import MathValue from "./MathValue";
 import TextInput from "./TextInput";
@@ -31,7 +30,4 @@ const FieldWidget: React.FC<WidgetProps> = (props) => {
 };
 
 export default FieldWidget;
-
-export { useOnWidgetChange, usePatchPropertyOnChange } from "./hooks";
-export { MathAssignment };
 export type { WidgetProps };

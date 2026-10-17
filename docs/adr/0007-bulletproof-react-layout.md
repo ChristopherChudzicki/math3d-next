@@ -60,11 +60,13 @@ three tiers — shared → features → app — imported one way, enforced by it
   production import would reach `src/app` without crossing a zone.
 - **The scene ↔ store cycle stays type-only:** `selectors.ts` uses
   `import type { RootState }`, which `import/no-cycle` skips.
-- **No tier- or feature-root barrels;** a component folder's `index.ts` only
-  re-exports its component, as in Bulletproof.
+- **No tier- or feature-root barrels,** except `test_util/index.ts` (test
+  helpers, imported by most specs). A component folder's `index.ts` only
+  re-exports from its folder, as in Bulletproof.
 - **Naming:**
   - tier and feature folders are camelCase (`util/hooks`,
-    `features/sceneActions`);
+    `features/sceneActions`), except `test_util` and
+    `services/react-query`;
   - below them, a folder named for a component is PascalCase
     (`items/FieldWidget`, `pages/MainPage`);
   - folders in `ui/` are PascalCase (`ui/Button`, `ui/Banners`), except

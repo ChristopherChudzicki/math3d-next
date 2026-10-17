@@ -8,7 +8,7 @@ import plus from "@iconify-icons/lucide/plus";
 import minus from "@iconify-icons/lucide/minus";
 import ButtonGroup from "@/ui/ButtonGroup";
 import IconButton from "@/ui/IconButton";
-import { assertNotNil } from "@/util";
+import { assertNotNil } from "@/util/predicates";
 import classNames from "classnames";
 import styles from "./SliderControls.module.css";
 
