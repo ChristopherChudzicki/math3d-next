@@ -36,7 +36,7 @@ const forms = {
   [MIT.VariableSlider]: VariableSlider,
   [MIT.Vector]: Vector,
   [MIT.VectorField]: VectorField,
-};
+} satisfies { [T in MIT]: MathItemForm<T> };
 
 const getMathItemForm = <T extends MIT>(type: T): MathItemForm<T> => {
   return forms[type] as MathItemForm<T>;

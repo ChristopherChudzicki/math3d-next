@@ -5,7 +5,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router";
-import Scene from "@/features/viewport/Viewport";
+import Viewport from "@/features/viewport/Viewport";
 import useSceneLoader from "@/app/useSceneLoader";
 import SceneControls from "@/features/editor/sidebar/SceneControls";
 import Sidebar from "@/ui/sidebar";
@@ -117,7 +117,7 @@ const MainPage: React.FC = () => {
           >
             <SceneControls loading={isLoading} />
           </Sidebar>
-          <Scene
+          <Viewport
             className={
               controlsOpen
                 ? styles["scene-adjust-controls-open"]

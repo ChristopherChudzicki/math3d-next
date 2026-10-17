@@ -1,4 +1,8 @@
-import { MathItemType, MathGraphic } from "@math3d/mathitem-configs";
+import {
+  MathItemType,
+  MathGraphic,
+  MathGraphicType,
+} from "@math3d/mathitem-configs";
 
 import React from "react";
 import Point from "./Point";
@@ -28,7 +32,7 @@ const graphics = {
   [MathItemType.ParametricSurface]: ParametricSurface,
   [MathItemType.Vector]: Vector,
   [MathItemType.VectorField]: VectorField,
-};
+} satisfies { [T in MathGraphicType]: GraphicComponent<T> };
 
 const NEEDS_RANGE: MathItemType[] = [
   MathItemType.ParametricSurface,

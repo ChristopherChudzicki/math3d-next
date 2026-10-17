@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router";
-import type { SignInError } from "@/features/auth/signInErrors";
+import type { SignInError } from "@/services/auth/signInErrorCodes";
 import { OVERLAY_PARAMS } from "./useOverlay";
 import type { OverlayHistoryState } from "./useOverlay";
 import { useCloseUrlLayer } from "./useCloseUrlLayer";

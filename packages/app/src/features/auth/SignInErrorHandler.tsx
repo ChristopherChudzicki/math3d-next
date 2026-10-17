@@ -3,7 +3,8 @@ import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { SIGN_IN_PARAM } from "@/services/overlays/useSignInDialog";
 import type { SignInHistoryState } from "@/services/overlays/useSignInDialog";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
-import { SIGN_IN_ERROR_PATH, toSignInError } from "./signInErrors";
+import { SIGN_IN_ERROR_PATH } from "@/config/paths";
+import { toSignInError } from "@/services/auth/signInErrorCodes";
 
 /** Turns allauth's `?error=` return into the sign-in dialog showing it. */
 const SignInErrorHandler: React.FC = () => {

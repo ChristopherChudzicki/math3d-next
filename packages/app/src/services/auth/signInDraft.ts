@@ -1,6 +1,6 @@
 import type { RootState } from "@/store/store";
 import { APP_VERSION } from "@/config/version";
-import { SIGN_IN_ERROR_PATH } from "@/features/auth/signInErrors";
+import { SIGN_IN_ERROR_PATH } from "@/config/paths";
 
 /**
  * The editor's state, carried across the sign-in redirect in `sessionStorage`

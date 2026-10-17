@@ -2,7 +2,10 @@ import type { MathItemType, MathItem } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import type { RootState } from "@/store/store";
 import { seedDb, makeItem } from "@math3d/mock-api";
-import { screen, within, user, assertInstanceOf, renderTestApp } from ".";
+import { screen, within } from "@testing-library/react";
+import user from "@testing-library/user-event";
+import { assertInstanceOf } from "@/util/predicates";
+import renderTestApp from "./renderTestApp";
 
 const addItem = async (itemTypeLabel: string): Promise<void> => {
   const addNewItemButton = screen.getByRole("button", { name: "Add Object" });

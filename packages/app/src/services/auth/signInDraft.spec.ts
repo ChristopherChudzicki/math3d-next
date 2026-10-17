@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { getStore } from "@/store/store";
-import { SIGN_IN_ERROR_PATH } from "@/features/auth/signInErrors";
+import { SIGN_IN_ERROR_PATH } from "@/config/paths";
 import {
   SIGN_IN_DRAFT_KEY,
   SIGN_IN_DRAFT_MAX_AGE_MS,

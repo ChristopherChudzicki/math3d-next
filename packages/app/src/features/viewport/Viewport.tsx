@@ -56,7 +56,7 @@ type MathboxRoot = MathboxSelection & {
 };
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
-const SceneContent = () => {
+const ViewportContent = () => {
   const dispatch = useAppDispatch();
   const items = useAppSelector(select.stableOrderedMathItems);
   const [x, y, z, camera] = useAppSelector((state) =>
@@ -116,7 +116,7 @@ const useIsOrthographic = () => {
 // ~5 minutes to ~45 seconds.
 const is3dDisabled = localStorage.getItem("disable3dScene") === "true";
 
-const Scene: React.FC<Props> = ({ className, still }) => {
+const Viewport: React.FC<Props> = ({ className, still }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [mathbox, setMathbox] = useState<MathboxSelection | null>(null);
   // Single-shot latch: once ready, it stays ready for this component's life.
@@ -194,11 +194,11 @@ const Scene: React.FC<Props> = ({ className, still }) => {
           focus={focus}
           ref={handleMathbox}
         >
-          <SceneContent />
+          <ViewportContent />
         </MB.Mathbox>
       )}
     </div>
   );
 };
 
-export default Scene;
+export default Viewport;

@@ -1,4 +1,4 @@
-import { createToastManager } from ".";
+import { createToastManager } from "./Toaster";
 
 const toastManager = createToastManager();
 /** Ids of open toasts by description: one toast per message. */

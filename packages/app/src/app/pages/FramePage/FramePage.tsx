@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router";
 
-import Scene from "@/features/viewport/Viewport";
+import Viewport from "@/features/viewport/Viewport";
 import useSceneLoader from "@/app/useSceneLoader";
 
 /**
@@ -15,7 +15,7 @@ const FramePage: React.FC = () => {
   useSceneLoader(sceneKey, { onNotFound: "silent" });
   return (
     <div style={{ position: "fixed", inset: 0 }}>
-      <Scene still />
+      <Viewport still />
     </div>
   );
 };
