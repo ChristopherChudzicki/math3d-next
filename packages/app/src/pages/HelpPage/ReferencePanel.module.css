@@ -5,6 +5,10 @@
   line-height: 1.334;
 }
 
+.tableContainer {
+  container-type: inline-size;
+}
+
 .table {
   width: 100%;
 }
@@ -13,14 +17,15 @@
   text-align: left;
 }
 
+.row th,
 .row td {
   padding-right: 16px;
   padding-left: 16px;
 }
-.row td:not(:last-of-type) {
-  white-space: no-wrap;
+.expression {
+  white-space: nowrap;
 }
-.row td:last-of-type {
+.description {
   width: 100%;
 }
 .row:not(:last-of-type) {
@@ -43,4 +48,45 @@ thead .row:first-of-type {
 
 .toggle {
   margin-left: 0.5em;
+}
+
+/* Three columns don't fit a narrow container: stack each entry as expression
+   and keys on one line, description below. The widest table needs ~484px. */
+@container (max-width: 539.98px) {
+  .table,
+  .table tbody {
+    display: block;
+  }
+
+  .table thead {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    width: 1px;
+  }
+
+  tbody .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 16px;
+    row-gap: 8px;
+    padding: 12px 0;
+  }
+
+  .row td {
+    padding: 0;
+  }
+
+  /* Shares the line only if it fits whole; otherwise wraps below, indented. */
+  .row .description {
+    flex: 1 1 auto;
+    width: auto;
+    padding-left: 16px;
+  }
+
+  .summary {
+    margin: 0;
+  }
 }

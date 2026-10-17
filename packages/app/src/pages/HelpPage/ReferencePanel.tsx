@@ -17,13 +17,16 @@ const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
   const [expanded, setExpanded] = useToggle(false);
   return (
     <tr className={styles.row}>
-      <td dangerouslySetInnerHTML={{ __html: entry.latex }} />
+      <td
+        className={styles.expression}
+        dangerouslySetInnerHTML={{ __html: entry.latex }}
+      />
       <td>
         <span className={styles.keyboard}>{entry.keyboard}</span>
       </td>
-      <td>
+      <td className={styles.description}>
         <div>
-          <p>
+          <p className={styles.summary}>
             <span
               dangerouslySetInnerHTML={{ __html: entry.summaryInnerHtml }}
             />
@@ -50,20 +53,22 @@ const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
 
 const ReferenceTable: React.FC<ReferencePanelProps> = ({ entries }) => {
   return (
-    <table className={styles.table}>
-      <thead>
-        <tr className={styles.row}>
-          <th>Expression</th>
-          <th>Keyboard</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-        {entries.map((entry) => (
-          <ReferenceRow key={entry.id} entry={entry} />
-        ))}
-      </tbody>
-    </table>
+    <div className={styles.tableContainer}>
+      <table className={styles.table}>
+        <thead>
+          <tr className={styles.row}>
+            <th>Expression</th>
+            <th>Keyboard</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {entries.map((entry) => (
+            <ReferenceRow key={entry.id} entry={entry} />
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
