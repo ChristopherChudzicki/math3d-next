@@ -15,7 +15,7 @@ import ParametricCurve from "./forms/ParametricCurve";
 import ParametricSurface from "./forms/ParametricSurface";
 import Point from "./forms/Point";
 import Variable from "./forms/Variable";
-import VariableSlider from "./forms/VariableSlider";
+import VariableSlider from "./forms/VariableSlider/VariableSlider";
 import Vector from "./forms/Vector";
 import VectorField from "./forms/VectorField";
 

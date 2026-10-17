@@ -6,7 +6,7 @@ import { useAppDispatch, useAppStore } from "@/store/hooks";
 import defaultScene from "@/store/scene/defaultScene";
 import sceneSlice from "@/store/scene/state/scene.slice";
 import { sceneTabTitle } from "@/store/scene/sceneTitle";
-import { useNotifications } from "@/ui/notifications/NotificationsContext";
+import { useNotifications } from "@/ui/Notifications/NotificationsContext";
 
 const { actions: itemActions } = sceneSlice;
 

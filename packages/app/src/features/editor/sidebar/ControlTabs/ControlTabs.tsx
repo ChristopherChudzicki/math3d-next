@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { Tabs } from "@/ui/Tabs";
-import ScrollingYOverflowX from "@/ui/scrollingOverflow";
+import ScrollingYOverflowX from "@/ui/ScrollingOverflow";
 import { useAppSelector } from "@/store/hooks";
 import { useDispatch } from "react-redux";
 import { actions } from "@/store/scene/state/scene.slice";

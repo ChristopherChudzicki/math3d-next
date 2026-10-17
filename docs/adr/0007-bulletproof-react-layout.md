@@ -32,11 +32,13 @@ three tiers — shared → features → app — imported one way, enforced by it
 | `stores/`              | `store/` (incl. `store/scene/`) |
 | `config/`              | `config/`                       |
 | `utils/`, `hooks/`     | `util/`                         |
-| `testing/`             | `test_util/` (in no zone)       |
+| `testing/`             | `test_util/` (tests only)       |
 | feature `api/`, `api/` | `packages/api`                  |
 
 - **Features:** `viewport`, `editor`, `sceneActions`, `library`, `auth`. No
-  feature imports another; pages in `app/` compose them.
+  feature imports another.
+- **Pages are routes:** `app/pages` holds everything with a route or an
+  `?overlay=` name, along with its page-local logic and styles.
 - **The scene model is shared**, in `store/scene/` (`state/`, `evaluation/`,
   `sceneTitle`, `defaultScene`). It imports no `ui`; `ui`, `util`,
   `services`, `config` and `types` don't import it; `state/` doesn't import
@@ -54,13 +56,22 @@ three tiers — shared → features → app — imported one way, enforced by it
   dodge a zone is not on the list.
 - **Lint reads the feature list from `src/features/`,** so a new feature
   folder gets its zone without a config edit.
+- **Only tests import `test_util`:** it renders the whole app, so a
+  production import would reach `src/app` without crossing a zone.
 - **The scene ↔ store cycle stays type-only:** `selectors.ts` uses
   `import type { RootState }`, which `import/no-cycle` skips.
-- **Feature-root barrels are gone;** per-component `index.ts` files stay, as
-  in Bulletproof.
+- **No tier- or feature-root barrels;** a component folder's `index.ts` only
+  re-exports its component, as in Bulletproof.
+- **Naming:**
+  - tier and feature folders are camelCase (`util/hooks`,
+    `features/sceneActions`);
+  - below them, a folder named for a component is PascalCase
+    (`items/FieldWidget`, `pages/MainPage`);
+  - folders in `ui/` are PascalCase (`ui/Button`, `ui/Banners`), except
+    `ui/dnd`;
+  - file names are not kebab-case.
 - **Departures from Bulletproof:** feature internals are split by sub-area
-  (`editor/{sidebar,items}`), not file type; shared folders keep their names;
-  file names are not kebab-case.
+  (`editor/{sidebar,items}`), not file type; shared folders keep their names.
 - **`config/` holds one module per env value that a spec mocks or several
   files read** (`displayAuthFlows`, `issueUrl`, …), so a spec can `vi.mock`
   one. A single consumer's read, or a call-time read a spec `vi.stubEnv`s,

@@ -5,8 +5,8 @@ import { Provider } from "react-redux";
 import { RouterProvider } from "react-router";
 import type { RouterProviderProps } from "react-router";
 import { AppStore } from "@/store/store";
-import { NotificationsProvider } from "@/ui/notifications/NotificationsContext";
-import NotificationsDisplay from "@/ui/notifications/NotificationsDisplay";
+import { NotificationsProvider } from "@/ui/Notifications/NotificationsContext";
+import NotificationsDisplay from "@/ui/Notifications/NotificationsDisplay";
 import ToastHost from "@/ui/Toast/ToastHost";
 
 interface AppProps {

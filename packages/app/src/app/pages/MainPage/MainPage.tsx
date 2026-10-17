@@ -8,7 +8,7 @@ import {
 import Viewport from "@/features/viewport/Viewport";
 import useSceneLoader from "@/app/useSceneLoader";
 import SceneControls from "@/features/editor/sidebar/SceneControls";
-import Sidebar from "@/ui/sidebar";
+import Sidebar from "@/ui/Sidebar";
 import { useBodyClass, useToggle } from "@/util/hooks";
 import SceneTitle from "@/features/sceneActions/SceneTitle";
 
@@ -17,8 +17,8 @@ import ToggleKeyboardButton from "@/features/editor/virtualKeyboard/KeyboardCont
 import { useSelector } from "react-redux";
 
 import * as select from "@/store/scene/state/selectors";
-import { BannersProvider } from "@/ui/banners/BannerContext";
-import BannerDisplay from "@/ui/banners/BannerDisplay";
+import { BannersProvider } from "@/ui/Banners/BannerContext";
+import BannerDisplay from "@/ui/Banners/BannerDisplay";
 import styles from "./MainPage.module.css";
 import Header from "./components/Header";
 import LegacyDialog from "./components/LegacyDialog";

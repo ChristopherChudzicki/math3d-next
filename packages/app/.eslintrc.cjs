@@ -128,6 +128,35 @@ module.exports = {
         ],
       },
     },
+    // test_util renders the whole app, so production code importing it would
+    // reach src/app (and ship test helpers) without crossing a zone.
+    {
+      files: ["src/**"],
+      excludedFiles: [
+        "**/*.spec.ts?(x)",
+        "**/__tests__/**",
+        "**/__mocks__/**",
+        "**/*.stories.tsx",
+        "src/test_util/**",
+        "src/setupTests.ts",
+      ],
+      rules: {
+        "import/no-restricted-paths": [
+          "error",
+          {
+            basePath: __dirname,
+            zones: [
+              ...layoutZones,
+              {
+                target: "./src",
+                from: "./src/test_util",
+                message: "test_util is for tests.",
+              },
+            ],
+          },
+        ],
+      },
+    },
     // The edge Worker (src/worker) is typechecked with Workers types via its
     // own tsconfig, excluded from the app's main tsconfig. Point ESLint's
     // typed-linting parser at that project so worker sources lint under the

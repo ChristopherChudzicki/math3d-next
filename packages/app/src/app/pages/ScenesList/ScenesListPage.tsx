@@ -9,7 +9,7 @@ import { useUrlLayerSearchParams } from "@/services/overlays/UrlLayer";
 import ExamplesListing from "@/features/library/ExamplesListing";
 import MyScenes from "@/features/library/MyScenes";
 import { ListType, OPEN_SCENES_BUTTON_ID } from "@/features/library/constants";
-import styles from "@/features/library/ScenesList.module.css";
+import styles from "./ScenesListPage.module.css";
 
 const normalizeListType = (
   listType: string,

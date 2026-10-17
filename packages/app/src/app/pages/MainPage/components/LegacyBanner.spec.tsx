@@ -5,8 +5,8 @@ import { render } from "@testing-library/react";
 import { makeItem, seedDb } from "@math3d/mock-api";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { findItemByTestId } from "@/test_util/mathItems";
-import { BannersProvider } from "@/ui/banners/BannerContext";
-import BannerDisplay from "@/ui/banners/BannerDisplay";
+import { BannersProvider } from "@/ui/Banners/BannerContext";
+import BannerDisplay from "@/ui/Banners/BannerDisplay";
 import LegacyBanner from "./LegacyBanner";
 
 const DISMISSED_KEY = "legacyBannerDismissed";

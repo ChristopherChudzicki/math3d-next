@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { TextButton } from "@/ui/TextLink";
-import { useBanners } from "@/ui/banners/BannerContext";
+import { useBanners } from "@/ui/Banners/BannerContext";
 
 const DISMISSED_KEY = "legacyBannerDismissed";
 const BANNER_ID = "legacy-scene";

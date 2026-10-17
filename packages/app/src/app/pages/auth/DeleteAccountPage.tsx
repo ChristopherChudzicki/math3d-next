@@ -13,7 +13,7 @@ import TextField from "@/ui/TextField";
 import { TextButton } from "@/ui/TextLink";
 import composeRefs from "@/util/composeRefs";
 import { useValidatedForm } from "@/util/forms";
-import { useNotifications } from "@/ui/notifications/NotificationsContext";
+import { useNotifications } from "@/ui/Notifications/NotificationsContext";
 import { dismissToast, showToast } from "@/ui/Toast/toasts";
 import styles from "./DeleteAccountPage.module.css";
 
