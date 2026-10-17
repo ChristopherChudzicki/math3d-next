@@ -1,5 +1,13 @@
 import type { QueryClient } from "@tanstack/react-query";
 
+type MutationMeta = {
+  /**
+   * Toast copy when the mutation fails. Omitted: generic copy. `false`: no
+   * toast — the call site renders its own error or builds its own toast.
+   */
+  errorToast?: string | false;
+};
+
 declare module "@tanstack/react-query" {
   interface Register {
     queryMeta: {
@@ -15,8 +23,11 @@ declare module "@tanstack/react-query" {
        */
       sameForAllUsers?: boolean;
     };
+    mutationMeta: MutationMeta;
   }
 }
+
+type MutationHookOptions = { meta?: MutationMeta };
 
 /**
  * Clear every cached query whose contents could differ per user, for use when
@@ -31,3 +42,4 @@ const resetOnAuthChange = (queryClient: QueryClient): Promise<void> =>
   });
 
 export { resetOnAuthChange };
+export type { MutationHookOptions, MutationMeta };

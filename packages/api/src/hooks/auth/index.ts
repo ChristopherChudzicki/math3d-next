@@ -2,14 +2,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { allauthClient, toApiError, unwrap, v1Client } from "../util";
 import { isApiError } from "../../util";
 import { resetOnAuthChange } from "../queryMeta";
+import type { MutationHookOptions } from "../queryMeta";
 
 const keys = {
   userMe: ["me"],
 };
 
-const useLogout = () => {
+const useLogout = ({ meta }: MutationHookOptions = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
+    meta,
     mutationFn: async () => {
       const { error, response } = await allauthClient.DELETE(
         "/_allauth/browser/v1/auth/session",
@@ -48,9 +50,10 @@ const useUserMe = () => {
   });
 };
 
-const useUserMeDelete = () => {
+const useUserMeDelete = ({ meta }: MutationHookOptions = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
+    meta,
     mutationFn: () => unwrap(v1Client.DELETE("/v1/me/")),
     onSuccess: async () => {
       await resetOnAuthChange(queryClient);

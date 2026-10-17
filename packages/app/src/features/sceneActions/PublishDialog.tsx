@@ -64,7 +64,8 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
   const store = useAppStore();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const createScene = useCreateScene();
+  // Failures show in the dialog: the title step reopens with an error.
+  const createScene = useCreateScene({ meta: { errorToast: false } });
   const signIn = useSignInDialog();
   const title = useAppSelector(select.title);
   const author = useAppSelector(select.author);
