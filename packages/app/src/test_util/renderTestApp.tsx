@@ -10,7 +10,10 @@ import { mockAuth, seedDb } from "@math3d/mock-api";
 import type { User } from "@math3d/api";
 import AppProviders from "@/AppProviders";
 import routes from "@/routes";
-import { createMutationCache } from "@/services/react-query/react-query";
+import {
+  createMutationCache,
+  createQueryCache,
+} from "@/services/react-query/react-query";
 
 /**
  * Wait until the app has settled: no `[aria-busy="true"]` element remains and
@@ -79,6 +82,7 @@ const renderTestApp = (
   // would otherwise stall tests well past their timeouts.
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
+    queryCache: createQueryCache(),
     mutationCache: createMutationCache(),
   });
 

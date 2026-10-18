@@ -23,6 +23,7 @@ import styles from "./MainPage.module.css";
 import Header from "./components/Header";
 import LegacyDialog from "./components/LegacyDialog";
 import LegacyBanner from "./components/LegacyBanner";
+import SceneLoadFailure from "./components/SceneLoadFailure";
 
 type UseSearchEnumOptions<T extends string = string> = {
   name: string;
@@ -67,8 +68,11 @@ const CONTROLS_VALUES = ["0", "1"] as const;
 const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
   const { sceneKey } = useParams();
-  const { isLoading } = useSceneLoader(sceneKey);
-  const isLegacy = useSelector(select.isLegacy);
+  const sceneLoad = useSceneLoader(sceneKey);
+  const { status } = sceneLoad;
+  const loadFailed = status === "error" || status === "offline";
+  // The store holds the previous route's scene until this one is ready.
+  const isLegacy = useSelector(select.isLegacy) && status === "ready";
   const [legacyDialogOpen, legacyDialog] = useToggle(false);
   // legacyDialogOpen lives here (not in LegacyDialog) so the banner's "View
   // details" and the pill can share one dialog instance. MainPage itself
@@ -108,24 +112,35 @@ const MainPage: React.FC = () => {
           <LegacyBanner sceneKey={sceneKey} onViewDetails={legacyDialog.on} />
         ) : null}
         <div className={styles.body}>
-          <Sidebar
-            className={styles.sidebar}
-            side="left"
-            visible={controlsOpen}
-            onVisibleChange={handleControlsClick}
-            label="Controls"
-          >
-            <SceneControls loading={isLoading} />
-          </Sidebar>
-          <Scene
-            className={
-              controlsOpen
-                ? styles["scene-adjust-controls-open"]
-                : styles["scene-adjust-controls-closed"]
-            }
-          />
+          {loadFailed ? (
+            <SceneLoadFailure
+              status={status}
+              onRetry={sceneLoad.retry}
+              retrying={sceneLoad.retrying}
+              failedAt={sceneLoad.failedAt}
+            />
+          ) : (
+            <>
+              <Sidebar
+                className={styles.sidebar}
+                side="left"
+                visible={controlsOpen}
+                onVisibleChange={handleControlsClick}
+                label="Controls"
+              >
+                <SceneControls loading={status === "loading"} />
+              </Sidebar>
+              <Scene
+                className={
+                  controlsOpen
+                    ? styles["scene-adjust-controls-open"]
+                    : styles["scene-adjust-controls-closed"]
+                }
+              />
+            </>
+          )}
         </div>
-        <ToggleKeyboardButton />
+        {loadFailed ? null : <ToggleKeyboardButton />}
         {sceneKey && isLegacy ? (
           <LegacyDialog
             sceneKey={sceneKey}

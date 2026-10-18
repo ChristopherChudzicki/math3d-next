@@ -1,4 +1,4 @@
-import { MutationCache, QueryClient } from "@tanstack/react-query";
+import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import * as Sentry from "@sentry/react";
 import { isApiError } from "@math3d/api";
 import { dismissToast, showToast } from "@/features/toasts";
@@ -26,8 +26,26 @@ const createMutationCache = (): MutationCache =>
     },
   });
 
+/**
+ * Reports query failures to Sentry, except the statuses a query declares in
+ * `meta.expectedErrors`. No toast: each query shows its own failure where its
+ * data would be.
+ */
+const createQueryCache = (): QueryCache =>
+  new QueryCache({
+    onError: (error, query) => {
+      if (isApiError(error, query.meta?.expectedErrors ?? [])) return;
+      // The key's leading parts name the endpoint; the rest can hold user
+      // input, like a scene key or a title filter.
+      Sentry.captureException(error, {
+        tags: { query: query.queryKey.slice(0, 2).join(".") },
+      });
+    },
+  });
+
 const createQueryClient = (): QueryClient => {
   return new QueryClient({
+    queryCache: createQueryCache(),
     mutationCache: createMutationCache(),
     defaultOptions: {
       queries: {
@@ -49,4 +67,9 @@ const createQueryClient = (): QueryClient => {
   });
 };
 
-export { createQueryClient, createMutationCache, DEFAULT_ERROR_TOAST };
+export {
+  createQueryClient,
+  createQueryCache,
+  createMutationCache,
+  DEFAULT_ERROR_TOAST,
+};

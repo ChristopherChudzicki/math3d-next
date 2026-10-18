@@ -1,6 +1,10 @@
 import { test, expect } from "vitest";
-import { seedDb } from "@math3d/mock-api";
+import { HttpResponse, http } from "msw";
+import { onlineManager } from "@tanstack/react-query";
+import { server } from "@math3d/mock-api/node";
+import { seedDb, urls } from "@math3d/mock-api";
 import {
+  act,
   renderTestApp,
   screen,
   user,
@@ -120,9 +124,8 @@ test("No-scene default reads the default-title meta when present", async () => {
 });
 
 test("Alerts and redirects home when the scene key is not found", async () => {
-  // MSW returns 404 for an unknown scene key; useScene surfaces it as an
-  // ApiError, which SceneControls maps to a "Not found" alert + redirect to "/".
-  // The scene never loads (controls stay busy), so we key off the alert dialog.
+  // MSW returns 404 for an unknown scene key, which useSceneLoader maps to a
+  // "Not found" alert + redirect to "/".
   const { location } = renderTestApp("/nonexistent-scene-key");
 
   const dialog = await screen.findByRole("alertdialog", { name: "Not found" });
@@ -132,4 +135,71 @@ test("Alerts and redirects home when the scene key is not found", async () => {
   await waitFor(() => {
     expect(location.current.pathname).toBe("/");
   });
+});
+
+const sceneControls = () =>
+  screen.queryByRole("tablist", { name: "Scene controls" });
+
+test("Offers a retry when the scene fails to load, keeping it up while retrying", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  let respond = () => {};
+  const responded = new Promise<void>((resolve) => {
+    respond = resolve;
+  });
+  server.use(
+    http.get(
+      urls.scenes.detail,
+      () => new HttpResponse(null, { status: 500 }),
+      { once: true },
+    ),
+  );
+  const { store } = renderTestApp(`/${scene.key}`);
+
+  const alert = await screen.findByRole("alert");
+  expect(alert).toHaveTextContent("Couldn’t load this scene.");
+  expect(sceneControls()).toBeNull();
+
+  server.use(
+    http.get(
+      urls.scenes.detail,
+      async () => {
+        await responded;
+        return HttpResponse.json(scene);
+      },
+      { once: true },
+    ),
+  );
+  const retry = within(alert).getByRole("button", { name: "Retry" });
+  await user.click(retry);
+
+  expect(retry).toHaveFocus();
+  expect(retry).toHaveAttribute("aria-disabled", "true");
+  expect(sceneControls()).toBeNull();
+
+  respond();
+
+  await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
+  expect(sceneControls()).not.toBeNull();
+  expect(screen.queryByRole("alert")).toBeNull();
+});
+
+test("Says the scene will load once back online", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  onlineManager.setOnline(false);
+  try {
+    const { store } = renderTestApp(`/${scene.key}`);
+    expect(
+      await screen.findByText(
+        "You’re offline. This scene will load when you reconnect.",
+      ),
+    ).toBeInTheDocument();
+    expect(sceneControls()).toBeNull();
+
+    act(() => onlineManager.setOnline(true));
+
+    await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
+    expect(sceneControls()).not.toBeNull();
+  } finally {
+    onlineManager.setOnline(true);
+  }
 });

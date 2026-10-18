@@ -1,0 +1,9 @@
+.container {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.alert {
+  width: min(100%, 28rem);
+}

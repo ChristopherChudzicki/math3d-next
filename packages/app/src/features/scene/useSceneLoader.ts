@@ -2,7 +2,7 @@ import { useScene, isApiError } from "@math3d/api";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 
-import { useAppDispatch, useAppStore } from "@/store/hooks";
+import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import defaultScene from "@/store/defaultScene";
 import { sceneSlice } from "@/features/sceneControls/mathItems";
 import { sceneTabTitle } from "@/features/scene/sceneTitle";
@@ -21,6 +21,21 @@ const { actions: itemActions } = sceneSlice;
 type OnNotFound = "redirect" | "silent";
 
 /**
+ * - `"offline"` — the fetch is paused until the browser is back online, when
+ *   React Query resumes it on its own.
+ * - `"error"` — any failure but a 404, which `onNotFound` handles.
+ */
+type SceneLoadStatus = "loading" | "ready" | "offline" | "not-found" | "error";
+
+type SceneLoad = {
+  status: SceneLoadStatus;
+  retry: () => void;
+  retrying: boolean;
+  /** When the latest attempt failed; changes with each failed retry. */
+  failedAt: number;
+};
+
+/**
  * Fetches a scene by key and loads it into Redux, independently of any editor
  * UI. This is the single place scene data-loading happens: fetch (React
  * Query) → `setScene` dispatch → `document.title`, plus 404 handling.
@@ -31,12 +46,23 @@ type OnNotFound = "redirect" | "silent";
 const useSceneLoader = (
   sceneKey?: string,
   { onNotFound = "redirect" }: { onNotFound?: OnNotFound } = {},
-): { isLoading: boolean } => {
+): SceneLoad => {
   const dispatch = useAppDispatch();
 
-  const { isLoading, data, error } = useScene(sceneKey, {
+  const {
+    data,
+    error,
+    errorUpdateCount,
+    errorUpdatedAt,
+    fetchStatus,
+    isFetching,
+    refetch,
+  } = useScene(sceneKey, {
     enabled: sceneKey !== undefined,
     staleTime: Infinity,
+    // A query without data is always stale, so focusing the tab would refetch
+    // a failed scene: a second "Not found" alert, or another Sentry event.
+    refetchOnWindowFocus: false,
   });
 
   // The site's crawler / link-preview default lives in
@@ -104,7 +130,28 @@ const useSceneLoader = (
     );
   }, [dispatch, scene, routeKey, store]);
 
-  return { isLoading };
+  const holdsRouteScene = useAppSelector(
+    (state) => state.scene.loaded && state.scene.key === routeKey,
+  );
+  const status = ((): SceneLoadStatus => {
+    // The store can hold this route's scene whatever the fetch did: a failed
+    // refetch, a scene just published, or a restored sign-in draft.
+    if (sceneKey === undefined || data || holdsRouteScene) return "ready";
+    if (isApiError(error, [404])) return "not-found";
+    if (fetchStatus === "paused") return "offline";
+    // A refetch clears `error`, so a retry in flight would read as loading.
+    if (error || errorUpdateCount > 0) return "error";
+    return "loading";
+  })();
+
+  return {
+    status,
+    retry: () => {
+      refetch();
+    },
+    retrying: isFetching,
+    failedAt: errorUpdatedAt,
+  };
 };
 
 export default useSceneLoader;
