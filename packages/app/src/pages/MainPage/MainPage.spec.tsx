@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { test, expect, vi } from "vitest";
 import { HttpResponse, http } from "msw";
 import { onlineManager } from "@tanstack/react-query";
 import { server } from "@math3d/mock-api/node";
@@ -13,6 +13,7 @@ import {
   within,
 } from "@/test_util";
 import invariant from "tiny-invariant";
+import errorPageCopy from "@/pages/ErrorPage/errorPage.copy";
 
 test.each([
   {
@@ -140,47 +141,25 @@ test("Alerts and redirects home when the scene key is not found", async () => {
 const sceneControls = () =>
   screen.queryByRole("tablist", { name: "Scene controls" });
 
-test("Offers a retry when the scene fails to load, keeping it up while retrying", async () => {
-  const scene = seedDb.withSceneFromItems([]);
-  let respond = () => {};
-  const responded = new Promise<void>((resolve) => {
-    respond = resolve;
-  });
-  server.use(
-    http.get(
-      urls.scenes.detail,
-      () => new HttpResponse(null, { status: 500 }),
-      { once: true },
-    ),
-  );
-  const { store } = renderTestApp(`/${scene.key}`);
+test("Shows the error page when the scene fails to load", async () => {
+  // React and React Router log the error the route's errorElement catches.
+  const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+  try {
+    const scene = seedDb.withSceneFromItems([]);
+    server.use(
+      http.get(
+        urls.scenes.detail,
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+    );
+    renderTestApp(`/${scene.key}`);
 
-  const alert = await screen.findByRole("alert");
-  expect(alert).toHaveTextContent("Couldn’t load this scene.");
-  expect(sceneControls()).toBeNull();
-
-  server.use(
-    http.get(
-      urls.scenes.detail,
-      async () => {
-        await responded;
-        return HttpResponse.json(scene);
-      },
-      { once: true },
-    ),
-  );
-  const retry = within(alert).getByRole("button", { name: "Retry" });
-  await user.click(retry);
-
-  expect(retry).toHaveFocus();
-  expect(retry).toHaveAttribute("aria-disabled", "true");
-  expect(sceneControls()).toBeNull();
-
-  respond();
-
-  await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
-  expect(sceneControls()).not.toBeNull();
-  expect(screen.queryByRole("alert")).toBeNull();
+    expect(
+      await screen.findByRole("heading", { name: errorPageCopy.title }),
+    ).toBeVisible();
+  } finally {
+    consoleError.mockRestore();
+  }
 });
 
 test("Says the scene will load once back online", async () => {
