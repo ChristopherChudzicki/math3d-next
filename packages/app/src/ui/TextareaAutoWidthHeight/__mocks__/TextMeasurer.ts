@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import { ITextMeasurer } from "../TextMeasurer";
+import { ITextMeasurer } from "@/ui/TextareaAutoWidthHeight/TextMeasurer";
 
 const fakeTextMetrics = (): TextMetrics => ({
   actualBoundingBoxAscent: 1,

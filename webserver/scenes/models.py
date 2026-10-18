@@ -1,16 +1,15 @@
 import datetime
 import random
 
+from django.contrib.postgres.indexes import GinIndex
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
-from django.contrib.postgres.indexes import GinIndex
 from django.db.models.functions import Now
 from django.utils import timezone
 
-from scenes.validators import validate_math_items
 from authentication.models import CustomUser
-
+from scenes.validators import validate_math_items
 
 # The authority for scene keys, backing both the field validator and the DB
 # CHECK. The screenshots and app Workers check paths against the same charset.

@@ -1,5 +1,5 @@
 import { screen, waitFor, within } from "@testing-library/react";
-import { shownToasts } from "@/features/toasts/toasts";
+import { shownToasts } from "@/ui/Toast/toasts";
 
 /**
  * Assert a toast shows `text`, and mark it acknowledged for the toast guard in

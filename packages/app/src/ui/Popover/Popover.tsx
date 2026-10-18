@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from "classnames";
 import { Popover as BasePopover } from "@base-ui/react/popover";
-import { isVirtualKeyboardTarget } from "../MathLive/virtualKeyboard";
+import { isVirtualKeyboardTarget } from "@/ui/MathLive/virtualKeyboard";
 import * as styles from "./Popover.module.css";
 
 const { Trigger, Close, Description } = BasePopover;

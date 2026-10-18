@@ -4,9 +4,9 @@ import type { Location } from "react-router";
 import { getCsrfToken } from "@math3d/api";
 import Button from "@/ui/Button";
 import { useAppStore } from "@/store/hooks";
-import { SIGN_IN_PARAM } from "@/features/overlays/useSignInDialog";
-import { saveSignInDraft } from "./signInDraft";
-import { useAuthStatus } from "./useAuthStatus";
+import { SIGN_IN_PARAM } from "@/services/overlays/useSignInDialog";
+import { saveSignInDraft } from "@/services/auth/signInDraft";
+import { useAuthStatus } from "@/services/auth/useAuthStatus";
 
 const PROVIDER_REDIRECT_URL = `${import.meta.env.VITE_API_BASE_URL}/_allauth/browser/v1/auth/provider/redirect`;
 

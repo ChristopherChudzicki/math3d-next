@@ -2,14 +2,14 @@ import { render, waitFor } from "@testing-library/react";
 import React from "react";
 import { createMemoryRouter, parsePath } from "react-router";
 import { getStore } from "@/store/store";
-import { takeSignInDraft } from "@/features/auth/signInDraft";
+import { takeSignInDraft } from "@/services/auth/signInDraft";
 
 import { InitialEntry } from "history";
 import { QueryClient } from "@tanstack/react-query";
 import { mockAuth, seedDb } from "@math3d/mock-api";
 import type { User } from "@math3d/api";
-import AppProviders from "@/AppProviders";
-import routes from "@/routes";
+import AppProviders from "@/app/AppProviders";
+import routes from "@/app/routes";
 import {
   createMutationCache,
   createQueryCache,

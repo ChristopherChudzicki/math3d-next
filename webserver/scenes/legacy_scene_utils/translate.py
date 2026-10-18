@@ -3,7 +3,7 @@ from copy import deepcopy
 from typing import Literal, cast
 
 import scenes.legacy_scene_utils.legacy_data as old
-from scenes.legacy_scene_utils.IssueLog import IssueLog
+from scenes.legacy_scene_utils.issue_log import IssueLog
 from scenes.schemas.math_items import (
     AssignmentObj,
     AxisItem,

@@ -43,6 +43,18 @@ dev = [
 requires = ["hatchling>=1.32.4"]
 build-backend = "hatchling.build"
 
+[tool.ruff]
+# Django apps sit at this level; without it isort files them as third-party.
+src = ["."]
+
+[tool.ruff.lint]
+# Django configures through mutable class attributes (Meta, ModelAdmin,
+# migrations), which is RUF012's whole target.
+ignore = ["RUF012"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["ninja.Query"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["main"]
 

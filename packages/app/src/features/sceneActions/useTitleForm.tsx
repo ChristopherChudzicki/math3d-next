@@ -4,7 +4,7 @@ import Alert from "@/ui/Alert";
 import TextField from "@/ui/TextField";
 import composeRefs from "@/util/composeRefs";
 import { useValidatedForm } from "@/util/forms";
-import { UNTITLED } from "@/features/scene/sceneTitle";
+import { UNTITLED } from "@/store/scene/sceneTitle";
 import styles from "./useTitleForm.module.css";
 
 // A blank title means untitled.

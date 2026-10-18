@@ -9,7 +9,7 @@ import sigma from "@iconify-icons/lucide/sigma";
 import circleHelp from "@iconify-icons/lucide/circle-help";
 import trash2 from "@iconify-icons/lucide/trash-2";
 import logOut from "@iconify-icons/lucide/log-out";
-import IconButton from "../IconButton";
+import IconButton from "@/ui/IconButton";
 import { Menu } from ".";
 
 const UserMenu: React.FC = () => (

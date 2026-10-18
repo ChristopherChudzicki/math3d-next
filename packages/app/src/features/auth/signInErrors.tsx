@@ -1,29 +1,14 @@
 import React from "react";
+import { ISSUE_URL } from "@/config/issueUrl";
+import type { SignInError } from "@/services/auth/signInErrorCodes";
 import TextLink from "@/ui/TextLink";
 
-type SignInError =
-  | "cancelled"
-  | "signup_closed"
-  | "email_taken"
-  | "unverified_email"
-  | "unknown";
-
-// Where allauth sends an error it can't return to callback_url
-// (HEADLESS_FRONTEND_URLS on the backend).
-const SIGN_IN_ERROR_PATH = "/app/sign-in-error";
-
 const ContactLink: React.FC<{ children: string }> = ({ children }) => (
-  <TextLink
-    href={import.meta.env.VITE_ISSUE_URL}
-    target="_blank"
-    rel="noreferrer"
-  >
+  <TextLink href={ISSUE_URL} target="_blank" rel="noreferrer">
     {children}
   </TextLink>
 );
 
-// allauth's `?error=` codes: AuthError values, SignupClosedException, and
-// CustomSocialAccountAdapter's validation errors.
 const SIGN_IN_ERROR_MESSAGES: Record<SignInError, React.ReactNode> = {
   cancelled: "Sign-in was cancelled.",
   signup_closed: "New sign-ups are closed right now.",
@@ -43,10 +28,4 @@ const SIGN_IN_ERROR_MESSAGES: Record<SignInError, React.ReactNode> = {
   ),
 };
 
-const toSignInError = (code: string): SignInError =>
-  Object.hasOwn(SIGN_IN_ERROR_MESSAGES, code)
-    ? (code as SignInError)
-    : "unknown";
-
-export { SIGN_IN_ERROR_MESSAGES, SIGN_IN_ERROR_PATH, toSignInError };
-export type { SignInError };
+export { SIGN_IN_ERROR_MESSAGES };

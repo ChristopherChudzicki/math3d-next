@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from "classnames";
-import Button from "../Button";
-import type { ButtonProps } from "../Button";
+import Button from "@/ui/Button";
+import type { ButtonProps } from "@/ui/Button";
 import * as styles from "./IconButton.module.css";
 
 type IconButtonProps = Omit<ButtonProps, "aria-label" | "aria-labelledby"> & {

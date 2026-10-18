@@ -1,14 +1,16 @@
 import colorsys
 import copy
+import json
 import os
+
+from allauth.account.models import EmailAddress
+from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from allauth.account.models import EmailAddress
-from allauth.socialaccount.models import SocialAccount
 from pydantic_settings import BaseSettings
+
 from scenes.models import ExampleScene, Scene
-import json
 
 
 class SeedEnv(BaseSettings):

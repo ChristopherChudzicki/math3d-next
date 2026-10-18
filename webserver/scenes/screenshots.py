@@ -10,7 +10,6 @@ import json
 import logging
 import urllib.request
 from enum import StrEnum
-from typing import Optional
 from urllib.parse import quote, urlencode
 
 from django.conf import settings
@@ -62,7 +61,7 @@ def reserve_render_slot() -> bool:
         return True
 
 
-def scene_image_url(key: str, version: str) -> Optional[str]:
+def scene_image_url(key: str, version: str) -> str | None:
     """The scene's screenshot URL, or None when the feature is dark. Tentative:
     ``fallback=none`` makes a missing render 404 rather than serve the OG card."""
     if not settings.SCREENSHOTS_ORIGIN:
@@ -94,7 +93,7 @@ def nudge_render(key: str, version: str) -> bool:
     except Exception:
         # Log-attribution only (a distinct line from a reserve failure), NOT the
         # isolation guard — maybe_render's outer try is what protects the save.
-        logger.error("nudge_render failed for key=%s", key, exc_info=True)
+        logger.exception("nudge_render failed for key=%s", key)
         return False
     return True
 
@@ -122,7 +121,7 @@ def maybe_render(key: str, version: str) -> RenderOutcome:
             return RenderOutcome.NUDGE_FAILED
         return RenderOutcome.NUDGED
     except Exception:
-        logger.error("maybe_render failed for key=%s", key, exc_info=True)
+        logger.exception("maybe_render failed for key=%s", key)
         return RenderOutcome.ERROR
 
 

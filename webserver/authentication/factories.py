@@ -1,18 +1,14 @@
-from typing import Generic, TypeVar
-
 import factory
 import faker
 from django.contrib.auth.hashers import make_password
 from factory.django import DjangoModelFactory
 
-import authentication.models as models
+from authentication import models
 
 fake = faker.Faker()
 
-T = TypeVar("T")
 
-
-class BaseFactory(DjangoModelFactory, Generic[T]):
+class BaseFactory[T](DjangoModelFactory):
     @classmethod
     def create(cls, **kwargs) -> T:
         return super().create(**kwargs)

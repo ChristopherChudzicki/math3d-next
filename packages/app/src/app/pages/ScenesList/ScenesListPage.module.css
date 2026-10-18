@@ -1,0 +1,18 @@
+/*
+ * Tabs.Root and each Panel sit between the flex-column popup and Body;
+ * without these, Body never gets a bounded height and never scrolls.
+ */
+.tabs,
+.panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.5rem;
+}

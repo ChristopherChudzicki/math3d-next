@@ -4,13 +4,19 @@ import zoneinfo
 import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from scenes.models import Scene, is_invalid_key_error
+
 from scenes.factories import SceneFactory
+from scenes.models import Scene, is_invalid_key_error
 
 
 def _valid_scene_kwargs(key):
     data = SceneFactory.build()
-    return dict(key=key, items=data.items, item_order=data.item_order, title=data.title)
+    return {
+        "key": key,
+        "items": data.items,
+        "item_order": data.item_order,
+        "title": data.title,
+    }
 
 
 @pytest.mark.django_db

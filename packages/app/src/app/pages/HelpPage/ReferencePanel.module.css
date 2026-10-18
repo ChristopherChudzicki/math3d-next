@@ -1,0 +1,92 @@
+.heading {
+  margin: 16px 0;
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.334;
+}
+
+.tableContainer {
+  container-type: inline-size;
+}
+
+.table {
+  width: 100%;
+}
+
+.row th {
+  text-align: left;
+}
+
+.row th,
+.row td {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+.expression {
+  white-space: nowrap;
+}
+.description {
+  width: 100%;
+}
+.row:not(:last-of-type) {
+  border-bottom: 1px solid var(--color-secondary-lighter);
+}
+
+thead .row:first-of-type {
+  border-bottom: 1px solid var(--color-secondary-lighter);
+}
+
+.keyboard {
+  font-family: var(--font-family-monospace);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-secondary-lighter);
+  padding: 4px;
+  white-space: nowrap;
+}
+
+.toggle {
+  margin-left: 0.5em;
+}
+
+/* Three columns don't fit a narrow container: stack each entry as expression
+   and keys on one line, description below. The widest table needs ~484px. */
+@container (max-width: 539.98px) {
+  .table,
+  .table tbody {
+    display: block;
+  }
+
+  .table thead {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    width: 1px;
+  }
+
+  tbody .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 16px;
+    row-gap: 8px;
+    padding: 12px 0;
+  }
+
+  .row td {
+    padding: 0;
+  }
+
+  /* Shares the line only if it fits whole; otherwise wraps below, indented. */
+  .row .description {
+    flex: 1 1 auto;
+    width: auto;
+    padding-left: 16px;
+  }
+
+  .summary {
+    margin: 0;
+  }
+}

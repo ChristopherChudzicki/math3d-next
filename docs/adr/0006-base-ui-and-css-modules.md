@@ -44,8 +44,8 @@ dependencies.
 - **`src/ui/` holds the generic components.** They know nothing about the app;
   app-specific config, such as MathLive keyboard layouts, is passed in as
   props. Lint enforces:
-  - `src/ui` imports nothing from `features/`, `pages/`, `store/`, `services/`,
-    `worker/`, `routes.tsx` or `AppProviders.tsx` (`import/no-restricted-paths`);
+  - `src/ui` imports nothing from `app/`, `features/`, `store/`, `services/`,
+    `config/` or `worker/` (`import/no-restricted-paths`);
   - `@base-ui/react` is imported only inside `src/ui`;
   - `@mui/*` and `@emotion/*` are banned everywhere.
 - **Styling.** CSS Module classes carry our own variants. Base UI's `data-*`
@@ -69,7 +69,7 @@ dependencies.
 - **Field errors** show in a tooltip beside the focused field, and the message
   becomes the field's accessible description via `aria-describedby`.
   **Notifications**: a failed action with no inline place to report it is a
-  toast (`features/toasts`); a message that needs a decision is an
+  toast (`ui/Toast/toasts`); a message that needs a decision is an
   `AlertDialog`. `NotificationsContext`'s remaining notices ("Not found",
   "Account Deleted") are still `AlertDialog`s.
 - **Storybook 10,** with one omnibus story per component, showing every

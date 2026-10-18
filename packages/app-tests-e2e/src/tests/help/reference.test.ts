@@ -30,3 +30,21 @@ test("Has expected headers and links", async ({ page }) => {
   });
   expect(hrefs).toEqual(headers.map((id) => `#${id}`));
 });
+
+test("Fits a phone-width viewport with every entry expanded", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto("/app/help/reference");
+  const showMore = page.getByRole("button", { name: "Show more" });
+  await expect(showMore.first()).toBeVisible();
+  await showMore.evaluateAll((buttons) => {
+    buttons.forEach((button) => (button as HTMLElement).click());
+  });
+  await expect(showMore).toHaveCount(0);
+
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - window.innerWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
+});

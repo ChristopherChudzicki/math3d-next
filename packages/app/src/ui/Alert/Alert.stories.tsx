@@ -2,7 +2,7 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Icon } from "@iconify/react/offline";
 import x from "@iconify-icons/lucide/x";
-import IconButton from "../IconButton";
+import IconButton from "@/ui/IconButton";
 import Alert from "./Alert";
 import type { AlertSeverity } from "./Alert";
 

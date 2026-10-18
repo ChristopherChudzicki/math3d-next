@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from "classnames";
 import { Dialog as BaseDialog } from "@base-ui/react/dialog";
-import renderInertWhileClosing from "../Dialog/renderInertWhileClosing";
+import renderInertWhileClosing from "@/ui/Dialog/renderInertWhileClosing";
 import * as styles from "./Drawer.module.css";
 
 type DrawerSide = "left" | "right";
@@ -50,6 +50,6 @@ export {
   Description,
   Body,
   Actions,
-} from "../Dialog/Dialog";
+} from "@/ui/Dialog/Dialog";
 export { Popup };
 export type { DrawerSide, DrawerSize, PopupProps };

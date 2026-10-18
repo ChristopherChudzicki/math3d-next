@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from "classnames";
-import Anchor from "../Anchor";
-import type { AnchorProps } from "../Anchor";
+import Anchor from "@/ui/Anchor";
+import type { AnchorProps } from "@/ui/Anchor";
 import * as styles from "./TextLink.module.css";
 
 /**
