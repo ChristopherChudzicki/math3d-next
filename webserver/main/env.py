@@ -115,7 +115,7 @@ class EnvConfig(BaseSettings):
         return value
 
     @model_validator(mode="after")
-    def _require_deployment_config(self) -> "EnvConfig":
+    def _require_deployment_config(self) -> EnvConfig:
         """
         Report every missing variable at once. Raising on the first would make
         a misconfigured deploy take one attempt per variable to diagnose.
@@ -153,7 +153,7 @@ class EnvConfig(BaseSettings):
         return self
 
     @model_validator(mode="after")
-    def _no_wildcard_hosts_on_a_deployment(self) -> "EnvConfig":
+    def _no_wildcard_hosts_on_a_deployment(self) -> EnvConfig:
         """
         allauth accepts a sign-in `callback_url` on any host ALLOWED_HOSTS
         matches, so a wildcard would let sign-in redirect off-site.
@@ -168,7 +168,7 @@ class EnvConfig(BaseSettings):
         return self
 
     @model_validator(mode="after")
-    def _csrf_cookie_domain_must_cover_spa_host(self) -> "EnvConfig":
+    def _csrf_cookie_domain_must_cover_spa_host(self) -> EnvConfig:
         """
         Cookie auth requires the SPA (next.math3d.org) and API
         (api.next.math3d.org) to share a registrable domain: default
