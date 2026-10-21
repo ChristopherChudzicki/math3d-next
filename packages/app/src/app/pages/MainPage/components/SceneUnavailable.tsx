@@ -10,7 +10,7 @@ import Viewport from "@/features/viewport/Viewport";
 import defaultScene from "@/store/scene/defaultScene";
 import sceneSlice from "@/store/scene/state/scene.slice";
 import { getStore } from "@/store/store";
-import Button from "@/ui/Button";
+import RetryButton from "@/ui/Button/RetryButton";
 import ButtonLink from "@/ui/ButtonLink";
 import { Spinner } from "@/ui/LoadingSpinner";
 import { dismissToast, showToast } from "@/ui/Toast/toasts";
@@ -129,10 +129,7 @@ const SceneUnavailable: React.FC<SceneUnavailableProps> = ({
           {status === "offline" ? null : (
             <div className={styles.actions}>
               {canRetry ? (
-                <Button loading={retrying} onClick={onRetry}>
-                  {retrying ? <Spinner size="1em" /> : null}
-                  Try again
-                </Button>
+                <RetryButton retrying={retrying} onClick={onRetry} />
               ) : null}
               <ButtonLink to="/" variant={canRetry ? "ghost" : "outline"}>
                 New scene

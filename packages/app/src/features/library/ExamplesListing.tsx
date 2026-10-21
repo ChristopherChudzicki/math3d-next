@@ -1,10 +1,10 @@
 import React from "react";
 import { useParams } from "react-router";
 import { useExampleScenes } from "@math3d/api";
-import Button from "@/ui/Button";
 import { Drawer } from "@/ui/Drawer";
-import LoadingSpinner, { Spinner } from "@/ui/LoadingSpinner";
+import LoadingSpinner from "@/ui/LoadingSpinner";
 import { useKeptFailure } from "@/util/hooks";
+import LoadFailed from "./LoadFailed";
 import SceneCard from "./SceneCard/SceneCard";
 import { ListType, cardTitle, sceneHref } from "./constants";
 import styles from "./ScenesList.module.css";
@@ -46,17 +46,12 @@ const ExamplesListing: React.FC = () => {
     }
     if (failure) {
       return (
-        <div className={styles.message}>
-          <div role="alert">
-            <p key={failedAttempts} className={styles.hint}>
-              Couldn&rsquo;t load examples.
-            </p>
-          </div>
-          <Button size="sm" loading={retrying} onClick={retry}>
-            {retrying ? <Spinner size="1em" /> : null}
-            Try again
-          </Button>
-        </div>
+        <LoadFailed
+          message="Couldn’t load examples."
+          retrying={retrying}
+          failedAttempts={failedAttempts}
+          retry={retry}
+        />
       );
     }
     return <LoadingSpinner label="Loading examples" />;

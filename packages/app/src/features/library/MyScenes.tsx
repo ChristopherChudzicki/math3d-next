@@ -17,7 +17,7 @@ import Button from "@/ui/Button";
 import Checkbox from "@/ui/Checkbox";
 import { Drawer } from "@/ui/Drawer";
 import IconButton from "@/ui/IconButton";
-import LoadingSpinner, { Spinner } from "@/ui/LoadingSpinner";
+import LoadingSpinner from "@/ui/LoadingSpinner";
 import { Menu } from "@/ui/Menu";
 import TextField from "@/ui/TextField";
 import { u } from "@/util/styles";
@@ -26,6 +26,7 @@ import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { useSignInDialog } from "@/services/overlays/useSignInDialog";
 import { dismissToast, showToast } from "@/ui/Toast/toasts";
 import DeleteSceneDialog from "./DeleteSceneDialog";
+import LoadFailed from "./LoadFailed";
 import SceneCard from "./SceneCard/SceneCard";
 import { ListType, cardTitle, sceneHref } from "./constants";
 import styles from "./ScenesList.module.css";
@@ -198,17 +199,12 @@ const MyScenesList: React.FC = () => {
   const renderBody = () => {
     if (failure) {
       return (
-        <div className={styles.message}>
-          <div role="alert">
-            <p key={failedAttempts} className={styles.hint}>
-              Couldn&rsquo;t load scenes.
-            </p>
-          </div>
-          <Button size="sm" loading={retrying} onClick={retry}>
-            {retrying ? <Spinner size="1em" /> : null}
-            Try again
-          </Button>
-        </div>
+        <LoadFailed
+          message="Couldn’t load scenes."
+          retrying={retrying}
+          failedAttempts={failedAttempts}
+          retry={retry}
+        />
       );
     }
     if (query.isPending) {
