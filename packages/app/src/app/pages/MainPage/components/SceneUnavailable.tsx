@@ -129,9 +129,18 @@ const SceneUnavailable: React.FC<SceneUnavailableProps> = ({
           {status === "offline" ? null : (
             <div className={styles.actions}>
               {canRetry ? (
-                <RetryButton retrying={retrying} onClick={onRetry} />
+                <RetryButton
+                  variant="solid"
+                  tone="primary"
+                  retrying={retrying}
+                  onClick={onRetry}
+                />
               ) : null}
-              <ButtonLink to="/" variant={canRetry ? "ghost" : "outline"}>
+              <ButtonLink
+                to="/"
+                variant={canRetry ? "ghost" : "solid"}
+                tone={canRetry ? "neutral" : "primary"}
+              >
                 New scene
               </ButtonLink>
             </div>

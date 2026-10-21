@@ -2,7 +2,7 @@ import { classifyFailure } from "@math3d/api";
 
 const DEFAULT_ERROR_COPY = "Something went wrong. Please try again later.";
 const UNREACHABLE_COPY =
-  "Couldn’t reach Math3d. Check your connection and try again.";
+  "Couldn’t reach Math3d. Check your connection, or try again in a moment.";
 
 /** What to tell the user when an action fails, for a toast or inline error. */
 const failureMessage = (error: unknown): string =>

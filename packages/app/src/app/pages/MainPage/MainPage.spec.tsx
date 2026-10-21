@@ -168,7 +168,7 @@ test("a 404 shows the not-found card at the same URL", async () => {
     await screen.findByRole("heading", { name: "This scene doesn’t exist." }),
   ).toBeVisible();
   expect(location.current.pathname).toBe("/nonexistent-scene-key");
-  expect(document.title).toBe("Not found");
+  expect(document.title).toBe("Scene not found | Math3d");
   expect(Sentry.captureException).not.toHaveBeenCalled();
 });
 

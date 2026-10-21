@@ -101,7 +101,7 @@ const useSceneLoader = (sceneKey?: string): SceneLoad => {
 
   useEffect(() => {
     if (status === "not-found") {
-      document.title = "Not found";
+      document.title = sceneTabTitle("Scene not found", defaultTitle.current);
       return;
     }
     // Shared with the Worker's edge <title> rewrite (sceneTitle.ts) so a
