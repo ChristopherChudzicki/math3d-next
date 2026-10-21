@@ -4,7 +4,8 @@ const endpoints = new WeakMap<Response, Endpoint>();
 
 /**
  * Record which endpoint produced `response`, so an `ApiError` built from it
- * can name the endpoint. The client middleware calls this for every response.
+ * can name the endpoint. The client middleware calls this for every response;
+ * it's exported for tests that build an `ApiError` by hand.
  */
 export const recordEndpoint = (response: Response, endpoint: Endpoint) => {
   endpoints.set(response, endpoint);
