@@ -1,7 +1,7 @@
 import createClient, { type Middleware } from "openapi-fetch";
 import type { paths as V1Paths } from "../generated-v1";
 import type { paths as AllauthPaths } from "../generated-allauth";
-import { ApiError } from "../util";
+import { ApiError, NetworkError, recordEndpoint } from "../util";
 
 // Read CSRF token from cookie before each request.
 // The cookie is set with CSRF_COOKIE_DOMAIN so it's readable across subdomains
@@ -30,6 +30,17 @@ const csrfMiddleware: Middleware = {
   },
 };
 
+// Name the endpoint on every failure: record it per response for `ApiError`,
+// and replace a fetch rejection with a `NetworkError`.
+const apiFailureMiddleware: Middleware = {
+  onResponse({ request, response, schemaPath }) {
+    recordEndpoint(response, { method: request.method, schemaPath });
+  },
+  onError({ request, error, schemaPath }) {
+    return new NetworkError(request.method, schemaPath, error);
+  },
+};
+
 const getBasePath = () => import.meta.env?.VITE_API_BASE_URL as string;
 
 // Late-bind fetch. openapi-fetch captures the `fetch` it is given when the
@@ -53,6 +64,9 @@ const createApiClient = <Paths extends object>(
     headers: opts.headers,
     fetch: lateBoundFetch,
   });
+  // Middleware response and error hooks run in reverse order, so registering
+  // this first means it sees the final response or error.
+  client.use(apiFailureMiddleware);
   client.use(csrfMiddleware);
   return client;
 };
