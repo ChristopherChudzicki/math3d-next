@@ -1,4 +1,9 @@
-import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
+import {
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  type Query,
+} from "@tanstack/react-query";
 import * as Sentry from "@sentry/react";
 import {
   ApiError,
@@ -99,6 +104,11 @@ const createQueryCache = (): QueryCache =>
     },
   });
 
+/** Refetching a failed query helps only if the failure was the network. */
+const refetchUnlessBroken = (query: Query): boolean =>
+  query.state.status !== "error" ||
+  classifyFailure(query.state.error) === "unreachable";
+
 const createQueryClient = (): QueryClient => {
   return new QueryClient({
     queryCache: createQueryCache(),
@@ -107,17 +117,19 @@ const createQueryClient = (): QueryClient => {
       queries: {
         staleTime: Infinity,
         retry: (failureCount, error) => {
-          const status = isApiError(error) ? error.status : undefined;
           /**
            * React Query's default behavior is to retry all failed queries 3
            * times. Many things (e.g., 403, 404) are not worth retrying. Let's
-           * just retry some explicit whitelist of status codes.
+           * just retry some explicit whitelist of status codes, and requests
+           * that got no response.
            */
-          if (status !== undefined && RETRY_STATUS_CODES.includes(status)) {
-            return failureCount < MAX_RETRIES;
-          }
-          return false;
+          const retryable =
+            classifyFailure(error) === "unreachable" ||
+            isApiError(error, RETRY_STATUS_CODES);
+          return retryable && failureCount < MAX_RETRIES;
         },
+        refetchOnWindowFocus: refetchUnlessBroken,
+        refetchOnReconnect: refetchUnlessBroken,
       },
     },
   });

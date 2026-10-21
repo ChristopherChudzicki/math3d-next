@@ -46,9 +46,6 @@ const useSceneLoader = (
   const { data, error, fetchStatus } = useScene(sceneKey, {
     enabled: sceneKey !== undefined,
     staleTime: Infinity,
-    // A query without data is always stale, so focusing the tab would refetch
-    // a missing scene and raise a second "Not found" alert.
-    refetchOnWindowFocus: false,
   });
 
   // The site's crawler / link-preview default lives in

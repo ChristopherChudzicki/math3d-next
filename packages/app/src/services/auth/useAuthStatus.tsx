@@ -17,7 +17,8 @@ type AuthStatus = "loading" | "authenticated" | "unauthenticated";
  * - otherwise (still in flight) → "loading"
  *
  * "loading" has to be a state the app leaves: consumers hide the sign-in
- * affordances during it, and `createQueryClient` does not retry a 500. Check
+ * affordances during it. `createQueryClient` doesn't retry a 500, and retries a
+ * network failure for up to about 7s. Check
  * `data` before `isError` — a refetch failure reports `isError` while keeping
  * the last success — so only a query that never answered reads as signed out.
  */

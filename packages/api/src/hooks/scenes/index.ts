@@ -21,7 +21,6 @@ const useScene = (
   opts: {
     enabled?: boolean;
     staleTime?: number;
-    refetchOnWindowFocus?: boolean;
   } = {},
 ) => {
   return useQuery({
