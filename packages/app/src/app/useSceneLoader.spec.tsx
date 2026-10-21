@@ -3,7 +3,9 @@ import { HttpResponse, http } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { seedDb, urls } from "@math3d/mock-api";
 import type { Scene } from "@math3d/api";
+import { focusManager } from "@tanstack/react-query";
 import { act, renameScene, renderTestApp, screen, waitFor } from "@/test_util";
+import { createQueryClient } from "@/services/react-query/react-query";
 import { getStore } from "@/store/store";
 import sceneSlice from "@/store/scene/state/scene.slice";
 import {
@@ -144,4 +146,89 @@ test("marking the open scene saved under a new key does not reload the route's s
   );
 
   expect(store.getState().scene.title).toBe("edited");
+});
+
+test("publishing over a route whose GET fails never shows the card", async () => {
+  const { store, router } = renderTestApp("/");
+  await waitFor(() => expect(store.getState().scene.loaded).toBe(true));
+  server.use(
+    http.get(urls.scenes.detail, () => new HttpResponse(null, { status: 500 })),
+  );
+
+  // PublishDialog marks the scene saved, then navigates to its new key.
+  act(() => {
+    store.dispatch(
+      sceneSlice.actions.markSaved({
+        key: "new-key",
+        author: null,
+        revision: store.getState().scene.revision,
+        loadCount: store.getState().scene.loadCount,
+      }),
+    );
+  });
+  await act(() => router.navigate("/new-key"));
+  await waitFor(() => expect(router.state.location.pathname).toBe("/new-key"));
+  await act(
+    () =>
+      new Promise((resolve) => {
+        setTimeout(resolve);
+      }),
+  );
+
+  expect(
+    screen.getByRole("tablist", { name: "Scene controls" }),
+  ).toBeInTheDocument();
+  expect(screen.queryByRole("alert")).toBeNull();
+});
+
+test("a restored sign-in draft whose GET fails shows the draft", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  saveSignInDraft(
+    editedDraftOf(scene),
+    `${window.location.origin}/${scene.key}`,
+  );
+  server.use(
+    http.get(urls.scenes.detail, () => new HttpResponse(null, { status: 500 })),
+  );
+
+  const { store, queryClient } = renderTestApp(`/${scene.key}`);
+
+  await waitFor(() =>
+    expect(
+      queryClient.getQueryState(["scenes", "detail", scene.key])?.status,
+    ).toBe("error"),
+  );
+  expect(store.getState().scene.title).toBe(`${scene.title} (edited)`);
+  expect(
+    screen.getByRole("tablist", { name: "Scene controls" }),
+  ).toBeInTheDocument();
+  expect(screen.queryByRole("alert")).toBeNull();
+});
+
+test("a paused fetch in a background tab while online isn't offline", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  server.use(http.get(urls.scenes.detail, () => HttpResponse.error()));
+  focusManager.setFocused(false);
+  try {
+    const { queryClient, router } = renderTestApp("/");
+    // Production retries; a retry waits for focus, so the fetch pauses.
+    const { retry } = createQueryClient().getDefaultOptions().queries ?? {};
+    queryClient.setDefaultOptions({
+      queries: {
+        ...queryClient.getDefaultOptions().queries,
+        retry,
+        retryDelay: 0,
+      },
+    });
+    await act(() => router.navigate(`/${scene.key}`));
+    await waitFor(() =>
+      expect(
+        queryClient.getQueryState(["scenes", "detail", scene.key])?.fetchStatus,
+      ).toBe("paused"),
+    );
+
+    expect(screen.queryByText(/You’re offline/)).toBeNull();
+  } finally {
+    focusManager.setFocused(undefined);
+  }
 });

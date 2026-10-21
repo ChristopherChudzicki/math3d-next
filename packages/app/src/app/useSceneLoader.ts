@@ -1,52 +1,90 @@
-import { useScene, isApiError } from "@math3d/api";
+import { classifyFailure, isApiError, useScene } from "@math3d/api";
+import { onlineManager } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router";
 
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import defaultScene from "@/store/scene/defaultScene";
 import sceneSlice from "@/store/scene/state/scene.slice";
 import { sceneTabTitle } from "@/store/scene/sceneTitle";
-import { useNotifications } from "@/ui/Notifications/NotificationsContext";
+import { useKeptFailure } from "@/util/hooks";
 
 const { actions: itemActions } = sceneSlice;
 
 /**
- * How a not-found (404) scene is handled.
- *
- * - `"redirect"` — notify the user and navigate home. Used by the editor.
- * - `"silent"` — do nothing; the scene simply never populates Redux. Used by
- *   the headless `/app/frame` render page, where a screenshotter must not be
- *   shown a dialog or redirected.
- */
-type OnNotFound = "redirect" | "silent";
-
-/**
- * - `"offline"` — the fetch is paused until the browser is back online, when
+ * Why the route's scene can't be shown:
+ * - `"offline"`: the fetch is paused until the browser is back online, when
  *   React Query resumes it on its own.
- * - `"error"` — any failure but a 404, which `onNotFound` handles.
+ * - `"not-found"`: the scene doesn't exist (404).
+ * - `"unreachable"`: the request got no response.
+ * - `"failed"`: anything else, plausibly our bug.
  */
-type SceneLoad =
-  | { status: "loading" | "ready" | "offline" | "not-found" }
-  | { status: "error"; error: Error };
+type SceneUnavailableStatus =
+  | "offline"
+  | "not-found"
+  | "unreachable"
+  | "failed";
+
+type SceneLoad = {
+  status: "loading" | "ready" | SceneUnavailableStatus;
+  /** The last failure loading the route's scene, kept through retries. */
+  failure: Error | null;
+  /** Increments each time a `retry()` fails. */
+  failedAttempts: number;
+  retrying: boolean;
+  retry: () => void;
+};
 
 /**
  * Fetches a scene by key and loads it into Redux, independently of any editor
  * UI. This is the single place scene data-loading happens: fetch (React
- * Query) → `setScene` dispatch → `document.title`, plus 404 handling.
+ * Query) → `setScene` dispatch → `document.title`.
  *
  * `SceneControls` and `<Viewport>` both read the resulting Redux state; neither
  * needs to be mounted for the load to occur.
  */
-const useSceneLoader = (
-  sceneKey?: string,
-  { onNotFound = "redirect" }: { onNotFound?: OnNotFound } = {},
-): SceneLoad => {
+const useSceneLoader = (sceneKey?: string): SceneLoad => {
   const dispatch = useAppDispatch();
 
-  const { data, error, fetchStatus } = useScene(sceneKey, {
+  const query = useScene(sceneKey, {
     enabled: sceneKey !== undefined,
     staleTime: Infinity,
   });
+  const { data, error, fetchStatus } = query;
+
+  const routeKey = sceneKey ?? null;
+  const store = useAppStore();
+  const holdsRouteScene = useAppSelector(
+    (state) => state.scene.loaded && state.scene.key === routeKey,
+  );
+  // Read, don't subscribe: what matters is whether the store held the route's
+  // scene when the failure arrived.
+  const { failure, failedAttempts, retrying, retry } = useKeptFailure(
+    { error, hasData: !!data, refetch: query.refetch },
+    {
+      key: sceneKey ?? "",
+      keep: () => {
+        const { loaded, key } = store.getState().scene;
+        return !(loaded && key === routeKey);
+      },
+    },
+  );
+
+  const status = ((): SceneLoad["status"] => {
+    // The store can hold this route's scene whatever the fetch did: a failed
+    // refetch, a scene just published, or a restored sign-in draft.
+    if (sceneKey === undefined || data || holdsRouteScene) return "ready";
+    if (failure) {
+      if (isApiError(failure, [404])) return "not-found";
+      return classifyFailure(failure) === "unreachable"
+        ? "unreachable"
+        : "failed";
+    }
+    // A retry in a background tab pauses too, waiting for focus.
+    if (fetchStatus === "paused" && !onlineManager.isOnline()) {
+      return "offline";
+    }
+    return "loading";
+  })();
 
   // The site's crawler / link-preview default lives in
   // <meta name="default-title">, which the metadata Worker leaves untouched
@@ -62,35 +100,19 @@ const useSceneLoader = (
   );
 
   useEffect(() => {
+    if (status === "not-found") {
+      document.title = "Not found";
+      return;
+    }
     // Shared with the Worker's edge <title> rewrite (sceneTitle.ts) so a
     // deep-linked scene shows the same tab title before and after app boot,
     // including the untitled case → the rich site default.
     document.title = data
       ? sceneTabTitle(data.title ?? "", defaultTitle.current)
       : defaultTitle.current;
-  }, [data]);
-
-  const { add: addNotification } = useNotifications();
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (onNotFound !== "redirect") return;
-    if (isApiError(error, [404])) {
-      const { confirmed } = addNotification({
-        type: "alert",
-        title: "Not found",
-        body: "The requested scene could not be found.",
-      });
-      document.title = "Not found";
-
-      confirmed.then(() => {
-        navigate("/");
-      });
-    }
-  }, [error, onNotFound, addNotification, navigate]);
+  }, [data, status]);
 
   const scene = sceneKey === undefined ? defaultScene : data;
-  const routeKey = sceneKey ?? null;
-  const store = useAppStore();
 
   useEffect(() => {
     // Load only a scene the store doesn't already hold: it may carry unsaved
@@ -113,19 +135,8 @@ const useSceneLoader = (
     );
   }, [dispatch, scene, routeKey, store]);
 
-  const holdsRouteScene = useAppSelector(
-    (state) => state.scene.loaded && state.scene.key === routeKey,
-  );
-  // The store can hold this route's scene whatever the fetch did: a failed
-  // refetch, a scene just published, or a restored sign-in draft.
-  if (sceneKey === undefined || data || holdsRouteScene) {
-    return { status: "ready" };
-  }
-  if (isApiError(error, [404])) return { status: "not-found" };
-  if (error) return { status: "error", error };
-  if (fetchStatus === "paused") return { status: "offline" };
-  return { status: "loading" };
+  return { status, failure, failedAttempts, retrying, retry };
 };
 
 export default useSceneLoader;
-export type { OnNotFound };
+export type { SceneLoad, SceneUnavailableStatus };

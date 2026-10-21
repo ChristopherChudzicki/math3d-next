@@ -39,6 +39,9 @@ const normalizeError = (error: unknown): NormalizedError => {
 /**
  * Route-level `errorElement`: catches render errors anywhere in the routed tree
  * and shows the branded fallback instead of React Router's raw default.
+ *
+ * For render crashes only. A failed API request shows where its data would be,
+ * and the React Query caches report it.
  */
 const ErrorPage: React.FC = () => {
   const error = useRouteError();

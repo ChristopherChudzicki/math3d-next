@@ -13,7 +13,14 @@ import {
   within,
 } from "@/test_util";
 import invariant from "tiny-invariant";
+import * as Sentry from "@sentry/react";
 import errorPageCopy from "@/app/pages/ErrorPage/errorPage.copy";
+import expectToast from "@/test_util/expectToast";
+
+vi.mock("@sentry/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@sentry/react")>()),
+  captureException: vi.fn(),
+}));
 
 test.each([
   {
@@ -124,42 +131,147 @@ test("No-scene default reads the default-title meta when present", async () => {
   }
 });
 
-test("Alerts and redirects home when the scene key is not found", async () => {
-  // MSW returns 404 for an unknown scene key, which useSceneLoader maps to a
-  // "Not found" alert + redirect to "/".
-  const { location } = renderTestApp("/nonexistent-scene-key");
-
-  const dialog = await screen.findByRole("alertdialog", { name: "Not found" });
-
-  await user.click(within(dialog).getByRole("button", { name: "OK" }));
-
-  await waitFor(() => {
-    expect(location.current.pathname).toBe("/");
-  });
-});
-
 const sceneControls = () =>
   screen.queryByRole("tablist", { name: "Scene controls" });
 
-test("Shows the error page when the scene fails to load", async () => {
-  // React and React Router log the error the route's errorElement catches.
-  const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
-  try {
-    const scene = seedDb.withSceneFromItems([]);
-    server.use(
-      http.get(
-        urls.scenes.detail,
-        () => new HttpResponse(null, { status: 500 }),
-      ),
-    );
-    renderTestApp(`/${scene.key}`);
+const answer = (status: number) => () =>
+  HttpResponse.json({ detail: "boom" }, { status });
 
-    expect(
-      await screen.findByRole("heading", { name: errorPageCopy.title }),
-    ).toBeVisible();
-  } finally {
-    consoleError.mockRestore();
-  }
+test("a 500 shows the failed card, not the error page", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  server.use(http.get(urls.scenes.detail, answer(500)));
+  renderTestApp(`/${scene.key}`);
+
+  expect(
+    await screen.findByRole("heading", { name: "Couldn’t load this scene." }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("link", { name: "Report this bug" }),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("heading", { name: errorPageCopy.title }),
+  ).toBeNull();
+  expect(sceneControls()).toBeNull();
+  expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+});
+
+test("a network failure shows the unreachable card", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  server.use(http.get(urls.scenes.detail, () => HttpResponse.error()));
+  renderTestApp(`/${scene.key}`);
+
+  expect(
+    await screen.findByRole("heading", { name: "Couldn’t reach Math3d." }),
+  ).toBeVisible();
+});
+
+test("a 404 shows the not-found card at the same URL", async () => {
+  const { location } = renderTestApp("/nonexistent-scene-key");
+
+  expect(
+    await screen.findByRole("heading", { name: "This scene doesn’t exist." }),
+  ).toBeVisible();
+  expect(location.current.pathname).toBe("/nonexistent-scene-key");
+  expect(document.title).toBe("Not found");
+  expect(Sentry.captureException).not.toHaveBeenCalled();
+});
+
+test("Try again keeps the card and focus, then focuses the title", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  let calls = 0;
+  let release = () => {};
+  server.use(
+    http.get(urls.scenes.detail, async () => {
+      calls += 1;
+      if (calls === 2) {
+        await new Promise<void>((resolve) => {
+          release = resolve;
+        });
+      }
+      // Returning nothing falls through to the default handler.
+      return calls <= 2 ? answer(500)() : undefined;
+    }),
+  );
+  renderTestApp(`/${scene.key}`);
+  const heading = () =>
+    screen.getByRole("heading", { name: "Couldn’t load this scene." });
+  const tryAgain = await screen.findByRole("button", { name: "Try again" });
+  const first = heading();
+
+  await user.click(tryAgain);
+  await waitFor(() => expect(calls).toBe(2));
+  expect(heading()).toBe(first);
+  expect(tryAgain).toHaveFocus();
+
+  // The failed retry re-renders the message, so it's announced again.
+  act(() => release());
+  await waitFor(() => expect(heading()).not.toBe(first));
+  expect(tryAgain).toHaveFocus();
+
+  await user.click(tryAgain);
+  invariant(scene.title, "seeded scenes have titles");
+  const title = await screen.findByRole("heading", { name: scene.title });
+  await waitFor(() => expect(title).toHaveFocus());
+});
+
+test("from the Scenes drawer, a 404 keeps the drawer open and toasts; opening a scene that loads dismisses it", async () => {
+  const current = seedDb.withSceneFromItems([]);
+  const missing = seedDb.withExampleScene();
+  const working = seedDb.withExampleScene();
+  server.use(
+    http.get(urls.scenes.detail, ({ params }) =>
+      params.key === missing.key ? answer(404)() : undefined,
+    ),
+  );
+  renderTestApp(`/${current.key}?overlay=scenes&list=examples`);
+  const dialog = await screen.findByRole("dialog", { name: "Scenes" });
+
+  await user.click(
+    await within(dialog).findByRole("link", { name: missing.title }),
+  );
+  await expectToast("This scene doesn’t exist.");
+  expect(screen.getByRole("dialog", { name: "Scenes" })).toBe(dialog);
+
+  await user.click(within(dialog).getByRole("link", { name: working.title }));
+  const region = screen.getByRole("region", { name: "Notifications" });
+  await waitFor(() =>
+    expect(within(region).queryByText("This scene doesn’t exist.")).toBeNull(),
+  );
+});
+
+test("two failing scenes in a row replace the toast", async () => {
+  const current = seedDb.withSceneFromItems([]);
+  const missing = seedDb.withExampleScene();
+  const broken = seedDb.withExampleScene();
+  server.use(
+    http.get(urls.scenes.detail, ({ params }) => {
+      if (params.key === missing.key) return answer(404)();
+      if (params.key === broken.key) return answer(500)();
+      return undefined;
+    }),
+  );
+  renderTestApp(`/${current.key}?overlay=scenes&list=examples`);
+  const dialog = await screen.findByRole("dialog", { name: "Scenes" });
+
+  await user.click(
+    await within(dialog).findByRole("link", { name: missing.title }),
+  );
+  await expectToast("This scene doesn’t exist.");
+  await user.click(within(dialog).getByRole("link", { name: broken.title }));
+
+  await expectToast("Couldn’t load this scene.");
+  const region = screen.getByRole("region", { name: "Notifications" });
+  expect(within(region).queryByText("This scene doesn’t exist.")).toBeNull();
+});
+
+test("New scene from not-found loads the default scene and resets the tab title", async () => {
+  const { location, store } = renderTestApp("/nonexistent-scene-key");
+
+  await user.click(await screen.findByRole("link", { name: "New scene" }));
+
+  await waitFor(() => expect(location.current.pathname).toBe("/"));
+  await waitFor(() => expect(store.getState().scene.loaded).toBe(true));
+  expect(document.title).not.toBe("Not found");
 });
 
 test("Says the scene will load once back online", async () => {
@@ -168,9 +280,7 @@ test("Says the scene will load once back online", async () => {
   try {
     const { store } = renderTestApp(`/${scene.key}`);
     expect(
-      await screen.findByText(
-        "You’re offline. This scene will load when you reconnect.",
-      ),
+      await screen.findByRole("heading", { name: "You’re offline." }),
     ).toBeInTheDocument();
     expect(sceneControls()).toBeNull();
 

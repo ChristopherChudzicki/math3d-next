@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   useLocation,
   useNavigate,
@@ -10,11 +10,12 @@ import useSceneLoader from "@/app/useSceneLoader";
 import SceneControls from "@/features/editor/sidebar/SceneControls";
 import Sidebar from "@/ui/Sidebar";
 import { useBodyClass, useToggle } from "@/util/hooks";
-import SceneTitle from "@/features/sceneActions/SceneTitle";
+import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
 
 import ToggleKeyboardButton from "@/features/editor/virtualKeyboard/KeyboardControls";
 
 import { useSelector } from "react-redux";
+import { useAppSelector } from "@/store/hooks";
 
 import * as select from "@/store/scene/state/selectors";
 import { BannersProvider } from "@/ui/Banners/BannerContext";
@@ -23,7 +24,7 @@ import styles from "./MainPage.module.css";
 import Header from "./components/Header";
 import LegacyDialog from "./components/LegacyDialog";
 import LegacyBanner from "./components/LegacyBanner";
-import WaitingForConnection from "./components/WaitingForConnection";
+import SceneUnavailable from "./components/SceneUnavailable";
 
 type UseSearchEnumOptions<T extends string = string> = {
   name: string;
@@ -69,7 +70,27 @@ const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
   const { sceneKey } = useParams();
   const sceneLoad = useSceneLoader(sceneKey);
-  const offline = sceneLoad.status === "offline";
+  const unavailable =
+    sceneLoad.status !== "ready" && sceneLoad.status !== "loading"
+      ? sceneLoad.status
+      : null;
+
+  // After a successful Try again, focus the scene's title, which replaces the
+  // card. It renders once the store holds the route's scene.
+  const retriedKey = useRef<string | undefined | null>(null);
+  const titleShown = useAppSelector(
+    (state) => state.scene.loaded && state.scene.key === (sceneKey ?? null),
+  );
+  useEffect(() => {
+    if (retriedKey.current !== sceneKey) return;
+    if (sceneLoad.status !== "ready" || !titleShown) return;
+    retriedKey.current = null;
+    document.getElementById(SCENE_TITLE_ID)?.focus();
+  }, [sceneKey, sceneLoad.status, titleShown]);
+  const handleRetry = () => {
+    retriedKey.current = sceneKey;
+    sceneLoad.retry();
+  };
   // The store holds the previous route's scene until this one is ready.
   const isLegacy = useSelector(select.isLegacy) && sceneLoad.status === "ready";
   const [legacyDialogOpen, legacyDialog] = useToggle(false);
@@ -98,8 +119,6 @@ const MainPage: React.FC = () => {
     },
     [setControlsVisibility],
   );
-  // The route's errorElement shows the error page.
-  if (sceneLoad.status === "error") throw sceneLoad.error;
   return (
     // Banners are scoped to MainPage: BannerDisplay renders inside this grid
     // (publishing --banner-height for the sidebar's scroll calc), so a banner
@@ -113,9 +132,16 @@ const MainPage: React.FC = () => {
           <LegacyBanner sceneKey={sceneKey} onViewDetails={legacyDialog.on} />
         ) : null}
         <div className={styles.body}>
-          {offline ? (
+          {unavailable ? (
             // Not the editor: the store may hold the previous route's scene.
-            <WaitingForConnection />
+            <SceneUnavailable
+              key={sceneKey}
+              status={unavailable}
+              failure={sceneLoad.failure}
+              failedAttempts={sceneLoad.failedAttempts}
+              retrying={sceneLoad.retrying}
+              onRetry={handleRetry}
+            />
           ) : (
             <>
               <Sidebar
@@ -137,7 +163,7 @@ const MainPage: React.FC = () => {
             </>
           )}
         </div>
-        {offline ? null : <ToggleKeyboardButton />}
+        {unavailable ? null : <ToggleKeyboardButton />}
         {sceneKey && isLegacy ? (
           <LegacyDialog
             sceneKey={sceneKey}
