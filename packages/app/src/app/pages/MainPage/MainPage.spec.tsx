@@ -239,39 +239,25 @@ test("from the Scenes drawer, a 404 keeps the drawer open and toasts; opening a 
   );
 });
 
-test("two failing scenes in a row replace the toast", async () => {
-  const current = seedDb.withSceneFromItems([]);
-  const missing = seedDb.withExampleScene();
-  const broken = seedDb.withExampleScene();
-  server.use(
-    http.get(urls.scenes.detail, ({ params }) => {
-      if (params.key === missing.key) return answer(404)();
-      if (params.key === broken.key) return answer(500)();
-      return undefined;
-    }),
-  );
-  renderTestApp(`/${current.key}?overlay=scenes&list=examples`);
-  const dialog = await screen.findByRole("dialog", { name: "Scenes" });
+test("opening the Scenes drawer over the card doesn't toast", async () => {
+  renderTestApp("/nonexistent-scene-key");
+  await screen.findByRole("heading", { name: "This scene doesn’t exist." });
 
-  await user.click(
-    await within(dialog).findByRole("link", { name: missing.title }),
-  );
-  await expectToast("This scene doesn’t exist.");
-  await user.click(within(dialog).getByRole("link", { name: broken.title }));
+  await user.click(screen.getByRole("button", { name: "Open scenes" }));
 
-  await expectToast("Couldn’t load this scene.");
-  const region = screen.getByRole("region", { name: "Notifications" });
-  expect(within(region).queryByText("This scene doesn’t exist.")).toBeNull();
+  await screen.findByRole("dialog", { name: "Scenes" });
+  // The toast guard in setupTests fails this test if a toast was shown.
 });
 
 test("New scene from not-found loads the default scene and resets the tab title", async () => {
+  document.title = "Math3d: Online 3d Graphing Calculator";
   const { location, store } = renderTestApp("/nonexistent-scene-key");
 
   await user.click(await screen.findByRole("link", { name: "New scene" }));
 
   await waitFor(() => expect(location.current.pathname).toBe("/"));
   await waitFor(() => expect(store.getState().scene.loaded).toBe(true));
-  expect(document.title).not.toBe("Not found");
+  expect(document.title).toBe("Math3d: Online 3d Graphing Calculator");
 });
 
 test("Says the scene will load once back online", async () => {

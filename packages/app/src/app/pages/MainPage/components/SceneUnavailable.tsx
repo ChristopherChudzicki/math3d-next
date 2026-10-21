@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Provider } from "react-redux";
 import { useSearchParams } from "react-router";
 import { Icon } from "@iconify/react/offline";
@@ -66,6 +66,8 @@ type SceneUnavailableProps = {
   failedAttempts: number;
   retrying: boolean;
   onRetry: () => void;
+  /** Called if the card unmounts while focus is inside it. */
+  onUnmountWithFocus: () => void;
 };
 
 /**
@@ -78,19 +80,31 @@ const SceneUnavailable: React.FC<SceneUnavailableProps> = ({
   failedAttempts,
   retrying,
   onRetry,
+  onUnmountWithFocus,
 }) => {
   const store = useEmptySceneStore();
+
+  // A layout cleanup runs before React removes the card's DOM, so focus is
+  // still inside it here.
+  const cardRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const card = cardRef.current;
+    return () => {
+      if (card?.contains(document.activeElement)) onUnmountWithFocus();
+    };
+  }, [onUnmountWithFocus]);
   const { heading, body } = COPY[status];
 
   // The Scenes drawer is a modal over the card (and the whole page on a
-  // phone), so while it's open a toast repeats the heading.
+  // phone), so if the card appears while it's open, a toast repeats the
+  // heading. Reopening the drawer later doesn't toast again.
   const [search] = useSearchParams();
-  const drawerOpen = search.get("overlay") === "scenes";
+  const [drawerWasOpen] = useState(() => search.get("overlay") === "scenes");
   useEffect(() => {
-    if (!drawerOpen || status === "offline") return undefined;
+    if (!drawerWasOpen || status === "offline") return undefined;
     showToast(heading);
     return () => dismissToast(heading);
-  }, [drawerOpen, status, heading]);
+  }, [drawerWasOpen, status, heading]);
 
   const canRetry = status === "unreachable" || status === "failed";
   return (
@@ -99,7 +113,7 @@ const SceneUnavailable: React.FC<SceneUnavailableProps> = ({
         <Viewport />
       </Provider>
       <div className={styles.overlay}>
-        <div className={styles.card}>
+        <div ref={cardRef} className={styles.card}>
           {status === "offline" ? <Spinner size="1.5rem" /> : null}
           {status === "failed" ? (
             <BrokenTorus className={styles.torus} />

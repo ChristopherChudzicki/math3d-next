@@ -75,22 +75,24 @@ const MainPage: React.FC = () => {
       ? sceneLoad.status
       : null;
 
-  // After a successful Try again, focus the scene's title, which replaces the
-  // card. It renders once the store holds the route's scene.
-  const retriedKey = useRef<string | undefined | null>(null);
+  // When the card goes away while it holds focus (a retry or reconnect
+  // succeeded, or "New scene"), focus moves to the scene's title. The title
+  // renders a commit later, once the store holds the route's scene.
+  const focusTitle = useRef(false);
   const titleShown = useAppSelector(
     (state) => state.scene.loaded && state.scene.key === (sceneKey ?? null),
   );
   useEffect(() => {
-    if (retriedKey.current !== sceneKey) return;
-    if (sceneLoad.status !== "ready" || !titleShown) return;
-    retriedKey.current = null;
+    if (unavailable) focusTitle.current = false;
+  }, [unavailable]);
+  useEffect(() => {
+    if (!focusTitle.current || !titleShown) return;
+    focusTitle.current = false;
     document.getElementById(SCENE_TITLE_ID)?.focus();
-  }, [sceneKey, sceneLoad.status, titleShown]);
-  const handleRetry = () => {
-    retriedKey.current = sceneKey;
-    sceneLoad.retry();
-  };
+  }, [titleShown]);
+  const handleCardLeftWithFocus = useCallback(() => {
+    focusTitle.current = true;
+  }, []);
   // The store holds the previous route's scene until this one is ready.
   const isLegacy = useSelector(select.isLegacy) && sceneLoad.status === "ready";
   const [legacyDialogOpen, legacyDialog] = useToggle(false);
@@ -140,7 +142,8 @@ const MainPage: React.FC = () => {
               failure={sceneLoad.failure}
               failedAttempts={sceneLoad.failedAttempts}
               retrying={sceneLoad.retrying}
-              onRetry={handleRetry}
+              onRetry={sceneLoad.retry}
+              onUnmountWithFocus={handleCardLeftWithFocus}
             />
           ) : (
             <>
