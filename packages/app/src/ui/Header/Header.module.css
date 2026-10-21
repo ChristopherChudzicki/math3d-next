@@ -29,6 +29,10 @@
   margin-right: 1rem;
 }
 
+.title-slot {
+  min-width: 0;
+}
+
 .title {
   margin: 0;
   font-size: 1.25rem;
