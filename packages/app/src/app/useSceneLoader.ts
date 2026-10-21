@@ -59,7 +59,13 @@ const useSceneLoader = (sceneKey?: string): SceneLoad => {
   // Read, don't subscribe: what matters is whether the store held the route's
   // scene when the failure arrived.
   const { failure, failedAttempts, retrying, retry } = useKeptFailure(
-    { error, hasData: !!data, refetch: query.refetch },
+    {
+      error,
+      hasData: !!data,
+      fetchStatus,
+      errorUpdateCount: query.errorUpdateCount,
+      refetch: query.refetch,
+    },
     {
       key: sceneKey ?? "",
       keep: () => {

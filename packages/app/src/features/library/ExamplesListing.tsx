@@ -16,7 +16,13 @@ const ExamplesListing: React.FC = () => {
   const { sceneKey } = useParams();
   const query = useExampleScenes({ limit: EXAMPLES_LIMIT });
   const { failure, retrying, failedAttempts, retry } = useKeptFailure(
-    { error: query.error, hasData: !!query.data, refetch: query.refetch },
+    {
+      error: query.error,
+      hasData: !!query.data,
+      fetchStatus: query.fetchStatus,
+      errorUpdateCount: query.errorUpdateCount,
+      refetch: query.refetch,
+    },
     { key: "examples" },
   );
 

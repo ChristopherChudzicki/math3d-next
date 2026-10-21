@@ -108,6 +108,8 @@ const MyScenesList: React.FC = () => {
     {
       error: query.error,
       hasData: !!query.data && !query.isPlaceholderData,
+      fetchStatus: query.fetchStatus,
+      errorUpdateCount: query.errorUpdateCount,
       refetch: query.refetch,
     },
     { key: JSON.stringify([filterValue, includeArchived]) },

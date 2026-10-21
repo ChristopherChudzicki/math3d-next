@@ -1,19 +1,12 @@
 import { useState } from "react";
-
-type KeptFailure = {
-  /** The last failure for `key`, kept through refetches until data arrives. */
-  failure: Error | null;
-  /** A retry started with `retry()` is in flight. */
-  retrying: boolean;
-  /** Increments each time a user-started retry fails; key the live region on it. */
-  failedAttempts: number;
-  retry: () => void;
-};
+import type { FetchStatus } from "@tanstack/react-query";
 
 type QueryLike = {
   error: Error | null;
   hasData: boolean;
-  refetch: () => Promise<{ error: Error | null }>;
+  fetchStatus: FetchStatus;
+  errorUpdateCount: number;
+  refetch: () => unknown;
 };
 
 type State = {
@@ -21,17 +14,7 @@ type State = {
   failure: Error | null;
   /** The last error judged by `keep()`, kept or not. */
   seen: Error | null;
-  retrying: boolean;
-  failedAttempts: number;
 };
-
-const initial = (key: string): State => ({
-  key,
-  failure: null,
-  seen: null,
-  retrying: false,
-  failedAttempts: 0,
-});
 
 /**
  * Keeps a query's failure on screen while the user retries it.
@@ -46,14 +29,14 @@ const initial = (key: string): State => ({
 const useKeptFailure = (
   query: QueryLike,
   { key, keep = () => true }: { key: string; keep?: () => boolean },
-): KeptFailure => {
-  const [state, setState] = useState(() => initial(key));
+) => {
+  const [state, setState] = useState<State>({ key, failure: null, seen: null });
 
   // Adjusting state during render, so the failure shows in the same render as
   // the error: https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
   let current = state;
   if (current.key !== key) {
-    current = initial(key);
+    current = { key, failure: null, seen: null };
   }
   if (query.hasData) {
     if (current.failure) current = { ...current, failure: null };
@@ -66,31 +49,16 @@ const useKeptFailure = (
   }
   if (current !== state) setState(current);
 
-  const retry = () => {
-    setState((prev) => ({ ...prev, retrying: true }));
-    query.refetch().then(({ error }) => {
-      setState((prev) => {
-        if (prev.key !== key) return prev;
-        if (!error) return { ...prev, retrying: false };
-        // The render may already have judged this error.
-        const kept = error === prev.seen ? prev.failure === error : keep();
-        if (!kept) return { ...prev, seen: error, retrying: false };
-        return {
-          ...prev,
-          failure: error,
-          seen: error,
-          retrying: false,
-          failedAttempts: prev.failedAttempts + 1,
-        };
-      });
-    });
-  };
-
   return {
+    /** The last failure for `key`, kept through refetches until data arrives. */
     failure: current.failure,
-    retrying: current.retrying,
-    failedAttempts: current.failedAttempts,
-    retry,
+    /** A fetch is in flight (or paused) while the failure shows. */
+    retrying: query.fetchStatus !== "idle",
+    /** Changes with each failed fetch; key the live region on it. */
+    failedAttempts: query.errorUpdateCount,
+    retry: () => {
+      query.refetch();
+    },
   };
 };
 
