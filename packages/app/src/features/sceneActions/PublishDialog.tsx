@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import * as Sentry from "@sentry/react";
-import { useCreateScene } from "@math3d/api";
+import { isApiFailure, useCreateScene } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
 import * as select from "@/store/scene/state/selectors";
@@ -130,7 +130,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
     if (!autoPublishing || autoPublishStarted.current) return;
     autoPublishStarted.current = true;
     publish(defaultTitle).catch((err) => {
-      Sentry.captureException(err);
+      if (!isApiFailure(err)) Sentry.captureException(err);
       setAutoPublishFailed(true);
       setAsksTitle(true);
     });

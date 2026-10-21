@@ -104,6 +104,7 @@ test("a failed deletion surfaces the error instead of silently reopening", async
     expect.objectContaining({ status: 500 }),
     expect.anything(),
   );
+  expect(Sentry.captureException).toHaveBeenCalledTimes(1);
 });
 
 test("a 403 sends the user to sign in again instead of a generic failure", async () => {
@@ -133,6 +134,7 @@ test("a 403 sends the user to sign in again instead of a generic failure", async
 
   await waitFor(() => expect(location.current.search).toBe("?signin="));
   await expectToast(FORBIDDEN_TOAST);
+  expect(Sentry.captureException).not.toHaveBeenCalled();
 });
 
 test("a 403 with the session intact keeps the dialog open under the toast", async () => {

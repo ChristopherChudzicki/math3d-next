@@ -53,7 +53,7 @@ const useUserMe = () => {
 const useUserMeDelete = ({ meta }: MutationHookOptions = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
-    meta,
+    meta: { expectedErrors: [403], ...meta },
     mutationFn: () => unwrap(v1Client.DELETE("/v1/me/")),
     onSuccess: async () => {
       await resetOnAuthChange(queryClient);

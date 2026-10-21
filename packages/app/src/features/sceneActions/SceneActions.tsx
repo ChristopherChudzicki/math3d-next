@@ -4,7 +4,7 @@ import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
 import { Icon } from "@iconify/react/offline";
 import chevronDown from "@iconify-icons/lucide/chevron-down";
-import { usePatchScene, useUserMe } from "@math3d/api";
+import { isApiFailure, usePatchScene, useUserMe } from "@math3d/api";
 import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
 import * as select from "@/store/scene/state/selectors";
@@ -141,8 +141,9 @@ const SceneActions: React.FC = () => {
       dispatch(actions.markSaved({ key, author, revision, loadCount }));
       setFlash({ text: "Saved!" });
     } catch (err) {
-      // The scene stays dirty, so Save stays available to retry.
-      Sentry.captureException(err);
+      // The scene stays dirty, so Save stays available to retry. The mutation
+      // cache reports API failures.
+      if (!isApiFailure(err)) Sentry.captureException(err);
     } finally {
       setSaving(false);
     }
