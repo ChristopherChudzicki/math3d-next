@@ -148,40 +148,7 @@ test("marking the open scene saved under a new key does not reload the route's s
   expect(store.getState().scene.title).toBe("edited");
 });
 
-test("publishing over a route whose GET fails never shows the card", async () => {
-  const { store, router } = renderTestApp("/");
-  await waitFor(() => expect(store.getState().scene.loaded).toBe(true));
-  server.use(
-    http.get(urls.scenes.detail, () => new HttpResponse(null, { status: 500 })),
-  );
-
-  // PublishDialog marks the scene saved, then navigates to its new key.
-  act(() => {
-    store.dispatch(
-      sceneSlice.actions.markSaved({
-        key: "new-key",
-        author: null,
-        revision: store.getState().scene.revision,
-        loadCount: store.getState().scene.loadCount,
-      }),
-    );
-  });
-  await act(() => router.navigate("/new-key"));
-  await waitFor(() => expect(router.state.location.pathname).toBe("/new-key"));
-  await act(
-    () =>
-      new Promise((resolve) => {
-        setTimeout(resolve);
-      }),
-  );
-
-  expect(
-    screen.getByRole("tablist", { name: "Scene controls" }),
-  ).toBeInTheDocument();
-  expect(screen.queryByRole("alert")).toBeNull();
-});
-
-test("a restored sign-in draft whose GET fails shows the draft", async () => {
+test("a route whose GET fails while the store holds its scene never shows the card, even as the store moves on", async () => {
   const scene = seedDb.withSceneFromItems([]);
   saveSignInDraft(
     editedDraftOf(scene),
@@ -190,19 +157,32 @@ test("a restored sign-in draft whose GET fails shows the draft", async () => {
   server.use(
     http.get(urls.scenes.detail, () => new HttpResponse(null, { status: 500 })),
   );
-
   const { store, queryClient } = renderTestApp(`/${scene.key}`);
-
   await waitFor(() =>
     expect(
       queryClient.getQueryState(["scenes", "detail", scene.key])?.status,
     ).toBe("error"),
   );
   expect(store.getState().scene.title).toBe(`${scene.title} (edited)`);
+  expect(screen.queryByRole("alert")).toBeNull();
+
+  // PublishDialog marks the scene saved a render before navigating.
+  act(() => {
+    const { revision, loadCount } = store.getState().scene;
+    store.dispatch(
+      sceneSlice.actions.markSaved({
+        key: "new-key",
+        author: null,
+        revision,
+        loadCount,
+      }),
+    );
+  });
+
+  expect(screen.queryByRole("alert")).toBeNull();
   expect(
     screen.getByRole("tablist", { name: "Scene controls" }),
   ).toBeInTheDocument();
-  expect(screen.queryByRole("alert")).toBeNull();
 });
 
 test("a paused fetch in a background tab while online isn't offline", async () => {

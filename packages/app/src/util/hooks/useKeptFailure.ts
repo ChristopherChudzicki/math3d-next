@@ -19,6 +19,8 @@ type QueryLike = {
 type State = {
   key: string;
   failure: Error | null;
+  /** The last error judged by `keep()`, kept or not. */
+  seen: Error | null;
   retrying: boolean;
   failedAttempts: number;
 };
@@ -26,6 +28,7 @@ type State = {
 const initial = (key: string): State => ({
   key,
   failure: null,
+  seen: null,
   retrying: false,
   failedAttempts: 0,
 });
@@ -54,8 +57,12 @@ const useKeptFailure = (
   }
   if (query.hasData) {
     if (current.failure) current = { ...current, failure: null };
-  } else if (query.error && query.error !== current.failure && keep()) {
-    current = { ...current, failure: query.error };
+  } else if (query.error && query.error !== current.seen) {
+    current = {
+      ...current,
+      seen: query.error,
+      failure: keep() ? query.error : current.failure,
+    };
   }
   if (current !== state) setState(current);
 
@@ -64,10 +71,14 @@ const useKeptFailure = (
     query.refetch().then(({ error }) => {
       setState((prev) => {
         if (prev.key !== key) return prev;
-        if (!error || !keep()) return { ...prev, retrying: false };
+        if (!error) return { ...prev, retrying: false };
+        // The render may already have judged this error.
+        const kept = error === prev.seen ? prev.failure === error : keep();
+        if (!kept) return { ...prev, seen: error, retrying: false };
         return {
           ...prev,
           failure: error,
+          seen: error,
           retrying: false,
           failedAttempts: prev.failedAttempts + 1,
         };
