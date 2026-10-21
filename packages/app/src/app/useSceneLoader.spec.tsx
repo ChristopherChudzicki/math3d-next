@@ -3,7 +3,7 @@ import { HttpResponse, http } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { seedDb, urls } from "@math3d/mock-api";
 import type { Scene } from "@math3d/api";
-import { act, renameScene, renderTestApp, waitFor } from "@/test_util";
+import { act, renameScene, renderTestApp, screen, waitFor } from "@/test_util";
 import { getStore } from "@/store/store";
 import sceneSlice from "@/store/scene/state/scene.slice";
 import {
@@ -100,6 +100,22 @@ test("a refetch of the open scene keeps unsaved edits", async () => {
   );
 
   expect(store.getState().scene.title).toBe(edited);
+});
+
+test("a failed refetch of the open scene keeps the editor", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  const { store, queryClient } = renderTestApp(`/${scene.key}`);
+  await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
+  server.use(
+    http.get(urls.scenes.detail, () => new HttpResponse(null, { status: 500 })),
+  );
+
+  await act(() => queryClient.refetchQueries());
+
+  expect(
+    screen.getByRole("tablist", { name: "Scene controls" }),
+  ).toBeInTheDocument();
+  expect(screen.queryByRole("alert")).toBeNull();
 });
 
 test("marking the open scene saved under a new key does not reload the route's scene", async () => {

@@ -22,6 +22,11 @@ declare module "@tanstack/react-query" {
        * one account's data to the next.
        */
       sameForAllUsers?: boolean;
+      /**
+       * Error statuses that are the caller's situation, not a bug — a bad link
+       * or an expired session — and so aren't reported to Sentry.
+       */
+      expectedErrors?: number[];
     };
     mutationMeta: MutationMeta;
   }

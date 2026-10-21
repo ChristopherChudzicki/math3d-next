@@ -1,6 +1,10 @@
-import { test, expect } from "vitest";
-import { seedDb } from "@math3d/mock-api";
+import { test, expect, vi } from "vitest";
+import { HttpResponse, http } from "msw";
+import { onlineManager } from "@tanstack/react-query";
+import { server } from "@math3d/mock-api/node";
+import { seedDb, urls } from "@math3d/mock-api";
 import {
+  act,
   renderTestApp,
   screen,
   user,
@@ -9,6 +13,7 @@ import {
   within,
 } from "@/test_util";
 import invariant from "tiny-invariant";
+import errorPageCopy from "@/app/pages/ErrorPage/errorPage.copy";
 
 test.each([
   {
@@ -120,9 +125,8 @@ test("No-scene default reads the default-title meta when present", async () => {
 });
 
 test("Alerts and redirects home when the scene key is not found", async () => {
-  // MSW returns 404 for an unknown scene key; useScene surfaces it as an
-  // ApiError, which SceneControls maps to a "Not found" alert + redirect to "/".
-  // The scene never loads (controls stay busy), so we key off the alert dialog.
+  // MSW returns 404 for an unknown scene key, which useSceneLoader maps to a
+  // "Not found" alert + redirect to "/".
   const { location } = renderTestApp("/nonexistent-scene-key");
 
   const dialog = await screen.findByRole("alertdialog", { name: "Not found" });
@@ -132,4 +136,49 @@ test("Alerts and redirects home when the scene key is not found", async () => {
   await waitFor(() => {
     expect(location.current.pathname).toBe("/");
   });
+});
+
+const sceneControls = () =>
+  screen.queryByRole("tablist", { name: "Scene controls" });
+
+test("Shows the error page when the scene fails to load", async () => {
+  // React and React Router log the error the route's errorElement catches.
+  const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+  try {
+    const scene = seedDb.withSceneFromItems([]);
+    server.use(
+      http.get(
+        urls.scenes.detail,
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+    );
+    renderTestApp(`/${scene.key}`);
+
+    expect(
+      await screen.findByRole("heading", { name: errorPageCopy.title }),
+    ).toBeVisible();
+  } finally {
+    consoleError.mockRestore();
+  }
+});
+
+test("Says the scene will load once back online", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  onlineManager.setOnline(false);
+  try {
+    const { store } = renderTestApp(`/${scene.key}`);
+    expect(
+      await screen.findByText(
+        "You’re offline. This scene will load when you reconnect.",
+      ),
+    ).toBeInTheDocument();
+    expect(sceneControls()).toBeNull();
+
+    act(() => onlineManager.setOnline(true));
+
+    await waitFor(() => expect(store.getState().scene.key).toBe(scene.key));
+    expect(sceneControls()).not.toBeNull();
+  } finally {
+    onlineManager.setOnline(true);
+  }
 });

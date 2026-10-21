@@ -23,6 +23,7 @@ import styles from "./MainPage.module.css";
 import Header from "./components/Header";
 import LegacyDialog from "./components/LegacyDialog";
 import LegacyBanner from "./components/LegacyBanner";
+import WaitingForConnection from "./components/WaitingForConnection";
 
 type UseSearchEnumOptions<T extends string = string> = {
   name: string;
@@ -67,8 +68,10 @@ const CONTROLS_VALUES = ["0", "1"] as const;
 const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
   const { sceneKey } = useParams();
-  const { isLoading } = useSceneLoader(sceneKey);
-  const isLegacy = useSelector(select.isLegacy);
+  const sceneLoad = useSceneLoader(sceneKey);
+  const offline = sceneLoad.status === "offline";
+  // The store holds the previous route's scene until this one is ready.
+  const isLegacy = useSelector(select.isLegacy) && sceneLoad.status === "ready";
   const [legacyDialogOpen, legacyDialog] = useToggle(false);
   // legacyDialogOpen lives here (not in LegacyDialog) so the banner's "View
   // details" and the pill can share one dialog instance. MainPage itself
@@ -95,6 +98,8 @@ const MainPage: React.FC = () => {
     },
     [setControlsVisibility],
   );
+  // The route's errorElement shows the error page.
+  if (sceneLoad.status === "error") throw sceneLoad.error;
   return (
     // Banners are scoped to MainPage: BannerDisplay renders inside this grid
     // (publishing --banner-height for the sidebar's scroll calc), so a banner
@@ -108,24 +113,31 @@ const MainPage: React.FC = () => {
           <LegacyBanner sceneKey={sceneKey} onViewDetails={legacyDialog.on} />
         ) : null}
         <div className={styles.body}>
-          <Sidebar
-            className={styles.sidebar}
-            side="left"
-            visible={controlsOpen}
-            onVisibleChange={handleControlsClick}
-            label="Controls"
-          >
-            <SceneControls loading={isLoading} />
-          </Sidebar>
-          <Viewport
-            className={
-              controlsOpen
-                ? styles["scene-adjust-controls-open"]
-                : styles["scene-adjust-controls-closed"]
-            }
-          />
+          {offline ? (
+            // Not the editor: the store may hold the previous route's scene.
+            <WaitingForConnection />
+          ) : (
+            <>
+              <Sidebar
+                className={styles.sidebar}
+                side="left"
+                visible={controlsOpen}
+                onVisibleChange={handleControlsClick}
+                label="Controls"
+              >
+                <SceneControls loading={sceneLoad.status === "loading"} />
+              </Sidebar>
+              <Viewport
+                className={
+                  controlsOpen
+                    ? styles["scene-adjust-controls-open"]
+                    : styles["scene-adjust-controls-closed"]
+                }
+              />
+            </>
+          )}
         </div>
-        <ToggleKeyboardButton />
+        {offline ? null : <ToggleKeyboardButton />}
         {sceneKey && isLegacy ? (
           <LegacyDialog
             sceneKey={sceneKey}

@@ -18,7 +18,11 @@ const detailKey = (key?: string) => ["scenes", "detail", String(key)];
 
 const useScene = (
   key?: string,
-  opts: { enabled?: boolean; staleTime?: number } = {},
+  opts: {
+    enabled?: boolean;
+    staleTime?: number;
+    refetchOnWindowFocus?: boolean;
+  } = {},
 ) => {
   return useQuery({
     queryKey: detailKey(key),
@@ -29,8 +33,9 @@ const useScene = (
       );
     },
     // GET /v1/scenes/{key}/ is unauthenticated and serves every caller the
-    // same body, so this cache survives a change of signed-in user.
-    meta: { sameForAllUsers: true },
+    // same body, so this cache survives a change of signed-in user. The key
+    // comes from the URL, so a 404 is a bad link.
+    meta: { sameForAllUsers: true, expectedErrors: [404] },
     ...opts,
   });
 };
@@ -69,6 +74,8 @@ const useInfiniteScenesMe = (
     },
     // A new filter keeps showing the previous results until its own arrive.
     placeholderData: keepPreviousData,
+    // The session can expire while the list is open.
+    meta: { expectedErrors: [401, 403] },
     ...opts,
   });
 };

@@ -2,7 +2,7 @@ import { useScene, isApiError } from "@math3d/api";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 
-import { useAppDispatch, useAppStore } from "@/store/hooks";
+import { useAppDispatch, useAppSelector, useAppStore } from "@/store/hooks";
 import defaultScene from "@/store/scene/defaultScene";
 import sceneSlice from "@/store/scene/state/scene.slice";
 import { sceneTabTitle } from "@/store/scene/sceneTitle";
@@ -21,6 +21,15 @@ const { actions: itemActions } = sceneSlice;
 type OnNotFound = "redirect" | "silent";
 
 /**
+ * - `"offline"` — the fetch is paused until the browser is back online, when
+ *   React Query resumes it on its own.
+ * - `"error"` — any failure but a 404, which `onNotFound` handles.
+ */
+type SceneLoad =
+  | { status: "loading" | "ready" | "offline" | "not-found" }
+  | { status: "error"; error: Error };
+
+/**
  * Fetches a scene by key and loads it into Redux, independently of any editor
  * UI. This is the single place scene data-loading happens: fetch (React
  * Query) → `setScene` dispatch → `document.title`, plus 404 handling.
@@ -31,12 +40,15 @@ type OnNotFound = "redirect" | "silent";
 const useSceneLoader = (
   sceneKey?: string,
   { onNotFound = "redirect" }: { onNotFound?: OnNotFound } = {},
-): { isLoading: boolean } => {
+): SceneLoad => {
   const dispatch = useAppDispatch();
 
-  const { isLoading, data, error } = useScene(sceneKey, {
+  const { data, error, fetchStatus } = useScene(sceneKey, {
     enabled: sceneKey !== undefined,
     staleTime: Infinity,
+    // A query without data is always stale, so focusing the tab would refetch
+    // a missing scene and raise a second "Not found" alert.
+    refetchOnWindowFocus: false,
   });
 
   // The site's crawler / link-preview default lives in
@@ -104,7 +116,18 @@ const useSceneLoader = (
     );
   }, [dispatch, scene, routeKey, store]);
 
-  return { isLoading };
+  const holdsRouteScene = useAppSelector(
+    (state) => state.scene.loaded && state.scene.key === routeKey,
+  );
+  // The store can hold this route's scene whatever the fetch did: a failed
+  // refetch, a scene just published, or a restored sign-in draft.
+  if (sceneKey === undefined || data || holdsRouteScene) {
+    return { status: "ready" };
+  }
+  if (isApiError(error, [404])) return { status: "not-found" };
+  if (error) return { status: "error", error };
+  if (fetchStatus === "paused") return { status: "offline" };
+  return { status: "loading" };
 };
 
 export default useSceneLoader;
