@@ -1,6 +1,7 @@
 import { test, expect, vi } from "vitest";
 import * as Sentry from "@sentry/react";
 import { http, HttpResponse } from "msw";
+import { UNREACHABLE_COPY } from "@/util/failureCopy";
 import { server } from "@math3d/mock-api/node";
 import { mockAuth } from "@math3d/mock-api";
 import {
@@ -105,6 +106,24 @@ test("a failed deletion surfaces the error instead of silently reopening", async
     expect.anything(),
   );
   expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+});
+
+test("a deletion that can't reach the server says so", async () => {
+  server.use(http.delete("*/v1/me/", () => HttpResponse.error()));
+  renderTestApp("/?overlay=delete-account", { isAuthenticated: true });
+  const dialog = await screen.findByRole("dialog", {
+    name: "Delete Account",
+  });
+
+  await user.type(
+    within(dialog).getByLabelText("Confirm"),
+    "Yes, permanently delete",
+  );
+  await user.click(
+    within(dialog).getByRole("button", { name: "Delete Account" }),
+  );
+
+  expect(await within(dialog).findByText(UNREACHABLE_COPY)).toBeVisible();
 });
 
 test("a 403 sends the user to sign in again instead of a generic failure", async () => {

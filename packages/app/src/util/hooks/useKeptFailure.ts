@@ -95,4 +95,3 @@ const useKeptFailure = (
 };
 
 export default useKeptFailure;
-export type { KeptFailure };

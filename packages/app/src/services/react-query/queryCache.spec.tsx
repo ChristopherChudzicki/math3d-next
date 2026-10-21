@@ -35,7 +35,11 @@ test.each([
     captured: {
       level: "warning",
       fingerprint: ["network", "GET", SCENE_PATH],
-      tags: { query: "scenes.detail" },
+      tags: {
+        query: "scenes.detail",
+        "api.method": "GET",
+        "api.path": SCENE_PATH,
+      },
     },
   },
   {

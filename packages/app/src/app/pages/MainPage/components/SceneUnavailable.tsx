@@ -42,7 +42,9 @@ const emptyScene = {
   author: null,
   title: "",
   isLegacy: false,
-  items: defaultScene.items.filter((item) => item.id !== "99"),
+  items: defaultScene.items.filter(
+    (item) => !defaultScene.itemOrder.initialFolder.includes(item.id),
+  ),
   order: { ...defaultScene.itemOrder, initialFolder: [] },
 };
 

@@ -12,13 +12,10 @@ import {
   isApiError,
 } from "@math3d/api";
 import { dismissToast, showToast } from "@/ui/Toast/toasts";
+import { failureMessage } from "@/util/failureCopy";
 
 const RETRY_STATUS_CODES = [408, 429, 502, 503, 504];
 const MAX_RETRIES = 3;
-
-const DEFAULT_ERROR_TOAST = "Something went wrong. Please try again later.";
-const UNREACHABLE_COPY =
-  "Couldn’t reach Math3d. Check your connection and try again.";
 
 /** The backend's 500 body names its own Sentry event (`main/views.py`). */
 const backendEventId = (data: unknown): string | undefined => {
@@ -44,7 +41,11 @@ const reportFailure = (
     Sentry.captureException(error, {
       level: "warning",
       fingerprint: ["network", error.method, error.schemaPath],
-      tags,
+      tags: {
+        ...tags,
+        "api.method": error.method,
+        "api.path": error.schemaPath,
+      },
     });
     return;
   }
@@ -74,12 +75,7 @@ const createMutationCache = (): MutationCache =>
     onError: (error, _variables, _onMutateResult, mutation) => {
       reportFailure(error, { expectedErrors: mutation.meta?.expectedErrors });
       const copy = mutation.meta?.errorToast;
-      if (copy === false) return;
-      const fallback =
-        classifyFailure(error) === "unreachable"
-          ? UNREACHABLE_COPY
-          : DEFAULT_ERROR_TOAST;
-      showToast(copy ?? fallback);
+      if (copy !== false) showToast(copy ?? failureMessage(error));
     },
     onSuccess: (_data, _variables, _onMutateResult, mutation) => {
       // Only a site's own copy identifies its failure; the default is shared.
@@ -135,10 +131,4 @@ const createQueryClient = (): QueryClient => {
   });
 };
 
-export {
-  createQueryClient,
-  createQueryCache,
-  createMutationCache,
-  DEFAULT_ERROR_TOAST,
-  UNREACHABLE_COPY,
-};
+export { createQueryClient, createQueryCache, createMutationCache };

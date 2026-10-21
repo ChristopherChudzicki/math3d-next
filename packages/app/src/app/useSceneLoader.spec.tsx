@@ -193,12 +193,9 @@ test("a paused fetch in a background tab while online isn't offline", async () =
     const { queryClient, router } = renderTestApp("/");
     // Production retries; a retry waits for focus, so the fetch pauses.
     const { retry } = createQueryClient().getDefaultOptions().queries ?? {};
-    queryClient.setDefaultOptions({
-      queries: {
-        ...queryClient.getDefaultOptions().queries,
-        retry,
-        retryDelay: 0,
-      },
+    queryClient.setQueryDefaults(["scenes", "detail"], {
+      retry,
+      retryDelay: 0,
     });
     await act(() => router.navigate(`/${scene.key}`));
     await waitFor(() =>

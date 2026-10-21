@@ -154,12 +154,13 @@ const MyScenesList: React.FC = () => {
         key: scene.key,
         patch: { archived: archiving },
       });
-      dismissToast(failureToast);
-      announce(`${archiving ? "Archived" : "Unarchived"} ${titleOf(scene)}`);
-      if (disappears) elementFor(focusKey)?.focus();
     } catch {
       showToast(failureToast);
+      return;
     }
+    dismissToast(failureToast);
+    announce(`${archiving ? "Archived" : "Unarchived"} ${titleOf(scene)}`);
+    if (disappears) elementFor(focusKey)?.focus();
   };
 
   const chooseDelete = (scene: MiniScene) => {

@@ -78,8 +78,10 @@ const renderTestApp = (
   // immediately; the production client retries some statuses with backoff, which
   // would otherwise stall tests well past their timeouts.
   const queryClient = createQueryClient();
+  const defaults = queryClient.getDefaultOptions();
   queryClient.setDefaultOptions({
-    queries: { ...queryClient.getDefaultOptions().queries, retry: false },
+    ...defaults,
+    queries: { ...defaults.queries, retry: false },
   });
 
   const user = seededUser ?? (isAuthenticated ? seedDb.withUser() : null);

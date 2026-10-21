@@ -16,11 +16,8 @@ import {
 import { NetworkError, type MutationMeta } from "@math3d/api";
 import ToastHost from "@/ui/Toast/ToastHost";
 import expectToast from "@/test_util/expectToast";
-import {
-  createMutationCache,
-  DEFAULT_ERROR_TOAST,
-  UNREACHABLE_COPY,
-} from "./react-query";
+import { DEFAULT_ERROR_COPY, UNREACHABLE_COPY } from "@/util/failureCopy";
+import { createMutationCache } from "./react-query";
 
 vi.mock("@sentry/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@sentry/react")>()),
@@ -60,7 +57,7 @@ const renderMutation = (
 test("a failure without copy toasts the default", async () => {
   const { result } = renderMutation();
   await act(() => result.current.mutateAsync().catch(() => {}));
-  await expectToast(DEFAULT_ERROR_TOAST);
+  await expectToast(DEFAULT_ERROR_COPY);
 });
 
 test("an unreachable failure toasts the network copy", async () => {
@@ -70,6 +67,15 @@ test("an unreachable failure toasts the network copy", async () => {
   );
   await act(() => result.current.mutateAsync().catch(() => {}));
   await expectToast(UNREACHABLE_COPY);
+});
+
+test("a site's copy wins over the network copy", async () => {
+  const { result } = renderMutation(
+    { errorToast: COPY },
+    new NetworkError("POST", "/v1/scenes/", new TypeError()),
+  );
+  await act(() => result.current.mutateAsync().catch(() => {}));
+  await expectToast(COPY);
 });
 
 test("a failure toasts the site's copy, and a later success dismisses it", async () => {

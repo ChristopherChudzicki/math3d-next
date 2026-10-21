@@ -11,8 +11,8 @@ import type {
 } from "react-hook-form";
 import { useCallback } from "react";
 import * as Sentry from "@sentry/react";
-import { classifyFailure, isApiFailure } from "@math3d/api";
-import { UNREACHABLE_COPY } from "@/services/react-query/react-query";
+import { isApiFailure } from "@math3d/api";
+import { failureMessage } from "@/util/failureCopy";
 
 /**
  * A wrapper around `react-hook-form`'s `useForm` that:
@@ -46,12 +46,7 @@ const useValidatedForm = <TFieldValues extends FieldValues = FieldValues>(
         try {
           await rawOnValid(data, event);
         } catch (err) {
-          setError("root", {
-            message:
-              classifyFailure(err) === "unreachable"
-                ? UNREACHABLE_COPY
-                : "Something went wrong. Please try again later.",
-          });
+          setError("root", { message: failureMessage(err) });
           // Nothing awaits this handler, so rethrowing would reach Sentry only
           // as an unhandled rejection.
           if (!isApiFailure(err)) Sentry.captureException(err);

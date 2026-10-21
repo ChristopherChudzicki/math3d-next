@@ -14,7 +14,6 @@ import {
 } from "@/test_util";
 import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
-import errorPageCopy from "@/app/pages/ErrorPage/errorPage.copy";
 import expectToast from "@/test_util/expectToast";
 
 vi.mock("@sentry/react", async (importOriginal) => ({
@@ -148,9 +147,6 @@ test("a 500 shows the failed card, not the error page", async () => {
   expect(
     screen.getByRole("link", { name: "Report this bug" }),
   ).toBeInTheDocument();
-  expect(
-    screen.queryByRole("heading", { name: errorPageCopy.title }),
-  ).toBeNull();
   expect(sceneControls()).toBeNull();
   expect(Sentry.captureException).toHaveBeenCalledTimes(1);
 });

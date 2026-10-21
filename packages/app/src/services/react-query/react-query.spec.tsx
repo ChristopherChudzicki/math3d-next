@@ -47,22 +47,28 @@ test.each([
   expect(queryFn).toHaveBeenCalledTimes(retries + 1);
 });
 
-test("a query that failed with a 500 doesn't refetch on focus", async () => {
-  const wrapper = getWrapper();
-  const queryFn = vi.fn().mockRejectedValue(apiError(500));
-  const { result } = renderHook(
-    () => useQuery({ queryKey: ["test"], queryFn }),
-    { wrapper },
-  );
-  await waitFor(() => expect(result.current.isError).toBe(true));
+test.each([
+  { error: apiError(500), calls: 1 },
+  { error: new NetworkError("GET", "/x/", new TypeError()), calls: 2 },
+])(
+  "a query that failed with '$error.message' is fetched $calls times after a focus",
+  async ({ error, calls }) => {
+    const wrapper = getWrapper();
+    const queryFn = vi.fn().mockRejectedValue(error);
+    const { result } = renderHook(
+      () => useQuery({ queryKey: ["test"], queryFn, retry: false }),
+      { wrapper },
+    );
+    await waitFor(() => expect(result.current.isError).toBe(true));
 
-  try {
-    await act(async () => {
-      focusManager.setFocused(false);
-      focusManager.setFocused(true);
-    });
-    expect(queryFn).toHaveBeenCalledTimes(1);
-  } finally {
-    focusManager.setFocused(undefined);
-  }
-});
+    try {
+      await act(async () => {
+        focusManager.setFocused(false);
+        focusManager.setFocused(true);
+      });
+      expect(queryFn).toHaveBeenCalledTimes(calls);
+    } finally {
+      focusManager.setFocused(undefined);
+    }
+  },
+);

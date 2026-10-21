@@ -13,6 +13,7 @@ import Alert from "@/ui/Alert";
 import { Spinner } from "@/ui/LoadingSpinner";
 import Button from "@/ui/Button";
 import { TextButton } from "@/ui/TextLink";
+import { failureMessage } from "@/util/failureCopy";
 import useTitleForm from "./useTitleForm";
 import { LinkActions, LinkField, useLinkCopy } from "./LinkDialog";
 import styles from "./PublishDialog.module.css";
@@ -84,7 +85,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
   const [asksTitle, setAsksTitle] = useState(
     () => sceneDisplayName(defaultTitle) === null,
   );
-  const [autoPublishFailed, setAutoPublishFailed] = useState(false);
+  const [autoPublishError, setAutoPublishError] = useState<string | null>(null);
   // StrictMode runs effects twice; this keeps it to one POST.
   const autoPublishStarted = useRef(false);
   const headings = HEADINGS[mode];
@@ -118,7 +119,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
   const { titleRef, isSubmitting, handleSubmit, renderFields } = useTitleForm({
     defaultTitle,
     onSubmit: (newTitle) => {
-      setAutoPublishFailed(false);
+      setAutoPublishError(null);
       return publish(newTitle);
     },
   });
@@ -131,7 +132,7 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
     autoPublishStarted.current = true;
     publish(defaultTitle).catch((err) => {
       if (!isApiFailure(err)) Sentry.captureException(err);
-      setAutoPublishFailed(true);
+      setAutoPublishError(failureMessage(err));
       setAsksTitle(true);
     });
   });
@@ -184,10 +185,8 @@ const PublishDialog: React.FC<PublishDialogProps> = ({
       <Dialog.Form onSubmit={handleSubmit}>
         <Dialog.Body>
           {renderFields(
-            autoPublishFailed ? (
-              <Alert severity="error">
-                Something went wrong. Please try again later.
-              </Alert>
+            autoPublishError ? (
+              <Alert severity="error">{autoPublishError}</Alert>
             ) : undefined,
           )}
         </Dialog.Body>

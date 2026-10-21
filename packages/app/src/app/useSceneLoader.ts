@@ -139,4 +139,4 @@ const useSceneLoader = (sceneKey?: string): SceneLoad => {
 };
 
 export default useSceneLoader;
-export type { SceneLoad, SceneUnavailableStatus };
+export type { SceneUnavailableStatus };
