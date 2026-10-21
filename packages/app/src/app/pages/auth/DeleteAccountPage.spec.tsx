@@ -102,6 +102,7 @@ test("a failed deletion surfaces the error instead of silently reopening", async
   ).toBeVisible();
   expect(Sentry.captureException).toHaveBeenCalledWith(
     expect.objectContaining({ status: 500 }),
+    expect.anything(),
   );
 });
 

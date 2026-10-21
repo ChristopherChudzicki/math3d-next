@@ -13,10 +13,14 @@ import {
   QueryClientProvider,
   useMutation,
 } from "@tanstack/react-query";
-import type { MutationMeta } from "@math3d/api";
+import { NetworkError, type MutationMeta } from "@math3d/api";
 import ToastHost from "@/ui/Toast/ToastHost";
 import expectToast from "@/test_util/expectToast";
-import { createMutationCache, DEFAULT_ERROR_TOAST } from "./react-query";
+import {
+  createMutationCache,
+  DEFAULT_ERROR_TOAST,
+  UNREACHABLE_COPY,
+} from "./react-query";
 
 vi.mock("@sentry/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@sentry/react")>()),
@@ -25,7 +29,10 @@ vi.mock("@sentry/react", async (importOriginal) => ({
 
 const COPY = "Couldn’t do the thing. Try again.";
 
-const renderMutation = (meta?: MutationMeta) => {
+const renderMutation = (
+  meta?: MutationMeta,
+  error: Error = new Error("boom"),
+) => {
   const client = new QueryClient({ mutationCache: createMutationCache() });
   let fail = true;
   const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -39,7 +46,7 @@ const renderMutation = (meta?: MutationMeta) => {
       useMutation({
         meta,
         mutationFn: async () => {
-          if (fail) throw new Error("boom");
+          if (fail) throw error;
         },
       }),
     { wrapper },
@@ -54,6 +61,15 @@ test("a failure without copy toasts the default", async () => {
   const { result } = renderMutation();
   await act(() => result.current.mutateAsync().catch(() => {}));
   await expectToast(DEFAULT_ERROR_TOAST);
+});
+
+test("an unreachable failure toasts the network copy", async () => {
+  const { result } = renderMutation(
+    undefined,
+    new NetworkError("POST", "/v1/scenes/", new TypeError()),
+  );
+  await act(() => result.current.mutateAsync().catch(() => {}));
+  await expectToast(UNREACHABLE_COPY);
 });
 
 test("a failure toasts the site's copy, and a later success dismisses it", async () => {
@@ -72,6 +88,7 @@ test("an opted-out failure shows no toast but still reaches Sentry", async () =>
   await act(() => result.current.mutateAsync().catch(() => {}));
   expect(Sentry.captureException).toHaveBeenCalledWith(
     expect.objectContaining({ message: "boom" }),
+    expect.anything(),
   );
   // The toast guard in setupTests fails this test if a toast was shown.
 });
