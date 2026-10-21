@@ -1,5 +1,7 @@
+from unittest import mock
+
 import pytest
-from django.test import Client
+from django.test import Client, override_settings
 
 
 @pytest.mark.django_db
@@ -29,3 +31,24 @@ def test_validation_error_maps_to_400_detail_body():
     body = response.json()
     assert set(body.keys()) == {"detail"}
     assert isinstance(body["detail"], list)
+
+
+@pytest.mark.django_db
+@override_settings(
+    CORS_ALLOWED_ORIGINS=["http://app.test"],
+    CREDENTIALED_CORS_ORIGINS=["http://app.test"],
+)
+def test_an_unhandled_error_returns_json_naming_its_sentry_event(sentry_events):
+    # The SPA can read the body only if the 500 carries the CORS headers too.
+    with mock.patch("scenes.api.get_object_or_404", side_effect=RuntimeError):
+        response = Client(raise_request_exception=False).get(
+            "/v1/scenes/abc/", HTTP_ORIGIN="http://app.test"
+        )
+
+    assert response.status_code == 500
+    assert response.headers["Access-Control-Allow-Credentials"] == "true"
+    (event,) = sentry_events
+    assert response.json() == {
+        "detail": "Internal server error.",
+        "sentry_event_id": event["event_id"],
+    }

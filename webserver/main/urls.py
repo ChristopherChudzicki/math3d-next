@@ -40,3 +40,5 @@ if "allauth.socialaccount.providers.dummy" in settings.INSTALLED_APPS:
     )
 
 urlpatterns.append(path("", lambda request: HttpResponseRedirect("/v1/docs")))
+
+handler500 = "main.views.server_error"

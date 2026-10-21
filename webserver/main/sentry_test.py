@@ -1,23 +1,7 @@
 from unittest import mock
 
 import pytest
-import sentry_sdk
 from django.test import Client
-
-from main.sentry import drop_sign_in_frame_locals
-
-
-@pytest.fixture
-def sentry_events():
-    """Events as they leave before_send; nothing is sent."""
-    events: list[dict] = []
-
-    def before_send(event, hint):
-        events.append(drop_sign_in_frame_locals(event, hint))
-
-    sentry_sdk.init(dsn="https://key@o1.ingest.sentry.io/1", before_send=before_send)
-    yield events
-    sentry_sdk.init()
 
 
 def _frames(event: dict) -> list[dict]:
@@ -47,10 +31,10 @@ def test_a_crash_during_sign_in_reaches_sentry_without_frame_locals(sentry_event
 @pytest.mark.django_db
 def test_other_crashes_keep_their_frame_locals(sentry_events):
     with (
-        mock.patch("main.views.JsonResponse", side_effect=RuntimeError),
+        mock.patch("scenes.api.get_object_or_404", side_effect=RuntimeError),
         pytest.raises(RuntimeError),
     ):
-        Client().get("/health")
+        Client().get("/v1/scenes/abc/")
 
     (event,) = sentry_events
     assert any("vars" in frame for frame in _frames(event))
