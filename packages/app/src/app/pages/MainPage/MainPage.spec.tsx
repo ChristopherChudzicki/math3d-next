@@ -274,3 +274,14 @@ test("Says the scene will load once back online", async () => {
     onlineManager.setOnline(true);
   }
 });
+
+test("offline from the Scenes drawer toasts too", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  onlineManager.setOnline(false);
+  try {
+    renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
+    await expectToast("You’re offline.");
+  } finally {
+    onlineManager.setOnline(true);
+  }
+});

@@ -103,7 +103,7 @@ const SceneUnavailable: React.FC<SceneUnavailableProps> = ({
   const [search] = useSearchParams();
   const [drawerWasOpen] = useState(() => search.get("overlay") === "scenes");
   useEffect(() => {
-    if (!drawerWasOpen || status === "offline") return undefined;
+    if (!drawerWasOpen) return undefined;
     showToast(heading);
     return () => dismissToast(heading);
   }, [drawerWasOpen, status, heading]);
