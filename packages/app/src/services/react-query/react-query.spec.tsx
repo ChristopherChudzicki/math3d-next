@@ -48,10 +48,11 @@ test.each([
 });
 
 test.each([
-  { error: apiError(500), calls: 1 },
+  { error: apiError(404), calls: 1 },
+  { error: apiError(500), calls: 2 },
   { error: new NetworkError("GET", "/x/", new TypeError()), calls: 2 },
 ])(
-  "a query that failed with '$error.message' is fetched $calls times after a focus",
+  "a query that failed with $error.message is fetched $calls times after a focus",
   async ({ error, calls }) => {
     const wrapper = getWrapper();
     const queryFn = vi.fn().mockRejectedValue(error);
