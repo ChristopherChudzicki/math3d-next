@@ -11,7 +11,6 @@ import { useSelector } from "react-redux";
 import IconButton from "@/ui/IconButton";
 import { Popover } from "@/ui/Popover";
 import circleHelp from "@iconify-icons/lucide/circle-help";
-import Markdown from "@/ui/Markdown";
 import FieldWidget, {
   useOnWidgetChange,
 } from "@/features/editor/items/FieldWidget";
@@ -74,9 +73,9 @@ const SettingsField: React.FC<SettingsFieldProps> = ({
         <span />
       )}
       {showTip ? (
-        <Markdown id={tipId} className={styles["tip-row"]}>
+        <p id={tipId} className={styles["tip-row"]}>
           {field.description}
-        </Markdown>
+        </p>
       ) : null}
     </>
   );

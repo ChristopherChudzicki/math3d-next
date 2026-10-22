@@ -3,14 +3,12 @@
  *
  * Handled via [vite-plugin-compile-time](https://github.com/egoist/vite-plugin-compile-time)
  */
-import showdown from "showdown";
 import { load as loadYaml } from "js-yaml";
+import { marked } from "marked";
 import { convertLatexToMarkup } from "mathlive";
 import * as yup from "yup";
 import fs from "fs";
 import path from "path";
-import * as htmlparser2 from "htmlparser2";
-import invariant from "tiny-invariant";
 import { Tag } from "./util";
 import type { ReferenceEntry } from "./util";
 
@@ -29,22 +27,32 @@ const readAll = () => {
     });
 };
 
-const mathExtensions: showdown.ShowdownExtension[] = [
-  {
-    type: "lang",
-    regex: /\\\((.*?)\\\)/g,
-    replace: (text: string) => {
-      return convertLatexToMarkup(text, { defaultMode: "inline-math" });
-    },
-  },
-  {
-    type: "lang",
-    regex: /\\\[((.|\n)*?)\\\]/g,
-    replace: (text: string) => {
-      return convertLatexToMarkup(text, { defaultMode: "math" });
-    },
-  },
-];
+const MATH = [
+  { regex: /\\\((.*?)\\\)/g, mode: "inline-math" },
+  { regex: /\\\[([\s\S]*?)\\\]/g, mode: "math" },
+] as const;
+const PLACEHOLDER = /MATHPLACEHOLDER(\d+)X/g;
+
+/**
+ * Renders markdown whose \( \) and \[ \] spans are LaTeX. The math is swapped
+ * for inert placeholders before markdown parsing, so markdown syntax inside
+ * it (`_`, `*`, `\`) is never interpreted.
+ */
+const renderMarkdown = (markdown: string, { inline = false } = {}) => {
+  const math: string[] = [];
+  const masked = MATH.reduce(
+    (text, { regex, mode }) =>
+      text.replace(regex, (_match, latex: string) => {
+        math.push(convertLatexToMarkup(latex, { defaultMode: mode }));
+        return `MATHPLACEHOLDER${math.length - 1}X`;
+      }),
+    markdown,
+  );
+  const html = inline
+    ? marked.parseInline(masked, { async: false })
+    : marked.parse(masked, { async: false });
+  return html.replace(PLACEHOLDER, (_match, i: string) => math[Number(i)]);
+};
 
 const files = readAll();
 
@@ -60,10 +68,6 @@ const parseFrontMatter = (filepath: string, contents: string) => {
     content: contents.slice(match[0].length),
   };
 };
-
-const converter = new showdown.Converter({
-  extensions: [...mathExtensions],
-});
 
 const schema = yup.object({
   name: yup.string().required(),
@@ -92,27 +96,15 @@ const validateMetadata = (filepath: string, data: unknown) => {
     throw new Error(`Error validating ${filepath}:\n${err}`);
   }
 };
-const summaryInnerHtml = (summary: string) => {
-  const html = converter.makeHtml(summary);
-  const dom = htmlparser2.parseDocument(html);
-  if (dom.childNodes.length !== 1) {
-    throw new Error("Summary must have exactly one root element");
-  }
-  const regex = /<p>(.*?)<\/p>/;
-  const match = regex.exec(html);
-  invariant(match !== null, "Summary must be a paragraph");
-  const innerHtml = match[1];
-  return innerHtml;
-};
 
 export const entries: ReferenceEntry[] = files.map(({ filepath, contents }) => {
   const { data, content } = parseFrontMatter(filepath, contents);
   const metadata = validateMetadata(filepath, data);
   const entry: ReferenceEntry = {
     ...metadata,
-    detailsHtml: converter.makeHtml(content),
+    detailsHtml: renderMarkdown(content),
     latex: convertLatexToMarkup(metadata.latex),
-    summaryInnerHtml: summaryInnerHtml(metadata.summary),
+    summaryInnerHtml: renderMarkdown(metadata.summary, { inline: true }),
     id: filepath,
   };
   return entry;
