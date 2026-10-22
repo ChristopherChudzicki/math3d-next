@@ -4,7 +4,7 @@
  * Handled via [vite-plugin-compile-time](https://github.com/egoist/vite-plugin-compile-time)
  */
 import showdown from "showdown";
-import matter from "gray-matter";
+import { load as loadYaml } from "js-yaml";
 import { convertLatexToMarkup } from "mathlive";
 import * as yup from "yup";
 import fs from "fs";
@@ -47,6 +47,19 @@ const mathExtensions: showdown.ShowdownExtension[] = [
 ];
 
 const files = readAll();
+
+const FRONT_MATTER = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
+
+const parseFrontMatter = (filepath: string, contents: string) => {
+  const match = FRONT_MATTER.exec(contents);
+  if (match === null) {
+    throw new Error(`${filepath} must start with --- front matter`);
+  }
+  return {
+    data: loadYaml(match[1]),
+    content: contents.slice(match[0].length),
+  };
+};
 
 const converter = new showdown.Converter({
   extensions: [...mathExtensions],
@@ -93,7 +106,7 @@ const summaryInnerHtml = (summary: string) => {
 };
 
 export const entries: ReferenceEntry[] = files.map(({ filepath, contents }) => {
-  const { data, content } = matter(contents);
+  const { data, content } = parseFrontMatter(filepath, contents);
   const metadata = validateMetadata(filepath, data);
   const entry: ReferenceEntry = {
     ...metadata,
