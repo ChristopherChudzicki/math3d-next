@@ -1,9 +1,3 @@
-ci:
-  # PR titles must be conventional commits (pr-title-check.yml).
-  autoupdate_commit_msg: "chore(deps): pre-commit autoupdate"
-  skip:
-    - prettier
-    - prettier-jsonc
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0

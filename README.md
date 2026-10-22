@@ -14,7 +14,7 @@ The math3d backend and database are managed by docker containers. The frontend i
 - [Yarn](https://yarnpkg.com/getting-started/install), our JS package manager
 - [nvm](https://github.com/nvm-sh/nvm), for managing node versions
 - [Docker](https://docs.docker.com/get-docker/), for containerization during development
-- [pre-commit](https://pre-commit.com/index.html), a framework for running pre-commit hooks
+- [prek](https://prek.j178.dev/), which runs the git hooks in `.pre-commit-config.yaml` (`uv tool install prek`, then `prek install`)
 
 Environment variables come from `.env.development` (committed) and `.env` (gitignored, your overrides). No loader such as direnv is needed:
 

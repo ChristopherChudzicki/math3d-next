@@ -12,10 +12,8 @@
       "automergeType": "branch"
     },
     {
-      "description": "pre-commit.ci autoupdate owns hook revs; Renovate only bumps additional_dependencies, which autoupdate never touches.",
       "matchManagers": ["pre-commit"],
-      "matchDepTypes": ["repository"],
-      "enabled": false
+      "groupName": "pre-commit hooks"
     }
   ]
 }
