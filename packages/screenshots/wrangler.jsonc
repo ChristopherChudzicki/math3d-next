@@ -22,13 +22,13 @@
   "observability": { "enabled": true },
   "browser": { "binding": "BROWSER" },
   "r2_buckets": [
-    { "binding": "SCREENSHOTS_BUCKET", "bucket_name": "math3d-screenshots" }
+    { "binding": "SCREENSHOTS_BUCKET", "bucket_name": "math3d-screenshots" },
   ],
   // FRAME_ORIGIN is deploy-injected (see deploy-reusable.yml); RENDER_DEADLINE_MS
   // is a fixed tuning constant with no cross-system twin, so it stays in-file.
   "vars": {
-    "RENDER_DEADLINE_MS": 60000
-  }
+    "RENDER_DEADLINE_MS": 60000,
+  },
   // RENDER_SECRET (gates POST /render) is intentionally NOT set here as a
   // plaintext var — it's a Worker secret, set via `wrangler secret put
   // RENDER_SECRET` (or the Cloudflare dashboard), not committed to this file.

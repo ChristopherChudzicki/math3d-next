@@ -5,8 +5,8 @@
   "name": "math3d-storybook",
   "compatibility_date": "2026-10-01",
   "assets": {
-    "directory": "../storybook-static"
+    "directory": "../storybook-static",
   },
   // Required by `wrangler preview`; the previews need no settings of their own.
-  "previews": {}
+  "previews": {},
 }

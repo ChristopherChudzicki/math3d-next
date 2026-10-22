@@ -21,13 +21,13 @@ interface MathNodeBase<T extends MathNodeType = MathNodeType> {
   toString: () => string;
 }
 
-interface AssignmentNode<T extends AssignmentType = AssignmentType>
-  extends MathNodeBase<T> {
+interface AssignmentNode<
+  T extends AssignmentType = AssignmentType,
+> extends MathNodeBase<T> {
   name: string;
 }
 
-interface FunctionAssignmentNode
-  extends AssignmentNode<MathNodeType.FunctionAssignmentNode> {
+interface FunctionAssignmentNode extends AssignmentNode<MathNodeType.FunctionAssignmentNode> {
   type: MathNodeType.FunctionAssignmentNode;
   params: string[];
 }

@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "package": "^1.0.1",
-    "prettier": "4.0.0-alpha.8"
+    "prettier": "4.0.0-alpha.13"
   },
   "resolutions": {
     "undici@npm:7.29.0": "7.29.1",

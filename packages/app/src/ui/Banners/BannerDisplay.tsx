@@ -17,7 +17,7 @@ const BannerItem: React.FC<{
   const confirming = banner.stage === "confirming";
   const showRememberOption = !confirming && !!banner.persistKey;
   const severity = confirming
-    ? banner.confirmedSeverity ?? banner.severity
+    ? (banner.confirmedSeverity ?? banner.severity)
     : banner.severity;
   const content =
     confirming && banner.confirmedContent

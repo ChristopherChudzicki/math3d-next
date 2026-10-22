@@ -206,26 +206,49 @@ Rolling back is a plain revert of the backend and of the Cloudflare Worker, whic
 - **OIDC terminated at a proxy** (a gateway forwarding a signed identity header, as in mitodl/mit-learn). Needs a gateway and an identity provider math3d doesn't run, for what allauth already does inside Django. Rejected.
 
 [^only-urls]: [`headless/account/urls.py:27`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/account/urls.py#L27) — the remaining patterns are added only `if not allauth_settings.SOCIALACCOUNT_ONLY`.
+
 [^verif-check]: [`account/checks.py:38-43`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/account/checks.py#L38-L43) — a `Critical` check, so it fails the boot.
+
 [^optional-mail]: [`account/stages.py:154-156`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/account/stages.py#L154-L156) — under `OPTIONAL`, `EmailVerificationStage` still sends mail; only `MANDATORY` blocks the login.
+
 [^signup-fields]: allauth's default lists `username*`, `password1*` and `password2*`; with `ACCOUNT_USER_MODEL_USERNAME_FIELD = None`, `manage.py check` refuses to start on it (a CRITICAL system check). A sign-in that brings no email address never reaches signup either way: `pre_social_login` refuses it first.
+
 [^scopes]: `SOCIALACCOUNT_PROVIDERS["google"]["SCOPE"]` replaces the default ([`oauth2/provider.py:70-78`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/oauth2/provider.py#L70-L78)), which is `profile`, plus `email` when `SOCIALACCOUNT_QUERY_EMAIL` is true ([`google/provider.py:61-65`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/google/provider.py#L61-L65)). `extract_extra_data` keeps the whole payload ([`base/provider.py:172`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/base/provider.py#L172)).
+
 [^uid-match]: [`socialaccount/models.py:343-348`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/models.py#L343-L348) — `_lookup_by_socialaccount` matches on `(provider, uid)` alone.
+
 [^dupe-stage]: [`socialaccount/internal/flows/signup.py:52-88`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/internal/flows/signup.py#L52-L88) — when the address already belongs to someone, auto-signup is abandoned in favour of the signup form.
+
 [^headless-errors]: [`headless/socialaccount/internal.py`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/internal.py#L16-L94) — `complete_login` redirects to the flow's `next` URL (our `callback_url`) with `error` and `error_process` added on failure. `on_authentication_error` falls back to `socialaccount_login_error` when there is no state: an invalid `provider/redirect` form ([`views.py:58-65`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/views.py#L58-L65)) or unrecoverable callback state. Under `HEADLESS_ONLY` an unset key raises `ImproperlyConfigured` ([`core/internal/httpkit.py:118-119`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/core/internal/httpkit.py#L118-L119)).
+
 [^decode]: [`google/views.py:95-104`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/google/views.py#L95-L104) — `verify_signature = not self.did_fetch_access_token`, citing [OpenID Connect Core §3.1.3.7](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation).
+
 [^login-by-token]: [`google/urls.py`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/google/urls.py) adds `google/login/token/` after `default_urlpatterns`. [`LoginByTokenView`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/google/views.py#L119-L159) is `csrf_exempt` and `login_not_required`, isn't gated by `HEADLESS_ONLY`, and checks only a `g_csrf_token` double-submit cookie before turning a POSTed credential into a session.
+
 [^callback-view]: `default_urlpatterns` mounts `login/` and `login/callback/`. `login/` 404s under `HEADLESS_ONLY` ([`base/views.py:12-14`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/base/views.py#L12-L14)); `OAuth2CallbackView` doesn't inherit that check. The redirect URI is built with an unqualified `reverse("google_callback")` ([`oauth2/views.py:55-58`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/oauth2/views.py#L55-L58)).
+
 [^provider-class]: The registry registers `SOCIALACCOUNT_PROVIDERS[<id>]["provider_class"]` in place of the built-in class ([`providers/__init__.py:47-52`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/__init__.py#L47-L52)); `provider/token` checks the attribute before calling `verify_token` ([`headless/socialaccount/inputs.py:78-84`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/inputs.py#L78-L84)), and the config lists the flow only when it is set ([`headless/socialaccount/response.py:22-23`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/response.py#L22-L23)). `urls.py` passes this subclass to `default_urlpatterns`, which imports views from the package the subclass's `package` attribute names: allauth's Google package ([`oauth2/urls.py:6-8`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/oauth2/urls.py#L6-L8)).
+
 [^pkce]: [`oauth2/provider.py:17,30-38`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/oauth2/provider.py#L17-L38) — `pkce_enabled_default = False`, overridable per provider with `OAUTH_PKCE_ENABLED`; Google doesn't override the default.
+
 [^safe-url]: [`account/adapter.py:598-619`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/account/adapter.py#L598-L619) — `is_safe_url` allows relative URLs, the request host, `ALLOWED_HOSTS` (wildcards included), and the hosts in `CSRF_TRUSTED_ORIGINS`.
+
 [^creds]: `EnvConfig._require_deployment_config` (`main/env.py`) requires both. Both reach allauth through `SOCIALACCOUNT_PROVIDERS["google"]["APP"]`, the same dict the linking settings test guards.
+
 [^signup-hook]: [`socialaccount/adapter.py:163`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/adapter.py#L163) delegates to our account adapter's `is_open_for_signup`, which returns `settings.ENABLE_SIGNUP`. On the callback path, `SignupClosedException` becomes `?error=signup_closed` ([`headless/socialaccount/internal.py:64-65`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/headless/socialaccount/internal.py#L64-L65)).
+
 [^signup-gate]: [`socialaccount/internal/flows/login.py:72-81`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/internal/flows/login.py#L72-L81) — only the new-identity branch calls `process_signup`, whose first step is the `is_open_for_signup` check.
+
 [^dev-flag]: `IS_DEPLOYMENT` is this project's own `EnvConfig` field, defaulting to `True`. When false, `settings.py` skips `SECURE_SSL_REDIRECT` and HSTS, turns off `SESSION_COOKIE_SECURE` and `CSRF_COOKIE_SECURE`, and widens `ALLOWED_HOSTS`, and `EnvConfig._require_deployment_config` stops requiring production config. A deployment that set it false would break in far louder ways than an extra test provider.
+
 [^admin-redirect]: `AdminSite.admin_view` calls `redirect_to_login(request.get_full_path(), reverse("admin:login"))` whenever `has_permission` is false (`django/contrib/admin/sites.py:243-246`).
+
 [^nickname]: [`socialaccount/app_settings.py:19-25`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/app_settings.py#L19-L25) — auto-signup skips the signup form, and [`save_user`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/adapter.py#L100-L107) calls the account adapter's hook only `if form`, so the hook that collected the nickname never runs. Google's [`extract_common_fields`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/google/provider.py#L78-L83) returns only `email`, `first_name` and `last_name`.
+
 [^setnull]: `on_delete` is enforced by Django, not the database, so the migration is free to apply and revert. `author` is already `null=True`.
+
 [^email-auth]: [`socialaccount/adapter.py:351-359`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/adapter.py#L351-L359) — `app.settings["email_authentication"]` wins when set; otherwise the global is OR'd with the provider's own setting, so a provider entry can turn linking on but not off. The settings test asserts both spellings are absent: lowercase inside `APP["settings"]`, uppercase at the `SOCIALACCOUNT_PROVIDERS["google"]` level ([`Provider.get_settings`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/socialaccount/providers/base/provider.py#L91-L92)).
+
 [^verified-fallback]: [`account/utils.py:263-267`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/account/utils.py#L263-L267) — `filter_users_by_email` narrows to verified addresses only when at least one exists.
+
 [^code-check]: [`account/checks.py:28-33`](https://github.com/pennersr/django-allauth/blob/65.15.0/allauth/account/checks.py#L28-L33) — `SOCIALACCOUNT_ONLY does not work with ACCOUNT_LOGIN_BY_CODE_ENABLED`.
