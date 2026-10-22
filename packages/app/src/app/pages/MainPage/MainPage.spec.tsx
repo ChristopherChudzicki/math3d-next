@@ -15,6 +15,7 @@ import {
 import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
 import expectToast from "@/test_util/expectToast";
+import sceneSlice from "@/store/scene/state/scene.slice";
 
 vi.mock("@sentry/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@sentry/react")>()),
@@ -273,6 +274,22 @@ test("Says the scene will load once back online", async () => {
   } finally {
     onlineManager.setOnline(true);
   }
+});
+
+test("from an unsaved scene, the card goes back to it instead of a new scene", async () => {
+  const { store, router, location } = renderTestApp("/");
+  await waitFor(() => expect(store.getState().scene.loaded).toBe(true));
+  act(() => {
+    store.dispatch(sceneSlice.actions.setTitle({ title: "My edits" }));
+  });
+
+  await act(() => router.navigate("/nonexistent-scene-key"));
+  await screen.findByRole("heading", { name: "This scene doesn’t exist." });
+  expect(screen.queryByRole("link", { name: "New scene" })).toBeNull();
+  await user.click(screen.getByRole("link", { name: "Back to your scene" }));
+
+  await waitFor(() => expect(location.current.pathname).toBe("/"));
+  expect(store.getState().scene.title).toBe("My edits");
 });
 
 test("offline from the Scenes drawer toasts too", async () => {

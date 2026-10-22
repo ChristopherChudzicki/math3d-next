@@ -9,6 +9,7 @@ import buildReportUrl from "@/app/pages/ErrorPage/errorPage.report";
 import Viewport from "@/features/viewport/Viewport";
 import defaultScene from "@/store/scene/defaultScene";
 import sceneSlice from "@/store/scene/state/scene.slice";
+import { useAppSelector } from "@/store/hooks";
 import { getStore } from "@/store/store";
 import RetryButton from "@/ui/Button/RetryButton";
 import ButtonLink from "@/ui/ButtonLink";
@@ -108,6 +109,11 @@ const SceneUnavailable: React.FC<SceneUnavailableProps> = ({
     return () => dismissToast(heading);
   }, [drawerWasOpen, status, heading]);
 
+  // `/` keeps the app store's scene when it already holds it, so with unsaved
+  // edits there, the link returns to them rather than to a new scene.
+  const holdsUnsavedScene = useAppSelector(
+    ({ scene }) => scene.loaded && scene.key === null && scene.dirty,
+  );
   const canRetry = status === "unreachable" || status === "failed";
   return (
     <div className={styles.container}>
@@ -141,7 +147,7 @@ const SceneUnavailable: React.FC<SceneUnavailableProps> = ({
                 variant={canRetry ? "ghost" : "solid"}
                 tone={canRetry ? "neutral" : "primary"}
               >
-                New scene
+                {holdsUnsavedScene ? "Back to your scene" : "New scene"}
               </ButtonLink>
             </div>
           )}
