@@ -31,12 +31,6 @@ def _require_owner(scene: Scene, request, action: str) -> None:
         raise HttpError(403, f"You do not have permission to {action} this scene.")
 
 
-@scenes_router.get("/", response=list[MiniSceneSchema], auth=None, by_alias=True)
-@paginate(LimitOffsetPagination)
-def list_scenes(request, filters: SceneFilterSchema = Query(...)):
-    return filters.filter(Scene.objects.all())
-
-
 @me_router.get(
     "/scenes/", response=list[MiniSceneSchema], auth=session_auth, by_alias=True
 )

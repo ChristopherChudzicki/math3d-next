@@ -13,7 +13,7 @@ from scenes.legacy_scene_utils.migrate_scene import migrate_scene
 from scenes.models import LegacyScene, Scene
 from scenes.tests.data import default_scene
 
-LIST_URL = "/v1/scenes/"
+SCENES_URL = "/v1/scenes/"
 ME_URL = "/v1/me/scenes/"
 EXAMPLES_URL = "/v1/examples/scenes/"
 LEGACY_URL = "/v1/legacy_scenes/"
@@ -26,69 +26,6 @@ LEGACY_DEHYDRATED_FIXTURE = {
     "sortableTree": {"root": []},
     "metadata": {"creationDate": '"2020-01-01T00:00:00Z"', "title": "Old"},
 }
-
-
-@pytest.mark.django_db
-def test_list_returns_limitoffset_envelope_id_asc():
-    s1 = SceneFactory.create()
-    s2 = SceneFactory.create()
-    response = Client().get(LIST_URL)
-    assert response.status_code == 200
-    body = response.json()
-    assert set(body.keys()) == {"items", "count"}
-    assert body["count"] == 2
-    keys = [item["key"] for item in body["items"]]
-    assert keys == [s1.key, s2.key]  # id-asc (Scene.Meta.ordering = ["id"])
-
-
-@pytest.mark.django_db
-def test_list_item_shape_aliases_dates():
-    SceneFactory.create()
-    item = Client().get(LIST_URL).json()["items"][0]
-    assert set(item.keys()) == {
-        "title",
-        "key",
-        "author",
-        "createdDate",
-        "modifiedDate",
-        "archived",
-        "imageUrl",
-    }
-    assert "items" not in item and "itemOrder" not in item
-
-
-@pytest.mark.django_db
-def test_list_default_limit_is_20():
-    for _ in range(21):
-        SceneFactory.create()
-    body = Client().get(LIST_URL).json()
-    assert body["count"] == 21
-    assert len(body["items"]) == 20
-
-
-@pytest.mark.django_db
-def test_list_title_filter_icontains():
-    SceneFactory.create(title="Alpha Curve")
-    SceneFactory.create(title="Beta Surface")
-    body = Client().get(LIST_URL, {"title": "alpha"}).json()
-    assert [i["title"] for i in body["items"]] == ["Alpha Curve"]
-
-
-@pytest.mark.django_db
-def test_list_archived_filter():
-    SceneFactory.create(archived=True)
-    SceneFactory.create(archived=False)
-    body = Client().get(LIST_URL, {"archived": "true"}).json()
-    assert body["count"] == 1
-    assert body["items"][0]["archived"] is True
-
-
-@pytest.mark.django_db
-def test_list_absent_archived_returns_all():
-    # FilterSchema footgun: an absent param must mean "no filter", not archived=False.
-    SceneFactory.create(archived=True)
-    SceneFactory.create(archived=False)
-    assert Client().get(LIST_URL).json()["count"] == 2
 
 
 @pytest.mark.django_db
@@ -146,6 +83,68 @@ def test_me_lists_most_recently_modified_first():
     body = client.get(ME_URL).json()
     # Neither id order nor created_date order gives this.
     assert [i["key"] for i in body["items"]] == [first.key, third.key, second.key]
+
+
+@pytest.mark.django_db
+def test_me_item_shape_aliases_dates():
+    me = CustomUserFactory.create()
+    SceneFactory.create(author=me)
+    client = Client()
+    client.force_login(me)
+    [item] = client.get(ME_URL).json()["items"]
+    assert set(item.keys()) == {
+        "title",
+        "key",
+        "author",
+        "createdDate",
+        "modifiedDate",
+        "archived",
+        "imageUrl",
+    }
+
+
+@pytest.mark.django_db
+def test_me_pages_by_limit_and_offset():
+    me = CustomUserFactory.create()
+    oldest, _, _ = SceneFactory.create_batch(3, author=me)
+    client = Client()
+    client.force_login(me)
+    body = client.get(ME_URL, {"limit": 2, "offset": 2}).json()
+    assert body["count"] == 3
+    assert [i["key"] for i in body["items"]] == [oldest.key]
+
+
+@pytest.mark.django_db
+def test_me_title_filter_icontains():
+    me = CustomUserFactory.create()
+    SceneFactory.create(author=me, title="Alpha Curve")
+    SceneFactory.create(author=me, title="Beta Surface")
+    client = Client()
+    client.force_login(me)
+    body = client.get(ME_URL, {"title": "alpha"}).json()
+    assert [i["title"] for i in body["items"]] == ["Alpha Curve"]
+
+
+@pytest.mark.django_db
+def test_me_archived_filter():
+    me = CustomUserFactory.create()
+    SceneFactory.create(author=me, archived=True)
+    unarchived = SceneFactory.create(author=me, archived=False)
+    client = Client()
+    client.force_login(me)
+    body = client.get(ME_URL, {"archived": "false"}).json()
+    assert [i["key"] for i in body["items"]] == [unarchived.key]
+
+
+@pytest.mark.django_db
+def test_me_absent_archived_returns_all():
+    # FilterSchema footgun: an absent param must mean "no filter", not archived=False.
+    me = CustomUserFactory.create()
+    SceneFactory.create(author=me, archived=True)
+    SceneFactory.create(author=me, archived=False)
+    client = Client()
+    client.force_login(me)
+    assert client.get(ME_URL).json()["count"] == 2
 
 
 @pytest.mark.django_db
@@ -232,10 +231,16 @@ def test_meta_unmigrated_legacy_key_returns_404_without_migrating():
 
 
 @pytest.mark.django_db
+def test_scenes_list_returns_405():
+    # Scenes are public by link, never listable or searchable.
+    assert Client().get(SCENES_URL).status_code == 405
+
+
+@pytest.mark.django_db
 def test_post_anonymous_creates_with_null_author_and_server_key():
     data = default_scene()
     body = {"items": data["items"], "itemOrder": data["itemOrder"], "title": "Mine"}
-    response = Client().post(LIST_URL, data=body, content_type="application/json")
+    response = Client().post(SCENES_URL, data=body, content_type="application/json")
     assert response.status_code == 201
     out = response.json()
     assert out["author"] is None
@@ -251,7 +256,7 @@ def test_post_authenticated_sets_author_to_self():
     client.force_login(me)
     data = default_scene()
     body = {"items": data["items"], "itemOrder": data["itemOrder"]}
-    out = client.post(LIST_URL, data=body, content_type="application/json").json()
+    out = client.post(SCENES_URL, data=body, content_type="application/json").json()
     assert out["author"] == me.id
 
 
@@ -260,7 +265,7 @@ def test_post_rejects_malformed_item_with_400():
     data = default_scene()
     data["items"][0]["properties"]["surprise"] = "boom"
     body = {"items": data["items"], "itemOrder": data["itemOrder"]}
-    response = Client().post(LIST_URL, data=body, content_type="application/json")
+    response = Client().post(SCENES_URL, data=body, content_type="application/json")
     assert response.status_code == 400
 
 
@@ -268,7 +273,7 @@ def test_post_rejects_malformed_item_with_400():
 def test_post_without_title_creates_untitled_scene():
     data = default_scene()
     body = {"items": data["items"], "itemOrder": data["itemOrder"]}
-    out = Client().post(LIST_URL, data=body, content_type="application/json").json()
+    out = Client().post(SCENES_URL, data=body, content_type="application/json").json()
     assert out["title"] == ""
 
 
@@ -276,7 +281,7 @@ def test_post_without_title_creates_untitled_scene():
 def test_post_rejects_multiline_title_with_400():
     data = default_scene()
     body = {"items": data["items"], "itemOrder": data["itemOrder"], "title": "a\nb"}
-    response = Client().post(LIST_URL, data=body, content_type="application/json")
+    response = Client().post(SCENES_URL, data=body, content_type="application/json")
     assert response.status_code == 400
     assert not Scene.objects.exists()
 
@@ -507,7 +512,7 @@ def test_create_scene_nudges_render_on_commit():
     data = default_scene()
     body = {"items": data["items"], "itemOrder": data["itemOrder"]}
     with mock.patch("scenes.screenshots.maybe_render") as maybe:
-        resp = Client().post(LIST_URL, data=body, content_type="application/json")
+        resp = Client().post(SCENES_URL, data=body, content_type="application/json")
     assert resp.status_code == 201
     key = resp.json()["key"]
     version = Scene.objects.get(key=key).screenshot_version
@@ -532,9 +537,9 @@ def test_render_version_matches_image_url_version(settings):
     data = default_scene()
     body = {"items": data["items"], "itemOrder": data["itemOrder"]}
     with mock.patch("scenes.screenshots.maybe_render") as maybe:
-        key = client.post(LIST_URL, data=body, content_type="application/json").json()[
-            "key"
-        ]
+        key = client.post(
+            SCENES_URL, data=body, content_type="application/json"
+        ).json()["key"]
         assert maybe.call_args.args == (key, _image_version(client, key))
         client.patch(_detail(key), data=body, content_type="application/json")
         assert maybe.call_count == 2
