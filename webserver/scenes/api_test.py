@@ -104,14 +104,14 @@ def test_me_item_shape_aliases_dates():
 
 
 @pytest.mark.django_db
-def test_me_default_limit_is_20():
+def test_me_pages_by_limit_and_offset():
     me = CustomUserFactory.create()
-    SceneFactory.create_batch(21, author=me)
+    oldest, _, _ = SceneFactory.create_batch(3, author=me)
     client = Client()
     client.force_login(me)
-    body = client.get(ME_URL).json()
-    assert body["count"] == 21
-    assert len(body["items"]) == 20
+    body = client.get(ME_URL, {"limit": 2, "offset": 2}).json()
+    assert body["count"] == 3
+    assert [i["key"] for i in body["items"]] == [oldest.key]
 
 
 @pytest.mark.django_db
@@ -128,12 +128,12 @@ def test_me_title_filter_icontains():
 @pytest.mark.django_db
 def test_me_archived_filter():
     me = CustomUserFactory.create()
-    archived = SceneFactory.create(author=me, archived=True)
-    SceneFactory.create(author=me, archived=False)
+    SceneFactory.create(author=me, archived=True)
+    unarchived = SceneFactory.create(author=me, archived=False)
     client = Client()
     client.force_login(me)
-    body = client.get(ME_URL, {"archived": "true"}).json()
-    assert [i["key"] for i in body["items"]] == [archived.key]
+    body = client.get(ME_URL, {"archived": "false"}).json()
+    assert [i["key"] for i in body["items"]] == [unarchived.key]
 
 
 @pytest.mark.django_db
@@ -145,13 +145,6 @@ def test_me_absent_archived_returns_all():
     client = Client()
     client.force_login(me)
     assert client.get(ME_URL).json()["count"] == 2
-
-
-@pytest.mark.django_db
-def test_scenes_list_returns_405():
-    # Scenes are public by link, never listable or searchable.
-    SceneFactory.create()
-    assert Client().get(SCENES_URL).status_code == 405
 
 
 @pytest.mark.django_db
@@ -235,6 +228,12 @@ def test_meta_unmigrated_legacy_key_returns_404_without_migrating():
     assert not Scene.objects.filter(key=legacy.key).exists()
     legacy.refresh_from_db()
     assert legacy.times_accessed == 0
+
+
+@pytest.mark.django_db
+def test_scenes_list_returns_405():
+    # Scenes are public by link, never listable or searchable.
+    assert Client().get(SCENES_URL).status_code == 405
 
 
 @pytest.mark.django_db
