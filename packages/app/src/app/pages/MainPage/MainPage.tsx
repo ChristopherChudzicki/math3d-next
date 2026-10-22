@@ -15,7 +15,6 @@ import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
 import ToggleKeyboardButton from "@/features/editor/virtualKeyboard/KeyboardControls";
 
 import { useSelector } from "react-redux";
-import { useAppSelector } from "@/store/hooks";
 
 import * as select from "@/store/scene/state/selectors";
 import { BannersProvider } from "@/ui/Banners/BannerContext";
@@ -79,9 +78,7 @@ const MainPage: React.FC = () => {
   // succeeded, or "New scene"), focus moves to the scene's title. The title
   // renders a commit later, once the store holds the route's scene.
   const focusTitle = useRef(false);
-  const titleShown = useAppSelector(
-    (state) => state.scene.loaded && state.scene.key === (sceneKey ?? null),
-  );
+  const titleShown = sceneLoad.holdsRouteScene;
   useEffect(() => {
     if (unavailable) focusTitle.current = false;
   }, [unavailable]);

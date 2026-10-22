@@ -28,10 +28,12 @@ type SceneLoad = {
   status: "loading" | "ready" | SceneUnavailableStatus;
   /** The last failure loading the route's scene, kept through retries. */
   failure: Error | null;
-  /** Increments each time a `retry()` fails. */
+  /** Changes with each failed fetch; key the live region on it. */
   failedAttempts: number;
   retrying: boolean;
   retry: () => void;
+  /** The app's store holds the route's scene, whatever the fetch did. */
+  holdsRouteScene: boolean;
 };
 
 /**
@@ -49,7 +51,7 @@ const useSceneLoader = (sceneKey?: string): SceneLoad => {
     enabled: sceneKey !== undefined,
     staleTime: Infinity,
   });
-  const { data, error, fetchStatus } = query;
+  const { data, fetchStatus } = query;
 
   const routeKey = sceneKey ?? null;
   const store = useAppStore();
@@ -58,22 +60,13 @@ const useSceneLoader = (sceneKey?: string): SceneLoad => {
   );
   // Read, don't subscribe: what matters is whether the store held the route's
   // scene when the failure arrived.
-  const { failure, failedAttempts, retrying, retry } = useKeptFailure(
-    {
-      error,
-      hasData: !!data,
-      fetchStatus,
-      errorUpdateCount: query.errorUpdateCount,
-      refetch: query.refetch,
+  const { failure, failedAttempts, retrying, retry } = useKeptFailure(query, {
+    key: sceneKey ?? "",
+    keep: () => {
+      const { loaded, key } = store.getState().scene;
+      return !(loaded && key === routeKey);
     },
-    {
-      key: sceneKey ?? "",
-      keep: () => {
-        const { loaded, key } = store.getState().scene;
-        return !(loaded && key === routeKey);
-      },
-    },
-  );
+  });
 
   const status = ((): SceneLoad["status"] => {
     // The store can hold this route's scene whatever the fetch did: a failed
@@ -141,7 +134,7 @@ const useSceneLoader = (sceneKey?: string): SceneLoad => {
     );
   }, [dispatch, scene, routeKey, store]);
 
-  return { status, failure, failedAttempts, retrying, retry };
+  return { status, failure, failedAttempts, retrying, retry, holdsRouteScene };
 };
 
 export default useSceneLoader;

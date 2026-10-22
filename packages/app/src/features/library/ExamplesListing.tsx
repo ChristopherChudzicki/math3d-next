@@ -15,16 +15,9 @@ const EXAMPLES_LIMIT = 100;
 const ExamplesListing: React.FC = () => {
   const { sceneKey } = useParams();
   const query = useExampleScenes({ limit: EXAMPLES_LIMIT });
-  const { failure, retrying, failedAttempts, retry } = useKeptFailure(
-    {
-      error: query.error,
-      hasData: !!query.data,
-      fetchStatus: query.fetchStatus,
-      errorUpdateCount: query.errorUpdateCount,
-      refetch: query.refetch,
-    },
-    { key: "examples" },
-  );
+  const { failure, retrying, failedAttempts, retry } = useKeptFailure(query, {
+    key: "examples",
+  });
 
   const renderBody = () => {
     // A failed refetch keeps the previous data; show it over the error.

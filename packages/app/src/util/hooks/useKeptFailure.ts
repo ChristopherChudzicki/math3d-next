@@ -2,8 +2,8 @@ import { useState } from "react";
 import type { FetchStatus } from "@tanstack/react-query";
 
 type QueryLike = {
+  data: unknown;
   error: Error | null;
-  hasData: boolean;
   fetchStatus: FetchStatus;
   errorUpdateCount: number;
   refetch: () => unknown;
@@ -24,11 +24,16 @@ type State = {
  * focus from the retry button. This keeps the last failure until data arrives
  * or `key` changes.
  *
- * A new error is kept only if `keep()` says so when it arrives.
+ * A new error is kept only if `keep()` says so when it arrives. `hasData`
+ * overrides `data !== undefined`, e.g. to discount placeholder data.
  */
 const useKeptFailure = (
   query: QueryLike,
-  { key, keep = () => true }: { key: string; keep?: () => boolean },
+  {
+    key,
+    keep = () => true,
+    hasData = query.data !== undefined,
+  }: { key: string; keep?: () => boolean; hasData?: boolean },
 ) => {
   const [state, setState] = useState<State>({ key, failure: null, seen: null });
 
@@ -38,7 +43,7 @@ const useKeptFailure = (
   if (current.key !== key) {
     current = { key, failure: null, seen: null };
   }
-  if (query.hasData) {
+  if (hasData) {
     if (current.failure) current = { ...current, failure: null };
   } else if (query.error && query.error !== current.seen) {
     current = {

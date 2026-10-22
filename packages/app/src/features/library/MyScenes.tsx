@@ -104,16 +104,10 @@ const MyScenesList: React.FC = () => {
   const settled = query.isSuccess && !query.isPlaceholderData;
   // A retry after a failed filter shows the previous filter's results as
   // placeholder data; that isn't this filter's data.
-  const { failure, retrying, failedAttempts, retry } = useKeptFailure(
-    {
-      error: query.error,
-      hasData: !!query.data && !query.isPlaceholderData,
-      fetchStatus: query.fetchStatus,
-      errorUpdateCount: query.errorUpdateCount,
-      refetch: query.refetch,
-    },
-    { key: JSON.stringify([filterValue, includeArchived]) },
-  );
+  const { failure, retrying, failedAttempts, retry } = useKeptFailure(query, {
+    key: JSON.stringify([filterValue, includeArchived]),
+    hasData: !!query.data && !query.isPlaceholderData,
+  });
 
   useEffect(() => {
     if (!announceCount.current) return;
