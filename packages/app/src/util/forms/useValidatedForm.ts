@@ -8,7 +8,9 @@ import type {
   Resolver,
   UseFormHandleSubmit,
   SubmitHandler,
+  SubmitErrorHandler,
 } from "react-hook-form";
+import type React from "react";
 import { useCallback } from "react";
 import * as Sentry from "@sentry/react";
 import { isApiFailure } from "@math3d/api";
@@ -41,15 +43,23 @@ const useValidatedForm = <TFieldValues extends FieldValues = FieldValues>(
     ...props,
   });
   const handleSubmit: UseFormHandleSubmit<TFieldValues> = useCallback(
-    (rawOnValid, onInvalid) => {
-      const onValid: SubmitHandler<TFieldValues> = async (data, event) => {
+    <TResult>(
+      rawOnValid: SubmitHandler<TFieldValues, TResult>,
+      onInvalid?: SubmitErrorHandler<TFieldValues>,
+    ) => {
+      const onValid = async (
+        data: TFieldValues,
+        event?: React.BaseSyntheticEvent,
+      ): Promise<Awaited<TResult> | undefined> => {
         try {
-          await rawOnValid(data, event);
+          const result = await rawOnValid(data, event);
+          return result;
         } catch (err) {
           setError("root", { message: failureMessage(err) });
           // Nothing awaits this handler, so rethrowing would reach Sentry only
           // as an unhandled rejection.
           if (!isApiFailure(err)) Sentry.captureException(err);
+          return undefined;
         }
       };
       return rawHandleSubmit(onValid, onInvalid);
