@@ -194,7 +194,7 @@ Troubleshooting:
 
 - Node 24.13.1 (see `.nvmrc`), Yarn 4.8.1 (corepack)
 - Dev env vars in `.env.development` (committed); local overrides in `.env` (gitignored). `yarn start`, `yarn test` and `yarn test-e2e` load both via `node --env-file-if-exists`, so no direnv is needed; variables already set in the shell win over both files. `yarn build` deliberately loads neither
-- Pre-commit hooks: Prettier (JS/TS), Ruff (Python), trailing whitespace, secret detection, zizmor (GitHub Actions security; pre-commit.ci runs it on PRs, and `.github/workflows/zizmor.yml` adds the online audits)
+- Pre-commit hooks (`.pre-commit-config.yaml`, run with [prek](https://prek.j178.dev/)): Prettier (JS/TS), Ruff (Python), trailing whitespace, secret detection, zizmor (GitHub Actions security; `.github/workflows/zizmor.yml` adds the online audits). On PRs, `.github/workflows/autofix.yml` runs them and the autofix.ci App pushes any fixes back to the branch. Renovate bumps hook revs
 
 ## Conventions
 
