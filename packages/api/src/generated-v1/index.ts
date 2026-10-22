@@ -97,8 +97,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** List Scenes */
-    get: operations["scenes_api_list_scenes"];
+    get?: never;
     put?: never;
     /** Create Scene */
     post: operations["scenes_api_create_scene"];
@@ -1126,31 +1125,6 @@ export interface operations {
     };
   };
   scenes_api_my_scenes: {
-    parameters: {
-      query?: {
-        title?: string | null;
-        archived?: boolean | null;
-        limit?: number;
-        offset?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["PagedMiniSceneSchema"];
-        };
-      };
-    };
-  };
-  scenes_api_list_scenes: {
     parameters: {
       query?: {
         title?: string | null;

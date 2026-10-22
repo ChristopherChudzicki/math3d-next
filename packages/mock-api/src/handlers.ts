@@ -55,7 +55,7 @@ type NoParams = Record<string, never>;
 export const urls = {
   scenes: {
     detail: `${BASE_URL}/v1/scenes/:key/`,
-    list: `${BASE_URL}/v1/scenes/`,
+    create: `${BASE_URL}/v1/scenes/`,
     meList: `${BASE_URL}/v1/me/scenes/`,
     examplesList: `${BASE_URL}/v1/examples/scenes/`,
   },
@@ -135,7 +135,7 @@ export const handlers = [
     },
   ),
   http.post<NoParams, Scene, ErrorResponseBody | Scene>(
-    urls.scenes.list,
+    urls.scenes.create,
     async ({ request }) => {
       const { title, items, itemOrder } = await request.json();
       if (typeof title !== "string") {

@@ -31,7 +31,7 @@ const openDuplicate = async () => {
 const holdPosts = () => {
   const gate = Promise.withResolvers<void>();
   server.use(
-    http.post(urls.scenes.list, async () => {
+    http.post(urls.scenes.create, async () => {
       await gate.promise;
       return HttpResponse.json({ detail: "late" }, { status: 500 });
     }),
@@ -50,7 +50,7 @@ test("a titled scene publishes without asking for a title", async () => {
 
 test("a failed publish offers the title step to retry, leaving the scene as it was", async () => {
   server.use(
-    http.post(urls.scenes.list, () =>
+    http.post(urls.scenes.create, () =>
       HttpResponse.json({ detail: "boom" }, { status: 500 }),
     ),
   );
@@ -184,7 +184,7 @@ test("a publish that lands after another scene loads leaves the user there", asy
   const gate = Promise.withResolvers<void>();
   const landed = Promise.withResolvers<void>();
   server.use(
-    http.post(urls.scenes.list, async () => {
+    http.post(urls.scenes.create, async () => {
       await gate.promise;
     }),
   );

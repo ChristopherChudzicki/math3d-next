@@ -1741,51 +1741,6 @@ paths:
       tags:
       - Scenes
   /v1/scenes/:
-    get:
-      operationId: scenes_api_list_scenes
-      parameters:
-      - in: query
-        name: title
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Title
-      - in: query
-        name: archived
-        required: false
-        schema:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Archived
-      - in: query
-        name: limit
-        required: false
-        schema:
-          default: 20
-          minimum: 1
-          title: Limit
-          type: integer
-      - in: query
-        name: offset
-        required: false
-        schema:
-          default: 0
-          minimum: 0
-          title: Offset
-          type: integer
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PagedMiniSceneSchema'
-          description: OK
-      summary: List Scenes
-      tags:
-      - Scenes
     post:
       operationId: scenes_api_create_scene
       parameters: []
