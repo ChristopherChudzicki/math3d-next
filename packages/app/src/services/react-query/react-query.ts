@@ -101,11 +101,11 @@ const createQueryCache = (): QueryCache =>
   });
 
 /**
- * Refetching a failed query can help only if the server or the network failed.
- * A 4xx answers the same request the same way again, and refetching a 429
- * can't help.
+ * Refetch a failed query on focus or reconnect only if the server or the
+ * network failed. A 4xx answers a repeat the same way; the transient ones (408,
+ * 429) are left to `retry`.
  */
-const refetchUnlessClientError = (query: Query): boolean => {
+const refetchIfTransient = (query: Query): boolean => {
   const { status, error } = query.state;
   if (status !== "error") return true;
   if (isApiError(error)) return error.status >= 500;
@@ -131,8 +131,8 @@ const createQueryClient = (): QueryClient => {
             isApiError(error, RETRY_STATUS_CODES);
           return retryable && failureCount < MAX_RETRIES;
         },
-        refetchOnWindowFocus: refetchUnlessClientError,
-        refetchOnReconnect: refetchUnlessClientError,
+        refetchOnWindowFocus: refetchIfTransient,
+        refetchOnReconnect: refetchIfTransient,
       },
     },
   });

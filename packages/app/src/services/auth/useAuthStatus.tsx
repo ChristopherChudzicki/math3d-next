@@ -13,7 +13,8 @@ type AuthStatus = "loading" | "authenticated" | "unauthenticated";
  *
  * - data is a User object → "authenticated"
  * - data is null (401/403 from server) → "unauthenticated"
- * - the query failed and never had data → "unauthenticated"
+ * - the query failed and never had data → "unauthenticated", including while
+ *   it refetches (on focus, say), so the sign-in affordances don't flicker
  * - otherwise (still in flight) → "loading"
  *
  * "loading" has to be a state the app leaves: consumers hide the sign-in
@@ -27,7 +28,11 @@ const useAuthStatus = (): AuthStatus => {
   if (userMeQuery.data) {
     return "authenticated";
   }
-  if (userMeQuery.data === null || userMeQuery.isError) {
+  if (
+    userMeQuery.data === null ||
+    userMeQuery.isError ||
+    userMeQuery.errorUpdateCount > 0
+  ) {
     return "unauthenticated";
   }
   return "loading";
