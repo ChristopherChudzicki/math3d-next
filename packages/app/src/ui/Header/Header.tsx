@@ -13,7 +13,7 @@ const Header: React.FC<HeaderProps> = (props) => (
     {/* Rendered even when empty, so the grid columns keep their order. */}
     <div className={styles.start}>{props.start}</div>
     <span className={styles.brand}>Math3d</span>
-    {props.title}
+    <div className={styles["title-slot"]}>{props.title}</div>
     <nav className={styles["nav-container"]}>{props.nav}</nav>
   </header>
 );

@@ -21,10 +21,12 @@ import LoadingSpinner from "@/ui/LoadingSpinner";
 import { Menu } from "@/ui/Menu";
 import TextField from "@/ui/TextField";
 import { u } from "@/util/styles";
+import { useKeptFailure } from "@/util/hooks";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { useSignInDialog } from "@/services/overlays/useSignInDialog";
 import { dismissToast, showToast } from "@/ui/Toast/toasts";
 import DeleteSceneDialog from "./DeleteSceneDialog";
+import LoadFailed from "./LoadFailed";
 import SceneCard from "./SceneCard/SceneCard";
 import { ListType, cardTitle, sceneHref } from "./constants";
 import styles from "./ScenesList.module.css";
@@ -100,6 +102,12 @@ const MyScenesList: React.FC = () => {
     [query.data],
   );
   const settled = query.isSuccess && !query.isPlaceholderData;
+  // A retry after a failed filter shows the previous filter's results as
+  // placeholder data; that isn't this filter's data.
+  const { failure, retrying, failedAttempts, retry } = useKeptFailure(query, {
+    key: JSON.stringify([filterValue, includeArchived]),
+    hasData: !!query.data && !query.isPlaceholderData,
+  });
 
   useEffect(() => {
     if (!announceCount.current) return;
@@ -136,19 +144,20 @@ const MyScenesList: React.FC = () => {
     const archiving = !scene.archived;
     const disappears = archiving && !includeArchived;
     const focusKey = neighborKey(scene.key);
-    const failure = `Couldn’t ${archiving ? "archive" : "unarchive"} “${titleOf(scene)}”. Try again.`;
+    const failureToast = `Couldn’t ${archiving ? "archive" : "unarchive"} “${titleOf(scene)}”. Try again.`;
     try {
       // Resolves after the list refetches, so a removed card is gone by then.
       await patch.mutateAsync({
         key: scene.key,
         patch: { archived: archiving },
       });
-      dismissToast(failure);
-      announce(`${archiving ? "Archived" : "Unarchived"} ${titleOf(scene)}`);
-      if (disappears) elementFor(focusKey)?.focus();
     } catch {
-      showToast(failure);
+      showToast(failureToast);
+      return;
     }
+    dismissToast(failureToast);
+    announce(`${archiving ? "Archived" : "Unarchived"} ${titleOf(scene)}`);
+    if (disappears) elementFor(focusKey)?.focus();
   };
 
   const chooseDelete = (scene: MiniScene) => {
@@ -184,22 +193,18 @@ const MyScenesList: React.FC = () => {
   };
 
   const renderBody = () => {
+    if (failure) {
+      return (
+        <LoadFailed
+          message="Couldn’t load scenes."
+          retrying={retrying}
+          failedAttempts={failedAttempts}
+          retry={retry}
+        />
+      );
+    }
     if (query.isPending) {
       return <LoadingSpinner label="Loading scenes" />;
-    }
-    if (query.isError && !query.data) {
-      return (
-        <div className={styles.message}>
-          <p className={styles.hint}>Couldn&rsquo;t load scenes.</p>
-          <Button
-            size="sm"
-            loading={query.isFetching}
-            onClick={() => query.refetch()}
-          >
-            Retry
-          </Button>
-        </div>
-      );
     }
     if (items.length === 0 && settled) {
       return (

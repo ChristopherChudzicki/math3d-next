@@ -1,7 +1,11 @@
 import React from "react";
-import { renderHook, waitFor } from "@testing-library/react";
-import { QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { ApiError } from "@math3d/api";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import {
+  focusManager,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
+import { ApiError, NetworkError } from "@math3d/api";
 import { createQueryClient } from "./react-query";
 
 const getWrapper = () => {
@@ -12,36 +16,59 @@ const getWrapper = () => {
   return wrapper;
 };
 
+const apiError = (status: number) =>
+  new ApiError(status, {}, new Response(null, { status }));
+
 test.each([
-  { status: 403, retries: 0 },
-  { status: 404, retries: 0 },
-  { status: 408, retries: 3 },
-  { status: 429, retries: 3 },
-  { status: 502, retries: 3 },
-  { status: 503, retries: 3 },
-  { status: 504, retries: 3 },
+  { error: apiError(403), retries: 0 },
+  { error: apiError(404), retries: 0 },
+  { error: apiError(408), retries: 3 },
+  { error: apiError(429), retries: 3 },
+  { error: apiError(502), retries: 3 },
+  { error: apiError(503), retries: 3 },
+  { error: apiError(504), retries: 3 },
+  { error: new NetworkError("GET", "/x/", new TypeError()), retries: 3 },
+])("should retry $error.message $retries times", async ({ error, retries }) => {
+  const wrapper = getWrapper();
+  const queryFn = vi.fn().mockRejectedValue(error);
+  const { result } = renderHook(
+    () =>
+      useQuery({
+        queryKey: ["test"],
+        queryFn,
+        retryDelay: 0,
+      }),
+    { wrapper },
+  );
+
+  await waitFor(() => {
+    expect(result.current.isError).toBe(true);
+  });
+  expect(queryFn).toHaveBeenCalledTimes(retries + 1);
+});
+
+test.each([
+  { error: apiError(500), calls: 1 },
+  { error: new NetworkError("GET", "/x/", new TypeError()), calls: 2 },
 ])(
-  "should retry $status failures $retries times",
-  async ({ status, retries }) => {
+  "a query that failed with '$error.message' is fetched $calls times after a focus",
+  async ({ error, calls }) => {
     const wrapper = getWrapper();
-    const queryFn = vi
-      .fn()
-      .mockRejectedValue(
-        new ApiError(status, {}, new Response(null, { status })),
-      );
+    const queryFn = vi.fn().mockRejectedValue(error);
     const { result } = renderHook(
-      () =>
-        useQuery({
-          queryKey: ["test"],
-          queryFn,
-          retryDelay: 0,
-        }),
+      () => useQuery({ queryKey: ["test"], queryFn, retry: false }),
       { wrapper },
     );
+    await waitFor(() => expect(result.current.isError).toBe(true));
 
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    });
-    expect(queryFn).toHaveBeenCalledTimes(retries + 1);
+    try {
+      await act(async () => {
+        focusManager.setFocused(false);
+        focusManager.setFocused(true);
+      });
+      expect(queryFn).toHaveBeenCalledTimes(calls);
+    } finally {
+      focusManager.setFocused(undefined);
+    }
   },
 );

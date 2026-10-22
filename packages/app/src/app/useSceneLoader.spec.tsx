@@ -3,7 +3,9 @@ import { HttpResponse, http } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { seedDb, urls } from "@math3d/mock-api";
 import type { Scene } from "@math3d/api";
+import { focusManager } from "@tanstack/react-query";
 import { act, renameScene, renderTestApp, screen, waitFor } from "@/test_util";
+import { createQueryClient } from "@/services/react-query/react-query";
 import { getStore } from "@/store/store";
 import sceneSlice from "@/store/scene/state/scene.slice";
 import {
@@ -144,4 +146,66 @@ test("marking the open scene saved under a new key does not reload the route's s
   );
 
   expect(store.getState().scene.title).toBe("edited");
+});
+
+test("a route whose GET fails while the store holds its scene never shows the card, even as the store moves on", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  saveSignInDraft(
+    editedDraftOf(scene),
+    `${window.location.origin}/${scene.key}`,
+  );
+  server.use(
+    http.get(urls.scenes.detail, () => new HttpResponse(null, { status: 500 })),
+  );
+  const { store, queryClient } = renderTestApp(`/${scene.key}`);
+  await waitFor(() =>
+    expect(
+      queryClient.getQueryState(["scenes", "detail", scene.key])?.status,
+    ).toBe("error"),
+  );
+  expect(store.getState().scene.title).toBe(`${scene.title} (edited)`);
+  expect(screen.queryByRole("alert")).toBeNull();
+
+  // PublishDialog marks the scene saved a render before navigating.
+  act(() => {
+    const { revision, loadCount } = store.getState().scene;
+    store.dispatch(
+      sceneSlice.actions.markSaved({
+        key: "new-key",
+        author: null,
+        revision,
+        loadCount,
+      }),
+    );
+  });
+
+  expect(screen.queryByRole("alert")).toBeNull();
+  expect(
+    screen.getByRole("tablist", { name: "Scene controls" }),
+  ).toBeInTheDocument();
+});
+
+test("a paused fetch in a background tab while online isn't offline", async () => {
+  const scene = seedDb.withSceneFromItems([]);
+  server.use(http.get(urls.scenes.detail, () => HttpResponse.error()));
+  focusManager.setFocused(false);
+  try {
+    const { queryClient, router } = renderTestApp("/");
+    // Production retries; a retry waits for focus, so the fetch pauses.
+    const { retry } = createQueryClient().getDefaultOptions().queries ?? {};
+    queryClient.setQueryDefaults(["scenes", "detail"], {
+      retry,
+      retryDelay: 0,
+    });
+    await act(() => router.navigate(`/${scene.key}`));
+    await waitFor(() =>
+      expect(
+        queryClient.getQueryState(["scenes", "detail", scene.key])?.fetchStatus,
+      ).toBe("paused"),
+    );
+
+    expect(screen.queryByText(/You’re offline/)).toBeNull();
+  } finally {
+    focusManager.setFocused(undefined);
+  }
 });

@@ -10,6 +10,9 @@ import * as select from "@/store/scene/state/selectors";
 import RenameDialog from "./RenameDialog";
 import styles from "./SceneTitle.module.css";
 
+/** Focus target when the route's scene appears in place of another view. */
+const SCENE_TITLE_ID = "scene-title";
+
 const SceneTitle: React.FC = () => {
   const title = useAppSelector(select.title);
   const key = useAppSelector(select.key);
@@ -29,7 +32,11 @@ const SceneTitle: React.FC = () => {
   const name = sceneDisplayName(title);
   return (
     <div className={styles.container}>
-      <h1 className={classNames(styles.title, { [styles.untitled]: !name })}>
+      <h1
+        id={SCENE_TITLE_ID}
+        tabIndex={-1}
+        className={classNames(styles.title, { [styles.untitled]: !name })}
+      >
         {name ?? UNTITLED}
       </h1>
       <IconButton
@@ -47,3 +54,4 @@ const SceneTitle: React.FC = () => {
 };
 
 export default SceneTitle;
+export { SCENE_TITLE_ID };

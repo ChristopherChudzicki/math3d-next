@@ -6,6 +6,11 @@ type MutationMeta = {
    * toast — the call site renders its own error or builds its own toast.
    */
   errorToast?: string | false;
+  /**
+   * Error statuses that are the caller's situation, not a bug, and so aren't
+   * reported to Sentry. Same as the query meta of the same name.
+   */
+  expectedErrors?: number[];
 };
 
 declare module "@tanstack/react-query" {

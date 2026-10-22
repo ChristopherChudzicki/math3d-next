@@ -11,11 +11,14 @@ import type {
 } from "react-hook-form";
 import { useCallback } from "react";
 import * as Sentry from "@sentry/react";
+import { isApiFailure } from "@math3d/api";
+import { failureMessage } from "@/util/failureCopy";
 
 /**
  * A wrapper around `react-hook-form`'s `useForm` that:
  *  1. requires a yup schema for client-side validation
- *  2. turns a rejected submit into a "root" error plus a Sentry event
+ *  2. turns a rejected submit into a "root" error, and reports it to Sentry
+ *     unless it's an API failure, which the mutation cache reports
  *
  * There is no per-field mapping: v1 rejects a bad body as ninja's
  * `{"detail": [...]}`, which names no field, and both consumers are
@@ -43,12 +46,10 @@ const useValidatedForm = <TFieldValues extends FieldValues = FieldValues>(
         try {
           await rawOnValid(data, event);
         } catch (err) {
-          setError("root", {
-            message: "Something went wrong. Please try again later.",
-          });
+          setError("root", { message: failureMessage(err) });
           // Nothing awaits this handler, so rethrowing would reach Sentry only
           // as an unhandled rejection.
-          Sentry.captureException(err);
+          if (!isApiFailure(err)) Sentry.captureException(err);
         }
       };
       return rawHandleSubmit(onValid, onInvalid);

@@ -54,7 +54,7 @@ test.describe("Deleting a scene", async () => {
 
     await page.goto(`/${key1}`);
     await expect(
-      page.getByRole("alertdialog", { name: "Not found" }),
+      page.getByRole("heading", { name: "This scene doesn’t exist." }),
     ).toBeVisible();
   });
 

@@ -5,15 +5,12 @@ import { getStore } from "@/store/store";
 import { takeSignInDraft } from "@/services/auth/signInDraft";
 
 import { InitialEntry } from "history";
-import { QueryClient } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import { mockAuth, seedDb } from "@math3d/mock-api";
 import type { User } from "@math3d/api";
 import AppProviders from "@/app/AppProviders";
 import routes from "@/app/routes";
-import {
-  createMutationCache,
-  createQueryCache,
-} from "@/services/react-query/react-query";
+import { createQueryClient } from "@/services/react-query/react-query";
 
 /**
  * Wait until the app has settled: no `[aria-busy="true"]` element remains and
@@ -80,10 +77,11 @@ const renderTestApp = (
   // Disable retries so error-state behavior (e.g. a 404 surfacing) settles
   // immediately; the production client retries some statuses with backoff, which
   // would otherwise stall tests well past their timeouts.
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-    queryCache: createQueryCache(),
-    mutationCache: createMutationCache(),
+  const queryClient = createQueryClient();
+  const defaults = queryClient.getDefaultOptions();
+  queryClient.setDefaultOptions({
+    ...defaults,
+    queries: { ...defaults.queries, retry: false },
   });
 
   const user = seededUser ?? (isAuthenticated ? seedDb.withUser() : null);

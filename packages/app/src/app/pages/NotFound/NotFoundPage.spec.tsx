@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { renderTestApp, screen, user, within, waitFor } from "@/test_util";
+import { renderTestApp, screen } from "@/test_util";
 
 test("unmatched /app path renders soft-404", async () => {
   renderTestApp("/app/does-not-exist");
@@ -22,14 +22,4 @@ test("unmatched non-app multi-segment path renders soft-404, not a crash", async
   expect(
     await screen.findByRole("heading", { name: /not found/i }),
   ).toBeVisible();
-});
-
-test("a non-existent scene key still notifies and redirects to /", async () => {
-  // Missing-scene behavior is unchanged (handled in SceneControls), NOT the soft-404 page.
-  // The notification is an alertdialog with an "OK" button (NotificationsDisplay
-  // renders "OK" for type:"alert"; SceneControls uses type:"alert").
-  const { location } = renderTestApp("/definitelynotascene");
-  const dialog = await screen.findByRole("alertdialog", { name: "Not found" });
-  await user.click(within(dialog).getByRole("button", { name: "OK" }));
-  await waitFor(() => expect(location.current.pathname).toBe("/"));
 });

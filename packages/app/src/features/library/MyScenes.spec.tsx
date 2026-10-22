@@ -259,22 +259,80 @@ test("filtering announces the result count", async () => {
   );
 });
 
-test("a failed load offers Retry", async () => {
+test("Try again keeps the error and focus while it retries", async () => {
   const { owner } = seedScenes(["Alpha"]);
+  let calls = 0;
+  let release = () => {};
   server.use(
-    http.get(
-      ME_LIST,
-      () => HttpResponse.json({ detail: "boom" }, { status: 500 }),
-      { once: true },
-    ),
+    http.get(ME_LIST, async () => {
+      calls += 1;
+      if (calls === 1) {
+        return HttpResponse.json({ detail: "boom" }, { status: 500 });
+      }
+      await new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      // Returning nothing falls through to the default handler.
+      return undefined;
+    }),
   );
-  await openMyScenes(owner);
+  const { dialog } = await openMyScenes(owner);
 
-  await user.click(await screen.findByRole("button", { name: "Retry" }));
+  const tryAgain = await within(dialog).findByRole("button", {
+    name: "Try again",
+  });
+  await user.click(tryAgain);
+  await waitFor(() => expect(calls).toBe(2));
+  expect(within(dialog).getByRole("alert")).toHaveTextContent(
+    "Couldn’t load scenes.",
+  );
+  expect(tryAgain).toHaveFocus();
 
+  act(() => release());
   expect(
     await screen.findByRole("link", { name: "Alpha" }),
   ).toBeInTheDocument();
+});
+
+test("a failed filter keeps its error through a retry", async () => {
+  const { owner } = seedScenes(["Alpha", "Beta"]);
+  const { dialog } = await openMyScenes(owner);
+  await screen.findByRole("link", { name: "Beta" });
+  let filtered = 0;
+  let release = () => {};
+  server.use(
+    http.get(ME_LIST, async ({ request }) => {
+      if (!new URL(request.url).searchParams.get("title")) return undefined;
+      filtered += 1;
+      if (filtered > 1) {
+        await new Promise<void>((resolve) => {
+          release = resolve;
+        });
+      }
+      return HttpResponse.json({ detail: "boom" }, { status: 500 });
+    }),
+  );
+
+  await user.type(screen.getByRole("textbox", { name: "Filter scenes" }), "Al");
+  await user.click(
+    await within(dialog).findByRole("button", { name: "Try again" }),
+  );
+  await waitFor(() => expect(filtered).toBe(2));
+  expect(within(dialog).getByRole("alert")).toHaveTextContent(
+    "Couldn’t load scenes.",
+  );
+  expect(screen.queryByRole("link", { name: "Beta" })).toBeNull();
+
+  act(() => release());
+  await waitFor(() =>
+    expect(
+      within(dialog).getByRole("button", { name: "Try again" }),
+    ).not.toHaveAttribute("aria-disabled", "true"),
+  );
+  expect(within(dialog).getByRole("alert")).toHaveTextContent(
+    "Couldn’t load scenes.",
+  );
+  expect(screen.queryByRole("link", { name: "Beta" })).toBeNull();
 });
 
 test("cards show the scene's imageUrl as their thumbnail", async () => {

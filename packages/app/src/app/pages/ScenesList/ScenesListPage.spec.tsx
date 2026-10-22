@@ -41,7 +41,7 @@ test("examples are listed in order, as the API returns them", async () => {
   expect(titles.slice(-2)).toEqual(examples.map((e) => e.title));
 });
 
-test("a failed examples request offers a retry", async () => {
+test("a failed examples request offers to try again", async () => {
   const scene = seedDb.withSceneFromItems([]);
   const example = seedDb.withExampleScene();
   server.use(
@@ -53,7 +53,7 @@ test("a failed examples request offers a retry", async () => {
   );
   renderTestApp(`/${scene.key}?overlay=scenes&list=examples`);
 
-  await user.click(await screen.findByRole("button", { name: "Retry" }));
+  await user.click(await screen.findByRole("button", { name: "Try again" }));
 
   expect(
     await screen.findByRole("link", { name: example.title }),

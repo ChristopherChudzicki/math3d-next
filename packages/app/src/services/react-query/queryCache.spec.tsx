@@ -7,7 +7,7 @@ import {
   QueryClientProvider,
   useQuery,
 } from "@tanstack/react-query";
-import { ApiError } from "@math3d/api";
+import { ApiError, NetworkError, recordEndpoint } from "@math3d/api";
 import { createQueryCache } from "./react-query";
 
 vi.mock("@sentry/react", async (importOriginal) => ({
@@ -15,42 +15,72 @@ vi.mock("@sentry/react", async (importOriginal) => ({
   captureException: vi.fn(),
 }));
 
-const apiError = (status: number) =>
-  new ApiError(status, {}, new Response(null, { status }));
+const SCENE_PATH = "/v1/scenes/{key}/";
+
+const apiError = (status: number, data: unknown = {}) => {
+  const response = new Response(null, { status });
+  recordEndpoint(response, { method: "GET", schemaPath: SCENE_PATH });
+  return new ApiError(status, data, response);
+};
 
 test.each([
-  { error: apiError(404), expectedErrors: [404], reported: false },
-  { error: apiError(404), expectedErrors: undefined, reported: true },
   {
-    error: new TypeError("Failed to fetch"),
-    expectedErrors: [404],
-    reported: true,
+    name: "an expected ApiError",
+    error: apiError(404),
+    captured: null,
   },
-])(
-  "$error.message (expected: $expectedErrors) reaches Sentry: $reported",
-  async ({ error, expectedErrors, reported }) => {
-    const client = new QueryClient({ queryCache: createQueryCache() });
-    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-      <QueryClientProvider client={client}>{children}</QueryClientProvider>
-    );
-    const { result } = renderHook(
-      () =>
-        useQuery({
-          queryKey: ["scenes", "detail", "some-key"],
-          queryFn: () => Promise.reject(error),
-          meta: { expectedErrors },
-          retry: false,
-        }),
-      { wrapper },
-    );
+  {
+    name: "a NetworkError",
+    error: new NetworkError("GET", SCENE_PATH, new TypeError()),
+    captured: {
+      level: "warning",
+      fingerprint: ["network", "GET", SCENE_PATH],
+      tags: {
+        query: "scenes.detail",
+        "api.method": "GET",
+        "api.path": SCENE_PATH,
+      },
+    },
+  },
+  {
+    name: "a 500 ApiError",
+    error: apiError(500, { sentry_event_id: "abc123" }),
+    captured: {
+      fingerprint: ["api", "GET", SCENE_PATH, "500"],
+      tags: {
+        query: "scenes.detail",
+        "api.method": "GET",
+        "api.path": SCENE_PATH,
+        "api.status": "500",
+        backend_event_id: "abc123",
+      },
+    },
+  },
+  {
+    name: "a plain Error",
+    error: new Error("boom"),
+    captured: { tags: { query: "scenes.detail" } },
+  },
+])("reports $name by its classification", async ({ error, captured }) => {
+  const client = new QueryClient({ queryCache: createQueryCache() });
+  const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  );
+  const { result } = renderHook(
+    () =>
+      useQuery({
+        queryKey: ["scenes", "detail", "some-key"],
+        queryFn: () => Promise.reject(error),
+        meta: { expectedErrors: [404] },
+        retry: false,
+      }),
+    { wrapper },
+  );
 
-    await waitFor(() => expect(result.current.isError).toBe(true));
-    if (reported) {
-      expect(Sentry.captureException).toHaveBeenCalledWith(error, {
-        tags: { query: "scenes.detail" },
-      });
-    } else {
-      expect(Sentry.captureException).not.toHaveBeenCalled();
-    }
-  },
-);
+  await waitFor(() => expect(result.current.isError).toBe(true));
+  if (captured) {
+    expect(Sentry.captureException).toHaveBeenCalledWith(error, captured);
+  } else {
+    expect(Sentry.captureException).not.toHaveBeenCalled();
+  }
+});
