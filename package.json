@@ -25,6 +25,11 @@
     "package": "^1.0.1",
     "prettier": "4.0.0-alpha.8"
   },
+  "resolutions": {
+    "undici@npm:7.29.0": "7.29.1",
+    "sharp@npm:0.35.2": "0.35.5",
+    "sharp@npm:0.35.4": "0.35.5"
+  },
   "msw": {
     "workerDirectory": "packages/app/public"
   }

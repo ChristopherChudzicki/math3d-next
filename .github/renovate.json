@@ -2,6 +2,9 @@
   "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
   "labels": ["dependencies"],
   "rangeStrategy": "bump",
+  "lockFileMaintenance": {
+    "enabled": true
+  },
   "pre-commit": {
     "enabled": true
   },
