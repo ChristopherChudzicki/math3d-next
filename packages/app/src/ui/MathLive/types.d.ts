@@ -1,7 +1,9 @@
 import type { MathfieldElement } from "mathlive";
 
-export interface MathfieldHTMLAttributes
-  extends Omit<React.HTMLAttributes<MathfieldElement>, "onInput"> {
+export interface MathfieldHTMLAttributes extends Omit<
+  React.HTMLAttributes<MathfieldElement>,
+  "onInput"
+> {
   onChange?: React.ChangeEventHandler<MathfieldElement> | undefined;
   /**
    * MathLive dispatches its `input` event on the `<math-field>` element itself,

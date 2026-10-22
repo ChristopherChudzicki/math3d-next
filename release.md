@@ -70,14 +70,12 @@ APP_VERSION = os.environ.get("APP_VERSION", "unknown")  # Set at runtime
 ### Workflows
 
 1. **`.github/workflows/release-rc.yml`** - Create RC Release
-
    - Manually triggered
    - Calculates next RC version from git tags
    - Creates RC tag and pre-release
    - Builds artifacts (no deployment)
 
 2. **`.github/workflows/release-prod.yml`** - Promote RC to Production
-
    - Manually triggered with RC tag input
    - Creates production tag from RC tag
    - Calls reusable deployment workflow

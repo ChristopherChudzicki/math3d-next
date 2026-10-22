@@ -21,9 +21,9 @@
       "!/apple-touch-icon.png",
       "!/robots.txt",
       "!/mockServiceWorker.js",
-      "!/index.html"
-    ]
-  }
+      "!/index.html",
+    ],
+  },
   // Runtime vars are deploy-injected (see deploy-reusable.yml); local dev: copy
   // `.dev.vars.example` to `.dev.vars`.
 }
