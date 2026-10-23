@@ -9,7 +9,6 @@ import type { PluginOption } from "vite";
 import { realpathSync } from "node:fs";
 import { markdown } from "./vite-plugins/markdown/plugin";
 import { compileHelpDoc } from "./vite-plugins/help-docs/compileHelpDoc";
-import { HELP_GROUPS } from "./src/app/pages/HelpPage/groups";
 
 /**
  * Identify which checkout this server serves, so the e2e suite can refuse to
@@ -128,7 +127,6 @@ export default defineConfig({
       query: "help-doc",
       compile: compileHelpDoc({
         docsRoot: path.resolve(__dirname, "./src/app/pages/HelpPage/docs"),
-        groups: HELP_GROUPS,
       }),
     }),
     checkoutIdentity(),

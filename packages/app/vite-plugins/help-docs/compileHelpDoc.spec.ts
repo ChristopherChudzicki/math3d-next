@@ -1,10 +1,7 @@
 import { convertLatexToMarkup } from "mathlive";
 import { compileHelpDoc } from "./compileHelpDoc";
 
-const compile = compileHelpDoc({
-  docsRoot: "/docs",
-  groups: ["trig", "calculus"],
-});
+const compile = compileHelpDoc({ docsRoot: "/docs" });
 
 const frontmatter = {
   name: "gradient",
@@ -47,7 +44,7 @@ describe("compileHelpDoc", () => {
     { case: "no front matter", data: undefined },
     { case: "an unknown key", data: { ...frontmatter, type: "function" } },
     { case: "a missing field", data: { ...frontmatter, keyboard: undefined } },
-    { case: "an unknown tag", data: { ...frontmatter, tags: ["algebra"] } },
+    { case: "an unknown tag", data: { ...frontmatter, tags: ["nope"] } },
   ])("rejects $case", ({ data }) => {
     expect(() =>
       compile({ file: "/docs/calculus/grad.md", frontmatter: data, body: "" }),

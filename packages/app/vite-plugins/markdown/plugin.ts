@@ -35,7 +35,11 @@ const markdown = ({ query, compile = renderBody }: MarkdownOptions): Plugin => {
       if (!id.endsWith(suffix)) return null;
       const file = id.slice(0, -`?${query}`.length);
       const value = compile({ file, ...parseFrontMatter(source) });
-      return { code: `export default ${JSON.stringify(value)};`, map: null };
+      // An empty map: the module is generated data with no source positions.
+      return {
+        code: `export default ${JSON.stringify(value)};`,
+        map: { mappings: "" },
+      };
     },
   };
 };

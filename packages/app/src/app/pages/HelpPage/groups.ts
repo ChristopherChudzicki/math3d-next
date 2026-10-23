@@ -1,7 +1,8 @@
 /**
  * Help reference groups, in display order. A doc's first tag is its group.
  *
- * Imported by vite.config.ts to validate doc tags, so this file has no imports.
+ * Imported by the build-time help-docs plugin to validate doc tags, so this
+ * file has no imports.
  */
 const HELP_GROUPS = [
   "algebra",
