@@ -138,6 +138,7 @@ def compare_scene(
     rehydrated: dict,
     defaults: dict[str, dict],
     table: Any,
+    initial_graphics: dict[str, dict] | None = None,
 ) -> SceneResult:
     """Classify everything that differs between math3d-react's view of a scene
     (`rehydrated`) and its math3d-next translation (`exported`)."""
@@ -151,7 +152,12 @@ def compare_scene(
     items = legacy_items(rehydrated)
     result.flags = _flags(items, defaults)
     for item_id, item in items.items():
-        known = defaults.get(item.get("type", ""), {})
+        # Fixed items (axes, grids, camera) also take properties from
+        # math3d-react's initialState, e.g. a grid's `axes`.
+        known = {
+            **defaults.get(item.get("type", ""), {}),
+            **(initial_graphics or {}).get(item_id, {}),
+        }
         result.unknown_properties.extend(
             (item.get("type", "?"), prop)
             for prop in item

@@ -130,6 +130,12 @@ def test_unknown_property_is_recorded_without_comparing_it():
     assert result.unknown_properties == [("POINT", "samples")]
 
 
+def test_property_from_initial_state_is_not_unknown():
+    scene = _scene({**POINT, "axes": "yz"}, POINT)
+    result = compare_scene(*scene, DEFAULTS, TABLE, {"p": {"axes": "yz"}})
+    assert result.unknown_properties == []
+
+
 def test_extra_shown_item_and_folder_membership_change_are_render_failures():
     extra = {"id": "q", "type": "POINT", "properties": POINT}
     exported, rehydrated = _scene(POINT, POINT, migrated_extra=[extra])

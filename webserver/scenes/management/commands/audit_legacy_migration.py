@@ -42,7 +42,9 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        defaults = json.loads(Path(options["defaults"]).read_text())["defaultSettings"]
+        react_defaults = json.loads(Path(options["defaults"]).read_text())
+        defaults = react_defaults["defaultSettings"]
+        initial_graphics = react_defaults["initialState"]["mathGraphics"]
         default_values = {
             v
             for settings in defaults.values()
@@ -66,6 +68,7 @@ class Command(BaseCommand):
                     json.loads(rehydrated_line),
                     defaults,
                     expected,
+                    initial_graphics,
                 )
                 verdict = agg.add(result, default_values)
                 record = {
