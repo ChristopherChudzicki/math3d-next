@@ -1,7 +1,6 @@
 ---
-type: function
 name: hyperbolic tangent
-latex: \(\tanh(x)\)
+latex: \tanh(x)
 keyboard: tanh(x)
 summary: Hyperbolic tangent
 tags:

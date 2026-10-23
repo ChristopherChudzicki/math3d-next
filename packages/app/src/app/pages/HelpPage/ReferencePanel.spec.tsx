@@ -2,16 +2,15 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ReferencePanel from "./ReferencePanel";
-import type { ReferenceEntry } from "./util";
+import type { HelpDoc } from "./types";
 
-const entry: ReferenceEntry = {
-  id: "sin",
-  name: "sine",
-  latex: "\\sin",
-  keyboard: "sin",
-  summaryInnerHtml: "The sine function.",
-  detailsHtml: "<p>More about sine.</p>",
+const doc: HelpDoc = {
+  id: "trig/sin",
   tags: ["trig"],
+  keyboard: "sin",
+  expressionHtml: "\\sin",
+  summaryHtml: "The sine function.",
+  detailsHtml: "<p>More about sine.</p>",
 };
 
 // "Show more" and "Show less" are deliberately one persistent element whose
@@ -20,7 +19,7 @@ const entry: ReferenceEntry = {
 // DOM, which would drop focus to <body> on each click.
 test("the show more/less toggle keeps focus when activated", async () => {
   const user = userEvent.setup();
-  render(<ReferencePanel entries={[entry]} />);
+  render(<ReferencePanel docs={[doc]} />);
 
   const toggle = screen.getByRole("button", { name: "Show more" });
   await user.click(toggle);

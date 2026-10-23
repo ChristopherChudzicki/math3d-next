@@ -1,7 +1,6 @@
 ---
-type: function
 name: sine
-latex: \(\sin(x)\)
+latex: \sin(x)
 keyboard: sin(x)
 summary: Sine
 tags:

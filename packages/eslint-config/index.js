@@ -53,7 +53,7 @@ module.exports = {
       {
         devDependencies: [
           "**/__tests__/**/*.ts",
-          "**/*.compile.ts",
+          "**/vite-plugins/**",
           "**/*.spec.ts",
           "**/*.spec.tsx",
           "**/playwright.config.ts",

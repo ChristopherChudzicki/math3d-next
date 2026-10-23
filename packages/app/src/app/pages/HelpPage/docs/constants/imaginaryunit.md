@@ -1,7 +1,6 @@
 ---
-type: function
 name: imaginary unit i
-latex: \(I\)
+latex: I
 keyboard: I
 summary: \(I = \sqrt{-1} \)
 tags:

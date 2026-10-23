@@ -1,7 +1,6 @@
 ---
-type: function
 name: unit tangent
-latex: \(\operatorname{unitT}(f, T)
+latex: \operatorname{unitT}(f, T)
 keyboard: unitT(f, T)
 summary: Unit tangent vector
 tags:

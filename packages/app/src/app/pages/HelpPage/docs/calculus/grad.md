@@ -1,7 +1,6 @@
 ---
-type: function
 name: gradient
-latex: \(\operatorname{grad}(f)\)
+latex: \operatorname{grad}(f)
 keyboard: grad(f)
 summary: Total derivative of \(f\).
 tags:

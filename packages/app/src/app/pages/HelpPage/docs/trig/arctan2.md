@@ -1,7 +1,6 @@
 ---
-type: function
 name: arctangent2
-latex: \(\arctan(y, x)\)
+latex: \arctan(y, x)
 keyboard: arctan(y, x)
 summary: 2-argument arctangent
 tags:

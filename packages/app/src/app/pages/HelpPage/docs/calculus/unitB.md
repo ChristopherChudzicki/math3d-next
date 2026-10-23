@@ -1,9 +1,8 @@
 ---
-type: function
 name: unit binormal
-latex: \(\operatorname{unitB}(f, T)
+latex: \operatorname{unitB}(f, T)
 keyboard: unitB(f, T)
-summary: Unit normal vector
+summary: Unit binormal vector
 tags:
   - calculus
 ---
