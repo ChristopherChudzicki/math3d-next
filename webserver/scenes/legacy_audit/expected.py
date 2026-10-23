@@ -413,8 +413,10 @@ def _variable_slider(item: dict, ctx: Context) -> list[Expectation]:
     # (react:.../VariableSlider/components/VariableSlider.js:99-104,
     # react:.../VariableSlider/components/AnimationControls.js:73-76,90-101).
     # next sweeps the range in duration/speed seconds at fps ticks/s
-    # (next:app/src/features/editor/items/forms/VariableSlider/VariableSlider.tsx:66-83).
-    out.add("fps", "60", "render", "constant")
+    # (next:app/src/features/editor/items/forms/VariableSlider/VariableSlider.tsx:66-83),
+    # so fps changes only smoothness. Policy: legacy sliders take next's default
+    # fps (next:mathitem-configs/src/items/variableSlider.ts:24).
+    out.add("fps", "50", "render", "constant")
     out.add("duration", "4", "render", "constant")
     # Animation starts on mount when isAnimating
     # (react:.../VariableSlider/components/AnimationControls.js:137-141).

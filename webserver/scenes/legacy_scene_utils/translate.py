@@ -87,7 +87,7 @@ class ItemMigrator:
         lhs, *rhs_pieces = expr.split("=")
         rhs = "=".join(rhs_pieces)
         if len(rhs_pieces) != 1:
-            self.log.error("Expected one rhs. Value: {expr}")
+            self.log.error(f"Expected one rhs. Value: {expr}")
 
         return AssignmentObj(
             type="assignment",
@@ -100,7 +100,7 @@ class ItemMigrator:
         rhs = "=".join(rhs_pieces)
 
         if len(rhs_pieces) != 1:
-            self.log.error("Expected one rhs. Value: {expr}")
+            self.log.error(f"Expected one rhs. Value: {expr}")
 
         matches = re.search(r"(.*?)\((.*?)\)", lhs)
         if matches is None:
@@ -470,7 +470,7 @@ class ItemMigrator:
         return VariableSliderProperties(
             description=x.description,
             duration="4",
-            fps="30",
+            fps="50",
             isAnimating=stringify(x.isAnimating),
             range=StrArray(type="array", items=[x.min, x.max]),
             speedMultiplier=self.find_speed(x.speedMultiplier),
