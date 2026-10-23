@@ -33,7 +33,7 @@ class Command(BaseCommand):
             default=0,
             help=(
                 "Keep going past this many problem scenes (a translation error, "
-                "or properties the translator ignored) before aborting"
+                "an ERROR issue, or properties the translator ignored) before aborting"
             ),
         )
 
@@ -52,14 +52,14 @@ class Command(BaseCommand):
             except Exception as e:  # noqa: BLE001 — reported and counted below
                 problems.append((legacy_scene.key, f"{type(e).__name__}: {e}"))
             else:
-                ignored = [
+                serious = [
                     issue.message
                     for issue in (translated.issues if translated else [])
-                    if issue.severity is Severity.WARNING
-                    and IGNORED_PROPERTIES in issue.message
+                    if issue.severity is Severity.ERROR
+                    or IGNORED_PROPERTIES in issue.message
                 ]
-                if ignored:
-                    problems.append((legacy_scene.key, "; ".join(ignored)))
+                if serious:
+                    problems.append((legacy_scene.key, "; ".join(serious)))
             if len(problems) > options["max_failures"]:
                 raise CommandError(self._summary(problems))
 

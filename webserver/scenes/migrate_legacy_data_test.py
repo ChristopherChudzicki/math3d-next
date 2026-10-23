@@ -45,3 +45,10 @@ def test_ignored_unknown_properties_count_as_problems():
     assert (
         legacy.migration_note == "WARNING p: Ignored unknown POINT properties: samples"
     )
+
+
+@pytest.mark.django_db
+def test_error_issues_count_as_problems():
+    _legacy(v={"type": "VECTOR_FIELD", "samples": "[1, 2]"})
+    with pytest.raises(CommandError, match="Invalid vector field samples"):
+        call_command("migrate_legacy_data")

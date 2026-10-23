@@ -1,5 +1,6 @@
 import copy
 import logging
+import math
 import re
 from dataclasses import dataclass
 from typing import Any
@@ -7,7 +8,7 @@ from typing import Any
 from django.core.exceptions import ValidationError
 
 from scenes.legacy_scene_utils.default_data import set_defaults
-from scenes.legacy_scene_utils.issue_log import Issue
+from scenes.legacy_scene_utils.issue_log import Issue, IssueLog
 from scenes.legacy_scene_utils.translate import ItemMigrator
 from scenes.models import LegacyScene, Scene, is_invalid_key_error
 
@@ -33,13 +34,24 @@ def parse_value(value: str, default: float) -> float:
         return default
 
 
-def get_axis_scales(old_items: dict) -> tuple[float, float, float]:
-    """Get the axis scales from the legacy axis items (flat dicts)."""
-    return (
-        parse_value(str(old_items["axis-x"].get("scale", "1")), 1),
-        parse_value(str(old_items["axis-y"].get("scale", "1")), 1),
-        parse_value(str(old_items["axis-z"].get("scale", "1/2")), 0.5),
-    )
+def get_axis_scales(old_items: dict, log: IssueLog) -> tuple[float, float, float]:
+    """Get the axis scales from the legacy axis items (flat dicts). A scale the
+    camera can't divide by (zero, negative, or not a plain number) falls back to
+    the default, with a warning."""
+    scales = []
+    for axis_id, default_text, default in (
+        ("axis-x", "1", 1.0),
+        ("axis-y", "1", 1.0),
+        ("axis-z", "1/2", 0.5),
+    ):
+        raw = str(old_items[axis_id].get("scale", default_text))
+        value = parse_value(raw, math.nan)
+        if not value > 0:
+            log.set_prefix(axis_id)
+            log.warning(f"Camera uses scale {default}; can't use axis scale {raw!r}")
+            value = default
+        scales.append(value)
+    return scales[0], scales[1], scales[2]
 
 
 def _legacy_title(metadata: dict) -> str:
@@ -92,9 +104,11 @@ def translate_legacy_scene(dehydrated: dict) -> TranslatedScene:
     for item_id, defaults in default_items.items():
         old_items[item_id] = {**defaults, **old_items[item_id]}
 
-    axis_scales = get_axis_scales(old_items)
+    log = IssueLog()
+    axis_scales = get_axis_scales(old_items, log)
 
     migrator = ItemMigrator(
+        log=log,
         x_scale=axis_scales[0],
         y_scale=axis_scales[1],
         z_scale=axis_scales[2],

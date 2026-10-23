@@ -56,6 +56,22 @@ def test_camera_is_scaled_by_the_scenes_axis_scales():
     assert _items(translated)["camera"]["position"] == "[1.0, -2.0, 4.0]"
 
 
+@pytest.mark.parametrize("scale", ["0", "x_{s}"])
+def test_unusable_axis_scale_falls_back_to_default_with_a_warning(scale):
+    translated = translate_legacy_scene(
+        _dehydrated(
+            graphics={
+                "axis-x": {"type": "AXIS", "scale": scale},
+                "camera": {"type": "CAMERA", "relativePosition": [2, -2, 1]},
+            }
+        )
+    )
+    assert _items(translated)["camera"]["position"] == "[2.0, -2.0, 2.0]"
+    assert [i.message for i in translated.issues] == [
+        f"axis-x: Camera uses scale 1.0; can't use axis scale {scale!r}"
+    ]
+
+
 @pytest.mark.parametrize(
     ("value", "expected"),
     [("2", 2.0), ("1/2", 0.5), ("\\frac{1}{4}", 0.25), ("1\\ ", 1.0), ("x_{s}", 7.0)],
