@@ -236,10 +236,8 @@ def test_blank_calculated_visibility_keeps_item_visible():
     assert got["visible"] is True
 
 
-def test_z_order_follows_opacity():
-    assert values(rehydrated("PARAMETRIC_SURFACE"))["zOrder"] == "25"
-    point = {**rehydrated("POINT"), "opacity": "T"}
-    assert isinstance(values(point)["zOrder"], NeedsEval)
+def test_z_order_uses_next_automatic_order_regardless_of_opacity():
+    assert values(rehydrated("PARAMETRIC_SURFACE"))["zOrder"] == ""
 
 
 def test_vector_field_samples_split_into_components():

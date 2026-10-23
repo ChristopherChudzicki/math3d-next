@@ -272,22 +272,13 @@ def _universal(out: _Out, item: dict) -> None:
     for prop in ("opacity", "zIndex", "zBias"):
         # Set verbatim on the render node (react:components/MathBox/MathBoxComponents.js:210-214).
         out.add(prop, _text(item.get(prop)), "render", prop)
-    out.add("zOrder", _z_order(item.get("opacity")), "render", "opacity")
+    # Policy, not reproduction: math3d-react derived draw order from opacity,
+    # zOrder = (1 - opacity)*100 (react:containers/MathBoxScene/components/MathBoxScene.js:106-110).
+    # math3d-next deliberately orders by the item tree instead, surfaces last
+    # (#1010; next:app/src/store/scene/state/selectors.ts defaultGraphicOrder),
+    # and uses that whenever zOrder is empty. Legacy scenes take the new order.
+    out.add("zOrder", "", "render", "constant")
     _visibility(out, item)
-
-
-def _z_order(opacity: Any) -> str | NeedsEval:
-    # math3d-react has no zOrder field: it passes zOrder = (1 - opacity)*100
-    # when opacity evaluates to a number, else 0
-    # (react:containers/MathBoxScene/components/MathBoxScene.js:106-110), and
-    # sets it on the render node (react:components/MathBox/MathBoxComponents.js:214).
-    # next evaluates `zOrder` and only falls back to its own folder-order
-    # default when it is empty (next:mathitem-configs/src/shared.ts:228-240,
-    # next:app/src/features/viewport/graphics/ParametricSurface.tsx:241).
-    value = _simple_number(opacity)
-    if value is None:
-        return NeedsEval(f"zOrder is (1 - opacity)*100 with opacity={opacity!r}")
-    return _js_number((1 - float(value)) * 100)
 
 
 def _visibility(out: _Out, item: dict) -> None:
@@ -760,7 +751,7 @@ EXPECTATIONS: dict[str, Callable[[dict, Context], list[Expectation]]] = {
 _UNIVERSAL_COVERAGE = {
     "description": "description (identity)",
     "color": "color (identity)",
-    "opacity": "opacity (identity); also zOrder = (1 - opacity)*100",
+    "opacity": "opacity (identity); zOrder is empty by policy (#1010), not derived from opacity",
     "zIndex": "zIndex (identity)",
     "zBias": "zBias (identity)",
     "visible": "visible (bool); forced true when useCalculatedVisibility has a blank expression",
