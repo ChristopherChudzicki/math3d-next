@@ -2,6 +2,7 @@ import copy
 import logging
 import re
 from dataclasses import dataclass
+from typing import Any
 
 from django.core.exceptions import ValidationError
 
@@ -15,34 +16,30 @@ logger = logging.getLogger(__name__)
 
 def parse_value(value: str, default: float) -> float:
     """
-    Parse a value from a string to a float. The value can be a fraction or a
-    decimal number.
+    Parse a legacy axis scale: a number, "a/b", or "\\frac{a}{b}" (LaTeX spaces
+    allowed). Anything else, e.g. a variable, falls back to the default.
     """
+    value = value.replace("\\ ", "").strip()
+    frac = re.fullmatch(r"\\frac\{(.+)\}\{(.+)\}", value)
+    if frac:
+        value = f"{frac[1]}/{frac[2]}"
     try:
         if "/" in value:
             numerator, denominator = value.split("/")
             return float(numerator) / float(denominator)
         return float(value)
-    except ValueError:
+    except (ValueError, ZeroDivisionError):
         # If the value cannot be parsed, return the default value
         return default
 
 
 def get_axis_scales(old_items: dict) -> tuple[float, float, float]:
-    """
-    Get the axis scales from the old items. The axis scales are stored in the
-    properties of the axis items.
-    """
-    x_scale = y_scale = z_scale = 1.0
-    for item_id, item in old_items.items():
-        if item_id == "axis-x":
-            x_scale = parse_value(item.get("properties", {}).get("scale", "1"), 1)
-        elif item_id == "axis-y":
-            y_scale = parse_value(item.get("properties", {}).get("scale", "1"), 1)
-        elif item_id == "axis-z":
-            z_scale = parse_value(item.get("properties", {}).get("scale", "1/2"), 0.5)
-
-    return x_scale, y_scale, z_scale
+    """Get the axis scales from the legacy axis items (flat dicts)."""
+    return (
+        parse_value(str(old_items["axis-x"].get("scale", "1")), 1),
+        parse_value(str(old_items["axis-y"].get("scale", "1")), 1),
+        parse_value(str(old_items["axis-z"].get("scale", "1/2")), 0.5),
+    )
 
 
 def _legacy_title(metadata: dict) -> str:
@@ -69,7 +66,10 @@ def translate_legacy_scene(dehydrated: dict) -> TranslatedScene:
     for item_id, item in dehydrated["folders"].items():
         item["type"] = "FOLDER"
 
-    default_items = {
+    # math3d-react's initialState items. A saved built-in item is only its diff
+    # against these, so they are merged per property below.
+    default_items: dict[str, dict[str, Any]] = {
+        "camera": {"type": "CAMERA"},
         "axis-x": {"type": "AXIS", "axis": "x"},
         "axis-y": {"type": "AXIS", "axis": "y"},
         "axis-z": {"type": "AXIS", "axis": "z", "scale": "1/2"},
@@ -89,6 +89,8 @@ def translate_legacy_scene(dehydrated: dict) -> TranslatedScene:
         **dehydrated["mathGraphics"],
         **dehydrated["mathSymbols"],
     }
+    for item_id, defaults in default_items.items():
+        old_items[item_id] = {**defaults, **old_items[item_id]}
 
     axis_scales = get_axis_scales(old_items)
 
@@ -136,7 +138,7 @@ def translate_legacy_scene(dehydrated: dict) -> TranslatedScene:
     )
 
 
-def migrate_scene(legacy_scene: LegacyScene):
+def migrate_scene(legacy_scene: LegacyScene) -> TranslatedScene | None:
     translated = translate_legacy_scene(legacy_scene.dehydrated)
     try:
         scene, _created = Scene.objects.update_or_create(
@@ -157,7 +159,7 @@ def migrate_scene(legacy_scene: LegacyScene):
         logger.warning(
             "Skipping migration of legacy scene with invalid key %r", legacy_scene.key
         )
-        return
+        return None
     # TimestampedModel.save() overwrites modified_date on every write (and
     # created_date on insert), so backdate with a queryset update.
     if translated.creation_date is None:
@@ -169,6 +171,7 @@ def migrate_scene(legacy_scene: LegacyScene):
     )
 
     legacy_scene.migration_note = "\n".join(
-        issue.message for issue in translated.issues
+        f"{issue.severity.name} {issue.message}" for issue in translated.issues
     )
     legacy_scene.save(update_fields=["migration_note"])
+    return translated

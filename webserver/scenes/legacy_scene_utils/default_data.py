@@ -1,4 +1,6 @@
-DEFAULT_FOLDERS = {
+from typing import Any
+
+DEFAULT_FOLDERS: dict[str, dict[str, Any]] = {
     "cameraFolder": {
         "isCollapsed": True,
         "isDropDisabled": True,
@@ -25,9 +27,13 @@ def set_defaults(dehydrated: dict):
     folders = dehydrated.get("folders", {})
     symbols = dehydrated.get("mathSymbols", {})
 
+    # Saved built-in folders are diffs against these defaults; merge per property.
     dehydrated["folders"] = {
-        **DEFAULT_FOLDERS,
         **folders,
+        **{
+            folder_id: {**defaults, **folders.get(folder_id, {})}
+            for folder_id, defaults in DEFAULT_FOLDERS.items()
+        },
     }
 
     dehydrated["sortableTree"] = {

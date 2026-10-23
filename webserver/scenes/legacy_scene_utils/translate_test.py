@@ -110,6 +110,24 @@ def test_boolean_variable():
             },
             {"useRelative": "false", "position": "[1+1, 2, 3]", "target": "[0, 0, -1]"},
         ),
+        (
+            {"relativePosition": [0, -2, 0], "relativeLookAt": [0, 0, 0]},
+            {"position": "[0.0, -2.0, 0.0]", "target": "[0.0, 0.0, 0.0]"},
+        ),
+        (
+            # math3d-react saves an orthographic camera dollied 50x away from
+            # its target; math3d-next stores the un-dollied position.
+            {
+                "isOrthographic": True,
+                "relativePosition": [0, 0, 50],
+                "relativeLookAt": [0, 0, 0],
+            },
+            {
+                "isOrthographic": "true",
+                "position": "[0.0, 0.0, 2.0]",
+                "target": "[0.0, 0.0, 0.0]",
+            },
+        ),
     ],
 )
 def test_camera(in_patch, out_patch):
@@ -317,9 +335,13 @@ def test_folder():
     assert expected_out == actual_out
 
 
-def test_grid():
+@pytest.mark.parametrize(
+    ("in_patch", "out_patch"),
+    [({}, {}), ({"width": "2", "snap": True}, {"width": "2", "snap": "true"})],
+)
+def test_grid(in_patch, out_patch):
     migrator = ItemMigrator()
-    data_in = {"type": "GRID", "color": "red"}
+    data_in = {"type": "GRID", "color": "red", **in_patch}
     expected_out = {
         "id": "some-id",
         "type": "GRID",
@@ -337,6 +359,7 @@ def test_grid():
             "zBias": "0",
             "zIndex": "0",
             "zOrder": "",
+            **out_patch,
         },
     }
     actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
@@ -566,7 +589,15 @@ def test_variable():
 
 @pytest.mark.parametrize(
     ("in_patch", "out_patch"),
-    [({}, {}), ({"speedMultiplier": 0.25}, {"speedMultiplier": "1/4"})],
+    [
+        ({}, {}),
+        ({"speedMultiplier": 0.25}, {"speedMultiplier": "1/4"}),
+        ({"speedMultiplier": 0.0625}, {"speedMultiplier": "1/16"}),
+        # math3d-next has no 1.5x or 3x; speeds double per step, so the
+        # nearest on that scale is the next faster one.
+        ({"speedMultiplier": 1.5}, {"speedMultiplier": "2"}),
+        ({"speedMultiplier": 3}, {"speedMultiplier": "4"}),
+    ],
 )
 def test_variable_slider(in_patch, out_patch):
     migrator = ItemMigrator()
@@ -636,6 +667,14 @@ def test_vector():
                 "samples3": "30",
             },
         ),
+        (
+            {"samples": "\\left[4,\\ 6,\\ 8\\right]"},
+            {
+                "samples1": "4",
+                "samples2": "6",
+                "samples3": "8",
+            },
+        ),
     ],
 )
 def test_vector_field(in_patch, out_patch):
@@ -681,3 +720,14 @@ def test_vector_field(in_patch, out_patch):
     }
     actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
+
+
+def test_unknown_legacy_property_is_ignored_and_logged():
+    migrator = ItemMigrator()
+    item = migrator.translate_item(
+        {"type": "EXPLICIT_SURFACE", "samples": "5"}, "some-id"
+    )
+    assert item.type == "EXPLICIT_SURFACE"
+    assert [i.message for i in migrator.log.issues()] == [
+        "some-id: Ignored unknown EXPLICIT_SURFACE properties: samples"
+    ]

@@ -1,3 +1,5 @@
+import dataclasses
+import math
 import re
 from copy import deepcopy
 from typing import Literal, cast
@@ -65,9 +67,21 @@ class ItemMigrator:
         if log is None:
             log = IssueLog()
         self.log = log
+        self.item_type = ""
         self.x_scale = x_scale
         self.y_scale = y_scale
         self.z_scale = z_scale
+
+    def legacy(self, cls, props: dict):
+        """Build the legacy dataclass, ignoring (and logging) keys it doesn't
+        define, as math3d-react's own rehydrate does."""
+        fields = {f.name for f in dataclasses.fields(cls)}
+        unknown = sorted(set(props) - fields)
+        if unknown:
+            self.log.warning(
+                f"Ignored unknown {self.item_type} properties: {', '.join(unknown)}"
+            )
+        return cls(**{k: v for k, v in props.items() if k in fields})
 
     def assignment(self, expr: str) -> AssignmentObj:
         lhs, *rhs_pieces = expr.split("=")
@@ -104,36 +118,39 @@ class ItemMigrator:
         items = [self.function_assignment(expr) for expr in exprs]
         return FunctionAssignmentArray(type="array", items=items)
 
-    def find_speed(self, speed: float) -> str:
-        if speed == 0.125:
-            return "1/8"
-        if speed == 0.25:
-            return "1/4"
-        if speed == 0.5:
-            return "1/2"
-        if speed == 0.75:
-            return "3/4"
-        if speed == 1:
-            return "1"
-        if speed == 2:
-            return "2"
-        if speed == 4:
-            return "4"
-        if speed == 8:
-            return "8"
+    # math3d-next's speeds (SliderControls.tsx speedOptions). Each step doubles,
+    # so an unsupported legacy speed maps to the nearest one on a log scale.
+    SPEEDS = {
+        1 / 16: "1/16",
+        1 / 8: "1/8",
+        1 / 4: "1/4",
+        1 / 2: "1/2",
+        3 / 4: "3/4",
+        1: "1",
+        2: "2",
+        4: "4",
+        8: "8",
+    }
 
-        self.log.error(f"Unexpected speedMultipler: {speed}")
-        return "1"
+    def find_speed(self, speed: float) -> str:
+        if speed in self.SPEEDS:
+            return self.SPEEDS[speed]
+        if not speed or speed <= 0:
+            self.log.error(f"Unexpected speedMultiplier: {speed}")
+            return "1"
+        nearest = min(self.SPEEDS, key=lambda s: abs(math.log(s / speed)))
+        self.log.warning(f"speedMultiplier {speed} -> {self.SPEEDS[nearest]}")
+        return self.SPEEDS[nearest]
 
     def vector_field_samples(self, arr: str):
-        match = re.match(r"(?:\\left)?\[(.+?),(.+?),(.+?)(?:\right)?\]", arr)
+        match = re.match(r"(?:\\left)?\[(.+?),(.+?),(.+?)(?:\\right)?\]$", arr.strip())
         if not match:
             self.log.error(f"Invalid vector field samples: {arr}")
             return "10", "10", "5"
-        return match[1].strip(), match[2].strip(), match[3].strip()
+        return tuple(m.replace("\\ ", " ").strip() for m in match.groups())  # type: ignore[return-value]
 
     def translate_axis(self, props) -> AxisProperties:
-        x = old.AxisProperties(**props)
+        x = self.legacy(old.AxisProperties, props)
         return AxisProperties(
             color=x.color,
             visible=x.visible,
@@ -163,7 +180,7 @@ class ItemMigrator:
         )
 
     def translate_boolean_variable(self, props) -> BooleanVariableProperties:
-        x = old.BooleanVariable(**props)
+        x = self.legacy(old.BooleanVariable, props)
         return BooleanVariableProperties(
             description=x.description,
             value=AssignmentObj(
@@ -174,19 +191,27 @@ class ItemMigrator:
         )
 
     def translate_camera(self, props) -> CameraProperties:
-        x = old.CameraProperties(**props)
+        x = self.legacy(old.CameraProperties, props)
 
-        relativePosition = [
+        position_in = [
             # Some legacy data has relativePosition as [null, null, null]
-            (x.relativePosition[0] or 0.5) / self.x_scale,
-            (x.relativePosition[1] or -2) / self.y_scale,
-            (x.relativePosition[2] or 0.5) / self.z_scale,
+            default if value is None else value
+            for value, default in zip(x.relativePosition, [0.5, -2, 0.5], strict=False)
         ]
-        relativeLookAt = [
-            (x.relativeLookAt[0] or 0) / self.x_scale,
-            (x.relativeLookAt[1] or 0) / self.y_scale,
-            (x.relativeLookAt[2] or 0) / self.z_scale,
+        look_at = [
+            default if value is None else value
+            for value, default in zip(x.relativeLookAt, [0, 0, 0], strict=False)
         ]
+        if x.isOrthographic:
+            # math3d-react fakes orthographic with a 50x dolly zoom and saves the
+            # dollied position (Camera.dollyZoom in MathBoxComponents.js);
+            # math3d-next stores the un-dollied one (viewport/Camera.tsx).
+            position_in = [
+                t + (p - t) / 50 for p, t in zip(position_in, look_at, strict=True)
+            ]
+        scales = [self.x_scale, self.y_scale, self.z_scale]
+        relativePosition = [p / k for p, k in zip(position_in, scales, strict=True)]
+        relativeLookAt = [t / k for t, k in zip(look_at, scales, strict=True)]
         position = str(relativePosition)
         target = str(relativeLookAt)
         if x.useComputed:
@@ -205,7 +230,7 @@ class ItemMigrator:
         )
 
     def translate_explicit_surface(self, props) -> ExplicitSurfaceProperties:
-        x = old.ExplicitSurfaceProperties(**props)
+        x = self.legacy(old.ExplicitSurfaceProperties, props)
         expr = self.function_assignment(x.expr)
         rangeU = x.rangeU if "=" in x.rangeU else f"_f(y)={x.rangeU}"
         rangeV = x.rangeV if "=" in x.rangeV else f"_f(x)={x.rangeV}"
@@ -235,7 +260,7 @@ class ItemMigrator:
         )
 
     def translate_explicit_surface_polar(self, props) -> ExplicitSurfacePolarProperties:
-        x = old.ExplicitSurfacePolarProperties(**props)
+        x = self.legacy(old.ExplicitSurfacePolarProperties, props)
         expr = self.function_assignment(x.expr)
         rangeU = x.rangeU if "=" in x.rangeU else f"_f(Q)={x.rangeU}"
         rangeV = x.rangeV if "=" in x.rangeV else f"_f(r)={x.rangeV}"
@@ -265,7 +290,7 @@ class ItemMigrator:
         )
 
     def translate_grid(self, props) -> GridProperties:
-        x = old.GridProperties(**props)
+        x = self.legacy(old.GridProperties, props)
         return GridProperties(
             color=x.color,
             description=x.description,
@@ -279,21 +304,21 @@ class ItemMigrator:
             zOrder="",
             zIndex=x.zIndex,
             divisions=x.divisions,
-            width="1/2",
-            snap="false",
+            width=x.width,
+            snap=stringify(x.snap),
             # cast narrows the legacy str for mypy; Pydantic validates the
             # Literal at runtime when GridProperties is constructed.
             axes=cast(Literal["xy", "yz", "zx"], x.axes),
         )
 
     def translate_folder(self, props) -> FolderProperties:
-        x = old.FolderProperties(**props)
+        x = self.legacy(old.FolderProperties, props)
         return FolderProperties(
             description=x.description, isCollapsed=stringify(x.isCollapsed)
         )
 
     def translate_implicit_surface(self, props) -> ImplicitSurfaceProperties:
-        x = old.ImplicitSurfaceProperties(**props)
+        x = self.legacy(old.ImplicitSurfaceProperties, props)
         return ImplicitSurfaceProperties(
             color=x.color,
             description=x.description,
@@ -330,7 +355,7 @@ class ItemMigrator:
         )
 
     def translate_line(self, props) -> LineProperties:
-        x = old.LineProperties(**props)
+        x = self.legacy(old.LineProperties, props)
         return LineProperties(
             color=x.color,
             coords=x.coords,
@@ -353,7 +378,7 @@ class ItemMigrator:
         )
 
     def translate_parametric_curve(self, props) -> ParametricCurveProperties:
-        x = old.ParametricCurveProperties(**props)
+        x = self.legacy(old.ParametricCurveProperties, props)
         return ParametricCurveProperties(
             color=x.color,
             description=x.description,
@@ -384,7 +409,7 @@ class ItemMigrator:
         )
 
     def translate_parametric_surface(self, props) -> ParametricSurfaceProperties:
-        x = old.ParametricSurfaceProperties(**props)
+        x = self.legacy(old.ParametricSurfaceProperties, props)
         expr = self.function_assignment(x.expr)
         rangeU = x.rangeU if "=" in x.rangeU else f"_f(v)={x.rangeU}"
         rangeV = x.rangeV if "=" in x.rangeV else f"_f(u)={x.rangeV}"
@@ -414,7 +439,7 @@ class ItemMigrator:
         )
 
     def translate_point(self, props) -> PointProperties:
-        x = old.PointProperties(**props)
+        x = self.legacy(old.PointProperties, props)
         return PointProperties(
             color=x.color,
             coords=x.coords,
@@ -434,14 +459,14 @@ class ItemMigrator:
         )
 
     def translate_variable(self, props) -> VariableProperties:
-        x = old.VariableProperties(**props)
+        x = self.legacy(old.VariableProperties, props)
         return VariableProperties(
             description=x.description,
             value=self.assignment(f"{x.name}={x.value}"),
         )
 
     def translate_variable_slider(self, props) -> VariableSliderProperties:
-        x = old.VariableSlider(**props)
+        x = self.legacy(old.VariableSlider, props)
         return VariableSliderProperties(
             description=x.description,
             duration="4",
@@ -453,7 +478,7 @@ class ItemMigrator:
         )
 
     def translate_vector(self, props) -> VectorProperties:
-        x = old.VectorProperties(**props)
+        x = self.legacy(old.VectorProperties, props)
         return VectorProperties(
             color=x.color,
             components=x.components,
@@ -477,7 +502,7 @@ class ItemMigrator:
         )
 
     def translate_vector_field(self, props) -> VectorFieldProperties:
-        x = old.VectorFieldProperties(**props)
+        x = self.legacy(old.VectorFieldProperties, props)
         samples1, samples2, samples3 = self.vector_field_samples(x.samples)
         return VectorFieldProperties(
             color=x.color,
@@ -523,6 +548,8 @@ class ItemMigrator:
         copy = deepcopy(item)
         item_type = copy["type"]
         del copy["type"]
+        self.log.set_prefix(item_id)
+        self.item_type = item_type
 
         if item_type == "AXIS":
             extra_defaults = {}
@@ -649,4 +676,4 @@ class ItemMigrator:
                 properties=self.translate_vector_field(copy),
             )
 
-        raise NotImplementedError(f"Unknown item type: {copy['type']}")
+        raise NotImplementedError(f"Unknown item type: {item_type}")
