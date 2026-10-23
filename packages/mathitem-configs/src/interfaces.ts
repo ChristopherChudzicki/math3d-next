@@ -24,6 +24,9 @@ export interface PropertyConfig<K, V = never> {
    * Appropriate for un-evaluated properties like `description` or `label`.
    */
   readonly validate?: Validate<V>;
+  /**
+   * Plain text, shown as a tip in the item's settings popover.
+   */
   readonly description?: string;
 }
 

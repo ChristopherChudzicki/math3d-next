@@ -3,15 +3,13 @@
  *
  * Handled via [vite-plugin-compile-time](https://github.com/egoist/vite-plugin-compile-time)
  */
-import showdown from "showdown";
-import matter from "gray-matter";
+import { load as loadYaml } from "js-yaml";
 import { convertLatexToMarkup } from "mathlive";
 import * as yup from "yup";
 import fs from "fs";
 import path from "path";
-import * as htmlparser2 from "htmlparser2";
-import invariant from "tiny-invariant";
 import { Tag } from "./util";
+import { renderMarkdown } from "./renderMarkdown";
 import type { ReferenceEntry } from "./util";
 
 const readAll = () => {
@@ -29,28 +27,20 @@ const readAll = () => {
     });
 };
 
-const mathExtensions: showdown.ShowdownExtension[] = [
-  {
-    type: "lang",
-    regex: /\\\((.*?)\\\)/g,
-    replace: (text: string) => {
-      return convertLatexToMarkup(text, { defaultMode: "inline-math" });
-    },
-  },
-  {
-    type: "lang",
-    regex: /\\\[((.|\n)*?)\\\]/g,
-    replace: (text: string) => {
-      return convertLatexToMarkup(text, { defaultMode: "math" });
-    },
-  },
-];
-
 const files = readAll();
 
-const converter = new showdown.Converter({
-  extensions: [...mathExtensions],
-});
+const FRONT_MATTER = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
+
+const parseFrontMatter = (filepath: string, contents: string) => {
+  const match = FRONT_MATTER.exec(contents);
+  if (match === null) {
+    throw new Error(`${filepath} must start with --- front matter`);
+  }
+  return {
+    data: loadYaml(match[1]),
+    content: contents.slice(match[0].length),
+  };
+};
 
 const schema = yup.object({
   name: yup.string().required(),
@@ -79,27 +69,15 @@ const validateMetadata = (filepath: string, data: unknown) => {
     throw new Error(`Error validating ${filepath}:\n${err}`);
   }
 };
-const summaryInnerHtml = (summary: string) => {
-  const html = converter.makeHtml(summary);
-  const dom = htmlparser2.parseDocument(html);
-  if (dom.childNodes.length !== 1) {
-    throw new Error("Summary must have exactly one root element");
-  }
-  const regex = /<p>(.*?)<\/p>/;
-  const match = regex.exec(html);
-  invariant(match !== null, "Summary must be a paragraph");
-  const innerHtml = match[1];
-  return innerHtml;
-};
 
 export const entries: ReferenceEntry[] = files.map(({ filepath, contents }) => {
-  const { data, content } = matter(contents);
+  const { data, content } = parseFrontMatter(filepath, contents);
   const metadata = validateMetadata(filepath, data);
   const entry: ReferenceEntry = {
     ...metadata,
-    detailsHtml: converter.makeHtml(content),
+    detailsHtml: renderMarkdown(content),
     latex: convertLatexToMarkup(metadata.latex),
-    summaryInnerHtml: summaryInnerHtml(metadata.summary),
+    summaryInnerHtml: renderMarkdown(metadata.summary, { inline: true }),
     id: filepath,
   };
   return entry;

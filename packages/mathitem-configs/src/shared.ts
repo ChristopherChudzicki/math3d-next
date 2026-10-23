@@ -234,9 +234,9 @@ const zOrder: PropertyConfig<"zOrder", number | undefined> = {
     return validators.real(v);
   },
   description: `Browser limitations mean transparency won't always look correct
-from all directions, particulary for surfaces. You will be able to see objects
+from all directions, particularly for surfaces. You will be able to see objects
 drawn first through objects drawn last. Higher values are drawn last. By default,
-surfaces are drawn last; ties are broken by the order of appearence in folders.`,
+surfaces are drawn last; ties are broken by the order of appearance in folders.`,
 };
 
 const start: PropertyConfig<"start", boolean> = {
