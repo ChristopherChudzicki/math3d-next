@@ -289,6 +289,9 @@ def _visibility(out: _Out, item: dict) -> None:
     # next shows `!!calculatedVisibility` whenever useCalculatedVisibility is
     # set, so an empty one hides the item
     # (next:app/src/store/scene/evaluation/mathScope.ts:102-110).
+    # Policy for a blank expression: math3d-react shows the item on load, but
+    # its author, who saw it hidden while editing, set `visible`; legacy scenes
+    # keep the author's `visible` (owner decision, 2026-10-23).
     use_calc = item.get("useCalculatedVisibility")
     calc = item.get("calculatedVisibility")
     calc_text = _text(calc) if calc is not None else ""
@@ -298,7 +301,7 @@ def _visibility(out: _Out, item: dict) -> None:
         out.add(
             "useCalculatedVisibility", False, "render", f"{src},calculatedVisibility"
         )
-        out.add("visible", True, "render", f"{src},calculatedVisibility")
+        out.add("visible", _bool(item.get("visible")), "render", "visible")
         out.add("calculatedVisibility", calc_text, "editor", "calculatedVisibility")
     elif use_calc is True:
         out.add("useCalculatedVisibility", True, "render", src)
@@ -756,7 +759,7 @@ _UNIVERSAL_COVERAGE = {
     "opacity": "opacity (identity); zOrder is empty by policy (#1010), not derived from opacity",
     "zIndex": "zIndex (identity)",
     "zBias": "zBias (identity)",
-    "visible": "visible (bool); forced true when useCalculatedVisibility has a blank expression",
+    "visible": "visible (bool); the author's value, also when useCalculatedVisibility has a blank expression",
     "useCalculatedVisibility": (
         "useCalculatedVisibility (bool); false when calculatedVisibility is blank"
     ),

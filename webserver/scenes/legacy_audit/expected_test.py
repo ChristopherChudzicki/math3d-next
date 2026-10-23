@@ -229,11 +229,11 @@ def test_surface_range_depending_on_second_parameter_swaps_sampling():
     )
 
 
-def test_blank_calculated_visibility_keeps_item_visible():
+def test_blank_calculated_visibility_keeps_the_authors_visibility():
     point = {**rehydrated("POINT"), "useCalculatedVisibility": True, "visible": False}
     got = values(point)
     assert got["useCalculatedVisibility"] is False
-    assert got["visible"] is True
+    assert got["visible"] is False
 
 
 def test_z_order_uses_next_automatic_order_regardless_of_opacity():
