@@ -1,9 +1,12 @@
+import copy
 import logging
 import re
+from dataclasses import dataclass
 
 from django.core.exceptions import ValidationError
 
 from scenes.legacy_scene_utils.default_data import set_defaults
+from scenes.legacy_scene_utils.issue_log import Issue
 from scenes.legacy_scene_utils.translate import ItemMigrator
 from scenes.models import LegacyScene, Scene, is_invalid_key_error
 
@@ -49,10 +52,21 @@ def _legacy_title(metadata: dict) -> str:
     return "" if title == "Untitled" else title
 
 
-def migrate_scene(legacy_scene: LegacyScene):
-    set_defaults(legacy_scene)
+@dataclass
+class TranslatedScene:
+    items: list[dict]
+    item_order: dict[str, list[str]]
+    title: str
+    creation_date: str | None
+    issues: list[Issue]
 
-    for item_id, item in legacy_scene.dehydrated["folders"].items():
+
+def translate_legacy_scene(dehydrated: dict) -> TranslatedScene:
+    """Translate a legacy scene's dehydrated blob without touching the database."""
+    dehydrated = copy.deepcopy(dehydrated)
+    set_defaults(dehydrated)
+
+    for item_id, item in dehydrated["folders"].items():
         item["type"] = "FOLDER"
 
     default_items = {
@@ -64,16 +78,16 @@ def migrate_scene(legacy_scene: LegacyScene):
         "grid-zx": {"type": "GRID", "axes": "zx", "visible": False},
     }
 
-    symbols = legacy_scene.dehydrated["mathSymbols"]
+    symbols = dehydrated["mathSymbols"]
     for item_id, item in symbols.items():
         if item["type"] == "VARIABLE_SLIDER" and "value" not in item:
-            item["value"] = legacy_scene.dehydrated["sliderValues"][item_id]
+            item["value"] = dehydrated["sliderValues"][item_id]
 
     old_items = {
         **default_items,
-        **legacy_scene.dehydrated["folders"],
-        **legacy_scene.dehydrated["mathGraphics"],
-        **legacy_scene.dehydrated["mathSymbols"],
+        **dehydrated["folders"],
+        **dehydrated["mathGraphics"],
+        **dehydrated["mathSymbols"],
     }
 
     axis_scales = get_axis_scales(old_items)
@@ -87,7 +101,7 @@ def migrate_scene(legacy_scene: LegacyScene):
     for item_id, item in old_items.items():
         items.append(migrator.translate_item(item, item_id).model_dump(mode="json"))
 
-    item_order = legacy_scene.dehydrated["sortableTree"]
+    item_order = dehydrated["sortableTree"]
     item_order["main"] = item_order["root"]
     del item_order["root"]
 
@@ -111,13 +125,26 @@ def migrate_scene(legacy_scene: LegacyScene):
         if not item_order[folder_id] and folder_id not in item_order["main"]:
             del item_order[folder_id]
 
+    metadata = dehydrated["metadata"]
+    creation_date = metadata.get("creationDate")
+    return TranslatedScene(
+        items=items,
+        item_order=item_order,
+        title=_legacy_title(metadata),
+        creation_date=None if creation_date is None else creation_date.replace('"', ""),
+        issues=migrator.log.issues(),
+    )
+
+
+def migrate_scene(legacy_scene: LegacyScene):
+    translated = translate_legacy_scene(legacy_scene.dehydrated)
     try:
         scene, _created = Scene.objects.update_or_create(
             key=legacy_scene.key,
             defaults={
-                "items": items,
-                "item_order": legacy_scene.dehydrated["sortableTree"],
-                "title": _legacy_title(legacy_scene.dehydrated["metadata"]),
+                "items": translated.items,
+                "item_order": translated.item_order,
+                "title": translated.title,
                 "times_accessed": legacy_scene.times_accessed,
                 "is_legacy": True,
             },
@@ -133,14 +160,15 @@ def migrate_scene(legacy_scene: LegacyScene):
         return
     # TimestampedModel.save() overwrites modified_date on every write (and
     # created_date on insert), so backdate with a queryset update.
-    creation_date = legacy_scene.dehydrated["metadata"]["creationDate"].replace('"', "")
+    if translated.creation_date is None:
+        raise KeyError("creationDate")
     Scene.objects.filter(pk=scene.id).update(
-        created_date=creation_date,
-        modified_date=creation_date,
-        content_modified_date=creation_date,
+        created_date=translated.creation_date,
+        modified_date=translated.creation_date,
+        content_modified_date=translated.creation_date,
     )
 
     legacy_scene.migration_note = "\n".join(
-        issue.message for issue in migrator.log.issues()
+        issue.message for issue in translated.issues
     )
     legacy_scene.save(update_fields=["migration_note"])

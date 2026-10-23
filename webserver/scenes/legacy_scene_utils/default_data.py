@@ -1,5 +1,3 @@
-from scenes.models import LegacyScene
-
 DEFAULT_FOLDERS = {
     "cameraFolder": {
         "isCollapsed": True,
@@ -23,18 +21,18 @@ SORTABLE_TREE_FIXED_POSITION = {
 }
 
 
-def set_defaults(scene: LegacyScene):
-    folders = scene.dehydrated.get("folders", {})
-    symbols = scene.dehydrated.get("mathSymbols", {})
+def set_defaults(dehydrated: dict):
+    folders = dehydrated.get("folders", {})
+    symbols = dehydrated.get("mathSymbols", {})
 
-    scene.dehydrated["folders"] = {
+    dehydrated["folders"] = {
         **DEFAULT_FOLDERS,
         **folders,
     }
 
-    scene.dehydrated["sortableTree"] = {
+    dehydrated["sortableTree"] = {
         **SORTABLE_TREE_FIXED_POSITION,
-        **scene.dehydrated["sortableTree"],
+        **dehydrated["sortableTree"],
     }
 
-    scene.dehydrated["mathSymbols"] = symbols
+    dehydrated["mathSymbols"] = symbols

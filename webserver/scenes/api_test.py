@@ -9,7 +9,10 @@ from django.test import Client
 
 from authentication.factories import CustomUserFactory
 from scenes.factories import ExampleSceneFactory, SceneFactory
-from scenes.legacy_scene_utils.migrate_scene import migrate_scene
+from scenes.legacy_scene_utils.migrate_scene import (
+    migrate_scene,
+    translate_legacy_scene,
+)
 from scenes.models import LegacyScene, Scene
 from scenes.tests.data import default_scene
 
@@ -354,7 +357,6 @@ def test_migrate_scene_reraises_non_key_validation_error(monkeypatch):
     # A legacy scene with a valid key but invalid items must fail loudly — the
     # invalid-key skip path must not swallow unrelated validation errors and
     # silently drop the scene (which would surface as a misleading 404).
-    # migrate_scene mutates `dehydrated` in place.
     legacy = LegacyScene.objects.create(
         dehydrated=copy.deepcopy(LEGACY_DEHYDRATED_FIXTURE)
     )
@@ -365,6 +367,22 @@ def test_migrate_scene_reraises_non_key_validation_error(monkeypatch):
     monkeypatch.setattr(Scene.objects, "update_or_create", raise_items_error)
     with pytest.raises(ValidationError):
         migrate_scene(legacy)
+
+
+@pytest.mark.django_db
+def test_migrate_scene_persists_the_pure_translation():
+    dehydrated = copy.deepcopy(LEGACY_DEHYDRATED_FIXTURE)
+    translated = translate_legacy_scene(dehydrated)
+    assert dehydrated == LEGACY_DEHYDRATED_FIXTURE
+
+    legacy = LegacyScene.objects.create(dehydrated=dehydrated)
+    migrate_scene(legacy)
+    scene = Scene.objects.get(key=legacy.key)
+    assert scene.items == translated.items
+    assert scene.item_order == translated.item_order
+    assert scene.title == translated.title
+    assert translated.creation_date is not None
+    assert scene.created_date.isoformat().startswith(translated.creation_date[:19])
 
 
 @pytest.mark.django_db
