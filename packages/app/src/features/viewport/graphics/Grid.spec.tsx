@@ -6,12 +6,11 @@ import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import type { MathItem } from "@math3d/mathitem-configs";
 import { getStore } from "@/store/store";
 import { actions } from "@/store/scene/state/scene.slice";
+import * as select from "@/store/scene/state/selectors";
 import Grid from "./Grid";
 
-test("an empty zIndex reaches MathBox unset, so it takes MathBox's default", async () => {
-  // An empty zIndex fails validation, which the evaluator warns about.
-  const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-  const scene = new SceneBuilder().grid("xy", { zIndex: "" });
+const renderGrid = async (opts: Partial<MathItem<MIT.Grid>["properties"]>) => {
+  const scene = new SceneBuilder().grid("xy", opts);
   const store = getStore();
   store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
   const item = scene.items.find(
@@ -32,6 +31,20 @@ test("an empty zIndex reaches MathBox unset, so it takes MathBox's default", asy
     $props?: Record<string, unknown>;
   };
   await waitFor(() => expect(node.$props).toHaveProperty("axes", "xy"));
-  expect(node.$props?.zIndex).toBeUndefined();
+  return { props: node.$props, store, item };
+};
+
+test("an empty zIndex reaches MathBox unset, so it takes MathBox's default", async () => {
+  // An empty zIndex fails validation, which the evaluator warns about.
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  const { props } = await renderGrid({ zIndex: "" });
+  expect(props?.zIndex).toBeUndefined();
   expect(warn).toHaveBeenCalled();
+});
+
+test("an empty zOrder takes the grid's place in the automatic draw order", async () => {
+  const { props, store, item } = await renderGrid({ zOrder: "" });
+  const automatic = select.defaultGraphicOrder(store.getState())[item.id];
+  expect(automatic).toEqual(expect.any(Number));
+  expect(props?.zOrder).toBe(automatic);
 });
