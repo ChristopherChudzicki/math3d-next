@@ -56,6 +56,21 @@ def test_camera_is_scaled_by_the_scenes_axis_scales():
     assert _items(translated)["camera"]["position"] == "[1.0, -2.0, 4.0]"
 
 
+def test_negative_axis_scale_keeps_its_sign():
+    # math3d-react saved world coordinates; math3d-next multiplies the stored
+    # position by the signed scale.
+    translated = translate_legacy_scene(
+        _dehydrated(
+            graphics={
+                "axis-z": {"type": "AXIS", "scale": "-0.5"},
+                "camera": {"type": "CAMERA", "relativePosition": [3, -3, 2]},
+            }
+        )
+    )
+    assert _items(translated)["camera"]["position"] == "[3.0, -3.0, -4.0]"
+    assert translated.issues == []
+
+
 @pytest.mark.parametrize("scale", ["0", "x_{s}"])
 def test_unusable_axis_scale_falls_back_to_default_with_a_warning(scale):
     translated = translate_legacy_scene(

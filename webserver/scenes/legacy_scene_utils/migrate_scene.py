@@ -35,9 +35,10 @@ def parse_value(value: str, default: float) -> float:
 
 
 def get_axis_scales(old_items: dict, log: IssueLog) -> tuple[float, float, float]:
-    """Get the axis scales from the legacy axis items (flat dicts). A scale the
-    camera can't divide by (zero, negative, or not a plain number) falls back to
-    the default, with a warning."""
+    """Get the axis scales from the legacy axis items (flat dicts). A negative
+    scale mirrors its axis in both apps and is kept; one the camera can't
+    divide by (zero, or not a plain number) falls back to the default, with a
+    warning."""
     scales = []
     for axis_id, default_text, default in (
         ("axis-x", "1", 1.0),
@@ -46,7 +47,7 @@ def get_axis_scales(old_items: dict, log: IssueLog) -> tuple[float, float, float
     ):
         raw = str(old_items[axis_id].get("scale", default_text))
         value = parse_value(raw, math.nan)
-        if not value > 0:
+        if value == 0 or math.isnan(value):
             log.set_prefix(axis_id)
             log.warning(f"Camera uses scale {default}; can't use axis scale {raw!r}")
             value = default
