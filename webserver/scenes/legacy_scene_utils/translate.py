@@ -470,7 +470,7 @@ class ItemMigrator:
         return VariableSliderProperties(
             description=x.description,
             duration="4",
-            fps="50",
+            fps="60",
             isAnimating=stringify(x.isAnimating),
             range=StrArray(type="array", items=[x.min, x.max]),
             speedMultiplier=self.find_speed(x.speedMultiplier),

@@ -608,7 +608,7 @@ def test_variable_slider(in_patch, out_patch):
         "properties": {
             "description": "Variable Slider",
             "duration": "4",
-            "fps": "50",
+            "fps": "60",
             "isAnimating": "false",
             "range": {"items": ["-5", "5"], "type": "array"},
             "speedMultiplier": "1",
