@@ -4380,7 +4380,7 @@ __metadata:
     tinycolor2: "npm:1.6.0"
     toposort: "npm:2.0.2"
     typed-css-modules: "npm:^0.9.1"
-    typescript: "npm:^5.7.2"
+    typescript: "npm:^5.9.3"
     use-long-press: "npm:^3.3.0"
     vite: "npm:^7.3.7"
     vite-tsconfig-paths: "npm:^5.1.4"
@@ -8076,7 +8076,7 @@ __metadata:
     prettier: "npm:4.0.0-alpha.8"
     ts-node: "npm:^10.9.2"
     turbo: "npm:^2.10.13"
-    typescript: "npm:^5.7.2"
+    typescript: "npm:^5.9.3"
   languageName: unknown
   linkType: soft
 
@@ -9868,7 +9868,7 @@ __metadata:
     "@math3d/eslint-config": "workspace:^"
     "@math3d/tsconfig": "workspace:*"
     eslint: "npm:^8.57.1"
-    typescript: "npm:^5.7.2"
+    typescript: "npm:^5.9.3"
     vitest: "npm:^4.1.12"
     wrangler: "npm:4.147.0"
   languageName: unknown
@@ -11261,7 +11261,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.7.2":
+"typescript@npm:^5.9.3":
   version: 5.9.3
   resolution: "typescript@npm:5.9.3"
   bin:
@@ -11271,7 +11271,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.7.2#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^5.9.3#optional!builtin<compat/typescript>":
   version: 5.9.3
   resolution: "typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>::version=5.9.3&hash=5786d5"
   bin:
