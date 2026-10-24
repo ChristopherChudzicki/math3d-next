@@ -1,7 +1,6 @@
 ---
-type: function
 name: sign
-latex: \(\operatorname{sign}(x)\)
+latex: \operatorname{sign}(x)
 keyboard: sign(x)
 summary: Sign function
 tags:

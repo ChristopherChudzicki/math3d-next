@@ -1,7 +1,6 @@
 ---
-type: function
 name: unit normal
-latex: \(\operatorname{unitN}(f, T)
+latex: \operatorname{unitN}(f, T)
 keyboard: unitN(f, T)
 summary: Unit normal vector
 tags:

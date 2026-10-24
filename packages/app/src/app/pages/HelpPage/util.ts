@@ -1,60 +1,19 @@
-interface ReferenceEntry {
-  id: string;
-  /**
-   * Human-readable name, displayed to users
-   */
-  name: string;
-  latex: string;
-  keyboard: string;
-  summaryInnerHtml: string;
-  detailsHtml?: string;
-  tags: string[];
-}
+import { HELP_GROUPS, HELP_GROUP_LABELS } from "./groups";
+import type { HelpGroup } from "./groups";
+import type { HelpDoc } from "./types";
 
-enum Tag {
-  Trig = "trig",
-  TrigHyperbolic = "trig-hyperbolic",
-  Algebra = "algebra",
-  Calculus = "calculus",
-  ExpLog = "explog",
-  Misc = "misc",
-  Constants = "constants",
-}
-
-const READABLE_TAG: Record<Tag, string> = {
-  [Tag.Algebra]: "Algebra",
-  [Tag.Calculus]: "Calculus",
-  [Tag.Trig]: "Trigonometry",
-  [Tag.TrigHyperbolic]: "Trigonometry (Hyperbolic)",
-  [Tag.Misc]: "Miscellaneous",
-  [Tag.ExpLog]: "Logs & Exponents",
-  [Tag.Constants]: "Constants",
-};
-
-type EntryGroup = {
-  tag: Tag;
+type DocGroup = {
+  id: HelpGroup;
   label: string;
-  entries: ReferenceEntry[];
+  docs: HelpDoc[];
 };
 
-const groupEntries = (entries: ReferenceEntry[]): EntryGroup[] => {
-  const groupMap = Object.groupBy(entries, (entry) => {
-    return entry.tags[0] as Tag;
-  });
-  const groups = Object.entries(groupMap)
-    .map(([t, group]) => {
-      const tag = t as Tag;
-      return {
-        tag,
-        label: READABLE_TAG[tag],
-        entries: group,
-      };
-    })
-    .sort((a, b) => {
-      return a.label.localeCompare(b.label);
-    });
-  return groups;
-};
+/** Groups docs by their first tag, in `HELP_GROUPS` order, skipping empty groups. */
+const groupDocs = (docs: HelpDoc[]): DocGroup[] =>
+  HELP_GROUPS.map((id) => ({
+    id,
+    label: HELP_GROUP_LABELS[id],
+    docs: docs.filter((doc) => doc.tags[0] === id),
+  })).filter((docGroup) => docGroup.docs.length > 0);
 
-export { Tag, READABLE_TAG, groupEntries };
-export type { ReferenceEntry };
+export { groupDocs };

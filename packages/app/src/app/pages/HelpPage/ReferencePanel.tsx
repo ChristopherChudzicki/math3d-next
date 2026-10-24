@@ -4,32 +4,30 @@ import React from "react";
 
 import { TextButton } from "@/ui/TextLink";
 import { useToggle } from "@/util/hooks";
-import type { ReferenceEntry } from "./data.compile";
+import type { HelpDoc } from "./types";
 import * as styles from "./ReferencePanel.module.css";
-import { groupEntries } from "./util";
+import { groupDocs } from "./util";
 
 type ReferencePanelProps = {
-  entries: ReferenceEntry[];
+  docs: HelpDoc[];
 };
 
-const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
-  const hasDetails = !!entry.detailsHtml;
+const ReferenceRow = ({ doc }: { doc: HelpDoc }) => {
+  const hasDetails = !!doc.detailsHtml;
   const [expanded, setExpanded] = useToggle(false);
   return (
     <tr className={styles.row}>
       <td
         className={styles.expression}
-        dangerouslySetInnerHTML={{ __html: entry.latex }}
+        dangerouslySetInnerHTML={{ __html: doc.expressionHtml }}
       />
       <td>
-        <span className={styles.keyboard}>{entry.keyboard}</span>
+        <span className={styles.keyboard}>{doc.keyboard}</span>
       </td>
       <td className={styles.description}>
         <div>
           <p className={styles.summary}>
-            <span
-              dangerouslySetInnerHTML={{ __html: entry.summaryInnerHtml }}
-            />
+            <span dangerouslySetInnerHTML={{ __html: doc.summaryHtml }} />
             {hasDetails && (
               // A single toggle that stays mounted across expand/collapse, so
               // it keeps keyboard focus when activated.
@@ -43,15 +41,15 @@ const ReferenceRow = ({ entry }: { entry: ReferenceEntry }) => {
             )}
           </p>
         </div>
-        {expanded && entry.detailsHtml && (
-          <div dangerouslySetInnerHTML={{ __html: entry.detailsHtml }} />
+        {expanded && doc.detailsHtml && (
+          <div dangerouslySetInnerHTML={{ __html: doc.detailsHtml }} />
         )}
       </td>
     </tr>
   );
 };
 
-const ReferenceTable: React.FC<ReferencePanelProps> = ({ entries }) => {
+const ReferenceTable: React.FC<ReferencePanelProps> = ({ docs }) => {
   return (
     <div className={styles.tableContainer}>
       <table className={styles.table}>
@@ -63,8 +61,8 @@ const ReferenceTable: React.FC<ReferencePanelProps> = ({ entries }) => {
           </tr>
         </thead>
         <tbody>
-          {entries.map((entry) => (
-            <ReferenceRow key={entry.id} entry={entry} />
+          {docs.map((doc) => (
+            <ReferenceRow key={doc.id} doc={doc} />
           ))}
         </tbody>
       </table>
@@ -72,15 +70,15 @@ const ReferenceTable: React.FC<ReferencePanelProps> = ({ entries }) => {
   );
 };
 
-const ReferencePanel: React.FC<ReferencePanelProps> = ({ entries }) => {
-  const groups = groupEntries(entries);
+const ReferencePanel: React.FC<ReferencePanelProps> = ({ docs }) => {
+  const groups = groupDocs(docs);
 
   return groups.map((group) => (
-    <React.Fragment key={group.tag}>
-      <h2 className={styles.heading} id={group.tag}>
+    <React.Fragment key={group.id}>
+      <h2 className={styles.heading} id={group.id}>
         {group.label}
       </h2>
-      <ReferenceTable entries={group.entries} />
+      <ReferenceTable docs={group.docs} />
     </React.Fragment>
   ));
 };

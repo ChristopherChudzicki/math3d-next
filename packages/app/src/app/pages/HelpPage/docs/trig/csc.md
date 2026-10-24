@@ -1,7 +1,6 @@
 ---
-type: function
 name: cosecant
-latex: \(\csc(x)\)
+latex: \csc(x)
 keyboard: csc(x)
 summary: Cosecant
 tags:

@@ -1,7 +1,6 @@
 ---
-type: function
 name: cotangent
-latex: \(\cot(x)\)
+latex: \cot(x)
 keyboard: cot(x)
 summary: Cotangent
 tags:

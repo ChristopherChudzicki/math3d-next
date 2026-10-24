@@ -1,7 +1,6 @@
 ---
-type: function
 name: hyperbolic cosine
-latex: \(\cosh(x)\)
+latex: \cosh(x)
 keyboard: cosh(x)
 summary: Hyperbolic cosine
 tags:

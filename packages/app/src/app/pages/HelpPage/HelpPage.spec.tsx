@@ -6,6 +6,8 @@ test("help reference loads at /app/help/reference", async () => {
   expect(
     await screen.findByRole("heading", { name: "Function Reference" }),
   ).toBeVisible();
+  // A compiled doc, so this fails if the docs glob matches nothing.
+  expect(await screen.findByText("sin(x)")).toBeVisible();
 });
 
 test("an overlay opens over an /app page (host wraps both subtrees)", async () => {

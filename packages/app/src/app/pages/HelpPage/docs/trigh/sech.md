@@ -1,7 +1,6 @@
 ---
-type: function
 name: hyperbolic secant
-latex: \(\operatorname{sech}(x)\)
+latex: \operatorname{sech}(x)
 keyboard: sech(x)
 summary: Hyperbolic secant
 tags:

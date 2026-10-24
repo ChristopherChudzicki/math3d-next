@@ -1,9 +1,6 @@
 import { convertLatexToMarkup } from "mathlive";
 import { renderMarkdown } from "./renderMarkdown";
 
-// renderMarkdown runs at build time, against the real mathlive.
-vi.unmock("mathlive");
-
 describe("renderMarkdown", () => {
   test("renders inline math without interpreting markdown inside it", () => {
     const math = convertLatexToMarkup("x_1 * y_2 *", {

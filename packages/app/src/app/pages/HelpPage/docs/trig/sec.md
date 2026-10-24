@@ -1,7 +1,6 @@
 ---
-type: function
 name: secant
-latex: \(\sec(x)\)
+latex: \sec(x)
 keyboard: sec(x)
 summary: Secant
 tags:

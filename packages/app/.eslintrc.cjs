@@ -84,6 +84,17 @@ const layoutZones = [
     message:
       "The edge Worker runs in workerd; it imports only sceneTitle from the app.",
   },
+  {
+    target: "./src",
+    from: "./vite-plugins",
+    message: "vite-plugins is build-time Node code; the app never imports it.",
+  },
+  {
+    target: "./vite-plugins",
+    from: "./src",
+    except: ["./app/pages/HelpPage/groups.ts", "./app/pages/HelpPage/types.ts"],
+    message: "Build-time plugins import only the Help doc groups and types.",
+  },
 ];
 
 module.exports = {

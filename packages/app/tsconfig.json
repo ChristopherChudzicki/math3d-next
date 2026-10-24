@@ -14,7 +14,7 @@
     ".storybook/*.tsx",
     "vite.config.ts",
     "vitest.worker.config.ts",
-    "src/app/pages/HelpPage/data.compile.ts"
+    "vite-plugins"
   ],
   // The Worker is typechecked separately with Workers (not DOM) types; see
   // src/worker/tsconfig.json.

@@ -1,7 +1,6 @@
 ---
-type: function
 name: cosine
-latex: \(\cos(x)\)
+latex: \cos(x)
 keyboard: cos(x)
 summary: Cosine
 tags:

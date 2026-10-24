@@ -1,7 +1,6 @@
 ---
-type: function
 name: hyperbolic sine
-latex: \(\sinh(x)\)
+latex: \sinh(x)
 keyboard: sinh(x)
 summary: Hyperbolic sine
 tags:

@@ -1,5 +1,3 @@
-// Build-time only: imported by data.compile.ts, so marked never ships.
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { marked } from "marked";
 import { convertLatexToMarkup } from "mathlive";
 
