@@ -56,6 +56,45 @@ def stringify(obj: bool):
         return "false"
 
 
+def split_top_level(arr: str) -> list[str] | None:
+    """Split a literal ``[a, b]`` or ``\\left[a, b\\right]`` on the commas that
+    aren't nested in brackets, or None if it isn't a literal array."""
+    text = re.sub(r"^\\left\[|\\right\]$", lambda m: m[0][-1], arr.strip())
+    if not (text.startswith("[") and text.endswith("]")):
+        return None
+    parts, depth, start = [], 0, 1
+    for i, char in enumerate(text[1:-1], start=1):
+        if char in "([{":
+            depth += 1
+        elif char in ")]}":
+            depth -= 1
+            if depth < 0:
+                return None
+        elif char == "," and depth == 0:
+            parts.append(text[start:i])
+            start = i + 1
+    if depth != 0:
+        return None
+    parts.append(text[start:-1])
+    return parts
+
+
+# A calculated visibility made only of whitespace, including LaTeX spacing
+# commands, is blank.
+_BLANK = re.compile(r"(?:\s|\\ |\\,|\\;|\\:|\\!|\\quad|\\qquad|~)*")
+
+
+def blank_to_empty(text: str) -> str:
+    return "" if _BLANK.fullmatch(text) else text
+
+
+def depends_on(rhs: str, param: str) -> bool:
+    """Whether ``rhs`` uses the symbol ``param``. math3d-next's parser turns
+    backslashes into spaces, so ``\\theta`` is the symbol ``theta``."""
+    symbols = re.findall(r"[A-Za-z_][A-Za-z0-9_]*", rhs.replace("\\", " "))
+    return param.replace("\\", "").strip() in symbols
+
+
 class ItemMigrator:
     def __init__(
         self,
@@ -74,7 +113,7 @@ class ItemMigrator:
 
     def legacy(self, cls, props: dict):
         """Build the legacy dataclass, ignoring (and logging) keys it doesn't
-        define, as math3d-react's own rehydrate does."""
+        define. math3d-react's renderers ignore such keys too."""
         fields = {f.name for f in dataclasses.fields(cls)}
         unknown = sorted(set(props) - fields)
         if unknown:
@@ -118,8 +157,17 @@ class ItemMigrator:
         items = [self.function_assignment(expr) for expr in exprs]
         return FunctionAssignmentArray(type="array", items=items)
 
-    # math3d-next's speeds (SliderControls.tsx speedOptions). Each step doubles,
-    # so an unsupported legacy speed maps to the nearest one on a log scale.
+    @staticmethod
+    def first_range_depends_on_second(domain: FunctionAssignmentArray) -> bool:
+        """math3d-react samples u with uSamples/gridU whichever range is a
+        function; math3d-next evaluates the 2nd parameter first when the 1st
+        one's range depends on it (validators/src/domainFuncs.ts), giving it
+        samples1/grid1."""
+        first = domain.items[0]
+        return any(depends_on(first.rhs, param) for param in first.params)
+
+    # math3d-next's speeds (SliderControls.tsx speedOptions). A legacy speed
+    # without an equal option maps to the nearest one on a log scale.
     SPEEDS = {
         1 / 16: "1/16",
         1 / 8: "1/8",
@@ -142,22 +190,29 @@ class ItemMigrator:
         self.log.warning(f"speedMultiplier {speed} -> {self.SPEEDS[nearest]}")
         return self.SPEEDS[nearest]
 
-    def vector_field_samples(self, arr: str):
-        match = re.match(r"(?:\\left)?\[(.+?),(.+?),(.+?)(?:\\right)?\]$", arr.strip())
-        if not match:
+    def vector_field_samples(self, arr: str) -> tuple[str, str, str]:
+        parts = split_top_level(arr)
+        if parts is None or len(parts) != 3:
             self.log.error(f"Invalid vector field samples: {arr}")
             return "10", "10", "5"
-        return tuple(m.replace("\\ ", " ").strip() for m in match.groups())  # type: ignore[return-value]
+        first, second, third = (p.replace("\\ ", " ").strip() for p in parts)
+        return first, second, third
+
+    def calculated_visibility(self, x) -> dict:
+        """A blank expression turns calculated visibility off, so the item
+        follows its own ``visible`` (owner decision, 2026-10-23)."""
+        calc = blank_to_empty(x.calculatedVisibility or "")
+        return {
+            "calculatedVisibility": calc,
+            "useCalculatedVisibility": bool(calc and x.useCalculatedVisibility),
+        }
 
     def translate_axis(self, props) -> AxisProperties:
         x = self.legacy(old.AxisProperties, props)
         return AxisProperties(
             color=x.color,
             visible=x.visible,
-            calculatedVisibility=x.calculatedVisibility,
-            useCalculatedVisibility=bool(
-                x.calculatedVisibility and x.useCalculatedVisibility
-            ),
+            **self.calculated_visibility(x),
             opacity=x.opacity,
             zIndex=x.zIndex,
             zBias=x.zBias,
@@ -226,7 +281,8 @@ class ItemMigrator:
             isPanEnabled=stringify(x.isPanEnabled),
             isZoomEnabled=stringify(x.isZoomEnabled),
             isRotateEnabled=stringify(x.isRotateEnabled),
-            updateOnDrag=stringify(True),
+            # A drag would write numbers over a computed camera's expressions.
+            updateOnDrag=stringify(not x.useComputed),
         )
 
     def translate_explicit_surface(self, props) -> ExplicitSurfaceProperties:
@@ -235,25 +291,23 @@ class ItemMigrator:
         rangeU = x.rangeU if "=" in x.rangeU else f"_f(y)={x.rangeU}"
         rangeV = x.rangeV if "=" in x.rangeV else f"_f(x)={x.rangeV}"
         domain = self.domain_array([rangeU, rangeV])
+        swap = self.first_range_depends_on_second(domain)
         return ExplicitSurfaceProperties(
             color=x.color,
             colorExpr=self.function_assignment(x.colorExpr),
             description=x.description,
             domain=domain,
             expr=expr,
-            grid1=x.gridU,
-            grid2=x.gridV,
+            grid1=x.gridV if swap else x.gridU,
+            grid2=x.gridU if swap else x.gridV,
             gridOpacity=x.gridOpacity,
             gridWidth=x.gridWidth,
             opacity=x.opacity,
-            samples1=x.uSamples,
-            samples2=x.vSamples,
+            samples1=x.vSamples if swap else x.uSamples,
+            samples2=x.uSamples if swap else x.vSamples,
             shaded=stringify(x.shaded),
             visible=x.visible,
-            calculatedVisibility=x.calculatedVisibility,
-            useCalculatedVisibility=bool(
-                x.calculatedVisibility and x.useCalculatedVisibility
-            ),
+            **self.calculated_visibility(x),
             zBias=x.zBias,
             zOrder="",
             zIndex=x.zIndex,
@@ -265,25 +319,23 @@ class ItemMigrator:
         rangeU = x.rangeU if "=" in x.rangeU else f"_f(\\theta)={x.rangeU}"
         rangeV = x.rangeV if "=" in x.rangeV else f"_f(r)={x.rangeV}"
         domain = self.domain_array([rangeU, rangeV])
+        swap = self.first_range_depends_on_second(domain)
         return ExplicitSurfacePolarProperties(
             color=x.color,
             colorExpr=self.function_assignment(x.colorExpr),
             description=x.description,
             domain=domain,
             expr=expr,
-            grid1=x.gridU,
-            grid2=x.gridV,
+            grid1=x.gridV if swap else x.gridU,
+            grid2=x.gridU if swap else x.gridV,
             gridOpacity=x.gridOpacity,
             gridWidth=x.gridWidth,
             opacity=x.opacity,
-            samples1=x.uSamples,
-            samples2=x.vSamples,
+            samples1=x.vSamples if swap else x.uSamples,
+            samples2=x.uSamples if swap else x.vSamples,
             shaded=stringify(x.shaded),
             visible=x.visible,
-            calculatedVisibility=x.calculatedVisibility,
-            useCalculatedVisibility=bool(
-                x.calculatedVisibility and x.useCalculatedVisibility
-            ),
+            **self.calculated_visibility(x),
             zBias=x.zBias,
             zOrder="",
             zIndex=x.zIndex,
@@ -296,10 +348,7 @@ class ItemMigrator:
             description=x.description,
             opacity=x.opacity,
             visible=x.visible,
-            calculatedVisibility=x.calculatedVisibility,
-            useCalculatedVisibility=bool(
-                x.calculatedVisibility and x.useCalculatedVisibility
-            ),
+            **self.calculated_visibility(x),
             zBias=x.zBias,
             zOrder="",
             zIndex=x.zIndex,
@@ -345,10 +394,7 @@ class ItemMigrator:
             samples=x.samples,
             shaded=stringify(x.shaded),
             visible=x.visible,
-            calculatedVisibility=x.calculatedVisibility,
-            useCalculatedVisibility=bool(
-                x.calculatedVisibility and x.useCalculatedVisibility
-            ),
+            **self.calculated_visibility(x),
             zBias=x.zBias,
             zOrder="",
             zIndex=x.zIndex,
@@ -367,10 +413,7 @@ class ItemMigrator:
             size=x.size,
             start=stringify(x.start),
             visible=x.visible,
-            calculatedVisibility=x.calculatedVisibility,
-            useCalculatedVisibility=bool(
-                x.calculatedVisibility and x.useCalculatedVisibility
-            ),
+            **self.calculated_visibility(x),
             width=x.width,
             zBias=x.zBias,
             zOrder="",
@@ -398,10 +441,7 @@ class ItemMigrator:
             start=stringify(x.start),
             size=x.size,
             visible=x.visible,
-            calculatedVisibility=x.calculatedVisibility,
-            useCalculatedVisibility=bool(
-                x.calculatedVisibility and x.useCalculatedVisibility
-            ),
+            **self.calculated_visibility(x),
             width=x.width,
             zBias=x.zBias,
             zOrder="",
@@ -414,25 +454,23 @@ class ItemMigrator:
         rangeU = x.rangeU if "=" in x.rangeU else f"_f(v)={x.rangeU}"
         rangeV = x.rangeV if "=" in x.rangeV else f"_f(u)={x.rangeV}"
         domain = self.domain_array([rangeU, rangeV])
+        swap = self.first_range_depends_on_second(domain)
         return ParametricSurfaceProperties(
             color=x.color,
             colorExpr=self.function_assignment(x.colorExpr),
             description=x.description,
             domain=domain,
             expr=expr,
-            grid1=x.gridU,
-            grid2=x.gridV,
+            grid1=x.gridV if swap else x.gridU,
+            grid2=x.gridU if swap else x.gridV,
             gridOpacity=x.gridOpacity,
             gridWidth=x.gridWidth,
             opacity=x.opacity,
-            samples1=x.uSamples,
-            samples2=x.vSamples,
+            samples1=x.vSamples if swap else x.uSamples,
+            samples2=x.uSamples if swap else x.vSamples,
             shaded=stringify(x.shaded),
             visible=x.visible,
-            calculatedVisibility=x.calculatedVisibility,
-            useCalculatedVisibility=bool(
-                x.calculatedVisibility and x.useCalculatedVisibility
-            ),
+            **self.calculated_visibility(x),
             zBias=x.zBias,
             zOrder="",
             zIndex=x.zIndex,
@@ -449,10 +487,7 @@ class ItemMigrator:
             opacity=x.opacity,
             size=x.size,
             visible=x.visible,
-            calculatedVisibility=x.calculatedVisibility,
-            useCalculatedVisibility=bool(
-                x.calculatedVisibility and x.useCalculatedVisibility
-            ),
+            **self.calculated_visibility(x),
             zBias=x.zBias,
             zOrder="",
             zIndex=x.zIndex,
@@ -491,10 +526,7 @@ class ItemMigrator:
             start=stringify(x.start),
             tail=x.tail,
             visible=x.visible,
-            calculatedVisibility=x.calculatedVisibility,
-            useCalculatedVisibility=bool(
-                x.calculatedVisibility and x.useCalculatedVisibility
-            ),
+            **self.calculated_visibility(x),
             width=x.width,
             zBias=x.zBias,
             zOrder="",
@@ -534,10 +566,7 @@ class ItemMigrator:
             size=x.size,
             start=stringify(x.start),
             visible=x.visible,
-            calculatedVisibility=x.calculatedVisibility,
-            useCalculatedVisibility=bool(
-                x.calculatedVisibility and x.useCalculatedVisibility
-            ),
+            **self.calculated_visibility(x),
             width=x.width,
             zBias=x.zBias,
             zOrder="",

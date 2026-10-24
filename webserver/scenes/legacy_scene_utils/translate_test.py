@@ -108,7 +108,12 @@ def test_boolean_variable():
                 "computedLookAt": "[0, 0, -1]",
                 "useComputed": True,
             },
-            {"useRelative": "false", "position": "[1+1, 2, 3]", "target": "[0, 0, -1]"},
+            {
+                "useRelative": "false",
+                "position": "[1+1, 2, 3]",
+                "target": "[0, 0, -1]",
+                "updateOnDrag": "false",
+            },
         ),
         (
             {"relativePosition": [0, -2, 0], "relativeLookAt": [0, 0, 0]},
@@ -182,6 +187,45 @@ def test_camera(in_patch, out_patch):
                 "visible": False,
                 "useCalculatedVisibility": True,
                 "calculatedVisibility": "!true",
+            },
+        ),
+        (
+            {
+                "useCalculatedVisibility": True,
+                "calculatedVisibility": "\\ \\,",
+                "visible": False,
+            },
+            {
+                "visible": False,
+                "useCalculatedVisibility": False,
+                "calculatedVisibility": "",
+            },
+        ),
+        (
+            # math3d-next samples y first when x's range depends on it.
+            {"rangeU": "_f(y)=[0, y]", "uSamples": "10", "gridV": "3"},
+            {
+                "domain": {
+                    "items": [
+                        {
+                            "name": "_f",
+                            "params": ["y"],
+                            "rhs": "[0, y]",
+                            "type": "function-assignment",
+                        },
+                        {
+                            "name": "_f",
+                            "params": ["x"],
+                            "rhs": "\\left[-2,\\ 2\\right]",
+                            "type": "function-assignment",
+                        },
+                    ],
+                    "type": "array",
+                },
+                "samples1": "64",
+                "samples2": "10",
+                "grid1": "3",
+                "grid2": "8",
             },
         ),
     ],
@@ -593,8 +637,8 @@ def test_variable():
         ({}, {}),
         ({"speedMultiplier": 0.25}, {"speedMultiplier": "1/4"}),
         ({"speedMultiplier": 0.0625}, {"speedMultiplier": "1/16"}),
-        # math3d-next has no 1.5x or 3x; speeds double per step, so the
-        # nearest on that scale is the next faster one.
+        # math3d-next has no 1.5x or 3x; the nearest option on a log scale is
+        # the next faster one.
         ({"speedMultiplier": 1.5}, {"speedMultiplier": "2"}),
         ({"speedMultiplier": 3}, {"speedMultiplier": "4"}),
     ],
@@ -673,6 +717,14 @@ def test_vector():
                 "samples1": "4",
                 "samples2": "6",
                 "samples3": "8",
+            },
+        ),
+        (
+            {"samples": "\\left[\\min\\left(a,b\\right),2,3\\right]"},
+            {
+                "samples1": "\\min\\left(a,b\\right)",
+                "samples2": "2",
+                "samples3": "3",
             },
         ),
     ],
