@@ -8,9 +8,9 @@ import math
 import re
 from typing import Any
 
-# LaTeX whitespace that renders identically: "\ " (explicit space) and plain
-# spaces. Removing all of it is safe for comparison because MathLive and the
-# parsers ignore it.
+# LaTeX whitespace: "\ " (explicit space) and plain spaces. math3d-next's
+# parser can treat a space as a token separator (`x y` vs `xy`), so this can
+# mask a real difference; check its count in the report.
 _LATEX_SPACE = re.compile(r"\\ |\s+")
 _NUMBER = r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?"
 _VECTOR = re.compile(
