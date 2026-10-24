@@ -16,6 +16,11 @@ RENDER_AND_EDITOR = frozenset({"render", "editor"})
 SAFE_LITERALS = {"xy", "yz", "zx", "x", "y", "z", "true", "false", ""}
 
 
+def _cell(text: str) -> str:
+    """Escape pipes, which end a Markdown table cell even inside backticks."""
+    return text.replace("|", "\\|")
+
+
 def _safe(value: Any, defaults: set[str]) -> str:
     """A value fit for a committed report, or just its shape."""
     if value is None or isinstance(value, bool):
@@ -47,6 +52,7 @@ class Aggregate:
     legacy_broken: Totals = field(default_factory=Totals)
     clean: Totals = field(default_factory=Totals)
     strict_clean: Totals = field(default_factory=Totals)
+    verified_clean: Totals = field(default_factory=Totals)
     crashes: Counter = field(default_factory=Counter)
     crash_weight: Counter = field(default_factory=Counter)
     cluster_scenes: Counter = field(default_factory=Counter)
@@ -108,6 +114,8 @@ class Aggregate:
             self.cluster_weight[cid] += w
         if not render:
             self.clean.add(w)
+            if not any(c.outcome == "needs_eval" for c in r.comparisons):
+                self.verified_clean.add(w)
         if not everything:
             self.strict_clean.add(w)
         self.scene_clusters.append((w, frozenset(render)))
@@ -170,7 +178,8 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
         "",
         (
             "Clean = no crash, no missing/extra item, no folder-membership change, and no `render`-severity "
-            "mismatch. Strict also counts `editor`-severity mismatches (descriptions, collapsed state, item order)."
+            "mismatch. Strict also counts `editor`-severity mismatches (descriptions, collapsed state, item order). "
+            "Verified also excludes scenes with a `needs_eval` comparison, which pass 1 can't check."
         ),
         "",
         "| | Scenes | Weighted | Weighted (+1) |",
@@ -182,6 +191,10 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
         (
             f"| Strict clean | {_pct(agg.strict_clean.scenes, judged_n)} | "
             f"{_pct(agg.strict_clean.weight, judged_w)} | {_pct(agg.strict_clean.weight_plus_one, judged_w1)} |"
+        ),
+        (
+            f"| Verified clean | {_pct(agg.verified_clean.scenes, judged_n)} | "
+            f"{_pct(agg.verified_clean.weight, judged_w)} | {_pct(agg.verified_clean.weight_plus_one, judged_w1)} |"
         ),
         "",
         "Weight concentration (share of all `times_accessed` held by the top N scenes): "
@@ -214,7 +227,7 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
             for (e, x), n in agg.cluster_examples.get(cid, Counter()).most_common(2)
         )
         lines.append(
-            f"| {agg.cluster_severity.get(cid, '?')} | {agg.cluster_scenes[cid]:,} | {w:,.0f} | `{cid}` | {examples} |"
+            f"| {agg.cluster_severity.get(cid, '?')} | {agg.cluster_scenes[cid]:,} | {w:,.0f} | `{_cell(cid)}` | {_cell(examples)} |"
         )
     lines += [
         "",
@@ -222,7 +235,7 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
         "",
         "| Fix through | Scenes clean | Weighted clean |",
         "|---|---|---|",
-        *(f"| `{cid}` | {n:.2%} | {w:.2%} |" for cid, n, w in fix_curve(agg)),
+        *(f"| `{_cell(cid)}` | {n:.2%} | {w:.2%} |" for cid, n, w in fix_curve(agg)),
         "",
         "## Comparison outcomes",
         "",

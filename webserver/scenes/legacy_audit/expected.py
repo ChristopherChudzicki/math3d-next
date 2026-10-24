@@ -13,6 +13,7 @@ with list indices as ints. A ``NeedsEval`` may sit on a subtree path (e.g.
 
 from __future__ import annotations
 
+import math
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -114,13 +115,18 @@ def _bool(value: Any) -> bool | NeedsEval:
     return NeedsEval(f"legacy value {value!r} is not a boolean")
 
 
-_LATEX_SPACE = r"(?:\s|\\ |\\,|\\;|\\!|~)"
+_LATEX_SPACE = r"(?:\s|\\ |\\,|\\;|\\:|\\!|\\quad|\\qquad|~)"
 _UNSIGNED = r"(?:\d+(?:\.\d*)?|\.\d+)"
 _NUMBER = rf"[+-]?{_UNSIGNED}"
 
 
 def _strip_latex_space(text: str) -> str:
     return re.sub(rf"^{_LATEX_SPACE}+|{_LATEX_SPACE}+$", "", text)
+
+
+def is_blank(text: Any) -> bool:
+    """Empty, or only whitespace and LaTeX spacing commands."""
+    return re.sub(_LATEX_SPACE, "", _text(text) if text is not None else "") == ""
 
 
 def _simple_number(text: Any) -> Fraction | None:
@@ -276,7 +282,9 @@ def _universal(out: _Out, item: dict) -> None:
     # zOrder = (1 - opacity)*100 (react:containers/MathBoxScene/components/MathBoxScene.js:106-110).
     # math3d-next deliberately orders by the item tree instead, surfaces last
     # (#1010; next:app/src/store/scene/state/selectors.ts defaultGraphicOrder),
-    # and uses that whenever zOrder is empty. Legacy scenes take the new order.
+    # and uses that when zOrder is empty, except for grids, which leave zOrder
+    # unset (next:app/src/features/viewport/graphics/Grid.tsx:31). Legacy
+    # scenes take the new order.
     out.add("zOrder", "", "render", "constant")
     _visibility(out, item)
 
@@ -291,18 +299,19 @@ def _visibility(out: _Out, item: dict) -> None:
     # (next:app/src/store/scene/evaluation/mathScope.ts:102-110).
     # Policy for a blank expression: math3d-react shows the item on load, but
     # its author, who saw it hidden while editing, set `visible`; legacy scenes
-    # keep the author's `visible` (owner decision, 2026-10-23).
+    # keep the author's `visible`, and the blank expression becomes empty
+    # (owner decisions, 2026-10-23 and 2026-10-24).
     use_calc = item.get("useCalculatedVisibility")
     calc = item.get("calculatedVisibility")
     calc_text = _text(calc) if calc is not None else ""
-    blank = re.sub(_LATEX_SPACE, "", calc_text) == ""
+    blank = is_blank(calc)
     src = "useCalculatedVisibility"
     if use_calc is True and blank:
         out.add(
             "useCalculatedVisibility", False, "render", f"{src},calculatedVisibility"
         )
         out.add("visible", _bool(item.get("visible")), "render", "visible")
-        out.add("calculatedVisibility", calc_text, "editor", "calculatedVisibility")
+        out.add("calculatedVisibility", "", "editor", "calculatedVisibility")
     elif use_calc is True:
         out.add("useCalculatedVisibility", True, "render", src)
         out.add("visible", _bool(item.get("visible")), "editor", "visible")
@@ -310,7 +319,12 @@ def _visibility(out: _Out, item: dict) -> None:
     else:
         out.add("useCalculatedVisibility", _bool(use_calc), "render", src)
         out.add("visible", _bool(item.get("visible")), "render", "visible")
-        out.add("calculatedVisibility", calc_text, "editor", "calculatedVisibility")
+        out.add(
+            "calculatedVisibility",
+            "" if blank else calc_text,
+            "editor",
+            "calculatedVisibility",
+        )
 
 
 def _label(out: _Out, item: dict) -> None:
@@ -417,7 +431,7 @@ def _variable_slider(item: dict, ctx: Context) -> list[Expectation]:
     # react:.../VariableSlider/components/AnimationControls.js:73-76,90-101).
     # next sweeps the range in duration/speed seconds at fps ticks/s
     # (next:app/src/features/editor/items/forms/VariableSlider/VariableSlider.tsx:66-83),
-    # so fps changes only smoothness. Owner decision: legacy sliders keep
+    # so while ticks keep up, fps changes only smoothness. Owner decision: legacy sliders keep
     # math3d-react's effective 60.
     out.add("fps", "60", "render", "constant")
     out.add("duration", "4", "render", "constant")
@@ -428,6 +442,12 @@ def _variable_slider(item: dict, ctx: Context) -> list[Expectation]:
     speed_value: str | NeedsEval
     if speed is not None and speed in _SPEEDS:
         speed_value = _SPEEDS[speed]
+    elif speed is not None and speed > 0:
+        # math3d-react also offered 1.5x and 3x
+        # (react:.../VariableSlider/components/AnimationControls.js:42-54).
+        # Owner decision (2026-10-24): take the nearest next option.
+        nearest = min(_SPEEDS, key=lambda s: abs(math.log(s / speed)))
+        speed_value = _SPEEDS[nearest]
     else:
         speed_value = NeedsEval(
             f"speedMultiplier={item.get('speedMultiplier')!r} has no math3d-next speed option"
@@ -495,11 +515,13 @@ def _camera(item: dict, ctx: Context) -> list[Expectation]:
         out.add("position", _text(item.get("computedPosition")), "render", src_p)
         out.add("target", _text(item.get("computedLookAt")), "render", src_t)
         out.add("useRelative", "false", "render", "useComputed")
-        # math3d-react disables rotate/zoom/pan for a computed camera
-        # (react:.../MathGraphics/Camera/index.js disabledField='useComputed'),
-        # so it can't be dragged and updateOnDrag has no effect. Policy: next's
-        # default (next:mathitem-configs/src/items/camera.ts:30).
-        out.add("updateOnDrag", "true", "none", "useComputed")
+        # Turning on useComputed in math3d-react sets rotate/zoom/pan false
+        # (react:.../MathGraphics/Camera/UseComputedToggle.js:27-32), and it
+        # never writes interaction back into computedPosition. next still
+        # fires onEnd on every pointerup, and with updateOnDrag=true writes
+        # the camera's numbers over the expressions when they differ
+        # (next:app/src/features/viewport/Camera.tsx:101-122).
+        out.add("updateOnDrag", "false", "render", "useComputed")
         return out.items
 
     # relativePosition/relativeLookAt are three.js world coordinates: the

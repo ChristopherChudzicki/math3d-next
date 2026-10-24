@@ -9,11 +9,12 @@ This checks that legacy math3d-react scenes migrate and display correctly in mat
 
 Every generated file is production scene data. Write it under the main checkout's `db-snapshots/legacy-audit/` (gitignored) with absolute paths, and never commit it. Committed reports contain aggregates only. A scene key grants access to an unlisted scene, so reports never include keys.
 
-| File               | Written by                                               | One line per legacy scene, in `LegacyScene.id` order                                                                                     |
-| ------------------ | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `legacy.jsonl`     | `export_legacy_audit`                                    | `{key, times_accessed, dehydrated, migrated: {items, item_order, title, creation_date} \| null, migrate_error: {type, message} \| null}` |
-| `rehydrated.jsonl` | math3d-react `client/src/legacyAudit/rehydrate.audit.js` | `{key, mathGraphics, mathSymbols, folders, sortableTree, sliderValues, metadata, legacy_broken: [reason]}`                               |
-| `findings.jsonl`   | `audit_legacy_migration`                                 | `{key, times_accessed, verdict, strict_clean, clusters, flags, mismatches, item_failures, order_failures}`                               |
+| File                 | Written by                                               | One line per legacy scene, in `LegacyScene.id` order                                                                                           |
+| -------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `legacy.jsonl`       | `export_legacy_audit`                                    | `{key, times_accessed, dehydrated, migrated: {items, item_order, title, creation_date} \| null, migrate_error: {type, message} \| null}`       |
+| `rehydrated.jsonl`   | math3d-react `client/src/legacyAudit/rehydrate.audit.js` | `{key, mathGraphics, mathSymbols, folders, sortableTree, sliderValues, metadata, legacy_broken: [reason]}`                                     |
+| `findings.jsonl`     | `audit_legacy_migration`                                 | `{key, times_accessed, verdict, strict_clean, clusters, flags, mismatches, item_failures, order_failures}`                                     |
+| `manual_checks.json` | `audit_legacy_migration`                                 | Not per scene: `{hidden_by_blank_visibility: [{rank, key, items}]}`, the top-100 scenes (by `times_accessed`) that a policy changes; see below |
 
 `react_defaults.json` (math3d-react's `defaultSettings` per type, plus `initialState`) is code-derived, not user data. A copy is checked in at `webserver/scenes/legacy_audit/fixtures/`.
 
@@ -32,6 +33,10 @@ IS_DEPLOYMENT=False uv run python manage.py audit_legacy_migration --legacy $D/l
 From a worktree, run the worktree's code on the host as shown, not through `docker compose run`, which runs the main checkout's code.
 
 After a translator fix, re-run only `export_legacy_audit` and `audit_legacy_migration`. math3d-react's output doesn't change.
+
+## Manual checks
+
+A blank calculated visibility keeps the author's `visible`, so math3d-next hides items that math3d-react showed on load (usually the `yz`/`zx` grids). `manual_checks.json` lists the top-100 scenes this affects, with the items. For each one, open the scene in math3d-react (`math3d.org/<key>`) and in a local math3d-next (`/<key>`), and check that hiding those items looks right. The keys stay in `db-snapshots/`; don't paste them anywhere public.
 
 ## Code to delete after the cutover
 
