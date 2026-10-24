@@ -381,7 +381,12 @@ def test_folder():
 
 @pytest.mark.parametrize(
     ("in_patch", "out_patch"),
-    [({}, {}), ({"width": "2", "snap": True}, {"width": "2", "snap": "true"})],
+    [
+        ({}, {}),
+        ({"width": "2", "snap": True}, {"width": "2", "snap": "true"}),
+        ({"zIndex": ""}, {"zIndex": "0"}),
+        ({"zIndex": "2"}, {"zIndex": "2"}),
+    ],
 )
 def test_grid(in_patch, out_patch):
     migrator = ItemMigrator()

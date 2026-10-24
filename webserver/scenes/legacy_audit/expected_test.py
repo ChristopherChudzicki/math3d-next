@@ -252,3 +252,7 @@ def test_vector_field_samples_split_into_components():
     field = {**rehydrated("VECTOR_FIELD"), "samples": "\\left[n,\\ 2,\\ 5\\right]"}
     got = values(field)
     assert (got["samples1"], got["samples2"], got["samples3"]) == ("n", "2", "5")
+
+
+def test_blank_z_index_becomes_zero():
+    assert values({**rehydrated("GRID", "grid-xy"), "zIndex": ""})["zIndex"] == "0"

@@ -275,9 +275,14 @@ def _universal(out: _Out, item: dict) -> None:
     """Fields shared by all graphics (react:containers/MathObjects/MathGraphics/metadata.js:12-40)."""
     out.add("description", _text(item.get("description")), "editor", "description")
     out.add("color", _text(item.get("color")), "render", "color")
-    for prop in ("opacity", "zIndex", "zBias"):
+    for prop in ("opacity", "zBias"):
         # Set verbatim on the render node (react:components/MathBox/MathBoxComponents.js:210-214).
         out.add(prop, _text(item.get(prop)), "render", prop)
+    # Owner decision (2026-10-24): a blank zIndex becomes "0". math3d-next's
+    # Grid falls back to its tree-order index for a blank one
+    # (next:app/src/features/viewport/graphics/Grid.tsx:31).
+    z_index = item.get("zIndex")
+    out.add("zIndex", "0" if is_blank(z_index) else _text(z_index), "render", "zIndex")
     # Policy, not reproduction: math3d-react derived draw order from opacity,
     # zOrder = (1 - opacity)*100 (react:containers/MathBoxScene/components/MathBoxScene.js:106-110).
     # math3d-next deliberately orders by the item tree instead, surfaces last

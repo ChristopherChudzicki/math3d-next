@@ -198,6 +198,12 @@ class ItemMigrator:
         first, second, third = (p.replace("\\ ", " ").strip() for p in parts)
         return first, second, third
 
+    @staticmethod
+    def z_index(x) -> str:
+        """A blank zIndex becomes "0", MathBox's default (owner decision,
+        2026-10-24); math3d-next's grids treat a blank one differently."""
+        return blank_to_empty(x.zIndex or "") or "0"
+
     def calculated_visibility(self, x) -> dict:
         """A blank expression turns calculated visibility off, so the item
         follows its own ``visible`` (owner decision, 2026-10-23)."""
@@ -214,7 +220,7 @@ class ItemMigrator:
             visible=x.visible,
             **self.calculated_visibility(x),
             opacity=x.opacity,
-            zIndex=x.zIndex,
+            zIndex=self.z_index(x),
             zBias=x.zBias,
             zOrder="",
             label=x.label,
@@ -310,7 +316,7 @@ class ItemMigrator:
             **self.calculated_visibility(x),
             zBias=x.zBias,
             zOrder="",
-            zIndex=x.zIndex,
+            zIndex=self.z_index(x),
         )
 
     def translate_explicit_surface_polar(self, props) -> ExplicitSurfacePolarProperties:
@@ -338,7 +344,7 @@ class ItemMigrator:
             **self.calculated_visibility(x),
             zBias=x.zBias,
             zOrder="",
-            zIndex=x.zIndex,
+            zIndex=self.z_index(x),
         )
 
     def translate_grid(self, props) -> GridProperties:
@@ -351,7 +357,7 @@ class ItemMigrator:
             **self.calculated_visibility(x),
             zBias=x.zBias,
             zOrder="",
-            zIndex=x.zIndex,
+            zIndex=self.z_index(x),
             divisions=x.divisions,
             width=x.width,
             snap=stringify(x.snap),
@@ -397,7 +403,7 @@ class ItemMigrator:
             **self.calculated_visibility(x),
             zBias=x.zBias,
             zOrder="",
-            zIndex=x.zIndex,
+            zIndex=self.z_index(x),
         )
 
     def translate_line(self, props) -> LineProperties:
@@ -417,7 +423,7 @@ class ItemMigrator:
             width=x.width,
             zBias=x.zBias,
             zOrder="",
-            zIndex=x.zIndex,
+            zIndex=self.z_index(x),
         )
 
     def translate_parametric_curve(self, props) -> ParametricCurveProperties:
@@ -445,7 +451,7 @@ class ItemMigrator:
             width=x.width,
             zBias=x.zBias,
             zOrder="",
-            zIndex=x.zIndex,
+            zIndex=self.z_index(x),
         )
 
     def translate_parametric_surface(self, props) -> ParametricSurfaceProperties:
@@ -473,7 +479,7 @@ class ItemMigrator:
             **self.calculated_visibility(x),
             zBias=x.zBias,
             zOrder="",
-            zIndex=x.zIndex,
+            zIndex=self.z_index(x),
         )
 
     def translate_point(self, props) -> PointProperties:
@@ -490,7 +496,7 @@ class ItemMigrator:
             **self.calculated_visibility(x),
             zBias=x.zBias,
             zOrder="",
-            zIndex=x.zIndex,
+            zIndex=self.z_index(x),
         )
 
     def translate_variable(self, props) -> VariableProperties:
@@ -530,7 +536,7 @@ class ItemMigrator:
             width=x.width,
             zBias=x.zBias,
             zOrder="",
-            zIndex=x.zIndex,
+            zIndex=self.z_index(x),
         )
 
     def translate_vector_field(self, props) -> VectorFieldProperties:
@@ -570,7 +576,7 @@ class ItemMigrator:
             width=x.width,
             zBias=x.zBias,
             zOrder="",
-            zIndex=x.zIndex,
+            zIndex=self.z_index(x),
         )
 
     def translate_item(self, item, item_id) -> MathItemUnion:
