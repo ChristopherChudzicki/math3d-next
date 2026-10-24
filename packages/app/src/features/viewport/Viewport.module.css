@@ -1,0 +1,14 @@
+/* Let drags and scrolls that start on the splash reach the orbit controls. */
+.viewport :global(.mathbox-loader) {
+  pointer-events: none;
+}
+
+/*
+ * mathbox re-shows its splash whenever a graphic mounts, so show it only
+ * during the first warmup. A still frame never shows it: the frame-count
+ * backstop can mark one ready mid-warmup, and the screenshotter captures at
+ * once. The splash sets its own inline display, hence !important.
+ */
+.splashHidden :global(.mathbox-loader) {
+  display: none !important;
+}

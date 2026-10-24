@@ -2,6 +2,8 @@ import mergeClassNames from "classnames";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import * as MB from "mathbox-react";
 import type { MathboxSelection } from "mathbox";
+// Styles mathbox's loading splash, which mathBox() always installs.
+import "mathbox/mathbox.css";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Vector3 } from "three";
 import { isMathGraphic, MathItemType } from "@math3d/mathitem-configs";
@@ -19,6 +21,7 @@ import Camera from "./Camera";
 import type { OnMoveEnd } from "./Camera";
 import { ZOOM_FACTOR } from "./dollyZoom";
 import { initDrainState, stepDrain } from "./stillReadiness";
+import * as styles from "./Viewport.module.css";
 
 type Props = {
   className?: string;
@@ -119,11 +122,12 @@ const is3dDisabled = localStorage.getItem("disable3dScene") === "true";
 const Viewport: React.FC<Props> = ({ className, still }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [mathbox, setMathbox] = useState<MathboxSelection | null>(null);
-  // Single-shot latch: once ready, it stays ready for this component's life.
-  // Correct for the frame page (one load, one mathbox instance, no refetch). A
-  // future "re-render this frame" feature that swaps the mathbox instance would
-  // need to reset this so a new warmup isn't advertised as ready.
-  const [stillReady, setStillReady] = useState(false);
+  // Single-shot latch: once the first warmup drains, it stays drained for this
+  // component's life. Correct for the frame page (one load, one mathbox
+  // instance, no refetch). A future "re-render this frame" feature that swaps
+  // the mathbox instance would need to reset this so a new warmup isn't
+  // advertised as ready.
+  const [warmedUp, setWarmedUp] = useState(false);
   const hasRequired = useAppSelector(select.hasItems(REQUIRED_ITEMS));
 
   const isOrthographic = useIsOrthographic();
@@ -135,11 +139,11 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
     setMathbox(mb);
   }, []);
 
-  // In `still` mode, wait for mathbox's warmup queue to drain, then halt the
-  // render loop and flag readiness so a screenshotter can capture a static,
-  // fully-rendered, CPU-idle frame.
+  // Wait for mathbox's first warmup to drain, which retires its loading
+  // splash. In `still` mode, also halt the render loop and flag readiness so a
+  // screenshotter can capture a static, fully-rendered, CPU-idle frame.
   useEffect(() => {
-    if (!still || !mathbox) return undefined;
+    if (!mathbox) return undefined;
     const context = (mathbox as MathboxRoot)._context;
     const readPending =
       typeof context?.getPending === "function"
@@ -158,8 +162,8 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
         // `stop()` is mathbox's documented loop control (start()/stop() on the
         // root selection, see index.js) — stable enough to call bare, unlike
         // the internal `_context.getPending` we feature-detect above.
-        (mathbox as MathboxRoot).stop();
-        setStillReady(true);
+        if (still) (mathbox as MathboxRoot).stop();
+        setWarmedUp(true);
         return;
       }
       raf = requestAnimationFrame(tick);
@@ -182,8 +186,10 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
   return (
     <div
       data-testid="scene"
-      data-scene-ready={still && stillReady ? "true" : undefined}
-      className={mergeClassNames(className)}
+      data-scene-ready={still && warmedUp ? "true" : undefined}
+      className={mergeClassNames(className, styles.viewport, {
+        [styles.splashHidden]: still || warmedUp,
+      })}
       style={{ width: "100%", height: "100%" }}
       ref={setContainer}
     >
