@@ -21,7 +21,7 @@ interface VariableSliderProperties {
 
 const defaultValues: VariableSliderProperties = {
   value: { lhs: "T", rhs: "0", type: "assignment" },
-  fps: "50",
+  fps: "60",
   range: {
     type: "array",
     items: ["-5", "+5"],
