@@ -87,16 +87,21 @@ const Camera: React.FC<CameraProps> = ({ item, range, scale, onMoveEnd }) => {
 
   const { convert } = useCoordinates({ useRelative, range, scale });
 
-  const controlsTarget = useMemo(() => {
-    return new Vector3(...convert.fromUi(target ?? [0, 0, 0]));
-  }, [target, convert]);
+  const threeTarget = useMemo(
+    () => convert.fromUi(target ?? [0, 0, 0]),
+    [target, convert],
+  );
+  // OrbitControls adopts this vector as its target and mutates it on pan.
+  const controlsTarget = useMemo(
+    () => new Vector3(...threeTarget),
+    [threeTarget],
+  );
 
   const threePos = useMemo(() => {
     if (!position) return undefined;
     const pos = convert.fromUi(position);
-    const targ = convert.fromUi(target ?? [0, 0, 0]);
-    return isOrthographic ? dolly.out(pos, targ).toArray() : pos;
-  }, [convert, position, target, isOrthographic]);
+    return isOrthographic ? dolly.out(pos, threeTarget).toArray() : pos;
+  }, [convert, position, threeTarget, isOrthographic]);
 
   const onEnd: OnControlsChangeEnd = useCallback(
     (e) => {
@@ -133,9 +138,12 @@ const Camera: React.FC<CameraProps> = ({ item, range, scale, onMoveEnd }) => {
   );
   return (
     <>
+      {/* MathBox moves the camera after OrbitControls aims it each frame, so
+          aim it here too, or that frame renders aimed from the old spot. */}
       <MB.Camera
         proxy
         position={threePos}
+        lookAt={threeTarget}
         fov={isOrthographic ? FOV_DOLLY_OUT : FOV_DOLLY_IN}
       />
       <Controls
