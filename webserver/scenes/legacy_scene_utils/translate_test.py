@@ -2,6 +2,7 @@ from typing import Any
 
 import pytest
 
+from scenes.legacy_scene_utils.issue_log import Severity
 from scenes.legacy_scene_utils.translate import ItemMigrator
 
 
@@ -788,3 +789,10 @@ def test_unknown_legacy_property_is_ignored_and_logged():
     assert [i.message for i in migrator.log.issues()] == [
         "some-id: Ignored unknown EXPLICIT_SURFACE properties: samples"
     ]
+
+
+def test_extra_equals_in_rhs_is_kept_with_a_warning():
+    migrator = ItemMigrator()
+    assignment = migrator.function_assignment("_f(x,y)=z=3-x")
+    assert assignment.rhs == "z=3-x"
+    assert [i.severity for i in migrator.log.issues()] == [Severity.WARNING]

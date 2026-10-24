@@ -122,12 +122,18 @@ class ItemMigrator:
             )
         return cls(**{k: v for k, v in props.items() if k in fields})
 
-    def assignment(self, expr: str) -> AssignmentObj:
+    def split_assignment(self, expr: str) -> tuple[str, str]:
         lhs, *rhs_pieces = expr.split("=")
-        rhs = "=".join(rhs_pieces)
-        if len(rhs_pieces) != 1:
-            self.log.error(f"Expected one rhs. Value: {expr}")
+        if not rhs_pieces:
+            self.log.error(f"Expected an assignment. Value: {expr}")
+        elif len(rhs_pieces) > 1:
+            # e.g. `_f(x,y)=z=3-x`: both apps evaluate the inner assignment to
+            # its value, so the expression still works.
+            self.log.warning(f"Kept an extra '=' in the right-hand side: {expr}")
+        return lhs, "=".join(rhs_pieces)
 
+    def assignment(self, expr: str) -> AssignmentObj:
+        lhs, rhs = self.split_assignment(expr)
         return AssignmentObj(
             type="assignment",
             lhs=lhs,
@@ -135,12 +141,7 @@ class ItemMigrator:
         )
 
     def function_assignment(self, expr: str) -> FunctionAssignmentObj:
-        lhs, *rhs_pieces = expr.split("=")
-        rhs = "=".join(rhs_pieces)
-
-        if len(rhs_pieces) != 1:
-            self.log.error(f"Expected one rhs. Value: {expr}")
-
+        lhs, rhs = self.split_assignment(expr)
         matches = re.search(r"(.*?)\((.*?)\)", lhs)
         if matches is None:
             raise ValueError(f"Expected lhs to have form 'f(...)'. Value: {lhs}")
