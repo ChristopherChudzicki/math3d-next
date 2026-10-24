@@ -8075,7 +8075,7 @@ __metadata:
     package: "npm:^1.0.1"
     prettier: "npm:4.0.0-alpha.8"
     ts-node: "npm:^10.9.2"
-    turbo: "npm:^2.10.13"
+    turbo: "npm:^2.11.10"
     typescript: "npm:^5.7.2"
   languageName: unknown
   linkType: soft
@@ -11102,7 +11102,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"turbo@npm:^2.10.13":
+"turbo@npm:^2.11.10":
   version: 2.11.10
   resolution: "turbo@npm:2.11.10"
   dependencies:
