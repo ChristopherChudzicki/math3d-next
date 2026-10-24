@@ -110,6 +110,7 @@ const hasItems =
   };
 
 const key = (state: RootState) => state.scene.key;
+const loadCount = (state: RootState) => state.scene.loadCount;
 
 const dirty = (state: RootState) => state.scene.dirty;
 
@@ -187,6 +188,7 @@ export {
   hasChildren,
   dirty,
   key,
+  loadCount,
   author,
 };
 export type { Subtree };

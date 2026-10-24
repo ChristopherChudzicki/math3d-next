@@ -1,0 +1,15 @@
+/*
+ * mathbox sets an inline display: block on its splash once it reports pending
+ * work; until then, keep it hidden so a scene with nothing to load never shows
+ * it. Let drags and scrolls that start on it reach the orbit controls.
+ */
+.viewport :global(.mathbox-loader) {
+  display: none;
+  pointer-events: none;
+}
+
+/* mathbox re-shows its splash whenever a graphic mounts; show it only during
+ * the first warmup. Its inline display needs !important to override. */
+.splashHidden :global(.mathbox-loader) {
+  display: none !important;
+}

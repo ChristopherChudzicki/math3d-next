@@ -1,7 +1,9 @@
-// `still`-mode readiness: deciding when a warming-up mathbox scene has settled
-// enough to screenshot. Extracted as a pure state machine (no rAF, no mathbox)
-// so the branching — which is subtle — can be unit-tested against synthetic
-// sample sequences. `Viewport.tsx` drives it once per animation frame.
+// Warmup-drain detection: deciding when a warming-up mathbox scene has settled.
+// It gates `still`-mode screenshots and how long the editor shows mathbox's
+// loading splash, so retuning these constants affects both. Extracted as a
+// pure state machine (no rAF, no mathbox) so the branching — which is subtle —
+// can be unit-tested against synthetic sample sequences. `Viewport.tsx` drives
+// it once per animation frame.
 //
 // mathbox drains its warmup queue a couple objects per frame, so a fixed frame
 // count under-renders any scene with more objects than the count covers (e.g. a
@@ -51,8 +53,8 @@ export const initDrainState = (now: number): DrainState => ({
  * empty queue only counts as "drained" once we've seen it non-empty at least
  * once. The consequence is that a scene whose queue is never observed non-empty
  * (instant drain, or nothing async to warm up) exits only via the
- * `STILL_MAX_FRAMES` backstop — acceptable because real scenes carry
- * axes/grid/camera and are observed pending on the slow hardware this targets.
+ * `STILL_MAX_FRAMES` backstop — acceptable because mathbox inserts only a couple
+ * of objects per frame, so any scene with more than that is observed pending.
  */
 export const stepDrain = (
   state: DrainState,
