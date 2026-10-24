@@ -122,11 +122,9 @@ const is3dDisabled = localStorage.getItem("disable3dScene") === "true";
 const Viewport: React.FC<Props> = ({ className, still }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [mathbox, setMathbox] = useState<MathboxSelection | null>(null);
-  // Single-shot latch: once the first warmup drains, it stays drained for this
-  // component's life. Correct for the frame page (one load, one mathbox
-  // instance, no refetch). A future "re-render this frame" feature that swaps
-  // the mathbox instance would need to reset this so a new warmup isn't
-  // advertised as ready.
+  // Latches on the first drain, per mount: a scene opened later in the editor
+  // gets no splash. Reset it if the frame page ever swaps its mathbox instance,
+  // or still mode advertises a new warmup as ready.
   const [warmedUp, setWarmedUp] = useState(false);
   const hasRequired = useAppSelector(select.hasItems(REQUIRED_ITEMS));
 
@@ -139,8 +137,8 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
     setMathbox(mb);
   }, []);
 
-  // Wait for mathbox's first warmup to drain, which retires its loading
-  // splash. In `still` mode, also halt the render loop and flag readiness so a
+  // Wait for mathbox's first warmup to drain, then hide its loading splash. In
+  // `still` mode, also halt the render loop and flag readiness so a
   // screenshotter can capture a static, fully-rendered, CPU-idle frame.
   useEffect(() => {
     if (!mathbox) return undefined;
@@ -188,7 +186,7 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
       data-testid="scene"
       data-scene-ready={still && warmedUp ? "true" : undefined}
       className={mergeClassNames(className, styles.viewport, {
-        [styles.splashHidden]: still || warmedUp,
+        [styles.splashHidden]: warmedUp,
       })}
       style={{ width: "100%", height: "100%" }}
       ref={setContainer}
