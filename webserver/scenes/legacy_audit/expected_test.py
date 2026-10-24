@@ -161,7 +161,7 @@ def test_computed_camera_uses_computed_expressions():
     assert got["position"] == camera["computedPosition"]
     assert got["target"] == camera["computedLookAt"]
     assert got["useRelative"] == "false"
-    assert got["updateOnDrag"] == "false"
+    assert got["updateOnDrag"] == "true"
 
 
 def test_camera_needs_eval_when_axis_scale_is_not_a_plain_number():

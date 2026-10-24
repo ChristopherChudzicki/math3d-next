@@ -495,10 +495,11 @@ def _camera(item: dict, ctx: Context) -> list[Expectation]:
         out.add("position", _text(item.get("computedPosition")), "render", src_p)
         out.add("target", _text(item.get("computedLookAt")), "render", src_t)
         out.add("useRelative", "false", "render", "useComputed")
-        # A drag must not overwrite the computed expressions: next's
-        # updateOnDrag=false snaps back instead of writing the drag into
-        # position/target (next:app/src/features/viewport/Camera.tsx:101-122).
-        out.add("updateOnDrag", "false", "render", "useComputed")
+        # math3d-react disables rotate/zoom/pan for a computed camera
+        # (react:.../MathGraphics/Camera/index.js disabledField='useComputed'),
+        # so it can't be dragged and updateOnDrag has no effect. Policy: next's
+        # default (next:mathitem-configs/src/items/camera.ts:30).
+        out.add("updateOnDrag", "true", "none", "useComputed")
         return out.items
 
     # relativePosition/relativeLookAt are three.js world coordinates: the
@@ -832,7 +833,7 @@ COVERAGE: dict[str, dict[str, str]] = {
         "relativeLookAt": "target (÷ axis scales, useRelative) unless useComputed",
         "computedPosition": "position (identity) when useComputed; otherwise dropped (unused)",
         "computedLookAt": "target (identity) when useComputed; otherwise dropped (unused)",
-        "useComputed": "useRelative = !useComputed; updateOnDrag = !useComputed",
+        "useComputed": "useRelative = !useComputed; updateOnDrag stays next's default (computed cameras can't be dragged)",
     },
     "AXIS": {
         **_UNIVERSAL_COVERAGE,
