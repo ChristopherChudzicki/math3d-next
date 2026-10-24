@@ -122,10 +122,11 @@ const is3dDisabled = localStorage.getItem("disable3dScene") === "true";
 const Viewport: React.FC<Props> = ({ className, still }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [mathbox, setMathbox] = useState<MathboxSelection | null>(null);
-  // Latches on the first drain, per mount: a scene opened later in the editor
-  // gets no splash. Reset it if the frame page ever swaps its mathbox instance,
-  // or still mode advertises a new warmup as ready.
-  const [warmedUp, setWarmedUp] = useState(false);
+  // The scene load whose warmup has drained, so each load shows the splash
+  // again. A mathbox instance swapped within one load counts as drained.
+  const loadCount = useAppSelector(select.loadCount);
+  const [drainedLoad, setDrainedLoad] = useState<number | null>(null);
+  const warmedUp = drainedLoad === loadCount;
   const hasRequired = useAppSelector(select.hasItems(REQUIRED_ITEMS));
 
   const isOrthographic = useIsOrthographic();
@@ -137,7 +138,7 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
     setMathbox(mb);
   }, []);
 
-  // Wait for mathbox's first warmup to drain, then hide its loading splash. In
+  // Wait for each scene load's warmup to drain, then hide its loading splash. In
   // `still` mode, also halt the render loop and flag readiness so a
   // screenshotter can capture a static, fully-rendered, CPU-idle frame.
   useEffect(() => {
@@ -161,13 +162,13 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
         // root selection, see index.js) — stable enough to call bare, unlike
         // the internal `_context.getPending` we feature-detect above.
         if (still) (mathbox as MathboxRoot).stop();
-        setWarmedUp(true);
+        setDrainedLoad(loadCount);
         return;
       }
       raf = requestAnimationFrame(tick);
     });
     return () => cancelAnimationFrame(raf);
-  }, [still, mathbox]);
+  }, [still, mathbox, loadCount]);
 
   // threestrap's size plugin (mathbox's resize pipeline) already listens for
   // a "resize" event on this container element directly, not just on
