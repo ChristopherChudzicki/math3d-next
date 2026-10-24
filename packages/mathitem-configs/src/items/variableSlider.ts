@@ -69,7 +69,7 @@ const config: IMathItemConfig<
       name: "fps",
       label: "Frames per second",
       widget: WidgetType.MathValue,
-      validate: validators.real,
+      validate: validators.positive,
     },
     range: {
       name: "range",

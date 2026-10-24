@@ -191,23 +191,6 @@ describe("Variable Slider", () => {
         value: valueObj("X=6 + 0"),
       },
     },
-    // {
-    //   duration: 0.4,
-    //   fps: 20,
-    //   min: 4,
-    //   max: 10,
-    //   periods: 3,
-    //   // 8 frames per period
-    //   // increment is (10 - 4)/8 = 0.75,  starting from 5
-    //   expectedValues: repeat([5.75, 6.5, 7.25, 8, 8.75, 9.5, 4.25, 5], 3),
-    //   props: {
-    //     speedMultiplier: "1",
-    //     duration: "0.4 + 0",
-    //     fps: "20 + 0",
-    //     range: range("4 + 0", "10 + 0"),
-    //     value: valueObj("X=5 + 0"),
-    //   },
-    // },
   ])(
     "It continuously updates mathscope with values only when play button is active",
     async ({ duration, periods, props, expectedValues }) => {
@@ -274,8 +257,7 @@ describe("Variable Slider", () => {
 
   test.each([
     { speedMultiplier: "1/2", expectedValues: [0.8, 1.6, 2.4, 3.2] },
-    // { speedMultiplier: "1", expectedValues: [1.6, 3.2, 4.8, 6.4] },
-    // { speedMultiplier: "2", expectedValues: [3.2, 6.4, 9.6, 2.8] },
+    { speedMultiplier: "2", expectedValues: [3.2, 6.4, 9.6, 2.8] },
   ])(
     "Speeding up/down affects duration and increment size, not framerate",
     async ({ speedMultiplier, expectedValues }) => {
@@ -298,7 +280,7 @@ describe("Variable Slider", () => {
 
   test("Steps by elapsed time when ticks land unevenly on frames", async () => {
     // A 40ms period over fake 16ms frames: ticks 48ms then 32ms apart, so
-    // steps alternate between 1.2 and 0.8 of 10/25 = 0.4.
+    // steps alternate between 1.2x and 0.8x the 0.4 increment.
     const { el, valueUpdates } = await setupTest({
       speedMultiplier: "1",
       duration: "1",

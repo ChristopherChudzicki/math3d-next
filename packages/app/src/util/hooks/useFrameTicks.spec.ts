@@ -7,18 +7,24 @@ import { useFrameTicks } from "./useFrameTicks";
  * `elapsed` of every onTicks call, rounded to 3 places.
  */
 const setup = (fps: number | null) => {
-  let pending: FrameRequestCallback | null = null;
+  let pending: { id: number; cb: FrameRequestCallback } | null = null;
+  let lastId = 0;
   vi.spyOn(window, "requestAnimationFrame").mockImplementation((cb) => {
-    pending = cb;
-    return 1;
+    lastId += 1;
+    pending = { id: lastId, cb };
+    return lastId;
   });
-  vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {
-    pending = null;
+  vi.spyOn(window, "cancelAnimationFrame").mockImplementation((id) => {
+    if (pending?.id === id) pending = null;
   });
   const onTicks = vi.fn();
   const view = renderHook(() => useFrameTicks(onTicks, fps));
   const ticksAt = (times: number[]) => {
-    times.forEach((t) => pending?.(t));
+    times.forEach((t) => {
+      const frame = pending;
+      pending = null;
+      frame?.cb(t);
+    });
     return onTicks.mock.calls.map(([n]) => Math.round(n * 1000) / 1000);
   };
   return { view, ticksAt };
@@ -55,20 +61,36 @@ describe("useFrameTicks", () => {
     expect(new Set(ticks)).toEqual(new Set([0.833, 1.25]));
   });
 
-  test("Reports every elapsed period when frames are slower than fps", () => {
+  test("Reports every elapsed period on slow frames, then returns to fps", () => {
     const { ticksAt } = setup(60);
-    // 20 Hz frames each cover three 60 fps periods.
-    expect(ticksAt(frames(50, 5))).toEqual([3, 3, 3, 3]);
+    // Two 50ms frames each cover three periods. Then 120 Hz frames: the
+    // first is early for the next period, the second is on time.
+    expect(ticksAt([0, 50, 100, 100 + 1000 / 120, 100 + 1000 / 60])).toEqual([
+      3, 3, 1,
+    ]);
   });
 
-  test("Resumes without catching up after frames pause", () => {
+  test("Doesn't reset after a long frame while visible", () => {
     const { ticksAt } = setup(10);
-    expect(ticksAt([0, 100, 5000, 5100])).toEqual([1, 1]);
+    expect(ticksAt([0, 1500, 1600])).toEqual([15, 1]);
+  });
+
+  test("Resumes without catching up after the page is hidden", () => {
+    const { ticksAt } = setup(10);
+    ticksAt([0, 100]);
+    document.dispatchEvent(new Event("visibilitychange"));
+    expect(ticksAt([5000, 5100])).toEqual([1, 1]);
+  });
+
+  test("Doesn't tick for a non-positive fps", () => {
+    const { ticksAt } = setup(-10);
+    expect(ticksAt(frames(20, 5))).toEqual([]);
   });
 
   test("Cancels its frame on unmount", () => {
     const { view, ticksAt } = setup(60);
+    const before = ticksAt(frames(20, 3));
     view.unmount();
-    expect(ticksAt(frames(20, 5))).toEqual([]);
+    expect(ticksAt(frames(20, 5))).toEqual(before);
   });
 });

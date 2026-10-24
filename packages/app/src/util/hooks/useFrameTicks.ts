@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Calls `onTicks(elapsed)` on animation frames, on average `fps` times per
- * second. `elapsed` is the time since the previous call in units of 1/fps,
- * so advancing by `elapsed * step` moves at a steady rate however the calls
- * land on frames. `null` stops.
+ * Calls `onTicks(elapsed)` on animation frames: on average `fps` times per
+ * second, or every frame when the display is slower than that. `elapsed` is
+ * the time since the previous call in units of 1/fps, so advancing by
+ * `elapsed * step` moves at a steady rate however the calls land on frames.
+ * `null`, or an `fps` that isn't a positive number, stops.
  */
 const useFrameTicks = (
   onTicks: (elapsed: number) => void,
@@ -20,10 +21,14 @@ const useFrameTicks = (
     const slack = periodMs / 10;
     let prev: number | null = null;
     let due = 0;
+    // A hidden tab gets no frames; resume from where it reappears rather than
+    // jumping ahead.
+    const restart = () => {
+      prev = null;
+    };
+    document.addEventListener("visibilitychange", restart);
     let id = requestAnimationFrame(function frame(now) {
-      // After a gap over a second (e.g. a background tab pauses frames),
-      // resume from here rather than jumping ahead.
-      if (prev === null || now - prev > 1000 + periodMs) {
+      if (prev === null) {
         prev = now;
         due = now + periodMs;
       } else if (now + slack >= due) {
@@ -35,7 +40,10 @@ const useFrameTicks = (
       }
       id = requestAnimationFrame(frame);
     });
-    return () => cancelAnimationFrame(id);
+    return () => {
+      cancelAnimationFrame(id);
+      document.removeEventListener("visibilitychange", restart);
+    };
   }, [fps]);
 };
 
