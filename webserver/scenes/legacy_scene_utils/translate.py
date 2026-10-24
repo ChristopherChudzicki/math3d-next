@@ -200,8 +200,8 @@ class ItemMigrator:
 
     @staticmethod
     def z_index(x) -> str:
-        """A blank zIndex becomes "0", MathBox's default (owner decision,
-        2026-10-24); math3d-next's grids treat a blank one differently."""
+        """A blank zIndex becomes "0", MathBox's default, so saved scenes say
+        it explicitly (owner decision, 2026-10-24)."""
         return blank_to_empty(x.zIndex or "") or "0"
 
     def calculated_visibility(self, x) -> dict:

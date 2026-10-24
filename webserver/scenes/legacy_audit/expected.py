@@ -278,18 +278,15 @@ def _universal(out: _Out, item: dict) -> None:
     for prop in ("opacity", "zBias"):
         # Set verbatim on the render node (react:components/MathBox/MathBoxComponents.js:210-214).
         out.add(prop, _text(item.get(prop)), "render", prop)
-    # Owner decision (2026-10-24): a blank zIndex becomes "0". math3d-next's
-    # Grid falls back to its tree-order index for a blank one
-    # (next:app/src/features/viewport/graphics/Grid.tsx:31).
+    # Owner decision (2026-10-24): a blank zIndex becomes "0", MathBox's
+    # default, so saved scenes say it explicitly.
     z_index = item.get("zIndex")
     out.add("zIndex", "0" if is_blank(z_index) else _text(z_index), "render", "zIndex")
     # Policy, not reproduction: math3d-react derived draw order from opacity,
     # zOrder = (1 - opacity)*100 (react:containers/MathBoxScene/components/MathBoxScene.js:106-110).
     # math3d-next deliberately orders by the item tree instead, surfaces last
     # (#1010; next:app/src/store/scene/state/selectors.ts defaultGraphicOrder),
-    # and uses that when zOrder is empty, except for grids, which leave zOrder
-    # unset (next:app/src/features/viewport/graphics/Grid.tsx:31). Legacy
-    # scenes take the new order.
+    # and uses that whenever zOrder is empty. Legacy scenes take the new order.
     out.add("zOrder", "", "render", "constant")
     _visibility(out, item)
 
