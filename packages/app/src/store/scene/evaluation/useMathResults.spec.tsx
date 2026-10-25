@@ -107,6 +107,20 @@ describe("useMathResults and useMathErrors", () => {
     expect(results.current).toStrictEqual({ a: 3, b: 9 });
   });
 
+  test("useMathResults keeps the last result while an expression errors", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { results, mathScope } = setup("id1", ["a"]);
+
+    await act(() => {
+      mathScope.setExpressions([{ id: "id1-a", parseable: "a = 1 + 2" }]);
+    });
+    await act(() => {
+      mathScope.setExpressions([{ id: "id1-a", parseable: "a = y^2" }]);
+    });
+
+    expect(results.current).toStrictEqual({ a: 3 });
+  });
+
   test("useMathErrors triggers re-renders when eval errors change", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     const { errors, mathScope } = setup("id1", ["x", "y", "z"]);

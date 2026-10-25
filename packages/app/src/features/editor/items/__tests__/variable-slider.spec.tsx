@@ -174,40 +174,23 @@ describe("Variable Slider", () => {
 
   test.each([
     {
-      duration: 0.6,
-      fps: 10,
+      duration: 0.48,
+      fps: 12.5,
       min: -10,
       max: 11,
       periods: 2,
-      // 6 frames per period
+      // 6 ticks per period, one every 80ms (5 fake 16ms animation frames)
       // increment is (11 - -10)/6 = 3.5,  starting from 6
       expectedValues: repeat([9.5, -8.0, -4.5, -1.0, 2.5, 6.0], 2),
       props: {
         speedMultiplier: "1",
         // simple check that these are parsed as math
-        duration: "0.6 + 0",
-        fps: "10 + 0",
+        duration: "0.48 + 0",
+        fps: "12.5 + 0",
         range: range("-10 + 0", "11 + 0"),
         value: valueObj("X=6 + 0"),
       },
     },
-    // {
-    //   duration: 0.4,
-    //   fps: 20,
-    //   min: 4,
-    //   max: 10,
-    //   periods: 3,
-    //   // 8 frames per period
-    //   // increment is (10 - 4)/8 = 0.75,  starting from 5
-    //   expectedValues: repeat([5.75, 6.5, 7.25, 8, 8.75, 9.5, 4.25, 5], 3),
-    //   props: {
-    //     speedMultiplier: "1",
-    //     duration: "0.4 + 0",
-    //     fps: "20 + 0",
-    //     range: range("4 + 0", "10 + 0"),
-    //     value: valueObj("X=5 + 0"),
-    //   },
-    // },
   ])(
     "It continuously updates mathscope with values only when play button is active",
     async ({ duration, periods, props, expectedValues }) => {
@@ -273,17 +256,16 @@ describe("Variable Slider", () => {
   );
 
   test.each([
-    { speedMultiplier: "1/2", expectedValues: [0.5, 1, 1.5, 2] },
-    // { speedMultiplier: "1", expectedValues: [1, 2, 3, 4] },
-    // { speedMultiplier: "2", expectedValues: [2, 4, 6, 8] },
+    { speedMultiplier: "1/2", expectedValues: [0.8, 1.6, 2.4, 3.2] },
+    { speedMultiplier: "2", expectedValues: [3.2, 6.4, 9.6, 2.8] },
   ])(
     "Speeding up/down affects duration and increment size, not framerate",
     async ({ speedMultiplier, expectedValues }) => {
-      const timeout = 1 / 5;
+      const timeout = 0.32;
       const props: Overrides = {
         speedMultiplier,
         duration: "0.5",
-        fps: "20",
+        fps: "12.5",
         range: range("0", "10"),
         value: valueObj("X=0"),
       };
@@ -295,6 +277,29 @@ describe("Variable Slider", () => {
       expectSliderArraysEqual(valueUpdates, expectedValues);
     },
   );
+
+  test("Steps by elapsed time when ticks land unevenly on frames", async () => {
+    // A 40ms period over fake 16ms frames: ticks 48ms then 32ms apart, so
+    // steps alternate between 1.2x and 0.8x the 0.4 increment.
+    const { el, valueUpdates } = await setupTest({
+      speedMultiplier: "1",
+      duration: "1",
+      fps: "25",
+      range: range("0", "10"),
+      value: valueObj("X=0"),
+    });
+    await user.click(el.btnToggle);
+    await userWaits(200, { useFake: true });
+    await user.click(el.btnToggle);
+
+    // Real time passing during the clicks can add a tick, so compare a
+    // prefix rather than the count.
+    expectSliderArraysEqual(
+      valueUpdates.slice(0, 4),
+      [0.48, 0.8, 1.28, 1.6],
+      0,
+    );
+  });
 
   test("Min, max, step passed to input[type=range]", async () => {
     const { el, min, max, fps, duration } = await setupTest();
