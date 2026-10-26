@@ -3,6 +3,7 @@ import type { MathItem } from "@math3d/mathitem-configs";
 import { faker } from "@faker-js/faker";
 import {
   act,
+  allowActWarnings,
   assertInstanceOf,
   renderTestApp,
   user,
@@ -299,6 +300,77 @@ describe("Variable Slider", () => {
       [0.48, 0.8, 1.28, 1.6],
       0,
     );
+  });
+
+  describe("Animation outlives the slider's form", () => {
+    // 6 ticks per period, one every 80ms; increment (11 - -10)/6 = 3.5
+    const props: Overrides = {
+      speedMultiplier: "1",
+      duration: "0.48",
+      fps: "12.5",
+      range: range("-10", "11"),
+      value: valueObj("X=6"),
+    };
+    const expectedValues = [9.5, -8.0, -4.5, -1.0, 2.5];
+
+    test("Keeps animating while the Setup tab is showing", async () => {
+      const { el, valueUpdates } = await setupTest(props);
+      await user.click(el.btnToggle);
+      await user.click(screen.getByRole("tab", { name: "Setup" }));
+      expect(el.item).not.toBeInTheDocument();
+
+      await userWaits(480, { useFake: true });
+
+      expectSliderArraysEqual(valueUpdates.slice(0, 5), expectedValues, 0);
+    });
+
+    test("Ticks once per period while its item is dragged", async () => {
+      // During a drag, dnd-kit re-renders from a MutationObserver, outside act.
+      allowActWarnings();
+      const { el, item, store, valueUpdates } = await setupTest(props);
+      const sortable = el.item.closest<HTMLElement>(
+        "[aria-roledescription=sortable]",
+      );
+      assertInstanceOf(sortable, HTMLElement);
+      await user.click(el.btnToggle);
+      act(() => sortable.focus());
+      await user.keyboard("[Space]");
+      await userWaits(20, { useFake: true });
+      // The drag overlay renders a second copy of the item's form.
+      expect(
+        screen.getAllByLabelText(`Settings for ${item.properties.description}`),
+      ).toHaveLength(2);
+
+      let dispatches = 0;
+      const unsubscribe = store.subscribe(() => {
+        dispatches += 1;
+      });
+      const updatesBefore = valueUpdates.length;
+      await userWaits(480, { useFake: true });
+      unsubscribe();
+
+      expect(valueUpdates.length - updatesBefore).toBeGreaterThan(3);
+      expect(dispatches).toBe(valueUpdates.length - updatesBefore);
+    });
+  });
+
+  test("Animating returns the value display to 2 digits", async () => {
+    const { el } = await setupTest({
+      value: valueObj("X=0"),
+      range: range("0", "1"),
+      duration: "0.5",
+      fps: "6",
+      speedMultiplier: "1",
+    });
+    await user.click(el.inputRhs);
+    await user.clear(el.inputRhs);
+    await user.paste("0.111");
+    expect(el.inputRhs.value).toBe("0.111");
+
+    await user.click(el.btnToggle);
+    await userWaits(200, { useFake: true });
+
+    expect(el.inputRhs.value).toMatch(/^\+0\.\d\d$/);
   });
 
   test("Min, max, step passed to input[type=range]", async () => {

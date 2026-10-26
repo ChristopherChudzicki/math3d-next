@@ -1,7 +1,15 @@
 import { test, expect } from "vitest";
-import { SceneBuilder, seedDb } from "@math3d/mock-api";
-import { renderTestApp, screen, waitFor, waitForAppReady } from "@/test_util";
+import { MathItemType as MIT } from "@math3d/mathitem-configs";
+import { SceneBuilder, makeItem, seedDb } from "@math3d/mock-api";
+import {
+  renderTestApp,
+  screen,
+  userWaits,
+  waitFor,
+  waitForAppReady,
+} from "@/test_util";
 import * as select from "@/store/scene/state/selectors";
+import { mathScopeId } from "@/store/scene/evaluation/mathScope";
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 
@@ -25,6 +33,23 @@ test("renders the scene with its data loaded and no editor UI", async () => {
   ).toBeNull();
   expect(screen.queryByRole("button", { name: "Expand Controls" })).toBeNull();
   expect(screen.queryByTestId("toggle-keyboard-button")).toBeNull();
+});
+
+test("does not animate a slider saved mid-animation", async () => {
+  const item = makeItem(MIT.VariableSlider, {
+    isAnimating: "true",
+    fps: "30",
+    value: { lhs: "X", rhs: "1", type: "assignment" },
+  });
+  const scene = seedDb.withSceneFromItems([item]);
+  const { store } = renderTestApp(`/app/frame/${scene.key}`);
+  const getValue = () =>
+    store.mathScope.get().results.get(mathScopeId(item.id, "value"));
+  await waitFor(() => expect(getValue()).toBe(1));
+
+  await userWaits(200);
+
+  expect(getValue()).toBe(1);
 });
 
 test("a missing scene neither alerts nor redirects (silent 404)", async () => {
