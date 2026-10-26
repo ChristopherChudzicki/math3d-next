@@ -19,8 +19,8 @@ type ExtraProps = {
 };
 
 const formatted = (x: string, numDecimalDigits?: number) => {
-  if (numDecimalDigits === undefined) return x;
   const xNum = Number(x);
+  if (numDecimalDigits === undefined || Number.isNaN(xNum)) return x;
   const prefix = x.trim().startsWith("+") ? "+" : "";
   return prefix + round(xNum, numDecimalDigits).toString();
 };

@@ -23,10 +23,11 @@ import {
   WidgetChangeEvent,
 } from "@/features/editor/items/FieldWidget/types";
 import type { SliderControlsProps } from "./SliderControls";
-import SliderControls, { mustFindSpeed } from "./SliderControls";
+import SliderControls from "./SliderControls";
 import {
-  getSliderParameters,
+  mustFindSpeed,
   sliderNumbers,
+  sliderStep,
   valueAssignment,
 } from "./sliderMath";
 import styles from "./slider.module.css";
@@ -85,10 +86,10 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
     },
     [onWidgetChange],
   );
-  const { baseIncrement } = getSliderParameters(min, max, fps, duration);
+  const step = sliderStep(min, max, fps, duration);
   const onStep: SliderControlsProps["onStep"] = useCallback(
-    (step) => onValueChange(value + baseIncrement * step),
-    [value, baseIncrement, onValueChange],
+    (n) => onValueChange(value + step * n),
+    [value, step, onValueChange],
   );
   const { range } = item.properties;
   const onSetRange = useMemo(() => {
@@ -152,7 +153,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
           aria-label={configProps.value.label}
           data-dndkit-no-drag
           onValueChange={onValueChange}
-          step={baseIncrement}
+          step={step}
           largeStep={(max - min) / 10}
           min={min}
           max={max}

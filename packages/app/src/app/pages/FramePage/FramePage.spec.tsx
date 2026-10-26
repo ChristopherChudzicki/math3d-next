@@ -36,20 +36,17 @@ test("renders the scene with its data loaded and no editor UI", async () => {
 });
 
 test("does not animate a slider saved mid-animation", async () => {
-  const item = makeItem(MIT.VariableSlider, {
-    isAnimating: "true",
-    fps: "30",
-    value: { lhs: "X", rhs: "1", type: "assignment" },
-  });
+  const item = makeItem(MIT.VariableSlider, { isAnimating: "true" });
   const scene = seedDb.withSceneFromItems([item]);
   const { store } = renderTestApp(`/app/frame/${scene.key}`);
   const getValue = () =>
     store.mathScope.get().results.get(mathScopeId(item.id, "value"));
-  await waitFor(() => expect(getValue()).toBe(1));
+  await waitFor(() => expect(getValue()).toEqual(expect.any(Number)));
+  const saved = getValue();
 
   await userWaits(200);
 
-  expect(getValue()).toBe(1);
+  expect(getValue()).toBe(saved);
 });
 
 test("a missing scene neither alerts nor redirects (silent 404)", async () => {

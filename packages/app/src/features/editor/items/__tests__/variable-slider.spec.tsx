@@ -349,14 +349,60 @@ describe("Variable Slider", () => {
       await userWaits(480, { useFake: true });
       unsubscribe();
 
-      expect(valueUpdates.length - updatesBefore).toBeGreaterThan(3);
-      expect(dispatches).toBe(valueUpdates.length - updatesBefore);
+      const updates = valueUpdates.length - updatesBefore;
+      // 6 periods; real time passing during the wait can add one.
+      expect(updates).toBeGreaterThanOrEqual(6);
+      expect(updates).toBeLessThanOrEqual(7);
+      expect(dispatches).toBe(updates);
     });
+  });
+
+  test("Continues from a value the user steps to mid-animation", async () => {
+    // A tick every 80ms; ticks and steps both move by 3.5.
+    const { el, valueUpdates } = await setupTest({
+      speedMultiplier: "1",
+      duration: "0.48",
+      fps: "12.5",
+      range: range("-10", "11"),
+    });
+    await user.click(el.btnToggle);
+    await userWaits(100, { useFake: true });
+    expect(valueUpdates.length).toBeGreaterThan(0);
+    const ticked = valueUpdates[valueUpdates.length - 1];
+
+    // A synchronous click, so no ticks land between the step and the wait.
+    act(() => el.btnDecrement.click());
+    await userWaits(80, { useFake: true });
+
+    // One step back, then one tick forward from the stepped value.
+    expectSliderArraysEqual(valueUpdates.slice(-2), [ticked - 3.5, ticked], 0);
+  });
+
+  test("Pauses playback, keeping the text, while the value is invalid", async () => {
+    // Fixed timing; random fps can tick outside act during the typing.
+    const { el, valueUpdates } = await setupTest({
+      fps: "12.5",
+      duration: "0.48",
+    });
+    await user.click(el.btnToggle);
+    await user.click(el.inputRhs);
+    await user.clear(el.inputRhs);
+    await user.paste("1+");
+    const updatesBefore = valueUpdates.length;
+
+    await userWaits(300, { useFake: true });
+
+    expect(el.inputRhs.value).toBe("1+");
+    expect(valueUpdates.length).toBe(updatesBefore);
+  });
+
+  test("Displays a non-numeric value as written", async () => {
+    const { el } = await setupTest({ value: valueObj("X=1+1") });
+    expect(el.inputRhs.value).toBe("1+1");
   });
 
   test("Animating returns the value display to 2 digits", async () => {
     const { el } = await setupTest({
-      value: valueObj("X=0"),
       range: range("0", "1"),
       duration: "0.5",
       fps: "6",
