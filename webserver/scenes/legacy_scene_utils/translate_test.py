@@ -733,6 +733,22 @@ def test_vector():
                 "samples3": "3",
             },
         ),
+        (
+            {"samples": "S_{1}"},
+            {
+                "samples1": "S_{1}\\left[0\\right]",
+                "samples2": "S_{1}\\left[1\\right]",
+                "samples3": "S_{1}\\left[2\\right]",
+            },
+        ),
+        (
+            {"samples": "n\\cdot\\left[1,1,1\\right]"},
+            {
+                "samples1": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[0\\right]",
+                "samples2": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[1\\right]",
+                "samples3": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[2\\right]",
+            },
+        ),
     ],
 )
 def test_vector_field(in_patch, out_patch):

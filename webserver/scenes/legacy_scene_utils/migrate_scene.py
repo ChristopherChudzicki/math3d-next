@@ -8,8 +8,9 @@ from typing import Any
 from django.core.exceptions import ValidationError
 
 from scenes.legacy_scene_utils.default_data import set_defaults
+from scenes.legacy_scene_utils.indexing import shift_indices
 from scenes.legacy_scene_utils.issue_log import Issue, IssueLog
-from scenes.legacy_scene_utils.translate import ItemMigrator
+from scenes.legacy_scene_utils.translate import ItemMigrator, blank_to_empty
 from scenes.models import LegacyScene, Scene, is_invalid_key_error
 
 logger = logging.getLogger(__name__)
@@ -17,29 +18,41 @@ logger = logging.getLogger(__name__)
 
 def parse_value(value: str, default: float) -> float:
     """
-    Parse a legacy axis scale: a number, "a/b", or "\\frac{a}{b}" (LaTeX spaces
-    allowed). Anything else, e.g. a variable, falls back to the default.
+    Parse a legacy axis scale: a number, "a/b", or "\\frac{a}{b}" (either may
+    be negated; LaTeX spaces allowed). Anything else, e.g. a variable, falls
+    back to the default.
     """
     value = value.replace("\\ ", "").strip()
-    frac = re.fullmatch(r"\\frac\{(.+)\}\{(.+)\}", value)
+    sign = 1.0
+    if value.startswith("-\\frac"):
+        sign, value = -1.0, value[1:]
+    frac = re.fullmatch(r"\\frac\{([^{}]+)\}\{([^{}]+)\}", value)
     if frac:
         value = f"{frac[1]}/{frac[2]}"
     try:
         if "/" in value:
             numerator, denominator = value.split("/")
-            return float(numerator) / float(denominator)
-        return float(value)
+            result = float(numerator) / float(denominator)
+        else:
+            result = float(value)
     except (ValueError, ZeroDivisionError):
-        # If the value cannot be parsed, return the default value
         return default
+    return sign * result if math.isfinite(result) else default
 
 
-def get_axis_scales(old_items: dict, log: IssueLog) -> tuple[float, float, float]:
-    """Get the axis scales from the legacy axis items (flat dicts). A negative
-    scale mirrors its axis in both apps and is kept; one the camera can't
-    divide by (zero, or not a plain number) falls back to the default, with a
+AxisScale = float | str
+
+
+def get_axis_scales(
+    old_items: dict, log: IssueLog
+) -> tuple[AxisScale, AxisScale, AxisScale]:
+    """Get the axis scales from the legacy axis items (flat dicts). A scale
+    that isn't a plain number stays an expression for math3d-next to evaluate,
+    as it does the axis's own. A negative scale mirrors its axis in both apps
+    and is kept. A blank one is 1.0, math3d-next's fallback for a scale it
+    can't evaluate (useAxesInfo.tsx); zero falls back to the default, with a
     warning."""
-    scales = []
+    scales: list[AxisScale] = []
     for axis_id, default_text, default in (
         ("axis-x", "1", 1.0),
         ("axis-y", "1", 1.0),
@@ -47,11 +60,16 @@ def get_axis_scales(old_items: dict, log: IssueLog) -> tuple[float, float, float
     ):
         raw = str(old_items[axis_id].get("scale", default_text))
         value = parse_value(raw, math.nan)
-        if value == 0 or math.isnan(value):
+        if value == 0:
             log.set_prefix(axis_id)
             log.warning(f"Camera uses scale {default}; can't use axis scale {raw!r}")
-            value = default
-        scales.append(value)
+            scales.append(default)
+        elif not math.isnan(value):
+            scales.append(value)
+        elif not blank_to_empty(raw):
+            scales.append(1.0)
+        else:
+            scales.append(shift_indices(raw)[0])
     return scales[0], scales[1], scales[2]
 
 

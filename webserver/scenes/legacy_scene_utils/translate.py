@@ -80,6 +80,15 @@ def split_top_level(arr: str) -> list[str] | None:
     return parts
 
 
+def balanced(text: str) -> bool:
+    depth = 0
+    for char in text:
+        depth += (char in "([{") - (char in ")]}")
+        if depth < 0:
+            return False
+    return depth == 0
+
+
 # A calculated visibility made only of whitespace, including LaTeX spacing
 # commands, is blank.
 _BLANK = re.compile(r"(?:\s|\\ |\\,|\\;|\\:|\\!|\\quad|\\qquad|~)*")
@@ -87,6 +96,21 @@ _BLANK = re.compile(r"(?:\s|\\ |\\,|\\;|\\:|\\!|\\quad|\\qquad|~)*")
 
 def blank_to_empty(text: str) -> str:
     return "" if _BLANK.fullmatch(text) else text
+
+
+def divide(numerator: float, denominator: float | str) -> float | str:
+    """``numerator / denominator``, as LaTeX when the denominator is."""
+    if numerator == 0:
+        return 0.0
+    if isinstance(denominator, str):
+        return f"\\frac{{{numerator}}}{{{denominator}}}"
+    return numerator / denominator
+
+
+def vector_text(components: list[float | str]) -> str:
+    if all(isinstance(c, float) for c in components):
+        return str(components)
+    return "\\left[" + ",".join(str(c) for c in components) + "\\right]"
 
 
 def depends_on(rhs: str, param: str) -> bool:
@@ -100,9 +124,9 @@ class ItemMigrator:
     def __init__(
         self,
         log: IssueLog | None = None,
-        x_scale: float = 1.0,
-        y_scale: float = 1.0,
-        z_scale: float = 0.5,
+        x_scale: float | str = 1.0,
+        y_scale: float | str = 1.0,
+        z_scale: float | str = 0.5,
     ):
         if log is None:
             log = IssueLog()
@@ -207,10 +231,17 @@ class ItemMigrator:
 
     def vector_field_samples(self, arr: str) -> tuple[str, str, str]:
         parts = split_top_level(arr)
-        if parts is None or len(parts) != 3:
+        if parts is not None and len(parts) == 3:
+            first, second, third = (p.replace("\\ ", " ").strip() for p in parts)
+            return first, second, third
+        if parts is not None or not blank_to_empty(arr) or not balanced(arr):
             self.log.error(f"Invalid vector field samples: {arr}")
             return "10", "10", "5"
-        first, second, third = (p.replace("\\ ", " ").strip() for p in parts)
+        # Any other expression, e.g. a variable, is indexed per direction.
+        name = arr.strip()
+        if not re.fullmatch(r"\\?[A-Za-z]\w*(?:_\{\w*\})?", name):
+            name = f"\\left({name}\\right)"
+        first, second, third = (f"{name}\\left[{i}\\right]" for i in range(3))
         return first, second, third
 
     @staticmethod
@@ -286,10 +317,12 @@ class ItemMigrator:
                 t + (p - t) / 50 for p, t in zip(position_in, look_at, strict=True)
             ]
         scales = [self.x_scale, self.y_scale, self.z_scale]
-        relativePosition = [p / k for p, k in zip(position_in, scales, strict=True)]
-        relativeLookAt = [t / k for t, k in zip(look_at, scales, strict=True)]
-        position = str(relativePosition)
-        target = str(relativeLookAt)
+        position = vector_text(
+            [divide(p, k) for p, k in zip(position_in, scales, strict=True)]
+        )
+        target = vector_text(
+            [divide(t, k) for t, k in zip(look_at, scales, strict=True)]
+        )
         if x.useComputed:
             position = x.computedPosition
             target = x.computedLookAt

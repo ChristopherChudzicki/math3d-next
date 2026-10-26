@@ -71,25 +71,48 @@ def test_negative_axis_scale_keeps_its_sign():
     assert translated.issues == []
 
 
-@pytest.mark.parametrize("scale", ["0", "x_{s}"])
-def test_unusable_axis_scale_falls_back_to_default_with_a_warning(scale):
+def _camera_position(x_scale: str):
     translated = translate_legacy_scene(
         _dehydrated(
             graphics={
-                "axis-x": {"type": "AXIS", "scale": scale},
+                "axis-x": {"type": "AXIS", "scale": x_scale},
                 "camera": {"type": "CAMERA", "relativePosition": [2, -2, 1]},
             }
         )
     )
-    assert _items(translated)["camera"]["position"] == "[2.0, -2.0, 2.0]"
-    assert [i.message for i in translated.issues] == [
-        f"axis-x: Camera uses scale 1.0; can't use axis scale {scale!r}"
+    return _items(translated)["camera"]["position"], translated.issues
+
+
+def test_symbolic_axis_scale_divides_the_camera_as_an_expression():
+    assert _camera_position("x_{s}") == (
+        "\\left[\\frac{2}{x_{s}},-2.0,2.0\\right]",
+        [],
+    )
+
+
+def test_blank_axis_scale_is_one():
+    assert _camera_position("\\ ") == ("[2.0, -2.0, 2.0]", [])
+
+
+def test_zero_axis_scale_falls_back_to_default_with_a_warning():
+    position, issues = _camera_position("0")
+    assert position == "[2.0, -2.0, 2.0]"
+    assert [i.message for i in issues] == [
+        "axis-x: Camera uses scale 1.0; can't use axis scale '0'"
     ]
 
 
 @pytest.mark.parametrize(
     ("value", "expected"),
-    [("2", 2.0), ("1/2", 0.5), ("\\frac{1}{4}", 0.25), ("1\\ ", 1.0), ("x_{s}", 7.0)],
+    [
+        ("2", 2.0),
+        ("1/2", 0.5),
+        ("\\frac{1}{4}", 0.25),
+        ("-\\frac{1}{4}", -0.25),
+        ("1\\ ", 1.0),
+        ("x_{s}", 7.0),
+        ("inf", 7.0),
+    ],
 )
 def test_parse_value(value, expected):
     assert parse_value(value, 7.0) == expected
