@@ -102,9 +102,9 @@ def translate_legacy_scene(dehydrated: dict) -> TranslatedScene:
     # against these, so they are merged per property below.
     default_items: dict[str, dict[str, Any]] = {
         "camera": {"type": "CAMERA"},
-        "axis-x": {"type": "AXIS", "axis": "x"},
-        "axis-y": {"type": "AXIS", "axis": "y"},
-        "axis-z": {"type": "AXIS", "axis": "z", "scale": "1/2"},
+        "axis-x": {"type": "AXIS", "axis": "x", "label": "x"},
+        "axis-y": {"type": "AXIS", "axis": "y", "label": "y"},
+        "axis-z": {"type": "AXIS", "axis": "z", "label": "z", "scale": "1/2"},
         "grid-xy": {"type": "GRID", "axes": "xy"},
         "grid-yz": {"type": "GRID", "axes": "yz", "visible": False},
         "grid-zx": {"type": "GRID", "axes": "zx", "visible": False},

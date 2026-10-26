@@ -1,3 +1,4 @@
+import copy
 from typing import Any
 
 DEFAULT_FOLDERS: dict[str, dict[str, Any]] = {
@@ -37,7 +38,7 @@ def set_defaults(dehydrated: dict):
     }
 
     dehydrated["sortableTree"] = {
-        **SORTABLE_TREE_FIXED_POSITION,
+        **copy.deepcopy(SORTABLE_TREE_FIXED_POSITION),
         **dehydrated["sortableTree"],
     }
 

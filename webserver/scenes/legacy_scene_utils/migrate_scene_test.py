@@ -31,6 +31,14 @@ def test_customized_default_grid_keeps_its_axes_and_visibility():
     assert (grid["axes"], grid["visible"], grid["color"]) == ("yz", False, "red")
 
 
+def test_customized_default_z_axis_keeps_its_label_and_scale():
+    translated = translate_legacy_scene(
+        _dehydrated(graphics={"axis-z": {"type": "AXIS", "color": "red"}})
+    )
+    axis = _items(translated)["axis-z"]
+    assert (axis["axis"], axis["label"], axis["scale"]) == ("z", "z", "1/2")
+
+
 def test_partially_saved_default_folder_keeps_its_description():
     translated = translate_legacy_scene(
         _dehydrated(folders={"axes": {"isCollapsed": True}})

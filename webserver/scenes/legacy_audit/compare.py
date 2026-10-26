@@ -43,7 +43,6 @@ class SceneResult:
     item_failures: list[tuple[str, str, str, str]] = field(default_factory=list)
     order_failures: list[tuple[str, str]] = field(default_factory=list)
     unknown_properties: list[tuple[str, str]] = field(default_factory=list)
-    inventory: list[tuple[str, str]] = field(default_factory=list)
     flags: list[str] = field(default_factory=list)
 
     def clusters(self, severities: frozenset[str]) -> set[str]:
@@ -145,7 +144,6 @@ def compare_scene(
     result = SceneResult(key=exported["key"], times_accessed=exported["times_accessed"])
     assert rehydrated["key"] == exported["key"], "input files are out of step"
 
-    _inventory(result, exported["dehydrated"])
     result.legacy_broken = rehydrated.get("legacy_broken", [])
     if "mathGraphics" not in rehydrated:
         return result
@@ -297,15 +295,3 @@ def _compare_scene_fields(result: SceneResult, exported: dict, migrated: dict) -
                 actual=actual,
             )
         )
-
-
-def _inventory(result: SceneResult, dehydrated: dict) -> None:
-    for item in (dehydrated.get("folders") or {}).values():
-        result.inventory.extend((FOLDER, prop) for prop in item if prop != "type")
-    for group in ("mathGraphics", "mathSymbols"):
-        for item in (dehydrated.get(group) or {}).values():
-            if isinstance(item, dict):
-                item_type = item.get("type", "?")
-                result.inventory.extend(
-                    (item_type, prop) for prop in item if prop != "type"
-                )

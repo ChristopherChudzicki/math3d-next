@@ -34,7 +34,7 @@ def hidden_by_blank_visibility(rehydrated: dict) -> list[str]:
     visibility on, a blank expression, and visible false."""
     return [
         item_id
-        for item_id, item in rehydrated["mathGraphics"].items()
+        for item_id, item in (rehydrated.get("mathGraphics") or {}).items()
         if item.get("useCalculatedVisibility") is True
         and item.get("visible") is False
         and expected.is_blank(item.get("calculatedVisibility"))

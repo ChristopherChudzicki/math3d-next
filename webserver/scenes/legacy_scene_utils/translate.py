@@ -113,11 +113,16 @@ def vector_text(components: list[float | str]) -> str:
     return "\\left[" + ",".join(str(c) for c in components) + "\\right]"
 
 
+def _symbol_text(latex: str) -> str:
+    """math3d-next's parser drops subscript braces and turns backslashes into
+    spaces: ``x_{1}`` is the symbol ``x_1``, ``\\theta`` the symbol ``theta``."""
+    return re.sub(r"_\{([^{}]*)\}", r"_\1", latex).replace("\\", " ")
+
+
 def depends_on(rhs: str, param: str) -> bool:
-    """Whether ``rhs`` uses the symbol ``param``. math3d-next's parser turns
-    backslashes into spaces, so ``\\theta`` is the symbol ``theta``."""
-    symbols = re.findall(r"[A-Za-z_][A-Za-z0-9_]*", rhs.replace("\\", " "))
-    return param.replace("\\", "").strip() in symbols
+    """Whether ``rhs`` uses the symbol ``param``."""
+    symbols = re.findall(r"[A-Za-z_][A-Za-z0-9_]*", _symbol_text(rhs))
+    return _symbol_text(param).strip() in symbols
 
 
 class ItemMigrator:
@@ -142,7 +147,7 @@ class ItemMigrator:
         fields = {f.name for f in dataclasses.fields(cls)}
         unknown = sorted(set(props) - fields)
         if unknown:
-            self.log.warning(
+            self.log.ignored_properties(
                 f"Ignored unknown {self.item_type} properties: {', '.join(unknown)}"
             )
         return cls(**{k: v for k, v in props.items() if k in fields})
@@ -180,7 +185,7 @@ class ItemMigrator:
 
     def function_assignment(self, expr: str) -> FunctionAssignmentObj:
         lhs, rhs = self.split_assignment(expr)
-        matches = re.search(r"(.*?)\((.*?)\)", lhs)
+        matches = re.search(r"([^(\n]*)\(([^)\n]*)\)", lhs)
         if matches is None:
             raise ValueError(f"Expected lhs to have form 'f(...)'. Value: {lhs}")
         name = matches[1]
@@ -197,13 +202,19 @@ class ItemMigrator:
         return FunctionAssignmentArray(type="array", items=items)
 
     @staticmethod
-    def first_range_depends_on_second(domain: FunctionAssignmentArray) -> bool:
-        """math3d-react samples u with uSamples/gridU whichever range is a
-        function; math3d-next evaluates the 2nd parameter first when the 1st
-        one's range depends on it (validators/src/domainFuncs.ts), giving it
-        samples1/grid1."""
+    def sampling(x, domain: FunctionAssignmentArray) -> dict:
+        """A surface's samples and grid lines. math3d-react samples u with
+        uSamples/gridU whichever range is a function; math3d-next evaluates
+        the 2nd parameter first when the 1st one's range depends on it
+        (validators/src/domainFuncs.ts), giving it samples1/grid1."""
         first = domain.items[0]
-        return any(depends_on(first.rhs, param) for param in first.params)
+        swap = any(depends_on(first.rhs, param) for param in first.params)
+        return {
+            "samples1": x.vSamples if swap else x.uSamples,
+            "samples2": x.uSamples if swap else x.vSamples,
+            "grid1": x.gridV if swap else x.gridU,
+            "grid2": x.gridU if swap else x.gridV,
+        }
 
     # math3d-next's speeds (SliderControls.tsx speedOptions). A legacy speed
     # without an equal option maps to the nearest one on a log scale.
@@ -222,7 +233,7 @@ class ItemMigrator:
     def find_speed(self, speed: float) -> str:
         if speed in self.SPEEDS:
             return self.SPEEDS[speed]
-        if not speed or speed <= 0:
+        if not isinstance(speed, int | float) or speed <= 0:
             self.log.error(f"Unexpected speedMultiplier: {speed}")
             return "1"
         nearest = min(self.SPEEDS, key=lambda s: abs(math.log(s / speed)))
@@ -250,7 +261,8 @@ class ItemMigrator:
         it explicitly (owner decision, 2026-10-24)."""
         return blank_to_empty(x.zIndex or "") or "0"
 
-    def calculated_visibility(self, x) -> dict:
+    @staticmethod
+    def calculated_visibility(x) -> dict:
         """A blank expression turns calculated visibility off, so the item
         follows its own ``visible`` (owner decision, 2026-10-23)."""
         calc = blank_to_empty(x.calculatedVisibility or "")
@@ -345,20 +357,16 @@ class ItemMigrator:
         rangeU = x.rangeU if "=" in x.rangeU else f"_f(y)={x.rangeU}"
         rangeV = x.rangeV if "=" in x.rangeV else f"_f(x)={x.rangeV}"
         domain = self.domain_array([rangeU, rangeV])
-        swap = self.first_range_depends_on_second(domain)
         return ExplicitSurfaceProperties(
             color=x.color,
             colorExpr=self.function_assignment(x.colorExpr),
             description=x.description,
             domain=domain,
             expr=expr,
-            grid1=x.gridV if swap else x.gridU,
-            grid2=x.gridU if swap else x.gridV,
+            **self.sampling(x, domain),
             gridOpacity=x.gridOpacity,
             gridWidth=x.gridWidth,
             opacity=x.opacity,
-            samples1=x.vSamples if swap else x.uSamples,
-            samples2=x.uSamples if swap else x.vSamples,
             shaded=stringify(x.shaded),
             visible=x.visible,
             **self.calculated_visibility(x),
@@ -373,20 +381,16 @@ class ItemMigrator:
         rangeU = x.rangeU if "=" in x.rangeU else f"_f(\\theta)={x.rangeU}"
         rangeV = x.rangeV if "=" in x.rangeV else f"_f(r)={x.rangeV}"
         domain = self.domain_array([rangeU, rangeV])
-        swap = self.first_range_depends_on_second(domain)
         return ExplicitSurfacePolarProperties(
             color=x.color,
             colorExpr=self.function_assignment(x.colorExpr),
             description=x.description,
             domain=domain,
             expr=expr,
-            grid1=x.gridV if swap else x.gridU,
-            grid2=x.gridU if swap else x.gridV,
+            **self.sampling(x, domain),
             gridOpacity=x.gridOpacity,
             gridWidth=x.gridWidth,
             opacity=x.opacity,
-            samples1=x.vSamples if swap else x.uSamples,
-            samples2=x.uSamples if swap else x.vSamples,
             shaded=stringify(x.shaded),
             visible=x.visible,
             **self.calculated_visibility(x),
@@ -508,20 +512,16 @@ class ItemMigrator:
         rangeU = x.rangeU if "=" in x.rangeU else f"_f(v)={x.rangeU}"
         rangeV = x.rangeV if "=" in x.rangeV else f"_f(u)={x.rangeV}"
         domain = self.domain_array([rangeU, rangeV])
-        swap = self.first_range_depends_on_second(domain)
         return ParametricSurfaceProperties(
             color=x.color,
             colorExpr=self.function_assignment(x.colorExpr),
             description=x.description,
             domain=domain,
             expr=expr,
-            grid1=x.gridV if swap else x.gridU,
-            grid2=x.gridU if swap else x.gridV,
+            **self.sampling(x, domain),
             gridOpacity=x.gridOpacity,
             gridWidth=x.gridWidth,
             opacity=x.opacity,
-            samples1=x.vSamples if swap else x.uSamples,
-            samples2=x.uSamples if swap else x.vSamples,
             shaded=stringify(x.shaded),
             visible=x.visible,
             **self.calculated_visibility(x),
@@ -636,23 +636,10 @@ class ItemMigrator:
         copy = self.shift_indices(copy)
 
         if item_type == "AXIS":
-            extra_defaults = {}
-            if item_id == "axis-x":
-                extra_defaults = {"axis": "x", "label": "x"}
-            elif item_id == "axis-y":
-                extra_defaults = {"axis": "y", "label": "y"}
-            elif item_id == "axis-z":
-                extra_defaults = {"axis": "z", "scale": "1/2", "label": "z"}
-
             return AxisItem(
                 id=item_id,
                 type="AXIS",
-                properties=self.translate_axis(
-                    {
-                        **extra_defaults,
-                        **copy,
-                    }
-                ),
+                properties=self.translate_axis(copy),
             )
 
         if item_type == "BOOLEAN_VARIABLE":

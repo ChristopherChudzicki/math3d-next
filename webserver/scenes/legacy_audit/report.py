@@ -66,7 +66,6 @@ class Aggregate:
     needs_eval: Counter = field(default_factory=Counter)
     expectation_errors: Counter = field(default_factory=Counter)
     unknown_properties: Counter = field(default_factory=Counter)
-    inventory: Counter = field(default_factory=Counter)
     flags: Counter = field(default_factory=Counter)
     weights: list[int] = field(default_factory=list)
     scene_clusters: list[tuple[int, frozenset[str]]] = field(default_factory=list)
@@ -75,8 +74,6 @@ class Aggregate:
         w = r.times_accessed
         self.all.add(w)
         self.weights.append(w)
-        for item_type, prop in set(r.inventory):
-            self.inventory[(item_type, prop)] += 1
         for item_type, prop in set(r.unknown_properties):
             self.unknown_properties[(item_type, prop)] += 1
         for flag in r.flags:
@@ -114,7 +111,9 @@ class Aggregate:
             self.cluster_weight[cid] += w
         if not render:
             self.clean.add(w)
-            if not any(c.outcome == "needs_eval" for c in r.comparisons):
+            if not any(
+                c.outcome in ("needs_eval", "expectation_error") for c in r.comparisons
+            ):
                 self.verified_clean.add(w)
         if not everything:
             self.strict_clean.add(w)
@@ -179,7 +178,7 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
         (
             "Clean = no crash, no missing/extra item, no folder-membership change, and no `render`-severity "
             "mismatch. Strict also counts `editor`-severity mismatches (descriptions, collapsed state, item order). "
-            "Verified also excludes scenes with a `needs_eval` comparison, which pass 1 can't check."
+            "Verified also excludes scenes with a comparison pass 1 can't check (`needs_eval`, `expectation_error`)."
         ),
         "",
         "| | Scenes | Weighted | Weighted (+1) |",
@@ -206,7 +205,7 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
         "| Scenes | Weight | Error |",
         "|---|---|---|",
         *(
-            f"| {n:,} | {agg.crash_weight[t]:,.0f} | `{t}` |"
+            f"| {n:,} | {agg.crash_weight[t]:,.0f} | `{_cell(t)}` |"
             for t, n in agg.crashes.most_common()
         ),
         "",
@@ -274,7 +273,7 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
         "| Type | Property | Scenes |",
         "|---|---|---|",
         *(
-            f"| {t} | `{p}` | {n:,} |"
+            f"| {t} | `{_cell(p)}` | {n:,} |"
             for (t, p), n in agg.unknown_properties.most_common(25)
         ),
         "",

@@ -5,10 +5,6 @@ from scenes.legacy_scene_utils.issue_log import Severity
 from scenes.legacy_scene_utils.migrate_scene import migrate_scene
 from scenes.models import LegacyScene
 
-# Problems that mean the translator doesn't fully understand a scene, as
-# opposed to ordinary notes about it.
-IGNORED_PROPERTIES = "Ignored unknown"
-
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
@@ -32,8 +28,9 @@ class Command(BaseCommand):
             type=int,
             default=0,
             help=(
-                "Keep going past this many problem scenes (a translation error, "
-                "an ERROR issue, or properties the translator ignored) before aborting"
+                "Abort after more than this many problem scenes: a translation "
+                "error, an ERROR issue, or properties the translator ignored. "
+                "Every scene that translates is saved, problems or not."
             ),
         )
 
@@ -46,7 +43,9 @@ class Command(BaseCommand):
             legacy_scenes = legacy_scenes[:limit]
 
         problems: list[tuple[str, str]] = []
-        for legacy_scene in tqdm.tqdm(legacy_scenes):
+        for legacy_scene in tqdm.tqdm(
+            legacy_scenes.iterator(chunk_size=500), total=legacy_scenes.count()
+        ):
             try:
                 translated = migrate_scene(legacy_scene)
             except Exception as e:  # noqa: BLE001 — reported and counted below
@@ -55,8 +54,7 @@ class Command(BaseCommand):
                 serious = [
                     issue.message
                     for issue in (translated.issues if translated else [])
-                    if issue.severity is Severity.ERROR
-                    or IGNORED_PROPERTIES in issue.message
+                    if issue.severity is Severity.ERROR or issue.ignored_properties
                 ]
                 if serious:
                     problems.append((legacy_scene.key, "; ".join(serious)))

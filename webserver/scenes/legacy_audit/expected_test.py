@@ -255,4 +255,4 @@ def test_vector_field_samples_split_into_components():
 
 
 def test_blank_z_index_becomes_zero():
-    assert values({**rehydrated("GRID", "grid-xy"), "zIndex": ""})["zIndex"] == "0"
+    assert values({**rehydrated("GRID"), "zIndex": ""})["zIndex"] == "0"

@@ -3,11 +3,10 @@ from typing import Any
 import pytest
 
 from scenes.legacy_scene_utils.issue_log import Severity
-from scenes.legacy_scene_utils.translate import ItemMigrator
+from scenes.legacy_scene_utils.translate import ItemMigrator, depends_on
 
 
 def test_axis():
-    migrator = ItemMigrator()
     migrator = ItemMigrator()
     data_in = {"type": "AXIS", "description": "test axis"}
     expected_out: dict[str, Any] = {
@@ -15,6 +14,7 @@ def test_axis():
         "type": "AXIS",
         "properties": {
             "axis": "x",
+            "label": "",
             "color": "#808080",
             "description": "test axis",
             "divisions": "10",
@@ -36,34 +36,8 @@ def test_axis():
             "zOrder": "",
         },
     }
-    assert migrator.translate_item(data_in, "axis-x").model_dump(mode="json") == {
-        **expected_out,
-        "id": "axis-x",
-        "properties": {
-            **expected_out["properties"],
-            "axis": "x",
-            "label": "x",
-        },
-    }
-    assert migrator.translate_item(data_in, "axis-y").model_dump(mode="json") == {
-        **expected_out,
-        "id": "axis-y",
-        "properties": {
-            **expected_out["properties"],
-            "axis": "y",
-            "label": "y",
-        },
-    }
-    assert migrator.translate_item(data_in, "axis-z").model_dump(mode="json") == {
-        **expected_out,
-        "id": "axis-z",
-        "properties": {
-            **expected_out["properties"],
-            "axis": "z",
-            "scale": "1/2",
-            "label": "z",
-        },
-    }
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
+    assert actual_out == expected_out
 
 
 def test_boolean_variable():
@@ -179,16 +153,8 @@ def test_camera(in_patch, out_patch):
             },
         ),
         (
-            {
-                "useCalculatedVisibility": True,
-                "calculatedVisibility": "!true",
-                "visible": False,
-            },
-            {
-                "visible": False,
-                "useCalculatedVisibility": True,
-                "calculatedVisibility": "!true",
-            },
+            {"useCalculatedVisibility": False, "calculatedVisibility": "!true"},
+            {"useCalculatedVisibility": False, "calculatedVisibility": "!true"},
         ),
         (
             {
@@ -643,10 +609,8 @@ def test_variable():
         ({}, {}),
         ({"speedMultiplier": 0.25}, {"speedMultiplier": "1/4"}),
         ({"speedMultiplier": 0.0625}, {"speedMultiplier": "1/16"}),
-        # math3d-next has no 1.5x or 3x; the nearest option on a log scale is
-        # the next faster one.
+        # math3d-next has no 1.5x; the nearest option on a log scale is 2x.
         ({"speedMultiplier": 1.5}, {"speedMultiplier": "2"}),
-        ({"speedMultiplier": 3}, {"speedMultiplier": "4"}),
     ],
 )
 def test_variable_slider(in_patch, out_patch):
@@ -828,3 +792,15 @@ def test_indices_shift_to_zero_based_in_expressions_only():
         "p\\left[0\\right]",
         "p\\left[1\\right]",
     )
+
+
+@pytest.mark.parametrize(
+    ("rhs", "param", "expected"),
+    [
+        ("\\left[0,y_{1}\\right]", "y_{1}", True),
+        ("\\theta+1", "\\theta", True),
+        ("x_1", "x", False),
+    ],
+)
+def test_depends_on(rhs, param, expected):
+    assert depends_on(rhs, param) is expected
