@@ -104,7 +104,7 @@ const setupTest = async (overrides: Overrides = {}) => {
     if (e.detail.changes.results.updated.has(mathScopeId(item.id, "value"))) {
       const v = mathScope.results.get(valueId);
       if (typeof v !== "number") {
-        throw new Error(`Value should be a number; received ${value}`);
+        throw new Error(`Value should be a number; received ${v}`);
       }
       valueUpdates.push(v);
     }
@@ -340,11 +340,7 @@ describe("Variable Slider", () => {
 
   test("Ticks once per period while its item is dragged", async () => {
     // A tick every 80ms
-    const { el, item, store, valueUpdates } = await setupTest({
-      speedMultiplier: "1",
-      duration: "0.48",
-      fps: "12.5",
-    });
+    const { el, item, store, valueUpdates } = await setupTest({ fps: "12.5" });
     const sortable = el.item.closest<HTMLElement>(
       "[aria-roledescription=sortable]",
     );
