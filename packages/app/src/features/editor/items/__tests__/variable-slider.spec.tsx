@@ -301,6 +301,21 @@ describe("Variable Slider", () => {
     );
   });
 
+  test("Plays an unrecognized saved speed at speed 1", async () => {
+    // A tick every 80ms; increment (11 - -10)/6 = 3.5 at speed 1
+    const { el, valueUpdates } = await setupTest({
+      speedMultiplier: "5",
+      duration: "0.48",
+      fps: "12.5",
+      range: range("-10", "11"),
+      value: valueObj("X=6"),
+    });
+    await user.click(el.btnToggle);
+    await userWaits(80, { useFake: true });
+
+    expect(valueUpdates[0]).toBeCloseTo(9.5);
+  });
+
   test("Keeps animating while the Setup tab is showing", async () => {
     // A tick every 80ms; increment (11 - -10)/6 = 3.5
     const { el, valueUpdates } = await setupTest({

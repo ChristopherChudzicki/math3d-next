@@ -25,7 +25,7 @@ import {
 import type { SliderControlsProps } from "./SliderControls";
 import SliderControls from "./SliderControls";
 import {
-  mustFindSpeed,
+  findSpeed,
   sliderNumbers,
   sliderStep,
   valueAssignment,
@@ -50,7 +50,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
   // The value displays rounded unless it's exactly what the user typed.
   const [typedRhs, setTypedRhs] = useState<string | null>(null);
 
-  const speed = mustFindSpeed(item.properties.speedMultiplier);
+  const speed = findSpeed(item.properties.speedMultiplier);
 
   const mathScope = useMathScope();
   const errors = useMathErrors(mathScope, item.id, errorNames);

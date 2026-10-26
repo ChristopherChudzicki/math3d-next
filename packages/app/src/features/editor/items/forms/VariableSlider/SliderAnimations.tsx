@@ -14,7 +14,7 @@ import {
 } from "@/store/scene/evaluation/mathScope";
 import { useFrameTicks } from "@/util/hooks/useFrameTicks";
 import {
-  mustFindSpeed,
+  findSpeed,
   sliderNumbers,
   sliderStep,
   valueAssignment,
@@ -41,7 +41,7 @@ const useSliderAnimation = (id: string) => {
   const results = useMathResults(mathScope, id, resultNames);
   const { fps, min, max, duration } = sliderNumbers(results);
   const isAnimating = !!results.isAnimating;
-  const speed = speedValue ? mustFindSpeed(speedValue).numeric : 1;
+  const speed = speedValue ? findSpeed(speedValue).numeric : 1;
   const increment = sliderStep(min, max, fps, duration) * speed;
 
   useFrameTicks(

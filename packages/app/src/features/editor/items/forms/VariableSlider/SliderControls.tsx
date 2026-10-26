@@ -11,7 +11,7 @@ import IconButton from "@/ui/IconButton";
 import classNames from "classnames";
 import styles from "./SliderControls.module.css";
 import type { SpeedOption } from "./sliderMath";
-import { findSpeed, mustFindSpeed } from "./sliderMath";
+import { adjacentSpeed } from "./sliderMath";
 
 const btnLabels = {
   pause: "Pause",
@@ -43,16 +43,16 @@ const SliderControls: React.FC<SliderControlsProps> = ({
     onAnimationChange(!isAnimating);
   }, [onAnimationChange, isAnimating]);
 
-  const canIncrease = !!findSpeed(speed.value, +1);
-  const canDecrease = !!findSpeed(speed.value, -1);
-  const onIncrease = useCallback(
-    () => onSpeedChange(mustFindSpeed(speed.value, +1)),
-    [onSpeedChange, speed],
-  );
-  const onDecrease = useCallback(
-    () => onSpeedChange(mustFindSpeed(speed.value, -1)),
-    [onSpeedChange, speed],
-  );
+  const faster = adjacentSpeed(speed, +1);
+  const slower = adjacentSpeed(speed, -1);
+  const canIncrease = !!faster;
+  const canDecrease = !!slower;
+  const onIncrease = useCallback(() => {
+    if (faster) onSpeedChange(faster);
+  }, [onSpeedChange, faster]);
+  const onDecrease = useCallback(() => {
+    if (slower) onSpeedChange(slower);
+  }, [onSpeedChange, slower]);
   const onStepUp = useCallback(() => onStep(+1), [onStep]);
   const onStepDown = useCallback(() => onStep(-1), [onStep]);
 

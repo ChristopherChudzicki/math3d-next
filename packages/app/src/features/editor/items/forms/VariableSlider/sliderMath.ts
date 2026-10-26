@@ -1,5 +1,4 @@
 import type { ParseableObjs } from "@math3d/parser";
-import { assertNotNil } from "@/util/predicates";
 
 type SpeedOption = {
   value: string;
@@ -7,31 +6,33 @@ type SpeedOption = {
   numeric: number;
 };
 
+const normalSpeed: SpeedOption = { value: "1", label: "1", numeric: 1 };
+
 const speedOptions: SpeedOption[] = [
   { value: "1/16", label: "1\u204416", numeric: 1 / 16 },
   { value: "1/8", label: "1\u20448", numeric: 1 / 8 },
   { value: "1/4", label: "1\u20444", numeric: 1 / 4 },
   { value: "1/2", label: "1\u20442", numeric: 1 / 2 },
   { value: "3/4", label: "3\u20444", numeric: 3 / 4 },
-  { value: "1", label: "1", numeric: 1 },
+  normalSpeed,
   { value: "2", label: "2", numeric: 2 },
   { value: "4", label: "4", numeric: 4 },
   { value: "8", label: "8", numeric: 8 },
 ];
 
-const findSpeed = (speed: string, increment = 0): SpeedOption | undefined => {
-  const i = speedOptions.findIndex((o) => o.value === speed);
-  if (i < 0) {
-    throw new Error(`Could not find speed: ${speed}`);
-  }
-  const newSpeed = speedOptions[i + increment];
-  return newSpeed;
-};
-const mustFindSpeed = (speed: string, increment = 0): SpeedOption => {
-  const newSpeed = findSpeed(speed, increment);
-  assertNotNil(newSpeed);
-  return newSpeed;
-};
+/**
+ * The option for a saved speed. Saved speeds aren't validated (by the backend
+ * or legacy migration), so an unrecognized one plays at speed 1.
+ */
+const findSpeed = (value: string): SpeedOption =>
+  speedOptions.find((o) => o.value === value) ?? normalSpeed;
+
+/** The next faster (+1) or slower (-1) option, if any. */
+const adjacentSpeed = (
+  speed: SpeedOption,
+  step: 1 | -1,
+): SpeedOption | undefined =>
+  speedOptions[speedOptions.findIndex((o) => o.value === speed.value) + step];
 
 const fallbacks = { fps: 60, min: -5, max: 5, value: 0, duration: 4 };
 
@@ -83,7 +84,7 @@ const valueAssignment = (
 
 export {
   findSpeed,
-  mustFindSpeed,
+  adjacentSpeed,
   sliderNumbers,
   wrap,
   sliderStep,
