@@ -27,7 +27,7 @@ D=$PWD/db-snapshots/legacy-audit; mkdir -p $D
 cd webserver
 IS_DEPLOYMENT=False DATABASE_URL=postgresql://docker:docker@localhost:5431/math3d uv run python manage.py export_legacy_audit --out $D/legacy.jsonl # pragma: allowlist secret
 (cd ../../math3d-react/client && CI=true LEGACY_AUDIT_DEFAULTS_OUT=$D/react_defaults.json LEGACY_AUDIT_IN=$D/legacy.jsonl LEGACY_AUDIT_OUT=$D/rehydrated.jsonl npm test -- --watchAll=false --testMatch '<rootDir>/src/legacyAudit/**/*.audit.js')
-IS_DEPLOYMENT=False uv run python manage.py audit_legacy_migration --legacy $D/legacy.jsonl --rehydrated $D/rehydrated.jsonl --defaults $D/react_defaults.json --out-dir $D/pass1
+IS_DEPLOYMENT=False uv run python manage.py audit_legacy_migration --legacy $D/legacy.jsonl --rehydrated $D/rehydrated.jsonl --defaults $D/react_defaults.json --out-dir $D/pass1 --meta "Snapshot=prod, pulled <date>" --meta "math3d-next=$(git rev-parse --short HEAD)" --meta "math3d-react=<commit>"
 ```
 
 From a worktree, run the worktree's code on the host as shown, not through `docker compose run`, which runs the main checkout's code.

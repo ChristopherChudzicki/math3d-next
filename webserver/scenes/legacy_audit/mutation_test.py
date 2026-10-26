@@ -31,7 +31,12 @@ DEHYDRATED = {
             "rangeU": "\\left[-1,\\ 3\\right]",
             "rangeV": "\\left[0,\\ 2\\right]",
         },
-        "p": {"type": "POINT", "labelVisible": True, "color": "#ff0000"},
+        "p": {
+            "type": "POINT",
+            "labelVisible": True,
+            "color": "#ff0000",
+            "coords": "c\\left[1\\right]",
+        },
         "v": {"type": "VECTOR_FIELD", "samples": "[4, 6, 8]"},
         "axis-x": {"type": "AXIS", "max": "10"},
     },
@@ -134,3 +139,9 @@ def test_injected_translator_bug_is_flagged(monkeypatch, method, mutate, flagged
 
     monkeypatch.setattr(ItemMigrator, method, mutated)
     assert flagged in _mismatches()
+
+
+def test_skipped_index_shift_is_flagged(monkeypatch):
+    assert ("p", "coords") not in _mismatches()
+    monkeypatch.setattr(ItemMigrator, "shift_indices", lambda self, props: props)
+    assert ("p", "coords") in _mismatches()

@@ -611,6 +611,7 @@ def test_variable():
         ({"speedMultiplier": 0.0625}, {"speedMultiplier": "1/16"}),
         # math3d-next has no 1.5x; the nearest option on a log scale is 2x.
         ({"speedMultiplier": 1.5}, {"speedMultiplier": "2"}),
+        ({"speedMultiplier": "fast"}, {"speedMultiplier": "1"}),
     ],
 )
 def test_variable_slider(in_patch, out_patch):
@@ -804,3 +805,10 @@ def test_indices_shift_to_zero_based_in_expressions_only():
 )
 def test_depends_on(rhs, param, expected):
     assert depends_on(rhs, param) is expected
+
+
+@pytest.mark.parametrize("samples", ["10", "", "\\left[[1,2\\right]"])
+def test_unusable_vector_field_samples_fall_back_with_an_error(samples):
+    migrator = ItemMigrator()
+    assert migrator.vector_field_samples(samples) == ("10", "10", "5")
+    assert [i.severity for i in migrator.log.issues()] == [Severity.ERROR]

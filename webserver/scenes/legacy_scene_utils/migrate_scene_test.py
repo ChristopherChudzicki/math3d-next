@@ -98,6 +98,20 @@ def test_symbolic_axis_scale_divides_the_camera_as_an_expression():
     )
 
 
+def test_symbolic_axis_scale_shifts_its_indices_for_the_camera_and_the_axis():
+    translated = translate_legacy_scene(
+        _dehydrated(
+            graphics={
+                "axis-x": {"type": "AXIS", "scale": "s\\left[1\\right]"},
+                "camera": {"type": "CAMERA", "relativePosition": [2, -2, 1]},
+            }
+        )
+    )
+    items = _items(translated)
+    assert items["camera"]["position"].startswith("\\left[\\frac{2}{s\\left[0\\right]}")
+    assert items["axis-x"]["scale"] == "s\\left[0\\right]"
+
+
 def test_blank_axis_scale_is_one():
     assert _camera_position("\\ ") == ("[2.0, -2.0, 2.0]", [])
 

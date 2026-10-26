@@ -368,6 +368,23 @@ def test_get_legacy_key_raises_when_migration_fails_with_no_stored_scene(
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("metadata", "error"),
+    [
+        ({"title": "Old"}, KeyError),
+        ({"title": "Old", "creationDate": '"not a date"'}, ValidationError),
+    ],
+)
+def test_migrate_scene_writes_nothing_when_it_fails(metadata, error):
+    legacy = LegacyScene.objects.create(
+        dehydrated={**LEGACY_DEHYDRATED_FIXTURE, "metadata": metadata}
+    )
+    with pytest.raises(error):
+        migrate_scene(legacy)
+    assert not Scene.objects.filter(key=legacy.key).exists()
+
+
+@pytest.mark.django_db
 def test_get_invalid_legacy_key_returns_404_not_500():
     # A legacy scene with an invalid key must not 500 the GET (constraint blocks creation).
     # IMPORTANT: dehydrated must be a *realistic* blob — migrate_scene()/set_defaults()

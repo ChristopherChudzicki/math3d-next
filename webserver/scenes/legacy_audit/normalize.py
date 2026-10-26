@@ -53,6 +53,18 @@ def _close(a: float, b: float) -> bool:
     return math.isclose(a, b, rel_tol=REL_TOL, abs_tol=ABS_TOL)
 
 
+def index_shifted(value: Any) -> Any:
+    """``value`` with math3d-react's 1-based array indices made 0-based, as
+    math3d-next counts them (owner decision, 2026-10-24). This is the
+    translator's own shift, so it is checked separately, against
+    math3d-next's parser: packages/parser/src/legacyAudit/."""
+    if isinstance(value, str):
+        return shift_indices(value)[0]
+    if isinstance(value, list):
+        return [index_shifted(v) for v in value]
+    return value
+
+
 def equivalence(expected: Any, actual: Any) -> str | None:
     """Return "exact", the name of the normalization that equates the two
     values, or None if they differ."""
@@ -80,11 +92,6 @@ def equivalence(expected: Any, actual: Any) -> str | None:
     if isinstance(expected, str) and isinstance(actual, str):
         if _latex_compact(expected) == _latex_compact(actual):
             return "latex_whitespace"
-        # math3d-next indexes arrays from 0 (owner decision, 2026-10-24). This
-        # is the translator's own shift, so it is checked separately, against
-        # math3d-next's parser: packages/parser/src/legacyAudit/.
-        if _latex_compact(shift_indices(expected)[0]) == _latex_compact(actual):
-            return "index_shift"
         expected_vector, actual_vector = _as_vector(expected), _as_vector(actual)
         if (
             expected_vector is not None

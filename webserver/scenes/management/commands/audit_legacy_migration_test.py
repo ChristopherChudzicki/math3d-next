@@ -14,3 +14,7 @@ def test_hidden_by_blank_visibility_lists_hidden_items_with_a_blank_expression()
         }
     }
     assert hidden_by_blank_visibility(rehydrated) == ["hidden"]
+
+
+def test_hidden_by_blank_visibility_tolerates_a_scene_without_graphics():
+    assert hidden_by_blank_visibility({}) == []

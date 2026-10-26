@@ -11,7 +11,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-from scenes.legacy_audit.normalize import equivalence
+from scenes.legacy_audit.normalize import equivalence, index_shifted
 
 MISSING = "<missing>"
 FOLDER = "FOLDER"
@@ -242,7 +242,13 @@ def _compare_item(
         if isinstance(exp.value, table.NeedsEval):
             comparison.outcome = "needs_eval"
         else:
-            kind = None if value == MISSING else equivalence(exp.value, value)
+            # An expression with indices must arrive shifted; text never is.
+            target = (
+                index_shifted(exp.value) if table.is_math(exp.source) else exp.value
+            )
+            kind = None if value == MISSING else equivalence(target, value)
+            if kind is not None and target != exp.value:
+                kind = "index_shift"
             if kind is None:
                 comparison.outcome = "mismatch"
             elif kind != "exact":

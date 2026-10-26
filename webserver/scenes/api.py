@@ -20,9 +20,9 @@ from scenes.schemas import (
     ScenePatchSchema,
     SceneSchema,
 )
+from scenes.screenshots import schedule_render
 
 logger = logging.getLogger(__name__)
-from scenes.screenshots import schedule_render
 
 scenes_router = Router()
 me_router = Router()

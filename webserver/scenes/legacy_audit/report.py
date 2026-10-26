@@ -9,7 +9,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from typing import Any
 
-from scenes.legacy_audit.compare import SceneResult, cluster_id
+from scenes.legacy_audit.compare import SceneResult, cluster_id, crash_template
 
 RENDER = frozenset({"render"})
 RENDER_AND_EDITOR = frozenset({"render", "editor"})
@@ -91,7 +91,10 @@ class Aggregate:
             elif c.outcome == "needs_eval":
                 self.needs_eval[(c.item_type, c.path)] += 1
             elif c.outcome == "expectation_error":
-                self.expectation_errors[(c.item_type, str(c.expected)[:120])] += 1
+                # The message may quote a user's value; keep only its shape.
+                error_type, _, message = str(c.expected).partition(": ")
+                template = crash_template({"type": error_type, "message": message})
+                self.expectation_errors[(c.item_type, template)] += 1
             elif c.outcome == "mismatch":
                 cid = cluster_id(c)
                 self.cluster_severity[cid] = c.severity
@@ -261,7 +264,7 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
         "Table errors (`expectation_error`, an unexpected legacy value the table couldn't handle): "
         + (
             ", ".join(
-                f"`{t}` {e} ×{n:,}"
+                f"`{t}` {_cell(e)} ×{n:,}"
                 for (t, e), n in agg.expectation_errors.most_common(10)
             )
             or "none"

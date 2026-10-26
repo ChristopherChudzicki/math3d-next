@@ -36,6 +36,18 @@ class Expectation:
     source: str
 
 
+# Legacy properties math3d-react treats as text and never evaluates:
+# description, color, label and axis have inputType 'text'
+# (react:containers/MathObjects/MathGraphics/metadata.js), a grid's axes has
+# no metadata entry, and a symbol's name is its assignment's left-hand side.
+TEXT_SOURCES = frozenset({"description", "color", "label", "axis", "axes", "name"})
+
+
+def is_math(source: str) -> bool:
+    """Whether an expectation's legacy source is evaluated as an expression."""
+    return not TEXT_SOURCES.intersection(source.split(","))
+
+
 @dataclass(frozen=True)
 class Context:
     item_id: str

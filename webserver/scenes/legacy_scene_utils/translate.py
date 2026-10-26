@@ -152,7 +152,7 @@ class ItemMigrator:
         return cls(**{k: v for k, v in props.items() if k in fields})
 
     # Legacy properties that are text, not expressions.
-    NOT_MATH = frozenset({"description", "color", "label", "axes", "name"})
+    NOT_MATH = frozenset({"description", "color", "label", "axis", "axes", "name"})
 
     def shift_indices(self, props: dict) -> dict:
         shifted = {}
@@ -244,7 +244,14 @@ class ItemMigrator:
         if parts is not None and len(parts) == 3:
             first, second, third = (p.replace("\\ ", " ").strip() for p in parts)
             return first, second, third
-        if parts is not None or not blank_to_empty(arr) or not balanced(arr):
+        # A number isn't one sample count per direction; indexing it fails.
+        is_number = re.fullmatch(r"\s*[-+]?(?:\d+\.?\d*|\.\d+)\s*", arr)
+        if (
+            parts is not None
+            or is_number
+            or not blank_to_empty(arr)
+            or not balanced(arr)
+        ):
             self.log.error(f"Invalid vector field samples: {arr}")
             return "10", "10", "5"
         # Any other expression, e.g. a variable, is indexed per direction.
@@ -347,7 +354,7 @@ class ItemMigrator:
             isPanEnabled=stringify(x.isPanEnabled),
             isZoomEnabled=stringify(x.isZoomEnabled),
             isRotateEnabled=stringify(x.isRotateEnabled),
-            # math3d-next writes the camera's numbers back on every pointerup,
+            # math3d-next writes the camera's numbers back after a drag moves it,
             # which would overwrite a computed camera's expressions.
             updateOnDrag=stringify(not x.useComputed),
         )

@@ -190,8 +190,7 @@ def migrate_scene(legacy_scene: LegacyScene) -> TranslatedScene | None:
             )
         except ValidationError as e:
             if not is_invalid_key_error(e):
-                # Invalid items (or any non-key validation failure) keep the old
-                # loud-failure contract — don't mislabel them as an invalid key.
+                # Invalid items aren't an invalid key: fail loudly.
                 raise
             logger.warning(
                 "Skipping migration of legacy scene with invalid key %r",
