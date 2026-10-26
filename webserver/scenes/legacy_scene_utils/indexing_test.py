@@ -11,6 +11,7 @@ from scenes.legacy_scene_utils.indexing import shift_indices
         ("A\\left[1,2\\right]", "A\\left[0,1\\right]"),
         ("f\\left(t\\right)\\left[3\\right]", "f\\left(t\\right)\\left[2\\right]"),
         ("V_{a}\\left[2\\right]", "V_{a}\\left[1\\right]"),
+        ("q_{12}\\left[2\\right]", "q_{12}\\left[1\\right]"),
         ("a\\left[i\\right]", "a\\left[i-1\\right]"),
         ("a\\left[i+1\\right]", "a\\left[i\\right]"),
         ("a\\left[2i-1\\right]", "a\\left[2i-2\\right]"),

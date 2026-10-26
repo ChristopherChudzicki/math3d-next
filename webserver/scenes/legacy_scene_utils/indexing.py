@@ -189,11 +189,14 @@ class _Shifter:
                 out.append(token.text)
                 out.append(self.shift(_text(inner)))
                 out.append(tokens[close].text)
-                if token.text == "{" and _unwraps(previous):
+                if token.text == "{" and previous is not None and _unwraps(previous):
                     # math3d-next drops these braces, so what precedes a
                     # following bracket is the group's last token.
-                    significant = _significant(inner)
-                    previous = significant[-1] if significant else previous
+                    last = (_significant(inner) or [previous])[-1]
+                    if last.kind == "word" and previous.kind == "word":
+                        # x_{12} is the name x_12, not the number 12.
+                        last = _Token("word", previous.text + last.text)
+                    previous = last
                     i = close + 1
                     continue
                 i = close
@@ -203,13 +206,12 @@ class _Shifter:
         return "".join(out)
 
 
-def _unwraps(token: _Token | None) -> bool:
+def _unwraps(token: _Token) -> bool:
     """Whether a brace group after ``token`` loses its braces in math3d-next's
     parser: subscripts and \\operatorname / \\mathrm."""
-    return token is not None and (
-        # "_" is a word character, so "x_" is one token.
-        (token.kind == "word" and token.text.endswith("_"))
-        or (token.kind == "command" and token.text in ("\\operatorname", "\\mathrm"))
+    # "_" is a word character, so "x_" is one token.
+    return (token.kind == "word" and token.text.endswith("_")) or (
+        token.kind == "command" and token.text in ("\\operatorname", "\\mathrm")
     )
 
 
