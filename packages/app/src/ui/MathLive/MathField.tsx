@@ -1,7 +1,7 @@
 import "./mathlive";
 
 import type { MathfieldElement } from "mathlive";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import composeRefs from "@/util/composeRefs";
 import type { MathFieldWebComponentProps } from "./types";
@@ -78,12 +78,15 @@ const MathField = (props: MathfieldProps) => {
     }
   });
 
+  // A new ref callback each render would detach and reattach the ref,
+  // setting `mf` twice per render.
+  const composedRef = useMemo(() => composeRefs(ref, setMf), [ref]);
   return (
     <math-field
       {...others}
       class={className}
       onInput={onChange}
-      ref={composeRefs(ref, setMf)}
+      ref={composedRef}
     />
   );
 };

@@ -1,7 +1,6 @@
 import React from "react";
 
 import MathItemsList from "@/features/editor/items/MathItemsList/MathItemsList";
-import SliderAnimations from "@/features/editor/items/forms/VariableSlider/SliderAnimations";
 import AddObjectButton from "./AddObjectButton";
 import ControlTabs from "./ControlTabs";
 import styles from "./SceneControls.module.css";
@@ -17,17 +16,14 @@ type Props = {
 
 const SceneControls: React.FC<Props> = ({ loading }) => {
   return (
-    <>
-      <SliderAnimations />
-      <ControlTabs
-        loading={loading}
-        tabBarExtraContent={
-          <AddObjectButton className={styles.AddObjectButton} />
-        }
-        mainContent={<MathItemsList rootId="main" />}
-        setupContent={<MathItemsList rootId="setup" />}
-      />
-    </>
+    <ControlTabs
+      loading={loading}
+      tabBarExtraContent={
+        <AddObjectButton className={styles.AddObjectButton} />
+      }
+      mainContent={<MathItemsList rootId="main" />}
+      setupContent={<MathItemsList rootId="setup" />}
+    />
   );
 };
 

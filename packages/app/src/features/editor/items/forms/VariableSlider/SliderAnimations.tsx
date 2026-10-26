@@ -41,10 +41,7 @@ const useSliderAnimation = (id: string) => {
   const results = useMathResults(mathScope, id, resultNames);
   const { fps, min, max, duration } = sliderNumbers(results);
   const isAnimating = !!results.isAnimating;
-  // Looked up only while animating, so an unknown saved speed can't throw for
-  // a slider that isn't playing.
-  const speed =
-    isAnimating && speedValue ? mustFindSpeed(speedValue).numeric : 1;
+  const speed = speedValue ? mustFindSpeed(speedValue).numeric : 1;
   const increment = sliderStep(min, max, fps, duration) * speed;
 
   useFrameTicks(
@@ -83,11 +80,14 @@ const sliderIds = (state: RootState) =>
 /**
  * Animates sliders. This lives outside the slider's form so animation
  * continues while the form is unmounted (e.g., on another sidebar tab) and runs
- * once per slider while the drag overlay shows a copy of the form.
+ * once per slider while the drag overlay shows a copy of the form. Mount it
+ * only where the scene is editable: still renders (e.g., `FramePage`) show
+ * saved values.
  */
 const SliderAnimations: React.FC = () => {
   const ids = useAppSelector(sliderIds, shallowEqual);
-  // Item ids recur across scenes; remount so no animation carries over.
+  // Item ids recur across scenes. Remount so a recurring id can't tick once
+  // with the previous scene's isAnimating/fps results.
   const loadCount = useAppSelector(select.loadCount);
   return (
     <React.Fragment key={loadCount}>

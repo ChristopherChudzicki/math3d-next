@@ -3,7 +3,6 @@ import type { MathItem } from "@math3d/mathitem-configs";
 import { faker } from "@faker-js/faker";
 import {
   act,
-  allowActWarnings,
   assertInstanceOf,
   renderTestApp,
   user,
@@ -302,59 +301,61 @@ describe("Variable Slider", () => {
     );
   });
 
-  describe("Animation outlives the slider's form", () => {
-    // 6 ticks per period, one every 80ms; increment (11 - -10)/6 = 3.5
-    const props: Overrides = {
+  test("Keeps animating while the Setup tab is showing", async () => {
+    // A tick every 80ms; increment (11 - -10)/6 = 3.5
+    const { el, valueUpdates } = await setupTest({
       speedMultiplier: "1",
       duration: "0.48",
       fps: "12.5",
       range: range("-10", "11"),
       value: valueObj("X=6"),
-    };
-    const expectedValues = [9.5, -8.0, -4.5, -1.0, 2.5];
-
-    test("Keeps animating while the Setup tab is showing", async () => {
-      const { el, valueUpdates } = await setupTest(props);
-      await user.click(el.btnToggle);
-      await user.click(screen.getByRole("tab", { name: "Setup" }));
-      expect(el.item).not.toBeInTheDocument();
-
-      await userWaits(480, { useFake: true });
-
-      expectSliderArraysEqual(valueUpdates.slice(0, 5), expectedValues, 0);
     });
+    await user.click(el.btnToggle);
+    await user.click(screen.getByRole("tab", { name: "Setup" }));
+    expect(el.item).not.toBeInTheDocument();
 
-    test("Ticks once per period while its item is dragged", async () => {
-      // During a drag, dnd-kit re-renders from a MutationObserver, outside act.
-      allowActWarnings();
-      const { el, item, store, valueUpdates } = await setupTest(props);
-      const sortable = el.item.closest<HTMLElement>(
-        "[aria-roledescription=sortable]",
-      );
-      assertInstanceOf(sortable, HTMLElement);
-      await user.click(el.btnToggle);
-      act(() => sortable.focus());
-      await user.keyboard("[Space]");
-      await userWaits(20, { useFake: true });
-      // The drag overlay renders a second copy of the item's form.
-      expect(
-        screen.getAllByLabelText(`Settings for ${item.properties.description}`),
-      ).toHaveLength(2);
+    await userWaits(480, { useFake: true });
 
-      let dispatches = 0;
-      const unsubscribe = store.subscribe(() => {
-        dispatches += 1;
-      });
-      const updatesBefore = valueUpdates.length;
-      await userWaits(480, { useFake: true });
-      unsubscribe();
+    expectSliderArraysEqual(
+      valueUpdates.slice(0, 5),
+      [9.5, -8.0, -4.5, -1.0, 2.5],
+      0,
+    );
+  });
 
-      const updates = valueUpdates.length - updatesBefore;
-      // 6 periods; real time passing during the wait can add one.
-      expect(updates).toBeGreaterThanOrEqual(6);
-      expect(updates).toBeLessThanOrEqual(7);
-      expect(dispatches).toBe(updates);
+  test("Ticks once per period while its item is dragged", async () => {
+    // A tick every 80ms
+    const { el, item, store, valueUpdates } = await setupTest({
+      speedMultiplier: "1",
+      duration: "0.48",
+      fps: "12.5",
     });
+    const sortable = el.item.closest<HTMLElement>(
+      "[aria-roledescription=sortable]",
+    );
+    assertInstanceOf(sortable, HTMLElement);
+    await user.click(el.btnToggle);
+    act(() => sortable.focus());
+    await user.keyboard("[Space]");
+    await userWaits(20, { useFake: true });
+    // The drag overlay renders a second copy of the item's form.
+    expect(
+      screen.getAllByLabelText(`Settings for ${item.properties.description}`),
+    ).toHaveLength(2);
+
+    let dispatches = 0;
+    const unsubscribe = store.subscribe(() => {
+      dispatches += 1;
+    });
+    const updatesBefore = valueUpdates.length;
+    await userWaits(480, { useFake: true });
+    unsubscribe();
+
+    const updates = valueUpdates.length - updatesBefore;
+    // 6 periods; real time passing during the wait can add one.
+    expect(updates).toBeGreaterThanOrEqual(6);
+    expect(updates).toBeLessThanOrEqual(7);
+    expect(dispatches).toBe(updates);
   });
 
   test("Continues from a value the user steps to mid-animation", async () => {
@@ -379,27 +380,27 @@ describe("Variable Slider", () => {
   });
 
   test("Pauses playback, keeping the text, while the value is invalid", async () => {
-    // Fixed timing; random fps can tick outside act during the typing.
-    const { el, valueUpdates } = await setupTest({
-      fps: "12.5",
-      duration: "0.48",
-    });
-    await user.click(el.btnToggle);
+    const { el, valueUpdates } = await setupTest();
     await user.click(el.inputRhs);
     await user.clear(el.inputRhs);
     await user.paste("1+");
+    await user.click(el.btnToggle);
     const updatesBefore = valueUpdates.length;
 
     await userWaits(300, { useFake: true });
 
     expect(el.inputRhs.value).toBe("1+");
     expect(valueUpdates.length).toBe(updatesBefore);
+    expect(el.btnToggle).toHaveAccessibleName(btnLabels.pause);
   });
 
-  test("Displays a non-numeric value as written", async () => {
-    const { el } = await setupTest({ value: valueObj("X=1+1") });
-    expect(el.inputRhs.value).toBe("1+1");
-  });
+  test.each(["1+1", ""])(
+    "Displays the non-numeric value %j as written",
+    async (rhs) => {
+      const { el } = await setupTest({ value: valueObj(`X=${rhs}`) });
+      expect(el.inputRhs.value).toBe(rhs);
+    },
+  );
 
   test("Animating returns the value display to 2 digits", async () => {
     const { el } = await setupTest({

@@ -20,7 +20,10 @@ type ExtraProps = {
 
 const formatted = (x: string, numDecimalDigits?: number) => {
   const xNum = Number(x);
-  if (numDecimalDigits === undefined || Number.isNaN(xNum)) return x;
+  // Number("") is 0, so check for empty input separately.
+  if (numDecimalDigits === undefined || !x.trim() || Number.isNaN(xNum)) {
+    return x;
+  }
   const prefix = x.trim().startsWith("+") ? "+" : "";
   return prefix + round(xNum, numDecimalDigits).toString();
 };
