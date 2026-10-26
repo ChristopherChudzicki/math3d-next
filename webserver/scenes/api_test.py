@@ -340,6 +340,34 @@ def test_get_legacy_key_migrates_then_returns_scene():
 
 
 @pytest.mark.django_db
+def test_get_legacy_key_serves_the_stored_scene_when_migration_fails(monkeypatch):
+    legacy = LegacyScene.objects.create(dehydrated=LEGACY_DEHYDRATED_FIXTURE)
+    migrate_scene(legacy)
+
+    def fail(*args, **kwargs):
+        raise ValueError("translator bug")
+
+    monkeypatch.setattr("scenes.api.migrate_scene", fail)
+    response = Client().get(_detail(legacy.key))
+    assert response.status_code == 200
+    assert response.json()["isLegacy"] is True
+
+
+@pytest.mark.django_db
+def test_get_legacy_key_raises_when_migration_fails_with_no_stored_scene(
+    monkeypatch,
+):
+    legacy = LegacyScene.objects.create(dehydrated=LEGACY_DEHYDRATED_FIXTURE)
+
+    def fail(*args, **kwargs):
+        raise ValueError("translator bug")
+
+    monkeypatch.setattr("scenes.api.migrate_scene", fail)
+    with pytest.raises(ValueError):
+        Client().get(_detail(legacy.key))
+
+
+@pytest.mark.django_db
 def test_get_invalid_legacy_key_returns_404_not_500():
     # A legacy scene with an invalid key must not 500 the GET (constraint blocks creation).
     # IMPORTANT: dehydrated must be a *realistic* blob — migrate_scene()/set_defaults()

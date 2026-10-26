@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from scenes.legacy_scene_utils.default_data import set_defaults
 from scenes.legacy_scene_utils.indexing import shift_indices
@@ -173,38 +174,40 @@ def translate_legacy_scene(dehydrated: dict) -> TranslatedScene:
 
 def migrate_scene(legacy_scene: LegacyScene) -> TranslatedScene | None:
     translated = translate_legacy_scene(legacy_scene.dehydrated)
-    try:
-        scene, _created = Scene.objects.update_or_create(
-            key=legacy_scene.key,
-            defaults={
-                "items": translated.items,
-                "item_order": translated.item_order,
-                "title": translated.title,
-                "times_accessed": legacy_scene.times_accessed,
-                "is_legacy": True,
-            },
-        )
-    except ValidationError as e:
-        if not is_invalid_key_error(e):
-            # Invalid items (or any non-key validation failure) keep the old
-            # loud-failure contract — don't mislabel them as an invalid key.
-            raise
-        logger.warning(
-            "Skipping migration of legacy scene with invalid key %r", legacy_scene.key
-        )
-        return None
-    # TimestampedModel.save() overwrites modified_date on every write (and
-    # created_date on insert), so backdate with a queryset update.
     if translated.creation_date is None:
         raise KeyError("creationDate")
-    Scene.objects.filter(pk=scene.id).update(
-        created_date=translated.creation_date,
-        modified_date=translated.creation_date,
-        content_modified_date=translated.creation_date,
-    )
+    with transaction.atomic():
+        try:
+            scene, _created = Scene.objects.update_or_create(
+                key=legacy_scene.key,
+                defaults={
+                    "items": translated.items,
+                    "item_order": translated.item_order,
+                    "title": translated.title,
+                    "times_accessed": legacy_scene.times_accessed,
+                    "is_legacy": True,
+                },
+            )
+        except ValidationError as e:
+            if not is_invalid_key_error(e):
+                # Invalid items (or any non-key validation failure) keep the old
+                # loud-failure contract — don't mislabel them as an invalid key.
+                raise
+            logger.warning(
+                "Skipping migration of legacy scene with invalid key %r",
+                legacy_scene.key,
+            )
+            return None
+        # TimestampedModel.save() overwrites modified_date on every write (and
+        # created_date on insert), so backdate with a queryset update.
+        Scene.objects.filter(pk=scene.id).update(
+            created_date=translated.creation_date,
+            modified_date=translated.creation_date,
+            content_modified_date=translated.creation_date,
+        )
 
-    legacy_scene.migration_note = "\n".join(
-        f"{issue.severity.name} {issue.message}" for issue in translated.issues
-    )
-    legacy_scene.save(update_fields=["migration_note"])
+        legacy_scene.migration_note = "\n".join(
+            f"{issue.severity.name} {issue.message}" for issue in translated.issues
+        )
+        legacy_scene.save(update_fields=["migration_note"])
     return translated
