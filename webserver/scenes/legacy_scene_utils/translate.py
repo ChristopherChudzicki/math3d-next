@@ -89,8 +89,7 @@ def balanced(text: str) -> bool:
     return depth == 0
 
 
-# A calculated visibility made only of whitespace, including LaTeX spacing
-# commands, is blank.
+# Text made only of whitespace, including LaTeX spacing commands, is blank.
 _BLANK = re.compile(r"(?:\s|\\ |\\,|\\;|\\:|\\!|\\quad|\\qquad|~)*")
 
 
@@ -264,7 +263,8 @@ class ItemMigrator:
     @staticmethod
     def calculated_visibility(x) -> dict:
         """A blank expression turns calculated visibility off, so the item
-        follows its own ``visible`` (owner decision, 2026-10-23)."""
+        follows its own ``visible``, and LaTeX spacing counts as blank (owner
+        decisions, 2026-10-23 and 2026-10-24)."""
         calc = blank_to_empty(x.calculatedVisibility or "")
         return {
             "calculatedVisibility": calc,
@@ -347,7 +347,8 @@ class ItemMigrator:
             isPanEnabled=stringify(x.isPanEnabled),
             isZoomEnabled=stringify(x.isZoomEnabled),
             isRotateEnabled=stringify(x.isRotateEnabled),
-            # A drag would write numbers over a computed camera's expressions.
+            # math3d-next writes the camera's numbers back on every pointerup,
+            # which would overwrite a computed camera's expressions.
             updateOnDrag=stringify(not x.useComputed),
         )
 

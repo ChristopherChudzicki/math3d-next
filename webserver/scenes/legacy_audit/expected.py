@@ -433,8 +433,8 @@ def _variable_slider(item: dict, ctx: Context) -> list[Expectation]:
     # react:.../VariableSlider/components/AnimationControls.js:73-76,90-101).
     # next sweeps the range in duration/speed seconds at fps ticks/s
     # (next:app/src/features/editor/items/forms/VariableSlider/VariableSlider.tsx:66-83),
-    # so while ticks keep up, fps changes only smoothness. Owner decision: legacy sliders keep
-    # math3d-react's effective 60.
+    # so while ticks keep up, fps changes only smoothness. Owner decision
+    # (2026-10-23): legacy sliders keep math3d-react's effective 60.
     out.add("fps", "60", "render", "constant")
     out.add("duration", "4", "render", "constant")
     # Animation starts on mount when isAnimating
@@ -782,13 +782,13 @@ _UNIVERSAL_COVERAGE = {
     "description": "description (identity)",
     "color": "color (identity)",
     "opacity": "opacity (identity); zOrder is empty by policy (#1010), not derived from opacity",
-    "zIndex": "zIndex (identity)",
+    "zIndex": 'zIndex (identity); blank -> "0"',
     "zBias": "zBias (identity)",
     "visible": "visible (bool); the author's value, also when useCalculatedVisibility has a blank expression",
     "useCalculatedVisibility": (
         "useCalculatedVisibility (bool); false when calculatedVisibility is blank"
     ),
-    "calculatedVisibility": "calculatedVisibility (identity)",
+    "calculatedVisibility": 'calculatedVisibility (identity); blank, including LaTeX spacing -> ""',
 }
 _LABEL_COVERAGE = {
     "label": "label (identity)",
@@ -839,7 +839,7 @@ COVERAGE: dict[str, dict[str, str]] = {
         "max": "range.items.1 (identity)",
         "description": "description (identity)",
         "isAnimating": 'isAnimating (bool -> "true"/"false")',
-        "speedMultiplier": "speedMultiplier (number -> next speed string, e.g. 0.5 -> 1/2)",
+        "speedMultiplier": "speedMultiplier (number -> nearest next speed on a log scale, e.g. 0.5 -> 1/2, 1.5 -> 2)",
     },
     "BOOLEAN_VARIABLE": {
         "name": "value.lhs (identity)",
@@ -857,7 +857,7 @@ COVERAGE: dict[str, dict[str, str]] = {
         "relativeLookAt": "target (÷ axis scales, useRelative) unless useComputed",
         "computedPosition": "position (identity) when useComputed; otherwise dropped (unused)",
         "computedLookAt": "target (identity) when useComputed; otherwise dropped (unused)",
-        "useComputed": "useRelative = !useComputed; updateOnDrag stays next's default (computed cameras can't be dragged)",
+        "useComputed": "useRelative = !useComputed; updateOnDrag = !useComputed",
     },
     "AXIS": {
         **_UNIVERSAL_COVERAGE,
