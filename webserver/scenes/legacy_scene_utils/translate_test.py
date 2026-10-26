@@ -796,3 +796,19 @@ def test_extra_equals_in_rhs_is_kept_with_a_warning():
     assignment = migrator.function_assignment("_f(x,y)=z=3-x")
     assert assignment.rhs == "z=3-x"
     assert [i.severity for i in migrator.log.issues()] == [Severity.WARNING]
+
+
+def test_indices_shift_to_zero_based_in_expressions_only():
+    item = ItemMigrator().translate_item(
+        {
+            "type": "POINT",
+            "coords": "p\\left[1\\right]",
+            "description": "p\\left[1\\right]",
+        },
+        "some-id",
+    )
+    props = item.model_dump()["properties"]
+    assert (props["coords"], props["description"]) == (
+        "p\\left[0\\right]",
+        "p\\left[1\\right]",
+    )

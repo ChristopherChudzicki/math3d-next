@@ -5,6 +5,7 @@ from copy import deepcopy
 from typing import Literal, cast
 
 import scenes.legacy_scene_utils.legacy_data as old
+from scenes.legacy_scene_utils.indexing import shift_indices
 from scenes.legacy_scene_utils.issue_log import IssueLog
 from scenes.schemas.math_items import (
     AssignmentObj,
@@ -121,6 +122,19 @@ class ItemMigrator:
                 f"Ignored unknown {self.item_type} properties: {', '.join(unknown)}"
             )
         return cls(**{k: v for k, v in props.items() if k in fields})
+
+    # Legacy properties that are text, not expressions.
+    NOT_MATH = frozenset({"description", "color", "label", "axes", "name"})
+
+    def shift_indices(self, props: dict) -> dict:
+        shifted = {}
+        for key, value in props.items():
+            if isinstance(value, str) and key not in self.NOT_MATH:
+                value, problems = shift_indices(value)
+                for problem in problems:
+                    self.log.warning(f"Left {problem} in {key} unshifted: {value}")
+            shifted[key] = value
+        return shifted
 
     def split_assignment(self, expr: str) -> tuple[str, str]:
         lhs, *rhs_pieces = expr.split("=")
@@ -586,6 +600,7 @@ class ItemMigrator:
         del copy["type"]
         self.log.set_prefix(item_id)
         self.item_type = item_type
+        copy = self.shift_indices(copy)
 
         if item_type == "AXIS":
             extra_defaults = {}

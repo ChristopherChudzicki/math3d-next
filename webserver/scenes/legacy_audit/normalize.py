@@ -8,6 +8,8 @@ import math
 import re
 from typing import Any
 
+from scenes.legacy_scene_utils.indexing import shift_indices
+
 # LaTeX whitespace: "\ " (explicit space) and plain spaces. math3d-next's
 # parser can treat a space as a token separator (`x y` vs `xy`), so this can
 # mask a real difference; check its count in the report.
@@ -78,6 +80,11 @@ def equivalence(expected: Any, actual: Any) -> str | None:
     if isinstance(expected, str) and isinstance(actual, str):
         if _latex_compact(expected) == _latex_compact(actual):
             return "latex_whitespace"
+        # math3d-next indexes arrays from 0 (owner decision, 2026-10-24). This
+        # is the translator's own shift, so it is checked separately, against
+        # math3d-next's parser: packages/parser/src/legacyAudit/.
+        if _latex_compact(shift_indices(expected)[0]) == _latex_compact(actual):
+            return "index_shift"
         expected_vector, actual_vector = _as_vector(expected), _as_vector(actual)
         if (
             expected_vector is not None
