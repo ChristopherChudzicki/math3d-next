@@ -101,7 +101,7 @@
     "identity-obj-proxy": "3.0.0",
     "js-yaml": "^4.3.2",
     "jsdom": "^26.1.0",
-    "marked": "^18.1.1",
+    "marked": "^18.1.2",
     "msw": "^2.0.14",
     "rollup-plugin-visualizer": "5.14.0",
     "storybook": "^10.6.2",
