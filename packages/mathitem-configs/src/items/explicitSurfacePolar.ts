@@ -70,7 +70,7 @@ const defaultValues: ExplicitSurfacePolarProperties = {
       {
         type: "function-assignment",
         name: "_f",
-        params: ["Q"],
+        params: ["\\theta"],
         rhs: "[0, 3]",
       },
       {
