@@ -9,7 +9,7 @@
     "@math3d/eslint-config": "workspace:*",
     "ts-node": "^10.9.2",
     "turbo": "^2.11.10",
-    "typescript": "^5.7.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "lint": "turbo run lint",
