@@ -8,9 +8,10 @@ import plus from "@iconify-icons/lucide/plus";
 import minus from "@iconify-icons/lucide/minus";
 import ButtonGroup from "@/ui/ButtonGroup";
 import IconButton from "@/ui/IconButton";
-import { assertNotNil } from "@/util/predicates";
 import classNames from "classnames";
 import styles from "./SliderControls.module.css";
+import type { SpeedOption } from "./sliderMath";
+import { adjacentSpeed } from "./sliderMath";
 
 const btnLabels = {
   pause: "Pause",
@@ -19,38 +20,6 @@ const btnLabels = {
   slower: "Decrease speed",
   increment: "Step forward",
   decrement: "Step backward",
-};
-
-type SpeedOption = {
-  value: string;
-  label: string;
-  numeric: number;
-};
-
-const speedOptions: SpeedOption[] = [
-  { value: "1/16", label: "1\u204416", numeric: 1 / 16 },
-  { value: "1/8", label: "1\u20448", numeric: 1 / 8 },
-  { value: "1/4", label: "1\u20444", numeric: 1 / 4 },
-  { value: "1/2", label: "1\u20442", numeric: 1 / 2 },
-  { value: "3/4", label: "3\u20444", numeric: 3 / 4 },
-  { value: "1", label: "1", numeric: 1 },
-  { value: "2", label: "2", numeric: 2 },
-  { value: "4", label: "4", numeric: 4 },
-  { value: "8", label: "8", numeric: 8 },
-];
-
-const findSpeed = (speed: string, increment = 0): SpeedOption | undefined => {
-  const i = speedOptions.findIndex((o) => o.value === speed);
-  if (i < 0) {
-    throw new Error(`Could not find speed: ${speed}`);
-  }
-  const newSpeed = speedOptions[i + increment];
-  return newSpeed;
-};
-const mustFindSpeed = (speed: string, increment = 0): SpeedOption => {
-  const newSpeed = findSpeed(speed, increment);
-  assertNotNil(newSpeed);
-  return newSpeed;
 };
 
 interface SliderControlsProps {
@@ -74,16 +43,16 @@ const SliderControls: React.FC<SliderControlsProps> = ({
     onAnimationChange(!isAnimating);
   }, [onAnimationChange, isAnimating]);
 
-  const canIncrease = !!findSpeed(speed.value, +1);
-  const canDecrease = !!findSpeed(speed.value, -1);
-  const onIncrease = useCallback(
-    () => onSpeedChange(mustFindSpeed(speed.value, +1)),
-    [onSpeedChange, speed],
-  );
-  const onDecrease = useCallback(
-    () => onSpeedChange(mustFindSpeed(speed.value, -1)),
-    [onSpeedChange, speed],
-  );
+  const faster = adjacentSpeed(speed, +1);
+  const slower = adjacentSpeed(speed, -1);
+  const canIncrease = !!faster;
+  const canDecrease = !!slower;
+  const onIncrease = useCallback(() => {
+    if (faster) onSpeedChange(faster);
+  }, [onSpeedChange, faster]);
+  const onDecrease = useCallback(() => {
+    if (slower) onSpeedChange(slower);
+  }, [onSpeedChange, slower]);
   const onStepUp = useCallback(() => onStep(+1), [onStep]);
   const onStepDown = useCallback(() => onStep(-1), [onStep]);
 
@@ -146,5 +115,4 @@ const SliderControls: React.FC<SliderControlsProps> = ({
 };
 
 export default SliderControls;
-export { mustFindSpeed };
-export type { SliderControlsProps, SpeedOption };
+export type { SliderControlsProps };

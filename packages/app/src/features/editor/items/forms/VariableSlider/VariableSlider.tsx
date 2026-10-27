@@ -3,10 +3,9 @@ import {
   MathItemType as MIT,
   WidgetType,
 } from "@math3d/mathitem-configs";
-import React, { useRef, useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 
 import Slider from "@/ui/Slider";
-import { useFrameTicks } from "@/util/hooks/useFrameTicks";
 import { ParseableObjs } from "@math3d/parser";
 import FieldWidget, {
   MathAssignment,
@@ -24,14 +23,19 @@ import {
   WidgetChangeEvent,
 } from "@/features/editor/items/FieldWidget/types";
 import type { SliderControlsProps } from "./SliderControls";
-import SliderControls, { mustFindSpeed } from "./SliderControls";
+import SliderControls from "./SliderControls";
+import {
+  findSpeed,
+  sliderNumbers,
+  sliderStep,
+  valueAssignment,
+} from "./sliderMath";
 import styles from "./slider.module.css";
 
 const config = configs[MIT.VariableSlider];
 const configProps = config.properties;
 
 const errorNames = ["value", "range", "fps"] as const;
-const fallbacks = { fps: 60, min: -5, max: 5, value: 0, duration: 4 };
 const resultNames = [
   "duration",
   "value",
@@ -40,120 +44,19 @@ const resultNames = [
   "isAnimating",
 ] as const;
 
-interface AnimatedSliderProps {
-  label: string;
-  fps: number;
-  baseDuration: number;
-  speedMultiplier: number;
-  isAnimating: boolean;
-  min: number;
-  max: number;
-  value: number;
-  onChange: (value: number, clean?: boolean) => void;
-}
-
-const trueMod = (x: number, modulus: number) => {
-  const y = x % modulus;
-  return y < 0 ? y + modulus : y;
-};
-
-const wrap = (x: number, min: number, max: number) =>
-  min + trueMod(x - min, max - min);
-
-const getSliderParameters = (
-  min: number,
-  max: number,
-  fps: number,
-  baseDuration: number,
-  speedMultiplier = 1,
-) => {
-  const duration = baseDuration / speedMultiplier;
-  const frames = fps * duration;
-  const baseFrames = fps * baseDuration;
-  const range = max - min;
-  const increment = range / frames;
-  const baseIncrement = range / baseFrames;
-  return { increment, baseIncrement };
-};
-
-const AnimatedSlider: React.FC<AnimatedSliderProps> = ({
-  onChange,
-  min,
-  max,
-  fps,
-  baseDuration,
-  speedMultiplier,
-  value,
-  isAnimating,
-  label,
-}) => {
-  const valueRef = useRef(value);
-  valueRef.current = value;
-  const { baseIncrement, increment } = getSliderParameters(
-    min,
-    max,
-    fps,
-    baseDuration,
-    speedMultiplier,
-  );
-
-  const onTicks = useCallback(
-    (elapsed: number) => {
-      valueRef.current = wrap(valueRef.current + elapsed * increment, min, max);
-      onChange(valueRef.current, true);
-    },
-    [increment, onChange, min, max],
-  );
-  const handleChange = useCallback(
-    (v: number) => {
-      valueRef.current = v;
-      onChange(valueRef.current);
-    },
-    [onChange],
-  );
-
-  useFrameTicks(onTicks, isAnimating ? fps : null);
-
-  return (
-    <Slider
-      aria-label={label}
-      data-dndkit-no-drag
-      onValueChange={handleChange}
-      step={baseIncrement}
-      largeStep={(max - min) / 10}
-      min={min}
-      max={max}
-      value={value}
-    />
-  );
-};
-
 const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
   const onWidgetChange = useOnWidgetChange(item);
-  const { lhs } = item.properties.value;
-  const [maxDigits, setMaxDigits] = useState<number | undefined>(2);
-  const lhsRef = useRef(lhs);
-  lhsRef.current = lhs;
+  const { lhs, rhs } = item.properties.value;
+  // The value displays rounded unless it's exactly what the user typed.
+  const [typedRhs, setTypedRhs] = useState<string | null>(null);
 
-  const speed = mustFindSpeed(item.properties.speedMultiplier);
+  const speed = findSpeed(item.properties.speedMultiplier);
 
   const mathScope = useMathScope();
   const errors = useMathErrors(mathScope, item.id, errorNames);
   const results = useMathResults(mathScope, item.id, resultNames);
   const isAnimating = !!results.isAnimating;
-
-  // Results keep their last valid value while an expression errors, so the
-  // fallbacks only apply until the first valid evaluation.
-  const resultRange = results.range as [number, number] | undefined;
-  const fps = typeof results.fps === "number" ? results.fps : fallbacks.fps;
-  const min = resultRange ? resultRange[0] : fallbacks.min;
-  const max = resultRange ? resultRange[1] : fallbacks.max;
-  const value =
-    typeof results.value === "number" ? results.value : fallbacks.value;
-  const duration =
-    typeof results.duration === "number"
-      ? results.duration
-      : fallbacks.duration;
+  const { fps, min, max, value, duration } = sliderNumbers(results);
 
   const onAnimationChange = useCallback(
     (animating: boolean) => {
@@ -162,28 +65,16 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
     [onWidgetChange],
   );
   const onValueChange = useCallback(
-    (v: number, clean?: boolean) => {
-      setMaxDigits(2);
-      const prefix = v > 0 ? "+" : "";
-      onWidgetChange(
-        {
-          name: "value",
-          value: {
-            lhs: lhsRef.current,
-            rhs: `${prefix}${v}`,
-            type: "assignment",
-          },
-        },
-        clean,
-      );
+    (v: number) => {
+      onWidgetChange({ name: "value", value: valueAssignment(lhs, v) });
     },
-    [onWidgetChange],
+    [onWidgetChange, lhs],
   );
   const onManualChange: OnWidgetChange<ParseableObjs["assignment"]> =
     useCallback(
       (e) => {
         if (e.oldValue?.rhs !== e.value.rhs) {
-          setMaxDigits(undefined);
+          setTypedRhs(e.value.rhs);
         }
         onWidgetChange(e);
       },
@@ -195,12 +86,10 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
     },
     [onWidgetChange],
   );
+  const step = sliderStep(min, max, fps, duration);
   const onStep: SliderControlsProps["onStep"] = useCallback(
-    (step) => {
-      const { baseIncrement } = getSliderParameters(min, max, fps, duration);
-      onValueChange(value + baseIncrement * step);
-    },
-    [value, min, max, fps, duration, onValueChange],
+    (n) => onValueChange(value + step * n),
+    [value, step, onValueChange],
   );
   const { range } = item.properties;
   const onSetRange = useMemo(() => {
@@ -240,7 +129,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
           name="value"
           value={item.properties.value}
           onChange={onManualChange}
-          numDecimalDigits={maxDigits}
+          numDecimalDigits={rhs === typedRhs ? undefined : 2}
         />
         <SliderControls
           className={styles.sliderControls}
@@ -260,16 +149,15 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
           label="Min"
           value={item.properties.range.items[0] as string}
         />
-        <AnimatedSlider
-          label={configProps.value.label}
+        <Slider
+          aria-label={configProps.value.label}
+          data-dndkit-no-drag
+          onValueChange={onValueChange}
+          step={step}
+          largeStep={(max - min) / 10}
           min={min}
           max={max}
           value={value}
-          fps={fps}
-          speedMultiplier={speed.numeric}
-          baseDuration={duration}
-          isAnimating={isAnimating}
-          onChange={onValueChange}
         />
         <FieldWidget
           widget={WidgetType.MathValue}

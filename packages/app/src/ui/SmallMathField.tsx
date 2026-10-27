@@ -21,11 +21,14 @@ const SmallMathField: React.FC<
       menuItems: [],
     };
   }, [props.options, mf]);
+  // A new ref callback each render would detach and reattach the ref,
+  // setting `mf` twice per render.
+  const composedRef = useMemo(() => composeRefs(ref, setMf), [ref]);
   return (
     <MathField
       {...others}
       options={options}
-      ref={composeRefs(ref, setMf)}
+      ref={composedRef}
       className={classNames("small-math-field", className)}
     />
   );

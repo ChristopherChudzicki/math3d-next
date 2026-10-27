@@ -8,6 +8,7 @@ import {
 import Viewport from "@/features/viewport/Viewport";
 import useSceneLoader from "@/app/useSceneLoader";
 import SceneControls from "@/features/editor/sidebar/SceneControls";
+import SliderAnimations from "@/features/editor/items/forms/VariableSlider/SliderAnimations";
 import Sidebar from "@/ui/Sidebar";
 import { useBodyClass, useToggle } from "@/util/hooks";
 import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
@@ -144,6 +145,7 @@ const MainPage: React.FC = () => {
             />
           ) : (
             <>
+              <SliderAnimations />
               <Sidebar
                 className={styles.sidebar}
                 side="left"
