@@ -281,7 +281,7 @@ def test_explicit_surface_polar(in_patch, out_patch):
                 "items": [
                     {
                         "name": "_f",
-                        "params": ["Q"],
+                        "params": ["\\theta"],
                         "rhs": "\\left[0,\\ 3\\right]",
                         "type": "function-assignment",
                     },

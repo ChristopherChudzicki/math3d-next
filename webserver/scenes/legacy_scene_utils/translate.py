@@ -262,7 +262,7 @@ class ItemMigrator:
     def translate_explicit_surface_polar(self, props) -> ExplicitSurfacePolarProperties:
         x = self.legacy(old.ExplicitSurfacePolarProperties, props)
         expr = self.function_assignment(x.expr)
-        rangeU = x.rangeU if "=" in x.rangeU else f"_f(Q)={x.rangeU}"
+        rangeU = x.rangeU if "=" in x.rangeU else f"_f(\\theta)={x.rangeU}"
         rangeV = x.rangeV if "=" in x.rangeV else f"_f(r)={x.rangeV}"
         domain = self.domain_array([rangeU, rangeV])
         return ExplicitSurfacePolarProperties(
