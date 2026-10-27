@@ -57,7 +57,7 @@ def index_shifted(value: Any) -> Any:
     """``value`` with math3d-react's 1-based array indices made 0-based, as
     math3d-next counts them (owner decision, 2026-10-24). This is the
     translator's own shift, so it is checked separately, against
-    math3d-next's parser: packages/parser/src/legacyAudit/."""
+    math3d-next's parser: packages/legacy-audit/."""
     if isinstance(value, str):
         return shift_indices(value)[0]
     if isinstance(value, list):

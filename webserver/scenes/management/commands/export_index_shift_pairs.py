@@ -2,7 +2,7 @@
 
 Reads export_legacy_audit's JSONL (no database) and writes one
 ``{before, after}`` line per distinct legacy expression containing a bracket.
-packages/parser/src/legacyAudit/indexShift.audit.spec.ts checks each pair
+packages/legacy-audit/src/indexShift.spec.ts checks each pair
 (docs/legacy-audit/README.md).
 
     uv run python manage.py export_index_shift_pairs \\

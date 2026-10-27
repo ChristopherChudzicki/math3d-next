@@ -38,7 +38,7 @@ The audit accepts the translator's 1-based → 0-based index shift as the `index
 
 ```bash
 IS_DEPLOYMENT=False uv run python manage.py export_index_shift_pairs --legacy $D/legacy.jsonl --out $D/index_shift_pairs.jsonl
-(cd ../packages/parser && LEGACY_INDEX_SHIFT_IN=$D/index_shift_pairs.jsonl LEGACY_INDEX_SHIFT_OUT=$D/index_shift_mismatches.jsonl yarn vitest --run src/legacyAudit)
+(cd ../packages/legacy-audit && LEGACY_INDEX_SHIFT_IN=$D/index_shift_pairs.jsonl LEGACY_INDEX_SHIFT_OUT=$D/index_shift_mismatches.jsonl yarn test)
 ```
 
 ## Manual checks
@@ -51,5 +51,5 @@ A blank calculated visibility keeps the author's `visible`, so math3d-next hides
 - `webserver/scenes/management/commands/export_legacy_audit.py`
 - `webserver/scenes/management/commands/audit_legacy_migration.py`
 - `webserver/scenes/management/commands/export_index_shift_pairs.py`
-- `packages/parser/src/legacyAudit/`
+- `packages/legacy-audit/`
 - math3d-react `client/src/legacyAudit/`

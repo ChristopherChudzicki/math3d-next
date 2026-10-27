@@ -1,6 +1,6 @@
 /**
  * Legacy audit: checks the Python translator's 1-based -> 0-based index shift
- * (webserver/scenes/legacy_scene_utils/indexing.py) against this parser.
+ * (webserver/scenes/legacy_scene_utils/indexing.py) against math3d-next's parser.
  *
  * Input: LEGACY_INDEX_SHIFT_IN, a JSONL file of {before, after} LaTeX pairs.
  * For each pair, parsing `before` and applying mathjs's index transform to
@@ -13,16 +13,14 @@
  * root degree in \sqrt[3]{x}. A pair that fails to parse on both sides is
  * counted, not compared.
  *
- * Skipped unless LEGACY_INDEX_SHIFT_IN is set. Delete with the rest of the
- * legacy audit tooling.
+ * Skipped unless LEGACY_INDEX_SHIFT_IN is set.
  */
-/// <reference types="node" />
 import * as fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import type * as mjs from "mathjs";
 import * as full from "mathjs";
 import math from "@math3d/custom-mathjs";
-import { latexParser } from "../parsers";
+import { latexParser } from "@math3d/parser";
 
 const input = process.env.LEGACY_INDEX_SHIFT_IN;
 const output = process.env.LEGACY_INDEX_SHIFT_OUT;
