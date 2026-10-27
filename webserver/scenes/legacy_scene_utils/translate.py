@@ -215,7 +215,7 @@ class ItemMigrator:
             "grid2": x.gridU if swap else x.gridV,
         }
 
-    # math3d-next's speeds (SliderControls.tsx speedOptions). A legacy speed
+    # math3d-next's speeds (sliderMath.ts speedOptions). A legacy speed
     # without an equal option maps to the nearest one on a log scale.
     SPEEDS = {
         1 / 16: "1/16",

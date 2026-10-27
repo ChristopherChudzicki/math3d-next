@@ -391,8 +391,8 @@ def _boolean_variable(item: dict, ctx: Context) -> list[Expectation]:
 
 
 # Legacy speeds are numbers (react:containers/MathObjects/MathSymbols/VariableSlider/components/AnimationControls.js:42-54);
-# next accepts only these strings and throws on any other
-# (next:app/src/features/editor/items/forms/VariableSlider/SliderControls.tsx:30-55).
+# next offers only these strings and plays any other at speed 1
+# (next:app/src/features/editor/items/forms/VariableSlider/sliderMath.ts:11-28).
 _SPEEDS: dict[Fraction, str] = {
     Fraction(1, 16): "1/16",
     Fraction(1, 8): "1/8",
@@ -414,7 +414,8 @@ def _variable_slider(item: dict, ctx: Context) -> list[Expectation]:
     # A null manual value means the slider's number in sliderValues is used:
     # `${name}=${sliderValues[id]}` (react:containers/MathScopeContext/selectors.js:13-14).
     # next's slider writes its number into value.rhs
-    # (next:app/src/features/editor/items/forms/VariableSlider/VariableSlider.tsx:171-185).
+    # (next:app/src/features/editor/items/forms/VariableSlider/VariableSlider.tsx:66-70,
+    # next:app/src/features/editor/items/forms/VariableSlider/sliderMath.ts:76-82).
     manual = item.get("value")
     if manual is not None:
         out.add("value.rhs", _text(manual), "render", "value")
@@ -444,7 +445,8 @@ def _variable_slider(item: dict, ctx: Context) -> list[Expectation]:
     # (react:.../VariableSlider/components/VariableSlider.js:99-104,
     # react:.../VariableSlider/components/AnimationControls.js:73-76,90-101).
     # next sweeps the range in duration/speed seconds at fps ticks/s
-    # (next:app/src/features/editor/items/forms/VariableSlider/VariableSlider.tsx:66-83),
+    # (next:app/src/features/editor/items/forms/VariableSlider/SliderAnimations.tsx:34-67,
+    # next:app/src/features/editor/items/forms/VariableSlider/sliderMath.ts:73-74),
     # so while ticks keep up, fps changes only smoothness. Owner decision
     # (2026-10-23): legacy sliders keep math3d-react's effective 60.
     out.add("fps", "60", "render", "constant")
