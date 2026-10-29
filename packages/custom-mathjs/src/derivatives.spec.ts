@@ -57,12 +57,12 @@ describe("diff", () => {
     const df = math.evaluate("diff(f)", { f });
     expect(typeof df).toBe("function");
     expect(df).toHaveLength(3);
-    expect(df).toNearlyEqual(manualDf, { digitsToCompare: 2 });
+    expect(df).toNearlyEqual(manualDf, { digitsToCompare: 6 });
 
     // If given a function and values, diff evaluates:
     const evalDf: FuncR3_R1 = (x, y, z) =>
       math.evaluate("diff(f, x, y, z)", { f, x, y, z });
-    expect(evalDf).toNearlyEqual(manualDf, { digitsToCompare: 2 });
+    expect(evalDf).toNearlyEqual(manualDf, { digitsToCompare: 6 });
   });
 
   it("differentiates js-defined functions R^2 => R^3", () => {
@@ -76,12 +76,12 @@ describe("diff", () => {
     const df = math.evaluate("diff(f)", { f });
     expect(typeof df).toBe("function");
     expect(df).toHaveLength(2);
-    expect(df).toNearlyEqual(manualDf, { digitsToCompare: 3 });
+    expect(df).toNearlyEqual(manualDf, { digitsToCompare: 6 });
 
     // If given a function and values, diff evaluates:
     const evalDf: FuncR2_R2R3 = (u, v) =>
       math.evaluate("diff(f, u, v)", { f, u, v });
-    expect(evalDf).toNearlyEqual(manualDf, { digitsToCompare: 3 });
+    expect(evalDf).toNearlyEqual(manualDf, { digitsToCompare: 6 });
   });
 });
 
