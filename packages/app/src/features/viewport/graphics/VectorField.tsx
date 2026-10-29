@@ -27,6 +27,11 @@ const props = [
   "expr",
 ] as const;
 
+// MathBox spaces samples from range end to end, putting a lone sample at the
+// minimum; centering puts it at the midpoint. MathBox rounds sample counts.
+const isLone = (samples: number | undefined) =>
+  samples !== undefined && Math.round(samples) === 1;
+
 const Vector: GraphicComponent<MathItemType.VectorField> = ({ item }) => {
   const scope = useMathScope();
   const defaultZOrder = useDefaultZOrder(item.id);
@@ -73,6 +78,9 @@ const Vector: GraphicComponent<MathItemType.VectorField> = ({ item }) => {
         rangeX={domain?.[0]}
         rangeY={domain?.[1]}
         rangeZ={domain?.[2]}
+        centeredX={isLone(samples1)}
+        centeredY={isLone(samples2)}
+        centeredZ={isLone(samples3)}
         expr={field}
       />
       <MB.Vector
