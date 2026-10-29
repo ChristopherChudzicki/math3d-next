@@ -5,6 +5,7 @@ describe("toLaTeX", () => {
   it("Converts scalar/primitive values correctly", () => {
     expect(toLaTeX(1.234)).toBe("1.234");
     expect(toLaTeX({ re: 1.23, im: 4.56 })).toBe("1.23 + 4.56i");
+    expect(toLaTeX({ re: 1.23, im: -4.56 })).toBe("1.23 - 4.56i");
     expect(toLaTeX(true)).toBe("true");
     expect(toLaTeX(false)).toBe("false");
   });

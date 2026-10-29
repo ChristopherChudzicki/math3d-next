@@ -13,7 +13,8 @@ const scalarToLaTeX = (value: unknown): string | null => {
   if (valType === "boolean") return `${value}`;
   if (value === null || value === undefined) return null;
   if (isComplex(value)) {
-    return `${scalarToLaTeX(value.re)} + ${scalarToLaTeX(value.im)}i`;
+    const sign = value.im < 0 ? "-" : "+";
+    return `${scalarToLaTeX(value.re)} ${sign} ${scalarToLaTeX(Math.abs(value.im))}i`;
   }
   return null;
 };
