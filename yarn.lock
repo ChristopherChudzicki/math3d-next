@@ -2460,7 +2460,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reduxjs/toolkit@npm:^2.2.3":
+"@reduxjs/toolkit@npm:^2.13.0":
   version: 2.13.0
   resolution: "@reduxjs/toolkit@npm:2.13.0"
   dependencies:
@@ -4343,7 +4343,7 @@ __metadata:
     "@math3d/tsconfig": "workspace:^"
     "@math3d/utils": "workspace:^"
     "@mswjs/data": "npm:^0.16.2"
-    "@reduxjs/toolkit": "npm:^2.2.3"
+    "@reduxjs/toolkit": "npm:^2.13.0"
     "@sentry/react": "npm:^10.70.0"
     "@sentry/vite-plugin": "npm:^5.4.1"
     "@storybook/addon-a11y": "npm:^10.6.5"

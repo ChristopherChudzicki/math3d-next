@@ -42,7 +42,7 @@
     "@math3d/parser": "workspace:^",
     "@math3d/react-textarea-autosize": "8.3.5",
     "@math3d/utils": "workspace:^",
-    "@reduxjs/toolkit": "^2.2.3",
+    "@reduxjs/toolkit": "^2.13.0",
     "@sentry/react": "^10.70.0",
     "@tanstack/react-query": "^5.62.10",
     "@testing-library/dom": "^10.4.2",
