@@ -21,6 +21,7 @@ const createTotalDerivative = factory(
           // @ts-expect-error the MathJS types only support numeric to matrices
           copy[j] = add(arg, +EPS2);
           const finalValue = f(...copy);
+          copy[j] = arg;
           // @ts-expect-error the MathJS types only support numeric to matrices
           const out: Numeric = divide(subtract(finalValue, initialValue), EPS);
           return out;
