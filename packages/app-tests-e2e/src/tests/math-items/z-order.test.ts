@@ -45,7 +45,7 @@ test("Check graphic zOrder values", async ({ page, prepareScene }) => {
    * F2_surfaceB    11              11
    */
 
-  await test.step("Check z-oder of F2_point (uses placeholder value)", async () => {
+  await test.step("Check z-order of F2_point (uses placeholder value)", async () => {
     const description = "F2_point";
     const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
@@ -56,7 +56,7 @@ test("Check graphic zOrder values", async ({ page, prepareScene }) => {
     await page.keyboard.press("Escape");
   });
 
-  await test.step("Check z-oder of F1_surfaceA (uses placeholder value)", async () => {
+  await test.step("Check z-order of F1_surfaceA (uses placeholder value)", async () => {
     const description = "F1_surfaceA";
     const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
@@ -67,7 +67,7 @@ test("Check graphic zOrder values", async ({ page, prepareScene }) => {
     await page.keyboard.press("Escape");
   });
 
-  await test.step("Check z-oder of F2_surfaceB (after the opaque F1_surfaceB)", async () => {
+  await test.step("Check z-order of F2_surfaceB (after the opaque F1_surfaceB)", async () => {
     const description = "F2_surfaceB";
     const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
@@ -78,7 +78,7 @@ test("Check graphic zOrder values", async ({ page, prepareScene }) => {
     await page.keyboard.press("Escape");
   });
 
-  await test.step("Check z-oder of F2_surfaceA (uses set value)", async () => {
+  await test.step("Check z-order of F2_surfaceA (uses set value)", async () => {
     const description = "F2_surfaceA";
     const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();

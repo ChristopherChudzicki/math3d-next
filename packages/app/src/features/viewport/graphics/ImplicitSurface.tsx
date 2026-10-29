@@ -3,7 +3,7 @@ import * as MB from "mathbox-react";
 import { MathItemType } from "@math3d/mathitem-configs";
 import { marchingCubes } from "@/util/marchingCubes";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import { useDefaultGraphicOrder } from "@/store/scene/evaluation/useDefaultGraphicOrder";
+import { useDefaultZOrder } from "@/store/scene/evaluation/useDefaultZOrder";
 import {
   useFinalVisibility,
   useMathItemResults,
@@ -27,7 +27,7 @@ const ImplicitSurface: GraphicComponent<MathItemType.ImplicitSurface> = ({
   item,
 }) => {
   const scope = useMathScope();
-  const defaultZOrder = useDefaultGraphicOrder();
+  const defaultZOrder = useDefaultZOrder(item.id);
   const { color } = item.properties;
   const {
     opacity,
@@ -35,7 +35,7 @@ const ImplicitSurface: GraphicComponent<MathItemType.ImplicitSurface> = ({
     shaded,
     zBias,
     zIndex,
-    zOrder = defaultZOrder[item.id],
+    zOrder = defaultZOrder,
     lhs,
     rhs,
     samples,

@@ -14,7 +14,7 @@ import FieldWidget, {
   useOnWidgetChange,
 } from "@/features/editor/items/FieldWidget";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import { useDefaultGraphicOrder } from "@/store/scene/evaluation/useDefaultGraphicOrder";
+import { useDefaultZOrder } from "@/store/scene/evaluation/useDefaultZOrder";
 import {
   getMathProperties,
   useMathErrors,
@@ -105,15 +105,13 @@ const SettingsForm = <T extends MathItemType>({
       return { field, value };
     });
   }, [config, item.properties]);
-  const defaultZOrder = useDefaultGraphicOrder();
+  const defaultZOrder = useDefaultZOrder(item.id);
 
   return (
     <div className={styles["settings-form"]}>
       {fields.map(({ field, value }) => {
         const extras =
-          field.name === "zOrder"
-            ? { placeholder: `${defaultZOrder[item.id]}` }
-            : {};
+          field.name === "zOrder" ? { placeholder: `${defaultZOrder}` } : {};
         return (
           <SettingsField
             key={field.name}

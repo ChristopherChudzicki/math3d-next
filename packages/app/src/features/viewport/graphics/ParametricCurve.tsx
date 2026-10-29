@@ -3,7 +3,7 @@ import * as MB from "mathbox-react";
 import type { IntervalEmitter } from "mathbox";
 import { MathItemType } from "@math3d/mathitem-configs";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import { useDefaultGraphicOrder } from "@/store/scene/evaluation/useDefaultGraphicOrder";
+import { useDefaultZOrder } from "@/store/scene/evaluation/useDefaultZOrder";
 import {
   useFinalVisibility,
   useMathItemResults,
@@ -29,7 +29,7 @@ const ParametricCurve: GraphicComponent<MathItemType.ParametricCurve> = ({
   item,
 }) => {
   const scope = useMathScope();
-  const defaultZOrder = useDefaultGraphicOrder();
+  const defaultZOrder = useDefaultZOrder(item.id);
   const { color } = item.properties;
   const {
     opacity,
@@ -37,7 +37,7 @@ const ParametricCurve: GraphicComponent<MathItemType.ParametricCurve> = ({
     width,
     zBias,
     zIndex,
-    zOrder = defaultZOrder[item.id],
+    zOrder = defaultZOrder,
     start,
     end,
     samples1,

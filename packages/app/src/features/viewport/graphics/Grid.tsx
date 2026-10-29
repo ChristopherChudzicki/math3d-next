@@ -6,7 +6,7 @@ import {
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import { useDefaultGraphicOrder } from "@/store/scene/evaluation/useDefaultGraphicOrder";
+import { useDefaultZOrder } from "@/store/scene/evaluation/useDefaultZOrder";
 import { GraphicComponent } from "./interfaces";
 
 const props = [
@@ -21,7 +21,7 @@ const props = [
 
 const Grid: GraphicComponent<MathItemType.Grid> = ({ item }) => {
   const scope = useMathScope();
-  const defaultZOrder = useDefaultGraphicOrder();
+  const defaultZOrder = useDefaultZOrder(item.id);
   const { color, axes } = item.properties;
   const {
     divisions,
@@ -29,7 +29,7 @@ const Grid: GraphicComponent<MathItemType.Grid> = ({ item }) => {
     width,
     zIndex,
     zBias,
-    zOrder = defaultZOrder[item.id],
+    zOrder = defaultZOrder,
     snap,
   } = useMathItemResults(scope, item, props);
   const finalVisibility = useFinalVisibility(scope, item);

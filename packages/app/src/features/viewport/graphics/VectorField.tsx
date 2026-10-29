@@ -3,7 +3,7 @@ import * as MB from "mathbox-react";
 import type { VolumeEmitter } from "mathbox";
 import { MathItemType } from "@math3d/mathitem-configs";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import { useDefaultGraphicOrder } from "@/store/scene/evaluation/useDefaultGraphicOrder";
+import { useDefaultZOrder } from "@/store/scene/evaluation/useDefaultZOrder";
 import {
   useFinalVisibility,
   useMathItemResults,
@@ -29,13 +29,13 @@ const props = [
 
 const Vector: GraphicComponent<MathItemType.VectorField> = ({ item }) => {
   const scope = useMathScope();
-  const defaultZOrder = useDefaultGraphicOrder();
+  const defaultZOrder = useDefaultZOrder(item.id);
   const { color } = item.properties;
   const {
     opacity,
     zBias,
     zIndex,
-    zOrder = defaultZOrder[item.id],
+    zOrder = defaultZOrder,
     size,
     width,
     start,

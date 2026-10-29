@@ -42,9 +42,9 @@ test("an empty zIndex reaches MathBox unset, so it takes MathBox's default", asy
   expect(warn).toHaveBeenCalled();
 });
 
-test("an empty zOrder takes the grid's place in the automatic draw order", async () => {
-  const { props, store, item } = await renderGrid({ zOrder: "" });
-  const automatic = select.graphicTreeOrder(store.getState())[item.id];
-  expect(automatic).toEqual(expect.any(Number));
-  expect(props?.zOrder).toBe(automatic);
+test("an empty zOrder takes the automatic draw order, after every opaque graphic", async () => {
+  const { props, store } = await renderGrid({ zOrder: "", opacity: "0.5" });
+  const graphics = Object.keys(select.graphicTreeOrder(store.getState()));
+  // The only translucent graphic draws last.
+  expect(props?.zOrder).toBe(graphics.length - 1);
 });

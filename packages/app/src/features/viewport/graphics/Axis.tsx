@@ -6,7 +6,7 @@ import {
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import { useDefaultGraphicOrder } from "@/store/scene/evaluation/useDefaultGraphicOrder";
+import { useDefaultZOrder } from "@/store/scene/evaluation/useDefaultZOrder";
 import { GraphicComponent } from "./interfaces";
 
 const props = [
@@ -27,14 +27,14 @@ const props = [
 const LABEL_OFFSET = [0, 30, 0];
 const Axis: GraphicComponent<MathItemType.Axis> = ({ item }) => {
   const scope = useMathScope();
-  const defaultZOrder = useDefaultGraphicOrder();
+  const defaultZOrder = useDefaultZOrder(item.id);
   const { color, axis, label } = item.properties;
   const {
     opacity,
     width,
     zIndex,
     zBias,
-    zOrder = defaultZOrder[item.id],
+    zOrder = defaultZOrder,
     start,
     end,
     max,
