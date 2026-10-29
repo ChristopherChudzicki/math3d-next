@@ -1,0 +1,137 @@
+"""Pass 2c of the legacy-migration audit (docs/legacy-audit/).
+
+Joins both apps' evaluations of every legacy scene: math3d-react's
+(eval_react.jsonl, from math3d-react's client/src/legacyAudit) and
+math3d-next's (eval_next.jsonl, from packages/legacy-audit), with the inputs
+they came from and pass 1's findings. Reads files only; no database.
+
+    uv run python manage.py audit_legacy_evaluation \\
+        --legacy /abs/legacy.jsonl --rehydrated /abs/rehydrated.jsonl \\
+        --pass1 /abs/pass1/findings.jsonl \\
+        --react /abs/pass2/eval_react.jsonl --next /abs/pass2/eval_next.jsonl \\
+        --out-dir /abs/pass2/
+
+Writes findings.jsonl and examples.json (per scene or with keys: keep out of
+git) and report.md (aggregates only). Exits non-zero when a field either
+evaluator emitted is neither paired nor known to be unpaired.
+"""
+
+import datetime
+import json
+from pathlib import Path
+
+import tqdm
+from django.core.management.base import BaseCommand, CommandError
+
+from scenes.legacy_audit.evaluation import (
+    MISSING,
+    Pair,
+    Tolerance,
+    cluster_key,
+    evaluate_scene,
+)
+from scenes.legacy_audit.evaluation_report import (
+    Aggregate,
+    render_markdown,
+    unaccounted,
+)
+from scenes.legacy_audit.pass2_allowlist import ALLOWLIST
+
+
+def _pair_record(p: Pair) -> dict:
+    s = p.spec
+    return {
+        "item": s.item_id,
+        "type": s.item_type,
+        "legacy_field": s.legacy_field,
+        "legacy_element": s.legacy_element,
+        "next_field": s.next_field,
+        "next_element": s.next_element,
+        "severity": s.severity,
+        "outcome": p.outcome,
+        "detail": p.detail,
+        "root": p.root,
+        "cluster": cluster_key(p),
+        "allowlisted": p.allowlisted,
+        "legacy": {
+            "status": p.legacy.status,
+            "message": p.legacy.message,
+            "value": None if p.legacy.value is MISSING else p.legacy.value,
+        },
+        "next": {
+            "status": p.next.status,
+            "message": p.next.message,
+            "value": None if p.next.value is MISSING else p.next.value,
+        },
+    }
+
+
+class Command(BaseCommand):
+    help = "Compare math3d-react's and math3d-next's evaluations of every legacy scene."
+
+    def add_arguments(self, parser):
+        for name in ("legacy", "rehydrated", "pass1", "react", "next", "out-dir"):
+            parser.add_argument(f"--{name}", required=True)
+        parser.add_argument("--rtol", type=float, default=Tolerance.rtol)
+        parser.add_argument("--atol", type=float, default=Tolerance.atol)
+        parser.add_argument("--loose-rtol", type=float, default=Tolerance.loose_rtol)
+        parser.add_argument("--limit", type=int, default=None)
+        parser.add_argument(
+            "--meta",
+            action="append",
+            default=[],
+            help="key=value for the report header",
+        )
+
+    def handle(self, *args, **options):
+        tol = Tolerance(options["rtol"], options["atol"], options["loose_rtol"])
+        out_dir = Path(options["out_dir"])
+        out_dir.mkdir(parents=True, exist_ok=True)
+        agg = Aggregate()
+        paths = [options[n] for n in ("legacy", "rehydrated", "react", "next", "pass1")]
+        files = [open(p) for p in paths]  # noqa: SIM115 — closed below
+        try:
+            with open(out_dir / "findings.jsonl", "w") as findings:
+                for count, lines in enumerate(tqdm.tqdm(zip(*files, strict=True))):
+                    if options["limit"] is not None and count >= options["limit"]:
+                        break
+                    legacy, rehydrated, react, nxt, pass1 = map(json.loads, lines)
+                    assert pass1["key"] == legacy["key"], (
+                        "pass-1 findings are out of step"
+                    )
+                    result = evaluate_scene(
+                        legacy, rehydrated, react, nxt, tol, ALLOWLIST
+                    )
+                    verdict = agg.add(result, pass1["verdict"])
+                    record = {
+                        "key": result.key,
+                        "times_accessed": result.times_accessed,
+                        "pass1_verdict": pass1["verdict"],
+                        **verdict,
+                        "pairs": [
+                            _pair_record(p)
+                            for p in result.pairs
+                            if p.outcome != "equal"
+                        ],
+                    }
+                    findings.write(json.dumps(record) + "\n")
+        finally:
+            for f in files:
+                f.close()
+
+        meta = {
+            "date": datetime.date.today().isoformat(),
+            "Tolerances": f"rtol {tol.rtol:g}, atol {tol.atol:g}, loose rtol {tol.loose_rtol:g}",
+        }
+        meta.update(dict(m.split("=", 1) for m in options["meta"]))
+        (out_dir / "report.md").write_text(render_markdown(agg, meta))
+        (out_dir / "examples.json").write_text(json.dumps(agg.top_examples(), indent=1))
+        self.stdout.write(f"Wrote {out_dir / 'report.md'}")
+        missing = unaccounted(agg)
+        if missing:
+            listing = "\n".join(
+                f"  {side} {t}.{f}: {n:,}" for side, t, f, n in missing[:30]
+            )
+            raise CommandError(
+                f"Fields neither paired nor known to be unpaired:\n{listing}"
+            )
