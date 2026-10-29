@@ -44,7 +44,7 @@ const numericTypeSimplify = (val: unknown): unknown => {
     return val.map(numericTypeSimplify);
   }
   if (math.isComplex(val)) {
-    if (val.im < IM_ROUNDING_THRESHOLD) {
+    if (Math.abs(val.im) < IM_ROUNDING_THRESHOLD) {
       return val.re;
     }
   }
