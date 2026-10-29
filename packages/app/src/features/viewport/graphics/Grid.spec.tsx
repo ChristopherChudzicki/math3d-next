@@ -44,7 +44,7 @@ test("an empty zIndex reaches MathBox unset, so it takes MathBox's default", asy
 
 test("an empty zOrder takes the grid's place in the automatic draw order", async () => {
   const { props, store, item } = await renderGrid({ zOrder: "" });
-  const automatic = select.defaultGraphicOrder(store.getState())[item.id];
+  const automatic = select.graphicTreeOrder(store.getState())[item.id];
   expect(automatic).toEqual(expect.any(Number));
   expect(props?.zOrder).toBe(automatic);
 });

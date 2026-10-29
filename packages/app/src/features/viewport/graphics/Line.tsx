@@ -1,9 +1,8 @@
 import React, { useMemo } from "react";
 import * as MB from "mathbox-react";
 import { MathItemType } from "@math3d/mathitem-configs";
-import { useSelector } from "react-redux";
-import * as select from "@/store/scene/state/selectors";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
+import { useDefaultGraphicOrder } from "@/store/scene/evaluation/useDefaultGraphicOrder";
 import {
   useFinalVisibility,
   useMathItemResults,
@@ -26,7 +25,7 @@ const props = [
 const labelOffset = [0, 40, 0];
 const Line: GraphicComponent<MathItemType.Line> = ({ item }) => {
   const scope = useMathScope();
-  const defaultZOrder = useSelector(select.defaultGraphicOrder);
+  const defaultZOrder = useDefaultGraphicOrder();
   const { color, label } = item.properties;
   const {
     coords,

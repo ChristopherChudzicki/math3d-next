@@ -8,9 +8,8 @@ import {
   isGradientName,
 } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
-import { useSelector } from "react-redux";
-import * as select from "@/store/scene/state/selectors";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
+import { useDefaultGraphicOrder } from "@/store/scene/evaluation/useDefaultGraphicOrder";
 import {
   useFinalVisibility,
   useMathItemResults,
@@ -233,7 +232,7 @@ const ParametricSurface: GraphicComponent<MIT.ParametricSurface> = ({
 }) => {
   invariant(range);
   const scope = useMathScope();
-  const defaultZOrder = useSelector(select.defaultGraphicOrder);
+  const defaultZOrder = useDefaultGraphicOrder();
   const { color } = item.properties;
   const {
     expr: func,
@@ -262,7 +261,7 @@ const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({
 }) => {
   invariant(range);
   const scope = useMathScope();
-  const defaultZOrder = useSelector(select.defaultGraphicOrder);
+  const defaultZOrder = useDefaultGraphicOrder();
   const { color } = item.properties;
   const {
     expr,
@@ -295,7 +294,7 @@ const ExplicitSurfacePolar: GraphicComponent<MIT.ExplicitSurfacePolar> = ({
 }) => {
   invariant(range);
   const scope = useMathScope();
-  const defaultZOrder = useSelector(select.defaultGraphicOrder);
+  const defaultZOrder = useDefaultGraphicOrder();
   const { color } = item.properties;
   const {
     expr,

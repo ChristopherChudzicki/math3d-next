@@ -7,7 +7,6 @@ import type {
   PropertyConfig,
 } from "@math3d/mathitem-configs";
 import React, { useMemo } from "react";
-import { useSelector } from "react-redux";
 import IconButton from "@/ui/IconButton";
 import { Popover } from "@/ui/Popover";
 import circleHelp from "@iconify-icons/lucide/circle-help";
@@ -15,7 +14,7 @@ import FieldWidget, {
   useOnWidgetChange,
 } from "@/features/editor/items/FieldWidget";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import * as select from "@/store/scene/state/selectors";
+import { useDefaultGraphicOrder } from "@/store/scene/evaluation/useDefaultGraphicOrder";
 import {
   getMathProperties,
   useMathErrors,
@@ -106,7 +105,7 @@ const SettingsForm = <T extends MathItemType>({
       return { field, value };
     });
   }, [config, item.properties]);
-  const defaultZOrder = useSelector(select.defaultGraphicOrder);
+  const defaultZOrder = useDefaultGraphicOrder();
 
   return (
     <div className={styles["settings-form"]}>

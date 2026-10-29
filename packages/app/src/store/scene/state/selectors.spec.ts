@@ -2,9 +2,9 @@ import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "vitest";
 import { getStore } from "@/store/store";
 import { actions } from "./scene.slice";
-import { defaultGraphicOrder } from "./selectors";
+import { graphicTreeOrder } from "./selectors";
 
-test("defaultGraphicOrder returns expected values", () => {
+test("graphicTreeOrder returns expected values", () => {
   const scene = new SceneBuilder();
   scene
     .folder({ description: "F1" })
@@ -22,7 +22,7 @@ test("defaultGraphicOrder returns expected values", () => {
   const store = getStore();
   store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
   const state = store.getState();
-  const result = defaultGraphicOrder(state);
+  const result = graphicTreeOrder(state);
   const readableResult = Object.fromEntries(
     Object.entries(result).map(([key, value]) => [
       key,
