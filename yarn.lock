@@ -250,7 +250,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@base-ui/react@npm:^1.8.0":
+"@base-ui/react@npm:^1.9.0":
   version: 1.9.0
   resolution: "@base-ui/react@npm:1.9.0"
   dependencies:
@@ -4319,7 +4319,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "app@workspace:packages/app"
   dependencies:
-    "@base-ui/react": "npm:^1.8.0"
+    "@base-ui/react": "npm:^1.9.0"
     "@cloudflare/vitest-pool-workers": "npm:^0.23.0"
     "@cloudflare/workers-types": "npm:^5.20261019.1"
     "@dnd-kit/core": "npm:^6.3.1"
