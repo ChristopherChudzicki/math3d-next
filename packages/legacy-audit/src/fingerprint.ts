@@ -69,7 +69,8 @@ const sampleFunction = (
         f,
         Array.from(
           { length: arity },
-          (_a, i) => POINTS[length][(j + i) % POINTS[length].length],
+          // A copy: index assignment mutates an array in place.
+          (_a, i) => [...POINTS[length][(j + i) % POINTS[length].length]],
         ),
         depth,
       ),
@@ -101,7 +102,7 @@ const fingerprint = (value: unknown, depth = 0): Fingerprint => {
     other:
       value === null
         ? "null"
-        : (value as object).constructor?.name ?? typeof value,
+        : (value as object).constructor?.name || typeof value,
   };
 };
 
