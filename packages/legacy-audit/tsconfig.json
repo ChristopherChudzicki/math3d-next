@@ -1,0 +1,7 @@
+{
+  "extends": "@math3d/tsconfig/base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "types": ["node"]
+  }
+}

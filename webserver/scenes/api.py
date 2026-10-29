@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -19,6 +21,8 @@ from scenes.schemas import (
     SceneSchema,
 )
 from scenes.screenshots import schedule_render
+
+logger = logging.getLogger(__name__)
 
 scenes_router = Router()
 me_router = Router()
@@ -87,7 +91,13 @@ def get_scene(request, key: str):
         legacy = LegacyScene.objects.get(key=key)
         legacy.times_accessed += 1
         legacy.save()
-        migrate_scene(legacy)
+        try:
+            migrate_scene(legacy)
+        except Exception:
+            # A translator bug shouldn't break a scene that migrated before.
+            if not Scene.objects.filter(key=key).exists():
+                raise
+            logger.exception("Serving the stored copy of legacy scene %s", key)
 
     scene = get_object_or_404(Scene, key=key)
     # Atomic counter that skips Scene.save()'s full_clean() and modified_date

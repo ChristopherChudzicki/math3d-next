@@ -1,6 +1,7 @@
-from scenes.models import LegacyScene
+import copy
+from typing import Any
 
-DEFAULT_FOLDERS = {
+DEFAULT_FOLDERS: dict[str, dict[str, Any]] = {
     "cameraFolder": {
         "isCollapsed": True,
         "isDropDisabled": True,
@@ -23,18 +24,22 @@ SORTABLE_TREE_FIXED_POSITION = {
 }
 
 
-def set_defaults(scene: LegacyScene):
-    folders = scene.dehydrated.get("folders", {})
-    symbols = scene.dehydrated.get("mathSymbols", {})
+def set_defaults(dehydrated: dict):
+    folders = dehydrated.get("folders", {})
+    symbols = dehydrated.get("mathSymbols", {})
 
-    scene.dehydrated["folders"] = {
-        **DEFAULT_FOLDERS,
+    # Saved built-in folders are diffs against these defaults; merge per property.
+    dehydrated["folders"] = {
         **folders,
+        **{
+            folder_id: {**defaults, **folders.get(folder_id, {})}
+            for folder_id, defaults in DEFAULT_FOLDERS.items()
+        },
     }
 
-    scene.dehydrated["sortableTree"] = {
-        **SORTABLE_TREE_FIXED_POSITION,
-        **scene.dehydrated["sortableTree"],
+    dehydrated["sortableTree"] = {
+        **copy.deepcopy(SORTABLE_TREE_FIXED_POSITION),
+        **dehydrated["sortableTree"],
     }
 
-    scene.dehydrated["mathSymbols"] = symbols
+    dehydrated["mathSymbols"] = symbols
