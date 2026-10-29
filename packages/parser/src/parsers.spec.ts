@@ -433,6 +433,16 @@ describe("returned node's MathNode.evaluate", () => {
     ]);
   });
 
+  it("Drops negligible imaginary parts, whatever their sign", () => {
+    expect(parse("e^{I\\pi}").evaluate()).toBe(-1);
+    expect(parse("e^{-I\\pi}").evaluate()).toBe(-1);
+  });
+
+  it("Keeps non-negligible imaginary parts, whatever their sign", () => {
+    expect(parse("\\sqrt{-4}").evaluate()).toMatchObject({ im: 2 });
+    expect(parse("-\\sqrt{-4}").evaluate()).toMatchObject({ im: -2 });
+  });
+
   it("Functions that throw errors hint at their origin", () => {
     const nodeF = parse("f(x) = 2^[1,2,3]");
     const f = nodeF.evaluate() as (x: number) => unknown;
