@@ -192,11 +192,13 @@ def test_slider_without_any_value_needs_eval():
     assert isinstance(got["value.rhs"], NeedsEval)
 
 
-def test_slider_speed_without_next_equivalent_needs_eval():
+def test_slider_speed_takes_the_nearest_next_option():
     slider = {**rehydrated("VARIABLE_SLIDER"), "speedMultiplier": 1.5}
-    assert isinstance(values(slider)["speedMultiplier"], NeedsEval)
+    assert values(slider)["speedMultiplier"] == "2"
     slider["speedMultiplier"] = 0.0625
     assert values(slider)["speedMultiplier"] == "1/16"
+    slider["speedMultiplier"] = "s"
+    assert isinstance(values(slider)["speedMultiplier"], NeedsEval)
 
 
 def test_surface_domain_is_range_u_then_range_v():
@@ -229,20 +231,28 @@ def test_surface_range_depending_on_second_parameter_swaps_sampling():
     )
 
 
-def test_blank_calculated_visibility_keeps_item_visible():
-    point = {**rehydrated("POINT"), "useCalculatedVisibility": True, "visible": False}
+def test_blank_calculated_visibility_keeps_the_authors_visibility():
+    point = {
+        **rehydrated("POINT"),
+        "useCalculatedVisibility": True,
+        "calculatedVisibility": "\\ \\quad",
+        "visible": False,
+    }
     got = values(point)
     assert got["useCalculatedVisibility"] is False
-    assert got["visible"] is True
+    assert got["visible"] is False
+    assert got["calculatedVisibility"] == ""
 
 
-def test_z_order_follows_opacity():
-    assert values(rehydrated("PARAMETRIC_SURFACE"))["zOrder"] == "25"
-    point = {**rehydrated("POINT"), "opacity": "T"}
-    assert isinstance(values(point)["zOrder"], NeedsEval)
+def test_z_order_uses_next_automatic_order_regardless_of_opacity():
+    assert values(rehydrated("PARAMETRIC_SURFACE"))["zOrder"] == ""
 
 
 def test_vector_field_samples_split_into_components():
     field = {**rehydrated("VECTOR_FIELD"), "samples": "\\left[n,\\ 2,\\ 5\\right]"}
     got = values(field)
     assert (got["samples1"], got["samples2"], got["samples3"]) == ("n", "2", "5")
+
+
+def test_blank_z_index_becomes_zero():
+    assert values({**rehydrated("GRID"), "zIndex": ""})["zIndex"] == "0"

@@ -2,11 +2,11 @@ from typing import Any
 
 import pytest
 
-from scenes.legacy_scene_utils.translate import ItemMigrator
+from scenes.legacy_scene_utils.issue_log import Severity
+from scenes.legacy_scene_utils.translate import ItemMigrator, depends_on
 
 
 def test_axis():
-    migrator = ItemMigrator()
     migrator = ItemMigrator()
     data_in = {"type": "AXIS", "description": "test axis"}
     expected_out: dict[str, Any] = {
@@ -14,6 +14,7 @@ def test_axis():
         "type": "AXIS",
         "properties": {
             "axis": "x",
+            "label": "",
             "color": "#808080",
             "description": "test axis",
             "divisions": "10",
@@ -35,34 +36,8 @@ def test_axis():
             "zOrder": "",
         },
     }
-    assert migrator.translate_item(data_in, "axis-x").model_dump(mode="json") == {
-        **expected_out,
-        "id": "axis-x",
-        "properties": {
-            **expected_out["properties"],
-            "axis": "x",
-            "label": "x",
-        },
-    }
-    assert migrator.translate_item(data_in, "axis-y").model_dump(mode="json") == {
-        **expected_out,
-        "id": "axis-y",
-        "properties": {
-            **expected_out["properties"],
-            "axis": "y",
-            "label": "y",
-        },
-    }
-    assert migrator.translate_item(data_in, "axis-z").model_dump(mode="json") == {
-        **expected_out,
-        "id": "axis-z",
-        "properties": {
-            **expected_out["properties"],
-            "axis": "z",
-            "scale": "1/2",
-            "label": "z",
-        },
-    }
+    actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
+    assert actual_out == expected_out
 
 
 def test_boolean_variable():
@@ -108,7 +83,30 @@ def test_boolean_variable():
                 "computedLookAt": "[0, 0, -1]",
                 "useComputed": True,
             },
-            {"useRelative": "false", "position": "[1+1, 2, 3]", "target": "[0, 0, -1]"},
+            {
+                "useRelative": "false",
+                "position": "[1+1, 2, 3]",
+                "target": "[0, 0, -1]",
+                "updateOnDrag": "false",
+            },
+        ),
+        (
+            {"relativePosition": [0, -2, 0], "relativeLookAt": [0, 0, 0]},
+            {"position": "[0.0, -2.0, 0.0]", "target": "[0.0, 0.0, 0.0]"},
+        ),
+        (
+            # math3d-react saves an orthographic camera dollied 50x away from
+            # its target; math3d-next stores the un-dollied position.
+            {
+                "isOrthographic": True,
+                "relativePosition": [0, 0, 50],
+                "relativeLookAt": [0, 0, 0],
+            },
+            {
+                "isOrthographic": "true",
+                "position": "[0.0, 0.0, 2.0]",
+                "target": "[0.0, 0.0, 0.0]",
+            },
         ),
     ],
 )
@@ -155,15 +153,46 @@ def test_camera(in_patch, out_patch):
             },
         ),
         (
+            {"useCalculatedVisibility": False, "calculatedVisibility": "!true"},
+            {"useCalculatedVisibility": False, "calculatedVisibility": "!true"},
+        ),
+        (
             {
                 "useCalculatedVisibility": True,
-                "calculatedVisibility": "!true",
+                "calculatedVisibility": "\\ \\,",
                 "visible": False,
             },
             {
                 "visible": False,
-                "useCalculatedVisibility": True,
-                "calculatedVisibility": "!true",
+                "useCalculatedVisibility": False,
+                "calculatedVisibility": "",
+            },
+        ),
+        (
+            # math3d-next samples y first when x's range depends on it.
+            {"rangeU": "_f(y)=[0, y]", "uSamples": "10", "gridV": "3"},
+            {
+                "domain": {
+                    "items": [
+                        {
+                            "name": "_f",
+                            "params": ["y"],
+                            "rhs": "[0, y]",
+                            "type": "function-assignment",
+                        },
+                        {
+                            "name": "_f",
+                            "params": ["x"],
+                            "rhs": "\\left[-2,\\ 2\\right]",
+                            "type": "function-assignment",
+                        },
+                    ],
+                    "type": "array",
+                },
+                "samples1": "64",
+                "samples2": "10",
+                "grid1": "3",
+                "grid2": "8",
             },
         ),
     ],
@@ -263,7 +292,7 @@ def test_explicit_surface_polar(in_patch, out_patch):
                 "items": [
                     {
                         "name": "_f",
-                        "params": ["Q"],
+                        "params": ["\\theta"],
                         "rhs": "\\left[0,\\ 3\\right]",
                         "type": "function-assignment",
                     },
@@ -317,9 +346,18 @@ def test_folder():
     assert expected_out == actual_out
 
 
-def test_grid():
+@pytest.mark.parametrize(
+    ("in_patch", "out_patch"),
+    [
+        ({}, {}),
+        ({"width": "2", "snap": True}, {"width": "2", "snap": "true"}),
+        ({"zIndex": ""}, {"zIndex": "0"}),
+        ({"zIndex": "2"}, {"zIndex": "2"}),
+    ],
+)
+def test_grid(in_patch, out_patch):
     migrator = ItemMigrator()
-    data_in = {"type": "GRID", "color": "red"}
+    data_in = {"type": "GRID", "color": "red", **in_patch}
     expected_out = {
         "id": "some-id",
         "type": "GRID",
@@ -337,6 +375,7 @@ def test_grid():
             "zBias": "0",
             "zIndex": "0",
             "zOrder": "",
+            **out_patch,
         },
     }
     actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
@@ -566,7 +605,14 @@ def test_variable():
 
 @pytest.mark.parametrize(
     ("in_patch", "out_patch"),
-    [({}, {}), ({"speedMultiplier": 0.25}, {"speedMultiplier": "1/4"})],
+    [
+        ({}, {}),
+        ({"speedMultiplier": 0.25}, {"speedMultiplier": "1/4"}),
+        ({"speedMultiplier": 0.0625}, {"speedMultiplier": "1/16"}),
+        # math3d-next has no 1.5x; the nearest option on a log scale is 2x.
+        ({"speedMultiplier": 1.5}, {"speedMultiplier": "2"}),
+        ({"speedMultiplier": "fast"}, {"speedMultiplier": "1"}),
+    ],
 )
 def test_variable_slider(in_patch, out_patch):
     migrator = ItemMigrator()
@@ -577,7 +623,7 @@ def test_variable_slider(in_patch, out_patch):
         "properties": {
             "description": "Variable Slider",
             "duration": "4",
-            "fps": "30",
+            "fps": "60",
             "isAnimating": "false",
             "range": {"items": ["-5", "5"], "type": "array"},
             "speedMultiplier": "1",
@@ -636,6 +682,38 @@ def test_vector():
                 "samples3": "30",
             },
         ),
+        (
+            {"samples": "\\left[4,\\ 6,\\ 8\\right]"},
+            {
+                "samples1": "4",
+                "samples2": "6",
+                "samples3": "8",
+            },
+        ),
+        (
+            {"samples": "\\left[\\min\\left(a,b\\right),2,3\\right]"},
+            {
+                "samples1": "\\min\\left(a,b\\right)",
+                "samples2": "2",
+                "samples3": "3",
+            },
+        ),
+        (
+            {"samples": "S_{1}"},
+            {
+                "samples1": "S_{1}\\left[0\\right]",
+                "samples2": "S_{1}\\left[1\\right]",
+                "samples3": "S_{1}\\left[2\\right]",
+            },
+        ),
+        (
+            {"samples": "n\\cdot\\left[1,1,1\\right]"},
+            {
+                "samples1": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[0\\right]",
+                "samples2": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[1\\right]",
+                "samples3": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[2\\right]",
+            },
+        ),
     ],
 )
 def test_vector_field(in_patch, out_patch):
@@ -681,3 +759,56 @@ def test_vector_field(in_patch, out_patch):
     }
     actual_out = migrator.translate_item(data_in, "some-id").model_dump(mode="json")
     assert expected_out == actual_out
+
+
+def test_unknown_legacy_property_is_ignored_and_logged():
+    migrator = ItemMigrator()
+    item = migrator.translate_item(
+        {"type": "EXPLICIT_SURFACE", "samples": "5"}, "some-id"
+    )
+    assert item.type == "EXPLICIT_SURFACE"
+    assert [i.message for i in migrator.log.issues()] == [
+        "some-id: Ignored unknown EXPLICIT_SURFACE properties: samples"
+    ]
+
+
+def test_extra_equals_in_rhs_is_kept_with_a_warning():
+    migrator = ItemMigrator()
+    assignment = migrator.function_assignment("_f(x,y)=z=3-x")
+    assert assignment.rhs == "z=3-x"
+    assert [i.severity for i in migrator.log.issues()] == [Severity.WARNING]
+
+
+def test_indices_shift_to_zero_based_in_expressions_only():
+    item = ItemMigrator().translate_item(
+        {
+            "type": "POINT",
+            "coords": "p\\left[1\\right]",
+            "description": "p\\left[1\\right]",
+        },
+        "some-id",
+    )
+    props = item.model_dump()["properties"]
+    assert (props["coords"], props["description"]) == (
+        "p\\left[0\\right]",
+        "p\\left[1\\right]",
+    )
+
+
+@pytest.mark.parametrize(
+    ("rhs", "param", "expected"),
+    [
+        ("\\left[0,y_{1}\\right]", "y_{1}", True),
+        ("\\theta+1", "\\theta", True),
+        ("x_1", "x", False),
+    ],
+)
+def test_depends_on(rhs, param, expected):
+    assert depends_on(rhs, param) is expected
+
+
+@pytest.mark.parametrize("samples", ["10", "", "\\left[[1,2\\right]"])
+def test_unusable_vector_field_samples_fall_back_with_an_error(samples):
+    migrator = ItemMigrator()
+    assert migrator.vector_field_samples(samples) == ("10", "10", "5")
+    assert [i.severity for i in migrator.log.issues()] == [Severity.ERROR]

@@ -11,7 +11,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-from scenes.legacy_audit.normalize import equivalence
+from scenes.legacy_audit.normalize import equivalence, index_shifted
 
 MISSING = "<missing>"
 FOLDER = "FOLDER"
@@ -43,7 +43,6 @@ class SceneResult:
     item_failures: list[tuple[str, str, str, str]] = field(default_factory=list)
     order_failures: list[tuple[str, str]] = field(default_factory=list)
     unknown_properties: list[tuple[str, str]] = field(default_factory=list)
-    inventory: list[tuple[str, str]] = field(default_factory=list)
     flags: list[str] = field(default_factory=list)
 
     def clusters(self, severities: frozenset[str]) -> set[str]:
@@ -145,7 +144,6 @@ def compare_scene(
     result = SceneResult(key=exported["key"], times_accessed=exported["times_accessed"])
     assert rehydrated["key"] == exported["key"], "input files are out of step"
 
-    _inventory(result, exported["dehydrated"])
     result.legacy_broken = rehydrated.get("legacy_broken", [])
     if "mathGraphics" not in rehydrated:
         return result
@@ -244,7 +242,13 @@ def _compare_item(
         if isinstance(exp.value, table.NeedsEval):
             comparison.outcome = "needs_eval"
         else:
-            kind = None if value == MISSING else equivalence(exp.value, value)
+            # An expression with indices must arrive shifted; text never is.
+            target = (
+                index_shifted(exp.value) if table.is_math(exp.source) else exp.value
+            )
+            kind = None if value == MISSING else equivalence(target, value)
+            if kind is not None and target != exp.value:
+                kind = "index_shift"
             if kind is None:
                 comparison.outcome = "mismatch"
             elif kind != "exact":
@@ -297,15 +301,3 @@ def _compare_scene_fields(result: SceneResult, exported: dict, migrated: dict) -
                 actual=actual,
             )
         )
-
-
-def _inventory(result: SceneResult, dehydrated: dict) -> None:
-    for item in (dehydrated.get("folders") or {}).values():
-        result.inventory.extend((FOLDER, prop) for prop in item if prop != "type")
-    for group in ("mathGraphics", "mathSymbols"):
-        for item in (dehydrated.get(group) or {}).values():
-            if isinstance(item, dict):
-                item_type = item.get("type", "?")
-                result.inventory.extend(
-                    (item_type, prop) for prop in item if prop != "type"
-                )

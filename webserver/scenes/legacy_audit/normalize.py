@@ -8,9 +8,11 @@ import math
 import re
 from typing import Any
 
-# LaTeX whitespace that renders identically: "\ " (explicit space) and plain
-# spaces. Removing all of it is safe for comparison because MathLive and the
-# parsers ignore it.
+from scenes.legacy_scene_utils.indexing import shift_indices
+
+# LaTeX whitespace: "\ " (explicit space) and plain spaces. math3d-next's
+# parser can treat a space as a token separator (`x y` vs `xy`), so this can
+# mask a real difference; check its count in the report.
 _LATEX_SPACE = re.compile(r"\\ |\s+")
 _NUMBER = r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?"
 _VECTOR = re.compile(
@@ -49,6 +51,18 @@ def _as_vector(value: Any) -> list[float] | None:
 
 def _close(a: float, b: float) -> bool:
     return math.isclose(a, b, rel_tol=REL_TOL, abs_tol=ABS_TOL)
+
+
+def index_shifted(value: Any) -> Any:
+    """``value`` with math3d-react's 1-based array indices made 0-based, as
+    math3d-next counts them (owner decision, 2026-10-24). This is the
+    translator's own shift, so it is checked separately, against
+    math3d-next's parser: packages/legacy-audit/."""
+    if isinstance(value, str):
+        return shift_indices(value)[0]
+    if isinstance(value, list):
+        return [index_shifted(v) for v in value]
+    return value
 
 
 def equivalence(expected: Any, actual: Any) -> str | None:

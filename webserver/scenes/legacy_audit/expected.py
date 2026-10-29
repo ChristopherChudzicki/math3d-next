@@ -13,6 +13,7 @@ with list indices as ints. A ``NeedsEval`` may sit on a subtree path (e.g.
 
 from __future__ import annotations
 
+import math
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -33,6 +34,18 @@ class Expectation:
     value: Any
     severity: Severity
     source: str
+
+
+# Legacy properties math3d-react treats as text and never evaluates:
+# description, color, label and axis have inputType 'text'
+# (react:containers/MathObjects/MathGraphics/metadata.js), a grid's axes has
+# no metadata entry, and a symbol's name is its assignment's left-hand side.
+TEXT_SOURCES = frozenset({"description", "color", "label", "axis", "axes", "name"})
+
+
+def is_math(source: str) -> bool:
+    """Whether an expectation's legacy source is evaluated as an expression."""
+    return not TEXT_SOURCES.intersection(source.split(","))
 
 
 @dataclass(frozen=True)
@@ -114,13 +127,18 @@ def _bool(value: Any) -> bool | NeedsEval:
     return NeedsEval(f"legacy value {value!r} is not a boolean")
 
 
-_LATEX_SPACE = r"(?:\s|\\ |\\,|\\;|\\!|~)"
+_LATEX_SPACE = r"(?:\s|\\ |\\,|\\;|\\:|\\!|\\quad|\\qquad|~)"
 _UNSIGNED = r"(?:\d+(?:\.\d*)?|\.\d+)"
 _NUMBER = rf"[+-]?{_UNSIGNED}"
 
 
 def _strip_latex_space(text: str) -> str:
     return re.sub(rf"^{_LATEX_SPACE}+|{_LATEX_SPACE}+$", "", text)
+
+
+def is_blank(text: Any) -> bool:
+    """Empty, or only whitespace and LaTeX spacing commands."""
+    return re.sub(_LATEX_SPACE, "", _text(text) if text is not None else "") == ""
 
 
 def _simple_number(text: Any) -> Fraction | None:
@@ -269,25 +287,20 @@ def _universal(out: _Out, item: dict) -> None:
     """Fields shared by all graphics (react:containers/MathObjects/MathGraphics/metadata.js:12-40)."""
     out.add("description", _text(item.get("description")), "editor", "description")
     out.add("color", _text(item.get("color")), "render", "color")
-    for prop in ("opacity", "zIndex", "zBias"):
+    for prop in ("opacity", "zBias"):
         # Set verbatim on the render node (react:components/MathBox/MathBoxComponents.js:210-214).
         out.add(prop, _text(item.get(prop)), "render", prop)
-    out.add("zOrder", _z_order(item.get("opacity")), "render", "opacity")
+    # Owner decision (2026-10-24): a blank zIndex becomes "0", MathBox's
+    # default, so saved scenes say it explicitly.
+    z_index = item.get("zIndex")
+    out.add("zIndex", "0" if is_blank(z_index) else _text(z_index), "render", "zIndex")
+    # Policy, not reproduction: math3d-react derived draw order from opacity,
+    # zOrder = (1 - opacity)*100 (react:containers/MathBoxScene/components/MathBoxScene.js:106-110).
+    # math3d-next deliberately orders by the item tree instead, surfaces last
+    # (#1010; next:app/src/store/scene/state/selectors.ts defaultGraphicOrder),
+    # and uses that whenever zOrder is empty. Legacy scenes take the new order.
+    out.add("zOrder", "", "render", "constant")
     _visibility(out, item)
-
-
-def _z_order(opacity: Any) -> str | NeedsEval:
-    # math3d-react has no zOrder field: it passes zOrder = (1 - opacity)*100
-    # when opacity evaluates to a number, else 0
-    # (react:containers/MathBoxScene/components/MathBoxScene.js:106-110), and
-    # sets it on the render node (react:components/MathBox/MathBoxComponents.js:214).
-    # next evaluates `zOrder` and only falls back to its own folder-order
-    # default when it is empty (next:mathitem-configs/src/shared.ts:228-240,
-    # next:app/src/features/viewport/graphics/ParametricSurface.tsx:241).
-    value = _simple_number(opacity)
-    if value is None:
-        return NeedsEval(f"zOrder is (1 - opacity)*100 with opacity={opacity!r}")
-    return _js_number((1 - float(value)) * 100)
 
 
 def _visibility(out: _Out, item: dict) -> None:
@@ -298,17 +311,21 @@ def _visibility(out: _Out, item: dict) -> None:
     # next shows `!!calculatedVisibility` whenever useCalculatedVisibility is
     # set, so an empty one hides the item
     # (next:app/src/store/scene/evaluation/mathScope.ts:102-110).
+    # Policy for a blank expression: math3d-react shows the item on load, but
+    # its author, who saw it hidden while editing, set `visible`; legacy scenes
+    # keep the author's `visible`, and the blank expression becomes empty
+    # (owner decisions, 2026-10-23 and 2026-10-24).
     use_calc = item.get("useCalculatedVisibility")
     calc = item.get("calculatedVisibility")
     calc_text = _text(calc) if calc is not None else ""
-    blank = re.sub(_LATEX_SPACE, "", calc_text) == ""
+    blank = is_blank(calc)
     src = "useCalculatedVisibility"
     if use_calc is True and blank:
         out.add(
             "useCalculatedVisibility", False, "render", f"{src},calculatedVisibility"
         )
-        out.add("visible", True, "render", f"{src},calculatedVisibility")
-        out.add("calculatedVisibility", calc_text, "editor", "calculatedVisibility")
+        out.add("visible", _bool(item.get("visible")), "render", "visible")
+        out.add("calculatedVisibility", "", "editor", "calculatedVisibility")
     elif use_calc is True:
         out.add("useCalculatedVisibility", True, "render", src)
         out.add("visible", _bool(item.get("visible")), "editor", "visible")
@@ -316,7 +333,12 @@ def _visibility(out: _Out, item: dict) -> None:
     else:
         out.add("useCalculatedVisibility", _bool(use_calc), "render", src)
         out.add("visible", _bool(item.get("visible")), "render", "visible")
-        out.add("calculatedVisibility", calc_text, "editor", "calculatedVisibility")
+        out.add(
+            "calculatedVisibility",
+            "" if blank else calc_text,
+            "editor",
+            "calculatedVisibility",
+        )
 
 
 def _label(out: _Out, item: dict) -> None:
@@ -369,8 +391,8 @@ def _boolean_variable(item: dict, ctx: Context) -> list[Expectation]:
 
 
 # Legacy speeds are numbers (react:containers/MathObjects/MathSymbols/VariableSlider/components/AnimationControls.js:42-54);
-# next accepts only these strings and throws on any other
-# (next:app/src/features/editor/items/forms/VariableSlider/SliderControls.tsx:30-55).
+# next offers only these strings and plays any other at speed 1
+# (next:app/src/features/editor/items/forms/VariableSlider/sliderMath.ts:11-28).
 _SPEEDS: dict[Fraction, str] = {
     Fraction(1, 16): "1/16",
     Fraction(1, 8): "1/8",
@@ -392,7 +414,8 @@ def _variable_slider(item: dict, ctx: Context) -> list[Expectation]:
     # A null manual value means the slider's number in sliderValues is used:
     # `${name}=${sliderValues[id]}` (react:containers/MathScopeContext/selectors.js:13-14).
     # next's slider writes its number into value.rhs
-    # (next:app/src/features/editor/items/forms/VariableSlider/VariableSlider.tsx:171-185).
+    # (next:app/src/features/editor/items/forms/VariableSlider/VariableSlider.tsx:66-70,
+    # next:app/src/features/editor/items/forms/VariableSlider/sliderMath.ts:76-82).
     manual = item.get("value")
     if manual is not None:
         out.add("value.rhs", _text(manual), "render", "value")
@@ -422,7 +445,10 @@ def _variable_slider(item: dict, ctx: Context) -> list[Expectation]:
     # (react:.../VariableSlider/components/VariableSlider.js:99-104,
     # react:.../VariableSlider/components/AnimationControls.js:73-76,90-101).
     # next sweeps the range in duration/speed seconds at fps ticks/s
-    # (next:app/src/features/editor/items/forms/VariableSlider/VariableSlider.tsx:66-83).
+    # (next:app/src/features/editor/items/forms/VariableSlider/SliderAnimations.tsx:34-67,
+    # next:app/src/features/editor/items/forms/VariableSlider/sliderMath.ts:73-74),
+    # so while ticks keep up, fps changes only smoothness. Owner decision
+    # (2026-10-23): legacy sliders keep math3d-react's effective 60.
     out.add("fps", "60", "render", "constant")
     out.add("duration", "4", "render", "constant")
     # Animation starts on mount when isAnimating
@@ -432,6 +458,12 @@ def _variable_slider(item: dict, ctx: Context) -> list[Expectation]:
     speed_value: str | NeedsEval
     if speed is not None and speed in _SPEEDS:
         speed_value = _SPEEDS[speed]
+    elif speed is not None and speed > 0:
+        # math3d-react also offered 1.5x and 3x
+        # (react:.../VariableSlider/components/AnimationControls.js:42-54).
+        # Owner decision (2026-10-24): take the nearest next option.
+        nearest = min(_SPEEDS, key=lambda s: abs(math.log(s / speed)))
+        speed_value = _SPEEDS[nearest]
     else:
         speed_value = NeedsEval(
             f"speedMultiplier={item.get('speedMultiplier')!r} has no math3d-next speed option"
@@ -499,9 +531,12 @@ def _camera(item: dict, ctx: Context) -> list[Expectation]:
         out.add("position", _text(item.get("computedPosition")), "render", src_p)
         out.add("target", _text(item.get("computedLookAt")), "render", src_t)
         out.add("useRelative", "false", "render", "useComputed")
-        # A drag must not overwrite the computed expressions: next's
-        # updateOnDrag=false snaps back instead of writing the drag into
-        # position/target (next:app/src/features/viewport/Camera.tsx:101-122).
+        # Turning on useComputed in math3d-react sets rotate/zoom/pan false
+        # (react:.../MathGraphics/Camera/UseComputedToggle.js:27-32), and it
+        # never writes interaction back into computedPosition. next still
+        # fires onEnd on every pointerup, and with updateOnDrag=true writes
+        # the camera's numbers over the expressions when they differ
+        # (next:app/src/features/viewport/Camera.tsx:101-122).
         out.add("updateOnDrag", "false", "render", "useComputed")
         return out.items
 
@@ -760,14 +795,14 @@ EXPECTATIONS: dict[str, Callable[[dict, Context], list[Expectation]]] = {
 _UNIVERSAL_COVERAGE = {
     "description": "description (identity)",
     "color": "color (identity)",
-    "opacity": "opacity (identity); also zOrder = (1 - opacity)*100",
-    "zIndex": "zIndex (identity)",
+    "opacity": "opacity (identity); zOrder is empty by policy (#1010), not derived from opacity",
+    "zIndex": 'zIndex (identity); blank -> "0"',
     "zBias": "zBias (identity)",
-    "visible": "visible (bool); forced true when useCalculatedVisibility has a blank expression",
+    "visible": "visible (bool); the author's value, also when useCalculatedVisibility has a blank expression",
     "useCalculatedVisibility": (
         "useCalculatedVisibility (bool); false when calculatedVisibility is blank"
     ),
-    "calculatedVisibility": "calculatedVisibility (identity)",
+    "calculatedVisibility": 'calculatedVisibility (identity); blank, including LaTeX spacing -> ""',
 }
 _LABEL_COVERAGE = {
     "label": "label (identity)",
@@ -818,7 +853,7 @@ COVERAGE: dict[str, dict[str, str]] = {
         "max": "range.items.1 (identity)",
         "description": "description (identity)",
         "isAnimating": 'isAnimating (bool -> "true"/"false")',
-        "speedMultiplier": "speedMultiplier (number -> next speed string, e.g. 0.5 -> 1/2)",
+        "speedMultiplier": "speedMultiplier (number -> nearest next speed on a log scale, e.g. 0.5 -> 1/2, 1.5 -> 2)",
     },
     "BOOLEAN_VARIABLE": {
         "name": "value.lhs (identity)",

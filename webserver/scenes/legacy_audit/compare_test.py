@@ -40,6 +40,7 @@ TABLE = SimpleNamespace(
     NeedsEval=NeedsEval,
     Context=lambda **kwargs: SimpleNamespace(**kwargs),
     EXPECTATIONS={"POINT": _point, "FOLDER": _folder},
+    is_math=lambda source: source == "size",
     LEGACY_TYPE_TO_NEXT_TYPE={"POINT": "POINT", "FOLDER": "FOLDER"},
 )
 DEFAULTS = {
@@ -115,6 +116,25 @@ def test_editor_mismatch_does_not_affect_render_clean():
     )
     assert _outcomes(result)["description"] == "mismatch"
     assert result.clusters(RENDER) == set()
+
+
+def test_an_index_must_be_shifted_in_an_expression_and_never_in_text():
+    point = {**POINT, "size": "s\\left[1\\right]", "description": "a[1]"}
+    shifted = {**point, "size": "s\\left[0\\right]"}
+    result = compare_scene(*_scene(point, shifted), DEFAULTS, TABLE)
+    assert [c.normalization for c in result.comparisons if c.path == "size"] == [
+        "index_shift"
+    ]
+    assert _outcomes(result) == {
+        "color": "match",
+        "description": "match",
+        "size": "match_normalized",
+    }
+    unshifted = compare_scene(*_scene(point, point), DEFAULTS, TABLE)
+    assert _outcomes(unshifted)["size"] == "mismatch"
+    text_shifted = {**shifted, "description": "a[0]"}
+    result = compare_scene(*_scene(point, text_shifted), DEFAULTS, TABLE)
+    assert _outcomes(result)["description"] == "mismatch"
 
 
 def test_needs_eval_and_missing_target_field():

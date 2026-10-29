@@ -1,0 +1,24 @@
+{
+  "name": "@math3d/legacy-audit",
+  "description": "Checks for the legacy-scene migration audit (docs/legacy-audit/). Its specs run only when given audit data; delete after the math3d.org cutover.",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@math3d/eslint-config": "workspace:^",
+    "@math3d/tsconfig": "workspace:^",
+    "@types/node": "^24.0.0",
+    "eslint": "^8.57.1",
+    "vitest": "^4.1.12"
+  },
+  "scripts": {
+    "test": "vitest --run",
+    "typecheck": "tsc --noEmit",
+    "test-watch": "vitest",
+    "lint": "eslint --max-warnings 0 \"**/*.ts?(x)\""
+  },
+  "dependencies": {
+    "@math3d/custom-mathjs": "workspace:^",
+    "@math3d/parser": "workspace:^",
+    "mathjs": "^15.2.0"
+  }
+}

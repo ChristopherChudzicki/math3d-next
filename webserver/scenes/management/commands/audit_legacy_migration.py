@@ -8,8 +8,8 @@ math3d-react's client/src/legacyAudit) with its math3d-next translation
         --legacy /abs/legacy.jsonl --rehydrated /abs/rehydrated.jsonl \\
         --defaults /abs/react_defaults.json --out-dir /abs/out/
 
-Writes findings.jsonl (per scene, contains keys: keep out of git) and
-report.md (aggregates only).
+Writes findings.jsonl and manual_checks.json (per scene, contain keys: keep
+out of git) and report.md (aggregates only).
 """
 
 import datetime
@@ -24,6 +24,21 @@ from scenes.legacy_audit.compare import compare_scene
 from scenes.legacy_audit.report import Aggregate, render_markdown
 
 CALIBRATION_SIZE = 20
+# The most-viewed scenes are checked by hand where a policy changes what
+# math3d-react showed.
+MANUAL_CHECK_TOP = 100
+
+
+def hidden_by_blank_visibility(rehydrated: dict) -> list[str]:
+    """Items math3d-react showed on load that math3d-next hides: calculated
+    visibility on, a blank expression, and visible false."""
+    return [
+        item_id
+        for item_id, item in (rehydrated.get("mathGraphics") or {}).items()
+        if item.get("useCalculatedVisibility") is True
+        and item.get("visible") is False
+        and expected.is_blank(item.get("calculatedVisibility"))
+    ]
 
 
 class Command(BaseCommand):
@@ -55,6 +70,7 @@ class Command(BaseCommand):
         out_dir.mkdir(parents=True, exist_ok=True)
         agg = Aggregate()
         top: list[tuple[float, dict]] = []
+        hidden: list[tuple[float, str, list[str]]] = []
         with (
             open(options["legacy"]) as legacy_file,
             open(options["rehydrated"]) as rehydrated_file,
@@ -63,9 +79,10 @@ class Command(BaseCommand):
             for legacy_line, rehydrated_line in tqdm.tqdm(
                 zip(legacy_file, rehydrated_file, strict=True)
             ):
+                rehydrated = json.loads(rehydrated_line)
                 result = compare_scene(
                     json.loads(legacy_line),
-                    json.loads(rehydrated_line),
+                    rehydrated,
                     defaults,
                     expected,
                     initial_graphics,
@@ -102,6 +119,13 @@ class Command(BaseCommand):
                     )
                 )
                 top = sorted(top, key=lambda t: -t[0])[:CALIBRATION_SIZE]
+                hidden.append(
+                    (
+                        result.times_accessed,
+                        result.key,
+                        hidden_by_blank_visibility(rehydrated),
+                    )
+                )
 
         meta = {"date": datetime.date.today().isoformat()}
         meta.update(dict(m.split("=", 1) for m in options["meta"]))
@@ -112,6 +136,19 @@ class Command(BaseCommand):
                     {"rank": i + 1, "times_accessed": w, **v}
                     for i, (w, v) in enumerate(top)
                 ],
+                indent=2,
+            )
+        )
+        ranked = sorted(hidden, key=lambda t: -t[0])[:MANUAL_CHECK_TOP]
+        (out_dir / "manual_checks.json").write_text(
+            json.dumps(
+                {
+                    "hidden_by_blank_visibility": [
+                        {"rank": i + 1, "key": key, "items": items}
+                        for i, (_, key, items) in enumerate(ranked)
+                        if items
+                    ]
+                },
                 indent=2,
             )
         )
