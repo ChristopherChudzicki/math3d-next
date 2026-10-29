@@ -1098,7 +1098,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hookform/resolvers@npm:^5.0.1":
+"@hookform/resolvers@npm:^5.9.2":
   version: 5.9.2
   resolution: "@hookform/resolvers@npm:5.9.2"
   dependencies:
@@ -4326,7 +4326,7 @@ __metadata:
     "@dnd-kit/sortable": "npm:^10.0.0"
     "@dnd-kit/utilities": "npm:^3.2.2"
     "@faker-js/faker": "npm:^10.6.0"
-    "@hookform/resolvers": "npm:^5.0.1"
+    "@hookform/resolvers": "npm:^5.9.2"
     "@iconify-icons/lucide": "npm:^1.2.136"
     "@iconify/react": "npm:^6.0.2"
     "@julr/vite-plugin-validate-env": "npm:^2.2.2"
