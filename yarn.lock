@@ -1826,7 +1826,7 @@ __metadata:
     "@math3d/eslint-config": "workspace:^"
     "@math3d/tsconfig": "workspace:^"
     "@testing-library/react": "npm:^16.3.3"
-    "@testing-library/user-event": "npm:^14.6.7"
+    "@testing-library/user-event": "npm:^14.6.8"
     "@types/react": "npm:^19.3.0"
     eslint: "npm:^8.57.1"
     jest-get-type: "npm:^29.6.3"
@@ -3228,7 +3228,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/user-event@npm:^14.6.3, @testing-library/user-event@npm:^14.6.7":
+"@testing-library/user-event@npm:^14.6.3, @testing-library/user-event@npm:^14.6.8":
   version: 14.6.8
   resolution: "@testing-library/user-event@npm:14.6.8"
   peerDependencies:
@@ -4352,7 +4352,7 @@ __metadata:
     "@testing-library/dom": "npm:^10.4.2"
     "@testing-library/jest-dom": "npm:6.9.1"
     "@testing-library/react": "npm:^16.3.3"
-    "@testing-library/user-event": "npm:^14.6.7"
+    "@testing-library/user-event": "npm:^14.6.8"
     "@types/js-yaml": "npm:^4.0.9"
     "@types/lodash-es": "npm:^4.17.12"
     "@types/node": "npm:^24.0.0"
