@@ -198,7 +198,8 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
         />
       )}
       {/* Gridlines share the surface's zOrder: MathBox rounds zOrder to an
-          integer, and the next integer is the next graphic's. */}
+          integer, and the next integer is the next graphic's. Among equal
+          zOrders, three.js draws in mesh-creation order. */}
       {dataNode && (
         <MB.Group>
           <MB.Resample source={dataNode} height={grid2} />

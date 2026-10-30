@@ -6,12 +6,13 @@ import type {
   AppMathScope,
   AppParseable,
 } from "@/store/scene/state/interfaces";
+import { mathScopeId } from "./mathScope";
 import { useMathScope } from "./useMathScope";
 
-const OPACITY_SUFFIX = "-opacity";
+// Every opacity's MathScope id ends with this.
+const OPACITY_SUFFIX = mathScopeId("", "opacity");
 
-// MathBox's own default, which a graphic whose opacity has never evaluated
-// gets.
+// The opacity a graphic draws with before its opacity has evaluated.
 const DEFAULT_OPACITY = 1;
 
 const drawnOpacity = (value: number | undefined) =>
@@ -27,15 +28,18 @@ const drawnOpacity = (value: number | undefined) =>
  */
 const orderByOpacity = (
   treeOrder: Record<string, number>,
-  opacities: ReadonlyMap<string, number>,
+  opacityOf: (itemId: string) => number | undefined,
 ): Record<string, number> => {
   const ids = Object.keys(treeOrder).sort(
     (a, b) =>
-      drawnOpacity(opacities.get(b)) - drawnOpacity(opacities.get(a)) ||
+      drawnOpacity(opacityOf(b)) - drawnOpacity(opacityOf(a)) ||
       treeOrder[a] - treeOrder[b],
   );
   return Object.fromEntries(ids.map((id, index) => [id, index]));
 };
+
+const isOpacity = (id: string, value: unknown): value is number =>
+  id.endsWith(OPACITY_SUFFIX) && typeof value === "number";
 
 /**
  * Each graphic's last evaluated opacity, shared by every graphic in a scope.
@@ -43,6 +47,7 @@ const orderByOpacity = (
  * because that is the opacity the graphic keeps drawing with.
  */
 class OpacityStore {
+  // Keyed by MathScope id.
   private opacities = new Map<string, number>();
 
   private listeners = new Set<() => void>();
@@ -54,25 +59,24 @@ class OpacityStore {
   };
 
   constructor(scope: AppMathScope) {
-    scope.results.forEach((value, id) => this.record(id, value));
+    scope.results.forEach((value, id) => {
+      if (isOpacity(id, value)) this.opacities.set(id, value);
+    });
     const onChange: OnChangeListener<AppParseable> = (event) => {
-      let changed = false;
+      let next: Map<string, number> | undefined;
       event.detail.changes.results.touched.forEach((id) => {
-        changed = this.record(id, scope.results.get(id)) || changed;
+        const value = scope.results.get(id);
+        if (isOpacity(id, value) && this.opacities.get(id) !== value) {
+          next ??= new Map(this.opacities);
+          next.set(id, value);
+        }
       });
-      if (changed) this.listeners.forEach((listener) => listener());
+      if (next) {
+        this.opacities = next;
+        this.listeners.forEach((listener) => listener());
+      }
     };
     scope.addEventListener("change", onChange);
-  }
-
-  private record(id: string, value: unknown): boolean {
-    if (!id.endsWith(OPACITY_SUFFIX) || typeof value !== "number") {
-      return false;
-    }
-    const itemId = id.slice(0, -OPACITY_SUFFIX.length);
-    if (this.opacities.get(itemId) === value) return false;
-    this.opacities = new Map(this.opacities).set(itemId, value);
-    return true;
   }
 
   subscribe = (listener: () => void) => {
@@ -87,7 +91,9 @@ class OpacityStore {
     if (cached?.treeOrder === treeOrder && cached.opacities === opacities) {
       return cached.order;
     }
-    const order = orderByOpacity(treeOrder, opacities);
+    const order = orderByOpacity(treeOrder, (itemId) =>
+      opacities.get(mathScopeId(itemId, "opacity")),
+    );
     this.cached = { treeOrder, opacities, order };
     return order;
   }

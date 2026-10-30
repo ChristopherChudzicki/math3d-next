@@ -18,7 +18,7 @@ describe("orderByOpacity", () => {
       ["c", 0.75],
       ["d", 1],
     ]);
-    expect(orderByOpacity(treeOrder, opacities)).toEqual({
+    expect(orderByOpacity(treeOrder, (id) => opacities.get(id))).toEqual({
       b: 0,
       d: 1,
       c: 2,
@@ -32,7 +32,7 @@ describe("orderByOpacity", () => {
       ["c", 2],
       ["d", 1],
     ]);
-    expect(orderByOpacity(treeOrder, opacities)).toEqual({
+    expect(orderByOpacity(treeOrder, (id) => opacities.get(id))).toEqual({
       b: 0,
       c: 1,
       d: 2,
@@ -47,8 +47,9 @@ describe("useDefaultZOrder", () => {
     scene
       .folder()
       .variable({ value: { type: "assignment", lhs: "a", rhs: "1" } }, "a")
-      .explicitSurface({}, "translucent")
-      .explicitSurface({ opacity: "a" }, "varying");
+      // Above "translucent", so tree order alone would draw it later.
+      .explicitSurface({ opacity: "a" }, "varying")
+      .explicitSurface({}, "translucent");
     const store = getStore();
     store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
     const { result } = renderHook(
