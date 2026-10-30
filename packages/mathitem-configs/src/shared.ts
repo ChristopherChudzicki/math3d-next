@@ -236,7 +236,8 @@ const zOrder: PropertyConfig<"zOrder", number | undefined> = {
   description: `Browser limitations mean transparency won't always look correct
 from all directions, particularly for surfaces. You will be able to see objects
 drawn first through objects drawn last. Higher values are drawn last. By default,
-surfaces are drawn last; ties are broken by the order of appearance in folders.`,
+more opaque objects are drawn first; among equally opaque ones, surfaces are
+drawn last, then ties are broken by position in folders.`,
 };
 
 const start: PropertyConfig<"start", boolean> = {

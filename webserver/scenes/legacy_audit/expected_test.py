@@ -244,7 +244,7 @@ def test_blank_calculated_visibility_keeps_the_authors_visibility():
     assert got["calculatedVisibility"] == ""
 
 
-def test_z_order_uses_next_automatic_order_regardless_of_opacity():
+def test_z_order_is_left_to_next_automatic_order():
     assert values(rehydrated("PARAMETRIC_SURFACE"))["zOrder"] == ""
 
 

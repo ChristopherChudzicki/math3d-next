@@ -23,7 +23,9 @@ test("Check graphic zOrder values", async ({ page, prepareScene }) => {
   await page.goto(`/${key}`);
 
   /**
-   * NOTE: Expected z-order order for this scene is:
+   * NOTE: Expected z-order order for this scene is below. Opaque graphics
+   * come first; F1_surfaceB is the only opaque surface (an implicit surface's
+   * default opacity is 1, the others' 0.75).
    *
    * item      default z-order     overridden z-order
    * ==================================================
@@ -36,14 +38,14 @@ test("Check graphic zOrder values", async ({ page, prepareScene }) => {
    * F1_point       9                9
    * F1_line        8                8
    * F1_surfaceA    13               13
-   * F1_surfaceB    12                4
+   * F1_surfaceB    10                4
    * F2_point       7                7
    * F2_line        6                6
-   * F2_surfaceA    11             100
-   * F2_surfaceB    10              10
+   * F2_surfaceA    12             100
+   * F2_surfaceB    11              11
    */
 
-  await test.step("Check z-oder of F2_point (uses placeholder value)", async () => {
+  await test.step("Check z-order of F2_point (uses placeholder value)", async () => {
     const description = "F2_point";
     const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
@@ -54,7 +56,7 @@ test("Check graphic zOrder values", async ({ page, prepareScene }) => {
     await page.keyboard.press("Escape");
   });
 
-  await test.step("Check z-oder of F1_surfaceA (uses placeholder value)", async () => {
+  await test.step("Check z-order of F1_surfaceA (uses placeholder value)", async () => {
     const description = "F1_surfaceA";
     const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
@@ -65,7 +67,18 @@ test("Check graphic zOrder values", async ({ page, prepareScene }) => {
     await page.keyboard.press("Escape");
   });
 
-  await test.step("Check z-oder of F2_surfaceA (uses set value)", async () => {
+  await test.step("Check z-order of F2_surfaceB (after the opaque F1_surfaceB)", async () => {
+    const description = "F2_surfaceB";
+    const item = getItemForm(page, { description });
+    await item.getByRole("button", { name: "More Settings" }).click();
+
+    const zOrder = page.getByLabel("Z-Order", { exact: true });
+    expect(await zOrder.evaluate(getLatex)).toBe("");
+    await expect(zOrder).toHaveText("11");
+    await page.keyboard.press("Escape");
+  });
+
+  await test.step("Check z-order of F2_surfaceA (uses set value)", async () => {
     const description = "F2_surfaceA";
     const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();

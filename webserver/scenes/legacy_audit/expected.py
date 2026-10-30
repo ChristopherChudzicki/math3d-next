@@ -294,11 +294,11 @@ def _universal(out: _Out, item: dict) -> None:
     # default, so saved scenes say it explicitly.
     z_index = item.get("zIndex")
     out.add("zIndex", "0" if is_blank(z_index) else _text(z_index), "render", "zIndex")
-    # Policy, not reproduction: math3d-react derived draw order from opacity,
-    # zOrder = (1 - opacity)*100 (react:containers/MathBoxScene/components/MathBoxScene.js:106-110).
-    # math3d-next deliberately orders by the item tree instead, surfaces last
-    # (#1010; next:app/src/store/scene/state/selectors.ts defaultGraphicOrder),
-    # and uses that whenever zOrder is empty. Legacy scenes take the new order.
+    # An empty zOrder takes math3d-next's automatic order, which draws more
+    # opaque graphics first, as math3d-react's zOrder = (1 - opacity)*100 did
+    # (react:containers/MathBoxScene/components/MathBoxScene.js:106-110). Ties
+    # follow the item tree, surfaces last
+    # (next:app/src/store/scene/evaluation/useDefaultZOrder.ts).
     out.add("zOrder", "", "render", "constant")
     _visibility(out, item)
 
@@ -795,7 +795,7 @@ EXPECTATIONS: dict[str, Callable[[dict, Context], list[Expectation]]] = {
 _UNIVERSAL_COVERAGE = {
     "description": "description (identity)",
     "color": "color (identity)",
-    "opacity": "opacity (identity); zOrder is empty by policy (#1010), not derived from opacity",
+    "opacity": "opacity (identity); zOrder is empty, so next orders by opacity, then tree",
     "zIndex": 'zIndex (identity); blank -> "0"',
     "zBias": "zBias (identity)",
     "visible": "visible (bool); the author's value, also when useCalculatedVisibility has a blank expression",

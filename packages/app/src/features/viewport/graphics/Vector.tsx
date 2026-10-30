@@ -1,9 +1,8 @@
 import React, { useMemo } from "react";
 import * as MB from "mathbox-react";
 import { MathItemType } from "@math3d/mathitem-configs";
-import { useSelector } from "react-redux";
-import * as select from "@/store/scene/state/selectors";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
+import { useDefaultZOrder } from "@/store/scene/evaluation/useDefaultZOrder";
 import {
   useFinalVisibility,
   useMathItemResults,
@@ -27,7 +26,7 @@ const props = [
 const labelOffset = [0, 40, 0];
 const Vector: GraphicComponent<MathItemType.Vector> = ({ item }) => {
   const scope = useMathScope();
-  const defaultZOrder = useSelector(select.defaultGraphicOrder);
+  const defaultZOrder = useDefaultZOrder(item.id);
   const { color, label } = item.properties;
   const {
     components,
@@ -39,7 +38,7 @@ const Vector: GraphicComponent<MathItemType.Vector> = ({ item }) => {
     labelVisible,
     start,
     end,
-    zOrder = defaultZOrder[item.id],
+    zOrder = defaultZOrder,
     width,
   } = useMathItemResults(scope, item, props);
   const coords = useMemo(() => {

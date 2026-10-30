@@ -8,9 +8,8 @@ import {
   isGradientName,
 } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
-import { useSelector } from "react-redux";
-import * as select from "@/store/scene/state/selectors";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
+import { useDefaultZOrder } from "@/store/scene/evaluation/useDefaultZOrder";
 import {
   useFinalVisibility,
   useMathItemResults,
@@ -198,6 +197,9 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
           shaded={shaded}
         />
       )}
+      {/* Gridlines share the surface's zOrder: MathBox rounds zOrder to an
+          integer, and the next integer is the next graphic's. Among equal
+          zOrders, three.js draws in mesh-creation order. */}
       {dataNode && (
         <MB.Group>
           <MB.Resample source={dataNode} height={grid2} />
@@ -206,7 +208,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
             color={gridColor}
             width={gridWidth}
             opacity={gridOpacity}
-            zOrder={(zOrder ?? 0) + 0.1}
+            zOrder={zOrder}
           />
         </MB.Group>
       )}
@@ -219,7 +221,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
             color={gridColor}
             width={gridWidth}
             opacity={gridOpacity}
-            zOrder={(zOrder ?? 0) + 1}
+            zOrder={zOrder}
           />
         </MB.Group>
       )}
@@ -233,12 +235,12 @@ const ParametricSurface: GraphicComponent<MIT.ParametricSurface> = ({
 }) => {
   invariant(range);
   const scope = useMathScope();
-  const defaultZOrder = useSelector(select.defaultGraphicOrder);
+  const defaultZOrder = useDefaultZOrder(item.id);
   const { color } = item.properties;
   const {
     expr: func,
     colorExpr: colorFunc,
-    zOrder = defaultZOrder[item.id],
+    zOrder = defaultZOrder,
     ...others
   } = useMathItemResults(scope, item, props);
 
@@ -262,12 +264,12 @@ const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({
 }) => {
   invariant(range);
   const scope = useMathScope();
-  const defaultZOrder = useSelector(select.defaultGraphicOrder);
+  const defaultZOrder = useDefaultZOrder(item.id);
   const { color } = item.properties;
   const {
     expr,
     colorExpr: colorFunc,
-    zOrder = defaultZOrder[item.id],
+    zOrder = defaultZOrder,
     ...others
   } = useMathItemResults(scope, item, props);
 
@@ -295,12 +297,12 @@ const ExplicitSurfacePolar: GraphicComponent<MIT.ExplicitSurfacePolar> = ({
 }) => {
   invariant(range);
   const scope = useMathScope();
-  const defaultZOrder = useSelector(select.defaultGraphicOrder);
+  const defaultZOrder = useDefaultZOrder(item.id);
   const { color } = item.properties;
   const {
     expr,
     colorExpr: colorFunc,
-    zOrder = defaultZOrder[item.id],
+    zOrder = defaultZOrder,
     ...others
   } = useMathItemResults(scope, item, props);
 

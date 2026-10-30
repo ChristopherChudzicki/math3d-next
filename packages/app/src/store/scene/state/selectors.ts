@@ -118,47 +118,46 @@ const itemOrder = (state: RootState) => state.scene.order;
 
 const isLegacy = (state: RootState) => state.scene.isLegacy;
 
-const defaultGraphicOrder: SelectorReturn<Record<string, number>> =
-  createSelector(
-    [mathItems, itemOrder],
-    (items, itemOrderDict) => {
-      const { main, setup } = itemOrderDict;
-      if (!main || !setup) {
-        return {};
-      }
-      invariant(main, "Main item order not found.");
-      invariant(setup, "Setup item order not found.");
-      const graphics = [...main, ...setup].flatMap((folderId) => {
-        const itemIds = itemOrderDict[folderId];
-        invariant(itemIds, `Item order for ${folderId} not found.`);
-        return itemIds.map((id) => items[id]).filter(isMathGraphic);
-      });
-      const reversed = [...graphics].reverse();
-      const ordered = reversed.sort((a, b) => {
-        if (isSurface(a) && isSurface(b)) {
-          return 0;
-        }
-        if (isSurface(a)) {
-          return 1; // draw surfaces last
-        }
-        if (isSurface(b)) {
-          return -1; // draw surfaces last
-        }
+const graphicTreeOrder: SelectorReturn<Record<string, number>> = createSelector(
+  [mathItems, itemOrder],
+  (items, itemOrderDict) => {
+    const { main, setup } = itemOrderDict;
+    if (!main || !setup) {
+      return {};
+    }
+    invariant(main, "Main item order not found.");
+    invariant(setup, "Setup item order not found.");
+    const graphics = [...main, ...setup].flatMap((folderId) => {
+      const itemIds = itemOrderDict[folderId];
+      invariant(itemIds, `Item order for ${folderId} not found.`);
+      return itemIds.map((id) => items[id]).filter(isMathGraphic);
+    });
+    const reversed = [...graphics].reverse();
+    const ordered = reversed.sort((a, b) => {
+      if (isSurface(a) && isSurface(b)) {
         return 0;
-      });
-      const orders = Object.fromEntries(
-        ordered.map((item, index) => {
-          return [item.id, index];
-        }),
-      );
-      return orders;
+      }
+      if (isSurface(a)) {
+        return 1; // draw surfaces last
+      }
+      if (isSurface(b)) {
+        return -1; // draw surfaces last
+      }
+      return 0;
+    });
+    const orders = Object.fromEntries(
+      ordered.map((item, index) => {
+        return [item.id, index];
+      }),
+    );
+    return orders;
+  },
+  {
+    memoizeOptions: {
+      resultEqualityCheck: shallowEqual,
     },
-    {
-      memoizeOptions: {
-        resultEqualityCheck: shallowEqual,
-      },
-    },
-  );
+  },
+);
 
 const sceneInfo = createSelector(
   [title, author, stableOrderedMathItems, itemOrder, key],
@@ -179,7 +178,7 @@ export {
   mathItem,
   stableOrderedMathItems,
   mathGraphics,
-  defaultGraphicOrder,
+  graphicTreeOrder,
   hasItems,
   getItems,
   sceneInfo,
