@@ -10,16 +10,16 @@ This checks that legacy math3d-react scenes migrate and display correctly in mat
 
 Every generated file is production scene data. Write it under the main checkout's `db-snapshots/legacy-audit/` (gitignored) with absolute paths, and never commit it. Committed reports contain aggregates only. A scene key grants access to an unlisted scene, so reports never include keys.
 
-| File                     | Written by                                                   | One line per legacy scene, in `LegacyScene.id` order                                                                                     |
-| ------------------------ | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `legacy.jsonl`           | `export_legacy_audit`                                        | `{key, times_accessed, dehydrated, migrated: {items, item_order, title, creation_date} \| null, migrate_error: {type, message} \| null}` |
-| `rehydrated.jsonl`       | math3d-react `client/src/legacyAudit/rehydrate.audit.js`     | `{key, mathGraphics, mathSymbols, folders, sortableTree, sliderValues, metadata, legacy_broken: [reason]}`                               |
-| `findings.jsonl`         | `audit_legacy_migration`                                     | `{key, times_accessed, verdict, strict_clean, clusters, flags, mismatches, item_failures, order_failures}`                               |
-| `manual_checks.json`     | `audit_legacy_migration`                                     | Not per scene: `{hidden_by_blank_visibility: [{rank, key, items}]}`: among the 100 most-viewed scenes, those a policy changes; see below |
-| `pass2/eval_next.jsonl`  | math3d-next `packages/legacy-audit/src/evaluateNext.spec.ts` | `{version: 2, key, crashed, items: {<itemId>: {<field>: {status, message?, value?, elements?, deps, features}}}}`                        |
-| `pass2/eval_react.jsonl` | math3d-react `client/src/legacyAudit/evaluate.audit.js`      | The same, without `elements` and `features`                                                                                              |
-| `pass2/findings.jsonl`   | `audit_legacy_evaluation`                                    | `{key, times_accessed, pass1_verdict, verdict, strict_clean, verified_clean, clusters, pairs: [every non-equal pair]}`                   |
-| `pass2/examples.json`    | `audit_legacy_evaluation`                                    | Not per scene: the most-viewed keys of each cluster, for filing tasks                                                                    |
+| File                       | Written by                                                   | One line per legacy scene, in `LegacyScene.id` order                                                                                                          |
+| -------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `legacy.jsonl`             | `export_legacy_audit`                                        | `{key, times_accessed, dehydrated, migrated: {items, item_order, title, creation_date} \| null, migrate_error: {type, message} \| null}`                      |
+| `rehydrated.jsonl`         | math3d-react `client/src/legacyAudit/rehydrate.audit.js`     | `{key, mathGraphics, mathSymbols, folders, sortableTree, sliderValues, metadata, legacy_broken: [reason]}`                                                    |
+| `pass1/findings.jsonl`     | `audit_legacy_migration`                                     | `{key, times_accessed, verdict, strict_clean, clusters, flags, mismatches, item_failures, order_failures}`                                                    |
+| `pass1/manual_checks.json` | `audit_legacy_migration`                                     | Not per scene: `{hidden_by_blank_visibility: [{rank, key, items}]}`: among the 100 most-viewed scenes, those a policy changes; see below                      |
+| `pass2/eval_next.jsonl`    | math3d-next `packages/legacy-audit/src/evaluateNext.spec.ts` | `{version: 2, key, crashed, items: {<itemId>: {<field>: {status, message?, value?, elements?, deps, features}}}}`                                             |
+| `pass2/eval_react.jsonl`   | math3d-react `client/src/legacyAudit/evaluate.audit.js`      | The same, without `elements` and `features`                                                                                                                   |
+| `pass2/findings.jsonl`     | `audit_legacy_evaluation`                                    | `{key, times_accessed, pass1_verdict, verdict, strict_clean, verified_clean, clusters, pairs: [every non-equal pair]}`, or `{…, verdict: "excluded", reason}` |
+| `pass2/examples.json`      | `audit_legacy_evaluation`                                    | Not per scene: the most-viewed keys of each cluster, for filing tasks                                                                                         |
 
 `react_defaults.json` (math3d-react's `defaultSettings` per type, plus `initialState`) is code-derived, not user data. A copy is checked in at `webserver/scenes/legacy_audit/fixtures/`.
 
@@ -41,7 +41,7 @@ After a translator fix, re-run only `export_legacy_audit` and `audit_legacy_migr
 
 ## Running pass 2
 
-Pass 2 needs pass 1's `legacy.jsonl`, `rehydrated.jsonl` and `pass1/findings.jsonl` from the same export. From the main checkout:
+Pass 2 needs pass 1's `legacy.jsonl`, `rehydrated.jsonl` and `pass1/findings.jsonl` from the same export, and math3d-react on branch `legacy-audit/rehydrate` (point `../math3d-react` at its worktree if that branch is checked out elsewhere). From the main checkout:
 
 ```bash
 D=$PWD/db-snapshots/legacy-audit; mkdir -p $D/pass2
@@ -51,7 +51,9 @@ cd webserver
 IS_DEPLOYMENT=False uv run python manage.py audit_legacy_evaluation --legacy $D/legacy.jsonl --rehydrated $D/rehydrated.jsonl --pass1 $D/pass1/findings.jsonl --react $D/pass2/eval_react.jsonl --next $D/pass2/eval_next.jsonl --out-dir $D/pass2 --meta "Snapshot=prod, pulled <date>" --meta "math3d-next=$(git rev-parse --short HEAD)" --meta "math3d-react=<commit>"
 ```
 
-Each evaluator takes about 15 minutes, and the join about 4. After a translator fix, re-run `export_legacy_audit`, `audit_legacy_migration`, math3d-next's evaluator and the join; math3d-react's output doesn't change. `audit_legacy_evaluation` exits non-zero when a field either evaluator emits is neither paired nor in `KNOWN_UNPAIRED` (`legacy_audit/evaluation.py`).
+Each evaluator takes about 15 minutes, and the join about 4. After a translator fix, re-run `export_legacy_audit`, `audit_legacy_migration`, math3d-next's evaluator and the join; math3d-react's output doesn't change. After writing the report, `audit_legacy_evaluation` exits non-zero if a field either evaluator emits has no pairing and no known reason to be unpaired: add it to the expected table or to `KNOWN_UNPAIRED` (`legacy_audit/evaluation.py`).
+
+The command writes each report's tables; its Findings section (hypotheses confirmed or refuted, what the clusters are) is written by hand.
 
 Accepted differences go in `legacy_audit/pass2_allowlist.py`, each citing app code or an owner decision. Before trusting a change to either fingerprint, run math3d-react's conformance check (`client/src/legacyAudit/README.md`).
 

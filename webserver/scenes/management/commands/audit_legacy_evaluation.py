@@ -16,7 +16,9 @@ git) and report.md (aggregates only). Exits non-zero when a field either
 evaluator emitted is neither paired nor known to be unpaired.
 """
 
+import contextlib
 import datetime
+import itertools
 import json
 from pathlib import Path
 
@@ -66,6 +68,21 @@ def _pair_record(p: Pair) -> dict:
     }
 
 
+def _scene_record(lines: tuple[str, ...], tol: Tolerance, agg: Aggregate) -> dict:
+    legacy, rehydrated, react, nxt, pass1 = map(json.loads, lines)
+    if pass1["key"] != legacy["key"]:
+        raise CommandError(f"--pass1 is out of step with --legacy at {legacy['key']}")
+    result = evaluate_scene(legacy, rehydrated, react, nxt, tol, ALLOWLIST)
+    verdict = agg.add(result, pass1["verdict"])
+    return {
+        "key": result.key,
+        "times_accessed": result.times_accessed,
+        "pass1_verdict": pass1["verdict"],
+        **verdict,
+        "pairs": [_pair_record(p) for p in result.pairs if p.outcome != "equal"],
+    }
+
+
 class Command(BaseCommand):
     help = "Compare math3d-react's and math3d-next's evaluations of every legacy scene."
 
@@ -84,40 +101,26 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        bad_meta = [m for m in options["meta"] if "=" not in m]
+        if bad_meta:
+            raise CommandError(f"--meta takes key=value: {bad_meta}")
         tol = Tolerance(options["rtol"], options["atol"], options["loose_rtol"])
         out_dir = Path(options["out_dir"])
         out_dir.mkdir(parents=True, exist_ok=True)
         agg = Aggregate()
-        paths = [options[n] for n in ("legacy", "rehydrated", "react", "next", "pass1")]
-        files = [open(p) for p in paths]  # noqa: SIM115 — closed below
-        try:
-            with open(out_dir / "findings.jsonl", "w") as findings:
-                for count, lines in enumerate(tqdm.tqdm(zip(*files, strict=True))):
-                    if options["limit"] is not None and count >= options["limit"]:
-                        break
-                    legacy, rehydrated, react, nxt, pass1 = map(json.loads, lines)
-                    assert pass1["key"] == legacy["key"], (
-                        "pass-1 findings are out of step"
+        names = ("legacy", "rehydrated", "react", "next", "pass1")
+        with contextlib.ExitStack() as stack:
+            files = [stack.enter_context(open(options[n])) for n in names]
+            findings = stack.enter_context(open(out_dir / "findings.jsonl", "w"))
+            for count, lines in enumerate(tqdm.tqdm(itertools.zip_longest(*files))):
+                if options["limit"] is not None and count >= options["limit"]:
+                    break
+                if None in lines:
+                    raise CommandError(
+                        f"{', '.join(f'--{n}' for n in names)} must have one line "
+                        "per scene, in the same order"
                     )
-                    result = evaluate_scene(
-                        legacy, rehydrated, react, nxt, tol, ALLOWLIST
-                    )
-                    verdict = agg.add(result, pass1["verdict"])
-                    record = {
-                        "key": result.key,
-                        "times_accessed": result.times_accessed,
-                        "pass1_verdict": pass1["verdict"],
-                        **verdict,
-                        "pairs": [
-                            _pair_record(p)
-                            for p in result.pairs
-                            if p.outcome != "equal"
-                        ],
-                    }
-                    findings.write(json.dumps(record) + "\n")
-        finally:
-            for f in files:
-                f.close()
+                findings.write(json.dumps(_scene_record(lines, tol, agg)) + "\n")
 
         meta = {
             "date": datetime.date.today().isoformat(),

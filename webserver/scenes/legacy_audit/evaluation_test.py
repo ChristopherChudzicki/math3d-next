@@ -6,6 +6,7 @@ from scenes.legacy_audit.evaluation import (
     PairSpec,
     Side,
     Tolerance,
+    _side,
     compare,
     label,
     mark_roots,
@@ -51,10 +52,17 @@ def spec(rule="value", **kwargs):
         ({"bool": True}, 1, "differ"),
         ({"other": "Unit"}, {"other": "Unit"}, "equal"),
         ({"other": "Unit"}, 1, "unsure"),
+        # Non-finite entries in the same places; the norm rule for the rest.
+        ([1e6, NAN, 1e-3], [1e6, NAN, 1.1e-3], "equal"),
+        ([1.0, NAN], [1.0, 2.0], "differ"),
     ],
 )
 def test_compare_values(a, b, outcome):
     assert compare(a, b, TOL).outcome == outcome
+
+
+def test_an_equal_pair_within_atol_has_no_error():
+    assert compare(0.0, 5e-10, TOL).error == 0
 
 
 def test_a_difference_within_the_loose_band_is_still_differ():
@@ -62,15 +70,22 @@ def test_a_difference_within_the_loose_band_is_still_differ():
     assert (v.outcome, v.loose) == ("differ", True)
 
 
+VEC3_ONLY = fn(ERR, ERR, vec={"2": [ERR, ERR], "3": [1, 2]})
+
+
 @pytest.mark.parametrize(
     ("a", "b", "outcome", "cause"),
     [
         (fn(1, 2), fn(1, 2, arity=2), "unsure", "arity"),
         ({"fn": 1, "at": None}, {"fn": 1, "at": None}, "unsure", "depth"),
+        ({"fn": 6, "at": None}, {"fn": 6, "at": None}, "unsure", "unsampled"),
         (fn(ERR, 2), fn(ERR, 2), "equal", None),
         (fn(ERR, 2), fn(1, 2), "differ", None),
         (fn(ERR, ERR), fn(ERR, ERR), "unsure", "no_evidence"),
+        (fn(1, 2), fn(ERR, ERR), "differ", None),
         (fn(1, NAN, NAN), fn(1, NAN, NAN), "unsure", "sparse"),
+        # A function of a 3-vector: only its vec-3 points are finite.
+        (VEC3_ONLY, VEC3_ONLY, "equal", None),
     ],
 )
 def test_compare_functions(a, b, outcome, cause):
@@ -88,12 +103,20 @@ def test_vector_retries_are_compared_when_both_sides_have_them():
     ("a", "b", "expected"),
     [
         ([1.0, 2.0], [-1.0, -2.0], "sign"),
+        ([1.0, 2.0], [1.0, 2.0002], "loose"),
         ([1.0, 2.0], [3.0, 6.0], "scale"),
+        # One pair of numbers always has a constant ratio.
+        (2.0, 6.0, "other"),
         ([1.0, 2.0], [0, 0], "zero_vs_value"),
         ([1.0, 2.0, 3.0], [3.0, 1.0, 2.0], "permuted"),
         (fn({"re": 0, "im": 2}, 1), fn(NAN, 1), "complex_vs_nan"),
         (fn({"re": 2, "im": -1}, 1), fn(2, 1), "complex_vs_real"),
+        # A complex value with a round-off imaginary part equals its real part.
+        (fn({"re": 2, "im": 1e-17}, {"re": 0, "im": 1}), fn(2, NAN), "complex_vs_nan"),
         (fn(1, 2), fn(1, ERR), "value_vs_error"),
+        (fn(NAN, 1), fn(ERR, 1), "nan_vs_error"),
+        ([1.0, 2.0], [1.0, NAN], "value_vs_nan"),
+        ([fn(1), 2.0], [NAN, 2.0], "other"),
         ([1.0, 2.0], [1.0, 9.0], "other"),
     ],
 )
@@ -103,25 +126,45 @@ def test_signature(a, b, expected):
     assert signature(a, b, v, TOL) == expected
 
 
+NO_POINTS = "no finite value at any sample point"
+
+
 @pytest.mark.parametrize(
-    ("legacy", "nxt", "outcome"),
+    ("legacy", "nxt", "outcome", "detail"),
     [
-        (Side(OK, 1), Side("eval", message="Undefined function min"), "regression"),
-        (Side("parse", message="x"), Side(OK, 1), "next_only_ok"),
-        (Side("parse", message="x"), Side("eval", message="y"), "both_error"),
+        (
+            Side(OK, 1),
+            Side("eval", message="Undefined function min"),
+            "regression",
+            "eval: Undefined function min",
+        ),
+        (Side("parse", message="x"), Side(OK, 1), "next_only_ok", "parse: x"),
+        (
+            Side("parse", message="x"),
+            Side("eval", message="y"),
+            "both_error",
+            "eval: y",
+        ),
         # A function finite at no point counts as an error opposite an error.
-        (Side(OK, fn(ERR, ERR)), Side("eval", message="y"), "both_error"),
+        (Side(OK, fn(ERR, ERR)), Side("eval", message="y"), "both_error", "eval: y"),
+        (
+            Side("parse", message="x"),
+            Side(OK, fn(ERR, ERR)),
+            "both_error",
+            f"eval: {NO_POINTS}",
+        ),
+        # A function without sample points isn't evidence of anything.
+        (
+            Side(OK, {"fn": 6, "at": None}),
+            Side("eval", message="y"),
+            "regression",
+            "eval: y",
+        ),
     ],
 )
-def test_status_table(legacy, nxt, outcome):
-    assert label(spec(), legacy, nxt, TOL).outcome == outcome
-
-
-def test_a_regression_names_the_stage_and_a_template_of_the_message():
-    pair = label(
-        spec(), Side(OK, 1), Side("eval", message="Undefined function min"), TOL
-    )
-    assert pair.detail == "eval: Undefined function min"
+def test_status_table(legacy, nxt, outcome, detail):
+    pair = label(spec(), legacy, nxt, TOL)
+    assert (pair.outcome, pair.detail) == (outcome, detail)
 
 
 def test_a_legacy_range_array_equals_a_next_domain_function_constant_at_it():
@@ -139,10 +182,35 @@ def test_calculated_visibility_compares_by_truthiness():
     assert pair.outcome == "equal"
 
 
-def test_template_keeps_function_names_and_hides_user_names_and_numbers():
-    assert template("Undefined function min") == "Undefined function min"
-    assert template("Undefined symbol Revenue") == "Undefined symbol X"
-    assert template("Index 3 out of range") == "Index N out of range"
+@pytest.mark.parametrize(
+    ("message", "expected"),
+    [
+        ("Undefined function min", "Undefined function min"),
+        ("Undefined function log10", "Undefined function log10"),
+        ("Undefined symbol Revenue", "Undefined symbol X"),
+        ("undefined symbols θ_x, φ", "undefined symbols X"),
+        (
+            "Name Revenue has been assigned multiple times.",
+            "Name X has been assigned multiple times.",
+        ),
+        ("x_{abc} is not a function", "X is not a function"),
+        ("Undefined symbol $secret", "Undefined symbol X"),
+        (
+            "'q' is not a function; its value is:\n  i",
+            "'…' is not a function; its value is: …",
+        ),
+        (
+            'Syntax error in part "12\'52.2"E16°42" (char 3)',
+            "Syntax error in part '…'EN°N\" (char N)",
+        ),
+        ("Can't evaluate 'x'", "Can't evaluate '…'"),
+        ("Index 3 out of range", "Index N out of range"),
+    ],
+)
+def test_template_keeps_function_names_and_hides_user_names_and_numbers(
+    message, expected
+):
+    assert template(message) == expected
 
 
 # --------------------------------------------------------------------------- #
@@ -231,6 +299,11 @@ def test_a_camera_without_use_computed_is_compared_with_numbers_from_evaluated_s
     assert (position.rule, position.expected) == ("camera", [1.0, 4.0, 6.0])
 
 
+def test_an_element_past_the_end_is_an_eval_error():
+    record = {"status": OK, "value": [1], "elements": [{"status": OK}]}
+    assert _side(record, 1, per_element_status=True).status == "eval"
+
+
 def test_reports_a_field_neither_paired_nor_known_as_unaccounted():
     point = {"type": "POINT", "coords": "\\left[1,2,3\\right]"}
     rehydrated = {"mathGraphics": {"p": point}, "mathSymbols": {}}
@@ -258,7 +331,7 @@ def test_a_pair_downstream_of_a_bad_dependency_is_not_a_root():
     assert [p.root for p in pairs] == [True, False]
 
 
-def test_fields_in_a_dependency_cycle_are_one_root():
+def test_fields_in_a_dependency_cycle_dont_make_each_other_downstream():
     pairs = [_bad_pair("a"), _bad_pair("b")]
     items = {
         "a": {"value": field(deps=["b-value"])},

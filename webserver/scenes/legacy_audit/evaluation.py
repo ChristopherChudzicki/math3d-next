@@ -11,17 +11,23 @@ from __future__ import annotations
 import json
 import math
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from scenes.legacy_audit import expected
+
+if TYPE_CHECKING:
+    from scenes.legacy_audit.pass2_allowlist import Entry
 
 MISSING = object()
 OK = "ok"
 # Outcomes that make a field "bad" for root finding.
 BAD = frozenset({"differ", "regression", "both_error"})
 SEVERITY_RANK = {"none": 0, "editor": 1, "render": 2}
+# packages/legacy-audit/sample_points.json has points for arities 0 to 5.
+MAX_SAMPLED_ARITY = 5
 
 # Fields one evaluator emits that have no counterpart to compare.
 KNOWN_UNPAIRED: dict[tuple[str, str], str] = {
@@ -50,7 +56,7 @@ KNOWN_UNPAIRED: dict[tuple[str, str], str] = {
     ("next", "duration"): "constant",
     ("next", "useRelative"): "derived from useComputed",
     ("next", "updateOnDrag"): "derived from useComputed",
-    # An axis's divisions are a constant; a grid's pair with its own.
+    # `AXIS.divisions` is a constant; `GRID.divisions` is paired.
     ("next", "AXIS.divisions"): "constant",
     # math3d-react evaluates a camera's computed position and look-at but
     # uses them only with useComputed (react:components/MathBox/MathBoxComponents.js:368-433).
@@ -154,6 +160,11 @@ def evidence(fp: Any) -> bool:
     return False
 
 
+def no_evidence(fp: Any) -> bool:
+    """A sampled function with a finite value at no point."""
+    return _is_fn(fp) and fp["at"] is not None and not evidence(fp)
+
+
 def _norm_rule(
     a: list[tuple[float, float]], b: list[tuple[float, float]], tol: Tolerance
 ) -> Verdict:
@@ -162,7 +173,8 @@ def _norm_rule(
     scale = max(
         math.hypot(*(c for x in a for c in x)), math.hypot(*(c for y in b for c in y))
     )
-    error = d / scale if scale else d
+    # The error beyond atol, so that every `equal` pair has error <= rtol.
+    error = max(0.0, d - tol.atol) / scale if scale else 0.0
     if d <= tol.atol + tol.rtol * scale:
         return Verdict(error=error, compared=True)
     return Verdict(
@@ -185,12 +197,24 @@ def _compare_points(a: list, b: list, tol: Tolerance) -> Verdict:
     return v
 
 
+def _point_sets(fp: dict) -> list[list]:
+    """The scalar points, then each vector retry's."""
+    vec = fp.get("vec") or {}
+    return [fp["at"], *(vec[length] for length in ("2", "3") if length in vec)]
+
+
+def _dense(points: list) -> bool:
+    return 2 * sum(1 for x in points if evidence(x)) >= len(points)
+
+
 def _compare_functions(a: dict, b: dict, tol: Tolerance) -> Verdict:
     if a["fn"] != b["fn"]:
         return Verdict("unsure", "arity")
     if a["at"] is None or b["at"] is None:
-        return Verdict("unsure", "depth")
-    if not evidence(a) or not evidence(b):
+        return Verdict(
+            "unsure", "unsampled" if a["fn"] > MAX_SAMPLED_ARITY else "depth"
+        )
+    if not evidence(a) and not evidence(b):
         return Verdict("unsure", "no_evidence")
     if a == b:
         v = Verdict(compared=True)
@@ -199,13 +223,11 @@ def _compare_functions(a: dict, b: dict, tol: Tolerance) -> Verdict:
         if a.get("vec") and b.get("vec"):
             for length in ("2", "3"):
                 v.merge(_compare_points(a["vec"][length], b["vec"][length], tol))
-    if v.outcome == "equal":
-        for side in (a, b):
-            points = side["at"] + [
-                x for xs in (side.get("vec") or {}).values() for x in xs
-            ]
-            if 2 * sum(1 for x in points if evidence(x)) < len(points):
-                return Verdict("unsure", "sparse", v.error, v.compared)
+    # A function of a 3-vector errors at every scalar point, so each point set
+    # is judged on its own.
+    dense = any(_dense(x) and _dense(y) for x, y in zip(_point_sets(a), _point_sets(b)))
+    if v.outcome == "equal" and not dense:
+        return Verdict("unsure", "sparse", v.error, v.compared)
     return v
 
 
@@ -225,10 +247,16 @@ def compare(a: Any, b: Any, tol: Tolerance) -> Verdict:
     if isinstance(a, list) and isinstance(b, list):
         if len(a) != len(b):
             return Verdict("differ", loose=False)
-        flat_a = [_as_complex(x) for x in a]
-        flat_b = [_as_complex(x) for x in b]
-        if all(x is not None for x in flat_a + flat_b):
-            return _norm_rule(flat_a, flat_b, tol)  # type: ignore[arg-type]
+        # Non-finite entries in the same places, and the norm rule for the rest.
+        finite = [(_as_complex(x), _as_complex(y)) for x, y in zip(a, b)]
+        if all(
+            (cx is not None and cy is not None) or (_nonfinite(x) and _nonfinite(y))
+            for (cx, cy), x, y in zip(finite, a, b)
+        ):
+            kept = [(cx, cy) for cx, cy in finite if cx is not None]
+            if not kept:
+                return Verdict()
+            return _norm_rule([x for x, _ in kept], [y for _, y in kept], tol)  # type: ignore[misc]
         v = Verdict()
         for x, y in zip(a, b, strict=True):
             v.merge(compare(x, y, tol))
@@ -269,6 +297,8 @@ def signature(a: Any, b: Any, v: Verdict, tol: Tolerance) -> str:
     # Number(...) of a complex is NaN).
     opposite = set()
     for x, y in leaves:
+        if compare(x, y, tol).outcome != "differ":
+            continue
         for c, other in ((_as_complex(x), y), (_as_complex(y), x)):
             if c is not None and c[1] != 0:
                 if _nonfinite(other):
@@ -281,6 +311,12 @@ def signature(a: Any, b: Any, v: Verdict, tol: Tolerance) -> str:
         return (
             "nan_vs_error" if all(_nonfinite(e) for e in errors) else "value_vs_error"
         )
+    if any(
+        (_nonfinite(x) and _as_complex(y) is not None)
+        or (_nonfinite(y) and _as_complex(x) is not None)
+        for x, y in leaves
+    ):
+        return "value_vs_nan"
     nums = [(x, y) for x, y in leaves if _is_number(x) and _is_number(y)]
     if nums and len(nums) == len(leaves):
         if all(x == 0 for x, _ in nums) != all(y == 0 for _, y in nums):
@@ -291,9 +327,13 @@ def signature(a: Any, b: Any, v: Verdict, tol: Tolerance) -> str:
                 for x, y in nums
             ):
                 return "sign"
-            ratios = {round(y / x, 6) for x, y in nums if abs(x) > tol.atol}
-            if len(ratios) == 1 and all(
-                abs(x) > tol.atol or abs(y) <= tol.atol for x, y in nums
+            # One pair of numbers always has a constant ratio.
+            nonzero = [(x, y) for x, y in nums if abs(x) > tol.atol]
+            ratios = {round(y / x, 6) for x, y in nonzero}
+            if (
+                len(nonzero) >= 2
+                and len(ratios) == 1
+                and all(abs(x) > tol.atol or abs(y) <= tol.atol for x, y in nums)
             ):
                 return "scale"
         xs, ys = sorted(x for x, _ in nums), sorted(y for _, y in nums)
@@ -351,11 +391,20 @@ def truthy(fp: Any) -> bool | None:
 _FUNCTION_NAMES = frozenset(
     json.loads((Path(__file__).parent / "fixtures" / "function_names.json").read_text())
 )
+_IDENT = r"(?:[^\W\d]|\$)[\w$]*"
+_NUMBER = re.compile(r"\d+(?:\.\d+)?(?:e[+-]?\d+)?")
+_TOKEN = re.compile(rf"{_IDENT}|{_NUMBER.pattern}")
 _NAMES_AFTER = re.compile(
     r"(Undefined (?:function|symbols?)|Depends on undefined symbol\(s\)|"
     r"Duplicate symbol name|Error evaluating|missing in provided namespace|"
     r"in function|Function|assigned multiple times:?|cyclic dependencies:?)\s+"
-    r"((?:[A-Za-z_][A-Za-z0-9_]*)(?:\s*,\s*[A-Za-z_][A-Za-z0-9_]*)*)"
+    rf"({_IDENT}(?:\s*,\s*{_IDENT})*)",
+    re.IGNORECASE,
+)
+_NAME_BEFORE = re.compile(
+    r"(?<!\S)\S+(?=\s+(?:has been assigned|contains a unit|"
+    r"has cyclic dependencies|is not a function))",
+    re.IGNORECASE,
 )
 
 
@@ -364,8 +413,12 @@ def template(message: str | None) -> str:
     names that aren't functions of either app's mathjs."""
     if not message:
         return ""
-    text = re.sub(r"'[^']*'|\"[^\"]*\"|`[^`]*`", "'…'", message)
-    text = re.sub(r"\d+(?:\.\d+)?(?:e[+-]?\d+)?", "N", text)
+    # An apostrophe inside a word ("doesn't") doesn't open a quote.
+    text = re.sub(r"(?<!\w)'[^']*'|\"[^\"]*\"|`[^`]*`", "'…'", message)
+    # Digits in a name too (E16 in a coordinate), unless it's a function's (log10).
+    text = _TOKEN.sub(
+        lambda m: m[0] if m[0] in _FUNCTION_NAMES else _NUMBER.sub("N", m[0]), text
+    )
 
     def names(m: re.Match) -> str:
         kept = [
@@ -374,8 +427,16 @@ def template(message: str | None) -> str:
         return f"{m.group(1)} {', '.join(dict.fromkeys(kept))}"
 
     text = _NAMES_AFTER.sub(names, text)
+    text = _NAME_BEFORE.sub(
+        lambda m: m[0] if m[0] in _FUNCTION_NAMES or m[0] == "'…'" else "X", text
+    )
+    text = re.sub(r"(its value is:).*", r"\1 …", text, flags=re.DOTALL)
     # Anything left that looks like LaTeX or an expression is user text.
-    text = re.sub(r"\\[A-Za-z]+|[A-Za-z_]\w*\([^)]*\)", "…", text)
+    text = re.sub(
+        r"\\[A-Za-z]+|[^\W\d]\w*\([^)]*\)",
+        lambda m: m[0] if m[0] == "symbol(s)" else "…",
+        text,
+    )
     return text[:120]
 
 
@@ -477,11 +538,11 @@ def _camera_pairs(
             PairSpec(
                 item_id,
                 "CAMERA",
-                exp.source.split(",")[0],
+                _legacy_field(exp.source),
                 None,
                 exp.path,
                 None,
-                "render",
+                exp.severity,
                 "camera",
                 numbers,
             )
@@ -609,18 +670,21 @@ class Pair:
     allowlisted: str | None = None
 
 
-def _side(record: dict, element: int | None, elements_from: str) -> Side:
-    """One field, or one element of it, from an evaluator's output."""
+def _side(record: dict, element: int | None, per_element_status: bool) -> Side:
+    """One field, or one element of it, from an evaluator's output. 2a records
+    each element's status separately; 2b has only the field's."""
     status, message = record["status"], record.get("message")
     value = record.get("value", MISSING)
     if element is None:
         return Side(status, value, message)
-    if elements_from == "elements" and "elements" in record:
-        el = (
-            record["elements"][element]
-            if element < len(record["elements"])
-            else {"status": status}
-        )
+    if per_element_status and "elements" in record:
+        if element >= len(record["elements"]):
+            if status != OK:
+                return Side(status, MISSING, message)
+            return Side("eval", MISSING, "no such element")
+        el = record["elements"][element]
+        # An element can be ok without a value when a sibling element failed
+        # and the field has no value as a whole; label() calls it `sibling`.
         el_value = (
             value[element]
             if isinstance(value, list) and element < len(value)
@@ -662,10 +726,10 @@ def label(spec: PairSpec, legacy: Side, nxt: Side, tol: Tolerance) -> Pair:
     """Apply the status table, then compare values (spec, "Comparison")."""
     l_ok, n_ok = legacy.status == OK, nxt.status == OK
     # No evidence: a function finite at no point is an error opposite an error.
-    if l_ok and not n_ok and _is_fn(legacy.value) and not evidence(legacy.value):
+    if l_ok and not n_ok and no_evidence(legacy.value):
         l_ok = False
         legacy = Side("eval", legacy.value, "no finite value at any sample point")
-    if n_ok and not l_ok and _is_fn(nxt.value) and not evidence(nxt.value):
+    if n_ok and not l_ok and no_evidence(nxt.value):
         n_ok = False
         nxt = Side("eval", nxt.value, "no finite value at any sample point")
     if l_ok and n_ok:
@@ -776,7 +840,7 @@ def evaluate_scene(
     react_eval: dict,
     next_eval: dict,
     tol: Tolerance,
-    allowlist: list | None = None,
+    allowlist: Sequence[Entry] = (),
 ) -> SceneResult:
     """Pair, label and find roots for one scene. The four inputs are one line
     each of legacy.jsonl, rehydrated.jsonl, eval_react.jsonl and
@@ -805,19 +869,19 @@ def evaluate_scene(
             legacy = Side(OK, spec.expected)
         else:
             legacy_record = react_items[spec.item_id][spec.legacy_field]
-            legacy = _side(legacy_record, spec.legacy_element, "value")
-        nxt = _side(next_record, spec.next_element, "elements")
+            legacy = _side(legacy_record, spec.legacy_element, False)
+        nxt = _side(next_record, spec.next_element, True)
         pair = label(spec, legacy, nxt, tol)
         pair.features = next_record.get("features", [])
         result.pairs.append(pair)
     mark_roots(result.pairs, react_items, next_items)
     for pair in result.pairs:
         if pair.root:
-            pair.allowlisted = allowlisted(pair, allowlist or [])
+            pair.allowlisted = allowlisted(pair, allowlist)
     return result
 
 
-def allowlisted(pair: Pair, allowlist: list) -> str | None:
+def allowlisted(pair: Pair, allowlist: Sequence[Entry]) -> str | None:
     for entry in allowlist:
         if entry.matches(pair):
             return entry.reason

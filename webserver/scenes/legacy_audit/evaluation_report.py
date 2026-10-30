@@ -11,8 +11,15 @@ import math
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 
-from scenes.legacy_audit.evaluation import BAD, SceneResult, cluster_key, shape
-from scenes.legacy_audit.report import Totals, _cell, _pct, concentration
+from scenes.legacy_audit.evaluation import (
+    BAD,
+    MISSING,
+    SEVERITY_RANK,
+    SceneResult,
+    cluster_key,
+    shape,
+)
+from scenes.legacy_audit.report import Totals, _cell, _pct, concentration, fix_curve
 
 EXAMPLES_PER_CLUSTER = 5
 
@@ -58,11 +65,10 @@ class Aggregate:
         w = r.times_accessed
         self.all.add(w)
         self.weights.append(w)
-        if r.excluded or pass1_verdict == "legacy_broken":
-            reason = r.excluded or "legacy_broken (pass 1)"
-            self.excluded[reason] += 1
+        if r.excluded:
+            self.excluded[r.excluded] += 1
             self.excluded_totals.add(w)
-            return {"verdict": "excluded", "reason": reason}
+            return {"verdict": "excluded", "reason": r.excluded}
         render: set[str] = set()
         everything: set[str] = set()
         counted: set[str] = set()
@@ -99,8 +105,10 @@ class Aggregate:
                 continue
             self.cluster_pairs[cid] += 1
             counted.add(cid)
-            self.cluster_severity[cid] = _max_severity(
-                self.cluster_severity.get(cid), p.spec.severity
+            self.cluster_severity[cid] = max(
+                self.cluster_severity.get(cid, "none"),
+                p.spec.severity,
+                key=SEVERITY_RANK.__getitem__,
             )
             self.cluster_shapes[cid][
                 (_shape(p.legacy.value), _shape(p.next.value))
@@ -147,14 +155,7 @@ class Aggregate:
         }
 
 
-def _max_severity(a: str | None, b: str) -> str:
-    rank = {None: -1, "none": 0, "editor": 1, "render": 2}
-    return b if rank[b] > rank[a] else a  # type: ignore[return-value]
-
-
 def _shape(value: object) -> str:
-    from scenes.legacy_audit.evaluation import MISSING
-
     return "—" if value is MISSING else shape(value)
 
 
@@ -174,25 +175,10 @@ def _decade_order(label: str) -> float:
     return float(label[2:])
 
 
-def fix_curve(agg: Aggregate, k_max: int = 12) -> list[tuple[str, float, float]]:
-    """Clean share after fixing render clusters 1..k, ranked by weight."""
-    ranked = [
-        cid
-        for cid, _ in agg.cluster_weight.most_common()
-        if agg.cluster_severity.get(cid) == "render" and "|both_error|" not in cid
-    ][:k_max]
-    total_n = len(agg.scene_clusters)
-    total_w = sum(w for w, _ in agg.scene_clusters)
-    curve = []
-    fixed: set[str] = set()
-    for cid in ranked:
-        fixed.add(cid)
-        n = sum(1 for _, cs in agg.scene_clusters if cs <= fixed)
-        w = sum(w for w, cs in agg.scene_clusters if cs <= fixed)
-        curve.append(
-            (cid, n / total_n if total_n else 0, w / total_w if total_w else 0)
-        )
-    return curve
+def fixable_curve(agg: Aggregate) -> list[tuple[str, float, float]]:
+    """The fix curve over clusters that make a scene unclean: `both_error`
+    is invalid source, not a fixable cause."""
+    return fix_curve(agg, keep=lambda cid: "|both_error|" not in cid)
 
 
 def _cluster_table(agg: Aggregate, keep, limit: int) -> list[str]:
@@ -266,7 +252,7 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
         ),
         "",
         "Weight concentration: "
-        + ", ".join(f"top {n}: {share}" for n, share in concentration(agg))  # type: ignore[arg-type]
+        + ", ".join(f"top {n}: {share}" for n, share in concentration(agg.weights))
         + ".",
         "",
         "## Pair outcomes",
@@ -282,8 +268,9 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
         "## Root causes, by weighted impact",
         "",
         (
-            "Roots only: a pair whose dependencies are all `equal`. Shapes are legacy → next; "
-            "features are math3d-next's."
+            "Roots only: a `differ`, `regression` or `both_error` pair none of whose transitive "
+            "dependencies, outside its own cycle, failed or is in such a pair. "
+            "Shapes are legacy → next; features are math3d-next's."
         ),
         "",
         *_cluster_table(agg, lambda outcome: outcome != "both_error", 50),
@@ -300,7 +287,10 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
         "",
         "| Fix through | Scenes clean | Weighted clean |",
         "|---|---|---|",
-        *(f"| `{_cell(cid)}` | {n:.2%} | {w:.2%} |" for cid, n, w in fix_curve(agg)),
+        *(
+            f"| `{_cell(cid)}` | {n:.2%} | {w:.2%} |"
+            for cid, n, w in fixable_curve(agg)
+        ),
         "",
         "## Feature lift",
         "",
@@ -323,7 +313,10 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
         "",
         "## Relative error per compared pair",
         "",
-        "Largest relative error among the numbers each `equal` or `differ` pair compares, by decade.",
+        (
+            "Largest relative error beyond atol among the numbers each `equal` or `differ` pair "
+            "compares, by decade. Every `equal` pair is at or below rtol."
+        ),
         "",
         "| Error | Pairs |",
         "|---|---|",
