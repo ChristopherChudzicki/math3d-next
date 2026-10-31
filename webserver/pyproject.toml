@@ -12,7 +12,7 @@ dependencies = [
 	"gunicorn>=23.0.0,<24.0.0",
 	"django-cors-headers>=4.9.0,<5.0.0",
 	"faker>=24.14.1,<25.0.0",
-	"psycopg>=3.2.10",
+	"psycopg>=3.3.6",
 	"whitenoise>=6.11.0",
 	"django-allauth[socialaccount]>=65.15,<66.0",
 	"django-ninja>=1.7.1,<2.0",
@@ -36,7 +36,7 @@ dev = [
 	# The runtime `psycopg` loads libpq from the system, which a bare macOS host
 	# and the CI runner lack. The binary wheel bundles its own. The Dockerfile
 	# syncs all groups, so the dev image and CI never exercise the system libpq.
-	"psycopg[binary]>=3.2.10",
+	"psycopg[binary]>=3.3.6",
 ]
 
 [build-system]
