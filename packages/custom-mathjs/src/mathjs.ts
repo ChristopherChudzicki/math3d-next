@@ -198,9 +198,10 @@ mathjs.import(
     root: mathjs.nthRoot,
     arccos: mathjs.acos,
     arcsin: mathjs.asin,
-    arctan: (x: number, y: number) => {
-      if (y === undefined) {
-        return mathjs.atan(x);
+    // arctan(y, x) generalizes arctan(y / x), as atan2(y, x) does.
+    arctan: (y: number, x?: number) => {
+      if (x === undefined) {
+        return mathjs.atan(y);
       }
       return mathjs.atan2(y, x);
     },

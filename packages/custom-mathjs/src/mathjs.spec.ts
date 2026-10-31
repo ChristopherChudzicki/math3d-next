@@ -18,6 +18,11 @@ describe("mathjs instance", () => {
     expect(math.acot).toBeDefined();
   });
 
+  it("takes y first in 2-argument arctan, like atan2(y, x)", () => {
+    expect(math.evaluate("arctan(1, -2)")).toBeCloseTo(Math.atan2(1, -2));
+    expect(math.evaluate("arctan(1)")).toBeCloseTo(Math.PI / 4);
+  });
+
   it("defines hyperbolic trig functions", () => {
     expect(math.sinh).toBeDefined();
     expect(math.cosh).toBeDefined();
