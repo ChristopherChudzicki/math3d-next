@@ -1223,7 +1223,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@iconify/react@npm:^6.0.2":
+"@iconify/react@npm:^6.0.3":
   version: 6.0.3
   resolution: "@iconify/react@npm:6.0.3"
   dependencies:
@@ -4328,7 +4328,7 @@ __metadata:
     "@faker-js/faker": "npm:^10.6.0"
     "@hookform/resolvers": "npm:^5.9.2"
     "@iconify-icons/lucide": "npm:^1.2.136"
-    "@iconify/react": "npm:^6.0.2"
+    "@iconify/react": "npm:^6.0.3"
     "@julr/vite-plugin-validate-env": "npm:^2.2.2"
     "@math3d/api": "workspace:^"
     "@math3d/custom-mathjs": "workspace:^"

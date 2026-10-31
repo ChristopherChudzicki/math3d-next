@@ -33,7 +33,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.9.2",
     "@iconify-icons/lucide": "^1.2.136",
-    "@iconify/react": "^6.0.2",
+    "@iconify/react": "^6.0.3",
     "@math3d/api": "workspace:^",
     "@math3d/custom-mathjs": "workspace:^",
     "@math3d/mathitem-configs": "workspace:^",
