@@ -34,4 +34,29 @@ class Entry:
         )
 
 
-ALLOWLIST: list[Entry] = []
+# Fields math3d-next validates with realFunc (next:validators/src/validators.ts),
+# from next:mathitem-configs/src/items.
+_REAL_FUNC_FIELDS = [
+    ("PARAMETRIC_CURVE", "expr"),
+    ("PARAMETRIC_SURFACE", "expr"),
+    ("PARAMETRIC_SURFACE", "colorExpr"),
+    ("EXPLICIT_SURFACE", "expr"),
+    ("EXPLICIT_SURFACE", "colorExpr"),
+    ("EXPLICIT_SURFACE_POLAR", "expr"),
+    ("EXPLICIT_SURFACE_POLAR", "colorExpr"),
+    ("IMPLICIT_SURFACE", "lhs"),
+    ("IMPLICIT_SURFACE", "rhs"),
+    ("VECTOR_FIELD", "expr"),
+]
+
+ALLOWLIST: list[Entry] = [
+    Entry(
+        "differ",
+        "complex_vs_nan",
+        "realFunc's Number(...) makes a complex output NaN, which isn't drawn; "
+        "owner decision 2026-11-01 (tk-math3d-next-realfunc-turns-a-complex-output-into-0f7f11)",
+        item_type,
+        next_field,
+    )
+    for item_type, next_field in _REAL_FUNC_FIELDS
+]
