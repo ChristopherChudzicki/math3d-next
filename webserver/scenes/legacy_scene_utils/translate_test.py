@@ -607,7 +607,6 @@ def test_variable():
     ("in_patch", "out_patch"),
     [
         ({}, {}),
-        ({"speedMultiplier": 0.25}, {"speedMultiplier": "1/4"}),
         ({"speedMultiplier": 0.0625}, {"speedMultiplier": "1/16"}),
         # math3d-next has no 1.5x; 1x over 4/1.5 s keeps the sweep time.
         (

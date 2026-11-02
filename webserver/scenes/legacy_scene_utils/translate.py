@@ -238,7 +238,7 @@ class ItemMigrator:
         if not isinstance(speed, int | float) or not math.isfinite(speed) or speed <= 0:
             self.log.error(f"Unexpected speedMultiplier: {speed}")
             return "1", "4"
-        duration = Fraction(4) / Fraction(str(speed))
+        duration = Fraction(4) / Fraction(speed)
         return "1", f"\\frac{{{duration.numerator}}}{{{duration.denominator}}}"
 
     def vector_field_samples(self, arr: str) -> tuple[str, str, str]:

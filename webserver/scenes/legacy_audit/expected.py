@@ -855,7 +855,7 @@ COVERAGE: dict[str, dict[str, str]] = {
         "max": "range.items.1 (identity)",
         "description": "description (identity)",
         "isAnimating": 'isAnimating (bool -> "true"/"false")',
-        "speedMultiplier": "speedMultiplier, duration (number -> equal next speed with duration 4; else speed 1 with duration 4/speed, e.g. 1.5 -> 1, \\frac{8}{3})",
+        "speedMultiplier": "speedMultiplier, duration (number -> math3d-next's equal speed with duration 4; other positive number -> speed 1 with duration 4/speed, e.g. 1.5 -> 1, \\frac{8}{3})",
     },
     "BOOLEAN_VARIABLE": {
         "name": "value.lhs (identity)",
