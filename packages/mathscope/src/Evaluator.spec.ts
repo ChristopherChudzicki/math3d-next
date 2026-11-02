@@ -326,6 +326,42 @@ describe("Evaluator", () => {
       // equal-by-reference.
       expect(a1).toBe(a2);
     });
+
+    it("keeps an assignment in a call argument local to its expression", () => {
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([
+        node("id-t", "t = 5"),
+        node("id-f", "f(s) = s"),
+        node("id-a", "a = f(t = 0)"),
+        node("id-g", "g(u) = u + t"),
+      ]);
+      evaluator.evaluate();
+      evaluator.enqueueAddExpressions([node("id-expr", "g(1)")]);
+      evaluator.evaluate();
+
+      expect(evaluator.results.get("id-a")).toBe(0);
+      expect(evaluator.results.get("id-expr")).toBe(6);
+      expect(evaluator.scope.get("t")).toBe(5);
+    });
+
+    it("keeps an assignment in a function body local to the function", () => {
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([
+        node("id-t", "t = 5"),
+        node("id-f", "f(s) = s"),
+        node("id-h", "h(x) = f(t = 0) + x"),
+        node("id-g", "g(u) = u + t"),
+      ]);
+      evaluator.evaluate();
+      evaluator.enqueueAddExpressions([node("id-h1", "h(1)")]);
+      evaluator.evaluate();
+      evaluator.enqueueAddExpressions([node("id-g1", "g(1)")]);
+      evaluator.evaluate();
+
+      expect(evaluator.results.get("id-h1")).toBe(1);
+      expect(evaluator.results.get("id-g1")).toBe(6);
+      expect(evaluator.scope.get("t")).toBe(5);
+    });
   });
 
   describe("enqueueAddExpressions", () => {

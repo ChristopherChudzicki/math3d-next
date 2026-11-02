@@ -12,7 +12,15 @@ const ASSIGNMENT_TYPES: readonly MathNodeType[] = assignmentTypes;
 
 type AssignmentType = (typeof assignmentTypes)[number];
 
-type Evaluate = (scope?: Map<string, unknown>) => unknown;
+/** A Map-like scope: mathjs reads and writes it, and its `isMap` checks these four methods. */
+interface Scope {
+  get(key: string): unknown;
+  has(key: string): boolean;
+  set(key: string, value: unknown): Scope;
+  keys(): IterableIterator<string>;
+}
+
+type Evaluate = (scope?: Scope) => unknown;
 interface MathNodeBase<T extends MathNodeType = MathNodeType> {
   id: string;
   type: T;
@@ -80,4 +88,5 @@ export type {
   EvaluationScope,
   MathNode,
   Parse,
+  Scope,
 };
