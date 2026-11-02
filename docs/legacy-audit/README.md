@@ -34,13 +34,6 @@ From a worktree, run the worktree's code on the host as shown, not through `dock
 
 After a translator fix, re-run only `export_legacy_audit` and `audit_legacy_migration`. math3d-react's output doesn't change.
 
-The audit accepts the translator's 1-based → 0-based index shift as the `index_shift` normalization. After a change to `legacy_scene_utils/indexing.py`, check the shift against math3d-next's parser. Every mismatch it writes should be a bracket after a LaTeX command (`\sqrt[3]{x}`, `\log[t]`), which the shift leaves alone:
-
-```bash
-IS_DEPLOYMENT=False uv run python manage.py export_index_shift_pairs --legacy $D/legacy.jsonl --out $D/index_shift_pairs.jsonl
-(cd ../packages/legacy-audit && LEGACY_INDEX_SHIFT_IN=$D/index_shift_pairs.jsonl LEGACY_INDEX_SHIFT_OUT=$D/index_shift_mismatches.jsonl yarn test)
-```
-
 ## Manual checks
 
 A blank calculated visibility keeps the author's `visible`, so math3d-next hides items that math3d-react showed on load (usually the `yz`/`zx` grids). `manual_checks.json` lists the affected scenes among the 100 most-viewed, with the items. For each one, open the scene in math3d-react (`math3d.org/<key>`) and in a local math3d-next (`/<key>`), and check that hiding those items looks right. The local backend must run this branch, since it re-translates a legacy scene on every GET, and the frontend must include #1403 (grid `zIndex`). The keys stay in `db-snapshots/`; don't paste them anywhere public.
@@ -50,6 +43,4 @@ A blank calculated visibility keeps the author's `visible`, so math3d-next hides
 - `webserver/scenes/legacy_audit/`
 - `webserver/scenes/management/commands/export_legacy_audit.py`
 - `webserver/scenes/management/commands/audit_legacy_migration.py`
-- `webserver/scenes/management/commands/export_index_shift_pairs.py`
-- `packages/legacy-audit/`
 - math3d-react `client/src/legacyAudit/`

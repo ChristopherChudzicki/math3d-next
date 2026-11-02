@@ -12,6 +12,32 @@ describe("makeMathScope", () => {
     expect(mathScope.results.get("b")).toBeCloseTo(0.5);
   });
 
+  test("a function can index with end", () => {
+    const mathScope = makeMathScope();
+    mathScope.setExpressions([
+      {
+        id: "a",
+        parseable: {
+          type: "assignment",
+          lhs: "a",
+          rhs: "\\left[10,20,30\\right]",
+        },
+      },
+      {
+        id: "f",
+        parseable: {
+          type: "function-assignment",
+          name: "f",
+          params: ["t"],
+          rhs: "a\\left[\\operatorname{end}\\right]+t",
+        },
+      },
+      { id: "b", parseable: "f(1)" },
+    ]);
+    expect(mathScope.errors).toEqual(new Map());
+    expect(mathScope.results.get("b")).toBe(31);
+  });
+
   test("builtin list has: sin, cos, exp, log...", () => {
     /**
      * Builtins list is via a mathjs property that isn't really documented, so

@@ -9,7 +9,6 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from scenes.legacy_scene_utils.default_data import set_defaults
-from scenes.legacy_scene_utils.indexing import shift_indices
 from scenes.legacy_scene_utils.issue_log import Issue, IssueLog
 from scenes.legacy_scene_utils.translate import ItemMigrator, blank_to_empty
 from scenes.models import LegacyScene, Scene, is_invalid_key_error
@@ -70,7 +69,7 @@ def get_axis_scales(
         elif not blank_to_empty(raw):
             scales.append(1.0)
         else:
-            scales.append(shift_indices(raw)[0])
+            scales.append(raw)
     return scales[0], scales[1], scales[2]
 
 

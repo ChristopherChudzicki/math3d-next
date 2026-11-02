@@ -703,17 +703,17 @@ def test_vector():
         (
             {"samples": "S_{1}"},
             {
-                "samples1": "S_{1}\\left[0\\right]",
-                "samples2": "S_{1}\\left[1\\right]",
-                "samples3": "S_{1}\\left[2\\right]",
+                "samples1": "S_{1}\\left[1\\right]",
+                "samples2": "S_{1}\\left[2\\right]",
+                "samples3": "S_{1}\\left[3\\right]",
             },
         ),
         (
             {"samples": "n\\cdot\\left[1,1,1\\right]"},
             {
-                "samples1": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[0\\right]",
-                "samples2": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[1\\right]",
-                "samples3": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[2\\right]",
+                "samples1": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[1\\right]",
+                "samples2": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[2\\right]",
+                "samples3": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[3\\right]",
             },
         ),
     ],
@@ -779,22 +779,6 @@ def test_extra_equals_in_rhs_is_kept_with_a_warning():
     assignment = migrator.function_assignment("_f(x,y)=z=3-x")
     assert assignment.rhs == "z=3-x"
     assert [i.severity for i in migrator.log.issues()] == [Severity.WARNING]
-
-
-def test_indices_shift_to_zero_based_in_expressions_only():
-    item = ItemMigrator().translate_item(
-        {
-            "type": "POINT",
-            "coords": "p\\left[1\\right]",
-            "description": "p\\left[1\\right]",
-        },
-        "some-id",
-    )
-    props = item.model_dump()["properties"]
-    assert (props["coords"], props["description"]) == (
-        "p\\left[0\\right]",
-        "p\\left[1\\right]",
-    )
 
 
 @pytest.mark.parametrize(

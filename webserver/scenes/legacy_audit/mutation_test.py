@@ -139,9 +139,3 @@ def test_injected_translator_bug_is_flagged(monkeypatch, method, mutate, flagged
 
     monkeypatch.setattr(ItemMigrator, method, mutated)
     assert flagged in _mismatches()
-
-
-def test_skipped_index_shift_is_flagged(monkeypatch):
-    assert ("p", "coords") not in _mismatches()
-    monkeypatch.setattr(ItemMigrator, "shift_indices", lambda self, props: props)
-    assert ("p", "coords") in _mismatches()
