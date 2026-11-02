@@ -9,7 +9,6 @@ import type {
   EvaluationScope,
   AnonMathNode,
   Parse,
-  Scope,
 } from "./interfaces";
 import { MathNodeType } from "./interfaces";
 import MathScope, { IdentifiedParseable, OnChangeListener } from "./MathScope";
@@ -22,7 +21,6 @@ export type {
   Parse,
   EvaluationScope,
   AnonMathNode,
-  Scope,
 };
 
 export {

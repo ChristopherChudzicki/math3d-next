@@ -1,6 +1,6 @@
 import math from "@math3d/custom-mathjs";
 import type * as mjs from "mathjs";
-import type { AnonMathNode, Scope } from "@math3d/mathscope";
+import type { AnonMathNode } from "@math3d/mathscope";
 import { EvaluationError } from "@math3d/mathscope";
 import invariant from "tiny-invariant";
 import type { ParseValidate } from "./interfaces";
@@ -58,7 +58,7 @@ const getValidatedEvaluate = (
   validate: ParseValidate = identity,
 ): AnonMathNode["evaluate"] => {
   const compiled = mjsNode.compile();
-  const unvalidatedEvaluate = (scope?: Scope) => {
+  const unvalidatedEvaluate: AnonMathNode["evaluate"] = (scope) => {
     const rawResult = compiled.evaluate(scope);
     if (typeof rawResult === "function") {
       const name =
@@ -84,7 +84,7 @@ const getValidatedEvaluate = (
     }
     return numericTypeSimplify(rawResult);
   };
-  const evaluate = (scope?: Scope) => {
+  const evaluate: AnonMathNode["evaluate"] = (scope) => {
     try {
       const result = unvalidatedEvaluate(scope);
       return validate(result, mjsNode);

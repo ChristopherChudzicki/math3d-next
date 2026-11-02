@@ -12,8 +12,8 @@ import {
   assertIsError,
   DiffingMap,
   isAssignmentNode,
-  LayeredScope,
   isNotNil,
+  LayeredScope,
   setDifference,
   setUnion,
 } from "./util";
@@ -225,6 +225,8 @@ export default class Evaluator {
             throw new UnmetDependencyError(unmet);
           }
         }
+        // mathjs runs an assignment inside an expression, as in `f(t = 0)`,
+        // against the scope it's given; the layer keeps it local.
         const evaluated = evaluate(new LayeredScope(this.scope));
         results.set(exprId, evaluated);
         errors.delete(exprId);

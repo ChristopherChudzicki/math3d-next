@@ -12,7 +12,7 @@ const ASSIGNMENT_TYPES: readonly MathNodeType[] = assignmentTypes;
 
 type AssignmentType = (typeof assignmentTypes)[number];
 
-/** The part of a `Map` that mathjs reads and writes as a scope. */
+/** A Map-like scope: mathjs reads and writes it, and its `isMap` checks these four methods. */
 interface Scope {
   get(key: string): unknown;
   has(key: string): boolean;
