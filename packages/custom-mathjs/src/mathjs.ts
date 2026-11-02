@@ -43,6 +43,13 @@ import {
   floorDependencies,
   ceilDependencies,
   modDependencies,
+  argDependencies,
+  lcmDependencies,
+  // statistics
+  minDependencies,
+  maxDependencies,
+  sumDependencies,
+  meanDependencies,
   // operators
   addDependencies,
   subtractDependencies,
@@ -70,13 +77,18 @@ import {
   crossDependencies,
   normDependencies,
   dotDependencies,
+  dotMultiplyDependencies,
+  traceDependencies,
   atan2Dependencies,
   // vectors
   indexDependencies,
   mapDependencies,
+  onesDependencies,
 } from "mathjs";
 
 import {
+  createCurl,
+  createDivergence,
   createTotalDerivative,
   createUnitB,
   createUnitN,
@@ -137,6 +149,15 @@ const miscFuncs = {
   floorDependencies,
   ceilDependencies,
   modDependencies,
+  argDependencies,
+  lcmDependencies,
+};
+
+const statistics = {
+  minDependencies,
+  maxDependencies,
+  sumDependencies,
+  meanDependencies,
 };
 
 const operators = {
@@ -164,6 +185,8 @@ const vectorFunctions = {
   crossDependencies,
   normDependencies,
   dotDependencies,
+  dotMultiplyDependencies,
+  traceDependencies,
 };
 
 const mathjs = create({
@@ -172,6 +195,7 @@ const mathjs = create({
   exponential,
   algebraic,
   miscFuncs,
+  statistics,
   operators,
   constants,
   evaluateDependencies,
@@ -182,6 +206,7 @@ const mathjs = create({
   // vectors, matrices
   indexDependencies,
   mapDependencies,
+  onesDependencies,
 });
 
 mathjs.import({
@@ -190,6 +215,8 @@ mathjs.import({
   unitT: createUnitT,
   unitN: createUnitN,
   unitB: createUnitB,
+  curl: createCurl,
+  div: createDivergence,
 });
 
 mathjs.import(

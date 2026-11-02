@@ -84,4 +84,32 @@ const createUnitB = factory(
   },
 );
 
-export { createTotalDerivative, createUnitT, createUnitN, createUnitB };
+// The instance's `diff` is createTotalDerivative, but the MathJS types describe
+// the builtin `diff` (differences between array entries) it replaces.
+type TotalDerivative = (f: NumericFunction, ...sample: number[]) => Numeric;
+
+type FuncR3R3 = (x: number, y: number, z: number) => number[];
+const createCurl = factory("curl", ["diff"], (deps) => {
+  const diff = deps.diff as unknown as TotalDerivative;
+  const curl = (f: FuncR3R3, x: number, y: number, z: number): number[] => {
+    const [dxf, dyf, dzf] = diff(f as NumericFunction, x, y, z) as number[][];
+    return [dyf[2] - dzf[1], dzf[0] - dxf[2], dxf[1] - dyf[0]];
+  };
+  return curl;
+});
+
+const createDivergence = factory("div", ["diff", "trace"], (deps) => {
+  const diff = deps.diff as unknown as TotalDerivative;
+  const div = (f: NumericFunction, ...sample: number[]): number =>
+    deps.trace(diff(f, ...sample) as number[][]) as number;
+  return div;
+});
+
+export {
+  createTotalDerivative,
+  createUnitT,
+  createUnitN,
+  createUnitB,
+  createCurl,
+  createDivergence,
+};

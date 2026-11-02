@@ -48,6 +48,23 @@ describe("mathjs instance", () => {
     expect(math.ln).toBeDefined();
   });
 
+  // math3d-react imported these from mathjs 3, whose conventions mathjs 15
+  // keeps: min/max/sum/mean take either several scalars or one matrix.
+  it.each([
+    ["max(1, 5, 3)", 5],
+    ["max([1, 5, 3])", 5],
+    ["min(2, -1)", -1],
+    ["sum(1, 2, 3)", 6],
+    ["sum([[1, 2], [3, 4]])", 10],
+    ["mean([1, 2, 3])", 2],
+    ["arg(-1)", Math.PI],
+    ["lcm(4, 6)", 12],
+    ["ones(3)", [1, 1, 1]],
+    ["dotMultiply([1, 2, 3], [4, 5, 6])", [4, 10, 18]],
+  ])("evaluates %s like math3d-react", (expr, expected) => {
+    expect(math.evaluate(expr).valueOf()).toEqual(expected);
+  });
+
   it("defines expected constants", () => {
     expect(math.i).toEqual([1, 0, 0]);
     expect(math.j).toEqual([0, 1, 0]);

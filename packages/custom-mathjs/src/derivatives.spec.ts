@@ -126,3 +126,32 @@ describe("unitB", () => {
     );
   });
 });
+
+describe("curl", () => {
+  it("is correct in special case", () => {
+    const f: FuncR3_R3 = (x, y, z) => [y * z ** 2, x ** 2 * z, x * y];
+    const manualCurl: FuncR3_R3 = (x, y, z) => [
+      x - x ** 2,
+      2 * y * z - y,
+      2 * x * z - z ** 2,
+    ];
+    expect((x: number, y: number, z: number) =>
+      math.evaluate("curl(f, x, y, z)", { f, x, y, z }),
+    ).toNearlyEqual(manualCurl, { digitsToCompare: 6 });
+  });
+});
+
+describe("div", () => {
+  it("is correct in special case", () => {
+    const f: FuncR3_R3 = (x, y, z) => [x ** 2 * y, y * z, x + z ** 3];
+    const manualDiv: FuncR3_R1 = (x, y, z) => 2 * x * y + z + 3 * z ** 2;
+    expect((x: number, y: number, z: number) =>
+      math.evaluate("div(f, x, y, z)", { f, x, y, z }),
+    ).toNearlyEqual(manualDiv, { digitsToCompare: 6 });
+  });
+
+  it("works in two dimensions", () => {
+    const f = (x: number, y: number) => [x * y, y ** 2];
+    expect(math.evaluate("div(f, 2, 3)", { f })).toBeCloseTo(3 + 6);
+  });
+});
