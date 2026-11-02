@@ -2,6 +2,7 @@ import dataclasses
 import math
 import re
 from copy import deepcopy
+from fractions import Fraction
 from typing import Literal, cast
 
 import scenes.legacy_scene_utils.legacy_data as old
@@ -215,8 +216,7 @@ class ItemMigrator:
             "grid2": x.gridU if swap else x.gridV,
         }
 
-    # math3d-next's speeds (sliderMath.ts speedOptions). A legacy speed
-    # without an equal option maps to the nearest one on a log scale.
+    # math3d-next's speeds (sliderMath.ts speedOptions).
     SPEEDS = {
         1 / 16: "1/16",
         1 / 8: "1/8",
@@ -229,15 +229,17 @@ class ItemMigrator:
         8: "8",
     }
 
-    def find_speed(self, speed: float) -> str:
+    def slider_timing(self, speed: float) -> tuple[str, str]:
+        """A legacy speed's (speedMultiplier, duration). math3d-react sweeps a
+        slider's range in 4/speed seconds (AnimationControls.js), so a speed
+        without an equal option plays at 1x over that duration."""
         if speed in self.SPEEDS:
-            return self.SPEEDS[speed]
-        if not isinstance(speed, int | float) or speed <= 0:
+            return self.SPEEDS[speed], "4"
+        if not isinstance(speed, int | float) or not math.isfinite(speed) or speed <= 0:
             self.log.error(f"Unexpected speedMultiplier: {speed}")
-            return "1"
-        nearest = min(self.SPEEDS, key=lambda s: abs(math.log(s / speed)))
-        self.log.warning(f"speedMultiplier {speed} -> {self.SPEEDS[nearest]}")
-        return self.SPEEDS[nearest]
+            return "1", "4"
+        duration = Fraction(4) / Fraction(speed)
+        return "1", f"\\frac{{{duration.numerator}}}{{{duration.denominator}}}"
 
     def vector_field_samples(self, arr: str) -> tuple[str, str, str]:
         parts = split_top_level(arr)
@@ -564,13 +566,14 @@ class ItemMigrator:
 
     def translate_variable_slider(self, props) -> VariableSliderProperties:
         x = self.legacy(old.VariableSlider, props)
+        speed, duration = self.slider_timing(x.speedMultiplier)
         return VariableSliderProperties(
             description=x.description,
-            duration="4",
+            duration=duration,
             fps="60",
             isAnimating=stringify(x.isAnimating),
             range=StrArray(type="array", items=[x.min, x.max]),
-            speedMultiplier=self.find_speed(x.speedMultiplier),
+            speedMultiplier=speed,
             value=self.assignment(f"{x.name}={x.value}"),
         )
 
