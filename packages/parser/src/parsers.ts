@@ -14,6 +14,9 @@ import {
 
 const cdotRule = new RegexpParserRule(/\\cdot/g, " * ");
 
+// \div is the ÷ sign; without this rule it would become a call to `div`.
+const divideRule = new RegexpParserRule(/\\div(?![a-zA-Z])/g, " / ");
+
 const fenceLRule = new RegexpParserRule(/\\left|\\right/g, "");
 
 const brackRule = new RegexpParserRule(/\\(?<side>[lr])brack/g, (match) => {
@@ -50,6 +53,7 @@ const parserRules: ParserRule[] = [
   subscriptRule,
   decorativeTextRule,
   cdotRule,
+  divideRule,
   fenceLRule,
   brackRule,
   leftBraceRule,

@@ -84,4 +84,43 @@ const createUnitB = factory(
   },
 );
 
-export { createTotalDerivative, createUnitT, createUnitN, createUnitB };
+// The instance's `diff` is createTotalDerivative, but the MathJS types describe
+// the builtin `diff` (differences between array entries) it replaces.
+type TotalDerivative = (
+  f: (...args: number[]) => Numeric,
+  ...sample: number[]
+) => Numeric;
+
+type FuncR3R3 = (x: number, y: number, z: number) => number[];
+const createCurl = factory("curl", ["diff"], ({ diff }) => {
+  const totalDerivative = diff as unknown as TotalDerivative;
+  const curl = (f: FuncR3R3, x: number, y: number, z: number): number[] => {
+    const jacobian = totalDerivative(f, x, y, z) as number[][];
+    if (!jacobian.every((row) => Array.isArray(row) && row.length === 3)) {
+      throw new Error("curl(F, x, y, z) requires F to return a 3-vector.");
+    }
+    const [dxf, dyf, dzf] = jacobian;
+    return [dyf[2] - dzf[1], dzf[0] - dxf[2], dxf[1] - dyf[0]];
+  };
+  return curl;
+});
+
+const createDivergence = factory(
+  "div",
+  ["diff", "trace"],
+  ({ diff, trace }) => {
+    const totalDerivative = diff as unknown as TotalDerivative;
+    const div = (f: NumericFunction, ...sample: number[]): number =>
+      trace(totalDerivative(f, ...sample) as number[][]);
+    return div;
+  },
+);
+
+export {
+  createTotalDerivative,
+  createUnitT,
+  createUnitN,
+  createUnitB,
+  createCurl,
+  createDivergence,
+};

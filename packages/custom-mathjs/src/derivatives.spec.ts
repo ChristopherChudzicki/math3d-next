@@ -126,3 +126,42 @@ describe("unitB", () => {
     );
   });
 });
+
+describe("curl", () => {
+  it("is correct in special case", () => {
+    const f: FuncR3_R3 = (x, y, z) => [y * z ** 2, x ** 2 * z, x * y];
+    const manualCurl: FuncR3_R3 = (x, y, z) => [
+      x - x ** 2,
+      2 * y * z - y,
+      2 * x * z - z ** 2,
+    ];
+    expect((x: number, y: number, z: number) =>
+      math.evaluate("curl(f, x, y, z)", { f, x, y, z }),
+    ).toNearlyEqual(manualCurl, { digitsToCompare: 6 });
+  });
+
+  it("rejects a field that does not return a 3-vector", () => {
+    const f = (x: number, y: number) => [x, y];
+    expect(() => math.evaluate("curl(f, 1, 2, 3)", { f })).toThrow(
+      "requires F to return a 3-vector",
+    );
+  });
+});
+
+describe("div", () => {
+  it("is correct in special case", () => {
+    const f: FuncR3_R3 = (x, y, z) => [x ** 2 * y, y * z, x + z ** 3];
+    const manualDiv: FuncR3_R1 = (x, y, z) => 2 * x * y + z + 3 * z ** 2;
+    expect((x: number, y: number, z: number) =>
+      math.evaluate("div(f, x, y, z)", { f, x, y, z }),
+    ).toNearlyEqual(manualDiv, { digitsToCompare: 6 });
+  });
+
+  it("works in two dimensions", () => {
+    const f = (x: number, y: number) => [x * y, y ** 2];
+    const manualDiv = (x: number, y: number) => 3 * y;
+    expect((x: number, y: number) =>
+      math.evaluate("div(f, x, y)", { f, x, y }),
+    ).toNearlyEqual(manualDiv, { digitsToCompare: 6 });
+  });
+});

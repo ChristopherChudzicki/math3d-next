@@ -70,6 +70,10 @@ describe("operatorname conversion", () => {
     const expected = "1 + sin(1+woof(x)) + y";
     expect(parser.preprocess(input)).toBe(expected);
   });
+
+  test("operatorname inside a subscript leaves one identifier", () => {
+    expect(parser.preprocess("t_{\\operatorname{max}}")).toBe("t_max");
+  });
 });
 
 describe("backslash removal", () => {
@@ -441,6 +445,19 @@ describe("returned node's MathNode.evaluate", () => {
   it("Keeps non-negligible imaginary parts, whatever their sign", () => {
     expect(parse("\\sqrt{-4}").evaluate()).toMatchObject({ im: 2 });
     expect(parse("-\\sqrt{-4}").evaluate()).toMatchObject({ im: -2 });
+  });
+
+  it("Divides by the ÷ sign", () => {
+    expect(parse("6\\div 3").evaluate()).toBe(2);
+  });
+
+  it("Calls functions spelled as LaTeX operators", () => {
+    expect(parse("\\max\\left(1,5\\right)").evaluate()).toBe(5);
+    const F = parse("F(x,y,z) = \\left[-y,x,0\\right]").evaluate();
+    const curl = parse("\\operatorname{curl}\\left(F,1,2,3\\right)").evaluate(
+      new Map([["F", F]]),
+    ) as number[];
+    curl.forEach((c, i) => expect(c).toBeCloseTo([0, 0, 2][i]));
   });
 
   it("Functions that throw errors hint at their origin", () => {
