@@ -326,6 +326,24 @@ describe("Evaluator", () => {
       // equal-by-reference.
       expect(a1).toBe(a2);
     });
+
+    it("keeps an assignment in a call argument local to its expression", () => {
+      const evaluator = new Evaluator();
+      evaluator.enqueueAddExpressions([
+        node("id-t", "t = 5"),
+        node("id-w", "w = 2"),
+        node("id-f", "f(s) = s"),
+        node("id-a", "a = f(t = 0)"),
+        node("id-g", "g(u) = u + w * t"),
+      ]);
+      evaluator.evaluate();
+      evaluator.enqueueAddExpressions([node("id-expr", "g(1)")]);
+      evaluator.evaluate();
+
+      expect(evaluator.results.get("id-a")).toBe(0);
+      expect(evaluator.results.get("id-expr")).toBe(11);
+      expect(evaluator.scope.get("t")).toBe(5);
+    });
   });
 
   describe("enqueueAddExpressions", () => {

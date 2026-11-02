@@ -12,6 +12,7 @@ import {
   assertIsError,
   DiffingMap,
   isAssignmentNode,
+  LayeredScope,
   isNotNil,
   setDifference,
   setUnion,
@@ -224,7 +225,7 @@ export default class Evaluator {
             throw new UnmetDependencyError(unmet);
           }
         }
-        const evaluated = evaluate(this.scope);
+        const evaluated = evaluate(new LayeredScope(this.scope));
         results.set(exprId, evaluated);
         errors.delete(exprId);
         if (
