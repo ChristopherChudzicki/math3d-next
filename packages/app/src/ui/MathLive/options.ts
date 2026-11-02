@@ -34,14 +34,14 @@ export const inlineShortcuts = {
   floor: "\\operatorname{floor}(#?)",
   ceil: "\\operatorname{ceil}(#?)",
   root: "\\operatorname{root}(#?, #?)",
-  max: "\\max(#?)",
-  min: "\\min(#?)",
-  sum: "\\operatorname{sum}(#?)",
-  mean: "\\operatorname{mean}(#?)",
-  lcm: "\\operatorname{lcm}(#?)",
-  arg: "\\arg(#?)",
-  ones: "\\operatorname{ones}(#?)",
-  dotMultiply: "\\operatorname{dotMultiply}(#?, #?)",
+  max: "\\operatorname{max}",
+  min: "\\operatorname{min}",
+  sum: "\\operatorname{sum}",
+  mean: "\\operatorname{mean}",
+  lcm: "\\operatorname{lcm}",
+  arg: "\\operatorname{arg}",
+  ones: "\\operatorname{ones}",
+  dotMultiply: "\\operatorname{dotMultiply}",
   // sqrt
   sqrt: "\\sqrt{#?}",
   // exp
@@ -99,8 +99,8 @@ export const inlineShortcuts = {
   unitN: "\\operatorname{unitN}(#?, #?)",
   unitB: "\\operatorname{unitB}(#?, #?)",
   grad: "\\operatorname{grad}(#?)",
-  curl: "\\operatorname{curl}(#?)",
-  div: "\\operatorname{div}(#?)",
+  curl: "\\operatorname{curl}",
+  div: "\\operatorname{div}",
   // operators
   "*": " \\cdot",
 };

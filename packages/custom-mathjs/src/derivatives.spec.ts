@@ -139,6 +139,13 @@ describe("curl", () => {
       math.evaluate("curl(f, x, y, z)", { f, x, y, z }),
     ).toNearlyEqual(manualCurl, { digitsToCompare: 6 });
   });
+
+  it("rejects a field that does not return a 3-vector", () => {
+    const f = (x: number, y: number) => [x, y];
+    expect(() => math.evaluate("curl(f, 1, 2, 3)", { f })).toThrow(
+      "requires F to return a 3-vector",
+    );
+  });
 });
 
 describe("div", () => {
@@ -152,6 +159,9 @@ describe("div", () => {
 
   it("works in two dimensions", () => {
     const f = (x: number, y: number) => [x * y, y ** 2];
-    expect(math.evaluate("div(f, 2, 3)", { f })).toBeCloseTo(3 + 6);
+    const manualDiv = (x: number, y: number) => 3 * y;
+    expect((x: number, y: number) =>
+      math.evaluate("div(f, x, y)", { f, x, y }),
+    ).toNearlyEqual(manualDiv, { digitsToCompare: 6 });
   });
 });
