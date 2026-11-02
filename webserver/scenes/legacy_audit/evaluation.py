@@ -53,7 +53,7 @@ KNOWN_UNPAIRED: dict[tuple[str, str], str] = {
     # Constants of the translation, checked by pass 1.
     ("next", "zOrder"): "constant (empty by policy, #1010)",
     ("next", "fps"): "constant",
-    ("next", "duration"): "constant",
+    ("next", "duration"): "derived from speedMultiplier",
     ("next", "useRelative"): "derived from useComputed",
     ("next", "updateOnDrag"): "derived from useComputed",
     # `AXIS.divisions` is a constant; `GRID.divisions` is paired.
