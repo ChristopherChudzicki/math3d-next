@@ -84,6 +84,16 @@ import {
   indexDependencies,
   mapDependencies,
   onesDependencies,
+  indexTransformDependencies,
+  rangeTransformDependencies,
+  subsetTransformDependencies,
+  mapTransformDependencies,
+  columnTransformDependencies,
+  concatTransformDependencies,
+  minTransformDependencies,
+  maxTransformDependencies,
+  sumTransformDependencies,
+  meanTransformDependencies,
 } from "mathjs";
 
 import {
@@ -207,6 +217,23 @@ const mathjs = create({
   indexDependencies,
   mapDependencies,
   onesDependencies,
+  // Expressions count from 1, as in full mathjs: a[1], a[end], index(1),
+  // subset's out-of-range errors, map's callback index, and the dimension
+  // arguments of column, concat, min, max, sum and mean. Ranges include
+  // their end (1:3 is [1, 2, 3]). The JS API stays 0-based.
+  // Keep these after the plain factories: expressions use whichever of f and
+  // f.transform is imported last.
+  indexTransformDependencies,
+  rangeTransformDependencies,
+  subsetTransformDependencies,
+  mapTransformDependencies,
+  // Other factories bring in column and concat as dependencies.
+  columnTransformDependencies,
+  concatTransformDependencies,
+  minTransformDependencies,
+  maxTransformDependencies,
+  sumTransformDependencies,
+  meanTransformDependencies,
 });
 
 mathjs.import({

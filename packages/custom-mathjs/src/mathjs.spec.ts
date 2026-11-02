@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, test, expect } from "vitest";
 import math from "./mathjs";
 
 describe("mathjs instance", () => {
@@ -21,6 +21,47 @@ describe("mathjs instance", () => {
   it("takes y first in 2-argument arctan, like atan2(y, x)", () => {
     expect(math.evaluate("arctan(1, -2)")).toBeCloseTo(Math.atan2(1, -2));
     expect(math.evaluate("arctan(1)")).toBeCloseTo(Math.PI / 4);
+  });
+
+  test.each([
+    { expr: "[10, 20, 30][1]", expected: 10 },
+    { expr: "[10, 20, 30][end]", expected: 30 },
+    { expr: "[10, 20, 30][2:3]", expected: [20, 30] },
+    { expr: "[10, 20, 30][:]", expected: [10, 20, 30] },
+    { expr: "map([10, 20], f(x, i) = i[1])", expected: [1, 2] },
+    { expr: "1:3", expected: [1, 2, 3] },
+    { expr: "column([1, 2; 3, 4], 1)", expected: [[1], [3]] },
+    { expr: "max([1, 5; 3, 2], 1)", expected: [3, 5] },
+    { expr: "min([1, 5; 3, 2], 2)", expected: [1, 2] },
+    { expr: "sum([1, 5; 3, 2], 2)", expected: [6, 5] },
+    { expr: "mean([1, 5; 3, 2], 1)", expected: [2, 3.5] },
+    {
+      expr: "concat([1, 2; 3, 4], [5, 6; 7, 8], 1)",
+      expected: [
+        [1, 2],
+        [3, 4],
+        [5, 6],
+        [7, 8],
+      ],
+    },
+  ])("indexes from 1 in expressions: $expr", ({ expr, expected }) => {
+    expect(math.evaluate(expr).valueOf()).toEqual(expected);
+  });
+
+  it("indexes diff's Jacobian from 1 with subset and index", () => {
+    const F = (x: number, y: number, z: number) => [x * y, y * z, z * x];
+    const entry = (i: number, j: number) =>
+      math.evaluate("subset(diff(F, 1, 2, 3), index(i, j))", { F, i, j });
+    // Row i holds the partials with respect to the i-th variable:
+    // [[y, 0, z], [x, z, 0], [0, y, x]] at (1, 2, 3).
+    expect(entry(1, 3)).toBeCloseTo(3);
+    expect(entry(3, 2)).toBeCloseTo(2);
+  });
+
+  it("reports an out-of-range index from 1", () => {
+    expect(() => math.evaluate("subset([1, 2, 3], index(4))")).toThrow(
+      "Index out of range (4 > 3)",
+    );
   });
 
   it("defines hyperbolic trig functions", () => {

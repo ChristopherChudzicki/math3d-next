@@ -11,6 +11,10 @@ test.each([
     expr: "f(g(x), r_2) + x^2 - a",
     symbols: ["f", "g", "r_2", "x", "a"],
   },
+  {
+    expr: "a[end] + b[c[end - 1]] + end",
+    symbols: ["a", "b", "c", "end"],
+  },
 ])("getDependencies returns symbols used in give node", ({ expr, symbols }) => {
   const node = parse(expr);
   const dependencies = getDependencies(node);
