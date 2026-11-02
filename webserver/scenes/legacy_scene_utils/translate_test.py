@@ -609,8 +609,11 @@ def test_variable():
         ({}, {}),
         ({"speedMultiplier": 0.25}, {"speedMultiplier": "1/4"}),
         ({"speedMultiplier": 0.0625}, {"speedMultiplier": "1/16"}),
-        # math3d-next has no 1.5x; the nearest option on a log scale is 2x.
-        ({"speedMultiplier": 1.5}, {"speedMultiplier": "2"}),
+        # math3d-next has no 1.5x; 1x over 4/1.5 s keeps the sweep time.
+        (
+            {"speedMultiplier": 1.5},
+            {"speedMultiplier": "1", "duration": "\\frac{8}{3}"},
+        ),
         ({"speedMultiplier": "fast"}, {"speedMultiplier": "1"}),
     ],
 )

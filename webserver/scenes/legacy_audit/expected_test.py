@@ -192,12 +192,18 @@ def test_slider_without_any_value_needs_eval():
     assert isinstance(got["value.rhs"], NeedsEval)
 
 
-def test_slider_speed_takes_the_nearest_next_option():
-    slider = {**rehydrated("VARIABLE_SLIDER"), "speedMultiplier": 1.5}
-    assert values(slider)["speedMultiplier"] == "2"
-    slider["speedMultiplier"] = 0.0625
-    assert values(slider)["speedMultiplier"] == "1/16"
-    slider["speedMultiplier"] = "s"
+@pytest.mark.parametrize(
+    ("speed", "next_speed", "duration"),
+    [(0.0625, "1/16", "4"), (3, "1", "\\frac{4}{3}")],
+)
+def test_slider_speed_keeps_the_sweep_time(speed, next_speed, duration):
+    slider = {**rehydrated("VARIABLE_SLIDER"), "speedMultiplier": speed}
+    got = values(slider)
+    assert (got["speedMultiplier"], got["duration"]) == (next_speed, duration)
+
+
+def test_slider_speed_without_a_number_needs_eval():
+    slider = {**rehydrated("VARIABLE_SLIDER"), "speedMultiplier": "s"}
     assert isinstance(values(slider)["speedMultiplier"], NeedsEval)
 
 

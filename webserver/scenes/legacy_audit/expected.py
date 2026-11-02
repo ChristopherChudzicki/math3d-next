@@ -13,7 +13,6 @@ with list indices as ints. A ``NeedsEval`` may sit on a subtree path (e.g.
 
 from __future__ import annotations
 
-import math
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -450,24 +449,27 @@ def _variable_slider(item: dict, ctx: Context) -> list[Expectation]:
     # so while ticks keep up, fps changes only smoothness. Owner decision
     # (2026-10-23): legacy sliders keep math3d-react's effective 60.
     out.add("fps", "60", "render", "constant")
-    out.add("duration", "4", "render", "constant")
     # Animation starts on mount when isAnimating
     # (react:.../VariableSlider/components/AnimationControls.js:137-141).
     out.add("isAnimating", _bool_str(item.get("isAnimating")), "render", "isAnimating")
     speed = _simple_number(item.get("speedMultiplier"))
     speed_value: str | NeedsEval
+    duration = "4"
     if speed is not None and speed in _SPEEDS:
         speed_value = _SPEEDS[speed]
     elif speed is not None and speed > 0:
         # math3d-react also offered 1.5x and 3x
         # (react:.../VariableSlider/components/AnimationControls.js:42-54).
-        # Owner decision (2026-10-24): take the nearest next option.
-        nearest = min(_SPEEDS, key=lambda s: abs(math.log(s / speed)))
-        speed_value = _SPEEDS[nearest]
+        # Owner decision (2026-11-02): play at 1x over math3d-react's sweep
+        # time, 4/speed s.
+        speed_value = "1"
+        sweep = 4 / speed
+        duration = f"\\frac{{{sweep.numerator}}}{{{sweep.denominator}}}"
     else:
         speed_value = NeedsEval(
             f"speedMultiplier={item.get('speedMultiplier')!r} has no math3d-next speed option"
         )
+    out.add("duration", duration, "render", "speedMultiplier")
     out.add("speedMultiplier", speed_value, "render", "speedMultiplier")
     return out.items
 
@@ -853,7 +855,7 @@ COVERAGE: dict[str, dict[str, str]] = {
         "max": "range.items.1 (identity)",
         "description": "description (identity)",
         "isAnimating": 'isAnimating (bool -> "true"/"false")',
-        "speedMultiplier": "speedMultiplier (number -> nearest next speed on a log scale, e.g. 0.5 -> 1/2, 1.5 -> 2)",
+        "speedMultiplier": "speedMultiplier, duration (number -> equal next speed with duration 4; else speed 1 with duration 4/speed, e.g. 1.5 -> 1, \\frac{8}{3})",
     },
     "BOOLEAN_VARIABLE": {
         "name": "value.lhs (identity)",
