@@ -6,7 +6,9 @@ from fractions import Fraction
 from typing import Literal, cast
 
 import scenes.legacy_scene_utils.legacy_data as old
+from scenes.legacy_scene_utils import pdiff
 from scenes.legacy_scene_utils.issue_log import IssueLog
+from scenes.legacy_scene_utils.symbols import depends_on
 from scenes.schemas.math_items import (
     AssignmentObj,
     AxisItem,
@@ -112,18 +114,6 @@ def vector_text(components: list[float | str]) -> str:
     return "\\left[" + ",".join(str(c) for c in components) + "\\right]"
 
 
-def _symbol_text(latex: str) -> str:
-    """math3d-next's parser drops subscript braces and turns backslashes into
-    spaces: ``x_{1}`` is the symbol ``x_1``, ``\\theta`` the symbol ``theta``."""
-    return re.sub(r"_\{([^{}]*)\}", r"_\1", latex).replace("\\", " ")
-
-
-def depends_on(rhs: str, param: str) -> bool:
-    """Whether ``rhs`` uses the symbol ``param``."""
-    symbols = re.findall(r"[A-Za-z_][A-Za-z0-9_]*", _symbol_text(rhs))
-    return _symbol_text(param).strip() in symbols
-
-
 class ItemMigrator:
     def __init__(
         self,
@@ -150,6 +140,21 @@ class ItemMigrator:
                 f"Ignored unknown {self.item_type} properties: {', '.join(unknown)}"
             )
         return cls(**{k: v for k, v in props.items() if k in fields})
+
+    # Legacy properties that are text, not expressions.
+    NOT_MATH = frozenset({"description", "color", "label", "axis", "axes", "name"})
+
+    def rewrite_pdiff(self, props: dict) -> dict:
+        rewritten = {}
+        for key, value in props.items():
+            if isinstance(value, str) and key not in self.NOT_MATH:
+                value, kept = pdiff.rewrite(value)
+                for call in kept:
+                    self.log.warning(
+                        f"Kept pdiff in {key}, which math3d-next can't express: {call}"
+                    )
+            rewritten[key] = value
+        return rewritten
 
     def split_assignment(self, expr: str) -> tuple[str, str]:
         lhs, *rhs_pieces = expr.split("=")
@@ -630,6 +635,7 @@ class ItemMigrator:
         del copy["type"]
         self.log.set_prefix(item_id)
         self.item_type = item_type
+        copy = self.rewrite_pdiff(copy)
 
         if item_type == "AXIS":
             return AxisItem(

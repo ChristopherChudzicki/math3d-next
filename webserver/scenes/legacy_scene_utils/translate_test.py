@@ -3,7 +3,9 @@ from typing import Any
 import pytest
 
 from scenes.legacy_scene_utils.issue_log import Severity
-from scenes.legacy_scene_utils.translate import ItemMigrator, depends_on
+from scenes.legacy_scene_utils.symbols import depends_on
+from scenes.legacy_scene_utils.translate import ItemMigrator
+from scenes.schemas.math_items import VariableItem
 
 
 def test_axis():
@@ -798,3 +800,32 @@ def test_unusable_vector_field_samples_fall_back_with_an_error(samples):
     migrator = ItemMigrator()
     assert migrator.vector_field_samples(samples) == ("10", "10", "5")
     assert [i.severity for i in migrator.log.issues()] == [Severity.ERROR]
+
+
+def test_pdiff_is_rewritten_in_expressions_but_not_text():
+    migrator = ItemMigrator()
+    pdiff = "\\operatorname{pdiff}"
+    description = f"Try {pdiff}\\left(F,z,1\\right)"
+    item = migrator.translate_item(
+        {
+            "type": "VARIABLE",
+            "name": "a",
+            "value": f"{pdiff}\\left(F,z,1\\right)+{pdiff}\\left(\\right)",
+            "description": description,
+        },
+        "some-id",
+    )
+    assert isinstance(item, VariableItem)
+    assert item.properties.value.rhs == (
+        f"\\frac{{\\partial F\\left(z\\right)}}{{\\partial z}}+{pdiff}\\left(\\right)"
+    )
+    assert item.properties.description == description
+    assert [(i.severity, i.message) for i in migrator.log.issues()] == [
+        (
+            Severity.WARNING,
+            (
+                "some-id: Kept pdiff in value, which math3d-next can't express: "
+                f"{pdiff}\\left(\\right)"
+            ),
+        )
+    ]
