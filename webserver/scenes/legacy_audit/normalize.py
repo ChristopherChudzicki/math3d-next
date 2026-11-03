@@ -8,7 +8,7 @@ import math
 import re
 from typing import Any
 
-from scenes.legacy_scene_utils import pdiff
+from scenes.legacy_scene_utils import operators, pdiff
 
 # LaTeX whitespace: "\ " (explicit space) and plain spaces. math3d-next's
 # parser can treat a space as a token separator (`x y` vs `xy`), so this can
@@ -53,15 +53,25 @@ def _close(a: float, b: float) -> bool:
     return math.isclose(a, b, rel_tol=REL_TOL, abs_tol=ABS_TOL)
 
 
-def pdiff_rewritten(value: Any) -> Any:
-    """``value`` with math3d-react's ``pdiff`` calls rewritten as the translator
-    rewrites them, since math3d-next has no ``pdiff``. This is the translator's
-    own rewrite, so pass 2 checks it, by evaluating both sides."""
-    if isinstance(value, str):
-        return pdiff.rewrite(value)[0]
-    if isinstance(value, list):
-        return [pdiff_rewritten(v) for v in value]
-    return value
+# The translator's rewrites of an expression (ItemMigrator.rewrite_pdiff, then
+# rewrite_operators), for what math3d-next lacks: math3d-react's `pdiff`, `|`
+# (dot) and `\&` (cross).
+_REWRITES = (("pdiff_rewrite", pdiff.rewrite), ("operator_rewrite", operators.rewrite))
+
+
+def rewritten(value: Any) -> tuple[Any, list[str]]:
+    """``value`` with the translator's rewrites applied in its order, and the
+    names of those that changed it. They are the translator's own code, so
+    pass 2 checks them, by evaluating both sides."""
+    if not isinstance(value, str):
+        return value, []
+    names = []
+    for name, rewrite in _REWRITES:
+        before = value
+        value = rewrite(value)[0]
+        if value != before:
+            names.append(name)
+    return value, names
 
 
 def equivalence(expected: Any, actual: Any) -> str | None:
