@@ -14,32 +14,19 @@ Both take the same central difference as ``pdiff``. Other calls are kept.
 
 import re
 
+from scenes.legacy_scene_utils.latex_tokens import NAME, SPACE, TOKEN
 from scenes.legacy_scene_utils.symbols import depends_on
 
 _CALL = "\\operatorname{pdiff}\\left("
 
-# `other` consumes escapes such as `\{` and `\,` whole, so they don't count as
-# brackets or commas.
-_TOKEN = re.compile(
-    r"""
-    (?P<open>\\left(?![A-Za-z])(?:\\[A-Za-z]+|\\.|.)|[(\[{])
-    | (?P<close>\\right(?![A-Za-z])(?:\\[A-Za-z]+|\\.|.)|[)\]}])
-    | (?P<comma>,)
-    | (?P<other>\\[A-Za-z]+|\\.|.)
-    """,
-    re.VERBOSE | re.DOTALL,
-)
-
-_NAME = re.compile(r"(?:[A-Za-z][A-Za-z0-9]*|\\[A-Za-z]+)(?:_\{\w+\}|_\w+)?")
 _INTEGER = re.compile(r"[1-9][0-9]*")
-_SPACE = re.compile(r"^(?:\s|\\ )+|(?:\s|\\ )+$")
 
 
 def _call_args(text: str, start: int) -> tuple[list[str], int] | None:
     """The top-level arguments of the call whose ``\\left(`` ends at ``start``,
     and the index just past its ``\\right)``; None if it isn't closed."""
     args, depth, arg_start = [], 0, start
-    for match in _TOKEN.finditer(text, start):
+    for match in TOKEN.finditer(text, start):
         kind = match.lastgroup
         if kind == "open":
             depth += 1
@@ -64,8 +51,8 @@ def _equivalent(args: list[str]) -> str | None:
         variable = points[i]
         others = [f, *points[:i], *points[i + 1 :]]
         if (
-            _NAME.fullmatch(f)
-            and _NAME.fullmatch(variable)
+            NAME.fullmatch(f)
+            and NAME.fullmatch(variable)
             and not any(depends_on(other, variable) for other in others)
         ):
             return (
@@ -91,7 +78,7 @@ def rewrite(latex: str) -> tuple[str, list[str]]:
         args = []
         for raw in raw_args:
             arg, arg_kept = rewrite(raw)
-            args.append(_SPACE.sub("", arg))
+            args.append(SPACE.sub("", arg))
             kept += arg_kept
         call = latex[found:end]
         equivalent = _equivalent(args)

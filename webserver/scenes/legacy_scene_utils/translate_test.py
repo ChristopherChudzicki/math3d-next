@@ -829,3 +829,26 @@ def test_pdiff_is_rewritten_in_expressions_but_not_text():
             ),
         )
     ]
+
+
+def test_dot_and_cross_are_rewritten_in_expressions_but_not_text():
+    migrator = ItemMigrator()
+    description = "Try a|b"
+    item = migrator.translate_item(
+        {
+            "type": "VARIABLE",
+            "name": "a",
+            "value": "\\left[a|b,|z|\\right]",
+            "description": description,
+        },
+        "some-id",
+    )
+    assert isinstance(item, VariableItem)
+    assert item.properties.value.rhs == "\\left[a\\cdot b,|z|\\right]"
+    assert item.properties.description == description
+    assert [(i.severity, i.message) for i in migrator.log.issues()] == [
+        (
+            Severity.WARNING,
+            "some-id: Kept | or \\& in value, with no clear dot or cross reading: |z|",
+        )
+    ]

@@ -1,12 +1,13 @@
 import dataclasses
 import math
 import re
+from collections.abc import Callable
 from copy import deepcopy
 from fractions import Fraction
 from typing import Literal, cast
 
 import scenes.legacy_scene_utils.legacy_data as old
-from scenes.legacy_scene_utils import pdiff
+from scenes.legacy_scene_utils import operators, pdiff
 from scenes.legacy_scene_utils.issue_log import IssueLog
 from scenes.legacy_scene_utils.symbols import depends_on
 from scenes.schemas.math_items import (
@@ -144,17 +145,33 @@ class ItemMigrator:
     # Legacy properties that are text, not expressions.
     NOT_MATH = frozenset({"description", "color", "label", "axis", "axes", "name"})
 
-    def rewrite_pdiff(self, props: dict) -> dict:
+    def rewrite_math(
+        self, props: dict, rewrite: Callable[[str], tuple[str, list[str]]], kept: str
+    ) -> dict:
+        """``props`` with ``rewrite`` applied to math, warning ``kept`` (a
+        template taking ``key`` and ``expr``) for each expression it keeps."""
         rewritten = {}
         for key, value in props.items():
             if isinstance(value, str) and key not in self.NOT_MATH:
-                value, kept = pdiff.rewrite(value)
-                for call in kept:
-                    self.log.warning(
-                        f"Kept pdiff in {key}, which math3d-next can't express: {call}"
-                    )
+                value, kept_exprs = rewrite(value)
+                for expr in kept_exprs:
+                    self.log.warning(kept.format(key=key, expr=expr))
             rewritten[key] = value
         return rewritten
+
+    def rewrite_pdiff(self, props: dict) -> dict:
+        return self.rewrite_math(
+            props,
+            pdiff.rewrite,
+            "Kept pdiff in {key}, which math3d-next can't express: {expr}",
+        )
+
+    def rewrite_operators(self, props: dict) -> dict:
+        return self.rewrite_math(
+            props,
+            operators.rewrite,
+            "Kept | or \\& in {key}, with no clear dot or cross reading: {expr}",
+        )
 
     def split_assignment(self, expr: str) -> tuple[str, str]:
         lhs, *rhs_pieces = expr.split("=")
@@ -635,7 +652,7 @@ class ItemMigrator:
         del copy["type"]
         self.log.set_prefix(item_id)
         self.item_type = item_type
-        copy = self.rewrite_pdiff(copy)
+        copy = self.rewrite_operators(self.rewrite_pdiff(copy))
 
         if item_type == "AXIS":
             return AxisItem(
