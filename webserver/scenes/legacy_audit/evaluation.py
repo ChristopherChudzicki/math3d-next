@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import math
 import re
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -829,10 +829,12 @@ def evaluate_scene(
     next_eval: dict,
     tol: Tolerance,
     allowlist: Sequence[Entry] = (),
+    replays: Mapping[str, dict] | None = None,
 ) -> SceneResult:
     """Pair, label and find roots for one scene. The four inputs are one line
     each of legacy.jsonl, rehydrated.jsonl, eval_react.jsonl and
-    eval_next.jsonl."""
+    eval_next.jsonl; `replays` maps a convention's reason to this scene's line
+    of its replay, when the replay evaluated it."""
     key = exported["key"]
     assert rehydrated["key"] == react_eval["key"] == next_eval["key"] == key, (
         "input files are out of step"
@@ -865,7 +867,9 @@ def evaluate_scene(
     mark_roots(result.pairs, react_items, next_items)
     for pair in result.pairs:
         if pair.root:
-            pair.allowlisted = allowlisted(pair, allowlist)
+            pair.allowlisted = allowlisted(pair, allowlist) or replayed(
+                pair, replays or {}, tol
+            )
     return result
 
 
@@ -873,6 +877,21 @@ def allowlisted(pair: Pair, allowlist: Sequence[Entry]) -> str | None:
     for entry in allowlist:
         if entry.matches(pair):
             return entry.reason
+    return None
+
+
+def replayed(pair: Pair, replays: Mapping[str, dict], tol: Tolerance) -> str | None:
+    """The reason of the first replay that turns a `differ` pair `equal`."""
+    if pair.outcome != "differ":
+        return None
+    s = pair.spec
+    for reason, record in replays.items():
+        field_record = record["items"].get(s.item_id, {}).get(s.next_field)
+        if field_record is None:
+            continue
+        replayed_side = _side(field_record, s.next_element, True)
+        if label(s, pair.legacy, replayed_side, tol).outcome == "equal":
+            return reason
     return None
 
 

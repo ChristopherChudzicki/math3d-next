@@ -9,7 +9,7 @@ they came from and pass 1's findings. Reads files only; no database.
         --legacy /abs/legacy.jsonl --rehydrated /abs/rehydrated.jsonl \\
         --pass1 /abs/pass1/findings.jsonl \\
         --react /abs/pass2/eval_react.jsonl --next /abs/pass2/eval_next.jsonl \\
-        --out-dir /abs/pass2/
+        --out-dir /abs/pass2/ [--replay /abs/pass2/replay_round.jsonl ...]
 
 Writes findings.jsonl and examples.json (per scene or with keys: keep out of
 git) and report.md (aggregates only). Exits non-zero when a field either
@@ -18,6 +18,7 @@ evaluator emitted is neither paired nor known to be unpaired.
 
 import contextlib
 import datetime
+import hashlib
 import itertools
 import json
 from pathlib import Path
@@ -37,7 +38,7 @@ from scenes.legacy_audit.evaluation_report import (
     render_markdown,
     unaccounted,
 )
-from scenes.legacy_audit.pass2_allowlist import ALLOWLIST
+from scenes.legacy_audit.pass2_allowlist import ALLOWLIST, REPLAYS
 
 
 def _pair_record(p: Pair) -> dict:
@@ -68,11 +69,44 @@ def _pair_record(p: Pair) -> dict:
     }
 
 
-def _scene_record(lines: tuple[str, ...], tol: Tolerance, agg: Aggregate) -> dict:
+def _load_replays(paths: list[str]) -> dict[str, dict[str, dict]]:
+    """Scene key → convention's reason → that scene's line of its replay."""
+    replays: dict[str, dict[str, dict]] = {}
+    for path in paths:
+        with open(path) as f:
+            for line in f:
+                record = json.loads(line)
+                convention = record.get("convention")
+                if convention not in REPLAYS:
+                    raise CommandError(f"{path}: unknown convention {convention!r}")
+                replays.setdefault(record["key"], {})[REPLAYS[convention]] = record
+    return replays
+
+
+def _scene_record(
+    lines: tuple[str, ...],
+    tol: Tolerance,
+    agg: Aggregate,
+    replays: dict[str, dict[str, dict]],
+) -> dict:
     legacy, rehydrated, react, nxt, pass1 = map(json.loads, lines)
     if pass1["key"] != legacy["key"]:
         raise CommandError(f"--pass1 is out of step with --legacy at {legacy['key']}")
-    result = evaluate_scene(legacy, rehydrated, react, nxt, tol, ALLOWLIST)
+    scene_replays = replays.get(legacy["key"], {})
+    legacy_sha256 = hashlib.sha256(lines[0].rstrip("\r\n").encode()).hexdigest()
+    if any(r["legacy_sha256"] != legacy_sha256 for r in scene_replays.values()):
+        raise CommandError(
+            f"a --replay is of another --legacy export, at {legacy['key']}"
+        )
+    result = evaluate_scene(
+        legacy,
+        rehydrated,
+        react,
+        nxt,
+        tol,
+        ALLOWLIST,
+        scene_replays,
+    )
     verdict = agg.add(result, pass1["verdict"])
     return {
         "key": result.key,
@@ -94,6 +128,12 @@ class Command(BaseCommand):
         parser.add_argument("--loose-rtol", type=float, default=Tolerance.loose_rtol)
         parser.add_argument("--limit", type=int, default=None)
         parser.add_argument(
+            "--replay",
+            action="append",
+            default=[],
+            help="a convention replay from packages/legacy-audit",
+        )
+        parser.add_argument(
             "--meta",
             action="append",
             default=[],
@@ -108,6 +148,7 @@ class Command(BaseCommand):
         out_dir = Path(options["out_dir"])
         out_dir.mkdir(parents=True, exist_ok=True)
         agg = Aggregate()
+        replays = _load_replays(options["replay"])
         names = ("legacy", "rehydrated", "react", "next", "pass1")
         with contextlib.ExitStack() as stack:
             files = [stack.enter_context(open(options[n])) for n in names]
@@ -120,7 +161,9 @@ class Command(BaseCommand):
                         f"{', '.join(f'--{n}' for n in names)} must have one line "
                         "per scene, in the same order"
                     )
-                findings.write(json.dumps(_scene_record(lines, tol, agg)) + "\n")
+                findings.write(
+                    json.dumps(_scene_record(lines, tol, agg, replays)) + "\n"
+                )
 
         meta = {
             "date": datetime.date.today().isoformat(),

@@ -251,6 +251,13 @@ const assignedName = (parseable: ValidatedParseable): string | undefined => {
 };
 
 type Migrated = { items: MathItemPatch[] };
+
+/** Whether any of the scene's math fields has one of `wanted` as a feature. */
+const usesAny = (migrated: Migrated, wanted: string[]): boolean =>
+  getIdentifiedExpressions(migrated.items).some(({ parseable }) =>
+    features(parseable).some((f) => wanted.includes(f)),
+  );
+
 type SceneResult = Record<string, Record<string, FieldResult>>;
 
 /**
@@ -320,5 +327,5 @@ const evaluateScene = (migrated: Migrated): SceneResult => {
   return out;
 };
 
-export { evaluateScene };
+export { evaluateScene, usesAny };
 export type { FieldResult, SceneResult, Status };

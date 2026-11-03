@@ -1,3 +1,4 @@
+import hashlib
 import json
 
 import pytest
@@ -14,7 +15,7 @@ from scenes.legacy_audit.evaluation import (
     evaluate_scene,
 )
 from scenes.legacy_audit.evaluation_report import Aggregate, fixable_curve
-from scenes.legacy_audit.pass2_allowlist import Entry
+from scenes.legacy_audit.pass2_allowlist import REPLAYS, Entry
 
 
 def scene(outcome, severity="render", root=True, allowlisted=None):
@@ -109,6 +110,28 @@ def test_slider_bounds_take_the_status_of_their_own_range_element():
     }
 
 
+@pytest.mark.parametrize(
+    ("next_value", "replayed_value", "allowlisted"),
+    [
+        (field(value=3), 2, "replayed"),
+        (field(value=3), 4, None),
+        # A replay explains a different value, never an error.
+        (field("eval", message="Undefined symbol q"), 2, None),
+    ],
+)
+def test_a_replay_allowlists_a_differ_pair_only_when_it_gives_reacts_value(
+    next_value, replayed_value, allowlisted
+):
+    exported, rehydrated, react, nxt = slider_scene(field(value=[-5, 5]))
+    nxt["items"]["s"]["value"] = next_value
+    replay = {"items": {"s": {"value": field(value=replayed_value)}}}
+    result = evaluate_scene(
+        exported, rehydrated, react, nxt, Tolerance(), replays={"replayed": replay}
+    )
+    [value] = [p for p in result.pairs if p.spec.legacy_field == "value"]
+    assert value.allowlisted == allowlisted
+
+
 def write_inputs(tmp_path, nxt_items, extra_next_line=False):
     exported, rehydrated, react, nxt = slider_scene(field(value=[-5, 5]))
     nxt["items"]["s"].update(nxt_items)
@@ -139,4 +162,43 @@ def test_command_names_the_inputs_when_their_lengths_differ(tmp_path):
     with pytest.raises(CommandError, match="one line per scene"):
         call_command(
             "audit_legacy_evaluation", *write_inputs(tmp_path, {}, extra_next_line=True)
+        )
+
+
+def _replay_args(tmp_path, convention, legacy_sha256=None):
+    legacy_line = (tmp_path / "legacy.jsonl").read_text().splitlines()[0]
+    path = tmp_path / "replay.jsonl"
+    record = {
+        "key": "k",
+        "convention": convention,
+        "legacy_sha256": legacy_sha256
+        or hashlib.sha256(legacy_line.encode()).hexdigest(),
+        "crashed": None,
+        "items": {"s": {"value": field(value=2)}},
+    }
+    path.write_text(json.dumps(record) + "\n")
+    return ["--replay", str(path)]
+
+
+def test_command_allowlists_a_pair_by_its_scenes_replay(tmp_path):
+    args = write_inputs(tmp_path, {"value": field(value=3)})
+    call_command("audit_legacy_evaluation", *args, *_replay_args(tmp_path, "round"))
+    [scene] = (tmp_path / "out" / "findings.jsonl").read_text().splitlines()
+    [pair] = json.loads(scene)["pairs"]
+    assert pair["allowlisted"] == REPLAYS["round"]
+
+
+def test_command_rejects_a_replay_of_an_unknown_convention(tmp_path):
+    args = write_inputs(tmp_path, {})
+    with pytest.raises(CommandError, match="unknown convention 'rounding'"):
+        call_command(
+            "audit_legacy_evaluation", *args, *_replay_args(tmp_path, "rounding")
+        )
+
+
+def test_command_rejects_a_replay_of_another_export(tmp_path):
+    args = write_inputs(tmp_path, {})
+    with pytest.raises(CommandError, match="another --legacy export"):
+        call_command(
+            "audit_legacy_evaluation", *args, *_replay_args(tmp_path, "round", "0")
         )

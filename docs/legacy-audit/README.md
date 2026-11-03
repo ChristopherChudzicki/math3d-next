@@ -18,6 +18,7 @@ Every generated file is production scene data. Write it under the main checkout'
 | `pass1/manual_checks.json` | `audit_legacy_migration`                                     | Not per scene: `{hidden_by_blank_visibility: [{rank, key, items}]}`: among the 100 most-viewed scenes, those a policy changes; see below                      |
 | `pass2/eval_next.jsonl`    | math3d-next `packages/legacy-audit/src/evaluateNext.spec.ts` | `{version: 2, key, crashed, items: {<itemId>: {<field>: {status, message?, value?, elements?, deps, features}}}}`                                             |
 | `pass2/eval_react.jsonl`   | math3d-react `client/src/legacyAudit/evaluate.audit.js`      | The same, without `elements` and `features`                                                                                                                   |
+| `pass2/replay_<c>.jsonl`   | math3d-next `evaluateNext.spec.ts` with a convention         | Only the scenes that use convention `<c>`'s triggers: the `eval_next` record plus `convention`                                                                |
 | `pass2/findings.jsonl`     | `audit_legacy_evaluation`                                    | `{key, times_accessed, pass1_verdict, verdict, strict_clean, verified_clean, clusters, pairs: [every non-equal pair]}`, or `{…, verdict: "excluded", reason}` |
 | `pass2/examples.json`      | `audit_legacy_evaluation`                                    | Not per scene: the most-viewed keys of each cluster, for filing tasks                                                                                         |
 
@@ -51,11 +52,18 @@ cd webserver
 IS_DEPLOYMENT=False uv run python manage.py audit_legacy_evaluation --legacy $D/legacy.jsonl --rehydrated $D/rehydrated.jsonl --pass1 $D/pass1/findings.jsonl --react $D/pass2/eval_react.jsonl --next $D/pass2/eval_next.jsonl --out-dir $D/pass2 --meta "Snapshot=prod, pulled <date>" --meta "math3d-next=$(git rev-parse --short HEAD)" --meta "math3d-react=<commit>"
 ```
 
-Each evaluator takes about 15 minutes, and the join about 4. After a translator fix, re-run `export_legacy_audit`, `audit_legacy_migration`, math3d-next's evaluator and the join; math3d-react's output doesn't change. After writing the report, `audit_legacy_evaluation` exits non-zero if a field either evaluator emits has no pairing and no known reason to be unpaired: add it to the expected table or to `KNOWN_UNPAIRED` (`legacy_audit/evaluation.py`).
+Each evaluator takes about 15 minutes, and the join about 4. After a translator fix, re-run `export_legacy_audit`, `audit_legacy_migration`, math3d-next's evaluator, the replays and the join; math3d-react's output doesn't change. After writing the report, `audit_legacy_evaluation` exits non-zero if a field either evaluator emits has no pairing and no known reason to be unpaired: add it to the expected table or to `KNOWN_UNPAIRED` (`legacy_audit/evaluation.py`).
 
 The command writes each report's tables; its Findings section (hypotheses confirmed or refuted, what the clusters are) is written by hand.
 
 Accepted differences go in `legacy_audit/pass2_allowlist.py`, each citing app code or an owner decision. Before trusting a change to either fingerprint, run math3d-react's conformance check (`client/src/legacyAudit/README.md`).
+
+A library convention the owner accepts (react's `round`, complex.js 2.0.4's addition) is accepted per pair instead. Replay math3d-next with that convention swapped in and pass the replay to the join, which accepts a `differ` pair when the replay gives math3d-react's value. A convention is a `CONVENTIONS` entry in `packages/legacy-audit/src/conventions.ts` plus a `REPLAYS` reason under the same key. The `round` replay takes about 7 minutes, `complex_add` about 13:
+
+```bash
+(cd packages/legacy-audit && for c in round complex_add; do LEGACY_EVAL_NEXT_CONVENTION=$c LEGACY_EVAL_NEXT_IN=$D/legacy.jsonl LEGACY_EVAL_NEXT_OUT=$D/pass2/replay_$c.jsonl yarn vitest --run src/evaluateNext.spec.ts; done)
+# then add to audit_legacy_evaluation: --replay $D/pass2/replay_round.jsonl --replay $D/pass2/replay_complex_add.jsonl
+```
 
 ## Manual checks
 

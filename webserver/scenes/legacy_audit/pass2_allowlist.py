@@ -4,6 +4,10 @@ Each entry matches root `differ` or `regression` pairs and cites the app code
 or owner decision that makes the difference acceptable. Matching pairs are
 reported apart and don't make a scene unclean; their dependents inherit the
 entry by not being roots.
+
+`REPLAYS` accepts a root `differ` pair when math3d-next, re-evaluated with one
+math3d-react convention swapped in (packages/legacy-audit `CONVENTIONS`),
+gives math3d-react's value: that convention is the whole difference.
 """
 
 from __future__ import annotations
@@ -60,3 +64,12 @@ ALLOWLIST: list[Entry] = [
     )
     for item_type, next_field in _REAL_FUNC_FIELDS
 ]
+
+REPLAYS: dict[str, str] = {
+    "round": "math3d-react's mathjs 3 rounds .5 toward +∞ (Math.round); mathjs 15 "
+    "rounds it away from zero; owner decision 2026-11-02 "
+    "(tk-pass-2-replay-known-library-convention-changes-s-6acbab)",
+    "complex_add": "math3d-react's complex.js 2.0.4 adds infinities component-wise, "
+    "so arg(log 0) is π; 2.4.3 makes the sum (∞, ∞), whose arg is π/4; owner "
+    "decision 2026-11-02 (tk-complex-js-arg-of-the-point-at-infinity-is-4-it--61b5fe)",
+}
