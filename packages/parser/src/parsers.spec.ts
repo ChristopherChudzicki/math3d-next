@@ -540,17 +540,15 @@ test("Small imaginary numbers are truncated", () => {
 
 describe("calling a user function with a point", () => {
   const { parse } = parser;
-  const scope = new Map<string, unknown>([
-    ["P", [1, 2, 3]],
-    ["x", [1, 2]],
-  ]);
+  const scope = new Map<string, unknown>([["P", [1, 2, 3]]]);
   [
     "T(x,y,z) = [x, y, z^2]",
     "g(P) = P[1] + P[2]",
     "F(x,y,z) = [-y, x, z]",
+    "h(v, i) = 2v",
     "k(t) = T([t, 2t, 3t])",
     "A = T",
-    "h = arctan",
+    "B = arctan",
     "J = diff(T)",
   ].forEach((expr) => {
     const node = parse(expr);
@@ -559,36 +557,42 @@ describe("calling a user function with a point", () => {
   });
   const evaluate = (expr: string) => parse(expr).evaluate(scope);
 
-  it.each(["T(P)", "T([1,2,3])", "k(1)"])(
-    "%s spreads the point into T's parameters",
-    (expr) => {
-      expect(evaluate(expr)).toEqual([1, 2, 9]);
-    },
-  );
+  it.each([
+    { from: "an array", expr: "T(P)" },
+    { from: "a Matrix literal", expr: "T([1,2,3])" },
+    { from: "a function body", expr: "k(1)" },
+    { from: "an alias", expr: "A(P)" },
+  ])("spreads a point into T's parameters from $from", ({ expr }) => {
+    expect(evaluate(expr)).toEqual([1, 2, 9]);
+  });
 
   it("passes the point whole to a one-parameter function", () => {
     expect(evaluate("g(P)")).toBe(3);
   });
 
-  it("spreads through an alias of a user function, not of a builtin", () => {
-    expect(evaluate("A(P)")).toEqual([1, 2, 9]);
-    expect(() => evaluate("h([1, 1])")).toThrow();
+  it.each([
+    ["B([1, 1])", "Function 'atan' doesn't apply to matrices"],
+    ["atan2(P)", "Too few arguments in function atan2"],
+  ])("leaves builtins and their aliases alone: %s", (expr, message) => {
+    expect(() => evaluate(expr)).toThrow(message);
   });
 
   it.each([
-    ["T([1,2])", "but got a vector with 2 components"],
-    ["T([[1,2,3],[4,5,6]])", "but got a 2×3 matrix"],
-    ["T(1,2)", "(or one vector with 3 components), but got 2"],
-  ])("%s names T's parameters", (expr, got) => {
-    expect(() => evaluate(expr)).toThrow(
-      `Error evaluating T: T(x, y, z) needs 3 inputs${got.startsWith("(") ? " " : ", "}${got}.`,
-    );
-  });
-
-  it("hints at brackets when a one-parameter function gets coordinates", () => {
-    expect(() => evaluate("g(1, 2, 3)")).toThrow(
-      "Error evaluating g: g(P) needs 1 input, but got 3; to pass a point, put its coordinates in brackets.",
-    );
+    [
+      "T([1,2])",
+      "Error evaluating T: T(x, y, z) needs 3 inputs, but got a vector with 2 components.",
+    ],
+    [
+      "T([[1,2,3],[4,5,6]])",
+      "Error evaluating T: T(x, y, z) needs 3 inputs, but got a 2×3 matrix.",
+    ],
+    [
+      "T(1,2)",
+      "Error evaluating T: T(x, y, z) needs 3 inputs, or one point [x, y, z], but got 2.",
+    ],
+    ["g(1, 2, 3)", "Error evaluating g: g(P) needs 1 input, but got 3."],
+  ])("%s says what the function needs", (expr, message) => {
+    expect(() => evaluate(expr)).toThrow(message);
   });
 
   it("shows T's message bare inside a graphic", () => {
@@ -610,16 +614,26 @@ describe("calling a user function with a point", () => {
     expect(evaluate(pointForm)).toEqual(evaluate(coordinateForm));
   });
 
-  it("diff leaves a mismatched point for T to reject", () => {
-    expect(() => evaluate("diff(T, [1, 2])")).toThrow(
+  it.each([
+    [
+      "diff(T, [1, 2])",
       "T(x, y, z) needs 3 inputs, but got a vector with 2 components",
-    );
+    ],
+    ["curl(F, [1, 2])", "curl(F, x, y, z) needs 3 coordinates"],
+  ])("%s rejects a point of the wrong length", (expr, message) => {
+    expect(() => evaluate(expr)).toThrow(message);
   });
 
   it("leaves diff alone when it takes no user function", () => {
     expect(evaluate("diff(norm, [3, 4])")).toBeCloseTo(1.4);
-    const leibniz = evaluate("\\frac{\\partial (2x)}{\\partial x}") as number[];
+    const leibniz = parser
+      .parse("\\frac{\\partial (2x)}{\\partial x}")
+      .evaluate(new Map([["x", [1, 2]]])) as number[];
     expect(leibniz).toHaveLength(2);
     leibniz.forEach((v) => expect(v).toBeCloseTo(2));
+  });
+
+  it("keeps the parameter count map reads from a user function", () => {
+    expect(evaluate("map([1, 2, 3], h)")).toEqual([2, 4, 6]);
   });
 });

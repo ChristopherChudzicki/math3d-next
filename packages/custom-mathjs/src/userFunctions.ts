@@ -2,8 +2,8 @@ import { isMatrix } from "mathjs";
 
 type UserFunctionSignature = { name: string; params: string[] };
 
-// Keyed by function identity: typed functions and the wrappers around them
-// all report length 2, so length can't tell a user function's arity.
+// Keyed by identity: builtins report length 2 whatever they take, so length
+// can't tell a user function from one.
 const signatures = new WeakMap<object, UserFunctionSignature>();
 
 /** Marks `f` as a user function, which a lone point may be spread into. */
@@ -29,7 +29,7 @@ const vectorEntries = (x: unknown): unknown[] | undefined => {
     : undefined;
 };
 
-/** A lone vector's entries when `n ≥ 2` of them are wanted; else `args`. */
+/** A lone vector of exactly `n ≥ 2` entries, spread; else `args`. */
 const spreadVector = (n: number, args: unknown[]): unknown[] => {
   if (n < 2 || args.length !== 1) return args;
   const entries = vectorEntries(args[0]);
@@ -47,6 +47,5 @@ export {
   setUserFunctionSignature,
   spreadPoint,
   spreadVector,
-  vectorEntries,
 };
 export type { UserFunctionSignature };

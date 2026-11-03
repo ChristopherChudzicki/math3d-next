@@ -103,7 +103,13 @@ type FuncR3R3 = (x: number, y: number, z: number) => number[];
 const createCurl = factory("curl", ["diff"], ({ diff }) => {
   const totalDerivative = diff as unknown as TotalDerivative;
   const curl = (f: FuncR3R3, ...point: unknown[]): number[] => {
-    const [x, y, z] = spreadVector(3, point) as number[];
+    const coordinates = spreadVector(3, point) as number[];
+    if (coordinates.length !== 3) {
+      throw new Error(
+        "curl(F, x, y, z) needs 3 coordinates, or one point [x, y, z]",
+      );
+    }
+    const [x, y, z] = coordinates;
     const jacobian = totalDerivative(f, x, y, z) as number[][];
     if (!jacobian.every((row) => Array.isArray(row) && row.length === 3)) {
       throw new Error("curl(F, x, y, z) requires F to return a 3-vector.");

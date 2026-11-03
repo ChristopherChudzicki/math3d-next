@@ -2,7 +2,6 @@ import math, {
   getUserFunctionSignature,
   setUserFunctionSignature,
   spreadPoint,
-  vectorEntries,
 } from "@math3d/custom-mathjs";
 import type { UserFunctionSignature } from "@math3d/custom-mathjs";
 import type * as mjs from "mathjs";
@@ -80,28 +79,20 @@ const arityError = (
   const n = params.length;
   if (spread.length === n) return undefined;
   const needs = `${name}(${params.join(", ")}) needs ${count(n, "input")}`;
-  if (n < 2) {
-    const hint =
-      n === 1 && args.length > 1
-        ? "; to pass a point, put its coordinates in brackets"
-        : "";
-    return `${needs}, but got ${args.length}${hint}`;
-  }
-  if (args.length === 1) {
-    const entries = vectorEntries(args[0]);
-    if (entries) {
-      return `${needs}, but got a vector with ${count(entries.length, "component")}`;
-    }
+  if (n >= 2 && args.length === 1) {
     const dims = shape(args[0]);
+    if (dims.length === 1) {
+      return `${needs}, but got a vector with ${count(dims[0], "component")}`;
+    }
     if (dims.length > 1) return `${needs}, but got a ${dims.join("×")} matrix`;
   }
-  return `${needs} (or one vector with ${count(n, "component")}), but got ${args.length}`;
+  const point = n >= 2 ? `, or one point [${params.join(", ")}]` : "";
+  return `${needs}${point}, but got ${args.length}`;
 };
 
 /**
- * The function an expression evaluates to, as items see it. A function
- * assignment's wrapper is marked as a user function, which spreads a lone
- * point; an alias's wrapper is marked as its target is.
+ * Wraps an item's function value. A function assignment is marked as a user
+ * function; an alias carries its target's mark.
  */
 const wrapFunction = (
   mjsNode: mjs.MathNode,
@@ -117,7 +108,7 @@ const wrapFunction = (
   const signature = own ?? getUserFunctionSignature(rawResult);
   const f = (...args: unknown[]) => {
     try {
-      const spread = spreadPoint(f, args);
+      const spread = own ? spreadPoint(f, args) : args;
       const error = own && arityError(own, args, spread);
       if (error) throw new Error(error);
       const rawEval = rawResult(...spread);

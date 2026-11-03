@@ -10,7 +10,7 @@ tags:
 - This is input as `grad(f)`, **not** `grad(f(x,y,z))`, etc.
 - The output is already a function: it does not need arguments specified. I.e,. `df=grad(f)` NOT `df(x,y) = grad(f)`.
 - Works on scalar-, vector-, or matrix-valued functions.
-- \(df\), like \(f\), can be called with a point in place of its coordinates: \(df(P)\).
+- If `f` takes coordinates, like `f(x,y,z)`, then `df` also takes a point `P = [x, y, z]`: `df(P)`.
 
 For example, you might define:
 

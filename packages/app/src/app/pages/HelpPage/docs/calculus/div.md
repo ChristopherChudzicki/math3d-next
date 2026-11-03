@@ -9,6 +9,6 @@ tags:
 
 - \(\mathbf{F}\) takes as many variables as it returns components, e.g. \(\operatorname{div}(\mathbf{F}, x, y)\) for a 2D field.
 - Pass \(\mathbf{F}\) itself, not \(\mathbf{F}(x, y, z)\).
-- A point works in place of the coordinates: \(\operatorname{div}(\mathbf{F}, P)\).
+- A point \(P = [x, y, z]\) works in place of the coordinates: \(\operatorname{div}(\mathbf{F}, P)\).
 
 For example, \(\operatorname{div}(F, x, y, z) = 3\) everywhere for \(F(x,y,z) = [x, y, z]\).
