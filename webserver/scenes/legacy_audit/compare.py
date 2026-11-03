@@ -11,7 +11,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-from scenes.legacy_audit.normalize import equivalence
+from scenes.legacy_audit.normalize import equivalence, pdiff_rewritten
 
 MISSING = "<missing>"
 FOLDER = "FOLDER"
@@ -242,7 +242,14 @@ def _compare_item(
         if isinstance(exp.value, table.NeedsEval):
             comparison.outcome = "needs_eval"
         else:
-            kind = None if value == MISSING else equivalence(exp.value, value)
+            # An expression's pdiff calls must arrive rewritten; text never is.
+            target = (
+                pdiff_rewritten(exp.value) if table.is_math(exp.source) else exp.value
+            )
+            comparison.expected = target
+            kind = None if value == MISSING else equivalence(target, value)
+            if kind is not None and target != exp.value:
+                kind = "pdiff_rewrite" if kind == "exact" else f"pdiff_rewrite+{kind}"
             if kind is None:
                 comparison.outcome = "mismatch"
             elif kind != "exact":

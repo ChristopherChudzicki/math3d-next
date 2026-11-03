@@ -65,18 +65,6 @@ KNOWN_UNPAIRED: dict[tuple[str, str], str] = {
 }
 
 
-# Legacy properties math3d-react treats as text and never evaluates:
-# description, color, label and axis have inputType 'text'
-# (react:containers/MathObjects/MathGraphics/metadata.js), a grid's axes has
-# no metadata entry, and a symbol's name is its assignment's left-hand side.
-TEXT_SOURCES = frozenset({"description", "color", "label", "axis", "axes", "name"})
-
-
-def is_math(source: str) -> bool:
-    """Whether an expectation's legacy source is evaluated as an expression."""
-    return not TEXT_SOURCES.intersection(source.split(","))
-
-
 def known_unpaired(side: str, item_type: str, field_name: str) -> str | None:
     return KNOWN_UNPAIRED.get(
         (side, f"{item_type}.{field_name}"), KNOWN_UNPAIRED.get((side, field_name))
@@ -580,7 +568,7 @@ def pair_scene(
             )
         groups: dict[tuple, str] = {}
         for exp in expectations:
-            if exp.source == "constant" or not is_math(exp.source):
+            if exp.source == "constant" or not expected.is_math(exp.source):
                 continue
             lf = _legacy_field(exp.source)
             nf, ne = _next_location(exp.path)

@@ -41,6 +41,7 @@ TABLE = SimpleNamespace(
     Context=lambda **kwargs: SimpleNamespace(**kwargs),
     EXPECTATIONS={"POINT": _point, "FOLDER": _folder},
     LEGACY_TYPE_TO_NEXT_TYPE={"POINT": "POINT", "FOLDER": "FOLDER"},
+    is_math=lambda source: source == "size",
 )
 DEFAULTS = {
     "POINT": {
@@ -115,6 +116,29 @@ def test_editor_mismatch_does_not_affect_render_clean():
     )
     assert _outcomes(result)["description"] == "mismatch"
     assert result.clusters(RENDER) == set()
+
+
+def test_pdiff_must_be_rewritten_in_an_expression_and_never_in_text():
+    call = "\\operatorname{pdiff}\\left(f,x,1\\right)"
+    point = {**POINT, "size": call, "description": call}
+    rewritten = {
+        **point,
+        "size": "\\frac{\\partial f\\left(x\\right)}{\\partial x}",
+    }
+    result = compare_scene(*_scene(point, rewritten), DEFAULTS, TABLE)
+    assert [c.normalization for c in result.comparisons if c.path == "size"] == [
+        "pdiff_rewrite"
+    ]
+    assert _outcomes(result) == {
+        "color": "match",
+        "description": "match",
+        "size": "match_normalized",
+    }
+    unrewritten = compare_scene(*_scene(point, point), DEFAULTS, TABLE)
+    assert _outcomes(unrewritten)["size"] == "mismatch"
+    text_rewritten = {**rewritten, "description": rewritten["size"]}
+    result = compare_scene(*_scene(point, text_rewritten), DEFAULTS, TABLE)
+    assert _outcomes(result)["description"] == "mismatch"
 
 
 def test_needs_eval_and_missing_target_field():
