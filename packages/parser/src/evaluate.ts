@@ -1,4 +1,10 @@
-import math from "@math3d/custom-mathjs";
+import math, {
+  getUserFunctionSignature,
+  setUserFunctionSignature,
+  spreadPoint,
+  vectorEntries,
+} from "@math3d/custom-mathjs";
+import type { UserFunctionSignature } from "@math3d/custom-mathjs";
 import type * as mjs from "mathjs";
 import type { AnonMathNode } from "@math3d/mathscope";
 import { EvaluationError } from "@math3d/mathscope";
@@ -53,6 +59,83 @@ const numericTypeSimplify = (val: unknown): unknown => {
 
 const identity = <T>(x: T): T => x;
 
+const count = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`;
+
+const shape = (x: unknown): number[] => {
+  const dims: number[] = [];
+  let entry = math.isMatrix(x) ? x.toArray() : x;
+  while (Array.isArray(entry)) {
+    dims.push(entry.length);
+    [entry] = entry;
+  }
+  return dims;
+};
+
+/** Why the user function can't take `args`, which spread to `spread`. */
+const arityError = (
+  { name, params }: UserFunctionSignature,
+  args: unknown[],
+  spread: unknown[],
+): string | undefined => {
+  const n = params.length;
+  if (spread.length === n) return undefined;
+  const needs = `${name}(${params.join(", ")}) needs ${count(n, "input")}`;
+  if (n < 2) {
+    const hint =
+      n === 1 && args.length > 1
+        ? "; to pass a point, put its coordinates in brackets"
+        : "";
+    return `${needs}, but got ${args.length}${hint}`;
+  }
+  if (args.length === 1) {
+    const entries = vectorEntries(args[0]);
+    if (entries) {
+      return `${needs}, but got a vector with ${count(entries.length, "component")}`;
+    }
+    const dims = shape(args[0]);
+    if (dims.length > 1) return `${needs}, but got a ${dims.join("×")} matrix`;
+  }
+  return `${needs} (or one vector with ${count(n, "component")}), but got ${args.length}`;
+};
+
+/**
+ * The function an expression evaluates to, as items see it. A function
+ * assignment's wrapper is marked as a user function, which spreads a lone
+ * point; an alias's wrapper is marked as its target is.
+ */
+const wrapFunction = (
+  mjsNode: mjs.MathNode,
+  rawResult: (...args: unknown[]) => unknown,
+) => {
+  const name =
+    math.isAssignmentNode(mjsNode) || math.isFunctionAssignmentNode(mjsNode)
+      ? mjsNode.name
+      : "";
+  const own = math.isFunctionAssignmentNode(mjsNode)
+    ? { name, params: mjsNode.params }
+    : undefined;
+  const signature = own ?? getUserFunctionSignature(rawResult);
+  const f = (...args: unknown[]) => {
+    try {
+      const spread = spreadPoint(f, args);
+      const error = own && arityError(own, args, spread);
+      if (error) throw new Error(error);
+      const rawEval = rawResult(...spread);
+      return numericTypeSimplify(rawEval);
+    } catch (e) {
+      if (!(e instanceof Error)) {
+        throw new Error('Expected error to be an instance of "Error"');
+      }
+      throw new FunctionEvaluationError(name, e);
+    }
+  };
+  if (signature) setUserFunctionSignature(f, signature);
+  Object.defineProperty(f, "length", {
+    value: own ? own.params.length : rawResult.length,
+  });
+  return f;
+};
+
 const getValidatedEvaluate = (
   mjsNode: mjs.MathNode,
   validate: ParseValidate = identity,
@@ -61,26 +144,7 @@ const getValidatedEvaluate = (
   const unvalidatedEvaluate: AnonMathNode["evaluate"] = (scope) => {
     const rawResult = compiled.evaluate(scope);
     if (typeof rawResult === "function") {
-      const name =
-        math.isAssignmentNode(mjsNode) || math.isFunctionAssignmentNode(mjsNode)
-          ? mjsNode.name
-          : "";
-      const f = (...args: unknown[]) => {
-        try {
-          const rawEval = rawResult(...args);
-          return numericTypeSimplify(rawEval);
-        } catch (e) {
-          if (!(e instanceof Error)) {
-            throw new Error('Expected error to be an instance of "Error"');
-          }
-          throw new FunctionEvaluationError(name, e);
-        }
-      };
-      const numArgs = math.isFunctionAssignmentNode(mjsNode)
-        ? mjsNode.params.length
-        : rawResult.length;
-      Object.defineProperty(f, "length", { value: numArgs });
-      return f;
+      return wrapFunction(mjsNode, rawResult);
     }
     return numericTypeSimplify(rawResult);
   };

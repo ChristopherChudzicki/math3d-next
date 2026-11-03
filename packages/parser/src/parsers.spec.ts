@@ -537,3 +537,89 @@ test("Small imaginary numbers are truncated", () => {
   expect(parse("I^2").evaluate()).toBe(-1);
   expect(parse("1+1e-11I").evaluate()).toBe(1);
 });
+
+describe("calling a user function with a point", () => {
+  const { parse } = parser;
+  const scope = new Map<string, unknown>([
+    ["P", [1, 2, 3]],
+    ["x", [1, 2]],
+  ]);
+  [
+    "T(x,y,z) = [x, y, z^2]",
+    "g(P) = P[1] + P[2]",
+    "F(x,y,z) = [-y, x, z]",
+    "k(t) = T([t, 2t, 3t])",
+    "A = T",
+    "h = arctan",
+    "J = diff(T)",
+  ].forEach((expr) => {
+    const node = parse(expr);
+    invariant("name" in node);
+    scope.set(node.name, node.evaluate(scope));
+  });
+  const evaluate = (expr: string) => parse(expr).evaluate(scope);
+
+  it.each(["T(P)", "T([1,2,3])", "k(1)"])(
+    "%s spreads the point into T's parameters",
+    (expr) => {
+      expect(evaluate(expr)).toEqual([1, 2, 9]);
+    },
+  );
+
+  it("passes the point whole to a one-parameter function", () => {
+    expect(evaluate("g(P)")).toBe(3);
+  });
+
+  it("spreads through an alias of a user function, not of a builtin", () => {
+    expect(evaluate("A(P)")).toEqual([1, 2, 9]);
+    expect(() => evaluate("h([1, 1])")).toThrow();
+  });
+
+  it.each([
+    ["T([1,2])", "but got a vector with 2 components"],
+    ["T([[1,2,3],[4,5,6]])", "but got a 2×3 matrix"],
+    ["T(1,2)", "(or one vector with 3 components), but got 2"],
+  ])("%s names T's parameters", (expr, got) => {
+    expect(() => evaluate(expr)).toThrow(
+      `Error evaluating T: T(x, y, z) needs 3 inputs${got.startsWith("(") ? " " : ", "}${got}.`,
+    );
+  });
+
+  it("hints at brackets when a one-parameter function gets coordinates", () => {
+    expect(() => evaluate("g(1, 2, 3)")).toThrow(
+      "Error evaluating g: g(P) needs 1 input, but got 3; to pass a point, put its coordinates in brackets.",
+    );
+  });
+
+  it("shows T's message bare inside a graphic", () => {
+    const curve = parse("_f(t) = T([t, t])").evaluate(scope) as (
+      t: number,
+    ) => unknown;
+    expect(() => curve(1)).toThrow(
+      /^T\(x, y, z\) needs 3 inputs, but got a vector with 2 components$/,
+    );
+  });
+
+  it.each([
+    ["diff(T, P)", "diff(T, 1, 2, 3)"],
+    ["J(P)", "diff(T, 1, 2, 3)"],
+    ["diff(diff(T), P)", "diff(diff(T), 1, 2, 3)"],
+    ["div(F, P)", "div(F, 1, 2, 3)"],
+    ["curl(F, P)", "curl(F, 1, 2, 3)"],
+  ])("%s equals %s", (pointForm, coordinateForm) => {
+    expect(evaluate(pointForm)).toEqual(evaluate(coordinateForm));
+  });
+
+  it("diff leaves a mismatched point for T to reject", () => {
+    expect(() => evaluate("diff(T, [1, 2])")).toThrow(
+      "T(x, y, z) needs 3 inputs, but got a vector with 2 components",
+    );
+  });
+
+  it("leaves diff alone when it takes no user function", () => {
+    expect(evaluate("diff(norm, [3, 4])")).toBeCloseTo(1.4);
+    const leibniz = evaluate("\\frac{\\partial (2x)}{\\partial x}") as number[];
+    expect(leibniz).toHaveLength(2);
+    leibniz.forEach((v) => expect(v).toBeCloseTo(2));
+  });
+});
