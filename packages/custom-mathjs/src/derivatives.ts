@@ -1,4 +1,10 @@
 import { factory } from "mathjs";
+import {
+  getUserFunctionSignature,
+  setUserFunctionSignature,
+  spreadPoint,
+  spreadVector,
+} from "./userFunctions";
 
 const EPS = 0.0008;
 const EPS2 = EPS / 2;
@@ -13,7 +19,7 @@ const createTotalDerivative = factory(
   ({ add, subtract, divide }) => {
     const totalDerivative = (f: NumericFunction, ...sample: Numeric[]) => {
       const df = (...args: Numeric[]): Numeric => {
-        const copy = [...args];
+        const copy = [...spreadPoint(f, args)] as Numeric[];
         const derivComponents = copy.map((arg, j) => {
           // @ts-expect-error the MathJS types only support numeric to matrices
           copy[j] = add(arg, -EPS2);
@@ -32,6 +38,8 @@ const createTotalDerivative = factory(
       };
 
       Object.defineProperty(df, "length", { value: f.length });
+      const signature = getUserFunctionSignature(f);
+      if (signature) setUserFunctionSignature(df, signature);
 
       if (sample.length === 0) {
         return df;
@@ -94,7 +102,14 @@ type TotalDerivative = (
 type FuncR3R3 = (x: number, y: number, z: number) => number[];
 const createCurl = factory("curl", ["diff"], ({ diff }) => {
   const totalDerivative = diff as unknown as TotalDerivative;
-  const curl = (f: FuncR3R3, x: number, y: number, z: number): number[] => {
+  const curl = (f: FuncR3R3, ...point: unknown[]): number[] => {
+    const coordinates = spreadVector(3, point) as number[];
+    if (coordinates.length !== 3) {
+      throw new Error(
+        "curl(F, x, y, z) needs 3 coordinates, or one point [x, y, z]",
+      );
+    }
+    const [x, y, z] = coordinates;
     const jacobian = totalDerivative(f, x, y, z) as number[][];
     if (!jacobian.every((row) => Array.isArray(row) && row.length === 3)) {
       throw new Error("curl(F, x, y, z) requires F to return a 3-vector.");

@@ -9,6 +9,7 @@ tags:
 
 - \(\mathbf{F}\) must be a function of three variables returning a 3-vector.
 - Pass \(\mathbf{F}\) itself, not \(\mathbf{F}(x, y, z)\).
+- A point \(P = [x, y, z]\) works in place of the coordinates: \(\operatorname{curl}(\mathbf{F}, P)\).
 
 For example, you might define:
 

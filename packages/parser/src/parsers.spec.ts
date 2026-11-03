@@ -537,3 +537,103 @@ test("Small imaginary numbers are truncated", () => {
   expect(parse("I^2").evaluate()).toBe(-1);
   expect(parse("1+1e-11I").evaluate()).toBe(1);
 });
+
+describe("calling a user function with a point", () => {
+  const { parse } = parser;
+  const scope = new Map<string, unknown>([["P", [1, 2, 3]]]);
+  [
+    "T(x,y,z) = [x, y, z^2]",
+    "g(P) = P[1] + P[2]",
+    "F(x,y,z) = [-y, x, z]",
+    "h(v, i) = 2v",
+    "k(t) = T([t, 2t, 3t])",
+    "A = T",
+    "B = arctan",
+    "J = diff(T)",
+  ].forEach((expr) => {
+    const node = parse(expr);
+    invariant("name" in node);
+    scope.set(node.name, node.evaluate(scope));
+  });
+  const evaluate = (expr: string) => parse(expr).evaluate(scope);
+
+  it.each([
+    { from: "an array", expr: "T(P)" },
+    { from: "a Matrix literal", expr: "T([1,2,3])" },
+    { from: "a function body", expr: "k(1)" },
+    { from: "an alias", expr: "A(P)" },
+  ])("spreads a point into T's parameters from $from", ({ expr }) => {
+    expect(evaluate(expr)).toEqual([1, 2, 9]);
+  });
+
+  it("passes the point whole to a one-parameter function", () => {
+    expect(evaluate("g(P)")).toBe(3);
+  });
+
+  it.each([
+    ["B([1, 1])", "Function 'atan' doesn't apply to matrices"],
+    ["atan2(P)", "Too few arguments in function atan2"],
+  ])("leaves builtins and their aliases alone: %s", (expr, message) => {
+    expect(() => evaluate(expr)).toThrow(message);
+  });
+
+  it.each([
+    [
+      "T([1,2])",
+      "Error evaluating T: T(x, y, z) needs 3 inputs, but got a vector with 2 components.",
+    ],
+    [
+      "T([[1,2,3],[4,5,6]])",
+      "Error evaluating T: T(x, y, z) needs 3 inputs, but got a 2×3 matrix.",
+    ],
+    [
+      "T(1,2)",
+      "Error evaluating T: T(x, y, z) needs 3 inputs, or one point [x, y, z], but got 2.",
+    ],
+    ["g(1, 2, 3)", "Error evaluating g: g(P) needs 1 input, but got 3."],
+  ])("%s says what the function needs", (expr, message) => {
+    expect(() => evaluate(expr)).toThrow(message);
+  });
+
+  it("shows T's message bare inside a graphic", () => {
+    const curve = parse("_f(t) = T([t, t])").evaluate(scope) as (
+      t: number,
+    ) => unknown;
+    expect(() => curve(1)).toThrow(
+      /^T\(x, y, z\) needs 3 inputs, but got a vector with 2 components$/,
+    );
+  });
+
+  it.each([
+    ["diff(T, P)", "diff(T, 1, 2, 3)"],
+    ["J(P)", "diff(T, 1, 2, 3)"],
+    ["diff(diff(T), P)", "diff(diff(T), 1, 2, 3)"],
+    ["div(F, P)", "div(F, 1, 2, 3)"],
+    ["curl(F, P)", "curl(F, 1, 2, 3)"],
+  ])("%s equals %s", (pointForm, coordinateForm) => {
+    expect(evaluate(pointForm)).toEqual(evaluate(coordinateForm));
+  });
+
+  it.each([
+    [
+      "diff(T, [1, 2])",
+      "T(x, y, z) needs 3 inputs, but got a vector with 2 components",
+    ],
+    ["curl(F, [1, 2])", "curl(F, x, y, z) needs 3 coordinates"],
+  ])("%s rejects a point of the wrong length", (expr, message) => {
+    expect(() => evaluate(expr)).toThrow(message);
+  });
+
+  it("leaves diff alone when it takes no user function", () => {
+    expect(evaluate("diff(norm, [3, 4])")).toBeCloseTo(1.4);
+    const leibniz = parser
+      .parse("\\frac{\\partial (2x)}{\\partial x}")
+      .evaluate(new Map([["x", [1, 2]]])) as number[];
+    expect(leibniz).toHaveLength(2);
+    leibniz.forEach((v) => expect(v).toBeCloseTo(2));
+  });
+
+  it("keeps the parameter count map reads from a user function", () => {
+    expect(evaluate("map([1, 2, 3], h)")).toEqual([2, 4, 6]);
+  });
+});
