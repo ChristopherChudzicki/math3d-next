@@ -15,6 +15,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from scenes.legacy_audit.evaluation import SURFACE_DOMAIN_TYPES
+
 if TYPE_CHECKING:
     from scenes.legacy_audit.evaluation import Pair
 
@@ -63,6 +65,18 @@ ALLOWLIST: list[Entry] = [
         next_field,
     )
     for item_type, next_field in _REAL_FUNC_FIELDS
+] + [
+    Entry(
+        "differ",
+        "complex_vs_nan",
+        "2c samples a domain off the drawn range too; within it, math3d-next skips "
+        "a complex bound's rows, and math3d-react draws the same with one complex "
+        "bound but throws every frame with two, so the scene never loads; owner "
+        "decision 2026-11-03 (tk-legacy-complex-surface-domains-complex-in-react--ce1718)",
+        item_type,
+        "domain",
+    )
+    for item_type in SURFACE_DOMAIN_TYPES
 ]
 
 REPLAYS: dict[str, str] = {

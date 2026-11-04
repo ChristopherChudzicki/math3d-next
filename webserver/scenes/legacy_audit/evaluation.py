@@ -466,12 +466,16 @@ def _legacy_field(source: str) -> str:
     return "value" if first == "sliderValues" else first
 
 
+# Item types whose `domain` is a pair of functions, one bound per parameter.
+SURFACE_DOMAIN_TYPES = (
+    "PARAMETRIC_SURFACE",
+    "EXPLICIT_SURFACE",
+    "EXPLICIT_SURFACE_POLAR",
+)
+
+
 def _rule(item_type: str, legacy_field: str, next_field: str) -> str:
-    if next_field == "domain" and item_type in (
-        "PARAMETRIC_SURFACE",
-        "EXPLICIT_SURFACE",
-        "EXPLICIT_SURFACE_POLAR",
-    ):
+    if next_field == "domain" and item_type in SURFACE_DOMAIN_TYPES:
         return "domain"
     if item_type == "POINT" and next_field == "coords":
         return "coords"
