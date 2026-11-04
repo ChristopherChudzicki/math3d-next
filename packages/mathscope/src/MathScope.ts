@@ -63,7 +63,7 @@ export default class MathScope<P> {
   }: {
     parse: Parse<P>;
     builtins?: Set<string>;
-    /** Ids of definitions that yield to a same-named definition, as builtins do. */
+    /** Ids of definitions that yield to a same-named non-overridable one. */
     isOverridable?: (id: string) => boolean;
   }) {
     this.parse = parse;

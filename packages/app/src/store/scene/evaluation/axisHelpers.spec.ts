@@ -57,6 +57,16 @@ test("rescale_z follows an axis bound that depends on a variable", () => {
   expect(scope().results.get("r-value")).toBe(1);
 });
 
+test.each([
+  { max: "5+", failure: "doesn't parse" },
+  { max: "q", failure: "doesn't evaluate" },
+])("rescale_z is undefined while an axis bound $failure", ({ max }) => {
+  const { scope, setAxisZ } = setup("\\operatorname{rescale}_z(0)");
+  setAxisZ({ max });
+  expect(scope().results.has("r-value")).toBe(false);
+  expect(scope().errors.has("r-value")).toBe(true);
+});
+
 test("an axis bound defined through its own name is a cycle", () => {
   const { scope, setAxisZ } = setup("1");
   setAxisZ({ max: "z_{\\operatorname{max}}+1" });

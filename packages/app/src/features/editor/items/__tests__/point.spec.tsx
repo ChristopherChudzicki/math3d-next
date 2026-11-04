@@ -9,10 +9,10 @@ import {
 } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
 import { assertNotNil } from "@/util/predicates";
-import { APP_OWNED_PREFIX } from "@/store/scene/evaluation/axisHelpers";
 import {
   findItemByDescription,
   getItemByDescription,
+  itemEntries,
 } from "@/test_util/mathItems";
 
 test.each([
@@ -45,7 +45,9 @@ test.each([
 
     await findItemByDescription(item.properties.description);
     const mathScope = store.mathScope.get();
-    expect(mathScope.errors.size).toBe(numEvalErrors + numParseErrors);
+    expect(itemEntries(mathScope.errors).size).toBe(
+      numEvalErrors + numParseErrors,
+    );
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);
   },
 );
@@ -82,7 +84,9 @@ test.each([
     const mathScope = store.mathScope.get();
 
     pasteText(coordsInput, coordsString);
-    expect(mathScope.errors.size).toBe(numEvalErrors + numParseErrors);
+    expect(itemEntries(mathScope.errors).size).toBe(
+      numEvalErrors + numParseErrors,
+    );
     expect(mathScope.results.get(id("coords"))).toStrictEqual(coords);
   },
 );
@@ -106,7 +110,7 @@ test("Adding items adds to mathScope", async () => {
   getItemByDescription(point.properties.description);
   const mathScope = store.mathScope.get();
   expect(mathScope.results.get(id("coords"))).toStrictEqual([[0, 0, 0]]);
-  expect(mathScope.errors.size).toBe(0);
+  expect(itemEntries(mathScope.errors).size).toBe(0);
 });
 
 test("Deleting items removes them from mathScope", async () => {
@@ -122,16 +126,12 @@ test("Deleting items removes them from mathScope", async () => {
 
   const item = await findItemByDescription(point.properties.description);
   const mathScope = store.mathScope.get();
-  const itemResultIds = () =>
-    [...mathScope.results.keys()].filter(
-      (id) => !id.startsWith(APP_OWNED_PREFIX),
-    );
-  expect(itemResultIds().length).toBeGreaterThan(1); // point + folder visibility
-  expect(mathScope.errors.size).toBeGreaterThan(0);
+  expect(itemEntries(mathScope.results).size).toBeGreaterThan(1); // point + folder visibility
+  expect(itemEntries(mathScope.errors).size).toBeGreaterThan(0);
 
   const remove = within(item).getByLabelText("Remove Item");
   await user.click(remove);
-  expect(itemResultIds()).toHaveLength(1); // folder visibility
-  expect(mathScope.errors.size).toBe(0);
+  expect(itemEntries(mathScope.results).size).toBe(1); // folder visibility
+  expect(itemEntries(mathScope.errors).size).toBe(0);
   expect(item).not.toBeInTheDocument();
 });

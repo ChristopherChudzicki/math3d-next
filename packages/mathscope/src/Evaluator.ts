@@ -103,8 +103,8 @@ export default class Evaluator {
   private graphManager: ExpressionGraphManager<MathNode>;
 
   /**
-   * @param isOverridable Ids of assignments that yield to any other assignment
-   * of the same name, as builtins do.
+   * @param isOverridable Ids of assignments that yield to a same-named
+   * assignment whose id isn't overridable, as builtins do.
    */
   constructor(
     builtins: Set<string> = new Set(),
@@ -234,7 +234,7 @@ export default class Evaluator {
         return;
       }
       try {
-        if (node.type === MathNodeType.FunctionAssignmentNode) {
+        if (isAssignmentNode(node)) {
           const unmet = getUnmetDependencies(node, this.scope, this.builtins);
           if (unmet.length > 0) {
             throw new UnmetDependencyError(unmet);

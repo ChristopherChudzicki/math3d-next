@@ -5,6 +5,7 @@ import {
 } from "@math3d/mathitem-configs";
 import { assertInstanceOf, renderTestApp, screen, user } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
+import { itemEntries } from "@/test_util/mathItems";
 
 const config = mathItemConfigs[MIT.ImplicitSurface];
 
@@ -59,7 +60,7 @@ test("Updating parameter names updates the lhs and rhs appropriately", async () 
   await user.clear(paramInput);
   await user.click(paramInput);
   await user.paste("a1");
-  expect(mathScope.errors.size).toBe(2);
+  expect(itemEntries(mathScope.errors).size).toBe(2);
   const newItem = store.getState().scene.items[
     item.id
   ] as MathItem<MIT.ImplicitSurface>;

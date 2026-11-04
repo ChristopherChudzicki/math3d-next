@@ -7,7 +7,11 @@ import MathScope, {
 } from "./MathScope";
 import { SimplerMathJsParser } from "./adapter";
 import type { Parseable } from "./adapter";
-import { CyclicAssignmentError, DuplicateAssignmentError } from "./Evaluator";
+import {
+  CyclicAssignmentError,
+  DuplicateAssignmentError,
+  UnmetDependencyError,
+} from "./Evaluator";
 
 const { parse } = new SimplerMathJsParser(math);
 
@@ -335,6 +339,12 @@ describe('MathScope "change-errors" Events', () => {
   });
 });
 
+test("an assignment that uses an undefined name is an unmet dependency", () => {
+  const scope = new MathScope<Parseable>({ parse });
+  scope.setExpressions([{ id: "b", parseable: "b = a + 1" }]);
+  expect(scope.errors.get("b")).toBeInstanceOf(UnmetDependencyError);
+});
+
 describe("overridable definitions", () => {
   const getScope = () =>
     new MathScope<Parseable>({
@@ -412,6 +422,13 @@ describe("overridable definitions", () => {
     expect(scope.errors.get("user:f")).toBeInstanceOf(CyclicAssignmentError);
     expect(scope.errors.get("user:k")).toBeInstanceOf(CyclicAssignmentError);
     expect(scope.errors.has("app:k")).toBe(false);
+  });
+
+  test("deleting a shadowed app definition keeps the user's value", () => {
+    const scope = getScope();
+    scope.setExpressions([appK, use, { id: "user:k", parseable: "k = 10" }]);
+    scope.deleteExpressions(["app:k"]);
+    expect(scope.results.get("use")).toBe(11);
   });
 
   test("an unparseable user definition doesn't hide the app's", () => {
