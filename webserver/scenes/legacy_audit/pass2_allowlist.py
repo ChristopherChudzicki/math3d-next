@@ -55,29 +55,45 @@ _REAL_FUNC_FIELDS = [
     ("VECTOR_FIELD", "expr"),
 ]
 
-ALLOWLIST: list[Entry] = [
-    Entry(
-        "differ",
-        "complex_vs_nan",
-        "realFunc's Number(...) makes a complex output NaN, which isn't drawn; "
-        "owner decision 2026-11-01 (tk-math3d-next-realfunc-turns-a-complex-output-into-0f7f11)",
-        item_type,
-        next_field,
-    )
-    for item_type, next_field in _REAL_FUNC_FIELDS
-] + [
-    Entry(
-        "differ",
-        "complex_vs_nan",
-        "2c samples a domain off the drawn range too; within it, math3d-next skips "
-        "a complex bound's rows, and math3d-react draws the same with one complex "
-        "bound but throws every frame with two, so the scene never loads; owner "
-        "decision 2026-11-03 (tk-legacy-complex-surface-domains-complex-in-react--ce1718)",
-        item_type,
-        "domain",
-    )
-    for item_type in SURFACE_DOMAIN_TYPES
-]
+ALLOWLIST: list[Entry] = (
+    [
+        Entry(
+            "differ",
+            "complex_vs_nan",
+            "realFunc's Number(...) makes a complex output NaN, which isn't drawn; "
+            "owner decision 2026-11-01 (tk-math3d-next-realfunc-turns-a-complex-output-into-0f7f11)",
+            item_type,
+            next_field,
+        )
+        for item_type, next_field in _REAL_FUNC_FIELDS
+    ]
+    + [
+        Entry(
+            "differ",
+            "complex_vs_nan",
+            "2c samples a domain off the drawn range too; within it, math3d-next skips "
+            "a complex bound's rows, and math3d-react draws the same with one complex "
+            "bound but throws every frame with two, so the scene never loads; owner "
+            "decision 2026-11-03 (tk-legacy-complex-surface-domains-complex-in-react--ce1718)",
+            item_type,
+            "domain",
+        )
+        for item_type in SURFACE_DOMAIN_TYPES
+    ]
+    + [
+        Entry(
+            "regression",
+            "validate: this must be a positive number",
+            "MathBox's volume rejects a non-positive count, so its voxel allocates "
+            "one layer (`dims.width || 1`, etc.), as it does for math3d-next, whose "
+            "validator leaves the count undefined; owner decision 2026-11-03 "
+            "(tk-legacy-vector-fields-with-0-samples-in-a-directi-f57cfc)",
+            "VECTOR_FIELD",
+            next_field,
+        )
+        for next_field in ("samples1", "samples2", "samples3")
+    ]
+)
 
 REPLAYS: dict[str, str] = {
     "round": "math3d-react's mathjs 3 rounds .5 toward +∞ (Math.round); mathjs 15 "
