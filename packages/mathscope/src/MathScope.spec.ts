@@ -7,6 +7,7 @@ import MathScope, {
 } from "./MathScope";
 import { SimplerMathJsParser } from "./adapter";
 import type { Parseable } from "./adapter";
+import { CyclicAssignmentError, DuplicateAssignmentError } from "./Evaluator";
 
 const { parse } = new SimplerMathJsParser(math);
 
@@ -331,5 +332,92 @@ describe('MathScope "change-errors" Events', () => {
     mathScope.deleteExpressions(["x"]);
     expect(spy1).toHaveBeenCalledTimes(1);
     expect(spy2).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("overridable definitions", () => {
+  const getScope = () =>
+    new MathScope<Parseable>({
+      parse,
+      isOverridable: (id) => id.startsWith("app:"),
+    });
+  const appK = { id: "app:k", parseable: "k = 1" };
+  const use = { id: "use", parseable: "k + 1" };
+
+  test("an app definition is used when nothing overrides it", () => {
+    const scope = getScope();
+    scope.setExpressions([appK, use]);
+    expect(scope.results.get("use")).toBe(2);
+  });
+
+  test("a user definition of the same name wins, with no errors", () => {
+    const scope = getScope();
+    scope.setExpressions([appK, use]);
+    scope.setExpressions([{ id: "user:k", parseable: "k = 10" }]);
+    expect(scope.results.get("use")).toBe(11);
+    expect(scope.errors).toStrictEqual(new Map());
+    expect(scope.results.has("app:k")).toBe(false);
+  });
+
+  test("deleting the user definition restores the app's", () => {
+    const scope = getScope();
+    scope.setExpressions([appK, use, { id: "user:k", parseable: "k = 10" }]);
+    scope.deleteExpressions(["user:k"]);
+    expect(scope.results.get("use")).toBe(2);
+  });
+
+  test("the user definition wins whichever is added first", () => {
+    const scope = getScope();
+    scope.setExpressions([{ id: "user:k", parseable: "k = 10" }, use]);
+    scope.setExpressions([appK]);
+    expect(scope.results.get("use")).toBe(11);
+  });
+
+  test("a shadowed app definition re-evaluating leaves the user's value", () => {
+    const scope = getScope();
+    scope.setExpressions([
+      { id: "j", parseable: "j = 1" },
+      { id: "app:k", parseable: "k = j" },
+      use,
+      { id: "user:k", parseable: "k = 10" },
+    ]);
+    scope.setExpressions([{ id: "j", parseable: "j = 5" }]);
+    expect(scope.results.get("use")).toBe(11);
+  });
+
+  test("two user definitions are still duplicates", () => {
+    const scope = getScope();
+    scope.setExpressions([
+      appK,
+      use,
+      { id: "user:k1", parseable: "k = 10" },
+      { id: "user:k2", parseable: "k = 20" },
+    ]);
+    expect(scope.errors.get("user:k1")).toBeInstanceOf(
+      DuplicateAssignmentError,
+    );
+    expect(scope.errors.get("user:k2")).toBeInstanceOf(
+      DuplicateAssignmentError,
+    );
+    expect(scope.errors.has("use")).toBe(true);
+  });
+
+  test("a cycle through a user definition is cyclic, not duplicate", () => {
+    const scope = getScope();
+    scope.setExpressions([
+      appK,
+      { id: "user:f", parseable: "f(t) = t + k" },
+      { id: "user:k", parseable: "k = f(1)" },
+    ]);
+    expect(scope.errors.get("user:f")).toBeInstanceOf(CyclicAssignmentError);
+    expect(scope.errors.get("user:k")).toBeInstanceOf(CyclicAssignmentError);
+    expect(scope.errors.has("app:k")).toBe(false);
+  });
+
+  test("an unparseable user definition doesn't hide the app's", () => {
+    const scope = getScope();
+    scope.setExpressions([appK, use, { id: "user:k", parseable: "k(t = " }]);
+    expect(scope.results.get("use")).toBe(2);
+    expect(scope.errors.has("user:k")).toBe(true);
   });
 });

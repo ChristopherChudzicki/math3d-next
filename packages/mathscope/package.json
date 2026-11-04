@@ -18,7 +18,6 @@
   "dependencies": {
     "@math3d/mathjs-utils": "workspace:^",
     "@math3d/utils": "workspace:^",
-    "just-group-by": "^2.2.0",
     "mathjs": "^15.2.0",
     "tarjan-graph": "^3.0.0",
     "toposort": "^2.0.2"
