@@ -6,3 +6,6 @@ openapi.allauth.yaml
 webserver/.venv/
 # Prettier splits Django template tags across lines, which Django cannot parse.
 webserver/**/templates/
+# Prettier escapes `_` inside the help docs' \( \) math, which MathLive then
+# renders literally.
+packages/app/src/app/pages/HelpPage/docs/

@@ -7,14 +7,14 @@ tags:
   - axes
 ---
 
-- \(\operatorname{rescale}\_y(t)\) and \(\operatorname{rescale}\_z(t)\) do the same for the y- and z-axes.
+- \(\operatorname{rescale}_y(t)\) and \(\operatorname{rescale}_z(t)\) do the same for the y- and z-axes.
 - They follow the axis's min and max as they change.
-- Handy in color maps, which need values from 0 to 1. A surface's default color map is \(\operatorname{mod}(\operatorname{rescale}\_z(z), 1)\).
+- Handy in color maps, which need values from 0 to 1. A surface's default color map is \(\operatorname{mod}(\operatorname{rescale}_z(z), 1)\).
 
 For example, to color a surface by the values of \(f(x, y)\):
 
 \[
-\operatorname{mod}(\operatorname{rescale}\_z(f(x, y)), 1)
+\operatorname{mod}(\operatorname{rescale}_z(f(x, y)), 1)
 \]
 
-If you define your own `rescale_x`, yours is used instead.
+If you define your own `rescale_x`, yours is used instead. Defining your own `x_min` doesn't change `rescale_x`, which always reads the axis.
