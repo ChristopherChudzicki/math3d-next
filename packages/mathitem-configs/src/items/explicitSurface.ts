@@ -1,5 +1,6 @@
 import { ParseableArray, ParseableObjs } from "@math3d/parser";
 import { validators } from "@math3d/validators";
+import { DEFAULT_COLOR_RHS } from "./colorExprParams";
 import { MathItemType, WidgetType } from "../constants";
 import type {
   IMathItem,
@@ -84,8 +85,8 @@ const defaultValues: ExplicitSurfaceProperties = {
   colorExpr: {
     type: "function-assignment",
     name: "_f",
-    params: ["X", "Y", "Z", "x", "y"],
-    rhs: "mod(Z, 1)",
+    params: ["x", "y", "z"],
+    rhs: DEFAULT_COLOR_RHS,
   },
   gridOpacity: "0.5",
   gridWidth: "2",
@@ -119,7 +120,7 @@ type EvaluatedProperties = {
   zIndex: number;
   zOrder: number | undefined;
   expr: (x: number, y: number) => number;
-  colorExpr: (X: number, Y: number, Z: number, u: number, v: number) => number;
+  colorExpr: (x: number, y: number, z: number) => number;
 };
 
 const config: IMathItemConfig<
@@ -140,7 +141,7 @@ const config: IMathItemConfig<
       name: "colorExpr",
       label: "Expression",
       widget: WidgetType.MathValue,
-      validate: validators.realFunc[5][1],
+      validate: validators.realFunc[3][1],
     },
     domain: domain2,
     color,

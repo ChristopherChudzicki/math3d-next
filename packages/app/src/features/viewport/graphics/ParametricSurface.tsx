@@ -7,15 +7,14 @@ import {
   gradients,
   isGradientName,
 } from "@math3d/mathitem-configs";
-import invariant from "tiny-invariant";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 import { useDefaultZOrder } from "@/store/scene/evaluation/useDefaultZOrder";
 import {
   useFinalVisibility,
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
-import { GraphicComponent, AxesRange } from "./interfaces";
-import { project } from "./util";
+import { GraphicComponent } from "./interfaces";
+import { explicitColorFunc, SurfaceColorFunc } from "./surfaceColor";
 
 const props = [
   "opacity",
@@ -45,7 +44,6 @@ const STATIC_COLOR_PROPS: AreaProps = {
 };
 
 const RANGE_01: [number, number] = [0, 1];
-const NORMALIZED_RANGE: AxesRange = [RANGE_01, RANGE_01, RANGE_01];
 
 type MathboxParametricSurfaceProps = {
   visible?: boolean;
@@ -68,8 +66,7 @@ type MathboxParametricSurfaceProps = {
   };
   shaded?: boolean;
   func?: (u: number, v: number) => [number, number, number];
-  range: AxesRange;
-  colorFunc?: (X: number, Y: number, Z: number, u: number, v: number) => number;
+  colorFunc?: SurfaceColorFunc;
   color?: string;
 };
 
@@ -89,7 +86,6 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
   func,
   colorFunc,
   color,
-  range,
   zOrder,
 }) => {
   const [dataNode, setData] = useState<MathboxSelection<"area"> | null>(null);
@@ -136,9 +132,8 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
         expr: (emit, U, V) => {
           const xyz = xyzFunc(U, V);
           if (!xyz) return;
-          const [X, Y, Z] = project(xyz, range, NORMALIZED_RANGE);
           const [u, v] = uvFunc(U, V);
-          const [r, g, b] = gradient.getRGB(colorFunc(X, Y, Z, u, v));
+          const [r, g, b] = gradient.getRGB(colorFunc(...xyz, u, v));
           emit(r, g, b, opacity ?? 1.0);
         },
         width: samples1,
@@ -163,7 +158,6 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
     uvFunc,
     samples1,
     samples2,
-    range,
   ]);
 
   const gridColor = useMemo(() => {
@@ -231,9 +225,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
 
 const ParametricSurface: GraphicComponent<MIT.ParametricSurface> = ({
   item,
-  range,
 }) => {
-  invariant(range);
   const scope = useMathScope();
   const defaultZOrder = useDefaultZOrder(item.id);
   const { color } = item.properties;
@@ -250,7 +242,6 @@ const ParametricSurface: GraphicComponent<MIT.ParametricSurface> = ({
       func={func}
       colorFunc={colorFunc}
       color={color}
-      range={range}
       zOrder={zOrder}
       visible={finalVisibility}
       {...others}
@@ -258,17 +249,13 @@ const ParametricSurface: GraphicComponent<MIT.ParametricSurface> = ({
   );
 };
 
-const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({
-  item,
-  range,
-}) => {
-  invariant(range);
+const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({ item }) => {
   const scope = useMathScope();
   const defaultZOrder = useDefaultZOrder(item.id);
   const { color } = item.properties;
   const {
     expr,
-    colorExpr: colorFunc,
+    colorExpr,
     zOrder = defaultZOrder,
     ...others
   } = useMathItemResults(scope, item, props);
@@ -277,13 +264,16 @@ const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({
     if (!expr) return undefined;
     return (x: number, y: number) => [x, y, +expr(x, y)];
   }, [expr]);
+  const colorFunc = useMemo(
+    () => colorExpr && explicitColorFunc(colorExpr),
+    [colorExpr],
+  );
   const finalVisibility = useFinalVisibility(scope, item);
   return (
     <MathboxParametricSurface
       func={func}
       colorFunc={colorFunc}
       color={color}
-      range={range}
       zOrder={zOrder}
       visible={finalVisibility}
       {...others}
@@ -293,9 +283,7 @@ const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({
 
 const ExplicitSurfacePolar: GraphicComponent<MIT.ExplicitSurfacePolar> = ({
   item,
-  range,
 }) => {
-  invariant(range);
   const scope = useMathScope();
   const defaultZOrder = useDefaultZOrder(item.id);
   const { color } = item.properties;
@@ -320,7 +308,6 @@ const ExplicitSurfacePolar: GraphicComponent<MIT.ExplicitSurfacePolar> = ({
       func={func}
       colorFunc={colorFunc}
       color={color}
-      range={range}
       zOrder={zOrder}
       visible={finalVisibility}
       {...others}

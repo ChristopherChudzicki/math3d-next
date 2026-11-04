@@ -14,6 +14,7 @@ test("Has expected headers and links", async ({ page }) => {
   const links = nav.getByRole("link");
   const expected = [
     "Algebra",
+    "Axes",
     "Calculus",
     "Constants",
     "Logs & Exponents",
