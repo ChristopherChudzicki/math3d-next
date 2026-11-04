@@ -479,6 +479,16 @@ def _variable_slider(item: dict, ctx: Context) -> list[Expectation]:
 _REACT_DOLLY = 50
 
 
+# next:legacy_scene_utils/migrate_scene.py FLAT_AXIS_SCALE: math3d-next rejects
+# a 0 axis scale, so a flat axis is 1/1024 (owner decision 2026-11-03,
+# tk-legacy-scenes-with-an-axis-scale-of-0-show-the-p-7fea41).
+_FLAT_AXIS_SCALE = "1/1024"
+
+
+def _flat(scale: Any) -> Any:
+    return _FLAT_AXIS_SCALE if _simple_number(scale) == 0 else scale
+
+
 def _axis_scales(ctx: Context) -> list[Fraction] | NeedsEval:
     # Each axis sets its component of the root cartesian's scale
     # (react:components/MathBox/MathBoxComponents.js:490-497); next reads the
@@ -490,8 +500,8 @@ def _axis_scales(ctx: Context) -> list[Fraction] | NeedsEval:
     for letter in "xyz":
         if letter not in by_axis:
             return NeedsEval(f"no legacy axis for {letter}")
-        value = _simple_number(by_axis[letter])
-        if value is None or value == 0:
+        value = _simple_number(_flat(by_axis[letter]))
+        if value is None:
             return NeedsEval(
                 f"axis {letter} scale {by_axis[letter]!r} is not a plain number"
             )
@@ -591,9 +601,10 @@ def _axis(item: dict, ctx: Context) -> list[Expectation]:
     out = _Out()
     _universal(out, item)
     _label(out, item)
-    for prop in ("min", "max", "scale", "size", "width"):
+    for prop in ("min", "max", "size", "width"):
         # react:components/MathBox/MathBoxComponents.js:465-523
         out.add(prop, _text(item.get(prop)), "render", prop)
+    out.add("scale", _text(_flat(item.get("scale"))), "render", "scale")
     out.add("axis", _text(item.get("axis")), "render", "axis")
     out.add(
         "ticksVisible", _bool_str(item.get("ticksVisible")), "render", "ticksVisible"

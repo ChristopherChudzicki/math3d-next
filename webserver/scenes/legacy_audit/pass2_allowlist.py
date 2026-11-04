@@ -93,6 +93,18 @@ ALLOWLIST: list[Entry] = (
         )
         for next_field in ("samples1", "samples2", "samples3")
     ]
+    + [
+        Entry(
+            "differ",
+            "zero_vs_value",
+            "math3d-next rejects a 0 axis scale, since it divides camera coordinates "
+            "by it (viewport/shared/coordinates.ts), so the translator makes it "
+            "1/1024: flat to the eye; owner decision 2026-11-03 "
+            "(tk-legacy-scenes-with-an-axis-scale-of-0-show-the-p-7fea41)",
+            "AXIS",
+            "scale",
+        )
+    ]
 )
 
 REPLAYS: dict[str, str] = {

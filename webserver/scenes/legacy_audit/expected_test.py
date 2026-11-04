@@ -173,6 +173,14 @@ def test_camera_needs_eval_when_axis_scale_is_not_a_plain_number():
     assert isinstance(got["target"], NeedsEval)
 
 
+def test_zero_axis_scale_is_flat_for_the_axis_and_the_camera():
+    axis_z = {**rehydrated("AXIS", "axis-z"), "scale": "0"}
+    axes = context().axes | {"axis-z": axis_z}
+    assert values(axis_z)["scale"] == "1/1024"
+    got = values(rehydrated("CAMERA", "camera"), context(axes=axes))
+    assert got["position"] == "[0.5, -2, 512]"
+
+
 @pytest.mark.parametrize(
     ("manual", "slider_values", "rhs"),
     [
