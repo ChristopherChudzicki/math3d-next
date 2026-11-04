@@ -1,6 +1,7 @@
 import pytest
 
 from scenes.legacy_scene_utils.migrate_scene import (
+    FLAT_AXIS_SCALE,
     parse_value,
     translate_legacy_scene,
 )
@@ -102,12 +103,19 @@ def test_blank_axis_scale_is_one():
     assert _camera_position("\\ ") == ("[2.0, -2.0, 2.0]", [])
 
 
-def test_zero_axis_scale_falls_back_to_default_with_a_warning():
-    position, issues = _camera_position("0")
-    assert position == "[2.0, -2.0, 2.0]"
-    assert [i.message for i in issues] == [
-        "axis-x: Camera uses scale 1.0; can't use axis scale '0'"
-    ]
+def test_zero_axis_scale_becomes_flat_and_divides_the_camera():
+    translated = translate_legacy_scene(
+        _dehydrated(
+            graphics={
+                "axis-z": {"type": "AXIS", "scale": "\\frac{0}{1}"},
+                "camera": {"type": "CAMERA", "relativePosition": [2, -2, 0.7]},
+            }
+        )
+    )
+    items = _items(translated)
+    assert items["axis-z"]["scale"] == FLAT_AXIS_SCALE
+    assert items["camera"]["position"] == "[2.0, -2.0, 716.8]"
+    assert translated.issues == []
 
 
 @pytest.mark.parametrize(

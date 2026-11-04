@@ -42,6 +42,11 @@ const nonnegative = real.test({
   message: "Expected a nonnegative number.",
   name: "nonnegative",
 });
+const nonzero = real.test({
+  test: (x) => x !== 0,
+  message: "Expected a nonzero number.",
+  name: "nonzero",
+});
 
 const realVectors = {
   1: yup.tuple([num]).strict().required(),
@@ -258,6 +263,7 @@ export const validators = {
   real: firstArg(real.validateSync.bind(real)),
   nonnegative: firstArg(positive.validateSync.bind(nonnegative)),
   positive: firstArg(positive.validateSync.bind(positive)),
+  nonzero: firstArg(nonzero.validateSync.bind(nonzero)),
   array: firstArg(array.validateSync.bind(array)),
   realFunc: realFuncValidators,
   realVec: realVecValidators,

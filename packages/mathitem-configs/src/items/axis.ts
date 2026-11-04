@@ -128,7 +128,8 @@ const config: IMathItemConfig<
       name: "scale",
       label: "Scale",
       widget: WidgetType.MathValue,
-      validate: validators.real,
+      // The camera's coordinates are divided by the scale (viewport/Camera.tsx).
+      validate: validators.nonzero,
     },
     size,
     ticksVisible: {
