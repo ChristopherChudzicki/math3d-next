@@ -16,6 +16,16 @@ import type { ResolvePromise } from "@math3d/utils";
 import { ParseableObjs } from "@math3d/parser";
 import { findItemByDescription, findBtn } from "@/test_util/mathItems";
 import { mathScopeId } from "@/store/scene/evaluation/mathScope";
+import { APP_OWNED_NAMES } from "@/store/scene/evaluation/axisHelpers";
+
+/** The scope's names, without the app's axis helpers and bounds. */
+const userScope = (evalScope: Map<string, unknown>) =>
+  new Map(
+    [...evalScope].filter(
+      ([name]) =>
+        !APP_OWNED_NAMES.has(name) && !/^_[xyz]_(min|max)$/.test(name),
+    ),
+  );
 
 const valueObj = (v: string): ParseableObjs["assignment"] => {
   const [lhs, rhs] = v.split("=");
@@ -448,13 +458,17 @@ describe("Variable Slider", () => {
       range: { items: ["-2", "+3"], type: "array" },
     });
     const mathsScope = store.mathScope.get();
-    expect(mathsScope.evalScope).toEqual(new Map(Object.entries({ X: 1 })));
+    expect(userScope(mathsScope.evalScope)).toEqual(
+      new Map(Object.entries({ X: 1 })),
+    );
 
     act(() => el.inputLhs.focus());
 
     await user.clear(el.inputLhs);
     await user.paste("Y1");
-    expect(mathsScope.evalScope).toEqual(new Map(Object.entries({ Y1: 1 })));
+    expect(userScope(mathsScope.evalScope)).toEqual(
+      new Map(Object.entries({ Y1: 1 })),
+    );
   });
 
   test.each([

@@ -8,10 +8,16 @@ import {
   MathItemPatch,
 } from "@math3d/mathitem-configs";
 import { filter as collectionFilter } from "lodash-es";
+import invariant from "tiny-invariant";
 import { isNotNil } from "@/util/predicates";
 import type { IdentifiedParseable } from "@math3d/mathscope";
-import type { Parseable, ValidatedParseable } from "@math3d/parser";
+import type {
+  Parseable,
+  ParseableObjs,
+  ValidatedParseable,
+} from "@math3d/parser";
 import { AppMathScope } from "@/store/scene/state/interfaces";
+import { axisBoundName } from "./axisHelpers";
 
 const mathScopeId = (itemId: string, propName: string) =>
   `${itemId}-${propName}`;
@@ -28,6 +34,30 @@ const getMathProperties = <T extends MathItemType>(
 ): PropertyConfig<string, unknown>[] =>
   collectionFilter(config.properties, (p) => MATH_WIDGETS.has(p.widget));
 
+/**
+ * An axis's min and max define the scope's `_x_min` etc., which the axis
+ * helpers read.
+ */
+const toParseableObj = (
+  item: MathItemPatch,
+  propName: string,
+  expr: string,
+): ParseableObjs["expr"] | ParseableObjs["assignment"] => {
+  if (
+    item.type === MathItemType.Axis &&
+    (propName === "min" || propName === "max")
+  ) {
+    const { axis } = (item as MathItemPatch<MathItemType.Axis>).properties;
+    invariant(axis, "An axis's bounds sync together with its axis property.");
+    return {
+      type: "assignment",
+      lhs: axisBoundName(axis, propName),
+      rhs: expr,
+    };
+  }
+  return { expr, type: "expr" };
+};
+
 const getIdentifiedExpressions = (
   items: MathItemPatch[],
 ): IdentifiedParseable<ValidatedParseable>[] =>
@@ -43,7 +73,7 @@ const getIdentifiedExpressions = (
           const parseable: Parseable = item.properties[prop.name];
           const parseableObj: Parseable =
             typeof parseable === "string"
-              ? { expr: parseable, type: "expr" }
+              ? toParseableObj(item, prop.name, parseable)
               : parseable;
           return {
             id: mathScopeId(item.id, prop.name),

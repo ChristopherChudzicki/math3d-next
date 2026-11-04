@@ -38,6 +38,17 @@ describe("makeMathScope", () => {
     expect(mathScope.results.get("b")).toBe(31);
   });
 
+  test("without axis items, the axis helpers use the viewport's default range", () => {
+    const mathScope = makeMathScope();
+    mathScope.setExpressions([
+      { id: "a", parseable: "\\operatorname{rescale}_x(0)" },
+      { id: "b", parseable: "z_{\\operatorname{max}}" },
+    ]);
+    expect(mathScope.errors).toEqual(new Map());
+    expect(mathScope.results.get("a")).toBe(0.5);
+    expect(mathScope.results.get("b")).toBe(1);
+  });
+
   test("builtin list has: sin, cos, exp, log...", () => {
     /**
      * Builtins list is via a mathjs property that isn't really documented, so

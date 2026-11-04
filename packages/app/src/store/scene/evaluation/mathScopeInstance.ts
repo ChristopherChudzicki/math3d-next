@@ -2,6 +2,7 @@ import MathScope from "@math3d/mathscope";
 import { latexParser, Parseable } from "@math3d/parser";
 import math from "@math3d/custom-mathjs";
 import { AppMathScope } from "@/store/scene/state/interfaces";
+import { APP_OWNED_PREFIX, AXIS_HELPERS } from "./axisHelpers";
 
 const builtins = new Set(
   Object.keys(
@@ -9,7 +10,14 @@ const builtins = new Set(
     math.expression.mathWithTransform,
   ),
 );
-const makeMathScope = (): AppMathScope =>
-  new MathScope<Parseable>({ parse: latexParser.parse, builtins });
+const makeMathScope = (): AppMathScope => {
+  const scope = new MathScope<Parseable>({
+    parse: latexParser.parse,
+    builtins,
+    isOverridable: (id) => id.startsWith(APP_OWNED_PREFIX),
+  });
+  scope.setExpressions(AXIS_HELPERS);
+  return scope;
+};
 
 export { makeMathScope, builtins };
