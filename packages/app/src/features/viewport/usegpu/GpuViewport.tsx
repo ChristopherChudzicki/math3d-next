@@ -17,26 +17,45 @@ import { project } from "@/features/viewport/graphics/util";
 import type { AxesRange } from "@/features/viewport/graphics/interfaces";
 import { GraphicSpecReporter, SpecCollector } from "./graphicSpecs";
 import { makeSceneRoot } from "./liveScene";
+import { toOrbit } from "./camera";
 import type { CameraSpec, Coords, GraphicSpec, SceneSpec } from "./specs";
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 
-const CAMERA_PROPS = ["position", "target", "useRelative"] as const;
+const CAMERA_PROPS = [
+  "position",
+  "target",
+  "useRelative",
+  "isRotateEnabled",
+  "isPanEnabled",
+  "isZoomEnabled",
+] as const;
 
 /** The camera item's position/target in MathBox cartesian coordinates, as ../Camera.tsx computes them. */
 const useCameraSpec = (
   camera: Parameters<typeof useMathItemResults>[1],
   range: AxesRange,
   scale: Coords,
-): CameraSpec => {
+) => {
   const scope = useMathScope();
   invariant(camera.type === MathItemType.Camera);
-  const { position, target, useRelative } = useMathItemResults(
-    scope,
-    camera,
-    CAMERA_PROPS,
+  const {
+    position,
+    target,
+    useRelative,
+    isRotateEnabled,
+    isPanEnabled,
+    isZoomEnabled,
+  } = useMathItemResults(scope, camera, CAMERA_PROPS);
+  const controls = useMemo<SceneSpec["controls"]>(
+    () => ({
+      rotate: isRotateEnabled ?? true,
+      pan: isPanEnabled ?? true,
+      zoom: isZoomEnabled ?? true,
+    }),
+    [isRotateEnabled, isPanEnabled, isZoomEnabled],
   );
-  return useMemo(() => {
+  const spec = useMemo<CameraSpec>(() => {
     const threeRange: AxesRange = [
       [-scale[0], scale[0]],
       [-scale[1], scale[1]],
@@ -51,6 +70,10 @@ const useCameraSpec = (
       target: fromUi(target ?? [0, 0, 0]),
     };
   }, [position, target, useRelative, range, scale]);
+  // Memoised so the orbit (and its `target` array) keeps its identity across
+  // unrelated scene changes; OrbitControls re-seeds from a new target.
+  const orbit = useMemo(() => toOrbit(spec), [spec]);
+  return { orbit, controls };
 };
 
 const useSpecCollector = () => {
@@ -77,7 +100,7 @@ const GpuViewportContent: React.FC = () => {
     select.getItems(state, REQUIRED_ITEMS),
   );
   const { scale, range } = useAxesInfo(x, y, z);
-  const cameraSpec = useCameraSpec(camera, range, scale);
+  const { orbit, controls } = useCameraSpec(camera, range, scale);
   const [specs, report] = useSpecCollector();
   const graphics = useMemo(() => items.filter(isMathGraphic), [items]);
 
@@ -85,12 +108,13 @@ const GpuViewportContent: React.FC = () => {
     () => ({
       range,
       scale,
-      camera: cameraSpec,
+      orbit,
+      controls,
       graphics: graphics.flatMap(({ id }) =>
         specs[id] ? [{ id, spec: specs[id] }] : [],
       ),
     }),
-    [range, scale, cameraSpec, graphics, specs],
+    [range, scale, orbit, controls, graphics, specs],
   );
 
   const render = useCallback(

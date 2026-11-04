@@ -4,7 +4,7 @@
  * instead of JSX and never touches React or Redux. Everything it needs
  * arrives as a `SceneSpec`.
  */
-import { keyed, use } from "@use-gpu/live";
+import { keyed, memoArgs, use } from "@use-gpu/live";
 import type { LiveElement } from "@use-gpu/live";
 import type { Emit, TensorArray } from "@use-gpu/core";
 import { AutoCanvas, WebGPU } from "@use-gpu/webgpu";
@@ -15,7 +15,7 @@ import {
   OrbitCamera,
   Pass,
 } from "@use-gpu/workbench";
-import { OrbitControls } from "@use-gpu/interact";
+import { ORBIT_CONTROLS_DEFAULT, OrbitControls } from "@use-gpu/interact";
 import { Sampler } from "@use-gpu/frame";
 import {
   Arrow,
@@ -31,7 +31,6 @@ import {
 } from "@use-gpu/plot";
 import type {
   AxisSpec,
-  CameraSpec,
   Coords,
   GraphicSpec,
   GridSpec,
@@ -96,8 +95,8 @@ const renderAxis = (spec: AxisSpec): LiveElement =>
 const renderGrid = (spec: GridSpec): LiveElement =>
   use(Grid, {
     axes: spec.axes,
-    first: { divide: spec.divisions[0] },
-    second: { divide: spec.divisions[1] },
+    first: { divide: spec.divisions[0], nice: spec.snap },
+    second: { divide: spec.divisions[1], nice: spec.snap },
     width: spec.width,
     color: spec.color,
     zBias: spec.zBias,
@@ -177,8 +176,9 @@ const renderSurface = (spec: SurfaceSpec): LiveElement => {
 const renderImplicitSurface = (spec: ImplicitSurfaceSpec): LiveElement => {
   const { value, domain, samples } = spec;
   const size = [samples, samples, samples];
-  // One extra ring of samples outside the domain closes the surface at the
-  // domain's boundary instead of leaving it open.
+  // Sample one cell beyond the domain; the layer then scissors the surface at
+  // the domain edge, so a surface crossing it is cut cleanly rather than
+  // ending a cell short.
   const padding = 1;
   // Finite-difference step: half a grid cell per axis.
   const h = domain.map(([lo, hi]) => (hi - lo) / samples / 2);
@@ -219,15 +219,12 @@ const renderImplicitSurface = (spec: ImplicitSurfaceSpec): LiveElement => {
             color: spec.color,
             zBias: spec.zBias,
             mode: drawMode(spec.color),
-            // DualContourLayer defaults this on, which dithers a translucent
-            // surface into speckle under MSAA.
-            alphaToCoverage: false,
           }),
       }),
   });
 };
 
-const renderGraphic = (spec: GraphicSpec): LiveElement => {
+const renderGraphic = memoArgs((spec: GraphicSpec): LiveElement => {
   switch (spec.kind) {
     case "point":
       return renderPoint(spec);
@@ -244,28 +241,17 @@ const renderGraphic = (spec: GraphicSpec): LiveElement => {
     default:
       return null;
   }
-};
+  // Specs are immutable, so an unchanged spec reference means nothing to
+  // redo; without this memo every graphic (and every CPU sampler behind it)
+  // re-ran on any change anywhere in the scene.
+}, "renderGraphic");
 
-/**
- * Use.GPU's orbit camera is y-up; math3d is z-up. `Cartesian` below rotates
- * the whole plot -90° about x, taking math (x, y, z) to world (x, z, -y).
- * The camera spec is in math3d coordinates, so apply the same map to it.
- */
-const toWorld = ([x, y, z]: Coords): Coords => [x, z, -y];
-
-/** Orbit parameters (see `makeOrbitMatrix` in @use-gpu/core) that put the camera at `position` looking at `target`. */
-const toOrbit = (camera: CameraSpec) => {
-  const p = toWorld(camera.position);
-  const t = toWorld(camera.target);
-  const d = [p[0] - t[0], p[1] - t[1], p[2] - t[2]];
-  const radius = Math.hypot(...d) || 1;
-  return {
-    radius,
-    pitch: Math.asin(d[1] / radius),
-    bearing: Math.atan2(-d[0], d[2]),
-    target: t,
-  };
-};
+/** The orbit-control bindings for the camera item's enable flags: an empty binding list disables that action. */
+const actionBindings = (controls: SceneSpec["controls"]) => ({
+  move: controls.pan ? ORBIT_CONTROLS_DEFAULT.move : [],
+  rotate: controls.rotate ? ORBIT_CONTROLS_DEFAULT.rotate : [],
+  zoom: controls.zoom ? ORBIT_CONTROLS_DEFAULT.zoom : [],
+});
 
 const PLOT_ROTATION_DEGREES = [-90, 0, 0];
 const WHITE = [1, 1, 1, 1];
@@ -297,7 +283,6 @@ export const makeSceneRoot = (
       plot,
     ],
   });
-  const orbit = toOrbit(scene.camera);
   return use(WebGPU, {
     fallback: () => null,
     children: use(AutoCanvas, {
@@ -305,7 +290,8 @@ export const makeSceneRoot = (
       samples: 4,
       backgroundColor: WHITE,
       children: use(OrbitControls, {
-        ...orbit,
+        ...scene.orbit,
+        actionBindings: actionBindings(scene.controls),
         render: (
           radius: number,
           bearing: number,

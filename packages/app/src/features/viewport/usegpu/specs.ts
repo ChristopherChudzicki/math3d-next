@@ -9,7 +9,7 @@ export type Coords = [number, number, number];
 export type Range3 = [[number, number], [number, number], [number, number]];
 
 type Common = {
-  /** MathBox-style depth bias, in the same units for both renderers. */
+  /** MathBox-style depth bias. Both renderers have one; their scales are not calibrated against each other. */
   zBias: number;
 };
 
@@ -67,6 +67,8 @@ export type GridSpec = Common & {
   kind: "grid";
   axes: "xy" | "yz" | "zx";
   divisions: [number, number];
+  /** Snap gridlines to round values instead of dividing the range evenly. */
+  snap: boolean;
   width: number;
   color: RGBA;
 };
@@ -89,10 +91,23 @@ export type CameraSpec = {
   target: Coords;
 };
 
+/** Use.GPU `OrbitControls` parameters (world coordinates, y up). */
+export type OrbitSpec = {
+  radius: number;
+  bearing: number;
+  pitch: number;
+  target: Coords;
+};
+
 export type SceneSpec = {
   range: Range3;
   scale: Coords;
-  camera: CameraSpec;
+  /**
+   * Seeds the orbit controls. Must keep its identity while the camera item is
+   * unchanged: a new `target` array resets the user's pan.
+   */
+  orbit: OrbitSpec;
+  controls: { rotate: boolean; pan: boolean; zoom: boolean };
   graphics: { id: string; spec: GraphicSpec }[];
 };
 

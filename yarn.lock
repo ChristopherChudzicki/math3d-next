@@ -4208,7 +4208,7 @@ __metadata:
 
 "@use-gpu/workbench@patch:@use-gpu/workbench@npm%3A0.21.0#~/.yarn/patches/@use-gpu-workbench-npm-0.21.0-2d614b987d.patch":
   version: 0.21.0
-  resolution: "@use-gpu/workbench@patch:@use-gpu/workbench@npm%3A0.21.0#~/.yarn/patches/@use-gpu-workbench-npm-0.21.0-2d614b987d.patch::version=0.21.0&hash=b6fc6b"
+  resolution: "@use-gpu/workbench@patch:@use-gpu/workbench@npm%3A0.21.0#~/.yarn/patches/@use-gpu-workbench-npm-0.21.0-2d614b987d.patch::version=0.21.0&hash=82026d"
   dependencies:
     "@use-gpu/core": "npm:^0.21.0"
     "@use-gpu/frame": "npm:^0.21.0"
@@ -4224,7 +4224,7 @@ __metadata:
     gl-matrix: "npm:3.4.3"
     lodash: "npm:^4.17.21"
     lru-cache: "npm:^6.0.0"
-  checksum: 10/ba882e15af9eba3d572d7aeba7f70c4cb218fb31a42057d9ac3711e9052ba4283f2d52ff59f8d1792829c25071604c6b621f10f82169a31dd4682469429032e3
+  checksum: 10/c43933c5d3682b0598bd842c10f69498bde8904045fdf39ca3fd542d5e3de8c6a606909c440212eb36fe02dd8219a295f5a4f83a347f824fc46e3e42f2266ebd
   languageName: node
   linkType: hard
 

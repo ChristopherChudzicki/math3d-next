@@ -247,15 +247,17 @@ const Surface: React.FC<Props<SurfaceItem> & { range: AxesRange }> = ({
     const gridColor: RGBA = gradient
       ? [0, 0, 0, gridOpacity ?? 0.5]
       : (flat.map((c, i) => (i < 3 ? c * 0.5 : gridOpacity ?? 0.5)) as RGBA);
+    const count = (n: number | undefined, fallback: number) =>
+      Math.max(2, Math.round(n ?? fallback));
     return {
       kind: "surface",
-      samples: [samples1 ?? 64, samples2 ?? 64],
+      samples: [count(samples1, 64), count(samples2, 64)],
       position,
       colorAt,
       shaded: shaded ?? true,
       zBias: zBias ?? 0,
       grid: {
-        lines: [grid1 ?? 8, grid2 ?? 8],
+        lines: [Math.round(grid1 ?? 8), Math.round(grid2 ?? 8)],
         width: gridWidth ?? 2,
         color: gridColor ?? BLACK,
       },
@@ -347,11 +349,11 @@ const Axis: React.FC<Props<MIT.Axis>> = ({ item }) => {
   return null;
 };
 
-const GRID_PROPS = ["divisions", "width", "opacity", "zBias"] as const;
+const GRID_PROPS = ["divisions", "width", "opacity", "zBias", "snap"] as const;
 const Grid: React.FC<Props<MIT.Grid>> = ({ item }) => {
   const scope = useMathScope();
   const visible = useFinalVisibility(scope, item);
-  const { divisions, width, opacity, zBias } = useMathItemResults(
+  const { divisions, width, opacity, zBias, snap } = useMathItemResults(
     scope,
     item,
     GRID_PROPS,
@@ -363,11 +365,12 @@ const Grid: React.FC<Props<MIT.Grid>> = ({ item }) => {
       kind: "grid",
       axes,
       divisions: [divisions?.[0] ?? 10, divisions?.[1] ?? 10],
+      snap: !!snap,
       width: width ?? 1,
       color: parseColor(color, opacity ?? 1),
       zBias: zBias ?? 0,
     };
-  }, [visible, axes, divisions, width, color, opacity, zBias]);
+  }, [visible, axes, divisions, snap, width, color, opacity, zBias]);
   useReportSpec(item.id, spec);
   return null;
 };
