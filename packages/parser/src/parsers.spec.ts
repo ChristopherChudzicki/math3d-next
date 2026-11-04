@@ -663,7 +663,7 @@ describe("calling a user function with a point", () => {
   });
 });
 
-describe("braced function calls stay one term", () => {
+describe("a function call in place of a variable keeps its meaning", () => {
   const scope = new Map<string, unknown>(
     Object.entries({
       r_y: (t: number) => 2 * t,
@@ -675,12 +675,16 @@ describe("braced function calls stay one term", () => {
   const evaluate = (expr: string) => parser.parse(expr).evaluate(scope);
 
   it.each([
-    { expr: "5{\\operatorname{r}_z\\left(z\\right)}", expected: 5 * 10 },
+    { expr: "5\\operatorname{r}_z\\left(z\\right)", expected: 5 * 10 },
     {
-      expr: "{r_y\\left(y\\right)}^{r_z\\left(z\\right)}",
+      expr: "\\pi \\operatorname{r}_z\\left(z\\right)",
+      expected: Math.PI * 10,
+    },
+    {
+      expr: "r_y\\left(y\\right)^{r_z\\left(z\\right)}",
       expected: 6 ** 10,
     },
-    { expr: "\\frac{{r_z\\left(z\\right)}}{2}", expected: 10 / 2 },
+    { expr: "\\frac{r_z\\left(z\\right)}{2}", expected: 10 / 2 },
   ])("$expr", ({ expr, expected }) => {
     expect(evaluate(expr)).toBe(expected);
   });

@@ -681,18 +681,17 @@ def _range_function(
     return param, rhs
 
 
-# A capital X, Y or Z that next's parser reads as a whole identifier.
-_NORMALIZED_COORDINATE = re.compile(r"(?<![A-Za-z_\\])[XYZ](?![A-Za-z0-9_])")
+# A capital X, Y or Z that next's parser reads as a whole identifier, not
+# part of a name, a command (`\X`) or a subscript (`x_{Z}`).
+_NORMALIZED_COORDINATE = re.compile(r"(?<![A-Za-z_\\])(?<!_\{)[XYZ](?![A-Za-z0-9_])")
 
 
 def _color_expr(out: _Out, item: dict, explicit: bool) -> None:
-    """math3d-react's color expressions take X, Y, Z: the point normalized over
-    the axis ranges (react:components/MathBox/MathBoxComponents.js, scaleToUnit).
-    next's take the point x, y, z and normalize with rescale_x etc.
-    (owner decision 2026-11-04, tk-color-maps-axis-normalizing-helpers-replace-the--10949b).
+    """react's color expressions take X, Y, Z, the point normalized over the
+    axis ranges (react:components/MathBox/MathBoxComponents.js, scaleToUnit);
+    next's take x, y, z and use rescale_x etc. (owner decision 2026-11-04).
     A coordinate is `$c` when a surface parameter or a global in the body
-    already has its name; an explicit surface's own parameters are x and y.
-    """
+    has its name; an explicit surface's own parameters are its x and y."""
     color = _parse_func_assignment(item.get("colorExpr"))
     expr = _parse_func_assignment(item.get("expr"))
     if color is None or expr is None:
@@ -710,12 +709,17 @@ def _color_expr(out: _Out, item: dict, explicit: bool) -> None:
         if explicit
         else [slots["x"], slots["y"], slots["z"], *surface_params]
     )
-    by_capital = {"X": slots.get("x", "x"), "Y": slots.get("y", "y"), "Z": slots["z"]}
+    if explicit:
+        x_slot, y_slot = surface_params if len(surface_params) == 2 else ("x", "y")
+    else:
+        x_slot, y_slot = slots["x"], slots["y"]
+    by_capital = {"X": x_slot, "Y": y_slot, "Z": slots["z"]}
 
     def rescaled(match: re.Match[str]) -> str:
         capital = match[0]
         call = f"\\operatorname{{rescale}}_{capital.lower()}\\left({by_capital[capital]}\\right)"
-        return "{" + call + "}"
+        # Braces keep an exponent grouped for display: Y^{rescale_z(z)}.
+        return "{" + call + "}" if body[: match.start()].endswith("^") else call
 
     out.add("colorExpr.type", "function-assignment", "render", "constant")
     out.add("colorExpr.name", name, "render", "colorExpr")

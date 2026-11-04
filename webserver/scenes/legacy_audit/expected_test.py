@@ -241,7 +241,7 @@ def test_surface_color_takes_coordinates_and_rescales():
     got = values(rehydrated("PARAMETRIC_SURFACE"))
     params = [got[f"colorExpr.params.{i}"] for i in range(5)]
     assert params == ["x", "y", "z", "u", "v"]
-    assert got["colorExpr.rhs"] == r"mod({\operatorname{rescale}_z\left(z\right)}, 1)"
+    assert got["colorExpr.rhs"] == r"mod(\operatorname{rescale}_z\left(z\right), 1)"
 
 
 def test_explicit_surface_color_keeps_a_global_z():
@@ -254,6 +254,17 @@ def test_explicit_surface_color_keeps_a_global_z():
     assert params == ["x", "y", r"\$z"]
     assert "colorExpr.params.3" not in got
     assert got["colorExpr.rhs"] == "\\arg(z(x,y))"
+
+
+def test_explicit_surface_color_rescales_its_own_params():
+    surface = {
+        **rehydrated("EXPLICIT_SURFACE"),
+        "expr": "_f(s, t)=s+t",
+        "colorExpr": "_f(X, Y, Z, s, t)=X+Y",
+    }
+    assert values(surface)["colorExpr.rhs"] == (
+        r"\operatorname{rescale}_x\left(s\right)+\operatorname{rescale}_y\left(t\right)"
+    )
 
 
 def test_blank_calculated_visibility_keeps_the_authors_visibility():
