@@ -8,6 +8,7 @@ from typing import Literal, cast
 
 import scenes.legacy_scene_utils.legacy_data as old
 from scenes.legacy_scene_utils import operators, pdiff
+from scenes.legacy_scene_utils.color_expr import translate_color_expr
 from scenes.legacy_scene_utils.issue_log import IssueLog
 from scenes.legacy_scene_utils.symbols import depends_on
 from scenes.schemas.math_items import (
@@ -377,7 +378,9 @@ class ItemMigrator:
         domain = self.domain_array([rangeU, rangeV])
         return ExplicitSurfaceProperties(
             color=x.color,
-            colorExpr=self.function_assignment(x.colorExpr),
+            colorExpr=translate_color_expr(
+                self.function_assignment(x.colorExpr), "explicit", expr.params
+            ),
             description=x.description,
             domain=domain,
             expr=expr,
@@ -401,7 +404,9 @@ class ItemMigrator:
         domain = self.domain_array([rangeU, rangeV])
         return ExplicitSurfacePolarProperties(
             color=x.color,
-            colorExpr=self.function_assignment(x.colorExpr),
+            colorExpr=translate_color_expr(
+                self.function_assignment(x.colorExpr), "polar", expr.params
+            ),
             description=x.description,
             domain=domain,
             expr=expr,
@@ -532,7 +537,9 @@ class ItemMigrator:
         domain = self.domain_array([rangeU, rangeV])
         return ParametricSurfaceProperties(
             color=x.color,
-            colorExpr=self.function_assignment(x.colorExpr),
+            colorExpr=translate_color_expr(
+                self.function_assignment(x.colorExpr), "parametric", expr.params
+            ),
             description=x.description,
             domain=domain,
             expr=expr,

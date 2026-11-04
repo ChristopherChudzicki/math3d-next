@@ -46,8 +46,8 @@ default_scene_data = {
                 "colorExpr": {
                     "type": "function-assignment",
                     "name": "_f",
-                    "params": ["X", "Y", "Z", "u", "v"],
-                    "rhs": "mod(Z, 1)",
+                    "params": ["x", "y", "z"],
+                    "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)",
                 },
                 "gridWidth": "2",
                 "description": "Explicit Surface",

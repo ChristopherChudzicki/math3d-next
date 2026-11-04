@@ -209,8 +209,8 @@ def test_explicit_surface(in_patch, out_patch):
             "color": "#3090FF",
             "colorExpr": {
                 "name": "_f",
-                "params": ["X", " Y", " Z", " x", " y"],
-                "rhs": "mod(Z, 1)",
+                "params": ["x", "y", "z"],
+                "rhs": "mod({\\operatorname{rescale}_z\\left(z\\right)}, 1)",
                 "type": "function-assignment",
             },
             "description": "Explicit Surface",
@@ -285,8 +285,8 @@ def test_explicit_surface_polar(in_patch, out_patch):
             "color": "#3090FF",
             "colorExpr": {
                 "name": "_f",
-                "params": ["X", " Y", " Z", " r", " \\theta"],
-                "rhs": "mod(Z, 1)",
+                "params": ["x", "y", "z", "r", "\\theta"],
+                "rhs": "mod({\\operatorname{rescale}_z\\left(z\\right)}, 1)",
                 "type": "function-assignment",
             },
             "description": "Explicit Surface (Polar)",
@@ -512,8 +512,8 @@ def test_parametric_surface():
             "color": "#3090FF",
             "colorExpr": {
                 "name": "_f",
-                "params": ["X", " Y", " Z", " u", " v"],
-                "rhs": "mod(Z, 1)",
+                "params": ["x", "y", "z", "u", "v"],
+                "rhs": "mod({\\operatorname{rescale}_z\\left(z\\right)}, 1)",
                 "type": "function-assignment",
             },
             "description": "Parametric Surface",

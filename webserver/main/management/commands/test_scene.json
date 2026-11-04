@@ -41,10 +41,10 @@
         "samples1": "64",
         "samples2": "64",
         "colorExpr": {
-          "rhs": "mod(Z, 1)",
+          "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)",
           "name": "_f",
           "type": "function-assignment",
-          "params": ["X", "Y", "Z", "x", "y"]
+          "params": ["x", "y", "z"]
         },
         "gridWidth": "2",
         "description": "Explicit Surface",
