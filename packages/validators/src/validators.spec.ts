@@ -60,3 +60,8 @@ describe("realFunc", () => {
     expect(v(1, 2)).toEqual(NaN);
   });
 });
+
+test("nonzero accepts a negative number and rejects zero", () => {
+  expect(validators.nonzero(-2)).toBe(-2);
+  expect(() => validators.nonzero(0)).toThrow("Expected a nonzero number.");
+});

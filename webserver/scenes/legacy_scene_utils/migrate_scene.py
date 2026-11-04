@@ -42,29 +42,33 @@ def parse_value(value: str, default: float) -> float:
 
 AxisScale = float | str
 
+# A zero axis scale flattens the scene in math3d-react, but math3d-next's camera
+# coordinates are divided by the scale (viewport/Camera.tsx), so 0 can't be
+# stored. This is flat to the eye, and a power of two divides the camera exactly.
+FLAT_AXIS_SCALE = "1/1024"
 
-def get_axis_scales(
-    old_items: dict, log: IssueLog
-) -> tuple[AxisScale, AxisScale, AxisScale]:
+_AXES = (("axis-x", "1"), ("axis-y", "1"), ("axis-z", "1/2"))
+
+
+def flatten_zero_axis_scales(old_items: dict) -> None:
+    """Replace each axis scale that is 0 with ``FLAT_AXIS_SCALE``."""
+    for axis_id, default_text in _AXES:
+        raw = str(old_items[axis_id].get("scale", default_text))
+        if parse_value(raw, math.nan) == 0:
+            old_items[axis_id] = {**old_items[axis_id], "scale": FLAT_AXIS_SCALE}
+
+
+def get_axis_scales(old_items: dict) -> tuple[AxisScale, AxisScale, AxisScale]:
     """Get the axis scales from the legacy axis items (flat dicts). A scale
     that isn't a plain number stays an expression for math3d-next to evaluate,
     as it does the axis's own. A negative scale mirrors its axis in both apps
     and is kept. A blank one is 1.0, math3d-next's fallback for a scale it
-    can't evaluate (useAxesInfo.tsx); zero falls back to the default, with a
-    warning."""
+    can't evaluate (useAxesInfo.tsx)."""
     scales: list[AxisScale] = []
-    for axis_id, default_text, default in (
-        ("axis-x", "1", 1.0),
-        ("axis-y", "1", 1.0),
-        ("axis-z", "1/2", 0.5),
-    ):
+    for axis_id, default_text in _AXES:
         raw = str(old_items[axis_id].get("scale", default_text))
         value = parse_value(raw, math.nan)
-        if value == 0:
-            log.set_prefix(axis_id)
-            log.warning(f"Camera uses scale {default}; can't use axis scale {raw!r}")
-            scales.append(default)
-        elif not math.isnan(value):
+        if not math.isnan(value):
             scales.append(value)
         elif not blank_to_empty(raw):
             scales.append(1.0)
@@ -124,7 +128,8 @@ def translate_legacy_scene(dehydrated: dict) -> TranslatedScene:
         old_items[item_id] = {**defaults, **old_items[item_id]}
 
     log = IssueLog()
-    axis_scales = get_axis_scales(old_items, log)
+    flatten_zero_axis_scales(old_items)
+    axis_scales = get_axis_scales(old_items)
 
     migrator = ItemMigrator(
         log=log,
