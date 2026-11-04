@@ -249,6 +249,11 @@ const Surface: React.FC<Props<SurfaceItem> & { range: AxesRange }> = ({
       : (flat.map((c, i) => (i < 3 ? c * 0.5 : gridOpacity ?? 0.5)) as RGBA);
     const count = (n: number | undefined, fallback: number) =>
       Math.max(2, Math.round(n ?? fallback));
+    // 0 means no gridlines; a single line would make the sampler step Δ/0.
+    const lineCount = (n: number | undefined, fallback: number) => {
+      const rounded = Math.round(n ?? fallback);
+      return rounded <= 0 ? 0 : Math.max(2, rounded);
+    };
     return {
       kind: "surface",
       samples: [count(samples1, 64), count(samples2, 64)],
@@ -257,7 +262,7 @@ const Surface: React.FC<Props<SurfaceItem> & { range: AxesRange }> = ({
       shaded: shaded ?? true,
       zBias: zBias ?? 0,
       grid: {
-        lines: [Math.round(grid1 ?? 8), Math.round(grid2 ?? 8)],
+        lines: [lineCount(grid1, 8), lineCount(grid2, 8)],
         width: gridWidth ?? 2,
         color: gridColor ?? BLACK,
       },
