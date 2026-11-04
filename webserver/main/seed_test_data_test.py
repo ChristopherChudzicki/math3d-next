@@ -4,8 +4,9 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 
 from main.management.commands.seed_test_data import create_test_user
-from scenes.factories import ExampleSceneFactory
+from scenes.factories import SceneFactory
 from scenes.models import ExampleScene, Scene
+from scenes.seed_scenes import read_seed_scene, seed_scene_paths
 
 
 @pytest.mark.django_db
@@ -108,24 +109,16 @@ def test_seeds_one_anonymous_scene():
 
 
 @pytest.mark.django_db
-def test_seeds_examples_once():
-    seed = {"email": "seeded@example.com", "uid": "4242", "scene_count": 1}
-    call_command("seed_test_data", **seed)
-    call_command("seed_test_data", **seed)
+def test_placeholder_examples_yield_to_committed_ones():
+    """Databases seeded before the committed examples existed hold placeholders
+    at 10/20/30, where committed examples land; re-seeding must not collide."""
+    placeholder = SceneFactory.create(title="Example Scene 0", author=None)
+    ExampleScene.objects.create(scene=placeholder, position=10)
 
-    assert [e.scene.title for e in ExampleScene.objects.all()] == [
-        "Example Scene 0",
-        "Example Scene 1",
-        "Example Scene 2",
-    ]
-
-
-@pytest.mark.django_db
-def test_existing_examples_are_left_alone():
-    """A database with real examples must not get test ones mixed in."""
-    example = ExampleSceneFactory.create()
     call_command(
         "seed_test_data", email="seeded@example.com", uid="4242", scene_count=1
     )
 
-    assert list(ExampleScene.objects.all()) == [example]
+    seeds = [read_seed_scene(path) for path in seed_scene_paths()]
+    committed = {seed.key for seed in seeds if seed.example}
+    assert {e.scene.key for e in ExampleScene.objects.all()} == committed

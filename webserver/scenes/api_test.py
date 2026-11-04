@@ -340,6 +340,19 @@ def test_get_legacy_key_migrates_then_returns_scene():
 
 
 @pytest.mark.django_db
+def test_get_legacy_key_serves_a_non_legacy_scene_as_is(monkeypatch):
+    """A row that stopped being legacy owns its key: its content stays, and
+    the legacy row's counter no longer moves."""
+    legacy = LegacyScene.objects.create(dehydrated=LEGACY_DEHYDRATED_FIXTURE)
+    owned = SceneFactory.create(key=legacy.key, is_legacy=False)
+    monkeypatch.setattr("scenes.api.migrate_scene", mock.Mock())
+    response = Client().get(_detail(legacy.key))
+    assert response.json()["title"] == owned.title
+    legacy.refresh_from_db()
+    assert legacy.times_accessed == 0
+
+
+@pytest.mark.django_db
 def test_get_legacy_key_serves_the_stored_scene_when_migration_fails(monkeypatch):
     legacy = LegacyScene.objects.create(dehydrated=LEGACY_DEHYDRATED_FIXTURE)
     migrate_scene(legacy)

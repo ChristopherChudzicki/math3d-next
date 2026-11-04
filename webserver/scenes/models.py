@@ -129,6 +129,10 @@ class Scene(TimestampedModel):
 
     times_accessed = models.IntegerField(default=0)
 
+    # True while the row is a provisional translation of a LegacyScene: the
+    # app shows the legacy banner, and get_scene re-translates it on every
+    # read. False once something owns the content (a seed file, a verified
+    # translation); the key is then served as is.
     is_legacy = models.BooleanField(default=False)
 
     # Bumped only by the edits that request a screenshot render (create, items,

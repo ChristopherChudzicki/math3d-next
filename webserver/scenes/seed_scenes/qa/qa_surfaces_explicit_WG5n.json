@@ -1,0 +1,343 @@
+{
+  "key": "qa_surfaces_explicit_WG5n",
+  "title": "QA: explicit surfaces",
+  "items": [
+    {
+      "id": "cameraFolder",
+      "type": "FOLDER",
+      "properties": {
+        "isCollapsed": "false",
+        "description": "Camera Controls"
+      }
+    },
+    {
+      "id": "camera",
+      "type": "CAMERA",
+      "properties": {
+        "description": "Camera",
+        "isOrthographic": "false",
+        "isPanEnabled": "false",
+        "isZoomEnabled": "true",
+        "isRotateEnabled": "true",
+        "position": "[-6, -4, 2]",
+        "target": "[0, 0, 0]",
+        "updateOnDrag": "true",
+        "useRelative": "false"
+      }
+    },
+    {
+      "id": "axes",
+      "type": "FOLDER",
+      "properties": {
+        "isCollapsed": "false",
+        "description": "Axes and Grids"
+      }
+    },
+    {
+      "id": "axis-x",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "x",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "x",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "6",
+        "width": "1",
+        "end": "true",
+        "start": "false",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-y",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "x",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "y",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "6",
+        "width": "1",
+        "end": "true",
+        "start": "false",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-z",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "x",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "z",
+        "scale": "1/2",
+        "ticksVisible": "true",
+        "size": "6",
+        "width": "1",
+        "end": "true",
+        "start": "false",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "grid-xy",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "axes": "xy",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "[10, 10]",
+        "snap": "false"
+      }
+    },
+    {
+      "id": "grid-yz",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "axes": "yz",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "[10, 10]",
+        "snap": "false"
+      }
+    },
+    {
+      "id": "grid-zx",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "axes": "zx",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "[10, 10]",
+        "snap": "false"
+      }
+    },
+    {
+      "id": "0",
+      "type": "FOLDER",
+      "properties": {
+        "isCollapsed": "false",
+        "description": "Explicit surfaces"
+      }
+    },
+    {
+      "id": "1",
+      "type": "EXPLICIT_SURFACE",
+      "properties": {
+        "description": "Explicit Surface",
+        "color": "#3090ff",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["x", "y"],
+          "rhs": "(x^2-y^2)/4"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["y"],
+              "rhs": "[-3, 3]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["x"],
+              "rhs": "[-3, 3]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", "Y", "Z", "x", "y"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "64",
+        "samples2": "64",
+        "grid1": "6",
+        "grid2": "6"
+      }
+    },
+    {
+      "id": "2",
+      "type": "EXPLICIT_SURFACE",
+      "properties": {
+        "description": "Explicit Surface",
+        "color": "#ff0000",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.5",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "false",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["x", "y"],
+          "rhs": "\\sin(x)+\\cos(y)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["y"],
+              "rhs": "[-3, 3]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["x"],
+              "rhs": "[-3, 3]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", "Y", "Z", "x", "y"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "1",
+        "samples1": "64",
+        "samples2": "64",
+        "grid1": "12",
+        "grid2": "12"
+      }
+    },
+    {
+      "id": "3",
+      "type": "EXPLICIT_SURFACE",
+      "properties": {
+        "description": "Explicit Surface",
+        "color": "#00aa00",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.5",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["x", "y"],
+          "rhs": "1-(x^2+y^2)/8"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["y"],
+              "rhs": "[-3, 3]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["x"],
+              "rhs": "[-3, 3]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", "Y", "Z", "x", "y"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "64",
+        "samples2": "64",
+        "grid1": "0",
+        "grid2": "0"
+      }
+    }
+  ],
+  "itemOrder": {
+    "0": ["1", "2", "3"],
+    "main": ["0"],
+    "setup": ["cameraFolder", "axes"],
+    "cameraFolder": ["camera"],
+    "axes": ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"]
+  }
+}

@@ -1,0 +1,987 @@
+{
+  "key": "horizontal_revolution_washer",
+  "title": "Surface of Revolution: Washer Method (Horizontal Axis)",
+  "items": [
+    {
+      "id": "camera",
+      "type": "CAMERA",
+      "properties": {
+        "description": "Camera",
+        "isOrthographic": "false",
+        "isPanEnabled": "false",
+        "isZoomEnabled": "true",
+        "isRotateEnabled": "true",
+        "position": "[0.5149807781923083, -2.4733700720570853, 0.61523373059784]",
+        "target": "[0.0, 0.0, 0.0]",
+        "updateOnDrag": "true",
+        "useRelative": "true"
+      }
+    },
+    {
+      "id": "axis-x",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "x",
+        "labelVisible": "true",
+        "min": "-1",
+        "max": "+5",
+        "axis": "x",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-y",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "y",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "y",
+        "scale": "1",
+        "ticksVisible": "false",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-z",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "y",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "z",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "grid-xy",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "xy"
+      }
+    },
+    {
+      "id": "grid-yz",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "yz"
+      }
+    },
+    {
+      "id": "grid-zx",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "zx"
+      }
+    },
+    {
+      "id": "1",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Controls",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "2",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Rotation Axis",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "3",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Washer",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "4",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Inner Surface",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "5",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Outer Surface",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "6",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Side Caps",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "7",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Helper Functions",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "32",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Front Cap",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "axes",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Axes and Grids",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "cameraFolder",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Camera Controls",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "mainFolder",
+      "type": "FOLDER",
+      "properties": {
+        "description": "A Folder",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "18",
+      "type": "LINE",
+      "properties": {
+        "description": "Line",
+        "color": "#2c3e50",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "",
+        "labelVisible": "false",
+        "size": "6",
+        "width": "4",
+        "start": "false",
+        "end": "false",
+        "coords": "\\left[\\left[\\ a-1,\\ 0,\\ y\\right],\\ \\left[\\ b+1,\\ 0,\\ y\\right]\\right]"
+      }
+    },
+    {
+      "id": "22",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Parametric Surface",
+        "color": "#e74c3c",
+        "visible": true,
+        "calculatedVisibility": "washer",
+        "useCalculatedVisibility": true,
+        "opacity": "0.75",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_c\\left(X-0.5\\cdot dX,u,v\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[0,\\ 1\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\theta\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "23",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Parametric Surface",
+        "color": "#e74c3c",
+        "visible": true,
+        "calculatedVisibility": "washer",
+        "useCalculatedVisibility": true,
+        "opacity": "0.75",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_f\\left(u,v\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[X-0.5\\cdot dX,\\ X+0.5\\cdot dX\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\theta\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "24",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Parametric Surface",
+        "color": "#e74c3c",
+        "visible": true,
+        "calculatedVisibility": "washer",
+        "useCalculatedVisibility": true,
+        "opacity": "0.75",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_c\\left(X+0.5\\cdot dX,u,v\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[0,1\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\theta\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "25",
+      "type": "PARAMETRIC_CURVE",
+      "properties": {
+        "description": "Parametric Curve",
+        "color": "#e67e22",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "size": "6",
+        "width": "4",
+        "start": "false",
+        "end": "false",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["t"],
+          "rhs": "r_g\\left(t,\\theta\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "expr",
+              "expr": "\\left[a,b\\right]"
+            }
+          ]
+        },
+        "samples1": "128"
+      }
+    },
+    {
+      "id": "26",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Parametric Surface",
+        "color": "#3090FF",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.4",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_g\\left(u,v\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[a,b\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\theta\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "28",
+      "type": "PARAMETRIC_CURVE",
+      "properties": {
+        "description": "Parametric Curve",
+        "color": "#e67e22",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "size": "6",
+        "width": "4",
+        "start": "false",
+        "end": "false",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["t"],
+          "rhs": "r_f\\left(t,\\theta\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "expr",
+              "expr": "\\left[a,b\\right]"
+            }
+          ]
+        },
+        "samples1": "128"
+      }
+    },
+    {
+      "id": "29",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Parametric Surface",
+        "color": "#3090FF",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.4",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_f\\left(u,v\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[a,b\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\theta\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "30",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Parametric Surface",
+        "color": "#3090FF",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.4",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_c\\left(a,u,v\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[0,1\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\theta\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "31",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Parametric Surface",
+        "color": "#3090FF",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.4",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_c\\left(b,u,v\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[0,1\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\theta\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "34",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Parametric Surface",
+        "color": "#3090FF",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.4",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "front\\left(u,\\ v\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[a,\\ b\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\ 1\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "35",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Parametric Surface",
+        "color": "#e74c3c",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.75",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "front\\left(u,\\ v\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[X-\\frac{dX}{2},X+\\frac{dX}{2}\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,1\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "8",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "a",
+          "rhs": "1"
+        },
+        "description": "Left Limit"
+      }
+    },
+    {
+      "id": "9",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "b",
+          "rhs": "4"
+        },
+        "description": "Right Limit"
+      }
+    },
+    {
+      "id": "10",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "f(x)",
+          "rhs": "3+e^{-x}"
+        },
+        "description": "Outer Radius"
+      }
+    },
+    {
+      "id": "11",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "g\\left(x\\right)",
+          "rhs": "\\sqrt{x}"
+        },
+        "description": "Inner Radius"
+      }
+    },
+    {
+      "id": "12",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "y",
+          "rhs": "1"
+        },
+        "description": "Axis"
+      }
+    },
+    {
+      "id": "13",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "dX",
+          "rhs": "0.125"
+        },
+        "description": "Washer Width"
+      }
+    },
+    {
+      "id": "14",
+      "type": "VARIABLE_SLIDER",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "\\theta",
+          "rhs": "6.283185307179587"
+        },
+        "fps": "60",
+        "range": {
+          "type": "array",
+          "items": ["0", "2\\pi"]
+        },
+        "duration": "4",
+        "description": "Rotation Angle",
+        "isAnimating": "false",
+        "speedMultiplier": "1"
+      }
+    },
+    {
+      "id": "15",
+      "type": "VARIABLE_SLIDER",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "X",
+          "rhs": "2.86"
+        },
+        "fps": "60",
+        "range": {
+          "type": "array",
+          "items": ["a", "b"]
+        },
+        "duration": "4",
+        "description": "Washer Position",
+        "isAnimating": "false",
+        "speedMultiplier": "1"
+      }
+    },
+    {
+      "id": "16",
+      "type": "BOOLEAN_VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "washer",
+          "rhs": "true"
+        },
+        "description": "Washer Visibility"
+      }
+    },
+    {
+      "id": "19",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "r_f\\left(t,\\ \\theta\\right)",
+          "rhs": "\\left[\\ t,\\ \\left(f\\left(t\\right)-y\\right)\\cdot\\sin\\left(\\theta\\right),\\ \\left(f\\left(t\\right)-y\\right)\\cos\\left(\\theta\\right)\\right]+\\left[\\ 0,\\ 0,\\ y\\right]"
+        },
+        "description": "Outer Radius Surface Function"
+      }
+    },
+    {
+      "id": "20",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "r_g\\left(t,\\theta\\right)",
+          "rhs": "\\left[\\ t,\\ \\left(g\\left(t\\right)-y\\right)\\cdot\\sin\\left(\\theta\\right),\\ \\left(g\\left(t\\right)-y\\right)\\cos\\left(\\theta\\right)\\right]+\\left[\\ 0,\\ 0,\\ y\\right]"
+        },
+        "description": "Inner Radius Surface Function"
+      }
+    },
+    {
+      "id": "21",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "r_c(t,u,v)",
+          "rhs": "r_f\\left(t,v\\right)+u\\cdot\\left(r_g\\left(t,v\\right)-r_f\\left(t,v\\right)\\right)"
+        },
+        "description": "Cap Function"
+      }
+    },
+    {
+      "id": "33",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "front\\left(u,\\ v\\right)",
+          "rhs": "v\\cdot r_f\\left(u,\\ \\theta\\right)\\ +\\ \\left(1-v\\right)\\cdot r_g\\left(u,\\ \\theta\\right)"
+        },
+        "description": "Variable or Function"
+      }
+    }
+  ],
+  "itemOrder": {
+    "1": ["10", "11", "14", "15", "16", "8", "9", "12", "13"],
+    "2": ["18"],
+    "3": ["22", "23", "24"],
+    "4": ["25", "26"],
+    "5": ["28", "29"],
+    "6": ["21", "30", "31"],
+    "7": ["19", "20"],
+    "32": ["33", "34", "35"],
+    "axes": ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"],
+    "main": ["1", "2", "3", "4", "5", "6", "32", "7"],
+    "setup": ["cameraFolder", "axes"],
+    "cameraFolder": ["camera"]
+  },
+  "example": {
+    "position": 140
+  }
+}

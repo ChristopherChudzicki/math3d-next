@@ -85,10 +85,15 @@ def get_scene_meta(request, key: str):
 
 @scenes_router.get("/{key}/", response=SceneSchema, auth=None, by_alias=True)
 def get_scene(request, key: str):
-    if LegacyScene.objects.filter(key=key).exists():
-        # v0 parity: re-migrate on every legacy-key GET. The .update() below then
-        # stacks on the count migrate_scene carries over — harmless for a view counter.
-        legacy = LegacyScene.objects.get(key=key)
+    legacy = LegacyScene.objects.filter(key=key).first()
+    if (
+        legacy is not None
+        and not Scene.objects.filter(key=key, is_legacy=False).exists()
+    ):
+        # v0 parity: re-migrate on every legacy-key GET, unless the row has been
+        # taken over (a seed file, a verified translation). The .update() below
+        # then stacks on the count migrate_scene carries over — harmless for a
+        # view counter.
         legacy.times_accessed += 1
         legacy.save()
         try:
