@@ -1,0 +1,26 @@
+diff --git a/cjs/layers/dual-contour-layer.cjs b/cjs/layers/dual-contour-layer.cjs
+index 5dcfea4af363bfc59b1224e08e9480aa1ccd9ecc..9f6bfecb9e4474dd2b339f5c3475d5961c810032 100644
+--- a/cjs/layers/dual-contour-layer.cjs
++++ b/cjs/layers/dual-contour-layer.cjs
+@@ -233,7 +233,7 @@ const DualContourLayer = (0, _live.memo)((props)=>{
+         alphaToCoverage,
+         alphaToDiscard,
+         depthTest: true,
+-        depthWrite: true,
++        depthWrite: mode !== "oit",
+         blend
+     });
+     const defines = (0, _live.useMemo)(()=>({
+diff --git a/mjs/layers/dual-contour-layer.mjs b/mjs/layers/dual-contour-layer.mjs
+index dc135af3b1550c9a0374f2ec5c1c26cf75a65f56..0984f58c9c7b3b6d2617e2c93db77869c181d656 100644
+--- a/mjs/layers/dual-contour-layer.mjs
++++ b/mjs/layers/dual-contour-layer.mjs
+@@ -223,7 +223,7 @@ export const DualContourLayer = memo((props)=>{
+         alphaToCoverage,
+         alphaToDiscard,
+         depthTest: true,
+-        depthWrite: true,
++        depthWrite: mode !== "oit",
+         blend
+     });
+     const defines = useMemo(()=>({

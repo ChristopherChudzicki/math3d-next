@@ -2,7 +2,7 @@
   "extends": "@math3d/tsconfig/base.json",
   "compilerOptions": {
     "rootDir": ".",
-    "types": ["vite/client", "vitest/globals"],
+    "types": ["vite/client", "vitest/globals", "@webgpu/types"],
     "baseUrl": "src",
     "paths": {
       "@/*": ["./*"]
