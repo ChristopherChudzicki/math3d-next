@@ -275,6 +275,31 @@ describe("Parsing assignments and function assignments", () => {
     },
   );
 
+  it.each([
+    { lhs: "\\$z", rhs: "3", type: "assignment" as const },
+    {
+      name: "\\$g",
+      params: ["t"],
+      rhs: "t",
+      type: "function-assignment" as const,
+    },
+  ])("Names starting with $ are reserved ($type)", (parseable) => {
+    const err = getParseError(parseable);
+    assertErrorMatches(err.lhs, /Names starting with \$ are reserved/);
+  });
+
+  it("allows parameters starting with $", () => {
+    const node = parser.parse({
+      name: "_f",
+      params: ["x", "y", "\\$z"],
+      rhs: "\\$z+x",
+      type: "function-assignment",
+    });
+    const f = node.evaluate();
+    invariant(typeof f === "function");
+    expect(f(1, 2, 10)).toBe(11);
+  });
+
   it("Associates bad parameters with their indexes", () => {
     const err = getParseError({
       lhs: "f(x,y,w+,z,z)",
@@ -635,5 +660,28 @@ describe("calling a user function with a point", () => {
 
   it("keeps the parameter count map reads from a user function", () => {
     expect(evaluate("map([1, 2, 3], h)")).toEqual([2, 4, 6]);
+  });
+});
+
+describe("braced function calls stay one term", () => {
+  const scope = new Map<string, unknown>(
+    Object.entries({
+      r_y: (t: number) => 2 * t,
+      r_z: (t: number) => 2 * t,
+      y: 3,
+      z: 5,
+    }),
+  );
+  const evaluate = (expr: string) => parser.parse(expr).evaluate(scope);
+
+  it.each([
+    { expr: "5{\\operatorname{r}_z\\left(z\\right)}", expected: 5 * 10 },
+    {
+      expr: "{r_y\\left(y\\right)}^{r_z\\left(z\\right)}",
+      expected: 6 ** 10,
+    },
+    { expr: "\\frac{{r_z\\left(z\\right)}}{2}", expected: 10 / 2 },
+  ])("$expr", ({ expr, expected }) => {
+    expect(evaluate(expr)).toBe(expected);
   });
 });
