@@ -237,6 +237,25 @@ def test_surface_range_depending_on_second_parameter_swaps_sampling():
     )
 
 
+def test_surface_color_takes_coordinates_and_rescales():
+    got = values(rehydrated("PARAMETRIC_SURFACE"))
+    params = [got[f"colorExpr.params.{i}"] for i in range(5)]
+    assert params == ["x", "y", "z", "u", "v"]
+    assert got["colorExpr.rhs"] == r"mod({\operatorname{rescale}_z\left(z\right)}, 1)"
+
+
+def test_explicit_surface_color_keeps_a_global_z():
+    surface = {
+        **rehydrated("EXPLICIT_SURFACE"),
+        "colorExpr": "_f(X, Y, Z, x, y)=\\arg(z(x,y))",
+    }
+    got = values(surface)
+    params = [got[f"colorExpr.params.{i}"] for i in range(3)]
+    assert params == ["x", "y", r"\$z"]
+    assert "colorExpr.params.3" not in got
+    assert got["colorExpr.rhs"] == "\\arg(z(x,y))"
+
+
 def test_blank_calculated_visibility_keeps_the_authors_visibility():
     point = {
         **rehydrated("POINT"),
