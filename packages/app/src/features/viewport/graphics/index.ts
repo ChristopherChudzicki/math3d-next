@@ -1,1 +1,1 @@
-export { Graphic, graphicNeedsRange } from "./Graphic";
+export { Graphic } from "./Graphic";

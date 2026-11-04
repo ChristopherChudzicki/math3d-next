@@ -40,4 +40,3 @@ const colorExprParams = (
 };
 
 export { colorExprParams, DEFAULT_COLOR_RHS };
-export type { SurfaceKind };

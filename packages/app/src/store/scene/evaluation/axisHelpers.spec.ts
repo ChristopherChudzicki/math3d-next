@@ -10,17 +10,20 @@ const assignment = (lhs: string, rhs: string) => ({
   rhs,
 });
 
+type Folder = ReturnType<SceneBuilder["folder"]>;
+
 /**
  * A store whose scene holds variables `a = 2` (id "a") and `r = <rhs>`
- * (id "r"), with the z axis running from -5 to 5.
+ * (id "r"), plus whatever `addItems` adds, with the z axis from -5 to 5.
  */
-const setup = (rhs: string) => {
+const setup = (rhs: string, addItems: (folder: Folder) => void = () => {}) => {
   const scene = new SceneBuilder();
   scene.axis("z", { min: "-5", max: "5" });
-  scene
+  const folder = scene
     .folder()
     .variable({ value: assignment("a", "2") }, "a")
     .variable({ value: assignment("r", rhs) }, "r");
+  addItems(folder);
   const store = getStore();
   store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
   const scope = () => store.mathScope.get();
@@ -76,21 +79,28 @@ test("an axis bound defined through its own name is a cycle", () => {
 });
 
 test("a user's x_min wins, while rescale_x still follows the axis", () => {
-  const { store, scope } = setup("\\operatorname{rescale}_x(0)");
-  store.dispatch(actions.addNewItem({ type: MIT.Variable }));
-  const userId = Object.values(store.getState().scene.items).find(
-    (item) => item.type === MIT.Variable && !["a", "r"].includes(item.id),
-  )?.id;
-  if (!userId) throw new Error("expected a new variable");
-  store.dispatch(
-    actions.setProperties({
-      id: userId,
-      type: MIT.Variable,
-      properties: { value: assignment("x_{\\operatorname{min}}", "100") },
-    }),
+  const { scope } = setup("\\operatorname{rescale}_x(0)", (folder) =>
+    folder.variable(
+      { value: assignment("x_{\\operatorname{min}}", "100") },
+      "user",
+    ),
   );
-  expect(scope().results.get(`${userId}-value`)).toBe(100);
   expect(scope().evalScope.get("x_min")).toBe(100);
   expect(scope().results.get("r-value")).toBe(0.5);
   expect(scope().errors).toEqual(new Map());
+});
+
+test.each([
+  { add: (f: Folder) => f.explicitSurface({}, "s"), args: [0, 0, 2.5] },
+  {
+    add: (f: Folder) => f.explicitSurfacePolar({}, "s"),
+    args: [0, 0, 2.5, 1, 0],
+  },
+  { add: (f: Folder) => f.parametricSurface({}, "s"), args: [0, 0, 2.5, 0, 0] },
+])("a default color map colors by the point's height", ({ add, args }) => {
+  const { scope } = setup("1", add);
+  const color = scope().results.get("s-colorExpr");
+  if (typeof color !== "function") throw new Error("expected a function");
+  // z = 2.5 is 3/4 of the way up a z axis from -5 to 5.
+  expect(color(...args)).toBe(0.75);
 });

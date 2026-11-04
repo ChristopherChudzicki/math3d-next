@@ -2,7 +2,6 @@ import {
   MathItem,
   MathItemType as MIT,
   isMathGraphic,
-  DEFAULT_COLOR_RHS,
 } from "@math3d/mathitem-configs";
 import { act, renderTestApp, screen, waitFor, within } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
@@ -234,7 +233,6 @@ test("Setting colorExpr for surfaces", async () => {
   await user.click(within(dialog).getByRole("tab", { name: "Color Map" }));
 
   within(dialog).getByText("f(a, b, z) =");
-  expect(within(dialog).queryByText(/capitals/)).not.toBeInTheDocument();
 
   const exprInput = within(dialog).getByRole("math", {
     name: "Color Expression",
@@ -248,12 +246,4 @@ test("Setting colorExpr for surfaces", async () => {
   expect(exprInput).toHaveValue("mod(a, 2) + 0.1");
   // updates store
   expect(getItem().properties.colorExpr.rhs).toBe("mod(a, 2) + 0.1");
-});
-
-test.each([
-  MIT.ExplicitSurface,
-  MIT.ExplicitSurfacePolar,
-  MIT.ParametricSurface,
-])("a new %s colors by mod(rescale_z(z), 1)", (type) => {
-  expect(makeItem(type).properties.colorExpr.rhs).toBe(DEFAULT_COLOR_RHS);
 });

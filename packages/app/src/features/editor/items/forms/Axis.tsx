@@ -18,7 +18,7 @@ import styles from "./Axis.module.css";
 const errorNames = ["axis", "min", "max", "scale"] as const;
 const mainRow = ["min", "max", "scale"] as const;
 
-/** An axis's min and max enter the scope as `_x_min = <field>`. */
+/** Min and max parse as `_x_min = <field>`, so show the error's rhs part. */
 const fieldError = (error?: Error) =>
   error instanceof DetailedAssignmentError ? error.rhs : error;
 

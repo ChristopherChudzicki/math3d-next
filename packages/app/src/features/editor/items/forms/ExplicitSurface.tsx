@@ -7,7 +7,7 @@ import { useColorExprParams } from "./useColorExprParams";
 const exprNames = ["expr"] as const;
 
 const ExplicitSurface: MathItemForm<MIT.ExplicitSurface> = ({ item }) => {
-  useColorExprParams(item, true);
+  useColorExprParams(item);
   return <RangedMathItemForm item={item} exprNames={exprNames} />;
 };
 

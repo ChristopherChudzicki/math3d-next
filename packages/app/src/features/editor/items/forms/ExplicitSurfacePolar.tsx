@@ -9,7 +9,7 @@ const exprNames = ["expr"] as const;
 const ExplicitSurfacePolar: MathItemForm<MIT.ExplicitSurfacePolar> = ({
   item,
 }) => {
-  useColorExprParams(item, true);
+  useColorExprParams(item);
   return <RangedMathItemForm item={item} exprNames={exprNames} />;
 };
 

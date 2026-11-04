@@ -34,15 +34,6 @@ const graphics = {
   [MathItemType.VectorField]: VectorField,
 } satisfies { [T in MathGraphicType]: GraphicComponent<T> };
 
-const NEEDS_RANGE: MathItemType[] = [
-  MathItemType.ParametricSurface,
-  MathItemType.ExplicitSurface,
-  MathItemType.ExplicitSurfacePolar,
-];
-const graphicNeedsRange = (type: MathItemType): boolean => {
-  return NEEDS_RANGE.includes(type);
-};
-
 const getGraphic = (item: MathGraphic): GraphicComponent => {
   const Graphic = graphics[item.type];
   // See https://stackoverflow.com/questions/69018617/typescript-and-object-literal-lookups
@@ -51,10 +42,10 @@ const getGraphic = (item: MathGraphic): GraphicComponent => {
   return Graphic;
 };
 
-const Graphic: GraphicComponent = React.memo(({ item, range }) => {
+const Graphic: GraphicComponent = React.memo(({ item }) => {
   const Component = getGraphic(item);
-  return <Component item={item} range={range} />;
+  return <Component item={item} />;
 });
 Graphic.displayName = "Graphic";
 
-export { Graphic, graphicNeedsRange };
+export { Graphic };
