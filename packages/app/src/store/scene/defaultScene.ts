@@ -1,4 +1,4 @@
-import { MathItemType } from "@math3d/mathitem-configs";
+import { DEFAULT_COLOR_RHS, MathItemType } from "@math3d/mathitem-configs";
 import type { Scene } from "@math3d/api";
 
 const defaultScene: Pick<
@@ -53,10 +53,10 @@ const defaultScene: Pick<
         samples1: "64",
         samples2: "64",
         colorExpr: {
-          rhs: "mod(Z, 1)",
+          rhs: DEFAULT_COLOR_RHS,
           name: "_f",
           type: "function-assignment",
-          params: ["X", "Y", "Z", "x", "y"],
+          params: ["x", "y", "z"],
         },
         gridWidth: "2",
         description: "Explicit Surface",

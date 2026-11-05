@@ -5,6 +5,7 @@ import { seedDb, makeItem } from "@math3d/mock-api";
 import { screen, within } from "@testing-library/react";
 import user from "@testing-library/user-event";
 import { assertInstanceOf } from "@/util/predicates";
+import { APP_OWNED_PREFIX } from "@/store/scene/evaluation/axisHelpers";
 import renderTestApp from "./renderTestApp";
 
 const addItem = async (itemTypeLabel: string): Promise<void> => {
@@ -65,7 +66,15 @@ const getActiveItem = (store: {
   return item;
 };
 
+/**
+ * The entries of a MathScope's results or errors that belong to scene items,
+ * without the app's own axis helpers.
+ */
+const itemEntries = <V>(entries: Map<string, V>): Map<string, V> =>
+  new Map([...entries].filter(([id]) => !id.startsWith(APP_OWNED_PREFIX)));
+
 export {
+  itemEntries,
   addItem,
   clickRemoveItem,
   getItemByDescription,

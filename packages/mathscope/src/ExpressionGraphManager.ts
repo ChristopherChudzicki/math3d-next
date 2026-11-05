@@ -1,8 +1,9 @@
-import groupBy from "just-group-by";
 import toposort from "toposort";
 
 import type { AnonAssignmentNode, AnonMathNode } from "./interfaces";
 import { DirectedGraph, isAssignmentNode } from "./util";
+
+const overridesNothing = () => false;
 
 /**
  * Helps manage a dependency graph for mathematical expressions.
@@ -20,6 +21,10 @@ import { DirectedGraph, isAssignmentNode } from "./util";
  * Includes helpers for:
  *  - finding a valid evaluation order of this graph
  *  - finding cycles and duplicate assignment nodes
+ *
+ * An assignment for which `isOverridable` is true is *shadowed* while the graph
+ * also holds a non-overridable assignment of the same name. A shadowed node is
+ * never a duplicate, and its value must not reach its dependents.
  */
 export default class ExpressionGraphManager<
   N extends AnonMathNode = AnonMathNode,
@@ -30,24 +35,41 @@ export default class ExpressionGraphManager<
 
   allowedDuplicateLeafRegex: RegExp;
 
+  private isOverridable: (node: N) => boolean;
+
+  private assignmentsByName = new Map<string, Set<N & AnonAssignmentNode>>();
+
   constructor(
     nodes: N[] = [],
     {
       allowedDuplicateLeafRegex = /^_/,
+      isOverridable = overridesNothing,
     }: {
       allowedDuplicateLeafRegex?: RegExp;
+      isOverridable?: (node: N) => boolean;
     } = {},
   ) {
     this.allowedDuplicateLeafRegex = allowedDuplicateLeafRegex;
+    this.isOverridable = isOverridable;
     this.addExpressions(nodes);
+  }
+
+  isShadowed(node: N): boolean {
+    if (!isAssignmentNode(node) || !this.isOverridable(node)) return false;
+    const sameName = this.assignmentsByName.get(node.name) ?? [];
+    return [...sameName].some((other) => !this.isOverridable(other));
   }
 
   addExpressions(nodes: N[]): void {
     nodes.forEach((node) => {
       this.graph.addNode(node);
+      if (isAssignmentNode(node)) {
+        const sameName = this.assignmentsByName.get(node.name) ?? new Set();
+        sameName.add(node);
+        this.assignmentsByName.set(node.name, sameName);
+      }
     });
-    const { assignments, duplicates } =
-      this.getAssignmentsAndDuplicatesByName();
+    const { assignments } = this.getAssignmentsAndDuplicatesByName();
     nodes.forEach((node) => {
       /**
        * Get dependencies of this node.
@@ -105,7 +127,10 @@ export default class ExpressionGraphManager<
      * In this sense, A2 depends on A1: its validity as an assignment depends on
      * whether A1 exists or not.
      *
+     * Duplicates are found only now, once this batch's edges exist: whether a
+     * `_` name may repeat depends on whether anything uses it.
      */
+    const { duplicates } = this.getAssignmentsAndDuplicatesByName();
     duplicates.forEach((dupes) => {
       dupes.forEach((dupe1) => {
         dupes.forEach((dupe2) => {
@@ -114,6 +139,23 @@ export default class ExpressionGraphManager<
           }
         });
       });
+    });
+
+    // Adding or deleting an overriding node re-evaluates the node it shadows,
+    // and so that node's dependents.
+    const names = new Set(nodes.filter(isAssignmentNode).map((n) => n.name));
+    names.forEach((name) => {
+      const sameName = [...(assignments.get(name) ?? [])];
+      const overridable = sameName.filter((n) => this.isOverridable(n));
+      sameName
+        .filter((n) => !this.isOverridable(n))
+        .forEach((overriding) => {
+          overridable.forEach((shadowed) => {
+            if (!this.graph.hasEdge(overriding, shadowed)) {
+              this.graph.addEdge(overriding, shadowed);
+            }
+          });
+        });
     });
   }
 
@@ -142,6 +184,11 @@ export default class ExpressionGraphManager<
     nodes.forEach((node) => {
       this.graph.deleteNode(node);
       this.unregisterDependencies(node);
+      if (isAssignmentNode(node)) {
+        const sameName = this.assignmentsByName.get(node.name);
+        sameName?.delete(node);
+        if (sameName?.size === 0) this.assignmentsByName.delete(node.name);
+      }
     });
   }
 
@@ -149,11 +196,12 @@ export default class ExpressionGraphManager<
     assignments: Map<string, (N & AnonAssignmentNode)[]>;
     duplicates: Map<string, (N & AnonAssignmentNode)[]>;
   } {
-    const assignments = this.getAssignmentNodesByName(
-      Array.from(this.graph.getNodes()),
+    const assignments = new Map(
+      [...this.assignmentsByName].map(([name, nodes]) => [name, [...nodes]]),
     );
     const duplicates = new Map<string, (N & AnonAssignmentNode)[]>();
-    assignments.forEach((nodes, name) => {
+    assignments.forEach((sameName, name) => {
+      const nodes = sameName.filter((node) => !this.isShadowed(node));
       const duplicateAllowed =
         this.allowedDuplicateLeafRegex.test(name) &&
         nodes.every((node) => this.graph.isLeaf(node));
@@ -182,6 +230,14 @@ export default class ExpressionGraphManager<
         ? this.graph.copy()
         : this.graph.getReachableSubgraph(sources);
 
+    // A shadowed node's value never reaches its dependents.
+    subgraph.getNodes().forEach((node) => {
+      if (!this.isShadowed(node)) return;
+      [...subgraph.getSuccessors(node)].forEach((successor) => {
+        subgraph.deleteEdge(node, successor);
+      });
+    });
+
     // Non-assignment nodes never have successors, so they can't be part of cycles
     const cycles = subgraph.getCycles() as (AnonAssignmentNode & N)[][];
 
@@ -196,15 +252,5 @@ export default class ExpressionGraphManager<
     const order = toposort(edges.map((e) => [e.from, e.to])).concat(isolated);
 
     return { order, cycles };
-  }
-
-  // static methods can't use the generic type parameter
-  // eslint-disable-next-line class-methods-use-this
-  private getAssignmentNodesByName(
-    nodes: N[],
-  ): Map<string, (N & AnonAssignmentNode)[]> {
-    const assignments = nodes.filter(isAssignmentNode);
-    const grouped = groupBy(assignments, (n) => n.name);
-    return new Map(Object.entries(grouped));
   }
 }

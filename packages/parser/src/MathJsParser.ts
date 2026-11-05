@@ -90,7 +90,10 @@ class MathJsParser implements IMathJsParser {
     let lhsError: Error | undefined;
     let rhsError: Error | undefined;
     try {
-      this.parse(`${lhs} = 0`);
+      const node = this.parse(`${lhs} = 0`);
+      if ("name" in node && node.name.startsWith("$")) {
+        lhsError = new AssignmentError("Names starting with $ are reserved.");
+      }
     } catch (err) {
       if (err instanceof AssignmentError) {
         lhsError = err;

@@ -1,6 +1,7 @@
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { renderTestApp, screen } from "@/test_util";
 import { seedDb, makeItem } from "@math3d/mock-api";
+import { itemEntries } from "@/test_util/mathItems";
 
 test("left-hand parse errors are indicated on left-hand side", async () => {
   const variable = makeItem(MIT.Variable, {
@@ -12,7 +13,7 @@ test("left-hand parse errors are indicated on left-hand side", async () => {
   const lhs = await screen.findByLabelText("left-hand side", { exact: false });
   const rhs = await screen.findByLabelText("right-hand side", { exact: false });
   const mathScope = store.mathScope.get();
-  expect(mathScope.errors.size).toBe(1);
+  expect(itemEntries(mathScope.errors).size).toBe(1);
   expect(lhs).toHaveClass("has-error");
   expect(rhs).not.toHaveClass("has-error");
 });
@@ -27,7 +28,7 @@ test("right-hand parse errors are indicated on right-hand side", async () => {
   const lhs = await screen.findByLabelText("left-hand side", { exact: false });
   const rhs = await screen.findByLabelText("right-hand side", { exact: false });
   const mathScope = store.mathScope.get();
-  expect(mathScope.errors.size).toBe(1);
+  expect(itemEntries(mathScope.errors).size).toBe(1);
   expect(lhs).not.toHaveClass("has-error");
   expect(rhs).toHaveClass("has-error");
 });

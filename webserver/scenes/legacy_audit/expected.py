@@ -681,8 +681,60 @@ def _range_function(
     return param, rhs
 
 
+# A capital X, Y or Z that next's parser reads as a whole identifier, not
+# part of a name, a command (`\X`) or a subscript (`x_{Z}`).
+_NORMALIZED_COORDINATE = re.compile(r"(?<![A-Za-z_\\])(?<!_\{)[XYZ](?![A-Za-z0-9_])")
+
+
+def _color_expr(out: _Out, item: dict, explicit: bool) -> None:
+    """react's color expressions take X, Y, Z, the point normalized over the
+    axis ranges (react:components/MathBox/MathBoxComponents.js, scaleToUnit);
+    next's take x, y, z and use rescale_x etc. (owner decision 2026-11-04).
+    A coordinate is `$c` when a surface parameter or a global in the body
+    has its name; an explicit surface's own parameters are its x and y."""
+    color = _parse_func_assignment(item.get("colorExpr"))
+    expr = _parse_func_assignment(item.get("expr"))
+    if color is None or expr is None:
+        out.func_assignment("colorExpr", item.get("colorExpr"), "colorExpr")
+        return
+    name, _, body = color
+    surface_params = expr[1]
+    coordinates = ["z"] if explicit else ["x", "y", "z"]
+    slots = {
+        c: f"\\${c}" if c in surface_params or _depends_on(body, c) else c
+        for c in coordinates
+    }
+    params = (
+        [*surface_params, slots["z"]]
+        if explicit
+        else [slots["x"], slots["y"], slots["z"], *surface_params]
+    )
+    if explicit:
+        x_slot, y_slot = surface_params if len(surface_params) == 2 else ("x", "y")
+    else:
+        x_slot, y_slot = slots["x"], slots["y"]
+    by_capital = {"X": x_slot, "Y": y_slot, "Z": slots["z"]}
+
+    def rescaled(match: re.Match[str]) -> str:
+        capital = match[0]
+        call = f"\\operatorname{{rescale}}_{capital.lower()}\\left({by_capital[capital]}\\right)"
+        # Braces keep an exponent grouped for display: Y^{rescale_z(z)}.
+        return "{" + call + "}" if body[: match.start()].endswith("^") else call
+
+    out.add("colorExpr.type", "function-assignment", "render", "constant")
+    out.add("colorExpr.name", name, "render", "colorExpr")
+    for i, param in enumerate(params):
+        out.add(f"colorExpr.params.{i}", param, "render", "colorExpr")
+    out.add(
+        "colorExpr.rhs",
+        _NORMALIZED_COORDINATE.sub(rescaled, body),
+        "render",
+        "colorExpr",
+    )
+
+
 def _make_surface(
-    label_u: str, label_v: str
+    label_u: str, label_v: str, explicit: bool = False
 ) -> Callable[[dict, Context], list[Expectation]]:
     """Parametric, explicit and polar surfaces share one renderer.
 
@@ -694,7 +746,7 @@ def _make_surface(
         _universal(out, item)
         out.add("shaded", _bool_str(item.get("shaded")), "render", "shaded")
         out.func_assignment("expr", item.get("expr"), "expr")
-        out.func_assignment("colorExpr", item.get("colorExpr"), "colorExpr")
+        _color_expr(out, item, explicit)
         # rangeU may depend on v and rangeV on u
         # (react:components/MathBox/MathBoxComponents.js:1091-1126). next's
         # domain is [range of 1st param as f(2nd), range of 2nd as f(1st)]
@@ -771,7 +823,7 @@ EXPECTATIONS: dict[str, Callable[[dict, Context], list[Expectation]]] = {
     "VECTOR": _vector,
     "PARAMETRIC_CURVE": _parametric_curve,
     "PARAMETRIC_SURFACE": _make_surface("u", "v"),
-    "EXPLICIT_SURFACE": _make_surface("x", "y"),
+    "EXPLICIT_SURFACE": _make_surface("x", "y", explicit=True),
     "EXPLICIT_SURFACE_POLAR": _make_surface("r", "\\theta"),
     "IMPLICIT_SURFACE": _implicit_surface,
     "VECTOR_FIELD": _vector_field,
@@ -810,7 +862,7 @@ _SURFACE_COVERAGE = {
     "expr": "expr: `_f(p1,p2)=rhs` -> function-assignment {name, params, rhs}",
     "rangeU": "domain.items.0: function of the 2nd parameter (prefix `_f(p2)=` split off if present)",
     "rangeV": "domain.items.1: function of the 1st parameter (prefix `_f(p1)=` split off if present)",
-    "colorExpr": "colorExpr: `_f(X,Y,Z,p1,p2)=rhs` -> function-assignment",
+    "colorExpr": "colorExpr: `_f(X,Y,Z,p1,p2)=rhs` -> `x,y,z,p1,p2` (explicit `p1,p2,z`), X -> rescale_x(x) etc.",
     "gridOpacity": "gridOpacity (identity)",
     "gridWidth": "gridWidth (identity)",
     "uSamples": "samples1 (samples2 when rangeU depends on the 2nd parameter)",

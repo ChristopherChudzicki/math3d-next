@@ -6,6 +6,7 @@
  */
 const HELP_GROUPS = [
   "algebra",
+  "axes",
   "calculus",
   "constants",
   "explog",
@@ -18,6 +19,7 @@ type HelpGroup = (typeof HELP_GROUPS)[number];
 
 const HELP_GROUP_LABELS: Record<HelpGroup, string> = {
   algebra: "Algebra",
+  axes: "Axes",
   calculus: "Calculus",
   constants: "Constants",
   explog: "Logs & Exponents",

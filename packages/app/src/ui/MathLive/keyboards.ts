@@ -1,4 +1,6 @@
 import type { VirtualKeyboardLayout } from "mathlive";
+// Loading mathlive defines window.mathVirtualKeyboard.
+import "./mathlive";
 
 const { mathVirtualKeyboard } = window;
 

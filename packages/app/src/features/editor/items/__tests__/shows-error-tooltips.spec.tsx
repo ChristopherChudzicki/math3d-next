@@ -40,6 +40,11 @@ test.each([
     item: makeItem(MIT.Point, { labelVisible: "true +" }),
     errMatcher: /Unexpected end of expression/,
   },
+  {
+    getInput: () => screen.findByLabelText("Min"),
+    item: makeItem(MIT.Axis, { min: "1 + " }),
+    errMatcher: /Unexpected end of expression/,
+  },
   // {
   //   getInput: () => screen.getByLabelText("Coordinates"),
   //   item: makeItem(MIT.Point, { coords: "[1,2,3] + " }),

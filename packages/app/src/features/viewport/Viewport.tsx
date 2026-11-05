@@ -15,7 +15,7 @@ import { actions } from "@/store/scene/state/scene.slice";
 import * as select from "@/store/scene/state/selectors";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 import { useMathResults } from "@/store/scene/evaluation/mathScope";
-import { Graphic, graphicNeedsRange } from "./graphics";
+import { Graphic } from "./graphics";
 import useAxesInfo from "./useAxesInfo";
 import Camera from "./Camera";
 import type { OnMoveEnd } from "./Camera";
@@ -96,12 +96,9 @@ const ViewportContent = () => {
         scale={scale}
         onMoveEnd={onCameraChange}
       />
-      {items.filter(isMathGraphic).map((item) => {
-        const others = {
-          ...(graphicNeedsRange(item.type) ? { range } : {}),
-        };
-        return <Graphic key={item.id} item={item} {...others} />;
-      })}
+      {items.filter(isMathGraphic).map((item) => (
+        <Graphic key={item.id} item={item} />
+      ))}
     </MB.Cartesian>
   );
 };

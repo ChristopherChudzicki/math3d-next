@@ -1,4 +1,5 @@
 import { describe, test, expect } from "vitest";
+import { itemEntries } from "@/test_util/mathItems";
 import { makeMathScope, builtins } from "./mathScopeInstance";
 
 describe("makeMathScope", () => {
@@ -34,8 +35,24 @@ describe("makeMathScope", () => {
       },
       { id: "b", parseable: "f(1)" },
     ]);
-    expect(mathScope.errors).toEqual(new Map());
+    expect(itemEntries(mathScope.errors)).toEqual(new Map());
     expect(mathScope.results.get("b")).toBe(31);
+  });
+
+  test("without axis items, the axis helpers are undefined", () => {
+    const mathScope = makeMathScope();
+    mathScope.setExpressions([
+      {
+        id: "a",
+        parseable: {
+          type: "assignment",
+          lhs: "a",
+          rhs: "\\operatorname{rescale}_x(0)",
+        },
+      },
+    ]);
+    expect(mathScope.results.has("a")).toBe(false);
+    expect(mathScope.errors.has("a")).toBe(true);
   });
 
   test("builtin list has: sin, cos, exp, log...", () => {

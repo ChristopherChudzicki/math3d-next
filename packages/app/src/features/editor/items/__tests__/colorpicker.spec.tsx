@@ -195,7 +195,7 @@ test("Setting colorExpr for surfaces", async () => {
     colorExpr: {
       type: "function-assignment",
       name: "_f",
-      params: ["X", "Y", "Z", "a", "b"],
+      params: ["a", "b", "z"],
       rhs: "mod(a, 2)",
     },
     expr: {
@@ -232,7 +232,7 @@ test("Setting colorExpr for surfaces", async () => {
 
   await user.click(within(dialog).getByRole("tab", { name: "Color Map" }));
 
-  within(dialog).getByText("f(X, Y, Z, a, b) =");
+  within(dialog).getByText("f(a, b, z) =");
 
   const exprInput = within(dialog).getByRole("math", {
     name: "Color Expression",

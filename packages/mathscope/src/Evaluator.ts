@@ -27,7 +27,7 @@ interface EvaluatorAction {
 export class UnmetDependencyError extends EvaluationError {
   constructor(unmetDependencyNames: string[]) {
     const sorted = [...unmetDependencyNames].sort();
-    const message = `Undefined symbol${sorted.length > 1 ? "s" : ""} ${sorted}`;
+    const message = `Undefined symbol${sorted.length > 1 ? "s" : ""} ${sorted.join(", ")}`;
     super(message);
   }
 }
@@ -100,11 +100,21 @@ export default class Evaluator {
 
   private changeQueue: EvaluatorAction[] = [];
 
-  private graphManager = new ExpressionGraphManager<MathNode>();
+  private graphManager: ExpressionGraphManager<MathNode>;
 
-  constructor(builtins: Set<string> = new Set()) {
+  /**
+   * @param isOverridable Whether the assignment with this id yields to a
+   * same-named one that isn't overridable, as builtins do.
+   */
+  constructor(
+    builtins: Set<string> = new Set(),
+    isOverridable: (id: string) => boolean = () => false,
+  ) {
     this.scope = new Map();
     this.builtins = builtins;
+    this.graphManager = new ExpressionGraphManager<MathNode>([], {
+      isOverridable: (node) => isOverridable(node.id),
+    });
   }
 
   private updateAssignmentErrors(
@@ -195,7 +205,7 @@ export default class Evaluator {
     nodesAffectedByDelete.forEach((node) => {
       results.delete(node.id);
       errors.delete(node.id);
-      if (isAssignmentNode(node)) {
+      if (isAssignmentNode(node) && !this.graphManager.isShadowed(node)) {
         this.scope.delete(node.name);
       }
     });
@@ -218,8 +228,13 @@ export default class Evaluator {
     order.forEach((node) => {
       const { evaluate } = node;
       const exprId = node.id;
+      if (this.graphManager.isShadowed(node)) {
+        results.delete(exprId);
+        errors.delete(exprId);
+        return;
+      }
       try {
-        if (node.type === MathNodeType.FunctionAssignmentNode) {
+        if (isAssignmentNode(node)) {
           const unmet = getUnmetDependencies(node, this.scope, this.builtins);
           if (unmet.length > 0) {
             throw new UnmetDependencyError(unmet);

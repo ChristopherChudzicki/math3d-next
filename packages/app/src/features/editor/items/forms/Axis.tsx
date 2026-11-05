@@ -4,6 +4,7 @@ import {
   MathItemType as MIT,
   WidgetType,
 } from "@math3d/mathitem-configs";
+import { DetailedAssignmentError } from "@math3d/parser";
 import FieldWidget, {
   useOnWidgetChange,
 } from "@/features/editor/items/FieldWidget";
@@ -16,6 +17,10 @@ import styles from "./Axis.module.css";
 
 const errorNames = ["axis", "min", "max", "scale"] as const;
 const mainRow = ["min", "max", "scale"] as const;
+
+/** Min and max parse as `_x_min = <field>`, so show the error's rhs part. */
+const fieldError = (error?: Error) =>
+  error instanceof DetailedAssignmentError ? error.rhs : error;
 
 const config = configs[MIT.Axis];
 
@@ -39,7 +44,7 @@ const Axis: MathItemForm<MIT.Axis> = ({ item }) => {
               widget={WidgetType.MathValue}
               label={configProps[name].label}
               name={name}
-              error={errors[name]}
+              error={fieldError(errors[name])}
               value={item.properties[name]}
               onChange={onWidgetChange}
             />

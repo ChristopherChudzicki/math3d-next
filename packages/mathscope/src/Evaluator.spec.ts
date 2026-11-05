@@ -59,7 +59,7 @@ describe("Evaluator", () => {
       );
       expect(evaluator.errors).toStrictEqual(
         asMap({
-          "id-c": mjsUnmetDepErr("x"),
+          "id-c": new UnmetDependencyError(["x"]),
           "id-expr1": mjsUnmetDepErr("c"),
         }),
       );
@@ -162,7 +162,7 @@ describe("Evaluator", () => {
       expect(evaluator.results).toStrictEqual(asMap({}));
       expect(evaluator.errors).toStrictEqual(
         asMap({
-          "id-x": mjsUnmetDepErr("z"),
+          "id-x": new UnmetDependencyError(["z"]),
           "id-y": mjsUnmetDepErr("x"),
         }),
       );

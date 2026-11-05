@@ -59,12 +59,18 @@ export default class MathScope<P> {
   constructor({
     parse,
     builtins = new Set(),
+    isOverridable,
   }: {
     parse: Parse<P>;
     builtins?: Set<string>;
+    /**
+     * Whether the definition with this id yields to a same-named one that
+     * isn't overridable.
+     */
+    isOverridable?: (id: string) => boolean;
   }) {
     this.parse = parse;
-    this.evaluator = new Evaluator(builtins);
+    this.evaluator = new Evaluator(builtins, isOverridable);
 
     this.results = this.evaluator.results;
 

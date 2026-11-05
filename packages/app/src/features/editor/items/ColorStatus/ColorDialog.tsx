@@ -8,7 +8,6 @@ import React, { useCallback, useState } from "react";
 import ColorPicker, { OnColorChange } from "@/ui/ColorPicker";
 import { Tabs } from "@/ui/Tabs";
 
-import StaticMath from "@/ui/MathLive/StaticMath";
 // Not from FieldWidget's index: it renders ColorWidget, which renders this.
 import { useOnWidgetChange } from "@/features/editor/items/FieldWidget/hooks";
 import ErrorTooltip from "@/features/editor/items/FieldWidget/ErrorTooltip";
@@ -66,10 +65,6 @@ const ColorExprInput: React.FC<ColorExprProps> = (props) => {
           value={item.properties.colorExpr.rhs}
         />
       </ErrorTooltip>
-      <p className={styles.note}>
-        Note: <StaticMath value="X, Y, Z" mode="inline" /> (capitals) refer to
-        normalized coordinates ranging from 0 to 1.
-      </p>
     </div>
   );
 };

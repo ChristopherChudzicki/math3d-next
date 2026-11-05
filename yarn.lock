@@ -1745,7 +1745,6 @@ __metadata:
     "@math3d/tsconfig": "workspace:^"
     "@math3d/utils": "workspace:^"
     eslint: "npm:^8.57.1"
-    just-group-by: "npm:^2.2.0"
     mathjs: "npm:^15.2.0"
     tarjan-graph: "npm:^3.0.0"
     toposort: "npm:^2.0.2"
@@ -7747,13 +7746,6 @@ __metadata:
     object.assign: "npm:^4.1.4"
     object.values: "npm:^1.1.6"
   checksum: 10/b61d44613687dfe4cc8ad4b4fbf3711bf26c60b8d5ed1f494d723e0808415c59b24a7c0ed8ab10736a40ff84eef38cbbfb68b395e05d31117b44ffc59d31edfc
-  languageName: node
-  linkType: hard
-
-"just-group-by@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "just-group-by@npm:2.2.0"
-  checksum: 10/943664c7310df37031356f0ee2605ea46499880cf5bd9203de19082e9a705e4ef7e01769bcad55e314d7c814e1bb89811e7737a776c6d152e1eb214201a2d9bf
   languageName: node
   linkType: hard
 

@@ -74,8 +74,8 @@ test.each([
       expectedEval: (abc: number, _y: number): number[] => [1 + abc, 0, 0],
     },
     colorExpr: {
-      initial: func("_f", ["X", "Y", "Z", "x", "y"], "mod(X, 1)"),
-      expectedFinal: func("_f", ["X", "Y", "Z", "abc", "y"], "mod(X, 1)"),
+      initial: func("_f", ["\\$x", "\\$y", "z", "x", "y"], "mod(z, 1)"),
+      expectedFinal: func("_f", ["x", "\\$y", "z", "abc", "y"], "mod(z, 1)"),
     },
     domain: {
       initial: dom(
@@ -97,8 +97,8 @@ test.each([
       expectedEval: (_x: number, abc: number) => [1 + abc, 0, 0],
     },
     colorExpr: {
-      initial: func("_f", ["X", "Y", "Z", "x", "y"], "mod(X, 1)"),
-      expectedFinal: func("_f", ["X", "Y", "Z", "x", "abc"], "mod(X, 1)"),
+      initial: func("_f", ["\\$x", "\\$y", "z", "x", "y"], "mod(z, 1)"),
+      expectedFinal: func("_f", ["\\$x", "y", "z", "x", "abc"], "mod(z, 1)"),
     },
     domain: {
       initial: dom(
@@ -158,6 +158,28 @@ test.each([
     expect(domActualEval.value[1](val)).toEqual(domExpectedEval[1](val));
   },
 );
+
+test("color params give way to surface params named x, y, and come back", async () => {
+  const { store, item } = await setupItemTest(MIT.ParametricSurface);
+  const colorParams = () =>
+    (store.getState().scene.items[item.id] as MathItem<MIT.ParametricSurface>)
+      .properties.colorExpr.params;
+  const renameParam = async (index: 0 | 1, name: string) => {
+    const input = getParamNameInputs()[index];
+    await user.clear(input);
+    await user.click(input);
+    await user.paste(name);
+  };
+  const rename = async ([first, second]: [string, string]) => {
+    await renameParam(0, first);
+    await renameParam(1, second);
+  };
+
+  await rename(["x", "y"]);
+  expect(colorParams()).toEqual(["\\$x", "\\$y", "z", "x", "y"]);
+  await rename(["u", "v"]);
+  expect(colorParams()).toEqual(["x", "y", "z", "u", "v"]);
+});
 
 test.each([
   {
