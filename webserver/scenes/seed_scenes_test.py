@@ -126,6 +126,27 @@ def test_every_committed_file_round_trips(path):
     assert list(dumped) == list(stored)
 
 
+@pytest.mark.parametrize("path", seed_scene_paths(), ids=lambda p: p.stem)
+def test_surface_color_functions_take_coordinates(path):
+    """The round trip can't see a stale colorExpr: the app reinterprets it
+    without a migration. Params follow colorExprParams in mathitem-configs."""
+
+    def slot(c: str) -> set[str]:
+        return {c, rf"\${c}"}
+
+    for item in json.loads(path.read_text())["items"]:
+        props = item["properties"]
+        if "colorExpr" not in props:
+            continue
+        surface, color = props["expr"]["params"], props["colorExpr"]["params"]
+        if item["type"] == "EXPLICIT_SURFACE":
+            assert color[:2] == surface and color[2] in slot("z"), item["id"]
+        else:
+            coords = zip(color[:3], "xyz", strict=True)
+            assert all(c in slot(name) for c, name in coords), item["id"]
+            assert color[3:] == surface, item["id"]
+
+
 @pytest.mark.parametrize(
     "bad",
     [{"exmaple": {"position": 3}}, {"key": "app"}],
