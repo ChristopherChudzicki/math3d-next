@@ -346,8 +346,8 @@
         "colorExpr": {
           "type": "function-assignment",
           "name": "_f",
-          "params": ["X", " Y", " Z", " u", " v"],
-          "rhs": "mod(Z, 1)"
+          "params": ["x", "y", "z", "u", "v"],
+          "rhs": "mod(\\operatorname{rescale}_z\\left(z\\right), 1)"
         },
         "gridOpacity": "0.5",
         "gridWidth": "2",

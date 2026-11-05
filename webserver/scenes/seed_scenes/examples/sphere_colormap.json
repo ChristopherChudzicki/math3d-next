@@ -219,7 +219,7 @@
         "colorExpr": {
           "type": "function-assignment",
           "name": "_f",
-          "params": ["X", " Y", " Z", " u", " v"],
+          "params": ["x", "y", "z", "u", "v"],
           "rhs": "g\\left(u-T,v\\right)"
         },
         "gridOpacity": "0.5",
