@@ -1,0 +1,282 @@
+{
+  "key": "vectors",
+  "title": "Vectors and Vector Tails",
+  "items": [
+    {
+      "id": "camera",
+      "type": "CAMERA",
+      "properties": {
+        "description": "Camera",
+        "isOrthographic": "false",
+        "isPanEnabled": "false",
+        "isZoomEnabled": "true",
+        "isRotateEnabled": "true",
+        "position": "[-0.47385710974897977, -1.3505688130352802, 0.7454483772785468]",
+        "target": "[0.0, 0.0, 0.0]",
+        "updateOnDrag": "true",
+        "useRelative": "true"
+      }
+    },
+    {
+      "id": "axis-x",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "x",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "x",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-y",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "y",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "y",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-z",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "z",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "z",
+        "scale": "1/2",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "grid-xy",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "xy"
+      }
+    },
+    {
+      "id": "grid-yz",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "yz"
+      }
+    },
+    {
+      "id": "grid-zx",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "zx"
+      }
+    },
+    {
+      "id": "cameraFolder",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Camera Controls",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "axes",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Axes and Grids",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "mainFolder",
+      "type": "FOLDER",
+      "properties": {
+        "description": "A Folder",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "1",
+      "type": "VECTOR",
+      "properties": {
+        "description": "Vector:\nBy default, vectors have their tails at the origin",
+        "color": "#3090FF",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "",
+        "labelVisible": "false",
+        "size": "6",
+        "width": "4",
+        "start": "false",
+        "end": "true",
+        "components": "\\left[3,2,1\\right]",
+        "tail": "\\left[0,0,0\\right]"
+      }
+    },
+    {
+      "id": "2",
+      "type": "VECTOR",
+      "properties": {
+        "description": "Vector:\nA different tail can be specified in object settings. Open object settings by pressing the gear.",
+        "color": "#f1c40f",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "",
+        "labelVisible": "false",
+        "size": "6",
+        "width": "4",
+        "start": "false",
+        "end": "true",
+        "components": "\\left[3,2,1\\right]",
+        "tail": "\\left[-3,2,1\\right]"
+      }
+    },
+    {
+      "id": "3",
+      "type": "VECTOR",
+      "properties": {
+        "description": "Vector:\nThe tail can  position can contain variables  or functions.\nHere the tail has coordinates [X,-2,-1]",
+        "color": "#9b59b6",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "",
+        "labelVisible": "false",
+        "size": "6",
+        "width": "4",
+        "start": "false",
+        "end": "true",
+        "components": "\\left[3,\\ 2,\\ 1\\right]",
+        "tail": "\\left[X,\\ -2,\\ -1\\right]"
+      }
+    },
+    {
+      "id": "4",
+      "type": "VARIABLE_SLIDER",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "X",
+          "rhs": "-2"
+        },
+        "fps": "60",
+        "range": {
+          "type": "array",
+          "items": ["-5", "5"]
+        },
+        "duration": "4",
+        "description": "Variable Slider",
+        "isAnimating": "false",
+        "speedMultiplier": "1"
+      }
+    }
+  ],
+  "itemOrder": {
+    "axes": ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"],
+    "main": ["mainFolder"],
+    "setup": ["cameraFolder", "axes"],
+    "mainFolder": ["1", "2", "3", "4"],
+    "cameraFolder": ["camera"]
+  },
+  "example": {
+    "position": 40
+  }
+}

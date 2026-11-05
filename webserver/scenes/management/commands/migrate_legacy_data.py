@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from scenes.legacy_scene_utils.issue_log import Severity
 from scenes.legacy_scene_utils.migrate_scene import migrate_scene
-from scenes.models import LegacyScene
+from scenes.models import LegacyScene, Scene
 
 
 class Command(BaseCommand):
@@ -34,13 +34,41 @@ class Command(BaseCommand):
             ),
         )
 
+        parser.add_argument(
+            "--force",
+            type=int,
+            metavar="N",
+            help=(
+                "Also re-translate scenes that were taken over (is_legacy=False: "
+                "a seed file or a verified translation owns their content). N "
+                "must equal the number of such scenes in the selection; the "
+                "command prints it when it refuses."
+            ),
+        )
+
     def handle(self, *args, **options):
-        limit = options["limit"]
-        legacy_scenes = LegacyScene.objects.order_by("id")
+        batch = LegacyScene.objects.order_by("id")
         if options["filter"]:
-            legacy_scenes = legacy_scenes.filter(key__in=options["filter"].split(","))
-        elif limit:
-            legacy_scenes = legacy_scenes[:limit]
+            batch = batch.filter(key__in=options["filter"].split(","))
+        elif options["limit"]:
+            batch = batch[: options["limit"]]
+        taken_over = Scene.objects.filter(is_legacy=False, key__in=batch.values("key"))
+        n_taken_over = taken_over.count()
+        legacy_scenes = LegacyScene.objects.filter(pk__in=batch.values("pk"))
+        if options["force"] is None:
+            legacy_scenes = legacy_scenes.exclude(key__in=taken_over.values("key"))
+            if n_taken_over:
+                self.stdout.write(
+                    f"Skipping {n_taken_over} taken-over scenes (--force "
+                    f"{n_taken_over} re-translates them)."
+                )
+        elif options["force"] != n_taken_over:
+            raise CommandError(
+                f"--force {options['force']} does not match: {n_taken_over} "
+                "taken-over scenes would be overwritten. Pass --force "
+                f"{n_taken_over} to confirm."
+            )
+        legacy_scenes = legacy_scenes.order_by("id")
 
         problems: list[tuple[str, str]] = []
         for legacy_scene in tqdm.tqdm(

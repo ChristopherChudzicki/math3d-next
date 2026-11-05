@@ -1,0 +1,209 @@
+{
+  "key": "qa_axes_grids_ncPQ",
+  "title": "QA: axes and grids",
+  "items": [
+    {
+      "id": "cameraFolder",
+      "type": "FOLDER",
+      "properties": {
+        "isCollapsed": "false",
+        "description": "Camera Controls"
+      }
+    },
+    {
+      "id": "camera",
+      "type": "CAMERA",
+      "properties": {
+        "description": "Camera",
+        "isOrthographic": "false",
+        "isPanEnabled": "false",
+        "isZoomEnabled": "true",
+        "isRotateEnabled": "true",
+        "position": "[-6, -4, 2]",
+        "target": "[0, 0, 0]",
+        "updateOnDrag": "true",
+        "useRelative": "false"
+      }
+    },
+    {
+      "id": "axes",
+      "type": "FOLDER",
+      "properties": {
+        "isCollapsed": "false",
+        "description": "Axes and Grids"
+      }
+    },
+    {
+      "id": "axis-x",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "time",
+        "labelVisible": "true",
+        "min": "-2",
+        "max": "3",
+        "axis": "x",
+        "scale": "2",
+        "ticksVisible": "true",
+        "size": "6",
+        "width": "1",
+        "end": "true",
+        "start": "false",
+        "divisions": "5"
+      }
+    },
+    {
+      "id": "axis-y",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "amount",
+        "labelVisible": "true",
+        "min": "-4",
+        "max": "4",
+        "axis": "y",
+        "scale": "1",
+        "ticksVisible": "false",
+        "size": "6",
+        "width": "1",
+        "end": "true",
+        "start": "false",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-z",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#ff0000",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "z",
+        "labelVisible": "false",
+        "min": "-1",
+        "max": "1",
+        "axis": "z",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "6",
+        "width": "1",
+        "end": "true",
+        "start": "false",
+        "divisions": "4"
+      }
+    },
+    {
+      "id": "grid-xy",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "axes": "xy",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1",
+        "divisions": "[4, 8]",
+        "snap": "true"
+      }
+    },
+    {
+      "id": "grid-yz",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "axes": "yz",
+        "color": "#3090ff",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "[8, 2]",
+        "snap": "false"
+      }
+    },
+    {
+      "id": "grid-zx",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "axes": "zx",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "[10, 10]",
+        "snap": "false"
+      }
+    },
+    {
+      "id": "0",
+      "type": "FOLDER",
+      "properties": {
+        "isCollapsed": "false",
+        "description": "Reference"
+      }
+    },
+    {
+      "id": "1",
+      "type": "POINT",
+      "properties": {
+        "coords": "[3, 4, 1]",
+        "description": "Point",
+        "size": "8",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "color": "#3090ff",
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "corner",
+        "labelVisible": "true"
+      }
+    }
+  ],
+  "itemOrder": {
+    "0": ["1"],
+    "main": ["0"],
+    "setup": ["cameraFolder", "axes"],
+    "cameraFolder": ["camera"],
+    "axes": ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"]
+  }
+}

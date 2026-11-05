@@ -1,0 +1,351 @@
+{
+  "key": "qa_vectors_IwNm",
+  "title": "QA: vectors and vector fields",
+  "items": [
+    {
+      "id": "cameraFolder",
+      "type": "FOLDER",
+      "properties": {
+        "isCollapsed": "false",
+        "description": "Camera Controls"
+      }
+    },
+    {
+      "id": "camera",
+      "type": "CAMERA",
+      "properties": {
+        "description": "Camera",
+        "isOrthographic": "false",
+        "isPanEnabled": "false",
+        "isZoomEnabled": "true",
+        "isRotateEnabled": "true",
+        "position": "[-6, -4, 2]",
+        "target": "[0, 0, 0]",
+        "updateOnDrag": "true",
+        "useRelative": "false"
+      }
+    },
+    {
+      "id": "axes",
+      "type": "FOLDER",
+      "properties": {
+        "isCollapsed": "false",
+        "description": "Axes and Grids"
+      }
+    },
+    {
+      "id": "axis-x",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "x",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "x",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "6",
+        "width": "1",
+        "end": "true",
+        "start": "false",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-y",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "y",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "y",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "6",
+        "width": "1",
+        "end": "true",
+        "start": "false",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-z",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "z",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "z",
+        "scale": "1/2",
+        "ticksVisible": "true",
+        "size": "6",
+        "width": "1",
+        "end": "true",
+        "start": "false",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "grid-xy",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "axes": "xy",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "[10, 10]",
+        "snap": "false"
+      }
+    },
+    {
+      "id": "grid-yz",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "axes": "yz",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "[10, 10]",
+        "snap": "false"
+      }
+    },
+    {
+      "id": "grid-zx",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "axes": "zx",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "[10, 10]",
+        "snap": "false"
+      }
+    },
+    {
+      "id": "0",
+      "type": "FOLDER",
+      "properties": {
+        "isCollapsed": "false",
+        "description": "Vectors"
+      }
+    },
+    {
+      "id": "1",
+      "type": "VECTOR",
+      "properties": {
+        "description": "Vector",
+        "color": "#ff0000",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "v",
+        "labelVisible": "true",
+        "size": "10",
+        "width": "6",
+        "start": "false",
+        "end": "true",
+        "components": "[2, 1, 1]",
+        "tail": "[0, 0, 0]"
+      }
+    },
+    {
+      "id": "2",
+      "type": "VECTOR",
+      "properties": {
+        "description": "Vector",
+        "color": "#00aa00",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.5",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "w",
+        "labelVisible": "true",
+        "size": "6",
+        "width": "4",
+        "start": "false",
+        "end": "true",
+        "components": "[-1, 2, 0]",
+        "tail": "[1, 1, 1]"
+      }
+    },
+    {
+      "id": "3",
+      "type": "VECTOR",
+      "properties": {
+        "description": "Vector",
+        "color": "#3090ff",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.5",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "",
+        "labelVisible": "false",
+        "size": "6",
+        "width": "4",
+        "start": "true",
+        "end": "true",
+        "components": "[0, 0, 2]",
+        "tail": "[-2, -2, 0]"
+      }
+    },
+    {
+      "id": "4",
+      "type": "VECTOR_FIELD",
+      "properties": {
+        "description": "Vector Field",
+        "color": "#ff8800",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "size": "8",
+        "width": "4",
+        "start": "false",
+        "end": "true",
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "expr",
+              "expr": "[-3, 3]"
+            },
+            {
+              "type": "expr",
+              "expr": "[0, 0]"
+            },
+            {
+              "type": "expr",
+              "expr": "[2, 2]"
+            }
+          ]
+        },
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["x", "y", "z"],
+          "rhs": "\\left[1, 0, 0\\right]"
+        },
+        "samples1": "2",
+        "samples2": "1",
+        "samples3": "1",
+        "scale": "0.5"
+      }
+    },
+    {
+      "id": "5",
+      "type": "VECTOR_FIELD",
+      "properties": {
+        "description": "Vector Field",
+        "color": "#8800ff",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.6",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "size": "6",
+        "width": "2",
+        "start": "false",
+        "end": "true",
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "expr",
+              "expr": "[-3, 3]"
+            },
+            {
+              "type": "expr",
+              "expr": "[-3, 3]"
+            },
+            {
+              "type": "expr",
+              "expr": "[-1, 1]"
+            }
+          ]
+        },
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["x", "y", "z"],
+          "rhs": "\\frac{\\left[y, -x, 0\\right]}{\\sqrt(x^2 + y^2)+0.1}"
+        },
+        "samples1": "10",
+        "samples2": "10",
+        "samples3": "3",
+        "scale": "0.4"
+      }
+    }
+  ],
+  "itemOrder": {
+    "0": ["1", "2", "3", "4", "5"],
+    "main": ["0"],
+    "setup": ["cameraFolder", "axes"],
+    "cameraFolder": ["camera"],
+    "axes": ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"]
+  }
+}

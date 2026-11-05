@@ -2,7 +2,6 @@ import logging
 
 from django.db.models import F
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from ninja import Query, Router, Status
 from ninja.errors import HttpError
 from ninja.pagination import LimitOffsetPagination, paginate
@@ -20,7 +19,7 @@ from scenes.schemas import (
     ScenePatchSchema,
     SceneSchema,
 )
-from scenes.screenshots import schedule_render
+from scenes.screenshots import save_content_change, schedule_render
 
 logger = logging.getLogger(__name__)
 
@@ -85,10 +84,15 @@ def get_scene_meta(request, key: str):
 
 @scenes_router.get("/{key}/", response=SceneSchema, auth=None, by_alias=True)
 def get_scene(request, key: str):
-    if LegacyScene.objects.filter(key=key).exists():
-        # v0 parity: re-migrate on every legacy-key GET. The .update() below then
-        # stacks on the count migrate_scene carries over — harmless for a view counter.
-        legacy = LegacyScene.objects.get(key=key)
+    legacy = LegacyScene.objects.filter(key=key).first()
+    if (
+        legacy is not None
+        and not Scene.objects.filter(key=key, is_legacy=False).exists()
+    ):
+        # v0 parity: re-migrate on every legacy-key GET, unless the row has been
+        # taken over (a seed file, a verified translation). The .update() below
+        # then stacks on the count migrate_scene carries over — harmless for a
+        # view counter.
         legacy.times_accessed += 1
         legacy.save()
         try:
@@ -122,12 +126,10 @@ def update_scene(request, key: str, payload: ScenePatchSchema):
         scene.archived = data["archived"]
     # Only content edits change the rendered PNG; a title/archived-only patch
     # must not burn a render slot (bulk archive/rename would drain the cap).
-    content_changed = bool(data.keys() & {"items", "item_order"})
-    if content_changed:
-        scene.content_modified_date = timezone.now()
-    scene.save()
-    if content_changed:
-        schedule_render(scene)
+    if data.keys() & {"items", "item_order"}:
+        save_content_change(scene)
+    else:
+        scene.save()
     return scene
 
 

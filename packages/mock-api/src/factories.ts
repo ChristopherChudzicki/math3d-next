@@ -148,10 +148,14 @@ class SceneBuilder implements IScene {
 
     addItemToScene(this, ids.setupFolder, axesFolder);
     const axisX = makeItem(MathItemType.Axis, { axis: "x" }, ids.axisX);
-    const axisY = makeItem(MathItemType.Axis, { axis: "y" }, ids.axisY);
+    const axisY = makeItem(
+      MathItemType.Axis,
+      { axis: "y", label: "y" },
+      ids.axisY,
+    );
     const axisZ = makeItem(
       MathItemType.Axis,
-      { axis: "z", scale: "1/2" },
+      { axis: "z", label: "z", scale: "1/2" },
       ids.axisZ,
     );
     const gridXY = makeItem(

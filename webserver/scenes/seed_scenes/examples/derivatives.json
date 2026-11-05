@@ -1,0 +1,323 @@
+{
+  "key": "derivatives",
+  "title": "diff: Using Derivatives",
+  "items": [
+    {
+      "id": "camera",
+      "type": "CAMERA",
+      "properties": {
+        "description": "Camera",
+        "isOrthographic": "false",
+        "isPanEnabled": "false",
+        "isZoomEnabled": "true",
+        "isRotateEnabled": "true",
+        "position": "[-0.7500000000000001, -1.25, 0.4999999999999998]",
+        "target": "[0.0, 0.0, 0.0]",
+        "updateOnDrag": "true",
+        "useRelative": "true"
+      }
+    },
+    {
+      "id": "axis-x",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "x",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "x",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-y",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "y",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "y",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-z",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "z",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "z",
+        "scale": "1/2",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "grid-xy",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "xy"
+      }
+    },
+    {
+      "id": "grid-yz",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "yz"
+      }
+    },
+    {
+      "id": "grid-zx",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "zx"
+      }
+    },
+    {
+      "id": "4",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Graphics",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "mainFolder",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Controls",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "cameraFolder",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Camera Controls",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "axes",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Axes and Grids",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "3",
+      "type": "PARAMETRIC_CURVE",
+      "properties": {
+        "description": "Parametric Curve",
+        "color": "#3090FF",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "size": "6",
+        "width": "4",
+        "start": "false",
+        "end": "false",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["t"],
+          "rhs": "f\\left(t\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "expr",
+              "expr": "\\left[-2,2\\right]"
+            }
+          ]
+        },
+        "samples1": "128"
+      }
+    },
+    {
+      "id": "5",
+      "type": "POINT",
+      "properties": {
+        "description": "Point",
+        "color": "#2c3e50",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "",
+        "labelVisible": "false",
+        "coords": "f\\left(T\\right)",
+        "size": "16"
+      }
+    },
+    {
+      "id": "6",
+      "type": "VECTOR",
+      "properties": {
+        "description": "Vector",
+        "color": "#e74c3c",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "",
+        "labelVisible": "false",
+        "size": "6",
+        "width": "4",
+        "start": "false",
+        "end": "true",
+        "components": "df\\left(T\\right)",
+        "tail": "f\\left(T\\right)"
+      }
+    },
+    {
+      "id": "1",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "f(t)",
+          "rhs": "\\left[t,t^2,t^3\\right]"
+        },
+        "description": "Function"
+      }
+    },
+    {
+      "id": "2",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "df(t)",
+          "rhs": "\\operatorname{diff}\\left(f,\\ t\\right)"
+        },
+        "description": "Function:\n\"diff\" is an operator that differentiates functions using the syntax below.\nIn general, \"diff\" returns the total derivative and may be scalar-valued, vector-valued, or matrix-valued."
+      }
+    },
+    {
+      "id": "7",
+      "type": "VARIABLE_SLIDER",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "T",
+          "rhs": "-1.04"
+        },
+        "fps": "60",
+        "range": {
+          "type": "array",
+          "items": ["-2", "2"]
+        },
+        "duration": "4",
+        "description": "Variable Slider",
+        "isAnimating": "false",
+        "speedMultiplier": "1"
+      }
+    }
+  ],
+  "itemOrder": {
+    "4": ["3", "5", "6"],
+    "axes": ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"],
+    "main": ["mainFolder", "4"],
+    "setup": ["cameraFolder", "axes"],
+    "mainFolder": ["1", "2", "7"],
+    "cameraFolder": ["camera"]
+  },
+  "example": {
+    "position": 70
+  }
+}

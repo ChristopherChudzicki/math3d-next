@@ -1,0 +1,294 @@
+{
+  "key": "calculated_visibility",
+  "title": "Controlling Multiple Object Visibility with Toggles",
+  "items": [
+    {
+      "id": "camera",
+      "type": "CAMERA",
+      "properties": {
+        "description": "Camera",
+        "isOrthographic": "false",
+        "isPanEnabled": "false",
+        "isZoomEnabled": "true",
+        "isRotateEnabled": "true",
+        "position": "[0.5005541532507943, -1.7359500680788371, 1.2481142142083221]",
+        "target": "[0.0, 0.0, 0.0]",
+        "updateOnDrag": "true",
+        "useRelative": "true"
+      }
+    },
+    {
+      "id": "axis-x",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "x",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "x",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-y",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "y",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "y",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-z",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "z",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "z",
+        "scale": "1/2",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "grid-xy",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "xy"
+      }
+    },
+    {
+      "id": "grid-yz",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "yz"
+      }
+    },
+    {
+      "id": "grid-zx",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "zx"
+      }
+    },
+    {
+      "id": "cameraFolder",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Camera Controls",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "axes",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Axes and Grids",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "mainFolder",
+      "type": "FOLDER",
+      "properties": {
+        "description": "A Folder",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "2",
+      "type": "POINT",
+      "properties": {
+        "description": "Point",
+        "color": "#e74c3c",
+        "visible": true,
+        "calculatedVisibility": "dragon",
+        "useCalculatedVisibility": true,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "",
+        "labelVisible": "false",
+        "coords": "\\left[-3,0,2\\right]",
+        "size": "16"
+      }
+    },
+    {
+      "id": "3",
+      "type": "POINT",
+      "properties": {
+        "description": "Point",
+        "color": "#9b59b6",
+        "visible": true,
+        "calculatedVisibility": "dragon",
+        "useCalculatedVisibility": true,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "A Point",
+        "labelVisible": "true",
+        "coords": "\\left[2,\\ 0,\\ 4\\right]",
+        "size": "16"
+      }
+    },
+    {
+      "id": "6",
+      "type": "EXPLICIT_SURFACE_POLAR",
+      "properties": {
+        "description": "Explicit Surface (Polar)\nTo control visibility with a toggle, set the value of \"calculated visibility\" in object settings (press the gear).",
+        "color": "#3090FF",
+        "visible": true,
+        "calculatedVisibility": "dragon",
+        "useCalculatedVisibility": true,
+        "opacity": "0.75",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["r", "\\theta"],
+          "rhs": "\\frac{1}{4}r^2\\cdot\\cos\\left(3\\theta\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["\\theta"],
+              "rhs": "\\left[0,\\ 3\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["r"],
+              "rhs": "\\left[-\\pi,\\ \\pi\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " r", " \\theta"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "64",
+        "samples2": "64",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "1",
+      "type": "BOOLEAN_VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "dragon",
+          "rhs": "true"
+        },
+        "description": "Toggle Switch:\nA toggle switch is a boolean variable (true/false). Toggles can be used to control the  visibility of multiple graphics objects at once.\n\nThis toggle has the silly name \"dragon\"."
+      }
+    }
+  ],
+  "itemOrder": {
+    "axes": ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"],
+    "main": ["mainFolder"],
+    "setup": ["cameraFolder", "axes"],
+    "mainFolder": ["1", "6", "2", "3"],
+    "cameraFolder": ["camera"]
+  },
+  "example": {
+    "position": 80
+  }
+}

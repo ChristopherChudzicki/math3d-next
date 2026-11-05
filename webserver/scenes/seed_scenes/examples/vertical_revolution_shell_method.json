@@ -1,0 +1,860 @@
+{
+  "key": "vertical_revolution_shell_method",
+  "title": "Volume of Revolution: Shell Method",
+  "items": [
+    {
+      "id": "camera",
+      "type": "CAMERA",
+      "properties": {
+        "description": "Camera",
+        "isOrthographic": "false",
+        "isPanEnabled": "false",
+        "isZoomEnabled": "true",
+        "isRotateEnabled": "true",
+        "position": "[0.014909559463207885, -1.2388397109310323, 0.5594301618402416]",
+        "target": "[0.0, 0.0, 0.0]",
+        "updateOnDrag": "true",
+        "useRelative": "true"
+      }
+    },
+    {
+      "id": "axis-x",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "x",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "x",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-y",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "y",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "y",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-z",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "y",
+        "labelVisible": "true",
+        "min": "-4",
+        "max": "+8",
+        "axis": "z",
+        "scale": "1/2",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "grid-xy",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "xy"
+      }
+    },
+    {
+      "id": "grid-yz",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "yz"
+      }
+    },
+    {
+      "id": "grid-zx",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "zx"
+      }
+    },
+    {
+      "id": "2",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Controls",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "3",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Helper Functions",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "19",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Surfaces: Top and Bottom",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "24",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Surfaces: Inner, Outer",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "30",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Surfaces: Shell",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "34",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Axis",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "cameraFolder",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Camera Controls",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "axes",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Axes and Grids",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "mainFolder",
+      "type": "FOLDER",
+      "properties": {
+        "description": "A Folder",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "22",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Parametric Surface",
+        "color": "#3090FF",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.4",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_g\\left(u,\\ v\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[a,\\ b\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\ \\theta\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "23",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Parametric Surface",
+        "color": "#3090FF",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.4",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_f\\left(u,\\ v\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[a,\\ b\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\ \\theta\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "26",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Inner Surface",
+        "color": "#3090FF",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_I\\left(u,\\ v,\\ a\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[0,\\ \\theta\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\ 1\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "27",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Outer Surface",
+        "color": "#3090FF",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.3",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_I\\left(u,\\ v,\\ b\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[0,\\ \\theta\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\ 1\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "28",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Shell Inner",
+        "color": "#e74c3c",
+        "visible": true,
+        "calculatedVisibility": "shell",
+        "useCalculatedVisibility": true,
+        "opacity": "0.75",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_I\\left(u,\\ v,\\ R-\\frac{dR}{2}\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[0,\\ \\theta\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\ 1\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "4",
+        "grid1": "2",
+        "grid2": "2"
+      }
+    },
+    {
+      "id": "31",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Shell Outer",
+        "color": "#e74c3c",
+        "visible": true,
+        "calculatedVisibility": "shell",
+        "useCalculatedVisibility": true,
+        "opacity": "0.75",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_I\\left(u,\\ v,\\ R+\\frac{dR}{2}\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[0,\\ \\theta\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\ 1\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "4",
+        "grid1": "2",
+        "grid2": "2"
+      }
+    },
+    {
+      "id": "32",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Shell Top",
+        "color": "#e74c3c",
+        "visible": true,
+        "calculatedVisibility": "shell",
+        "useCalculatedVisibility": true,
+        "opacity": "0.75",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_f\\left(u,\\ v\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[R-\\frac{dR}{2},R+\\frac{dR}{2}\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\ \\theta\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "24",
+        "samples2": "24",
+        "grid1": "2",
+        "grid2": "2"
+      }
+    },
+    {
+      "id": "33",
+      "type": "PARAMETRIC_SURFACE",
+      "properties": {
+        "description": "Shell Bottom",
+        "color": "#e74c3c",
+        "visible": true,
+        "calculatedVisibility": "shell",
+        "useCalculatedVisibility": true,
+        "opacity": "0.75",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["u", "v"],
+          "rhs": "r_g\\left(u,\\ v\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["v"],
+              "rhs": "\\left[R-\\frac{dR}{2},R+\\frac{dR}{2}\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["u"],
+              "rhs": "\\left[0,\\ \\theta\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " u", " v"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "64",
+        "samples2": "64",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "38",
+      "type": "LINE",
+      "properties": {
+        "description": "Line",
+        "color": "#2c3e50",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "",
+        "labelVisible": "false",
+        "size": "6",
+        "width": "8",
+        "start": "false",
+        "end": "false",
+        "coords": "\\left[\\left[X,0,y_1\\right],\\left[X,0,y_2\\right]\\right]"
+      }
+    },
+    {
+      "id": "6",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "f(x)",
+          "rhs": "6-x^2"
+        },
+        "description": "Top Function"
+      }
+    },
+    {
+      "id": "7",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "g\\left(x\\right)",
+          "rhs": "x"
+        },
+        "description": "Bottom Function"
+      }
+    },
+    {
+      "id": "9",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "a",
+          "rhs": "0"
+        },
+        "description": "Inner Radius"
+      }
+    },
+    {
+      "id": "10",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "b",
+          "rhs": "2"
+        },
+        "description": "Outer Radius"
+      }
+    },
+    {
+      "id": "11",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "X",
+          "rhs": "-1"
+        },
+        "description": "Axis"
+      }
+    },
+    {
+      "id": "12",
+      "type": "VARIABLE_SLIDER",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "\\theta",
+          "rhs": "3.9584067435231396"
+        },
+        "fps": "60",
+        "range": {
+          "type": "array",
+          "items": ["0", "2\\pi"]
+        },
+        "duration": "4",
+        "description": "Rotation Angle",
+        "isAnimating": "false",
+        "speedMultiplier": "1"
+      }
+    },
+    {
+      "id": "14",
+      "type": "VARIABLE_SLIDER",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "R",
+          "rhs": "1.3"
+        },
+        "fps": "60",
+        "range": {
+          "type": "array",
+          "items": ["a", "b"]
+        },
+        "duration": "4",
+        "description": "Shell Radius",
+        "isAnimating": "false",
+        "speedMultiplier": "1"
+      }
+    },
+    {
+      "id": "15",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "r_f\\left(t,\\ \\theta\\right)",
+          "rhs": "\\left[\\left(t-X\\right)\\cdot\\cos\\left(\\theta\\right),\\ \\left(t-X\\right)\\cdot\\sin\\left(\\theta\\right),\\ f\\left(t\\right)\\right]+\\left[X,0,0\\right]"
+        },
+        "description": "Top Surface Function"
+      }
+    },
+    {
+      "id": "16",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "r_g\\left(t,\\ \\theta\\right)",
+          "rhs": "\\left[\\left(t-X\\right)\\cdot\\cos\\left(\\theta\\right),\\ \\left(t-X\\right)\\cdot\\sin\\left(\\theta\\right),\\ g\\left(t\\right)\\right]+\\left[X,0,0\\right]"
+        },
+        "description": "Bottom Surface Function"
+      }
+    },
+    {
+      "id": "17",
+      "type": "BOOLEAN_VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "shell",
+          "rhs": "true"
+        },
+        "description": "Shell Visibility"
+      }
+    },
+    {
+      "id": "25",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "r_I\\left(\\theta,\\ t,\\ r\\right)",
+          "rhs": "t\\cdot r_f\\left(r,\\ \\theta\\right)+\\left(1-t\\right)\\cdot r_g\\left(r,\\ \\theta\\right)"
+        },
+        "description": "Interpolator Function"
+      }
+    },
+    {
+      "id": "29",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "dR",
+          "rhs": "0.05"
+        },
+        "description": "Shell Width"
+      }
+    },
+    {
+      "id": "37",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "y_1",
+          "rhs": "-3"
+        },
+        "description": "Rotation Axis Bottom"
+      }
+    },
+    {
+      "id": "39",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "y_2",
+          "rhs": "7"
+        },
+        "description": "Rotation Axis Top"
+      }
+    }
+  ],
+  "itemOrder": {
+    "2": ["6", "7", "12", "14", "17", "11", "9", "10", "29", "37", "39"],
+    "3": ["15", "16", "25"],
+    "19": ["23", "22"],
+    "24": ["26", "27"],
+    "30": ["28", "31", "32", "33"],
+    "34": ["38"],
+    "axes": ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"],
+    "main": ["2", "34", "19", "24", "30", "3"],
+    "setup": ["cameraFolder", "axes"],
+    "cameraFolder": ["camera"]
+  },
+  "example": {
+    "position": 150
+  }
+}

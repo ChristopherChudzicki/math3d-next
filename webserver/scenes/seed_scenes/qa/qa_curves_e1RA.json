@@ -1,0 +1,304 @@
+{
+  "key": "qa_curves_e1RA",
+  "title": "QA: lines and curves",
+  "items": [
+    {
+      "id": "cameraFolder",
+      "type": "FOLDER",
+      "properties": {
+        "isCollapsed": "false",
+        "description": "Camera Controls"
+      }
+    },
+    {
+      "id": "camera",
+      "type": "CAMERA",
+      "properties": {
+        "description": "Camera",
+        "isOrthographic": "false",
+        "isPanEnabled": "false",
+        "isZoomEnabled": "true",
+        "isRotateEnabled": "true",
+        "position": "[-6, -4, 2]",
+        "target": "[0, 0, 0]",
+        "updateOnDrag": "true",
+        "useRelative": "false"
+      }
+    },
+    {
+      "id": "axes",
+      "type": "FOLDER",
+      "properties": {
+        "isCollapsed": "false",
+        "description": "Axes and Grids"
+      }
+    },
+    {
+      "id": "axis-x",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "x",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "x",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "6",
+        "width": "1",
+        "end": "true",
+        "start": "false",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-y",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "y",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "y",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "6",
+        "width": "1",
+        "end": "true",
+        "start": "false",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-z",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "z",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "z",
+        "scale": "1/2",
+        "ticksVisible": "true",
+        "size": "6",
+        "width": "1",
+        "end": "true",
+        "start": "false",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "grid-xy",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "axes": "xy",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "[10, 10]",
+        "snap": "false"
+      }
+    },
+    {
+      "id": "grid-yz",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "axes": "yz",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "[10, 10]",
+        "snap": "false"
+      }
+    },
+    {
+      "id": "grid-zx",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "axes": "zx",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "[10, 10]",
+        "snap": "false"
+      }
+    },
+    {
+      "id": "0",
+      "type": "FOLDER",
+      "properties": {
+        "isCollapsed": "false",
+        "description": "Lines and curves"
+      }
+    },
+    {
+      "id": "1",
+      "type": "LINE",
+      "properties": {
+        "description": "Line",
+        "color": "#ff0000",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "",
+        "labelVisible": "false",
+        "size": "12",
+        "width": "8",
+        "start": "true",
+        "end": "true",
+        "coords": "[[-3, -3, 0], [3, 3, 0]]"
+      }
+    },
+    {
+      "id": "2",
+      "type": "LINE",
+      "properties": {
+        "description": "Line",
+        "color": "#00aa00",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "",
+        "labelVisible": "false",
+        "size": "6",
+        "width": "2",
+        "start": "false",
+        "end": "false",
+        "coords": "[[-3, 3, 0], [3, -3, 0]]"
+      }
+    },
+    {
+      "id": "3",
+      "type": "PARAMETRIC_CURVE",
+      "properties": {
+        "description": "Parametric Curve",
+        "color": "#3090ff",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.5",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "size": "6",
+        "width": "6",
+        "start": "false",
+        "end": "false",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["t"],
+          "rhs": "\\left[2\\cos(t), 2\\sin(t), t/2\\right]"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "expr",
+              "expr": "\\left[-2\\pi, 2\\pi\\right]"
+            }
+          ]
+        },
+        "samples1": "128"
+      }
+    },
+    {
+      "id": "4",
+      "type": "PARAMETRIC_CURVE",
+      "properties": {
+        "description": "Parametric Curve",
+        "color": "#ff8800",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "0.5",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "size": "6",
+        "width": "6",
+        "start": "false",
+        "end": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["t"],
+          "rhs": "\\left[2\\cos(t), 2\\sin(t), -t/2\\right]"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "expr",
+              "expr": "\\left[-2\\pi, 2\\pi\\right]"
+            }
+          ]
+        },
+        "samples1": "128"
+      }
+    }
+  ],
+  "itemOrder": {
+    "0": ["1", "2", "3", "4"],
+    "main": ["0"],
+    "setup": ["cameraFolder", "axes"],
+    "cameraFolder": ["camera"],
+    "axes": ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"]
+  }
+}

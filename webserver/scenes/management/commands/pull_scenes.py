@@ -80,6 +80,7 @@ class Command(BaseCommand):
                 "title": external_scene.title,
                 "archived": external_scene.archived,
                 "times_accessed": external_scene.times_accessed,
+                "is_legacy": external_scene.is_legacy,
             }
             if not upsert_scene(scene_dict):
                 invalid_keys.append(scene_dict["key"])

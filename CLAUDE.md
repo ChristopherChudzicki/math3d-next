@@ -179,7 +179,7 @@ Worktrees get their own frontend port so they never test the main checkout's cod
 2. `./scripts/setup_worktree_env.sh` (once) — writes a `.env` with a dedicated port (3002–3009, already trusted by the backend)
 3. `yarn test-e2e` (or `just e2e`) — starts this worktree's own dev server on its port; the main checkout's `:3000` server is untouched. If the suite ends up pointed at another checkout's server, the global-setup identity check fails with instructions.
 
-The docker backend and database are shared with the main checkout — never `docker compose up` from a worktree. That rules out `just start` here too (it wraps `docker compose up`); for a standalone dev server use `yarn start`, which loads the worktree's `.env` and so its port.
+The docker backend and database are shared with the main checkout — never `docker compose up` from a worktree. That rules out `just start` here too (it wraps `docker compose up`); for a standalone dev server use `yarn start`, which loads the worktree's `.env` and so its port. To run a management command against the worktree's own `webserver/` code, use `scripts/manage_worktree.sh <command>`; it mounts this checkout's `webserver/` into a one-off container of the main checkout's compose stack.
 
 Troubleshooting:
 

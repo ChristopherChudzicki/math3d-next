@@ -1,0 +1,326 @@
+{
+  "key": "z_bias",
+  "title": "Fine-tuning Visibility with z-bias",
+  "items": [
+    {
+      "id": "camera",
+      "type": "CAMERA",
+      "properties": {
+        "description": "Camera",
+        "isOrthographic": "false",
+        "isPanEnabled": "false",
+        "isZoomEnabled": "true",
+        "isRotateEnabled": "true",
+        "position": "[1.588086401796261, -1.1559540607206158, 1.5840723024490586]",
+        "target": "[0.0, 0.0, 0.0]",
+        "updateOnDrag": "true",
+        "useRelative": "true"
+      }
+    },
+    {
+      "id": "axis-x",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "x",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "x",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-y",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "y",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "y",
+        "scale": "1",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "axis-z",
+      "type": "AXIS",
+      "properties": {
+        "description": "Axis",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "label": "z",
+        "labelVisible": "true",
+        "min": "-5",
+        "max": "+5",
+        "axis": "z",
+        "scale": "1/2",
+        "ticksVisible": "true",
+        "size": "2",
+        "width": "1",
+        "start": "false",
+        "end": "true",
+        "divisions": "10"
+      }
+    },
+    {
+      "id": "grid-xy",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "xy"
+      }
+    },
+    {
+      "id": "grid-yz",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "yz"
+      }
+    },
+    {
+      "id": "grid-zx",
+      "type": "GRID",
+      "properties": {
+        "description": "Grid",
+        "color": "#808080",
+        "visible": false,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "width": "1/2",
+        "divisions": "\\left[10,\\ 10\\right]",
+        "snap": "false",
+        "axes": "zx"
+      }
+    },
+    {
+      "id": "cameraFolder",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Camera Controls",
+        "isCollapsed": "true"
+      }
+    },
+    {
+      "id": "axes",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Axes and Grids",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "mainFolder",
+      "type": "FOLDER",
+      "properties": {
+        "description": "A Folder",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "2",
+      "type": "PARAMETRIC_CURVE",
+      "properties": {
+        "description": "ParametricCurve\nThis red curve is hard to see because it has the same 3D-position as the blue surface. The renderer can't decide which object to draw on top.",
+        "color": "#e74c3c",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "size": "6",
+        "width": "6",
+        "start": "false",
+        "end": "false",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["t"],
+          "rhs": "\\left[t,\\ 2,\\ f\\left(t,\\ 2\\right)\\right]"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "expr",
+              "expr": "\\left[-3,3\\right]"
+            }
+          ]
+        },
+        "samples1": "128"
+      }
+    },
+    {
+      "id": "3",
+      "type": "PARAMETRIC_CURVE",
+      "properties": {
+        "description": "Parametric Curve\nSetting the z-bias in object settings (click the gear) is a nice way to solve this problem. Try viewing the yellow line from different angle: it will always appear closer to the camera.\nThe z-bias of an object is a positional bias toward the camera (\"z\" in the context refers to an axis pointing toward the camera, not the mathematical z axis.)",
+        "color": "#f1c40f",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "1",
+        "zOrder": "",
+        "size": "6",
+        "width": "6",
+        "start": "false",
+        "end": "false",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["t"],
+          "rhs": "\\left[t,\\ 2.1,\\ f\\left(t,2.1\\right)\\right]"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "expr",
+              "expr": "\\left[-3,3\\right]"
+            }
+          ]
+        },
+        "samples1": "128"
+      }
+    },
+    {
+      "id": "5",
+      "type": "EXPLICIT_SURFACE",
+      "properties": {
+        "description": "Explicit Surface",
+        "color": "#3090FF",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["x", "y"],
+          "rhs": "f\\left(x,\\ y\\right)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["y"],
+              "rhs": "\\left[-2,2\\right]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["x"],
+              "rhs": "\\left[-3,3\\right]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["X", " Y", " Z", " x", " y"],
+          "rhs": "mod(Z, 1)"
+        },
+        "gridOpacity": "0.5",
+        "gridWidth": "2",
+        "samples1": "64",
+        "samples2": "64",
+        "grid1": "8",
+        "grid2": "8"
+      }
+    },
+    {
+      "id": "4",
+      "type": "VARIABLE",
+      "properties": {
+        "value": {
+          "type": "assignment",
+          "lhs": "f\\left(x,\\ y\\right)",
+          "rhs": "\\frac{1}{2}y^2-x^2"
+        },
+        "description": "Variable or Function"
+      }
+    }
+  ],
+  "itemOrder": {
+    "axes": ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"],
+    "main": ["mainFolder"],
+    "setup": ["cameraFolder", "axes"],
+    "mainFolder": ["4", "5", "2", "3"],
+    "cameraFolder": ["camera"]
+  },
+  "example": {
+    "position": 90
+  }
+}

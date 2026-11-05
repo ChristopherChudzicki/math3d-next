@@ -6,6 +6,7 @@ import os
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from pydantic_settings import BaseSettings
@@ -64,7 +65,6 @@ def create_test_user(email: str, *, uid: str):
 
 
 TEST_SCENE_COUNT = 100
-EXAMPLE_SCENE_COUNT = 3
 
 GOLDEN_ANGLE = 137.508
 
@@ -114,16 +114,17 @@ class Command(BaseCommand):
             seed_scene(f"Test Scene {j}", user_1, distinct_color(j))
         # Owned by no one, as an anonymous visitor's scenes are.
         seed_scene("Anonymous Scene", None)
-        # Leaves alone a database that already has examples, e.g. ones 0026
-        # seeded from pulled scenes.
-        if not ExampleScene.objects.exists():
-            for j in range(EXAMPLE_SCENE_COUNT):
-                scene = seed_scene(f"Example Scene {j}", None, distinct_color(j))
-                ExampleScene.objects.create(scene=scene, position=10 * (j + 1))
+        # Databases seeded before the committed examples existed hold
+        # placeholder examples at positions the committed ones claim, and
+        # position is unique: clear them before loading.
+        ExampleScene.objects.filter(
+            scene__author=None, scene__title__startswith="Example Scene "
+        ).delete()
+        call_command("load_seed_scenes", stdout=self.stdout)
 
         self.stdout.write(
             self.style.SUCCESS(
                 f"Seeded {email} with {scene_count} scenes, plus one anonymous "
-                "scene and, if there are none, example scenes."
+                "scene and the committed seed scenes."
             )
         )

@@ -29,7 +29,7 @@ test("The scenes button opens the Examples tab, listing the examples", async ({
   await expect(
     dialog.getByRole("tab", { name: "Examples", selected: true }),
   ).toBeVisible();
-  // seed_test_data seeds examples into a database that has none.
+  // seed_test_data loads the committed examples.
   await expect(dialog.getByRole("listitem").first()).toBeVisible();
 });
 
