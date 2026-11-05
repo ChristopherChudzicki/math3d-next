@@ -1,6 +1,6 @@
 import { makeOrbitPosition } from "@use-gpu/core";
-import { toOrbit, toWorld } from "./camera";
-import type { Coords } from "./specs";
+import type { Coords } from "@/features/viewport/shared/coordinates";
+import { toOrbit, toWorld } from "./orbit";
 
 const cases: { position: Coords; target: Coords }[] = [
   { position: [0.5, -2, 0.5], target: [0, 0, 0] },

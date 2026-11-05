@@ -1,8 +1,17 @@
-import type { CameraSpec, Coords, OrbitSpec } from "./specs";
+import type { Coords } from "@/features/viewport/shared/coordinates";
+import type { CameraSpec } from "./spec/types";
+
+/** Use.GPU `OrbitControls` parameters (world coordinates, y up). */
+export type OrbitSpec = {
+  radius: number;
+  bearing: number;
+  pitch: number;
+  target: Coords;
+};
 
 /**
  * Use.GPU's orbit camera is y-up; math3d is z-up. The plot is rotated -90°
- * about x (`Cartesian rotation` in liveScene.ts), taking math (x, y, z) to
+ * about x (`PLOT_ROTATION_DEGREES` in live/scene.ts), taking math (x, y, z) to
  * world (x, z, -y). The camera spec is in math3d coordinates, so apply the
  * same map to it.
  */

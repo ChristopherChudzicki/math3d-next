@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   useLocation,
   useNavigate,
@@ -6,6 +6,7 @@ import {
   useSearchParams,
 } from "react-router";
 import Viewport from "@/features/viewport/mathbox/Viewport";
+import GpuViewport from "@/features/viewport/usegpu/GpuViewport";
 import useSceneLoader from "@/app/useSceneLoader";
 import SceneControls from "@/features/editor/sidebar/SceneControls";
 import SliderAnimations from "@/features/editor/items/forms/VariableSlider/SliderAnimations";
@@ -65,13 +66,8 @@ const useSearchEnum = <T extends string>({
 };
 
 const CONTROLS_VALUES = ["0", "1"] as const;
-// Spike: `?renderer=usegpu` swaps MathBox for the Use.GPU (WebGPU) viewport.
-// Loaded on demand so the default bundle (and jsdom tests) never pull in
-// Use.GPU.
+// `?renderer=usegpu` swaps MathBox for the Use.GPU (WebGPU) viewport.
 const RENDERER_VALUES = ["mathbox", "usegpu"] as const;
-const GpuViewport = React.lazy(
-  () => import("@/features/viewport/usegpu/GpuViewport"),
-);
 
 const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
@@ -168,15 +164,13 @@ const MainPage: React.FC = () => {
                 <SceneControls loading={sceneLoad.status === "loading"} />
               </Sidebar>
               {renderer === "usegpu" ? (
-                <Suspense fallback={null}>
-                  <GpuViewport
-                    className={
-                      controlsOpen
-                        ? styles["scene-adjust-controls-open"]
-                        : styles["scene-adjust-controls-closed"]
-                    }
-                  />
-                </Suspense>
+                <GpuViewport
+                  className={
+                    controlsOpen
+                      ? styles["scene-adjust-controls-open"]
+                      : styles["scene-adjust-controls-closed"]
+                  }
+                />
               ) : (
                 <Viewport
                   className={

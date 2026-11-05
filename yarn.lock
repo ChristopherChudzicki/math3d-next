@@ -4019,7 +4019,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@use-gpu/core@npm:0.21.0, @use-gpu/core@npm:^0.21.0":
+"@use-gpu/core@npm:0.21.0":
   version: 0.21.0
   resolution: "@use-gpu/core@npm:0.21.0"
   dependencies:
@@ -4032,7 +4032,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@use-gpu/frame@npm:0.21.0, @use-gpu/frame@npm:^0.21.0":
+"@use-gpu/frame@npm:0.21.0":
   version: 0.21.0
   resolution: "@use-gpu/frame@npm:0.21.0"
   dependencies:
@@ -4046,7 +4046,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@use-gpu/glyph@npm:^0.21.0":
+"@use-gpu/glyph@npm:0.21.0":
   version: 0.21.0
   resolution: "@use-gpu/glyph@npm:0.21.0"
   dependencies:
@@ -4066,21 +4066,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@use-gpu/live@npm:0.21.0, @use-gpu/live@npm:^0.21.0":
+"@use-gpu/live@npm:0.21.0":
   version: 0.21.0
   resolution: "@use-gpu/live@npm:0.21.0"
   checksum: 10/3cdbe7dc2f14a689d7da5cc0683017f567ba63b27ba8dfd3a66a25255c01712b602bc379474ecead498cd9ae658978e024ed8692ffda0960080c785636cd265d
   languageName: node
   linkType: hard
 
-"@use-gpu/math@npm:^0.21.0":
+"@use-gpu/math@npm:0.21.0":
   version: 0.21.0
   resolution: "@use-gpu/math@npm:0.21.0"
   checksum: 10/e7f6b5927b2213dd64d32f7f8f3138a40bd1dccb1f2511542184af2701621f0be361164a1cd98517c66661085a0dcd0b49e2eab94ac4e3d76f476277fb27e602
   languageName: node
   linkType: hard
 
-"@use-gpu/parse@npm:^0.21.0":
+"@use-gpu/parse@npm:0.21.0":
   version: 0.21.0
   resolution: "@use-gpu/parse@npm:0.21.0"
   dependencies:
@@ -4090,7 +4090,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@use-gpu/plot@npm:0.21.0, @use-gpu/plot@npm:^0.21.0":
+"@use-gpu/plot@npm:0.21.0":
   version: 0.21.0
   resolution: "@use-gpu/plot@npm:0.21.0"
   dependencies:
@@ -4115,7 +4115,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@use-gpu/shader@npm:^0.21.0":
+"@use-gpu/shader@npm:0.21.0":
   version: 0.21.0
   resolution: "@use-gpu/shader@npm:0.21.0"
   dependencies:
@@ -4134,14 +4134,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@use-gpu/state@npm:^0.21.0":
+"@use-gpu/state@npm:0.21.0":
   version: 0.21.0
   resolution: "@use-gpu/state@npm:0.21.0"
   checksum: 10/a6e465166c37b456ea2c48d69638be41372bb4bff2e72493c1fd5bfc3758a55f5cb0d4180f9eeebb8b64228b826ab64adaa3243e19ee2dac1f7c14b701b18260
   languageName: node
   linkType: hard
 
-"@use-gpu/traits@npm:^0.21.0":
+"@use-gpu/traits@npm:0.21.0":
   version: 0.21.0
   resolution: "@use-gpu/traits@npm:0.21.0"
   dependencies:
@@ -4161,7 +4161,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@use-gpu/wgsl@npm:^0.21.0":
+"@use-gpu/wgsl@npm:0.21.0":
   version: 0.21.0
   resolution: "@use-gpu/wgsl@npm:0.21.0"
   checksum: 10/0a8d6359803194672d56f7dd43bc7c70d8a60dacb7578e4409ed250feed4dd59791b99ddfbc274f50c97e4a8e7d3a96d92daedaa4c6d6d231719b1a136ff5a8f

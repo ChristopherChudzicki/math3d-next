@@ -1,16 +1,17 @@
 /**
- * Renderer-neutral description of what a scene draws. React components read
- * the Redux store and MathScope and produce these; the Use.GPU tree consumes
- * them. Nothing in here depends on either renderer.
+ * What each graphic draws, in math-item terms: evaluated positions, RGBA
+ * colors, sample callbacks. The components in this folder read the store and
+ * MathScope and produce these; usegpu/live turns them into a Live tree.
  */
+import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
 
 export type RGBA = [number, number, number, number];
-export type Coords = [number, number, number];
-export type Range3 = [[number, number], [number, number], [number, number]];
 
 type Common = {
   /** MathBox-style depth bias. Both renderers have one; their scales are not calibrated against each other. */
   zBias: number;
+  /** MathBox squeezes a higher zIndex's depth toward the near plane, so it draws over lower ones. */
+  zIndex: number;
 };
 
 export type PointSpec = Common & {
@@ -44,7 +45,7 @@ export type SurfaceSpec = Common & {
 
 export type ImplicitSurfaceSpec = Common & {
   kind: "implicit";
-  domain: Range3;
+  domain: AxesRange;
   /** Samples per axis. */
   samples: number;
   /** The surface is the zero level set of this function. */
@@ -89,26 +90,6 @@ export type CameraSpec = {
    */
   position: Coords;
   target: Coords;
-};
-
-/** Use.GPU `OrbitControls` parameters (world coordinates, y up). */
-export type OrbitSpec = {
-  radius: number;
-  bearing: number;
-  pitch: number;
-  target: Coords;
-};
-
-export type SceneSpec = {
-  range: Range3;
-  scale: Coords;
-  /**
-   * Seeds the orbit controls. Must keep its identity while the camera item is
-   * unchanged: a new `target` array resets the user's pan.
-   */
-  orbit: OrbitSpec;
-  controls: { rotate: boolean; pan: boolean; zoom: boolean };
-  graphics: { id: string; spec: GraphicSpec }[];
 };
 
 const DEFAULT_COLOR = "3090ff";
