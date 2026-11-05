@@ -28,6 +28,8 @@ Like production, the dev environment serves the frontend and API from separate s
 - **Frontend**: http://math3d.localhost:3000
 - **API**: http://api.math3d.localhost:8000
 
+Append `?renderer=usegpu` to a scene URL to try the opt-in WebGPU renderer ([ADR-0008](docs/adr/0008-usegpu-opt-in-renderer.md)).
+
 ### Signing in during development
 
 The sign-in dialog's "Sign in as dev user" (`VITE_ENABLE_DUMMY_AUTH`) opens
