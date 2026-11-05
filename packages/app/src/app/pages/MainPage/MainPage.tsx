@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { Suspense, useCallback, useEffect, useRef } from "react";
 import {
   useLocation,
   useNavigate,
@@ -65,6 +65,13 @@ const useSearchEnum = <T extends string>({
 };
 
 const CONTROLS_VALUES = ["0", "1"] as const;
+// Spike: `?renderer=usegpu` swaps MathBox for the Use.GPU (WebGPU) viewport.
+// Loaded on demand so the default bundle (and jsdom tests) never pull in
+// Use.GPU.
+const RENDERER_VALUES = ["mathbox", "usegpu"] as const;
+const GpuViewport = React.lazy(
+  () => import("@/features/viewport/usegpu/GpuViewport"),
+);
 
 const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
@@ -109,6 +116,11 @@ const MainPage: React.FC = () => {
     defaultValue: "1",
   });
   const controlsOpen = controlsVisibility === "1";
+  const [renderer] = useSearchEnum({
+    name: "renderer",
+    values: RENDERER_VALUES,
+    defaultValue: "mathbox",
+  });
   const handleControlsClick = useCallback(
     (currentlyOpen: boolean) => {
       if (currentlyOpen) {
@@ -155,13 +167,25 @@ const MainPage: React.FC = () => {
               >
                 <SceneControls loading={sceneLoad.status === "loading"} />
               </Sidebar>
-              <Viewport
-                className={
-                  controlsOpen
-                    ? styles["scene-adjust-controls-open"]
-                    : styles["scene-adjust-controls-closed"]
-                }
-              />
+              {renderer === "usegpu" ? (
+                <Suspense fallback={null}>
+                  <GpuViewport
+                    className={
+                      controlsOpen
+                        ? styles["scene-adjust-controls-open"]
+                        : styles["scene-adjust-controls-closed"]
+                    }
+                  />
+                </Suspense>
+              ) : (
+                <Viewport
+                  className={
+                    controlsOpen
+                      ? styles["scene-adjust-controls-open"]
+                      : styles["scene-adjust-controls-closed"]
+                  }
+                />
+              )}
             </>
           )}
         </div>
