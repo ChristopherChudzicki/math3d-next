@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import { LiveCanvas } from "@use-gpu/react";
 import { MathItemType } from "@math3d/mathitem-configs";
 import type { MathItem } from "@math3d/mathitem-configs";
@@ -7,12 +7,12 @@ import { useMathItemResults } from "@/store/scene/evaluation/mathScope";
 import { fromUi } from "@/features/viewport/shared/coordinates";
 import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
 import { useViewportItems } from "@/features/viewport/shared/useViewportItems";
-import { GraphicSpecReporter } from "@/features/viewport/usegpu/spec/reporter";
-import { SpecCollector } from "@/features/viewport/usegpu/spec/collector";
-import type {
-  CameraSpec,
-  GraphicSpec,
-} from "@/features/viewport/usegpu/spec/types";
+import { GraphicSpecReporter } from "@/features/viewport/usegpu/graphicSpec/reporter";
+import {
+  SpecCollector,
+  useSpecCollector,
+} from "@/features/viewport/usegpu/graphicSpec/collector";
+import type { CameraSpec } from "@/features/viewport/usegpu/graphicSpec/types";
 import { toOrbit } from "@/features/viewport/usegpu/orbit";
 import { makeSceneRoot } from "./scene";
 import type { SceneHooks, SceneSpec } from "./scene";
@@ -58,22 +58,6 @@ const useOrbit = (
   // Keeps orbit.target's identity; see SceneSpec.orbit.
   const orbit = useMemo(() => toOrbit(spec), [spec]);
   return { orbit, controls };
-};
-
-const useSpecCollector = () => {
-  const [specs, setSpecs] = useState<Record<string, GraphicSpec>>({});
-  const report = useCallback((id: string, spec: GraphicSpec | null) => {
-    setSpecs((current) => {
-      if (spec === null) {
-        if (!(id in current)) return current;
-        const { [id]: _removed, ...rest } = current;
-        return rest;
-      }
-      if (current[id] === spec) return current;
-      return { ...current, [id]: spec };
-    });
-  }, []);
-  return [specs, report] as const;
 };
 
 const CANVAS_STYLE = { width: "100%", height: "100%", display: "block" };

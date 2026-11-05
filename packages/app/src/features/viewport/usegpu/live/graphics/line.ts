@@ -1,7 +1,7 @@
 import { use } from "@use-gpu/live";
 import type { LiveElement } from "@use-gpu/live";
 import { Arrow, Line } from "@use-gpu/plot";
-import type { LineSpec } from "@/features/viewport/usegpu/spec/types";
+import type { LineSpec } from "@/features/viewport/usegpu/graphicSpec/types";
 import { drawMode } from "./util";
 
 export const renderLine = (spec: LineSpec): LiveElement => {

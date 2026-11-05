@@ -5,6 +5,7 @@
  */
 import React, { Suspense, useCallback, useState } from "react";
 import { useLocation } from "react-router";
+import * as Sentry from "@sentry/react";
 import TextLink from "@/ui/TextLink";
 import is3dDisabled from "@/features/viewport/shared/is3dDisabled";
 import { useHasViewportItems } from "@/features/viewport/shared/useViewportItems";
@@ -23,6 +24,26 @@ const useDefaultRendererLocation = () => {
   return { pathname, search: query ? `?${query}` : "", hash };
 };
 
+const Unavailable: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const defaultRenderer = useDefaultRendererLocation();
+  // Centered: an open sidebar covers the viewport's left edge.
+  return (
+    <div
+      style={{
+        display: "grid",
+        placeItems: "center",
+        height: "100%",
+        padding: "1em",
+      }}
+    >
+      <p>
+        {children}{" "}
+        <TextLink to={defaultRenderer}>Use the default renderer</TextLink>
+      </p>
+    </div>
+  );
+};
+
 type Props = { className?: string };
 
 const GpuViewport: React.FC<Props> = ({ className }) => {
@@ -31,26 +52,33 @@ const GpuViewport: React.FC<Props> = ({ className }) => {
   const onUnsupported = useCallback((error: unknown) => {
     // eslint-disable-next-line no-console
     console.error(error);
+    Sentry.captureException(error);
     setUnsupported(true);
   }, []);
-  const defaultRenderer = useDefaultRendererLocation();
 
   const renderContent = () => {
     if (is3dDisabled()) return null;
     if (!("gpu" in navigator) || unsupported) {
       return (
-        <p style={{ padding: "1em" }}>
+        <Unavailable>
           WebGPU is unavailable in this browser, which the Use.GPU renderer
-          needs.{" "}
-          <TextLink to={defaultRenderer}>Use the default renderer</TextLink>
-        </p>
+          needs.
+        </Unavailable>
       );
     }
     if (!hasRequired) return null;
+    // A failed chunk or .wasm load throws here; past this boundary it would
+    // replace the whole editor with the route's error page.
     return (
-      <Suspense fallback={null}>
-        <GpuViewportContent onUnsupported={onUnsupported} />
-      </Suspense>
+      <Sentry.ErrorBoundary
+        fallback={
+          <Unavailable>The Use.GPU renderer failed to load.</Unavailable>
+        }
+      >
+        <Suspense fallback={null}>
+          <GpuViewportContent onUnsupported={onUnsupported} />
+        </Suspense>
+      </Sentry.ErrorBoundary>
     );
   };
 

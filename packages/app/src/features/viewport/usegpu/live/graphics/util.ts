@@ -1,4 +1,4 @@
-import type { RGBA } from "@/features/viewport/usegpu/spec/types";
+import type { RGBA } from "@/features/viewport/usegpu/graphicSpec/types";
 
 /**
  * Translucent graphics go through the weighted-blended OIT pass, so their

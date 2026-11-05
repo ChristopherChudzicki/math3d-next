@@ -17,9 +17,10 @@ import {
 import { ORBIT_CONTROLS_DEFAULT, OrbitControls } from "@use-gpu/interact";
 import { Cartesian, Plot } from "@use-gpu/plot";
 import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
-import type { GraphicSpec } from "@/features/viewport/usegpu/spec/types";
+import type { GraphicSpec } from "@/features/viewport/usegpu/graphicSpec/types";
+import { PLOT_ROTATION_DEGREES } from "@/features/viewport/usegpu/orbit";
 import type { OrbitSpec } from "@/features/viewport/usegpu/orbit";
-import { renderGraphic } from "./graphics";
+import { renderGraphic } from "./graphics/renderGraphic";
 
 export type SceneSpec = {
   range: AxesRange;
@@ -45,7 +46,6 @@ const actionBindings = (controls: SceneSpec["controls"]) => ({
   zoom: controls.zoom ? ORBIT_CONTROLS_DEFAULT.zoom : [],
 });
 
-const PLOT_ROTATION_DEGREES = [-90, 0, 0];
 const WHITE = [1, 1, 1, 1];
 
 export const makeSceneRoot = (

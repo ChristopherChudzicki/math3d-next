@@ -117,6 +117,7 @@ const MainPage: React.FC = () => {
     values: RENDERER_VALUES,
     defaultValue: "mathbox",
   });
+  const SceneViewport = renderer === "usegpu" ? GpuViewport : Viewport;
   const handleControlsClick = useCallback(
     (currentlyOpen: boolean) => {
       if (currentlyOpen) {
@@ -163,23 +164,13 @@ const MainPage: React.FC = () => {
               >
                 <SceneControls loading={sceneLoad.status === "loading"} />
               </Sidebar>
-              {renderer === "usegpu" ? (
-                <GpuViewport
-                  className={
-                    controlsOpen
-                      ? styles["scene-adjust-controls-open"]
-                      : styles["scene-adjust-controls-closed"]
-                  }
-                />
-              ) : (
-                <Viewport
-                  className={
-                    controlsOpen
-                      ? styles["scene-adjust-controls-open"]
-                      : styles["scene-adjust-controls-closed"]
-                  }
-                />
-              )}
+              <SceneViewport
+                className={
+                  controlsOpen
+                    ? styles["scene-adjust-controls-open"]
+                    : styles["scene-adjust-controls-closed"]
+                }
+              />
             </>
           )}
         </div>

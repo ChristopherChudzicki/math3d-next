@@ -25,3 +25,9 @@ test("cameraPatches writes when there was no stored position", () => {
     ),
   ).not.toBeNull();
 });
+
+test("cameraPatches writes when only the target moved", () => {
+  expect(
+    cameraPatches(prev, { position: [1, 2, 3], target: [0, 0, 1] }),
+  ).not.toBeNull();
+});

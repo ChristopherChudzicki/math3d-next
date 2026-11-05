@@ -44,7 +44,7 @@
     "@use-gpu/traits": "0.21.0",
     "@use-gpu/webgpu": "0.21.0",
     "@use-gpu/wgsl": "0.21.0",
-    "@use-gpu/workbench@npm:^0.21.0": "patch:@use-gpu/workbench@npm%3A0.21.0#~/.yarn/patches/@use-gpu-workbench-npm-0.21.0-2d614b987d.patch"
+    "@use-gpu/workbench": "patch:@use-gpu/workbench@npm%3A0.21.0#~/.yarn/patches/@use-gpu-workbench-npm-0.21.0-2d614b987d.patch"
   },
   "msw": {
     "workerDirectory": "packages/app/public"

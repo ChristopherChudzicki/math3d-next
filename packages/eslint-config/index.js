@@ -56,7 +56,6 @@ module.exports = {
           "**/vite-plugins/**",
           "**/*.spec.ts",
           "**/*.spec.tsx",
-          "**/testUtils.ts?(x)",
           "**/playwright.config.ts",
           "**/vite.config.ts",
           "**/vitest.*.config.ts",

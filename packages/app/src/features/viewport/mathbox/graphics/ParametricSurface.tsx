@@ -13,6 +13,12 @@ import {
   useFinalVisibility,
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
+import {
+  domainMap,
+  explicitPolarSurface,
+  explicitSurface,
+} from "@/features/viewport/shared/surfaceDomain";
+import type { SurfaceDomain } from "@/features/viewport/shared/surfaceDomain";
 import { explicitColorFunc } from "@/features/viewport/shared/surfaceColor";
 import type { SurfaceColorFunc } from "@/features/viewport/shared/surfaceColor";
 import { GraphicComponent } from "./interfaces";
@@ -58,13 +64,7 @@ type MathboxParametricSurfaceProps = {
   grid2?: number;
   gridWidth?: number;
   gridOpacity?: number;
-  domain?: {
-    value: [
-      (param: number) => [number, number],
-      (param: number) => [number, number],
-    ];
-    order: [number, number];
-  };
+  domain?: SurfaceDomain;
   shaded?: boolean;
   func?: (u: number, v: number) => [number, number, number];
   colorFunc?: SurfaceColorFunc;
@@ -92,19 +92,11 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
   const [dataNode, setData] = useState<MathboxSelection<"area"> | null>(null);
   const [colorNode, setColor] = useState<MathboxSelection<"area"> | null>(null);
 
-  const uvFunc = useCallback(
-    (UU: number, VV: number) => {
-      if (!domain) return [UU, VV];
-      const { order } = domain;
-      const [fu, fv] = order.map((x) => domain.value[x]);
-      const [u1, u2] = fu(0);
-      const u = (U: number) => u1 + (u2 - u1) * U;
-      const v = (U: number, V: number) => {
-        const [v1, v2] = fv(u(U));
-        return v1 + (v2 - v1) * V;
-      };
-      return order[0] === 0 ? [u(UU), v(UU, VV)] : [v(UU, VV), u(UU)];
-    },
+  const uvFunc = useMemo(
+    () =>
+      domain
+        ? domainMap(domain)
+        : (U: number, V: number): [number, number] => [U, V],
     [domain],
   );
   const xyzFunc = useCallback(
@@ -261,10 +253,7 @@ const ExplicitSurface: GraphicComponent<MIT.ExplicitSurface> = ({ item }) => {
     ...others
   } = useMathItemResults(scope, item, props);
 
-  const func: MathboxParametricSurfaceProps["func"] = useMemo(() => {
-    if (!expr) return undefined;
-    return (x: number, y: number) => [x, y, +expr(x, y)];
-  }, [expr]);
+  const func = useMemo(() => expr && explicitSurface(expr), [expr]);
   const colorFunc = useMemo(
     () => colorExpr && explicitColorFunc(colorExpr),
     [colorExpr],
@@ -295,14 +284,7 @@ const ExplicitSurfacePolar: GraphicComponent<MIT.ExplicitSurfacePolar> = ({
     ...others
   } = useMathItemResults(scope, item, props);
 
-  const func: MathboxParametricSurfaceProps["func"] = useMemo(() => {
-    if (!expr) return undefined;
-    return (r: number, q: number) => [
-      r * Math.cos(q),
-      r * Math.sin(q),
-      expr(r, q),
-    ];
-  }, [expr]);
+  const func = useMemo(() => expr && explicitPolarSurface(expr), [expr]);
   const finalVisibility = useFinalVisibility(scope, item);
   return (
     <MathboxParametricSurface

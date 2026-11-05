@@ -3,6 +3,7 @@
  * colors, sample callbacks. The components in this folder read the store and
  * MathScope and produce these; usegpu/live turns them into a Live tree.
  */
+import tinycolor from "tinycolor2";
 import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
 
 export type RGBA = [number, number, number, number];
@@ -92,16 +93,16 @@ export type CameraSpec = {
   target: Coords;
 };
 
-const DEFAULT_COLOR = "3090ff";
+const DEFAULT_COLOR = "#3090ff";
 
-/** `#rrggbb` to RGBA in [0, 1]; anything else (e.g. a gradient name) falls back to the default blue. */
+/** Any color tinycolor parses, to RGBA in [0, 1]; anything else (e.g. a gradient name) falls back to the default blue. */
 export const parseColor = (text: string, opacity: number): RGBA => {
-  const match = /^#?([0-9a-f]{6})$/i.exec(text.trim());
-  const hex = match ? match[1] : DEFAULT_COLOR;
-  const channel = (i: number) =>
-    parseInt(hex.slice(2 * i, 2 * i + 2), 16) / 255;
+  const parsed = tinycolor(text);
+  const { r, g, b } = (
+    parsed.isValid() ? parsed : tinycolor(DEFAULT_COLOR)
+  ).toRgb();
   const alpha = Number.isFinite(opacity)
     ? Math.min(Math.max(opacity, 0), 1)
     : 1;
-  return [channel(0), channel(1), channel(2), alpha];
+  return [r / 255, g / 255, b / 255, alpha];
 };

@@ -1,5 +1,5 @@
 import type { Coords } from "@/features/viewport/shared/coordinates";
-import type { CameraSpec } from "./spec/types";
+import type { CameraSpec } from "./graphicSpec/types";
 
 /** Use.GPU `OrbitControls` parameters (world coordinates, y up). */
 export type OrbitSpec = {
@@ -10,11 +10,12 @@ export type OrbitSpec = {
 };
 
 /**
- * Use.GPU's orbit camera is y-up; math3d is z-up. The plot is rotated -90°
- * about x (`PLOT_ROTATION_DEGREES` in live/scene.ts), taking math (x, y, z) to
- * world (x, z, -y). The camera spec is in math3d coordinates, so apply the
- * same map to it.
+ * Use.GPU's orbit camera is y-up; math3d is z-up. live/scene.ts rotates the
+ * plot by this much, taking math (x, y, z) to world (x, z, -y): `toWorld`.
  */
+export const PLOT_ROTATION_DEGREES = [-90, 0, 0];
+
+/** Where the plot rotation takes a math3d point. The camera spec is in math3d coordinates. */
 export const toWorld = ([x, y, z]: Coords): Coords => [x, z, -y];
 
 /**

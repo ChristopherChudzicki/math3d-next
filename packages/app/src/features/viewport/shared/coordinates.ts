@@ -50,5 +50,5 @@ const toUi = (
   return project(pos, cartesianRange(scale), range);
 };
 
-export { project, fromUi, toUi };
+export { fromUi, toUi };
 export type { Coords, AxesRange };

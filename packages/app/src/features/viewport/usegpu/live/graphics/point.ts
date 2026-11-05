@@ -1,7 +1,7 @@
 import { use } from "@use-gpu/live";
 import type { LiveElement } from "@use-gpu/live";
 import { Point } from "@use-gpu/plot";
-import type { PointSpec } from "@/features/viewport/usegpu/spec/types";
+import type { PointSpec } from "@/features/viewport/usegpu/graphicSpec/types";
 import { drawMode } from "./util";
 
 export const renderPoint = (spec: PointSpec): LiveElement =>

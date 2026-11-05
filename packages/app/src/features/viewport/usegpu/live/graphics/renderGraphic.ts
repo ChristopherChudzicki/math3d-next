@@ -1,6 +1,6 @@
 import { memoArgs } from "@use-gpu/live";
 import type { LiveElement } from "@use-gpu/live";
-import type { GraphicSpec } from "@/features/viewport/usegpu/spec/types";
+import type { GraphicSpec } from "@/features/viewport/usegpu/graphicSpec/types";
 import { renderPoint } from "./point";
 import { renderLine } from "./line";
 import { renderSurface } from "./surface";

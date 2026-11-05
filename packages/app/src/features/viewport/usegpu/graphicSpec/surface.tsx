@@ -10,6 +10,11 @@ import {
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
 import type { Coords } from "@/features/viewport/shared/coordinates";
+import {
+  domainMap,
+  explicitPolarSurface,
+  explicitSurface,
+} from "@/features/viewport/shared/surfaceDomain";
 import { explicitColorFunc } from "@/features/viewport/shared/surfaceColor";
 import type { SurfaceColorFunc } from "@/features/viewport/shared/surfaceColor";
 import type { GraphicSpec, RGBA } from "./types";
@@ -55,9 +60,9 @@ const toParametric = (
   if (!expr) return undefined;
   switch (type) {
     case MIT.ExplicitSurface:
-      return (x, y) => [x, y, +expr(x, y)];
+      return explicitSurface(expr as (x: number, y: number) => number);
     case MIT.ExplicitSurfacePolar:
-      return (r, q) => [r * Math.cos(q), r * Math.sin(q), +expr(r, q)];
+      return explicitPolarSurface(expr as (r: number, q: number) => number);
     default:
       return (u, v) => expr(u, v) as Coords;
   }
@@ -86,18 +91,7 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
   const spec = useMemo<GraphicSpec | null>(() => {
     const func = toParametric(item.type, expr);
     if (!visible || !func || !domain) return null;
-    // Same (U, V) ∈ [0,1]² → (u, v) mapping as the MathBox surface: the second
-    // parameter's domain may depend on the first.
-    const { order } = domain;
-    const [fu, fv] = order.map((i) => domain.value[i]);
-    const [u1, u2] = fu(0);
-    const uOf = (U: number) => u1 + (u2 - u1) * U;
-    const vOf = (U: number, V: number) => {
-      const [v1, v2] = fv(uOf(U));
-      return v1 + (v2 - v1) * V;
-    };
-    const uv = (U: number, V: number): [number, number] =>
-      order[0] === 0 ? [uOf(U), vOf(U, V)] : [vOf(U, V), uOf(U)];
+    const uv = domainMap(domain);
     const position: XYZ = (U, V) => func(...uv(U, V));
 
     const alpha = opacity ?? 1;
@@ -110,8 +104,9 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
       const [r, g, b] = gradient.getRGB(colorFunc(...position(U, V), u, v));
       return [r, g, b, alpha];
     };
+    // MathBox's default line color.
     const gridColor: RGBA = gradient
-      ? [0, 0, 0, gridOpacity ?? 0.5]
+      ? [0.5, 0.5, 0.5, gridOpacity ?? 0.5]
       : (flat.map((c, i) => (i < 3 ? c * 0.5 : gridOpacity ?? 0.5)) as RGBA);
     const count = (n: number | undefined, fallback: number) =>
       Math.max(2, Math.round(n ?? fallback));

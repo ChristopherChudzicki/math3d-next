@@ -4,20 +4,35 @@ import { Provider } from "react-redux";
 import { MemoryRouter, useLocation } from "react-router";
 import user from "@testing-library/user-event";
 import { SceneBuilder } from "@math3d/mock-api";
+import * as Sentry from "@sentry/react";
 import { getStore } from "@/store/store";
 import { actions } from "@/store/scene/state/scene.slice";
 import GpuViewport from "./GpuViewport";
 
-// Stands in for a WebGPU device that fails to mount.
-const FailingContent = ({
-  onUnsupported,
-}: {
-  onUnsupported: (error: unknown) => void;
-}) => {
-  useEffect(() => onUnsupported(new Error("no adapter")), [onUnsupported]);
+vi.mock("@sentry/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@sentry/react")>()),
+  captureException: vi.fn(),
+}));
+
+type ContentProps = { onUnsupported: (error: unknown) => void };
+
+// Stands in for usegpu/live; each test that renders it picks how it fails.
+const content = vi.hoisted(() => {
+  const RendersNothing = (_props: ContentProps): null => null;
+  return { Component: RendersNothing, RendersNothing };
+});
+vi.mock("./live/GpuViewportContent", () => ({
+  default: (props: ContentProps) => content.Component(props),
+}));
+
+const noAdapter = new Error("no adapter");
+const ReportsUnsupported = ({ onUnsupported }: ContentProps) => {
+  useEffect(() => onUnsupported(noAdapter), [onUnsupported]);
   return null;
 };
-vi.mock("./live/GpuViewportContent", () => ({ default: FailingContent }));
+const FailsToLoad = (): null => {
+  throw new Error("Failed to fetch dynamically imported module");
+};
 
 const LocationProbe = () => {
   const { pathname, search } = useLocation();
@@ -39,6 +54,7 @@ const renderViewport = () => {
 };
 
 afterEach(() => {
+  content.Component = content.RendersNothing;
   localStorage.clear();
   // @ts-expect-error navigator.gpu is required in @webgpu/types; one test adds a stand-in.
   delete navigator.gpu;
@@ -62,10 +78,24 @@ test("without navigator.gpu it says WebGPU is unavailable and links to the defau
   );
 });
 
-test("when the device fails to mount it says WebGPU is unavailable and logs why", async () => {
-  const error = vi.spyOn(console, "error").mockImplementation(() => {});
+test("when the renderer reports WebGPU unsupported it says so and reports why", async () => {
+  vi.spyOn(console, "error").mockImplementation(() => {});
   Object.defineProperty(navigator, "gpu", { value: {}, configurable: true });
+  content.Component = ReportsUnsupported;
   renderViewport();
   expect(await screen.findByText(/WebGPU is unavailable/)).toBeInTheDocument();
-  expect(error).toHaveBeenCalledWith(new Error("no adapter"));
+  expect(Sentry.captureException).toHaveBeenCalledWith(noAdapter);
+});
+
+test("when the renderer fails to load it says so in the viewport", async () => {
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  Object.defineProperty(navigator, "gpu", { value: {}, configurable: true });
+  content.Component = FailsToLoad;
+  renderViewport();
+  expect(
+    await screen.findByText(/The Use.GPU renderer failed to load/),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("link", { name: "Use the default renderer" }),
+  ).toBeInTheDocument();
 });
