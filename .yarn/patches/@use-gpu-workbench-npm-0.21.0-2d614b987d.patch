@@ -35,6 +35,18 @@ index e33a1abf4595d1d7ee9f460b4cb4f2fa868c7dcc..cb53d9a4dc0075278e0b62220bd95d3c
  export type DualContourLayerProps = {
      values: ShaderSource;
      normals?: ShaderSource;
+diff --git a/cjs/render/buffer/oit-buffer.cjs b/cjs/render/buffer/oit-buffer.cjs
+index 959557e..df090b0 100644
+--- a/cjs/render/buffer/oit-buffer.cjs
++++ b/cjs/render/buffer/oit-buffer.cjs
+@@ -42,6 +42,7 @@ const OITBuffer = (0, _live.memo)(()=>{
+             variant: 'textureLoad',
+             depthStencil: null,
+             colorSpace: 'linear',
++            colorInput: 'linear',
+             blend: {
+                 color: {
+                     srcFactor: 'one',
 diff --git a/mjs/layers/dual-contour-layer.d.mts b/mjs/layers/dual-contour-layer.d.mts
 index 3a17aea347f2b0d24957d13037b273d7a578f540..669a6420eb0ea2fba701a01c56ef465aa2ebb104 100644
 --- a/mjs/layers/dual-contour-layer.d.mts
@@ -72,3 +84,15 @@ index dc135af3b1550c9a0374f2ec5c1c26cf75a65f56..8e4b65fabdf73d38ecfd0fa0c3314a11
          blend
      });
      const defines = useMemo(()=>({
+diff --git a/mjs/render/buffer/oit-buffer.mjs b/mjs/render/buffer/oit-buffer.mjs
+index 8ba64bb..dc0ce7f 100644
+--- a/mjs/render/buffer/oit-buffer.mjs
++++ b/mjs/render/buffer/oit-buffer.mjs
+@@ -15,6 +15,7 @@ export const OITBuffer = memo(()=>{
+             variant: 'textureLoad',
+             depthStencil: null,
+             colorSpace: 'linear',
++            colorInput: 'linear',
+             blend: {
+                 color: {
+                     srcFactor: 'one',

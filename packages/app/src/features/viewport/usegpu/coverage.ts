@@ -224,11 +224,12 @@ export const coverage = {
   },
   [MIT.Camera]: {
     description: "n/a: editor only",
-    isOrthographic: "todo",
+    isOrthographic: "drawn",
     isPanEnabled: "drawn",
     isZoomEnabled: "drawn",
     isRotateEnabled: "drawn",
-    updateOnDrag: "todo",
+    updateOnDrag:
+      "approximate: snapping back re-seeds the whole orbit, so a pan is undone too",
     position: "drawn",
     target: "drawn",
     useRelative: "drawn",

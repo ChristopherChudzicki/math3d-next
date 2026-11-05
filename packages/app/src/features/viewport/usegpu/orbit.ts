@@ -35,3 +35,45 @@ export const toOrbit = (camera: CameraSpec): OrbitSpec => {
     target: t,
   };
 };
+
+/** Where `makeOrbitPosition` (dolly 1) puts the camera, as a world-space offset from the target. */
+const orbitOffset = ({ radius, bearing, pitch }: OrbitSpec): Coords => [
+  -radius * Math.cos(pitch) * Math.sin(bearing),
+  radius * Math.sin(pitch),
+  radius * Math.cos(pitch) * Math.cos(bearing),
+];
+
+const fromWorld = ([x, y, z]: Coords): Coords => [x, -z, y];
+
+/** The inverse of `toOrbit`. */
+export const fromOrbit = (orbit: OrbitSpec): CameraSpec => {
+  const d = orbitOffset(orbit);
+  const t = orbit.target;
+  return {
+    position: fromWorld([t[0] + d[0], t[1] + d[1], t[2] + d[2]]),
+    target: fromWorld(t),
+  };
+};
+
+const cross = (a: Coords, b: Coords): Coords => [
+  a[1] * b[2] - a[2] * b[1],
+  a[2] * b[0] - a[0] * b[2],
+  a[0] * b[1] - a[1] * b[0],
+];
+
+const normalize = (v: Coords): Coords => {
+  const n = Math.hypot(...v);
+  return [v[0] / n, v[1] / n, v[2] / n];
+};
+
+/**
+ * The world-space key light position for a camera orbit: MathBox's light,
+ * fixed at (1, 2, 2) in view space (right, up, towards the viewer).
+ */
+export const keyLightPosition = (orbit: OrbitSpec): Coords => {
+  const z = normalize(orbitOffset({ ...orbit, radius: 1 }));
+  const side = cross([0, 1, 0], z);
+  const x: Coords = Math.hypot(...side) < 1e-6 ? [1, 0, 0] : normalize(side);
+  const y = cross(z, x);
+  return [0, 1, 2].map((i) => x[i] + 2 * y[i] + 2 * z[i]) as Coords;
+};

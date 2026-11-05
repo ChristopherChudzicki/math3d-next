@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { LiveCanvas } from "@use-gpu/react";
 import { MathItemType } from "@math3d/mathitem-configs";
 import type { MathItem } from "@math3d/mathitem-configs";
@@ -14,6 +14,7 @@ import {
 } from "@/features/viewport/usegpu/graphicSpec/collector";
 import type { CameraSpec } from "@/features/viewport/usegpu/graphicSpec/types";
 import { toOrbit } from "@/features/viewport/usegpu/orbit";
+import { useOrbitWriteBack } from "@/features/viewport/usegpu/useOrbitWriteBack";
 import { makeSceneRoot } from "./scene";
 import type { SceneHooks, SceneSpec } from "./scene";
 
@@ -24,12 +25,15 @@ const CAMERA_PROPS = [
   "isRotateEnabled",
   "isPanEnabled",
   "isZoomEnabled",
+  "isOrthographic",
+  "updateOnDrag",
 ] as const;
 
 const useOrbit = (
   camera: MathItem<MathItemType.Camera>,
   range: AxesRange,
   scale: Coords,
+  host: React.RefObject<HTMLElement | null>,
 ) => {
   const scope = useMathScope();
   const {
@@ -39,6 +43,8 @@ const useOrbit = (
     isRotateEnabled,
     isPanEnabled,
     isZoomEnabled,
+    isOrthographic,
+    updateOnDrag,
   } = useMathItemResults(scope, camera, CAMERA_PROPS);
   const controls = useMemo<SceneSpec["controls"]>(
     () => ({
@@ -57,18 +63,47 @@ const useOrbit = (
   );
   // Keeps orbit.target's identity; see SceneSpec.orbit.
   const orbit = useMemo(() => toOrbit(spec), [spec]);
-  return { orbit, controls };
+  const projection = useMemo(
+    () => ({ dolly: isOrthographic ? 0 : 1 }),
+    [isOrthographic],
+  );
+  const stored = useMemo(
+    () => ({
+      id: camera.id,
+      position,
+      target,
+      useRelative: !!useRelative,
+      updateOnDrag: updateOnDrag ?? true,
+    }),
+    [camera.id, position, target, useRelative, updateOnDrag],
+  );
+  const { onOrbit, controlsVersion } = useOrbitWriteBack(
+    host,
+    stored,
+    range,
+    scale,
+  );
+  return { orbit, controls, projection, controlsVersion, onOrbit };
 };
 
 const CANVAS_STYLE = { width: "100%", height: "100%", display: "block" };
+const HOST_STYLE = { width: "100%", height: "100%" };
 
 /**
  * The entry to usegpu/live, the only code that imports Use.GPU's runtime.
  * `usegpu/GpuViewport` loads it with React.lazy.
  */
-const GpuViewportContent: React.FC<SceneHooks> = ({ onUnsupported }) => {
+type Props = { onUnsupported: SceneHooks["onUnsupported"] };
+
+const GpuViewportContent: React.FC<Props> = ({ onUnsupported }) => {
   const { graphics, camera, range, scale } = useViewportItems();
-  const { orbit, controls } = useOrbit(camera, range, scale);
+  const host = useRef<HTMLDivElement>(null);
+  const { orbit, controls, projection, controlsVersion, onOrbit } = useOrbit(
+    camera,
+    range,
+    scale,
+    host,
+  );
   const [specs, report] = useSpecCollector();
 
   const scene = useMemo<SceneSpec>(
@@ -76,18 +111,29 @@ const GpuViewportContent: React.FC<SceneHooks> = ({ onUnsupported }) => {
       range,
       scale,
       orbit,
+      controlsVersion,
+      projection,
       controls,
       graphics: graphics.flatMap(({ id }) =>
         specs[id] ? [{ id, spec: specs[id] }] : [],
       ),
     }),
-    [range, scale, orbit, controls, graphics, specs],
+    [
+      range,
+      scale,
+      orbit,
+      controlsVersion,
+      projection,
+      controls,
+      graphics,
+      specs,
+    ],
   );
 
   const render = useCallback(
     (canvas: HTMLCanvasElement) =>
-      makeSceneRoot(canvas, scene, { onUnsupported }),
-    [scene, onUnsupported],
+      makeSceneRoot(canvas, scene, { onUnsupported, onOrbit }),
+    [scene, onUnsupported, onOrbit],
   );
 
   return (
@@ -97,7 +143,9 @@ const GpuViewportContent: React.FC<SceneHooks> = ({ onUnsupported }) => {
           <GraphicSpecReporter key={item.id} item={item} />
         ))}
       </SpecCollector.Provider>
-      <LiveCanvas style={CANVAS_STYLE} render={render} />
+      <div ref={host} style={HOST_STYLE}>
+        <LiveCanvas style={CANVAS_STYLE} render={render} />
+      </div>
     </>
   );
 };

@@ -19,7 +19,10 @@ import { ORBIT_CONTROLS_DEFAULT, OrbitControls } from "@use-gpu/interact";
 import { Cartesian, Plot } from "@use-gpu/plot";
 import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
 import type { GraphicSpec } from "@/features/viewport/usegpu/graphicSpec/types";
-import { PLOT_ROTATION_DEGREES } from "@/features/viewport/usegpu/orbit";
+import {
+  keyLightPosition,
+  PLOT_ROTATION_DEGREES,
+} from "@/features/viewport/usegpu/orbit";
 import type { OrbitSpec } from "@/features/viewport/usegpu/orbit";
 import { renderGraphic } from "./graphics/renderGraphic";
 
@@ -31,6 +34,10 @@ export type SceneSpec = {
    * unchanged: a new `target` array resets the user's pan.
    */
   orbit: OrbitSpec;
+  /** Bumping it re-seeds the orbit controls from `orbit`. */
+  controlsVersion: number;
+  /** `OrbitCamera`'s dolly: 1 is perspective, 0 orthographic. */
+  projection: { dolly: number };
   controls: { rotate: boolean; pan: boolean; zoom: boolean };
   graphics: { id: string; spec: GraphicSpec }[];
 };
@@ -38,6 +45,11 @@ export type SceneSpec = {
 export type SceneHooks = {
   /** WebGPU found no adapter, or could not mount a device on it. */
   onUnsupported(error: unknown): void;
+  /**
+   * Called with the controls' orbit whenever it differs from the last call,
+   * including on first render.
+   */
+  onOrbit(orbit: OrbitSpec): void;
 };
 
 /** The orbit-control bindings for the camera item's enable flags: an empty binding list disables that action. */
@@ -78,15 +90,39 @@ export const makeSceneRoot = (
       }),
     }),
   });
-  const pass = use(Pass, {
-    lights: true,
-    oit: true,
-    children: [
-      use(AmbientLight, { intensity: 0.6 }),
-      use(DirectionalLight, { position: [1, 3, 2], intensity: 0.8 }),
-      plot,
-    ],
-  });
+  const ambient = use(AmbientLight, { intensity: 0.6 });
+  // Rebuilt only when the key light moves, so zoom and pan keep the Pass.
+  let lit: { light: Coords; pass: LiveElement } | null = null;
+  const litPass = (orbit: OrbitSpec) => {
+    const light = keyLightPosition(orbit);
+    if (!lit || lit.light.some((v, i) => v !== light[i])) {
+      lit = {
+        light,
+        pass: use(Pass, {
+          lights: true,
+          oit: true,
+          children: [
+            ambient,
+            use(DirectionalLight, { position: light, intensity: 0.8 }),
+            plot,
+          ],
+        }),
+      };
+    }
+    return lit.pass;
+  };
+  let last: OrbitSpec | null = null;
+  const report = (orbit: OrbitSpec) => {
+    const same =
+      last &&
+      last.radius === orbit.radius &&
+      last.bearing === orbit.bearing &&
+      last.pitch === orbit.pitch &&
+      last.target.every((v, i) => v === orbit.target[i]);
+    if (same) return;
+    last = orbit;
+    hooks.onOrbit(orbit);
+  };
   return use(WebGPU, {
     fallback: (error: Error) => {
       hooks.onUnsupported(error);
@@ -98,20 +134,27 @@ export const makeSceneRoot = (
       backgroundColor: WHITE,
       children: use(OrbitControls, {
         ...scene.orbit,
+        version: scene.controlsVersion,
         actionBindings: actionBindings(scene.controls),
         render: (
           radius: number,
           bearing: number,
           pitch: number,
-          target: Coords,
-        ) =>
-          use(OrbitCamera, {
+          target: ArrayLike<number>,
+        ) => {
+          const orbit: OrbitSpec = {
             radius,
             bearing,
             pitch,
-            target,
-            children: pass,
-          }),
+            target: [target[0], target[1], target[2]],
+          };
+          report(orbit);
+          return use(OrbitCamera, {
+            ...orbit,
+            dolly: scene.projection.dolly,
+            children: litPass(orbit),
+          });
+        },
       }),
     }),
   });
