@@ -8,8 +8,8 @@ import Surface from "./surface";
 import ImplicitSurface from "./implicitSurface";
 import Axis from "./axis";
 import Grid from "./grid";
-
-const notDrawnYet: SpecComponent<MIT.Vector | MIT.VectorField> = () => null;
+import Vector from "./vector";
+import VectorField from "./vectorField";
 
 const reporters = {
   [MIT.Point]: Point,
@@ -21,8 +21,8 @@ const reporters = {
   [MIT.ImplicitSurface]: ImplicitSurface,
   [MIT.Axis]: Axis,
   [MIT.Grid]: Grid,
-  [MIT.Vector]: notDrawnYet,
-  [MIT.VectorField]: notDrawnYet,
+  [MIT.Vector]: Vector,
+  [MIT.VectorField]: VectorField,
 } satisfies { [T in MathGraphicType]: SpecComponent<T> };
 
 /** Reports `item`'s `GraphicSpec` to the enclosing `SpecCollector`. */
