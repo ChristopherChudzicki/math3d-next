@@ -5,7 +5,7 @@ import type { ParseableObjs } from "@math3d/parser";
  * Id prefix of the app's own scope definitions. A user's definition of the
  * same name overrides them.
  */
-const APP_OWNED_PREFIX = "builtin:";
+const APP_OWNED_PREFIX = "app:";
 
 const AXES = ["x", "y", "z"] as const;
 const BOUNDS = ["min", "max"] as const;

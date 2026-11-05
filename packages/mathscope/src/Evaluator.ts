@@ -27,7 +27,7 @@ interface EvaluatorAction {
 export class UnmetDependencyError extends EvaluationError {
   constructor(unmetDependencyNames: string[]) {
     const sorted = [...unmetDependencyNames].sort();
-    const message = `Undefined symbol${sorted.length > 1 ? "s" : ""} ${sorted}`;
+    const message = `Undefined symbol${sorted.length > 1 ? "s" : ""} ${sorted.join(", ")}`;
     super(message);
   }
 }
@@ -103,8 +103,8 @@ export default class Evaluator {
   private graphManager: ExpressionGraphManager<MathNode>;
 
   /**
-   * @param isOverridable Ids of assignments that yield to a same-named
-   * assignment whose id isn't overridable, as builtins do.
+   * @param isOverridable Whether the assignment with this id yields to a
+   * same-named one that isn't overridable, as builtins do.
    */
   constructor(
     builtins: Set<string> = new Set(),
