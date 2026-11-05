@@ -30,6 +30,7 @@ export const renderSurface = (spec: SurfaceSpec): LiveElement => {
       // Biased above the surface, as MathBox biases its gridlines.
       zBias: spec.zBias + 1,
       zIndex: spec.zIndex,
+      depth: 1,
       mode: drawMode(grid.color),
     });
   const hasGrid = grid.width > 0 && grid.color[3] > 0;

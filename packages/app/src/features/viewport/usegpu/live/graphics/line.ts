@@ -12,6 +12,7 @@ const renderPath = (spec: LineSpec): LiveElement => {
     color: spec.color,
     zBias: spec.zBias,
     zIndex: spec.zIndex,
+    depth: 1,
     mode: drawMode(spec.color),
   };
   return spec.start || spec.end

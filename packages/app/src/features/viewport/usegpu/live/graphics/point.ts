@@ -13,6 +13,7 @@ export const renderPoint = (spec: PointSpec): LiveElement =>
       color: spec.color,
       zBias: spec.zBias,
       zIndex: spec.zIndex,
+      depth: 1,
       mode: drawMode(spec.color),
     }),
     spec.positions,

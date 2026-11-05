@@ -152,6 +152,7 @@ export const makeSceneRoot = (
           return use(OrbitCamera, {
             ...orbit,
             dolly: scene.projection.dolly,
+            focus: 1,
             children: litPass(orbit),
           });
         },

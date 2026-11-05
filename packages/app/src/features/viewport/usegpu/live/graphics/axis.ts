@@ -40,7 +40,7 @@ const renderTicks = (spec: AxisSpec): LiveElement =>
             size: 10,
             width: 2,
             color: spec.color,
-            depth: 0,
+            depth: 1,
             offset: spec.axis === "y" ? [1, 0, 0] : [0, 1, 0],
             zBias: spec.zBias,
             mode: drawMode(spec.color),
