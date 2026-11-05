@@ -198,6 +198,9 @@ def _dense(points: list) -> bool:
 def _compare_functions(a: dict, b: dict, tol: Tolerance) -> Verdict:
     if a["fn"] != b["fn"]:
         return Verdict("unsure", "arity")
+    # 2a can't map the audit's normalized X, Y, Z onto a flat axis.
+    if b.get("flat_axis"):
+        return Verdict("unsure", "flat_axis")
     if a["at"] is None or b["at"] is None:
         return Verdict(
             "unsure", "unsampled" if a["fn"] > MAX_SAMPLED_ARITY else "depth"

@@ -10,6 +10,7 @@ import type { IdentifiedParseable, MathNode } from "@math3d/mathscope";
 import { latexParser } from "@math3d/parser";
 import type { Parseable, ValidatedParseable } from "@math3d/parser";
 import {
+  MathItemType,
   WidgetType,
   mathItemConfigs,
   type MathItemPatch,
@@ -55,6 +56,46 @@ const MATH_WIDGETS = new Set([
   WidgetType.CustomMath,
 ]);
 
+// Copied from app/src/store/scene/evaluation/axisHelpers.ts.
+const APP_OWNED_PREFIX = "app:";
+const axisBoundName = (axis: string, bound: string) => `_${axis}_${bound}`;
+const AXIS_HELPERS = ["x", "y", "z"].flatMap((axis) => {
+  const min = axisBoundName(axis, "min");
+  const max = axisBoundName(axis, "max");
+  return [
+    {
+      id: `${APP_OWNED_PREFIX}rescale_${axis}`,
+      parseable: {
+        type: "function-assignment" as const,
+        name: `rescale_${axis}`,
+        params: ["t"],
+        rhs: `(t-${min})/(${max}-${min})`,
+      },
+    },
+    ...["min", "max"].map((bound) => ({
+      id: `${APP_OWNED_PREFIX}${axis}_${bound}`,
+      parseable: {
+        type: "assignment" as const,
+        lhs: `${axis}_${bound}`,
+        rhs: axisBoundName(axis, bound),
+      },
+    })),
+  ];
+});
+
+// syncMathScope's toParseableObj: an axis's min and max define `_x_min` etc.
+const toParseableObj = (item: MathItemPatch, field: string, expr: string) => {
+  const { axis } = item.properties as { axis?: string };
+  if (item.type === MathItemType.Axis && (field === "min" || field === "max")) {
+    return {
+      type: "assignment" as const,
+      lhs: axisBoundName(axis ?? "", field),
+      rhs: expr,
+    };
+  }
+  return { expr, type: "expr" as const };
+};
+
 const wrapValidate = (validate?: ParseValidate) =>
   validate &&
   ((value: unknown, node: mjs.MathNode) => {
@@ -77,7 +118,7 @@ const getIdentifiedExpressions = (items: MathItemPatch[]) =>
         const parseable = properties[prop.name];
         const parseableObj =
           typeof parseable === "string"
-            ? { expr: parseable, type: "expr" as const }
+            ? toParseableObj(item, prop.name, parseable)
             : parseable;
         return {
           itemId: item.id,
@@ -250,6 +291,99 @@ const assignedName = (parseable: ValidatedParseable): string | undefined => {
   }
 };
 
+type Fn = (...args: unknown[]) => unknown;
+const isFn = (value: unknown): value is Fn => typeof value === "function";
+
+const SURFACES = new Set<string>([
+  MathItemType.ParametricSurface,
+  MathItemType.ExplicitSurfacePolar,
+  MathItemType.ExplicitSurface,
+]);
+
+type ColorUse = {
+  /** The axes whose rescale the body calls. */
+  rescaled: Set<string>;
+  /** Per explicit-surface parameter: whether the body uses it only inside its axis's rescale. */
+  onlyRescaled: [boolean, boolean];
+};
+
+// What a translated color body says about the legacy one: math3d-react's X
+// became rescale_x(<x slot>) (webserver legacy_scene_utils/color_expr.py).
+const colorUse = (parseable: Parseable): ColorUse => {
+  const use: ColorUse = { rescaled: new Set(), onlyRescaled: [false, false] };
+  if (
+    typeof parseable !== "object" ||
+    parseable.type !== "function-assignment"
+  ) {
+    return use;
+  }
+  const params = parseable.params.slice(0, 2).map((p) => p.trim());
+  const inHelper = [false, false];
+  const bare = [false, false];
+  try {
+    math
+      .parse(latexParser.preprocess(parseable.rhs))
+      .traverse((n, _path, parent) => {
+        if (math.isFunctionNode(n)) {
+          const match = /^rescale_([xyz])$/.exec(n.fn.toString());
+          if (match) use.rescaled.add(match[1]);
+        }
+        if (!math.isSymbolNode(n)) return;
+        const i = params.indexOf(n.name);
+        if (i < 0) return;
+        const helper = `rescale_${"xy"[i]}`;
+        if (math.isFunctionNode(parent) && parent.fn.toString() === helper) {
+          inHelper[i] = true;
+        } else {
+          bare[i] = true;
+        }
+      });
+  } catch {
+    return use;
+  }
+  use.onlyRescaled = [inHelper[0] && !bare[0], inHelper[1] && !bare[1]];
+  return use;
+};
+
+/**
+ * math3d-react's surface color expressions take the point's coordinates
+ * normalized to [0, 1], X, Y, Z, then the surface's parameters; math3d-next's
+ * take coordinates. This calls next's with react's arguments, so both are
+ * sampled at the same points.
+ */
+const legacyColorLayout = (
+  type: string,
+  fn: Fn,
+  use: ColorUse,
+  bounds: unknown[][],
+): Fn => {
+  const { add, multiply, subtract } = math as unknown as Record<string, Fn>;
+  // A slot is read only inside its axis's rescale, which errors anyway when
+  // that axis's bounds failed, so the sample passes through.
+  const raw = (i: number, t: unknown) => {
+    const [min, max] = bounds[i];
+    if (min === undefined || max === undefined) return t;
+    return add(min, multiply(t, subtract(max, min)));
+  };
+  if (type !== MathItemType.ExplicitSurface) {
+    return (X, Y, Z, u, v) => fn(raw(0, X), raw(1, Y), raw(2, Z), u, v);
+  }
+  // An explicit surface's x and y are its parameters, which react's X and Y
+  // match on screen but not at the audit's independent sample points. A body
+  // using a parameter both bare and rescaled can't match both, so it differs.
+  const [fromX, fromY] = use.onlyRescaled;
+  return (X, Y, Z, x, y) =>
+    fn(fromX ? raw(0, X) : x, fromY ? raw(1, Y) : y, raw(2, Z));
+};
+
+// Both apps divide by a flat axis's width of 0, but the audit's free X, Y, Z
+// can't be mapped back onto it, so the color isn't sampled.
+const rescalesFlatAxis = (use: ColorUse, bounds: unknown[][]) =>
+  [...use.rescaled].some((axis) => {
+    const [min, max] = bounds["xyz".indexOf(axis)];
+    return typeof min === "number" && min === max;
+  });
+
 type Migrated = { items: MathItemPatch[] };
 
 /** Whether any of the scene's math fields has one of `wanted` as a feature. */
@@ -276,7 +410,8 @@ const evaluateScene = (migrated: Migrated): SceneResult => {
   const parsed = new Map<string, MathNode>();
   const parseFailed = new Set<string>();
   const parse = (parseable: ValidatedParseable) => {
-    const id = idOf.get(parseable as object)!;
+    const id = idOf.get(parseable as object);
+    if (id === undefined) return latexParser.parse(parseable);
     try {
       const node = latexParser.parse(parseable);
       parsed.set(id, node as MathNode);
@@ -287,10 +422,15 @@ const evaluateScene = (migrated: Migrated): SceneResult => {
     }
   };
 
-  const scope = new MathScope<ValidatedParseable>({ parse, builtins });
-  scope.setExpressions(
-    expressions as IdentifiedParseable<ValidatedParseable>[],
-  );
+  const scope = new MathScope<ValidatedParseable>({
+    parse,
+    builtins,
+    isOverridable: (id) => id.startsWith(APP_OWNED_PREFIX),
+  });
+  scope.setExpressions([
+    ...(AXIS_HELPERS as IdentifiedParseable<ValidatedParseable>[]),
+    ...(expressions as IdentifiedParseable<ValidatedParseable>[]),
+  ]);
 
   const idsByName = new Map<string, string[]>();
   expressions.forEach(({ id, parseable }) => {
@@ -300,6 +440,23 @@ const evaluateScene = (migrated: Migrated): SceneResult => {
       idsByName.set(name, [...(idsByName.get(name) ?? []), id]);
     }
   });
+  // An axis helper's dependents depend on its axis's bounds.
+  ["x", "y", "z"].forEach((axis) => {
+    const bounds = ["min", "max"].flatMap(
+      (bound) => idsByName.get(axisBoundName(axis, bound)) ?? [],
+    );
+    [`rescale_${axis}`, `${axis}_min`, `${axis}_max`].forEach((name) => {
+      if (!idsByName.has(name)) idsByName.set(name, bounds);
+    });
+  });
+  // From the axis fields, which rescale_x reads; a user's x_min hides app:x_min.
+  const axisBounds = ["x", "y", "z"].map((axis) =>
+    ["min", "max"].map((bound) => {
+      const ids = idsByName.get(axisBoundName(axis, bound)) ?? [];
+      return ids.length === 1 ? scope.results.get(ids[0]) : undefined;
+    }),
+  );
+  const typeOf = new Map(items.map((i) => [i.id, i.type]));
 
   const out: SceneResult = {};
   expressions.forEach(({ itemId, field, id, parseable }) => {
@@ -316,7 +473,16 @@ const evaluateScene = (migrated: Migrated): SceneResult => {
       result.status = stage(err, parseFailed.has(id));
       result.message = message(err);
     } else {
-      result.value = fingerprint(reportedValue(field, scope.results.get(id)));
+      const value = reportedValue(field, scope.results.get(id));
+      const type = typeOf.get(itemId);
+      if (field === "colorExpr" && type && SURFACES.has(type) && isFn(value)) {
+        const use = colorUse(parseable);
+        result.value = rescalesFlatAxis(use, axisBounds)
+          ? { fn: 5, at: null, flat_axis: true }
+          : fingerprint(legacyColorLayout(type, value, use, axisBounds));
+      } else {
+        result.value = fingerprint(value);
+      }
     }
     if (typeof parseable === "object" && parseable.type === "array") {
       result.elements = elementResults(parseable.items, err, result.status);

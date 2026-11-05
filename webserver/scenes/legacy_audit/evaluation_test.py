@@ -79,6 +79,12 @@ VEC3_ONLY = fn(ERR, ERR, vec={"2": [ERR, ERR], "3": [1, 2]})
         (fn(1, 2), fn(1, 2, arity=2), "unsure", "arity"),
         ({"fn": 1, "at": None}, {"fn": 1, "at": None}, "unsure", "depth"),
         ({"fn": 6, "at": None}, {"fn": 6, "at": None}, "unsure", "unsampled"),
+        (
+            fn(1, 2, arity=5),
+            {"fn": 5, "at": None, "flat_axis": True},
+            "unsure",
+            "flat_axis",
+        ),
         (fn(ERR, 2), fn(ERR, 2), "equal", None),
         (fn(ERR, 2), fn(1, 2), "differ", None),
         (fn(ERR, ERR), fn(ERR, ERR), "unsure", "no_evidence"),

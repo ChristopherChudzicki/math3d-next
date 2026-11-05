@@ -25,6 +25,8 @@ type Fingerprint =
       // Present when every scalar point errors: points with vector arguments
       // of length 2 and 3, for functions like f(P) = P[1]·P[2].
       vec?: { 2: Fingerprint[]; 3: Fingerprint[] };
+      // A surface color 2a doesn't sample: it rescales a flat axis.
+      flat_axis?: true;
     };
 
 const POINTS: Record<string, number[][]> = samplePoints;
