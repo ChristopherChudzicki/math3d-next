@@ -105,7 +105,7 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
       const [r, g, b] = gradient.getRGB(colorFunc(...position(U, V), u, v));
       return [r, g, b, alpha];
     };
-    // MathBox's default line color.
+    // Like MathBox: grey gridlines on a gradient, else the surface color at half brightness.
     const gridColor: RGBA = gradient
       ? [0.5, 0.5, 0.5, gridOpacity ?? 0.5]
       : (flat.map((c, i) => (i < 3 ? c * 0.5 : gridOpacity ?? 0.5)) as RGBA);

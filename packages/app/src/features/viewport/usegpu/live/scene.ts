@@ -78,7 +78,7 @@ export const makeSceneRoot = (
   const graphics = scene.graphics.map(({ id, spec }) =>
     keyed(renderGraphic, id, spec),
   );
-  // Plot's label support needs a font context even when nothing is labelled.
+  // Plot's label support needs a font context even when nothing is labeled.
   const plot = use(FontLoader, {
     fonts: FONTS,
     children: use(Plot, {

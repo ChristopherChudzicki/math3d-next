@@ -1,6 +1,6 @@
 import { gradientFromGrid } from "./implicitGrid";
 
-test("a linear field has its exact normalised gradient at every cell", () => {
+test("a linear field has its exact normalized gradient at every cell", () => {
   const size: [number, number, number] = [3, 4, 5];
   const spacing: [number, number, number] = [1, 0.5, 2];
   const values = new Float32Array(3 * 4 * 5);
@@ -21,7 +21,7 @@ test("a linear field has its exact normalised gradient at every cell", () => {
   }
 });
 
-test("a NaN neighbour yields the fallback normal", () => {
+test("a NaN neighbor yields the fallback normal", () => {
   const values = new Float32Array(27).map((_, i) => 2 * (i % 3)); // f = 2x
   values[12] = NaN;
   const n = gradientFromGrid(values, [3, 3, 3], [1, 1, 1]);

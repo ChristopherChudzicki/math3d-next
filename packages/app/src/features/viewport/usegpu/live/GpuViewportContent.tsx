@@ -89,12 +89,12 @@ const useOrbit = (
 const CANVAS_STYLE = { width: "100%", height: "100%", display: "block" };
 const HOST_STYLE = { width: "100%", height: "100%" };
 
+type Props = { onUnsupported: SceneHooks["onUnsupported"] };
+
 /**
  * The entry to usegpu/live, the only code that imports Use.GPU's runtime.
  * `usegpu/GpuViewport` loads it with React.lazy.
  */
-type Props = { onUnsupported: SceneHooks["onUnsupported"] };
-
 const GpuViewportContent: React.FC<Props> = ({ onUnsupported }) => {
   const { graphics, camera, range, scale } = useViewportItems();
   const host = useRef<HTMLDivElement>(null);

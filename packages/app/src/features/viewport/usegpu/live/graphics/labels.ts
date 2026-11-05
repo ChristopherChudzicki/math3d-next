@@ -19,7 +19,7 @@ export const LABEL_STYLE = {
 export const ITEM_LABEL_OFFSET: [number, number] = [0, -40];
 
 /**
- * Screen-space text centred at each position plus `offsetPx`. Use.GPU's
+ * Screen-space text centered at each position plus `offsetPx`. Use.GPU's
  * label frame has +y down the screen (MathBox's is up).
  */
 export const renderLabels = (

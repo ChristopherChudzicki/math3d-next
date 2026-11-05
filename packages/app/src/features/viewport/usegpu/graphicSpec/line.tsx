@@ -30,7 +30,7 @@ type LineLike = MathItem<
 >;
 
 /**
- * The style fields every line-like item shares, memoised. Until a result
+ * The style fields every line-like item shares, memoized. Until a result
  * evaluates, each falls back to the Line item's default (`defaultWidth`
  * overrides the width).
  */

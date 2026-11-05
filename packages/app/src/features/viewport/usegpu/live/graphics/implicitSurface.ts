@@ -21,7 +21,7 @@ type ImplicitNormalsProps = {
 
 /** Normals for a sampled `f32` field, from finite differences of the grid itself. */
 const ImplicitNormals = ({ values, spacing, render }: ImplicitNormalsProps) => {
-  // `spacing` is a fresh array every render, so memoise on its entries.
+  // `spacing` is a fresh array every render, so memoize on its entries.
   const [sx, sy, sz] = spacing;
   const normals = useMemo(() => {
     const size = Array.from(values.size) as Vec3;

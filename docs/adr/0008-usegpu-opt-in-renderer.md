@@ -12,10 +12,10 @@ with a WebGPU adapter.
 ## Decision
 
 **Add Use.GPU as a second renderer behind `?renderer=usegpu`. MathBox stays
-the default and is unchanged.**
+the default.**
 
-- `MainPage` picks the viewport from `?renderer`; without it, nothing about
-  the MathBox path changes.
+- `MainPage` picks the viewport from `?renderer` (`mathbox` by default, or
+  `usegpu`).
 - Without `navigator.gpu` (or with no adapter), the Use.GPU viewport says
   WebGPU is unavailable and links back to the default renderer.
 
@@ -29,7 +29,7 @@ the default and is unchanged.**
   to `shared/`.
 - **`usegpu/live/`** is the only code that imports Use.GPU's runtime
   (`@use-gpu/*` except `@use-gpu/core`, enforced by `no-restricted-imports`).
-  Only `usegpu/GpuViewport` reaches it.
+  Only `usegpu/GpuViewport` reaches it (an `import/no-restricted-paths` zone).
 - **`usegpu/graphicSpec/`** reads the store and MathScope and produces specs.
   **A spec field is in math-item terms only** (evaluated positions, RGBA
   colors, sample callbacks), never a Use.GPU prop, so the specs are testable
@@ -56,7 +56,7 @@ upstream bugs:
 - **`DualContourLayer` passes `depthTest`/`depthWrite` through.** It hardcodes
   both to `true`, so a translucent implicit surface self-occludes into speckle.
 - **`OITBuffer`'s `OIT/Transparency` target gets `colorInput: 'linear'`.**
-  Otherwise order-independent-transparency draws are linearised and never
+  Otherwise order-independent-transparency draws are linearized and never
   converted back, darkening mid-tone translucent colors by a 2.2 gamma.
 
 **Remove a hunk** when a Use.GPU release contains its fix.
@@ -83,12 +83,12 @@ upstream bugs:
   - bump every `@use-gpu/*` package together (Renovate groups them, on
     dashboard approval);
   - regenerate the workbench patch (steps in `usegpu/pins.spec.ts`), dropping
-    any hunk the release fixed, and run the canary;
+    any hunk the release fixed, and run `usegpu/pins.spec.ts`;
   - open each QA scene in two tabs, one per renderer;
   - read the release's deprecation list.
 - The E2E smoke test (`viewport/usegpu-renderer.test.ts`) checks only that the
-  route loads without page errors: a canvas with a WebGPU adapter, the
-  unavailable message without.
+  route loads without page errors: a canvas that stays up with a WebGPU
+  adapter, the unavailable message without.
 
 ## Alternatives considered
 

@@ -2,7 +2,7 @@
 export const MAX_IMPLICIT_SAMPLES = 128;
 
 /**
- * The normalised gradient of a sampled scalar field, one `vec4` per cell, in
+ * The normalized gradient of a sampled scalar field, one `vec4` per cell, in
  * the x-fastest layout `Sampler` writes. `size` is the full grid, padding
  * included; `values` may be over-allocated, and only its first nx·ny·nz
  * entries are read. Central differences inside, one-sided at the faces; a

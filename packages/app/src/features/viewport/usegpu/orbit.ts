@@ -11,11 +11,11 @@ export type OrbitSpec = {
 
 /**
  * Use.GPU's orbit camera is y-up; math3d is z-up. live/scene.ts rotates the
- * plot by this much, taking math (x, y, z) to world (x, z, -y): `toWorld`.
+ * plot by this much, taking cartesian (x, y, z) to world (x, z, -y): `toWorld`.
  */
 export const PLOT_ROTATION_DEGREES = [-90, 0, 0];
 
-/** Where the plot rotation takes a math3d point. The camera spec is in math3d coordinates. */
+/** Where the plot rotation takes a cartesian point; `CameraSpec` is cartesian. */
 export const toWorld = ([x, y, z]: Coords): Coords => [x, z, -y];
 
 /**
