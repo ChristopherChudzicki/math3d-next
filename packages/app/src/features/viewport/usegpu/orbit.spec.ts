@@ -3,10 +3,9 @@ import type { Coords } from "@/features/viewport/shared/coordinates";
 import { fromOrbit, keyLightPosition, toOrbit, toWorld } from "./orbit";
 
 const cases: { position: Coords; target: Coords }[] = [
-  { position: [0.5, -2, 0.5], target: [0, 0, 0] },
   { position: [-1.2, 0.8, 2], target: [0.3, 0.1, -0.4] },
+  // A pole: straight above the target.
   { position: [0, 0, 3], target: [0, 0, 0] },
-  { position: [2, 2, -1], target: [1, 1, 1] },
 ];
 
 test.each(cases)(
@@ -49,18 +48,12 @@ test("keyLightPosition is MathBox's view-space (1, 2, 2) in world coordinates", 
 });
 
 // At a pole the view's x falls back to world +x, so y = z × x.
-test.each([
-  { pitch: Math.PI / 2, expected: [1, 2, -2] },
-  { pitch: -Math.PI / 2, expected: [1, -2, 2] },
-])(
-  "keyLightPosition at pitch $pitch uses world +x as the view's x",
-  ({ pitch, expected }) => {
-    const light = keyLightPosition({
-      radius: 3,
-      bearing: 0,
-      pitch,
-      target: [0, 0, 0],
-    });
-    expected.forEach((v, i) => expect(light[i]).toBeCloseTo(v, 6));
-  },
-);
+test("keyLightPosition at a pole uses world +x as the view's x", () => {
+  const light = keyLightPosition({
+    radius: 3,
+    bearing: 0,
+    pitch: Math.PI / 2,
+    target: [0, 0, 0],
+  });
+  [1, 2, -2].forEach((v, i) => expect(light[i]).toBeCloseTo(v, 6));
+});

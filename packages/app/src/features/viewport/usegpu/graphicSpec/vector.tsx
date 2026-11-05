@@ -7,7 +7,7 @@ import {
 } from "@/store/scene/evaluation/mathScope";
 import type { Coords } from "@/features/viewport/shared/coordinates";
 import type { GraphicSpec } from "./types";
-import { visibleLabel } from "./types";
+import { visibleLabel } from "./style";
 import { useLineStyle } from "./line";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";

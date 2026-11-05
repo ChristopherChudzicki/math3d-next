@@ -18,7 +18,7 @@ import {
 import { explicitColorFunc } from "@/features/viewport/shared/surfaceColor";
 import type { SurfaceColorFunc } from "@/features/viewport/shared/surfaceColor";
 import type { GraphicSpec, RGBA } from "./types";
-import { parseColor } from "./types";
+import { baseStyle, sampleCount } from "./style";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";
 
@@ -96,7 +96,8 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
 
     const alpha = opacity ?? 1;
     const gradient = isGradientName(color) ? gradients[color] : null;
-    const flat = parseColor(color, alpha);
+    const base = baseStyle({ opacity, zBias, zIndex }, color);
+    const flat = base.color;
     const colorFunc = colorExpr && toColorFunc(item.type, colorExpr);
     const colorAt = (U: number, V: number): RGBA => {
       if (!gradient || !colorFunc) return flat;
@@ -108,8 +109,6 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
     const gridColor: RGBA = gradient
       ? [0.5, 0.5, 0.5, gridOpacity ?? 0.5]
       : (flat.map((c, i) => (i < 3 ? c * 0.5 : gridOpacity ?? 0.5)) as RGBA);
-    const count = (n: number | undefined, fallback: number) =>
-      Math.max(2, Math.round(n ?? fallback));
     // 0 means no gridlines; a single line would make the sampler step Δ/0.
     const lineCount = (n: number | undefined, fallback: number) => {
       const rounded = Math.round(n ?? fallback);
@@ -117,12 +116,12 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
     };
     return {
       kind: "surface",
-      samples: [count(samples1, 64), count(samples2, 64)],
+      samples: [sampleCount(samples1, 64), sampleCount(samples2, 64)],
       position,
       colorAt,
       shaded: shaded ?? true,
-      zBias: zBias ?? 0,
-      zIndex: zIndex ?? 0,
+      zBias: base.zBias,
+      zIndex: base.zIndex,
       grid: {
         lines: [lineCount(grid1, 8), lineCount(grid2, 8)],
         width: gridWidth ?? 2,

@@ -19,7 +19,7 @@ const tickLabelOffset = (axis: AxisSpec["axis"]): [number, number] =>
   axis === "z" ? [20, 0] : [0, 20];
 
 /** MathBox's 30px above the axis end. */
-const LABEL_OFFSET: [number, number] = [0, -30];
+const AXIS_LABEL_OFFSET: [number, number] = [0, -30];
 
 const renderTicks = (spec: AxisSpec): LiveElement =>
   spec.ticks.visible
@@ -65,7 +65,7 @@ const renderAxisLabel = (spec: AxisSpec): LiveElement =>
     : renderLabels(
         [axisEnd(spec.axis, spec.range[1])],
         spec.label,
-        LABEL_OFFSET,
+        AXIS_LABEL_OFFSET,
         spec,
       );
 

@@ -4,6 +4,12 @@ import type { CoverageTable } from "@/features/viewport/shared/coverage";
 // Use.GPU's zIndex sorts draw calls, which depth testing and OIT make invisible.
 const Z_INDEX_PULL = "MathBox also pulls a higher zIndex toward the camera";
 const Z_INDEX = `approximate: orders draw calls only; ${Z_INDEX_PULL}` as const;
+const zIndexIgnored = (component: string) =>
+  `approximate: ignored by Use.GPU's ${component}; ${Z_INDEX_PULL}` as const;
+const Z_BIAS =
+  "approximate: Use.GPU's zBias units are not calibrated against MathBox's";
+const BOLD_LABEL =
+  "approximate: regular weight; MathBox draws item labels bold";
 
 /** What the Use.GPU renderer does with each stored property. */
 export const coverage = {
@@ -23,8 +29,7 @@ export const coverage = {
     calculatedVisibility: "drawn",
     useCalculatedVisibility: "drawn",
     width: "drawn",
-    zBias:
-      "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
+    zBias: Z_BIAS,
     zIndex: `approximate: orders label draw calls only; ${Z_INDEX_PULL}`,
     zOrder: "n/a: order-independent transparency",
     start: "drawn",
@@ -42,21 +47,19 @@ export const coverage = {
     calculatedVisibility: "drawn",
     useCalculatedVisibility: "drawn",
     width: "drawn",
-    zBias:
-      "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
-    zIndex: `approximate: ignored, as Use.GPU's Grid takes no zIndex; ${Z_INDEX_PULL}`,
+    zBias: Z_BIAS,
+    zIndex: zIndexIgnored("Grid"),
     zOrder: "n/a: order-independent transparency",
   },
   [MIT.Point]: {
     color: "drawn",
     coords: "drawn",
     description: "n/a: editor only",
-    label: "approximate: regular weight; MathBox draws item labels bold",
+    label: BOLD_LABEL,
     labelVisible: "drawn",
     opacity: "drawn",
     size: "drawn",
-    zBias:
-      "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
+    zBias: Z_BIAS,
     zIndex: Z_INDEX,
     zOrder: "n/a: order-independent transparency",
     visible: "drawn",
@@ -67,7 +70,7 @@ export const coverage = {
     color: "drawn",
     coords: "drawn",
     description: "n/a: editor only",
-    label: "approximate: regular weight; MathBox draws item labels bold",
+    label: BOLD_LABEL,
     labelVisible: "drawn",
     opacity: "drawn",
     visible: "drawn",
@@ -75,8 +78,7 @@ export const coverage = {
     useCalculatedVisibility: "drawn",
     size: "drawn",
     width: "drawn",
-    zBias:
-      "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
+    zBias: Z_BIAS,
     zIndex: Z_INDEX,
     zOrder: "n/a: order-independent transparency",
     start: "drawn",
@@ -86,7 +88,7 @@ export const coverage = {
     color: "drawn",
     components: "drawn",
     description: "n/a: editor only",
-    label: "approximate: regular weight; MathBox draws item labels bold",
+    label: BOLD_LABEL,
     labelVisible: "drawn",
     opacity: "drawn",
     tail: "drawn",
@@ -95,8 +97,7 @@ export const coverage = {
     useCalculatedVisibility: "drawn",
     size: "drawn",
     width: "drawn",
-    zBias:
-      "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
+    zBias: Z_BIAS,
     zIndex: Z_INDEX,
     zOrder: "n/a: order-independent transparency",
     start: "drawn",
@@ -109,8 +110,7 @@ export const coverage = {
     visible: "drawn",
     calculatedVisibility: "drawn",
     useCalculatedVisibility: "drawn",
-    zBias:
-      "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
+    zBias: Z_BIAS,
     zIndex: Z_INDEX,
     zOrder: "n/a: order-independent transparency",
     size: "drawn",
@@ -134,8 +134,7 @@ export const coverage = {
     useCalculatedVisibility: "drawn",
     size: "drawn",
     width: "drawn",
-    zBias:
-      "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
+    zBias: Z_BIAS,
     zIndex: Z_INDEX,
     zOrder: "n/a: order-independent transparency",
     start: "drawn",
@@ -160,8 +159,7 @@ export const coverage = {
     visible: "drawn",
     calculatedVisibility: "drawn",
     useCalculatedVisibility: "drawn",
-    zBias:
-      "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
+    zBias: Z_BIAS,
     zIndex: `approximate: orders gridline draw calls only; ${Z_INDEX_PULL}`,
     zOrder: "n/a: order-independent transparency",
   },
@@ -182,8 +180,7 @@ export const coverage = {
     visible: "drawn",
     calculatedVisibility: "drawn",
     useCalculatedVisibility: "drawn",
-    zBias:
-      "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
+    zBias: Z_BIAS,
     zIndex: `approximate: orders gridline draw calls only; ${Z_INDEX_PULL}`,
     zOrder: "n/a: order-independent transparency",
   },
@@ -204,8 +201,7 @@ export const coverage = {
     visible: "drawn",
     calculatedVisibility: "drawn",
     useCalculatedVisibility: "drawn",
-    zBias:
-      "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
+    zBias: Z_BIAS,
     zIndex: `approximate: orders gridline draw calls only; ${Z_INDEX_PULL}`,
     zOrder: "n/a: order-independent transparency",
   },
@@ -221,9 +217,8 @@ export const coverage = {
     domain: "drawn",
     lhs: "drawn",
     rhs: "drawn",
-    zBias:
-      "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
-    zIndex: `approximate: ignored, as Use.GPU's ImplicitSurface drops zIndex; ${Z_INDEX_PULL}`,
+    zBias: Z_BIAS,
+    zIndex: zIndexIgnored("ImplicitSurface"),
     zOrder: "n/a: order-independent transparency",
   },
   [MIT.Camera]: {

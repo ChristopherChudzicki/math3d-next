@@ -11,8 +11,7 @@ test("an axis reports its range, ticks and label", () => {
     max: "3",
   });
   const item = scene.items.find(
-    (x): x is MathItem<MIT.Axis> =>
-      x.id === "axis-x" && x.type === MIT.Axis,
+    (x): x is MathItem<MIT.Axis> => x.id === "axis-x" && x.type === MIT.Axis,
   );
   invariant(item, "axis-x not found");
   expect(renderGraphicSpec(scene, "axis-x")).toMatchObject({

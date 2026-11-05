@@ -64,3 +64,10 @@ test("0 gridlines along a parameter draws none along it", () => {
   const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
   expect(spec.grid.lines[0]).toBe(0);
 });
+
+test("1 gridline along a parameter draws 2, its edges", () => {
+  const scene = new SceneBuilder();
+  scene.folder().parametricSurface({ grid1: "1" }, "s");
+  const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
+  expect(spec.grid.lines[0]).toBe(2);
+});

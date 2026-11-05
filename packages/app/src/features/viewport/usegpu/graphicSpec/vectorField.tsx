@@ -35,7 +35,8 @@ const VectorField: SpecComponent<MIT.VectorField> = ({ item }) => {
   const style = useLineStyle(scope, item, 2);
   const spec = useMemo<GraphicSpec | null>(() => {
     if (!visible || !expr || !domain) return null;
-    // As MathBox does: counts round, and a missing or sub-1 count draws nothing.
+    // As MathBox does: counts round, and a missing or sub-1 count draws
+    // nothing, unlike `sampleCount`'s minimum of 2 for curves and surfaces.
     const counts = [samples1, samples2, samples3].map((n) =>
       n === undefined ? 0 : Math.round(n),
     );

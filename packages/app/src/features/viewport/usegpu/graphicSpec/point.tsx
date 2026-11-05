@@ -6,7 +6,7 @@ import {
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
 import type { GraphicSpec } from "./types";
-import { parseColor, visibleLabel } from "./types";
+import { baseStyle, visibleLabel } from "./style";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";
 
@@ -31,9 +31,7 @@ const Point: SpecComponent<MIT.Point> = ({ item }) => {
       kind: "point",
       positions: coords,
       size: size ?? 8,
-      color: parseColor(color, opacity ?? 1),
-      zBias: zBias ?? 0,
-      zIndex: zIndex ?? 0,
+      ...baseStyle({ opacity, zBias, zIndex }, color),
       label: visibleLabel(label, labelVisible),
     };
   }, [

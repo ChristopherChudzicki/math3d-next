@@ -2,7 +2,10 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { isMathGraphic } from "@math3d/mathitem-configs";
 import type { MathItem } from "@math3d/mathitem-configs";
-import { mathScopeId } from "@/store/scene/evaluation/mathScope";
+import {
+  finalVisibility,
+  mathScopeId,
+} from "@/store/scene/evaluation/mathScope";
 import {
   renderGraphicSpec,
   storeWithScene,
@@ -34,12 +37,12 @@ test.each(qaScenes.map((scene) => ({ key: scene.key, scene })))(
   "every visible graphic in QA scene $key produces a spec",
   ({ scene }) => {
     const scope = storeWithScene(scene).mathScope.get();
-    const isVisible = (item: MathItem) => {
-      if (!isMathGraphic(item)) return false;
-      const { visible, useCalculatedVisibility } = item.properties;
-      if (!useCalculatedVisibility) return visible;
-      return !!scope.results.get(mathScopeId(item.id, "calculatedVisibility"));
-    };
+    const isVisible = (item: MathItem) =>
+      isMathGraphic(item) &&
+      finalVisibility(
+        item,
+        scope.results.get(mathScopeId(item.id, "calculatedVisibility")),
+      );
     const missing = scene.items
       .filter(isVisible)
       .filter((item) => renderGraphicSpec(scene, item.id) === null)

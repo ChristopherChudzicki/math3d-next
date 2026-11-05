@@ -6,7 +6,7 @@ import {
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
 import type { GraphicSpec } from "./types";
-import { parseColor } from "./types";
+import { baseStyle } from "./style";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";
 
@@ -36,9 +36,7 @@ const Grid: SpecComponent<MIT.Grid> = ({ item }) => {
       divisions: [divisions?.[0] ?? 10, divisions?.[1] ?? 10],
       snap: !!snap,
       width: width ?? 1,
-      color: parseColor(color, opacity ?? 1),
-      zBias: zBias ?? 0,
-      zIndex: zIndex ?? 0,
+      ...baseStyle({ opacity, zBias, zIndex }, color),
     };
   }, [visible, axes, divisions, snap, width, color, opacity, zBias, zIndex]);
   useReportSpec(item.id, spec);

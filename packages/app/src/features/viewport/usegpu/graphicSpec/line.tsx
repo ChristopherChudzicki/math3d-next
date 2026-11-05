@@ -9,7 +9,7 @@ import {
 import type { AppMathScope } from "@/store/scene/state/interfaces";
 import type { Coords } from "@/features/viewport/shared/coordinates";
 import type { GraphicSpec, LineSpec } from "./types";
-import { parseColor, visibleLabel } from "./types";
+import { baseStyle, sampleCount, visibleLabel } from "./style";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";
 
@@ -45,9 +45,7 @@ export const useLineStyle = (
   return useMemo(
     () => ({
       width: width ?? defaultWidth,
-      color: parseColor(color, opacity ?? 1),
-      zBias: zBias ?? 0,
-      zIndex: zIndex ?? 0,
+      ...baseStyle({ opacity, zBias, zIndex }, color),
       start: !!start,
       end: !!end,
       arrowSize: size ?? 6,
@@ -93,7 +91,7 @@ export const ParametricCurve: SpecComponent<MIT.ParametricCurve> = ({
   const spec = useMemo<GraphicSpec | null>(() => {
     if (!visible || !expr || !domain) return null;
     const [t1, t2] = domain[0];
-    const n = Math.max(2, Math.round(samples1 ?? 128));
+    const n = sampleCount(samples1, 128);
     const path: Coords[] = [];
     for (let i = 0; i < n; i += 1) {
       const [x, y, z] = expr(t1 + ((t2 - t1) * i) / (n - 1));
