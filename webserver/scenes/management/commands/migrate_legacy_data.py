@@ -47,28 +47,31 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        legacy_scenes = LegacyScene.objects.order_by("id")
+        batch = LegacyScene.objects.order_by("id")
         if options["filter"]:
-            legacy_scenes = legacy_scenes.filter(key__in=options["filter"].split(","))
-        taken_over = Scene.objects.filter(
-            is_legacy=False, key__in=legacy_scenes.values("key")
-        ).count()
-        if options["force"] is None:
-            legacy_scenes = legacy_scenes.exclude(
-                key__in=Scene.objects.filter(is_legacy=False).values("key")
+            batch = batch.filter(key__in=options["filter"].split(","))
+        elif options["limit"]:
+            batch = batch[: options["limit"]]
+        keys = list(batch.values_list("key", flat=True))
+        taken_over = set(
+            Scene.objects.filter(is_legacy=False, key__in=keys).values_list(
+                "key", flat=True
             )
+        )
+        if options["force"] is None:
+            keys = [key for key in keys if key not in taken_over]
             if taken_over:
                 self.stdout.write(
-                    f"Skipping {taken_over} taken-over scenes (--force {taken_over} "
-                    "re-translates them)."
+                    f"Skipping {len(taken_over)} taken-over scenes (--force "
+                    f"{len(taken_over)} re-translates them)."
                 )
-        elif options["force"] != taken_over:
+        elif options["force"] != len(taken_over):
             raise CommandError(
-                f"--force {options['force']} does not match: {taken_over} taken-over "
-                f"scenes would be overwritten. Pass --force {taken_over} to confirm."
+                f"--force {options['force']} does not match: {len(taken_over)} "
+                "taken-over scenes would be overwritten. Pass --force "
+                f"{len(taken_over)} to confirm."
             )
-        if options["limit"] and not options["filter"]:
-            legacy_scenes = legacy_scenes[: options["limit"]]
+        legacy_scenes = LegacyScene.objects.filter(key__in=keys).order_by("id")
 
         problems: list[tuple[str, str]] = []
         for legacy_scene in tqdm.tqdm(

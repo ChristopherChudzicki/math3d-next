@@ -2,10 +2,8 @@ from django.db import migrations
 
 
 def mark(apps, schema_editor):
-    # 0015 added is_legacy with default=False and no backfill, and pull_scenes
-    # never copied it, so translations written before either carry False. From
-    # now on False means "taken over" (served as is, never re-translated), so
-    # every authorless row under a legacy key that nobody took over is True.
+    # Translations written before 0015 added the field, and rows pull_scenes
+    # copied without it, carry the default False, which means "taken over".
     Scene = apps.get_model("scenes", "Scene")
     LegacyScene = apps.get_model("scenes", "LegacyScene")
     Scene.objects.filter(

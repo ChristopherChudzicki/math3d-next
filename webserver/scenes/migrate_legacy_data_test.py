@@ -79,3 +79,13 @@ def test_force_must_name_the_number_of_scenes_it_overwrites(taken_over):
     assert Scene.objects.get(key=taken_over.key).title == "owned"
     call_command("migrate_legacy_data", "--force", "1")
     assert Scene.objects.get(key=taken_over.key).is_legacy is True
+
+
+@pytest.mark.django_db
+def test_force_counts_taken_over_scenes_within_the_limited_batch(taken_over):
+    second = _legacy()
+    migrate_scene(second)
+    Scene.objects.filter(key=second.key).update(is_legacy=False)
+    call_command("migrate_legacy_data", "--limit", "1", "--force", "1")
+    assert Scene.objects.get(key=taken_over.key).is_legacy is True
+    assert Scene.objects.get(key=second.key).is_legacy is False
