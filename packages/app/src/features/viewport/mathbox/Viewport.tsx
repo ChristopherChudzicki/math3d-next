@@ -6,8 +6,6 @@ import type { MathboxSelection } from "mathbox";
 import "mathbox/mathbox.css";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Vector3 } from "three";
-import { isMathGraphic, MathItemType } from "@math3d/mathitem-configs";
-import invariant from "tiny-invariant";
 import { debounce } from "lodash-es";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useElementResize } from "@/util/hooks";
@@ -15,8 +13,12 @@ import { actions } from "@/store/scene/state/scene.slice";
 import * as select from "@/store/scene/state/selectors";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 import { useMathResults } from "@/store/scene/evaluation/mathScope";
+import {
+  useHasViewportItems,
+  useViewportItems,
+} from "@/features/viewport/shared/useViewportItems";
+import is3dDisabled from "@/features/viewport/shared/is3dDisabled";
 import { Graphic } from "./graphics";
-import useAxesInfo from "./useAxesInfo";
 import Camera from "./Camera";
 import type { OnMoveEnd } from "./Camera";
 import { ZOOM_FACTOR } from "./dollyZoom";
@@ -58,31 +60,14 @@ type MathboxRoot = MathboxSelection & {
   _context?: MathboxContext;
 };
 
-const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 const ViewportContent = () => {
   const dispatch = useAppDispatch();
-  const items = useAppSelector(select.stableOrderedMathItems);
-  const [x, y, z, camera] = useAppSelector((state) =>
-    select.getItems(state, REQUIRED_ITEMS),
-  );
-  invariant(camera.type === MathItemType.Camera);
-  const { scale, range } = useAxesInfo(x, y, z);
+  const { graphics, camera, range, scale } = useViewportItems();
 
   const onCameraChange: OnMoveEnd = useMemo(() => {
-    const cb: OnMoveEnd = (event) => {
-      dispatch(
-        actions.patchProperty({
-          id: camera.id,
-          path: "/position",
-          value: `[${event.position.map((pos) => pos.toPrecision(6))}]`,
-        }),
-      );
-      dispatch(
-        actions.patchProperty({
-          id: camera.id,
-          path: "/target",
-          value: `[${event.target.map((pos) => pos.toPrecision(6))}]`,
-        }),
+    const cb: OnMoveEnd = (patches) => {
+      patches.forEach((patch) =>
+        dispatch(actions.patchProperty({ id: camera.id, ...patch })),
       );
     };
     return debounce(cb, 200);
@@ -96,7 +81,7 @@ const ViewportContent = () => {
         scale={scale}
         onMoveEnd={onCameraChange}
       />
-      {items.filter(isMathGraphic).map((item) => (
+      {graphics.map((item) => (
         <Graphic key={item.id} item={item} />
       ))}
     </MB.Cartesian>
@@ -110,12 +95,6 @@ const useIsOrthographic = () => {
   return !!isOrthographic;
 };
 
-// E2E tests set this flag via Playwright's `disable3d` fixture to skip
-// MathBox/WebGL initialization. Most E2E tests only interact with the
-// controls sidebar, and disabling 3D rendering cuts test runtime from
-// ~5 minutes to ~45 seconds.
-const is3dDisabled = localStorage.getItem("disable3dScene") === "true";
-
 const Viewport: React.FC<Props> = ({ className, still }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [mathbox, setMathbox] = useState<MathboxSelection | null>(null);
@@ -124,7 +103,7 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
   const loadCount = useAppSelector(select.loadCount);
   const [drainedLoad, setDrainedLoad] = useState<number | null>(null);
   const warmedUp = drainedLoad === loadCount;
-  const hasRequired = useAppSelector(select.hasItems(REQUIRED_ITEMS));
+  const hasRequired = useHasViewportItems();
 
   const isOrthographic = useIsOrthographic();
   const focus = isOrthographic ? ZOOM_FACTOR : 1;
@@ -189,7 +168,7 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
       style={{ width: "100%", height: "100%" }}
       ref={setContainer}
     >
-      {container && hasRequired && !is3dDisabled && (
+      {container && hasRequired && !is3dDisabled() && (
         <MB.Mathbox
           container={container}
           options={mathboxOptions}

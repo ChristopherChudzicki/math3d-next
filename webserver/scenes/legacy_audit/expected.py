@@ -470,7 +470,7 @@ _REACT_DOLLY = 50
 def _axis_scales(ctx: Context) -> list[Fraction] | NeedsEval:
     # Each axis sets its component of the root cartesian's scale
     # (react:components/MathBox/MathBoxComponents.js:490-497); next reads the
-    # same three axis scales (next:app/src/features/viewport/useAxesInfo.tsx:34-41).
+    # same three axis scales (next:app/src/features/viewport/shared/useAxesInfo.tsx:34-41).
     by_axis: dict[str, Any] = {}
     for axis_item in ctx.axes.values():
         by_axis[axis_item.get("axis", "x")] = axis_item.get("scale")
@@ -514,9 +514,9 @@ def _camera(item: dict, ctx: Context) -> list[Expectation]:
         # the cartesian range and scale
         # (react:components/MathBox/MathBoxComponents.js:368-433). next's
         # useRelative=false does the same projection
-        # (next:app/src/features/viewport/Camera.tsx:47-57). The ortho dolly
+        # (next:app/src/features/viewport/shared/coordinates.ts:32-40). The ortho dolly
         # is applied by each app on top (react:...MathBoxComponents.js:394-397,
-        # next:app/src/features/viewport/Camera.tsx:94-99).
+        # next:app/src/features/viewport/mathbox/Camera.tsx:85-89).
         src_p, src_t = "computedPosition,useComputed", "computedLookAt,useComputed"
         out.add("position", _text(item.get("computedPosition")), "render", src_p)
         out.add("target", _text(item.get("computedLookAt")), "render", src_t)
@@ -526,7 +526,7 @@ def _camera(item: dict, ctx: Context) -> list[Expectation]:
         # never writes interaction back into computedPosition. next still
         # fires onEnd on every pointerup, and with updateOnDrag=true writes
         # the camera's numbers over the expressions when they differ
-        # (next:app/src/features/viewport/Camera.tsx:101-122).
+        # (next:app/src/features/viewport/mathbox/Camera.tsx:91-111).
         out.add("updateOnDrag", "false", "render", "useComputed")
         return out.items
 
@@ -536,7 +536,7 @@ def _camera(item: dict, ctx: Context) -> list[Expectation]:
     # react:services/getCameraData.js), and loading sets them straight back
     # (react:components/MathBox/MathBoxComponents.js:351-366). next's
     # useRelative=true multiplies by the axis scales
-    # (next:app/src/features/viewport/Camera.tsx:55), so divide by them here.
+    # (next:app/src/features/viewport/shared/coordinates.ts:38), so divide by them here.
     src_p = "relativePosition,useComputed"
     src_t = "relativeLookAt,useComputed"
     position: str | NeedsEval
@@ -558,8 +558,8 @@ def _camera(item: dict, ctx: Context) -> list[Expectation]:
             # before the deferred MathBox camera digest,
             # react-nm:mathbox/src/model/attributes.js:445-450). next dollies
             # the stored position out itself
-            # (next:app/src/features/viewport/Camera.tsx:94-99,
-            # next:app/src/features/viewport/dollyZoom.ts:84-88). The same
+            # (next:app/src/features/viewport/mathbox/Camera.tsx:85-89,
+            # next:app/src/features/viewport/mathbox/dollyZoom.ts:84-88). The same
             # frustum at the target comes from storing the undollied position
             # target + (saved - target)/50.
             pos = [t + (p - t) / _REACT_DOLLY for p, t in zip(pos, look, strict=True)]
@@ -569,7 +569,7 @@ def _camera(item: dict, ctx: Context) -> list[Expectation]:
     out.add("target", target, "render", src_t)
     out.add("useRelative", "true", "render", "useComputed")
     # Free dragging, captured as the scene's camera on save: next's
-    # updateOnDrag=true (next:app/src/features/viewport/Camera.tsx:101-122);
+    # updateOnDrag=true (next:app/src/features/viewport/mathbox/Camera.tsx:91-111);
     # false would snap the camera back after every drag.
     out.add("updateOnDrag", "true", "render", "useComputed")
     return out.items
@@ -591,7 +591,7 @@ def _axis(item: dict, ctx: Context) -> list[Expectation]:
     # react-nm:mathbox/src/primitives/types/traits.ts:227-231), and ticks from
     # `scale({divide: 10})` (react:components/MathBox/MathBoxComponents.js:558-564).
     # next passes start/end/divisions through
-    # (next:app/src/features/viewport/graphics/Axis.tsx:57-69).
+    # (next:app/src/features/viewport/mathbox/graphics/Axis.tsx:57-69).
     out.add("start", "false", "render", "constant")
     out.add("end", "true", "render", "constant")
     out.add("divisions", "10", "render", "constant")
@@ -648,7 +648,7 @@ def _parametric_curve(item: dict, ctx: Context) -> list[Expectation]:
     out.func_assignment("expr", item.get("expr"), "expr")
     out.expr_domain(item, ("range",))
     # Interval width (react:components/MathBox/MathBoxComponents.js:754-758);
-    # next: next:app/src/features/viewport/graphics/ParametricCurve.tsx:63-69.
+    # next: next:app/src/features/viewport/mathbox/graphics/ParametricCurve.tsx:63-69.
     out.add("samples1", _text(item.get("samples")), "render", "samples")
     return out.items
 
@@ -759,7 +759,7 @@ def _make_surface(
         # (react:components/MathBox/MathBoxComponents.js:844-889,1148-1187).
         # next puts whichever parameter it evaluates first on the width: the
         # 2nd one when the 1st one's range depends on it
-        # (next:app/src/features/viewport/graphics/ParametricSurface.tsx:99-113,178-225).
+        # (next:app/src/features/viewport/mathbox/graphics/ParametricSurface.tsx:95-109,173-220).
         # Swap so each parameter keeps its sample and gridline counts.
         swapped = first is not None and _depends_on(first[1], first[0])
         u_src, v_src = ("vSamples", "uSamples") if swapped else ("uSamples", "vSamples")
@@ -796,7 +796,7 @@ def _vector_field(item: dict, ctx: Context) -> list[Expectation]:
     out.func_assignment("expr", item.get("expr"), "expr")
     out.add("scale", _text(item.get("scale")), "render", "scale")
     # One 3-vector of sample counts (react:components/MathBox/MathBoxComponents.js:1477-1491)
-    # becomes three fields (next:app/src/features/viewport/graphics/VectorField.tsx:68-71).
+    # becomes three fields (next:app/src/features/viewport/mathbox/graphics/VectorField.tsx:73-76).
     parts = _split_vector(item.get("samples"))
     for i in range(3):
         value: str | NeedsEval

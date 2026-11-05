@@ -5,7 +5,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router";
-import Viewport from "@/features/viewport/Viewport";
+import Viewport from "@/features/viewport/mathbox/Viewport";
 import useSceneLoader from "@/app/useSceneLoader";
 import SceneControls from "@/features/editor/sidebar/SceneControls";
 import SliderAnimations from "@/features/editor/items/forms/VariableSlider/SliderAnimations";

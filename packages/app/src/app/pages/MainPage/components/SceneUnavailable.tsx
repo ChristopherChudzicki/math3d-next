@@ -6,7 +6,7 @@ import externalLink from "@iconify-icons/lucide/external-link";
 import type { SceneUnavailableStatus } from "@/app/useSceneLoader";
 import BrokenTorus from "@/app/pages/ErrorPage/BrokenTorus";
 import buildReportUrl from "@/app/pages/ErrorPage/errorPage.report";
-import Viewport from "@/features/viewport/Viewport";
+import Viewport from "@/features/viewport/mathbox/Viewport";
 import defaultScene from "@/store/scene/defaultScene";
 import sceneSlice from "@/store/scene/state/scene.slice";
 import { useAppSelector } from "@/store/hooks";

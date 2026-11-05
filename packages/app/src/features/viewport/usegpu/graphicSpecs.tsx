@@ -21,8 +21,8 @@ import {
   useFinalVisibility,
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
-import type { AxesRange } from "@/features/viewport/graphics/interfaces";
-import { project } from "@/features/viewport/graphics/util";
+import type { AxesRange } from "@/features/viewport/shared/coordinates";
+import { project } from "@/features/viewport/shared/coordinates";
 import type { Coords, GraphicSpec, RGBA } from "./specs";
 import { parseColor } from "./specs";
 

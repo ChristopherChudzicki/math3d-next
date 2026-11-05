@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import type { Coords } from "./graphics/interfaces";
+import type { Coords } from "@/features/viewport/shared/coordinates";
 
 /**
  * A dolly zoom is a camera effect where the camera simultaneously moves away

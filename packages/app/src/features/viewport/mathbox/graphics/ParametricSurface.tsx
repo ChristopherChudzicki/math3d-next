@@ -13,8 +13,9 @@ import {
   useFinalVisibility,
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
+import { explicitColorFunc } from "@/features/viewport/shared/surfaceColor";
+import type { SurfaceColorFunc } from "@/features/viewport/shared/surfaceColor";
 import { GraphicComponent } from "./interfaces";
-import { explicitColorFunc, SurfaceColorFunc } from "./surfaceColor";
 
 const props = [
   "opacity",

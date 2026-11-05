@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router";
 
-import Viewport from "@/features/viewport/Viewport";
+import Viewport from "@/features/viewport/mathbox/Viewport";
 import useSceneLoader from "@/app/useSceneLoader";
 
 /**
