@@ -339,10 +339,27 @@ describe('MathScope "change-errors" Events', () => {
   });
 });
 
+test("an unmet dependency error lists the undefined names", () => {
+  expect(new UnmetDependencyError(["b", "a"]).message).toBe(
+    "Undefined symbols a, b",
+  );
+});
+
 test("an assignment that uses an undefined name is an unmet dependency", () => {
   const scope = new MathScope<Parseable>({ parse });
   scope.setExpressions([{ id: "b", parseable: "b = a + 1" }]);
   expect(scope.errors.get("b")).toBeInstanceOf(UnmetDependencyError);
+});
+
+test("underscore names added in one batch are duplicates once something uses them", () => {
+  const scope = new MathScope<Parseable>({ parse });
+  scope.setExpressions([
+    { id: "a", parseable: "_k = 1" },
+    { id: "b", parseable: "_k = 3" },
+    { id: "use", parseable: "_k + 1" },
+  ]);
+  expect(scope.errors.get("a")).toBeInstanceOf(DuplicateAssignmentError);
+  expect(scope.errors.get("b")).toBeInstanceOf(DuplicateAssignmentError);
 });
 
 describe("overridable definitions", () => {

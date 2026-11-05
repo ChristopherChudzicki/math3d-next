@@ -69,8 +69,7 @@ export default class ExpressionGraphManager<
         this.assignmentsByName.set(node.name, sameName);
       }
     });
-    const { assignments, duplicates } =
-      this.getAssignmentsAndDuplicatesByName();
+    const { assignments } = this.getAssignmentsAndDuplicatesByName();
     nodes.forEach((node) => {
       /**
        * Get dependencies of this node.
@@ -128,7 +127,10 @@ export default class ExpressionGraphManager<
      * In this sense, A2 depends on A1: its validity as an assignment depends on
      * whether A1 exists or not.
      *
+     * Duplicates are found only now, once this batch's edges exist: whether a
+     * `_` name may repeat depends on whether anything uses it.
      */
+    const { duplicates } = this.getAssignmentsAndDuplicatesByName();
     duplicates.forEach((dupes) => {
       dupes.forEach((dupe1) => {
         dupes.forEach((dupe2) => {
