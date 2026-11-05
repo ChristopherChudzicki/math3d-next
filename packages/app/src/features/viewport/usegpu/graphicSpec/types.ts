@@ -20,6 +20,8 @@ export type PointSpec = Common & {
   positions: Coords[];
   size: number;
   color: RGBA;
+  /** Drawn at each point; `null` when hidden or empty. */
+  label: string | null;
 };
 
 export type LineSpec = Common & {
@@ -30,6 +32,8 @@ export type LineSpec = Common & {
   start: boolean;
   end: boolean;
   arrowSize: number;
+  /** Drawn at the last point; `null` when hidden or empty. */
+  label: string | null;
 };
 
 export type SurfaceSpec = Common & {
@@ -63,6 +67,10 @@ export type AxisSpec = Common & {
   start: boolean;
   end: boolean;
   arrowSize: number;
+  range: [number, number];
+  ticks: { divisions: number; visible: boolean };
+  /** Drawn at the axis end; `null` when hidden or empty. */
+  label: string | null;
 };
 
 export type GridSpec = Common & {
@@ -92,6 +100,12 @@ export type CameraSpec = {
   position: Coords;
   target: Coords;
 };
+
+/** An item label's text when it should be drawn, else `null`. */
+export const visibleLabel = (
+  text: string,
+  visible: boolean | undefined,
+): string | null => (visible && text ? text : null);
 
 const DEFAULT_COLOR = "#3090ff";
 

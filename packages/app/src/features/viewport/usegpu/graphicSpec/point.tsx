@@ -6,21 +6,25 @@ import {
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
 import type { GraphicSpec } from "./types";
-import { parseColor } from "./types";
+import { parseColor, visibleLabel } from "./types";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";
 
-const POINT_PROPS = ["coords", "size", "opacity", "zBias", "zIndex"] as const;
+const POINT_PROPS = [
+  "coords",
+  "size",
+  "opacity",
+  "zBias",
+  "zIndex",
+  "labelVisible",
+] as const;
 
 const Point: SpecComponent<MIT.Point> = ({ item }) => {
   const scope = useMathScope();
   const visible = useFinalVisibility(scope, item);
-  const { coords, size, opacity, zBias, zIndex } = useMathItemResults(
-    scope,
-    item,
-    POINT_PROPS,
-  );
-  const { color } = item.properties;
+  const { coords, size, opacity, zBias, zIndex, labelVisible } =
+    useMathItemResults(scope, item, POINT_PROPS);
+  const { color, label } = item.properties;
   const spec = useMemo<GraphicSpec | null>(() => {
     if (!visible || !coords) return null;
     return {
@@ -30,8 +34,19 @@ const Point: SpecComponent<MIT.Point> = ({ item }) => {
       color: parseColor(color, opacity ?? 1),
       zBias: zBias ?? 0,
       zIndex: zIndex ?? 0,
+      label: visibleLabel(label, labelVisible),
     };
-  }, [visible, coords, size, color, opacity, zBias, zIndex]);
+  }, [
+    visible,
+    coords,
+    size,
+    color,
+    opacity,
+    zBias,
+    zIndex,
+    label,
+    labelVisible,
+  ]);
   useReportSpec(item.id, spec);
   return null;
 };

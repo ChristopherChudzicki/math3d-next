@@ -14,6 +14,7 @@ import {
   OrbitCamera,
   Pass,
 } from "@use-gpu/workbench";
+import type { FontSource } from "@use-gpu/workbench";
 import { ORBIT_CONTROLS_DEFAULT, OrbitControls } from "@use-gpu/interact";
 import { Cartesian, Plot } from "@use-gpu/plot";
 import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
@@ -48,6 +49,15 @@ const actionBindings = (controls: SceneSpec["controls"]) => ({
 
 const WHITE = [1, 1, 1, 1];
 
+const FONTS: FontSource[] = [
+  {
+    family: "Lato",
+    weight: "normal",
+    style: "normal",
+    src: "/fonts/Lato-Regular.ttf",
+  },
+];
+
 export const makeSceneRoot = (
   canvas: HTMLCanvasElement,
   scene: SceneSpec,
@@ -58,6 +68,7 @@ export const makeSceneRoot = (
   );
   // Plot's label support needs a font context even when nothing is labelled.
   const plot = use(FontLoader, {
+    fonts: FONTS,
     children: use(Plot, {
       children: use(Cartesian, {
         range: scene.range,

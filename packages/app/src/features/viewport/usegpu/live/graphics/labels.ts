@@ -1,0 +1,45 @@
+import { use } from "@use-gpu/live";
+import type { LiveElement } from "@use-gpu/live";
+import { Label } from "@use-gpu/plot";
+import type { Coords } from "@/features/viewport/shared/coordinates";
+
+/** Shared by every label. Without a `family`, labels render in Use.GPU's built-in fallback font. */
+export const LABEL_STYLE = {
+  family: "Lato",
+  size: 16,
+  color: [0, 0, 0, 1],
+  depth: 0,
+};
+
+/** MathBox's 40px above a point or line end. */
+export const ITEM_LABEL_OFFSET: [number, number] = [0, -40];
+
+/**
+ * Screen-space text centred at each position plus `offsetPx`. Use.GPU's
+ * label frame has +y down the screen (MathBox's is up).
+ */
+export const renderLabels = (
+  positions: Coords[],
+  text: string,
+  offsetPx: [number, number],
+  zBias: number,
+): LiveElement =>
+  use(Label, {
+    positions,
+    labels: positions.map(() => text),
+    placement: "center",
+    offset: offsetPx,
+    zBias,
+    ...LABEL_STYLE,
+  });
+
+/** `drawn`, plus `label` at `positions` when there is one. */
+export const withItemLabel = (
+  drawn: LiveElement,
+  positions: Coords[],
+  label: string | null,
+  zBias: number,
+): LiveElement =>
+  label === null
+    ? drawn
+    : [drawn, renderLabels(positions, label, ITEM_LABEL_OFFSET, zBias)];

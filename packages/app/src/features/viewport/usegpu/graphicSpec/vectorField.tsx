@@ -45,6 +45,7 @@ const VectorField: SpecComponent<MIT.VectorField> = ({ item }) => {
       kind: "line",
       paths: sampleVectorField(expr, domain, samples, scale),
       ...style,
+      label: null,
     };
   }, [visible, expr, domain, samples1, samples2, samples3, scale, style]);
   useReportSpec(item.id, spec);

@@ -16,3 +16,21 @@ test("a point reports its evaluated coordinates, color and zIndex", () => {
     zIndex: 3,
   });
 });
+
+test("a visible point label is its text", () => {
+  const scene = new SceneBuilder();
+  scene.folder().point({ labelVisible: "true", label: "P" }, "p");
+  expect(renderGraphicSpec(scene, "p")).toMatchObject({ label: "P" });
+});
+
+test("a point label is null unless labelVisible", () => {
+  const scene = new SceneBuilder();
+  scene.folder().point({ label: "P" }, "p");
+  expect(renderGraphicSpec(scene, "p")).toMatchObject({ label: null });
+});
+
+test("an empty point label is null", () => {
+  const scene = new SceneBuilder();
+  scene.folder().point({ labelVisible: "true", label: "" }, "p");
+  expect(renderGraphicSpec(scene, "p")).toMatchObject({ label: null });
+});
