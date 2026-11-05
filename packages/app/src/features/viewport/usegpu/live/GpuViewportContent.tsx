@@ -73,7 +73,7 @@ const useOrbit = (
       position,
       target,
       useRelative: !!useRelative,
-      updateOnDrag: updateOnDrag ?? true,
+      updateOnDrag: !!updateOnDrag,
     }),
     [camera.id, position, target, useRelative, updateOnDrag],
   );

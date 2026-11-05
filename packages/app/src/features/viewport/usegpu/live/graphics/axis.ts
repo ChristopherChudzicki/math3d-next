@@ -77,6 +77,7 @@ export const renderAxis = (spec: AxisSpec): LiveElement => [
     start: spec.start,
     end: spec.end,
     size: spec.arrowSize,
+    depth: 1,
     zBias: spec.zBias,
     mode: drawMode(spec.color),
   }),

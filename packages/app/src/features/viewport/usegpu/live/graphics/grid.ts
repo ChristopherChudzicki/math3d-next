@@ -10,6 +10,7 @@ export const renderGrid = (spec: GridSpec): LiveElement =>
     first: { divide: spec.divisions[0], nice: spec.snap },
     second: { divide: spec.divisions[1], nice: spec.snap },
     width: spec.width,
+    depth: 1,
     color: spec.color,
     zBias: spec.zBias,
     mode: drawMode(spec.color),

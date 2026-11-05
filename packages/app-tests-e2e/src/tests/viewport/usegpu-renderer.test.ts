@@ -28,6 +28,11 @@ test("?renderer=usegpu renders a canvas, or says WebGPU is unavailable", async (
   const viewport = page.getByTestId("scene");
   if (hasGpu) {
     await expect(viewport.locator("canvas")).toBeVisible();
+    // The canvas mounts before the adapter and device resolve, which can still fail.
+    await page.waitForTimeout(1500);
+    await expect(
+      viewport.getByRole("link", { name: "Use the default renderer" }),
+    ).toHaveCount(0);
   } else {
     await expect(
       viewport.getByText("WebGPU is unavailable in this browser"),

@@ -53,9 +53,11 @@ const GpuViewport: React.FC<Props> = ({ className }) => {
   const loadCount = useAppSelector(select.loadCount);
   const [unsupported, setUnsupported] = useState(false);
   const onUnsupported = useCallback((error: unknown) => {
+    // A browser limitation, not an app error.
+    const message = error instanceof Error ? error.message : String(error);
     // eslint-disable-next-line no-console
-    console.error(error);
-    Sentry.captureException(error);
+    console.warn(error);
+    Sentry.captureMessage(`WebGPU unsupported: ${message}`, { level: "info" });
     setUnsupported(true);
   }, []);
 
