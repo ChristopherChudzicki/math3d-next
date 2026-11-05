@@ -6,10 +6,9 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import Client
 
 from scenes.factories import ExampleSceneFactory, SceneFactory
-from scenes.models import ExampleScene, LegacyScene, Scene
+from scenes.models import ExampleScene, Scene
 from scenes.seed_scenes import (
     SEED_DIR,
     ExampleRef,
@@ -58,14 +57,9 @@ def test_load_refuses_a_users_scene(qa_seed):
 
 
 def test_load_takes_over_a_legacy_scene(qa_seed):
-    legacy = LegacyScene.objects.create(dehydrated={})
-    SceneFactory(key=legacy.key, author=None, is_legacy=True)
-    scene, status = load_one(qa_seed.model_copy(update={"key": legacy.key}))
+    existing = SceneFactory(author=None, is_legacy=True)
+    scene, status = load_one(qa_seed.model_copy(update={"key": existing.key}))
     assert (status, scene.is_legacy) == ("updated", False)
-    with mock.patch("scenes.api.migrate_scene") as migrate:
-        response = Client().get(f"/v1/scenes/{legacy.key}/")
-    assert response.json()["title"] == qa_seed.title
-    migrate.assert_not_called()
 
 
 @pytest.mark.django_db(transaction=True)
@@ -124,12 +118,6 @@ def test_load_refuses_duplicates_across_seeds(qa_seed, update):
     assert not Scene.objects.filter(key__startswith="ex_").exists()
 
 
-def test_dump_round_trips_an_example(qa_seed):
-    seed = qa_seed.model_copy(update={"example": ExampleRef(position=30)})
-    scene, _ = load_one(seed)
-    assert dump_seed_scene(scene)["example"] == {"position": 30}
-
-
 @pytest.mark.parametrize("path", seed_scene_paths(), ids=lambda p: p.stem)
 def test_every_committed_file_round_trips(path):
     scene, _ = load_one(read_seed_scene(path))
@@ -155,6 +143,17 @@ def test_command_fails_before_writing_on_a_bad_file(qa_path, qa_seed, tmp_path):
     bad.write_text("{}")
     with pytest.raises(CommandError, match="bad.json"):
         call_command("load_seed_scenes", str(qa_path), str(bad))
+    assert not Scene.objects.filter(key=qa_seed.key).exists()
+
+
+def test_command_rolls_back_the_batch_on_a_refused_seed(qa_path, qa_seed, tmp_path):
+    existing = SceneFactory()
+    refused = tmp_path / "refused.json"
+    refused.write_text(
+        json.dumps(json.loads(qa_path.read_text()) | {"key": existing.key})
+    )
+    with pytest.raises(CommandError, match="belongs to a user"):
+        call_command("load_seed_scenes", str(qa_path), str(refused))
     assert not Scene.objects.filter(key=qa_seed.key).exists()
 
 

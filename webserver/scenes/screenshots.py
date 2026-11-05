@@ -125,6 +125,14 @@ def maybe_render(key: str, version: str) -> RenderOutcome:
         return RenderOutcome.ERROR
 
 
+def save_content_change(scene: Scene) -> None:
+    """Save after an items/item_order edit: moves the screenshot version and
+    schedules a render. A title or archived edit saves plainly instead."""
+    scene.content_modified_date = timezone.now()
+    scene.save()
+    schedule_render(scene)
+
+
 def schedule_render(scene: Scene) -> None:
     """Fire maybe_render after the surrounding DB work commits.
 

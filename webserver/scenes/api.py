@@ -2,7 +2,6 @@ import logging
 
 from django.db.models import F
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from ninja import Query, Router, Status
 from ninja.errors import HttpError
 from ninja.pagination import LimitOffsetPagination, paginate
@@ -20,7 +19,7 @@ from scenes.schemas import (
     ScenePatchSchema,
     SceneSchema,
 )
-from scenes.screenshots import schedule_render
+from scenes.screenshots import save_content_change, schedule_render
 
 logger = logging.getLogger(__name__)
 
@@ -127,12 +126,10 @@ def update_scene(request, key: str, payload: ScenePatchSchema):
         scene.archived = data["archived"]
     # Only content edits change the rendered PNG; a title/archived-only patch
     # must not burn a render slot (bulk archive/rename would drain the cap).
-    content_changed = bool(data.keys() & {"items", "item_order"})
-    if content_changed:
-        scene.content_modified_date = timezone.now()
-    scene.save()
-    if content_changed:
-        schedule_render(scene)
+    if data.keys() & {"items", "item_order"}:
+        save_content_change(scene)
+    else:
+        scene.save()
     return scene
 
 

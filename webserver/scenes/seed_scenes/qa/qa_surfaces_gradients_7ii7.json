@@ -1,6 +1,6 @@
 {
   "key": "qa_surfaces_gradients_7ii7",
-  "title": "QA: colour gradients and gridlines",
+  "title": "QA: color gradients and gridlines",
   "items": [
     {
       "id": "cameraFolder",
@@ -73,7 +73,7 @@
         "zIndex": "0",
         "zBias": "0",
         "zOrder": "",
-        "label": "x",
+        "label": "y",
         "labelVisible": "true",
         "min": "-5",
         "max": "+5",
@@ -100,7 +100,7 @@
         "zIndex": "0",
         "zBias": "0",
         "zOrder": "",
-        "label": "x",
+        "label": "z",
         "labelVisible": "true",
         "min": "-5",
         "max": "+5",

@@ -9,17 +9,17 @@ scene per graphical feature for checking the renderers against each other;
 - `./manage.py load_seed_scenes` upserts `qa/*.json` and `examples/*.json` by
   `key`; `seed_test_data` calls it, so CI and a fresh dev database have them.
 - From a worktree: `scripts/manage_worktree.sh load_seed_scenes`.
-- In production, `heroku run ./manage.py load_seed_scenes` after a deploy that
-  changes these files. It is not in the `release:` phase, so a refused load
-  can never block a deploy.
-- Open a scene at `http://math3d.localhost:3000/<key>`. Once a second renderer
-  exists, the same key in two tabs with different `?renderer=` is the
-  side-by-side comparison.
+- In production, after a deploy that changes these files:
+  `heroku run ./manage.py load_seed_scenes scenes/seed_scenes/examples/*.json`.
+  Only the examples: a QA scene would just spend a render slot there. It is not
+  in the `release:` phase, so a refused load can never block a deploy.
+- Open a scene at `http://math3d.localhost:3000/<key>`; the same key in two
+  tabs is the side-by-side comparison once there are two renderers.
 
 ## File format
 
-The public scene API's shape plus `key`; `dump_seed_scene` writes the keys in
-this order:
+The public scene API's shape plus `key`, keys in this order (the round-trip
+test checks it):
 
 ```json
 { "key": "qa_points_JdnA", "title": "QA: points", "items": [...], "itemOrder": {...} }
@@ -34,11 +34,7 @@ The loader refuses a key that belongs to a user's scene, and takes over a
 legacy scene: the file becomes its content, it stops being legacy, and
 `GET /v1/scenes/{key}/` no longer re-translates it. QA keys are
 `qa_<feature>_<4 chars from KEY_ALPHABET>`, e.g. `qa_points_JdnA`; the random
-tail keeps clear of legacy keys, so a QA scene never takes one over. A tail:
-
-```bash
-uv run ./manage.py shell -c "from scenes.models import _random_key; print(_random_key(4))"
-```
+tail keeps clear of legacy keys, so a QA scene never takes one over.
 
 ## Authoring or updating a scene
 
@@ -67,19 +63,6 @@ scene in the list, so remove it in the admin. The loader stops on a position
 that two examples claim: two seed files, or a seed file and an example that
 has none (move or remove that one in the admin).
 
-Exporting the current production list, from a shell with access to it:
-
-```bash
-set -o pipefail
-API=https://<the production API origin>
-mkdir -p webserver/scenes/seed_scenes/examples
-curl -s "$API/v1/examples/scenes/?limit=100" | jq -r '.items[].key' |
-  nl -v0 | while read -r i key; do
-    curl -s "$API/v1/scenes/$key/" |
-      jq --argjson p "$((10 * (i + 1)))" '{key, title, items, itemOrder, example: {position: $p}}' \
-      > "webserver/scenes/seed_scenes/examples/$key.json"
-  done
-```
-
 The examples are legacy scenes; loading the files takes them over (above), so
 reviewing a file in git is the visual audit that ends its legacy status.
+`migrate_legacy_data` skips taken-over scenes unless told `--force`.

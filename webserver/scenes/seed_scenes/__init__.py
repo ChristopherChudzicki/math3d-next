@@ -10,14 +10,13 @@ from typing import Literal
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.utils import timezone
 from ninja import Field, Schema
 from pydantic import ConfigDict, field_validator
 
 from scenes.models import SCENE_KEY_VALIDATOR, ExampleScene, Scene
 from scenes.schemas.math_items import MathItem
 from scenes.schemas.scenes import SceneTitle
-from scenes.screenshots import schedule_render
+from scenes.screenshots import save_content_change, schedule_render
 
 SEED_DIR = Path(__file__).parent
 SEED_SUBDIRS = ("qa", "examples")
@@ -156,12 +155,9 @@ def _load_scene(seed: SeedScene) -> tuple[Scene, LoadStatus]:
     scene.item_order = seed.item_order
     scene.is_legacy = False
     if content_changed:
-        # screenshot_version derives from this date; as in update_scene, only
-        # a content change moves it.
-        scene.content_modified_date = timezone.now()
-    scene.save()
-    if content_changed:
-        schedule_render(scene)
+        save_content_change(scene)
+    else:
+        scene.save()
     return scene, "updated"
 
 
@@ -173,7 +169,7 @@ def _place_examples(placements: list[tuple[Scene, ExampleRef | None]]) -> None:
         .exclude(scene__in=scenes)
         .select_related("scene")
     )
-    for example in taken:
+    if (example := taken.first()) is not None:
         raise ValidationError(
             f"Example position {example.position} is held by scene "
             f"{example.scene.key!r}, which has no seed file; move or remove it "
