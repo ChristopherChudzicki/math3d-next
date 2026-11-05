@@ -671,6 +671,11 @@ def test_vector():
     assert expected_out == actual_out
 
 
+def vector_field_domain(z: str) -> dict:
+    default = {"expr": "\\left[-5,\\ 5\\right]", "type": "expr"}
+    return {"items": [default, default, {"expr": z, "type": "expr"}], "type": "array"}
+
+
 @pytest.mark.parametrize(
     ("in_patch", "out_patch"),
     [
@@ -716,6 +721,21 @@ def test_vector():
                 "samples1": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[1\\right]",
                 "samples2": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[2\\right]",
                 "samples3": "\\left(n\\cdot\\left[1,1,1\\right]\\right)\\left[3\\right]",
+            },
+        ),
+        # math3d-react draws a 0 count as one layer at the range's first bound.
+        (
+            {"samples": "[10, 10, 0]", "rangeZ": "\\left[5,\\ 1\\right]"},
+            {
+                "samples3": "1",
+                "domain": vector_field_domain(z="\\left[5,5\\right]"),
+            },
+        ),
+        (
+            {"samples": "[10, 10, 0]", "rangeZ": "R"},
+            {
+                "samples3": "0",
+                "domain": vector_field_domain(z="R"),
             },
         ),
     ],

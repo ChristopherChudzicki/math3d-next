@@ -298,5 +298,16 @@ def test_vector_field_samples_split_into_components():
     assert (got["samples1"], got["samples2"], got["samples3"]) == ("n", "2", "5")
 
 
+def test_vector_field_zero_samples_become_one_over_the_first_bound():
+    field = {
+        **rehydrated("VECTOR_FIELD"),
+        "samples": "[10, 10, 0]",
+        "rangeZ": "\\left[5,\\ 1\\right]",
+    }
+    got = values(field)
+    assert got["samples3"] == "1"
+    assert got["domain.items.2.expr"] == "\\left[5,5\\right]"
+
+
 def test_blank_z_index_becomes_zero():
     assert values({**rehydrated("GRID"), "zIndex": ""})["zIndex"] == "0"

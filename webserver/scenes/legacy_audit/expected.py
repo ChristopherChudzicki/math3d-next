@@ -815,12 +815,24 @@ def _vector_field(item: dict, ctx: Context) -> list[Expectation]:
     out = _Out()
     _universal(out, item)
     _line_like(out, item)
-    out.expr_domain(item, ("rangeX", "rangeY", "rangeZ"))
-    out.func_assignment("expr", item.get("expr"), "expr")
-    out.add("scale", _text(item.get("scale")), "render", "scale")
     # One 3-vector of sample counts (react:components/MathBox/MathBoxComponents.js:1477-1491)
     # becomes three fields (next:app/src/features/viewport/mathbox/graphics/VectorField.tsx:73-76).
     parts = _split_vector(item.get("samples"))
+    # math3d-react draws a 0 count as one layer at the range's first bound a
+    # (react:components/MathBox/MathBoxComponents.js:1424-1431); next centers a
+    # lone sample (next:app/src/features/viewport/mathbox/graphics/VectorField.tsx:30-33),
+    # so a literal 0 becomes 1 over [a, a]; owner decision 2026-11-04
+    # (tk-legacy-vector-fields-with-0-samples-in-a-directi-f57cfc).
+    ranges = dict(item)
+    if parts is not None and len(parts) == 3:
+        for i, prop in enumerate(("rangeX", "rangeY", "rangeZ")):
+            bounds = _split_vector(item.get(prop))
+            if parts[i] == "0" and bounds is not None and len(bounds) == 2:
+                parts[i] = "1"
+                ranges[prop] = f"\\left[{bounds[0]},{bounds[0]}\\right]"
+    out.expr_domain(ranges, ("rangeX", "rangeY", "rangeZ"))
+    out.func_assignment("expr", item.get("expr"), "expr")
+    out.add("scale", _text(item.get("scale")), "render", "scale")
     for i in range(3):
         value: str | NeedsEval
         if parts is not None and len(parts) == 3:

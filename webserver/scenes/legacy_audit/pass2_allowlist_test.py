@@ -28,3 +28,34 @@ def test_only_a_lone_point_with_a_nonreal_coordinate_is_allowlisted(
     )
     assert pair.outcome == "regression"
     assert any(entry.matches(pair) for entry in ALLOWLIST) == allowlisted
+
+
+@pytest.mark.parametrize(
+    ("legacy", "next_", "allowlisted"),
+    [
+        ([[-5, 5], [-5, 5], [5, 1]], [[-5, 5], [-5, 5], [5, 5]], True),
+        # The last bound, not the first: not the translator's flattening.
+        ([[-5, 5], [-5, 5], [5, 1]], [[-5, 5], [-5, 5], [1, 1]], False),
+    ],
+)
+def test_only_a_vector_field_range_flattened_to_its_first_bound_is_allowlisted(
+    legacy, next_, allowlisted
+):
+    pair = label(
+        spec(item_type="VECTOR_FIELD", next_field="domain"),
+        Side(OK, legacy),
+        Side(OK, next_),
+        TOL,
+    )
+    assert pair.outcome == "differ"
+    assert any(entry.matches(pair) for entry in ALLOWLIST) == allowlisted
+
+
+def test_a_vector_field_zero_count_written_as_one_is_allowlisted():
+    pair = label(
+        spec(item_type="VECTOR_FIELD", next_field="samples3"),
+        Side(OK, 0),
+        Side(OK, 1),
+        TOL,
+    )
+    assert any(entry.matches(pair) for entry in ALLOWLIST)

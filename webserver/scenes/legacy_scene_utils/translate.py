@@ -273,6 +273,17 @@ class ItemMigrator:
         return first, second, third
 
     @staticmethod
+    def flatten_zero_samples(count: str, range_: str) -> tuple[str, str]:
+        """Translate a 0 count to 1 over `[a, a]`, `a` being the range's first
+        bound. math3d-react draws a 0 count as one layer at `a`; math3d-next
+        centers a lone sample, so the flat range keeps it there."""
+        parts = split_top_level(range_)
+        if count != "0" or parts is None or len(parts) != 2:
+            return count, range_
+        first = parts[0].replace("\\ ", " ").strip()
+        return "1", f"\\left[{first},{first}\\right]"
+
+    @staticmethod
     def z_index(x) -> str:
         """A blank zIndex becomes "0", MathBox's default, so saved scenes say
         it explicitly (owner decision, 2026-10-24)."""
@@ -616,7 +627,10 @@ class ItemMigrator:
 
     def translate_vector_field(self, props) -> VectorFieldProperties:
         x = self.legacy(old.VectorFieldProperties, props)
-        samples1, samples2, samples3 = self.vector_field_samples(x.samples)
+        counts = self.vector_field_samples(x.samples)
+        samples1, range_x = self.flatten_zero_samples(counts[0], x.rangeX)
+        samples2, range_y = self.flatten_zero_samples(counts[1], x.rangeY)
+        samples3, range_z = self.flatten_zero_samples(counts[2], x.rangeZ)
         return VectorFieldProperties(
             color=x.color,
             description=x.description,
@@ -625,15 +639,15 @@ class ItemMigrator:
                 items=[
                     ExprObj(
                         type="expr",
-                        expr=x.rangeX,
+                        expr=range_x,
                     ),
                     ExprObj(
                         type="expr",
-                        expr=x.rangeY,
+                        expr=range_y,
                     ),
                     ExprObj(
                         type="expr",
-                        expr=x.rangeZ,
+                        expr=range_z,
                     ),
                 ],
             ),
