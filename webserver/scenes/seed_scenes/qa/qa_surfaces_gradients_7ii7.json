@@ -219,8 +219,8 @@
         "colorExpr": {
           "type": "function-assignment",
           "name": "_f",
-          "params": ["X", "Y", "Z", "x", "y"],
-          "rhs": "mod(Z, 1)"
+          "params": ["x", "y", "z"],
+          "rhs": "mod(z, 1)"
         },
         "gridOpacity": "1",
         "gridWidth": "4",
@@ -270,8 +270,8 @@
         "colorExpr": {
           "type": "function-assignment",
           "name": "_f",
-          "params": ["X", "Y", "Z", "u", "v"],
-          "rhs": "(X+3)/6"
+          "params": ["x", "y", "z", "u", "v"],
+          "rhs": "(x+3)/6"
         },
         "gridOpacity": "0.2",
         "gridWidth": "1",

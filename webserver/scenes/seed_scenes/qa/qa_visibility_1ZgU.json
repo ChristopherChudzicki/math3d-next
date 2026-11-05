@@ -257,8 +257,8 @@
         "colorExpr": {
           "type": "function-assignment",
           "name": "_f",
-          "params": ["X", "Y", "Z", "x", "y"],
-          "rhs": "mod(Z, 1)"
+          "params": ["x", "y", "z"],
+          "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)"
         },
         "gridOpacity": "0",
         "gridWidth": "2",
@@ -308,8 +308,8 @@
         "colorExpr": {
           "type": "function-assignment",
           "name": "_f",
-          "params": ["X", "Y", "Z", "x", "y"],
-          "rhs": "mod(Z, 1)"
+          "params": ["x", "y", "z"],
+          "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)"
         },
         "gridOpacity": "0",
         "gridWidth": "2",
@@ -359,8 +359,8 @@
         "colorExpr": {
           "type": "function-assignment",
           "name": "_f",
-          "params": ["X", "Y", "Z", "x", "y"],
-          "rhs": "mod(Z, 1)"
+          "params": ["x", "y", "z"],
+          "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)"
         },
         "gridOpacity": "0",
         "gridWidth": "2",
