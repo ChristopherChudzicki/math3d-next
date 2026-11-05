@@ -19,8 +19,12 @@ type SurfaceDomain = {
 const domainMap = (domain: SurfaceDomain) => {
   const { order } = domain;
   const [fFirst, fSecond] = order.map((i) => domain.value[i]);
-  const [a1, a2] = fFirst(0);
-  const first = (U: number) => a1 + (a2 - a1) * U;
+  // Range functions run per sample, not when the map is built: MathBox builds
+  // it during render, where a throw would reach the route's error page.
+  const first = (U: number) => {
+    const [a1, a2] = fFirst(0);
+    return a1 + (a2 - a1) * U;
+  };
   const second = (U: number, V: number) => {
     const [b1, b2] = fSecond(first(U));
     return b1 + (b2 - b1) * V;

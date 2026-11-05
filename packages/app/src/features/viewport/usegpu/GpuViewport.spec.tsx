@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { MemoryRouter, useLocation } from "react-router";
 import user from "@testing-library/user-event";
@@ -39,10 +39,14 @@ const LocationProbe = () => {
   return <output aria-label="location">{`${pathname}${search}`}</output>;
 };
 
-const renderViewport = () => {
+const loadScene = (store: ReturnType<typeof getStore>) => {
   const scene = new SceneBuilder();
-  const store = getStore();
   store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
+};
+
+const renderViewport = () => {
+  const store = getStore();
+  loadScene(store);
   render(
     <Provider store={store}>
       <MemoryRouter initialEntries={["/abc?renderer=usegpu&controls=0"]}>
@@ -51,6 +55,7 @@ const renderViewport = () => {
       </MemoryRouter>
     </Provider>,
   );
+  return { store };
 };
 
 afterEach(() => {
@@ -87,15 +92,19 @@ test("when the renderer reports WebGPU unsupported it says so and reports why", 
   expect(Sentry.captureException).toHaveBeenCalledWith(noAdapter);
 });
 
-test("when the renderer fails to load it says so in the viewport", async () => {
+test("when the renderer throws it says so in the viewport until another scene loads", async () => {
   vi.spyOn(console, "error").mockImplementation(() => {});
   Object.defineProperty(navigator, "gpu", { value: {}, configurable: true });
   content.Component = FailsToLoad;
-  renderViewport();
+  const { store } = renderViewport();
   expect(
-    await screen.findByText(/The Use.GPU renderer failed to load/),
+    await screen.findByText(/The Use.GPU renderer stopped on an error/),
   ).toBeInTheDocument();
   expect(
     screen.getByRole("link", { name: "Use the default renderer" }),
   ).toBeInTheDocument();
+
+  content.Component = content.RendersNothing;
+  act(() => loadScene(store));
+  expect(screen.queryByText(/stopped on an error/)).not.toBeInTheDocument();
 });

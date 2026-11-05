@@ -7,6 +7,8 @@ import React, { Suspense, useCallback, useState } from "react";
 import { useLocation } from "react-router";
 import * as Sentry from "@sentry/react";
 import TextLink from "@/ui/TextLink";
+import { useAppSelector } from "@/store/hooks";
+import * as select from "@/store/scene/state/selectors";
 import is3dDisabled from "@/features/viewport/shared/is3dDisabled";
 import { useHasViewportItems } from "@/features/viewport/shared/useViewportItems";
 
@@ -48,6 +50,7 @@ type Props = { className?: string };
 
 const GpuViewport: React.FC<Props> = ({ className }) => {
   const hasRequired = useHasViewportItems();
+  const loadCount = useAppSelector(select.loadCount);
   const [unsupported, setUnsupported] = useState(false);
   const onUnsupported = useCallback((error: unknown) => {
     // eslint-disable-next-line no-console
@@ -67,12 +70,14 @@ const GpuViewport: React.FC<Props> = ({ className }) => {
       );
     }
     if (!hasRequired) return null;
-    // A failed chunk or .wasm load throws here; past this boundary it would
-    // replace the whole editor with the route's error page.
+    // A failed chunk or .wasm load, or a render error, throws here; past this
+    // boundary it would replace the whole editor with the route's error page.
+    // Loading another scene remounts it, clearing the error.
     return (
       <Sentry.ErrorBoundary
+        key={loadCount}
         fallback={
-          <Unavailable>The Use.GPU renderer failed to load.</Unavailable>
+          <Unavailable>The Use.GPU renderer stopped on an error.</Unavailable>
         }
       >
         <Suspense fallback={null}>
