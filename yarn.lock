@@ -1654,6 +1654,41 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lezer/common@npm:1.2.1":
+  version: 1.2.1
+  resolution: "@lezer/common@npm:1.2.1"
+  checksum: 10/b362ed2e97664e4b36b3dbff49b52d1bfc5accc0152b577fefd46e585d012ff685d1fd336d75d80066e01c0505b1135d4cf69be5e330b5bfec2e2650c437bcae
+  languageName: node
+  linkType: hard
+
+"@lezer/common@npm:^1.0.0, @lezer/common@npm:^1.1.0":
+  version: 1.5.5
+  resolution: "@lezer/common@npm:1.5.5"
+  checksum: 10/b20f2ec34e729780821c4beec726ee0556a434702773e714cba77a0efc5d6c1c1fb7eb90c3d0a38514e679556a117a21bae855cd4e7f204eeeb0ed4e0d0caf97
+  languageName: node
+  linkType: hard
+
+"@lezer/generator@npm:^1.8.1":
+  version: 1.8.1
+  resolution: "@lezer/generator@npm:1.8.1"
+  dependencies:
+    "@lezer/common": "npm:^1.1.0"
+    "@lezer/lr": "npm:^1.3.0"
+  bin:
+    lezer-generator: src/lezer-generator.cjs
+  checksum: 10/73ab404b59a16b11a9401981d12b559fa8565ef560014b4b716d4b70207f6e0162399c0643905528dc285e524593d76033ac5047c2c467f12d75d08e8f24b6bf
+  languageName: node
+  linkType: hard
+
+"@lezer/lr@npm:^1.3.0, @lezer/lr@npm:^1.4.2":
+  version: 1.4.12
+  resolution: "@lezer/lr@npm:1.4.12"
+  dependencies:
+    "@lezer/common": "npm:^1.0.0"
+  checksum: 10/1dada93114ffff0554a2f0f085d51e299ebb01dd3750dacd16683243aff32653fe8cd0f84370d82af7bde24c2b0dd7f8e826b43df2375ca37598d2d48929361a
+  languageName: node
+  linkType: hard
+
 "@math3d/api@workspace:^, @math3d/api@workspace:packages/api":
   version: 0.0.0-use.local
   resolution: "@math3d/api@workspace:packages/api"
@@ -3365,6 +3400,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/command-line-args@npm:^5.2.3":
+  version: 5.2.3
+  resolution: "@types/command-line-args@npm:5.2.3"
+  checksum: 10/3d90db5b4bbaabd049654a0d12fa378989ab0d76a0f98d4c606761b5a08ce76458df0f9bb175219e187b4cd57e285e6f836d23e86b2c3d997820854cc3ed9121
+  languageName: node
+  linkType: hard
+
 "@types/deep-eql@npm:*":
   version: 4.0.2
   resolution: "@types/deep-eql@npm:4.0.2"
@@ -3977,6 +4019,199 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@use-gpu/core@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/core@npm:0.21.0"
+  dependencies:
+    "@use-gpu/math": "npm:^0.21.0"
+    "@use-gpu/state": "npm:^0.21.0"
+    earcut: "npm:^2.2.4"
+    gl-matrix: "npm:3.4.3"
+    lodash: "npm:^4.17.21"
+  checksum: 10/2b2bd41f07d7cead089ecb8da5ac444c898160665e23550cf768078a2790574f12aa3b98caf95b5224c8ed2c4885423c49ac44d3819fdd1cdf8ad8be20efa05d
+  languageName: node
+  linkType: hard
+
+"@use-gpu/frame@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/frame@npm:0.21.0"
+  dependencies:
+    "@use-gpu/core": "npm:^0.21.0"
+    "@use-gpu/live": "npm:^0.21.0"
+    "@use-gpu/math": "npm:^0.21.0"
+    "@use-gpu/parse": "npm:^0.21.0"
+    "@use-gpu/state": "npm:^0.21.0"
+    "@use-gpu/traits": "npm:^0.21.0"
+  checksum: 10/3db9d492e9d37c49bd6be6fac1266134eb2d9796a3e2f03a128628d2f4036f9019b22fa41e8e85a420eef856d0013b87985fdfbf4e339e5deb571a5e4cb3435b
+  languageName: node
+  linkType: hard
+
+"@use-gpu/glyph@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/glyph@npm:0.21.0"
+  dependencies:
+    "@use-gpu/state": "npm:^0.21.0"
+  checksum: 10/ac99d17f0ce8add0ff1fde3efe77848e904da5d4225ab0a9c5a64e19d41e38d94952f959663d5f581527906a17f4fa85b3042256d5bcd355b0cfbd859b8f26b2
+  languageName: node
+  linkType: hard
+
+"@use-gpu/interact@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/interact@npm:0.21.0"
+  dependencies:
+    "@use-gpu/frame": "npm:^0.21.0"
+    "@use-gpu/plot": "npm:^0.21.0"
+    "@use-gpu/workbench": "npm:^0.21.0"
+  checksum: 10/20c6fed5d07fce305901f7851119c367bef05cf986dfe0a42c528f585f447ad08aacc81802cd5162b1d8953e95f108147ff1521db71ab6f92e533c786051449e
+  languageName: node
+  linkType: hard
+
+"@use-gpu/live@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/live@npm:0.21.0"
+  checksum: 10/3cdbe7dc2f14a689d7da5cc0683017f567ba63b27ba8dfd3a66a25255c01712b602bc379474ecead498cd9ae658978e024ed8692ffda0960080c785636cd265d
+  languageName: node
+  linkType: hard
+
+"@use-gpu/math@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/math@npm:0.21.0"
+  checksum: 10/e7f6b5927b2213dd64d32f7f8f3138a40bd1dccb1f2511542184af2701621f0be361164a1cd98517c66661085a0dcd0b49e2eab94ac4e3d76f476277fb27e602
+  languageName: node
+  linkType: hard
+
+"@use-gpu/parse@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/parse@npm:0.21.0"
+  dependencies:
+    "@use-gpu/core": "npm:^0.21.0"
+    gl-matrix: "npm:3.4.3"
+  checksum: 10/0490412584a34073d0f3b13ab31fe418e0ac2c0d27405855dbfc3851eff686c0c8603b19c1154a7dbef11444d4e05c3ec6bb6b7f06c8da1e821f8e2ad2d0716f
+  languageName: node
+  linkType: hard
+
+"@use-gpu/plot@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/plot@npm:0.21.0"
+  dependencies:
+    "@use-gpu/core": "npm:^0.21.0"
+    "@use-gpu/frame": "npm:^0.21.0"
+    "@use-gpu/live": "npm:^0.21.0"
+    "@use-gpu/shader": "npm:^0.21.0"
+    "@use-gpu/workbench": "npm:^0.21.0"
+  checksum: 10/323a0633e0768c9ccf729d19879bc295c94673a6e3d0fcf6f8eee19d41883a2266273efba69adc01a34b41cfd900518ee430d84819b8d9fc2ac8c8fc2e4973ef
+  languageName: node
+  linkType: hard
+
+"@use-gpu/react@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/react@npm:0.21.0"
+  dependencies:
+    "@use-gpu/live": "npm:^0.21.0"
+  peerDependencies:
+    react: "*"
+    react-dom: "*"
+  checksum: 10/4dcab5fd3bd6ebb0c1fa61dd1c6673ca9b76e8b6adc37f3ea2b587777d15a0cf0313f48272e7fecb549b50c9500408358b83c77f201220072c77f380103e9797
+  languageName: node
+  linkType: hard
+
+"@use-gpu/shader@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/shader@npm:0.21.0"
+  dependencies:
+    "@lezer/common": "npm:1.2.1"
+    "@lezer/generator": "npm:^1.8.1"
+    "@lezer/lr": "npm:^1.4.2"
+    "@types/command-line-args": "npm:^5.2.3"
+    command-line-args: "npm:^6.0.0"
+    glob: "npm:^13.0.0"
+    lodash: "npm:^4.17.21"
+    lru-cache: "npm:^6.0.0"
+    magic-string: "npm:^0.30.11"
+  bin:
+    shader2ts: bin/shader2ts.mjs
+  checksum: 10/72e3b4a6a7edb63faf9d1e8b4322b0367ea47b9fefea128588dd783765f31c96edd2a9d0d5ebfaa6dc4d53e01dd8516507a82ceb653e6e05db4a012d6cd1141d
+  languageName: node
+  linkType: hard
+
+"@use-gpu/state@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/state@npm:0.21.0"
+  checksum: 10/a6e465166c37b456ea2c48d69638be41372bb4bff2e72493c1fd5bfc3758a55f5cb0d4180f9eeebb8b64228b826ab64adaa3243e19ee2dac1f7c14b701b18260
+  languageName: node
+  linkType: hard
+
+"@use-gpu/traits@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/traits@npm:0.21.0"
+  dependencies:
+    "@use-gpu/live": "npm:^0.21.0"
+  checksum: 10/3a6b73f641dcb6138a216ad8ff11ff75a338b7da540e8f1643ede238b53a1af4c768e7dd9ca77c3d5380f70a6d53fa552199c1f6b998088e2e1873e9c13d087c
+  languageName: node
+  linkType: hard
+
+"@use-gpu/webgpu@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/webgpu@npm:0.21.0"
+  dependencies:
+    "@use-gpu/core": "npm:^0.21.0"
+    "@use-gpu/live": "npm:^0.21.0"
+    "@use-gpu/workbench": "npm:^0.21.0"
+  checksum: 10/557ff4b6db57944106e7157757a204796bb3879a3cc5e1083e707e94a4a207f69564a405f49224dfb36d573c55d0d4f2967a6e6e53248c476f8c3e4a4faa762e
+  languageName: node
+  linkType: hard
+
+"@use-gpu/wgsl@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/wgsl@npm:0.21.0"
+  checksum: 10/0a8d6359803194672d56f7dd43bc7c70d8a60dacb7578e4409ed250feed4dd59791b99ddfbc274f50c97e4a8e7d3a96d92daedaa4c6d6d231719b1a136ff5a8f
+  languageName: node
+  linkType: hard
+
+"@use-gpu/workbench@npm:0.21.0":
+  version: 0.21.0
+  resolution: "@use-gpu/workbench@npm:0.21.0"
+  dependencies:
+    "@use-gpu/core": "npm:^0.21.0"
+    "@use-gpu/frame": "npm:^0.21.0"
+    "@use-gpu/glyph": "npm:^0.21.0"
+    "@use-gpu/live": "npm:^0.21.0"
+    "@use-gpu/math": "npm:^0.21.0"
+    "@use-gpu/parse": "npm:^0.21.0"
+    "@use-gpu/shader": "npm:^0.21.0"
+    "@use-gpu/state": "npm:^0.21.0"
+    "@use-gpu/traits": "npm:^0.21.0"
+    "@use-gpu/wgsl": "npm:^0.21.0"
+    comlink: "npm:^4.4.1"
+    gl-matrix: "npm:3.4.3"
+    lodash: "npm:^4.17.21"
+    lru-cache: "npm:^6.0.0"
+  checksum: 10/a6cda9b42e4a4a02f3d235011dfa22ed56b746c86a4d78140c7fb408b908d3eeb396e3adbad3b40e42d15faa7aed01427ea57a25d6e4e2bb580ad1b39348bca1
+  languageName: node
+  linkType: hard
+
+"@use-gpu/workbench@patch:@use-gpu/workbench@npm%3A0.21.0#~/.yarn/patches/@use-gpu-workbench-npm-0.21.0-2d614b987d.patch":
+  version: 0.21.0
+  resolution: "@use-gpu/workbench@patch:@use-gpu/workbench@npm%3A0.21.0#~/.yarn/patches/@use-gpu-workbench-npm-0.21.0-2d614b987d.patch::version=0.21.0&hash=82026d"
+  dependencies:
+    "@use-gpu/core": "npm:^0.21.0"
+    "@use-gpu/frame": "npm:^0.21.0"
+    "@use-gpu/glyph": "npm:^0.21.0"
+    "@use-gpu/live": "npm:^0.21.0"
+    "@use-gpu/math": "npm:^0.21.0"
+    "@use-gpu/parse": "npm:^0.21.0"
+    "@use-gpu/shader": "npm:^0.21.0"
+    "@use-gpu/state": "npm:^0.21.0"
+    "@use-gpu/traits": "npm:^0.21.0"
+    "@use-gpu/wgsl": "npm:^0.21.0"
+    comlink: "npm:^4.4.1"
+    gl-matrix: "npm:3.4.3"
+    lodash: "npm:^4.17.21"
+    lru-cache: "npm:^6.0.0"
+  checksum: 10/c43933c5d3682b0598bd842c10f69498bde8904045fdf39ca3fd542d5e3de8c6a606909c440212eb36fe02dd8219a295f5a4f83a347f824fc46e3e42f2266ebd
+  languageName: node
+  linkType: hard
+
 "@vitejs/plugin-react@npm:^4.7.0":
   version: 4.7.0
   resolution: "@vitejs/plugin-react@npm:4.7.0"
@@ -4121,6 +4356,13 @@ __metadata:
   version: 1.1.1
   resolution: "@webcontainer/env@npm:1.1.1"
   checksum: 10/c3cd2c207bc2948dce91fa900aa1c6541832075021b720bda01043596359142bc7dd75670608aa7b6f5075d6ae63748a0f90b24e554e1a04ee69b968551eef66
+  languageName: node
+  linkType: hard
+
+"@webgpu/types@npm:^0.1.74":
+  version: 0.1.74
+  resolution: "@webgpu/types@npm:0.1.74"
+  checksum: 10/f927a5a7be39719d0fe1ee564fc1961a7063bac2170da18c01a9e775390ee027bc6b3cb2424a68fd0bf52329072a7458ad3d28d4e029ef19ffe59495065bc821
   languageName: node
   linkType: hard
 
@@ -4346,7 +4588,16 @@ __metadata:
     "@types/three": "npm:^0.146.0"
     "@types/tinycolor2": "npm:1.4.6"
     "@types/toposort": "npm:2.0.7"
+    "@use-gpu/core": "npm:0.21.0"
+    "@use-gpu/frame": "npm:0.21.0"
+    "@use-gpu/interact": "npm:0.21.0"
+    "@use-gpu/live": "npm:0.21.0"
+    "@use-gpu/plot": "npm:0.21.0"
+    "@use-gpu/react": "npm:0.21.0"
+    "@use-gpu/webgpu": "npm:0.21.0"
+    "@use-gpu/workbench": "patch:@use-gpu/workbench@npm%3A0.21.0#~/.yarn/patches/@use-gpu-workbench-npm-0.21.0-2d614b987d.patch"
     "@vitejs/plugin-react": "npm:^4.7.0"
+    "@webgpu/types": "npm:^0.1.74"
     classnames: "npm:2.5.1"
     concurrently: "npm:^9.2.5"
     eslint: "npm:^8.57.1"
@@ -4382,6 +4633,7 @@ __metadata:
     typescript: "npm:^5.9.3"
     use-long-press: "npm:^3.3.0"
     vite: "npm:^7.3.7"
+    vite-plugin-wasm: "npm:^3.6.0"
     vite-tsconfig-paths: "npm:^5.1.4"
     vitest: "npm:^4.1.12"
     wrangler: "npm:4.147.0"
@@ -4416,6 +4668,13 @@ __metadata:
   version: 5.3.2
   resolution: "aria-query@npm:5.3.2"
   checksum: 10/b2fe9bc98bd401bc322ccb99717c1ae2aaf53ea0d468d6e7aebdc02fac736e4a99b46971ee05b783b08ade23c675b2d8b60e4a1222a95f6e27bc4d2a0bfdcc03
+  languageName: node
+  linkType: hard
+
+"array-back@npm:^6.2.3":
+  version: 6.2.3
+  resolution: "array-back@npm:6.2.3"
+  checksum: 10/473739a493a2c1e5b5193e024f12042bb0a72c091711d8bfb966d6b4030f1703a5696a16f2477f11964e1d17294bf5d0b1a65a4f3f625d658d8c61581913553b
   languageName: node
   linkType: hard
 
@@ -5052,6 +5311,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"comlink@npm:^4.4.1":
+  version: 4.4.2
+  resolution: "comlink@npm:4.4.2"
+  checksum: 10/ecee53b5b4536b3aa3f7636c383f831e68fbc013def77665cc7fad873d72cfa23b994e1ec4b49e83e4e909c1089a03acae03a523e33a5e5ed938cdb613456434
+  languageName: node
+  linkType: hard
+
+"command-line-args@npm:^6.0.0":
+  version: 6.0.2
+  resolution: "command-line-args@npm:6.0.2"
+  dependencies:
+    array-back: "npm:^6.2.3"
+    find-replace: "npm:^5.0.2"
+    lodash.camelcase: "npm:^4.3.0"
+    typical: "npm:^7.3.0"
+  peerDependencies:
+    "@75lb/nature": "*"
+  peerDependenciesMeta:
+    "@75lb/nature":
+      optional: true
+  checksum: 10/66b5fe60cb5365199077ae6f49e0decb1999475b622e1b201c60fcdb3923702fa9ce14223d3b66da39e7b1090eb3f8fce8161f11dd622ff8f4d27209aee6d3b2
+  languageName: node
+  linkType: hard
+
 "complex-esm@npm:^2.1.1-esm1":
   version: 2.1.1-esm1
   resolution: "complex-esm@npm:2.1.1-esm1"
@@ -5504,6 +5787,13 @@ __metadata:
     es-errors: "npm:^1.3.0"
     gopd: "npm:^1.2.0"
   checksum: 10/5add88a3d68d42d6e6130a0cac450b7c2edbe73364bbd2fc334564418569bea97c6943a8fcd70e27130bf32afc236f30982fc4905039b703f23e9e0433c29934
+  languageName: node
+  linkType: hard
+
+"earcut@npm:^2.2.4":
+  version: 2.2.4
+  resolution: "earcut@npm:2.2.4"
+  checksum: 10/ca8b24714cc2fa67f98fbca6ddcf64bb42ee8d75d0b4f1a81486b3282b0f7f1bf9ec49ad4d02149985886a0c8a03a173463f2acb1f51fa0bb7ba2e1d4aa1254d
   languageName: node
   linkType: hard
 
@@ -6516,6 +6806,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"find-replace@npm:^5.0.2":
+  version: 5.0.2
+  resolution: "find-replace@npm:5.0.2"
+  peerDependencies:
+    "@75lb/nature": "*"
+  peerDependenciesMeta:
+    "@75lb/nature":
+      optional: true
+  checksum: 10/d2cf7cbaa343a418960af1b9ed5c982aba966f101e834d2b37217f1962e7223c1bf0a21742b67381c92ab5c47ebd65dd334ee77ac5f6a9180741c691aa78fc8f
+  languageName: node
+  linkType: hard
+
 "find-up-json@npm:^2.0.2, find-up-json@npm:^2.0.5":
   version: 2.0.5
   resolution: "find-up-json@npm:2.0.5"
@@ -6758,6 +7060,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"gl-matrix@npm:3.4.3":
+  version: 3.4.3
+  resolution: "gl-matrix@npm:3.4.3"
+  checksum: 10/25ca2f7c762b7547cf462614ac7e0b98cffb131899f014e60a7e50395f4e9304efbb31dc73921e5af2a355cff663bee984d2710765f6730853e90d1c54d5d8e3
+  languageName: node
+  linkType: hard
+
 "glob-parent@npm:^5.1.2, glob-parent@npm:~5.1.2":
   version: 5.1.2
   resolution: "glob-parent@npm:5.1.2"
@@ -6792,7 +7101,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^13.0.1, glob@npm:^13.0.6":
+"glob@npm:^13.0.0, glob@npm:^13.0.1, glob@npm:^13.0.6":
   version: 13.0.6
   resolution: "glob@npm:13.0.6"
   dependencies:
@@ -7934,6 +8243,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.camelcase@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "lodash.camelcase@npm:4.3.0"
+  checksum: 10/c301cc379310441dc73cd6cebeb91fb254bea74e6ad3027f9346fc43b4174385153df420ffa521654e502fd34c40ef69ca4e7d40ee7129a99e06f306032bfc65
+  languageName: node
+  linkType: hard
+
 "lodash.merge@npm:^4.6.2":
   version: 4.6.2
   resolution: "lodash.merge@npm:4.6.2"
@@ -8002,6 +8318,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lru-cache@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "lru-cache@npm:6.0.0"
+  dependencies:
+    yallist: "npm:^4.0.0"
+  checksum: 10/fc1fe2ee205f7c8855fa0f34c1ab0bcf14b6229e35579ec1fd1079f31d6fc8ef8eb6fd17f2f4d99788d7e339f50e047555551ebd5e434dda503696e7c6591825
+  languageName: node
+  linkType: hard
+
 "lru-cache@npm:^7.14.1":
   version: 7.18.3
   resolution: "lru-cache@npm:7.18.3"
@@ -8018,7 +8343,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"magic-string@npm:^0.30.21, magic-string@npm:~0.30.8":
+"magic-string@npm:^0.30.11, magic-string@npm:^0.30.21, magic-string@npm:~0.30.8":
   version: 0.30.21
   resolution: "magic-string@npm:0.30.21"
   dependencies:
@@ -11273,6 +11598,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typical@npm:^7.3.0":
+  version: 7.3.0
+  resolution: "typical@npm:7.3.0"
+  checksum: 10/fae1e7dd0a127bdf940228ff89f6221cfdd3c1ceb2cf506fadd69b8c7aef6e8bbda98ca1026d63341e52a29393672c7e144c1d33c7d6eba93e4e17cd4710b40a
+  languageName: node
+  linkType: hard
+
 "unbox-primitive@npm:^1.1.0":
   version: 1.1.0
   resolution: "unbox-primitive@npm:1.1.0"
@@ -11521,6 +11853,15 @@ __metadata:
   version: 3.0.1
   resolution: "v8-compile-cache-lib@npm:3.0.1"
   checksum: 10/88d3423a52b6aaf1836be779cab12f7016d47ad8430dffba6edf766695e6d90ad4adaa3d8eeb512cc05924f3e246c4a4ca51e089dccf4402caa536b5e5be8961
+  languageName: node
+  linkType: hard
+
+"vite-plugin-wasm@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "vite-plugin-wasm@npm:3.6.0"
+  peerDependencies:
+    vite: ^2 || ^3 || ^4 || ^5 || ^6 || ^7 || ^8
+  checksum: 10/404e8aab51ba35db1599f84da53a1d123e158bd6f41ea1ce9000ab660af171c62d3ed305ae0366e593eb2201157917f0cfb1c287334abbb4690a3ad94aeae5b1
   languageName: node
   linkType: hard
 
@@ -12125,6 +12466,13 @@ __metadata:
   version: 3.1.1
   resolution: "yallist@npm:3.1.1"
   checksum: 10/9af0a4329c3c6b779ac4736c69fae4190ac03029fa27c1aef4e6bcc92119b73dea6fe5db5fe881fb0ce2a0e9539a42cdf60c7c21eda04d1a0b8c082e38509efb
+  languageName: node
+  linkType: hard
+
+"yallist@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "yallist@npm:4.0.0"
+  checksum: 10/4cb02b42b8a93b5cf50caf5d8e9beb409400a8a4d85e83bb0685c1457e9ac0b7a00819e9f5991ac25ffabb56a78e2f017c1acc010b3a1babfe6de690ba531abd
   languageName: node
   linkType: hard
 

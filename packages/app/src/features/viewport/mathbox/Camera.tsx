@@ -5,10 +5,11 @@ import invariant from "tiny-invariant";
 import { Vector3 } from "three";
 import { useMathItemResults } from "@/store/scene/evaluation/mathScope";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import type { AxesRange, Coords } from "./graphics/interfaces";
-import { project } from "./graphics/util";
+import { fromUi, toUi } from "@/features/viewport/shared/coordinates";
+import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
+import { cameraPatches } from "@/features/viewport/shared/cameraWriteBack";
+import type { CameraPatch } from "@/features/viewport/shared/cameraWriteBack";
 import { dolly, FOV_DOLLY_IN, FOV_DOLLY_OUT } from "./dollyZoom";
-import sameCoordinates from "./sameCoordinates";
 
 const { Controls } = MB.Threestrap;
 
@@ -27,13 +28,7 @@ type OnControlsChangeEnd = NonNullable<
   React.ComponentProps<typeof Controls>["onEnd"]
 >;
 
-type OnMoveEnd = ({
-  position,
-  target,
-}: {
-  position: [number, number, number];
-  target: [number, number, number];
-}) => void;
+type OnMoveEnd = (patches: CameraPatch[]) => void;
 
 const useCoordinates = ({
   range,
@@ -44,23 +39,13 @@ const useCoordinates = ({
   scale: [number, number, number];
   useRelative?: boolean;
 }) => {
-  const convert = useMemo(() => {
-    const threeJsRange: AxesRange = [
-      [-scale[0], scale[0]],
-      [-scale[1], scale[1]],
-      [-scale[2], scale[2]],
-    ];
-    return {
-      fromUi: (pos: Coords) => {
-        if (useRelative) return pos.map((p, i) => p * scale[i]) as Coords;
-        return project(pos, range, threeJsRange);
-      },
-      toUi: (pos: Coords) => {
-        if (useRelative) return pos.map((p, i) => p / scale[i]) as Coords;
-        return project(pos, threeJsRange, range);
-      },
-    };
-  }, [range, useRelative, scale]);
+  const convert = useMemo(
+    () => ({
+      fromUi: (pos: Coords) => fromUi(pos, range, scale, useRelative),
+      toUi: (pos: Coords) => toUi(pos, range, scale, useRelative),
+    }),
+    [range, useRelative, scale],
+  );
 
   return { convert };
 };
@@ -118,13 +103,11 @@ const Camera: React.FC<CameraProps> = ({ item, range, scale, onMoveEnd }) => {
         : cameraPosition;
       const newPosition = convert.toUi(withoutDollyZoom);
       const newTarget = convert.toUi(cameraTarget);
-      // A click on the scene ends a "move" that went nowhere; it isn't an edit.
-      const moved =
-        !position ||
-        !sameCoordinates(newPosition, position) ||
-        !sameCoordinates(newTarget, target ?? [0, 0, 0]);
-      if (!moved) return;
-      onMoveEnd?.({ position: newPosition, target: newTarget });
+      const patches = cameraPatches(
+        { position, target: target ?? [0, 0, 0] },
+        { position: newPosition, target: newTarget },
+      );
+      if (patches) onMoveEnd?.(patches);
     },
     [
       onMoveEnd,

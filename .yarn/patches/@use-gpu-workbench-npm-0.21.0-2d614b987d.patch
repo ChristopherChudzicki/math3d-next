@@ -1,0 +1,74 @@
+diff --git a/cjs/layers/dual-contour-layer.cjs b/cjs/layers/dual-contour-layer.cjs
+index 5dcfea4af363bfc59b1224e08e9480aa1ccd9ecc..2ef1de179ff9f361fad5161db51a0378cceb9484 100644
+--- a/cjs/layers/dual-contour-layer.cjs
++++ b/cjs/layers/dual-contour-layer.cjs
+@@ -53,7 +53,7 @@ const DualContourLayer = (0, _live.memo)((props)=>{
+     loopX = false,
+     loopY = false,
+     loopZ = false,
+-    */ live = false, alphaToCoverage = true, alphaToDiscard, side = 'both', mode = 'opaque', blend, transform } = props;
++    */ live = false, alphaToCoverage = true, alphaToDiscard, side = 'both', mode = 'opaque', blend, depthTest, depthWrite, transform } = props;
+     const size = (0, _useDataBinding.useDataSize)(props.size, props.values);
+     const hasPadding = !!padding;
+     const v = (0, _useShaderRef.useShaderRef)(null, values);
+@@ -232,8 +232,8 @@ const DualContourLayer = (0, _live.memo)((props)=>{
+         scissor: scissor || hasPadding,
+         alphaToCoverage,
+         alphaToDiscard,
+-        depthTest: true,
+-        depthWrite: true,
++        depthTest,
++        depthWrite,
+         blend
+     });
+     const defines = (0, _live.useMemo)(()=>({
+diff --git a/cjs/layers/dual-contour-layer.d.cts b/cjs/layers/dual-contour-layer.d.cts
+index e33a1abf4595d1d7ee9f460b4cb4f2fa868c7dcc..cb53d9a4dc0075278e0b62220bd95d3c473d7035 100644
+--- a/cjs/layers/dual-contour-layer.d.cts
++++ b/cjs/layers/dual-contour-layer.d.cts
+@@ -6,7 +6,7 @@ import { FacetSource } from '../primitives/hooks/facets.d.cts';
+ import { PickingSource } from '../primitives/hooks/picking.d.cts';
+ import { TransformContextProps } from '../providers/transform-provider.d.cts';
+ import { PipelineOptions } from '../hooks/usePipelineOptions.d.cts';
+-export type DualContourLayerFlags = Pick<PickingSource, 'id' | 'lookup'> & Pick<FacetSource, 'facet'> & Pick<Partial<PipelineOptions>, 'mode' | 'side' | 'shadow' | 'alphaToCoverage' | 'alphaToDiscard' | 'blend'>;
++export type DualContourLayerFlags = Pick<PickingSource, 'id' | 'lookup'> & Pick<FacetSource, 'facet'> & Pick<Partial<PipelineOptions>, 'mode' | 'side' | 'shadow' | 'depthTest' | 'depthWrite' | 'alphaToCoverage' | 'alphaToDiscard' | 'blend'>;
+ export type DualContourLayerProps = {
+     values: ShaderSource;
+     normals?: ShaderSource;
+diff --git a/mjs/layers/dual-contour-layer.d.mts b/mjs/layers/dual-contour-layer.d.mts
+index 3a17aea347f2b0d24957d13037b273d7a578f540..669a6420eb0ea2fba701a01c56ef465aa2ebb104 100644
+--- a/mjs/layers/dual-contour-layer.d.mts
++++ b/mjs/layers/dual-contour-layer.d.mts
+@@ -6,7 +6,7 @@ import { FacetSource } from '../primitives/hooks/facets.d.mts';
+ import { PickingSource } from '../primitives/hooks/picking.d.mts';
+ import { TransformContextProps } from '../providers/transform-provider.d.mts';
+ import { PipelineOptions } from '../hooks/usePipelineOptions.d.mts';
+-export type DualContourLayerFlags = Pick<PickingSource, 'id' | 'lookup'> & Pick<FacetSource, 'facet'> & Pick<Partial<PipelineOptions>, 'mode' | 'side' | 'shadow' | 'alphaToCoverage' | 'alphaToDiscard' | 'blend'>;
++export type DualContourLayerFlags = Pick<PickingSource, 'id' | 'lookup'> & Pick<FacetSource, 'facet'> & Pick<Partial<PipelineOptions>, 'mode' | 'side' | 'shadow' | 'depthTest' | 'depthWrite' | 'alphaToCoverage' | 'alphaToDiscard' | 'blend'>;
+ export type DualContourLayerProps = {
+     values: ShaderSource;
+     normals?: ShaderSource;
+diff --git a/mjs/layers/dual-contour-layer.mjs b/mjs/layers/dual-contour-layer.mjs
+index dc135af3b1550c9a0374f2ec5c1c26cf75a65f56..8e4b65fabdf73d38ecfd0fa0c3314a11f8454526 100644
+--- a/mjs/layers/dual-contour-layer.mjs
++++ b/mjs/layers/dual-contour-layer.mjs
+@@ -43,7 +43,7 @@ export const DualContourLayer = memo((props)=>{
+     loopX = false,
+     loopY = false,
+     loopZ = false,
+-    */ live = false, alphaToCoverage = true, alphaToDiscard, side = 'both', mode = 'opaque', blend, transform } = props;
++    */ live = false, alphaToCoverage = true, alphaToDiscard, side = 'both', mode = 'opaque', blend, depthTest, depthWrite, transform } = props;
+     const size = useDataSize(props.size, props.values);
+     const hasPadding = !!padding;
+     const v = useShaderRef(null, values);
+@@ -222,8 +222,8 @@ export const DualContourLayer = memo((props)=>{
+         scissor: scissor || hasPadding,
+         alphaToCoverage,
+         alphaToDiscard,
+-        depthTest: true,
+-        depthWrite: true,
++        depthTest,
++        depthWrite,
+         blend
+     });
+     const defines = useMemo(()=>({

@@ -5,7 +5,8 @@ import {
   useParams,
   useSearchParams,
 } from "react-router";
-import Viewport from "@/features/viewport/Viewport";
+import Viewport from "@/features/viewport/mathbox/Viewport";
+import GpuViewport from "@/features/viewport/usegpu/GpuViewport";
 import useSceneLoader from "@/app/useSceneLoader";
 import SceneControls from "@/features/editor/sidebar/SceneControls";
 import SliderAnimations from "@/features/editor/items/forms/VariableSlider/SliderAnimations";
@@ -65,6 +66,8 @@ const useSearchEnum = <T extends string>({
 };
 
 const CONTROLS_VALUES = ["0", "1"] as const;
+// `?renderer=usegpu` swaps MathBox for the Use.GPU (WebGPU) viewport.
+const RENDERER_VALUES = ["mathbox", "usegpu"] as const;
 
 const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
@@ -109,6 +112,12 @@ const MainPage: React.FC = () => {
     defaultValue: "1",
   });
   const controlsOpen = controlsVisibility === "1";
+  const [renderer] = useSearchEnum({
+    name: "renderer",
+    values: RENDERER_VALUES,
+    defaultValue: "mathbox",
+  });
+  const SceneViewport = renderer === "usegpu" ? GpuViewport : Viewport;
   const handleControlsClick = useCallback(
     (currentlyOpen: boolean) => {
       if (currentlyOpen) {
@@ -155,7 +164,7 @@ const MainPage: React.FC = () => {
               >
                 <SceneControls loading={sceneLoad.status === "loading"} />
               </Sidebar>
-              <Viewport
+              <SceneViewport
                 className={
                   controlsOpen
                     ? styles["scene-adjust-controls-open"]

@@ -13,8 +13,8 @@ scene per graphical feature for checking the renderers against each other;
   `heroku run ./manage.py load_seed_scenes scenes/seed_scenes/examples/*.json`.
   Only the examples: a QA scene would just spend a render slot there. It is not
   in the `release:` phase, so a refused load can never block a deploy.
-- Open a scene at `http://math3d.localhost:3000/<key>`; the same key in two
-  tabs is the side-by-side comparison once there are two renderers.
+- Open a scene at `http://math3d.localhost:3000/<key>`. To compare renderers,
+  open the same key in two tabs, one with `?renderer=usegpu` (WebGPU).
 
 ## File format
 

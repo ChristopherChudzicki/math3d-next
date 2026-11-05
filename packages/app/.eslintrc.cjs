@@ -39,6 +39,32 @@ const noParentImports = {
   message: "Import from outside this folder with an @/ path.",
 };
 
+// Use.GPU's runtime stays behind the one React.lazy in usegpu/GpuViewport, so
+// it never reaches the main bundle or jsdom tests (@use-gpu/wgsl's CommonJS
+// build is .js in a "type": "module" package). @use-gpu/core loads under jsdom.
+const useGpuRuntime = {
+  group: ["@use-gpu/*", "!@use-gpu/core"],
+  message: "Use.GPU's runtime loads only through usegpu/live (React.lazy).",
+};
+
+// ESLint overrides replace a rule's options rather than merging them, so every
+// override builds its pattern list here.
+const restrictedImports = ({
+  allowBaseUi = false,
+  allowParentImports = false,
+  allowUseGpu = false,
+} = {}) => ({
+  paths: [iconifyOnline],
+  patterns: [
+    ...(allowBaseUi ? [] : [baseUi]),
+    noMui,
+    ...(allowParentImports ? [] : [noParentImports]),
+    ...(allowUseGpu ? [] : [useGpuRuntime]),
+  ],
+});
+
+const VIEWPORT = "./src/features/viewport";
+
 const layoutZones = [
   ...features.map((feature) => ({
     target: `./src/features/${feature}`,
@@ -85,6 +111,33 @@ const layoutZones = [
       "The edge Worker runs in workerd; it imports only sceneTitle from the app.",
   },
   {
+    target: `${VIEWPORT}/mathbox`,
+    from: `${VIEWPORT}/usegpu`,
+    message: "The renderers don't import each other; share code via shared/.",
+  },
+  {
+    target: `${VIEWPORT}/usegpu`,
+    from: `${VIEWPORT}/mathbox`,
+    message: "The renderers don't import each other; share code via shared/.",
+  },
+  {
+    target: `${VIEWPORT}/shared`,
+    from: [`${VIEWPORT}/mathbox`, `${VIEWPORT}/usegpu`],
+    message: "viewport/shared serves both renderers and imports neither.",
+  },
+  {
+    // mathbox/, shared/ and other features are covered by the zones above.
+    target: [
+      "./src/app",
+      `${VIEWPORT}/*.{ts,tsx}`,
+      `${VIEWPORT}/usegpu/!(live)/**`,
+      `${VIEWPORT}/usegpu/*.{ts,tsx}`,
+    ],
+    from: `${VIEWPORT}/usegpu/live`,
+    message:
+      "Only usegpu/GpuViewport reaches usegpu/live, through its React.lazy.",
+  },
+  {
     target: "./src",
     from: "./vite-plugins",
     message: "vite-plugins is build-time Node code; the app never imports it.",
@@ -107,7 +160,7 @@ module.exports = {
     ],
     "no-restricted-imports": [
       "error",
-      { paths: [iconifyOnline], patterns: [baseUi, noMui] },
+      restrictedImports({ allowParentImports: true }),
     ],
     // Safari drops a <ul>'s list semantics under `list-style: none` unless
     // role="list" is explicit. nav/navigation is the rule's own default.
@@ -121,13 +174,7 @@ module.exports = {
       files: ["src/**"],
       excludedFiles: ["src/worker/**"],
       rules: {
-        "no-restricted-imports": [
-          "error",
-          {
-            paths: [iconifyOnline],
-            patterns: [baseUi, noMui, noParentImports],
-          },
-        ],
+        "no-restricted-imports": ["error", restrictedImports()],
       },
     },
     {
@@ -135,7 +182,16 @@ module.exports = {
       rules: {
         "no-restricted-imports": [
           "error",
-          { paths: [iconifyOnline], patterns: [noMui, noParentImports] },
+          restrictedImports({ allowBaseUi: true }),
+        ],
+      },
+    },
+    {
+      files: ["src/features/viewport/usegpu/live/**"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          restrictedImports({ allowUseGpu: true }),
         ],
       },
     },
