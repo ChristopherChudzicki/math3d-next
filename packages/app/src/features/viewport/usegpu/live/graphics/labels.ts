@@ -2,6 +2,10 @@ import { use } from "@use-gpu/live";
 import type { LiveElement } from "@use-gpu/live";
 import { Label } from "@use-gpu/plot";
 import type { Coords } from "@/features/viewport/shared/coordinates";
+import type { GraphicSpec } from "@/features/viewport/usegpu/graphicSpec/types";
+
+/** A graphic's depth bias and draw order, shared by its labels. */
+export type Layering = Pick<GraphicSpec, "zBias" | "zIndex">;
 
 /** Shared by every label. Without a `family`, labels render in Use.GPU's built-in fallback font. */
 export const LABEL_STYLE = {
@@ -22,7 +26,7 @@ export const renderLabels = (
   positions: Coords[],
   text: string,
   offsetPx: [number, number],
-  zBias: number,
+  { zBias, zIndex }: Layering,
 ): LiveElement =>
   use(Label, {
     positions,
@@ -30,6 +34,7 @@ export const renderLabels = (
     placement: "center",
     offset: offsetPx,
     zBias,
+    zIndex,
     ...LABEL_STYLE,
   });
 
@@ -38,8 +43,8 @@ export const withItemLabel = (
   drawn: LiveElement,
   positions: Coords[],
   label: string | null,
-  zBias: number,
+  layering: Layering,
 ): LiveElement =>
   label === null
     ? drawn
-    : [drawn, renderLabels(positions, label, ITEM_LABEL_OFFSET, zBias)];
+    : [drawn, renderLabels(positions, label, ITEM_LABEL_OFFSET, layering)];

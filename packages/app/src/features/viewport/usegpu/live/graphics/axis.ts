@@ -52,6 +52,7 @@ const renderTicks = (spec: AxisSpec): LiveElement =>
             placement: "center",
             offset: tickLabelOffset(spec.axis),
             zBias: spec.zBias,
+            zIndex: spec.zIndex,
             ...LABEL_STYLE,
           }),
         ],
@@ -65,7 +66,7 @@ const renderAxisLabel = (spec: AxisSpec): LiveElement =>
         [axisEnd(spec.axis, spec.range[1])],
         spec.label,
         LABEL_OFFSET,
-        spec.zBias,
+        spec,
       );
 
 export const renderAxis = (spec: AxisSpec): LiveElement => [

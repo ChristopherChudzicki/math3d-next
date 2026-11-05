@@ -1,6 +1,10 @@
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import type { CoverageTable } from "@/features/viewport/shared/coverage";
 
+// Use.GPU's zIndex sorts draw calls, which depth testing and OIT make invisible.
+const Z_INDEX_PULL = "MathBox also pulls a higher zIndex toward the camera";
+const Z_INDEX = `approximate: orders draw calls only; ${Z_INDEX_PULL}` as const;
+
 /** What the Use.GPU renderer does with each stored property. */
 export const coverage = {
   [MIT.Axis]: {
@@ -21,7 +25,7 @@ export const coverage = {
     width: "drawn",
     zBias:
       "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
-    zIndex: "todo",
+    zIndex: `approximate: orders label draw calls only; ${Z_INDEX_PULL}`,
     zOrder: "n/a: order-independent transparency",
     start: "drawn",
     end: "drawn",
@@ -40,7 +44,7 @@ export const coverage = {
     width: "drawn",
     zBias:
       "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
-    zIndex: "todo",
+    zIndex: `approximate: ignored, as Use.GPU's Grid takes no zIndex; ${Z_INDEX_PULL}`,
     zOrder: "n/a: order-independent transparency",
   },
   [MIT.Point]: {
@@ -53,7 +57,7 @@ export const coverage = {
     size: "drawn",
     zBias:
       "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
-    zIndex: "todo",
+    zIndex: Z_INDEX,
     zOrder: "n/a: order-independent transparency",
     visible: "drawn",
     calculatedVisibility: "drawn",
@@ -73,7 +77,7 @@ export const coverage = {
     width: "drawn",
     zBias:
       "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
-    zIndex: "todo",
+    zIndex: Z_INDEX,
     zOrder: "n/a: order-independent transparency",
     start: "drawn",
     end: "drawn",
@@ -93,7 +97,7 @@ export const coverage = {
     width: "drawn",
     zBias:
       "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
-    zIndex: "todo",
+    zIndex: Z_INDEX,
     zOrder: "n/a: order-independent transparency",
     start: "drawn",
     end: "drawn",
@@ -107,7 +111,7 @@ export const coverage = {
     useCalculatedVisibility: "drawn",
     zBias:
       "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
-    zIndex: "todo",
+    zIndex: Z_INDEX,
     zOrder: "n/a: order-independent transparency",
     size: "drawn",
     width: "drawn",
@@ -132,7 +136,7 @@ export const coverage = {
     width: "drawn",
     zBias:
       "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
-    zIndex: "todo",
+    zIndex: Z_INDEX,
     zOrder: "n/a: order-independent transparency",
     start: "drawn",
     end: "drawn",
@@ -158,7 +162,7 @@ export const coverage = {
     useCalculatedVisibility: "drawn",
     zBias:
       "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
-    zIndex: "todo",
+    zIndex: `approximate: orders gridline draw calls only; ${Z_INDEX_PULL}`,
     zOrder: "n/a: order-independent transparency",
   },
   [MIT.ExplicitSurface]: {
@@ -180,7 +184,7 @@ export const coverage = {
     useCalculatedVisibility: "drawn",
     zBias:
       "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
-    zIndex: "todo",
+    zIndex: `approximate: orders gridline draw calls only; ${Z_INDEX_PULL}`,
     zOrder: "n/a: order-independent transparency",
   },
   [MIT.ExplicitSurfacePolar]: {
@@ -202,7 +206,7 @@ export const coverage = {
     useCalculatedVisibility: "drawn",
     zBias:
       "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
-    zIndex: "todo",
+    zIndex: `approximate: orders gridline draw calls only; ${Z_INDEX_PULL}`,
     zOrder: "n/a: order-independent transparency",
   },
   [MIT.ImplicitSurface]: {
@@ -219,7 +223,7 @@ export const coverage = {
     rhs: "drawn",
     zBias:
       "approximate: Use.GPU's zBias units are not calibrated against MathBox's",
-    zIndex: "todo",
+    zIndex: `approximate: ignored, as Use.GPU's ImplicitSurface drops zIndex; ${Z_INDEX_PULL}`,
     zOrder: "n/a: order-independent transparency",
   },
   [MIT.Camera]: {

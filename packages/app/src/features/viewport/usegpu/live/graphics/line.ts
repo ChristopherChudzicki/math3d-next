@@ -11,6 +11,7 @@ const renderPath = (spec: LineSpec): LiveElement => {
     width: spec.width,
     color: spec.color,
     zBias: spec.zBias,
+    zIndex: spec.zIndex,
     mode: drawMode(spec.color),
   };
   return spec.start || spec.end
@@ -25,10 +26,5 @@ const renderPath = (spec: LineSpec): LiveElement => {
 
 export const renderLine = (spec: LineSpec): LiveElement => {
   const last = spec.paths.at(-1)?.at(-1);
-  return withItemLabel(
-    renderPath(spec),
-    last ? [last] : [],
-    spec.label,
-    spec.zBias,
-  );
+  return withItemLabel(renderPath(spec), last ? [last] : [], spec.label, spec);
 };
