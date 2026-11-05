@@ -52,26 +52,23 @@ class Command(BaseCommand):
             batch = batch.filter(key__in=options["filter"].split(","))
         elif options["limit"]:
             batch = batch[: options["limit"]]
-        keys = list(batch.values_list("key", flat=True))
-        taken_over = set(
-            Scene.objects.filter(is_legacy=False, key__in=keys).values_list(
-                "key", flat=True
-            )
-        )
+        taken_over = Scene.objects.filter(is_legacy=False, key__in=batch.values("key"))
+        n_taken_over = taken_over.count()
+        legacy_scenes = LegacyScene.objects.filter(pk__in=batch.values("pk"))
         if options["force"] is None:
-            keys = [key for key in keys if key not in taken_over]
-            if taken_over:
+            legacy_scenes = legacy_scenes.exclude(key__in=taken_over.values("key"))
+            if n_taken_over:
                 self.stdout.write(
-                    f"Skipping {len(taken_over)} taken-over scenes (--force "
-                    f"{len(taken_over)} re-translates them)."
+                    f"Skipping {n_taken_over} taken-over scenes (--force "
+                    f"{n_taken_over} re-translates them)."
                 )
-        elif options["force"] != len(taken_over):
+        elif options["force"] != n_taken_over:
             raise CommandError(
-                f"--force {options['force']} does not match: {len(taken_over)} "
+                f"--force {options['force']} does not match: {n_taken_over} "
                 "taken-over scenes would be overwritten. Pass --force "
-                f"{len(taken_over)} to confirm."
+                f"{n_taken_over} to confirm."
             )
-        legacy_scenes = LegacyScene.objects.filter(key__in=keys).order_by("id")
+        legacy_scenes = legacy_scenes.order_by("id")
 
         problems: list[tuple[str, str]] = []
         for legacy_scene in tqdm.tqdm(
