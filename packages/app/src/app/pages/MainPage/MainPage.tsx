@@ -31,6 +31,7 @@ import styles from "./MainPage.module.css";
 import Header from "./components/Header";
 import LegacyDialog from "./components/LegacyDialog";
 import LegacyBanner from "./components/LegacyBanner";
+import RendererPill from "./components/RendererPill";
 import SceneUnavailable from "./components/SceneUnavailable";
 import WebGpuNotice from "./components/WebGpuNotice";
 
@@ -196,14 +197,17 @@ const MainPage: React.FC = () => {
           )}
         </div>
         {unavailable ? null : <ToggleKeyboardButton />}
-        {sceneKey && isLegacy ? (
-          <LegacyDialog
-            sceneKey={sceneKey}
-            open={legacyDialogOpen}
-            onOpen={legacyDialog.on}
-            onClose={legacyDialog.off}
-          />
-        ) : null}
+        <div className={styles.corner}>
+          {unavailable ? null : <RendererPill />}
+          {sceneKey && isLegacy ? (
+            <LegacyDialog
+              sceneKey={sceneKey}
+              open={legacyDialogOpen}
+              onOpen={legacyDialog.on}
+              onClose={legacyDialog.off}
+            />
+          ) : null}
+        </div>
       </div>
     </BannersProvider>
   );
