@@ -1,12 +1,16 @@
+import { useEffect } from "react";
 import { test, expect, vi } from "vitest";
 import { HttpResponse, http } from "msw";
 import { onlineManager } from "@tanstack/react-query";
 import { server } from "@math3d/mock-api/node";
-import { seedDb, urls } from "@math3d/mock-api";
+import { makeItem, seedDb, urls } from "@math3d/mock-api";
+import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import {
   act,
   renderTestApp,
   screen,
+  storeRendererPreference,
+  stubWebGpu,
   user,
   waitFor,
   waitForAppReady,
@@ -16,10 +20,23 @@ import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
 import expectToast from "@/test_util/expectToast";
 import sceneSlice from "@/store/scene/state/scene.slice";
+import { findItemByTestId } from "@/test_util/mathItems";
 
 vi.mock("@sentry/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@sentry/react")>()),
   captureException: vi.fn(),
+  captureMessage: vi.fn(),
+}));
+
+type ContentProps = { onUnsupported: (error: unknown) => void };
+
+// Stands in for usegpu/live; a test swaps in how it behaves.
+const gpuContent = vi.hoisted(() => {
+  const RendersNothing = (_props: ContentProps): null => null;
+  return { Component: RendersNothing, RendersNothing };
+});
+vi.mock("@/features/viewport/usegpu/live/GpuViewportContent", () => ({
+  default: (props: ContentProps) => gpuContent.Component(props),
 }));
 
 test.each([
@@ -301,4 +318,97 @@ test("offline from the Scenes drawer toasts too", async () => {
   } finally {
     onlineManager.setOnline(true);
   }
+});
+
+const noDevice = new Error("no device");
+const ReportsNoDevice = ({ onUnsupported }: ContentProps) => {
+  useEffect(() => onUnsupported(noDevice), [onUnsupported]);
+  return null;
+};
+
+describe("renderer", () => {
+  const NOTICE =
+    "This link asks for the experimental WebGPU renderer, which this browser doesn't support. Showing the scene with the default renderer.";
+
+  afterEach(() => {
+    gpuContent.Component = gpuContent.RendersNothing;
+  });
+
+  test("a stored Use.GPU preference waits for detection, then draws Use.GPU", async () => {
+    storeRendererPreference("usegpu");
+    let resolveAdapter: (adapter: unknown) => void = () => {};
+    stubWebGpu(
+      () =>
+        new Promise((resolve) => {
+          resolveAdapter = resolve;
+        }),
+    );
+    const item = makeItem(MIT.Point);
+    const scene = seedDb.withSceneFromItems([item]);
+    renderTestApp(`/${scene.key}`);
+
+    await findItemByTestId(item.id);
+    expect(screen.queryByTestId("scene")).toBeNull();
+
+    await act(async () => resolveAdapter({}));
+    expect(await screen.findByTestId("scene")).toHaveAttribute(
+      "data-renderer",
+      "usegpu",
+    );
+  });
+
+  test("?renderer=usegpu without WebGPU draws MathBox and says so until the param goes", async () => {
+    const { router } = renderTestApp("/?renderer=usegpu");
+    expect(await screen.findByTestId("scene")).toHaveAttribute(
+      "data-renderer",
+      "mathbox",
+    );
+    expect(await screen.findByText(NOTICE)).toBeInTheDocument();
+
+    await act(() => router.navigate("/"));
+    expect(screen.getByTestId("scene")).toHaveAttribute(
+      "data-renderer",
+      "mathbox",
+    );
+    expect(screen.queryByText(NOTICE)).toBeNull();
+  });
+
+  test("a stored preference without WebGPU draws MathBox silently", async () => {
+    storeRendererPreference("usegpu");
+    renderTestApp("/");
+    expect(await screen.findByTestId("scene")).toHaveAttribute(
+      "data-renderer",
+      "mathbox",
+    );
+    expect(screen.queryByText(NOTICE)).toBeNull();
+  });
+
+  test("a device failure under a stored preference falls back to MathBox", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    storeRendererPreference("usegpu");
+    stubWebGpu();
+    gpuContent.Component = ReportsNoDevice;
+    renderTestApp("/");
+
+    await waitFor(() =>
+      expect(screen.getByTestId("scene")).toHaveAttribute(
+        "data-renderer",
+        "mathbox",
+      ),
+    );
+    expect(warn).toHaveBeenCalledWith(noDevice);
+    expect(screen.queryByText(NOTICE)).toBeNull();
+  });
+
+  test("an invalid ?renderer is logged and drawn as MathBox", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    renderTestApp("/?renderer=foo");
+    expect(await screen.findByTestId("scene")).toHaveAttribute(
+      "data-renderer",
+      "mathbox",
+    );
+    expect(error).toHaveBeenCalledWith(
+      "Invalid value foo for search parameter renderer",
+    );
+  });
 });

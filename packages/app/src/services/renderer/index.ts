@@ -12,7 +12,7 @@ export {
   setRendererPreference,
   useRendererPreference,
 } from "./rendererPreference";
-export { useRenderer } from "./useRenderer";
+export { RENDERER_PARAM, useRenderer } from "./useRenderer";
 export {
   RENDERER_SETTING_ID,
   focusRendererSetting,

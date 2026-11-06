@@ -161,6 +161,7 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
   return (
     <div
       data-testid="scene"
+      data-renderer="mathbox"
       data-scene-ready={still && warmedUp ? "true" : undefined}
       className={mergeClassNames(className, styles.viewport, {
         [styles.splashHidden]: warmedUp,

@@ -6,6 +6,7 @@ import chevronDown from "@iconify-icons/lucide/chevron-down";
 import menuIcon from "@iconify-icons/lucide/menu";
 import user from "@iconify-icons/lucide/user";
 import type { AuthStatus } from "@/services/auth/useAuthStatus";
+import { RENDERER_SETTING_ID } from "@/services/renderer";
 import styles from "./UserMenu.module.css";
 
 const UserMenu: React.FC<{
@@ -25,6 +26,7 @@ const UserMenu: React.FC<{
   // The menu takes its name from the trigger.
   const trigger = useHamburger ? (
     <Menu.Trigger
+      id={RENDERER_SETTING_ID}
       render={
         <IconButton label="Open Menu">
           <Icon icon={menuIcon} aria-hidden="true" />
@@ -33,6 +35,7 @@ const UserMenu: React.FC<{
     />
   ) : (
     <Menu.Trigger
+      id={RENDERER_SETTING_ID}
       render={
         <IconButton
           variant="solid"

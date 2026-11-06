@@ -13,6 +13,12 @@ import SliderAnimations from "@/features/editor/items/forms/VariableSlider/Slide
 import Sidebar from "@/ui/Sidebar";
 import { useBodyClass, useToggle } from "@/util/hooks";
 import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
+import {
+  RENDERER_PARAM,
+  isRenderer,
+  startWebGpuDetection,
+  useRenderer,
+} from "@/services/renderer";
 
 import ToggleKeyboardButton from "@/features/editor/virtualKeyboard/KeyboardControls";
 
@@ -26,6 +32,7 @@ import Header from "./components/Header";
 import LegacyDialog from "./components/LegacyDialog";
 import LegacyBanner from "./components/LegacyBanner";
 import SceneUnavailable from "./components/SceneUnavailable";
+import WebGpuNotice from "./components/WebGpuNotice";
 
 type UseSearchEnumOptions<T extends string = string> = {
   name: string;
@@ -66,8 +73,20 @@ const useSearchEnum = <T extends string>({
 };
 
 const CONTROLS_VALUES = ["0", "1"] as const;
-// `?renderer=usegpu` swaps MathBox for the Use.GPU (WebGPU) viewport.
-const RENDERER_VALUES = ["mathbox", "usegpu"] as const;
+
+/** `useRenderer` reads an invalid `?renderer` as missing; this page logs it. */
+const useLogInvalidRendererParam = () => {
+  const [search] = useSearchParams();
+  const raw = search.get(RENDERER_PARAM);
+  useEffect(() => {
+    if (raw !== null && !isRenderer(raw)) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `Invalid value ${raw} for search parameter ${RENDERER_PARAM}`,
+      );
+    }
+  }, [raw]);
+};
 
 const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
@@ -112,11 +131,9 @@ const MainPage: React.FC = () => {
     defaultValue: "1",
   });
   const controlsOpen = controlsVisibility === "1";
-  const [renderer] = useSearchEnum({
-    name: "renderer",
-    values: RENDERER_VALUES,
-    defaultValue: "mathbox",
-  });
+  useEffect(() => startWebGpuDetection(), []);
+  const { renderer, notice } = useRenderer();
+  useLogInvalidRendererParam();
   const SceneViewport = renderer === "usegpu" ? GpuViewport : Viewport;
   const handleControlsClick = useCallback(
     (currentlyOpen: boolean) => {
@@ -137,6 +154,7 @@ const MainPage: React.FC = () => {
       <div className={styles.container}>
         <Header title={<SceneTitle />} />
         <BannerDisplay />
+        <WebGpuNotice active={notice} />
         {sceneKey && isLegacy ? (
           <LegacyBanner sceneKey={sceneKey} onViewDetails={legacyDialog.on} />
         ) : null}
@@ -164,13 +182,16 @@ const MainPage: React.FC = () => {
               >
                 <SceneControls loading={sceneLoad.status === "loading"} />
               </Sidebar>
-              <SceneViewport
-                className={
-                  controlsOpen
-                    ? styles["scene-adjust-controls-open"]
-                    : styles["scene-adjust-controls-closed"]
-                }
-              />
+              {/* Empty while WebGPU detection is pending, at most 2 s. */}
+              {renderer ? (
+                <SceneViewport
+                  className={
+                    controlsOpen
+                      ? styles["scene-adjust-controls-open"]
+                      : styles["scene-adjust-controls-closed"]
+                  }
+                />
+              ) : null}
             </>
           )}
         </div>

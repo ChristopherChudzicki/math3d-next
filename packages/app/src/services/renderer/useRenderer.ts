@@ -43,4 +43,4 @@ const useRenderer = (): ResolvedRenderer & {
   return { ...resolved, chooseRenderer };
 };
 
-export { useRenderer };
+export { RENDERER_PARAM, useRenderer };
