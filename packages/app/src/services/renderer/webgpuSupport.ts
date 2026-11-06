@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-/** `failed`: an adapter was found, but Use.GPU couldn't start a device on it. */
+/** `failed`: detection found an adapter, but Use.GPU couldn't start on it. */
 type WebGpuSupport = "pending" | "available" | "unavailable" | "failed";
 
 const DETECTION_TIMEOUT_MS = 2000;
@@ -31,7 +31,7 @@ const useWebGpuSupport = (): WebGpuSupport =>
   useSyncExternalStore(subscribe, () => state);
 
 // Use.GPU requests its own adapter, so this one is discarded. `low-power`
-// keeps the check off a discrete GPU.
+// asks for the integrated GPU on a dual-GPU machine.
 const requestAdapter = async (): Promise<WebGpuSupport> => {
   try {
     const adapter = await navigator.gpu.requestAdapter({

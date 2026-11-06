@@ -136,7 +136,7 @@ const MainPage: React.FC = () => {
   useEffect(() => startWebGpuDetection(), []);
   const { renderer, notice } = useRenderer();
   const webgpu = useWebGpuSupport();
-  // The notice would sit above the card that says the scene doesn't exist.
+  // No notice above the scene-unavailable card.
   let noticeReason: WebGpuNoticeReason | null = null;
   if (!unavailable && webgpu === "failed") noticeReason = "failed";
   else if (!unavailable && notice) noticeReason = "link";

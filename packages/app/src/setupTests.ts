@@ -43,7 +43,7 @@ vitest.mock("@/util/hooks/useShadowStylesheet");
 vitest.mock("@/ui/TextareaAutoWidthHeight/TextMeasurer");
 
 /**
- * Vitest's JSDOM run can't import Use.GPU (ADR-0008), which also needs WebGPU.
+ * Vitest's JSDOM run can't import Use.GPU (ADR-0008), and has no WebGPU anyway.
  * A test sets `gpuContent.Component` to choose how the lazy renderer behaves.
  */
 vi.mock("@/features/viewport/usegpu/live/GpuViewportContent", async () => {

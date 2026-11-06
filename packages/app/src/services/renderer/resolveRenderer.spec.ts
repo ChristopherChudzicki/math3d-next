@@ -45,6 +45,12 @@ test.each([
     expected: { renderer: "mathbox", notice: false },
   },
   {
+    param: "usegpu",
+    preference: null,
+    webgpu: "failed",
+    expected: { renderer: "mathbox", notice: true },
+  },
+  {
     param: null,
     preference: null,
     webgpu: "available",

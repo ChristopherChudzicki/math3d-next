@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useBanners } from "@/ui/Banners/BannerContext";
 
-const BANNER_ID = "webgpu-unavailable";
+const BANNER_ID = "webgpu-notice";
 
 const CONTENT = {
   link: "This link asks for the experimental WebGPU renderer, which isn't available in this browser. Showing the scene with the default renderer.",

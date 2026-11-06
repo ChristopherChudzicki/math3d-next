@@ -46,8 +46,8 @@ const GpuViewport: React.FC<Props> = ({ className }) => {
   const onUnsupported = useCallback((error: unknown) => {
     // Use.GPU calls this on every render while in error; report the first.
     if (!markWebGpuFailed()) return;
-    // Not `chooseRenderer`: a `?renderer=usegpu` stays in the URL, which is
-    // safe because resolution draws MathBox once WebGPU has failed.
+    // Not `chooseRenderer`: the user didn't choose this, so `?renderer` stays;
+    // resolution draws MathBox once WebGPU has failed.
     setRendererPreference("mathbox");
     // A browser limitation, not an app error.
     const message = error instanceof Error ? error.message : String(error);
