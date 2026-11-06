@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import Any
 
+import pytest
+
 from scenes.legacy_audit.compare import compare_scene
 from scenes.legacy_audit.report import RENDER
 
@@ -41,6 +43,7 @@ TABLE = SimpleNamespace(
     Context=lambda **kwargs: SimpleNamespace(**kwargs),
     EXPECTATIONS={"POINT": _point, "FOLDER": _folder},
     LEGACY_TYPE_TO_NEXT_TYPE={"POINT": "POINT", "FOLDER": "FOLDER"},
+    is_math=lambda source: source == "size",
 )
 DEFAULTS = {
     "POINT": {
@@ -115,6 +118,39 @@ def test_editor_mismatch_does_not_affect_render_clean():
     )
     assert _outcomes(result)["description"] == "mismatch"
     assert result.clusters(RENDER) == set()
+
+
+@pytest.mark.parametrize(
+    ("source", "translated", "normalization"),
+    [
+        (
+            "\\operatorname{pdiff}\\left(f,x,1\\right)",
+            "\\frac{\\partial f\\left(x\\right)}{\\partial x}",
+            "pdiff_rewrite",
+        ),
+        ("u|v", "u\\cdot v", "operator_rewrite"),
+        ("u|v", "u\\cdot\\ v", "operator_rewrite+latex_whitespace"),
+        (
+            "\\operatorname{pdiff}\\left(f,x,1\\right)|v",
+            "\\left(\\frac{\\partial f\\left(x\\right)}{\\partial x}\\right)\\cdot v",
+            "pdiff_rewrite+operator_rewrite",
+        ),
+    ],
+)
+def test_an_expression_must_arrive_rewritten_and_text_never(
+    source, translated, normalization
+):
+    point = {**POINT, "size": source, "description": source}
+    rewritten = {**point, "size": translated}
+    result = compare_scene(*_scene(point, rewritten), DEFAULTS, TABLE)
+    [size] = [c for c in result.comparisons if c.path == "size"]
+    assert (size.outcome, size.normalization) == ("match_normalized", normalization)
+    assert _outcomes(result)["description"] == "match"
+    unrewritten = compare_scene(*_scene(point, point), DEFAULTS, TABLE)
+    assert _outcomes(unrewritten)["size"] == "mismatch"
+    text_rewritten = {**rewritten, "description": translated}
+    result = compare_scene(*_scene(point, text_rewritten), DEFAULTS, TABLE)
+    assert _outcomes(result)["description"] == "mismatch"
 
 
 def test_needs_eval_and_missing_target_field():

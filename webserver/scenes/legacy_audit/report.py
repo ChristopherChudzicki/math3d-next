@@ -6,8 +6,9 @@ or math3d-react defaults (see `_safe`).
 """
 
 from collections import Counter, defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Protocol
 
 from scenes.legacy_audit.compare import SceneResult, cluster_id, crash_template
 
@@ -132,12 +133,20 @@ def _pct(part: float, whole: float) -> str:
     return "n/a" if not whole else f"{100 * part / whole:.2f}%"
 
 
-def fix_curve(agg: Aggregate, k_max: int = 12) -> list[tuple[str, float, float]]:
+class Clustered(Protocol):
+    cluster_weight: Counter
+    cluster_severity: dict[str, str]
+    scene_clusters: list[tuple[int, frozenset[str]]]
+
+
+def fix_curve(
+    agg: Clustered, k_max: int = 12, keep: Callable[[str], bool] = lambda cid: True
+) -> list[tuple[str, float, float]]:
     """Clean share after fixing render clusters 1..k, ranked by weight."""
     ranked = [
         cid
         for cid, _ in agg.cluster_weight.most_common()
-        if agg.cluster_severity.get(cid) == "render"
+        if agg.cluster_severity.get(cid) == "render" and keep(cid)
     ][:k_max]
     total_n = len(agg.scene_clusters)
     total_w = sum(w for w, _ in agg.scene_clusters)
@@ -153,8 +162,8 @@ def fix_curve(agg: Aggregate, k_max: int = 12) -> list[tuple[str, float, float]]
     return curve
 
 
-def concentration(agg: Aggregate) -> list[tuple[int, str]]:
-    ordered = sorted(agg.weights, reverse=True)
+def concentration(weights: list[int]) -> list[tuple[int, str]]:
+    ordered = sorted(weights, reverse=True)
     total = sum(ordered)
     return [(n, _pct(sum(ordered[:n]), total)) for n in (1, 10, 100, 1000)]
 
@@ -200,7 +209,7 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
         ),
         "",
         "Weight concentration (share of all `times_accessed` held by the top N scenes): "
-        + ", ".join(f"top {n}: {share}" for n, share in concentration(agg))
+        + ", ".join(f"top {n}: {share}" for n, share in concentration(agg.weights))
         + ".",
         "",
         "## Crash census",

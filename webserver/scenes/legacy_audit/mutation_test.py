@@ -36,6 +36,8 @@ DEHYDRATED = {
             "labelVisible": True,
             "color": "#ff0000",
             "coords": "c\\left[1\\right]",
+            "size": "\\operatorname{pdiff}\\left(g,a,1\\right)",
+            "opacity": "u|v",
         },
         "v": {"type": "VECTOR_FIELD", "samples": "[4, 6, 8]"},
         "axis-x": {"type": "AXIS", "max": "10"},
@@ -138,4 +140,14 @@ def test_injected_translator_bug_is_flagged(monkeypatch, method, mutate, flagged
         return out
 
     monkeypatch.setattr(ItemMigrator, method, mutated)
+    assert flagged in _mismatches()
+
+
+@pytest.mark.parametrize(
+    ("method", "flagged"),
+    [("rewrite_pdiff", ("p", "size")), ("rewrite_operators", ("p", "opacity"))],
+)
+def test_a_skipped_rewrite_is_flagged(monkeypatch, method, flagged):
+    assert flagged not in _mismatches()
+    monkeypatch.setattr(ItemMigrator, method, lambda self, props: props)
     assert flagged in _mismatches()
