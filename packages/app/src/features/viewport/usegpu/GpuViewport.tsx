@@ -1,7 +1,6 @@
 /**
- * The Use.GPU (WebGPU) viewport. This shell imports none of Use.GPU: the
- * renderer loads behind the one `React.lazy` below, and only when `MainPage`
- * resolves to Use.GPU.
+ * The Use.GPU (WebGPU) viewport. This shell imports none of Use.GPU; the
+ * renderer loads behind the one `React.lazy` below.
  */
 import React, { Suspense, useCallback } from "react";
 import * as Sentry from "@sentry/react";
@@ -11,6 +10,7 @@ import * as select from "@/store/scene/state/selectors";
 import {
   focusRendererSetting,
   markWebGpuUnavailable,
+  setRendererPreference,
   useRenderer,
 } from "@/services/renderer";
 import is3dDisabled from "@/features/viewport/shared/is3dDisabled";
@@ -39,7 +39,7 @@ const ErrorFallback: React.FC = () => {
         padding: "1em",
       }}
     >
-      <p>The WebGPU renderer ran into an error.</p>
+      <p style={{ margin: 0 }}>The WebGPU renderer ran into an error.</p>
       <Button onClick={switchToDefault}>Switch to the default renderer</Button>
     </div>
   );
@@ -53,6 +53,7 @@ const GpuViewport: React.FC<Props> = ({ className }) => {
   const onUnsupported = useCallback((error: unknown) => {
     // Use.GPU calls this on every render while in error; report the first.
     if (!markWebGpuUnavailable()) return;
+    setRendererPreference("mathbox");
     // A browser limitation, not an app error.
     const message = error instanceof Error ? error.message : String(error);
     // eslint-disable-next-line no-console

@@ -183,7 +183,7 @@ const MainPage: React.FC = () => {
               >
                 <SceneControls loading={sceneLoad.status === "loading"} />
               </Sidebar>
-              {/* Empty while WebGPU detection is pending, at most 2 s. */}
+              {/* Empty while WebGPU detection is pending. */}
               {renderer ? (
                 <SceneViewport
                   className={

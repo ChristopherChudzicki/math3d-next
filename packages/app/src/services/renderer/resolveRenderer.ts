@@ -8,7 +8,7 @@ const isRenderer = (value: unknown): value is Renderer =>
 type ResolvedRenderer = {
   /** `null` while WebGPU detection is pending. */
   renderer: Renderer | null;
-  /** The URL asked for Use.GPU and this browser can't run it. */
+  /** `true` when the URL asked for Use.GPU and this browser can't run it. */
   notice: boolean;
 };
 

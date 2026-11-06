@@ -14,7 +14,7 @@ const WebGpuNotice: React.FC<{ active: boolean }> = ({ active }) => {
       severity: "info",
       ariaLabel: "Dismiss WebGPU notice",
       content:
-        "This link asks for the experimental WebGPU renderer, which this browser doesn't support. Showing the scene with the default renderer.",
+        "This link asks for the experimental WebGPU renderer, which isn't available in this browser. Showing the scene with the default renderer.",
     });
     return () => dismiss(BANNER_ID);
   }, [active, show, dismiss]);
