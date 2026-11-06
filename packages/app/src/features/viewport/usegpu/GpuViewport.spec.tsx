@@ -10,6 +10,8 @@ import { actions } from "@/store/scene/state/scene.slice";
 import { RENDERER_SETTING_ID } from "@/services/renderer";
 import { RENDERER_PREFERENCE_KEY } from "@/services/renderer/rendererPreference";
 import { stubWebGpu } from "@/test_util";
+import { gpuContent } from "@/test_util/gpuViewportContent";
+import type { ContentProps } from "@/test_util/gpuViewportContent";
 import GpuViewport from "./GpuViewport";
 
 vi.mock("@sentry/react", async (importOriginal) => ({
@@ -17,16 +19,12 @@ vi.mock("@sentry/react", async (importOriginal) => ({
   captureMessage: vi.fn(),
 }));
 
-type ContentProps = { onUnsupported: (error: unknown) => void };
-
-// Stands in for usegpu/live; each test that renders it picks how it fails.
-const content = vi.hoisted(() => {
-  const RendersNothing = (_props: ContentProps): null => null;
-  return { Component: RendersNothing, RendersNothing };
+vi.mock("./live/GpuViewportContent", async () => {
+  const shared = await import("@/test_util/gpuViewportContent");
+  return {
+    default: (props: ContentProps) => shared.gpuContent.Component(props),
+  };
 });
-vi.mock("./live/GpuViewportContent", () => ({
-  default: (props: ContentProps) => content.Component(props),
-}));
 
 const noAdapter = new Error("no adapter");
 // Use.GPU calls its fallback on every render while in error.
@@ -63,7 +61,7 @@ const renderViewport = () => {
 };
 
 afterEach(() => {
-  content.Component = content.RendersNothing;
+  gpuContent.Component = gpuContent.RendersNothing;
 });
 
 test("with 3D disabled it renders the empty scene container", () => {
@@ -75,7 +73,7 @@ test("with 3D disabled it renders the empty scene container", () => {
 test("when the renderer reports WebGPU unsupported it reports once", async () => {
   const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
   stubWebGpu();
-  content.Component = ReportsUnsupportedTwice;
+  gpuContent.Component = ReportsUnsupportedTwice;
   renderViewport();
   await waitFor(() => expect(warn).toHaveBeenCalledWith(noAdapter));
   expect(Sentry.captureMessage).toHaveBeenCalledOnce();
@@ -89,7 +87,7 @@ test("when the renderer reports WebGPU unsupported it reports once", async () =>
 test("when the renderer throws, its button switches to the default renderer", async () => {
   vi.spyOn(console, "error").mockImplementation(() => {});
   stubWebGpu();
-  content.Component = FailsToLoad;
+  gpuContent.Component = FailsToLoad;
   const { store } = renderViewport();
   expect(
     await screen.findByText("The WebGPU renderer ran into an error."),
@@ -101,7 +99,7 @@ test("when the renderer throws, its button switches to the default renderer", as
   expect(localStorage.getItem(RENDERER_PREFERENCE_KEY)).toBe("mathbox");
   expect(screen.getByRole("button", { name: "Account menu" })).toHaveFocus();
 
-  content.Component = content.RendersNothing;
+  gpuContent.Component = gpuContent.RendersNothing;
   act(() => loadScene(store));
   expect(screen.queryByText(/ran into an error/)).not.toBeInTheDocument();
 });

@@ -21,6 +21,8 @@ import * as Sentry from "@sentry/react";
 import expectToast from "@/test_util/expectToast";
 import sceneSlice from "@/store/scene/state/scene.slice";
 import { findItemByTestId } from "@/test_util/mathItems";
+import { gpuContent } from "@/test_util/gpuViewportContent";
+import type { ContentProps } from "@/test_util/gpuViewportContent";
 
 vi.mock("@sentry/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@sentry/react")>()),
@@ -28,16 +30,12 @@ vi.mock("@sentry/react", async (importOriginal) => ({
   captureMessage: vi.fn(),
 }));
 
-type ContentProps = { onUnsupported: (error: unknown) => void };
-
-// Stands in for usegpu/live; a test swaps in how it behaves.
-const gpuContent = vi.hoisted(() => {
-  const RendersNothing = (_props: ContentProps): null => null;
-  return { Component: RendersNothing, RendersNothing };
+vi.mock("@/features/viewport/usegpu/live/GpuViewportContent", async () => {
+  const shared = await import("@/test_util/gpuViewportContent");
+  return {
+    default: (props: ContentProps) => shared.gpuContent.Component(props),
+  };
 });
-vi.mock("@/features/viewport/usegpu/live/GpuViewportContent", () => ({
-  default: (props: ContentProps) => gpuContent.Component(props),
-}));
 
 test.each([
   {
