@@ -14,10 +14,10 @@ with a WebGPU adapter.
 **Add Use.GPU as a second renderer behind `?renderer=usegpu`. MathBox stays
 the default.**
 
-- `MainPage` picks the viewport from `?renderer` (`mathbox` by default, or
-  `usegpu`).
-- Without `navigator.gpu` (or with no adapter), the Use.GPU viewport says
-  WebGPU is unavailable and links back to the default renderer.
+- `MainPage` picks the viewport from the account-menu preference; an explicit
+  `?renderer` (`mathbox` or `usegpu`) wins.
+- Without `navigator.gpu` (or with no adapter), `MainPage` falls back to
+  MathBox, with a notice when the URL asked for Use.GPU.
 
 ### Folders and lint zones
 
@@ -38,7 +38,7 @@ the default.**
 ### The lazy boundary
 
 - `usegpu/GpuViewport` loads `usegpu/live/GpuViewportContent` through one
-  `React.lazy`, and only when `navigator.gpu` exists. The main bundle carries
+  `React.lazy`, and only when `MainPage` resolves to Use.GPU. The main bundle carries
   none of Use.GPU.
 - **Why:** `@use-gpu/wgsl@0.21.0` ships CommonJS `.js` files inside a
   `"type": "module"` package, which Vitest's jsdom run can't import. The
@@ -85,10 +85,12 @@ upstream bugs:
     any hunk the release fixed, and run `usegpu/pins.spec.ts`;
   - open each QA scene in two tabs, one per renderer;
   - read the release's deprecation list.
-- The E2E smoke test (`viewport/usegpu-renderer.test.ts`) checks that the
-  route loads the lazy chunk without page errors. No Playwright-launched
-  Chromium, on macOS or CI, has a WebGPU adapter, so it sees only the
-  unavailable message and never checks drawing.
+- Two E2E tests cover the renderer. `viewport/usegpu-renderer.test.ts` forces
+  `requestAdapter` to resolve `null` and checks that `?renderer=usegpu` draws
+  MathBox, shows the notice and never loads the lazy chunk.
+  `viewport/usegpu-drawing.test.ts` launches Chromium with SwiftShader flags,
+  which yield a WebGPU adapter, and checks that the Use.GPU viewport loads the
+  lazy chunk, renders a canvas and reports `[data-ready]`.
 
 ## Alternatives considered
 
