@@ -1,16 +1,19 @@
-import { test, expect } from "vitest";
+import { describe, test, expect } from "vitest";
 import { delay, http } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { urls } from "@math3d/mock-api";
 import invariant from "tiny-invariant";
 import {
+  act,
   renderTestApp,
   screen,
+  stubWebGpu,
   user,
   waitFor,
   waitForAppReady,
   within,
 } from "@/test_util";
+import { markWebGpuFailed } from "@/services/renderer/webgpuSupport";
 
 test.each([
   {
@@ -215,4 +218,105 @@ test("closing the scenes dialog returns focus to the scenes button, even when a 
   await waitFor(() =>
     expect(screen.getByRole("button", { name: "Open scenes" })).toHaveFocus(),
   );
+});
+
+describe("the renderer item", () => {
+  const ITEM = "WebGPU renderer (experimental)";
+  const openMenu = async () => {
+    await user.click(screen.getByRole("button", { name: "Open Menu" }));
+    // Wait until the menu is open and populated.
+    await screen.findByRole("menuitem", { name: "Contact" });
+  };
+  const expectRenderer = async (renderer: string) =>
+    waitFor(() =>
+      expect(screen.getByTestId("scene")).toHaveAttribute(
+        "data-renderer",
+        renderer,
+      ),
+    );
+
+  test.each([
+    { isAuthenticated: false, trigger: "Open Menu" },
+    { isAuthenticated: true, trigger: "Open User Menu" },
+  ])(
+    "with WebGPU the menu offers the renderer, unchecked ($trigger)",
+    async ({ isAuthenticated, trigger }) => {
+      stubWebGpu();
+      renderTestApp("", { isAuthenticated });
+      await user.click(await screen.findByRole("button", { name: trigger }));
+
+      const item = await screen.findByRole("menuitemcheckbox", { name: ITEM });
+      await waitFor(() => expect(item).not.toHaveAttribute("aria-disabled"));
+      expect(item).toHaveAttribute("aria-checked", "false");
+      const reference = screen.getByRole("menuitem", {
+        name: "Function Reference",
+      });
+      const contact = screen.getByRole("menuitem", { name: "Contact" });
+      expect(reference.compareDocumentPosition(item)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING,
+      );
+      expect(item.compareDocumentPosition(contact)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING,
+      );
+    },
+  );
+
+  test("an adapter that resolves null disables the item and says why", async () => {
+    stubWebGpu(async () => null);
+    renderTestApp("");
+    await openMenu();
+    const item = screen.getByRole("menuitemcheckbox", { name: ITEM });
+    await waitFor(() =>
+      expect(item).toHaveAccessibleDescription("Not available in this browser"),
+    );
+    expect(item).toHaveAttribute("aria-disabled", "true");
+  });
+
+  test("after a device failure the item is disabled and says so", async () => {
+    stubWebGpu();
+    renderTestApp("");
+    await openMenu();
+    const item = screen.getByRole("menuitemcheckbox", { name: ITEM });
+    await waitFor(() => expect(item).not.toHaveAttribute("aria-disabled"));
+
+    act(() => {
+      markWebGpuFailed();
+    });
+    expect(item).toHaveAttribute("aria-disabled", "true");
+    expect(item).toHaveAccessibleDescription("Couldn't start on this device");
+  });
+
+  test("checking it draws Use.GPU and closes the menu", async () => {
+    stubWebGpu();
+    renderTestApp("");
+    await user.click(screen.getByRole("button", { name: "Open Menu" }));
+    await user.click(await screen.findByRole("menuitemcheckbox"));
+
+    await expectRenderer("usegpu");
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+
+  test("under ?renderer=usegpu it is checked, and unchecking draws MathBox", async () => {
+    stubWebGpu();
+    renderTestApp("/?renderer=usegpu");
+    await user.click(screen.getByRole("button", { name: "Open Menu" }));
+    const item = await screen.findByRole("menuitemcheckbox");
+    expect(item).toHaveAttribute("aria-checked", "true");
+
+    await user.click(item);
+    await expectRenderer("mathbox");
+  });
+
+  test("while detection is pending the item is disabled without a reason, then enabled", async () => {
+    const adapter = Promise.withResolvers<unknown>();
+    stubWebGpu(() => adapter.promise);
+    renderTestApp("");
+    await openMenu();
+    const item = screen.getByRole("menuitemcheckbox", { name: ITEM });
+    expect(item).toHaveAttribute("aria-disabled", "true");
+    expect(item).not.toHaveAccessibleDescription();
+
+    await act(async () => adapter.resolve({}));
+    await waitFor(() => expect(item).not.toHaveAttribute("aria-disabled"));
+  });
 });

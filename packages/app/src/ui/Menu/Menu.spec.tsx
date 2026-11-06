@@ -48,3 +48,47 @@ test("choosing a link item closes the menu", async () => {
 
   await waitFor(() => expect(menu).not.toBeInTheDocument());
 });
+
+test("clicking a checkbox item toggles it and closes the menu", async () => {
+  const onCheckedChange = vi.fn();
+  render(
+    <Menu.Root>
+      <Menu.Trigger>Menu</Menu.Trigger>
+      <Menu.Popup>
+        <Menu.CheckboxItem checked={false} onCheckedChange={onCheckedChange}>
+          Experimental
+        </Menu.CheckboxItem>
+      </Menu.Popup>
+    </Menu.Root>,
+  );
+  await user.click(screen.getByRole("button", { name: "Menu" }));
+  const menu = await screen.findByRole("menu");
+
+  await user.click(
+    screen.getByRole("menuitemcheckbox", { name: "Experimental" }),
+  );
+
+  expect(onCheckedChange).toHaveBeenCalledExactlyOnceWith(
+    true,
+    expect.anything(),
+  );
+  await waitFor(() => expect(menu).not.toBeInTheDocument());
+});
+
+test("a checkbox item's description describes it without joining its name", async () => {
+  render(
+    <Menu.Root>
+      <Menu.Trigger>Menu</Menu.Trigger>
+      <Menu.Popup>
+        <Menu.CheckboxItem checked={false} description="Needs a GPU">
+          Experimental
+        </Menu.CheckboxItem>
+      </Menu.Popup>
+    </Menu.Root>,
+  );
+  await user.click(screen.getByRole("button", { name: "Menu" }));
+
+  expect(
+    await screen.findByRole("menuitemcheckbox", { name: "Experimental" }),
+  ).toHaveAccessibleDescription("Needs a GPU");
+});

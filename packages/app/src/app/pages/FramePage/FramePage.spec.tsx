@@ -4,6 +4,8 @@ import { SceneBuilder, makeItem, seedDb } from "@math3d/mock-api";
 import {
   renderTestApp,
   screen,
+  storeRendererPreference,
+  stubWebGpu,
   userWaits,
   waitFor,
   waitForAppReady,
@@ -56,4 +58,18 @@ test("a missing scene neither alerts nor redirects (silent 404)", async () => {
 
   expect(screen.queryByRole("dialog")).toBeNull();
   expect(location.current.pathname).toBe("/app/frame/does-not-exist");
+});
+
+test("FramePage draws MathBox whatever the renderer choice", async () => {
+  stubWebGpu();
+  storeRendererPreference("usegpu");
+  const scene = new SceneBuilder();
+  seedDb.withScene(scene.json());
+
+  renderTestApp(`/app/frame/${scene.key}?renderer=usegpu`);
+
+  expect(await screen.findByTestId("scene")).toHaveAttribute(
+    "data-renderer",
+    "mathbox",
+  );
 });

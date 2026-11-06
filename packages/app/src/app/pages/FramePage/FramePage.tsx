@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams } from "react-router";
 
+// MathBox only: Browser Run, which renders OG images, has no WebGPU adapter.
 import Viewport from "@/features/viewport/mathbox/Viewport";
 import useSceneLoader from "@/app/useSceneLoader";
 

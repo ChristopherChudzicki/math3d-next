@@ -1,5 +1,6 @@
 declare const styles: {
   readonly "danger": string;
+  readonly "description": string;
   readonly "groupLabel": string;
   readonly "icon": string;
   readonly "item": string;
@@ -8,6 +9,9 @@ declare const styles: {
   readonly "popup": string;
   readonly "positioner": string;
   readonly "separator": string;
+  readonly "text": string;
+  readonly "whenChecked": string;
+  readonly "whenUnchecked": string;
 };
 export = styles;
 

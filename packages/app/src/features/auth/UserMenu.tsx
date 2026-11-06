@@ -12,8 +12,10 @@ const UserMenu: React.FC<{
   authStatus: AuthStatus;
   /** Shown at the top of the menu, labelling its items. */
   email?: string;
+  /** The trigger's `id`, which both trigger variants carry. */
+  triggerId?: string;
   children: React.ReactNode;
-}> = ({ authStatus, email, children }) => {
+}> = ({ authStatus, email, triggerId, children }) => {
   // A person avatar would tell a visitor with no account that they have one,
   // and on desktop it duplicates the header's own "Sign in" button; their menu
   // is mostly general navigation. The pending ["me"] query keeps the hamburger,
@@ -25,6 +27,7 @@ const UserMenu: React.FC<{
   // The menu takes its name from the trigger.
   const trigger = useHamburger ? (
     <Menu.Trigger
+      id={triggerId}
       render={
         <IconButton label="Open Menu">
           <Icon icon={menuIcon} aria-hidden="true" />
@@ -33,6 +36,7 @@ const UserMenu: React.FC<{
     />
   ) : (
     <Menu.Trigger
+      id={triggerId}
       render={
         <IconButton
           variant="solid"

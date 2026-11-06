@@ -13,6 +13,9 @@ import SliderAnimations from "@/features/editor/items/forms/VariableSlider/Slide
 import Sidebar from "@/ui/Sidebar";
 import { useBodyClass, useToggle } from "@/util/hooks";
 import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
+import { isRenderer } from "@/services/renderer/resolveRenderer";
+import { RENDERER_PARAM, useRenderer } from "@/services/renderer/useRenderer";
+import { startWebGpuDetection } from "@/services/renderer/webgpuSupport";
 
 import ToggleKeyboardButton from "@/features/editor/virtualKeyboard/KeyboardControls";
 
@@ -25,12 +28,30 @@ import styles from "./MainPage.module.css";
 import Header from "./components/Header";
 import LegacyDialog from "./components/LegacyDialog";
 import LegacyBanner from "./components/LegacyBanner";
+import RendererPill from "./components/RendererPill";
 import SceneUnavailable from "./components/SceneUnavailable";
+import WebGpuNotice from "./components/WebGpuNotice";
 
 type UseSearchEnumOptions<T extends string = string> = {
   name: string;
   values: readonly T[];
   defaultValue: T;
+};
+
+/** Logs a present search parameter that `isValid` rejects. */
+const useLogInvalidSearchParam = (
+  name: string,
+  isValid: (raw: string) => boolean,
+) => {
+  const [search] = useSearchParams();
+  const raw = search.get(name);
+  const valid = raw === null || isValid(raw);
+  useEffect(() => {
+    if (!valid) {
+      // eslint-disable-next-line no-console
+      console.error(`Invalid value ${raw} for search parameter ${name}`);
+    }
+  }, [valid, name, raw]);
 };
 
 const useSearchEnum = <T extends string>({
@@ -42,14 +63,9 @@ const useSearchEnum = <T extends string>({
   const location = useLocation();
   const navigate = useNavigate();
   const raw = search.get(name);
-  const valid = raw === null || values.includes(raw as T);
-  useEffect(() => {
-    if (!valid) {
-      // eslint-disable-next-line no-console
-      console.error(`Invalid value ${raw} for search parameter ${name}`);
-    }
-  }, [valid, name, raw]);
-  const value = valid ? (raw as T) ?? defaultValue : defaultValue;
+  const isValue = (value: string) => values.includes(value as T);
+  useLogInvalidSearchParam(name, isValue);
+  const value = raw !== null && isValue(raw) ? (raw as T) : defaultValue;
   const set = useCallback(
     (v: T) => {
       const next = new URLSearchParams(search);
@@ -66,8 +82,6 @@ const useSearchEnum = <T extends string>({
 };
 
 const CONTROLS_VALUES = ["0", "1"] as const;
-// `?renderer=usegpu` swaps MathBox for the Use.GPU (WebGPU) viewport.
-const RENDERER_VALUES = ["mathbox", "usegpu"] as const;
 
 const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
@@ -112,11 +126,12 @@ const MainPage: React.FC = () => {
     defaultValue: "1",
   });
   const controlsOpen = controlsVisibility === "1";
-  const [renderer] = useSearchEnum({
-    name: "renderer",
-    values: RENDERER_VALUES,
-    defaultValue: "mathbox",
-  });
+  useEffect(() => startWebGpuDetection(), []);
+  const { renderer, notice } = useRenderer();
+  // While the scene loads, a 404 may be on its way.
+  const noticeReason =
+    notice === "link" && sceneLoad.status !== "ready" ? null : notice;
+  useLogInvalidSearchParam(RENDERER_PARAM, isRenderer);
   const SceneViewport = renderer === "usegpu" ? GpuViewport : Viewport;
   const handleControlsClick = useCallback(
     (currentlyOpen: boolean) => {
@@ -137,6 +152,7 @@ const MainPage: React.FC = () => {
       <div className={styles.container}>
         <Header title={<SceneTitle />} />
         <BannerDisplay />
+        <WebGpuNotice reason={noticeReason} />
         {sceneKey && isLegacy ? (
           <LegacyBanner sceneKey={sceneKey} onViewDetails={legacyDialog.on} />
         ) : null}
@@ -164,25 +180,31 @@ const MainPage: React.FC = () => {
               >
                 <SceneControls loading={sceneLoad.status === "loading"} />
               </Sidebar>
-              <SceneViewport
-                className={
-                  controlsOpen
-                    ? styles["scene-adjust-controls-open"]
-                    : styles["scene-adjust-controls-closed"]
-                }
-              />
+              {/* Empty while detection decides whether Use.GPU can draw. */}
+              {renderer ? (
+                <SceneViewport
+                  className={
+                    controlsOpen
+                      ? styles["scene-adjust-controls-open"]
+                      : styles["scene-adjust-controls-closed"]
+                  }
+                />
+              ) : null}
             </>
           )}
         </div>
         {unavailable ? null : <ToggleKeyboardButton />}
-        {sceneKey && isLegacy ? (
-          <LegacyDialog
-            sceneKey={sceneKey}
-            open={legacyDialogOpen}
-            onOpen={legacyDialog.on}
-            onClose={legacyDialog.off}
-          />
-        ) : null}
+        <div className={styles.corner}>
+          {unavailable ? null : <RendererPill />}
+          {sceneKey && isLegacy ? (
+            <LegacyDialog
+              sceneKey={sceneKey}
+              open={legacyDialogOpen}
+              onOpen={legacyDialog.on}
+              onClose={legacyDialog.off}
+            />
+          ) : null}
+        </div>
       </div>
     </BannersProvider>
   );

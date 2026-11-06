@@ -6,6 +6,10 @@ import lightbulb from "@iconify-icons/lucide/lightbulb";
 import circleHelp from "@iconify-icons/lucide/circle-help";
 import SceneActions from "@/features/sceneActions/SceneActions";
 
+import { RENDERER_SETTING_ID } from "@/services/renderer/focusRendererSetting";
+import { useRenderer } from "@/services/renderer/useRenderer";
+import { useWebGpuSupport } from "@/services/renderer/webgpuSupport";
+import type { WebGpuSupport } from "@/services/renderer/webgpuSupport";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { DISPLAY_AUTH_FLOWS } from "@/config/displayAuthFlows";
 import { ISSUE_URL } from "@/config/issueUrl";
@@ -44,12 +48,21 @@ const LoginButtons: React.FC<{
   );
 };
 
+const DISABLED_REASON: Record<WebGpuSupport, string | undefined> = {
+  pending: undefined,
+  available: undefined,
+  unavailable: "Not available in this browser",
+  failed: "Couldn't start on this device",
+};
+
 const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
   authStatus,
 }) => {
   const { open } = useOverlay();
   const { open: openSignIn } = useSignInDialog();
   const isAuthenticated = authStatus === "authenticated";
+  const { renderer, chooseRenderer } = useRenderer();
+  const webGpuSupport = useWebGpuSupport();
   return (
     <>
       {/* Not `!isAuthenticated`: while the me-query is still in flight the
@@ -83,6 +96,14 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
       >
         Function Reference
       </Menu.LinkItem>
+      <Menu.CheckboxItem
+        checked={renderer === "usegpu"}
+        onCheckedChange={(on) => chooseRenderer(on ? "usegpu" : "mathbox")}
+        disabled={webGpuSupport !== "available"}
+        description={DISABLED_REASON[webGpuSupport]}
+      >
+        WebGPU renderer (experimental)
+      </Menu.CheckboxItem>
       <Menu.LinkItem
         icon={<Icon icon={circleHelp} aria-hidden="true" />}
         href={ISSUE_URL}
@@ -146,7 +167,11 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
         <>
           <SceneActions />
           <LoginButtons isAuthenticated={authStatus} />
-          <UserMenu authStatus={authStatus} email={userQuery.data?.email}>
+          <UserMenu
+            authStatus={authStatus}
+            email={userQuery.data?.email}
+            triggerId={RENDERER_SETTING_ID}
+          >
             <UserMenuItems authStatus={authStatus} />
           </UserMenu>
         </>

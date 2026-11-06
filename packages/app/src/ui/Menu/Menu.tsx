@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useId } from "react";
 import classNames from "classnames";
 import { Menu as BaseMenu } from "@base-ui/react/menu";
+import { Icon } from "@iconify/react/offline";
+import square from "@iconify-icons/lucide/square";
+import squareCheck from "@iconify-icons/lucide/square-check";
 import * as styles from "./Menu.module.css";
 
 const { Root, Trigger, Group } = BaseMenu;
@@ -103,6 +106,55 @@ const LinkItem: React.FC<LinkItemProps> = ({
   </BaseMenu.LinkItem>
 );
 
+type CheckboxItemProps = Omit<
+  BaseMenu.CheckboxItem.Props,
+  "className" | "children"
+> &
+  Omit<ItemContentProps, "icon"> & {
+    /** A muted second line: the item's accessible description, not part of its name. */
+    description?: React.ReactNode;
+    className?: string;
+  };
+
+/**
+ * A checkable menu item; a checkbox takes the icon slot. Closes the menu
+ * on click (Base UI's default is to stay open), like the other items.
+ */
+const CheckboxItem: React.FC<CheckboxItemProps> = ({
+  closeOnClick = true,
+  description,
+  className,
+  children,
+  ...others
+}) => {
+  const labelId = useId();
+  const descriptionId = useId();
+  return (
+    <BaseMenu.CheckboxItem
+      aria-labelledby={labelId}
+      aria-describedby={description ? descriptionId : undefined}
+      {...others}
+      closeOnClick={closeOnClick}
+      className={classNames(styles.item, styles.neutral, className)}
+    >
+      <span className={styles.icon} aria-hidden="true">
+        <Icon icon={square} className={styles.whenUnchecked} />
+        <Icon icon={squareCheck} className={styles.whenChecked} />
+      </span>
+      <span className={styles.text}>
+        <span id={labelId} className={styles.label}>
+          {children}
+        </span>
+        {description ? (
+          <span id={descriptionId} className={styles.description}>
+            {description}
+          </span>
+        ) : null}
+      </span>
+    </BaseMenu.CheckboxItem>
+  );
+};
+
 type SeparatorProps = Omit<BaseMenu.Separator.Props, "className"> & {
   className?: string;
 };
@@ -125,5 +177,15 @@ const GroupLabel: React.FC<GroupLabelProps> = ({ className, ...others }) => (
   />
 );
 
-export { Root, Trigger, Popup, Item, LinkItem, Separator, Group, GroupLabel };
-export type { PopupProps, ItemProps, LinkItemProps };
+export {
+  Root,
+  Trigger,
+  Popup,
+  Item,
+  LinkItem,
+  CheckboxItem,
+  Separator,
+  Group,
+  GroupLabel,
+};
+export type { PopupProps, ItemProps, LinkItemProps, CheckboxItemProps };
