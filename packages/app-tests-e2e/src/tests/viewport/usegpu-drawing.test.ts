@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
+import { colorfulPixelRatio } from "@/utils/colorfulPixelRatio";
 
 test.use({
   disable3d: false,
@@ -22,8 +23,17 @@ test("?renderer=usegpu draws with the Use.GPU viewport", async ({
 }) => {
   const pageErrors: Error[] = [];
   page.on("pageerror", (error) => pageErrors.push(error));
-  const responses: string[] = [];
-  page.on("response", (response) => responses.push(response.url()));
+  // Use.GPU reports WGSL and validation errors through console.error. Failed
+  // requests log there too (a signed-out session check answers 403).
+  const consoleErrors: string[] = [];
+  page.on("console", (message) => {
+    const text = message.text();
+    if (
+      message.type() === "error" &&
+      !text.startsWith("Failed to load resource")
+    )
+      consoleErrors.push(text);
+  });
 
   const scene = new SceneBuilder();
   scene.folder({ description: "Surface" }).explicitSurface();
@@ -36,7 +46,18 @@ test("?renderer=usegpu draws with the Use.GPU viewport", async ({
   await expect(viewport.locator("[data-ready]")).toBeAttached({
     timeout: 15_000,
   });
-  // A build keeps the module's name as the prefix of its hashed chunk.
-  expect(responses.some((url) => /GpuViewportContent/.test(url))).toBe(true);
+  // `data-ready` marks a device, not a frame: wait for the colored surface.
+  // An empty scene (axes and grid only) reads 0; see `frame-render.test.ts`.
+  await expect
+    .poll(
+      async () =>
+        colorfulPixelRatio(
+          page,
+          (await viewport.screenshot()).toString("base64"),
+        ),
+      { timeout: 15_000 },
+    )
+    .toBeGreaterThan(0.1);
   expect(pageErrors).toEqual([]);
+  expect(consoleErrors).toEqual([]);
 });

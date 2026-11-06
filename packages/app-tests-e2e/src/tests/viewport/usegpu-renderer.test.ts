@@ -17,8 +17,8 @@ test("?renderer=usegpu without a WebGPU adapter draws MathBox and says so", asyn
   });
   const pageErrors: Error[] = [];
   page.on("pageerror", (error) => pageErrors.push(error));
-  const responses: string[] = [];
-  page.on("response", (response) => responses.push(response.url()));
+  const requests: string[] = [];
+  page.on("request", (request) => requests.push(request.url()));
 
   const scene = new SceneBuilder();
   scene.folder({ description: "Surface" }).explicitSurface();
@@ -34,6 +34,6 @@ test("?renderer=usegpu without a WebGPU adapter draws MathBox and says so", asyn
     ),
   ).toBeVisible();
   // A build keeps the module's name as the prefix of its hashed chunk.
-  expect(responses.filter((url) => /GpuViewportContent/.test(url))).toEqual([]);
+  expect(requests.filter((url) => /GpuViewportContent/.test(url))).toEqual([]);
   expect(pageErrors).toEqual([]);
 });
