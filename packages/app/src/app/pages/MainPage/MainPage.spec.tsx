@@ -321,16 +321,13 @@ const ReportsNoDevice = ({ onUnsupported }: ContentProps) => {
 describe("renderer", () => {
   const NOTICE =
     "This link asks for the experimental WebGPU renderer, which isn't available in this browser. Showing the scene with the default renderer.";
+  const FAILED =
+    "The WebGPU renderer couldn't start on this device. Showing the scene with the default renderer.";
 
   test("a stored Use.GPU preference waits for detection, then draws Use.GPU", async () => {
     storeRendererPreference("usegpu");
-    let resolveAdapter: (adapter: unknown) => void = () => {};
-    stubWebGpu(
-      () =>
-        new Promise((resolve) => {
-          resolveAdapter = resolve;
-        }),
-    );
+    const adapter = Promise.withResolvers<unknown>();
+    stubWebGpu(() => adapter.promise);
     const item = makeItem(MIT.Point);
     const scene = seedDb.withSceneFromItems([item]);
     renderTestApp(`/${scene.key}`);
@@ -338,7 +335,7 @@ describe("renderer", () => {
     await findItemByTestId(item.id);
     expect(screen.queryByTestId("scene")).toBeNull();
 
-    await act(async () => resolveAdapter({}));
+    await act(async () => adapter.resolve({}));
     expect(await screen.findByTestId("scene")).toHaveAttribute(
       "data-renderer",
       "usegpu",
@@ -361,6 +358,14 @@ describe("renderer", () => {
     expect(screen.queryByText(NOTICE)).toBeNull();
   });
 
+  test("?renderer=usegpu on a missing scene shows no notice", async () => {
+    renderTestApp("/nonexistent-scene-key?renderer=usegpu");
+    expect(
+      await screen.findByRole("heading", { name: "This scene doesn’t exist." }),
+    ).toBeVisible();
+    expect(screen.queryByText(NOTICE)).toBeNull();
+  });
+
   test("a stored preference without WebGPU draws MathBox silently", async () => {
     storeRendererPreference("usegpu");
     renderTestApp("/");
@@ -371,25 +376,38 @@ describe("renderer", () => {
     expect(screen.queryByText(NOTICE)).toBeNull();
   });
 
-  test("a device failure under a stored preference falls back to MathBox", async () => {
+  test("a device failure under a stored preference draws MathBox, says so, and resets the preference", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     storeRendererPreference("usegpu");
     stubWebGpu();
     gpuContent.Component = ReportsNoDevice;
     renderTestApp("/");
 
-    await waitFor(() =>
-      expect(screen.getByTestId("scene")).toHaveAttribute(
-        "data-renderer",
-        "mathbox",
-      ),
+    expect(await screen.findByText(FAILED)).toBeInTheDocument();
+    expect(screen.getByTestId("scene")).toHaveAttribute(
+      "data-renderer",
+      "mathbox",
     );
     expect(warn).toHaveBeenCalledWith(noDevice);
-    expect(screen.queryByText(NOTICE)).toBeNull();
     expect(localStorage.getItem(RENDERER_PREFERENCE_KEY)).toBe("mathbox");
   });
 
-  test("an invalid ?renderer is logged and drawn as MathBox", async () => {
+  test("a device failure under ?renderer=usegpu keeps the param and shows the failure, not the link notice", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    stubWebGpu();
+    gpuContent.Component = ReportsNoDevice;
+    const { location } = renderTestApp("/?renderer=usegpu");
+
+    expect(await screen.findByText(FAILED)).toBeInTheDocument();
+    expect(screen.getByTestId("scene")).toHaveAttribute(
+      "data-renderer",
+      "mathbox",
+    );
+    expect(screen.queryByText(NOTICE)).toBeNull();
+    expect(location.current.search).toBe("?renderer=usegpu");
+  });
+
+  test("an invalid ?renderer is logged and ignored", async () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     renderTestApp("/?renderer=foo");
     expect(await screen.findByTestId("scene")).toHaveAttribute(

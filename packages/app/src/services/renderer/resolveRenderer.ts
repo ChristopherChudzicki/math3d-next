@@ -1,12 +1,13 @@
 import type { WebGpuSupport } from "./webgpuSupport";
 
-type Renderer = "mathbox" | "usegpu";
+const RENDERERS = ["mathbox", "usegpu"] as const;
+type Renderer = (typeof RENDERERS)[number];
 
 const isRenderer = (value: unknown): value is Renderer =>
-  value === "mathbox" || value === "usegpu";
+  RENDERERS.includes(value as Renderer);
 
 type ResolvedRenderer = {
-  /** `null` while WebGPU detection is pending. */
+  /** `null` while Use.GPU is requested and WebGPU detection is pending. */
   renderer: Renderer | null;
   /** `true` when the URL asked for Use.GPU and this browser can't run it. */
   notice: boolean;
@@ -28,5 +29,5 @@ const resolveRenderer = ({
   return { renderer: "mathbox", notice: param === "usegpu" };
 };
 
-export { isRenderer, resolveRenderer };
+export { RENDERERS, isRenderer, resolveRenderer };
 export type { Renderer, ResolvedRenderer };

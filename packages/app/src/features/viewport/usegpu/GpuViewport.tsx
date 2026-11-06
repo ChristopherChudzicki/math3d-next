@@ -7,12 +7,9 @@ import * as Sentry from "@sentry/react";
 import Button from "@/ui/Button";
 import { useAppSelector } from "@/store/hooks";
 import * as select from "@/store/scene/state/selectors";
-import {
-  focusRendererSetting,
-  markWebGpuUnavailable,
-  setRendererPreference,
-  useRenderer,
-} from "@/services/renderer";
+import { setRendererPreference } from "@/services/renderer/rendererPreference";
+import { useSwitchToDefaultRenderer } from "@/services/renderer/useSwitchToDefaultRenderer";
+import { markWebGpuFailed } from "@/services/renderer/webgpuSupport";
 import is3dDisabled from "@/features/viewport/shared/is3dDisabled";
 import { useHasViewportItems } from "@/features/viewport/shared/useViewportItems";
 
@@ -22,11 +19,7 @@ const GpuViewportContent = React.lazy(
 );
 
 const ErrorFallback: React.FC = () => {
-  const { chooseRenderer } = useRenderer();
-  const switchToDefault = () => {
-    chooseRenderer("mathbox");
-    focusRendererSetting();
-  };
+  const switchToDefault = useSwitchToDefaultRenderer();
   // Centered: an open sidebar covers the viewport's left edge.
   return (
     <div
@@ -52,7 +45,9 @@ const GpuViewport: React.FC<Props> = ({ className }) => {
   const loadCount = useAppSelector(select.loadCount);
   const onUnsupported = useCallback((error: unknown) => {
     // Use.GPU calls this on every render while in error; report the first.
-    if (!markWebGpuUnavailable()) return;
+    if (!markWebGpuFailed()) return;
+    // Not `chooseRenderer`: a `?renderer=usegpu` stays in the URL, which is
+    // safe because resolution draws MathBox once WebGPU has failed.
     setRendererPreference("mathbox");
     // A browser limitation, not an app error.
     const message = error instanceof Error ? error.message : String(error);

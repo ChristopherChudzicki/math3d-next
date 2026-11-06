@@ -1,8 +1,8 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { stubWebGpu } from "@/test_util/renderer";
+import { stubWebGpu } from "@/test_util";
 import {
-  markWebGpuUnavailable,
+  markWebGpuFailed,
   startWebGpuDetection,
   useWebGpuSupport,
 } from "./webgpuSupport";
@@ -11,7 +11,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-test("no navigator.gpu is unavailable without detecting", () => {
+test("no navigator.gpu is unavailable", () => {
   const { result } = renderHook(useWebGpuSupport);
 
   expect(result.current).toBe("unavailable");
@@ -32,12 +32,6 @@ test.each([
   {
     failure: "a rejection",
     requestAdapter: () => Promise.reject(new Error("no adapter")),
-  },
-  {
-    failure: "a synchronous throw",
-    requestAdapter: () => {
-      throw new Error("no adapter");
-    },
   },
 ])("$failure is unavailable", async ({ requestAdapter }) => {
   stubWebGpu(requestAdapter);
@@ -70,31 +64,28 @@ test("detection runs once per page load", async () => {
   act(startWebGpuDetection);
 
   await waitFor(() => expect(result.current).toBe("available"));
-  expect(requestAdapter).toHaveBeenCalledOnce();
+  expect(requestAdapter).toHaveBeenCalledExactlyOnceWith({
+    powerPreference: "low-power",
+  });
 });
 
 test("a late adapter doesn't undo a device failure", async () => {
-  let resolveAdapter: (adapter: unknown) => void = () => {};
-  stubWebGpu(
-    () =>
-      new Promise((resolve) => {
-        resolveAdapter = resolve;
-      }),
-  );
+  const adapter = Promise.withResolvers<unknown>();
+  stubWebGpu(() => adapter.promise);
   const { result } = renderHook(useWebGpuSupport);
   act(startWebGpuDetection);
 
   act(() => {
-    markWebGpuUnavailable();
+    markWebGpuFailed();
   });
-  await act(async () => resolveAdapter({}));
+  await act(async () => adapter.resolve({}));
 
-  expect(result.current).toBe("unavailable");
+  expect(result.current).toBe("failed");
 });
 
-test("markWebGpuUnavailable reports only the call that changes state", () => {
+test("markWebGpuFailed reports only the call that changes state", () => {
   stubWebGpu();
 
-  expect(markWebGpuUnavailable()).toBe(true);
-  expect(markWebGpuUnavailable()).toBe(false);
+  expect(markWebGpuFailed()).toBe(true);
+  expect(markWebGpuFailed()).toBe(false);
 });

@@ -13,12 +13,12 @@ import SliderAnimations from "@/features/editor/items/forms/VariableSlider/Slide
 import Sidebar from "@/ui/Sidebar";
 import { useBodyClass, useToggle } from "@/util/hooks";
 import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
+import { isRenderer } from "@/services/renderer/resolveRenderer";
+import { RENDERER_PARAM, useRenderer } from "@/services/renderer/useRenderer";
 import {
-  RENDERER_PARAM,
-  isRenderer,
   startWebGpuDetection,
-  useRenderer,
-} from "@/services/renderer";
+  useWebGpuSupport,
+} from "@/services/renderer/webgpuSupport";
 
 import ToggleKeyboardButton from "@/features/editor/virtualKeyboard/KeyboardControls";
 
@@ -34,11 +34,28 @@ import LegacyBanner from "./components/LegacyBanner";
 import RendererPill from "./components/RendererPill";
 import SceneUnavailable from "./components/SceneUnavailable";
 import WebGpuNotice from "./components/WebGpuNotice";
+import type { WebGpuNoticeReason } from "./components/WebGpuNotice";
 
 type UseSearchEnumOptions<T extends string = string> = {
   name: string;
   values: readonly T[];
   defaultValue: T;
+};
+
+/** Logs a present search parameter that `isValid` rejects. */
+const useLogInvalidSearchParam = (
+  name: string,
+  isValid: (raw: string) => boolean,
+) => {
+  const [search] = useSearchParams();
+  const raw = search.get(name);
+  const valid = raw === null || isValid(raw);
+  useEffect(() => {
+    if (!valid) {
+      // eslint-disable-next-line no-console
+      console.error(`Invalid value ${raw} for search parameter ${name}`);
+    }
+  }, [valid, name, raw]);
 };
 
 const useSearchEnum = <T extends string>({
@@ -50,14 +67,12 @@ const useSearchEnum = <T extends string>({
   const location = useLocation();
   const navigate = useNavigate();
   const raw = search.get(name);
-  const valid = raw === null || values.includes(raw as T);
-  useEffect(() => {
-    if (!valid) {
-      // eslint-disable-next-line no-console
-      console.error(`Invalid value ${raw} for search parameter ${name}`);
-    }
-  }, [valid, name, raw]);
-  const value = valid ? (raw as T) ?? defaultValue : defaultValue;
+  const isValue = useCallback(
+    (value: string) => values.includes(value as T),
+    [values],
+  );
+  useLogInvalidSearchParam(name, isValue);
+  const value = raw !== null && isValue(raw) ? (raw as T) : defaultValue;
   const set = useCallback(
     (v: T) => {
       const next = new URLSearchParams(search);
@@ -74,20 +89,6 @@ const useSearchEnum = <T extends string>({
 };
 
 const CONTROLS_VALUES = ["0", "1"] as const;
-
-/** `useRenderer` reads an invalid `?renderer` as missing; this page logs it. */
-const useLogInvalidRendererParam = () => {
-  const [search] = useSearchParams();
-  const raw = search.get(RENDERER_PARAM);
-  useEffect(() => {
-    if (raw !== null && !isRenderer(raw)) {
-      // eslint-disable-next-line no-console
-      console.error(
-        `Invalid value ${raw} for search parameter ${RENDERER_PARAM}`,
-      );
-    }
-  }, [raw]);
-};
 
 const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
@@ -134,7 +135,12 @@ const MainPage: React.FC = () => {
   const controlsOpen = controlsVisibility === "1";
   useEffect(() => startWebGpuDetection(), []);
   const { renderer, notice } = useRenderer();
-  useLogInvalidRendererParam();
+  const webgpu = useWebGpuSupport();
+  // The notice would sit above the card that says the scene doesn't exist.
+  let noticeReason: WebGpuNoticeReason | null = null;
+  if (!unavailable && webgpu === "failed") noticeReason = "failed";
+  else if (!unavailable && notice) noticeReason = "link";
+  useLogInvalidSearchParam(RENDERER_PARAM, isRenderer);
   const SceneViewport = renderer === "usegpu" ? GpuViewport : Viewport;
   const handleControlsClick = useCallback(
     (currentlyOpen: boolean) => {
@@ -155,7 +161,7 @@ const MainPage: React.FC = () => {
       <div className={styles.container}>
         <Header title={<SceneTitle />} />
         <BannerDisplay />
-        <WebGpuNotice active={notice} />
+        <WebGpuNotice reason={noticeReason} />
         {sceneKey && isLegacy ? (
           <LegacyBanner sceneKey={sceneKey} onViewDetails={legacyDialog.on} />
         ) : null}
@@ -183,7 +189,7 @@ const MainPage: React.FC = () => {
               >
                 <SceneControls loading={sceneLoad.status === "loading"} />
               </Sidebar>
-              {/* Empty while WebGPU detection is pending. */}
+              {/* Empty while detection decides whether Use.GPU can draw. */}
               {renderer ? (
                 <SceneViewport
                   className={

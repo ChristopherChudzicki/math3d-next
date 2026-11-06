@@ -13,6 +13,7 @@ import {
   waitForAppReady,
   within,
 } from "@/test_util";
+import { markWebGpuFailed } from "@/services/renderer/webgpuSupport";
 
 test.each([
   {
@@ -245,6 +246,7 @@ describe("the renderer item", () => {
       await user.click(await screen.findByRole("button", { name: trigger }));
 
       const item = await screen.findByRole("menuitemcheckbox", { name: ITEM });
+      await waitFor(() => expect(item).not.toHaveAttribute("aria-disabled"));
       expect(item).toHaveAttribute("aria-checked", "false");
       const reference = screen.getByRole("menuitem", {
         name: "Function Reference",
@@ -262,12 +264,24 @@ describe("the renderer item", () => {
   test("an adapter that resolves null disables the item and says why", async () => {
     stubWebGpu(async () => null);
     renderTestApp("");
-    // Lets the null adapter settle before the menu is opened.
-    await act(() => Promise.resolve());
+    await openMenu();
+    const item = screen.getByRole("menuitemcheckbox", { name: ITEM });
+    await waitFor(() =>
+      expect(item).toHaveAccessibleDescription("Not available in this browser"),
+    );
+    expect(item).toHaveAttribute("aria-disabled", "true");
+  });
+
+  test("after a device failure the item is disabled and says so", async () => {
+    stubWebGpu();
+    renderTestApp("");
+    act(() => {
+      markWebGpuFailed();
+    });
     await openMenu();
     const item = screen.getByRole("menuitemcheckbox", { name: ITEM });
     expect(item).toHaveAttribute("aria-disabled", "true");
-    expect(item).toHaveAccessibleDescription("Not available in this browser");
+    expect(item).toHaveAccessibleDescription("Couldn't start on this device");
   });
 
   test("checking it draws Use.GPU and closes the menu", async () => {

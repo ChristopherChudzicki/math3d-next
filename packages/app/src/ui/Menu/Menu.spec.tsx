@@ -68,8 +68,10 @@ test("clicking a checkbox item toggles it and closes the menu", async () => {
     screen.getByRole("menuitemcheckbox", { name: "Experimental" }),
   );
 
-  expect(onCheckedChange).toHaveBeenCalledOnce();
-  expect(onCheckedChange.mock.calls[0][0]).toBe(true);
+  expect(onCheckedChange).toHaveBeenCalledExactlyOnceWith(
+    true,
+    expect.anything(),
+  );
   await waitFor(() => expect(menu).not.toBeInTheDocument());
 });
 

@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 
-type WebGpuSupport = "pending" | "available" | "unavailable";
+/** `failed`: an adapter was found, but Use.GPU couldn't start a device on it. */
+type WebGpuSupport = "pending" | "available" | "unavailable" | "failed";
 
 const DETECTION_TIMEOUT_MS = 2000;
 
@@ -29,10 +30,13 @@ const subscribe = (listener: () => void) => {
 const useWebGpuSupport = (): WebGpuSupport =>
   useSyncExternalStore(subscribe, () => state);
 
-// Use.GPU requests its own adapter, so this one is discarded.
+// Use.GPU requests its own adapter, so this one is discarded. `low-power`
+// keeps the check off a discrete GPU.
 const requestAdapter = async (): Promise<WebGpuSupport> => {
   try {
-    const adapter = await navigator.gpu.requestAdapter();
+    const adapter = await navigator.gpu.requestAdapter({
+      powerPreference: "low-power",
+    });
     return adapter ? "available" : "unavailable";
   } catch {
     return "unavailable";
@@ -56,9 +60,9 @@ const startWebGpuDetection = (): void => {
 };
 
 /** Returns `true` only on the call that changed the state. */
-const markWebGpuUnavailable = (): boolean => {
-  if (state === "unavailable") return false;
-  setState("unavailable");
+const markWebGpuFailed = (): boolean => {
+  if (state === "failed") return false;
+  setState("failed");
   return true;
 };
 
@@ -69,7 +73,7 @@ const resetWebGpuSupport = (): void => {
 };
 
 export {
-  markWebGpuUnavailable,
+  markWebGpuFailed,
   resetWebGpuSupport,
   startWebGpuDetection,
   useWebGpuSupport,

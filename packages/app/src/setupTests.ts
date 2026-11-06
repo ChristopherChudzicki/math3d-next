@@ -1,10 +1,8 @@
 import { server } from "@math3d/mock-api/node";
 import { mockAuth } from "@math3d/mock-api";
 import { shownToasts } from "@/ui/Toast/toasts";
-import {
-  resetRendererPreference,
-  resetWebGpuSupport,
-} from "@/services/renderer";
+import { resetRendererPreference } from "@/services/renderer/rendererPreference";
+import { resetWebGpuSupport } from "@/services/renderer/webgpuSupport";
 import { gpuContent } from "@/test_util/gpuViewportContent";
 import type { ContentProps } from "@/test_util/gpuViewportContent";
 
@@ -45,8 +43,8 @@ vitest.mock("@/util/hooks/useShadowStylesheet");
 vitest.mock("@/ui/TextareaAutoWidthHeight/TextMeasurer");
 
 /**
- * Use.GPU needs WebGPU, which JSDOM lacks. A test sets `gpuContent.Component`
- * to choose how the lazy renderer behaves.
+ * Vitest's JSDOM run can't import Use.GPU (ADR-0008), which also needs WebGPU.
+ * A test sets `gpuContent.Component` to choose how the lazy renderer behaves.
  */
 vi.mock("@/features/viewport/usegpu/live/GpuViewportContent", async () => {
   const shared = await import("@/test_util/gpuViewportContent");

@@ -100,9 +100,6 @@
 .description {
   font-size: var(--font-size-small);
   color: var(--color-text-light);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .separator {

@@ -12,7 +12,7 @@ test.each([
   { isAuthenticated: false, trigger: "Open Menu" },
   { isAuthenticated: true, trigger: "Open User Menu" },
 ])(
-  "the pill explains the renderer and switches back, focusing the menu ($trigger)",
+  "the pill explains the renderer and switches back, focusing the menu trigger ($trigger)",
   async ({ isAuthenticated, trigger }) => {
     stubWebGpu();
     storeRendererPreference("usegpu");
@@ -24,7 +24,7 @@ test.each([
       name: "WebGPU renderer",
     });
     expect(popover).toHaveTextContent(
-      "You're using the experimental WebGPU renderer. You can change this in the menu.",
+      "You're using the experimental WebGPU renderer. You can also change this in the menu.",
     );
 
     await user.click(
@@ -39,7 +39,7 @@ test.each([
     await waitFor(() =>
       expect(screen.queryByRole("button", { name: "WebGPU" })).toBeNull(),
     );
-    expect(document.activeElement).toBe(menuTrigger);
+    expect(menuTrigger).toHaveFocus();
   },
 );
 

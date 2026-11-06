@@ -6,7 +6,10 @@ import lightbulb from "@iconify-icons/lucide/lightbulb";
 import circleHelp from "@iconify-icons/lucide/circle-help";
 import SceneActions from "@/features/sceneActions/SceneActions";
 
-import { useRenderer, useWebGpuSupport } from "@/services/renderer";
+import { RENDERER_SETTING_ID } from "@/services/renderer/focusRendererSetting";
+import { useRenderer } from "@/services/renderer/useRenderer";
+import { useWebGpuSupport } from "@/services/renderer/webgpuSupport";
+import type { WebGpuSupport } from "@/services/renderer/webgpuSupport";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { DISPLAY_AUTH_FLOWS } from "@/config/displayAuthFlows";
 import { ISSUE_URL } from "@/config/issueUrl";
@@ -43,6 +46,11 @@ const LoginButtons: React.FC<{
       Sign in
     </Button>
   );
+};
+
+const UNAVAILABLE_REASON: Partial<Record<WebGpuSupport, string>> = {
+  unavailable: "Not available in this browser",
+  failed: "Couldn't start on this device",
 };
 
 const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
@@ -90,11 +98,7 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
         checked={renderer === "usegpu"}
         onCheckedChange={(on) => chooseRenderer(on ? "usegpu" : "mathbox")}
         disabled={webGpuSupport !== "available"}
-        description={
-          webGpuSupport === "unavailable"
-            ? "Not available in this browser"
-            : undefined
-        }
+        description={UNAVAILABLE_REASON[webGpuSupport]}
       >
         WebGPU renderer (experimental)
       </Menu.CheckboxItem>
@@ -161,7 +165,11 @@ const AppHeader: React.FC<AppHeaderProps> = (props) => {
         <>
           <SceneActions />
           <LoginButtons isAuthenticated={authStatus} />
-          <UserMenu authStatus={authStatus} email={userQuery.data?.email}>
+          <UserMenu
+            authStatus={authStatus}
+            email={userQuery.data?.email}
+            triggerId={RENDERER_SETTING_ID}
+          >
             <UserMenuItems authStatus={authStatus} />
           </UserMenu>
         </>

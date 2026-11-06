@@ -7,7 +7,7 @@ import { SceneBuilder } from "@math3d/mock-api";
 import * as Sentry from "@sentry/react";
 import { getStore } from "@/store/store";
 import { actions } from "@/store/scene/state/scene.slice";
-import { RENDERER_SETTING_ID } from "@/services/renderer";
+import { RENDERER_SETTING_ID } from "@/services/renderer/focusRendererSetting";
 import { RENDERER_PREFERENCE_KEY } from "@/services/renderer/rendererPreference";
 import { stubWebGpu } from "@/test_util";
 import { gpuContent } from "@/test_util/gpuViewportContent";
@@ -58,7 +58,7 @@ test("with 3D disabled it renders the empty scene container", () => {
   expect(screen.getByTestId("scene")).toBeEmptyDOMElement();
 });
 
-test("when the renderer reports WebGPU unsupported it reports once", async () => {
+test("a repeated unsupported report warns and reaches Sentry once", async () => {
   const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
   stubWebGpu();
   gpuContent.Component = ReportsUnsupportedTwice;

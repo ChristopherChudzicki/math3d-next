@@ -142,18 +142,16 @@ const CheckboxItem: React.FC<CheckboxItemProps> = ({
         <Icon icon={square} className={styles.whenUnchecked} />
         <Icon icon={squareCheck} className={styles.whenChecked} />
       </span>
-      {description ? (
-        <span className={styles.text}>
-          <span id={labelId} className={styles.label}>
-            {children}
-          </span>
+      <span className={styles.text}>
+        <span id={labelId} className={styles.label}>
+          {children}
+        </span>
+        {description ? (
           <span id={descriptionId} className={styles.description}>
             {description}
           </span>
-        </span>
-      ) : (
-        <span className={styles.label}>{children}</span>
-      )}
+        ) : null}
+      </span>
     </BaseMenu.CheckboxItem>
   );
 };

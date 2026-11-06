@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
-import { storeRendererPreference } from "@/test_util/renderer";
+import { storeRendererPreference } from "@/test_util";
 import {
   resetRendererPreference,
   setRendererPreference,

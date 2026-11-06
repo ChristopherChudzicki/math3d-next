@@ -51,7 +51,7 @@ test.each([
     expected: { renderer: "mathbox", notice: false },
   },
 ] as const)(
-  "?renderer=$param, preference $preference, WebGPU $webgpu",
+  "?renderer=$param, preference $preference, WebGPU $webgpu → $expected.renderer, notice $expected.notice",
   ({ expected, ...input }) => {
     expect(resolveRenderer(input)).toEqual(expected);
   },
