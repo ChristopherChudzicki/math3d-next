@@ -23,6 +23,7 @@ test("reads what was stored", () => {
   const { result } = renderHook(useRendererPreference);
 
   choose("usegpu");
+  act(resetRendererPreference);
 
   expect(result.current).toBe("usegpu");
   expect(localStorage.rendererPreference).toBe("usegpu");
@@ -38,14 +39,15 @@ test("a garbage value reads as unset", () => {
 
 test("storage that throws reads as unset and keeps the choice in memory", () => {
   storeRendererPreference("usegpu");
+  const { result } = renderHook(useRendererPreference);
+  expect(result.current).toBe("usegpu");
   vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
     throw new DOMException("denied", "SecurityError");
   });
   vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
     throw new DOMException("quota", "QuotaExceededError");
   });
-  resetRendererPreference();
-  const { result } = renderHook(useRendererPreference);
+  act(resetRendererPreference);
   expect(result.current).toBeNull();
 
   choose("usegpu");
