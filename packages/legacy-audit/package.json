@@ -1,6 +1,6 @@
 {
   "name": "@math3d/legacy-audit",
-  "description": "Checks for the legacy-scene migration audit (docs/legacy-audit/). Its specs run only when given audit data; delete after the math3d.org cutover.",
+  "description": "Checks for the legacy-scene migration audit (docs/legacy-audit/). The full-corpus runner (evaluateNext.spec.ts) runs only when given audit data; delete after the math3d.org cutover.",
   "private": true,
   "type": "module",
   "devDependencies": {

@@ -87,9 +87,12 @@ const AXIS_HELPERS = ["x", "y", "z"].flatMap((axis) => {
 const toParseableObj = (item: MathItemPatch, field: string, expr: string) => {
   const { axis } = item.properties as { axis?: string };
   if (item.type === MathItemType.Axis && (field === "min" || field === "max")) {
+    if (!axis) {
+      throw new Error("An axis's bounds sync together with its axis property.");
+    }
     return {
       type: "assignment" as const,
-      lhs: axisBoundName(axis ?? "", field),
+      lhs: axisBoundName(axis, field),
       rhs: expr,
     };
   }
@@ -178,7 +181,7 @@ const features = (parseable: Parseable): string[] => {
       } else if (math.isConditionalNode(n)) {
         found.add("conditional");
       } else if (math.isFunctionAssignmentNode(n)) {
-        // Graphics' own functions are named _f.
+        // Graphics' own functions (_f) start with _.
         if (!n.name.startsWith("_")) found.add("function_assignment");
       } else if (math.isRelationalNode(n)) {
         found.add("relational");
@@ -308,7 +311,7 @@ type ColorUse = {
 };
 
 // What a translated color body says about the legacy one: math3d-react's X
-// became rescale_x(<x slot>) (webserver legacy_scene_utils/color_expr.py).
+// became rescale_x(<x slot>) (webserver/scenes/legacy_scene_utils/color_expr.py).
 const colorUse = (parseable: Parseable): ColorUse => {
   const use: ColorUse = { rescaled: new Set(), onlyRescaled: [false, false] };
   if (
@@ -449,7 +452,7 @@ const evaluateScene = (migrated: Migrated): SceneResult => {
       if (!idsByName.has(name)) idsByName.set(name, bounds);
     });
   });
-  // From the axis fields, which rescale_x reads; a user's x_min hides app:x_min.
+  // _x_min etc., which rescale_x reads, not x_min, which a user can override.
   const axisBounds = ["x", "y", "z"].map((axis) =>
     ["min", "max"].map((bound) => {
       const ids = idsByName.get(axisBoundName(axis, bound)) ?? [];
@@ -494,4 +497,3 @@ const evaluateScene = (migrated: Migrated): SceneResult => {
 };
 
 export { evaluateScene, usesAny };
-export type { FieldResult, SceneResult, Status };

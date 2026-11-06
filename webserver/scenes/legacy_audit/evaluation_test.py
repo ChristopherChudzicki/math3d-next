@@ -1,6 +1,7 @@
 import pytest
 
 from scenes.legacy_audit.evaluation import (
+    MISSING,
     OK,
     Pair,
     PairSpec,
@@ -116,6 +117,8 @@ def test_vector_retries_are_compared_when_both_sides_have_them():
         ([1.0, 2.0], [0, 0], "zero_vs_value"),
         ([1.0, 2.0, 3.0], [3.0, 1.0, 2.0], "permuted"),
         (fn({"re": 0, "im": 2}, 1), fn(NAN, 1), "complex_vs_nan"),
+        (fn({"re": 0, "im": 2}, ERR), fn(NAN, NAN), "complex_vs_nan"),
+        (fn({"re": 0, "im": 2}, 1), fn(NAN, 5), "value_vs_nan"),
         (fn({"re": 2, "im": -1}, 1), fn(2, 1), "complex_vs_real"),
         # A complex value with a round-off imaginary part equals its real part.
         (fn({"re": 2, "im": 1e-17}, {"re": 0, "im": 1}), fn(2, NAN), "complex_vs_nan"),
@@ -183,9 +186,31 @@ def test_a_legacy_point_equals_math3d_next_one_element_list_of_it():
     assert pair.outcome == "equal"
 
 
-def test_calculated_visibility_compares_by_truthiness():
-    pair = label(spec("truthiness"), Side(OK, 1), Side(OK, {"bool": True}), TOL)
-    assert pair.outcome == "equal"
+@pytest.mark.parametrize(
+    ("legacy", "nxt", "expected"),
+    [
+        (Side(OK, 1), Side(OK, {"bool": True}), ("equal", None)),
+        (Side(OK, 0), Side("eval", MISSING, "e"), ("equal", None)),
+        # math3d-react leaves an item visible unless the value is a boolean or
+        # a number; math3d-next hides it when the expression errors.
+        (
+            Side("eval", MISSING, "e"),
+            Side("eval", MISSING, "e"),
+            ("differ", "next_hides"),
+        ),
+        (Side(OK, [1, 0]), Side(OK, {"bool": False}), ("differ", "next_hides")),
+        (Side(OK, {"bool": False}), Side(OK, 1), ("differ", "next_shows")),
+    ],
+)
+def test_calculated_visibility_compares_what_each_app_draws(legacy, nxt, expected):
+    pair = label(spec("truthiness"), legacy, nxt, TOL)
+    assert (pair.outcome, pair.detail) == expected
+
+
+def test_unused_calculated_visibility_keeps_the_status_table():
+    nothing = Side("eval", MISSING, "e")
+    pair = label(spec("truthiness", severity="editor"), nothing, nothing, TOL)
+    assert pair.outcome == "both_error"
 
 
 @pytest.mark.parametrize(
@@ -211,6 +236,10 @@ def test_calculated_visibility_compares_by_truthiness():
         ),
         ("Can't evaluate 'x'", "Can't evaluate '…'"),
         ("Index 3 out of range", "Index N out of range"),
+        (
+            "g(a, b) needs 2 inputs, or one point [a, b], but got 1",
+            "… needs N inputs, or one point […], but got N",
+        ),
     ],
 )
 def test_template_keeps_function_names_and_hides_user_names_and_numbers(
@@ -257,7 +286,6 @@ def test_slider_bounds_pair_with_range_elements_and_its_value_with_slider_values
     slider = {
         "type": "VARIABLE_SLIDER",
         "name": "T",
-        "value": None,
         "min": "-5",
         "max": "5",
     }
@@ -293,7 +321,6 @@ def test_a_camera_without_use_computed_is_compared_with_numbers_from_evaluated_s
     camera = {
         "type": "CAMERA",
         "useComputed": False,
-        "isOrthographic": False,
         "relativePosition": [2, 4, 6],
         "relativeLookAt": [0, 0, 0],
     }
@@ -335,6 +362,21 @@ def test_a_pair_downstream_of_a_bad_dependency_is_not_a_root():
     items = {"a": {"value": field()}, "b": {"value": field(deps=["a-value"])}}
     mark_roots(pairs, items, items)
     assert [p.root for p in pairs] == [True, False]
+
+
+@pytest.mark.parametrize(
+    ("legacy", "outcome", "root"),
+    [((OK, 1), "regression", True), (("eval",), "both_error", False)],
+)
+def test_a_dependency_failing_in_both_apps_explains_only_a_react_failure(
+    legacy, outcome, root
+):
+    a = Pair(spec(item_id="a"), Side("eval"), Side("eval"), "both_error")
+    b = Pair(spec(item_id="b"), Side(*legacy), Side("eval"), outcome)
+    react = {"a": {"f": field("eval")}, "b": {"f": field(deps=["a-f"])}}
+    nxt = {"a": {"f": field("eval")}, "b": {"f": field("eval", deps=["a-f"])}}
+    mark_roots([a, b], react, nxt)
+    assert b.root is root
 
 
 def test_fields_in_a_dependency_cycle_dont_make_each_other_downstream():

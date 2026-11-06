@@ -1,5 +1,6 @@
 import hashlib
 import json
+import subprocess
 
 import pytest
 from django.core.management import call_command
@@ -14,7 +15,12 @@ from scenes.legacy_audit.evaluation import (
     Tolerance,
     evaluate_scene,
 )
-from scenes.legacy_audit.evaluation_report import Aggregate, fixable_curve
+from scenes.legacy_audit.evaluation_report import (
+    Aggregate,
+    fixable_curve,
+    render_markdown,
+)
+from scenes.legacy_audit.evaluation_test import field
 from scenes.legacy_audit.pass2_allowlist import REPLAYS, Entry
 
 
@@ -34,6 +40,7 @@ def scene(outcome, severity="render", root=True, allowlisted=None):
         (scene("both_error"), "clean", True, True),
         (scene("differ", severity="editor"), "clean", False, True),
         (scene("unsure"), "clean", True, False),
+        (SceneResult("k", 10, crash="boom"), "unclean", False, False),
     ],
 )
 def test_scene_verdicts(result, verdict, strict, verified):
@@ -45,6 +52,19 @@ def test_scene_verdicts(result, verdict, strict, verified):
     )
 
 
+def test_headline_shares_leave_excluded_scenes_out():
+    agg = Aggregate()
+    for result, weight in [
+        (scene("differ", root=False), 30),
+        (scene("regression"), 10),
+        (SceneResult("k", 0, crash="boom"), 20),
+        (SceneResult("k", 0, excluded="legacy_broken"), 40),
+    ]:
+        result.times_accessed = weight
+        agg.add(result, "clean")
+    assert "| Pass-2-clean | 33.33% | 50.00% |" in render_markdown(agg, {"date": "d"})
+
+
 def test_a_both_error_root_is_clustered_but_left_out_of_the_fix_curve():
     agg = Aggregate()
     agg.add(scene("both_error"), "clean")
@@ -53,10 +73,6 @@ def test_a_both_error_root_is_clustered_but_left_out_of_the_fix_curve():
     assert [cid for cid, _, _ in fixable_curve(agg)] == [
         "POINT|coords|regression|other"
     ]
-
-
-def field(status=OK, value=1, **extra):
-    return {"status": status, "value": value, "deps": [], **extra}
 
 
 def slider_scene(next_range):
@@ -132,9 +148,12 @@ def test_a_replay_allowlists_a_differ_pair_only_when_it_gives_reacts_value(
     assert value.allowlisted == allowlisted
 
 
-def write_inputs(tmp_path, nxt_items, extra_next_line=False):
+def write_inputs(tmp_path, nxt_items, extra_next_line=False, nxt_sha256=None):
     exported, rehydrated, react, nxt = slider_scene(field(value=[-5, 5]))
     nxt["items"]["s"].update(nxt_items)
+    nxt["legacy_sha256"] = (
+        nxt_sha256 or hashlib.sha256(json.dumps(exported).encode()).hexdigest()
+    )
     lines = {
         "legacy": [exported],
         "rehydrated": [rehydrated],
@@ -202,3 +221,25 @@ def test_command_rejects_a_replay_of_another_export(tmp_path):
         call_command(
             "audit_legacy_evaluation", *args, *_replay_args(tmp_path, "round", "0")
         )
+
+
+def test_command_rejects_a_next_evaluation_of_another_export(tmp_path):
+    args = write_inputs(tmp_path, {}, nxt_sha256="0")
+    with pytest.raises(CommandError, match="--next is of another --legacy export"):
+        call_command("audit_legacy_evaluation", *args)
+
+
+def test_command_refuses_to_overwrite_an_input(tmp_path):
+    args = write_inputs(tmp_path, {})
+    pass1 = tmp_path / "pass1.jsonl"
+    args[args.index("--out-dir") + 1] = str(tmp_path)
+    (tmp_path / "findings.jsonl").write_text(pass1.read_text())
+    args[args.index(str(pass1))] = str(tmp_path / "findings.jsonl")
+    with pytest.raises(CommandError, match="overwrite"):
+        call_command("audit_legacy_evaluation", *args)
+
+
+def test_command_refuses_an_out_dir_git_would_track(tmp_path):
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    with pytest.raises(CommandError, match="isn't gitignored"):
+        call_command("audit_legacy_evaluation", *write_inputs(tmp_path, {}))

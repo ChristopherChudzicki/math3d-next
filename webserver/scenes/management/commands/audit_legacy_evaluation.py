@@ -11,9 +11,9 @@ they came from and pass 1's findings. Reads files only; no database.
         --react /abs/pass2/eval_react.jsonl --next /abs/pass2/eval_next.jsonl \\
         --out-dir /abs/pass2/ [--replay /abs/pass2/replay_round.jsonl ...]
 
-Writes findings.jsonl and examples.json (per scene or with keys: keep out of
-git) and report.md (aggregates only). Exits non-zero when a field either
-evaluator emitted is neither paired nor known to be unpaired.
+Writes findings.jsonl and examples.json (per scene or with keys, so --out-dir
+must be gitignored) and report.md (aggregates only). Exits non-zero when a
+field either evaluator emitted is neither paired nor known to be unpaired.
 """
 
 import contextlib
@@ -21,6 +21,7 @@ import datetime
 import hashlib
 import itertools
 import json
+import subprocess
 from pathlib import Path
 
 import tqdm
@@ -94,6 +95,8 @@ def _scene_record(
         raise CommandError(f"--pass1 is out of step with --legacy at {legacy['key']}")
     scene_replays = replays.get(legacy["key"], {})
     legacy_sha256 = hashlib.sha256(lines[0].rstrip("\r\n").encode()).hexdigest()
+    if nxt.get("legacy_sha256") != legacy_sha256:
+        raise CommandError(f"--next is of another --legacy export, at {legacy['key']}")
     if any(r["legacy_sha256"] != legacy_sha256 for r in scene_replays.values()):
         raise CommandError(
             f"a --replay is of another --legacy export, at {legacy['key']}"
@@ -146,7 +149,22 @@ class Command(BaseCommand):
             raise CommandError(f"--meta takes key=value: {bad_meta}")
         tol = Tolerance(options["rtol"], options["atol"], options["loose_rtol"])
         out_dir = Path(options["out_dir"])
+        inputs = [
+            options[n] for n in ("legacy", "rehydrated", "pass1", "react", "next")
+        ]
+        if (out_dir / "findings.jsonl").resolve() in {
+            Path(p).resolve() for p in [*inputs, *options["replay"]]
+        }:
+            raise CommandError("--out-dir would overwrite an input's findings.jsonl")
         out_dir.mkdir(parents=True, exist_ok=True)
+        # findings.jsonl and examples.json hold scene keys.
+        tracked = subprocess.run(
+            ["git", "-C", str(out_dir), "check-ignore", "-q", "."],
+            capture_output=True,
+            check=False,
+        )
+        if tracked.returncode == 1:
+            raise CommandError(f"--out-dir {out_dir} isn't gitignored")
         agg = Aggregate()
         replays = _load_replays(options["replay"])
         names = ("legacy", "rehydrated", "react", "next", "pass1")

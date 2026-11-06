@@ -479,9 +479,9 @@ def _variable_slider(item: dict, ctx: Context) -> list[Expectation]:
 _REACT_DOLLY = 50
 
 
-# next:legacy_scene_utils/migrate_scene.py FLAT_AXIS_SCALE: math3d-next rejects
-# a 0 axis scale, so a flat axis is 1/1024 (owner decision 2026-11-03,
-# tk-legacy-scenes-with-an-axis-scale-of-0-show-the-p-7fea41).
+# A copy of scenes/legacy_scene_utils/migrate_scene.py's FLAT_AXIS_SCALE, so
+# pass 1 checks it: math3d-next rejects a 0 axis scale, so a flat axis is
+# 1/1024 (owner decision 2026-11-03, tk-legacy-scenes-with-an-axis-scale-of-0-show-the-p-7fea41).
 _FLAT_AXIS_SCALE = "1/1024"
 
 

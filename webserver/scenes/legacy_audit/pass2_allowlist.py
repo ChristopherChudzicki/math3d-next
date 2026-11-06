@@ -60,7 +60,8 @@ ALLOWLIST: list[Entry] = (
         Entry(
             "differ",
             "complex_vs_nan",
-            "realFunc's Number(...) makes a complex output NaN, which isn't drawn; "
+            "`realFunc`'s `Number(...)` makes a complex output `NaN`, which isn't "
+            "drawn; "
             "owner decision 2026-11-01 (tk-math3d-next-realfunc-turns-a-complex-output-into-0f7f11)",
             item_type,
             next_field,
@@ -71,9 +72,10 @@ ALLOWLIST: list[Entry] = (
         Entry(
             "differ",
             "complex_vs_nan",
-            "2c samples a domain off the drawn range too; within it, math3d-next skips "
-            "a complex bound's rows, and math3d-react draws the same with one complex "
-            "bound but throws every frame with two, so the scene never loads; owner "
+            "Most differing samples fall outside the drawn range. Within it, "
+            "math3d-next skips rows where a bound is complex; math3d-react does the "
+            "same with one complex bound, and with two throws every frame and never "
+            "loads the scene; owner "
             "decision 2026-11-03 (tk-legacy-complex-surface-domains-complex-in-react--ce1718)",
             item_type,
             "domain",
@@ -84,9 +86,10 @@ ALLOWLIST: list[Entry] = (
         Entry(
             "regression",
             "validate: this must be a positive number",
-            "MathBox's volume rejects a non-positive count, so its voxel allocates "
-            "one layer (`dims.width || 1`, etc.), as it does for math3d-next, whose "
-            "validator leaves the count undefined; owner decision 2026-11-03 "
+            "Both apps draw one layer: MathBox's volume rejects a count of 0, which "
+            "leaves it unset, and its voxel allocates `dims.width || 1` etc.; "
+            "math3d-next's validator leaves the count undefined; owner decision "
+            "2026-11-03 "
             "(tk-legacy-vector-fields-with-0-samples-in-a-directi-f57cfc)",
             "VECTOR_FIELD",
             next_field,
@@ -98,7 +101,8 @@ ALLOWLIST: list[Entry] = (
             "differ",
             "zero_vs_value",
             "math3d-next rejects a 0 axis scale, since it divides camera coordinates "
-            "by it (viewport/shared/coordinates.ts), so the translator makes it "
+            "by it (next:app/src/features/viewport/shared/coordinates.ts), so the "
+            "translator makes it "
             "1/1024: flat to the eye; owner decision 2026-11-03 "
             "(tk-legacy-scenes-with-an-axis-scale-of-0-show-the-p-7fea41)",
             "AXIS",
@@ -120,10 +124,10 @@ ALLOWLIST: list[Entry] = (
 )
 
 REPLAYS: dict[str, str] = {
-    "round": "math3d-react's mathjs 3 rounds .5 toward +∞ (Math.round); mathjs 15 "
+    "round": "math3d-react's mathjs 3 rounds .5 toward +∞ (`Math.round`); mathjs 15 "
     "rounds it away from zero; owner decision 2026-11-02 "
     "(tk-pass-2-replay-known-library-convention-changes-s-6acbab)",
     "complex_add": "math3d-react's complex.js 2.0.4 adds infinities component-wise, "
-    "so arg(log 0) is π; 2.4.3 makes the sum (∞, ∞), whose arg is π/4; owner "
+    "so `arg(log 0)` is π; 2.4.3 makes the sum (∞, ∞), whose `arg` is π/4; owner "
     "decision 2026-11-02 (tk-complex-js-arg-of-the-point-at-infinity-is-4-it--61b5fe)",
 }

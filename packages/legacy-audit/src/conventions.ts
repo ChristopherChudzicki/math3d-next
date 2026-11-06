@@ -15,8 +15,7 @@ type ComplexClass = {
 
 const CONVENTIONS = {
   // react's mathjs 3 rounds a number with Math.round, so .5 goes toward +∞;
-  // mathjs 15 rounds it away from zero, after snapping x to a nearby decimal.
-  // round(x, n) keeps mathjs 15's form.
+  // mathjs 15 rounds it away from zero. round(x, n) keeps mathjs 15's.
   round: {
     triggers: ["round"],
     install: () => {
@@ -35,8 +34,7 @@ const CONVENTIONS = {
   },
   // react's complex.js 2.0.4 adds and subtracts component-wise, so
   // -∞ + 0i stays (-∞, 0). 2.4.3 makes a sum with one infinite operand
-  // Complex.INFINITY, (∞, ∞), and ∞ + ∞ NaN. Functions of the sum such as
-  // arg, re, im, abs, norm, conj, sqrt and exp tell the two apart.
+  // Complex.INFINITY, (∞, ∞), and ∞ + ∞ NaN.
   complex_add: {
     triggers: ["arg", "re", "im", "abs", "norm", "conj", "sqrt", "exp"],
     install: () => {

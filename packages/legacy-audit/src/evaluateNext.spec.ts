@@ -2,26 +2,40 @@
  * Legacy audit, pass 2a: runs evaluateNext.ts over every migrated scene.
  *
  * Input: LEGACY_EVAL_NEXT_IN, legacy.jsonl from export_legacy_audit. Output:
- * LEGACY_EVAL_NEXT_OUT, one line per input line. LEGACY_EVAL_NEXT_LIMIT stops
- * after that many scenes.
+ * LEGACY_EVAL_NEXT_OUT, one line per input line, each tagged with the sha256
+ * of its input line, which pass 2c checks against its own input.
+ * LEGACY_EVAL_NEXT_LIMIT stops after that many scenes.
  *
  * With LEGACY_EVAL_NEXT_CONVENTION, a key of CONVENTIONS, this is a replay: it
  * evaluates with that math3d-react convention swapped in, and writes only the
- * scenes that use one of its triggers, each tagged with the convention and the
- * sha256 of its input line, which pass 2c checks against its own input.
+ * scenes that use one of its triggers, each tagged with the convention.
  *
- * Skipped unless LEGACY_EVAL_NEXT_IN and LEGACY_EVAL_NEXT_OUT are set.
+ * Skipped when no LEGACY_EVAL_NEXT_* variable is set.
  */
 import { createHash } from "node:crypto";
 import * as fs from "node:fs";
+import * as path from "node:path";
 import * as readline from "node:readline";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { CONVENTIONS, type Convention } from "./conventions";
 import { evaluateScene, usesAny } from "./evaluateNext";
 
+const configured = Object.keys(process.env).some((k) =>
+  k.startsWith("LEGACY_EVAL_NEXT_"),
+);
 const input = process.env.LEGACY_EVAL_NEXT_IN;
 const output = process.env.LEGACY_EVAL_NEXT_OUT;
-const limit = Number(process.env.LEGACY_EVAL_NEXT_LIMIT ?? Infinity);
+if (configured && (!input || !output)) {
+  throw new Error("Set both LEGACY_EVAL_NEXT_IN and LEGACY_EVAL_NEXT_OUT");
+}
+if (input && output && path.resolve(input) === path.resolve(output)) {
+  throw new Error("LEGACY_EVAL_NEXT_OUT would overwrite LEGACY_EVAL_NEXT_IN");
+}
+const rawLimit = process.env.LEGACY_EVAL_NEXT_LIMIT;
+const limit = rawLimit === undefined ? Infinity : Number(rawLimit);
+if (rawLimit !== undefined && !(Number.isInteger(limit) && limit > 0)) {
+  throw new Error(`LEGACY_EVAL_NEXT_LIMIT must be a positive integer`);
+}
 const convention = process.env.LEGACY_EVAL_NEXT_CONVENTION as
   | Convention
   | undefined;
@@ -30,7 +44,7 @@ if (convention && !Object.hasOwn(CONVENTIONS, convention)) {
 }
 const replay = convention ? CONVENTIONS[convention] : undefined;
 
-describe.skipIf(!input || !output)("legacy evaluation, math3d-next", () => {
+describe.skipIf(!configured)("legacy evaluation, math3d-next", () => {
   const { random } = Math;
   let undo = () => {};
   beforeAll(() => {
@@ -82,10 +96,13 @@ describe.skipIf(!input || !output)("legacy evaluation, math3d-next", () => {
             crashes += 1;
             record = { crashed: (err as Error).message, items: {} };
           }
-          fs.writeSync(
-            fd,
-            `${JSON.stringify({ version: 2, key: scene.key, ...(convention && { convention, legacy_sha256: createHash("sha256").update(line).digest("hex") }), ...record })}\n`,
-          );
+          const out = {
+            key: scene.key,
+            legacy_sha256: createHash("sha256").update(line).digest("hex"),
+            ...(convention && { convention }),
+            ...record,
+          };
+          fs.writeSync(fd, `${JSON.stringify(out)}\n`);
           written += 1;
         }
       }

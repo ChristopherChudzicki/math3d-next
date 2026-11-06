@@ -17,8 +17,10 @@ from scenes.legacy_audit.evaluation import (
     SEVERITY_RANK,
     SceneResult,
     cluster_key,
+    cluster_parts,
     shape,
 )
+from scenes.legacy_audit.pass2_allowlist import ALLOWLIST, REPLAYS
 from scenes.legacy_audit.report import Totals, _cell, _pct, concentration, fix_curve
 
 EXAMPLES_PER_CLUSTER = 5
@@ -178,7 +180,12 @@ def _decade_order(label: str) -> float:
 def fixable_curve(agg: Aggregate) -> list[tuple[str, float, float]]:
     """The fix curve over clusters that make a scene unclean: `both_error`
     is invalid source, not a fixable cause."""
-    return fix_curve(agg, keep=lambda cid: "|both_error|" not in cid)
+    return fix_curve(
+        agg,
+        keep=lambda cid: (
+            cid.startswith("crash|") or cluster_parts(cid)[2] != "both_error"
+        ),
+    )
 
 
 def _cluster_table(agg: Aggregate, keep, limit: int) -> list[str]:
@@ -190,7 +197,7 @@ def _cluster_table(agg: Aggregate, keep, limit: int) -> list[str]:
     for cid, w in agg.cluster_weight.most_common():
         if cid.startswith("crash|"):
             continue
-        item_type, next_field, outcome, detail = cid.split("|", 3)
+        item_type, next_field, outcome, detail = cluster_parts(cid)
         if not keep(outcome):
             continue
         shapes = "; ".join(
@@ -205,6 +212,21 @@ def _cluster_table(agg: Aggregate, keep, limit: int) -> list[str]:
         rows += 1
         if rows >= limit:
             break
+    return lines
+
+
+def _allowlisted(agg: Aggregate) -> list[str]:
+    by_reason: dict[str, Counter] = {
+        r: Counter() for r in [*(e.reason for e in ALLOWLIST), *REPLAYS.values()]
+    }
+    for (cid, reason), n in agg.allowlisted.items():
+        by_reason.setdefault(reason, Counter())[cid] += n
+    lines = []
+    for reason, clusters in sorted(by_reason.items(), key=lambda r: -r[1].total()):
+        lines.append(f"- ×{clusters.total():,}: {reason}")
+        for cid, n in clusters.most_common():
+            item_type, next_field, outcome, detail = cluster_parts(cid)
+            lines.append(f"  - `{item_type}.{next_field}` {outcome} `{detail}` ×{n:,}")
     return lines
 
 
@@ -333,13 +355,9 @@ def render_markdown(agg: Aggregate, meta: dict[str, str]) -> str:
         "",
         "## Allowlisted",
         "",
-        *(
-            [
-                f"- `{_cell(cid)}` ×{n:,}: {reason}"
-                for (cid, reason), n in agg.allowlisted.most_common()
-            ]
-            or ["None."]
-        ),
+        "Pairs each allowlist entry and replay accepted; ×0 means it no longer matches.",
+        "",
+        *_allowlisted(agg),
         "",
         "## Unpaired fields",
         "",

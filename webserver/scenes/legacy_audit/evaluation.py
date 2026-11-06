@@ -31,8 +31,6 @@ MAX_SAMPLED_ARITY = 5
 
 # Fields one evaluator emits that have no counterpart to compare.
 KNOWN_UNPAIRED: dict[tuple[str, str], str] = {
-    # math3d-next evaluates these as "true"/"false" text; math3d-react holds a
-    # JS boolean it never parses. Pass 1 checks the text.
     **{
         ("next", prop): "a JS boolean in math3d-react; pass 1 checks the text"
         for prop in (
@@ -50,7 +48,7 @@ KNOWN_UNPAIRED: dict[tuple[str, str], str] = {
             "isRotateEnabled",
         )
     },
-    # Constants of the translation, checked by pass 1.
+    # Set by the translator, not from user math; pass 1 checks them.
     ("next", "zOrder"): "constant (empty by policy, #1010)",
     ("next", "fps"): "constant",
     ("next", "duration"): "derived from speedMultiplier",
@@ -285,19 +283,28 @@ def signature(a: Any, b: Any, v: Verdict, tol: Tolerance) -> str:
     errors: list[Any] = []
     _leaves(a, b, leaves, errors)
     # A complex value opposite a real one, or opposite NaN (realFunc's
-    # Number(...) of a complex is NaN).
-    opposite = set()
+    # Number(...) of a complex is NaN). complex_vs_nan is allowlisted, so every
+    # other differing leaf must be undrawn in both apps.
+    kinds = []
     for x, y in leaves:
         if compare(x, y, tol).outcome != "differ":
             continue
+        kind = None
         for c, other in ((_as_complex(x), y), (_as_complex(y), x)):
             if c is not None and c[1] != 0:
                 if _nonfinite(other):
-                    opposite.add("complex_vs_nan")
+                    kind = "complex_vs_nan"
                 elif (o := _as_complex(other)) is not None and o[1] == 0:
-                    opposite.add("complex_vs_real")
-    if opposite:
-        return "complex_vs_real" if "complex_vs_real" in opposite else "complex_vs_nan"
+                    kind = "complex_vs_real"
+        kinds.append(kind)
+    if "complex_vs_real" in kinds:
+        return "complex_vs_real"
+    if (
+        "complex_vs_nan" in kinds
+        and all(k == "complex_vs_nan" for k in kinds)
+        and all(_nonfinite(e) for e in errors)
+    ):
+        return "complex_vs_nan"
     if errors:
         return (
             "nan_vs_error" if all(_nonfinite(e) for e in errors) else "value_vs_error"
@@ -375,6 +382,24 @@ def truthy(fp: Any) -> bool | None:
     return None
 
 
+def react_shows(side: Side) -> bool:
+    """Whether math3d-react draws an item with this calculatedVisibility: it
+    applies `!!value` to a boolean or number and otherwise leaves the item
+    visible (react:components/MathBox/MathBoxComponents.js:216-222)."""
+    v = side.value
+    if side.status == OK and (
+        _is_number(v) or (isinstance(v, dict) and ("bool" in v or "nonfinite" in v))
+    ):
+        return bool(truthy(v))
+    return True
+
+
+def next_shows(side: Side) -> bool | None:
+    """`!!calculatedVisibility`; an error leaves no result, so it hides
+    (next:app/src/store/scene/evaluation/mathScope.ts:102-108)."""
+    return truthy(side.value) if side.status == OK else False
+
+
 # --------------------------------------------------------------------------- #
 # Message templates
 # --------------------------------------------------------------------------- #
@@ -406,6 +431,8 @@ def template(message: str | None) -> str:
         return ""
     # An apostrophe inside a word ("doesn't") doesn't open a quote.
     text = re.sub(r"(?<!\w)'[^']*'|\"[^\"]*\"|`[^`]*`", "'…'", message)
+    # A bracketed list names a function's parameters.
+    text = re.sub(r"\[[^\]]*\]", "[…]", text)
     # Digits in a name too (E16 in a coordinate), unless it's a function's (log10).
     text = _TOKEN.sub(
         lambda m: m[0] if m[0] in _FUNCTION_NAMES else _NUMBER.sub("N", m[0]), text
@@ -727,6 +754,17 @@ def label(spec: PairSpec, legacy: Side, nxt: Side, tol: Tolerance) -> Pair:
     if n_ok and not l_ok and no_evidence(nxt.value):
         n_ok = False
         nxt = Side("eval", nxt.value, "no finite value at any sample point")
+    # Only with useCalculatedVisibility (render severity) does either app draw by it.
+    if (
+        spec.rule == "truthiness"
+        and spec.severity == "render"
+        and (shown := next_shows(nxt)) is not None
+    ):
+        if react_shows(legacy) == shown:
+            return Pair(spec, legacy, nxt, "equal")
+        return Pair(
+            spec, legacy, nxt, "differ", "next_shows" if shown else "next_hides"
+        )
     if l_ok and n_ok:
         if nxt.value is MISSING:
             return Pair(spec, legacy, nxt, "unsure", "sibling")
@@ -791,22 +829,34 @@ def mark_roots(pairs: list[Pair], react_items: dict, next_items: dict) -> None:
                 graphs[side][fid] = record.get("deps", [])
                 if record["status"] != OK:
                     bad[side].add(fid)
+    both_bad: set[str] = set()
     for p in pairs:
         if p.outcome in BAD:
             bad["react"].add(f"{p.spec.item_id}-{p.spec.legacy_field}")
             bad["next"].add(f"{p.spec.item_id}-{p.spec.next_field}")
+        if p.outcome == "both_error":
+            both_bad.add(f"{p.spec.item_id}-{p.spec.next_field}")
     caches: dict[str, dict] = {"react": {}, "next": {}}
     for p in pairs:
         if p.outcome not in BAD:
             continue
+        # A field math3d-react evaluated despite its failed dependencies isn't
+        # explained by one that fails in both apps.
+        react_ok = p.legacy.status == OK
+        sides = [("next", f"{p.spec.item_id}-{p.spec.next_field}")]
+        if not react_ok:
+            sides.insert(0, ("react", f"{p.spec.item_id}-{p.spec.legacy_field}"))
         downstream = False
-        for side, fid in (
-            ("react", f"{p.spec.item_id}-{p.spec.legacy_field}"),
-            ("next", f"{p.spec.item_id}-{p.spec.next_field}"),
-        ):
+        for side, fid in sides:
             g, cache = graphs[side], caches[side]
+            ignored = both_bad if react_ok else set()
             for dep in _reach(g, fid, cache):
-                if dep in bad[side] and dep != fid and fid not in _reach(g, dep, cache):
+                if (
+                    dep in bad[side]
+                    and dep not in ignored
+                    and dep != fid
+                    and fid not in _reach(g, dep, cache)
+                ):
                     downstream = True
                     break
             if downstream:
@@ -905,3 +955,9 @@ def replayed(pair: Pair, replays: Mapping[str, dict], tol: Tolerance) -> str | N
 def cluster_key(pair: Pair) -> str:
     s = pair.spec
     return f"{s.item_type}|{s.next_field}|{pair.outcome}|{pair.detail}"
+
+
+def cluster_parts(cid: str) -> tuple[str, str, str, str]:
+    """Type, field, outcome and detail of a non-crash cluster_key."""
+    item_type, next_field, outcome, detail = cid.split("|", 3)
+    return item_type, next_field, outcome, detail

@@ -10,17 +10,17 @@ This checks that legacy math3d-react scenes migrate and display correctly in mat
 
 Every generated file is production scene data. Write it under the main checkout's `db-snapshots/legacy-audit/` (gitignored) with absolute paths, and never commit it. Committed reports contain aggregates only. A scene key grants access to an unlisted scene, so reports never include keys.
 
-| File                       | Written by                                                   | One line per legacy scene, in `LegacyScene.id` order                                                                                                          |
-| -------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `legacy.jsonl`             | `export_legacy_audit`                                        | `{key, times_accessed, dehydrated, migrated: {items, item_order, title, creation_date} \| null, migrate_error: {type, message} \| null}`                      |
-| `rehydrated.jsonl`         | math3d-react `client/src/legacyAudit/rehydrate.audit.js`     | `{key, mathGraphics, mathSymbols, folders, sortableTree, sliderValues, metadata, legacy_broken: [reason]}`                                                    |
-| `pass1/findings.jsonl`     | `audit_legacy_migration`                                     | `{key, times_accessed, verdict, strict_clean, clusters, flags, mismatches, item_failures, order_failures}`                                                    |
-| `pass1/manual_checks.json` | `audit_legacy_migration`                                     | Not per scene: `{hidden_by_blank_visibility: [{rank, key, items}]}`: among the 100 most-viewed scenes, those a policy changes; see below                      |
-| `pass2/eval_next.jsonl`    | math3d-next `packages/legacy-audit/src/evaluateNext.spec.ts` | `{version: 2, key, crashed, items: {<itemId>: {<field>: {status, message?, value?, elements?, deps, features}}}}`                                             |
-| `pass2/eval_react.jsonl`   | math3d-react `client/src/legacyAudit/evaluate.audit.js`      | The same, without `elements` and `features`                                                                                                                   |
-| `pass2/replay_<c>.jsonl`   | math3d-next `evaluateNext.spec.ts` with a convention         | Only the scenes that use convention `<c>`'s triggers: the `eval_next` record plus `convention`                                                                |
-| `pass2/findings.jsonl`     | `audit_legacy_evaluation`                                    | `{key, times_accessed, pass1_verdict, verdict, strict_clean, verified_clean, clusters, pairs: [every non-equal pair]}`, or `{…, verdict: "excluded", reason}` |
-| `pass2/examples.json`      | `audit_legacy_evaluation`                                    | Not per scene: the most-viewed keys of each cluster, for filing tasks                                                                                         |
+| File                       | Written by                                                   | One line per legacy scene, in `LegacyScene.id` order                                                                                                                |
+| -------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `legacy.jsonl`             | `export_legacy_audit`                                        | `{key, times_accessed, dehydrated, migrated: {items, item_order, title, creation_date} \| null, migrate_error: {type, message} \| null}`                            |
+| `rehydrated.jsonl`         | math3d-react `client/src/legacyAudit/rehydrate.audit.js`     | `{key, mathGraphics, mathSymbols, folders, sortableTree, sliderValues, metadata, legacy_broken: [reason]}`                                                          |
+| `pass1/findings.jsonl`     | `audit_legacy_migration`                                     | `{key, times_accessed, verdict, strict_clean, clusters, flags, mismatches, item_failures, order_failures}`                                                          |
+| `pass1/manual_checks.json` | `audit_legacy_migration`                                     | Not per scene: `{hidden_by_blank_visibility: [{rank, key, items}]}`: among the 100 most-viewed scenes, those a policy changes; see below                            |
+| `pass2/eval_next.jsonl`    | math3d-next `packages/legacy-audit/src/evaluateNext.spec.ts` | `{key, legacy_sha256, crashed, items: {<itemId>: {<field>: {status, message?, value?, elements?, deps, features}}}}`: the sha256 of the scene's `legacy.jsonl` line |
+| `pass2/eval_react.jsonl`   | math3d-react `client/src/legacyAudit/evaluate.audit.js`      | The same, without `elements` and `features`                                                                                                                         |
+| `pass2/replay_<c>.jsonl`   | math3d-next `evaluateNext.spec.ts` with a convention         | Only the scenes that use convention `<c>`'s triggers: the `eval_next` record plus `convention`                                                                      |
+| `pass2/findings.jsonl`     | `audit_legacy_evaluation`                                    | `{key, times_accessed, pass1_verdict, verdict, strict_clean, verified_clean, clusters, pairs: [every non-equal pair]}`, or `{…, verdict: "excluded", reason}`       |
+| `pass2/examples.json`      | `audit_legacy_evaluation`                                    | Not per scene: the most-viewed keys of each cluster, for filing tasks                                                                                               |
 
 `react_defaults.json` (math3d-react's `defaultSettings` per type, plus `initialState`) is code-derived, not user data. A copy is checked in at `webserver/scenes/legacy_audit/fixtures/`.
 
@@ -47,23 +47,19 @@ Pass 2 needs pass 1's `legacy.jsonl`, `rehydrated.jsonl` and `pass1/findings.jso
 ```bash
 D=$PWD/db-snapshots/legacy-audit; mkdir -p $D/pass2
 (cd packages/legacy-audit && LEGACY_EVAL_NEXT_IN=$D/legacy.jsonl LEGACY_EVAL_NEXT_OUT=$D/pass2/eval_next.jsonl yarn vitest --run src/evaluateNext.spec.ts)
+(cd packages/legacy-audit && for c in round complex_add; do LEGACY_EVAL_NEXT_CONVENTION=$c LEGACY_EVAL_NEXT_IN=$D/legacy.jsonl LEGACY_EVAL_NEXT_OUT=$D/pass2/replay_$c.jsonl yarn vitest --run src/evaluateNext.spec.ts; done)
 (cd ../math3d-react/client && CI=true LEGACY_EVAL_IN=$D/rehydrated.jsonl LEGACY_EVAL_OUT=$D/pass2/eval_react.jsonl LEGACY_SAMPLE_POINTS=$OLDPWD/packages/legacy-audit/sample_points.json npm test -- --watchAll=false --testMatch '<rootDir>/src/legacyAudit/evaluate.audit.js')
 cd webserver
-IS_DEPLOYMENT=False uv run python manage.py audit_legacy_evaluation --legacy $D/legacy.jsonl --rehydrated $D/rehydrated.jsonl --pass1 $D/pass1/findings.jsonl --react $D/pass2/eval_react.jsonl --next $D/pass2/eval_next.jsonl --out-dir $D/pass2 --meta "Snapshot=prod, pulled <date>" --meta "math3d-next=$(git rev-parse --short HEAD)" --meta "math3d-react=<commit>"
+IS_DEPLOYMENT=False uv run python manage.py audit_legacy_evaluation --legacy $D/legacy.jsonl --rehydrated $D/rehydrated.jsonl --pass1 $D/pass1/findings.jsonl --react $D/pass2/eval_react.jsonl --next $D/pass2/eval_next.jsonl --replay $D/pass2/replay_round.jsonl --replay $D/pass2/replay_complex_add.jsonl --out-dir $D/pass2 --meta "Snapshot=prod, pulled <date>" --meta "math3d-next=$(git rev-parse --short HEAD)" --meta "math3d-react=<commit>"
 ```
 
-Each evaluator takes about 15 minutes, and the join about 4. After a translator fix, re-run `export_legacy_audit`, `audit_legacy_migration`, math3d-next's evaluator, the replays and the join; math3d-react's output doesn't change. After writing the report, `audit_legacy_evaluation` exits non-zero if a field either evaluator emits has no pairing and no known reason to be unpaired: add it to the expected table or to `KNOWN_UNPAIRED` (`legacy_audit/evaluation.py`).
+Each evaluator takes about 15 minutes, the `round` replay about 7, `complex_add` about 13, and the join about 4. The join refuses inputs from different exports and an `--out-dir` git would track. After a translator fix, re-run `export_legacy_audit`, `audit_legacy_migration`, math3d-next's evaluator, the replays and the join; math3d-react's output doesn't change. After writing the report, `audit_legacy_evaluation` exits non-zero if a field either evaluator emits has no pairing and no known reason to be unpaired: add it to the expected table or to `KNOWN_UNPAIRED` (`legacy_audit/evaluation.py`).
 
-The command writes each report's tables; its Findings section (hypotheses confirmed or refuted, what the clusters are) is written by hand.
+The command writes the tables. Write the Short version and Findings (hypotheses confirmed or refuted, what the clusters are) by hand, under the metadata table.
 
 Accepted differences go in `legacy_audit/pass2_allowlist.py`, each citing app code or an owner decision. Before trusting a change to either fingerprint, run math3d-react's conformance check (`client/src/legacyAudit/README.md`).
 
-A library convention the owner accepts (react's `round`, complex.js 2.0.4's addition) is accepted per pair instead. Replay math3d-next with that convention swapped in and pass the replay to the join, which accepts a `differ` pair when the replay gives math3d-react's value. A convention is a `CONVENTIONS` entry in `packages/legacy-audit/src/conventions.ts` plus a `REPLAYS` reason under the same key. The `round` replay takes about 7 minutes, `complex_add` about 13:
-
-```bash
-(cd packages/legacy-audit && for c in round complex_add; do LEGACY_EVAL_NEXT_CONVENTION=$c LEGACY_EVAL_NEXT_IN=$D/legacy.jsonl LEGACY_EVAL_NEXT_OUT=$D/pass2/replay_$c.jsonl yarn vitest --run src/evaluateNext.spec.ts; done)
-# then add to audit_legacy_evaluation: --replay $D/pass2/replay_round.jsonl --replay $D/pass2/replay_complex_add.jsonl
-```
+Accept a library convention (react's `round`, complex.js 2.0.4's addition) per pair, not in the allowlist: the replays re-evaluate math3d-next with it swapped in, and the join accepts a `differ` pair when the replay gives math3d-react's value. A convention is a `CONVENTIONS` entry in `packages/legacy-audit/src/conventions.ts` plus a `REPLAYS` reason under the same key.
 
 ## Manual checks
 

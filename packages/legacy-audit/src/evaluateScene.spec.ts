@@ -58,6 +58,9 @@ describe("evaluateScene", () => {
         make(MathItemType.VariableSlider, "s", {
           range: { type: "array", items: ["-5", "qq"] },
         }),
+        make(MathItemType.VariableSlider, "t", {
+          range: { type: "array", items: ["-5", "\\left[1"] },
+        }),
         make(MathItemType.Point, "q", { coords: "\\left[1,2" }),
         make(MathItemType.ExplicitSurface, "e"),
       ],
@@ -80,10 +83,14 @@ describe("evaluateScene", () => {
   });
 
   it("reports array elements separately", () => {
-    const { elements } = result().s.range;
-    expect(elements).toEqual([
+    const r = result();
+    expect(r.s.range.elements).toEqual([
       { status: "ok" },
       { status: "eval", message: expect.stringContaining("qq") },
+    ]);
+    expect(r.t.range.elements).toMatchObject([
+      { status: "ok" },
+      { status: "parse" },
     ]);
   });
 
@@ -99,8 +106,12 @@ describe("evaluateScene", () => {
 
 describe("evaluateScene's surface colors", () => {
   const { random } = Math;
+  beforeAll(() => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
   afterAll(() => {
     Math.random = random;
+    vi.restoreAllMocks();
   });
 
   const bounds = { x: ["-2", "6"], y: ["1", "3"], z: ["-8", "0"] };

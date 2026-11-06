@@ -1,7 +1,7 @@
 /**
  * fingerprint_cases.json lists expressions that mean the same in both apps,
  * with their fingerprints. math3d-react's fingerprint.audit.js checks the
- * same file, so the two fingerprint implementations agree.
+ * same file, so both implementations agree on these cases.
  */
 import { describe, expect, it } from "vitest";
 import { latexParser } from "@math3d/parser";
