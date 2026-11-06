@@ -1,4 +1,4 @@
-/* A button floating over the scene's bottom-right corner. */
+/* Pill look for buttons floating over the scene. */
 .pill {
   border-radius: 999px;
   background-color: var(--color-background);

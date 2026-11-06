@@ -9,7 +9,8 @@ import * as styles from "./RendererPill.module.css";
 const RendererPill: React.FC = () => {
   const { renderer, chooseRenderer } = useRenderer();
   if (renderer !== "usegpu") return null;
-  // Focus moves first, so the unmounting popover doesn't return it to the pill.
+  // React commits after this handler, so focus leaves before the popover
+  // unmounts and isn't returned to the pill.
   const handleSwitch = () => {
     chooseRenderer("mathbox");
     focusRendererSetting();
@@ -23,7 +24,12 @@ const RendererPill: React.FC = () => {
           </Button>
         }
       />
-      <Popover.Popup side="top" align="end" className={styles.popup}>
+      <Popover.Popup
+        side="top"
+        align="end"
+        className={styles.popup}
+        aria-label="WebGPU renderer"
+      >
         <Popover.Description className={styles.description}>
           You&apos;re using the experimental WebGPU renderer. You can change
           this in the menu.

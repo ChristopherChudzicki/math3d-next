@@ -109,7 +109,7 @@ type CheckboxItemProps = Omit<
   BaseMenu.CheckboxItem.Props,
   "className" | "children"
 > &
-  ItemContentProps & {
+  Omit<ItemContentProps, "icon"> & {
     className?: string;
   };
 
@@ -118,7 +118,6 @@ type CheckboxItemProps = Omit<
  * on click (Base UI's default is to stay open), like the other items.
  */
 const CheckboxItem: React.FC<CheckboxItemProps> = ({
-  icon: _icon,
   closeOnClick = true,
   className,
   children,
@@ -129,8 +128,8 @@ const CheckboxItem: React.FC<CheckboxItemProps> = ({
     closeOnClick={closeOnClick}
     className={classNames(styles.item, styles.neutral, className)}
   >
-    {/* The slot stays rendered while unchecked so labels stay aligned. */}
     <span className={styles.icon} aria-hidden="true">
+      {/* Mounted while unchecked so the hidden slot keeps labels aligned. */}
       <BaseMenu.CheckboxItemIndicator keepMounted className={styles.indicator}>
         <Icon icon={check} />
       </BaseMenu.CheckboxItemIndicator>
