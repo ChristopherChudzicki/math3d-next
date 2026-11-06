@@ -112,7 +112,7 @@ This app is deployed as a true react SPA hosted on a CDN with APIs powered by Dj
 
 `packages/app/src` follows [Bulletproof React](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md)'s tiers, imported one way — shared → features → app ([ADR-0007](docs/adr/0007-bulletproof-react-layout.md)):
 
-- **Shared**: `ui/` (generic components), `util/`, `services/` (React Query, session, URL layers, Sentry), `store/` (incl. `store/scene/`), `config/`, `types/`
+- **Shared**: `ui/` (generic components), `util/`, `services/` (React Query, session, URL layers, renderer choice, Sentry), `store/` (incl. `store/scene/`), `config/`, `types/`
 - **Features**: `features/{viewport,editor,sceneActions,library,auth}` — no feature imports another
 - **App**: `app/` — routes, providers, `app/pages/` composing features
 
