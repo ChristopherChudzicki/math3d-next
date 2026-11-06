@@ -128,7 +128,8 @@ const MainPage: React.FC = () => {
   const controlsOpen = controlsVisibility === "1";
   useEffect(() => startWebGpuDetection(), []);
   const { renderer, notice } = useRenderer();
-  // While the scene loads, a 404 may be on its way.
+  // Only `link` waits for a ready scene, which may yet be unavailable; `failed`
+  // is page-wide.
   const noticeReason =
     notice === "link" && sceneLoad.status !== "ready" ? null : notice;
   useLogInvalidSearchParam(RENDERER_PARAM, isRenderer);

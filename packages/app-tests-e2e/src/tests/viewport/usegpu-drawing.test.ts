@@ -28,16 +28,17 @@ test("?renderer=usegpu draws with the Use.GPU viewport", async ({
   const consoleErrors: string[] = [];
   page.on("console", (message) => {
     if (message.type() !== "error") return;
-    const expected403 =
+    const signedOutMe =
       message.text().startsWith("Failed to load resource") &&
       /\/me\/?$/.test(new URL(message.location().url).pathname);
-    if (!expected403) consoleErrors.push(message.text());
+    if (!signedOutMe) consoleErrors.push(message.text());
   });
 
   const scene = new SceneBuilder();
   scene.folder({ description: "Surface" }).explicitSurface();
   const key = await prepareScene(scene.json());
-  // No controls sidebar, matching `frame-render.test.ts`, where 0.1 is calibrated.
+  // `frame-render.test.ts` calibrates the 0.1 threshold below with no controls
+  // sidebar.
   await page.goto(`/${key}?renderer=usegpu&controls=0`);
 
   const viewport = page.getByTestId("scene");

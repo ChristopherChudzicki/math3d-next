@@ -322,7 +322,7 @@ describe("renderer", () => {
   const NOTICE =
     "This link asks for the experimental WebGPU renderer, which isn't available in this browser. Showing the scene with the default renderer.";
   const FAILED =
-    "The WebGPU renderer couldn't start on this device. Showing the scene with the default renderer.";
+    "The WebGPU renderer couldn't start on this device, so Math3d switched to the default renderer.";
 
   test("a stored Use.GPU preference waits for detection, then draws Use.GPU", async () => {
     storeRendererPreference("usegpu");
@@ -394,7 +394,7 @@ describe("renderer", () => {
     expect(localStorage.getItem(RENDERER_PREFERENCE_KEY)).toBe("mathbox");
   });
 
-  test("a dismissed failure notice stays dismissed after a missing scene and the next", async () => {
+  test("a dismissed failure notice stays dismissed through a missing scene and on to the next scene", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     storeRendererPreference("usegpu");
     stubWebGpu();

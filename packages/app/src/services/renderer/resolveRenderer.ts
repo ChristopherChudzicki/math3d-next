@@ -7,8 +7,9 @@ const isRenderer = (value: unknown): value is Renderer =>
   RENDERERS.includes(value as Renderer);
 
 /**
- * Why MathBox draws in place of a requested Use.GPU: `link` when the URL asked
- * for it without WebGPU, `failed` once Use.GPU couldn't start.
+ * Why MathBox draws in place of Use.GPU: `link` when `?renderer=usegpu` meets a
+ * browser without WebGPU; `failed`, for the rest of the page load, once Use.GPU
+ * couldn't start.
  */
 type NoticeReason = "link" | "failed";
 
@@ -27,7 +28,8 @@ const resolveRenderer = ({
   preference: Renderer | null;
   webgpu: WebGpuSupport;
 }): ResolvedRenderer => {
-  // Checked first: a failure resets the preference to `mathbox`.
+  // Checked first: the failure resets the preference to `mathbox`, but its
+  // notice lasts the page load.
   if (webgpu === "failed") return { renderer: "mathbox", notice: "failed" };
   const requested = isRenderer(param) ? param : preference;
   if (requested !== "usegpu") return { renderer: "mathbox", notice: null };
