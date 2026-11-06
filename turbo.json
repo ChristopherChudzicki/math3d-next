@@ -4,6 +4,12 @@
   "tasks": {
     "lint": {},
     "test": {},
+    "app#test": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/webserver/scenes/seed_scenes/qa/**"
+      ]
+    },
     "typecheck": {}
   }
 }

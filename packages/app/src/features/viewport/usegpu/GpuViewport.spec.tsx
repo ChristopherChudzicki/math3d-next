@@ -11,7 +11,7 @@ import GpuViewport from "./GpuViewport";
 
 vi.mock("@sentry/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@sentry/react")>()),
-  captureException: vi.fn(),
+  captureMessage: vi.fn(),
 }));
 
 type ContentProps = { onUnsupported: (error: unknown) => void };
@@ -84,12 +84,15 @@ test("without navigator.gpu it says WebGPU is unavailable and links to the defau
 });
 
 test("when the renderer reports WebGPU unsupported it says so and reports why", async () => {
-  vi.spyOn(console, "error").mockImplementation(() => {});
+  vi.spyOn(console, "warn").mockImplementation(() => {});
   Object.defineProperty(navigator, "gpu", { value: {}, configurable: true });
   content.Component = ReportsUnsupported;
   renderViewport();
   expect(await screen.findByText(/WebGPU is unavailable/)).toBeInTheDocument();
-  expect(Sentry.captureException).toHaveBeenCalledWith(noAdapter);
+  expect(Sentry.captureMessage).toHaveBeenCalledWith(
+    "WebGPU unsupported: no adapter",
+    { level: "info" },
+  );
 });
 
 test("when the renderer throws it says so in the viewport until another scene loads", async () => {

@@ -3,12 +3,20 @@ import type { LiveElement } from "@use-gpu/live";
 import { Point } from "@use-gpu/plot";
 import type { PointSpec } from "@/features/viewport/usegpu/graphicSpec/types";
 import { drawMode } from "./util";
+import { withItemLabel } from "./labels";
 
 export const renderPoint = (spec: PointSpec): LiveElement =>
-  use(Point, {
-    positions: spec.positions,
-    size: spec.size,
-    color: spec.color,
-    zBias: spec.zBias,
-    mode: drawMode(spec.color),
-  });
+  withItemLabel(
+    use(Point, {
+      positions: spec.positions,
+      size: spec.size,
+      color: spec.color,
+      zBias: spec.zBias,
+      zIndex: spec.zIndex,
+      depth: 1,
+      mode: drawMode(spec.color),
+    }),
+    spec.positions,
+    spec.label,
+    spec,
+  );

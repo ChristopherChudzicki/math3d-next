@@ -222,7 +222,7 @@
           "params": ["x", "y", "z"],
           "rhs": "1"
         },
-        "samples": "40"
+        "samples": "32"
       }
     },
     {
@@ -268,7 +268,7 @@
           "params": ["x", "y", "z"],
           "rhs": "1"
         },
-        "samples": "40"
+        "samples": "32"
       }
     },
     {

@@ -6,7 +6,7 @@ import type {
 
 /**
  * How a renderer handles one stored property. `approximate` and `n/a` say why;
- * `todo` marks a property the renderer ignores for now.
+ * `todo` marks a property not yet classified.
  */
 export type Coverage =
   | "drawn"

@@ -11,11 +11,11 @@ export type OrbitSpec = {
 
 /**
  * Use.GPU's orbit camera is y-up; math3d is z-up. live/scene.ts rotates the
- * plot by this much, taking math (x, y, z) to world (x, z, -y): `toWorld`.
+ * plot by this much, taking cartesian (x, y, z) to world (x, z, -y): `toWorld`.
  */
 export const PLOT_ROTATION_DEGREES = [-90, 0, 0];
 
-/** Where the plot rotation takes a math3d point. The camera spec is in math3d coordinates. */
+/** Where the plot rotation takes a cartesian point; `CameraSpec` is cartesian. */
 export const toWorld = ([x, y, z]: Coords): Coords => [x, z, -y];
 
 /**
@@ -33,5 +33,24 @@ export const toOrbit = (camera: CameraSpec): OrbitSpec => {
     pitch: Math.asin(Math.max(-1, Math.min(1, d[1] / radius))),
     bearing: Math.atan2(-d[0], d[2]),
     target: t,
+  };
+};
+
+/** Where `makeOrbitPosition` (dolly 1) puts the camera, as a world-space offset from the target. */
+const orbitOffset = ({ radius, bearing, pitch }: OrbitSpec): Coords => [
+  -radius * Math.cos(pitch) * Math.sin(bearing),
+  radius * Math.sin(pitch),
+  radius * Math.cos(pitch) * Math.cos(bearing),
+];
+
+const fromWorld = ([x, y, z]: Coords): Coords => [x, -z, y];
+
+/** The inverse of `toOrbit`. */
+export const fromOrbit = (orbit: OrbitSpec): CameraSpec => {
+  const d = orbitOffset(orbit);
+  const t = orbit.target;
+  return {
+    position: fromWorld([t[0] + d[0], t[1] + d[1], t[2] + d[2]]),
+    target: fromWorld(t),
   };
 };

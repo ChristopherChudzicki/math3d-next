@@ -6,7 +6,7 @@ import {
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
 import type { GraphicSpec } from "./types";
-import { parseColor } from "./types";
+import { baseStyle, sampleCount } from "./style";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";
 
@@ -32,12 +32,10 @@ const ImplicitSurface: SpecComponent<MIT.ImplicitSurface> = ({ item }) => {
     return {
       kind: "implicit",
       domain,
-      samples: Math.max(2, Math.round(samples ?? 20)),
+      samples: sampleCount(samples, 20),
       value: (x, y, z) => lhs(x, y, z) - rhs(x, y, z),
-      color: parseColor(color, opacity ?? 1),
+      ...baseStyle({ opacity, zBias, zIndex }, color),
       shaded: shaded ?? true,
-      zBias: zBias ?? 0,
-      zIndex: zIndex ?? 0,
     };
   }, [
     visible,

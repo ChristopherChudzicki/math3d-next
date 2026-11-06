@@ -3,7 +3,6 @@
  * colors, sample callbacks. The components in this folder read the store and
  * MathScope and produce these; usegpu/live turns them into a Live tree.
  */
-import tinycolor from "tinycolor2";
 import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
 
 export type RGBA = [number, number, number, number];
@@ -11,7 +10,11 @@ export type RGBA = [number, number, number, number];
 type Common = {
   /** MathBox-style depth bias. Both renderers have one; their scales are not calibrated against each other. */
   zBias: number;
-  /** MathBox squeezes a higher zIndex's depth toward the near plane, so it draws over lower ones. */
+  /**
+   * MathBox squeezes a higher zIndex's depth toward the near plane, so it draws
+   * over lower ones. Use.GPU only orders draw calls by it, where a component
+   * accepts it; see `usegpu/coverage.ts`.
+   */
   zIndex: number;
 };
 
@@ -20,6 +23,8 @@ export type PointSpec = Common & {
   positions: Coords[];
   size: number;
   color: RGBA;
+  /** Drawn at each point; `null` when hidden or empty. */
+  label: string | null;
 };
 
 export type LineSpec = Common & {
@@ -30,6 +35,8 @@ export type LineSpec = Common & {
   start: boolean;
   end: boolean;
   arrowSize: number;
+  /** Drawn at the last point; `null` when hidden or empty. */
+  label: string | null;
 };
 
 export type SurfaceSpec = Common & {
@@ -47,7 +54,7 @@ export type SurfaceSpec = Common & {
 export type ImplicitSurfaceSpec = Common & {
   kind: "implicit";
   domain: AxesRange;
-  /** Samples per axis. */
+  /** Cells per axis, as in MathBox. */
   samples: number;
   /** The surface is the zero level set of this function. */
   value: (x: number, y: number, z: number) => number;
@@ -63,6 +70,10 @@ export type AxisSpec = Common & {
   start: boolean;
   end: boolean;
   arrowSize: number;
+  range: [number, number];
+  ticks: { divisions: number; visible: boolean };
+  /** Drawn at the axis end; `null` when hidden or empty. */
+  label: string | null;
 };
 
 export type GridSpec = Common & {
@@ -91,18 +102,4 @@ export type CameraSpec = {
    */
   position: Coords;
   target: Coords;
-};
-
-const DEFAULT_COLOR = "#3090ff";
-
-/** Any color tinycolor parses, to RGBA in [0, 1]; anything else (e.g. a gradient name) falls back to the default blue. */
-export const parseColor = (text: string, opacity: number): RGBA => {
-  const parsed = tinycolor(text);
-  const { r, g, b } = (
-    parsed.isValid() ? parsed : tinycolor(DEFAULT_COLOR)
-  ).toRgb();
-  const alpha = Number.isFinite(opacity)
-    ? Math.min(Math.max(opacity, 0), 1)
-    : 1;
-  return [r / 255, g / 255, b / 255, alpha];
 };

@@ -1,31 +1,51 @@
-import { use } from "@use-gpu/live";
+import { use, useMemo } from "@use-gpu/live";
 import type { LiveElement } from "@use-gpu/live";
+import { toTensorArray } from "@use-gpu/core";
 import type { Emit, TensorArray } from "@use-gpu/core";
 import { Sampler } from "@use-gpu/frame";
 import { ImplicitSurface } from "@use-gpu/plot";
 import type { ImplicitSurfaceSpec } from "@/features/viewport/usegpu/graphicSpec/types";
+import {
+  gradientFromGrid,
+  implicitGridLayout,
+} from "@/features/viewport/usegpu/implicitGrid";
 import { drawMode } from "./util";
+
+type Vec3 = [number, number, number];
+
+type ImplicitNormalsProps = {
+  values: TensorArray;
+  spacing: Vec3;
+  render: (normals: TensorArray) => LiveElement;
+};
+
+/** Normals for a sampled `f32` field, from finite differences of the grid itself. */
+const ImplicitNormals = ({ values, spacing, render }: ImplicitNormalsProps) => {
+  // `spacing` is a fresh array every render, so memoize on its entries.
+  const [sx, sy, sz] = spacing;
+  const normals = useMemo(() => {
+    const size = Array.from(values.size) as Vec3;
+    const grid = gradientFromGrid(values.array as Float32Array, size, [
+      sx,
+      sy,
+      sz,
+    ]);
+    return toTensorArray("vec4<f32>", grid, size);
+  }, [values, sx, sy, sz]);
+  return render(normals);
+};
 
 export const renderImplicitSurface = (
   spec: ImplicitSurfaceSpec,
 ): LiveElement => {
-  const { value, domain, samples } = spec;
-  const size = [samples, samples, samples];
-  // Sample one cell beyond the domain; the layer then scissors the surface at
-  // the domain edge, so a surface crossing it is cut cleanly rather than
-  // ending a cell short.
+  const { value, domain } = spec;
+  const { size, spacing } = implicitGridLayout(spec.samples, domain);
+  // Sample one cell beyond the domain, at the same spacing; the layer then
+  // scissors the surface at the domain edge, so a surface crossing it is cut
+  // cleanly rather than ending a cell short.
   const padding = 1;
-  // Finite-difference step: half a grid cell per axis.
-  const h = domain.map(([lo, hi]) => (hi - lo) / samples / 2);
   const emitValue = (emit: Emit, x: number, y: number, z: number) => {
     emit(value(x, y, z));
-  };
-  const emitNormal = (emit: Emit, x: number, y: number, z: number) => {
-    const nx = value(x + h[0], y, z) - value(x - h[0], y, z);
-    const ny = value(x, y + h[1], z) - value(x, y - h[1], z);
-    const nz = value(x, y, z + h[2]) - value(x, y, z - h[2]);
-    const len = Math.hypot(nx, ny, nz) || 1;
-    emit(nx / len, ny / len, nz / len, 0);
   };
   return use(Sampler, {
     axes: "xyz",
@@ -35,13 +55,9 @@ export const renderImplicitSurface = (
     padding,
     expr: emitValue,
     render: (values: TensorArray) =>
-      use(Sampler, {
-        axes: "xyz",
-        format: "vec4<f32>",
-        size,
-        range: domain,
-        padding,
-        expr: emitNormal,
+      use(ImplicitNormals, {
+        values,
+        spacing,
         render: (normals: TensorArray) =>
           use(ImplicitSurface, {
             values,

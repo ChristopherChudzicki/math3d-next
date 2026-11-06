@@ -16,6 +16,7 @@
       "/*",
       "!/assets/*",
       "!/og/*",
+      "!/fonts/*",
       "!/favicon.ico",
       "!/favicon.svg",
       "!/apple-touch-icon.png",

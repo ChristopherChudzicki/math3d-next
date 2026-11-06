@@ -55,7 +55,9 @@ three tiers — shared → features → app — imported one way, enforced by it
   viewer mode's `canEdit`). Moving feature code into the shared tier to
   dodge a zone is not on the list.
 - **Lint reads the feature list from `src/features/`,** so a new feature
-  folder gets its zone without a config edit.
+  folder gets its zone without a config edit. The renderer zones inside
+  `features/viewport` ([ADR-0008](0008-usegpu-opt-in-renderer.md)) are
+  written by hand in `.eslintrc.cjs`.
 - **Only tests import `test_util`:** it renders the whole app, so a
   production import would reach `src/app` without crossing a zone.
 - **The scene ↔ store cycle stays type-only:** `selectors.ts` uses

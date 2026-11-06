@@ -98,15 +98,23 @@ const useMathItemResults = <
   >;
 };
 
+/** Whether `item` is drawn, given its evaluated `calculatedVisibility`. */
+export const finalVisibility = (
+  item: MathGraphic,
+  calculatedVisibility: unknown,
+): boolean => {
+  const { visible, useCalculatedVisibility } = item.properties;
+  return useCalculatedVisibility ? !!calculatedVisibility : visible;
+};
+
 const CALCULATED_VIS = ["calculatedVisibility"] as const;
 const useFinalVisibility = (mathScope: AppMathScope, item: MathGraphic) => {
-  const { visible, useCalculatedVisibility } = item.properties;
   const { calculatedVisibility } = useMathItemResults(
     mathScope,
     item,
     CALCULATED_VIS,
   );
-  return useCalculatedVisibility ? !!calculatedVisibility : visible;
+  return finalVisibility(item, calculatedVisibility);
 };
 
 const useMathErrors = <K extends string>(
