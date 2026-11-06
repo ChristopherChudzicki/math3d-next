@@ -1,16 +1,26 @@
-import { test, expect } from "vitest";
+import { describe, test, expect, vi } from "vitest";
 import { delay, http } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { urls } from "@math3d/mock-api";
 import invariant from "tiny-invariant";
 import {
+  act,
   renderTestApp,
   screen,
+  stubWebGpu,
   user,
   waitFor,
   waitForAppReady,
   within,
 } from "@/test_util";
+import type { ContentProps } from "@/test_util/gpuViewportContent";
+
+vi.mock("@/features/viewport/usegpu/live/GpuViewportContent", async () => {
+  const shared = await import("@/test_util/gpuViewportContent");
+  return {
+    default: (props: ContentProps) => shared.gpuContent.Component(props),
+  };
+});
 
 test.each([
   {
@@ -215,4 +225,80 @@ test("closing the scenes dialog returns focus to the scenes button, even when a 
   await waitFor(() =>
     expect(screen.getByRole("button", { name: "Open scenes" })).toHaveFocus(),
   );
+});
+
+describe("the renderer item", () => {
+  const ITEM = "WebGPU renderer (experimental)";
+  const openMenu = async () => {
+    await user.click(screen.getByRole("button", { name: "Open Menu" }));
+    // Positive anchor: the menu is open and populated.
+    await screen.findByRole("menuitem", { name: "Contact" });
+  };
+  const expectRenderer = async (renderer: string) =>
+    waitFor(() =>
+      expect(screen.getByTestId("scene")).toHaveAttribute(
+        "data-renderer",
+        renderer,
+      ),
+    );
+
+  test("with WebGPU the menu offers the renderer, unchecked", async () => {
+    stubWebGpu();
+    renderTestApp("", { isAuthenticated: false });
+    await user.click(screen.getByRole("button", { name: "Open Menu" }));
+
+    const item = await screen.findByRole("menuitemcheckbox", { name: ITEM });
+    expect(item).toHaveAttribute("aria-checked", "false");
+    const reference = screen.getByRole("menuitem", {
+      name: "Function Reference",
+    });
+    const contact = screen.getByRole("menuitem", { name: "Contact" });
+    expect(reference.compareDocumentPosition(item)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(item.compareDocumentPosition(contact)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+
+  test("an adapter that resolves null hides the item", async () => {
+    stubWebGpu(async () => null);
+    renderTestApp("", { isAuthenticated: false });
+    // Lets the null adapter settle before the menu is opened.
+    await act(() => Promise.resolve());
+    await openMenu();
+    expect(screen.queryByRole("menuitemcheckbox")).toBeNull();
+  });
+
+  test("checking it draws Use.GPU and closes the menu", async () => {
+    stubWebGpu();
+    renderTestApp("", { isAuthenticated: false });
+    await user.click(screen.getByRole("button", { name: "Open Menu" }));
+    await user.click(await screen.findByRole("menuitemcheckbox"));
+
+    await expectRenderer("usegpu");
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+
+  test("under ?renderer=usegpu it is checked, and unchecking draws MathBox", async () => {
+    stubWebGpu();
+    renderTestApp("/?renderer=usegpu", { isAuthenticated: false });
+    await user.click(screen.getByRole("button", { name: "Open Menu" }));
+    const item = await screen.findByRole("menuitemcheckbox");
+    expect(item).toHaveAttribute("aria-checked", "true");
+
+    await user.click(item);
+    await expectRenderer("mathbox");
+  });
+
+  test("while detection is pending the item is absent, then appears", async () => {
+    const adapter = Promise.withResolvers<unknown>();
+    stubWebGpu(() => adapter.promise);
+    renderTestApp("", { isAuthenticated: false });
+    await openMenu();
+    expect(screen.queryByRole("menuitemcheckbox")).toBeNull();
+
+    await act(async () => adapter.resolve({}));
+    expect(await screen.findByRole("menuitemcheckbox")).toBeInTheDocument();
+  });
 });

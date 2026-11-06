@@ -6,6 +6,7 @@ import lightbulb from "@iconify-icons/lucide/lightbulb";
 import circleHelp from "@iconify-icons/lucide/circle-help";
 import SceneActions from "@/features/sceneActions/SceneActions";
 
+import { useRenderer, useWebGpuSupport } from "@/services/renderer";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { DISPLAY_AUTH_FLOWS } from "@/config/displayAuthFlows";
 import { ISSUE_URL } from "@/config/issueUrl";
@@ -50,6 +51,8 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
   const { open } = useOverlay();
   const { open: openSignIn } = useSignInDialog();
   const isAuthenticated = authStatus === "authenticated";
+  const { renderer, chooseRenderer } = useRenderer();
+  const webGpuSupport = useWebGpuSupport();
   return (
     <>
       {/* Not `!isAuthenticated`: while the me-query is still in flight the
@@ -83,6 +86,14 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
       >
         Function Reference
       </Menu.LinkItem>
+      {webGpuSupport === "available" && (
+        <Menu.CheckboxItem
+          checked={renderer === "usegpu"}
+          onCheckedChange={(on) => chooseRenderer(on ? "usegpu" : "mathbox")}
+        >
+          WebGPU renderer (experimental)
+        </Menu.CheckboxItem>
+      )}
       <Menu.LinkItem
         icon={<Icon icon={circleHelp} aria-hidden="true" />}
         href={ISSUE_URL}
