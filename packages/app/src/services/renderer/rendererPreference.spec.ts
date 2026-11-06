@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 const choose = (renderer: Renderer) =>
-  // The rule takes any function named like "render" for Testing Library's.
+  // The rule mistakes `setRendererPreference` for a Testing Library render.
   // eslint-disable-next-line testing-library/no-unnecessary-act
   act(() => {
     setRendererPreference(renderer);

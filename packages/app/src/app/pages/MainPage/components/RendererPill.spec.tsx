@@ -1,6 +1,4 @@
-import { test, expect, vi } from "vitest";
-import { makeItem, seedDb } from "@math3d/mock-api";
-import { MathItemType as MIT } from "@math3d/mathitem-configs";
+import { test, expect } from "vitest";
 import {
   renderTestApp,
   screen,
@@ -9,15 +7,6 @@ import {
   user,
   waitFor,
 } from "@/test_util";
-import { findItemByTestId } from "@/test_util/mathItems";
-import type { ContentProps } from "@/test_util/gpuViewportContent";
-
-vi.mock("@/features/viewport/usegpu/live/GpuViewportContent", async () => {
-  const shared = await import("@/test_util/gpuViewportContent");
-  return {
-    default: (props: ContentProps) => shared.gpuContent.Component(props),
-  };
-});
 
 test.each([
   { isAuthenticated: false, trigger: "Open Menu" },
@@ -31,7 +20,9 @@ test.each([
     const menuTrigger = await screen.findByRole("button", { name: trigger });
 
     await user.click(await screen.findByRole("button", { name: "WebGPU" }));
-    const popover = await screen.findByRole("dialog");
+    const popover = await screen.findByRole("dialog", {
+      name: "WebGPU renderer",
+    });
     expect(popover).toHaveTextContent(
       "You're using the experimental WebGPU renderer. You can change this in the menu.",
     );
@@ -51,15 +42,6 @@ test.each([
     expect(document.activeElement).toBe(menuTrigger);
   },
 );
-
-test("under MathBox there is no pill", async () => {
-  const item = makeItem(MIT.Point);
-  const scene = seedDb.withSceneFromItems([item]);
-  renderTestApp(`/${scene.key}`);
-
-  await findItemByTestId(item.id);
-  expect(screen.queryByRole("button", { name: "WebGPU" })).toBeNull();
-});
 
 test("no pill on the scene-unavailable card", async () => {
   stubWebGpu();

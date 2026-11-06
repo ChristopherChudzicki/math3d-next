@@ -5,6 +5,8 @@ import {
   resetRendererPreference,
   resetWebGpuSupport,
 } from "@/services/renderer";
+import { gpuContent } from "@/test_util/gpuViewportContent";
+import type { ContentProps } from "@/test_util/gpuViewportContent";
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:
@@ -41,6 +43,17 @@ vitest.mock("mathlive", () => vi.importActual("@/__mocks__/mathlive"));
 vitest.mock("@/util/hooks/useShadowStylesheet");
 
 vitest.mock("@/ui/TextareaAutoWidthHeight/TextMeasurer");
+
+/**
+ * Use.GPU needs WebGPU, which JSDOM lacks. A test sets `gpuContent.Component`
+ * to choose how the lazy renderer behaves.
+ */
+vi.mock("@/features/viewport/usegpu/live/GpuViewportContent", async () => {
+  const shared = await import("@/test_util/gpuViewportContent");
+  return {
+    default: (props: ContentProps) => shared.gpuContent.Component(props),
+  };
+});
 
 /**
  * JSDOM does not implement ResizeObserver. A no-op stand-in is enough for
@@ -89,6 +102,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   server.resetHandlers();
+  gpuContent.Component = gpuContent.RendersNothing;
   // @ts-expect-error navigator.gpu is required in @webgpu/types; stubWebGpu adds a stand-in.
   delete navigator.gpu;
 });

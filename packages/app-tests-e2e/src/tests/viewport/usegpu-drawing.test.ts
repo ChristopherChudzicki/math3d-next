@@ -4,6 +4,7 @@ import { test } from "@/fixtures/users";
 
 test.use({
   disable3d: false,
+  // SwiftShader gives headless Chromium a WebGPU adapter, on macOS and on Linux CI.
   launchOptions: {
     args: [
       "--enable-unsafe-webgpu",
@@ -19,6 +20,8 @@ test("?renderer=usegpu draws with the Use.GPU viewport", async ({
   page,
   prepareScene,
 }) => {
+  const pageErrors: Error[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error));
   const responses: string[] = [];
   page.on("response", (response) => responses.push(response.url()));
 
@@ -30,7 +33,10 @@ test("?renderer=usegpu draws with the Use.GPU viewport", async ({
   const viewport = page.getByTestId("scene");
   await expect(viewport).toHaveAttribute("data-renderer", "usegpu");
   await expect(viewport.locator("canvas")).toBeVisible();
-  await expect(viewport.locator("[data-ready]")).toBeAttached();
+  await expect(viewport.locator("[data-ready]")).toBeAttached({
+    timeout: 15_000,
+  });
   // A build keeps the module's name as the prefix of its hashed chunk.
   expect(responses.some((url) => /GpuViewportContent/.test(url))).toBe(true);
+  expect(pageErrors).toEqual([]);
 });

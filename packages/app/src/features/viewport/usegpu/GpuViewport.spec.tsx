@@ -19,15 +19,7 @@ vi.mock("@sentry/react", async (importOriginal) => ({
   captureMessage: vi.fn(),
 }));
 
-vi.mock("./live/GpuViewportContent", async () => {
-  const shared = await import("@/test_util/gpuViewportContent");
-  return {
-    default: (props: ContentProps) => shared.gpuContent.Component(props),
-  };
-});
-
 const noAdapter = new Error("no adapter");
-// Use.GPU calls its fallback on every render while in error.
 const ReportsUnsupportedTwice = ({ onUnsupported }: ContentProps) => {
   useEffect(() => {
     onUnsupported(noAdapter);
@@ -49,7 +41,7 @@ const renderViewport = () => {
   loadScene(store);
   render(
     <Provider store={store}>
-      <MemoryRouter initialEntries={["/abc?renderer=usegpu"]}>
+      <MemoryRouter initialEntries={["/abc"]}>
         <button type="button" id={RENDERER_SETTING_ID}>
           Account menu
         </button>
@@ -59,10 +51,6 @@ const renderViewport = () => {
   );
   return { store };
 };
-
-afterEach(() => {
-  gpuContent.Component = gpuContent.RendersNothing;
-});
 
 test("with 3D disabled it renders the empty scene container", () => {
   localStorage.setItem("disable3dScene", "true");

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { test, expect, vi } from "vitest";
+import { describe, test, expect, vi } from "vitest";
 import { HttpResponse, http } from "msw";
 import { onlineManager } from "@tanstack/react-query";
 import { server } from "@math3d/mock-api/node";
@@ -21,6 +21,7 @@ import * as Sentry from "@sentry/react";
 import expectToast from "@/test_util/expectToast";
 import sceneSlice from "@/store/scene/state/scene.slice";
 import { findItemByTestId } from "@/test_util/mathItems";
+import { RENDERER_PREFERENCE_KEY } from "@/services/renderer/rendererPreference";
 import { gpuContent } from "@/test_util/gpuViewportContent";
 import type { ContentProps } from "@/test_util/gpuViewportContent";
 
@@ -29,13 +30,6 @@ vi.mock("@sentry/react", async (importOriginal) => ({
   captureException: vi.fn(),
   captureMessage: vi.fn(),
 }));
-
-vi.mock("@/features/viewport/usegpu/live/GpuViewportContent", async () => {
-  const shared = await import("@/test_util/gpuViewportContent");
-  return {
-    default: (props: ContentProps) => shared.gpuContent.Component(props),
-  };
-});
 
 test.each([
   {
@@ -326,11 +320,7 @@ const ReportsNoDevice = ({ onUnsupported }: ContentProps) => {
 
 describe("renderer", () => {
   const NOTICE =
-    "This link asks for the experimental WebGPU renderer, which this browser doesn't support. Showing the scene with the default renderer.";
-
-  afterEach(() => {
-    gpuContent.Component = gpuContent.RendersNothing;
-  });
+    "This link asks for the experimental WebGPU renderer, which isn't available in this browser. Showing the scene with the default renderer.";
 
   test("a stored Use.GPU preference waits for detection, then draws Use.GPU", async () => {
     storeRendererPreference("usegpu");
@@ -396,6 +386,7 @@ describe("renderer", () => {
     );
     expect(warn).toHaveBeenCalledWith(noDevice);
     expect(screen.queryByText(NOTICE)).toBeNull();
+    expect(localStorage.getItem(RENDERER_PREFERENCE_KEY)).toBe("mathbox");
   });
 
   test("an invalid ?renderer is logged and drawn as MathBox", async () => {

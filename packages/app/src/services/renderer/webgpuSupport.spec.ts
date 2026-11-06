@@ -61,6 +61,18 @@ test("no answer within 2 s is unavailable", async () => {
   expect(result.current).toBe("unavailable");
 });
 
+test("detection runs once per page load", async () => {
+  const requestAdapter = vi.fn(async () => ({}));
+  stubWebGpu(requestAdapter);
+  const { result } = renderHook(useWebGpuSupport);
+
+  act(startWebGpuDetection);
+  act(startWebGpuDetection);
+
+  await waitFor(() => expect(result.current).toBe("available"));
+  expect(requestAdapter).toHaveBeenCalledOnce();
+});
+
 test("a late adapter doesn't undo a device failure", async () => {
   let resolveAdapter: (adapter: unknown) => void = () => {};
   stubWebGpu(

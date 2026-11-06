@@ -8,7 +8,7 @@ test("?renderer=usegpu without a WebGPU adapter draws MathBox and says so", asyn
   page,
   prepareScene,
 }) => {
-  // No adapter whatever the browser offers, so this branch always holds.
+  // Hides any real adapter, so the fallback path runs on every machine.
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "gpu", {
       value: { requestAdapter: async () => null },
@@ -30,7 +30,7 @@ test("?renderer=usegpu without a WebGPU adapter draws MathBox and says so", asyn
   await expect(viewport.locator("canvas")).toBeVisible();
   await expect(
     page.getByText(
-      "This link asks for the experimental WebGPU renderer, which this browser doesn't support. Showing the scene with the default renderer.",
+      "This link asks for the experimental WebGPU renderer, which isn't available in this browser. Showing the scene with the default renderer.",
     ),
   ).toBeVisible();
   // A build keeps the module's name as the prefix of its hashed chunk.

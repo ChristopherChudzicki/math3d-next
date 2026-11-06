@@ -9,13 +9,13 @@ import { useRenderer } from "./useRenderer";
 const renderUseRenderer = (initialEntry: InitialEntry) => {
   const api: {
     current: {
-      renderer: ReturnType<typeof useRenderer>;
+      hook: ReturnType<typeof useRenderer>;
       preference: ReturnType<typeof useRendererPreference>;
     } | null;
   } = { current: null };
   const Probe: React.FC = () => {
     api.current = {
-      renderer: useRenderer(),
+      hook: useRenderer(),
       preference: useRendererPreference(),
     };
     return null;
@@ -35,7 +35,7 @@ test("chooseRenderer stores the choice and drops only ?renderer", async () => {
     state: { x: 1 },
   });
 
-  await act(async () => api.current?.renderer.chooseRenderer("mathbox"));
+  await act(async () => api.current?.hook.chooseRenderer("mathbox"));
 
   expect(api.current?.preference).toBe("mathbox");
   const { location } = router.state;
@@ -50,7 +50,7 @@ test("chooseRenderer doesn't navigate without ?renderer", async () => {
   const { router, api } = renderUseRenderer("/abc");
   const { key } = router.state.location;
 
-  await act(async () => api.current?.renderer.chooseRenderer("usegpu"));
+  await act(async () => api.current?.hook.chooseRenderer("usegpu"));
 
   expect(api.current?.preference).toBe("usegpu");
   expect(router.state.location.key).toBe(key);

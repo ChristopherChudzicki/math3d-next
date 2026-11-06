@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from "vitest";
+import { describe, test, expect } from "vitest";
 import { delay, http } from "msw";
 import { server } from "@math3d/mock-api/node";
 import { urls } from "@math3d/mock-api";
@@ -13,14 +13,6 @@ import {
   waitForAppReady,
   within,
 } from "@/test_util";
-import type { ContentProps } from "@/test_util/gpuViewportContent";
-
-vi.mock("@/features/viewport/usegpu/live/GpuViewportContent", async () => {
-  const shared = await import("@/test_util/gpuViewportContent");
-  return {
-    default: (props: ContentProps) => shared.gpuContent.Component(props),
-  };
-});
 
 test.each([
   {
@@ -231,7 +223,7 @@ describe("the renderer item", () => {
   const ITEM = "WebGPU renderer (experimental)";
   const openMenu = async () => {
     await user.click(screen.getByRole("button", { name: "Open Menu" }));
-    // Positive anchor: the menu is open and populated.
+    // Wait until the menu is open and populated.
     await screen.findByRole("menuitem", { name: "Contact" });
   };
   const expectRenderer = async (renderer: string) =>
@@ -242,28 +234,34 @@ describe("the renderer item", () => {
       ),
     );
 
-  test("with WebGPU the menu offers the renderer, unchecked", async () => {
-    stubWebGpu();
-    renderTestApp("", { isAuthenticated: false });
-    await user.click(screen.getByRole("button", { name: "Open Menu" }));
+  test.each([
+    { isAuthenticated: false, trigger: "Open Menu" },
+    { isAuthenticated: true, trigger: "Open User Menu" },
+  ])(
+    "with WebGPU the menu offers the renderer, unchecked ($trigger)",
+    async ({ isAuthenticated, trigger }) => {
+      stubWebGpu();
+      renderTestApp("", { isAuthenticated });
+      await user.click(await screen.findByRole("button", { name: trigger }));
 
-    const item = await screen.findByRole("menuitemcheckbox", { name: ITEM });
-    expect(item).toHaveAttribute("aria-checked", "false");
-    const reference = screen.getByRole("menuitem", {
-      name: "Function Reference",
-    });
-    const contact = screen.getByRole("menuitem", { name: "Contact" });
-    expect(reference.compareDocumentPosition(item)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
-    expect(item.compareDocumentPosition(contact)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
-  });
+      const item = await screen.findByRole("menuitemcheckbox", { name: ITEM });
+      expect(item).toHaveAttribute("aria-checked", "false");
+      const reference = screen.getByRole("menuitem", {
+        name: "Function Reference",
+      });
+      const contact = screen.getByRole("menuitem", { name: "Contact" });
+      expect(reference.compareDocumentPosition(item)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING,
+      );
+      expect(item.compareDocumentPosition(contact)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING,
+      );
+    },
+  );
 
   test("an adapter that resolves null hides the item", async () => {
     stubWebGpu(async () => null);
-    renderTestApp("", { isAuthenticated: false });
+    renderTestApp("");
     // Lets the null adapter settle before the menu is opened.
     await act(() => Promise.resolve());
     await openMenu();
@@ -272,7 +270,7 @@ describe("the renderer item", () => {
 
   test("checking it draws Use.GPU and closes the menu", async () => {
     stubWebGpu();
-    renderTestApp("", { isAuthenticated: false });
+    renderTestApp("");
     await user.click(screen.getByRole("button", { name: "Open Menu" }));
     await user.click(await screen.findByRole("menuitemcheckbox"));
 
@@ -282,7 +280,7 @@ describe("the renderer item", () => {
 
   test("under ?renderer=usegpu it is checked, and unchecking draws MathBox", async () => {
     stubWebGpu();
-    renderTestApp("/?renderer=usegpu", { isAuthenticated: false });
+    renderTestApp("/?renderer=usegpu");
     await user.click(screen.getByRole("button", { name: "Open Menu" }));
     const item = await screen.findByRole("menuitemcheckbox");
     expect(item).toHaveAttribute("aria-checked", "true");
@@ -294,7 +292,7 @@ describe("the renderer item", () => {
   test("while detection is pending the item is absent, then appears", async () => {
     const adapter = Promise.withResolvers<unknown>();
     stubWebGpu(() => adapter.promise);
-    renderTestApp("", { isAuthenticated: false });
+    renderTestApp("");
     await openMenu();
     expect(screen.queryByRole("menuitemcheckbox")).toBeNull();
 
