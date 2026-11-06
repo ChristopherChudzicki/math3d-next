@@ -1,6 +1,10 @@
 import { server } from "@math3d/mock-api/node";
 import { mockAuth } from "@math3d/mock-api";
 import { shownToasts } from "@/ui/Toast/toasts";
+import {
+  resetRendererPreference,
+  resetWebGpuSupport,
+} from "@/services/renderer";
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:
@@ -66,6 +70,8 @@ beforeAll(() => {
 beforeEach(() => {
   localStorage.clear();
   sessionStorage.clear();
+  resetWebGpuSupport();
+  resetRendererPreference();
   mockAuth.setCurrentUser(null);
   // A mutation that failed after the previous test ended isn't this test's.
   shownToasts.length = 0;
@@ -83,5 +89,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   server.resetHandlers();
+  // @ts-expect-error navigator.gpu is required in @webgpu/types; stubWebGpu adds a stand-in.
+  delete navigator.gpu;
 });
 afterAll(() => server.close());
