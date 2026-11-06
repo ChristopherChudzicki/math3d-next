@@ -6,9 +6,9 @@ import type { Coords } from "@/features/viewport/shared/coordinates";
 import type { GraphicSpec } from "@/features/viewport/usegpu/graphicSpec/types";
 
 /** A graphic's depth bias and draw order, shared by its labels. */
-export type Layering = Pick<GraphicSpec, "zBias" | "zIndex">;
+type Layering = Pick<GraphicSpec, "zBias" | "zIndex">;
 
-/** Shared by every label. Without a `family`, labels render in Use.GPU's built-in fallback font. */
+/** Shared by every label. `family` must name a font in `scene.ts`'s `FONTS`; an unknown one falls back to Use.GPU's built-in font. */
 export const LABEL_STYLE = {
   family: "Lato",
   size: 16,
@@ -17,7 +17,7 @@ export const LABEL_STYLE = {
 };
 
 /** MathBox's 40px above a point or line end. */
-export const ITEM_LABEL_OFFSET: [number, number] = [0, -40];
+const ITEM_LABEL_OFFSET: [number, number] = [0, -40];
 
 type LabelProps = Parameters<typeof Label>[0] & { offset: [number, number] };
 

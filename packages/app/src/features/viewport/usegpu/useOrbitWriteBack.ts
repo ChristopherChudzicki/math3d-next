@@ -94,4 +94,3 @@ const useOrbitWriteBack = (
 };
 
 export { useOrbitWriteBack };
-export type { StoredCamera };

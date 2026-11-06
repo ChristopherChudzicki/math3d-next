@@ -53,9 +53,9 @@ the default.**
 `.yarn/patches/@use-gpu-workbench-npm-0.21.0-2d614b987d.patch` fixes two
 upstream bugs:
 
-- **`DualContourLayer` passes `depthTest`/`depthWrite` through.** It hardcodes
+- `DualContourLayer` passes `depthTest`/`depthWrite` through. It hardcodes
   both to `true`, so a translucent implicit surface self-occludes into speckle.
-- **`OITBuffer`'s `OIT/Transparency` target gets `colorInput: 'linear'`.**
+- `OITBuffer`'s `OIT/Transparency` target gets `colorInput: 'linear'`.
   Otherwise order-independent-transparency draws are linearized and never
   converted back, darkening mid-tone translucent colors by a 2.2 gamma.
 
@@ -71,8 +71,8 @@ upstream bugs:
   a property that doesn't apply; `todo` is a gap.
 - QA scenes (`webserver/scenes/seed_scenes/qa/`, one per graphical feature)
   are compared by hand: the same key in two tabs, one with
-  `?renderer=usegpu`. No Playwright-launched Chromium on macOS exposes a WebGPU
-  adapter, so there is no automated comparison.
+  `?renderer=usegpu`. No Playwright-launched Chromium, on macOS or CI, exposes a
+  WebGPU adapter, so there is no automated comparison.
 
 ## Consequences
 
@@ -86,9 +86,10 @@ upstream bugs:
     any hunk the release fixed, and run `usegpu/pins.spec.ts`;
   - open each QA scene in two tabs, one per renderer;
   - read the release's deprecation list.
-- The E2E smoke test (`viewport/usegpu-renderer.test.ts`) checks only that the
-  route loads without page errors: a canvas that stays up with a WebGPU
-  adapter, the unavailable message without.
+- The E2E smoke test (`viewport/usegpu-renderer.test.ts`) checks that the
+  route loads the lazy chunk without page errors. No Playwright-launched
+  Chromium, on macOS or CI, has a WebGPU adapter, so it sees only the
+  unavailable message and never checks drawing.
 
 ## Alternatives considered
 

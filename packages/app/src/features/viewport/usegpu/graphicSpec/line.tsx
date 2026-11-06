@@ -13,9 +13,9 @@ import { baseStyle, sampleCount, visibleLabel } from "./style";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";
 
-export type LineStyle = Omit<LineSpec, "kind" | "paths" | "label">;
+type LineStyle = Omit<LineSpec, "kind" | "paths" | "label">;
 
-export const LINE_STYLE_PROPS = [
+const LINE_STYLE_PROPS = [
   "width",
   "opacity",
   "zBias",

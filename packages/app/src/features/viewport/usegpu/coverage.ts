@@ -1,7 +1,6 @@
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import type { CoverageTable } from "@/features/viewport/shared/coverage";
 
-// Use.GPU's zIndex sorts draw calls, which depth testing and OIT make invisible.
 const Z_INDEX_PULL = "MathBox also pulls a higher zIndex toward the camera";
 const Z_INDEX = `approximate: orders draw calls only; ${Z_INDEX_PULL}` as const;
 const zIndexIgnored = (component: string) =>

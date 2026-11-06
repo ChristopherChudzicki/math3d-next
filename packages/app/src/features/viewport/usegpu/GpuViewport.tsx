@@ -74,7 +74,8 @@ const GpuViewport: React.FC<Props> = ({ className }) => {
     if (!hasRequired) return null;
     // A failed chunk or .wasm load, or a render error, throws here; past this
     // boundary it would replace the whole editor with the route's error page.
-    // Loading another scene remounts it, clearing the error.
+    // Loading another scene remounts it, clearing a render error; React.lazy
+    // caches a rejected import(), so a failed load stays failed until reload.
     return (
       <Sentry.ErrorBoundary
         key={loadCount}

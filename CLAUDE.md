@@ -102,7 +102,7 @@ This app is deployed as a true react SPA hosted on a CDN with APIs powered by Dj
 - **Rendering**: Vite dev/build, React 19, TypeScript (strict)
 - **State**: Redux Toolkit. Store: `packages/app/src/store/store.ts`. The scene model (slice, selectors, MathScope evaluation) is `packages/app/src/store/scene/`
 - **UI**: [Base UI](https://base-ui.com), wrapped by the generic components in `packages/app/src/ui/` ([ADR-0006](docs/adr/0006-base-ui-and-css-modules.md)). Color tokens: `packages/app/src/globals.css`. Icons: Iconify (Lucide)
-- **3D Visualization**: MathBox + Three.js, via [mathbox-react](https://github.com/ChristopherChudzicki/mathbox-react) bindings. `?renderer=usegpu` swaps in an opt-in [Use.GPU](https://usegpu.live) (WebGPU) renderer under `features/viewport/usegpu/` ([ADR-0008](docs/adr/0008-usegpu-opt-in-renderer.md)): folder/lint zones, the `React.lazy` boundary into `usegpu/live/`, and the `@use-gpu/workbench` Yarn patch.
+- **3D Visualization**: MathBox + Three.js, via [mathbox-react](https://github.com/ChristopherChudzicki/mathbox-react) bindings. `?renderer=usegpu` swaps in an opt-in [Use.GPU](https://usegpu.live) (WebGPU) renderer under `features/viewport/usegpu/`; [ADR-0008](docs/adr/0008-usegpu-opt-in-renderer.md) covers its lint zones, `React.lazy` boundary into `usegpu/live/`, and `@use-gpu/workbench` Yarn patch.
 - **Math Input**: MathLive (LaTeX-style input fields)
 - **Data Fetching**: TanStack React Query + openapi-fetch
 - **Routing**: React Router v7. Routes: `packages/app/src/app/routes.tsx`
