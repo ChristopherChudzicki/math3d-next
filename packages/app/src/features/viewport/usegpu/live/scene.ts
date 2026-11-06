@@ -61,7 +61,7 @@ const actionBindings = (controls: SceneSpec["controls"]) => ({
 
 const WHITE = [1, 1, 1, 1];
 
-// MathBox's hardcoded light direction, (1, 2, 2) in math coordinates.
+// MathBox's hardcoded light direction, (1, 2, 2) in cartesian coordinates.
 const KEY_LIGHT = toWorld([1, 2, 2]);
 
 const FONTS: FontSource[] = [

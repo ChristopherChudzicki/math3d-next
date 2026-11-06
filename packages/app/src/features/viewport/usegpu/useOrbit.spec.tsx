@@ -18,7 +18,7 @@ const range: AxesRange = [
 ];
 const scale: Coords = [1, 2, 0.5];
 
-const renderOrbit = (
+const renderUseOrbit = (
   scene: SceneBuilder,
   camera: MathItem<MathItemType.Camera>,
 ) => {
@@ -26,8 +26,13 @@ const renderOrbit = (
   const host = { current: document.createElement("div") };
   return renderHook(() => useOrbit(camera, range, scale, host), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  }).result.current;
+  });
 };
+
+const renderOrbit = (
+  scene: SceneBuilder,
+  camera: MathItem<MathItemType.Camera>,
+) => renderUseOrbit(scene, camera).result.current;
 
 test("defaults the camera and its controls before anything evaluates", () => {
   // A camera the scene doesn't hold has no results.
@@ -50,4 +55,14 @@ test("an orthographic camera gets dolly 0", () => {
   const camera = scene.items.find((x) => x.id === "camera");
   invariant(camera?.type === MathItemType.Camera);
   expect(renderOrbit(scene, camera).projection).toEqual({ dolly: 0 });
+});
+
+test("keeps the same orbit across rerenders, so the user's pan survives", () => {
+  const scene = new SceneBuilder();
+  const camera = scene.items.find((x) => x.id === "camera");
+  invariant(camera?.type === MathItemType.Camera);
+  const { result, rerender } = renderUseOrbit(scene, camera);
+  const { orbit } = result.current;
+  rerender();
+  expect(result.current.orbit).toBe(orbit);
 });

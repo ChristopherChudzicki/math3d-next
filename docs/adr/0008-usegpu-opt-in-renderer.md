@@ -71,8 +71,7 @@ upstream bugs:
   a property that doesn't apply; `todo` is a gap.
 - QA scenes (`webserver/scenes/seed_scenes/qa/`, one per graphical feature)
   are compared by hand: the same key in two tabs, one with
-  `?renderer=usegpu`. No Playwright-launched Chromium, on macOS or CI, exposes a
-  WebGPU adapter, so there is no automated comparison.
+  `?renderer=usegpu`.
 
 ## Consequences
 

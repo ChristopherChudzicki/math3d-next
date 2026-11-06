@@ -54,7 +54,7 @@ export type SurfaceSpec = Common & {
 export type ImplicitSurfaceSpec = Common & {
   kind: "implicit";
   domain: AxesRange;
-  /** Samples per axis. */
+  /** Cells per axis, as in MathBox. */
   samples: number;
   /** The surface is the zero level set of this function. */
   value: (x: number, y: number, z: number) => number;

@@ -16,11 +16,9 @@ test("?renderer=usegpu renders a canvas, or says WebGPU is unavailable", async (
   const scene = new SceneBuilder();
   scene.folder({ description: "Surface" }).explicitSurface();
   const key = await prepareScene(scene.json());
-  // navigator.gpu exists even without an adapter, so both branches load the
-  // lazy chunk and the text .wasm it imports. The dev server serves the chunk
-  // as GpuViewportContent.tsx and inlines the .wasm, so only a build fetches it.
-  // Matched by content type: the SPA fallback answers a missing asset with a
-  // 200 text/html.
+  // navigator.gpu exists without an adapter, so both branches load the chunk and its
+  // text .wasm; the dev server inlines the .wasm, so only a build fetches it. Matched
+  // by content type: the SPA fallback answers a missing asset with 200 text/html.
   const chunk = page.waitForResponse(
     (r) =>
       /\/GpuViewportContent[-.]/.test(r.url()) &&

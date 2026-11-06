@@ -1,6 +1,11 @@
-import { gradientFromGrid } from "./implicitGrid";
+import type { AxesRange } from "@/features/viewport/shared/coordinates";
+import {
+  MAX_IMPLICIT_CELLS,
+  gradientFromGrid,
+  implicitGridLayout,
+} from "./implicitGrid";
 
-test("a linear field has its exact normalized gradient at every cell", () => {
+test("a linear field has its exact normalized gradient at every grid point", () => {
   const size: [number, number, number] = [3, 4, 5];
   const spacing: [number, number, number] = [1, 0.5, 2];
   const values = new Float32Array(3 * 4 * 5);
@@ -32,4 +37,21 @@ test("a constant field, whose gradient is zero, yields the fallback normal", () 
   const values = new Float32Array(27).fill(1);
   const n = gradientFromGrid(values, [3, 3, 3], [1, 1, 1]);
   expect(Array.from(n.slice(0, 4))).toEqual([0, 0, 1, 0]);
+});
+
+test("samples counts cells per axis, capped at MAX_IMPLICIT_CELLS", () => {
+  const domain: AxesRange = [
+    [0, 4],
+    [-1, 1],
+    [2, 10],
+  ];
+  expect(implicitGridLayout(4, domain)).toEqual({
+    size: [5, 5, 5],
+    spacing: [1, 0.5, 2],
+  });
+  const n = MAX_IMPLICIT_CELLS;
+  expect(implicitGridLayout(n + 1, domain)).toEqual({
+    size: [n + 1, n + 1, n + 1],
+    spacing: [4 / n, 2 / n, 8 / n],
+  });
 });

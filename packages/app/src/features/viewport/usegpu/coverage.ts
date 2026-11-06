@@ -25,7 +25,8 @@ export const coverage = {
     opacity: "drawn",
     scale: "drawn",
     size: "drawn",
-    ticksVisible: "drawn",
+    ticksVisible:
+      "approximate: tick labels have no outline; MathBox's are MB.Labels with the same 2 px white one",
     visible: "drawn",
     calculatedVisibility: "drawn",
     useCalculatedVisibility: "drawn",
@@ -213,7 +214,7 @@ export const coverage = {
     visible: "drawn",
     calculatedVisibility: "drawn",
     useCalculatedVisibility: "drawn",
-    samples: "approximate: capped at 128 per axis",
+    samples: "approximate: capped at 128 cells per axis",
     shaded: SHADED,
     domain: "drawn",
     lhs: "drawn",

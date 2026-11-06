@@ -1,9 +1,28 @@
-/** Per-axis cell cap for implicit surfaces: memory and CPU normals grow as samples³. */
-export const MAX_IMPLICIT_SAMPLES = 128;
+import type { AxesRange } from "@/features/viewport/shared/coordinates";
+
+/** Per-axis cell cap for implicit surfaces: memory and CPU normals grow as cells³. */
+export const MAX_IMPLICIT_CELLS = 128;
+
+type Vec3 = [number, number, number];
 
 /**
- * The normalized gradient of a sampled scalar field, one `vec4` per cell, in
- * the x-fastest layout `Sampler` writes. `size` is the full grid, padding
+ * Like MathBox, `samples` counts cells per axis, so each axis has n + 1 points
+ * from lo to hi inclusive.
+ */
+export const implicitGridLayout = (
+  samples: number,
+  domain: AxesRange,
+): { size: Vec3; spacing: Vec3 } => {
+  const n = Math.min(samples, MAX_IMPLICIT_CELLS);
+  return {
+    size: [n + 1, n + 1, n + 1],
+    spacing: domain.map(([lo, hi]) => (hi - lo) / n) as Vec3,
+  };
+};
+
+/**
+ * The normalized gradient of a sampled scalar field, one `vec4` per grid
+ * point, in the x-fastest layout `Sampler` writes. `size` is the full grid, padding
  * included; `values` may be over-allocated, and only its first nx·ny·nz
  * entries are read. Central differences inside, one-sided at the faces; a
  * non-finite or zero gradient gets `[0, 0, 1, 0]`.
