@@ -17,7 +17,10 @@ import type { PopoverRootProps } from "@/ui/Popover";
 import { Tooltip } from "@/ui/Tooltip";
 import { useOnWidgetChange } from "@/features/editor/items/FieldWidget";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import { useMathItemResults } from "@/store/scene/evaluation/mathScope";
+import {
+  useFinalVisibility,
+  useMathItemResults,
+} from "@/store/scene/evaluation/mathScope";
 import ColorPopup from "./ColorPopup";
 import styles from "./ColorStatus.module.css";
 
@@ -44,7 +47,7 @@ const ColorStatus: React.FC<Props> = (props) => {
   const { item } = props;
   const [dialogVisible, setDialogVisible] = useToggle(false);
   const [buttonEl, setButtonEl] = useState<HTMLElement | null>(null);
-  const { color, visible, useCalculatedVisibility } = item.properties;
+  const { color, visible } = item.properties;
   const mathScope = useMathScope();
   const [calcVisInit, setCalcVisInit] = useToggle(false);
   const { calculatedVisibility } = useMathItemResults(
@@ -53,9 +56,7 @@ const ColorStatus: React.FC<Props> = (props) => {
     EVALUATED_PROPS,
   );
 
-  const finalVisibility = useCalculatedVisibility
-    ? !!calculatedVisibility
-    : visible;
+  const finalVisibility = useFinalVisibility(mathScope, item);
   const onChange = useOnWidgetChange(item);
   const colorAndStyle = useMemo(() => getColorConfig(color), [color]);
   const style = useMemo(

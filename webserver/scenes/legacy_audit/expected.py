@@ -307,9 +307,9 @@ def _visibility(out: _Out, item: dict) -> None:
     # skipped and calculatedVisibility only sets the group's visibility when
     # it evaluates to a boolean or number; otherwise the group keeps MathBox's
     # default (visible) (react:components/MathBox/MathBoxComponents.js:216-228).
-    # next shows `!!calculatedVisibility` whenever useCalculatedVisibility is
-    # set, so an empty one hides the item
-    # (next:app/src/store/scene/evaluation/mathScope.ts:102-110).
+    # next shows the item when the expression errors and defers to `visible`
+    # when it is blank (next:app/src/store/scene/evaluation/mathScope.ts
+    # `finalVisibility`).
     # Policy for a blank expression: math3d-react shows the item on load, but
     # its author, who saw it hidden while editing, set `visible`; legacy scenes
     # keep the author's `visible`, and the blank expression becomes empty
