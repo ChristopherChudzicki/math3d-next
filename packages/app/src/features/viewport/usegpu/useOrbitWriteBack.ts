@@ -19,7 +19,8 @@ type StoredCamera = {
 };
 
 /**
- * Ends each camera move 200 ms after the last `pointerup`/`wheel` on `host`:
+ * Ends each camera move 200 ms after the last `pointerup`/`pointercancel`/`wheel`
+ * on `host`, unless a pointer is still down:
  * writes it to the camera item when `updateOnDrag`, else bumps
  * `controlsVersion` so the controls snap back.
  */
@@ -63,16 +64,27 @@ const useOrbitWriteBack = (
   useEffect(() => {
     const el = host.current;
     if (!el) return undefined;
-    const end = debounce(() => onMoveEndRef.current(), 200);
+    const down = new Set<number>();
+    const end = debounce(() => {
+      if (down.size === 0) onMoveEndRef.current();
+    }, 200);
+    const press = (e: PointerEvent) => {
+      down.add(e.pointerId);
+    };
+    const release = (e: PointerEvent) => {
+      down.delete(e.pointerId);
+      end();
+    };
     // Capture phase: the orbit controls stop these events on the canvas.
     const options = { capture: true };
-    const cancel = () => end.cancel();
-    el.addEventListener("pointerdown", cancel, options);
-    el.addEventListener("pointerup", end, options);
+    el.addEventListener("pointerdown", press, options);
+    el.addEventListener("pointerup", release, options);
+    el.addEventListener("pointercancel", release, options);
     el.addEventListener("wheel", end, options);
     return () => {
-      el.removeEventListener("pointerdown", cancel, options);
-      el.removeEventListener("pointerup", end, options);
+      el.removeEventListener("pointerdown", press, options);
+      el.removeEventListener("pointerup", release, options);
+      el.removeEventListener("pointercancel", release, options);
       el.removeEventListener("wheel", end, options);
       end.cancel();
     };

@@ -39,15 +39,16 @@ export const renderImplicitSurface = (
   spec: ImplicitSurfaceSpec,
 ): LiveElement => {
   const { value, domain } = spec;
-  const samples = Math.min(spec.samples, MAX_IMPLICIT_SAMPLES);
-  const size = [samples, samples, samples];
+  // Like MathBox, `samples` counts cells per axis, so n + 1 points.
+  const n = Math.min(spec.samples, MAX_IMPLICIT_SAMPLES);
+  const size = [n + 1, n + 1, n + 1];
   // Sample one cell beyond the domain; the layer then scissors the surface at
   // the domain edge, so a surface crossing it is cut cleanly rather than
   // ending a cell short.
   const padding = 1;
-  // Sampler places `samples` points from lo to hi inclusive; padding extends
-  // the grid outward at the same step.
-  const spacing = domain.map(([lo, hi]) => (hi - lo) / (samples - 1)) as Vec3;
+  // Sampler places its points from lo to hi inclusive; padding extends the
+  // grid outward at the same step.
+  const spacing = domain.map(([lo, hi]) => (hi - lo) / n) as Vec3;
   const emitValue = (emit: Emit, x: number, y: number, z: number) => {
     emit(value(x, y, z));
   };

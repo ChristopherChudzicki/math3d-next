@@ -20,8 +20,8 @@ import { Cartesian, Plot } from "@use-gpu/plot";
 import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
 import type { GraphicSpec } from "@/features/viewport/usegpu/graphicSpec/types";
 import {
-  keyLightPosition,
   PLOT_ROTATION_DEGREES,
+  toWorld,
 } from "@/features/viewport/usegpu/orbit";
 import type { OrbitSpec } from "@/features/viewport/usegpu/orbit";
 import { renderGraphic } from "./graphics/renderGraphic";
@@ -61,6 +61,9 @@ const actionBindings = (controls: SceneSpec["controls"]) => ({
 
 const WHITE = [1, 1, 1, 1];
 
+// MathBox's hardcoded light direction, (1, 2, 2) in math coordinates.
+const KEY_LIGHT = toWorld([1, 2, 2]);
+
 const FONTS: FontSource[] = [
   {
     family: "Lato",
@@ -90,27 +93,15 @@ export const makeSceneRoot = (
       }),
     }),
   });
-  const ambient = use(AmbientLight, { intensity: 0.6 });
-  // Rebuilt only when the key light moves, so zoom and pan keep the Pass.
-  let lit: { light: Coords; pass: LiveElement } | null = null;
-  const litPass = (orbit: OrbitSpec) => {
-    const light = keyLightPosition(orbit);
-    if (!lit || lit.light.some((v, i) => v !== light[i])) {
-      lit = {
-        light,
-        pass: use(Pass, {
-          lights: true,
-          oit: true,
-          children: [
-            ambient,
-            use(DirectionalLight, { position: light, intensity: 0.8 }),
-            plot,
-          ],
-        }),
-      };
-    }
-    return lit.pass;
-  };
+  const pass = use(Pass, {
+    lights: true,
+    oit: true,
+    children: [
+      use(AmbientLight, { intensity: 0.6 }),
+      use(DirectionalLight, { position: KEY_LIGHT, intensity: 0.8 }),
+      plot,
+    ],
+  });
   let last: OrbitSpec | null = null;
   const report = (orbit: OrbitSpec) => {
     const same =
@@ -153,7 +144,7 @@ export const makeSceneRoot = (
             ...orbit,
             dolly: scene.projection.dolly,
             focus: 1,
-            children: litPass(orbit),
+            children: pass,
           });
         },
       }),

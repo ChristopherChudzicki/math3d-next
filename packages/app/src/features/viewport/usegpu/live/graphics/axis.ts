@@ -1,12 +1,12 @@
 import { use } from "@use-gpu/live";
 import type { LiveElement } from "@use-gpu/live";
 import type { TensorArray } from "@use-gpu/core";
-import { Axis, Label, Scale, Tick } from "@use-gpu/plot";
+import { Axis, Scale, Tick } from "@use-gpu/plot";
 import type { Coords } from "@/features/viewport/shared/coordinates";
 import type { AxisSpec } from "@/features/viewport/usegpu/graphicSpec/types";
 import { formatTick } from "./format";
 import { drawMode } from "./util";
-import { LABEL_STYLE, renderLabels } from "./labels";
+import { CssPixelLabel, LABEL_STYLE, renderLabels } from "./labels";
 
 const axisEnd = (axis: AxisSpec["axis"], max: number): Coords => {
   if (axis === "x") return [max, 0, 0];
@@ -45,7 +45,7 @@ const renderTicks = (spec: AxisSpec): LiveElement =>
             zBias: spec.zBias,
             mode: drawMode(spec.color),
           }),
-          use(Label, {
+          use(CssPixelLabel, {
             positions,
             values,
             formatter: formatTick,

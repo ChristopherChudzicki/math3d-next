@@ -71,3 +71,10 @@ test("1 gridline along a parameter draws 2, its edges", () => {
   const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
   expect(spec.grid.lines[0]).toBe(2);
 });
+
+test("a gradient surface clamps opacity to 1, like a flat color", () => {
+  const scene = new SceneBuilder();
+  scene.folder().explicitSurface({ color: "rainbow", opacity: "1.5" }, "s");
+  const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
+  expect(spec.colorAt(0.5, 0.5)[3]).toBe(1);
+});

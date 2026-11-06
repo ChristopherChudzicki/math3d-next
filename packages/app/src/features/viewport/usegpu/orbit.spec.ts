@@ -1,6 +1,6 @@
 import { makeOrbitPosition } from "@use-gpu/core";
 import type { Coords } from "@/features/viewport/shared/coordinates";
-import { fromOrbit, keyLightPosition, toOrbit, toWorld } from "./orbit";
+import { fromOrbit, toOrbit, toWorld } from "./orbit";
 
 const cases: { position: Coords; target: Coords }[] = [
   { position: [-1.2, 0.8, 2], target: [0.3, 0.1, -0.4] },
@@ -35,25 +35,3 @@ test.each(cases)(
     });
   },
 );
-
-test("keyLightPosition is MathBox's view-space (1, 2, 2) in world coordinates", () => {
-  // Bearing and pitch 0: the camera sits on world +z, so view space is world space.
-  const light = keyLightPosition({
-    radius: 3,
-    bearing: 0,
-    pitch: 0,
-    target: [0, 0, 0],
-  });
-  [1, 2, 2].forEach((v, i) => expect(light[i]).toBeCloseTo(v, 6));
-});
-
-// At a pole the view's x falls back to world +x, so y = z × x.
-test("keyLightPosition at a pole uses world +x as the view's x", () => {
-  const light = keyLightPosition({
-    radius: 3,
-    bearing: 0,
-    pitch: Math.PI / 2,
-    target: [0, 0, 0],
-  });
-  [1, 2, -2].forEach((v, i) => expect(light[i]).toBeCloseTo(v, 6));
-});

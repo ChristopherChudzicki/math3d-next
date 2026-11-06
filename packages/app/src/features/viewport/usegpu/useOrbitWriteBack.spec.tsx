@@ -111,3 +111,13 @@ test("with updateOnDrag off it bumps controlsVersion instead of dispatching", ()
   expect(storedPosition()).toBe(before);
   expect(result.current.controlsVersion).toBe(1);
 });
+
+test("a pointerdown before the move ends defers it while the pointer is down", () => {
+  const { result, storedPosition, move, wait } = setup(true);
+  const before = storedPosition();
+  move([1, -1, 0.5], new PointerEvent("pointerup"));
+  move([1, -1, 0.5], new PointerEvent("pointerdown"));
+  wait();
+  expect(storedPosition()).toBe(before);
+  expect(result.current.controlsVersion).toBe(0);
+});

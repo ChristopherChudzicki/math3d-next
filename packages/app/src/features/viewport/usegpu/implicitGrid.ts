@@ -1,4 +1,4 @@
-/** Per-axis sample cap for implicit surfaces: memory and CPU normals grow as samples³. */
+/** Per-axis cell cap for implicit surfaces: memory and CPU normals grow as samples³. */
 export const MAX_IMPLICIT_SAMPLES = 128;
 
 /**

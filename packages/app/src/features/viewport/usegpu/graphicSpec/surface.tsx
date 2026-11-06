@@ -94,10 +94,10 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
     const uv = domainMap(domain);
     const position: XYZ = (U, V) => func(...uv(U, V));
 
-    const alpha = opacity ?? 1;
     const gradient = isGradientName(color) ? gradients[color] : null;
     const base = baseStyle({ opacity, zBias, zIndex }, color);
     const flat = base.color;
+    const alpha = flat[3];
     const colorFunc = colorExpr && toColorFunc(item.type, colorExpr);
     const colorAt = (U: number, V: number): RGBA => {
       if (!gradient || !colorFunc) return flat;

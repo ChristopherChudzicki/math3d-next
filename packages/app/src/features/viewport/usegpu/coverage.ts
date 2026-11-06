@@ -8,8 +8,10 @@ const zIndexIgnored = (component: string) =>
   `approximate: ignored by Use.GPU's ${component}; ${Z_INDEX_PULL}` as const;
 const Z_BIAS =
   "approximate: Use.GPU's zBias units are not calibrated against MathBox's";
-const BOLD_LABEL =
-  "approximate: regular weight; MathBox draws item labels bold";
+const ITEM_LABEL =
+  "approximate: regular weight, no outline; MathBox draws item labels bold with a 2 px white outline";
+const SHADED =
+  "approximate: physically based diffuse and specular; MathBox uses its own blend";
 
 /** What the Use.GPU renderer does with each stored property. */
 export const coverage = {
@@ -17,7 +19,7 @@ export const coverage = {
     axis: "drawn",
     color: "drawn",
     description: "n/a: editor only",
-    label: "drawn",
+    label: "approximate: no outline; MathBox draws a 2 px white one",
     labelVisible: "drawn",
     min: "drawn",
     max: "drawn",
@@ -55,7 +57,7 @@ export const coverage = {
     color: "drawn",
     coords: "drawn",
     description: "n/a: editor only",
-    label: BOLD_LABEL,
+    label: ITEM_LABEL,
     labelVisible: "drawn",
     opacity: "drawn",
     size: "drawn",
@@ -70,7 +72,7 @@ export const coverage = {
     color: "drawn",
     coords: "drawn",
     description: "n/a: editor only",
-    label: BOLD_LABEL,
+    label: ITEM_LABEL,
     labelVisible: "drawn",
     opacity: "drawn",
     visible: "drawn",
@@ -88,7 +90,7 @@ export const coverage = {
     color: "drawn",
     components: "drawn",
     description: "n/a: editor only",
-    label: BOLD_LABEL,
+    label: ITEM_LABEL,
     labelVisible: "drawn",
     opacity: "drawn",
     tail: "drawn",
@@ -153,7 +155,7 @@ export const coverage = {
     grid2: "drawn",
     gridWidth: "drawn",
     opacity: "drawn",
-    shaded: "drawn",
+    shaded: SHADED,
     samples1: "drawn",
     samples2: "drawn",
     visible: "drawn",
@@ -174,7 +176,7 @@ export const coverage = {
     grid2: "drawn",
     gridWidth: "drawn",
     opacity: "drawn",
-    shaded: "drawn",
+    shaded: SHADED,
     samples1: "drawn",
     samples2: "drawn",
     visible: "drawn",
@@ -195,7 +197,7 @@ export const coverage = {
     gridWidth: "drawn",
     opacity: "drawn",
     domain: "drawn",
-    shaded: "drawn",
+    shaded: SHADED,
     samples1: "drawn",
     samples2: "drawn",
     visible: "drawn",
@@ -212,8 +214,8 @@ export const coverage = {
     visible: "drawn",
     calculatedVisibility: "drawn",
     useCalculatedVisibility: "drawn",
-    samples: "drawn",
-    shaded: "drawn",
+    samples: "approximate: capped at 128 per axis",
+    shaded: SHADED,
     domain: "drawn",
     lhs: "drawn",
     rhs: "drawn",

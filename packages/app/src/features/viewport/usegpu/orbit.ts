@@ -54,26 +54,3 @@ export const fromOrbit = (orbit: OrbitSpec): CameraSpec => {
     target: fromWorld(t),
   };
 };
-
-const cross = (a: Coords, b: Coords): Coords => [
-  a[1] * b[2] - a[2] * b[1],
-  a[2] * b[0] - a[0] * b[2],
-  a[0] * b[1] - a[1] * b[0],
-];
-
-const normalize = (v: Coords): Coords => {
-  const n = Math.hypot(...v);
-  return [v[0] / n, v[1] / n, v[2] / n];
-};
-
-/**
- * The world-space key light position for a camera orbit: MathBox's light,
- * fixed at (1, 2, 2) in view space (right, up, towards the viewer).
- */
-export const keyLightPosition = (orbit: OrbitSpec): Coords => {
-  const z = normalize(orbitOffset({ ...orbit, radius: 1 }));
-  const side = cross([0, 1, 0], z);
-  const x: Coords = Math.hypot(...side) < 1e-6 ? [1, 0, 0] : normalize(side);
-  const y = cross(z, x);
-  return [0, 1, 2].map((i) => x[i] + 2 * y[i] + 2 * z[i]) as Coords;
-};

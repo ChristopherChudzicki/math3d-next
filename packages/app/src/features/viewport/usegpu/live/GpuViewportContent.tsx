@@ -87,7 +87,8 @@ const useOrbit = (
 };
 
 const CANVAS_STYLE = { width: "100%", height: "100%", display: "block" };
-const HOST_STYLE = { width: "100%", height: "100%" };
+// Without it, touch drags scroll or zoom the page instead of orbiting.
+const HOST_STYLE = { width: "100%", height: "100%", touchAction: "none" };
 
 type Props = { onUnsupported: SceneHooks["onUnsupported"] };
 
