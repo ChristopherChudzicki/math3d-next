@@ -104,12 +104,8 @@
   text-overflow: ellipsis;
 }
 
-.indicator {
-  display: inline-flex;
-  width: 1em;
-  height: 1em;
-}
-
-.indicator[data-unchecked] {
-  visibility: hidden;
+/* Base UI marks a checkbox item with data-checked or data-unchecked. */
+.item[data-checked] .whenUnchecked,
+.item[data-unchecked] .whenChecked {
+  display: none;
 }

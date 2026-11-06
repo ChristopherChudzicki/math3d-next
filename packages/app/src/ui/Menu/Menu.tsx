@@ -2,7 +2,8 @@ import React from "react";
 import classNames from "classnames";
 import { Menu as BaseMenu } from "@base-ui/react/menu";
 import { Icon } from "@iconify/react/offline";
-import check from "@iconify-icons/lucide/check";
+import square from "@iconify-icons/lucide/square";
+import squareCheck from "@iconify-icons/lucide/square-check";
 import * as styles from "./Menu.module.css";
 
 const { Root, Trigger, Group } = BaseMenu;
@@ -114,7 +115,7 @@ type CheckboxItemProps = Omit<
   };
 
 /**
- * A checkable menu item; the check mark takes the icon slot. Closes the menu
+ * A checkable menu item; a checkbox takes the icon slot. Closes the menu
  * on click (Base UI's default is to stay open), like the other items.
  */
 const CheckboxItem: React.FC<CheckboxItemProps> = ({
@@ -129,10 +130,8 @@ const CheckboxItem: React.FC<CheckboxItemProps> = ({
     className={classNames(styles.item, styles.neutral, className)}
   >
     <span className={styles.icon} aria-hidden="true">
-      {/* Mounted while unchecked so the hidden slot keeps labels aligned. */}
-      <BaseMenu.CheckboxItemIndicator keepMounted className={styles.indicator}>
-        <Icon icon={check} />
-      </BaseMenu.CheckboxItemIndicator>
+      <Icon icon={square} className={styles.whenUnchecked} />
+      <Icon icon={squareCheck} className={styles.whenChecked} />
     </span>
     <span className={styles.label}>{children}</span>
   </BaseMenu.CheckboxItem>
