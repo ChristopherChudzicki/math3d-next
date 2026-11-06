@@ -175,7 +175,7 @@
       "id": "mainFolder",
       "type": "FOLDER",
       "properties": {
-        "description": "A Folder",
+        "description": "Sliders",
         "isCollapsed": "false"
       }
     },
@@ -183,7 +183,7 @@
       "id": "3",
       "type": "EXPLICIT_SURFACE",
       "properties": {
-        "description": "Explicit Surface:\nWe can use the slider variables defined above in defining a surface (or any expression)",
+        "description": "Explicit Surface\nSlider variables can be used in any expression. This surface uses A and b.",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -265,7 +265,7 @@
           "items": ["0.5", "3"]
         },
         "duration": "4",
-        "description": "Another Slider!",
+        "description": "Variable Slider",
         "isAnimating": "false",
         "speedMultiplier": "1"
       }

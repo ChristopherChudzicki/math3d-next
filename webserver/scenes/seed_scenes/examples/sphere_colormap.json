@@ -175,7 +175,7 @@
       "id": "mainFolder",
       "type": "FOLDER",
       "properties": {
-        "description": "A Folder",
+        "description": "Color Maps",
         "isCollapsed": "false"
       }
     },
@@ -183,7 +183,7 @@
       "id": "3",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface:\nThis sphere uses g(u - T, v) as its color map.\nHold-press the rainbow, then switch to \"Color Map\" for details.",
+        "description": "Parametric Surface\nThis sphere's color map is g(u - T, v). Press and hold the color dot, then open the Color Map tab for details.",
         "color": "temperature",
         "visible": true,
         "calculatedVisibility": "",
@@ -239,7 +239,7 @@
           "lhs": "f\\left(\\phi,\\ \\theta\\right)",
           "rhs": "\\left[\\cos\\left(\\phi\\right)\\cdot\\sin\\left(\\theta\\right),\\ \\sin\\left(\\phi\\right)\\cdot\\sin\\left(\\theta\\right),\\cos\\left(\\theta\\right)\\right]"
         },
-        "description": "Parametric description of sphere:"
+        "description": "Sphere Parametrization"
       }
     },
     {
@@ -251,7 +251,7 @@
           "lhs": "g\\left(\\phi,\\ \\theta\\right)",
           "rhs": "\\frac{1+\\cos\\left(3\\phi\\right)}{2}\\cdot\\sin\\left(2\\theta\\right)^2"
         },
-        "description": "Color function on Sphere"
+        "description": "Color Function"
       }
     },
     {
@@ -269,7 +269,7 @@
           "items": ["0", "2\\pi"]
         },
         "duration": "4",
-        "description": "Variable Slider: Angle Shift",
+        "description": "Angle Shift",
         "isAnimating": "true",
         "speedMultiplier": "2"
       }

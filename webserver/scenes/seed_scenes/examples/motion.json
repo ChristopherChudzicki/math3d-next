@@ -215,7 +215,7 @@
       "id": "6",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Parametric Curve",
+        "description": "Full Path",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -250,7 +250,7 @@
       "id": "7",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Parametric Curve",
+        "description": "Path Traveled",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -304,7 +304,7 @@
       "id": "9",
       "type": "VECTOR",
       "properties": {
-        "description": "Vector (scaled)",
+        "description": "Velocity Vector (scaled)",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "",
@@ -327,7 +327,7 @@
       "id": "12",
       "type": "VECTOR",
       "properties": {
-        "description": "Vector",
+        "description": "Acceleration Vector (scaled)",
         "color": "#e67e22",
         "visible": true,
         "calculatedVisibility": "",
@@ -375,7 +375,7 @@
           "lhs": "r\\left(t\\right)",
           "rhs": "\\left[4\\cos\\left(\\pi\\ t\\right),\\ 2\\sin\\left(\\pi\\ t\\right),\\ t\\right]"
         },
-        "description": "Variable or Function"
+        "description": "Position Function"
       }
     },
     {
@@ -399,7 +399,7 @@
           "lhs": "a\\left(t\\right)",
           "rhs": "\\operatorname{diff}\\left(v,\\ t\\right)"
         },
-        "description": "Variable or Function"
+        "description": "Acceleration Function"
       }
     },
     {

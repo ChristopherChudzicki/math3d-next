@@ -6,7 +6,7 @@
       "id": "camera",
       "type": "CAMERA",
       "properties": {
-        "description": "Camera\nWhile the camera position is animated, rotate, zoom, and pan are automatically turned off.",
+        "description": "Camera\nRotate, zoom, and pan are turned off here, so they don't fight the camera animation.",
         "isOrthographic": "false",
         "isPanEnabled": "false",
         "isZoomEnabled": "false",
@@ -175,7 +175,7 @@
       "id": "mainFolder",
       "type": "FOLDER",
       "properties": {
-        "description": "A Folder",
+        "description": "Camera Animation",
         "isCollapsed": "false"
       }
     },
@@ -206,7 +206,7 @@
       "id": "4",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Parametric Curve: Camera Path",
+        "description": "Camera Path",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -246,7 +246,7 @@
           "lhs": "f(t)",
           "rhs": "\\left[R\\left(t\\right)\\cdot\\cos\\left(t\\right),\\ R\\left(t\\right)\\cdot\\sin\\left(t\\right),\\ t\\right]"
         },
-        "description": "Function:\nThis function and the slider above are used to animate the camera position. Activate the \"Axes & Camera\" tab above to see how."
+        "description": "Function\nThis function and the slider above animate the camera position. Open the Setup tab to see how."
       }
     },
     {

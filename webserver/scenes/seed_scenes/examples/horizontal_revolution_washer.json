@@ -1,6 +1,6 @@
 {
   "key": "horizontal_revolution_washer",
-  "title": "Surface of Revolution: Washer Method (Horizontal Axis)",
+  "title": "Volume of Revolution: Washer Method (Horizontal Axis)",
   "items": [
     {
       "id": "camera",
@@ -236,18 +236,10 @@
       }
     },
     {
-      "id": "mainFolder",
-      "type": "FOLDER",
-      "properties": {
-        "description": "A Folder",
-        "isCollapsed": "false"
-      }
-    },
-    {
       "id": "18",
       "type": "LINE",
       "properties": {
-        "description": "Line",
+        "description": "Rotation Axis",
         "color": "#2c3e50",
         "visible": true,
         "calculatedVisibility": "",
@@ -827,7 +819,7 @@
           "lhs": "f(x)",
           "rhs": "3+e^{-x}"
         },
-        "description": "Outer Radius"
+        "description": "Outer Curve"
       }
     },
     {
@@ -839,7 +831,7 @@
           "lhs": "g\\left(x\\right)",
           "rhs": "\\sqrt{x}"
         },
-        "description": "Inner Radius"
+        "description": "Inner Curve"
       }
     },
     {
@@ -963,7 +955,7 @@
           "lhs": "front\\left(u,\\ v\\right)",
           "rhs": "v\\cdot r_f\\left(u,\\ \\theta\\right)\\ +\\ \\left(1-v\\right)\\cdot r_g\\left(u,\\ \\theta\\right)"
         },
-        "description": "Variable or Function"
+        "description": "Front Cap Function"
       }
     }
   ],

@@ -175,7 +175,7 @@
       "id": "mainFolder",
       "type": "FOLDER",
       "properties": {
-        "description": "A Folder",
+        "description": "Labels",
         "isCollapsed": "false"
       }
     },
@@ -183,7 +183,7 @@
       "id": "1",
       "type": "POINT",
       "properties": {
-        "description": "Point:\nOpen object settings (press the gear) to add a label to a point. Make sure to also set \"labelVisible\".",
+        "description": "Point\nTo label a point, open the object settings (press the gear), enter a Label, and set Label Visible.",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -192,7 +192,7 @@
         "zIndex": "0",
         "zBias": "0",
         "zOrder": "",
-        "label": "My Point",
+        "label": "P",
         "labelVisible": "true",
         "coords": "\\left[3,-2,4\\right]",
         "size": "16"
@@ -202,7 +202,7 @@
       "id": "2",
       "type": "VECTOR",
       "properties": {
-        "description": "Vector\nVectors and lines can be labeled, too. Vector and line labels appear at the end.",
+        "description": "Vector\nVectors and lines can be labeled too. Their labels appear at the end.",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "",
@@ -211,7 +211,7 @@
         "zIndex": "0",
         "zBias": "0",
         "zOrder": "",
-        "label": "Your Vector",
+        "label": "v",
         "labelVisible": "true",
         "size": "6",
         "width": "4",
@@ -234,7 +234,7 @@
         "zIndex": "0",
         "zBias": "0",
         "zOrder": "",
-        "label": "A Line!",
+        "label": "L",
         "labelVisible": "true",
         "size": "6",
         "width": "4",

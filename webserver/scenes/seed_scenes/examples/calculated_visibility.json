@@ -1,6 +1,6 @@
 {
   "key": "calculated_visibility",
-  "title": "Controlling Multiple Object Visibility with Toggles",
+  "title": "Controlling Visibility with Toggles",
   "items": [
     {
       "id": "camera",
@@ -175,7 +175,7 @@
       "id": "mainFolder",
       "type": "FOLDER",
       "properties": {
-        "description": "A Folder",
+        "description": "Toggles",
         "isCollapsed": "false"
       }
     },
@@ -186,7 +186,7 @@
         "description": "Point",
         "color": "#e74c3c",
         "visible": true,
-        "calculatedVisibility": "dragon",
+        "calculatedVisibility": "show",
         "useCalculatedVisibility": true,
         "opacity": "1",
         "zIndex": "0",
@@ -205,13 +205,13 @@
         "description": "Point",
         "color": "#9b59b6",
         "visible": true,
-        "calculatedVisibility": "dragon",
+        "calculatedVisibility": "show",
         "useCalculatedVisibility": true,
         "opacity": "1",
         "zIndex": "0",
         "zBias": "0",
         "zOrder": "",
-        "label": "A Point",
+        "label": "P",
         "labelVisible": "true",
         "coords": "\\left[2,\\ 0,\\ 4\\right]",
         "size": "16"
@@ -221,10 +221,10 @@
       "id": "6",
       "type": "EXPLICIT_SURFACE_POLAR",
       "properties": {
-        "description": "Explicit Surface (Polar)\nTo control visibility with a toggle, set the value of \"calculated visibility\" in object settings (press the gear).",
+        "description": "Explicit Surface (Polar)\nTo control an object's visibility with a toggle, open its settings (press the gear) and set Calculated Visibility to the toggle's name.",
         "color": "#3090FF",
         "visible": true,
-        "calculatedVisibility": "dragon",
+        "calculatedVisibility": "show",
         "useCalculatedVisibility": true,
         "opacity": "0.75",
         "zIndex": "0",
@@ -274,10 +274,10 @@
       "properties": {
         "value": {
           "type": "assignment",
-          "lhs": "dragon",
+          "lhs": "show",
           "rhs": "true"
         },
-        "description": "Toggle Switch:\nA toggle switch is a boolean variable (true/false). Toggles can be used to control the  visibility of multiple graphics objects at once.\n\nThis toggle has the silly name \"dragon\"."
+        "description": "Toggle Switch\nA toggle switch is a boolean variable (true or false). One toggle can control the visibility of several objects at once."
       }
     }
   ],

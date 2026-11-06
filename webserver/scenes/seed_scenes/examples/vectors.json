@@ -175,7 +175,7 @@
       "id": "mainFolder",
       "type": "FOLDER",
       "properties": {
-        "description": "A Folder",
+        "description": "Vectors",
         "isCollapsed": "false"
       }
     },
@@ -183,7 +183,7 @@
       "id": "1",
       "type": "VECTOR",
       "properties": {
-        "description": "Vector:\nBy default, vectors have their tails at the origin",
+        "description": "Vector\nBy default, a vector's tail is at the origin.",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -206,7 +206,7 @@
       "id": "2",
       "type": "VECTOR",
       "properties": {
-        "description": "Vector:\nA different tail can be specified in object settings. Open object settings by pressing the gear.",
+        "description": "Vector\nTo move the tail, open the object settings (press the gear).",
         "color": "#f1c40f",
         "visible": true,
         "calculatedVisibility": "",
@@ -229,7 +229,7 @@
       "id": "3",
       "type": "VECTOR",
       "properties": {
-        "description": "Vector:\nThe tail can  position can contain variables  or functions.\nHere the tail has coordinates [X,-2,-1]",
+        "description": "Vector\nThe tail can depend on variables or functions. Here, the tail is [X, -2, -1].",
         "color": "#9b59b6",
         "visible": true,
         "calculatedVisibility": "",

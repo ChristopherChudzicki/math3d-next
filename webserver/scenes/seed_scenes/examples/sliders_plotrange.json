@@ -1,6 +1,6 @@
 {
   "key": "sliders_plotrange",
-  "title": "Using Sliders to Animate Plot Range",
+  "title": "Using Sliders to Animate the Plot Range",
   "items": [
     {
       "id": "camera",
@@ -175,7 +175,7 @@
       "id": "mainFolder",
       "type": "FOLDER",
       "properties": {
-        "description": "A Folder",
+        "description": "Animated Plot Range",
         "isCollapsed": "false"
       }
     },
@@ -229,7 +229,7 @@
           "items": ["-2\\pi", "2\\pi"]
         },
         "duration": "4",
-        "description": "Variable Slider\nSlider endpoints can contain symbols like pi, or other even variables.",
+        "description": "Variable Slider\nSlider endpoints can contain constants like π, or even other variables.",
         "isAnimating": "true",
         "speedMultiplier": "1"
       }

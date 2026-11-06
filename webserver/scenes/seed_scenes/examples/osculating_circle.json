@@ -159,7 +159,7 @@
       "id": "4",
       "type": "FOLDER",
       "properties": {
-        "description": "Helper Functions:",
+        "description": "Helper Functions",
         "isCollapsed": "true"
       }
     },
@@ -191,7 +191,7 @@
       "id": "mainFolder",
       "type": "FOLDER",
       "properties": {
-        "description": "A Folder",
+        "description": "Controls",
         "isCollapsed": "false"
       }
     },
@@ -234,7 +234,7 @@
       "id": "11",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Parametric Curve",
+        "description": "Osculating Circle",
         "color": "#e67e22",
         "visible": true,
         "calculatedVisibility": "",
@@ -269,7 +269,7 @@
       "id": "12",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface",
+        "description": "Osculating Plane",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -345,7 +345,7 @@
           "lhs": "r(t)",
           "rhs": "\\left[\\ 2\\cos\\left(t\\right),\\ \\sin\\left(t\\right),\\ \\frac{t}{2}\\right]"
         },
-        "description": "Variable or Function"
+        "description": "Curve"
       }
     },
     {
@@ -381,7 +381,7 @@
           "lhs": "f\\left(u,\\ t\\right)",
           "rhs": "r\\left(u\\right)+R\\left(u\\right)\\cdot\\left(N\\left(u\\right)+\\cos\\left(t\\right)T\\left(u\\right)+\\sin\\left(t\\right)N\\left(u\\right)\\right)"
         },
-        "description": "Osculating Circle: u is the point of tangency, t is the parameter"
+        "description": "Osculating Circle\nThe circle is tangent to the curve at r(u); t parametrizes the circle."
       }
     },
     {
@@ -393,7 +393,7 @@
           "lhs": "N\\left(t\\right)",
           "rhs": "\\operatorname{unitN}\\left(r,\\ t\\right)"
         },
-        "description": "Variable or Function"
+        "description": "Unit Normal Vector"
       }
     }
   ],

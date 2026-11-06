@@ -1,6 +1,6 @@
 {
   "key": "tnb",
-  "title": "The TNB Vectors for Parametric Curves",
+  "title": "TNB Vectors for Parametric Curves",
   "items": [
     {
       "id": "camera",
@@ -175,7 +175,7 @@
       "id": "mainFolder",
       "type": "FOLDER",
       "properties": {
-        "description": "A Folder",
+        "description": "TNB Frame",
         "isCollapsed": "false"
       }
     },
@@ -218,7 +218,7 @@
       "id": "4",
       "type": "VECTOR",
       "properties": {
-        "description": "Vector",
+        "description": "Unit Tangent Vector",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "",
@@ -241,7 +241,7 @@
       "id": "5",
       "type": "VECTOR",
       "properties": {
-        "description": "Vector",
+        "description": "Unit Normal Vector",
         "color": "#9b59b6",
         "visible": true,
         "calculatedVisibility": "",
@@ -264,7 +264,7 @@
       "id": "6",
       "type": "VECTOR",
       "properties": {
-        "description": "Vector",
+        "description": "Unit Binormal Vector",
         "color": "#e67e22",
         "visible": true,
         "calculatedVisibility": "",
@@ -292,7 +292,7 @@
           "lhs": "f\\left(t\\right)",
           "rhs": "\\left[t^3,t^2,t\\right]"
         },
-        "description": "Variable or Function"
+        "description": "Curve"
       }
     },
     {
