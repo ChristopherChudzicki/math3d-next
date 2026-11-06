@@ -11,11 +11,9 @@ import {
   storeWithScene,
 } from "@/test_util/renderGraphicSpec";
 import type { SceneInput } from "@/test_util/renderGraphicSpec";
+import { repoRoot } from "@/test_util/repoRoot";
 
-const QA_DIR = path.resolve(
-  import.meta.dirname,
-  "../../../../../../../webserver/scenes/seed_scenes/qa",
-);
+const QA_DIR = path.join(repoRoot, "webserver/scenes/seed_scenes/qa");
 
 type QaScene = {
   key: string;

@@ -4,8 +4,8 @@ import { test } from "@/fixtures/users";
 
 test.use({ disable3d: false });
 
-// Playwright's Chromium on macOS exposes no WebGPU adapter, so locally this
-// takes the "unavailable" branch; a GPU-capable runner takes the canvas one.
+// No Playwright-launched Chromium, on macOS or on CI, exposes a WebGPU adapter,
+// so this takes the "unavailable" branch; a GPU-capable runner takes the other.
 test("?renderer=usegpu renders a canvas, or says WebGPU is unavailable", async ({
   page,
   prepareScene,
@@ -16,7 +16,23 @@ test("?renderer=usegpu renders a canvas, or says WebGPU is unavailable", async (
   const scene = new SceneBuilder();
   scene.folder({ description: "Surface" }).explicitSurface();
   const key = await prepareScene(scene.json());
+  // navigator.gpu exists even without an adapter, so both branches load the
+  // lazy chunk and the text .wasm it imports. The dev server serves the chunk
+  // as GpuViewportContent.tsx and inlines the .wasm, so only a build fetches it.
+  // Matched by content type: the SPA fallback answers a missing asset with a
+  // 200 text/html.
+  const chunk = page.waitForResponse(
+    (r) =>
+      /\/GpuViewportContent[-.]/.test(r.url()) &&
+      /javascript/.test(r.headers()["content-type"] ?? ""),
+  );
+  const wasm = page
+    .waitForResponse((r) => r.headers()["content-type"] === "application/wasm")
+    .catch(() => null);
   await page.goto(`/${key}?renderer=usegpu`);
+  if (!new URL((await chunk).url()).pathname.endsWith(".tsx")) {
+    expect(await wasm).not.toBeNull();
+  }
 
   // This package's TS lib has no WebGPU types.
   const hasGpu = await page.evaluate(() => {
@@ -28,8 +44,8 @@ test("?renderer=usegpu renders a canvas, or says WebGPU is unavailable", async (
   const viewport = page.getByTestId("scene");
   if (hasGpu) {
     await expect(viewport.locator("canvas")).toBeVisible();
-    // The canvas mounts before the adapter and device resolve, which can still fail.
-    await page.waitForTimeout(1500);
+    // Set once the controls first render, so the adapter and device are up.
+    await expect(viewport.locator("[data-ready]")).toBeAttached();
     await expect(
       viewport.getByRole("link", { name: "Use the default renderer" }),
     ).toHaveCount(0);

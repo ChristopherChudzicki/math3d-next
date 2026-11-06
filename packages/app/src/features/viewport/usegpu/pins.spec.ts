@@ -8,15 +8,10 @@
  * so it also covers Use.GPU's own requests, and point packages/app's
  * dependency at the new patch file.
  */
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
-
-const repoRoot = (() => {
-  let dir = import.meta.dirname;
-  while (!existsSync(path.join(dir, "yarn.lock"))) dir = path.dirname(dir);
-  return dir;
-})();
+import { repoRoot } from "@/test_util/repoRoot";
 
 const readJson = (file: string) => JSON.parse(readFileSync(file, "utf8"));
 
