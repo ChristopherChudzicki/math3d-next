@@ -259,13 +259,15 @@ describe("the renderer item", () => {
     },
   );
 
-  test("an adapter that resolves null hides the item", async () => {
+  test("an adapter that resolves null disables the item and says why", async () => {
     stubWebGpu(async () => null);
     renderTestApp("");
     // Lets the null adapter settle before the menu is opened.
     await act(() => Promise.resolve());
     await openMenu();
-    expect(screen.queryByRole("menuitemcheckbox")).toBeNull();
+    const item = screen.getByRole("menuitemcheckbox", { name: ITEM });
+    expect(item).toHaveAttribute("aria-disabled", "true");
+    expect(item).toHaveAccessibleDescription("Not available in this browser");
   });
 
   test("checking it draws Use.GPU and closes the menu", async () => {
@@ -289,14 +291,16 @@ describe("the renderer item", () => {
     await expectRenderer("mathbox");
   });
 
-  test("while detection is pending the item is absent, then appears", async () => {
+  test("while detection is pending the item is disabled without a reason, then enabled", async () => {
     const adapter = Promise.withResolvers<unknown>();
     stubWebGpu(() => adapter.promise);
     renderTestApp("");
     await openMenu();
-    expect(screen.queryByRole("menuitemcheckbox")).toBeNull();
+    const item = screen.getByRole("menuitemcheckbox", { name: ITEM });
+    expect(item).toHaveAttribute("aria-disabled", "true");
+    expect(item).not.toHaveAccessibleDescription();
 
     await act(async () => adapter.resolve({}));
-    expect(await screen.findByRole("menuitemcheckbox")).toBeInTheDocument();
+    await waitFor(() => expect(item).not.toHaveAttribute("aria-disabled"));
   });
 });

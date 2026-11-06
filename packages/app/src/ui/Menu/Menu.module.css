@@ -70,7 +70,8 @@
   outline-offset: -2px;
 }
 
-.item[data-disabled] {
+/* A description stays undimmed: it often says why the item is disabled. */
+.item[data-disabled] :is(.icon, .label) {
   opacity: 0.45;
 }
 
@@ -84,6 +85,21 @@
 .label {
   flex: 1;
   min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.description {
+  font-size: var(--font-size-small);
+  color: var(--color-text-light);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

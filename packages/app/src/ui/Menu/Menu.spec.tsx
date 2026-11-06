@@ -72,3 +72,21 @@ test("clicking a checkbox item toggles it and closes the menu", async () => {
   expect(onCheckedChange.mock.calls[0][0]).toBe(true);
   await waitFor(() => expect(menu).not.toBeInTheDocument());
 });
+
+test("a checkbox item's description describes it without joining its name", async () => {
+  render(
+    <Menu.Root>
+      <Menu.Trigger>Menu</Menu.Trigger>
+      <Menu.Popup>
+        <Menu.CheckboxItem checked={false} description="Needs a GPU">
+          Experimental
+        </Menu.CheckboxItem>
+      </Menu.Popup>
+    </Menu.Root>,
+  );
+  await user.click(screen.getByRole("button", { name: "Menu" }));
+
+  expect(
+    await screen.findByRole("menuitemcheckbox", { name: "Experimental" }),
+  ).toHaveAccessibleDescription("Needs a GPU");
+});

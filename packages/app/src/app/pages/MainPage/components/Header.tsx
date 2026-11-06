@@ -86,14 +86,18 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
       >
         Function Reference
       </Menu.LinkItem>
-      {webGpuSupport === "available" && (
-        <Menu.CheckboxItem
-          checked={renderer === "usegpu"}
-          onCheckedChange={(on) => chooseRenderer(on ? "usegpu" : "mathbox")}
-        >
-          WebGPU renderer (experimental)
-        </Menu.CheckboxItem>
-      )}
+      <Menu.CheckboxItem
+        checked={renderer === "usegpu"}
+        onCheckedChange={(on) => chooseRenderer(on ? "usegpu" : "mathbox")}
+        disabled={webGpuSupport !== "available"}
+        description={
+          webGpuSupport === "unavailable"
+            ? "Not available in this browser"
+            : undefined
+        }
+      >
+        WebGPU renderer (experimental)
+      </Menu.CheckboxItem>
       <Menu.LinkItem
         icon={<Icon icon={circleHelp} aria-hidden="true" />}
         href={ISSUE_URL}

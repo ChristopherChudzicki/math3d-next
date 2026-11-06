@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import classNames from "classnames";
 import { Menu as BaseMenu } from "@base-ui/react/menu";
 import { Icon } from "@iconify/react/offline";
@@ -111,6 +111,8 @@ type CheckboxItemProps = Omit<
   "className" | "children"
 > &
   Omit<ItemContentProps, "icon"> & {
+    /** A muted second line: the item's accessible description, not part of its name. */
+    description?: React.ReactNode;
     className?: string;
   };
 
@@ -120,22 +122,41 @@ type CheckboxItemProps = Omit<
  */
 const CheckboxItem: React.FC<CheckboxItemProps> = ({
   closeOnClick = true,
+  description,
   className,
   children,
   ...others
-}) => (
-  <BaseMenu.CheckboxItem
-    {...others}
-    closeOnClick={closeOnClick}
-    className={classNames(styles.item, styles.neutral, className)}
-  >
-    <span className={styles.icon} aria-hidden="true">
-      <Icon icon={square} className={styles.whenUnchecked} />
-      <Icon icon={squareCheck} className={styles.whenChecked} />
-    </span>
-    <span className={styles.label}>{children}</span>
-  </BaseMenu.CheckboxItem>
-);
+}) => {
+  const labelId = useId();
+  const descriptionId = useId();
+  return (
+    <BaseMenu.CheckboxItem
+      {...(description
+        ? { "aria-labelledby": labelId, "aria-describedby": descriptionId }
+        : {})}
+      {...others}
+      closeOnClick={closeOnClick}
+      className={classNames(styles.item, styles.neutral, className)}
+    >
+      <span className={styles.icon} aria-hidden="true">
+        <Icon icon={square} className={styles.whenUnchecked} />
+        <Icon icon={squareCheck} className={styles.whenChecked} />
+      </span>
+      {description ? (
+        <span className={styles.text}>
+          <span id={labelId} className={styles.label}>
+            {children}
+          </span>
+          <span id={descriptionId} className={styles.description}>
+            {description}
+          </span>
+        </span>
+      ) : (
+        <span className={styles.label}>{children}</span>
+      )}
+    </BaseMenu.CheckboxItem>
+  );
+};
 
 type SeparatorProps = Omit<BaseMenu.Separator.Props, "className"> & {
   className?: string;
