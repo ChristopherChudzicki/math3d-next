@@ -98,23 +98,20 @@ const useMathItemResults = <
   >;
 };
 
-/** Whether `item` is drawn, given its evaluated `calculatedVisibility`. */
+/**
+ * Whether `item` is drawn. A blank `calculatedVisibility` defers to `visible`
+ * (it would evaluate to `false` without error). One that errors shows the
+ * item, even over a stale result: `useMathResults` keeps the last good value.
+ */
 export const finalVisibility = (
   item: MathGraphic,
   calculatedVisibility: unknown,
+  calculatedVisibilityError: Error | undefined,
 ): boolean => {
   const { visible, useCalculatedVisibility } = item.properties;
-  return useCalculatedVisibility ? !!calculatedVisibility : visible;
-};
-
-const CALCULATED_VIS = ["calculatedVisibility"] as const;
-const useFinalVisibility = (mathScope: AppMathScope, item: MathGraphic) => {
-  const { calculatedVisibility } = useMathItemResults(
-    mathScope,
-    item,
-    CALCULATED_VIS,
-  );
-  return finalVisibility(item, calculatedVisibility);
+  const blank = item.properties.calculatedVisibility.trim() === "";
+  if (!useCalculatedVisibility || blank) return visible;
+  return calculatedVisibilityError !== undefined || !!calculatedVisibility;
 };
 
 const useMathErrors = <K extends string>(
@@ -149,6 +146,21 @@ const useMathErrors = <K extends string>(
   }, [scope, ids, onChange]);
 
   return errorsSlice;
+};
+
+const CALCULATED_VIS = ["calculatedVisibility"] as const;
+const useFinalVisibility = (mathScope: AppMathScope, item: MathGraphic) => {
+  const { calculatedVisibility } = useMathItemResults(
+    mathScope,
+    item,
+    CALCULATED_VIS,
+  );
+  const errors = useMathErrors(mathScope, item.id, CALCULATED_VIS);
+  return finalVisibility(
+    item,
+    calculatedVisibility,
+    errors.calculatedVisibility,
+  );
 };
 
 const MATH_WIDGETS = new Set([

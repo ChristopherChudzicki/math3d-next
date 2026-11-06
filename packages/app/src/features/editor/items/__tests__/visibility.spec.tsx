@@ -84,6 +84,34 @@ describe("Visible and calculatedVisibility", () => {
     },
   );
 
+  test("A calculated visibility that errors shows the graphic", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { ui } = await setup({
+      visible: false,
+      useCalculatedVisibility: true,
+      calculatedVisibility: "undefinedName",
+    });
+    const showPoint = await within(ui.point).findByRole("button", {
+      name: "Show Graphic",
+    });
+    expect(showPoint).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test.each([{ visible: true }, { visible: false }])(
+    "A blank calculated visibility defers to visible ($visible)",
+    async ({ visible }) => {
+      const { ui } = await setup({
+        visible,
+        useCalculatedVisibility: true,
+        calculatedVisibility: "",
+      });
+      const showPoint = await within(ui.point).findByRole("button", {
+        name: "Show Graphic",
+      });
+      expect(showPoint).toHaveAttribute("aria-pressed", String(visible));
+    },
+  );
+
   test.each([{ visible: false }, { visible: true }])(
     "Clicking 'Show Graphic' turns useCalculatedVisibility off",
     async ({ visible }) => {

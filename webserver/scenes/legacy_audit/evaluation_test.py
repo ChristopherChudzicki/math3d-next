@@ -190,14 +190,9 @@ def test_a_legacy_point_equals_math3d_next_one_element_list_of_it():
     ("legacy", "nxt", "expected"),
     [
         (Side(OK, 1), Side(OK, {"bool": True}), ("equal", None)),
-        (Side(OK, 0), Side("eval", MISSING, "e"), ("equal", None)),
-        # math3d-react leaves an item visible unless the value is a boolean or
-        # a number; math3d-next hides it when the expression errors.
-        (
-            Side("eval", MISSING, "e"),
-            Side("eval", MISSING, "e"),
-            ("differ", "next_hides"),
-        ),
+        # Both apps show an item whose calculated visibility errors.
+        (Side("eval", MISSING, "e"), Side("eval", MISSING, "e"), ("equal", None)),
+        (Side(OK, 0), Side("eval", MISSING, "e"), ("differ", "next_shows")),
         (Side(OK, [1, 0]), Side(OK, {"bool": False}), ("differ", "next_hides")),
         (Side(OK, {"bool": False}), Side(OK, 1), ("differ", "next_shows")),
     ],

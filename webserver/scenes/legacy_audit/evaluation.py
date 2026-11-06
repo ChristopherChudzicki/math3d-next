@@ -395,9 +395,9 @@ def react_shows(side: Side) -> bool:
 
 
 def next_shows(side: Side) -> bool | None:
-    """`!!calculatedVisibility`; an error leaves no result, so it hides
-    (next:app/src/store/scene/evaluation/mathScope.ts:102-108)."""
-    return truthy(side.value) if side.status == OK else False
+    """`!!calculatedVisibility`; an error shows the item
+    (next:app/src/store/scene/evaluation/mathScope.ts `finalVisibility`)."""
+    return truthy(side.value) if side.status == OK else True
 
 
 # --------------------------------------------------------------------------- #
