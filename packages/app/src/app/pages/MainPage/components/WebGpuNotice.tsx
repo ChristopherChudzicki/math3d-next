@@ -1,18 +1,20 @@
 import React, { useEffect } from "react";
 import { useBanners } from "@/ui/Banners/BannerContext";
+import type { NoticeReason } from "@/services/renderer/resolveRenderer";
 
 const BANNER_ID = "webgpu-notice";
 
-const CONTENT = {
+const CONTENT: Record<NoticeReason, string> = {
   link: "This link asks for the experimental WebGPU renderer, which isn't available in this browser. Showing the scene with the default renderer.",
   failed:
     "The WebGPU renderer couldn't start on this device. Showing the scene with the default renderer.",
 };
 
-type WebGpuNoticeReason = keyof typeof CONTENT;
-
-/** Registers the notice for a WebGPU renderer that can't draw this scene. */
-const WebGpuNotice: React.FC<{ reason: WebGpuNoticeReason | null }> = ({
+/**
+ * Registers the banner saying why MathBox draws in place of the WebGPU
+ * renderer.
+ */
+const WebGpuNotice: React.FC<{ reason: NoticeReason | null }> = ({
   reason,
 }) => {
   const { show, dismiss } = useBanners();
@@ -32,4 +34,3 @@ const WebGpuNotice: React.FC<{ reason: WebGpuNoticeReason | null }> = ({
 };
 
 export default WebGpuNotice;
-export type { WebGpuNoticeReason };

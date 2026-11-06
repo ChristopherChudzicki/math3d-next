@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-/** `failed`: detection found an adapter, but Use.GPU couldn't start on it. */
+/** `failed`: detection found an adapter, but Use.GPU then couldn't start. */
 type WebGpuSupport = "pending" | "available" | "unavailable" | "failed";
 
 const DETECTION_TIMEOUT_MS = 2000;

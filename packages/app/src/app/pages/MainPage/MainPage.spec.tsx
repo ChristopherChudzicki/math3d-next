@@ -358,8 +358,10 @@ describe("renderer", () => {
     expect(screen.queryByText(NOTICE)).toBeNull();
   });
 
-  test("?renderer=usegpu on a missing scene shows no notice", async () => {
+  test("?renderer=usegpu on a missing scene never shows the notice", async () => {
     renderTestApp("/nonexistent-scene-key?renderer=usegpu");
+    // While the scene loads, before the 404 arrives.
+    expect(screen.queryByText(NOTICE)).toBeNull();
     expect(
       await screen.findByRole("heading", { name: "This scene doesn’t exist." }),
     ).toBeVisible();
@@ -390,6 +392,26 @@ describe("renderer", () => {
     );
     expect(warn).toHaveBeenCalledWith(noDevice);
     expect(localStorage.getItem(RENDERER_PREFERENCE_KEY)).toBe("mathbox");
+  });
+
+  test("a dismissed failure notice stays dismissed after a missing scene and the next", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    storeRendererPreference("usegpu");
+    stubWebGpu();
+    gpuContent.Component = ReportsNoDevice;
+    const next = makeItem(MIT.Point);
+    const nextScene = seedDb.withSceneFromItems([next]);
+    const { router } = renderTestApp("/");
+    await screen.findByText(FAILED);
+
+    await user.click(
+      screen.getByRole("button", { name: "Dismiss WebGPU notice" }),
+    );
+    await act(() => router.navigate("/nonexistent-scene-key"));
+    await screen.findByRole("heading", { name: "This scene doesn’t exist." });
+    await act(() => router.navigate(`/${nextScene.key}`));
+    await findItemByTestId(next.id);
+    expect(screen.queryByText(FAILED)).toBeNull();
   });
 
   test("a device failure under ?renderer=usegpu keeps the param and shows the failure, not the link notice", async () => {

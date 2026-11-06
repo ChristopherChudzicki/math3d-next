@@ -49,7 +49,7 @@ const GpuViewport: React.FC<Props> = ({ className }) => {
     // Not `chooseRenderer`: the user didn't choose this, so `?renderer` stays;
     // resolution draws MathBox once WebGPU has failed.
     setRendererPreference("mathbox");
-    // A browser limitation, not an app error.
+    // A browser or device limitation, not an app error.
     const message = error instanceof Error ? error.message : String(error);
     // eslint-disable-next-line no-console
     console.warn(error);

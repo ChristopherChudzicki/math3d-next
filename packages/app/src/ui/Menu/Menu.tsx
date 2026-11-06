@@ -131,9 +131,8 @@ const CheckboxItem: React.FC<CheckboxItemProps> = ({
   const descriptionId = useId();
   return (
     <BaseMenu.CheckboxItem
-      {...(description
-        ? { "aria-labelledby": labelId, "aria-describedby": descriptionId }
-        : {})}
+      aria-labelledby={labelId}
+      aria-describedby={description ? descriptionId : undefined}
       {...others}
       closeOnClick={closeOnClick}
       className={classNames(styles.item, styles.neutral, className)}

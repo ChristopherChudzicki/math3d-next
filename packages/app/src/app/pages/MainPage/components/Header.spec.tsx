@@ -275,11 +275,13 @@ describe("the renderer item", () => {
   test("after a device failure the item is disabled and says so", async () => {
     stubWebGpu();
     renderTestApp("");
+    await openMenu();
+    const item = screen.getByRole("menuitemcheckbox", { name: ITEM });
+    await waitFor(() => expect(item).not.toHaveAttribute("aria-disabled"));
+
     act(() => {
       markWebGpuFailed();
     });
-    await openMenu();
-    const item = screen.getByRole("menuitemcheckbox", { name: ITEM });
     expect(item).toHaveAttribute("aria-disabled", "true");
     expect(item).toHaveAccessibleDescription("Couldn't start on this device");
   });

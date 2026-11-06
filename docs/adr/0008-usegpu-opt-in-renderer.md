@@ -17,7 +17,7 @@ with a WebGPU adapter.
   or `usegpu`) wins over a per-browser preference set from the account menu.
 - Without a WebGPU adapter (detection gives up after 2 s), MathBox draws, with
   a notice when the URL asked for Use.GPU. A device that fails to start also
-  falls back to MathBox, with a notice.
+  falls back to MathBox, with a notice, and stores `mathbox` as the preference.
 - `FramePage` stays MathBox-only: Cloudflare Browser Run, which renders OG
   images, has no WebGPU adapter.
 

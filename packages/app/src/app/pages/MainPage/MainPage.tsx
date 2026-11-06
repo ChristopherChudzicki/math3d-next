@@ -15,10 +15,7 @@ import { useBodyClass, useToggle } from "@/util/hooks";
 import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
 import { isRenderer } from "@/services/renderer/resolveRenderer";
 import { RENDERER_PARAM, useRenderer } from "@/services/renderer/useRenderer";
-import {
-  startWebGpuDetection,
-  useWebGpuSupport,
-} from "@/services/renderer/webgpuSupport";
+import { startWebGpuDetection } from "@/services/renderer/webgpuSupport";
 
 import ToggleKeyboardButton from "@/features/editor/virtualKeyboard/KeyboardControls";
 
@@ -34,7 +31,6 @@ import LegacyBanner from "./components/LegacyBanner";
 import RendererPill from "./components/RendererPill";
 import SceneUnavailable from "./components/SceneUnavailable";
 import WebGpuNotice from "./components/WebGpuNotice";
-import type { WebGpuNoticeReason } from "./components/WebGpuNotice";
 
 type UseSearchEnumOptions<T extends string = string> = {
   name: string;
@@ -67,10 +63,7 @@ const useSearchEnum = <T extends string>({
   const location = useLocation();
   const navigate = useNavigate();
   const raw = search.get(name);
-  const isValue = useCallback(
-    (value: string) => values.includes(value as T),
-    [values],
-  );
+  const isValue = (value: string) => values.includes(value as T);
   useLogInvalidSearchParam(name, isValue);
   const value = raw !== null && isValue(raw) ? (raw as T) : defaultValue;
   const set = useCallback(
@@ -135,11 +128,9 @@ const MainPage: React.FC = () => {
   const controlsOpen = controlsVisibility === "1";
   useEffect(() => startWebGpuDetection(), []);
   const { renderer, notice } = useRenderer();
-  const webgpu = useWebGpuSupport();
-  // No notice above the scene-unavailable card.
-  let noticeReason: WebGpuNoticeReason | null = null;
-  if (!unavailable && webgpu === "failed") noticeReason = "failed";
-  else if (!unavailable && notice) noticeReason = "link";
+  // While the scene loads, a 404 may be on its way.
+  const noticeReason =
+    notice === "link" && sceneLoad.status !== "ready" ? null : notice;
   useLogInvalidSearchParam(RENDERER_PARAM, isRenderer);
   const SceneViewport = renderer === "usegpu" ? GpuViewport : Viewport;
   const handleControlsClick = useCallback(

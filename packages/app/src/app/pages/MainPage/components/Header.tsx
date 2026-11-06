@@ -48,7 +48,9 @@ const LoginButtons: React.FC<{
   );
 };
 
-const UNAVAILABLE_REASON: Partial<Record<WebGpuSupport, string>> = {
+const DISABLED_REASON: Record<WebGpuSupport, string | undefined> = {
+  pending: undefined,
+  available: undefined,
   unavailable: "Not available in this browser",
   failed: "Couldn't start on this device",
 };
@@ -98,7 +100,7 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
         checked={renderer === "usegpu"}
         onCheckedChange={(on) => chooseRenderer(on ? "usegpu" : "mathbox")}
         disabled={webGpuSupport !== "available"}
-        description={UNAVAILABLE_REASON[webGpuSupport]}
+        description={DISABLED_REASON[webGpuSupport]}
       >
         WebGPU renderer (experimental)
       </Menu.CheckboxItem>
