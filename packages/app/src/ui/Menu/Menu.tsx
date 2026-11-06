@@ -1,6 +1,8 @@
 import React from "react";
 import classNames from "classnames";
 import { Menu as BaseMenu } from "@base-ui/react/menu";
+import { Icon } from "@iconify/react/offline";
+import check from "@iconify-icons/lucide/check";
 import * as styles from "./Menu.module.css";
 
 const { Root, Trigger, Group } = BaseMenu;
@@ -103,6 +105,40 @@ const LinkItem: React.FC<LinkItemProps> = ({
   </BaseMenu.LinkItem>
 );
 
+type CheckboxItemProps = Omit<
+  BaseMenu.CheckboxItem.Props,
+  "className" | "children"
+> &
+  ItemContentProps & {
+    className?: string;
+  };
+
+/**
+ * A checkable menu item; the check mark takes the icon slot. Closes the menu
+ * on click (Base UI's default is to stay open), like the other items.
+ */
+const CheckboxItem: React.FC<CheckboxItemProps> = ({
+  icon: _icon,
+  closeOnClick = true,
+  className,
+  children,
+  ...others
+}) => (
+  <BaseMenu.CheckboxItem
+    {...others}
+    closeOnClick={closeOnClick}
+    className={classNames(styles.item, styles.neutral, className)}
+  >
+    {/* The slot stays rendered while unchecked so labels stay aligned. */}
+    <span className={styles.icon} aria-hidden="true">
+      <BaseMenu.CheckboxItemIndicator keepMounted className={styles.indicator}>
+        <Icon icon={check} />
+      </BaseMenu.CheckboxItemIndicator>
+    </span>
+    <span className={styles.label}>{children}</span>
+  </BaseMenu.CheckboxItem>
+);
+
 type SeparatorProps = Omit<BaseMenu.Separator.Props, "className"> & {
   className?: string;
 };
@@ -125,5 +161,15 @@ const GroupLabel: React.FC<GroupLabelProps> = ({ className, ...others }) => (
   />
 );
 
-export { Root, Trigger, Popup, Item, LinkItem, Separator, Group, GroupLabel };
-export type { PopupProps, ItemProps, LinkItemProps };
+export {
+  Root,
+  Trigger,
+  Popup,
+  Item,
+  LinkItem,
+  CheckboxItem,
+  Separator,
+  Group,
+  GroupLabel,
+};
+export type { PopupProps, ItemProps, LinkItemProps, CheckboxItemProps };

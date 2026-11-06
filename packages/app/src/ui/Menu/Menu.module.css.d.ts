@@ -2,6 +2,7 @@ declare const styles: {
   readonly "danger": string;
   readonly "groupLabel": string;
   readonly "icon": string;
+  readonly "indicator": string;
   readonly "item": string;
   readonly "label": string;
   readonly "neutral": string;

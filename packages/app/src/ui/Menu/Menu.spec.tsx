@@ -48,3 +48,27 @@ test("choosing a link item closes the menu", async () => {
 
   await waitFor(() => expect(menu).not.toBeInTheDocument());
 });
+
+test("clicking a checkbox item toggles it and closes the menu", async () => {
+  const onCheckedChange = vi.fn();
+  render(
+    <Menu.Root>
+      <Menu.Trigger>Menu</Menu.Trigger>
+      <Menu.Popup>
+        <Menu.CheckboxItem checked={false} onCheckedChange={onCheckedChange}>
+          Experimental
+        </Menu.CheckboxItem>
+      </Menu.Popup>
+    </Menu.Root>,
+  );
+  await user.click(screen.getByRole("button", { name: "Menu" }));
+  const menu = await screen.findByRole("menu");
+
+  await user.click(
+    screen.getByRole("menuitemcheckbox", { name: "Experimental" }),
+  );
+
+  expect(onCheckedChange).toHaveBeenCalledOnce();
+  expect(onCheckedChange.mock.calls[0][0]).toBe(true);
+  await waitFor(() => expect(menu).not.toBeInTheDocument());
+});

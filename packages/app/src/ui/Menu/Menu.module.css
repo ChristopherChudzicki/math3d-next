@@ -103,3 +103,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Reserves the check mark's width while the item is unchecked. */
+.indicator {
+  display: inline-flex;
+  width: 1em;
+  height: 1em;
+}
+
+.indicator[data-unchecked] {
+  visibility: hidden;
+}
