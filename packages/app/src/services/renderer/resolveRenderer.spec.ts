@@ -52,7 +52,7 @@ test.each([
   },
   {
     param: null,
-    preference: "usegpu",
+    preference: "mathbox",
     webgpu: "failed",
     expected: { renderer: "mathbox", notice: "failed" },
   },
