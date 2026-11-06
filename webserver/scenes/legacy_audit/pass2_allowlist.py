@@ -105,6 +105,18 @@ ALLOWLIST: list[Entry] = (
             "scale",
         )
     ]
+    + [
+        Entry(
+            "regression",
+            "validate: this tuple value has too ",
+            "math3d-react passes any length to a 3-channel MathBox array, which reads "
+            "the list in threes; math3d-next's error for coords that aren't 3 numbers "
+            "is the more accurate behaviour; owner decision 2026-11-05 "
+            "(tk-legacy-points-whose-coords-aren-t-3-numbers-acce-53723e)",
+            "POINT",
+            "coords",
+        )
+    ]
 )
 
 REPLAYS: dict[str, str] = {
