@@ -16,7 +16,10 @@ with a WebGPU adapter.
 - `services/renderer/` picks the viewport: an explicit `?renderer` (`mathbox`
   or `usegpu`) wins over a per-browser preference set from the account menu.
 - Without a WebGPU adapter (detection gives up after 2 s), MathBox draws, with
-  a notice when the URL asked for Use.GPU.
+  a notice when the URL asked for Use.GPU. A device that fails to start also
+  falls back to MathBox, with a notice.
+- `FramePage` stays MathBox-only: Cloudflare Browser Run, which renders OG
+  images, has no WebGPU adapter.
 
 ### Folders and lint zones
 
@@ -69,7 +72,8 @@ upstream bugs:
   a property that doesn't apply; `todo` is a gap.
 - QA scenes (`webserver/scenes/seed_scenes/qa/`, one per graphical feature)
   are compared by hand: the same key in two tabs, one with
-  `?renderer=usegpu`.
+  `?renderer=mathbox` and one with `?renderer=usegpu` (a stored preference
+  would otherwise put both on Use.GPU).
 
 ## Consequences
 
@@ -81,14 +85,15 @@ upstream bugs:
     dashboard approval);
   - regenerate the workbench patch (steps in `usegpu/pins.spec.ts`), dropping
     any hunk the release fixed, and run `usegpu/pins.spec.ts`;
-  - open each QA scene in two tabs, one per renderer;
+  - open each QA scene in two tabs, `?renderer=mathbox` and `?renderer=usegpu`;
   - read the release's deprecation list.
 - E2E: `viewport/usegpu-renderer.test.ts` stubs a null adapter and checks
   `?renderer=usegpu` draws MathBox with the notice, never loading the lazy
   chunk; `viewport/usegpu-drawing.test.ts` gets an adapter from SwiftShader
-  flags and checks Use.GPU draws (`canvas`, `[data-ready]`).
+  flags and checks Use.GPU draws: colored pixels in the viewport, and no
+  console errors, where Use.GPU reports WGSL and validation errors.
 
 ## Alternatives considered
 
 - **Replace MathBox outright.** Use.GPU is alpha and WebGPU is not in every
-  browser; an opt-in keeps the default path untouched while parity is built.
+  browser; an opt-in keeps MathBox the default while parity is built.
