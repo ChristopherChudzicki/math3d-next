@@ -85,6 +85,7 @@ upstream bugs:
     dashboard approval);
   - regenerate the workbench patch (steps in `usegpu/pins.spec.ts`), dropping
     any hunk the release fixed, and run `usegpu/pins.spec.ts`;
+  - if `OrbitControls` gains touch gestures, delete `usePinchZoom`;
   - open each QA scene in two tabs, `?renderer=mathbox` and `?renderer=usegpu`;
   - read the release's deprecation list.
 - E2E: `viewport/usegpu-renderer.test.ts` stubs a null adapter and checks

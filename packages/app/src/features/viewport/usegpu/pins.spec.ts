@@ -6,7 +6,8 @@
  * (cjs, mjs, and both .d.ts files) and `oit-buffer` (cjs, mjs), `yarn
  * patch-commit -s <folder>`, then keep the root resolution keyed by bare name,
  * so it also covers Use.GPU's own requests, and point packages/app's
- * dependency at the new patch file.
+ * dependency at the new patch file. If `OrbitControls` gains touch gestures,
+ * delete `usePinchZoom`.
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -36,15 +37,18 @@ const workbenchConsumers = [
     ),
 ];
 
-const resolveWorkbench = (consumer: string) =>
+const packageDir = (consumer: string, pkg: string) =>
   path.dirname(
     createRequire(path.join(repoRoot, consumer, "package.json")).resolve(
-      "@use-gpu/workbench/package.json",
+      `${pkg}/package.json`,
     ),
   );
 
 const readWorkbench = (consumer: string, file: string) =>
-  readFileSync(path.join(resolveWorkbench(consumer), file), "utf8");
+  readFileSync(
+    path.join(packageDir(consumer, "@use-gpu/workbench"), file),
+    "utf8",
+  );
 
 test.each(workbenchConsumers)(
   "%s loads the patched workbench, which passes depthTest and depthWrite to DualContourLayer",
@@ -63,3 +67,24 @@ test.each(workbenchConsumers)(
     ).toContain("colorInput: 'linear'");
   },
 );
+
+const interactSrc = (file: string) =>
+  readFileSync(
+    path.join(packageDir("packages/app", "@use-gpu/interact"), file),
+    "utf8",
+  );
+
+test("OrbitControls has no touch gestures, so usePinchZoom is still needed", () => {
+  const src = interactSrc("mjs/controls/orbit-controls.mjs");
+  expect(src).not.toMatch(/touch|pinch|pointerId/i);
+  expect(src).toMatch(/zoom: \[\s*\{\s*wheel: true\s*\}\s*\]/);
+});
+
+test("OrbitControls re-seeds a prop only when it changes, so a pinch can seed radius alone", () => {
+  expect(interactSrc("mjs/controls/orbit-controls.mjs")).toContain(
+    "useDerivedState(initialRadius, version)",
+  );
+  expect(interactSrc("mjs/hooks/useDerivedState.mjs")).toContain(
+    "useVersion(newInitial) + version",
+  );
+});
