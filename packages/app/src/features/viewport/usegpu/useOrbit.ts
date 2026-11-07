@@ -93,15 +93,12 @@ export const useOrbit = (
     start: () => {
       startRadius.current = latest.current?.radius ?? orbit.radius;
     },
-    move: (ratio) => {
-      // Zero when zoom was enabled mid-pinch, after `start` was skipped.
-      if (startRadius.current <= 0) return;
+    move: (ratio) =>
       setPinch({
         seed: orbit,
         version: controlsVersion,
         radius: startRadius.current * ratio,
-      });
-    },
+      }),
   });
   const seeded = useMemo(
     () =>

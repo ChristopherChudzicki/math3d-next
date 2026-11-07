@@ -37,15 +37,18 @@ const workbenchConsumers = [
     ),
 ];
 
-const resolveWorkbench = (consumer: string) =>
+const packageDir = (consumer: string, pkg: string) =>
   path.dirname(
     createRequire(path.join(repoRoot, consumer, "package.json")).resolve(
-      "@use-gpu/workbench/package.json",
+      `${pkg}/package.json`,
     ),
   );
 
 const readWorkbench = (consumer: string, file: string) =>
-  readFileSync(path.join(resolveWorkbench(consumer), file), "utf8");
+  readFileSync(
+    path.join(packageDir(consumer, "@use-gpu/workbench"), file),
+    "utf8",
+  );
 
 test.each(workbenchConsumers)(
   "%s loads the patched workbench, which passes depthTest and depthWrite to DualContourLayer",
@@ -67,14 +70,7 @@ test.each(workbenchConsumers)(
 
 const interactSrc = (file: string) =>
   readFileSync(
-    path.join(
-      path.dirname(
-        createRequire(path.join(repoRoot, "packages/app/package.json")).resolve(
-          "@use-gpu/interact/package.json",
-        ),
-      ),
-      file,
-    ),
+    path.join(packageDir("packages/app", "@use-gpu/interact"), file),
     "utf8",
   );
 

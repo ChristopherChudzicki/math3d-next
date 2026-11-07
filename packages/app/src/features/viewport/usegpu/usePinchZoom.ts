@@ -4,7 +4,7 @@ import type { RefObject } from "react";
 type PinchHandlers = {
   /** Two fingers are down: a pinch starts, or restarts with a new pair. */
   start(): void;
-  /** The pair's distance at `start` over its current distance. */
+  /** The pair's distance at `start` over its current distance; only after `start`. */
   move(ratio: number): void;
 };
 
@@ -31,15 +31,15 @@ export const usePinchZoom = (
     const touches = new Map<number, [number, number]>();
     let startDistance = 0;
     let swallowing = false;
+    let pinching = false;
     const distance = () => {
       const [[x1, y1], [x2, y2]] = touches.values();
       return Math.hypot(x2 - x1, y2 - y1);
     };
     const restartIfPair = () => {
       startDistance = touches.size === 2 ? distance() : 0;
-      if (startDistance > 0 && latest.current.enabled) {
-        latest.current.handlers.start();
-      }
+      pinching = startDistance > 0 && latest.current.enabled;
+      if (pinching) latest.current.handlers.start();
     };
     const down = (e: PointerEvent) => {
       if (e.pointerType !== "touch") return;
@@ -60,7 +60,7 @@ export const usePinchZoom = (
       if (!swallowing) return;
       e.stopPropagation();
       const d = startDistance > 0 ? distance() : 0;
-      if (d > 0 && latest.current.enabled) {
+      if (d > 0 && pinching && latest.current.enabled) {
         latest.current.handlers.move(startDistance / d);
       }
     };

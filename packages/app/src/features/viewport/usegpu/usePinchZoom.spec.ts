@@ -2,11 +2,15 @@ import { renderHook } from "@testing-library/react";
 import { usePinchZoom } from "./usePinchZoom";
 
 const setup = (enabled = true) => {
-  const host = document.createElement("div");
-  const canvas = host.appendChild(document.createElement("canvas"));
+  const host = { current: document.createElement("div") };
+  const canvas = host.current.appendChild(document.createElement("canvas"));
   const start = vi.fn();
   const move = vi.fn();
-  renderHook(() => usePinchZoom({ current: host }, enabled, { start, move }));
+  const { rerender } = renderHook(
+    (props: { enabled: boolean }) =>
+      usePinchZoom(host, props.enabled, { start, move }),
+    { initialProps: { enabled } },
+  );
   const canvasMoves = vi.fn();
   canvas.addEventListener("pointermove", canvasMoves);
   /** A touch pointer event, dispatched at the canvas. */
@@ -17,7 +21,7 @@ const setup = (enabled = true) => {
         { pointerId, pointerType: "touch", isPrimary: pointerId === 1 },
       ),
     );
-  return { start, move, canvasMoves, touch };
+  return { start, move, canvasMoves, touch, rerender };
 };
 
 test("spreading two fingers to twice their distance reports a ratio of 1/2", () => {
@@ -52,6 +56,7 @@ test.each(["pointerup", "pointercancel"])(
     touch("pointermove", 1, 6, 0);
     expect(canvasMoves).toHaveBeenCalledTimes(1);
     touch(lastLift, 1);
+    // Non-primary, so the stale-touch reset can't stand in for the lift listener.
     touch("pointerdown", 3, 0, 0);
     touch("pointermove", 3, 5, 0);
     expect(canvasMoves).toHaveBeenCalledTimes(2);
@@ -76,4 +81,14 @@ test("disabled, it reports no pinch but still keeps two-finger moves from the ca
   expect(start).not.toHaveBeenCalled();
   expect(move).not.toHaveBeenCalled();
   expect(canvasMoves).not.toHaveBeenCalled();
+});
+
+test("zoom enabled mid-pinch reports no moves until a new pair starts", () => {
+  const { start, move, touch, rerender } = setup(false);
+  touch("pointerdown", 1, 0, 0);
+  touch("pointerdown", 2, 10, 0);
+  rerender({ enabled: true });
+  touch("pointermove", 2, 20, 0);
+  expect(start).not.toHaveBeenCalled();
+  expect(move).not.toHaveBeenCalled();
 });
