@@ -733,6 +733,13 @@ def _compare_by_rule(spec: PairSpec, a: Any, b: Any, tol: Tolerance) -> Verdict:
     if spec.rule == "coords":
         # math3d-next validates a point's coords as one or many points
         # (next:mathitem-configs/src/items/point.ts), so one point is [[x, y, z]].
+        # MathBox reads math3d-react's column [[x], [y], [z]] in order as (x, y, z).
+        if (
+            isinstance(a, list)
+            and a
+            and all(isinstance(x, list) and len(x) == 1 for x in a)
+        ):
+            a = [x[0] for x in a]
         single = isinstance(b, list) and len(b) == 1 and isinstance(b[0], list)
         flat = isinstance(a, list) and not any(isinstance(x, list) for x in a)
         if single and flat:

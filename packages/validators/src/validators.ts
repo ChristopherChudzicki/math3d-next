@@ -215,11 +215,23 @@ const realFuncValidators = {
   },
 };
 
+// A column vector such as [1;2;3] evaluates to [[1],[2],[3]].
+const flattenColumn = (value: unknown) =>
+  Array.isArray(value) &&
+  value.every((row) => Array.isArray(row) && row.length === 1)
+    ? value.map((row) => row[0])
+    : value;
+
+const realVec =
+  <N extends Dim>(n: N) =>
+  (value: unknown) =>
+    realVectors[n].validateSync(flattenColumn(value)) as RealVectors[N];
+
 const realVecValidators = {
-  1: firstArg(realVectors[1].validateSync.bind(realVectors[1])),
-  2: firstArg(realVectors[2].validateSync.bind(realVectors[2])),
-  3: firstArg(realVectors[3].validateSync.bind(realVectors[3])),
-  4: firstArg(realVectors[4].validateSync.bind(realVectors[4])),
+  1: realVec(1),
+  2: realVec(2),
+  3: realVec(3),
+  4: realVec(4),
 };
 
 function arrayOf<T, N extends number>(

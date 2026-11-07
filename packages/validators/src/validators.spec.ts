@@ -65,3 +65,18 @@ test("nonzero accepts a negative number and rejects zero", () => {
   expect(validators.nonzero(-2)).toBe(-2);
   expect(() => validators.nonzero(0)).toThrow("Expected a nonzero number.");
 });
+
+describe("realVec", () => {
+  test("accepts a column vector as the same vector", () => {
+    expect(validators.realVec[3]([[1], [2], [3]])).toEqual([1, 2, 3]);
+  });
+
+  test("leaves a list of 3D points as separate points", () => {
+    const points = [
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9],
+    ];
+    expect(validators.oneOrMany(validators.realVec[3])(points)).toEqual(points);
+  });
+});
