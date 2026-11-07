@@ -472,6 +472,23 @@ describe("returned node's MathNode.evaluate", () => {
     expect(parse("-\\sqrt{-4}").evaluate()).toMatchObject({ im: -2 });
   });
 
+  it.each([
+    { expr: "0x+1", name: "x" },
+    { expr: "0b+1", name: "b" },
+    { expr: "0o+1", name: "o" },
+    { expr: "1+2\\cdot0x", name: "x" },
+  ])("reads $expr with 0 times a variable", ({ expr, name }) => {
+    expect(parse(expr).evaluate(new Map([[name, 7]]))).toBe(1);
+  });
+
+  it.each([
+    { expr: "a0x", name: "a0x" },
+    { expr: "a_{0x}", name: "a_0x" },
+    { expr: "a_{10x}", name: "a_10x" },
+  ])("leaves a 0 inside a name alone: $expr", ({ expr, name }) => {
+    expect(parse(expr).evaluate(new Map([[name, 3]]))).toBe(3);
+  });
+
   it("Divides by the ÷ sign", () => {
     expect(parse("6\\div 3").evaluate()).toBe(2);
   });
