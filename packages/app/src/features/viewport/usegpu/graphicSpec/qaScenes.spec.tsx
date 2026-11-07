@@ -7,7 +7,7 @@ import {
   mathScopeId,
 } from "@/store/scene/evaluation/mathScope";
 import {
-  renderGraphicSpec,
+  collectGraphicSpecs,
   storeWithScene,
 } from "@/test_util/renderGraphicSpec";
 import type { SceneInput } from "@/test_util/renderGraphicSpec";
@@ -42,10 +42,9 @@ test.each(qaScenes.map((scene) => ({ key: scene.key, scene })))(
         finalVisibility(item, scope.results.get(id), scope.errors.get(id))
       );
     };
-    const missing = scene.items
-      .filter(isVisible)
-      .filter((item) => renderGraphicSpec(scene, item.id) === null)
-      .map((item) => item.id);
+    const visible = scene.items.filter(isVisible).map((item) => item.id);
+    const specs = collectGraphicSpecs(scene, visible);
+    const missing = visible.filter((id) => !specs[id]);
     expect(missing).toEqual([]);
   },
 );

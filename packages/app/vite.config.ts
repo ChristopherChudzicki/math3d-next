@@ -156,6 +156,9 @@ export default defineConfig({
           name: "jsdom",
           globals: true,
           clearMocks: true,
+          // RTK's dev checks warn on wall-clock time, so a GC pause or CPU contention
+          // fails a test via failOnConsole. Real slowness fails every attempt.
+          retry: { count: 2, condition: /InvariantMiddleware took \d+ms/ },
           setupFiles: ["./src/setupTests.ts"],
           environment: "jsdom",
           env: {

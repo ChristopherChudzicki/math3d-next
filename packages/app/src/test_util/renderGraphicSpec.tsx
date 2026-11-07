@@ -30,22 +30,34 @@ export const storeWithScene = (scene: SceneInput) => {
 };
 
 /**
- * The spec item `id` reports once `scene` is loaded. Results reach the spec
- * components in effects, which `render` flushes, so the last report is the
- * settled one.
+ * The spec each of `ids` reports once `scene` is loaded, keyed by id; an id
+ * that never reports is absent. Results reach the spec components in effects,
+ * which `render` flushes, so each item's last report is the settled one.
  */
-export const renderGraphicSpec = (
+export const collectGraphicSpecs = (
   scene: SceneInput,
-  id: string,
-): GraphicSpec | null => {
+  ids: string[],
+): Partial<Record<string, GraphicSpec | null>> => {
   const store = storeWithScene(scene);
-  const collector = vi.fn<(id: string, spec: GraphicSpec | null) => void>();
+  const specs: Partial<Record<string, GraphicSpec | null>> = {};
+  const collect = (id: string, spec: GraphicSpec | null) => {
+    specs[id] = spec;
+  };
   render(
     <Provider store={store}>
-      <SpecCollector.Provider value={collector}>
-        <Harness id={id} />
+      <SpecCollector.Provider value={collect}>
+        {ids.map((id) => (
+          <Harness key={id} id={id} />
+        ))}
       </SpecCollector.Provider>
     </Provider>,
   );
-  return collector.mock.lastCall?.[1] ?? null;
+  // A copy: unmounting at cleanup reports null into `specs`.
+  return { ...specs };
 };
+
+/** The spec item `id` reports once `scene` is loaded. */
+export const renderGraphicSpec = (
+  scene: SceneInput,
+  id: string,
+): GraphicSpec | null => collectGraphicSpecs(scene, [id])[id] ?? null;
