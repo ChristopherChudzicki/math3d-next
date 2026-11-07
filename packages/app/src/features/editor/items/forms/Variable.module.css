@@ -2,19 +2,20 @@
   color: var(--color-text-light);
 }
 
-.rhs {
-  overflow: auto;
-  /*
-  Assign some max widths to prevent overflow when active item.
-
-  66px = lhs max width with padding
-  33px = equal sign width (plus a little)
-  12px = a little extra, unsure why...borders?
-  */
-  max-width: calc(100vw - 66px - var(--leftright-gutter-total) - 35px - 12px);
+/*
+The cap goes on the wrapper, the row's flex item: on .field, a percentage
+would resolve against the content-sized wrapper rather than the row.
+*/
+.lhsWrapper {
+  flex-shrink: 0;
+  max-width: 50%;
+}
+.rhsWrapper {
+  /* lets the RHS shrink below its content */
+  min-width: 0;
 }
 
-.lhs {
-  overflow: auto;
-  max-width: 60px;
+.field {
+  /* 4pt = .field-widget-input's inline margins, which max-width excludes */
+  max-width: calc(100% - 4pt);
 }

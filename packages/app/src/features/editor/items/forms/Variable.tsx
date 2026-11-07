@@ -54,8 +54,10 @@ const Variable: MathItemForm<MIT.Variable> = ({ item }) => {
   return (
     <ItemTemplate item={item} config={config}>
       <MathAssignment
-        lhsClassName={styles.lhs}
-        rhsClassName={styles.rhs}
+        lhsWrapperClassName={styles.lhsWrapper}
+        rhsWrapperClassName={styles.rhsWrapper}
+        lhsClassName={styles.field}
+        rhsClassName={styles.field}
         label={configProps.value.label}
         error={errors.value}
         name="value"

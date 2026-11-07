@@ -4,6 +4,8 @@ import { Tooltip } from "@/ui/Tooltip";
 
 interface Props {
   error?: Error;
+  /** Applied to the element wrapping `children`. */
+  className?: string;
   /** The field; it must pass `aria-describedby` to its focusable element. */
   children: React.ReactElement<{ "aria-describedby"?: string }>;
 }
@@ -12,7 +14,7 @@ interface Props {
  * Shows `error` beside its field while the field has focus, and makes the
  * message the field's accessible description meanwhile.
  */
-const ErrorTooltip: React.FC<Props> = ({ error, children }) => {
+const ErrorTooltip: React.FC<Props> = ({ error, className, children }) => {
   const [isFocused, setIsFocused] = useToggle(false);
   const [anchor, setAnchor] = useState<HTMLSpanElement | null>(null);
   const tooltipId = useId();
@@ -25,7 +27,12 @@ const ErrorTooltip: React.FC<Props> = ({ error, children }) => {
     .join(" ");
   return (
     <>
-      <span ref={setAnchor} onBlur={setIsFocused.off} onFocus={setIsFocused.on}>
+      <span
+        ref={setAnchor}
+        className={className}
+        onBlur={setIsFocused.off}
+        onFocus={setIsFocused.on}
+      >
         {React.cloneElement(children, {
           "aria-describedby": describedBy || undefined,
         })}
