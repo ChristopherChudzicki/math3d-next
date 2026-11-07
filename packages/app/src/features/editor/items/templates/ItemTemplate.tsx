@@ -20,6 +20,23 @@ import CloseButton from "./CloseButton";
 import styles from "./ItemTemplate.module.css";
 import SettingsPopover from "./SettingsPopover";
 
+/**
+ * Keeps math-field focus when a control in a widened item is pressed; otherwise
+ * the item narrows and the control slides out from under the pointer.
+ */
+const keepMathFocus: React.MouseEventHandler<HTMLFormElement> = (e) => {
+  const form = e.currentTarget;
+  if (
+    e.target instanceof Element &&
+    // Base UI renders Switch and Checkbox as spans.
+    e.target.closest("button, [role=switch], [role=checkbox]") &&
+    // A narrow form is its sizer's width minus its 2px of side margins.
+    form.offsetWidth > (form.parentElement?.clientWidth ?? Infinity)
+  ) {
+    e.preventDefault();
+  }
+};
+
 type Props<T extends MIT> = {
   showAlignmentBar?: boolean;
   sideContent?: React.ReactNode;
@@ -53,62 +70,66 @@ const ItemTemplate = <T extends MIT>({
   const permanent = useAppSelector(select.isPermanent(item.id));
 
   return (
-    <form
-      data-testid={`settings-${item.id}`}
-      aria-label={`Settings for ${item.properties.description}`}
-      className={classNames(styles.container, {
-        [styles.childItem]: childItem,
-      })}
-      onFocus={onFocus}
-    >
-      <div
-        className={classNames(
-          styles["grid-left-gutter"],
-          styles["left-gutter"],
-          u.positionRelative,
-          u.dFlex,
-          {
-            [styles["item-active"]]: isActive,
-          },
-        )}
+    <div className={styles.sizer}>
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- onMouseDown only keeps focus for the buttons inside */}
+      <form
+        data-testid={`settings-${item.id}`}
+        aria-label={`Settings for ${item.properties.description}`}
+        className={classNames(styles.container, {
+          [styles.childItem]: childItem,
+        })}
+        onFocus={onFocus}
+        onMouseDown={keepMathFocus}
       >
-        {showAlignmentBar && <div className={styles["vertical-line"]} />}
-        {sideContent}
-        {isMathGraphic(item) && <ColorStatus item={item} />}
-      </div>
-      <div className={styles["grid-center-top"]}>
-        <FieldWidget
-          widget={WidgetType.AutosizeText}
-          label={config.properties.description.label}
-          name="description"
-          value={item.properties.description}
-          onChange={onWidgetChange}
-          className={styles.description}
-        />
-      </div>
-      <div className={styles["grid-center-bottom"]}>{children}</div>
-      <div
-        className={classNames(
-          styles["grid-right-gutter-top"],
-          u.dFlex,
-          u.justifyContentEnd,
-        )}
-      >
-        <CloseButton
-          disabled={permanent || hasChildren}
-          className={classNames({
-            [styles.hidden]: permanent,
-          })}
-          onClick={remove}
-          label="Remove Item"
-        />
-      </div>
-      <div className={styles["grid-right-gutter-bottom"]}>
-        {config.settingsProperties.length > 0 && (
-          <SettingsPopover item={item} config={config} />
-        )}
-      </div>
-    </form>
+        <div
+          className={classNames(
+            styles["grid-left-gutter"],
+            styles["left-gutter"],
+            u.positionRelative,
+            u.dFlex,
+            {
+              [styles["item-active"]]: isActive,
+            },
+          )}
+        >
+          {showAlignmentBar && <div className={styles["vertical-line"]} />}
+          {sideContent}
+          {isMathGraphic(item) && <ColorStatus item={item} />}
+        </div>
+        <div className={styles["grid-center-top"]}>
+          <FieldWidget
+            widget={WidgetType.AutosizeText}
+            label={config.properties.description.label}
+            name="description"
+            value={item.properties.description}
+            onChange={onWidgetChange}
+            className={styles.description}
+          />
+        </div>
+        <div className={styles["grid-center-bottom"]}>{children}</div>
+        <div
+          className={classNames(
+            styles["grid-right-gutter-top"],
+            u.dFlex,
+            u.justifyContentEnd,
+          )}
+        >
+          <CloseButton
+            disabled={permanent || hasChildren}
+            className={classNames({
+              [styles.hidden]: permanent,
+            })}
+            onClick={remove}
+            label="Remove Item"
+          />
+        </div>
+        <div className={styles["grid-right-gutter-bottom"]}>
+          {config.settingsProperties.length > 0 && (
+            <SettingsPopover item={item} config={config} />
+          )}
+        </div>
+      </form>
+    </div>
   );
 };
 

@@ -25,7 +25,9 @@
   margin-left: 1px;
   margin-right: 1px;
 }
-.container:focus-within {
+/* Widen only while an editable math-field has focus; read-only ones ("=")
+   take focus on click too. */
+.container:has(math-field:focus:not([read-only])) {
   grid-template-columns:
     var(--left-gutter-width) minmax(
       auto,
@@ -35,14 +37,22 @@
   width: fit-content;
   min-width: calc(100% - 2px);
 }
-.container:not(:focus-within) > * {
+/* Gutters never overflow; clipping them would cut off focus rings. */
+.container:not(:has(math-field:focus:not([read-only])))
+  > :is(.grid-center-top, .grid-center-bottom) {
   overflow: hidden;
+}
+
+/* Size container for .grid-center-top's 100cqi cap. */
+.sizer {
+  container-type: inline-size;
 }
 
 .description {
   /** Make description lighter so that mathfields draw more visual focus */
   color: var(--color-text-light);
-  max-width: 100%;
+  /* Minus .field-widget-input's 2pt + 2pt inline margins. */
+  max-width: calc(100% - 4pt);
 }
 
 .grid-left-gutter {
@@ -57,6 +67,9 @@
   grid-column-end: 3;
   grid-row-start: 1;
   grid-row-end: 2;
+  /* The narrow column's width (2px = form margins). Unlike a % max-width, it
+     also caps the description's intrinsic width, so widening never re-wraps it. */
+  max-width: calc(100cqi - 2px - var(--leftright-gutter-total));
 }
 .grid-center-bottom {
   grid-column-start: 2;
