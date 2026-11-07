@@ -12,10 +12,11 @@ gives math3d-react's value: that convention is the whole difference.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from scenes.legacy_audit.evaluation import SURFACE_DOMAIN_TYPES
+from scenes.legacy_audit.evaluation import SURFACE_DOMAIN_TYPES, _is_complex
 
 if TYPE_CHECKING:
     from scenes.legacy_audit.evaluation import Pair
@@ -30,6 +31,7 @@ class Entry:
     reason: str
     item_type: str | None = None
     next_field: str | None = None
+    legacy_value: Callable[[Any], bool] | None = None
 
     def matches(self, pair: Pair) -> bool:
         return (
@@ -37,7 +39,21 @@ class Entry:
             and (pair.detail or "").startswith(self.detail)
             and self.item_type in (None, pair.spec.item_type)
             and self.next_field in (None, pair.spec.next_field)
+            and (self.legacy_value is None or self.legacy_value(pair.legacy.value))
         )
+
+
+def _one_nonreal_vector(value: Any) -> bool:
+    """One 3-vector with a NaN or non-real complex component."""
+    return (
+        isinstance(value, list)
+        and len(value) == 3
+        and not any(isinstance(x, list) for x in value)
+        and any(
+            x == {"nonfinite": "NaN"} or (_is_complex(x) and x["im"] != 0)
+            for x in value
+        )
+    )
 
 
 # Fields math3d-next validates with realFunc (next:validators/src/validators.ts),
@@ -119,6 +135,26 @@ ALLOWLIST: list[Entry] = (
             "(tk-legacy-points-whose-coords-aren-t-3-numbers-acce-53723e)",
             "POINT",
             "coords",
+        )
+    ]
+    + [
+        Entry(
+            "regression",
+            "validate: ",
+            "Neither app draws it: math3d-react draws nothing at a NaN position, and "
+            "a complex entry becomes NaN in a point's MathBox array or fails a "
+            "vector's `validateVector`; "
+            "math3d-next rejects it and draws nothing "
+            "(next:app/src/features/viewport/mathbox/graphics); owner decision "
+            "2026-11-07 (tk-legacy-points-vectors-with-nan-or-complex-coordi-343596)",
+            item_type,
+            next_field,
+            _one_nonreal_vector,
+        )
+        for item_type, next_field in (
+            ("POINT", "coords"),
+            ("VECTOR", "components"),
+            ("VECTOR", "tail"),
         )
     ]
 )
