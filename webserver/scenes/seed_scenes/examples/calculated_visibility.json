@@ -277,7 +277,7 @@
           "lhs": "show",
           "rhs": "true"
         },
-        "description": "Toggle Switch\nA toggle switch is a boolean variable (true or false). One toggle can control the visibility of several objects at once."
+        "description": "Toggle Switch\nA toggle switch is a boolean variable (true or false). One toggle can control the visibility of several objects at once. This one is named show, but any variable name works."
       }
     }
   ],

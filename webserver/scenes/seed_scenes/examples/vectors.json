@@ -206,7 +206,7 @@
       "id": "2",
       "type": "VECTOR",
       "properties": {
-        "description": "Vector\nTo move the tail, open the object settings (press the gear).",
+        "description": "Vector\nThis vector's tail is at [-3, 2, 1]. To set a tail, open its settings (press the gear).",
         "color": "#f1c40f",
         "visible": true,
         "calculatedVisibility": "",
@@ -229,7 +229,7 @@
       "id": "3",
       "type": "VECTOR",
       "properties": {
-        "description": "Vector\nThe tail can depend on variables or functions. Here, the tail is [X, -2, -1].",
+        "description": "Vector\nThe tail can depend on variables or functions. Here, the tail is [X, -2, -1], so the X slider below moves it.",
         "color": "#9b59b6",
         "visible": true,
         "calculatedVisibility": "",

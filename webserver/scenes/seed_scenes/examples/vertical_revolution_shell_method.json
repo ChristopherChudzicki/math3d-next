@@ -175,7 +175,7 @@
       "id": "19",
       "type": "FOLDER",
       "properties": {
-        "description": "Surfaces: Top and Bottom",
+        "description": "Top and Bottom Surfaces",
         "isCollapsed": "true"
       }
     },
@@ -183,7 +183,7 @@
       "id": "24",
       "type": "FOLDER",
       "properties": {
-        "description": "Surfaces: Inner and Outer",
+        "description": "Inner and Outer Surfaces",
         "isCollapsed": "true"
       }
     },
@@ -191,7 +191,7 @@
       "id": "30",
       "type": "FOLDER",
       "properties": {
-        "description": "Surfaces: Shell",
+        "description": "Shell",
         "isCollapsed": "true"
       }
     },
@@ -427,7 +427,7 @@
       "id": "28",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Shell Inner",
+        "description": "Shell Inner Wall",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "shell",
@@ -478,7 +478,7 @@
       "id": "31",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Shell Outer",
+        "description": "Shell Outer Wall",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "shell",
@@ -658,7 +658,7 @@
           "lhs": "f(x)",
           "rhs": "6-x^2"
         },
-        "description": "Top Function"
+        "description": "Top Curve"
       }
     },
     {
@@ -670,7 +670,7 @@
           "lhs": "g\\left(x\\right)",
           "rhs": "x"
         },
-        "description": "Bottom Function"
+        "description": "Bottom Curve"
       }
     },
     {
@@ -706,7 +706,7 @@
           "lhs": "X",
           "rhs": "-1"
         },
-        "description": "Axis"
+        "description": "Axis Position"
       }
     },
     {

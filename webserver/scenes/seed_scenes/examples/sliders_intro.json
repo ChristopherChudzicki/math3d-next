@@ -245,7 +245,7 @@
           "items": ["-20", "20"]
         },
         "duration": "4",
-        "description": "Variable Slider",
+        "description": "Variable Slider\nDrag to change A, or press play to animate it. Edit Min and Max to change its range.",
         "isAnimating": "false",
         "speedMultiplier": "1"
       }

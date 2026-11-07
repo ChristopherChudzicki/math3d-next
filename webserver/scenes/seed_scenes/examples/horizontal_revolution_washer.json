@@ -261,7 +261,7 @@
       "id": "22",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface",
+        "description": "Washer Left Face",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "washer",
@@ -312,7 +312,7 @@
       "id": "23",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface",
+        "description": "Washer Outer Wall",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "washer",
@@ -363,7 +363,7 @@
       "id": "24",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface",
+        "description": "Washer Right Face",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "washer",
@@ -414,7 +414,7 @@
       "id": "25",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Parametric Curve",
+        "description": "Rotated Inner Curve",
         "color": "#e67e22",
         "visible": true,
         "calculatedVisibility": "",
@@ -449,7 +449,7 @@
       "id": "26",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface",
+        "description": "Inner Surface",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -500,7 +500,7 @@
       "id": "28",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Parametric Curve",
+        "description": "Rotated Outer Curve",
         "color": "#e67e22",
         "visible": true,
         "calculatedVisibility": "",
@@ -535,7 +535,7 @@
       "id": "29",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface",
+        "description": "Outer Surface",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -586,7 +586,7 @@
       "id": "30",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface",
+        "description": "Left Cap",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -637,7 +637,7 @@
       "id": "31",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface",
+        "description": "Right Cap",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -688,7 +688,7 @@
       "id": "34",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface",
+        "description": "Front Cap",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -739,7 +739,7 @@
       "id": "35",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface",
+        "description": "Washer Front Cap",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "",
@@ -843,7 +843,7 @@
           "lhs": "y",
           "rhs": "1"
         },
-        "description": "Axis"
+        "description": "Axis Position"
       }
     },
     {
@@ -919,7 +919,7 @@
           "lhs": "r_f\\left(t,\\ \\theta\\right)",
           "rhs": "\\left[\\ t,\\ \\left(f\\left(t\\right)-y\\right)\\cdot\\sin\\left(\\theta\\right),\\ \\left(f\\left(t\\right)-y\\right)\\cos\\left(\\theta\\right)\\right]+\\left[\\ 0,\\ 0,\\ y\\right]"
         },
-        "description": "Outer Radius Surface Function"
+        "description": "Outer Surface Function"
       }
     },
     {
@@ -931,7 +931,7 @@
           "lhs": "r_g\\left(t,\\theta\\right)",
           "rhs": "\\left[\\ t,\\ \\left(g\\left(t\\right)-y\\right)\\cdot\\sin\\left(\\theta\\right),\\ \\left(g\\left(t\\right)-y\\right)\\cos\\left(\\theta\\right)\\right]+\\left[\\ 0,\\ 0,\\ y\\right]"
         },
-        "description": "Inner Radius Surface Function"
+        "description": "Inner Surface Function"
       }
     },
     {
@@ -943,7 +943,7 @@
           "lhs": "r_c(t,u,v)",
           "rhs": "r_f\\left(t,v\\right)+u\\cdot\\left(r_g\\left(t,v\\right)-r_f\\left(t,v\\right)\\right)"
         },
-        "description": "Cap Function"
+        "description": "Side Cap Function"
       }
     },
     {

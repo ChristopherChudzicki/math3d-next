@@ -199,7 +199,7 @@
       "id": "6",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Parametric Curve",
+        "description": "Curve",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -331,7 +331,7 @@
           "items": ["-2\\pi", "2\\pi"]
         },
         "duration": "4",
-        "description": "Variable Slider",
+        "description": "Point of Tangency",
         "isAnimating": "true",
         "speedMultiplier": "1"
       }
@@ -345,7 +345,7 @@
           "lhs": "r(t)",
           "rhs": "\\left[\\ 2\\cos\\left(t\\right),\\ \\sin\\left(t\\right),\\ \\frac{t}{2}\\right]"
         },
-        "description": "Curve"
+        "description": "Curve Function"
       }
     },
     {
@@ -381,7 +381,7 @@
           "lhs": "f\\left(u,\\ t\\right)",
           "rhs": "r\\left(u\\right)+R\\left(u\\right)\\cdot\\left(N\\left(u\\right)+\\cos\\left(t\\right)T\\left(u\\right)+\\sin\\left(t\\right)N\\left(u\\right)\\right)"
         },
-        "description": "Osculating Circle\nThe circle is tangent to the curve at r(u); t parametrizes the circle."
+        "description": "Osculating Circle Function\nThe circle is tangent to the curve at r(u); t parametrizes the circle."
       }
     },
     {

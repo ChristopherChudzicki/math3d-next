@@ -285,7 +285,7 @@
       "id": "8",
       "type": "POINT",
       "properties": {
-        "description": "Point",
+        "description": "Particle",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -361,7 +361,7 @@
           "items": ["-5", "5"]
         },
         "duration": "4",
-        "description": "Variable Slider",
+        "description": "Time",
         "isAnimating": "true",
         "speedMultiplier": "1/8"
       }

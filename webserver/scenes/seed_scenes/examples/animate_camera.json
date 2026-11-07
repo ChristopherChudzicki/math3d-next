@@ -6,7 +6,7 @@
       "id": "camera",
       "type": "CAMERA",
       "properties": {
-        "description": "Camera\nRotate, zoom, and pan are turned off here, so they don't fight the camera animation.",
+        "description": "Camera\nRotate, Zoom, and Pan are off in this scene so they don't interfere with the camera animation.",
         "isOrthographic": "false",
         "isPanEnabled": "false",
         "isZoomEnabled": "false",
@@ -258,7 +258,7 @@
           "lhs": "R\\left(t\\right)",
           "rhs": "3+0.25\\cdot t^2"
         },
-        "description": "Function"
+        "description": "Path Radius"
       }
     },
     {

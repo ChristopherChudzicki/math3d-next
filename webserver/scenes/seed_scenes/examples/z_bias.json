@@ -207,7 +207,7 @@
           "items": [
             {
               "type": "expr",
-              "expr": "\\left[-3,3\\right]"
+              "expr": "\\left[-2,2\\right]"
             }
           ]
         },
@@ -218,7 +218,7 @@
       "id": "3",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Parametric Curve\nThis yellow curve also lies on the surface, but its positive z-bias draws it on top. Rotate the view: it stays visible. To set Z-Bias, open the object settings (press the gear).\nZ-bias nudges an object toward the camera. (\"z\" means the direction toward the camera, not the z-axis.)",
+        "description": "Parametric Curve\nThis yellow curve also lies on the surface, but its Z-Bias of 1 draws it on top from every angle. To set Z-Bias, open its settings (press the gear).\nZ-Bias nudges an object toward the camera; here \"z\" means the direction toward the camera, not the z-axis.",
         "color": "#f1c40f",
         "visible": true,
         "calculatedVisibility": "",
@@ -242,7 +242,7 @@
           "items": [
             {
               "type": "expr",
-              "expr": "\\left[-3,3\\right]"
+              "expr": "\\left[-2,2\\right]"
             }
           ]
         },

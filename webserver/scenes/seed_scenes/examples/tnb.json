@@ -183,7 +183,7 @@
       "id": "3",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Parametric Curve",
+        "description": "Curve",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -292,7 +292,7 @@
           "lhs": "f\\left(t\\right)",
           "rhs": "\\left[t^3,t^2,t\\right]"
         },
-        "description": "Curve"
+        "description": "Curve Function"
       }
     },
     {
@@ -310,7 +310,7 @@
           "items": ["-2", "2"]
         },
         "duration": "4",
-        "description": "Variable Slider",
+        "description": "Point on Curve",
         "isAnimating": "true",
         "speedMultiplier": "1"
       }

@@ -408,7 +408,7 @@
           "items": ["0", "2\\pi"]
         },
         "duration": "4",
-        "description": "Variable Slider",
+        "description": "Ruling Position",
         "isAnimating": "true",
         "speedMultiplier": "1"
       }

@@ -183,7 +183,7 @@
       "id": "1",
       "type": "POINT",
       "properties": {
-        "description": "Point\nTo label a point, open the object settings (press the gear), enter a Label, and set Label Visible.",
+        "description": "Point\nTo label a point, open its settings (press the gear), type the label in Label, and turn on Label Visible.",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -202,7 +202,7 @@
       "id": "2",
       "type": "VECTOR",
       "properties": {
-        "description": "Vector\nVectors and lines can be labeled too. Their labels appear at the end.",
+        "description": "Vector\nVectors and lines can be labeled too. The label appears at a vector's tip and at a line's last point.",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "",
