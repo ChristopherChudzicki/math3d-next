@@ -175,7 +175,7 @@
       "id": "mainFolder",
       "type": "FOLDER",
       "properties": {
-        "description": "A Folder",
+        "description": "Color and Visibility",
         "isCollapsed": "false"
       }
     },
@@ -183,7 +183,7 @@
       "id": "1",
       "type": "EXPLICIT_SURFACE_POLAR",
       "properties": {
-        "description": "Explicit Surface (Polar)\nPress the colored dot next to a graphics object to toggle visibility; press and hold to change color.",
+        "description": "Explicit Surface (Polar)\nPress the color dot next to an object to toggle visibility; press and hold to change color.",
         "color": "#e67e22",
         "visible": true,
         "calculatedVisibility": "",

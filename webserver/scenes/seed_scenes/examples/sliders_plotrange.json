@@ -1,6 +1,6 @@
 {
   "key": "sliders_plotrange",
-  "title": "Using Sliders to Animate Plot Range",
+  "title": "Using Sliders to Animate the Plot Range",
   "items": [
     {
       "id": "camera",
@@ -175,7 +175,7 @@
       "id": "mainFolder",
       "type": "FOLDER",
       "properties": {
-        "description": "A Folder",
+        "description": "Animated Plot Range",
         "isCollapsed": "false"
       }
     },
@@ -183,7 +183,7 @@
       "id": "1",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Parametric Curve\nSliders can be used to animate the plot range for curves and surfaces.",
+        "description": "Parametric Curve\nThis curve's domain is [-2π, T], so it grows as the slider animates. Any curve or surface domain can use slider variables.",
         "color": "#e67e22",
         "visible": true,
         "calculatedVisibility": "",
@@ -229,7 +229,7 @@
           "items": ["-2\\pi", "2\\pi"]
         },
         "duration": "4",
-        "description": "Variable Slider\nSlider endpoints can contain symbols like pi, or other even variables.",
+        "description": "Variable Slider\nSlider endpoints can be expressions like 2π, and can even use other variables.",
         "isAnimating": "true",
         "speedMultiplier": "1"
       }

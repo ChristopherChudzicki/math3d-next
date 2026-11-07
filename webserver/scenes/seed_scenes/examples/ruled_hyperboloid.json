@@ -199,7 +199,7 @@
       "id": "6",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Top Curve",
+        "description": "Bottom Curve",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -234,7 +234,7 @@
       "id": "7",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Bottom Curve",
+        "description": "Top Curve",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -269,7 +269,7 @@
       "id": "8",
       "type": "LINE",
       "properties": {
-        "description": "Line",
+        "description": "Ruling Line",
         "color": "#e67e22",
         "visible": true,
         "calculatedVisibility": "",
@@ -291,7 +291,7 @@
       "id": "10",
       "type": "POINT",
       "properties": {
-        "description": "Point",
+        "description": "Line Endpoints",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "",
@@ -310,7 +310,7 @@
       "id": "11",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface",
+        "description": "Ruled Surface",
         "color": "#e67e22",
         "visible": true,
         "calculatedVisibility": "",
@@ -378,7 +378,7 @@
           "lhs": "r_2\\left(t\\right)",
           "rhs": "\\left[3\\cdot\\cos\\left(t+\\frac{\\pi}{2}\\right),\\ 3\\cdot\\sin\\left(t+\\frac{\\pi}{2}\\right),\\ +3\\right]"
         },
-        "description": "Top Function"
+        "description": "Top Circle"
       }
     },
     {
@@ -408,7 +408,7 @@
           "items": ["0", "2\\pi"]
         },
         "duration": "4",
-        "description": "Variable Slider",
+        "description": "Ruling Position",
         "isAnimating": "true",
         "speedMultiplier": "1"
       }

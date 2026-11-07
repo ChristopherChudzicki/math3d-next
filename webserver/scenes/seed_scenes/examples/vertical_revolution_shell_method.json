@@ -1,6 +1,6 @@
 {
   "key": "vertical_revolution_shell_method",
-  "title": "Volume of Revolution: Shell Method",
+  "title": "Volume of Revolution: Shell Method (Vertical Axis)",
   "items": [
     {
       "id": "camera",
@@ -175,7 +175,7 @@
       "id": "19",
       "type": "FOLDER",
       "properties": {
-        "description": "Surfaces: Top and Bottom",
+        "description": "Top and Bottom Surfaces",
         "isCollapsed": "true"
       }
     },
@@ -183,7 +183,7 @@
       "id": "24",
       "type": "FOLDER",
       "properties": {
-        "description": "Surfaces: Inner, Outer",
+        "description": "Inner and Outer Surfaces",
         "isCollapsed": "true"
       }
     },
@@ -191,7 +191,7 @@
       "id": "30",
       "type": "FOLDER",
       "properties": {
-        "description": "Surfaces: Shell",
+        "description": "Shell",
         "isCollapsed": "true"
       }
     },
@@ -199,7 +199,7 @@
       "id": "34",
       "type": "FOLDER",
       "properties": {
-        "description": "Axis",
+        "description": "Rotation Axis",
         "isCollapsed": "true"
       }
     },
@@ -220,18 +220,10 @@
       }
     },
     {
-      "id": "mainFolder",
-      "type": "FOLDER",
-      "properties": {
-        "description": "A Folder",
-        "isCollapsed": "false"
-      }
-    },
-    {
       "id": "22",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface",
+        "description": "Bottom Surface",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -282,7 +274,7 @@
       "id": "23",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Parametric Surface",
+        "description": "Top Surface",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -435,7 +427,7 @@
       "id": "28",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Shell Inner",
+        "description": "Shell Inner Wall",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "shell",
@@ -486,7 +478,7 @@
       "id": "31",
       "type": "PARAMETRIC_SURFACE",
       "properties": {
-        "description": "Shell Outer",
+        "description": "Shell Outer Wall",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "shell",
@@ -639,7 +631,7 @@
       "id": "38",
       "type": "LINE",
       "properties": {
-        "description": "Line",
+        "description": "Rotation Axis",
         "color": "#2c3e50",
         "visible": true,
         "calculatedVisibility": "",
@@ -666,7 +658,7 @@
           "lhs": "f(x)",
           "rhs": "6-x^2"
         },
-        "description": "Top Function"
+        "description": "Top Curve"
       }
     },
     {
@@ -678,7 +670,7 @@
           "lhs": "g\\left(x\\right)",
           "rhs": "x"
         },
-        "description": "Bottom Function"
+        "description": "Bottom Curve"
       }
     },
     {
@@ -690,7 +682,7 @@
           "lhs": "a",
           "rhs": "0"
         },
-        "description": "Inner Radius"
+        "description": "Left Limit"
       }
     },
     {
@@ -702,7 +694,7 @@
           "lhs": "b",
           "rhs": "2"
         },
-        "description": "Outer Radius"
+        "description": "Right Limit"
       }
     },
     {
@@ -714,7 +706,7 @@
           "lhs": "X",
           "rhs": "-1"
         },
-        "description": "Axis"
+        "description": "Axis Position"
       }
     },
     {
@@ -752,7 +744,7 @@
           "items": ["a", "b"]
         },
         "duration": "4",
-        "description": "Shell Radius",
+        "description": "Shell Position",
         "isAnimating": "false",
         "speedMultiplier": "1"
       }

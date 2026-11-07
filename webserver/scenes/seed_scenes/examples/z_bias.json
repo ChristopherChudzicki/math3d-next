@@ -1,6 +1,6 @@
 {
   "key": "z_bias",
-  "title": "Fine-tuning Visibility with z-bias",
+  "title": "Fine-Tuning Visibility with Z-Bias",
   "items": [
     {
       "id": "camera",
@@ -175,7 +175,7 @@
       "id": "mainFolder",
       "type": "FOLDER",
       "properties": {
-        "description": "A Folder",
+        "description": "Z-Bias",
         "isCollapsed": "false"
       }
     },
@@ -183,7 +183,7 @@
       "id": "2",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "ParametricCurve\nThis red curve is hard to see because it has the same 3D-position as the blue surface. The renderer can't decide which object to draw on top.",
+        "description": "Parametric Curve\nThis red curve lies on the blue surface, so it is hard to see: the renderer can't tell which one to draw on top.",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "",
@@ -207,7 +207,7 @@
           "items": [
             {
               "type": "expr",
-              "expr": "\\left[-3,3\\right]"
+              "expr": "\\left[-2,2\\right]"
             }
           ]
         },
@@ -218,7 +218,7 @@
       "id": "3",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Parametric Curve\nSetting the z-bias in object settings (click the gear) is a nice way to solve this problem. Try viewing the yellow line from different angle: it will always appear closer to the camera.\nThe z-bias of an object is a positional bias toward the camera (\"z\" in the context refers to an axis pointing toward the camera, not the mathematical z axis.)",
+        "description": "Parametric Curve\nThis yellow curve also lies on the surface, but its Z-Bias of 1 draws it on top from every angle. To set Z-Bias, open its settings (press the gear).\nZ-Bias nudges an object toward the camera; here \"z\" means the direction toward the camera, not the z-axis.",
         "color": "#f1c40f",
         "visible": true,
         "calculatedVisibility": "",
@@ -242,7 +242,7 @@
           "items": [
             {
               "type": "expr",
-              "expr": "\\left[-3,3\\right]"
+              "expr": "\\left[-2,2\\right]"
             }
           ]
         },
@@ -309,7 +309,7 @@
           "lhs": "f\\left(x,\\ y\\right)",
           "rhs": "\\frac{1}{2}y^2-x^2"
         },
-        "description": "Variable or Function"
+        "description": "Function"
       }
     }
   ],

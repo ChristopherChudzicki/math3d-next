@@ -175,7 +175,7 @@
       "id": "mainFolder",
       "type": "FOLDER",
       "properties": {
-        "description": "A Folder",
+        "description": "Functions",
         "isCollapsed": "false"
       }
     },
@@ -183,7 +183,7 @@
       "id": "2",
       "type": "PARAMETRIC_CURVE",
       "properties": {
-        "description": "Parametric Curve\nOnce a function is defined, we can re-use it for different purposes. Here, we draw a curve.",
+        "description": "Parametric Curve\nOnce defined, a function can be reused. Here, f defines a curve.",
         "color": "#3090FF",
         "visible": true,
         "calculatedVisibility": "",
@@ -218,7 +218,7 @@
       "id": "3",
       "type": "POINT",
       "properties": {
-        "description": "Point\nAnd here we animate a point. Note that \"T\" is the slider value.",
+        "description": "Point\nHere, f gives the point's position. T is the slider's value, so the point moves along the curve as the slider animates.",
         "color": "#e74c3c",
         "visible": true,
         "calculatedVisibility": "",
@@ -242,7 +242,7 @@
           "lhs": "f\\left(t\\right)",
           "rhs": "\\left[t,\\ 3\\cdot\\cos\\left(\\pi\\ t\\right),\\ 2\\sin\\left(\\pi\\ t\\right)\\right]"
         },
-        "description": "Function\nFunctions can be scalar-valued or vector-valued. Here's a vector-valued function."
+        "description": "Function\nFunctions can be scalar-valued or vector-valued. This one is vector-valued."
       }
     },
     {
