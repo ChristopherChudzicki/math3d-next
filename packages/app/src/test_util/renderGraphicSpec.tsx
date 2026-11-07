@@ -30,16 +30,16 @@ export const storeWithScene = (scene: SceneInput) => {
 };
 
 /**
- * The specs items `ids` report once `scene` is loaded, by id. Results reach
- * the spec components in effects, which `render` flushes, so each item's last
- * report is the settled one.
+ * The spec each of `ids` reports once `scene` is loaded, keyed by id; an id
+ * that never reports is absent. Results reach the spec components in effects,
+ * which `render` flushes, so each item's last report is the settled one.
  */
 export const collectGraphicSpecs = (
   scene: SceneInput,
   ids: string[],
-): Record<string, GraphicSpec | null> => {
+): Partial<Record<string, GraphicSpec | null>> => {
   const store = storeWithScene(scene);
-  const specs: Record<string, GraphicSpec | null> = {};
+  const specs: Partial<Record<string, GraphicSpec | null>> = {};
   const collect = (id: string, spec: GraphicSpec | null) => {
     specs[id] = spec;
   };
@@ -52,7 +52,8 @@ export const collectGraphicSpecs = (
       </SpecCollector.Provider>
     </Provider>,
   );
-  return specs;
+  // A copy: unmounting at cleanup reports null into `specs`.
+  return { ...specs };
 };
 
 /** The spec item `id` reports once `scene` is loaded. */
