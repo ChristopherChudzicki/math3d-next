@@ -181,8 +181,9 @@ def test_a_legacy_range_array_equals_a_next_domain_function_constant_at_it():
     assert pair.outcome == "equal"
 
 
-def test_a_legacy_point_equals_math3d_next_one_element_list_of_it():
-    pair = label(spec("coords"), Side(OK, [1, 2, 3]), Side(OK, [[1, 2, 3]]), TOL)
+@pytest.mark.parametrize("legacy", [[1, 2, 3], [[1], [2], [3]]])
+def test_a_legacy_point_equals_math3d_next_one_element_list_of_it(legacy):
+    pair = label(spec("coords"), Side(OK, legacy), Side(OK, [[1, 2, 3]]), TOL)
     assert pair.outcome == "equal"
 
 
