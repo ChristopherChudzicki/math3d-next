@@ -32,6 +32,13 @@ const spaceRule = new RegexpParserRule(/[~\s]+/g, " ");
 
 const backslashRule = new RegexpParserRule(/\\/g, " ");
 
+// mathjs reads a number starting 0b, 0o or 0x as a binary, octal or hex
+// literal; a space makes 0x the product 0·x, except inside a name like a_0x.
+const zeroPrefixRule = new RegexpParserRule(
+  /(?<![\p{L}\p{N}_$])0(?=[box])/gu,
+  "0 ",
+);
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const simplifyRule: MathJsRule = {
   type: ParserRuleType.MathJs,
@@ -61,6 +68,7 @@ const parserRules: ParserRule[] = [
   backslashRule,
   spaceRule,
   validateParameters,
+  zeroPrefixRule,
   // MathJS rules
   pdiffRule,
   // simplifyRule,
