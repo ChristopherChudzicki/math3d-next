@@ -12,8 +12,14 @@ import ErrorTooltip from "./ErrorTooltip";
 import style from "./widget.module.css";
 
 type ExtraProps = {
+  /** On the left-hand side's math-field. */
   lhsClassName?: string;
+  /** On the right-hand side's math-field. */
   rhsClassName?: string;
+  /** On the element wrapping the left-hand field: the row's flex item. */
+  lhsWrapperClassName?: string;
+  /** On the element wrapping the right-hand field: the row's flex item. */
+  rhsWrapperClassName?: string;
   separatorClassName?: string;
   numDecimalDigits?: number;
 };
@@ -51,6 +57,8 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
     className,
     lhsClassName,
     rhsClassName,
+    lhsWrapperClassName,
+    rhsWrapperClassName,
     separatorClassName,
     itemId,
     numDecimalDigits,
@@ -84,7 +92,7 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
   const rhsLabel = `${label} (right-hand side)`;
   return (
     <div {...others} className={classNames(className, u.dFlex)}>
-      <ErrorTooltip error={errors.lhs}>
+      <ErrorTooltip error={errors.lhs} className={lhsWrapperClassName}>
         <SmallMathField
           aria-label={lhsLabel}
           className={classNames(
@@ -100,7 +108,7 @@ const MathAssignment: React.FC<MathAssignmentProps> = (props) => {
       <div>
         <ReadonlyMathField className={separatorClassName} value="=" />
       </div>
-      <ErrorTooltip error={errors.rhs}>
+      <ErrorTooltip error={errors.rhs} className={rhsWrapperClassName}>
         <SmallMathField
           aria-label={rhsLabel}
           className={classNames(
