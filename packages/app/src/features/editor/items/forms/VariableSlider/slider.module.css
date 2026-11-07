@@ -19,9 +19,17 @@
 
 .sliderRow {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  /* A focused range field is uncapped; without a floor it squeezes the slider. */
+  grid-template-columns: auto minmax(5rem, 1fr) auto;
   align-items: center;
-  gap: 1em;
+  gap: 1rem;
+}
+
+/* Unfocused, each range field gets half of what the narrow row leaves after
+   the slider's floor and gaps (4pt = its margins); MathLive clips the rest.
+   A % cap would not cap min-content, which is what widens a focused item. */
+.rangeField:not(:focus) {
+  max-width: calc((var(--narrow-center-width) - 5rem - 2rem) / 2 - 4pt);
 }
 
 .sliderControls {

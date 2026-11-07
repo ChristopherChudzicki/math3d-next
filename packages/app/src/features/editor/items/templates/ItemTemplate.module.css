@@ -4,6 +4,9 @@
   --leftright-gutter-total: calc(
     var(--left-gutter-width) + var(--right-gutter-width)
   );
+  /* The center column's width while the item is narrow (2px = side margins).
+     100cqi resolves where it's used, against .sizer. */
+  --narrow-center-width: calc(100cqi - 2px - var(--leftright-gutter-total));
   background-color: var(--color-background);
   display: grid;
   grid-template-columns: var(--left-gutter-width) minmax(0, 1fr) var(
@@ -67,9 +70,9 @@
   grid-column-end: 3;
   grid-row-start: 1;
   grid-row-end: 2;
-  /* The narrow column's width (2px = form margins). Unlike a % max-width, it
-     also caps the description's intrinsic width, so widening never re-wraps it. */
-  max-width: calc(100cqi - 2px - var(--leftright-gutter-total));
+  /* Unlike a % max-width, a fixed one also caps the description's intrinsic
+     width, so widening never re-wraps it. */
+  max-width: var(--narrow-center-width);
 }
 .grid-center-bottom {
   grid-column-start: 2;
