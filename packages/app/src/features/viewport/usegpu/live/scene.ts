@@ -34,8 +34,8 @@ export type SceneSpec = {
   range: AxesRange;
   scale: Coords;
   /**
-   * Seeds the orbit controls. Must keep its identity while the camera item is
-   * unchanged: a new `target` array resets the user's pan.
+   * Seeds the orbit controls, which re-seed each field only when it changes
+   * (by identity): a new `target` array resets the user's pan.
    */
   orbit: OrbitSpec;
   /** Bumping it re-seeds the orbit controls from `orbit`. */

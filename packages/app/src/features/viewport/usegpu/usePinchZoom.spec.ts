@@ -14,7 +14,7 @@ const setup = (enabled = true) => {
     canvas.dispatchEvent(
       Object.assign(
         new MouseEvent(type, { bubbles: true, clientX: x, clientY: y }),
-        { pointerId, pointerType: "touch" },
+        { pointerId, pointerType: "touch", isPrimary: pointerId === 1 },
       ),
     );
   return { start, move, canvasMoves, touch };
@@ -40,19 +40,32 @@ test("a lifted finger's replacement restarts the pinch from the new pair", () =>
   expect(move).toHaveBeenLastCalledWith(2);
 });
 
-test("touch moves reach the canvas until a second finger lands, then not until every finger lifts", () => {
+test.each(["pointerup", "pointercancel"])(
+  "touch moves reach the canvas until a second finger lands, then not until every finger lifts (last lift: %s)",
+  (lastLift) => {
+    const { canvasMoves, touch } = setup();
+    touch("pointerdown", 1, 0, 0);
+    touch("pointermove", 1, 5, 0);
+    expect(canvasMoves).toHaveBeenCalledTimes(1);
+    touch("pointerdown", 2, 10, 0);
+    touch("pointerup", 2);
+    touch("pointermove", 1, 6, 0);
+    expect(canvasMoves).toHaveBeenCalledTimes(1);
+    touch(lastLift, 1);
+    touch("pointerdown", 3, 0, 0);
+    touch("pointermove", 3, 5, 0);
+    expect(canvasMoves).toHaveBeenCalledTimes(2);
+  },
+);
+
+test("a new first finger drops a touch whose lift never arrived", () => {
   const { canvasMoves, touch } = setup();
   touch("pointerdown", 1, 0, 0);
-  touch("pointermove", 1, 5, 0);
-  expect(canvasMoves).toHaveBeenCalledTimes(1);
   touch("pointerdown", 2, 10, 0);
-  touch("pointerup", 2);
-  touch("pointermove", 1, 6, 0);
-  expect(canvasMoves).toHaveBeenCalledTimes(1);
   touch("pointerup", 1);
   touch("pointerdown", 1, 0, 0);
   touch("pointermove", 1, 5, 0);
-  expect(canvasMoves).toHaveBeenCalledTimes(2);
+  expect(canvasMoves).toHaveBeenCalledTimes(1);
 });
 
 test("disabled, it reports no pinch but still keeps two-finger moves from the canvas", () => {

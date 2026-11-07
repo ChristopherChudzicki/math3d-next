@@ -6,7 +6,8 @@
  * (cjs, mjs, and both .d.ts files) and `oit-buffer` (cjs, mjs), `yarn
  * patch-commit -s <folder>`, then keep the root resolution keyed by bare name,
  * so it also covers Use.GPU's own requests, and point packages/app's
- * dependency at the new patch file.
+ * dependency at the new patch file. If `OrbitControls` gains touch gestures,
+ * delete `usePinchZoom`.
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -63,3 +64,31 @@ test.each(workbenchConsumers)(
     ).toContain("colorInput: 'linear'");
   },
 );
+
+const interactSrc = (file: string) =>
+  readFileSync(
+    path.join(
+      path.dirname(
+        createRequire(path.join(repoRoot, "packages/app/package.json")).resolve(
+          "@use-gpu/interact/package.json",
+        ),
+      ),
+      file,
+    ),
+    "utf8",
+  );
+
+test("OrbitControls has no touch gestures, so usePinchZoom is still needed", () => {
+  const src = interactSrc("mjs/controls/orbit-controls.mjs");
+  expect(src).not.toMatch(/touch|pinch|pointerId/i);
+  expect(src).toMatch(/zoom: \[\s*\{\s*wheel: true\s*\}\s*\]/);
+});
+
+test("OrbitControls re-seeds a prop only when it changes, so a pinch can seed radius alone", () => {
+  expect(interactSrc("mjs/controls/orbit-controls.mjs")).toContain(
+    "useDerivedState(initialRadius, version)",
+  );
+  expect(interactSrc("mjs/hooks/useDerivedState.mjs")).toContain(
+    "useVersion(newInitial) + version",
+  );
+});

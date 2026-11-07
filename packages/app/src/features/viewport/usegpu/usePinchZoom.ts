@@ -10,8 +10,9 @@ type PinchHandlers = {
 
 /**
  * Two-finger touch pinches on `host`, reported while `enabled`. From the
- * second finger until every finger lifts, touch moves never reach the canvas:
- * Use.GPU's orbit controls track one pointer and would read two fingers as a
+ * second finger until every finger lifts, later fingers' `pointerdown`s and
+ * all touch moves are kept from the canvas: Use.GPU's DOM events track one
+ * pointer position, so its orbit controls would read two fingers as a
  * jittery rotate.
  */
 export const usePinchZoom = (
@@ -42,6 +43,11 @@ export const usePinchZoom = (
     };
     const down = (e: PointerEvent) => {
       if (e.pointerType !== "touch") return;
+      // A new first finger: drop any touch whose lift never reached `host`.
+      if (e.isPrimary) {
+        touches.clear();
+        swallowing = false;
+      }
       touches.set(e.pointerId, [e.clientX, e.clientY]);
       if (touches.size < 2) return;
       swallowing = true;

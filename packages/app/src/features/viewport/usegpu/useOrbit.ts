@@ -81,8 +81,8 @@ export const useOrbit = (
     scale,
   );
 
-  // A pinch reseeds only `radius`, so the controls keep the user's rotation
-  // and pan. It lapses when the camera item changes or the controls snap back.
+  // OrbitControls re-seeds a field only when it changes, so changing `radius`
+  // alone keeps the user's rotation and pan. Lapses on a camera edit or snap-back.
   const [pinch, setPinch] = useState<{
     seed: OrbitSpec;
     version: number;
@@ -93,12 +93,15 @@ export const useOrbit = (
     start: () => {
       startRadius.current = latest.current?.radius ?? orbit.radius;
     },
-    move: (ratio) =>
+    move: (ratio) => {
+      // Zero when zoom was enabled mid-pinch, after `start` was skipped.
+      if (startRadius.current <= 0) return;
       setPinch({
         seed: orbit,
         version: controlsVersion,
         radius: startRadius.current * ratio,
-      }),
+      });
+    },
   });
   const seeded = useMemo(
     () =>
