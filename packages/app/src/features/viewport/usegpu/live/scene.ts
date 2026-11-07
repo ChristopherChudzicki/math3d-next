@@ -15,7 +15,11 @@ import {
   Pass,
 } from "@use-gpu/workbench";
 import type { FontSource } from "@use-gpu/workbench";
-import { ORBIT_CONTROLS_DEFAULT, OrbitControls } from "@use-gpu/interact";
+import {
+  Cursor,
+  ORBIT_CONTROLS_DEFAULT,
+  OrbitControls,
+} from "@use-gpu/interact";
 import { Cartesian, Plot } from "@use-gpu/plot";
 import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
 import type { GraphicSpec } from "@/features/viewport/usegpu/graphicSpec/types";
@@ -123,31 +127,36 @@ export const makeSceneRoot = (
       canvas,
       samples: 4,
       backgroundColor: WHITE,
-      children: use(OrbitControls, {
-        ...scene.orbit,
-        version: scene.controlsVersion,
-        actionBindings: actionBindings(scene.controls),
-        render: (
-          radius: number,
-          bearing: number,
-          pitch: number,
-          target: ArrayLike<number>,
-        ) => {
-          const orbit: OrbitSpec = {
-            radius,
-            bearing,
-            pitch,
-            target: [target[0], target[1], target[2]],
-          };
-          report(orbit);
-          return use(OrbitCamera, {
-            ...orbit,
-            dolly: scene.projection.dolly,
-            focus: 1,
-            children: pass,
-          });
-        },
-      }),
+      children: [
+        // AutoCanvas owns the canvas cursor (default `default`); `move` matches
+        // MathBox, whose threestrap `cursor` plugin shows it whenever controls exist.
+        use(Cursor, { cursor: "move" }),
+        use(OrbitControls, {
+          ...scene.orbit,
+          version: scene.controlsVersion,
+          actionBindings: actionBindings(scene.controls),
+          render: (
+            radius: number,
+            bearing: number,
+            pitch: number,
+            target: ArrayLike<number>,
+          ) => {
+            const orbit: OrbitSpec = {
+              radius,
+              bearing,
+              pitch,
+              target: [target[0], target[1], target[2]],
+            };
+            report(orbit);
+            return use(OrbitCamera, {
+              ...orbit,
+              dolly: scene.projection.dolly,
+              focus: 1,
+              children: pass,
+            });
+          },
+        }),
+      ],
     }),
   });
 };

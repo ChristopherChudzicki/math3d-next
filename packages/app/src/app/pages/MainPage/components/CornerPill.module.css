@@ -1,15 +1,12 @@
-/* Floats over the scene's bottom-right corner. */
-.trigger {
-  position: absolute;
-  bottom: 6px;
-  right: 6px;
+/* Pill look for buttons floating over the scene. */
+.pill {
   border-radius: 999px;
   background-color: var(--color-background);
 }
 
 /* Button's own tints are translucent, which would show the scene through. */
 @media (hover: hover) {
-  .trigger:hover:not([data-disabled]) {
+  .pill:hover:not([data-disabled]) {
     background-color: color-mix(
       in srgb,
       currentColor 8%,
@@ -18,7 +15,7 @@
   }
 }
 
-.trigger:active:not([data-disabled]) {
+.pill:active:not([data-disabled]) {
   background-color: color-mix(
     in srgb,
     currentColor 16%,

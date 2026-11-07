@@ -28,7 +28,7 @@ Like production, the dev environment serves the frontend and API from separate s
 - **Frontend**: http://math3d.localhost:3000
 - **API**: http://api.math3d.localhost:8000
 
-Append `?renderer=usegpu` to a scene URL to try the opt-in WebGPU renderer ([ADR-0008](docs/adr/0008-usegpu-opt-in-renderer.md)).
+To try the opt-in WebGPU renderer ([ADR-0008](docs/adr/0008-usegpu-opt-in-renderer.md)), check "WebGPU renderer (experimental)" in the top-right menu, or append `?renderer=usegpu` to a scene URL.
 
 ### Signing in during development
 

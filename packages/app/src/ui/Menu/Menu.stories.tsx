@@ -32,6 +32,14 @@ const UserMenu: React.FC = () => (
           Contact (disabled)
         </Menu.Item>
         <Menu.Separator />
+        <Menu.CheckboxItem defaultChecked={false}>
+          Unchecked option
+        </Menu.CheckboxItem>
+        <Menu.CheckboxItem defaultChecked>Checked option</Menu.CheckboxItem>
+        <Menu.CheckboxItem disabled description="Not available here">
+          Disabled option
+        </Menu.CheckboxItem>
+        <Menu.Separator />
         {/* A group label names the group, so it labels the account actions. */}
         <Menu.Group>
           <Menu.GroupLabel>Signed in as someone@example.com</Menu.GroupLabel>

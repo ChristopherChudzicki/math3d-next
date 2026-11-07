@@ -35,12 +35,13 @@ test.each(qaScenes.map((scene) => ({ key: scene.key, scene })))(
   "every visible graphic in QA scene $key produces a spec",
   ({ scene }) => {
     const scope = storeWithScene(scene).mathScope.get();
-    const isVisible = (item: MathItem) =>
-      isMathGraphic(item) &&
-      finalVisibility(
-        item,
-        scope.results.get(mathScopeId(item.id, "calculatedVisibility")),
+    const isVisible = (item: MathItem) => {
+      const id = mathScopeId(item.id, "calculatedVisibility");
+      return (
+        isMathGraphic(item) &&
+        finalVisibility(item, scope.results.get(id), scope.errors.get(id))
       );
+    };
     const visible = scene.items.filter(isVisible).map((item) => item.id);
     const specs = collectGraphicSpecs(scene, visible);
     const missing = visible.filter((id) => !specs[id]);

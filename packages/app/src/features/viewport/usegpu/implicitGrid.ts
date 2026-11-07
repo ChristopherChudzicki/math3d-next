@@ -6,6 +6,13 @@ export const MAX_IMPLICIT_CELLS = 128;
 type Vec3 = [number, number, number];
 
 /**
+ * Use.GPU's dual contouring joins only edges with a strict sign change, so an
+ * exact 0 leaves a hole; count it as negative, like MathBox's marching cubes.
+ */
+export const nudgeZero = (value: number): number =>
+  value === 0 ? -1e-20 : value;
+
+/**
  * Like MathBox, `samples` counts cells per axis, so each axis has n + 1 points
  * from lo to hi inclusive.
  */

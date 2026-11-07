@@ -11,13 +11,15 @@ with a WebGPU adapter.
 
 ## Decision
 
-**Add Use.GPU as a second renderer behind `?renderer=usegpu`. MathBox stays
-the default.**
+**Add Use.GPU as a second, opt-in renderer. MathBox stays the default.**
 
-- `MainPage` picks the viewport from `?renderer` (`mathbox` by default, or
-  `usegpu`).
-- Without `navigator.gpu` (or with no adapter), the Use.GPU viewport says
-  WebGPU is unavailable and links back to the default renderer.
+- `services/renderer/` picks the viewport: an explicit `?renderer` (`mathbox`
+  or `usegpu`) wins over a per-browser preference set from the account menu.
+- Without a WebGPU adapter (detection gives up after 2 s), MathBox draws, with
+  a notice when the URL asked for Use.GPU. A device that fails to start also
+  falls back to MathBox, with a notice, and stores `mathbox` as the preference.
+- `FramePage` stays MathBox-only: Cloudflare Browser Run, which renders OG
+  images, has no WebGPU adapter.
 
 ### Folders and lint zones
 
@@ -38,8 +40,7 @@ the default.**
 ### The lazy boundary
 
 - `usegpu/GpuViewport` loads `usegpu/live/GpuViewportContent` through one
-  `React.lazy`, and only when `navigator.gpu` exists. The main bundle carries
-  none of Use.GPU.
+  `React.lazy`. The main bundle carries none of Use.GPU.
 - **Why:** `@use-gpu/wgsl@0.21.0` ships CommonJS `.js` files inside a
   `"type": "module"` package, which Vitest's jsdom run can't import. The
   boundary keeps the runtime out of every jsdom test.
@@ -71,7 +72,8 @@ upstream bugs:
   a property that doesn't apply; `todo` is a gap.
 - QA scenes (`webserver/scenes/seed_scenes/qa/`, one per graphical feature)
   are compared by hand: the same key in two tabs, one with
-  `?renderer=usegpu`.
+  `?renderer=mathbox` and one with `?renderer=usegpu` (a stored preference
+  would otherwise put both on Use.GPU).
 
 ## Consequences
 
@@ -83,14 +85,15 @@ upstream bugs:
     dashboard approval);
   - regenerate the workbench patch (steps in `usegpu/pins.spec.ts`), dropping
     any hunk the release fixed, and run `usegpu/pins.spec.ts`;
-  - open each QA scene in two tabs, one per renderer;
+  - open each QA scene in two tabs, `?renderer=mathbox` and `?renderer=usegpu`;
   - read the release's deprecation list.
-- The E2E smoke test (`viewport/usegpu-renderer.test.ts`) checks that the
-  route loads the lazy chunk without page errors. No Playwright-launched
-  Chromium, on macOS or CI, has a WebGPU adapter, so it sees only the
-  unavailable message and never checks drawing.
+- E2E: `viewport/usegpu-renderer.test.ts` stubs a null adapter and checks
+  `?renderer=usegpu` draws MathBox with the notice, never loading the lazy
+  chunk; `viewport/usegpu-drawing.test.ts` gets an adapter from SwiftShader
+  flags and checks Use.GPU draws: colored pixels in the viewport, and no
+  console errors, where Use.GPU reports WGSL and validation errors.
 
 ## Alternatives considered
 
 - **Replace MathBox outright.** Use.GPU is alpha and WebGPU is not in every
-  browser; an opt-in keeps the default path untouched while parity is built.
+  browser; an opt-in keeps MathBox the default while parity is built.

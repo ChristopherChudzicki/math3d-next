@@ -3,7 +3,15 @@ import {
   MAX_IMPLICIT_CELLS,
   gradientFromGrid,
   implicitGridLayout,
+  nudgeZero,
 } from "./implicitGrid";
+
+test("nudgeZero makes ±0 slightly negative and leaves other values alone", () => {
+  expect(nudgeZero(0)).toBe(-1e-20);
+  expect(nudgeZero(-0)).toBe(-1e-20);
+  expect(nudgeZero(0.25)).toBe(0.25);
+  expect(nudgeZero(NaN)).toBeNaN();
+});
 
 test("a linear field has its exact normalized gradient at every grid point", () => {
   const size: [number, number, number] = [3, 4, 5];

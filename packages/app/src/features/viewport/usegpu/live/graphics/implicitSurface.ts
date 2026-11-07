@@ -8,6 +8,7 @@ import type { ImplicitSurfaceSpec } from "@/features/viewport/usegpu/graphicSpec
 import {
   gradientFromGrid,
   implicitGridLayout,
+  nudgeZero,
 } from "@/features/viewport/usegpu/implicitGrid";
 import { drawMode } from "./util";
 
@@ -45,7 +46,7 @@ export const renderImplicitSurface = (
   // cleanly rather than ending a cell short.
   const padding = 1;
   const emitValue = (emit: Emit, x: number, y: number, z: number) => {
-    emit(value(x, y, z));
+    emit(nudgeZero(value(x, y, z)));
   };
   return use(Sampler, {
     axes: "xyz",
