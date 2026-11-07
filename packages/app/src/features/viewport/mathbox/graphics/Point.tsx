@@ -37,7 +37,7 @@ const Point: GraphicComponent<MathItemType.Point> = ({ item }) => {
     return Array(coords?.length ?? 0).fill(label);
   }, [coords, label]);
   const finalVisibility = useFinalVisibility(scope, item);
-  return !finalVisibility ? null : (
+  return !finalVisibility || !coords ? null : (
     <MB.Group>
       <MB.Array data={coords} items={1} channels={3} />
       <MB.Point

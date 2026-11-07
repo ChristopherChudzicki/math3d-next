@@ -47,7 +47,7 @@ const Line: GraphicComponent<MathItemType.Line> = ({ item }) => {
   const labels = useMemo(() => {
     return [label];
   }, [label]);
-  return !finalVisibility ? null : (
+  return !finalVisibility || !coords ? null : (
     <MB.Group>
       <MB.Array data={coords} items={1} channels={3} />
       <MB.Line

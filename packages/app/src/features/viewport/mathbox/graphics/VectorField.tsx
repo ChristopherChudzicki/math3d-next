@@ -67,7 +67,7 @@ const Vector: GraphicComponent<MathItemType.VectorField> = ({ item }) => {
   );
 
   const finalVisibility = useFinalVisibility(scope, item);
-  return !finalVisibility ? null : (
+  return !finalVisibility || !domain ? null : (
     <MB.Group>
       <MB.Volume
         width={samples1}

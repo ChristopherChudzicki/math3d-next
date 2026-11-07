@@ -55,7 +55,7 @@ const Vector: GraphicComponent<MathItemType.Vector> = ({ item }) => {
   }, [label]);
 
   const finalVisibility = useFinalVisibility(scope, item);
-  return !finalVisibility ? null : (
+  return !finalVisibility || !coords ? null : (
     <MB.Group>
       <MB.Array data={coords} items={1} channels={3} />
       <MB.Line

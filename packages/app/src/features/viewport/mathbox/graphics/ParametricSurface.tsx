@@ -159,7 +159,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
     return c.lerp(new Color("black"), 0.5).getHex();
   }, [hasColorFunc, color]);
 
-  return !visible ? null : (
+  return !visible || !domain ? null : (
     <MB.Group>
       <MB.Area {...STATIC_COLOR_PROPS} {...colorProps} ref={setColor} />
       <MB.Area
