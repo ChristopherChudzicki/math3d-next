@@ -11,6 +11,7 @@ declare const styles: {
   readonly "hidden": string;
   readonly "item-active": string;
   readonly "left-gutter": string;
+  readonly "sizer": string;
   readonly "vertical-line": string;
 };
 export = styles;

@@ -142,6 +142,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
       </div>
       <div className={styles.sliderRow}>
         <FieldWidget
+          className={styles.rangeField}
           widget={WidgetType.MathValue}
           name="min"
           error={rangeErrors.min}
@@ -160,6 +161,7 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
           value={value}
         />
         <FieldWidget
+          className={styles.rangeField}
           widget={WidgetType.MathValue}
           name="max"
           error={rangeErrors.max}
