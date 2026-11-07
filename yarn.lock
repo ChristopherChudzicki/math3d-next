@@ -1223,14 +1223,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@iconify/react@npm:^6.0.3":
-  version: 6.0.3
-  resolution: "@iconify/react@npm:6.0.3"
+"@iconify/react@npm:^6.0.4":
+  version: 6.0.4
+  resolution: "@iconify/react@npm:6.0.4"
   dependencies:
     "@iconify/types": "npm:^2.0.0"
   peerDependencies:
     react: ">=18.0.0"
-  checksum: 10/178400b191efec9c03e1aa0ccb1b7b9340ec6df03fdeff8904e8b38b3ae763804fe19d8f7526791194e0e0b0d5efefa94b07f30a7a1462b6adaad6861d4c241a
+  checksum: 10/458d2f413bbaf5b5d7a35660d1b9724aad88cb9095a08f0e980c07bbfae499fb10e0f2acf9a1bc5bed8f5d84562a7694247a27a14903043c080b3b979140e7eb
   languageName: node
   linkType: hard
 
@@ -4571,7 +4571,7 @@ __metadata:
     "@faker-js/faker": "npm:^10.6.0"
     "@hookform/resolvers": "npm:^5.9.2"
     "@iconify-icons/lucide": "npm:^1.2.136"
-    "@iconify/react": "npm:^6.0.3"
+    "@iconify/react": "npm:^6.0.4"
     "@julr/vite-plugin-validate-env": "npm:^2.2.2"
     "@math3d/api": "workspace:^"
     "@math3d/custom-mathjs": "workspace:^"
