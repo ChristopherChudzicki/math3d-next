@@ -29,7 +29,12 @@ const useOrbitWriteBack = (
   camera: StoredCamera,
   range: AxesRange,
   scale: Coords,
-): { onOrbit: (orbit: OrbitSpec) => void; controlsVersion: number } => {
+): {
+  onOrbit: (orbit: OrbitSpec) => void;
+  controlsVersion: number;
+  /** The controls' orbit as last reported to `onOrbit`. */
+  latest: RefObject<OrbitSpec | null>;
+} => {
   const dispatch = useAppDispatch();
   const latest = useRef<OrbitSpec | null>(null);
   const [controlsVersion, setControlsVersion] = useState(0);
@@ -90,7 +95,7 @@ const useOrbitWriteBack = (
     };
   }, [host]);
 
-  return { onOrbit, controlsVersion };
+  return { onOrbit, controlsVersion, latest };
 };
 
 export { useOrbitWriteBack };
