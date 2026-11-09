@@ -1,0 +1,15 @@
+{
+  "name": "@math3d/viewport-spec",
+  "exports": "./src/index.ts",
+  "main": "./src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@math3d/eslint-config": "workspace:^",
+    "@math3d/tsconfig": "workspace:^",
+    "eslint": "^8.57.1"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --max-warnings 0 \"**/*.ts?(x)\""
+  }
+}

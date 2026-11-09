@@ -1,5 +1,5 @@
 import tinycolor from "tinycolor2";
-import type { RGBA } from "./types";
+import type { RGBA } from "@math3d/viewport-spec";
 
 /** An item label's text when it should be drawn, else `null`. */
 export const visibleLabel = (

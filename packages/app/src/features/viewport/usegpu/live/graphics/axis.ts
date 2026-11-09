@@ -3,7 +3,7 @@ import type { LiveElement } from "@use-gpu/live";
 import type { TensorArray } from "@use-gpu/core";
 import { Axis, Scale, Tick } from "@use-gpu/plot";
 import type { Coords } from "@/features/viewport/shared/coordinates";
-import type { AxisSpec } from "@/features/viewport/usegpu/graphicSpec/types";
+import type { AxisSpec } from "@math3d/viewport-spec";
 import { formatTick } from "./format";
 import { drawMode } from "./util";
 import { CssPixelLabel, LABEL_STYLE, renderLabels } from "./labels";

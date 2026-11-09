@@ -1,7 +1,7 @@
 import { use } from "@use-gpu/live";
 import type { LiveElement } from "@use-gpu/live";
 import { Point } from "@use-gpu/plot";
-import type { PointSpec } from "@/features/viewport/usegpu/graphicSpec/types";
+import type { PointSpec } from "@math3d/viewport-spec";
 import { drawMode } from "./util";
 import { withItemLabel } from "./labels";
 

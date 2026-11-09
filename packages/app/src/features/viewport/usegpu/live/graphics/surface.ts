@@ -3,7 +3,7 @@ import type { LiveElement } from "@use-gpu/live";
 import type { Emit, TensorArray } from "@use-gpu/core";
 import { Sampler } from "@use-gpu/frame";
 import { Line, Surface, Transpose } from "@use-gpu/plot";
-import type { SurfaceSpec } from "@/features/viewport/usegpu/graphicSpec/types";
+import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { drawMode } from "./util";
 
 const UNIT_RANGE: [number, number][] = [

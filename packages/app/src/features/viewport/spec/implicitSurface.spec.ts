@@ -1,6 +1,6 @@
 import { SceneBuilder } from "@math3d/mock-api";
 import { renderGraphicSpec } from "@/test_util/renderGraphicSpec";
-import type { ImplicitSurfaceSpec } from "./types";
+import type { ImplicitSurfaceSpec } from "@math3d/viewport-spec";
 
 test("an implicit surface is the zero level set of lhs − rhs", () => {
   const scene = new SceneBuilder();

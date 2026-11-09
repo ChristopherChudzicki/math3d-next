@@ -5,7 +5,7 @@ import {
   useFinalVisibility,
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
-import type { GraphicSpec } from "./types";
+import type { GraphicSpec } from "@math3d/viewport-spec";
 import { visibleLabel } from "./style";
 import { useLineStyle } from "./line";
 import { useReportSpec } from "./collector";

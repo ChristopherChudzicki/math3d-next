@@ -5,7 +5,7 @@ import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 import { useMathItemResults } from "@/store/scene/evaluation/mathScope";
 import { fromUi } from "@/features/viewport/shared/coordinates";
 import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
-import type { CameraSpec } from "./graphicSpec/types";
+import type { CameraSpec } from "@math3d/viewport-spec";
 import { toOrbit } from "./orbit";
 import type { OrbitSpec } from "./orbit";
 import { usePinchZoom } from "./usePinchZoom";

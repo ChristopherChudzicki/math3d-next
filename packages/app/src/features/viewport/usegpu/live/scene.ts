@@ -22,7 +22,7 @@ import {
 } from "@use-gpu/interact";
 import { Cartesian, Plot } from "@use-gpu/plot";
 import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
-import type { GraphicSpec } from "@/features/viewport/usegpu/graphicSpec/types";
+import type { GraphicSpec } from "@math3d/viewport-spec";
 import {
   PLOT_ROTATION_DEGREES,
   toWorld,

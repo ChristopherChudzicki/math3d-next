@@ -1,11 +1,11 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import { LiveCanvas } from "@use-gpu/react";
 import { useViewportItems } from "@/features/viewport/shared/useViewportItems";
-import { GraphicSpecReporter } from "@/features/viewport/usegpu/graphicSpec/reporter";
+import { GraphicSpecReporter } from "@/features/viewport/spec/reporter";
 import {
   SpecCollector,
   useSpecCollector,
-} from "@/features/viewport/usegpu/graphicSpec/collector";
+} from "@/features/viewport/spec/collector";
 import { useOrbit } from "@/features/viewport/usegpu/useOrbit";
 import { makeSceneRoot } from "./scene";
 import type { SceneHooks, SceneSpec } from "./scene";

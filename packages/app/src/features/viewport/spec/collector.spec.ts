@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
-import type { GraphicSpec } from "./types";
+import type { GraphicSpec } from "@math3d/viewport-spec";
 import { useSpecCollector } from "./collector";
 
 const spec = { kind: "point" } as GraphicSpec;

@@ -8,7 +8,7 @@ import {
 } from "@/store/scene/evaluation/mathScope";
 import type { AppMathScope } from "@/store/scene/state/interfaces";
 import type { Coords } from "@/features/viewport/shared/coordinates";
-import type { GraphicSpec, LineSpec } from "./types";
+import type { GraphicSpec, LineSpec } from "@math3d/viewport-spec";
 import { baseStyle, sampleCount, visibleLabel } from "./style";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";

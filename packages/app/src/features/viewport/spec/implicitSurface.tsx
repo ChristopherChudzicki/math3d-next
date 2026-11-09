@@ -5,48 +5,52 @@ import {
   useFinalVisibility,
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
-import type { GraphicSpec } from "./types";
-import { baseStyle, visibleLabel } from "./style";
+import type { GraphicSpec } from "@math3d/viewport-spec";
+import { baseStyle, sampleCount } from "./style";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";
 
-const POINT_PROPS = [
-  "coords",
-  "size",
+const IMPLICIT_PROPS = [
+  "lhs",
+  "rhs",
+  "domain",
+  "samples",
   "opacity",
+  "shaded",
   "zBias",
   "zIndex",
-  "labelVisible",
 ] as const;
 
-const Point: SpecComponent<MIT.Point> = ({ item }) => {
+const ImplicitSurface: SpecComponent<MIT.ImplicitSurface> = ({ item }) => {
   const scope = useMathScope();
   const visible = useFinalVisibility(scope, item);
-  const { coords, size, opacity, zBias, zIndex, labelVisible } =
-    useMathItemResults(scope, item, POINT_PROPS);
-  const { color, label } = item.properties;
+  const { lhs, rhs, domain, samples, opacity, shaded, zBias, zIndex } =
+    useMathItemResults(scope, item, IMPLICIT_PROPS);
+  const { color } = item.properties;
   const spec = useMemo<GraphicSpec | null>(() => {
-    if (!visible || !coords) return null;
+    if (!visible || !lhs || !rhs || !domain) return null;
     return {
-      kind: "point",
-      positions: coords,
-      size: size ?? 8,
+      kind: "implicit",
+      domain,
+      samples: sampleCount(samples, 20),
+      value: (x, y, z) => lhs(x, y, z) - rhs(x, y, z),
       ...baseStyle({ opacity, zBias, zIndex }, color),
-      label: visibleLabel(label, labelVisible),
+      shaded: shaded ?? true,
     };
   }, [
     visible,
-    coords,
-    size,
+    lhs,
+    rhs,
+    domain,
+    samples,
     color,
     opacity,
+    shaded,
     zBias,
     zIndex,
-    label,
-    labelVisible,
   ]);
   useReportSpec(item.id, spec);
   return null;
 };
 
-export default Point;
+export default ImplicitSurface;

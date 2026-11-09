@@ -81,6 +81,7 @@ This app is deployed as a true react SPA hosted on a CDN with APIs powered by Dj
 - **`packages/mathscope`** — Evaluation engine: manages a scope of named expressions with dependency tracking (topological sort), cycle detection, and change events
 - **`packages/validators`** — Validates parsed math expressions against expected types (e.g., "must be a 3D vector")
 - **`packages/mathitem-configs`** — Schema definitions for all 16 math object types (Point, ParametricSurface, VectorField, etc.). Each defines properties, default values, widget types, and a `make()` factory
+- **`packages/viewport-spec`** — Renderer-neutral types for what the viewport draws (`GraphicSpec`, `CameraSpec`, `RGBA`, `Coords`). `app`'s `features/viewport/spec/` produces them from evaluated math items; each renderer consumes them
 
 **App and API:**
 

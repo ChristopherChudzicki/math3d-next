@@ -17,7 +17,7 @@ import {
 } from "@/features/viewport/shared/surfaceDomain";
 import { explicitColorFunc } from "@/features/viewport/shared/surfaceColor";
 import type { SurfaceColorFunc } from "@/features/viewport/shared/surfaceColor";
-import type { GraphicSpec, RGBA } from "./types";
+import type { GraphicSpec, RGBA } from "@math3d/viewport-spec";
 import { baseStyle, sampleCount } from "./style";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";

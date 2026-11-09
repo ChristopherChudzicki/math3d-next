@@ -7,9 +7,9 @@ import invariant from "tiny-invariant";
 import { getStore } from "@/store/store";
 import { useAppSelector } from "@/store/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
-import { SpecCollector } from "@/features/viewport/usegpu/graphicSpec/collector";
-import { GraphicSpecReporter } from "@/features/viewport/usegpu/graphicSpec/reporter";
-import type { GraphicSpec } from "@/features/viewport/usegpu/graphicSpec/types";
+import { SpecCollector } from "@/features/viewport/spec/collector";
+import { GraphicSpecReporter } from "@/features/viewport/spec/reporter";
+import type { GraphicSpec } from "@math3d/viewport-spec";
 
 const Harness: React.FC<{ id: string }> = ({ id }) => {
   const item = useAppSelector((state) => state.scene.items[id]);

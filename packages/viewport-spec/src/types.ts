@@ -1,19 +1,19 @@
 /**
  * What each graphic draws, in math-item terms: evaluated positions, RGBA
- * colors, sample callbacks. The components in this folder read the store and
- * MathScope and produce these; usegpu/live turns them into a Live tree.
+ * colors, sample callbacks. The app's viewport/spec components read the store
+ * and MathScope and produce these; each renderer turns them into its own scene.
  */
-import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
+import type { AxesRange, Coords } from "./coordinates";
 
 export type RGBA = [number, number, number, number];
 
 type Common = {
-  /** MathBox-style depth bias. Both renderers have one; their scales are not calibrated against each other. */
+  /** MathBox-style depth bias. Each renderer has one; their scales are not calibrated against each other. */
   zBias: number;
   /**
    * MathBox squeezes a higher zIndex's depth toward the near plane, so it draws
-   * over lower ones. Use.GPU only orders draw calls by it, where a component
-   * accepts it; see `usegpu/coverage.ts`.
+   * over lower ones; each renderer's coverage table says how it approximates
+   * that.
    */
   zIndex: number;
 };
