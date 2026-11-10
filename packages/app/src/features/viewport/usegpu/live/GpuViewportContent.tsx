@@ -1,11 +1,6 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import { LiveCanvas } from "@use-gpu/react";
-import { useViewportItems } from "@/features/viewport/shared/useViewportItems";
-import { GraphicSpecReporter } from "@/features/viewport/spec/reporter";
-import {
-  SpecCollector,
-  useSpecCollector,
-} from "@/features/viewport/spec/collector";
+import { useViewportSpec } from "@/features/viewport/spec/useViewportSpec";
 import { useOrbit } from "@/features/viewport/usegpu/useOrbit";
 import { makeSceneRoot } from "./scene";
 import type { SceneHooks, SceneSpec } from "./scene";
@@ -21,38 +16,25 @@ type Props = { onUnsupported: SceneHooks["onUnsupported"] };
  * `usegpu/GpuViewport` loads it with React.lazy.
  */
 const GpuViewportContent: React.FC<Props> = ({ onUnsupported }) => {
-  const { graphics, camera, range, scale } = useViewportItems();
+  const { spec, reporters, cameraItem } = useViewportSpec();
   const host = useRef<HTMLDivElement>(null);
-  const { orbit, controls, projection, controlsVersion, onOrbit } = useOrbit(
-    camera,
-    range,
-    scale,
+  const { orbit, projection, controlsVersion, onOrbit } = useOrbit(
+    spec,
+    cameraItem,
     host,
   );
-  const [specs, report] = useSpecCollector();
 
   const scene = useMemo<SceneSpec>(
     () => ({
-      range,
-      scale,
+      range: spec.range,
+      scale: spec.scale,
+      controls: spec.controls,
+      graphics: spec.graphics,
       orbit,
       controlsVersion,
       projection,
-      controls,
-      graphics: graphics.flatMap(({ id }) =>
-        specs[id] ? [{ id, spec: specs[id] }] : [],
-      ),
     }),
-    [
-      range,
-      scale,
-      orbit,
-      controlsVersion,
-      projection,
-      controls,
-      graphics,
-      specs,
-    ],
+    [spec, orbit, controlsVersion, projection],
   );
 
   const reportOrbit = useCallback(
@@ -71,11 +53,7 @@ const GpuViewportContent: React.FC<Props> = ({ onUnsupported }) => {
 
   return (
     <>
-      <SpecCollector.Provider value={report}>
-        {graphics.map((item) => (
-          <GraphicSpecReporter key={item.id} item={item} />
-        ))}
-      </SpecCollector.Provider>
+      {reporters}
       <div ref={host} style={HOST_STYLE}>
         <LiveCanvas style={CANVAS_STYLE} render={render} />
       </div>

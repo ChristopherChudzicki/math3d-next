@@ -47,12 +47,21 @@ const useGpuRuntime = {
   message: "Use.GPU's runtime loads only through usegpu/live (React.lazy).",
 };
 
+// The path zones below keep renderer folders out of spec/ and shared/; this
+// keeps renderer packages out (docs/adr/0009).
+const noRendererPackages = {
+  group: ["three", "three/*", "mathbox*", "@use-gpu/*"],
+  message:
+    "viewport/spec and viewport/shared are renderer-neutral; renderer code goes in its own folder.",
+};
+
 // ESLint overrides replace a rule's options rather than merging them, so every
 // override builds its pattern list here.
 const restrictedImports = ({
   allowBaseUi = false,
   allowParentImports = false,
   allowUseGpu = false,
+  rendererNeutral = false,
 } = {}) => ({
   paths: [iconifyOnline],
   patterns: [
@@ -60,6 +69,7 @@ const restrictedImports = ({
     noMui,
     ...(allowParentImports ? [] : [noParentImports]),
     ...(allowUseGpu ? [] : [useGpuRuntime]),
+    ...(rendererNeutral ? [noRendererPackages] : []),
   ],
 });
 
@@ -192,6 +202,18 @@ module.exports = {
         "no-restricted-imports": [
           "error",
           restrictedImports({ allowBaseUi: true }),
+        ],
+      },
+    },
+    {
+      files: [
+        "src/features/viewport/spec/**",
+        "src/features/viewport/shared/**",
+      ],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          restrictedImports({ rendererNeutral: true }),
         ],
       },
     },

@@ -23,27 +23,9 @@ with a WebGPU adapter.
 
 ### Folders and lint zones
 
-`features/viewport/` holds one folder per renderer plus `shared/` and `spec/`,
-with zones written by hand in `packages/app/.eslintrc.cjs`:
-
-- **`shared/`** is imported by the renderers and `spec/`; it imports none of
-  them.
-- **`spec/`** reads the store and MathScope and produces specs; it imports no
-  renderer, and any renderer may import it. Use.GPU draws from the specs;
-  MathBox still reads math items directly. **A spec field is in math-item
-  terms only** (evaluated positions, RGBA colors, sample callbacks), never a
-  renderer prop, so the specs are testable under jsdom and survive a renderer
-  swap.
-- **`mathbox/`** and **`usegpu/`** don't import each other; common code moves
-  to `shared/`.
-- **`usegpu/live/`** is the only code that imports Use.GPU's runtime
-  (`@use-gpu/*` except `@use-gpu/core`, enforced by `no-restricted-imports`).
-  Only `usegpu/GpuViewport` reaches it (an `import/no-restricted-paths` zone).
-
-The spec **types** (`GraphicSpec`, `CameraSpec`, `RGBA`, `Coords`, `AxesRange`)
-live in the `@math3d/viewport-spec` workspace, so a renderer that is its own
-workspace (one needing a different `three` than `mathbox-react` allows) can
-consume them without importing from `app`.
+[ADR-0009](0009-renderer-neutral-viewport-spec.md) records the
+`features/viewport/` folders, their lint zones, and the
+`@math3d/viewport-spec` types Use.GPU draws from.
 
 ### The lazy boundary
 

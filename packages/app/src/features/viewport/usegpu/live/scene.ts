@@ -21,7 +21,7 @@ import {
   OrbitControls,
 } from "@use-gpu/interact";
 import { Cartesian, Plot } from "@use-gpu/plot";
-import type { AxesRange, Coords, GraphicSpec } from "@math3d/viewport-spec";
+import type { ViewportHooks, ViewportSpec } from "@math3d/viewport-spec";
 import {
   PLOT_ROTATION_DEGREES,
   toWorld,
@@ -29,9 +29,11 @@ import {
 import type { OrbitSpec } from "@/features/viewport/usegpu/orbit";
 import { renderGraphic } from "./graphics/renderGraphic";
 
-export type SceneSpec = {
-  range: AxesRange;
-  scale: Coords;
+/** `ViewportSpec` with its camera as Use.GPU's orbit controls take it. */
+export type SceneSpec = Pick<
+  ViewportSpec,
+  "range" | "scale" | "controls" | "graphics"
+> & {
   /**
    * Seeds the orbit controls, which re-seed each field only when it changes
    * (by identity): a new `target` array resets the user's pan.
@@ -41,13 +43,9 @@ export type SceneSpec = {
   controlsVersion: number;
   /** `OrbitCamera`'s dolly: 1 is perspective, 0 orthographic. */
   projection: { dolly: number };
-  controls: { rotate: boolean; pan: boolean; zoom: boolean };
-  graphics: { id: string; spec: GraphicSpec }[];
 };
 
-export type SceneHooks = {
-  /** WebGPU found no adapter, or could not mount a device on it. */
-  onUnsupported(error: unknown): void;
+export type SceneHooks = Pick<ViewportHooks, "onUnsupported"> & {
   /**
    * Called with the controls' orbit whenever it differs from the last call,
    * including on first render.
