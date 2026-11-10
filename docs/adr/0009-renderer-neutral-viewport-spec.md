@@ -31,7 +31,7 @@ reports back through `ViewportHooks`, both types in
 - A renderer derives its own shapes from `ViewportSpec`: Use.GPU's
   `SceneSpec` replaces `camera` and `orthographic` with y-up orbit parameters
   and a dolly.
-- Coverage tables stay in `app`
+- Coverage tables live in `app`
   ([ADR-0008](0008-usegpu-opt-in-renderer.md#parity-record)).
 
 ### Folders and lint zones
@@ -58,8 +58,9 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
   store (camera write-back, fallback on `onUnsupported`) stays in its `app`
   glue.
 - MathBox stays outside the contract while it reads math items directly.
-- `onCameraMove` has no caller until a renderer reports in `CameraSpec`;
-  Use.GPU writes back orbit parameters through `usegpu/useOrbitWriteBack`.
+- Nothing calls `onCameraMove` while Use.GPU's write-back
+  (`usegpu/useOrbitWriteBack`) handles its own orbit parameters; splitting
+  out its neutral half moves Use.GPU onto the hook.
 
 ## Alternatives considered
 
