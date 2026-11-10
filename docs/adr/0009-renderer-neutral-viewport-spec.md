@@ -5,8 +5,7 @@
 ## Context
 
 MathBox reads math items from the store inside its own React tree. Use.GPU
-([ADR-0008](0008-usegpu-opt-in-renderer.md)) can't: its components are not
-React components. A planned three.js renderer may be its own workspace, with
+([ADR-0008](0008-usegpu-opt-in-renderer.md)) can't: its scene is a Live tree, outside React's context. A planned three.js renderer may be its own workspace, with
 a different `three` than `mathbox-react` allows, and so can't import `app`
 at all. Both need the scene as plain data.
 
@@ -26,12 +25,14 @@ reports back through `ViewportHooks`, both types in
   this browser; `onCameraMove(camera)` as the user moves the camera. The app
   decides when a move ends and what to write back.
 - **`features/viewport/spec/`** produces it: `useViewportSpec` returns the
-  spec plus the reporter elements to render alongside the renderer, which
-  feed it each graphic's spec.
-- **A renderer derives its own shapes from `ViewportSpec`**, next to its
-  glue: Use.GPU's `SceneSpec` swaps the camera for y-up orbit parameters.
-- **Coverage tables stay in `app`**, one per renderer folder, typed by
-  `shared/coverage.ts`, so the package needs nothing from `mathitem-configs`.
+  spec, the reporter elements to render alongside the renderer (they feed it
+  each graphic's spec), and the camera item for write-back.
+- **A renderer derives its own shapes from `ViewportSpec`**: Use.GPU's
+  `SceneSpec` replaces `camera` and `orthographic` with y-up orbit parameters
+  and a dolly.
+- **Coverage tables live in `app`**
+  ([ADR-0008](0008-usegpu-opt-in-renderer.md#parity-record)), so the package
+  needs nothing from `mathitem-configs`.
 
 ### Folders and lint zones
 
@@ -41,8 +42,7 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
 - **`shared/`** is imported by the renderers and `spec/`; it imports none of
   them.
 - **`spec/`** reads the store and MathScope and produces specs; it imports no
-  renderer, and any renderer may import it. Use.GPU draws from the specs;
-  MathBox still reads math items directly. **A spec field is in math-item
+  renderer, and any renderer may import it. **A spec field is in math-item
   terms only** (evaluated positions, RGBA colors, sample callbacks), never a
   renderer prop, so the specs are testable under jsdom and survive a renderer
   swap.
@@ -61,9 +61,8 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
   store (camera write-back, fallback on `onUnsupported`) stays in its `app`
   glue.
 - MathBox stays outside the contract while it reads math items directly.
-- Use.GPU doesn't call `onCameraMove` yet: its write-back
-  (`usegpu/useOrbitWriteBack`) reads orbit parameters, and moves behind the
-  hook in the three.js camera work.
+- Nothing calls `onCameraMove`: Use.GPU's write-back
+  (`usegpu/useOrbitWriteBack`) works in orbit parameters.
 
 ## Alternatives considered
 

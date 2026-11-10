@@ -71,11 +71,3 @@ test("a relative camera position is a fraction of the axes' scale", () => {
   const { result } = renderCameraSpec(scene, sceneCamera(scene));
   expect(result.current.camera.position).toEqual(scale);
 });
-
-test("keeps its identity across rerenders", () => {
-  const scene = new SceneBuilder();
-  const { result, rerender } = renderCameraSpec(scene, sceneCamera(scene));
-  const before = result.current;
-  rerender();
-  expect(result.current).toBe(before);
-});

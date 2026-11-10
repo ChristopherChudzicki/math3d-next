@@ -8,16 +8,19 @@ import type { CameraSpec, GraphicSpec } from "./types";
 export type ViewportGraphic = { id: string; spec: GraphicSpec };
 
 export type ViewportSpec = {
-  /** The axes' extent, `[min, max]` per axis, in math coordinates. */
+  /** The axes' extent in math coordinates. */
   range: AxesRange;
   /** View coordinates map `range` onto `[-scale, scale]` per axis. */
   scale: Coords;
+  /** Seen with a 60° field of view, as both MathBox and Use.GPU draw it. */
   camera: CameraSpec;
   /** A parallel projection instead of perspective. */
   orthographic: boolean;
-  /** Which camera interactions the user may make. */
   controls: { rotate: boolean; pan: boolean; zoom: boolean };
-  /** In the scene's item order; a graphic with nothing to draw is absent. */
+  /**
+   * In the scene's item order; a graphic with nothing to draw is absent.
+   * Each `spec` keeps its identity until it changes, so diff by `id` and `===`.
+   */
   graphics: ViewportGraphic[];
 };
 

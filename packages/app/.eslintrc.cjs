@@ -123,12 +123,14 @@ const layoutZones = [
   {
     target: `${VIEWPORT}/mathbox`,
     from: `${VIEWPORT}/usegpu`,
-    message: "The renderers don't import each other; share code via shared/.",
+    message:
+      "The renderers don't import each other; share code via shared/ or spec/.",
   },
   {
     target: `${VIEWPORT}/usegpu`,
     from: `${VIEWPORT}/mathbox`,
-    message: "The renderers don't import each other; share code via shared/.",
+    message:
+      "The renderers don't import each other; share code via shared/ or spec/.",
   },
   {
     target: `${VIEWPORT}/shared`,

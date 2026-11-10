@@ -73,12 +73,18 @@ const renderOrbit = (
   camera: MathItem<MathItemType.Camera>,
 ) => renderUseOrbit(scene, camera).result.current;
 
-test("an orthographic camera gets dolly 0", () => {
-  const scene = new SceneBuilder().camera({ isOrthographic: "true" });
-  expect(renderOrbit(scene, sceneCamera(scene)).projection).toEqual({
-    dolly: 0,
-  });
-});
+test.each([
+  { isOrthographic: "false", dolly: 1 },
+  { isOrthographic: "true", dolly: 0 },
+])(
+  "isOrthographic $isOrthographic gets dolly $dolly",
+  ({ isOrthographic, dolly }) => {
+    const scene = new SceneBuilder().camera({ isOrthographic });
+    expect(renderOrbit(scene, sceneCamera(scene)).projection).toEqual({
+      dolly,
+    });
+  },
+);
 
 test("keeps the same orbit across rerenders, so the user's pan survives", () => {
   const scene = new SceneBuilder();

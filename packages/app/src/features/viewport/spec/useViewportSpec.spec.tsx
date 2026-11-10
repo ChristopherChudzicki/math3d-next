@@ -7,26 +7,32 @@ import { storeWithScene } from "@/test_util/renderGraphicSpec";
 import { actions } from "@/store/scene/state/scene.slice";
 import { useViewportSpec } from "./useViewportSpec";
 
+const renderViewportSpec = (scene: SceneBuilder) => {
+  const store = storeWithScene(scene);
+  const latest: { spec?: ViewportSpec } = {};
+  const Harness = () => {
+    const viewport = useViewportSpec();
+    latest.spec = viewport.spec;
+    return viewport.reporters;
+  };
+  const ui = () => (
+    <Provider store={store}>
+      <Harness />
+    </Provider>
+  );
+  const view = render(ui());
+  return { store, latest, rerender: () => view.rerender(ui()) };
+};
+
 test("lists the graphics with something to draw in item order, whenever each starts drawing", () => {
   const scene = new SceneBuilder();
   const folder = scene.folder();
   folder.point({}, "p");
   folder.point({ visible: false }, "q");
   folder.point({}, "r");
-  const store = storeWithScene(scene);
-  let spec: ViewportSpec | undefined;
-  const Harness = () => {
-    const viewport = useViewportSpec();
-    spec = viewport.spec;
-    return viewport.reporters;
-  };
-  render(
-    <Provider store={store}>
-      <Harness />
-    </Provider>,
-  );
+  const { store, latest } = renderViewportSpec(scene);
   const points = () =>
-    spec?.graphics
+    latest.spec?.graphics
       .map(({ id }) => id)
       .filter((id) => ["p", "q", "r"].includes(id));
   expect(points()).toEqual(["p", "r"]);
@@ -37,4 +43,11 @@ test("lists the graphics with something to draw in item order, whenever each sta
     );
   });
   expect(points()).toEqual(["p", "q", "r"]);
+});
+
+test("keeps its identity across rerenders", () => {
+  const { latest, rerender } = renderViewportSpec(new SceneBuilder());
+  const before = latest.spec;
+  rerender();
+  expect(latest.spec).toBe(before);
 });
