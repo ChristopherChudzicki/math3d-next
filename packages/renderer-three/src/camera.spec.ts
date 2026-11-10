@@ -70,6 +70,16 @@ test("an orthographic camera clips nothing behind its position", () => {
   expect(Math.abs(behind.z)).toBeLessThan(1);
 });
 
+test("an orthographic camera at its target still has a view", () => {
+  const { view, spec } = setup(true);
+  view.setSpec({
+    ...spec,
+    camera: { position: [1, 1, 1], target: [1, 1, 1] },
+    cameraRevision: 1,
+  });
+  expect((view.camera as OrthographicCamera).top).toBeGreaterThan(0);
+});
+
 test("a resize keeps the orthographic view's height", () => {
   const { view } = setup(true);
   const { top } = view.camera as OrthographicCamera;
@@ -106,10 +116,11 @@ test.each([false, true])(
     view.controls.target.set(1, 1, 1);
     view.controls.update();
 
+    // A new camera object alone leaves the view.
     view.setSpec({ ...spec, camera: { ...camera } });
-    expect(view.spec()).not.toEqual(nearCamera(camera));
+    expect(view.current()).not.toEqual(nearCamera(camera));
     view.setSpec({ ...spec, cameraRevision: 1 });
-    expect(view.spec()).toEqual(nearCamera(camera));
+    expect(view.current()).toEqual(nearCamera(camera));
     expect(view.camera.zoom).toBe(1);
   },
 );
@@ -120,13 +131,13 @@ test.each([false, true])(
     const { view, spec } = setup(orthographic);
     view.controls.rotateLeft(0.5);
     view.controls.dollyOut(2);
-    const before = view.spec();
+    const before = view.current();
 
     view.setSpec({ ...spec, orthographic: !orthographic });
     expect(view.camera).toBeInstanceOf(
       orthographic ? PerspectiveCamera : OrthographicCamera,
     );
-    expect(view.spec()).toEqual(nearCamera(before));
+    expect(view.current()).toEqual(nearCamera(before));
   },
 );
 

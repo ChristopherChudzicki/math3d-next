@@ -60,8 +60,6 @@ export class ThreeScene {
       options.onCameraMove(camera);
       this.invalidate();
     });
-    // As MathBox shows it over its controls.
-    this.canvas.style.cursor = "move";
     this.scene.add(this.world);
     this.renderer = new WebGPURenderer({
       canvas: this.canvas,

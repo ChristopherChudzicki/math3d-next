@@ -64,6 +64,7 @@ test("a drag in the three.js viewport writes the camera back", async ({
   await expectThreeViewport(page);
   await page.getByRole("tab", { name: "Setup" }).click();
   const position = getItemForm(page, { id: "camera" }).getByLabel("Position");
+  await expect.poll(() => position.evaluate(getLatex)).not.toBe("");
   const before = await position.evaluate(getLatex);
 
   const canvas = page.getByTestId("scene").locator("canvas");

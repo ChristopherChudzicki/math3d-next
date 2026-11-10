@@ -20,8 +20,7 @@ const setup = (scene: SceneBuilder) => {
   const { result, unmount } = renderHook(() => useViewportSpec(host), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
   });
-  // Results load in an effect, so the evaluated camera replaces the first
-  // render's defaults with one bump.
+  // Results load in an effect, so the revision starts past 0.
   const initial = result.current.spec.cameraRevision;
   /** Revisions since setup. */
   const revision = () => result.current.spec.cameraRevision - initial;
@@ -35,10 +34,10 @@ const setup = (scene: SceneBuilder) => {
       store.dispatch(actions.patchProperty({ id, path, value }));
     });
   /** Reports the camera at `position` (stored coordinates), then fires `event`. */
-  const move = (position: Coords, event: Event) => {
+  const move = (position: Coords, event: Event, useRelative = false) => {
     const { range, scale, camera } = result.current.spec;
     result.current.onCameraMove({
-      position: fromUi(position, range, scale, false),
+      position: fromUi(position, range, scale, useRelative),
       target: camera.target,
     });
     host.current.dispatchEvent(event);
@@ -73,12 +72,22 @@ afterEach(() => {
 });
 
 test(`writes the move to the camera item ${MOVE_END_DELAY} ms after pointerup`, () => {
-  const { storedPosition, move, wait } = setup(new SceneBuilder());
+  const { revision, storedPosition, move, wait } = setup(new SceneBuilder());
   move([1, -1, 0.5], new PointerEvent("pointerup"));
   act(() => {
     vi.advanceTimersByTime(MOVE_END_DELAY - 1);
   });
   expect(storedPosition()).not.toBe(MOVED);
+  wait();
+  expect(storedPosition()).toBe(MOVED);
+  // Through the stored camera changing.
+  expect(revision()).toBe(1);
+});
+
+test("a relative camera writes the move relative to the axes' scale", () => {
+  const scene = new SceneBuilder().camera({ useRelative: "true" });
+  const { storedPosition, move, wait } = setup(scene);
+  move([1, -1, 0.5], new PointerEvent("pointerup"), true);
   wait();
   expect(storedPosition()).toBe(MOVED);
 });
@@ -123,22 +132,15 @@ test.each([true, false])(
   "a move that went nowhere changes nothing (updateOnDrag %s)",
   (updateOnDrag) => {
     const scene = new SceneBuilder().camera({
-      position: "[0.5, -2, 0.5]",
       updateOnDrag: String(updateOnDrag),
     });
     const { revision, storedPosition, release } = setup(scene);
     const before = storedPosition();
-    release([0.5, -2, 0.5]);
+    release([-6, -4, 2]);
     expect(storedPosition()).toBe(before);
     expect(revision()).toBe(0);
   },
 );
-
-test("a written move bumps the revision through the stored camera", () => {
-  const { revision, release } = setup(new SceneBuilder());
-  release([1, -1, 0.5]);
-  expect(revision()).toBe(1);
-});
 
 test("with updateOnDrag off, a move bumps the revision and writes nothing", () => {
   const scene = new SceneBuilder().camera({ updateOnDrag: "false" });

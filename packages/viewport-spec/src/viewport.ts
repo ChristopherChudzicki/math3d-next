@@ -19,15 +19,15 @@ export type ViewportSpec = {
   camera: CameraSpec;
   /**
    * When it changes, the renderer moves the view to `camera`; otherwise it
-   * leaves the user's view where they put it. Nothing else moves the view.
+   * leaves the user's view where they put it.
    */
   cameraRevision: number;
   /**
    * A parallel projection instead of perspective. It shows, at
    * `camera.target`, what the perspective view shows there: a visible height
-   * of 2 × |position − target| × tan(30°). Nothing in its view is clipped,
-   * including what lies behind `camera.position`. A renderer that zooms it by
-   * a zoom factor reports the zoom to `onCameraMove` as distance.
+   * of 2 × |position − target| × tan(30°). Nothing behind `camera.position`
+   * is clipped. A renderer that zooms by scaling the projection reports the
+   * zoom to `onCameraMove` as distance.
    */
   orthographic: boolean;
   controls: { rotate: boolean; pan: boolean; zoom: boolean };

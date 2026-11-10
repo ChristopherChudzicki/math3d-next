@@ -40,12 +40,13 @@ reports back through `ViewportHooks`, both types in
     the axes' range or scale changes, and when a move ends with
     `updateOnDrag` off (the stored camera is then unchanged, so nothing else
     in the spec would change).
-  - Not `camera`'s identity: a refactor that compares cameras by value or
-    copies the spec would silently break snap-back, only in the rare scenes
-    with `updateOnDrag` off.
+  - Why not a new `camera` object: snap-back would hinge on identity, which a
+    value comparison or a spec copy silently loses, and only in the rare
+    scenes with `updateOnDrag` off.
 - **Move-end timing and write-back are the app's.** A move ends 200 ms after
-  the last pointer release or wheel on `host` with no pointer down; the last
-  `onCameraMove` before it is written to the camera item, or snaps back.
+  the last pointer release or wheel on `host` with no pointer down; then the
+  last `onCameraMove` is written to the camera item or, with `updateOnDrag`
+  off, the view snaps back.
 - **Orthographic keeps position + target.** It shows, at the target, what
   the 60° perspective view shows there: visible height
   2 × |position − target| × tan(30°). A renderer that zooms it by a factor
@@ -87,7 +88,7 @@ taking a `ViewportSpec`, `ViewportHooks` and `forceWebGL`, and is built on
 - Frames draw on change, but three's own animation-frame loop runs from the
   first frame until disposal.
 - The camera is `camera.ts`'s `ViewCamera`: three's `OrbitControls` (no
-  damping, so frames stop when the user does) on a `PerspectiveCamera` or a
+  damping, so redraws stop when the user does) on a `PerspectiveCamera` or a
   true `OrthographicCamera`.
 - Its Vitest project runs in Node, so it tests pure code only.
 
@@ -123,8 +124,8 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
 
 - A new renderer draws from `useViewportSpec`'s output and reports camera
   moves to its `onCameraMove`; what else touches the store (fallback on
-  `onUnsupported`) stays in its `app` glue. Adding one touches the renderer list, `MainPage`'s map and the lint
-  zones.
+  `onUnsupported`) stays in its `app` glue. Adding one touches the renderer
+  list, `MainPage`'s map and the lint zones.
 - While MathBox stays, the app ships two copies of `three`: the main bundle
   carries `0.147` and the three.js chunk its own. three.js logs "Multiple
   instances of Three.js being imported" when that chunk loads.

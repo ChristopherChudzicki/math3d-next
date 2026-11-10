@@ -13,15 +13,18 @@ type CameraInput = Pick<
   "camera" | "cameraRevision" | "orthographic" | "controls"
 >;
 
-/** Half the visible height at the target, per `ViewportSpec.orthographic`. */
+/**
+ * Half the visible height at the target, per `ViewportSpec.orthographic`.
+ * A camera at its target gets distance 1, as in Use.GPU, not an empty view.
+ */
 const orthographicHalfHeight = ({ position, target }: CameraSpec) =>
-  Math.hypot(
+  (Math.hypot(
     position[0] - target[0],
     position[1] - target[1],
     position[2] - target[2],
-  ) * TAN_HALF_FOV;
+  ) || 1) * TAN_HALF_FOV;
 
-const makeCamera = <C extends PerspectiveCamera | OrthographicCamera>(
+const zUp = <C extends PerspectiveCamera | OrthographicCamera>(
   camera: C,
 ): C => {
   // OrbitControls orbits around `up`, read when the controls are built.
@@ -35,16 +38,15 @@ const makeCamera = <C extends PerspectiveCamera | OrthographicCamera>(
  * `CameraSpec`; a move `setSpec` makes is not reported.
  */
 export class ViewCamera {
-  private readonly perspective = makeCamera(
-    new PerspectiveCamera(FOV, 1, NEAR, FAR),
-  );
+  private readonly perspective = zUp(new PerspectiveCamera(FOV, 1, NEAR, FAR));
 
-  // The near plane sits FAR behind the camera, so nothing in the view's
-  // column is clipped; see `ViewportSpec.orthographic`.
-  private readonly orthographic = makeCamera(
+  // near = -FAR: nothing behind the camera is clipped; see
+  // `ViewportSpec.orthographic`.
+  private readonly orthographic = zUp(
     new OrthographicCamera(-1, 1, 1, -1, -FAR, FAR),
   );
 
+  /** Public so specs can drive the controls without a DOM. */
   readonly controls: OrbitControls;
 
   /** The orthographic view's half height at zoom 1. */
@@ -64,16 +66,18 @@ export class ViewCamera {
     // Until the first spec places the camera.
     this.controls.enabled = false;
     this.controls.addEventListener("change", () => {
-      if (!this.placing) onMove(this.spec());
+      if (!this.placing) onMove(this.current());
     });
+    // MathBox's cursor whenever it has controls.
+    domElement?.style.setProperty("cursor", "move");
   }
 
   get camera(): PerspectiveCamera | OrthographicCamera {
     return this.controls.object as PerspectiveCamera | OrthographicCamera;
   }
 
-  /** The view as the user left it, with an orthographic zoom as distance. */
-  spec(): CameraSpec {
+  /** The current view, with an orthographic zoom folded into distance. */
+  current(): CameraSpec {
     const { camera } = this;
     const { target } = this.controls;
     const offset = camera.position.clone().sub(target);
@@ -93,7 +97,7 @@ export class ViewCamera {
     this.revision = cameraRevision;
     if (orthographic !== this.camera instanceof OrthographicCamera) {
       // Carries the current view over to the other projection.
-      const current = this.spec();
+      const current = this.current();
       this.controls.object = orthographic
         ? this.orthographic
         : this.perspective;
@@ -120,7 +124,7 @@ export class ViewCamera {
       this.halfHeight = orthographicHalfHeight({ position, target });
     }
     this.updateProjection();
-    // Syncs the controls to the camera; they report it as a change.
+    // `update()` may fire `change`; `placing` keeps it unreported.
     this.placing = true;
     this.controls.update();
     this.placing = false;

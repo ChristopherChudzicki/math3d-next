@@ -20,7 +20,7 @@ const WRITE_BACK_PROPS = [
 /** How long after the last pointer release or wheel a camera move ends. */
 export const MOVE_END_DELAY = 200;
 
-/** Counts changes to the stored camera and the axes' range and scale. */
+/** Bumps when the stored camera, range or scale changes, and on `bump()`. */
 const useStoredRevision = (
   camera: CameraSpec,
   range: AxesRange,
@@ -71,6 +71,7 @@ export const useCameraWriteBack = (
 
   const onMoveEnd = useCallback(() => {
     const moved = latest.current;
+    // Consumed, so a later click with no move writes or snaps nothing.
     latest.current = null;
     if (!moved) return;
     const patches = cameraPatches(
@@ -118,7 +119,7 @@ export const useCameraWriteBack = (
       down.delete(e.pointerId);
       end();
     };
-    // Capture phase: orbit controls may stop these events on their canvas.
+    // Capture phase: Use.GPU's controls stop these events on their canvas.
     const options = { capture: true };
     el.addEventListener("pointerdown", press, options);
     el.addEventListener("pointerup", release, options);
