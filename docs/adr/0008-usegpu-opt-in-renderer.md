@@ -41,9 +41,9 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
   Only `usegpu/GpuViewport` reaches it (an `import/no-restricted-paths` zone).
 
 The spec **types** (`GraphicSpec`, `CameraSpec`, `RGBA`, `Coords`, `AxesRange`)
-live in the `@math3d/viewport-spec` workspace, so a renderer that is its own workspace (one
-needing a different `three` than `mathbox-react` allows) can consume them
-without importing from `app`.
+live in the `@math3d/viewport-spec` workspace, so a renderer that is its own
+workspace (one needing a different `three` than `mathbox-react` allows) can
+consume them without importing from `app`.
 
 ### The lazy boundary
 

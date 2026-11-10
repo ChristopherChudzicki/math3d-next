@@ -108,9 +108,8 @@ export type GraphicSpec =
 
 export type CameraSpec = {
   /**
-   * Camera and target in MathBox's cartesian coordinates: the axes' range
-   * mapped onto [-scale, scale], z up. That is what the camera item's
-   * `position`/`target` convert to in the MathBox viewport.
+   * In view coordinates: the axes' range mapped onto [-scale, scale], z up.
+   * The app's `fromUi` converts the camera item's `position`/`target` into them.
    */
   position: Coords;
   target: Coords;
