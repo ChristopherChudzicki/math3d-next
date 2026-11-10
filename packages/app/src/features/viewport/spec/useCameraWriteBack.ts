@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { RefObject } from "react";
 import { debounce } from "lodash-es";
 import type { MathItem, MathItemType } from "@math3d/mathitem-configs";
@@ -20,7 +26,11 @@ const WRITE_BACK_PROPS = [
 /** How long after the last pointer release or wheel a camera move ends. */
 export const MOVE_END_DELAY = 200;
 
-/** Bumps when the stored camera, range or scale changes, and on `bump()`. */
+/**
+ * Bumps when the stored camera, range or scale changes, and on `bump()`.
+ * Range and scale are compared here, not left to `camera`'s memo, since the
+ * reset rule names them.
+ */
 const useStoredRevision = (
   camera: CameraSpec,
   range: AxesRange,
@@ -64,16 +74,22 @@ export const useCameraWriteBack = (
     WRITE_BACK_PROPS,
   );
   const [cameraRevision, bump] = useStoredRevision(camera, range, scale);
-  const latest = useRef<CameraSpec | null>(null);
+  const revisionRef = useRef(cameraRevision);
+  useLayoutEffect(() => {
+    revisionRef.current = cameraRevision;
+  });
+  const latest = useRef<{ camera: CameraSpec; revision: number } | null>(null);
   const onCameraMove = useCallback((next: CameraSpec) => {
-    latest.current = next;
+    latest.current = { camera: next, revision: revisionRef.current };
   }, []);
 
   const onMoveEnd = useCallback(() => {
-    const moved = latest.current;
+    const last = latest.current;
     // Consumed, so a later click with no move writes or snaps nothing.
     latest.current = null;
-    if (!moved) return;
+    // A move from before a reset is in the old view's coordinates.
+    if (!last || last.revision !== cameraRevision) return;
+    const moved = last.camera;
     const patches = cameraPatches(
       { position, target: target ?? [0, 0, 0] },
       {
@@ -90,6 +106,7 @@ export const useCameraWriteBack = (
       dispatch(actions.patchProperty({ id: cameraItem.id, ...patch })),
     );
   }, [
+    cameraRevision,
     position,
     target,
     useRelative,

@@ -1,7 +1,7 @@
 /**
- * A box at the axes' range and an x/y/z line (red/green/blue) from the origin
- * to each axis's max, in three's one-pixel lines, so the camera can be checked
- * by hand. It stands in until a primitive draws, and the lines task
+ * A box at the axes' range and red/green/blue lines from the origin to each
+ * axis's max, so the camera can be checked by hand. A placeholder until a
+ * primitive draws: the lines task
  * (tk-three-js-renderer-lines-vectors-parametric-curve-44974d) deletes it.
  */
 import {

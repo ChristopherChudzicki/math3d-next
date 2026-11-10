@@ -96,7 +96,7 @@ export class ViewCamera {
     const reset = cameraRevision !== this.revision;
     this.revision = cameraRevision;
     if (orthographic !== this.camera instanceof OrthographicCamera) {
-      // Carries the current view over to the other projection.
+      // Carries the current view over, unless a new revision replaces it.
       const current = this.current();
       this.controls.object = orthographic
         ? this.orthographic

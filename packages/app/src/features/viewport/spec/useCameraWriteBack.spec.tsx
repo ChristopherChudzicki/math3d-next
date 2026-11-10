@@ -12,6 +12,8 @@ import { MOVE_END_DELAY } from "./useCameraWriteBack";
 import { useViewportSpec } from "./useViewportSpec";
 
 const MOVED = "[1.00000,-1.00000,0.500000]";
+/** The camera item's default `position`. */
+const DEFAULT_POSITION: Coords = [-6, -4, 2];
 
 const setup = (scene: SceneBuilder) => {
   vi.useFakeTimers();
@@ -131,12 +133,12 @@ test("a pending move writes nothing after unmount", () => {
 test.each([true, false])(
   "a move that went nowhere changes nothing (updateOnDrag %s)",
   (updateOnDrag) => {
-    const scene = new SceneBuilder().camera({
-      updateOnDrag: String(updateOnDrag),
-    });
+    const scene = new SceneBuilder().camera(
+      updateOnDrag ? {} : { updateOnDrag: "false" },
+    );
     const { revision, storedPosition, release } = setup(scene);
     const before = storedPosition();
-    release([-6, -4, 2]);
+    release(DEFAULT_POSITION);
     expect(storedPosition()).toBe(before);
     expect(revision()).toBe(0);
   },
@@ -172,6 +174,15 @@ test.each([
   const { revision, patch } = setup(new SceneBuilder());
   patch(id, path, value);
   expect(revision()).toBe(1);
+});
+
+test("a move reported before a reset writes nothing", () => {
+  const { storedPosition, patch, move, click } = setup(new SceneBuilder());
+  move([1, -1, 0.5], new PointerEvent("pointerdown"));
+  patch("axis-x", "/max", "10");
+  const before = storedPosition();
+  click();
+  expect(storedPosition()).toBe(before);
 });
 
 test("an unrelated edit keeps the revision", () => {

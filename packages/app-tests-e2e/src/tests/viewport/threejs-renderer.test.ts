@@ -59,6 +59,7 @@ test("a drag in the three.js viewport writes the camera back", async ({
   page,
   prepareScene,
 }) => {
+  const errors = collectPageErrors(page);
   const key = await prepareScene(new SceneBuilder().json());
   await page.goto(`/${key}?renderer=threejs`);
   await expectThreeViewport(page);
@@ -77,4 +78,5 @@ test("a drag in the three.js viewport writes the camera back", async ({
   await page.mouse.up();
 
   await expect.poll(() => position.evaluate(getLatex)).not.toBe(before);
+  expect(errors).toEqual([]);
 });

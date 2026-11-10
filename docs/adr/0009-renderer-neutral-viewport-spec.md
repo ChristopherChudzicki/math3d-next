@@ -37,12 +37,12 @@ reports back through `ViewportHooks`, both types in
   a renderer moves the view to `camera`; otherwise it leaves the user's view
   alone, even when `camera` changes identity.
   - `spec/useCameraWriteBack` bumps it when the stored camera changes, when
-    the axes' range or scale changes, and when a move ends with
-    `updateOnDrag` off (the stored camera is then unchanged, so nothing else
-    in the spec would change).
+    the axes' range or scale changes, and when a move that went somewhere
+    ends with `updateOnDrag` off (the stored camera is then unchanged, so
+    nothing else in the spec would change).
   - Why not a new `camera` object: snap-back would hinge on identity, which a
-    value comparison or a spec copy silently loses, and only in the rare
-    scenes with `updateOnDrag` off.
+    value comparison or a spec copy silently loses, and the loss would show
+    only in the rare scenes with `updateOnDrag` off.
 - **Move-end timing and write-back are the app's.** A move ends 200 ms after
   the last pointer release or wheel on `host` with no pointer down; then the
   last `onCameraMove` is written to the camera item or, with `updateOnDrag`
