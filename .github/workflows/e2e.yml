@@ -75,7 +75,7 @@ jobs:
       # The frontend is served by Playwright's webServer config (`yarn preview`
       # in CI), which waits for the URL to be ready before running tests.
       - name: Install Playwright Browsers
-        run: yarn workspace app-tests-e2e playwright install --with-deps
+        run: yarn workspace app-tests-e2e playwright install --with-deps chromium
       - name: Run Playwright tests
         run: yarn test-e2e
         env:
