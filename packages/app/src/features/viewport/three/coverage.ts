@@ -4,6 +4,9 @@ import type { CoverageTable } from "@/features/viewport/shared/coverage";
 const Z_BIAS =
   "approximate: matches MathBox in perspective; in orthographic, MathBox's dolly lets any zBias win outright and this renderer doesn't";
 
+const GRID_OPACITY =
+  "approximate: opaque gridlines draw before every translucent mesh, so they show through a translucent surface in front of them; MathBox hides them";
+
 /** The properties every line-like item shares. */
 const STROKE = {
   color: "drawn",
@@ -20,6 +23,30 @@ const STROKE = {
   zOrder: "todo",
   start: "drawn",
   end: "drawn",
+} as const;
+
+/** The properties parametric, explicit and polar surfaces share. */
+const SURFACE = {
+  expr: "drawn",
+  colorExpr: "drawn",
+  color: "drawn",
+  domain: "drawn",
+  description: "n/a: editor only",
+  gridOpacity: GRID_OPACITY,
+  grid1: "drawn",
+  grid2: "drawn",
+  gridWidth: "drawn",
+  opacity: "drawn",
+  shaded: "drawn",
+  samples1: "drawn",
+  samples2: "drawn",
+  visible: "drawn",
+  calculatedVisibility: "drawn",
+  useCalculatedVisibility: "drawn",
+  zBias: Z_BIAS,
+  zIndex: "drawn",
+  // Left `todo` for the transparency task, which decides draw order.
+  zOrder: "todo",
 } as const;
 
 /** What the three.js renderer does with each stored property. */
@@ -105,69 +132,9 @@ export const coverage = {
     domain: "drawn",
     samples1: "drawn",
   },
-  [MIT.ParametricSurface]: {
-    expr: "todo",
-    colorExpr: "todo",
-    color: "todo",
-    description: "todo",
-    domain: "todo",
-    gridOpacity: "todo",
-    grid1: "todo",
-    grid2: "todo",
-    gridWidth: "todo",
-    opacity: "todo",
-    shaded: "todo",
-    samples1: "todo",
-    samples2: "todo",
-    visible: "todo",
-    calculatedVisibility: "todo",
-    useCalculatedVisibility: "todo",
-    zBias: "todo",
-    zIndex: "todo",
-    zOrder: "todo",
-  },
-  [MIT.ExplicitSurface]: {
-    expr: "todo",
-    colorExpr: "todo",
-    domain: "todo",
-    color: "todo",
-    description: "todo",
-    gridOpacity: "todo",
-    grid1: "todo",
-    grid2: "todo",
-    gridWidth: "todo",
-    opacity: "todo",
-    shaded: "todo",
-    samples1: "todo",
-    samples2: "todo",
-    visible: "todo",
-    calculatedVisibility: "todo",
-    useCalculatedVisibility: "todo",
-    zBias: "todo",
-    zIndex: "todo",
-    zOrder: "todo",
-  },
-  [MIT.ExplicitSurfacePolar]: {
-    expr: "todo",
-    colorExpr: "todo",
-    color: "todo",
-    description: "todo",
-    gridOpacity: "todo",
-    grid1: "todo",
-    grid2: "todo",
-    gridWidth: "todo",
-    opacity: "todo",
-    domain: "todo",
-    shaded: "todo",
-    samples1: "todo",
-    samples2: "todo",
-    visible: "todo",
-    calculatedVisibility: "todo",
-    useCalculatedVisibility: "todo",
-    zBias: "todo",
-    zIndex: "todo",
-    zOrder: "todo",
-  },
+  [MIT.ParametricSurface]: SURFACE,
+  [MIT.ExplicitSurface]: SURFACE,
+  [MIT.ExplicitSurfacePolar]: SURFACE,
   [MIT.ImplicitSurface]: {
     color: "todo",
     description: "todo",
