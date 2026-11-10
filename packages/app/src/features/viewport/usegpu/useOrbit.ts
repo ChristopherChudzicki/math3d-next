@@ -36,7 +36,7 @@ export const useOrbit = (
   );
 
   // OrbitControls re-seeds a field only when it changes, so changing `radius`
-  // alone keeps the user's rotation and pan. Lapses on a camera edit or a `cameraRevision` bump.
+  // alone keeps the user's rotation and pan. Lapses on any `cameraRevision` bump.
   const [pinch, setPinch] = useState<{
     seed: OrbitSpec;
     version: number;
