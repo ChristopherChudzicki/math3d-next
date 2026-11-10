@@ -1,9 +1,11 @@
 import { expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import invariant from "tiny-invariant";
 import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
 import { collectPageErrors } from "@/utils/collectPageErrors";
 import UserMenu from "@/utils/pages/UserMenu";
+import { getItemForm, getLatex } from "@/utils/selectors";
 
 test.use({ disable3d: false });
 
@@ -51,4 +53,27 @@ test("choosing three.js in the menu draws with it", async ({
   await menu.opener().click();
   await expect(menu.renderer("three.js (experimental)")).toBeChecked();
   expect(errors).toEqual([]);
+});
+
+test("a drag in the three.js viewport writes the camera back", async ({
+  page,
+  prepareScene,
+}) => {
+  const key = await prepareScene(new SceneBuilder().json());
+  await page.goto(`/${key}?renderer=threejs`);
+  await expectThreeViewport(page);
+  await page.getByRole("tab", { name: "Setup" }).click();
+  const position = getItemForm(page, { id: "camera" }).getByLabel("Position");
+  const before = await position.evaluate(getLatex);
+
+  const canvas = page.getByTestId("scene").locator("canvas");
+  const box = await canvas.boundingBox();
+  invariant(box);
+  const [x, y] = [box.x + box.width / 2, box.y + box.height / 2];
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 100, y + 40, { steps: 10 });
+  await page.mouse.up();
+
+  await expect.poll(() => position.evaluate(getLatex)).not.toBe(before);
 });

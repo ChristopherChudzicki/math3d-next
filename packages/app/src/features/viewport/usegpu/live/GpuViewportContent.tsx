@@ -16,11 +16,11 @@ type Props = { onUnsupported: SceneHooks["onUnsupported"] };
  * `usegpu/GpuViewport` loads it with React.lazy.
  */
 const GpuViewportContent: React.FC<Props> = ({ onUnsupported }) => {
-  const { spec, reporters, cameraItem } = useViewportSpec();
   const host = useRef<HTMLDivElement>(null);
+  const { spec, reporters, onCameraMove } = useViewportSpec(host);
   const { orbit, projection, controlsVersion, onOrbit } = useOrbit(
     spec,
-    cameraItem,
+    onCameraMove,
     host,
   );
 

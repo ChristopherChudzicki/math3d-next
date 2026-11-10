@@ -1,61 +1,38 @@
 import type React from "react";
-import { useMemo, useRef, useState } from "react";
-import type { MathItem, MathItemType } from "@math3d/mathitem-configs";
-import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import { useMathItemResults } from "@/store/scene/evaluation/mathScope";
-import type { ViewportSpec } from "@math3d/viewport-spec";
-import { toOrbit } from "./orbit";
+import { useCallback, useMemo, useRef, useState } from "react";
+import type { ViewportHooks, ViewportSpec } from "@math3d/viewport-spec";
+import { fromOrbit, toOrbit } from "./orbit";
 import type { OrbitSpec } from "./orbit";
 import { usePinchZoom } from "./usePinchZoom";
-import { useOrbitWriteBack } from "./useOrbitWriteBack";
-
-const WRITE_BACK_PROPS = [
-  "position",
-  "target",
-  "useRelative",
-  "updateOnDrag",
-] as const;
 
 /**
- * Orbit-control inputs for the viewport's camera, plus pinch zoom and the
- * write-back that ends each move.
+ * Orbit-control inputs for the viewport's camera, plus pinch zoom. `onOrbit`
+ * reports the controls' orbit to `onCameraMove`; `controlsVersion` is the
+ * spec's `cameraRevision`.
  */
 export const useOrbit = (
   viewport: Pick<
     ViewportSpec,
-    "camera" | "orthographic" | "controls" | "range" | "scale"
+    "camera" | "orthographic" | "controls" | "cameraRevision"
   >,
-  cameraItem: MathItem<MathItemType.Camera>,
+  onCameraMove: ViewportHooks["onCameraMove"],
   host: React.RefObject<HTMLElement | null>,
 ) => {
-  const { camera, orthographic, controls, range, scale } = viewport;
-  const scope = useMathScope();
-  const { position, target, useRelative, updateOnDrag } = useMathItemResults(
-    scope,
-    cameraItem,
-    WRITE_BACK_PROPS,
-  );
+  const { camera, orthographic, controls } = viewport;
+  const controlsVersion = viewport.cameraRevision;
   // Keeps orbit.target's identity; see SceneSpec.orbit.
   const orbit = useMemo(() => toOrbit(camera), [camera]);
   const projection = useMemo(
     () => ({ dolly: orthographic ? 0 : 1 }),
     [orthographic],
   );
-  const stored = useMemo(
-    () => ({
-      id: cameraItem.id,
-      position,
-      target,
-      useRelative: !!useRelative,
-      updateOnDrag: !!updateOnDrag,
-    }),
-    [cameraItem.id, position, target, useRelative, updateOnDrag],
-  );
-  const { onOrbit, controlsVersion, latest } = useOrbitWriteBack(
-    host,
-    stored,
-    range,
-    scale,
+  const latest = useRef<OrbitSpec | null>(null);
+  const onOrbit = useCallback(
+    (next: OrbitSpec) => {
+      latest.current = next;
+      onCameraMove(fromOrbit(next));
+    },
+    [onCameraMove],
   );
 
   // OrbitControls re-seeds a field only when it changes, so changing `radius`

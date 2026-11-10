@@ -2,34 +2,21 @@ import React from "react";
 import { act, renderHook } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { SceneBuilder } from "@math3d/mock-api";
-import { MathItemType } from "@math3d/mathitem-configs";
-import type { MathItem } from "@math3d/mathitem-configs";
-import invariant from "tiny-invariant";
 import { storeWithScene } from "@/test_util/renderGraphicSpec";
 import { fromUi } from "@/features/viewport/shared/coordinates";
-import type { AxesRange, Coords } from "@math3d/viewport-spec";
 import { actions } from "@/store/scene/state/scene.slice";
-import { useCameraSpec } from "@/features/viewport/spec/camera";
+import { useViewportSpec } from "@/features/viewport/spec/useViewportSpec";
+import { MOVE_END_DELAY } from "@/features/viewport/spec/useCameraWriteBack";
 import { toOrbit } from "./orbit";
 import { useOrbit } from "./useOrbit";
 
-const range: AxesRange = [
-  [-5, 5],
-  [-5, 5],
-  [-5, 5],
-];
-const scale: Coords = [1, 2, 0.5];
-
-const renderUseOrbit = (
-  scene: SceneBuilder,
-  camera: MathItem<MathItemType.Camera>,
-) => {
+const renderUseOrbit = (scene: SceneBuilder) => {
   const store = storeWithScene(scene);
   const host = { current: document.createElement("div") };
   const view = renderHook(
     () => {
-      const fields = useCameraSpec(camera, range, scale);
-      return useOrbit({ ...fields, range, scale }, camera, host);
+      const { spec, onCameraMove } = useViewportSpec(host);
+      return { spec, ...useOrbit(spec, onCameraMove, host) };
     },
     {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
@@ -62,16 +49,8 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-const sceneCamera = (scene: SceneBuilder) => {
-  const camera = scene.items.find((x) => x.id === "camera");
-  invariant(camera?.type === MathItemType.Camera);
-  return camera;
-};
-
-const renderOrbit = (
-  scene: SceneBuilder,
-  camera: MathItem<MathItemType.Camera>,
-) => renderUseOrbit(scene, camera).result.current;
+const renderOrbit = (scene: SceneBuilder) =>
+  renderUseOrbit(scene).result.current;
 
 test.each([
   { isOrthographic: "false", dolly: 1 },
@@ -80,7 +59,7 @@ test.each([
   "isOrthographic $isOrthographic gets dolly $dolly",
   ({ isOrthographic, dolly }) => {
     const scene = new SceneBuilder().camera({ isOrthographic });
-    expect(renderOrbit(scene, sceneCamera(scene)).projection).toEqual({
+    expect(renderOrbit(scene).projection).toEqual({
       dolly,
     });
   },
@@ -88,7 +67,7 @@ test.each([
 
 test("keeps the same orbit across rerenders, so the user's pan survives", () => {
   const scene = new SceneBuilder();
-  const { result, rerender } = renderUseOrbit(scene, sceneCamera(scene));
+  const { result, rerender } = renderUseOrbit(scene);
   const { orbit } = result.current;
   rerender();
   expect(result.current.orbit).toBe(orbit);
@@ -96,7 +75,7 @@ test("keeps the same orbit across rerenders, so the user's pan survives", () => 
 
 test("a pinch halves the radius the controls last reported, keeping their target", () => {
   const scene = new SceneBuilder();
-  const { result, pinchOut } = renderUseOrbit(scene, sceneCamera(scene));
+  const { result, pinchOut } = renderUseOrbit(scene);
   const { orbit } = result.current;
   result.current.onOrbit({ ...orbit, radius: 3 });
   pinchOut();
@@ -106,7 +85,7 @@ test("a pinch halves the radius the controls last reported, keeping their target
 
 test("a camera with zoom disabled ignores pinches", () => {
   const scene = new SceneBuilder().camera({ isZoomEnabled: "false" });
-  const { result, pinchOut } = renderUseOrbit(scene, sceneCamera(scene));
+  const { result, pinchOut } = renderUseOrbit(scene);
   const { orbit } = result.current;
   pinchOut();
   expect(result.current.orbit).toBe(orbit);
@@ -115,21 +94,21 @@ test("a camera with zoom disabled ignores pinches", () => {
 test("the controls snapping back drop the pinch", () => {
   vi.useFakeTimers();
   const scene = new SceneBuilder().camera({ updateOnDrag: "false" });
-  const { result, pinchOut } = renderUseOrbit(scene, sceneCamera(scene));
-  const { orbit } = result.current;
+  const { result, pinchOut } = renderUseOrbit(scene);
+  const { orbit, controlsVersion } = result.current;
   const lift = pinchOut();
   result.current.onOrbit(result.current.orbit);
   lift();
   act(() => {
-    vi.advanceTimersByTime(200);
+    vi.advanceTimersByTime(MOVE_END_DELAY);
   });
-  expect(result.current.controlsVersion).toBe(1);
+  expect(result.current.controlsVersion).toBe(controlsVersion + 1);
   expect(result.current.orbit).toBe(orbit);
 });
 
 test("editing the camera item drops the pinch", () => {
   const scene = new SceneBuilder();
-  const { result, store, pinchOut } = renderUseOrbit(scene, sceneCamera(scene));
+  const { result, store, pinchOut } = renderUseOrbit(scene);
   pinchOut();
   act(() => {
     store.dispatch(
@@ -140,6 +119,7 @@ test("editing the camera item drops the pinch", () => {
       }),
     );
   });
+  const { range, scale } = result.current.spec;
   expect(result.current.orbit).toEqual(
     toOrbit({
       position: fromUi([1, -1, 0.5], range, scale, false),

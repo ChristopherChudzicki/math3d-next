@@ -18,17 +18,16 @@ const HOST_STYLE = { width: "100%", height: "100%" };
 const ThreeViewportContent: React.FC<{
   onUnsupported: ViewportHooks["onUnsupported"];
 }> = ({ onUnsupported }) => {
-  const { spec, reporters } = useViewportSpec();
   const host = useRef<HTMLDivElement>(null);
+  const { spec, reporters, onCameraMove } = useViewportSpec(host);
   const hooks = useMemo<ViewportHooks>(
     () => ({
       onUnsupported,
-      // renderer-three has no camera controls.
-      onCameraMove: () => {},
+      onCameraMove,
       // E2E waits on it.
       onReady: () => host.current?.setAttribute("data-ready", ""),
     }),
-    [onUnsupported],
+    [onUnsupported, onCameraMove],
   );
   return (
     <>

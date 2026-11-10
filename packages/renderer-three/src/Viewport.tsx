@@ -31,6 +31,7 @@ const Viewport: React.FC<ViewportProps> = ({
     const next = new ThreeScene(host.current, {
       forceWebGL,
       onFirstFrame: () => latestHooks.current.onReady(),
+      onCameraMove: (camera) => latestHooks.current.onCameraMove(camera),
       onError: (error) => {
         if (current) setFailure({ error });
       },
