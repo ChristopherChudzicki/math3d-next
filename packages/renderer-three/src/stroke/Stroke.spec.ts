@@ -56,6 +56,15 @@ describe("Stroke", () => {
     });
   });
 
+  test("shares its materials with every other stroke", () => {
+    const materials = (stroke: Stroke) =>
+      stroke.objects.map((mesh) => mesh.material);
+    const [line, arrows] = materials(new Stroke());
+    const [otherLine, otherArrows] = materials(new Stroke());
+    expect(line).toBe(otherLine);
+    expect(arrows).toBe(otherArrows);
+  });
+
   test("blends a translucent stroke and not an opaque one", () => {
     const stroke = new Stroke();
     const isBlended = () =>

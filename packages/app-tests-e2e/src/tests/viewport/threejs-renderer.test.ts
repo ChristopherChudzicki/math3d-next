@@ -95,6 +95,6 @@ test("a line keeps its pixel width when an axis is rescaled", async ({
   const squashed = await shareAt("1/4");
 
   expect(full).toBeGreaterThan(0.002);
-  expect(squashed / full).toBeCloseTo(1, 1);
+  expect(Math.abs(squashed / full - 1)).toBeLessThan(0.05);
   expect(errors).toEqual([]);
 });

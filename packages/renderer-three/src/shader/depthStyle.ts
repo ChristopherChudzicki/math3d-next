@@ -26,6 +26,8 @@ const ndcZ = (depth: Node<"float">) => {
  * - `zBias` moves depth as MathBox's `z *= 1 - zBias / 32768` does under its
  *   perspective camera, restated as a change in view depth so that it is the
  *   same on both backends and in both projections.
+ *   A negative one reaches this camera's far plane, a tenth of MathBox's,
+ *   sooner: `zBias` -1 is clipped beyond depth 396, MathBox's beyond 615.
  * - `zIndex`, rounded and never negative as in MathBox, divides NDC depth
  *   past the near plane by `zIndex + 1`: a higher one draws over a lower one
  *   unless that one is almost at the camera.

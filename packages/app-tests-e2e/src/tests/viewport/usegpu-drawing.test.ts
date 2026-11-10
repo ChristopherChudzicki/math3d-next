@@ -3,20 +3,9 @@ import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
 import { collectPageErrors } from "@/utils/collectPageErrors";
 import { colorfulPixelRatio } from "@/utils/colorfulPixelRatio";
+import { webgpuLaunchOptions } from "@/utils/webgpuLaunchOptions";
 
-test.use({
-  disable3d: false,
-  // SwiftShader gives headless Chromium a WebGPU adapter, on macOS and on Linux CI.
-  launchOptions: {
-    args: [
-      "--enable-unsafe-webgpu",
-      "--enable-features=Vulkan",
-      "--use-vulkan=swiftshader",
-      "--use-webgpu-adapter=swiftshader",
-      "--use-angle=swiftshader",
-    ],
-  },
-});
+test.use({ disable3d: false, launchOptions: webgpuLaunchOptions });
 
 test("?renderer=usegpu draws with the Use.GPU viewport", async ({
   page,

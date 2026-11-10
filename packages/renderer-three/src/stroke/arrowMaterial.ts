@@ -2,23 +2,18 @@
  * The stroke's arrowheads: a cone per head, built in view space and sized as
  * MathBox's `arrow.position` shader sizes it.
  */
-import { DoubleSide, MeshBasicNodeMaterial } from "three/webgpu";
 import {
-  attribute,
   cross,
   length,
   max,
-  modelViewMatrix,
   normalize,
   positionGeometry,
   select,
   vec3,
-  vec4,
 } from "three/tsl";
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import type { Template } from "./Instances";
-import type { ARROW_LAYOUT } from "./packPaths";
-import { arrowLengthAt, strokeStyle } from "./style";
+import { arrowLengthAt, strokeMaterial, strokeStyle, toView } from "./style";
 
 const SIDES = 24;
 /** A cone's length over its radius, as MathBox draws it. */
@@ -39,9 +34,6 @@ export const CONE_TEMPLATE: Template = {
   }),
 };
 
-const toView = (name: (typeof ARROW_LAYOUT)[number][0]) =>
-  modelViewMatrix.mul(vec4(attribute<"vec3">(name, "vec3"), 1)).xyz;
-
 const build = () => {
   const tip = toView("arrowTip");
   const middle = toView("pathMiddle");
@@ -60,26 +52,14 @@ const build = () => {
     .add(up.mul(radius).mul(positionGeometry.y))
     .add(along.mul(coneLength).mul(positionGeometry.z));
   // No direction to point in: every vertex at the tip draws nothing.
-  return projectWithDepthStyle(
-    select(shaftLength.greaterThan(0), position, tip),
-    strokeStyle.zBias,
-    strokeStyle.zIndex,
-  );
+  return {
+    vertex: projectWithDepthStyle(
+      select(shaftLength.greaterThan(0), position, tip),
+      strokeStyle.zBias,
+      strokeStyle.zIndex,
+    ),
+  };
 };
 
-const materials = new Map<boolean, MeshBasicNodeMaterial>();
-
-/** The arrowhead material, shared like `lineMaterial`. */
-export const arrowMaterial = (transparent: boolean): MeshBasicNodeMaterial => {
-  let material = materials.get(transparent);
-  if (!material) {
-    material = new MeshBasicNodeMaterial();
-    material.vertexNode = build();
-    material.colorNode = strokeStyle.color;
-    material.transparent = transparent;
-    // As MathBox draws it.
-    material.side = DoubleSide;
-    materials.set(transparent, material);
-  }
-  return material;
-};
+/** The arrowhead material for a stroke of that transparency. */
+export const arrowMaterial = strokeMaterial(build);

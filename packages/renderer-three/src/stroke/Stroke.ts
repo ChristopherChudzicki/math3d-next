@@ -25,7 +25,7 @@ export class Stroke {
   private readonly line = new Instances(
     SEGMENT_TEMPLATE,
     SEGMENT_LAYOUT,
-    lineMaterial(false),
+    lineMaterial(false, false),
   );
 
   private readonly arrows = new Instances(
@@ -48,14 +48,14 @@ export class Stroke {
   }
 
   set(paths: Coords[][], style: StrokeStyle): void {
-    this.uniforms.set(style);
+    const ends = { start: !!style.start, end: !!style.end };
+    this.uniforms.set(style, ends);
     // A translucent stroke blends, in three's pass after every opaque one;
     // it still writes depth, as MathBox does.
     const transparent = style.color[3] < 1;
-    this.line.mesh.material = lineMaterial(transparent);
+    this.line.mesh.material = lineMaterial(transparent, ends.start || ends.end);
     this.arrows.mesh.material = arrowMaterial(transparent);
     this.line.fill(countSegments(paths), (out) => packSegments(paths, out));
-    const ends = { start: !!style.start, end: !!style.end };
     this.arrows.fill(countArrows(paths, ends), (out) =>
       packArrows(paths, ends, out),
     );

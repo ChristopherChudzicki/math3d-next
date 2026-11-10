@@ -2,10 +2,8 @@
  * The stroke's line: one quad per segment, widened in screen space with
  * miter joins, after MathBox's `line.position` shader.
  */
-import { DoubleSide, MeshBasicNodeMaterial } from "three/webgpu";
 import type { Node } from "three/webgpu";
 import {
-  attribute,
   cameraNear,
   cameraProjectionMatrix,
   dot,
@@ -14,7 +12,6 @@ import {
   max,
   min,
   mix,
-  modelViewMatrix,
   positionGeometry,
   select,
   sqrt,
@@ -24,17 +21,13 @@ import {
 } from "three/tsl";
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import type { Template } from "./Instances";
-import type { SEGMENT_LAYOUT } from "./packPaths";
-import { arrowLengthAt, strokeStyle } from "./style";
+import { arrowLengthAt, strokeMaterial, strokeStyle, toView } from "./style";
 
 /** x is the corner's end of the segment (0 or 1), y its side of the line (±1). */
 export const SEGMENT_TEMPLATE: Template = {
   positions: [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0],
   index: [0, 1, 2, 2, 1, 3],
 };
-
-const toView = (name: (typeof SEGMENT_LAYOUT)[number][0]) =>
-  modelViewMatrix.mul(vec4(attribute<"vec3">(name, "vec3"), 1)).xyz;
 
 const viewDepth = (view: Node<"vec3">) => view.z.negate();
 
@@ -72,7 +65,7 @@ const perpendicular = (v: Node<"vec2">) => vec2(v.y, v.x.negate());
 // Squared screen length below which two points count as one.
 const COINCIDENT = 1e-12;
 
-const build = () => {
+const build = (heads: boolean) => {
   const atB = positionGeometry.x.greaterThan(0.5);
   const side = positionGeometry.y;
   const a = toView("segmentA");
@@ -100,11 +93,16 @@ const build = () => {
   const right2 = dot(toRight, toRight);
   const hasLeft = left2.greaterThan(COINCIDENT);
   const hasRight = right2.greaterThan(COINCIDENT);
-  const normalLeft = perpendicular(toLeft.div(sqrt(max(left2, COINCIDENT))));
-  const normalRight = perpendicular(toRight.div(sqrt(max(right2, COINCIDENT))));
+  const ownLeft = perpendicular(toLeft.div(sqrt(max(left2, COINCIDENT))));
+  const ownRight = perpendicular(toRight.div(sqrt(max(right2, COINCIDENT))));
+  // A path's end has one leg, whose normal stands in for the missing one's:
+  // the miter below is then that leg's square end.
+  const normalLeft = select<"vec2">(hasLeft, ownLeft, ownRight);
+  const normalRight = select<"vec2">(hasRight, ownRight, ownLeft);
 
-  // Miter along the mean normal, stretched to keep both legs' width; MathBox
-  // caps the stretch near 10 and its run along a leg at the shorter leg.
+  // Miter along the mean normal, lengthened to keep each leg's width: at most
+  // 10×, and no farther along a leg than MathBox's cap, the shorter leg's
+  // length over its clip w.
   const sum = normalLeft.add(normalRight);
   const sumLength = length(sum);
   const miterNormal = select(
@@ -116,28 +114,25 @@ const build = () => {
   const acrossLeg = max(dot(normalLeft, miterNormal).abs(), 0.1);
   const alongLeg = dot(perpendicular(normalLeft), miterNormal);
   const run = alongLeg.div(acrossLeg);
-  const halfWidthOnScreen = strokeStyle.halfWidth
-    .mul(projectionScale.y)
-    .div(max(clipCenter.w, 1e-6));
+  const halfWidthAtUnitW = strokeStyle.halfWidth.mul(projectionScale.y);
   const shorterLeg2 = min(left2, right2).div(
-    max(halfWidthOnScreen.mul(halfWidthOnScreen), 1e-20),
+    max(halfWidthAtUnitW.mul(halfWidthAtUnitW), 1e-20),
   );
   const miter = miterNormal.mul(
     sqrt(float(1).add(min(shorterLeg2, run.mul(run)))),
   );
 
-  const join = select<"vec2">(
-    hasLeft.and(hasRight),
-    miter,
-    select<"vec2">(
-      hasLeft,
-      normalLeft,
-      select<"vec2">(hasRight, normalRight, vec2(0, 0)),
-    ),
-  );
+  const join = select<"vec2">(hasLeft.or(hasRight), miter, vec2(0, 0));
   const position = center
     .add(vec3(join.mul(side).mul(strokeStyle.halfWidth), 0))
     .toVar();
+
+  const vertex = projectWithDepthStyle(
+    position,
+    strokeStyle.zBias,
+    strokeStyle.zIndex,
+  );
+  if (!heads) return { vertex };
 
   // How far each fragment is from the arrowheads' bases, as a multiple of
   // the arrowhead's length: negative inside one. MathBox's `clipEnds`.
@@ -149,7 +144,8 @@ const build = () => {
     const toTip = tip.sub(center);
     const distance = length(toTip);
     const along = dot(tip.sub(position), toTip.div(max(distance, 1e-12)));
-    // `equal(0)`, as MathBox tests it: a non-finite tip then clips nothing.
+    // Exact `== 0`, as in MathBox: a non-finite tip gives a NaN distance,
+    // which clips nothing.
     return select(
       hasHead.greaterThan(0.5),
       select(distance.equal(0), -1, along.div(max(arrowLength, 1e-12)).sub(1)),
@@ -162,33 +158,17 @@ const build = () => {
   ).toVarying();
 
   return {
-    vertex: projectWithDepthStyle(
-      position,
-      strokeStyle.zBias,
-      strokeStyle.zIndex,
-    ),
+    vertex,
     mask: outsideHeads.x.lessThan(0).or(outsideHeads.y.lessThan(0)).not(),
   };
 };
 
-const materials = new Map<boolean, MeshBasicNodeMaterial>();
+const plain = strokeMaterial(() => build(false));
+const clippedUnderHeads = strokeMaterial(() => build(true));
 
 /**
- * The line material, one per transparency and shared by every stroke: each
- * mesh's `userData.stroke` supplies its style.
+ * The line material for a stroke of that transparency. Only one with
+ * arrowheads (`heads`) carries the `discard` that clips the line under them.
  */
-export const lineMaterial = (transparent: boolean): MeshBasicNodeMaterial => {
-  let material = materials.get(transparent);
-  if (!material) {
-    const { vertex, mask } = build();
-    material = new MeshBasicNodeMaterial();
-    material.vertexNode = vertex;
-    material.maskNode = mask;
-    material.colorNode = strokeStyle.color;
-    material.transparent = transparent;
-    // A quad's winding follows its segment's direction on screen.
-    material.side = DoubleSide;
-    materials.set(transparent, material);
-  }
-  return material;
-};
+export const lineMaterial = (transparent: boolean, heads: boolean) =>
+  (heads ? clippedUnderHeads : plain)(transparent);

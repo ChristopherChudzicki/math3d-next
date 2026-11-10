@@ -18,9 +18,8 @@ export const strideOf = (layout: Layout): number =>
   layout.reduce((sum, [, size]) => sum + size, 0);
 
 /**
- * A mesh drawing one `template` per instance, in one draw call. The
- * per-instance floats refill in place; the buffer is replaced only when the
- * instances outgrow it.
+ * A mesh that draws `template` once per instance. The per-instance floats
+ * refill in place; the buffer is replaced only when the instances outgrow it.
  */
 export class Instances {
   readonly mesh: Mesh<InstancedBufferGeometry, Material>;

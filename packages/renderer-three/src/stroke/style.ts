@@ -1,8 +1,18 @@
-import { Vector4 } from "three/webgpu";
+import { DoubleSide, MeshBasicNodeMaterial, Vector4 } from "three/webgpu";
 import type { Node } from "three/webgpu";
-import { clamp, float, length, max, userData } from "three/tsl";
+import {
+  attribute,
+  clamp,
+  float,
+  length,
+  max,
+  modelViewMatrix,
+  userData,
+  vec4,
+} from "three/tsl";
 import type { LineSpec } from "@math3d/viewport-spec";
 import { viewUnitsPerPixel } from "../shader/viewUnits";
+import type { ARROW_LAYOUT, ArrowEnds, SEGMENT_LAYOUT } from "./packPaths";
 
 /** Without `start`, `end` and `arrowSize`, a stroke has no arrowheads. */
 export type StrokeStyle = Pick<
@@ -32,14 +42,14 @@ export class StrokeUniforms {
 
   end = 0;
 
-  set(style: StrokeStyle): void {
+  set(style: StrokeStyle, ends: ArrowEnds): void {
     this.color.set(...style.color);
     this.width = style.width;
     this.zBias = style.zBias;
     this.zIndex = style.zIndex;
     this.arrowSize = style.arrowSize ?? 0;
-    this.start = Number(style.start ?? false);
-    this.end = Number(style.end ?? false);
+    this.start = Number(ends.start);
+    this.end = Number(ends.end);
   }
 }
 
@@ -86,4 +96,37 @@ export const arrowLengthAt = (
     .mul(space);
   const shortfall = clamp(pathLength.div(full).mul(0.333).oneMinus(), 0, 1);
   return full.mul(shortfall.mul(shortfall).mul(shortfall).oneMinus());
+};
+
+type PointAttribute = (typeof SEGMENT_LAYOUT | typeof ARROW_LAYOUT)[number][0];
+
+/** A per-instance point, in view space. */
+export const toView = (name: PointAttribute) =>
+  modelViewMatrix.mul(vec4(attribute<"vec3">(name, "vec3"), 1)).xyz;
+
+type Shader = { vertex: Node<"vec4">; mask?: Node };
+
+/**
+ * A stroke material per transparency, built on first use and shared by every
+ * stroke: each mesh's `userData.stroke` supplies its style.
+ */
+export const strokeMaterial = (build: () => Shader) => {
+  const materials = new Map<boolean, MeshBasicNodeMaterial>();
+  return (transparent: boolean): MeshBasicNodeMaterial => {
+    let material = materials.get(transparent);
+    if (!material) {
+      const { vertex, mask } = build();
+      material = new MeshBasicNodeMaterial();
+      material.vertexNode = vertex;
+      if (mask) material.maskNode = mask;
+      material.colorNode = strokeStyle.color;
+      material.transparent = transparent;
+      // A quad's winding follows its segment's direction on screen. three
+      // draws a translucent two-sided mesh twice, back faces then front, as
+      // MathBox's three does: a translucent cone shows its far side.
+      material.side = DoubleSide;
+      materials.set(transparent, material);
+    }
+    return material;
+  };
 };

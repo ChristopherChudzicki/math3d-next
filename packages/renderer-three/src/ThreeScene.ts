@@ -1,4 +1,5 @@
 import {
+  ColorManagement,
   Group,
   LinearSRGBColorSpace,
   Scene,
@@ -10,6 +11,10 @@ import { mathToView } from "./viewTransform";
 import { builders } from "./graphics/builders";
 import { syncGraphics } from "./graphics/syncGraphics";
 import type { DrawnGraphics } from "./graphics/syncGraphics";
+
+// Colors stay the sRGB values the spec gives (see `outputColorSpace` below),
+// so three must not convert a `Color` to linear on its way in either.
+ColorManagement.enabled = false;
 
 type Options = {
   /** Use the WebGL2 backend even where WebGPU is available. */
@@ -84,6 +89,9 @@ export class ThreeScene {
   async init(): Promise<void> {
     await this.renderer.init();
     if (this.disposed) return;
+    // E2E reads it.
+    this.canvas.dataset.backend =
+      "isWebGPUBackend" in this.renderer.backend ? "webgpu" : "webgl2";
     this.resizeObserver.observe(this.host);
     this.resize();
   }

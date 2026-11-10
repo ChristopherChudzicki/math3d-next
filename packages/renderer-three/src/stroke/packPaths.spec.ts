@@ -87,8 +87,10 @@ describe("packArrows", () => {
     expect(arrows([[first]], { start: true, end: true })).toEqual([]);
   });
 
-  test("a non-finite tip gets none", () => {
-    const path: Coords[] = [first, second, [Infinity, 0, 0]];
+  test.each<{ name: string; path: Coords[] }>([
+    { name: "tip", path: [first, second, [Infinity, 0, 0]] },
+    { name: "neighbor", path: [first, [Infinity, 0, 0], last] },
+  ])("a head with a non-finite $name is left out", ({ path }) => {
     expect(arrows([path], { start: false, end: true })).toEqual([]);
   });
 });

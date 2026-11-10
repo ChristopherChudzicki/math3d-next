@@ -2,9 +2,9 @@ import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import type { CoverageTable } from "@/features/viewport/shared/coverage";
 
 const Z_BIAS =
-  "approximate: matches MathBox in perspective; orthographic keeps that bias, where MathBox's dolly lets any zBias win outright";
+  "approximate: matches MathBox in perspective; in orthographic, MathBox's dolly lets any zBias win outright and this renderer doesn't";
 
-/** The properties every line-like item shares, as the stroke draws them. */
+/** The properties every line-like item shares. */
 const STROKE = {
   color: "drawn",
   description: "n/a: editor only",
@@ -16,7 +16,7 @@ const STROKE = {
   width: "drawn",
   zBias: Z_BIAS,
   zIndex: "drawn",
-  // Classified with the transparency model.
+  // Left `todo` for the transparency task, which decides draw order.
   zOrder: "todo",
   start: "drawn",
   end: "drawn",
