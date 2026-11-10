@@ -7,7 +7,7 @@ import invariant from "tiny-invariant";
 import { getStore } from "@/store/store";
 import { actions } from "@/store/scene/state/scene.slice";
 import { fromUi } from "@/features/viewport/shared/coordinates";
-import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
+import type { AxesRange, Coords } from "@math3d/viewport-spec";
 import { toOrbit } from "./orbit";
 import { useOrbitWriteBack } from "./useOrbitWriteBack";
 

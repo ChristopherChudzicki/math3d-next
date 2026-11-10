@@ -1,19 +1,24 @@
 /**
  * What each graphic draws, in math-item terms: evaluated positions, RGBA
- * colors, sample callbacks. The components in this folder read the store and
- * MathScope and produce these; usegpu/live turns them into a Live tree.
+ * colors, sample callbacks. The app's viewport/spec components read the store
+ * and MathScope and produce these; a renderer that draws from specs (Use.GPU
+ * today) turns them into its own scene, while MathBox reads math items directly.
+ *
+ * Positions are in math coordinates, as the items evaluate them; only
+ * `CameraSpec` is in view coordinates. Pixel quantities (`width`, `size`) are
+ * CSS pixels, as MathBox draws them.
  */
-import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
+import type { AxesRange, Coords } from "./coordinates";
 
 export type RGBA = [number, number, number, number];
 
 type Common = {
-  /** MathBox-style depth bias. Both renderers have one; their scales are not calibrated against each other. */
+  /** MathBox-style depth bias. Each renderer has one; their scales are not calibrated against each other. */
   zBias: number;
   /**
    * MathBox squeezes a higher zIndex's depth toward the near plane, so it draws
-   * over lower ones. Use.GPU only orders draw calls by it, where a component
-   * accepts it; see `usegpu/coverage.ts`.
+   * over lower ones. Other renderers approximate that (Use.GPU only orders draw
+   * calls by it, where a component accepts it); see each renderer's coverage table.
    */
   zIndex: number;
 };
@@ -21,6 +26,7 @@ type Common = {
 export type PointSpec = Common & {
   kind: "point";
   positions: Coords[];
+  /** Point diameter, in CSS pixels. */
   size: number;
   color: RGBA;
   /** Drawn at each point; `null` when hidden or empty. */
@@ -30,10 +36,13 @@ export type PointSpec = Common & {
 export type LineSpec = Common & {
   kind: "line";
   paths: Coords[][];
+  /** Line width, in CSS pixels. */
   width: number;
   color: RGBA;
+  /** Arrowheads at each path's first and last point. */
   start: boolean;
   end: boolean;
+  /** Arrowhead scale: MathBox draws the head 1.25 × arrowSize × width pixels long. */
   arrowSize: number;
   /** Drawn at the last point; `null` when hidden or empty. */
   label: string | null;
@@ -65,10 +74,13 @@ export type ImplicitSurfaceSpec = Common & {
 export type AxisSpec = Common & {
   kind: "axis";
   axis: "x" | "y" | "z";
+  /** Line width, in CSS pixels. */
   width: number;
   color: RGBA;
+  /** Arrowheads at the axis's low and high end. */
   start: boolean;
   end: boolean;
+  /** Arrowhead scale, as in `LineSpec`. */
   arrowSize: number;
   range: [number, number];
   ticks: { divisions: number; visible: boolean };
@@ -96,9 +108,8 @@ export type GraphicSpec =
 
 export type CameraSpec = {
   /**
-   * Camera and target in MathBox's cartesian coordinates: the axes' range
-   * mapped onto [-scale, scale], z up. That is what the camera item's
-   * `position`/`target` convert to in the MathBox viewport.
+   * In view coordinates: the axes' range mapped onto [-scale, scale], z up.
+   * The app's `fromUi` converts the camera item's `position`/`target` into them.
    */
   position: Coords;
   target: Coords;

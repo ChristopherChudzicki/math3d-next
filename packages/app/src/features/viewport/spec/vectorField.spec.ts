@@ -1,6 +1,6 @@
 import { SceneBuilder } from "@math3d/mock-api";
 import { renderGraphicSpec } from "@/test_util/renderGraphicSpec";
-import type { LineSpec } from "./types";
+import type { LineSpec } from "@math3d/viewport-spec";
 
 test("a vector field draws one arrow per grid point", () => {
   const scene = new SceneBuilder();

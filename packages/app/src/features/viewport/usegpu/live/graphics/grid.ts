@@ -1,7 +1,7 @@
 import { use } from "@use-gpu/live";
 import type { LiveElement } from "@use-gpu/live";
 import { Grid } from "@use-gpu/plot";
-import type { GridSpec } from "@/features/viewport/usegpu/graphicSpec/types";
+import type { GridSpec } from "@math3d/viewport-spec";
 import { drawMode } from "./util";
 
 export const renderGrid = (spec: GridSpec): LiveElement =>

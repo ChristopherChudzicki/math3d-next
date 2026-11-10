@@ -2,7 +2,7 @@ import { SceneBuilder } from "@math3d/mock-api";
 import { MathItemType as MIT, gradients } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import { renderGraphicSpec } from "@/test_util/renderGraphicSpec";
-import type { SurfaceSpec } from "./types";
+import type { SurfaceSpec } from "@math3d/viewport-spec";
 
 test("an explicit surface maps (U, V) onto its domain and colors by the raw x, y, z, as MathBox does", () => {
   const scene = new SceneBuilder();

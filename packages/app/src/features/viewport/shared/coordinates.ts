@@ -1,5 +1,4 @@
-type Coords = [number, number, number];
-type AxesRange = [[number, number], [number, number], [number, number]];
+import type { AxesRange, Coords } from "@math3d/viewport-spec";
 
 /**
  * Project a coordinate from one linear range to another
@@ -51,4 +50,3 @@ const toUi = (
 };
 
 export { fromUi, toUi };
-export type { Coords, AxesRange };

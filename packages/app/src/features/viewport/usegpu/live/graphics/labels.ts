@@ -2,8 +2,7 @@ import { use } from "@use-gpu/live";
 import type { LiveElement } from "@use-gpu/live";
 import { Label } from "@use-gpu/plot";
 import { useRenderContext } from "@use-gpu/workbench";
-import type { Coords } from "@/features/viewport/shared/coordinates";
-import type { GraphicSpec } from "@/features/viewport/usegpu/graphicSpec/types";
+import type { Coords, GraphicSpec } from "@math3d/viewport-spec";
 
 /** A graphic's depth bias and draw order, shared by its labels. */
 type Layering = Pick<GraphicSpec, "zBias" | "zIndex">;

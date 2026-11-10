@@ -85,6 +85,7 @@ This app is deployed as a true react SPA hosted on a CDN with APIs powered by Dj
 **App and API:**
 
 - **`packages/app`** — Main React app (Vite, port 3000). Entry: `src/main.tsx`. Orchestrates all math packages + MathBox rendering
+- **`packages/viewport-spec`** — Renderer-neutral types for what the viewport draws (`GraphicSpec`, `CameraSpec`, `RGBA`, `Coords`, `AxesRange`). `app`'s `features/viewport/spec/` produces them from evaluated math items; the Use.GPU renderer draws from them (MathBox reads math items directly)
 - **`packages/api`** — Auto-generated OpenAPI types (openapi-typescript) + openapi-fetch client + React Query hooks for scenes/auth
 - **`packages/mock-api`** — MSW-based mock API with faker-generated data and `SceneBuilder` for tests
 - **`packages/app-tests-e2e`** — Playwright E2E tests

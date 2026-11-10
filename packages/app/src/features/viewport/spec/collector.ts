@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import type { MathGraphic, MathGraphicType } from "@math3d/mathitem-configs";
-import type { GraphicSpec } from "./types";
+import type { GraphicSpec } from "@math3d/viewport-spec";
 
 type Report = (id: string, spec: GraphicSpec | null) => void;
 

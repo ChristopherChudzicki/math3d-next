@@ -1,4 +1,4 @@
-import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
+import type { AxesRange, Coords } from "@math3d/viewport-spec";
 
 // A lone sample sits at the midpoint, as MathBox's centered Volume puts it.
 const axisSamples = ([min, max]: [number, number], n: number): number[] =>

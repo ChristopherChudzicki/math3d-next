@@ -4,7 +4,7 @@ import { toTensorArray } from "@use-gpu/core";
 import type { Emit, TensorArray } from "@use-gpu/core";
 import { Sampler } from "@use-gpu/frame";
 import { ImplicitSurface } from "@use-gpu/plot";
-import type { ImplicitSurfaceSpec } from "@/features/viewport/usegpu/graphicSpec/types";
+import type { ImplicitSurfaceSpec } from "@math3d/viewport-spec";
 import {
   gradientFromGrid,
   implicitGridLayout,

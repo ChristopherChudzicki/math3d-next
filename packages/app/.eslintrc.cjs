@@ -122,11 +122,20 @@ const layoutZones = [
   },
   {
     target: `${VIEWPORT}/shared`,
-    from: [`${VIEWPORT}/mathbox`, `${VIEWPORT}/usegpu`],
-    message: "viewport/shared serves both renderers and imports neither.",
+    from: VIEWPORT,
+    except: ["./shared"],
+    message:
+      "viewport/shared is imported by the renderers and spec/; it imports none of them.",
   },
   {
-    // mathbox/, shared/ and other features are covered by the zones above.
+    target: `${VIEWPORT}/spec`,
+    from: VIEWPORT,
+    except: ["./spec", "./shared"],
+    message:
+      "viewport/spec produces renderer-neutral specs and imports no renderer.",
+  },
+  {
+    // mathbox/, shared/, spec/ and other features are covered by the zones above.
     target: [
       "./src/app",
       `${VIEWPORT}/*.{ts,tsx}`,

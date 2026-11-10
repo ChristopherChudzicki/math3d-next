@@ -1,4 +1,4 @@
-import type { Coords } from "./coordinates";
+import type { Coords } from "@math3d/viewport-spec";
 import sameCoordinates from "./sameCoordinates";
 
 type CameraPatch = { path: "/position" | "/target"; value: string };

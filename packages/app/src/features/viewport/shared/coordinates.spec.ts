@@ -1,5 +1,5 @@
+import type { AxesRange, Coords } from "@math3d/viewport-spec";
 import { fromUi, toUi } from "./coordinates";
-import type { AxesRange, Coords } from "./coordinates";
 
 const range: AxesRange = [
   [-2, 4],
