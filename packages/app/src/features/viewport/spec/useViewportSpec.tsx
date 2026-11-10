@@ -7,8 +7,8 @@ import { useCameraSpec } from "./camera";
 
 /**
  * The scene as a `ViewportSpec`. Render `reporters` alongside the renderer:
- * the graphics' specs reach `spec` through them. `cameraItem` is for writing
- * camera moves back to the store.
+ * they fill `spec.graphics`, which is empty without them. `cameraItem` is for
+ * writing camera moves back to the store.
  */
 export const useViewportSpec = () => {
   const { graphics, camera, range, scale } = useViewportItems();

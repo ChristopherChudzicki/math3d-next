@@ -5,9 +5,10 @@
 ## Context
 
 MathBox reads math items from the store inside its own React tree. Use.GPU
-([ADR-0008](0008-usegpu-opt-in-renderer.md)) can't: its scene is a Live tree, outside React's context. A planned three.js renderer may be its own workspace, with
-a different `three` than `mathbox-react` allows, and so can't import `app`
-at all. Both need the scene as plain data.
+([ADR-0008](0008-usegpu-opt-in-renderer.md)) can't: its scene is a Live tree,
+outside React's context. A planned three.js renderer may be its own workspace,
+with a different `three` than `mathbox-react` allows, and so can't import
+`app` at all. Both need the scene as plain data.
 
 ## Decision
 
@@ -15,45 +16,41 @@ at all. Both need the scene as plain data.
 reports back through `ViewportHooks`, both types in
 `@math3d/viewport-spec`.**
 
-- **`@math3d/viewport-spec`** holds types only (`ViewportSpec`,
-  `ViewportHooks`, `GraphicSpec`, `CameraSpec`, `RGBA`, `Coords`,
-  `AxesRange`): no runtime dependencies on `app`, React or any renderer.
-- **`ViewportSpec`** is the axes' range and scale, the camera (`CameraSpec`
-  in view coordinates, an orthographic flag, the enabled controls) and the
-  graphics as an ordered `{ id, spec }` list.
-- **`ViewportHooks`**: `onUnsupported(error)` when the renderer can't run in
-  this browser; `onCameraMove(camera)` as the user moves the camera. The app
+- `@math3d/viewport-spec` holds types only (`ViewportSpec`, `ViewportHooks`,
+  `GraphicSpec`, `CameraSpec`, `RGBA`, `Coords`, `AxesRange`): no runtime
+  dependencies on `app`, React or any renderer.
+- `ViewportSpec` is the axes' `range` and `scale`, the `camera` (a
+  `CameraSpec` in view coordinates), an `orthographic` flag, the enabled
+  `controls`, and the `graphics` as an ordered `{ id, spec }` list.
+- `ViewportHooks`: `onUnsupported(error)` when the renderer can't run in this
+  browser; `onCameraMove(camera)` as the user moves the camera. The app
   decides when a move ends and what to write back.
-- **`features/viewport/spec/`** produces it: `useViewportSpec` returns the
-  spec, the reporter elements to render alongside the renderer (they feed it
-  each graphic's spec), and the camera item for write-back.
-- **A renderer derives its own shapes from `ViewportSpec`**: Use.GPU's
+- `features/viewport/spec/` produces it: `useViewportSpec` returns the spec,
+  the reporter elements that fill `spec.graphics` (render them alongside the
+  renderer), and the camera item for write-back.
+- A renderer derives its own shapes from `ViewportSpec`: Use.GPU's
   `SceneSpec` replaces `camera` and `orthographic` with y-up orbit parameters
   and a dolly.
-- **Coverage tables live in `app`**
-  ([ADR-0008](0008-usegpu-opt-in-renderer.md#parity-record)), so the package
-  needs nothing from `mathitem-configs`.
+- Coverage tables stay in `app`
+  ([ADR-0008](0008-usegpu-opt-in-renderer.md#parity-record)).
 
 ### Folders and lint zones
 
 `features/viewport/` holds one folder per renderer plus `shared/` and `spec/`,
 with zones written by hand in `packages/app/.eslintrc.cjs`:
 
-- **`shared/`** is imported by the renderers and `spec/`; it imports none of
+- `shared/` is imported by the renderers and `spec/`; it imports none of
   them.
-- **`spec/`** reads the store and MathScope and produces specs; it imports no
+- `spec/` reads the store and MathScope and produces specs; it imports no
   renderer, and any renderer may import it. **A spec field is in math-item
   terms only** (evaluated positions, RGBA colors, sample callbacks), never a
   renderer prop, so the specs are testable under jsdom and survive a renderer
   swap.
-- **`spec/` and `shared/` import no renderer package** (`three`, `mathbox*`,
+- `spec/` and `shared/` import no renderer package (`three`, `mathbox*`,
   `@use-gpu/*`; a `no-restricted-imports` group). The path zones above
   check folders only.
-- **The renderer folders** (`mathbox/`, `usegpu/`) don't import each other;
+- The renderer folders (`mathbox/`, `usegpu/`) don't import each other;
   common code moves to `shared/` or `spec/`.
-- **`usegpu/live/`** is the only code that imports Use.GPU's runtime
-  (`@use-gpu/*` except `@use-gpu/core`, enforced by `no-restricted-imports`).
-  Only `usegpu/GpuViewport` reaches it (an `import/no-restricted-paths` zone).
 
 ## Consequences
 
@@ -61,8 +58,8 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
   store (camera write-back, fallback on `onUnsupported`) stays in its `app`
   glue.
 - MathBox stays outside the contract while it reads math items directly.
-- Nothing calls `onCameraMove`: Use.GPU's write-back
-  (`usegpu/useOrbitWriteBack`) works in orbit parameters.
+- `onCameraMove` has no caller until a renderer reports in `CameraSpec`;
+  Use.GPU writes back orbit parameters through `usegpu/useOrbitWriteBack`.
 
 ## Alternatives considered
 

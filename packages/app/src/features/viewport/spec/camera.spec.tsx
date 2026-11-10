@@ -49,19 +49,29 @@ test("defaults the camera and its controls before anything evaluates", () => {
   });
 });
 
-test("reports the camera item's projection and enabled controls", () => {
-  const scene = new SceneBuilder().camera({
-    isOrthographic: "true",
-    isRotateEnabled: "false",
-    isPanEnabled: "true",
-    isZoomEnabled: "false",
-  });
+test("reports an orthographic camera", () => {
+  const scene = new SceneBuilder().camera({ isOrthographic: "true" });
   const { result } = renderCameraSpec(scene, sceneCamera(scene));
-  expect(result.current).toMatchObject({
-    orthographic: true,
-    controls: { rotate: false, pan: true, zoom: false },
-  });
+  expect(result.current.orthographic).toBe(true);
 });
+
+test.each(["rotate", "pan", "zoom"] as const)(
+  "disabling %s leaves the other controls enabled",
+  (disabled) => {
+    const scene = new SceneBuilder().camera({
+      isRotateEnabled: String(disabled !== "rotate"),
+      isPanEnabled: String(disabled !== "pan"),
+      isZoomEnabled: String(disabled !== "zoom"),
+    });
+    const { result } = renderCameraSpec(scene, sceneCamera(scene));
+    expect(result.current.controls).toEqual({
+      rotate: true,
+      pan: true,
+      zoom: true,
+      [disabled]: false,
+    });
+  },
+);
 
 test("a relative camera position is a fraction of the axes' scale", () => {
   const scene = new SceneBuilder().camera({

@@ -56,7 +56,7 @@ three tiers — shared → features → app — imported one way, enforced by it
   dodge a zone is not on the list.
 - **Lint reads the feature list from `src/features/`,** so a new feature
   folder gets its zone without a config edit. The renderer zones inside
-  `features/viewport` ([ADR-0008](0008-usegpu-opt-in-renderer.md)) are
+  `features/viewport` ([ADR-0009](0009-renderer-neutral-viewport-spec.md)) are
   written by hand in `.eslintrc.cjs`.
 - **Only tests import `test_util`:** it renders the whole app, so a
   production import would reach `src/app` without crossing a zone.

@@ -85,7 +85,7 @@ This app is deployed as a true react SPA hosted on a CDN with APIs powered by Dj
 **App and API:**
 
 - **`packages/app`** — Main React app (Vite, port 3000). Entry: `src/main.tsx`. Orchestrates all math packages + MathBox rendering
-- **`packages/viewport-spec`** — Renderer-neutral, types-only contract for what the viewport draws: `ViewportSpec` (axes, camera, ordered `GraphicSpec`s) and `ViewportHooks` (`onUnsupported`, `onCameraMove`). `app`'s `features/viewport/spec/` produces it (`useViewportSpec`) from evaluated math items; the Use.GPU renderer draws from it (MathBox reads math items directly). [ADR-0009](docs/adr/0009-renderer-neutral-viewport-spec.md) records the boundary
+- **`packages/viewport-spec`** — Renderer-neutral, types-only contract for what the viewport draws (`ViewportSpec`, `ViewportHooks`, `GraphicSpec`). `app`'s `features/viewport/spec/` produces it (`useViewportSpec`) from evaluated math items; the Use.GPU renderer draws from it (MathBox reads math items directly). [ADR-0009](docs/adr/0009-renderer-neutral-viewport-spec.md) records the boundary
 - **`packages/api`** — Auto-generated OpenAPI types (openapi-typescript) + openapi-fetch client + React Query hooks for scenes/auth
 - **`packages/mock-api`** — MSW-based mock API with faker-generated data and `SceneBuilder` for tests
 - **`packages/app-tests-e2e`** — Playwright E2E tests

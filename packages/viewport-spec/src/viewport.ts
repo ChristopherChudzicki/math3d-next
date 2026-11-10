@@ -10,7 +10,10 @@ export type ViewportGraphic = { id: string; spec: GraphicSpec };
 export type ViewportSpec = {
   /** The axes' extent in math coordinates. */
   range: AxesRange;
-  /** View coordinates map `range` onto `[-scale, scale]` per axis. */
+  /**
+   * Each axis's half-length in view coordinates: `range` maps onto
+   * `[-scale, scale]`.
+   */
   scale: Coords;
   /** Seen with a 60° field of view, as both MathBox and Use.GPU draw it. */
   camera: CameraSpec;
@@ -19,7 +22,8 @@ export type ViewportSpec = {
   controls: { rotate: boolean; pan: boolean; zoom: boolean };
   /**
    * In the scene's item order; a graphic with nothing to draw is absent.
-   * Each `spec` keeps its identity until it changes, so diff by `id` and `===`.
+   * Each `spec` keeps its identity until it changes, so a renderer can skip a
+   * graphic whose `spec` is `===` the last one with the same `id`.
    */
   graphics: ViewportGraphic[];
 };

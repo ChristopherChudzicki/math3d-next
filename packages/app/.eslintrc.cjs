@@ -61,7 +61,7 @@ const restrictedImports = ({
   allowBaseUi = false,
   allowParentImports = false,
   allowUseGpu = false,
-  rendererNeutral = false,
+  banRendererPackages = false,
 } = {}) => ({
   paths: [iconifyOnline],
   patterns: [
@@ -69,7 +69,7 @@ const restrictedImports = ({
     noMui,
     ...(allowParentImports ? [] : [noParentImports]),
     ...(allowUseGpu ? [] : [useGpuRuntime]),
-    ...(rendererNeutral ? [noRendererPackages] : []),
+    ...(banRendererPackages ? [noRendererPackages] : []),
   ],
 });
 
@@ -215,7 +215,7 @@ module.exports = {
       rules: {
         "no-restricted-imports": [
           "error",
-          restrictedImports({ rendererNeutral: true }),
+          restrictedImports({ banRendererPackages: true }),
         ],
       },
     },

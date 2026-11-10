@@ -24,7 +24,7 @@ const renderViewportSpec = (scene: SceneBuilder) => {
   return { store, latest, rerender: () => view.rerender(ui()) };
 };
 
-test("lists the graphics with something to draw in item order, whenever each starts drawing", () => {
+test("lists drawable graphics in item order, including one that becomes visible later", () => {
   const scene = new SceneBuilder();
   const folder = scene.folder();
   folder.point({}, "p");
