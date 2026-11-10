@@ -10,6 +10,8 @@ import type { WebGpuSupport } from "./webgpuSupport";
 type NoticeReason = "link" | "failed";
 
 type ResolvedRenderer = {
+  /** The `?renderer=` param, else the preference, else the default. */
+  requested: Renderer;
   /** `null` while Use.GPU is requested and WebGPU detection is pending. */
   renderer: Renderer | null;
   notice: NoticeReason | null;
@@ -31,16 +33,20 @@ const resolveRenderer = ({
   if (webgpu === "failed") {
     const { needsWebGpu } = RENDERERS[requested];
     return {
+      requested,
       renderer: needsWebGpu ? DEFAULT_RENDERER : requested,
       notice: "failed",
     };
   }
   if (!RENDERERS[requested].needsWebGpu) {
-    return { renderer: requested, notice: null };
+    return { requested, renderer: requested, notice: null };
   }
-  if (webgpu === "pending") return { renderer: null, notice: null };
-  if (webgpu === "available") return { renderer: requested, notice: null };
+  if (webgpu === "pending") return { requested, renderer: null, notice: null };
+  if (webgpu === "available") {
+    return { requested, renderer: requested, notice: null };
+  }
   return {
+    requested,
     renderer: DEFAULT_RENDERER,
     notice: param === requested ? "link" : null,
   };

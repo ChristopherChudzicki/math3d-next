@@ -321,8 +321,7 @@ const ReportsNoDevice = ({ onUnsupported }: ContentProps) => {
 describe("renderer", () => {
   const NOTICE =
     "This link asks for the experimental Use.GPU renderer, which isn't available in this browser. Showing the scene with the default renderer.";
-  const FAILED =
-    "The Use.GPU renderer couldn't start on this device, so Math3d switched to the default renderer.";
+  const FAILED = "The Use.GPU renderer couldn't start on this device.";
 
   test("a stored Use.GPU preference waits for detection, then draws Use.GPU", async () => {
     storeRendererPreference("usegpu");

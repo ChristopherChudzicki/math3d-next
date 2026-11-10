@@ -62,7 +62,7 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
   const { open } = useOverlay();
   const { open: openSignIn } = useSignInDialog();
   const isAuthenticated = authStatus === "authenticated";
-  const { renderer, chooseRenderer } = useRenderer();
+  const { renderer, requested, chooseRenderer } = useRenderer();
   const webGpuSupport = useWebGpuSupport();
   return (
     <>
@@ -98,7 +98,11 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
         Function Reference
       </Menu.LinkItem>
       <Menu.Separator />
-      <Menu.RadioGroup value={renderer} onValueChange={chooseRenderer}>
+      <Menu.RadioGroup
+        // `renderer` is null while WebGPU detection is pending.
+        value={renderer ?? requested}
+        onValueChange={chooseRenderer}
+      >
         <Menu.GroupLabel>Renderer</Menu.GroupLabel>
         {RENDERER_KEYS.map((key) => {
           const { menuLabel, needsWebGpu } = RENDERERS[key];

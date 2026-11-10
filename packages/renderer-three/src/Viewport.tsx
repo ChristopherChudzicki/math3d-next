@@ -23,14 +23,18 @@ const Viewport: React.FC<ViewportProps> = ({
     latestHooks.current = hooks;
   });
   const [scene, setScene] = useState<ThreeScene | null>(null);
+  const [failure, setFailure] = useState<{ error: unknown } | null>(null);
 
   useEffect(() => {
     if (!host.current) return undefined;
+    let current = true;
     const next = new ThreeScene(host.current, {
       forceWebGL,
       onFirstFrame: () => latestHooks.current.onReady(),
+      onError: (error) => {
+        if (current) setFailure({ error });
+      },
     });
-    let current = true;
     next.init().then(
       () => {
         if (current) setScene(next);
@@ -50,6 +54,8 @@ const Viewport: React.FC<ViewportProps> = ({
     scene?.setSpec(spec);
   }, [scene, spec]);
 
+  // Rethrown during render so the error boundary above sees it.
+  if (failure) throw failure.error;
   return <div ref={host} style={HOST_STYLE} />;
 };
 

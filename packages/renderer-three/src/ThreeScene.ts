@@ -12,6 +12,8 @@ type Options = {
   forceWebGL: boolean;
   /** Called once, after the first frame is drawn. */
   onFirstFrame(): void;
+  /** Gets what a resize or a frame throws, since neither runs inside React. */
+  onError(error: unknown): void;
 };
 
 /**
@@ -60,7 +62,9 @@ export class ThreeScene {
       forceWebGL: options.forceWebGL,
     });
     this.renderer.setClearColor(0xffffff, 1);
-    this.resizeObserver = new ResizeObserver(() => this.resize());
+    this.resizeObserver = new ResizeObserver(() =>
+      this.reporting(() => this.resize()),
+    );
   }
 
   /** Resolves once a backend is up; rejects when neither WebGPU nor WebGL2 is. */
@@ -108,7 +112,7 @@ export class ThreeScene {
 
   private resize(): void {
     if (!this.hasSize()) return;
-    // Browser zoom and moving between screens change it.
+    // Browser zoom changes it.
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(this.host.clientWidth, this.host.clientHeight, false);
     this.updateCamera();
@@ -125,8 +129,16 @@ export class ThreeScene {
     if (this.frame !== null || this.disposed) return;
     this.frame = requestAnimationFrame(() => {
       this.frame = null;
-      this.draw();
+      this.reporting(() => this.draw());
     });
+  }
+
+  private reporting(callback: () => void): void {
+    try {
+      callback();
+    } catch (error) {
+      this.options.onError(error);
+    }
   }
 
   private draw(): void {

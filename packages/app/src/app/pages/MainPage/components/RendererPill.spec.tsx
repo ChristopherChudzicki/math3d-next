@@ -19,7 +19,9 @@ test.each([
     renderTestApp("/", { isAuthenticated });
     const menuTrigger = await screen.findByRole("button", { name: trigger });
 
-    await user.click(await screen.findByRole("button", { name: "Use.GPU" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Use.GPU renderer" }),
+    );
     const popover = await screen.findByRole("dialog", {
       name: "Use.GPU renderer",
     });
@@ -37,7 +39,9 @@ test.each([
       ),
     );
     await waitFor(() =>
-      expect(screen.queryByRole("button", { name: "Use.GPU" })).toBeNull(),
+      expect(
+        screen.queryByRole("button", { name: "Use.GPU renderer" }),
+      ).toBeNull(),
     );
     expect(menuTrigger).toHaveFocus();
   },
@@ -48,7 +52,7 @@ test("the pill names the three.js renderer", async () => {
   renderTestApp("/");
 
   expect(
-    await screen.findByRole("button", { name: "three.js" }),
+    await screen.findByRole("button", { name: "three.js renderer" }),
   ).toBeInTheDocument();
 });
 
@@ -60,5 +64,5 @@ test("no pill on the scene-unavailable card", async () => {
   expect(
     await screen.findByRole("heading", { name: "This scene doesn’t exist." }),
   ).toBeVisible();
-  expect(screen.queryByRole("button", { name: "Use.GPU" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Use.GPU renderer" })).toBeNull();
 });

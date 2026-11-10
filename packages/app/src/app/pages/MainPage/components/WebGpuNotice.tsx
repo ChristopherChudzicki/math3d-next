@@ -6,8 +6,7 @@ const BANNER_ID = "webgpu-notice";
 
 const CONTENT: Record<NoticeReason, string> = {
   link: "This link asks for the experimental Use.GPU renderer, which isn't available in this browser. Showing the scene with the default renderer.",
-  failed:
-    "The Use.GPU renderer couldn't start on this device, so Math3d switched to the default renderer.",
+  failed: "The Use.GPU renderer couldn't start on this device.",
 };
 
 /** Registers the banner saying why the Use.GPU renderer isn't in use. */

@@ -20,7 +20,11 @@ const RendererPill: React.FC = () => {
     <Popover.Root>
       <Popover.Trigger
         render={
-          <Button size="sm" className={pill.pill}>
+          <Button
+            size="sm"
+            className={pill.pill}
+            aria-label={`${name} renderer`}
+          >
             {name}
           </Button>
         }

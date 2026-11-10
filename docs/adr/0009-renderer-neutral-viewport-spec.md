@@ -54,7 +54,10 @@ taking a `ViewportSpec`, `ViewportHooks` and `forceWebGL`, and is built on
 `WebGPURenderer` (`three/webgpu`), which falls back to WebGL2 by itself.
 
 - A graphic kind plugs in as a builder in `graphics/builders.ts`;
-  `syncGraphics` adds, updates and disposes graphics by `id`.
+  `syncGraphics` adds, updates and disposes graphics by `id`, and gives each
+  its item's place in the list for breaking draw-order ties.
+- `Viewport` rethrows what a frame or resize throws, so the error boundary
+  sees it.
 - Frames draw on change, but three's own animation-frame loop runs from the
   first frame until disposal.
 - Its Vitest project runs in Node, so it tests pure code only.

@@ -45,7 +45,23 @@ test("a changed spec updates its graphic in place", () => {
   sync([{ id: "a", spec: next }]);
 
   expect(builders.point).toHaveBeenCalledOnce();
-  expect(graphic.update).toHaveBeenCalledExactlyOnceWith(next);
+  expect(graphic.update).toHaveBeenCalledExactlyOnceWith(next, 0);
+});
+
+test("graphics learn their place in the item list, and when it changes", () => {
+  const { builders, graphic, sync } = setup();
+  const a = point(1);
+  const b = point(2);
+  sync([{ id: "a", spec: a }]);
+
+  sync([
+    { id: "b", spec: b },
+    { id: "a", spec: a },
+  ]);
+
+  expect(builders.point).toHaveBeenNthCalledWith(1, a, 0);
+  expect(builders.point).toHaveBeenNthCalledWith(2, b, 0);
+  expect(graphic.update).toHaveBeenCalledExactlyOnceWith(a, 1);
 });
 
 test("a graphic that leaves the spec is removed and disposed", () => {

@@ -334,12 +334,13 @@ describe("the Renderer group", () => {
     await expectRenderer("mathbox");
   });
 
-  test("while detection is pending Use.GPU is disabled without a reason, then enabled", async () => {
+  test("while detection is pending a requested Use.GPU is checked but disabled without a reason, then enabled", async () => {
     const adapter = Promise.withResolvers<unknown>();
     stubWebGpu(() => adapter.promise);
-    renderTestApp("");
+    renderTestApp("?renderer=usegpu");
     await openMenu();
     const item = screen.getByRole("menuitemradio", { name: USE_GPU });
+    expect(item).toBeChecked();
     expect(item).toHaveAttribute("aria-disabled", "true");
     expect(item).not.toHaveAccessibleDescription();
 
