@@ -85,7 +85,8 @@ This app is deployed as a true react SPA hosted on a CDN with APIs powered by Dj
 **App and API:**
 
 - **`packages/app`** — Main React app (Vite, port 3000). Entry: `src/main.tsx`. Orchestrates all math packages + MathBox rendering
-- **`packages/viewport-spec`** — Renderer-neutral, types-only contract for what the viewport draws (`ViewportSpec`, `ViewportHooks`, `GraphicSpec`). `app`'s `features/viewport/spec/` produces it (`useViewportSpec`) from evaluated math items; the Use.GPU renderer draws from it (MathBox reads math items directly). [ADR-0009](docs/adr/0009-renderer-neutral-viewport-spec.md) records the boundary
+- **`packages/viewport-spec`** — Renderer-neutral, types-only contract for what the viewport draws (`ViewportSpec`, `ViewportHooks`, `GraphicSpec`). `app`'s `features/viewport/spec/` produces it (`useViewportSpec`) from evaluated math items; the Use.GPU and three.js renderers draw from it (MathBox reads math items directly). [ADR-0009](docs/adr/0009-renderer-neutral-viewport-spec.md) records the boundary
+- **`packages/renderer-three`** — The opt-in three.js renderer (`WebGPURenderer`, falling back to WebGL2): a React `Viewport` drawing a `ViewportSpec`. Carries its own `three`, newer than the `three@0.147` MathBox needs, so `app` loads it only through the `React.lazy` in `features/viewport/three/`
 - **`packages/api`** — Auto-generated OpenAPI types (openapi-typescript) + openapi-fetch client + React Query hooks for scenes/auth
 - **`packages/mock-api`** — MSW-based mock API with faker-generated data and `SceneBuilder` for tests
 - **`packages/app-tests-e2e`** — Playwright E2E tests
@@ -103,7 +104,7 @@ This app is deployed as a true react SPA hosted on a CDN with APIs powered by Dj
 - **Rendering**: Vite dev/build, React 19, TypeScript (strict)
 - **State**: Redux Toolkit. Store: `packages/app/src/store/store.ts`. The scene model (slice, selectors, MathScope evaluation) is `packages/app/src/store/scene/`
 - **UI**: [Base UI](https://base-ui.com), wrapped by the generic components in `packages/app/src/ui/` ([ADR-0006](docs/adr/0006-base-ui-and-css-modules.md)). Color tokens: `packages/app/src/globals.css`. Icons: Iconify (Lucide)
-- **3D Visualization**: MathBox + Three.js, via [mathbox-react](https://github.com/ChristopherChudzicki/mathbox-react) bindings. `?renderer=usegpu`, or the account menu's WebGPU item, swaps in an opt-in [Use.GPU](https://usegpu.live) (WebGPU) renderer under `features/viewport/usegpu/`; [ADR-0008](docs/adr/0008-usegpu-opt-in-renderer.md) covers its `React.lazy` boundary into `usegpu/live/` and `@use-gpu/workbench` Yarn patch; [ADR-0009](docs/adr/0009-renderer-neutral-viewport-spec.md) the `features/viewport/` folders and lint zones.
+- **3D Visualization**: MathBox + Three.js, via [mathbox-react](https://github.com/ChristopherChudzicki/mathbox-react) bindings. The account menu's "Renderer" group or `?renderer=` (keys in `services/renderer/renderers.ts`) swaps in an opt-in renderer: [Use.GPU](https://usegpu.live) (WebGPU, `features/viewport/usegpu/`) or three.js (`features/viewport/three/` → `packages/renderer-three`). [ADR-0008](docs/adr/0008-usegpu-opt-in-renderer.md) covers Use.GPU's `React.lazy` boundary into `usegpu/live/` and `@use-gpu/workbench` Yarn patch; [ADR-0009](docs/adr/0009-renderer-neutral-viewport-spec.md) the renderer list, lazy boundaries and lint zones.
 - **Math Input**: MathLive (LaTeX-style input fields)
 - **Data Fetching**: TanStack React Query + openapi-fetch
 - **Routing**: React Router v7. Routes: `packages/app/src/app/routes.tsx`

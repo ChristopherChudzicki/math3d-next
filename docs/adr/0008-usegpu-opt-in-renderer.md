@@ -13,8 +13,9 @@ with a WebGPU adapter.
 
 **Add Use.GPU as a second, opt-in renderer. MathBox stays the default.**
 
-- `services/renderer/` picks the viewport: an explicit `?renderer` (`mathbox`
-  or `usegpu`) wins over a per-browser preference set from the account menu.
+- `services/renderer/` picks the viewport: an explicit `?renderer` (a key of
+  [ADR-0009's renderer list](0009-renderer-neutral-viewport-spec.md#the-renderer-list))
+  wins over a per-browser preference set from the account menu.
 - Without a WebGPU adapter (detection gives up after 2 s), MathBox draws, with
   a notice when the URL asked for Use.GPU. A device that fails to start also
   falls back to MathBox, with a notice, and stores `mathbox` as the preference.
@@ -56,8 +57,8 @@ upstream bugs:
 ### Parity record
 
 - `shared/coverage.ts` types a table that classifies every stored property of
-  every rendered item; `mathbox/coverage.ts` and `usegpu/coverage.ts` fill it.
-  A new property fails typecheck until both renderers classify it.
+  every rendered item; each renderer folder's `coverage.ts` fills it. A new
+  property fails typecheck until every renderer classifies it.
 - An `approximate: <why>` entry is a known difference from MathBox; `n/a:` is
   a property that doesn't apply; `todo` is a gap.
 - QA scenes (`webserver/scenes/seed_scenes/qa/`, one per graphical feature)

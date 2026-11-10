@@ -5,6 +5,8 @@ import { resetRendererPreference } from "@/services/renderer/rendererPreference"
 import { resetWebGpuSupport } from "@/services/renderer/webgpuSupport";
 import { gpuContent } from "@/test_util/gpuViewportContent";
 import type { ContentProps } from "@/test_util/gpuViewportContent";
+import { threeViewport } from "@/test_util/threeViewport";
+import type { ThreeViewportProps } from "@/test_util/threeViewport";
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:
@@ -50,6 +52,15 @@ vi.mock("@/features/viewport/usegpu/live/GpuViewportContent", async () => {
   const shared = await import("@/test_util/gpuViewportContent");
   return {
     default: (props: ContentProps) => shared.gpuContent.Component(props),
+  };
+});
+
+/** JSDOM has neither WebGPU nor WebGL2 for three.js to draw with. */
+vi.mock("@math3d/renderer-three", async () => {
+  const shared = await import("@/test_util/threeViewport");
+  return {
+    Viewport: (props: ThreeViewportProps) =>
+      shared.threeViewport.Component(props),
   };
 });
 
@@ -101,6 +112,7 @@ beforeEach(() => {
 afterEach(() => {
   server.resetHandlers();
   gpuContent.Component = gpuContent.RendersNothing;
+  threeViewport.Component = threeViewport.RendersNothing;
   // @ts-expect-error navigator.gpu is required in @webgpu/types; stubWebGpu adds a stand-in.
   delete navigator.gpu;
 });

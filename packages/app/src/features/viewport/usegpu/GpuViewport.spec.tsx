@@ -78,7 +78,7 @@ test("when the renderer throws, its button switches to the default renderer", as
   gpuContent.Component = FailsToLoad;
   const { store } = renderViewport();
   expect(
-    await screen.findByText("The WebGPU renderer ran into an error."),
+    await screen.findByText("The Use.GPU renderer ran into an error."),
   ).toBeInTheDocument();
 
   await user.click(

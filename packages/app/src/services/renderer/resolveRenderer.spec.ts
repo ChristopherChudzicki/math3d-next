@@ -62,6 +62,18 @@ test.each([
     webgpu: "available",
     expected: { renderer: "mathbox", notice: null },
   },
+  {
+    param: "threejs",
+    preference: "usegpu",
+    webgpu: "pending",
+    expected: { renderer: "threejs", notice: null },
+  },
+  {
+    param: null,
+    preference: "threejs",
+    webgpu: "failed",
+    expected: { renderer: "threejs", notice: "failed" },
+  },
 ] as const)(
   "?renderer=$param, preference $preference, WebGPU $webgpu → $expected.renderer, notice $expected.notice",
   ({ expected, ...input }) => {

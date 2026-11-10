@@ -2,11 +2,10 @@ import React, { useId } from "react";
 import classNames from "classnames";
 import { Menu as BaseMenu } from "@base-ui/react/menu";
 import { Icon } from "@iconify/react/offline";
-import square from "@iconify-icons/lucide/square";
-import squareCheck from "@iconify-icons/lucide/square-check";
+import check from "@iconify-icons/lucide/check";
 import * as styles from "./Menu.module.css";
 
-const { Root, Trigger, Group } = BaseMenu;
+const { Root, Trigger, Group, RadioGroup } = BaseMenu;
 
 type PopupProps = Omit<BaseMenu.Popup.Props, "className"> &
   Pick<
@@ -106,10 +105,7 @@ const LinkItem: React.FC<LinkItemProps> = ({
   </BaseMenu.LinkItem>
 );
 
-type CheckboxItemProps = Omit<
-  BaseMenu.CheckboxItem.Props,
-  "className" | "children"
-> &
+type RadioItemProps = Omit<BaseMenu.RadioItem.Props, "className" | "children"> &
   Omit<ItemContentProps, "icon"> & {
     /** A muted second line: the item's accessible description, not part of its name. */
     description?: React.ReactNode;
@@ -117,10 +113,11 @@ type CheckboxItemProps = Omit<
   };
 
 /**
- * A checkable menu item; a checkbox takes the icon slot. Closes the menu
- * on click (Base UI's default is to stay open), like the other items.
+ * One choice in a `RadioGroup`; a checkmark in the icon slot marks the chosen
+ * one. Closes the menu on click (Base UI's default is to stay open), like the
+ * other items.
  */
-const CheckboxItem: React.FC<CheckboxItemProps> = ({
+const RadioItem: React.FC<RadioItemProps> = ({
   closeOnClick = true,
   description,
   className,
@@ -130,7 +127,7 @@ const CheckboxItem: React.FC<CheckboxItemProps> = ({
   const labelId = useId();
   const descriptionId = useId();
   return (
-    <BaseMenu.CheckboxItem
+    <BaseMenu.RadioItem
       aria-labelledby={labelId}
       aria-describedby={description ? descriptionId : undefined}
       {...others}
@@ -138,8 +135,7 @@ const CheckboxItem: React.FC<CheckboxItemProps> = ({
       className={classNames(styles.item, styles.neutral, className)}
     >
       <span className={styles.icon} aria-hidden="true">
-        <Icon icon={square} className={styles.whenUnchecked} />
-        <Icon icon={squareCheck} className={styles.whenChecked} />
+        <Icon icon={check} className={styles.checkmark} />
       </span>
       <span className={styles.text}>
         <span id={labelId} className={styles.label}>
@@ -151,7 +147,7 @@ const CheckboxItem: React.FC<CheckboxItemProps> = ({
           </span>
         ) : null}
       </span>
-    </BaseMenu.CheckboxItem>
+    </BaseMenu.RadioItem>
   );
 };
 
@@ -183,9 +179,10 @@ export {
   Popup,
   Item,
   LinkItem,
-  CheckboxItem,
+  RadioGroup,
+  RadioItem,
   Separator,
   Group,
   GroupLabel,
 };
-export type { PopupProps, ItemProps, LinkItemProps, CheckboxItemProps };
+export type { PopupProps, ItemProps, LinkItemProps, RadioItemProps };

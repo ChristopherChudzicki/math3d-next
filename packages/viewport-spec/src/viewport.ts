@@ -36,4 +36,6 @@ export type ViewportHooks = {
    * when a move has ended.
    */
   onCameraMove(camera: CameraSpec): void;
+  /** The first frame is drawn. */
+  onReady(): void;
 };

@@ -320,9 +320,9 @@ const ReportsNoDevice = ({ onUnsupported }: ContentProps) => {
 
 describe("renderer", () => {
   const NOTICE =
-    "This link asks for the experimental WebGPU renderer, which isn't available in this browser. Showing the scene with the default renderer.";
+    "This link asks for the experimental Use.GPU renderer, which isn't available in this browser. Showing the scene with the default renderer.";
   const FAILED =
-    "The WebGPU renderer couldn't start on this device, so Math3d switched to the default renderer.";
+    "The Use.GPU renderer couldn't start on this device, so Math3d switched to the default renderer.";
 
   test("a stored Use.GPU preference waits for detection, then draws Use.GPU", async () => {
     storeRendererPreference("usegpu");
@@ -405,7 +405,7 @@ describe("renderer", () => {
     await screen.findByText(FAILED);
 
     await user.click(
-      screen.getByRole("button", { name: "Dismiss WebGPU notice" }),
+      screen.getByRole("button", { name: "Dismiss Use.GPU notice" }),
     );
     await act(() => router.navigate("/nonexistent-scene-key"));
     await screen.findByRole("heading", { name: "This scene doesn’t exist." });

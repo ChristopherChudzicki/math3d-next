@@ -1,11 +1,12 @@
 import { focusRendererSetting } from "./focusRendererSetting";
+import { DEFAULT_RENDERER } from "./renderers";
 import { useRenderer } from "./useRenderer";
 
-/** Switches to MathBox and focuses the menu trigger, where the setting lives. */
+/** Switches to the default renderer and focuses the menu trigger, where the setting lives. */
 const useSwitchToDefaultRenderer = (): (() => void) => {
   const { chooseRenderer } = useRenderer();
   return () => {
-    chooseRenderer("mathbox");
+    chooseRenderer(DEFAULT_RENDERER);
     focusRendererSetting();
   };
 };

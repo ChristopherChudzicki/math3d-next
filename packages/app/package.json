@@ -41,6 +41,7 @@
     "@math3d/mathscope": "workspace:^",
     "@math3d/parser": "workspace:^",
     "@math3d/react-textarea-autosize": "8.3.5",
+    "@math3d/renderer-three": "workspace:^",
     "@math3d/utils": "workspace:^",
     "@math3d/viewport-spec": "workspace:^",
     "@reduxjs/toolkit": "^2.13.0",

@@ -7,6 +7,7 @@ import circleHelp from "@iconify-icons/lucide/circle-help";
 import SceneActions from "@/features/sceneActions/SceneActions";
 
 import { RENDERER_SETTING_ID } from "@/services/renderer/focusRendererSetting";
+import { RENDERER_KEYS, RENDERERS } from "@/services/renderer/renderers";
 import { useRenderer } from "@/services/renderer/useRenderer";
 import { useWebGpuSupport } from "@/services/renderer/webgpuSupport";
 import type { WebGpuSupport } from "@/services/renderer/webgpuSupport";
@@ -96,14 +97,26 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
       >
         Function Reference
       </Menu.LinkItem>
-      <Menu.CheckboxItem
-        checked={renderer === "usegpu"}
-        onCheckedChange={(on) => chooseRenderer(on ? "usegpu" : "mathbox")}
-        disabled={webGpuSupport !== "available"}
-        description={DISABLED_REASON[webGpuSupport]}
-      >
-        WebGPU renderer (experimental)
-      </Menu.CheckboxItem>
+      <Menu.Separator />
+      <Menu.RadioGroup value={renderer} onValueChange={chooseRenderer}>
+        <Menu.GroupLabel>Renderer</Menu.GroupLabel>
+        {RENDERER_KEYS.map((key) => {
+          const { menuLabel, needsWebGpu } = RENDERERS[key];
+          return (
+            <Menu.RadioItem
+              key={key}
+              value={key}
+              disabled={needsWebGpu && webGpuSupport !== "available"}
+              description={
+                needsWebGpu ? DISABLED_REASON[webGpuSupport] : undefined
+              }
+            >
+              {menuLabel}
+            </Menu.RadioItem>
+          );
+        })}
+      </Menu.RadioGroup>
+      <Menu.Separator />
       <Menu.LinkItem
         icon={<Icon icon={circleHelp} aria-hidden="true" />}
         href={ISSUE_URL}

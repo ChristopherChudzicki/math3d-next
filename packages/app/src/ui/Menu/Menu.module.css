@@ -117,8 +117,7 @@
   text-overflow: ellipsis;
 }
 
-/* Base UI marks a checkbox item with data-checked or data-unchecked. */
-.item[data-checked] .whenUnchecked,
-.item[data-unchecked] .whenChecked {
-  display: none;
+/* An unchosen radio item keeps the checkmark's space, so labels line up. */
+.item[data-unchecked] .checkmark {
+  visibility: hidden;
 }

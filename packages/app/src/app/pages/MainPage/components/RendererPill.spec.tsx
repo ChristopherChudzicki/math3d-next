@@ -19,12 +19,12 @@ test.each([
     renderTestApp("/", { isAuthenticated });
     const menuTrigger = await screen.findByRole("button", { name: trigger });
 
-    await user.click(await screen.findByRole("button", { name: "WebGPU" }));
+    await user.click(await screen.findByRole("button", { name: "Use.GPU" }));
     const popover = await screen.findByRole("dialog", {
-      name: "WebGPU renderer",
+      name: "Use.GPU renderer",
     });
     expect(popover).toHaveTextContent(
-      "You're using the experimental WebGPU renderer. You can also change this in the menu.",
+      "You're using the experimental Use.GPU renderer. You can also change this in the menu.",
     );
 
     await user.click(
@@ -37,11 +37,20 @@ test.each([
       ),
     );
     await waitFor(() =>
-      expect(screen.queryByRole("button", { name: "WebGPU" })).toBeNull(),
+      expect(screen.queryByRole("button", { name: "Use.GPU" })).toBeNull(),
     );
     expect(menuTrigger).toHaveFocus();
   },
 );
+
+test("the pill names the three.js renderer", async () => {
+  storeRendererPreference("threejs");
+  renderTestApp("/");
+
+  expect(
+    await screen.findByRole("button", { name: "three.js" }),
+  ).toBeInTheDocument();
+});
 
 test("no pill on the scene-unavailable card", async () => {
   stubWebGpu();
@@ -51,5 +60,5 @@ test("no pill on the scene-unavailable card", async () => {
   expect(
     await screen.findByRole("heading", { name: "This scene doesn’t exist." }),
   ).toBeVisible();
-  expect(screen.queryByRole("button", { name: "WebGPU" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Use.GPU" })).toBeNull();
 });
