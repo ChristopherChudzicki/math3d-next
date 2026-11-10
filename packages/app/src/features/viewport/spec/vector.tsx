@@ -5,8 +5,7 @@ import {
   useFinalVisibility,
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
-import type { Coords } from "@/features/viewport/shared/coordinates";
-import type { GraphicSpec } from "@math3d/viewport-spec";
+import type { Coords, GraphicSpec } from "@math3d/viewport-spec";
 import { visibleLabel } from "./style";
 import { useLineStyle } from "./line";
 import { useReportSpec } from "./collector";

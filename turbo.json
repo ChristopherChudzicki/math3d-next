@@ -10,6 +10,6 @@
         "$TURBO_ROOT$/webserver/scenes/seed_scenes/qa/**"
       ]
     },
-    "typecheck": {}
+    "typecheck": { "dependsOn": ["^typecheck"] }
   }
 }

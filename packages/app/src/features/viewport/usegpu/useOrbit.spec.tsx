@@ -7,7 +7,7 @@ import type { MathItem } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import { storeWithScene } from "@/test_util/renderGraphicSpec";
 import { fromUi } from "@/features/viewport/shared/coordinates";
-import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
+import type { AxesRange, Coords } from "@math3d/viewport-spec";
 import { actions } from "@/store/scene/state/scene.slice";
 import { toOrbit } from "./orbit";
 import { useOrbit } from "./useOrbit";

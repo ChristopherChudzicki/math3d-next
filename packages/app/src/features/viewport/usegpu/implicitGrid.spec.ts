@@ -1,4 +1,4 @@
-import type { AxesRange } from "@/features/viewport/shared/coordinates";
+import type { AxesRange } from "@math3d/viewport-spec";
 import {
   MAX_IMPLICIT_CELLS,
   gradientFromGrid,

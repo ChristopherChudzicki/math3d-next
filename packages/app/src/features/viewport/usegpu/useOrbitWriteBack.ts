@@ -4,7 +4,7 @@ import { debounce } from "lodash-es";
 import { useAppDispatch } from "@/store/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
 import { toUi } from "@/features/viewport/shared/coordinates";
-import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
+import type { AxesRange, Coords } from "@math3d/viewport-spec";
 import { cameraPatches } from "@/features/viewport/shared/cameraWriteBack";
 import { fromOrbit } from "./orbit";
 import type { OrbitSpec } from "./orbit";

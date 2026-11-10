@@ -6,7 +6,7 @@ import { Vector3 } from "three";
 import { useMathItemResults } from "@/store/scene/evaluation/mathScope";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 import { fromUi, toUi } from "@/features/viewport/shared/coordinates";
-import type { AxesRange, Coords } from "@/features/viewport/shared/coordinates";
+import type { AxesRange, Coords } from "@math3d/viewport-spec";
 import { cameraPatches } from "@/features/viewport/shared/cameraWriteBack";
 import type { CameraPatch } from "@/features/viewport/shared/cameraWriteBack";
 import { dolly, FOV_DOLLY_IN, FOV_DOLLY_OUT } from "./dollyZoom";

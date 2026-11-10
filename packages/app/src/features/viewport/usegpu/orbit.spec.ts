@@ -1,5 +1,5 @@
 import { makeOrbitPosition } from "@use-gpu/core";
-import type { Coords } from "@/features/viewport/shared/coordinates";
+import type { Coords } from "@math3d/viewport-spec";
 import { fromOrbit, toOrbit, toWorld } from "./orbit";
 
 const cases: { position: Coords; target: Coords }[] = [

@@ -50,4 +50,3 @@ const toUi = (
 };
 
 export { fromUi, toUi };
-export type { Coords, AxesRange };

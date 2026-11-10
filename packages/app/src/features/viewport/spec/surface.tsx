@@ -9,7 +9,7 @@ import {
   useFinalVisibility,
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
-import type { Coords } from "@/features/viewport/shared/coordinates";
+import type { Coords, GraphicSpec, RGBA } from "@math3d/viewport-spec";
 import {
   domainMap,
   explicitPolarSurface,
@@ -17,7 +17,6 @@ import {
 } from "@/features/viewport/shared/surfaceDomain";
 import { explicitColorFunc } from "@/features/viewport/shared/surfaceColor";
 import type { SurfaceColorFunc } from "@/features/viewport/shared/surfaceColor";
-import type { GraphicSpec, RGBA } from "@math3d/viewport-spec";
 import { baseStyle, sampleCount } from "./style";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";

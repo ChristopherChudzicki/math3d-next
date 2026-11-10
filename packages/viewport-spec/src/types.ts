@@ -1,7 +1,12 @@
 /**
  * What each graphic draws, in math-item terms: evaluated positions, RGBA
  * colors, sample callbacks. The app's viewport/spec components read the store
- * and MathScope and produce these; each renderer turns them into its own scene.
+ * and MathScope and produce these; a renderer that draws from specs (Use.GPU
+ * today) turns them into its own scene, while MathBox reads math items directly.
+ *
+ * Positions are in math coordinates, as the items evaluate them; only
+ * `CameraSpec` is in view coordinates. Pixel quantities (`width`, `size`) are
+ * CSS pixels, as MathBox draws them.
  */
 import type { AxesRange, Coords } from "./coordinates";
 
@@ -12,8 +17,8 @@ type Common = {
   zBias: number;
   /**
    * MathBox squeezes a higher zIndex's depth toward the near plane, so it draws
-   * over lower ones; each renderer's coverage table says how it approximates
-   * that.
+   * over lower ones. Other renderers approximate that (Use.GPU only orders draw
+   * calls by it, where a component accepts it); see each renderer's coverage table.
    */
   zIndex: number;
 };
@@ -21,6 +26,7 @@ type Common = {
 export type PointSpec = Common & {
   kind: "point";
   positions: Coords[];
+  /** Point diameter, in CSS pixels. */
   size: number;
   color: RGBA;
   /** Drawn at each point; `null` when hidden or empty. */
@@ -30,10 +36,13 @@ export type PointSpec = Common & {
 export type LineSpec = Common & {
   kind: "line";
   paths: Coords[][];
+  /** Line width, in CSS pixels. */
   width: number;
   color: RGBA;
+  /** Arrowheads at each path's first and last point. */
   start: boolean;
   end: boolean;
+  /** Arrowhead scale: MathBox draws the head 1.25 × arrowSize × width pixels long. */
   arrowSize: number;
   /** Drawn at the last point; `null` when hidden or empty. */
   label: string | null;
@@ -65,10 +74,13 @@ export type ImplicitSurfaceSpec = Common & {
 export type AxisSpec = Common & {
   kind: "axis";
   axis: "x" | "y" | "z";
+  /** Line width, in CSS pixels. */
   width: number;
   color: RGBA;
+  /** Arrowheads at the axis's low and high end. */
   start: boolean;
   end: boolean;
+  /** Arrowhead scale, as in `LineSpec`. */
   arrowSize: number;
   range: [number, number];
   ticks: { divisions: number; visible: boolean };

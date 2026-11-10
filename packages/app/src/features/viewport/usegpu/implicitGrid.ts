@@ -1,4 +1,4 @@
-import type { AxesRange } from "@/features/viewport/shared/coordinates";
+import type { AxesRange } from "@math3d/viewport-spec";
 
 /** Per-axis cell cap for implicit surfaces: memory and CPU normals grow as cells³. */
 export const MAX_IMPLICIT_CELLS = 128;

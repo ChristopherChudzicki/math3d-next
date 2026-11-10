@@ -1,5 +1,4 @@
-import type { Coords } from "@/features/viewport/shared/coordinates";
-import type { CameraSpec } from "@math3d/viewport-spec";
+import type { Coords, CameraSpec } from "@math3d/viewport-spec";
 
 /** Use.GPU `OrbitControls` parameters (world coordinates, y up). */
 export type OrbitSpec = {
