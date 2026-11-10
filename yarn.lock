@@ -4635,7 +4635,7 @@ __metadata:
     js-yaml: "npm:^4.3.2"
     jsdom: "npm:^26.1.0"
     lodash-es: "npm:4.18.1"
-    marked: "npm:^18.1.2"
+    marked: "npm:^18.2.0"
     mathbox: "npm:^2.3.1"
     mathbox-react: "npm:^1.0.1"
     mathlive: "npm:^0.110.0"
@@ -8396,12 +8396,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:^18.1.2":
-  version: 18.1.2
-  resolution: "marked@npm:18.1.2"
+"marked@npm:^18.2.0":
+  version: 18.2.0
+  resolution: "marked@npm:18.2.0"
   bin:
     marked: bin/marked.js
-  checksum: 10/9a49aa5322758bd6ec474e42cb4e42d06fef725adc84f27a7d9797036b67287f83b8e866dd7b12badf3847ba10bf34a9af2058df53e05d5a9118370d85a115fb
+  checksum: 10/3cbf9d9aec786a99836c505563eec46389872bedaaa095d7956cc7851082e3e98ed1b36cf000f275f77706af790293e454c65cc36d5060b9a9f15ce5f0200d50
   languageName: node
   linkType: hard
 
