@@ -10,3 +10,4 @@ export type {
   GraphicSpec,
   CameraSpec,
 } from "./types";
+export type { ViewportSpec, ViewportGraphic, ViewportHooks } from "./viewport";

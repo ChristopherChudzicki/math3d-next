@@ -3,75 +3,53 @@ import { useMemo, useRef, useState } from "react";
 import type { MathItem, MathItemType } from "@math3d/mathitem-configs";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 import { useMathItemResults } from "@/store/scene/evaluation/mathScope";
-import { fromUi } from "@/features/viewport/shared/coordinates";
-import type { AxesRange, Coords, CameraSpec } from "@math3d/viewport-spec";
+import type { ViewportSpec } from "@math3d/viewport-spec";
 import { toOrbit } from "./orbit";
 import type { OrbitSpec } from "./orbit";
 import { usePinchZoom } from "./usePinchZoom";
 import { useOrbitWriteBack } from "./useOrbitWriteBack";
 
-const CAMERA_PROPS = [
+const WRITE_BACK_PROPS = [
   "position",
   "target",
   "useRelative",
-  "isRotateEnabled",
-  "isPanEnabled",
-  "isZoomEnabled",
-  "isOrthographic",
   "updateOnDrag",
 ] as const;
 
 /**
- * The camera item's evaluated values as orbit-control inputs, defaulted until
- * they evaluate, plus pinch zoom and the write-back that ends each move.
+ * Orbit-control inputs for the viewport's camera, plus pinch zoom and the
+ * write-back that ends each move.
  */
 export const useOrbit = (
-  camera: MathItem<MathItemType.Camera>,
-  range: AxesRange,
-  scale: Coords,
+  viewport: Pick<
+    ViewportSpec,
+    "camera" | "orthographic" | "controls" | "range" | "scale"
+  >,
+  cameraItem: MathItem<MathItemType.Camera>,
   host: React.RefObject<HTMLElement | null>,
 ) => {
+  const { camera, orthographic, controls, range, scale } = viewport;
   const scope = useMathScope();
-  const {
-    position,
-    target,
-    useRelative,
-    isRotateEnabled,
-    isPanEnabled,
-    isZoomEnabled,
-    isOrthographic,
-    updateOnDrag,
-  } = useMathItemResults(scope, camera, CAMERA_PROPS);
-  const controls = useMemo(
-    () => ({
-      rotate: isRotateEnabled ?? true,
-      pan: isPanEnabled ?? true,
-      zoom: isZoomEnabled ?? true,
-    }),
-    [isRotateEnabled, isPanEnabled, isZoomEnabled],
-  );
-  const spec = useMemo<CameraSpec>(
-    () => ({
-      position: fromUi(position ?? [0.5, -2, 0.5], range, scale, !!useRelative),
-      target: fromUi(target ?? [0, 0, 0], range, scale, !!useRelative),
-    }),
-    [position, target, useRelative, range, scale],
+  const { position, target, useRelative, updateOnDrag } = useMathItemResults(
+    scope,
+    cameraItem,
+    WRITE_BACK_PROPS,
   );
   // Keeps orbit.target's identity; see SceneSpec.orbit.
-  const orbit = useMemo(() => toOrbit(spec), [spec]);
+  const orbit = useMemo(() => toOrbit(camera), [camera]);
   const projection = useMemo(
-    () => ({ dolly: isOrthographic ? 0 : 1 }),
-    [isOrthographic],
+    () => ({ dolly: orthographic ? 0 : 1 }),
+    [orthographic],
   );
   const stored = useMemo(
     () => ({
-      id: camera.id,
+      id: cameraItem.id,
       position,
       target,
       useRelative: !!useRelative,
       updateOnDrag: !!updateOnDrag,
     }),
-    [camera.id, position, target, useRelative, updateOnDrag],
+    [cameraItem.id, position, target, useRelative, updateOnDrag],
   );
   const { onOrbit, controlsVersion, latest } = useOrbitWriteBack(
     host,
@@ -107,5 +85,5 @@ export const useOrbit = (
     [pinch, orbit, controlsVersion],
   );
 
-  return { orbit: seeded, controls, projection, controlsVersion, onOrbit };
+  return { orbit: seeded, projection, controlsVersion, onOrbit };
 };

@@ -1,7 +1,7 @@
 import React from "react";
 import { act, renderHook } from "@testing-library/react";
 import { Provider } from "react-redux";
-import { SceneBuilder, makeItem } from "@math3d/mock-api";
+import { SceneBuilder } from "@math3d/mock-api";
 import { MathItemType } from "@math3d/mathitem-configs";
 import type { MathItem } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
@@ -9,6 +9,7 @@ import { storeWithScene } from "@/test_util/renderGraphicSpec";
 import { fromUi } from "@/features/viewport/shared/coordinates";
 import type { AxesRange, Coords } from "@math3d/viewport-spec";
 import { actions } from "@/store/scene/state/scene.slice";
+import { useCameraSpec } from "@/features/viewport/spec/camera";
 import { toOrbit } from "./orbit";
 import { useOrbit } from "./useOrbit";
 
@@ -25,9 +26,15 @@ const renderUseOrbit = (
 ) => {
   const store = storeWithScene(scene);
   const host = { current: document.createElement("div") };
-  const view = renderHook(() => useOrbit(camera, range, scale, host), {
-    wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  });
+  const view = renderHook(
+    () => {
+      const fields = useCameraSpec(camera, range, scale);
+      return useOrbit({ ...fields, range, scale }, camera, host);
+    },
+    {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    },
+  );
   /** Two touches 10px apart, spread to 20px: a pinch with ratio 1/2. */
   const pinchOut = () => {
     const touch = (type: string, pointerId: number, x: number) =>
@@ -66,28 +73,18 @@ const renderOrbit = (
   camera: MathItem<MathItemType.Camera>,
 ) => renderUseOrbit(scene, camera).result.current;
 
-test("defaults the camera and its controls before anything evaluates", () => {
-  // A camera the scene doesn't hold has no results.
-  const { orbit, controls, projection } = renderOrbit(
-    new SceneBuilder(),
-    makeItem(MathItemType.Camera, {}, "unevaluated"),
-  );
-  expect(orbit).toEqual(
-    toOrbit({
-      position: fromUi([0.5, -2, 0.5], range, scale, false),
-      target: fromUi([0, 0, 0], range, scale, false),
-    }),
-  );
-  expect(controls).toEqual({ rotate: true, pan: true, zoom: true });
-  expect(projection).toEqual({ dolly: 1 });
-});
-
-test("an orthographic camera gets dolly 0", () => {
-  const scene = new SceneBuilder().camera({ isOrthographic: "true" });
-  expect(renderOrbit(scene, sceneCamera(scene)).projection).toEqual({
-    dolly: 0,
-  });
-});
+test.each([
+  { isOrthographic: "false", dolly: 1 },
+  { isOrthographic: "true", dolly: 0 },
+])(
+  "isOrthographic $isOrthographic gets dolly $dolly",
+  ({ isOrthographic, dolly }) => {
+    const scene = new SceneBuilder().camera({ isOrthographic });
+    expect(renderOrbit(scene, sceneCamera(scene)).projection).toEqual({
+      dolly,
+    });
+  },
+);
 
 test("keeps the same orbit across rerenders, so the user's pan survives", () => {
   const scene = new SceneBuilder();
