@@ -1,5 +1,6 @@
 import type { Group } from "three/webgpu";
 import type { GraphicSpec } from "@math3d/viewport-spec";
+import { buildLine } from "./line";
 
 export type SpecOf<K extends GraphicSpec["kind"]> = Extract<
   GraphicSpec,
@@ -24,4 +25,4 @@ export type GraphicBuilders = {
   [K in GraphicSpec["kind"]]?: (spec: SpecOf<K>) => Graphic<SpecOf<K>>;
 };
 
-export const builders: GraphicBuilders = {};
+export const builders: GraphicBuilders = { line: buildLine };

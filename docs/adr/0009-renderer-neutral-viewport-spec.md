@@ -92,6 +92,36 @@ taking a `ViewportSpec`, `ViewportHooks` and `forceWebGL`, and is built on
   true `OrthographicCamera`.
 - Its Vitest project runs in Node, so it tests pure code only.
 
+#### Drawing marks
+
+A graphic's `object` holds math coordinates under a non-uniformly scaled
+parent, so anything sized in pixels is built in the shader, in view space:
+
+- **Pixel sizes are MathBox's.** `shader/viewUnits.ts` gives the view units
+  one CSS pixel spans at view depth 1 (MathBox's `worldUnit`). A width or
+  arrowhead is that size in view space: exact at one view unit from the camera,
+  smaller farther away in perspective, and the same in orthographic as in the
+  perspective view it replaces.
+- **Lines are a `Stroke`** (`stroke/Stroke.ts`): add its `objects` to the
+  item's `Group` and call `set(paths, style)` on every change. It ports
+  MathBox's line and arrow shaders (miter joins, arrowheads that shrink on
+  short paths, the line clipped under them) and keeps a line that crosses the
+  near plane intact. It is meant for every later stroke too: axes, ticks,
+  grids and surface gridlines.
+  - Two draw calls per stroke however many paths: one quad per segment and
+    one cone per arrowhead, both instanced. `set` refills the instance
+    buffers in place and replaces them only to grow.
+  - Its materials are shared by every stroke, so each shader compiles once
+    per transparency. Each mesh's style is `userData.stroke`, read per object
+    by the shader.
+- **`zBias` and `zIndex` go through `shader/depthStyle.ts`**, whatever the
+  mark. `zBias` reproduces MathBox's under its perspective camera, stated as
+  a change in view depth so both backends and both projections agree;
+  MathBox's own orthographic (a dolly) lets any `zBias` win outright.
+- **Colors are output unconverted** (`outputColorSpace` is linear), so they
+  blend in sRGB as MathBox's do. three's default pipeline blends in linear
+  space, which lightens every translucent mark.
+
 `features/viewport/three/ThreeViewport` is the app's glue: it collects the
 spec with `useViewportSpec` and loads the package through its one
 `React.lazy`, so the second `three` ships only in that lazy chunk. It and
