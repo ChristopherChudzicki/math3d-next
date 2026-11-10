@@ -30,7 +30,7 @@ test("?renderer=usegpu without a WebGPU adapter draws MathBox and says so", asyn
   await expect(viewport.locator("canvas")).toBeVisible();
   await expect(
     page.getByText(
-      "This link asks for the experimental WebGPU renderer, which isn't available in this browser. Showing the scene with the default renderer.",
+      "This link asks for the experimental Use.GPU renderer, which isn't available in this browser. Showing the scene with the default renderer.",
     ),
   ).toBeVisible();
   // A build keeps the module's name as the prefix of its hashed chunk.

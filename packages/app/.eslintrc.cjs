@@ -49,10 +49,27 @@ const useGpuRuntime = {
 
 // The path zones below keep renderer folders out of spec/ and shared/; this
 // keeps renderer packages out (docs/adr/0009).
+// Anchored: a bare "three" would also match the @/…/viewport/three folder.
+const RENDERER_PACKAGES = ["/three", "/three/*", "/mathbox*", "@use-gpu/*"];
 const noRendererPackages = {
-  group: ["three", "three/*", "mathbox*", "@use-gpu/*"],
+  group: RENDERER_PACKAGES,
   message:
     "viewport/spec and viewport/shared are renderer-neutral; renderer code goes in its own folder.",
+};
+// `three` here is MathBox's copy; @math3d/renderer-three carries its own.
+const threeAdapter = {
+  group: RENDERER_PACKAGES,
+  message:
+    "viewport/three is a thin adapter; three.js code goes in @math3d/renderer-three.",
+};
+
+// The three.js renderer stays behind the one React.lazy in
+// three/ThreeViewport, so it never reaches the main bundle. A dynamic
+// import() is not checked by this rule.
+const rendererThree = {
+  group: ["@math3d/renderer-three"],
+  message:
+    "@math3d/renderer-three loads only through three/ThreeViewport (React.lazy).",
 };
 
 // ESLint overrides replace a rule's options rather than merging them, so every
@@ -61,7 +78,7 @@ const restrictedImports = ({
   allowBaseUi = false,
   allowParentImports = false,
   allowUseGpu = false,
-  banRendererPackages = false,
+  rendererPackages = null,
 } = {}) => ({
   paths: [iconifyOnline],
   patterns: [
@@ -69,11 +86,13 @@ const restrictedImports = ({
     noMui,
     ...(allowParentImports ? [] : [noParentImports]),
     ...(allowUseGpu ? [] : [useGpuRuntime]),
-    ...(banRendererPackages ? [noRendererPackages] : []),
+    rendererThree,
+    ...(rendererPackages ? [rendererPackages] : []),
   ],
 });
 
 const VIEWPORT = "./src/features/viewport";
+const RENDERER_DIRS = ["mathbox", "usegpu", "three"];
 
 const layoutZones = [
   ...features.map((feature) => ({
@@ -120,18 +139,14 @@ const layoutZones = [
     message:
       "The edge Worker runs in workerd; it imports only sceneTitle from the app.",
   },
-  {
-    target: `${VIEWPORT}/mathbox`,
-    from: `${VIEWPORT}/usegpu`,
+  ...RENDERER_DIRS.map((dir) => ({
+    target: `${VIEWPORT}/${dir}`,
+    from: RENDERER_DIRS.filter((other) => other !== dir).map(
+      (other) => `${VIEWPORT}/${other}`,
+    ),
     message:
       "The renderers don't import each other; share code via shared/ or spec/.",
-  },
-  {
-    target: `${VIEWPORT}/usegpu`,
-    from: `${VIEWPORT}/mathbox`,
-    message:
-      "The renderers don't import each other; share code via shared/ or spec/.",
-  },
+  })),
   {
     target: `${VIEWPORT}/shared`,
     from: VIEWPORT,
@@ -147,7 +162,7 @@ const layoutZones = [
       "viewport/spec produces renderer-neutral specs and imports no renderer.",
   },
   {
-    // mathbox/, shared/, spec/ and other features are covered by the zones above.
+    // mathbox/, three/, shared/, spec/ and other features are covered by the zones above.
     target: [
       "./src/app",
       `${VIEWPORT}/*.{ts,tsx}`,
@@ -215,7 +230,16 @@ module.exports = {
       rules: {
         "no-restricted-imports": [
           "error",
-          restrictedImports({ banRendererPackages: true }),
+          restrictedImports({ rendererPackages: noRendererPackages }),
+        ],
+      },
+    },
+    {
+      files: ["src/features/viewport/three/**"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          restrictedImports({ rendererPackages: threeAdapter }),
         ],
       },
     },

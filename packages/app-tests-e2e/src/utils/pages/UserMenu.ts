@@ -64,6 +64,12 @@ class UserMenu {
     return this.root.getByRole("menuitem", { name: "Contact" });
   }
 
+  renderer(name: string): Locator {
+    return this.root
+      .getByRole("group", { name: "Renderer" })
+      .getByRole("menuitemradio", { name });
+  }
+
   items(): Locator {
     return this.root.getByRole("menuitem");
   }

@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
-import { isRenderer } from "./resolveRenderer";
-import type { Renderer } from "./resolveRenderer";
+import { isRenderer } from "./renderers";
+import type { Renderer } from "./renderers";
 
 const RENDERER_PREFERENCE_KEY = "rendererPreference";
 

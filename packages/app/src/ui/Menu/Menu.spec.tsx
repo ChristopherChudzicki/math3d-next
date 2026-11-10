@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import user from "@testing-library/user-event";
 import { Menu } from ".";
 
@@ -49,46 +49,33 @@ test("choosing a link item closes the menu", async () => {
   await waitFor(() => expect(menu).not.toBeInTheDocument());
 });
 
-test("clicking a checkbox item toggles it and closes the menu", async () => {
-  const onCheckedChange = vi.fn();
+test("a radio group is named by its label, and choosing an item closes the menu", async () => {
+  const onValueChange = vi.fn();
   render(
     <Menu.Root>
       <Menu.Trigger>Menu</Menu.Trigger>
       <Menu.Popup>
-        <Menu.CheckboxItem checked={false} onCheckedChange={onCheckedChange}>
-          Experimental
-        </Menu.CheckboxItem>
+        <Menu.RadioGroup value="a" onValueChange={onValueChange}>
+          <Menu.GroupLabel>Renderer</Menu.GroupLabel>
+          <Menu.RadioItem value="a">First</Menu.RadioItem>
+          <Menu.RadioItem value="b" description="Faster">
+            Second
+          </Menu.RadioItem>
+        </Menu.RadioGroup>
       </Menu.Popup>
     </Menu.Root>,
   );
   await user.click(screen.getByRole("button", { name: "Menu" }));
   const menu = await screen.findByRole("menu");
+  const group = screen.getByRole("group", { name: "Renderer" });
+  const first = within(group).getByRole("menuitemradio", { name: "First" });
+  const second = within(group).getByRole("menuitemradio", { name: "Second" });
+  expect(first).toBeChecked();
+  expect(second).not.toBeChecked();
+  expect(second).toHaveAccessibleDescription("Faster");
 
-  await user.click(
-    screen.getByRole("menuitemcheckbox", { name: "Experimental" }),
-  );
+  await user.click(second);
 
-  expect(onCheckedChange).toHaveBeenCalledExactlyOnceWith(
-    true,
-    expect.anything(),
-  );
+  expect(onValueChange).toHaveBeenCalledExactlyOnceWith("b", expect.anything());
   await waitFor(() => expect(menu).not.toBeInTheDocument());
-});
-
-test("a checkbox item's description describes it without joining its name", async () => {
-  render(
-    <Menu.Root>
-      <Menu.Trigger>Menu</Menu.Trigger>
-      <Menu.Popup>
-        <Menu.CheckboxItem checked={false} description="Needs a GPU">
-          Experimental
-        </Menu.CheckboxItem>
-      </Menu.Popup>
-    </Menu.Root>,
-  );
-  await user.click(screen.getByRole("button", { name: "Menu" }));
-
-  expect(
-    await screen.findByRole("menuitemcheckbox", { name: "Experimental" }),
-  ).toHaveAccessibleDescription("Needs a GPU");
 });

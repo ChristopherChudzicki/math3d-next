@@ -1,7 +1,8 @@
 import { useCallback } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { resolveRenderer } from "./resolveRenderer";
-import type { Renderer, ResolvedRenderer } from "./resolveRenderer";
+import type { ResolvedRenderer } from "./resolveRenderer";
+import type { Renderer } from "./renderers";
 import {
   setRendererPreference,
   useRendererPreference,

@@ -6,9 +6,9 @@
 
 MathBox reads math items from the store inside its own React tree. Use.GPU
 ([ADR-0008](0008-usegpu-opt-in-renderer.md)) can't: its scene is a Live tree,
-outside React's context. A planned three.js renderer may be its own workspace,
-with a different `three` than `mathbox-react` allows, and so can't import
-`app` at all. Both need the scene as plain data.
+outside React's context. The three.js renderer is its own workspace, with a
+different `three` than `mathbox-react` allows, and so can't import `app` at
+all. Both need the scene as plain data.
 
 ## Decision
 
@@ -23,8 +23,9 @@ reports back through `ViewportHooks`, both types in
   `CameraSpec` in view coordinates), an `orthographic` flag, the enabled
   `controls`, and the `graphics` as an ordered `{ id, spec }` list.
 - `ViewportHooks`: `onUnsupported(error)` when the renderer can't run in this
-  browser; `onCameraMove(camera)` as the user moves the camera. The app
-  decides when a move ends and what to write back.
+  browser; `onCameraMove(camera)` as the user moves the camera (the app
+  decides when a move ends and what to write back); `onReady()` once the
+  first frame is drawn (the three.js glue sets `data-ready` for E2E).
 - `features/viewport/spec/` produces it: `useViewportSpec` returns the spec,
   the reporter elements that fill `spec.graphics` (render them alongside the
   renderer), and the camera item for write-back.
@@ -33,6 +34,43 @@ reports back through `ViewportHooks`, both types in
   and a dolly.
 - Coverage tables live in `app`
   ([ADR-0008](0008-usegpu-opt-in-renderer.md#parity-record)).
+
+### The renderer list
+
+`services/renderer/renderers.ts` lists the renderers, keyed `mathbox`
+(default), `usegpu` and `threejs`, each with its library name, menu label
+and whether it needs WebGPU. The keys are the `?renderer=` values and the
+stored preference; the account menu's "Renderer" radio group and
+`RendererPill` read the list. The shared tier can't import viewports, so
+`MainPage` maps each key to its viewport in a `Record<Renderer, …>`, which
+fails typecheck until a new key has one.
+
+### `@math3d/renderer-three`
+
+The three.js renderer is the `packages/renderer-three` workspace, with its
+own `three` and `@types/three` (Yarn nests them under the workspace; the
+app's root copy is MathBox's `three@0.147`). It exports a React `Viewport`
+taking a `ViewportSpec`, `ViewportHooks` and `forceWebGL`, and is built on
+`WebGPURenderer` (`three/webgpu`), which falls back to WebGL2 by itself.
+
+- A graphic kind plugs in as a builder in `graphics/builders.ts`;
+  `syncGraphics` adds, updates and disposes graphics by `id`. Each item's
+  `Group` gets its place in the list as `renderOrder`, which three sorts on
+  before its parts' own `renderOrder`; builders never see it.
+- `Viewport` rethrows what a frame or resize throws, so the error boundary
+  sees it.
+- Frames draw on change, but three's own animation-frame loop runs from the
+  first frame until disposal.
+- Its Vitest project runs in Node, so it tests pure code only.
+
+`features/viewport/three/ThreeViewport` is the app's glue: it collects the
+spec with `useViewportSpec` and loads the package through its one
+`React.lazy`, so the second `three` ships only in that lazy chunk. It and
+`usegpu/GpuViewport` render inside `shared/ViewportShell` (scene container,
+error boundary, `Suspense`). A
+`no-restricted-imports` group bans static imports of
+`@math3d/renderer-three` everywhere in `app` (the rule doesn't check
+`import()`). jsdom tests get a stand-in from `setupTests.ts`.
 
 ### Folders and lint zones
 
@@ -46,18 +84,28 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
   terms only** (evaluated positions, RGBA colors, sample callbacks), never a
   renderer prop, so the specs are testable under jsdom and survive a renderer
   swap.
-- `spec/` and `shared/` import no renderer package (`three`, `mathbox*`,
-  `@use-gpu/*`; a `no-restricted-imports` group). The path zones above
-  check folders only.
-- The renderer folders (`mathbox/`, `usegpu/`) don't import each other;
-  common code moves to `shared/` or `spec/`.
+- `spec/`, `shared/` and `three/` import no renderer package (`three`,
+  `mathbox*`, `@use-gpu/*`; a `no-restricted-imports` group). The path
+  zones above check folders only. In `app`, `three` is MathBox's copy, so
+  three.js code goes in `@math3d/renderer-three`.
+- The renderer folders (`mathbox/`, `usegpu/`, `three/`) don't import each
+  other; common code moves to `shared/` or `spec/`.
 
 ## Consequences
 
 - A new renderer draws from `useViewportSpec`'s output; what touches the
   store (camera write-back, fallback on `onUnsupported`) stays in its `app`
-  glue.
+  glue. Adding one touches the renderer list, `MainPage`'s map and the lint
+  zones.
+- While MathBox stays, the app ships two copies of `three`: the main bundle
+  carries `0.147` and the three.js chunk its own. three.js logs "Multiple
+  instances of Three.js being imported" when that chunk loads.
 - MathBox stays outside the contract while it reads math items directly.
+- In three.js, an item draws as one block: none of its parts can go between
+  another item's parts. MathBox is the same, since math3d gives every part of
+  an item one `zOrder`.
+- Opaque three.js draws follow item order, not front to back (unmeasured;
+  expected negligible at math3d's scene sizes).
 - Nothing calls `onCameraMove` while Use.GPU's write-back
   (`usegpu/useOrbitWriteBack`) handles its own orbit parameters; splitting
   out its neutral half moves Use.GPU onto the hook.

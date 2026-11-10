@@ -1,0 +1,28 @@
+{
+  "name": "@math3d/renderer-three",
+  "exports": "./src/index.ts",
+  "main": "./src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "@math3d/viewport-spec": "workspace:^",
+    "@types/three": "0.187.0",
+    "three": "0.187.0"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0"
+  },
+  "devDependencies": {
+    "@math3d/eslint-config": "workspace:^",
+    "@math3d/tsconfig": "workspace:^",
+    "@types/react": "^19.3.0",
+    "eslint": "^8.57.1",
+    "react": "^19.3.0",
+    "vitest": "^4.1.12"
+  },
+  "scripts": {
+    "test": "vitest --run",
+    "typecheck": "tsc --noEmit",
+    "test-watch": "vitest",
+    "lint": "eslint --max-warnings 0 \"**/*.ts?(x)\""
+  }
+}

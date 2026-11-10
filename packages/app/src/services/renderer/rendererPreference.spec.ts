@@ -6,7 +6,7 @@ import {
   setRendererPreference,
   useRendererPreference,
 } from "./rendererPreference";
-import type { Renderer } from "./resolveRenderer";
+import type { Renderer } from "./renderers";
 
 afterEach(() => {
   vi.restoreAllMocks();

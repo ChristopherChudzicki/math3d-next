@@ -7,13 +7,15 @@ import {
 } from "react-router";
 import Viewport from "@/features/viewport/mathbox/Viewport";
 import GpuViewport from "@/features/viewport/usegpu/GpuViewport";
+import ThreeViewport from "@/features/viewport/three/ThreeViewport";
 import useSceneLoader from "@/app/useSceneLoader";
 import SceneControls from "@/features/editor/sidebar/SceneControls";
 import SliderAnimations from "@/features/editor/items/forms/VariableSlider/SliderAnimations";
 import Sidebar from "@/ui/Sidebar";
 import { useBodyClass, useToggle } from "@/util/hooks";
 import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
-import { isRenderer } from "@/services/renderer/resolveRenderer";
+import { isRenderer } from "@/services/renderer/renderers";
+import type { Renderer } from "@/services/renderer/renderers";
 import { RENDERER_PARAM, useRenderer } from "@/services/renderer/useRenderer";
 import { startWebGpuDetection } from "@/services/renderer/webgpuSupport";
 
@@ -83,6 +85,12 @@ const useSearchEnum = <T extends string>({
 
 const CONTROLS_VALUES = ["0", "1"] as const;
 
+const VIEWPORTS: Record<Renderer, React.FC<{ className?: string }>> = {
+  mathbox: Viewport,
+  usegpu: GpuViewport,
+  threejs: ThreeViewport,
+};
+
 const MainPage: React.FC = () => {
   useBodyClass(styles.bodyVariables);
   const { sceneKey } = useParams();
@@ -133,7 +141,7 @@ const MainPage: React.FC = () => {
   const noticeReason =
     notice === "link" && sceneLoad.status !== "ready" ? null : notice;
   useLogInvalidSearchParam(RENDERER_PARAM, isRenderer);
-  const SceneViewport = renderer === "usegpu" ? GpuViewport : Viewport;
+  const SceneViewport = renderer ? VIEWPORTS[renderer] : null;
   const handleControlsClick = useCallback(
     (currentlyOpen: boolean) => {
       if (currentlyOpen) {
@@ -182,7 +190,7 @@ const MainPage: React.FC = () => {
                 <SceneControls loading={sceneLoad.status === "loading"} />
               </Sidebar>
               {/* Empty while detection decides whether Use.GPU can draw. */}
-              {renderer ? (
+              {SceneViewport ? (
                 <SceneViewport
                   className={
                     controlsOpen

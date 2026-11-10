@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
+import { collectPageErrors } from "@/utils/collectPageErrors";
 import { colorfulPixelRatio } from "@/utils/colorfulPixelRatio";
 
 test.use({
@@ -21,18 +22,8 @@ test("?renderer=usegpu draws with the Use.GPU viewport", async ({
   page,
   prepareScene,
 }) => {
-  const pageErrors: Error[] = [];
-  page.on("pageerror", (error) => pageErrors.push(error));
-  // Use.GPU reports WGSL and validation errors through console.error. Failed
-  // requests log there too; only `/me` may fail (signed out, it answers 403).
-  const consoleErrors: string[] = [];
-  page.on("console", (message) => {
-    if (message.type() !== "error") return;
-    const signedOutMe =
-      message.text().startsWith("Failed to load resource") &&
-      /\/me\/?$/.test(new URL(message.location().url).pathname);
-    if (!signedOutMe) consoleErrors.push(message.text());
-  });
+  // Use.GPU reports WGSL and validation errors through console.error.
+  const errors = collectPageErrors(page);
 
   const scene = new SceneBuilder();
   scene.folder({ description: "Surface" }).explicitSurface();
@@ -59,6 +50,5 @@ test("?renderer=usegpu draws with the Use.GPU viewport", async ({
       { timeout: 15_000 },
     )
     .toBeGreaterThan(0.1);
-  expect(pageErrors).toEqual([]);
-  expect(consoleErrors).toEqual([]);
+  expect(errors).toEqual([]);
 });

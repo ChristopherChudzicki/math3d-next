@@ -1,4 +1,5 @@
 declare const styles: {
+  readonly "checkmark": string;
   readonly "danger": string;
   readonly "description": string;
   readonly "groupLabel": string;
@@ -10,8 +11,6 @@ declare const styles: {
   readonly "positioner": string;
   readonly "separator": string;
   readonly "text": string;
-  readonly "whenChecked": string;
-  readonly "whenUnchecked": string;
 };
 export = styles;
 

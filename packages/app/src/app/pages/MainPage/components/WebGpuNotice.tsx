@@ -5,12 +5,11 @@ import type { NoticeReason } from "@/services/renderer/resolveRenderer";
 const BANNER_ID = "webgpu-notice";
 
 const CONTENT: Record<NoticeReason, string> = {
-  link: "This link asks for the experimental WebGPU renderer, which isn't available in this browser. Showing the scene with the default renderer.",
-  failed:
-    "The WebGPU renderer couldn't start on this device, so Math3d switched to the default renderer.",
+  link: "This link asks for the experimental Use.GPU renderer, which isn't available in this browser. Showing the scene with the default renderer.",
+  failed: "The Use.GPU renderer couldn't start on this device.",
 };
 
-/** Registers the banner saying why the WebGPU renderer isn't in use. */
+/** Registers the banner saying why the Use.GPU renderer isn't in use. */
 const WebGpuNotice: React.FC<{ reason: NoticeReason | null }> = ({
   reason,
 }) => {
@@ -21,7 +20,7 @@ const WebGpuNotice: React.FC<{ reason: NoticeReason | null }> = ({
     show({
       id: BANNER_ID,
       severity: "info",
-      ariaLabel: "Dismiss WebGPU notice",
+      ariaLabel: "Dismiss Use.GPU notice",
       content: CONTENT[reason],
     });
     return () => dismiss(BANNER_ID);
