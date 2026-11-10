@@ -63,7 +63,7 @@ Accept a library convention (react's `round`, complex.js 2.0.4's addition) per p
 
 ## Manual checks
 
-A blank calculated visibility keeps the author's `visible`, so math3d-next hides items that math3d-react showed on load (usually the `yz`/`zx` grids). `manual_checks.json` lists the affected scenes among the 100 most-viewed, with the items. For each one, open the scene in math3d-react (`math3d.org/<key>`) and in a local math3d-next (`/<key>`), and check that hiding those items looks right. The local backend must run this branch, since it re-translates a legacy scene on every GET, and the frontend must include #1403 (grid `zIndex`). The keys stay in `db-snapshots/`; don't paste them anywhere public.
+A blank calculated visibility keeps the author's `visible`, so math3d-next hides items that math3d-react showed on load (usually the `yz`/`zx` grids). math3d-react hid them while the author edited, and its sidebar marks them hidden; only a fresh load draws them. `manual_checks.json` lists the affected scenes among the 100 most-viewed, with the items. For each one, open the scene in math3d-react (`math3d.org/<key>`) and in a local math3d-next (`/<key>`), and check that hiding those items looks right. The local backend must run this branch, since it re-translates a legacy scene on every GET, and the frontend must include #1403 (grid `zIndex`). The keys stay in `db-snapshots/`; don't paste them anywhere public.
 
 ## Code to delete after the cutover
 

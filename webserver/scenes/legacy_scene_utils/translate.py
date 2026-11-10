@@ -282,7 +282,8 @@ class ItemMigrator:
     def calculated_visibility(x) -> dict:
         """A blank expression turns calculated visibility off, so the item
         follows its own ``visible``, and LaTeX spacing counts as blank (owner
-        decisions, 2026-10-23 and 2026-10-24)."""
+        decisions, 2026-10-23 and 2026-10-24). math3d-react drew such an item
+        hidden while the author edited and visible only after a fresh load."""
         calc = blank_to_empty(x.calculatedVisibility or "")
         return {
             "calculatedVisibility": calc,
