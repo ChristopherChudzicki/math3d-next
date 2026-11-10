@@ -33,6 +33,19 @@ const zUp = <C extends PerspectiveCamera | OrthographicCamera>(
 };
 
 /**
+ * Zooms by a fixed 0.95 per wheel event or dolly-drag step, as MathBox's
+ * three r147 controls do; r187's scale each step by |deltaY| / 100.
+ */
+class MathBoxZoomControls extends OrbitControls {
+  // Overrides an internal that @types/three doesn't declare; camera.spec.ts
+  // pins it through the wheel handler.
+  // eslint-disable-next-line no-underscore-dangle
+  _getZoomScale(): number {
+    return 0.95 ** this.zoomSpeed;
+  }
+}
+
+/**
  * The viewport's camera, z up, moved by `OrbitControls` on `domElement`
  * (none in tests). `onMove` gets each move the controls make, as a
  * `CameraSpec`; a move `setSpec` makes is not reported.
@@ -62,7 +75,7 @@ export class ViewCamera {
     domElement: HTMLElement | null,
     onMove: (camera: CameraSpec) => void,
   ) {
-    this.controls = new OrbitControls(this.perspective, domElement);
+    this.controls = new MathBoxZoomControls(this.perspective, domElement);
     // Until the first spec places the camera.
     this.controls.enabled = false;
     this.controls.addEventListener("change", () => {

@@ -148,6 +148,21 @@ test("the controls wait for the first spec", () => {
   expect(view.controls.enabled).toBe(true);
 });
 
+test("a wheel event zooms by 0.95 whatever its deltaY, as MathBox does", () => {
+  const distanceAfterWheel = (deltaY: number) => {
+    const { view } = setup(false);
+    const wheel = view.controls as unknown as {
+      _handleMouseWheel(
+        event: Pick<WheelEvent, "deltaY" | "clientX" | "clientY">,
+      ): void;
+    };
+    wheel._handleMouseWheel({ deltaY, clientX: 0, clientY: 0 });
+    return distance(view.current());
+  };
+  expect(distanceAfterWheel(3)).toBeCloseTo(5 / 0.95);
+  expect(distanceAfterWheel(300)).toBeCloseTo(5 / 0.95);
+});
+
 test("passes the enabled controls on", () => {
   const { view, spec } = setup(false);
   view.setSpec({
