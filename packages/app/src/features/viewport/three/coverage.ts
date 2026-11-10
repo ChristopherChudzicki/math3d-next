@@ -80,15 +80,15 @@ export const coverage = {
   [MIT.Line]: {
     ...STROKE,
     coords: "drawn",
-    label: "todo",
-    labelVisible: "todo",
+    label: "drawn",
+    labelVisible: "drawn",
   },
   [MIT.Vector]: {
     ...STROKE,
     components: "drawn",
     tail: "drawn",
-    label: "todo",
-    labelVisible: "todo",
+    label: "drawn",
+    labelVisible: "drawn",
   },
   [MIT.VectorField]: {
     ...STROKE,

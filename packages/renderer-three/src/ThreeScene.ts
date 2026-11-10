@@ -11,6 +11,7 @@ import { mathToView } from "./viewTransform";
 import { builders } from "./graphics/builders";
 import { syncGraphics } from "./graphics/syncGraphics";
 import type { DrawnGraphics } from "./graphics/syncGraphics";
+import { onLabelRelayout } from "./label/atlas";
 
 // Colors stay the sRGB values the spec gives (see `outputColorSpace` below),
 // so three must not convert a `Color` to linear on its way in either.
@@ -49,6 +50,8 @@ export class ThreeScene {
   private readonly resizeObserver: ResizeObserver;
 
   private readonly view: ViewCamera;
+
+  private readonly stopLabelRelayout = onLabelRelayout(() => this.invalidate());
 
   private spec: ViewportSpec | null = null;
 
@@ -115,6 +118,7 @@ export class ThreeScene {
     this.disposed = true;
     if (this.frame !== null) cancelAnimationFrame(this.frame);
     this.resizeObserver.disconnect();
+    this.stopLabelRelayout();
     this.view.dispose();
     this.canvas.remove();
     this.graphics.forEach(({ graphic }) => graphic.dispose());

@@ -114,6 +114,15 @@ parent, so anything sized in pixels is built in the shader, in view space:
   `ColorManagement` is off), so they blend in sRGB as MathBox's do. three's
   default pipeline blends in linear space, which lightens every translucent
   mark.
+- **Every label is a `Labels`** (`label/Labels.ts`), MathBox's `<Label>`:
+  plain text, as MathBox's is, 16 px `sans-serif` with a 2 px white outline.
+  - Unlike a stroke, a label keeps its pixel size at any depth (MathBox's
+    `attach.depth` is 0), so its quad is laid out in screen pixels around its
+    projected anchor, on whole device pixels.
+  - All labels draw from one canvas atlas holding each string once, at the
+    device pixel ratio. It lays out again when the ratio changes or a font
+    loads, and `ThreeScene` redraws then.
+  - Labels blend at their edges and write depth, as MathBox's do.
 
 `features/viewport/three/ThreeViewport` is the app's glue: it collects the
 spec with `useViewportSpec` and loads the package through its one
