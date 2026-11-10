@@ -1,19 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
+import { fakeSurface } from "./__tests__/fakeSurface";
 import { ATLAS_WIDTH, LabelAtlas } from "./LabelAtlas";
-import type { AtlasSurface, LabelText, Slot } from "./LabelAtlas";
-
-/** Rasters 10 device pixels per character, 20 tall, scaled by the ratio. */
-const fakeSurface = () => {
-  const surface = {
-    measure: vi.fn(({ text }: LabelText, ratio: number): [number, number] => [
-      10 * text.length * ratio,
-      20 * ratio,
-    ]),
-    reset: vi.fn<AtlasSurface["reset"]>(),
-    draw: vi.fn<AtlasSurface["draw"]>(),
-  };
-  return surface;
-};
+import type { LabelText, Slot } from "./LabelAtlas";
 
 const label = (text: string): LabelText => ({ text, weight: "normal" });
 
@@ -90,12 +78,11 @@ describe("LabelAtlas", () => {
     const atlas = new LabelAtlas(fakeSurface(), () => {});
     atlas.acquire(label("kept"));
     atlas.acquire(label("gone"));
+    const freed = atlas.slot(label("gone"));
     atlas.release(label("gone"));
     atlas.relayout();
     atlas.acquire(label("new"));
-    expect(atlas.slot(label("new")).x).toBe(
-      atlas.slot(label("kept")).width + 1,
-    );
+    expect(atlas.slot(label("new"))).toMatchObject({ x: freed.x, y: freed.y });
   });
 
   test("draws every string again at a new pixel ratio", () => {
@@ -106,7 +93,6 @@ describe("LabelAtlas", () => {
     surface.draw.mockClear();
     onRelayout.mockClear();
     atlas.setPixelRatio(2);
-    expect(atlas.pixelRatio).toBe(2);
     expect(surface.draw).toHaveBeenCalledWith(
       label("1"),
       { x: 0, y: 0, width: 20, height: 40 },

@@ -70,12 +70,14 @@ test("a vector's label is drawn above its tip", async ({
     await screenshot("false"),
   );
 
-  // MathBox's 40 px offset, which it scales by 2/3 with the text.
+  expect(box.right, "the label drew").toBeGreaterThanOrEqual(0);
+  // A "v", with neither ascender nor descender, centers on its em box.
   const center = {
     x: (box.left + box.right) / 2,
     y: (box.top + box.bottom) / 2,
   };
   expect(Math.abs(center.x - box.width / 2)).toBeLessThan(4);
+  // fromMathBoxOffset([0, 40]): 24 px above the tip.
   expect(Math.abs(center.y - (box.height / 2 - 24))).toBeLessThan(5);
   expect(errors).toEqual([]);
 });

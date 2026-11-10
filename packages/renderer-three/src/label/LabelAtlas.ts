@@ -15,7 +15,10 @@ export interface AtlasSurface {
   draw(label: LabelText, slot: Slot, pixelRatio: number): void;
 }
 
-/** Wide enough for any one label MathBox draws at a pixel ratio of 3. */
+/**
+ * MathBox cuts a label at 640 CSS px, which fits at a pixel ratio of 3; a
+ * wider raster is cut.
+ */
 export const ATLAS_WIDTH = 2048;
 const MIN_HEIGHT = 64;
 /** Blank pixels between rasters, so filtering never reads a neighbor. */
@@ -46,8 +49,8 @@ export class LabelAtlas {
   private ratio = 1;
 
   /**
-   * @param onRelayout Called after every string moved, so that users re-read
-   *   their slots.
+   * @param onRelayout Called after a relayout moves the strings, so users
+   *   re-read their slots.
    */
   constructor(
     private readonly surface: AtlasSurface,
@@ -76,6 +79,7 @@ export class LabelAtlas {
     const added = { label, users: 1, slot: this.place(label) };
     this.entries.set(key, added);
     if (this.used > this.surfaceHeight) {
+      // Out of room: grows by laying every string out again.
       this.relayout();
     } else {
       this.surface.draw(label, added.slot, this.ratio);
@@ -109,7 +113,7 @@ export class LabelAtlas {
     this.relayout();
   }
 
-  /** Measures and draws every string again, as after a font loads. */
+  /** Measures and draws every string again. */
   relayout(): void {
     if (this.entries.size === 0) return;
     this.shelves = [];

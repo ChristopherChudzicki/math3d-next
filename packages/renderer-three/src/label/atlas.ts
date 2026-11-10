@@ -5,8 +5,8 @@ import { atlasInputs } from "./labelMaterial";
 const listeners = new Set<() => void>();
 
 /**
- * Calls `listener` whenever labels move in the atlas outside a spec update:
- * after a pixel-ratio change or a font load. Returns the unsubscribe.
+ * Calls `listener` whenever labels move in the atlas, as after a pixel-ratio
+ * change. Returns the unsubscribe.
  */
 export const onLabelRelayout = (listener: () => void): (() => void) => {
   listeners.add(listener);
@@ -14,8 +14,10 @@ export const onLabelRelayout = (listener: () => void): (() => void) => {
 };
 
 const create = (): LabelAtlas => {
+  const empty = atlasInputs.texture.value;
+  // Lets go of a freed texture's canvas.
   const surface = new CanvasSurface((texture) => {
-    if (texture) atlasInputs.texture.value = texture;
+    atlasInputs.texture.value = texture ?? empty;
   });
   const atlas = new LabelAtlas(surface, () => {
     atlasInputs.size.value.set(...atlas.size);
@@ -30,9 +32,6 @@ const create = (): LabelAtlas => {
       .addEventListener("change", watchPixelRatio, { once: true });
   };
   watchPixelRatio();
-  // `sans-serif` needs no loading, but a web font in its place would draw
-  // in a fallback until it loads.
-  document.fonts.addEventListener("loadingdone", () => atlas.relayout());
   return atlas;
 };
 

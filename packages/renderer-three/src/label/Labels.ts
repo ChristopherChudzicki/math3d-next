@@ -1,7 +1,8 @@
 import type { Coords, RGBA } from "@math3d/viewport-spec";
 import { Instances, strideOf } from "../stroke/Instances";
+import { isDrawable, put } from "../stroke/packPaths";
 import { labelAtlas, onLabelRelayout } from "./atlas";
-import type { LabelAtlas, LabelText, LabelWeight } from "./LabelAtlas";
+import type { LabelAtlas, LabelText, LabelWeight, Slot } from "./LabelAtlas";
 import {
   LABEL_LAYOUT,
   LabelUniforms,
@@ -9,22 +10,26 @@ import {
   labelMaterial,
 } from "./labelMaterial";
 
+/**
+ * math3d gives its MathBox labels a weight and an offset only, so the rest
+ * default to MathBox's own.
+ */
 export type LabelStyle = {
   weight: LabelWeight;
-  color: RGBA;
-  /** From the anchor to the text's center, in CSS pixels, +y up the screen. */
+  /** MathBox's `<Label offset>`, +y up the screen. */
   offset: readonly [number, number];
-  zBias: number;
-  zIndex: number;
+  /** MathBox's gray when absent. */
+  color?: RGBA;
+  zBias?: number;
+  zIndex?: number;
 };
 
-/** The gray MathBox draws labels in: its default style color. */
-export const MATHBOX_LABEL_COLOR: RGBA = [0.5, 0.5, 0.5, 1];
+const MATHBOX_LABEL_COLOR: RGBA = [0.5, 0.5, 0.5, 1];
 
 /**
- * MathBox's `<Label offset>` as a `LabelStyle` offset. MathBox scales the
- * offset with the text, which it draws at 16 px from a 24 px atlas, and
- * centers its sprite 4 atlas pixels above the text's em box.
+ * A MathBox label offset in CSS pixels to the text's center. MathBox scales
+ * the offset by 16/24 with the text, and centers its sprite 4 atlas px above
+ * the middle of the text's em box.
  */
 export const fromMathBoxOffset = ([x, y]: readonly [number, number]): [
   number,
@@ -32,8 +37,6 @@ export const fromMathBoxOffset = ([x, y]: readonly [number, number]): [
 ] => [(x * 2) / 3, (y * 2) / 3 - 8 / 3];
 
 const STRIDE = strideOf(LABEL_LAYOUT);
-
-const isDrawable = (point: Coords) => point.every(Number.isFinite);
 
 /**
  * Text drawn at points, a fixed size on screen, depth-tested: MathBox's
@@ -49,8 +52,6 @@ export class Labels {
 
   private readonly uniforms = new LabelUniforms();
 
-  private readonly atlas: LabelAtlas = labelAtlas();
-
   private readonly unsubscribe = onLabelRelayout(() => this.fill());
 
   /** One per distinct string, each acquired once from the atlas. */
@@ -58,14 +59,15 @@ export class Labels {
 
   private anchors: Coords[] = [];
 
-  /** Each anchor's string. */
   private anchorTexts: LabelText[] = [];
 
   /** Add it to the item's `Group`. */
   readonly mesh = this.instances.mesh;
 
-  constructor() {
+  constructor(private readonly atlas: LabelAtlas = labelAtlas()) {
     this.mesh.userData.label = this.uniforms;
+    // After the rest of its item; `syncGraphics` orders the items.
+    this.mesh.renderOrder = 1;
   }
 
   /**
@@ -74,10 +76,11 @@ export class Labels {
    */
   set(
     positions: readonly Coords[],
-    text: string | readonly string[],
+    text: string | null | readonly (string | null)[],
     style: LabelStyle,
   ): void {
-    const textAt = (i: number) => (typeof text === "string" ? text : text[i]);
+    const textAt = (i: number) =>
+      typeof text === "string" || text === null ? text : text[i];
     const texts = new Map<string, LabelText>();
     const anchors: Coords[] = [];
     const anchorTexts: LabelText[] = [];
@@ -100,10 +103,10 @@ export class Labels {
     this.anchorTexts = anchorTexts;
 
     const { uniforms } = this;
-    uniforms.color.set(...style.color);
-    uniforms.offset.set(...style.offset);
-    uniforms.zBias = style.zBias;
-    uniforms.zIndex = style.zIndex;
+    uniforms.color.set(...(style.color ?? MATHBOX_LABEL_COLOR));
+    uniforms.offset.set(...fromMathBoxOffset(style.offset));
+    uniforms.zBias = style.zBias ?? 0;
+    uniforms.zIndex = style.zIndex ?? 0;
     this.fill();
   }
 
@@ -116,10 +119,22 @@ export class Labels {
 
   private fill(): void {
     const { anchors, anchorTexts, atlas } = this;
+    const slots = new Map<LabelText, Slot>();
     this.instances.fill(anchors.length, (out) => {
       anchors.forEach((anchor, i) => {
-        const { x, y, width, height } = atlas.slot(anchorTexts[i]);
-        out.set([...anchor, x, y, width, height], i * STRIDE);
+        const label = anchorTexts[i];
+        let slot = slots.get(label);
+        if (!slot) {
+          slot = atlas.slot(label);
+          slots.set(label, slot);
+        }
+        const offset = put(out, i * STRIDE, anchor);
+        /* eslint-disable no-param-reassign */
+        out[offset] = slot.x;
+        out[offset + 1] = slot.y;
+        out[offset + 2] = slot.width;
+        out[offset + 3] = slot.height;
+        /* eslint-enable no-param-reassign */
       });
       return anchors.length;
     });

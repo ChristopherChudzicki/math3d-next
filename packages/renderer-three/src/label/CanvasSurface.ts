@@ -81,8 +81,6 @@ export class CanvasSurface implements AtlasSurface {
     if (!context || !texture) throw new Error("The atlas has no surface.");
     const { x, y, width, height } = slot;
     context.save();
-    context.fillStyle = "#000";
-    context.fillRect(x, y, width, height);
     context.beginPath();
     context.rect(x, y, width, height);
     context.clip();
