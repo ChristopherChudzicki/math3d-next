@@ -92,6 +92,29 @@ taking a `ViewportSpec`, `ViewportHooks` and `forceWebGL`, and is built on
   true `OrthographicCamera`.
 - Its Vitest project runs in Node, so it tests pure code only.
 
+#### Drawing marks
+
+A graphic's `object` holds math coordinates under a non-uniformly scaled
+parent, so anything sized in pixels is built in the shader, in view space:
+
+- **Pixel sizes are MathBox's.** `shader/viewUnits.ts` gives the view units
+  one CSS pixel spans at view depth 1 (MathBox's `worldUnit`). A width or
+  arrowhead is that size in view space: exact at one view unit from the camera,
+  smaller farther away in perspective, and the same in orthographic as in the
+  perspective view it replaces.
+- **Every stroke is a `Stroke`** (`stroke/Stroke.ts`), a port of MathBox's
+  line and arrow shaders: lines, vectors, curves and vector fields, and the
+  axes, ticks, grids and surface gridlines still to come.
+- **`zBias` and `zIndex` go through `shader/depthStyle.ts`**, whatever the
+  mark. `zBias` reproduces MathBox's under its perspective camera, stated as
+  a change in view depth so it is the same on WebGPU and WebGL2 and in both
+  projections; MathBox's own orthographic (a dolly) lets any `zBias` win
+  outright.
+- **Colors are output unconverted** (`outputColorSpace` is linear and
+  `ColorManagement` is off), so they blend in sRGB as MathBox's do. three's
+  default pipeline blends in linear space, which lightens every translucent
+  mark.
+
 `features/viewport/three/ThreeViewport` is the app's glue: it collects the
 spec with `useViewportSpec` and loads the package through its one
 `React.lazy`, so the second `three` ships only in that lazy chunk. It and

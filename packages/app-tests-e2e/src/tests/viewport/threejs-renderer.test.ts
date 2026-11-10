@@ -1,22 +1,13 @@
 import { expect } from "@playwright/test";
-import type { Page } from "@playwright/test";
 import invariant from "tiny-invariant";
 import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
 import { collectPageErrors } from "@/utils/collectPageErrors";
 import UserMenu from "@/utils/pages/UserMenu";
 import { getItemForm, getLatex } from "@/utils/selectors";
+import { coloredShare, expectThreeViewport } from "@/utils/threeViewport";
 
 test.use({ disable3d: false });
-
-const expectThreeViewport = async (page: Page) => {
-  const viewport = page.getByTestId("scene");
-  await expect(viewport).toHaveAttribute("data-renderer", "threejs");
-  await expect(viewport.locator("canvas")).toBeVisible();
-  await expect(viewport.locator("[data-ready]")).toBeAttached({
-    timeout: 15_000,
-  });
-};
 
 test("?renderer=threejs draws with the three.js viewport", async ({
   page,
@@ -78,5 +69,32 @@ test("a drag in the three.js viewport writes the camera back", async ({
   await page.mouse.up();
 
   await expect.poll(() => position.evaluate(getLatex)).not.toBe(before);
+  expect(errors).toEqual([]);
+});
+
+test("a line keeps its pixel width when an axis is rescaled", async ({
+  page,
+  prepareScene,
+}) => {
+  const errors = collectPageErrors(page);
+  // The camera and the line sit on x = 0, so rescaling x moves nothing: the
+  // drawing changes only if the line's width, which runs along x on screen,
+  // is scaled with the axis.
+  const shareAt = async (xScale: string) => {
+    const scene = new SceneBuilder()
+      .camera({ position: "[0, -6, 2]" })
+      .axis("x", { scale: xScale });
+    scene.folder().line({ coords: "[[0, 0, -3], [0, 0, 3]]", width: "20" });
+    const key = await prepareScene(scene.json());
+    await page.goto(`/${key}?renderer=threejs&controls=0`);
+    await expectThreeViewport(page);
+    return coloredShare(page);
+  };
+
+  const full = await shareAt("1");
+  const squashed = await shareAt("1/4");
+
+  expect(full).toBeGreaterThan(0.002);
+  expect(Math.abs(squashed / full - 1)).toBeLessThan(0.05);
   expect(errors).toEqual([]);
 });

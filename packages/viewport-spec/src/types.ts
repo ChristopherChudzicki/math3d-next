@@ -6,7 +6,8 @@
  *
  * Positions are in math coordinates, as the items evaluate them; only
  * `CameraSpec` is in view coordinates. Pixel quantities (`width`, `size`) are
- * CSS pixels, as MathBox draws them.
+ * CSS pixels as MathBox draws them: exact at one view unit from the camera,
+ * and scaled with distance like anything else in a perspective view.
  */
 import type { AxesRange, Coords } from "./coordinates";
 

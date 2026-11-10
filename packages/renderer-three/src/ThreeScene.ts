@@ -1,11 +1,20 @@
-import { Group, Scene, WebGPURenderer } from "three/webgpu";
+import {
+  ColorManagement,
+  Group,
+  LinearSRGBColorSpace,
+  Scene,
+  WebGPURenderer,
+} from "three/webgpu";
 import type { CameraSpec, ViewportSpec } from "@math3d/viewport-spec";
 import { ViewCamera } from "./camera";
 import { mathToView } from "./viewTransform";
-import { ReferenceFrame } from "./referenceFrame";
 import { builders } from "./graphics/builders";
 import { syncGraphics } from "./graphics/syncGraphics";
 import type { DrawnGraphics } from "./graphics/syncGraphics";
+
+// Colors stay the sRGB values the spec gives (see `outputColorSpace` below),
+// so three must not convert a `Color` to linear on its way in either.
+ColorManagement.enabled = false;
 
 type Options = {
   /** Use the WebGL2 backend even where WebGPU is available. */
@@ -32,8 +41,6 @@ export class ThreeScene {
   private readonly world = new Group();
 
   private readonly graphics: DrawnGraphics = new Map();
-
-  private readonly referenceFrame = new ReferenceFrame();
 
   private readonly scene = new Scene();
 
@@ -64,12 +71,14 @@ export class ThreeScene {
       this.invalidate();
     });
     this.scene.add(this.world);
-    this.world.add(this.referenceFrame.object);
     this.renderer = new WebGPURenderer({
       canvas: this.canvas,
       antialias: true,
       forceWebGL: options.forceWebGL,
     });
+    // Colors go to the canvas as given and blend there in sRGB, as MathBox's
+    // do; three's default blends in linear space, which lightens translucency.
+    this.renderer.outputColorSpace = LinearSRGBColorSpace;
     this.renderer.setClearColor(0xffffff, 1);
     this.resizeObserver = new ResizeObserver(() =>
       this.reporting(() => this.resize()),
@@ -80,6 +89,9 @@ export class ThreeScene {
   async init(): Promise<void> {
     await this.renderer.init();
     if (this.disposed) return;
+    // E2E reads it.
+    this.canvas.dataset.backend =
+      "isWebGPUBackend" in this.renderer.backend ? "webgpu" : "webgl2";
     this.resizeObserver.observe(this.host);
     this.resize();
   }
@@ -91,7 +103,6 @@ export class ThreeScene {
       const { scale, offset } = mathToView(spec.range, spec.scale);
       this.world.scale.set(...scale);
       this.world.position.set(...offset);
-      this.referenceFrame.setRange(spec.range);
     }
     this.view.setSpec(spec);
     if (last?.graphics !== spec.graphics) {
@@ -107,7 +118,6 @@ export class ThreeScene {
     this.view.dispose();
     this.canvas.remove();
     this.graphics.forEach(({ graphic }) => graphic.dispose());
-    this.referenceFrame.dispose();
     // dispose() awaits init(), so it rejects whenever init did; init()'s
     // caller owns that failure.
     this.renderer.dispose().catch(() => {});
