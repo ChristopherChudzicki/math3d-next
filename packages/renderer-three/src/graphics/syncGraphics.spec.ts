@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest";
-import { Group, Object3D } from "three/webgpu";
+import { Group } from "three/webgpu";
 import type { PointSpec, ViewportGraphic } from "@math3d/viewport-spec";
-import type { GraphicBuilders } from "./builders";
+import type { Graphic, GraphicBuilders } from "./builders";
 import { syncGraphics } from "./syncGraphics";
 import type { DrawnGraphics } from "./syncGraphics";
 
@@ -18,59 +18,71 @@ const point = (x: number): PointSpec => ({
 const setup = () => {
   const world = new Group();
   const drawn: DrawnGraphics = new Map();
-  const graphic = { object: new Object3D(), update: vi.fn(), dispose: vi.fn() };
-  const builders: GraphicBuilders = { point: vi.fn(() => graphic) };
+  const built: Graphic[] = [];
+  const builders: GraphicBuilders = {
+    point: vi.fn(() => {
+      const graphic = {
+        object: new Group(),
+        update: vi.fn(),
+        dispose: vi.fn(),
+      };
+      built.push(graphic);
+      return graphic;
+    }),
+  };
   const sync = (graphics: ViewportGraphic[]) =>
     syncGraphics(world, drawn, graphics, builders);
-  return { world, drawn, graphic, builders, sync };
+  return { world, drawn, built, builders, sync };
 };
 
 test("builds a new graphic into the world, and skips an unchanged spec", () => {
-  const { world, graphic, builders, sync } = setup();
+  const { world, built, builders, sync } = setup();
   const spec = point(1);
 
   sync([{ id: "a", spec }]);
   sync([{ id: "a", spec }]);
 
   expect(builders.point).toHaveBeenCalledOnce();
-  expect(world.children).toEqual([graphic.object]);
-  expect(graphic.update).not.toHaveBeenCalled();
+  expect(world.children).toEqual([built[0].object]);
+  expect(built[0].update).not.toHaveBeenCalled();
 });
 
 test("a changed spec updates its graphic in place", () => {
-  const { builders, graphic, sync } = setup();
+  const { builders, built, sync } = setup();
   sync([{ id: "a", spec: point(1) }]);
   const next = point(2);
 
   sync([{ id: "a", spec: next }]);
 
   expect(builders.point).toHaveBeenCalledOnce();
-  expect(graphic.update).toHaveBeenCalledExactlyOnceWith(next, 0);
+  expect(built[0].update).toHaveBeenCalledExactlyOnceWith(next);
 });
 
-test("graphics learn their place in the item list, and when it changes", () => {
-  const { builders, graphic, sync } = setup();
+test("a graphic's renderOrder follows its item's place, without an update", () => {
+  const { built, sync } = setup();
   const a = point(1);
   const b = point(2);
   sync([{ id: "a", spec: a }]);
+  const [graphicA] = built;
+  expect(graphicA.object.renderOrder).toBe(0);
 
   sync([
     { id: "b", spec: b },
     { id: "a", spec: a },
   ]);
 
-  expect(builders.point).toHaveBeenNthCalledWith(1, a, 0);
-  expect(builders.point).toHaveBeenNthCalledWith(2, b, 0);
-  expect(graphic.update).toHaveBeenCalledExactlyOnceWith(a, 1);
+  expect(built[1].object.renderOrder).toBe(0);
+  expect(graphicA.object.renderOrder).toBe(1);
+  expect(graphicA.update).not.toHaveBeenCalled();
 });
 
 test("a graphic that leaves the spec is removed and disposed", () => {
-  const { world, drawn, graphic, sync } = setup();
+  const { world, drawn, built, sync } = setup();
   sync([{ id: "a", spec: point(1) }]);
 
   sync([]);
 
   expect(world.children).toEqual([]);
   expect(drawn.size).toBe(0);
-  expect(graphic.dispose).toHaveBeenCalledOnce();
+  expect(built[0].dispose).toHaveBeenCalledOnce();
 });

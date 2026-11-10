@@ -4,20 +4,20 @@ import type { Graphic, GraphicBuilders } from "./builders";
 
 export type DrawnGraphics = Map<
   string,
-  { spec: GraphicSpec; order: number; graphic: Graphic }
+  { spec: GraphicSpec; graphic: Graphic }
 >;
 
-const build = (spec: GraphicSpec, order: number, builders: GraphicBuilders) => {
+const build = (spec: GraphicSpec, builders: GraphicBuilders) => {
   const builder = builders[spec.kind] as
-    | ((s: GraphicSpec, o: number) => Graphic)
+    | ((s: GraphicSpec) => Graphic)
     | undefined;
-  return builder?.(spec, order) ?? null;
+  return builder?.(spec) ?? null;
 };
 
 /**
  * Brings `drawn` and `world`'s children in line with `graphics`. An item's
- * graphic kind never changes, so a changed spec or place in the list updates
- * its graphic in place.
+ * graphic kind never changes, so a changed spec updates its graphic in place.
+ * Each graphic's `renderOrder` is its item's place in the list.
  */
 export const syncGraphics = (
   world: Group,
@@ -35,15 +35,16 @@ export const syncGraphics = (
   graphics.forEach(({ id, spec }, order) => {
     const entry = drawn.get(id);
     if (entry) {
-      if (entry.spec === spec && entry.order === order) return;
-      entry.graphic.update(spec, order);
+      entry.graphic.object.renderOrder = order;
+      if (entry.spec === spec) return;
+      entry.graphic.update(spec);
       entry.spec = spec;
-      entry.order = order;
       return;
     }
-    const graphic = build(spec, order, builders);
+    const graphic = build(spec, builders);
     if (!graphic) return;
+    graphic.object.renderOrder = order;
     world.add(graphic.object);
-    drawn.set(id, { spec, order, graphic });
+    drawn.set(id, { spec, graphic });
   });
 };

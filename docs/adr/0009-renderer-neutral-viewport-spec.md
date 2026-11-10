@@ -54,8 +54,9 @@ taking a `ViewportSpec`, `ViewportHooks` and `forceWebGL`, and is built on
 `WebGPURenderer` (`three/webgpu`), which falls back to WebGL2 by itself.
 
 - A graphic kind plugs in as a builder in `graphics/builders.ts`;
-  `syncGraphics` adds, updates and disposes graphics by `id`, and gives each
-  its item's place in the list for breaking draw-order ties.
+  `syncGraphics` adds, updates and disposes graphics by `id`. Each item's
+  `Group` gets its place in the list as `renderOrder`, which three sorts on
+  before its parts' own `renderOrder`; builders never see it.
 - `Viewport` rethrows what a frame or resize throws, so the error boundary
   sees it.
 - Frames draw on change, but three's own animation-frame loop runs from the
@@ -100,6 +101,11 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
   carries `0.147` and the three.js chunk its own. three.js logs "Multiple
   instances of Three.js being imported" when that chunk loads.
 - MathBox stays outside the contract while it reads math items directly.
+- In three.js, an item draws as one block: none of its parts can go between
+  another item's parts. MathBox is the same, since math3d gives every part of
+  an item one `zOrder`.
+- Opaque three.js draws follow item order, not front to back (unmeasured;
+  expected negligible at math3d's scene sizes).
 - Nothing calls `onCameraMove` while Use.GPU's write-back
   (`usegpu/useOrbitWriteBack`) handles its own orbit parameters; splitting
   out its neutral half moves Use.GPU onto the hook.
