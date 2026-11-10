@@ -20,18 +20,44 @@ reports back through `ViewportHooks`, both types in
   `GraphicSpec`, `CameraSpec`, `RGBA`, `Coords`, `AxesRange`): no runtime
   dependencies on `app`, React or any renderer.
 - `ViewportSpec` is the axes' `range` and `scale`, the `camera` (a
-  `CameraSpec` in view coordinates), an `orthographic` flag, the enabled
-  `controls`, and the `graphics` as an ordered `{ id, spec }` list.
+  `CameraSpec` in view coordinates), a `cameraRevision`, an `orthographic`
+  flag, the enabled `controls`, and the `graphics` as an ordered
+  `{ id, spec }` list.
 - `ViewportHooks`: `onUnsupported(error)` when the renderer can't run in this
   browser; `onCameraMove(camera)` as the user moves the camera (the app
   decides when a move ends and what to write back); `onReady()` once the
   first frame is drawn (the three.js glue sets `data-ready` for E2E).
-- `features/viewport/spec/` produces it: `useViewportSpec` returns the spec,
-  the reporter elements that fill `spec.graphics` (render them alongside the
-  renderer), and the camera item for write-back.
+- `features/viewport/spec/` produces it: `useViewportSpec(host)` returns the
+  spec, the reporter elements that fill `spec.graphics` (render them
+  alongside the renderer), and the `onCameraMove` hook.
+
+### The camera
+
+- **`cameraRevision` is the one signal to move the view.** When it changes,
+  a renderer moves the view to `camera`; otherwise it leaves the user's view
+  alone, even when `camera` changes identity.
+  - `spec/useCameraWriteBack` bumps it when the stored camera changes, when
+    the axes' range or scale changes, and when a move that went somewhere
+    ends with `updateOnDrag` off (the stored camera is then unchanged, so
+    nothing else in the spec would change).
+  - Why not a new `camera` object: snap-back would hinge on identity, which a
+    value comparison or a spec copy silently loses, and the loss would show
+    only in the rare scenes with `updateOnDrag` off.
+- **Move-end timing and write-back are the app's.** A move ends 200 ms after
+  the last pointer release or wheel on `host` with no pointer down; then the
+  last `onCameraMove` is written to the camera item or, with `updateOnDrag`
+  off, the view snaps back.
+- **Orthographic keeps position + target.** It shows, at the target, what
+  the 60° perspective view shows there: visible height
+  2 × |position − target| × tan(30°). A renderer that zooms it by a factor
+  (three.js's `OrbitControls` does) reports the zoom as distance, and nothing
+  behind the stored position is clipped (MathBox gets this from its ×40
+  dolly, Use.GPU from near = −far, three.js from a near plane far behind the
+  camera).
 - A renderer derives its own shapes from `ViewportSpec`: Use.GPU's
   `SceneSpec` replaces `camera` and `orthographic` with y-up orbit parameters
-  and a dolly.
+  and a dolly, and passes `cameraRevision` to its orbit controls as their
+  `version`.
 - Coverage tables live in `app`
   ([ADR-0008](0008-usegpu-opt-in-renderer.md#parity-record)).
 
@@ -61,6 +87,9 @@ taking a `ViewportSpec`, `ViewportHooks` and `forceWebGL`, and is built on
   sees it.
 - Frames draw on change, but three's own animation-frame loop runs from the
   first frame until disposal.
+- The camera is `camera.ts`'s `ViewCamera`: three's `OrbitControls` (no
+  damping, so redraws stop when the user does) on a `PerspectiveCamera` or a
+  true `OrthographicCamera`.
 - Its Vitest project runs in Node, so it tests pure code only.
 
 `features/viewport/three/ThreeViewport` is the app's glue: it collects the
@@ -93,10 +122,10 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
 
 ## Consequences
 
-- A new renderer draws from `useViewportSpec`'s output; what touches the
-  store (camera write-back, fallback on `onUnsupported`) stays in its `app`
-  glue. Adding one touches the renderer list, `MainPage`'s map and the lint
-  zones.
+- A new renderer draws from `useViewportSpec`'s output and reports camera
+  moves to its `onCameraMove`; what else touches the store (fallback on
+  `onUnsupported`) stays in its `app` glue. Adding one touches the renderer
+  list, `MainPage`'s map and the lint zones.
 - While MathBox stays, the app ships two copies of `three`: the main bundle
   carries `0.147` and the three.js chunk its own. three.js logs "Multiple
   instances of Three.js being imported" when that chunk loads.
@@ -106,9 +135,6 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
   an item one `zOrder`.
 - Opaque three.js draws follow item order, not front to back (unmeasured;
   expected negligible at math3d's scene sizes).
-- Nothing calls `onCameraMove` while Use.GPU's write-back
-  (`usegpu/useOrbitWriteBack`) handles its own orbit parameters; splitting
-  out its neutral half moves Use.GPU onto the hook.
 
 ## Alternatives considered
 

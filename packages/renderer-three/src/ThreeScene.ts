@@ -1,8 +1,8 @@
 import { Group, Scene, WebGPURenderer } from "three/webgpu";
-import type { Camera } from "three/webgpu";
-import type { ViewportSpec } from "@math3d/viewport-spec";
-import { makeCamera } from "./camera";
+import type { CameraSpec, ViewportSpec } from "@math3d/viewport-spec";
+import { ViewCamera } from "./camera";
 import { mathToView } from "./viewTransform";
+import { ReferenceFrame } from "./referenceFrame";
 import { builders } from "./graphics/builders";
 import { syncGraphics } from "./graphics/syncGraphics";
 import type { DrawnGraphics } from "./graphics/syncGraphics";
@@ -12,6 +12,8 @@ type Options = {
   forceWebGL: boolean;
   /** Called once, after the first frame is drawn. */
   onFirstFrame(): void;
+  /** The camera as the user moves it. */
+  onCameraMove(camera: CameraSpec): void;
   /** Gets what a resize or a frame throws, since neither runs inside React. */
   onError(error: unknown): void;
 };
@@ -31,15 +33,17 @@ export class ThreeScene {
 
   private readonly graphics: DrawnGraphics = new Map();
 
+  private readonly referenceFrame = new ReferenceFrame();
+
   private readonly scene = new Scene();
 
   private readonly renderer: WebGPURenderer;
 
   private readonly resizeObserver: ResizeObserver;
 
-  private spec: ViewportSpec | null = null;
+  private readonly view: ViewCamera;
 
-  private camera: Camera | null = null;
+  private spec: ViewportSpec | null = null;
 
   private frame: number | null = null;
 
@@ -55,7 +59,12 @@ export class ThreeScene {
     this.canvas.style.width = "100%";
     this.canvas.style.height = "100%";
     host.appendChild(this.canvas);
+    this.view = new ViewCamera(this.canvas, (camera) => {
+      options.onCameraMove(camera);
+      this.invalidate();
+    });
     this.scene.add(this.world);
+    this.world.add(this.referenceFrame.object);
     this.renderer = new WebGPURenderer({
       canvas: this.canvas,
       antialias: true,
@@ -82,13 +91,9 @@ export class ThreeScene {
       const { scale, offset } = mathToView(spec.range, spec.scale);
       this.world.scale.set(...scale);
       this.world.position.set(...offset);
+      this.referenceFrame.setRange(spec.range);
     }
-    if (
-      last?.camera !== spec.camera ||
-      last?.orthographic !== spec.orthographic
-    ) {
-      this.updateCamera();
-    }
+    this.view.setSpec(spec);
     if (last?.graphics !== spec.graphics) {
       syncGraphics(this.world, this.graphics, spec.graphics, builders);
     }
@@ -99,8 +104,10 @@ export class ThreeScene {
     this.disposed = true;
     if (this.frame !== null) cancelAnimationFrame(this.frame);
     this.resizeObserver.disconnect();
+    this.view.dispose();
     this.canvas.remove();
     this.graphics.forEach(({ graphic }) => graphic.dispose());
+    this.referenceFrame.dispose();
     // dispose() awaits init(), so it rejects whenever init did; init()'s
     // caller owns that failure.
     this.renderer.dispose().catch(() => {});
@@ -114,15 +121,10 @@ export class ThreeScene {
     if (!this.hasSize()) return;
     // Browser zoom changes it.
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(this.host.clientWidth, this.host.clientHeight, false);
-    this.updateCamera();
-    this.invalidate();
-  }
-
-  private updateCamera(): void {
-    if (!this.spec || !this.hasSize()) return;
     const { clientWidth, clientHeight } = this.host;
-    this.camera = makeCamera(this.spec, clientWidth / clientHeight);
+    this.renderer.setSize(clientWidth, clientHeight, false);
+    this.view.setAspect(clientWidth / clientHeight);
+    this.invalidate();
   }
 
   private invalidate(): void {
@@ -142,9 +144,9 @@ export class ThreeScene {
   }
 
   private draw(): void {
-    // Before init resolves, or while the host has no size.
-    if (!this.renderer.initialized || !this.camera || !this.hasSize()) return;
-    this.renderer.render(this.scene, this.camera);
+    // Before init resolves or the first spec, or while the host has no size.
+    if (!this.renderer.initialized || !this.spec || !this.hasSize()) return;
+    this.renderer.render(this.scene, this.view.camera);
     if (!this.drawn) {
       this.drawn = true;
       this.options.onFirstFrame();

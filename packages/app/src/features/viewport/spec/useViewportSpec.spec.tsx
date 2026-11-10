@@ -11,7 +11,7 @@ const renderViewportSpec = (scene: SceneBuilder) => {
   const store = storeWithScene(scene);
   const latest: { spec?: ViewportSpec } = {};
   const Harness = () => {
-    const viewport = useViewportSpec();
+    const viewport = useViewportSpec({ current: null });
     latest.spec = viewport.spec;
     return viewport.reporters;
   };

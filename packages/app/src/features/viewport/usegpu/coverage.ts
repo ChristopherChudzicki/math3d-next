@@ -229,8 +229,7 @@ export const coverage = {
     isPanEnabled: "drawn",
     isZoomEnabled: "drawn",
     isRotateEnabled: "drawn",
-    updateOnDrag:
-      "approximate: snapping back re-seeds the whole orbit, so a pan is undone too",
+    updateOnDrag: "drawn",
     position: "drawn",
     target: "drawn",
     useRelative: "drawn",
