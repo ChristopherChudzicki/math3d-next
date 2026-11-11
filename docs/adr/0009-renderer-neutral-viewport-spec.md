@@ -239,8 +239,8 @@ passes `ordered` for `?oit=0`):
   - The way back is in commit `2ac84d77` (#1479): its `OitFrame`, which
     wraps `oitPass(scene, camera)` in a `RenderPipeline` with the weight as
     its `weightNode`, and the two things `ThreeScene` did for it, the
-    renderer's `outputBufferType: UnsignedByteType` and the `resized()` call
-    behind its draw-twice workaround. The addon accumulates the same ones of
+    renderer's `outputBufferType: UnsignedByteType` and the `oit.resized()`
+    call behind its draw-twice workaround. The addon accumulates the same ones of
     this renderer's materials as `accumulates` does, so they stay;
     `accumulatingLast` goes.
 - **`oit` costs more than `ordered` on WebGL2**: about twice the frame time
