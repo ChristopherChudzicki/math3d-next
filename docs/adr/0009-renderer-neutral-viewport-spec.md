@@ -112,9 +112,10 @@ parent, so anything sized in pixels is built in the shader, in view space:
   do: three draws a translucent mesh's back faces first, so winding decides
   how it overlaps itself.
 - **Every point is a `Discs`** (`point/Discs.ts`), MathBox's circle point:
-  1.2 × `size` across at view depth 1 (its `optical` scale) with a one-pixel
-  antialiased rim. Like MathBox it draws all fills, then all rims, so a rim's
-  depth write never hides a farther disc.
+  a disc of the given diameter at view depth 1 with a one-pixel antialiased
+  rim. `buildPoint` passes 1.2 × `size`, as MathBox's `optical` circle draws.
+  Like MathBox it draws all fills, then all rims, so a rim's depth write never
+  hides a farther disc.
 - **`zBias` and `zIndex` go through `shader/depthStyle.ts`**, whatever the
   mark. `zBias` reproduces MathBox's under its perspective camera, stated as
   a change in view depth so it is the same on WebGPU and WebGL2 and in both

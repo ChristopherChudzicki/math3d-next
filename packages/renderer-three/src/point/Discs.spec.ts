@@ -5,7 +5,7 @@ import { Discs } from "./Discs";
 import type { DiscStyle } from "./discMaterial";
 
 const style = (overrides: Partial<DiscStyle> = {}): DiscStyle => ({
-  size: 8,
+  diameter: 8,
   color: [0.2, 0.4, 0.6, 1],
   zBias: 2,
   zIndex: 1,
@@ -29,9 +29,16 @@ describe("Discs", () => {
     expect(instanceCounts(discs)).toEqual([100, 100]);
   });
 
-  test("draws nothing without a finite point", () => {
+  test.each([
+    {
+      without: "a finite point",
+      at: [[Infinity, 0, 0]] as Coords[],
+      given: style(),
+    },
+    { without: "a size", at: points(1), given: style({ diameter: 0 }) },
+  ])("draws nothing without $without", ({ at, given }) => {
     const discs = new Discs();
-    discs.set([[Infinity, 0, 0]], style());
+    discs.set(at, given);
     expect(discs.objects.map((mesh) => mesh.visible)).toEqual([false, false]);
   });
 
@@ -48,7 +55,7 @@ describe("Discs", () => {
       const { color, ...numbers } = mesh.userData.disc;
       expect(color.toArray()).toEqual(given.color);
       expect(numbers).toEqual({
-        size: given.size,
+        diameter: given.diameter,
         zBias: given.zBias,
         zIndex: given.zIndex,
       });

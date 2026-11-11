@@ -31,17 +31,17 @@ export const SQUARE_TEMPLATE: Template = {
   index: [0, 1, 2, 2, 1, 3],
 };
 
-// MathBox's `optical` circle (on by default) draws 1.2 × `size`.
-const OPTICAL_SCALE = 1.2;
-
-export type DiscStyle = Pick<PointSpec, "size" | "color" | "zBias" | "zIndex">;
+export type DiscStyle = Pick<PointSpec, "color" | "zBias" | "zIndex"> & {
+  /** In CSS pixels at view depth 1. */
+  diameter: number;
+};
 
 /**
  * One set of discs' style as shader inputs, at `userData.disc` on each of
  * its meshes, where the shared materials read it per mesh.
  */
 export class DiscUniforms {
-  size = 0;
+  diameter = 0;
 
   /** RGBA as the spec gives it: `ThreeScene` outputs colors unconverted. */
   readonly color = new Vector4();
@@ -51,7 +51,7 @@ export class DiscUniforms {
   zIndex = 0;
 
   set(style: DiscStyle): void {
-    this.size = style.size;
+    this.diameter = style.diameter;
     this.color.set(...style.color);
     this.zBias = style.zBias;
     this.zIndex = style.zIndex;
@@ -73,9 +73,7 @@ const build = (part: DiscPart) => {
     vec4(attribute<"vec3">("discCenter", "vec3"), 1),
   ).xyz;
   // Fixed in view space, like a stroke's width: MathBox's point `depth` is 1.
-  const radius = read("size", "float")
-    .mul(0.5 * OPTICAL_SCALE)
-    .mul(viewUnitsPerPixel);
+  const radius = read("diameter", "float").mul(0.5).mul(viewUnitsPerPixel);
   const clip = cameraProjectionMatrix.mul(vec4(center, 1));
   // At the point's depth, in either projection.
   const viewUnitsPerDevicePixel = clip.w
@@ -110,12 +108,12 @@ const materials = new Map<string, MeshBasicNodeMaterial>();
 
 /**
  * A disc part's material, shared by every set of discs with that part and
- * transparency. The edge always blends; the fill only when translucent.
- * Both write depth, as MathBox's do.
+ * transparency. The edge always blends, whatever `translucent` says; the fill
+ * only when translucent. Both write depth, as MathBox's do.
  */
 export const discMaterial = (
   part: DiscPart,
-  translucent: boolean,
+  translucent = false,
 ): MeshBasicNodeMaterial => {
   const transparent = part === "edge" || translucent;
   const key = `${part}/${transparent}`;
@@ -128,8 +126,8 @@ export const discMaterial = (
     material.maskNode = shader.mask;
     material.transparent = transparent;
     material.depthWrite = true;
-    // A mirrored axis flips the square's winding. It is flat, so one pass
-    // draws it.
+    // three reverses a mirrored item's front face, though the square, built
+    // in view space, isn't mirrored. It is flat, so one pass draws it.
     material.side = DoubleSide;
     material.forceSinglePass = true;
     materials.set(key, material);

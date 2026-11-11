@@ -2,11 +2,11 @@ import { Group } from "three/webgpu";
 import type { PointSpec } from "@math3d/viewport-spec";
 import { Discs } from "../point/Discs";
 import { Labels } from "../label/Labels";
-import type { LabelStyle } from "../label/Labels";
 import type { Graphic } from "./builders";
+import { ITEM_LABEL } from "./itemLabel";
 
-/** Where math3d's MathBox point labels land. */
-const LABEL_STYLE: LabelStyle = { weight: "bold", offset: [0, 24] };
+// MathBox's `optical` circle, on by default, is drawn this many times `size`.
+const MATHBOX_CIRCLE_SCALE = 1.2;
 
 /** Points, each with the item's label. */
 export const buildPoint = (spec: PointSpec): Graphic<PointSpec> => {
@@ -15,8 +15,11 @@ export const buildPoint = (spec: PointSpec): Graphic<PointSpec> => {
   // After the discs' fill and rims.
   labels.mesh.renderOrder = 2;
   const set = (next: PointSpec) => {
-    discs.set(next.positions, next);
-    labels.set(next.positions, next.label, LABEL_STYLE);
+    discs.set(next.positions, {
+      ...next,
+      diameter: MATHBOX_CIRCLE_SCALE * next.size,
+    });
+    labels.set(next.positions, next.label, ITEM_LABEL);
   };
   set(spec);
   return {

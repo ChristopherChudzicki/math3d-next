@@ -39,11 +39,17 @@ describe("buildPoint", () => {
     );
   });
 
+  test("draws discs 1.2 × size across, as MathBox's circle", () => {
+    const spec = pointSpec();
+    const { discs } = partsOf(buildPoint(spec));
+    expect(discs[0].userData.disc.diameter).toBe(1.2 * spec.size);
+  });
+
   test("redraws in place for an updated spec", () => {
     const graphic = buildPoint(pointSpec());
     const { discs, labels } = partsOf(graphic);
     graphic.update(pointSpec({ positions: [[0, 0, 0]], label: null }));
-    expect(partsOf(graphic).discs).toEqual(discs);
+    partsOf(graphic).discs.forEach((mesh, i) => expect(mesh).toBe(discs[i]));
     expect(discs[0].geometry.instanceCount).toBe(1);
     expect(labels.visible).toBe(false);
   });

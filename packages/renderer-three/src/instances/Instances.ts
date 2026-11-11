@@ -17,12 +17,18 @@ export type Layout = readonly (readonly [name: string, size: number])[];
 export const strideOf = (layout: Layout): number =>
   layout.reduce((sum, [, size]) => sum + size, 0);
 
+type InstancedMesh = Mesh<InstancedBufferGeometry, Material>;
+
 /**
- * A mesh that draws `template` once per instance. The per-instance floats
- * refill in place; the buffer is replaced only when the instances outgrow it.
+ * Meshes, one per material, that each draw `template` once per instance from
+ * one buffer. The per-instance floats refill in place; the buffer is replaced
+ * only when the instances outgrow it.
  */
 export class Instances {
-  readonly mesh: Mesh<InstancedBufferGeometry, Material>;
+  readonly meshes: readonly InstancedMesh[];
+
+  /** The first of `meshes`. */
+  readonly mesh: InstancedMesh;
 
   private readonly stride: number;
 
@@ -31,13 +37,18 @@ export class Instances {
   constructor(
     private readonly template: Template,
     private readonly layout: Layout,
-    material: Material,
+    materials: Material | readonly Material[],
   ) {
     this.stride = strideOf(layout);
-    this.mesh = new Mesh(new InstancedBufferGeometry(), material);
-    // The shader places every vertex, so the geometry's bounds say nothing.
-    this.mesh.frustumCulled = false;
-    this.mesh.visible = false;
+    const geometry = new InstancedBufferGeometry();
+    this.meshes = ([] as Material[]).concat(materials).map((material) => {
+      const mesh = new Mesh(geometry, material);
+      // The shader places every vertex, so the geometry's bounds say nothing.
+      mesh.frustumCulled = false;
+      mesh.visible = false;
+      return mesh;
+    });
+    [this.mesh] = this.meshes;
   }
 
   /** How many instances fit without replacing the buffer. */
@@ -64,14 +75,17 @@ export class Instances {
       buffer.needsUpdate = true;
     }
     this.mesh.geometry.instanceCount = count;
-    this.mesh.visible = count > 0;
+    this.meshes.forEach((mesh) => {
+      // eslint-disable-next-line no-param-reassign
+      mesh.visible = count > 0;
+    });
   }
 
   dispose(): void {
     this.mesh.geometry.dispose();
-    // Releases what the renderer keeps per mesh; the material is shared and
-    // stays.
-    this.mesh.dispose();
+    // Releases what the renderer keeps per mesh; the materials are shared and
+    // stay.
+    this.meshes.forEach((mesh) => mesh.dispose());
   }
 
   /** A new geometry, since a GPU buffer can't grow; disposing the old one frees its buffer. */
@@ -97,6 +111,9 @@ export class Instances {
       offset += size;
     });
     this.buffer = buffer;
-    this.mesh.geometry = geometry;
+    this.meshes.forEach((mesh) => {
+      // eslint-disable-next-line no-param-reassign
+      mesh.geometry = geometry;
+    });
   }
 }
