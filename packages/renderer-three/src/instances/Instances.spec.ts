@@ -86,6 +86,18 @@ describe("Instances", () => {
     expect(() => instances.fill(2, () => 3)).toThrow();
   });
 
+  test("draws the same instances in each of its meshes, after growing too", () => {
+    const instances = new Instances(TEMPLATE, LAYOUT, [
+      new MeshBasicMaterial(),
+      new MeshBasicMaterial(),
+    ]);
+    fill(instances, 4);
+    fill(instances, 5);
+    const [first, second] = instances.meshes;
+    expect(second.geometry).toBe(first.geometry);
+    expect(second.visible).toBe(true);
+  });
+
   test("hides the mesh while it has no instances", () => {
     const instances = make();
     fill(instances, 2);

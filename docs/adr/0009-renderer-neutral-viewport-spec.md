@@ -30,6 +30,10 @@ reports back through `ViewportHooks`, both types in
 - `features/viewport/spec/` produces it: `useViewportSpec(host)` returns the
   spec, the reporter elements that fill `spec.graphics` (render them
   alongside the renderer), and the `onCameraMove` hook.
+- **A spec field is a true quantity**, drawn as given by every renderer. A
+  factor that only reproduces how MathBox reads a stored value, such as its
+  circle points' 1.2 × `size`, is applied once, by name, in the spec
+  producer.
 
 ### The camera
 
@@ -112,6 +116,23 @@ parent, so anything sized in pixels is built in the shader, in view space:
   carries through the axes' scale. A surface's triangles wind as MathBox's
   do: three draws a translucent mesh's back faces first, so winding decides
   how it overlaps itself.
+- **An implicit surface is meshed on the CPU** (`graphics/implicit.ts`), so
+  it draws on WebGL2 too. The equation is sampled once on a grid of `samples`
+  cells per axis, 128 at most, then meshed by marching cubes with shared
+  vertices and the grid's gradient as normals.
+  - Marching cubes, not the surface nets Use.GPU draws: its silhouette
+    keeps creases and cone points that surface nets round off or bridge, and
+    it ends a surface exactly on the domain's faces with no padding or
+    clipping.
+  - Sampling is nearly all the cost, so a spec with the same `value`,
+    `domain` and `samples` as the one drawn is not sampled again.
+  - Triangles wind counterclockwise seen from where `value` is positive, so
+    which side of a translucent surface shows through depends on the
+    equation's sign.
+- **Every point is a `Discs`** (`point/Discs.ts`), MathBox's circle point:
+  a disc `size` across at view depth 1 with a one-pixel antialiased rim.
+  Like MathBox it draws all fills, then all rims, so a rim's depth write never
+  hides a farther disc.
 - **`zBias` and `zIndex` go through `shader/depthStyle.ts`**, whatever the
   mark. `zBias` reproduces MathBox's under its perspective camera, stated as
   a change in view depth so it is the same on WebGPU and WebGL2 and in both
@@ -122,8 +143,8 @@ parent, so anything sized in pixels is built in the shader, in view space:
   default pipeline blends in linear space, which lightens every translucent
   mark.
 - **Every label is a `Labels`** (`label/Labels.ts`), MathBox's `<Label>`:
-  line, vector, axis and tick labels, and the point labels still to come.
-  16 px `sans-serif` with a 2 px white outline, no LaTeX (MathBox has none).
+  line, vector, point, axis and tick labels. 16 px `sans-serif` with a 2 px
+  white outline, no LaTeX (MathBox has none).
   Unlike a stroke, it keeps its pixel size at any depth (MathBox's
   `attach.depth` is 0), so its quad is laid out in screen pixels around its
   projected anchor. All labels share one canvas atlas, drawn at the device

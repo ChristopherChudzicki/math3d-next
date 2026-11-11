@@ -43,7 +43,10 @@ export type LineSpec = Common & {
   /** Arrowheads at each path's first and last point. */
   start: boolean;
   end: boolean;
-  /** Arrowhead scale: MathBox draws the head 1.25 × arrowSize × width pixels long. */
+  /**
+   * Arrowhead base width, in line widths; the head is a 2.5 : 1 cone, so
+   * 1.25 × this long.
+   */
   arrowSize: number;
   /** Drawn at the last point; `null` when hidden or empty. */
   label: string | null;
@@ -66,7 +69,12 @@ export type ImplicitSurfaceSpec = Common & {
   domain: AxesRange;
   /** Cells per axis, as in MathBox. */
   samples: number;
-  /** The surface is the zero level set of this function. */
+  /**
+   * The surface is the zero level set of this function. A renderer may skip
+   * sampling when a spec has the same function as the last (as when a
+   * variable drives only the opacity); a new function for the same surface
+   * costs that speed and nothing else.
+   */
   value: (x: number, y: number, z: number) => number;
   color: RGBA;
   shaded: boolean;
@@ -81,7 +89,7 @@ export type AxisSpec = Common & {
   /** Arrowheads at the axis's low and high end. */
   start: boolean;
   end: boolean;
-  /** Arrowhead scale, as in `LineSpec`. */
+  /** Arrowhead base width, in line widths, as in `LineSpec`. */
   arrowSize: number;
   range: [number, number];
   ticks: {

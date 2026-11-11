@@ -131,3 +131,36 @@ test("an axis's ticks keep their pixel length when the axis they run along is re
   expect(Math.abs(squashedTicks / ticks - 1)).toBeLessThan(0.1);
   expect(errors).toEqual([]);
 });
+
+test("a point is a disc of MathBox's size, whatever an axis's scale", async ({
+  page,
+  prepareScene,
+}) => {
+  const errors = collectPageErrors(page);
+  // The axes' default range maps 5 units to 1 view unit, so the point is at
+  // view depth 1, where MathBox draws a disc 1.2 × size across.
+  const size = 30;
+  const shareAt = async (xScale: string) => {
+    const scene = new SceneBuilder()
+      .camera({ position: "[0, -5, 0]" })
+      .axis("x", { scale: xScale });
+    scene.folder().point({ coords: "[0, 0, 0]", size: String(size) });
+    const key = await prepareScene(scene.json());
+    await page.goto(`/${key}?renderer=threejs&controls=0`);
+    await expectThreeViewport(page);
+    return coloredShare(page);
+  };
+
+  const full = await shareAt("1");
+  const squashed = await shareAt("1/4");
+
+  const box = await page.getByTestId("scene").boundingBox();
+  invariant(box);
+  // The antialiased rim adds about a pixel to the colored radius.
+  const disc = Math.PI * (0.6 * size + 1) ** 2;
+  expect(Math.abs(full / (disc / (box.width * box.height)) - 1)).toBeLessThan(
+    0.1,
+  );
+  expect(Math.abs(squashed / full - 1)).toBeLessThan(0.05);
+  expect(errors).toEqual([]);
+});
