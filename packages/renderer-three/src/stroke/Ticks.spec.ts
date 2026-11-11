@@ -4,7 +4,6 @@ import { Ticks } from "./Ticks";
 import type { TickStyle } from "./Ticks";
 
 const style: TickStyle = {
-  width: 2,
   color: [0.2, 0.4, 0.6, 1],
   zBias: 0,
   zIndex: 0,
@@ -38,13 +37,13 @@ describe("Ticks", () => {
     ]);
   });
 
-  test("gives its mesh the style, as the stroke shaders read it", () => {
+  test("gives its mesh the style at MathBox's tick width, as the stroke shaders read it", () => {
     const ticks = new Ticks();
     ticks.set([[0, 0, 0]], [0, 1, 0], style);
     const { color, width, zBias, zIndex } = ticks.mesh.userData.stroke;
     expect(color.toArray()).toEqual(style.color);
     expect({ width, zBias, zIndex }).toEqual({
-      width: style.width,
+      width: 2,
       zBias: style.zBias,
       zIndex: style.zIndex,
     });

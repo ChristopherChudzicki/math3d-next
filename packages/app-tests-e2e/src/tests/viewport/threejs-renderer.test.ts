@@ -106,14 +106,15 @@ test("an axis's ticks keep their pixel length when the axis they run along is re
   const errors = collectPageErrors(page);
   // z's ticks run along y. The camera and the z axis sit on y = 0, so
   // rescaling y changes the drawing only if it stretches the ticks.
-  const shareAt = async (yScale: string) => {
+  const shareAt = async (yScale: string, ticksVisible: string) => {
     const scene = new SceneBuilder()
-      .camera({ position: "[-6, 0, 0]" })
+      .camera({ position: "[-3, 0, 0]" })
       .axis("y", { scale: yScale })
       .axis("z", {
         color: "#ff0000",
         width: "1/4",
         divisions: "40",
+        ticksVisible,
         labelVisible: "false",
       });
     const key = await prepareScene(scene.json());
@@ -122,9 +123,11 @@ test("an axis's ticks keep their pixel length when the axis they run along is re
     return coloredShare(page);
   };
 
-  const full = await shareAt("1");
-  const squashed = await shareAt("1/4");
+  const line = await shareAt("1", "false");
+  const ticks = (await shareAt("1", "true")) - line;
+  const squashedTicks = (await shareAt("1/4", "true")) - line;
 
-  expect(Math.abs(squashed / full - 1)).toBeLessThan(0.05);
+  expect(ticks).toBeGreaterThan(0.0002);
+  expect(Math.abs(squashedTicks / ticks - 1)).toBeLessThan(0.1);
   expect(errors).toEqual([]);
 });

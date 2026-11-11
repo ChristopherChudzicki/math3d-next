@@ -5,7 +5,7 @@
 import { attribute, modelViewMatrix, normalize, vec4 } from "three/tsl";
 import { viewUnitsPerPixel } from "../shader/viewUnits";
 import type { Layout } from "../instances/Instances";
-import { buildLine } from "./lineMaterial";
+import { lineVertex } from "./lineMaterial";
 import { strokeMaterial } from "./style";
 
 /** Per tick: where it is, and the direction it runs, in math coordinates. */
@@ -14,8 +14,9 @@ export const TICK_LAYOUT = [
   ["tickDirection", 3],
 ] as const satisfies Layout;
 
-/** MathBox's tick length, in CSS pixels. */
+/** MathBox's tick length and width, in CSS pixels. */
 const TICK_SIZE = 10;
+export const TICK_WIDTH = 2;
 
 const build = () => {
   const center = modelViewMatrix.mul(
@@ -29,7 +30,7 @@ const build = () => {
   const half = along.mul(viewUnitsPerPixel.mul(TICK_SIZE / 2));
   const a = center.sub(half);
   const b = center.add(half);
-  return buildLine(false, { before: a, a, b, after: b });
+  return lineVertex(false, { before: a, a, b, after: b });
 };
 
 /** The tick material for ticks of that transparency, shared by all. */

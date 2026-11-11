@@ -85,7 +85,7 @@ const packedSegment = (): ViewSegment => ({
 });
 
 /** A stroke line's vertex stage, and with `heads` its mask, for `segment`. */
-export const buildLine = (
+export const lineVertex = (
   heads: boolean,
   segment: ViewSegment = packedSegment(),
 ) => {
@@ -185,8 +185,8 @@ export const buildLine = (
   };
 };
 
-const plain = strokeMaterial(() => buildLine(false));
-const clippedUnderHeads = strokeMaterial(() => buildLine(true));
+const plain = strokeMaterial(() => lineVertex(false));
+const clippedUnderHeads = strokeMaterial(() => lineVertex(true));
 
 /**
  * The line material for a stroke of that transparency. Only one with

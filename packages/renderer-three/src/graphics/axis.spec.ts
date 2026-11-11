@@ -45,16 +45,19 @@ describe("buildAxis", () => {
     expect(arrows.geometry.instanceCount).toBe(1);
   });
 
-  test("draws a tick and a label at each tick value, ticks opaque and unbiased as in math3d's MathBox", () => {
+  test("draws a tick and a label at each tick value, ticks in the axis's style", () => {
     const spec = axisSpec();
     const { ticks, tickLabels } = partsOf(buildAxis(spec));
     expect(ticks.geometry.instanceCount).toBe(spec.ticks.values.length);
     expect(tickLabels.geometry.instanceCount).toBe(spec.ticks.values.length);
     expect(firstPoint(ticks, "tickCenter")).toEqual([0, -2, 0]);
     expect(firstPoint(ticks, "tickDirection")).toEqual([1, 0, 0]);
-    const { color, width, zBias, zIndex } = ticks.userData.stroke;
-    expect(color.toArray()).toEqual([0.5, 0.5, 0.5, 1]);
-    expect({ width, zBias, zIndex }).toEqual({ width: 2, zBias: 0, zIndex: 0 });
+    const { color, zBias, zIndex } = ticks.userData.stroke;
+    expect(color.toArray()).toEqual(spec.color);
+    expect({ zBias, zIndex }).toEqual({
+      zBias: spec.zBias,
+      zIndex: spec.zIndex,
+    });
   });
 
   test("draws no ticks or tick labels when ticks are hidden", () => {

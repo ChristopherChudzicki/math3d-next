@@ -5,8 +5,6 @@ import {
   useFinalVisibility,
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
-import { useAppSelector } from "@/store/hooks";
-import * as select from "@/store/scene/state/selectors";
 import useAxesInfo from "@/features/viewport/shared/useAxesInfo";
 import type { GraphicSpec } from "@math3d/viewport-spec";
 import { baseStyle } from "./style";
@@ -23,8 +21,6 @@ const GRID_PROPS = [
   "snap",
 ] as const;
 
-const AXES = ["axis-x", "axis-y", "axis-z"];
-
 const AXIS_INDEX = { x: 0, y: 1, z: 2 } as const;
 
 const Grid: SpecComponent<MIT.Grid> = ({ item }) => {
@@ -35,8 +31,7 @@ const Grid: SpecComponent<MIT.Grid> = ({ item }) => {
     item,
     GRID_PROPS,
   );
-  const [x, y, z] = useAppSelector((state) => select.getItems(state, AXES));
-  const { range: axesRange } = useAxesInfo(x, y, z);
+  const { range: axesRange } = useAxesInfo();
   const { color, axes } = item.properties;
   const spec = useMemo<GraphicSpec | null>(() => {
     if (!visible) return null;

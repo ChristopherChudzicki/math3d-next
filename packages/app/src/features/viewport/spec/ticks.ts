@@ -1,15 +1,27 @@
 export type TickOptions = {
-  /** Keep a tick at exactly zero. */
+  /** Keep a tick at zero. */
   zero: boolean;
   /** Snap the step to 1, 2 or 5 times a power of ten; else divide the range evenly. */
   nice: boolean;
 };
 
+/** How far, in steps, a range end may miss a tick and still get it. */
+const ON_TICK = 1e-9;
+
 /**
- * MathBox's `linear` ticks (`mathbox/src/util/ticks.js`, at its defaults for
- * everything but `zero` and `nice`): about `divisions` equally spaced values
- * in `[min, max]`. Floating-point error carries through as in MathBox, so a
- * tick meant to be zero can land a hair off it and survive `zero: false`.
+ * About `divisions` equally spaced values in `[min, max]`: MathBox's `linear`
+ * ticks (`mathbox/src/util/ticks.js`) at its defaults for everything but
+ * `zero` and `nice`. It departs from MathBox where MathBox's floating point
+ * goes wrong:
+ * - A nice tick is an exact decimal: 0.3, not 0.30000000000000004.
+ * - A range end on a tick keeps it: MathBox drops −0.7 from [−0.7, 0.7] in
+ *   tenths.
+ * - An ideal step of exactly a power of ten is the step: MathBox steps by 500
+ *   over [0, 10000] in 10.
+ * - No tick falls outside the range. MathBox's last nice tick can overshoot
+ *   by a step ([−8.4, −8.239] in 5 gets −8.2); with no nice step inside the
+ *   range it counts backwards ([1, 4] in 1 gets [5, 0]); and with negative
+ *   `divisions` and no `nice` it counts down from `min`.
  */
 export const linearTicks = (
   [min, max]: readonly [number, number],
@@ -18,27 +30,34 @@ export const linearTicks = (
 ): number[] => {
   const n = divisions || 10;
   const ideal = (max - min) / n;
-  let first = min;
-  let step = ideal;
-  let count = n;
-  if (nice) {
-    // Not `Math.log10`: MathBox's quotient gives 2.9999… for 1000, so its
-    // ticks there step by 500, not 1000.
-    const ref = 10 ** Math.floor(Math.log(ideal) / Math.log(10));
-    // Of 5, 1 and ½ × ref, the step nearest `ideal` by ratio; the first wins a tie.
-    let distance = Infinity;
-    [5, 1, 0.5].forEach((factor) => {
-      const candidate = ref * factor;
-      const d = Math.max(candidate / ideal, ideal / candidate);
-      if (d < distance) {
-        distance = d;
-        step = candidate;
-      }
-    });
-    first = Math.ceil(min / step) * step;
-    count = Math.ceil((Math.floor(max / step) * step - first) / step);
-  }
   const ticks: number[] = [];
-  for (let i = 0; i <= count; i += 1) ticks.push(first + i * step);
+  if (!nice) {
+    for (let i = 0; i <= n; i += 1) ticks.push(min + i * ideal);
+  } else if (ideal > 0 && Number.isFinite(ideal)) {
+    // The step is `mantissa` × 10^`power`: of 5, 1 and ½ times the power of
+    // ten below `ideal`, the one nearest it by ratio; the first wins a tie.
+    const below = Math.floor(Math.log10(ideal));
+    const distance = ([m, e]: readonly [number, number]) => {
+      const ratio = (m * 10 ** e) / ideal;
+      return Math.max(ratio, 1 / ratio);
+    };
+    const candidates = [
+      [5, below],
+      [1, below],
+      [5, below - 1],
+    ] as const;
+    const [mantissa, power] = candidates.reduce<readonly [number, number]>(
+      (best, candidate) =>
+        distance(candidate) < distance(best) ? candidate : best,
+      candidates[0],
+    );
+    const step = mantissa * 10 ** power;
+    // An integer over a power of ten is the nearest double to that decimal.
+    const tick = (i: number) =>
+      power >= 0 ? i * step : (i * mantissa) / 10 ** -power;
+    const first = Math.ceil(min / step - ON_TICK);
+    const last = Math.floor(max / step + ON_TICK);
+    for (let i = first; i <= last; i += 1) ticks.push(tick(i));
+  }
   return zero ? ticks : ticks.filter((x) => x !== 0);
 };

@@ -7,6 +7,9 @@ const Z_BIAS =
 const GRID_OPACITY =
   "approximate: at gridOpacity 1 gridlines draw in three's opaque pass, so they show through a translucent surface in front; MathBox hides them behind their own surface";
 
+const TICKS_FOLLOW_AXIS =
+  "ticks take the axis's opacity, zBias and zIndex; math3d's MathBox draws them opaque at zBias and zIndex 0";
+
 /** The properties every line-like item shares. */
 const STROKE = {
   color: "drawn",
@@ -54,6 +57,9 @@ const SURFACE = {
 export const coverage = {
   [MIT.Axis]: {
     ...STROKE,
+    opacity: `approximate: ${TICKS_FOLLOW_AXIS}`,
+    zBias: `${Z_BIAS}; ${TICKS_FOLLOW_AXIS}`,
+    zIndex: `approximate: ${TICKS_FOLLOW_AXIS}`,
     axis: "drawn",
     label: "drawn",
     labelVisible: "drawn",
