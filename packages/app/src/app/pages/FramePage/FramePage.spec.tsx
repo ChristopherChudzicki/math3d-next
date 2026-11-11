@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { test, expect } from "vitest";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { SceneBuilder, makeItem, seedDb } from "@math3d/mock-api";
@@ -5,15 +6,22 @@ import {
   renderTestApp,
   screen,
   storeRendererPreference,
-  stubWebGpu,
   userWaits,
   waitFor,
   waitForAppReady,
 } from "@/test_util";
 import * as select from "@/store/scene/state/selectors";
 import { mathScopeId } from "@/store/scene/evaluation/mathScope";
+import { RENDERER_PREFERENCE_KEY } from "@/services/renderer/rendererPreference";
+import { gpuContent } from "@/test_util/gpuViewportContent";
+import type { ContentProps } from "@/test_util/gpuViewportContent";
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
+
+const NoAdapter = ({ onUnsupported }: ContentProps) => {
+  useEffect(() => onUnsupported(new Error("no adapter")), [onUnsupported]);
+  return null;
+};
 
 test("renders the scene with its data loaded and no editor UI", async () => {
   const scene = new SceneBuilder();
@@ -60,16 +68,56 @@ test("a missing scene neither alerts nor redirects (silent 404)", async () => {
   expect(location.current.pathname).toBe("/app/frame/does-not-exist");
 });
 
-test("FramePage draws MathBox whatever the renderer choice", async () => {
-  stubWebGpu();
-  storeRendererPreference("usegpu");
+test("without ?renderer it draws MathBox, whatever the stored preference", async () => {
+  storeRendererPreference("threejs");
+  const scene = new SceneBuilder();
+  seedDb.withScene(scene.json());
+
+  renderTestApp(`/app/frame/${scene.key}`);
+
+  expect(await screen.findByTestId("scene")).toHaveAttribute(
+    "data-renderer",
+    "mathbox",
+  );
+});
+
+test("?renderer=threejs draws three.js", async () => {
+  const scene = new SceneBuilder();
+  seedDb.withScene(scene.json());
+
+  renderTestApp(`/app/frame/${scene.key}?renderer=threejs`);
+
+  expect(await screen.findByTestId("scene")).toHaveAttribute(
+    "data-renderer",
+    "threejs",
+  );
+});
+
+test("a Use.GPU that can't start marks the page failed, with no fallback", async () => {
+  vi.spyOn(console, "warn").mockImplementation(() => {});
+  gpuContent.Component = NoAdapter;
   const scene = new SceneBuilder();
   seedDb.withScene(scene.json());
 
   renderTestApp(`/app/frame/${scene.key}?renderer=usegpu`);
 
+  const viewport = await screen.findByTestId("scene");
+  await waitFor(() =>
+    expect(viewport).toHaveAttribute("data-scene-error", "unsupported"),
+  );
+  expect(viewport).toHaveAttribute("data-renderer", "usegpu");
+  expect(viewport).not.toHaveAttribute("data-scene-ready");
+  expect(localStorage.getItem(RENDERER_PREFERENCE_KEY)).toBeNull();
+});
+
+test("an unknown ?renderer marks the page failed", async () => {
+  const scene = new SceneBuilder();
+  seedDb.withScene(scene.json());
+
+  renderTestApp(`/app/frame/${scene.key}?renderer=foo`);
+
   expect(await screen.findByTestId("scene")).toHaveAttribute(
-    "data-renderer",
-    "mathbox",
+    "data-scene-error",
+    "invalid-renderer",
   );
 });

@@ -24,15 +24,12 @@ test("?renderer=usegpu draws with the Use.GPU viewport", async ({
   const viewport = page.getByTestId("scene");
   await expect(viewport).toHaveAttribute("data-renderer", "usegpu");
   await expect(viewport.locator("canvas")).toBeVisible();
-  await expect(viewport.locator("[data-ready]")).toBeAttached({
+  await expect(viewport).toHaveAttribute("data-scene-ready", "true", {
     timeout: 15_000,
   });
-  // `data-ready` marks a device, not a frame: wait for the colored surface.
   // An empty scene (axes and grid only) reads 0; see `frame-render.test.ts`.
-  await expect
-    .poll(async () => colorfulPixelRatio(await viewport.screenshot()), {
-      timeout: 15_000,
-    })
-    .toBeGreaterThan(0.1);
+  expect(await colorfulPixelRatio(await viewport.screenshot())).toBeGreaterThan(
+    0.1,
+  );
   expect(errors).toEqual([]);
 });

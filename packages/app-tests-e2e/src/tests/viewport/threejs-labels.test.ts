@@ -3,7 +3,7 @@ import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
 import { collectPageErrors } from "@/utils/collectPageErrors";
 import { decodePng } from "@/utils/decodePng";
-import { coloredShare, expectThreeViewport } from "@/utils/threeViewport";
+import { expectThreeViewport } from "@/utils/threeViewport";
 
 test.use({ disable3d: false });
 
@@ -50,7 +50,6 @@ test("a vector's label is drawn above its tip", async ({
     const key = await prepareScene(scene.json());
     await page.goto(`/${key}?renderer=threejs&controls=0`);
     await expectThreeViewport(page);
-    await coloredShare(page);
     return page.getByTestId("scene").screenshot();
   };
 

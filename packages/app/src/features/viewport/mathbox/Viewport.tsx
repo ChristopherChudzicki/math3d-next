@@ -7,10 +7,9 @@ import "mathbox/mathbox.css";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Vector3 } from "three";
 import { debounce } from "lodash-es";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch } from "@/store/hooks";
 import { useElementResize } from "@/util/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
-import * as select from "@/store/scene/state/selectors";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 import { useMathResults } from "@/store/scene/evaluation/mathScope";
 import {
@@ -18,6 +17,7 @@ import {
   useViewportItems,
 } from "@/features/viewport/shared/useViewportItems";
 import is3dDisabled from "@/features/viewport/shared/is3dDisabled";
+import { useLoadFlag } from "@/features/viewport/shared/useLoadFlag";
 import { Graphic } from "./graphics";
 import Camera from "./Camera";
 import type { OnMoveEnd } from "./Camera";
@@ -28,9 +28,8 @@ import * as styles from "./Viewport.module.css";
 type Props = {
   className?: string;
   /**
-   * Render a single still frame: warm up briefly, halt the render loop (rather
-   * than looping at ~60fps forever), and mark the container `data-scene-ready`
-   * for a headless screenshotter. Used by the `/app/frame` render page.
+   * Render a single still frame: halt the render loop once warmed up (rather
+   * than looping at ~60fps forever). Used by the `/app/frame` render page.
    */
   still?: boolean;
 };
@@ -98,11 +97,9 @@ const useIsOrthographic = () => {
 const Viewport: React.FC<Props> = ({ className, still }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [mathbox, setMathbox] = useState<MathboxSelection | null>(null);
-  // The scene load whose warmup has drained, so each load shows the splash
-  // again. A mathbox instance swapped within one load counts as drained.
-  const loadCount = useAppSelector(select.loadCount);
-  const [drainedLoad, setDrainedLoad] = useState<number | null>(null);
-  const warmedUp = drainedLoad === loadCount;
+  // Per scene load, so each load shows the splash again. A mathbox instance
+  // swapped within one load counts as drained.
+  const [warmedUp, markWarmedUp] = useLoadFlag();
   const hasRequired = useHasViewportItems();
 
   const isOrthographic = useIsOrthographic();
@@ -114,9 +111,9 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
     setMathbox(mb);
   }, []);
 
-  // Wait for each scene load's warmup to drain, then hide its loading splash. In
-  // `still` mode, also halt the render loop and flag readiness so a
-  // screenshotter can capture a static, fully-rendered, CPU-idle frame.
+  // Wait for each scene load's warmup to drain, then hide its loading splash and
+  // mark the container `data-scene-ready`. In `still` mode, also halt the
+  // render loop, so a screenshotter captures a CPU-idle frame.
   useEffect(() => {
     if (!mathbox) return undefined;
     const context = (mathbox as MathboxRoot)._context;
@@ -138,13 +135,13 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
         // root selection, see index.js) — stable enough to call bare, unlike
         // the internal `_context.getPending` we feature-detect above.
         if (still) (mathbox as MathboxRoot).stop();
-        setDrainedLoad(loadCount);
+        markWarmedUp();
         return;
       }
       raf = requestAnimationFrame(tick);
     });
     return () => cancelAnimationFrame(raf);
-  }, [still, mathbox, loadCount]);
+  }, [still, mathbox, markWarmedUp]);
 
   // threestrap's size plugin (mathbox's resize pipeline) already listens for
   // a "resize" event on this container element directly, not just on
@@ -162,7 +159,7 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
     <div
       data-testid="scene"
       data-renderer="mathbox"
-      data-scene-ready={still && warmedUp ? "true" : undefined}
+      data-scene-ready={warmedUp ? "true" : undefined}
       className={mergeClassNames(className, styles.viewport, {
         [styles.splashHidden]: warmedUp,
       })}

@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router";
 import user from "@testing-library/user-event";
 import { SceneBuilder } from "@math3d/mock-api";
+import type { ViewportHooks } from "@math3d/viewport-spec";
 import * as Sentry from "@sentry/react";
 import { getStore } from "@/store/store";
 import { actions } from "@/store/scene/state/scene.slice";
@@ -17,10 +18,14 @@ vi.mock("@sentry/react", async (importOriginal) => ({
   captureMessage: vi.fn(),
 }));
 
-const renderViewport = (url = "/") => {
-  const store = getStore();
+const loadScene = (store: ReturnType<typeof getStore>) => {
   const scene = new SceneBuilder();
   store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
+};
+
+const renderViewport = (url = "/") => {
+  const store = getStore();
+  loadScene(store);
   render(
     <Provider store={store}>
       <MemoryRouter initialEntries={[url]}>
@@ -28,21 +33,49 @@ const renderViewport = (url = "/") => {
       </MemoryRouter>
     </Provider>,
   );
+  return { store };
 };
 
-test("the first drawn frame marks the viewport ready", async () => {
-  const DrawsAFrame = ({ hooks }: ThreeViewportProps) => {
-    useEffect(() => hooks.onReady(), [hooks]);
+test("ready holds only for the scene load whose renderer settled", async () => {
+  const mounted: ViewportHooks[] = [];
+  const Records = ({ hooks }: ThreeViewportProps) => {
+    useEffect(() => {
+      mounted.push(hooks);
+    }, [hooks]);
     return null;
   };
-  threeViewport.Component = DrawsAFrame;
+  threeViewport.Component = Records;
+  const { store } = renderViewport();
+  const scene = screen.getByTestId("scene");
+  await waitFor(() => expect(mounted).toHaveLength(1));
+  const [first] = mounted;
+
+  act(() => first.onReady());
+  expect(scene).toHaveAttribute("data-scene-ready", "true");
+
+  act(() => loadScene(store));
+  expect(scene).not.toHaveAttribute("data-scene-ready");
+  await waitFor(() => expect(mounted.at(-1)).not.toBe(first));
+
+  act(() => mounted.at(-1)?.onReady());
+  // The first load's renderer settling late changes nothing.
+  act(() => first.onReady());
+  expect(scene).toHaveAttribute("data-scene-ready", "true");
+});
+
+test("a render error marks the scene failed", async () => {
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  threeViewport.Component = () => {
+    throw new Error("lost the device");
+  };
   renderViewport();
 
-  const scene = screen.getByTestId("scene");
-  await waitFor(() =>
-    // E2E waits on this attribute, which no accessible query reaches.
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(scene.querySelector("[data-ready]")).not.toBeNull(),
+  expect(
+    await screen.findByText("The three.js renderer ran into an error."),
+  ).toBeInTheDocument();
+  expect(screen.getByTestId("scene")).toHaveAttribute(
+    "data-scene-error",
+    "error",
   );
 });
 
@@ -59,6 +92,10 @@ test("an unsupported browser gets a way back to the default renderer", async () 
   expect(
     await screen.findByText("The three.js renderer can't run in this browser."),
   ).toBeInTheDocument();
+  expect(screen.getByTestId("scene")).toHaveAttribute(
+    "data-scene-error",
+    "unsupported",
+  );
   expect(warn).toHaveBeenCalledWith(noBackend);
   expect(Sentry.captureMessage).toHaveBeenCalledExactlyOnceWith(
     "three.js unsupported: no backend",

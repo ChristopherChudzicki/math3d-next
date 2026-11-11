@@ -15,6 +15,7 @@ import type { DrawnGraphics } from "./graphics/syncGraphics";
 import { onLabelRelayout } from "./label/atlas";
 import { OitFrame } from "./OitFrame";
 import type { Transparency } from "./shader/material";
+import { Settle } from "./settle";
 
 // Colors stay the sRGB values the spec gives (see `outputColorSpace` below),
 // so three must not convert a `Color` to linear on its way in either.
@@ -46,8 +47,11 @@ type Options = {
   forceWebGL: boolean;
   /** How translucent marks combine; the backend's default when absent. */
   transparency?: Transparency;
-  /** Called once, after the first frame is drawn. */
-  onFirstFrame(): void;
+  /**
+   * Called once: after the `ResizeObserver` has reported, the first drawn
+   * frame with no redraw pending.
+   */
+  onSettled(): void;
   /** The camera as the user moves it. */
   onCameraMove(camera: CameraSpec): void;
   /** Gets what a resize or a frame throws, since neither runs inside React. */
@@ -101,7 +105,10 @@ export class ThreeScene {
 
   private frame: number | null = null;
 
-  private drawn = false;
+  private readonly settle = new Settle(
+    () => this.frame !== null,
+    () => this.options.onSettled(),
+  );
 
   private disposed = false;
 
@@ -134,7 +141,10 @@ export class ThreeScene {
     this.renderer.outputColorSpace = LinearSRGBColorSpace;
     this.renderer.setClearColor(0xffffff, 1);
     this.resizeObserver = new ResizeObserver(() =>
-      this.reporting(() => this.resize()),
+      this.reporting(() => {
+        this.settle.resized();
+        this.resize();
+      }),
     );
   }
 
@@ -165,6 +175,7 @@ export class ThreeScene {
   dispose(): void {
     this.disposed = true;
     if (this.frame !== null) cancelAnimationFrame(this.frame);
+    this.settle.dispose();
     this.resizeObserver.disconnect();
     this.stopLabelRelayout();
     this.view.dispose();
@@ -237,9 +248,6 @@ export class ThreeScene {
     if (!this.built || !this.hasSize()) return;
     if (this.oit) this.oit.render(this.view.camera);
     else this.renderer.render(this.scene, this.view.camera);
-    if (!this.drawn) {
-      this.drawn = true;
-      this.options.onFirstFrame();
-    }
+    this.settle.drawn();
   }
 }

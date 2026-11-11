@@ -51,6 +51,10 @@ export type ViewportHooks = {
    * when a move has ended.
    */
   onCameraMove(camera: CameraSpec): void;
-  /** The first frame is drawn. */
+  /**
+   * Every graphic in the spec the renderer holds is drawn, and nothing more
+   * will change without new input. Called once. Whether that spec is the
+   * whole scene is the app's to know.
+   */
   onReady(): void;
 };

@@ -2,23 +2,16 @@ import { expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { colorfulPixelRatio } from "@/utils/colorfulPixelRatio";
 
-/** Waits for the three.js viewport's first frame. */
+/** Waits for the three.js viewport to draw and settle. */
 export const expectThreeViewport = async (page: Page) => {
   const viewport = page.getByTestId("scene");
   await expect(viewport).toHaveAttribute("data-renderer", "threejs");
   await expect(viewport.locator("canvas")).toBeVisible();
-  await expect(viewport.locator("[data-ready]")).toBeAttached({
+  await expect(viewport).toHaveAttribute("data-scene-ready", "true", {
     timeout: 15_000,
   });
 };
 
-/**
- * The share of the viewport's pixels that are colored, once any are: the
- * first frame can come before the scene's graphics do.
- */
-export const coloredShare = async (page: Page): Promise<number> => {
-  const viewport = page.getByTestId("scene");
-  const read = async () => colorfulPixelRatio(await viewport.screenshot());
-  await expect.poll(read, { timeout: 15_000 }).toBeGreaterThan(0);
-  return read();
-};
+/** The share of the viewport's pixels that are colored. */
+export const coloredShare = async (page: Page): Promise<number> =>
+  colorfulPixelRatio(await page.getByTestId("scene").screenshot());

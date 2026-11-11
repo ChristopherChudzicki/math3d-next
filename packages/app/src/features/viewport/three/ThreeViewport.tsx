@@ -6,9 +6,9 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import * as Sentry from "@sentry/react";
 import type { ViewportHooks } from "@math3d/viewport-spec";
-import RendererFallback from "@/features/viewport/shared/RendererFallback";
 import ViewportShell from "@/features/viewport/shared/ViewportShell";
 import { useViewportSpec } from "@/features/viewport/spec/useViewportSpec";
+import { useLoadFlag } from "@/features/viewport/shared/useLoadFlag";
 
 const RendererViewport = React.lazy(() =>
   import("@math3d/renderer-three").then((m) => ({ default: m.Viewport })),
@@ -30,9 +30,9 @@ const TRANSPARENCIES = new Map<string | null, Transparency>([
   ["1", "oit"],
 ]);
 
-const ThreeViewportContent: React.FC<{
-  onUnsupported: ViewportHooks["onUnsupported"];
-}> = ({ onUnsupported }) => {
+const ThreeViewportContent: React.FC<
+  Pick<ViewportHooks, "onUnsupported" | "onReady">
+> = ({ onUnsupported, onReady }) => {
   const host = useRef<HTMLDivElement>(null);
   const { spec, reporters, onCameraMove } = useViewportSpec(host);
   const [searchParams] = useSearchParams();
@@ -41,10 +41,9 @@ const ThreeViewportContent: React.FC<{
     () => ({
       onUnsupported,
       onCameraMove,
-      // E2E waits on it.
-      onReady: () => host.current?.setAttribute("data-ready", ""),
+      onReady,
     }),
-    [onUnsupported, onCameraMove],
+    [onUnsupported, onCameraMove, onReady],
   );
   return (
     <>
@@ -64,6 +63,7 @@ type Props = { className?: string };
 
 const ThreeViewport: React.FC<Props> = ({ className }) => {
   const [unsupported, setUnsupported] = useState(false);
+  const [ready, onReady] = useLoadFlag();
   const onUnsupported = useCallback((error: unknown) => {
     setUnsupported(true);
     // A browser or device limitation, not an app error.
@@ -79,13 +79,12 @@ const ThreeViewport: React.FC<Props> = ({ className }) => {
     <ViewportShell
       renderer="threejs"
       errorMessage="The three.js renderer ran into an error."
+      ready={ready}
+      unsupported={unsupported}
+      unsupportedMessage="The three.js renderer can't run in this browser."
       className={className}
     >
-      {unsupported ? (
-        <RendererFallback message="The three.js renderer can't run in this browser." />
-      ) : (
-        <ThreeViewportContent onUnsupported={onUnsupported} />
-      )}
+      <ThreeViewportContent onUnsupported={onUnsupported} onReady={onReady} />
     </ViewportShell>
   );
 };

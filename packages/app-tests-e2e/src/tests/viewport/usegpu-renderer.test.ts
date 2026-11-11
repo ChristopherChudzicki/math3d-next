@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
+import { hideWebGpu } from "@/utils/hideWebGpu";
 
 test.use({ disable3d: false });
 
@@ -8,13 +9,7 @@ test("?renderer=usegpu without a WebGPU adapter draws MathBox and says so", asyn
   page,
   prepareScene,
 }) => {
-  // Hides any real adapter, so the fallback path runs on every machine.
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, "gpu", {
-      value: { requestAdapter: async () => null },
-      configurable: true,
-    });
-  });
+  await hideWebGpu(page);
   const pageErrors: Error[] = [];
   page.on("pageerror", (error) => pageErrors.push(error));
   const requests: string[] = [];
