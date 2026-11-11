@@ -117,15 +117,11 @@ describe("buildImplicit", () => {
     expect(meshOf(graphic).visible).toBe(false);
   });
 
-  test("frees the meshing buffers when the last implicit surface is disposed", () => {
+  test("frees the meshing buffers when a surface is disposed", () => {
     const spec = implicitSpec();
-    const [first, second] = [buildImplicit(spec), buildImplicit(spec)];
-    /** The length of the buffer a one-cell grid is sampled into. */
-    const gridBuffer = () =>
-      sampleScalarGrid(1, spec.domain, () => 0).values.length;
-    first.dispose();
-    expect(gridBuffer()).toBe((spec.samples + 1) ** 3);
-    second.dispose();
-    expect(gridBuffer()).toBe(8);
+    buildImplicit(spec).dispose();
+    // A one-cell grid is sampled into a buffer of its own size.
+    const grid = sampleScalarGrid(1, spec.domain, () => 0);
+    expect(grid.values.length).toBe(8);
   });
 });

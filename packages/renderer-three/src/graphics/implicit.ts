@@ -11,10 +11,6 @@ import type { Graphic } from "./builders";
  */
 export const MAX_IMPLICIT_CELLS = 128;
 
-// How many implicit surfaces are drawn. The meshing buffers only grow, to
-// megabytes at the cell cap, so disposing the last surface frees them.
-let surfaces = 0;
-
 /** Whether two specs sample the same field at the same points. */
 const sameField = (a: ImplicitSurfaceSpec, b: ImplicitSurfaceSpec) =>
   a.value === b.value &&
@@ -55,17 +51,15 @@ export const buildImplicit = (
     drawn = next;
   };
   set(spec);
-  surfaces += 1;
   return {
     object: new Group().add(surface.mesh),
     update: set,
     dispose: () => {
       surface.dispose();
-      surfaces -= 1;
-      if (surfaces === 0) {
-        freeGridBuffer();
-        freeMeshBuffers();
-      }
+      // The meshing buffers only grow, to megabytes at the cell cap. Another
+      // surface's next remesh allocates them anew.
+      freeGridBuffer();
+      freeMeshBuffers();
     },
   };
 };
