@@ -51,7 +51,7 @@ export type LineSpec = Common & {
 
 export type SurfaceSpec = Common & {
   kind: "surface";
-  /** Sample counts along the two parameters. */
+  /** Sample counts along the two parameters, each at least 2. */
   samples: [number, number];
   /** Position at normalized parameters in [0, 1]². */
   position: (u: number, v: number) => Coords;
