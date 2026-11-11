@@ -51,6 +51,14 @@ export type SceneHooks = Pick<ViewportHooks, "onUnsupported"> & {
    * including on first render.
    */
   onOrbit(orbit: OrbitSpec): void;
+  /** The plot, with every graphic, has rendered: the font has loaded. */
+  onGraphicsMounted(): void;
+};
+
+/** Renders nothing; calls `onRender` whenever it renders. */
+const RenderProbe = ({ onRender }: { onRender: () => void }) => {
+  onRender();
+  return null;
 };
 
 /** The orbit-control bindings for the camera item's enable flags: an empty binding list disables that action. */
@@ -90,7 +98,10 @@ export const makeSceneRoot = (
         range: scene.range,
         scale: scene.scale,
         rotation: PLOT_ROTATION_DEGREES,
-        children: graphics,
+        children: [
+          ...graphics,
+          use(RenderProbe, { onRender: hooks.onGraphicsMounted }),
+        ],
       }),
     }),
   });

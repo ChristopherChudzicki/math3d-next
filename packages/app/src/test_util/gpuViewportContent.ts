@@ -1,4 +1,6 @@
-export type ContentProps = { onUnsupported: (error: unknown) => void };
+import type { ViewportHooks } from "@math3d/viewport-spec";
+
+export type ContentProps = Pick<ViewportHooks, "onUnsupported" | "onReady">;
 
 const RendersNothing = (_props: ContentProps): null => null;
 

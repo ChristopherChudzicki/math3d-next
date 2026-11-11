@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useState } from "react";
 import * as Sentry from "@sentry/react";
 import { useAppSelector } from "@/store/hooks";
 import * as select from "@/store/scene/state/selectors";
@@ -11,6 +11,10 @@ type Props = {
   renderer: Renderer;
   /** Shown, with a way back to the default renderer, after a render error. */
   errorMessage: string;
+  /** The renderer has called `ViewportHooks.onReady` for this scene load. */
+  ready: boolean;
+  /** The renderer can't run in this browser. */
+  unsupported: boolean;
   className?: string;
   /** The renderer, usually behind a `React.lazy`. */
   children: React.ReactNode;
@@ -20,16 +24,24 @@ type Props = {
 const ViewportShell: React.FC<Props> = ({
   renderer,
   errorMessage,
+  ready,
+  unsupported,
   className,
   children,
 }) => {
   const hasRequired = useHasViewportItems();
   const loadCount = useAppSelector(select.loadCount);
+  const [errorLoad, setErrorLoad] = useState<number | null>(null);
   const show = !is3dDisabled() && hasRequired;
+  let failure: "unsupported" | "error" | undefined;
+  if (unsupported) failure = "unsupported";
+  else if (errorLoad === loadCount) failure = "error";
   return (
     <div
       data-testid="scene"
       data-renderer={renderer}
+      data-scene-ready={ready && !failure ? "true" : undefined}
+      data-scene-error={failure}
       className={className}
       style={{ width: "100%", height: "100%" }}
     >
@@ -42,6 +54,7 @@ const ViewportShell: React.FC<Props> = ({
         <Sentry.ErrorBoundary
           key={loadCount}
           fallback={<RendererFallback message={errorMessage} />}
+          onError={() => setErrorLoad(loadCount)}
         >
           <Suspense fallback={null}>{children}</Suspense>
         </Sentry.ErrorBoundary>

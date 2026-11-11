@@ -46,8 +46,8 @@ type Options = {
   forceWebGL: boolean;
   /** How translucent marks combine; the backend's default when absent. */
   transparency?: Transparency;
-  /** Called once, after the first frame is drawn. */
-  onFirstFrame(): void;
+  /** Called once, when a frame at the host's size is drawn and no redraw follows it. */
+  onSettled(): void;
   /** The camera as the user moves it. */
   onCameraMove(camera: CameraSpec): void;
   /** Gets what a resize or a frame throws, since neither runs inside React. */
@@ -101,7 +101,13 @@ export class ThreeScene {
 
   private frame: number | null = null;
 
-  private drawn = false;
+  // ResizeObserver's first report can come frames after the first draw, and
+  // its resize redraws: until it has reported, a drawn frame may not be the last.
+  private observed = false;
+
+  private settleCheck: number | null = null;
+
+  private settled = false;
 
   private disposed = false;
 
@@ -134,7 +140,10 @@ export class ThreeScene {
     this.renderer.outputColorSpace = LinearSRGBColorSpace;
     this.renderer.setClearColor(0xffffff, 1);
     this.resizeObserver = new ResizeObserver(() =>
-      this.reporting(() => this.resize()),
+      this.reporting(() => {
+        this.observed = true;
+        this.resize();
+      }),
     );
   }
 
@@ -165,6 +174,7 @@ export class ThreeScene {
   dispose(): void {
     this.disposed = true;
     if (this.frame !== null) cancelAnimationFrame(this.frame);
+    if (this.settleCheck !== null) cancelAnimationFrame(this.settleCheck);
     this.resizeObserver.disconnect();
     this.stopLabelRelayout();
     this.view.dispose();
@@ -237,9 +247,18 @@ export class ThreeScene {
     if (!this.built || !this.hasSize()) return;
     if (this.oit) this.oit.render(this.view.camera);
     else this.renderer.render(this.scene, this.view.camera);
-    if (!this.drawn) {
-      this.drawn = true;
-      this.options.onFirstFrame();
+    if (!this.settled) {
+      this.settleCheck ??= requestAnimationFrame(() => {
+        this.settleCheck = null;
+        this.reporting(() => this.settle());
+      });
     }
+  }
+
+  /** Settled once the animation frame after a draw has no redraw pending. */
+  private settle(): void {
+    if (this.settled || this.frame !== null || !this.observed) return;
+    this.settled = true;
+    this.options.onSettled();
   }
 }

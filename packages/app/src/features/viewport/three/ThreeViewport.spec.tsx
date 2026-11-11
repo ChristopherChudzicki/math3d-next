@@ -30,19 +30,34 @@ const renderViewport = (url = "/") => {
   );
 };
 
-test("the first drawn frame marks the viewport ready", async () => {
-  const DrawsAFrame = ({ hooks }: ThreeViewportProps) => {
+test("onReady marks the scene ready", async () => {
+  const Settles = ({ hooks }: ThreeViewportProps) => {
     useEffect(() => hooks.onReady(), [hooks]);
     return null;
   };
-  threeViewport.Component = DrawsAFrame;
+  threeViewport.Component = Settles;
   renderViewport();
 
   const scene = screen.getByTestId("scene");
+  expect(scene).not.toHaveAttribute("data-scene-ready");
   await waitFor(() =>
-    // E2E waits on this attribute, which no accessible query reaches.
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(scene.querySelector("[data-ready]")).not.toBeNull(),
+    expect(scene).toHaveAttribute("data-scene-ready", "true"),
+  );
+});
+
+test("a render error marks the scene failed", async () => {
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  threeViewport.Component = () => {
+    throw new Error("lost the device");
+  };
+  renderViewport();
+
+  expect(
+    await screen.findByText("The three.js renderer ran into an error."),
+  ).toBeInTheDocument();
+  expect(screen.getByTestId("scene")).toHaveAttribute(
+    "data-scene-error",
+    "error",
   );
 });
 
@@ -59,6 +74,10 @@ test("an unsupported browser gets a way back to the default renderer", async () 
   expect(
     await screen.findByText("The three.js renderer can't run in this browser."),
   ).toBeInTheDocument();
+  expect(screen.getByTestId("scene")).toHaveAttribute(
+    "data-scene-error",
+    "unsupported",
+  );
   expect(warn).toHaveBeenCalledWith(noBackend);
   expect(Sentry.captureMessage).toHaveBeenCalledExactlyOnceWith(
     "three.js unsupported: no backend",

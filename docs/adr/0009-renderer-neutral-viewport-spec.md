@@ -30,8 +30,9 @@ reports back through `ViewportHooks`, both types in
   `GraphicSpec`, so a graphic that only moves in the list keeps its spec.
 - `ViewportHooks`: `onUnsupported(error)` when the renderer can't run in this
   browser; `onCameraMove(camera)` as the user moves the camera (the app
-  decides when a move ends and what to write back); `onReady()` once the
-  first frame is drawn (the three.js glue sets `data-ready` for E2E).
+  decides when a move ends and what to write back); `onReady()`, once, when
+  every graphic in the spec is drawn and nothing more will change without
+  new input.
 - `features/viewport/spec/` produces it: `useViewportSpec(host)` returns the
   spec, the reporter elements that fill `spec.graphics` (render them
   alongside the renderer), and the `onCameraMove` hook.
@@ -39,6 +40,28 @@ reports back through `ViewportHooks`, both types in
   factor that only reproduces how MathBox reads a stored value, such as its
   circle points' 1.2 × `size`, is applied once, by name, in the spec
   producer.
+
+### Ready and failed
+
+- **The scene container (`data-testid="scene"`) says what drew and how it
+  went, for every renderer:** `data-renderer`, `data-scene-ready="true"`
+  once settled, `data-scene-error` (`unsupported`, `error`, or the frame
+  route's `invalid-renderer`) when it can't draw. three.js's canvas adds
+  `data-backend` (`webgpu` or `webgl2`).
+- How each renderer settles:
+  - MathBox: its warmup queue has stayed empty for 500 ms
+    (`mathbox/stillReadiness.ts`).
+  - three.js: the animation frame after a draw has no redraw pending, once
+    the `ResizeObserver` has reported; its first report can come frames after
+    the first draw, and its resize redraws.
+  - Use.GPU: 300 ms with no frame and no pipeline compile pending, counting
+    only frames drawn after the graphics mount (`usegpu/settle.ts`). It
+    compiles pipelines asynchronously and draws a layer only once its
+    pipeline resolves, which on SwiftShader takes 300–400 ms.
+- **`/app/frame/:sceneKey` draws with `?renderer=`, MathBox without it**, and
+  never reads the stored preference. A renderer that can't start marks the
+  page failed; there is no fallback to MathBox. The OG worker sends no
+  parameter.
 
 ### The camera
 

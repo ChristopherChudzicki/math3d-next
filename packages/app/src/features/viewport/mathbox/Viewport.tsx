@@ -28,9 +28,8 @@ import * as styles from "./Viewport.module.css";
 type Props = {
   className?: string;
   /**
-   * Render a single still frame: warm up briefly, halt the render loop (rather
-   * than looping at ~60fps forever), and mark the container `data-scene-ready`
-   * for a headless screenshotter. Used by the `/app/frame` render page.
+   * Render a single still frame: halt the render loop once warmed up (rather
+   * than looping at ~60fps forever). Used by the `/app/frame` render page.
    */
   still?: boolean;
 };
@@ -114,9 +113,9 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
     setMathbox(mb);
   }, []);
 
-  // Wait for each scene load's warmup to drain, then hide its loading splash. In
-  // `still` mode, also halt the render loop and flag readiness so a
-  // screenshotter can capture a static, fully-rendered, CPU-idle frame.
+  // Wait for each scene load's warmup to drain, then hide its loading splash and
+  // mark the container `data-scene-ready`. In `still` mode, also halt the
+  // render loop, so a screenshotter captures a CPU-idle frame.
   useEffect(() => {
     if (!mathbox) return undefined;
     const context = (mathbox as MathboxRoot)._context;
@@ -162,7 +161,7 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
     <div
       data-testid="scene"
       data-renderer="mathbox"
-      data-scene-ready={still && warmedUp ? "true" : undefined}
+      data-scene-ready={warmedUp ? "true" : undefined}
       className={mergeClassNames(className, styles.viewport, {
         [styles.splashHidden]: warmedUp,
       })}
