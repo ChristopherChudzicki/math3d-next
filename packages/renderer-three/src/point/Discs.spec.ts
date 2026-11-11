@@ -89,7 +89,7 @@ describe("Discs", () => {
     discs.set(points(1), style({ color: [1, 0, 0, 0.5] }));
     expect(fill.material).toBe(fillMaterial("translucent", "oit"));
     expect(edge.material).toBe(edgeMaterial("translucent", "oit"));
-    // Like the fill, it goes through the OIT pass rather than blending in place.
+    // Like the fill, it accumulates rather than blending in place.
     expect(edge.material.depthWrite).toBe(false);
   });
 

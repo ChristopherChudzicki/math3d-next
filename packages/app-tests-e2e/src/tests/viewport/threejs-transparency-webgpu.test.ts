@@ -3,9 +3,11 @@ import { test } from "@/fixtures/users";
 import { collectPageErrors } from "@/utils/collectPageErrors";
 import { expectThreeViewport } from "@/utils/threeViewport";
 import {
+  blueFirstOverRed,
   expectRedToHideBlue,
   narrowWindow,
   redOverBlue,
+  sharesOnce,
 } from "@/utils/threeTransparency";
 import { webgpuLaunchOptions } from "@/utils/webgpuLaunchOptions";
 
@@ -30,5 +32,18 @@ test("three.js order-independent transparency on WebGPU tests depth, also after 
 
   await narrowWindow(page);
   await expectRedToHideBlue(page);
+  expect(errors).toEqual([]);
+});
+
+test("three.js order-independent transparency on WebGPU blends whatever the zOrder", async ({
+  page,
+  prepareScene,
+}) => {
+  const errors = collectPageErrors(page);
+  const key = await prepareScene(blueFirstOverRed().json());
+  await page.goto(`/${key}?renderer=threejs&controls=0`);
+
+  await expectThreeViewport(page);
+  await sharesOnce(page, "blueOverRed");
   expect(errors).toEqual([]);
 });

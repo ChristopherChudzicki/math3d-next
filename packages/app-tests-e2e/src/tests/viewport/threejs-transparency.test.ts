@@ -61,3 +61,29 @@ test("three.js order-independent transparency on WebGL2 tests depth, also after 
   await expectRedToHideBlue(page);
   expect(errors).toEqual([]);
 });
+
+test("three.js on WebGL2 without per-attachment blending draws in MathBox's order, even when asked for order-independent transparency", async ({
+  page,
+  prepareScene,
+}) => {
+  const errors = collectPageErrors(page);
+  await page.addInitScript(() => {
+    const { getExtension } = WebGL2RenderingContext.prototype;
+    WebGL2RenderingContext.prototype.getExtension = function withoutIndexed(
+      this: WebGL2RenderingContext,
+      name: string,
+    ) {
+      return name === "OES_draw_buffers_indexed"
+        ? null
+        : Reflect.apply(getExtension, this, [name]);
+    };
+  });
+  const key = await prepareScene(blueFirstOverRed().json());
+  await page.goto(`/${key}?renderer=threejs&controls=0&oit=1`);
+
+  await expectThreeViewport(page);
+  await expect(canvas(page)).toHaveAttribute("data-transparency", "ordered");
+  // The translucent plane is drawn, which the OIT pass couldn't do here.
+  await sharesOnce(page, "blueOverWhite");
+  expect(errors).toEqual([]);
+});

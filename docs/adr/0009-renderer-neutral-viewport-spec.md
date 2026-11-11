@@ -210,32 +210,52 @@ error boundary, `Suspense`). A
 Two models, chosen per `ThreeScene` (`Viewport`'s `transparency`; the app
 passes `?oit=1` or `?oit=0`):
 
-- **`oit`, the default on WebGPU**: order-independent. `OitFrame` runs
-  three's weighted, blended OIT pass (`three/addons/tsl/display/OITPassNode`).
-  Opaque marks draw first; labels and opaque points' rims, whose alpha only
-  antialiases them, blend over those in the spec's order and write depth;
-  every translucent fragment in front of that depth is then composited,
-  whatever the order. A fragment's share of the blended color falls with its
-  depth relative to the scene (`NEARNESS_GAIN`), so the nearer layer reads as
-  nearer. That depth is the one before `zBias` and `zIndex`, which move
-  occlusion and not the blend.
+- **`oit`, the default on WebGPU**: order-independent. `OitFrame` draws
+  weighted, blended OIT (McGuire and Bavoil) in one multisampled render
+  target. Opaque marks draw first; labels and opaque points' rims, whose
+  alpha only antialiases them, blend over those in the spec's order and write
+  depth; every translucent fragment in front of that depth is then
+  composited, whatever the order. A fragment's share of the blended color
+  falls with its depth relative to the scene (`NEARNESS_GAIN`), so the nearer
+  layer reads as nearer. That depth is the one before `zBias` and `zIndex`,
+  which move occlusion and not the blend.
 - **`ordered`, the default on WebGL2**: MathBox's way, for like-for-like
   comparison. Every material blends and writes depth, in the spec's order,
   with three's back-then-front draw of translucent meshes whose triangles
   face both ways.
-- **WebGL2 defaults to `ordered`** because three's OIT pass draws the whole
-  scene without MSAA there, so thin gridlines break into dots.
+- **The OIT pass is ours, standing in for three's addon**
+  (`three/addons/tsl/display/OITPassNode`) until that one antialiases on
+  WebGL2:
+  - The addon draws into two render targets that share a depth texture.
+    WebGL2 can't multisample that, so there the addon turns MSAA off for the
+    whole scene (`OITPassNode.setup()`), and math3d's gridlines, under a
+    device pixel wide a few units from the camera, break into dots.
+  - `OitFrame` keeps the scene's color, the weighted sum and the coverage in
+    one target's three attachments, over one depth buffer, and draws the
+    scene once. Nothing is shared, so MSAA stays on. Each material's shader
+    writes the attachments that are its own (`accumulates` in
+    `shader/material.ts` decides, inside the pass's outputs), and
+    `ThreeScene` sorts accumulating marks last (`drawOrder.ts`) so they test
+    against complete depth.
+  - On WebGPU it draws what the addon draws, to within 2/255 a channel, so
+    one pass serves both backends.
+  - The way back: an `OitFrame` that wraps `oitPass(scene, camera)` in a
+    `RenderPipeline` with the weight as its `weightNode`, as the one in
+    commit `2ac84d77` does. `accumulates` is the addon's own test, so the
+    materials stay; `accumulatingLast` goes.
+- **WebGL2 still defaults to `ordered`.** The pass takes about twice
+  `ordered`'s frame time there on the one GPU it is measured on, and is
+  unchecked on weaker ones and where OG images render.
+- **Without `OES_draw_buffers_indexed`**, WebGL2 can't blend each attachment
+  its own way, and `ThreeScene` draws `ordered` whatever was asked.
 - **`shader/material.ts` alone sets blending and depth flags.** A mark
   states what its alpha is for (`opaque`, `translucent`, or `edges`) and
   whether its triangles all face one way; `sharedMaterial` turns that and
   the model into `transparent`, `blending`, `depthWrite`, `side` and
   `forceSinglePass`, and caches the material.
 - **three never sorts by depth.** `ThreeScene` replaces both of three's sort
-  functions with the spec's order, then part order.
-- Two workarounds for three 0.187, in `OitFrame`: three clears depth on a
-  target's first render, and the accumulation target shares the scene's, so
-  the first frame into newly sized targets is drawn twice; and the pass
-  updates per render, not per animation frame, so that second draw happens.
+  functions with the spec's order, then part order; under `oit`,
+  accumulating marks follow the rest.
 
 ### Folders and lint zones
 

@@ -3,12 +3,12 @@ import {
   Group,
   LinearSRGBColorSpace,
   Scene,
-  UnsignedByteType,
   WebGPURenderer,
 } from "three/webgpu";
 import type { CameraSpec, ViewportSpec } from "@math3d/viewport-spec";
 import { ViewCamera } from "./camera";
 import { mathToView } from "./viewTransform";
+import { accumulatingLast, inDrawOrder } from "./drawOrder";
 import { builders } from "./graphics/builders";
 import { syncGraphics } from "./graphics/syncGraphics";
 import type { DrawnGraphics } from "./graphics/syncGraphics";
@@ -21,21 +21,9 @@ import { Settle } from "./settle";
 // so three must not convert a `Color` to linear on its way in either.
 ColorManagement.enabled = false;
 
-type Drawn = {
-  groupOrder: number | null;
-  renderOrder: number | null;
-  id: number | null;
-};
-
-/** Items in the spec's order, an item's parts in their own: never by depth. */
-const inDrawOrder = (a: Drawn, b: Drawn) =>
-  (a.groupOrder ?? 0) - (b.groupOrder ?? 0) ||
-  (a.renderOrder ?? 0) - (b.renderOrder ?? 0) ||
-  (a.id ?? 0) - (b.id ?? 0);
-
 /**
- * Each backend's model unless told otherwise. On WebGL2 three's OIT pass has
- * no MSAA, which breaks thin lines into dots, so it keeps MathBox's order.
+ * Each backend's model unless told otherwise. WebGL2 keeps MathBox's order:
+ * the OIT pass's cost there is measured on one desktop GPU only.
  */
 const DEFAULT_TRANSPARENCY: Record<"webgpu" | "webgl2", Transparency> = {
   webgpu: "oit",
@@ -129,8 +117,6 @@ export class ThreeScene {
       canvas: this.canvas,
       antialias: true,
       forceWebGL: options.forceWebGL,
-      // What the OIT pass draws the scene into: the canvas's own precision.
-      outputBufferType: UnsignedByteType,
     });
     // three's default sorts equal `renderOrder`s by distance, which reorders
     // blended marks as the camera moves.
@@ -158,9 +144,15 @@ export class ThreeScene {
     this.canvas.dataset.backend = backend;
     this.transparency =
       this.options.transparency ?? DEFAULT_TRANSPARENCY[backend];
+    // `OitFrame` blends each attachment its own way. Without the extension
+    // three's WebGL2 backend blends all alike, and translucent marks vanish.
+    if (backend === "webgl2" && !this.blendsPerAttachment()) {
+      this.transparency = "ordered";
+    }
     this.canvas.dataset.transparency = this.transparency;
     if (this.transparency === "oit") {
-      this.oit = new OitFrame(this.renderer, this.scene, this.view.camera);
+      this.oit = new OitFrame(this.renderer, this.scene);
+      this.renderer.setTransparentSort(accumulatingLast);
     }
     this.build();
     this.resizeObserver.observe(this.host);
@@ -212,6 +204,12 @@ export class ThreeScene {
     this.invalidate();
   }
 
+  private blendsPerAttachment(): boolean {
+    // The context three made: a canvas hands out one per type.
+    const gl = this.canvas.getContext("webgl2");
+    return gl?.getExtension("OES_draw_buffers_indexed") != null;
+  }
+
   private hasSize(): boolean {
     return this.host.clientWidth > 0 && this.host.clientHeight > 0;
   }
@@ -223,7 +221,6 @@ export class ThreeScene {
     const { clientWidth, clientHeight } = this.host;
     this.renderer.setSize(clientWidth, clientHeight, false);
     this.view.setAspect(clientWidth / clientHeight);
-    this.oit?.resized();
     this.invalidate();
   }
 
