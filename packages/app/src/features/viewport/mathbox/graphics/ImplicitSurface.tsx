@@ -3,7 +3,7 @@ import * as MB from "mathbox-react";
 import { MathItemType } from "@math3d/mathitem-configs";
 import { marchingCubes } from "@/util/marchingCubes";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import { useDefaultZOrder } from "@/store/scene/evaluation/useDefaultZOrder";
+import { useDefaultZOrder } from "@/store/scene/evaluation/zOrders";
 import {
   useFinalVisibility,
   useMathItemResults,

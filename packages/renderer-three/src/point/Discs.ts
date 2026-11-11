@@ -1,7 +1,7 @@
 import type { Coords } from "@math3d/viewport-spec";
 import { Instances } from "../instances/Instances";
 import { isDrawable, put } from "../instances/points";
-import { alphaOf } from "../shader/material";
+import { opacityOf } from "../shader/material";
 import type { Transparency } from "../shader/material";
 import {
   DISC_LAYOUT,
@@ -43,12 +43,13 @@ export class Discs {
 
   set(points: readonly Coords[], style: DiscStyle): void {
     this.uniforms.set(style);
-    const alpha = alphaOf(style.color[3]);
+    const opacity = opacityOf(style.color[3]);
     const [fill, edge] = this.objects;
-    fill.material = fillMaterial(alpha, this.transparency);
-    edge.material = edgeMaterial(alpha, this.transparency);
-    // MathBox draws nothing at size 0; the rim's padding alone would.
-    const drawn = style.diameter > 0 ? points : [];
+    fill.material = fillMaterial(opacity, this.transparency);
+    edge.material = edgeMaterial(opacity, this.transparency);
+    // MathBox draws nothing at size 0, where the rim's padding alone would
+    // draw, nor with no opacity, where the discs would still write depth.
+    const drawn = style.diameter > 0 && style.color[3] > 0 ? points : [];
     this.instances.fill(drawn.length, (out) => {
       let count = 0;
       drawn.forEach((point) => {

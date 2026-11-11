@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { CustomBlending, DoubleSide, NormalBlending } from "three/webgpu";
 import { vec4 } from "three/tsl";
-import { alphaOf, sharedMaterial } from "./material";
+import { opacityOf, sharedMaterial } from "./material";
 
 const shader = () => ({ vertex: vec4(0, 0, 0, 1), color: vec4(1, 0, 0, 1) });
 
@@ -36,40 +36,38 @@ describe("sharedMaterial", () => {
       alpha: "edges",
       flags: { transparent: true, blending: CustomBlending, depthWrite: true },
     },
-  ] as const)("oit: only a translucent mark accumulates ($alpha)", (c) => {
-    expect(sharedMaterial("mixed", shader)(c.alpha, "oit")).toMatchObject({
-      ...c.flags,
-      forceSinglePass: true,
-    });
-  });
-
-  test.each(["opaque", "translucent", "edges"] as const)(
-    "ordered: a mark of %s alpha blends and writes depth",
-    (alpha) => {
-      expect(sharedMaterial("mixed", shader)(alpha, "ordered")).toMatchObject({
-        transparent: true,
-        blending: NormalBlending,
-        depthWrite: true,
+  ] as const)(
+    "oit: a mark of $alpha alpha accumulates only if translucent",
+    (c) => {
+      expect(sharedMaterial("mixed", shader)(c.alpha, "oit")).toMatchObject({
+        ...c.flags,
+        forceSinglePass: true,
       });
     },
   );
 
+  // Only a translucent mark whose triangles face both ways needs three's
+  // back-then-front passes.
   test.each([
-    { facing: "uniform", forceSinglePass: true },
-    { facing: "mixed", forceSinglePass: false },
+    { facing: "mixed", alpha: "translucent", forceSinglePass: false },
+    { facing: "mixed", alpha: "opaque", forceSinglePass: true },
+    { facing: "uniform", alpha: "translucent", forceSinglePass: true },
   ] as const)(
-    "ordered: $facing facing draws in one pass = $forceSinglePass",
-    ({ facing, forceSinglePass }) => {
-      expect(
-        sharedMaterial(facing, shader)("translucent", "ordered"),
-      ).toMatchObject({ forceSinglePass });
+    "ordered: a $alpha mark of $facing facing blends, writes depth and sets forceSinglePass $forceSinglePass",
+    ({ facing, alpha, forceSinglePass }) => {
+      expect(sharedMaterial(facing, shader)(alpha, "ordered")).toMatchObject({
+        transparent: true,
+        blending: NormalBlending,
+        depthWrite: true,
+        forceSinglePass,
+      });
     },
   );
 });
 
 test.each([
-  { value: 1, alpha: "opaque" },
-  { value: 0.5, alpha: "translucent" },
-])("alphaOf($value) is $alpha", ({ value, alpha }) => {
-  expect(alphaOf(value)).toBe(alpha);
+  { alpha: 1, opacity: "opaque" },
+  { alpha: 0.5, opacity: "translucent" },
+])("opacityOf($alpha) is $opacity", ({ alpha, opacity }) => {
+  expect(opacityOf(alpha)).toBe(opacity);
 });

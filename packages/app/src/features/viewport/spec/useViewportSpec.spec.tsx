@@ -48,16 +48,37 @@ test("lists drawable graphics, including one that becomes visible later", () => 
 test("lists graphics in MathBox's draw order: by zOrder, by default opaque first, then up the tree", async () => {
   const scene = new SceneBuilder();
   const folder = scene.folder();
-  folder.point({ opacity: "0.5" }, "translucent");
+  // Tree order alone would draw these bottom to top.
+  folder.point({ zOrder: "-1" }, "first");
   folder.point({}, "upper");
   folder.point({}, "lower");
-  folder.point({ zOrder: "-1" }, "first");
+  folder.point({ opacity: "0.5" }, "translucent");
   const { latest } = renderViewportSpec(scene);
   await waitFor(() =>
     expect(
       ids(latest.spec, ["translucent", "upper", "lower", "first"]),
     ).toEqual(["first", "lower", "upper", "translucent"]),
   );
+});
+
+test("a new zOrder reorders the graphics; one that only moved keeps its spec", async () => {
+  const scene = new SceneBuilder();
+  const folder = scene.folder();
+  folder.point({}, "p");
+  folder.point({}, "q");
+  const { store, latest } = renderViewportSpec(scene);
+  const points = () =>
+    (latest.spec?.graphics ?? []).filter(({ id }) => ["p", "q"].includes(id));
+  const [q, p] = points();
+  expect([q.id, p.id]).toEqual(["q", "p"]);
+
+  act(() => {
+    store.dispatch(
+      actions.patchProperty({ id: "q", path: "/zOrder", value: "9" }),
+    );
+  });
+  await waitFor(() => expect(points()[1].id).toBe("q"));
+  expect(points()[0].spec).toBe(p.spec);
 });
 
 test("keeps its identity across rerenders", () => {

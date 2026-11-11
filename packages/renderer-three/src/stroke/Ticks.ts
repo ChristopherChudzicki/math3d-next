@@ -1,7 +1,7 @@
 import type { Coords } from "@math3d/viewport-spec";
 import { Instances, strideOf } from "../instances/Instances";
 import { isDrawable, put } from "../instances/points";
-import { alphaOf } from "../shader/material";
+import { opacityOf } from "../shader/material";
 import type { Transparency } from "../shader/material";
 import { SEGMENT_TEMPLATE } from "./lineMaterial";
 import { TICK_LAYOUT, TICK_WIDTH, tickMaterial } from "./tickMaterial";
@@ -41,12 +41,14 @@ export class Ticks {
   set(positions: readonly Coords[], direction: Coords, style: TickStyle): void {
     this.uniforms.set({ ...style, width: TICK_WIDTH }, NO_HEADS);
     this.mesh.material = tickMaterial(
-      alphaOf(style.color[3]),
+      opacityOf(style.color[3]),
       this.transparency,
     );
-    this.instances.fill(positions.length, (out) => {
+    // MathBox hides a mark with no opacity; drawn, it would still write depth.
+    const drawn = style.color[3] > 0 ? positions : [];
+    this.instances.fill(drawn.length, (out) => {
       let offset = 0;
-      positions.forEach((position) => {
+      drawn.forEach((position) => {
         if (!isDrawable(position)) return;
         offset = put(out, offset, position);
         offset = put(out, offset, direction);

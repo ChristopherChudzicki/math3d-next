@@ -48,9 +48,7 @@ export const buildSurface = (
     const grid = sampleGrid(next.samples, next.position);
     fillSurface(surface, grid, next);
     const { lines, width, color } = next.grid;
-    // MathBox hides a line with no opacity rather than drawing it.
-    const hasGrid = width > 0 && color[3] > 0;
-    gridlines.set(hasGrid ? isolines(grid, lines) : [], {
+    gridlines.set(width > 0 ? isolines(grid, lines) : [], {
       width,
       color,
       zBias: next.zBias + GRIDLINE_Z_BIAS,

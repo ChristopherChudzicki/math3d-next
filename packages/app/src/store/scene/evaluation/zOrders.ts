@@ -59,7 +59,7 @@ class OrderingStore {
   private cached?: {
     treeOrder: Record<string, number>;
     values: ReadonlyMap<string, number>;
-    order: Record<string, number>;
+    defaultZOrders: Record<string, number>;
     zOrders: Record<string, number>;
   };
 
@@ -91,22 +91,26 @@ class OrderingStore {
     };
   };
 
-  /** `order`: each graphic's default zOrder. `zOrders`: its own, else that. */
+  /**
+   * Each graphic's default zOrder and the zOrder it draws with: its own, else
+   * the default.
+   */
   orders(treeOrder: Record<string, number>) {
     const { cached, values } = this;
     if (cached?.treeOrder === treeOrder && cached.values === values) {
       return cached;
     }
-    const order = orderByOpacity(treeOrder, (itemId) =>
+    const defaultZOrders = orderByOpacity(treeOrder, (itemId) =>
       values.get(mathScopeId(itemId, "opacity")),
     );
     const zOrders = Object.fromEntries(
-      Object.keys(order).map((itemId) => [
-        itemId,
-        values.get(mathScopeId(itemId, "zOrder")) ?? order[itemId],
-      ]),
+      Object.entries(defaultZOrders).map(([itemId, defaultZOrder]) => {
+        const own = values.get(mathScopeId(itemId, "zOrder"));
+        // MathBox's zOrder is an integer: it rounds.
+        return [itemId, own === undefined ? defaultZOrder : Math.round(own)];
+      }),
     );
-    this.cached = { treeOrder, values, order, zOrders };
+    this.cached = { treeOrder, values, defaultZOrders, zOrders };
     return this.cached;
   }
 }
@@ -130,7 +134,7 @@ const useDefaultZOrder = (itemId: string): number | undefined => {
   const treeOrder = useSelector(select.graphicTreeOrder);
   return useSyncExternalStore(
     store.subscribe,
-    () => store.orders(treeOrder).order[itemId],
+    () => store.orders(treeOrder).defaultZOrders[itemId],
   );
 };
 

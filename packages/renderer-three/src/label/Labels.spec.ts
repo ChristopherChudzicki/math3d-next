@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { NormalBlending } from "three/webgpu";
 import type { Coords } from "@math3d/viewport-spec";
 import { fakeSurface } from "./__tests__/fakeSurface";
 import { LabelAtlas } from "./LabelAtlas";
@@ -71,5 +72,15 @@ describe("Labels", () => {
     atlas.setPixelRatio(2);
     // 10 CSS px at the new ratio.
     expect(slotWidths(labels)).toEqual([20]);
+  });
+
+  test("under the ordered model, blends as three does and not in place", () => {
+    const labels = new Labels("ordered", new LabelAtlas(fakeSurface()));
+    labels.set([[0, 0, 0]], "P", style);
+    expect(labels.mesh.material).toMatchObject({
+      transparent: true,
+      blending: NormalBlending,
+      depthWrite: true,
+    });
   });
 });

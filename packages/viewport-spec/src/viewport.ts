@@ -32,11 +32,10 @@ export type ViewportSpec = {
   orthographic: boolean;
   controls: { rotate: boolean; pan: boolean; zoom: boolean };
   /**
-   * In draw order, for a renderer whose result depends on it: by each item's
-   * `zOrder`, which defaults to more opaque items first, then the item tree
-   * bottom to top with surfaces last. Drawn in this order with depth writes
-   * on, the scene looks as MathBox draws it. A graphic with nothing to draw
-   * is absent.
+   * In MathBox's draw order: by `zOrder`, which defaults to more opaque items
+   * first, then the item tree bottom to top with surfaces last. Drawn in
+   * order with depth writes on, this gives MathBox's occlusion. A graphic
+   * with nothing to draw is absent.
    *
    * Each `spec` keeps its identity until it changes, so a renderer can skip a
    * graphic whose `spec` is `===` the last one with the same `id`.

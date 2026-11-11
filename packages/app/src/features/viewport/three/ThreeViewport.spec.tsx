@@ -81,9 +81,7 @@ test.each([
     const Renderer = vi.fn((_props: ThreeViewportProps) => null);
     threeViewport.Component = Renderer;
     renderViewport(url);
-    await waitFor(() =>
-      expect(Renderer.mock.lastCall?.[0].transparency).toBe(transparency),
-    );
-    expect(Renderer).toHaveBeenCalled();
+    await waitFor(() => expect(Renderer).toHaveBeenCalled());
+    expect(Renderer.mock.lastCall?.[0].transparency).toBe(transparency);
   },
 );

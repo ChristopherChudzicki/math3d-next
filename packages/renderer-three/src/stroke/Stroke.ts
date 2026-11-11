@@ -1,6 +1,6 @@
 import type { Coords } from "@math3d/viewport-spec";
 import { Instances } from "../instances/Instances";
-import { alphaOf } from "../shader/material";
+import { opacityOf } from "../shader/material";
 import type { Transparency } from "../shader/material";
 import { CONE_TEMPLATE, arrowMaterial } from "./arrowMaterial";
 import { SEGMENT_TEMPLATE, lineMaterial } from "./lineMaterial";
@@ -35,7 +35,7 @@ export class Stroke {
     this.line = new Instances(
       SEGMENT_TEMPLATE,
       SEGMENT_LAYOUT,
-      lineMaterial("opaque", false, transparency),
+      lineMaterial(false, "opaque", transparency),
     );
     this.arrows = new Instances(
       CONE_TEMPLATE,
@@ -52,17 +52,19 @@ export class Stroke {
   set(paths: Coords[][], style: StrokeStyle): void {
     const ends = { start: !!style.start, end: !!style.end };
     this.uniforms.set(style, ends);
-    const alpha = alphaOf(style.color[3]);
+    const opacity = opacityOf(style.color[3]);
     const { transparency } = this;
     this.line.mesh.material = lineMaterial(
-      alpha,
       ends.start || ends.end,
+      opacity,
       transparency,
     );
-    this.arrows.mesh.material = arrowMaterial(alpha, transparency);
-    this.line.fill(countSegments(paths), (out) => packSegments(paths, out));
-    this.arrows.fill(countArrows(paths, ends), (out) =>
-      packArrows(paths, ends, out),
+    this.arrows.mesh.material = arrowMaterial(opacity, transparency);
+    // MathBox hides a mark with no opacity; drawn, it would still write depth.
+    const drawn = style.color[3] > 0 ? paths : [];
+    this.line.fill(countSegments(drawn), (out) => packSegments(drawn, out));
+    this.arrows.fill(countArrows(drawn, ends), (out) =>
+      packArrows(drawn, ends, out),
     );
   }
 

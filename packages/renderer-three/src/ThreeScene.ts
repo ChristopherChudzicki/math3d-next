@@ -33,9 +33,8 @@ const inDrawOrder = (a: Drawn, b: Drawn) =>
   (a.id ?? 0) - (b.id ?? 0);
 
 /**
- * The model each backend draws with unless told otherwise. On WebGL2 three's
- * OIT pass draws the whole scene without MSAA, which breaks thin lines into
- * dots, so translucency there keeps MathBox's order.
+ * Each backend's model unless told otherwise. On WebGL2 three's OIT pass has
+ * no MSAA, which breaks thin lines into dots, so it keeps MathBox's order.
  */
 const DEFAULT_TRANSPARENCY: Record<"webgpu" | "webgl2", Transparency> = {
   webgpu: "oit",
@@ -92,8 +91,11 @@ export class ThreeScene {
 
   private spec: ViewportSpec | null = null;
 
-  /** Set once the backend is known. */
-  private transparency: Transparency = "oit";
+  /** The spec the scene's objects were last built from. */
+  private built: ViewportSpec | null = null;
+
+  /** Null until the backend is known. */
+  private transparency: Transparency | null = null;
 
   private oit: OitFrame | null = null;
 
@@ -150,31 +152,14 @@ export class ThreeScene {
     if (this.transparency === "oit") {
       this.oit = new OitFrame(this.renderer, this.scene, this.view.camera);
     }
+    this.build();
     this.resizeObserver.observe(this.host);
     this.resize();
   }
 
   setSpec(spec: ViewportSpec): void {
-    const last = this.spec;
     this.spec = spec;
-    if (last?.range !== spec.range || last?.scale !== spec.scale) {
-      const { scale, offset } = mathToView(spec.range, spec.scale);
-      this.world.scale.set(...scale);
-      this.world.position.set(...offset);
-      // The axes' box, which holds most of any scene.
-      this.oit?.setRadius(Math.hypot(...spec.scale));
-    }
-    this.view.setSpec(spec);
-    if (last?.graphics !== spec.graphics) {
-      syncGraphics(
-        this.world,
-        this.graphics,
-        spec.graphics,
-        builders,
-        this.transparency,
-      );
-    }
-    this.invalidate();
+    this.build();
   }
 
   dispose(): void {
@@ -189,6 +174,31 @@ export class ThreeScene {
     // dispose() awaits init(), so it rejects whenever init did; init()'s
     // caller owns that failure.
     this.renderer.dispose().catch(() => {});
+  }
+
+  /** Brings the scene's objects up to `spec`, once the model is known. */
+  private build(): void {
+    const { spec, built: last, transparency } = this;
+    if (!spec || !transparency) return;
+    this.built = spec;
+    if (last?.range !== spec.range || last?.scale !== spec.scale) {
+      const { scale, offset } = mathToView(spec.range, spec.scale);
+      this.world.scale.set(...scale);
+      this.world.position.set(...offset);
+      // Half the diagonal of the axes' box, which holds most of any scene.
+      this.oit?.setRadius(Math.hypot(...spec.scale));
+    }
+    this.view.setSpec(spec);
+    if (last?.graphics !== spec.graphics) {
+      syncGraphics(
+        this.world,
+        this.graphics,
+        spec.graphics,
+        builders,
+        transparency,
+      );
+    }
+    this.invalidate();
   }
 
   private hasSize(): boolean {
@@ -224,7 +234,7 @@ export class ThreeScene {
 
   private draw(): void {
     // Before init resolves or the first spec, or while the host has no size.
-    if (!this.renderer.initialized || !this.spec || !this.hasSize()) return;
+    if (!this.built || !this.hasSize()) return;
     if (this.oit) this.oit.render(this.view.camera);
     else this.renderer.render(this.scene, this.view.camera);
     if (!this.drawn) {

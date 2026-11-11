@@ -5,15 +5,15 @@ const Z_BIAS =
   "approximate: matches MathBox in perspective; in orthographic, MathBox's dolly lets any zBias win outright and this renderer doesn't";
 
 /** Where translucent items blend in MathBox's draw order. */
-const ORDERED = "on WebGL2, or with ?oit=0";
+const ORDERED = "with ?oit=0, the default on WebGL2";
 
-const Z_ORDER = `approximate: translucent items blend order-independently, so zOrder only says which of two coinciding opaque marks or labels is on top; ${ORDERED}, items draw in zOrder with depth writes, as in MathBox`;
+const Z_ORDER = `approximate: by default on WebGPU, translucent items blend order-independently, so zOrder only says which of two coinciding opaque marks or labels is on top; ${ORDERED}, items draw in zOrder with depth writes, as in MathBox`;
 
-const Z_INDEX_BLEND = `where two translucent items overlap, the higher zIndex takes over their blended color; MathBox blends it over the lower, as this renderer does ${ORDERED}`;
+const Z_INDEX_BLEND = `by default on WebGPU, two overlapping translucent items blend by depth whatever their zIndex; MathBox blends the higher over the lower, as this renderer does ${ORDERED}`;
 
 const Z_INDEX = `approximate: draws over lower ones as in MathBox, but ${Z_INDEX_BLEND}`;
 
-const GRID_OPACITY = `approximate: a translucent surface tints the gridlines behind it, its own far ones too, where MathBox hides them; ${ORDERED}, they are hidden as in MathBox`;
+const GRID_OPACITY = `approximate: by default on WebGPU, a translucent surface tints the gridlines behind it, its own far ones too, where MathBox hides them; ${ORDERED}, they are hidden as in MathBox`;
 
 const TICKS_FOLLOW_AXIS =
   "ticks take the axis's opacity, zBias and zIndex; math3d's MathBox draws them opaque at zBias and zIndex 0";
@@ -138,7 +138,7 @@ export const coverage = {
   [MIT.ImplicitSurface]: {
     color: "drawn",
     description: "n/a: editor only",
-    opacity: `approximate: a translucent closed surface shows its far side through its near side; MathBox does when lhs − rhs is negative outside it, and ${ORDERED}, this renderer does when it is positive`,
+    opacity: `approximate: by default on WebGPU, a translucent closed surface shows its far side through its near side; MathBox does when lhs − rhs is negative outside it, and ${ORDERED}, this renderer does when it is positive`,
     visible: "drawn",
     calculatedVisibility: "drawn",
     useCalculatedVisibility: "drawn",

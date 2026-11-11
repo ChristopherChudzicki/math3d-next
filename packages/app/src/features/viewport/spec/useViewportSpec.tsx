@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import type { RefObject } from "react";
 import type { ViewportSpec } from "@math3d/viewport-spec";
 import { useViewportItems } from "@/features/viewport/shared/useViewportItems";
-import { useZOrders } from "@/store/scene/evaluation/useDefaultZOrder";
+import { useZOrders } from "@/store/scene/evaluation/zOrders";
 import { SpecCollector, useSpecCollector } from "./collector";
 import { GraphicSpecReporter } from "./reporter";
 import { useCameraSpec } from "./camera";

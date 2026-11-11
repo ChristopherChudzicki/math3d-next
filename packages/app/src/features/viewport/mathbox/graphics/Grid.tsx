@@ -6,7 +6,7 @@ import {
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import { useDefaultZOrder } from "@/store/scene/evaluation/useDefaultZOrder";
+import { useDefaultZOrder } from "@/store/scene/evaluation/zOrders";
 import { GraphicComponent } from "./interfaces";
 
 const props = [

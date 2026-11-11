@@ -1,9 +1,11 @@
 import {
+  Fn,
   cameraNear,
   cameraProjectionMatrix,
   float,
   max,
   mix,
+  varyingProperty,
   vec4,
 } from "three/tsl";
 import type { Node } from "three/webgpu";
@@ -21,6 +23,12 @@ const ndcZ = (depth: Node<"float">) => {
 };
 
 /**
+ * A fragment's view-space z before `zBias` and `zIndex` move its depth. In a
+ * material with a `vertexNode`, three's `positionView` has them applied.
+ */
+export const unbiasedViewZ = varyingProperty("float", "v_unbiasedViewZ");
+
+/**
  * Projects a view-space position with MathBox's `zBias` and `zIndex`.
  *
  * - `zBias` moves depth as MathBox's `z *= 1 - zBias / 32768` does under its
@@ -36,19 +44,21 @@ export const projectWithDepthStyle = (
   view: Node<"vec3">,
   zBias: Node<"float">,
   zIndex: Node<"float">,
-): Node<"vec4"> => {
-  const clip = cameraProjectionMatrix.mul(vec4(view, 1));
-  const depth = view.z.negate();
-  // An orthographic view also draws what is behind the camera, where the
-  // perspective formula has no meaning: the bias there is the near plane's.
-  const from = max(depth, MATHBOX_NEAR);
-  // 1/d' = (1 - e)/d + e (f + n)/(2 f n), with e = zBias / 32768.
-  const epsilon = zBias.div(32768);
-  const to = from.div(
-    max(epsilon.oneMinus().add(epsilon.mul(BIAS_RATE).mul(from)), 1e-6),
-  );
-  const biased = ndcZ(depth.sub(from.sub(to)));
-  const layer = max(zIndex.round(), 0);
-  const z = mix(ndcZ(cameraNear), biased, float(1).div(layer.add(1)));
-  return vec4(clip.xy, z.mul(clip.w), clip.w);
-};
+): Node<"vec4"> =>
+  Fn(() => {
+    unbiasedViewZ.assign(view.z);
+    const clip = cameraProjectionMatrix.mul(vec4(view, 1));
+    const depth = view.z.negate();
+    // An orthographic view also draws what is behind the camera, where the
+    // perspective formula has no meaning: the bias there is the near plane's.
+    const from = max(depth, MATHBOX_NEAR);
+    // 1/d' = (1 - e)/d + e (f + n)/(2 f n), with e = zBias / 32768.
+    const epsilon = zBias.div(32768);
+    const to = from.div(
+      max(epsilon.oneMinus().add(epsilon.mul(BIAS_RATE).mul(from)), 1e-6),
+    );
+    const biased = ndcZ(depth.sub(from.sub(to)));
+    const layer = max(zIndex.round(), 0);
+    const z = mix(ndcZ(cameraNear), biased, float(1).div(layer.add(1)));
+    return vec4(clip.xy, z.mul(clip.w), clip.w);
+  })();

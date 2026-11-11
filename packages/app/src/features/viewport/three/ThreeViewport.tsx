@@ -22,10 +22,13 @@ const HOST_STYLE = { width: "100%", height: "100%" };
  * renderer's default for its backend.
  */
 const TRANSPARENCY_PARAM = "oit";
-const TRANSPARENCIES: Partial<Record<string, "oit" | "ordered">> = {
-  "0": "ordered",
-  "1": "oit",
-};
+type Transparency = React.ComponentProps<
+  typeof RendererViewport
+>["transparency"];
+const TRANSPARENCIES = new Map<string | null, Transparency>([
+  ["0", "ordered"],
+  ["1", "oit"],
+]);
 
 const ThreeViewportContent: React.FC<{
   onUnsupported: ViewportHooks["onUnsupported"];
@@ -33,8 +36,7 @@ const ThreeViewportContent: React.FC<{
   const host = useRef<HTMLDivElement>(null);
   const { spec, reporters, onCameraMove } = useViewportSpec(host);
   const [searchParams] = useSearchParams();
-  const transparency =
-    TRANSPARENCIES[searchParams.get(TRANSPARENCY_PARAM) ?? ""];
+  const transparency = TRANSPARENCIES.get(searchParams.get(TRANSPARENCY_PARAM));
   const hooks = useMemo<ViewportHooks>(
     () => ({
       onUnsupported,

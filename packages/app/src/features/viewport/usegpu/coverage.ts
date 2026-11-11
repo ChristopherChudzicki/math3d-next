@@ -7,6 +7,8 @@ const zIndexIgnored = (component: string) =>
   `approximate: ignored by Use.GPU's ${component}; ${Z_INDEX_PULL}` as const;
 const Z_BIAS =
   "approximate: Use.GPU's zBias units are not calibrated against MathBox's";
+const Z_ORDER =
+  "approximate: transparency is order-independent, so zOrder only says which of two overlapping labels or coinciding lines is on top";
 const ITEM_LABEL =
   "approximate: regular weight, no outline; MathBox draws item labels bold with a 2 px white outline";
 const SHADED =
@@ -33,7 +35,7 @@ export const coverage = {
     width: "drawn",
     zBias: Z_BIAS,
     zIndex: `approximate: orders label draw calls only; ${Z_INDEX_PULL}`,
-    zOrder: "n/a: order-independent transparency",
+    zOrder: Z_ORDER,
     start: "drawn",
     end: "drawn",
     divisions: "drawn",
@@ -51,7 +53,7 @@ export const coverage = {
     width: "drawn",
     zBias: Z_BIAS,
     zIndex: zIndexIgnored("Grid"),
-    zOrder: "n/a: order-independent transparency",
+    zOrder: Z_ORDER,
   },
   [MIT.Point]: {
     color: "drawn",
@@ -63,7 +65,7 @@ export const coverage = {
     size: "drawn",
     zBias: Z_BIAS,
     zIndex: Z_INDEX,
-    zOrder: "n/a: order-independent transparency",
+    zOrder: Z_ORDER,
     visible: "drawn",
     calculatedVisibility: "drawn",
     useCalculatedVisibility: "drawn",
@@ -82,7 +84,7 @@ export const coverage = {
     width: "drawn",
     zBias: Z_BIAS,
     zIndex: Z_INDEX,
-    zOrder: "n/a: order-independent transparency",
+    zOrder: Z_ORDER,
     start: "drawn",
     end: "drawn",
   },
@@ -101,7 +103,7 @@ export const coverage = {
     width: "drawn",
     zBias: Z_BIAS,
     zIndex: Z_INDEX,
-    zOrder: "n/a: order-independent transparency",
+    zOrder: Z_ORDER,
     start: "drawn",
     end: "drawn",
   },
@@ -114,7 +116,7 @@ export const coverage = {
     useCalculatedVisibility: "drawn",
     zBias: Z_BIAS,
     zIndex: Z_INDEX,
-    zOrder: "n/a: order-independent transparency",
+    zOrder: Z_ORDER,
     size: "drawn",
     width: "drawn",
     start: "drawn",
@@ -138,7 +140,7 @@ export const coverage = {
     width: "drawn",
     zBias: Z_BIAS,
     zIndex: Z_INDEX,
-    zOrder: "n/a: order-independent transparency",
+    zOrder: Z_ORDER,
     start: "drawn",
     end: "drawn",
     domain: "drawn",
@@ -163,7 +165,7 @@ export const coverage = {
     useCalculatedVisibility: "drawn",
     zBias: Z_BIAS,
     zIndex: `approximate: orders gridline draw calls only; ${Z_INDEX_PULL}`,
-    zOrder: "n/a: order-independent transparency",
+    zOrder: Z_ORDER,
   },
   [MIT.ExplicitSurface]: {
     expr: "drawn",
@@ -184,7 +186,7 @@ export const coverage = {
     useCalculatedVisibility: "drawn",
     zBias: Z_BIAS,
     zIndex: `approximate: orders gridline draw calls only; ${Z_INDEX_PULL}`,
-    zOrder: "n/a: order-independent transparency",
+    zOrder: Z_ORDER,
   },
   [MIT.ExplicitSurfacePolar]: {
     expr: "drawn",
@@ -205,7 +207,7 @@ export const coverage = {
     useCalculatedVisibility: "drawn",
     zBias: Z_BIAS,
     zIndex: `approximate: orders gridline draw calls only; ${Z_INDEX_PULL}`,
-    zOrder: "n/a: order-independent transparency",
+    zOrder: Z_ORDER,
   },
   [MIT.ImplicitSurface]: {
     color: "drawn",
@@ -221,7 +223,7 @@ export const coverage = {
     rhs: "drawn",
     zBias: Z_BIAS,
     zIndex: zIndexIgnored("ImplicitSurface"),
-    zOrder: "n/a: order-independent transparency",
+    zOrder: Z_ORDER,
   },
   [MIT.Camera]: {
     description: "n/a: editor only",

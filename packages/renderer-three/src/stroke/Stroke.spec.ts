@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { NormalBlending } from "three/webgpu";
 import type { Coords } from "@math3d/viewport-spec";
 import { Stroke } from "./Stroke";
 import type { StrokeStyle } from "./style";
@@ -73,5 +74,23 @@ describe("Stroke", () => {
     expect(isBlended()).toEqual([true, true]);
     stroke.set(vectors(1), style());
     expect(isBlended()).toEqual([false, false]);
+  });
+
+  test("under the ordered model, blends an opaque stroke too", () => {
+    const stroke = new Stroke("ordered");
+    stroke.set(vectors(1), style({ end: true }));
+    stroke.objects.forEach((mesh) =>
+      expect(mesh.material).toMatchObject({
+        transparent: true,
+        blending: NormalBlending,
+        depthWrite: true,
+      }),
+    );
+  });
+
+  test("draws nothing without an opacity", () => {
+    const stroke = new Stroke("oit");
+    stroke.set(vectors(1), style({ end: true, color: [1, 0, 0, 0] }));
+    expect(stroke.objects.map((mesh) => mesh.visible)).toEqual([false, false]);
   });
 });

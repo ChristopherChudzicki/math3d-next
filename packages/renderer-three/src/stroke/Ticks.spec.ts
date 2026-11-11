@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { NormalBlending } from "three/webgpu";
 import type { Coords } from "@math3d/viewport-spec";
 import { Ticks } from "./Ticks";
 import type { TickStyle } from "./Ticks";
@@ -55,5 +56,21 @@ describe("Ticks", () => {
     expect(ticks.mesh.material.transparent).toBe(true);
     ticks.set([[0, 0, 0]], [0, 1, 0], style);
     expect(ticks.mesh.material.transparent).toBe(false);
+  });
+
+  test("under the ordered model, blends opaque ticks too", () => {
+    const ticks = new Ticks("ordered");
+    ticks.set([[0, 0, 0]], [0, 1, 0], style);
+    expect(ticks.mesh.material).toMatchObject({
+      transparent: true,
+      blending: NormalBlending,
+      depthWrite: true,
+    });
+  });
+
+  test("draws nothing without an opacity", () => {
+    const ticks = new Ticks("oit");
+    ticks.set([[0, 0, 0]], [0, 1, 0], { ...style, color: [1, 0, 0, 0] });
+    expect(ticks.mesh.visible).toBe(false);
   });
 });

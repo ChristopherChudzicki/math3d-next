@@ -1,4 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
+import { NormalBlending } from "three/webgpu";
 import type { BufferAttribute } from "three/webgpu";
 import { TriangleMesh } from "./TriangleMesh";
 import type { MeshBuffers } from "./TriangleMesh";
@@ -65,6 +66,16 @@ describe("TriangleMesh", () => {
     expect(mesh.mesh.material.transparent).toBe(true);
     fill(mesh, 1);
     expect(mesh.mesh.material.transparent).toBe(false);
+  });
+
+  test("under the ordered model, blends an opaque mesh too", () => {
+    const mesh = new TriangleMesh("ordered");
+    fill(mesh, 1);
+    expect(mesh.mesh.material).toMatchObject({
+      transparent: true,
+      blending: NormalBlending,
+      depthWrite: true,
+    });
   });
 
   test("shares one material per shading and transparency", () => {

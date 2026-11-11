@@ -60,7 +60,7 @@ upstream bugs:
   every rendered item; each renderer folder's `coverage.ts` fills it. A new
   property fails typecheck until every renderer classifies it.
 - An `approximate: <why>` entry is a known difference from MathBox; `n/a:` is
-  a property that doesn't apply; `todo` is a gap.
+  a property that doesn't apply.
 - QA scenes (`webserver/scenes/seed_scenes/qa/`, one per graphical feature)
   are compared by hand: the same key in two tabs, one with
   `?renderer=mathbox` and one with `?renderer=usegpu` (a stored preference

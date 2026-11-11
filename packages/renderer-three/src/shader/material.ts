@@ -10,31 +10,37 @@ import type { Node } from "three/webgpu";
 import { userData } from "three/tsl";
 
 /**
- * What a mark's alpha is for: `opaque` when it is 1 wherever the mark draws,
- * `translucent` when what lies behind shows through, `edges` when it is below
- * 1 only to antialias the mark's outline.
+ * Whether what lies behind a mark shows through it: `opaque` when its alpha
+ * is 1 wherever it draws, `translucent` otherwise.
  */
-export type Alpha = "opaque" | "translucent" | "edges";
+export type Opacity = "opaque" | "translucent";
 
-/** The fact for a mark whose color has that alpha throughout. */
-export const alphaOf = (alpha: number): Alpha =>
+/** The `Opacity` of a mark whose color has this alpha everywhere. */
+export const opacityOf = (alpha: number): Opacity =>
   alpha < 1 ? "translucent" : "opaque";
+
+/**
+ * What a mark's alpha is for: an `Opacity`, or `edges` when it is below 1
+ * only to antialias the mark's outline.
+ */
+type Alpha = Opacity | "edges";
 
 /**
  * Whether a mark's triangles all face the same way on screen: a label's or a
  * disc's quad does (`uniform`); a surface's, a cone's and a line's don't
  * (`mixed`).
  */
-export type Facing = "uniform" | "mixed";
+type Facing = "uniform" | "mixed";
 
 /**
  * How translucent marks combine.
  *
  * - `oit`: order-independent. Opaque marks draw first, then `edges` marks
- *   blend over them in item order, and three's OIT pass composites every
+ *   blend over them in draw order, and three's OIT pass composites every
  *   `translucent` fragment in front of those, whatever the order.
- * - `ordered`: MathBox's way. Every mark blends and writes depth, in item
- *   order, so a translucent mark hides whatever is drawn after it behind it.
+ * - `ordered`: MathBox's way. Every mark blends and writes depth, in draw
+ *   order, so a translucent mark hides anything drawn later that lies behind
+ *   it.
  */
 export type Transparency = "oit" | "ordered";
 
@@ -59,22 +65,28 @@ const setOitFlags = (material: MeshBasicNodeMaterial, alpha: Alpha) => {
     material.blendDst = OneMinusSrcAlphaFactor;
     material.blendSrcAlpha = OneFactor;
   }
-  // The OIT pass tests translucent fragments against depth without writing it.
+  // three's OIT pass turns depth writes off while it accumulates; this states
+  // the same.
   material.depthWrite = alpha !== "translucent";
   // Order-independent, so three's back-then-front passes would add nothing.
   material.forceSinglePass = true;
   /* eslint-enable no-param-reassign */
 };
 
-const setOrderedFlags = (material: MeshBasicNodeMaterial, facing: Facing) => {
+const setOrderedFlags = (
+  material: MeshBasicNodeMaterial,
+  alpha: Alpha,
+  facing: Facing,
+) => {
   /* eslint-disable no-param-reassign */
   // MathBox makes every material `transparent`, so three keeps all in one
-  // list, drawn in item order, and each writes depth.
+  // list, drawn in draw order, and each writes depth.
   material.transparent = true;
   material.depthWrite = true;
   // three draws a blended two-sided mesh twice, back faces then front, as
-  // MathBox's three does: a translucent cone shows its far side.
-  material.forceSinglePass = facing === "uniform";
+  // MathBox's three does: a translucent cone shows its far side. An opaque
+  // mark looks the same drawn once.
+  material.forceSinglePass = facing === "uniform" || alpha === "opaque";
   /* eslint-enable no-param-reassign */
 };
 
@@ -97,12 +109,18 @@ export const sharedMaterial = (facing: Facing, build: () => Shader) => {
       // mirrored item's front face, and a line's quads follow their segments.
       material.side = DoubleSide;
       if (transparency === "oit") setOitFlags(material, alpha);
-      else setOrderedFlags(material, facing);
+      else setOrderedFlags(material, alpha, facing);
       materials.set(key, material);
     }
     return material;
   };
 };
+
+/** A mark's material for its opacity, under the scene's transparency model. */
+export type MarkMaterial = (
+  opacity: Opacity,
+  transparency: Transparency,
+) => MeshBasicNodeMaterial;
 
 type NodeType = "float" | "vec2" | "vec4";
 

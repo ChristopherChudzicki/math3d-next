@@ -8,7 +8,7 @@ import {
   isGradientName,
 } from "@math3d/mathitem-configs";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import { useDefaultZOrder } from "@/store/scene/evaluation/useDefaultZOrder";
+import { useDefaultZOrder } from "@/store/scene/evaluation/zOrders";
 import {
   useFinalVisibility,
   useMathItemResults,

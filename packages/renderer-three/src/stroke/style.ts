@@ -11,6 +11,7 @@ import {
 } from "three/tsl";
 import type { LineSpec } from "@math3d/viewport-spec";
 import { sharedMaterial, uniformsAt } from "../shader/material";
+import type { MarkMaterial, Shader } from "../shader/material";
 import { viewUnitsPerPixel } from "../shader/viewUnits";
 import type { ARROW_LAYOUT, ArrowEnds, SEGMENT_LAYOUT } from "./packPaths";
 
@@ -104,11 +105,11 @@ type PointAttribute = (typeof SEGMENT_LAYOUT | typeof ARROW_LAYOUT)[number][0];
 export const toView = (name: PointAttribute) =>
   modelViewMatrix.mul(vec4(attribute<"vec3">(name, "vec3"), 1)).xyz;
 
-type Shape = { vertex: Node<"vec4">; mask?: Node };
+type Shape = Omit<Shader, "color">;
 
 /**
  * The materials for one part of a stroke, in the stroke's color. Each mesh's
  * `userData.stroke` supplies its style.
  */
-export const strokeMaterial = (build: () => Shape) =>
+export const strokeMaterial = (build: () => Shape): MarkMaterial =>
   sharedMaterial("mixed", () => ({ ...build(), color: strokeStyle.color }));

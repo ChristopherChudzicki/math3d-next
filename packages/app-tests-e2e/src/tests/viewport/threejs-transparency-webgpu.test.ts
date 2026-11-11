@@ -2,7 +2,11 @@ import { expect } from "@playwright/test";
 import { test } from "@/fixtures/users";
 import { collectPageErrors } from "@/utils/collectPageErrors";
 import { expectThreeViewport } from "@/utils/threeViewport";
-import { expectRedToHideBlue, redOverBlue } from "@/utils/threeTransparency";
+import {
+  expectRedToHideBlue,
+  narrowWindow,
+  redOverBlue,
+} from "@/utils/threeTransparency";
 import { webgpuLaunchOptions } from "@/utils/webgpuLaunchOptions";
 
 // Without an adapter three.js falls back to WebGL2, which
@@ -24,10 +28,7 @@ test("three.js order-independent transparency on WebGPU tests depth, also after 
   await expect(canvas).toHaveAttribute("data-transparency", "oit");
   await expectRedToHideBlue(page);
 
-  const { width, height } = page.viewportSize()!;
-  await page.setViewportSize({ width: width - 40, height });
-  // The resized frame is the last one drawn: nothing asks for another.
-  await page.waitForTimeout(500);
+  await narrowWindow(page);
   await expectRedToHideBlue(page);
   expect(errors).toEqual([]);
 });
