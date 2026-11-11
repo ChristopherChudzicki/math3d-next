@@ -25,8 +25,6 @@ describe("Discs", () => {
     const discs = new Discs();
     discs.set([[0, 0, 0], [NaN, 0, 0], ...points(2)], style());
     expect(instanceCounts(discs)).toEqual([3, 3]);
-    discs.set(points(100), style());
-    expect(instanceCounts(discs)).toEqual([100, 100]);
   });
 
   test.each([

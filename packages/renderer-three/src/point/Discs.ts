@@ -39,7 +39,7 @@ export class Discs {
   set(points: readonly Coords[], style: DiscStyle): void {
     this.uniforms.set(style);
     this.instances.mesh.material = discMaterial("fill", style.color[3] < 1);
-    // MathBox draws nothing at no size; the rim's padding alone would.
+    // MathBox draws nothing at size 0; the rim's padding alone would.
     const drawn = style.diameter > 0 ? points : [];
     this.instances.fill(drawn.length, (out) => {
       let count = 0;

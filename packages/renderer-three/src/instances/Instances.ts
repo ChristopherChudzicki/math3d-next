@@ -37,7 +37,7 @@ export class Instances {
   constructor(
     private readonly template: Template,
     private readonly layout: Layout,
-    materials: Material | readonly Material[],
+    materials: Material | readonly [Material, ...Material[]],
   ) {
     this.stride = strideOf(layout);
     const geometry = new InstancedBufferGeometry();
