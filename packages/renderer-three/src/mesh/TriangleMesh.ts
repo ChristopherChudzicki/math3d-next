@@ -55,7 +55,8 @@ export class TriangleMesh {
 
   /**
    * Draws what `write` puts in buffers with room for `vertexCount` vertices
-   * and `indexCount` indices.
+   * and `indexCount` indices. Any vertex with alpha below 1 makes the whole
+   * mesh use the translucent material.
    */
   fill(
     vertexCount: number,

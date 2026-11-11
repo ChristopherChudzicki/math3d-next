@@ -73,6 +73,7 @@ describe("buildSurface", () => {
       grid: { ...spec.grid, width: 0 },
     });
     graphic.update(next);
+    expect(partsOf(graphic).surface).toBe(surface);
     expect(surface.geometry.drawRange.count).toBe(3 * cellTriangles(next));
     expect(line.visible).toBe(false);
   });
