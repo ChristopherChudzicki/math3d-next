@@ -39,8 +39,8 @@ export class OitFrame {
 
   constructor(renderer: WebGPURenderer, scene: Scene, camera: Camera) {
     this.pass = oitPass(scene, camera);
-    // three's default weight is a function of absolute view depth, flat at
-    // this scene's scale. This one is relative to the scene, so the same at
+    // three's default weight is a function of absolute view depth, nearly flat
+    // at this scene's scale. This one is relative to the scene, so the same at
     // any zoom and in either projection.
     const origin = cameraViewMatrix.mul(vec4(0, 0, 0, 1)).z;
     const nearness = clamp(
