@@ -30,6 +30,10 @@ reports back through `ViewportHooks`, both types in
 - `features/viewport/spec/` produces it: `useViewportSpec(host)` returns the
   spec, the reporter elements that fill `spec.graphics` (render them
   alongside the renderer), and the `onCameraMove` hook.
+- **A spec field is a true quantity**, drawn as given by every renderer. A
+  factor that only reproduces how MathBox reads a stored value, such as its
+  circle points' 1.2 × `size`, is applied once, by name, in the spec
+  producer.
 
 ### The camera
 
@@ -112,8 +116,7 @@ parent, so anything sized in pixels is built in the shader, in view space:
   do: three draws a translucent mesh's back faces first, so winding decides
   how it overlaps itself.
 - **Every point is a `Discs`** (`point/Discs.ts`), MathBox's circle point:
-  a disc of the given diameter at view depth 1 with a one-pixel antialiased
-  rim. `buildPoint` passes 1.2 × `size`, as MathBox's `optical` circle draws.
+  a disc `size` across at view depth 1 with a one-pixel antialiased rim.
   Like MathBox it draws all fills, then all rims, so a rim's depth write never
   hides a farther disc.
 - **`zBias` and `zIndex` go through `shader/depthStyle.ts`**, whatever the

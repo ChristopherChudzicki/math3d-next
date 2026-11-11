@@ -5,9 +5,6 @@ import { Labels } from "../label/Labels";
 import type { Graphic } from "./builders";
 import { ITEM_LABEL } from "./itemLabel";
 
-// MathBox's `optical` circle, on by default, is drawn this many times `size`.
-const MATHBOX_CIRCLE_SCALE = 1.2;
-
 /** Points, each with the item's label. */
 export const buildPoint = (spec: PointSpec): Graphic<PointSpec> => {
   const discs = new Discs();
@@ -15,10 +12,7 @@ export const buildPoint = (spec: PointSpec): Graphic<PointSpec> => {
   // After the discs' fill and rims.
   labels.mesh.renderOrder = 2;
   const set = (next: PointSpec) => {
-    discs.set(next.positions, {
-      ...next,
-      diameter: MATHBOX_CIRCLE_SCALE * next.size,
-    });
+    discs.set(next.positions, { ...next, diameter: next.size });
     labels.set(next.positions, next.label, ITEM_LABEL);
   };
   set(spec);

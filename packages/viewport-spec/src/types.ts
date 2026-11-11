@@ -27,7 +27,7 @@ type Common = {
 export type PointSpec = Common & {
   kind: "point";
   positions: Coords[];
-  /** Point diameter, in CSS pixels. MathBox's circle is drawn 1.2 × this wide. */
+  /** Point diameter, in CSS pixels. */
   size: number;
   color: RGBA;
   /** Drawn at each point; `null` when hidden or empty. */

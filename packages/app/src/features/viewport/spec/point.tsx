@@ -10,6 +10,10 @@ import { baseStyle, visibleLabel } from "./style";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";
 
+// MathBox draws its circle points (`optical`, on by default) 1.2 × their
+// stored size across, and saved scenes' sizes were chosen against that.
+const MATHBOX_POINT_SCALE = 1.2;
+
 const POINT_PROPS = [
   "coords",
   "size",
@@ -30,7 +34,7 @@ const Point: SpecComponent<MIT.Point> = ({ item }) => {
     return {
       kind: "point",
       positions: coords,
-      size: size ?? 8,
+      size: MATHBOX_POINT_SCALE * (size ?? 8),
       ...baseStyle({ opacity, zBias, zIndex }, color),
       label: visibleLabel(label, labelVisible),
     };
