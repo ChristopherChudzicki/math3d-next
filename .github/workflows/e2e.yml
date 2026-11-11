@@ -74,8 +74,10 @@ jobs:
         run: yarn build
       # The frontend is served by Playwright's webServer config (`yarn preview`
       # in CI), which waits for the URL to be ready before running tests.
+      # No --with-deps: the runner image ships Chrome and its system libraries,
+      # and apt mirror outages would otherwise fail the job.
       - name: Install Playwright Browsers
-        run: yarn workspace app-tests-e2e playwright install --with-deps chromium
+        run: yarn workspace app-tests-e2e playwright install chromium
       - name: Run Playwright tests
         run: yarn test-e2e
         env:
