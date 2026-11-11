@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import type { InstancedBufferGeometry } from "three/webgpu";
 import type { Coords } from "@math3d/viewport-spec";
 import { Discs } from "./Discs";
+import { edgeMaterial, fillMaterial } from "./discMaterial";
 import type { DiscStyle } from "./discMaterial";
 
 const style = (overrides: Partial<DiscStyle> = {}): DiscStyle => ({
@@ -69,15 +70,24 @@ describe("Discs", () => {
     expect(edge).toBe(otherEdge);
   });
 
-  test("always blends the rims, and the fills only when translucent", () => {
+  test("an opaque disc's rim only antialiases it; a translucent disc's is as translucent as its fill", () => {
     const discs = new Discs("oit");
-    const isBlended = () =>
-      discs.objects.map(
-        (mesh) => (mesh.material as { transparent: boolean }).transparent,
-      );
-    discs.set(points(1), style({ color: [1, 0, 0, 0.5] }));
-    expect(isBlended()).toEqual([true, true]);
+    const materials = () => discs.objects.map((mesh) => mesh.material);
     discs.set(points(1), style());
-    expect(isBlended()).toEqual([false, true]);
+    expect(materials()).toEqual([
+      fillMaterial("opaque", "oit"),
+      edgeMaterial("opaque", "oit"),
+    ]);
+    expect(edgeMaterial("opaque", "oit")).toMatchObject({
+      transparent: true,
+      depthWrite: true,
+    });
+    discs.set(points(1), style({ color: [1, 0, 0, 0.5] }));
+    expect(materials()).toEqual([
+      fillMaterial("translucent", "oit"),
+      edgeMaterial("translucent", "oit"),
+    ]);
+    // Like the fill, it must not hide what is behind it from the OIT pass.
+    expect(edgeMaterial("translucent", "oit").depthWrite).toBe(false);
   });
 });

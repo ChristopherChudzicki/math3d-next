@@ -50,7 +50,7 @@ const isOrdering = (id: string, value: unknown): value is number =>
  * in a scope. Like useMathResults, it keeps the last value while one errors
  * or is emptied, because that is the value the graphic keeps drawing with.
  */
-class OpacityStore {
+class OrderingStore {
   // Opacities and zOrders, keyed by MathScope id.
   private values = new Map<string, number>();
 
@@ -111,11 +111,11 @@ class OpacityStore {
   }
 }
 
-const stores = new WeakMap<AppMathScope, OpacityStore>();
-const opacityStore = (scope: AppMathScope) => {
+const stores = new WeakMap<AppMathScope, OrderingStore>();
+const orderingStore = (scope: AppMathScope) => {
   let store = stores.get(scope);
   if (!store) {
-    store = new OpacityStore(scope);
+    store = new OrderingStore(scope);
     stores.set(scope, store);
   }
   return store;
@@ -126,7 +126,7 @@ const opacityStore = (scope: AppMathScope) => {
  * opacity, then tree order. Undefined for a graphic outside the tree.
  */
 const useDefaultZOrder = (itemId: string): number | undefined => {
-  const store = opacityStore(useMathScope());
+  const store = orderingStore(useMathScope());
   const treeOrder = useSelector(select.graphicTreeOrder);
   return useSyncExternalStore(
     store.subscribe,
@@ -139,7 +139,7 @@ const useDefaultZOrder = (itemId: string): number | undefined => {
  * own where it has one, else its default.
  */
 const useZOrders = (): Record<string, number> => {
-  const store = opacityStore(useMathScope());
+  const store = orderingStore(useMathScope());
   const treeOrder = useSelector(select.graphicTreeOrder);
   return useSyncExternalStore(
     store.subscribe,
