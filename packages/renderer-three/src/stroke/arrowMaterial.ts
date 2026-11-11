@@ -13,11 +13,15 @@ import {
 } from "three/tsl";
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import type { Template } from "../instances/Instances";
-import { arrowLengthAt, strokeMaterial, strokeStyle, toView } from "./style";
+import {
+  LENGTH_TO_RADIUS,
+  arrowLengthAt,
+  strokeMaterial,
+  strokeStyle,
+  toView,
+} from "./style";
 
 const SIDES = 24;
-/** A cone's length over its radius, as MathBox draws it. */
-const LENGTH_TO_RADIUS = 2.5;
 
 const ring = Array.from({ length: SIDES }, (_, i) => {
   const angle = (2 * Math.PI * i) / SIDES;

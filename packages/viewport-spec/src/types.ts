@@ -43,7 +43,10 @@ export type LineSpec = Common & {
   /** Arrowheads at each path's first and last point. */
   start: boolean;
   end: boolean;
-  /** Arrowhead scale: MathBox draws the head 1.25 × arrowSize × width pixels long. */
+  /**
+   * Arrowhead base width, in line widths; the head is a 2.5 : 1 cone, so
+   * 1.25 × this long.
+   */
   arrowSize: number;
   /** Drawn at the last point; `null` when hidden or empty. */
   label: string | null;
@@ -81,7 +84,7 @@ export type AxisSpec = Common & {
   /** Arrowheads at the axis's low and high end. */
   start: boolean;
   end: boolean;
-  /** Arrowhead scale, as in `LineSpec`. */
+  /** Arrowhead base width, in line widths, as in `LineSpec`. */
   arrowSize: number;
   range: [number, number];
   ticks: { divisions: number; visible: boolean };

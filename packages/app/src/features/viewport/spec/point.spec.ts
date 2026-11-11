@@ -17,6 +17,12 @@ test("a point reports its evaluated coordinates, color and zIndex", () => {
   });
 });
 
+test("a point's size is the diameter MathBox draws, 1.2 × its stored size", () => {
+  const scene = new SceneBuilder();
+  scene.folder().point({ size: "10" }, "p");
+  expect(renderGraphicSpec(scene, "p")).toMatchObject({ size: 12 });
+});
+
 test("a visible point label is its text", () => {
   const scene = new SceneBuilder();
   scene.folder().point({ labelVisible: "true", label: "P" }, "p");

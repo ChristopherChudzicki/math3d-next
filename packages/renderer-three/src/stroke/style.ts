@@ -75,10 +75,13 @@ export const strokeStyle = {
   halfWidth: width.mul(0.5).mul(viewUnitsPerPixel),
 };
 
+/** An arrowhead cone's length over its base radius, as MathBox draws it. */
+export const LENGTH_TO_RADIUS = 2.5;
+
 /**
  * The length, in view units, of an arrowhead at `tip`, on a path with that
- * view-space middle point and other end. MathBox's sizing: 1.25 × arrowSize
- * × width, shrunk with a cubic ease on a short path.
+ * view-space middle point and other end: a cone `arrowSize` line widths
+ * across its base, shrunk with a cubic ease on a short path, as MathBox's.
  */
 export const arrowLengthAt = (
   tip: Node<"vec3">,
@@ -86,10 +89,11 @@ export const arrowLengthAt = (
   otherEnd: Node<"vec3">,
 ): Node<"float"> => {
   const full = max(
-    arrowSize.mul(width).mul(1.25).mul(viewUnitsPerPixel),
+    arrowSize.mul(width).mul(0.5).mul(LENGTH_TO_RADIUS).mul(viewUnitsPerPixel),
     1e-12,
   );
-  // MathBox's `arrowSpace`: a path with a head at each end counts as half as long.
+  // MathBox's short-path rule (`arrowSpace`): a path with a head at each end
+  // counts as half as long.
   const space = float(1.25).div(max(hasStart.add(hasEnd), 1));
   const pathLength = max(length(tip.sub(middle)), length(middle.sub(otherEnd)))
     .mul(2)
