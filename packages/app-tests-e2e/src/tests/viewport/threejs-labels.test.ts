@@ -34,7 +34,13 @@ test("a vector's label is drawn above its tip", async ({
   const errors = collectPageErrors(page);
   // The camera looks at the vector's tip, so the tip is at the center.
   const screenshot = async (labelVisible: string) => {
-    const scene = new SceneBuilder().camera({ position: "[0, -6, 0]" });
+    // No axes: the y axis points at the camera, so its labels pile up at the
+    // tip, where the vector's label overlaps them.
+    const scene = new SceneBuilder()
+      .camera({ position: "[0, -6, 0]" })
+      .axis("x", { visible: false })
+      .axis("y", { visible: false })
+      .axis("z", { visible: false });
     scene.folder().vector({
       tail: "[0, 0, -2]",
       components: "[0, 0, 2]",
