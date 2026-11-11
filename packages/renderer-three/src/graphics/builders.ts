@@ -1,5 +1,7 @@
 import type { Group } from "three/webgpu";
 import type { GraphicSpec } from "@math3d/viewport-spec";
+import { buildAxis } from "./axis";
+import { buildGrid } from "./grid";
 import { buildLine } from "./line";
 import { buildSurface } from "./surface";
 
@@ -29,4 +31,6 @@ export type GraphicBuilders = {
 export const builders: GraphicBuilders = {
   line: buildLine,
   surface: buildSurface,
+  axis: buildAxis,
+  grid: buildGrid,
 };

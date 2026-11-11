@@ -10,6 +10,7 @@ import { visibleLabel } from "./style";
 import { useLineStyle } from "./line";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";
+import { linearTicks } from "./ticks";
 
 const AXIS_PROPS = [
   "min",
@@ -28,12 +29,18 @@ const Axis: SpecComponent<MIT.Axis> = ({ item }) => {
   const { axis, label } = item.properties;
   const spec = useMemo<GraphicSpec | null>(() => {
     if (!visible) return null;
+    const range: [number, number] = [min ?? -1, max ?? 1];
+    const split = divisions ?? 10;
     return {
       kind: "axis",
       axis,
       ...style,
-      range: [min ?? -1, max ?? 1],
-      ticks: { divisions: divisions ?? 10, visible: !!ticksVisible },
+      range,
+      ticks: {
+        divisions: split,
+        visible: !!ticksVisible,
+        values: linearTicks(range, split, { zero: false, nice: true }),
+      },
       label: visibleLabel(label, labelVisible),
     };
   }, [

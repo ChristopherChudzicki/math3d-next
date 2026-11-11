@@ -84,7 +84,12 @@ export type AxisSpec = Common & {
   /** Arrowhead scale, as in `LineSpec`. */
   arrowSize: number;
   range: [number, number];
-  ticks: { divisions: number; visible: boolean };
+  ticks: {
+    divisions: number;
+    visible: boolean;
+    /** Where ticks go: MathBox's `Scale` over `range`, without zero. */
+    values: number[];
+  };
   /** Drawn at the axis end; `null` when hidden or empty. */
   label: string | null;
 };
@@ -92,9 +97,16 @@ export type AxisSpec = Common & {
 export type GridSpec = Common & {
   kind: "grid";
   axes: "xy" | "yz" | "zx";
+  /** The range of each of `axes`, which every gridline spans. */
+  range: [[number, number], [number, number]];
   divisions: [number, number];
   /** Snap gridlines to round values instead of dividing the range evenly. */
   snap: boolean;
+  /**
+   * Where gridlines cross each of `axes`: `values[0]` along the first, each
+   * a line parallel to the second, and the other way round.
+   */
+  values: [number[], number[]];
   width: number;
   color: RGBA;
 };

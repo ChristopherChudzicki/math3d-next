@@ -98,3 +98,33 @@ test("a line keeps its pixel width when an axis is rescaled", async ({
   expect(Math.abs(squashed / full - 1)).toBeLessThan(0.05);
   expect(errors).toEqual([]);
 });
+
+test("an axis's ticks keep their pixel length when the axis they run along is rescaled", async ({
+  page,
+  prepareScene,
+}) => {
+  const errors = collectPageErrors(page);
+  // z's ticks run along y. The camera and the z axis sit on y = 0, so
+  // rescaling y changes the drawing only if it stretches the ticks.
+  const shareAt = async (yScale: string) => {
+    const scene = new SceneBuilder()
+      .camera({ position: "[-6, 0, 0]" })
+      .axis("y", { scale: yScale })
+      .axis("z", {
+        color: "#ff0000",
+        width: "1/4",
+        divisions: "40",
+        labelVisible: "false",
+      });
+    const key = await prepareScene(scene.json());
+    await page.goto(`/${key}?renderer=threejs&controls=0`);
+    await expectThreeViewport(page);
+    return coloredShare(page);
+  };
+
+  const full = await shareAt("1");
+  const squashed = await shareAt("1/4");
+
+  expect(Math.abs(squashed / full - 1)).toBeLessThan(0.05);
+  expect(errors).toEqual([]);
+});
