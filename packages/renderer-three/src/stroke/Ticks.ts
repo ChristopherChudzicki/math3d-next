@@ -1,6 +1,7 @@
 import type { Coords } from "@math3d/viewport-spec";
 import { Instances, strideOf } from "../instances/Instances";
 import { isDrawable, put } from "../instances/points";
+import { alphaOf } from "../shader/material";
 import { SEGMENT_TEMPLATE } from "./lineMaterial";
 import { TICK_LAYOUT, TICK_WIDTH, tickMaterial } from "./tickMaterial";
 import { StrokeUniforms } from "./style";
@@ -23,7 +24,7 @@ export class Ticks {
   private readonly instances = new Instances(
     SEGMENT_TEMPLATE,
     TICK_LAYOUT,
-    tickMaterial(false),
+    tickMaterial("opaque"),
   );
 
   /** Add it to the item's `Group`. */
@@ -36,7 +37,7 @@ export class Ticks {
   /** A tick at each of `positions`, each running along `direction`. */
   set(positions: readonly Coords[], direction: Coords, style: TickStyle): void {
     this.uniforms.set({ ...style, width: TICK_WIDTH }, NO_HEADS);
-    this.mesh.material = tickMaterial(style.color[3] < 1);
+    this.mesh.material = tickMaterial(alphaOf(style.color[3]));
     this.instances.fill(positions.length, (out) => {
       let offset = 0;
       positions.forEach((position) => {

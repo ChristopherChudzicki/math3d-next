@@ -20,6 +20,7 @@ import {
   vec4,
 } from "three/tsl";
 import { projectWithDepthStyle } from "../shader/depthStyle";
+import type { Alpha } from "../shader/material";
 import type { Template } from "../instances/Instances";
 import { arrowLengthAt, strokeMaterial, strokeStyle, toView } from "./style";
 
@@ -189,8 +190,8 @@ const plain = strokeMaterial(() => lineVertex(false));
 const clippedUnderHeads = strokeMaterial(() => lineVertex(true));
 
 /**
- * The line material for a stroke of that transparency. Only one with
- * arrowheads (`heads`) carries the `discard` that clips the line under them.
+ * The line material for a stroke of that alpha. Only one with arrowheads
+ * (`heads`) carries the `discard` that clips the line under them.
  */
-export const lineMaterial = (transparent: boolean, heads: boolean) =>
-  (heads ? clippedUnderHeads : plain)(transparent);
+export const lineMaterial = (alpha: Alpha, heads: boolean) =>
+  (heads ? clippedUnderHeads : plain)(alpha);

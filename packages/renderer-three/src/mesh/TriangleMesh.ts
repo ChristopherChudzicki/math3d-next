@@ -39,7 +39,7 @@ const markWritten = (attribute: BufferAttribute, count: number) => {
  * replaced only when a fill outgrows them.
  */
 export class TriangleMesh {
-  readonly mesh = new Mesh(new BufferGeometry(), meshMaterial(true, false));
+  readonly mesh = new Mesh(new BufferGeometry(), meshMaterial(true, "opaque"));
 
   private readonly uniforms = new MeshUniforms();
 
@@ -56,7 +56,7 @@ export class TriangleMesh {
   /**
    * Draws what `write` puts in buffers with room for `vertexCount` vertices
    * and `indexCount` indices. Any vertex with alpha below 1 makes the whole
-   * mesh use the translucent material. The buffers hold what the last fill
+   * mesh translucent. The buffers hold what the last fill
    * wrote, unless this one needs more room than any before it.
    */
   fill(
@@ -96,7 +96,10 @@ export class TriangleMesh {
     markWritten(index, indexCount);
     geometry.setDrawRange(0, indexCount);
     this.uniforms.set(style);
-    this.mesh.material = meshMaterial(style.shaded, translucent);
+    this.mesh.material = meshMaterial(
+      style.shaded,
+      translucent ? "translucent" : "opaque",
+    );
     this.mesh.visible = true;
   }
 

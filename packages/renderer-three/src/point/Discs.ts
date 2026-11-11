@@ -1,11 +1,13 @@
 import type { Coords } from "@math3d/viewport-spec";
 import { Instances } from "../instances/Instances";
 import { isDrawable, put } from "../instances/points";
+import { alphaOf } from "../shader/material";
 import {
   DISC_LAYOUT,
   DiscUniforms,
   SQUARE_TEMPLATE,
-  discMaterial,
+  edgeMaterial,
+  fillMaterial,
 } from "./discMaterial";
 import type { DiscStyle } from "./discMaterial";
 
@@ -20,8 +22,8 @@ export class Discs {
   private readonly uniforms = new DiscUniforms();
 
   private readonly instances = new Instances(SQUARE_TEMPLATE, DISC_LAYOUT, [
-    discMaterial("fill"),
-    discMaterial("edge"),
+    fillMaterial("opaque"),
+    edgeMaterial(),
   ]);
 
   /** Add these to the item's `Group`, keeping their `renderOrder`s 0 and 1. */
@@ -38,7 +40,7 @@ export class Discs {
 
   set(points: readonly Coords[], style: DiscStyle): void {
     this.uniforms.set(style);
-    this.instances.mesh.material = discMaterial("fill", style.color[3] < 1);
+    this.instances.mesh.material = fillMaterial(alphaOf(style.color[3]));
     // MathBox draws nothing at size 0; the rim's padding alone would.
     const drawn = style.diameter > 0 ? points : [];
     this.instances.fill(drawn.length, (out) => {

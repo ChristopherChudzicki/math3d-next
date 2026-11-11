@@ -1,4 +1,3 @@
-import { DoubleSide, MeshBasicNodeMaterial } from "three/webgpu";
 import type { Node } from "three/webgpu";
 import {
   attribute,
@@ -18,12 +17,13 @@ import {
   select,
   sqrt,
   transformNormalToView,
-  userData,
   vec3,
   vec4,
 } from "three/tsl";
 import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { projectWithDepthStyle } from "../shader/depthStyle";
+import { sharedMaterial, uniformsAt } from "../shader/material";
+import type { Alpha } from "../shader/material";
 
 export type MeshStyle = Pick<SurfaceSpec, "shaded" | "zBias" | "zIndex">;
 
@@ -42,9 +42,7 @@ export class MeshUniforms {
   }
 }
 
-// three's types give `userData` no node type; this casts to the one asked for.
-const read = (property: Exclude<keyof MeshUniforms, "set">) =>
-  userData(`mesh.${property}`, "float") as unknown as Node<"float">;
+const read = uniformsAt<MeshUniforms>("mesh");
 
 /**
  * The view-space normal from the `normal` attribute, normalized. A zero
@@ -91,35 +89,27 @@ const mathboxShading = (
   return vec4(sqrt(shaded), color.a);
 };
 
-const materials = new Map<string, MeshBasicNodeMaterial>();
+const build = (shaded: boolean) => () => {
+  const color = attribute<"vec4">("color", "vec4");
+  return {
+    vertex: projectWithDepthStyle(
+      positionView,
+      read("zBias", "float"),
+      read("zIndex", "float"),
+    ),
+    color: shaded ? mathboxShading(color, viewNormal()) : color,
+    // MathBox discards where the interpolated color has no opacity.
+    mask: color.a.greaterThan(0),
+  };
+};
+
+const shadedMaterial = sharedMaterial("mixed", build(true));
+const flatMaterial = sharedMaterial("mixed", build(false));
 
 /**
  * A triangle mesh's material, shared by every mesh with that shading and
- * transparency. The mesh supplies the attributes `TriangleMesh` writes
+ * alpha. The mesh supplies the attributes `TriangleMesh` writes
  * (`MeshBuffers`) and its depth style at `userData.mesh`.
  */
-export const meshMaterial = (
-  shaded: boolean,
-  transparent: boolean,
-): MeshBasicNodeMaterial => {
-  const key = `${shaded}/${transparent}`;
-  let material = materials.get(key);
-  if (!material) {
-    material = new MeshBasicNodeMaterial();
-    const color = attribute<"vec4">("color", "vec4");
-    material.colorNode = shaded ? mathboxShading(color, viewNormal()) : color;
-    // MathBox discards where the interpolated color has no opacity.
-    material.maskNode = color.a.greaterThan(0);
-    material.vertexNode = projectWithDepthStyle(
-      positionView,
-      read("zBias"),
-      read("zIndex"),
-    );
-    // Double-sided, and writing depth even when translucent, like MathBox's
-    // surfaces.
-    material.transparent = transparent;
-    material.side = DoubleSide;
-    materials.set(key, material);
-  }
-  return material;
-};
+export const meshMaterial = (shaded: boolean, alpha: Alpha) =>
+  (shaded ? shadedMaterial : flatMaterial)(alpha);

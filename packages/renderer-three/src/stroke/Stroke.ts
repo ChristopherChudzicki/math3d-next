@@ -1,5 +1,6 @@
 import type { Coords } from "@math3d/viewport-spec";
 import { Instances } from "../instances/Instances";
+import { alphaOf } from "../shader/material";
 import { CONE_TEMPLATE, arrowMaterial } from "./arrowMaterial";
 import { SEGMENT_TEMPLATE, lineMaterial } from "./lineMaterial";
 import {
@@ -25,13 +26,13 @@ export class Stroke {
   private readonly line = new Instances(
     SEGMENT_TEMPLATE,
     SEGMENT_LAYOUT,
-    lineMaterial(false, false),
+    lineMaterial("opaque", false),
   );
 
   private readonly arrows = new Instances(
     CONE_TEMPLATE,
     ARROW_LAYOUT,
-    arrowMaterial(false),
+    arrowMaterial("opaque"),
   );
 
   /** Add these to the item's `Group`. */
@@ -50,11 +51,9 @@ export class Stroke {
   set(paths: Coords[][], style: StrokeStyle): void {
     const ends = { start: !!style.start, end: !!style.end };
     this.uniforms.set(style, ends);
-    // A translucent stroke blends, in three's pass after every opaque one;
-    // it still writes depth, as MathBox does.
-    const transparent = style.color[3] < 1;
-    this.line.mesh.material = lineMaterial(transparent, ends.start || ends.end);
-    this.arrows.mesh.material = arrowMaterial(transparent);
+    const alpha = alphaOf(style.color[3]);
+    this.line.mesh.material = lineMaterial(alpha, ends.start || ends.end);
+    this.arrows.mesh.material = arrowMaterial(alpha);
     this.line.fill(countSegments(paths), (out) => packSegments(paths, out));
     this.arrows.fill(countArrows(paths, ends), (out) =>
       packArrows(paths, ends, out),
