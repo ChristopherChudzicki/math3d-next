@@ -138,19 +138,23 @@ export const coverage = {
   [MIT.ExplicitSurface]: SURFACE,
   [MIT.ExplicitSurfacePolar]: SURFACE,
   [MIT.ImplicitSurface]: {
-    color: "todo",
-    description: "todo",
-    opacity: "todo",
-    visible: "todo",
-    calculatedVisibility: "todo",
-    useCalculatedVisibility: "todo",
-    samples: "todo",
-    shaded: "todo",
-    domain: "todo",
-    lhs: "todo",
-    rhs: "todo",
-    zBias: "todo",
-    zIndex: "todo",
+    color: "drawn",
+    description: "n/a: editor only",
+    opacity:
+      "approximate: a translucent closed surface shows its far side through its near side when lhs − rhs is positive outside it, and not when negative; MathBox does the reverse",
+    visible: "drawn",
+    calculatedVisibility: "drawn",
+    useCalculatedVisibility: "drawn",
+    samples:
+      "approximate: cells per axis as in MathBox, capped at 128; MathBox has no cap but draws nothing above 5400 triangles",
+    shaded:
+      "approximate: lit with smooth normals from the sampled grid's gradient, as Use.GPU does; MathBox lights each triangle flat",
+    domain: "drawn",
+    lhs: "drawn",
+    rhs: "drawn",
+    zBias: Z_BIAS,
+    zIndex: "drawn",
+    // Left `todo` for the transparency task, which decides draw order.
     zOrder: "todo",
   },
   [MIT.Camera]: {

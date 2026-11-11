@@ -69,7 +69,12 @@ export type ImplicitSurfaceSpec = Common & {
   domain: AxesRange;
   /** Cells per axis, as in MathBox. */
   samples: number;
-  /** The surface is the zero level set of this function. */
+  /**
+   * The surface is the zero level set of this function. A renderer may skip
+   * sampling when a spec has the same function as the last (as when a
+   * variable drives only the opacity); a new function for the same surface
+   * costs that speed and nothing else.
+   */
   value: (x: number, y: number, z: number) => number;
   color: RGBA;
   shaded: boolean;

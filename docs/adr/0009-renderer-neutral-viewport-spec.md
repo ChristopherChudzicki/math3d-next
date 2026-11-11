@@ -115,6 +115,19 @@ parent, so anything sized in pixels is built in the shader, in view space:
   carries through the axes' scale. A surface's triangles wind as MathBox's
   do: three draws a translucent mesh's back faces first, so winding decides
   how it overlaps itself.
+- **An implicit surface is meshed on the CPU** (`graphics/implicit.ts`), so
+  it draws on WebGL2 too. The equation is sampled once on a grid of `samples`
+  cells per axis, 128 at most, then meshed by marching cubes with shared
+  vertices and the grid's gradient as normals.
+  - Marching cubes, not the surface nets Use.GPU draws: its silhouette
+    keeps creases and cone points that surface nets round off or bridge, and
+    it ends a surface exactly on the domain's faces with no padding or
+    clipping.
+  - Sampling is nearly all the cost, so a spec with the same `value`,
+    `domain` and `samples` as the one drawn is not sampled again.
+  - Triangles wind counterclockwise seen from where `value` is positive, so
+    which side of a translucent surface shows through depends on the
+    equation's sign.
 - **Every point is a `Discs`** (`point/Discs.ts`), MathBox's circle point:
   a disc `size` across at view depth 1 with a one-pixel antialiased rim.
   Like MathBox it draws all fills, then all rims, so a rim's depth write never
