@@ -17,6 +17,7 @@ import GpuViewport from "./GpuViewport";
 vi.mock("@sentry/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@sentry/react")>()),
   captureMessage: vi.fn(),
+  captureException: vi.fn(),
 }));
 
 const noAdapter = new Error("no adapter");
@@ -25,6 +26,11 @@ const ReportsUnsupportedTwice = ({ onUnsupported }: ContentProps) => {
     onUnsupported(noAdapter);
     onUnsupported(noAdapter);
   }, [onUnsupported]);
+  return null;
+};
+const gpuError = new Error("WebGPU error: invalid buffer");
+const ReportsGpuError = ({ onGpuError }: ContentProps) => {
+  useEffect(() => onGpuError(gpuError), [onGpuError]);
   return null;
 };
 const FailsToLoad = (): null => {
@@ -36,7 +42,7 @@ const loadScene = (store: ReturnType<typeof getStore>) => {
   store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
 };
 
-const renderViewport = () => {
+const renderViewport = ({ failInPlace = false } = {}) => {
   const store = getStore();
   loadScene(store);
   render(
@@ -45,7 +51,7 @@ const renderViewport = () => {
         <button type="button" id={RENDERER_SETTING_ID}>
           Account menu
         </button>
-        <GpuViewport />
+        <GpuViewport failInPlace={failInPlace} />
       </MemoryRouter>
     </Provider>,
   );
@@ -90,4 +96,33 @@ test("when the renderer throws, its button switches to the default renderer", as
   gpuContent.Component = gpuContent.RendersNothing;
   act(() => loadScene(store));
   expect(screen.queryByText(/ran into an error/)).not.toBeInTheDocument();
+});
+
+test("a GPU error is reported, and the scene stays up", async () => {
+  const error = vi.spyOn(console, "error").mockImplementation(() => {});
+  stubWebGpu();
+  gpuContent.Component = ReportsGpuError;
+  renderViewport();
+
+  await waitFor(() =>
+    expect(Sentry.captureException).toHaveBeenCalledWith(gpuError),
+  );
+  expect(error).toHaveBeenCalledWith(gpuError);
+  expect(screen.getByTestId("scene")).not.toHaveAttribute("data-scene-error");
+});
+
+test("with failInPlace, a GPU error also fails the scene", async () => {
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  stubWebGpu();
+  gpuContent.Component = ReportsGpuError;
+  renderViewport({ failInPlace: true });
+
+  expect(
+    await screen.findByText("The Use.GPU renderer ran into an error."),
+  ).toBeInTheDocument();
+  expect(screen.getByTestId("scene")).toHaveAttribute(
+    "data-scene-error",
+    "error",
+  );
+  expect(Sentry.captureException).toHaveBeenCalledWith(gpuError);
 });

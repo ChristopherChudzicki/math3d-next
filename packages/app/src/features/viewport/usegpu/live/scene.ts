@@ -54,8 +54,10 @@ export type SceneHooks = Pick<ViewportHooks, "onUnsupported"> & {
   onOrbit(orbit: OrbitSpec): void;
   /** The plot's children are rendering, which happens only once the font has loaded. */
   onGraphicsMounted(): void;
-  /** The device reported an error, or was lost, after it came up. */
-  onError(error: Error): void;
+  /** The device was lost after it came up. */
+  onDeviceLost(error: Error): void;
+  /** The device reported a validation, out-of-memory or internal error. */
+  onGpuError(error: Error): void;
 };
 
 const RenderProbe = ({ onRender }: { onRender: () => void }) => {
@@ -153,7 +155,7 @@ export const makeSceneRoot = (
     // Use.GPU types it `Error`, but `uncapturederror` gives a `GPUError`, which
     // has only a `message`.
     onError: (error: GPUError) =>
-      hooks.onError(new Error(`WebGPU error: ${error.message}`)),
+      hooks.onGpuError(new Error(`WebGPU error: ${error.message}`)),
     children: use(AutoCanvas, {
       canvas,
       samples: 4,
@@ -162,7 +164,7 @@ export const makeSceneRoot = (
         // AutoCanvas owns the canvas cursor (default `default`); `move` matches
         // MathBox, whose threestrap `cursor` plugin shows it whenever controls exist.
         use(Cursor, { cursor: "move" }),
-        use(WatchDeviceLoss, { onLost: hooks.onError }),
+        use(WatchDeviceLoss, { onLost: hooks.onDeviceLost }),
         use(OrbitControls, {
           ...scene.orbit,
           version: scene.controlsVersion,

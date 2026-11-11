@@ -19,7 +19,8 @@ type Props = {
   className?: string;
   /**
    * When Use.GPU can't start, say so here and leave the stored renderer
-   * preference alone, rather than leave it to the page to draw the default.
+   * preference alone, rather than leave it to the page to draw the default;
+   * and treat any GPU error as a failure.
    */
   failInPlace?: boolean;
 };
@@ -27,6 +28,7 @@ type Props = {
 const GpuViewport: React.FC<Props> = ({ className, failInPlace = false }) => {
   const [unsupported, setUnsupported] = useState(false);
   const [ready, onReady] = useLoadFlag();
+  const [gpuFailed, failGpu] = useLoadFlag();
   const onUnsupported = useCallback(
     (error: unknown) => {
       if (failInPlace) setUnsupported(true);
@@ -45,6 +47,17 @@ const GpuViewport: React.FC<Props> = ({ className, failInPlace = false }) => {
     },
     [failInPlace],
   );
+  // WebGPU invalidates only the command that failed, and the rest draw; a
+  // capture can't trust the frame, but an editor's scene stays up.
+  const onGpuError = useCallback(
+    (error: Error) => {
+      if (failInPlace) failGpu();
+      // eslint-disable-next-line no-console
+      console.error(error);
+      Sentry.captureException(error);
+    },
+    [failInPlace, failGpu],
+  );
 
   return (
     <ViewportShell
@@ -53,9 +66,14 @@ const GpuViewport: React.FC<Props> = ({ className, failInPlace = false }) => {
       ready={ready}
       unsupported={unsupported}
       unsupportedMessage="The Use.GPU renderer can't run in this browser."
+      failed={gpuFailed}
       className={className}
     >
-      <GpuViewportContent onUnsupported={onUnsupported} onReady={onReady} />
+      <GpuViewportContent
+        onUnsupported={onUnsupported}
+        onReady={onReady}
+        onGpuError={onGpuError}
+      />
     </ViewportShell>
   );
 };

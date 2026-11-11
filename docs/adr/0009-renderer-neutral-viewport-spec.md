@@ -51,6 +51,10 @@ reports back through `ViewportHooks`, both types in
   warmup drain and never sets `data-scene-error`; with no WebGL the route's
   error page replaces it. three.js's canvas adds
   `data-backend` (`webgpu` or `webgl2`).
+- Use.GPU's device loss fails the scene everywhere. An uncaptured GPU error
+  (validation, out-of-memory or internal) fails it only on the frame route
+  (`failInPlace`); elsewhere it is logged and sent to Sentry, and the scene
+  keeps drawing, since WebGPU invalidates only the failed command.
 - How each renderer settles:
   - MathBox: its warmup queue has stayed empty for 500 ms, or after 300
     frames (`mathbox/stillReadiness.ts`).

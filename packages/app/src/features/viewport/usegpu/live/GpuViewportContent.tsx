@@ -14,25 +14,30 @@ import {
   observeCanvas,
 } from "@/features/viewport/usegpu/settle";
 import { makeSceneRoot } from "./scene";
-import type { SceneSpec } from "./scene";
+import type { SceneHooks, SceneSpec } from "./scene";
 
 const CANVAS_STYLE = { width: "100%", height: "100%", display: "block" };
 // Without it, touch drags scroll or zoom the page instead of orbiting.
 const HOST_STYLE = { width: "100%", height: "100%", touchAction: "none" };
 
-type Props = Pick<ViewportHooks, "onUnsupported" | "onReady">;
+type Props = Pick<ViewportHooks, "onUnsupported" | "onReady"> &
+  Pick<SceneHooks, "onGpuError">;
 
 /**
  * The entry to usegpu/live, the only code that imports Use.GPU's runtime.
  * `usegpu/GpuViewport` loads it with React.lazy.
  */
-const GpuViewportContent: React.FC<Props> = ({ onUnsupported, onReady }) => {
+const GpuViewportContent: React.FC<Props> = ({
+  onUnsupported,
+  onReady,
+  onGpuError,
+}) => {
   const host = useRef<HTMLDivElement>(null);
   // `settle` keeps the first `onReady`; a new scene load remounts this with a
   // new one.
   const [settle] = useState(() => makeSettleWatch(onReady));
   const [failure, setFailure] = useState<{ error: Error } | null>(null);
-  const onError = useCallback((error: Error) => setFailure({ error }), []);
+  const onDeviceLost = useCallback((error: Error) => setFailure({ error }), []);
   useEffect(() => () => settle.cancel(), [settle]);
   const observed = useRef<HTMLCanvasElement | null>(null);
   const { spec, reporters, onCameraMove } = useViewportSpec(host);
@@ -65,10 +70,11 @@ const GpuViewportContent: React.FC<Props> = ({ onUnsupported, onReady }) => {
         onUnsupported,
         onOrbit,
         onGraphicsMounted: settle.arm,
-        onError,
+        onDeviceLost,
+        onGpuError,
       });
     },
-    [scene, onUnsupported, onOrbit, settle, onError],
+    [scene, onUnsupported, onOrbit, settle, onDeviceLost, onGpuError],
   );
 
   // Rethrown during render so the error boundary above sees it.

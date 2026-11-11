@@ -1,6 +1,8 @@
 import type { ViewportHooks } from "@math3d/viewport-spec";
 
-export type ContentProps = Pick<ViewportHooks, "onUnsupported" | "onReady">;
+export type ContentProps = Pick<ViewportHooks, "onUnsupported" | "onReady"> & {
+  onGpuError(error: Error): void;
+};
 
 const RendersNothing = (_props: ContentProps): null => null;
 
