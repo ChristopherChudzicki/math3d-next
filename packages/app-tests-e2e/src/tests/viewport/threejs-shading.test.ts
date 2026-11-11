@@ -4,16 +4,17 @@ import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
 import { collectPageErrors } from "@/utils/collectPageErrors";
 import { decodePng } from "@/utils/decodePng";
+import { expectThreeViewport } from "@/utils/threeViewport";
 
 test.use({ disable3d: false });
 
 /**
- * An opaque red plane seen from below, its side away from the light: only
- * ambient light reaches it, about 0.6 of the color glossy and 0.25 matte.
+ * An opaque red plane z = 0, seen from `camera`. From below, only ambient
+ * light reaches its visible side; from above, the key light does too.
  */
-const unlitRedPlane = () => {
+const redPlane = (camera: string) => {
   const scene = new SceneBuilder();
-  scene.camera({ position: "[1, 2, -8]", target: "[0, 0, 0]" });
+  scene.camera({ position: camera, target: "[0, 0, 0]" });
   scene.folder().explicitSurface({
     expr: {
       type: "function-assignment",
@@ -43,23 +44,38 @@ const medianRed = async (page: Page) => {
   return reds[Math.floor(reds.length / 2)];
 };
 
+const BELOW = "[1, 2, -8]";
+const ABOVE = "[1, 2, 8]";
+
 [
-  { query: "", shading: "glossy", red: [130, 180] },
-  { query: "&gloss=0", shading: "matte", red: [40, 100] },
-].forEach(({ query, shading, red: [low, high] }) => {
-  test(`three.js on the frame route lights surfaces ${shading} with "${query || "no gloss param"}"`, async ({
+  // Ambient only: 0.6 of the color glossy, about 0.25 matte.
+  {
+    side: "unlit",
+    camera: BELOW,
+    query: "",
+    shading: "glossy",
+    red: [130, 180],
+  },
+  {
+    side: "unlit",
+    camera: BELOW,
+    query: "&gloss=0",
+    shading: "matte",
+    red: [40, 100],
+  },
+  // Ambient plus the key light's diffuse term.
+  { side: "lit", camera: ABOVE, query: "", shading: "glossy", red: [200, 240] },
+].forEach(({ side, camera, query, shading, red: [low, high] }) => {
+  test(`three.js on the frame route lights a surface's ${side} side ${shading} with "${query || "no gloss param"}"`, async ({
     page,
     prepareScene,
   }) => {
     const errors = collectPageErrors(page);
-    const key = await prepareScene(unlitRedPlane().json());
+    const key = await prepareScene(redPlane(camera).json());
     await page.goto(`/app/frame/${key}?renderer=threejs${query}`);
 
-    const viewport = page.getByTestId("scene");
-    await expect(viewport).toHaveAttribute("data-scene-ready", "true", {
-      timeout: 15_000,
-    });
-    await expect(viewport.locator("canvas")).toHaveAttribute(
+    await expectThreeViewport(page);
+    await expect(page.getByTestId("scene").locator("canvas")).toHaveAttribute(
       "data-shading",
       shading,
     );

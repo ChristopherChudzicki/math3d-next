@@ -17,8 +17,8 @@ const RendererViewport = React.lazy(() =>
 const HOST_STYLE = { width: "100%", height: "100%" };
 
 /**
- * `?gloss=0` lights surfaces as MathBox does, for comparison captures;
- * otherwise they are glossy, as in Use.GPU.
+ * `?gloss=0` lights shaded surfaces as MathBox does, for comparison captures;
+ * otherwise they are glossy.
  */
 const GLOSS_PARAM = "gloss";
 

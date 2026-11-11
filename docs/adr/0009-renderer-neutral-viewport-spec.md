@@ -210,13 +210,15 @@ error boundary, `Suspense`). A
 Two looks for shaded surfaces, chosen per `ThreeScene` (`Viewport`'s
 `shading`; the app passes `matte` for `?gloss=0`):
 
-- **`glossy`, the default**: Use.GPU's look. `mesh/meshMaterial.ts` ports
-  Use.GPU's default lit material (Burley diffuse, an untinted GGX highlight,
-  roughness 0.35) under the app's ambient and key light, lit on the sRGB
-  color as Use.GPU lights it.
+- **`glossy`, the default**: Burley diffuse and an untinted GGX highlight
+  (roughness 0.35) under ambient 0.6 and a key light of 0.4, applied to the
+  sRGB color as given. `mesh/meshMaterial.ts` ports it from Use.GPU's
+  default lit material and the lights the app gives Use.GPU.
 - **`matte`**: MathBox's look, for comparison captures against math3d.org.
-- Both use MathBox's light direction and facing test. Unshaded surfaces,
-  lines, points and labels look the same under either.
+- Both use MathBox's light direction and facing test, and clamp the shaded
+  color to 1: OIT accumulates in half float, where a brighter color would
+  lighten every translucent layer it blends with.
+- Only shaded surfaces differ.
 
 #### Transparency
 

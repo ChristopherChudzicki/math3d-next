@@ -78,7 +78,7 @@ describe("TriangleMesh", () => {
     });
   });
 
-  test("shares one material per shading and transparency", () => {
+  test("shares one material per transparency, apart for shaded and flat", () => {
     const [shaded, alsoShaded, flat] = [0, 1, 2].map(
       () => new TriangleMesh("oit", "glossy"),
     );
@@ -89,7 +89,7 @@ describe("TriangleMesh", () => {
     expect(flat.mesh.material).not.toBe(shaded.mesh.material);
   });
 
-  test("lights a matte mesh with its own material, but draws an unshaded one alike", () => {
+  test("gives glossy and matte meshes different materials, and flat ones the same", () => {
     const [glossy, matte] = (["glossy", "matte"] as const).map(
       (shading) => new TriangleMesh("oit", shading),
     );

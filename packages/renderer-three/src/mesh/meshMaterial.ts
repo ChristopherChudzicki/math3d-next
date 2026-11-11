@@ -9,6 +9,7 @@ import {
   float,
   length,
   max,
+  min,
   mix,
   normalize,
   PI,
@@ -107,17 +108,18 @@ const pow5 = (x: Node<"float">) => {
 };
 
 const ROUGHNESS = 0.35;
+// The lights `usegpu/live/scene.ts` gives Use.GPU: ambient 0.6, and a key
+// light of intensity 0.8 that its default gray (0.5) halves to 0.4. Use.GPU
+// scales directional light, not ambient, by π.
 const AMBIENT = 0.6;
-// Use.GPU's `DirectionalLight` is gray (0.5) unless given a color, so the
-// intensity 0.8 that `usegpu/live/scene.ts` passes lights at 0.4.
 const KEY_LIGHT = 0.4;
 const F0 = 0.04;
 
 /**
- * Use.GPU's lit surface: its default material (`@use-gpu/wgsl`
- * `fragment/pbr`, metalness 0, roughness 0.35) under the ambient and
- * directional light the app gives it. Burley diffuse and an untinted GGX
- * highlight, lit on the sRGB color as given, as Use.GPU does.
+ * A port of Use.GPU's default lit material (`@use-gpu/wgsl`
+ * `material/pbr-default`: metalness 0, roughness 0.35) under one key light
+ * and ambient light. Burley diffuse and an untinted GGX highlight, applied to
+ * the sRGB color as given.
  */
 const glossyShading = (
   color: Node<"vec4">,
@@ -134,6 +136,7 @@ const glossyShading = (
   const dotNV = saturate(dot(n, V));
   const dotNH = saturate(dot(n, H));
   const dotLH = saturate(dot(L, H));
+  // Schlick, with f90 = max(F0, 1 − roughness), as Use.GPU does.
   const fresnel = float(Math.max(F0, 1 - ROUGHNESS) - F0)
     .mul(pow5(float(1).sub(dotLH)))
     .add(F0);
@@ -167,8 +170,8 @@ const glossyShading = (
 };
 
 /**
- * How shaded surfaces are lit: `glossy`, Use.GPU's look, or `matte`,
- * MathBox's.
+ * How shaded surfaces are lit: `glossy`, brighter than MathBox with a white
+ * highlight, or `matte`, as MathBox lights them.
  */
 export type Shading = "glossy" | "matte";
 
@@ -182,7 +185,9 @@ const build = (shading: Shading | null) => () => {
       read("zBias", "float"),
       read("zIndex", "float"),
     ),
-    color: shading ? SHADINGS[shading](color, viewNormal()) : color,
+    // Clamped: OIT accumulates in half float, where a color above 1 would
+    // brighten every translucent layer it blends with.
+    color: shading ? min(SHADINGS[shading](color, viewNormal()), 1) : color,
     // MathBox discards where the interpolated color has no opacity.
     mask: color.a.greaterThan(0),
   };

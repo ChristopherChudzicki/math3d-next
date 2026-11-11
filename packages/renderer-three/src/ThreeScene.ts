@@ -48,8 +48,8 @@ type Options = {
   onCameraMove(camera: CameraSpec): void;
   /** Gets what a resize or a frame throws, since neither runs inside React. */
   onError(error: unknown): void;
-  /** How shaded surfaces are lit. */
-  shading: Shading;
+  /** How shaded surfaces are lit; `glossy` when absent. */
+  shading?: Shading;
 };
 
 /**
@@ -95,6 +95,8 @@ export class ThreeScene {
   /** Null until the backend is known. */
   private transparency: Transparency | null = null;
 
+  private readonly shading: Shading;
+
   private oit: OitFrame | null = null;
 
   private frame: number | null = null;
@@ -113,8 +115,9 @@ export class ThreeScene {
     this.canvas.style.display = "block";
     this.canvas.style.width = "100%";
     this.canvas.style.height = "100%";
+    this.shading = options.shading ?? "glossy";
     // E2E reads it.
-    this.canvas.dataset.shading = options.shading;
+    this.canvas.dataset.shading = this.shading;
     host.appendChild(this.canvas);
     this.view = new ViewCamera(this.canvas, (camera) => {
       options.onCameraMove(camera);
@@ -206,7 +209,7 @@ export class ThreeScene {
         spec.graphics,
         builders,
         transparency,
-        this.options.shading,
+        this.shading,
       );
     }
     this.invalidate();

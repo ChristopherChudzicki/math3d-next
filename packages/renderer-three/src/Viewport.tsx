@@ -15,10 +15,7 @@ export type ViewportProps = {
    * can.
    */
   transparency?: Transparency;
-  /**
-   * How shaded surfaces are lit: `glossy`, Use.GPU's look, or `matte`,
-   * MathBox's.
-   */
+  /** How shaded surfaces are lit; `glossy` when absent. */
   shading?: Shading;
 };
 
@@ -30,7 +27,7 @@ const Viewport: React.FC<ViewportProps> = ({
   hooks,
   forceWebGL = false,
   transparency,
-  shading = "glossy",
+  shading,
 }) => {
   const host = useRef<HTMLDivElement>(null);
   const latestHooks = useRef(hooks);
