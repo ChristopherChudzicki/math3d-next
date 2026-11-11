@@ -141,9 +141,14 @@ test("a point is a disc of MathBox's size, whatever an axis's scale", async ({
   // view depth 1, where MathBox draws a disc 1.2 × size across.
   const size = 30;
   const shareAt = async (xScale: string) => {
+    // No axes or grid: the y axis points at the camera and the xy grid is
+    // edge-on, so both would cross the disc.
     const scene = new SceneBuilder()
       .camera({ position: "[0, -5, 0]" })
-      .axis("x", { scale: xScale });
+      .axis("x", { scale: xScale, visible: false })
+      .axis("y", { visible: false })
+      .axis("z", { visible: false })
+      .grid("xy", { visible: false });
     scene.folder().point({ coords: "[0, 0, 0]", size: String(size) });
     const key = await prepareScene(scene.json());
     await page.goto(`/${key}?renderer=threejs&controls=0`);
