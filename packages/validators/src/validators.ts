@@ -147,6 +147,7 @@ const realFunc = <M extends Dim | 5, N extends Dim>(fromDim: M, toDim: N) => {
     .transform((f) => {
       const ff = (...args: unknown[]) => {
         const out = f(...args);
+        if (typeof out === "number") return out;
         return Array.isArray(out) ? out.map(Number) : +Number(out);
       };
 

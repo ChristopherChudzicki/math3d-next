@@ -9,6 +9,7 @@ import type { AnonMathNode } from "@math3d/mathscope";
 import { EvaluationError } from "@math3d/mathscope";
 import invariant from "tiny-invariant";
 import type { ParseValidate } from "./interfaces";
+import { fastCompile } from "./fastCompile";
 
 class FunctionEvaluationError extends EvaluationError {
   innerError: Error;
@@ -108,11 +109,17 @@ const wrapFunction = (
   const signature = own ?? getUserFunctionSignature(rawResult);
   const f = (...args: unknown[]) => {
     try {
-      const spread = own ? spreadPoint(f, args) : args;
-      const error = own && arityError(own, args, spread);
-      if (error) throw new Error(error);
+      let spread = args;
+      // Matching arity: nothing to spread or reject.
+      if (own && args.length !== own.params.length) {
+        spread = spreadPoint(f, args);
+        const error = arityError(own, args, spread);
+        if (error) throw new Error(error);
+      }
       const rawEval = rawResult(...spread);
-      return numericTypeSimplify(rawEval);
+      return typeof rawEval === "number"
+        ? rawEval
+        : numericTypeSimplify(rawEval);
     } catch (e) {
       if (!(e instanceof Error)) {
         throw new Error('Expected error to be an instance of "Error"');
@@ -131,7 +138,7 @@ const getValidatedEvaluate = (
   mjsNode: mjs.MathNode,
   validate: ParseValidate = identity,
 ): AnonMathNode["evaluate"] => {
-  const compiled = mjsNode.compile();
+  const compiled = fastCompile(mjsNode);
   const unvalidatedEvaluate: AnonMathNode["evaluate"] = (scope) => {
     const rawResult = compiled.evaluate(scope);
     if (typeof rawResult === "function") {
