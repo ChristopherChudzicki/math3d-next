@@ -2,10 +2,10 @@ import { describe, expect, test } from "vitest";
 import type { Coords } from "@math3d/viewport-spec";
 import { fakeSurface } from "./__tests__/fakeSurface";
 import { LabelAtlas } from "./LabelAtlas";
-import { Labels, fromMathBoxOffset } from "./Labels";
+import { Labels } from "./Labels";
 import type { LabelStyle } from "./Labels";
 
-const style: LabelStyle = { weight: "bold", offset: [0, 40] };
+const style: LabelStyle = { weight: "bold", offset: [0, 24] };
 
 const setUp = () => {
   const atlas = new LabelAtlas(fakeSurface(), () => {});
@@ -13,10 +13,6 @@ const setUp = () => {
 };
 
 const drawn = (labels: Labels) => labels.mesh.geometry.instanceCount;
-
-test("fromMathBoxOffset scales by 16/24 and lowers by 4 atlas px", () => {
-  expect(fromMathBoxOffset([30, 40])).toEqual([20, 24]);
-});
 
 describe("Labels", () => {
   test("draws a label at each finite position that has text", () => {
@@ -42,6 +38,15 @@ describe("Labels", () => {
       style,
     );
     expect(drawn(labels)).toBe(2);
+  });
+
+  test("gives its mesh the style as given, with MathBox's defaults for the rest", () => {
+    const { labels } = setUp();
+    labels.set([[0, 0, 0]], "a", style);
+    const { color, offset, zBias, zIndex } = labels.mesh.userData.label;
+    expect(offset.toArray()).toEqual(style.offset);
+    expect(color.toArray()).toEqual([0.5, 0.5, 0.5, 1]);
+    expect([zBias, zIndex]).toEqual([0, 0]);
   });
 
   test("gives the atlas back strings it no longer draws, and all of them on dispose", () => {

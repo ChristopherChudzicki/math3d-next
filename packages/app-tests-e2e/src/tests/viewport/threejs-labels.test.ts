@@ -77,7 +77,7 @@ test("a vector's label is drawn above its tip", async ({
     y: (box.top + box.bottom) / 2,
   };
   expect(Math.abs(center.x - box.width / 2)).toBeLessThan(4);
-  // fromMathBoxOffset([0, 40]): 24 px above the tip.
+  // `line.ts` puts the label 24 px above the tip.
   expect(Math.abs(center.y - (box.height / 2 - 24))).toBeLessThan(5);
   expect(errors).toEqual([]);
 });

@@ -10,31 +10,17 @@ import {
   labelMaterial,
 } from "./labelMaterial";
 
-/**
- * math3d gives its MathBox labels a weight and an offset only, so the rest
- * default to MathBox's own.
- */
 export type LabelStyle = {
   weight: LabelWeight;
-  /** MathBox's `<Label offset>`, +y up the screen. */
+  /** CSS pixels from the anchor to the label's center, +y up the screen. */
   offset: readonly [number, number];
-  /** MathBox's gray when absent. */
+  /** MathBox's label gray when absent. */
   color?: RGBA;
   zBias?: number;
   zIndex?: number;
 };
 
 const MATHBOX_LABEL_COLOR: RGBA = [0.5, 0.5, 0.5, 1];
-
-/**
- * A MathBox label offset in CSS pixels to the text's center. MathBox scales
- * the offset by 16/24 with the text, and centers its sprite 4 atlas px above
- * the middle of the text's em box.
- */
-export const fromMathBoxOffset = ([x, y]: readonly [number, number]): [
-  number,
-  number,
-] => [(x * 2) / 3, (y * 2) / 3 - 8 / 3];
 
 const STRIDE = strideOf(LABEL_LAYOUT);
 
@@ -104,7 +90,7 @@ export class Labels {
 
     const { uniforms } = this;
     uniforms.color.set(...(style.color ?? MATHBOX_LABEL_COLOR));
-    uniforms.offset.set(...fromMathBoxOffset(style.offset));
+    uniforms.offset.set(...style.offset);
     uniforms.zBias = style.zBias ?? 0;
     uniforms.zIndex = style.zIndex ?? 0;
     this.fill();

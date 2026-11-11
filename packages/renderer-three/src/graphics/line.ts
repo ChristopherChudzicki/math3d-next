@@ -5,8 +5,8 @@ import { Labels } from "../label/Labels";
 import type { LabelStyle } from "../label/Labels";
 import type { Graphic } from "./builders";
 
-/** As math3d gives MathBox's line and vector labels. */
-const LABEL_STYLE: LabelStyle = { weight: "bold", offset: [0, 40] };
+/** Where math3d's MathBox line and vector labels land. */
+const LABEL_STYLE: LabelStyle = { weight: "bold", offset: [0, 24] };
 
 /** Lines, vectors, parametric curves and vector fields. */
 export const buildLine = (spec: LineSpec): Graphic<LineSpec> => {
