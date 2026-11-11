@@ -7,6 +7,9 @@ const Z_BIAS =
 const GRID_OPACITY =
   "approximate: at gridOpacity 1 gridlines draw in three's opaque pass, so they show through a translucent surface in front; MathBox hides them behind their own surface";
 
+const TICKS_FOLLOW_AXIS =
+  "ticks take the axis's opacity, zBias and zIndex; math3d's MathBox draws them opaque at zBias and zIndex 0";
+
 /** The properties every line-like item shares. */
 const STROKE = {
   color: "drawn",
@@ -53,41 +56,33 @@ const SURFACE = {
 /** What the three.js renderer does with each stored property. */
 export const coverage = {
   [MIT.Axis]: {
-    axis: "todo",
-    color: "todo",
-    description: "todo",
-    label: "todo",
-    labelVisible: "todo",
-    min: "todo",
-    max: "todo",
-    opacity: "todo",
-    scale: "todo",
-    size: "todo",
-    ticksVisible: "todo",
-    visible: "todo",
-    calculatedVisibility: "todo",
-    useCalculatedVisibility: "todo",
-    width: "todo",
-    zBias: "todo",
-    zIndex: "todo",
-    zOrder: "todo",
-    start: "todo",
-    end: "todo",
-    divisions: "todo",
+    ...STROKE,
+    opacity: `approximate: ${TICKS_FOLLOW_AXIS}`,
+    zBias: `${Z_BIAS}; ${TICKS_FOLLOW_AXIS}`,
+    zIndex: `approximate: ${TICKS_FOLLOW_AXIS}`,
+    axis: "drawn",
+    label: "drawn",
+    labelVisible: "drawn",
+    min: "drawn",
+    max: "drawn",
+    scale: "drawn",
+    ticksVisible: "drawn",
+    divisions: "drawn",
   },
   [MIT.Grid]: {
-    axes: "todo",
-    description: "todo",
-    divisions: "todo",
-    color: "todo",
-    opacity: "todo",
-    snap: "todo",
-    visible: "todo",
-    calculatedVisibility: "todo",
-    useCalculatedVisibility: "todo",
-    width: "todo",
-    zBias: "todo",
-    zIndex: "todo",
+    axes: "drawn",
+    description: "n/a: editor only",
+    divisions: "drawn",
+    color: "drawn",
+    opacity: "drawn",
+    snap: "drawn",
+    visible: "drawn",
+    calculatedVisibility: "drawn",
+    useCalculatedVisibility: "drawn",
+    width: "drawn",
+    zBias: Z_BIAS,
+    zIndex: "drawn",
+    // Left `todo` for the transparency task, which decides draw order.
     zOrder: "todo",
   },
   [MIT.Point]: {

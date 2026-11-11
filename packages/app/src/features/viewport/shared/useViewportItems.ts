@@ -14,11 +14,9 @@ const useHasViewportItems = () =>
 /** What a viewport draws: the graphics in order, the camera, and the axes' extent. */
 const useViewportItems = () => {
   const items = useAppSelector(select.stableOrderedMathItems);
-  const [x, y, z, camera] = useAppSelector((state) =>
-    select.getItems(state, REQUIRED_ITEMS),
-  );
+  const camera = useAppSelector(select.mathItem("camera"));
   invariant(camera.type === MathItemType.Camera);
-  const { scale, range } = useAxesInfo(x, y, z);
+  const { scale, range } = useAxesInfo();
   const graphics = useMemo(() => items.filter(isMathGraphic), [items]);
   return { graphics, camera, range, scale };
 };

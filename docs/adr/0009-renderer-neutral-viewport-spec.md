@@ -107,8 +107,9 @@ parent, so anything sized in pixels is built in the shader, in view space:
   smaller farther away in perspective, and the same in orthographic as in the
   perspective view it replaces.
 - **Every stroke is a `Stroke`** (`stroke/Stroke.ts`), a port of MathBox's
-  line and arrow shaders: lines, vectors, curves, vector fields and surface
-  gridlines, and the axes, ticks and grids still to come.
+  line and arrow shaders: lines, vectors, curves, vector fields, surface
+  gridlines, axes and grids. Ticks are `Ticks` (`stroke/Ticks.ts`): the same
+  line shader, its ends placed 10 px apart in view space around each tick.
 - **Every triangle mesh is a `TriangleMesh`** (`mesh/TriangleMesh.ts`), drawn
   with a port of MathBox's surface shading, gamma step included. It takes
   per-vertex RGBA, and normals in its own coordinates that the normal matrix
@@ -142,8 +143,8 @@ parent, so anything sized in pixels is built in the shader, in view space:
   default pipeline blends in linear space, which lightens every translucent
   mark.
 - **Every label is a `Labels`** (`label/Labels.ts`), MathBox's `<Label>`:
-  line and vector labels, and the point, axis and tick labels still to come.
-  16 px `sans-serif` with a 2 px white outline, no LaTeX (MathBox has none).
+  line, vector, point, axis and tick labels. 16 px `sans-serif` with a 2 px
+  white outline, no LaTeX (MathBox has none).
   Unlike a stroke, it keeps its pixel size at any depth (MathBox's
   `attach.depth` is 0), so its quad is laid out in screen pixels around its
   projected anchor. All labels share one canvas atlas, drawn at the device
@@ -173,7 +174,10 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
   renderer, and any renderer may import it. **A spec field is in math-item
   terms only** (evaluated positions, RGBA colors, sample callbacks), never a
   renderer prop, so the specs are testable under jsdom and survive a renderer
-  swap.
+  swap. Tick and gridline values count as math-item terms: `spec/ticks.ts`
+  (MathBox's `linear`) computes them into `AxisSpec` and `GridSpec`, and
+  each renderer formats tick labels itself. Use.GPU still derives its own
+  from `divisions` and `snap`.
 - `spec/`, `shared/` and `three/` import no renderer package (`three`,
   `mathbox*`, `@use-gpu/*`; a `no-restricted-imports` group). The path
   zones above check folders only. In `app`, `three` is MathBox's copy, so

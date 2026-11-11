@@ -13,7 +13,8 @@ test("an axis reports its range, ticks and label", () => {
   expect(renderGraphicSpec(scene, "axis-x")).toMatchObject({
     kind: "axis",
     range: [-5, 5],
-    ticks: { divisions: 4, visible: true },
+    // MathBox's nice ticks over [-5, 5] step by 5; zero is left out.
+    ticks: { divisions: 4, visible: true, values: [-5, 5] },
     label: item.properties.label,
   });
 });

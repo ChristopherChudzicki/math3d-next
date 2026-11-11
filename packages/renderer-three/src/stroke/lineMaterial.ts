@@ -65,16 +65,38 @@ const perpendicular = (v: Node<"vec2">) => vec2(v.y, v.x.negate());
 // Squared screen length below which two points count as one.
 const COINCIDENT = 1e-12;
 
-const build = (heads: boolean) => {
+/**
+ * A segment's ends and the path's points beyond each, in view space. A
+ * point beyond that equals its end means the path ends there.
+ */
+export type ViewSegment = {
+  before: Node<"vec3">;
+  a: Node<"vec3">;
+  b: Node<"vec3">;
+  after: Node<"vec3">;
+};
+
+/** The segment `packSegments` wrote. */
+const packedSegment = (): ViewSegment => ({
+  before: toView("segmentBefore"),
+  a: toView("segmentA"),
+  b: toView("segmentB"),
+  after: toView("segmentAfter"),
+});
+
+/** A stroke line's vertex stage, and with `heads` its mask, for `segment`. */
+export const lineVertex = (
+  heads: boolean,
+  segment: ViewSegment = packedSegment(),
+) => {
   const atB = positionGeometry.x.greaterThan(0.5);
   const side = positionGeometry.y;
-  const a = toView("segmentA");
-  const b = toView("segmentB");
+  const { before, a, b, after } = segment;
   // This corner's point, the segment's other end, and the path's next point
   // beyond this corner (the corner's own point where there is none).
   const corner = select(atB, b, a);
   const farEnd = select(atB, a, b);
-  const beyond = select(atB, toView("segmentAfter"), toView("segmentBefore"));
+  const beyond = select(atB, after, before);
 
   const center = clipToNear(corner, farEnd).toVar();
   const cut = viewDepth(corner).lessThan(cameraNear);
@@ -163,8 +185,8 @@ const build = (heads: boolean) => {
   };
 };
 
-const plain = strokeMaterial(() => build(false));
-const clippedUnderHeads = strokeMaterial(() => build(true));
+const plain = strokeMaterial(() => lineVertex(false));
+const clippedUnderHeads = strokeMaterial(() => lineVertex(true));
 
 /**
  * The line material for a stroke of that transparency. Only one with

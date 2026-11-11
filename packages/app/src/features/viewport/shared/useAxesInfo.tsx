@@ -1,4 +1,6 @@
-import { MathItem, MathItemType } from "@math3d/mathitem-configs";
+import { MathItemType } from "@math3d/mathitem-configs";
+import { useAppSelector } from "@/store/hooks";
+import * as select from "@/store/scene/state/selectors";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 import { useMathItemResults } from "@/store/scene/evaluation/mathScope";
 import { useMemo } from "react";
@@ -11,11 +13,13 @@ type AxesInfo = {
   scale: [number, number, number];
 };
 
-const useAxesInfo = (
-  axisX: MathItem,
-  axisY: MathItem,
-  axisZ: MathItem,
-): AxesInfo => {
+const AXES = ["axis-x", "axis-y", "axis-z"];
+
+/** The axes' range and scale, from the scene's three axis items. */
+const useAxesInfo = (): AxesInfo => {
+  const [axisX, axisY, axisZ] = useAppSelector((state) =>
+    select.getItems(state, AXES),
+  );
   invariant(axisX.type === MathItemType.Axis, "x is not an axis");
   invariant(axisY.type === MathItemType.Axis, "y is not an axis");
   invariant(axisZ.type === MathItemType.Axis, "z is not an axis");

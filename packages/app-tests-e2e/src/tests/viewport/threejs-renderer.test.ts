@@ -99,6 +99,39 @@ test("a line keeps its pixel width when an axis is rescaled", async ({
   expect(errors).toEqual([]);
 });
 
+test("an axis's ticks keep their pixel length when the axis they run along is rescaled", async ({
+  page,
+  prepareScene,
+}) => {
+  const errors = collectPageErrors(page);
+  // z's ticks run along y. The camera and the z axis sit on y = 0, so
+  // rescaling y changes the drawing only if it stretches the ticks.
+  const shareAt = async (yScale: string, ticksVisible: string) => {
+    const scene = new SceneBuilder()
+      .camera({ position: "[-3, 0, 0]" })
+      .axis("y", { scale: yScale })
+      .axis("z", {
+        color: "#ff0000",
+        width: "1/4",
+        divisions: "40",
+        ticksVisible,
+        labelVisible: "false",
+      });
+    const key = await prepareScene(scene.json());
+    await page.goto(`/${key}?renderer=threejs&controls=0`);
+    await expectThreeViewport(page);
+    return coloredShare(page);
+  };
+
+  const line = await shareAt("1", "false");
+  const ticks = (await shareAt("1", "true")) - line;
+  const squashedTicks = (await shareAt("1/4", "true")) - line;
+
+  expect(ticks).toBeGreaterThan(0.0002);
+  expect(Math.abs(squashedTicks / ticks - 1)).toBeLessThan(0.1);
+  expect(errors).toEqual([]);
+});
+
 test("a point is a disc of MathBox's size, whatever an axis's scale", async ({
   page,
   prepareScene,
@@ -108,9 +141,14 @@ test("a point is a disc of MathBox's size, whatever an axis's scale", async ({
   // view depth 1, where MathBox draws a disc 1.2 × size across.
   const size = 30;
   const shareAt = async (xScale: string) => {
+    // No axes or grid: the y axis points at the camera and the xy grid is
+    // edge-on, so both would cross the disc.
     const scene = new SceneBuilder()
       .camera({ position: "[0, -5, 0]" })
-      .axis("x", { scale: xScale });
+      .axis("x", { scale: xScale, visible: false })
+      .axis("y", { visible: false })
+      .axis("z", { visible: false })
+      .grid("xy", { visible: false });
     scene.folder().point({ coords: "[0, 0, 0]", size: String(size) });
     const key = await prepareScene(scene.json());
     await page.goto(`/${key}?renderer=threejs&controls=0`);
