@@ -1,6 +1,7 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test } from "vitest";
 import type { BufferAttribute, Mesh } from "three/webgpu";
 import type { ImplicitSurfaceSpec } from "@math3d/viewport-spec";
+import { sampleScalarGrid } from "../mesh/scalarGrid";
 import { MAX_IMPLICIT_CELLS, buildImplicit } from "./implicit";
 
 /** A unit sphere, and how many times it has been evaluated. */
@@ -33,8 +34,17 @@ const implicitSpec = (
   ...overrides,
 });
 
-const meshOf = (graphic: ReturnType<typeof buildImplicit>) =>
-  graphic.object.children[0] as Mesh;
+type Implicit = ReturnType<typeof buildImplicit>;
+
+const built: Implicit[] = [];
+/** Builds a surface that is disposed after the test. */
+const build = (spec: ImplicitSurfaceSpec): Implicit => {
+  built.push(buildImplicit(spec));
+  return built[built.length - 1];
+};
+afterEach(() => built.splice(0).forEach((graphic) => graphic.dispose()));
+
+const meshOf = (graphic: Implicit) => graphic.object.children[0] as Mesh;
 
 const colorOf = (mesh: Mesh, vertex: number) => {
   const colors = mesh.geometry.getAttribute("color") as BufferAttribute;
@@ -44,7 +54,7 @@ const colorOf = (mesh: Mesh, vertex: number) => {
 describe("buildImplicit", () => {
   test("draws the level set in the spec's color and depth style", () => {
     const spec = implicitSpec({ color: [0.25, 0.5, 0.75, 0.5] });
-    const mesh = meshOf(buildImplicit(spec));
+    const mesh = meshOf(build(spec));
     expect(mesh.visible).toBe(true);
     expect(mesh.geometry.drawRange.count).toBeGreaterThan(0);
     expect(colorOf(mesh, 0)).toEqual(spec.color);
@@ -54,19 +64,17 @@ describe("buildImplicit", () => {
 
   test("samples the corners of `samples` cells per axis, up to the cap", () => {
     const few = countedSphere();
-    buildImplicit(implicitSpec({ samples: 8, value: few.value }));
+    build(implicitSpec({ samples: 8, value: few.value }));
     expect(few.calls).toBe(9 ** 3);
     const many = countedSphere();
-    buildImplicit(
-      implicitSpec({ samples: MAX_IMPLICIT_CELLS + 1, value: many.value }),
-    );
+    build(implicitSpec({ samples: MAX_IMPLICIT_CELLS + 1, value: many.value }));
     expect(many.calls).toBe((MAX_IMPLICIT_CELLS + 1) ** 3);
   });
 
   test("restyles the same field without sampling it again", () => {
     const sphere = countedSphere();
     const spec = implicitSpec({ value: sphere.value });
-    const graphic = buildImplicit(spec);
+    const graphic = build(spec);
     const mesh = meshOf(graphic);
     const { count } = mesh.geometry.drawRange;
     const { calls } = sphere;
@@ -94,7 +102,7 @@ describe("buildImplicit", () => {
   ])("remeshes in place when %s changes", (_, change) => {
     const sphere = countedSphere();
     const spec = implicitSpec({ value: sphere.value });
-    const graphic = buildImplicit(spec);
+    const graphic = build(spec);
     const mesh = meshOf(graphic);
     const { calls } = sphere;
     const next = change(spec);
@@ -104,8 +112,20 @@ describe("buildImplicit", () => {
   });
 
   test("draws nothing when the field never crosses zero", () => {
-    const graphic = buildImplicit(implicitSpec());
+    const graphic = build(implicitSpec());
     graphic.update(implicitSpec({ value: () => 1 }));
     expect(meshOf(graphic).visible).toBe(false);
+  });
+
+  test("frees the meshing buffers when the last implicit surface is disposed", () => {
+    const spec = implicitSpec();
+    const [first, second] = [buildImplicit(spec), buildImplicit(spec)];
+    /** The length of the buffer a one-cell grid is sampled into. */
+    const gridBuffer = () =>
+      sampleScalarGrid(1, spec.domain, () => 0).values.length;
+    first.dispose();
+    expect(gridBuffer()).toBe((spec.samples + 1) ** 3);
+    second.dispose();
+    expect(gridBuffer()).toBe(8);
   });
 });

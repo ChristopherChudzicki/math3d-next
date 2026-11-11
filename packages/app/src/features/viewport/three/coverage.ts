@@ -147,7 +147,7 @@ export const coverage = {
     samples:
       "approximate: cells per axis as in MathBox, capped at 128; MathBox has no cap but draws nothing above 5400 triangles",
     shaded:
-      "approximate: lit with smooth normals from the equation's gradient, as Use.GPU does; MathBox lights each triangle flat",
+      "approximate: lit with smooth normals from the sampled grid's gradient, as Use.GPU does; MathBox lights each triangle flat",
     domain: "drawn",
     lhs: "drawn",
     rhs: "drawn",

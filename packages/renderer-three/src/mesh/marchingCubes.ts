@@ -8,7 +8,7 @@ export type IsoMesh = {
   indexCount: number;
   /** xyz per vertex. */
   position: Float32Array;
-  /** Unit xyz per vertex; zero where the field has no finite gradient. */
+  /** Unit xyz per vertex; zero where the grid gives no finite, nonzero gradient. */
   normal: Float32Array;
   /** Three vertex indices per triangle. */
   index: Uint32Array;
@@ -54,6 +54,14 @@ let index = new Uint32Array(0);
 let edgeVertex = new Int32Array(0);
 const gradients = new Float64Array(6);
 const edgeAt = new Int32Array(12);
+
+/** Frees the buffers meshes are built in; the next mesh allocates anew. */
+export const freeMeshBuffers = (): void => {
+  position = new Float32Array(0);
+  normal = new Float32Array(0);
+  index = new Uint32Array(0);
+  edgeVertex = new Int32Array(0);
+};
 
 const grown = <T extends Float32Array | Uint32Array>(
   buffer: T,

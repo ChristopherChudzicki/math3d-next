@@ -115,9 +115,10 @@ parent, so anything sized in pixels is built in the shader, in view space:
   it draws on WebGL2 too. The equation is sampled once on a grid of `samples`
   cells per axis, 128 at most, then meshed by marching cubes with shared
   vertices and the grid's gradient as normals.
-  - Marching cubes, not the surface nets Use.GPU draws: it keeps creases
-    and cone points that surface nets round off or bridge, and it ends a
-    surface exactly on the domain's faces with no padding or clipping.
+  - Marching cubes, not the surface nets Use.GPU draws: its silhouette
+    keeps creases and cone points that surface nets round off or bridge, and
+    it ends a surface exactly on the domain's faces with no padding or
+    clipping.
   - Sampling is nearly all the cost, so a spec with the same `value`,
     `domain` and `samples` as the one drawn is not sampled again.
   - Triangles wind counterclockwise seen from where `value` is positive, so

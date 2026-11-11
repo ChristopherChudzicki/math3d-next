@@ -1,8 +1,8 @@
 import { Group } from "three/webgpu";
 import type { ImplicitSurfaceSpec } from "@math3d/viewport-spec";
 import { TriangleMesh } from "../mesh/TriangleMesh";
-import { marchingCubes } from "../mesh/marchingCubes";
-import { sampleScalarGrid } from "../mesh/scalarGrid";
+import { freeMeshBuffers, marchingCubes } from "../mesh/marchingCubes";
+import { freeGridBuffer, sampleScalarGrid } from "../mesh/scalarGrid";
 import type { Graphic } from "./builders";
 
 /**
@@ -10,6 +10,10 @@ import type { Graphic } from "./builders";
  * times, on the main thread: about a second at 128.
  */
 export const MAX_IMPLICIT_CELLS = 128;
+
+// How many implicit surfaces are drawn. The meshing buffers only grow, to
+// megabytes at the cell cap, so disposing the last surface frees them.
+let surfaces = 0;
 
 /** Whether two specs sample the same field at the same points. */
 const sameField = (a: ImplicitSurfaceSpec, b: ImplicitSurfaceSpec) =>
@@ -51,9 +55,17 @@ export const buildImplicit = (
     drawn = next;
   };
   set(spec);
+  surfaces += 1;
   return {
     object: new Group().add(surface.mesh),
     update: set,
-    dispose: () => surface.dispose(),
+    dispose: () => {
+      surface.dispose();
+      surfaces -= 1;
+      if (surfaces === 0) {
+        freeGridBuffer();
+        freeMeshBuffers();
+      }
+    },
   };
 };

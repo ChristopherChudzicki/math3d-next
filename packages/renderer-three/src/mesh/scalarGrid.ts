@@ -17,6 +17,11 @@ export type ScalarGrid = {
 // One buffer for every grid: a grid is meshed before the next is sampled.
 let scratch = new Float32Array(0);
 
+/** Frees the buffer grids are sampled into; the next grid allocates anew. */
+export const freeGridBuffer = (): void => {
+  scratch = new Float32Array(0);
+};
+
 /**
  * Samples `value` at the corners of `cells` cells per axis over `domain`,
  * both ends included. The grid's `values` are overwritten by the next call.
@@ -50,7 +55,8 @@ export const sampleScalarGrid = (
 
 /**
  * Writes the field's gradient at point (i, j, k) to `out[at..at + 2]`:
- * central differences, one-sided at the grid's faces.
+ * central differences, one-sided where a neighbor is off the grid or not
+ * finite.
  */
 export const writeGradient = (
   { size: [nx, ny, nz], spacing: [hx, hy, hz], values }: ScalarGrid,
@@ -62,12 +68,12 @@ export const writeGradient = (
 ): void => {
   const c = i + nx * (j + ny * k);
   const sz = nx * ny;
-  const iLo = i > 0 ? 1 : 0;
-  const iHi = i < nx - 1 ? 1 : 0;
-  const jLo = j > 0 ? nx : 0;
-  const jHi = j < ny - 1 ? nx : 0;
-  const kLo = k > 0 ? sz : 0;
-  const kHi = k < nz - 1 ? sz : 0;
+  const iLo = i > 0 && Number.isFinite(values[c - 1]) ? 1 : 0;
+  const iHi = i < nx - 1 && Number.isFinite(values[c + 1]) ? 1 : 0;
+  const jLo = j > 0 && Number.isFinite(values[c - nx]) ? nx : 0;
+  const jHi = j < ny - 1 && Number.isFinite(values[c + nx]) ? nx : 0;
+  const kLo = k > 0 && Number.isFinite(values[c - sz]) ? sz : 0;
+  const kHi = k < nz - 1 && Number.isFinite(values[c + sz]) ? sz : 0;
   /* eslint-disable no-param-reassign */
   out[at] = (values[c + iHi] - values[c - iLo]) / ((iLo + iHi) * hx);
   out[at + 1] = (values[c + jHi] - values[c - jLo]) / (((jLo + jHi) / nx) * hy);

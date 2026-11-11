@@ -32,3 +32,21 @@ test("a linear field has its exact gradient at every grid point, the faces inclu
     }
   }
 });
+
+test("steps over a non-finite sample: its neighbours keep the exact gradient", () => {
+  const grid = sampleScalarGrid(4, domain, (x, y, z) =>
+    x === 2 && y === 0 && z === 6 ? NaN : x + 2 * y + 3 * z,
+  );
+  const out = new Float64Array(3);
+  [
+    [1, 2, 2],
+    [3, 2, 2],
+    [2, 1, 2],
+    [2, 3, 2],
+    [2, 2, 1],
+    [2, 2, 3],
+  ].forEach(([i, j, k]) => {
+    writeGradient(grid, i, j, k, out, 0);
+    expect(Array.from(out)).toEqual([1, 2, 3]);
+  });
+});
