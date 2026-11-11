@@ -121,3 +121,14 @@ test.each([
     expect(Renderer.mock.lastCall?.[0].transparency).toBe(transparency);
   },
 );
+
+test.each([
+  { url: "/", shading: undefined },
+  { url: "/?gloss=0", shading: "matte" },
+])("$url asks the renderer for shading $shading", async ({ url, shading }) => {
+  const Renderer = vi.fn((_props: ThreeViewportProps) => null);
+  threeViewport.Component = Renderer;
+  renderViewport(url);
+  await waitFor(() => expect(Renderer).toHaveBeenCalled());
+  expect(Renderer.mock.lastCall?.[0].shading).toBe(shading);
+});

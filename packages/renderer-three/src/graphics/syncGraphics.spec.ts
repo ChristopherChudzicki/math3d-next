@@ -31,7 +31,7 @@ const setup = () => {
     }),
   };
   const sync = (graphics: ViewportGraphic[]) =>
-    syncGraphics(world, drawn, graphics, builders, "oit");
+    syncGraphics(world, drawn, graphics, builders, "oit", "matte");
   return { world, drawn, built, builders, sync };
 };
 
@@ -42,7 +42,7 @@ test("builds a new graphic into the world, and skips an unchanged spec", () => {
   sync([{ id: "a", spec }]);
   sync([{ id: "a", spec }]);
 
-  expect(builders.point).toHaveBeenCalledExactlyOnceWith(spec, "oit");
+  expect(builders.point).toHaveBeenCalledExactlyOnceWith(spec, "oit", "matte");
   expect(world.children).toEqual([built[0].object]);
   expect(built[0].update).not.toHaveBeenCalled();
 });

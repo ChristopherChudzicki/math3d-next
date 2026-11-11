@@ -18,6 +18,9 @@ const GRID_OPACITY = `approximate: by default, a translucent surface tints the g
 const TICKS_FOLLOW_AXIS =
   "ticks take the axis's opacity, zBias and zIndex; math3d's MathBox draws them opaque at zBias and zIndex 0";
 
+const SHADED =
+  "approximate: by default glossy, brighter than MathBox with a white highlight; with ?gloss=0, lit as in MathBox";
+
 /** The properties every line-like item shares. */
 const STROKE = {
   color: "drawn",
@@ -47,7 +50,7 @@ const SURFACE = {
   grid2: "drawn",
   gridWidth: "drawn",
   opacity: "drawn",
-  shaded: "drawn",
+  shaded: SHADED,
   samples1: "drawn",
   samples2: "drawn",
   visible: "drawn",
@@ -144,8 +147,7 @@ export const coverage = {
     useCalculatedVisibility: "drawn",
     samples:
       "approximate: cells per axis as in MathBox, capped at 128; MathBox has no cap but draws nothing above 5400 triangles",
-    shaded:
-      "approximate: lit with smooth normals from the sampled grid's gradient, as Use.GPU does; MathBox lights each triangle flat",
+    shaded: `${SHADED}. Also, normals are smooth, from the sampled grid's gradient; MathBox lights each triangle flat`,
     domain: "drawn",
     lhs: "drawn",
     rhs: "drawn",

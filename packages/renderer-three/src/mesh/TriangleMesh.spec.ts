@@ -24,7 +24,7 @@ const attribute = (mesh: TriangleMesh, name: string) =>
 
 describe("TriangleMesh", () => {
   test("refills its buffers in place while they fit, and draws only what was written", () => {
-    const mesh = new TriangleMesh("oit");
+    const mesh = new TriangleMesh("oit", "glossy");
     fill(mesh, 10);
     const { geometry } = mesh.mesh;
     const positions = attribute(mesh, "position").array;
@@ -38,7 +38,7 @@ describe("TriangleMesh", () => {
   });
 
   test("replaces and disposes its geometry when a fill outgrows it, at least doubling", () => {
-    const mesh = new TriangleMesh("oit");
+    const mesh = new TriangleMesh("oit", "glossy");
     fill(mesh, 4);
     const old = mesh.mesh.geometry;
     const disposed = vi.fn();
@@ -51,13 +51,13 @@ describe("TriangleMesh", () => {
   });
 
   test("never computes bounds, which a NaN sample would make NaN", () => {
-    const mesh = new TriangleMesh("oit");
+    const mesh = new TriangleMesh("oit", "glossy");
     fill(mesh, 1);
     expect(mesh.mesh.geometry.boundingSphere?.radius).toBe(Infinity);
   });
 
   test("blends when any vertex is translucent", () => {
-    const mesh = new TriangleMesh("oit");
+    const mesh = new TriangleMesh("oit", "glossy");
     mesh.fill(3, 3, style, (out) => {
       out.color.fill(1, 0, 12);
       out.color.set([0.5], 11);
@@ -69,7 +69,7 @@ describe("TriangleMesh", () => {
   });
 
   test("under the ordered model, blends an opaque mesh too", () => {
-    const mesh = new TriangleMesh("ordered");
+    const mesh = new TriangleMesh("ordered", "glossy");
     fill(mesh, 1);
     expect(mesh.mesh.material).toMatchObject({
       transparent: true,
@@ -78,9 +78,9 @@ describe("TriangleMesh", () => {
     });
   });
 
-  test("shares one material per shading and transparency", () => {
+  test("shares one material per transparency, apart for shaded and flat", () => {
     const [shaded, alsoShaded, flat] = [0, 1, 2].map(
-      () => new TriangleMesh("oit"),
+      () => new TriangleMesh("oit", "glossy"),
     );
     fill(shaded, 1);
     fill(alsoShaded, 1);
@@ -89,8 +89,21 @@ describe("TriangleMesh", () => {
     expect(flat.mesh.material).not.toBe(shaded.mesh.material);
   });
 
+  test("gives glossy and matte meshes different materials, and flat ones the same", () => {
+    const [glossy, matte] = (["glossy", "matte"] as const).map(
+      (shading) => new TriangleMesh("oit", shading),
+    );
+    fill(glossy, 1);
+    fill(matte, 1);
+    expect(matte.mesh.material).not.toBe(glossy.mesh.material);
+    const unshaded = { given: { ...style, shaded: false } };
+    fill(glossy, 1, unshaded);
+    fill(matte, 1, unshaded);
+    expect(matte.mesh.material).toBe(glossy.mesh.material);
+  });
+
   test("puts its depth style at userData.mesh for the material", () => {
-    const mesh = new TriangleMesh("oit");
+    const mesh = new TriangleMesh("oit", "glossy");
     fill(mesh, 1);
     const given = { ...style, zBias: -2, zIndex: 0 };
     fill(mesh, 1, { given });
@@ -101,7 +114,7 @@ describe("TriangleMesh", () => {
   });
 
   test("draws nothing without triangles, before or after a fill", () => {
-    const mesh = new TriangleMesh("oit");
+    const mesh = new TriangleMesh("oit", "glossy");
     fill(mesh, 0);
     expect(mesh.mesh.visible).toBe(false);
     fill(mesh, 1);

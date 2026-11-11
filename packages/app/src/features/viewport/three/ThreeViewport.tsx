@@ -17,6 +17,12 @@ const RendererViewport = React.lazy(() =>
 const HOST_STYLE = { width: "100%", height: "100%" };
 
 /**
+ * `?gloss=0` lights shaded surfaces as MathBox does, for comparison captures;
+ * otherwise they are glossy.
+ */
+const GLOSS_PARAM = "gloss";
+
+/**
  * `?oit=0` draws translucent items in MathBox's order, for comparing the two
  * renderers. Without it they blend order-independently where the browser
  * can.
@@ -47,6 +53,7 @@ const ThreeViewportContent: React.FC<
           spec={spec}
           hooks={hooks}
           transparency={transparency}
+          shading={searchParams.get(GLOSS_PARAM) === "0" ? "matte" : undefined}
         />
       </div>
     </>

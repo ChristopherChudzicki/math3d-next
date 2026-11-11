@@ -8,7 +8,7 @@ import {
 import type { Material } from "three/webgpu";
 import type { Transparency } from "../shader/material";
 import { MeshUniforms, meshMaterial } from "./meshMaterial";
-import type { MeshStyle } from "./meshMaterial";
+import type { MeshStyle, Shading } from "./meshMaterial";
 
 /** The buffers `TriangleMesh.fill` hands its writer, in the mesh's coordinates. */
 export type MeshBuffers = {
@@ -49,10 +49,13 @@ export class TriangleMesh {
 
   private indexCapacity = 0;
 
-  constructor(private readonly transparency: Transparency) {
+  constructor(
+    private readonly transparency: Transparency,
+    private readonly shading: Shading,
+  ) {
     this.mesh = new Mesh(
       new BufferGeometry(),
-      meshMaterial(true, "opaque", transparency),
+      meshMaterial(true, "opaque", transparency, shading),
     );
     this.mesh.userData.mesh = this.uniforms;
     this.mesh.frustumCulled = false;
@@ -106,6 +109,7 @@ export class TriangleMesh {
       style.shaded,
       translucent ? "translucent" : "opaque",
       this.transparency,
+      this.shading,
     );
     this.mesh.visible = true;
   }
