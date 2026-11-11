@@ -12,16 +12,17 @@ const ON_TICK = 1e-9;
  * About `divisions` equally spaced values in `[min, max]`: MathBox's `linear`
  * ticks (`mathbox/src/util/ticks.js`) at its defaults for everything but
  * `zero` and `nice`. It departs from MathBox where MathBox's floating point
- * goes wrong:
+ * goes wrong, and for negative `divisions`:
  * - A nice tick is an exact decimal: 0.3, not 0.30000000000000004.
  * - A range end on a tick keeps it: MathBox drops −0.7 from [−0.7, 0.7] in
  *   tenths.
  * - An ideal step of exactly a power of ten is the step: MathBox steps by 500
  *   over [0, 10000] in 10.
  * - No tick falls outside the range. MathBox's last nice tick can overshoot
- *   by a step ([−8.4, −8.239] in 5 gets −8.2); with no nice step inside the
- *   range it counts backwards ([1, 4] in 1 gets [5, 0]); and with negative
- *   `divisions` and no `nice` it counts down from `min`.
+ *   by a step ([−8.4, −8.239] in 5 gets −8.2), and with no nice step inside
+ *   the range it counts backwards ([1, 4] in 1 gets [5, 0]).
+ * - Negative `divisions` gives no ticks; without `nice`, MathBox divides as
+ *   for their absolute value.
  */
 export const linearTicks = (
   [min, max]: readonly [number, number],

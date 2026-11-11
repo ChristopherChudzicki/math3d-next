@@ -14,8 +14,10 @@ export const TICK_LAYOUT = [
   ["tickDirection", 3],
 ] as const satisfies Layout;
 
-/** MathBox's tick length and width, in CSS pixels. */
+/** MathBox's tick length, in CSS pixels. */
 const TICK_SIZE = 10;
+
+/** MathBox's tick width, in CSS pixels. */
 export const TICK_WIDTH = 2;
 
 const build = () => {

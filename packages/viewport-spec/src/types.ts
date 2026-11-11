@@ -87,7 +87,7 @@ export type AxisSpec = Common & {
   ticks: {
     divisions: number;
     visible: boolean;
-    /** Where ticks go: MathBox's `Scale` over `range`, without zero. */
+    /** Where ticks go: the app's `linearTicks` over `range`, without zero. */
     values: number[];
   };
   /** Drawn at the axis end; `null` when hidden or empty. */
