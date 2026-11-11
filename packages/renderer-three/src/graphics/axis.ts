@@ -6,6 +6,7 @@ import { Labels } from "../label/Labels";
 import type { LabelStyle } from "../label/Labels";
 import { formatTick } from "./formatTick";
 import { pointOn } from "./coords";
+import type { Transparency } from "../shader/material";
 import type { Graphic } from "./builders";
 
 const onAxis = (axis: AxisSpec["axis"], value: number): Coords =>
@@ -27,11 +28,14 @@ const tickLabelStyle = (axis: AxisSpec["axis"]): LabelStyle => ({
 const END_LABEL_STYLE: LabelStyle = { weight: "normal", offset: [0, 17] };
 
 /** An axis line, its ticks and their labels, and its end label. */
-export const buildAxis = (spec: AxisSpec): Graphic<AxisSpec> => {
-  const stroke = new Stroke();
-  const ticks = new Ticks();
-  const tickLabels = new Labels();
-  const endLabel = new Labels();
+export const buildAxis = (
+  spec: AxisSpec,
+  transparency: Transparency,
+): Graphic<AxisSpec> => {
+  const stroke = new Stroke(transparency);
+  const ticks = new Ticks(transparency);
+  const tickLabels = new Labels(transparency);
+  const endLabel = new Labels(transparency);
   // MathBox's order, after the stroke.
   ticks.mesh.renderOrder = 1;
   tickLabels.mesh.renderOrder = 2;

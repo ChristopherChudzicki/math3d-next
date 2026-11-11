@@ -1,6 +1,10 @@
 import type { ViewportHooks, ViewportSpec } from "@math3d/viewport-spec";
 
-export type ThreeViewportProps = { spec: ViewportSpec; hooks: ViewportHooks };
+export type ThreeViewportProps = {
+  spec: ViewportSpec;
+  hooks: ViewportHooks;
+  transparency?: "oit" | "ordered";
+};
 
 const RendersNothing = (_props: ThreeViewportProps): null => null;
 

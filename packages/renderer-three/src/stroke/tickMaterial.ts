@@ -35,5 +35,5 @@ const build = () => {
   return lineVertex(false, { before: a, a, b, after: b });
 };
 
-/** The tick material for ticks of that transparency, shared by all. */
+/** The tick material for ticks of that alpha, shared by all. */
 export const tickMaterial = strokeMaterial(build);

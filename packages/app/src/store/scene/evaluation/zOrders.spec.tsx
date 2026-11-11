@@ -5,7 +5,7 @@ import { SceneBuilder } from "@math3d/mock-api";
 import { MathItemType } from "@math3d/mathitem-configs";
 import { getStore } from "@/store/store";
 import { actions } from "@/store/scene/state/scene.slice";
-import { orderByOpacity, useDefaultZOrder } from "./useDefaultZOrder";
+import { orderByOpacity, useDefaultZOrder, useZOrders } from "./zOrders";
 
 describe("orderByOpacity", () => {
   // Keys out of tree order, so that only the tiebreak keeps tree order.
@@ -100,5 +100,43 @@ describe("useDefaultZOrder", () => {
     // count as opaque.
     set("varying", MathItemType.ExplicitSurface, { opacity: "a+" });
     expect(result.current.varying).toBeGreaterThan(result.current.translucent);
+  });
+});
+
+describe("useZOrders", () => {
+  const setup = (zOrder: string) => {
+    const scene = new SceneBuilder();
+    scene.folder().point({}, "defaulted").point({ zOrder }, "own");
+    const store = getStore();
+    store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
+    const { result } = renderHook(
+      () => ({
+        zOrders: useZOrders(),
+        defaulted: useDefaultZOrder("defaulted"),
+      }),
+      {
+        wrapper: ({ children }) => (
+          <Provider store={store}>{children}</Provider>
+        ),
+      },
+    );
+    return { result, store };
+  };
+
+  test("gives a graphic its own zOrder, rounded as MathBox's is, else its default", async () => {
+    const { result } = setup("7.5");
+    await waitFor(() => expect(result.current.zOrders.own).toBe(8));
+    expect(result.current.zOrders.defaulted).toBe(result.current.defaulted);
+  });
+
+  test("keeps a zOrder once it is emptied", async () => {
+    const { result, store } = setup("7");
+    await waitFor(() => expect(result.current.zOrders.own).toBe(7));
+    act(() => {
+      store.dispatch(
+        actions.patchProperty({ id: "own", path: "/zOrder", value: "" }),
+      );
+    });
+    expect(result.current.zOrders.own).toBe(7);
   });
 });

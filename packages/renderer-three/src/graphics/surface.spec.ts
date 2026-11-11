@@ -31,13 +31,15 @@ const cellTriangles = ({ samples: [cols, rows] }: SurfaceSpec) =>
 describe("buildSurface", () => {
   test("draws two triangles per sample cell", () => {
     const spec = surfaceSpec();
-    const { surface } = partsOf(buildSurface(spec));
+    const { surface } = partsOf(buildSurface(spec, "oit"));
     expect(surface.geometry.drawRange.count).toBe(3 * cellTriangles(spec));
   });
 
   test("strokes gridlines in the grid's style, after the surface and biased in front of it", () => {
     const spec = surfaceSpec();
-    const { surface, line, gridlines, segments } = partsOf(buildSurface(spec));
+    const { surface, line, gridlines, segments } = partsOf(
+      buildSurface(spec, "oit"),
+    );
     gridlines.forEach((mesh) =>
       expect(mesh.renderOrder).toBeGreaterThan(surface.renderOrder),
     );
@@ -59,14 +61,14 @@ describe("buildSurface", () => {
   ])("draws no gridlines with %o", (grid) => {
     const spec = surfaceSpec();
     const { line } = partsOf(
-      buildSurface(surfaceSpec({ grid: { ...spec.grid, ...grid } })),
+      buildSurface(surfaceSpec({ grid: { ...spec.grid, ...grid } }), "oit"),
     );
     expect(line.visible).toBe(false);
   });
 
   test("redraws in place for an updated spec", () => {
     const spec = surfaceSpec();
-    const graphic = buildSurface(spec);
+    const graphic = buildSurface(spec, "oit");
     const { surface, line } = partsOf(graphic);
     const next = surfaceSpec({
       samples: [4, 3],

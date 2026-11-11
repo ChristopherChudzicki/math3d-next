@@ -2,10 +2,24 @@ import React, { useMemo } from "react";
 import type { RefObject } from "react";
 import type { ViewportSpec } from "@math3d/viewport-spec";
 import { useViewportItems } from "@/features/viewport/shared/useViewportItems";
+import { useZOrders } from "@/store/scene/evaluation/zOrders";
 import { SpecCollector, useSpecCollector } from "./collector";
 import { GraphicSpecReporter } from "./reporter";
 import { useCameraSpec } from "./camera";
 import { useCameraWriteBack } from "./useCameraWriteBack";
+
+/**
+ * Lower zOrders first, as MathBox draws them. Equal ones keep their place;
+ * graphics outside the tree go last.
+ */
+const inDrawOrder = <T extends { id: string }>(
+  graphics: T[],
+  zOrders: Record<string, number>,
+): T[] =>
+  [...graphics].sort(
+    (a, b) =>
+      (zOrders[a.id] ?? Number.MAX_VALUE) - (zOrders[b.id] ?? Number.MAX_VALUE),
+  );
 
 /**
  * The scene as a `ViewportSpec`. Render `reporters` alongside the renderer:
@@ -24,17 +38,18 @@ export const useViewportSpec = (host: RefObject<HTMLElement | null>) => {
     scale,
   );
   const [specs, report] = useSpecCollector();
+  const zOrders = useZOrders();
   const spec = useMemo<ViewportSpec>(
     () => ({
       range,
       scale,
       ...cameraFields,
       cameraRevision,
-      graphics: graphics.flatMap(({ id }) =>
+      graphics: inDrawOrder(graphics, zOrders).flatMap(({ id }) =>
         specs[id] ? [{ id, spec: specs[id] }] : [],
       ),
     }),
-    [range, scale, cameraFields, cameraRevision, graphics, specs],
+    [range, scale, cameraFields, cameraRevision, graphics, specs, zOrders],
   );
   const reporters = useMemo(
     () => (

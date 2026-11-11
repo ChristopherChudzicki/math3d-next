@@ -3,14 +3,7 @@
  * plus an offset in CSS pixels, after MathBox's `sprite.position` and
  * `label.outline` shaders.
  */
-import {
-  DoubleSide,
-  MeshBasicNodeMaterial,
-  Texture,
-  Vector2,
-  Vector4,
-} from "three/webgpu";
-import type { Node } from "three/webgpu";
+import { Texture, Vector2, Vector4 } from "three/webgpu";
 import {
   attribute,
   mix,
@@ -22,13 +15,14 @@ import {
   sqrt,
   texture,
   uniform,
-  userData,
   varying,
   vec2,
   vec3,
   vec4,
 } from "three/tsl";
 import { projectWithDepthStyle } from "../shader/depthStyle";
+import { sharedMaterial, uniformsAt } from "../shader/material";
+import type { Transparency } from "../shader/material";
 import type { Layout, Template } from "../instances/Instances";
 
 /** Per label: its anchor, then its atlas slot as x, y, width, height. */
@@ -68,11 +62,7 @@ export class LabelUniforms {
   zIndex = 0;
 }
 
-// three's types give `userData` no node type; this casts to the one asked for.
-const read = <T extends "float" | "vec2" | "vec4">(
-  property: keyof LabelUniforms,
-  type: T,
-) => userData(`label.${property}`, type) as unknown as Node<T>;
+const read = uniformsAt<LabelUniforms>("label");
 
 const build = () => {
   const color = read("color", "vec4");
@@ -127,23 +117,11 @@ const build = () => {
   };
 };
 
-let material: MeshBasicNodeMaterial | null = null;
+const material = sharedMaterial("uniform", build);
 
-/** The material every label shares, built on first use. */
-export const labelMaterial = (): MeshBasicNodeMaterial => {
-  if (!material) {
-    const shader = build();
-    material = new MeshBasicNodeMaterial();
-    material.vertexNode = shader.vertex;
-    material.colorNode = shader.color;
-    material.maskNode = shader.mask;
-    // Blends its edges; writes depth where it covers, as MathBox's labels do.
-    material.transparent = true;
-    material.depthWrite = true;
-    // three reverses a mirrored item's front face, though the quad, built in
-    // screen space, isn't mirrored. One pass, or its edges blend twice.
-    material.side = DoubleSide;
-    material.forceSinglePass = true;
-  }
-  return material;
-};
+/**
+ * The material labels share. Its alpha is the text's and the outline's
+ * antialiasing; a label has no opacity of its own.
+ */
+export const labelMaterial = (transparency: Transparency) =>
+  material("edges", transparency);

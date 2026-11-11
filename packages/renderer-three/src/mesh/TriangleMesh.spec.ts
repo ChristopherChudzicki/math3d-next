@@ -1,4 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
+import { NormalBlending } from "three/webgpu";
 import type { BufferAttribute } from "three/webgpu";
 import { TriangleMesh } from "./TriangleMesh";
 import type { MeshBuffers } from "./TriangleMesh";
@@ -23,7 +24,7 @@ const attribute = (mesh: TriangleMesh, name: string) =>
 
 describe("TriangleMesh", () => {
   test("refills its buffers in place while they fit, and draws only what was written", () => {
-    const mesh = new TriangleMesh();
+    const mesh = new TriangleMesh("oit");
     fill(mesh, 10);
     const { geometry } = mesh.mesh;
     const positions = attribute(mesh, "position").array;
@@ -37,7 +38,7 @@ describe("TriangleMesh", () => {
   });
 
   test("replaces and disposes its geometry when a fill outgrows it, at least doubling", () => {
-    const mesh = new TriangleMesh();
+    const mesh = new TriangleMesh("oit");
     fill(mesh, 4);
     const old = mesh.mesh.geometry;
     const disposed = vi.fn();
@@ -50,13 +51,13 @@ describe("TriangleMesh", () => {
   });
 
   test("never computes bounds, which a NaN sample would make NaN", () => {
-    const mesh = new TriangleMesh();
+    const mesh = new TriangleMesh("oit");
     fill(mesh, 1);
     expect(mesh.mesh.geometry.boundingSphere?.radius).toBe(Infinity);
   });
 
   test("blends when any vertex is translucent", () => {
-    const mesh = new TriangleMesh();
+    const mesh = new TriangleMesh("oit");
     mesh.fill(3, 3, style, (out) => {
       out.color.fill(1, 0, 12);
       out.color.set([0.5], 11);
@@ -67,8 +68,20 @@ describe("TriangleMesh", () => {
     expect(mesh.mesh.material.transparent).toBe(false);
   });
 
+  test("under the ordered model, blends an opaque mesh too", () => {
+    const mesh = new TriangleMesh("ordered");
+    fill(mesh, 1);
+    expect(mesh.mesh.material).toMatchObject({
+      transparent: true,
+      blending: NormalBlending,
+      depthWrite: true,
+    });
+  });
+
   test("shares one material per shading and transparency", () => {
-    const [shaded, alsoShaded, flat] = [0, 1, 2].map(() => new TriangleMesh());
+    const [shaded, alsoShaded, flat] = [0, 1, 2].map(
+      () => new TriangleMesh("oit"),
+    );
     fill(shaded, 1);
     fill(alsoShaded, 1);
     fill(flat, 1, { given: { ...style, shaded: false } });
@@ -77,7 +90,7 @@ describe("TriangleMesh", () => {
   });
 
   test("puts its depth style at userData.mesh for the material", () => {
-    const mesh = new TriangleMesh();
+    const mesh = new TriangleMesh("oit");
     fill(mesh, 1);
     const given = { ...style, zBias: -2, zIndex: 0 };
     fill(mesh, 1, { given });
@@ -88,7 +101,7 @@ describe("TriangleMesh", () => {
   });
 
   test("draws nothing without triangles, before or after a fill", () => {
-    const mesh = new TriangleMesh();
+    const mesh = new TriangleMesh("oit");
     fill(mesh, 0);
     expect(mesh.mesh.visible).toBe(false);
     fill(mesh, 1);

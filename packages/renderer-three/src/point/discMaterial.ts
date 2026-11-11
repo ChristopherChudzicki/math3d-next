@@ -3,8 +3,7 @@
  * to a circle in the fragment shader, after MathBox's `point.position`,
  * `point.mask.circle` and `point.alpha.circle` shaders.
  */
-import { DoubleSide, MeshBasicNodeMaterial, Vector4 } from "three/webgpu";
-import type { Node } from "three/webgpu";
+import { Vector4 } from "three/webgpu";
 import {
   attribute,
   cameraProjectionMatrix,
@@ -12,13 +11,14 @@ import {
   modelViewMatrix,
   positionGeometry,
   screenSize,
-  userData,
   varying,
   vec3,
   vec4,
 } from "three/tsl";
 import type { PointSpec } from "@math3d/viewport-spec";
 import { projectWithDepthStyle } from "../shader/depthStyle";
+import { sharedMaterial, uniformsAt } from "../shader/material";
+import type { MarkMaterial } from "../shader/material";
 import { viewUnitsPerPixel } from "../shader/viewUnits";
 import type { Layout, Template } from "../instances/Instances";
 
@@ -58,14 +58,10 @@ export class DiscUniforms {
   }
 }
 
-// three's types give `userData` no node type; this casts to the one asked for.
-const read = <T extends "float" | "vec4">(
-  property: Exclude<keyof DiscUniforms, "set">,
-  type: T,
-) => userData(`disc.${property}`, type) as unknown as Node<T>;
+const read = uniformsAt<DiscUniforms>("disc");
 
 /** Fill: where the disc is opaque. Edge: its antialiased rim. */
-export type DiscPart = "fill" | "edge";
+type DiscPart = "fill" | "edge";
 
 const build = (part: DiscPart) => {
   const color = read("color", "vec4");
@@ -104,33 +100,16 @@ const build = (part: DiscPart) => {
       };
 };
 
-const materials = new Map<string, MeshBasicNodeMaterial>();
+/** The material for the fill of discs of that opacity. */
+export const fillMaterial: MarkMaterial = sharedMaterial("uniform", () =>
+  build("fill"),
+);
+
+const edge = sharedMaterial("uniform", () => build("edge"));
 
 /**
- * A disc part's material, shared by every set of discs with that part and
- * transparency. The edge always blends, whatever `translucent` says; the fill
- * only when translucent. Both write depth, as MathBox's do.
+ * The material for the rim of discs of that opacity. An opaque disc's rim
+ * only antialiases it; a translucent disc's is as translucent as its fill.
  */
-export const discMaterial = (
-  part: DiscPart,
-  translucent = false,
-): MeshBasicNodeMaterial => {
-  const transparent = part === "edge" || translucent;
-  const key = `${part}/${transparent}`;
-  let material = materials.get(key);
-  if (!material) {
-    const shader = build(part);
-    material = new MeshBasicNodeMaterial();
-    material.vertexNode = shader.vertex;
-    material.colorNode = shader.color;
-    material.maskNode = shader.mask;
-    material.transparent = transparent;
-    material.depthWrite = true;
-    // three reverses a mirrored item's front face, though the square, built
-    // in view space, isn't mirrored. It is flat, so one pass draws it.
-    material.side = DoubleSide;
-    material.forceSinglePass = true;
-    materials.set(key, material);
-  }
-  return material;
-};
+export const edgeMaterial: MarkMaterial = (opacity, transparency) =>
+  edge(opacity === "opaque" ? "edges" : opacity, transparency);

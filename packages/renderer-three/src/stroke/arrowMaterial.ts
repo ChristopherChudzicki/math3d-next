@@ -65,5 +65,5 @@ const build = () => {
   };
 };
 
-/** The arrowhead material for a stroke of that transparency. */
+/** The arrowhead material for a stroke of that alpha. */
 export const arrowMaterial = strokeMaterial(build);

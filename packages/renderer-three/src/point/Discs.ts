@@ -1,11 +1,14 @@
 import type { Coords } from "@math3d/viewport-spec";
 import { Instances } from "../instances/Instances";
 import { isDrawable, put } from "../instances/points";
+import { opacityOf } from "../shader/material";
+import type { Transparency } from "../shader/material";
 import {
   DISC_LAYOUT,
   DiscUniforms,
   SQUARE_TEMPLATE,
-  discMaterial,
+  edgeMaterial,
+  fillMaterial,
 } from "./discMaterial";
 import type { DiscStyle } from "./discMaterial";
 
@@ -19,15 +22,17 @@ import type { DiscStyle } from "./discMaterial";
 export class Discs {
   private readonly uniforms = new DiscUniforms();
 
-  private readonly instances = new Instances(SQUARE_TEMPLATE, DISC_LAYOUT, [
-    discMaterial("fill"),
-    discMaterial("edge"),
-  ]);
+  private readonly instances: Instances;
 
   /** Add these to the item's `Group`, keeping their `renderOrder`s 0 and 1. */
-  readonly objects = this.instances.meshes;
+  readonly objects: Instances["meshes"];
 
-  constructor() {
+  constructor(private readonly transparency: Transparency) {
+    this.instances = new Instances(SQUARE_TEMPLATE, DISC_LAYOUT, [
+      fillMaterial("opaque", transparency),
+      edgeMaterial("opaque", transparency),
+    ]);
+    this.objects = this.instances.meshes;
     const [, edge] = this.objects;
     edge.renderOrder = 1;
     this.objects.forEach((mesh) => {
@@ -38,9 +43,13 @@ export class Discs {
 
   set(points: readonly Coords[], style: DiscStyle): void {
     this.uniforms.set(style);
-    this.instances.mesh.material = discMaterial("fill", style.color[3] < 1);
-    // MathBox draws nothing at size 0; the rim's padding alone would.
-    const drawn = style.diameter > 0 ? points : [];
+    const opacity = opacityOf(style.color[3]);
+    const [fill, edge] = this.objects;
+    fill.material = fillMaterial(opacity, this.transparency);
+    edge.material = edgeMaterial(opacity, this.transparency);
+    // MathBox draws nothing at size 0, where the rim's padding alone would
+    // draw, nor with no opacity, where the discs would still write depth.
+    const drawn = style.diameter > 0 && style.color[3] > 0 ? points : [];
     this.instances.fill(drawn.length, (out) => {
       let count = 0;
       drawn.forEach((point) => {

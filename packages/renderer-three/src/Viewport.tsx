@@ -1,12 +1,18 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ViewportHooks, ViewportSpec } from "@math3d/viewport-spec";
 import { ThreeScene } from "./ThreeScene";
+import type { Transparency } from "./shader/material";
 
 export type ViewportProps = {
   spec: ViewportSpec;
   hooks: ViewportHooks;
   /** Use the WebGL2 backend even where WebGPU is available. */
   forceWebGL?: boolean;
+  /**
+   * How translucent marks combine: `oit` for order-independent transparency,
+   * `ordered` for MathBox's draw order. The backend's default when absent.
+   */
+  transparency?: Transparency;
 };
 
 const HOST_STYLE = { width: "100%", height: "100%" };
@@ -16,6 +22,7 @@ const Viewport: React.FC<ViewportProps> = ({
   spec,
   hooks,
   forceWebGL = false,
+  transparency,
 }) => {
   const host = useRef<HTMLDivElement>(null);
   const latestHooks = useRef(hooks);
@@ -30,6 +37,7 @@ const Viewport: React.FC<ViewportProps> = ({
     let current = true;
     const next = new ThreeScene(host.current, {
       forceWebGL,
+      transparency,
       onFirstFrame: () => latestHooks.current.onReady(),
       onCameraMove: (camera) => latestHooks.current.onCameraMove(camera),
       onError: (error) => {
@@ -49,7 +57,7 @@ const Viewport: React.FC<ViewportProps> = ({
       next.dispose();
       setScene(null);
     };
-  }, [forceWebGL]);
+  }, [forceWebGL, transparency]);
 
   useEffect(() => {
     scene?.setSpec(spec);

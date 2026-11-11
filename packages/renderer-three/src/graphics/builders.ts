@@ -1,5 +1,6 @@
 import type { Group } from "three/webgpu";
 import type { GraphicSpec } from "@math3d/viewport-spec";
+import type { Transparency } from "../shader/material";
 import { buildAxis } from "./axis";
 import { buildGrid } from "./grid";
 import { buildImplicit } from "./implicit";
@@ -27,7 +28,10 @@ export type Graphic<S extends GraphicSpec = GraphicSpec> = {
 
 /** One builder per graphic kind; a kind without one isn't drawn. */
 export type GraphicBuilders = {
-  [K in GraphicSpec["kind"]]?: (spec: SpecOf<K>) => Graphic<SpecOf<K>>;
+  [K in GraphicSpec["kind"]]?: (
+    spec: SpecOf<K>,
+    transparency: Transparency,
+  ) => Graphic<SpecOf<K>>;
 };
 
 export const builders: GraphicBuilders = {

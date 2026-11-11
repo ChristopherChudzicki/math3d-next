@@ -1,5 +1,7 @@
 import type { Coords } from "@math3d/viewport-spec";
 import { Instances } from "../instances/Instances";
+import { opacityOf } from "../shader/material";
+import type { Transparency } from "../shader/material";
 import { CONE_TEMPLATE, arrowMaterial } from "./arrowMaterial";
 import { SEGMENT_TEMPLATE, lineMaterial } from "./lineMaterial";
 import {
@@ -22,25 +24,25 @@ import type { StrokeStyle } from "./style";
 export class Stroke {
   private readonly uniforms = new StrokeUniforms();
 
-  private readonly line = new Instances(
-    SEGMENT_TEMPLATE,
-    SEGMENT_LAYOUT,
-    lineMaterial(false, false),
-  );
+  private readonly line: Instances;
 
-  private readonly arrows = new Instances(
-    CONE_TEMPLATE,
-    ARROW_LAYOUT,
-    arrowMaterial(false),
-  );
+  private readonly arrows: Instances;
 
   /** Add these to the item's `Group`. */
-  readonly objects: readonly Instances["mesh"][] = [
-    this.line.mesh,
-    this.arrows.mesh,
-  ];
+  readonly objects: readonly Instances["mesh"][];
 
-  constructor() {
+  constructor(private readonly transparency: Transparency) {
+    this.line = new Instances(
+      SEGMENT_TEMPLATE,
+      SEGMENT_LAYOUT,
+      lineMaterial(false, "opaque", transparency),
+    );
+    this.arrows = new Instances(
+      CONE_TEMPLATE,
+      ARROW_LAYOUT,
+      arrowMaterial("opaque", transparency),
+    );
+    this.objects = [this.line.mesh, this.arrows.mesh];
     this.objects.forEach((mesh) => {
       // eslint-disable-next-line no-param-reassign
       mesh.userData.stroke = this.uniforms;
@@ -50,14 +52,19 @@ export class Stroke {
   set(paths: Coords[][], style: StrokeStyle): void {
     const ends = { start: !!style.start, end: !!style.end };
     this.uniforms.set(style, ends);
-    // A translucent stroke blends, in three's pass after every opaque one;
-    // it still writes depth, as MathBox does.
-    const transparent = style.color[3] < 1;
-    this.line.mesh.material = lineMaterial(transparent, ends.start || ends.end);
-    this.arrows.mesh.material = arrowMaterial(transparent);
-    this.line.fill(countSegments(paths), (out) => packSegments(paths, out));
-    this.arrows.fill(countArrows(paths, ends), (out) =>
-      packArrows(paths, ends, out),
+    const opacity = opacityOf(style.color[3]);
+    const { transparency } = this;
+    this.line.mesh.material = lineMaterial(
+      ends.start || ends.end,
+      opacity,
+      transparency,
+    );
+    this.arrows.mesh.material = arrowMaterial(opacity, transparency);
+    // MathBox hides a mark with no opacity; drawn, it would still write depth.
+    const drawn = style.color[3] > 0 ? paths : [];
+    this.line.fill(countSegments(drawn), (out) => packSegments(drawn, out));
+    this.arrows.fill(countArrows(drawn, ends), (out) =>
+      packArrows(drawn, ends, out),
     );
   }
 

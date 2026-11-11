@@ -14,7 +14,7 @@ import FieldWidget, {
   useOnWidgetChange,
 } from "@/features/editor/items/FieldWidget";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import { useDefaultZOrder } from "@/store/scene/evaluation/useDefaultZOrder";
+import { useDefaultZOrder } from "@/store/scene/evaluation/zOrders";
 import {
   getMathProperties,
   useMathErrors,

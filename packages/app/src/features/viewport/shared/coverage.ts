@@ -4,15 +4,8 @@ import type {
   MathItemType,
 } from "@math3d/mathitem-configs";
 
-/**
- * How a renderer handles one stored property. `approximate` and `n/a` say why;
- * `todo` marks a property not yet classified.
- */
-export type Coverage =
-  | "drawn"
-  | `approximate: ${string}`
-  | `n/a: ${string}`
-  | "todo";
+/** How a renderer handles one stored property. `approximate` and `n/a` say why. */
+export type Coverage = "drawn" | `approximate: ${string}` | `n/a: ${string}`;
 
 type RenderedType = MathGraphicType | MathItemType.Camera;
 

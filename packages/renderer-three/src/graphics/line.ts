@@ -2,13 +2,17 @@ import { Group } from "three/webgpu";
 import type { LineSpec } from "@math3d/viewport-spec";
 import { Stroke } from "../stroke/Stroke";
 import { Labels } from "../label/Labels";
+import type { Transparency } from "../shader/material";
 import type { Graphic } from "./builders";
 import { ITEM_LABEL } from "./itemLabel";
 
 /** Lines, vectors, parametric curves and vector fields. */
-export const buildLine = (spec: LineSpec): Graphic<LineSpec> => {
-  const stroke = new Stroke();
-  const labels = new Labels();
+export const buildLine = (
+  spec: LineSpec,
+  transparency: Transparency,
+): Graphic<LineSpec> => {
+  const stroke = new Stroke(transparency);
+  const labels = new Labels(transparency);
   // After the stroke.
   labels.mesh.renderOrder = 1;
   const set = (next: LineSpec) => {

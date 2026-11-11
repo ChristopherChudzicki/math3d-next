@@ -5,6 +5,8 @@ import {
   Sphere,
   Vector3,
 } from "three/webgpu";
+import type { Material } from "three/webgpu";
+import type { Transparency } from "../shader/material";
 import { MeshUniforms, meshMaterial } from "./meshMaterial";
 import type { MeshStyle } from "./meshMaterial";
 
@@ -39,7 +41,7 @@ const markWritten = (attribute: BufferAttribute, count: number) => {
  * replaced only when a fill outgrows them.
  */
 export class TriangleMesh {
-  readonly mesh = new Mesh(new BufferGeometry(), meshMaterial(true, false));
+  readonly mesh: Mesh<BufferGeometry, Material>;
 
   private readonly uniforms = new MeshUniforms();
 
@@ -47,7 +49,11 @@ export class TriangleMesh {
 
   private indexCapacity = 0;
 
-  constructor() {
+  constructor(private readonly transparency: Transparency) {
+    this.mesh = new Mesh(
+      new BufferGeometry(),
+      meshMaterial(true, "opaque", transparency),
+    );
     this.mesh.userData.mesh = this.uniforms;
     this.mesh.frustumCulled = false;
     this.mesh.visible = false;
@@ -56,8 +62,8 @@ export class TriangleMesh {
   /**
    * Draws what `write` puts in buffers with room for `vertexCount` vertices
    * and `indexCount` indices. Any vertex with alpha below 1 makes the whole
-   * mesh use the translucent material. The buffers hold what the last fill
-   * wrote, unless this one needs more room than any before it.
+   * mesh translucent. The buffers hold what the last fill wrote, unless this
+   * one needs more room than any before it.
    */
   fill(
     vertexCount: number,
@@ -96,7 +102,11 @@ export class TriangleMesh {
     markWritten(index, indexCount);
     geometry.setDrawRange(0, indexCount);
     this.uniforms.set(style);
-    this.mesh.material = meshMaterial(style.shaded, translucent);
+    this.mesh.material = meshMaterial(
+      style.shaded,
+      translucent ? "translucent" : "opaque",
+      this.transparency,
+    );
     this.mesh.visible = true;
   }
 

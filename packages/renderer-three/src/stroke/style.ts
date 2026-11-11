@@ -1,4 +1,4 @@
-import { DoubleSide, MeshBasicNodeMaterial, Vector4 } from "three/webgpu";
+import { Vector4 } from "three/webgpu";
 import type { Node } from "three/webgpu";
 import {
   attribute,
@@ -7,10 +7,11 @@ import {
   length,
   max,
   modelViewMatrix,
-  userData,
   vec4,
 } from "three/tsl";
 import type { LineSpec } from "@math3d/viewport-spec";
+import { sharedMaterial, uniformsAt } from "../shader/material";
+import type { MarkMaterial, Shader } from "../shader/material";
 import { viewUnitsPerPixel } from "../shader/viewUnits";
 import type { ARROW_LAYOUT, ArrowEnds, SEGMENT_LAYOUT } from "./packPaths";
 
@@ -53,11 +54,7 @@ export class StrokeUniforms {
   }
 }
 
-// three's types give `userData` no node type; this casts to the one asked for.
-const read = <T extends "float" | "vec4">(
-  property: Exclude<keyof StrokeUniforms, "set">,
-  type: T,
-) => userData(`stroke.${property}`, type) as unknown as Node<T>;
+const read = uniformsAt<StrokeUniforms>("stroke");
 
 const width = read("width", "float");
 const arrowSize = read("arrowSize", "float");
@@ -108,29 +105,11 @@ type PointAttribute = (typeof SEGMENT_LAYOUT | typeof ARROW_LAYOUT)[number][0];
 export const toView = (name: PointAttribute) =>
   modelViewMatrix.mul(vec4(attribute<"vec3">(name, "vec3"), 1)).xyz;
 
-type Shader = { vertex: Node<"vec4">; mask?: Node };
+type Shape = Omit<Shader, "color">;
 
 /**
- * A stroke material per transparency, built on first use and shared by every
- * stroke: each mesh's `userData.stroke` supplies its style.
+ * The materials for one part of a stroke, in the stroke's color. Each mesh's
+ * `userData.stroke` supplies its style.
  */
-export const strokeMaterial = (build: () => Shader) => {
-  const materials = new Map<boolean, MeshBasicNodeMaterial>();
-  return (transparent: boolean): MeshBasicNodeMaterial => {
-    let material = materials.get(transparent);
-    if (!material) {
-      const { vertex, mask } = build();
-      material = new MeshBasicNodeMaterial();
-      material.vertexNode = vertex;
-      if (mask) material.maskNode = mask;
-      material.colorNode = strokeStyle.color;
-      material.transparent = transparent;
-      // A quad's winding follows its segment's direction on screen. three
-      // draws a translucent two-sided mesh twice, back faces then front, as
-      // MathBox's three does: a translucent cone shows its far side.
-      material.side = DoubleSide;
-      materials.set(transparent, material);
-    }
-    return material;
-  };
-};
+export const strokeMaterial = (build: () => Shape): MarkMaterial =>
+  sharedMaterial("mixed", () => ({ ...build(), color: strokeStyle.color }));

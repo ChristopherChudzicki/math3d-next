@@ -3,6 +3,7 @@
  * `@math3d/renderer-three` package loads behind the one `React.lazy` below.
  */
 import React, { useCallback, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router";
 import * as Sentry from "@sentry/react";
 import type { ViewportHooks } from "@math3d/viewport-spec";
 import RendererFallback from "@/features/viewport/shared/RendererFallback";
@@ -15,11 +16,27 @@ const RendererViewport = React.lazy(() =>
 
 const HOST_STYLE = { width: "100%", height: "100%" };
 
+/**
+ * `?oit=0` draws translucent items in MathBox's order, for comparing the two
+ * renderers; `?oit=1` draws them order-independently. Without it, the
+ * renderer's default for its backend.
+ */
+const TRANSPARENCY_PARAM = "oit";
+type Transparency = React.ComponentProps<
+  typeof RendererViewport
+>["transparency"];
+const TRANSPARENCIES = new Map<string | null, Transparency>([
+  ["0", "ordered"],
+  ["1", "oit"],
+]);
+
 const ThreeViewportContent: React.FC<{
   onUnsupported: ViewportHooks["onUnsupported"];
 }> = ({ onUnsupported }) => {
   const host = useRef<HTMLDivElement>(null);
   const { spec, reporters, onCameraMove } = useViewportSpec(host);
+  const [searchParams] = useSearchParams();
+  const transparency = TRANSPARENCIES.get(searchParams.get(TRANSPARENCY_PARAM));
   const hooks = useMemo<ViewportHooks>(
     () => ({
       onUnsupported,
@@ -33,7 +50,11 @@ const ThreeViewportContent: React.FC<{
     <>
       {reporters}
       <div ref={host} style={HOST_STYLE}>
-        <RendererViewport spec={spec} hooks={hooks} />
+        <RendererViewport
+          spec={spec}
+          hooks={hooks}
+          transparency={transparency}
+        />
       </div>
     </>
   );
