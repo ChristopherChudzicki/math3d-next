@@ -150,7 +150,10 @@ export const makeSceneRoot = (
       hooks.onUnsupported(error);
       return null;
     },
-    onError: hooks.onError,
+    // Use.GPU types it `Error`, but `uncapturederror` gives a `GPUError`, which
+    // has only a `message`.
+    onError: (error: GPUError) =>
+      hooks.onError(new Error(`WebGPU error: ${error.message}`)),
     children: use(AutoCanvas, {
       canvas,
       samples: 4,

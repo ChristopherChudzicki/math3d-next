@@ -48,8 +48,8 @@ type Options = {
   /** How translucent marks combine; the backend's default when absent. */
   transparency?: Transparency;
   /**
-   * Called once, when a frame is drawn with no redraw pending, once the
-   * `ResizeObserver` has reported.
+   * Called once: after the `ResizeObserver` has reported, the first drawn
+   * frame with no redraw pending.
    */
   onSettled(): void;
   /** The camera as the user moves it. */

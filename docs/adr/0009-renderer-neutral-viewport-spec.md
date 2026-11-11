@@ -47,8 +47,9 @@ reports back through `ViewportHooks`, both types in
   it settled:** `data-renderer`, and `data-scene-ready="true"` once
   settled. three.js and Use.GPU set it from `onReady` and add
   `data-scene-error` (`unsupported`, or `error` after a render or device
-  error) when they can't draw; MathBox sets neither from the hooks, and with
-  no WebGL the route's error page replaces it. three.js's canvas adds
+  error) when they can't draw. MathBox sets `data-scene-ready` from its own
+  warmup drain and never sets `data-scene-error`; with no WebGL the route's
+  error page replaces it. three.js's canvas adds
   `data-backend` (`webgpu` or `webgl2`).
 - How each renderer settles:
   - MathBox: its warmup queue has stayed empty for 500 ms, or after 300
@@ -64,9 +65,11 @@ reports back through `ViewportHooks`, both types in
   - Ready holds for one scene load; a late `onReady` from a replaced load is
     ignored (`shared/useLoadFlag.ts`).
 - **`/app/frame/:sceneKey` draws with `?renderer=`, MathBox without it**, and
-  never reads the stored preference. A renderer that can't start marks the
-  page failed, and an unknown `?renderer=` sets
-  `data-scene-error="invalid-renderer"`; there is no fallback to MathBox. The
+  never reads the stored preference. three.js and Use.GPU mark the page
+  failed when they can't start, and an unknown `?renderer=` sets
+  `data-scene-error="invalid-renderer"`; there is no fallback to MathBox. A
+  throw inside Use.GPU's own render, or a font that never loads, sets neither
+  attribute, so a capture waits out its timeout. The
   OG worker sends no parameter: Browser Run has no WebGPU adapter.
 
 ### The camera
