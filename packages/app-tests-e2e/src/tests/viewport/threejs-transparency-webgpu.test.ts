@@ -4,8 +4,11 @@ import { collectPageErrors } from "@/utils/collectPageErrors";
 import { expectThreeViewport } from "@/utils/threeViewport";
 import {
   expectRedToHideBlue,
+  expectSameColor,
   narrowWindow,
+  overlapColor,
   redOverBlue,
+  translucentPair,
 } from "@/utils/threeTransparency";
 import { webgpuLaunchOptions } from "@/utils/webgpuLaunchOptions";
 
@@ -30,5 +33,28 @@ test("three.js order-independent transparency on WebGPU tests depth, also after 
 
   await narrowWindow(page);
   await expectRedToHideBlue(page);
+  expect(errors).toEqual([]);
+});
+
+test("three.js order-independent transparency on WebGPU blends two translucent items alike in either zOrder", async ({
+  page,
+  prepareScene,
+}) => {
+  // It loads two scenes.
+  test.slow();
+  const errors = collectPageErrors(page);
+  const canvas = page.getByTestId("scene").locator("canvas");
+  const overlapWith = async (first: "blue" | "red") => {
+    const key = await prepareScene(translucentPair(first).json());
+    await page.goto(`/${key}?renderer=threejs&controls=0`);
+    await expectThreeViewport(page);
+    await expect(canvas).toHaveAttribute("data-backend", "webgpu");
+    await expect(canvas).toHaveAttribute("data-transparency", "oit");
+    return overlapColor(page);
+  };
+
+  const blueFirst = await overlapWith("blue");
+  const redFirst = await overlapWith("red");
+  expectSameColor(redFirst, blueFirst);
   expect(errors).toEqual([]);
 });

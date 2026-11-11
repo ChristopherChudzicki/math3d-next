@@ -10,7 +10,8 @@ export type ViewportProps = {
   forceWebGL?: boolean;
   /**
    * How translucent marks combine: `oit` for order-independent transparency,
-   * `ordered` for MathBox's draw order. The backend's default when absent.
+   * `ordered` for MathBox's draw order. `oit` when absent, where the browser
+   * can.
    */
   transparency?: Transparency;
 };

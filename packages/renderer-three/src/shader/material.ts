@@ -2,11 +2,12 @@ import {
   CustomBlending,
   DoubleSide,
   MeshBasicNodeMaterial,
+  NormalBlending,
   OneFactor,
   OneMinusSrcAlphaFactor,
   SrcAlphaFactor,
 } from "three/webgpu";
-import type { Node } from "three/webgpu";
+import type { Material, Node } from "three/webgpu";
 import { userData } from "three/tsl";
 
 /**
@@ -36,7 +37,7 @@ type Facing = "uniform" | "mixed";
  * How translucent marks combine.
  *
  * - `oit`: order-independent. Opaque marks draw first, then `edges` marks
- *   blend over them in draw order, and three's OIT pass composites every
+ *   blend over them in draw order, and `OitFrame` composites every
  *   `translucent` fragment in front of those, whatever the order.
  * - `ordered`: MathBox's way. Every mark blends and writes depth, in draw
  *   order, so a translucent mark hides anything drawn later that lies behind
@@ -58,15 +59,15 @@ const setOitFlags = (material: MeshBasicNodeMaterial, alpha: Alpha) => {
   // blends with the background where an opaque mark is yet to be drawn.
   material.transparent = alpha !== "opaque";
   if (alpha === "edges") {
-    // The OIT pass takes every material with three's `NormalBlending`. These
-    // are its factors under another name, so an edge blends in place.
+    // `accumulates` takes every `transparent` material with three's
+    // `NormalBlending`. These are its factors under another name, so an edge
+    // blends in place.
     material.blending = CustomBlending;
     material.blendSrc = SrcAlphaFactor;
     material.blendDst = OneMinusSrcAlphaFactor;
     material.blendSrcAlpha = OneFactor;
   }
-  // three's OIT pass turns depth writes off while it accumulates; this states
-  // the same.
+  // An accumulating fragment hides nothing: any order gives one picture.
   material.depthWrite = alpha !== "translucent";
   // Order-independent, so three's back-then-front passes would add nothing.
   material.forceSinglePass = true;
@@ -89,6 +90,15 @@ const setOrderedFlags = (
   material.forceSinglePass = facing === "uniform" || alpha === "opaque";
   /* eslint-enable no-param-reassign */
 };
+
+/**
+ * Whether `OitFrame` accumulates a material's fragments, to composite them
+ * whatever the order: under `oit`, the materials of `translucent` marks.
+ * Among this renderer's materials, three's `OITPassNode` addon picks the
+ * same ones.
+ */
+export const accumulates = (material: Material): boolean =>
+  material.transparent && material.blending === NormalBlending;
 
 /**
  * The materials for one shader, built on first use and shared by every mesh

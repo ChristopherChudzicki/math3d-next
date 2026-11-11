@@ -111,7 +111,6 @@ test("an unsupported browser gets a way back to the default renderer", async () 
 test.each([
   { url: "/", transparency: undefined },
   { url: "/?oit=0", transparency: "ordered" },
-  { url: "/?oit=1", transparency: "oit" },
 ])(
   "$url asks the renderer for transparency $transparency",
   async ({ url, transparency }) => {

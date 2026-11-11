@@ -3,12 +3,12 @@ import {
   Group,
   LinearSRGBColorSpace,
   Scene,
-  UnsignedByteType,
   WebGPURenderer,
 } from "three/webgpu";
 import type { CameraSpec, ViewportSpec } from "@math3d/viewport-spec";
 import { ViewCamera } from "./camera";
 import { mathToView } from "./viewTransform";
+import { inDrawOrder } from "./drawOrder";
 import { builders } from "./graphics/builders";
 import { syncGraphics } from "./graphics/syncGraphics";
 import type { DrawnGraphics } from "./graphics/syncGraphics";
@@ -21,31 +21,22 @@ import { Settle } from "./settle";
 // so three must not convert a `Color` to linear on its way in either.
 ColorManagement.enabled = false;
 
-type Drawn = {
-  groupOrder: number | null;
-  renderOrder: number | null;
-  id: number | null;
-};
+let orderedReported = false;
 
-/** Items in the spec's order, an item's parts in their own: never by depth. */
-const inDrawOrder = (a: Drawn, b: Drawn) =>
-  (a.groupOrder ?? 0) - (b.groupOrder ?? 0) ||
-  (a.renderOrder ?? 0) - (b.renderOrder ?? 0) ||
-  (a.id ?? 0) - (b.id ?? 0);
-
-/**
- * Each backend's model unless told otherwise. On WebGL2 three's OIT pass has
- * no MSAA, which breaks thin lines into dots, so it keeps MathBox's order.
- */
-const DEFAULT_TRANSPARENCY: Record<"webgpu" | "webgl2", Transparency> = {
-  webgpu: "oit",
-  webgl2: "ordered",
+/** Says once per page why `oit` gave way to `ordered`: no picture shows it. */
+const reportOrdered = (obstacle: string) => {
+  if (orderedReported) return;
+  orderedReported = true;
+  // eslint-disable-next-line no-console
+  console.info(
+    `three.js renderer: translucent items draw in order, not order-independently (${obstacle}).`,
+  );
 };
 
 type Options = {
   /** Use the WebGL2 backend even where WebGPU is available. */
   forceWebGL: boolean;
-  /** How translucent marks combine; the backend's default when absent. */
+  /** How translucent marks combine; `oit` when absent, where the browser can. */
   transparency?: Transparency;
   /**
    * Called once: after the `ResizeObserver` has reported, the first drawn
@@ -129,8 +120,6 @@ export class ThreeScene {
       canvas: this.canvas,
       antialias: true,
       forceWebGL: options.forceWebGL,
-      // What the OIT pass draws the scene into: the canvas's own precision.
-      outputBufferType: UnsignedByteType,
     });
     // three's default sorts equal `renderOrder`s by distance, which reorders
     // blended marks as the camera moves.
@@ -156,11 +145,16 @@ export class ThreeScene {
     const backend =
       "isWebGPUBackend" in this.renderer.backend ? "webgpu" : "webgl2";
     this.canvas.dataset.backend = backend;
-    this.transparency =
-      this.options.transparency ?? DEFAULT_TRANSPARENCY[backend];
+    this.transparency = this.options.transparency ?? "oit";
+    const obstacle =
+      this.transparency === "oit" ? OitFrame.obstacle(this.renderer) : null;
+    if (obstacle) {
+      this.transparency = "ordered";
+      reportOrdered(obstacle);
+    }
     this.canvas.dataset.transparency = this.transparency;
     if (this.transparency === "oit") {
-      this.oit = new OitFrame(this.renderer, this.scene, this.view.camera);
+      this.oit = new OitFrame(this.renderer, this.scene);
     }
     this.build();
     this.resizeObserver.observe(this.host);
@@ -223,7 +217,6 @@ export class ThreeScene {
     const { clientWidth, clientHeight } = this.host;
     this.renderer.setSize(clientWidth, clientHeight, false);
     this.view.setAspect(clientWidth / clientHeight);
-    this.oit?.resized();
     this.invalidate();
   }
 

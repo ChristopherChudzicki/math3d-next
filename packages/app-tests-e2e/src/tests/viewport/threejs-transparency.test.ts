@@ -6,22 +6,25 @@ import { expectThreeViewport } from "@/utils/threeViewport";
 import {
   blueFirstOverRed,
   expectRedToHideBlue,
+  expectSameColor,
   narrowWindow,
+  overlapColor,
   redOverBlue,
   sharesOnce,
+  translucentPair,
 } from "@/utils/threeTransparency";
 
 test.use({ disable3d: false });
 
 const canvas = (page: Page) => page.getByTestId("scene").locator("canvas");
 
-test("three.js on WebGL2 draws in MathBox's order by default: zOrder decides what a translucent item hides", async ({
+test("three.js with ?oit=0 draws in MathBox's order: zOrder decides what a translucent item hides", async ({
   page,
   prepareScene,
 }) => {
   const errors = collectPageErrors(page);
   const key = await prepareScene(blueFirstOverRed().json());
-  await page.goto(`/${key}?renderer=threejs&controls=0`);
+  await page.goto(`/${key}?renderer=threejs&controls=0&oit=0`);
 
   await expectThreeViewport(page);
   await expect(canvas(page)).toHaveAttribute("data-backend", "webgl2");
@@ -33,17 +36,41 @@ test("three.js on WebGL2 draws in MathBox's order by default: zOrder decides wha
   expect(errors).toEqual([]);
 });
 
-test("three.js order-independent transparency on WebGL2 blends whatever the zOrder", async ({
+test("three.js order-independent transparency on WebGL2 blends two translucent items alike in either zOrder", async ({
+  page,
+  prepareScene,
+}) => {
+  // It loads two scenes.
+  test.slow();
+  const errors = collectPageErrors(page);
+  const overlapWith = async (first: "blue" | "red") => {
+    const key = await prepareScene(translucentPair(first).json());
+    await page.goto(`/${key}?renderer=threejs&controls=0`);
+    await expectThreeViewport(page);
+    await expect(canvas(page)).toHaveAttribute("data-backend", "webgl2");
+    await expect(canvas(page)).toHaveAttribute("data-transparency", "oit");
+    return overlapColor(page);
+  };
+
+  const blueFirst = await overlapWith("blue");
+  const redFirst = await overlapWith("red");
+  expectSameColor(redFirst, blueFirst);
+  expect(errors).toEqual([]);
+});
+
+test("three.js order-independent transparency on WebGL2 is antialiased", async ({
   page,
   prepareScene,
 }) => {
   const errors = collectPageErrors(page);
-  const key = await prepareScene(blueFirstOverRed().json());
-  await page.goto(`/${key}?renderer=threejs&controls=0&oit=1`);
+  const key = await prepareScene(redOverBlue().json());
+  await page.goto(`/${key}?renderer=threejs&controls=0`);
 
   await expectThreeViewport(page);
   await expect(canvas(page)).toHaveAttribute("data-transparency", "oit");
-  await sharesOnce(page, "blueOverRed");
+  // Without MSAA the red plane's edge is a staircase of plain red pixels.
+  const { redIntoWhite } = await sharesOnce(page, "red");
+  expect(redIntoWhite).toBeGreaterThan(0.0005);
   expect(errors).toEqual([]);
 });
 
@@ -53,11 +80,42 @@ test("three.js order-independent transparency on WebGL2 tests depth, also after 
 }) => {
   const errors = collectPageErrors(page);
   const key = await prepareScene(redOverBlue().json());
-  await page.goto(`/${key}?renderer=threejs&controls=0&oit=1`);
+  await page.goto(`/${key}?renderer=threejs&controls=0`);
 
   await expectThreeViewport(page);
   await expectRedToHideBlue(page);
   await narrowWindow(page);
   await expectRedToHideBlue(page);
+  expect(errors).toEqual([]);
+});
+
+test("three.js on WebGL2 without per-attachment blending draws in MathBox's order and says why", async ({
+  page,
+  prepareScene,
+}) => {
+  const errors = collectPageErrors(page);
+  const infos: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "info") infos.push(message.text());
+  });
+  await page.addInitScript(() => {
+    const { getExtension } = WebGL2RenderingContext.prototype;
+    WebGL2RenderingContext.prototype.getExtension = function withoutIndexed(
+      this: WebGL2RenderingContext,
+      name: string,
+    ) {
+      return name === "OES_draw_buffers_indexed"
+        ? null
+        : Reflect.apply(getExtension, this, [name]);
+    };
+  });
+  const key = await prepareScene(blueFirstOverRed().json());
+  await page.goto(`/${key}?renderer=threejs&controls=0`);
+
+  await expectThreeViewport(page);
+  await expect(canvas(page)).toHaveAttribute("data-transparency", "ordered");
+  // The translucent plane is drawn, which the OIT pass couldn't do here.
+  await sharesOnce(page, "blueOverWhite");
+  expect(infos.join("\n")).toContain("OES_draw_buffers_indexed is missing");
   expect(errors).toEqual([]);
 });
