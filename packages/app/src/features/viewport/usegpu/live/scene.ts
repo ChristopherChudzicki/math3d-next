@@ -4,7 +4,7 @@
  * instead of JSX and never touches React or Redux. Everything it needs
  * arrives as a `SceneSpec` plus `SceneHooks`.
  */
-import { keyed, use } from "@use-gpu/live";
+import { keyed, use, useResource } from "@use-gpu/live";
 import type { LiveElement } from "@use-gpu/live";
 import { AutoCanvas, WebGPU } from "@use-gpu/webgpu";
 import {
@@ -13,6 +13,7 @@ import {
   FontLoader,
   OrbitCamera,
   Pass,
+  useDeviceContext,
 } from "@use-gpu/workbench";
 import type { FontSource } from "@use-gpu/workbench";
 import {
@@ -51,13 +52,31 @@ export type SceneHooks = Pick<ViewportHooks, "onUnsupported"> & {
    * including on first render.
    */
   onOrbit(orbit: OrbitSpec): void;
-  /** The plot, with every graphic, has rendered: the font has loaded. */
+  /** The plot's children are rendering, which happens only once the font has loaded. */
   onGraphicsMounted(): void;
+  /** The device reported an error, or was lost, after it came up. */
+  onError(error: Error): void;
 };
 
-/** Renders nothing; calls `onRender` whenever it renders. */
 const RenderProbe = ({ onRender }: { onRender: () => void }) => {
   onRender();
+  return null;
+};
+
+const WatchDeviceLoss = ({ onLost }: { onLost: (error: Error) => void }) => {
+  const device = useDeviceContext();
+  useResource(
+    (dispose) => {
+      let mounted = true;
+      dispose(() => {
+        mounted = false;
+      });
+      device.lost.then((info) => {
+        if (mounted) onLost(new Error(`WebGPU device lost: ${info.message}`));
+      });
+    },
+    [device],
+  );
   return null;
 };
 
@@ -131,6 +150,7 @@ export const makeSceneRoot = (
       hooks.onUnsupported(error);
       return null;
     },
+    onError: hooks.onError,
     children: use(AutoCanvas, {
       canvas,
       samples: 4,
@@ -139,6 +159,7 @@ export const makeSceneRoot = (
         // AutoCanvas owns the canvas cursor (default `default`); `move` matches
         // MathBox, whose threestrap `cursor` plugin shows it whenever controls exist.
         use(Cursor, { cursor: "move" }),
+        use(WatchDeviceLoss, { onLost: hooks.onError }),
         use(OrbitControls, {
           ...scene.orbit,
           version: scene.controlsVersion,

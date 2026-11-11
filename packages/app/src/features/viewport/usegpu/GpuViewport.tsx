@@ -7,9 +7,8 @@ import * as Sentry from "@sentry/react";
 import { setRendererPreference } from "@/services/renderer/rendererPreference";
 import { DEFAULT_RENDERER } from "@/services/renderer/renderers";
 import { markWebGpuFailed } from "@/services/renderer/webgpuSupport";
-import RendererFallback from "@/features/viewport/shared/RendererFallback";
 import ViewportShell from "@/features/viewport/shared/ViewportShell";
-import { useSceneReady } from "@/features/viewport/shared/useSceneReady";
+import { useLoadFlag } from "@/features/viewport/shared/useLoadFlag";
 
 const GpuViewportContent = React.lazy(
   // eslint-disable-next-line import/no-restricted-paths -- the lazy boundary
@@ -19,23 +18,23 @@ const GpuViewportContent = React.lazy(
 type Props = {
   className?: string;
   /**
-   * For the `/app/frame` render page: when Use.GPU can't start, say so here
-   * and leave the stored renderer preference alone.
+   * When Use.GPU can't start, say so here and leave the stored renderer
+   * preference alone, rather than leave it to the page to draw the default.
    */
-  still?: boolean;
+  failInPlace?: boolean;
 };
 
-const GpuViewport: React.FC<Props> = ({ className, still = false }) => {
+const GpuViewport: React.FC<Props> = ({ className, failInPlace = false }) => {
   const [unsupported, setUnsupported] = useState(false);
-  const [ready, onReady] = useSceneReady();
+  const [ready, onReady] = useLoadFlag();
   const onUnsupported = useCallback(
     (error: unknown) => {
-      if (still) setUnsupported(true);
+      if (failInPlace) setUnsupported(true);
       // Use.GPU calls this on every render while in error; report the first.
       if (!markWebGpuFailed()) return;
       // Not `chooseRenderer`: the user didn't choose this, so `?renderer`
       // stays; resolution draws the default once WebGPU has failed.
-      if (!still) setRendererPreference(DEFAULT_RENDERER);
+      if (!failInPlace) setRendererPreference(DEFAULT_RENDERER);
       // A browser or device limitation, not an app error.
       const message = error instanceof Error ? error.message : String(error);
       // eslint-disable-next-line no-console
@@ -44,7 +43,7 @@ const GpuViewport: React.FC<Props> = ({ className, still = false }) => {
         level: "info",
       });
     },
-    [still],
+    [failInPlace],
   );
 
   return (
@@ -53,13 +52,10 @@ const GpuViewport: React.FC<Props> = ({ className, still = false }) => {
       errorMessage="The Use.GPU renderer ran into an error."
       ready={ready}
       unsupported={unsupported}
+      unsupportedMessage="The Use.GPU renderer can't run in this browser."
       className={className}
     >
-      {unsupported ? (
-        <RendererFallback message="The Use.GPU renderer can't run in this browser." />
-      ) : (
-        <GpuViewportContent onUnsupported={onUnsupported} onReady={onReady} />
-      )}
+      <GpuViewportContent onUnsupported={onUnsupported} onReady={onReady} />
     </ViewportShell>
   );
 };

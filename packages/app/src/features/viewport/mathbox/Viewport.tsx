@@ -7,10 +7,9 @@ import "mathbox/mathbox.css";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Vector3 } from "three";
 import { debounce } from "lodash-es";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch } from "@/store/hooks";
 import { useElementResize } from "@/util/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
-import * as select from "@/store/scene/state/selectors";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 import { useMathResults } from "@/store/scene/evaluation/mathScope";
 import {
@@ -18,6 +17,7 @@ import {
   useViewportItems,
 } from "@/features/viewport/shared/useViewportItems";
 import is3dDisabled from "@/features/viewport/shared/is3dDisabled";
+import { useLoadFlag } from "@/features/viewport/shared/useLoadFlag";
 import { Graphic } from "./graphics";
 import Camera from "./Camera";
 import type { OnMoveEnd } from "./Camera";
@@ -97,11 +97,9 @@ const useIsOrthographic = () => {
 const Viewport: React.FC<Props> = ({ className, still }) => {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [mathbox, setMathbox] = useState<MathboxSelection | null>(null);
-  // The scene load whose warmup has drained, so each load shows the splash
-  // again. A mathbox instance swapped within one load counts as drained.
-  const loadCount = useAppSelector(select.loadCount);
-  const [drainedLoad, setDrainedLoad] = useState<number | null>(null);
-  const warmedUp = drainedLoad === loadCount;
+  // Per scene load, so each load shows the splash again. A mathbox instance
+  // swapped within one load counts as drained.
+  const [warmedUp, markWarmedUp] = useLoadFlag();
   const hasRequired = useHasViewportItems();
 
   const isOrthographic = useIsOrthographic();
@@ -137,13 +135,13 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
         // root selection, see index.js) — stable enough to call bare, unlike
         // the internal `_context.getPending` we feature-detect above.
         if (still) (mathbox as MathboxRoot).stop();
-        setDrainedLoad(loadCount);
+        markWarmedUp();
         return;
       }
       raf = requestAnimationFrame(tick);
     });
     return () => cancelAnimationFrame(raf);
-  }, [still, mathbox, loadCount]);
+  }, [still, mathbox, markWarmedUp]);
 
   // threestrap's size plugin (mathbox's resize pipeline) already listens for
   // a "resize" event on this container element directly, not just on

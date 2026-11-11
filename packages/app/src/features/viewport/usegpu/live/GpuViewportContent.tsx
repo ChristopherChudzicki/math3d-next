@@ -28,8 +28,11 @@ type Props = Pick<ViewportHooks, "onUnsupported" | "onReady">;
  */
 const GpuViewportContent: React.FC<Props> = ({ onUnsupported, onReady }) => {
   const host = useRef<HTMLDivElement>(null);
-  // A new scene load remounts this, with a new `onReady`.
+  // `settle` keeps the first `onReady`; a new scene load remounts this with a
+  // new one.
   const [settle] = useState(() => makeSettleWatch(onReady));
+  const [failure, setFailure] = useState<{ error: Error } | null>(null);
+  const onError = useCallback((error: Error) => setFailure({ error }), []);
   useEffect(() => () => settle.cancel(), [settle]);
   const observed = useRef<HTMLCanvasElement | null>(null);
   const { spec, reporters, onCameraMove } = useViewportSpec(host);
@@ -62,11 +65,14 @@ const GpuViewportContent: React.FC<Props> = ({ onUnsupported, onReady }) => {
         onUnsupported,
         onOrbit,
         onGraphicsMounted: settle.arm,
+        onError,
       });
     },
-    [scene, onUnsupported, onOrbit, settle],
+    [scene, onUnsupported, onOrbit, settle, onError],
   );
 
+  // Rethrown during render so the error boundary above sees it.
+  if (failure) throw failure.error;
   return (
     <>
       {reporters}
@@ -77,5 +83,6 @@ const GpuViewportContent: React.FC<Props> = ({ onUnsupported, onReady }) => {
   );
 };
 
-// A re-render redraws, so the viewport's own state changes must not reach it.
+// Every re-render draws a frame, so `GpuViewport`'s `ready` state must not
+// re-render this.
 export default React.memo(GpuViewportContent);

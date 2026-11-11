@@ -6,10 +6,9 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import * as Sentry from "@sentry/react";
 import type { ViewportHooks } from "@math3d/viewport-spec";
-import RendererFallback from "@/features/viewport/shared/RendererFallback";
 import ViewportShell from "@/features/viewport/shared/ViewportShell";
 import { useViewportSpec } from "@/features/viewport/spec/useViewportSpec";
-import { useSceneReady } from "@/features/viewport/shared/useSceneReady";
+import { useLoadFlag } from "@/features/viewport/shared/useLoadFlag";
 
 const RendererViewport = React.lazy(() =>
   import("@math3d/renderer-three").then((m) => ({ default: m.Viewport })),
@@ -64,7 +63,7 @@ type Props = { className?: string };
 
 const ThreeViewport: React.FC<Props> = ({ className }) => {
   const [unsupported, setUnsupported] = useState(false);
-  const [ready, onReady] = useSceneReady();
+  const [ready, onReady] = useLoadFlag();
   const onUnsupported = useCallback((error: unknown) => {
     setUnsupported(true);
     // A browser or device limitation, not an app error.
@@ -82,13 +81,10 @@ const ThreeViewport: React.FC<Props> = ({ className }) => {
       errorMessage="The three.js renderer ran into an error."
       ready={ready}
       unsupported={unsupported}
+      unsupportedMessage="The three.js renderer can't run in this browser."
       className={className}
     >
-      {unsupported ? (
-        <RendererFallback message="The three.js renderer can't run in this browser." />
-      ) : (
-        <ThreeViewportContent onUnsupported={onUnsupported} onReady={onReady} />
-      )}
+      <ThreeViewportContent onUnsupported={onUnsupported} onReady={onReady} />
     </ViewportShell>
   );
 };

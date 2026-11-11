@@ -43,25 +43,31 @@ reports back through `ViewportHooks`, both types in
 
 ### Ready and failed
 
-- **The scene container (`data-testid="scene"`) says what drew and how it
-  went, for every renderer:** `data-renderer`, `data-scene-ready="true"`
-  once settled, `data-scene-error` (`unsupported`, `error`, or the frame
-  route's `invalid-renderer`) when it can't draw. three.js's canvas adds
+- **The scene container (`data-testid="scene"`) says what drew and whether
+  it settled:** `data-renderer`, and `data-scene-ready="true"` once
+  settled. three.js and Use.GPU set it from `onReady` and add
+  `data-scene-error` (`unsupported`, or `error` after a render or device
+  error) when they can't draw; MathBox sets neither from the hooks, and with
+  no WebGL the route's error page replaces it. three.js's canvas adds
   `data-backend` (`webgpu` or `webgl2`).
 - How each renderer settles:
-  - MathBox: its warmup queue has stayed empty for 500 ms
-    (`mathbox/stillReadiness.ts`).
+  - MathBox: its warmup queue has stayed empty for 500 ms, or after 300
+    frames (`mathbox/stillReadiness.ts`).
   - three.js: the animation frame after a draw has no redraw pending, once
-    the `ResizeObserver` has reported; its first report can come frames after
-    the first draw, and its resize redraws.
-  - Use.GPU: 300 ms with no frame and no pipeline compile pending, counting
+    the `ResizeObserver` has reported (`renderer-three/src/settle.ts`); its
+    first report can come frames after the first draw, and its resize
+    redraws.
+  - Use.GPU: no frame for 300 ms and no pipeline compile pending, counting
     only frames drawn after the graphics mount (`usegpu/settle.ts`). It
     compiles pipelines asynchronously and draws a layer only once its
     pipeline resolves, which on SwiftShader takes 300–400 ms.
+  - Ready holds for one scene load; a late `onReady` from a replaced load is
+    ignored (`shared/useLoadFlag.ts`).
 - **`/app/frame/:sceneKey` draws with `?renderer=`, MathBox without it**, and
   never reads the stored preference. A renderer that can't start marks the
-  page failed; there is no fallback to MathBox. The OG worker sends no
-  parameter.
+  page failed, and an unknown `?renderer=` sets
+  `data-scene-error="invalid-renderer"`; there is no fallback to MathBox. The
+  OG worker sends no parameter: Browser Run has no WebGPU adapter.
 
 ### The camera
 

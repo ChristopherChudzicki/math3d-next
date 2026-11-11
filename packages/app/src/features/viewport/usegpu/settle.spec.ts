@@ -7,31 +7,38 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-test("settles once frames drawn since arm() go quiet", () => {
+const setup = () => {
   const onSettled = vi.fn();
-  const watch = makeSettleWatch(onSettled);
+  return { onSettled, watch: makeSettleWatch(onSettled) };
+};
 
+test("frames before arm() don't count", () => {
+  const { onSettled, watch } = setup();
   watch.frame();
+  watch.arm();
   vi.advanceTimersByTime(2 * SETTLE_QUIET_MS);
   expect(onSettled).not.toHaveBeenCalled();
-
-  watch.arm();
-  watch.frame();
-  vi.advanceTimersByTime(SETTLE_QUIET_MS - 1);
-  watch.frame();
-  vi.advanceTimersByTime(SETTLE_QUIET_MS - 1);
-  expect(onSettled).not.toHaveBeenCalled();
-  vi.advanceTimersByTime(1);
-  expect(onSettled).toHaveBeenCalledOnce();
 
   watch.frame();
   vi.advanceTimersByTime(SETTLE_QUIET_MS);
   expect(onSettled).toHaveBeenCalledOnce();
 });
 
+test("a frame restarts the countdown", () => {
+  const { onSettled, watch } = setup();
+  watch.arm();
+  watch.frame();
+  vi.advanceTimersByTime(SETTLE_QUIET_MS - 1);
+  watch.frame();
+  vi.advanceTimersByTime(SETTLE_QUIET_MS - 1);
+  expect(onSettled).not.toHaveBeenCalled();
+
+  vi.advanceTimersByTime(1);
+  expect(onSettled).toHaveBeenCalledOnce();
+});
+
 test("waits for every pending compile, however long", () => {
-  const onSettled = vi.fn();
-  const watch = makeSettleWatch(onSettled);
+  const { onSettled, watch } = setup();
   watch.arm();
   watch.frame();
   watch.compileStarted();
@@ -41,6 +48,16 @@ test("waits for every pending compile, however long", () => {
   expect(onSettled).not.toHaveBeenCalled();
 
   watch.compileEnded();
+  vi.advanceTimersByTime(SETTLE_QUIET_MS);
+  expect(onSettled).toHaveBeenCalledOnce();
+});
+
+test("settles once", () => {
+  const { onSettled, watch } = setup();
+  watch.arm();
+  watch.frame();
+  vi.advanceTimersByTime(SETTLE_QUIET_MS);
+  watch.frame();
   vi.advanceTimersByTime(SETTLE_QUIET_MS);
   expect(onSettled).toHaveBeenCalledOnce();
 });

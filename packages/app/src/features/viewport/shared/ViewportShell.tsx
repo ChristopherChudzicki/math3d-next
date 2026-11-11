@@ -1,10 +1,11 @@
-import React, { Suspense, useState } from "react";
+import React, { Suspense } from "react";
 import * as Sentry from "@sentry/react";
 import { useAppSelector } from "@/store/hooks";
 import * as select from "@/store/scene/state/selectors";
 import type { Renderer } from "@/services/renderer/renderers";
 import is3dDisabled from "./is3dDisabled";
 import { useHasViewportItems } from "./useViewportItems";
+import { useLoadFlag } from "./useLoadFlag";
 import RendererFallback from "./RendererFallback";
 
 type Props = {
@@ -13,8 +14,9 @@ type Props = {
   errorMessage: string;
   /** The renderer has called `ViewportHooks.onReady` for this scene load. */
   ready: boolean;
-  /** The renderer can't run in this browser. */
+  /** The renderer can't run in this browser: show `unsupportedMessage` instead. */
   unsupported: boolean;
+  unsupportedMessage: string;
   className?: string;
   /** The renderer, usually behind a `React.lazy`. */
   children: React.ReactNode;
@@ -26,16 +28,17 @@ const ViewportShell: React.FC<Props> = ({
   errorMessage,
   ready,
   unsupported,
+  unsupportedMessage,
   className,
   children,
 }) => {
   const hasRequired = useHasViewportItems();
   const loadCount = useAppSelector(select.loadCount);
-  const [errorLoad, setErrorLoad] = useState<number | null>(null);
+  const [errored, setErrored] = useLoadFlag();
   const show = !is3dDisabled() && hasRequired;
   let failure: "unsupported" | "error" | undefined;
   if (unsupported) failure = "unsupported";
-  else if (errorLoad === loadCount) failure = "error";
+  else if (errored) failure = "error";
   return (
     <div
       data-testid="scene"
@@ -54,9 +57,13 @@ const ViewportShell: React.FC<Props> = ({
         <Sentry.ErrorBoundary
           key={loadCount}
           fallback={<RendererFallback message={errorMessage} />}
-          onError={() => setErrorLoad(loadCount)}
+          onError={setErrored}
         >
-          <Suspense fallback={null}>{children}</Suspense>
+          {unsupported ? (
+            <RendererFallback message={unsupportedMessage} />
+          ) : (
+            <Suspense fallback={null}>{children}</Suspense>
+          )}
         </Sentry.ErrorBoundary>
       ) : null}
     </div>

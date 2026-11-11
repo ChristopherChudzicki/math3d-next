@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
+import { hideWebGpu } from "@/utils/hideWebGpu";
 import { colorfulPixelRatio } from "@/utils/colorfulPixelRatio";
 import { webgpuLaunchOptions } from "@/utils/webgpuLaunchOptions";
 
@@ -36,12 +37,7 @@ test("a renderer that can't start marks the frame failed, with no fallback", asy
   page,
   prepareScene,
 }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, "gpu", {
-      value: { requestAdapter: async () => null },
-      configurable: true,
-    });
-  });
+  await hideWebGpu(page);
   const key = await prepareScene(new SceneBuilder().json());
 
   await page.goto(`/app/frame/${key}?renderer=usegpu`);

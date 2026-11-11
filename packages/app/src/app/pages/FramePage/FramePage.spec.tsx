@@ -15,15 +15,9 @@ import { mathScopeId } from "@/store/scene/evaluation/mathScope";
 import { RENDERER_PREFERENCE_KEY } from "@/services/renderer/rendererPreference";
 import { gpuContent } from "@/test_util/gpuViewportContent";
 import type { ContentProps } from "@/test_util/gpuViewportContent";
-import { threeViewport } from "@/test_util/threeViewport";
-import type { ThreeViewportProps } from "@/test_util/threeViewport";
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 
-const Settles = ({ hooks }: ThreeViewportProps) => {
-  useEffect(() => hooks.onReady(), [hooks]);
-  return null;
-};
 const NoAdapter = ({ onUnsupported }: ContentProps) => {
   useEffect(() => onUnsupported(new Error("no adapter")), [onUnsupported]);
   return null;
@@ -87,17 +81,15 @@ test("without ?renderer it draws MathBox, whatever the stored preference", async
   );
 });
 
-test("?renderer=threejs draws three.js, ready once it settles", async () => {
-  threeViewport.Component = Settles;
+test("?renderer=threejs draws three.js", async () => {
   const scene = new SceneBuilder();
   seedDb.withScene(scene.json());
 
   renderTestApp(`/app/frame/${scene.key}?renderer=threejs`);
 
-  const viewport = await screen.findByTestId("scene");
-  expect(viewport).toHaveAttribute("data-renderer", "threejs");
-  await waitFor(() =>
-    expect(viewport).toHaveAttribute("data-scene-ready", "true"),
+  expect(await screen.findByTestId("scene")).toHaveAttribute(
+    "data-renderer",
+    "threejs",
   );
 });
 

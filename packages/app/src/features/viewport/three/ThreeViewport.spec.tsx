@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router";
 import user from "@testing-library/user-event";
 import { SceneBuilder } from "@math3d/mock-api";
+import type { ViewportHooks } from "@math3d/viewport-spec";
 import * as Sentry from "@sentry/react";
 import { getStore } from "@/store/store";
 import { actions } from "@/store/scene/state/scene.slice";
@@ -17,10 +18,14 @@ vi.mock("@sentry/react", async (importOriginal) => ({
   captureMessage: vi.fn(),
 }));
 
-const renderViewport = (url = "/") => {
-  const store = getStore();
+const loadScene = (store: ReturnType<typeof getStore>) => {
   const scene = new SceneBuilder();
   store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
+};
+
+const renderViewport = (url = "/") => {
+  const store = getStore();
+  loadScene(store);
   render(
     <Provider store={store}>
       <MemoryRouter initialEntries={[url]}>
@@ -28,21 +33,34 @@ const renderViewport = (url = "/") => {
       </MemoryRouter>
     </Provider>,
   );
+  return { store };
 };
 
-test("onReady marks the scene ready", async () => {
-  const Settles = ({ hooks }: ThreeViewportProps) => {
-    useEffect(() => hooks.onReady(), [hooks]);
+test("ready holds only for the scene load whose renderer settled", async () => {
+  const mounted: ViewportHooks[] = [];
+  const Records = ({ hooks }: ThreeViewportProps) => {
+    useEffect(() => {
+      mounted.push(hooks);
+    }, [hooks]);
     return null;
   };
-  threeViewport.Component = Settles;
-  renderViewport();
-
+  threeViewport.Component = Records;
+  const { store } = renderViewport();
   const scene = screen.getByTestId("scene");
+  await waitFor(() => expect(mounted).toHaveLength(1));
+  const [first] = mounted;
+
+  act(() => first.onReady());
+  expect(scene).toHaveAttribute("data-scene-ready", "true");
+
+  act(() => loadScene(store));
   expect(scene).not.toHaveAttribute("data-scene-ready");
-  await waitFor(() =>
-    expect(scene).toHaveAttribute("data-scene-ready", "true"),
-  );
+  await waitFor(() => expect(mounted.at(-1)).not.toBe(first));
+
+  act(() => mounted.at(-1)?.onReady());
+  // The first load's renderer settling late changes nothing.
+  act(() => first.onReady());
+  expect(scene).toHaveAttribute("data-scene-ready", "true");
 });
 
 test("a render error marks the scene failed", async () => {

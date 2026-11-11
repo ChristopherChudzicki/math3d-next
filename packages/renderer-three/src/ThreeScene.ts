@@ -15,6 +15,7 @@ import type { DrawnGraphics } from "./graphics/syncGraphics";
 import { onLabelRelayout } from "./label/atlas";
 import { OitFrame } from "./OitFrame";
 import type { Transparency } from "./shader/material";
+import { Settle } from "./settle";
 
 // Colors stay the sRGB values the spec gives (see `outputColorSpace` below),
 // so three must not convert a `Color` to linear on its way in either.
@@ -46,7 +47,10 @@ type Options = {
   forceWebGL: boolean;
   /** How translucent marks combine; the backend's default when absent. */
   transparency?: Transparency;
-  /** Called once, when a frame at the host's size is drawn and no redraw follows it. */
+  /**
+   * Called once, when a frame is drawn with no redraw pending, once the
+   * `ResizeObserver` has reported.
+   */
   onSettled(): void;
   /** The camera as the user moves it. */
   onCameraMove(camera: CameraSpec): void;
@@ -101,13 +105,10 @@ export class ThreeScene {
 
   private frame: number | null = null;
 
-  // ResizeObserver's first report can come frames after the first draw, and
-  // its resize redraws: until it has reported, a drawn frame may not be the last.
-  private observed = false;
-
-  private settleCheck: number | null = null;
-
-  private settled = false;
+  private readonly settle = new Settle(
+    () => this.frame !== null,
+    () => this.options.onSettled(),
+  );
 
   private disposed = false;
 
@@ -141,7 +142,7 @@ export class ThreeScene {
     this.renderer.setClearColor(0xffffff, 1);
     this.resizeObserver = new ResizeObserver(() =>
       this.reporting(() => {
-        this.observed = true;
+        this.settle.resized();
         this.resize();
       }),
     );
@@ -174,7 +175,7 @@ export class ThreeScene {
   dispose(): void {
     this.disposed = true;
     if (this.frame !== null) cancelAnimationFrame(this.frame);
-    if (this.settleCheck !== null) cancelAnimationFrame(this.settleCheck);
+    this.settle.dispose();
     this.resizeObserver.disconnect();
     this.stopLabelRelayout();
     this.view.dispose();
@@ -247,18 +248,6 @@ export class ThreeScene {
     if (!this.built || !this.hasSize()) return;
     if (this.oit) this.oit.render(this.view.camera);
     else this.renderer.render(this.scene, this.view.camera);
-    if (!this.settled) {
-      this.settleCheck ??= requestAnimationFrame(() => {
-        this.settleCheck = null;
-        this.reporting(() => this.settle());
-      });
-    }
-  }
-
-  /** Settled once the animation frame after a draw has no redraw pending. */
-  private settle(): void {
-    if (this.settled || this.frame !== null || !this.observed) return;
-    this.settled = true;
-    this.options.onSettled();
+    this.settle.drawn();
   }
 }

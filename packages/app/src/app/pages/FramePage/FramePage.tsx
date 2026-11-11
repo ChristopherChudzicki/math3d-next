@@ -11,7 +11,7 @@ import useSceneLoader from "@/app/useSceneLoader";
 
 const VIEWPORTS: Record<Renderer, React.ReactElement> = {
   mathbox: <Viewport still />,
-  usegpu: <GpuViewport still />,
+  usegpu: <GpuViewport failInPlace />,
   threejs: <ThreeViewport />,
 };
 
@@ -20,8 +20,9 @@ const VIEWPORTS: Record<Renderer, React.ReactElement> = {
  * sidebar, controls, or virtual keyboard). It loads the scene by key and
  * renders only the 3D scene, full-viewport, with the renderer `?renderer=`
  * names (MathBox without it; never the stored preference). The scene's
- * container gets `data-scene-ready="true"` once drawn and settled, or
- * `data-scene-error` when the renderer can't draw; there is no fallback.
+ * container gets `data-scene-ready="true"` once drawn and settled; three.js
+ * and Use.GPU set `data-scene-error` when they can't draw. There is no
+ * fallback.
  */
 const FramePage: React.FC = () => {
   const { sceneKey } = useParams();

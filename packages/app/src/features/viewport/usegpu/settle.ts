@@ -16,7 +16,7 @@ type SettleWatch = {
   frame(): void;
   compileStarted(): void;
   compileEnded(): void;
-  /** Stops the pending countdown; the next frame or compile starts it again. */
+  /** Stops the pending countdown; the next frame or finished compile restarts it. */
   cancel(): void;
 };
 
