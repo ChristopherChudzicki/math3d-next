@@ -81,18 +81,16 @@ const call = (fn: Fn, args: Part[]): Part => {
   }
   if (closures.length === 2) {
     const [arg0, arg1] = closures;
-    const [, exponent] = args;
-    if (
-      fn === mathWithTransform.pow &&
-      exponent.constant &&
-      Number.isInteger(exponent.value)
-    ) {
-      // mathjs's number `pow` is `Math.pow` when the exponent is whole.
-      const n = exponent.value as number;
-      return dynamic((a, b, c, d, e) => {
-        const u = arg0(a, b, c, d, e);
-        return typeof u === "number" ? u ** n : fn(u, n);
-      });
+    if (fn === mathWithTransform.pow) {
+      const [, exponent] = args;
+      if (exponent.constant && Number.isInteger(exponent.value)) {
+        // mathjs's number `pow` is `Math.pow` when the exponent is whole.
+        const n = exponent.value as number;
+        return dynamic((a, b, c, d, e) => {
+          const u = arg0(a, b, c, d, e);
+          return typeof u === "number" ? u ** n : fn(u, n);
+        });
+      }
     }
     const fast = numberImplementation(fn, 2);
     if (!fast) {
