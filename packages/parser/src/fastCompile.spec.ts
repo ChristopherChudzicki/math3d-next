@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
-import math from "@math3d/custom-mathjs";
+import math, { mathWithTransform, typed } from "@math3d/custom-mathjs";
 import MathScope from "@math3d/mathscope";
-import { fastCompile, numberImplementation } from "./fastCompile";
+import { fastCompile } from "./fastCompile";
 import { latexParser } from "./parsers";
 
 type Fn = (...args: unknown[]) => unknown;
@@ -15,25 +15,40 @@ const outcome = (f: () => unknown) => {
   }
 };
 
+/**
+ * `expr` evaluated by fastCompile and by mathjs, and whether fastCompile did
+ * so without handing the expression to mathjs.
+ */
 const evaluateBoth = (expr: string, scope: Record<string, unknown> = {}) => {
   const node = math.parse(expr);
+  const compiled = node.compile();
+  const mathjsEvaluate = vi.spyOn(compiled, "evaluate");
+  vi.spyOn(node, "compile").mockReturnValue(compiled);
+  const fast = outcome(() =>
+    fastCompile(node).evaluate(new Map(Object.entries(scope))),
+  );
   return {
-    fast: outcome(() =>
-      fastCompile(node).evaluate(new Map(Object.entries(scope))),
-    ),
+    fast,
+    tookFastPath: mathjsEvaluate.mock.calls.length === 0,
     mathjs: outcome(() =>
-      node.compile().evaluate(new Map(Object.entries(scope))),
+      math
+        .parse(expr)
+        .compile()
+        .evaluate(new Map(Object.entries(scope))),
     ),
   };
 };
 
-/** Asserts `expr` defines a function that agrees with mathjs at each of `points`. */
+/**
+ * Asserts `expr` defines a function that agrees with mathjs at each of
+ * `points`. Returns whether fastCompile built it without mathjs.
+ */
 const expectSameFunction = (
   expr: string,
   points: unknown[][],
   scope: Record<string, unknown> = {},
 ) => {
-  const { fast, mathjs } = evaluateBoth(expr, scope);
+  const { fast, mathjs, tookFastPath } = evaluateBoth(expr, scope);
   expect(fast.value).toBeInstanceOf(Function);
   // A function result, as `diff(x)` gives, is a new one on every call.
   const at = (f: unknown, point: unknown[]) =>
@@ -44,54 +59,130 @@ const expectSameFunction = (
   points.forEach((point) => {
     expect(at(fast.value, point)).toEqual(at(mathjs.value, point));
   });
+  return tookFastPath;
 };
 
 describe("fastCompile agrees with mathjs", () => {
-  test.each([
-    { expr: "f(x, y, z) = x^2 + y z - x / y + (-z)", points: [[1, 2, 3]] },
-    { expr: "f(x) = a x + pi", scope: { a: 2.5 } },
-    { expr: "f(x) = x i + [1, 2, 3] x + v", scope: { v: [1, 0, 0] } },
-    { expr: "f(x) = max(x, 1, 2) + norm([x, 1])" },
-    { expr: "f(x) = sin(x)", scope: { sin: (x: number) => 10 * x } },
-    { expr: "f(x) = x + 1", scope: { add: () => 0 } },
-    { expr: "f(x) = x + 1", scope: { x: 100 } },
-    { expr: "f(x) = x + a(x)", scope: { a: 2.5 } },
-  ])("$expr with $scope", ({ expr, scope, points }) => {
-    expectSameFunction(expr, points ?? [[-8], [0.5]], scope);
+  test.each<{
+    title: string;
+    expr: string;
+    point: unknown[];
+    scope?: Record<string, unknown>;
+    fast: boolean;
+  }>([
+    {
+      title: "arithmetic",
+      expr: "f(x, y, z) = x^2 + y z - x / y + (-z)",
+      point: [1, 2, 3],
+      fast: true,
+    },
+    {
+      title: "a scope value and a constant",
+      expr: "f(x) = a x + pi",
+      point: [0.5],
+      scope: { a: 2.5 },
+      fast: true,
+    },
+    {
+      title: "values that aren't numbers",
+      expr: "f(x) = x i + [1, 2, 3] x + v",
+      point: [0.5],
+      scope: { v: [1, 0, 0] },
+      fast: true,
+    },
+    {
+      title: "a call with three arguments",
+      expr: "f(x) = max(x, 1, 2) + norm([x, 1])",
+      point: [-8],
+      fast: true,
+    },
+    {
+      title: "a scope function named as mathjs's",
+      expr: "f(x) = sin(x)",
+      point: [0.5],
+      scope: { sin: (x: number) => 10 * x },
+      fast: true,
+    },
+    {
+      title: "a scope value named as an operator's function",
+      expr: "f(x) = x + 1",
+      point: [0.5],
+      scope: { add: () => 0 },
+      fast: true,
+    },
+    {
+      title: "a parameter named as a scope value",
+      expr: "f(x) = x + 1",
+      point: [0.5],
+      scope: { x: 100 },
+      fast: true,
+    },
+    {
+      title: "a scope value called though it is no function",
+      expr: "f(x) = x + a(x)",
+      point: [0.5],
+      scope: { a: 2.5 },
+      fast: false,
+    },
+    {
+      title: "a node type it doesn't handle",
+      expr: "f(x) = x > 0 ? 1 : 2",
+      point: [1],
+      fast: false,
+    },
+    {
+      title: "a parameter called as a function",
+      expr: "f(sin, x) = sin(x)",
+      point: [Math.cos, 0],
+      fast: false,
+    },
+    {
+      title: "more parameters than a closure has slots",
+      expr: "f(a, b, c, d, e, g) = a + b + c + d + e + g",
+      point: [1, 2, 3, 4, 5, 6],
+      fast: false,
+    },
+    {
+      title: "an undefined name",
+      expr: "f(x) = x + undefinedName",
+      point: [1],
+      fast: false,
+    },
+    {
+      title: "a parameter named as an Object.prototype property",
+      expr: "f(toString) = toString + 1",
+      point: [1],
+      fast: false,
+    },
+    {
+      // The scope's `f` is an earlier definition, not the one being defined.
+      title: "a function that calls itself",
+      expr: "f(x) = f(x) + 1",
+      point: [1],
+      scope: { f: () => 5 },
+      fast: false,
+    },
+  ])("$title: $expr", ({ expr, point, scope, fast }) => {
+    expect(expectSameFunction(expr, [point], scope)).toBe(fast);
   });
 
-  test.each([
-    { expr: "f(x) = x > 0 ? 1 : 2", point: [1] },
-    { expr: "f(sin, x) = sin(x)", point: [Math.cos, 0] },
-    { expr: "f(a, b, c, d, e, g) = a + b + c + d + e + g" },
-    { expr: "f(x) = x + undefinedName", point: [1] },
-    { expr: "f(toString) = toString + 1", point: [1] },
-    // The scope's `f` is an earlier definition, not the one being defined.
-    { expr: "f(x) = f(x) + 1", point: [1], scope: { f: () => 5 } },
-  ])("$expr, which it leaves to mathjs", ({ expr, point, scope }) => {
-    expectSameFunction(expr, [point ?? [1, 2, 3, 4, 5, 6]], scope);
-  });
-
-  test.each([
-    { expr: "2 + 3 a", scope: { a: 2.5 } },
-    { expr: "b = [1, 2] a", scope: { a: 2.5 } },
-  ])("the value $expr", ({ expr, scope }) => {
-    const { fast, mathjs } = evaluateBoth(expr, scope);
-    expect(fast).toEqual(mathjs);
-  });
+  test.each([{ expr: "2 + 3 a" }, { expr: "b = [1, 2] a" }])(
+    "the value $expr",
+    ({ expr }) => {
+      const { fast, mathjs, tookFastPath } = evaluateBoth(expr, { a: 2.5 });
+      expect(fast).toEqual(mathjs);
+      expect(tookFastPath).toBe(true);
+    },
+  );
 
   test("an expression mathjs won't compile", () => {
     const node = math.parse("5!");
-    expect(outcome(() => fastCompile(node))).toEqual(
-      outcome(() => node.compile()),
-    );
-    expect(() => fastCompile(node)).toThrow("factorial");
+    expect(outcome(() => fastCompile(node))).toEqual({
+      error: 'Function factorial missing in provided namespace "math"',
+    });
   });
 
   test("every function called with numbers", () => {
-    const { mathWithTransform } = math.expression as unknown as {
-      mathWithTransform: Record<string, unknown>;
-    };
     // Names like `not` parse as operators, so `not(x)` is no function call.
     const isCallable = (name: string) => {
       try {
@@ -117,10 +208,13 @@ describe("fastCompile agrees with mathjs", () => {
   });
 });
 
-// Without one, every call still agrees with mathjs and is only slower.
-test("mathjs functions have a number implementation to skip dispatch to", () => {
-  expect(numberImplementation(math.sin, 1)).toBeInstanceOf(Function);
-  expect(numberImplementation(math.add, 2)).toBeInstanceOf(Function);
+// fastCompile skips dispatch by calling these. Without them every call still
+// agrees with mathjs and is only slower.
+test("typed-function gives the implementation a call with numbers runs", () => {
+  const implementation = (name: string, args: number[]) =>
+    typed.resolve(mathWithTransform[name], args)?.implementation;
+  expect(implementation("sin", [0])).toBeInstanceOf(Function);
+  expect(implementation("add", [0, 0])).toBeInstanceOf(Function);
 });
 
 describe("what a function reads once per evaluation", () => {
@@ -141,7 +235,7 @@ describe("what a function reads once per evaluation", () => {
     expect((scope.results.get("f") as Fn)(3)).toBe(300);
   });
 
-  test("a subexpression without parameters is computed once", () => {
+  test("a number-valued subexpression without parameters is computed once", () => {
     const g = vi.fn((a: number) => a + 1);
     const scope = new Map<string, unknown>([
       ["a", 2],

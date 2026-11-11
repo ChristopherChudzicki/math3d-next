@@ -1,15 +1,5 @@
-import math from "@math3d/custom-mathjs";
+import math, { mathWithTransform, typed } from "@math3d/custom-mathjs";
 import type * as mjs from "mathjs";
-
-/**
- * Compiles a mathjs tree to closures that agree with `node.compile()` but
- * sample faster: scope names and parameter-free subexpressions are read once
- * per evaluation, and all-number calls skip typed-function dispatch. Anything
- * unhandled is evaluated by mathjs.
- *
- * Reading the scope once is sound because MathScope re-evaluates an
- * expression when a name it uses changes.
- */
 
 type Scope = mjs.MapLike<string, unknown>;
 
@@ -24,9 +14,6 @@ type Closure = (
   e?: unknown,
 ) => unknown;
 
-/** Arguments are positional, so a function with more parameters goes to mathjs. */
-const MAX_PARAMS = 5;
-
 const pickArgument: Closure[] = [
   (a) => a,
   (a, b) => b,
@@ -35,13 +22,16 @@ const pickArgument: Closure[] = [
   (a, b, c, d, e) => e,
 ];
 
+/** A closure has this many argument slots; a longer function goes to mathjs. */
+const MAX_PARAMS = pickArgument.length;
+
 /** A subexpression that is the same for every call, or one that isn't. */
-type Part =
-  | { constant: true; value: unknown }
-  | { constant: false; run: Closure };
+type Constant = { constant: true; value: unknown };
+type Part = Constant | { constant: false; run: Closure };
 
 const constant = (value: unknown): Part => ({ constant: true, value });
 const dynamic = (run: Closure): Part => ({ constant: false, run });
+const isConstant = (part: Part): part is Constant => part.constant;
 
 const toClosure = (part: Part): Closure => {
   if (!part.constant) return part.run;
@@ -52,27 +42,11 @@ const toClosure = (part: Part): Closure => {
 /** Thrown while building to hand the whole expression to mathjs. */
 class Unsupported extends Error {}
 
-const { mathWithTransform } = (
-  math as unknown as {
-    expression: { mathWithTransform: Record<string, unknown> };
-  }
-).expression;
-
-const { typed } = math as unknown as {
-  typed: {
-    isTypedFunction(f: unknown): boolean;
-    resolve(f: unknown, args: unknown[]): { implementation: Fn } | null;
-  };
-};
-
 const asMatrix =
   (math.config as unknown as () => { matrix: string })().matrix !== "Array";
 
 /** Whether mathjs refuses to read `name` from its tables of arguments and functions. */
-const isUnsafeName = (name: string) =>
-  name !== "length" &&
-  name !== "name" &&
-  (name in Object.prototype || name in Function.prototype);
+const isUnsafeName = (name: string) => name in Object.prototype;
 
 const isPlainFunction = (value: unknown): value is Fn =>
   typeof value === "function" &&
@@ -85,9 +59,9 @@ const numberImplementation = (fn: Fn, arity: number): Fn | undefined =>
     : undefined;
 
 const call = (fn: Fn, args: Part[]): Part => {
-  if (args.every((arg) => arg.constant)) {
+  if (args.every(isConstant)) {
     try {
-      const value = fn(...args.map((arg) => (arg as { value: unknown }).value));
+      const value = fn(...args.map((arg) => arg.value));
       // Only numbers are folded: a folded array would be one object shared
       // by every call.
       if (typeof value === "number") return constant(value);
@@ -133,7 +107,8 @@ const call = (fn: Fn, args: Part[]): Part => {
 const builder = (params: string[], scope: Scope, self?: string) => {
   /** What `name` means outside the parameters: the scope's value, else mathjs's. */
   const lookup = (name: string): unknown => {
-    // mathjs has a function see itself; the scope holds only its predecessor.
+    // mathjs resolves `self` to the function being defined; the scope holds
+    // an earlier definition.
     if (name === self || isUnsafeName(name)) throw new Unsupported();
     if (scope.has(name)) return scope.get(name);
     if (Object.hasOwn(mathWithTransform, name)) return mathWithTransform[name];
@@ -195,10 +170,13 @@ const evaluate = (node: mjs.MathNode, scope: Scope): unknown => {
 };
 
 /**
- * A stand-in for `node.compile()`, with two differences. A function
- * assignment evaluates to a function that takes its arguments as given: it
- * checks neither their number nor their types. And an assignment is not
- * written to the scope.
+ * A stand-in for `node.compile()` that samples faster, except that:
+ * - scope names, and parameter-free subexpressions with number values, are
+ *   read once per `evaluate`, not per call. MathScope re-evaluates an
+ *   expression when a name it uses changes, so this is safe there;
+ * - a function assignment evaluates to a plain function with no arity check;
+ * - an assignment is not written to the scope.
+ * An expression with anything unhandled is evaluated entirely by mathjs.
  */
 const fastCompile = (
   node: mjs.MathNode,
@@ -219,4 +197,4 @@ const fastCompile = (
   };
 };
 
-export { fastCompile, numberImplementation };
+export { fastCompile };

@@ -189,8 +189,8 @@ export default class Evaluator {
    * Updates `results` and `errors` properties with enqueued changes to the
    * expression graph.
    * - Only re-evaluates the affected subgraph: the changed expressions and
-   *   every expression that depends on one. An evaluated function may
-   *   therefore keep the scope values it read.
+   *   every expression that depends on one, so a function value may capture
+   *   the scope values it reads when evaluated.
    * - Returns a diff indicating changes.
    * - runs in O(|affectedSubgraph|)
    */
