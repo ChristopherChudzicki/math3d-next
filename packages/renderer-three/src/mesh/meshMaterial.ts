@@ -108,8 +108,9 @@ const flatMaterial = sharedMaterial("mixed", build(false));
 
 /**
  * A triangle mesh's material, shared by every mesh with that shading,
- * opacity and transparency model. The mesh supplies the attributes `TriangleMesh` writes
- * (`MeshBuffers`) and its depth style at `userData.mesh`.
+ * opacity and transparency model. The mesh supplies the attributes
+ * `TriangleMesh` writes (`MeshBuffers`) and its depth style at
+ * `userData.mesh`.
  */
 export const meshMaterial = (
   shaded: boolean,

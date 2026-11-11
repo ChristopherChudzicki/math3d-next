@@ -26,7 +26,9 @@ test("three.js on WebGL2 draws in MathBox's order by default: zOrder decides wha
   await expectThreeViewport(page);
   await expect(canvas(page)).toHaveAttribute("data-backend", "webgl2");
   await expect(canvas(page)).toHaveAttribute("data-transparency", "ordered");
-  const { blueOverRed } = await sharesOnce(page, "blueOverWhite");
+  const { red, blueOverRed } = await sharesOnce(page, "blueOverWhite");
+  // The red plane is drawn: it shows where it sticks out from under the blue.
+  expect(red).toBeGreaterThan(0.01);
   expect(blueOverRed).toBeLessThan(0.001);
   expect(errors).toEqual([]);
 });

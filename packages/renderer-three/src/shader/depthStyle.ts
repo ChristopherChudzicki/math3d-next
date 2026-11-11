@@ -24,7 +24,8 @@ const ndcZ = (depth: Node<"float">) => {
 
 /**
  * A fragment's view-space z before `zBias` and `zIndex` move its depth. In a
- * material with a `vertexNode`, three's `positionView` has them applied.
+ * material with a `vertexNode`, three's `positionView` has them applied. Set
+ * by `projectWithDepthStyle`, which every mark's vertex must go through.
  */
 export const unbiasedViewZ = varyingProperty("float", "v_unbiasedViewZ");
 
