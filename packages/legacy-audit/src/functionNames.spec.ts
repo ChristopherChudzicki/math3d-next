@@ -4,7 +4,7 @@
  */
 import * as fs from "node:fs";
 import { expect, it } from "vitest";
-import math from "@math3d/custom-mathjs";
+import { mathWithTransform } from "@math3d/custom-mathjs";
 
 const names: string[] = JSON.parse(
   fs.readFileSync(
@@ -17,9 +17,6 @@ const names: string[] = JSON.parse(
 );
 
 it("names every builtin in math3d-next's scope", () => {
-  const scope = Object.keys(
-    // @ts-expect-error mathWithTransform is not in mathjs's types
-    math.expression.mathWithTransform,
-  );
+  const scope = Object.keys(mathWithTransform);
   expect(scope.filter((name) => !names.includes(name))).toEqual([]);
 });

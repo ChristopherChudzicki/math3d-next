@@ -15,6 +15,7 @@
   },
   "scripts": {
     "test": "vitest --run",
+    "bench": "vitest bench --run",
     "typecheck": "tsc --noEmit",
     "test-watch": "vitest",
     "lint": "eslint --max-warnings 0 \"**/*.ts?(x)\""

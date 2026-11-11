@@ -4,7 +4,7 @@
  * evaluateNext.spec.ts runs it over every scene.
  */
 import type * as mjs from "mathjs";
-import math from "@math3d/custom-mathjs";
+import math, { mathWithTransform } from "@math3d/custom-mathjs";
 import MathScope, { EvaluationError } from "@math3d/mathscope";
 import type { IdentifiedParseable, MathNode } from "@math3d/mathscope";
 import { latexParser } from "@math3d/parser";
@@ -41,12 +41,7 @@ class ValidateError extends EvaluationError {
 }
 
 // Copied from app/src/store/scene/evaluation/mathScopeInstance.ts.
-const builtins = new Set(
-  Object.keys(
-    // @ts-expect-error mathWithTransform is not in mathjs's types
-    math.expression.mathWithTransform,
-  ),
-);
+const builtins = new Set(Object.keys(mathWithTransform));
 
 // Copied from app/src/store/scene/evaluation/syncMathScope.ts.
 const MATH_WIDGETS = new Set([
