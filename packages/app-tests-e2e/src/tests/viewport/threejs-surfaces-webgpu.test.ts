@@ -5,6 +5,8 @@ import { collectPageErrors } from "@/utils/collectPageErrors";
 import { coloredShare, expectThreeViewport } from "@/utils/threeViewport";
 import { webgpuLaunchOptions } from "@/utils/webgpuLaunchOptions";
 
+// Without an adapter three.js falls back to WebGL2, which
+// `threejs-surfaces.test.ts` covers.
 test.use({ disable3d: false, launchOptions: webgpuLaunchOptions });
 
 test("three.js draws a surface on the WebGPU backend", async ({

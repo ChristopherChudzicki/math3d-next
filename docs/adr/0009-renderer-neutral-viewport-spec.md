@@ -105,12 +105,11 @@ parent, so anything sized in pixels is built in the shader, in view space:
 - **Every stroke is a `Stroke`** (`stroke/Stroke.ts`), a port of MathBox's
   line and arrow shaders: lines, vectors, curves, vector fields and surface
   gridlines, and the axes, ticks and grids still to come.
-- **Every shaded mesh uses `mesh/meshMaterial.ts`**, a port of MathBox's
-  surface shading, gamma step included. A mesh supplies per-vertex RGBA
-  and normals in its own coordinates; the normal matrix carries them through
-  the axes' scale. A surface's triangles wind as MathBox's do, because a
-  translucent mesh draws its back faces first, so the winding decides how it
-  overlaps itself.
+- **Every triangle mesh is a `TriangleMesh`** (`mesh/TriangleMesh.ts`), drawn
+  with a port of MathBox's surface shading, gamma step included. It takes
+  per-vertex RGBA, and normals in its own coordinates that the normal matrix
+  carries through the axes' scale. Triangles wind as MathBox's do: three draws a translucent
+  mesh's back faces first, so winding decides how it overlaps itself.
 - **`zBias` and `zIndex` go through `shader/depthStyle.ts`**, whatever the
   mark. `zBias` reproduces MathBox's under its perspective camera, stated as
   a change in view depth so it is the same on WebGPU and WebGL2 and in both

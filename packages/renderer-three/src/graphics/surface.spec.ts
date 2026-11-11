@@ -20,7 +20,12 @@ const parts = (spec: SurfaceSpec) => {
 };
 
 describe("buildSurface", () => {
-  test("draws the gridlines after the surface, biased in front of it", () => {
+  test("draws two triangles per sample cell", () => {
+    const { surface } = parts(surfaceSpec());
+    expect(surface.geometry.drawRange.count).toBe(6 * 7 * 7);
+  });
+
+  test("draws the gridlines after the surface, biased in front of it, one segment per sample step", () => {
     const { surface, line, gridlines } = parts(surfaceSpec());
     gridlines.forEach((mesh) =>
       expect(mesh.renderOrder).toBeGreaterThan(surface.renderOrder),

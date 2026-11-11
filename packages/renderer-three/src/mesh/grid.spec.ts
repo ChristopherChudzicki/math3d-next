@@ -66,6 +66,7 @@ describe("writeIndex", () => {
     const normals = new Float32Array(3 * cols * rows);
     writeNormals(grid, normals);
     expect(Array.from(normals.slice(0, 3))).toEqual([0, 0, 1]);
+    let area = 0;
     for (let t = 0; t < count; t += 3) {
       const [a, b, c] = [index[t], index[t + 1], index[t + 2]].map(
         (k) => grid.points[k],
@@ -73,13 +74,10 @@ describe("writeIndex", () => {
       const turn =
         (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
       expect(turn).toBeGreaterThan(0);
+      area += turn / 2;
     }
-  });
-
-  test("covers every cell with two triangles", () => {
-    const index = new Uint32Array(6 * 4);
-    writeIndex(2, 2, index);
-    expect(new Set(index)).toEqual(new Set([0, 1, 2, 3]));
+    // No cell missing or covered twice.
+    expect(area).toBeCloseTo(1);
   });
 });
 
@@ -101,8 +99,8 @@ describe("isolines", () => {
     const paths = isolines(grid, [6, 2]);
     expect(paths).toHaveLength(8);
     // MathBox's resample: line k samples index round(k * 63 / 5).
-    const fixedU = paths.slice(0, 6).map((path) => path[0][0] * 63);
-    expect(fixedU.map(Math.round)).toEqual([0, 13, 25, 38, 50, 63]);
+    const uIndices = paths.slice(0, 6).map((path) => path[0][0] * 63);
+    expect(uIndices.map(Math.round)).toEqual([0, 13, 25, 38, 50, 63]);
     paths.slice(0, 6).forEach((path) => {
       expect(path).toHaveLength(64);
       expect(new Set(path.map(([u]) => u)).size).toBe(1);
@@ -112,7 +110,7 @@ describe("isolines", () => {
     fixedV.forEach((path) => expect(path).toHaveLength(64));
   });
 
-  test("draws none in a direction with no lines", () => {
+  test("returns no paths for zero lines", () => {
     expect(isolines(sampleGrid([4, 4], flat), [0, 0])).toEqual([]);
   });
 });

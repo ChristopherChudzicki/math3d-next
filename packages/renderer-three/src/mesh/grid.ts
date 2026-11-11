@@ -23,7 +23,7 @@ export const sampleGrid = (
   return { cols, rows, points };
 };
 
-// Indexed writes: destructuring is measurably slower on a per-frame refill.
+// Indexed writes, as in `stroke/packPaths.ts`: this runs on every refill.
 /* eslint-disable no-param-reassign, prefer-destructuring */
 
 export const writePositions = ({ points }: Grid, out: Float32Array): void => {
@@ -60,8 +60,7 @@ export const writeColors = (
 /**
  * Writes MathBox's surface normals, up to sign: the unit cross product of the
  * steps to the next point along u and along v, a step at the grid's far edge
- * mirroring the one before it. Where that is zero or not finite, writes
- * zero, which the material lights as MathBox does.
+ * mirroring the one before it. Zero where that is zero or not finite.
  */
 export const writeNormals = (
   { cols, rows, points }: Grid,
@@ -70,7 +69,6 @@ export const writeNormals = (
   for (let j = 0; j < rows; j += 1) {
     for (let i = 0; i < cols; i += 1) {
       const k = j * cols + i;
-      // Each step runs from `from` to `to`.
       const uTo = points[i < cols - 1 ? k + 1 : k];
       const uFrom = points[i < cols - 1 ? k : k - 1];
       const vTo = points[j < rows - 1 ? k + cols : k];
@@ -94,11 +92,9 @@ export const writeNormals = (
 };
 
 /**
- * Writes two triangles per grid cell, in MathBox's order and winding, and
- * returns how many indices. Each winds counterclockwise about the normals
- * `writeNormals` writes, so a fragment is front facing where its normal
- * faces the camera. A translucent mesh draws its back faces first, so
- * matching MathBox's winding matches its self-overlap.
+ * Writes two triangles per cell and returns how many indices. MathBox's
+ * order and winding: three draws a translucent mesh's back faces first, so
+ * the winding decides how a translucent surface overlaps itself.
  */
 export const writeIndex = (cols: number, rows: number, out: Uint32Array) => {
   let n = 0;
@@ -129,22 +125,22 @@ const nearestLine = (line: number, lineCount: number, sampleCount: number) =>
     : 0;
 
 /**
- * Gridlines along sampled columns and rows: `lines[0]` at fixed u, each
- * running along v, and `lines[1]` at fixed v, each running along u.
+ * Gridlines along sampled columns and rows: `uLines` at fixed u, each
+ * running along v, then `vLines` at fixed v, each running along u.
  */
 export const isolines = (
   { cols, rows, points }: Grid,
-  [fixedU, fixedV]: [number, number],
+  [uLines, vLines]: [number, number],
 ): Coords[][] => {
   const paths: Coords[][] = [];
-  for (let line = 0; line < fixedU; line += 1) {
-    const i = nearestLine(line, fixedU, cols);
+  for (let line = 0; line < uLines; line += 1) {
+    const i = nearestLine(line, uLines, cols);
     const path: Coords[] = new Array(rows);
     for (let j = 0; j < rows; j += 1) path[j] = points[j * cols + i];
     paths.push(path);
   }
-  for (let line = 0; line < fixedV; line += 1) {
-    const j = nearestLine(line, fixedV, rows);
+  for (let line = 0; line < vLines; line += 1) {
+    const j = nearestLine(line, vLines, rows);
     paths.push(points.slice(j * cols, (j + 1) * cols));
   }
   return paths;

@@ -5,7 +5,7 @@ const Z_BIAS =
   "approximate: matches MathBox in perspective; in orthographic, MathBox's dolly lets any zBias win outright and this renderer doesn't";
 
 const GRID_OPACITY =
-  "approximate: opaque gridlines draw before every translucent mesh, so they show through a translucent surface in front of them; MathBox hides them";
+  "approximate: at gridOpacity 1 gridlines draw in three's opaque pass, so they show through a translucent surface in front; MathBox hides them behind their own surface";
 
 /** The properties every line-like item shares. */
 const STROKE = {
@@ -43,9 +43,10 @@ const SURFACE = {
   visible: "drawn",
   calculatedVisibility: "drawn",
   useCalculatedVisibility: "drawn",
-  zBias: Z_BIAS,
-  zIndex: "drawn",
-  // Left `todo` for the transparency task, which decides draw order.
+  zBias: `${Z_BIAS}; gridlines sit at the surface's zBias + 5, MathBox's at a fixed 5`,
+  zIndex:
+    "approximate: gridlines share the surface's zIndex; MathBox's stay at 0, so there a surface with zIndex 1 or more hides its own gridlines",
+  // Draw order belongs to the transparency task.
   zOrder: "todo",
 } as const;
 

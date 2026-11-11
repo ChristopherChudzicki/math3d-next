@@ -3,14 +3,17 @@ import type { Node } from "three/webgpu";
 import {
   attribute,
   cameraViewMatrix,
+  cross,
+  dFdx,
+  dFdy,
   dot,
-  faceDirection,
   float,
   length,
   max,
   mix,
   normalize,
   positionView,
+  positionViewDirection,
   pow,
   select,
   sqrt,
@@ -19,7 +22,10 @@ import {
   vec3,
   vec4,
 } from "three/tsl";
+import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { projectWithDepthStyle } from "../shader/depthStyle";
+
+export type MeshStyle = Pick<SurfaceSpec, "shaded" | "zBias" | "zIndex">;
 
 /**
  * One mesh's depth style. It sits at `userData.mesh` on the mesh, where the
@@ -30,17 +36,18 @@ export class MeshUniforms {
 
   zIndex = 0;
 
-  set({ zBias, zIndex }: { zBias: number; zIndex: number }): void {
+  set({ zBias, zIndex }: MeshStyle): void {
     this.zBias = zBias;
     this.zIndex = zIndex;
   }
 }
 
-const read = (property: "zBias" | "zIndex") =>
+// three's types give `userData` no node type; this casts to the one asked for.
+const read = (property: Exclude<keyof MeshUniforms, "set">) =>
   userData(`mesh.${property}`, "float") as unknown as Node<"float">;
 
 /**
- * The view-space normal, normalized, from the `normal` attribute. A zero
+ * The view-space normal from the `normal` attribute, normalized. A zero
  * normal gives MathBox's fallback, view-space up.
  */
 const viewNormal = () => {
@@ -56,21 +63,22 @@ const viewNormal = () => {
  * MathBox's shaded mesh color (`mesh.fragment.shaded`): a fixed light along
  * (1, 2, 2) in world space, wrapped diffuse and a specular highlight in a
  * lightened copy of the color. Like MathBox, it shades the squared color and
- * outputs the square root (`mesh.gamma.in`/`out`). `normal` is in view space;
- * MathBox turns it toward the camera, which `faceDirection` does here for
- * consistently wound triangles.
+ * outputs the square root (`mesh.gamma.in`/`out`).
  */
-export const mathboxShading = (
+const mathboxShading = (
   color: Node<"vec4">,
   normal: Node<"vec3">,
 ): Node<"vec4"> => {
   const rgb = color.rgb.mul(color.rgb);
   const towardLight = normalize(cameraViewMatrix.mul(vec4(1, 2, 2, 0)).xyz);
-  const toCamera = normalize(positionView.negate());
-  const n = normalize(normal).mul(faceDirection);
+  // MathBox's facing test: the triangle's screen-space orientation, not its
+  // winding, turns the interpolated normal toward the camera.
+  const face = cross(dFdx(positionView), dFdy(positionView));
+  const side = select(dot(normal, face).greaterThan(0), 1, -1);
+  const n = normalize(normal).mul(side);
   const cosine = dot(n, towardLight);
   const diffuse = mix(max(cosine, 0), cosine.mul(0.5).add(0.5), 0.1);
-  const halfway = normalize(towardLight.add(toCamera));
+  const halfway = normalize(towardLight.add(positionViewDirection));
   const specular = pow(max(dot(n, halfway), 0), 16);
   const inverse = float(1).sub(rgb);
   const offSpecular = float(1).sub(inverse.mul(inverse));
@@ -84,9 +92,8 @@ const materials = new Map<string, MeshBasicNodeMaterial>();
 
 /**
  * A triangle mesh's material, shared by every mesh with that shading and
- * transparency. The mesh supplies `normal` (zero where undefined) and
- * `color` (RGBA, unconverted) attributes in its own coordinates, and its
- * depth style at `userData.mesh` (`MeshUniforms`).
+ * transparency. The mesh supplies the attributes `TriangleMesh` writes
+ * (`MeshBuffers`) and its depth style at `userData.mesh`.
  */
 export const meshMaterial = (
   shaded: boolean,
@@ -106,7 +113,7 @@ export const meshMaterial = (
       read("zIndex"),
     );
     // Translucent, it still writes depth, and three draws its back faces
-    // before its front faces, as MathBox's three does.
+    // first, as MathBox's three does.
     material.transparent = transparent;
     material.side = DoubleSide;
     materials.set(key, material);
