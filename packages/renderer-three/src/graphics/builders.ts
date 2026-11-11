@@ -1,5 +1,6 @@
 import type { Group } from "three/webgpu";
 import type { GraphicSpec } from "@math3d/viewport-spec";
+import { buildImplicit } from "./implicit";
 import { buildLine } from "./line";
 import { buildSurface } from "./surface";
 
@@ -27,6 +28,7 @@ export type GraphicBuilders = {
 };
 
 export const builders: GraphicBuilders = {
+  implicit: buildImplicit,
   line: buildLine,
   surface: buildSurface,
 };

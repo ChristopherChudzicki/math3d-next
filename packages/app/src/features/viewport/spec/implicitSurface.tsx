@@ -27,28 +27,26 @@ const ImplicitSurface: SpecComponent<MIT.ImplicitSurface> = ({ item }) => {
   const { lhs, rhs, domain, samples, opacity, shaded, zBias, zIndex } =
     useMathItemResults(scope, item, IMPLICIT_PROPS);
   const { color } = item.properties;
+  // Memoized apart from the spec: while lhs and rhs evaluate to the same
+  // functions, a renderer gets the function it has already sampled.
+  const value = useMemo(
+    () =>
+      lhs && rhs
+        ? (x: number, y: number, z: number) => lhs(x, y, z) - rhs(x, y, z)
+        : null,
+    [lhs, rhs],
+  );
   const spec = useMemo<GraphicSpec | null>(() => {
-    if (!visible || !lhs || !rhs || !domain) return null;
+    if (!visible || !value || !domain) return null;
     return {
       kind: "implicit",
       domain,
       samples: sampleCount(samples, 20),
-      value: (x, y, z) => lhs(x, y, z) - rhs(x, y, z),
+      value,
       ...baseStyle({ opacity, zBias, zIndex }, color),
       shaded: shaded ?? true,
     };
-  }, [
-    visible,
-    lhs,
-    rhs,
-    domain,
-    samples,
-    color,
-    opacity,
-    shaded,
-    zBias,
-    zIndex,
-  ]);
+  }, [visible, value, domain, samples, color, opacity, shaded, zBias, zIndex]);
   useReportSpec(item.id, spec);
   return null;
 };
