@@ -423,7 +423,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.16.2,<3.0" },
     { name = "pyyaml", specifier = ">=6.0.3,<7.0" },
     { name = "sentry-sdk", extras = ["django"], specifier = ">=2.68.1,<3.0.0" },
-    { name = "tqdm", specifier = ">=4.64.1,<5.0.0" },
+    { name = "tqdm", specifier = ">=4.70.1,<5.0.0" },
     { name = "whitenoise", specifier = ">=6.11.0" },
 ]
 
