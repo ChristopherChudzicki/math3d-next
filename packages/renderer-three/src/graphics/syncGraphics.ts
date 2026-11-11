@@ -1,5 +1,6 @@
 import type { Group } from "three/webgpu";
 import type { GraphicSpec, ViewportGraphic } from "@math3d/viewport-spec";
+import type { Transparency } from "../shader/material";
 import type { Graphic, GraphicBuilders } from "./builders";
 
 export type DrawnGraphics = Map<
@@ -7,11 +8,15 @@ export type DrawnGraphics = Map<
   { spec: GraphicSpec; graphic: Graphic }
 >;
 
-const build = (spec: GraphicSpec, builders: GraphicBuilders) => {
+const build = (
+  spec: GraphicSpec,
+  builders: GraphicBuilders,
+  transparency: Transparency,
+) => {
   const builder = builders[spec.kind] as
-    | ((s: GraphicSpec) => Graphic)
+    | ((s: GraphicSpec, t: Transparency) => Graphic)
     | undefined;
-  return builder?.(spec) ?? null;
+  return builder?.(spec, transparency) ?? null;
 };
 
 /**
@@ -24,6 +29,7 @@ export const syncGraphics = (
   drawn: DrawnGraphics,
   graphics: ViewportGraphic[],
   builders: GraphicBuilders,
+  transparency: Transparency,
 ): void => {
   const ids = new Set(graphics.map(({ id }) => id));
   drawn.forEach(({ graphic }, id) => {
@@ -41,7 +47,7 @@ export const syncGraphics = (
       entry.spec = spec;
       return;
     }
-    const graphic = build(spec, builders);
+    const graphic = build(spec, builders, transparency);
     if (!graphic) return;
     graphic.object.renderOrder = order;
     world.add(graphic.object);

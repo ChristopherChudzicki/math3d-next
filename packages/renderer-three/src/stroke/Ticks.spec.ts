@@ -11,7 +11,7 @@ const style: TickStyle = {
 
 describe("Ticks", () => {
   test("draws a tick at each finite position, along the given direction", () => {
-    const ticks = new Ticks();
+    const ticks = new Ticks("oit");
     const positions: Coords[] = [
       [1, 0, 0],
       [NaN, 0, 0],
@@ -38,7 +38,7 @@ describe("Ticks", () => {
   });
 
   test("gives its mesh the style at MathBox's tick width, as the stroke shaders read it", () => {
-    const ticks = new Ticks();
+    const ticks = new Ticks("oit");
     ticks.set([[0, 0, 0]], [0, 1, 0], style);
     const { color, width, zBias, zIndex } = ticks.mesh.userData.stroke;
     expect(color.toArray()).toEqual(style.color);
@@ -50,7 +50,7 @@ describe("Ticks", () => {
   });
 
   test("blends translucent ticks and not opaque ones", () => {
-    const ticks = new Ticks();
+    const ticks = new Ticks("oit");
     ticks.set([[0, 0, 0]], [0, 1, 0], { ...style, color: [1, 0, 0, 0.5] });
     expect(ticks.mesh.material.transparent).toBe(true);
     ticks.set([[0, 0, 0]], [0, 1, 0], style);

@@ -4,8 +4,12 @@ import type { CoverageTable } from "@/features/viewport/shared/coverage";
 const Z_BIAS =
   "approximate: matches MathBox in perspective; in orthographic, MathBox's dolly lets any zBias win outright and this renderer doesn't";
 
-const GRID_OPACITY =
-  "approximate: at gridOpacity 1 gridlines draw in three's opaque pass, so they show through a translucent surface in front; MathBox hides them behind their own surface";
+/** Where translucent items blend in MathBox's draw order. */
+const ORDERED = "on WebGL2, or with ?oit=0,";
+
+const Z_ORDER = `approximate: translucent items blend order-independently, so zOrder only says which of two coinciding opaque marks or labels is on top; ${ORDERED} items draw in zOrder with depth writes, as in MathBox`;
+
+const GRID_OPACITY = `approximate: a translucent surface tints the gridlines behind it, its own far ones too, where MathBox hides them; ${ORDERED} they are hidden as in MathBox`;
 
 const TICKS_FOLLOW_AXIS =
   "ticks take the axis's opacity, zBias and zIndex; math3d's MathBox draws them opaque at zBias and zIndex 0";
@@ -22,8 +26,7 @@ const STROKE = {
   width: "drawn",
   zBias: Z_BIAS,
   zIndex: "drawn",
-  // Left `todo` for the transparency task, which decides draw order.
-  zOrder: "todo",
+  zOrder: Z_ORDER,
   start: "drawn",
   end: "drawn",
 } as const;
@@ -49,8 +52,7 @@ const SURFACE = {
   zBias: `${Z_BIAS}; gridlines sit at the surface's zBias + 5, MathBox's at a fixed 5, so there a surface with zBias above 5 hides its own gridlines`,
   zIndex:
     "approximate: gridlines share the surface's zIndex; MathBox's stay at 0, so there a surface with zIndex 1 or more hides its own gridlines",
-  // Left `todo` for the transparency task, which decides draw order.
-  zOrder: "todo",
+  zOrder: Z_ORDER,
 } as const;
 
 /** What the three.js renderer does with each stored property. */
@@ -82,8 +84,7 @@ export const coverage = {
     width: "drawn",
     zBias: Z_BIAS,
     zIndex: "drawn",
-    // Left `todo` for the transparency task, which decides draw order.
-    zOrder: "todo",
+    zOrder: Z_ORDER,
   },
   [MIT.Point]: {
     color: "drawn",
@@ -95,8 +96,7 @@ export const coverage = {
     size: "drawn",
     zBias: Z_BIAS,
     zIndex: "drawn",
-    // Left `todo` for the transparency task, which decides draw order.
-    zOrder: "todo",
+    zOrder: Z_ORDER,
     visible: "drawn",
     calculatedVisibility: "drawn",
     useCalculatedVisibility: "drawn",
@@ -135,8 +135,7 @@ export const coverage = {
   [MIT.ImplicitSurface]: {
     color: "drawn",
     description: "n/a: editor only",
-    opacity:
-      "approximate: a translucent closed surface shows its far side through its near side when lhs − rhs is positive outside it, and not when negative; MathBox does the reverse",
+    opacity: `approximate: a translucent closed surface shows its far side through its near side; MathBox does when lhs − rhs is negative outside it, and ${ORDERED} this renderer does when it is positive`,
     visible: "drawn",
     calculatedVisibility: "drawn",
     useCalculatedVisibility: "drawn",
@@ -149,8 +148,7 @@ export const coverage = {
     rhs: "drawn",
     zBias: Z_BIAS,
     zIndex: "drawn",
-    // Left `todo` for the transparency task, which decides draw order.
-    zOrder: "todo",
+    zOrder: Z_ORDER,
   },
   [MIT.Camera]: {
     description: "n/a: editor only",

@@ -39,7 +39,7 @@ const firstPoint = (mesh: Mesh<InstancedBufferGeometry>, name: string) => {
 
 describe("buildAxis", () => {
   test("strokes the axis across its range, with its arrowheads", () => {
-    const { line, arrows } = partsOf(buildAxis(axisSpec()));
+    const { line, arrows } = partsOf(buildAxis(axisSpec(), "oit"));
     expect(firstPoint(line, "segmentA")).toEqual([0, -2, 0]);
     expect(firstPoint(line, "segmentB")).toEqual([0, 3, 0]);
     expect(arrows.geometry.instanceCount).toBe(1);
@@ -47,7 +47,7 @@ describe("buildAxis", () => {
 
   test("draws a tick and a label at each tick value, ticks in the axis's style", () => {
     const spec = axisSpec();
-    const { ticks, tickLabels } = partsOf(buildAxis(spec));
+    const { ticks, tickLabels } = partsOf(buildAxis(spec, "oit"));
     expect(ticks.geometry.instanceCount).toBe(spec.ticks.values.length);
     expect(tickLabels.geometry.instanceCount).toBe(spec.ticks.values.length);
     expect(firstPoint(ticks, "tickCenter")).toEqual([0, -2, 0]);
@@ -62,7 +62,7 @@ describe("buildAxis", () => {
 
   test("draws no ticks or tick labels when ticks are hidden", () => {
     const spec = axisSpec();
-    const graphic = buildAxis(spec);
+    const graphic = buildAxis(spec, "oit");
     graphic.update(axisSpec({ ticks: { ...spec.ticks, visible: false } }));
     const { ticks, tickLabels } = partsOf(graphic);
     expect(ticks.visible).toBe(false);
@@ -70,14 +70,14 @@ describe("buildAxis", () => {
   });
 
   test("labels the axis's high end", () => {
-    const { endLabel } = partsOf(buildAxis(axisSpec()));
+    const { endLabel } = partsOf(buildAxis(axisSpec(), "oit"));
     expect(endLabel.geometry.instanceCount).toBe(1);
     expect(firstPoint(endLabel, "labelAnchor")).toEqual([0, 3, 0]);
   });
 
   test("orders its parts as MathBox draws them: stroke, ticks, tick labels, end label", () => {
     const { line, arrows, ticks, tickLabels, endLabel } = partsOf(
-      buildAxis(axisSpec()),
+      buildAxis(axisSpec(), "oit"),
     );
     expect(line.renderOrder).toBe(arrows.renderOrder);
     expect(arrows.renderOrder).toBeLessThan(ticks.renderOrder);

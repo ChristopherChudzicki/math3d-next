@@ -22,6 +22,7 @@ import {
 } from "three/tsl";
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
+import type { Transparency } from "../shader/material";
 import type { Layout, Template } from "../instances/Instances";
 
 /** Per label: its anchor, then its atlas slot as x, y, width, height. */
@@ -119,7 +120,8 @@ const build = () => {
 const material = sharedMaterial("uniform", build);
 
 /**
- * The material every label shares. Its alpha is the text's and the outline's
+ * The material labels share. Its alpha is the text's and the outline's
  * antialiasing; a label has no opacity of its own.
  */
-export const labelMaterial = () => material("edges");
+export const labelMaterial = (transparency: Transparency) =>
+  material("edges", transparency);

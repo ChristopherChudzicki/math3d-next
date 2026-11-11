@@ -5,7 +5,11 @@ import { SceneBuilder } from "@math3d/mock-api";
 import { MathItemType } from "@math3d/mathitem-configs";
 import { getStore } from "@/store/store";
 import { actions } from "@/store/scene/state/scene.slice";
-import { orderByOpacity, useDefaultZOrder } from "./useDefaultZOrder";
+import {
+  orderByOpacity,
+  useDefaultZOrder,
+  useZOrders,
+} from "./useDefaultZOrder";
 
 describe("orderByOpacity", () => {
   // Keys out of tree order, so that only the tiebreak keeps tree order.
@@ -101,4 +105,19 @@ describe("useDefaultZOrder", () => {
     set("varying", MathItemType.ExplicitSurface, { opacity: "a+" });
     expect(result.current.varying).toBeGreaterThan(result.current.translucent);
   });
+});
+
+test("useZOrders gives a graphic its own zOrder, else its default", async () => {
+  const scene = new SceneBuilder();
+  scene.folder().point({}, "defaulted").point({ zOrder: "7.5" }, "own");
+  const store = getStore();
+  store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
+  const { result } = renderHook(
+    () => ({ zOrders: useZOrders(), defaulted: useDefaultZOrder("defaulted") }),
+    {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    },
+  );
+  await waitFor(() => expect(result.current.zOrders.own).toBe(7.5));
+  expect(result.current.zOrders.defaulted).toBe(result.current.defaulted);
 });

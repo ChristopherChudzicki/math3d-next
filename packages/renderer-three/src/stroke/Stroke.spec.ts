@@ -26,20 +26,20 @@ const instanceCounts = (stroke: Stroke) =>
 
 describe("Stroke", () => {
   test("draws every path's segments in one mesh and its arrowheads in another", () => {
-    const stroke = new Stroke();
+    const stroke = new Stroke("oit");
     stroke.set(vectors(100), style({ start: true, end: true }));
     expect(instanceCounts(stroke)).toEqual([100, 200]);
   });
 
   test("draws no arrowheads unless the style asks for them", () => {
-    const stroke = new Stroke();
+    const stroke = new Stroke("oit");
     stroke.set(vectors(3), style());
     const [, arrows] = stroke.objects;
     expect(arrows.visible).toBe(false);
   });
 
   test("gives its meshes the style, as the shaders read it", () => {
-    const stroke = new Stroke();
+    const stroke = new Stroke("oit");
     const given = style({ end: true });
     stroke.set(vectors(1), given);
     stroke.objects.forEach((mesh) => {
@@ -59,14 +59,14 @@ describe("Stroke", () => {
   test("shares its materials with every other stroke", () => {
     const materials = (stroke: Stroke) =>
       stroke.objects.map((mesh) => mesh.material);
-    const [line, arrows] = materials(new Stroke());
-    const [otherLine, otherArrows] = materials(new Stroke());
+    const [line, arrows] = materials(new Stroke("oit"));
+    const [otherLine, otherArrows] = materials(new Stroke("oit"));
     expect(line).toBe(otherLine);
     expect(arrows).toBe(otherArrows);
   });
 
   test("blends a translucent stroke and not an opaque one", () => {
-    const stroke = new Stroke();
+    const stroke = new Stroke("oit");
     const isBlended = () =>
       stroke.objects.map((mesh) => mesh.material.transparent);
     stroke.set(vectors(1), style({ color: [1, 0, 0, 0.5] }));

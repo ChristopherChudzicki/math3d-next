@@ -12,6 +12,9 @@ import { useMathScope } from "./useMathScope";
 // Every opacity's MathScope id ends with this.
 const OPACITY_SUFFIX = mathScopeId("", "opacity");
 
+// Every zOrder's MathScope id ends with this.
+const Z_ORDER_SUFFIX = mathScopeId("", "zOrder");
+
 // The opacity a graphic draws with before its opacity has evaluated.
 const DEFAULT_OPACITY = 1;
 
@@ -38,41 +41,43 @@ const orderByOpacity = (
   return Object.fromEntries(ids.map((id, index) => [id, index]));
 };
 
-const isOpacity = (id: string, value: unknown): value is number =>
-  id.endsWith(OPACITY_SUFFIX) && typeof value === "number";
+const isOrdering = (id: string, value: unknown): value is number =>
+  (id.endsWith(OPACITY_SUFFIX) || id.endsWith(Z_ORDER_SUFFIX)) &&
+  typeof value === "number";
 
 /**
- * Each graphic's last evaluated opacity, shared by every graphic in a scope.
- * Like useMathResults, it keeps the last value while an opacity errors,
- * because that is the opacity the graphic keeps drawing with.
+ * Each graphic's last evaluated opacity and zOrder, shared by every graphic
+ * in a scope. Like useMathResults, it keeps the last value while one errors
+ * or is emptied, because that is the value the graphic keeps drawing with.
  */
 class OpacityStore {
-  // Keyed by MathScope id.
-  private opacities = new Map<string, number>();
+  // Opacities and zOrders, keyed by MathScope id.
+  private values = new Map<string, number>();
 
   private listeners = new Set<() => void>();
 
   private cached?: {
     treeOrder: Record<string, number>;
-    opacities: ReadonlyMap<string, number>;
+    values: ReadonlyMap<string, number>;
     order: Record<string, number>;
+    zOrders: Record<string, number>;
   };
 
   constructor(scope: AppMathScope) {
     scope.results.forEach((value, id) => {
-      if (isOpacity(id, value)) this.opacities.set(id, value);
+      if (isOrdering(id, value)) this.values.set(id, value);
     });
     const onChange: OnChangeListener<AppParseable> = (event) => {
       let next: Map<string, number> | undefined;
       event.detail.changes.results.touched.forEach((id) => {
         const value = scope.results.get(id);
-        if (isOpacity(id, value) && this.opacities.get(id) !== value) {
-          next ??= new Map(this.opacities);
+        if (isOrdering(id, value) && this.values.get(id) !== value) {
+          next ??= new Map(this.values);
           next.set(id, value);
         }
       });
       if (next) {
-        this.opacities = next;
+        this.values = next;
         this.listeners.forEach((listener) => listener());
       }
     };
@@ -86,16 +91,23 @@ class OpacityStore {
     };
   };
 
-  order(treeOrder: Record<string, number>): Record<string, number> {
-    const { cached, opacities } = this;
-    if (cached?.treeOrder === treeOrder && cached.opacities === opacities) {
-      return cached.order;
+  /** `order`: each graphic's default zOrder. `zOrders`: its own, else that. */
+  orders(treeOrder: Record<string, number>) {
+    const { cached, values } = this;
+    if (cached?.treeOrder === treeOrder && cached.values === values) {
+      return cached;
     }
     const order = orderByOpacity(treeOrder, (itemId) =>
-      opacities.get(mathScopeId(itemId, "opacity")),
+      values.get(mathScopeId(itemId, "opacity")),
     );
-    this.cached = { treeOrder, opacities, order };
-    return order;
+    const zOrders = Object.fromEntries(
+      Object.keys(order).map((itemId) => [
+        itemId,
+        values.get(mathScopeId(itemId, "zOrder")) ?? order[itemId],
+      ]),
+    );
+    this.cached = { treeOrder, values, order, zOrders };
+    return this.cached;
   }
 }
 
@@ -118,8 +130,21 @@ const useDefaultZOrder = (itemId: string): number | undefined => {
   const treeOrder = useSelector(select.graphicTreeOrder);
   return useSyncExternalStore(
     store.subscribe,
-    () => store.order(treeOrder)[itemId],
+    () => store.orders(treeOrder).order[itemId],
   );
 };
 
-export { useDefaultZOrder, orderByOpacity };
+/**
+ * The zOrder MathBox draws each graphic in the tree with, by item id: its
+ * own where it has one, else its default.
+ */
+const useZOrders = (): Record<string, number> => {
+  const store = opacityStore(useMathScope());
+  const treeOrder = useSelector(select.graphicTreeOrder);
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.orders(treeOrder).zOrders,
+  );
+};
+
+export { useDefaultZOrder, useZOrders, orderByOpacity };

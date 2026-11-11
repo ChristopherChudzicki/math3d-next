@@ -9,7 +9,7 @@ const style: LabelStyle = { weight: "bold", offset: [0, 24] };
 
 const setUp = () => {
   const atlas = new LabelAtlas(fakeSurface());
-  return { atlas, labels: new Labels(atlas) };
+  return { atlas, labels: new Labels("oit", atlas) };
 };
 
 const drawn = (labels: Labels) => labels.mesh.geometry.instanceCount;

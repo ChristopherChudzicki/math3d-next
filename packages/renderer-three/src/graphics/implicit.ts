@@ -3,6 +3,7 @@ import type { ImplicitSurfaceSpec } from "@math3d/viewport-spec";
 import { TriangleMesh } from "../mesh/TriangleMesh";
 import { freeMeshBuffers, marchingCubes } from "../mesh/marchingCubes";
 import { freeGridBuffer, sampleScalarGrid } from "../mesh/scalarGrid";
+import type { Transparency } from "../shader/material";
 import type { Graphic } from "./builders";
 
 /**
@@ -22,8 +23,9 @@ const sameField = (a: ImplicitSurfaceSpec, b: ImplicitSurfaceSpec) =>
 /** Implicit surfaces: the zero level set of the spec's `value`. */
 export const buildImplicit = (
   spec: ImplicitSurfaceSpec,
+  transparency: Transparency,
 ): Graphic<ImplicitSurfaceSpec> => {
-  const surface = new TriangleMesh();
+  const surface = new TriangleMesh(transparency);
   let drawn: ImplicitSurfaceSpec | null = null;
   let vertexCount = 0;
   let indexCount = 0;

@@ -11,6 +11,7 @@ import {
 } from "../mesh/parametricGrid";
 import type { ParametricGrid } from "../mesh/parametricGrid";
 import { Stroke } from "../stroke/Stroke";
+import type { Transparency } from "../shader/material";
 import type { Graphic } from "./builders";
 
 // Like MathBox's own surface wireframe (zBias + lineBias); the app's MathBox
@@ -32,9 +33,12 @@ const fillSurface = (
 };
 
 /** Parametric, explicit and polar surfaces, with their gridlines. */
-export const buildSurface = (spec: SurfaceSpec): Graphic<SurfaceSpec> => {
-  const surface = new TriangleMesh();
-  const gridlines = new Stroke();
+export const buildSurface = (
+  spec: SurfaceSpec,
+  transparency: Transparency,
+): Graphic<SurfaceSpec> => {
+  const surface = new TriangleMesh(transparency);
+  const gridlines = new Stroke(transparency);
   gridlines.objects.forEach((mesh) => {
     // After the surface, within the item's group.
     // eslint-disable-next-line no-param-reassign

@@ -18,7 +18,7 @@ import {
 import type { PointSpec } from "@math3d/viewport-spec";
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
-import type { Alpha } from "../shader/material";
+import type { Alpha, Transparency } from "../shader/material";
 import { viewUnitsPerPixel } from "../shader/viewUnits";
 import type { Layout, Template } from "../instances/Instances";
 
@@ -103,8 +103,13 @@ const build = (part: DiscPart) => {
 const fill = sharedMaterial("uniform", () => build("fill"));
 const edge = sharedMaterial("uniform", () => build("edge"));
 
-/** The material for the fill of discs of that alpha, shared by all. */
-export const fillMaterial = (alpha: Alpha) => fill(alpha);
+/** The material for the fill of discs of that alpha. */
+export const fillMaterial = (alpha: Alpha, transparency: Transparency) =>
+  fill(alpha, transparency);
 
-/** The rim's material, shared by all: its alpha only antialiases the disc. */
-export const edgeMaterial = () => edge("edges");
+/**
+ * The material for the rim of discs of that alpha. An opaque disc's rim only
+ * antialiases it; a translucent disc's is as translucent as its fill.
+ */
+export const edgeMaterial = (alpha: Alpha, transparency: Transparency) =>
+  edge(alpha === "opaque" ? "edges" : alpha, transparency);

@@ -24,7 +24,7 @@ const gridSpec: GridSpec = {
 
 describe("buildGrid", () => {
   test("strokes a line across the plane at each value, spanning the other axis's range", () => {
-    const [line] = buildGrid(gridSpec).object
+    const [line] = buildGrid(gridSpec, "oit").object
       .children as Mesh<InstancedBufferGeometry>[];
     const { geometry } = line;
     const point = (name: string, i: number) => {
@@ -65,7 +65,7 @@ describe("buildGrid", () => {
   });
 
   test("strokes in the grid's style", () => {
-    const [line] = buildGrid(gridSpec).object.children as Mesh[];
+    const [line] = buildGrid(gridSpec, "oit").object.children as Mesh[];
     const { color, width, zBias, zIndex } = line.userData.stroke;
     expect(color.toArray()).toEqual(gridSpec.color);
     expect({ width, zBias, zIndex }).toEqual({

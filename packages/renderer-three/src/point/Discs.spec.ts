@@ -22,7 +22,7 @@ const instanceCounts = (discs: Discs) =>
 
 describe("Discs", () => {
   test("draws a fill and a rim for each finite point, in one mesh each", () => {
-    const discs = new Discs();
+    const discs = new Discs("oit");
     discs.set([[0, 0, 0], [NaN, 0, 0], ...points(2)], style());
     expect(instanceCounts(discs)).toEqual([3, 3]);
   });
@@ -35,18 +35,18 @@ describe("Discs", () => {
     },
     { without: "a size", at: points(1), given: style({ diameter: 0 }) },
   ])("draws nothing without $without", ({ at, given }) => {
-    const discs = new Discs();
+    const discs = new Discs("oit");
     discs.set(at, given);
     expect(discs.objects.map((mesh) => mesh.visible)).toEqual([false, false]);
   });
 
   test("draws the rims after the fills", () => {
-    const [fill, edge] = new Discs().objects;
+    const [fill, edge] = new Discs("oit").objects;
     expect(edge.renderOrder).toBeGreaterThan(fill.renderOrder);
   });
 
   test("gives its meshes the style, as the shaders read it", () => {
-    const discs = new Discs();
+    const discs = new Discs("oit");
     const given = style();
     discs.set(points(1), given);
     discs.objects.forEach((mesh) => {
@@ -63,14 +63,14 @@ describe("Discs", () => {
   test("shares its materials with every other set of discs", () => {
     const materials = (discs: Discs) =>
       discs.objects.map((mesh) => mesh.material);
-    const [fill, edge] = materials(new Discs());
-    const [otherFill, otherEdge] = materials(new Discs());
+    const [fill, edge] = materials(new Discs("oit"));
+    const [otherFill, otherEdge] = materials(new Discs("oit"));
     expect(fill).toBe(otherFill);
     expect(edge).toBe(otherEdge);
   });
 
   test("always blends the rims, and the fills only when translucent", () => {
-    const discs = new Discs();
+    const discs = new Discs("oit");
     const isBlended = () =>
       discs.objects.map(
         (mesh) => (mesh.material as { transparent: boolean }).transparent,

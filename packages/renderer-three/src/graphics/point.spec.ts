@@ -32,7 +32,7 @@ const partsOf = (graphic: ReturnType<typeof buildPoint>) => {
 describe("buildPoint", () => {
   test("labels every point, after its discs", () => {
     const spec = pointSpec();
-    const { discs, labels } = partsOf(buildPoint(spec));
+    const { discs, labels } = partsOf(buildPoint(spec, "oit"));
     expect(labels.geometry.instanceCount).toBe(spec.positions.length);
     discs.forEach((mesh) =>
       expect(labels.renderOrder).toBeGreaterThan(mesh.renderOrder),
@@ -40,7 +40,7 @@ describe("buildPoint", () => {
   });
 
   test("redraws in place for an updated spec", () => {
-    const graphic = buildPoint(pointSpec());
+    const graphic = buildPoint(pointSpec(), "oit");
     const { discs, labels } = partsOf(graphic);
     graphic.update(pointSpec({ positions: [[0, 0, 0]], label: null }));
     partsOf(graphic).discs.forEach((mesh, i) => expect(mesh).toBe(discs[i]));

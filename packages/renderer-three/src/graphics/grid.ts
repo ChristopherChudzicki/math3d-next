@@ -3,11 +3,15 @@ import type { GridSpec } from "@math3d/viewport-spec";
 import { Stroke } from "../stroke/Stroke";
 import { pointOn } from "./coords";
 import type { AxisName } from "./coords";
+import type { Transparency } from "../shader/material";
 import type { Graphic } from "./builders";
 
 /** Gridlines across a plane through the origin, each spanning the plane's range. */
-export const buildGrid = (spec: GridSpec): Graphic<GridSpec> => {
-  const stroke = new Stroke();
+export const buildGrid = (
+  spec: GridSpec,
+  transparency: Transparency,
+): Graphic<GridSpec> => {
+  const stroke = new Stroke(transparency);
   const set = (next: GridSpec) => {
     const axes = [...next.axes] as AxisName[];
     const at = (u: number, v: number) => pointOn(axes, [u, v]);

@@ -21,8 +21,13 @@ reports back through `ViewportHooks`, both types in
   dependencies on `app`, React or any renderer.
 - `ViewportSpec` is the axes' `range` and `scale`, the `camera` (a
   `CameraSpec` in view coordinates), a `cameraRevision`, an `orthographic`
-  flag, the enabled `controls`, and the `graphics` as an ordered
-  `{ id, spec }` list.
+  flag, the enabled `controls`, and the `graphics` as an `{ id, spec }` list
+  in draw order.
+- **`graphics` is in MathBox's draw order**: by each item's `zOrder`, which
+  defaults to more opaque items first, then the item tree bottom to top with
+  surfaces last (`useZOrders`). A renderer that draws the list in order with
+  depth writes on gets MathBox's picture; the order is not in any
+  `GraphicSpec`, so a change of order rebuilds nothing.
 - `ViewportHooks`: `onUnsupported(error)` when the renderer can't run in this
   browser; `onCameraMove(camera)` as the user moves the camera (the app
   decides when a move ends and what to write back); `onReady()` once the
@@ -80,8 +85,9 @@ fails typecheck until a new key has one.
 The three.js renderer is the `packages/renderer-three` workspace, with its
 own `three` and `@types/three` (Yarn nests them under the workspace; the
 app's root copy is MathBox's `three@0.147`). It exports a React `Viewport`
-taking a `ViewportSpec`, `ViewportHooks` and `forceWebGL`, and is built on
-`WebGPURenderer` (`three/webgpu`), which falls back to WebGL2 by itself.
+taking a `ViewportSpec`, `ViewportHooks`, `forceWebGL` and `transparency`,
+and is built on `WebGPURenderer` (`three/webgpu`), which falls back to WebGL2
+by itself.
 
 - A graphic kind plugs in as a builder in `graphics/builders.ts`;
   `syncGraphics` adds, updates and disposes graphics by `id`. Each item's
@@ -114,8 +120,8 @@ parent, so anything sized in pixels is built in the shader, in view space:
   with a port of MathBox's surface shading, gamma step included. It takes
   per-vertex RGBA, and normals in its own coordinates that the normal matrix
   carries through the axes' scale. A surface's triangles wind as MathBox's
-  do: three draws a translucent mesh's back faces first, so winding decides
-  how it overlaps itself.
+  do: on the `ordered` path three draws a translucent mesh's back faces
+  first, so winding decides how it overlaps itself.
 - **An implicit surface is meshed on the CPU** (`graphics/implicit.ts`), so
   it draws on WebGL2 too. The equation is sampled once on a grid of `samples`
   cells per axis, 128 at most, then meshed by marching cubes with shared
@@ -127,8 +133,8 @@ parent, so anything sized in pixels is built in the shader, in view space:
   - Sampling is nearly all the cost, so a spec with the same `value`,
     `domain` and `samples` as the one drawn is not sampled again.
   - Triangles wind counterclockwise seen from where `value` is positive, so
-    which side of a translucent surface shows through depends on the
-    equation's sign.
+    on the `ordered` path which side of a translucent surface shows through
+    depends on the equation's sign.
 - **Every point is a `Discs`** (`point/Discs.ts`), MathBox's circle point:
   a disc `size` across at view depth 1 with a one-pixel antialiased rim.
   Like MathBox it draws all fills, then all rims, so a rim's depth write never
@@ -141,7 +147,7 @@ parent, so anything sized in pixels is built in the shader, in view space:
 - **Colors are output unconverted** (`outputColorSpace` is linear and
   `ColorManagement` is off), so they blend in sRGB as MathBox's do. three's
   default pipeline blends in linear space, which lightens every translucent
-  mark.
+  mark. The OIT pass's targets hold the same unconverted values.
 - **Every label is a `Labels`** (`label/Labels.ts`), MathBox's `<Label>`:
   line, vector, point, axis and tick labels. 16 px `sans-serif` with a 2 px
   white outline, no LaTeX (MathBox has none).
@@ -200,6 +206,36 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
   an item one `zOrder`.
 - Opaque three.js draws follow item order, not front to back (unmeasured;
   expected negligible at math3d's scene sizes).
+
+#### Transparency
+
+Two models, chosen per `ThreeScene` (`Viewport`'s `transparency`; the app
+passes `?oit=1` or `?oit=0`):
+
+- **`oit`, the default on WebGPU**: order-independent. `OitFrame` runs
+  three's weighted, blended OIT pass (`three/addons/tsl/display/OITPassNode`).
+  Opaque marks draw first; labels and point rims, whose alpha only
+  antialiases them, blend over those in item order and write depth; every
+  translucent fragment in front of that depth is then composited, whatever
+  the order. A fragment's share of the blended color falls with its depth
+  relative to the scene (`NEARNESS_GAIN`), so the nearer layer reads as
+  nearer.
+- **`ordered`, the default on WebGL2**: MathBox's way, for like-for-like
+  comparison. Every material blends and writes depth, in the spec's order,
+  with three's back-then-front draw of two-sided meshes.
+- **WebGL2 defaults to `ordered`** because three's OIT pass has no MSAA
+  there, for opaque marks too, and thin gridlines break into dots.
+- **`shader/material.ts` alone sets blending and depth flags.** A mark
+  states what its alpha is for (`opaque`, `translucent`, or `edges`) and
+  whether its triangles all face one way; `sharedMaterial` turns that and
+  the model into `transparent`, `blending`, `depthWrite`, `side` and
+  `forceSinglePass`, and caches the material.
+- **three never sorts by depth.** `ThreeScene` replaces both of three's sort
+  functions with item order, then part order.
+- Two workarounds for three 0.187, in `OitFrame`: the frame after the pass's
+  targets are resized is drawn twice, because its first draw loses the
+  shared depth; and the pass updates per render, not per animation frame, so
+  that second draw happens.
 
 ## Alternatives considered
 

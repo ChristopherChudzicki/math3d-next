@@ -3,6 +3,7 @@ import {
   Group,
   LinearSRGBColorSpace,
   Scene,
+  UnsignedByteType,
   WebGPURenderer,
 } from "three/webgpu";
 import type { CameraSpec, ViewportSpec } from "@math3d/viewport-spec";
@@ -12,14 +13,40 @@ import { builders } from "./graphics/builders";
 import { syncGraphics } from "./graphics/syncGraphics";
 import type { DrawnGraphics } from "./graphics/syncGraphics";
 import { onLabelRelayout } from "./label/atlas";
+import { OitFrame } from "./OitFrame";
+import type { Transparency } from "./shader/material";
 
 // Colors stay the sRGB values the spec gives (see `outputColorSpace` below),
 // so three must not convert a `Color` to linear on its way in either.
 ColorManagement.enabled = false;
 
+type Drawn = {
+  groupOrder: number | null;
+  renderOrder: number | null;
+  id: number | null;
+};
+
+/** Items in the spec's order, an item's parts in their own: never by depth. */
+const inDrawOrder = (a: Drawn, b: Drawn) =>
+  (a.groupOrder ?? 0) - (b.groupOrder ?? 0) ||
+  (a.renderOrder ?? 0) - (b.renderOrder ?? 0) ||
+  (a.id ?? 0) - (b.id ?? 0);
+
+/**
+ * The model each backend draws with unless told otherwise. On WebGL2 three's
+ * OIT pass draws the whole scene without MSAA, which breaks thin lines into
+ * dots, so translucency there keeps MathBox's order.
+ */
+const DEFAULT_TRANSPARENCY: Record<"webgpu" | "webgl2", Transparency> = {
+  webgpu: "oit",
+  webgl2: "ordered",
+};
+
 type Options = {
   /** Use the WebGL2 backend even where WebGPU is available. */
   forceWebGL: boolean;
+  /** How translucent marks combine; the backend's default when absent. */
+  transparency?: Transparency;
   /** Called once, after the first frame is drawn. */
   onFirstFrame(): void;
   /** The camera as the user moves it. */
@@ -65,6 +92,11 @@ export class ThreeScene {
 
   private spec: ViewportSpec | null = null;
 
+  /** Set once the backend is known. */
+  private transparency: Transparency = "oit";
+
+  private oit: OitFrame | null = null;
+
   private frame: number | null = null;
 
   private drawn = false;
@@ -88,7 +120,13 @@ export class ThreeScene {
       canvas: this.canvas,
       antialias: true,
       forceWebGL: options.forceWebGL,
+      // What the OIT pass draws the scene into: the canvas's own precision.
+      outputBufferType: UnsignedByteType,
     });
+    // three's default sorts equal `renderOrder`s by distance, which reorders
+    // blended marks as the camera moves.
+    this.renderer.setOpaqueSort(inDrawOrder);
+    this.renderer.setTransparentSort(inDrawOrder);
     // Colors go to the canvas as given and blend there in sRGB, as MathBox's
     // do; three's default blends in linear space, which lightens translucency.
     this.renderer.outputColorSpace = LinearSRGBColorSpace;
@@ -103,8 +141,15 @@ export class ThreeScene {
     await this.renderer.init();
     if (this.disposed) return;
     // E2E reads it.
-    this.canvas.dataset.backend =
+    const backend =
       "isWebGPUBackend" in this.renderer.backend ? "webgpu" : "webgl2";
+    this.canvas.dataset.backend = backend;
+    this.transparency =
+      this.options.transparency ?? DEFAULT_TRANSPARENCY[backend];
+    this.canvas.dataset.transparency = this.transparency;
+    if (this.transparency === "oit") {
+      this.oit = new OitFrame(this.renderer, this.scene, this.view.camera);
+    }
     this.resizeObserver.observe(this.host);
     this.resize();
   }
@@ -116,10 +161,18 @@ export class ThreeScene {
       const { scale, offset } = mathToView(spec.range, spec.scale);
       this.world.scale.set(...scale);
       this.world.position.set(...offset);
+      // The axes' box, which holds most of any scene.
+      this.oit?.setRadius(Math.hypot(...spec.scale));
     }
     this.view.setSpec(spec);
     if (last?.graphics !== spec.graphics) {
-      syncGraphics(this.world, this.graphics, spec.graphics, builders);
+      syncGraphics(
+        this.world,
+        this.graphics,
+        spec.graphics,
+        builders,
+        this.transparency,
+      );
     }
     this.invalidate();
   }
@@ -132,6 +185,7 @@ export class ThreeScene {
     this.view.dispose();
     this.canvas.remove();
     this.graphics.forEach(({ graphic }) => graphic.dispose());
+    this.oit?.dispose();
     // dispose() awaits init(), so it rejects whenever init did; init()'s
     // caller owns that failure.
     this.renderer.dispose().catch(() => {});
@@ -148,6 +202,7 @@ export class ThreeScene {
     const { clientWidth, clientHeight } = this.host;
     this.renderer.setSize(clientWidth, clientHeight, false);
     this.view.setAspect(clientWidth / clientHeight);
+    this.oit?.resized();
     this.invalidate();
   }
 
@@ -170,7 +225,8 @@ export class ThreeScene {
   private draw(): void {
     // Before init resolves or the first spec, or while the host has no size.
     if (!this.renderer.initialized || !this.spec || !this.hasSize()) return;
-    this.renderer.render(this.scene, this.view.camera);
+    if (this.oit) this.oit.render(this.view.camera);
+    else this.renderer.render(this.scene, this.view.camera);
     if (!this.drawn) {
       this.drawn = true;
       this.options.onFirstFrame();

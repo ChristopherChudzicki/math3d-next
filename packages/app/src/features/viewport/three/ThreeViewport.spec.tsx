@@ -17,13 +17,13 @@ vi.mock("@sentry/react", async (importOriginal) => ({
   captureMessage: vi.fn(),
 }));
 
-const renderViewport = () => {
+const renderViewport = (url = "/") => {
   const store = getStore();
   const scene = new SceneBuilder();
   store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
   render(
     <Provider store={store}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[url]}>
         <ThreeViewport />
       </MemoryRouter>
     </Provider>,
@@ -70,3 +70,20 @@ test("an unsupported browser gets a way back to the default renderer", async () 
   );
   expect(localStorage.getItem(RENDERER_PREFERENCE_KEY)).toBe("mathbox");
 });
+
+test.each([
+  { url: "/", transparency: undefined },
+  { url: "/?oit=0", transparency: "ordered" },
+  { url: "/?oit=1", transparency: "oit" },
+])(
+  "$url asks the renderer for transparency $transparency",
+  async ({ url, transparency }) => {
+    const Renderer = vi.fn((_props: ThreeViewportProps) => null);
+    threeViewport.Component = Renderer;
+    renderViewport(url);
+    await waitFor(() =>
+      expect(Renderer.mock.lastCall?.[0].transparency).toBe(transparency),
+    );
+    expect(Renderer).toHaveBeenCalled();
+  },
+);

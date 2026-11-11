@@ -1,6 +1,7 @@
 import type { Coords, RGBA } from "@math3d/viewport-spec";
 import { Instances, strideOf } from "../instances/Instances";
 import { isDrawable, put } from "../instances/points";
+import type { Transparency } from "../shader/material";
 import { labelAtlas } from "./atlas";
 import type { LabelAtlas, LabelText, LabelWeight, Slot } from "./LabelAtlas";
 import {
@@ -30,11 +31,7 @@ const STRIDE = strideOf(LABEL_LAYOUT);
  * label's raster is in one shared atlas.
  */
 export class Labels {
-  private readonly instances = new Instances(
-    QUAD_TEMPLATE,
-    LABEL_LAYOUT,
-    labelMaterial(),
-  );
+  private readonly instances: Instances;
 
   private readonly uniforms = new LabelUniforms();
 
@@ -46,11 +43,20 @@ export class Labels {
   private anchorTexts: LabelText[] = [];
 
   /** Add it to the item's `Group`. */
-  readonly mesh = this.instances.mesh;
+  readonly mesh: Instances["mesh"];
 
   private readonly unsubscribe: () => void;
 
-  constructor(private readonly atlas: LabelAtlas = labelAtlas()) {
+  constructor(
+    transparency: Transparency,
+    private readonly atlas: LabelAtlas = labelAtlas(),
+  ) {
+    this.instances = new Instances(
+      QUAD_TEMPLATE,
+      LABEL_LAYOUT,
+      labelMaterial(transparency),
+    );
+    this.mesh = this.instances.mesh;
     this.mesh.userData.label = this.uniforms;
     this.unsubscribe = atlas.onRelayout(() => this.fill());
   }

@@ -23,7 +23,7 @@ import {
 import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
-import type { Alpha } from "../shader/material";
+import type { Alpha, Transparency } from "../shader/material";
 
 export type MeshStyle = Pick<SurfaceSpec, "shaded" | "zBias" | "zIndex">;
 
@@ -111,5 +111,8 @@ const flatMaterial = sharedMaterial("mixed", build(false));
  * alpha. The mesh supplies the attributes `TriangleMesh` writes
  * (`MeshBuffers`) and its depth style at `userData.mesh`.
  */
-export const meshMaterial = (shaded: boolean, alpha: Alpha) =>
-  (shaded ? shadedMaterial : flatMaterial)(alpha);
+export const meshMaterial = (
+  shaded: boolean,
+  alpha: Alpha,
+  transparency: Transparency,
+) => (shaded ? shadedMaterial : flatMaterial)(alpha, transparency);
