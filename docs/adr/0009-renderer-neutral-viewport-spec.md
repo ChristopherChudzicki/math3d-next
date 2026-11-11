@@ -216,8 +216,9 @@ Two looks for shaded surfaces, chosen per `ThreeScene` (`Viewport`'s
   default lit material and the lights the app gives Use.GPU.
 - **`matte`**: MathBox's look, for comparison captures against math3d.org.
 - Both use MathBox's light direction and facing test, and clamp the shaded
-  color to 1: OIT accumulates in half float, where a brighter color would
-  lighten every translucent layer it blends with.
+  color to 1, as the unorm targets do: OIT accumulates in half float, where a
+  color above 1 would brighten the blend of every translucent layer at that
+  pixel.
 - Only shaded surfaces differ.
 
 #### Transparency

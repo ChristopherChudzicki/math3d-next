@@ -185,8 +185,8 @@ const build = (shading: Shading | null) => () => {
       read("zBias", "float"),
       read("zIndex", "float"),
     ),
-    // Clamped: OIT accumulates in half float, where a color above 1 would
-    // brighten every translucent layer it blends with.
+    // Clamped to 1, as the unorm targets do: OIT accumulates in half float,
+    // where a color above 1 would brighten the blend at that pixel.
     color: shading ? min(SHADINGS[shading](color, viewNormal()), 1) : color,
     // MathBox discards where the interpolated color has no opacity.
     mask: color.a.greaterThan(0),
