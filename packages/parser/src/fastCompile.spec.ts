@@ -77,6 +77,18 @@ describe("fastCompile agrees with mathjs", () => {
       fast: true,
     },
     {
+      title: "whole-number exponents",
+      expr: "f(x) = x^2 + x^(-3) + (x i)^2",
+      point: [-1.5],
+      fast: true,
+    },
+    {
+      title: "a fractional exponent of a negative number",
+      expr: "f(x) = x^0.5",
+      point: [-4],
+      fast: true,
+    },
+    {
       title: "a scope value and a constant",
       expr: "f(x) = a x + pi",
       point: [0.5],
