@@ -52,8 +52,15 @@ export class ThreeScene {
   private readonly view: ViewCamera;
 
   // A new devicePixelRatio relays out the labels without resizing the host.
+  // Only then resize: it clears the drawing buffer and reallocates its targets.
   private readonly stopLabelRelayout = onLabelRelayout(() =>
-    this.reporting(() => this.resize()),
+    this.reporting(() => {
+      if (window.devicePixelRatio === this.renderer.getPixelRatio()) {
+        this.invalidate();
+      } else {
+        this.resize();
+      }
+    }),
   );
 
   private spec: ViewportSpec | null = null;
