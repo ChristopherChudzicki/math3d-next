@@ -245,11 +245,11 @@ passes `ordered` for `?oit=0`):
     `accumulatingLast` goes.
 - **`oit` costs more than `ordered` on WebGL2**: about twice the frame time
   on the one GPU it is measured on (an M1 Pro; 8 ms against 4 ms at
-  2200×1420), mostly a fixed cost of clearing and resolving three
-  multisampled attachments. It is unmeasured on weaker GPUs and where OG
-  images render.
+  2200×1420). The extra is mostly fixed; by inference, it is clearing and
+  resolving three multisampled attachments. It is unmeasured on weaker GPUs
+  and where OG images render.
 - **Where the pass can't run, `ThreeScene` draws `ordered`** whatever was
-  asked (`OitFrame.supported`): on WebGL2 without `OES_draw_buffers_indexed`
+  asked, and says why once on the console (`OitFrame.obstacle`): on WebGL2 without `OES_draw_buffers_indexed`
   or `EXT_color_buffer_float`, or with
   `WEBGL_multisampled_render_to_texture` (a path of three's that the
   three-attachment target is untested on), and in WebGPU's compatibility

@@ -21,10 +21,22 @@ import { Settle } from "./settle";
 // so three must not convert a `Color` to linear on its way in either.
 ColorManagement.enabled = false;
 
+let orderedReported = false;
+
+/** Says once per page why `oit` gave way to `ordered`: no picture shows it. */
+const reportOrdered = (obstacle: string) => {
+  if (orderedReported) return;
+  orderedReported = true;
+  // eslint-disable-next-line no-console
+  console.info(
+    `three.js renderer: translucent items draw in order, not order-independently (${obstacle}).`,
+  );
+};
+
 type Options = {
   /** Use the WebGL2 backend even where WebGPU is available. */
   forceWebGL: boolean;
-  /** How translucent marks combine; `oit` when absent. */
+  /** How translucent marks combine; `oit` when absent, where the browser can. */
   transparency?: Transparency;
   /**
    * Called once: after the `ResizeObserver` has reported, the first drawn
@@ -134,8 +146,11 @@ export class ThreeScene {
       "isWebGPUBackend" in this.renderer.backend ? "webgpu" : "webgl2";
     this.canvas.dataset.backend = backend;
     this.transparency = this.options.transparency ?? "oit";
-    if (this.transparency === "oit" && !OitFrame.supported(this.renderer)) {
+    const obstacle =
+      this.transparency === "oit" ? OitFrame.obstacle(this.renderer) : null;
+    if (obstacle) {
       this.transparency = "ordered";
+      reportOrdered(obstacle);
     }
     this.canvas.dataset.transparency = this.transparency;
     if (this.transparency === "oit") {

@@ -91,27 +91,31 @@ export class OitFrame {
   private readonly size = new Vector2();
 
   /**
-   * Whether the pass can draw on the renderer's backend, once that is up. It
-   * needs each attachment blended its own way and a multisampled half-float
-   * one; without the first, translucent marks vanish.
+   * What keeps the pass from drawing on the renderer's backend, once that is
+   * up, or null. It needs each attachment blended its own way and a
+   * multisampled half-float one; without the first, translucent marks vanish.
    */
-  static supported(renderer: WebGPURenderer): boolean {
+  static obstacle(renderer: WebGPURenderer): string | null {
     const { backend } = renderer;
     if ("isWebGPUBackend" in backend) {
       // Untyped. three sets it for a device in WebGPU's compatibility mode,
       // where it blends every attachment as the material does.
-      return !("compatibilityMode" in backend && backend.compatibilityMode);
+      return "compatibilityMode" in backend && backend.compatibilityMode
+        ? "WebGPU is in compatibility mode"
+        : null;
     }
     // The context three made: a canvas hands out one per type.
     const gl = renderer.domElement.getContext("webgl2");
-    if (!gl) return false;
-    return (
-      gl.getExtension("OES_draw_buffers_indexed") !== null &&
-      gl.getExtension("EXT_color_buffer_float") !== null &&
-      // With it three attaches multisampled textures, a path this target's
-      // three attachments are untested on.
-      gl.getExtension("WEBGL_multisampled_render_to_texture") === null
+    if (!gl) return "no WebGL2 context";
+    const missing = ["OES_draw_buffers_indexed", "EXT_color_buffer_float"].find(
+      (name) => gl.getExtension(name) === null,
     );
+    if (missing) return `${missing} is missing`;
+    // With it three attaches multisampled textures, a path this target's
+    // three attachments are untested on.
+    return gl.getExtension("WEBGL_multisampled_render_to_texture") === null
+      ? null
+      : "WEBGL_multisampled_render_to_texture is present";
   }
 
   constructor(
@@ -140,13 +144,15 @@ export class OitFrame {
     );
     const alpha = output.a;
     const weight = alpha.mul(exp(nearness.mul(NEARNESS_GAIN)));
+    // A mark writes zeros to `sum` and `coverage` when they aren't its own.
+    // Blended, as all are on WebGPU, a zero adds nothing. three's WebGL2
+    // backend writes an opaque mark's unblended, before any mark accumulates,
+    // so the clear value must be zero too: this stores coverage, not three's
+    // revealage, which clears to one.
     this.outputs = mrt({
       // Zero alpha under the material's own blend leaves the color as it is.
       output: byMaterial(vec4(0), output),
       sum: byMaterial(vec4(output.rgb.mul(alpha), alpha).mul(weight), vec4(0)),
-      // Zero is the clear value, and three's WebGL2 backend writes an opaque
-      // mark's zero unblended, before any mark accumulates. three's
-      // revealage clears to one.
       coverage: byMaterial(alpha, float(0)),
     })
       .setBlendMode("sum", added)
