@@ -23,7 +23,7 @@ test("frame page captures the scene after it renders, not blank", async ({
     timeout: 60_000,
   });
   const png = await page.getByTestId("scene").screenshot();
-  const ratio = await colorfulPixelRatio(page, png.toString("base64"));
+  const ratio = await colorfulPixelRatio(png);
 
   // A fully-rendered default explicit surface fills ~0.51 of the frame with
   // colored pixels; an empty scene (axes + grid only, i.e. what a too-early

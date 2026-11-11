@@ -1,5 +1,5 @@
 import type { Coords } from "@math3d/viewport-spec";
-import { Instances } from "./Instances";
+import { Instances } from "../instances/Instances";
 import { CONE_TEMPLATE, arrowMaterial } from "./arrowMaterial";
 import { SEGMENT_TEMPLATE, lineMaterial } from "./lineMaterial";
 import {

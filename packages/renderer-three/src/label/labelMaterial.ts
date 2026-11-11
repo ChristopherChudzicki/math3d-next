@@ -3,7 +3,13 @@
  * plus an offset in CSS pixels, after MathBox's `sprite.position` and
  * `label.outline` shaders.
  */
-import { MeshBasicNodeMaterial, Texture, Vector2, Vector4 } from "three/webgpu";
+import {
+  DoubleSide,
+  MeshBasicNodeMaterial,
+  Texture,
+  Vector2,
+  Vector4,
+} from "three/webgpu";
 import type { Node } from "three/webgpu";
 import {
   attribute,
@@ -23,7 +29,7 @@ import {
   vec4,
 } from "three/tsl";
 import { projectWithDepthStyle } from "../shader/depthStyle";
-import type { Layout, Template } from "../stroke/Instances";
+import type { Layout, Template } from "../instances/Instances";
 
 /** Per label: its anchor, then its atlas slot as x, y, width, height. */
 export const LABEL_LAYOUT = [
@@ -80,9 +86,9 @@ const build = () => {
   );
   const slot = attribute<"vec4">("labelSlot", "vec4");
 
-  // In device pixels from the bottom left. A raster drawn at another pixel
-  // ratio than the screen's keeps its CSS size.
+  // A raster drawn at another pixel ratio than the screen's keeps its CSS size.
   const size = slot.zw.mul(screenDPR.div(atlasInputs.pixelRatio));
+  // In device pixels from the bottom left.
   const center = clip.xy
     .div(clip.w)
     .mul(0.5)
@@ -134,6 +140,10 @@ export const labelMaterial = (): MeshBasicNodeMaterial => {
     // Blends its edges; writes depth where it covers, as MathBox's labels do.
     material.transparent = true;
     material.depthWrite = true;
+    // A mirrored axis flips the quad's winding. One pass, or its edges blend
+    // twice.
+    material.side = DoubleSide;
+    material.forceSinglePass = true;
   }
   return material;
 };

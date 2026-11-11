@@ -12,6 +12,8 @@ const LABEL_STYLE: LabelStyle = { weight: "bold", offset: [0, 24] };
 export const buildLine = (spec: LineSpec): Graphic<LineSpec> => {
   const stroke = new Stroke();
   const labels = new Labels();
+  // After the stroke.
+  labels.mesh.renderOrder = 1;
   const set = (next: LineSpec) => {
     stroke.set(next.paths, next);
     const end = next.paths.at(-1)?.at(-1);

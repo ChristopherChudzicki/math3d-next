@@ -20,7 +20,7 @@ import {
   vec4,
 } from "three/tsl";
 import { projectWithDepthStyle } from "../shader/depthStyle";
-import type { Template } from "./Instances";
+import type { Template } from "../instances/Instances";
 import { arrowLengthAt, strokeMaterial, strokeStyle, toView } from "./style";
 
 /** x is the corner's end of the segment (0 or 1), y its side of the line (±1). */

@@ -115,11 +115,16 @@ parent, so anything sized in pixels is built in the shader, in view space:
   default pipeline blends in linear space, which lightens every translucent
   mark.
 - **Every label is a `Labels`** (`label/Labels.ts`), MathBox's `<Label>`:
+  line and vector labels, and the point, axis and tick labels still to come.
   16 px `sans-serif` with a 2 px white outline, no LaTeX (MathBox has none).
   Unlike a stroke, it keeps its pixel size at any depth (MathBox's
   `attach.depth` is 0), so its quad is laid out in screen pixels around its
   projected anchor. All labels share one canvas atlas, drawn at the device
-  pixel ratio and redrawn when it changes.
+  pixel ratio and redrawn when the ratio changes.
+- **Label offsets are on-screen CSS pixels** to the label's center. To match
+  MathBox, a builder passes where a MathBox `<Label offset>` `[x, y]` lands,
+  `[2x/3, 2y/3 − 8/3]`, rounded: MathBox scales the offset with its 24 px
+  glyph atlas and draws its text 4 atlas px below each sprite's center.
 
 `features/viewport/three/ThreeViewport` is the app's glue: it collects the
 spec with `useViewportSpec` and loads the package through its one

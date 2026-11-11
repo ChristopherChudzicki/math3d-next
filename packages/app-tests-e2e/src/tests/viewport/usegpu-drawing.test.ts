@@ -30,14 +30,9 @@ test("?renderer=usegpu draws with the Use.GPU viewport", async ({
   // `data-ready` marks a device, not a frame: wait for the colored surface.
   // An empty scene (axes and grid only) reads 0; see `frame-render.test.ts`.
   await expect
-    .poll(
-      async () =>
-        colorfulPixelRatio(
-          page,
-          (await viewport.screenshot()).toString("base64"),
-        ),
-      { timeout: 15_000 },
-    )
+    .poll(async () => colorfulPixelRatio(await viewport.screenshot()), {
+      timeout: 15_000,
+    })
     .toBeGreaterThan(0.1);
   expect(errors).toEqual([]);
 });

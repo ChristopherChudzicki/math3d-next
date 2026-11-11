@@ -14,7 +14,7 @@ const overlaps = (a: Slot, b: Slot) =>
 describe("LabelAtlas", () => {
   test("draws a string once, however many labels use it", () => {
     const surface = fakeSurface();
-    const atlas = new LabelAtlas(surface, () => {});
+    const atlas = new LabelAtlas(surface);
     atlas.acquire(label("1"));
     atlas.acquire(label("1"));
     atlas.acquire(label("2"));
@@ -25,7 +25,7 @@ describe("LabelAtlas", () => {
   });
 
   test("tells bold from normal text", () => {
-    const atlas = new LabelAtlas(fakeSurface(), () => {});
+    const atlas = new LabelAtlas(fakeSurface());
     atlas.acquire(label("x"));
     atlas.acquire({ text: "x", weight: "bold" });
     expect(atlas.slot(label("x"))).not.toEqual(
@@ -34,7 +34,7 @@ describe("LabelAtlas", () => {
   });
 
   test("keeps a string until its last user releases it", () => {
-    const atlas = new LabelAtlas(fakeSurface(), () => {});
+    const atlas = new LabelAtlas(fakeSurface());
     atlas.acquire(label("1"));
     atlas.acquire(label("1"));
     atlas.release(label("1"));
@@ -45,7 +45,7 @@ describe("LabelAtlas", () => {
 
   test("frees the surface when no strings remain", () => {
     const surface = fakeSurface();
-    const atlas = new LabelAtlas(surface, () => {});
+    const atlas = new LabelAtlas(surface);
     atlas.acquire(label("1"));
     atlas.release(label("1"));
     expect(surface.reset).toHaveBeenLastCalledWith(0, 0);
@@ -55,7 +55,8 @@ describe("LabelAtlas", () => {
   test("grows by laying every string out again, without overlaps", () => {
     const surface = fakeSurface();
     const onRelayout = vi.fn();
-    const atlas = new LabelAtlas(surface, onRelayout);
+    const atlas = new LabelAtlas(surface);
+    atlas.onRelayout(onRelayout);
     const texts = Array.from({ length: 200 }, (_, i) => label(`label ${i}`));
     texts.forEach((text) => atlas.acquire(text));
 
@@ -75,7 +76,7 @@ describe("LabelAtlas", () => {
   });
 
   test("reclaims a released string's space when it next lays out", () => {
-    const atlas = new LabelAtlas(fakeSurface(), () => {});
+    const atlas = new LabelAtlas(fakeSurface());
     atlas.acquire(label("kept"));
     atlas.acquire(label("gone"));
     const freed = atlas.slot(label("gone"));
@@ -88,7 +89,8 @@ describe("LabelAtlas", () => {
   test("draws every string again at a new pixel ratio", () => {
     const surface = fakeSurface();
     const onRelayout = vi.fn();
-    const atlas = new LabelAtlas(surface, onRelayout);
+    const atlas = new LabelAtlas(surface);
+    atlas.onRelayout(onRelayout);
     atlas.acquire(label("1"));
     surface.draw.mockClear();
     onRelayout.mockClear();

@@ -1,7 +1,7 @@
 import type { Coords, RGBA } from "@math3d/viewport-spec";
-import { Instances, strideOf } from "../stroke/Instances";
-import { isDrawable, put } from "../stroke/packPaths";
-import { labelAtlas, onLabelRelayout } from "./atlas";
+import { Instances, strideOf } from "../instances/Instances";
+import { isDrawable, put } from "../instances/points";
+import { labelAtlas } from "./atlas";
 import type { LabelAtlas, LabelText, LabelWeight, Slot } from "./LabelAtlas";
 import {
   LABEL_LAYOUT,
@@ -38,8 +38,6 @@ export class Labels {
 
   private readonly uniforms = new LabelUniforms();
 
-  private readonly unsubscribe = onLabelRelayout(() => this.fill());
-
   /** One per distinct string, each acquired once from the atlas. */
   private texts = new Map<string, LabelText>();
 
@@ -50,10 +48,11 @@ export class Labels {
   /** Add it to the item's `Group`. */
   readonly mesh = this.instances.mesh;
 
+  private readonly unsubscribe: () => void;
+
   constructor(private readonly atlas: LabelAtlas = labelAtlas()) {
     this.mesh.userData.label = this.uniforms;
-    // After the rest of its item; `syncGraphics` orders the items.
-    this.mesh.renderOrder = 1;
+    this.unsubscribe = atlas.onRelayout(() => this.fill());
   }
 
   /**

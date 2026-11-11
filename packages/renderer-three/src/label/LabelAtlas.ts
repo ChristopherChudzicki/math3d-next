@@ -3,7 +3,7 @@ export type LabelWeight = "normal" | "bold";
 /** A string as drawn: the atlas holds one raster per text and weight. */
 export type LabelText = { text: string; weight: LabelWeight };
 
-/** A raster's place in the atlas, in device pixels from its top left. */
+/** A raster's place in the atlas, in device pixels from the atlas's top left. */
 export type Slot = { x: number; y: number; width: number; height: number };
 
 /** Where the atlas draws: a canvas in the browser, a fake in tests. */
@@ -15,10 +15,7 @@ export interface AtlasSurface {
   draw(label: LabelText, slot: Slot, pixelRatio: number): void;
 }
 
-/**
- * MathBox cuts a label at 640 CSS px, which fits at a pixel ratio of 3; a
- * wider raster is cut.
- */
+/** Fits 640 CSS px of text at a pixel ratio of 3; a wider raster is cut at both ends. */
 export const ATLAS_WIDTH = 2048;
 const MIN_HEIGHT = 64;
 /** Blank pixels between rasters, so filtering never reads a neighbor. */
@@ -48,14 +45,18 @@ export class LabelAtlas {
 
   private ratio = 1;
 
+  private readonly listeners = new Set<() => void>();
+
+  constructor(private readonly surface: AtlasSurface) {}
+
   /**
-   * @param onRelayout Called after a relayout moves the strings, so users
-   *   re-read their slots.
+   * Calls `listener` after each relayout, which moves the strings, so users
+   * re-read their slots. Returns the unsubscribe.
    */
-  constructor(
-    private readonly surface: AtlasSurface,
-    private readonly onRelayout: () => void,
-  ) {}
+  onRelayout(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
 
   /** The surface's size in device pixels. */
   get size(): [number, number] {
@@ -127,7 +128,7 @@ export class LabelAtlas {
     this.entries.forEach(({ label, slot }) =>
       this.surface.draw(label, slot, this.ratio),
     );
-    this.onRelayout();
+    this.listeners.forEach((listener) => listener());
   }
 
   /** A slot on the first shelf of the same height with room, else on a new shelf. */

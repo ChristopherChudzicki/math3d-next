@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 import type { AtlasSurface, LabelText } from "../LabelAtlas";
 
-/** For tests: rasters 10 device pixels per character, 20 tall, times the ratio. */
+/** For tests: rasters 10 CSS px wide per character and 20 tall, at the given ratio. */
 export const fakeSurface = () => ({
   measure: vi.fn(({ text }: LabelText, ratio: number): [number, number] => [
     10 * text.length * ratio,
