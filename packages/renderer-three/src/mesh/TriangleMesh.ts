@@ -55,15 +55,18 @@ export class TriangleMesh {
 
   /**
    * Draws what `write` puts in buffers with room for `vertexCount` vertices
-   * and `indexCount` indices. `write` returns whether any vertex is
-   * translucent.
+   * and `indexCount` indices.
    */
   fill(
     vertexCount: number,
     indexCount: number,
     style: MeshStyle,
-    write: (buffers: MeshBuffers) => boolean,
+    write: (buffers: MeshBuffers) => void,
   ): void {
+    if (indexCount === 0) {
+      this.mesh.visible = false;
+      return;
+    }
     if (vertexCount > this.vertexCapacity || indexCount > this.indexCapacity) {
       this.allocate(
         Math.max(vertexCount, 2 * this.vertexCapacity),
@@ -74,12 +77,17 @@ export class TriangleMesh {
     const attribute = (name: string) =>
       geometry.getAttribute(name) as BufferAttribute;
     const index = geometry.getIndex() as BufferAttribute;
-    const translucent = write({
+    const color = attribute("color").array as Float32Array;
+    write({
       position: attribute("position").array as Float32Array,
       normal: attribute("normal").array as Float32Array,
-      color: attribute("color").array as Float32Array,
+      color,
       index: index.array as Uint32Array,
     });
+    let translucent = false;
+    for (let k = 3; k < 4 * vertexCount && !translucent; k += 4) {
+      translucent = color[k] < 1;
+    }
     ATTRIBUTES.forEach(([name, size]) =>
       markWritten(attribute(name), vertexCount * size),
     );
@@ -87,7 +95,7 @@ export class TriangleMesh {
     geometry.setDrawRange(0, indexCount);
     this.uniforms.set(style);
     this.mesh.material = meshMaterial(style.shaded, translucent);
-    this.mesh.visible = indexCount > 0;
+    this.mesh.visible = true;
   }
 
   dispose(): void {

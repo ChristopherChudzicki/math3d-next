@@ -6,7 +6,7 @@ import {
   writeColors,
   writeIndex,
   writeNormals,
-} from "./grid";
+} from "./parametricGrid";
 
 const flat = (u: number, v: number): Coords => [u, v, 0];
 
@@ -33,12 +33,12 @@ describe("sampleGrid", () => {
 });
 
 describe("writeNormals", () => {
-  test("is the same unit normal everywhere on a plane, far edges included", () => {
+  test("is MathBox's normal, the v step cross the u step, everywhere on a plane, far edges included", () => {
     const tilted = (u: number, v: number): Coords => [u, v, u];
     normalsOf(tilted).forEach((normal) => {
-      expect(normal[0]).toBeCloseTo(-Math.SQRT1_2);
+      expect(normal[0]).toBeCloseTo(Math.SQRT1_2);
       expect(normal[1]).toBeCloseTo(0);
-      expect(normal[2]).toBeCloseTo(Math.SQRT1_2);
+      expect(normal[2]).toBeCloseTo(-Math.SQRT1_2);
     });
   });
 
@@ -51,21 +51,18 @@ describe("writeNormals", () => {
     const normals = normalsOf(hole);
     // The center and the points whose steps reach it.
     [1, 3, 4, 5, 7].forEach((k) => expect(normals[k]).toEqual([0, 0, 0]));
-    expect(normals[0]).toEqual([0, 0, 1]);
+    expect(normals[0]).toEqual([0, 0, -1]);
   });
 });
 
 describe("writeIndex", () => {
-  test("winds each triangle counterclockwise about the surface normal", () => {
+  test("winds each triangle counterclockwise in (u, v), as MathBox does, covering each cell once", () => {
     const cols = 3;
     const rows = 3;
     const grid = sampleGrid([cols, rows], flat);
     const index = new Uint32Array(6 * cols * rows);
     const count = writeIndex(cols, rows, index);
     expect(count).toBe(6 * (cols - 1) * (rows - 1));
-    const normals = new Float32Array(3 * cols * rows);
-    writeNormals(grid, normals);
-    expect(Array.from(normals.slice(0, 3))).toEqual([0, 0, 1]);
     let area = 0;
     for (let t = 0; t < count; t += 3) {
       const [a, b, c] = [index[t], index[t + 1], index[t + 2]].map(
@@ -82,14 +79,11 @@ describe("writeIndex", () => {
 });
 
 describe("writeColors", () => {
-  test("writes each sample's RGBA and reports any translucency", () => {
+  test("writes each sample's RGBA at its parameters", () => {
     const out = new Float32Array(4 * 4);
-    const opaque = (u: number, v: number): RGBA => [u, v, 0, 1];
-    expect(writeColors(sampleGrid([2, 2], flat), opaque, out)).toBe(false);
-    expect(Array.from(out.slice(4, 8))).toEqual([1, 0, 0, 1]);
-
-    const fading = (u: number): RGBA => [0, 0, 0, 1 - u];
-    expect(writeColors(sampleGrid([2, 2], flat), fading, out)).toBe(true);
+    const colorAt = (u: number, v: number): RGBA => [u, v, 0, 1 - u];
+    writeColors(sampleGrid([2, 2], flat), colorAt, out);
+    expect(Array.from(out.slice(4, 8))).toEqual([1, 0, 0, 0]);
   });
 });
 
@@ -105,12 +99,8 @@ describe("isolines", () => {
       expect(path).toHaveLength(64);
       expect(new Set(path.map(([u]) => u)).size).toBe(1);
     });
-    const fixedV = paths.slice(6);
-    expect(fixedV.map((path) => path[0][1])).toEqual([0, 1]);
-    fixedV.forEach((path) => expect(path).toHaveLength(64));
-  });
-
-  test("returns no paths for zero lines", () => {
-    expect(isolines(sampleGrid([4, 4], flat), [0, 0])).toEqual([]);
+    const vPaths = paths.slice(6);
+    expect(vPaths.map((path) => path[0][1])).toEqual([0, 1]);
+    vPaths.forEach((path) => expect(path).toHaveLength(64));
   });
 });

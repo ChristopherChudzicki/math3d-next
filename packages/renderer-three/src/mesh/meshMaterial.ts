@@ -72,8 +72,11 @@ const mathboxShading = (
   const rgb = color.rgb.mul(color.rgb);
   const towardLight = normalize(cameraViewMatrix.mul(vec4(1, 2, 2, 0)).xyz);
   // MathBox's facing test: the triangle's screen-space orientation, not its
-  // winding, turns the interpolated normal toward the camera.
-  const face = cross(dFdx(positionView), dFdy(positionView));
+  // winding, turns the interpolated normal toward the camera. The fragment
+  // stage's `positionView` is rebuilt from the biased clip position, so the
+  // view position comes through a varying.
+  const view = positionView.toVarying("v_meshView");
+  const face = cross(dFdx(view), dFdy(view));
   const side = select(dot(normal, face).greaterThan(0), 1, -1);
   const n = normalize(normal).mul(side);
   const cosine = dot(n, towardLight);
@@ -112,8 +115,8 @@ export const meshMaterial = (
       read("zBias"),
       read("zIndex"),
     );
-    // Translucent, it still writes depth, and three draws its back faces
-    // first, as MathBox's three does.
+    // Double-sided, and writing depth even when translucent, like MathBox's
+    // surfaces.
     material.transparent = transparent;
     material.side = DoubleSide;
     materials.set(key, material);

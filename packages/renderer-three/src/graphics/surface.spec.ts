@@ -3,44 +3,77 @@ import type { InstancedBufferGeometry, Mesh } from "three/webgpu";
 import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { buildSurface } from "./surface";
 
-const surfaceSpec = (grid: Partial<SurfaceSpec["grid"]> = {}): SurfaceSpec => ({
+const surfaceSpec = (overrides: Partial<SurfaceSpec> = {}): SurfaceSpec => ({
   kind: "surface",
-  samples: [8, 8],
+  samples: [8, 6],
   position: (u, v) => [u, v, 0],
   colorAt: () => [0.2, 0.4, 0.6, 1],
   shaded: true,
-  grid: { lines: [3, 4], width: 2, color: [0.1, 0.2, 0.3, 0.5], ...grid },
+  grid: { lines: [3, 4], width: 2, color: [0.1, 0.2, 0.3, 0.5] },
   zBias: 2,
   zIndex: 1,
+  ...overrides,
 });
 
-const parts = (spec: SurfaceSpec) => {
-  const [surface, ...gridlines] = buildSurface(spec).object.children as Mesh[];
-  return { surface, line: gridlines[0], gridlines };
+const partsOf = (graphic: ReturnType<typeof buildSurface>) => {
+  const [surface, line] = graphic.object.children as Mesh[];
+  return {
+    surface,
+    line,
+    gridlines: graphic.object.children.slice(1) as Mesh[],
+    segments: () => (line.geometry as InstancedBufferGeometry).instanceCount,
+  };
 };
+
+const cellTriangles = ({ samples: [cols, rows] }: SurfaceSpec) =>
+  2 * (cols - 1) * (rows - 1);
 
 describe("buildSurface", () => {
   test("draws two triangles per sample cell", () => {
-    const { surface } = parts(surfaceSpec());
-    expect(surface.geometry.drawRange.count).toBe(6 * 7 * 7);
+    const spec = surfaceSpec();
+    const { surface } = partsOf(buildSurface(spec));
+    expect(surface.geometry.drawRange.count).toBe(3 * cellTriangles(spec));
   });
 
-  test("draws the gridlines after the surface, biased in front of it, one segment per sample step", () => {
-    const { surface, line, gridlines } = parts(surfaceSpec());
+  test("strokes gridlines in the grid's style, after the surface and biased in front of it", () => {
+    const spec = surfaceSpec();
+    const { surface, line, gridlines, segments } = partsOf(buildSurface(spec));
     gridlines.forEach((mesh) =>
       expect(mesh.renderOrder).toBeGreaterThan(surface.renderOrder),
     );
-    expect((line.geometry as InstancedBufferGeometry).instanceCount).toBe(
-      (3 + 4) * 7,
-    );
-    expect(line.userData.stroke).toMatchObject({ zBias: 2 + 5, zIndex: 1 });
+    const [cols, rows] = spec.samples;
+    const [uLines, vLines] = spec.grid.lines;
+    expect(segments()).toBe(uLines * (rows - 1) + vLines * (cols - 1));
+    const { color, ...numbers } = line.userData.stroke;
+    expect(color.toArray()).toEqual(spec.grid.color);
+    expect(numbers).toMatchObject({
+      width: spec.grid.width,
+      zBias: spec.zBias + 5,
+      zIndex: spec.zIndex,
+    });
   });
 
   test.each([
     { width: 0 },
     { color: [0.1, 0.2, 0.3, 0] as SurfaceSpec["grid"]["color"] },
   ])("draws no gridlines with %o", (grid) => {
-    const { line } = parts(surfaceSpec(grid));
+    const spec = surfaceSpec();
+    const { line } = partsOf(
+      buildSurface(surfaceSpec({ grid: { ...spec.grid, ...grid } })),
+    );
+    expect(line.visible).toBe(false);
+  });
+
+  test("redraws in place for an updated spec", () => {
+    const spec = surfaceSpec();
+    const graphic = buildSurface(spec);
+    const { surface, line } = partsOf(graphic);
+    const next = surfaceSpec({
+      samples: [4, 3],
+      grid: { ...spec.grid, width: 0 },
+    });
+    graphic.update(next);
+    expect(surface.geometry.drawRange.count).toBe(3 * cellTriangles(next));
     expect(line.visible).toBe(false);
   });
 });

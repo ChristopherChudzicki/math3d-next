@@ -8,23 +8,26 @@ import {
   writeIndex,
   writeNormals,
   writePositions,
-} from "../mesh/grid";
-import type { Grid } from "../mesh/grid";
+} from "../mesh/parametricGrid";
+import type { ParametricGrid } from "../mesh/parametricGrid";
 import { Stroke } from "../stroke/Stroke";
 import type { Graphic } from "./builders";
 
-// MathBox gives gridlines a fixed zBias 5; offsetting the surface's own
-// keeps them in front of it whatever it is.
+// Like MathBox's own surface wireframe (zBias + lineBias); the app's MathBox
+// renderer pins gridlines at 5 instead.
 const GRIDLINE_Z_BIAS = 5;
 
-const fillSurface = (mesh: TriangleMesh, grid: Grid, spec: SurfaceSpec) => {
+const fillSurface = (
+  mesh: TriangleMesh,
+  grid: ParametricGrid,
+  spec: SurfaceSpec,
+) => {
   const { cols, rows } = grid;
-  const cells = cols > 1 && rows > 1 ? (cols - 1) * (rows - 1) : 0;
-  mesh.fill(cols * rows, 6 * cells, spec, (out) => {
+  mesh.fill(cols * rows, 6 * (cols - 1) * (rows - 1), spec, (out) => {
     writePositions(grid, out.position);
     if (spec.shaded) writeNormals(grid, out.normal);
-    if (cells > 0) writeIndex(cols, rows, out.index);
-    return writeColors(grid, spec.colorAt, out.color);
+    writeIndex(cols, rows, out.index);
+    writeColors(grid, spec.colorAt, out.color);
   });
 };
 

@@ -43,10 +43,10 @@ const SURFACE = {
   visible: "drawn",
   calculatedVisibility: "drawn",
   useCalculatedVisibility: "drawn",
-  zBias: `${Z_BIAS}; gridlines sit at the surface's zBias + 5, MathBox's at a fixed 5`,
+  zBias: `${Z_BIAS}; gridlines sit at the surface's zBias + 5, MathBox's at a fixed 5, so there a surface with zBias above 5 hides its own gridlines`,
   zIndex:
     "approximate: gridlines share the surface's zIndex; MathBox's stay at 0, so there a surface with zIndex 1 or more hides its own gridlines",
-  // Draw order belongs to the transparency task.
+  // Left `todo` for the transparency task, which decides draw order.
   zOrder: "todo",
 } as const;
 

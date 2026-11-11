@@ -16,7 +16,6 @@ const fill = (
     out.position.fill(1, 0, 9 * triangles);
     out.color.fill(alpha, 0, 12 * triangles);
     out.index.set(Array.from({ length: 3 * triangles }, (_, k) => k));
-    return alpha < 1;
   });
 
 const attribute = (mesh: TriangleMesh, name: string) =>
@@ -56,9 +55,13 @@ describe("TriangleMesh", () => {
     expect(mesh.mesh.geometry.boundingSphere?.radius).toBe(Infinity);
   });
 
-  test("blends when the writer reports translucency", () => {
+  test("blends when any vertex is translucent", () => {
     const mesh = new TriangleMesh();
-    fill(mesh, 1, { alpha: 0.5 });
+    mesh.fill(3, 3, style, (out) => {
+      out.color.fill(1, 0, 12);
+      out.color.set([0.5], 11);
+      out.index.set([0, 1, 2]);
+    });
     expect(mesh.mesh.material.transparent).toBe(true);
     fill(mesh, 1);
     expect(mesh.mesh.material.transparent).toBe(false);
@@ -76,11 +79,18 @@ describe("TriangleMesh", () => {
   test("puts its depth style at userData.mesh for the material", () => {
     const mesh = new TriangleMesh();
     fill(mesh, 1);
-    expect(mesh.mesh.userData.mesh).toMatchObject({ zBias: 3, zIndex: 1 });
+    const given = { ...style, zBias: -2, zIndex: 0 };
+    fill(mesh, 1, { given });
+    expect({ ...mesh.mesh.userData.mesh }).toEqual({
+      zBias: given.zBias,
+      zIndex: given.zIndex,
+    });
   });
 
-  test("draws nothing without triangles", () => {
+  test("draws nothing without triangles, before or after a fill", () => {
     const mesh = new TriangleMesh();
+    fill(mesh, 0);
+    expect(mesh.mesh.visible).toBe(false);
     fill(mesh, 1);
     fill(mesh, 0);
     expect(mesh.mesh.visible).toBe(false);
