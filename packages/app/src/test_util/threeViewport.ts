@@ -4,6 +4,7 @@ export type ThreeViewportProps = {
   spec: ViewportSpec;
   hooks: ViewportHooks;
   transparency?: "oit" | "ordered";
+  shading?: "glossy" | "matte";
 };
 
 const RendersNothing = (_props: ThreeViewportProps): null => null;

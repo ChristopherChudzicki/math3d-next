@@ -11,6 +11,7 @@ import {
 } from "../mesh/parametricGrid";
 import type { ParametricGrid } from "../mesh/parametricGrid";
 import { Stroke } from "../stroke/Stroke";
+import type { Shading } from "../mesh/meshMaterial";
 import type { Transparency } from "../shader/material";
 import type { Graphic } from "./builders";
 
@@ -36,8 +37,9 @@ const fillSurface = (
 export const buildSurface = (
   spec: SurfaceSpec,
   transparency: Transparency,
+  shading: Shading,
 ): Graphic<SurfaceSpec> => {
-  const surface = new TriangleMesh(transparency);
+  const surface = new TriangleMesh(transparency, shading);
   const gridlines = new Stroke(transparency);
   gridlines.objects.forEach((mesh) => {
     // After the surface, within the item's group.

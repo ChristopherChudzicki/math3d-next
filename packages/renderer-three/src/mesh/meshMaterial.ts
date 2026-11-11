@@ -11,9 +11,11 @@ import {
   max,
   mix,
   normalize,
+  PI,
   positionView,
   positionViewDirection,
   pow,
+  saturate,
   select,
   sqrt,
   transformNormalToView,
@@ -57,26 +59,36 @@ const viewNormal = () => {
   ).toVarying("v_meshNormal");
 };
 
+/** The light's view-space direction, MathBox's (1, 2, 2) in world space. */
+const towardLightView = () =>
+  normalize(cameraViewMatrix.mul(vec4(1, 2, 2, 0)).xyz);
+
+/**
+ * The interpolated normal turned toward the camera. MathBox's facing test:
+ * the triangle's screen-space orientation, not its winding, decides. The
+ * fragment stage's `positionView` is rebuilt from the biased clip position,
+ * so the view position comes through a varying.
+ */
+const facingNormal = (normal: Node<"vec3">) => {
+  const view = positionView.toVarying("v_meshView");
+  const face = cross(dFdx(view), dFdy(view));
+  const side = select(dot(normal, face).greaterThan(0), 1, -1);
+  return normalize(normal).mul(side);
+};
+
 /**
  * MathBox's shaded mesh color (`mesh.fragment.shaded`): a fixed light along
  * (1, 2, 2) in world space, wrapped diffuse and a specular highlight in a
  * lightened copy of the color. Like MathBox, it shades the squared color and
  * outputs the square root (`mesh.gamma.in`/`out`).
  */
-const mathboxShading = (
+const matteShading = (
   color: Node<"vec4">,
   normal: Node<"vec3">,
 ): Node<"vec4"> => {
   const rgb = color.rgb.mul(color.rgb);
-  const towardLight = normalize(cameraViewMatrix.mul(vec4(1, 2, 2, 0)).xyz);
-  // MathBox's facing test: the triangle's screen-space orientation, not its
-  // winding, turns the interpolated normal toward the camera. The fragment
-  // stage's `positionView` is rebuilt from the biased clip position, so the
-  // view position comes through a varying.
-  const view = positionView.toVarying("v_meshView");
-  const face = cross(dFdx(view), dFdy(view));
-  const side = select(dot(normal, face).greaterThan(0), 1, -1);
-  const n = normalize(normal).mul(side);
+  const towardLight = towardLightView();
+  const n = facingNormal(normal);
   const cosine = dot(n, towardLight);
   const diffuse = mix(max(cosine, 0), cosine.mul(0.5).add(0.5), 0.1);
   const halfway = normalize(towardLight.add(positionViewDirection));
@@ -89,7 +101,80 @@ const mathboxShading = (
   return vec4(sqrt(shaded), color.a);
 };
 
-const build = (shaded: boolean) => () => {
+const pow5 = (x: Node<"float">) => {
+  const x2 = x.mul(x);
+  return x2.mul(x2).mul(x);
+};
+
+const ROUGHNESS = 0.35;
+const AMBIENT = 0.6;
+// Use.GPU's `DirectionalLight` is gray (0.5) unless given a color, so the
+// intensity 0.8 that `usegpu/live/scene.ts` passes lights at 0.4.
+const KEY_LIGHT = 0.4;
+const F0 = 0.04;
+
+/**
+ * Use.GPU's lit surface: its default material (`@use-gpu/wgsl`
+ * `fragment/pbr`, metalness 0, roughness 0.35) under the ambient and
+ * directional light the app gives it. Burley diffuse and an untinted GGX
+ * highlight, lit on the sRGB color as given, as Use.GPU does.
+ */
+const glossyShading = (
+  color: Node<"vec4">,
+  normal: Node<"vec3">,
+): Node<"vec4"> => {
+  const albedo = color.rgb;
+  const n = facingNormal(normal);
+  const L = towardLightView();
+  const V = positionViewDirection;
+  const H = normalize(L.add(V));
+  const a = float(ROUGHNESS * ROUGHNESS);
+  const a2 = a.mul(a);
+  const dotNL = saturate(dot(n, L));
+  const dotNV = saturate(dot(n, V));
+  const dotNH = saturate(dot(n, H));
+  const dotLH = saturate(dot(L, H));
+  const fresnel = float(Math.max(F0, 1 - ROUGHNESS) - F0)
+    .mul(pow5(float(1).sub(dotLH)))
+    .add(F0);
+  // GGX in Use.GPU's `ndfGGX` form.
+  const ah = dotNH.mul(a);
+  const k = a.div(float(1).sub(dotNH.mul(dotNH)).add(ah.mul(ah)));
+  const distribution = k.mul(k).div(PI);
+  // Height-correlated Smith visibility.
+  const visibility = float(0.5).div(
+    dotNL
+      .mul(sqrt(dotNV.sub(a2.mul(dotNV)).mul(dotNV).add(a2)))
+      .add(dotNV.mul(sqrt(dotNL.sub(a2.mul(dotNL)).mul(dotNL).add(a2))))
+      .add(0.00001),
+  );
+  const f90 = a.mul(2).mul(dotLH).mul(dotLH).add(0.5);
+  const scatter = (c: Node<"float">) =>
+    f90
+      .sub(1)
+      .mul(pow5(float(1).sub(c)))
+      .add(1);
+  const burley = scatter(dotNL).mul(scatter(dotNV)).div(PI);
+  const diffuse = albedo.mul(burley).mul(float(1).sub(fresnel));
+  const specular = fresnel.mul(distribution).mul(visibility);
+  const lit = albedo.mul(AMBIENT).add(
+    diffuse
+      .add(specular)
+      .mul(dotNL)
+      .mul(KEY_LIGHT * Math.PI),
+  );
+  return vec4(lit, color.a);
+};
+
+/**
+ * How shaded surfaces are lit: `glossy`, Use.GPU's look, or `matte`,
+ * MathBox's.
+ */
+export type Shading = "glossy" | "matte";
+
+const SHADINGS = { glossy: glossyShading, matte: matteShading };
+
+const build = (shading: Shading | null) => () => {
   const color = attribute<"vec4">("color", "vec4");
   return {
     vertex: projectWithDepthStyle(
@@ -97,23 +182,27 @@ const build = (shaded: boolean) => () => {
       read("zBias", "float"),
       read("zIndex", "float"),
     ),
-    color: shaded ? mathboxShading(color, viewNormal()) : color,
+    color: shading ? SHADINGS[shading](color, viewNormal()) : color,
     // MathBox discards where the interpolated color has no opacity.
     mask: color.a.greaterThan(0),
   };
 };
 
-const shadedMaterial = sharedMaterial("mixed", build(true));
-const flatMaterial = sharedMaterial("mixed", build(false));
+const materials = {
+  glossy: sharedMaterial("mixed", build("glossy")),
+  matte: sharedMaterial("mixed", build("matte")),
+  flat: sharedMaterial("mixed", build(null)),
+};
 
 /**
  * A triangle mesh's material, shared by every mesh with that shading,
- * opacity and transparency model. The mesh supplies the attributes
- * `TriangleMesh` writes (`MeshBuffers`) and its depth style at
- * `userData.mesh`.
+ * opacity and transparency model. `shading` applies only when `shaded`. The
+ * mesh supplies the attributes `TriangleMesh` writes (`MeshBuffers`) and its
+ * depth style at `userData.mesh`.
  */
 export const meshMaterial = (
   shaded: boolean,
   opacity: Opacity,
   transparency: Transparency,
-) => (shaded ? shadedMaterial : flatMaterial)(opacity, transparency);
+  shading: Shading,
+) => materials[shaded ? shading : "flat"](opacity, transparency);

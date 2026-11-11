@@ -39,7 +39,7 @@ type Implicit = ReturnType<typeof buildImplicit>;
 const built: Implicit[] = [];
 /** Builds a surface that is disposed after the test. */
 const build = (spec: ImplicitSurfaceSpec): Implicit => {
-  built.push(buildImplicit(spec, "oit"));
+  built.push(buildImplicit(spec, "oit", "glossy"));
   return built[built.length - 1];
 };
 afterEach(() => built.splice(0).forEach((graphic) => graphic.dispose()));
@@ -119,7 +119,7 @@ describe("buildImplicit", () => {
 
   test("frees the meshing buffers when a surface is disposed", () => {
     const spec = implicitSpec();
-    buildImplicit(spec, "oit").dispose();
+    buildImplicit(spec, "oit", "glossy").dispose();
     // A one-cell grid is sampled into a buffer of its own size.
     const grid = sampleScalarGrid(1, spec.domain, () => 0);
     expect(grid.values.length).toBe(8);

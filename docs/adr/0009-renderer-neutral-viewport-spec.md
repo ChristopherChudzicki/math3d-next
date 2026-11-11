@@ -205,6 +205,19 @@ error boundary, `Suspense`). A
 `@math3d/renderer-three` everywhere in `app` (the rule doesn't check
 `import()`). jsdom tests get a stand-in from `setupTests.ts`.
 
+#### Surface shading
+
+Two looks for shaded surfaces, chosen per `ThreeScene` (`Viewport`'s
+`shading`; the app passes `matte` for `?gloss=0`):
+
+- **`glossy`, the default**: Use.GPU's look. `mesh/meshMaterial.ts` ports
+  Use.GPU's default lit material (Burley diffuse, an untinted GGX highlight,
+  roughness 0.35) under the app's ambient and key light, lit on the sRGB
+  color as Use.GPU lights it.
+- **`matte`**: MathBox's look, for comparison captures against math3d.org.
+- Both use MathBox's light direction and facing test. Unshaded surfaces,
+  lines, points and labels look the same under either.
+
 #### Transparency
 
 Two models, chosen per `ThreeScene` (`Viewport`'s `transparency`; the app

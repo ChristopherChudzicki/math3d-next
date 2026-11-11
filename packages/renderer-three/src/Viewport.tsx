@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ViewportHooks, ViewportSpec } from "@math3d/viewport-spec";
 import { ThreeScene } from "./ThreeScene";
+import type { Shading } from "./mesh/meshMaterial";
 import type { Transparency } from "./shader/material";
 
 export type ViewportProps = {
@@ -14,6 +15,11 @@ export type ViewportProps = {
    * can.
    */
   transparency?: Transparency;
+  /**
+   * How shaded surfaces are lit: `glossy`, Use.GPU's look, or `matte`,
+   * MathBox's.
+   */
+  shading?: Shading;
 };
 
 const HOST_STYLE = { width: "100%", height: "100%" };
@@ -24,6 +30,7 @@ const Viewport: React.FC<ViewportProps> = ({
   hooks,
   forceWebGL = false,
   transparency,
+  shading = "glossy",
 }) => {
   const host = useRef<HTMLDivElement>(null);
   const latestHooks = useRef(hooks);
@@ -39,6 +46,7 @@ const Viewport: React.FC<ViewportProps> = ({
     const next = new ThreeScene(host.current, {
       forceWebGL,
       transparency,
+      shading,
       onSettled: () => latestHooks.current.onReady(),
       onCameraMove: (camera) => latestHooks.current.onCameraMove(camera),
       onError: (error) => {
@@ -58,7 +66,7 @@ const Viewport: React.FC<ViewportProps> = ({
       next.dispose();
       setScene(null);
     };
-  }, [forceWebGL, transparency]);
+  }, [forceWebGL, transparency, shading]);
 
   useEffect(() => {
     scene?.setSpec(spec);
