@@ -30,6 +30,10 @@ reports back through `ViewportHooks`, both types in
 - `features/viewport/spec/` produces it: `useViewportSpec(host)` returns the
   spec, the reporter elements that fill `spec.graphics` (render them
   alongside the renderer), and the `onCameraMove` hook.
+- **A spec field is a true quantity**, drawn as given by every renderer. A
+  factor that only reproduces how MathBox reads a stored value, such as its
+  circle points' 1.2 × `size`, is applied once, by name, in the spec
+  producer.
 
 ### The camera
 
@@ -124,6 +128,10 @@ parent, so anything sized in pixels is built in the shader, in view space:
   - Triangles wind counterclockwise seen from where `value` is positive, so
     which side of a translucent surface shows through depends on the
     equation's sign.
+- **Every point is a `Discs`** (`point/Discs.ts`), MathBox's circle point:
+  a disc `size` across at view depth 1 with a one-pixel antialiased rim.
+  Like MathBox it draws all fills, then all rims, so a rim's depth write never
+  hides a farther disc.
 - **`zBias` and `zIndex` go through `shader/depthStyle.ts`**, whatever the
   mark. `zBias` reproduces MathBox's under its perspective camera, stated as
   a change in view depth so it is the same on WebGPU and WebGL2 and in both

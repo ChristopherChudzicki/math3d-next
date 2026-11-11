@@ -140,8 +140,8 @@ export const labelMaterial = (): MeshBasicNodeMaterial => {
     // Blends its edges; writes depth where it covers, as MathBox's labels do.
     material.transparent = true;
     material.depthWrite = true;
-    // A mirrored axis flips the quad's winding. One pass, or its edges blend
-    // twice.
+    // three reverses a mirrored item's front face, though the quad, built in
+    // screen space, isn't mirrored. One pass, or its edges blend twice.
     material.side = DoubleSide;
     material.forceSinglePass = true;
   }

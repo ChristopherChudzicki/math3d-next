@@ -2,6 +2,7 @@ import type { Group } from "three/webgpu";
 import type { GraphicSpec } from "@math3d/viewport-spec";
 import { buildImplicit } from "./implicit";
 import { buildLine } from "./line";
+import { buildPoint } from "./point";
 import { buildSurface } from "./surface";
 
 export type SpecOf<K extends GraphicSpec["kind"]> = Extract<
@@ -30,5 +31,6 @@ export type GraphicBuilders = {
 export const builders: GraphicBuilders = {
   implicit: buildImplicit,
   line: buildLine,
+  point: buildPoint,
   surface: buildSurface,
 };
