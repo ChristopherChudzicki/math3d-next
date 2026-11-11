@@ -18,17 +18,9 @@ const HOST_STYLE = { width: "100%", height: "100%" };
 
 /**
  * `?oit=0` draws translucent items in MathBox's order, for comparing the two
- * renderers; `?oit=1` draws them order-independently. Without it, the
- * renderer's default for its backend.
+ * renderers. Without it they blend order-independently.
  */
 const TRANSPARENCY_PARAM = "oit";
-type Transparency = React.ComponentProps<
-  typeof RendererViewport
->["transparency"];
-const TRANSPARENCIES = new Map<string | null, Transparency>([
-  ["0", "ordered"],
-  ["1", "oit"],
-]);
 
 const ThreeViewportContent: React.FC<
   Pick<ViewportHooks, "onUnsupported" | "onReady">
@@ -36,7 +28,8 @@ const ThreeViewportContent: React.FC<
   const host = useRef<HTMLDivElement>(null);
   const { spec, reporters, onCameraMove } = useViewportSpec(host);
   const [searchParams] = useSearchParams();
-  const transparency = TRANSPARENCIES.get(searchParams.get(TRANSPARENCY_PARAM));
+  const transparency =
+    searchParams.get(TRANSPARENCY_PARAM) === "0" ? "ordered" : undefined;
   const hooks = useMemo<ViewportHooks>(
     () => ({
       onUnsupported,

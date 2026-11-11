@@ -21,19 +21,10 @@ import { Settle } from "./settle";
 // so three must not convert a `Color` to linear on its way in either.
 ColorManagement.enabled = false;
 
-/**
- * Each backend's model unless told otherwise. WebGL2 keeps MathBox's order:
- * the OIT pass's cost there is measured on one desktop GPU only.
- */
-const DEFAULT_TRANSPARENCY: Record<"webgpu" | "webgl2", Transparency> = {
-  webgpu: "oit",
-  webgl2: "ordered",
-};
-
 type Options = {
   /** Use the WebGL2 backend even where WebGPU is available. */
   forceWebGL: boolean;
-  /** How translucent marks combine; the backend's default when absent. */
+  /** How translucent marks combine; `oit` when absent. */
   transparency?: Transparency;
   /**
    * Called once: after the `ResizeObserver` has reported, the first drawn
@@ -142,8 +133,7 @@ export class ThreeScene {
     const backend =
       "isWebGPUBackend" in this.renderer.backend ? "webgpu" : "webgl2";
     this.canvas.dataset.backend = backend;
-    this.transparency =
-      this.options.transparency ?? DEFAULT_TRANSPARENCY[backend];
+    this.transparency = this.options.transparency ?? "oit";
     // `OitFrame` blends each attachment its own way. Without the extension
     // three's WebGL2 backend blends all alike, and translucent marks vanish.
     if (backend === "webgl2" && !this.blendsPerAttachment()) {

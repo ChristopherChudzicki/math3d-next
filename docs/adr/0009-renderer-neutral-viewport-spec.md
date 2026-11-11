@@ -208,9 +208,9 @@ error boundary, `Suspense`). A
 #### Transparency
 
 Two models, chosen per `ThreeScene` (`Viewport`'s `transparency`; the app
-passes `?oit=1` or `?oit=0`):
+passes `ordered` for `?oit=0`):
 
-- **`oit`, the default on WebGPU**: order-independent. `OitFrame` draws
+- **`oit`, the default**: order-independent. `OitFrame` draws
   weighted, blended OIT (McGuire and Bavoil) in one multisampled render
   target. Opaque marks draw first; labels and opaque points' rims, whose
   alpha only antialiases them, blend over those in the spec's order and write
@@ -219,10 +219,9 @@ passes `?oit=1` or `?oit=0`):
   falls with its depth relative to the scene (`NEARNESS_GAIN`), so the nearer
   layer reads as nearer. That depth is the one before `zBias` and `zIndex`,
   which move occlusion and not the blend.
-- **`ordered`, the default on WebGL2**: MathBox's way, for like-for-like
-  comparison. Every material blends and writes depth, in the spec's order,
-  with three's back-then-front draw of translucent meshes whose triangles
-  face both ways.
+- **`ordered`**: MathBox's way, for like-for-like comparison. Every material
+  blends and writes depth, in the spec's order, with three's back-then-front
+  draw of translucent meshes whose triangles face both ways.
 - **The OIT pass is ours, standing in for three's addon**
   (`three/addons/tsl/display/OITPassNode`) until that one antialiases on
   WebGL2:
@@ -243,9 +242,11 @@ passes `?oit=1` or `?oit=0`):
     `RenderPipeline` with the weight as its `weightNode`, as the one in
     commit `2ac84d77` does. `accumulates` is the addon's own test, so the
     materials stay; `accumulatingLast` goes.
-- **WebGL2 still defaults to `ordered`.** The pass takes about twice
-  `ordered`'s frame time there on the one GPU it is measured on, and is
-  unchecked on weaker ones and where OG images render.
+- **`oit` costs more than `ordered` on WebGL2**: about twice the frame time
+  on the one GPU it is measured on (an M1 Pro; 8 ms against 4 ms at
+  2200×1420), mostly a fixed cost of clearing and resolving three
+  multisampled attachments. It is unmeasured on weaker GPUs and where OG
+  images render.
 - **Without `OES_draw_buffers_indexed`**, WebGL2 can't blend each attachment
   its own way, and `ThreeScene` draws `ordered` whatever was asked.
 - **`shader/material.ts` alone sets blending and depth flags.** A mark

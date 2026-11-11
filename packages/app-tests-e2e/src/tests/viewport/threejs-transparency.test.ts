@@ -15,16 +15,15 @@ test.use({ disable3d: false });
 
 const canvas = (page: Page) => page.getByTestId("scene").locator("canvas");
 
-test("three.js on WebGL2 draws in MathBox's order by default: zOrder decides what a translucent item hides", async ({
+test("three.js with ?oit=0 draws in MathBox's order: zOrder decides what a translucent item hides", async ({
   page,
   prepareScene,
 }) => {
   const errors = collectPageErrors(page);
   const key = await prepareScene(blueFirstOverRed().json());
-  await page.goto(`/${key}?renderer=threejs&controls=0`);
+  await page.goto(`/${key}?renderer=threejs&controls=0&oit=0`);
 
   await expectThreeViewport(page);
-  await expect(canvas(page)).toHaveAttribute("data-backend", "webgl2");
   await expect(canvas(page)).toHaveAttribute("data-transparency", "ordered");
   const { red, blueOverRed } = await sharesOnce(page, "blueOverWhite");
   // The red plane is drawn: it shows where it sticks out from under the blue.
@@ -39,9 +38,10 @@ test("three.js order-independent transparency on WebGL2 blends whatever the zOrd
 }) => {
   const errors = collectPageErrors(page);
   const key = await prepareScene(blueFirstOverRed().json());
-  await page.goto(`/${key}?renderer=threejs&controls=0&oit=1`);
+  await page.goto(`/${key}?renderer=threejs&controls=0`);
 
   await expectThreeViewport(page);
+  await expect(canvas(page)).toHaveAttribute("data-backend", "webgl2");
   await expect(canvas(page)).toHaveAttribute("data-transparency", "oit");
   await sharesOnce(page, "blueOverRed");
   expect(errors).toEqual([]);
@@ -53,7 +53,7 @@ test("three.js order-independent transparency on WebGL2 tests depth, also after 
 }) => {
   const errors = collectPageErrors(page);
   const key = await prepareScene(redOverBlue().json());
-  await page.goto(`/${key}?renderer=threejs&controls=0&oit=1`);
+  await page.goto(`/${key}?renderer=threejs&controls=0`);
 
   await expectThreeViewport(page);
   await expectRedToHideBlue(page);
@@ -62,7 +62,7 @@ test("three.js order-independent transparency on WebGL2 tests depth, also after 
   expect(errors).toEqual([]);
 });
 
-test("three.js on WebGL2 without per-attachment blending draws in MathBox's order, even when asked for order-independent transparency", async ({
+test("three.js on WebGL2 without per-attachment blending draws in MathBox's order", async ({
   page,
   prepareScene,
 }) => {
@@ -79,7 +79,7 @@ test("three.js on WebGL2 without per-attachment blending draws in MathBox's orde
     };
   });
   const key = await prepareScene(blueFirstOverRed().json());
-  await page.goto(`/${key}?renderer=threejs&controls=0&oit=1`);
+  await page.goto(`/${key}?renderer=threejs&controls=0`);
 
   await expectThreeViewport(page);
   await expect(canvas(page)).toHaveAttribute("data-transparency", "ordered");
