@@ -24,6 +24,7 @@ import {
   uniform,
   vec4,
 } from "three/tsl";
+import { accumulatingLast } from "./drawOrder";
 import { unbiasedViewZ } from "./shader/depthStyle";
 import { accumulates } from "./shader/material";
 
@@ -63,17 +64,17 @@ covered.blendDst = OneMinusSrcColorFactor;
  * Draws a scene with weighted, blended order-independent transparency
  * (McGuire and Bavoil) in one multisampled render target.
  *
- * It stands in for three's `OITPassNode` addon, which has no MSAA on WebGL2:
- * its two render targets share a depth texture, which WebGL2 can't
- * multisample, so thin gridlines break into dots. ADR-0009 has the reasoning
- * and the way back to the addon.
+ * It stands in for three's `OITPassNode` addon until that one antialiases on
+ * WebGL2. The addon's two render targets share a depth texture, which WebGL2
+ * can't multisample, so thin gridlines break into dots there. ADR-0009 has
+ * the reasoning and the way back to the addon.
  *
  * One draw writes three attachments. A mark that accumulates (see
  * `accumulates`) writes its weighted color to `sum` and its alpha to
  * `coverage`; any other writes its color to `output`. Each writes zeros to
- * the attachments that aren't its own, which changes nothing there as long
- * as accumulating marks draw last (`accumulatingLast`). The colors composite
- * unconverted, as sRGB values.
+ * the attachments that aren't its own, which changes nothing there.
+ * Accumulating marks draw last (`accumulatingLast`), so they test against
+ * the others' depth. The colors composite unconverted, as sRGB values.
  */
 export class OitFrame {
   private readonly target: RenderTarget;
@@ -88,6 +89,30 @@ export class OitFrame {
   private readonly radius = uniform(1);
 
   private readonly size = new Vector2();
+
+  /**
+   * Whether the pass can draw on the renderer's backend, once that is up. It
+   * needs each attachment blended its own way and a multisampled half-float
+   * one; without the first, translucent marks vanish.
+   */
+  static supported(renderer: WebGPURenderer): boolean {
+    const { backend } = renderer;
+    if ("isWebGPUBackend" in backend) {
+      // Untyped. three sets it for a device in WebGPU's compatibility mode,
+      // where it blends every attachment as the material does.
+      return !("compatibilityMode" in backend && backend.compatibilityMode);
+    }
+    // The context three made: a canvas hands out one per type.
+    const gl = renderer.domElement.getContext("webgl2");
+    if (!gl) return false;
+    return (
+      gl.getExtension("OES_draw_buffers_indexed") !== null &&
+      gl.getExtension("EXT_color_buffer_float") !== null &&
+      // With it three attaches multisampled textures, a path this target's
+      // three attachments are untested on.
+      gl.getExtension("WEBGL_multisampled_render_to_texture") === null
+    );
+  }
 
   constructor(
     private readonly renderer: WebGPURenderer,
@@ -119,8 +144,9 @@ export class OitFrame {
       // Zero alpha under the material's own blend leaves the color as it is.
       output: byMaterial(vec4(0), output),
       sum: byMaterial(vec4(output.rgb.mul(alpha), alpha).mul(weight), vec4(0)),
-      // Zero is neutral with blending on or off: for an opaque material
-      // three's WebGL2 backend turns it off, its WebGPU one doesn't.
+      // Zero is the clear value, and three's WebGL2 backend writes an opaque
+      // mark's zero unblended, before any mark accumulates. three's
+      // revealage clears to one.
       coverage: byMaterial(alpha, float(0)),
     })
       .setBlendMode("sum", added)
@@ -140,6 +166,8 @@ export class OitFrame {
     );
     this.compositeMaterial.depthTest = false;
     this.compositeMaterial.depthWrite = false;
+
+    renderer.setTransparentSort(accumulatingLast);
   }
 
   setRadius(radius: number): void {

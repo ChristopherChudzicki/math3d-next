@@ -6,9 +6,12 @@ import { expectThreeViewport } from "@/utils/threeViewport";
 import {
   blueFirstOverRed,
   expectRedToHideBlue,
+  expectSameColor,
   narrowWindow,
+  overlapColor,
   redOverBlue,
   sharesOnce,
+  translucentPair,
 } from "@/utils/threeTransparency";
 
 test.use({ disable3d: false });
@@ -32,18 +35,41 @@ test("three.js with ?oit=0 draws in MathBox's order: zOrder decides what a trans
   expect(errors).toEqual([]);
 });
 
-test("three.js order-independent transparency on WebGL2 blends whatever the zOrder", async ({
+test("three.js order-independent transparency on WebGL2 blends two translucent items alike in either zOrder", async ({
+  page,
+  prepareScene,
+}) => {
+  // It loads two scenes.
+  test.slow();
+  const errors = collectPageErrors(page);
+  const overlapWith = async (first: "blue" | "red") => {
+    const key = await prepareScene(translucentPair(first).json());
+    await page.goto(`/${key}?renderer=threejs&controls=0`);
+    await expectThreeViewport(page);
+    await expect(canvas(page)).toHaveAttribute("data-backend", "webgl2");
+    await expect(canvas(page)).toHaveAttribute("data-transparency", "oit");
+    return overlapColor(page);
+  };
+
+  const blueFirst = await overlapWith("blue");
+  const redFirst = await overlapWith("red");
+  expectSameColor(redFirst, blueFirst);
+  expect(errors).toEqual([]);
+});
+
+test("three.js order-independent transparency on WebGL2 is antialiased", async ({
   page,
   prepareScene,
 }) => {
   const errors = collectPageErrors(page);
-  const key = await prepareScene(blueFirstOverRed().json());
+  const key = await prepareScene(redOverBlue().json());
   await page.goto(`/${key}?renderer=threejs&controls=0`);
 
   await expectThreeViewport(page);
-  await expect(canvas(page)).toHaveAttribute("data-backend", "webgl2");
   await expect(canvas(page)).toHaveAttribute("data-transparency", "oit");
-  await sharesOnce(page, "blueOverRed");
+  // Without MSAA the red plane's edge is a staircase of plain red pixels.
+  const { redIntoWhite } = await sharesOnce(page, "red");
+  expect(redIntoWhite).toBeGreaterThan(0.0005);
   expect(errors).toEqual([]);
 });
 

@@ -8,7 +8,7 @@ import {
 import type { CameraSpec, ViewportSpec } from "@math3d/viewport-spec";
 import { ViewCamera } from "./camera";
 import { mathToView } from "./viewTransform";
-import { accumulatingLast, inDrawOrder } from "./drawOrder";
+import { inDrawOrder } from "./drawOrder";
 import { builders } from "./graphics/builders";
 import { syncGraphics } from "./graphics/syncGraphics";
 import type { DrawnGraphics } from "./graphics/syncGraphics";
@@ -134,15 +134,12 @@ export class ThreeScene {
       "isWebGPUBackend" in this.renderer.backend ? "webgpu" : "webgl2";
     this.canvas.dataset.backend = backend;
     this.transparency = this.options.transparency ?? "oit";
-    // `OitFrame` blends each attachment its own way. Without the extension
-    // three's WebGL2 backend blends all alike, and translucent marks vanish.
-    if (backend === "webgl2" && !this.blendsPerAttachment()) {
+    if (this.transparency === "oit" && !OitFrame.supported(this.renderer)) {
       this.transparency = "ordered";
     }
     this.canvas.dataset.transparency = this.transparency;
     if (this.transparency === "oit") {
       this.oit = new OitFrame(this.renderer, this.scene);
-      this.renderer.setTransparentSort(accumulatingLast);
     }
     this.build();
     this.resizeObserver.observe(this.host);
@@ -192,12 +189,6 @@ export class ThreeScene {
       );
     }
     this.invalidate();
-  }
-
-  private blendsPerAttachment(): boolean {
-    // The context three made: a canvas hands out one per type.
-    const gl = this.canvas.getContext("webgl2");
-    return gl?.getExtension("OES_draw_buffers_indexed") != null;
   }
 
   private hasSize(): boolean {

@@ -233,30 +233,37 @@ passes `ordered` for `?oit=0`):
     one target's three attachments, over one depth buffer, and draws the
     scene once. Nothing is shared, so MSAA stays on. Each material's shader
     writes the attachments that are its own (`accumulates` in
-    `shader/material.ts` decides, inside the pass's outputs), and
-    `ThreeScene` sorts accumulating marks last (`drawOrder.ts`) so they test
-    against complete depth.
+    `shader/material.ts` decides, inside the pass's outputs).
   - On WebGPU it draws what the addon draws, to within 2/255 a channel, so
     one pass serves both backends.
-  - The way back: an `OitFrame` that wraps `oitPass(scene, camera)` in a
-    `RenderPipeline` with the weight as its `weightNode`, as the one in
-    commit `2ac84d77` does. `accumulates` is the addon's own test, so the
-    materials stay; `accumulatingLast` goes.
+  - The way back is in commit `2ac84d77` (#1479): its `OitFrame`, which
+    wraps `oitPass(scene, camera)` in a `RenderPipeline` with the weight as
+    its `weightNode`, and the two things `ThreeScene` did for it, the
+    renderer's `outputBufferType: UnsignedByteType` and the `resized()` call
+    behind its draw-twice workaround. The addon accumulates the same ones of
+    this renderer's materials as `accumulates` does, so they stay;
+    `accumulatingLast` goes.
 - **`oit` costs more than `ordered` on WebGL2**: about twice the frame time
   on the one GPU it is measured on (an M1 Pro; 8 ms against 4 ms at
   2200×1420), mostly a fixed cost of clearing and resolving three
   multisampled attachments. It is unmeasured on weaker GPUs and where OG
   images render.
-- **Without `OES_draw_buffers_indexed`**, WebGL2 can't blend each attachment
-  its own way, and `ThreeScene` draws `ordered` whatever was asked.
+- **Where the pass can't run, `ThreeScene` draws `ordered`** whatever was
+  asked (`OitFrame.supported`): on WebGL2 without `OES_draw_buffers_indexed`
+  or `EXT_color_buffer_float`, or with
+  `WEBGL_multisampled_render_to_texture` (a path of three's that the
+  three-attachment target is untested on), and in WebGPU's compatibility
+  mode. Without per-attachment blending three blends every attachment as the
+  material does, and translucent marks vanish.
 - **`shader/material.ts` alone sets blending and depth flags.** A mark
   states what its alpha is for (`opaque`, `translucent`, or `edges`) and
   whether its triangles all face one way; `sharedMaterial` turns that and
   the model into `transparent`, `blending`, `depthWrite`, `side` and
   `forceSinglePass`, and caches the material.
 - **three never sorts by depth.** `ThreeScene` replaces both of three's sort
-  functions with the spec's order, then part order; under `oit`,
-  accumulating marks follow the rest.
+  functions with the spec's order, then part order. `OitFrame` puts
+  accumulating marks after the rest (`drawOrder.ts`), so they test against
+  complete depth.
 
 ### Folders and lint zones
 

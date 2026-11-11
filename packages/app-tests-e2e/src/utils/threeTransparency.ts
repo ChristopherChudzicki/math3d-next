@@ -51,7 +51,61 @@ export const blueFirstOverRed = (): SceneBuilder => {
   return scene;
 };
 
-/** The shares of the viewport that are plain red, and blue blended over red or white. */
+/**
+ * A translucent blue plane over a translucent red one, with `zOrder`s that
+ * draw `first` first and both after everything else in the scene.
+ */
+export const translucentPair = (first: "blue" | "red"): SceneBuilder => {
+  const [blue, red] = first === "blue" ? ["100", "101"] : ["101", "100"];
+  const scene = new SceneBuilder();
+  scene
+    .folder()
+    .explicitSurface(plane(1, BLUE, "0.5", { zOrder: blue }))
+    .explicitSurface(plane(-1, RED, "0.5", { zOrder: red }));
+  return scene;
+};
+
+type Rgb = [number, number, number];
+
+/** The mean color of the middle of the viewport, where the planes overlap. */
+const middleColor = async (page: Page): Promise<Rgb> => {
+  const png = await page.getByTestId("scene").screenshot();
+  const { data, width, height } = await decodePng(png);
+  const half = 10;
+  const sum: Rgb = [0, 0, 0];
+  for (let y = height / 2 - half; y < height / 2 + half; y += 1) {
+    for (let x = width / 2 - half; x < width / 2 + half; x += 1) {
+      const i = 4 * (Math.floor(y) * width + Math.floor(x));
+      sum[0] += data[i];
+      sum[1] += data[i + 1];
+      sum[2] += data[i + 2];
+    }
+  }
+  const pixels = (2 * half) ** 2;
+  return [sum[0] / pixels, sum[1] / pixels, sum[2] / pixels];
+};
+
+/** Polls until the middle of the viewport is drawn, then returns its color. */
+export const overlapColor = async (page: Page): Promise<Rgb> => {
+  await expect
+    .poll(async () => Math.min(...(await middleColor(page))), {
+      timeout: 15_000,
+    })
+    .toBeLessThan(230);
+  return middleColor(page);
+};
+
+/** Two colors alike to within what dithering and rounding move a channel. */
+export const expectSameColor = (actual: Rgb, expected: Rgb) => {
+  actual.forEach((channel, i) => {
+    expect(Math.abs(channel - expected[i])).toBeLessThan(3);
+  });
+};
+
+/**
+ * The shares of the viewport that are plain red, blue blended over red or
+ * white, and red blended into white, as along an antialiased red edge.
+ */
 export const shares = async (page: Page) => {
   const png = await page.getByTestId("scene").screenshot();
   const { data } = await decodePng(png);
@@ -59,17 +113,20 @@ export const shares = async (page: Page) => {
   let red = 0;
   let blueOverRed = 0;
   let blueOverWhite = 0;
+  let redIntoWhite = 0;
   for (let i = 0; i < data.length; i += 4) {
     const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
     if (r > 230 && g < 25 && b < 25) red += 1;
     if (half(r) && g < 25 && half(b)) blueOverRed += 1;
     if (half(r) && half(g) && b > 230) blueOverWhite += 1;
+    if (r > 230 && g > 40 && g < 215 && Math.abs(g - b) < 25) redIntoWhite += 1;
   }
   const pixels = data.length / 4;
   return {
     red: red / pixels,
     blueOverRed: blueOverRed / pixels,
     blueOverWhite: blueOverWhite / pixels,
+    redIntoWhite: redIntoWhite / pixels,
   };
 };
 

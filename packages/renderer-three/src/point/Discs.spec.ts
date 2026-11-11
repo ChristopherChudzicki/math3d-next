@@ -5,6 +5,7 @@ import type { Coords } from "@math3d/viewport-spec";
 import { Discs } from "./Discs";
 import { edgeMaterial, fillMaterial } from "./discMaterial";
 import type { DiscStyle } from "./discMaterial";
+import { accumulates } from "../shader/material";
 
 const style = (overrides: Partial<DiscStyle> = {}): DiscStyle => ({
   diameter: 8,
@@ -89,8 +90,8 @@ describe("Discs", () => {
     discs.set(points(1), style({ color: [1, 0, 0, 0.5] }));
     expect(fill.material).toBe(fillMaterial("translucent", "oit"));
     expect(edge.material).toBe(edgeMaterial("translucent", "oit"));
-    // Like the fill, it accumulates rather than blending in place.
-    expect(edge.material.depthWrite).toBe(false);
+    // Like the fill, rather than blending in place.
+    expect(accumulates(edge.material)).toBe(true);
   });
 
   test("under the ordered model, blends opaque discs too", () => {

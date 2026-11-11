@@ -59,8 +59,9 @@ const setOitFlags = (material: MeshBasicNodeMaterial, alpha: Alpha) => {
   // blends with the background where an opaque mark is yet to be drawn.
   material.transparent = alpha !== "opaque";
   if (alpha === "edges") {
-    // `accumulates` takes every material with three's `NormalBlending`. These
-    // are its factors under another name, so an edge blends in place.
+    // `accumulates` takes every `transparent` material with three's
+    // `NormalBlending`. These are its factors under another name, so an edge
+    // blends in place.
     material.blending = CustomBlending;
     material.blendSrc = SrcAlphaFactor;
     material.blendDst = OneMinusSrcAlphaFactor;
@@ -93,7 +94,8 @@ const setOrderedFlags = (
 /**
  * Whether `OitFrame` accumulates a material's fragments, to composite them
  * whatever the order: under `oit`, the materials of `translucent` marks.
- * three's `OITPassNode` addon picks the same ones.
+ * Among this renderer's materials, three's `OITPassNode` addon picks the
+ * same ones.
  */
 export const accumulates = (material: Material): boolean =>
   material.transparent && material.blending === NormalBlending;

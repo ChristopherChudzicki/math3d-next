@@ -19,8 +19,8 @@ const accumulating = ({ material }: Drawn) =>
   material !== null && accumulates(material);
 
 /**
- * Draw order, but accumulating marks after all others: `OitFrame` tests them
- * against the depth the others write, so that depth must be complete.
+ * Draw order, but accumulating marks after all others: `OitFrame`, which
+ * sorts with it, tests them against the depth the others write.
  */
 export const accumulatingLast = (a: Drawn, b: Drawn): number =>
   Number(accumulating(a)) - Number(accumulating(b)) || inDrawOrder(a, b);

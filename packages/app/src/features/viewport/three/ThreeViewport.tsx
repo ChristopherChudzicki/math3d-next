@@ -18,7 +18,8 @@ const HOST_STYLE = { width: "100%", height: "100%" };
 
 /**
  * `?oit=0` draws translucent items in MathBox's order, for comparing the two
- * renderers. Without it they blend order-independently.
+ * renderers. Without it they blend order-independently where the browser
+ * can.
  */
 const TRANSPARENCY_PARAM = "oit";
 
