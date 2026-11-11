@@ -18,8 +18,7 @@ export const expectThreeViewport = async (page: Page) => {
  */
 export const coloredShare = async (page: Page): Promise<number> => {
   const viewport = page.getByTestId("scene");
-  const read = async () =>
-    colorfulPixelRatio(page, (await viewport.screenshot()).toString("base64"));
+  const read = async () => colorfulPixelRatio(await viewport.screenshot());
   await expect.poll(read, { timeout: 15_000 }).toBeGreaterThan(0);
   return read();
 };

@@ -12,7 +12,7 @@ import {
   vec3,
 } from "three/tsl";
 import { projectWithDepthStyle } from "../shader/depthStyle";
-import type { Template } from "./Instances";
+import type { Template } from "../instances/Instances";
 import { arrowLengthAt, strokeMaterial, strokeStyle, toView } from "./style";
 
 const SIDES = 24;

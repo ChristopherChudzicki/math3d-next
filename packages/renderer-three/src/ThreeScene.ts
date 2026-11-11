@@ -11,6 +11,7 @@ import { mathToView } from "./viewTransform";
 import { builders } from "./graphics/builders";
 import { syncGraphics } from "./graphics/syncGraphics";
 import type { DrawnGraphics } from "./graphics/syncGraphics";
+import { onLabelRelayout } from "./label/atlas";
 
 // Colors stay the sRGB values the spec gives (see `outputColorSpace` below),
 // so three must not convert a `Color` to linear on its way in either.
@@ -49,6 +50,18 @@ export class ThreeScene {
   private readonly resizeObserver: ResizeObserver;
 
   private readonly view: ViewCamera;
+
+  // A new devicePixelRatio relays out the labels without resizing the host.
+  // Only then resize: it clears the drawing buffer and reallocates its targets.
+  private readonly stopLabelRelayout = onLabelRelayout(() =>
+    this.reporting(() => {
+      if (window.devicePixelRatio === this.renderer.getPixelRatio()) {
+        this.invalidate();
+      } else {
+        this.resize();
+      }
+    }),
+  );
 
   private spec: ViewportSpec | null = null;
 
@@ -115,6 +128,7 @@ export class ThreeScene {
     this.disposed = true;
     if (this.frame !== null) cancelAnimationFrame(this.frame);
     this.resizeObserver.disconnect();
+    this.stopLabelRelayout();
     this.view.dispose();
     this.canvas.remove();
     this.graphics.forEach(({ graphic }) => graphic.dispose());

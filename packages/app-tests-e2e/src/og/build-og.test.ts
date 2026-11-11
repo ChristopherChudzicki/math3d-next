@@ -72,7 +72,7 @@ test("build default OG image", async ({ page, prepareScene }) => {
   // ~0.086 of this 2x frame. 0.04 sits well above the blank floor and well below
   // the real render for GL-backend variance. Assert on `raw`: after setContent
   // the page is the card, not the scene.
-  const ratio = await colorfulPixelRatio(page, raw.toString("base64"));
+  const ratio = await colorfulPixelRatio(raw);
   expect(ratio).toBeGreaterThan(0.04);
 
   // 2. Trim the uniform background so the torus fills the card's lower band.
