@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Calls `onTicks(elapsed)` on animation frames: on average `fps` times per
- * second, or every frame when the display is slower than that. `elapsed` is
- * the time since the previous call in units of 1/fps, so advancing by
- * `elapsed * step` moves at a steady rate however the calls land on frames.
- * `null`, or an `fps` that isn't a positive number, stops.
+ * Calls `onTicks(elapsed)` in a task just after an animation frame: on average
+ * `fps` times per second, or after every frame when the display is slower than
+ * that. `elapsed` is the time since the previous call in units of 1/fps, so
+ * advancing by `elapsed * step` moves at a steady rate however the calls land
+ * on frames. `null`, or an `fps` that isn't a positive number, stops.
  */
 const useFrameTicks = (
   onTicks: (elapsed: number) => void,
@@ -27,6 +27,14 @@ const useFrameTicks = (
       prev = null;
     };
     document.addEventListener("visibilitychange", restart);
+    let unreported = 0;
+    let report: ReturnType<typeof setTimeout> | null = null;
+    const reportTicks = () => {
+      report = null;
+      const elapsed = unreported;
+      unreported = 0;
+      cbRef.current(elapsed);
+    };
     let id = requestAnimationFrame(function frame(now) {
       if (prev === null) {
         prev = now;
@@ -36,12 +44,16 @@ const useFrameTicks = (
         prev = now;
         // Next due time: past `now` by whole periods, keeping the phase.
         due += periodMs * (Math.floor((now + slack - due) / periodMs) + 1);
-        cbRef.current(elapsed);
+        unreported += elapsed;
+        // After the frame: inside it, a renderer that draws on change misses
+        // updates on consecutive frames. This unnested timeout isn't clamped.
+        report ??= setTimeout(reportTicks, 0);
       }
       id = requestAnimationFrame(frame);
     });
     return () => {
       cancelAnimationFrame(id);
+      if (report !== null) clearTimeout(report);
       document.removeEventListener("visibilitychange", restart);
     };
   }, [fps]);
