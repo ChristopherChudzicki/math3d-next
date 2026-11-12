@@ -63,7 +63,7 @@ const defaultValues: ExplicitSurfacePolarProperties = {
     type: "function-assignment",
     name: "_f",
     params: ["r", "\\theta"],
-    rhs: "\\frac{1}{4} \\cdot r^2 \\cdot cos(3\\theta)",
+    rhs: "\\frac{1}{4} \\cdot r^2 \\cdot \\cos(3\\theta)",
   },
   domain: {
     type: "array",
@@ -78,7 +78,7 @@ const defaultValues: ExplicitSurfacePolarProperties = {
         type: "function-assignment",
         name: "_f",
         params: ["r"],
-        rhs: "[-pi, pi]",
+        rhs: "\\left[-\\pi, \\pi\\right]",
       },
     ],
   },
