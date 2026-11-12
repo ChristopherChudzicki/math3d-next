@@ -9,10 +9,11 @@ export const mathToView = (
   range: AxesRange,
   viewScale: Coords,
 ): { scale: Coords; offset: Coords } => {
-  const width = range.map(([min, max]) => max - min || 1);
-  const scale = width.map((w, i) => (2 * viewScale[i]) / w) as Coords;
+  const scale = range.map(
+    ([min, max], i) => (2 * viewScale[i]) / (max - min || 1),
+  ) as Coords;
   const offset = range.map(
-    ([min], i) => -(min + width[i] / 2) * scale[i],
+    ([min], i) => -min * scale[i] - viewScale[i],
   ) as Coords;
   return { scale, offset };
 };

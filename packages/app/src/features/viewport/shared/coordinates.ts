@@ -1,6 +1,6 @@
 import type { AxesRange, Coords } from "@math3d/viewport-spec";
 
-/** A range's width; a zero-width range spans one unit, as in MathBox. */
+/** A zero-width range spans one unit, as in MathBox. */
 const width = ([min, max]: [number, number]) => max - min || 1;
 
 /**

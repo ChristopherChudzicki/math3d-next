@@ -5,7 +5,7 @@ import type { CameraSpec, ViewportSpec } from "@math3d/viewport-spec";
 /** Vertical field of view, in degrees, as MathBox and Use.GPU draw it. */
 export const FOV = 60;
 export const TAN_HALF_FOV = Math.tan(((FOV / 2) * Math.PI) / 180);
-// MathBox's camera (threestrap's defaults).
+// MathBox's camera planes (threestrap's defaults).
 const NEAR = 0.01;
 const FAR = 10000;
 
