@@ -80,7 +80,7 @@
     "tinycolor2": "1.6.0",
     "toposort": "2.0.2",
     "use-long-press": "^3.3.0",
-    "yup": "^1.3.2"
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.23.0",

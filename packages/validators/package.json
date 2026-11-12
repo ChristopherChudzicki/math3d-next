@@ -20,6 +20,6 @@
     "@math3d/mathjs-utils": "workspace:^",
     "@math3d/utils": "workspace:^",
     "mathjs": "^15.2.0",
-    "yup": "^1.3.2"
+    "yup": "^1.7.1"
   }
 }
