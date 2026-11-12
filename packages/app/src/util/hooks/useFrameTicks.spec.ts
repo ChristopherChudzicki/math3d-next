@@ -3,10 +3,12 @@ import { useFrameTicks } from "./useFrameTicks";
 
 /**
  * Stubs requestAnimationFrame so each test chooses its frame timestamps.
- * Returns `ticksAt(times)`: runs one frame per timestamp, then returns the
- * `elapsed` of every onTicks call, rounded to 3 places.
+ * Returns `ticksAt(times)`: runs one frame per timestamp, and the timeout it
+ * sets, then returns `calls()`: the `elapsed` of every onTicks call, rounded
+ * to 3 places. `frame(t)` runs one frame without its timeout.
  */
 const setup = (fps: number | null) => {
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
   let pending: { id: number; cb: FrameRequestCallback } | null = null;
   let lastId = 0;
   vi.spyOn(window, "requestAnimationFrame").mockImplementation((cb) => {
@@ -19,15 +21,21 @@ const setup = (fps: number | null) => {
   });
   const onTicks = vi.fn();
   const view = renderHook(() => useFrameTicks(onTicks, fps));
+  const frame = (t: number) => {
+    const queued = pending;
+    pending = null;
+    queued?.cb(t);
+  };
+  const calls = () =>
+    onTicks.mock.calls.map(([n]) => Math.round(n * 1000) / 1000);
   const ticksAt = (times: number[]) => {
     times.forEach((t) => {
-      const frame = pending;
-      pending = null;
-      frame?.cb(t);
+      frame(t);
+      vi.runOnlyPendingTimers();
     });
-    return onTicks.mock.calls.map(([n]) => Math.round(n * 1000) / 1000);
+    return calls();
   };
-  return { view, ticksAt };
+  return { view, frame, calls, ticksAt };
 };
 
 /** Frame timestamps every `period` ms, starting at 0. */
@@ -35,6 +43,7 @@ const frames = (period: number, count: number) =>
   Array.from({ length: count }, (_, i) => i * period);
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
@@ -92,5 +101,32 @@ describe("useFrameTicks", () => {
     const before = ticksAt(frames(20, 3));
     view.unmount();
     expect(ticksAt(frames(20, 5))).toEqual(before);
+  });
+
+  test("Cancels its timeout on an unmount between a frame and the timeout", () => {
+    const { view, frame, calls, ticksAt } = setup(60);
+    ticksAt([0]);
+    frame(20);
+    view.unmount();
+    vi.runOnlyPendingTimers();
+    expect(calls()).toEqual([]);
+  });
+
+  test("Calls onTicks after the frame, not in its callback", () => {
+    const { frame, calls, ticksAt } = setup(60);
+    ticksAt([0]);
+    frame(20);
+    expect(calls()).toEqual([]);
+    vi.runOnlyPendingTimers();
+    expect(calls()).toEqual([1.2]);
+  });
+
+  test("Reports two due frames in one call when its timeout runs late", () => {
+    const { frame, calls, ticksAt } = setup(60);
+    ticksAt([0]);
+    frame(20);
+    frame(40);
+    vi.runOnlyPendingTimers();
+    expect(calls()).toEqual([2.4]);
   });
 });

@@ -132,7 +132,9 @@ by itself.
 - `Viewport` rethrows what a frame or resize throws, so the error boundary
   sees it.
 - Frames draw on change, but three's own animation-frame loop runs from the
-  first frame until disposal.
+  first frame until disposal. A change made inside an animation-frame callback
+  shares a draw with one made in the next frame, so `useFrameTicks` ticks in a
+  task after the frame.
 - The camera is `camera.ts`'s `ViewCamera`: three's `OrbitControls` (no
   damping, so redraws stop when the user does) on a `PerspectiveCamera` or a
   true `OrthographicCamera`.

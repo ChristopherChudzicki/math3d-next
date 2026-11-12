@@ -29,7 +29,7 @@ const sliderItem = (state: RootState, id: string) =>
   state.scene.items[id] as MathItem<MIT.VariableSlider> | undefined;
 
 /**
- * Advances slider `id` on animation frames while it's animating.
+ * Advances slider `id` after animation frames while it's animating.
  */
 const useSliderAnimation = (id: string) => {
   const dispatch = useAppDispatch();
