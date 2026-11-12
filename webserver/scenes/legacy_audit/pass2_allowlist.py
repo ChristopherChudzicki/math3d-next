@@ -32,6 +32,8 @@ class Entry:
     item_type: str | None = None
     next_field: str | None = None
     legacy_value: Callable[[Any], bool] | None = None
+    # Sees both values: (legacy, next).
+    values: Callable[[Any, Any], bool] | None = None
 
     def matches(self, pair: Pair) -> bool:
         return (
@@ -40,6 +42,7 @@ class Entry:
             and self.item_type in (None, pair.spec.item_type)
             and self.next_field in (None, pair.spec.next_field)
             and (self.legacy_value is None or self.legacy_value(pair.legacy.value))
+            and (self.values is None or self.values(pair.legacy.value, pair.next.value))
         )
 
 
@@ -55,6 +58,24 @@ def _one_nonreal_vector(value: Any) -> bool:
         )
     )
 
+
+def _ranges_flattened(legacy: Any, nxt: Any) -> bool:
+    """Each next range is the legacy one or `[a, a]`, `a` its first bound."""
+    return (
+        isinstance(legacy, list)
+        and isinstance(nxt, list)
+        and len(legacy) == len(nxt)
+        and all(
+            n == r or (isinstance(r, list) and len(r) == 2 and n == [r[0], r[0]])
+            for r, n in zip(legacy, nxt, strict=True)
+        )
+    )
+
+
+ZERO_SAMPLES_DECISION = (
+    "owner decision 2026-11-04 "
+    "(tk-legacy-vector-fields-with-0-samples-in-a-directi-f57cfc)"
+)
 
 # Fields math3d-next validates with realFunc (next:validators/src/validators.ts),
 # from next:mathitem-configs/src/items.
@@ -102,15 +123,39 @@ ALLOWLIST: list[Entry] = (
         Entry(
             "regression",
             "validate: this must be a positive number",
-            "Both apps draw one layer: MathBox's volume rejects a count of 0, which "
-            "leaves it unset, and its voxel allocates `dims.width || 1` etc.; "
-            "math3d-next's validator leaves the count undefined; owner decision "
-            "2026-11-03 "
-            "(tk-legacy-vector-fields-with-0-samples-in-a-directi-f57cfc)",
+            "A 0 count the translator keeps (its range isn't a literal [a, b], or "
+            "it is computed): MathBox's volume rejects it, leaving it unset, and "
+            "its voxel allocates `dims.width || 1` etc., so math3d-react and "
+            "math3d-next's MathBox renderer both draw one layer; "
+            + ZERO_SAMPLES_DECISION,
             "VECTOR_FIELD",
             next_field,
         )
         for next_field in ("samples1", "samples2", "samples3")
+    ]
+    + [
+        Entry(
+            "differ",
+            "zero_vs_value",
+            "The translator writes a literal 0 count as 1 over a flat range "
+            "(scenes/legacy_scene_utils/translate.py `flatten_zero_samples`), "
+            "which draws the same layer; " + ZERO_SAMPLES_DECISION,
+            "VECTOR_FIELD",
+            next_field,
+            legacy_value=lambda v: v == 0,
+        )
+        for next_field in ("samples1", "samples2", "samples3")
+    ]
+    + [
+        Entry(
+            "differ",
+            "",
+            "A direction with a literal 0 count is flattened to [a, a], a its first "
+            "bound, where math3d-react draws its one layer; " + ZERO_SAMPLES_DECISION,
+            "VECTOR_FIELD",
+            "domain",
+            values=_ranges_flattened,
+        )
     ]
     + [
         Entry(
