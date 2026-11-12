@@ -3,12 +3,12 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Provider } from "react-redux";
 import { screen, userEvent, within } from "storybook/test";
 import { addableTypes, MathItemType as MIT } from "@math3d/mathitem-configs";
+import type { MathItem } from "@math3d/mathitem-configs";
 import { SceneBuilder } from "@math3d/mock-api";
-import { getStore } from "@/store/store";
-import type { AppStore } from "@/store/store";
 import { actions } from "@/store/scene/state/scene.slice";
-import MathItemsList from "@/features/editor/items/MathItemsList/MathItemsList";
-import SliderAnimations from "@/features/editor/items/forms/VariableSlider/SliderAnimations";
+import { storeWithScene } from "@/test_util/storeWithScene";
+import MathItemsList from "./MathItemsList/MathItemsList";
+import SliderAnimations from "./forms/VariableSlider/SliderAnimations";
 import styles from "./MathItemForms.stories.module.css";
 
 type Column = { heading: string; rootId: "main" | "setup" };
@@ -20,7 +20,7 @@ type Args = {
 
 type SceneColumnsProps = Args & {
   build: () => SceneBuilder;
-  setup?: (store: AppStore) => void;
+  activeId?: string;
   columns: Column[];
 };
 
@@ -30,15 +30,13 @@ type SceneColumnsProps = Args & {
  */
 const SceneColumns: React.FC<SceneColumnsProps> = ({
   build,
-  setup,
+  activeId,
   columns,
   width,
 }) => {
   const [store] = useState(() => {
-    const s = getStore();
-    const scene = build();
-    s.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
-    setup?.(s);
+    const s = storeWithScene(build());
+    if (activeId) s.dispatch(actions.setActiveItem({ id: activeId }));
     return s;
   });
   return (
@@ -114,13 +112,20 @@ const buildAllItems = () => {
   return scene;
 };
 
+/**
+ * Without the setup folder, whose x axis would clash with the Axis row's
+ * `_x_min` / `_x_max`.
+ */
+const sceneWithoutSetup = () => new SceneBuilder({}, { setup: false });
+
 const buildErrors = () => {
-  const scene = new SceneBuilder();
+  const scene = sceneWithoutSetup();
   scene
     .folder({ description: "Errors" })
+    // Parse and evaluation errors draw the same underline; only the tooltip
+    // text differs.
     .item(MIT.Point, {
-      description:
-        "Point: 2D coordinates (parse and evaluation errors look the same)",
+      description: "Point: 2D coordinates",
       coords: "[1, 2]",
     })
     .item(MIT.Variable, {
@@ -180,8 +185,8 @@ const buildErrors = () => {
       range: { type: "array", items: ["5", "-5"] },
     })
     .item(MIT.BooleanVariable, {
-      description: "Toggle: bad value",
-      value: { type: "assignment", lhs: "p", rhs: "1 > " },
+      description: "Toggle: bad name",
+      value: { type: "assignment", lhs: "p + ", rhs: "true" },
     })
     .item(MIT.Camera, {
       description: "Camera: bad Pan expression",
@@ -204,7 +209,7 @@ export const AllItems: Story = {
   render: (args) => (
     <SceneColumns
       build={buildAllItems}
-      setup={(s) => s.dispatch(actions.setActiveItem({ id: ACTIVE_ID }))}
+      activeId={ACTIVE_ID}
       columns={[MAIN, SETUP]}
       {...args}
     />
@@ -218,17 +223,18 @@ export const Errors: Story = {
 };
 
 /**
- * One item with its settings popover open. Only one popover stays open at a
- * time, so each layout gets its own story; other types reuse `SettingsForm`
- * with different rows.
+ * Opens one item's settings popover. Every type's popover is `SettingsForm`
+ * with its own rows; settings popovers close each other, so each layout gets
+ * its own story.
  */
-const settingsStory = (
-  addItem: (folder: ReturnType<SceneBuilder["folder"]>) => void,
+const settingsStory = <T extends Exclude<MIT, MIT.Folder>>(
+  type: T,
+  props?: Partial<MathItem<T>["properties"]>,
   afterOpen?: () => Promise<void>,
 ): Story => {
   const build = () => {
-    const scene = new SceneBuilder();
-    addItem(scene.folder({ description: "Settings" }));
+    const scene = sceneWithoutSetup();
+    scene.folder({ description: "Settings" }).item(type, props);
     return scene;
   };
   return {
@@ -244,31 +250,27 @@ const settingsStory = (
   };
 };
 
-/** Widgets of each kind, with errors in the popover. */
-export const AxisSettings = settingsStory((folder) =>
-  folder.item(MIT.Axis, {
-    calculatedVisibility: "1 + ",
-    useCalculatedVisibility: true,
-    ticksVisible: "1 > ",
-  }),
-);
+/** Every settings widget kind (color, text, boolean, math), with errors. */
+export const AxisSettings = settingsStory(MIT.Axis, {
+  calculatedVisibility: "1 + ",
+  useCalculatedVisibility: true,
+  ticksVisible: "1 > ",
+});
 
-/** A single field. */
-export const SliderSettings = settingsStory((folder) =>
-  folder.item(MIT.VariableSlider),
-);
+/** The smallest popover: Duration is its only setting. */
+export const SliderSettings = settingsStory(MIT.VariableSlider);
 
 /** The color popup's Color Map tab, with an invalid color expression. */
 export const ColorPopup = settingsStory(
-  (folder) =>
-    folder.item(MIT.ParametricSurface, {
-      colorExpr: {
-        type: "function-assignment",
-        name: "_f",
-        params: ["x", "y", "z", "u", "v"],
-        rhs: "z + ",
-      },
-    }),
+  MIT.ParametricSurface,
+  {
+    colorExpr: {
+      type: "function-assignment",
+      name: "_f",
+      params: ["x", "y", "z", "u", "v"],
+      rhs: "z + ",
+    },
+  },
   async () => {
     const settings = await screen.findByRole("dialog", { name: /Settings$/ });
     await userEvent.click(

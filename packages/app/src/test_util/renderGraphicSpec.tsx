@@ -1,32 +1,19 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import { Provider } from "react-redux";
-import type { SceneBuilder } from "@math3d/mock-api";
 import { isMathGraphic } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
-import { getStore } from "@/store/store";
 import { useAppSelector } from "@/store/hooks";
-import { actions } from "@/store/scene/state/scene.slice";
 import { SpecCollector } from "@/features/viewport/spec/collector";
 import { GraphicSpecReporter } from "@/features/viewport/spec/reporter";
 import type { GraphicSpec } from "@math3d/viewport-spec";
+import { storeWithScene } from "./storeWithScene";
+import type { SceneInput } from "./storeWithScene";
 
 const Harness: React.FC<{ id: string }> = ({ id }) => {
   const item = useAppSelector((state) => state.scene.items[id]);
   invariant(isMathGraphic(item), `${id} is not a graphic`);
   return <GraphicSpecReporter item={item} />;
-};
-
-export type SceneInput = Pick<
-  SceneBuilder,
-  "items" | "itemOrder" | "title" | "key" | "isLegacy" | "author"
->;
-
-/** A fresh store with `scene` loaded and evaluated. */
-export const storeWithScene = (scene: SceneInput) => {
-  const store = getStore();
-  store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
-  return store;
 };
 
 /**
