@@ -1,3 +1,5 @@
+import tinycolor from "tinycolor2";
+
 type SurfaceColorFunc = (
   x: number,
   y: number,
@@ -15,5 +17,17 @@ const explicitColorFunc =
   (x, y, z) =>
     color(x, y, z);
 
-export { explicitColorFunc };
+/**
+ * A solid-colored surface's gridline color, as math3d-react drew it: the
+ * surface color with its HSL lightness L scaled by 1 − 0.75·(1 − L).
+ */
+const gridlineColor = (color: string): string => {
+  const hsl = tinycolor(color).toHsl();
+  return tinycolor({
+    ...hsl,
+    l: hsl.l * (1 - 0.75 * (1 - hsl.l)),
+  }).toHexString();
+};
+
+export { explicitColorFunc, gridlineColor };
 export type { SurfaceColorFunc };
