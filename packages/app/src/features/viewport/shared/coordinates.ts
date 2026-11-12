@@ -1,5 +1,8 @@
 import type { AxesRange, Coords } from "@math3d/viewport-spec";
 
+/** A zero-width range spans one unit, as in MathBox. */
+const width = ([min, max]: [number, number]) => max - min || 1;
+
 /**
  * Project a coordinate from one linear range to another
  */
@@ -7,15 +10,11 @@ const project = (
   position1: Coords,
   range1: AxesRange,
   range2: AxesRange,
-): Coords => {
-  const [x1, y1, z1] = position1;
-  const [[xMin1, xMax1], [yMin1, yMax1], [zMin1, zMax1]] = range1;
-  const [[xMin2, xMax2], [yMin2, yMax2], [zMin2, zMax2]] = range2;
-  const x2 = xMin2 + ((x1 - xMin1) / (xMax1 - xMin1)) * (xMax2 - xMin2);
-  const y2 = yMin2 + ((y1 - yMin1) / (yMax1 - yMin1)) * (yMax2 - yMin2);
-  const z2 = zMin2 + ((z1 - zMin1) / (zMax1 - zMin1)) * (zMax2 - zMin2);
-  return [x2, y2, z2];
-};
+): Coords =>
+  position1.map(
+    (p, i) =>
+      range2[i][0] + ((p - range1[i][0]) / width(range1[i])) * width(range2[i]),
+  ) as Coords;
 
 const cartesianRange = (scale: Coords): AxesRange => [
   [-scale[0], scale[0]],

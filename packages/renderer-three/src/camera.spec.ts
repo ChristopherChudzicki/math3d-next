@@ -70,6 +70,20 @@ test("an orthographic camera clips nothing behind its position", () => {
   expect(Math.abs(behind.z)).toBeLessThan(1);
 });
 
+test.each([false, true])(
+  "draws what lies thousands of units away, as MathBox does (orthographic: %s)",
+  (orthographic) => {
+    const { view, spec, project } = setup(orthographic);
+    view.setSpec({
+      ...spec,
+      camera: { position: [0, -2000, 1500], target: [0, 0, 0] },
+      cameraRevision: 1,
+    });
+    // 4,000 from the camera, 1,500 beyond its target.
+    expect(Math.abs(project([0, 1200, -900]).z)).toBeLessThan(1);
+  },
+);
+
 test("an orthographic camera at its target still has a view", () => {
   const { view, spec } = setup(true);
   view.setSpec({

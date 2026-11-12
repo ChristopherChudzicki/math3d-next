@@ -31,3 +31,16 @@ test.each([
     expect(fromUi(ui as Coords, range, scale, useRelative)).toEqual(cartesian);
   },
 );
+
+test("a zero-width axis range spans [min, min + 1], as in MathBox", () => {
+  const flat: AxesRange = [
+    [-2, 4],
+    [0, 1],
+    [3, 3],
+  ];
+  const ui: Coords = [4, 0, 3.5];
+  const cartesian = fromUi(ui, flat, scale, false);
+
+  expect(cartesian).toEqual([1, -2, 0]);
+  expect(toUi(cartesian, flat, scale, false)).toEqual(ui);
+});
