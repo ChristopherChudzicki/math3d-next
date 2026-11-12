@@ -29,5 +29,15 @@ const gridlineColor = (color: string): string => {
   }).toHexString();
 };
 
-export { explicitColorFunc, gridlineColor };
+/**
+ * A solid-colored surface's gridline color in the viewport spec (three.js,
+ * Use.GPU): its HSL lightness scaled by 0.55, darker than `gridlineColor`,
+ * which three.js's glossy shading and order-independent blending wash out.
+ */
+const specGridlineColor = (color: string): string => {
+  const hsl = tinycolor(color).toHsl();
+  return tinycolor({ ...hsl, l: 0.55 * hsl.l }).toHexString();
+};
+
+export { explicitColorFunc, gridlineColor, specGridlineColor };
 export type { SurfaceColorFunc };

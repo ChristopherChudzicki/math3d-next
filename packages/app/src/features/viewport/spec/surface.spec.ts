@@ -3,7 +3,7 @@ import { MathItemType as MIT, gradients } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import { renderGraphicSpec } from "@/test_util/renderGraphicSpec";
 import type { SurfaceSpec } from "@math3d/viewport-spec";
-import { gridlineColor } from "@/features/viewport/shared/surfaceColor";
+import { specGridlineColor } from "@/features/viewport/shared/surfaceColor";
 import { parseColor } from "./style";
 
 test("an explicit surface maps (U, V) onto its domain and colors by the raw x, y, z, as MathBox does", () => {
@@ -67,7 +67,7 @@ test("a solid-colored surface's gridlines take its gridline color and gridOpacit
   invariant(item?.type === MIT.ParametricSurface);
   const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
   expect(spec.grid.color).toEqual(
-    parseColor(gridlineColor(item.properties.color), 0.3),
+    parseColor(specGridlineColor(item.properties.color), 0.3),
   );
 });
 
