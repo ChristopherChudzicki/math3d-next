@@ -123,7 +123,13 @@ const ItemTemplate = <T extends MIT>({
             label="Remove Item"
           />
         </div>
-        <div className={styles["grid-right-gutter-bottom"]}>
+        <div
+          className={classNames(
+            styles["grid-right-gutter-bottom"],
+            u.dFlex,
+            u.justifyContentEnd,
+          )}
+        >
           {config.settingsProperties.length > 0 && (
             <SettingsPopover item={item} config={config} />
           )}
