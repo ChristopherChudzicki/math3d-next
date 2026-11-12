@@ -1,0 +1,23 @@
+.columns {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.column {
+  width: var(--column-width);
+  flex: none;
+}
+
+/* An item can widen past the column while an editable math field has focus,
+   as past the sidebar in the app; lift it above the next column. */
+.column:has(math-field:focus:not([read-only])) {
+  position: relative;
+  z-index: 1;
+}
+
+.heading {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+}

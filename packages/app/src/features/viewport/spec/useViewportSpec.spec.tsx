@@ -3,7 +3,7 @@ import { act, render, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { SceneBuilder } from "@math3d/mock-api";
 import type { ViewportSpec } from "@math3d/viewport-spec";
-import { storeWithScene } from "@/test_util/renderGraphicSpec";
+import { storeWithScene } from "@/test_util/storeWithScene";
 import { actions } from "@/store/scene/state/scene.slice";
 import { useViewportSpec } from "./useViewportSpec";
 

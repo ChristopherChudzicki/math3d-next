@@ -283,48 +283,40 @@ class Folder {
     return this;
   }
 
+  item<T extends Exclude<MathItemType, MathItemType.Folder>>(
+    type: T,
+    opts: Partial<MathItem<T>["properties"]> = {},
+    id?: string,
+  ) {
+    return this.#add(makeItem(type, opts, id ?? getNextId(this.#scene)));
+  }
+
   axis(
     opts: Partial<MathItem<MathItemType.Axis>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(MathItemType.Axis, opts, id ?? getNextId(this.#scene)),
-    );
+    return this.item(MathItemType.Axis, opts, id);
   }
 
   booleanVariable(
     opts: Partial<MathItem<MathItemType.BooleanVariable>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(
-        MathItemType.BooleanVariable,
-        opts,
-        id ?? getNextId(this.#scene),
-      ),
-    );
+    return this.item(MathItemType.BooleanVariable, opts, id);
   }
 
   camera(
     opts: Partial<MathItem<MathItemType.Camera>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(MathItemType.Camera, opts, id ?? getNextId(this.#scene)),
-    );
+    return this.item(MathItemType.Camera, opts, id);
   }
 
   explicitSurface(
     opts: Partial<MathItem<MathItemType.ExplicitSurface>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(
-        MathItemType.ExplicitSurface,
-        opts,
-        id ?? getNextId(this.#scene),
-      ),
-    );
+    return this.item(MathItemType.ExplicitSurface, opts, id);
   }
 
   explicitSurfacePolar(
@@ -333,115 +325,77 @@ class Folder {
     > = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(
-        MathItemType.ExplicitSurfacePolar,
-        opts,
-        id ?? getNextId(this.#scene),
-      ),
-    );
+    return this.item(MathItemType.ExplicitSurfacePolar, opts, id);
   }
 
   grid(
     opts: Partial<MathItem<MathItemType.Grid>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(MathItemType.Grid, opts, id ?? getNextId(this.#scene)),
-    );
+    return this.item(MathItemType.Grid, opts, id);
   }
 
   implicitSurface(
     opts: Partial<MathItem<MathItemType.ImplicitSurface>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(
-        MathItemType.ImplicitSurface,
-        opts,
-        id ?? getNextId(this.#scene),
-      ),
-    );
+    return this.item(MathItemType.ImplicitSurface, opts, id);
   }
 
   line(
     opts: Partial<MathItem<MathItemType.Line>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(MathItemType.Line, opts, id ?? getNextId(this.#scene)),
-    );
+    return this.item(MathItemType.Line, opts, id);
   }
 
   parametricCurve(
     opts: Partial<MathItem<MathItemType.ParametricCurve>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(
-        MathItemType.ParametricCurve,
-        opts,
-        id ?? getNextId(this.#scene),
-      ),
-    );
+    return this.item(MathItemType.ParametricCurve, opts, id);
   }
 
   parametricSurface(
     opts: Partial<MathItem<MathItemType.ParametricSurface>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(
-        MathItemType.ParametricSurface,
-        opts,
-        id ?? getNextId(this.#scene),
-      ),
-    );
+    return this.item(MathItemType.ParametricSurface, opts, id);
   }
 
   point(
     opts: Partial<MathItem<MathItemType.Point>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(MathItemType.Point, opts, id ?? getNextId(this.#scene)),
-    );
+    return this.item(MathItemType.Point, opts, id);
   }
 
   variable(
     opts: Partial<MathItem<MathItemType.Variable>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(MathItemType.Variable, opts, id ?? getNextId(this.#scene)),
-    );
+    return this.item(MathItemType.Variable, opts, id);
   }
 
   variableSlider(
     opts: Partial<MathItem<MathItemType.VariableSlider>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(MathItemType.VariableSlider, opts, id ?? getNextId(this.#scene)),
-    );
+    return this.item(MathItemType.VariableSlider, opts, id);
   }
 
   vector(
     opts: Partial<MathItem<MathItemType.Vector>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(MathItemType.Vector, opts, id ?? getNextId(this.#scene)),
-    );
+    return this.item(MathItemType.Vector, opts, id);
   }
 
   vectorField(
     opts: Partial<MathItem<MathItemType.VectorField>["properties"]> = {},
     id?: string,
   ) {
-    return this.#add(
-      makeItem(MathItemType.VectorField, opts, id ?? getNextId(this.#scene)),
-    );
+    return this.item(MathItemType.VectorField, opts, id);
   }
 }
 

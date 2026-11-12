@@ -2,10 +2,8 @@ import React from "react";
 import { act, render } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { SceneBuilder } from "@math3d/mock-api";
-import {
-  renderGraphicSpec,
-  storeWithScene,
-} from "@/test_util/renderGraphicSpec";
+import { renderGraphicSpec } from "@/test_util/renderGraphicSpec";
+import { storeWithScene } from "@/test_util/storeWithScene";
 import { actions } from "@/store/scene/state/scene.slice";
 import type { ImplicitSurfaceSpec } from "@math3d/viewport-spec";
 import { useViewportSpec } from "./useViewportSpec";

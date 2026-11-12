@@ -6,11 +6,9 @@ import {
   finalVisibility,
   mathScopeId,
 } from "@/store/scene/evaluation/mathScope";
-import {
-  collectGraphicSpecs,
-  storeWithScene,
-} from "@/test_util/renderGraphicSpec";
-import type { SceneInput } from "@/test_util/renderGraphicSpec";
+import { collectGraphicSpecs } from "@/test_util/renderGraphicSpec";
+import { storeWithScene } from "@/test_util/storeWithScene";
+import type { SceneInput } from "@/test_util/storeWithScene";
 import { repoRoot } from "@/test_util/repoRoot";
 
 const QA_DIR = path.join(repoRoot, "webserver/scenes/seed_scenes/qa");

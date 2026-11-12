@@ -6,7 +6,7 @@ import { MathItemType } from "@math3d/mathitem-configs";
 import type { MathItem } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
 import type { AxesRange, Coords } from "@math3d/viewport-spec";
-import { storeWithScene } from "@/test_util/renderGraphicSpec";
+import { storeWithScene } from "@/test_util/storeWithScene";
 import { fromUi } from "@/features/viewport/shared/coordinates";
 import { useCameraSpec } from "./camera";
 
