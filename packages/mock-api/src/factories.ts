@@ -283,6 +283,14 @@ class Folder {
     return this;
   }
 
+  item<T extends Exclude<MathItemType, MathItemType.Folder>>(
+    type: T,
+    opts: Partial<MathItem<T>["properties"]> = {},
+    id?: string,
+  ) {
+    return this.#add(makeItem(type, opts, id ?? getNextId(this.#scene)));
+  }
+
   axis(
     opts: Partial<MathItem<MathItemType.Axis>["properties"]> = {},
     id?: string,

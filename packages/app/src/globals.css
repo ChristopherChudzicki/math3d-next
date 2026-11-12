@@ -88,6 +88,7 @@ math-field {
   font-size: 1.25rem;
   color: var(--color-text-primary);
 }
-math-field::part(menu-toggle) {
+math-field::part(menu-toggle),
+math-field::part(virtual-keyboard-toggle) {
   display: none;
 }
