@@ -15,9 +15,12 @@ import {
   explicitPolarSurface,
   explicitSurface,
 } from "@/features/viewport/shared/surfaceDomain";
-import { explicitColorFunc } from "@/features/viewport/shared/surfaceColor";
+import {
+  explicitColorFunc,
+  gridlineColor,
+} from "@/features/viewport/shared/surfaceColor";
 import type { SurfaceColorFunc } from "@/features/viewport/shared/surfaceColor";
-import { baseStyle, sampleCount } from "./style";
+import { baseStyle, parseColor, sampleCount } from "./style";
 import { useReportSpec } from "./collector";
 import type { SpecComponent } from "./collector";
 
@@ -104,10 +107,10 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
       const [r, g, b] = gradient.getRGB(colorFunc(...position(U, V), u, v));
       return [r, g, b, alpha];
     };
-    // Like MathBox: grey gridlines on a gradient, else the surface color at half brightness.
+    // On a gradient, MathBox's default line color.
     const gridColor: RGBA = gradient
       ? [0.5, 0.5, 0.5, gridOpacity ?? 0.5]
-      : (flat.map((c, i) => (i < 3 ? c * 0.5 : gridOpacity ?? 0.5)) as RGBA);
+      : parseColor(gridlineColor(color), gridOpacity ?? 0.5);
     // 0 means no gridlines; a single line would make the sampler step Δ/0.
     const lineCount = (n: number | undefined, fallback: number) => {
       const rounded = Math.round(n ?? fallback);

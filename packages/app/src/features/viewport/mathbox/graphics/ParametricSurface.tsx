@@ -19,7 +19,10 @@ import {
   explicitSurface,
 } from "@/features/viewport/shared/surfaceDomain";
 import type { SurfaceDomain } from "@/features/viewport/shared/surfaceDomain";
-import { explicitColorFunc } from "@/features/viewport/shared/surfaceColor";
+import {
+  explicitColorFunc,
+  gridlineColor,
+} from "@/features/viewport/shared/surfaceColor";
 import type { SurfaceColorFunc } from "@/features/viewport/shared/surfaceColor";
 import { GraphicComponent } from "./interfaces";
 
@@ -153,11 +156,10 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
     samples2,
   ]);
 
-  const gridColor = useMemo(() => {
-    if (hasColorFunc) return undefined;
-    const c = new Color(color);
-    return c.lerp(new Color("black"), 0.5).getHex();
-  }, [hasColorFunc, color]);
+  const gridColor = useMemo(
+    () => (!color || isGradientName(color) ? undefined : gridlineColor(color)),
+    [color],
+  );
 
   return !visible || !domain ? null : (
     <MB.Group>

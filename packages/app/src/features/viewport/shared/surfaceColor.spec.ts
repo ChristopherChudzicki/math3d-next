@@ -1,6 +1,13 @@
-import { explicitColorFunc } from "./surfaceColor";
+import { explicitColorFunc, gridlineColor } from "./surfaceColor";
 
 test("an explicit surface's color function reads only the coordinates", () => {
   const color = explicitColorFunc((x, y, z) => 100 * x + 10 * y + z);
   expect(color(1, 2, 3, 7, 8)).toBe(123);
+});
+
+test.each([
+  ["#3090ff", "#0062d3"],
+  ["#f1c40f", "#987b09"],
+])("a %s surface's gridlines are %s, as in math3d-react", (color, line) => {
+  expect(gridlineColor(color)).toBe(line);
 });
