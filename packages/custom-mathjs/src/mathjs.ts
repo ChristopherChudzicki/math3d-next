@@ -257,7 +257,7 @@ mathjs.import(
     // (-8)^(1/3) is -2, where principalPow gives 1 + 1.73i.
     pow: mathjs.typed("pow", {
       "number, number": (x: number, y: number) => {
-        // principalPow is Math.pow here.
+        // Same as principalPow here, without its typed dispatch.
         if (x >= 0 || Number.isInteger(y)) return x ** y;
         // A NaN base is left to principalPow.
         const sign = x < 0 ? realRootSign(y) : 0;

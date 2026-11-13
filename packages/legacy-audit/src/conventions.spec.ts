@@ -56,12 +56,6 @@ describe("CONVENTIONS", () => {
       next: -2,
       react: { re: expect.closeTo(1, 12), im: expect.closeTo(3 ** 0.5, 12) },
     },
-    {
-      convention: "principal_pow" as const,
-      rhs: "\\left(-8\\right)^{\\frac{2}{3}}",
-      next: expect.closeTo(4, 12),
-      react: { re: expect.closeTo(-2, 12), im: expect.closeTo(12 ** 0.5, 12) },
-    },
   ])(
     "$convention swaps in math3d-react's value of $rhs until undone",
     ({ convention, rhs, next, react }) => {

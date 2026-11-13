@@ -67,7 +67,7 @@ Accept a library convention (react's `round`, complex.js 2.0.4's addition) or an
   - `(-8)^(1/3)`: math3d-react gives the principal root `1 + 1.73i`, which isn't drawn; math3d-next gives `-2` whenever the exponent's value is within rounding of `p/q` with `q` odd and below 100 (`packages/custom-mathjs/src/realRootSign.ts`). That includes decimal and variable exponents: `x^0.2`, and `x^a` with `a = 1/3`.
   - A legacy graph of `x^(1/3)` that stops at `x = 0` continues through negative `x`.
   - Stored scenes are not rewritten. An author who wants the old result can narrow the domain or make the base complex, `(x + 0I)^(1/3)`.
-  - Size on the 2026-11-04 export: at most 488 of 101,142 scenes change in a drawn function (view weight 1,931 of 1,400,421). 453 only gain drawn values, 25 change a value or lose one (formulas that used the complex result, such as `abs(x*((1/y)^(1/n) - 1))`), and 10 change otherwise. _Upper bounds_: counted at sample points that may lie outside an item's drawn domain.
+  - Size on the 2026-11-04 export: at most 488 of 101,142 scenes change in a drawn function (view weight 1,931 of 1,400,421). 453 only gain drawn values, 25 change a value or lose one (formulas that used the complex result, such as `abs(x*((1/y)^(1/n) - 1))`), and 10 change in ways not classified further. _Upper bounds_: counted at sample points that may lie outside an item's drawn domain.
   - Pass 2 accepts these pairs through the `principal_pow` replay. In a field that draws only real values the replay gives `NaN` where math3d-react gives a complex number, a pair the allowlist accepts. A point or vector whose coordinate changes this way is not accepted and shows as a `differ` to review.
 
 ## Manual checks

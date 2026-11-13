@@ -19,7 +19,7 @@ describe("realRootSign", () => {
     ["a fraction reached with rounding error", 1 - 2 / 3, -1],
     ["a negative exponent", -2 / 3, 1],
     ["a decimal that is an odd fraction", 0.2, -1],
-  ])("takes %s", (_title, y, expected) => {
+  ])("gives the sign for %s", (_title, y, expected) => {
     expect(realRootSign(y)).toBe(expected);
   });
 

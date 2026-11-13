@@ -26,12 +26,9 @@ let lastY = NaN;
 let lastSign: Sign = 0;
 
 /**
- * For a negative x, the sign of the real value of x^y, which is then that
- * sign times |x|^y: (-1)^p when y is a fraction p/q with q odd and below
- * MAX_DENOMINATOR. Otherwise 0: no real value to prefer.
- *
- * y arrives as a float, so "is p/q" means within rounding of it: 1/3,
- * 1 - 2/3 and 0.2 all qualify.
+ * For a negative x, the s with x^y = s·|x|^y: (-1)^p when y is within
+ * rounding of p/q in lowest terms (1/3, 1 - 2/3, 0.2), q odd and below
+ * MAX_DENOMINATOR. Otherwise 0, and the caller takes the principal root.
  */
 const realRootSign = (y: number): Sign => {
   // A graph raises every sample to the same power, so the last answer is

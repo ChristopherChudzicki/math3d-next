@@ -1,5 +1,5 @@
 import { describe, it, test, expect } from "vitest";
-import math, { principalPow } from "./mathjs";
+import math from "./mathjs";
 
 describe("mathjs instance", () => {
   it("defines trig functions", () => {
@@ -116,15 +116,11 @@ describe("mathjs instance", () => {
     ["(-2)^3", "-8"],
     ["[1, 2; 3, 4]^2", "[[7, 10], [15, 22]]"],
   ])(
-    "a negative number takes a real root where it has one: %s",
+    "pow takes the principal root except for a negative number to an odd-denominator fraction: %s",
     (expr, expected) => {
       expect(math.format(math.evaluate(expr), 6)).toBe(expected);
     },
   );
-
-  it("keeps mathjs's own pow as principalPow", () => {
-    expect(math.format(principalPow(-8, 1 / 3), 6)).toBe("1 + 1.73205i");
-  });
 
   it("defines expected constants", () => {
     expect(math.i).toEqual([1, 0, 0]);

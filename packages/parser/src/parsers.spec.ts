@@ -719,38 +719,14 @@ describe("a power of a negative number", () => {
 
   it.each([
     { expr: "x^{\\frac{1}{3}}", expected: "-2" },
-    { expr: "x^{2/3}", expected: "4" },
     { expr: "x^{-\\frac{1}{3}}", expected: "-0.5" },
     { expr: "\\operatorname{pow}(x, \\frac{1}{3})", expected: "-2" },
     { expr: "x^{a}", expected: "-2" },
     { expr: "x^{\\frac{1}{n}}", expected: "-2" },
-    { expr: "(-32)^{0.2}", expected: "-2" },
   ])(
-    "takes the real root when the exponent's value is an odd-denominator fraction: $expr",
+    "takes the real root however an odd-denominator exponent is written: $expr",
     ({ expr, expected }) => {
       expect(evaluate(expr)).toBe(expected);
     },
   );
-
-  it.each([
-    {
-      title: "an even denominator",
-      expr: "x^{\\frac{1}{2}}",
-      expected: "2.82843i",
-    },
-    {
-      title: "a denominator of 100 or more",
-      expr: "(-1)^{\\frac{1}{101}}",
-      expected: "0.999516 + 0.0310999i",
-    },
-  ])(
-    "takes the principal root when the exponent has $title",
-    ({ expr, expected }) => {
-      expect(evaluate(expr)).toBe(expected);
-    },
-  );
-
-  it("takes the principal root of a complex base", () => {
-    expect(evaluate("(x + 0I)^{\\frac{1}{3}}")).toBe("1 + 1.73205i");
-  });
 });

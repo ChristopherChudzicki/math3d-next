@@ -55,8 +55,8 @@ const CONVENTIONS = {
       };
     },
   },
-  // react's `^` is always mathjs's pow, the principal root. math3d-next's
-  // takes a real root where it has one (custom-mathjs/src/realRootSign.ts).
+  // react's `^` is always mathjs's pow, the principal root. math3d-next's takes
+  // the real root for an odd-denominator exponent (custom-mathjs/src/realRootSign.ts).
   principal_pow: {
     triggers: ["fractional_pow", "pow"],
     install: () => {
