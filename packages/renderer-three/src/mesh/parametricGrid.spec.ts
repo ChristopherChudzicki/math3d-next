@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import type { Coords, RGBA } from "@math3d/viewport-spec";
 import {
+  closedAxes,
   sampleGrid,
   writeColors,
   writeIndex,
@@ -91,4 +92,21 @@ test("writes each sample's (u, v) for the shader's gridlines", () => {
   const out = new Float32Array(12);
   writeParameters(sampleGrid([3, 2], flat), out);
   expect(Array.from(out)).toEqual([0, 0, 0.5, 0, 1, 0, 0, 1, 0.5, 1, 1, 1]);
+});
+
+test("finds which axes close on themselves", () => {
+  const turn = (t: number) => 2 * Math.PI * t;
+  const torus = (u: number, v: number): Coords => [
+    (2 + Math.cos(turn(v))) * Math.cos(turn(u)),
+    (2 + Math.cos(turn(v))) * Math.sin(turn(u)),
+    Math.sin(turn(v)),
+  ];
+  const cylinder = (u: number, v: number): Coords => [
+    Math.cos(turn(u)),
+    Math.sin(turn(u)),
+    v,
+  ];
+  expect(closedAxes(sampleGrid([16, 8], torus))).toEqual([true, true]);
+  expect(closedAxes(sampleGrid([16, 8], cylinder))).toEqual([true, false]);
+  expect(closedAxes(sampleGrid([16, 8], flat))).toEqual([false, false]);
 });

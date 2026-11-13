@@ -1,4 +1,5 @@
 import {
+  Color,
   ColorManagement,
   Group,
   LinearSRGBColorSpace,
@@ -15,6 +16,7 @@ import type { DrawnGraphics } from "./graphics/syncGraphics";
 import { onLabelRelayout } from "./label/atlas";
 import type { Shading } from "./mesh/meshMaterial";
 import { OitFrame } from "./OitFrame";
+import { BACKGROUND } from "./shader/background";
 import type { Transparency } from "./shader/material";
 import { Settle } from "./settle";
 
@@ -136,7 +138,7 @@ export class ThreeScene {
     // Colors go to the canvas as given and blend there in sRGB, as MathBox's
     // do; three's default blends in linear space, which lightens translucency.
     this.renderer.outputColorSpace = LinearSRGBColorSpace;
-    this.renderer.setClearColor(0xffffff, 1);
+    this.renderer.setClearColor(new Color(...BACKGROUND), 1);
     this.resizeObserver = new ResizeObserver(() =>
       this.reporting(() => {
         this.settle.resized();

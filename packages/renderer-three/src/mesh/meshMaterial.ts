@@ -34,10 +34,14 @@ import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
 import { viewUnitsPerPixel } from "../shader/viewUnits";
+import { BACKGROUND } from "../shader/background";
 import type { Opacity, Transparency } from "../shader/material";
 
 export type MeshStyle = Pick<SurfaceSpec, "shaded" | "zBias" | "zIndex"> &
-  Partial<Pick<SurfaceSpec, "grid">>;
+  Partial<Pick<SurfaceSpec, "grid">> & {
+    /** Whether the surface closes on itself along u and along v. */
+    gridClosed?: [boolean, boolean];
+  };
 
 /**
  * One mesh's depth style and gridlines. It sits at `userData.mesh` on the
@@ -55,13 +59,17 @@ export class MeshUniforms {
 
   gridOpacity = 0;
 
-  set({ zBias, zIndex, grid }: MeshStyle): void {
+  /** 1 along an axis whose edges coincide, else 0. */
+  readonly gridClosed = new Vector2();
+
+  set({ zBias, zIndex, grid, gridClosed = [false, false] }: MeshStyle): void {
     this.zBias = zBias;
     this.zIndex = zIndex;
     const [u, v] = grid && grid.width > 0 ? grid.lines : [0, 0];
     this.gridLines.set(u, v);
     this.gridWidth = grid?.width ?? 0;
     this.gridOpacity = grid?.color[3] ?? 0;
+    this.gridClosed.set(Number(gridClosed[0]), Number(gridClosed[1]));
   }
 }
 
@@ -221,12 +229,12 @@ const gridlineAlpha = (): Node<"float"> => {
     .y.div(w)
     .mul(screenSize.y)
     .mul(0.5);
-  // Only an edge line's inner half lies on the surface: it draws that half
-  // the line's full width.
+  // An open surface's edge line has only its inner half on the surface, so
+  // it draws at double width; where edges coincide, each draws one half.
   const onEdge = max(
     float(1).sub(step(0.5, nearest)),
     step(lines.sub(1.5), nearest),
-  );
+  ).mul(float(1).sub(read("gridClosed", "vec2")));
   const half = onEdge.add(1).mul(halfPixels);
   // A line under a pixel wide covers one pixel, faded by its width.
   const coverage = saturate(max(half, 0.5).add(0.5).sub(pixelsToLine))
@@ -235,16 +243,24 @@ const gridlineAlpha = (): Node<"float"> => {
   return max(coverage.x, coverage.y).mul(read("gridOpacity", "float"));
 };
 
+// Relative luminance about L* 38: math3d's Navy and pure blue lie below;
+// its Red, Purple, Gray and default Blue above.
+const DARK_LUMINANCE = 0.1;
+
 /**
- * The lit color with its gridlines drawn over it: darker where the surface
- * looks light over the white background, lighter where it looks dark.
+ * The lit color with its gridlines drawn over it: darker on a surface whose
+ * color looks light over the background, lighter on one that looks dark.
  */
-const withGridlines = (lit: Node<"vec4">): Node<"vec4"> => {
+const withGridlines = (
+  color: Node<"vec4">,
+  lit: Node<"vec4">,
+): Node<"vec4"> => {
   const lineAlpha = gridlineAlpha();
-  const luminance = dot(lit.rgb, vec3(0.2126, 0.7152, 0.0722));
-  const seen = mix(float(1), luminance, lit.a);
+  // Blended in sRGB, as the canvas blends, then decoded as a 2.2 power.
+  const seen = mix(vec3(...BACKGROUND), color.rgb, color.a);
+  const luminance = dot(pow(seen, vec3(2.2)), vec3(0.2126, 0.7152, 0.0722));
   const line = select(
-    seen.greaterThan(0.4),
+    luminance.greaterThan(DARK_LUMINANCE),
     lit.rgb.mul(0.6),
     mix(lit.rgb, vec3(1), 0.4),
   );
@@ -262,7 +278,7 @@ const build = (shading: Shading | null) => () => {
   // Clamped to 1, as the unorm targets do: OIT accumulates in half float,
   // where a color above 1 would brighten the blend at that pixel.
   const lit = shading ? min(SHADINGS[shading](color, viewNormal()), 1) : color;
-  const drawn = withGridlines(lit);
+  const drawn = withGridlines(color, lit);
   return {
     vertex: projectWithDepthStyle(
       positionView,

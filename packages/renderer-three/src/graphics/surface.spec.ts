@@ -46,6 +46,18 @@ describe("buildSurface", () => {
     });
   });
 
+  test("tells the shader which axes close on themselves", () => {
+    const tube = surfaceSpec({
+      position: (u, v) => [
+        Math.cos(2 * Math.PI * u),
+        Math.sin(2 * Math.PI * u),
+        v,
+      ],
+    });
+    const surface = meshOf(buildSurface(tube, "oit", "glossy"));
+    expect(surface.userData.mesh.gridClosed.toArray()).toEqual([1, 0]);
+  });
+
   test("redraws in place for an updated spec, with no gridlines at width 0", () => {
     const spec = surfaceSpec();
     const graphic = buildSurface(spec, "oit", "glossy");

@@ -2,6 +2,7 @@ import { Group } from "three/webgpu";
 import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { TriangleMesh } from "../mesh/TriangleMesh";
 import {
+  closedAxes,
   sampleGrid,
   writeColors,
   writeIndex,
@@ -26,7 +27,8 @@ export const buildSurface = (
   const set = (next: SurfaceSpec) => {
     const grid = sampleGrid(next.samples, next.position);
     const { cols, rows } = grid;
-    surface.fill(cols * rows, 6 * (cols - 1) * (rows - 1), next, (out) => {
+    const style = { ...next, gridClosed: closedAxes(grid) };
+    surface.fill(cols * rows, 6 * (cols - 1) * (rows - 1), style, (out) => {
       writePositions(grid, out.position);
       if (next.shaded) writeNormals(grid, out.normal);
       writeIndex(cols, rows, out.index);

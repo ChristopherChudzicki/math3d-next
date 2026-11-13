@@ -231,10 +231,11 @@ Two looks for shaded surfaces, chosen per `ThreeScene` (`Viewport`'s
 A surface's gridlines differ in both looks. MathBox draws them in one flat
 color, math3d-react's darkened tint of the surface (or grey on a color
 map), which vanishes where shading brings the surface to about the same
-brightness. Here a line is the lit surface color, darkened where the
-surface looks light and lightened where it looks dark (counting the white
-background behind a translucent one), so it stays visible however the
-surface is lit. The grid color's alpha still applies; its RGB doesn't.
+brightness. Here a line is the lit surface color, darkened on a surface
+whose color is light and lightened on one whose color is dark (lightness
+about L\* 38, counting the background behind a translucent one), so it
+stays visible however the surface is lit and keeps one shade along its
+length. The grid color's alpha still applies; its RGB doesn't.
 
 #### Transparency
 
