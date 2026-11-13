@@ -172,9 +172,8 @@ parent, so anything sized in pixels is built in the shader, in view space:
   a change in view depth so it is the same on WebGPU and WebGL2 and in both
   projections; MathBox's own orthographic (a dolly) lets any `zBias` win
   outright. Labels and axis ticks are also pulled toward the camera by 1% of
-  the view depth (in orthographic, the depth that shows as much of the
-  scene), so a surface through their anchor doesn't cut them, as it does
-  MathBox's.
+  the view depth (in orthographic, of the camera's distance over its zoom),
+  so a surface through their anchor doesn't cut them, as it does MathBox's.
 - **Colors are output unconverted** (`outputColorSpace` is linear and
   `ColorManagement` is off), so they blend in sRGB as MathBox's do. three's
   default pipeline blends in linear space, which lightens every translucent

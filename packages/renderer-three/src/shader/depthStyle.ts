@@ -49,9 +49,8 @@ export const unbiasedViewZ = varyingProperty("float", "v_unbiasedViewZ");
  *   past the near plane by `zIndex + 1`: a higher one draws over a lower one
  *   unless that one is almost at the camera.
  * - `pull`, this renderer's own, moves depth toward the camera by that
- *   fraction of the view's reach: the view depth in perspective, the depth
- *   that shows as much of the scene in orthographic. So it is the same share
- *   of the screen at any zoom.
+ *   fraction of the view's reach (the view depth in perspective, the camera's
+ *   distance over its zoom in orthographic), the same share at any zoom.
  */
 export const projectWithDepthStyle = (
   view: Node<"vec3">,
