@@ -725,7 +725,7 @@ describe("a power of a negative number", () => {
     { expr: "\\operatorname{pow}(x, \\frac{1}{3})", expected: "-2" },
     { expr: "(x^{\\frac{1}{3}})^{\\frac{1}{3}}", expected: "-1.25992" },
   ])(
-    "takes the real root when the exponent is written as an odd fraction: $expr",
+    "takes the real root when the exponent is written as an odd-denominator fraction: $expr",
     ({ expr, expected }) => {
       expect(evaluate(expr)).toBe(expected);
     },

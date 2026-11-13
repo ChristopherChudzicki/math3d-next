@@ -948,7 +948,7 @@ def replayed(
     pair: Pair, replays: Mapping[str, dict], allowlist: Sequence[Entry], tol: Tolerance
 ) -> str | None:
     """The reason of the first replay that turns a `differ` pair `equal`, or
-    into a pair the allowlist accepts."""
+    into a `differ` pair the allowlist accepts: then both reasons."""
     if pair.outcome != "differ":
         return None
     s = pair.spec
@@ -958,8 +958,13 @@ def replayed(
             continue
         replayed_side = _side(field_record, s.next_element, True)
         replayed_pair = label(s, pair.legacy, replayed_side, tol)
-        if replayed_pair.outcome == "equal" or allowlisted(replayed_pair, allowlist):
+        if replayed_pair.outcome == "equal":
             return reason
+        # Not a `regression` entry: next evaluates the field, the replay doesn't.
+        if replayed_pair.outcome == "differ":
+            entry_reason = allowlisted(replayed_pair, allowlist)
+            if entry_reason:
+                return f"{reason}; then: {entry_reason}"
     return None
 
 

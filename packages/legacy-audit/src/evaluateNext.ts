@@ -161,8 +161,8 @@ const features = (parseable: Parseable): string[] => {
   texts(parseable).forEach((text) => {
     let node: mjs.MathNode;
     try {
-      // With the rule, a power that takes a real root shows as its builtin,
-      // the principal_pow replay's trigger.
+      // realRootRule turns an odd-denominator-fraction power into $realPowOdd
+      // or $realPowEven, principal_pow's triggers.
       node = realRootRule.transform(math.parse(latexParser.preprocess(text)));
     } catch {
       return;

@@ -148,22 +148,39 @@ def test_a_replay_allowlists_a_differ_pair_when_it_gives_reacts_value(
     assert value.allowlisted == allowlisted
 
 
-def test_a_replay_allowlists_a_pair_it_turns_into_an_allowlisted_one():
+@pytest.mark.parametrize(
+    ("replayed_field", "entry", "allowlisted"),
+    [
+        (
+            field(value=4),
+            Entry("differ", "", "accepted", values=lambda _, nxt: nxt == 4),
+            "replayed; then: accepted",
+        ),
+        # Where the replay fails, math3d-next's own value is what is drawn.
+        (
+            field("eval", message="Undefined symbol q"),
+            Entry("regression", "eval: Undefined symbol", "accepted"),
+            None,
+        ),
+    ],
+)
+def test_a_replay_allowlists_a_pair_it_turns_into_an_allowlisted_differ(
+    replayed_field, entry, allowlisted
+):
     exported, rehydrated, react, nxt = slider_scene(field(value=[-5, 5]))
     nxt["items"]["s"]["value"] = field(value=3)
-    replay = {"items": {"s": {"value": field(value=4)}}}
-    allowlist = [Entry("differ", "", "accepted", values=lambda _, nxt: nxt == 4)]
+    replay = {"items": {"s": {"value": replayed_field}}}
     result = evaluate_scene(
         exported,
         rehydrated,
         react,
         nxt,
         Tolerance(),
-        allowlist,
+        [entry],
         replays={"replayed": replay},
     )
     [value] = [p for p in result.pairs if p.spec.legacy_field == "value"]
-    assert value.allowlisted == "replayed"
+    assert value.allowlisted == allowlisted
 
 
 def write_inputs(tmp_path, nxt_items, extra_next_line=False, nxt_sha256=None):

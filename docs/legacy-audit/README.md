@@ -59,7 +59,7 @@ The command writes the tables. Write the Short version and Findings (hypotheses 
 
 Accepted differences go in `legacy_audit/pass2_allowlist.py`, each citing app code or an owner decision. Before trusting a change to either fingerprint, run math3d-react's conformance check (`client/src/legacyAudit/README.md`).
 
-Accept a library convention (react's `round`, complex.js 2.0.4's addition) or an intended change to what an expression evaluates to (`principal_pow`, below) per pair, not in the allowlist: the replays re-evaluate math3d-next with it swapped in, and the join accepts a `differ` pair when the replay gives math3d-react's value, or differs from it only as an allowlist entry accepts. A convention is a `CONVENTIONS` entry in `packages/legacy-audit/src/conventions.ts` plus a `REPLAYS` reason under the same key.
+Accept a library convention (react's `round`, complex.js 2.0.4's addition) or an intended change to what an expression evaluates to (`principal_pow`, below) per pair, not in the allowlist: the replays re-evaluate math3d-next with it swapped in, and the join accepts a `differ` pair when the replay gives math3d-react's value, or a `differ` pair the allowlist accepts. A convention is a `CONVENTIONS` entry in `packages/legacy-audit/src/conventions.ts` plus a `REPLAYS` reason under the same key.
 
 ## Intended differences in evaluation
 
@@ -69,7 +69,7 @@ Accept a library convention (react's `round`, complex.js 2.0.4's addition) or an
   - Stored scenes are not rewritten. An author who wants the old result can narrow the domain or make the base complex, `(x + 0I)^(1/3)`.
   - Decimal and variable exponents (`x^0.2`, `x^a`) keep the principal root in both apps.
   - Size on the 2026-11-04 export: at most 212 of 101,142 scenes (view weight 684 of 1,400,421), each only gaining drawn samples. _An upper bound_: counted from a replay of a wider rule that also matched decimal exponents, at sample points that may lie outside an item's drawn domain.
-  - Pass 2 accepts these pairs through the `principal_pow` replay. In a field that draws only real values the replay gives `NaN` where math3d-react gives a complex number, a pair the allowlist accepts.
+  - Pass 2 accepts these pairs through the `principal_pow` replay. In a field that draws only real values the replay gives `NaN` where math3d-react gives a complex number, a pair the allowlist accepts. A point or vector whose coordinate changes this way is not accepted and shows as a `differ` to review.
 
 ## Manual checks
 

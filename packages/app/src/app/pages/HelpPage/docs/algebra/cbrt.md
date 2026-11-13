@@ -7,4 +7,4 @@ tags:
   - algebra
 ---
 
-For a negative \(x\) this is the real root, as \(x^{1/3}\) is: see \(x^a\) under Logs & Exponents.
+\(\operatorname{cbrt}(-8) = -2\), the same as \((-8)^{1/3}\). For which powers take the real root, see \(x^a\) under Logs & Exponents.
