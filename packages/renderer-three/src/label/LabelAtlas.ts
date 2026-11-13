@@ -114,20 +114,24 @@ export class LabelAtlas {
     this.relayout();
   }
 
-  /** Measures and draws every string again. */
+  /**
+   * Measures and draws every string again. Listeners hear of it even with no
+   * strings: a scene resizes to a new pixel ratio through them.
+   */
   relayout(): void {
-    if (this.entries.size === 0) return;
-    this.shelves = [];
-    this.used = 0;
-    this.entries.forEach((entry) => {
-      // eslint-disable-next-line no-param-reassign
-      entry.slot = this.place(entry.label);
-    });
-    this.surfaceHeight = Math.max(MIN_HEIGHT, nextPowerOfTwo(this.used));
-    this.surface.reset(ATLAS_WIDTH, this.surfaceHeight);
-    this.entries.forEach(({ label, slot }) =>
-      this.surface.draw(label, slot, this.ratio),
-    );
+    if (this.entries.size > 0) {
+      this.shelves = [];
+      this.used = 0;
+      this.entries.forEach((entry) => {
+        // eslint-disable-next-line no-param-reassign
+        entry.slot = this.place(entry.label);
+      });
+      this.surfaceHeight = Math.max(MIN_HEIGHT, nextPowerOfTwo(this.used));
+      this.surface.reset(ATLAS_WIDTH, this.surfaceHeight);
+      this.entries.forEach(({ label, slot }) =>
+        this.surface.draw(label, slot, this.ratio),
+      );
+    }
     this.listeners.forEach((listener) => listener());
   }
 
