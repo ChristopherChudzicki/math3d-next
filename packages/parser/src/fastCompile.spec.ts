@@ -89,7 +89,7 @@ describe("fastCompile agrees with mathjs", () => {
       fast: true,
     },
     {
-      title: "a real root of a negative number",
+      title: "a real root of a negative number, as mathjs gives it",
       expr: "f(x) = x^(1/3)",
       point: [-8],
       fast: true,

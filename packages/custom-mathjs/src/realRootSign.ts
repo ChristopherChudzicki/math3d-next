@@ -13,7 +13,10 @@ const findSign = (y: number): Sign => {
     [p0, p] = [p, whole * p + p0];
     [q0, q] = [q, whole * q + q0];
     if (q >= MAX_DENOMINATOR) return 0;
-    if (Math.abs(p / q - target) <= 4 * Number.EPSILON * target) {
+    // An absolute floor too: 10.2 - 10 is off by 7e-16, more than 4 ulp of
+    // 0.2. Fractions with q < MAX_DENOMINATOR are 1e-4 apart, far wider.
+    const tolerance = Math.max(1e-12, 4 * Number.EPSILON * target);
+    if (Math.abs(p / q - target) <= tolerance) {
       if (q % 2 === 0) return 0;
       return p % 2 === 0 ? 1 : -1;
     }

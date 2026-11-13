@@ -116,7 +116,21 @@ describe("mathjs instance", () => {
     ["(-2)^3", "-8"],
     ["[1, 2; 3, 4]^2", "[[7, 10], [15, 22]]"],
   ])(
-    "pow takes the principal root except for a negative number to an odd-denominator fraction: %s",
+    "pow differs from mathjs's only for a negative number to an odd-denominator fraction: %s",
+    (expr, expected) => {
+      expect(math.format(math.evaluate(expr), 6)).toBe(expected);
+    },
+  );
+
+  it.each([
+    ["root(-8, 3)", "-2"],
+    ["root(16, 4)", "2"],
+    ["root(16)", "4"],
+    ["root(-16, 4)", "NaN"],
+    ["root(-16)", "NaN"],
+    ["root(-8, 1.5)", "NaN"],
+  ])(
+    "root gives the real root, or NaN where there is none: %s",
     (expr, expected) => {
       expect(math.format(math.evaluate(expr), 6)).toBe(expected);
     },

@@ -21,7 +21,7 @@ from scenes.legacy_audit.evaluation_report import (
     render_markdown,
 )
 from scenes.legacy_audit.evaluation_test import field
-from scenes.legacy_audit.pass2_allowlist import REPLAYS, Entry
+from scenes.legacy_audit.pass2_allowlist import ALLOWLIST, REPLAYS, Entry
 
 
 def scene(outcome, severity="render", root=True, allowlisted=None):
@@ -63,6 +63,15 @@ def test_headline_shares_leave_excluded_scenes_out():
         result.times_accessed = weight
         agg.add(result, "clean")
     assert "| Pass-2-clean | 33.33% | 50.00% |" in render_markdown(agg, {"date": "d"})
+
+
+def test_a_pair_accepted_through_a_replay_counts_under_the_replay_and_the_entry():
+    replay, entry = REPLAYS["principal_pow"], ALLOWLIST[0].reason
+    agg = Aggregate()
+    agg.add(scene("differ", allowlisted=f"{replay}; then: {entry}"), "clean")
+    report = render_markdown(agg, {"date": "d"})
+    assert f"- ×1: {replay}" in report
+    assert f"- ×1: {entry}" in report
 
 
 def test_a_both_error_root_is_clustered_but_left_out_of_the_fix_curve():

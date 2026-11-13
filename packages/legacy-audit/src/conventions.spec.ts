@@ -78,7 +78,7 @@ describe("CONVENTIONS", () => {
     expect(usesAny(scene, CONVENTIONS.complex_add.triggers)).toBe(false);
   });
 
-  it("finds a power that is not whole as written, and no other", () => {
+  it("finds a power that is not whole as written", () => {
     const { triggers } = CONVENTIONS.principal_pow;
     expect(usesAny({ items: [variable("x^{a}")] }, triggers)).toBe(true);
     expect(usesAny({ items: [variable("x^2+x^{-1}")] }, triggers)).toBe(false);

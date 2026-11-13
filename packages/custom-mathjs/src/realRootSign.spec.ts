@@ -18,13 +18,15 @@ describe("realRootSign", () => {
   it.each([
     ["a fraction reached with rounding error", 1 - 2 / 3, -1],
     ["a negative exponent", -2 / 3, 1],
-    ["a decimal that is an odd fraction", 0.2, -1],
+    ["a fraction reached by subtracting larger numbers", 10.2 - 10, -1],
+    ["a decimal that is an odd-denominator fraction", 0.2, -1],
   ])("gives the sign for %s", (_title, y, expected) => {
     expect(realRootSign(y)).toBe(expected);
   });
 
   it.each([
     ["a denominator of 100 or more", 1 / 101],
+    ["a decimal that is near a fraction", 0.3333333],
     ["an infinite exponent", Infinity],
   ])("leaves %s to the principal root", (_title, y) => {
     expect(realRootSign(y)).toBe(0);

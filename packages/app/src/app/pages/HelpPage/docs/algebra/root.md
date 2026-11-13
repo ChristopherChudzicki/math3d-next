@@ -7,6 +7,6 @@ tags:
   - algebra
 ---
 
-For a negative \(x\) and an odd \(n\), this is the real root: \(\operatorname{root}(-8, 3) = -2\). Unlike \(x^{1/n}\), this takes the real root for any odd \(n\), however large.
+For a negative \(x\) and an odd whole \(n\), this is the real root: \(\operatorname{root}(-8, 3) = -2\). \(x^{1/n}\) gives the real root only for an odd \(n\) below 100.
 
-For a negative \(x\) and an even \(n\) there is no real root, and the result is an error.
+For a negative \(x\) and any other \(n\) there is no real root. The result is \(\text{NaN}\), and a graph leaves that part out.

@@ -248,8 +248,9 @@ mathjs.import({
   div: createDivergence,
 });
 
-/** mathjs's own pow: a negative number to a fraction gives the complex principal root. */
+/** mathjs's own pow. */
 const principalPow = mathjs.pow;
+const { nthRoot } = mathjs;
 
 mathjs.import(
   {
@@ -265,6 +266,16 @@ mathjs.import(
       },
       "any, any": (x: MathType, y: number | Complex) => principalPow(x, y),
     }),
+    // nthRoot, except that a negative number with no real root gives NaN,
+    // which a graph leaves out, where nthRoot throws and blanks the graph.
+    root: mathjs.typed("root", {
+      number: (x: number) => (x < 0 ? NaN : nthRoot(x)),
+      "number, number": (x: number, n: number) =>
+        x < 0 && Math.abs(n % 2) !== 1 ? NaN : nthRoot(x, n),
+      any: (x: MathType) => nthRoot(x as number),
+      "any, any": (x: MathType, n: MathType) =>
+        nthRoot(x as number, n as number),
+    }),
   },
   { override: true },
 );
@@ -272,7 +283,6 @@ mathjs.import(
 mathjs.import(
   {
     customConstants,
-    root: mathjs.nthRoot,
     arccos: mathjs.acos,
     arcsin: mathjs.asin,
     // arctan(y, x) generalizes arctan(y / x), as atan2(y, x) does.

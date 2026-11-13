@@ -194,7 +194,7 @@ const features = (parseable: Parseable): string[] => {
         if (LOGICAL.has(n.fn)) found.add("logical");
         if (n.implicit) found.add("implicit_multiplication");
         if (n.fn === "pow" && !isWholeLiteral(n.args[1])) {
-          found.add("fractional_pow");
+          found.add("nonwhole_pow");
         }
       }
     });

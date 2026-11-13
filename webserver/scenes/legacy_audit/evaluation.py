@@ -960,7 +960,7 @@ def replayed(
         replayed_pair = label(s, pair.legacy, replayed_side, tol)
         if replayed_pair.outcome == "equal":
             return reason
-        # Not a `regression` entry: next evaluates the field, the replay doesn't.
+        # Never a `regression`: the replay fails there, but math3d-next draws the field.
         if replayed_pair.outcome == "differ":
             entry_reason = allowlisted(replayed_pair, allowlist)
             if entry_reason:
