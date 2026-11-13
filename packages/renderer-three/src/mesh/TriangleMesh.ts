@@ -18,6 +18,8 @@ export type MeshBuffers = {
   normal: Float32Array;
   /** RGBA per vertex, as given: no color-space conversion. */
   color: Float32Array;
+  /** A surface's (u, v) in [0, 1]² per vertex, where its gridlines are drawn. */
+  parameter: Float32Array;
   /** Three vertex indices per triangle. */
   index: Uint32Array;
 };
@@ -26,6 +28,7 @@ const ATTRIBUTES = [
   ["position", 3],
   ["normal", 3],
   ["color", 4],
+  ["parameter", 2],
 ] as const;
 
 const markWritten = (attribute: BufferAttribute, count: number) => {
@@ -93,6 +96,7 @@ export class TriangleMesh {
       position: attribute("position").array as Float32Array,
       normal: attribute("normal").array as Float32Array,
       color,
+      parameter: attribute("parameter").array as Float32Array,
       index: index.array as Uint32Array,
     });
     let translucent = false;

@@ -38,6 +38,19 @@ export const writePositions = (
   }
 };
 
+export const writeParameters = (
+  { cols, rows }: ParametricGrid,
+  out: Float32Array,
+): void => {
+  for (let j = 0; j < rows; j += 1) {
+    for (let i = 0; i < cols; i += 1) {
+      const k = j * cols + i;
+      out[2 * k] = parameter(i, cols);
+      out[2 * k + 1] = parameter(j, rows);
+    }
+  }
+};
+
 export const writeColors = (
   { cols, rows }: ParametricGrid,
   colorAt: (u: number, v: number) => RGBA,
@@ -117,31 +130,35 @@ export const writeIndex = (cols: number, rows: number, out: Uint32Array) => {
 
 /* eslint-enable no-param-reassign, prefer-destructuring */
 
-// MathBox resamples the grid with nearest filtering, so each gridline lies
-// on the sample row or column nearest its even spacing.
-const nearestSample = (line: number, lineCount: number, sampleCount: number) =>
-  lineCount > 1
-    ? Math.floor((line * (sampleCount - 1)) / (lineCount - 1) + 0.5)
-    : 0;
-
 /**
- * Gridlines along sampled columns and rows: `uLines` at fixed u, each
- * running along v, then `vLines` at fixed v, each running along u.
+ * Whether the grid's first and last columns (u) and rows (v) coincide, as a
+ * torus's do at its seams: there, each edge gridline is half of one line.
  */
-export const isolines = (
-  { cols, rows, points }: ParametricGrid,
-  [uLines, vLines]: [number, number],
-): Coords[][] => {
-  const paths: Coords[][] = [];
-  for (let line = 0; line < uLines; line += 1) {
-    const i = nearestSample(line, uLines, cols);
-    const path: Coords[] = new Array(rows);
-    for (let j = 0; j < rows; j += 1) path[j] = points[j * cols + i];
-    paths.push(path);
-  }
-  for (let line = 0; line < vLines; line += 1) {
-    const j = nearestSample(line, vLines, rows);
-    paths.push(points.slice(j * cols, (j + 1) * cols));
-  }
-  return paths;
+export const closedAxes = ({
+  cols,
+  rows,
+  points,
+}: ParametricGrid): [boolean, boolean] => {
+  let extent = 0;
+  points.forEach((point) =>
+    point.forEach((x) => {
+      if (Number.isFinite(x)) extent = Math.max(extent, Math.abs(x));
+    }),
+  );
+  const tolerance = 1e-6 * extent;
+  // Two samples undefined alike count as the same, so a row a surface of
+  // revolution leaves undefined doesn't open its seam.
+  const same = (a: number, b: number) =>
+    points[a].every((x, k) => {
+      const y = points[b][k];
+      return Number.isFinite(x) || Number.isFinite(y)
+        ? Math.abs(x - y) <= tolerance
+        : true;
+    });
+  let u = true;
+  for (let j = 0; j < rows && u; j += 1)
+    u = same(j * cols, j * cols + cols - 1);
+  let v = true;
+  for (let i = 0; i < cols && v; i += 1) v = same(i, (rows - 1) * cols + i);
+  return [u, v];
 };

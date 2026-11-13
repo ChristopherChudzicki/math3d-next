@@ -151,8 +151,8 @@ parent, so anything sized in pixels is built in the shader, in view space:
   smaller farther away in perspective, and the same in orthographic as in the
   perspective view it replaces.
 - **Every stroke is a `Stroke`** (`stroke/Stroke.ts`), a port of MathBox's
-  line and arrow shaders: lines, vectors, curves, vector fields, surface
-  gridlines, axes and grids. Ticks are `Ticks` (`stroke/Ticks.ts`): the same
+  line and arrow shaders: lines, vectors, curves, vector fields, axes and
+  grids. Ticks are `Ticks` (`stroke/Ticks.ts`): the same
   line shader, its ends placed 10 px apart in view space around each tick.
 - **Every triangle mesh is a `TriangleMesh`** (`mesh/TriangleMesh.ts`), drawn
   with a port of MathBox's surface shading, gamma step included. It takes
@@ -160,6 +160,11 @@ parent, so anything sized in pixels is built in the shader, in view space:
   carries through the axes' scale. A surface's triangles wind as MathBox's
   do: under the `ordered` model three draws a translucent mesh's back faces
   first, so winding decides how it overlaps itself.
+- **A surface's gridlines are drawn by its own shader**, not as strokes. A
+  fragment near an even step of its (u, v) composites a line over its lit
+  color, as wide as a stroke of the grid's width at that depth. The line is
+  part of the surface's fragment, so OIT never averages it with the surface,
+  and it needs no depth offset. A surface at opacity 0 still draws its lines.
 - **An implicit surface is meshed on the CPU** (`graphics/implicit.ts`), so
   it draws on WebGL2 too. The equation is sampled once on a grid of `samples`
   cells per axis, 128 at most, then meshed by marching cubes with shared
@@ -222,6 +227,15 @@ Two looks for shaded surfaces, chosen per `ThreeScene` (`Viewport`'s
   color above 1 would brighten the blend of every translucent layer at that
   pixel.
 - Only shaded surfaces differ.
+
+A surface's gridlines differ in both looks. MathBox draws them in one flat
+color, math3d-react's darkened tint of the surface (or grey on a color
+map), which vanishes where shading brings the surface to about the same
+brightness. Here a line is the lit surface color, darkened on a surface
+whose color is light and lightened on one whose color is dark (lightness
+about L\* 38, counting the background behind a translucent one), so it
+stays visible however the surface is lit and keeps one shade along its
+length. The grid color's alpha still applies; its RGB doesn't.
 
 #### Transparency
 

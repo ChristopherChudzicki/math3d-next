@@ -61,7 +61,13 @@ export type SurfaceSpec = Common & {
   /** Color (with opacity) at normalized parameters in [0, 1]². */
   colorAt: (u: number, v: number) => RGBA;
   shaded: boolean;
-  grid: { lines: [number, number]; width: number; color: RGBA };
+  grid: {
+    /** Gridlines along each parameter: 0 for none, else at least 2. */
+    lines: [number, number];
+    width: number;
+    /** three.js uses only the alpha, drawing lines in contrast to the surface. */
+    color: RGBA;
+  };
 };
 
 export type ImplicitSurfaceSpec = Common & {

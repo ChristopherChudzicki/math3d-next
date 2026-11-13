@@ -107,7 +107,7 @@ describe("TriangleMesh", () => {
     fill(mesh, 1);
     const given = { ...style, zBias: -2, zIndex: 0 };
     fill(mesh, 1, { given });
-    expect({ ...mesh.mesh.userData.mesh }).toEqual({
+    expect(mesh.mesh.userData.mesh).toMatchObject({
       zBias: given.zBias,
       zIndex: given.zIndex,
     });

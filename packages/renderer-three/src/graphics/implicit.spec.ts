@@ -59,7 +59,8 @@ describe("buildImplicit", () => {
     expect(mesh.geometry.drawRange.count).toBeGreaterThan(0);
     expect(colorOf(mesh, 0)).toEqual(spec.color);
     expect(mesh.material).toMatchObject({ transparent: true });
-    expect({ ...mesh.userData.mesh }).toEqual({ zBias: 2, zIndex: 1 });
+    expect(mesh.userData.mesh).toMatchObject({ zBias: 2, zIndex: 1 });
+    expect(mesh.userData.mesh.gridLines.toArray()).toEqual([0, 0]);
   });
 
   test("samples the corners of `samples` cells per axis, up to the cap", () => {
