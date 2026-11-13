@@ -66,6 +66,10 @@ html {
   --color-text-primary: rgb(67, 67, 67);
 
   --border-radius: 4px;
+  --header-height: 50px;
+  --sidebar-width: min(375px, calc(100vw - 50px));
+  --sidebar-z: 10;
+  --sidebar-duration: 0.5s;
   --transition-duration: 300ms;
   --transition-timing-function: ease;
   /* Every overlay primitive in src/ui; above the sidebar (--sidebar-z). */

@@ -11,7 +11,7 @@ import useSceneLoader from "@/app/useSceneLoader";
 import SceneControls from "@/features/editor/sidebar/SceneControls";
 import SliderAnimations from "@/features/editor/items/forms/VariableSlider/SliderAnimations";
 import Sidebar from "@/ui/Sidebar";
-import { useBodyClass, useToggle } from "@/util/hooks";
+import { useToggle } from "@/util/hooks";
 import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
 import { isRenderer } from "@/services/renderer/renderers";
 import type { Renderer } from "@/services/renderer/renderers";
@@ -88,7 +88,6 @@ const VIEWPORTS: Record<Renderer, React.FC<{ className?: string }>> = {
 };
 
 const MainPage: React.FC = () => {
-  useBodyClass(styles.bodyVariables);
   const { sceneKey } = useParams();
   const sceneLoad = useSceneLoader(sceneKey);
   const unavailable =

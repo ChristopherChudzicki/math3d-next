@@ -1,6 +1,5 @@
 declare const styles: {
   readonly "body": string;
-  readonly "bodyVariables": string;
   readonly "container": string;
   readonly "corner": string;
   readonly "scene-adjust-controls-closed": string;

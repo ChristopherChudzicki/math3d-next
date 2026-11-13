@@ -6,14 +6,6 @@
   overflow: hidden;
 }
 
-.bodyVariables {
-  --header-height: 50px;
-  --banner-height: 0px;
-  --sidebar-width: min(375px, calc(100vw - 50px));
-  --sidebar-z: 10;
-  --sidebar-duration: 0.5s;
-}
-
 .sidebar {
   height: 100%;
   width: var(--sidebar-width);
