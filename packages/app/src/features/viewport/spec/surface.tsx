@@ -17,7 +17,7 @@ import {
 } from "@/features/viewport/shared/surfaceDomain";
 import {
   explicitColorFunc,
-  specGridlineColor,
+  gridlineColor,
 } from "@/features/viewport/shared/surfaceColor";
 import type { SurfaceColorFunc } from "@/features/viewport/shared/surfaceColor";
 import { baseStyle, parseColor, sampleCount } from "./style";
@@ -110,7 +110,7 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
     // On a gradient, MathBox's default line color.
     const gridColor: RGBA = gradient
       ? [0.5, 0.5, 0.5, gridOpacity ?? 0.5]
-      : parseColor(specGridlineColor(color), gridOpacity ?? 0.5);
+      : parseColor(gridlineColor(color), gridOpacity ?? 0.5);
     // 0 means no gridlines; a single line would make the sampler step Δ/0.
     const lineCount = (n: number | undefined, fallback: number) => {
       const rounded = Math.round(n ?? fallback);

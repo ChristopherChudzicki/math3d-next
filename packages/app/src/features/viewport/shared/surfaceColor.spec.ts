@@ -1,8 +1,4 @@
-import {
-  explicitColorFunc,
-  gridlineColor,
-  specGridlineColor,
-} from "./surfaceColor";
+import { explicitColorFunc, gridlineColor } from "./surfaceColor";
 
 test("an explicit surface's color function reads only the coordinates", () => {
   const color = explicitColorFunc((x, y, z) => 100 * x + 10 * y + z);
@@ -14,8 +10,4 @@ test.each([
   ["#f1c40f", "#987b09"],
 ])("a %s surface's gridlines are %s, as in math3d-react", (color, line) => {
   expect(gridlineColor(color)).toBe(line);
-});
-
-test("a surface's gridlines in the viewport spec scale its lightness by 0.55", () => {
-  expect(specGridlineColor("#3090ff")).toBe("#004da7");
 });
