@@ -1,16 +1,12 @@
-import { useEffect } from "react";
 import { describe, test, expect, vi } from "vitest";
 import { HttpResponse, http } from "msw";
 import { onlineManager } from "@tanstack/react-query";
 import { server } from "@math3d/mock-api/node";
-import { makeItem, seedDb, urls } from "@math3d/mock-api";
-import { MathItemType as MIT } from "@math3d/mathitem-configs";
+import { seedDb, urls } from "@math3d/mock-api";
 import {
   act,
   renderTestApp,
   screen,
-  storeRendererPreference,
-  stubWebGpu,
   user,
   waitFor,
   waitForAppReady,
@@ -20,15 +16,10 @@ import invariant from "tiny-invariant";
 import * as Sentry from "@sentry/react";
 import expectToast from "@/test_util/expectToast";
 import sceneSlice from "@/store/scene/state/scene.slice";
-import { findItemByTestId } from "@/test_util/mathItems";
-import { RENDERER_PREFERENCE_KEY } from "@/services/renderer/rendererPreference";
-import { gpuContent } from "@/test_util/gpuViewportContent";
-import type { ContentProps } from "@/test_util/gpuViewportContent";
 
 vi.mock("@sentry/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@sentry/react")>()),
   captureException: vi.fn(),
-  captureMessage: vi.fn(),
 }));
 
 test.each([
@@ -312,122 +303,7 @@ test("offline from the Scenes drawer toasts too", async () => {
   }
 });
 
-const noDevice = new Error("no device");
-const ReportsNoDevice = ({ onUnsupported }: ContentProps) => {
-  useEffect(() => onUnsupported(noDevice), [onUnsupported]);
-  return null;
-};
-
 describe("renderer", () => {
-  const NOTICE =
-    "This link asks for the experimental Use.GPU renderer, which isn't available in this browser. Showing the scene with the default renderer.";
-  const FAILED = "The Use.GPU renderer couldn't start on this device.";
-
-  test("a stored Use.GPU preference waits for detection, then draws Use.GPU", async () => {
-    storeRendererPreference("usegpu");
-    const adapter = Promise.withResolvers<unknown>();
-    stubWebGpu(() => adapter.promise);
-    const item = makeItem(MIT.Point);
-    const scene = seedDb.withSceneFromItems([item]);
-    renderTestApp(`/${scene.key}`);
-
-    await findItemByTestId(item.id);
-    expect(screen.queryByTestId("scene")).toBeNull();
-
-    await act(async () => adapter.resolve({}));
-    expect(await screen.findByTestId("scene")).toHaveAttribute(
-      "data-renderer",
-      "usegpu",
-    );
-  });
-
-  test("?renderer=usegpu without WebGPU draws MathBox and says so until the param goes", async () => {
-    const { router } = renderTestApp("/?renderer=usegpu");
-    expect(await screen.findByTestId("scene")).toHaveAttribute(
-      "data-renderer",
-      "mathbox",
-    );
-    expect(await screen.findByText(NOTICE)).toBeInTheDocument();
-
-    await act(() => router.navigate("/"));
-    expect(screen.getByTestId("scene")).toHaveAttribute(
-      "data-renderer",
-      "mathbox",
-    );
-    expect(screen.queryByText(NOTICE)).toBeNull();
-  });
-
-  test("?renderer=usegpu on a missing scene never shows the notice", async () => {
-    renderTestApp("/nonexistent-scene-key?renderer=usegpu");
-    // While the scene loads, before the 404 arrives.
-    expect(screen.queryByText(NOTICE)).toBeNull();
-    expect(
-      await screen.findByRole("heading", { name: "This scene doesn’t exist." }),
-    ).toBeVisible();
-    expect(screen.queryByText(NOTICE)).toBeNull();
-  });
-
-  test("a stored preference without WebGPU draws MathBox silently", async () => {
-    storeRendererPreference("usegpu");
-    renderTestApp("/");
-    expect(await screen.findByTestId("scene")).toHaveAttribute(
-      "data-renderer",
-      "mathbox",
-    );
-    expect(screen.queryByText(NOTICE)).toBeNull();
-  });
-
-  test("a device failure under a stored preference draws MathBox, says so, and resets the preference", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    storeRendererPreference("usegpu");
-    stubWebGpu();
-    gpuContent.Component = ReportsNoDevice;
-    renderTestApp("/");
-
-    expect(await screen.findByText(FAILED)).toBeInTheDocument();
-    expect(screen.getByTestId("scene")).toHaveAttribute(
-      "data-renderer",
-      "mathbox",
-    );
-    expect(warn).toHaveBeenCalledWith(noDevice);
-    expect(localStorage.getItem(RENDERER_PREFERENCE_KEY)).toBe("mathbox");
-  });
-
-  test("a dismissed failure notice stays dismissed through a missing scene and on to the next scene", async () => {
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    storeRendererPreference("usegpu");
-    stubWebGpu();
-    gpuContent.Component = ReportsNoDevice;
-    const next = makeItem(MIT.Point);
-    const nextScene = seedDb.withSceneFromItems([next]);
-    const { router } = renderTestApp("/");
-    await screen.findByText(FAILED);
-
-    await user.click(
-      screen.getByRole("button", { name: "Dismiss Use.GPU notice" }),
-    );
-    await act(() => router.navigate("/nonexistent-scene-key"));
-    await screen.findByRole("heading", { name: "This scene doesn’t exist." });
-    await act(() => router.navigate(`/${nextScene.key}`));
-    await findItemByTestId(next.id);
-    expect(screen.queryByText(FAILED)).toBeNull();
-  });
-
-  test("a device failure under ?renderer=usegpu keeps the param and shows the failure, not the link notice", async () => {
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    stubWebGpu();
-    gpuContent.Component = ReportsNoDevice;
-    const { location } = renderTestApp("/?renderer=usegpu");
-
-    expect(await screen.findByText(FAILED)).toBeInTheDocument();
-    expect(screen.getByTestId("scene")).toHaveAttribute(
-      "data-renderer",
-      "mathbox",
-    );
-    expect(screen.queryByText(NOTICE)).toBeNull();
-    expect(location.current.search).toBe("?renderer=usegpu");
-  });
-
   test("an invalid ?renderer is logged and ignored", async () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     renderTestApp("/?renderer=foo");

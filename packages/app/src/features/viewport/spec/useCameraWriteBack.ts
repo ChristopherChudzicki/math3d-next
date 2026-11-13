@@ -136,7 +136,6 @@ export const useCameraWriteBack = (
       down.delete(e.pointerId);
       end();
     };
-    // Capture phase: Use.GPU's controls stop these events on their canvas.
     const options = { capture: true };
     el.addEventListener("pointerdown", press, options);
     el.addEventListener("pointerup", release, options);

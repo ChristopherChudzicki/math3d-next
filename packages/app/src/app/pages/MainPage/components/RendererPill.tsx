@@ -14,7 +14,7 @@ import * as styles from "./RendererPill.module.css";
 const RendererPill: React.FC = () => {
   const { renderer } = useRenderer();
   const handleSwitch = useSwitchToDefaultRenderer();
-  if (!renderer || renderer === DEFAULT_RENDERER) return null;
+  if (renderer === DEFAULT_RENDERER) return null;
   const { name } = RENDERERS[renderer];
   return (
     <Popover.Root>

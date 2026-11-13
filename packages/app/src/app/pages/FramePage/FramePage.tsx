@@ -2,7 +2,6 @@ import React from "react";
 import { useParams, useSearchParams } from "react-router";
 
 import Viewport from "@/features/viewport/mathbox/Viewport";
-import GpuViewport from "@/features/viewport/usegpu/GpuViewport";
 import ThreeViewport from "@/features/viewport/three/ThreeViewport";
 import { DEFAULT_RENDERER, isRenderer } from "@/services/renderer/renderers";
 import type { Renderer } from "@/services/renderer/renderers";
@@ -11,7 +10,6 @@ import useSceneLoader from "@/app/useSceneLoader";
 
 const VIEWPORTS: Record<Renderer, React.ReactElement> = {
   mathbox: <Viewport still />,
-  usegpu: <GpuViewport failInPlace />,
   threejs: <ThreeViewport />,
 };
 
@@ -21,8 +19,7 @@ const VIEWPORTS: Record<Renderer, React.ReactElement> = {
  * renders only the 3D scene, full-viewport, with the renderer `?renderer=`
  * names (MathBox without it; never the stored preference). The scene's
  * container gets `data-scene-ready="true"` once drawn and settled; three.js
- * and Use.GPU set `data-scene-error` when they can't draw. There is no
- * fallback.
+ * sets `data-scene-error` when it can't draw. There is no fallback.
  */
 const FramePage: React.FC = () => {
   const { sceneKey } = useParams();

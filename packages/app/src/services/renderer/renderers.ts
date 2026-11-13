@@ -3,22 +3,9 @@
  * a stored preference. `name` is the library, as the pill shows it.
  */
 const RENDERERS = {
-  mathbox: { name: "MathBox", menuLabel: "Default", needsWebGpu: false },
-  usegpu: {
-    name: "Use.GPU",
-    menuLabel: "Use.GPU (experimental)",
-    needsWebGpu: true,
-  },
-  threejs: {
-    name: "three.js",
-    menuLabel: "three.js (experimental)",
-    // WebGPURenderer falls back to WebGL2 by itself.
-    needsWebGpu: false,
-  },
-} as const satisfies Record<
-  string,
-  { name: string; menuLabel: string; needsWebGpu: boolean }
->;
+  mathbox: { name: "MathBox", menuLabel: "Default" },
+  threejs: { name: "three.js", menuLabel: "three.js (experimental)" },
+} as const satisfies Record<string, { name: string; menuLabel: string }>;
 
 type Renderer = keyof typeof RENDERERS;
 

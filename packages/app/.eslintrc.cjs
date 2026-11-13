@@ -39,18 +39,10 @@ const noParentImports = {
   message: "Import from outside this folder with an @/ path.",
 };
 
-// Use.GPU's runtime stays behind the one React.lazy in usegpu/GpuViewport, so
-// it never reaches the main bundle or jsdom tests (@use-gpu/wgsl's CommonJS
-// build is .js in a "type": "module" package). @use-gpu/core loads under jsdom.
-const useGpuRuntime = {
-  group: ["@use-gpu/*", "!@use-gpu/core"],
-  message: "Use.GPU's runtime loads only through usegpu/live (React.lazy).",
-};
-
 // The path zones below keep renderer folders out of spec/ and shared/; this
 // keeps renderer packages out (docs/adr/0009).
 // Anchored: a bare "three" would also match the @/…/viewport/three folder.
-const RENDERER_PACKAGES = ["/three", "/three/*", "/mathbox*", "@use-gpu/*"];
+const RENDERER_PACKAGES = ["/three", "/three/*", "/mathbox*"];
 const noRendererPackages = {
   group: RENDERER_PACKAGES,
   message:
@@ -77,7 +69,6 @@ const rendererThree = {
 const restrictedImports = ({
   allowBaseUi = false,
   allowParentImports = false,
-  allowUseGpu = false,
   rendererPackages = null,
 } = {}) => ({
   paths: [iconifyOnline],
@@ -85,14 +76,13 @@ const restrictedImports = ({
     ...(allowBaseUi ? [] : [baseUi]),
     noMui,
     ...(allowParentImports ? [] : [noParentImports]),
-    ...(allowUseGpu ? [] : [useGpuRuntime]),
     rendererThree,
     ...(rendererPackages ? [rendererPackages] : []),
   ],
 });
 
 const VIEWPORT = "./src/features/viewport";
-const RENDERER_DIRS = ["mathbox", "usegpu", "three"];
+const RENDERER_DIRS = ["mathbox", "three"];
 
 const layoutZones = [
   ...features.map((feature) => ({
@@ -162,18 +152,6 @@ const layoutZones = [
       "viewport/spec produces renderer-neutral specs and imports no renderer.",
   },
   {
-    // mathbox/, three/, shared/, spec/ and other features are covered by the zones above.
-    target: [
-      "./src/app",
-      `${VIEWPORT}/*.{ts,tsx}`,
-      `${VIEWPORT}/usegpu/!(live)/**`,
-      `${VIEWPORT}/usegpu/*.{ts,tsx}`,
-    ],
-    from: `${VIEWPORT}/usegpu/live`,
-    message:
-      "Only usegpu/GpuViewport reaches usegpu/live, through its React.lazy.",
-  },
-  {
     target: "./src",
     from: "./vite-plugins",
     message: "vite-plugins is build-time Node code; the app never imports it.",
@@ -240,15 +218,6 @@ module.exports = {
         "no-restricted-imports": [
           "error",
           restrictedImports({ rendererPackages: threeAdapter }),
-        ],
-      },
-    },
-    {
-      files: ["src/features/viewport/usegpu/live/**"],
-      rules: {
-        "no-restricted-imports": [
-          "error",
-          restrictedImports({ allowUseGpu: true }),
         ],
       },
     },

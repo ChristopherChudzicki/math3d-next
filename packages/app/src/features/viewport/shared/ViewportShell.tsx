@@ -17,8 +17,6 @@ type Props = {
   /** The renderer can't run in this browser: show `unsupportedMessage` instead. */
   unsupported: boolean;
   unsupportedMessage: string;
-  /** The renderer failed after it started: shown as a render error is. */
-  failed?: boolean;
   className?: string;
   /** The renderer, usually behind a `React.lazy`. */
   children: React.ReactNode;
@@ -31,7 +29,6 @@ const ViewportShell: React.FC<Props> = ({
   ready,
   unsupported,
   unsupportedMessage,
-  failed = false,
   className,
   children,
 }) => {
@@ -41,7 +38,7 @@ const ViewportShell: React.FC<Props> = ({
   const show = !is3dDisabled() && hasRequired;
   let failure: "unsupported" | "error" | undefined;
   if (unsupported) failure = "unsupported";
-  else if (errored || failed) failure = "error";
+  else if (errored) failure = "error";
   return (
     <div
       data-testid="scene"

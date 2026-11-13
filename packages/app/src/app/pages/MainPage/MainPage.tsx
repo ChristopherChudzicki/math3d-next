@@ -6,7 +6,6 @@ import {
   useSearchParams,
 } from "react-router";
 import Viewport from "@/features/viewport/mathbox/Viewport";
-import GpuViewport from "@/features/viewport/usegpu/GpuViewport";
 import ThreeViewport from "@/features/viewport/three/ThreeViewport";
 import useSceneLoader from "@/app/useSceneLoader";
 import SceneControls from "@/features/editor/sidebar/SceneControls";
@@ -17,7 +16,6 @@ import SceneTitle, { SCENE_TITLE_ID } from "@/features/sceneActions/SceneTitle";
 import { isRenderer } from "@/services/renderer/renderers";
 import type { Renderer } from "@/services/renderer/renderers";
 import { RENDERER_PARAM, useRenderer } from "@/services/renderer/useRenderer";
-import { startWebGpuDetection } from "@/services/renderer/webgpuSupport";
 
 import ToggleKeyboardButton from "@/features/editor/virtualKeyboard/KeyboardControls";
 
@@ -32,7 +30,6 @@ import LegacyDialog from "./components/LegacyDialog";
 import LegacyBanner from "./components/LegacyBanner";
 import RendererPill from "./components/RendererPill";
 import SceneUnavailable from "./components/SceneUnavailable";
-import WebGpuNotice from "./components/WebGpuNotice";
 
 type UseSearchEnumOptions<T extends string = string> = {
   name: string;
@@ -87,7 +84,6 @@ const CONTROLS_VALUES = ["0", "1"] as const;
 
 const VIEWPORTS: Record<Renderer, React.FC<{ className?: string }>> = {
   mathbox: Viewport,
-  usegpu: GpuViewport,
   threejs: ThreeViewport,
 };
 
@@ -134,14 +130,9 @@ const MainPage: React.FC = () => {
     defaultValue: "1",
   });
   const controlsOpen = controlsVisibility === "1";
-  useEffect(() => startWebGpuDetection(), []);
-  const { renderer, notice } = useRenderer();
-  // Only `link` waits for a ready scene, which may yet be unavailable; `failed`
-  // is page-wide.
-  const noticeReason =
-    notice === "link" && sceneLoad.status !== "ready" ? null : notice;
+  const { renderer } = useRenderer();
   useLogInvalidSearchParam(RENDERER_PARAM, isRenderer);
-  const SceneViewport = renderer ? VIEWPORTS[renderer] : null;
+  const SceneViewport = VIEWPORTS[renderer];
   const handleControlsClick = useCallback(
     (currentlyOpen: boolean) => {
       if (currentlyOpen) {
@@ -161,7 +152,6 @@ const MainPage: React.FC = () => {
       <div className={styles.container}>
         <Header title={<SceneTitle />} />
         <BannerDisplay />
-        <WebGpuNotice reason={noticeReason} />
         {sceneKey && isLegacy ? (
           <LegacyBanner sceneKey={sceneKey} onViewDetails={legacyDialog.on} />
         ) : null}
@@ -189,16 +179,13 @@ const MainPage: React.FC = () => {
               >
                 <SceneControls loading={sceneLoad.status === "loading"} />
               </Sidebar>
-              {/* Empty while detection decides whether Use.GPU can draw. */}
-              {SceneViewport ? (
-                <SceneViewport
-                  className={
-                    controlsOpen
-                      ? styles["scene-adjust-controls-open"]
-                      : styles["scene-adjust-controls-closed"]
-                  }
-                />
-              ) : null}
+              <SceneViewport
+                className={
+                  controlsOpen
+                    ? styles["scene-adjust-controls-open"]
+                    : styles["scene-adjust-controls-closed"]
+                }
+              />
             </>
           )}
         </div>

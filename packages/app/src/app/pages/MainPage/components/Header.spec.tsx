@@ -4,16 +4,13 @@ import { server } from "@math3d/mock-api/node";
 import { urls } from "@math3d/mock-api";
 import invariant from "tiny-invariant";
 import {
-  act,
   renderTestApp,
   screen,
-  stubWebGpu,
   user,
   waitFor,
   waitForAppReady,
   within,
 } from "@/test_util";
-import { markWebGpuFailed } from "@/services/renderer/webgpuSupport";
 
 test.each([
   {
@@ -221,7 +218,6 @@ test("closing the scenes dialog returns focus to the scenes button, even when a 
 });
 
 describe("the Renderer group", () => {
-  const USE_GPU = "Use.GPU (experimental)";
   const THREE = "three.js (experimental)";
   const openMenu = async () => {
     await user.click(screen.getByRole("button", { name: "Open Menu" }));
@@ -240,27 +236,16 @@ describe("the Renderer group", () => {
     { isAuthenticated: false, trigger: "Open Menu" },
     { isAuthenticated: true, trigger: "Open User Menu" },
   ])(
-    "with WebGPU the menu offers three renderers, the default chosen ($trigger)",
+    "the menu offers the renderers, the default chosen ($trigger)",
     async ({ isAuthenticated, trigger }) => {
-      stubWebGpu();
       renderTestApp("", { isAuthenticated });
       await user.click(await screen.findByRole("button", { name: trigger }));
 
       const group = await screen.findByRole("group", { name: "Renderer" });
       const items = within(group).getAllByRole("menuitemradio");
-      expect(items.map((item) => item.textContent)).toEqual([
-        "Default",
-        USE_GPU,
-        THREE,
-      ]);
-      await waitFor(() =>
-        items.forEach((item) =>
-          expect(item).not.toHaveAttribute("aria-disabled"),
-        ),
-      );
+      expect(items.map((item) => item.textContent)).toEqual(["Default", THREE]);
       expect(items.map((item) => item.getAttribute("aria-checked"))).toEqual([
         "true",
-        "false",
         "false",
       ]);
       const reference = screen.getByRole("menuitem", {
@@ -276,75 +261,24 @@ describe("the Renderer group", () => {
     },
   );
 
-  test("an adapter that resolves null disables Use.GPU and says why, leaving three.js enabled", async () => {
-    stubWebGpu(async () => null);
+  test("choosing a renderer draws it and closes the menu", async () => {
     renderTestApp("");
     await openMenu();
-    const item = screen.getByRole("menuitemradio", { name: USE_GPU });
-    await waitFor(() =>
-      expect(item).toHaveAccessibleDescription("Not available in this browser"),
+    await user.click(screen.getByRole("menuitemradio", { name: THREE }));
+
+    await expectRenderer("threejs");
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+
+  test("under ?renderer=threejs three.js is chosen, and choosing Default draws MathBox", async () => {
+    renderTestApp("/?renderer=threejs");
+    await openMenu();
+    expect(screen.getByRole("menuitemradio", { name: THREE })).toHaveAttribute(
+      "aria-checked",
+      "true",
     );
-    expect(item).toHaveAttribute("aria-disabled", "true");
-    expect(
-      screen.getByRole("menuitemradio", { name: THREE }),
-    ).not.toHaveAttribute("aria-disabled");
-  });
-
-  test("after a device failure Use.GPU is disabled and says so", async () => {
-    stubWebGpu();
-    renderTestApp("");
-    await openMenu();
-    const item = screen.getByRole("menuitemradio", { name: USE_GPU });
-    await waitFor(() => expect(item).not.toHaveAttribute("aria-disabled"));
-
-    act(() => {
-      markWebGpuFailed();
-    });
-    expect(item).toHaveAttribute("aria-disabled", "true");
-    expect(item).toHaveAccessibleDescription("Couldn't start on this device");
-  });
-
-  test.each([
-    { name: USE_GPU, renderer: "usegpu" },
-    { name: THREE, renderer: "threejs" },
-  ])(
-    "choosing $name draws it and closes the menu",
-    async ({ name, renderer }) => {
-      stubWebGpu();
-      renderTestApp("");
-      await openMenu();
-      const item = screen.getByRole("menuitemradio", { name });
-      await waitFor(() => expect(item).not.toHaveAttribute("aria-disabled"));
-      await user.click(item);
-
-      await expectRenderer(renderer);
-      await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
-    },
-  );
-
-  test("under ?renderer=usegpu Use.GPU is chosen, and choosing Default draws MathBox", async () => {
-    stubWebGpu();
-    renderTestApp("/?renderer=usegpu");
-    await openMenu();
-    expect(
-      screen.getByRole("menuitemradio", { name: USE_GPU }),
-    ).toHaveAttribute("aria-checked", "true");
 
     await user.click(screen.getByRole("menuitemradio", { name: "Default" }));
     await expectRenderer("mathbox");
-  });
-
-  test("while detection is pending a requested Use.GPU is checked but disabled without a reason, then enabled", async () => {
-    const adapter = Promise.withResolvers<unknown>();
-    stubWebGpu(() => adapter.promise);
-    renderTestApp("?renderer=usegpu");
-    await openMenu();
-    const item = screen.getByRole("menuitemradio", { name: USE_GPU });
-    expect(item).toBeChecked();
-    expect(item).toHaveAttribute("aria-disabled", "true");
-    expect(item).not.toHaveAccessibleDescription();
-
-    await act(async () => adapter.resolve({}));
-    await waitFor(() => expect(item).not.toHaveAttribute("aria-disabled"));
   });
 });

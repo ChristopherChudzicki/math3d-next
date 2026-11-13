@@ -11,7 +11,7 @@ import user from "@testing-library/user-event";
 import renderTestApp, { waitForAppReady } from "./renderTestApp";
 import countRequests from "./countRequests";
 import expectToast from "./expectToast";
-import { storeRendererPreference, stubWebGpu } from "./renderer";
+import { storeRendererPreference } from "./renderer";
 
 export * from "./test_util";
 export {
@@ -26,6 +26,5 @@ export {
   within,
   renderTestApp,
   storeRendererPreference,
-  stubWebGpu,
   waitForAppReady,
 };

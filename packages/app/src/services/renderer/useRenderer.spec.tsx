@@ -30,7 +30,7 @@ const renderUseRenderer = (initialEntry: InitialEntry) => {
 test("chooseRenderer stores the choice and drops only ?renderer", async () => {
   const { router, api } = renderUseRenderer({
     pathname: "/abc",
-    search: "?renderer=usegpu&controls=0&overlay=scenes&list=examples",
+    search: "?renderer=threejs&controls=0&overlay=scenes&list=examples",
     hash: "#h",
     state: { x: 1 },
   });
@@ -50,8 +50,8 @@ test("chooseRenderer doesn't navigate without ?renderer", async () => {
   const { router, api } = renderUseRenderer("/abc");
   const { key } = router.state.location;
 
-  await act(async () => api.current?.hook.chooseRenderer("usegpu"));
+  await act(async () => api.current?.hook.chooseRenderer("threejs"));
 
-  expect(api.current?.preference).toBe("usegpu");
+  expect(api.current?.preference).toBe("threejs");
   expect(router.state.location.key).toBe(key);
 });

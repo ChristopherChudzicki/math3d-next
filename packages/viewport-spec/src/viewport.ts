@@ -15,7 +15,7 @@ export type ViewportSpec = {
    * `[-scale, scale]`.
    */
   scale: Coords;
-  /** Seen with a 60° field of view, as both MathBox and Use.GPU draw it. */
+  /** Seen with a 60° field of view, as MathBox draws it. */
   camera: CameraSpec;
   /**
    * When it changes, the renderer moves the view to `camera`; otherwise it

@@ -139,9 +139,9 @@ const pow5 = (x: Node<"float">) => {
 };
 
 const ROUGHNESS = 0.35;
-// The lights `usegpu/live/scene.ts` gives Use.GPU: ambient 0.6, and a key
-// light of intensity 0.8 that its default gray (0.5) halves to 0.4. Use.GPU
-// scales directional light, not ambient, by π.
+// Use.GPU's lit-material lights as math3d configured them: ambient 0.6, and a
+// key light of intensity 0.8 that its default gray (0.5) halves to 0.4.
+// Use.GPU scales directional light, not ambient, by π.
 const AMBIENT = 0.6;
 const KEY_LIGHT = 0.4;
 const F0 = 0.04;

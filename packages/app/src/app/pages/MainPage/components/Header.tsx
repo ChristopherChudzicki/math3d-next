@@ -9,8 +9,6 @@ import SceneActions from "@/features/sceneActions/SceneActions";
 import { RENDERER_SETTING_ID } from "@/services/renderer/focusRendererSetting";
 import { RENDERER_KEYS, RENDERERS } from "@/services/renderer/renderers";
 import { useRenderer } from "@/services/renderer/useRenderer";
-import { useWebGpuSupport } from "@/services/renderer/webgpuSupport";
-import type { WebGpuSupport } from "@/services/renderer/webgpuSupport";
 import { useAuthStatus } from "@/services/auth/useAuthStatus";
 import { DISPLAY_AUTH_FLOWS } from "@/config/displayAuthFlows";
 import { ISSUE_URL } from "@/config/issueUrl";
@@ -49,21 +47,13 @@ const LoginButtons: React.FC<{
   );
 };
 
-const DISABLED_REASON: Record<WebGpuSupport, string | undefined> = {
-  pending: undefined,
-  available: undefined,
-  unavailable: "Not available in this browser",
-  failed: "Couldn't start on this device",
-};
-
 const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
   authStatus,
 }) => {
   const { open } = useOverlay();
   const { open: openSignIn } = useSignInDialog();
   const isAuthenticated = authStatus === "authenticated";
-  const { renderer, requested, chooseRenderer } = useRenderer();
-  const webGpuSupport = useWebGpuSupport();
+  const { renderer, chooseRenderer } = useRenderer();
   return (
     <>
       {/* Not `!isAuthenticated`: while the me-query is still in flight the
@@ -98,27 +88,13 @@ const UserMenuItems: React.FC<{ authStatus: AuthStatus }> = ({
         Function Reference
       </Menu.LinkItem>
       <Menu.Separator />
-      <Menu.RadioGroup
-        // `renderer` is null while WebGPU detection is pending.
-        value={renderer ?? requested}
-        onValueChange={chooseRenderer}
-      >
+      <Menu.RadioGroup value={renderer} onValueChange={chooseRenderer}>
         <Menu.GroupLabel>Renderer</Menu.GroupLabel>
-        {RENDERER_KEYS.map((key) => {
-          const { menuLabel, needsWebGpu } = RENDERERS[key];
-          return (
-            <Menu.RadioItem
-              key={key}
-              value={key}
-              disabled={needsWebGpu && webGpuSupport !== "available"}
-              description={
-                needsWebGpu ? DISABLED_REASON[webGpuSupport] : undefined
-              }
-            >
-              {menuLabel}
-            </Menu.RadioItem>
-          );
-        })}
+        {RENDERER_KEYS.map((key) => (
+          <Menu.RadioItem key={key} value={key}>
+            {RENDERERS[key].menuLabel}
+          </Menu.RadioItem>
+        ))}
       </Menu.RadioGroup>
       <Menu.Separator />
       <Menu.LinkItem
