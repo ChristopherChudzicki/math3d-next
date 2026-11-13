@@ -1,6 +1,6 @@
 # 0008 — Use.GPU as an opt-in second renderer
 
-**Status:** Proposed
+**Status:** Superseded by [0010](0010-three-js-default-renderer.md)
 
 ## Context
 
