@@ -73,6 +73,42 @@ const wrap = (x: number, min: number, max: number) =>
 const sliderStep = (min: number, max: number, fps: number, duration: number) =>
   (max - min) / (fps * duration);
 
+// Copies of Base UI's slider rounding (slider/utils/roundValueToStep), which
+// @base-ui/react doesn't export.
+const decimalPlaces = (x: number) => {
+  if (x === 0) return 0;
+  if (Math.abs(x) < 1) {
+    const [mantissa, exponent] = x.toExponential().split("e-");
+    return (mantissa.split(".")[1]?.length ?? 0) + Number(exponent);
+  }
+  return x.toString().split(".")[1]?.length ?? 0;
+};
+const roundValueToStep = (v: number, step: number, min: number) => {
+  const nearest = Math.round((v - min) / step) * step + min;
+  return Number(
+    nearest.toFixed(Math.max(decimalPlaces(step), decimalPlaces(min))),
+  );
+};
+
+/**
+ * Moves `v` by `n` steps without accumulating float error. An on-grid value
+ * (as dragging leaves it) lands where dragging there would; an off-grid value
+ * (typed, or reached during playback) moves by `n * step`, rounded as Base UI
+ * rounds a keyboard step.
+ */
+const stepValue = (v: number, n: number, min: number, step: number) => {
+  const k = (v - min) / step;
+  if (Number.isFinite(k) && Math.abs(k - Math.round(k)) <= 1e-6) {
+    return roundValueToStep(v + n * step, step, min);
+  }
+  const places = Math.max(
+    decimalPlaces(v),
+    decimalPlaces(step),
+    decimalPlaces(min),
+  );
+  return Number((v + n * step).toFixed(places));
+};
+
 const valueAssignment = (
   lhs: string,
   v: number,
@@ -88,6 +124,7 @@ export {
   sliderNumbers,
   wrap,
   sliderStep,
+  stepValue,
   valueAssignment,
 };
 export type { SpeedOption };

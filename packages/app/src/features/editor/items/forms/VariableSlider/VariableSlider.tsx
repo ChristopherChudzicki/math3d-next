@@ -28,6 +28,7 @@ import {
   findSpeed,
   sliderNumbers,
   sliderStep,
+  stepValue,
   valueAssignment,
 } from "./sliderMath";
 import styles from "./slider.module.css";
@@ -88,8 +89,8 @@ const VariableSlider: MathItemForm<MIT.VariableSlider> = ({ item }) => {
   );
   const step = sliderStep(min, max, fps, duration);
   const onStep: SliderControlsProps["onStep"] = useCallback(
-    (n) => onValueChange(value + step * n),
-    [value, step, onValueChange],
+    (n) => onValueChange(stepValue(value, n, min, step)),
+    [value, min, step, onValueChange],
   );
   const { range } = item.properties;
   const onSetRange = useMemo(() => {

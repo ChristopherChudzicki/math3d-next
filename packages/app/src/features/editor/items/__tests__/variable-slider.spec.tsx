@@ -225,9 +225,27 @@ describe("Variable Slider", () => {
 
       expect(increment).toBeGreaterThan(0);
       expect(typeof valueUpdates[0]).toBe("number");
-      expect(valueUpdates[0]).toEqual(value + dirMultiplier * increment);
+      expect(valueUpdates[0]).toBeCloseTo(
+        value + dirMultiplier * increment,
+        10,
+      );
     },
   );
+
+  test("Stepping lands where dragging would, without float drift", async () => {
+    // A step of 1/24: six steps from 0 sum to 0.24999999999999997.
+    const { el, valueUpdates } = await setupTest({
+      fps: "24",
+      duration: "10",
+      range: range("0", "10"),
+      value: valueObj("X=0"),
+    });
+    for (let i = 0; i < 6; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await user.click(el.btnIncrement);
+    }
+    expect(valueUpdates.at(-1)).toBe(0.25);
+  });
 
   /**
    * Skipping this for now. @testing-library/user-event seems not to trigger
