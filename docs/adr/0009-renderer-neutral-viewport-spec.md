@@ -1,6 +1,6 @@
 # 0009 — A renderer-neutral viewport contract
 
-**Status:** Proposed
+**Status:** Accepted
 
 ## Context
 

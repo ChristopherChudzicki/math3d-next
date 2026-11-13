@@ -1,6 +1,6 @@
 # 0010 — three.js as the default renderer
 
-**Status:** Proposed
+**Status:** Accepted
 
 ## Context
 
