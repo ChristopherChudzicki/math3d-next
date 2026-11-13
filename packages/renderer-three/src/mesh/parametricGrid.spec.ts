@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest";
 import type { Coords, RGBA } from "@math3d/viewport-spec";
 import {
-  isolines,
   sampleGrid,
   writeColors,
   writeIndex,
   writeNormals,
+  writeParameters,
 } from "./parametricGrid";
 
 const flat = (u: number, v: number): Coords => [u, v, 0];
@@ -87,20 +87,8 @@ describe("writeColors", () => {
   });
 });
 
-describe("isolines", () => {
-  test("runs gridlines along the sample rows and columns nearest even spacing", () => {
-    const grid = sampleGrid([64, 64], flat);
-    const paths = isolines(grid, [6, 2]);
-    expect(paths).toHaveLength(8);
-    // MathBox's resample: line k samples index round(k * 63 / 5).
-    const uIndices = paths.slice(0, 6).map((path) => path[0][0] * 63);
-    expect(uIndices.map(Math.round)).toEqual([0, 13, 25, 38, 50, 63]);
-    paths.slice(0, 6).forEach((path) => {
-      expect(path).toHaveLength(64);
-      expect(new Set(path.map(([u]) => u)).size).toBe(1);
-    });
-    const vPaths = paths.slice(6);
-    expect(vPaths.map((path) => path[0][1])).toEqual([0, 1]);
-    vPaths.forEach((path) => expect(path).toHaveLength(64));
-  });
+test("writes each sample's (u, v) for the shader's gridlines", () => {
+  const out = new Float32Array(12);
+  writeParameters(sampleGrid([3, 2], flat), out);
+  expect(Array.from(out)).toEqual([0, 0, 0.5, 0, 1, 0, 0, 1, 0.5, 1, 1, 1]);
 });

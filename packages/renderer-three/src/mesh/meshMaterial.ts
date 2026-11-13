@@ -1,12 +1,16 @@
+import { Vector2 } from "three/webgpu";
 import type { Node } from "three/webgpu";
 import {
+  abs,
   attribute,
+  cameraProjectionMatrix,
   cameraViewMatrix,
   cross,
   dFdx,
   dFdy,
   dot,
   float,
+  floor,
   length,
   max,
   min,
@@ -17,31 +21,47 @@ import {
   positionViewDirection,
   pow,
   saturate,
+  screenSize,
   select,
   sqrt,
+  step,
   transformNormalToView,
+  vec2,
   vec3,
   vec4,
 } from "three/tsl";
 import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
+import { viewUnitsPerPixel } from "../shader/viewUnits";
 import type { Opacity, Transparency } from "../shader/material";
 
-export type MeshStyle = Pick<SurfaceSpec, "shaded" | "zBias" | "zIndex">;
+export type MeshStyle = Pick<SurfaceSpec, "shaded" | "zBias" | "zIndex"> &
+  Partial<Pick<SurfaceSpec, "grid">>;
 
 /**
- * One mesh's depth style. It sits at `userData.mesh` on the mesh, where the
- * shared materials read it per mesh.
+ * One mesh's depth style and gridlines. It sits at `userData.mesh` on the
+ * mesh, where the shared materials read it per mesh.
  */
 export class MeshUniforms {
   zBias = 0;
 
   zIndex = 0;
 
-  set({ zBias, zIndex }: MeshStyle): void {
+  /** Gridlines along u and along v: 0 for none. */
+  readonly gridLines = new Vector2();
+
+  gridWidth = 0;
+
+  gridOpacity = 0;
+
+  set({ zBias, zIndex, grid }: MeshStyle): void {
     this.zBias = zBias;
     this.zIndex = zIndex;
+    const [u, v] = grid && grid.width > 0 ? grid.lines : [0, 0];
+    this.gridLines.set(u, v);
+    this.gridWidth = grid?.width ?? 0;
+    this.gridOpacity = grid?.color[3] ?? 0;
   }
 }
 
@@ -60,6 +80,9 @@ const viewNormal = () => {
   ).toVarying("v_meshNormal");
 };
 
+// One node for every use: three declares a varying per node, not per name.
+const meshView = positionView.toVarying("v_meshView");
+
 /** The light's view-space direction, MathBox's (1, 2, 2) in world space. */
 const towardLightView = () =>
   normalize(cameraViewMatrix.mul(vec4(1, 2, 2, 0)).xyz);
@@ -71,7 +94,7 @@ const towardLightView = () =>
  * so the view position comes through a varying.
  */
 const facingNormal = (normal: Node<"vec3">) => {
-  const view = positionView.toVarying("v_meshView");
+  const view = meshView;
   const face = cross(dFdx(view), dFdy(view));
   const side = select(dot(normal, face).greaterThan(0), 1, -1);
   return normalize(normal).mul(side);
@@ -177,19 +200,79 @@ export type Shading = "glossy" | "matte";
 
 const SHADINGS = { glossy: glossyShading, matte: matteShading };
 
+/**
+ * How much of this fragment is gridline, times `gridOpacity`: lines at even
+ * steps of (u, v), as wide on screen as a stroke of `gridWidth` at this depth.
+ */
+const gridlineAlpha = (): Node<"float"> => {
+  const lines = read("gridLines", "vec2");
+  const t = attribute<"vec2">("parameter", "vec2").mul(max(lines.sub(1), 0));
+  // Each axis's own screen gradient: `fwidth` widens diagonal lines by √2.
+  const perPixel = vec2(
+    length(vec2(dFdx(t.x), dFdy(t.x))),
+    length(vec2(dFdx(t.y), dFdy(t.y))),
+  );
+  const nearest = floor(t.add(0.5));
+  const pixelsToLine = abs(t.sub(nearest)).div(max(perPixel, 1e-6));
+  const halfWidth = read("gridWidth", "float").mul(0.5).mul(viewUnitsPerPixel);
+  const { w } = cameraProjectionMatrix.mul(vec4(meshView, 1));
+  const halfPixels = cameraProjectionMatrix
+    .mul(vec4(0, halfWidth, 0, 0))
+    .y.div(w)
+    .mul(screenSize.y)
+    .mul(0.5);
+  // Only an edge line's inner half lies on the surface: it draws that half
+  // the line's full width.
+  const onEdge = max(
+    float(1).sub(step(0.5, nearest)),
+    step(lines.sub(1.5), nearest),
+  );
+  const half = onEdge.add(1).mul(halfPixels);
+  // A line under a pixel wide covers one pixel, faded by its width.
+  const coverage = saturate(max(half, 0.5).add(0.5).sub(pixelsToLine))
+    .mul(min(half.mul(2), 1))
+    .mul(min(lines, 1));
+  return max(coverage.x, coverage.y).mul(read("gridOpacity", "float"));
+};
+
+/**
+ * The lit color with its gridlines drawn over it: darker where the surface
+ * looks light over the white background, lighter where it looks dark.
+ */
+const withGridlines = (lit: Node<"vec4">): Node<"vec4"> => {
+  const lineAlpha = gridlineAlpha();
+  const luminance = dot(lit.rgb, vec3(0.2126, 0.7152, 0.0722));
+  const seen = mix(float(1), luminance, lit.a);
+  const line = select(
+    seen.greaterThan(0.4),
+    lit.rgb.mul(0.6),
+    mix(lit.rgb, vec3(1), 0.4),
+  );
+  // The line composited over the surface, as if drawn on top of it.
+  const alpha = lineAlpha.add(lit.a.mul(float(1).sub(lineAlpha)));
+  const rgb = line
+    .mul(lineAlpha)
+    .add(lit.rgb.mul(lit.a).mul(float(1).sub(lineAlpha)))
+    .div(max(alpha, 1e-6));
+  return vec4(rgb, alpha);
+};
+
 const build = (shading: Shading | null) => () => {
   const color = attribute<"vec4">("color", "vec4");
+  // Clamped to 1, as the unorm targets do: OIT accumulates in half float,
+  // where a color above 1 would brighten the blend at that pixel.
+  const lit = shading ? min(SHADINGS[shading](color, viewNormal()), 1) : color;
+  const drawn = withGridlines(lit);
   return {
     vertex: projectWithDepthStyle(
       positionView,
       read("zBias", "float"),
       read("zIndex", "float"),
     ),
-    // Clamped to 1, as the unorm targets do: OIT accumulates in half float,
-    // where a color above 1 would brighten the blend at that pixel.
-    color: shading ? min(SHADINGS[shading](color, viewNormal()), 1) : color,
-    // MathBox discards where the interpolated color has no opacity.
-    mask: color.a.greaterThan(0),
+    color: drawn,
+    // Discards where neither the surface nor a gridline has opacity, as
+    // MathBox discards where the interpolated color has none.
+    mask: drawn.a.greaterThan(0),
   };
 };
 
