@@ -220,13 +220,22 @@ def _allowlisted(agg: Aggregate) -> list[str]:
         r: Counter() for r in [*(e.reason for e in ALLOWLIST), *REPLAYS.values()]
     }
     for (cid, reason), n in agg.allowlisted.items():
-        by_reason.setdefault(reason, Counter())[cid] += n
+        replay, then, entry = reason.partition("; then: ")
+        if then:
+            # Counted under both, so neither reads as unused.
+            by_reason.setdefault(replay, Counter())[cid, "then an allowlist entry"] += n
+            by_reason.setdefault(entry, Counter())[cid, "after a replay"] += n
+        else:
+            by_reason.setdefault(reason, Counter())[cid, ""] += n
     lines = []
     for reason, clusters in sorted(by_reason.items(), key=lambda r: -r[1].total()):
         lines.append(f"- ×{clusters.total():,}: {reason}")
-        for cid, n in clusters.most_common():
+        for (cid, via), n in clusters.most_common():
             item_type, next_field, outcome, detail = cluster_parts(cid)
-            lines.append(f"  - `{item_type}.{next_field}` {outcome} `{detail}` ×{n:,}")
+            suffix = f" ({via})" if via else ""
+            lines.append(
+                f"  - `{item_type}.{next_field}` {outcome} `{detail}` ×{n:,}{suffix}"
+            )
     return lines
 
 

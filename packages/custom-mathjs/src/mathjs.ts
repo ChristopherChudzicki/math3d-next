@@ -95,6 +95,7 @@ import {
   sumTransformDependencies,
   meanTransformDependencies,
 } from "mathjs";
+import type { Complex, MathType } from "mathjs";
 
 import {
   createCurl,
@@ -106,6 +107,7 @@ import {
 } from "./derivatives";
 
 import customConstants from "./constants";
+import { realRootSign } from "./realRootSign";
 
 const normalTrig = {
   sinDependencies,
@@ -246,10 +248,40 @@ mathjs.import({
   div: createDivergence,
 });
 
+/** mathjs's own pow. */
+const principalPow = mathjs.pow;
+const { nthRoot } = mathjs;
+
+mathjs.import(
+  {
+    // A negative number to an odd-denominator fraction takes its real root:
+    // (-8)^(1/3) is -2, where principalPow gives 1 + 1.73i.
+    pow: mathjs.typed("pow", {
+      "number, number": (x: number, y: number) => {
+        // Same as principalPow here, without its typed dispatch.
+        if (x >= 0 || Number.isInteger(y)) return x ** y;
+        // A NaN base is left to principalPow.
+        const sign = x < 0 ? realRootSign(y) : 0;
+        return sign === 0 ? principalPow(x, y) : sign * (-x) ** y;
+      },
+      "any, any": (x: MathType, y: number | Complex) => principalPow(x, y),
+    }),
+    // nthRoot, except that a negative number with no real root gives NaN,
+    // which a graph leaves out, where nthRoot throws and blanks the graph.
+    root: mathjs.typed("root", {
+      number: (x: number) => (x < 0 ? NaN : nthRoot(x)),
+      "number, number": (x: number, n: number) =>
+        x < 0 && Math.abs(n % 2) !== 1 ? NaN : nthRoot(x, n),
+      any: nthRoot,
+      "any, any": nthRoot,
+    }),
+  },
+  { override: true },
+);
+
 mathjs.import(
   {
     customConstants,
-    root: mathjs.nthRoot,
     arccos: mathjs.acos,
     arcsin: mathjs.asin,
     // arctan(y, x) generalizes arctan(y / x), as atan2(y, x) does.
@@ -274,3 +306,4 @@ mathjs.import(
 );
 
 export default mathjs;
+export { principalPow };

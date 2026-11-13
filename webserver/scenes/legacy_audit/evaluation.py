@@ -932,7 +932,7 @@ def evaluate_scene(
     for pair in result.pairs:
         if pair.root:
             pair.allowlisted = allowlisted(pair, allowlist) or replayed(
-                pair, replays or {}, tol
+                pair, replays or {}, allowlist, tol
             )
     return result
 
@@ -944,8 +944,11 @@ def allowlisted(pair: Pair, allowlist: Sequence[Entry]) -> str | None:
     return None
 
 
-def replayed(pair: Pair, replays: Mapping[str, dict], tol: Tolerance) -> str | None:
-    """The reason of the first replay that turns a `differ` pair `equal`."""
+def replayed(
+    pair: Pair, replays: Mapping[str, dict], allowlist: Sequence[Entry], tol: Tolerance
+) -> str | None:
+    """The reason of the first replay that turns a `differ` pair `equal`, or
+    into a `differ` pair the allowlist accepts: then both reasons."""
     if pair.outcome != "differ":
         return None
     s = pair.spec
@@ -954,8 +957,14 @@ def replayed(pair: Pair, replays: Mapping[str, dict], tol: Tolerance) -> str | N
         if field_record is None:
             continue
         replayed_side = _side(field_record, s.next_element, True)
-        if label(s, pair.legacy, replayed_side, tol).outcome == "equal":
+        replayed_pair = label(s, pair.legacy, replayed_side, tol)
+        if replayed_pair.outcome == "equal":
             return reason
+        # Never a `regression`: the replay fails there, but math3d-next draws the field.
+        if replayed_pair.outcome == "differ":
+            entry_reason = allowlisted(replayed_pair, allowlist)
+            if entry_reason:
+                return f"{reason}; then: {entry_reason}"
     return None
 
 

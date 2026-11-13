@@ -1,5 +1,6 @@
 import { describe, test, expect, it } from "vitest";
 import invariant from "tiny-invariant";
+import math from "@math3d/custom-mathjs";
 import { Parseable } from "./interfaces";
 import { DetailedAssignmentError } from "./MathJsParser";
 import { latexParser as parser } from "./parsers";
@@ -705,4 +706,27 @@ describe("a function call in place of a variable keeps its meaning", () => {
   ])("$expr", ({ expr, expected }) => {
     expect(evaluate(expr)).toBe(expected);
   });
+});
+
+describe("a power of a negative number", () => {
+  const scope = new Map<string, unknown>([
+    ["x", -8],
+    ["a", 1 / 3],
+    ["n", 3],
+  ]);
+  const evaluate = (expr: string) =>
+    math.format(parser.parse(expr).evaluate(scope), 6);
+
+  it.each([
+    { expr: "x^{\\frac{1}{3}}", expected: "-2" },
+    { expr: "x^{-\\frac{1}{3}}", expected: "-0.5" },
+    { expr: "\\operatorname{pow}(x, \\frac{1}{3})", expected: "-2" },
+    { expr: "x^{a}", expected: "-2" },
+    { expr: "x^{\\frac{1}{n}}", expected: "-2" },
+  ])(
+    "takes the real root however an odd-denominator exponent is written: $expr",
+    ({ expr, expected }) => {
+      expect(evaluate(expr)).toBe(expected);
+    },
+  );
 });

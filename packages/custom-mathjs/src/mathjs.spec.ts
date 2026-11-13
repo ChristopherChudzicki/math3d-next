@@ -106,6 +106,37 @@ describe("mathjs instance", () => {
     expect(math.evaluate(expr).valueOf()).toEqual(expected);
   });
 
+  it.each([
+    ["(-8)^(1/3)", "-2"],
+    ["pow(-8, 2/3)", "4"],
+    ["(-32)^0.2", "-2"],
+    ["(-8)^(1/2)", "2.82843i"],
+    ["(-8 + 0I)^(1/3)", "1 + 1.73205i"],
+    ["8^(1/3)", "2"],
+    ["(-2)^3", "-8"],
+    ["[1, 2; 3, 4]^2", "[[7, 10], [15, 22]]"],
+  ])(
+    "pow differs from mathjs's only for a negative number to an odd-denominator fraction: %s",
+    (expr, expected) => {
+      expect(math.format(math.evaluate(expr), 6)).toBe(expected);
+    },
+  );
+
+  it.each([
+    ["root(-8, 3)", "-2"],
+    ["root(16, 4)", "2"],
+    ["root(16)", "4"],
+    ["root(-16, 4)", "NaN"],
+    ["root(-16)", "NaN"],
+    ["root(-8, 1.5)", "NaN"],
+    ["root(-8, -3)", "-0.5"],
+  ])(
+    "root gives the real root, or NaN where there is none: %s",
+    (expr, expected) => {
+      expect(math.format(math.evaluate(expr), 6)).toBe(expected);
+    },
+  );
+
   it("defines expected constants", () => {
     expect(math.i).toEqual([1, 0, 0]);
     expect(math.j).toEqual([0, 1, 0]);

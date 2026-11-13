@@ -75,7 +75,7 @@ This app is deployed as a true react SPA hosted on a CDN with APIs powered by Dj
 
 **Math evaluation pipeline** (data flows top → bottom):
 
-- **`packages/custom-mathjs`** — Configured Math.js instance with custom functions (numerical derivatives: `diff`, `unitT`, `unitN`, `unitB`) and curated function subset
+- **`packages/custom-mathjs`** — Configured Math.js instance with custom functions (numerical derivatives: `diff`, `unitT`, `unitN`, `unitB`) and curated function subset. Overrides `pow`: a negative base to an odd-denominator fraction takes its real root (`realRootSign.ts`)
 - **`packages/mathjs-utils`** — Math.js utilities: dependency extraction from AST nodes, LaTeX conversion
 - **`packages/parser`** — Parses LaTeX-style input (from MathLive) into Math.js AST. Handles fractions, exponents, subscripts, partial derivatives via transformation rules
 - **`packages/mathscope`** — Evaluation engine: manages a scope of named expressions with dependency tracking (topological sort), cycle detection, and change events

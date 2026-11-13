@@ -89,6 +89,12 @@ describe("fastCompile agrees with mathjs", () => {
       fast: true,
     },
     {
+      title: "a negative base to 1/3",
+      expr: "f(x) = x^(1/3)",
+      point: [-8],
+      fast: true,
+    },
+    {
       title: "a scope value and a constant",
       expr: "f(x) = a x + pi",
       point: [0.5],

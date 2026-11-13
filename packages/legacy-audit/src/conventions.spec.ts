@@ -50,6 +50,12 @@ describe("CONVENTIONS", () => {
       next: Math.PI / 4,
       react: Math.PI,
     },
+    {
+      convention: "principal_pow" as const,
+      rhs: "\\left(-8\\right)^{\\frac{1}{3}}",
+      next: -2,
+      react: { re: expect.closeTo(1, 12), im: expect.closeTo(3 ** 0.5, 12) },
+    },
   ])(
     "$convention swaps in math3d-react's value of $rhs until undone",
     ({ convention, rhs, next, react }) => {
@@ -70,5 +76,11 @@ describe("CONVENTIONS", () => {
     };
     expect(usesAny(scene, CONVENTIONS.round.triggers)).toBe(true);
     expect(usesAny(scene, CONVENTIONS.complex_add.triggers)).toBe(false);
+  });
+
+  it("finds a power that is not whole as written", () => {
+    const { triggers } = CONVENTIONS.principal_pow;
+    expect(usesAny({ items: [variable("x^{a}")] }, triggers)).toBe(true);
+    expect(usesAny({ items: [variable("x^2+x^{-1}")] }, triggers)).toBe(false);
   });
 });

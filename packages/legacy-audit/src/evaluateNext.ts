@@ -156,6 +156,15 @@ const texts = (parseable: Parseable): string[] => {
   }
 };
 
+/** Whether `node` is a whole number as written, such as 2, -1 or (3). */
+const isWholeLiteral = (node: mjs.MathNode): boolean => {
+  if (math.isParenthesisNode(node)) return isWholeLiteral(node.content);
+  if (math.isOperatorNode(node) && node.fn === "unaryMinus") {
+    return isWholeLiteral(node.args[0]);
+  }
+  return math.isConstantNode(node) && Number.isInteger(node.value);
+};
+
 const features = (parseable: Parseable): string[] => {
   const found = new Set<string>();
   texts(parseable).forEach((text) => {
@@ -184,6 +193,9 @@ const features = (parseable: Parseable): string[] => {
         if (RELATIONAL.has(n.fn)) found.add("relational");
         if (LOGICAL.has(n.fn)) found.add("logical");
         if (n.implicit) found.add("implicit_multiplication");
+        if (n.fn === "pow" && !isWholeLiteral(n.args[1])) {
+          found.add("nonwhole_pow");
+        }
       }
     });
   });

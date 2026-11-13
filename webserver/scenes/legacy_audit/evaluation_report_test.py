@@ -21,7 +21,7 @@ from scenes.legacy_audit.evaluation_report import (
     render_markdown,
 )
 from scenes.legacy_audit.evaluation_test import field
-from scenes.legacy_audit.pass2_allowlist import REPLAYS, Entry
+from scenes.legacy_audit.pass2_allowlist import ALLOWLIST, REPLAYS, Entry
 
 
 def scene(outcome, severity="render", root=True, allowlisted=None):
@@ -63,6 +63,15 @@ def test_headline_shares_leave_excluded_scenes_out():
         result.times_accessed = weight
         agg.add(result, "clean")
     assert "| Pass-2-clean | 33.33% | 50.00% |" in render_markdown(agg, {"date": "d"})
+
+
+def test_a_pair_accepted_through_a_replay_counts_under_the_replay_and_the_entry():
+    replay, entry = REPLAYS["principal_pow"], ALLOWLIST[0].reason
+    agg = Aggregate()
+    agg.add(scene("differ", allowlisted=f"{replay}; then: {entry}"), "clean")
+    report = render_markdown(agg, {"date": "d"})
+    assert f"- ×1: {replay}\n" in report
+    assert f"- ×1: {entry}\n" in report
 
 
 def test_a_both_error_root_is_clustered_but_left_out_of_the_fix_curve():
@@ -135,7 +144,7 @@ def test_slider_bounds_take_the_status_of_their_own_range_element():
         (field("eval", message="Undefined symbol q"), 2, None),
     ],
 )
-def test_a_replay_allowlists_a_differ_pair_only_when_it_gives_reacts_value(
+def test_a_replay_allowlists_a_differ_pair_when_it_gives_reacts_value(
     next_value, replayed_value, allowlisted
 ):
     exported, rehydrated, react, nxt = slider_scene(field(value=[-5, 5]))
@@ -143,6 +152,41 @@ def test_a_replay_allowlists_a_differ_pair_only_when_it_gives_reacts_value(
     replay = {"items": {"s": {"value": field(value=replayed_value)}}}
     result = evaluate_scene(
         exported, rehydrated, react, nxt, Tolerance(), replays={"replayed": replay}
+    )
+    [value] = [p for p in result.pairs if p.spec.legacy_field == "value"]
+    assert value.allowlisted == allowlisted
+
+
+@pytest.mark.parametrize(
+    ("replayed_field", "entry", "allowlisted"),
+    [
+        (
+            field(value=4),
+            Entry("differ", "", "accepted", values=lambda _, nxt: nxt == 4),
+            "replayed; then: accepted",
+        ),
+        # Where the replay fails, math3d-next's own value is what is drawn.
+        (
+            field("eval", message="Undefined symbol q"),
+            Entry("regression", "eval: Undefined symbol", "accepted"),
+            None,
+        ),
+    ],
+)
+def test_a_replay_allowlists_a_pair_it_turns_into_an_allowlisted_differ(
+    replayed_field, entry, allowlisted
+):
+    exported, rehydrated, react, nxt = slider_scene(field(value=[-5, 5]))
+    nxt["items"]["s"]["value"] = field(value=3)
+    replay = {"items": {"s": {"value": replayed_field}}}
+    result = evaluate_scene(
+        exported,
+        rehydrated,
+        react,
+        nxt,
+        Tolerance(),
+        [entry],
+        replays={"replayed": replay},
     )
     [value] = [p for p in result.pairs if p.spec.legacy_field == "value"]
     assert value.allowlisted == allowlisted

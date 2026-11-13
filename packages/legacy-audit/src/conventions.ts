@@ -1,10 +1,11 @@
 /**
  * math3d-react conventions that a replay of the pass 2a evaluator swaps in, one
- * at a time, so pass 2c can show that a difference is the convention alone
+ * at a time, so pass 2c can show that a difference is the convention alone,
+ * or the convention and an allowlisted difference
  * (docs/legacy-audit/README.md). A replay evaluates only the scenes with a
  * trigger among their features. `install` returns its undo.
  */
-import math from "@math3d/custom-mathjs";
+import math, { principalPow } from "@math3d/custom-mathjs";
 
 type ComplexValue = { re: number; im: number };
 type ComplexOp = (this: ComplexValue, a: unknown, b?: unknown) => ComplexValue;
@@ -52,6 +53,16 @@ const CONVENTIONS = {
         Complex.prototype.add = add;
         Complex.prototype.sub = sub;
       };
+    },
+  },
+  // math3d-react's pow: (-8)^(1/3) is the principal root, not -2
+  // (custom-mathjs/src/realRootSign.ts).
+  principal_pow: {
+    triggers: ["nonwhole_pow", "pow"],
+    install: () => {
+      const { pow } = math;
+      math.import({ pow: principalPow }, { override: true });
+      return () => math.import({ pow }, { override: true });
     },
   },
 } satisfies Record<string, { triggers: string[]; install: () => () => void }>;
