@@ -10,7 +10,6 @@ import {
   validateParameters,
   subscriptRule,
   exponentRule,
-  realRootRule,
 } from "./rules";
 
 const cdotRule = new RegexpParserRule(/\\cdot/g, " * ");
@@ -72,7 +71,6 @@ const parserRules: ParserRule[] = [
   zeroPrefixRule,
   // MathJS rules
   pdiffRule,
-  realRootRule,
   // simplifyRule,
 ];
 

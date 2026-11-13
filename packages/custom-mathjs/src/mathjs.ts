@@ -107,6 +107,7 @@ import {
 } from "./derivatives";
 
 import customConstants from "./constants";
+import { realRootSign } from "./realRootSign";
 
 const normalTrig = {
   sinDependencies,
@@ -247,23 +248,26 @@ mathjs.import({
   div: createDivergence,
 });
 
-/** pow, except that a negative number to a number gives sign * |x|^y. */
-const realPow = (name: string, sign: 1 | -1) =>
-  mathjs.typed(name, {
-    "number, number": (x: number, y: number) => {
-      if (x < 0) return sign * (-x) ** y;
-      // pow is Math.pow for x >= 0. A NaN base is left to it.
-      return x >= 0 ? x ** y : mathjs.pow(x, y);
-    },
-    "any, any": (x: MathType, y: number | Complex) => mathjs.pow(x, y),
-  });
+/** mathjs's own pow: a negative number to a fraction gives the complex principal root. */
+const principalPow = mathjs.pow;
 
-mathjs.import({
-  // What the parser's realRootRule makes of x^(p/q) with q odd, by whether p
-  // is odd or even: (-8)^(1/3) is -2, not pow's principal root 1 + 1.73i.
-  $realPowOdd: realPow("$realPowOdd", -1),
-  $realPowEven: realPow("$realPowEven", 1),
-});
+mathjs.import(
+  {
+    // A negative number to an odd-denominator fraction takes its real root:
+    // (-8)^(1/3) is -2, where principalPow gives 1 + 1.73i.
+    pow: mathjs.typed("pow", {
+      "number, number": (x: number, y: number) => {
+        // principalPow is Math.pow here.
+        if (x >= 0 || Number.isInteger(y)) return x ** y;
+        // A NaN base is left to principalPow.
+        const sign = x < 0 ? realRootSign(y) : 0;
+        return sign === 0 ? principalPow(x, y) : sign * (-x) ** y;
+      },
+      "any, any": (x: MathType, y: number | Complex) => principalPow(x, y),
+    }),
+  },
+  { override: true },
+);
 
 mathjs.import(
   {
@@ -293,3 +297,4 @@ mathjs.import(
 );
 
 export default mathjs;
+export { principalPow };

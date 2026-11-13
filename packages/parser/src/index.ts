@@ -7,5 +7,5 @@ export type {
   ValidatedParseable,
   ValidatedParseableObjs,
 } from "./interfaces";
-export { ParameterErrors, realRootRule } from "./rules";
+export { ParameterErrors } from "./rules";
 export { DetailedAssignmentError } from "./MathJsParser";

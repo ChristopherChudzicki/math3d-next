@@ -63,12 +63,11 @@ Accept a library convention (react's `round`, complex.js 2.0.4's addition) or an
 
 ## Intended differences in evaluation
 
-- **A negative base to an odd-denominator power takes its real root** (owner decision 2026-11-12, `tk-decision-needed-what-a-negative-base-to-a-fracti-368eb1`).
-  - `(-8)^(1/3)`: math3d-react gives the principal root `1 + 1.73i`, which isn't drawn; math3d-next gives `-2` when the exponent is written as a fraction of whole numbers whose denominator, in lowest terms, is odd (`packages/parser/src/rules/realRootRule.ts`).
+- **A negative base to an odd-denominator power takes its real root** (owner decision 2026-11-13, `tk-decision-needed-what-a-negative-base-to-a-fracti-368eb1`).
+  - `(-8)^(1/3)`: math3d-react gives the principal root `1 + 1.73i`, which isn't drawn; math3d-next gives `-2` whenever the exponent's value is within rounding of `p/q` with `q` odd and below 100 (`packages/custom-mathjs/src/realRootSign.ts`). That includes decimal and variable exponents: `x^0.2`, and `x^a` with `a = 1/3`.
   - A legacy graph of `x^(1/3)` that stops at `x = 0` continues through negative `x`.
   - Stored scenes are not rewritten. An author who wants the old result can narrow the domain or make the base complex, `(x + 0I)^(1/3)`.
-  - Decimal and variable exponents (`x^0.2`, `x^a`) keep the principal root in both apps.
-  - Size on the 2026-11-04 export: at most 212 of 101,142 scenes (view weight 684 of 1,400,421), each only gaining drawn samples. _An upper bound_: counted from a replay of a wider rule that also matched decimal exponents, at sample points that may lie outside an item's drawn domain.
+  - Size on the 2026-11-04 export: at most 488 of 101,142 scenes change in a drawn function (view weight 1,931 of 1,400,421). 453 only gain drawn values, 25 change a value or lose one (formulas that used the complex result, such as `abs(x*((1/y)^(1/n) - 1))`), and 10 change otherwise. _Upper bounds_: counted at sample points that may lie outside an item's drawn domain.
   - Pass 2 accepts these pairs through the `principal_pow` replay. In a field that draws only real values the replay gives `NaN` where math3d-react gives a complex number, a pair the allowlist accepts. A point or vector whose coordinate changes this way is not accepted and shows as a `differ` to review.
 
 ## Manual checks

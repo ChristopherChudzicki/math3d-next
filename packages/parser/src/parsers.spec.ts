@@ -721,11 +721,12 @@ describe("a power of a negative number", () => {
     { expr: "x^{\\frac{1}{3}}", expected: "-2" },
     { expr: "x^{2/3}", expected: "4" },
     { expr: "x^{-\\frac{1}{3}}", expected: "-0.5" },
-    { expr: "x^{\\frac{2}{6}}", expected: "-2" },
     { expr: "\\operatorname{pow}(x, \\frac{1}{3})", expected: "-2" },
-    { expr: "(x^{\\frac{1}{3}})^{\\frac{1}{3}}", expected: "-1.25992" },
+    { expr: "x^{a}", expected: "-2" },
+    { expr: "x^{\\frac{1}{n}}", expected: "-2" },
+    { expr: "(-32)^{0.2}", expected: "-2" },
   ])(
-    "takes the real root when the exponent is written as an odd-denominator fraction: $expr",
+    "takes the real root when the exponent's value is an odd-denominator fraction: $expr",
     ({ expr, expected }) => {
       expect(evaluate(expr)).toBe(expected);
     },
@@ -737,20 +738,13 @@ describe("a power of a negative number", () => {
       expr: "x^{\\frac{1}{2}}",
       expected: "2.82843i",
     },
-    { title: "a variable", expr: "x^{a}", expected: "1 + 1.73205i" },
     {
-      title: "a fraction of a variable",
-      expr: "x^{\\frac{1}{n}}",
-      expected: "1 + 1.73205i",
-    },
-    { title: "a decimal", expr: "x^{0.2}", expected: "1.22624 + 0.890916i" },
-    {
-      title: "a percentage",
-      expr: "x^{20\\%}",
-      expected: "1.22624 + 0.890916i",
+      title: "a denominator of 100 or more",
+      expr: "(-1)^{\\frac{1}{101}}",
+      expected: "0.999516 + 0.0310999i",
     },
   ])(
-    "takes the principal root when the exponent is $title",
+    "takes the principal root when the exponent has $title",
     ({ expr, expected }) => {
       expect(evaluate(expr)).toBe(expected);
     },

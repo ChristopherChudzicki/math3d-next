@@ -1,5 +1,5 @@
 import { describe, it, test, expect } from "vitest";
-import math from "./mathjs";
+import math, { principalPow } from "./mathjs";
 
 describe("mathjs instance", () => {
   it("defines trig functions", () => {
@@ -107,13 +107,23 @@ describe("mathjs instance", () => {
   });
 
   it.each([
-    ["$realPowOdd(-8, 1/3)", "-2"],
-    ["$realPowEven(-8, 2/3)", "4"],
-    ["$realPowOdd(8, 1/3)", "2"],
-    ["$realPowOdd([1, 2; 3, 4], 2)", "[[7, 10], [15, 22]]"],
-    ["(-8)^(1/3)", "1 + 1.73205i"],
-  ])("only a negative number differs from pow: %s", (expr, expected) => {
-    expect(math.format(math.evaluate(expr), 6)).toBe(expected);
+    ["(-8)^(1/3)", "-2"],
+    ["pow(-8, 2/3)", "4"],
+    ["(-32)^0.2", "-2"],
+    ["(-8)^(1/2)", "2.82843i"],
+    ["(-8 + 0I)^(1/3)", "1 + 1.73205i"],
+    ["8^(1/3)", "2"],
+    ["(-2)^3", "-8"],
+    ["[1, 2; 3, 4]^2", "[[7, 10], [15, 22]]"],
+  ])(
+    "a negative number takes a real root where it has one: %s",
+    (expr, expected) => {
+      expect(math.format(math.evaluate(expr), 6)).toBe(expected);
+    },
+  );
+
+  it("keeps mathjs's own pow as principalPow", () => {
+    expect(math.format(principalPow(-8, 1 / 3), 6)).toBe("1 + 1.73205i");
   });
 
   it("defines expected constants", () => {

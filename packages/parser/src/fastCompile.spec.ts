@@ -89,8 +89,8 @@ describe("fastCompile agrees with mathjs", () => {
       fast: true,
     },
     {
-      title: "the real root the parser asks for",
-      expr: "f(x) = $realPowOdd(x, 1/3)",
+      title: "a real root of a negative number",
+      expr: "f(x) = x^(1/3)",
       point: [-8],
       fast: true,
     },

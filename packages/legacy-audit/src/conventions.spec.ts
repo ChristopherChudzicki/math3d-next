@@ -84,11 +84,9 @@ describe("CONVENTIONS", () => {
     expect(usesAny(scene, CONVENTIONS.complex_add.triggers)).toBe(false);
   });
 
-  it("finds a power the parser rewrites, and no other", () => {
+  it("finds a power that is not whole as written, and no other", () => {
     const { triggers } = CONVENTIONS.principal_pow;
-    expect(usesAny({ items: [variable("x^{\\frac{1}{3}}")] }, triggers)).toBe(
-      true,
-    );
-    expect(usesAny({ items: [variable("x^{0.5}+x^2")] }, triggers)).toBe(false);
+    expect(usesAny({ items: [variable("x^{a}")] }, triggers)).toBe(true);
+    expect(usesAny({ items: [variable("x^2+x^{-1}")] }, triggers)).toBe(false);
   });
 });

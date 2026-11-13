@@ -13,22 +13,6 @@ describe("makeMathScope", () => {
     expect(mathScope.results.get("b")).toBeCloseTo(0.5);
   });
 
-  test("a power the parser rewrites needs nothing defined", () => {
-    const mathScope = makeMathScope();
-    mathScope.setExpressions([
-      {
-        id: "b",
-        parseable: {
-          type: "assignment",
-          lhs: "b",
-          rhs: "\\left(-8\\right)^{\\frac{1}{3}}",
-        },
-      },
-    ]);
-    expect(itemEntries(mathScope.errors)).toEqual(new Map());
-    expect(mathScope.results.get("b")).toBe(-2);
-  });
-
   test("a function can index with end", () => {
     const mathScope = makeMathScope();
     mathScope.setExpressions([

@@ -213,8 +213,8 @@ REPLAYS: dict[str, str] = {
     "so `arg(log 0)` is π; 2.4.3 makes the sum (∞, ∞), whose `arg` is π/4; owner "
     "decision 2026-11-02 (tk-complex-js-arg-of-the-point-at-infinity-is-4-it--61b5fe)",
     "principal_pow": "math3d-react's `^` takes the principal root, so `(-8)^(1/3)` is "
-    "complex and isn't drawn; math3d-next takes the real root, -2, when the exponent "
-    "is written as a fraction of whole numbers whose denominator is odd in lowest "
-    "terms, so such a graph gains the part where the base is negative; owner "
-    "decision 2026-11-12 (tk-decision-needed-what-a-negative-base-to-a-fracti-368eb1)",
+    "complex and isn't drawn; math3d-next takes the real root, -2, when the exponent's "
+    "value is a fraction whose denominator is odd and below 100, so such a graph gains "
+    "the part where the base is negative; owner decision 2026-11-13 "
+    "(tk-decision-needed-what-a-negative-base-to-a-fracti-368eb1)",
 }

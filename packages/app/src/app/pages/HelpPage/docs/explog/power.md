@@ -9,11 +9,13 @@ tags:
 
 `pow(x, a)` is the same as \(x^a\).
 
-For a negative \(x\) and a power that is not a whole number:
+For a negative \(x\) and a power \(a\) that is not a whole number:
 
-- If the exponent is written as a fraction of whole numbers whose denominator is odd in lowest terms, as in \(x^{1/3}\), \(x^{2/5}\) or \(x^{2/6}\), the result is the real root: \((-8)^{1/3} = -2\).
-- Otherwise, as in \(x^{0.2}\), \(x^{1/2}\), or \(x^{a}\) even when \(a = 1/3\), the result is the complex principal root: \((-8)^{0.2} \approx 1.23 + 0.89I\). Graphs leave out complex values, so a graph of \(x^{0.2}\) stops at \(x = 0\).
+- If \(a\) is a fraction whose denominator is odd, as \(1/3\), \(2/5\) and \(0.2 = 1/5\) are, the result is the real root: \((-8)^{1/3} = -2\). The same holds for a variable: \(x^a\) with \(a = 1/3\).
+- Otherwise, as for \(x^{1/2}\) or \(x^{0.3}\), the result is the complex principal root: \((-8)^{0.3} \approx 1.10 + 1.51I\). Graphs leave out complex values, so a graph of \(x^{0.3}\) stops at \(x = 0\).
+
+A denominator of 100 or more counts as "otherwise".
+
+When a slider sets \(a\), the part of a graph where \(x < 0\) appears only at the values that are such fractions, so it flickers as the slider moves. Restricting the graph to \(x \geq 0\) avoids that.
 
 For the principal root of a fraction too, make the base complex with a capital \(I\): \((x + 0I)^{1/3}\).
-
-For a real root whose degree is a variable, use \(\operatorname{root}(x, n)\).

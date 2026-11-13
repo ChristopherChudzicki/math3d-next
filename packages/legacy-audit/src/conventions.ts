@@ -5,7 +5,7 @@
  * (docs/legacy-audit/README.md). A replay evaluates only the scenes with a
  * trigger among their features. `install` returns its undo.
  */
-import math from "@math3d/custom-mathjs";
+import math, { principalPow } from "@math3d/custom-mathjs";
 
 type ComplexValue = { re: number; im: number };
 type ComplexOp = (this: ComplexValue, a: unknown, b?: unknown) => ComplexValue;
@@ -55,21 +55,14 @@ const CONVENTIONS = {
       };
     },
   },
-  // react's `^` is always mathjs's pow, the principal root. For when
-  // math3d-next takes a real root, see packages/parser/src/rules/realRootRule.ts.
+  // react's `^` is always mathjs's pow, the principal root. math3d-next's
+  // takes a real root where it has one (custom-mathjs/src/realRootSign.ts).
   principal_pow: {
-    triggers: ["$realPowOdd", "$realPowEven"],
+    triggers: ["fractional_pow", "pow"],
     install: () => {
-      const { $realPowOdd, $realPowEven } = math as unknown as Record<
-        string,
-        unknown
-      >;
-      math.import(
-        { $realPowOdd: math.pow, $realPowEven: math.pow },
-        { override: true },
-      );
-      return () =>
-        math.import({ $realPowOdd, $realPowEven }, { override: true });
+      const { pow } = math;
+      math.import({ pow: principalPow }, { override: true });
+      return () => math.import({ pow }, { override: true });
     },
   },
 } satisfies Record<string, { triggers: string[]; install: () => () => void }>;
