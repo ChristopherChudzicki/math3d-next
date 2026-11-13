@@ -106,6 +106,16 @@ describe("mathjs instance", () => {
     expect(math.evaluate(expr).valueOf()).toEqual(expected);
   });
 
+  it.each([
+    ["$realPowOdd(-8, 1/3)", "-2"],
+    ["$realPowEven(-8, 2/3)", "4"],
+    ["$realPowOdd(8, 1/3)", "2"],
+    ["$realPowOdd([1, 2; 3, 4], 2)", "[[7, 10], [15, 22]]"],
+    ["(-8)^(1/3)", "1 + 1.73205i"],
+  ])("only a negative number differs from pow: %s", (expr, expected) => {
+    expect(math.format(math.evaluate(expr), 6)).toBe(expected);
+  });
+
   it("defines expected constants", () => {
     expect(math.i).toEqual([1, 0, 0]);
     expect(math.j).toEqual([0, 1, 0]);

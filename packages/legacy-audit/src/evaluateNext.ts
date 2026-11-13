@@ -7,7 +7,7 @@ import type * as mjs from "mathjs";
 import math, { mathWithTransform } from "@math3d/custom-mathjs";
 import MathScope, { EvaluationError } from "@math3d/mathscope";
 import type { IdentifiedParseable, MathNode } from "@math3d/mathscope";
-import { latexParser } from "@math3d/parser";
+import { latexParser, realRootRule } from "@math3d/parser";
 import type { Parseable, ValidatedParseable } from "@math3d/parser";
 import {
   MathItemType,
@@ -161,7 +161,9 @@ const features = (parseable: Parseable): string[] => {
   texts(parseable).forEach((text) => {
     let node: mjs.MathNode;
     try {
-      node = math.parse(latexParser.preprocess(text));
+      // With the rule, a power that takes a real root shows as its builtin,
+      // the principal_pow replay's trigger.
+      node = realRootRule.transform(math.parse(latexParser.preprocess(text)));
     } catch {
       return;
     }

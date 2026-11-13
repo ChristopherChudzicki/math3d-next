@@ -1,4 +1,6 @@
 [
+  "$realPowEven",
+  "$realPowOdd",
   "AccessorNode",
   "ArgumentsError",
   "ArrayNode",

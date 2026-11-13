@@ -50,6 +50,18 @@ describe("CONVENTIONS", () => {
       next: Math.PI / 4,
       react: Math.PI,
     },
+    {
+      convention: "principal_pow" as const,
+      rhs: "\\left(-8\\right)^{\\frac{1}{3}}",
+      next: -2,
+      react: { re: expect.closeTo(1, 12), im: expect.closeTo(3 ** 0.5, 12) },
+    },
+    {
+      convention: "principal_pow" as const,
+      rhs: "\\left(-8\\right)^{\\frac{2}{3}}",
+      next: expect.closeTo(4, 12),
+      react: { re: expect.closeTo(-2, 12), im: expect.closeTo(12 ** 0.5, 12) },
+    },
   ])(
     "$convention swaps in math3d-react's value of $rhs until undone",
     ({ convention, rhs, next, react }) => {
@@ -70,5 +82,13 @@ describe("CONVENTIONS", () => {
     };
     expect(usesAny(scene, CONVENTIONS.round.triggers)).toBe(true);
     expect(usesAny(scene, CONVENTIONS.complex_add.triggers)).toBe(false);
+  });
+
+  it("finds a power the parser rewrites, and no other", () => {
+    const { triggers } = CONVENTIONS.principal_pow;
+    expect(usesAny({ items: [variable("x^{\\frac{1}{3}}")] }, triggers)).toBe(
+      true,
+    );
+    expect(usesAny({ items: [variable("x^{0.5}+x^2")] }, triggers)).toBe(false);
   });
 });

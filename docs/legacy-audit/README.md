@@ -47,10 +47,10 @@ Pass 2 needs pass 1's `legacy.jsonl`, `rehydrated.jsonl` and `pass1/findings.jso
 ```bash
 D=$PWD/db-snapshots/legacy-audit; mkdir -p $D/pass2
 (cd packages/legacy-audit && LEGACY_EVAL_NEXT_IN=$D/legacy.jsonl LEGACY_EVAL_NEXT_OUT=$D/pass2/eval_next.jsonl yarn vitest --run src/evaluateNext.spec.ts)
-(cd packages/legacy-audit && for c in round complex_add; do LEGACY_EVAL_NEXT_CONVENTION=$c LEGACY_EVAL_NEXT_IN=$D/legacy.jsonl LEGACY_EVAL_NEXT_OUT=$D/pass2/replay_$c.jsonl yarn vitest --run src/evaluateNext.spec.ts; done)
+(cd packages/legacy-audit && for c in round complex_add principal_pow; do LEGACY_EVAL_NEXT_CONVENTION=$c LEGACY_EVAL_NEXT_IN=$D/legacy.jsonl LEGACY_EVAL_NEXT_OUT=$D/pass2/replay_$c.jsonl yarn vitest --run src/evaluateNext.spec.ts; done)
 (cd ../math3d-react/client && CI=true LEGACY_EVAL_IN=$D/rehydrated.jsonl LEGACY_EVAL_OUT=$D/pass2/eval_react.jsonl LEGACY_SAMPLE_POINTS=$OLDPWD/packages/legacy-audit/sample_points.json npm test -- --watchAll=false --testMatch '<rootDir>/src/legacyAudit/evaluate.audit.js')
 cd webserver
-IS_DEPLOYMENT=False uv run python manage.py audit_legacy_evaluation --legacy $D/legacy.jsonl --rehydrated $D/rehydrated.jsonl --pass1 $D/pass1/findings.jsonl --react $D/pass2/eval_react.jsonl --next $D/pass2/eval_next.jsonl --replay $D/pass2/replay_round.jsonl --replay $D/pass2/replay_complex_add.jsonl --out-dir $D/pass2 --meta "Snapshot=prod, pulled <date>" --meta "math3d-next=$(git rev-parse --short HEAD)" --meta "math3d-react=<commit>"
+IS_DEPLOYMENT=False uv run python manage.py audit_legacy_evaluation --legacy $D/legacy.jsonl --rehydrated $D/rehydrated.jsonl --pass1 $D/pass1/findings.jsonl --react $D/pass2/eval_react.jsonl --next $D/pass2/eval_next.jsonl --replay $D/pass2/replay_round.jsonl --replay $D/pass2/replay_complex_add.jsonl --replay $D/pass2/replay_principal_pow.jsonl --out-dir $D/pass2 --meta "Snapshot=prod, pulled <date>" --meta "math3d-next=$(git rev-parse --short HEAD)" --meta "math3d-react=<commit>"
 ```
 
 Each evaluator takes about 15 minutes, the `round` replay about 7, `complex_add` about 13, and the join about 4. The join refuses inputs from different exports and an `--out-dir` git would track. After a translator fix, re-run `export_legacy_audit`, `audit_legacy_migration`, math3d-next's evaluator, the replays and the join; math3d-react's output doesn't change. After writing the report, `audit_legacy_evaluation` exits non-zero if a field either evaluator emits has no pairing and no known reason to be unpaired: add it to the expected table or to `KNOWN_UNPAIRED` (`legacy_audit/evaluation.py`).
@@ -59,7 +59,17 @@ The command writes the tables. Write the Short version and Findings (hypotheses 
 
 Accepted differences go in `legacy_audit/pass2_allowlist.py`, each citing app code or an owner decision. Before trusting a change to either fingerprint, run math3d-react's conformance check (`client/src/legacyAudit/README.md`).
 
-Accept a library convention (react's `round`, complex.js 2.0.4's addition) per pair, not in the allowlist: the replays re-evaluate math3d-next with it swapped in, and the join accepts a `differ` pair when the replay gives math3d-react's value. A convention is a `CONVENTIONS` entry in `packages/legacy-audit/src/conventions.ts` plus a `REPLAYS` reason under the same key.
+Accept a library convention (react's `round`, complex.js 2.0.4's addition) or an intended change to what an expression evaluates to (`principal_pow`, below) per pair, not in the allowlist: the replays re-evaluate math3d-next with it swapped in, and the join accepts a `differ` pair when the replay gives math3d-react's value, or differs from it only as an allowlist entry accepts. A convention is a `CONVENTIONS` entry in `packages/legacy-audit/src/conventions.ts` plus a `REPLAYS` reason under the same key.
+
+## Intended differences in evaluation
+
+- **A negative base to an odd-denominator power takes its real root** (owner decision 2026-11-12, `tk-decision-needed-what-a-negative-base-to-a-fracti-368eb1`).
+  - `(-8)^(1/3)`: math3d-react gives the principal root `1 + 1.73i`, which isn't drawn; math3d-next gives `-2` when the exponent is written as a fraction of whole numbers whose denominator, in lowest terms, is odd (`packages/parser/src/rules/realRootRule.ts`).
+  - A legacy graph of `x^(1/3)` that stops at `x = 0` continues through negative `x`.
+  - Stored scenes are not rewritten. An author who wants the old result can narrow the domain or make the base complex, `(x + 0I)^(1/3)`.
+  - Decimal and variable exponents (`x^0.2`, `x^a`) keep the principal root in both apps.
+  - Size on the 2026-11-04 export: at most 212 of 101,142 scenes (view weight 684 of 1,400,421), each only gaining drawn samples. _An upper bound_: counted from a replay of a wider rule that also matched decimal exponents, at sample points that may lie outside an item's drawn domain.
+  - Pass 2 accepts these pairs through the `principal_pow` replay. In a field that draws only real values the replay gives `NaN` where math3d-react gives a complex number, a pair the allowlist accepts.
 
 ## Manual checks
 

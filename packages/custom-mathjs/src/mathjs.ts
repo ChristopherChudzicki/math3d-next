@@ -95,6 +95,7 @@ import {
   sumTransformDependencies,
   meanTransformDependencies,
 } from "mathjs";
+import type { Complex, MathType } from "mathjs";
 
 import {
   createCurl,
@@ -244,6 +245,27 @@ mathjs.import({
   unitB: createUnitB,
   curl: createCurl,
   div: createDivergence,
+});
+
+type NumberPow = (x: number, y: number) => unknown;
+const principalPow = (
+  mathjs.typed as unknown as { find(f: unknown, signature: string): NumberPow }
+).find(mathjs.pow, "number, number");
+
+/** pow, except that a negative number to a number gives sign * |x|^y. */
+const realPow = (name: string, sign: 1 | -1) =>
+  mathjs.typed(name, {
+    "number, number": (x: number, y: number) =>
+      x < 0 ? sign * (-x) ** y : principalPow(x, y),
+    "any, any": (x: MathType, y: number | Complex) => mathjs.pow(x, y),
+  });
+
+mathjs.import({
+  // What the parser's realRootRule makes of x^(p/q) with q odd, by whether p
+  // is odd or even. A negative number takes its real root, (-1)^p |x|^(p/q):
+  // (-8)^(1/3) is -2, not pow's principal root 1 + 1.73i.
+  $realPowOdd: realPow("$realPowOdd", -1),
+  $realPowEven: realPow("$realPowEven", 1),
 });
 
 mathjs.import(

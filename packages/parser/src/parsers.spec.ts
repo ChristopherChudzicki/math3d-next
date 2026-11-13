@@ -1,5 +1,6 @@
 import { describe, test, expect, it } from "vitest";
 import invariant from "tiny-invariant";
+import math from "@math3d/custom-mathjs";
 import { Parseable } from "./interfaces";
 import { DetailedAssignmentError } from "./MathJsParser";
 import { latexParser as parser } from "./parsers";
@@ -704,5 +705,58 @@ describe("a function call in place of a variable keeps its meaning", () => {
     { expr: "\\frac{r_z\\left(z\\right)}{2}", expected: 10 / 2 },
   ])("$expr", ({ expr, expected }) => {
     expect(evaluate(expr)).toBe(expected);
+  });
+});
+
+describe("a power of a negative number", () => {
+  const scope = new Map<string, unknown>([
+    ["x", -8],
+    ["a", 1 / 3],
+    ["n", 3],
+  ]);
+  const evaluate = (expr: string) =>
+    math.format(parser.parse(expr).evaluate(scope), 6);
+
+  it.each([
+    { expr: "x^{\\frac{1}{3}}", expected: "-2" },
+    { expr: "x^{2/3}", expected: "4" },
+    { expr: "x^{-\\frac{1}{3}}", expected: "-0.5" },
+    { expr: "x^{\\frac{2}{6}}", expected: "-2" },
+    { expr: "\\operatorname{pow}(x, \\frac{1}{3})", expected: "-2" },
+    { expr: "(x^{\\frac{1}{3}})^{\\frac{1}{3}}", expected: "-1.25992" },
+  ])(
+    "takes the real root when the exponent is written as an odd fraction: $expr",
+    ({ expr, expected }) => {
+      expect(evaluate(expr)).toBe(expected);
+    },
+  );
+
+  it.each([
+    {
+      title: "an even denominator",
+      expr: "x^{\\frac{1}{2}}",
+      expected: "2.82843i",
+    },
+    { title: "a variable", expr: "x^{a}", expected: "1 + 1.73205i" },
+    {
+      title: "a fraction of a variable",
+      expr: "x^{\\frac{1}{n}}",
+      expected: "1 + 1.73205i",
+    },
+    { title: "a decimal", expr: "x^{0.2}", expected: "1.22624 + 0.890916i" },
+    {
+      title: "a percentage",
+      expr: "x^{20\\%}",
+      expected: "1.22624 + 0.890916i",
+    },
+  ])(
+    "takes the principal root when the exponent is $title",
+    ({ expr, expected }) => {
+      expect(evaluate(expr)).toBe(expected);
+    },
+  );
+
+  it("takes the principal root of a complex base", () => {
+    expect(evaluate("(x + 0I)^{\\frac{1}{3}}")).toBe("1 + 1.73205i");
   });
 });

@@ -89,6 +89,12 @@ describe("fastCompile agrees with mathjs", () => {
       fast: true,
     },
     {
+      title: "the real root the parser asks for",
+      expr: "f(x) = $realPowOdd(x, 1/3)",
+      point: [-8],
+      fast: true,
+    },
+    {
       title: "a scope value and a constant",
       expr: "f(x) = a x + pi",
       point: [0.5],

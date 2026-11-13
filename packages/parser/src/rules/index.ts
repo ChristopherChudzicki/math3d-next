@@ -5,6 +5,7 @@ import subscriptRule from "./subscriptRule";
 import validateParameters, { ParameterErrors } from "./validateParameters";
 import RegexpParserRule from "./RegexpParserRule";
 import exponentRule from "./exponentRule";
+import realRootRule from "./realRootRule";
 
 export {
   RegexpParserRule,
@@ -15,4 +16,5 @@ export {
   validateParameters,
   ParameterErrors,
   exponentRule,
+  realRootRule,
 };

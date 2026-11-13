@@ -135,7 +135,7 @@ def test_slider_bounds_take_the_status_of_their_own_range_element():
         (field("eval", message="Undefined symbol q"), 2, None),
     ],
 )
-def test_a_replay_allowlists_a_differ_pair_only_when_it_gives_reacts_value(
+def test_a_replay_allowlists_a_differ_pair_when_it_gives_reacts_value(
     next_value, replayed_value, allowlisted
 ):
     exported, rehydrated, react, nxt = slider_scene(field(value=[-5, 5]))
@@ -146,6 +146,24 @@ def test_a_replay_allowlists_a_differ_pair_only_when_it_gives_reacts_value(
     )
     [value] = [p for p in result.pairs if p.spec.legacy_field == "value"]
     assert value.allowlisted == allowlisted
+
+
+def test_a_replay_allowlists_a_pair_it_turns_into_an_allowlisted_one():
+    exported, rehydrated, react, nxt = slider_scene(field(value=[-5, 5]))
+    nxt["items"]["s"]["value"] = field(value=3)
+    replay = {"items": {"s": {"value": field(value=4)}}}
+    allowlist = [Entry("differ", "", "accepted", values=lambda _, nxt: nxt == 4)]
+    result = evaluate_scene(
+        exported,
+        rehydrated,
+        react,
+        nxt,
+        Tolerance(),
+        allowlist,
+        replays={"replayed": replay},
+    )
+    [value] = [p for p in result.pairs if p.spec.legacy_field == "value"]
+    assert value.allowlisted == "replayed"
 
 
 def write_inputs(tmp_path, nxt_items, extra_next_line=False, nxt_sha256=None):
