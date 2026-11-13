@@ -14,15 +14,18 @@ ADRs are numbered and committed alongside the code. Statuses:
   supersedes it. Corrections that leave the decision intact (a wrong fact, a
   renamed host or file) are made in place.
 - **Superseded by NNNN** — replaced by a later ADR, kept for the record.
+- **Rejected by NNNN** — not adopted, or withdrawn; the later ADR says why. Kept
+  for the record.
 
-| #                                                 | Title                                             | Status   |
-| ------------------------------------------------- | ------------------------------------------------- | -------- |
-| [0001](0001-server-side-scene-screenshots.md)     | Server-side scene screenshots via a render Worker | Accepted |
-| [0002](0002-browser-rendering-cost-protection.md) | Cost protection for paid-tier Browser Rendering   | Accepted |
-| [0003](0003-sentry-monitoring.md)                 | Sentry monitoring (errors + traces)               | Accepted |
-| [0004](0004-oauth-only-authentication.md)         | OAuth-only authentication                         | Accepted |
-| [0005](0005-local-google-sign-in-testing.md)      | Exercising Google sign-in in local development    | Accepted |
-| [0006](0006-base-ui-and-css-modules.md)           | Base UI + CSS Modules instead of MUI              | Accepted |
-| [0007](0007-bulletproof-react-layout.md)          | Bulletproof React layout for `packages/app/src`   | Proposed |
-| [0008](0008-usegpu-opt-in-renderer.md)            | Use.GPU as an opt-in second renderer              | Proposed |
-| [0009](0009-renderer-neutral-viewport-spec.md)    | A renderer-neutral viewport contract              | Proposed |
+| #                                                 | Title                                             | Status           |
+| ------------------------------------------------- | ------------------------------------------------- | ---------------- |
+| [0001](0001-server-side-scene-screenshots.md)     | Server-side scene screenshots via a render Worker | Accepted         |
+| [0002](0002-browser-rendering-cost-protection.md) | Cost protection for paid-tier Browser Rendering   | Accepted         |
+| [0003](0003-sentry-monitoring.md)                 | Sentry monitoring (errors + traces)               | Accepted         |
+| [0004](0004-oauth-only-authentication.md)         | OAuth-only authentication                         | Accepted         |
+| [0005](0005-local-google-sign-in-testing.md)      | Exercising Google sign-in in local development    | Accepted         |
+| [0006](0006-base-ui-and-css-modules.md)           | Base UI + CSS Modules instead of MUI              | Accepted         |
+| [0007](0007-bulletproof-react-layout.md)          | Bulletproof React layout for `packages/app/src`   | Proposed         |
+| [0008](0008-usegpu-opt-in-renderer.md)            | Use.GPU as an opt-in second renderer              | Rejected by 0010 |
+| [0009](0009-renderer-neutral-viewport-spec.md)    | A renderer-neutral viewport contract              | Accepted         |
+| [0010](0010-three-js-default-renderer.md)         | three.js as the default renderer                  | Accepted         |

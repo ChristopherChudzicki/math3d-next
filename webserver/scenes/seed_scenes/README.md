@@ -15,8 +15,8 @@ scene per graphical feature for checking the renderers against each other;
   Only the examples: a QA scene would just spend a render slot there. It is not
   in the `release:` phase, so a refused load can never block a deploy.
 - Open a scene at `http://math3d.localhost:3000/<key>`. To compare renderers,
-  open the same key in two tabs, one with `?renderer=mathbox` and one with
-  `?renderer=usegpu` (WebGPU).
+  open the same key in two tabs, one with `?renderer=mathbox` and one
+  without (three.js).
 
 ## File format
 

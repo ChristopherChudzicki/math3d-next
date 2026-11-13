@@ -35,3 +35,22 @@ it("closes the browser and rejects when a render outlives the deadline", async (
   ).rejects.toThrow(/deadline/i);
   expect(close).toHaveBeenCalled(); // closed on timeout, aborting the hung op
 });
+
+it("rejects at once when the scene reports it can't draw", async () => {
+  const screenshot = vi.fn();
+  const fakeBrowser = {
+    newPage: async () => ({
+      setViewport: async () => {},
+      goto: async () => {},
+      waitForSelector: async () => ({ evaluate: async () => "unsupported" }),
+      screenshot,
+    }),
+    close: vi.fn().mockResolvedValue(undefined),
+  };
+  const launch = vi.fn().mockResolvedValue(fakeBrowser);
+
+  await expect(
+    renderScene(env as never, "k", 1000, launch as never),
+  ).rejects.toThrow("scene error: unsupported");
+  expect(screenshot).not.toHaveBeenCalled();
+});

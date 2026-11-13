@@ -5,7 +5,6 @@ import react from "@vitejs/plugin-react";
 import viteTsconfigPaths from "vite-tsconfig-paths";
 import { Schema, ValidateEnv } from "@julr/vite-plugin-validate-env";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
-import wasm from "vite-plugin-wasm";
 import type { PluginOption } from "vite";
 import { realpathSync } from "node:fs";
 import { markdown } from "./vite-plugins/markdown/plugin";
@@ -117,8 +116,6 @@ export default defineConfig({
       VITE_USE_MSW: Schema.string.optional(),
     }),
     react(),
-    // @use-gpu/glyph imports its text rasterizer as an ESM .wasm module.
-    wasm(),
     viteTsconfigPaths(),
     visualizer({
       filename: "dist/stats.html",

@@ -8,6 +8,13 @@
   pointer-events: none;
 }
 
+/* Without WebGL, threestrap fills the container with its own message, which
+ * would push RendererFallback's button out of view. Its inline display needs
+ * !important to override. */
+.viewport :global(.threestrap-fallback) {
+  display: none !important;
+}
+
 /* mathbox re-shows its splash whenever a graphic mounts; show it only during
  * the first warmup. Its inline display needs !important to override. */
 .splashHidden :global(.mathbox-loader) {

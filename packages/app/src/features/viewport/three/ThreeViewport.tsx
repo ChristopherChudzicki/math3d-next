@@ -79,10 +79,10 @@ const ThreeViewport: React.FC<Props> = ({ className }) => {
   return (
     <ViewportShell
       renderer="threejs"
-      errorMessage="The three.js renderer ran into an error."
+      errorMessage="This scene couldn't be drawn."
       ready={ready}
       unsupported={unsupported}
-      unsupportedMessage="The three.js renderer can't run in this browser."
+      unsupportedMessage="This browser can't run the default 3D renderer."
       className={className}
     >
       <ThreeViewportContent onUnsupported={onUnsupported} onReady={onReady} />

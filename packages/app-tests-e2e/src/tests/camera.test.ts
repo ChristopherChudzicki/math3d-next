@@ -5,6 +5,7 @@ import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
 import { whenMathboxRendered } from "@/utils/selectors";
 
+// These read the camera MathBox draws with, through `window.mathbox`.
 test.use({ disable3d: false });
 
 const getCameraPosition = async (
@@ -53,7 +54,7 @@ test("Setting camera position/target using UI coordinates", async ({
   scene.axis("z", { min: "-8", max: "8", scale: "3/2" });
   scene.camera({ position: "[1, 3, 2]", target: "[-0.5, 2, 6]" });
   const key = await prepareScene(scene.json());
-  await page.goto(`/${key}`);
+  await page.goto(`/${key}?renderer=mathbox`);
   const scales = new Vector3(1 / 2, 2, 3 / 2);
   await expectCameraPos(page, new Vector3(0.5, 0.75, 0.25).multiply(scales));
   await expectControlsTarget(
@@ -76,7 +77,7 @@ test("`useRelative: true` sets camera position/target using ThreeJS coordinates"
     useRelative: "true",
   });
   const key = await prepareScene(scene.json());
-  await page.goto(`/${key}`);
+  await page.goto(`/${key}?renderer=mathbox`);
 
   const scales = new Vector3(1 / 2, 2, 3 / 2);
   await expectCameraPos(page, new Vector3(1, 3, 2).multiply(scales));
@@ -97,7 +98,7 @@ test("isOrthographic: true does a dollyZoom", async ({
     isOrthographic: "true",
   });
   const key = await prepareScene(scene.json());
-  await page.goto(`/${key}`);
+  await page.goto(`/${key}?renderer=mathbox`);
 
   // position and target in scaled coordinates
   const scales = new Vector3(1 / 2, 2, 3 / 2);
@@ -135,7 +136,7 @@ test("isOrthographic: true does a dollyZoom with useRelative: true", async ({
   const zoomFactor = 40 - 1;
   const expectedCameraPos = expectedPos.add(diff.multiplyScalar(zoomFactor));
 
-  await page.goto(`/${key}`);
+  await page.goto(`/${key}?renderer=mathbox`);
 
   await expectCameraPos(page, expectedCameraPos);
   await expectControlsTarget(page, expectedTarget);

@@ -136,17 +136,15 @@ export const useCameraWriteBack = (
       down.delete(e.pointerId);
       end();
     };
-    // Capture phase: Use.GPU's controls stop these events on their canvas.
-    const options = { capture: true };
-    el.addEventListener("pointerdown", press, options);
-    el.addEventListener("pointerup", release, options);
-    el.addEventListener("pointercancel", release, options);
-    el.addEventListener("wheel", end, options);
+    el.addEventListener("pointerdown", press);
+    el.addEventListener("pointerup", release);
+    el.addEventListener("pointercancel", release);
+    el.addEventListener("wheel", end);
     return () => {
-      el.removeEventListener("pointerdown", press, options);
-      el.removeEventListener("pointerup", release, options);
-      el.removeEventListener("pointercancel", release, options);
-      el.removeEventListener("wheel", end, options);
+      el.removeEventListener("pointerdown", press);
+      el.removeEventListener("pointerup", release);
+      el.removeEventListener("pointercancel", release);
+      el.removeEventListener("wheel", end);
       end.cancel();
     };
   }, [host]);

@@ -64,7 +64,7 @@ const ImplicitSurface: GraphicComponent<MathItemType.ImplicitSurface> = ({
     // Sample cap of 5400 was found experimentally; I do not really understand
     // what goes wrong when too many samples are generated.
     // This is... not great. Surface will silently disappear if too many
-    // samples. Better than crashing. UseGPU would probably avoid this problem.
+    // samples. Better than crashing.
     if (trueSamplesNum > 5400) return [];
 
     return implicitTriangles;

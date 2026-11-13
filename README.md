@@ -28,7 +28,7 @@ Like production, the dev environment serves the frontend and API from separate s
 - **Frontend**: http://math3d.localhost:3000
 - **API**: http://api.math3d.localhost:8000
 
-To try an opt-in renderer ([ADR-0008](docs/adr/0008-usegpu-opt-in-renderer.md), [ADR-0009](docs/adr/0009-renderer-neutral-viewport-spec.md)), pick it under "Renderer" in the top-right menu, or append `?renderer=usegpu` or `?renderer=threejs` to a scene URL.
+Scenes draw with three.js ([ADR-0010](docs/adr/0010-three-js-default-renderer.md), [ADR-0009](docs/adr/0009-renderer-neutral-viewport-spec.md)). To compare with the legacy MathBox renderer, pick it under "Renderer" in the top-right menu, or append `?renderer=mathbox` to a scene URL.
 
 ### Signing in during development
 

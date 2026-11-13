@@ -2,7 +2,7 @@ import { OrthographicCamera, PerspectiveCamera } from "three/webgpu";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import type { CameraSpec, ViewportSpec } from "@math3d/viewport-spec";
 
-/** Vertical field of view, in degrees, as MathBox and Use.GPU draw it. */
+/** Vertical field of view, in degrees, as MathBox draws it. */
 export const FOV = 60;
 export const TAN_HALF_FOV = Math.tan(((FOV / 2) * Math.PI) / 180);
 // MathBox's camera planes (threestrap's defaults).
@@ -16,7 +16,7 @@ type CameraInput = Pick<
 
 /**
  * Half the visible height at the target, per `ViewportSpec.orthographic`.
- * A camera at its target gets distance 1, as in Use.GPU, not an empty view.
+ * A camera at its target gets distance 1, not an empty view.
  */
 const orthographicHalfHeight = ({ position, target }: CameraSpec) =>
   (Math.hypot(

@@ -10,15 +10,13 @@ import RendererFallback from "./RendererFallback";
 
 type Props = {
   renderer: Renderer;
-  /** Shown, with a way back to the default renderer, after a render error. */
+  /** Shown after a render error, beside a button that switches renderer. */
   errorMessage: string;
   /** The renderer has called `ViewportHooks.onReady` for this scene load. */
   ready: boolean;
   /** The renderer can't run in this browser: show `unsupportedMessage` instead. */
   unsupported: boolean;
   unsupportedMessage: string;
-  /** The renderer failed after it started: shown as a render error is. */
-  failed?: boolean;
   className?: string;
   /** The renderer, usually behind a `React.lazy`. */
   children: React.ReactNode;
@@ -31,7 +29,6 @@ const ViewportShell: React.FC<Props> = ({
   ready,
   unsupported,
   unsupportedMessage,
-  failed = false,
   className,
   children,
 }) => {
@@ -41,7 +38,7 @@ const ViewportShell: React.FC<Props> = ({
   const show = !is3dDisabled() && hasRequired;
   let failure: "unsupported" | "error" | undefined;
   if (unsupported) failure = "unsupported";
-  else if (errored || failed) failure = "error";
+  else if (errored) failure = "error";
   return (
     <div
       data-testid="scene"
@@ -59,11 +56,14 @@ const ViewportShell: React.FC<Props> = ({
         // failed until reload.
         <Sentry.ErrorBoundary
           key={loadCount}
-          fallback={<RendererFallback message={errorMessage} />}
+          fallback={
+            <RendererFallback renderer={renderer} message={errorMessage} />
+          }
           onError={setErrored}
         >
           {failure ? (
             <RendererFallback
+              renderer={renderer}
               message={unsupported ? unsupportedMessage : errorMessage}
             />
           ) : (

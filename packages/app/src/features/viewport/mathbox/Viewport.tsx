@@ -7,7 +7,9 @@ import "mathbox/mathbox.css";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Vector3 } from "three";
 import { debounce } from "lodash-es";
-import { useAppDispatch } from "@/store/hooks";
+import * as Sentry from "@sentry/react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import * as select from "@/store/scene/state/selectors";
 import { useElementResize } from "@/util/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
@@ -18,6 +20,7 @@ import {
 } from "@/features/viewport/shared/useViewportItems";
 import is3dDisabled from "@/features/viewport/shared/is3dDisabled";
 import { useLoadFlag } from "@/features/viewport/shared/useLoadFlag";
+import RendererFallback from "@/features/viewport/shared/RendererFallback";
 import { Graphic } from "./graphics";
 import Camera from "./Camera";
 import type { OnMoveEnd } from "./Camera";
@@ -100,6 +103,8 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
   // Per scene load, so each load shows the splash again. A mathbox instance
   // swapped within one load counts as drained.
   const [warmedUp, markWarmedUp] = useLoadFlag();
+  const [errored, setErrored] = useLoadFlag();
+  const loadCount = useAppSelector(select.loadCount);
   const hasRequired = useHasViewportItems();
 
   const isOrthographic = useIsOrthographic();
@@ -159,7 +164,8 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
     <div
       data-testid="scene"
       data-renderer="mathbox"
-      data-scene-ready={warmedUp ? "true" : undefined}
+      data-scene-ready={warmedUp && !errored ? "true" : undefined}
+      data-scene-error={errored ? "error" : undefined}
       className={mergeClassNames(className, styles.viewport, {
         [styles.splashHidden]: warmedUp,
       })}
@@ -167,14 +173,28 @@ const Viewport: React.FC<Props> = ({ className, still }) => {
       ref={setContainer}
     >
       {container && hasRequired && !is3dDisabled() && (
-        <MB.Mathbox
-          container={container}
-          options={mathboxOptions}
-          focus={focus}
-          ref={handleMathbox}
+        // Without WebGL, mathbox-react throws here; past this boundary the
+        // route's error page would replace the editor. Loading another scene
+        // remounts it.
+        <Sentry.ErrorBoundary
+          key={loadCount}
+          fallback={
+            <RendererFallback
+              renderer="mathbox"
+              message="This scene couldn't be drawn."
+            />
+          }
+          onError={setErrored}
         >
-          <ViewportContent />
-        </MB.Mathbox>
+          <MB.Mathbox
+            container={container}
+            options={mathboxOptions}
+            focus={focus}
+            ref={handleMathbox}
+          >
+            <ViewportContent />
+          </MB.Mathbox>
+        </Sentry.ErrorBoundary>
       )}
     </div>
   );

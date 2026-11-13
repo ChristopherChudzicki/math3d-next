@@ -1,14 +1,13 @@
 # 0009 — A renderer-neutral viewport contract
 
-**Status:** Proposed
+**Status:** Accepted
 
 ## Context
 
-MathBox reads math items from the store inside its own React tree. Use.GPU
-([ADR-0008](0008-usegpu-opt-in-renderer.md)) can't: its scene is a Live tree,
-outside React's context. The three.js renderer is its own workspace, with a
-different `three` than `mathbox-react` allows, and so can't import `app` at
-all. Both need the scene as plain data.
+MathBox reads math items from the store inside its own React tree. The
+three.js renderer is its own workspace, with a different `three` than
+`mathbox-react` allows, and so can't import `app` at all. It needs the scene
+as plain data.
 
 ## Decision
 
@@ -45,16 +44,11 @@ reports back through `ViewportHooks`, both types in
 
 - **The scene container (`data-testid="scene"`) says what drew and whether
   it settled:** `data-renderer`, and `data-scene-ready="true"` once
-  settled. three.js and Use.GPU set it from `onReady` and add
-  `data-scene-error` (`unsupported`, or `error` after a render or device
-  error) when they can't draw. MathBox sets `data-scene-ready` from its own
-  warmup drain and never sets `data-scene-error`; with no WebGL the route's
-  error page replaces it. three.js's canvas adds
-  `data-backend` (`webgpu` or `webgl2`).
-- Use.GPU's device loss fails the scene everywhere. An uncaptured GPU error
-  (validation, out-of-memory or internal) fails it only on the frame route
-  (`failInPlace`); elsewhere it is logged and sent to Sentry, and the scene
-  keeps drawing, since WebGPU invalidates only the failed command.
+  settled. three.js sets it from `onReady` and adds `data-scene-error`
+  (`unsupported`, or `error` after a render error) when it can't draw.
+  MathBox sets `data-scene-ready` from its own warmup drain, and
+  `data-scene-error="error"` when it throws, as it does without WebGL.
+  three.js's canvas adds `data-backend` (`webgpu` or `webgl2`).
 - How each renderer settles:
   - MathBox: its warmup queue has stayed empty for 500 ms, or after 300
     frames (`mathbox/stillReadiness.ts`).
@@ -62,19 +56,14 @@ reports back through `ViewportHooks`, both types in
     the `ResizeObserver` has reported (`renderer-three/src/settle.ts`); its
     first report can come frames after the first draw, and its resize
     redraws.
-  - Use.GPU: no frame for 300 ms and no pipeline compile pending, counting
-    only frames drawn after the graphics mount (`usegpu/settle.ts`). It
-    compiles pipelines asynchronously and draws a layer only once its
-    pipeline resolves, which on SwiftShader takes 300–400 ms.
   - Ready holds for one scene load; a late `onReady` from a replaced load is
     ignored (`shared/useLoadFlag.ts`).
-- **`/app/frame/:sceneKey` draws with `?renderer=`, MathBox without it**, and
-  never reads the stored preference. three.js and Use.GPU mark the page
-  failed when they can't start, and an unknown `?renderer=` sets
-  `data-scene-error="invalid-renderer"`; there is no fallback to MathBox. A
-  throw inside Use.GPU's own render, or a font that never loads, sets neither
-  attribute, so a capture waits out its timeout. The
-  OG worker sends no parameter: Browser Run has no WebGPU adapter.
+- **`/app/frame/:sceneKey` draws with `?renderer=`, the default renderer
+  without it**, and never reads the stored preference. A renderer marks the
+  page failed when it can't draw, and an unknown `?renderer=` sets
+  `data-scene-error="invalid-renderer"`; there is no automatic fallback. The
+  OG worker and the default-image build send no parameter, so OG images
+  follow the default.
 
 ### The camera
 
@@ -97,24 +86,21 @@ reports back through `ViewportHooks`, both types in
   2 × |position − target| × tan(30°). A renderer that zooms it by a factor
   (three.js's `OrbitControls` does) reports the zoom as distance, and nothing
   behind the stored position is clipped (MathBox gets this from its ×40
-  dolly, Use.GPU from near = −far, three.js from a near plane far behind the
-  camera).
-- A renderer derives its own shapes from `ViewportSpec`: Use.GPU's
-  `SceneSpec` replaces `camera` and `orthographic` with y-up orbit parameters
-  and a dolly, and passes `cameraRevision` to its orbit controls as their
-  `version`.
-- Coverage tables live in `app`
-  ([ADR-0008](0008-usegpu-opt-in-renderer.md#parity-record)).
+  dolly, three.js from a near plane far behind the camera).
+- Coverage tables, one per renderer, live in `app`
+  (`features/viewport/<renderer>/coverage.ts`).
 
 ### The renderer list
 
-`services/renderer/renderers.ts` lists the renderers, keyed `mathbox`
-(default), `usegpu` and `threejs`, each with its library name, menu label
-and whether it needs WebGPU. The keys are the `?renderer=` values and the
-stored preference; the account menu's "Renderer" radio group and
-`RendererPill` read the list. The shared tier can't import viewports, so
-`MainPage` maps each key to its viewport in a `Record<Renderer, …>`, which
-fails typecheck until a new key has one.
+`services/renderer/renderers.ts` lists the renderers, keyed `threejs`
+(`DEFAULT_RENDERER`) and `mathbox` (`LEGACY_RENDERER`,
+[ADR-0010](0010-three-js-default-renderer.md)), each with its library name,
+menu label and pill description. The keys are the `?renderer=` values and
+the stored preference; the account menu's "Renderer" radio group and
+`RendererPill` read the list, and `RendererFallback` offers the legacy
+renderer when the default can't draw. The shared tier can't import
+viewports, so `MainPage` and `FramePage` map each key to its viewport in a
+`Record<Renderer, …>`, which fails typecheck until a new key has one.
 
 ### `@math3d/renderer-three`
 
@@ -169,10 +155,9 @@ parent, so anything sized in pixels is built in the shader, in view space:
   it draws on WebGL2 too. The equation is sampled once on a grid of `samples`
   cells per axis, 128 at most, then meshed by marching cubes with shared
   vertices and the grid's gradient as normals.
-  - Marching cubes, not the surface nets Use.GPU draws: its silhouette
-    keeps creases and cone points that surface nets round off or bridge, and
-    it ends a surface exactly on the domain's faces with no padding or
-    clipping.
+  - Marching cubes, not surface nets: marching cubes keeps creases and cone
+    points that surface nets round off or bridge, and ends a surface exactly
+    on the domain's faces with no padding or clipping.
   - Sampling is nearly all the cost, so a spec with the same `value`,
     `domain` and `samples` as the one drawn is not sampled again.
   - Triangles wind counterclockwise seen from where `value` is positive, so
@@ -205,9 +190,9 @@ parent, so anything sized in pixels is built in the shader, in view space:
 
 `features/viewport/three/ThreeViewport` is the app's glue: it collects the
 spec with `useViewportSpec` and loads the package through its one
-`React.lazy`, so the second `three` ships only in that lazy chunk. It and
-`usegpu/GpuViewport` render inside `shared/ViewportShell` (scene container,
-error boundary, `Suspense`). A
+`React.lazy`, so the second `three` ships only in that lazy chunk. It
+renders inside `shared/ViewportShell` (scene container, error boundary,
+`Suspense`). A
 `no-restricted-imports` group bans static imports of
 `@math3d/renderer-three` everywhere in `app` (the rule doesn't check
 `import()`). jsdom tests get a stand-in from `setupTests.ts`.
@@ -220,7 +205,8 @@ Two looks for shaded surfaces, chosen per `ThreeScene` (`Viewport`'s
 - **`glossy`, the default**: Burley diffuse and an untinted GGX highlight
   (roughness 0.35) under ambient 0.6 and a key light of 0.4, applied to the
   sRGB color as given. `mesh/meshMaterial.ts` ports it from Use.GPU's
-  default lit material and the lights the app gives Use.GPU.
+  default lit material, under Use.GPU's lit-material lights as math3d
+  configured them.
 - **`matte`**: MathBox's look, for comparison captures against math3d.org.
 - Both use MathBox's light direction and facing test, and clamp the shaded
   color to 1, as the unorm targets do: OIT accumulates in half float, where a
@@ -310,13 +296,12 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
   renderer prop, so the specs are testable under jsdom and survive a renderer
   swap. Tick and gridline values count as math-item terms: `spec/ticks.ts`
   (MathBox's `linear`) computes them into `AxisSpec` and `GridSpec`, and
-  each renderer formats tick labels itself. Use.GPU still derives its own
-  from `divisions` and `snap`.
+  each renderer formats tick labels itself.
 - `spec/`, `shared/` and `three/` import no renderer package (`three`,
-  `mathbox*`, `@use-gpu/*`; a `no-restricted-imports` group). The path
+  `mathbox*`; a `no-restricted-imports` group). The path
   zones above check folders only. In `app`, `three` is MathBox's copy, so
   three.js code goes in `@math3d/renderer-three`.
-- The renderer folders (`mathbox/`, `usegpu/`, `three/`) don't import each
+- The renderer folders (`mathbox/`, `three/`) don't import each
   other; common code moves to `shared/` or `spec/`.
 
 ## Consequences
@@ -337,8 +322,7 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
 
 ## Alternatives considered
 
-- **Each renderer reads the store itself.** Use.GPU and a separate-workspace
-  three.js renderer can't, and the spec components would be duplicated per
-  renderer.
+- **Each renderer reads the store itself.** A separate-workspace three.js
+  renderer can't, and the spec components would be duplicated per renderer.
 - **Coverage tables in `@math3d/viewport-spec`.** They key on
   `mathitem-configs` types, which would give the package a dependency.

@@ -1,8 +1,8 @@
 /**
  * What each graphic draws, in math-item terms: evaluated positions, RGBA
  * colors, sample callbacks. The app's viewport/spec components read the store
- * and MathScope and produce these; a renderer that draws from specs (Use.GPU
- * today) turns them into its own scene, while MathBox reads math items directly.
+ * and MathScope and produce these; a renderer that draws from specs (three.js)
+ * turns them into its own scene, while MathBox reads math items directly.
  *
  * Positions are in math coordinates, as the items evaluate them; only
  * `CameraSpec` is in view coordinates. Pixel quantities (`width`, `size`) are
@@ -18,8 +18,8 @@ type Common = {
   zBias: number;
   /**
    * MathBox squeezes a higher zIndex's depth toward the near plane, so it draws
-   * over lower ones. Other renderers approximate that (Use.GPU only orders draw
-   * calls by it, where a component accepts it); see each renderer's coverage table.
+   * over lower ones. Other renderers approximate that; see each renderer's
+   * coverage table.
    */
   zIndex: number;
 };

@@ -3,7 +3,7 @@ import Button from "@/ui/Button";
 import { Popover } from "@/ui/Popover";
 import { DEFAULT_RENDERER, RENDERERS } from "@/services/renderer/renderers";
 import { useRenderer } from "@/services/renderer/useRenderer";
-import { useSwitchToDefaultRenderer } from "@/services/renderer/useSwitchToDefaultRenderer";
+import { useSwitchRenderer } from "@/services/renderer/useSwitchRenderer";
 import * as pill from "./CornerPill.module.css";
 import * as styles from "./RendererPill.module.css";
 
@@ -13,9 +13,9 @@ import * as styles from "./RendererPill.module.css";
  */
 const RendererPill: React.FC = () => {
   const { renderer } = useRenderer();
-  const handleSwitch = useSwitchToDefaultRenderer();
-  if (!renderer || renderer === DEFAULT_RENDERER) return null;
-  const { name } = RENDERERS[renderer];
+  const switchRenderer = useSwitchRenderer();
+  if (renderer === DEFAULT_RENDERER) return null;
+  const { name, description } = RENDERERS[renderer];
   return (
     <Popover.Root>
       <Popover.Trigger
@@ -36,10 +36,9 @@ const RendererPill: React.FC = () => {
         aria-label={`${name} renderer`}
       >
         <Popover.Description className={styles.description}>
-          You&apos;re using the experimental {name} renderer. You can also
-          change this in the menu.
+          You&apos;re using {description}. You can also change this in the menu.
         </Popover.Description>
-        <Button size="sm" onClick={handleSwitch}>
+        <Button size="sm" onClick={() => switchRenderer(DEFAULT_RENDERER)}>
           Switch to the default renderer
         </Button>
       </Popover.Popup>
