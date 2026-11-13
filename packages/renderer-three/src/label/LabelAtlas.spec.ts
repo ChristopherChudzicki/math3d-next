@@ -102,4 +102,14 @@ describe("LabelAtlas", () => {
     );
     expect(onRelayout).toHaveBeenCalledOnce();
   });
+
+  test("tells its listeners of a new pixel ratio when it holds no strings", () => {
+    const surface = fakeSurface();
+    const onRelayout = vi.fn();
+    const atlas = new LabelAtlas(surface);
+    atlas.onRelayout(onRelayout);
+    atlas.setPixelRatio(2);
+    expect(onRelayout).toHaveBeenCalledOnce();
+    expect(surface.reset).not.toHaveBeenCalled();
+  });
 });
