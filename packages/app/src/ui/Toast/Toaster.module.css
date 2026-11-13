@@ -1,7 +1,7 @@
 .viewport {
   position: fixed;
-  /* MainPage sets these on <body>; other routes have neither. */
-  top: calc(var(--header-height, 50px) + var(--banner-height, 0px) + 8px);
+  /* BannerDisplay sets --banner-height on <body> while it's mounted. */
+  top: calc(var(--header-height) + var(--banner-height, 0px) + 8px);
   left: 50%;
   z-index: var(--z-index-toast);
   display: flex;
