@@ -9,4 +9,4 @@ tags:
 
 For a negative \(x\) and an odd whole \(n\), this is the real root: \(\operatorname{root}(-8, 3) = -2\). \(x^{1/n}\) gives the real root only for an odd \(n\) below 100.
 
-For a negative \(x\) and any other \(n\) there is no real root. The result is \(\text{NaN}\), and a graph leaves that part out.
+For a negative \(x\) and any other \(n\) there is no real root. The result is not a number (\(\text{NaN}\)), and a graph leaves that part out.

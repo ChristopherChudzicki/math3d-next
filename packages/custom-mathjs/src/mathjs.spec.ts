@@ -129,6 +129,7 @@ describe("mathjs instance", () => {
     ["root(-16, 4)", "NaN"],
     ["root(-16)", "NaN"],
     ["root(-8, 1.5)", "NaN"],
+    ["root(-8, -3)", "-0.5"],
   ])(
     "root gives the real root, or NaN where there is none: %s",
     (expr, expected) => {

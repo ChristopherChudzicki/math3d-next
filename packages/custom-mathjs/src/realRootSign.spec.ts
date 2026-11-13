@@ -26,7 +26,7 @@ describe("realRootSign", () => {
 
   it.each([
     ["a denominator of 100 or more", 1 / 101],
-    ["a decimal that is near a fraction", 0.3333333],
+    ["a decimal that is near a fraction", 0.3333333333],
     ["an infinite exponent", Infinity],
   ])("leaves %s to the principal root", (_title, y) => {
     expect(realRootSign(y)).toBe(0);

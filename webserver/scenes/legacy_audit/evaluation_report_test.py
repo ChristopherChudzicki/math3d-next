@@ -70,8 +70,8 @@ def test_a_pair_accepted_through_a_replay_counts_under_the_replay_and_the_entry(
     agg = Aggregate()
     agg.add(scene("differ", allowlisted=f"{replay}; then: {entry}"), "clean")
     report = render_markdown(agg, {"date": "d"})
-    assert f"- ×1: {replay}" in report
-    assert f"- ×1: {entry}" in report
+    assert f"- ×1: {replay}\n" in report
+    assert f"- ×1: {entry}\n" in report
 
 
 def test_a_both_error_root_is_clustered_but_left_out_of_the_fix_curve():

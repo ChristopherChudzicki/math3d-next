@@ -272,9 +272,8 @@ mathjs.import(
       number: (x: number) => (x < 0 ? NaN : nthRoot(x)),
       "number, number": (x: number, n: number) =>
         x < 0 && Math.abs(n % 2) !== 1 ? NaN : nthRoot(x, n),
-      any: (x: MathType) => nthRoot(x as number),
-      "any, any": (x: MathType, n: MathType) =>
-        nthRoot(x as number, n as number),
+      any: nthRoot,
+      "any, any": nthRoot,
     }),
   },
   { override: true },
