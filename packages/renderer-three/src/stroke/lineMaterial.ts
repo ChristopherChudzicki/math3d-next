@@ -20,6 +20,7 @@ import {
   vec4,
 } from "three/tsl";
 import { projectWithDepthStyle } from "../shader/depthStyle";
+import { projectionScale } from "../shader/viewUnits";
 import type { Opacity, Transparency } from "../shader/material";
 import type { Template } from "../instances/Instances";
 import { arrowLengthAt, strokeMaterial, strokeStyle, toView } from "./style";
@@ -46,9 +47,6 @@ const clipToNear = (point: Node<"vec3">, toward: Node<"vec3">) => {
     point,
   );
 };
-
-/** How the projection scales view x and y. */
-const projectionScale = cameraProjectionMatrix.mul(vec4(1, 1, 0, 0)).xy;
 
 const project = (view: Node<"vec3">) =>
   cameraProjectionMatrix.mul(vec4(view, 1));

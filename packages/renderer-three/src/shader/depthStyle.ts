@@ -9,6 +9,8 @@ import {
   vec4,
 } from "three/tsl";
 import type { Node } from "three/webgpu";
+import { TAN_HALF_FOV } from "../camera";
+import { projectionScale } from "./viewUnits";
 
 // MathBox's camera planes (threestrap's defaults), which calibrate its zBias.
 const MATHBOX_NEAR = 0.01;
@@ -17,9 +19,9 @@ const BIAS_RATE =
   (MATHBOX_FAR + MATHBOX_NEAR) / (2 * MATHBOX_FAR * MATHBOX_NEAR);
 
 /**
- * The `pull` of labels and axis ticks. Each is flat at its anchor's depth,
- * so a surface through the anchor, at an angle to the screen, would cover
- * part of it.
+ * The `pull` of labels and axis ticks. Each is a few pixels across, centred
+ * on its anchor, so a surface through the anchor at an angle to the screen
+ * would cover part of it.
  */
 export const ANNOTATION_PULL = 0.01;
 
@@ -30,9 +32,10 @@ const ndcZ = (depth: Node<"float">) => {
 };
 
 /**
- * A fragment's view-space z before `zBias` and `zIndex` move its depth. In a
- * material with a `vertexNode`, three's `positionView` has them applied. Set
- * by `projectWithDepthStyle`, which every mark's vertex must go through.
+ * A fragment's view-space z before `projectWithDepthStyle` moves its depth.
+ * In a material with a `vertexNode`, three's `positionView` has the move
+ * applied. Set by `projectWithDepthStyle`, which every mark's vertex must go
+ * through.
  */
 export const unbiasedViewZ = varyingProperty("float", "v_unbiasedViewZ");
 
@@ -45,14 +48,16 @@ export const unbiasedViewZ = varyingProperty("float", "v_unbiasedViewZ");
  * - `zIndex`, rounded and never negative as in MathBox, divides NDC depth
  *   past the near plane by `zIndex + 1`: a higher one draws over a lower one
  *   unless that one is almost at the camera.
- * - `pull`, this renderer's own, moves depth that fraction of the way to the
- *   camera, the same at any zoom.
+ * - `pull`, this renderer's own, moves depth toward the camera by that
+ *   fraction of the view's reach: the view depth in perspective, the depth
+ *   that shows as much of the scene in orthographic. So it is the same share
+ *   of the screen at any zoom.
  */
 export const projectWithDepthStyle = (
   view: Node<"vec3">,
   zBias: Node<"float">,
   zIndex: Node<"float">,
-  pull: Node<"float"> | number = 0,
+  pull = 0,
 ): Node<"vec4"> =>
   Fn(() => {
     unbiasedViewZ.assign(view.z);
@@ -66,7 +71,10 @@ export const projectWithDepthStyle = (
     const to = from.div(
       max(epsilon.oneMinus().add(epsilon.mul(BIAS_RATE).mul(from)), 1e-6),
     );
-    const biased = ndcZ(depth.sub(from.sub(to)).sub(from.mul(pull)));
+    const reach = max(clip.w, MATHBOX_NEAR).div(
+      projectionScale.y.mul(TAN_HALF_FOV),
+    );
+    const biased = ndcZ(depth.sub(from.sub(to)).sub(reach.mul(pull)));
     const layer = max(zIndex.round(), 0);
     const z = mix(ndcZ(cameraNear), biased, float(1).div(layer.add(1)));
     return vec4(clip.xy, z.mul(clip.w), clip.w);
