@@ -9,40 +9,44 @@ import { coloredShare, expectThreeViewport } from "@/utils/threeViewport";
 
 test.use({ disable3d: false });
 
-test("?renderer=threejs draws with the three.js viewport", async ({
-  page,
-  prepareScene,
-}) => {
-  const errors = collectPageErrors(page);
-  const key = await prepareScene(new SceneBuilder().json());
-  await page.goto(`/${key}?renderer=threejs`);
-
-  await expectThreeViewport(page);
-  await expect(
-    page.getByRole("button", { name: "three.js renderer" }),
-  ).toBeVisible();
-  expect(errors).toEqual([]);
-});
-
-test("choosing three.js in the menu draws with it", async ({
+test("a scene draws with three.js by default, with no renderer pill", async ({
   page,
   prepareScene,
 }) => {
   const errors = collectPageErrors(page);
   const key = await prepareScene(new SceneBuilder().json());
   await page.goto(`/${key}`);
-  await expect(page.getByTestId("scene")).toHaveAttribute(
-    "data-renderer",
-    "mathbox",
-  );
-
-  const menu = new UserMenu(page);
-  await menu.opener().click();
-  await menu.renderer("three.js (experimental)").click();
 
   await expectThreeViewport(page);
+  await expect(page.getByRole("button", { name: /renderer$/ })).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test("the menu switches to MathBox and back, and a reload keeps the choice", async ({
+  page,
+  prepareScene,
+}) => {
+  const errors = collectPageErrors(page);
+  const key = await prepareScene(new SceneBuilder().json());
+  await page.goto(`/${key}`);
+  await expectThreeViewport(page);
+  const menu = new UserMenu(page);
+  const scene = page.getByTestId("scene");
+
   await menu.opener().click();
-  await expect(menu.renderer("three.js (experimental)")).toBeChecked();
+  await menu.renderer("Legacy (MathBox)").click();
+  await expect(scene).toHaveAttribute("data-renderer", "mathbox");
+  await page.reload();
+  await expect(scene).toHaveAttribute("data-renderer", "mathbox");
+  await expect(
+    page.getByRole("button", { name: "MathBox renderer" }),
+  ).toBeVisible();
+
+  await menu.opener().click();
+  await menu.renderer("Default").click();
+  await expectThreeViewport(page);
+  await page.reload();
+  await expectThreeViewport(page);
   expect(errors).toEqual([]);
 });
 

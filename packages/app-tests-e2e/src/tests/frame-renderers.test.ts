@@ -4,12 +4,12 @@ import { test } from "@/fixtures/users";
 import { hideGpu } from "@/utils/hideGpu";
 import { colorfulPixelRatio } from "@/utils/colorfulPixelRatio";
 
-// `/app/frame/:key?renderer=` draws with the renderer it names and marks the
-// scene `data-scene-ready` once drawn and settled. `frame-render.test.ts`
-// covers MathBox.
+// `/app/frame/:key` draws with three.js unless `?renderer=` names another, and
+// marks the scene `data-scene-ready` once drawn and settled.
+// `frame-render.test.ts` covers MathBox.
 test.use({ disable3d: false });
 
-test("?renderer=threejs is ready once the scene is drawn and settled", async ({
+test("by default it draws three.js, ready once drawn and settled", async ({
   page,
   prepareScene,
 }) => {
@@ -17,7 +17,7 @@ test("?renderer=threejs is ready once the scene is drawn and settled", async ({
   scene.folder({ description: "Surface" }).explicitSurface();
   const key = await prepareScene(scene.json());
 
-  await page.goto(`/app/frame/${key}?renderer=threejs`);
+  await page.goto(`/app/frame/${key}`);
   const viewport = page.getByTestId("scene");
   await expect(viewport).toHaveAttribute("data-scene-ready", "true", {
     timeout: 30_000,
@@ -37,7 +37,7 @@ test("a renderer that can't start marks the frame failed, with no fallback", asy
   await hideGpu(page);
   const key = await prepareScene(new SceneBuilder().json());
 
-  await page.goto(`/app/frame/${key}?renderer=threejs`);
+  await page.goto(`/app/frame/${key}`);
   const viewport = page.getByTestId("scene");
   await expect(viewport).toHaveAttribute("data-scene-error", "unsupported", {
     timeout: 15_000,

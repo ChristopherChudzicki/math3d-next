@@ -3,8 +3,8 @@ import { resolveRenderer } from "./resolveRenderer";
 
 test.each([
   { param: "mathbox", preference: "threejs", expected: "mathbox" },
-  { param: "foo", preference: "threejs", expected: "threejs" },
-  { param: null, preference: null, expected: "mathbox" },
+  { param: "usegpu", preference: "mathbox", expected: "mathbox" },
+  { param: null, preference: null, expected: "threejs" },
 ] as const)(
   "?renderer=$param, preference $preference → $expected",
   ({ expected, ...input }) => {

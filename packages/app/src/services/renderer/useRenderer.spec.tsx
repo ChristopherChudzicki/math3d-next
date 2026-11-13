@@ -30,14 +30,14 @@ const renderUseRenderer = (initialEntry: InitialEntry) => {
 test("chooseRenderer stores the choice and drops only ?renderer", async () => {
   const { router, api } = renderUseRenderer({
     pathname: "/abc",
-    search: "?renderer=threejs&controls=0&overlay=scenes&list=examples",
+    search: "?renderer=mathbox&controls=0&overlay=scenes&list=examples",
     hash: "#h",
     state: { x: 1 },
   });
 
-  await act(async () => api.current?.hook.chooseRenderer("mathbox"));
+  await act(async () => api.current?.hook.chooseRenderer("threejs"));
 
-  expect(api.current?.preference).toBe("mathbox");
+  expect(api.current?.preference).toBe("threejs");
   const { location } = router.state;
   expect(location.pathname).toBe("/abc");
   expect(location.search).toBe("?controls=0&overlay=scenes&list=examples");
@@ -50,8 +50,8 @@ test("chooseRenderer doesn't navigate without ?renderer", async () => {
   const { router, api } = renderUseRenderer("/abc");
   const { key } = router.state.location;
 
-  await act(async () => api.current?.hook.chooseRenderer("threejs"));
+  await act(async () => api.current?.hook.chooseRenderer("mathbox"));
 
-  expect(api.current?.preference).toBe("threejs");
+  expect(api.current?.preference).toBe("mathbox");
   expect(router.state.location.key).toBe(key);
 });

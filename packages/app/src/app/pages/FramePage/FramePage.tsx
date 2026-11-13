@@ -17,9 +17,10 @@ const VIEWPORTS: Record<Renderer, React.ReactElement> = {
  * A bare, scene-only view for headless screenshots — no editor UI (no header,
  * sidebar, controls, or virtual keyboard). It loads the scene by key and
  * renders only the 3D scene, full-viewport, with the renderer `?renderer=`
- * names (MathBox without it; never the stored preference). The scene's
- * container gets `data-scene-ready="true"` once drawn and settled; three.js
- * sets `data-scene-error` when it can't draw. There is no fallback.
+ * names (the default renderer without it; never the stored preference). The
+ * scene's container gets `data-scene-ready="true"` once drawn and settled;
+ * a renderer sets `data-scene-error` when it can't draw. There is no automatic
+ * fallback.
  */
 const FramePage: React.FC = () => {
   const { sceneKey } = useParams();

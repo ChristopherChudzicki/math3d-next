@@ -71,7 +71,7 @@ test("a render error marks the scene failed", async () => {
   renderViewport();
 
   expect(
-    await screen.findByText("The three.js renderer ran into an error."),
+    await screen.findByText("This scene couldn't be drawn."),
   ).toBeInTheDocument();
   expect(screen.getByTestId("scene")).toHaveAttribute(
     "data-scene-error",
@@ -79,7 +79,7 @@ test("a render error marks the scene failed", async () => {
   );
 });
 
-test("an unsupported browser gets a way back to the default renderer", async () => {
+test("an unsupported browser gets a way to the legacy renderer", async () => {
   const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
   const noBackend = new Error("no backend");
   const Unsupported = ({ hooks }: ThreeViewportProps) => {
@@ -90,7 +90,7 @@ test("an unsupported browser gets a way back to the default renderer", async () 
   renderViewport();
 
   expect(
-    await screen.findByText("The three.js renderer can't run in this browser."),
+    await screen.findByText("This browser can't run the default 3D renderer."),
   ).toBeInTheDocument();
   expect(screen.getByTestId("scene")).toHaveAttribute(
     "data-scene-error",
@@ -103,7 +103,7 @@ test("an unsupported browser gets a way back to the default renderer", async () 
   );
 
   await user.click(
-    screen.getByRole("button", { name: "Switch to the default renderer" }),
+    screen.getByRole("button", { name: "Switch to the legacy renderer" }),
   );
   expect(localStorage.getItem(RENDERER_PREFERENCE_KEY)).toBe("mathbox");
 });

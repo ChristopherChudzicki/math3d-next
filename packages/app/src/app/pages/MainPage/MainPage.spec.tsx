@@ -306,13 +306,13 @@ test("offline from the Scenes drawer toasts too", async () => {
 describe("renderer", () => {
   test("an invalid ?renderer is logged and ignored", async () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
-    renderTestApp("/?renderer=foo");
+    renderTestApp("/?renderer=usegpu");
     expect(await screen.findByTestId("scene")).toHaveAttribute(
       "data-renderer",
-      "mathbox",
+      "threejs",
     );
     expect(error).toHaveBeenCalledWith(
-      "Invalid value foo for search parameter renderer",
+      "Invalid value usegpu for search parameter renderer",
     );
   });
 });

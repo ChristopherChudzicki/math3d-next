@@ -2,7 +2,9 @@ import { useSyncExternalStore } from "react";
 import { isRenderer } from "./renderers";
 import type { Renderer } from "./renderers";
 
-const RENDERER_PREFERENCE_KEY = "rendererPreference";
+// Not `rendererPreference`: choices there were made while MathBox was the
+// default, so `mathbox` there mostly means "the default".
+const RENDERER_PREFERENCE_KEY = "renderer";
 
 // Blocked site data makes storage access throw; the choice then lasts only as
 // long as the page.

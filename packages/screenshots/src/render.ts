@@ -2,11 +2,12 @@ import puppeteer from "@cloudflare/puppeteer";
 import type { Env } from "./env";
 import { sceneFrameUrl } from "./keys";
 
-const READY_SELECTOR = '[data-scene-ready="true"]';
+// A scene that can't draw sets data-scene-error instead of data-scene-ready.
+const SETTLED_SELECTOR = '[data-scene-ready="true"], [data-scene-error]';
 const NAV_TIMEOUT_MS = 15_000; // page-load nav bound; RENDER_DEADLINE_MS is authoritative
-// data-scene-ready is a wall-clock quiescence heuristic on mathbox warmup — give it
-// headroom, but keep it below RENDER_DEADLINE_MS (the authoritative bound that closes
-// the browser). Ordering: RENDER_DEADLINE_MS > READY_TIMEOUT_MS.
+// data-scene-ready is the renderer's own settle heuristic, not a paint guarantee —
+// give it headroom, but keep it below RENDER_DEADLINE_MS (the authoritative bound
+// that closes the browser). Ordering: RENDER_DEADLINE_MS > READY_TIMEOUT_MS.
 const READY_TIMEOUT_MS = 45_000;
 
 export const withTimeout = async <T>(
@@ -28,10 +29,10 @@ export const withTimeout = async <T>(
 };
 
 /**
- * Render {FRAME_ORIGIN}/app/frame/{key} to a 1200x630 PNG. Waits for the
- * still-mode readiness signal (data-scene-ready). Launch/close per render for v1
- * simplicity; browser reuse is a roadmap optimization. Throws on any failure —
- * the caller swallows.
+ * Render {FRAME_ORIGIN}/app/frame/{key} to a 1200x630 PNG. Waits for
+ * data-scene-ready, failing at once on data-scene-error. Launch/close per render
+ * for v1 simplicity; browser reuse is a roadmap optimization. Throws on any
+ * failure — the caller swallows.
  *
  * v1 framing decision: render at 1200x630, deviceScaleFactor 1 — exactly the
  * dimensions declared in index.html's og:image:width/height. The scene uses its
@@ -68,7 +69,13 @@ export const renderScene = async (
         waitUntil: "networkidle0",
         timeout: NAV_TIMEOUT_MS,
       });
-      await page.waitForSelector(READY_SELECTOR, { timeout: READY_TIMEOUT_MS });
+      const scene = await page.waitForSelector(SETTLED_SELECTOR, {
+        timeout: READY_TIMEOUT_MS,
+      });
+      const error = await scene?.evaluate((el) =>
+        el.getAttribute("data-scene-error"),
+      );
+      if (error) throw new Error(`scene error: ${error}`);
       // @cloudflare/puppeteer 1.3.0's `screenshot({ type: "png" })` resolves a
       // Node `Buffer`, not a plain `Uint8Array` (its .d.ts pulls in `@types/node`
       // via a triple-slash reference). `Buffer` extends `Uint8Array`, so this is

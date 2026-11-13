@@ -1,10 +1,22 @@
 import React from "react";
 import Button from "@/ui/Button";
-import { useSwitchToDefaultRenderer } from "@/services/renderer/useSwitchToDefaultRenderer";
+import {
+  DEFAULT_RENDERER,
+  LEGACY_RENDERER,
+} from "@/services/renderer/renderers";
+import type { Renderer } from "@/services/renderer/renderers";
+import { useSwitchRenderer } from "@/services/renderer/useSwitchRenderer";
 
-/** Says why an experimental renderer isn't drawing, and offers the default one. */
-const RendererFallback: React.FC<{ message: string }> = ({ message }) => {
-  const switchToDefault = useSwitchToDefaultRenderer();
+/**
+ * Says why `renderer` isn't drawing and offers another: the legacy renderer
+ * when `renderer` is the default, else the default.
+ */
+const RendererFallback: React.FC<{ renderer: Renderer; message: string }> = ({
+  renderer,
+  message,
+}) => {
+  const switchRenderer = useSwitchRenderer();
+  const isDefault = renderer === DEFAULT_RENDERER;
   // Centered: an open sidebar covers the viewport's left edge.
   return (
     <div
@@ -18,7 +30,15 @@ const RendererFallback: React.FC<{ message: string }> = ({ message }) => {
       }}
     >
       <p style={{ margin: 0 }}>{message}</p>
-      <Button onClick={switchToDefault}>Switch to the default renderer</Button>
+      <Button
+        onClick={() =>
+          switchRenderer(isDefault ? LEGACY_RENDERER : DEFAULT_RENDERER)
+        }
+      >
+        {isDefault
+          ? "Switch to the legacy renderer"
+          : "Switch to the default renderer"}
+      </Button>
     </div>
   );
 };

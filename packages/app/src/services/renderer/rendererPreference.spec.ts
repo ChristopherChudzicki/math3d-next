@@ -22,11 +22,20 @@ const choose = (renderer: Renderer) =>
 test("reads what was stored", () => {
   const { result } = renderHook(useRendererPreference);
 
-  choose("threejs");
+  choose("mathbox");
   act(resetRendererPreference);
 
-  expect(result.current).toBe("threejs");
-  expect(localStorage.rendererPreference).toBe("threejs");
+  expect(result.current).toBe("mathbox");
+  expect(localStorage.renderer).toBe("mathbox");
+});
+
+test("a choice stored under the old key reads as unset", () => {
+  localStorage.setItem("rendererPreference", "mathbox");
+  resetRendererPreference();
+
+  const { result } = renderHook(useRendererPreference);
+
+  expect(result.current).toBeNull();
 });
 
 test("a garbage value reads as unset", () => {
@@ -38,9 +47,9 @@ test("a garbage value reads as unset", () => {
 });
 
 test("storage that throws reads as unset and keeps the choice in memory", () => {
-  storeRendererPreference("threejs");
+  storeRendererPreference("mathbox");
   const { result } = renderHook(useRendererPreference);
-  expect(result.current).toBe("threejs");
+  expect(result.current).toBe("mathbox");
   vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
     throw new DOMException("denied", "SecurityError");
   });
@@ -50,7 +59,7 @@ test("storage that throws reads as unset and keeps the choice in memory", () => 
   act(resetRendererPreference);
   expect(result.current).toBeNull();
 
-  choose("threejs");
+  choose("mathbox");
 
-  expect(result.current).toBe("threejs");
+  expect(result.current).toBe("mathbox");
 });

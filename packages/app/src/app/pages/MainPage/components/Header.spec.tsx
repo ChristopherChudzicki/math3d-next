@@ -218,7 +218,7 @@ test("closing the scenes dialog returns focus to the scenes button, even when a 
 });
 
 describe("the Renderer group", () => {
-  const THREE = "three.js (experimental)";
+  const LEGACY = "Legacy (MathBox)";
   const openMenu = async () => {
     await user.click(screen.getByRole("button", { name: "Open Menu" }));
     // Wait until the menu is open and populated.
@@ -243,7 +243,10 @@ describe("the Renderer group", () => {
 
       const group = await screen.findByRole("group", { name: "Renderer" });
       const items = within(group).getAllByRole("menuitemradio");
-      expect(items.map((item) => item.textContent)).toEqual(["Default", THREE]);
+      expect(items.map((item) => item.textContent)).toEqual([
+        "Default",
+        LEGACY,
+      ]);
       expect(items.map((item) => item.getAttribute("aria-checked"))).toEqual([
         "true",
         "false",
@@ -264,21 +267,21 @@ describe("the Renderer group", () => {
   test("choosing a renderer draws it and closes the menu", async () => {
     renderTestApp("");
     await openMenu();
-    await user.click(screen.getByRole("menuitemradio", { name: THREE }));
+    await user.click(screen.getByRole("menuitemradio", { name: LEGACY }));
 
-    await expectRenderer("threejs");
+    await expectRenderer("mathbox");
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
   });
 
-  test("under ?renderer=threejs three.js is chosen, and choosing Default draws MathBox", async () => {
-    renderTestApp("/?renderer=threejs");
+  test("under ?renderer=mathbox MathBox is chosen, and choosing Default draws three.js", async () => {
+    renderTestApp("/?renderer=mathbox");
     await openMenu();
-    expect(screen.getByRole("menuitemradio", { name: THREE })).toHaveAttribute(
+    expect(screen.getByRole("menuitemradio", { name: LEGACY })).toHaveAttribute(
       "aria-checked",
       "true",
     );
 
     await user.click(screen.getByRole("menuitemradio", { name: "Default" }));
-    await expectRenderer("mathbox");
+    await expectRenderer("threejs");
   });
 });

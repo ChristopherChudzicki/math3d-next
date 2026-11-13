@@ -68,8 +68,8 @@ test("a missing scene neither alerts nor redirects (silent 404)", async () => {
   expect(location.current.pathname).toBe("/app/frame/does-not-exist");
 });
 
-test("without ?renderer it draws MathBox, whatever the stored preference", async () => {
-  storeRendererPreference("threejs");
+test("without ?renderer it draws three.js, whatever the stored preference", async () => {
+  storeRendererPreference("mathbox");
   const scene = new SceneBuilder();
   seedDb.withScene(scene.json());
 
@@ -77,19 +77,19 @@ test("without ?renderer it draws MathBox, whatever the stored preference", async
 
   expect(await screen.findByTestId("scene")).toHaveAttribute(
     "data-renderer",
-    "mathbox",
+    "threejs",
   );
 });
 
-test("?renderer=threejs draws three.js", async () => {
+test("?renderer=mathbox draws MathBox", async () => {
   const scene = new SceneBuilder();
   seedDb.withScene(scene.json());
 
-  renderTestApp(`/app/frame/${scene.key}?renderer=threejs`);
+  renderTestApp(`/app/frame/${scene.key}?renderer=mathbox`);
 
   expect(await screen.findByTestId("scene")).toHaveAttribute(
     "data-renderer",
-    "threejs",
+    "mathbox",
   );
 });
 
@@ -99,7 +99,7 @@ test("a renderer that can't start marks the page failed, with no fallback", asyn
   const scene = new SceneBuilder();
   seedDb.withScene(scene.json());
 
-  renderTestApp(`/app/frame/${scene.key}?renderer=threejs`);
+  renderTestApp(`/app/frame/${scene.key}`);
 
   const viewport = await screen.findByTestId("scene");
   await waitFor(() =>

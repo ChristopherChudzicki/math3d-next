@@ -10,7 +10,7 @@ import RendererFallback from "./RendererFallback";
 
 type Props = {
   renderer: Renderer;
-  /** Shown, with a way back to the default renderer, after a render error. */
+  /** Shown after a render error, beside a button that switches renderer. */
   errorMessage: string;
   /** The renderer has called `ViewportHooks.onReady` for this scene load. */
   ready: boolean;
@@ -56,11 +56,14 @@ const ViewportShell: React.FC<Props> = ({
         // failed until reload.
         <Sentry.ErrorBoundary
           key={loadCount}
-          fallback={<RendererFallback message={errorMessage} />}
+          fallback={
+            <RendererFallback renderer={renderer} message={errorMessage} />
+          }
           onError={setErrored}
         >
           {failure ? (
             <RendererFallback
+              renderer={renderer}
               message={unsupported ? unsupportedMessage : errorMessage}
             />
           ) : (
