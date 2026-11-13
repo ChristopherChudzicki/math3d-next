@@ -85,10 +85,14 @@ const packedSegment = (): ViewSegment => ({
   after: toView("segmentAfter"),
 });
 
-/** A stroke line's vertex stage, and with `heads` its mask, for `segment`. */
+/**
+ * A stroke line's vertex stage, and with `heads` its mask, for `segment`,
+ * with `projectWithDepthStyle`'s `pull`.
+ */
 export const lineVertex = (
   heads: boolean,
   segment: ViewSegment = packedSegment(),
+  pull = 0,
 ) => {
   const atB = positionGeometry.x.greaterThan(0.5);
   const side = positionGeometry.y;
@@ -154,6 +158,7 @@ export const lineVertex = (
     position,
     strokeStyle.zBias,
     strokeStyle.zIndex,
+    pull,
   );
   if (!heads) return { vertex };
 

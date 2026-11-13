@@ -20,7 +20,7 @@ import {
   vec3,
   vec4,
 } from "three/tsl";
-import { projectWithDepthStyle } from "../shader/depthStyle";
+import { ANNOTATION_PULL, projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
 import type { Transparency } from "../shader/material";
 import type { Layout, Template } from "../instances/Instances";
@@ -73,6 +73,7 @@ const build = () => {
     anchor,
     read("zBias", "float"),
     read("zIndex", "float"),
+    ANNOTATION_PULL,
   );
   const slot = attribute<"vec4">("labelSlot", "vec4");
 

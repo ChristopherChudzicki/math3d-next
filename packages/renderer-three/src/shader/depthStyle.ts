@@ -16,6 +16,13 @@ const MATHBOX_FAR = 10000;
 const BIAS_RATE =
   (MATHBOX_FAR + MATHBOX_NEAR) / (2 * MATHBOX_FAR * MATHBOX_NEAR);
 
+/**
+ * The `pull` of labels and axis ticks. Each is flat at its anchor's depth,
+ * so a surface through the anchor, at an angle to the screen, would cover
+ * part of it.
+ */
+export const ANNOTATION_PULL = 0.01;
+
 /** NDC z of a point `depth` in front of the camera. */
 const ndcZ = (depth: Node<"float">) => {
   const clip = cameraProjectionMatrix.mul(vec4(0, 0, depth.negate(), 1));
@@ -38,11 +45,14 @@ export const unbiasedViewZ = varyingProperty("float", "v_unbiasedViewZ");
  * - `zIndex`, rounded and never negative as in MathBox, divides NDC depth
  *   past the near plane by `zIndex + 1`: a higher one draws over a lower one
  *   unless that one is almost at the camera.
+ * - `pull`, this renderer's own, moves depth that fraction of the way to the
+ *   camera, the same at any zoom.
  */
 export const projectWithDepthStyle = (
   view: Node<"vec3">,
   zBias: Node<"float">,
   zIndex: Node<"float">,
+  pull: Node<"float"> | number = 0,
 ): Node<"vec4"> =>
   Fn(() => {
     unbiasedViewZ.assign(view.z);
@@ -56,7 +66,7 @@ export const projectWithDepthStyle = (
     const to = from.div(
       max(epsilon.oneMinus().add(epsilon.mul(BIAS_RATE).mul(from)), 1e-6),
     );
-    const biased = ndcZ(depth.sub(from.sub(to)));
+    const biased = ndcZ(depth.sub(from.sub(to)).sub(from.mul(pull)));
     const layer = max(zIndex.round(), 0);
     const z = mix(ndcZ(cameraNear), biased, float(1).div(layer.add(1)));
     return vec4(clip.xy, z.mul(clip.w), clip.w);

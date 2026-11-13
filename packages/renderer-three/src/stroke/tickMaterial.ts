@@ -3,6 +3,7 @@
  * along its direction as the view sees it; MathBox's `ticks.position`.
  */
 import { attribute, modelViewMatrix, normalize, vec4 } from "three/tsl";
+import { ANNOTATION_PULL } from "../shader/depthStyle";
 import { viewUnitsPerPixel } from "../shader/viewUnits";
 import type { Layout } from "../instances/Instances";
 import { lineVertex } from "./lineMaterial";
@@ -32,7 +33,7 @@ const build = () => {
   const half = along.mul(viewUnitsPerPixel.mul(TICK_SIZE / 2));
   const a = center.sub(half);
   const b = center.add(half);
-  return lineVertex(false, { before: a, a, b, after: b });
+  return lineVertex(false, { before: a, a, b, after: b }, ANNOTATION_PULL);
 };
 
 /** The tick material for ticks of that alpha, shared by all. */
