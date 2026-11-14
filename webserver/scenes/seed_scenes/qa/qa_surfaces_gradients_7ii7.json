@@ -193,7 +193,7 @@
         "zBias": "0",
         "zOrder": "",
         "shaded": "true",
-        "wrapColors": "false",
+        "wrapColors": "true",
         "expr": {
           "type": "function-assignment",
           "name": "_f",
@@ -221,7 +221,7 @@
           "type": "function-assignment",
           "name": "_f",
           "params": ["x", "y", "z"],
-          "rhs": "mod(z, 1)"
+          "rhs": "z"
         },
         "gridOpacity": "1",
         "gridWidth": "4",

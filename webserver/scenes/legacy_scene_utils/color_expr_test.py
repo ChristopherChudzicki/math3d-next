@@ -59,6 +59,26 @@ def test_explicit_surface_rescales_its_own_params():
         params=["X", "Y", "Z", "s", "t"],
         rhs="X+Y",
     )
-    translated = translate_color_expr(legacy, "explicit", ["s", "t"])
+    translated, _ = translate_color_expr(legacy, "explicit", ["s", "t"], "#3090FF")
     assert translated.params == ["s", "t", "z"]
     assert translated.rhs == f"{rescaled('x', 's')}+{rescaled('y', 't')}"
+
+
+@pytest.mark.parametrize(
+    ("rhs", "color", "wraps"),
+    [
+        ("mod(Z, 1)", "temperature", "true"),
+        ("mod(Z, 0)", "temperature", "false"),
+        ("Z", "temperature", "false"),
+        # math3d-react's Rainbow wrapped every value.
+        ("Z", "rainbow", "true"),
+    ],
+)
+def test_wraps_where_the_mod_is_rewritten_as_wrapping_or_on_rainbow(rhs, color, wraps):
+    legacy = FunctionAssignmentObj(
+        type="function-assignment", name="_f", params=["X", "Y", "Z", "u", "v"], rhs=rhs
+    )
+    color_expr, wrap_colors = translate_color_expr(
+        legacy, "parametric", ["u", "v"], color
+    )
+    assert (color_expr.rhs, wrap_colors) == (Z, wraps)

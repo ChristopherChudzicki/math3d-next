@@ -239,7 +239,7 @@
         "zBias": "0",
         "zOrder": "",
         "shaded": "true",
-        "wrapColors": "false",
+        "wrapColors": "true",
         "expr": {
           "type": "function-assignment",
           "name": "_f",
@@ -267,7 +267,7 @@
           "type": "function-assignment",
           "name": "_f",
           "params": ["x", "y", "z", "u", "v"],
-          "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)"
+          "rhs": "\\operatorname{rescale}_z(z)"
         },
         "gridOpacity": "0.3",
         "gridWidth": "2",

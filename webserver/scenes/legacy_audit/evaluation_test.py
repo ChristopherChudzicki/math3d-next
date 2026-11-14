@@ -396,3 +396,25 @@ def test_leaves_a_surfaces_wrap_colors_unpaired():
     assert any(
         u[2] == "wrapColors" and u[3].startswith("known") for u in pairing.unpaired
     )
+
+
+@pytest.mark.parametrize(
+    ("color", "rule"), [("rainbow", "hue"), ("temperature", "value")]
+)
+def test_compares_a_rainbow_surfaces_color_as_a_hue(color, rule):
+    surface = {**rehydrated_item("PARAMETRIC_SURFACE"), "color": color}
+    rehydrated = {"mathGraphics": {"s": surface}, "mathSymbols": {}}
+    react = {"s": {"colorExpr": field()}}
+    nxt = {"s": {"colorExpr": field(), "wrapColors": field()}}
+    _, pairing = _pairs(rehydrated, react, nxt)
+    assert [p.rule for p in pairing.pairs if p.next_field == "colorExpr"] == [rule]
+
+
+def test_a_hue_is_equal_a_whole_number_apart():
+    legacy = Side(OK, fn(-0.25, 0.5, 1.0))
+    assert (
+        label(spec("hue"), legacy, Side(OK, fn(0.75, 0.5, 0.0)), TOL).outcome == "equal"
+    )
+    assert (
+        label(spec("hue"), legacy, Side(OK, fn(0.5, 0.5, 0.0)), TOL).outcome == "differ"
+    )

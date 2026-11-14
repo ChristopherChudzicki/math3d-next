@@ -10,6 +10,12 @@
         "$TURBO_ROOT$/webserver/scenes/seed_scenes/qa/**"
       ]
     },
+    "@math3d/parser#test": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/webserver/scenes/legacy_scene_utils/strip_mod_cases.json"
+      ]
+    },
     "typecheck": { "dependsOn": ["^typecheck"] }
   }
 }

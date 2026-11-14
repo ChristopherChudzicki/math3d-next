@@ -407,11 +407,12 @@ class ItemMigrator:
         rangeU = x.rangeU if "=" in x.rangeU else f"_f(y)={x.rangeU}"
         rangeV = x.rangeV if "=" in x.rangeV else f"_f(x)={x.rangeV}"
         domain = self.domain_array([rangeU, rangeV])
+        color_expr, wrap_colors = translate_color_expr(
+            self.function_assignment(x.colorExpr), "explicit", expr.params, x.color
+        )
         return ExplicitSurfaceProperties(
             color=x.color,
-            colorExpr=translate_color_expr(
-                self.function_assignment(x.colorExpr), "explicit", expr.params
-            ),
+            colorExpr=color_expr,
             description=x.description,
             domain=domain,
             expr=expr,
@@ -420,7 +421,7 @@ class ItemMigrator:
             gridWidth=x.gridWidth,
             opacity=x.opacity,
             shaded=stringify(x.shaded),
-            wrapColors="false",
+            wrapColors=wrap_colors,
             **self.visibility(x),
             zBias=x.zBias,
             zOrder="",
@@ -433,11 +434,12 @@ class ItemMigrator:
         rangeU = x.rangeU if "=" in x.rangeU else f"_f(\\theta)={x.rangeU}"
         rangeV = x.rangeV if "=" in x.rangeV else f"_f(r)={x.rangeV}"
         domain = self.domain_array([rangeU, rangeV])
+        color_expr, wrap_colors = translate_color_expr(
+            self.function_assignment(x.colorExpr), "polar", expr.params, x.color
+        )
         return ExplicitSurfacePolarProperties(
             color=x.color,
-            colorExpr=translate_color_expr(
-                self.function_assignment(x.colorExpr), "polar", expr.params
-            ),
+            colorExpr=color_expr,
             description=x.description,
             domain=domain,
             expr=expr,
@@ -446,7 +448,7 @@ class ItemMigrator:
             gridWidth=x.gridWidth,
             opacity=x.opacity,
             shaded=stringify(x.shaded),
-            wrapColors="false",
+            wrapColors=wrap_colors,
             **self.visibility(x),
             zBias=x.zBias,
             zOrder="",
@@ -562,11 +564,12 @@ class ItemMigrator:
         rangeU = x.rangeU if "=" in x.rangeU else f"_f(v)={x.rangeU}"
         rangeV = x.rangeV if "=" in x.rangeV else f"_f(u)={x.rangeV}"
         domain = self.domain_array([rangeU, rangeV])
+        color_expr, wrap_colors = translate_color_expr(
+            self.function_assignment(x.colorExpr), "parametric", expr.params, x.color
+        )
         return ParametricSurfaceProperties(
             color=x.color,
-            colorExpr=translate_color_expr(
-                self.function_assignment(x.colorExpr), "parametric", expr.params
-            ),
+            colorExpr=color_expr,
             description=x.description,
             domain=domain,
             expr=expr,
@@ -575,7 +578,7 @@ class ItemMigrator:
             gridWidth=x.gridWidth,
             opacity=x.opacity,
             shaded=stringify(x.shaded),
-            wrapColors="false",
+            wrapColors=wrap_colors,
             **self.visibility(x),
             zBias=x.zBias,
             zOrder="",

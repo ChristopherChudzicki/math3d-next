@@ -231,7 +231,7 @@
         "zBias": "0",
         "zOrder": "1",
         "shaded": "true",
-        "wrapColors": "false",
+        "wrapColors": "true",
         "expr": {
           "type": "function-assignment",
           "name": "_f",
@@ -259,7 +259,7 @@
           "type": "function-assignment",
           "name": "_f",
           "params": ["x", "y", "z"],
-          "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)"
+          "rhs": "\\operatorname{rescale}_z(z)"
         },
         "gridOpacity": "0",
         "gridWidth": "2",
@@ -283,7 +283,7 @@
         "zBias": "0",
         "zOrder": "2",
         "shaded": "true",
-        "wrapColors": "false",
+        "wrapColors": "true",
         "expr": {
           "type": "function-assignment",
           "name": "_f",
@@ -311,7 +311,7 @@
           "type": "function-assignment",
           "name": "_f",
           "params": ["x", "y", "z"],
-          "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)"
+          "rhs": "\\operatorname{rescale}_z(z)"
         },
         "gridOpacity": "0",
         "gridWidth": "2",
@@ -335,7 +335,7 @@
         "zBias": "0",
         "zOrder": "0",
         "shaded": "true",
-        "wrapColors": "false",
+        "wrapColors": "true",
         "expr": {
           "type": "function-assignment",
           "name": "_f",
@@ -363,7 +363,7 @@
           "type": "function-assignment",
           "name": "_f",
           "params": ["x", "y", "z"],
-          "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)"
+          "rhs": "\\operatorname{rescale}_z(z)"
         },
         "gridOpacity": "0",
         "gridWidth": "2",

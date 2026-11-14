@@ -475,7 +475,7 @@ class PairSpec:
     next_field: str
     next_element: int | None
     severity: str
-    rule: str = "value"  # value | domain | coords | truthiness | camera
+    rule: str = "value"  # value | domain | coords | truthiness | camera | hue
     expected: Any = None  # the camera rule's expected numbers
 
 
@@ -507,7 +507,10 @@ SURFACE_DOMAIN_TYPES = (
 )
 
 
-def _rule(item_type: str, legacy_field: str, next_field: str) -> str:
+def _rule(item_type: str, legacy_field: str, next_field: str, item: dict) -> str:
+    # react's Rainbow drew a surface's color value as a hue, which wraps.
+    if next_field == "colorExpr" and item.get("color") == "rainbow":
+        return "hue"
     if next_field == "domain" and item_type in SURFACE_DOMAIN_TYPES:
         return "domain"
     if item_type == "POINT" and next_field == "coords":
@@ -639,7 +642,7 @@ def pair_scene(
                     nf,
                     ne,
                     severity,
-                    _rule(item_type, lf, nf),
+                    _rule(item_type, lf, nf, item),
                 )
             )
         for side, fields, other in (
@@ -723,7 +726,25 @@ def _side(record: dict, element: int | None, per_element_status: bool) -> Side:
     return Side("eval", MISSING, "no such element")
 
 
+def _hue(fp: Any) -> Any:
+    """A fingerprint with each real number t as the complex number at angle
+    2πt on the unit circle, so values a whole number apart are equal."""
+    if _is_number(fp):
+        angle = 2 * math.pi * fp
+        return {"re": math.cos(angle), "im": math.sin(angle)}
+    if isinstance(fp, list):
+        return [_hue(x) for x in fp]
+    if _is_fn(fp):
+        hued = {**fp, "at": None if fp["at"] is None else _hue(fp["at"])}
+        if fp.get("vec"):
+            hued["vec"] = {k: _hue(v) for k, v in fp["vec"].items()}
+        return hued
+    return fp
+
+
 def _compare_by_rule(spec: PairSpec, a: Any, b: Any, tol: Tolerance) -> Verdict:
+    if spec.rule == "hue":
+        return compare(_hue(a), _hue(b), tol)
     if (
         spec.rule == "domain"
         and isinstance(a, list)

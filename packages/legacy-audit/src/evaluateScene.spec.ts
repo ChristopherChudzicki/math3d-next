@@ -117,28 +117,31 @@ describe("evaluateScene's surface colors", () => {
   const bounds = { x: ["-2", "6"], y: ["1", "3"], z: ["-8", "0"] };
   const axis = (name: string, [min, max]: string[]) =>
     make(MathItemType.Axis, `axis-${name}`, { axis: name, min, max });
+  // Unwrapped unless asked, so the samples are the color's raw values.
   const color = (
     type: MathItemType,
     params: string[],
     rhs: string,
-    overrides: Partial<typeof bounds> = {},
+    {
+      axes = {},
+      wrapColors = "false",
+    }: { axes?: Partial<typeof bounds>; wrapColors?: string } = {},
   ) =>
     evaluateScene({
       items: [
-        ...Object.entries({ ...bounds, ...overrides }).map(([n, b]) =>
-          axis(n, b),
-        ),
+        ...Object.entries({ ...bounds, ...axes }).map(([n, b]) => axis(n, b)),
         make(type, "s", {
           colorExpr: { type: "function-assignment", name: "_f", params, rhs },
+          wrapColors,
         }),
       ],
     }).s.colorExpr;
-  const parametric = (rhs: string, overrides?: Partial<typeof bounds>) =>
+  const parametric = (rhs: string, options?: Parameters<typeof color>[3]) =>
     color(
       MathItemType.ParametricSurface,
       ["x", "y", "z", "u", "v"],
       rhs,
-      overrides,
+      options,
     );
   const points = (samplePoints as Record<string, number[][]>)["5"];
   const at = (i: number) => points.map((p) => expect.closeTo(p[i], 9));
@@ -159,13 +162,21 @@ describe("evaluateScene's surface colors", () => {
     },
   );
 
+  it("compares a color that wraps as its value mod 1", () => {
+    const got = parametric(`3${rescaleZ}`, { wrapColors: "true" });
+    const wrappedZ = points.map((p) =>
+      expect.closeTo(3 * p[2] - Math.floor(3 * p[2]), 9),
+    );
+    expect(got.value).toEqual({ fn: 5, at: wrappedZ });
+  });
+
   it("doesn't sample a color that rescales a flat axis", () => {
-    const got = parametric(rescaleZ, { z: ["0", "0"] });
+    const got = parametric(rescaleZ, { axes: { z: ["0", "0"] } });
     expect(got.value).toEqual({ fn: 5, at: null, flat_axis: true });
   });
 
   it("samples a color whose unused axis has an invalid bound", () => {
-    const got = parametric(rescaleZ, { x: ["", "6"] });
+    const got = parametric(rescaleZ, { axes: { x: ["", "6"] } });
     expect(got.value).toEqual({ fn: 5, at: at(2) });
   });
 

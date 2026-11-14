@@ -1,0 +1,57 @@
+{
+  "rewritten": [
+    {
+      "original": "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)",
+      "rewritten": "\\operatorname{rescale}_z(z)",
+      "wraps": true
+    },
+    {
+      "original": "\\operatorname{mod}\\left(Z,\\ 1\\right)",
+      "rewritten": "Z",
+      "wraps": true
+    },
+    {
+      "original": "mod(\\max(x, y), 1)",
+      "rewritten": "\\max(x, y)",
+      "wraps": true
+    },
+    {
+      "original": "\\mathrm{mod}(1.5Z,1)\\ ",
+      "rewritten": "1.5Z",
+      "wraps": true
+    },
+    {
+      "original": "mod\\left(\\frac{x+y}{2}, 01\\right)",
+      "rewritten": "\\frac{x+y}{2}",
+      "wraps": true
+    },
+    {
+      "original": "\\frac{\\operatorname{mod}\\left(u\\cdot v,m\\right)}{m}",
+      "rewritten": "\\frac{u\\cdot v}{m}",
+      "wraps": true
+    },
+    {
+      "original": "\\frac{\\operatorname{mod}\\left(v,\\pi\\right)}{\\ \\pi}",
+      "rewritten": "\\frac{v}{\\ \\pi}",
+      "wraps": true
+    },
+    {
+      "original": "\\operatorname{mod}(Z,0)",
+      "rewritten": "Z",
+      "wraps": false
+    }
+  ],
+  "kept": [
+    "mod(Z, 2)",
+    "mod(Z,1)+mod(X,1)",
+    "2mod(Z,1)",
+    "mod(Z, 1, 2)",
+    "mod(Z)",
+    "mod\\left[Z,1\\right]",
+    "mod(Z,1]",
+    "\\text{mod}(Z,1)",
+    "modulus(Z,1)",
+    "\\frac{\\operatorname{mod}(Z,20)}{40}",
+    "\\frac{\\operatorname{mod}(Z,20)}{20}+0.26"
+  ]
+}

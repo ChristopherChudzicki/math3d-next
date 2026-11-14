@@ -6,6 +6,7 @@ clash rule match ``colorExprParams`` in ``@math3d/mathitem-configs``."""
 import re
 from typing import Literal
 
+from scenes.legacy_scene_utils.strip_mod import ModRewrite, rewrite_color_mod
 from scenes.legacy_scene_utils.symbols import depends_on
 from scenes.schemas.math_items import FunctionAssignmentObj
 
@@ -58,13 +59,28 @@ def rewrite_color_body(body: str, slots: tuple[str, str, str]) -> str:
     return _NORMALIZED.sub(replace, body)
 
 
+def legacy_wraps(color: str, rewrite: ModRewrite | None) -> bool:
+    """Whether a legacy surface wraps colors outside [0, 1]. math3d-react's
+    Rainbow wrapped every value: it passed it to three's ``setHSL``, which
+    wraps the hue. Its other maps took the end colors, so they wrap only
+    where the outer ``mod`` is rewritten as wrapping."""
+    return color == "rainbow" or (rewrite is not None and rewrite.wraps)
+
+
 def translate_color_expr(
-    legacy: FunctionAssignmentObj, kind: SurfaceKind, surface_params: list[str]
-) -> FunctionAssignmentObj:
-    slots = _slots(kind, surface_params, legacy.rhs)
-    return FunctionAssignmentObj(
+    legacy: FunctionAssignmentObj,
+    kind: SurfaceKind,
+    surface_params: list[str],
+    color: str,
+) -> tuple[FunctionAssignmentObj, str]:
+    """The color expression and ``wrapColors``."""
+    rewrite = rewrite_color_mod(legacy.rhs)
+    body = legacy.rhs if rewrite is None else rewrite.rhs
+    slots = _slots(kind, surface_params, body)
+    color_expr = FunctionAssignmentObj(
         type="function-assignment",
         name=legacy.name,
-        params=color_params(kind, surface_params, legacy.rhs),
-        rhs=rewrite_color_body(legacy.rhs, (slots["x"], slots["y"], slots["z"])),
+        params=color_params(kind, surface_params, body),
+        rhs=rewrite_color_body(body, (slots["x"], slots["y"], slots["z"])),
     )
+    return color_expr, "true" if legacy_wraps(color, rewrite) else "false"

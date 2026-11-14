@@ -394,6 +394,17 @@ const rescalesFlatAxis = (use: ColorUse, bounds: unknown[][]) =>
     return typeof min === "number" && min === max;
   });
 
+/**
+ * A wrapping surface's color as its value mod 1, as math3d-react drew it:
+ * through the `mod(f, 1)` the translator drops, or as Rainbow's hue.
+ */
+const wrapped =
+  (fn: Fn): Fn =>
+  (...args) => {
+    const t = fn(...args);
+    return typeof t === "number" ? t - Math.floor(t) : t;
+  };
+
 type Migrated = { items: MathItemPatch[] };
 
 /** Whether any of the scene's math fields has one of `wanted` as a feature. */
@@ -487,9 +498,11 @@ const evaluateScene = (migrated: Migrated): SceneResult => {
       const type = typeOf.get(itemId);
       if (field === "colorExpr" && type && SURFACES.has(type) && isFn(value)) {
         const use = colorUse(parseable);
+        const wraps = scope.results.get(`${itemId}-wrapColors`) === true;
+        const shown = wraps ? wrapped(value) : value;
         result.value = rescalesFlatAxis(use, axisBounds)
           ? { fn: 5, at: null, flat_axis: true }
-          : fingerprint(legacyColorLayout(type, value, use, axisBounds));
+          : fingerprint(legacyColorLayout(type, shown, use, axisBounds));
       } else {
         result.value = fingerprint(value);
       }

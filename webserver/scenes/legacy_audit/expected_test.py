@@ -249,11 +249,24 @@ def test_surface_range_depending_on_second_parameter_swaps_sampling():
     )
 
 
-def test_surface_color_takes_coordinates_and_rescales():
+def test_surface_color_takes_coordinates_rescales_and_drops_an_outer_mod():
     got = values(rehydrated("PARAMETRIC_SURFACE"))
     params = [got[f"colorExpr.params.{i}"] for i in range(5)]
     assert params == ["x", "y", "z", "u", "v"]
-    assert got["colorExpr.rhs"] == r"mod(\operatorname{rescale}_z\left(z\right), 1)"
+    assert got["colorExpr.rhs"] == r"\operatorname{rescale}_z\left(z\right)"
+    assert got["wrapColors"] == "true"
+
+
+@pytest.mark.parametrize(
+    ("color", "wraps"), [("rainbow", "true"), ("temperature", "false")]
+)
+def test_a_rainbow_surface_wraps_without_a_mod(color, wraps):
+    surface = {
+        **rehydrated("PARAMETRIC_SURFACE"),
+        "color": color,
+        "colorExpr": "_f(X, Y, Z, u, v)=Z",
+    }
+    assert values(surface)["wrapColors"] == wraps
 
 
 def test_explicit_surface_color_keeps_a_global_z():

@@ -19,6 +19,10 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Any, Literal
 
+# Shared with the translator: pass 2 checks its result by comparing colors
+# mod 1, and packages/parser's colorModRewrite.spec checks the rewrites.
+from scenes.legacy_scene_utils.strip_mod import rewrite_color_mod
+
 Severity = Literal["render", "editor", "none"]
 
 
@@ -725,11 +729,17 @@ def _color_expr(out: _Out, item: dict, explicit: bool) -> None:
     A coordinate is `$c` when a surface parameter or a global in the body
     has its name; an explicit surface's own parameters are its x and y."""
     color = _parse_func_assignment(item.get("colorExpr"))
+    rewrite = None if color is None else rewrite_color_mod(color[2])
+    # react's Rainbow wrapped every value: three's setHSL wraps the hue
+    # (react:constants/colors.js). Its other maps took the end colors.
+    wraps = item.get("color") == "rainbow" or (rewrite is not None and rewrite.wraps)
+    out.add("wrapColors", _bool_str(wraps), "render", "constant")
     expr = _parse_func_assignment(item.get("expr"))
     if color is None or expr is None:
         out.func_assignment("colorExpr", item.get("colorExpr"), "colorExpr")
         return
-    name, _, body = color
+    name, _, legacy_body = color
+    body = legacy_body if rewrite is None else rewrite.rhs
     surface_params = expr[1]
     coordinates = ["z"] if explicit else ["x", "y", "z"]
     slots = {
@@ -777,9 +787,6 @@ def _make_surface(
         out = _Out()
         _universal(out, item, ctx)
         out.add("shaded", _bool_str(item.get("shaded")), "render", "shaded")
-        # react clamped colors outside [0, 1]; only a `mod` in the expression
-        # wrapped them.
-        out.add("wrapColors", "false", "render", "constant")
         out.func_assignment("expr", item.get("expr"), "expr")
         _color_expr(out, item, explicit)
         # rangeU may depend on v and rangeV on u
