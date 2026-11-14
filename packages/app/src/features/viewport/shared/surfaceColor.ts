@@ -29,5 +29,16 @@ const gridlineColor = (color: string): string => {
   }).toHexString();
 };
 
-export { explicitColorFunc, gridlineColor };
+/** ε in `SurfaceColor`'s `wrap` rule (`@math3d/viewport-spec`). */
+const WRAP_TOLERANCE = 1e-4;
+
+/** A color map's position in [0, 1] for value `t`, by `SurfaceColor`'s `wrap` rule. */
+const colorMapValue = (t: number, wrap: boolean): number => {
+  if (!Number.isFinite(t)) return 0;
+  const inside = t >= -WRAP_TOLERANCE && t <= 1 + WRAP_TOLERANCE;
+  if (wrap && !inside) return t - Math.floor(t);
+  return Math.min(Math.max(t, 0), 1);
+};
+
+export { colorMapValue, explicitColorFunc, gridlineColor };
 export type { SurfaceColorFunc };

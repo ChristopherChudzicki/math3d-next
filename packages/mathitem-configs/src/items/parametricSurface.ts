@@ -17,6 +17,7 @@ import {
   opacity,
   domain2,
   shaded,
+  wrapColors,
   samples1,
   visibilityProps,
   samples2,
@@ -38,6 +39,7 @@ interface ParametricSurfaceProperties {
   zOrder: string;
 
   shaded: string; // eval to boolean;
+  wrapColors: string; // eval to boolean;
   expr: ParseableObjs["function-assignment"];
   domain: ParseableArray<ParseableObjs["function-assignment"]>;
   colorExpr: ParseableObjs["function-assignment"];
@@ -60,6 +62,7 @@ const defaultValues: ParametricSurfaceProperties = {
   zBias: "0",
   zOrder: "",
   shaded: "true",
+  wrapColors: "true",
   expr: {
     type: "function-assignment",
     name: "_f",
@@ -114,6 +117,7 @@ type EvaluatedProperties = {
   opacity: number;
   domain: EvaluatedDomain2;
   shaded: boolean;
+  wrapColors: boolean;
   samples1: number;
   samples2: number;
   calculatedVisibility: boolean;
@@ -153,6 +157,7 @@ const config: IMathItemConfig<
     gridWidth,
     opacity,
     shaded,
+    wrapColors,
     samples1,
     samples2,
     ...visibilityProps,

@@ -1,6 +1,9 @@
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import type { CoverageTable } from "@/features/viewport/shared/coverage";
 
+const WRAP_COLORS =
+  "approximate: wraps per vertex, so a wrap from the high end to the low one blends across a cell";
+
 /** What the MathBox renderer does with each stored property. */
 export const coverage = {
   [MIT.Axis]: {
@@ -135,6 +138,7 @@ export const coverage = {
   [MIT.ParametricSurface]: {
     expr: "drawn",
     colorExpr: "drawn",
+    wrapColors: WRAP_COLORS,
     color: "drawn",
     description: "n/a: editor only",
     domain: "drawn",
@@ -156,6 +160,7 @@ export const coverage = {
   [MIT.ExplicitSurface]: {
     expr: "drawn",
     colorExpr: "drawn",
+    wrapColors: WRAP_COLORS,
     domain: "drawn",
     color: "drawn",
     description: "n/a: editor only",
@@ -177,6 +182,7 @@ export const coverage = {
   [MIT.ExplicitSurfacePolar]: {
     expr: "drawn",
     colorExpr: "drawn",
+    wrapColors: WRAP_COLORS,
     color: "drawn",
     description: "n/a: editor only",
     gridOpacity: "drawn",

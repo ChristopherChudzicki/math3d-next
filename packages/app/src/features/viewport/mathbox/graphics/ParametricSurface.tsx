@@ -20,6 +20,7 @@ import {
 } from "@/features/viewport/shared/surfaceDomain";
 import type { SurfaceDomain } from "@/features/viewport/shared/surfaceDomain";
 import {
+  colorMapValue,
   explicitColorFunc,
   gridlineColor,
 } from "@/features/viewport/shared/surfaceColor";
@@ -39,6 +40,7 @@ const props = [
   "gridOpacity",
   "domain",
   "shaded",
+  "wrapColors",
   "expr",
   "colorExpr",
 ] as const;
@@ -69,6 +71,7 @@ type MathboxParametricSurfaceProps = {
   gridOpacity?: number;
   domain?: SurfaceDomain;
   shaded?: boolean;
+  wrapColors?: boolean;
   func?: (u: number, v: number) => [number, number, number];
   colorFunc?: SurfaceColorFunc;
   color?: string;
@@ -87,6 +90,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
   gridOpacity,
   domain,
   shaded,
+  wrapColors = false,
   func,
   colorFunc,
   color,
@@ -129,7 +133,9 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
           const xyz = xyzFunc(U, V);
           if (!xyz) return;
           const [u, v] = uvFunc(U, V);
-          const [r, g, b] = gradient.getRGB(colorFunc(...xyz, u, v));
+          const [r, g, b] = gradient.getRGB(
+            colorMapValue(colorFunc(...xyz, u, v), wrapColors),
+          );
           emit(r, g, b, opacity ?? 1.0);
         },
         width: samples1,
@@ -151,6 +157,7 @@ const MathboxParametricSurface: React.FC<MathboxParametricSurfaceProps> = ({
     opacity,
     xyzFunc,
     colorFunc,
+    wrapColors,
     uvFunc,
     samples1,
     samples2,

@@ -5,3 +5,46 @@
 .panel {
   padding: 0.5em;
 }
+
+.options {
+  margin-top: 0.75em;
+}
+
+.gradient {
+  height: 0.75em;
+  border-radius: 2px;
+}
+
+.ends {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5em;
+  font-size: var(--font-size-small);
+  color: var(--color-text-light);
+}
+
+.help {
+  margin: 0.25em 0 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-light);
+}
+
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+/* Beats math-field's global 1.25rem and .field-widget's margin, so the
+   interval reads as part of the line. */
+.help .interval {
+  display: inline-block;
+  vertical-align: baseline;
+  margin: 0;
+  font-size: 1.15em;
+}
+
+.help .interval::part(container),
+.help .interval::part(content) {
+  padding: 0;
+}

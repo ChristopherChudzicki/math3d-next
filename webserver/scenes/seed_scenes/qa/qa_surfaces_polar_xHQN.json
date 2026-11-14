@@ -193,6 +193,7 @@
         "zBias": "0",
         "zOrder": "",
         "shaded": "true",
+        "wrapColors": "false",
         "expr": {
           "type": "function-assignment",
           "name": "_f",
@@ -244,6 +245,7 @@
         "zBias": "0",
         "zOrder": "",
         "shaded": "true",
+        "wrapColors": "false",
         "expr": {
           "type": "function-assignment",
           "name": "_f",
@@ -295,6 +297,7 @@
         "zBias": "0",
         "zOrder": "",
         "shaded": "true",
+        "wrapColors": "false",
         "expr": {
           "type": "function-assignment",
           "name": "_f",

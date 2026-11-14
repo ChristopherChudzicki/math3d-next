@@ -17,6 +17,7 @@ from pydantic import (
     Field,
     RootModel,
     TypeAdapter,
+    model_validator,
 )
 
 
@@ -43,6 +44,19 @@ class _Strict(BaseModel):
     """Shared config: reject unknown keys, mirror the JTD no-extra contract."""
 
     model_config = ConfigDict(extra="forbid")
+
+
+class _WrapColorsDefault(BaseModel):
+    """Defaults a missing ``wrapColors`` to "false": such a surface was saved
+    clamping. Strict validation would otherwise refuse the row on read, and a
+    save from a frontend that predates the field."""
+
+    @model_validator(mode="before")
+    @classmethod
+    def _default_wrap_colors(cls, data: object) -> object:
+        if isinstance(data, dict) and "wrapColors" not in data:
+            return {**data, "wrapColors": "false"}
+        return data
 
 
 # --- Value models (mirror ParseableObjs in packages/parser/src/interfaces.ts;
@@ -135,7 +149,7 @@ class CameraProperties(_Strict):
     useRelative: str
 
 
-class ExplicitSurfaceProperties(_Strict):
+class ExplicitSurfaceProperties(_WrapColorsDefault, _Strict):
     description: str
     color: str
     visible: bool
@@ -146,6 +160,7 @@ class ExplicitSurfaceProperties(_Strict):
     zBias: str
     zOrder: str
     shaded: str
+    wrapColors: str
     expr: FunctionAssignmentObj
     domain: FunctionAssignmentArray
     colorExpr: FunctionAssignmentObj
@@ -157,7 +172,7 @@ class ExplicitSurfaceProperties(_Strict):
     grid2: str
 
 
-class ExplicitSurfacePolarProperties(_Strict):
+class ExplicitSurfacePolarProperties(_WrapColorsDefault, _Strict):
     # Structurally identical to ExplicitSurfaceProperties today; kept as its own
     # model (1:1 file-mirror invariant) so a future divergence in either is caught
     # by the assignability check. Do NOT alias to ExplicitSurfaceProperties.
@@ -171,6 +186,7 @@ class ExplicitSurfacePolarProperties(_Strict):
     zBias: str
     zOrder: str
     shaded: str
+    wrapColors: str
     expr: FunctionAssignmentObj
     domain: FunctionAssignmentArray
     colorExpr: FunctionAssignmentObj
@@ -258,7 +274,7 @@ class ParametricCurveProperties(_Strict):
     samples1: str
 
 
-class ParametricSurfaceProperties(_Strict):
+class ParametricSurfaceProperties(_WrapColorsDefault, _Strict):
     description: str
     color: str
     visible: bool
@@ -269,6 +285,7 @@ class ParametricSurfaceProperties(_Strict):
     zBias: str
     zOrder: str
     shaded: str
+    wrapColors: str
     expr: FunctionAssignmentObj
     domain: FunctionAssignmentArray
     colorExpr: FunctionAssignmentObj

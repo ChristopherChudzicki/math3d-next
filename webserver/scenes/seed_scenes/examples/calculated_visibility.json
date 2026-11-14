@@ -231,6 +231,7 @@
         "zBias": "0",
         "zOrder": "",
         "shaded": "true",
+        "wrapColors": "false",
         "expr": {
           "type": "function-assignment",
           "name": "_f",

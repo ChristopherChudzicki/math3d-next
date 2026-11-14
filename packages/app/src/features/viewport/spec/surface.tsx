@@ -9,7 +9,12 @@ import {
   useFinalVisibility,
   useMathItemResults,
 } from "@/store/scene/evaluation/mathScope";
-import type { Coords, GraphicSpec, RGBA } from "@math3d/viewport-spec";
+import type {
+  Coords,
+  GraphicSpec,
+  RGBA,
+  SurfaceColor,
+} from "@math3d/viewport-spec";
 import {
   domainMap,
   explicitPolarSurface,
@@ -36,6 +41,7 @@ const SURFACE_PROPS = [
   "gridOpacity",
   "opacity",
   "shaded",
+  "wrapColors",
   "zBias",
   "zIndex",
 ] as const;
@@ -86,6 +92,7 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
     gridOpacity,
     opacity,
     shaded,
+    wrapColors,
     zBias,
     zIndex,
   } = results;
@@ -105,15 +112,18 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
 
     const gradient = isGradientName(color) ? gradients[color] : null;
     const base = baseStyle({ opacity, zBias, zIndex }, color);
-    const flat = base.color;
-    const alpha = flat[3];
     const colorFunc = colorExpr && toColorFunc(item.type, colorExpr);
-    const colorAt = (U: number, V: number): RGBA => {
-      if (!gradient || !colorFunc) return flat;
-      const [u, v] = uv(U, V);
-      const [r, g, b] = gradient.getRGB(colorFunc(...position(U, V), u, v));
-      return [r, g, b, alpha];
-    };
+    const surfaceColor: SurfaceColor =
+      gradient && colorFunc
+        ? {
+            kind: "map",
+            map: gradient.getRGB,
+            valueAt: (U, V, point) => colorFunc(...point, ...uv(U, V)),
+            // Undefined when invalid, which clamps, as the switch shows off.
+            wrap: wrapColors ?? false,
+            alpha: base.color[3],
+          }
+        : { kind: "solid", rgba: base.color };
     // On a gradient, MathBox's default line color.
     const gridColor: RGBA = gradient
       ? [0.5, 0.5, 0.5, gridOpacity ?? 0.5]
@@ -127,7 +137,7 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
       kind: "surface",
       samples: [sampleCount(samples1, 64), sampleCount(samples2, 64)],
       position,
-      colorAt,
+      color: surfaceColor,
       shaded: shaded ?? true,
       zBias: base.zBias,
       zIndex: base.zIndex,
@@ -150,6 +160,7 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
     gridOpacity,
     opacity,
     shaded,
+    wrapColors,
     zBias,
     zIndex,
     color,

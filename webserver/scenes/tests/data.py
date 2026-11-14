@@ -35,6 +35,7 @@ default_scene_data = {
                     ],
                 },
                 "shaded": "true",
+                "wrapColors": "true",
                 "zIndex": "0",
                 "zOrder": "",
                 "opacity": "0.5",

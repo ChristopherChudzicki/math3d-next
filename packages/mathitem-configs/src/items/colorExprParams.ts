@@ -1,6 +1,6 @@
 type SurfaceKind = "explicit" | "parametric" | "polar";
 
-const DEFAULT_COLOR_RHS = "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)";
+const DEFAULT_COLOR_RHS = "\\operatorname{rescale}_z(z)";
 
 /** Stands in for a coordinate whose name is taken; users can't define `$` names. */
 const standIn = (coordinate: string) => `\\$${coordinate}`;

@@ -193,6 +193,7 @@
         "zBias": "0",
         "zOrder": "",
         "shaded": "true",
+        "wrapColors": "false",
         "expr": {
           "type": "function-assignment",
           "name": "_f",
@@ -244,6 +245,7 @@
         "zBias": "0",
         "zOrder": "",
         "shaded": "true",
+        "wrapColors": "false",
         "expr": {
           "type": "function-assignment",
           "name": "_f",
@@ -280,13 +282,178 @@
         "grid1": "16",
         "grid2": "16"
       }
+    },
+    {
+      "id": "wrap",
+      "type": "FOLDER",
+      "properties": {
+        "description": "Wrap outside [0, 1]",
+        "isCollapsed": "false"
+      }
+    },
+    {
+      "id": "wrap-on",
+      "type": "EXPLICIT_SURFACE",
+      "properties": {
+        "description": "Wraps: (x+y)/3 with Wrap on",
+        "color": "temperature",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "wrapColors": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["x", "y"],
+          "rhs": "\\sin(x)\\cos(y)+3.5"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["y"],
+              "rhs": "[-3, 3]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["x"],
+              "rhs": "[-3, 3]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["x", "y", "z"],
+          "rhs": "\\frac{x+y}{3}"
+        },
+        "gridOpacity": "1",
+        "gridWidth": "4",
+        "samples1": "64",
+        "samples2": "64",
+        "grid1": "6",
+        "grid2": "6"
+      }
+    },
+    {
+      "id": "wrap-off",
+      "type": "EXPLICIT_SURFACE",
+      "properties": {
+        "description": "Clamps: (x+y)/3 with Wrap off",
+        "color": "temperature",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "wrapColors": "false",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["x", "y"],
+          "rhs": "\\sin(x)\\cos(y)-3.5"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["y"],
+              "rhs": "[-3, 3]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["x"],
+              "rhs": "[-3, 3]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["x", "y", "z"],
+          "rhs": "\\frac{x+y}{3}"
+        },
+        "gridOpacity": "1",
+        "gridWidth": "4",
+        "samples1": "64",
+        "samples2": "64",
+        "grid1": "6",
+        "grid2": "6"
+      }
+    },
+    {
+      "id": "constant-one",
+      "type": "EXPLICIT_SURFACE",
+      "properties": {
+        "description": "Constant 1: the high end, no speckle",
+        "color": "temperature",
+        "visible": true,
+        "calculatedVisibility": "",
+        "useCalculatedVisibility": false,
+        "opacity": "1",
+        "zIndex": "0",
+        "zBias": "0",
+        "zOrder": "",
+        "shaded": "true",
+        "wrapColors": "true",
+        "expr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["x", "y"],
+          "rhs": "\\sin(x)\\cos(y)"
+        },
+        "domain": {
+          "type": "array",
+          "items": [
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["y"],
+              "rhs": "[3.5, 5]"
+            },
+            {
+              "type": "function-assignment",
+              "name": "_f",
+              "params": ["x"],
+              "rhs": "[-3, 3]"
+            }
+          ]
+        },
+        "colorExpr": {
+          "type": "function-assignment",
+          "name": "_f",
+          "params": ["x", "y", "z"],
+          "rhs": "1"
+        },
+        "gridOpacity": "1",
+        "gridWidth": "4",
+        "samples1": "64",
+        "samples2": "64",
+        "grid1": "6",
+        "grid2": "6"
+      }
     }
   ],
   "itemOrder": {
     "0": ["1", "2"],
-    "main": ["0"],
+    "main": ["0", "wrap"],
     "setup": ["cameraFolder", "axes"],
     "cameraFolder": ["camera"],
-    "axes": ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"]
+    "axes": ["axis-x", "axis-y", "axis-z", "grid-xy", "grid-yz", "grid-zx"],
+    "wrap": ["wrap-on", "wrap-off", "constant-one"]
   }
 }

@@ -5,9 +5,11 @@ from pydantic import ValidationError
 
 from scenes.schemas.math_items import (
     MATH_ITEM_LIST_ADAPTER,
+    ExplicitSurfaceItem,
     MathItemType,
     _MathItemUnion,
 )
+from scenes.tests.data import default_scene
 
 
 def _variant_classes():
@@ -63,3 +65,13 @@ def test_adapter_rejects_unknown_type():
     items = [{"id": "x", "type": "NOPE", "properties": {}}]
     with pytest.raises(ValidationError):
         MATH_ITEM_LIST_ADAPTER.validate_python(items)
+
+
+def test_a_surface_saved_without_wrap_colors_reads_as_clamping():
+    surface = default_scene()["items"][0]
+    del surface["properties"]["wrapColors"]
+
+    [item] = MATH_ITEM_LIST_ADAPTER.validate_python([surface])
+
+    assert isinstance(item, ExplicitSurfaceItem)
+    assert item.properties.wrapColors == "false"

@@ -18,6 +18,8 @@ export type MeshBuffers = {
   normal: Float32Array;
   /** RGBA per vertex, as given: no color-space conversion. */
   color: Float32Array;
+  /** A mapped mesh's value per vertex, looked up in its map per pixel. */
+  value: Float32Array;
   /** A surface's (u, v) in [0, 1]² per vertex, where its gridlines are drawn. */
   parameter: Float32Array;
   /** Three vertex indices per triangle. */
@@ -28,6 +30,7 @@ const ATTRIBUTES = [
   ["position", 3],
   ["normal", 3],
   ["color", 4],
+  ["value", 1],
   ["parameter", 2],
 ] as const;
 
@@ -96,6 +99,7 @@ export class TriangleMesh {
       position: attribute("position").array as Float32Array,
       normal: attribute("normal").array as Float32Array,
       color,
+      value: attribute("value").array as Float32Array,
       parameter: attribute("parameter").array as Float32Array,
       index: index.array as Uint32Array,
     });
@@ -104,7 +108,11 @@ export class TriangleMesh {
       translucent = color[k] < 1;
     }
     ATTRIBUTES.forEach(([name, size]) =>
-      markWritten(attribute(name), vertexCount * size),
+      // Only a mapped mesh's color uses `value`.
+      markWritten(
+        attribute(name),
+        name === "value" && !style.colorMap ? 0 : vertexCount * size,
+      ),
     );
     markWritten(index, indexCount);
     geometry.setDrawRange(0, indexCount);

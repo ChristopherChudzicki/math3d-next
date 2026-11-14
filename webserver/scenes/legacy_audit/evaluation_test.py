@@ -15,6 +15,7 @@ from scenes.legacy_audit.evaluation import (
     signature,
     template,
 )
+from scenes.legacy_audit.expected_test import rehydrated as rehydrated_item
 
 TOL = Tolerance()
 NAN = {"nonfinite": "NaN"}
@@ -383,3 +384,15 @@ def test_fields_in_a_dependency_cycle_dont_make_each_other_downstream():
     }
     mark_roots(pairs, items, items)
     assert [p.root for p in pairs] == [True, True]
+
+
+def test_leaves_a_surfaces_wrap_colors_unpaired():
+    surface = rehydrated_item("PARAMETRIC_SURFACE")
+    rehydrated = {"mathGraphics": {"s": surface}, "mathSymbols": {}}
+    react = {"s": {"colorExpr": field()}}
+    nxt = {"s": {"colorExpr": field(), "wrapColors": field()}}
+    pairs, pairing = _pairs(rehydrated, react, nxt)
+    assert not [p for p in pairs if p[2] == "wrapColors"]
+    assert any(
+        u[2] == "wrapColors" and u[3].startswith("known") for u in pairing.unpaired
+    )

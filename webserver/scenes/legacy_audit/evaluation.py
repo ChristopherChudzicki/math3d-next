@@ -54,6 +54,7 @@ KNOWN_UNPAIRED: dict[tuple[str, str], str] = {
     ("next", "duration"): "derived from speedMultiplier",
     ("next", "useRelative"): "derived from useComputed",
     ("next", "updateOnDrag"): "derived from useComputed",
+    ("next", "wrapColors"): "derived from colorExpr",
     # `AXIS.divisions` is a constant; `GRID.divisions` is paired.
     ("next", "AXIS.divisions"): "constant",
     # math3d-react evaluates a camera's computed position and look-at but

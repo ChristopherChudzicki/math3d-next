@@ -7,6 +7,9 @@ import type { OnMathFieldChange } from "@/ui/MathLive";
 import SmallMathField from "@/ui/SmallMathField";
 import * as u from "@/util/styles/utils.module.css";
 import invariant from "tiny-invariant";
+import { mathItemConfigs } from "@math3d/mathitem-configs";
+import type { MathItemType } from "@math3d/mathitem-configs";
+import { useAppStore } from "@/store/hooks";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 
 import { useMathResults } from "@/store/scene/evaluation/mathScope";
@@ -14,6 +17,12 @@ import { IWidgetProps } from "./types";
 import styles from "./widget.module.css";
 
 const LITERAL_BOOLEAN_STRINGS = ["false", "true"];
+/** The property's value in a newly made item of this type. */
+const defaultValue = (type: MathItemType, name: string): string => {
+  const { properties } = mathItemConfigs[type].make("");
+  return (properties as unknown as Record<string, string>)[name];
+};
+
 const COMPUTED_NOTE =
   "Value is computed by expression. Reset to re-enable toggle switch control.";
 
@@ -44,6 +53,10 @@ const MathBoolean: React.FC<
   );
 
   const mathScope = useMathScope();
+  const store = useAppStore();
+  // What Reset restores: the switch's value before "Use Expression" in this
+  // mount, else the property's default.
+  const [restoreValue, setRestoreValue] = useState<string | null>(null);
 
   const triggerChange = useCallback(
     (newValue: string) => {
@@ -69,10 +82,16 @@ const MathBoolean: React.FC<
   );
 
   const handleReset = useCallback(() => {
-    triggerChange("false");
+    const item = store.getState().scene.items[itemId];
+    invariant(item);
+    triggerChange(restoreValue ?? defaultValue(item.type, name));
+    setRestoreValue(null);
     setShouldUseExpression(false);
-  }, [triggerChange]);
-  const useExpression = useCallback(() => setShouldUseExpression(true), []);
+  }, [store, itemId, name, restoreValue, triggerChange]);
+  const useExpression = useCallback(() => {
+    setRestoreValue(LITERAL_BOOLEAN_STRINGS.includes(value) ? value : null);
+    setShouldUseExpression(true);
+  }, [value]);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   // The open tooltip describes the switch itself; don't repeat its text.
   const switchDescribedBy = [

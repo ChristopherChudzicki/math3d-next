@@ -54,13 +54,12 @@ test("an explicit surface maps (U, V) onto its domain and colors by the raw x, y
   const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
 
   expect(spec.position(0.5, 0.5)).toEqual([1, 0.5, 1.5]);
-  const [r, g, b] = gradients.rainbow.getRGB(1.5 / 4);
-  expect(spec.colorAt(0.5, 0.5)).toEqual([
-    r,
-    g,
-    b,
-    Number(item.properties.opacity),
-  ]);
+  invariant(spec.color.kind === "map");
+  // The same function each time, so the renderer's per-map cache holds.
+  expect(spec.color.map).toBe(gradients.rainbow.getRGB);
+  expect(spec.color.valueAt(0.5, 0.5, spec.position(0.5, 0.5))).toBe(1.5 / 4);
+  expect(spec.color.alpha).toBe(Number(item.properties.opacity));
+  expect(spec.color.wrap).toBe(true);
   // MathBox's default line color.
   expect(spec.grid.color.slice(0, 3)).toEqual([0.5, 0.5, 0.5]);
 });
@@ -71,6 +70,7 @@ test("a solid-colored surface's gridlines take its gridline color and gridOpacit
   const item = scene.items.find((x) => x.id === "s");
   invariant(item?.type === MIT.ParametricSurface);
   const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
+  expect(spec.color).toEqual({ kind: "solid", rgba: expect.any(Array) });
   expect(spec.grid.color).toEqual(
     parseColor(gridlineColor(item.properties.color), 0.3),
   );
@@ -94,7 +94,8 @@ test("a gradient surface clamps opacity to 1, like a flat color", () => {
   const scene = new SceneBuilder();
   scene.folder().explicitSurface({ color: "rainbow", opacity: "1.5" }, "s");
   const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
-  expect(spec.colorAt(0.5, 0.5)[3]).toBe(1);
+  invariant(spec.color.kind === "map");
+  expect(spec.color.alpha).toBe(1);
 });
 
 test("the spec's position function is new only when a variable the position uses changes", () => {
@@ -132,14 +133,29 @@ test("the spec's position function is new only when a variable the position uses
       );
     });
   set("a", "0.5");
-  const { getRGB } = gradients.rainbow;
-  expect(specs.map(({ colorAt }) => colorAt(0, 0).slice(0, 3))).toEqual([
-    getRGB(1),
-    getRGB(0.5),
-  ]);
+  const values = specs.map(({ color, position }) => {
+    invariant(color.kind === "map");
+    return color.valueAt(0, 0, position(0, 0));
+  });
+  expect(values).toEqual([1, 0.5]);
   expect(specs[1].position).toBe(specs[0].position);
   set("b", "2");
   expect(specs).toHaveLength(3);
   expect(specs[2].position).not.toBe(specs[1].position);
   expect(specs[2].position(0, 0)[2]).toBe(2);
 });
+
+test.each([
+  { wrapColors: "false", wrap: false },
+  // An invalid expression evaluates to nothing, which clamps.
+  { wrapColors: "1+", wrap: false },
+])(
+  "a gradient surface with wrapColors $wrapColors has wrap $wrap",
+  ({ wrapColors, wrap }) => {
+    const scene = new SceneBuilder();
+    scene.folder().explicitSurface({ color: "rainbow", wrapColors }, "s");
+    const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
+    invariant(spec.color.kind === "map");
+    expect(spec.color.wrap).toBe(wrap);
+  },
+);

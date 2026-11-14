@@ -247,3 +247,53 @@ test("Setting colorExpr for surfaces", async () => {
   // updates store
   expect(getItem().properties.colorExpr.rhs).toBe("mod(a, 2) + 0.1");
 });
+
+describe("the Color Map tab's wrap setting", () => {
+  const openColorMap = async (
+    itemProps: Partial<MathItem<MIT.ExplicitSurface>["properties"]>,
+  ) => {
+    const helpers = await setup(MIT.ExplicitSurface, itemProps);
+    const dialog = await helpers.openDialog();
+    await helpers.user.click(
+      within(dialog).getByRole("tab", { name: "Color Map" }),
+    );
+    return { ...helpers, dialog };
+  };
+
+  const WRAPS =
+    /^Colors outside \[0, 1\] wrap: 1\.25 is the same color as 0\.25\./;
+  const CLAMPS =
+    /^Colors outside \[0, 1\] take the end colors: 1\.25 is the same color as 1\./;
+
+  test("toggles wrapColors and says what each setting does", async () => {
+    const { dialog, getItem, user } = await openColorMap({
+      color: "rainbow",
+    });
+    const toggle = within(dialog).getByRole("switch", {
+      name: "Toggle property: Wrap colors",
+    });
+    expect(toggle).toHaveAccessibleDescription(WRAPS);
+
+    await user.click(toggle);
+
+    expect(getItem().properties.wrapColors).toBe("false");
+    await waitFor(() => expect(toggle).toHaveAccessibleDescription(CLAMPS));
+  });
+
+  test("describes a computed setting by its value", async () => {
+    const { dialog } = await openColorMap({
+      color: "rainbow",
+      wrapColors: "1>2",
+    });
+    const toggle = within(dialog).getByRole("switch", {
+      name: "Toggle property: Wrap colors",
+    });
+    await waitFor(() => expect(toggle).toHaveAccessibleDescription(CLAMPS));
+  });
+
+  test("with a solid color, points to the gradients in place of the setting", async () => {
+    const { dialog } = await openColorMap({});
+    within(dialog).getByText("Pick a gradient on the Color tab to color by f.");
+    expect(within(dialog).queryByRole("switch")).toBe(null);
+  });
+});

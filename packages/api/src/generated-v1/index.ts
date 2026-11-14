@@ -329,6 +329,8 @@ export interface components {
       useCalculatedVisibility: boolean;
       /** Visible */
       visible: boolean;
+      /** Wrapcolors */
+      wrapColors: string;
       /** Zbias */
       zBias: string;
       /** Zindex */
@@ -367,6 +369,8 @@ export interface components {
       useCalculatedVisibility: boolean;
       /** Visible */
       visible: boolean;
+      /** Wrapcolors */
+      wrapColors: string;
       /** Zbias */
       zBias: string;
       /** Zindex */
@@ -723,6 +727,8 @@ export interface components {
       useCalculatedVisibility: boolean;
       /** Visible */
       visible: boolean;
+      /** Wrapcolors */
+      wrapColors: string;
       /** Zbias */
       zBias: string;
       /** Zindex */

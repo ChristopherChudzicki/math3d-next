@@ -42,6 +42,7 @@ const STROKE = {
 const SURFACE = {
   expr: "drawn",
   colorExpr: "drawn",
+  wrapColors: "drawn",
   color: "drawn",
   domain: "drawn",
   description: "n/a: editor only",

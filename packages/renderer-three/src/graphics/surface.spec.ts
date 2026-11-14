@@ -1,13 +1,14 @@
 import { describe, expect, test, vi } from "vitest";
 import type { BufferAttribute, Mesh } from "three/webgpu";
 import type { Coords, SurfaceSpec } from "@math3d/viewport-spec";
+import { blankColorMap } from "../mesh/colorMapTexture";
 import { buildSurface } from "./surface";
 
 const surfaceSpec = (overrides: Partial<SurfaceSpec> = {}): SurfaceSpec => ({
   kind: "surface",
   samples: [8, 6],
   position: (u, v) => [u, v, 0],
-  colorAt: () => [0.2, 0.4, 0.6, 1],
+  color: { kind: "solid", rgba: [0.2, 0.4, 0.6, 1] },
   shaded: true,
   grid: { lines: [3, 4], width: 2, color: [0.1, 0.2, 0.3, 0.5] },
   zBias: 2,
@@ -63,6 +64,30 @@ describe("buildSurface", () => {
     expect(surface.userData.mesh.gridClosed.toArray()).toEqual([1, 0]);
   });
 
+  test("tells the shader whether a map wraps, and a solid surface that it has none", () => {
+    const map = (t: number): [number, number, number] => [t, 0, 1 - t];
+    const color = { kind: "map", map, valueAt: () => 0.5, alpha: 1 } as const;
+    const settings = (spec: SurfaceSpec) => {
+      const { mapped, wrapColors, mapTexture } = meshOf(
+        buildSurface(spec, "oit", "glossy"),
+      ).userData.mesh;
+      return { mapped, wrapColors, blank: mapTexture === blankColorMap() };
+    };
+    expect(settings(surfaceSpec({ color: { ...color, wrap: true } }))).toEqual({
+      mapped: 1,
+      wrapColors: 1,
+      blank: false,
+    });
+    expect(settings(surfaceSpec({ color: { ...color, wrap: false } }))).toEqual(
+      { mapped: 1, wrapColors: 0, blank: false },
+    );
+    expect(settings(surfaceSpec())).toEqual({
+      mapped: 0,
+      wrapColors: 0,
+      blank: true,
+    });
+  });
+
   test("redraws in place for an updated spec, with no gridlines at width 0", () => {
     const spec = surfaceSpec();
     const graphic = buildSurface(spec, "oit", "glossy");
@@ -89,7 +114,7 @@ describe("buildSurface", () => {
       ...spec,
       // A new array with the same counts, as each spec from the app has.
       samples: [...spec.samples],
-      colorAt: () => rgba,
+      color: { kind: "solid", rgba },
     });
     expect(position).not.toHaveBeenCalled();
     expect(attributeOf(surface, "position")).toEqual(positions);

@@ -1,4 +1,4 @@
-import type { Coords, RGBA } from "@math3d/viewport-spec";
+import type { Coords, SurfaceColor } from "@math3d/viewport-spec";
 
 /**
  * A surface sampled on a `cols` × `rows` grid over [0, 1]², each at least 2:
@@ -51,20 +51,39 @@ export const writeParameters = (
   }
 };
 
+const FLOAT32_MAX = 3.4028234663852886e38;
+
+/**
+ * The value limited to float32's range, which leaves its clamped and wrapped
+ * map positions as they were (float32's largest values are integers); 0
+ * where it isn't finite.
+ */
+const storable = (value: number) =>
+  Number.isFinite(value)
+    ? Math.min(Math.max(value, -FLOAT32_MAX), FLOAT32_MAX)
+    : 0;
+
+/**
+ * Writes each vertex's RGBA, or a map's value and alpha, which the shader
+ * looks up per pixel.
+ */
 export const writeColors = (
-  { cols, rows }: ParametricGrid,
-  colorAt: (u: number, v: number) => RGBA,
-  out: Float32Array,
+  { cols, rows, points }: ParametricGrid,
+  color: SurfaceColor,
+  out: { color: Float32Array; value: Float32Array },
 ): void => {
+  const count = cols * rows;
+  if (color.kind === "solid") {
+    for (let k = 0; k < count; k += 1) out.color.set(color.rgba, 4 * k);
+    return;
+  }
+  out.color.fill(0, 0, 4 * count);
   for (let j = 0; j < rows; j += 1) {
     const v = parameter(j, rows);
     for (let i = 0; i < cols; i += 1) {
-      const color = colorAt(parameter(i, cols), v);
-      const k = 4 * (j * cols + i);
-      out[k] = color[0];
-      out[k + 1] = color[1];
-      out[k + 2] = color[2];
-      out[k + 3] = color[3];
+      const k = j * cols + i;
+      out.value[k] = storable(color.valueAt(parameter(i, cols), v, points[k]));
+      out.color[4 * k + 3] = color.alpha;
     }
   }
 };

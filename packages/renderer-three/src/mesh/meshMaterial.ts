@@ -1,5 +1,5 @@
 import { Vector2 } from "three/webgpu";
-import type { Node } from "three/webgpu";
+import type { DataTexture, Node } from "three/webgpu";
 import {
   abs,
   attribute,
@@ -11,6 +11,8 @@ import {
   dot,
   float,
   floor,
+  fract,
+  int,
   length,
   max,
   min,
@@ -25,27 +27,39 @@ import {
   select,
   sqrt,
   step,
+  texture,
   transformNormalToView,
   vec2,
   vec3,
   vec4,
 } from "three/tsl";
-import type { SurfaceSpec } from "@math3d/viewport-spec";
+import type { ColorMap, SurfaceSpec } from "@math3d/viewport-spec";
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
 import { viewUnitsPerPixel } from "../shader/viewUnits";
 import { BACKGROUND } from "../shader/background";
 import type { Opacity, Transparency } from "../shader/material";
+import {
+  COLOR_MAP_WIDTH,
+  blankColorMap,
+  colorMapTexture,
+} from "./colorMapTexture";
 
 export type MeshStyle = Pick<SurfaceSpec, "shaded" | "zBias" | "zIndex"> &
   Partial<Pick<SurfaceSpec, "grid">> & {
     /** Whether the surface closes on itself along u and along v. */
     gridClosed?: [boolean, boolean];
+    /**
+     * Colors each pixel by `map` at the interpolated `value`, wrapped or
+     * clamped by `SurfaceColor`'s `wrap` rule; without it, the mesh takes its
+     * `color` attribute.
+     */
+    colorMap?: { map: ColorMap; wrap: boolean };
   };
 
 /**
- * One mesh's depth style and gridlines. It sits at `userData.mesh` on the
- * mesh, where the shared materials read it per mesh.
+ * One mesh's depth style, gridlines and color map. It sits at
+ * `userData.mesh` on the mesh, where the shared materials read it per mesh.
  */
 export class MeshUniforms {
   zBias = 0;
@@ -62,7 +76,21 @@ export class MeshUniforms {
   /** 1 along an axis whose edges coincide, else 0. */
   readonly gridClosed = new Vector2();
 
-  set({ zBias, zIndex, grid, gridClosed = [false, false] }: MeshStyle): void {
+  /** 1 when the mesh colors through `mapTexture`, else 0. */
+  mapped = 0;
+
+  /** 1 when the map wraps values outside [0, 1], 0 when it clamps them. */
+  wrapColors = 0;
+
+  mapTexture: DataTexture = blankColorMap();
+
+  set({
+    zBias,
+    zIndex,
+    grid,
+    gridClosed = [false, false],
+    colorMap,
+  }: MeshStyle): void {
     this.zBias = zBias;
     this.zIndex = zIndex;
     const [u, v] = grid && grid.width > 0 ? grid.lines : [0, 0];
@@ -70,10 +98,48 @@ export class MeshUniforms {
     this.gridWidth = grid?.width ?? 0;
     this.gridOpacity = grid?.color[3] ?? 0;
     this.gridClosed.set(Number(gridClosed[0]), Number(gridClosed[1]));
+    this.mapped = colorMap ? 1 : 0;
+    this.wrapColors = colorMap?.wrap ? 1 : 0;
+    this.mapTexture = colorMap
+      ? colorMapTexture(colorMap.map)
+      : blankColorMap();
   }
 }
 
 const read = uniformsAt<MeshUniforms>("mesh");
+
+// ε in `SurfaceColor`'s `wrap` rule (`@math3d/viewport-spec`).
+const WRAP_TOLERANCE = 1e-4;
+
+/**
+ * The vertex color, or on a mapped mesh its map at the interpolated `value`,
+ * wrapped or clamped by `SurfaceColor`'s `wrap` rule. The texture is chosen
+ * per mesh, and sampled at level 0 so the jump where values wrap needs no
+ * derivatives.
+ */
+const mappedColor = (color: Node<"vec4">): Node<"vec4"> => {
+  const t = attribute<"float">("value", "float");
+  const outside = t
+    .lessThan(-WRAP_TOLERANCE)
+    .or(t.greaterThan(1 + WRAP_TOLERANCE));
+  const wraps = read("wrapColors", "float").greaterThan(0.5).and(outside);
+  const position = select(wraps, fract(t), saturate(t));
+  // Texel centers: 0 and 1 land on the end texels.
+  const u = position
+    .mul(COLOR_MAP_WIDTH - 1)
+    .add(0.5)
+    .div(COLOR_MAP_WIDTH);
+  // The level is `texture()`'s argument: `.level()` clones the node, and a
+  // clone drops `onObjectUpdate`.
+  const map = texture(blankColorMap(), vec2(u, 0.5), int(0)).onObjectUpdate(
+    ({ object }) => (object?.userData.mesh as MeshUniforms).mapTexture,
+  );
+  return select(
+    read("mapped", "float").greaterThan(0.5),
+    vec4(map.rgb, color.a),
+    color,
+  );
+};
 
 /**
  * The view-space normal from the `normal` attribute, normalized. A zero
@@ -274,7 +340,7 @@ const withGridlines = (
 };
 
 const build = (shading: Shading | null) => () => {
-  const color = attribute<"vec4">("color", "vec4");
+  const color = mappedColor(attribute<"vec4">("color", "vec4"));
   // Clamped to 1, as the unorm targets do: OIT accumulates in half float,
   // where a color above 1 would brighten the blend at that pixel.
   const lit = shading ? min(SHADINGS[shading](color, viewNormal()), 1) : color;

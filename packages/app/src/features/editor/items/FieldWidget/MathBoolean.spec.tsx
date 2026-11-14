@@ -165,3 +165,38 @@ test("Clicking reset resets widget", async () => {
   await user.click(await getReset(), { pointerEventsCheck: 0 });
   expect(await findToggle()).toBeEnabled();
 });
+
+test("Reset of an expression the scene loaded with restores the property's default", async () => {
+  // Shaded defaults to "true", so a reset to "false" would unshade it.
+  const surface = makeItem(MIT.ExplicitSurface, { shaded: "!false" });
+  const scene = seedDb.withSceneFromItems([surface]);
+  const { store } = renderTestApp(`/${scene.key}`);
+  await user.click(await screen.findByLabelText("More Settings"), {
+    pointerEventsCheck: 0,
+  });
+  const settings = await screen.findByRole("dialog", {
+    name: "Explicit Surface Settings",
+  });
+  const shaded = within(settings).getByLabelText("Shaded");
+
+  await user.click(within(shaded).getByText("Reset"), {
+    pointerEventsCheck: 0,
+  });
+
+  const item = store.getState().scene.items[surface.id];
+  expect(item.properties).toHaveProperty("shaded", "true");
+});
+
+test("Reset after Use Expression restores the switch's earlier value", async () => {
+  // Label Visible defaults to "false" on a point.
+  const { getValue, getReset, findUseExpr, findExpr } = await setup("true");
+
+  await user.click(await findUseExpr(), { pointerEventsCheck: 0 });
+  const expr = await findExpr();
+  await user.clear(expr);
+  await user.type(expr, "1>2");
+  await waitFor(() => expect(getValue()).toBe(false));
+  await user.click(getReset(), { pointerEventsCheck: 0 });
+
+  await waitFor(() => expect(getValue()).toBe(true));
+});

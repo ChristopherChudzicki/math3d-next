@@ -33,6 +33,7 @@
           ]
         },
         "shaded": "true",
+        "wrapColors": "true",
         "zIndex": "0",
         "opacity": "0.75",
         "visible": true,

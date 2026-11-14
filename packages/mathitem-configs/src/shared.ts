@@ -152,6 +152,14 @@ const shaded: PropertyConfig<"shaded", boolean> = {
   validate: validators.boolean,
 };
 
+/** Values outside [0, 1] wrap around the color map when true; else they clamp. */
+const wrapColors: PropertyConfig<"wrapColors", boolean> = {
+  name: "wrapColors",
+  label: "Wrap colors",
+  widget: WidgetType.MathBoolean,
+  validate: validators.boolean,
+};
+
 const size: PropertyConfig<"size", number> = {
   name: "size",
   label: "Size",
@@ -278,6 +286,7 @@ export {
   useCalculatedVisibility,
   visibilityProps,
   width,
+  wrapColors,
   zBias,
   zIndex,
   zOrder,

@@ -143,10 +143,12 @@ parent, so anything sized in pixels is built in the shader, in view space:
   line shader, its ends placed 10 px apart in view space around each tick.
 - **Every triangle mesh is a `TriangleMesh`** (`mesh/TriangleMesh.ts`), drawn
   with a port of MathBox's surface shading, gamma step included. It takes
-  per-vertex RGBA, and normals in its own coordinates that the normal matrix
-  carries through the axes' scale. A surface's triangles wind as MathBox's
-  do: under the `ordered` model three draws a translucent mesh's back faces
-  first, so winding decides how it overlaps itself.
+  normals in its own coordinates, which the normal matrix carries through the
+  axes' scale, and per-vertex RGBA or, on a surface with a color map, a
+  per-vertex value that its shader wraps or clamps and looks up per pixel. A
+  surface's triangles wind as MathBox's do: under the `ordered` model three
+  draws a translucent mesh's back faces first, so winding decides how it
+  overlaps itself.
 - **A surface's gridlines are drawn by its own shader**, not as strokes. A
   fragment near an even step of its (u, v) composites a line over its lit
   color, as wide as a stroke of the grid's width at that depth. The line is
@@ -293,11 +295,11 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
   them.
 - `spec/` reads the store and MathScope and produces specs; it imports no
   renderer, and any renderer may import it. **A spec field is in math-item
-  terms only** (evaluated positions, RGBA colors, sample callbacks), never a
-  renderer prop, so the specs are testable under jsdom and survive a renderer
-  swap. Tick and gridline values count as math-item terms: `spec/ticks.ts`
-  (MathBox's `linear`) computes them into `AxisSpec` and `GridSpec`, and
-  each renderer formats tick labels itself.
+  terms only** (evaluated positions, RGBA colors, color maps, sample
+  callbacks), never a renderer prop, so the specs are testable under jsdom and
+  survive a renderer swap. Tick and gridline values count as math-item
+  terms: `spec/ticks.ts` (MathBox's `linear`) computes them into `AxisSpec`
+  and `GridSpec`, and each renderer formats tick labels itself.
 - `spec/`, `shared/` and `three/` import no renderer package (`three`,
   `mathbox*`; a `no-restricted-imports` group). The path
   zones above check folders only. In `app`, `three` is MathBox's copy, so

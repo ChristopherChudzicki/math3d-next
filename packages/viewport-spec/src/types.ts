@@ -1,8 +1,9 @@
 /**
  * What each graphic draws, in math-item terms: evaluated positions, RGBA
- * colors, sample callbacks. The app's viewport/spec components read the store
- * and MathScope and produce these; a renderer that draws from specs (three.js)
- * turns them into its own scene, while MathBox reads math items directly.
+ * colors or color maps, sample callbacks. The app's viewport/spec components
+ * read the store and MathScope and produce these; a renderer that draws from
+ * specs (three.js) turns them into its own scene, while MathBox reads math
+ * items directly.
  *
  * Positions are in math coordinates, as the items evaluate them; only
  * `CameraSpec` is in view coordinates. Pixel quantities (`width`, `size`) are
@@ -52,6 +53,36 @@ export type LineSpec = Common & {
   label: string | null;
 };
 
+/**
+ * A color map: `t` in [0, 1] to RGB in [0, 1]. Pure, and the same function
+ * for the same map, so a renderer may cache what it builds from it by
+ * identity.
+ */
+export type ColorMap = (t: number) => [number, number, number];
+
+export type SurfaceColor =
+  | { kind: "solid"; rgba: RGBA }
+  | {
+      kind: "map";
+      map: ColorMap;
+      /**
+       * The value to look up at normalized parameters in [0, 1]², given the
+       * point already sampled there.
+       */
+      valueAt: (u: number, v: number, point: Coords) => number;
+      /**
+       * The map position for a value `t`, with ε = 1e-4:
+       * - wrapping, `t` in [−ε, 1 + ε] clamps to [0, 1] and any other `t`
+       *   wraps to `t − ⌊t⌋`, so 1 is the high end and 2 the low end;
+       * - not wrapping, `t` clamps to [0, 1];
+       * - a non-finite `t` is 0.
+       * ε keeps a value that interpolation lands a hair past an exact 0 or 1
+       * from wrapping to the far end.
+       */
+      wrap: boolean;
+      alpha: number;
+    };
+
 export type SurfaceSpec = Common & {
   kind: "surface";
   /** Sample counts along the two parameters, each at least 2. */
@@ -62,8 +93,7 @@ export type SurfaceSpec = Common & {
    * variable drives only the color); a new function only costs a resample.
    */
   position: (u: number, v: number) => Coords;
-  /** Color (with opacity) at normalized parameters in [0, 1]². */
-  colorAt: (u: number, v: number) => RGBA;
+  color: SurfaceColor;
   shaded: boolean;
   grid: {
     /** Gridlines along each parameter: 0 for none, else at least 2. */

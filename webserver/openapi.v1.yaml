@@ -306,6 +306,9 @@ components:
         visible:
           title: Visible
           type: boolean
+        wrapColors:
+          title: Wrapcolors
+          type: string
         zBias:
           title: Zbias
           type: string
@@ -326,6 +329,7 @@ components:
       - zBias
       - zOrder
       - shaded
+      - wrapColors
       - expr
       - domain
       - colorExpr
@@ -385,6 +389,9 @@ components:
         visible:
           title: Visible
           type: boolean
+        wrapColors:
+          title: Wrapcolors
+          type: string
         zBias:
           title: Zbias
           type: string
@@ -405,6 +412,7 @@ components:
       - zBias
       - zOrder
       - shaded
+      - wrapColors
       - expr
       - domain
       - colorExpr
@@ -1045,6 +1053,9 @@ components:
         visible:
           title: Visible
           type: boolean
+        wrapColors:
+          title: Wrapcolors
+          type: string
         zBias:
           title: Zbias
           type: string
@@ -1065,6 +1076,7 @@ components:
       - zBias
       - zOrder
       - shaded
+      - wrapColors
       - expr
       - domain
       - colorExpr

@@ -777,6 +777,9 @@ def _make_surface(
         out = _Out()
         _universal(out, item, ctx)
         out.add("shaded", _bool_str(item.get("shaded")), "render", "shaded")
+        # react clamped colors outside [0, 1]; only a `mod` in the expression
+        # wrapped them.
+        out.add("wrapColors", "false", "render", "constant")
         out.func_assignment("expr", item.get("expr"), "expr")
         _color_expr(out, item, explicit)
         # rangeU may depend on v and rangeV on u

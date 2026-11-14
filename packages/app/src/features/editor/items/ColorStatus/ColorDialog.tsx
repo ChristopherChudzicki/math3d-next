@@ -2,9 +2,13 @@ import {
   MathGraphic,
   colorsAndGradients,
   colors,
+  gradients,
+  isGradientName,
+  mathItemConfigs as configs,
+  MathItemType as MIT,
 } from "@math3d/mathitem-configs";
 import type { ParseableObjs } from "@math3d/parser";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useId, useState } from "react";
 import ColorPicker, { OnColorChange } from "@/ui/ColorPicker";
 import { Tabs } from "@/ui/Tabs";
 
@@ -14,12 +18,20 @@ import ErrorTooltip from "@/features/editor/items/FieldWidget/ErrorTooltip";
 import MathValue from "@/features/editor/items/FieldWidget/MathValue";
 import { OnWidgetChange } from "@/features/editor/items/FieldWidget/types";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import { useMathErrors } from "@/store/scene/evaluation/mathScope";
+import {
+  useMathErrors,
+  useMathResults,
+} from "@/store/scene/evaluation/mathScope";
+import MathBoolean from "@/features/editor/items/FieldWidget/MathBoolean";
 import ReadonlyMathField from "@/features/editor/items/FieldWidget/ReadonlyMathField";
+import * as u from "@/util/styles/utils.module.css";
 import styles from "./ColorDialog.module.css";
 
 type GraphicWithColorExpr = MathGraphic & {
-  properties: { colorExpr: ParseableObjs["function-assignment"] };
+  properties: {
+    colorExpr: ParseableObjs["function-assignment"];
+    wrapColors: string;
+  };
 };
 
 const hasColorExpr = (
@@ -69,6 +81,76 @@ const ColorExprInput: React.FC<ColorExprProps> = (props) => {
   );
 };
 
+const WRAP_COLORS = ["wrapColors"] as const;
+
+/**
+ * The selected gradient, the wrap setting and what it does; with a solid
+ * color, a pointer to the gradients.
+ */
+const ColorMapOptions: React.FC<{
+  item: GraphicWithColorExpr;
+  onChange: OnWidgetChange<string>;
+}> = ({ item, onChange }) => {
+  const mathScope = useMathScope();
+  const { wrapColors: error } = useMathErrors(mathScope, item.id, WRAP_COLORS);
+  // Undefined when invalid, which clamps.
+  const { wrapColors: wraps = false } = useMathResults(
+    mathScope,
+    item.id,
+    WRAP_COLORS,
+  );
+  const labelId = useId();
+  const helpId = useId();
+  const { color } = item.properties;
+  if (!isGradientName(color)) {
+    return (
+      <p className={styles.help}>
+        Pick a gradient on the Color tab to color by f.
+      </p>
+    );
+  }
+  return (
+    <div className={styles.options}>
+      <div
+        className={styles.gradient}
+        style={{ background: gradients[color].backgroundPreview }}
+        role="img"
+        aria-label={`${gradients[color].label}, from 0 to 1`}
+      />
+      <div className={styles.ends} aria-hidden="true">
+        <span>0</span>
+        <span>1</span>
+      </div>
+      <div className={styles.wrap}>
+        <span id={labelId}>Wrap</span>
+        <ErrorTooltip error={error}>
+          <MathBoolean
+            itemId={item.id}
+            name="wrapColors"
+            label={configs[MIT.ParametricSurface].properties.wrapColors.label}
+            aria-labelledby={labelId}
+            aria-describedby={helpId}
+            value={item.properties.wrapColors}
+            onChange={onChange}
+            error={error}
+          />
+        </ErrorTooltip>
+      </div>
+      <p id={helpId} className={styles.help}>
+        Colors outside{" "}
+        {/* MathLive's rendered math has no accessible text, so a copy reads it. */}
+        <span aria-hidden="true">
+          <ReadonlyMathField value="[0, 1]" className={styles.interval} />
+        </span>
+        <span className={u.visuallyHidden}>[0, 1]</span>{" "}
+        {wraps
+          ? "wrap: 1.25 is the same color as 0.25."
+          : "take the end colors: 1.25 is the same color as 1."}
+      </p>
+    </div>
+  );
+};
+
 interface ColorDialogProps {
   item: MathGraphic;
   className?: string;
@@ -101,6 +183,7 @@ const ColorDialog: React.FC<ColorDialogProps> = (props) => {
           </Tabs.Panel>
           <Tabs.Panel value="colormap" className={styles.panel} tabIndex={-1}>
             <ColorExprInput item={item} onChange={onWidgetChange} />
+            <ColorMapOptions item={item} onChange={onWidgetChange} />
           </Tabs.Panel>
         </Tabs.Root>
       ) : (

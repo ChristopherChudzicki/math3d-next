@@ -46,6 +46,7 @@ const defaultScene: Pick<
           ],
         },
         shaded: "true",
+        wrapColors: "true",
         opacity: "0.75",
         visible: true,
         calculatedVisibility: "",

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { Coords, RGBA } from "@math3d/viewport-spec";
+import type { Coords } from "@math3d/viewport-spec";
 import {
   closedAxes,
   sampleGrid,
@@ -80,11 +80,56 @@ describe("writeIndex", () => {
 });
 
 describe("writeColors", () => {
-  test("writes each sample's RGBA at its parameters", () => {
-    const out = new Float32Array(4 * 4);
-    const colorAt = (u: number, v: number): RGBA => [u, v, 0, 1 - u];
-    writeColors(sampleGrid([2, 2], flat), colorAt, out);
-    expect(Array.from(out.slice(4, 8))).toEqual([1, 0, 0, 0]);
+  const buffers = (vertices: number) => ({
+    color: new Float32Array(4 * vertices),
+    value: new Float32Array(vertices),
+  });
+
+  test("writes a solid color to every vertex", () => {
+    const out = buffers(4);
+    writeColors(
+      sampleGrid([2, 2], flat),
+      { kind: "solid", rgba: [0.1, 0.2, 0.3, 0.4] },
+      out,
+    );
+    expect(Array.from(out.color.slice(12, 16))).toEqual(
+      Array.from(new Float32Array([0.1, 0.2, 0.3, 0.4])),
+    );
+  });
+
+  test("writes a map's value at each sample, and its alpha", () => {
+    const out = buffers(4);
+    writeColors(
+      sampleGrid([2, 2], (u, v) => [u, v, 3]),
+      {
+        kind: "map",
+        map: () => [1, 1, 1],
+        valueAt: (u, v, [, , z]) => z + u - v,
+        wrap: false,
+        alpha: 0.5,
+      },
+      out,
+    );
+    expect(Array.from(out.value)).toEqual([3, 4, 2, 3]);
+    expect(Array.from(out.color.slice(4, 8))).toEqual([0, 0, 0, 0.5]);
+  });
+
+  test("writes a value past float32's range as its end, and a non-finite one as 0", () => {
+    const out = buffers(4);
+    const values = [NaN, Infinity, 1e39, -1e39];
+    writeColors(
+      sampleGrid([2, 2], flat),
+      {
+        kind: "map",
+        map: () => [0, 0, 0],
+        valueAt: (u, v) => values[2 * v + u],
+        wrap: false,
+        alpha: 1,
+      },
+      out,
+    );
+    const max = 3.4028234663852886e38;
+    expect(Array.from(out.value)).toEqual([0, 0, max, -max]);
   });
 });
 
