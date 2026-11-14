@@ -46,6 +46,8 @@ type Options = {
    * frame with no redraw pending.
    */
   onSettled(): void;
+  /** Called once, after the first draw. */
+  onDrawn(): void;
   /** The camera as the user moves it. */
   onCameraMove(camera: CameraSpec): void;
   /** Gets what a resize or a frame throws, since neither runs inside React. */
@@ -109,6 +111,8 @@ export class ThreeScene {
   );
 
   private disposed = false;
+
+  private drawn = false;
 
   constructor(
     private readonly host: HTMLElement,
@@ -252,6 +256,10 @@ export class ThreeScene {
     if (!this.built || !this.hasSize()) return;
     if (this.oit) this.oit.render(this.view.camera);
     else this.renderer.render(this.scene, this.view.camera);
+    if (!this.drawn) {
+      this.drawn = true;
+      this.options.onDrawn();
+    }
     this.settle.drawn();
   }
 }

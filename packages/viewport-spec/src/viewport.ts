@@ -52,6 +52,12 @@ export type ViewportHooks = {
    */
   onCameraMove(camera: CameraSpec): void;
   /**
+   * The renderer has drawn the spec it holds for the first time. Called once.
+   * Unlike `onReady`, it comes even while the scene keeps redrawing, as it
+   * does while a slider animates.
+   */
+  onDrawn(): void;
+  /**
    * Every graphic in the spec the renderer holds is drawn, and nothing more
    * will change without new input. Called once. Whether that spec is the
    * whole scene is the app's to know.

@@ -20,6 +20,8 @@ type Props = {
   className?: string;
   /** The renderer, usually behind a `React.lazy`. */
   children: React.ReactNode;
+  /** Drawn over the renderer, outside its `Suspense`, while there's no failure. */
+  overlay?: React.ReactNode;
 };
 
 /** The scene container for a renderer loaded behind `React.lazy`. */
@@ -31,6 +33,7 @@ const ViewportShell: React.FC<Props> = ({
   unsupportedMessage,
   className,
   children,
+  overlay,
 }) => {
   const hasRequired = useHasViewportItems();
   const loadCount = useAppSelector(select.loadCount);
@@ -46,7 +49,7 @@ const ViewportShell: React.FC<Props> = ({
       data-scene-ready={ready && !failure ? "true" : undefined}
       data-scene-error={failure}
       className={className}
-      style={{ width: "100%", height: "100%" }}
+      style={{ width: "100%", height: "100%", position: "relative" }}
     >
       {show ? (
         // A failed chunk load or a render error throws here; past this
@@ -69,6 +72,7 @@ const ViewportShell: React.FC<Props> = ({
           ) : (
             <Suspense fallback={null}>{children}</Suspense>
           )}
+          {failure ? null : overlay}
         </Sentry.ErrorBoundary>
       ) : null}
     </div>
