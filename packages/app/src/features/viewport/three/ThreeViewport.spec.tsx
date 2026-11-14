@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { onTestFinished } from "vitest";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router";
@@ -10,6 +11,7 @@ import { getStore } from "@/store/store";
 import { actions } from "@/store/scene/state/scene.slice";
 import { RENDERER_PREFERENCE_KEY } from "@/services/renderer/rendererPreference";
 import { threeViewport } from "@/test_util/threeViewport";
+import { stubKnotLoaderSupport } from "@/test_util/knotLoaderSupport";
 import type { ThreeViewportProps } from "@/test_util/threeViewport";
 import ThreeViewport from "./ThreeViewport";
 
@@ -61,6 +63,63 @@ test("ready holds only for the scene load whose renderer settled", async () => {
   // The first load's renderer settling late changes nothing.
   act(() => first.onReady());
   expect(scene).toHaveAttribute("data-scene-ready", "true");
+});
+
+test("shows the loading knot until the first draw, then closes it and stops its worker", async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+  onTestFinished(() => {
+    vi.useRealTimers();
+  });
+  const { posted, terminate } = stubKnotLoaderSupport();
+  const mounted: ViewportHooks[] = [];
+  const Records = ({ hooks }: ThreeViewportProps) => {
+    useEffect(() => {
+      mounted.push(hooks);
+    }, [hooks]);
+    return null;
+  };
+  threeViewport.Component = Records;
+  renderViewport();
+  await waitFor(() => expect(mounted).toHaveLength(1));
+  expect(screen.queryByRole("progressbar")).toBeNull();
+
+  await act(() => vi.advanceTimersByTimeAsync(400));
+
+  expect(
+    screen.getByRole("progressbar", { name: "Loading scene" }),
+  ).toBeInTheDocument();
+  expect(posted).toContainEqual({ type: "stage", stage: "building" });
+
+  // No onReady: a scene animating a slider is drawn but never settles.
+  act(() => mounted[0].onDrawn());
+
+  expect(posted).toContainEqual({ type: "stage", stage: "done" });
+  await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
+  expect(terminate).toHaveBeenCalled();
+});
+
+test("a scene drawn within 400 ms never shows the loading knot", async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+  onTestFinished(() => {
+    vi.useRealTimers();
+  });
+  const { posted } = stubKnotLoaderSupport();
+  const mounted: ViewportHooks[] = [];
+  const Records = ({ hooks }: ThreeViewportProps) => {
+    useEffect(() => {
+      mounted.push(hooks);
+    }, [hooks]);
+    return null;
+  };
+  threeViewport.Component = Records;
+  renderViewport();
+  await waitFor(() => expect(mounted).toHaveLength(1));
+  act(() => mounted[0].onDrawn());
+
+  await act(() => vi.advanceTimersByTimeAsync(1000));
+
+  expect(screen.queryByRole("progressbar")).toBeNull();
+  expect(posted).toEqual([]);
 });
 
 test("a render error marks the scene failed", async () => {

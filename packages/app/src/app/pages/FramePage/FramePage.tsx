@@ -10,7 +10,7 @@ import useSceneLoader from "@/app/useSceneLoader";
 
 const VIEWPORTS: Record<Renderer, React.ReactElement> = {
   mathbox: <Viewport still />,
-  threejs: <ThreeViewport />,
+  threejs: <ThreeViewport loader={false} />,
 };
 
 /**

@@ -29,9 +29,10 @@ reports back through `ViewportHooks`, both types in
   `GraphicSpec`, so a graphic that only moves in the list keeps its spec.
 - `ViewportHooks`: `onUnsupported(error)` when the renderer can't run in this
   browser; `onCameraMove(camera)` as the user moves the camera (the app
-  decides when a move ends and what to write back); `onReady()`, once, when
-  every graphic in the spec is drawn and nothing more will change without
-  new input.
+  decides when a move ends and what to write back); `onDrawn()`, once, after
+  the first draw, which the app's loading indicator waits for; `onReady()`,
+  once, when every graphic in the spec is drawn and nothing more will change
+  without new input.
 - `features/viewport/spec/` produces it: `useViewportSpec(host)` returns the
   spec, the reporter elements that fill `spec.graphics` (render them
   alongside the renderer), and the `onCameraMove` hook.

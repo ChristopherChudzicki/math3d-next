@@ -45,6 +45,7 @@ const Viewport: React.FC<ViewportProps> = ({
       transparency,
       shading,
       onSettled: () => latestHooks.current.onReady(),
+      onDrawn: () => latestHooks.current.onDrawn(),
       onCameraMove: (camera) => latestHooks.current.onCameraMove(camera),
       onError: (error) => {
         if (current) setFailure({ error });

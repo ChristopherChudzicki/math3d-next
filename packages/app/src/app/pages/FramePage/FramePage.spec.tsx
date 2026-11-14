@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { test, expect } from "vitest";
+import { test, expect, onTestFinished, vi } from "vitest";
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
 import { SceneBuilder, makeItem, seedDb } from "@math3d/mock-api";
 import {
+  act,
   renderTestApp,
   screen,
   storeRendererPreference,
@@ -15,6 +16,7 @@ import { mathScopeId } from "@/store/scene/evaluation/mathScope";
 import { RENDERER_PREFERENCE_KEY } from "@/services/renderer/rendererPreference";
 import { threeViewport } from "@/test_util/threeViewport";
 import type { ThreeViewportProps } from "@/test_util/threeViewport";
+import { stubKnotLoaderSupport } from "@/test_util/knotLoaderSupport";
 
 const REQUIRED_ITEMS = ["axis-x", "axis-y", "axis-z", "camera"];
 
@@ -43,6 +45,26 @@ test("renders the scene with its data loaded and no editor UI", async () => {
   ).toBeNull();
   expect(screen.queryByRole("button", { name: "Expand Controls" })).toBeNull();
   expect(screen.queryByTestId("toggle-keyboard-button")).toBeNull();
+});
+
+test("draws no loading knot, which would show in a capture", async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true });
+  onTestFinished(() => {
+    vi.useRealTimers();
+  });
+  stubKnotLoaderSupport();
+  const scene = new SceneBuilder();
+  seedDb.withScene(scene.json());
+
+  const { store } = renderTestApp(`/app/frame/${scene.key}`);
+
+  await waitFor(() =>
+    expect(select.hasItems(REQUIRED_ITEMS)(store.getState())).toBe(true),
+  );
+  // Past the knot's show delay.
+  await act(() => vi.advanceTimersByTimeAsync(1000));
+
+  expect(screen.queryByRole("progressbar")).toBeNull();
 });
 
 test("does not animate a slider saved mid-animation", async () => {
