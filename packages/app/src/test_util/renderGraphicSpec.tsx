@@ -16,20 +16,13 @@ const Harness: React.FC<{ id: string }> = ({ id }) => {
   return <GraphicSpecReporter item={item} />;
 };
 
-/**
- * The spec each of `ids` reports once `scene` is loaded, keyed by id; an id
- * that never reports is absent. Results reach the spec components in effects,
- * which `render` flushes, so each item's last report is the settled one.
- */
-export const collectGraphicSpecs = (
+/** Renders the spec component of each of `ids` in `scene`, reporting to `collect`. */
+const mountSpecs = (
   scene: SceneInput,
   ids: string[],
-): Partial<Record<string, GraphicSpec | null>> => {
+  collect: (id: string, spec: GraphicSpec | null) => void,
+) => {
   const store = storeWithScene(scene);
-  const specs: Partial<Record<string, GraphicSpec | null>> = {};
-  const collect = (id: string, spec: GraphicSpec | null) => {
-    specs[id] = spec;
-  };
   render(
     <Provider store={store}>
       <SpecCollector.Provider value={collect}>
@@ -39,6 +32,22 @@ export const collectGraphicSpecs = (
       </SpecCollector.Provider>
     </Provider>,
   );
+  return store;
+};
+
+/**
+ * The spec each of `ids` reports once `scene` is loaded, keyed by id; an id
+ * that never reports is absent. Results reach the spec components in effects,
+ * which `render` flushes, so each item's last report is the settled one.
+ */
+export const collectGraphicSpecs = (
+  scene: SceneInput,
+  ids: string[],
+): Partial<Record<string, GraphicSpec | null>> => {
+  const specs: Partial<Record<string, GraphicSpec | null>> = {};
+  mountSpecs(scene, ids, (id, spec) => {
+    specs[id] = spec;
+  });
   // A copy: unmounting at cleanup reports null into `specs`.
   return { ...specs };
 };
@@ -50,24 +59,16 @@ export const renderGraphicSpec = (
 ): GraphicSpec | null => collectGraphicSpecs(scene, [id])[id] ?? null;
 
 /**
- * Each new non-null spec item `id` reports, from `scene` loading on: `specs`
- * grows as the returned store changes.
+ * Renders item `id` of `scene` and records each non-null spec it reports;
+ * `specs` grows as the returned `store` changes.
  */
 export const trackGraphicSpec = <S extends GraphicSpec>(
   scene: SceneInput,
   id: string,
 ) => {
-  const store = storeWithScene(scene);
   const specs: S[] = [];
-  const collect = (_: string, spec: GraphicSpec | null) => {
-    if (spec && spec !== specs.at(-1)) specs.push(spec as S);
-  };
-  render(
-    <Provider store={store}>
-      <SpecCollector.Provider value={collect}>
-        <Harness id={id} />
-      </SpecCollector.Provider>
-    </Provider>,
-  );
+  const store = mountSpecs(scene, [id], (_, spec) => {
+    if (spec) specs.push(spec as S);
+  });
   return { store, specs };
 };

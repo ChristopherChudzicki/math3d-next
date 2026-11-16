@@ -97,13 +97,20 @@ test("a gradient surface clamps opacity to 1, like a flat color", () => {
   expect(spec.colorAt(0.5, 0.5)[3]).toBe(1);
 });
 
-test("a variable that only colors the surface leaves the spec's position function as it was", () => {
+test("the spec's position function is new only when a variable the position uses changes", () => {
   const scene = new SceneBuilder();
   const folder = scene.folder();
   folder.variable({ value: { type: "assignment", lhs: "a", rhs: "1" } }, "a");
+  folder.variable({ value: { type: "assignment", lhs: "b", rhs: "1" } }, "b");
   folder.explicitSurface(
     {
       color: "rainbow",
+      expr: {
+        type: "function-assignment",
+        name: "_f",
+        params: ["x", "y"],
+        rhs: "b",
+      },
       colorExpr: {
         type: "function-assignment",
         name: "_f",
@@ -114,19 +121,25 @@ test("a variable that only colors the surface leaves the spec's position functio
     "s",
   );
   const { store, specs } = trackGraphicSpec<SurfaceSpec>(scene, "s");
-  act(() => {
-    store.dispatch(
-      actions.patchProperty({
-        id: "a",
-        path: "/value",
-        value: { type: "assignment", lhs: "a", rhs: "0.5" },
-      }),
-    );
-  });
+  const set = (id: string, rhs: string) =>
+    act(() => {
+      store.dispatch(
+        actions.patchProperty({
+          id,
+          path: "/value",
+          value: { type: "assignment", lhs: id, rhs },
+        }),
+      );
+    });
+  set("a", "0.5");
   const { getRGB } = gradients.rainbow;
   expect(specs.map(({ colorAt }) => colorAt(0, 0).slice(0, 3))).toEqual([
     getRGB(1),
     getRGB(0.5),
   ]);
   expect(specs[1].position).toBe(specs[0].position);
+  set("b", "2");
+  expect(specs).toHaveLength(3);
+  expect(specs[2].position).not.toBe(specs[1].position);
+  expect(specs[2].position(0, 0)[2]).toBe(2);
 });

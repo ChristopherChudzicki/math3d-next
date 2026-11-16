@@ -41,8 +41,8 @@ const cached = (range: (param: number) => Range) => {
 const domainMap = (domain: SurfaceDomain) => {
   const { order } = domain;
   const [fFirst, fSecond] = order.map((i) => cached(domain.value[i]));
-  // Range functions first run at a sample: both renderers build the map
-  // during render, where a throw would reach the route's error page.
+  // Range functions run at the first sample that needs them, never while the
+  // map is built: both renderers build it during render.
   const first = (U: number) => {
     const [a1, a2] = fFirst(0);
     return a1 + (a2 - a1) * U;

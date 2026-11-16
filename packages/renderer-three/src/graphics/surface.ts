@@ -31,18 +31,16 @@ export const buildSurface = (
   shading: Shading,
 ): Graphic<SurfaceSpec> => {
   const surface = new TriangleMesh(transparency, shading);
-  let drawn: {
-    spec: SurfaceSpec;
-    grid: ParametricGrid;
-    gridClosed: [boolean, boolean];
-  } | null = null;
+  let drawn: { spec: SurfaceSpec; grid: ParametricGrid } | null = null;
   const set = (next: SurfaceSpec) => {
-    // The same positions again: sampling them is the cost, so keep the grid.
-    const kept = drawn && samePositions(drawn.spec, next) ? drawn : null;
-    const grid = kept?.grid ?? sampleGrid(next.samples, next.position);
-    const gridClosed = kept?.gridClosed ?? closedAxes(grid);
+    // Same positions: reuse the sampled grid; the buffer writes below are
+    // cheap next to sampling.
+    const grid =
+      drawn && samePositions(drawn.spec, next)
+        ? drawn.grid
+        : sampleGrid(next.samples, next.position);
     const { cols, rows } = grid;
-    const style = { ...next, gridClosed };
+    const style = { ...next, gridClosed: closedAxes(grid) };
     surface.fill(cols * rows, 6 * (cols - 1) * (rows - 1), style, (out) => {
       writePositions(grid, out.position);
       if (next.shaded) writeNormals(grid, out.normal);
@@ -50,7 +48,7 @@ export const buildSurface = (
       writeColors(grid, next.colorAt, out.color);
       writeParameters(grid, out.parameter);
     });
-    drawn = { spec: next, grid, gridClosed };
+    drawn = { spec: next, grid };
   };
   set(spec);
   return {

@@ -33,8 +33,8 @@ const VectorField: SpecComponent<MIT.VectorField> = ({ item }) => {
     scale = 0.5,
   } = useMathItemResults(scope, item, PROPS);
   const style = useLineStyle(scope, item, 2);
-  // Its own memo: sampling evaluates the field, and a variable that drives
-  // only the style must not sample again.
+  // Apart from the style memo so a style-only change doesn't sample the
+  // field again.
   const paths = useMemo(() => {
     if (!visible || !expr || !domain) return null;
     // As MathBox does: counts round, and a missing or sub-1 count draws

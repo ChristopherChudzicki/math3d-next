@@ -90,8 +90,8 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
     zIndex,
   } = results;
   const { color } = item.properties;
-  // Its own memo: a renderer resamples the surface on a new `position`, and a
-  // variable that drives only the color or style must not make one.
+  // Apart from the spec memo so a color- or style-only change keeps
+  // `position`; renderers resample on a new one.
   const parametric = useMemo(() => {
     const func = toParametric(item.type, expr);
     if (!func || !domain) return null;
