@@ -226,6 +226,87 @@ describe("fastCompile agrees with mathjs", () => {
   });
 });
 
+describe("arithmetic on vectors agrees with mathjs", () => {
+  // Operands the fast path takes, and ones it must leave to mathjs.
+  const operands = {
+    n: -2.5,
+    zero: 0,
+    v: [1, -2, 0.5],
+    w: [4, 0, -3],
+    extremes: [Infinity, NaN, -0],
+    m: math.matrix([3, 0, -4]),
+    // mathjs converts operands and results to a matrix's datatype.
+    typed: math.matrix([3, 0, -4], "dense", "number"),
+    one: [7],
+    two: [1, 2],
+    none: [],
+    nested: [
+      [1, 2],
+      [3, 4],
+    ],
+    square: math.matrix([
+      [1, 2],
+      [3, 4],
+    ]),
+    z: [1, math.complex(0, 1), 3],
+  };
+  const names = Object.keys(operands);
+
+  test.each(["+", "-", "*", "/", "^"])(
+    "a %s b for each pair of operands",
+    (operator) => {
+      names.forEach((a) =>
+        names.forEach((b) => {
+          const { fast, mathjs, tookFastPath } = evaluateBoth(
+            `f(x) = ${a} ${operator} ${b}`,
+            operands,
+          );
+          expect(tookFastPath).toBe(true);
+          const at = (f: unknown) => outcome(() => (f as Fn)(0));
+          expect({ a, b, ...at(fast.value) }).toEqual({
+            a,
+            b,
+            ...at(mathjs.value),
+          });
+        }),
+      );
+    },
+  );
+
+  test("a vector result is a new one at each call", () => {
+    const f = fastCompile(math.parse("f(x) = v + w")).evaluate(
+      new Map(Object.entries(operands)),
+    ) as Fn;
+    expect(f(0)).not.toBe(f(0));
+  });
+});
+
+describe("which calls reach mathjs's dispatch", () => {
+  const scope = {
+    v: [1, -2, 0.5],
+    w: [4, 0, -3],
+    m: math.matrix([3, 0, -4]),
+  };
+
+  test.each<{ expr: string; dispatched: string[] }>([
+    { expr: "f(x) = x^2 + sin(x) - x / 3", dispatched: [] },
+    { expr: "f(x) = x v", dispatched: [] },
+    { expr: "f(x) = v / x", dispatched: [] },
+    { expr: "f(x) = v - w", dispatched: [] },
+    { expr: "f(x) = x m + v", dispatched: [] },
+    { expr: "f(x) = (x + v) - (v - x)", dispatched: [] },
+    { expr: "f(x) = (v + x) - (x - v) + v x", dispatched: [] },
+    { expr: "f(x) = x I", dispatched: ["multiply"] },
+  ])("$expr dispatches $dispatched", ({ expr, dispatched }) => {
+    const names: string[] = [];
+    const f = fastCompile(math.parse(expr), {
+      onDispatch: (name) => names.push(name),
+    }).evaluate(new Map(Object.entries(scope))) as Fn;
+    f(0.5);
+    expect(names).toEqual(dispatched);
+  });
+});
+
 // fastCompile skips dispatch by calling these. Without them every call still
 // agrees with mathjs and is only slower.
 test("typed-function gives the implementation a call with numbers runs", () => {
