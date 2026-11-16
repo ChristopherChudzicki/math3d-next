@@ -11,6 +11,7 @@ import { filter as collectionFilter, pickBy } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { OnChangeListener } from "@math3d/mathscope";
 import { AppMathScope, AppParseable } from "@/store/scene/state/interfaces";
+import { visibilityMode } from "@/store/scene/state/util";
 
 type EvaluationResultsSlice<K extends string> = Partial<Record<K, unknown>>;
 type EvaluationErrorsSlice<K extends string> = Partial<Record<K, Error>>;
@@ -99,18 +100,19 @@ const useMathItemResults = <
 };
 
 /**
- * Whether `item` is drawn. A blank `calculatedVisibility` defers to `visible`
- * (it would evaluate to `false` without error). One that errors shows the
- * item, even over a stale result: `useMathResults` keeps the last good value.
+ * Whether `item` is drawn. Unless it follows its `calculatedVisibility` (a
+ * blank one counts as not following; see `visibilityMode`), `visible` decides.
+ * An expression that errors shows the item, even over a stale result:
+ * `useMathResults` keeps the last good value.
  */
 export const finalVisibility = (
   item: MathGraphic,
   calculatedVisibility: unknown,
   calculatedVisibilityError: Error | undefined,
 ): boolean => {
-  const { visible, useCalculatedVisibility } = item.properties;
-  const blank = item.properties.calculatedVisibility.trim() === "";
-  if (!useCalculatedVisibility || blank) return visible;
+  if (visibilityMode(item.properties) !== "following") {
+    return item.properties.visible;
+  }
   return calculatedVisibilityError !== undefined || !!calculatedVisibility;
 };
 

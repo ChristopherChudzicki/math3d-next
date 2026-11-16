@@ -15,49 +15,39 @@ import { positioning } from "@/util/styles";
 import { Popover } from "@/ui/Popover";
 import type { PopoverRootProps } from "@/ui/Popover";
 import { Tooltip } from "@/ui/Tooltip";
-import { useOnWidgetChange } from "@/features/editor/items/FieldWidget";
+import { showNotice } from "@/ui/Toast/toasts";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { actions } from "@/store/scene/state/scene.slice";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import {
-  useFinalVisibility,
-  useMathItemResults,
-} from "@/store/scene/evaluation/mathScope";
+import { useFinalVisibility } from "@/store/scene/evaluation/mathScope";
+import VisibilityBadge from "@/features/editor/items/visibility/VisibilityBadge";
+import { visibilityMode } from "@/store/scene/state/util";
 import ColorPopup from "./ColorPopup";
 import styles from "./ColorStatus.module.css";
 
 const TOOLTIP_DELAY = 800;
-
 interface Props {
   item: MathGraphic;
 }
-
-const useEffectEvent = (cb: () => void, deps: unknown[]) => {
-  const cbRef = useRef(cb);
-  useEffect(() => {
-    cbRef.current = cb;
-  });
-  useEffect(() => {
-    cbRef.current();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
-};
-
-const EVALUATED_PROPS = ["calculatedVisibility"] as const;
 
 const ColorStatus: React.FC<Props> = (props) => {
   const { item } = props;
   const [dialogVisible, setDialogVisible] = useToggle(false);
   const [buttonEl, setButtonEl] = useState<HTMLElement | null>(null);
-  const { color, visible } = item.properties;
+  const { color } = item.properties;
   const mathScope = useMathScope();
-  const [calcVisInit, setCalcVisInit] = useToggle(false);
-  const { calculatedVisibility } = useMathItemResults(
-    mathScope,
-    item,
-    EVALUATED_PROPS,
-  );
-
   const finalVisibility = useFinalVisibility(mathScope, item);
-  const onChange = useOnWidgetChange(item);
+  const mode = visibilityMode(item.properties);
+  const dispatch = useAppDispatch();
+  const loadCount = useAppSelector((state) => state.scene.loadCount);
+  const closeNotice = useRef<() => void>(undefined);
+  // Rows can survive a scene switch (the next scene may reuse ids), so a load
+  // closes the notice too.
+  useEffect(() => () => closeNotice.current?.(), [loadCount]);
+  // Once the item isn't manual, there's nothing left to undo.
+  useEffect(() => {
+    if (mode !== "manual") closeNotice.current?.();
+  }, [mode]);
   const colorAndStyle = useMemo(() => getColorConfig(color), [color]);
   const style = useMemo(
     () =>
@@ -72,9 +62,45 @@ const ColorStatus: React.FC<Props> = (props) => {
       setDialogVisible.off();
       return;
     }
-    onChange({ name: "visible", value: !visible });
-    onChange({ name: "useCalculatedVisibility", value: false });
-  }, [dialogVisible, setDialogVisible, visible, onChange]);
+    closeNotice.current?.();
+    // Flip what's shown, not `visible`, which the expression may be overriding.
+    dispatch(
+      actions.setProperties({
+        id: item.id,
+        type: item.type,
+        properties: {
+          visible: !finalVisibility,
+          useCalculatedVisibility: false,
+        },
+      }),
+    );
+    if (mode !== "following" || !buttonEl) return;
+    const { visible } = item.properties;
+    closeNotice.current = showNotice({
+      description: finalVisibility ? "Hidden by hand." : "Shown by hand.",
+      anchor: buttonEl,
+      action: {
+        label: "Undo",
+        // The notice closes if the expression is cleared or the item removed.
+        onClick: () =>
+          dispatch(
+            actions.setProperties({
+              id: item.id,
+              type: item.type,
+              properties: { visible, useCalculatedVisibility: true },
+            }),
+          ),
+      },
+    });
+  }, [
+    dialogVisible,
+    setDialogVisible,
+    dispatch,
+    item,
+    finalVisibility,
+    mode,
+    buttonEl,
+  ]);
   const handleOpenChange: PopoverRootProps["onOpenChange"] = (
     open,
     eventDetails,
@@ -96,23 +122,8 @@ const ColorStatus: React.FC<Props> = (props) => {
     onClick: handleButtonClick,
   });
 
-  useEffect(() => {
-    if (calculatedVisibility && !calcVisInit) {
-      setCalcVisInit.on();
-    }
-  }, [calculatedVisibility, calcVisInit, setCalcVisInit]);
-  useEffectEvent(() => {
-    if (!calcVisInit) return;
-    if (item.properties.calculatedVisibility !== "") {
-      onChange({
-        name: "useCalculatedVisibility",
-        value: true,
-      });
-    }
-  }, [calculatedVisibility, item.properties.calculatedVisibility]);
-
   return (
-    <>
+    <span className={classNames(styles.dot, positioning["absolute-centered"])}>
       <Tooltip.Root>
         <Tooltip.Trigger
           delay={TOOLTIP_DELAY}
@@ -123,19 +134,16 @@ const ColorStatus: React.FC<Props> = (props) => {
               ref={setButtonEl}
               aria-pressed={finalVisibility}
               aria-label="Show Graphic"
-              className={classNames(
-                styles.circle,
-                positioning["absolute-centered"],
-                {
-                  [styles.empty]: !finalVisibility,
-                },
-              )}
+              className={classNames(styles.circle, {
+                [styles.empty]: !finalVisibility,
+              })}
               {...longAndShortClick.handlers}
             />
           }
         />
         <Tooltip.Popup>Press and hold to change color</Tooltip.Popup>
       </Tooltip.Root>
+      <VisibilityBadge item={item} />
       <Popover.Root
         open={dialogVisible}
         onOpenChange={handleOpenChange}
@@ -143,7 +151,7 @@ const ColorStatus: React.FC<Props> = (props) => {
       >
         <ColorPopup item={item} anchor={buttonEl} />
       </Popover.Root>
-    </>
+    </span>
   );
 };
 

@@ -1,8 +1,9 @@
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import { renderTestApp, user, within } from "@/test_util";
+import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
 import * as _ from "lodash-es";
 import { seedDb, makeItem } from "@math3d/mock-api";
 import { findItemByTestId } from "@/test_util/mathItems";
+import expectToast from "@/test_util/expectToast";
 
 describe("Visible and calculatedVisibility", () => {
   const setup = async ({
@@ -112,44 +113,229 @@ describe("Visible and calculatedVisibility", () => {
     },
   );
 
-  test.each([{ visible: false }, { visible: true }])(
-    "Clicking 'Show Graphic' turns useCalculatedVisibility off",
-    async ({ visible }) => {
+  test.each([
+    { visible: true, booleanRhs: "true" },
+    { visible: false, booleanRhs: "false" },
+  ])(
+    "Clicking 'Show Graphic' flips what's shown and sets visibility by hand (stored visible: $visible, expression: $booleanRhs)",
+    async ({ visible, booleanRhs }) => {
       const { ui, getPointData } = await setup({
         visible,
-        booleanRhs: "true",
+        booleanRhs,
         useCalculatedVisibility: true,
       });
       const showPoint = await within(ui.point).findByRole("button", {
         name: "Show Graphic",
       });
+      const shown = booleanRhs === "true";
+      expect(showPoint).toHaveAttribute("aria-pressed", String(shown));
       await user.click(showPoint);
+      expect(showPoint).toHaveAttribute("aria-pressed", String(!shown));
       expect(getPointData().properties).toEqual(
         expect.objectContaining({
           useCalculatedVisibility: false,
-          visible: !visible,
+          visible: !shown,
         }),
       );
+      await expectToast(shown ? "Hidden by hand." : "Shown by hand.");
     },
   );
 
-  test.each([{ visible: false }, { visible: true }])(
-    "Clicking 'Show Graphic' turns useCalculatedVisibility off",
-    async ({ visible }) => {
-      const { ui, getPointData } = await setup({
-        visible,
-        booleanRhs: "true",
-        useCalculatedVisibility: false,
+  test("A manual item on the Setup tab follows its expression once a toggle on Main flips", async () => {
+    const boolean = makeItem(MIT.BooleanVariable, {
+      value: { lhs: "foo", rhs: "false", type: "assignment" },
+    });
+    const main = makeItem(MIT.Folder);
+    const setupFolder = makeItem(MIT.Folder);
+    const axis = makeItem(MIT.Axis, {
+      calculatedVisibility: "foo",
+      useCalculatedVisibility: false,
+    });
+    const { key } = seedDb.withScene({
+      items: [main, boolean, setupFolder, axis],
+      itemOrder: {
+        main: [main.id],
+        [main.id]: [boolean.id],
+        setup: [setupFolder.id],
+        [setupFolder.id]: [axis.id],
+      },
+    });
+    const { store } = renderTestApp(`/${key}`);
+
+    const ui = await findItemByTestId(boolean.id);
+    await user.click(within(ui).getByRole("switch", { name: "Value" }));
+
+    expect(store.getState().scene.items[axis.id].properties).toEqual(
+      expect.objectContaining({ useCalculatedVisibility: true }),
+    );
+  });
+
+  test.each([
+    {
+      useCalculatedVisibility: true,
+      calculatedVisibility: "foo",
+      badge: "Calculated Visibility: following",
+    },
+    {
+      useCalculatedVisibility: false,
+      calculatedVisibility: "foo",
+      badge: "Calculated Visibility: set by hand",
+    },
+    {
+      useCalculatedVisibility: true,
+      calculatedVisibility: "undefinedName",
+      badge: "Calculated Visibility: error",
+    },
+    {
+      useCalculatedVisibility: false,
+      calculatedVisibility: "undefinedName",
+      badge: "Calculated Visibility: set by hand",
+    },
+  ])(
+    "The badge names what decides visibility: '$badge' (expression '$calculatedVisibility', following: $useCalculatedVisibility)",
+    async ({ useCalculatedVisibility, calculatedVisibility, badge }) => {
+      vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { ui } = await setup({
+        useCalculatedVisibility,
+        calculatedVisibility,
       });
-      await user.click(
-        within(ui.boolean).getByRole("switch", { name: "Value" }),
-      );
-      expect(getPointData().properties).toEqual(
-        expect.objectContaining({
-          useCalculatedVisibility: true,
-          visible,
-        }),
-      );
+      expect(
+        await within(ui.point).findByRole("button", { name: badge }),
+      ).toBeInTheDocument();
     },
   );
+
+  test("An item with no expression has no badge", async () => {
+    const { ui } = await setup({ calculatedVisibility: "" });
+    await within(ui.point).findByRole("button", { name: "Show Graphic" });
+    expect(
+      within(ui.point).queryByRole("button", { name: /Calculated Visibility/ }),
+    ).toBeNull();
+  });
+
+  test("The badge's popover explains it and can hand visibility back", async () => {
+    const { ui, getPointData } = await setup({
+      useCalculatedVisibility: false,
+    });
+    await user.click(
+      await within(ui.point).findByRole("button", {
+        name: "Calculated Visibility: set by hand",
+      }),
+    );
+    const popover = await screen.findByRole("dialog");
+    expect(popover).toHaveAccessibleDescription(
+      "Shown or hidden by hand until its Calculated Visibility changes value:",
+    );
+
+    await user.click(
+      within(popover).getByRole("switch", {
+        name: "Follow Calculated Visibility",
+      }),
+    );
+
+    expect(getPointData().properties).toEqual(
+      expect.objectContaining({ useCalculatedVisibility: true }),
+    );
+  });
+
+  test("Undo after a click hands visibility back to the expression", async () => {
+    const { ui, getPointData } = await setup({
+      booleanRhs: "true",
+      useCalculatedVisibility: true,
+    });
+    const showPoint = await within(ui.point).findByRole("button", {
+      name: "Show Graphic",
+    });
+    await user.click(showPoint);
+    expect(showPoint).toHaveAttribute("aria-pressed", "false");
+    await expectToast("Hidden by hand.");
+
+    await user.click(screen.getByRole("button", { name: "Undo" }));
+
+    expect(getPointData().properties).toEqual(
+      expect.objectContaining({ useCalculatedVisibility: true, visible: true }),
+    );
+    expect(showPoint).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("A second click on the dot closes the notice", async () => {
+    const { ui } = await setup({
+      booleanRhs: "true",
+      useCalculatedVisibility: true,
+    });
+    const showPoint = await within(ui.point).findByRole("button", {
+      name: "Show Graphic",
+    });
+    await user.click(showPoint);
+    await expectToast("Hidden by hand.");
+    const undo = screen.getByRole("button", { name: "Undo" });
+
+    await user.click(showPoint);
+
+    await waitFor(() => expect(undo).not.toBeInTheDocument());
+  });
+
+  test("Follow Calculated Visibility switch: off keeps what's shown, on follows the expression", async () => {
+    const { ui, getPointData } = await setup({
+      booleanRhs: "false",
+      useCalculatedVisibility: true,
+    });
+    await user.click(
+      within(ui.point).getByRole("button", { name: "More Settings" }),
+    );
+    const follow = await screen.findByRole("switch", {
+      name: "Follow Calculated Visibility",
+    });
+    expect(follow).toBeChecked();
+
+    await user.click(follow);
+    expect(getPointData().properties).toEqual(
+      expect.objectContaining({
+        useCalculatedVisibility: false,
+        visible: false,
+      }),
+    );
+
+    await user.click(follow);
+    expect(getPointData().properties).toEqual(
+      expect.objectContaining({ useCalculatedVisibility: true }),
+    );
+  });
+
+  test("The notice closes once the expression takes over again", async () => {
+    const { ui } = await setup({
+      booleanRhs: "true",
+      useCalculatedVisibility: true,
+    });
+    await user.click(
+      await within(ui.point).findByRole("button", { name: "Show Graphic" }),
+    );
+    await expectToast("Hidden by hand.");
+    const undo = screen.getByRole("button", { name: "Undo" });
+
+    await user.click(within(ui.boolean).getByRole("switch", { name: "Value" }));
+
+    await waitFor(() => expect(undo).not.toBeInTheDocument());
+  });
+
+  // A notice would also fail the toast guard in setupTests at teardown.
+  test("Clicking a manual item shows no notice", async () => {
+    const { ui } = await setup({ useCalculatedVisibility: false });
+    await user.click(
+      await within(ui.point).findByRole("button", { name: "Show Graphic" }),
+    );
+    expect(screen.queryByRole("button", { name: "Undo" })).toBeNull();
+  });
+
+  test("Follow Calculated Visibility is disabled with no expression", async () => {
+    const { ui } = await setup({ calculatedVisibility: "" });
+    await user.click(
+      within(ui.point).getByRole("button", { name: "More Settings" }),
+    );
+    expect(
+      await screen.findByRole("switch", {
+        name: "Follow Calculated Visibility",
+      }),
+    ).toHaveAttribute("aria-disabled", "true");
+  });
 });

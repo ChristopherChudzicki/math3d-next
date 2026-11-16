@@ -1,6 +1,14 @@
-.circle {
-  border-radius: 50%;
+/* The dot and its badge. */
+.dot {
   width: calc(100% - 10px);
+  aspect-ratio: 1;
+}
+
+.circle {
+  position: relative;
+  display: block;
+  border-radius: 50%;
+  width: 100%;
   aspect-ratio: 1;
   border: none;
   background: var(--indicator-color);

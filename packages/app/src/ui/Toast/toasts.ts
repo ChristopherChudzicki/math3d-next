@@ -47,4 +47,64 @@ const showToast = (description: string): void => {
   shownToasts.push(description);
 };
 
-export { toastManager, showToast, dismissToast, shownToasts };
+const noticeManager = createToastManager();
+let openNotice: string | undefined;
+
+type NoticeOptions = {
+  description: string;
+  anchor: Element;
+  action?: { label: string; onClick: () => void };
+  timeout?: number;
+};
+
+/**
+ * Show a short notice beside `anchor`, replacing any open one. Returns a
+ * function that closes it if it's still open. Replacing closes and adds rather
+ * than updating, so the new text is announced.
+ */
+const showNotice = ({
+  description,
+  anchor,
+  action,
+  timeout = 6000,
+}: NoticeOptions): (() => void) => {
+  const previous = openNotice;
+  const id = `notice-${(nextId += 1)}`;
+  openNotice = id;
+  const close = () => {
+    if (openNotice !== id) return;
+    openNotice = undefined;
+    afterEffects(() => noticeManager.close(id));
+  };
+  afterEffects(() => {
+    if (previous !== undefined) noticeManager.close(previous);
+    noticeManager.add({
+      id,
+      description,
+      timeout,
+      priority: "low",
+      positionerProps: { anchor },
+      actionProps: action && {
+        children: action.label,
+        onClick: () => {
+          action.onClick();
+          close();
+        },
+      },
+      onClose: () => {
+        if (openNotice === id) openNotice = undefined;
+      },
+    });
+  });
+  shownToasts.push(description);
+  return close;
+};
+
+export {
+  toastManager,
+  showToast,
+  dismissToast,
+  shownToasts,
+  noticeManager,
+  showNotice,
+};

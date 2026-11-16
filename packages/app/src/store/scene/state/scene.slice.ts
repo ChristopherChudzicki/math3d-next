@@ -1,15 +1,28 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { CaseReducer } from "@reduxjs/toolkit";
 import type { Reducer, UnknownAction } from "redux";
-import { mathItemConfigs, MathItemType } from "@math3d/mathitem-configs";
-import type { MathItem, MathItemPatch } from "@math3d/mathitem-configs";
+import {
+  isMathGraphic,
+  mathItemConfigs,
+  MathItemType,
+} from "@math3d/mathitem-configs";
+import type {
+  MathGraphic,
+  MathItem,
+  MathItemPatch,
+} from "@math3d/mathitem-configs";
 import { keyBy } from "lodash-es";
 import jsonPatch from "fast-json-patch";
 
 import invariant from "tiny-invariant";
 import { assertNotNil } from "@/util/predicates";
 import type { SceneState } from "./interfaces";
-import { isDescendantOf, MAIN_FOLDER, SETTINGS_FOLDER } from "./util";
+import {
+  hasCalculatedVisibility,
+  isDescendantOf,
+  MAIN_FOLDER,
+  SETTINGS_FOLDER,
+} from "./util";
 
 const getInitialState = (): SceneState => ({
   key: null,
@@ -156,9 +169,37 @@ const slice = createSlice({
     setProperties: withClean(false)<MathItemPatch<MathItemType>>(
       (state, action) => {
         const { id, properties: newProperties } = action.payload;
-        const { properties: oldProperties } = state.items[id];
+        const item = state.items[id];
+        const { properties: oldProperties } = item;
         // @ts-expect-error TODO figure this out + reconisder the unions
-        state.items[id].properties = { ...oldProperties, ...newProperties };
+        item.properties = { ...oldProperties, ...newProperties };
+        // Editing the expression puts it in charge; clearing it hands
+        // visibility back to `visible`.
+        if (
+          isMathGraphic(item) &&
+          "calculatedVisibility" in newProperties &&
+          newProperties.calculatedVisibility !==
+            (oldProperties as MathGraphic["properties"]).calculatedVisibility
+        ) {
+          item.properties.useCalculatedVisibility = hasCalculatedVisibility(
+            item.properties,
+          );
+        }
+      },
+    ),
+    /** Hands visibility back to each item's Calculated Visibility, if it has one. */
+    followCalculatedVisibility: withClean(false)<{ ids: string[] }>(
+      (state, action) => {
+        action.payload.ids.forEach((id) => {
+          const item = state.items[id];
+          if (
+            item &&
+            isMathGraphic(item) &&
+            hasCalculatedVisibility(item.properties)
+          ) {
+            item.properties.useCalculatedVisibility = true;
+          }
+        });
       },
     ),
     patchProperty: withClean(false)<{

@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react/offline";
 import settings from "@iconify-icons/lucide/settings";
+import { isMathGraphic } from "@math3d/mathitem-configs";
 import type {
   MathItem,
   MathItemConfig,
@@ -8,6 +9,7 @@ import type {
 } from "@math3d/mathitem-configs";
 import React, { useMemo } from "react";
 import IconButton from "@/ui/IconButton";
+import FollowSwitch from "@/features/editor/items/visibility/FollowSwitch";
 import { Popover } from "@/ui/Popover";
 import circleHelp from "@iconify-icons/lucide/circle-help";
 import FieldWidget, {
@@ -113,15 +115,23 @@ const SettingsForm = <T extends MathItemType>({
         const extras =
           field.name === "zOrder" ? { placeholder: `${defaultZOrder}` } : {};
         return (
-          <SettingsField
-            key={field.name}
-            itemId={item.id}
-            field={field}
-            value={value}
-            error={errors[field.name]}
-            onWidgetChange={onWidgetChange}
-            {...extras}
-          />
+          <React.Fragment key={field.name}>
+            <SettingsField
+              itemId={item.id}
+              field={field}
+              value={value}
+              error={errors[field.name]}
+              onWidgetChange={onWidgetChange}
+              {...extras}
+            />
+            {field.name === "calculatedVisibility" && isMathGraphic(item) ? (
+              <>
+                <FollowSwitch item={item} />
+                {/* The help-icon column */}
+                <span />
+              </>
+            ) : null}
+          </React.Fragment>
         );
       })}
     </div>

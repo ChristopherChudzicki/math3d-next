@@ -1,0 +1,72 @@
+/* A small mark under the dot, in a background-colored disc. */
+.badge {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: calc(50% - 6px);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-background);
+  color: var(--color-text-light);
+  font-size: 9px;
+  cursor: pointer;
+}
+
+/* A 24px target (WCAG 2.5.8) that starts at the dot's edge, so it never
+   takes clicks meant for the dot. */
+.badge::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  bottom: -10px;
+  left: -6px;
+  right: -6px;
+}
+
+.badge:hover,
+.badge:focus-visible {
+  color: var(--color-text-primary);
+}
+
+.error,
+.error:hover,
+.error:focus-visible {
+  color: var(--color-danger);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 16rem;
+  padding: 0.75rem;
+}
+
+/* Overrides ReadonlyMathField's `align-self: center`. */
+.content > .expression {
+  align-self: flex-start;
+}
+
+.text {
+  margin: 0;
+  font-size: var(--font-size-small);
+}
+
+.message {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: var(--font-size-small);
+}
+
+.follow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: var(--font-size-small);
+}
