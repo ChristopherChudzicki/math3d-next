@@ -33,7 +33,9 @@ const VectorField: SpecComponent<MIT.VectorField> = ({ item }) => {
     scale = 0.5,
   } = useMathItemResults(scope, item, PROPS);
   const style = useLineStyle(scope, item, 2);
-  const spec = useMemo<GraphicSpec | null>(() => {
+  // Its own memo: sampling evaluates the field, and a variable that drives
+  // only the style must not sample again.
+  const paths = useMemo(() => {
     if (!visible || !expr || !domain) return null;
     // As MathBox does: counts round, and a missing or sub-1 count draws
     // nothing, unlike `sampleCount`'s minimum of 2 for curves and surfaces.
@@ -42,13 +44,12 @@ const VectorField: SpecComponent<MIT.VectorField> = ({ item }) => {
     );
     if (counts.some((n) => n < 1)) return null;
     const samples = counts as [number, number, number];
-    return {
-      kind: "line",
-      paths: sampleVectorField(expr, domain, samples, scale),
-      ...style,
-      label: null,
-    };
-  }, [visible, expr, domain, samples1, samples2, samples3, scale, style]);
+    return sampleVectorField(expr, domain, samples, scale);
+  }, [visible, expr, domain, samples1, samples2, samples3, scale]);
+  const spec = useMemo<GraphicSpec | null>(
+    () => paths && { kind: "line", paths, ...style, label: null },
+    [paths, style],
+  );
   useReportSpec(item.id, spec);
   return null;
 };

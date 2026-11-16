@@ -48,3 +48,26 @@ export const renderGraphicSpec = (
   scene: SceneInput,
   id: string,
 ): GraphicSpec | null => collectGraphicSpecs(scene, [id])[id] ?? null;
+
+/**
+ * Each new non-null spec item `id` reports, from `scene` loading on: `specs`
+ * grows as the returned store changes.
+ */
+export const trackGraphicSpec = <S extends GraphicSpec>(
+  scene: SceneInput,
+  id: string,
+) => {
+  const store = storeWithScene(scene);
+  const specs: S[] = [];
+  const collect = (_: string, spec: GraphicSpec | null) => {
+    if (spec && spec !== specs.at(-1)) specs.push(spec as S);
+  };
+  render(
+    <Provider store={store}>
+      <SpecCollector.Provider value={collect}>
+        <Harness id={id} />
+      </SpecCollector.Provider>
+    </Provider>,
+  );
+  return { store, specs };
+};

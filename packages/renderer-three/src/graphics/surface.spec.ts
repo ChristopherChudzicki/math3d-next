@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { Mesh } from "three/webgpu";
+import type { BufferAttribute, Mesh } from "three/webgpu";
 import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { buildSurface } from "./surface";
 
@@ -24,6 +24,21 @@ const meshOf = (graphic: ReturnType<typeof buildSurface>) => {
 const gridOf = (surface: Mesh) => {
   const { gridLines, gridWidth, gridOpacity } = surface.userData.mesh;
   return { lines: gridLines.toArray(), width: gridWidth, opacity: gridOpacity };
+};
+
+const attributeOf = (surface: Mesh, name: string) =>
+  Array.from((surface.geometry.getAttribute(name) as BufferAttribute).array);
+
+/** A plane that counts its samples. */
+const countedPlane = () => {
+  const plane = {
+    calls: 0,
+    position: (u: number, v: number): [number, number, number] => {
+      plane.calls += 1;
+      return [u, v, v];
+    },
+  };
+  return plane;
 };
 
 const cellTriangles = ({ samples: [cols, rows] }: SurfaceSpec) =>
@@ -70,5 +85,40 @@ describe("buildSurface", () => {
     expect(meshOf(graphic)).toBe(surface);
     expect(surface.geometry.drawRange.count).toBe(3 * cellTriangles(next));
     expect(gridOf(surface).lines).toEqual([0, 0]);
+  });
+
+  test("recolors the same positions without sampling them again", () => {
+    const plane = countedPlane();
+    const spec = surfaceSpec({ position: plane.position });
+    const graphic = buildSurface(spec, "oit", "glossy");
+    const surface = meshOf(graphic);
+    const { calls } = plane;
+    const positions = attributeOf(surface, "position");
+    const rgba: [number, number, number, number] = [1, 0, 0, 1];
+    graphic.update({
+      ...spec,
+      // A new array with the same counts, as each spec from the app has.
+      samples: [...spec.samples],
+      colorAt: () => rgba,
+    });
+    expect(plane.calls).toBe(calls);
+    expect(attributeOf(surface, "position")).toEqual(positions);
+    expect(attributeOf(surface, "color").slice(0, 4)).toEqual(rgba);
+  });
+
+  test.each<[string, (spec: SurfaceSpec) => SurfaceSpec]>([
+    [
+      "position",
+      (spec) => ({ ...spec, position: (u, v) => spec.position(u, v) }),
+    ],
+    ["samples", (spec) => ({ ...spec, samples: [5, 4] })],
+  ])("samples again when %s changes", (_, change) => {
+    const plane = countedPlane();
+    const spec = surfaceSpec({ position: plane.position });
+    const graphic = buildSurface(spec, "oit", "glossy");
+    const { calls } = plane;
+    const next = change(spec);
+    graphic.update(next);
+    expect(plane.calls - calls).toBe(next.samples[0] * next.samples[1]);
   });
 });

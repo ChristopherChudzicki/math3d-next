@@ -10,9 +10,16 @@ import {
   writeParameters,
   writePositions,
 } from "../mesh/parametricGrid";
+import type { ParametricGrid } from "../mesh/parametricGrid";
 import type { Shading } from "../mesh/meshMaterial";
 import type { Transparency } from "../shader/material";
 import type { Graphic } from "./builders";
+
+/** Whether two specs sample the same positions. */
+const samePositions = (a: SurfaceSpec, b: SurfaceSpec) =>
+  a.position === b.position &&
+  a.samples[0] === b.samples[0] &&
+  a.samples[1] === b.samples[1];
 
 /**
  * Parametric, explicit and polar surfaces. The surface's shader draws its
@@ -24,10 +31,18 @@ export const buildSurface = (
   shading: Shading,
 ): Graphic<SurfaceSpec> => {
   const surface = new TriangleMesh(transparency, shading);
+  let drawn: {
+    spec: SurfaceSpec;
+    grid: ParametricGrid;
+    gridClosed: [boolean, boolean];
+  } | null = null;
   const set = (next: SurfaceSpec) => {
-    const grid = sampleGrid(next.samples, next.position);
+    // The same positions again: sampling them is the cost, so keep the grid.
+    const kept = drawn && samePositions(drawn.spec, next) ? drawn : null;
+    const grid = kept?.grid ?? sampleGrid(next.samples, next.position);
+    const gridClosed = kept?.gridClosed ?? closedAxes(grid);
     const { cols, rows } = grid;
-    const style = { ...next, gridClosed: closedAxes(grid) };
+    const style = { ...next, gridClosed };
     surface.fill(cols * rows, 6 * (cols - 1) * (rows - 1), style, (out) => {
       writePositions(grid, out.position);
       if (next.shaded) writeNormals(grid, out.normal);
@@ -35,6 +50,7 @@ export const buildSurface = (
       writeColors(grid, next.colorAt, out.color);
       writeParameters(grid, out.parameter);
     });
+    drawn = { spec: next, grid, gridClosed };
   };
   set(spec);
   return {

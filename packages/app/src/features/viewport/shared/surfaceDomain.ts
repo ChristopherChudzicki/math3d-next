@@ -13,14 +13,36 @@ type SurfaceDomain = {
 };
 
 /**
+ * Past this many arguments a range function's cache starts over, so that
+ * changing sample counts, which bring new arguments, can't grow it forever.
+ */
+const MAX_CACHED_RANGES = 1024;
+
+/**
+ * `range` with its results kept by argument: a sampler asks once per sample,
+ * and a grid has few distinct arguments.
+ */
+const cached = (range: (param: number) => Range) => {
+  const ranges = new Map<number, Range>();
+  return (param: number): Range => {
+    const known = ranges.get(param);
+    if (known) return known;
+    const value = range(param);
+    if (ranges.size >= MAX_CACHED_RANGES) ranges.clear();
+    ranges.set(param, value);
+    return value;
+  };
+};
+
+/**
  * Maps (U, V) ∈ [0, 1]² onto the domain's parameters. U spans the constant
  * range; V spans the other's, evaluated at U's parameter value.
  */
 const domainMap = (domain: SurfaceDomain) => {
   const { order } = domain;
-  const [fFirst, fSecond] = order.map((i) => domain.value[i]);
-  // Range functions run per sample, not when the map is built: both renderers
-  // build it during render, where a throw would reach the route's error page.
+  const [fFirst, fSecond] = order.map((i) => cached(domain.value[i]));
+  // Range functions first run at a sample: both renderers build the map
+  // during render, where a throw would reach the route's error page.
   const first = (U: number) => {
     const [a1, a2] = fFirst(0);
     return a1 + (a2 - a1) * U;

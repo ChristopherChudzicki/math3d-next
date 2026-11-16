@@ -56,7 +56,12 @@ export type SurfaceSpec = Common & {
   kind: "surface";
   /** Sample counts along the two parameters, each at least 2. */
   samples: [number, number];
-  /** Position at normalized parameters in [0, 1]². */
+  /**
+   * Position at normalized parameters in [0, 1]². A renderer may skip
+   * sampling when a spec has the same function and `samples` as the last (as
+   * when a variable drives only the color); a new function for the same
+   * surface costs that speed and nothing else.
+   */
   position: (u: number, v: number) => Coords;
   /** Color (with opacity) at normalized parameters in [0, 1]². */
   colorAt: (u: number, v: number) => RGBA;

@@ -1,7 +1,12 @@
 import { SceneBuilder } from "@math3d/mock-api";
 import { MathItemType as MIT, gradients } from "@math3d/mathitem-configs";
 import invariant from "tiny-invariant";
-import { renderGraphicSpec } from "@/test_util/renderGraphicSpec";
+import { act } from "@testing-library/react";
+import {
+  renderGraphicSpec,
+  trackGraphicSpec,
+} from "@/test_util/renderGraphicSpec";
+import { actions } from "@/store/scene/state/scene.slice";
 import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { gridlineColor } from "@/features/viewport/shared/surfaceColor";
 import { parseColor } from "./style";
@@ -90,4 +95,38 @@ test("a gradient surface clamps opacity to 1, like a flat color", () => {
   scene.folder().explicitSurface({ color: "rainbow", opacity: "1.5" }, "s");
   const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
   expect(spec.colorAt(0.5, 0.5)[3]).toBe(1);
+});
+
+test("a variable that only colors the surface leaves the spec's position function as it was", () => {
+  const scene = new SceneBuilder();
+  const folder = scene.folder();
+  folder.variable({ value: { type: "assignment", lhs: "a", rhs: "1" } }, "a");
+  folder.explicitSurface(
+    {
+      color: "rainbow",
+      colorExpr: {
+        type: "function-assignment",
+        name: "_f",
+        params: ["x", "y", "z"],
+        rhs: "a",
+      },
+    },
+    "s",
+  );
+  const { store, specs } = trackGraphicSpec<SurfaceSpec>(scene, "s");
+  act(() => {
+    store.dispatch(
+      actions.patchProperty({
+        id: "a",
+        path: "/value",
+        value: { type: "assignment", lhs: "a", rhs: "0.5" },
+      }),
+    );
+  });
+  const { getRGB } = gradients.rainbow;
+  expect(specs.map(({ colorAt }) => colorAt(0, 0).slice(0, 3))).toEqual([
+    getRGB(1),
+    getRGB(0.5),
+  ]);
+  expect(specs[1].position).toBe(specs[0].position);
 });
