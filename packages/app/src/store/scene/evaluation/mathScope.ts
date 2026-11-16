@@ -11,6 +11,7 @@ import { filter as collectionFilter, pickBy } from "lodash-es";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { OnChangeListener } from "@math3d/mathscope";
 import { AppMathScope, AppParseable } from "@/store/scene/state/interfaces";
+import { visibilityMode } from "@/store/scene/state/util";
 
 type EvaluationResultsSlice<K extends string> = Partial<Record<K, unknown>>;
 type EvaluationErrorsSlice<K extends string> = Partial<Record<K, Error>>;
@@ -108,9 +109,9 @@ export const finalVisibility = (
   calculatedVisibility: unknown,
   calculatedVisibilityError: Error | undefined,
 ): boolean => {
-  const { visible, useCalculatedVisibility } = item.properties;
-  const blank = item.properties.calculatedVisibility.trim() === "";
-  if (!useCalculatedVisibility || blank) return visible;
+  if (visibilityMode(item.properties) !== "following") {
+    return item.properties.visible;
+  }
   return calculatedVisibilityError !== undefined || !!calculatedVisibility;
 };
 

@@ -128,3 +128,61 @@ test("loading a scene clears dirty", () => {
 
   expect(reducer(edited, setSceneFrom(second)).dirty).toBe(false);
 });
+
+describe("calculated visibility", () => {
+  const loadPoint = (properties: {
+    calculatedVisibility: string;
+    useCalculatedVisibility: boolean;
+  }) => {
+    const point = makeItem(MIT.Point, properties);
+    return { point, state: load(seedDb.withSceneFromItems([point])) };
+  };
+  const setText = (id: string, calculatedVisibility: string) =>
+    actions.setProperties({
+      id,
+      type: MIT.Point,
+      properties: { calculatedVisibility },
+    });
+
+  test.each([
+    { text: "b", following: true },
+    { text: " ", following: false },
+  ])(
+    "editing the expression to '$text' sets useCalculatedVisibility $following",
+    ({ text, following }) => {
+      const { point, state } = loadPoint({
+        calculatedVisibility: "a",
+        useCalculatedVisibility: !following,
+      });
+      const next = reducer(state, setText(point.id, text));
+      expect(next.items[point.id].properties).toMatchObject({
+        useCalculatedVisibility: following,
+      });
+    },
+  );
+
+  test("re-sending the same expression leaves it manual", () => {
+    const { point, state } = loadPoint({
+      calculatedVisibility: "a",
+      useCalculatedVisibility: false,
+    });
+    const next = reducer(state, setText(point.id, "a"));
+    expect(next.items[point.id].properties).toMatchObject({
+      useCalculatedVisibility: false,
+    });
+  });
+
+  test("followCalculatedVisibility skips blank expressions and missing items", () => {
+    const { point, state } = loadPoint({
+      calculatedVisibility: "",
+      useCalculatedVisibility: false,
+    });
+    const next = reducer(
+      state,
+      actions.followCalculatedVisibility({ ids: [point.id, "missing"] }),
+    );
+    expect(next.items[point.id].properties).toMatchObject({
+      useCalculatedVisibility: false,
+    });
+  });
+});

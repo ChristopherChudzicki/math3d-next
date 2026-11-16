@@ -2,6 +2,7 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import type { SceneState } from "./scene/state/interfaces";
 import sceneSlice from "./scene/state/scene.slice";
 import { createMathScopeSync } from "./scene/evaluation/mathScopeSync";
+import { createCalculatedVisibilityRelink } from "./scene/evaluation/calculatedVisibilityRelink";
 
 type RootState = {
   scene: SceneState;
@@ -21,11 +22,12 @@ type ConfigureStoreOptions = {
 
 const getStore = ({ preloadedState }: ConfigureStoreOptions = {}) => {
   const mathScopeSync = createMathScopeSync();
+  const relink = createCalculatedVisibilityRelink(mathScopeSync.source);
   const store = configureStore({
     reducer: rootReducer,
     preloadedState,
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(mathScopeSync.middleware),
+      getDefaultMiddleware().concat(relink, mathScopeSync.middleware),
   });
   return Object.assign(store, { mathScope: mathScopeSync.source });
 };

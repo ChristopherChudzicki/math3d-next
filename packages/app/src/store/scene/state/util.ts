@@ -1,5 +1,25 @@
 import { SceneState } from "./interfaces";
 
+type VisibilityProperties = {
+  calculatedVisibility: string;
+  useCalculatedVisibility: boolean;
+};
+
+const hasCalculatedVisibility = (properties: VisibilityProperties) =>
+  properties.calculatedVisibility.trim() !== "";
+
+/**
+ * What decides whether a graphic is shown: its Calculated Visibility
+ * ("following"), or its `visible` toggle, because the user set it by hand
+ * ("manual") or because there's no expression ("none").
+ */
+const visibilityMode = (
+  properties: VisibilityProperties,
+): "following" | "manual" | "none" => {
+  if (!hasCalculatedVisibility(properties)) return "none";
+  return properties.useCalculatedVisibility ? "following" : "manual";
+};
+
 const MAIN_FOLDER = "main";
 const SETTINGS_FOLDER = "setup";
 
@@ -25,4 +45,10 @@ const isDescendantOf = (
   return isDescendantOf(order, parent, candidateAncestor);
 };
 
-export { isDescendantOf, MAIN_FOLDER, SETTINGS_FOLDER };
+export {
+  hasCalculatedVisibility,
+  isDescendantOf,
+  MAIN_FOLDER,
+  SETTINGS_FOLDER,
+  visibilityMode,
+};

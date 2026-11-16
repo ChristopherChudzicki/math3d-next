@@ -1,13 +1,7 @@
 import classNames from "classnames";
 import { getColorConfig } from "@math3d/mathitem-configs";
 import type { MathGraphic } from "@math3d/mathitem-configs";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useToggle } from "@/util/hooks";
 import { useLongAndShortClick } from "@/util/hooks/useLongAndShortClick";
 
@@ -15,12 +9,10 @@ import { positioning } from "@/util/styles";
 import { Popover } from "@/ui/Popover";
 import type { PopoverRootProps } from "@/ui/Popover";
 import { Tooltip } from "@/ui/Tooltip";
-import { useOnWidgetChange } from "@/features/editor/items/FieldWidget";
+import { useAppDispatch } from "@/store/hooks";
+import { actions } from "@/store/scene/state/scene.slice";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import {
-  useFinalVisibility,
-  useMathItemResults,
-} from "@/store/scene/evaluation/mathScope";
+import { useFinalVisibility } from "@/store/scene/evaluation/mathScope";
 import ColorPopup from "./ColorPopup";
 import styles from "./ColorStatus.module.css";
 
@@ -30,34 +22,14 @@ interface Props {
   item: MathGraphic;
 }
 
-const useEffectEvent = (cb: () => void, deps: unknown[]) => {
-  const cbRef = useRef(cb);
-  useEffect(() => {
-    cbRef.current = cb;
-  });
-  useEffect(() => {
-    cbRef.current();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
-};
-
-const EVALUATED_PROPS = ["calculatedVisibility"] as const;
-
 const ColorStatus: React.FC<Props> = (props) => {
   const { item } = props;
   const [dialogVisible, setDialogVisible] = useToggle(false);
   const [buttonEl, setButtonEl] = useState<HTMLElement | null>(null);
-  const { color, visible } = item.properties;
+  const { color } = item.properties;
   const mathScope = useMathScope();
-  const [calcVisInit, setCalcVisInit] = useToggle(false);
-  const { calculatedVisibility } = useMathItemResults(
-    mathScope,
-    item,
-    EVALUATED_PROPS,
-  );
-
   const finalVisibility = useFinalVisibility(mathScope, item);
-  const onChange = useOnWidgetChange(item);
+  const dispatch = useAppDispatch();
   const colorAndStyle = useMemo(() => getColorConfig(color), [color]);
   const style = useMemo(
     () =>
@@ -72,9 +44,17 @@ const ColorStatus: React.FC<Props> = (props) => {
       setDialogVisible.off();
       return;
     }
-    onChange({ name: "visible", value: !visible });
-    onChange({ name: "useCalculatedVisibility", value: false });
-  }, [dialogVisible, setDialogVisible, visible, onChange]);
+    dispatch(
+      actions.setProperties({
+        id: item.id,
+        type: item.type,
+        properties: {
+          visible: !finalVisibility,
+          useCalculatedVisibility: false,
+        },
+      }),
+    );
+  }, [dialogVisible, setDialogVisible, dispatch, item, finalVisibility]);
   const handleOpenChange: PopoverRootProps["onOpenChange"] = (
     open,
     eventDetails,
@@ -95,21 +75,6 @@ const ColorStatus: React.FC<Props> = (props) => {
     onLongClick: setDialogVisible.on,
     onClick: handleButtonClick,
   });
-
-  useEffect(() => {
-    if (calculatedVisibility && !calcVisInit) {
-      setCalcVisInit.on();
-    }
-  }, [calculatedVisibility, calcVisInit, setCalcVisInit]);
-  useEffectEvent(() => {
-    if (!calcVisInit) return;
-    if (item.properties.calculatedVisibility !== "") {
-      onChange({
-        name: "useCalculatedVisibility",
-        value: true,
-      });
-    }
-  }, [calculatedVisibility, item.properties.calculatedVisibility]);
 
   return (
     <>
