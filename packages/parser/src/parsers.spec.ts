@@ -463,6 +463,21 @@ describe("returned node's MathNode.evaluate", () => {
     ]);
   });
 
+  it("Simplifies each entry of a vector", () => {
+    expect(parse("[e^{I\\pi}, 2]").evaluate()).toStrictEqual([-1, 2]);
+  });
+
+  it.each([
+    { from: "an array", v: [1, 2, 3] },
+    { from: "a matrix", v: math.matrix([1, 2, 3]) },
+  ])("Gives a function's vector result from $from as a new array", ({ v }) => {
+    const f = parse("f() = v").evaluate(
+      new Map([["v", v]]),
+    ) as CallableFunction;
+    expect(f()).toStrictEqual([1, 2, 3]);
+    expect(f()).not.toBe(v.valueOf());
+  });
+
   it("Drops negligible imaginary parts, whatever their sign", () => {
     expect(parse("e^{I\\pi}").evaluate()).toBe(-1);
     expect(parse("e^{-I\\pi}").evaluate()).toBe(-1);

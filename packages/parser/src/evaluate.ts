@@ -9,7 +9,7 @@ import type { AnonMathNode } from "@math3d/mathscope";
 import { EvaluationError } from "@math3d/mathscope";
 import invariant from "tiny-invariant";
 import type { ParseValidate } from "./interfaces";
-import { fastCompile } from "./fastCompile";
+import { fastCompile, numbersOf } from "./fastCompile";
 
 class FunctionEvaluationError extends EvaluationError {
   innerError: Error;
@@ -43,6 +43,9 @@ class FunctionEvaluationError extends EvaluationError {
 
 const IM_ROUNDING_THRESHOLD = 1e-10;
 const numericTypeSimplify = (val: unknown): unknown => {
+  // A vector of numbers, the usual sample, has nothing to simplify.
+  const numbers = numbersOf(val);
+  if (numbers) return numbers.slice();
   if (math.isMatrix(val)) {
     return val.toArray().map(numericTypeSimplify);
   }

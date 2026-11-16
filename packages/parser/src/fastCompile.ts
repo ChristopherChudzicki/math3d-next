@@ -58,6 +58,83 @@ const numberImplementation = (fn: Fn, arity: number): Fn | undefined =>
     ? typed.resolve(fn, Array(arity).fill(0))?.implementation
     : undefined;
 
+/** Whether `x` is an array holding only numbers, so one with no nesting. */
+const isNumbers = (x: unknown): x is number[] => {
+  if (!Array.isArray(x)) return false;
+  for (let i = 0; i < x.length; i += 1) {
+    if (typeof x[i] !== "number") return false;
+  }
+  return true;
+};
+
+/**
+ * The entries of a vector of numbers: the array itself, or a matrix's own,
+ * not a copy. A matrix with a datatype is left to mathjs, which converts
+ * operands and results to that type.
+ */
+const numbersOf = (x: unknown): number[] | undefined => {
+  if (!math.isMatrix(x)) return isNumbers(x) ? x : undefined;
+  if (x.datatype() !== undefined) return undefined;
+  const data = x.valueOf();
+  return isNumbers(data) ? data : undefined;
+};
+
+/** `entries` as mathjs returns them for an operation on `operands`. */
+const vectorLike = (entries: number[], ...operands: unknown[]) =>
+  operands.some(math.isMatrix) ? math.matrix(entries) : entries;
+
+type VectorShapes = {
+  numberVector?: true;
+  vectorNumber?: true;
+  vectorVector?: true;
+};
+/**
+ * The operand shapes, beyond two numbers, for which mathjs applies an
+ * operator entry by entry. Two vectors must be the same length: mathjs
+ * broadcasts a one-entry vector. Vector × vector is a dot product, and
+ * number / vector an inverse.
+ */
+const VECTOR_SHAPES = new Map<unknown, VectorShapes>([
+  [
+    mathWithTransform.add,
+    { numberVector: true, vectorNumber: true, vectorVector: true },
+  ],
+  [
+    mathWithTransform.subtract,
+    { numberVector: true, vectorNumber: true, vectorVector: true },
+  ],
+  [mathWithTransform.multiply, { numberVector: true, vectorNumber: true }],
+  [mathWithTransform.divide, { vectorNumber: true }],
+]);
+
+/**
+ * `fn` of two operands that aren't both numbers: `numberFn` entry by entry
+ * for vectors of numbers in one of `shapes`, else mathjs's `fn`.
+ */
+const vectorCall =
+  (fn: Fn, numberFn: Fn, shapes: VectorShapes) => (u: unknown, v: unknown) => {
+    const xs = typeof u === "number" ? undefined : numbersOf(u);
+    const ys = typeof v === "number" ? undefined : numbersOf(v);
+    let out: number[] | undefined;
+    if (typeof u === "number" && ys && shapes.numberVector) {
+      out = new Array(ys.length);
+      for (let i = 0; i < ys.length; i += 1) {
+        out[i] = numberFn(u, ys[i]) as number;
+      }
+    } else if (xs && typeof v === "number" && shapes.vectorNumber) {
+      out = new Array(xs.length);
+      for (let i = 0; i < xs.length; i += 1) {
+        out[i] = numberFn(xs[i], v) as number;
+      }
+    } else if (xs && ys && xs.length === ys.length && shapes.vectorVector) {
+      out = new Array(xs.length);
+      for (let i = 0; i < xs.length; i += 1) {
+        out[i] = numberFn(xs[i], ys[i]) as number;
+      }
+    }
+    return out ? vectorLike(out, u, v) : fn(u, v);
+  };
+
 const call = (fn: Fn, args: Part[]): Part => {
   if (args.every(isConstant)) {
     try {
@@ -98,12 +175,14 @@ const call = (fn: Fn, args: Part[]): Part => {
         fn(arg0(a, b, c, d, e), arg1(a, b, c, d, e)),
       );
     }
+    const shapes = VECTOR_SHAPES.get(fn);
+    const other = shapes ? vectorCall(fn, fast, shapes) : fn;
     return dynamic((a, b, c, d, e) => {
       const u = arg0(a, b, c, d, e);
       const v = arg1(a, b, c, d, e);
       return typeof u === "number" && typeof v === "number"
         ? fast(u, v)
-        : fn(u, v);
+        : other(u, v);
     });
   }
   return dynamic((a, b, c, d, e) =>
@@ -208,4 +287,4 @@ const fastCompile = (
   };
 };
 
-export { fastCompile };
+export { fastCompile, numbersOf };
