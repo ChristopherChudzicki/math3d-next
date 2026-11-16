@@ -2,9 +2,9 @@ FROM python:3.12.5
 
 WORKDIR /src/webserver
 
-# Install just (task runner) and uv (package manager)
-RUN curl -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
-RUN pip install --no-cache-dir uv
+# Install just (task runner) and uv (package manager). just matches the
+# version pinned in .github/workflows/test.yaml.
+RUN pip install --no-cache-dir rust-just==1.58.0 uv
 
 # Copy only dependency metadata first for better layer caching
 COPY webserver/pyproject.toml ./
