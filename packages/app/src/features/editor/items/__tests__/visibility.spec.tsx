@@ -184,27 +184,21 @@ describe("Visible and calculatedVisibility", () => {
     {
       useCalculatedVisibility: true,
       calculatedVisibility: "foo",
-      description: "Follows its Calculated Visibility.",
+      badge: "Calculated Visibility: following",
     },
     {
       useCalculatedVisibility: false,
       calculatedVisibility: "foo",
-      description:
-        "Shown or hidden by hand until its Calculated Visibility changes value.",
+      badge: "Calculated Visibility: set by hand",
     },
     {
       useCalculatedVisibility: true,
       calculatedVisibility: "undefinedName",
-      description: "Its Calculated Visibility has an error, so it's shown.",
-    },
-    {
-      useCalculatedVisibility: true,
-      calculatedVisibility: "",
-      description: "",
+      badge: "Calculated Visibility: error",
     },
   ])(
-    "'Show Graphic' describes what decides visibility (expression '$calculatedVisibility', following: $useCalculatedVisibility)",
-    async ({ useCalculatedVisibility, calculatedVisibility, description }) => {
+    "The badge names what decides visibility: '$badge'",
+    async ({ useCalculatedVisibility, calculatedVisibility, badge }) => {
       if (calculatedVisibility === "undefinedName") {
         vi.spyOn(console, "warn").mockImplementation(() => {});
       }
@@ -212,12 +206,44 @@ describe("Visible and calculatedVisibility", () => {
         useCalculatedVisibility,
         calculatedVisibility,
       });
-      const showPoint = await within(ui.point).findByRole("button", {
-        name: "Show Graphic",
-      });
-      expect(showPoint).toHaveAccessibleDescription(description);
+      expect(
+        await within(ui.point).findByRole("button", { name: badge }),
+      ).toBeInTheDocument();
     },
   );
+
+  test("An item with no expression has no badge", async () => {
+    const { ui } = await setup({ calculatedVisibility: "" });
+    await within(ui.point).findByRole("button", { name: "Show Graphic" });
+    expect(
+      within(ui.point).queryByRole("button", { name: /Calculated Visibility/ }),
+    ).toBeNull();
+  });
+
+  test("The badge's popover explains it and can hand visibility back", async () => {
+    const { ui, getPointData } = await setup({
+      useCalculatedVisibility: false,
+    });
+    await user.click(
+      await within(ui.point).findByRole("button", {
+        name: "Calculated Visibility: set by hand",
+      }),
+    );
+    const popover = await screen.findByRole("dialog");
+    expect(popover).toHaveAccessibleDescription(
+      "Shown or hidden by hand until its Calculated Visibility changes value:",
+    );
+
+    await user.click(
+      within(popover).getByRole("switch", {
+        name: "Follow Calculated Visibility",
+      }),
+    );
+
+    expect(getPointData().properties).toEqual(
+      expect.objectContaining({ useCalculatedVisibility: true }),
+    );
+  });
 
   test("Undo after a click hands visibility back to the expression", async () => {
     const { ui, getPointData } = await setup({

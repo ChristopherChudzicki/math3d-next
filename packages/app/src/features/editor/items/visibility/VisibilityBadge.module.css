@@ -1,0 +1,69 @@
+/* A small knockout in the background color, so it reads the same on every
+   color, gradient and hidden dot. */
+.badge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-background);
+  color: var(--color-text-light);
+  font-size: 9px;
+  cursor: pointer;
+}
+
+/* A 24px target (WCAG 2.5.8) around the 12px mark. */
+.badge::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+
+.badge:hover,
+.badge:focus-visible {
+  color: var(--color-text-primary);
+}
+
+.error,
+.error:hover,
+.error:focus-visible {
+  color: var(--color-danger);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 16rem;
+  padding: 0.75rem;
+}
+
+/* Over ReadonlyMathField's own centering. */
+.content > .expression {
+  align-self: flex-start;
+}
+
+.text {
+  margin: 0;
+  font-size: var(--font-size-small);
+}
+
+.message {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: var(--font-size-small);
+}
+
+.follow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: var(--font-size-small);
+}

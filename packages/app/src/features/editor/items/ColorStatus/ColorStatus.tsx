@@ -8,11 +8,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Icon } from "@iconify/react/offline";
-import type { IconifyIcon } from "@iconify/react/offline";
-import circleAlert from "@iconify-icons/lucide/circle-alert";
-import hand from "@iconify-icons/lucide/hand";
-import link2 from "@iconify-icons/lucide/link-2";
 import { useToggle } from "@/util/hooks";
 import { useLongAndShortClick } from "@/util/hooks/useLongAndShortClick";
 
@@ -24,34 +19,13 @@ import { showNotice } from "@/ui/Toast/toasts";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
-import {
-  useFinalVisibility,
-  useMathErrors,
-} from "@/store/scene/evaluation/mathScope";
+import { useFinalVisibility } from "@/store/scene/evaluation/mathScope";
+import VisibilityBadge from "@/features/editor/items/visibility/VisibilityBadge";
 import { visibilityMode } from "@/store/scene/state/util";
 import ColorPopup from "./ColorPopup";
 import styles from "./ColorStatus.module.css";
 
 const TOOLTIP_DELAY = 800;
-const CALCULATED_VISIBILITY = ["calculatedVisibility"] as const;
-
-type Badge = { icon: IconifyIcon; text: string; className?: string };
-const BADGES: Record<"following" | "manual" | "error", Badge> = {
-  following: {
-    icon: link2,
-    text: "Follows its Calculated Visibility.",
-  },
-  manual: {
-    icon: hand,
-    text: "Shown or hidden by hand until its Calculated Visibility changes value.",
-  },
-  error: {
-    icon: circleAlert,
-    text: "Its Calculated Visibility has an error, so it's shown.",
-    className: styles["badge-error"],
-  },
-};
-
 interface Props {
   item: MathGraphic;
 }
@@ -63,14 +37,7 @@ const ColorStatus: React.FC<Props> = (props) => {
   const { color } = item.properties;
   const mathScope = useMathScope();
   const finalVisibility = useFinalVisibility(mathScope, item);
-  const errors = useMathErrors(mathScope, item.id, CALCULATED_VISIBILITY);
   const mode = visibilityMode(item.properties);
-  let badge: Badge | undefined;
-  if (mode === "manual") badge = BADGES.manual;
-  if (mode === "following") {
-    badge = errors.calculatedVisibility ? BADGES.error : BADGES.following;
-  }
-  const badgeTextId = `${item.id}-visibility-mode`;
   const dispatch = useAppDispatch();
   const loadCount = useAppSelector((state) => state.scene.loadCount);
   const closeNotice = useRef<() => void>(undefined);
@@ -149,11 +116,10 @@ const ColorStatus: React.FC<Props> = (props) => {
   });
 
   return (
-    <>
+    <span className={classNames(styles.dot, positioning["absolute-centered"])}>
       <Tooltip.Root>
         <Tooltip.Trigger
           delay={TOOLTIP_DELAY}
-          aria-describedby={badge ? badgeTextId : undefined}
           render={
             <button
               type="button"
@@ -161,34 +127,16 @@ const ColorStatus: React.FC<Props> = (props) => {
               ref={setButtonEl}
               aria-pressed={finalVisibility}
               aria-label="Show Graphic"
-              className={classNames(
-                styles.circle,
-                positioning["absolute-centered"],
-                {
-                  [styles.empty]: !finalVisibility,
-                },
-              )}
+              className={classNames(styles.circle, {
+                [styles.empty]: !finalVisibility,
+              })}
               {...longAndShortClick.handlers}
-            >
-              {badge ? (
-                <span className={classNames(styles.badge, badge.className)}>
-                  <Icon icon={badge.icon} aria-hidden="true" />
-                </span>
-              ) : null}
-            </button>
+            />
           }
         />
-        <Tooltip.Popup>
-          {/* The trigger's description already says this. */}
-          {badge ? <div aria-hidden="true">{badge.text}</div> : null}
-          Press and hold to change color
-        </Tooltip.Popup>
+        <Tooltip.Popup>Press and hold to change color</Tooltip.Popup>
       </Tooltip.Root>
-      {badge ? (
-        <span id={badgeTextId} hidden>
-          {badge.text}
-        </span>
-      ) : null}
+      <VisibilityBadge item={item} />
       <Popover.Root
         open={dialogVisible}
         onOpenChange={handleOpenChange}
@@ -196,7 +144,7 @@ const ColorStatus: React.FC<Props> = (props) => {
       >
         <ColorPopup item={item} anchor={buttonEl} />
       </Popover.Root>
-    </>
+    </span>
   );
 };
 

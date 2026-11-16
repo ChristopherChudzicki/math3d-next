@@ -1,6 +1,14 @@
-.circle {
-  border-radius: 50%;
+/* The dot and its badge. */
+.dot {
   width: calc(100% - 10px);
+  aspect-ratio: 1;
+}
+
+.circle {
+  position: relative;
+  display: block;
+  border-radius: 50%;
+  width: 100%;
   aspect-ratio: 1;
   border: none;
   background: var(--indicator-color);
@@ -20,28 +28,4 @@
 }
 .empty.circle::before {
   background: var(--color-background);
-}
-
-/* Says what decides visibility. A self-contained chip, so it reads the same
-   on every color, gradient and hidden dot. */
-.badge {
-  position: absolute;
-  right: -3px;
-  bottom: -3px;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1px solid var(--color-secondary);
-  background: var(--color-background);
-  color: var(--color-text-primary);
-  font-size: 9px;
-  pointer-events: none;
-}
-
-.badge-error {
-  border-color: var(--color-danger);
-  color: var(--color-danger);
 }

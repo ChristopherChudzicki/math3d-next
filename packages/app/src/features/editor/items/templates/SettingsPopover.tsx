@@ -10,10 +10,7 @@ import type {
 } from "@math3d/mathitem-configs";
 import React, { useMemo } from "react";
 import IconButton from "@/ui/IconButton";
-import Switch from "@/ui/Switch";
-import { useAppDispatch } from "@/store/hooks";
-import { actions } from "@/store/scene/state/scene.slice";
-import { visibilityMode } from "@/store/scene/state/util";
+import FollowSwitch from "@/features/editor/items/visibility/FollowSwitch";
 import { Popover } from "@/ui/Popover";
 import circleHelp from "@iconify-icons/lucide/circle-help";
 import FieldWidget, {
@@ -23,7 +20,6 @@ import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 import { useDefaultZOrder } from "@/store/scene/evaluation/zOrders";
 import {
   getMathProperties,
-  useFinalVisibility,
   useMathErrors,
 } from "@/store/scene/evaluation/mathScope";
 import { OnWidgetChange } from "@/features/editor/items/FieldWidget/types";
@@ -87,36 +83,14 @@ const SettingsField: React.FC<SettingsFieldProps> = ({
   );
 };
 
-/** Whether Calculated Visibility decides; turning it off keeps what's shown. */
 const FollowCalculatedVisibility: React.FC<{ item: MathGraphic }> = ({
   item,
 }) => {
-  const dispatch = useAppDispatch();
-  const shown = useFinalVisibility(useMathScope(), item);
-  const mode = visibilityMode(item.properties);
   const labelId = `${item.id}-followCalculatedVisibility`;
   return (
     <>
       <span id={labelId}>Follow Calculated Visibility</span>
-      <Switch
-        aria-labelledby={labelId}
-        checked={mode === "following"}
-        disabled={mode === "none"}
-        onCheckedChange={(checked) => {
-          dispatch(
-            checked
-              ? actions.followCalculatedVisibility({ ids: [item.id] })
-              : actions.setProperties({
-                  id: item.id,
-                  type: item.type,
-                  properties: {
-                    visible: shown,
-                    useCalculatedVisibility: false,
-                  },
-                }),
-          );
-        }}
-      />
+      <FollowSwitch item={item} labelId={labelId} />
       {/* The help-icon column */}
       <span />
     </>
