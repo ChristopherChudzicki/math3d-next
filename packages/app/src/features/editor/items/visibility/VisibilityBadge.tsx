@@ -46,7 +46,6 @@ const VisibilityBadge: React.FC<{ item: MathGraphic }> = ({ item }) => {
   if (mode === "none") return null;
   const error = mode === "following" ? errors.calculatedVisibility : undefined;
   const badge = BADGES[error ? "error" : mode];
-  const labelId = `${item.id}-badge-follow`;
   return (
     <Popover.Root>
       <Popover.Trigger
@@ -73,8 +72,7 @@ const VisibilityBadge: React.FC<{ item: MathGraphic }> = ({ item }) => {
           />
           {error ? <p className={styles.message}>{error.message}</p> : null}
           <div className={styles.follow}>
-            <span id={labelId}>Follow Calculated Visibility</span>
-            <FollowSwitch item={item} labelId={labelId} />
+            <FollowSwitch item={item} />
           </div>
         </div>
       </Popover.Popup>

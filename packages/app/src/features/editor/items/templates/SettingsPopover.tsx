@@ -2,7 +2,6 @@ import { Icon } from "@iconify/react/offline";
 import settings from "@iconify-icons/lucide/settings";
 import { isMathGraphic } from "@math3d/mathitem-configs";
 import type {
-  MathGraphic,
   MathItem,
   MathItemConfig,
   MathItemType,
@@ -83,20 +82,6 @@ const SettingsField: React.FC<SettingsFieldProps> = ({
   );
 };
 
-const FollowCalculatedVisibility: React.FC<{ item: MathGraphic }> = ({
-  item,
-}) => {
-  const labelId = `${item.id}-followCalculatedVisibility`;
-  return (
-    <>
-      <span id={labelId}>Follow Calculated Visibility</span>
-      <FollowSwitch item={item} labelId={labelId} />
-      {/* The help-icon column */}
-      <span />
-    </>
-  );
-};
-
 const SettingsForm = <T extends MathItemType>({
   config,
   item,
@@ -140,7 +125,11 @@ const SettingsForm = <T extends MathItemType>({
               {...extras}
             />
             {field.name === "calculatedVisibility" && isMathGraphic(item) ? (
-              <FollowCalculatedVisibility item={item} />
+              <>
+                <FollowSwitch item={item} />
+                {/* The help-icon column */}
+                <span />
+              </>
             ) : null}
           </React.Fragment>
         );

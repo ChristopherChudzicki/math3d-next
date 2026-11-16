@@ -41,7 +41,8 @@ const ColorStatus: React.FC<Props> = (props) => {
   const dispatch = useAppDispatch();
   const loadCount = useAppSelector((state) => state.scene.loadCount);
   const closeNotice = useRef<() => void>(undefined);
-  // Rows outlive a scene switch (ids recur), so a new scene closes it too.
+  // Rows can survive a scene switch (the next scene may reuse ids), so a load
+  // closes the notice too.
   useEffect(() => () => closeNotice.current?.(), [loadCount]);
   // Once the item isn't manual, there's nothing left to undo.
   useEffect(() => {
@@ -74,15 +75,21 @@ const ColorStatus: React.FC<Props> = (props) => {
       }),
     );
     if (mode !== "following" || !buttonEl) return;
-    const name = item.properties.description.trim();
-    const what = name ? `“${name}”` : "Graphic";
+    const { visible } = item.properties;
     closeNotice.current = showNotice({
-      description: `${what} ${finalVisibility ? "hidden" : "shown"} by hand.`,
+      description: finalVisibility ? "Hidden by hand." : "Shown by hand.",
       anchor: buttonEl,
       action: {
         label: "Undo",
+        // The notice closes if the expression is cleared or the item removed.
         onClick: () =>
-          dispatch(actions.followCalculatedVisibility({ ids: [item.id] })),
+          dispatch(
+            actions.setProperties({
+              id: item.id,
+              type: item.type,
+              properties: { visible, useCalculatedVisibility: true },
+            }),
+          ),
       },
     });
   }, [

@@ -96,6 +96,7 @@ const showNotice = ({
       },
     });
   });
+  shownToasts.push(description);
   return close;
 };
 

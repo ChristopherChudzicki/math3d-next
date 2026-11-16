@@ -1,9 +1,8 @@
-/* A small knockout in the background color, so it reads the same on every
-   color, gradient and hidden dot. */
+/* A small mark under the dot, in a background-colored disc. */
 .badge {
   position: absolute;
-  right: -2px;
-  bottom: -2px;
+  top: calc(100% + 2px);
+  left: calc(50% - 6px);
   z-index: 1;
   display: grid;
   place-items: center;
@@ -18,11 +17,15 @@
   cursor: pointer;
 }
 
-/* A 24px target (WCAG 2.5.8) around the 12px mark. */
+/* A 24px target (WCAG 2.5.8) that starts at the dot's edge, so it never
+   takes clicks meant for the dot. */
 .badge::after {
   content: "";
   position: absolute;
-  inset: -6px;
+  top: -2px;
+  bottom: -10px;
+  left: -6px;
+  right: -6px;
 }
 
 .badge:hover,
@@ -44,7 +47,7 @@
   padding: 0.75rem;
 }
 
-/* Over ReadonlyMathField's own centering. */
+/* Overrides ReadonlyMathField's `align-self: center`. */
 .content > .expression {
   align-self: flex-start;
 }

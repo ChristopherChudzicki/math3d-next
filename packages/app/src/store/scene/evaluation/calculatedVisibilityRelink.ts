@@ -44,9 +44,6 @@ const readValues = (
  * Hands a manually set item back to its Calculated Visibility when the
  * expression's value changes. Errors don't count, so a variable retyped through
  * a parse error relinks only if the value it settles on differs.
- *
- * Runs outside `mathScopeSync`, which has synced the scope by the time
- * `next(action)` returns.
  */
 const createCalculatedVisibilityRelink = (
   source: MathScopeSource,
