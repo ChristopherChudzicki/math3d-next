@@ -19,15 +19,20 @@ test("showing the same message again replaces the open toast", async () => {
   await expectToast("Couldn’t save.");
 });
 
-test("a replaced notice's close function leaves its replacement open", async () => {
+test("a stale close() doesn't stop the next notice replacing the open one", async () => {
   render(<ToastHost />);
   const anchor = document.body;
   const closeFirst = await act(async () =>
-    showNotice({ description: "Hidden by hand.", anchor }),
+    showNotice({ description: "First.", anchor }),
   );
-  await act(async () => showNotice({ description: "Hidden by hand.", anchor }));
+  await expectToast("First.");
+  await act(async () => showNotice({ description: "Second.", anchor }));
+  await expectToast("Second.");
 
   await act(async () => closeFirst());
+  await act(async () => showNotice({ description: "Third.", anchor }));
 
-  await expectToast("Hidden by hand.");
+  await expectToast("Third.");
+  const region = screen.getByRole("region", { name: "Notices" });
+  await waitFor(() => expect(within(region).queryByText("Second.")).toBeNull());
 });

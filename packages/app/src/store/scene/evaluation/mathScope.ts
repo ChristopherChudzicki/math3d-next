@@ -100,8 +100,8 @@ const useMathItemResults = <
 };
 
 /**
- * Whether `item` is drawn. Unless it follows its `calculatedVisibility` (see
- * `visibilityMode`; a blank one would evaluate to `false`), `visible` decides.
+ * Whether `item` is drawn. Unless it follows its `calculatedVisibility` (a
+ * blank one counts as not following; see `visibilityMode`), `visible` decides.
  * An expression that errors shows the item, even over a stale result:
  * `useMathResults` keeps the last good value.
  */
