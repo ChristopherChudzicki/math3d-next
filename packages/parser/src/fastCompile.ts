@@ -58,7 +58,7 @@ const numberImplementation = (fn: Fn, arity: number): Fn | undefined =>
     ? typed.resolve(fn, Array(arity).fill(0))?.implementation
     : undefined;
 
-/** Whether `x` is an array holding only numbers, so one with no nesting. */
+/** Whether `x` is a flat array of numbers. */
 const isNumbers = (x: unknown): x is number[] => {
   if (!Array.isArray(x)) return false;
   for (let i = 0; i < x.length; i += 1) {
@@ -68,9 +68,9 @@ const isNumbers = (x: unknown): x is number[] => {
 };
 
 /**
- * The entries of a vector of numbers: the array itself, or a matrix's own,
- * not a copy. A matrix with a datatype is left to mathjs, which converts
- * operands and results to that type.
+ * The entries of a vector of numbers, uncopied: the array itself or a
+ * matrix's own. `undefined` for a matrix with a datatype, whose operands and
+ * results mathjs converts to that type.
  */
 const numbersOf = (x: unknown): number[] | undefined => {
   if (!math.isMatrix(x)) return isNumbers(x) ? x : undefined;
@@ -78,10 +78,6 @@ const numbersOf = (x: unknown): number[] | undefined => {
   const data = x.valueOf();
   return isNumbers(data) ? data : undefined;
 };
-
-/** `entries` as mathjs returns them for an operation on `operands`. */
-const vectorLike = (entries: number[], ...operands: unknown[]) =>
-  operands.some(math.isMatrix) ? math.matrix(entries) : entries;
 
 type VectorShapes = {
   numberVector?: true;
@@ -92,7 +88,7 @@ type VectorShapes = {
  * The operand shapes, beyond two numbers, for which mathjs applies an
  * operator entry by entry. Two vectors must be the same length: mathjs
  * broadcasts a one-entry vector. Vector × vector is a dot product, and
- * number / vector an inverse.
+ * dividing by a vector multiplies by its matrix inverse.
  */
 const VECTOR_SHAPES = new Map<unknown, VectorShapes>([
   [
@@ -132,7 +128,9 @@ const vectorCall =
         out[i] = numberFn(xs[i], ys[i]) as number;
       }
     }
-    return out ? vectorLike(out, u, v) : fn(u, v);
+    if (!out) return fn(u, v);
+    // A matrix operand makes the result one, as in mathjs.
+    return math.isMatrix(u) || math.isMatrix(v) ? math.matrix(out) : out;
   };
 
 /** Told the name of each mathjs function a sample calls through its dispatch. */
@@ -187,13 +185,13 @@ const call = (fn: Fn, args: Part[], onDispatch?: OnDispatch): Part => {
       );
     }
     const shapes = VECTOR_SHAPES.get(fn);
-    const other = shapes ? vectorCall(slow, fast, shapes) : slow;
+    const nonNumber = shapes ? vectorCall(slow, fast, shapes) : slow;
     return dynamic((a, b, c, d, e) => {
       const u = arg0(a, b, c, d, e);
       const v = arg1(a, b, c, d, e);
       return typeof u === "number" && typeof v === "number"
         ? fast(u, v)
-        : other(u, v);
+        : nonNumber(u, v);
     });
   }
   return dynamic((a, b, c, d, e) =>
@@ -289,7 +287,7 @@ const evaluate = (
  * An expression with anything unhandled is evaluated entirely by mathjs.
  *
  * `onDispatch` is for tests: results can't show whether a call took a fast
- * path, since mathjs's dispatch gives the same ones.
+ * path, since mathjs's dispatch gives the same results.
  */
 const fastCompile = (
   node: mjs.MathNode,

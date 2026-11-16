@@ -43,7 +43,8 @@ class FunctionEvaluationError extends EvaluationError {
 
 const IM_ROUNDING_THRESHOLD = 1e-10;
 const numericTypeSimplify = (val: unknown): unknown => {
-  // A vector of numbers, the usual sample, has nothing to simplify.
+  // A vector of numbers, the usual sample, has nothing to simplify. Copied,
+  // since `numbersOf` returns the operand's own array.
   const numbers = numbersOf(val);
   if (numbers) return numbers.slice();
   if (math.isMatrix(val)) {
