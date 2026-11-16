@@ -1,6 +1,8 @@
 import { Icon } from "@iconify/react/offline";
 import settings from "@iconify-icons/lucide/settings";
+import { isMathGraphic } from "@math3d/mathitem-configs";
 import type {
+  MathGraphic,
   MathItem,
   MathItemConfig,
   MathItemType,
@@ -8,6 +10,10 @@ import type {
 } from "@math3d/mathitem-configs";
 import React, { useMemo } from "react";
 import IconButton from "@/ui/IconButton";
+import Switch from "@/ui/Switch";
+import { useAppDispatch } from "@/store/hooks";
+import { actions } from "@/store/scene/state/scene.slice";
+import { visibilityMode } from "@/store/scene/state/util";
 import { Popover } from "@/ui/Popover";
 import circleHelp from "@iconify-icons/lucide/circle-help";
 import FieldWidget, {
@@ -17,6 +23,7 @@ import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 import { useDefaultZOrder } from "@/store/scene/evaluation/zOrders";
 import {
   getMathProperties,
+  useFinalVisibility,
   useMathErrors,
 } from "@/store/scene/evaluation/mathScope";
 import { OnWidgetChange } from "@/features/editor/items/FieldWidget/types";
@@ -80,6 +87,41 @@ const SettingsField: React.FC<SettingsFieldProps> = ({
   );
 };
 
+/** Whether the item's Calculated Visibility decides; off, it keeps what's shown. */
+const FollowCalculatedVisibility: React.FC<{ item: MathGraphic }> = ({
+  item,
+}) => {
+  const dispatch = useAppDispatch();
+  const shown = useFinalVisibility(useMathScope(), item);
+  const mode = visibilityMode(item.properties);
+  const labelId = `${item.id}-followCalculatedVisibility`;
+  return (
+    <>
+      <span id={labelId}>Follow Calculated Visibility</span>
+      <Switch
+        aria-labelledby={labelId}
+        checked={mode === "following"}
+        disabled={mode === "none"}
+        onCheckedChange={(checked) => {
+          dispatch(
+            checked
+              ? actions.followCalculatedVisibility({ ids: [item.id] })
+              : actions.setProperties({
+                  id: item.id,
+                  type: item.type,
+                  properties: {
+                    visible: shown,
+                    useCalculatedVisibility: false,
+                  },
+                }),
+          );
+        }}
+      />
+      <span />
+    </>
+  );
+};
+
 const SettingsForm = <T extends MathItemType>({
   config,
   item,
@@ -113,15 +155,19 @@ const SettingsForm = <T extends MathItemType>({
         const extras =
           field.name === "zOrder" ? { placeholder: `${defaultZOrder}` } : {};
         return (
-          <SettingsField
-            key={field.name}
-            itemId={item.id}
-            field={field}
-            value={value}
-            error={errors[field.name]}
-            onWidgetChange={onWidgetChange}
-            {...extras}
-          />
+          <React.Fragment key={field.name}>
+            <SettingsField
+              itemId={item.id}
+              field={field}
+              value={value}
+              error={errors[field.name]}
+              onWidgetChange={onWidgetChange}
+              {...extras}
+            />
+            {field.name === "calculatedVisibility" && isMathGraphic(item) ? (
+              <FollowCalculatedVisibility item={item} />
+            ) : null}
+          </React.Fragment>
         );
       })}
     </div>

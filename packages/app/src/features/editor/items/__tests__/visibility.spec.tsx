@@ -1,5 +1,5 @@
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import { renderTestApp, user, within } from "@/test_util";
+import { renderTestApp, screen, user, within } from "@/test_util";
 import * as _ from "lodash-es";
 import { seedDb, makeItem } from "@math3d/mock-api";
 import { findItemByTestId } from "@/test_util/mathItems";
@@ -181,6 +181,93 @@ describe("Visible and calculatedVisibility", () => {
     await user.click(within(ui).getByRole("switch", { name: "Value" }));
 
     expect(store.getState().scene.items[axis.id].properties).toEqual(
+      expect.objectContaining({ useCalculatedVisibility: true }),
+    );
+  });
+
+  test.each([
+    {
+      useCalculatedVisibility: true,
+      calculatedVisibility: "foo",
+      description: "Shown or hidden by its Calculated Visibility.",
+    },
+    {
+      useCalculatedVisibility: false,
+      calculatedVisibility: "foo",
+      description:
+        "Shown or hidden by hand. Calculated Visibility takes over when its value changes.",
+    },
+    {
+      useCalculatedVisibility: true,
+      calculatedVisibility: "undefinedName",
+      description: "Its Calculated Visibility has an error, so it's shown.",
+    },
+    {
+      useCalculatedVisibility: true,
+      calculatedVisibility: "",
+      description: "",
+    },
+  ])(
+    "'Show Graphic' says what decides visibility: '$description'",
+    async ({ useCalculatedVisibility, calculatedVisibility, description }) => {
+      if (calculatedVisibility === "undefinedName") {
+        vi.spyOn(console, "warn").mockImplementation(() => {});
+      }
+      const { ui } = await setup({
+        useCalculatedVisibility,
+        calculatedVisibility,
+      });
+      const showPoint = await within(ui.point).findByRole("button", {
+        name: "Show Graphic",
+      });
+      expect(showPoint).toHaveAccessibleDescription(description);
+    },
+  );
+
+  test("Undo after a click hands visibility back to the expression", async () => {
+    const { ui, getPointData } = await setup({
+      booleanRhs: "true",
+      useCalculatedVisibility: true,
+    });
+    const showPoint = await within(ui.point).findByRole("button", {
+      name: "Show Graphic",
+    });
+    await user.click(showPoint);
+    expect(showPoint).toHaveAttribute("aria-pressed", "false");
+    const { description } = getPointData().properties;
+    await screen.findByText(`“${description}” hidden by hand.`);
+
+    await user.click(screen.getByRole("button", { name: "Undo" }));
+
+    expect(getPointData().properties).toEqual(
+      expect.objectContaining({ useCalculatedVisibility: true }),
+    );
+    expect(showPoint).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("The Follow Calculated Visibility switch works both ways, keeping what's shown", async () => {
+    const { ui, getPointData } = await setup({
+      booleanRhs: "false",
+      useCalculatedVisibility: true,
+    });
+    await user.click(
+      within(ui.point).getByRole("button", { name: "More Settings" }),
+    );
+    const follow = await screen.findByRole("switch", {
+      name: "Follow Calculated Visibility",
+    });
+    expect(follow).toBeChecked();
+
+    await user.click(follow);
+    expect(getPointData().properties).toEqual(
+      expect.objectContaining({
+        useCalculatedVisibility: false,
+        visible: false,
+      }),
+    );
+
+    await user.click(follow);
+    expect(getPointData().properties).toEqual(
       expect.objectContaining({ useCalculatedVisibility: true }),
     );
   });

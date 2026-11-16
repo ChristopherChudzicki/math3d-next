@@ -81,3 +81,32 @@
   font-size: var(--font-size-small);
   line-height: 1.43;
 }
+
+.positioner {
+  z-index: var(--z-index-toast);
+}
+
+.notice {
+  border: 1px solid var(--color-secondary-light);
+  border-radius: calc(2 * var(--border-radius));
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  box-shadow:
+    0 8px 24px rgb(0 0 0 / 16%),
+    0 1px 4px rgb(0 0 0 / 10%);
+  width: max-content;
+  max-width: min(20rem, 100vw - 2rem);
+  transition: opacity 150ms ease-out;
+}
+
+.notice[data-starting-style],
+.notice[data-ending-style] {
+  opacity: 0;
+}
+
+.noticeContent {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.125rem 0.125rem 0.75rem;
+}

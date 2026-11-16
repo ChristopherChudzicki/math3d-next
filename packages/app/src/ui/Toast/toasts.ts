@@ -47,4 +47,67 @@ const showToast = (description: string): void => {
   shownToasts.push(description);
 };
 
-export { toastManager, showToast, dismissToast, shownToasts };
+const noticeManager = createToastManager();
+/** Each slot's open notice id. */
+const openNotices = new Map<string, string>();
+
+type NoticeOptions = {
+  /** One notice per slot: a new one replaces the last. */
+  slot: string;
+  description: string;
+  anchor: Element;
+  action?: { label: string; onClick: () => void };
+  timeout?: number;
+};
+
+/**
+ * Show a short notice beside `anchor`. Returns a function that closes it, if
+ * it's still the one open in its slot. Replacing closes and adds rather than
+ * updating, so the new text is announced.
+ */
+const showNotice = ({
+  slot,
+  description,
+  anchor,
+  action,
+  timeout = 6000,
+}: NoticeOptions): (() => void) => {
+  const previous = openNotices.get(slot);
+  const id = `notice-${(nextId += 1)}`;
+  openNotices.set(slot, id);
+  const close = () => {
+    if (openNotices.get(slot) !== id) return;
+    openNotices.delete(slot);
+    afterEffects(() => noticeManager.close(id));
+  };
+  afterEffects(() => {
+    if (previous !== undefined) noticeManager.close(previous);
+    noticeManager.add({
+      id,
+      description,
+      timeout,
+      priority: "low",
+      positionerProps: { anchor },
+      actionProps: action && {
+        children: action.label,
+        onClick: () => {
+          action.onClick();
+          close();
+        },
+      },
+      onClose: () => {
+        if (openNotices.get(slot) === id) openNotices.delete(slot);
+      },
+    });
+  });
+  return close;
+};
+
+export {
+  toastManager,
+  showToast,
+  dismissToast,
+  shownToasts,
+  noticeManager,
+  showNotice,
+};
