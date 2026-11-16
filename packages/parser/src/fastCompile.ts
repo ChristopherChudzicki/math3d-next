@@ -135,7 +135,10 @@ const vectorCall =
     return out ? vectorLike(out, u, v) : fn(u, v);
   };
 
-const call = (fn: Fn, args: Part[]): Part => {
+/** Told the name of each mathjs function a sample calls through its dispatch. */
+type OnDispatch = (name: string) => void;
+
+const call = (fn: Fn, args: Part[], onDispatch?: OnDispatch): Part => {
   if (args.every(isConstant)) {
     try {
       const value = fn(...args.map((arg) => arg.value));
@@ -146,14 +149,22 @@ const call = (fn: Fn, args: Part[]): Part => {
       // Thrown again at each call, as mathjs does.
     }
   }
+  // What a sample calls when no fast path takes its arguments.
+  const slow: Fn =
+    onDispatch && typed.isTypedFunction(fn)
+      ? (...operands) => {
+          onDispatch(fn.name);
+          return fn(...operands);
+        }
+      : fn;
   const closures = args.map(toClosure);
   if (closures.length === 1) {
     const [arg0] = closures;
     const fast = numberImplementation(fn, 1);
-    if (!fast) return dynamic((a, b, c, d, e) => fn(arg0(a, b, c, d, e)));
+    if (!fast) return dynamic((a, b, c, d, e) => slow(arg0(a, b, c, d, e)));
     return dynamic((a, b, c, d, e) => {
       const u = arg0(a, b, c, d, e);
-      return typeof u === "number" ? fast(u) : fn(u);
+      return typeof u === "number" ? fast(u) : slow(u);
     });
   }
   if (closures.length === 2) {
@@ -165,18 +176,18 @@ const call = (fn: Fn, args: Part[]): Part => {
         const n = exponent.value as number;
         return dynamic((a, b, c, d, e) => {
           const u = arg0(a, b, c, d, e);
-          return typeof u === "number" ? u ** n : fn(u, n);
+          return typeof u === "number" ? u ** n : slow(u, n);
         });
       }
     }
     const fast = numberImplementation(fn, 2);
     if (!fast) {
       return dynamic((a, b, c, d, e) =>
-        fn(arg0(a, b, c, d, e), arg1(a, b, c, d, e)),
+        slow(arg0(a, b, c, d, e), arg1(a, b, c, d, e)),
       );
     }
     const shapes = VECTOR_SHAPES.get(fn);
-    const other = shapes ? vectorCall(fn, fast, shapes) : fn;
+    const other = shapes ? vectorCall(slow, fast, shapes) : slow;
     return dynamic((a, b, c, d, e) => {
       const u = arg0(a, b, c, d, e);
       const v = arg1(a, b, c, d, e);
@@ -186,7 +197,7 @@ const call = (fn: Fn, args: Part[]): Part => {
     });
   }
   return dynamic((a, b, c, d, e) =>
-    fn(...closures.map((arg) => arg(a, b, c, d, e))),
+    slow(...closures.map((arg) => arg(a, b, c, d, e))),
   );
 };
 
@@ -194,7 +205,12 @@ const call = (fn: Fn, args: Part[]): Part => {
  * Builds the parts of a function with these `params`, or of a value when
  * there are none. `self` is the function's own name.
  */
-const builder = (params: string[], scope: Scope, self?: string) => {
+const builder = (
+  params: string[],
+  scope: Scope,
+  self?: string,
+  onDispatch?: OnDispatch,
+) => {
   /** What `name` means outside the parameters: the scope's value, else mathjs's. */
   const lookup = (name: string): unknown => {
     // mathjs resolves `self` to the function being defined; the scope holds
@@ -220,14 +236,14 @@ const builder = (params: string[], scope: Scope, self?: string) => {
         ? mathWithTransform[node.fn]
         : undefined;
       if (!isPlainFunction(fn)) throw new Unsupported();
-      return call(fn, node.args.map(build));
+      return call(fn, node.args.map(build), onDispatch);
     }
     if (math.isFunctionNode(node)) {
       if (!math.isSymbolNode(node.fn)) throw new Unsupported();
       if (params.includes(node.fn.name)) throw new Unsupported();
       const fn = lookup(node.fn.name);
       if (!isPlainFunction(fn)) throw new Unsupported();
-      return call(fn, node.args.map(build));
+      return call(fn, node.args.map(build), onDispatch);
     }
     if (math.isArrayNode(node)) {
       const items = node.items.map(build).map(toClosure);
@@ -244,19 +260,23 @@ const builder = (params: string[], scope: Scope, self?: string) => {
   return build;
 };
 
-const evaluate = (node: mjs.MathNode, scope: Scope): unknown => {
+const evaluate = (
+  node: mjs.MathNode,
+  scope: Scope,
+  onDispatch?: OnDispatch,
+): unknown => {
   if (math.isFunctionAssignmentNode(node)) {
     const { params, name } = node;
     if (params.length > MAX_PARAMS) throw new Unsupported();
     if (params.some(isUnsafeName)) throw new Unsupported();
-    return toClosure(builder(params, scope, name)(node.expr));
+    return toClosure(builder(params, scope, name, onDispatch)(node.expr));
   }
   let expr = node;
   if (math.isAssignmentNode(node)) {
     if (!math.isSymbolNode(node.object) || node.index) throw new Unsupported();
     expr = node.value;
   }
-  return toClosure(builder([], scope)(expr))();
+  return toClosure(builder([], scope, undefined, onDispatch)(expr))();
 };
 
 /**
@@ -267,9 +287,13 @@ const evaluate = (node: mjs.MathNode, scope: Scope): unknown => {
  * - a function assignment evaluates to a plain function with no arity check;
  * - an assignment is not written to the scope.
  * An expression with anything unhandled is evaluated entirely by mathjs.
+ *
+ * `onDispatch` is for tests: results can't show whether a call took a fast
+ * path, since mathjs's dispatch gives the same ones.
  */
 const fastCompile = (
   node: mjs.MathNode,
+  { onDispatch }: { onDispatch?: OnDispatch } = {},
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): { evaluate: (scope?: Scope) => any } => {
   // Up front, since compiling is where mathjs rejects some expressions, such
@@ -278,7 +302,7 @@ const fastCompile = (
   return {
     evaluate: (scope = new Map()) => {
       try {
-        return evaluate(node, scope);
+        return evaluate(node, scope, onDispatch);
       } catch (err) {
         if (!(err instanceof Unsupported)) throw err;
       }

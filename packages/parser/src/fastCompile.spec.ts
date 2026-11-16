@@ -281,6 +281,37 @@ describe("arithmetic on vectors agrees with mathjs", () => {
   });
 });
 
+describe("which calls reach mathjs's dispatch", () => {
+  const scope = {
+    v: [1, -2, 0.5],
+    w: [4, 0, -3],
+    m: math.matrix([3, 0, -4]),
+    one: [7],
+    typed: math.matrix([3, 0, -4], "dense", "number"),
+  };
+
+  test.each<{ expr: string; dispatched: string[] }>([
+    { expr: "f(x) = x^2 + sin(x) - x / 3", dispatched: [] },
+    { expr: "f(x) = x v", dispatched: [] },
+    { expr: "f(x) = v / x", dispatched: [] },
+    { expr: "f(x) = v - w", dispatched: [] },
+    { expr: "f(x) = x m + v", dispatched: [] },
+    // A dot product.
+    { expr: "f(x) = (x v) * w", dispatched: ["multiply"] },
+    // mathjs broadcasts the one-entry vector.
+    { expr: "f(x) = one + v", dispatched: ["add"] },
+    { expr: "f(x) = typed + x", dispatched: ["add"] },
+    { expr: "f(x) = x I", dispatched: ["multiply"] },
+  ])("$expr dispatches $dispatched", ({ expr, dispatched }) => {
+    const names: string[] = [];
+    const f = fastCompile(math.parse(expr), {
+      onDispatch: (name) => names.push(name),
+    }).evaluate(new Map(Object.entries(scope))) as Fn;
+    f(0.5);
+    expect(names).toEqual(dispatched);
+  });
+});
+
 // fastCompile skips dispatch by calling these. Without them every call still
 // agrees with mathjs and is only slower.
 test("typed-function gives the implementation a call with numbers runs", () => {
