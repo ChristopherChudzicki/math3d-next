@@ -1,5 +1,10 @@
 import { SceneBuilder } from "@math3d/mock-api";
-import { renderGraphicSpec } from "@/test_util/renderGraphicSpec";
+import { act } from "@testing-library/react";
+import {
+  renderGraphicSpec,
+  trackGraphicSpec,
+} from "@/test_util/renderGraphicSpec";
+import { actions } from "@/store/scene/state/scene.slice";
 import type { LineSpec } from "@math3d/viewport-spec";
 
 test("a vector field draws one arrow per grid point", () => {
@@ -35,4 +40,23 @@ test("without an evaluated scale, arrows are scaled by 0.5 as in MathBox", () =>
     [-5, 0.5, 0],
   ]);
   expect(warn).toHaveBeenCalled();
+});
+
+test("a variable that only styles the field leaves its sampled arrows as they were", () => {
+  const scene = new SceneBuilder();
+  const folder = scene.folder();
+  folder.variable({ value: { type: "assignment", lhs: "a", rhs: "1" } }, "a");
+  folder.vectorField({ opacity: "a" }, "f");
+  const { store, specs } = trackGraphicSpec<LineSpec>(scene, "f");
+  act(() => {
+    store.dispatch(
+      actions.patchProperty({
+        id: "a",
+        path: "/value",
+        value: { type: "assignment", lhs: "a", rhs: "0.5" },
+      }),
+    );
+  });
+  expect(specs.map(({ color }) => color[3])).toEqual([1, 0.5]);
+  expect(specs[1].paths).toBe(specs[0].paths);
 });

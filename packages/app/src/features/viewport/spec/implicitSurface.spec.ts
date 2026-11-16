@@ -1,12 +1,11 @@
-import React from "react";
-import { act, render } from "@testing-library/react";
-import { Provider } from "react-redux";
+import { act } from "@testing-library/react";
 import { SceneBuilder } from "@math3d/mock-api";
-import { renderGraphicSpec } from "@/test_util/renderGraphicSpec";
-import { storeWithScene } from "@/test_util/storeWithScene";
+import {
+  renderGraphicSpec,
+  trackGraphicSpec,
+} from "@/test_util/renderGraphicSpec";
 import { actions } from "@/store/scene/state/scene.slice";
 import type { ImplicitSurfaceSpec } from "@math3d/viewport-spec";
-import { useViewportSpec } from "./useViewportSpec";
 
 test("an implicit surface is the zero level set of lhs − rhs", () => {
   const scene = new SceneBuilder();
@@ -21,21 +20,7 @@ test("a variable that only styles the surface leaves the spec's value function a
   const folder = scene.folder();
   folder.variable({ value: { type: "assignment", lhs: "a", rhs: "1" } }, "a");
   folder.implicitSurface({ opacity: "a" }, "s");
-  const store = storeWithScene(scene);
-  const specs: ImplicitSurfaceSpec[] = [];
-  const Harness = () => {
-    const { spec, reporters } = useViewportSpec({ current: null });
-    const surface = spec.graphics.find(({ id }) => id === "s")?.spec;
-    if (surface && surface !== specs.at(-1)) {
-      specs.push(surface as ImplicitSurfaceSpec);
-    }
-    return reporters;
-  };
-  render(
-    <Provider store={store}>
-      <Harness />
-    </Provider>,
-  );
+  const { store, specs } = trackGraphicSpec<ImplicitSurfaceSpec>(scene, "s");
   act(() => {
     store.dispatch(
       actions.patchProperty({

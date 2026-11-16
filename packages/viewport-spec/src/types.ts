@@ -56,7 +56,11 @@ export type SurfaceSpec = Common & {
   kind: "surface";
   /** Sample counts along the two parameters, each at least 2. */
   samples: [number, number];
-  /** Position at normalized parameters in [0, 1]². */
+  /**
+   * Position at normalized parameters in [0, 1]². Renderers may reuse the
+   * last samples while this function and `samples` are unchanged (as when a
+   * variable drives only the color); a new function only costs a resample.
+   */
   position: (u: number, v: number) => Coords;
   /** Color (with opacity) at normalized parameters in [0, 1]². */
   colorAt: (u: number, v: number) => RGBA;
@@ -76,10 +80,10 @@ export type ImplicitSurfaceSpec = Common & {
   /** Cells per axis, as in MathBox. */
   samples: number;
   /**
-   * The surface is the zero level set of this function. A renderer may skip
-   * sampling when a spec has the same function as the last (as when a
-   * variable drives only the opacity); a new function for the same surface
-   * costs that speed and nothing else.
+   * The surface is the zero level set of this function. Renderers may reuse
+   * the last samples while this function, `samples` and `domain` are
+   * unchanged (as when a variable drives only the opacity); a new function
+   * only costs a resample.
    */
   value: (x: number, y: number, z: number) => number;
   color: RGBA;

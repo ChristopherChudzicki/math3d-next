@@ -90,11 +90,18 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
     zIndex,
   } = results;
   const { color } = item.properties;
-  const spec = useMemo<GraphicSpec | null>(() => {
+  // Apart from the spec memo so a color- or style-only change keeps
+  // `position`; renderers resample on a new one.
+  const parametric = useMemo(() => {
     const func = toParametric(item.type, expr);
-    if (!visible || !func || !domain) return null;
+    if (!func || !domain) return null;
     const uv = domainMap(domain);
     const position: XYZ = (U, V) => func(...uv(U, V));
+    return { uv, position };
+  }, [item.type, expr, domain]);
+  const spec = useMemo<GraphicSpec | null>(() => {
+    if (!visible || !parametric) return null;
+    const { uv, position } = parametric;
 
     const gradient = isGradientName(color) ? gradients[color] : null;
     const base = baseStyle({ opacity, zBias, zIndex }, color);
@@ -133,9 +140,8 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
   }, [
     item.type,
     visible,
-    expr,
+    parametric,
     colorExpr,
-    domain,
     samples1,
     samples2,
     grid1,
