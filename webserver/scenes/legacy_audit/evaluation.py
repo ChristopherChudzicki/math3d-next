@@ -384,8 +384,9 @@ def truthy(fp: Any) -> bool | None:
 
 def react_shows(side: Side) -> bool:
     """Whether math3d-react draws an item with this calculatedVisibility: it
-    applies `!!value` to a boolean or number and otherwise leaves the item
-    visible (react:components/MathBox/MathBoxComponents.js:216-222)."""
+    applies `!!value` to a boolean or number and otherwise leaves the item as
+    it was, visible except the initially hidden grids, which this ignores
+    (react:components/MathBox/MathBoxComponents.js:216-222)."""
     v = side.value
     if side.status == OK and (
         _is_number(v) or (isinstance(v, dict) and ("bool" in v or "nonfinite" in v))

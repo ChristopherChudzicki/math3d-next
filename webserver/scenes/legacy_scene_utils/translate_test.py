@@ -165,7 +165,7 @@ def test_camera(in_patch, out_patch):
                 "visible": False,
             },
             {
-                "visible": False,
+                "visible": True,
                 "useCalculatedVisibility": False,
                 "calculatedVisibility": "",
             },

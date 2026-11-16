@@ -282,7 +282,7 @@ class _Out:
             self.add(f"domain.items.{i}.expr", _text(item.get(prop)), "render", prop)
 
 
-def _universal(out: _Out, item: dict) -> None:
+def _universal(out: _Out, item: dict, ctx: Context) -> None:
     """Fields shared by all graphics (react:containers/MathObjects/MathGraphics/metadata.js:12-40)."""
     out.add("description", _text(item.get("description")), "editor", "description")
     out.add("color", _text(item.get("color")), "render", "color")
@@ -299,21 +299,25 @@ def _universal(out: _Out, item: dict) -> None:
     # follow the item tree, surfaces last
     # (next:app/src/store/scene/evaluation/useDefaultZOrder.ts).
     out.add("zOrder", "", "render", "constant")
-    _visibility(out, item)
+    _visibility(out, item, ctx.item_id)
 
 
-def _visibility(out: _Out, item: dict) -> None:
+# Fixed grids math3d-react's initial scene hides (react:store/initialState.js:66-75).
+_INITIALLY_HIDDEN = {"grid-yz", "grid-zx"}
+
+
+def _visibility(out: _Out, item: dict, item_id: str) -> None:
     # math3d-react: with useCalculatedVisibility the `visible` handler is
     # skipped and calculatedVisibility only sets the group's visibility when
-    # it evaluates to a boolean or number; otherwise the group keeps MathBox's
-    # default (visible) (react:components/MathBox/MathBoxComponents.js:216-228).
+    # it evaluates to a boolean or number; otherwise the group keeps its
+    # initial visibility, shown except the initially hidden grids
+    # (react:components/MathBox/MathBoxComponents.js:216-228).
     # next shows the item when the expression errors and defers to `visible`
     # when it is blank (next:app/src/store/scene/evaluation/mathScope.ts
     # `finalVisibility`).
-    # Policy for a blank expression: math3d-react shows the item on load, but
-    # its author, who saw it hidden while editing, set `visible`; legacy scenes
-    # keep the author's `visible`, and the blank expression becomes empty
-    # (owner decisions, 2026-10-23 and 2026-10-24).
+    # Policy for a blank expression: draw what a fresh load of math3d-react
+    # draws (shown, except initially hidden grids) and empty the expression
+    # (owner decision, 2026-11-15).
     use_calc = item.get("useCalculatedVisibility")
     calc = item.get("calculatedVisibility")
     calc_text = _text(calc) if calc is not None else ""
@@ -323,7 +327,12 @@ def _visibility(out: _Out, item: dict) -> None:
         out.add(
             "useCalculatedVisibility", False, "render", f"{src},calculatedVisibility"
         )
-        out.add("visible", _bool(item.get("visible")), "render", "visible")
+        out.add(
+            "visible",
+            item_id not in _INITIALLY_HIDDEN,
+            "render",
+            f"{src},calculatedVisibility",
+        )
         out.add("calculatedVisibility", "", "editor", "calculatedVisibility")
     elif use_calc is True:
         out.add("useCalculatedVisibility", True, "render", src)
@@ -599,7 +608,7 @@ def _camera(item: dict, ctx: Context) -> list[Expectation]:
 
 def _axis(item: dict, ctx: Context) -> list[Expectation]:
     out = _Out()
-    _universal(out, item)
+    _universal(out, item, ctx)
     _label(out, item)
     for prop in ("min", "max", "size", "width"):
         # react:components/MathBox/MathBoxComponents.js:465-523
@@ -623,7 +632,7 @@ def _axis(item: dict, ctx: Context) -> list[Expectation]:
 
 def _grid(item: dict, ctx: Context) -> list[Expectation]:
     out = _Out()
-    _universal(out, item)
+    _universal(out, item, ctx)
     # react:components/MathBox/MathBoxComponents.js:585-608
     out.add("width", _text(item.get("width")), "render", "width")
     out.add("divisions", _text(item.get("divisions")), "render", "divisions")
@@ -636,7 +645,7 @@ def _grid(item: dict, ctx: Context) -> list[Expectation]:
 
 def _point(item: dict, ctx: Context) -> list[Expectation]:
     out = _Out()
-    _universal(out, item)
+    _universal(out, item, ctx)
     _label(out, item)
     # react:components/MathBox/MathBoxComponents.js:620-635
     out.add("coords", _text(item.get("coords")), "render", "coords")
@@ -646,7 +655,7 @@ def _point(item: dict, ctx: Context) -> list[Expectation]:
 
 def _line(item: dict, ctx: Context) -> list[Expectation]:
     out = _Out()
-    _universal(out, item)
+    _universal(out, item, ctx)
     _label(out, item)
     _line_like(out, item)
     out.add("coords", _text(item.get("coords")), "render", "coords")
@@ -655,7 +664,7 @@ def _line(item: dict, ctx: Context) -> list[Expectation]:
 
 def _vector(item: dict, ctx: Context) -> list[Expectation]:
     out = _Out()
-    _universal(out, item)
+    _universal(out, item, ctx)
     _label(out, item)
     _line_like(out, item)
     # Drawn from tail to tail + components (react:components/MathBox/MathBoxComponents.js:708-712).
@@ -666,7 +675,7 @@ def _vector(item: dict, ctx: Context) -> list[Expectation]:
 
 def _parametric_curve(item: dict, ctx: Context) -> list[Expectation]:
     out = _Out()
-    _universal(out, item)
+    _universal(out, item, ctx)
     _line_like(out, item)
     out.func_assignment("expr", item.get("expr"), "expr")
     out.expr_domain(item, ("range",))
@@ -766,7 +775,7 @@ def _make_surface(
 
     def expect(item: dict, ctx: Context) -> list[Expectation]:
         out = _Out()
-        _universal(out, item)
+        _universal(out, item, ctx)
         out.add("shaded", _bool_str(item.get("shaded")), "render", "shaded")
         out.func_assignment("expr", item.get("expr"), "expr")
         _color_expr(out, item, explicit)
@@ -801,7 +810,7 @@ def _make_surface(
 
 def _implicit_surface(item: dict, ctx: Context) -> list[Expectation]:
     out = _Out()
-    _universal(out, item)
+    _universal(out, item, ctx)
     out.add("shaded", _bool_str(item.get("shaded")), "render", "shaded")
     # Marching cubes over lhs - rhs = 0 (react:components/MathBox/MathBoxComponents.js:1294-1328).
     out.func_assignment("lhs", item.get("lhs"), "lhs")
@@ -813,7 +822,7 @@ def _implicit_surface(item: dict, ctx: Context) -> list[Expectation]:
 
 def _vector_field(item: dict, ctx: Context) -> list[Expectation]:
     out = _Out()
-    _universal(out, item)
+    _universal(out, item, ctx)
     _line_like(out, item)
     # One 3-vector of sample counts (react:components/MathBox/MathBoxComponents.js:1477-1491)
     # becomes three fields (next:app/src/features/viewport/mathbox/graphics/VectorField.tsx:73-76).
@@ -875,7 +884,7 @@ _UNIVERSAL_COVERAGE = {
     "opacity": "opacity (identity); zOrder is empty, so next orders by opacity, then tree",
     "zIndex": 'zIndex (identity); blank -> "0"',
     "zBias": "zBias (identity)",
-    "visible": "visible (bool); the author's value, also when useCalculatedVisibility has a blank expression",
+    "visible": "visible (bool); with useCalculatedVisibility and a blank expression, as a fresh load drew it",
     "useCalculatedVisibility": (
         "useCalculatedVisibility (bool); false when calculatedVisibility is blank"
     ),
