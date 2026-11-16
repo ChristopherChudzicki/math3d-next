@@ -1,5 +1,5 @@
 import { MathItemType as MIT } from "@math3d/mathitem-configs";
-import { renderTestApp, screen, user, within } from "@/test_util";
+import { renderTestApp, screen, user, waitFor, within } from "@/test_util";
 import * as _ from "lodash-es";
 import { seedDb, makeItem } from "@math3d/mock-api";
 import { findItemByTestId } from "@/test_util/mathItems";
@@ -116,7 +116,7 @@ describe("Visible and calculatedVisibility", () => {
     { visible: false, booleanRhs: "true" },
     { visible: true, booleanRhs: "false" },
   ])(
-    "Clicking 'Show Graphic' flips what's shown and sets visibility by hand (visible: $visible, expression: $booleanRhs)",
+    "Clicking 'Show Graphic' flips what's shown and sets visibility by hand (stored visible: $visible, expression: $booleanRhs)",
     async ({ visible, booleanRhs }) => {
       const { ui, getPointData } = await setup({
         visible,
@@ -139,23 +139,18 @@ describe("Visible and calculatedVisibility", () => {
     },
   );
 
-  test.each([{ booleanRhs: "true" }, { booleanRhs: "false" }])(
-    "Toggling a boolean the expression reads hands visibility back to it (from $booleanRhs)",
-    async ({ booleanRhs }) => {
-      const { ui, getPointData } = await setup({
-        booleanRhs,
-        useCalculatedVisibility: false,
-      });
-      await user.click(
-        within(ui.boolean).getByRole("switch", { name: "Value" }),
-      );
-      expect(getPointData().properties).toEqual(
-        expect.objectContaining({ useCalculatedVisibility: true }),
-      );
-    },
-  );
+  test("Flipping a toggle the expression reads hands visibility back to it", async () => {
+    const { ui, getPointData } = await setup({
+      booleanRhs: "false",
+      useCalculatedVisibility: false,
+    });
+    await user.click(within(ui.boolean).getByRole("switch", { name: "Value" }));
+    expect(getPointData().properties).toEqual(
+      expect.objectContaining({ useCalculatedVisibility: true }),
+    );
+  });
 
-  test("An item on the Setup tab follows its expression again while Main is showing", async () => {
+  test("A manual item on the Setup tab follows its expression once a toggle on Main flips", async () => {
     const boolean = makeItem(MIT.BooleanVariable, {
       value: { lhs: "foo", rhs: "false", type: "assignment" },
     });
@@ -189,13 +184,13 @@ describe("Visible and calculatedVisibility", () => {
     {
       useCalculatedVisibility: true,
       calculatedVisibility: "foo",
-      description: "Shown or hidden by its Calculated Visibility.",
+      description: "Follows its Calculated Visibility.",
     },
     {
       useCalculatedVisibility: false,
       calculatedVisibility: "foo",
       description:
-        "Shown or hidden by hand. Calculated Visibility takes over when its value changes.",
+        "Shown or hidden by hand until its Calculated Visibility changes value.",
     },
     {
       useCalculatedVisibility: true,
@@ -208,7 +203,7 @@ describe("Visible and calculatedVisibility", () => {
       description: "",
     },
   ])(
-    "'Show Graphic' says what decides visibility: '$description'",
+    "'Show Graphic' describes what decides visibility (expression '$calculatedVisibility', following: $useCalculatedVisibility)",
     async ({ useCalculatedVisibility, calculatedVisibility, description }) => {
       if (calculatedVisibility === "undefinedName") {
         vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -245,7 +240,7 @@ describe("Visible and calculatedVisibility", () => {
     expect(showPoint).toHaveAttribute("aria-pressed", "true");
   });
 
-  test("The Follow Calculated Visibility switch works both ways, keeping what's shown", async () => {
+  test("Follow Calculated Visibility switch: off keeps what's shown, on follows the expression", async () => {
     const { ui, getPointData } = await setup({
       booleanRhs: "false",
       useCalculatedVisibility: true,
@@ -270,5 +265,40 @@ describe("Visible and calculatedVisibility", () => {
     expect(getPointData().properties).toEqual(
       expect.objectContaining({ useCalculatedVisibility: true }),
     );
+  });
+
+  test("The notice closes once the expression takes over again", async () => {
+    const { ui } = await setup({
+      booleanRhs: "true",
+      useCalculatedVisibility: true,
+    });
+    await user.click(
+      await within(ui.point).findByRole("button", { name: "Show Graphic" }),
+    );
+    const undo = await screen.findByRole("button", { name: "Undo" });
+
+    await user.click(within(ui.boolean).getByRole("switch", { name: "Value" }));
+
+    await waitFor(() => expect(undo).not.toBeInTheDocument());
+  });
+
+  test("Clicking a manual item shows no notice", async () => {
+    const { ui } = await setup({ useCalculatedVisibility: false });
+    await user.click(
+      await within(ui.point).findByRole("button", { name: "Show Graphic" }),
+    );
+    expect(screen.queryByRole("button", { name: "Undo" })).toBeNull();
+  });
+
+  test("Follow Calculated Visibility is disabled with no expression", async () => {
+    const { ui } = await setup({ calculatedVisibility: "" });
+    await user.click(
+      within(ui.point).getByRole("button", { name: "More Settings" }),
+    );
+    expect(
+      await screen.findByRole("switch", {
+        name: "Follow Calculated Visibility",
+      }),
+    ).toHaveAttribute("aria-disabled", "true");
   });
 });

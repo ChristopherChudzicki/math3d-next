@@ -1,9 +1,10 @@
+import type { MathGraphic } from "@math3d/mathitem-configs";
 import { SceneState } from "./interfaces";
 
-type VisibilityProperties = {
-  calculatedVisibility: string;
-  useCalculatedVisibility: boolean;
-};
+type VisibilityProperties = Pick<
+  MathGraphic["properties"],
+  "calculatedVisibility" | "useCalculatedVisibility"
+>;
 
 const hasCalculatedVisibility = (properties: VisibilityProperties) =>
   properties.calculatedVisibility.trim() !== "";

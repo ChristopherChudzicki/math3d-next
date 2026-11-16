@@ -13,18 +13,21 @@ const setup = (driver: MathItem, calculatedVisibility: string) => {
     calculatedVisibility,
     useCalculatedVisibility: false,
   });
-  const scene = seedDb.withSceneFromItems([driver, point]);
   const store = getStore();
-  store.dispatch(
-    actions.setScene({
-      key: scene.key,
-      author: null,
-      items: scene.items,
-      order: scene.itemOrder,
-      title: "",
-      isLegacy: false,
-    }),
-  );
+  const load = (items: MathItem[]) => {
+    const scene = seedDb.withSceneFromItems(items);
+    store.dispatch(
+      actions.setScene({
+        key: scene.key,
+        author: null,
+        items: scene.items,
+        order: scene.itemOrder,
+        title: "",
+        isLegacy: false,
+      }),
+    );
+  };
+  load([driver, point]);
   const setDriver = (rhs: string, clean?: boolean) =>
     store.dispatch(
       actions.setProperties(
@@ -41,7 +44,7 @@ const setup = (driver: MathItem, calculatedVisibility: string) => {
   const following = () =>
     (store.getState().scene.items[point.id] as MathGraphic).properties
       .useCalculatedVisibility;
-  return { store, setDriver, following };
+  return { store, load, point, setDriver, following };
 };
 
 test.each(["true", "false"])(
@@ -80,8 +83,12 @@ test("an error on the way doesn't count; the value it settles on does", () => {
   expect(following()).toBe(true);
 });
 
-test("loading a scene leaves manual items manual", () => {
-  const { following } = setup(variable("a", "5"), "a>2");
+test("loading a scene that reuses ids and values differ leaves it manual", () => {
+  const driver = variable("a", "5");
+  const { load, point, following } = setup(driver, "a>2");
+
+  load([{ ...variable("a", "1"), id: driver.id }, point]);
+
   expect(following()).toBe(false);
 });
 

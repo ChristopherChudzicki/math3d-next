@@ -62,6 +62,7 @@ const createCalculatedVisibilityRelink = (
     const { items } = api.getState().scene;
     if (items === synced) return result;
     synced = items;
+    // A new scene's values aren't changes.
     const previous = actions.setScene.match(action) ? new Map() : values;
     const read = readValues(source, items, previous);
     values = read.values;

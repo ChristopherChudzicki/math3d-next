@@ -87,7 +87,7 @@ const SettingsField: React.FC<SettingsFieldProps> = ({
   );
 };
 
-/** Whether the item's Calculated Visibility decides; off, it keeps what's shown. */
+/** Whether Calculated Visibility decides; turning it off keeps what's shown. */
 const FollowCalculatedVisibility: React.FC<{ item: MathGraphic }> = ({
   item,
 }) => {
@@ -117,6 +117,7 @@ const FollowCalculatedVisibility: React.FC<{ item: MathGraphic }> = ({
           );
         }}
       />
+      {/* The help-icon column */}
       <span />
     </>
   );

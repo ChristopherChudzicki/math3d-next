@@ -30,7 +30,7 @@ const ToastList: React.FC = () => {
   ));
 };
 
-/** The app's one toast stack, fed by `toastManager`. */
+/** The app's stack of toasts that wait to be dismissed, fed by `toastManager`. */
 const Toaster: React.FC<{ toastManager: ToastManager }> = ({
   toastManager,
 }) => (
@@ -79,8 +79,8 @@ const NoticeList: React.FC = () => {
 
 /**
  * Short notices shown beside the element they're about (`positionerProps`'
- * `anchor`). A separate stack from `Toaster`'s: its viewport is transformed,
- * which would offset anchored toasts.
+ * `anchor`). Kept apart from `Toaster`, whose viewport is transformed, which
+ * would offset anchored toasts.
  */
 const NoticeToaster: React.FC<{ toastManager: ToastManager }> = ({
   toastManager,

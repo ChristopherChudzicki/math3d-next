@@ -21,8 +21,7 @@ import { Popover } from "@/ui/Popover";
 import type { PopoverRootProps } from "@/ui/Popover";
 import { Tooltip } from "@/ui/Tooltip";
 import { showNotice } from "@/ui/Toast/toasts";
-import * as u from "@/util/styles/utils.module.css";
-import { useAppDispatch, useAppStore } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { actions } from "@/store/scene/state/scene.slice";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 import {
@@ -40,11 +39,11 @@ type Badge = { icon: IconifyIcon; text: string; className?: string };
 const BADGES: Record<"following" | "manual" | "error", Badge> = {
   following: {
     icon: link2,
-    text: "Shown or hidden by its Calculated Visibility.",
+    text: "Follows its Calculated Visibility.",
   },
   manual: {
     icon: hand,
-    text: "Shown or hidden by hand. Calculated Visibility takes over when its value changes.",
+    text: "Shown or hidden by hand until its Calculated Visibility changes value.",
   },
   error: {
     icon: circleAlert,
@@ -73,9 +72,10 @@ const ColorStatus: React.FC<Props> = (props) => {
   }
   const badgeTextId = `${item.id}-visibility-mode`;
   const dispatch = useAppDispatch();
-  const store = useAppStore();
+  const loadCount = useAppSelector((state) => state.scene.loadCount);
   const closeNotice = useRef<() => void>(undefined);
-  useEffect(() => () => closeNotice.current?.(), []);
+  // Rows outlive a scene switch (ids recur), so a new scene closes it too.
+  useEffect(() => () => closeNotice.current?.(), [loadCount]);
   // Once the item isn't manual, there's nothing left to undo.
   useEffect(() => {
     if (mode !== "manual") closeNotice.current?.();
@@ -94,6 +94,8 @@ const ColorStatus: React.FC<Props> = (props) => {
       setDialogVisible.off();
       return;
     }
+    closeNotice.current?.();
+    // Flip what's shown, not `visible`, which the expression may be overriding.
     dispatch(
       actions.setProperties({
         id: item.id,
@@ -105,19 +107,15 @@ const ColorStatus: React.FC<Props> = (props) => {
       }),
     );
     if (mode !== "following" || !buttonEl) return;
-    const { loadCount } = store.getState().scene;
-    const { description } = item.properties;
+    const name = item.properties.description.trim();
+    const what = name ? `“${name}”` : "Graphic";
     closeNotice.current = showNotice({
-      slot: "visibility-override",
-      description: `“${description}” ${finalVisibility ? "hidden" : "shown"} by hand.`,
+      description: `${what} ${finalVisibility ? "hidden" : "shown"} by hand.`,
       anchor: buttonEl,
       action: {
         label: "Undo",
-        onClick: () => {
-          // Item ids recur across scenes; don't touch another scene's item.
-          if (store.getState().scene.loadCount !== loadCount) return;
-          dispatch(actions.followCalculatedVisibility({ ids: [item.id] }));
-        },
+        onClick: () =>
+          dispatch(actions.followCalculatedVisibility({ ids: [item.id] })),
       },
     });
   }, [
@@ -128,7 +126,6 @@ const ColorStatus: React.FC<Props> = (props) => {
     finalVisibility,
     mode,
     buttonEl,
-    store,
   ]);
   const handleOpenChange: PopoverRootProps["onOpenChange"] = (
     open,
@@ -182,12 +179,13 @@ const ColorStatus: React.FC<Props> = (props) => {
           }
         />
         <Tooltip.Popup>
-          {badge ? <div>{badge.text}</div> : null}
+          {/* The trigger's description already says this. */}
+          {badge ? <div aria-hidden="true">{badge.text}</div> : null}
           Press and hold to change color
         </Tooltip.Popup>
       </Tooltip.Root>
       {badge ? (
-        <span id={badgeTextId} className={u.visuallyHidden}>
+        <span id={badgeTextId} hidden>
           {badge.text}
         </span>
       ) : null}

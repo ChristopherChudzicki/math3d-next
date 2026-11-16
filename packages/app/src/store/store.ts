@@ -27,6 +27,7 @@ const getStore = ({ preloadedState }: ConfigureStoreOptions = {}) => {
     reducer: rootReducer,
     preloadedState,
     middleware: (getDefaultMiddleware) =>
+      // relink must wrap mathScopeSync, to see the synced scope.
       getDefaultMiddleware().concat(relink, mathScopeSync.middleware),
   });
   return Object.assign(store, { mathScope: mathScopeSync.source });

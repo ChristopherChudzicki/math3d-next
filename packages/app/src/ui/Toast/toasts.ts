@@ -48,12 +48,9 @@ const showToast = (description: string): void => {
 };
 
 const noticeManager = createToastManager();
-/** Each slot's open notice id. */
-const openNotices = new Map<string, string>();
+let openNotice: string | undefined;
 
 type NoticeOptions = {
-  /** One notice per slot: a new one replaces the last. */
-  slot: string;
   description: string;
   anchor: Element;
   action?: { label: string; onClick: () => void };
@@ -61,23 +58,22 @@ type NoticeOptions = {
 };
 
 /**
- * Show a short notice beside `anchor`. Returns a function that closes it, if
- * it's still the one open in its slot. Replacing closes and adds rather than
- * updating, so the new text is announced.
+ * Show a short notice beside `anchor`, replacing any open one. Returns a
+ * function that closes it if it's still open. Replacing closes and adds rather
+ * than updating, so the new text is announced.
  */
 const showNotice = ({
-  slot,
   description,
   anchor,
   action,
   timeout = 6000,
 }: NoticeOptions): (() => void) => {
-  const previous = openNotices.get(slot);
+  const previous = openNotice;
   const id = `notice-${(nextId += 1)}`;
-  openNotices.set(slot, id);
+  openNotice = id;
   const close = () => {
-    if (openNotices.get(slot) !== id) return;
-    openNotices.delete(slot);
+    if (openNotice !== id) return;
+    openNotice = undefined;
     afterEffects(() => noticeManager.close(id));
   };
   afterEffects(() => {
@@ -96,7 +92,7 @@ const showNotice = ({
         },
       },
       onClose: () => {
-        if (openNotices.get(slot) === id) openNotices.delete(slot);
+        if (openNotice === id) openNotice = undefined;
       },
     });
   });
