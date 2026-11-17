@@ -4,7 +4,7 @@ import re
 from collections.abc import Callable
 from copy import deepcopy
 from fractions import Fraction
-from typing import Literal, cast
+from typing import Any, Literal, cast
 
 import scenes.legacy_scene_utils.legacy_data as old
 from scenes.legacy_scene_utils import operators, pdiff
@@ -116,6 +116,19 @@ def vector_text(components: list[float | str]) -> str:
     return "\\left[" + ",".join(str(c) for c in components) + "\\right]"
 
 
+# math3d-react's initialState items (react:store/initialState.js). A saved
+# built-in item is only its diff against these; migrate_scene merges the two.
+INITIAL_ITEMS: dict[str, dict[str, Any]] = {
+    "camera": {"type": "CAMERA"},
+    "axis-x": {"type": "AXIS", "axis": "x", "label": "x"},
+    "axis-y": {"type": "AXIS", "axis": "y", "label": "y"},
+    "axis-z": {"type": "AXIS", "axis": "z", "label": "z", "scale": "1/2"},
+    "grid-xy": {"type": "GRID", "axes": "xy"},
+    "grid-yz": {"type": "GRID", "axes": "yz", "visible": False},
+    "grid-zx": {"type": "GRID", "axes": "zx", "visible": False},
+}
+
+
 class ItemMigrator:
     def __init__(
         self,
@@ -128,6 +141,7 @@ class ItemMigrator:
             log = IssueLog()
         self.log = log
         self.item_type = ""
+        self.item_id = ""
         self.x_scale = x_scale
         self.y_scale = y_scale
         self.z_scale = z_scale
@@ -289,14 +303,20 @@ class ItemMigrator:
         it explicitly (owner decision, 2026-10-24)."""
         return blank_to_empty(x.zIndex or "") or "0"
 
-    @staticmethod
-    def calculated_visibility(x) -> dict:
-        """A blank expression turns calculated visibility off, so the item
-        follows its own ``visible``, and LaTeX spacing counts as blank (owner
-        decisions, 2026-10-23 and 2026-10-24). math3d-react drew such an item
-        hidden while the author edited and visible only after a fresh load."""
+    def visibility(self, x) -> dict:
+        """With calculated visibility on and a blank expression (LaTeX spacing
+        included), a fresh load of math3d-react ignores ``visible`` and draws
+        the item, except the yz and zx grids, which start hidden
+        (react:components/MathBox/MathBoxComponents.js:216-228; owner decision,
+        2026-11-15). The translation does the same and turns calculated
+        visibility off."""
         calc = blank_to_empty(x.calculatedVisibility or "")
+        if x.useCalculatedVisibility and not calc:
+            visible = INITIAL_ITEMS.get(self.item_id, {}).get("visible", True)
+        else:
+            visible = x.visible
         return {
+            "visible": visible,
             "calculatedVisibility": calc,
             "useCalculatedVisibility": bool(calc and x.useCalculatedVisibility),
         }
@@ -305,8 +325,7 @@ class ItemMigrator:
         x = self.legacy(old.AxisProperties, props)
         return AxisProperties(
             color=x.color,
-            visible=x.visible,
-            **self.calculated_visibility(x),
+            **self.visibility(x),
             opacity=x.opacity,
             zIndex=self.z_index(x),
             zBias=x.zBias,
@@ -401,8 +420,7 @@ class ItemMigrator:
             gridWidth=x.gridWidth,
             opacity=x.opacity,
             shaded=stringify(x.shaded),
-            visible=x.visible,
-            **self.calculated_visibility(x),
+            **self.visibility(x),
             zBias=x.zBias,
             zOrder="",
             zIndex=self.z_index(x),
@@ -427,8 +445,7 @@ class ItemMigrator:
             gridWidth=x.gridWidth,
             opacity=x.opacity,
             shaded=stringify(x.shaded),
-            visible=x.visible,
-            **self.calculated_visibility(x),
+            **self.visibility(x),
             zBias=x.zBias,
             zOrder="",
             zIndex=self.z_index(x),
@@ -440,8 +457,7 @@ class ItemMigrator:
             color=x.color,
             description=x.description,
             opacity=x.opacity,
-            visible=x.visible,
-            **self.calculated_visibility(x),
+            **self.visibility(x),
             zBias=x.zBias,
             zOrder="",
             zIndex=self.z_index(x),
@@ -486,8 +502,7 @@ class ItemMigrator:
             opacity=x.opacity,
             samples=x.samples,
             shaded=stringify(x.shaded),
-            visible=x.visible,
-            **self.calculated_visibility(x),
+            **self.visibility(x),
             zBias=x.zBias,
             zOrder="",
             zIndex=self.z_index(x),
@@ -505,8 +520,7 @@ class ItemMigrator:
             opacity=x.opacity,
             size=x.size,
             start=stringify(x.start),
-            visible=x.visible,
-            **self.calculated_visibility(x),
+            **self.visibility(x),
             width=x.width,
             zBias=x.zBias,
             zOrder="",
@@ -533,8 +547,7 @@ class ItemMigrator:
             samples1=x.samples,
             start=stringify(x.start),
             size=x.size,
-            visible=x.visible,
-            **self.calculated_visibility(x),
+            **self.visibility(x),
             width=x.width,
             zBias=x.zBias,
             zOrder="",
@@ -560,8 +573,7 @@ class ItemMigrator:
             gridWidth=x.gridWidth,
             opacity=x.opacity,
             shaded=stringify(x.shaded),
-            visible=x.visible,
-            **self.calculated_visibility(x),
+            **self.visibility(x),
             zBias=x.zBias,
             zOrder="",
             zIndex=self.z_index(x),
@@ -577,8 +589,7 @@ class ItemMigrator:
             labelVisible=stringify(x.labelVisible),
             opacity=x.opacity,
             size=x.size,
-            visible=x.visible,
-            **self.calculated_visibility(x),
+            **self.visibility(x),
             zBias=x.zBias,
             zOrder="",
             zIndex=self.z_index(x),
@@ -617,8 +628,7 @@ class ItemMigrator:
             size=x.size,
             start=stringify(x.start),
             tail=x.tail,
-            visible=x.visible,
-            **self.calculated_visibility(x),
+            **self.visibility(x),
             width=x.width,
             zBias=x.zBias,
             zOrder="",
@@ -660,8 +670,7 @@ class ItemMigrator:
             scale=x.scale,
             size=x.size,
             start=stringify(x.start),
-            visible=x.visible,
-            **self.calculated_visibility(x),
+            **self.visibility(x),
             width=x.width,
             zBias=x.zBias,
             zOrder="",
@@ -673,6 +682,7 @@ class ItemMigrator:
         item_type = copy["type"]
         del copy["type"]
         self.log.set_prefix(item_id)
+        self.item_id = item_id
         self.item_type = item_type
         copy = self.rewrite_operators(self.rewrite_pdiff(copy))
 

@@ -29,15 +29,17 @@ CALIBRATION_SIZE = 20
 MANUAL_CHECK_TOP = 100
 
 
-def hidden_by_blank_visibility(rehydrated: dict) -> list[str]:
-    """Items math3d-react showed on load that math3d-next hides: calculated
-    visibility on, a blank expression, and visible false."""
+def overridden_by_blank_visibility(rehydrated: dict) -> list[str]:
+    """Graphics with calculated visibility on and a blank expression whose saved
+    `visible` differs from what a fresh load draws. Cameras have no `visible`,
+    so without the type check every camera would be listed."""
     return [
         item_id
         for item_id, item in (rehydrated.get("mathGraphics") or {}).items()
-        if item.get("useCalculatedVisibility") is True
-        and item.get("visible") is False
+        if item.get("type") != "CAMERA"
+        and item.get("useCalculatedVisibility") is True
         and expected.is_blank(item.get("calculatedVisibility"))
+        and item.get("visible") != (item_id not in expected.INITIALLY_HIDDEN)
     ]
 
 
@@ -70,7 +72,7 @@ class Command(BaseCommand):
         out_dir.mkdir(parents=True, exist_ok=True)
         agg = Aggregate()
         top: list[tuple[float, dict]] = []
-        hidden: list[tuple[float, str, list[str]]] = []
+        overridden: list[tuple[float, str, list[str]]] = []
         with (
             open(options["legacy"]) as legacy_file,
             open(options["rehydrated"]) as rehydrated_file,
@@ -119,11 +121,11 @@ class Command(BaseCommand):
                     )
                 )
                 top = sorted(top, key=lambda t: -t[0])[:CALIBRATION_SIZE]
-                hidden.append(
+                overridden.append(
                     (
                         result.times_accessed,
                         result.key,
-                        hidden_by_blank_visibility(rehydrated),
+                        overridden_by_blank_visibility(rehydrated),
                     )
                 )
 
@@ -139,11 +141,11 @@ class Command(BaseCommand):
                 indent=2,
             )
         )
-        ranked = sorted(hidden, key=lambda t: -t[0])[:MANUAL_CHECK_TOP]
+        ranked = sorted(overridden, key=lambda t: -t[0])[:MANUAL_CHECK_TOP]
         (out_dir / "manual_checks.json").write_text(
             json.dumps(
                 {
-                    "hidden_by_blank_visibility": [
+                    "overridden_by_blank_visibility": [
                         {"rank": i + 1, "key": key, "items": items}
                         for i, (_, key, items) in enumerate(ranked)
                         if items

@@ -44,10 +44,14 @@ def rehydrated(item_type: str, initial_id: str | None = None) -> dict:
     return {"type": item_type, **DEFAULTS[item_type], **initial}
 
 
-def context(axes: dict[str, dict] | None = None, slider_values: Any = None) -> Context:
+def context(
+    axes: dict[str, dict] | None = None,
+    slider_values: Any = None,
+    item_id: str = SLIDER_ID,
+) -> Context:
     default_axes = {k: rehydrated("AXIS", k) for k in ("axis-x", "axis-y", "axis-z")}
     return Context(
-        item_id=SLIDER_ID,
+        item_id=item_id,
         axes=axes if axes is not None else default_axes,
         slider_values={SLIDER_ID: 0} if slider_values is None else slider_values,
     )
@@ -275,16 +279,22 @@ def test_explicit_surface_color_rescales_its_own_params():
     )
 
 
-def test_blank_calculated_visibility_keeps_the_authors_visibility():
-    point = {
-        **rehydrated("POINT"),
+@pytest.mark.parametrize(
+    ("item_id", "item_type", "saved_visible", "shown"),
+    [("p", "POINT", False, True), ("grid-yz", "GRID", True, False)],
+)
+def test_blank_calculated_visibility_shows_as_a_fresh_load_did(
+    item_id, item_type, saved_visible, shown
+):
+    item = {
+        **rehydrated(item_type, item_id),
         "useCalculatedVisibility": True,
         "calculatedVisibility": "\\ \\quad",
-        "visible": False,
+        "visible": saved_visible,
     }
-    got = values(point)
+    got = values(item, context(item_id=item_id))
     assert got["useCalculatedVisibility"] is False
-    assert got["visible"] is False
+    assert got["visible"] is shown
     assert got["calculatedVisibility"] == ""
 
 

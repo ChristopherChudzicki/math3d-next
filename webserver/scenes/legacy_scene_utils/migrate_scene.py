@@ -3,14 +3,17 @@ import logging
 import math
 import re
 from dataclasses import dataclass
-from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from scenes.legacy_scene_utils.default_data import set_defaults
 from scenes.legacy_scene_utils.issue_log import Issue, IssueLog
-from scenes.legacy_scene_utils.translate import ItemMigrator, blank_to_empty
+from scenes.legacy_scene_utils.translate import (
+    INITIAL_ITEMS,
+    ItemMigrator,
+    blank_to_empty,
+)
 from scenes.models import LegacyScene, Scene, is_invalid_key_error
 
 logger = logging.getLogger(__name__)
@@ -101,30 +104,18 @@ def translate_legacy_scene(dehydrated: dict) -> TranslatedScene:
     for item_id, item in dehydrated["folders"].items():
         item["type"] = "FOLDER"
 
-    # math3d-react's initialState items. A saved built-in item is only its diff
-    # against these, so they are merged per property below.
-    default_items: dict[str, dict[str, Any]] = {
-        "camera": {"type": "CAMERA"},
-        "axis-x": {"type": "AXIS", "axis": "x", "label": "x"},
-        "axis-y": {"type": "AXIS", "axis": "y", "label": "y"},
-        "axis-z": {"type": "AXIS", "axis": "z", "label": "z", "scale": "1/2"},
-        "grid-xy": {"type": "GRID", "axes": "xy"},
-        "grid-yz": {"type": "GRID", "axes": "yz", "visible": False},
-        "grid-zx": {"type": "GRID", "axes": "zx", "visible": False},
-    }
-
     symbols = dehydrated["mathSymbols"]
     for item_id, item in symbols.items():
         if item["type"] == "VARIABLE_SLIDER" and "value" not in item:
             item["value"] = dehydrated["sliderValues"][item_id]
 
     old_items = {
-        **default_items,
+        **INITIAL_ITEMS,
         **dehydrated["folders"],
         **dehydrated["mathGraphics"],
         **dehydrated["mathSymbols"],
     }
-    for item_id, defaults in default_items.items():
+    for item_id, defaults in INITIAL_ITEMS.items():
         old_items[item_id] = {**defaults, **old_items[item_id]}
 
     log = IssueLog()

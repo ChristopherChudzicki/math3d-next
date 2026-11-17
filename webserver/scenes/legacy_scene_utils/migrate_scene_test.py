@@ -32,6 +32,24 @@ def test_customized_default_grid_keeps_its_axes_and_visibility():
     assert (grid["axes"], grid["visible"], grid["color"]) == ("yz", False, "red")
 
 
+@pytest.mark.parametrize(
+    ("item_id", "saved_visible", "shown"),
+    [("grid-yz", True, False), ("grid-xy", False, True)],
+)
+def test_default_grid_with_a_blank_calculated_visibility_shows_as_initially(
+    item_id, saved_visible, shown
+):
+    saved = {
+        "type": "GRID",
+        "visible": saved_visible,
+        "useCalculatedVisibility": True,
+        "calculatedVisibility": "",
+    }
+    translated = translate_legacy_scene(_dehydrated(graphics={item_id: saved}))
+    grid = _items(translated)[item_id]
+    assert (grid["visible"], grid["useCalculatedVisibility"]) == (shown, False)
+
+
 def test_customized_default_z_axis_keeps_its_label_and_scale():
     translated = translate_legacy_scene(
         _dehydrated(graphics={"axis-z": {"type": "AXIS", "color": "red"}})

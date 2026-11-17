@@ -144,19 +144,39 @@ def test_camera(in_patch, out_patch):
     [
         (
             {
-                "visible": True,
+                "visible": False,
                 "useCalculatedVisibility": True,
                 "calculatedVisibility": "!false",
             },
             {
-                "visible": True,
+                "visible": False,
                 "useCalculatedVisibility": True,
                 "calculatedVisibility": "!false",
             },
         ),
         (
-            {"useCalculatedVisibility": False, "calculatedVisibility": "!true"},
-            {"useCalculatedVisibility": False, "calculatedVisibility": "!true"},
+            {
+                "visible": False,
+                "useCalculatedVisibility": False,
+                "calculatedVisibility": "!true",
+            },
+            {
+                "visible": False,
+                "useCalculatedVisibility": False,
+                "calculatedVisibility": "!true",
+            },
+        ),
+        (
+            {
+                "visible": False,
+                "useCalculatedVisibility": False,
+                "calculatedVisibility": "\\ ",
+            },
+            {
+                "visible": False,
+                "useCalculatedVisibility": False,
+                "calculatedVisibility": "",
+            },
         ),
         (
             {
@@ -165,7 +185,7 @@ def test_camera(in_patch, out_patch):
                 "visible": False,
             },
             {
-                "visible": False,
+                "visible": True,
                 "useCalculatedVisibility": False,
                 "calculatedVisibility": "",
             },

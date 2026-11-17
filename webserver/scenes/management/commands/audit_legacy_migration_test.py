@@ -1,20 +1,25 @@
 from scenes.management.commands.audit_legacy_migration import (
-    hidden_by_blank_visibility,
+    overridden_by_blank_visibility,
 )
 
 
-def test_hidden_by_blank_visibility_lists_hidden_items_with_a_blank_expression():
-    shown = {"useCalculatedVisibility": True, "calculatedVisibility": "\\ "}
+def test_overridden_by_blank_visibility_lists_items_a_fresh_load_draws_differently():
+    blank = {"useCalculatedVisibility": True, "calculatedVisibility": "\\ "}
     rehydrated = {
         "mathGraphics": {
-            "hidden": {**shown, "visible": False},
-            "visible": {**shown, "visible": True},
-            "has-expr": {**shown, "visible": False, "calculatedVisibility": "a"},
-            "calc-off": {**shown, "visible": False, "useCalculatedVisibility": False},
+            "hidden": {**blank, "visible": False},
+            "shown": {**blank, "visible": True},
+            "grid-yz": {**blank, "visible": True},
+            "has-expr": {**blank, "visible": False, "calculatedVisibility": "a"},
+            "calc-off": {**blank, "visible": False, "useCalculatedVisibility": False},
+            "camera": {**blank, "type": "CAMERA"},
         }
     }
-    assert hidden_by_blank_visibility(rehydrated) == ["hidden"]
+    assert overridden_by_blank_visibility(rehydrated) == [
+        "hidden",
+        "grid-yz",
+    ]
 
 
-def test_hidden_by_blank_visibility_tolerates_a_scene_without_graphics():
-    assert hidden_by_blank_visibility({}) == []
+def test_overridden_by_blank_visibility_tolerates_a_scene_without_graphics():
+    assert overridden_by_blank_visibility({}) == []
