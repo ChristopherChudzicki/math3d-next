@@ -10,6 +10,7 @@ import { EvaluationError } from "@math3d/mathscope";
 import invariant from "tiny-invariant";
 import type { ParseValidate } from "./interfaces";
 import { fastCompile, numbersOf } from "./fastCompile";
+import { isModOne } from "./outerMod";
 
 class FunctionEvaluationError extends EvaluationError {
   innerError: Error;
@@ -138,11 +139,25 @@ const wrapFunction = (
   return f;
 };
 
+type AnyFunction = (...args: never[]) => unknown;
+
+const wrapping = new WeakSet<object>();
+
+/**
+ * Whether `f` was evaluated from `f(…) = mod(g, 1)` with mathjs's own `mod`,
+ * so its values wrap at 1: 0.99 is near 0.01.
+ */
+const wrapsAtOne = (f: AnyFunction): boolean => wrapping.has(f);
+
 const getValidatedEvaluate = (
   mjsNode: mjs.MathNode,
   validate: ParseValidate = identity,
 ): AnonMathNode["evaluate"] => {
   const compiled = fastCompile(mjsNode);
+  const modOne =
+    math.isFunctionAssignmentNode(mjsNode) &&
+    !mjsNode.params.includes("mod") &&
+    isModOne(mjsNode.expr);
   const unvalidatedEvaluate: AnonMathNode["evaluate"] = (scope) => {
     const rawResult = compiled.evaluate(scope);
     if (typeof rawResult === "function") {
@@ -152,8 +167,12 @@ const getValidatedEvaluate = (
   };
   const evaluate: AnonMathNode["evaluate"] = (scope) => {
     try {
-      const result = unvalidatedEvaluate(scope);
-      return validate(result, mjsNode);
+      const result = validate(unvalidatedEvaluate(scope), mjsNode);
+      // A scope with its own `mod` gives the call another meaning.
+      if (modOne && typeof result === "function" && !scope?.has("mod")) {
+        wrapping.add(result);
+      }
+      return result;
     } catch (err) {
       invariant(err instanceof Error);
       if (err instanceof EvaluationError) {
@@ -167,4 +186,4 @@ const getValidatedEvaluate = (
   return evaluate;
 };
 
-export { getValidatedEvaluate };
+export { getValidatedEvaluate, wrapsAtOne };

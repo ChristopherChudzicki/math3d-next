@@ -4,6 +4,7 @@ import {
   gradients,
   isGradientName,
 } from "@math3d/mathitem-configs";
+import { wrapsAtOne } from "@math3d/parser";
 import { useMathScope } from "@/store/scene/evaluation/useMathScope";
 import {
   useFinalVisibility,
@@ -108,12 +109,19 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
     const flat = base.color;
     const alpha = flat[3];
     const colorFunc = colorExpr && toColorFunc(item.type, colorExpr);
+    const valueAt =
+      colorFunc &&
+      ((U: number, V: number, point: Coords) =>
+        colorFunc(...point, ...uv(U, V)));
     const colorAt = (U: number, V: number): RGBA => {
-      if (!gradient || !colorFunc) return flat;
-      const [u, v] = uv(U, V);
-      const [r, g, b] = gradient.getRGB(colorFunc(...position(U, V), u, v));
+      if (!gradient || !valueAt) return flat;
+      const [r, g, b] = gradient.getRGB(valueAt(U, V, position(U, V)));
       return [r, g, b, alpha];
     };
+    const periodicColor =
+      gradient && colorExpr && valueAt && wrapsAtOne(colorExpr)
+        ? { map: gradient.getRGB, valueAt, alpha }
+        : undefined;
     // On a gradient, MathBox's default line color.
     const gridColor: RGBA = gradient
       ? [0.5, 0.5, 0.5, gridOpacity ?? 0.5]
@@ -128,6 +136,7 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
       samples: [sampleCount(samples1, 64), sampleCount(samples2, 64)],
       position,
       colorAt,
+      periodicColor,
       shaded: shaded ?? true,
       zBias: base.zBias,
       zIndex: base.zIndex,

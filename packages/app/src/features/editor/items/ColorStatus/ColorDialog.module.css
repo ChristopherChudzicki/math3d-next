@@ -5,3 +5,20 @@
 .panel {
   padding: 0.5em;
 }
+
+.bar {
+  margin-bottom: 0.5em;
+}
+
+.preview {
+  height: 0.75em;
+  border: 1px solid var(--color-secondary-light);
+  border-radius: 2px;
+}
+
+.ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-small);
+  color: var(--color-text-light);
+}

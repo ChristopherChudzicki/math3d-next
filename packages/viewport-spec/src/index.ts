@@ -1,6 +1,7 @@
 export type { Coords, AxesRange } from "./coordinates";
 export type {
   RGBA,
+  ColorMap,
   PointSpec,
   LineSpec,
   SurfaceSpec,

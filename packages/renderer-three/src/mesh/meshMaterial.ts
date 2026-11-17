@@ -1,5 +1,5 @@
 import { Vector2 } from "three/webgpu";
-import type { Node } from "three/webgpu";
+import type { DataTexture, Node } from "three/webgpu";
 import {
   abs,
   attribute,
@@ -8,9 +8,12 @@ import {
   cross,
   dFdx,
   dFdy,
+  atan,
   dot,
   float,
   floor,
+  fract,
+  int,
   length,
   max,
   min,
@@ -25,27 +28,39 @@ import {
   select,
   sqrt,
   step,
+  texture,
   transformNormalToView,
   vec2,
   vec3,
   vec4,
 } from "three/tsl";
-import type { SurfaceSpec } from "@math3d/viewport-spec";
+import type { ColorMap, SurfaceSpec } from "@math3d/viewport-spec";
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
 import { viewUnitsPerPixel } from "../shader/viewUnits";
 import { BACKGROUND } from "../shader/background";
 import type { Opacity, Transparency } from "../shader/material";
+import {
+  COLOR_MAP_WIDTH,
+  blankColorMap,
+  colorMapTexture,
+} from "./colorMapTexture";
 
 export type MeshStyle = Pick<SurfaceSpec, "shaded" | "zBias" | "zIndex"> &
   Partial<Pick<SurfaceSpec, "grid">> & {
     /** Whether the surface closes on itself along u and along v. */
     gridClosed?: [boolean, boolean];
+    /**
+     * Colors each pixel by this map at the angle of the interpolated `phase`,
+     * with the `color` attribute's alpha; without it, the mesh takes its
+     * `color` attribute.
+     */
+    colorMap?: ColorMap;
   };
 
 /**
- * One mesh's depth style and gridlines. It sits at `userData.mesh` on the
- * mesh, where the shared materials read it per mesh.
+ * One mesh's depth style, gridlines and color map. It sits at
+ * `userData.mesh` on the mesh, where the shared materials read it per mesh.
  */
 export class MeshUniforms {
   zBias = 0;
@@ -62,7 +77,16 @@ export class MeshUniforms {
   /** 1 along an axis whose edges coincide, else 0. */
   readonly gridClosed = new Vector2();
 
-  set({ zBias, zIndex, grid, gridClosed = [false, false] }: MeshStyle): void {
+  /** The color map's texture, on a mesh that has one. */
+  mapTexture?: DataTexture;
+
+  set({
+    zBias,
+    zIndex,
+    grid,
+    gridClosed = [false, false],
+    colorMap,
+  }: MeshStyle): void {
     this.zBias = zBias;
     this.zIndex = zIndex;
     const [u, v] = grid && grid.width > 0 ? grid.lines : [0, 0];
@@ -70,10 +94,38 @@ export class MeshUniforms {
     this.gridWidth = grid?.width ?? 0;
     this.gridOpacity = grid?.color[3] ?? 0;
     this.gridClosed.set(Number(gridClosed[0]), Number(gridClosed[1]));
+    this.mapTexture = colorMap && colorMapTexture(colorMap);
   }
 }
 
 const read = uniformsAt<MeshUniforms>("mesh");
+
+/**
+ * A mapped mesh's color: its map at the angle of the interpolated `phase`,
+ * with the vertex alpha. The texture is chosen per mesh.
+ */
+const mappedColor = (color: Node<"vec4">): Node<"vec4"> => {
+  const phase = attribute<"vec2">("phase", "vec2");
+  // At the circle's center there is no angle: the map's low end.
+  const position = select(
+    dot(phase, phase).lessThan(1e-12),
+    0,
+    fract(atan(phase.y, phase.x).div(2 * Math.PI)),
+  );
+  // Texel centers: 0 and 1 land on the end texels.
+  const u = position
+    .mul(COLOR_MAP_WIDTH - 1)
+    .add(0.5)
+    .div(COLOR_MAP_WIDTH);
+  // The level is `texture()`'s argument: `.level()` clones the node, and a
+  // clone drops `onObjectUpdate`.
+  const map = texture(blankColorMap(), vec2(u, 0.5), int(0)).onObjectUpdate(
+    ({ object }) =>
+      (object?.userData.mesh as MeshUniforms | undefined)?.mapTexture ??
+      blankColorMap(),
+  );
+  return vec4(map.rgb, color.a);
+};
 
 /**
  * The view-space normal from the `normal` attribute, normalized. A zero
@@ -273,8 +325,9 @@ const withGridlines = (
   return vec4(rgb, alpha);
 };
 
-const build = (shading: Shading | null) => () => {
-  const color = attribute<"vec4">("color", "vec4");
+const build = (shading: Shading | null, mapped: boolean) => () => {
+  const vertexColor = attribute<"vec4">("color", "vec4");
+  const color = mapped ? mappedColor(vertexColor) : vertexColor;
   // Clamped to 1, as the unorm targets do: OIT accumulates in half float,
   // where a color above 1 would brighten the blend at that pixel.
   const lit = shading ? min(SHADINGS[shading](color, viewNormal()), 1) : color;
@@ -292,15 +345,18 @@ const build = (shading: Shading | null) => () => {
   };
 };
 
-const materials = {
-  glossy: sharedMaterial("mixed", build("glossy")),
-  matte: sharedMaterial("mixed", build("matte")),
-  flat: sharedMaterial("mixed", build(null)),
-};
+const materialsFor = (mapped: boolean) => ({
+  glossy: sharedMaterial("mixed", build("glossy", mapped)),
+  matte: sharedMaterial("mixed", build("matte", mapped)),
+  flat: sharedMaterial("mixed", build(null, mapped)),
+});
+
+const materials = { vertex: materialsFor(false), mapped: materialsFor(true) };
 
 /**
  * A triangle mesh's material, shared by every mesh with that shading,
- * opacity and transparency model. `shading` applies only when `shaded`. The
+ * opacity, transparency model and source of color (`mapped`: its color map,
+ * else its vertex colors). `shading` applies only when `shaded`. The
  * mesh supplies the attributes `TriangleMesh` writes (`MeshBuffers`) and its
  * depth style at `userData.mesh`.
  */
@@ -309,4 +365,9 @@ export const meshMaterial = (
   opacity: Opacity,
   transparency: Transparency,
   shading: Shading,
-) => materials[shaded ? shading : "flat"](opacity, transparency);
+  mapped = false,
+) =>
+  materials[mapped ? "mapped" : "vertex"][shaded ? shading : "flat"](
+    opacity,
+    transparency,
+  );

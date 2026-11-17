@@ -143,3 +143,86 @@ test("the spec's position function is new only when a variable the position uses
   expect(specs[2].position).not.toBe(specs[1].position);
   expect(specs[2].position(0, 0)[2]).toBe(2);
 });
+
+describe("periodicColor", () => {
+  const colorExpr = (rhs: string) => ({
+    type: "function-assignment" as const,
+    name: "_f",
+    params: ["x", "y", "z"],
+    rhs,
+  });
+
+  test("a gradient surface colored by mod(g, 1) gives the expression's value and its map", () => {
+    const scene = new SceneBuilder();
+    scene.folder().parametricSurface(
+      {
+        color: "rainbow",
+        colorExpr: {
+          type: "function-assignment",
+          name: "_f",
+          params: ["x", "y", "z", "u", "v"],
+          rhs: "mod(u, 1)",
+        },
+      },
+      "s",
+    );
+    const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
+    const [U, V] = [0.9, 0.8];
+    const value = spec.periodicColor?.valueAt(U, V, spec.position(U, V));
+    invariant(value !== undefined);
+    expect(spec.periodicColor).toEqual({
+      // The same function each time, so the renderer's per-map cache holds.
+      map: gradients.rainbow.getRGB,
+      valueAt: expect.any(Function),
+      alpha: spec.colorAt(U, V)[3],
+    });
+    // u is 2.4 there: the surface's own parameter, over its domain [-3, 3].
+    expect(value).toBeCloseTo(0.4);
+    expect(spec.colorAt(U, V).slice(0, 3)).toEqual(
+      gradients.rainbow.getRGB(value),
+    );
+  });
+
+  test("a gradient without an outer mod has none", () => {
+    const scene = new SceneBuilder();
+    scene
+      .folder()
+      .explicitSurface({ color: "rainbow", colorExpr: colorExpr("z") }, "s");
+    const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
+    expect(spec.periodicColor).toBeUndefined();
+  });
+
+  test("a solid color has none", () => {
+    const scene = new SceneBuilder();
+    scene.folder().explicitSurface({}, "s");
+    const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
+    expect(spec.periodicColor).toBeUndefined();
+  });
+
+  test("a scene that defines its own mod has none", () => {
+    const scene = new SceneBuilder();
+    const folder = scene.folder();
+    const g = { type: "assignment" as const, lhs: "g(a, b)", rhs: "0.25" };
+    folder.variable({ value: g }, "g");
+    folder.explicitSurface(
+      { color: "rainbow", colorExpr: colorExpr("mod(z, 1)") },
+      "s",
+    );
+    const { store, specs } = trackGraphicSpec<SurfaceSpec>(scene, "s");
+    expect(specs[0].periodicColor).toBeDefined();
+    act(() => {
+      store.dispatch(
+        actions.patchProperty({
+          id: "g",
+          path: "/value",
+          value: { ...g, lhs: "mod(a, b)" },
+        }),
+      );
+    });
+    const spec = specs[specs.length - 1];
+    expect(spec.periodicColor).toBeUndefined();
+    expect(spec.colorAt(0.9, 0.8).slice(0, 3)).toEqual(
+      gradients.rainbow.getRGB(0.25),
+    );
+  });
+});
