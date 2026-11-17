@@ -116,8 +116,8 @@ def vector_text(components: list[float | str]) -> str:
     return "\\left[" + ",".join(str(c) for c in components) + "\\right]"
 
 
-# math3d-react's initialState items. A saved built-in item is only its diff
-# against these, so they are merged per property.
+# math3d-react's initialState items (react:store/initialState.js). A saved
+# built-in item is only its diff against these; migrate_scene merges the two.
 INITIAL_ITEMS: dict[str, dict[str, Any]] = {
     "camera": {"type": "CAMERA"},
     "axis-x": {"type": "AXIS", "axis": "x", "label": "x"},
@@ -306,9 +306,10 @@ class ItemMigrator:
     def visibility(self, x) -> dict:
         """With calculated visibility on and a blank expression (LaTeX spacing
         included), a fresh load of math3d-react ignores ``visible`` and draws
-        the item as its initial scene had it: shown, except the yz and zx grids
+        the item, except the yz and zx grids, which start hidden
         (react:components/MathBox/MathBoxComponents.js:216-228; owner decision,
-        2026-11-15)."""
+        2026-11-15). The translation does the same and turns calculated
+        visibility off."""
         calc = blank_to_empty(x.calculatedVisibility or "")
         if x.useCalculatedVisibility and not calc:
             visible = INITIAL_ITEMS.get(self.item_id, {}).get("visible", True)

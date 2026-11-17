@@ -29,20 +29,17 @@ CALIBRATION_SIZE = 20
 MANUAL_CHECK_TOP = 100
 
 
-def overridden_by_blank_visibility(
-    rehydrated: dict, initial_graphics: dict[str, dict]
-) -> list[str]:
+def overridden_by_blank_visibility(rehydrated: dict) -> list[str]:
     """Graphics with calculated visibility on and a blank expression whose saved
-    `visible` differs from a fresh load's (initialState's, else shown). Cameras
-    have no `visible`."""
+    `visible` differs from what a fresh load draws. Cameras have no `visible`,
+    so without the type check every camera would be listed."""
     return [
         item_id
         for item_id, item in (rehydrated.get("mathGraphics") or {}).items()
         if item.get("type") != "CAMERA"
         and item.get("useCalculatedVisibility") is True
         and expected.is_blank(item.get("calculatedVisibility"))
-        and item.get("visible")
-        != initial_graphics.get(item_id, {}).get("visible", True)
+        and item.get("visible") != (item_id not in expected.INITIALLY_HIDDEN)
     ]
 
 
@@ -128,7 +125,7 @@ class Command(BaseCommand):
                     (
                         result.times_accessed,
                         result.key,
-                        overridden_by_blank_visibility(rehydrated, initial_graphics),
+                        overridden_by_blank_visibility(rehydrated),
                     )
                 )
 

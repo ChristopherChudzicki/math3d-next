@@ -72,7 +72,7 @@ Accept a library convention (react's `round`, complex.js 2.0.4's addition) or an
 
 ## Manual checks
 
-With calculated visibility on and a blank expression, a fresh load of math3d-react ignores the saved `visible` and draws the item, except the initially hidden `yz`/`zx` grids. The translation does the same, overriding what the author saw while editing. `manual_checks.json` lists the affected items in the 100 most-viewed scenes. For each, open the scene in math3d-react (`math3d.org/<key>`) and in a local math3d-next (`/<key>`), and check that those items look the same. The local backend must run this branch, since it re-translates a legacy scene on every GET, and the frontend must include #1403 (grid `zIndex`). The keys stay in `db-snapshots/`; don't paste them anywhere public.
+With calculated visibility on and a blank expression, a fresh load of math3d-react ignores the saved `visible`: it draws the item, or hides it for the `yz`/`zx` grids, which start hidden. The translation does the same, so it can differ from the saved `visible`. (The 2026-10-23 pass-1 report predates this policy, owner decision 2026-11-15.) `manual_checks.json` lists the affected items in the 100 most-viewed scenes. For each, open the scene in math3d-react (`math3d.org/<key>`) and in a local math3d-next (`/<key>`), and check that those items look the same. The local backend must run this branch, since it re-translates a legacy scene on every GET, and the frontend must include #1403 (grid `zIndex`). The keys stay in `db-snapshots/`; don't paste them anywhere public.
 
 ## Code to delete after the cutover
 

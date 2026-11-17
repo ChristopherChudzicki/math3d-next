@@ -303,7 +303,7 @@ def _universal(out: _Out, item: dict, ctx: Context) -> None:
 
 
 # Fixed grids math3d-react's initial scene hides (react:store/initialState.js:66-75).
-_INITIALLY_HIDDEN = {"grid-yz", "grid-zx"}
+INITIALLY_HIDDEN = {"grid-yz", "grid-zx"}
 
 
 def _visibility(out: _Out, item: dict, item_id: str) -> None:
@@ -329,7 +329,7 @@ def _visibility(out: _Out, item: dict, item_id: str) -> None:
         )
         out.add(
             "visible",
-            item_id not in _INITIALLY_HIDDEN,
+            item_id not in INITIALLY_HIDDEN,
             "render",
             f"{src},calculatedVisibility",
         )
