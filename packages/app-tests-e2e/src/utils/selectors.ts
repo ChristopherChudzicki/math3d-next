@@ -48,4 +48,17 @@ const whenMathboxRendered = (page: Page) =>
     expect(exists).toBe(true);
   }).toPass();
 
-export { getItemForm, getLatex, whenMathboxRendered };
+/**
+ * `getByLabel`, minus MathLive's keyboard sink: a textbox inside each
+ * <math-field /> that repeats the field's label.
+ */
+const getByFieldLabel = (
+  root: Page | Locator,
+  label: string,
+  options?: { exact?: boolean },
+): Locator =>
+  root
+    .getByLabel(label, options)
+    .and(root.locator(':not([part="keyboard-sink"])'));
+
+export { getItemForm, getByFieldLabel, getLatex, whenMathboxRendered };

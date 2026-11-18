@@ -1,6 +1,10 @@
 type SurfaceKind = "explicit" | "parametric" | "polar";
 
-const DEFAULT_COLOR_RHS = "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)";
+// Inside a function's parentheses, MathLive drops a plain "(" that does not
+// directly follow a function name (`rescale_z(z)` would read as `rescale_z z`),
+// so the inner parens use \left \right.
+const DEFAULT_COLOR_RHS =
+  "\\operatorname{mod}(\\operatorname{rescale}_z\\left(z\\right),1)";
 
 /** Stands in for a coordinate whose name is taken; users can't define `$` names. */
 const standIn = (coordinate: string) => `\\$${coordinate}`;

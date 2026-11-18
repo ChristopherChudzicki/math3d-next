@@ -12,13 +12,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@arnog/colors@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@arnog/colors@npm:0.5.0"
-  checksum: 10/ca6b5c37a973addd62778853071a1c285e28bb0e51e865ebbda2a352243f7af2abd3a2809976e9fc26091e2baf646d4f89cf8815a9509faedee1c3a487d96c05
-  languageName: node
-  linkType: hard
-
 "@asamuzakjp/css-color@npm:^3.2.0":
   version: 3.2.0
   resolution: "@asamuzakjp/css-color@npm:3.2.0"
@@ -438,17 +431,6 @@ __metadata:
   version: 1.5.0
   resolution: "@colors/colors@npm:1.5.0"
   checksum: 10/9d226461c1e91e95f067be2bdc5e6f99cfe55a721f45afb44122e23e4b8602eeac4ff7325af6b5a369f36396ee1514d3809af3f57769066d80d83790d8e53339
-  languageName: node
-  linkType: hard
-
-"@cortex-js/compute-engine@npm:0.58.0":
-  version: 0.58.0
-  resolution: "@cortex-js/compute-engine@npm:0.58.0"
-  dependencies:
-    "@arnog/colors": "npm:^0.5.0"
-    complex-esm: "npm:^2.1.1-esm1"
-    decimal.js: "npm:^10.6.0"
-  checksum: 10/fcfd93857f80ac93549d3c84c879afb085aa6c46003382d86b1f408ed6853a4b15f515a68fd4caac18296408255d49a8265fcd3f2c424996da1e22737a7d6136
   languageName: node
   linkType: hard
 
@@ -4381,7 +4363,7 @@ __metadata:
     "@types/three": "npm:^0.146.0"
     envalid: "npm:^8.2.0"
     eslint: "npm:^8.57.1"
-    mathlive: "npm:^0.110.0"
+    mathlive: "npm:^0.111.4"
     sharp: "npm:^0.35.5"
     three: "npm:^0.147.0"
     tiny-invariant: "npm:^1.3.3"
@@ -4450,7 +4432,7 @@ __metadata:
     marked: "npm:^18.2.0"
     mathbox: "npm:^2.3.1"
     mathbox-react: "npm:^1.0.1"
-    mathlive: "npm:^0.110.0"
+    mathlive: "npm:^0.111.4"
     msw: "npm:^2.15.0"
     ordinal: "npm:1.0.3"
     react: "npm:^19.3.1"
@@ -5143,13 +5125,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"complex-esm@npm:^2.1.1-esm1":
-  version: 2.1.1-esm1
-  resolution: "complex-esm@npm:2.1.1-esm1"
-  checksum: 10/c1d8af14efd2cbadd9fbee61541a0d201b26cc055d9fd8def1e8fde3c4b76966614af285907565a78cff8943a452dba4f0a6c0321f7103504400ca9b8777f861
-  languageName: node
-  linkType: hard
-
 "complex.js@npm:^2.2.5":
   version: 2.4.3
   resolution: "complex.js@npm:2.4.3"
@@ -5374,7 +5349,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"decimal.js@npm:^10.4.3, decimal.js@npm:^10.5.0, decimal.js@npm:^10.6.0":
+"decimal.js@npm:^10.4.3, decimal.js@npm:^10.5.0":
   version: 10.6.0
   resolution: "decimal.js@npm:10.6.0"
   checksum: 10/c0d45842d47c311d11b38ce7ccc911121953d4df3ebb1465d92b31970eb4f6738a065426a06094af59bee4b0d64e42e7c8984abd57b6767c64ea90cf90bb4a69
@@ -8216,12 +8191,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathlive@npm:^0.110.0":
-  version: 0.110.0
-  resolution: "mathlive@npm:0.110.0"
-  dependencies:
-    "@cortex-js/compute-engine": "npm:0.58.0"
-  checksum: 10/6b8ffb4150e22b1c0067f47188e3ae404e6ad3ab3c92ed2b6ee43323c5ccf4c1d3d0d4c875904a891bc4d16e860e3c38f118deb8d09207ad55513db86bbda40f
+"mathlive@npm:^0.111.4":
+  version: 0.111.4
+  resolution: "mathlive@npm:0.111.4"
+  checksum: 10/4be0d30dfc1fd6ae166bc45c173301780e4eb03ca1ee1d8fdc3b1cc043a28ef7af6b9597937b2b9d11acc51e65768e17669af1cc79f754532dcf640d5806ab9a
   languageName: node
   linkType: hard
 

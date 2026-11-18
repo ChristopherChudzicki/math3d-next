@@ -2,6 +2,7 @@ import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
 import AppPage from "@/utils/pages/AppPage";
+import { getByFieldLabel } from "@/utils/selectors";
 
 test("Settings details toggle", async ({ page, prepareScene }) => {
   const scene = new SceneBuilder();
@@ -23,7 +24,7 @@ test("Settings details toggle", async ({ page, prepareScene }) => {
   await expect(moreSettings.root).toBeVisible();
 
   // Locate zBias
-  const zBias = moreSettings.root.getByLabel("Z-Bias", { exact: true });
+  const zBias = getByFieldLabel(moreSettings.root, "Z-Bias", { exact: true });
   await expect(zBias).toBeVisible();
   const descriptionToggle = moreSettings.root.getByRole("button", {
     name: "Show Z-Bias Description",

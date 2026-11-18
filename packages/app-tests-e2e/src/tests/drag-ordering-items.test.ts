@@ -1,6 +1,8 @@
 import { Locator, Page, expect } from "@playwright/test";
 import { test } from "@/fixtures/users";
 import { SceneBuilder } from "@math3d/mock-api";
+import AppPage from "@/utils/pages/AppPage";
+import { getLatex } from "@/utils/selectors";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
@@ -156,4 +158,36 @@ test("Dragging folder X before folder Y", async ({ page }) => {
   await drag(page, source, target, { targetOffset: { x: 5, y: -40 } });
   const after = await getAllItemDescriptions(page);
   expect(after).toEqual("F1 P1a P1b F3 P3a P3b F2 P2a P2b".split(" "));
+});
+
+test("A reordered item's fields keep the app's inline shortcuts", async ({
+  page,
+}) => {
+  await page.goto(`/${key}`);
+  await page.locator("css=[aria-roledescription='sortable']").first().waitFor();
+  const source = getItem(page, "F2", "P2a");
+  const target = getItem(page, "F2", "P2b");
+  await expect(source).toBeVisible();
+  await expect(target).toBeVisible();
+  const targetBox = await target.boundingBox();
+  await drag(page, source, target, {
+    targetOffset: { x: 25, y: (targetBox?.height ?? 0) - 4 },
+  });
+  expect(await getAllItemDescriptions(page)).toEqual(
+    "F1 P1a P1b F2 P2b P2a F3 P3a P3b".split(" "),
+  );
+
+  const app = new AppPage(page);
+  const expectShortcutApplies = async (description: string) => {
+    const item = await app.getUniqueItemSettings({ description });
+    const mf = item.field("Coordinates");
+    await mf.click();
+    await mf.pressSequentially("rescale");
+    await expect
+      .poll(() => mf.evaluate(getLatex))
+      .toContain(String.raw`\operatorname{\mathrm{rescale}}`);
+  };
+  // The reorder moves one of the two items in the DOM; which is React's choice.
+  await expectShortcutApplies("P2a");
+  await expectShortcutApplies("P2b");
 });

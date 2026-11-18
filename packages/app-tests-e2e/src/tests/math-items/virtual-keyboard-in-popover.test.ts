@@ -3,6 +3,7 @@ import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
 import AppPage from "@/utils/pages/AppPage";
+import { getByFieldLabel } from "@/utils/selectors";
 import type ItemSettings from "@/utils/pages/ItemSettings";
 
 const makeScene = () => {
@@ -22,7 +23,7 @@ const focusEmptySettingsField = async (
   const item = await app.getUniqueItemSettings({ id: "the_point" });
   const moreSettings = item.moreSettings();
   await moreSettings.opener().click();
-  const zBias = moreSettings.root.getByLabel("Z-Bias", { exact: true });
+  const zBias = getByFieldLabel(moreSettings.root, "Z-Bias", { exact: true });
   await press(zBias);
   await expect(zBias).toBeFocused();
   await page.keyboard.press("ControlOrMeta+a");

@@ -4,7 +4,7 @@ import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
 import { collectPageErrors } from "@/utils/collectPageErrors";
 import UserMenu from "@/utils/pages/UserMenu";
-import { getItemForm, getLatex } from "@/utils/selectors";
+import { getByFieldLabel, getItemForm, getLatex } from "@/utils/selectors";
 import { coloredShare, expectThreeViewport } from "@/utils/threeViewport";
 
 test.use({ disable3d: false });
@@ -59,7 +59,10 @@ test("a drag in the three.js viewport writes the camera back", async ({
   await page.goto(`/${key}?renderer=threejs`);
   await expectThreeViewport(page);
   await page.getByRole("tab", { name: "Setup" }).click();
-  const position = getItemForm(page, { id: "camera" }).getByLabel("Position");
+  const position = getByFieldLabel(
+    getItemForm(page, { id: "camera" }),
+    "Position",
+  );
   await expect.poll(() => position.evaluate(getLatex)).not.toBe("");
   const before = await position.evaluate(getLatex);
 
