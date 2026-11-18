@@ -18,7 +18,7 @@ export type MeshBuffers = {
   normal: Float32Array;
   /** RGBA per vertex, as given: no color-space conversion. */
   color: Float32Array;
-  /** A mapped mesh's value per vertex, as a point on the unit circle. */
+  /** A periodic mesh's color value per vertex, as a point on the unit circle. */
   phase: Float32Array;
   /** A surface's (u, v) in [0, 1]² per vertex, where its gridlines are drawn. */
   parameter: Float32Array;

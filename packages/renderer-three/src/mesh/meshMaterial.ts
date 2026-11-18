@@ -99,10 +99,10 @@ export class MeshUniforms {
 const read = uniformsAt<MeshUniforms>("mesh");
 
 /**
- * A mapped mesh's color: its map at the angle of the interpolated `phase`,
+ * A periodic mesh's color: its map at the angle of the interpolated `phase`,
  * with the vertex alpha. The texture is chosen per mesh.
  */
-const mappedColor = (color: Node<"vec4">): Node<"vec4"> => {
+const periodicColor = (color: Node<"vec4">): Node<"vec4"> => {
   const phase = attribute<"vec2">("phase", "vec2");
   // At the circle's center there is no angle: the map's low end.
   const position = select(
@@ -321,9 +321,9 @@ const withGridlines = (
   return vec4(rgb, alpha);
 };
 
-const build = (shading: Shading | null, mapped: boolean) => () => {
+const build = (shading: Shading | null, periodic: boolean) => () => {
   const vertexColor = attribute<"vec4">("color", "vec4");
-  const color = mapped ? mappedColor(vertexColor) : vertexColor;
+  const color = periodic ? periodicColor(vertexColor) : vertexColor;
   // Clamped to 1, as the unorm targets do: OIT accumulates in half float,
   // where a color above 1 would brighten the blend at that pixel.
   const lit = shading ? min(SHADINGS[shading](color, viewNormal()), 1) : color;
@@ -341,17 +341,17 @@ const build = (shading: Shading | null, mapped: boolean) => () => {
   };
 };
 
-const materialsFor = (mapped: boolean) => ({
-  glossy: sharedMaterial("mixed", build("glossy", mapped)),
-  matte: sharedMaterial("mixed", build("matte", mapped)),
-  flat: sharedMaterial("mixed", build(null, mapped)),
+const materialsFor = (periodic: boolean) => ({
+  glossy: sharedMaterial("mixed", build("glossy", periodic)),
+  matte: sharedMaterial("mixed", build("matte", periodic)),
+  flat: sharedMaterial("mixed", build(null, periodic)),
 });
 
-const materials = { vertex: materialsFor(false), mapped: materialsFor(true) };
+const materials = { vertex: materialsFor(false), periodic: materialsFor(true) };
 
 /**
  * A triangle mesh's material, shared by every mesh with that shading,
- * opacity, transparency model and source of color (`mapped`: its color map,
+ * opacity, transparency model and source of color (`periodic`: its color map,
  * else its vertex colors). `shading` applies only when `shaded`. The
  * mesh supplies the attributes `TriangleMesh` writes (`MeshBuffers`) and its
  * depth style at `userData.mesh`.
@@ -361,9 +361,9 @@ export const meshMaterial = (
   opacity: Opacity,
   transparency: Transparency,
   shading: Shading,
-  mapped = false,
+  periodic = false,
 ) =>
-  materials[mapped ? "mapped" : "vertex"][shaded ? shading : "flat"](
+  materials[periodic ? "periodic" : "vertex"][shaded ? shading : "flat"](
     opacity,
     transparency,
   );

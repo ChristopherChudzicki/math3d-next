@@ -56,8 +56,9 @@ export const colorMapTexture = (map: ColorMap): DataTexture => {
 let blank: DataTexture | undefined;
 
 /**
- * What an unmapped mesh samples. It has the map textures' format and filters,
- * since the shader build reads them from the texture it is built with.
+ * The texture the periodic material is built with; each mesh then supplies
+ * its own. It has the map textures' format and filters, since the shader
+ * build reads them from this one.
  */
 export const blankColorMap = (): DataTexture => {
   blank ??= makeTexture(new Uint8Array(4 * COLOR_MAP_WIDTH));
