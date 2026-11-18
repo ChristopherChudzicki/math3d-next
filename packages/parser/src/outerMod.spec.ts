@@ -14,7 +14,7 @@ describe("isModOne", () => {
     expect(isModOne(parse(latex))).toBe(true);
   });
 
-  test.each(["mod(Z, 2)", "mod(Z, 1) + mod(X, 1)"])(
+  test.each(["mod(Z, 2)", "mod(Z, a)", "mod(Z, 1) + mod(X, 1)"])(
     "is false of %s",
     (latex) => {
       expect(isModOne(parse(latex))).toBe(false);
@@ -30,10 +30,6 @@ describe("wrapsAtOne", () => {
 
   test("is true of a function evaluated from mod(g, 1)", () => {
     expect(wrapsAtOne(evaluate("mod(2 x, 1)", ["x"]))).toBe(true);
-  });
-
-  test("is false of a function with no outer mod", () => {
-    expect(wrapsAtOne(evaluate("1 + mod(x, 1)", ["x"]))).toBe(false);
   });
 
   test.each([

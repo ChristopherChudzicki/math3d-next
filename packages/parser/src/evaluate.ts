@@ -154,6 +154,7 @@ const getValidatedEvaluate = (
   validate: ParseValidate = identity,
 ): AnonMathNode["evaluate"] => {
   const compiled = fastCompile(mjsNode);
+  // A parameter or a scope entry named `mod` hides mathjs's.
   const modOne =
     math.isFunctionAssignmentNode(mjsNode) &&
     !mjsNode.params.includes("mod") &&
@@ -168,7 +169,6 @@ const getValidatedEvaluate = (
   const evaluate: AnonMathNode["evaluate"] = (scope) => {
     try {
       const result = validate(unvalidatedEvaluate(scope), mjsNode);
-      // A scope with its own `mod` gives the call another meaning.
       if (modOne && typeof result === "function" && !scope?.has("mod")) {
         wrapping.add(result);
       }

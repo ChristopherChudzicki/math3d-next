@@ -13,7 +13,6 @@ import {
   float,
   floor,
   fract,
-  int,
   length,
   max,
   min,
@@ -77,7 +76,6 @@ export class MeshUniforms {
   /** 1 along an axis whose edges coincide, else 0. */
   readonly gridClosed = new Vector2();
 
-  /** The color map's texture, on a mesh that has one. */
   mapTexture?: DataTexture;
 
   set({
@@ -117,9 +115,7 @@ const mappedColor = (color: Node<"vec4">): Node<"vec4"> => {
     .mul(COLOR_MAP_WIDTH - 1)
     .add(0.5)
     .div(COLOR_MAP_WIDTH);
-  // The level is `texture()`'s argument: `.level()` clones the node, and a
-  // clone drops `onObjectUpdate`.
-  const map = texture(blankColorMap(), vec2(u, 0.5), int(0)).onObjectUpdate(
+  const map = texture(blankColorMap(), vec2(u, 0.5)).onObjectUpdate(
     ({ object }) =>
       (object?.userData.mesh as MeshUniforms | undefined)?.mapTexture ??
       blankColorMap(),

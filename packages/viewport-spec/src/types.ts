@@ -73,11 +73,10 @@ export type SurfaceSpec = Common & {
   colorAt: (u: number, v: number) => RGBA;
   /**
    * Present when `colorAt` is `[...map(valueAt), alpha]` and the value
-   * wraps: it lies in [0, 1) up to rounding, and 0.99 is as near 0.01 as
-   * 0.03 is. A
-   * renderer may then draw sharper by blending the value between samples
-   * the short way around and coloring each pixel by `map`. A renderer that
-   * ignores this is still correct.
+   * wraps: where finite it lies in [0, 1) up to rounding, and 0.99 is as
+   * near 0.01 as 0.03 is. A renderer may then draw sharper by blending the
+   * value between samples the short way around and coloring each pixel by
+   * `map`. A renderer that ignores this is still correct.
    */
   periodicColor?: {
     map: ColorMap;

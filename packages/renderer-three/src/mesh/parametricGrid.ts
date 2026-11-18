@@ -71,7 +71,7 @@ export const writeColors = (
       if (periodicColor) {
         const value = periodicColor.valueAt(u, v, points[k]);
         const finite = Number.isFinite(value);
-        // mathjs's `mod` can return a hair below 0, which is 0, not 1.
+        // In [0, 1) up to rounding: a hair below 0 is 0, not 1.
         const angle = 2 * Math.PI * Math.max(value, 0);
         out.phase[2 * k] = finite ? Math.cos(angle) : 0;
         out.phase[2 * k + 1] = finite ? Math.sin(angle) : 0;

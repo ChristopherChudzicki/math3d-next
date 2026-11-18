@@ -84,10 +84,9 @@ describe("writeColors", () => {
     color: new Float32Array(4 * vertices),
     phase: new Float32Array(2 * vertices),
   });
-  const colorAt = vi.fn((u: number, v: number): RGBA => [u, v, 0, 1 - u]);
-
   test("writes each sample's RGBA at its parameters", () => {
     const out = buffers(4);
+    const colorAt = (u: number, v: number): RGBA => [u, v, 0, 1 - u];
     writeColors(sampleGrid([2, 2], flat), { colorAt }, out);
     expect(Array.from(out.color.slice(4, 8))).toEqual([1, 0, 0, 0]);
   });
@@ -101,7 +100,7 @@ describe("writeColors", () => {
       valueAt: (u: number, v: number, [x, y]: Coords) => values[2 * y + x],
       alpha: 0.5,
     };
-    colorAt.mockClear();
+    const colorAt = vi.fn((): RGBA => [1, 1, 1, 1]);
     writeColors(sampleGrid([2, 2], flat), { colorAt, periodicColor }, out);
     const expected = [0, 1, -1, 0, 1, 0, 0, 0];
     Array.from(out.phase).forEach((c, k) => expect(c).toBeCloseTo(expected[k]));
