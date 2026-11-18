@@ -694,17 +694,27 @@ describe("calling a user function with a point", () => {
 describe("map with a user function", () => {
   const { parse } = parser;
   const scope = new Map<string, unknown>([["P", [1, 2, 3]]]);
-  ["d(x) = 2x", "w(v, j) = j", "t(a, b, j) = j"].forEach((expr) => {
+  [
+    "d(x) = 2x",
+    "s(a, b) = a + b",
+    "w(v, j) = j",
+    "t(a, b, j) = j",
+    "u(v, j, A) = A",
+    "p(k) = [k, 0]",
+  ].forEach((expr) => {
     const node = parse(expr);
     invariant("name" in node);
     scope.set(node.name, node.evaluate(scope));
   });
   const evaluate = (expr: string) => parse(expr).evaluate(scope);
 
-  it.each(["map(1:3, d)", "map(P, d)"])(
-    "passes a one-parameter function only the value: %s",
-    (expr) => {
-      expect(evaluate(expr)).toEqual([2, 4, 6]);
+  it.each([
+    { expr: "map(1:3, d)", expected: [2, 4, 6] },
+    { expr: "map(1:2, 3:4, s)", expected: [4, 6] },
+  ])(
+    "passes a function with one parameter per collection only the values: $expr",
+    ({ expr, expected }) => {
+      expect(evaluate(expr)).toEqual(expected);
     },
   );
 
@@ -715,11 +725,25 @@ describe("map with a user function", () => {
     },
   );
 
+  it("passes the collection after the index", () => {
+    expect(evaluate("map(1:2, u)")).toEqual([
+      [1, 2],
+      [1, 2],
+    ]);
+  });
+
   it("rejects a function with fewer parameters than collections", () => {
     expect(() => evaluate("map(1:2, 3:4, d)")).toThrow(
       "d(x) needs 1 input, but got 2",
     );
   });
+
+  it.each(["map(1:3, p)", "map(P, p)"])(
+    "sizes a list of points as points × coordinates: %s",
+    (expr) => {
+      expect(evaluate(`size(${expr})`)).toEqual([3, 2]);
+    },
+  );
 });
 
 describe("a function call in place of a variable keeps its meaning", () => {

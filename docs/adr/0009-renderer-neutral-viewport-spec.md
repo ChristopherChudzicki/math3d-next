@@ -144,9 +144,13 @@ parent, so anything sized in pixels is built in the shader, in view space:
 - **Every triangle mesh is a `TriangleMesh`** (`mesh/TriangleMesh.ts`), drawn
   with a port of MathBox's surface shading, gamma step included. It takes
   per-vertex RGBA, and normals in its own coordinates that the normal matrix
-  carries through the axes' scale. A surface's triangles wind as MathBox's
-  do: under the `ordered` model three draws a translucent mesh's back faces
-  first, so winding decides how it overlaps itself.
+  carries through the axes' scale. A surface whose color is a map of a value
+  that wraps (`SurfaceSpec.periodicColor`) sends that value instead, as a
+  point on the unit circle (`phase`), and its shader looks the map up per
+  pixel at the interpolated point's angle, so a wrap blends the short way
+  round. A surface's triangles wind as MathBox's do: under the `ordered` model
+  three draws a translucent mesh's back faces first, so winding decides how it
+  overlaps itself.
 - **A surface's gridlines are drawn by its own shader**, not as strokes. A
   fragment near an even step of its (u, v) composites a line over its lit
   color, as wide as a stroke of the grid's width at that depth. The line is

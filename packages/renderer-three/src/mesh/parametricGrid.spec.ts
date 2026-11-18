@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import type { Coords, RGBA } from "@math3d/viewport-spec";
 import {
   closedAxes,
@@ -80,11 +80,35 @@ describe("writeIndex", () => {
 });
 
 describe("writeColors", () => {
+  const buffers = (vertices: number) => ({
+    color: new Float32Array(4 * vertices),
+    phase: new Float32Array(2 * vertices),
+  });
   test("writes each sample's RGBA at its parameters", () => {
-    const out = new Float32Array(4 * 4);
+    const out = buffers(4);
     const colorAt = (u: number, v: number): RGBA => [u, v, 0, 1 - u];
-    writeColors(sampleGrid([2, 2], flat), colorAt, out);
-    expect(Array.from(out.slice(4, 8))).toEqual([1, 0, 0, 0]);
+    writeColors(sampleGrid([2, 2], flat), { colorAt }, out);
+    expect(Array.from(out.color.slice(4, 8))).toEqual([1, 0, 0, 0]);
+  });
+
+  test("with a periodic color, writes each value as a point on the unit circle, and its alpha", () => {
+    const out = buffers(4);
+    // By vertex: a quarter turn, a half turn, a hair below 0, and no value.
+    const values = [0.25, 0.5, -1e-13, NaN];
+    const periodicColor = {
+      map: (): [number, number, number] => [1, 1, 1],
+      valueAt: (u: number, v: number, [x, y]: Coords) => values[2 * y + x],
+      alpha: 0.5,
+    };
+    const colorAt = vi.fn((): RGBA => [1, 1, 1, 1]);
+    writeColors(sampleGrid([2, 2], flat), { colorAt, periodicColor }, out);
+    const expected = [0, 1, -1, 0, 1, 0, 0, 0];
+    Array.from(out.phase).forEach((c, k) => expect(c).toBeCloseTo(expected[k]));
+    // Exactly 0, so the vertex sits on the seam's low side.
+    expect(out.phase[5]).toBe(0);
+    expect(out.color[7]).toBe(0.5);
+    // The value is the color expression; `colorAt` would evaluate it again.
+    expect(colorAt).not.toHaveBeenCalled();
   });
 });
 

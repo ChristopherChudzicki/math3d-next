@@ -247,3 +247,14 @@ test("Setting colorExpr for surfaces", async () => {
   // updates store
   expect(getItem().properties.colorExpr.rhs).toBe("mod(a, 2) + 0.1");
 });
+
+test.each([
+  { props: { color: "rainbow" }, name: "Rainbow, from 0 to 1" },
+  // A surface's default color.
+  { props: {}, name: "Blue for every value" },
+])("the Color Map tab shows a bar of $name", async ({ props, name }) => {
+  const { openDialog, user } = await setup(MIT.ExplicitSurface, props);
+  const dialog = await openDialog();
+  await user.click(within(dialog).getByRole("tab", { name: "Color Map" }));
+  within(dialog).getByRole("img", { name });
+});

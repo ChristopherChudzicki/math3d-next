@@ -1,4 +1,5 @@
-import type { Coords, RGBA } from "@math3d/viewport-spec";
+import type { Coords, SurfaceSpec } from "@math3d/viewport-spec";
+import { writePhase } from "./phase";
 
 /**
  * A surface sampled on a `cols` × `rows` grid over [0, 1]², each at least 2:
@@ -51,20 +52,30 @@ export const writeParameters = (
   }
 };
 
+/**
+ * Writes each vertex's RGBA or, with a periodic color, its alpha and its
+ * value's phase. A cell with no finite value draws the map's low end.
+ */
 export const writeColors = (
-  { cols, rows }: ParametricGrid,
-  colorAt: (u: number, v: number) => RGBA,
-  out: Float32Array,
+  { cols, rows, points }: ParametricGrid,
+  { colorAt, periodicColor }: Pick<SurfaceSpec, "colorAt" | "periodicColor">,
+  out: { color: Float32Array; phase: Float32Array },
 ): void => {
   for (let j = 0; j < rows; j += 1) {
     const v = parameter(j, rows);
     for (let i = 0; i < cols; i += 1) {
-      const color = colorAt(parameter(i, cols), v);
-      const k = 4 * (j * cols + i);
-      out[k] = color[0];
-      out[k + 1] = color[1];
-      out[k + 2] = color[2];
-      out[k + 3] = color[3];
+      const k = j * cols + i;
+      const u = parameter(i, cols);
+      if (periodicColor) {
+        writePhase(out.phase, k, periodicColor.valueAt(u, v, points[k]));
+        out.color[4 * k + 3] = periodicColor.alpha;
+      } else {
+        const color = colorAt(u, v);
+        out.color[4 * k] = color[0];
+        out.color[4 * k + 1] = color[1];
+        out.color[4 * k + 2] = color[2];
+        out.color[4 * k + 3] = color[3];
+      }
     }
   }
 };

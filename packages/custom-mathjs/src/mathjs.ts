@@ -311,12 +311,11 @@ mathjs.import(
 // mathjs.import would drop a transform attached to typed `map` (it rebuilds
 // the function from its signatures), so set the transform directly.
 const { expression } = mathjs as unknown as Internals;
-const mapTransform = createUserMapTransform(
-  mathjs.map as (...args: unknown[]) => unknown,
-  expression.transform.map as RawArgsTransform,
-);
-expression.transform.map = mapTransform;
-expression.mathWithTransform.map = mapTransform;
+expression.mathWithTransform.map = createUserMapTransform({
+  map: mathjs.map as (...args: unknown[]) => unknown,
+  matrix: mathjs.matrix as (data: unknown) => unknown,
+  mathjsTransform: expression.mathWithTransform.map as RawArgsTransform,
+});
 
 export default mathjs;
 export { principalPow };

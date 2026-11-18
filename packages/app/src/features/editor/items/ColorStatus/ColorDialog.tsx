@@ -2,6 +2,7 @@ import {
   MathGraphic,
   colorsAndGradients,
   colors,
+  getColorConfig,
 } from "@math3d/mathitem-configs";
 import type { ParseableObjs } from "@math3d/parser";
 import React, { useCallback, useState } from "react";
@@ -69,6 +70,33 @@ const ColorExprInput: React.FC<ColorExprProps> = (props) => {
   );
 };
 
+/**
+ * The colors that values from 0 to 1 take: the gradient, or one color
+ * throughout when the surface's color is solid.
+ */
+const ColorMapBar: React.FC<{ color: string }> = ({ color }) => {
+  const config = getColorConfig(color);
+  const name = config.label || config.value;
+  return (
+    <div className={styles.bar}>
+      <div
+        className={styles.preview}
+        style={{ background: config.backgroundPreview }}
+        role="img"
+        aria-label={
+          config.type === "gradient"
+            ? `${name}, from 0 to 1`
+            : `${name} for every value`
+        }
+      />
+      <div className={styles.ends} aria-hidden="true">
+        <span>0</span>
+        <span>1</span>
+      </div>
+    </div>
+  );
+};
+
 interface ColorDialogProps {
   item: MathGraphic;
   className?: string;
@@ -100,6 +128,7 @@ const ColorDialog: React.FC<ColorDialogProps> = (props) => {
             />
           </Tabs.Panel>
           <Tabs.Panel value="colormap" className={styles.panel} tabIndex={-1}>
+            <ColorMapBar color={item.properties.color} />
             <ColorExprInput item={item} onChange={onWidgetChange} />
           </Tabs.Panel>
         </Tabs.Root>
