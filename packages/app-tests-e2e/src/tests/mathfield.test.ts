@@ -28,6 +28,25 @@ test("Typing arrays into an empty <math-field />", async ({
   );
 });
 
+test("Typing an inline shortcut inserts its LaTeX", async ({
+  page,
+  prepareScene,
+}) => {
+  const scene = new SceneBuilder();
+  scene.folder().point({ description: "SomePoint", coords: "" });
+  const key = await prepareScene(scene.json());
+  await page.goto(`/${key}`);
+  const app = new AppPage(page);
+
+  const item = await app.getUniqueItemSettings({ description: "SomePoint" });
+  const mf = item.field("Coordinates");
+  // An app shortcut, not one of MathLive's defaults.
+  await mf.pressSequentially("rescale");
+  await expect
+    .poll(() => mf.evaluate(getLatex))
+    .toBe(String.raw`\operatorname{rescale}`);
+});
+
 /** The default scene's surface's color map field, caret at its start. */
 const focusDefaultColorMap = async (page: Page) => {
   await page.goto(`/`);
@@ -62,6 +81,17 @@ test("Editing the default color map keeps its parentheses", async ({
   await expect
     .poll(() => mf.evaluate(getLatex))
     .toContain(String.raw`_{z}\left(z\right)`);
+});
+
+test("Typing ')' closes a '(' typed before existing content", async ({
+  page,
+}) => {
+  const mf = await focusDefaultColorMap(page);
+  // Slow enough for React to render between keys, as it does for a person typing.
+  await mf.pressSequentially("(z)", { delay: 100 });
+  await expect
+    .poll(() => mf.evaluate(getLatex))
+    .toContain(String.raw`\left(z\right)\operatorname{mod}`);
 });
 
 const activeElement = (page: Page) =>

@@ -8,7 +8,7 @@ import type { MathFieldWebComponentProps } from "./types";
 
 type MathfieldPropsOptions = Pick<
   MathfieldElement,
-  "inlineShortcuts" | "readOnly" | "menuItems" | "placeholder"
+  "inlineShortcuts" | "macros" | "readOnly" | "menuItems" | "placeholder"
 >;
 interface MathfieldProps extends MathFieldWebComponentProps {
   value?: string;
@@ -35,26 +35,33 @@ const MathField = (props: MathfieldProps) => {
     ...others
   } = props;
   const [mf, setMf] = useState<MathfieldElement | null>(null);
-  const mfOptsRef = useRef<NonNullable<MathfieldProps["options"]>>({});
+  const defaultsRef = useRef<NonNullable<MathfieldProps["options"]>>({});
+  const appliedRef = useRef<NonNullable<MathfieldProps["options"]>>({});
 
   useEffect(() => {
     if (!mf) return;
+    const defaults = defaultsRef.current;
+    const applied = appliedRef.current;
     const keys = new Set([
-      ...Object.keys(mfOptsRef.current),
+      ...Object.keys(applied),
       ...Object.keys(options ?? {}),
     ]) as Set<keyof MathfieldPropsOptions>;
     keys.forEach((key) => {
-      if (!mfOptsRef.current[key]) {
+      const next = options?.[key];
+      // Assigning some options (e.g., macros) re-parses the field's content,
+      // which drops in-progress edits like an auto-inserted closing paren.
+      if (next === applied[key]) return;
+      if (!(key in defaults)) {
         // @ts-expect-error keys, values not correlated well.
-        mfOptsRef.current[key] = mf[key];
+        defaults[key] = mf[key];
       }
-      if (options?.[key]) {
-        // @ts-expect-error keys, values not correlated well.
-        mf[key] = options[key];
+      // @ts-expect-error keys, values not correlated well.
+      mf[key] = next ?? defaults[key];
+      if (next === undefined) {
+        delete applied[key];
       } else {
         // @ts-expect-error keys, values not correlated well.
-        mf[key] = mfOptsRef.current[key];
-        delete mfOptsRef.current[key];
+        applied[key] = next;
       }
     });
   }, [mf, options]);

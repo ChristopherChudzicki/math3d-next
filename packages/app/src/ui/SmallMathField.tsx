@@ -4,23 +4,26 @@ import composeRefs from "@/util/composeRefs";
 import { MathField, MathfieldElement, MathfieldProps } from "./MathLive";
 import * as mfOptions from "./MathLive/options";
 
+const NO_MENU_ITEMS: MathfieldElement["menuItems"] = [];
+
 const SmallMathField: React.FC<
   MathfieldProps & { ref?: React.Ref<MathfieldElement> }
 > = (props) => {
   const [mf, setMf] = useState<MathfieldElement | null>(null);
   const { className, ref, ...others } = props;
+  const macros = useMemo(
+    () => mf && { ...mf.macros, ...mfOptions.extraMacros },
+    [mf],
+  );
   const options: MathfieldProps["options"] = useMemo(() => {
-    if (!mf) return {};
+    if (!macros) return {};
     return {
       ...props.options,
       inlineShortcuts: mfOptions.inlineShortcuts,
-      macros: {
-        ...mf.macros,
-        ...mfOptions.extraMacros,
-      },
-      menuItems: [],
+      macros,
+      menuItems: NO_MENU_ITEMS,
     };
-  }, [props.options, mf]);
+  }, [props.options, macros]);
   // A new ref callback each render would detach and reattach the ref,
   // setting `mf` twice per render.
   const composedRef = useMemo(() => composeRefs(ref, setMf), [ref]);
