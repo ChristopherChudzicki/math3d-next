@@ -11,6 +11,10 @@ import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { gridlineColor } from "@/features/viewport/shared/surfaceColor";
 import { parseColor } from "./style";
 
+/** The color a renderer draws at (U, V): `colorAt` of the point sampled there. */
+const colorAt = (spec: SurfaceSpec, U: number, V: number) =>
+  spec.colorAt(U, V, spec.position(U, V));
+
 test("an explicit surface maps (U, V) onto its domain and colors by the raw x, y, z, as MathBox does", () => {
   const scene = new SceneBuilder();
   scene.folder().explicitSurface(
@@ -55,7 +59,7 @@ test("an explicit surface maps (U, V) onto its domain and colors by the raw x, y
 
   expect(spec.position(0.5, 0.5)).toEqual([1, 0.5, 1.5]);
   const [r, g, b] = gradients.rainbow.getRGB(1.5 / 4);
-  expect(spec.colorAt(0.5, 0.5)).toEqual([
+  expect(colorAt(spec, 0.5, 0.5)).toEqual([
     r,
     g,
     b,
@@ -63,6 +67,27 @@ test("an explicit surface maps (U, V) onto its domain and colors by the raw x, y
   ]);
   // MathBox's default line color.
   expect(spec.grid.color.slice(0, 3)).toEqual([0.5, 0.5, 0.5]);
+});
+
+test("colorAt colors the point it is given, not the position at its parameters", () => {
+  const scene = new SceneBuilder();
+  scene.folder().explicitSurface(
+    {
+      color: "rainbow",
+      colorExpr: {
+        type: "function-assignment",
+        name: "_f",
+        params: ["x", "y", "z"],
+        rhs: "z",
+      },
+    },
+    "s",
+  );
+  const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
+  const z = spec.position(0.5, 0.5)[2] + 0.25;
+  expect(spec.colorAt(0.5, 0.5, [0, 0, z]).slice(0, 3)).toEqual(
+    gradients.rainbow.getRGB(z),
+  );
 });
 
 test("a solid-colored surface's gridlines take its gridline color and gridOpacity", () => {
@@ -94,7 +119,7 @@ test("a gradient surface clamps opacity to 1, like a flat color", () => {
   const scene = new SceneBuilder();
   scene.folder().explicitSurface({ color: "rainbow", opacity: "1.5" }, "s");
   const spec = renderGraphicSpec(scene, "s") as SurfaceSpec;
-  expect(spec.colorAt(0.5, 0.5)[3]).toBe(1);
+  expect(colorAt(spec, 0.5, 0.5)[3]).toBe(1);
 });
 
 test("the spec's position function is new only when a variable the position uses changes", () => {
@@ -133,7 +158,7 @@ test("the spec's position function is new only when a variable the position uses
     });
   set("a", "0.5");
   const { getRGB } = gradients.rainbow;
-  expect(specs.map(({ colorAt }) => colorAt(0, 0).slice(0, 3))).toEqual([
+  expect(specs.map((spec) => colorAt(spec, 0, 0).slice(0, 3))).toEqual([
     getRGB(1),
     getRGB(0.5),
   ]);
@@ -174,11 +199,11 @@ describe("periodicColor", () => {
       // The same function each time, so the renderer's per-map cache holds.
       map: gradients.rainbow.getRGB,
       valueAt: expect.any(Function),
-      alpha: spec.colorAt(U, V)[3],
+      alpha: colorAt(spec, U, V)[3],
     });
     // u is 2.4 there: the surface's own parameter, over its domain [-3, 3].
     expect(value).toBeCloseTo(0.4);
-    expect(spec.colorAt(U, V).slice(0, 3)).toEqual(
+    expect(colorAt(spec, U, V).slice(0, 3)).toEqual(
       gradients.rainbow.getRGB(value),
     );
   });
@@ -221,7 +246,7 @@ describe("periodicColor", () => {
     });
     const spec = specs[specs.length - 1];
     expect(spec.periodicColor).toBeUndefined();
-    expect(spec.colorAt(0.9, 0.8).slice(0, 3)).toEqual(
+    expect(colorAt(spec, 0.9, 0.8).slice(0, 3)).toEqual(
       gradients.rainbow.getRGB(0.25),
     );
   });

@@ -70,7 +70,7 @@ export const writeColors = (
         writePhase(out.phase, k, periodicColor.valueAt(u, v, points[k]));
         out.color[4 * k + 3] = periodicColor.alpha;
       } else {
-        const color = colorAt(u, v);
+        const color = colorAt(u, v, points[k]);
         out.color[4 * k] = color[0];
         out.color[4 * k + 1] = color[1];
         out.color[4 * k + 2] = color[2];
