@@ -185,7 +185,7 @@ test("A reordered item's fields keep the app's inline shortcuts", async ({
     await mf.pressSequentially("rescale");
     await expect
       .poll(() => mf.evaluate(getLatex))
-      .toContain(String.raw`\operatorname{`);
+      .toContain(String.raw`\operatorname{\mathrm{rescale}}`);
   };
   // The reorder moves one of the two items in the DOM; which is React's choice.
   await expectShortcutApplies("P2a");

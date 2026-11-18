@@ -43,8 +43,8 @@ const MathField = (props: MathfieldProps) => {
       const applied = appliedRef.current;
       (Object.keys(options) as (keyof MathfieldPropsOptions)[]).forEach(
         (key) => {
-          // Assigning macros re-parses the field, which drops in-progress
-          // edits like an auto-inserted closing paren.
+          // Assigning macros re-parses the field, which turns the provisional
+          // ")" of a just-typed "(" into a permanent one.
           if (options[key] === applied[key]) return;
           // @ts-expect-error keys, values not correlated well.
           mf[key] = options[key];

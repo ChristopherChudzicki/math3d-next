@@ -4,6 +4,8 @@ import composeRefs from "@/util/composeRefs";
 import { MathField, MathfieldElement, MathfieldProps } from "./MathLive";
 import * as mfOptions from "./MathLive/options";
 
+// MathField reassigns an option whenever its value's identity changes, and
+// assigning macros re-parses the field, so each option value stays stable.
 const NO_MENU_ITEMS: MathfieldElement["menuItems"] = [];
 
 const SmallMathField: React.FC<

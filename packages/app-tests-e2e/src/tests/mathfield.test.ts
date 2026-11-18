@@ -80,7 +80,9 @@ test("Editing the default color map keeps its parentheses", async ({
 
   await expect
     .poll(() => mf.evaluate(getLatex))
-    .toContain(String.raw`_{z}\left(z\right)`);
+    .toBe(
+      String.raw`\operatorname{mod}(\operatorname{\mathrm{rescale}}_{z}\left(z\right),1)`,
+    );
 });
 
 test("Typing ')' closes a '(' typed before existing content", async ({
@@ -91,7 +93,9 @@ test("Typing ')' closes a '(' typed before existing content", async ({
   await mf.pressSequentially("(z)", { delay: 100 });
   await expect
     .poll(() => mf.evaluate(getLatex))
-    .toContain(String.raw`\left(z\right)\operatorname{mod}`);
+    .toBe(
+      String.raw`\left(z\right)\operatorname{mod}(\operatorname{\mathrm{rescale}}_{z}\left(z\right),1)`,
+    );
 });
 
 const activeElement = (page: Page) =>

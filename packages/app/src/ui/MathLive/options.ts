@@ -28,7 +28,7 @@ export const inlineShortcuts = {
   arcsech: "\\operatorname{arcsech}(#?)",
   arccoth: "\\operatorname{arccoth}(#?)",
   // misc
-  abs: "\\abs(#?)",
+  abs: "\\operatorname{abs}(#?)",
   norm: "\\operatorname{norm}{(#?)}",
   sign: "\\operatorname{sign}(#?)",
   floor: "\\operatorname{floor}(#?)",
