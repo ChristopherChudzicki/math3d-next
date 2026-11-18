@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import invariant from "tiny-invariant";
+import { getByFieldLabel } from "@/utils/selectors";
 
 type FieldName = "description" | string;
 
@@ -54,7 +55,7 @@ class ItemSettings {
   }
 
   field(name: FieldName): Locator {
-    return this.root.getByLabel(name);
+    return getByFieldLabel(this.root, name);
   }
 
   /** The gutter highlight marking this item as the active one. */

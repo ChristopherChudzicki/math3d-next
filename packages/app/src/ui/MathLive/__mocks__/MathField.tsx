@@ -22,7 +22,7 @@ const MockMathField = (
     // eslint-disable-next-line jsx-a11y/role-supports-aria-props
     <textarea
       {...others}
-      // mathlive uses 'math' role for its interactive math elements
+      // Real fields are role=group; "math" sets the mock apart in specs.
       // eslint-disable-next-line jsx-a11y/no-interactive-element-to-noninteractive-role
       role="math"
       data-mathfield

@@ -1,7 +1,7 @@
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
-import { getItemForm, getLatex } from "@/utils/selectors";
+import { getByFieldLabel, getItemForm, getLatex } from "@/utils/selectors";
 
 test("Check graphic zOrder values", async ({ page, prepareScene }) => {
   test.slow();
@@ -50,7 +50,7 @@ test("Check graphic zOrder values", async ({ page, prepareScene }) => {
     const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
 
-    const zOrder = page.getByLabel("Z-Order", { exact: true });
+    const zOrder = getByFieldLabel(page, "Z-Order", { exact: true });
     expect(await zOrder.evaluate(getLatex)).toBe("");
     await expect(zOrder).toHaveText("7");
     await page.keyboard.press("Escape");
@@ -61,7 +61,7 @@ test("Check graphic zOrder values", async ({ page, prepareScene }) => {
     const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
 
-    const zOrder = page.getByLabel("Z-Order", { exact: true });
+    const zOrder = getByFieldLabel(page, "Z-Order", { exact: true });
     expect(await zOrder.evaluate(getLatex)).toBe("");
     await expect(zOrder).toHaveText("13");
     await page.keyboard.press("Escape");
@@ -72,7 +72,7 @@ test("Check graphic zOrder values", async ({ page, prepareScene }) => {
     const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
 
-    const zOrder = page.getByLabel("Z-Order", { exact: true });
+    const zOrder = getByFieldLabel(page, "Z-Order", { exact: true });
     expect(await zOrder.evaluate(getLatex)).toBe("");
     await expect(zOrder).toHaveText("11");
     await page.keyboard.press("Escape");
@@ -83,7 +83,7 @@ test("Check graphic zOrder values", async ({ page, prepareScene }) => {
     const item = getItemForm(page, { description });
     await item.getByRole("button", { name: "More Settings" }).click();
 
-    const zOrder = page.getByLabel("Z-Order", { exact: true });
+    const zOrder = getByFieldLabel(page, "Z-Order", { exact: true });
     expect(await zOrder.evaluate(getLatex)).toBe("100");
     await expect(zOrder).toHaveText("100");
     await page.keyboard.press("Escape");
