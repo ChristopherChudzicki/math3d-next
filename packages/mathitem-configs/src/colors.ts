@@ -112,9 +112,17 @@ const isGradientName = (name: string): name is keyof typeof gradients => {
 
 const colorsAndGradients = [...colors, ...[rainbow, bluered, temperature]];
 
-/** The predefined color or gradient for `text`, else a plain color config. */
+/**
+ * The predefined color or gradient for `text`, else a plain color config. A
+ * color matches in any letter case; a gradient's name must match exactly, as
+ * `isGradientName` does.
+ */
 const getColorConfig = (text: string) =>
-  colorsAndGradients.find((c) => c.value === text) ?? makeColorConfig(text, "");
+  colorsAndGradients.find((c) =>
+    c.type === "color"
+      ? c.value.toLowerCase() === text.toLowerCase()
+      : c.value === text,
+  ) ?? makeColorConfig(text, "");
 
 export type { ColorOrGradientConfig };
 

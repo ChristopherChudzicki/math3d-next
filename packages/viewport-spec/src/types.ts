@@ -52,6 +52,13 @@ export type LineSpec = Common & {
   label: string | null;
 };
 
+/**
+ * A color map: `t` in [0, 1] to RGB in [0, 1]. Pure, and the same function
+ * for the same map, so a renderer may cache what it builds from it by
+ * identity.
+ */
+export type ColorMap = (t: number) => [number, number, number];
+
 export type SurfaceSpec = Common & {
   kind: "surface";
   /** Sample counts along the two parameters, each at least 2. */
@@ -64,6 +71,19 @@ export type SurfaceSpec = Common & {
   position: (u: number, v: number) => Coords;
   /** Color (with opacity) at normalized parameters in [0, 1]². */
   colorAt: (u: number, v: number) => RGBA;
+  /**
+   * Present when `colorAt` is `[...map(valueAt), alpha]` and the value
+   * wraps: where finite it lies in [0, 1) up to rounding, and 0.99 is as
+   * near 0.01 as 0.03 is. A renderer may then draw sharper by blending the
+   * value between samples the short way around and coloring each pixel by
+   * `map`. A renderer that ignores this is still correct.
+   */
+  periodicColor?: {
+    map: ColorMap;
+    /** `point` is `position(u, v)`, passed so it isn't evaluated again. */
+    valueAt: (u: number, v: number, point: Coords) => number;
+    alpha: number;
+  };
   shaded: boolean;
   grid: {
     /** Gridlines along each parameter: 0 for none, else at least 2. */

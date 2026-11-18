@@ -1,6 +1,8 @@
 import { describe, expect, test, vi } from "vitest";
 import type { BufferAttribute, Mesh } from "three/webgpu";
 import type { Coords, SurfaceSpec } from "@math3d/viewport-spec";
+import { colorMapTexture } from "../mesh/colorMapTexture";
+import { meshMaterial } from "../mesh/meshMaterial";
 import { buildSurface } from "./surface";
 
 const surfaceSpec = (overrides: Partial<SurfaceSpec> = {}): SurfaceSpec => ({
@@ -61,6 +63,29 @@ describe("buildSurface", () => {
     });
     const surface = meshOf(buildSurface(tube, "oit", "glossy"));
     expect(surface.userData.mesh.gridClosed.toArray()).toEqual([1, 0]);
+  });
+
+  test("a surface draws through its periodic color's map, and by vertex color once it has none", () => {
+    const map = (t: number): [number, number, number] => [t, 0, 1 - t];
+    const periodicColor = { map, valueAt: () => 0.5, alpha: 1 };
+    const graphic = buildSurface(
+      surfaceSpec({ periodicColor }),
+      "oit",
+      "glossy",
+    );
+    const surface = meshOf(graphic);
+    expect(surface.material).toBe(
+      meshMaterial(true, "opaque", "oit", "glossy", true),
+    );
+    expect(surface.userData.mesh.mapTexture).toBe(colorMapTexture(map));
+
+    graphic.update(surfaceSpec());
+    expect(surface.material).toBe(
+      meshMaterial(true, "opaque", "oit", "glossy", false),
+    );
+    expect(attributeOf(surface, "color").slice(0, 4)).toEqual(
+      Array.from(new Float32Array([0.2, 0.4, 0.6, 1])),
+    );
   });
 
   test("redraws in place for an updated spec, with no gridlines at width 0", () => {
