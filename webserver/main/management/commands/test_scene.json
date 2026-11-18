@@ -41,7 +41,7 @@
         "samples1": "64",
         "samples2": "64",
         "colorExpr": {
-          "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)",
+          "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z\\left(z\\right),1)",
           "name": "_f",
           "type": "function-assignment",
           "params": ["x", "y", "z"]

@@ -1,8 +1,10 @@
 import type { Page } from "@playwright/test";
+import type { MathfieldElement } from "mathlive";
 import { test } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
 import AppPage from "@/utils/pages/AppPage";
+import { getByFieldLabel, getLatex } from "@/utils/selectors";
 
 test("Typing arrays into an empty <math-field />", async ({
   page,
@@ -24,6 +26,42 @@ test("Typing arrays into an empty <math-field />", async ({
     "value",
     String.raw`\left\lbrack1,2,3,\right\rbrack`,
   );
+});
+
+/** The default scene's surface's color map field, caret at its start. */
+const focusDefaultColorMap = async (page: Page) => {
+  await page.goto(`/`);
+  const app = new AppPage(page);
+  const item = await app.getUniqueItemSettings({
+    description: "Explicit Surface",
+  });
+  // A long press opens the color dialog.
+  await item.root.getByRole("button", { name: "Show Graphic" }).click({
+    delay: 700,
+  });
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("tab", { name: "Color Map" }).click();
+  const mf = getByFieldLabel(dialog, "Color Expression", { exact: true });
+  await mf.click();
+  await mf.evaluate((e) =>
+    (e as MathfieldElement).executeCommand("moveToMathfieldStart"),
+  );
+  return mf;
+};
+
+test("Editing the default color map keeps its parentheses", async ({
+  page,
+}) => {
+  const mf = await focusDefaultColorMap(page);
+  await page.keyboard.press("End");
+  // MathLive re-serializes only on an edit; before one, value echoes the stored LaTeX.
+  await mf.pressSequentially("+0");
+  await page.keyboard.press("Backspace");
+  await page.keyboard.press("Backspace");
+
+  await expect
+    .poll(() => mf.evaluate(getLatex))
+    .toContain(String.raw`_{z}\left(z\right)`);
 });
 
 const activeElement = (page: Page) =>

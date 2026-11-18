@@ -266,7 +266,7 @@
           "type": "function-assignment",
           "name": "_f",
           "params": ["x", "y", "z", "u", "v"],
-          "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)"
+          "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z\\left(z\\right),1)"
         },
         "gridOpacity": "0.3",
         "gridWidth": "2",

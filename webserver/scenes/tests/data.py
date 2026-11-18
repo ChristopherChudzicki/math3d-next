@@ -47,7 +47,7 @@ default_scene_data = {
                     "type": "function-assignment",
                     "name": "_f",
                     "params": ["x", "y", "z"],
-                    "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z(z),1)",
+                    "rhs": "\\operatorname{mod}(\\operatorname{rescale}_z\\left(z\\right),1)",
                 },
                 "gridWidth": "2",
                 "description": "Explicit Surface",
