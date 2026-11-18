@@ -1,4 +1,4 @@
-import { isSymbolNode } from "mathjs";
+import { isMatrix, isSymbolNode } from "mathjs";
 import type { MathNode, MathScope } from "mathjs";
 import { getUserFunctionSignature } from "./userFunctions";
 
@@ -12,14 +12,19 @@ type RawArgsTransform = ((
 ) => unknown) & { rawArgs: true };
 
 /**
- * mathjs's map transform, except that a user function gets only the
- * arguments it declares: mathjs passes it the index and collections too,
- * whatever its arity, and a user function rejects extra arguments.
+ * mathjs's map transform, except that a user function gets the index and
+ * collections only if it declares them: mathjs passes them whatever its
+ * arity, and a user function rejects extra arguments.
  */
-const createUserMapTransform = (
-  map: Fn,
-  mathjsTransform: RawArgsTransform,
-): RawArgsTransform => {
+const createUserMapTransform = ({
+  map,
+  matrix,
+  mathjsTransform,
+}: {
+  map: Fn;
+  matrix: (data: unknown) => unknown;
+  mathjsTransform: RawArgsTransform;
+}): RawArgsTransform => {
   const transform = (args: MathNode[], math: unknown, scope: MathScope) => {
     const last = args[args.length - 1];
     const callback = isSymbolNode(last)
@@ -33,8 +38,8 @@ const createUserMapTransform = (
       .map((arg) => arg.compile().evaluate(scope) as unknown);
     const arity = signature.params.length;
     const n = collections.length;
-    // The callback receives n values, the index, then the n collections.
-    // Every value is passed, so too few parameters is still an error.
+    // mathjs calls `limited` with n values, the index, then the n
+    // collections. Every value is passed, so too few parameters still errors.
     const limited = (...received: unknown[]) => {
       const passed = received.slice(0, Math.max(arity, n));
       if (arity > n) {
@@ -43,10 +48,10 @@ const createUserMapTransform = (
       }
       return f(...passed);
     };
-    // mathjs may read `length` to decide what to pass; 2n + 1 asks for the
-    // index and collections.
-    Object.defineProperty(limited, "length", { value: 2 * n + 1 });
-    return map(...collections, limited);
+    const result = map(...collections, limited);
+    // DenseMatrix.map keeps the input's size even when f returns vectors;
+    // rebuilding from the data recomputes it.
+    return isMatrix(result) ? matrix(result.toArray()) : result;
   };
   return Object.assign(transform, { rawArgs: true as const });
 };

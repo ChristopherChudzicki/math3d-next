@@ -1,10 +1,7 @@
 import math from "./mathjs";
 
 type Internals = {
-  expression: {
-    transform: Record<string, unknown>;
-    mathWithTransform: Record<string, unknown>;
-  };
+  expression: { mathWithTransform: Record<string, unknown> };
   typed: {
     isTypedFunction(f: unknown): boolean;
     /** The signature of `f` that a call with `args` runs, if any. */
