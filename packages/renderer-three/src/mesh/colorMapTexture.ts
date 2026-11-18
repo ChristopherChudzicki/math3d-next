@@ -5,12 +5,17 @@ import {
   RGBAFormat,
   UnsignedByteType,
 } from "three/webgpu";
+import type { Node } from "three/webgpu";
+import { vec2 } from "three/tsl";
 import type { ColorMap } from "@math3d/viewport-spec";
 
 /** Texels per color map. */
 export const COLOR_MAP_WIDTH = 256;
 
-/** Texel k holds `map(k / (COLOR_MAP_WIDTH − 1))`, as RGBA bytes. */
+/**
+ * Texel k holds `map(k / (COLOR_MAP_WIDTH − 1))`, as RGBA bytes:
+ * `colorMapCoordinate`'s inverse.
+ */
 export const colorMapTexels = (map: ColorMap): Uint8Array => {
   const texels = new Uint8Array(4 * COLOR_MAP_WIDTH);
   const byte = (c: number) => Math.round(Math.min(Math.max(c, 0), 1) * 255);
@@ -20,6 +25,19 @@ export const colorMapTexels = (map: ColorMap): Uint8Array => {
   }
   return texels;
 };
+
+/**
+ * Where to sample a color map's texture for `position` in [0, 1]: 0 and 1
+ * land on the centers of the end texels.
+ */
+export const colorMapCoordinate = (position: Node<"float">): Node<"vec2"> =>
+  vec2(
+    position
+      .mul(COLOR_MAP_WIDTH - 1)
+      .add(0.5)
+      .div(COLOR_MAP_WIDTH),
+    0.5,
+  );
 
 /**
  * Filtered, unmipmapped, clamped to its edges and with no color-space

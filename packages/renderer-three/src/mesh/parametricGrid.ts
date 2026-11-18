@@ -1,4 +1,5 @@
 import type { Coords, SurfaceSpec } from "@math3d/viewport-spec";
+import { writePhase } from "./phase";
 
 /**
  * A surface sampled on a `cols` × `rows` grid over [0, 1]², each at least 2:
@@ -52,11 +53,8 @@ export const writeParameters = (
 };
 
 /**
- * Writes each vertex's RGBA or, with a periodic color, its alpha and `phase`:
- * the value as a point on the unit circle, so blending takes the short way
- * around. A value that isn't finite is the circle's center, leaving the
- * blend to the other vertices; a cell with no finite vertex draws the map's
- * low end.
+ * Writes each vertex's RGBA or, with a periodic color, its alpha and its
+ * value's phase. A cell with no finite value draws the map's low end.
  */
 export const writeColors = (
   { cols, rows, points }: ParametricGrid,
@@ -69,12 +67,7 @@ export const writeColors = (
       const k = j * cols + i;
       const u = parameter(i, cols);
       if (periodicColor) {
-        const value = periodicColor.valueAt(u, v, points[k]);
-        const finite = Number.isFinite(value);
-        // In [0, 1) up to rounding: a hair below 0 is 0, not 1.
-        const angle = 2 * Math.PI * Math.max(value, 0);
-        out.phase[2 * k] = finite ? Math.cos(angle) : 0;
-        out.phase[2 * k + 1] = finite ? Math.sin(angle) : 0;
+        writePhase(out.phase, k, periodicColor.valueAt(u, v, points[k]));
         out.color[4 * k + 3] = periodicColor.alpha;
       } else {
         const color = colorAt(u, v);

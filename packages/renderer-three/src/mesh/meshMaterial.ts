@@ -8,11 +8,9 @@ import {
   cross,
   dFdx,
   dFdy,
-  atan,
   dot,
   float,
   floor,
-  fract,
   length,
   max,
   min,
@@ -40,10 +38,11 @@ import { viewUnitsPerPixel } from "../shader/viewUnits";
 import { BACKGROUND } from "../shader/background";
 import type { Opacity, Transparency } from "../shader/material";
 import {
-  COLOR_MAP_WIDTH,
   blankColorMap,
+  colorMapCoordinate,
   colorMapTexture,
 } from "./colorMapTexture";
+import { phaseValue } from "./phase";
 
 export type MeshStyle = Pick<SurfaceSpec, "shaded" | "zBias" | "zIndex"> &
   Partial<Pick<SurfaceSpec, "grid">> & {
@@ -103,19 +102,11 @@ const read = uniformsAt<MeshUniforms>("mesh");
  * with the vertex alpha. The texture is chosen per mesh.
  */
 const periodicColor = (color: Node<"vec4">): Node<"vec4"> => {
-  const phase = attribute<"vec2">("phase", "vec2");
-  // At the circle's center there is no angle: the map's low end.
-  const position = select(
-    dot(phase, phase).lessThan(1e-12),
-    0,
-    fract(atan(phase.y, phase.x).div(2 * Math.PI)),
-  );
-  // Texel centers: 0 and 1 land on the end texels.
-  const u = position
-    .mul(COLOR_MAP_WIDTH - 1)
-    .add(0.5)
-    .div(COLOR_MAP_WIDTH);
-  const map = texture(blankColorMap(), vec2(u, 0.5)).onObjectUpdate(
+  const position = phaseValue(attribute<"vec2">("phase", "vec2"));
+  const map = texture(
+    blankColorMap(),
+    colorMapCoordinate(position),
+  ).onObjectUpdate(
     ({ object }) =>
       (object?.userData.mesh as MeshUniforms | undefined)?.mapTexture ??
       blankColorMap(),
