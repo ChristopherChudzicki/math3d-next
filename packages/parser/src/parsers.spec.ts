@@ -693,7 +693,7 @@ describe("calling a user function with a point", () => {
 
 describe("map with a user function", () => {
   const { parse } = parser;
-  const scope = new Map<string, unknown>();
+  const scope = new Map<string, unknown>([["P", [1, 2, 3]]]);
   [
     "d(x) = 2x",
     "s(a, b) = a + b",
@@ -712,7 +712,7 @@ describe("map with a user function", () => {
     { expr: "map(1:3, d)", expected: [2, 4, 6] },
     { expr: "map(1:2, 3:4, s)", expected: [4, 6] },
   ])(
-    "passes one parameter per collection only the values: $expr",
+    "passes a function with one parameter per collection only the values: $expr",
     ({ expr, expected }) => {
       expect(evaluate(expr)).toEqual(expected);
     },
@@ -738,9 +738,12 @@ describe("map with a user function", () => {
     );
   });
 
-  it("sizes a list of points by its points", () => {
-    expect(evaluate("size(map(1:2, p))")).toEqual([2, 2]);
-  });
+  it.each(["map(1:3, p)", "map(P, p)"])(
+    "sizes a list of points as points × coordinates: %s",
+    (expr) => {
+      expect(evaluate(`size(${expr})`)).toEqual([3, 2]);
+    },
+  );
 });
 
 describe("a function call in place of a variable keeps its meaning", () => {

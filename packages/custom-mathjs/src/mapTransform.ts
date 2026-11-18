@@ -13,8 +13,9 @@ type RawArgsTransform = ((
 
 /**
  * mathjs's map transform, except that a user function gets the index and
- * collections only if it declares them: mathjs passes them whatever its
- * arity, and a user function rejects extra arguments.
+ * collections only if it declares them, and a Matrix result is sized by its
+ * data. mathjs passes `f(x)` the index and collection too, which a user
+ * function rejects.
  */
 const createUserMapTransform = ({
   map,
