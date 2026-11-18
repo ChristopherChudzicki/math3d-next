@@ -181,6 +181,35 @@ def test_a_legacy_range_array_equals_a_next_domain_function_constant_at_it():
     assert pair.outcome == "equal"
 
 
+def test_a_rainbow_color_compares_modulo_one():
+    legacy, nxt = Side(OK, fn(2.25, -0.25)), Side(OK, fn(0.25, 0.75))
+    assert label(spec("hue"), legacy, nxt, TOL).outcome == "equal"
+    assert label(spec(), legacy, nxt, TOL).outcome == "differ"
+
+
+def test_a_rainbow_color_just_below_an_integer_is_the_hue_at_it():
+    legacy, nxt = Side(OK, fn(-1.0)), Side(OK, fn(0.9999999999999998))
+    assert label(spec("hue"), legacy, nxt, TOL).outcome == "equal"
+
+
+@pytest.mark.parametrize(
+    ("color", "rule"), [("rainbow", "hue"), ("temperature", "value")]
+)
+def test_only_a_rainbow_surface_color_pairs_by_hue(color, rule):
+    surface = {
+        "type": "PARAMETRIC_SURFACE",
+        "color": color,
+        "expr": "_f(u,v)=[u,v,0]",
+        "colorExpr": "_f(X,Y,Z,u,v)=2Z",
+    }
+    rehydrated = {"mathGraphics": {"s": surface, **AXES}, "mathSymbols": {}}
+    react = {"s": {"colorExpr": field()}}
+    nxt = {"s": {"colorExpr": field()}}
+    pairing = pair_scene(rehydrated, react, nxt, {})
+    (pair,) = [p for p in pairing.pairs if p.next_field == "colorExpr"]
+    assert pair.rule == rule
+
+
 @pytest.mark.parametrize("legacy", [[1, 2, 3], [[1], [2], [3]]])
 def test_a_legacy_point_equals_math3d_next_one_element_list_of_it(legacy):
     pair = label(spec("coords"), Side(OK, legacy), Side(OK, [[1, 2, 3]]), TOL)
