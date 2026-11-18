@@ -1,7 +1,10 @@
 import math from "./mathjs";
 
 type Internals = {
-  expression: { mathWithTransform: Record<string, unknown> };
+  expression: {
+    transform: Record<string, unknown>;
+    mathWithTransform: Record<string, unknown>;
+  };
   typed: {
     isTypedFunction(f: unknown): boolean;
     /** The signature of `f` that a call with `args` runs, if any. */
@@ -21,3 +24,4 @@ const { expression, typed } = math as unknown as Internals;
 const { mathWithTransform } = expression;
 
 export { mathWithTransform, typed };
+export type { Internals };

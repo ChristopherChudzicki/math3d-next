@@ -603,7 +603,6 @@ describe("calling a user function with a point", () => {
     "T(x,y,z) = [x, y, z^2]",
     "g(P) = P[1] + P[2]",
     "F(x,y,z) = [-y, x, z]",
-    "h(v, i) = 2v",
     "k(t) = T([t, 2t, 3t])",
     "A = T",
     "B = arctan",
@@ -690,9 +689,36 @@ describe("calling a user function with a point", () => {
     expect(leibniz).toHaveLength(2);
     leibniz.forEach((v) => expect(v).toBeCloseTo(2));
   });
+});
 
-  it("keeps the parameter count map reads from a user function", () => {
-    expect(evaluate("map([1, 2, 3], h)")).toEqual([2, 4, 6]);
+describe("map with a user function", () => {
+  const { parse } = parser;
+  const scope = new Map<string, unknown>([["P", [1, 2, 3]]]);
+  ["d(x) = 2x", "w(v, j) = j", "t(a, b, j) = j"].forEach((expr) => {
+    const node = parse(expr);
+    invariant("name" in node);
+    scope.set(node.name, node.evaluate(scope));
+  });
+  const evaluate = (expr: string) => parse(expr).evaluate(scope);
+
+  it.each(["map(1:3, d)", "map(P, d)"])(
+    "passes a one-parameter function only the value: %s",
+    (expr) => {
+      expect(evaluate(expr)).toEqual([2, 4, 6]);
+    },
+  );
+
+  it.each(["map(1:2, w)", "map(1:2, 3:4, t)"])(
+    "passes the index after the values, counting from 1: %s",
+    (expr) => {
+      expect(evaluate(expr)).toEqual([[1], [2]]);
+    },
+  );
+
+  it("rejects a function with fewer parameters than collections", () => {
+    expect(() => evaluate("map(1:2, 3:4, d)")).toThrow(
+      "d(x) needs 1 input, but got 2",
+    );
   });
 });
 

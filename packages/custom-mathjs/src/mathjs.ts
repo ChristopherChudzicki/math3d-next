@@ -107,6 +107,9 @@ import {
 } from "./derivatives";
 
 import customConstants from "./constants";
+import type { Internals } from "./internals";
+import { createUserMapTransform } from "./mapTransform";
+import type { RawArgsTransform } from "./mapTransform";
 import { realRootSign } from "./realRootSign";
 
 const normalTrig = {
@@ -304,6 +307,16 @@ mathjs.import(
   },
   { override: true },
 );
+
+// mathjs.import would drop a transform attached to typed `map` (it rebuilds
+// the function from its signatures), so set the transform directly.
+const { expression } = mathjs as unknown as Internals;
+const mapTransform = createUserMapTransform(
+  mathjs.map as (...args: unknown[]) => unknown,
+  expression.transform.map as RawArgsTransform,
+);
+expression.transform.map = mapTransform;
+expression.mathWithTransform.map = mapTransform;
 
 export default mathjs;
 export { principalPow };
