@@ -4,7 +4,7 @@ import pytest
 
 from scenes.legacy_scene_utils.issue_log import Severity
 from scenes.legacy_scene_utils.symbols import depends_on
-from scenes.legacy_scene_utils.translate import ItemMigrator
+from scenes.legacy_scene_utils.translate import ItemMigrator, wrapped_at_one
 from scenes.schemas.math_items import VariableItem
 
 
@@ -188,6 +188,30 @@ def test_camera(in_patch, out_patch):
                 "visible": True,
                 "useCalculatedVisibility": False,
                 "calculatedVisibility": "",
+            },
+        ),
+        (
+            {"color": "rainbow", "colorExpr": "_f(X, Y, Z, x, y)=x+y"},
+            {
+                "color": "rainbow",
+                "colorExpr": {
+                    "name": "_f",
+                    "params": ["x", "y", "z"],
+                    "rhs": "\\operatorname{mod}\\left(x+y, 1\\right)",
+                    "type": "function-assignment",
+                },
+            },
+        ),
+        (
+            {"color": "temperature", "colorExpr": "_f(X, Y, Z, x, y)=x+y"},
+            {
+                "color": "temperature",
+                "colorExpr": {
+                    "name": "_f",
+                    "params": ["x", "y", "z"],
+                    "rhs": "x+y",
+                    "type": "function-assignment",
+                },
             },
         ),
         (
@@ -892,3 +916,28 @@ def test_dot_and_cross_are_rewritten_in_expressions_but_not_text():
             "some-id: Kept | or \\& in value, with no clear dot or cross reading: |z|",
         )
     ]
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        r"0.23+3\cdot\operatorname{mod}(u,1)",
+        r"\operatorname{mod}(u,1)\cdot(v, 1)",
+        r"\operatorname{mod}(u+v,0.4)",
+    ],
+)
+def test_wrapped_at_one_wraps(body):
+    assert wrapped_at_one(body) == rf"\operatorname{{mod}}\left({body}, 1\right)"
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "mod(u, 1)",
+        r"\operatorname{mod}\left(u,\ 1\right)",
+        r"\operatorname{mod}(g\left(u,v\right),1)",
+        r"\ ",
+    ],
+)
+def test_wrapped_at_one_keeps_a_blank_body_or_a_mod_one_call(body):
+    assert wrapped_at_one(body) == body
