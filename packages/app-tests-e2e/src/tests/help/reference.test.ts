@@ -18,6 +18,7 @@ test("Has expected headers and links", async ({ page }) => {
     "Calculus",
     "Constants",
     "Logs & Exponents",
+    "Lists",
     "Miscellaneous",
     "Trigonometry",
     "Trigonometry (Hyperbolic)",
