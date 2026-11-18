@@ -21,3 +21,4 @@ const { expression, typed } = math as unknown as Internals;
 const { mathWithTransform } = expression;
 
 export { mathWithTransform, typed };
+export type { Internals };
