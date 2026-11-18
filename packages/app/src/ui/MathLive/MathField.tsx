@@ -35,35 +35,33 @@ const MathField = (props: MathfieldProps) => {
     ...others
   } = props;
   const [mf, setMf] = useState<MathfieldElement | null>(null);
-  const defaultsRef = useRef<NonNullable<MathfieldProps["options"]>>({});
-  const appliedRef = useRef<NonNullable<MathfieldProps["options"]>>({});
+  const appliedRef = useRef<Partial<MathfieldPropsOptions>>({});
 
   useEffect(() => {
-    if (!mf) return;
-    const defaults = defaultsRef.current;
-    const applied = appliedRef.current;
-    const keys = new Set([
-      ...Object.keys(applied),
-      ...Object.keys(options ?? {}),
-    ]) as Set<keyof MathfieldPropsOptions>;
-    keys.forEach((key) => {
-      const next = options?.[key];
-      // Assigning some options (e.g., macros) re-parses the field's content,
-      // which drops in-progress edits like an auto-inserted closing paren.
-      if (next === applied[key]) return;
-      if (!(key in defaults)) {
-        // @ts-expect-error keys, values not correlated well.
-        defaults[key] = mf[key];
-      }
-      // @ts-expect-error keys, values not correlated well.
-      mf[key] = next ?? defaults[key];
-      if (next === undefined) {
-        delete applied[key];
-      } else {
-        // @ts-expect-error keys, values not correlated well.
-        applied[key] = next;
-      }
-    });
+    if (!mf || !options) return undefined;
+    const apply = () => {
+      const applied = appliedRef.current;
+      (Object.keys(options) as (keyof MathfieldPropsOptions)[]).forEach(
+        (key) => {
+          // Assigning macros re-parses the field, which drops in-progress
+          // edits like an auto-inserted closing paren.
+          if (options[key] === applied[key]) return;
+          // @ts-expect-error keys, values not correlated well.
+          mf[key] = options[key];
+          // @ts-expect-error keys, values not correlated well.
+          applied[key] = options[key];
+        },
+      );
+    };
+    apply();
+    // MathLive resets these options when the element is moved in the DOM
+    // (e.g., a keyed reorder), firing "mount" once it has reconnected.
+    const reapply = () => {
+      appliedRef.current = {};
+      apply();
+    };
+    mf.addEventListener("mount", reapply);
+    return () => mf.removeEventListener("mount", reapply);
   }, [mf, options]);
 
   useEffect(() => {

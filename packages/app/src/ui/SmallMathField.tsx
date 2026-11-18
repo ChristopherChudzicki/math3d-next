@@ -15,15 +15,14 @@ const SmallMathField: React.FC<
     () => mf && { ...mf.macros, ...mfOptions.extraMacros },
     [mf],
   );
-  const options: MathfieldProps["options"] = useMemo(() => {
-    if (!macros) return {};
-    return {
-      ...props.options,
-      inlineShortcuts: mfOptions.inlineShortcuts,
-      macros,
-      menuItems: NO_MENU_ITEMS,
-    };
-  }, [props.options, macros]);
+  const options: MathfieldProps["options"] = macros
+    ? {
+        ...props.options,
+        inlineShortcuts: mfOptions.inlineShortcuts,
+        macros,
+        menuItems: NO_MENU_ITEMS,
+      }
+    : undefined;
   // A new ref callback each render would detach and reattach the ref,
   // setting `mf` twice per render.
   const composedRef = useMemo(() => composeRefs(ref, setMf), [ref]);

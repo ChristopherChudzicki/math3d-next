@@ -22,7 +22,7 @@ const MockMathField = (
     // eslint-disable-next-line jsx-a11y/role-supports-aria-props
     <textarea
       {...others}
-      // Real fields are role=group; "math" sets the mock apart in specs.
+      // Real fields are role=group; specs find this mock by role "math".
       // eslint-disable-next-line jsx-a11y/no-interactive-element-to-noninteractive-role
       role="math"
       data-mathfield

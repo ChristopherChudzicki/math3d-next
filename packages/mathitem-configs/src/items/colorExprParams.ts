@@ -1,7 +1,7 @@
 type SurfaceKind = "explicit" | "parametric" | "polar";
 
-// MathLive drops a plain "(" nested in a function's parentheses
-// (`\sin(x(z))` reads as `\sin(xz))`), so the inner parens use \left \right.
+// MathLive drops a plain "(" nested in a function's parentheses (this would
+// read as `rescale_z z`), so the inner parens use \left \right.
 const DEFAULT_COLOR_RHS =
   "\\operatorname{mod}(\\operatorname{rescale}_z\\left(z\\right),1)";
 
