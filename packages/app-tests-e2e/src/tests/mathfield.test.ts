@@ -1,27 +1,33 @@
 import type { Page } from "@playwright/test";
 import type { MathfieldElement } from "mathlive";
-import { test } from "@/fixtures/users";
-import type { Fixtures } from "@/fixtures/users";
+import { test, type Fixtures } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
 import AppPage from "@/utils/pages/AppPage";
 import { getByFieldLabel, getLatex } from "@/utils/selectors";
 
+/** An empty Point's Coordinates field, focused. */
+const focusEmptyCoords = async (
+  page: Page,
+  prepareScene: Fixtures["prepareScene"],
+) => {
+  const scene = new SceneBuilder();
+  scene.folder().point({ description: "SomePoint", coords: "" });
+  const key = await prepareScene(scene.json());
+  await page.goto(`/${key}`);
+  const app = new AppPage(page);
+  const item = await app.getUniqueItemSettings({ description: "SomePoint" });
+  const mf = item.field("Coordinates");
+  await mf.click();
+  await expect(mf).toBeFocused();
+  return mf;
+};
+
 test("Typing arrays into an empty <math-field />", async ({
   page,
   prepareScene,
 }) => {
-  const scene = new SceneBuilder();
-  scene.folder().point({
-    description: "SomePoint",
-    coords: "",
-  });
-  const key = await prepareScene(scene.json());
-  await page.goto(`/${key}`);
-  const app = new AppPage(page);
-
-  const item = await app.getUniqueItemSettings({ description: "SomePoint" });
-  const mf = item.field("Coordinates");
+  const mf = await focusEmptyCoords(page, prepareScene);
   await mf.type("[1,2,3,]");
   await expect(mf).toHaveJSProperty(
     "value",
@@ -33,14 +39,7 @@ test("Typing an inline shortcut inserts its LaTeX", async ({
   page,
   prepareScene,
 }) => {
-  const scene = new SceneBuilder();
-  scene.folder().point({ description: "SomePoint", coords: "" });
-  const key = await prepareScene(scene.json());
-  await page.goto(`/${key}`);
-  const app = new AppPage(page);
-
-  const item = await app.getUniqueItemSettings({ description: "SomePoint" });
-  const mf = item.field("Coordinates");
+  const mf = await focusEmptyCoords(page, prepareScene);
   // An app shortcut, not one of MathLive's defaults.
   await mf.pressSequentially("rescale");
   await expect
@@ -142,28 +141,11 @@ test("Toggling keyboard visibility auto-focuses a math-field and shows virtual k
   await expect(page.locator(".ML__keyboard")).toBeHidden();
 });
 
-/** An empty Point's Coordinates field, focused. */
-const focusEmptyCoords = async (
-  page: Page,
-  prepareScene: Fixtures["prepareScene"],
-) => {
-  const scene = new SceneBuilder();
-  scene.folder().point({ description: "SomePoint", coords: "" });
-  const key = await prepareScene(scene.json());
-  await page.goto(`/${key}`);
-  const app = new AppPage(page);
-  const item = await app.getUniqueItemSettings({ description: "SomePoint" });
-  const mf = item.field("Coordinates");
-  await mf.click();
-  await expect(mf).toBeFocused();
-  return { item, mf };
-};
-
 test("Escape leaves a math field in math mode and focused", async ({
   page,
   prepareScene,
 }) => {
-  const { mf } = await focusEmptyCoords(page, prepareScene);
+  const mf = await focusEmptyCoords(page, prepareScene);
   await mf.pressSequentially("x");
   await page.keyboard.press("Escape");
   await mf.pressSequentially("y");
@@ -212,7 +194,7 @@ test("The virtual keyboard's ĵ and k̂ keys insert their unit vectors", async (
   page,
   prepareScene,
 }) => {
-  const { mf } = await focusEmptyCoords(page, prepareScene);
+  const mf = await focusEmptyCoords(page, prepareScene);
   const layer = await showVirtualKeyboard(page);
   const key = (label: string) => layer.getByLabel(label, { exact: true });
   const shift = layer.locator(".shift");
@@ -230,22 +212,27 @@ test("The virtual keyboard's ĵ and k̂ keys insert their unit vectors", async (
   );
 });
 
-// Each key gets an empty field: nested inserts serialize inconsistently.
-["arcsinh", "arccosh", "arctanh"].forEach((fn) => {
-  test(`The virtual keyboard's ${fn} key inserts ${fn}`, async ({
-    page,
-    prepareScene,
-  }) => {
-    const { mf } = await focusEmptyCoords(page, prepareScene);
-    const layer = await showVirtualKeyboard(page, "f(x)");
-
+test("The virtual keyboard's inverse hyperbolic keys insert their functions", async ({
+  page,
+  prepareScene,
+}) => {
+  const mf = await focusEmptyCoords(page, prepareScene);
+  const layer = await showVirtualKeyboard(page, "f(x)");
+  // Each key gets an empty field: nested inserts serialize inconsistently.
+  const expectKeyInserts = async (fn: string) => {
+    await mf.evaluate((e) =>
+      (e as MathfieldElement).executeCommand("deleteAll"),
+    );
     await layer
       .getByLabel(String.raw`\operatorname{${fn}}(#0)`, { exact: true })
       .click();
-
     await expect(mf).toHaveJSProperty(
       "value",
       String.raw`\operatorname{\mathrm{${fn}}}(\placeholder{})`,
     );
-  });
+  };
+
+  await expectKeyInserts("arcsinh");
+  await expectKeyInserts("arccosh");
+  await expectKeyInserts("arctanh");
 });

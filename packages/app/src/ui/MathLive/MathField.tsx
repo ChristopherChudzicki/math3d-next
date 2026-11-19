@@ -19,7 +19,8 @@ type OnMathFieldChange = NonNullable<MathfieldProps["onChange"]>;
 
 /**
  * MathLive's Escape switches math and text mode to raw-LaTeX mode, stranding
- * later typing. Without the binding, Escape does nothing, as in a text input.
+ * later typing. Without the binding, Escape passes through to the page, as in
+ * a text input, so an enclosing popover or dialog still closes.
  */
 const withoutEscapeToLatex = (keybindings: readonly Keybinding[]) =>
   keybindings.filter((kb) => !(kb.key === "[Escape]" && kb.ifMode !== "latex"));
