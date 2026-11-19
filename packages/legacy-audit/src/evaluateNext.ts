@@ -394,6 +394,42 @@ const rescalesFlatAxis = (use: ColorUse, bounds: unknown[][]) =>
     return typeof min === "number" && min === max;
   });
 
+// The translator's wrap of a legacy Rainbow color body
+// (webserver/scenes/legacy_scene_utils/translate.py, `wrapped_at_one`).
+const WRAP_START = "\\operatorname{mod}\\left(";
+const WRAP_END = ", 1\\right)";
+
+const balanced = (text: string) => {
+  let depth = 0;
+  const neverBelowZero = [...text].every((char) => {
+    if ("([{".includes(char)) depth += 1;
+    if (")]}".includes(char)) depth -= 1;
+    return depth >= 0;
+  });
+  return neverBelowZero && depth === 0;
+};
+
+/**
+ * The item with a Rainbow color body taken out of the translator's
+ * mod(…, 1). Pass 2 compares Rainbow colors modulo 1 anyway, and where the
+ * body is complex, mod throws but the body still compares with math3d-react's.
+ */
+const unwrapRainbow = (item: MathItemPatch): MathItemPatch => {
+  const { color, colorExpr } = item.properties as {
+    color?: unknown;
+    colorExpr?: { rhs?: unknown };
+  };
+  const rhs = colorExpr?.rhs;
+  if (color !== "rainbow" || typeof rhs !== "string") return item;
+  if (!rhs.startsWith(WRAP_START) || !rhs.endsWith(WRAP_END)) return item;
+  const body = rhs.slice(WRAP_START.length, -WRAP_END.length);
+  if (!balanced(body)) return item;
+  return {
+    ...item,
+    properties: { ...item.properties, colorExpr: { ...colorExpr, rhs: body } },
+  } as MathItemPatch;
+};
+
 type Migrated = { items: MathItemPatch[] };
 
 /** Whether any of the scene's math fields has one of `wanted` as a feature. */
@@ -412,7 +448,9 @@ type SceneResult = Record<string, Record<string, FieldResult>>;
 const evaluateScene = (migrated: Migrated): SceneResult => {
   Math.random = seededRandom(1);
   // The app's keyBy: the last item with an id wins.
-  const items = [...new Map(migrated.items.map((i) => [i.id, i])).values()];
+  const items = [
+    ...new Map(migrated.items.map((i) => [i.id, unwrapRainbow(i)])).values(),
+  ];
   const expressions = getIdentifiedExpressions(items);
 
   const idOf = new WeakMap<object, string>();

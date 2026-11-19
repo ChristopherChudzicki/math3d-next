@@ -757,12 +757,38 @@ def _color_expr(out: _Out, item: dict, explicit: bool) -> None:
     out.add("colorExpr.name", name, "render", "colorExpr")
     for i, param in enumerate(params):
         out.add(f"colorExpr.params.{i}", param, "render", "colorExpr")
-    out.add(
-        "colorExpr.rhs",
-        _NORMALIZED_COORDINATE.sub(rescaled, body),
-        "render",
-        "colorExpr",
-    )
+    rhs = _NORMALIZED_COORDINATE.sub(rescaled, body)
+    # react's Rainbow is a hue, so its values wrap at 1
+    # (react:constants/colors.js:19-34, setHSL); next's Rainbow does not.
+    if item.get("color") == "rainbow" and not is_blank(rhs) and not _mod_one(rhs):
+        rhs = rf"\operatorname{{mod}}\left({rhs}, 1\right)"
+    out.add("colorExpr.rhs", rhs, "render", "colorExpr")
+
+
+def _mod_one(text: str) -> bool:
+    """Whether ``text`` is wholly one call ``mod(g, 1)``."""
+    text = re.sub(r"\\(?:left|right)(?![A-Za-z])", "", text).strip()
+    head = re.match(r"(?:\\operatorname\{mod\}|mod)\s*\(", text)
+    if head is None:
+        return False
+    args, start, depth = [], head.end(), 0
+    for i in range(head.end() - 1, len(text)):
+        char = text[i]
+        if char in "([{":
+            depth += 1
+        elif char in ")]}":
+            depth -= 1
+            if depth == 0:
+                args.append(text[start:i])
+                return (
+                    i == len(text) - 1
+                    and len(args) == 2
+                    and _strip_latex_space(args[1]) == "1"
+                )
+        elif char == "," and depth == 1 and text[i - 1] != "\\":
+            args.append(text[start:i])
+            start = i + 1
+    return False
 
 
 def _make_surface(
@@ -906,7 +932,7 @@ _SURFACE_COVERAGE = {
     "expr": "expr: `_f(p1,p2)=rhs` -> function-assignment {name, params, rhs}",
     "rangeU": "domain.items.0: function of the 2nd parameter (prefix `_f(p2)=` split off if present)",
     "rangeV": "domain.items.1: function of the 1st parameter (prefix `_f(p1)=` split off if present)",
-    "colorExpr": "colorExpr: `_f(X,Y,Z,p1,p2)=rhs` -> `x,y,z,p1,p2` (explicit `p1,p2,z`), X -> rescale_x(x) etc.",
+    "colorExpr": "colorExpr: `_f(X,Y,Z,p1,p2)=rhs` -> `x,y,z,p1,p2` (explicit `p1,p2,z`), X -> rescale_x(x) etc.; a Rainbow rhs not blank and not wholly `mod(g, 1)` -> `mod(rhs, 1)`",
     "gridOpacity": "gridOpacity (identity)",
     "gridWidth": "gridWidth (identity)",
     "uSamples": "samples1 (samples2 when rangeU depends on the 2nd parameter)",

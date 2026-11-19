@@ -474,7 +474,7 @@ class PairSpec:
     next_field: str
     next_element: int | None
     severity: str
-    rule: str = "value"  # value | domain | coords | truthiness | camera
+    rule: str = "value"  # value | domain | coords | truthiness | camera | hue
     expected: Any = None  # the camera rule's expected numbers
 
 
@@ -506,9 +506,12 @@ SURFACE_DOMAIN_TYPES = (
 )
 
 
-def _rule(item_type: str, legacy_field: str, next_field: str) -> str:
+def _rule(item: dict, legacy_field: str, next_field: str) -> str:
+    item_type = item["type"]
     if next_field == "domain" and item_type in SURFACE_DOMAIN_TYPES:
         return "domain"
+    if next_field == "colorExpr" and item.get("color") == "rainbow":
+        return "hue"
     if item_type == "POINT" and next_field == "coords":
         return "coords"
     if next_field == "calculatedVisibility":
@@ -638,7 +641,7 @@ def pair_scene(
                     nf,
                     ne,
                     severity,
-                    _rule(item_type, lf, nf),
+                    _rule(item, lf, nf),
                 )
             )
         for side, fields, other in (
@@ -722,6 +725,23 @@ def _side(record: dict, element: int | None, per_element_status: bool) -> Side:
     return Side("eval", MISSING, "no such element")
 
 
+def _hue(fp: Any, tol: Tolerance) -> Any:
+    """A Rainbow color value as the hue math3d-react draws: setHSL wraps it at 1
+    with euclideanModulo (react:constants/colors.js:19-34), as Python's `%` does."""
+    if _is_number(fp):
+        hue = fp % 1
+        # Just below 1 draws as 0; a rescale's round trip can land either side.
+        return 0.0 if 1 - hue <= tol.atol else hue
+    if _is_fn(fp) and fp["at"] is not None:
+        vec = {k: [_hue(x, tol) for x in v] for k, v in (fp.get("vec") or {}).items()}
+        return {
+            **fp,
+            "at": [_hue(x, tol) for x in fp["at"]],
+            **({"vec": vec} if vec else {}),
+        }
+    return fp
+
+
 def _compare_by_rule(spec: PairSpec, a: Any, b: Any, tol: Tolerance) -> Verdict:
     if (
         spec.rule == "domain"
@@ -777,16 +797,12 @@ def label(spec: PairSpec, legacy: Side, nxt: Side, tol: Tolerance) -> Pair:
     if l_ok and n_ok:
         if nxt.value is MISSING:
             return Pair(spec, legacy, nxt, "unsure", "sibling")
-        v = _compare_by_rule(spec, legacy.value, nxt.value, tol)
+        a, b = legacy.value, nxt.value
+        if spec.rule == "hue":
+            a, b = _hue(a, tol), _hue(b, tol)
+        v = _compare_by_rule(spec, a, b, tol)
         if v.outcome == "differ":
-            return Pair(
-                spec,
-                legacy,
-                nxt,
-                "differ",
-                signature(legacy.value, nxt.value, v, tol),
-                v,
-            )
+            return Pair(spec, legacy, nxt, "differ", signature(a, b, v, tol), v)
         return Pair(spec, legacy, nxt, v.outcome, v.cause, v)
     if l_ok:
         return Pair(

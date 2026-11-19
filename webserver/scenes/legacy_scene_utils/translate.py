@@ -8,7 +8,7 @@ from typing import Any, Literal, cast
 
 import scenes.legacy_scene_utils.legacy_data as old
 from scenes.legacy_scene_utils import operators, pdiff
-from scenes.legacy_scene_utils.color_expr import translate_color_expr
+from scenes.legacy_scene_utils.color_expr import SurfaceKind, translate_color_expr
 from scenes.legacy_scene_utils.issue_log import IssueLog
 from scenes.legacy_scene_utils.symbols import depends_on
 from scenes.schemas.math_items import (
@@ -99,6 +99,22 @@ _BLANK = re.compile(r"(?:\s|\\ |\\,|\\;|\\:|\\!|\\quad|\\qquad|~)*")
 
 def blank_to_empty(text: str) -> str:
     return "" if _BLANK.fullmatch(text) else text
+
+
+_MOD_ONE = re.compile(
+    r"(?:\\operatorname\{mod\}|mod)\s*(?:\\left)?\("
+    r"(.*),(?:\\ |\s)*1(?:\\ |\s)*(?:\\right)?\)",
+    re.DOTALL,
+)
+
+
+def wrapped_at_one(body: str) -> str:
+    """``body`` inside ``mod(…, 1)``, unless it is blank or already one such
+    call."""
+    call = _MOD_ONE.fullmatch(body.strip())
+    if not blank_to_empty(body) or (call and balanced(call[1])):
+        return body
+    return rf"\operatorname{{mod}}\left({body}, 1\right)"
 
 
 def divide(numerator: float, denominator: float | str) -> float | str:
@@ -219,6 +235,18 @@ class ItemMigrator:
             params=params,
             rhs=rhs,
         )
+
+    def color_expr(
+        self, x, kind: SurfaceKind, surface_params: list[str]
+    ) -> FunctionAssignmentObj:
+        """math3d-react's Rainbow is a hue, so it wraps at 1; math3d-next's
+        does not."""
+        translated = translate_color_expr(
+            self.function_assignment(x.colorExpr), kind, surface_params
+        )
+        if x.color == "rainbow":
+            translated.rhs = wrapped_at_one(translated.rhs)
+        return translated
 
     def domain_array(self, exprs: list[str]) -> FunctionAssignmentArray:
         items = [self.function_assignment(expr) for expr in exprs]
@@ -409,9 +437,7 @@ class ItemMigrator:
         domain = self.domain_array([rangeU, rangeV])
         return ExplicitSurfaceProperties(
             color=x.color,
-            colorExpr=translate_color_expr(
-                self.function_assignment(x.colorExpr), "explicit", expr.params
-            ),
+            colorExpr=self.color_expr(x, "explicit", expr.params),
             description=x.description,
             domain=domain,
             expr=expr,
@@ -434,9 +460,7 @@ class ItemMigrator:
         domain = self.domain_array([rangeU, rangeV])
         return ExplicitSurfacePolarProperties(
             color=x.color,
-            colorExpr=translate_color_expr(
-                self.function_assignment(x.colorExpr), "polar", expr.params
-            ),
+            colorExpr=self.color_expr(x, "polar", expr.params),
             description=x.description,
             domain=domain,
             expr=expr,
@@ -562,9 +586,7 @@ class ItemMigrator:
         domain = self.domain_array([rangeU, rangeV])
         return ParametricSurfaceProperties(
             color=x.color,
-            colorExpr=translate_color_expr(
-                self.function_assignment(x.colorExpr), "parametric", expr.params
-            ),
+            colorExpr=self.color_expr(x, "parametric", expr.params),
             description=x.description,
             domain=domain,
             expr=expr,

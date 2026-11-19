@@ -280,6 +280,40 @@ def test_explicit_surface_color_rescales_its_own_params():
 
 
 @pytest.mark.parametrize(
+    ("color", "color_expr", "rhs"),
+    [
+        (
+            "rainbow",
+            "_f(X, Y, Z, u, v)=2Z",
+            r"\operatorname{mod}\left(2\operatorname{rescale}_z\left(z\right), 1\right)",
+        ),
+        (
+            "rainbow",
+            "_f(X, Y, Z, u, v)=mod(2Z, 1)",
+            r"mod(2\operatorname{rescale}_z\left(z\right), 1)",
+        ),
+        (
+            "rainbow",
+            "_f(X, Y, Z, u, v)=mod(Z, 1)+1",
+            r"\operatorname{mod}\left(mod(\operatorname{rescale}_z\left(z\right), 1)+1, 1\right)",
+        ),
+        (
+            "temperature",
+            "_f(X, Y, Z, u, v)=2Z",
+            r"2\operatorname{rescale}_z\left(z\right)",
+        ),
+    ],
+)
+def test_rainbow_surface_color_wraps_at_one(color, color_expr, rhs):
+    surface = {
+        **rehydrated("PARAMETRIC_SURFACE"),
+        "color": color,
+        "colorExpr": color_expr,
+    }
+    assert values(surface)["colorExpr.rhs"] == rhs
+
+
+@pytest.mark.parametrize(
     ("item_id", "item_type", "saved_visible", "shown"),
     [("p", "POINT", False, True), ("grid-yz", "GRID", True, False)],
 )

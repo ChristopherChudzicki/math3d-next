@@ -172,4 +172,26 @@ describe("evaluateScene's surface colors", () => {
   it("traces a color through rescale to its axis's bounds", () => {
     expect(parametric(rescaleZ).deps).toEqual(["axis-z-min", "axis-z-max"]);
   });
+
+  it("samples a Rainbow color's body inside the translator's mod(…, 1)", () => {
+    // Complex where u < 0, where mod would throw.
+    const body = "\\log\\left(u\\right)";
+    const rainbow = (rhs: string) =>
+      evaluateScene({
+        items: [
+          make(MathItemType.ParametricSurface, "s", {
+            color: "rainbow",
+            colorExpr: {
+              type: "function-assignment",
+              name: "_f",
+              params: ["x", "y", "z", "u", "v"],
+              rhs,
+            },
+          }),
+        ],
+      }).s.colorExpr.value;
+    expect(rainbow(`\\operatorname{mod}\\left(${body}, 1\\right)`)).toEqual(
+      rainbow(body),
+    );
+  });
 });
