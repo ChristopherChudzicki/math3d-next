@@ -5,6 +5,9 @@ import subscriptRule from "./subscriptRule";
 import validateParameters, { ParameterErrors } from "./validateParameters";
 import RegexpParserRule from "./RegexpParserRule";
 import exponentRule from "./exponentRule";
+import functionApplicationRule from "./functionApplicationRule";
+import functionCommandSpacingRule from "./functionCommandSpacingRule";
+import { FUNCTION_ARITY } from "./functionNames";
 
 export {
   RegexpParserRule,
@@ -15,4 +18,7 @@ export {
   validateParameters,
   ParameterErrors,
   exponentRule,
+  functionApplicationRule,
+  functionCommandSpacingRule,
+  FUNCTION_ARITY,
 };

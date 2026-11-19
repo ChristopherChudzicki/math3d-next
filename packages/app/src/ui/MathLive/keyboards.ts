@@ -40,9 +40,9 @@ const LAYOUTS: Record<CustomKeyboards, VirtualKeyboardLayout> = {
         "[separator-5]",
         {
           latex: "e^{#0}",
-          shift: "\\ln(#0)",
+          shift: "\\ln",
           class: "hide-shift",
-          variants: ["\\exp(#0)", "\\ln(#0)", "\\log(#0)"],
+          variants: ["\\exp", "\\ln", "\\log"],
         },
         {
           latex: "I",
@@ -142,11 +142,11 @@ const LAYOUTS: Record<CustomKeyboards, VirtualKeyboardLayout> = {
     rows: [
       [
         { latex: "e^{#0}" },
-        { latex: "\\ln(#0)" },
+        { latex: "\\ln" },
         "[separator-5]",
-        { latex: "\\sin(#0)" }, // middle
-        { latex: "\\cos(#0)" },
-        { latex: "\\tan(#0)" },
+        { latex: "\\sin" }, // middle
+        { latex: "\\cos" },
+        { latex: "\\tan" },
         "[separator-5]",
         // right
         { latex: "\\frac{\\differentialD #0}{\\differentialD #1}", width: 1.5 },
@@ -154,11 +154,11 @@ const LAYOUTS: Record<CustomKeyboards, VirtualKeyboardLayout> = {
       ],
       [
         { latex: "\\sqrt{#0}" },
-        { latex: "\\operatorname{sign}(#0)" },
+        { latex: "\\operatorname{sign}" },
         "[separator-5]",
-        { latex: "\\arcsin(#0)", class: "small" }, // middle
-        { latex: "\\arccos(#0)", class: "small" },
-        { latex: "\\arctan(#0)", class: "small" },
+        { latex: "\\arcsin", class: "small" }, // middle
+        { latex: "\\arccos", class: "small" },
+        { latex: "\\arctan", class: "small" },
         "[separator-5]",
         {
           latex: "\\operatorname{unitT}(\\vec{r},t)",
@@ -180,32 +180,32 @@ const LAYOUTS: Record<CustomKeyboards, VirtualKeyboardLayout> = {
         },
       ],
       [
-        { latex: "\\operatorname{floor}(#0)", class: "small" },
-        { latex: "\\operatorname{ceil}(#0)", class: "small" },
+        { latex: "\\operatorname{floor}", class: "small" },
+        { latex: "\\operatorname{ceil}", class: "small" },
         "[separator-5]",
-        { latex: "\\sinh(#0)" }, // middle
-        { latex: "\\cosh(#0)" },
-        { latex: "\\tanh(#0)" },
+        { latex: "\\sinh" }, // middle
+        { latex: "\\cosh" },
+        { latex: "\\tanh" },
         "[separator-5]",
         { latex: "\\operatorname{Im}(#0)" },
         { latex: "\\operatorname{Re}(#0)" },
-        { latex: "\\operatorname{abs}(#0)" },
+        { latex: "\\operatorname{abs}" },
       ],
       [
         { label: "[shift]", width: 2.0 },
         "[separator-5]",
         {
-          latex: "\\operatorname{arcsinh}(#0)",
+          latex: "\\operatorname{arcsinh}",
           class: "small",
           insert: "\\arcsinh",
         }, // middle
         {
-          latex: "\\operatorname{arccosh}(#0)",
+          latex: "\\operatorname{arccosh}",
           class: "small",
           insert: "\\arccosh",
         },
         {
-          latex: "\\operatorname{arctanh}(#0)",
+          latex: "\\operatorname{arctanh}",
           class: "small",
           insert: "\\arctanh",
         },
