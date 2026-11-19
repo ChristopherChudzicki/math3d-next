@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams, useSearchParams } from "react-router";
 
-import Viewport from "@/features/viewport/mathbox/Viewport";
+import MathboxViewport from "@/features/viewport/mathbox/LazyViewport";
 import ThreeViewport from "@/features/viewport/three/ThreeViewport";
 import { DEFAULT_RENDERER, isRenderer } from "@/services/renderer/renderers";
 import type { Renderer } from "@/services/renderer/renderers";
@@ -9,7 +9,7 @@ import { RENDERER_PARAM } from "@/services/renderer/useRenderer";
 import useSceneLoader from "@/app/useSceneLoader";
 
 const VIEWPORTS: Record<Renderer, React.ReactElement> = {
-  mathbox: <Viewport still />,
+  mathbox: <MathboxViewport still />,
   threejs: <ThreeViewport loader={false} />,
 };
 

@@ -138,6 +138,13 @@ const layoutZones = [
       "The renderers don't import each other; share code via shared/ or spec/.",
   })),
   {
+    target: "./src/app",
+    from: `${VIEWPORT}/mathbox`,
+    except: ["./LazyViewport.tsx"],
+    message:
+      "MathBox loads only through mathbox/LazyViewport (React.lazy), so it stays out of the main bundle.",
+  },
+  {
     target: `${VIEWPORT}/shared`,
     from: VIEWPORT,
     except: ["./shared"],

@@ -103,6 +103,12 @@ renderer when the default can't draw. The shared tier can't import
 viewports, so `MainPage` and `FramePage` map each key to its viewport in a
 `Record<Renderer, …>`, which fails typecheck until a new key has one.
 
+Each renderer loads on first use, so the main bundle carries neither: the
+three.js one through `three/ThreeViewport` (below), MathBox through
+`mathbox/LazyViewport`, a `React.lazy` in its own `Suspense`. An
+`import/no-restricted-paths` zone keeps `src/app` from importing anything
+else in `mathbox/`.
+
 ### `@math3d/renderer-three`
 
 The three.js renderer is the `packages/renderer-three` workspace, with its

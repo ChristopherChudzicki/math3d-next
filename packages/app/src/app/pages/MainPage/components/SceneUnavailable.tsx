@@ -6,7 +6,6 @@ import externalLink from "@iconify-icons/lucide/external-link";
 import type { SceneUnavailableStatus } from "@/app/useSceneLoader";
 import BrokenTorus from "@/app/pages/ErrorPage/BrokenTorus";
 import buildReportUrl from "@/app/pages/ErrorPage/errorPage.report";
-import Viewport from "@/features/viewport/mathbox/Viewport";
 import defaultScene from "@/store/scene/defaultScene";
 import sceneSlice from "@/store/scene/state/scene.slice";
 import { useAppSelector } from "@/store/hooks";
@@ -63,6 +62,8 @@ const useEmptySceneStore = () => {
 };
 
 type SceneUnavailableProps = {
+  /** The chosen renderer's viewport, drawn behind the card. */
+  Viewport: React.ComponentType;
   status: SceneUnavailableStatus;
   failure: Error | null;
   /** Re-announces the message when it changes. */
@@ -78,6 +79,7 @@ type SceneUnavailableProps = {
  * Render with `key={sceneKey}`, so each scene gets its own.
  */
 const SceneUnavailable: React.FC<SceneUnavailableProps> = ({
+  Viewport,
   status,
   failure,
   failedAttempts,

@@ -5,7 +5,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router";
-import Viewport from "@/features/viewport/mathbox/Viewport";
+import MathboxViewport from "@/features/viewport/mathbox/LazyViewport";
 import ThreeViewport from "@/features/viewport/three/ThreeViewport";
 import useSceneLoader from "@/app/useSceneLoader";
 import SceneControls from "@/features/editor/sidebar/SceneControls";
@@ -83,7 +83,7 @@ const useSearchEnum = <T extends string>({
 const CONTROLS_VALUES = ["0", "1"] as const;
 
 const VIEWPORTS: Record<Renderer, React.FC<{ className?: string }>> = {
-  mathbox: Viewport,
+  mathbox: MathboxViewport,
   threejs: ThreeViewport,
 };
 
@@ -159,6 +159,7 @@ const MainPage: React.FC = () => {
             // Not the editor: the store may hold the previous route's scene.
             <SceneUnavailable
               key={sceneKey}
+              Viewport={SceneViewport}
               status={unavailable}
               failure={sceneLoad.failure}
               failedAttempts={sceneLoad.failedAttempts}
