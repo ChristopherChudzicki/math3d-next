@@ -75,17 +75,22 @@ export type SurfaceSpec = Common & {
    */
   colorAt: (u: number, v: number, point: Coords) => RGBA;
   /**
-   * Present when `colorAt` is `[...map(valueAt), alpha]` and the value
-   * wraps: where finite it lies in [0, 1) up to rounding, and 0.99 is as
-   * near 0.01 as 0.03 is. A renderer may then draw sharper by blending the
-   * value between samples the short way around and coloring each pixel by
-   * `map`. A renderer that ignores this is still correct.
+   * Present when `colorAt` is `[...map(valueAt), alpha]`. A renderer may
+   * then draw sharper by blending the value between samples and coloring
+   * each pixel by `map`. A renderer that ignores this is still correct.
    */
-  periodicColor?: {
+  mapColor?: {
     map: ColorMap;
     /** `point` as in `colorAt`. */
     valueAt: (u: number, v: number, point: Coords) => number;
     alpha: number;
+    /**
+     * Whether the value wraps: where finite it lies in [0, 1) up to
+     * rounding, and 0.99 is as near 0.01 as 0.03 is, so it blends the short
+     * way around. Otherwise a value may jump between samples, where a blend
+     * would sweep the map.
+     */
+    periodic: boolean;
   };
   shaded: boolean;
   grid: {

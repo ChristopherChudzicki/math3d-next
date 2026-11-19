@@ -82,7 +82,7 @@ describe("writeIndex", () => {
 describe("writeColors", () => {
   const buffers = (vertices: number) => ({
     color: new Float32Array(4 * vertices),
-    phase: new Float32Array(2 * vertices),
+    mapValue: new Float32Array(2 * vertices),
   });
   test("writes each sample's RGBA, from its parameters and its sampled point", () => {
     const out = buffers(4);
@@ -101,19 +101,38 @@ describe("writeColors", () => {
     const out = buffers(4);
     // By vertex: a quarter turn, a half turn, a hair below 0, and no value.
     const values = [0.25, 0.5, -1e-13, NaN];
-    const periodicColor = {
+    const mapColor = {
       map: (): [number, number, number] => [1, 1, 1],
       valueAt: (u: number, v: number, [x, y]: Coords) => values[2 * y + x],
       alpha: 0.5,
+      periodic: true,
     };
     const colorAt = vi.fn((): RGBA => [1, 1, 1, 1]);
-    writeColors(sampleGrid([2, 2], flat), { colorAt, periodicColor }, out);
+    writeColors(sampleGrid([2, 2], flat), { colorAt, mapColor }, out);
     const expected = [0, 1, -1, 0, 1, 0, 0, 0];
-    Array.from(out.phase).forEach((c, k) => expect(c).toBeCloseTo(expected[k]));
+    Array.from(out.mapValue).forEach((c, k) =>
+      expect(c).toBeCloseTo(expected[k]),
+    );
     // Exactly 0, so the vertex sits on the seam's low side.
-    expect(out.phase[5]).toBe(0);
+    expect(out.mapValue[5]).toBe(0);
     expect(out.color[7]).toBe(0.5);
     // The value is the color expression; `colorAt` would evaluate it again.
+    expect(colorAt).not.toHaveBeenCalled();
+  });
+
+  test("with a color that doesn't wrap, writes each value's map and alpha, and each value and weight", () => {
+    const out = buffers(4);
+    // A jump between u = 0 and u = 1.
+    const mapColor = {
+      map: (t: number): [number, number, number] => [t, 0, 1 - t],
+      valueAt: (u: number) => 0.75 * u,
+      alpha: 0.5,
+      periodic: false,
+    };
+    const colorAt = vi.fn((): RGBA => [1, 1, 1, 1]);
+    writeColors(sampleGrid([2, 2], flat), { colorAt, mapColor }, out);
+    expect(Array.from(out.color.slice(4, 8))).toEqual([0.75, 0, 0.25, 0.5]);
+    expect(Array.from(out.mapValue.slice(0, 4))).toEqual([0, 1, 0.75, 1]);
     expect(colorAt).not.toHaveBeenCalled();
   });
 });

@@ -67,25 +67,34 @@ describe("buildSurface", () => {
 
   test("a surface draws through its periodic color's map, and by vertex color once it has none", () => {
     const map = (t: number): [number, number, number] => [t, 0, 1 - t];
-    const periodicColor = { map, valueAt: () => 0.5, alpha: 1 };
-    const graphic = buildSurface(
-      surfaceSpec({ periodicColor }),
-      "oit",
-      "glossy",
-    );
+    const mapColor = { map, valueAt: () => 0.5, alpha: 1, periodic: true };
+    const graphic = buildSurface(surfaceSpec({ mapColor }), "oit", "glossy");
     const surface = meshOf(graphic);
     expect(surface.material).toBe(
-      meshMaterial(true, "opaque", "oit", "glossy", true),
+      meshMaterial(true, "opaque", "oit", "glossy", "periodic"),
     );
     expect(surface.userData.mesh.mapTexture).toBe(colorMapTexture(map));
 
     graphic.update(surfaceSpec());
     expect(surface.material).toBe(
-      meshMaterial(true, "opaque", "oit", "glossy", false),
+      meshMaterial(true, "opaque", "oit", "glossy", "vertex"),
     );
     expect(attributeOf(surface, "color").slice(0, 4)).toEqual(
       Array.from(new Float32Array([0.2, 0.4, 0.6, 1])),
     );
+  });
+
+  test("a surface whose mapped color doesn't wrap draws through its map, beside its vertex colors", () => {
+    const map = (t: number): [number, number, number] => [t, 0, 1 - t];
+    const mapColor = { map, valueAt: () => 0.5, alpha: 1, periodic: false };
+    const surface = meshOf(
+      buildSurface(surfaceSpec({ mapColor }), "oit", "glossy"),
+    );
+    expect(surface.material).toBe(
+      meshMaterial(true, "opaque", "oit", "glossy", "mapped"),
+    );
+    expect(surface.userData.mesh.mapTexture).toBe(colorMapTexture(map));
+    expect(attributeOf(surface, "color").slice(0, 4)).toEqual([0.5, 0, 0.5, 1]);
   });
 
   test("redraws in place for an updated spec, with no gridlines at width 0", () => {

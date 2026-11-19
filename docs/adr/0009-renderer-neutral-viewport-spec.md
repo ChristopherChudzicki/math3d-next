@@ -149,10 +149,13 @@ parent, so anything sized in pixels is built in the shader, in view space:
   with a port of MathBox's surface shading, gamma step included. It takes
   per-vertex RGBA, and normals in its own coordinates that the normal matrix
   carries through the axes' scale. A surface whose color is a map of a value
-  that wraps (`SurfaceSpec.periodicColor`) sends that value instead, as a
-  point on the unit circle (`phase`), and its shader looks the map up per
+  that wraps (`SurfaceSpec.mapColor`, `periodic`) sends that value instead, as
+  a point on the unit circle (`mapValue`), and its shader looks the map up per
   pixel at the interpolated point's angle, so a wrap blends the short way
-  round. A surface's triangles wind as MathBox's do: under the `ordered` model
+  round. One whose value doesn't wrap sends the value clamped to [0, 1] beside
+  its vertex colors, and its shader looks the map up per pixel, fading to the
+  vertex colors where the value changes by 0.2 to 0.3 or more along an edge
+  (`mesh/mappedValue.ts`), since that may be a jump. A surface's triangles wind as MathBox's do: under the `ordered` model
   three draws a translucent mesh's back faces first, so winding decides how it
   overlaps itself.
 - **A surface's gridlines are drawn by its own shader**, not as strokes. A

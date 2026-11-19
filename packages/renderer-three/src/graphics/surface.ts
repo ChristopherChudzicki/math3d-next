@@ -43,7 +43,7 @@ export const buildSurface = (
     const style = {
       ...next,
       gridClosed: closedAxes(grid),
-      colorMap: next.periodicColor?.map,
+      colorMap: next.mapColor,
     };
     surface.fill(cols * rows, 6 * (cols - 1) * (rows - 1), style, (out) => {
       writePositions(grid, out.position);

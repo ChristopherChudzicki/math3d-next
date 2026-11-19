@@ -1,4 +1,5 @@
 import type { Coords, SurfaceSpec } from "@math3d/viewport-spec";
+import { writeMappedValues } from "./mappedValue";
 import { writePhase } from "./phase";
 
 /**
@@ -52,32 +53,50 @@ export const writeParameters = (
   }
 };
 
+const setColor = (
+  out: Float32Array,
+  k: number,
+  [r, g, b]: readonly number[],
+  alpha: number,
+) => {
+  out[4 * k] = r;
+  out[4 * k + 1] = g;
+  out[4 * k + 2] = b;
+  out[4 * k + 3] = alpha;
+};
+
 /**
- * Writes each vertex's RGBA or, with a periodic color, its alpha and its
- * value's phase. A cell with no finite value draws the map's low end.
+ * Writes each vertex's RGBA and, for a color that is a map of a value, that
+ * value to `mapValue` (`TriangleMesh`'s `MeshBuffers`). A periodic color
+ * writes only alpha to `color`, and its cells with no finite value draw the
+ * map's low end.
  */
 export const writeColors = (
   { cols, rows, points }: ParametricGrid,
-  { colorAt, periodicColor }: Pick<SurfaceSpec, "colorAt" | "periodicColor">,
-  out: { color: Float32Array; phase: Float32Array },
+  { colorAt, mapColor }: Pick<SurfaceSpec, "colorAt" | "mapColor">,
+  out: { color: Float32Array; mapValue: Float32Array },
 ): void => {
+  const mapped = mapColor && !mapColor.periodic;
+  const values = new Float64Array(mapped ? cols * rows : 0);
   for (let j = 0; j < rows; j += 1) {
     const v = parameter(j, rows);
     for (let i = 0; i < cols; i += 1) {
       const k = j * cols + i;
       const u = parameter(i, cols);
-      if (periodicColor) {
-        writePhase(out.phase, k, periodicColor.valueAt(u, v, points[k]));
-        out.color[4 * k + 3] = periodicColor.alpha;
-      } else {
+      if (!mapColor) {
         const color = colorAt(u, v, points[k]);
-        out.color[4 * k] = color[0];
-        out.color[4 * k + 1] = color[1];
-        out.color[4 * k + 2] = color[2];
-        out.color[4 * k + 3] = color[3];
+        setColor(out.color, k, color, color[3]);
+      } else if (mapColor.periodic) {
+        writePhase(out.mapValue, k, mapColor.valueAt(u, v, points[k]));
+        out.color[4 * k + 3] = mapColor.alpha;
+      } else {
+        // `colorAt`'s color, from the value it would evaluate again.
+        values[k] = mapColor.valueAt(u, v, points[k]);
+        setColor(out.color, k, mapColor.map(values[k]), mapColor.alpha);
       }
     }
   }
+  if (mapped) writeMappedValues(values, cols, rows, out.mapValue);
 };
 
 /**
