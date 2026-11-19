@@ -58,16 +58,7 @@ test.describe("Typing a function name inserts the bare function", () => {
   ];
   cases.forEach(([typed, expected]) => {
     test(typed, async ({ page, prepareScene }) => {
-      const scene = new SceneBuilder();
-      scene.folder().point({ description: "SomePoint", coords: "" });
-      const key = await prepareScene(scene.json());
-      await page.goto(`/${key}`);
-      const app = new AppPage(page);
-
-      const item = await app.getUniqueItemSettings({
-        description: "SomePoint",
-      });
-      const mf = item.field("Coordinates");
+      const mf = await focusEmptyCoords(page, prepareScene);
       await mf.pressSequentially(typed);
       await expect.poll(() => mf.evaluate(getLatex)).toBe(expected);
     });
@@ -245,18 +236,14 @@ test("The virtual keyboard's inverse hyperbolic keys insert their functions", as
 }) => {
   const mf = await focusEmptyCoords(page, prepareScene);
   const layer = await showVirtualKeyboard(page, "f(x)");
-  // Each key gets an empty field: nested inserts serialize inconsistently.
+  // Each key gets an empty field: MathLive wraps adjacent operator names in \mathrm.
   const expectKeyInserts = async (fn: string) => {
+    const latex = String.raw`\operatorname{${fn}}`;
     await mf.evaluate((e) =>
       (e as MathfieldElement).executeCommand("deleteAll"),
     );
-    await layer
-      .getByLabel(String.raw`\operatorname{${fn}}(#0)`, { exact: true })
-      .click();
-    await expect(mf).toHaveJSProperty(
-      "value",
-      String.raw`\operatorname{\mathrm{${fn}}}(\placeholder{})`,
-    );
+    await layer.getByLabel(latex, { exact: true }).click();
+    await expect(mf).toHaveJSProperty("value", latex);
   };
 
   await expectKeyInserts("arcsinh");
