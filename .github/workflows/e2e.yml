@@ -60,14 +60,19 @@ jobs:
             echo "TEST_USER_STATIC_EMAIL=$TEST_USER_STATIC_EMAIL"
             echo "DISABLE_ALLAUTH_RATE_LIMITS=true"
           } >> .env
-      - name: Build docker stack
-        run: docker compose build
-      - name: Migrate backend database
-        run: docker compose run --rm webserver uv run ./manage.py migrate
-      - name: Seed database
-        run: docker compose run --rm webserver uv run ./manage.py seed_test_data
-      - name: Start docker stack
-        run: docker compose up -d
+      # The backend needs nothing from the Node steps, so it comes up in the
+      # background while they run; "Wait for backend" joins it.
+      - name: Start backend in background
+        run: |
+          {
+            if bash -ec '
+              docker compose build
+              docker compose run --rm webserver uv run ./manage.py migrate
+              docker compose run --rm webserver uv run ./manage.py seed_test_data
+              docker compose up -d
+            '; then status=0; else status=$?; fi
+            echo "$status" > "$RUNNER_TEMP/backend.status"
+          } > "$RUNNER_TEMP/backend.log" 2>&1 &
       - name: Install dependencies
         run: yarn install --immutable
       - name: Build Frontend
@@ -78,6 +83,13 @@ jobs:
       # and apt mirror outages would otherwise fail the job.
       - name: Install Playwright Browsers
         run: yarn workspace app-tests-e2e playwright install chromium
+      - name: Wait for backend
+        run: |
+          timeout 600 bash -c "until [ -f '$RUNNER_TEMP/backend.status' ]; do sleep 1; done"
+          echo "::group::Backend setup log"
+          cat "$RUNNER_TEMP/backend.log"
+          echo "::endgroup::"
+          exit "$(cat "$RUNNER_TEMP/backend.status")"
       - name: Run Playwright tests
         run: yarn test-e2e
         env:
