@@ -13,46 +13,42 @@ type SurfaceDomain = {
 };
 
 /**
- * Past this many arguments a range function's cache starts over, so that
- * changing sample counts, which bring new arguments, can't grow it forever.
+ * Past this many values of U the map's cache starts over, so that changing
+ * sample counts, which bring new values, can't grow it forever.
  */
-const MAX_CACHED_RANGES = 1024;
-
-/**
- * `range` with its results kept by argument: a sampler asks once per sample,
- * and a grid has few distinct arguments.
- */
-const cached = (range: (param: number) => Range) => {
-  const ranges = new Map<number, Range>();
-  return (param: number): Range => {
-    const known = ranges.get(param);
-    if (known) return known;
-    const value = range(param);
-    if (ranges.size >= MAX_CACHED_RANGES) ranges.clear();
-    ranges.set(param, value);
-    return value;
-  };
-};
+const MAX_CACHED_COLUMNS = 1024;
 
 /**
  * Maps (U, V) ∈ [0, 1]² onto the domain's parameters. U spans the constant
  * range; V spans the other's, evaluated at U's parameter value.
+ *
+ * What depends only on U is kept by U: a sampler asks once per sample, and a
+ * grid has few distinct values of U.
  */
 const domainMap = (domain: SurfaceDomain) => {
   const { order } = domain;
-  const [fFirst, fSecond] = order.map((i) => cached(domain.value[i]));
+  const [rangeOfFirst, rangeOfSecond] = order.map((i) => domain.value[i]);
+  let firstRange: Range | undefined;
+  const columns = new Map<
+    number,
+    { first: number; low: number; high: number }
+  >();
   // Range functions run at the first sample that needs them, never while the
   // map is built: both renderers build it during render.
-  const first = (U: number) => {
-    const [a1, a2] = fFirst(0);
-    return a1 + (a2 - a1) * U;
+  return (U: number, V: number): Range => {
+    let column = columns.get(U);
+    if (!column) {
+      firstRange ??= rangeOfFirst(0);
+      const first = firstRange[0] + (firstRange[1] - firstRange[0]) * U;
+      const [low, high] = rangeOfSecond(first);
+      column = { first, low, high };
+      if (columns.size >= MAX_CACHED_COLUMNS) columns.clear();
+      columns.set(U, column);
+    }
+    const { first, low, high } = column;
+    const second = low + (high - low) * V;
+    return order[0] === 0 ? [first, second] : [second, first];
   };
-  const second = (U: number, V: number) => {
-    const [b1, b2] = fSecond(first(U));
-    return b1 + (b2 - b1) * V;
-  };
-  return (U: number, V: number): Range =>
-    order[0] === 0 ? [first(U), second(U, V)] : [second(U, V), first(U)];
 };
 
 type Expr2 = (a: number, b: number) => number;
