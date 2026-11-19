@@ -1,5 +1,5 @@
 import React from "react";
-import { expect, test, vi } from "vitest";
+import { expect, test } from "vitest";
 import * as Sentry from "@sentry/react";
 import { renderHook, waitFor } from "@testing-library/react";
 import {
@@ -9,11 +9,6 @@ import {
 } from "@tanstack/react-query";
 import { ApiError, NetworkError, recordEndpoint } from "@math3d/api";
 import { createQueryCache } from "./react-query";
-
-vi.mock("@sentry/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@sentry/react")>()),
-  captureException: vi.fn(),
-}));
 
 const SCENE_PATH = "/v1/scenes/{key}/";
 

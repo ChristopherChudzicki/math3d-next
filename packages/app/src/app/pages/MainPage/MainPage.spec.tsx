@@ -17,11 +17,6 @@ import * as Sentry from "@sentry/react";
 import expectToast from "@/test_util/expectToast";
 import sceneSlice from "@/store/scene/state/scene.slice";
 
-vi.mock("@sentry/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@sentry/react")>()),
-  captureException: vi.fn(),
-}));
-
 test.each([
   {
     url: "/?controls=1",

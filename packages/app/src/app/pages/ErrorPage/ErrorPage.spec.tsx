@@ -8,8 +8,6 @@ import { screen, waitFor } from "@/test_util";
 import ErrorPage, { normalizeError } from "./ErrorPage";
 import copy from "./errorPage.copy";
 
-vi.mock("@sentry/react", () => ({ captureException: vi.fn() }));
-
 const Boom: React.FC = () => {
   throw new Error("Cannot read properties of undefined (reading 'type')");
 };

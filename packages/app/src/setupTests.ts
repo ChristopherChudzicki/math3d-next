@@ -41,6 +41,16 @@ vitest.mock("@/util/hooks/useShadowStylesheet");
 
 vitest.mock("@/ui/TextareaAutoWidthHeight/TextMeasurer");
 
+/**
+ * Sentry isn't initialized in tests, so capturing is a no-op either way; these
+ * spies let any spec assert on what was reported.
+ */
+vi.mock("@sentry/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@sentry/react")>()),
+  captureException: vi.fn(),
+  captureMessage: vi.fn(),
+}));
+
 /** JSDOM has neither WebGPU nor WebGL2 for three.js to draw with. */
 vi.mock("@math3d/renderer-three", async () => {
   const shared = await import("@/test_util/threeViewport");
