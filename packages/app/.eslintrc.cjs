@@ -55,6 +55,14 @@ const threeAdapter = {
     "viewport/three is a thin adapter; three.js code goes in @math3d/renderer-three.",
 };
 
+// MathBox and its `three` load only inside viewport/mathbox, behind
+// mathbox/LazyViewport, so they never reach the main bundle.
+const mathboxPackages = {
+  group: RENDERER_PACKAGES,
+  message:
+    "MathBox's packages are imported only in viewport/mathbox, which loads through mathbox/LazyViewport (React.lazy).",
+};
+
 // The three.js renderer stays behind the one React.lazy in
 // three/ThreeViewport, so it never reaches the main bundle. A dynamic
 // import() is not checked by this rule.
@@ -69,7 +77,7 @@ const rendererThree = {
 const restrictedImports = ({
   allowBaseUi = false,
   allowParentImports = false,
-  rendererPackages = null,
+  rendererPackages = mathboxPackages,
 } = {}) => ({
   paths: [iconifyOnline],
   patterns: [
@@ -225,6 +233,15 @@ module.exports = {
         "no-restricted-imports": [
           "error",
           restrictedImports({ rendererPackages: threeAdapter }),
+        ],
+      },
+    },
+    {
+      files: ["src/features/viewport/mathbox/**"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          restrictedImports({ rendererPackages: null }),
         ],
       },
     },

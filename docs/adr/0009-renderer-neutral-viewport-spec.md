@@ -105,9 +105,9 @@ viewports, so `MainPage` and `FramePage` map each key to its viewport in a
 
 Each renderer loads on first use, so the main bundle carries neither: the
 three.js one through `three/ThreeViewport` (below), MathBox through
-`mathbox/LazyViewport`, a `React.lazy` in its own `Suspense`. An
-`import/no-restricted-paths` zone keeps `src/app` from importing anything
-else in `mathbox/`.
+`mathbox/LazyViewport`, a `React.lazy` in its own `Suspense` and error
+boundary. Lint keeps MathBox's packages inside `mathbox/`, and `src/app`
+from importing anything there but `LazyViewport`.
 
 ### `@math3d/renderer-three`
 
@@ -321,9 +321,9 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
   moves to its `onCameraMove`; what else touches the store (fallback on
   `onUnsupported`) stays in its `app` glue. Adding one touches the renderer
   list, `MainPage`'s map and the lint zones.
-- While MathBox stays, the app ships two copies of `three`: the main bundle
-  carries `0.147` and the three.js chunk its own. three.js logs "Multiple
-  instances of Three.js being imported" when that chunk loads.
+- While MathBox stays, the app ships two copies of `three`, one in each
+  renderer's chunk. A session that draws with both loads both, and three.js
+  logs "Multiple instances of Three.js being imported".
 - MathBox stays outside the contract while it reads math items directly.
 - In three.js, an item draws as one block: none of its parts can go between
   another item's parts. MathBox is the same, since math3d gives every part of

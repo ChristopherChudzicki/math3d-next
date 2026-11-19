@@ -42,8 +42,8 @@ legacy. Use.GPU is removed.**
   `onUnsupported`. A future WebGPU-only renderer needs gating again.
 - A browser with neither WebGPU nor WebGL2 gets a message and a button, not
   a scene.
-- The main bundle still carries MathBox and its `three@0.147`, so the default
-  path downloads both copies of `three`.
+- MathBox and its `three@0.147` load only when chosen
+  ([ADR-0009](0009-renderer-neutral-viewport-spec.md)).
 
 ## Alternatives considered
 

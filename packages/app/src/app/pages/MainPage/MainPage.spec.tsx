@@ -166,6 +166,10 @@ test("a 404 shows the not-found card at the same URL", async () => {
   ).toBeVisible();
   expect(location.current.pathname).toBe("/nonexistent-scene-key");
   expect(document.title).toBe("Scene not found | Math3d");
+  expect(await screen.findByTestId("scene")).toHaveAttribute(
+    "data-renderer",
+    "threejs",
+  );
   expect(Sentry.captureException).not.toHaveBeenCalled();
 });
 
