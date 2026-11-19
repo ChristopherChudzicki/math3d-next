@@ -23,7 +23,6 @@ jobs:
     runs-on: ubuntu-24.04
     environment: "ci"
     env:
-      SKIP_YARN_COREPACK_CHECK: true
       VITE_APP_VERSION: ci
       VITE_DISPLAY_AUTH_FLOWS: "true"
       VITE_ENABLE_DUMMY_AUTH: "true"
@@ -47,11 +46,12 @@ jobs:
           API_HOST=$(echo "$TEST_API_URL" | sed -E 's|https?://||; s|:[0-9]+$||')
           echo "127.0.0.1 $APP_HOST $API_HOST" | sudo tee -a /etc/hosts
           echo "::1       $APP_HOST $API_HOST" | sudo tee -a /etc/hosts
+      # Before setup-node, so `cache: yarn` sees Yarn 4 rather than the runner's Yarn 1.
+      - run: corepack enable
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: ".nvmrc"
           cache: "yarn"
-      - run: corepack enable
       - name: Write env file for docker
         run: |
           {

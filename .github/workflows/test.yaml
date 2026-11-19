@@ -16,7 +16,6 @@ jobs:
     runs-on: ubuntu-26.04
     environment: "ci"
     env:
-      SKIP_YARN_COREPACK_CHECK: true
       APP_BASE_URL: ${{ vars.APP_BASE_URL }}
       VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
       VITE_APP_VERSION: ci
@@ -27,11 +26,12 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           persist-credentials: false
+      # Before setup-node, so `cache: yarn` sees Yarn 4 rather than the runner's Yarn 1.
+      - run: corepack enable
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: ".nvmrc"
           cache: "yarn"
-      - run: corepack enable
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn fmt-check
@@ -106,18 +106,17 @@ jobs:
     # This job checks that the generated clients checked into version control are
     # up-to-date. Both clients are types-only (openapi-typescript) — a single
     # index.ts each, regenerated, prettier-formatted, and diffed directly.
-    env:
-      SKIP_YARN_COREPACK_CHECK: true # https://github.com/actions/setup-node/issues/531#issuecomment-1819151412
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           persist-credentials: false
+      # Before setup-node, so `cache: yarn` sees Yarn 4 rather than the runner's Yarn 1.
+      - run: corepack enable
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: ".nvmrc"
           cache: "yarn"
-      - run: corepack enable
       - name: Setup env variables
         run: cp .env.development .env
       - name: Install dependencies

@@ -14,18 +14,17 @@ permissions:
 jobs:
   autofix:
     runs-on: ubuntu-26.04
-    env:
-      SKIP_YARN_COREPACK_CHECK: true
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           persist-credentials: false
+      # Before setup-node, so `cache: yarn` sees Yarn 4 rather than the runner's Yarn 1.
+      - run: corepack enable
       # The prettier hooks run the repo's own prettier from node_modules.
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: ".nvmrc"
           cache: "yarn"
-      - run: corepack enable
       - run: yarn install --immutable
       - uses: j178/prek-action@7b101f8338a08d2bd6fdb3625e4e7692428763a3 # v3.1.1
         with:
