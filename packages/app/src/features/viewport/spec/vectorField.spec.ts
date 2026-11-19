@@ -17,10 +17,39 @@ test("a vector field draws one arrow per grid point", () => {
   expect(spec.paths).toHaveLength(2);
 });
 
-test("a sample count that rounds below 1 draws nothing", () => {
+const tails = (spec: LineSpec) => spec.paths.map(([tail]) => tail);
+
+test("a sample count that rounds below 1 samples once, at the range minimum", () => {
   const scene = new SceneBuilder();
-  scene.folder().vectorField({ samples1: "0.4" }, "f");
-  expect(renderGraphicSpec(scene, "f")).toBeNull();
+  scene
+    .folder()
+    .vectorField({ samples1: "0.4", samples2: "1", samples3: "1" }, "f");
+  const spec = renderGraphicSpec(scene, "f") as LineSpec;
+  expect(tails(spec)).toEqual([[-5, 0, 0]]);
+});
+
+test("a sample count rounds to the nearest integer", () => {
+  const scene = new SceneBuilder();
+  scene
+    .folder()
+    .vectorField({ samples1: "0.6", samples2: "1", samples3: "1" }, "f");
+  const spec = renderGraphicSpec(scene, "f") as LineSpec;
+  expect(tails(spec)).toEqual([[0, 0, 0]]);
+});
+
+test("a missing sample count samples once, at the range minimum", () => {
+  // A count of 0 fails validation (which warns), so it reaches the spec missing.
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  const scene = new SceneBuilder();
+  scene
+    .folder()
+    .vectorField({ samples1: "2", samples2: "1", samples3: "0" }, "f");
+  const spec = renderGraphicSpec(scene, "f") as LineSpec;
+  expect(tails(spec)).toEqual([
+    [-5, 0, -5],
+    [5, 0, -5],
+  ]);
+  expect(warn).toHaveBeenCalled();
 });
 
 test("without an evaluated scale, arrows are scaled by 0.5 as in MathBox", () => {

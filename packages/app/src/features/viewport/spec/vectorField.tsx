@@ -37,13 +37,10 @@ const VectorField: SpecComponent<MIT.VectorField> = ({ item }) => {
   // field again.
   const paths = useMemo(() => {
     if (!visible || !expr || !domain) return null;
-    // As MathBox does: counts round, and a missing or sub-1 count draws
-    // nothing, unlike `sampleCount`'s minimum of 2 for curves and surfaces.
-    const counts = [samples1, samples2, samples3].map((n) =>
-      n === undefined ? 0 : Math.round(n),
-    );
-    if (counts.some((n) => n < 1)) return null;
-    const samples = counts as [number, number, number];
+    // MathBox rounds sample counts; a missing count acts as 0.
+    const samples = [samples1, samples2, samples3].map((n) =>
+      Math.round(n ?? 0),
+    ) as [number, number, number];
     return sampleVectorField(expr, domain, samples, scale);
   }, [visible, expr, domain, samples1, samples2, samples3, scale]);
   const spec = useMemo<GraphicSpec | null>(
