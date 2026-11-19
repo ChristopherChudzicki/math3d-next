@@ -44,23 +44,21 @@ jobs:
   build:
     runs-on: ubuntu-26.04
     environment: ${{ inputs.environment }}
-    env:
-      SKIP_YARN_COREPACK_CHECK: true
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ inputs.ref }}
           persist-credentials: false
 
+      # Before setup-node, so `cache: yarn` sees Yarn 4 rather than the runner's Yarn 1.
+      - run: corepack enable
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: ".nvmrc"
           cache: "yarn"
 
       - name: Install dependencies
-        run: |
-          corepack enable
-          yarn install --immutable
+        run: yarn install --immutable
 
       - name: Build frontend
         run: yarn build
@@ -132,14 +130,14 @@ jobs:
     if: ${{ !inputs.dry_run && inputs.environment == 'production' }}
     runs-on: ubuntu-26.04
     environment: ${{ inputs.environment }}
-    env:
-      SKIP_YARN_COREPACK_CHECK: true
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ inputs.ref }}
           persist-credentials: false
 
+      # Before setup-node, so `cache: yarn` sees Yarn 4 rather than the runner's Yarn 1.
+      - run: corepack enable
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: ".nvmrc"
@@ -151,9 +149,7 @@ jobs:
       # EUNSUPPORTEDPROTOCOL here). Running the workspace-pinned wrangler is also
       # the single source of truth for the version — no duplicated version string.
       - name: Install dependencies
-        run: |
-          corepack enable
-          yarn install --immutable
+        run: yarn install --immutable
 
       - name: Download build artifacts
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -193,23 +189,21 @@ jobs:
     runs-on: ubuntu-26.04
     environment: ${{ inputs.environment }}
     continue-on-error: true
-    env:
-      SKIP_YARN_COREPACK_CHECK: true
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ inputs.ref }}
           persist-credentials: false
 
+      # Before setup-node, so `cache: yarn` sees Yarn 4 rather than the runner's Yarn 1.
+      - run: corepack enable
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: ".nvmrc"
           cache: "yarn"
 
       - name: Install dependencies
-        run: |
-          corepack enable
-          yarn install --immutable
+        run: yarn install --immutable
 
       - name: Deploy screenshots render Worker
         working-directory: packages/screenshots
