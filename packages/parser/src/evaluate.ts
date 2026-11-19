@@ -1,3 +1,4 @@
+import { registerBatch } from "@math3d/batch-eval";
 import math, {
   getUserFunctionSignature,
   setUserFunctionSignature,
@@ -169,6 +170,11 @@ const getValidatedEvaluate = (
   const evaluate: AnonMathNode["evaluate"] = (scope) => {
     try {
       const result = validate(unvalidatedEvaluate(scope), mjsNode);
+      // Compiled now: a later read of `scope` could see newer values than
+      // the function closed over.
+      if (typeof result === "function") {
+        registerBatch(result, mjsNode, scope ?? new Map());
+      }
       if (modOne && typeof result === "function" && !scope?.has("mod")) {
         wrapping.add(result);
       }

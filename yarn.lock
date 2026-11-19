@@ -1660,7 +1660,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math3d/batch-eval@workspace:packages/batch-eval":
+"@math3d/batch-eval@workspace:^, @math3d/batch-eval@workspace:packages/batch-eval":
   version: 0.0.0-use.local
   resolution: "@math3d/batch-eval@workspace:packages/batch-eval"
   dependencies:
@@ -1794,11 +1794,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math3d/parser@workspace:packages/parser"
   dependencies:
+    "@math3d/batch-eval": "workspace:^"
     "@math3d/custom-mathjs": "workspace:^"
     "@math3d/eslint-config": "workspace:^"
     "@math3d/mathscope": "workspace:^"
     "@math3d/tsconfig": "workspace:^"
     "@math3d/utils": "workspace:^"
+    "@math3d/validators": "workspace:^"
     "@types/lodash-es": "npm:^4.17.12"
     eslint: "npm:^8.57.1"
     lodash-es: "npm:4.18.1"
