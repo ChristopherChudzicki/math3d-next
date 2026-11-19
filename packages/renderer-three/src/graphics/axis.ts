@@ -2,6 +2,7 @@ import { Group } from "three/webgpu";
 import type { AxisSpec, Coords } from "@math3d/viewport-spec";
 import { Stroke } from "../stroke/Stroke";
 import { Ticks } from "../stroke/Ticks";
+import { headReach } from "../stroke/style";
 import { Labels } from "../label/Labels";
 import type { LabelStyle } from "../label/Labels";
 import { formatTick } from "./formatTick";
@@ -48,12 +49,21 @@ export const buildAxis = (
     // Ticks take the axis's opacity, zBias and zIndex, which math3d's
     // MathBox ticks don't.
     ticks.set(positions, TICK_DIRECTION[next.axis], next);
-    tickLabels.set(
-      positions,
-      values.map(formatTick),
-      tickLabelStyle(next.axis),
-    );
-    endLabel.set([onAxis(next.axis, max)], next.label, END_LABEL_STYLE);
+    // Seen from behind, an arrowhead covers its own tip, where a tick or the
+    // end label can sit: every label of an axis with one clears it.
+    const anchorStyle = {
+      zBias: next.zBias,
+      zIndex: next.zIndex,
+      clearance: next.start || next.end ? headReach(next) : 0,
+    };
+    tickLabels.set(positions, values.map(formatTick), {
+      ...tickLabelStyle(next.axis),
+      ...anchorStyle,
+    });
+    endLabel.set([onAxis(next.axis, max)], next.label, {
+      ...END_LABEL_STYLE,
+      ...anchorStyle,
+    });
   };
   set(spec);
   return {

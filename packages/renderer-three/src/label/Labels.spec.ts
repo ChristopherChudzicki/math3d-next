@@ -5,6 +5,7 @@ import { fakeSurface } from "./__tests__/fakeSurface";
 import { LabelAtlas } from "./LabelAtlas";
 import { Labels } from "./Labels";
 import type { LabelStyle } from "./Labels";
+import { OVERLAY_LAYER } from "../shader/sceneDepth";
 
 const style: LabelStyle = { weight: "bold", offset: [0, 24] };
 
@@ -50,10 +51,22 @@ describe("Labels", () => {
   test("gives its mesh the style as given, with MathBox's defaults for the rest", () => {
     const { labels } = setUp();
     labels.set([[0, 0, 0]], "a", style);
-    const { color, offset, zBias, zIndex } = labels.mesh.userData.label;
+    const { color, offset, zBias, zIndex, clearance } =
+      labels.mesh.userData.label;
     expect(offset.toArray()).toEqual(style.offset);
     expect(color.toArray()).toEqual([0.5, 0.5, 0.5, 1]);
-    expect([zBias, zIndex]).toEqual([0, 0]);
+    expect([zBias, zIndex, clearance]).toEqual([0, 0, 0]);
+  });
+
+  test("under the oit model, draws over the scene with no depth test", () => {
+    const { labels } = setUp();
+    labels.set([[0, 0, 0]], "P", style);
+    expect(labels.mesh.layers.isEnabled(OVERLAY_LAYER)).toBe(true);
+    expect(labels.mesh.layers.isEnabled(0)).toBe(false);
+    expect(labels.mesh.material).toMatchObject({
+      depthTest: false,
+      depthWrite: false,
+    });
   });
 
   test("gives the atlas back strings it no longer draws, and all of them on dispose", () => {
@@ -74,12 +87,14 @@ describe("Labels", () => {
     expect(slotWidths(labels)).toEqual([20]);
   });
 
-  test("under the ordered model, blends as three does and not in place", () => {
+  test("under the ordered model, draws in the scene, depth-tested, blending as three does", () => {
     const labels = new Labels("ordered", new LabelAtlas(fakeSurface()));
     labels.set([[0, 0, 0]], "P", style);
+    expect(labels.mesh.layers.isEnabled(0)).toBe(true);
     expect(labels.mesh.material).toMatchObject({
       transparent: true,
       blending: NormalBlending,
+      depthTest: true,
       depthWrite: true,
     });
   });

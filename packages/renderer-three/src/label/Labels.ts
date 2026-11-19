@@ -2,6 +2,7 @@ import type { Coords, RGBA } from "@math3d/viewport-spec";
 import { Instances, strideOf } from "../instances/Instances";
 import { isDrawable, put } from "../instances/points";
 import type { Transparency } from "../shader/material";
+import { OVERLAY_LAYER } from "../shader/sceneDepth";
 import { labelAtlas } from "./atlas";
 import type { LabelAtlas, LabelText, LabelWeight, Slot } from "./LabelAtlas";
 import {
@@ -17,8 +18,17 @@ export type LabelStyle = {
   offset: readonly [number, number];
   /** MathBox's label gray when absent. */
   color?: RGBA;
+  /**
+   * With `zIndex`, the depth style of the mark at the anchor; 0 when absent.
+   * Unread under `ordered`.
+   */
   zBias?: number;
   zIndex?: number;
+  /**
+   * How far that mark reaches from the anchor, in CSS pixels at view depth 1,
+   * so it never hides its own label; 0 when absent. Unread under `ordered`.
+   */
+  clearance?: number;
 };
 
 const MATHBOX_LABEL_COLOR: RGBA = [0.5, 0.5, 0.5, 1];
@@ -26,9 +36,13 @@ const MATHBOX_LABEL_COLOR: RGBA = [0.5, 0.5, 0.5, 1];
 const STRIDE = strideOf(LABEL_LAYOUT);
 
 /**
- * Text drawn at points, a fixed size on screen, depth-tested: MathBox's
- * `<Label>`. One mesh and one draw call for any number of labels; every
- * label's raster is in one shared atlas.
+ * Text drawn at points, a fixed size on screen: MathBox's `<Label>`. One
+ * mesh and one draw call for any number of labels; every label's raster is
+ * in one shared atlas.
+ *
+ * Under `oit` a label draws over the finished scene, whole unless the scene
+ * covers its anchor. Under `ordered` it is depth-tested per fragment, as
+ * MathBox's is.
  */
 export class Labels {
   private readonly instances: Instances;
@@ -58,6 +72,7 @@ export class Labels {
     );
     this.mesh = this.instances.mesh;
     this.mesh.userData.label = this.uniforms;
+    if (transparency === "oit") this.mesh.layers.set(OVERLAY_LAYER);
     this.unsubscribe = atlas.onRelayout(() => this.fill());
   }
 
@@ -98,6 +113,7 @@ export class Labels {
     uniforms.offset.set(...style.offset);
     uniforms.zBias = style.zBias ?? 0;
     uniforms.zIndex = style.zIndex ?? 0;
+    uniforms.clearance = style.clearance ?? 0;
     this.fill();
   }
 

@@ -1,6 +1,7 @@
 import { Group } from "three/webgpu";
 import type { LineSpec } from "@math3d/viewport-spec";
 import { Stroke } from "../stroke/Stroke";
+import { headReach } from "../stroke/style";
 import { Labels } from "../label/Labels";
 import type { Transparency } from "../shader/material";
 import type { Graphic } from "./builders";
@@ -18,7 +19,13 @@ export const buildLine = (
   const set = (next: LineSpec) => {
     stroke.set(next.paths, next);
     const end = next.paths.at(-1)?.at(-1);
-    labels.set(end ? [end] : [], next.label, ITEM_LABEL);
+    labels.set(end ? [end] : [], next.label, {
+      ...ITEM_LABEL,
+      zBias: next.zBias,
+      zIndex: next.zIndex,
+      // Seen from behind, an arrowhead at the path's end covers its own tip.
+      clearance: next.end ? headReach(next) : 0,
+    });
   };
   set(spec);
   return {
