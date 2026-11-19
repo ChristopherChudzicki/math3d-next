@@ -32,4 +32,42 @@ test("a variable that only styles the surface leaves the spec's value function a
   });
   expect(specs.map(({ color }) => color[3])).toEqual([1, 0.5]);
   expect(specs[1].value).toBe(specs[0].value);
+  expect(specs[1].values).toBe(specs[0].values);
+  expect(specs[0].values).toBeDefined();
+});
+
+test("a surface of numbers has `values`, which agree with `value`", () => {
+  const scene = new SceneBuilder();
+  scene.folder().implicitSurface({}, "s");
+  const spec = renderGraphicSpec(scene, "s") as ImplicitSurfaceSpec;
+  const steps = [-2, -0.5, 1, 3];
+  const points = steps.flatMap((x) =>
+    steps.flatMap((y) => steps.map((z) => [x, y, z])),
+  );
+  const result = spec.values?.(
+    Float64Array.from(points, ([x]) => x),
+    Float64Array.from(points, ([, y]) => y),
+    Float64Array.from(points, ([, , z]) => z),
+  );
+  expect(Array.from(result ?? [])).toEqual(
+    points.map(([x, y, z]) => spec.value(x, y, z)),
+  );
+});
+
+test("a surface whose equation uses vectors has no `values`", () => {
+  const scene = new SceneBuilder();
+  scene.folder().implicitSurface(
+    {
+      lhs: {
+        type: "function-assignment",
+        name: "_f",
+        params: ["x", "y", "z"],
+        rhs: "\\left[x,y,z\\right]\\cdot\\left[x,y,z\\right]",
+      },
+    },
+    "s",
+  );
+  const spec = renderGraphicSpec(scene, "s") as ImplicitSurfaceSpec;
+  expect(spec.value(1, 2, 3)).toBe(14 - 10);
+  expect(spec.values).toBeUndefined();
 });

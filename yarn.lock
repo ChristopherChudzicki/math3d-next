@@ -4401,6 +4401,7 @@ __metadata:
     "@iconify/react": "npm:^6.0.4"
     "@julr/vite-plugin-validate-env": "npm:^2.2.2"
     "@math3d/api": "workspace:^"
+    "@math3d/batch-eval": "workspace:^"
     "@math3d/custom-mathjs": "workspace:^"
     "@math3d/eslint-config": "workspace:^"
     "@math3d/mathitem-configs": "workspace:^"
