@@ -1,5 +1,5 @@
 import React from "react";
-import { expect, test, vi } from "vitest";
+import { expect, test } from "vitest";
 import * as Sentry from "@sentry/react";
 import {
   act,
@@ -18,11 +18,6 @@ import ToastHost from "@/ui/Toast/ToastHost";
 import expectToast from "@/test_util/expectToast";
 import { DEFAULT_ERROR_COPY, UNREACHABLE_COPY } from "@/util/failureCopy";
 import { createMutationCache } from "./react-query";
-
-vi.mock("@sentry/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@sentry/react")>()),
-  captureException: vi.fn(),
-}));
 
 const COPY = "Couldn’t do the thing. Try again.";
 

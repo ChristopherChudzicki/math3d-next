@@ -70,7 +70,9 @@ const ViewportShell: React.FC<Props> = ({
               message={unsupported ? unsupportedMessage : errorMessage}
             />
           ) : (
-            <Suspense fallback={null}>{children}</Suspense>
+            // Busy until the renderer's chunk arrives, so waitForAppReady
+            // also waits for it.
+            <Suspense fallback={<div aria-busy="true" />}>{children}</Suspense>
           )}
           {failure ? null : overlay}
         </Sentry.ErrorBoundary>

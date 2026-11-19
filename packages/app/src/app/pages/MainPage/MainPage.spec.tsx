@@ -17,11 +17,6 @@ import * as Sentry from "@sentry/react";
 import expectToast from "@/test_util/expectToast";
 import sceneSlice from "@/store/scene/state/scene.slice";
 
-vi.mock("@sentry/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@sentry/react")>()),
-  captureException: vi.fn(),
-}));
-
 test.each([
   {
     url: "/?controls=1",
@@ -43,8 +38,9 @@ test.each([
   },
 ])(
   "'controls' URL query parameter controls whether the controls are visible",
-  ({ controlsVisible, url, expectedHidden, expectedInert }) => {
-    renderTestApp(url);
+  async ({ controlsVisible, url, expectedHidden, expectedInert }) => {
+    const { queryClient } = renderTestApp(url);
+    await waitForAppReady(queryClient);
     const expandBtn = screen.queryByRole("button", { name: "Expand Controls" });
     const collapseBtn = screen.queryByRole("button", {
       name: "Collapse Controls",

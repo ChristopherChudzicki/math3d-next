@@ -1,4 +1,4 @@
-import { test, expect, vi } from "vitest";
+import { test, expect } from "vitest";
 import * as Sentry from "@sentry/react";
 import { http, HttpResponse } from "msw";
 import { UNREACHABLE_COPY } from "@/util/failureCopy";
@@ -13,11 +13,6 @@ import {
   waitFor,
   within,
 } from "@/test_util";
-
-vi.mock("@sentry/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@sentry/react")>()),
-  captureException: vi.fn(),
-}));
 
 const FORBIDDEN_TOAST =
   "Your sign-in couldn’t be verified, so nothing was deleted. Try again.";

@@ -15,11 +15,6 @@ import { stubKnotLoaderSupport } from "@/test_util/knotLoaderSupport";
 import type { ThreeViewportProps } from "@/test_util/threeViewport";
 import ThreeViewport from "./ThreeViewport";
 
-vi.mock("@sentry/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@sentry/react")>()),
-  captureMessage: vi.fn(),
-}));
-
 const loadScene = (store: ReturnType<typeof getStore>) => {
   const scene = new SceneBuilder();
   store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
