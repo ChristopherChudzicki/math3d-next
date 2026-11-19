@@ -169,10 +169,9 @@ const getValidatedEvaluate = (
           : numericTypeSimplify(rawResult),
         mjsNode,
       );
-      // Only a function fastCompile built reads the scope once, as a batched
-      // form does. Registered now, before the scope's values move on. The
-      // form is keyed on the validated function: sound while a validator
-      // leaves a number result unchanged, as `realFunc` does.
+      // Registered now: a batched form reads the scope once, as a function
+      // fastCompile built does. It is keyed on the validated function: sound
+      // while a validator leaves a number result unchanged, as `realFunc` does.
       if (typeof result === "function" && isFastCompiled(rawResult)) {
         registerBatch(result, mjsNode, scope ?? new Map());
       }

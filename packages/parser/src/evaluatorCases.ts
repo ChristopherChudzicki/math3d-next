@@ -68,7 +68,7 @@ export const functionCases: FunctionCase[] = [
   },
   {
     title: "a scope value that isn't a number",
-    expr: "f(x) = x i + v",
+    expr: "f(x) = x + v",
     point: [0.5],
     scope: { v: [1, 0, 0] },
     fast: true,
