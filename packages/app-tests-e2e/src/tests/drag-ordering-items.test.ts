@@ -160,7 +160,7 @@ test("Dragging folder X before folder Y", async ({ page }) => {
   expect(after).toEqual("F1 P1a P1b F3 P3a P3b F2 P2a P2b".split(" "));
 });
 
-test("A reordered item's fields keep the app's inline shortcuts", async ({
+test("A reordered item's fields keep the app's shortcuts and keybindings", async ({
   page,
 }) => {
   await page.goto(`/${key}`);
@@ -178,7 +178,7 @@ test("A reordered item's fields keep the app's inline shortcuts", async ({
   );
 
   const app = new AppPage(page);
-  const expectShortcutApplies = async (description: string) => {
+  const expectOptionsApply = async (description: string) => {
     const item = await app.getUniqueItemSettings({ description });
     const mf = item.field("Coordinates");
     await mf.click();
@@ -186,8 +186,11 @@ test("A reordered item's fields keep the app's inline shortcuts", async ({
     await expect
       .poll(() => mf.evaluate(getLatex))
       .toContain(String.raw`\operatorname{\mathrm{rescale}}`);
+    await page.keyboard.press("Escape");
+    await mf.pressSequentially("x");
+    await expect(mf).toHaveJSProperty("mode", "math");
   };
   // The reorder moves one of the two items in the DOM; which is React's choice.
-  await expectShortcutApplies("P2a");
-  await expectShortcutApplies("P2b");
+  await expectOptionsApply("P2a");
+  await expectOptionsApply("P2b");
 });

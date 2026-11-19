@@ -32,6 +32,13 @@ describe("preprocesser fraction conversion", () => {
   });
 });
 
+test("Unbraced single-digit square roots", () => {
+  const input = "x + \\sqrt23 + \\sqrt{y}";
+  const expected = "x + sqrt(2)3 + sqrt(y)";
+  expect(parser.preprocess(input)).toBe(expected);
+  expect(parser.parse("\\sqrt2").evaluate()).toBeCloseTo(Math.SQRT2);
+});
+
 test("Unbracketed exponent conversion", () => {
   const input = "1 + 2^34 + 5^ab";
   const expected = "1 + 2^(3)4 + 5^(a)b";
