@@ -15,16 +15,14 @@ import { stubKnotLoaderSupport } from "@/test_util/knotLoaderSupport";
 import type { ThreeViewportProps } from "@/test_util/threeViewport";
 import ThreeViewport from "./ThreeViewport";
 
-const loadScene = (
-  store: ReturnType<typeof getStore>,
-  scene = new SceneBuilder(),
-) => {
+const loadScene = (store: ReturnType<typeof getStore>) => {
+  const scene = new SceneBuilder();
   store.dispatch(actions.setScene({ ...scene, order: scene.itemOrder }));
 };
 
-const renderViewport = (url = "/", scene?: SceneBuilder) => {
+const renderViewport = (url = "/") => {
   const store = getStore();
-  loadScene(store, scene);
+  loadScene(store);
   render(
     <Provider store={store}>
       <MemoryRouter initialEntries={[url]}>
@@ -188,22 +186,3 @@ test.each([
   await waitFor(() => expect(Renderer).toHaveBeenCalled());
   expect(Renderer.mock.lastCall?.[0].shading).toBe(shading);
 });
-
-test.each([
-  { url: "/", batched: true },
-  { url: "/?batch=0", batched: false },
-])(
-  "$url gives the renderer an implicit surface with `values`: $batched",
-  async ({ url, batched }) => {
-    const Renderer = vi.fn((_props: ThreeViewportProps) => null);
-    threeViewport.Component = Renderer;
-    const scene = new SceneBuilder();
-    scene.folder().implicitSurface({}, "s");
-    renderViewport(url, scene);
-    const drawn = () =>
-      Renderer.mock.lastCall?.[0].spec.graphics.find(({ id }) => id === "s")
-        ?.spec;
-    await waitFor(() => expect(drawn()).toBeDefined());
-    expect("values" in drawn()!).toBe(batched);
-  },
-);

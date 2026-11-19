@@ -1800,7 +1800,6 @@ __metadata:
     "@math3d/mathscope": "workspace:^"
     "@math3d/tsconfig": "workspace:^"
     "@math3d/utils": "workspace:^"
-    "@math3d/validators": "workspace:^"
     "@types/lodash-es": "npm:^4.17.12"
     eslint: "npm:^8.57.1"
     lodash-es: "npm:4.18.1"

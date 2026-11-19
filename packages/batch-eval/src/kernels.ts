@@ -109,10 +109,8 @@ const number = (value: unknown): number => {
 };
 
 /**
- * `fn` applied per sample. With one or two operands it calls
- * `typed.resolve(fn, zeros)`'s implementation when `fn` is a typed function
- * that has one, else `fn`; with any other count it calls `fn`. This is what
- * `fastCompile` calls for number operands.
+ * `fn` per sample, through its number implementation for one or two
+ * operands, as `fastCompile` calls it.
  */
 export const generic = (
   fn: Fn,

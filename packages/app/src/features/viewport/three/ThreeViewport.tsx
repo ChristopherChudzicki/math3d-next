@@ -16,7 +16,6 @@ import ViewportShell from "@/features/viewport/shared/ViewportShell";
 import { useViewportSpec } from "@/features/viewport/spec/useViewportSpec";
 import { useLoadFlag } from "@/features/viewport/shared/useLoadFlag";
 import KnotLoader from "./loader/KnotLoader";
-import { withoutBatchedForms } from "./batchFlag";
 
 const RendererViewport = React.lazy(() =>
   import("@math3d/renderer-three").then((m) => ({ default: m.Viewport })),
@@ -46,12 +45,6 @@ const GLOSS_PARAM = "gloss";
  */
 const TRANSPARENCY_PARAM = "oit";
 
-/**
- * `?batch=0` has implicit surfaces sampled a point at a time, for measuring
- * and comparing against the batched path. It affects only this page.
- */
-const BATCH_PARAM = "batch";
-
 type ContentProps = Pick<
   ViewportHooks,
   "onUnsupported" | "onDrawn" | "onReady"
@@ -64,13 +57,8 @@ const ThreeViewportContent: React.FC<ContentProps> = ({
   onLoaded,
 }) => {
   const host = useRef<HTMLDivElement>(null);
-  const { spec: batchedSpec, reporters, onCameraMove } = useViewportSpec(host);
+  const { spec, reporters, onCameraMove } = useViewportSpec(host);
   const [searchParams] = useSearchParams();
-  const batch = searchParams.get(BATCH_PARAM) !== "0";
-  const spec = useMemo(
-    () => (batch ? batchedSpec : withoutBatchedForms(batchedSpec)),
-    [batch, batchedSpec],
-  );
   const transparency =
     searchParams.get(TRANSPARENCY_PARAM) === "0" ? "ordered" : undefined;
   const hooks = useMemo<ViewportHooks>(

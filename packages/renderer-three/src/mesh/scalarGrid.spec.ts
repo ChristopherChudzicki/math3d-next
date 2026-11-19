@@ -60,13 +60,15 @@ describe("with a spec's `values`", () => {
   ): Float64Array | undefined => xs.map((x, k) => field(x, ys[k], zs[k]));
   const sampled = (...args: Parameters<typeof sampleScalarGrid>) =>
     Array.from(sampleScalarGrid(...args).values.subarray(0, 27));
-  const expected = sampled(2, domain, field);
+  const fromValues = sampled(2, domain, field);
+  // Offset from `batched`, so a sample shows which of the two gave it. Grids
+  // share one buffer, so the same field twice would pass with nothing written.
+  const value = (x: number, y: number, z: number) => field(x, y, z) + 1;
+  const fromValue = sampled(2, domain, value);
 
-  test("samples through it, a slab at a time, without calling `value`", () => {
-    const value = vi.fn(field);
+  test("samples through it, a slab at a time", () => {
     const values = vi.fn(batched);
-    expect(sampled(2, domain, value, values)).toEqual(expected);
-    expect(value).not.toHaveBeenCalled();
+    expect(sampled(2, domain, value, values)).toEqual(fromValues);
     expect(values).toHaveBeenCalledTimes(3);
   });
 
@@ -75,18 +77,21 @@ describe("with a spec's `values`", () => {
       .fn(batched)
       .mockImplementationOnce(batched)
       .mockImplementationOnce(() => undefined);
-    expect(sampled(2, domain, field, values)).toEqual(expected);
+    expect(sampled(2, domain, value, values)).toEqual([
+      ...fromValues.slice(0, 9),
+      ...fromValue.slice(9),
+    ]);
     expect(values).toHaveBeenCalledTimes(2);
   });
 
   test("an error from `value` surfaces when it declines", () => {
     const error = new Error("no value here");
-    const value = (x: number, y: number, z: number) => {
+    const throwing = (x: number, y: number, z: number) => {
       if (x === 2 && y === 0 && z === 6) throw error;
       return field(x, y, z);
     };
-    expect(() => sampleScalarGrid(2, domain, value, () => undefined)).toThrow(
-      error,
-    );
+    expect(() =>
+      sampleScalarGrid(2, domain, throwing, () => undefined),
+    ).toThrow(error);
   });
 });

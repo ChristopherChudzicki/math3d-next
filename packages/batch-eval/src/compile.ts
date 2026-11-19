@@ -27,15 +27,7 @@ const toEvaluate = (part: Part): Evaluate => {
   return () => value;
 };
 
-/** The per-sample compiler handles this many parameters; so does this one. */
-const MAX_PARAMS = 5;
-
-/** Whether mathjs refuses to read `name` from its tables of arguments and functions. */
-const isUnsafeName = (name: string) => name in Object.prototype;
-
-const isPlainFunction = (value: unknown): value is Fn =>
-  typeof value === "function" &&
-  (value as { rawArgs?: boolean }).rawArgs !== true;
+const isFunction = (value: unknown): value is Fn => typeof value === "function";
 
 const KERNELS_1 = new Map<unknown, Kernel1>([
   [mathWithTransform.unaryMinus, kernels.unaryMinus],
@@ -57,21 +49,20 @@ const call1 =
  * Compiles `f(params) = body` into batch kernels, reading scope values now.
  * `compiledOf` gives the compiled form of a function value that has one.
  * Throws `Unsupported` for anything but numbers.
+ *
+ * Only for a function `fastCompile` built from `node`. What it hands to
+ * mathjs, such as a function that calls itself or a parameter called as a
+ * function, is not rejected here and would compile to the wrong thing.
  */
 export const compile = (
   node: mjs.FunctionAssignmentNode,
   scope: Scope,
   compiledOf: (value: unknown) => Compiled | undefined,
 ): Compiled => {
-  const { params, name: self } = node;
-  if (params.length > MAX_PARAMS) throw new Unsupported();
-  if (params.some(isUnsafeName)) throw new Unsupported();
+  const { params } = node;
 
   /** What `name` means outside the parameters: the scope's value, else mathjs's. */
   const lookup = (name: string): unknown => {
-    // mathjs resolves the function's own name to the function being defined;
-    // the scope holds an earlier definition.
-    if (name === self || isUnsafeName(name)) throw new Unsupported();
     if (scope.has(name)) return scope.get(name);
     if (Object.hasOwn(mathWithTransform, name)) return mathWithTransform[name];
     throw new Unsupported();
@@ -153,14 +144,13 @@ export const compile = (
       const fn = Object.hasOwn(mathWithTransform, expr.fn)
         ? mathWithTransform[expr.fn]
         : undefined;
-      if (!isPlainFunction(fn)) throw new Unsupported();
+      if (!isFunction(fn)) throw new Unsupported();
       return call(fn, expr.args.map(build));
     }
     if (math.isFunctionNode(expr)) {
       if (!math.isSymbolNode(expr.fn)) throw new Unsupported();
-      if (params.includes(expr.fn.name)) throw new Unsupported();
       const fn = lookup(expr.fn.name);
-      if (!isPlainFunction(fn)) throw new Unsupported();
+      if (!isFunction(fn)) throw new Unsupported();
       return call(fn, expr.args.map(build));
     }
     throw new Unsupported();

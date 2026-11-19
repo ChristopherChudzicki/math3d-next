@@ -110,10 +110,9 @@ export type ImplicitSurfaceSpec = Common & {
    */
   value: (x: number, y: number, z: number) => number;
   /**
-   * `value` at many points: entry `k` is `value(xs[k], ys[k], zs[k])`, or
-   * `undefined` when it can't. The array is overwritten by the next call. A
-   * renderer may use it in place of `value`, and must call `value` when it
-   * returns `undefined`.
+   * `value` at many points: entry `k` is `value(xs[k], ys[k], zs[k])`.
+   * Returns `undefined` to decline, and the renderer then calls `value`. The
+   * result is overwritten by the next call.
    */
   values?: (
     xs: Float64Array,

@@ -1,6 +1,5 @@
 import { batchOf } from "@math3d/batch-eval";
 import math from "@math3d/custom-mathjs";
-import { validators } from "@math3d/validators";
 import { describe, expect, test } from "vitest";
 import { getValidatedEvaluate } from "./evaluate";
 import { functionCases } from "./evaluatorCases";
@@ -11,13 +10,13 @@ type Fn = (...args: number[]) => unknown;
 /** What MathScope holds for `expr`: evaluated as the app evaluates it. */
 const define = (
   expr: string,
-  scope: Record<string, unknown> = {},
+  scope: Record<string, unknown> | Map<string, unknown> = {},
   validate?: ParseValidate,
 ) =>
   getValidatedEvaluate(
     math.parse(expr),
     validate,
-  )(new Map(Object.entries(scope))) as Fn;
+  )(scope instanceof Map ? scope : new Map(Object.entries(scope))) as Fn;
 
 // No NaN: mathjs's fractional power of NaN is complex, so a column holding
 // one declines.
@@ -86,18 +85,29 @@ describe("a batched form agrees with the function the app holds", () => {
     },
   );
 
-  test("a validated function carries the form", () => {
-    const f = define(
-      "f(x, y, z) = x^2 + y z - 4",
-      {},
-      validators.realFunc[3][1] as ParseValidate,
-    );
-    expectMatches(f);
+  test("the function a validator returns carries the form", () => {
+    // As `realFunc` does: a new function that passes numbers through.
+    const validate: ParseValidate = (evaluated) => {
+      const inner = evaluated as Fn;
+      const wrapped = (...args: number[]) => inner(...args);
+      return Object.defineProperty(wrapped, "length", { value: inner.length });
+    };
+    expectMatches(define("f(x, y, z) = x^2 + y z - 4", {}, validate));
   });
 
-  test("a user function called twice", () => {
-    const g = define("g(x) = x^2 + 1");
-    expectMatches(define("f(x) = g(x) + g(2 x)", { g }));
+  test("a scope value is the one at evaluation", () => {
+    const scope = new Map<string, unknown>([["a", 2]]);
+    const f = define("f(x) = a x", scope);
+    scope.set("a", 100);
+    expect(runForm(f, [[3]])).toEqual(Float64Array.of(6));
+  });
+
+  test("a call with the wrong number of arguments declines, as the function throws", () => {
+    const g = define("g(x) = x + 1");
+    const f = define("f(x, y) = g(x, y)", { g });
+    expect(() => f(1, 2)).toThrow("needs 1 input");
+    expect(batchOf(f)).toBeDefined();
+    expect(runForm(f, [[1], [2]])).toBeUndefined();
   });
 
   test("an alias has no form, and a call to it still matches", () => {

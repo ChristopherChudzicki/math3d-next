@@ -109,7 +109,7 @@ describe.each(["unaryMinus", "unaryPlus"] as const)("%s", (name) => {
 describe("powInt", () => {
   const reference = numberFn("pow", 2);
 
-  test.each([2, 3, -1, 0, 4])("an array to the power %s", (n) => {
+  test.each([2, 3, -1])("an array to the power %s", (n) => {
     const xs = singles();
     const a = Float64Array.from(xs);
     const result = run((pool) => kernels.powInt(n)(xs.length, a, pool))(

@@ -33,7 +33,11 @@ const toForm = ({ params, evaluate }: Compiled): BatchForm => {
   return { params, run };
 };
 
-/** Gives `f` a batched form if `node` supports one. Never throws. */
+/**
+ * Gives `f` a batched form if `node` supports one. Never throws. `f` must be
+ * a function `fastCompile` built from `node`, or a wrapper that returns its
+ * numbers unchanged.
+ */
 export const registerBatch = (
   f: object,
   node: mjs.MathNode,

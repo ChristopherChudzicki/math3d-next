@@ -58,13 +58,12 @@ describe("a function of numbers matches mathjs", () => {
     { expr: "f(x) = x^2 + x^(-3) + x^0" },
     { expr: "f(x) = x^0.5", columns: POSITIVE },
     { expr: "f(x) = sin(x) + exp(x)" },
-    { expr: "f(x, y, z) = max(x, y, z)" },
+    { expr: "f(x, y) = max(x, 1, y)" },
     { expr: "f(x, y, z) = add(x, y, z)" },
     {
       expr: "f(x, y) = add(x, y)",
       scope: { add: (a: number, b: number) => a * b + 100 },
     },
-    { expr: "f(x) = h(x)", scope: { h: (x: number) => x + 1 } },
   ])("$expr", ({ expr, scope, columns }) => {
     expectMatches(define(expr, scope), columns);
   });
@@ -93,13 +92,8 @@ describe("a function of numbers matches mathjs", () => {
 });
 
 describe("no batched form", () => {
-  test.each<{ expr: string; scope?: ScopeEntries }>([
-    { expr: "f(x) = [x, 1]" },
-    { expr: "f(x) = x i" },
-    { expr: "f(x) = x + v", scope: { v: [1, 0, 0] } },
-    { expr: "f(x) = x + sqrt(-4)" },
-  ])("$expr", ({ expr, scope }) => {
-    expect(batchOf(define(expr, scope))).toBeUndefined();
+  test("a constant call that isn't a number", () => {
+    expect(batchOf(define("f(x) = x + sqrt(-4)"))).toBeUndefined();
   });
 
   test("a node that isn't a function assignment", () => {

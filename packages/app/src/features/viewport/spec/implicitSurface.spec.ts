@@ -53,3 +53,24 @@ test("a surface whose equation uses vectors has no `values`", () => {
   expect(spec.value(1, 2, 3)).toBe(14 - 10);
   expect(spec.values).toBeUndefined();
 });
+
+test("`values` declines where a side of the equation isn't a number", () => {
+  const scene = new SceneBuilder();
+  scene.folder().implicitSurface(
+    {
+      lhs: {
+        type: "function-assignment",
+        name: "_f",
+        params: ["x", "y", "z"],
+        rhs: "\\sqrt{x}",
+      },
+    },
+    "s",
+  );
+  const { values } = renderGraphicSpec(scene, "s") as ImplicitSurfaceSpec;
+  const zeros = new Float64Array(2);
+  expect(values?.(Float64Array.of(4, 9), zeros, zeros)).toEqual(
+    Float64Array.of(1, 2),
+  );
+  expect(values?.(Float64Array.of(4, -1), zeros, zeros)).toBeUndefined();
+});
