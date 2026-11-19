@@ -88,7 +88,9 @@ const rewriteProduct = (node: mjs.OperatorNode): mjs.MathNode => {
       i += 1;
     } else {
       const [applied, end] = apply(factors, i, name);
-      if (end < factors.length && !functionName(factors[end])) {
+      const after = factors[end];
+      // Another function name or an existing call may follow: `sin x cos(y)`.
+      if (after && !functionName(after) && !math.isFunctionNode(after)) {
         throw missingParens(name);
       }
       out.push(

@@ -31,6 +31,12 @@ describe("a function name followed by one factor is a call", () => {
     [String.raw`\sinh x`, Math.sinh(x)],
     [String.raw`\operatorname{arcsinh}x`, Math.asinh(x)],
     [String.raw`\sin\sin x`, Math.sin(Math.sin(x))],
+    [String.raw`\sin x\cos(y)`, Math.sin(x) * Math.cos(y)],
+    [
+      String.raw`\sin x\cos(y)\sin\theta`,
+      Math.sin(x) * Math.cos(y) * Math.sin(1),
+    ],
+    [String.raw`\sin(x)\cos y`, Math.sin(x) * Math.cos(y)],
   ])("%s", (latex, expected) => {
     expect(evaluate(latex)).toBeCloseTo(expected);
   });
