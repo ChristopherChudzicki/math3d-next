@@ -41,6 +41,7 @@ export const buildImplicit = (
               Math.min(next.samples, MAX_IMPLICIT_CELLS),
               next.domain,
               next.value,
+              next.values,
             ),
           );
     if (mesh) ({ vertexCount, indexCount } = mesh);
