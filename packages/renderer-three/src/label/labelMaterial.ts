@@ -6,7 +6,7 @@
 import { Texture, Vector2, Vector4 } from "three/webgpu";
 import {
   attribute,
-  cameraProjectionMatrix,
+  float,
   mix,
   modelViewMatrix,
   positionGeometry,
@@ -21,6 +21,7 @@ import {
   vec3,
   vec4,
 } from "three/tsl";
+import { projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
 import type { Transparency } from "../shader/material";
 import { anchorShows } from "../shader/sceneDepth";
@@ -80,7 +81,9 @@ const build = (whole: boolean) => {
   const anchor = modelViewMatrix.mul(
     vec4(attribute<"vec3">("labelAnchor", "vec3"), 1),
   ).xyz;
-  const clip = cameraProjectionMatrix.mul(vec4(anchor, 1));
+  // Through the depth style, so the label's depth and that of a mark at its
+  // anchor come from the same arithmetic.
+  const clip = projectWithDepthStyle(anchor, float(0), float(0));
   const inFront = clip.w.greaterThan(0);
   const drawn = whole
     ? inFront.and(

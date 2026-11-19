@@ -97,7 +97,8 @@ export class OitFrame {
   private readonly compositeMaterial = new NodeMaterial();
 
   // A mesh of the overlay draw: on WebGPU three draws a `QuadMesh` without
-  // multisampling, and the multisampled overlay draw after it overwrites it.
+  // multisampling, and the multisampled overlay draw after it overwrites the
+  // canvas.
   private readonly composite = new Mesh(
     new PlaneGeometry(2, 2),
     this.compositeMaterial,
