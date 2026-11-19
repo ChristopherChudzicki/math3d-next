@@ -12,6 +12,24 @@ permissions:
   contents: read
 
 jobs:
+  frontend-checks:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      # Before setup-node, so `cache: yarn` sees Yarn 4 rather than the runner's Yarn 1.
+      - run: corepack enable
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version-file: ".nvmrc"
+          cache: "yarn"
+      - run: yarn install --immutable
+      - run: yarn lint
+      - run: yarn fmt-check
+      - run: yarn workspace app css-types --list-different
+      - run: yarn typecheck
+
   frontend-tests:
     runs-on: ubuntu-26.04
     environment: "ci"
@@ -33,10 +51,6 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "yarn"
       - run: yarn install --immutable
-      - run: yarn lint
-      - run: yarn fmt-check
-      - run: yarn workspace app css-types --list-different
-      - run: yarn typecheck
       - run: yarn test -- --test-timeout=10000
 
   webserver-tests:
