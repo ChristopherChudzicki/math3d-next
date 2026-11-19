@@ -3,6 +3,7 @@ import { SceneBuilder } from "@math3d/mock-api";
 import { test } from "@/fixtures/users";
 import { collectPageErrors } from "@/utils/collectPageErrors";
 import { decodePng } from "@/utils/decodePng";
+import { labelBox, labelInSphere, labelOverSurface } from "@/utils/threeLabels";
 import { expectThreeViewport } from "@/utils/threeViewport";
 
 test.use({ disable3d: false });
@@ -67,5 +68,41 @@ test("a vector's label is drawn above its tip", async ({
   expect(Math.abs(center.x - box.width / 2)).toBeLessThan(4);
   // `line.ts` puts the label 24 px above the tip.
   expect(Math.abs(center.y - (box.height / 2 - 24))).toBeLessThan(5);
+  expect(errors).toEqual([]);
+});
+
+test("a label over an opaque surface that tilts across it draws whole", async ({
+  page,
+  prepareScene,
+}) => {
+  // It loads two scenes.
+  test.slow();
+  const errors = collectPageErrors(page);
+  const boxOver = async (surface: string) => {
+    const key = await prepareScene(labelOverSurface(surface).json());
+    await page.goto(`/${key}?renderer=threejs&controls=0`);
+    await expectThreeViewport(page);
+    return labelBox(page);
+  };
+
+  // Through the label's anchor, rising across the label's width.
+  const tilted = await boxOver("x+y");
+  const flatBelow = await boxOver("-1");
+
+  expect(flatBelow, "the label drew").not.toBeNull();
+  expect(tilted).toEqual(flatBelow);
+  expect(errors).toEqual([]);
+});
+
+test("a label inside an opaque solid is hidden", async ({
+  page,
+  prepareScene,
+}) => {
+  const errors = collectPageErrors(page);
+  const key = await prepareScene(labelInSphere().json());
+  await page.goto(`/${key}?renderer=threejs&controls=0`);
+  await expectThreeViewport(page);
+
+  expect(await labelBox(page)).toBeNull();
   expect(errors).toEqual([]);
 });

@@ -35,7 +35,23 @@ describe("sharedMaterial", () => {
     {
       alpha: "edges",
       accumulating: false,
-      flags: { transparent: true, blending: CustomBlending, depthWrite: true },
+      flags: {
+        transparent: true,
+        blending: CustomBlending,
+        depthWrite: true,
+        depthTest: true,
+      },
+    },
+    // Drawn over the finished scene, whose depth it must leave alone.
+    {
+      alpha: "overlay",
+      accumulating: false,
+      flags: {
+        transparent: true,
+        blending: CustomBlending,
+        depthWrite: false,
+        depthTest: false,
+      },
     },
   ] as const)(
     "oit: a mark of $alpha alpha accumulates only if translucent",

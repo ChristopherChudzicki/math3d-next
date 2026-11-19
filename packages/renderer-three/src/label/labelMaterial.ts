@@ -6,6 +6,7 @@
 import { Texture, Vector2, Vector4 } from "three/webgpu";
 import {
   attribute,
+  float,
   mix,
   modelViewMatrix,
   positionGeometry,
@@ -23,6 +24,8 @@ import {
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
 import type { Transparency } from "../shader/material";
+import { projectAnchor } from "../shader/sceneDepth";
+import { viewUnitsPerPixel } from "../shader/viewUnits";
 import type { Layout, Template } from "../instances/Instances";
 
 /** Per label: its anchor, then its atlas slot as x, y, width, height. */
@@ -57,23 +60,38 @@ export class LabelUniforms {
   /** CSS pixels, +y up the screen. */
   readonly offset = new Vector2();
 
+  /** Those of the mark at the anchor. */
   zBias = 0;
 
   zIndex = 0;
+
+  /** How far the mark at the anchor reaches from it, in CSS pixels at view depth 1. */
+  clearance = 0;
 }
 
 const read = uniformsAt<LabelUniforms>("label");
 
-const build = () => {
+/**
+ * `whole` draws each label by its anchor alone, all of it or none, for the
+ * overlay layer. Otherwise the scene's depth test cuts a label wherever a
+ * surface crosses its quad, at MathBox's unbiased label depth.
+ */
+const build = (whole: boolean) => {
   const color = read("color", "vec4");
   const anchor = modelViewMatrix.mul(
     vec4(attribute<"vec3">("labelAnchor", "vec3"), 1),
   ).xyz;
-  const clip = projectWithDepthStyle(
-    anchor,
-    read("zBias", "float"),
-    read("zIndex", "float"),
-  );
+  const anchored = whole
+    ? projectAnchor(
+        anchor,
+        read("zBias", "float"),
+        read("zIndex", "float"),
+        read("clearance", "float").mul(viewUnitsPerPixel),
+      )
+    : null;
+  const clip =
+    anchored?.clip ?? projectWithDepthStyle(anchor, float(0), float(0));
+  const inFront = clip.w.greaterThan(0);
   const slot = attribute<"vec4">("labelSlot", "vec4");
 
   // A raster drawn at another pixel ratio than the screen's keeps its CSS size.
@@ -93,9 +111,9 @@ const build = () => {
     .mul(2)
     .sub(1);
   const vertex = select(
-    clip.w.greaterThan(0),
+    anchored ? inFront.and(anchored.shows) : inFront,
     vec4(ndc.mul(clip.w), clip.z, clip.w),
-    // Behind a perspective camera: outside the clip volume.
+    // Behind a perspective camera, or covered: outside the clip volume.
     vec4(0, 0, 2, 1),
   );
 
@@ -117,11 +135,15 @@ const build = () => {
   };
 };
 
-const material = sharedMaterial("uniform", build);
+const inScene = sharedMaterial("uniform", () => build(false));
+const overScene = sharedMaterial("uniform", () => build(true));
 
 /**
  * The material labels share. Its alpha is the text's and the outline's
- * antialiasing; a label has no opacity of its own.
+ * antialiasing; a label has no opacity of its own. Under `oit` it is for a
+ * mesh on the overlay layer.
  */
 export const labelMaterial = (transparency: Transparency) =>
-  material("edges", transparency);
+  transparency === "oit"
+    ? overScene("overlay", transparency)
+    : inScene("edges", transparency);

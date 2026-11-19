@@ -1,11 +1,14 @@
 import {
   BlendMode,
+  BufferAttribute,
+  BufferGeometry,
   CustomBlending,
+  DepthTexture,
   HalfFloatType,
+  Mesh,
   NodeMaterial,
   OneFactor,
   OneMinusSrcColorFactor,
-  QuadMesh,
   RedFormat,
   RenderTarget,
   Vector2,
@@ -20,6 +23,8 @@ import {
   mix,
   mrt,
   output,
+  positionGeometry,
+  screenUV,
   texture,
   uniform,
   vec4,
@@ -27,6 +32,7 @@ import {
 import { accumulatingLast } from "./drawOrder";
 import { unbiasedViewZ } from "./shader/depthStyle";
 import { accumulates } from "./shader/material";
+import { OVERLAY_LAYER, sceneDepth } from "./shader/sceneDepth";
 
 /**
  * How fast a translucent fragment's share of the blended color falls with
@@ -60,6 +66,12 @@ const covered = new BlendMode(CustomBlending);
 covered.blendSrc = OneFactor;
 covered.blendDst = OneMinusSrcColorFactor;
 
+/** The layer of every mark but the overlay's: three's default. */
+const SCENE_LAYER = 0;
+
+/** One triangle over the whole view, in clip space. */
+const FULL_VIEW = [-1, -1, 0, 3, -1, 0, -1, 3, 0];
+
 /**
  * Draws a scene with weighted, blended order-independent transparency
  * (McGuire and Bavoil) in one multisampled render target.
@@ -75,15 +87,29 @@ covered.blendDst = OneMinusSrcColorFactor;
  * the attachments that aren't its own, which changes nothing there.
  * Accumulating marks draw last (`accumulatingLast`), so they test against
  * the others' depth. The colors composite unconverted, as sRGB values.
+ *
+ * A second draw puts the composite on the canvas and, over it, the marks of
+ * the overlay layer, which read the first draw's depth as `sceneDepth`.
  */
 export class OitFrame {
   private readonly target: RenderTarget;
+
+  private readonly depth = new DepthTexture(1, 1);
 
   private readonly outputs: ReturnType<typeof mrt>;
 
   private readonly compositeMaterial = new NodeMaterial();
 
-  private readonly composite = new QuadMesh(this.compositeMaterial);
+  // A mesh of the overlay draw, not a `QuadMesh` drawn on its own: three
+  // gives that draw no multisampling, and a multisampled one after it clears
+  // the canvas.
+  private readonly composite = new Mesh(
+    new BufferGeometry().setAttribute(
+      "position",
+      new BufferAttribute(new Float32Array(FULL_VIEW), 3),
+    ),
+    this.compositeMaterial,
+  );
 
   /** The scene's radius around the origin, in view units. */
   private readonly radius = uniform(1);
@@ -125,8 +151,7 @@ export class OitFrame {
     this.target = new RenderTarget(1, 1, {
       count: 3,
       samples: renderer.samples,
-      // Nothing reads depth after the draw.
-      resolveDepthBuffer: false,
+      depthTexture: this.depth,
     });
     const [color, sum, coverage] = this.target.textures;
     color.name = "output";
@@ -160,18 +185,23 @@ export class OitFrame {
       .setClearColor("sum", 0x000000, 0)
       .setClearColor("coverage", 0x000000, 0);
 
-    const opaque = texture(color);
-    const blended = texture(sum);
+    const opaque = texture(color, screenUV);
+    const blended = texture(sum, screenUV);
+    this.compositeMaterial.vertexNode = vec4(positionGeometry.xy, 0, 1);
     this.compositeMaterial.fragmentNode = vec4(
       mix(
         opaque.rgb,
         blended.rgb.div(blended.a.max(1e-5)),
-        texture(coverage).r,
+        texture(coverage, screenUV).r,
       ),
       opaque.a,
     );
     this.compositeMaterial.depthTest = false;
     this.compositeMaterial.depthWrite = false;
+    // Opaque, so three draws it before the overlay's blended marks.
+    this.composite.layers.set(OVERLAY_LAYER);
+    this.composite.frustumCulled = false;
+    scene.add(this.composite);
 
     renderer.setTransparentSort(accumulatingLast);
   }
@@ -186,14 +216,21 @@ export class OitFrame {
     target.setSize(this.size.x, this.size.y);
     renderer.setRenderTarget(target);
     renderer.setMRT(this.outputs);
+    camera.layers.set(SCENE_LAYER);
     renderer.render(this.scene, camera);
     renderer.setRenderTarget(null);
     renderer.setMRT(null);
-    this.composite.render(renderer);
+    sceneDepth.value = this.depth;
+    camera.layers.set(OVERLAY_LAYER);
+    renderer.render(this.scene, camera);
+    camera.layers.set(SCENE_LAYER);
   }
 
   dispose(): void {
     this.target.dispose();
+    this.depth.dispose();
+    this.scene.remove(this.composite);
+    this.composite.geometry.dispose();
     this.compositeMaterial.dispose();
   }
 }
