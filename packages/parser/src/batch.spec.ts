@@ -53,12 +53,6 @@ const expectMatches = (f: Fn, cols = columns(f.length)) => {
 describe("a batched form agrees with the function the app holds", () => {
   const batching = functionCases.filter((c) => c.batches);
 
-  // mathjs evaluates what fastCompile hands it, reading the scope at each
-  // call; a batched form reads it once, so the two could differ there.
-  test("only a function fastCompile evaluates itself gets a form", () => {
-    expect(batching.filter((c) => !c.fast)).toEqual([]);
-  });
-
   test.each(functionCases.filter((c) => !c.batches))(
     "no form for $title: $expr",
     ({ expr, scope }) => {

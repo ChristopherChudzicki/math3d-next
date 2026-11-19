@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import math, { mathWithTransform, typed } from "@math3d/custom-mathjs";
 import MathScope from "@math3d/mathscope";
 import { functionCases } from "./evaluatorCases";
-import { fastCompile } from "./fastCompile";
+import { fastCompile, isFastCompiled } from "./fastCompile";
 import { latexParser } from "./parsers";
 
 type Fn = (...args: unknown[]) => unknown;
@@ -76,6 +76,14 @@ describe("fastCompile agrees with mathjs", () => {
       expect(tookFastPath).toBe(true);
     },
   );
+
+  test.each([
+    { expr: "f(x) = x + 1", built: true },
+    { expr: "f(x) = x > 0 ? 1 : 2", built: false },
+  ])("isFastCompiled($expr) is $built", ({ expr, built }) => {
+    const f = fastCompile(math.parse(expr)).evaluate();
+    expect(isFastCompiled(f)).toBe(built);
+  });
 
   test("an expression mathjs won't compile", () => {
     const node = math.parse("5!");

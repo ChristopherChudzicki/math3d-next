@@ -10,7 +10,7 @@ import type { AnonMathNode } from "@math3d/mathscope";
 import { EvaluationError } from "@math3d/mathscope";
 import invariant from "tiny-invariant";
 import type { ParseValidate } from "./interfaces";
-import { fastCompile, numbersOf } from "./fastCompile";
+import { fastCompile, isFastCompiled, numbersOf } from "./fastCompile";
 import { isModOne } from "./outerMod";
 
 class FunctionEvaluationError extends EvaluationError {
@@ -160,19 +160,18 @@ const getValidatedEvaluate = (
     math.isFunctionAssignmentNode(mjsNode) &&
     !mjsNode.params.includes("mod") &&
     isModOne(mjsNode.expr);
-  const unvalidatedEvaluate: AnonMathNode["evaluate"] = (scope) => {
-    const rawResult = compiled.evaluate(scope);
-    if (typeof rawResult === "function") {
-      return wrapFunction(mjsNode, rawResult);
-    }
-    return numericTypeSimplify(rawResult);
-  };
   const evaluate: AnonMathNode["evaluate"] = (scope) => {
     try {
-      const result = validate(unvalidatedEvaluate(scope), mjsNode);
-      // Compiled now: a later read of `scope` could see newer values than
-      // the function closed over.
-      if (typeof result === "function") {
+      const rawResult = compiled.evaluate(scope);
+      const result = validate(
+        typeof rawResult === "function"
+          ? wrapFunction(mjsNode, rawResult)
+          : numericTypeSimplify(rawResult),
+        mjsNode,
+      );
+      // Only a function fastCompile built reads the scope once, as a batched
+      // form does. Registered now, before the scope's values move on.
+      if (typeof result === "function" && isFastCompiled(rawResult)) {
         registerBatch(result, mjsNode, scope ?? new Map());
       }
       if (modOne && typeof result === "function" && !scope?.has("mod")) {
