@@ -62,6 +62,11 @@ describe("errors", () => {
       "Put the arguments of root in parentheses, like root(…, …).",
     ],
     [String.raw`\sin^2\theta`, "Write sin^2 … as sin(…)^2."],
+    [String.raw`\sin^{2x}\theta`, "Write sin^k … as sin(…)^k."],
+    [
+      String.raw`\operatorname{norm}\left\lbrack1,2\right\rbrack`,
+      "Put the argument of norm in parentheses, like norm(…).",
+    ],
     [
       String.raw`\sin^{-1}x`,
       "For the inverse, use arcsin(…); for 1/sin(…), write sin(…)^-1.",

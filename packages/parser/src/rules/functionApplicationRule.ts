@@ -24,8 +24,14 @@ const missingParens = (name: string) =>
 const unwrapParens = (node: mjs.MathNode): mjs.MathNode =>
   math.isParenthesisNode(node) ? unwrapParens(node.content) : node;
 
+const isSimple = (node: mjs.MathNode): boolean =>
+  math.isConstantNode(node) ||
+  math.isSymbolNode(node) ||
+  (isUnarySign(node) && isSimple(node.args[0]));
+
 const poweredFunction = (name: string, exponent: mjs.MathNode) => {
-  const k = unwrapParens(exponent).toString();
+  const unwrapped = unwrapParens(exponent);
+  const k = isSimple(unwrapped) ? unwrapped.toString() : "k";
   if (k === "-1" && functionArity(`arc${name}`)) {
     return new Error(
       `For the inverse, use arc${name}(…); for 1/${name}(…), write ${name}(…)^-1.`,
@@ -73,8 +79,9 @@ const rewriteProduct = (node: mjs.OperatorNode): mjs.MathNode => {
   let i = 0;
   while (i < factors.length) {
     const f = factors[i];
-    const signed = i === 0 && isUnarySign(f) ? functionName(f.args[0]) : null;
-    const name = signed ?? functionName(f);
+    const sign =
+      i === 0 && isUnarySign(f) && functionName(f.args[0]) ? f : null;
+    const name = functionName(sign ? sign.args[0] : f);
     if (!name) {
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       out.push(rewrite(f));
@@ -85,9 +92,7 @@ const rewriteProduct = (node: mjs.OperatorNode): mjs.MathNode => {
         throw missingParens(name);
       }
       out.push(
-        signed && isUnarySign(f)
-          ? new math.OperatorNode(f.op, f.fn, [applied])
-          : applied,
+        sign ? new math.OperatorNode(sign.op, sign.fn, [applied]) : applied,
       );
       i = end;
     }
@@ -97,6 +102,11 @@ const rewriteProduct = (node: mjs.OperatorNode): mjs.MathNode => {
 
 const rewrite = (node: mjs.MathNode): mjs.MathNode => {
   if (isImplicitProduct(node)) return rewriteProduct(node);
+  // mathjs reads `norm [1,2]` as indexing into `norm`.
+  if (math.isAccessorNode(node)) {
+    const name = functionName(node.object);
+    if (name) throw missingParens(name);
+  }
   if (math.isOperatorNode(node)) {
     const [base, exponent] = node.args;
     const baseName = functionName(base);

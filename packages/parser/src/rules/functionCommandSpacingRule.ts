@@ -2,8 +2,8 @@ import { ParserRuleType, TextParserRule } from "../interfaces";
 import { FUNCTION_ARITY } from "./functionNames";
 
 const names = Object.keys(FUNCTION_ARITY).join("|");
-// Only before a digit, letter or command: `\log_2`, `\sin(` and
-// `t_{\operatorname{max}}` stay as they are.
+// A bare command can only be followed by a digit or another command (a letter
+// would extend its name); `\log_2`, `\sin(` and `t_{\operatorname{max}}` stay.
 const commandRegex = new RegExp(String.raw`\\(?:${names})(?=[0-9\\])`, "g");
 const operatornameRegex = new RegExp(
   String.raw`\\operatorname\{(?:${names}|\\mathrm\{(?:${names})\})\}(?=[0-9a-zA-Z\\])`,
