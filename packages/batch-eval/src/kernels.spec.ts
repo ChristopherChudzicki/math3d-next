@@ -4,6 +4,7 @@ import * as kernels from "./kernels";
 import type { Kernel1, Kernel2 } from "./kernels";
 import { createPool } from "./pool";
 import { randomDoubles, SPECIAL } from "./testColumns";
+import { Decline } from "./types";
 import type { Column } from "./types";
 
 type NumberFn = (...args: number[]) => number;
@@ -125,5 +126,66 @@ describe("powInt", () => {
     expect(run((pool) => kernels.powInt(3)(4, 1.1, pool))(4)).toBe(
       reference(1.1, 3),
     );
+  });
+});
+
+describe("generic", () => {
+  type Fn = (...args: unknown[]) => unknown;
+  const fn = (name: string) => mathWithTransform[name] as Fn;
+  const xs = randomDoubles(20, 4);
+  const ys = randomDoubles(20, 5);
+  const zs = randomDoubles(20, 6);
+  const runGeneric = (f: Fn, args: Column[], count = xs.length) =>
+    run((pool) => kernels.generic(f, args.length)(count, args, pool))(count);
+
+  test("a function of one number, per sample", () => {
+    expectSame(
+      runGeneric(fn("sin"), [Float64Array.from(xs)]),
+      xs.map((x) => Math.sin(x)),
+    );
+  });
+
+  test("a function of two numbers, with a number and an array", () => {
+    expectSame(
+      runGeneric(fn("atan2"), [2, Float64Array.from(ys)]),
+      ys.map((y) => Math.atan2(2, y)),
+    );
+    expectSame(
+      runGeneric(fn("atan2"), [Float64Array.from(xs), 2]),
+      xs.map((x) => Math.atan2(x, 2)),
+    );
+    expectSame(
+      runGeneric(fn("atan2"), [Float64Array.from(xs), Float64Array.from(ys)]),
+      xs.map((x, i) => Math.atan2(x, ys[i])),
+    );
+  });
+
+  test("a function of three numbers", () => {
+    expectSame(
+      runGeneric(fn("max"), [
+        Float64Array.from(xs),
+        Float64Array.from(ys),
+        Float64Array.from(zs),
+      ]),
+      xs.map((x, i) => fn("max")(x, ys[i], zs[i]) as number),
+    );
+  });
+
+  test("a function that isn't mathjs's is called as it is", () => {
+    expectSame(
+      runGeneric((x) => 10 * (x as number), [Float64Array.from(xs)]),
+      xs.map((x) => 10 * x),
+    );
+  });
+
+  test("only numbers give a number", () => {
+    expect(runGeneric(fn("atan2"), [1, 2])).toBe(Math.atan2(1, 2));
+  });
+
+  test.each([
+    { name: "in an array", args: [Float64Array.from([4, -1])], count: 2 },
+    { name: "from numbers alone", args: [-1], count: 1 },
+  ])("a result that isn't a number declines ($name)", ({ args, count }) => {
+    expect(() => runGeneric(fn("sqrt"), args, count)).toThrow(Decline);
   });
 });
