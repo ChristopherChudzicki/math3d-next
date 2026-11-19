@@ -15,8 +15,8 @@ type Props = {
   /** The renderer has called `ViewportHooks.onReady` for this scene load. */
   ready: boolean;
   /** The renderer can't run in this browser: show `unsupportedMessage` instead. */
-  unsupported: boolean;
-  unsupportedMessage: string;
+  unsupported?: boolean;
+  unsupportedMessage?: string;
   className?: string;
   /** The renderer, usually behind a `React.lazy`. */
   children: React.ReactNode;
@@ -29,8 +29,8 @@ const ViewportShell: React.FC<Props> = ({
   renderer,
   errorMessage,
   ready,
-  unsupported,
-  unsupportedMessage,
+  unsupported = false,
+  unsupportedMessage = "",
   className,
   children,
   overlay,

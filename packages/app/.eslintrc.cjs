@@ -55,6 +55,14 @@ const threeAdapter = {
     "viewport/three is a thin adapter; three.js code goes in @math3d/renderer-three.",
 };
 
+// MathBox and its `three` load only inside viewport/mathbox, behind the
+// React.lazy in mathbox/Viewport, so they never reach the main bundle.
+const mathboxPackages = {
+  group: RENDERER_PACKAGES,
+  message:
+    "Import three/mathbox* only in viewport/mathbox; elsewhere they land in the main bundle. three.js code goes in @math3d/renderer-three.",
+};
+
 // The three.js renderer stays behind the one React.lazy in
 // three/ThreeViewport, so it never reaches the main bundle. A dynamic
 // import() is not checked by this rule.
@@ -69,7 +77,7 @@ const rendererThree = {
 const restrictedImports = ({
   allowBaseUi = false,
   allowParentImports = false,
-  rendererPackages = null,
+  rendererPackages = mathboxPackages,
 } = {}) => ({
   paths: [iconifyOnline],
   patterns: [
@@ -137,6 +145,13 @@ const layoutZones = [
     message:
       "The renderers don't import each other; share code via shared/ or spec/.",
   })),
+  {
+    target: "./src/app",
+    from: `${VIEWPORT}/mathbox`,
+    except: ["./Viewport.tsx"],
+    message:
+      "Import the MathBox viewport from mathbox/Viewport; anything else in mathbox/ pulls MathBox into the main bundle.",
+  },
   {
     target: `${VIEWPORT}/shared`,
     from: VIEWPORT,
@@ -218,6 +233,15 @@ module.exports = {
         "no-restricted-imports": [
           "error",
           restrictedImports({ rendererPackages: threeAdapter }),
+        ],
+      },
+    },
+    {
+      files: ["src/features/viewport/mathbox/**"],
+      rules: {
+        "no-restricted-imports": [
+          "error",
+          restrictedImports({ rendererPackages: null }),
         ],
       },
     },

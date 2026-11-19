@@ -29,12 +29,13 @@ test("a MathBox that throws offers the default renderer", async () => {
     </Provider>,
   );
 
-  expect(await screen.findByTestId("scene")).toHaveAttribute(
+  const button = await screen.findByRole("button", {
+    name: "Switch to the default renderer",
+  });
+  expect(screen.getByTestId("scene")).toHaveAttribute(
     "data-scene-error",
     "error",
   );
-  await user.click(
-    screen.getByRole("button", { name: "Switch to the default renderer" }),
-  );
+  await user.click(button);
   expect(localStorage.getItem(RENDERER_PREFERENCE_KEY)).toBe("threejs");
 });
