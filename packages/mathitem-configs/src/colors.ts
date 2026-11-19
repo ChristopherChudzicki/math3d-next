@@ -12,6 +12,7 @@ interface GradientConfig {
   value: string;
   label: string;
   backgroundPreview: string;
+  /** The color at `x`; `x` outside [0, 1] takes the nearer end's color. */
   getRGB: (x: number) => [number, number, number];
 }
 
@@ -49,6 +50,11 @@ const colors: ColorConfig[] = [
   ["#808080", "Gray"],
 ].map(([text, label]) => makeColorConfig(text, label));
 
+const clamped =
+  (unclamped: GradientConfig["getRGB"]): GradientConfig["getRGB"] =>
+  (x) =>
+    unclamped(Math.min(Math.max(x, 0), 1));
+
 const rainbow: GradientConfig = {
   type: "gradient",
   value: "rainbow",
@@ -64,19 +70,17 @@ const rainbow: GradientConfig = {
     hsl(0, 100%, 50%)
   )
   `,
-  getRGB: (frac: number) => {
+  getRGB: clamped((frac) => {
     const color = tinycolor.fromRatio({ h: 1 - frac, s: 1, l: 0.5 });
     return toFractionRgb(color.toRgb());
-  },
+  }),
 };
 const bluered: GradientConfig = {
   type: "gradient",
   value: "bluered",
   label: "Blue to Red",
   backgroundPreview: "linear-gradient(to right, blue, red)",
-  getRGB: (frac: number) => {
-    return [frac, 0, 1 - frac];
-  },
+  getRGB: clamped((frac) => [frac, 0, 1 - frac]),
 };
 
 const temperature: GradientConfig = {
@@ -91,14 +95,14 @@ const temperature: GradientConfig = {
     hsl(60, 100%, 50%),
     hsl(0, 100%, 50%)
   )`,
-  getRGB: (frac: number) => {
+  getRGB: clamped((frac) => {
     const color = tinycolor.fromRatio({
       h: 0.666 * (1 - frac),
       s: 1,
       l: 0.5,
     });
     return toFractionRgb(color.toRgb());
-  },
+  }),
 };
 
 const gradients = {
