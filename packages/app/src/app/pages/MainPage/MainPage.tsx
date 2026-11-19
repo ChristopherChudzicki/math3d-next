@@ -5,7 +5,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router";
-import MathboxViewport from "@/features/viewport/mathbox/LazyViewport";
+import MathboxViewport from "@/features/viewport/mathbox/Viewport";
 import ThreeViewport from "@/features/viewport/three/ThreeViewport";
 import useSceneLoader from "@/app/useSceneLoader";
 import SceneControls from "@/features/editor/sidebar/SceneControls";

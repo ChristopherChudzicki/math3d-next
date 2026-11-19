@@ -103,11 +103,9 @@ renderer when the default can't draw. The shared tier can't import
 viewports, so `MainPage` and `FramePage` map each key to its viewport in a
 `Record<Renderer, …>`, which fails typecheck until a new key has one.
 
-Each renderer loads on first use, so the main bundle carries neither: the
-three.js one through `three/ThreeViewport` (below), MathBox through
-`mathbox/LazyViewport`, a `React.lazy` in its own `Suspense` and error
-boundary. Lint keeps MathBox's packages inside `mathbox/`, and `src/app`
-from importing anything there but `LazyViewport`.
+Each renderer's library loads on first use, so the main bundle carries
+neither: each viewport (`three/ThreeViewport`, `mathbox/Viewport`) is a shell
+around one `React.lazy`, inside `shared/ViewportShell`.
 
 ### `@math3d/renderer-three`
 
@@ -201,7 +199,7 @@ parent, so anything sized in pixels is built in the shader, in view space:
 
 `features/viewport/three/ThreeViewport` is the app's glue: it collects the
 spec with `useViewportSpec` and loads the package through its one
-`React.lazy`, so the second `three` ships only in that lazy chunk. It
+`React.lazy`, so its `three` ships only in that lazy chunk. It
 renders inside `shared/ViewportShell` (scene container, error boundary,
 `Suspense`). A
 `no-restricted-imports` group bans static imports of
@@ -308,10 +306,10 @@ with zones written by hand in `packages/app/.eslintrc.cjs`:
   swap. Tick and gridline values count as math-item terms: `spec/ticks.ts`
   (MathBox's `linear`) computes them into `AxisSpec` and `GridSpec`, and
   each renderer formats tick labels itself.
-- `spec/`, `shared/` and `three/` import no renderer package (`three`,
-  `mathbox*`; a `no-restricted-imports` group). The path
-  zones above check folders only. In `app`, `three` is MathBox's copy, so
-  three.js code goes in `@math3d/renderer-three`.
+- Only `mathbox/` imports a renderer package (`three`, `mathbox*`; a
+  `no-restricted-imports` group), and `src/app` imports nothing there but
+  `Viewport`. The path zones above check folders only. In `app`, `three` is
+  MathBox's copy, so three.js code goes in `@math3d/renderer-three`.
 - The renderer folders (`mathbox/`, `three/`) don't import each
   other; common code moves to `shared/` or `spec/`.
 

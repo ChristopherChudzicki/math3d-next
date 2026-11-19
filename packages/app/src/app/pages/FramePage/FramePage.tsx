@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams, useSearchParams } from "react-router";
 
-import MathboxViewport from "@/features/viewport/mathbox/LazyViewport";
+import MathboxViewport from "@/features/viewport/mathbox/Viewport";
 import ThreeViewport from "@/features/viewport/three/ThreeViewport";
 import { DEFAULT_RENDERER, isRenderer } from "@/services/renderer/renderers";
 import type { Renderer } from "@/services/renderer/renderers";

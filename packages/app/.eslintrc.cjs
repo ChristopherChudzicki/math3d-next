@@ -55,12 +55,12 @@ const threeAdapter = {
     "viewport/three is a thin adapter; three.js code goes in @math3d/renderer-three.",
 };
 
-// MathBox and its `three` load only inside viewport/mathbox, behind
-// mathbox/LazyViewport, so they never reach the main bundle.
+// MathBox and its `three` load only inside viewport/mathbox, behind the
+// React.lazy in mathbox/Viewport, so they never reach the main bundle.
 const mathboxPackages = {
   group: RENDERER_PACKAGES,
   message:
-    "MathBox's packages are imported only in viewport/mathbox, which loads through mathbox/LazyViewport (React.lazy).",
+    "Import three/mathbox* only in viewport/mathbox; elsewhere they land in the main bundle. three.js code goes in @math3d/renderer-three.",
 };
 
 // The three.js renderer stays behind the one React.lazy in
@@ -148,9 +148,9 @@ const layoutZones = [
   {
     target: "./src/app",
     from: `${VIEWPORT}/mathbox`,
-    except: ["./LazyViewport.tsx"],
+    except: ["./Viewport.tsx"],
     message:
-      "MathBox loads only through mathbox/LazyViewport (React.lazy), so it stays out of the main bundle.",
+      "Import the MathBox viewport from mathbox/Viewport; anything else in mathbox/ pulls MathBox into the main bundle.",
   },
   {
     target: `${VIEWPORT}/shared`,
