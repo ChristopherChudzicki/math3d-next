@@ -10,6 +10,8 @@ import {
   validateParameters,
   subscriptRule,
   exponentRule,
+  functionApplicationRule,
+  functionCommandSpacingRule,
 } from "./rules";
 
 const cdotRule = new RegexpParserRule(/\\cdot/g, " * ");
@@ -55,6 +57,7 @@ const simplifyRule: MathJsRule = {
 };
 
 const parserRules: ParserRule[] = [
+  functionCommandSpacingRule,
   fractionRule,
   exponentRule,
   subscriptRule,
@@ -71,6 +74,7 @@ const parserRules: ParserRule[] = [
   zeroPrefixRule,
   // MathJS rules
   pdiffRule,
+  functionApplicationRule,
   // simplifyRule,
 ];
 
