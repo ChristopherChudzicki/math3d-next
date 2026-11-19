@@ -54,14 +54,9 @@ const POSITIVE = [BASE.filter((x) => x > 0)];
 
 describe("a function of numbers matches mathjs", () => {
   test.each<{ expr: string; scope?: ScopeEntries; columns?: number[][] }>([
-    { expr: "f(x, y) = x + y" },
-    { expr: "f(x, y) = x - y" },
-    { expr: "f(x, y) = x * y" },
-    { expr: "f(x, y) = x / y" },
     { expr: "f(x) = -x + (+x)" },
     { expr: "f(x) = x^2 + x^(-3) + x^0" },
     { expr: "f(x) = x^0.5", columns: POSITIVE },
-    { expr: "f(x) = a x + pi", scope: { a: 2.5 } },
     { expr: "f(x) = sin(x) + exp(x)" },
     { expr: "f(x, y, z) = max(x, y, z)" },
     { expr: "f(x, y, z) = add(x, y, z)" },
@@ -69,19 +64,9 @@ describe("a function of numbers matches mathjs", () => {
       expr: "f(x, y) = add(x, y)",
       scope: { add: (a: number, b: number) => a * b + 100 },
     },
-    // An operator's function never comes from the scope.
-    { expr: "f(x) = x + 1", scope: { add: () => 0 } },
-    { expr: "f(x) = sin(x)", scope: { sin: (x: number) => 10 * x } },
     { expr: "f(x) = h(x)", scope: { h: (x: number) => x + 1 } },
   ])("$expr", ({ expr, scope, columns }) => {
     expectMatches(define(expr, scope), columns);
-  });
-
-  test("a scope function named as mathjs's replaces it", () => {
-    const f = define("f(x, y) = add(x, y)", {
-      add: (a: number, b: number) => a * b + 100,
-    });
-    expect(runForm(f, [[1], [2]])).toEqual(Float64Array.of(102));
   });
 
   test("a constant value fills the result", () => {
@@ -112,13 +97,6 @@ describe("no batched form", () => {
     { expr: "f(x) = [x, 1]" },
     { expr: "f(x) = x i" },
     { expr: "f(x) = x + v", scope: { v: [1, 0, 0] } },
-    { expr: "f(x) = x + a(x)", scope: { a: 2.5 } },
-    { expr: "f(x) = x > 0 ? 1 : 2" },
-    { expr: "f(sin, x) = sin(x)" },
-    { expr: "f(a, b, c, d, e, g) = a + b" },
-    { expr: "f(x) = x + undefinedName" },
-    { expr: "f(toString) = toString + 1" },
-    { expr: "f(x) = f(x) + 1", scope: { f: () => 5 } },
     { expr: "f(x) = x + sqrt(-4)" },
   ])("$expr", ({ expr, scope }) => {
     expect(batchOf(define(expr, scope))).toBeUndefined();

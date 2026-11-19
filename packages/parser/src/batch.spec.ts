@@ -19,8 +19,10 @@ const define = (
     validate,
   )(new Map(Object.entries(scope))) as Fn;
 
+// No NaN: mathjs's fractional power of NaN is complex, so a column holding
+// one declines.
 const VALUES = [
-  ...[0, -0, 1, -1, 0.5, -2.5, 1e300, 1e-300, NaN, Infinity, -Infinity],
+  ...[0, -0, 1, -1, 0.5, -2.5, 1e300, 1e-300, Infinity, -Infinity],
   ...Array.from({ length: 40 }, (_, i) => Math.sin(i + 1) * 10 ** (i % 5)),
 ];
 /** One column per parameter, each a different rotation of the same values. */
@@ -35,24 +37,27 @@ const runForm = (f: Fn, cols: number[][]) =>
     ...cols.map((column) => Float64Array.from(column)),
   );
 
-/** Where `result` differs from what `f` gives, sample by sample. */
-const mismatches = (f: Fn, cols: number[][], result: Float64Array) =>
-  cols[0].flatMap((_x, i) => {
-    const expected = f(...cols.map((column) => column[i]));
-    return Object.is(result[i], expected)
-      ? []
-      : [{ i, actual: result[i], expected }];
-  });
-
 /** Asserts `f`'s batched form gives what `f` gives at every sample. */
 const expectMatches = (f: Fn, cols = columns(f.length)) => {
   const result = runForm(f, cols);
   expect(result).toBeInstanceOf(Float64Array);
-  expect(mismatches(f, cols, result!)).toEqual([]);
+  const mismatches = cols[0].flatMap((_x, i) => {
+    const expected = f(...cols.map((column) => column[i]));
+    return Object.is(result![i], expected)
+      ? []
+      : [{ i, actual: result![i], expected }];
+  });
+  expect(mismatches).toEqual([]);
 };
 
 describe("a batched form agrees with the function the app holds", () => {
   const batching = functionCases.filter((c) => c.batches);
+
+  // mathjs evaluates what fastCompile hands it, reading the scope at each
+  // call; a batched form reads it once, so the two could differ there.
+  test("only a function fastCompile evaluates itself gets a form", () => {
+    expect(batching.filter((c) => !c.fast)).toEqual([]);
+  });
 
   test.each(functionCases.filter((c) => !c.batches))(
     "no form for $title: $expr",
@@ -69,10 +74,7 @@ describe("a batched form agrees with the function the app holds", () => {
         f,
         (point as number[]).map((x) => [x]),
       );
-      // mathjs gives a complex NaN for some of these, so a run may decline.
-      const cols = columns(f.length);
-      const result = runForm(f, cols);
-      if (result) expect(mismatches(f, cols, result)).toEqual([]);
+      expectMatches(f);
     },
   );
 

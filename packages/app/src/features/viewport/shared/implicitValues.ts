@@ -16,8 +16,6 @@ export const implicitValues = (
   if (!left || !right || left.params !== 3 || right.params !== 3) {
     return undefined;
   }
-  // One form's second run would overwrite its first result.
-  if (left === right) return undefined;
   let out = new Float64Array(0);
   return (xs, ys, zs) => {
     const count = xs.length;

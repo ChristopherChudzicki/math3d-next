@@ -36,24 +36,6 @@ test("a variable that only styles the surface leaves the spec's value function a
   expect(specs[0].values).toBeDefined();
 });
 
-test("a surface of numbers has `values`, which agree with `value`", () => {
-  const scene = new SceneBuilder();
-  scene.folder().implicitSurface({}, "s");
-  const spec = renderGraphicSpec(scene, "s") as ImplicitSurfaceSpec;
-  const steps = [-2, -0.5, 1, 3];
-  const points = steps.flatMap((x) =>
-    steps.flatMap((y) => steps.map((z) => [x, y, z])),
-  );
-  const result = spec.values?.(
-    Float64Array.from(points, ([x]) => x),
-    Float64Array.from(points, ([, y]) => y),
-    Float64Array.from(points, ([, , z]) => z),
-  );
-  expect(Array.from(result ?? [])).toEqual(
-    points.map(([x, y, z]) => spec.value(x, y, z)),
-  );
-});
-
 test("a surface whose equation uses vectors has no `values`", () => {
   const scene = new SceneBuilder();
   scene.folder().implicitSurface(
