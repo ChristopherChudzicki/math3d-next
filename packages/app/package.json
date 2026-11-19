@@ -35,6 +35,7 @@
     "@iconify-icons/lucide": "^1.2.136",
     "@iconify/react": "^6.0.4",
     "@math3d/api": "workspace:^",
+    "@math3d/batch-eval": "workspace:^",
     "@math3d/custom-mathjs": "workspace:^",
     "@math3d/mathitem-configs": "workspace:^",
     "@math3d/mathjs-utils": "workspace:*",

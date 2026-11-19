@@ -258,6 +258,15 @@ const builder = (
   return build;
 };
 
+const fastCompiled = new WeakSet<object>();
+
+/**
+ * Whether `f` is a function `fastCompile` built itself. One it handed to
+ * mathjs reads the scope at each call, not once.
+ */
+const isFastCompiled = (f: unknown): boolean =>
+  typeof f === "function" && fastCompiled.has(f);
+
 const evaluate = (
   node: mjs.MathNode,
   scope: Scope,
@@ -267,7 +276,9 @@ const evaluate = (
     const { params, name } = node;
     if (params.length > MAX_PARAMS) throw new Unsupported();
     if (params.some(isUnsafeName)) throw new Unsupported();
-    return toClosure(builder(params, scope, name, onDispatch)(node.expr));
+    const f = toClosure(builder(params, scope, name, onDispatch)(node.expr));
+    fastCompiled.add(f);
+    return f;
   }
   let expr = node;
   if (math.isAssignmentNode(node)) {
@@ -309,4 +320,4 @@ const fastCompile = (
   };
 };
 
-export { fastCompile, numbersOf };
+export { fastCompile, isFastCompiled, numbersOf };

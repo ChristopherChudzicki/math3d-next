@@ -1,3 +1,4 @@
+import { registerBatch } from "@math3d/batch-eval";
 import math, {
   getUserFunctionSignature,
   setUserFunctionSignature,
@@ -9,7 +10,7 @@ import type { AnonMathNode } from "@math3d/mathscope";
 import { EvaluationError } from "@math3d/mathscope";
 import invariant from "tiny-invariant";
 import type { ParseValidate } from "./interfaces";
-import { fastCompile, numbersOf } from "./fastCompile";
+import { fastCompile, isFastCompiled, numbersOf } from "./fastCompile";
 import { isModOne } from "./outerMod";
 
 class FunctionEvaluationError extends EvaluationError {
@@ -159,16 +160,21 @@ const getValidatedEvaluate = (
     math.isFunctionAssignmentNode(mjsNode) &&
     !mjsNode.params.includes("mod") &&
     isModOne(mjsNode.expr);
-  const unvalidatedEvaluate: AnonMathNode["evaluate"] = (scope) => {
-    const rawResult = compiled.evaluate(scope);
-    if (typeof rawResult === "function") {
-      return wrapFunction(mjsNode, rawResult);
-    }
-    return numericTypeSimplify(rawResult);
-  };
   const evaluate: AnonMathNode["evaluate"] = (scope) => {
     try {
-      const result = validate(unvalidatedEvaluate(scope), mjsNode);
+      const rawResult = compiled.evaluate(scope);
+      const result = validate(
+        typeof rawResult === "function"
+          ? wrapFunction(mjsNode, rawResult)
+          : numericTypeSimplify(rawResult),
+        mjsNode,
+      );
+      // Registered now: a batched form reads the scope once, as a function
+      // fastCompile built does. It is keyed on the validated function: sound
+      // while a validator leaves a number result unchanged, as `realFunc` does.
+      if (typeof result === "function" && isFastCompiled(rawResult)) {
+        registerBatch(result, mjsNode, scope ?? new Map());
+      }
       if (modOne && typeof result === "function" && !scope?.has("mod")) {
         wrapping.add(result);
       }

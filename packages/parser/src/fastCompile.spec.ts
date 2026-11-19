@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import math, { mathWithTransform, typed } from "@math3d/custom-mathjs";
 import MathScope from "@math3d/mathscope";
+import { functionCases } from "./evaluatorCases";
 import { fastCompile } from "./fastCompile";
 import { latexParser } from "./parsers";
 
@@ -63,124 +64,7 @@ const expectSameFunction = (
 };
 
 describe("fastCompile agrees with mathjs", () => {
-  test.each<{
-    title: string;
-    expr: string;
-    point: unknown[];
-    scope?: Record<string, unknown>;
-    fast: boolean;
-  }>([
-    {
-      title: "arithmetic",
-      expr: "f(x, y, z) = x^2 + y z - x / y + (-z)",
-      point: [1, 2, 3],
-      fast: true,
-    },
-    {
-      title: "whole-number exponents",
-      expr: "f(x) = x^2 + x^(-3) + (x i)^2",
-      point: [-1.5],
-      fast: true,
-    },
-    {
-      title: "a fractional exponent of a negative number",
-      expr: "f(x) = x^0.5",
-      point: [-4],
-      fast: true,
-    },
-    {
-      title: "a negative base to 1/3",
-      expr: "f(x) = x^(1/3)",
-      point: [-8],
-      fast: true,
-    },
-    {
-      title: "a scope value and a constant",
-      expr: "f(x) = a x + pi",
-      point: [0.5],
-      scope: { a: 2.5 },
-      fast: true,
-    },
-    {
-      title: "values that aren't numbers",
-      expr: "f(x) = x i + [1, 2, 3] x + v",
-      point: [0.5],
-      scope: { v: [1, 0, 0] },
-      fast: true,
-    },
-    {
-      title: "a call with three arguments",
-      expr: "f(x) = max(x, 1, 2) + norm([x, 1])",
-      point: [-8],
-      fast: true,
-    },
-    {
-      title: "a scope function named as mathjs's",
-      expr: "f(x) = sin(x)",
-      point: [0.5],
-      scope: { sin: (x: number) => 10 * x },
-      fast: true,
-    },
-    {
-      title: "a scope value named as an operator's function",
-      expr: "f(x) = x + 1",
-      point: [0.5],
-      scope: { add: () => 0 },
-      fast: true,
-    },
-    {
-      title: "a parameter named as a scope value",
-      expr: "f(x) = x + 1",
-      point: [0.5],
-      scope: { x: 100 },
-      fast: true,
-    },
-    {
-      title: "a scope value called though it is no function",
-      expr: "f(x) = x + a(x)",
-      point: [0.5],
-      scope: { a: 2.5 },
-      fast: false,
-    },
-    {
-      title: "a node type it doesn't handle",
-      expr: "f(x) = x > 0 ? 1 : 2",
-      point: [1],
-      fast: false,
-    },
-    {
-      title: "a parameter called as a function",
-      expr: "f(sin, x) = sin(x)",
-      point: [Math.cos, 0],
-      fast: false,
-    },
-    {
-      title: "more parameters than a closure has slots",
-      expr: "f(a, b, c, d, e, g) = a + b + c + d + e + g",
-      point: [1, 2, 3, 4, 5, 6],
-      fast: false,
-    },
-    {
-      title: "an undefined name",
-      expr: "f(x) = x + undefinedName",
-      point: [1],
-      fast: false,
-    },
-    {
-      title: "a parameter named as an Object.prototype property",
-      expr: "f(toString) = toString + 1",
-      point: [1],
-      fast: false,
-    },
-    {
-      // The scope's `f` is an earlier definition, not the one being defined.
-      title: "a function that calls itself",
-      expr: "f(x) = f(x) + 1",
-      point: [1],
-      scope: { f: () => 5 },
-      fast: false,
-    },
-  ])("$title: $expr", ({ expr, point, scope, fast }) => {
+  test.each(functionCases)("$title: $expr", ({ expr, point, scope, fast }) => {
     expect(expectSameFunction(expr, [point], scope)).toBe(fast);
   });
 

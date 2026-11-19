@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import type { AxesRange } from "@math3d/viewport-spec";
 import { sampleScalarGrid, writeGradient } from "./scalarGrid";
 
@@ -48,5 +48,50 @@ test("steps over a non-finite sample: its neighbours keep the exact gradient", (
   ].forEach(([i, j, k]) => {
     writeGradient(grid, i, j, k, out, 0);
     expect(Array.from(out)).toEqual([1, 2, 3]);
+  });
+});
+
+describe("with a spec's `values`", () => {
+  const field = (x: number, y: number, z: number) => x + 10 * y + 100 * z;
+  const batched = (
+    xs: Float64Array,
+    ys: Float64Array,
+    zs: Float64Array,
+  ): Float64Array | undefined => xs.map((x, k) => field(x, ys[k], zs[k]));
+  const sampled = (...args: Parameters<typeof sampleScalarGrid>) =>
+    Array.from(sampleScalarGrid(...args).values.subarray(0, 27));
+  const fromValues = sampled(2, domain, field);
+  // Offset from `batched`, so a sample shows which of the two gave it. Grids
+  // share one buffer, so the same field twice would pass with nothing written.
+  const value = (x: number, y: number, z: number) => field(x, y, z) + 1;
+  const fromValue = sampled(2, domain, value);
+
+  test("samples through it, a slab at a time", () => {
+    const values = vi.fn(batched);
+    expect(sampled(2, domain, value, values)).toEqual(fromValues);
+    expect(values).toHaveBeenCalledTimes(3);
+  });
+
+  test("samples a slab it declines, and every later one, with `value`", () => {
+    const values = vi
+      .fn(batched)
+      .mockImplementationOnce(batched)
+      .mockImplementationOnce(() => undefined);
+    expect(sampled(2, domain, value, values)).toEqual([
+      ...fromValues.slice(0, 9),
+      ...fromValue.slice(9),
+    ]);
+    expect(values).toHaveBeenCalledTimes(2);
+  });
+
+  test("an error from `value` surfaces when it declines", () => {
+    const error = new Error("no value here");
+    const throwing = (x: number, y: number, z: number) => {
+      if (x === 2 && y === 0 && z === 6) throw error;
+      return field(x, y, z);
+    };
+    expect(() =>
+      sampleScalarGrid(2, domain, throwing, () => undefined),
+    ).toThrow(error);
   });
 });

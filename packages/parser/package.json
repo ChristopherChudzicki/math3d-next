@@ -16,6 +16,7 @@
     "lint": "eslint --max-warnings 0 \"**/*.ts?(x)\""
   },
   "dependencies": {
+    "@math3d/batch-eval": "workspace:^",
     "@math3d/custom-mathjs": "workspace:^",
     "@math3d/mathscope": "workspace:^",
     "@math3d/utils": "workspace:^",
