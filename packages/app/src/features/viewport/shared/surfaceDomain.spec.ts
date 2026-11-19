@@ -38,3 +38,20 @@ test("a range function that throws does so at a sample, not when the map is buil
   });
   expect(() => map(0.5, 0.5)).toThrow("no range");
 });
+
+test("a range function that throws at one U throws at each sample there, and at no other", () => {
+  const map = domainMap({
+    value: [
+      () => [0, 2],
+      (u) => {
+        if (u === 2) throw new Error("no range");
+        return [0, u];
+      },
+    ],
+    order: [0, 1],
+  });
+  expect(map(0.5, 0.5)).toEqual([1, 0.5]);
+  expect(() => map(1, 0.5)).toThrow("no range");
+  expect(() => map(1, 1)).toThrow("no range");
+  expect(map(0.5, 1)).toEqual([1, 1]);
+});
