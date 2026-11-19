@@ -51,9 +51,9 @@ const colors: ColorConfig[] = [
 ].map(([text, label]) => makeColorConfig(text, label));
 
 const clamped =
-  (onUnit: GradientConfig["getRGB"]): GradientConfig["getRGB"] =>
+  (unclamped: GradientConfig["getRGB"]): GradientConfig["getRGB"] =>
   (x) =>
-    onUnit(Math.min(Math.max(x, 0), 1));
+    unclamped(Math.min(Math.max(x, 0), 1));
 
 const rainbow: GradientConfig = {
   type: "gradient",
