@@ -1,6 +1,6 @@
 import "./mathlive";
 
-import type { MathfieldElement } from "mathlive";
+import type { Keybinding, MathfieldElement } from "mathlive";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import composeRefs from "@/util/composeRefs";
@@ -16,6 +16,13 @@ interface MathfieldProps extends MathFieldWebComponentProps {
 }
 
 type OnMathFieldChange = NonNullable<MathfieldProps["onChange"]>;
+
+/**
+ * MathLive's Escape switches math and text mode to raw-LaTeX mode, stranding
+ * later typing. Without the binding, Escape does nothing, as in a text input.
+ */
+const withoutEscapeToLatex = (keybindings: readonly Keybinding[]) =>
+  keybindings.filter((kb) => !(kb.key === "[Escape]" && kb.ifMode !== "latex"));
 
 /**
  * A React component for MathLive's MathField.
@@ -36,6 +43,17 @@ const MathField = (props: MathfieldProps) => {
   } = props;
   const [mf, setMf] = useState<MathfieldElement | null>(null);
   const appliedRef = useRef<Partial<MathfieldPropsOptions>>({});
+
+  useEffect(() => {
+    if (!mf) return undefined;
+    const apply = () => {
+      mf.keybindings = withoutEscapeToLatex(mf.keybindings);
+    };
+    apply();
+    // MathLive resets keybindings when the element is moved in the DOM.
+    mf.addEventListener("mount", apply);
+    return () => mf.removeEventListener("mount", apply);
+  }, [mf]);
 
   useEffect(() => {
     if (!mf || !options) return undefined;

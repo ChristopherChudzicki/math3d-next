@@ -105,20 +105,20 @@ const LAYOUTS: Record<CustomKeyboards, VirtualKeyboardLayout> = {
         },
         {
           latex: "\\mathbf{\\hat{j}}",
-          insert: "\\uniti",
-          aside: "[1,0,0]",
+          insert: "\\unitj",
+          aside: "[0,1,0]",
           shift: {
             latex: "\\mathbf{\\hat{y}}",
-            insert: "\\unitx",
+            insert: "\\unity",
           },
         },
         {
           latex: "\\mathbf{\\hat{k}}",
-          insert: "\\uniti",
-          aside: "[1,0,0]",
+          insert: "\\unitk",
+          aside: "[0,0,1]",
           shift: {
             latex: "\\mathbf{\\hat{z}}",
-            insert: "\\unitx",
+            insert: "\\unitz",
           },
         },
       ],
@@ -197,17 +197,14 @@ const LAYOUTS: Record<CustomKeyboards, VirtualKeyboardLayout> = {
         {
           latex: "\\operatorname{arcsinh}(#0)",
           class: "small",
-          insert: "\\arcsinh",
         }, // middle
         {
           latex: "\\operatorname{arccosh}(#0)",
           class: "small",
-          insert: "\\arccosh",
         },
         {
           latex: "\\operatorname{arctanh}(#0)",
           class: "small",
-          insert: "\\arctanh",
         },
         "[separator-5]",
         "[left]",

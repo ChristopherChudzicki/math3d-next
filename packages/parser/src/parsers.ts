@@ -12,6 +12,12 @@ import {
   exponentRule,
 } from "./rules";
 
+// MathLive serializes a single-digit root unbraced: \sqrt2.
+const sqrtDigitRule = new RegexpParserRule(
+  /\\sqrt(\d)/g,
+  (match) => `\\sqrt{${match[1]}}`,
+);
+
 const cdotRule = new RegexpParserRule(/\\cdot/g, " * ");
 
 // \div is the ÷ sign; without this rule it would become a call to `div`.
@@ -56,6 +62,7 @@ const simplifyRule: MathJsRule = {
 
 const parserRules: ParserRule[] = [
   fractionRule,
+  sqrtDigitRule,
   exponentRule,
   subscriptRule,
   decorativeTextRule,

@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 import type { MathfieldElement } from "mathlive";
 import { test } from "@/fixtures/users";
+import type { Fixtures } from "@/fixtures/users";
 import { expect } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
 import AppPage from "@/utils/pages/AppPage";
@@ -139,4 +140,112 @@ test("Toggling keyboard visibility auto-focuses a math-field and shows virtual k
   await expect(page.locator(".ML__keyboard")).toBeHidden();
   await page.locator("math-field").first().click();
   await expect(page.locator(".ML__keyboard")).toBeHidden();
+});
+
+/** An empty Point's Coordinates field, focused. */
+const focusEmptyCoords = async (
+  page: Page,
+  prepareScene: Fixtures["prepareScene"],
+) => {
+  const scene = new SceneBuilder();
+  scene.folder().point({ description: "SomePoint", coords: "" });
+  const key = await prepareScene(scene.json());
+  await page.goto(`/${key}`);
+  const app = new AppPage(page);
+  const item = await app.getUniqueItemSettings({ description: "SomePoint" });
+  const mf = item.field("Coordinates");
+  await mf.click();
+  await expect(mf).toBeFocused();
+  return { item, mf };
+};
+
+test("Escape leaves a math field in math mode and focused", async ({
+  page,
+  prepareScene,
+}) => {
+  const { mf } = await focusEmptyCoords(page, prepareScene);
+  await mf.pressSequentially("x");
+  await page.keyboard.press("Escape");
+  await mf.pressSequentially("y");
+
+  await expect(mf).toHaveJSProperty("value", "xy");
+  await expect(mf).toHaveJSProperty("mode", "math");
+  await expect(mf).toBeFocused();
+});
+
+test("Escape in a settings popover's math field closes the popover", async ({
+  page,
+  prepareScene,
+}) => {
+  const scene = new SceneBuilder();
+  scene.folder().point({}, "the_point");
+  const key = await prepareScene(scene.json());
+  await page.goto(`/${key}`);
+  const app = new AppPage(page);
+  const item = await app.getUniqueItemSettings({ id: "the_point" });
+  const moreSettings = item.moreSettings();
+  await moreSettings.opener().click();
+  const zBias = getByFieldLabel(moreSettings.root, "Z-Bias", { exact: true });
+  await zBias.click();
+  await expect(zBias).toBeFocused();
+
+  await page.keyboard.press("Escape");
+
+  await expect(moreSettings.root).toBeHidden();
+});
+
+/** The virtual keyboard's visible layer: "123" unless `switchTo` names another. */
+const showVirtualKeyboard = async (page: Page, switchTo?: "f(x)") => {
+  await page.getByRole("button", { name: "Enable math keyboard" }).click();
+  const keyboard = page.locator(".ML__keyboard");
+  await expect(keyboard).toBeVisible();
+  if (switchTo) {
+    await keyboard
+      .locator(".layer-switch:visible", { hasText: switchTo })
+      .first()
+      .click();
+  }
+  return keyboard.locator(".MLK__layer.is-visible");
+};
+
+test("The virtual keyboard's ĵ and k̂ keys insert their unit vectors", async ({
+  page,
+  prepareScene,
+}) => {
+  const { mf } = await focusEmptyCoords(page, prepareScene);
+  const layer = await showVirtualKeyboard(page);
+  const key = (label: string) => layer.getByLabel(label, { exact: true });
+  const shift = layer.locator(".shift");
+
+  await key(String.raw`\unitj`).click();
+  await key(String.raw`\unitk`).click();
+  await shift.click();
+  await key(String.raw`\unitj`).click();
+  await shift.click();
+  await key(String.raw`\unitk`).click();
+
+  await expect(mf).toHaveJSProperty(
+    "value",
+    String.raw`\unitj\unitk\unity\unitz`,
+  );
+});
+
+// Each key gets an empty field: nested inserts serialize inconsistently.
+["arcsinh", "arccosh", "arctanh"].forEach((fn) => {
+  test(`The virtual keyboard's ${fn} key inserts ${fn}`, async ({
+    page,
+    prepareScene,
+  }) => {
+    const { mf } = await focusEmptyCoords(page, prepareScene);
+    const layer = await showVirtualKeyboard(page, "f(x)");
+
+    await layer
+      .getByLabel(String.raw`\operatorname{${fn}}(#0)`, { exact: true })
+      .click();
+
+    await expect(mf).toHaveJSProperty(
+      "value",
+      String.raw`\operatorname{\mathrm{${fn}}}(\placeholder{})`,
+    );
+  });
 });
