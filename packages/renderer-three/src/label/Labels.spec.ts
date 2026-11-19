@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Layers, NormalBlending } from "three/webgpu";
+import { NormalBlending } from "three/webgpu";
 import type { Coords } from "@math3d/viewport-spec";
 import { fakeSurface } from "./__tests__/fakeSurface";
 import { LabelAtlas } from "./LabelAtlas";
@@ -15,12 +15,6 @@ const setUp = () => {
 };
 
 const drawn = (labels: Labels) => labels.mesh.geometry.instanceCount;
-
-const onLayer = (labels: Labels, layer: number) => {
-  const layers = new Layers();
-  layers.set(layer);
-  return labels.mesh.layers.test(layers);
-};
 
 /** Each drawn label's slot width, as the shader reads it. */
 const slotWidths = (labels: Labels) => {
@@ -64,18 +58,11 @@ describe("Labels", () => {
     expect([zBias, zIndex, clearance]).toEqual([0, 0, 0]);
   });
 
-  test("gives its mesh the depth style and reach of the mark at the anchor", () => {
-    const { labels } = setUp();
-    const mark = { zBias: 2, zIndex: 1, clearance: 16 };
-    labels.set([[0, 0, 0]], "a", { ...style, ...mark });
-    expect(labels.mesh.userData.label).toMatchObject(mark);
-  });
-
   test("under the oit model, draws over the scene with no depth test", () => {
     const { labels } = setUp();
     labels.set([[0, 0, 0]], "P", style);
-    expect(onLayer(labels, OVERLAY_LAYER)).toBe(true);
-    expect(onLayer(labels, 0)).toBe(false);
+    expect(labels.mesh.layers.isEnabled(OVERLAY_LAYER)).toBe(true);
+    expect(labels.mesh.layers.isEnabled(0)).toBe(false);
     expect(labels.mesh.material).toMatchObject({
       depthTest: false,
       depthWrite: false,
@@ -103,7 +90,7 @@ describe("Labels", () => {
   test("under the ordered model, draws in the scene, depth-tested, blending as three does", () => {
     const labels = new Labels("ordered", new LabelAtlas(fakeSurface()));
     labels.set([[0, 0, 0]], "P", style);
-    expect(onLayer(labels, 0)).toBe(true);
+    expect(labels.mesh.layers.isEnabled(0)).toBe(true);
     expect(labels.mesh.material).toMatchObject({
       transparent: true,
       blending: NormalBlending,

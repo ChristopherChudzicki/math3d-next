@@ -49,8 +49,8 @@ export const buildAxis = (
     // Ticks take the axis's opacity, zBias and zIndex, which math3d's
     // MathBox ticks don't.
     ticks.set(positions, TICK_DIRECTION[next.axis], next);
-    // A tick or the end label can sit at an arrowhead's tip, which the cone
-    // covers from behind: every label of an axis with one clears it.
+    // Seen from behind, an arrowhead covers its own tip, where a tick or the
+    // end label can sit: every label of an axis with one clears it.
     const anchorStyle = {
       zBias: next.zBias,
       zIndex: next.zIndex,

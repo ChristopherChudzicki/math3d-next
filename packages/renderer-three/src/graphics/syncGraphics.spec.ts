@@ -1,6 +1,7 @@
 import { expect, test, vi } from "vitest";
 import { Group } from "three/webgpu";
 import type { PointSpec, ViewportGraphic } from "@math3d/viewport-spec";
+import { OVERLAY_LAYER } from "../shader/sceneDepth";
 import type { Graphic, GraphicBuilders } from "./builders";
 import { syncGraphics } from "./syncGraphics";
 import type { DrawnGraphics } from "./syncGraphics";
@@ -74,6 +75,15 @@ test("a graphic's renderOrder follows its item's place, without an update", () =
   expect(built[1].object.renderOrder).toBe(0);
   expect(graphicA.object.renderOrder).toBe(1);
   expect(graphicA.update).not.toHaveBeenCalled();
+});
+
+test("a graphic's group is on the overlay layer too, where its renderOrder orders its labels", () => {
+  const { built, sync } = setup();
+
+  sync([{ id: "a", spec: point(1) }]);
+
+  expect(built[0].object.layers.isEnabled(0)).toBe(true);
+  expect(built[0].object.layers.isEnabled(OVERLAY_LAYER)).toBe(true);
 });
 
 test("a graphic that leaves the spec is removed and disposed", () => {

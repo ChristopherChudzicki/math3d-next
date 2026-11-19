@@ -6,9 +6,11 @@ import { DepthTexture, WebGLCoordinateSystem } from "three/webgpu";
 import type { Node } from "three/webgpu";
 import {
   Fn,
+  cameraNear,
   cameraProjectionMatrix,
   clamp,
   ivec2,
+  min,
   screenDPR,
   screenSize,
   texture,
@@ -57,33 +59,29 @@ const toStoredDepth = (ndcZ: Node<"float">): Node<"float"> =>
   )() as Node<"float">;
 
 /**
- * Projects a view-space anchor for a mark of the overlay layer.
- *
- * `shows` is whether the scene leaves the anchor uncovered: at one of the
- * taps, nothing is nearer than the anchor by more than the tolerance plus
+ * Whether the scene leaves a view-space anchor uncovered: at one of the taps,
+ * nothing is nearer than the anchor by more than the tolerance plus
  * `clearance`, in view units. `zBias` and `zIndex` are those of the mark at
- * the anchor, so the two tie.
+ * the anchor, so the anchor ties with that mark's depth.
  */
-export const projectAnchor = (
+export const anchorShows = (
   view: Node<"vec3">,
   zBias: Node<"float">,
   zIndex: Node<"float">,
   clearance: Node<"float">,
-): { clip: Node<"vec4">; shows: Node<"bool"> } => {
+): Node<"bool"> => {
   const clip = cameraProjectionMatrix.mul(vec4(view, 1));
-  const nearer = projectWithDepthStyle(
-    vec3(view.xy, view.z.add(clearance).add(TOLERANCE)),
-    zBias,
-    zIndex,
-  );
-  const ndcZ = nearer.z.div(nearer.w);
-  const depth = toStoredDepth(ndcZ);
+  // No nearer than the near plane: behind a perspective camera, NDC depth
+  // runs backwards.
+  const z = min(view.z.add(clearance).add(TOLERANCE), cameraNear.negate());
+  const nearer = projectWithDepthStyle(vec3(view.xy, z), zBias, zIndex);
+  const depth = toStoredDepth(nearer.z.div(nearer.w));
   const ndc = clip.xy.div(clip.w);
   // In device pixels; texel rows run down the screen.
   const pixel = vec2(ndc.x.mul(0.5).add(0.5), ndc.y.mul(-0.5).add(0.5)).mul(
     screenSize,
   );
-  const shows = TAPS.map(([x, y]) => {
+  return TAPS.map(([x, y]) => {
     const tap = clamp(
       pixel.add(vec2(x, y).mul(screenDPR.mul(TAP_RADIUS))),
       vec2(0, 0),
@@ -91,5 +89,4 @@ export const projectAnchor = (
     );
     return depth.lessThanEqual(sceneDepth.load(ivec2(tap)).x);
   }).reduce((any, tap) => any.or(tap));
-  return { clip: vec4(clip.xy, ndcZ.mul(clip.w), clip.w), shows };
 };

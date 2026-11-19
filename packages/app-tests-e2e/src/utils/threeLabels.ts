@@ -12,8 +12,8 @@ const fn = (params: string[], rhs: string) => ({
   rhs,
 });
 
-/** No axes or grid, and a labelled point at the origin, where the camera looks. */
-const labelledPoint = (cameraPosition: string) => {
+/** No axes or grid, and a labelled point; the camera looks at the origin. */
+const labelledPoint = (cameraPosition: string, coords = "[0, 0, 0]") => {
   const scene = new SceneBuilder()
     .camera({ position: cameraPosition })
     .axis("x", { visible: false })
@@ -22,8 +22,8 @@ const labelledPoint = (cameraPosition: string) => {
     .grid("xy", { visible: false });
   const folder = scene.folder();
   folder.point({
-    coords: "[0, 0, 0]",
-    // No red in it, as in the surfaces: only the label has any.
+    coords,
+    // No red in it, as in the other marks: only the label has any.
     color: "#00ff00",
     label: "WWWW",
     labelVisible: "true",
@@ -60,18 +60,42 @@ export const labelInSphere = (): SceneBuilder => {
   return scene;
 };
 
+/**
+ * A labelled point off the view's center, seen from straight above, with a
+ * thin line crossing just over it. An opaque plane lies under the point and
+ * over each place that mirrors it across the center.
+ */
+export const labelUnderThinLine = (): SceneBuilder => {
+  const { scene, folder } = labelledPoint("[0, 0, 6]", "[0.2, 0.1, 0]");
+  // 0.3 above the point, and nearer the center by that share of the
+  // camera's height, so it crosses the point on screen.
+  folder.line({
+    coords: "[[-0.2, 0.095, 0.3], [0.6, 0.095, 0.3]]",
+    color: "#000000",
+    width: "2",
+  });
+  folder.explicitSurface({
+    expr: fn(["x", "y"], "0.3-1.5x-3y"),
+    color: BLUE,
+    opacity: "1",
+    shaded: "false",
+    gridOpacity: "0",
+  });
+  return scene;
+};
+
 type Box = { left: number; right: number; top: number; bottom: number };
 
 /**
- * The bounding box of the label's pixels (those with any red) in a window
- * around where the point's label draws, or null when there are none. The
- * window's corners must show the surface: a lost scene draw leaves them the
- * page's color.
+ * The bounding box of the label's pixels (those with red above 100) in an
+ * area around the view's center, or null when there are none. The area's
+ * corners must show the surface: a lost scene draw leaves them the page's
+ * color.
  */
 export const labelBox = async (page: Page): Promise<Box | null> => {
   const png = await page.getByTestId("scene").screenshot();
   const { data, width, height } = await decodePng(png);
-  const window: Box = {
+  const area: Box = {
     left: Math.floor(width / 2) - 100,
     right: Math.floor(width / 2) + 100,
     top: Math.floor(height / 2) - 70,
@@ -80,10 +104,10 @@ export const labelBox = async (page: Page): Promise<Box | null> => {
   const red = (x: number, y: number) => data[4 * (y * width + x)];
   const blue = (x: number, y: number) => data[4 * (y * width + x) + 2];
   [
-    [window.left, window.top],
-    [window.right, window.top],
-    [window.left, window.bottom],
-    [window.right, window.bottom],
+    [area.left, area.top],
+    [area.right, area.top],
+    [area.left, area.bottom],
+    [area.right, area.bottom],
   ].forEach(([x, y]) => {
     expect(red(x, y), "the surface is drawn under the label").toBeLessThan(30);
     expect(blue(x, y), "the surface is drawn under the label").toBeGreaterThan(
@@ -91,8 +115,8 @@ export const labelBox = async (page: Page): Promise<Box | null> => {
     );
   });
   const box: Box = { left: Infinity, right: -1, top: Infinity, bottom: -1 };
-  for (let y = window.top; y <= window.bottom; y += 1) {
-    for (let x = window.left; x <= window.right; x += 1) {
+  for (let y = area.top; y <= area.bottom; y += 1) {
+    for (let x = area.left; x <= area.right; x += 1) {
       if (red(x, y) > 100) {
         box.left = Math.min(box.left, x);
         box.right = Math.max(box.right, x);

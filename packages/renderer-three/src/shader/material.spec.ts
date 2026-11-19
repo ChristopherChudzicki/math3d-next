@@ -42,7 +42,7 @@ describe("sharedMaterial", () => {
         depthTest: true,
       },
     },
-    // Drawn over the finished scene, whose depth it must leave alone.
+    // Drawn over the finished scene, with no depth test.
     {
       alpha: "overlay",
       accumulating: false,

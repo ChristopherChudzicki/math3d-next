@@ -19,12 +19,15 @@ export type LabelStyle = {
   /** MathBox's label gray when absent. */
   color?: RGBA;
   /**
-   * The depth style of the mark at the anchor, and how far it reaches from
-   * the anchor in CSS pixels at view depth 1, so that mark never hides its
-   * own label; 0 when absent. Under `ordered` nothing reads them.
+   * With `zIndex`, the depth style of the mark at the anchor; 0 when absent.
+   * Unread under `ordered`.
    */
   zBias?: number;
   zIndex?: number;
+  /**
+   * How far that mark reaches from the anchor, in CSS pixels at view depth 1,
+   * so it never hides its own label; 0 when absent. Unread under `ordered`.
+   */
   clearance?: number;
 };
 

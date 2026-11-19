@@ -6,7 +6,7 @@
 import { Texture, Vector2, Vector4 } from "three/webgpu";
 import {
   attribute,
-  float,
+  cameraProjectionMatrix,
   mix,
   modelViewMatrix,
   positionGeometry,
@@ -21,10 +21,9 @@ import {
   vec3,
   vec4,
 } from "three/tsl";
-import { projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
 import type { Transparency } from "../shader/material";
-import { projectAnchor } from "../shader/sceneDepth";
+import { anchorShows } from "../shader/sceneDepth";
 import { viewUnitsPerPixel } from "../shader/viewUnits";
 import type { Layout, Template } from "../instances/Instances";
 
@@ -60,7 +59,7 @@ export class LabelUniforms {
   /** CSS pixels, +y up the screen. */
   readonly offset = new Vector2();
 
-  /** Those of the mark at the anchor. */
+  /** With `zIndex`, the depth style of the mark at the anchor. */
   zBias = 0;
 
   zIndex = 0;
@@ -81,17 +80,18 @@ const build = (whole: boolean) => {
   const anchor = modelViewMatrix.mul(
     vec4(attribute<"vec3">("labelAnchor", "vec3"), 1),
   ).xyz;
-  const anchored = whole
-    ? projectAnchor(
-        anchor,
-        read("zBias", "float"),
-        read("zIndex", "float"),
-        read("clearance", "float").mul(viewUnitsPerPixel),
-      )
-    : null;
-  const clip =
-    anchored?.clip ?? projectWithDepthStyle(anchor, float(0), float(0));
+  const clip = cameraProjectionMatrix.mul(vec4(anchor, 1));
   const inFront = clip.w.greaterThan(0);
+  const drawn = whole
+    ? inFront.and(
+        anchorShows(
+          anchor,
+          read("zBias", "float"),
+          read("zIndex", "float"),
+          read("clearance", "float").mul(viewUnitsPerPixel),
+        ),
+      )
+    : inFront;
   const slot = attribute<"vec4">("labelSlot", "vec4");
 
   // A raster drawn at another pixel ratio than the screen's keeps its CSS size.
@@ -111,7 +111,7 @@ const build = (whole: boolean) => {
     .mul(2)
     .sub(1);
   const vertex = select(
-    anchored ? inFront.and(anchored.shows) : inFront,
+    drawn,
     vec4(ndc.mul(clip.w), clip.z, clip.w),
     // Behind a perspective camera, or covered: outside the clip volume.
     vec4(0, 0, 2, 1),

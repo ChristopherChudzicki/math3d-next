@@ -1,7 +1,5 @@
 import {
   BlendMode,
-  BufferAttribute,
-  BufferGeometry,
   CustomBlending,
   DepthTexture,
   HalfFloatType,
@@ -9,6 +7,7 @@ import {
   NodeMaterial,
   OneFactor,
   OneMinusSrcColorFactor,
+  PlaneGeometry,
   RedFormat,
   RenderTarget,
   Vector2,
@@ -69,9 +68,6 @@ covered.blendDst = OneMinusSrcColorFactor;
 /** The layer of every mark but the overlay's: three's default. */
 const SCENE_LAYER = 0;
 
-/** One triangle over the whole view, in clip space. */
-const FULL_VIEW = [-1, -1, 0, 3, -1, 0, -1, 3, 0];
-
 /**
  * Draws a scene with weighted, blended order-independent transparency
  * (McGuire and Bavoil) in one multisampled render target.
@@ -100,14 +96,10 @@ export class OitFrame {
 
   private readonly compositeMaterial = new NodeMaterial();
 
-  // A mesh of the overlay draw, not a `QuadMesh` drawn on its own: three
-  // gives that draw no multisampling, and a multisampled one after it clears
-  // the canvas.
+  // A mesh of the overlay draw: on WebGPU three draws a `QuadMesh` without
+  // multisampling, and the multisampled overlay draw after it overwrites it.
   private readonly composite = new Mesh(
-    new BufferGeometry().setAttribute(
-      "position",
-      new BufferAttribute(new Float32Array(FULL_VIEW), 3),
-    ),
+    new PlaneGeometry(2, 2),
     this.compositeMaterial,
   );
 
@@ -222,8 +214,11 @@ export class OitFrame {
     renderer.setMRT(null);
     sceneDepth.value = this.depth;
     camera.layers.set(OVERLAY_LAYER);
-    renderer.render(this.scene, camera);
-    camera.layers.set(SCENE_LAYER);
+    try {
+      renderer.render(this.scene, camera);
+    } finally {
+      camera.layers.set(SCENE_LAYER);
+    }
   }
 
   dispose(): void {

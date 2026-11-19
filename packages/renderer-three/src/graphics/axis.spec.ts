@@ -88,6 +88,13 @@ describe("buildAxis", () => {
     expect(endLabel.userData.label).toMatchObject(mark);
   });
 
+  test("gives its labels room for an arrowhead at its low end alone", () => {
+    const spec = axisSpec({ start: true, end: false });
+    const { tickLabels, endLabel } = partsOf(buildAxis(spec, "oit"));
+    expect(tickLabels.userData.label.clearance).toBe(headReach(spec));
+    expect(endLabel.userData.label.clearance).toBe(headReach(spec));
+  });
+
   test("gives its labels no clearance without an arrowhead", () => {
     const { tickLabels, endLabel } = partsOf(
       buildAxis(axisSpec({ end: false }), "oit"),
