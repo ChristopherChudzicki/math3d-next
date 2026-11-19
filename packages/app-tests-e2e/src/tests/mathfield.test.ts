@@ -47,6 +47,33 @@ test("Typing an inline shortcut inserts its LaTeX", async ({
     .toBe(String.raw`\operatorname{rescale}`);
 });
 
+test.describe("Typing a function name inserts the bare function", () => {
+  const cases = [
+    ["sin(x)", String.raw`\sin\left(x\right)`],
+    ["cos(x)+sin(x)", String.raw`\cos\left(x\right)+\sin\left(x\right)`],
+    ["sinh", String.raw`\sinh`],
+    ["arcsinh", String.raw`\operatorname{arcsinh}`],
+    ["abs(x)", String.raw`\operatorname{\mathrm{abs}}\left(x\right)`],
+    ["sin 2x", String.raw`\sin2x`],
+  ];
+  cases.forEach(([typed, expected]) => {
+    test(typed, async ({ page, prepareScene }) => {
+      const scene = new SceneBuilder();
+      scene.folder().point({ description: "SomePoint", coords: "" });
+      const key = await prepareScene(scene.json());
+      await page.goto(`/${key}`);
+      const app = new AppPage(page);
+
+      const item = await app.getUniqueItemSettings({
+        description: "SomePoint",
+      });
+      const mf = item.field("Coordinates");
+      await mf.pressSequentially(typed);
+      await expect.poll(() => mf.evaluate(getLatex)).toBe(expected);
+    });
+  });
+});
+
 /** The default scene's surface's color map field, caret at its start. */
 const focusDefaultColorMap = async (page: Page) => {
   await page.goto(`/`);

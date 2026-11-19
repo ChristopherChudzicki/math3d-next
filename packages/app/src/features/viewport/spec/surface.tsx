@@ -113,9 +113,9 @@ const Surface: SpecComponent<SurfaceItem> = ({ item }) => {
       colorFunc &&
       ((U: number, V: number, point: Coords) =>
         colorFunc(...point, ...uv(U, V)));
-    const colorAt = (U: number, V: number): RGBA => {
+    const colorAt = (U: number, V: number, point: Coords): RGBA => {
       if (!gradient || !valueAt) return flat;
-      const [r, g, b] = gradient.getRGB(valueAt(U, V, position(U, V)));
+      const [r, g, b] = gradient.getRGB(valueAt(U, V, point));
       return [r, g, b, alpha];
     };
     const periodicColor =

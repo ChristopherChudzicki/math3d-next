@@ -69,8 +69,11 @@ export type SurfaceSpec = Common & {
    * variable drives only the color); a new function only costs a resample.
    */
   position: (u: number, v: number) => Coords;
-  /** Color (with opacity) at normalized parameters in [0, 1]². */
-  colorAt: (u: number, v: number) => RGBA;
+  /**
+   * Color (with opacity) at normalized parameters in [0, 1]². `point` is
+   * `position(u, v)`, passed so it isn't evaluated again.
+   */
+  colorAt: (u: number, v: number, point: Coords) => RGBA;
   /**
    * Present when `colorAt` is `[...map(valueAt), alpha]` and the value
    * wraps: where finite it lies in [0, 1) up to rounding, and 0.99 is as
@@ -80,7 +83,7 @@ export type SurfaceSpec = Common & {
    */
   periodicColor?: {
     map: ColorMap;
-    /** `point` is `position(u, v)`, passed so it isn't evaluated again. */
+    /** `point` as in `colorAt`. */
     valueAt: (u: number, v: number, point: Coords) => number;
     alpha: number;
   };

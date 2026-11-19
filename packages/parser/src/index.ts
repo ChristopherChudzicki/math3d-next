@@ -8,5 +8,5 @@ export type {
   ValidatedParseable,
   ValidatedParseableObjs,
 } from "./interfaces";
-export { ParameterErrors } from "./rules";
+export { ParameterErrors, FUNCTION_ARITY } from "./rules";
 export { DetailedAssignmentError } from "./MathJsParser";

@@ -84,11 +84,17 @@ describe("writeColors", () => {
     color: new Float32Array(4 * vertices),
     phase: new Float32Array(2 * vertices),
   });
-  test("writes each sample's RGBA at its parameters", () => {
+  test("writes each sample's RGBA, from its parameters and its sampled point", () => {
     const out = buffers(4);
-    const colorAt = (u: number, v: number): RGBA => [u, v, 0, 1 - u];
-    writeColors(sampleGrid([2, 2], flat), { colorAt }, out);
-    expect(Array.from(out.color.slice(4, 8))).toEqual([1, 0, 0, 0]);
+    const grid = sampleGrid([2, 2], (u, v) => [10 * u, 10 * v, 0]);
+    const colorAt = (u: number, v: number, [x, y]: Coords): RGBA => [
+      u,
+      v,
+      x,
+      y,
+    ];
+    writeColors(grid, { colorAt }, out);
+    expect(Array.from(out.color.slice(4, 8))).toEqual([1, 0, 10, 0]);
   });
 
   test("with a periodic color, writes each value as a point on the unit circle, and its alpha", () => {

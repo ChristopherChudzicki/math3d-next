@@ -10,6 +10,8 @@ import {
   validateParameters,
   subscriptRule,
   exponentRule,
+  functionApplicationRule,
+  functionCommandSpacingRule,
 } from "./rules";
 
 // MathLive serializes a single-digit root unbraced: \sqrt2.
@@ -61,6 +63,7 @@ const simplifyRule: MathJsRule = {
 };
 
 const parserRules: ParserRule[] = [
+  functionCommandSpacingRule,
   fractionRule,
   sqrtDigitRule,
   exponentRule,
@@ -78,6 +81,7 @@ const parserRules: ParserRule[] = [
   zeroPrefixRule,
   // MathJS rules
   pdiffRule,
+  functionApplicationRule,
   // simplifyRule,
 ];
 
