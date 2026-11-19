@@ -38,8 +38,9 @@ test.each([
   },
 ])(
   "'controls' URL query parameter controls whether the controls are visible",
-  ({ controlsVisible, url, expectedHidden, expectedInert }) => {
-    renderTestApp(url);
+  async ({ controlsVisible, url, expectedHidden, expectedInert }) => {
+    const { queryClient } = renderTestApp(url);
+    await waitForAppReady(queryClient);
     const expandBtn = screen.queryByRole("button", { name: "Expand Controls" });
     const collapseBtn = screen.queryByRole("button", {
       name: "Collapse Controls",

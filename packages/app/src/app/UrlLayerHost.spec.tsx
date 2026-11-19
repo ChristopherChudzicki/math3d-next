@@ -16,13 +16,15 @@ import {
 import AppProviders from "./AppProviders";
 import UrlLayerHost from "./UrlLayerHost";
 
-test("no overlay param renders no dialog", () => {
-  renderTestApp("/");
+test("no overlay param renders no dialog", async () => {
+  const { queryClient } = renderTestApp("/");
+  await waitForAppReady(queryClient);
   expect(screen.queryByRole("dialog")).toBe(null);
 });
 
-test("unknown overlay value renders nothing and is left in the URL", () => {
-  const { location } = renderTestApp("/?overlay=bogus");
+test("unknown overlay value renders nothing and is left in the URL", async () => {
+  const { location, queryClient } = renderTestApp("/?overlay=bogus");
+  await waitForAppReady(queryClient);
   expect(screen.queryByRole("dialog")).toBe(null);
   expect(location.current.search).toContain("overlay=bogus");
 });
