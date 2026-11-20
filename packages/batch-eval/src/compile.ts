@@ -2,6 +2,7 @@ import math, { mathWithTransform } from "@math3d/custom-mathjs";
 import type * as mjs from "mathjs";
 import * as kernels from "./kernels";
 import type { Kernel1, Kernel2 } from "./kernels";
+import { createRepeats } from "./repeats";
 import type { Compiled, Evaluate } from "./types";
 
 type Fn = (...args: unknown[]) => unknown;
@@ -14,7 +15,16 @@ export class Unsupported extends Error {}
 /** A subexpression that is the same number at every sample, or one that isn't. */
 type Part =
   | { constant: true; value: number }
-  | { constant: false; evaluate: Evaluate };
+  | {
+      constant: false;
+      evaluate: Evaluate;
+      /** The index of the one parameter it reads, or `SEVERAL`. */
+      reads: number;
+      /** Whether it calls anything but `+ - * /`, unary `±` and whole powers. */
+      calls: boolean;
+    };
+
+const SEVERAL = -1;
 
 const constant = (value: unknown): Part => {
   if (typeof value !== "number") throw new Unsupported();
@@ -80,21 +90,33 @@ export const compile = (
     throw new Unsupported();
   };
 
-  const call = (fn: Fn, operands: Part[]): Part => {
-    if (operands.every((operand) => operand.constant)) {
-      let value: unknown;
-      try {
-        value = fn(...operands.map((operand) => operand.value));
-      } catch {
-        throw new Unsupported();
-      }
-      return constant(value);
-    }
+  const repeats = createRepeats(params.length);
+
+  /**
+   * `part` evaluated once per repeat of its parameter's column, when it reads
+   * one parameter of several and does more than arithmetic. Sound while a
+   * function gives the same number for the same input: the mathjs instance
+   * has nothing like `random`.
+   */
+  const oncePerRepeat = (part: Part): Part => {
+    if (part.constant || !part.calls || part.reads === SEVERAL) return part;
+    if (params.length < 2) return part;
+    return {
+      ...part,
+      evaluate: repeats.oncePerRepeat(part.evaluate, part.reads),
+    };
+  };
+
+  /** How `fn` runs over `operands`, and whether that is arithmetic alone. */
+  const kernelOf = (
+    fn: Fn,
+    operands: Part[],
+  ): { evaluate: Evaluate; arithmetic: boolean } => {
     const evaluates = operands.map(toEvaluate);
     const inner = compiledOf(fn);
     if (inner && inner.params === operands.length) {
       return {
-        constant: false,
+        arithmetic: false,
         evaluate: (count, args, pool) =>
           inner.evaluate(
             count,
@@ -104,9 +126,13 @@ export const compile = (
       };
     }
     if (operands.length === 1) {
-      const kernel = KERNELS_1.get(fn) ?? MATH_KERNELS_1.get(fn);
+      const arithmetic = KERNELS_1.get(fn);
+      const kernel = arithmetic ?? MATH_KERNELS_1.get(fn);
       if (kernel) {
-        return { constant: false, evaluate: call1(kernel, evaluates[0]) };
+        return {
+          arithmetic: arithmetic !== undefined,
+          evaluate: call1(kernel, evaluates[0]),
+        };
       }
     }
     if (operands.length === 2) {
@@ -114,7 +140,7 @@ export const compile = (
       const kernel = KERNELS_2.get(fn);
       if (kernel) {
         return {
-          constant: false,
+          arithmetic: true,
           evaluate: (count, args, pool) =>
             kernel(count, a(count, args, pool), b(count, args, pool), pool),
         };
@@ -126,14 +152,14 @@ export const compile = (
         Number.isInteger(exponent.value)
       ) {
         return {
-          constant: false,
+          arithmetic: true,
           evaluate: call1(kernels.powInt(exponent.value), a),
         };
       }
     }
     const kernel = kernels.generic(fn, operands.length);
     return {
-      constant: false,
+      arithmetic: false,
       evaluate: (count, args, pool) =>
         kernel(
           count,
@@ -143,13 +169,46 @@ export const compile = (
     };
   };
 
+  const call = (fn: Fn, operands: Part[]): Part => {
+    if (operands.every((operand) => operand.constant)) {
+      let value: unknown;
+      try {
+        value = fn(...operands.map((operand) => operand.value));
+      } catch {
+        throw new Unsupported();
+      }
+      return constant(value);
+    }
+    const varying = operands.filter((operand) => !operand.constant);
+    const reads = varying.every((operand) => operand.reads === varying[0].reads)
+      ? varying[0].reads
+      : SEVERAL;
+    // An operand that reads one parameter where the call reads several is a
+    // maximal subexpression of one parameter.
+    const { evaluate, arithmetic } = kernelOf(
+      fn,
+      reads === SEVERAL ? operands.map(oncePerRepeat) : operands,
+    );
+    return {
+      constant: false,
+      evaluate,
+      reads,
+      calls: !arithmetic || varying.some((operand) => operand.calls),
+    };
+  };
+
   const build = (expr: mjs.MathNode): Part => {
     if (math.isConstantNode(expr)) return constant(expr.value);
     if (math.isParenthesisNode(expr)) return build(expr.content);
     if (math.isSymbolNode(expr)) {
       const index = params.indexOf(expr.name);
       if (index < 0) return constant(lookup(expr.name));
-      return { constant: false, evaluate: (_count, args) => args[index] };
+      return {
+        constant: false,
+        evaluate: (_count, args) => args[index],
+        reads: index,
+        calls: false,
+      };
     }
     if (math.isOperatorNode(expr)) {
       // Operators come from mathjs, never the scope.
@@ -168,5 +227,6 @@ export const compile = (
     throw new Unsupported();
   };
 
-  return { params: params.length, evaluate: toEvaluate(build(node.expr)) };
+  const body = toEvaluate(oncePerRepeat(build(node.expr)));
+  return { params: params.length, evaluate: repeats.inspecting(body) };
 };
