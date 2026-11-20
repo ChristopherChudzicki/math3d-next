@@ -22,10 +22,9 @@ export const opacityOf = (alpha: number): Opacity =>
 
 /**
  * What a mark's alpha is for: an `Opacity`, or `edges` when it is below 1
- * only to antialias the mark's outline. `overlay` is `edges` for a mark
- * drawn over the finished scene, which neither tests nor writes depth.
+ * only to antialias the mark's outline.
  */
-type Alpha = Opacity | "edges" | "overlay";
+type Alpha = Opacity | "edges";
 
 /**
  * Whether a mark's triangles all face the same way on screen: a label's or a
@@ -39,8 +38,7 @@ type Facing = "uniform" | "mixed";
  *
  * - `oit`: order-independent. Opaque marks draw first, then `edges` marks
  *   blend over them in draw order, and `OitFrame` composites every
- *   `translucent` fragment in front of those, whatever the order. `overlay`
- *   marks draw over that composite.
+ *   `translucent` fragment in front of those, whatever the order.
  * - `ordered`: MathBox's way. Every mark blends and writes depth, in draw
  *   order, so a translucent mark hides anything drawn later that lies behind
  *   it.
@@ -60,7 +58,7 @@ const setOitFlags = (material: MeshBasicNodeMaterial, alpha: Alpha) => {
   // three's opaque pass, then its blended one: an antialiased edge never
   // blends with the background where an opaque mark is yet to be drawn.
   material.transparent = alpha !== "opaque";
-  if (alpha === "edges" || alpha === "overlay") {
+  if (alpha === "edges") {
     // `accumulates` takes every `transparent` material with three's
     // `NormalBlending`. These are its factors under another name, so an edge
     // blends in place.
@@ -70,8 +68,7 @@ const setOitFlags = (material: MeshBasicNodeMaterial, alpha: Alpha) => {
     material.blendSrcAlpha = OneFactor;
   }
   // An accumulating fragment hides nothing: any order gives one picture.
-  material.depthWrite = alpha === "opaque" || alpha === "edges";
-  material.depthTest = alpha !== "overlay";
+  material.depthWrite = alpha !== "translucent";
   // Order-independent, so three's back-then-front passes would add nothing.
   material.forceSinglePass = true;
   /* eslint-enable no-param-reassign */

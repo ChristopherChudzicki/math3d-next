@@ -2,7 +2,6 @@ import type { Group } from "three/webgpu";
 import type { GraphicSpec, ViewportGraphic } from "@math3d/viewport-spec";
 import type { Shading } from "../mesh/meshMaterial";
 import type { Transparency } from "../shader/material";
-import { OVERLAY_LAYER } from "../shader/sceneDepth";
 import type { Graphic, GraphicBuilders } from "./builders";
 
 export type DrawnGraphics = Map<
@@ -54,8 +53,6 @@ export const syncGraphics = (
     const graphic = build(spec, builders, transparency, shading);
     if (!graphic) return;
     graphic.object.renderOrder = order;
-    // three skips the `renderOrder` of a group its camera's layers leave out.
-    graphic.object.layers.enable(OVERLAY_LAYER);
     world.add(graphic.object);
     drawn.set(id, { spec, graphic });
   });

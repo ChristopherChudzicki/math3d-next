@@ -39,12 +39,6 @@ describe("buildPoint", () => {
     );
   });
 
-  test("gives its labels the point's depth style", () => {
-    const mark = { zBias: 2, zIndex: 1 };
-    const { labels } = partsOf(buildPoint(pointSpec(mark), "oit"));
-    expect(labels.userData.label).toMatchObject(mark);
-  });
-
   test("redraws in place for an updated spec", () => {
     const graphic = buildPoint(pointSpec(), "oit");
     const { discs, labels } = partsOf(graphic);

@@ -3,7 +3,6 @@ import type { InstancedBufferGeometry, Mesh } from "three/webgpu";
 import type { AxisSpec } from "@math3d/viewport-spec";
 import { LabelAtlas } from "../label/LabelAtlas";
 import { fakeSurface } from "../label/__tests__/fakeSurface";
-import { headReach } from "../stroke/style";
 import { buildAxis } from "./axis";
 
 vi.mock("../label/atlas", () => {
@@ -74,33 +73,6 @@ describe("buildAxis", () => {
     const { endLabel } = partsOf(buildAxis(axisSpec(), "oit"));
     expect(endLabel.geometry.instanceCount).toBe(1);
     expect(firstPoint(endLabel, "labelAnchor")).toEqual([0, 3, 0]);
-  });
-
-  test("gives its labels the axis's depth style, and room for its arrowhead", () => {
-    const spec = axisSpec();
-    const { tickLabels, endLabel } = partsOf(buildAxis(spec, "oit"));
-    const mark = {
-      zBias: spec.zBias,
-      zIndex: spec.zIndex,
-      clearance: headReach(spec),
-    };
-    expect(tickLabels.userData.label).toMatchObject(mark);
-    expect(endLabel.userData.label).toMatchObject(mark);
-  });
-
-  test("gives its labels room for an arrowhead at its low end alone", () => {
-    const spec = axisSpec({ start: true, end: false });
-    const { tickLabels, endLabel } = partsOf(buildAxis(spec, "oit"));
-    expect(tickLabels.userData.label.clearance).toBe(headReach(spec));
-    expect(endLabel.userData.label.clearance).toBe(headReach(spec));
-  });
-
-  test("gives its labels no clearance without an arrowhead", () => {
-    const { tickLabels, endLabel } = partsOf(
-      buildAxis(axisSpec({ end: false }), "oit"),
-    );
-    expect(tickLabels.userData.label.clearance).toBe(0);
-    expect(endLabel.userData.label.clearance).toBe(0);
   });
 
   test("orders its parts as MathBox draws them: stroke, ticks, tick labels, end label", () => {

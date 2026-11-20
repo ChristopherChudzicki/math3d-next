@@ -6,7 +6,6 @@
 import { Texture, Vector2, Vector4 } from "three/webgpu";
 import {
   attribute,
-  float,
   mix,
   modelViewMatrix,
   positionGeometry,
@@ -24,8 +23,6 @@ import {
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
 import type { Transparency } from "../shader/material";
-import { anchorShows } from "../shader/sceneDepth";
-import { viewUnitsPerPixel } from "../shader/viewUnits";
 import type { Layout, Template } from "../instances/Instances";
 
 /** Per label: its anchor, then its atlas slot as x, y, width, height. */
@@ -60,41 +57,23 @@ export class LabelUniforms {
   /** CSS pixels, +y up the screen. */
   readonly offset = new Vector2();
 
-  /** With `zIndex`, the depth style of the mark at the anchor. */
   zBias = 0;
 
   zIndex = 0;
-
-  /** How far the mark at the anchor reaches from it, in CSS pixels at view depth 1. */
-  clearance = 0;
 }
 
 const read = uniformsAt<LabelUniforms>("label");
 
-/**
- * `whole` draws each label by its anchor alone, all of it or none, for the
- * overlay layer. Otherwise the scene's depth test cuts a label wherever a
- * surface crosses its quad, at MathBox's unbiased label depth.
- */
-const build = (whole: boolean) => {
+const build = () => {
   const color = read("color", "vec4");
   const anchor = modelViewMatrix.mul(
     vec4(attribute<"vec3">("labelAnchor", "vec3"), 1),
   ).xyz;
-  // Through the depth style, so the label's depth and that of a mark at its
-  // anchor come from the same arithmetic.
-  const clip = projectWithDepthStyle(anchor, float(0), float(0));
-  const inFront = clip.w.greaterThan(0);
-  const drawn = whole
-    ? inFront.and(
-        anchorShows(
-          anchor,
-          read("zBias", "float"),
-          read("zIndex", "float"),
-          read("clearance", "float").mul(viewUnitsPerPixel),
-        ),
-      )
-    : inFront;
+  const clip = projectWithDepthStyle(
+    anchor,
+    read("zBias", "float"),
+    read("zIndex", "float"),
+  );
   const slot = attribute<"vec4">("labelSlot", "vec4");
 
   // A raster drawn at another pixel ratio than the screen's keeps its CSS size.
@@ -114,9 +93,9 @@ const build = (whole: boolean) => {
     .mul(2)
     .sub(1);
   const vertex = select(
-    drawn,
+    clip.w.greaterThan(0),
     vec4(ndc.mul(clip.w), clip.z, clip.w),
-    // Behind a perspective camera, or covered: outside the clip volume.
+    // Behind a perspective camera: outside the clip volume.
     vec4(0, 0, 2, 1),
   );
 
@@ -138,15 +117,11 @@ const build = (whole: boolean) => {
   };
 };
 
-const inScene = sharedMaterial("uniform", () => build(false));
-const overScene = sharedMaterial("uniform", () => build(true));
+const material = sharedMaterial("uniform", build);
 
 /**
  * The material labels share. Its alpha is the text's and the outline's
- * antialiasing; a label has no opacity of its own. Under `oit` it is for a
- * mesh on the overlay layer.
+ * antialiasing; a label has no opacity of its own.
  */
 export const labelMaterial = (transparency: Transparency) =>
-  transparency === "oit"
-    ? overScene("overlay", transparency)
-    : inScene("edges", transparency);
+  material("edges", transparency);
