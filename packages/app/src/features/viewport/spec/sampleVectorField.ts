@@ -1,10 +1,12 @@
 import type { AxesRange, Coords } from "@math3d/viewport-spec";
 
-// A lone sample sits at the midpoint, as MathBox's centered Volume puts it.
-const axisSamples = ([min, max]: [number, number], n: number): number[] =>
-  n === 1
-    ? [(min + max) / 2]
-    : Array.from({ length: n }, (_, i) => min + ((max - min) * i) / (n - 1));
+// As math3d's MathBox Volume places them: a count below 1 samples once, at
+// the start of its range; a count of 1 sits at the midpoint.
+const axisSamples = ([min, max]: [number, number], n: number): number[] => {
+  if (n < 1) return [min];
+  if (n === 1) return [(min + max) / 2];
+  return Array.from({ length: n }, (_, i) => min + ((max - min) * i) / (n - 1));
+};
 
 /**
  * One `[tail, head]` per grid point, x fastest (as `MB.Volume` emits), with
