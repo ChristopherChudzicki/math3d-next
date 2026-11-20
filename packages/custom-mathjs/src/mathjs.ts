@@ -204,6 +204,9 @@ const vectorFunctions = {
   traceDependencies,
 };
 
+// Every function here must give the same result for the same arguments:
+// `fastCompile` and `@math3d/batch-eval` compute a subexpression once and
+// reuse it. Something like `random` would need both to skip it.
 const mathjs = create({
   normalTrig,
   hyperbolicTrig,

@@ -1,7 +1,7 @@
 import { mathWithTransform, typed } from "@math3d/custom-mathjs";
 import { describe, expect, test } from "vitest";
 import * as kernels from "./kernels";
-import type { Kernel1, Kernel2 } from "./kernels";
+import type { Kernel2 } from "./kernels";
 import { createPool } from "./pool";
 import { randomDoubles, SPECIAL } from "./testColumns";
 import { Decline } from "./types";
@@ -87,19 +87,10 @@ describe.each(["add", "subtract", "multiply", "divide"] as const)(
 );
 
 describe.each([
-  "unaryMinus",
-  "unaryPlus",
-  "sin",
-  "cos",
-  "tan",
-  "atan",
-  "sinh",
-  "cosh",
-  "tanh",
-  "exp",
-  "abs",
-] as const)("%s", (name) => {
-  const kernel: Kernel1 = kernels[name];
+  ["unaryMinus", kernels.unaryMinus],
+  ["unaryPlus", kernels.unaryPlus],
+  ...Object.entries(kernels.MATH_KERNELS),
+])("%s", (name, kernel) => {
   const reference = numberFn(name, 1);
 
   test("an array", () => {

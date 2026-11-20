@@ -1,15 +1,7 @@
-import math from "@math3d/custom-mathjs";
-import { describe, expect, test, vi } from "vitest";
-import { batchOf, registerBatch } from "./registry";
-
-type Fn = (...args: number[]) => unknown;
-
-const define = (expr: string, scope: Record<string, unknown> = {}): Fn => {
-  const node = math.parse(expr);
-  const f = node.compile().evaluate(new Map(Object.entries(scope))) as Fn;
-  registerBatch(f, node, new Map(Object.entries(scope)));
-  return f;
-};
+import { describe, expect, onTestFinished, test, vi } from "vitest";
+import { batchOf } from "./registry";
+import { define, mismatches, runForm } from "./testForms";
+import type { Fn } from "./testForms";
 
 /** Every point of a grid with `axis` on each of `params` axes, first axis fastest. */
 const grid = (axis: number[], params: number): number[][] => {
@@ -22,28 +14,12 @@ const grid = (axis: number[], params: number): number[][] => {
   );
 };
 
-const run = (f: Fn, columns: number[][]) =>
-  batchOf(f)!.run(
-    columns[0].length,
-    ...columns.map((column) => Float64Array.from(column)),
-  );
-
 // Finite at both ends: a NaN result there would hide a wrong entry at the
 // edge of a tile or run.
 const AXIS = [-2.5, NaN, -1, -0, 0, Infinity, 0.3, 1, 7.25];
 
-/** Asserts `f`'s batched form gives what `f` gives, sample by sample. */
-const expectMatches = (f: Fn, columns = grid(AXIS, batchOf(f)!.params)) => {
-  const result = run(f, columns);
-  expect(result).toBeInstanceOf(Float64Array);
-  const mismatches = columns[0].flatMap((_x, i) => {
-    const expected = f(...columns.map((column) => column[i]));
-    return Object.is(result![i], expected)
-      ? []
-      : [{ i, actual: result![i], expected }];
-  });
-  expect(mismatches).toEqual([]);
-};
+const expectMatches = (f: Fn, columns = grid(AXIS, batchOf(f)!.params)) =>
+  expect(mismatches(f, columns)).toEqual([]);
 
 describe("columns that repeat give the numbers the function gives", () => {
   test.each([
@@ -92,7 +68,7 @@ describe("columns that repeat give the numbers the function gives", () => {
 
   test("0 and -0 are different values", () => {
     const f = define("f(x, y) = sin(x) * y");
-    const result = run(f, [
+    const result = runForm(f, [
       [0, -0, 0, 0],
       [1, 1, 1, 1],
     ]);
@@ -101,7 +77,7 @@ describe("columns that repeat give the numbers the function gives", () => {
 
   test("after a run that declined", () => {
     const f = define("f(x, y) = x * sqrt(y)");
-    expect(run(f, grid([4, -1], 2))).toBeUndefined();
+    expect(runForm(f, grid([4, -1], 2))).toBeUndefined();
     expectMatches(f, grid([4, 9, 16], 2));
   });
 });
@@ -112,45 +88,45 @@ describe("how often a subexpression of one parameter runs", () => {
 
   test("once per entry of the period of a column that tiles", () => {
     const g = counted();
-    run(define("f(x, y) = (g(x * x) + 1) * y", { g }), grid(AXIS_4, 2));
+    runForm(define("f(x, y) = (g(x * x) + 1) * y", { g }), grid(AXIS_4, 2));
     expect(g).toHaveBeenCalledTimes(4);
   });
 
   test("once per run of a column that comes in runs", () => {
     const g = counted();
-    run(define("f(x, y) = x * g(y)", { g }), grid(AXIS_4, 2));
+    runForm(define("f(x, y) = x * g(y)", { g }), grid(AXIS_4, 2));
     expect(g).toHaveBeenCalledTimes(4);
   });
 
   test("once for a constant column", () => {
     const g = counted();
-    run(define("f(x, z) = x + g(z)", { g }), [AXIS_4, [7, 7, 7, 7]]);
+    runForm(define("f(x, z) = x + g(z)", { g }), [AXIS_4, [7, 7, 7, 7]]);
     expect(g).toHaveBeenCalledTimes(1);
   });
 
   test("when it is the whole function", () => {
     const g = counted();
-    run(define("f(x, y) = g(x)", { g }), grid(AXIS_4, 2));
+    runForm(define("f(x, y) = g(x)", { g }), grid(AXIS_4, 2));
     expect(g).toHaveBeenCalledTimes(4);
   });
 
   test("when it is a function with a loop of its own", () => {
     const sin = vi.spyOn(Math, "sin");
-    run(define("f(x, y) = sin(x) * y"), grid(AXIS_4, 2));
+    onTestFinished(() => sin.mockRestore());
+    runForm(define("f(x, y) = sin(x) * y"), grid(AXIS_4, 2));
     expect(sin).toHaveBeenCalledTimes(4);
-    sin.mockRestore();
   });
 
   test("every sample when the column doesn't repeat", () => {
     const g = counted();
     const broken = [1, 2, 3, 1, 2, 3, 1, 9];
-    run(define("f(x, y) = g(x) * y", { g }), [broken, broken]);
+    runForm(define("f(x, y) = g(x) * y", { g }), [broken, broken]);
     expect(g).toHaveBeenCalledTimes(8);
   });
 
   test("every sample for a function of one parameter", () => {
     const g = counted();
-    run(define("f(x) = g(x)", { g }), [[1, 2, 1, 2]]);
+    runForm(define("f(x) = g(x)", { g }), [[1, 2, 1, 2]]);
     expect(g).toHaveBeenCalledTimes(4);
   });
 });

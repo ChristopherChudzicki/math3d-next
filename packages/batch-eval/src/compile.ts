@@ -18,7 +18,10 @@ type Part =
   | {
       constant: false;
       evaluate: Evaluate;
-      /** The index of the one parameter it reads, or `SEVERAL`. */
+      /**
+       * The index of the one parameter it reads, or `SEVERAL`. A wrong value
+       * makes reuse give wrong numbers, not an error.
+       */
       reads: number;
       /** Whether it calls anything but `+ - * /`, unary `±` and whole powers. */
       calls: boolean;
@@ -43,18 +46,16 @@ const KERNELS_1 = new Map<unknown, Kernel1>([
   [mathWithTransform.unaryMinus, kernels.unaryMinus],
   [mathWithTransform.unaryPlus, kernels.unaryPlus],
 ]);
-/** The functions whose mathjs number implementation is the `Math` function. */
-const MATH_KERNELS_1 = new Map<unknown, Kernel1>([
-  [mathWithTransform.sin, kernels.sin],
-  [mathWithTransform.cos, kernels.cos],
-  [mathWithTransform.tan, kernels.tan],
-  [mathWithTransform.atan, kernels.atan],
-  [mathWithTransform.sinh, kernels.sinh],
-  [mathWithTransform.cosh, kernels.cosh],
-  [mathWithTransform.tanh, kernels.tanh],
-  [mathWithTransform.exp, kernels.exp],
-  [mathWithTransform.abs, kernels.abs],
-]);
+/**
+ * Functions whose mathjs number implementation is the `Math` function, given
+ * loops of their own.
+ */
+const MATH_KERNELS_1 = new Map<unknown, Kernel1>(
+  Object.entries(kernels.MATH_KERNELS).map(([name, kernel]) => [
+    mathWithTransform[name],
+    kernel,
+  ]),
+);
 const KERNELS_2 = new Map<unknown, Kernel2>([
   [mathWithTransform.add, kernels.add],
   [mathWithTransform.subtract, kernels.subtract],
@@ -93,12 +94,11 @@ export const compile = (
   const repeats = createRepeats(params.length);
 
   /**
-   * `part` evaluated once per repeat of its parameter's column, when it reads
-   * one parameter of several and does more than arithmetic. Sound while a
-   * function gives the same number for the same input: the mathjs instance
-   * has nothing like `random`.
+   * `part`, evaluated once per period entry or run of its parameter's column,
+   * when it reads one parameter of several and makes a call. Sound only while
+   * a function gives the same number for the same input.
    */
-  const oncePerRepeat = (part: Part): Part => {
+  const reuseRepeats = (part: Part): Part => {
     if (part.constant || !part.calls || part.reads === SEVERAL) return part;
     if (params.length < 2) return part;
     return {
@@ -187,7 +187,7 @@ export const compile = (
     // maximal subexpression of one parameter.
     const { evaluate, arithmetic } = kernelOf(
       fn,
-      reads === SEVERAL ? operands.map(oncePerRepeat) : operands,
+      reads === SEVERAL ? operands.map(reuseRepeats) : operands,
     );
     return {
       constant: false,
@@ -227,6 +227,6 @@ export const compile = (
     throw new Unsupported();
   };
 
-  const body = toEvaluate(oncePerRepeat(build(node.expr)));
+  const body = toEvaluate(reuseRepeats(build(node.expr)));
   return { params: params.length, evaluate: repeats.inspecting(body) };
 };

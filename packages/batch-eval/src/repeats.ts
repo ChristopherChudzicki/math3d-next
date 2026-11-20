@@ -8,13 +8,20 @@ const RUNS = 2;
  * Finds, at each call of a compiled function, where its argument columns
  * repeat as a grid's do when its points are listed in order: the fastest
  * axis tiles with a period, a slower one comes in runs.
+ *
+ * Call `oncePerRepeat` for every subtree before `inspecting`, which decides
+ * then which columns to inspect. What an inspection finds is valid only
+ * while that call of `body` runs: a compiled function is never re-entered.
  */
 export const createRepeats = (params: number) => {
   const inspected = new Array<boolean>(params).fill(false);
   const kind = new Uint8Array(params);
   /** The period, or the run length. */
   const size = new Int32Array(params);
-  /** Each run's value, for the parameters whose columns come in runs. */
+  /**
+   * Each run's value, for the parameters whose columns come in runs. Also the
+   * argument list such a parameter's subtree gets: it reads only its own.
+   */
   const runValues = new Array<Column>(params).fill(NaN);
 
   const inspect = (
@@ -69,7 +76,8 @@ export const createRepeats = (params: number) => {
         if (kind[param] === TILED) {
           const values = subtree(length, args, pool);
           if (typeof values === "number") return values;
-          // Not expanded in place: `values` can be the caller's own column.
+          // Not expanded in place: `values` can be the caller's column, which
+          // isn't ours to write.
           const out = pool.take();
           for (let i = 0; i < length; i += 1) out[i] = values[i];
           for (let filled = length; filled < count; ) {
@@ -104,7 +112,7 @@ export const createRepeats = (params: number) => {
         for (let p = 0; p < params; p += 1) {
           const column = args[p];
           kind[p] = NONE;
-          if (inspected[p] && typeof column !== "number" && count > 1) {
+          if (inspected[p] && typeof column !== "number") {
             inspect(count, column, p, pool);
           }
         }
