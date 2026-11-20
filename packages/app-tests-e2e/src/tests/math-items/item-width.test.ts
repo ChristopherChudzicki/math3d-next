@@ -1,6 +1,7 @@
 import { test } from "@/fixtures/users";
 import { expect, type Page } from "@playwright/test";
 import { SceneBuilder } from "@math3d/mock-api";
+import invariant from "tiny-invariant";
 import AppPage from "@/utils/pages/AppPage";
 import type ItemSettings from "@/utils/pages/ItemSettings";
 
@@ -47,7 +48,7 @@ const widens = async (item: ItemSettings, focus: () => Promise<void>) => {
   });
 });
 
-test("A description is as wide as its text, and a long one wraps onto more lines", async ({
+test("A short description stays narrow, and a long one wraps", async ({
   page,
   prepareScene,
 }) => {
@@ -64,11 +65,8 @@ test("A description is as wide as its text, and a long one wraps onto more lines
     const item = await app.getUniqueItemSettings({ id });
     const field = await item.field("Description").boundingBox();
     const root = await item.root.boundingBox();
-    return {
-      width: field?.width ?? NaN,
-      height: field?.height ?? NaN,
-      itemWidth: root?.width ?? NaN,
-    };
+    invariant(field && root);
+    return { width: field.width, height: field.height, itemWidth: root.width };
   };
   const short = await size("short");
   expect(short.width).toBeLessThan(short.itemWidth / 2);

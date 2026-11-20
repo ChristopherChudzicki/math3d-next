@@ -4,10 +4,7 @@ import React, { useCallback } from "react";
 import { IWidgetProps, WidgetChangeEvent } from "./types";
 import styles from "./widget.module.css";
 
-/**
- * A textarea sized to its text by CSS (`field-sizing: content`): as wide as
- * its longest line up to the container, then wrapping onto more lines.
- */
+/** Sized to its text by CSS `field-sizing: content`; wraps at its `max-width`. */
 const AutosizeText: React.FC<
   IWidgetProps & {
     ref?: React.Ref<HTMLTextAreaElement>;
@@ -36,7 +33,6 @@ const AutosizeText: React.FC<
       className={classNames(
         { [styles["has-error"]]: error },
         styles["field-widget-input"],
-        styles["autosize-text"],
         className,
       )}
       name={name}
