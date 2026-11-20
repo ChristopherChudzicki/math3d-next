@@ -101,6 +101,89 @@ export const powInt =
     return out;
   };
 
+// Each loop is its own function literal: a loop that calls several functions
+// runs each slower once it has called a second, even as one closure per
+// function, as `generic` makes them (measured; cause unconfirmed).
+const sin: Kernel1 = (count, a, pool) => {
+  if (typeof a === "number") return Math.sin(a);
+  const out = pool.take();
+  for (let i = 0; i < count; i += 1) out[i] = Math.sin(a[i]);
+  return out;
+};
+
+const cos: Kernel1 = (count, a, pool) => {
+  if (typeof a === "number") return Math.cos(a);
+  const out = pool.take();
+  for (let i = 0; i < count; i += 1) out[i] = Math.cos(a[i]);
+  return out;
+};
+
+const tan: Kernel1 = (count, a, pool) => {
+  if (typeof a === "number") return Math.tan(a);
+  const out = pool.take();
+  for (let i = 0; i < count; i += 1) out[i] = Math.tan(a[i]);
+  return out;
+};
+
+const atan: Kernel1 = (count, a, pool) => {
+  if (typeof a === "number") return Math.atan(a);
+  const out = pool.take();
+  for (let i = 0; i < count; i += 1) out[i] = Math.atan(a[i]);
+  return out;
+};
+
+const sinh: Kernel1 = (count, a, pool) => {
+  if (typeof a === "number") return Math.sinh(a);
+  const out = pool.take();
+  for (let i = 0; i < count; i += 1) out[i] = Math.sinh(a[i]);
+  return out;
+};
+
+const cosh: Kernel1 = (count, a, pool) => {
+  if (typeof a === "number") return Math.cosh(a);
+  const out = pool.take();
+  for (let i = 0; i < count; i += 1) out[i] = Math.cosh(a[i]);
+  return out;
+};
+
+const tanh: Kernel1 = (count, a, pool) => {
+  if (typeof a === "number") return Math.tanh(a);
+  const out = pool.take();
+  for (let i = 0; i < count; i += 1) out[i] = Math.tanh(a[i]);
+  return out;
+};
+
+const exp: Kernel1 = (count, a, pool) => {
+  if (typeof a === "number") return Math.exp(a);
+  const out = pool.take();
+  for (let i = 0; i < count; i += 1) out[i] = Math.exp(a[i]);
+  return out;
+};
+
+const abs: Kernel1 = (count, a, pool) => {
+  if (typeof a === "number") return Math.abs(a);
+  const out = pool.take();
+  for (let i = 0; i < count; i += 1) out[i] = Math.abs(a[i]);
+  return out;
+};
+
+/**
+ * The loops above, by the name of the mathjs function each stands in for.
+ * One belongs here only if mathjs's number implementation of that name is
+ * the `Math` function; the kernel spec compares every entry with mathjs's.
+ */
+export const MATH_KERNELS: Record<string, Kernel1> = {
+  sin,
+  cos,
+  tan,
+  atan,
+  sinh,
+  cosh,
+  tanh,
+  exp,
+  abs,
+};
+
 type Fn = (...args: unknown[]) => unknown;
 
 const number = (value: unknown): number => {
