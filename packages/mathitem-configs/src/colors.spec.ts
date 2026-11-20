@@ -15,9 +15,24 @@ describe("getColorConfig", () => {
   });
 });
 
+test.each([
+  { name: "rainbow", x: 0, rgb: [1, 0, 0] },
+  { name: "rainbow", x: 0.25, rgb: [0.5, 0, 1] },
+  { name: "temperature", x: 0, rgb: [0, 0, 1] },
+  { name: "temperature", x: 0.5, rgb: [0, 1, 0] },
+] as const)("$name at $x is $rgb", ({ name, x, rgb }) => {
+  gradients[name].getRGB(x).forEach((channel, i) => {
+    expect(channel).toBeCloseTo(rgb[i], 2);
+  });
+});
+
 describe.each(Object.values(gradients))("$label gradient", ({ getRGB }) => {
   test("a value outside [0, 1] takes the nearer end's color", () => {
     expect(getRGB(-0.5)).toEqual(getRGB(0));
     expect(getRGB(1.5)).toEqual(getRGB(1));
+  });
+
+  test("NaN is black", () => {
+    expect(getRGB(NaN)).toEqual([0, 0, 0]);
   });
 });
