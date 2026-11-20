@@ -24,7 +24,6 @@
     "@math3d/parser": "workspace:^",
     "@math3d/utils": "workspace:^",
     "@math3d/validators": "workspace:^",
-    "mathjs": "^15.2.0",
-    "tinycolor2": "^1.6.0"
+    "mathjs": "^15.2.0"
   }
 }

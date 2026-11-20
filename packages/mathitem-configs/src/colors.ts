@@ -1,5 +1,3 @@
-import tinycolor from "tinycolor2";
-
 interface ColorConfig {
   type: "color";
   value: string;
@@ -12,22 +10,25 @@ interface GradientConfig {
   value: string;
   label: string;
   backgroundPreview: string;
-  /** The color at `x`; `x` outside [0, 1] takes the nearer end's color. */
+  /**
+   * The color at `x`; `x` outside [0, 1] takes the nearer end's color, and
+   * NaN is black.
+   */
   getRGB: (x: number) => [number, number, number];
 }
 
 type ColorOrGradientConfig = ColorConfig | GradientConfig;
 
-const toFractionRgb = ({
-  r,
-  g,
-  b,
-}: {
-  r: number;
-  b: number;
-  g: number;
-}): [number, number, number] => {
-  return [r / 255, g / 255, b / 255];
+/**
+ * RGB in [0, 1] at hue `h` (in turns, 0 to 1), full saturation, 50% lightness:
+ * the "HSL to RGB alternative" formula in Wikipedia's "HSL and HSV".
+ */
+const hueRgb = (h: number): [number, number, number] => {
+  const channel = (n: number) => {
+    const k = (n + 12 * h) % 12;
+    return 0.5 - 0.5 * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+  };
+  return [channel(0), channel(8), channel(4)];
 };
 
 const makeColorConfig = (text: string, label: string): ColorConfig => ({
@@ -53,7 +54,7 @@ const colors: ColorConfig[] = [
 const clamped =
   (unclamped: GradientConfig["getRGB"]): GradientConfig["getRGB"] =>
   (x) =>
-    unclamped(Math.min(Math.max(x, 0), 1));
+    Number.isNaN(x) ? [0, 0, 0] : unclamped(Math.min(Math.max(x, 0), 1));
 
 const rainbow: GradientConfig = {
   type: "gradient",
@@ -70,10 +71,7 @@ const rainbow: GradientConfig = {
     hsl(0, 100%, 50%)
   )
   `,
-  getRGB: clamped((frac) => {
-    const color = tinycolor.fromRatio({ h: 1 - frac, s: 1, l: 0.5 });
-    return toFractionRgb(color.toRgb());
-  }),
+  getRGB: clamped((frac) => hueRgb(1 - frac)),
 };
 const bluered: GradientConfig = {
   type: "gradient",
@@ -95,14 +93,7 @@ const temperature: GradientConfig = {
     hsl(60, 100%, 50%),
     hsl(0, 100%, 50%)
   )`,
-  getRGB: clamped((frac) => {
-    const color = tinycolor.fromRatio({
-      h: 0.666 * (1 - frac),
-      s: 1,
-      l: 0.5,
-    });
-    return toFractionRgb(color.toRgb());
-  }),
+  getRGB: clamped((frac) => hueRgb(0.666 * (1 - frac))),
 };
 
 const gradients = {

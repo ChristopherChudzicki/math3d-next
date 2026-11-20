@@ -1738,7 +1738,6 @@ __metadata:
     eslint: "npm:^8.57.1"
     js-yaml: "npm:^4.3.2"
     mathjs: "npm:^15.2.0"
-    tinycolor2: "npm:^1.6.0"
     vitest: "npm:^4.1.12"
   languageName: unknown
   linkType: soft
@@ -10929,7 +10928,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tinycolor2@npm:1.6.0, tinycolor2@npm:^1.6.0":
+"tinycolor2@npm:1.6.0":
   version: 1.6.0
   resolution: "tinycolor2@npm:1.6.0"
   checksum: 10/066c3acf4f82b81c58a0d3ab85f49407efe95ba87afc3c7a16b1d77625193dfbe10dd46c26d0a263c1137361dd5a6a68bff2fb71def5fb9b9aec940fb030bcd4
