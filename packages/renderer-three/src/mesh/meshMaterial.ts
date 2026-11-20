@@ -31,7 +31,7 @@ import {
   vec3,
   vec4,
 } from "three/tsl";
-import type { ColorMap, SurfaceSpec } from "@math3d/viewport-spec";
+import type { SurfaceSpec } from "@math3d/viewport-spec";
 import { projectWithDepthStyle } from "../shader/depthStyle";
 import { sharedMaterial, uniformsAt } from "../shader/material";
 import { viewUnitsPerPixel } from "../shader/viewUnits";
@@ -44,25 +44,27 @@ import {
 } from "./colorMapTexture";
 import { phaseValue } from "./phase";
 
+/**
+ * With `mapColor`, each pixel takes `map` at the interpolated `mapValue` and
+ * the `color` attribute's alpha: periodic, at its angle; else at its value,
+ * mixed toward the `color` attribute by its weight. Without it, the mesh
+ * takes its `color` attribute.
+ */
 export type MeshStyle = Pick<SurfaceSpec, "shaded" | "zBias" | "zIndex"> &
-  Partial<Pick<SurfaceSpec, "grid">> & {
+  Partial<Pick<SurfaceSpec, "grid" | "mapColor">> & {
     /** Whether the surface closes on itself along u and along v. */
     gridClosed?: [boolean, boolean];
-    /**
-     * Colors each pixel by `map` at the interpolated `mapValue`, with the
-     * `color` attribute's alpha: periodic, at its angle; else at its value,
-     * mixed toward the `color` attribute by its weight. Without it, the mesh
-     * takes its `color` attribute.
-     */
-    colorMap?: { map: ColorMap; periodic: boolean };
   };
 
-/** Where a mesh's color comes from: `MeshStyle.colorMap`, or its vertices. */
+/**
+ * Where a mesh's color comes from: a periodic map color, a mapped one (any
+ * other map color), or its vertices.
+ */
 export type ColorSource = "vertex" | "periodic" | "mapped";
 
-export const colorSource = ({ colorMap }: MeshStyle): ColorSource => {
-  if (!colorMap) return "vertex";
-  return colorMap.periodic ? "periodic" : "mapped";
+export const colorSource = ({ mapColor }: MeshStyle): ColorSource => {
+  if (!mapColor) return "vertex";
+  return mapColor.periodic ? "periodic" : "mapped";
 };
 
 /**
@@ -91,7 +93,7 @@ export class MeshUniforms {
     zIndex,
     grid,
     gridClosed = [false, false],
-    colorMap,
+    mapColor,
   }: MeshStyle): void {
     this.zBias = zBias;
     this.zIndex = zIndex;
@@ -100,7 +102,7 @@ export class MeshUniforms {
     this.gridWidth = grid?.width ?? 0;
     this.gridOpacity = grid?.color[3] ?? 0;
     this.gridClosed.set(Number(gridClosed[0]), Number(gridClosed[1]));
-    this.mapTexture = colorMap && colorMapTexture(colorMap.map);
+    this.mapTexture = mapColor && colorMapTexture(mapColor.map);
   }
 }
 

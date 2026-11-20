@@ -68,15 +68,15 @@ export const expectColorMapPlanes = async (page: Page) => {
 };
 
 /**
- * Two Rainbow planes with no `mod`, seen from above. One cell runs from 0.62
- * to 0.72, through green; the other plane steps from 0 to 1 across its first
+ * Two Rainbow planes with no `mod`, seen from above. One cell runs from 0.64
+ * to 0.70, through green; the other plane steps from 0 to 1 across its first
  * of two cells, both ends red.
  */
 export const colorMapPlanesNoMod = () => {
   const scene = new SceneBuilder();
   scene.camera({ position: "[1, 2, 8]", target: "[0, 0, 0]" });
   const folder = scene.folder();
-  folder.explicitSurface(plane("rainbow", "[-2, 0]", "0.62 + 0.05(x + 2)"));
+  folder.explicitSurface(plane("rainbow", "[-2, 0]", "0.64 + 0.03(x + 2)"));
   folder.explicitSurface(plane("rainbow", "[0, 2]", "floor(x/2 + 1/2)", 2));
   return scene;
 };

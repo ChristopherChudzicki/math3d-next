@@ -152,12 +152,12 @@ parent, so anything sized in pixels is built in the shader, in view space:
   that wraps (`SurfaceSpec.mapColor`, `periodic`) sends that value instead, as
   a point on the unit circle (`mapValue`), and its shader looks the map up per
   pixel at the interpolated point's angle, so a wrap blends the short way
-  round. One whose value doesn't wrap sends the value clamped to [0, 1] beside
-  its vertex colors, and its shader looks the map up per pixel, fading to the
-  vertex colors where the value changes by 0.2 to 0.3 or more along an edge
-  (`mesh/mappedValue.ts`), since that may be a jump. A surface's triangles wind as MathBox's do: under the `ordered` model
-  three draws a translucent mesh's back faces first, so winding decides how it
-  overlaps itself.
+  round. One whose value doesn't wrap sends the value, clamped to [0, 1], and
+  a weight beside its vertex colors; its shader looks the map up per pixel,
+  fading to the vertex colors where the value changes enough along an edge to
+  be a jump (`mesh/mappedValue.ts`). A surface's triangles wind as MathBox's
+  do: under the `ordered` model three draws a translucent mesh's back faces
+  first, so winding decides how it overlaps itself.
 - **A surface's gridlines are drawn by its own shader**, not as strokes. A
   fragment near an even step of its (u, v) composites a line over its lit
   color, as wide as a stroke of the grid's width at that depth. The line is

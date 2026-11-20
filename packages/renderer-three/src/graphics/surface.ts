@@ -40,16 +40,12 @@ export const buildSurface = (
         ? drawn.grid
         : sampleGrid(next.samples, next.position);
     const { cols, rows } = grid;
-    const style = {
-      ...next,
-      gridClosed: closedAxes(grid),
-      colorMap: next.mapColor,
-    };
+    const style = { ...next, gridClosed: closedAxes(grid) };
     surface.fill(cols * rows, 6 * (cols - 1) * (rows - 1), style, (out) => {
       writePositions(grid, out.position);
       if (next.shaded) writeNormals(grid, out.normal);
       writeIndex(cols, rows, out.index);
-      writeColors(grid, next, out);
+      writeColors(grid, next, style.gridClosed, out);
       writeParameters(grid, out.parameter);
     });
     drawn = { spec: next, grid };

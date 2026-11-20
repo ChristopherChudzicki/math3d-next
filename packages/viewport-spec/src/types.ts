@@ -86,9 +86,7 @@ export type SurfaceSpec = Common & {
     alpha: number;
     /**
      * Whether the value wraps: where finite it lies in [0, 1) up to
-     * rounding, and 0.99 is as near 0.01 as 0.03 is, so it blends the short
-     * way around. Otherwise a value may jump between samples, where a blend
-     * would sweep the map.
+     * rounding, and 0.99 is as near 0.01 as 0.03 is.
      */
     periodic: boolean;
   };

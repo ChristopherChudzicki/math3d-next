@@ -19,9 +19,9 @@ export type MeshBuffers = {
   /** RGBA per vertex, as given: no color-space conversion. */
   color: Float32Array;
   /**
-   * A mapped color's value per vertex: a periodic one's as a point on the
-   * unit circle (`phase.ts`), else the value in [0, 1] and its weight toward
-   * the vertex color (`mappedValue.ts`).
+   * A map color's value per vertex: a periodic one's as a point on the unit
+   * circle (`phase.ts`), else the value in [0, 1] and its weight toward the
+   * vertex color (`mappedValue.ts`).
    */
   mapValue: Float32Array;
   /** A surface's (u, v) in [0, 1]² per vertex, where its gridlines are drawn. */

@@ -65,7 +65,7 @@ describe("buildSurface", () => {
     expect(surface.userData.mesh.gridClosed.toArray()).toEqual([1, 0]);
   });
 
-  test("a surface draws through its periodic color's map, and by vertex color once it has none", () => {
+  test("a surface draws through its map color, periodic or mapped, and by vertex color once it has none", () => {
     const map = (t: number): [number, number, number] => [t, 0, 1 - t];
     const mapColor = { map, valueAt: () => 0.5, alpha: 1, periodic: true };
     const graphic = buildSurface(surfaceSpec({ mapColor }), "oit", "glossy");
@@ -75,6 +75,13 @@ describe("buildSurface", () => {
     );
     expect(surface.userData.mesh.mapTexture).toBe(colorMapTexture(map));
 
+    graphic.update(surfaceSpec({ mapColor: { ...mapColor, periodic: false } }));
+    expect(surface.material).toBe(
+      meshMaterial(true, "opaque", "oit", "glossy", "mapped"),
+    );
+    expect(surface.userData.mesh.mapTexture).toBe(colorMapTexture(map));
+    expect(attributeOf(surface, "color").slice(0, 4)).toEqual([0.5, 0, 0.5, 1]);
+
     graphic.update(surfaceSpec());
     expect(surface.material).toBe(
       meshMaterial(true, "opaque", "oit", "glossy", "vertex"),
@@ -82,19 +89,6 @@ describe("buildSurface", () => {
     expect(attributeOf(surface, "color").slice(0, 4)).toEqual(
       Array.from(new Float32Array([0.2, 0.4, 0.6, 1])),
     );
-  });
-
-  test("a surface whose mapped color doesn't wrap draws through its map, beside its vertex colors", () => {
-    const map = (t: number): [number, number, number] => [t, 0, 1 - t];
-    const mapColor = { map, valueAt: () => 0.5, alpha: 1, periodic: false };
-    const surface = meshOf(
-      buildSurface(surfaceSpec({ mapColor }), "oit", "glossy"),
-    );
-    expect(surface.material).toBe(
-      meshMaterial(true, "opaque", "oit", "glossy", "mapped"),
-    );
-    expect(surface.userData.mesh.mapTexture).toBe(colorMapTexture(map));
-    expect(attributeOf(surface, "color").slice(0, 4)).toEqual([0.5, 0, 0.5, 1]);
   });
 
   test("redraws in place for an updated spec, with no gridlines at width 0", () => {

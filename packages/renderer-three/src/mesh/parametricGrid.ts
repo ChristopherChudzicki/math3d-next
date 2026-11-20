@@ -66,14 +66,15 @@ const setColor = (
 };
 
 /**
- * Writes each vertex's RGBA and, for a color that is a map of a value, that
- * value to `mapValue` (`TriangleMesh`'s `MeshBuffers`). A periodic color
- * writes only alpha to `color`, and its cells with no finite value draw the
- * map's low end.
+ * Writes each vertex's RGBA and, for a map color, its `mapValue`: a periodic
+ * color's phase, with only alpha in `color`; else its clamped value and
+ * weight, joined at the seam of each `closed` axis. A periodic cell with no
+ * finite value draws the map's low end.
  */
 export const writeColors = (
   { cols, rows, points }: ParametricGrid,
   { colorAt, mapColor }: Pick<SurfaceSpec, "colorAt" | "mapColor">,
+  closed: readonly [boolean, boolean],
   out: { color: Float32Array; mapValue: Float32Array },
 ): void => {
   const mapped = mapColor && !mapColor.periodic;
@@ -90,13 +91,13 @@ export const writeColors = (
         writePhase(out.mapValue, k, mapColor.valueAt(u, v, points[k]));
         out.color[4 * k + 3] = mapColor.alpha;
       } else {
-        // `colorAt`'s color, from the value it would evaluate again.
+        // Equals `colorAt`'s color, without evaluating the expression twice.
         values[k] = mapColor.valueAt(u, v, points[k]);
         setColor(out.color, k, mapColor.map(values[k]), mapColor.alpha);
       }
     }
   }
-  if (mapped) writeMappedValues(values, cols, rows, out.mapValue);
+  if (mapped) writeMappedValues(values, cols, rows, closed, out.mapValue);
 };
 
 /**

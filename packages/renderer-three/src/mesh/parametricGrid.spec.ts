@@ -93,7 +93,7 @@ describe("writeColors", () => {
       x,
       y,
     ];
-    writeColors(grid, { colorAt }, out);
+    writeColors(grid, { colorAt }, [false, false], out);
     expect(Array.from(out.color.slice(4, 8))).toEqual([1, 0, 10, 0]);
   });
 
@@ -108,7 +108,12 @@ describe("writeColors", () => {
       periodic: true,
     };
     const colorAt = vi.fn((): RGBA => [1, 1, 1, 1]);
-    writeColors(sampleGrid([2, 2], flat), { colorAt, mapColor }, out);
+    writeColors(
+      sampleGrid([2, 2], flat),
+      { colorAt, mapColor },
+      [false, false],
+      out,
+    );
     const expected = [0, 1, -1, 0, 1, 0, 0, 0];
     Array.from(out.mapValue).forEach((c, k) =>
       expect(c).toBeCloseTo(expected[k]),
@@ -122,7 +127,7 @@ describe("writeColors", () => {
 
   test("with a color that doesn't wrap, writes each value's map and alpha, and each value and weight", () => {
     const out = buffers(4);
-    // A jump between u = 0 and u = 1.
+    // A change of 0.75 across the cell, over the blend threshold.
     const mapColor = {
       map: (t: number): [number, number, number] => [t, 0, 1 - t],
       valueAt: (u: number) => 0.75 * u,
@@ -130,7 +135,12 @@ describe("writeColors", () => {
       periodic: false,
     };
     const colorAt = vi.fn((): RGBA => [1, 1, 1, 1]);
-    writeColors(sampleGrid([2, 2], flat), { colorAt, mapColor }, out);
+    writeColors(
+      sampleGrid([2, 2], flat),
+      { colorAt, mapColor },
+      [false, false],
+      out,
+    );
     expect(Array.from(out.color.slice(4, 8))).toEqual([0.75, 0, 0.25, 0.5]);
     expect(Array.from(out.mapValue.slice(0, 4))).toEqual([0, 1, 0.75, 1]);
     expect(colorAt).not.toHaveBeenCalled();
